@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -17,6 +17,26 @@ import { WorkContext } from '../../work-context/work-context.model';
 import { MiscConfig } from '../../config/global-config.model';
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { signal, Signal } from '@angular/core';
+
+type ProjectServiceSignals = {
+  list$: Observable<Project[]>;
+  listSorted$: Observable<Project[]>;
+  listSortedForUI$: Observable<Project[]>;
+  listSortedForUI: Signal<Project[]>;
+  listSorted: Signal<Project[]>;
+};
+
+type TagServiceSignals = {
+  tags$: Observable<any[]>;
+  tagsNoMyDayAndNoList$: Observable<any[]>;
+  tagsNoMyDayAndNoListSorted$: Observable<any[]>;
+  tagsSortedForUI$: Observable<any[]>;
+  tagsSorted$: Observable<any[]>;
+  tagsNoMyDayAndNoListSorted: Signal<any[]>;
+  tagsSorted: Signal<any[]>;
+  tagsSortedForUI: Signal<any[]>;
+};
 
 describe('AddTaskBarComponent', () => {
   let component: AddTaskBarComponent;
@@ -94,6 +114,31 @@ describe('AddTaskBarComponent', () => {
     isDisableAnimations: false,
   };
 
+  const createProjectSignals = (projects: Project[]): ProjectServiceSignals => {
+    const projects$ = of(projects);
+    return {
+      list$: projects$,
+      listSorted$: projects$,
+      listSortedForUI$: projects$,
+      listSortedForUI: signal(projects),
+      listSorted: signal(projects),
+    };
+  };
+
+  const createTagSignals = (tags: any[]): TagServiceSignals => {
+    const tags$ = of(tags);
+    return {
+      tags$,
+      tagsNoMyDayAndNoList$: tags$,
+      tagsNoMyDayAndNoListSorted$: tags$,
+      tagsSortedForUI$: tags$,
+      tagsSorted$: tags$,
+      tagsNoMyDayAndNoListSorted: signal(tags),
+      tagsSorted: signal(tags),
+      tagsSortedForUI: signal(tags),
+    };
+  };
+
   beforeEach(async () => {
     // Create spies
     mockTaskService = jasmine.createSpyObj('TaskService', [
@@ -104,11 +149,15 @@ describe('AddTaskBarComponent', () => {
     mockWorkContextService = jasmine.createSpyObj('WorkContextService', [], {
       activeWorkContext$: new BehaviorSubject<WorkContext | null>(null),
     });
-    mockProjectService = jasmine.createSpyObj('ProjectService', [], {
-      list$: of(mockProjects),
-    });
-    mockTagService = jasmine.createSpyObj('TagService', [], {
-      tags$: of([
+    mockProjectService = jasmine.createSpyObj(
+      'ProjectService',
+      [],
+      createProjectSignals(mockProjects),
+    );
+    mockTagService = jasmine.createSpyObj(
+      'TagService',
+      [],
+      createTagSignals([
         {
           id: 'tag-1',
           title: 'Test Tag',
@@ -116,15 +165,7 @@ describe('AddTaskBarComponent', () => {
           icon: 'label',
         },
       ]),
-      tagsNoMyDayAndNoList$: of([
-        {
-          id: 'tag-1',
-          title: 'Test Tag',
-          theme: { primary: '#2196f3' },
-          icon: 'label',
-        },
-      ]),
-    });
+    );
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
       shortSyntax$: of({}),
@@ -386,9 +427,11 @@ describe('AddTaskBarComponent', () => {
       TestBed.resetTestingModule();
 
       // Create a separate mock for empty projects list
-      mockProjectServiceEmpty = jasmine.createSpyObj('ProjectService', [], {
-        list$: of([]),
-      });
+      mockProjectServiceEmpty = jasmine.createSpyObj(
+        'ProjectService',
+        [],
+        createProjectSignals([]),
+      );
 
       await TestBed.configureTestingModule({
         imports: [AddTaskBarComponent, NoopAnimationsModule, TranslateModule.forRoot()],

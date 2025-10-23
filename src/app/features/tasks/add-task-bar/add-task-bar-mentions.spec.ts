@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { AddTaskBarComponent } from './add-task-bar.component';
 import { TaskService } from '../task.service';
@@ -72,11 +72,16 @@ describe('AddTaskBarComponent Mentions Integration', () => {
     });
     const projectServiceSpy = jasmine.createSpyObj('ProjectService', [], {
       list$: of(validProjects),
+      listSorted$: of(validProjects),
+      listSortedForUI$: of(validProjects),
+      listSortedForUI: signal(validProjects),
     });
     tagsSubject = new BehaviorSubject(validTags);
     const tagServiceSpy = jasmine.createSpyObj('TagService', ['addTag'], {
       tags$: of(validTags),
       tagsNoMyDayAndNoList$: tagsSubject,
+      tagsNoMyDayAndNoListSorted$: tagsSubject,
+      tagsNoMyDayAndNoListSorted: signal(validTags),
     });
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       shortSyntax$: of({
