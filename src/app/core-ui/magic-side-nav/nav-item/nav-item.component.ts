@@ -7,7 +7,6 @@ import {
   output,
   AfterViewInit,
   OnDestroy,
-  NgZone,
   ElementRef,
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
@@ -71,7 +70,6 @@ import { TaskService } from 'src/app/features/tasks/task.service';
 export class NavItemComponent implements AfterViewInit, OnDestroy {
   private readonly _store = inject(Store);
   private _dragDropRegistry = inject(DragDropRegistry);
-  private _ngZone = inject(NgZone);
   private _externalDragService = inject(ScheduleExternalDragService);
   private _pointerUpSubscription: Subscription | null = null;
   private _elementRef = inject(ElementRef);
@@ -161,7 +159,7 @@ export class NavItemComponent implements AfterViewInit, OnDestroy {
   ngAfterViewInit(): void {
     // Listen for global pointer releases while a drag is active
     this._pointerUpSubscription = this._dragDropRegistry.pointerUp.subscribe((event) => {
-      this._ngZone.run(() => this._handlePointerUp(event));
+      this._handlePointerUp(event);
     });
   }
 
