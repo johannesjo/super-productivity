@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   ElementRef,
   inject,
   input,
   output,
+  signal,
   viewChild,
 } from '@angular/core';
 import {
@@ -27,12 +29,11 @@ import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { T } from '../../../t.const';
 import { TagService } from '../tag.service';
 import { TaskService } from '../../tasks/task.service';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TaskCopy } from '../../tasks/task.model';
 import { TagComponent } from '../tag/tag.component';
 import { TranslatePipe } from '@ngx-translate/core';
-import { switchMap } from 'rxjs/operators';
 import { TODAY_TAG } from '../tag.const';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface Suggestion {
   id: string;
@@ -68,6 +69,7 @@ export class TagEditComponent {
 
   private _tagService = inject(TagService);
   private _taskService = inject(TaskService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   task = input<TaskCopy>();
   isShowMyDayTag = input<boolean>(false);
@@ -83,15 +85,20 @@ export class TagEditComponent {
   readonly inputEl = viewChild<ElementRef<HTMLInputElement>>('inputElRef');
   readonly matAutocomplete = viewChild<MatAutocomplete>('autoElRef');
 
-  inputVal = toSignal<string>(this.inputCtrl.valueChanges);
-  tagSuggestions = toSignal(
-    toObservable(this.isShowMyDayTag).pipe(
-      switchMap((isShowMyDay) =>
-        isShowMyDay ? this._tagService.tags$ : this._tagService.tagsNoMyDayAndNoList$,
-      ),
-    ),
-    { initialValue: [] },
+  inputVal = signal<string>('');
+  tagSuggestions = computed(() =>
+    this.isShowMyDayTag()
+      ? this._tagService.tagsSortedForUI()
+      : this._tagService.tagsNoMyDayAndNoListSorted(),
   );
+
+  constructor() {
+    this.inputCtrl.valueChanges
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((value: string | null) => {
+        this.inputVal.set(value ?? '');
+      });
+  }
 
   allExcludedTagIds = computed<string[]>(() => [
     ...this.tagIds(),
