@@ -338,11 +338,13 @@
 
 <!--*ngIf="isShowContextMenu"-->
 
-<task-context-menu
-  #taskContextMenu
-  [isAdvancedControls]="true"
-  [task]="t"
-></task-context-menu>
+@if (isContextMenuLoaded()) {
+  <task-context-menu
+    #taskContextMenu
+    [isAdvancedControls]="true"
+    [task]="t"
+  ></task-context-menu>
+}
 
 <mat-menu
   #projectMenu="matMenu"

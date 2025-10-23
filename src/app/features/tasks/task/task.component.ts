@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, forkJoin, of } from 'rxjs';
+import { EMPTY, Subscription, forkJoin, of } from 'rxjs';
 import {
   HideSubTasksMode,
   TaskCopy,
@@ -234,6 +234,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   // Lazy-loaded project list - only fetched when project menu opens
   moveToProjectList = signal<Project[] | undefined>(undefined);
+  private _loadedProjectListForProjectId: string | null | undefined;
+  private _moveToProjectListSub?: Subscription;
 
   parentTask = toSignal(
     this._task$.pipe(
@@ -248,6 +250,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private _currentPanTimeout?: number;
   private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
+  isContextMenuLoaded = signal(false);
 
   // methods come last
 
@@ -321,6 +324,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
     window.clearTimeout(this._doubleClickTimeout);
+    this._moveToProjectListSub?.unsubscribe();
   }
 
   scheduleTask(): void {
@@ -466,15 +470,24 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   _loadProjectListIfNeeded(): void {
     // Only load if not already loaded
-    if (this.moveToProjectList() === undefined) {
-      const t = this.task();
-      this._projectService
-        .getProjectsWithoutId$(t.projectId || null)
-        .pipe(first())
-        .subscribe((projects) => {
-          this.moveToProjectList.set(projects);
-        });
+    const currentProjectId = this.task().projectId || null;
+    const isLoadedForCurrentProject =
+      this._loadedProjectListForProjectId === currentProjectId &&
+      this._moveToProjectListSub &&
+      !this._moveToProjectListSub.closed;
+
+    if (isLoadedForCurrentProject) {
+      return;
     }
+
+    this._moveToProjectListSub?.unsubscribe();
+    this._loadedProjectListForProjectId = currentProjectId;
+
+    this._moveToProjectListSub = this._projectService
+      .getProjectsWithoutId$(currentProjectId)
+      .subscribe((projects) => {
+        this.moveToProjectList.set(projects);
+      });
   }
 
   updateTaskTitleIfChanged({
@@ -732,6 +745,20 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
     this.taskTitleEditEl()?.textarea().nativeElement?.blur();
+    event.preventDefault();
+    event.stopPropagation();
+    if ('stopImmediatePropagation' in event) {
+      event.stopImmediatePropagation();
+    }
+
+    if (!this.isContextMenuLoaded()) {
+      this.isContextMenuLoaded.set(true);
+      setTimeout(() => {
+        this.taskContextMenu()?.open(event);
+      });
+      return;
+    }
+
     this.taskContextMenu()?.open(event);
   }
 
