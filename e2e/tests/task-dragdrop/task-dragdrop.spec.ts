@@ -32,24 +32,32 @@ test.describe('Drag Task to change project and labels', () => {
     // Add first project
     await page.keyboard.press('Shift+P');
 
-    // Wait for input to be visible
+    // Wait for dialog and input to be visible
+    await page.waitForSelector('dialog-create-project', { state: 'visible' });
     await projectNameInput.waitFor({ state: 'visible', timeout: 15000 });
     await projectNameInput.fill(`${testPrefix}-TestProject 1`);
     await page.keyboard.press('Enter');
-    // wait for dialog to close
-    await page.waitForTimeout(50);
-    await expect(project1NavItem).toBeVisible();
+    // Wait for dialog to close and nav item to appear
+    await page.waitForSelector('dialog-create-project', {
+      state: 'hidden',
+      timeout: 5000,
+    });
+    await project1NavItem.waitFor({ state: 'visible', timeout: 5000 });
 
     // Add another project
     await page.keyboard.press('Shift+P');
 
-    // Wait for input to be visible
+    // Wait for dialog and input to be visible
+    await page.waitForSelector('dialog-create-project', { state: 'visible' });
     await projectNameInput.waitFor({ state: 'visible', timeout: 15000 });
     await projectNameInput.fill(`${testPrefix}-TestProject 2`);
     await page.keyboard.press('Enter');
-    // wait for dialog to close
-    await page.waitForTimeout(50);
-    await expect(project2NavItem).toBeVisible();
+    // Wait for dialog to close and nav item to appear
+    await page.waitForSelector('dialog-create-project', {
+      state: 'hidden',
+      timeout: 5000,
+    });
+    await project2NavItem.waitFor({ state: 'visible', timeout: 5000 });
 
     // find drag handle of task
     const firstTask = page.locator('task').first();
@@ -57,12 +65,14 @@ test.describe('Drag Task to change project and labels', () => {
 
     // Drag and drop to first project
     await dragHandle.dragTo(project1NavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).toContainText(
       `${testPrefix}-TestProject 1`,
     );
 
     // Drag and drop to second project
     await dragHandle.dragTo(project2NavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).not.toContainText(
       `${testPrefix}-TestProject 1`,
     );
@@ -73,6 +83,7 @@ test.describe('Drag Task to change project and labels', () => {
     // Drag and drop back to inbox
     const inboxNavItem = page.getByRole('menuitem').filter({ hasText: 'Inbox' });
     await dragHandle.dragTo(inboxNavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).not.toContainText(
       `${testPrefix}-TestProject 2`,
     );
@@ -110,22 +121,24 @@ test.describe('Drag Task to change project and labels', () => {
     await tagMenu.hover();
     await createTagBtn.waitFor({ state: 'visible', timeout: 3000 });
     await createTagBtn.click();
+    await page.waitForSelector('dialog-prompt', { state: 'visible' });
     await tagNameInput.waitFor({ state: 'visible', timeout: 3000 });
     await tagNameInput.fill(`${testPrefix}-Tag1`);
     await page.keyboard.press('Enter');
-    // wait for dialog to close
-    await page.waitForTimeout(50);
-    await tag1NavItem.waitFor({ state: 'visible', timeout: 3000 });
+    // Wait for dialog to close and nav item to appear
+    await page.waitForSelector('dialog-prompt', { state: 'hidden', timeout: 5000 });
+    await tag1NavItem.waitFor({ state: 'visible', timeout: 5000 });
 
     await tagMenu.hover();
     await createTagBtn.waitFor({ state: 'visible', timeout: 3000 });
     await createTagBtn.click();
+    await page.waitForSelector('dialog-prompt', { state: 'visible' });
     await tagNameInput.waitFor({ state: 'visible', timeout: 3000 });
     await tagNameInput.fill(`${testPrefix}-Tag2`);
     await page.keyboard.press('Enter');
-    // wait for dialog to close
-    await page.waitForTimeout(50);
-    await tag2NavItem.waitFor({ state: 'visible', timeout: 3000 });
+    // Wait for dialog to close and nav item to appear
+    await page.waitForSelector('dialog-prompt', { state: 'hidden', timeout: 5000 });
+    await tag2NavItem.waitFor({ state: 'visible', timeout: 5000 });
 
     // find drag handle of task
     const firstTask = page.locator('task').first();
@@ -133,15 +146,18 @@ test.describe('Drag Task to change project and labels', () => {
 
     // Drag and drop to first tag
     await dragHandle.dragTo(tag1NavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).toContainText(`${testPrefix}-Tag1`);
 
     // Drag and drop to second tag
     await dragHandle.dragTo(tag2NavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).toContainText(`${testPrefix}-Tag1`);
     await expect(firstTask.locator('tag-list')).toContainText(`${testPrefix}-Tag2`);
 
     // Drag and drop again to first tag to remove it
     await dragHandle.dragTo(tag1NavItem);
+    await page.waitForTimeout(500); // Wait for drag animation and state update
     await expect(firstTask.locator('tag-list')).not.toContainText(`${testPrefix}-Tag1`);
     await expect(firstTask.locator('tag-list')).toContainText(`${testPrefix}-Tag2`);
   });
