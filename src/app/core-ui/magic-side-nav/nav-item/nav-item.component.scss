@@ -88,7 +88,8 @@
   right: 16px;
   display: flex;
   align-items: center;
-  color: var(--text-color-muted);
+  color: var(--text-color);
+  font-weight: 500;
   // avoid affecting drag handle
   pointer-events: none;
 }

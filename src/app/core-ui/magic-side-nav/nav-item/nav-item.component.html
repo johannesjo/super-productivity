@@ -15,11 +15,11 @@
   >
     <mat-icon
       class="nav-icon"
-      style="color: {{
+      [style.color]="
         defaultIcon() !== 'today' &&
-          defaultIcon() !== 'inbox' &&
-          workContext()?.theme.primary
-      }}"
+        defaultIcon() !== 'inbox' &&
+        workContext()?.theme.primary
+      "
       [class.nav-icon-emoji]="isWorkContextEmojiIcon()"
       [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
       >{{ workContext()!.icon || defaultIcon() }}
@@ -42,6 +42,7 @@
     #settingsBtn
     class="additional-btn"
     mat-icon-button
+    [attr.aria-label]="'CONTEXT_MENU.TITLE' | translate"
   >
     <mat-icon>more_vert</mat-icon>
   </button>
@@ -85,6 +86,7 @@
     #folderSettingsBtn
     class="additional-btn"
     mat-icon-button
+    [attr.aria-label]="'CONTEXT_MENU.TITLE' | translate"
   >
     <mat-icon>more_vert</mat-icon>
   </button>
