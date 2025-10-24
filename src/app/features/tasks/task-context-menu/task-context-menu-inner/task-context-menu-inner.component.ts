@@ -148,16 +148,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
-    map((projects) => projects.slice().sort((a, b) => a.title.localeCompare(b.title))),
+    switchMap((pid) => this._projectService.getProjectsWithoutIdSorted$(pid || null)),
   );
-  private readonly _toggleTagListUnsorted = toSignal(
-    this._tagService.tagsNoMyDayAndNoList$,
-    { initialValue: [] },
-  );
-  toggleTagList = computed(() =>
-    [...this._toggleTagListUnsorted()].sort((a, b) => a.title.localeCompare(b.title)),
-  );
+  toggleTagList = this._tagService.tagsNoMyDayAndNoListSorted;
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
   //   take(1),

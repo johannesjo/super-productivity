@@ -20,6 +20,7 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
+import { getIsLocked } from './shared-state';
 import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
 import { pluginNodeExecutor } from './plugin-node-executor';
 
@@ -86,7 +87,7 @@ export const initIpcInterfaces = (): void => {
   });
 
   ipcMain.on(IPC.LOCK_SCREEN, () => {
-    if ((app as any).isLocked) {
+    if (getIsLocked()) {
       return;
     }
 

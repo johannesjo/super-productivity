@@ -38,6 +38,7 @@ interface ChartClickEvent {
       <button
         mat-icon-button
         class="share-btn"
+        tabIndex="-1"
         (click)="shareChart()"
         [disabled]="!isLoaded || isSharing"
         [matTooltip]="'Share Chart' | translate"

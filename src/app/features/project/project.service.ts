@@ -37,6 +37,7 @@ import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { sortByTitle } from '../../util/sort-by-title';
 
 @Injectable({
   providedIn: 'root',
@@ -48,7 +49,18 @@ export class ProjectService {
   private readonly _timeTrackingService = inject(TimeTrackingService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
-  list = toSignal(this.list$);
+  list = toSignal(this.list$, { initialValue: [] });
+
+  listSorted$: Observable<Project[]> = this.list$.pipe(
+    map((projects) => sortByTitle(projects)),
+  );
+  listSorted = toSignal(this.listSorted$, { initialValue: [] });
+
+  // Filtered and sorted list for UI (excludes archived and hidden projects)
+  listSortedForUI$: Observable<Project[]> = this.listSorted$.pipe(
+    map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
+  );
+  listSortedForUI = toSignal(this.listSortedForUI$, { initialValue: [] });
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
 
@@ -67,6 +79,12 @@ export class ProjectService {
   getProjectsWithoutId$(projectId: string | null): Observable<Project[]> {
     return this._store$.pipe(
       select(selectUnarchivedProjectsWithoutCurrent, { currentId: projectId }),
+    );
+  }
+
+  getProjectsWithoutIdSorted$(projectId: string | null): Observable<Project[]> {
+    return this.getProjectsWithoutId$(projectId).pipe(
+      map((projects) => sortByTitle(projects)),
     );
   }
 

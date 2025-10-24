@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { interval, Observable, of } from 'rxjs';
 import {
@@ -51,6 +52,11 @@ export class GlobalTrackingIntervalService {
     // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
     shareReplay(1),
   );
+
+  // Shared signal to avoid creating 200+ subscriptions in task components
+  todayDateStr = toSignal(this.todayDateStr$, {
+    initialValue: this._dateService.todayStr(),
+  });
 
   constructor() {
     this._currentTrackingStart = Date.now();

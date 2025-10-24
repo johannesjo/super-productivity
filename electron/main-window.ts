@@ -23,6 +23,7 @@ import {
   hideOverlayWindow,
   showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
+import { getIsQuiting, setIsQuiting } from './shared-state';
 
 let mainWin: BrowserWindow;
 
@@ -291,7 +292,7 @@ const appCloseHandler = (app: App): void => {
   let ids: string[] = [];
 
   const _quitApp = (): void => {
-    (app as any).isQuiting = true;
+    setIsQuiting(true);
     // Destroy overlay window before closing main window to ensure window-all-closed fires
     destroyOverlayWindow();
     mainWin.close();
@@ -315,11 +316,11 @@ const appCloseHandler = (app: App): void => {
 
   mainWin.on('close', (event) => {
     // NOTE: this might not work if we run a second instance of the app
-    log('close, isQuiting:', (app as any).isQuiting);
-    if (!(app as any).isQuiting) {
+    log('close, isQuiting:', getIsQuiting());
+    if (!getIsQuiting()) {
       event.preventDefault();
       getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
+        if (appCfg && appCfg.misc.isMinimizeToTray && !getIsQuiting()) {
           mainWin.hide();
           showOverlayWindow();
           return;
@@ -353,7 +354,7 @@ const appCloseHandler = (app: App): void => {
 };
 
 const appMinimizeHandler = (app: App): void => {
-  if (!(app as any).isQuiting) {
+  if (!getIsQuiting()) {
     // TODO find reason for the typing error
     // @ts-ignore
     mainWin.on('minimize', (event: Event) => {

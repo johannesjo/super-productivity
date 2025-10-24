@@ -73,3 +73,9 @@ export const selectIsRunning = createSelector(
   selectTimer,
   (timer) => timer.isRunning && timer.purpose !== null,
 );
+
+// Session completed selector
+export const selectIsSessionCompleted = createSelector(
+  selectCurrentScreen,
+  (currentScreen) => currentScreen === 'SessionDone',
+);

@@ -14,7 +14,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { EMPTY, forkJoin, of } from 'rxjs';
+import { EMPTY, forkJoin, of, Subscription } from 'rxjs';
 import {
   HideSubTasksMode,
   TaskCopy,
@@ -28,14 +28,7 @@ import {
   expandInOnlyAnimation,
 } from '../../../ui/animations/expand.ani';
 import { GlobalConfigService } from '../../config/global-config.service';
-import {
-  concatMap,
-  distinctUntilChanged,
-  first,
-  map,
-  switchMap,
-  tap,
-} from 'rxjs/operators';
+import { concatMap, first, switchMap, tap } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { PanDirective, PanEvent } from '../../../ui/swipe-gesture/pan.directive';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
@@ -81,7 +74,6 @@ import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { TagToggleMenuListComponent } from '../../tag/tag-toggle-menu-list/tag-toggle-menu-list.component';
 import { Store } from '@ngrx/store';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { environment } from '../../../../environments/environment';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -141,24 +133,22 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _renderer = inject(Renderer2);
   private readonly _store = inject(Store);
   private readonly _projectService = inject(ProjectService);
-  private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private readonly _taskFocusService = inject(TaskFocusService);
+
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
+  readonly globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
   isInSubTaskList = input<boolean>(false);
 
-  // computed
-  currentId = toSignal(this._taskService.currentTaskId$);
-  isCurrent = computed(() => this.currentId() === this.task().id);
-  selectedId = this._taskService.selectedTaskId;
-  isSelected = computed(() => this.selectedId() === this.task().id);
-  todayStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
-
-  todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
-  isTaskOnTodayList = computed(() => this.todayList().includes(this.task().id));
+  // Use shared signals from services to avoid creating 600+ subscriptions on initial render
+  isCurrent = computed(() => this._taskService.currentTaskId() === this.task().id);
+  isSelected = computed(() => this._taskService.selectedTaskId() === this.task().id);
+  isTaskOnTodayList = computed(() =>
+    this._taskService.todayList().includes(this.task().id),
+  );
   isTodayListActive = computed(() => this.workContextService.isToday);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
@@ -179,7 +169,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const t = this.task();
     return (
       (t.dueWithTime && isToday(t.dueWithTime)) ||
-      (t.dueDay && t.dueDay === this.todayStr())
+      (t.dueDay && t.dueDay === this.globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -188,7 +178,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       this.task().dueDay &&
       (!this.isTodayListActive() ||
         this.isOverdue() ||
-        this.task().dueDay !== this.todayStr())
+        this.task().dueDay !== this.globalTrackingIntervalService.todayDateStr())
     );
   });
 
@@ -201,19 +191,22 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       !this.isTodayListActive() &&
       !this.task().isDone &&
-      this.task().dueDay === this.todayStr()
+      this.task().dueDay === this.globalTrackingIntervalService.todayDateStr()
     );
   });
 
   isShowAddToToday = computed(() => {
     const task = this.task();
+    const todayStr = this.globalTrackingIntervalService.todayDateStr();
     return this.isTodayListActive()
       ? (task.dueWithTime && !isToday(task.dueWithTime)) ||
-          (task.dueDay && task.dueDay !== this.todayStr())
+          (task.dueDay && task.dueDay !== todayStr)
       : !this.isShowRemoveFromToday() &&
-          task.dueDay !== this.todayStr() &&
+          task.dueDay !== todayStr &&
           (!task.dueWithTime || !isToday(task.dueWithTime));
   });
+
+  isPanHelperVisible = signal(false);
 
   T: typeof T = T;
   IS_TOUCH_PRIMARY: boolean = IS_TOUCH_PRIMARY;
@@ -242,13 +235,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   private _task$ = toObservable(this.task);
 
-  moveToProjectList = toSignal(
-    this._task$.pipe(
-      map((t) => t.projectId),
-      distinctUntilChanged(),
-      switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
-    ),
-  );
+  // Lazy-loaded project list - only fetched when project menu opens
+  moveToProjectList = signal<Project[] | undefined>(undefined);
+  private _loadedProjectListForProjectId: string | null | undefined;
+  private _moveToProjectListSub?: Subscription;
 
   parentTask = toSignal(
     this._task$.pipe(
@@ -263,6 +253,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private _currentPanTimeout?: number;
   private _doubleClickTimeout?: number;
   private _isTaskDeleteTriggered = false;
+  private _panHelperVisibilityTimeout?: number;
+  private readonly _snapBackHideDelayMs = 200;
+  isContextMenuLoaded = signal(false);
 
   // methods come last
 
@@ -336,6 +329,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     window.clearTimeout(this._currentPanTimeout);
     window.clearTimeout(this._doubleClickTimeout);
+    this._moveToProjectListSub?.unsubscribe();
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+    }
   }
 
   scheduleTask(): void {
@@ -470,11 +467,35 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   openProjectMenu(): void {
     const t = this.task();
     if (!t.parentId) {
+      // Lazy load project list when menu opens
+      this._loadProjectListIfNeeded();
       const projectMenuTrigger = this.projectMenuTrigger();
       if (projectMenuTrigger) {
         projectMenuTrigger.openMenu();
       }
     }
+  }
+
+  _loadProjectListIfNeeded(): void {
+    // Only load if not already loaded
+    const currentProjectId = this.task().projectId || null;
+    const isLoadedForCurrentProject =
+      this._loadedProjectListForProjectId === currentProjectId &&
+      this._moveToProjectListSub &&
+      !this._moveToProjectListSub.closed;
+
+    if (isLoadedForCurrentProject) {
+      return;
+    }
+
+    this._moveToProjectListSub?.unsubscribe();
+    this._loadedProjectListForProjectId = currentProjectId;
+
+    this._moveToProjectListSub = this._projectService
+      .getProjectsWithoutId$(currentProjectId)
+      .subscribe((projects) => {
+        this.moveToProjectList.set(projects);
+      });
   }
 
   updateTaskTitleIfChanged({
@@ -635,10 +656,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   titleBarClick(event: MouseEvent): void {
-    console.log(event.target);
+    const targetEl = event.target as HTMLElement;
+    if (targetEl.closest('task-title')) {
+      return;
+    }
     if (IS_TOUCH_PRIMARY && this.task().title.length) {
       this.toggleShowDetailPanel(event);
-    } else if ((event.target as HTMLElement).tagName.toUpperCase() !== 'TEXTAREA') {
+    } else {
       this.focusSelf();
     }
   }
@@ -723,15 +747,29 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   focusTitleForEdit(): void {
     const taskTitleEditEl = this.taskTitleEditEl();
-    if (!taskTitleEditEl || !taskTitleEditEl.textarea().nativeElement) {
+    if (!taskTitleEditEl) {
       TaskLog.log(taskTitleEditEl);
       throw new Error('No el');
     }
-    taskTitleEditEl.textarea().nativeElement.focus();
+    taskTitleEditEl.focusInput();
   }
 
   openContextMenu(event: TouchEvent | MouseEvent): void {
-    this.taskTitleEditEl()?.textarea().nativeElement?.blur();
+    this.taskTitleEditEl()?.cancelEditing();
+    event.preventDefault();
+    event.stopPropagation();
+    if ('stopImmediatePropagation' in event) {
+      event.stopImmediatePropagation();
+    }
+
+    if (!this.isContextMenuLoaded()) {
+      this.isContextMenuLoaded.set(true);
+      setTimeout(() => {
+        this.taskContextMenu()?.open(event);
+      });
+      return;
+    }
+
     this.taskContextMenu()?.open(event);
   }
 
@@ -753,11 +791,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       (targetEl.className.indexOf && targetEl.className.indexOf('drag-handle') > -1) ||
       Math.abs(ev.deltaY) > Math.abs(ev.deltaX) ||
-      document.activeElement === taskTitleEditEl.textarea().nativeElement ||
+      taskTitleEditEl.isEditing() ||
       ev.isFinal
     ) {
+      this._hidePanHelper();
       return;
     }
+    this._showPanHelper();
     this.isPreventPointerEventsWhilePanning = true;
   }
 
@@ -767,13 +807,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
-    if (!blockLeftElRef || !blockRightElRef) {
-      throw new Error('No el');
-    }
+    const hideDelay = this._snapBackHideDelayMs;
 
     this.isPreventPointerEventsWhilePanning = false;
-    this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
-    this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+    if (blockLeftElRef) {
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
+    }
+    if (blockRightElRef) {
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+    }
 
     if (this._currentPanTimeout) {
       window.clearTimeout(this._currentPanTimeout);
@@ -781,7 +823,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
     if (this.isActionTriggered) {
       if (this.isLockPanLeft) {
-        this._renderer.setStyle(blockRightElRef.nativeElement, 'transform', `scaleX(1)`);
+        if (blockRightElRef) {
+          this._renderer.setStyle(
+            blockRightElRef.nativeElement,
+            'transform',
+            `scaleX(1)`,
+          );
+        }
         this._currentPanTimeout = window.setTimeout(() => {
           if (this.task().repeatCfgId) {
             this.editTaskRepeatCfg();
@@ -789,17 +837,19 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
             this.scheduleTask();
           }
 
-          this._resetAfterPan();
+          this._resetAfterPan(hideDelay);
         }, 100);
       } else if (this.isLockPanRight) {
-        this._renderer.setStyle(blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
+        if (blockLeftElRef) {
+          this._renderer.setStyle(blockLeftElRef.nativeElement, 'transform', `scaleX(1)`);
+        }
         this._currentPanTimeout = window.setTimeout(() => {
           this.toggleTaskDone();
-          this._resetAfterPan();
+          this._resetAfterPan(hideDelay);
         }, 100);
       }
     } else {
-      this._resetAfterPan();
+      this._resetAfterPan(hideDelay);
     }
   }
 
@@ -960,7 +1010,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
     if (!innerWrapperElRef || !blockLeftElRef || !blockRightElRef) {
-      throw new Error('No el');
+      return;
     }
 
     // Dynamically determine direction based on current pan position
@@ -1006,29 +1056,53 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  private _resetAfterPan(): void {
+  private _showPanHelper(): void {
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+      this._panHelperVisibilityTimeout = undefined;
+    }
+    this.isPanHelperVisible.set(true);
+  }
+
+  private _hidePanHelper(delayMs: number = 0): void {
+    if (this._panHelperVisibilityTimeout) {
+      window.clearTimeout(this._panHelperVisibilityTimeout);
+    }
+    if (delayMs > 0) {
+      this._panHelperVisibilityTimeout = window.setTimeout(() => {
+        this.isPanHelperVisible.set(false);
+        this._panHelperVisibilityTimeout = undefined;
+      }, delayMs);
+    } else {
+      this.isPanHelperVisible.set(false);
+      this._panHelperVisibilityTimeout = undefined;
+    }
+  }
+
+  private _resetAfterPan(hideDelay: number = 0): void {
     const blockLeftElRef = this.blockLeftElRef();
     const blockRightElRef = this.blockRightElRef();
     const innerWrapperElRef = this.innerWrapperElRef();
-    if (
-      !this.taskTitleEditEl() ||
-      !blockLeftElRef ||
-      !blockRightElRef ||
-      !innerWrapperElRef
-    ) {
-      throw new Error('No el');
-    }
-
     this.isPreventPointerEventsWhilePanning = false;
     this.isActionTriggered = false;
     this.isLockPanLeft = false;
     this.isLockPanRight = false;
-    // const scale = 0;
-    // this._renderer.setStyle(this.blockLeftEl.nativeElement, 'transform', `scaleX(${scale})`);
-    // this._renderer.setStyle(this.blockRightEl.nativeElement, 'transform', `scaleX(${scale})`);
-    this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
-    this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
-    this._renderer.setStyle(innerWrapperElRef.nativeElement, 'transform', ``);
+    if (blockLeftElRef) {
+      this._renderer.removeClass(blockLeftElRef.nativeElement, 'isActive');
+      this._renderer.setStyle(blockLeftElRef.nativeElement, 'width', '0');
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transition');
+      this._renderer.removeStyle(blockLeftElRef.nativeElement, 'transform');
+    }
+    if (blockRightElRef) {
+      this._renderer.removeClass(blockRightElRef.nativeElement, 'isActive');
+      this._renderer.setStyle(blockRightElRef.nativeElement, 'width', '0');
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transition');
+      this._renderer.removeStyle(blockRightElRef.nativeElement, 'transform');
+    }
+    if (innerWrapperElRef) {
+      this._renderer.setStyle(innerWrapperElRef.nativeElement, 'transform', ``);
+    }
+    this._hidePanHelper(hideDelay);
   }
 
   get kb(): KeyboardConfig {

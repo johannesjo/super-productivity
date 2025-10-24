@@ -94,11 +94,14 @@ describe('AddTaskBarActionsComponent', () => {
 
     mockProjectService = jasmine.createSpyObj('ProjectService', [], {
       list$: of([mockProject]),
+      listSortedForUI: signal([mockProject]),
+      listSorted: signal([mockProject]),
     });
 
     mockTagService = jasmine.createSpyObj('TagService', [], {
       tags$: of([mockTag]),
       tagsNoMyDayAndNoList$: of([mockTag]),
+      tagsNoMyDayAndNoListSorted: signal([mockTag]),
     });
 
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
