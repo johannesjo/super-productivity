@@ -87,6 +87,17 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       },
     ],
   },
+  // Repeat from completion date instead of start date
+  {
+    key: 'repeatFromCompletionDate',
+    type: 'checkbox',
+    defaultValue: false,
+    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE,
+      description: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE_DESCRIPTION,
+    },
+  },
   {
     key: 'startDate',
     type: 'input',
