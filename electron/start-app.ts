@@ -86,7 +86,10 @@ export const startApp = (): void => {
     }
 
     if (val && val.includes('--user-data-dir=')) {
-      const customUserDir = val.replace('--user-data-dir=', '').trim();
+      const customUserDir = val
+        .replace('--user-data-dir=', '')
+        .trim()
+        .replace(/[\/\\]+$/, ''); // Remove trailing slashes
       log('Using custom directory for user data', customUserDir);
       app.setPath('userData', customUserDir);
       wasUserDataDirSet = true;
