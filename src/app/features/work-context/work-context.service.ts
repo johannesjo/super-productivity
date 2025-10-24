@@ -11,7 +11,7 @@ import {
   WorkContextType,
 } from './work-context.model';
 import { setActiveWorkContext } from './store/work-context.actions';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import {
   concatMap,
   delayWhen,
@@ -81,6 +81,10 @@ export class WorkContextService {
   private _translateService = inject(TranslateService);
   private _timeTrackingService = inject(TimeTrackingService);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _pendingNavigationUrl: string | null = null;
+  private readonly _navigationMeasureName = 'work-view-route';
+  private readonly _navigationStartMark = 'work-view-route:start';
+  private readonly _navigationEndMark = 'work-view-route:end';
 
   // here because to avoid circular dependencies
   // should be treated as private
@@ -409,6 +413,10 @@ export class WorkContextService {
       this.activeWorkContextType = v.activeType;
     });
 
+    this._router.events
+      .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
+      .subscribe((event) => this._markNavigationStart(event.url));
+
     // we need all data to be loaded before we dispatch a setActiveContext action
     this._router.events
       .pipe(
@@ -427,6 +435,8 @@ export class WorkContextService {
         ),
       )
       .subscribe(({ urlAfterRedirects }: NavigationEnd) => {
+        this._markNavigationEnd(urlAfterRedirects);
+
         const split = urlAfterRedirects.split('/');
         const id = split[2];
 
@@ -667,5 +677,65 @@ export class WorkContextService {
   // NOTE: NEVER call this from some place other than the route change stuff
   private _setActiveContext(activeId: string, activeType: WorkContextType): void {
     this._store$.dispatch(setActiveWorkContext({ activeId, activeType }));
+  }
+
+  private _markNavigationStart(url: string): void {
+    if (!this._isPerformanceApiAvailable() || !this._shouldTrackNavigation(url)) {
+      return;
+    }
+
+    this._pendingNavigationUrl = url;
+    performance.mark(this._navigationStartMark);
+  }
+
+  private _markNavigationEnd(url: string): void {
+    if (
+      !this._isPerformanceApiAvailable() ||
+      !this._pendingNavigationUrl ||
+      !this._shouldTrackNavigation(url)
+    ) {
+      return;
+    }
+
+    performance.mark(this._navigationEndMark);
+    try {
+      performance.measure(
+        this._navigationMeasureName,
+        this._navigationStartMark,
+        this._navigationEndMark,
+      );
+    } catch {
+      // ignore measure errors (e.g. start mark missing)
+    } finally {
+      this._clearNavigationMarks();
+      this._pendingNavigationUrl = null;
+    }
+  }
+
+  private _clearNavigationMarks(): void {
+    if (!this._isPerformanceApiAvailable()) {
+      return;
+    }
+    try {
+      performance.clearMarks(this._navigationStartMark);
+      performance.clearMarks(this._navigationEndMark);
+      performance.clearMeasures(this._navigationMeasureName);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+
+  private _shouldTrackNavigation(url: string): boolean {
+    return /(tag|project)\/.+\/tasks/.test(url);
+  }
+
+  private _isPerformanceApiAvailable(): boolean {
+    return (
+      typeof performance !== 'undefined' &&
+      typeof performance.mark === 'function' &&
+      typeof performance.measure === 'function' &&
+      typeof performance.clearMarks === 'function' &&
+      typeof performance.clearMeasures === 'function'
+    );
   }
 }
