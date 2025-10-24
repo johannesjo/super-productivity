@@ -45,9 +45,10 @@ export class AddTaskBarParserService {
       return;
     }
 
-    // Get current tags from state to pass as tagIds
+    // Get current tags from state to preserve pre-selected tags
+    const currentState = this._stateService.state();
     const parseResult = shortSyntax(
-      { title: text, tagIds: [] },
+      { title: text, tagIds: currentState.tagIds },
       config,
       allTags,
       allProjects,
@@ -59,14 +60,13 @@ export class AddTaskBarParserService {
     if (!parseResult) {
       // No parse result means no short syntax found
       // Preserve current user-selected values instead of falling back to defaults
-      const currentState = this._stateService.state();
 
       currentResult = {
         cleanText: text,
         projectId: this._stateService.isAutoDetected()
           ? defaultProject?.id || null
           : null,
-        tagIds: [],
+        tagIds: currentState.tagIds, // Preserve pre-selected tags
         newTagTitles: [],
         timeEstimate: null,
         // Preserve current date/time if user has selected them, otherwise use defaults
