@@ -87,15 +87,54 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
       },
     ],
   },
-  // Repeat from completion date instead of start date
+  // Schedule type: from due date or from completion
   {
     key: 'repeatFromCompletionDate',
-    type: 'checkbox',
+    type: 'select',
     defaultValue: false,
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    hideExpression: (model: any) => {
+      // Only show for CUSTOM mode
+      if (model.quickSetting !== 'CUSTOM') {
+        return true;
+      }
+      // Hide for "every 1 day" (same as daily - no difference between fixed/flexible)
+      if (model.repeatCycle === 'DAILY' && model.repeatEvery === 1) {
+        return true;
+      }
+      // Hide for "every 1 week" (e.g., "every Monday" - inherently a fixed schedule)
+      if (model.repeatCycle === 'WEEKLY' && model.repeatEvery === 1) {
+        return true;
+      }
+      // Show for all other cases: "every X days/weeks/months/years" where X > 1
+      return false;
+    },
     templateOptions: {
-      label: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE,
-      description: T.F.TASK_REPEAT.F.REPEAT_FROM_COMPLETION_DATE_DESCRIPTION,
+      label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_LABEL,
+      description: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_DESCRIPTION,
+      options: [],
+    },
+    expressionProperties: {
+      ['templateOptions.options']: (model: any) => {
+        const repeatEvery = model.repeatEvery || 1;
+        const cycleMap: Record<string, string> = {
+          DAILY: repeatEvery === 1 ? 'day' : 'days',
+          WEEKLY: repeatEvery === 1 ? 'week' : 'weeks',
+          MONTHLY: repeatEvery === 1 ? 'month' : 'months',
+          YEARLY: repeatEvery === 1 ? 'year' : 'years',
+        };
+        const cycleName = cycleMap[model.repeatCycle] || 'days';
+
+        return [
+          {
+            value: false,
+            label: `Fixed schedule (every ${repeatEvery} ${cycleName} from start date)`,
+          },
+          {
+            value: true,
+            label: `After completion (${repeatEvery} ${cycleName} after I finish)`,
+          },
+        ];
+      },
     },
   },
   {
