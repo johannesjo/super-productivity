@@ -105,6 +105,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Sync history state with mobile menu visibility status
+    effect(() => {
+      this.syncMobileNavHistory(this.showMobileMenuOverlay());
+    });
+
     effect(() => {
       const isFullMode = this.isFullMode();
       if (!this.isMobile()) {
@@ -193,7 +198,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   toggleMobileNav(): void {
     this.showMobileMenuOverlay.update((show) => !show);
-    this.syncMobileNavHistory();
   }
 
   /** Handle "back" button to hide mobile menu overlay */
@@ -201,9 +205,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     if (this.showMobileMenuOverlay()) this.toggleMobileNav();
   }
 
-  /** Synchronize browser history state with the visibility of the mobile menu overlay */
-  syncMobileNavHistory(): void {
-    const isVisible = this.showMobileMenuOverlay();
+  /** Synchronize window history state with the visibility of the mobile menu overlay */
+  syncMobileNavHistory(isVisible: boolean): void {
     const hasState = window.history.state[HISTORY_STATE.MOBILE_NAVIGATION] !== undefined;
     if (!isVisible && !hasState) return;
 
