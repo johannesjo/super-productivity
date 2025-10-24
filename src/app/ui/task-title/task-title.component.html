@@ -1,4 +1,4 @@
-@let currentValue = tmpValue ?? '';
+@let currentValue = tmpValue() ?? '';
 @let trimmedValue = currentValue.trim();
 @let hasContent = trimmedValue.length > 0;
 @let displayText =

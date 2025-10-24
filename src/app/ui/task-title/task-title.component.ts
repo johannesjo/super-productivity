@@ -14,6 +14,10 @@ import { TranslateModule } from '@ngx-translate/core';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { Log } from '../../core/log';
 
+/**
+ * Inline-editable text field for task titles.
+ * Click to edit, Enter/Escape to save. Removes newlines and short syntax.
+ */
 @Component({
   selector: 'task-title',
   imports: [TranslateModule],
@@ -28,20 +32,36 @@ import { Log } from '../../core/log';
 export class TaskTitleComponent implements OnDestroy {
   T: typeof T = T;
 
+  // Reset value only if user is not currently editing (prevents overwriting edits during sync)
   @Input() set resetToLastExternalValueTrigger(value: unknown) {
-    if (!this._isFocused() && this.tmpValue !== this.lastExternalValue) {
-      this.tmpValue = this.lastExternalValue;
+    const externalValue = this._extractExternalValue(value);
+    if (externalValue === undefined) {
+      return;
+    }
+
+    this.lastExternalValue = externalValue;
+    if (!this._isFocused() && this.tmpValue() !== externalValue) {
+      this.updateTmpValue(externalValue, this.textarea()?.nativeElement);
     }
   }
 
+  /**
+   * Updates the displayed value from parent component.
+   * Syncs both the signal (tmpValue) and the textarea DOM element.
+   *
+   * Why we need this: When short syntax is processed by the parent,
+   * the cleaned value must update BOTH the signal and the textarea DOM.
+   * Without updating the textarea directly, the old value with short syntax
+   * remains visible in the DOM even though the signal has the cleaned value.
+   */
   @Input() set value(value: string) {
-    this.tmpValue = value;
-    this.lastExternalValue = value;
+    const externalValue = value ?? '';
+    this.lastExternalValue = externalValue;
+    this.updateTmpValue(externalValue, this.textarea()?.nativeElement);
   }
 
-  lastExternalValue?: string;
-  tmpValue?: string;
-
+  lastExternalValue?: string; // Last value from parent, used to detect changes on blur
+  readonly tmpValue = signal(''); // Current editing value
   readonly textarea = viewChild<ElementRef<HTMLTextAreaElement>>('textAreaElement');
 
   readonly valueEdited = output<{
@@ -56,6 +76,7 @@ export class TaskTitleComponent implements OnDestroy {
 
   constructor() {}
 
+  // Click anywhere to enter edit mode
   @HostListener('mousedown', ['$event'])
   onMouseDown(event: MouseEvent): void {
     event.stopPropagation();
@@ -94,6 +115,7 @@ export class TaskTitleComponent implements OnDestroy {
     return this._isFocused();
   }
 
+  // Move cursor to end when focused
   focused(): void {
     this._isFocused.set(true);
     this._isEditing.set(true);
@@ -118,6 +140,7 @@ export class TaskTitleComponent implements OnDestroy {
     this._endEditing();
   }
 
+  // Enter/Escape to submit and blur
   handleKeyDown(ev: KeyboardEvent): void {
     ev.stopPropagation();
     if (ev.key === 'Escape') {
@@ -128,6 +151,7 @@ export class TaskTitleComponent implements OnDestroy {
     }
   }
 
+  // Android WebView: Enter key comes through as textInput
   onTextInput(ev: Event): void {
     if (IS_ANDROID_WEB_VIEW && (ev as InputEvent)?.data?.slice(-1) === '\n') {
       Log.log('android enter key press');
@@ -139,11 +163,18 @@ export class TaskTitleComponent implements OnDestroy {
     }
   }
 
+  /**
+   * Updates both the signal and textarea DOM with the new value.
+   *
+   * Critical for short syntax removal: Angular's signal update alone doesn't
+   * update the textarea DOM value. We must manually sync textarea.value to
+   * ensure the cleaned text (without short syntax) is visible to the user.
+   */
   updateTmpValue(value: string, target?: HTMLTextAreaElement | null): void {
     const sanitizedValue = this._sanitizeForEditing(value);
-    this.tmpValue = sanitizedValue;
+    this.tmpValue.set(sanitizedValue); // Update signal
     if (target && target.value !== sanitizedValue) {
-      target.value = sanitizedValue;
+      target.value = sanitizedValue; // Update DOM directly
     }
   }
 
@@ -155,6 +186,7 @@ export class TaskTitleComponent implements OnDestroy {
     this.updateTmpValue(target.value, target);
   }
 
+  // Sanitize pasted content (remove newlines)
   handlePaste(event: ClipboardEvent): void {
     event.preventDefault();
 
@@ -173,7 +205,7 @@ export class TaskTitleComponent implements OnDestroy {
     this.updateTmpValue(newVal, textarea);
 
     requestAnimationFrame(() => {
-      const finalValue = this.tmpValue ?? '';
+      const finalValue = this.tmpValue() ?? '';
       const caretPosition = Math.min(start + cleaned.length, finalValue.length);
       textarea.selectionStart = textarea.selectionEnd = caretPosition;
     });
@@ -185,8 +217,8 @@ export class TaskTitleComponent implements OnDestroy {
 
   private _submit(blurEvent?: FocusEvent): void {
     const previousValue = this.lastExternalValue;
-    const cleanVal = this._cleanValue(this.tmpValue);
-    this.tmpValue = cleanVal;
+    const cleanVal = this._cleanValue(this.tmpValue());
+    this.tmpValue.set(cleanVal);
     this.lastExternalValue = cleanVal;
     this.valueEdited.emit({
       newVal: cleanVal,
@@ -201,6 +233,17 @@ export class TaskTitleComponent implements OnDestroy {
 
   private _sanitizeForEditing(value: string = ''): string {
     return value?.replace(/\r/g, '').replace(/\n/g, '');
+  }
+
+  private _extractExternalValue(value: unknown): string | undefined {
+    if (typeof value === 'string') {
+      return value;
+    }
+    if (value && typeof value === 'object' && 'title' in value) {
+      const title = (value as { title?: unknown }).title;
+      return typeof title === 'string' ? title : undefined;
+    }
+    return undefined;
   }
 
   private _endEditing(): void {
