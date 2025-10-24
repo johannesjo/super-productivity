@@ -19,6 +19,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import {
+  animationFrameScheduler,
   from,
   fromEvent,
   Observable,
@@ -28,7 +29,7 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, switchMap } from 'rxjs/operators';
+import { delay, filter, map, observeOn, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
@@ -156,7 +157,11 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       filter((isChanging) => !isChanging),
       delay(50),
       switchMap(() => this.splitTopEl$),
-      switchMap((el) => fromEvent(el, 'scroll')),
+      switchMap((el) =>
+        // Defer scroll reactions to the next frame so layoutService.isScrolled
+        // toggles happen in sync with the browser repaint.
+        fromEvent(el, 'scroll').pipe(observeOn(animationFrameScheduler)),
+      ),
     );
 
   private _subs: Subscription = new Subscription();

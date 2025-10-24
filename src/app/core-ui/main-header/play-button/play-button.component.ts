@@ -23,7 +23,8 @@ import { Task } from '../../../features/tasks/task.model';
 import { WorkContext } from '../../../features/work-context/work-context.model';
 import { TaskService } from '../../../features/tasks/task.service';
 import { PomodoroService } from '../../../features/pomodoro/pomodoro.service';
-import { Subscription } from 'rxjs';
+import { animationFrameScheduler, Subscription } from 'rxjs';
+import { distinctUntilChanged, observeOn } from 'rxjs/operators';
 
 @Component({
   selector: 'play-button',
@@ -333,19 +334,25 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
 
     // Subscribe to task progress for circle animation
     this._subs.add(
-      this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-        const circleSvgEl = this.circleSvg()?.nativeElement;
-        if (circleSvgEl) {
-          let progress = progressIN || 0;
-          if (progress > 1) {
-            progress = 1;
+      this.taskService.currentTaskProgress$
+        .pipe(
+          // Align ring updates with the frame budget and skip duplicate ratios.
+          observeOn(animationFrameScheduler),
+          distinctUntilChanged(),
+        )
+        .subscribe((progressIN) => {
+          const circleSvgEl = this.circleSvg()?.nativeElement;
+          if (circleSvgEl) {
+            let progress = progressIN || 0;
+            if (progress > 1) {
+              progress = 1;
+            }
+            // Calculate dashoffset: 0 when 0%, negative circumference when 100%
+            // This shows the completed portion of the circle
+            const dashOffset = this.circumference * -progress;
+            this._renderer.setStyle(circleSvgEl, 'stroke-dashoffset', dashOffset);
           }
-          // Calculate dashoffset: 0 when 0%, negative circumference when 100%
-          // This shows the completed portion of the circle
-          const dashOffset = this.circumference * -progress;
-          this._renderer.setStyle(circleSvgEl, 'stroke-dashoffset', dashOffset);
-        }
-      }),
+        }),
     );
   }
 
