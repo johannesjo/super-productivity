@@ -439,6 +439,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     } else if (!this.task.repeatCfgId) {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
       this._taskService.moveToProject(taskWithSubTasks, projectId);
+      this.onClose();
     } else {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
 
@@ -475,6 +476,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
                   projectId,
                 });
                 this._taskService.moveToProject(taskWithSubTasks, projectId);
+                this.onClose();
                 return EMPTY;
               }
 
@@ -523,7 +525,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             },
           ),
         )
-        .subscribe(() => this.focusRelatedTaskOrNext());
+        .subscribe(() => this.onClose());
     }
   }
 
