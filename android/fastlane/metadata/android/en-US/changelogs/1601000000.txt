@@ -1,0 +1,71 @@
+
+### Bug Fixes
+
+* app not closing on MacOS (6350a72), closes #5327
+* close move to project context menu after selecting a project
+* code error
+* color gets stuck behind glass ui (847ba4a), closes #5316
+* current work context lost in add task bar when typing short syntax
+* don't introduce model validation error
+* Initialize isEmoji on component initialization for icon-input component
+* not being able to enter space at end of task title
+* prevent chart component download chart image on enter press
+* prevent share button from being focused
+* **settings:** add color input for cross-browser consistency (#3931)
+* **shepherd:** outdated tour (d53ac82), closes #5313
+* short syntax not being removed from task title on edit
+* spell checker phoning home #5314
+* styling for drag handle on mobile
+* **task:** prefer shortest project title prefix match (#4225)
+* Update "Repeat from Completion" text and logic for task repeat configurations
+### Features
+
+* Add "Repeat from Completion" logic for task repeat configurations
+* add option to share list as markdown
+* **customizerMenu:** change color of active filter button
+* **customizerMenu:** first draft for component
+* **customizerMenu:** move filter button left of play button
+* **customizerMenu:** move filter button to right of project title
+* **customizerMenu:** polish new filter menu button and menu
+* **customizerMenu:** second draft for component
+* **customizerMenu:** try to move checkmark to the right
+* don't show productivity tip longer unless activated
+* **focusMode:** keep banner if focus session is complete
+* improve context menus
+* improve error handling for #5330
+* improve mobile navigation experience
+* improve performance during route changes
+* improve styling for focus mode mode selection
+* improve task-title component to make it more performant
+* make share work for native android
+* make tag and project suggestions more consistent #5343
+* make tag and project suggestions more consistent 2 #5343
+* **metric:** add share function
+* **metric:** improve on share function
+* **metric:** improve responsiveness
+* **metric:** make all charts shareable
+* **metrics:** add heatmap
+* **metrics:** add support for first day of week setting
+* **metrics:** make today case work
+* **metrics:** polish heatmap
+* only show filter button on work view pages
+* performance improvements
+* **repeatTasks:** improve on ui
+* **repeatTasks:** improve on ui from PR
+* **schedule:** refresh current time badge too
+* **schedule:** remove filter button from right
+* **share:** add native share
+* **share:** implement for basic project metrics
+* **share:** improve share
+* **share:** improve share
+* **share:** outline multi platform share functionality
+* **share:** remove electron share again
+* **shepherd:** animate buttons (f3fd788), closes #5297
+* **task:** improve performance of task component 1 (f70f427), closes #5212
+* **task:** improve performance of task component 2 (05ddbce), closes #5212
+* **task:** improve performance of task component 3 (fdb0b77), closes #5212
+* **task:** improve performance of task component 4 (69fa815), closes #5212
+* **task:** improve performance of task component 5 (8169e3b), closes #5212
+
+
+
