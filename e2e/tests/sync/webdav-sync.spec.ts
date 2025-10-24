@@ -1,7 +1,10 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { SyncPage } from '../../pages/sync.page';
 
-test.describe('WebDAV Sync', () => {
+// FIXME: These tests require a WebDAV server running on localhost:2345
+// To run these tests, set up a WebDAV server with credentials admin/admin
+// Example: docker run -p 2345:80 -e WEBDAV_USERNAME=admin -e WEBDAV_PASSWORD=admin bytemark/webdav
+test.describe.skip('WebDAV Sync', () => {
   let syncPage: SyncPage;
 
   test.beforeEach(async ({ page, workViewPage }) => {
