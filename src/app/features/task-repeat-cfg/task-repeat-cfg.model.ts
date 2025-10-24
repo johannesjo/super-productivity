@@ -54,7 +54,7 @@ export interface TaskRepeatCfgCopy {
   // ... possible sub tasks & attachments
   shouldInheritSubtasks?: boolean;
   // Base new start date on completion date
-  repeatFromCompletionDate: boolean;
+  repeatFromCompletionDate?: boolean;
   // new UX: disable auto update checkbox (auto-update is default)
   disableAutoUpdateSubtasks?: boolean;
   subTaskTemplates?: {
