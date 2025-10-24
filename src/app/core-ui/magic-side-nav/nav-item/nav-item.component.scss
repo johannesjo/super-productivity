@@ -65,17 +65,16 @@
   font-weight: normal;
 }
 
-:host:hover .task-count {
-  display: none !important;
+@media (hover: hover) {
+  :host:hover .task-count {
+    display: none !important;
+  }
 }
 
 @media (hover: none) {
   .additional-btn {
     opacity: 1;
     visibility: visible;
-  }
-  .task-count {
-    display: none !important;
   }
 }
 
@@ -92,10 +91,6 @@
   color: var(--text-color-muted);
   // avoid affecting drag handle
   pointer-events: none;
-
-  @include mq(xs, max) {
-    display: none;
-  }
 }
 
 // Active state visuals - ensure they override Angular Material styles
@@ -290,6 +285,8 @@ button[mat-menu-item].nav-link.active {
   }
 
   .task-count {
-    display: none;
+    display: flex;
+    font-size: 9px;
+    right: 12px;
   }
 }
