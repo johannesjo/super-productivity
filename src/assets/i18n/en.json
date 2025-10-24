@@ -1460,7 +1460,6 @@
         "REPEAT_FROM_COMPLETION_DATE": "Repeat, when done",
         "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "The next task is created from your completion date, not from start date. (e.g., 'Every 7 days' = 7 days after completion)",
         "SCHEDULE_TYPE_LABEL": "Schedule type",
-        "SCHEDULE_TYPE_DESCRIPTION": "Choose how the interval is calculated. Fixed: Sticks to calendar dates (good for meetings, weekly reports). Flexible: Counts from when you complete it (good for habits, exercise, regular maintenance).",
         "SCHEDULE_TYPE_FIXED": "Fixed schedule (e.g., every Monday, 1st of month)",
         "SCHEDULE_TYPE_FLEXIBLE": "After completion (e.g., 7 days after I finish)",
         "REMOVE_INSTANCE": "Remove today",
