@@ -14,6 +14,7 @@ import { SharePayload } from '../share.model';
   template: `
     <button
       mat-icon-button
+      type="button"
       [matTooltip]="tooltip()"
       (click)="share()"
       [disabled]="disabled()"
