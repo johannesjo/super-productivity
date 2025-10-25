@@ -347,6 +347,6 @@ export class BoardPanelComponent {
   }
 
   _isTaskInBacklog(task: Readonly<TaskCopy>): boolean {
-    return this.allBacklogTaskIds().has(task.id);
+    return this.allBacklogTaskIds().has(task.parentId || task.id);
   }
 }
