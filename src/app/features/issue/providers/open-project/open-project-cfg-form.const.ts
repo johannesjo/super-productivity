@@ -15,7 +15,7 @@ export const OPEN_PROJECT_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderOpe
 
       templateOptions: {
         label: T.F.OPEN_PROJECT.FORM.HOST,
-        type: 'text',
+        type: 'url',
         pattern: /^.+\/.+?$/i,
         required: true,
       },

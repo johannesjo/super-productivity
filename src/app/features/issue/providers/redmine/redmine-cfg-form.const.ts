@@ -31,7 +31,7 @@ export const REDMINE_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderRedmine>
 
     templateOptions: {
       label: T.F.REDMINE.FORM.HOST,
-      type: 'text',
+      type: 'url',
       pattern: /^.+\/.+?$/i,
       required: true,
     },
