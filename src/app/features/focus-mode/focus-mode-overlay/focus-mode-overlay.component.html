@@ -15,22 +15,13 @@
       </button>
 
       <ng-template #selectModeTpl>
-        <mat-button-toggle-group
+        <segmented-button-group
           class="focus-mode-select-mode"
-          [value]="selectedMode()"
-          style="margin-bottom: -32px"
-          (change)="selectMode($event.value)"
-        >
-          <mat-button-toggle [value]="FocusModeMode.Flowtime"
-            >{{ T.F.FOCUS_MODE.FLOWTIME | translate }}
-          </mat-button-toggle>
-          <mat-button-toggle [value]="FocusModeMode.Pomodoro"
-            >{{ T.F.FOCUS_MODE.POMODORO | translate }}
-          </mat-button-toggle>
-          <mat-button-toggle [value]="FocusModeMode.Countdown"
-            >{{ T.F.FOCUS_MODE.COUNTDOWN | translate }}
-          </mat-button-toggle>
-        </mat-button-toggle-group>
+          [options]="modeOptions"
+          [selectedId]="selectedMode()"
+          [ariaLabel]="T.F.FOCUS_MODE.SELECT_MODE | translate"
+          (selectionChange)="selectMode($event)"
+        ></segmented-button-group>
       </ng-template>
 
       <!-- -->

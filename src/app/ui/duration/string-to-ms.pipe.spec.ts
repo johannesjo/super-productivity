@@ -26,15 +26,49 @@ describe('stringToMs', () => {
     expect(stringToMs('1h 10')).toBe(4200000);
     expect(stringToMs('1h10')).toBe(4200000);
 
-    // Case: missing all units.
-    expect(stringToMs('10')).toBe(0);
-
     // Case: using floats (with dot or comma separator).
     expect(stringToMs('1.5h')).toBe(5400000);
     expect(stringToMs('1,5h')).toBe(5400000);
 
     // Case: combining floats with subunits (opinionated choice: adds up).
     expect(stringToMs('1,5h 10m')).toBe(6000000);
+  });
+
+  it('should accept decimals without leading 0', () => {
+    expect(stringToMs('.5h')).toBe(30 * 60 * 1000);
+    expect(stringToMs(',5h')).toBe(30 * 60 * 1000);
+  });
+
+  it('should accept full time stings', () => {
+    // Case: hh:mm
+    // eslint-disable-next-line no-mixed-operators
+    expect(stringToMs('02:30')).toBe((2 * 60 + 30) * 60 * 1000);
+
+    // Case: h:mm
+    // eslint-disable-next-line no-mixed-operators
+    expect(stringToMs('2:15')).toBe((2 * 60 + 15) * 60 * 1000);
+  });
+
+  it('should reject incomplete hh:m', () => {
+    // Case h:m
+    expect(stringToMs('1:5')).toBe(0);
+
+    // Case hh:m
+    expect(stringToMs('03:8')).toBe(0);
+  });
+
+  it('should interpret numbers without unit', () => {
+    // Case: integer (greater 8) missing all units => treat as minutes
+    expect(stringToMs('10')).toBe(10 * 60 * 1000);
+
+    // Case: integer (less or equal 8) missing all units => treat as hours
+    expect(stringToMs('8')).toBe(8 * 60 * 60 * 1000);
+
+    // Case: fractional missing all units => treat as hours
+    expect(stringToMs('.5')).toBe(30 * 60 * 1000);
+    expect(stringToMs('1.5')).toBe((60 + 30) * 60 * 1000);
+    // eslint-disable-next-line no-mixed-operators
+    expect(stringToMs('10.5')).toBe((10 * 60 + 30) * 60 * 1000);
   });
 
   describe('zero values', () => {
@@ -56,6 +90,14 @@ describe('stringToMs', () => {
 
     it('should handle 0 without unit', () => {
       expect(stringToMs('0')).toBe(0);
+    });
+
+    it('should handle 00:00', () => {
+      expect(stringToMs('00:00')).toBe(0);
+    });
+
+    it('should handle 0:00', () => {
+      expect(stringToMs('0:00')).toBe(0);
     });
   });
 

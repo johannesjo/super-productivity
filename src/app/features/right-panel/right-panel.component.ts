@@ -85,6 +85,8 @@ const clampWidth = (width: number, maxWidth: number | string): number => {
     '[class.isOpen]': 'isOpen()',
     // eslint-disable-next-line @typescript-eslint/naming-convention
     '[class.resizing]': 'isResizing()',
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[class.windowResizing]': 'isWindowResizing()',
   },
   standalone: true,
 })
@@ -144,6 +146,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // Resize functionality
   readonly currentWidth = signal<number>(RIGHT_PANEL_CONFIG.DEFAULT_WIDTH);
   readonly isResizing = signal(false);
+  readonly isWindowResizing = signal(false);
   private readonly _startX = signal(0);
   private readonly _startWidth = signal(0);
 
@@ -161,6 +164,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   // Performance optimization for drag events
   private _lastDragTime = 0;
   private _lastResizeTime = 0;
+  private _windowResizeDebounceTimer: number | undefined;
 
   // Close button drag detection
   private _closeButtonDragStart = { x: 0, y: 0 };
@@ -250,6 +254,12 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       this._handleDragEnd();
     }
 
+    // Clean up window resize debounce timer
+    if (this._windowResizeDebounceTimer) {
+      window.clearTimeout(this._windowResizeDebounceTimer);
+      this._windowResizeDebounceTimer = undefined;
+    }
+
     // Remove window resize listener
     window.removeEventListener('resize', this._boundOnWindowResize);
 
@@ -269,13 +279,21 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
   private _throttledWindowResize(): void {
     // Throttle resize events for better performance
     const now = Date.now();
-    if (now - this._lastResizeTime < DRAG_CONFIG.THROTTLE_MS * 4) return; // Less frequent than drag
+    if (now - this._lastResizeTime < DRAG_CONFIG.THROTTLE_MS * 2) return; // 32ms throttle
     this._lastResizeTime = now;
 
     this._handleWindowResize();
   }
 
   private _handleWindowResize(): void {
+    // Set window resizing state to prevent scrollbar conflicts
+    this.isWindowResizing.set(true);
+
+    // Clear previous debounce timer
+    if (this._windowResizeDebounceTimer) {
+      window.clearTimeout(this._windowResizeDebounceTimer);
+    }
+
     // Only recalculate if using percentage-based max width
     if (
       typeof RIGHT_PANEL_CONFIG.MAX_WIDTH === 'string' &&
@@ -286,10 +304,19 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
       // If current width exceeds new max width, clamp it
       if (currentWidth > newMaxWidthInPixels) {
-        this.currentWidth.set(newMaxWidthInPixels);
-        this._saveWidthToStorage();
+        // Use requestAnimationFrame to ensure DOM update completes
+        requestAnimationFrame(() => {
+          this.currentWidth.set(newMaxWidthInPixels);
+          this._saveWidthToStorage();
+        });
       }
     }
+
+    // Debounce: wait 300ms after last resize event to unset flag
+    this._windowResizeDebounceTimer = window.setTimeout(() => {
+      this.isWindowResizing.set(false);
+      this._windowResizeDebounceTimer = undefined;
+    }, 300);
   }
 
   close(): void {
@@ -306,6 +333,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     this._layoutService.hideNotes();
     this._layoutService.hideAddTaskPanel();
     this._layoutService.hideTaskViewCustomizerPanel();
+    this._layoutService.hideScheduleDayPanel();
     this._store.dispatch(hidePluginPanel());
 
     this.wasClosed.emit();

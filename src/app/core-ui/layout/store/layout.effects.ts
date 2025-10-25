@@ -3,6 +3,7 @@ import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { hideNonTaskSidePanelContent } from './layout.actions';
 import { filter, mapTo } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
+import { TaskDetailTargetPanel } from '../../../features/tasks/task.model';
 import { LayoutService } from '../layout.service';
 import { NavigationStart, NavigationEnd, Router } from '@angular/router';
 
@@ -23,7 +24,12 @@ export class LayoutEffects {
   hideNotesWhenTaskIsSelected$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setSelectedTask),
-      filter(({ id }) => id !== null),
+      filter(({ id, taskDetailTargetPanel, isSkipToggle }) => {
+        // Do not hide side content when opening modal (DONT_OPEN_PANEL) or when explicitly skipped
+        if (id === null) return false;
+        if (isSkipToggle) return false;
+        return taskDetailTargetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL;
+      }),
       mapTo(hideNonTaskSidePanelContent()),
     ),
   );

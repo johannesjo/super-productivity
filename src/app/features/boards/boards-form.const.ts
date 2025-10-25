@@ -9,6 +9,7 @@ import {
 import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
 import { DEFAULT_PANEL_CFG } from './boards.const';
+import { FormlyFieldConfig } from '@ngx-formly/core/lib/models/fieldconfig';
 
 const getNewPanel = (): BoardPanelCfg => ({
   ...DEFAULT_PANEL_CFG,
@@ -123,6 +124,24 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
                 // label: T.F.BOARDS.FORM.TASK_DONE_STATE_UNDONE,
                 label: 'Not Scheduled',
               },
+            ],
+          },
+        },
+        {
+          key: 'sortByDue',
+          type: 'radio',
+          expressions: {
+            hide: (fCfg: FormlyFieldConfig) =>
+              fCfg.model.scheduledState !== BoardPanelCfgScheduledState.Scheduled,
+          },
+          props: {
+            label: 'Sort by due date',
+            required: true,
+            defaultValue: 'off',
+            options: [
+              { value: 'off', label: 'Off' },
+              { value: 'asc', label: 'Ascending (soonest first)' },
+              { value: 'desc', label: 'Descending (furthest first)' },
             ],
           },
         },

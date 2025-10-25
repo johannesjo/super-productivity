@@ -12,6 +12,10 @@ import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
+import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
+import { TaskViewCustomizerPanelComponent } from '../../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
+import { GlobalConfigService } from '../../../features/config/global-config.service';
+import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
 
 @Component({
   selector: 'page-title',
@@ -26,6 +30,7 @@ import { WorkContextService } from '../../../features/work-context/work-context.
     MatMenuContent,
     MatMenuTrigger,
     WorkContextMenuComponent,
+    TaskViewCustomizerPanelComponent,
     TranslatePipe,
   ],
   template: `
@@ -39,14 +44,35 @@ import { WorkContextService } from '../../../features/work-context/work-context.
         {{ displayTitle() }}
       </div>
       @if (!isXxxs()) {
-        <button
-          [mat-menu-trigger-for]="activeWorkContextMenu"
-          [matTooltip]="T.MH.PROJECT_MENU | translate"
-          class="project-settings-btn"
-          mat-icon-button
-        >
-          <mat-icon>more_vert</mat-icon>
-        </button>
+        <div class="page-title-actions">
+          <button
+            [mat-menu-trigger-for]="activeWorkContextMenu"
+            [matTooltip]="T.MH.PROJECT_MENU | translate"
+            class="project-settings-btn"
+            mat-icon-button
+          >
+            <mat-icon>more_vert</mat-icon>
+          </button>
+          @if (isWorkViewPage()) {
+            <button
+              class="task-filter-btn"
+              [class.isCustomized]="taskViewCustomizerService.isCustomized()"
+              [matMenuTriggerFor]="customizerPanel.menu"
+              mat-icon-button
+              matTooltip="{{
+                T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate
+              }} {{
+                kb.toggleTaskViewCustomizerPanel
+                  ? '[' + kb.toggleTaskViewCustomizerPanel + ']'
+                  : ''
+              }}"
+            >
+              <mat-icon>filter_list</mat-icon>
+            </button>
+
+            <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
+          }
+        </div>
       }
       <mat-menu #activeWorkContextMenu="matMenu">
         <ng-template matMenuContent>
@@ -84,21 +110,56 @@ import { WorkContextService } from '../../../features/work-context/work-context.
         }
       }
 
+      .page-title-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--s-quarter);
+        margin-left: calc(-1 * var(--s));
+        margin-right: var(--s2);
+      }
+
       .project-settings-btn {
-        display: none;
-        @media (min-width: 600px) {
+        opacity: 1;
+
+        /*display: none;*/
+        /*@media (min-width: 600px) {*/
+        /*  display: block;*/
+        /*  transition: var(--transition-standard);*/
+        /*  opacity: 0;*/
+        /*  position: relative;*/
+        /*  z-index: 1;*/
+        /*}*/
+
+        /*&:hover,*/
+        /*.page-title:hover + .page-title-actions &,*/
+        /*.page-title-actions:hover & {*/
+        /*  opacity: 1;*/
+        /*}*/
+      }
+
+      .task-filter-btn {
+        position: relative;
+        transition: all 0.2s ease;
+        overflow: visible !important;
+
+        .mat-icon {
+          transition: transform 0.2s ease;
           display: block;
-          transition: var(--transition-standard);
-          opacity: 0;
-          margin-right: var(--s2);
-          margin-left: calc(-1 * var(--s));
-          position: relative;
-          z-index: 1;
         }
 
-        &:hover,
-        .page-title:hover + & {
-          opacity: 1;
+        &.isCustomized {
+          color: var(--c-accent);
+          box-shadow: none;
+        }
+
+        &:hover:not(.isCustomized):not(:disabled) {
+          background-color: var(--hover-color, rgba(0, 0, 0, 0.04));
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+          background: transparent !important;
         }
       }
     `,
@@ -109,6 +170,8 @@ export class PageTitleComponent {
   private _breakpointObserver = inject(BreakpointObserver);
   private _router = inject(Router);
   private _workContextService = inject(WorkContextService);
+  readonly taskViewCustomizerService = inject(TaskViewCustomizerService);
+  private readonly _configService = inject(GlobalConfigService);
 
   readonly T = T;
 
@@ -140,6 +203,13 @@ export class PageTitleComponent {
   );
   isBoardsSection = toSignal(this._isBoardsSection$, { initialValue: false });
 
+  private _isWorkViewPage$ = this._router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
+    startWith(!!this._router.url.match(/tasks$/)),
+  );
+  isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
+
   // Override title for special routes
   displayTitle = computed(() => {
     if (this.isScheduleSection()) {
@@ -158,4 +228,8 @@ export class PageTitleComponent {
   isXxxs = toSignal(this._isXxxs$.pipe(map((result) => result.matches)), {
     initialValue: false,
   });
+
+  get kb(): KeyboardConfig {
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
+  }
 }

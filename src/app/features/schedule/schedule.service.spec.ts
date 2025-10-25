@@ -1,13 +1,46 @@
 import { TestBed } from '@angular/core/testing';
 import { ScheduleService } from './schedule.service';
 import { DateService } from '../../core/date/date.service';
+import { provideMockStore } from '@ngrx/store/testing';
+import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
+import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { selectTimelineConfig } from '../config/store/global-config.reducer';
+import { selectPlannerDayMap } from '../planner/store/planner.selectors';
+import { of } from 'rxjs';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { TaskService } from '../tasks/task.service';
 
 describe('ScheduleService', () => {
   let service: ScheduleService;
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [ScheduleService, DateService],
+      providers: [
+        ScheduleService,
+        DateService,
+        provideMockStore({
+          selectors: [
+            { selector: selectTimelineTasks, value: { unPlanned: [], planned: [] } },
+            {
+              selector: selectTaskRepeatCfgsWithAndWithoutStartTime,
+              value: { withStartTime: [], withoutStartTime: [] },
+            },
+            {
+              selector: selectTimelineConfig,
+              value: { isWorkStartEndEnabled: false, isLunchBreakEnabled: false },
+            },
+            { selector: selectPlannerDayMap, value: {} },
+          ],
+        }),
+        {
+          provide: CalendarIntegrationService,
+          useValue: { icalEvents$: of([]) },
+        },
+        {
+          provide: TaskService,
+          useValue: { currentTaskId: () => null },
+        },
+      ],
     });
     service = TestBed.inject(ScheduleService);
   });

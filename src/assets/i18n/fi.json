@@ -108,7 +108,7 @@
         "CREATE_NEW_TAGS_MSG": "{{nr}} uutta tunnistetta on luotava, jotta tämä taulu toimisi",
         "EDIT_BOARD": "Muokkaa taulua",
         "NO_PANELS_BTN": "Määritä taulu",
-        "NO_PANELS_MSG": "Tällä taululla ei ole määritettyjä paneeleja. Lisää joitakin paneeleja siihen."
+        "NO_PANELS_MSG": "Taululta puuttuu määritettyjä paneeleja. Lisää siihen paneeleja."
       }
     },
     "CALDAV": {
@@ -237,12 +237,12 @@
       "PREP_STRETCH": "Tee kevyttä venyttelyä",
       "SELECT_ANOTHER_TASK": "Valitse toinen tehtävä",
       "SELECT_TASK": "Valitse tehtävä, johon keskittyä",
-      "SESSION_COMPLETED": "Keskittymistunti suoritettu!",
+      "SESSION_COMPLETED": "Keskittymissessio suoritettu!",
       "POMODORO_SESSION_COMPLETED": "Pomodorotunti suoritettu!",
-      "SET_FOCUS_SESSION_DURATION": "Aseta keskittymistunnin kesto",
+      "SET_FOCUS_SESSION_DURATION": "Aseta keskittymissession kesto",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Näytä/piilota tehtävän muistiinpanot ja liitteet",
-      "START_FOCUS_SESSION": "Käynnistä keskittymistunti",
-      "START_NEXT_FOCUS_SESSION": "Käynnistä seuraava keskittymistunti",
+      "START_FOCUS_SESSION": "Käynnistä Keskittymissessio",
+      "START_NEXT_FOCUS_SESSION": "Käynnistä seuraava Keskittymissessio",
       "WORKED_FOR": "Työskentelit",
       "BREAK_RELAX_MSG": "Ota hetki rentoutumiseen",
       "SKIP_BREAK": "Ohita tauko",
@@ -268,7 +268,8 @@
         "SCOPE": "Laajuus",
         "SCOPE_ALL": "Kaikki",
         "SCOPE_ASSIGNED": "Minulle osoitetut",
-        "SCOPE_CREATED": "Minun luomat"
+        "SCOPE_CREATED": "Minun luomat",
+        "TOKEN": "Käyttöoikeustunnus"
       },
       "FORM_SECTION": {
         "HELP": "<p>Tässä voit määrittää SuperProductivityn listamaan avoimet Gitea-ongelmat tietystä arkistosta tehtävänluontipaneelissa päivittäisessä suunnittelinäkymässä. Ne listataan ehdotuksina ja tarjoavat linkin ongelmaan sekä lisätietoja siitä.</p> <p>Lisäksi voit automaattisesti lisätä ja tuoda kaikki avoimet ongelmat.</p><p>Käyttörajoitusten ja pääsyn saamiseksi voit antaa käyttöoikeustunnuksen.",
@@ -584,6 +585,7 @@
         "GLOBAL_METRICS": "Globaalit mittarit",
         "IMPROVEMENT_SELECTION_COUNT": "Parannustekijän valintakertojen määrä",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mieliala ja tuottavuus ajan kuluessa",
+        "FOCUS_SESSION_TRENDS": "Keskittymissessiot ajan myötä",
         "NO_ADDITIONAL_DATA_YET": "Ei vielä kerättyjä lisätietoja. Käytä lomaketta päivittäisen yhteenvedon \"Arviointi\"-paneelissa tehdäksesi niin.",
         "OBSTRUCTION_SELECTION_COUNT": "Esteen aiheuttaneen tekijän valintakertojen määrä",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klikkauslaskurit ajan kuluessa",
@@ -850,8 +852,8 @@
         "CREATE_TITLE": "Luo kansio",
         "EDIT_TITLE": "Muokkaa kansiota",
         "NAME_LABEL": "Kansion nimi",
-        "NAME_PLACEHOLDER": "Anna kansion nimi",
-        "NAME_REQUIRED": "Kansion nimi on pakollinen",
+        "NAME_PLACEHOLDER": "Nimeä kansio",
+        "NAME_REQUIRED": "Kansio on nimettävä",
         "PARENT_LABEL": "Yläkansio",
         "NO_PARENT": "Ei yläkansiota (pääkansio)"
       },
@@ -864,8 +866,26 @@
       "TOOLTIP_CREATE": "Luo projektikansio",
       "TOOLTIP_VISIBILITY": "Näytä/piilota projektit"
     },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Luo kansio",
+        "EDIT_TITLE": "Muokkaa kansiota",
+        "NAME_LABEL": "Kansion nimi",
+        "NAME_PLACEHOLDER": "Nimeä kansio",
+        "NAME_REQUIRED": "Kansio on nimettävä",
+        "PARENT_LABEL": "Yläkansio",
+        "NO_PARENT": "No yläkansiota (pääkansio)"
+      },
+      "SELECT": {
+        "LABEL": "Kansio",
+        "PLACEHOLDER": "Valitse kansio",
+        "NO_PARENT": "Ei kansiota (pääkansio)"
+      },
+      "CONFIRM_DELETE": "Haluatko varmasti poistaa kansion \"{{title}}\"? Kansion tunnisteet siirretään pääkansioon.",
+      "TOOLTIP_CREATE": "Luo tunnistekansio"
+    },
     "QUICK_HISTORY": {
-      "NO_DATA": "Ei tietoa nykyiseltä vuodelta",
+      "NO_DATA": "Ei tietoa tältä vuodelta",
       "PAGE_TITLE": "Pikahistoria",
       "WEEK_TITLE": "Viikko {{nr}} ({{timeSpent}})"
     },
@@ -1228,7 +1248,7 @@
         "EDIT_SCHEDULED": "Aikatauluta uudelleen",
         "EDIT_TAGS": "Muokkaa tunnisteita",
         "EDIT_TASK_TITLE": "Muokkaa otsikkoa",
-        "FOCUS_SESSION": "Käynnistä keskittymistunti",
+        "FOCUS_SESSION": "Käynnistä Keskittymissessio",
         "MARK_DONE": "Merkitse valmiiksi",
         "MARK_UNDONE": "Merkitse keskeneräiseksi",
         "MOVE_TO_BACKLOG": "Siirrä taakkaputkeen",
@@ -1263,6 +1283,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Lisää kaikki tänään",
         "ADD_TO_TODAY": "Lisää tänään",
+        "COMPLETE": "Valmis",
+        "COMPLETE_ALL": "Kaikki valmiit",
         "DONE": "Valmis",
         "DUE_TASK": "Muistutus suunnitellusta tehtävästä",
         "DUE_TASKS": "Muistutus suunnitelluista tehtävistä",
@@ -1310,7 +1332,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Lisää uusi merkintä päivälle {{date}}",
         "DATE": "Päivämäärä uudelle merkinnälle",
-        "HELP": "Esimerkkejä:<br> 30min => 30 minuuttia<br> 2h => 2 tuntia<br> 2h 30min => 2 tuntia ja 30 minuuttia",
+        "HELP": "Esimerkkejä:<br> 30m => 30 minuuttia<br> 2h => 2 tuntia<br> 2h 30m => 2 tuntia ja 30 minuuttia<br> 1.5h => 1 tunti ja 30 minuuttia<br> 03:15 => 3 tuntia ja 15 minuuttia",
         "TINE_SPENT": "Käytetty aika",
         "TITLE": "Lisää päivälle"
       },
@@ -1561,7 +1583,8 @@
       "WEEK": {
         "EXPORT": "Vie viikon tiedot",
         "NO_DATA": "Ei tehtäviä tällä viikolla vielä.",
-        "TITLE": "Otsikko"
+        "TITLE": "Otsikko",
+        "FOCUS_SUMMARY": "Keskittymissessioita (määrä / aika)"
       }
     }
   },
@@ -1615,7 +1638,7 @@
     "NEXT": "Seuraava",
     "NO_CON": "Olet tällä hetkellä offline-tilassa. Yhdistä internetiin.",
     "NONE": "Ei mitään",
-    "OK": "Ok",
+    "OK": "Selvä",
     "OVERDUE": "Myöhässä",
     "PREVIOUS": "Edellinen",
     "REMOVE": "Poista",
@@ -1670,6 +1693,7 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Lisää uusi muistiinpano",
       "ADD_NEW_TASK": "Lisää uusi tehtävä",
+      "ADD_NEW_PROJECT": "Lisää uusi projekti",
       "APP_WIDE_SHORTCUTS": "Globaalit pikanäppäimet (sovelluksen laajuiset)",
       "COLLAPSE_SUB_TASKS": "Sulje alitehtävät",
       "EXPAND_SUB_TASKS": "Laajenna alitehtävät",
@@ -1777,7 +1801,6 @@
       "IS_HIDE_NAV": "Piilota navigointi, kunnes päänimikettä hoveroidaan (vain työpöytä)",
       "IS_MINIMIZE_TO_TRAY": "Pienennä tehtäväpalkkiin (vain työpöytä)",
       "IS_SHOW_TIP_LONGER": "Näytä tuottavuusvinkki sovelluksen käynnistyksessä hieman pidempään",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Poista tuottavuusvinkit käytöstä sovelluksen käynnistyksessä",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Näytä nykyinen laskuri tehtäväpalkissa / tilavalikossa (vain työpöytä mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Näytä nykyinen tehtävä tehtäväpalkissa / tilavalikossa (vain työpöytä mac/windows)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Ota päällekkäisyysindikaattori-ikkuna käyttöön (työpöytä linux/gnome)",
@@ -1985,6 +2008,7 @@
     "ADD_TASKS_FROM_TODAY": "Lisää tehtäviä tänään",
     "BACK": "Odota, unohdin jotain!",
     "BREAK_LABEL": "Tauot (määrä / aika)",
+    "FOCUS_SUMMARY": "Keskittyminen (määrä / aika)",
     "CELEBRATE": "Ota hetki <i>juhlia!</i>",
     "CLEAR_ALL_CONTINUE": "Tyhjennä kaikki valmiit ja jatka",
     "D_CONFIRM_APP_CLOSE": {
@@ -2121,7 +2145,7 @@
     "UNKNOWN_ERROR": "Tuntematon virhe tapahtui",
     "PLUGIN_DIALOG_TITLE": "Laajennuksen viesti",
     "NO_CONTENT_PROVIDED": "Sisältöä ei annettu",
-    "OK": "OK",
+    "OK": "Selvä",
     "LOADING_INTERFACE": "Ladataan laajennuksen käyttöliittymää...",
     "ERROR_LOADING_PLUGIN": "Virhe laajennuksen lataamisessa",
     "GO_BACK": "Palaa takaisin",
@@ -2135,7 +2159,7 @@
     "INDEX_HTML_NOT_LOADED": "Laajennuksen index.html:ää ei ladattu"
   },
   "SCHEDULE": {
-    "LAST": "Viimeinen:",
+    "LAST": "Edellinen:",
     "NEXT": "Seuraava",
     "NO_REPEATABLE_TASKS": "Tällä hetkellä ei ole toistuvia tehtäviä. Voit aikatauluttaa tehtävän valitsemalla \"Toista tehtävä\" tehtävän sivupaneelissa. Avaaksesi sen klikkaa tehtävää kohdattaessa näkyvää oikeanpuoleisinta kuvaketta (tai napauta vain tehtävää mobiilissa).",
     "NO_SCHEDULED": "Tällä hetkellä ei ole aikataulutettuja tehtäviä. Voit aikatauluttaa tehtävän valitsemalla \"Aikatauluta tehtävä\" tehtävän kontekstivalikossa. Avaaksesi sen napsauta hiiren oikealla painikkeella (pitkä painallus mobiilissa) tehtävää.",
@@ -2165,7 +2189,7 @@
   },
   "V": {
     "E_1TO10": "Anna arvo 1 ja 10 välillä",
-    "E_DATETIME": "Annettu arvo ei ole päivämäärä ja aika!",
+    "E_DATETIME": "Annettu arvo ei ole päivämäärä tai aika!",
     "E_DURATION": "Anna kelvollinen kesto (esim. 1h)",
     "E_MAX": "Ei saa olla suurempi kuin {{val}}",
     "E_MAX_LENGTH": "Saa olla enintään {{val}} merkkiä pitkä",
@@ -2175,17 +2199,17 @@
     "E_REQUIRED": "Tämä kenttä on pakollinen"
   },
   "WW": {
-    "ADD_MORE": "Lisää lisää",
+    "ADD_MORE": "Lisää enemmän",
     "ADD_SCHEDULED_FOR_TOMORROW": "Lisää huomiseksi suunnitellut tehtävät ({{nr}})",
     "ADD_SOME_TASKS": "Lisää joitakin tehtäviä suunnitellaksesi päiväsi!",
     "DONE_TASKS": "Valmiit tehtävät",
     "DONE_TASKS_IN_ARCHIVE": "Täällä ei tällä hetkellä ole valmiita tehtäviä, mutta joitakin on jo arkistoitu.",
-    "ESTIMATE_REMAINING": "Arvio jäljellä:",
+    "ESTIMATE_REMAINING": "Arvioitu kesto:",
     "LATER_TODAY": "Myöhemmin tänään",
-    "FINISH_DAY": "Tallenna päivä",
-    "FINISH_DAY_FOR_PROJECT": "Tallenna päivä tälle projektille",
-    "FINISH_DAY_FOR_TAG": "Tallenna päivä tälle tunnisteelle",
-    "FINISH_DAY_TOOLTIP": "Arvioi päiväsi, siirrä kaikki valmiit tehtävät arkistoon (valinnainen) ja/tai suunnittele seuraava päiväsi.",
+    "FINISH_DAY": "Lopeta päivä",
+    "FINISH_DAY_FOR_PROJECT": "Lopeta päivä tälle projektille",
+    "FINISH_DAY_FOR_TAG": "Lopeta päivä tälle tunnisteelle",
+    "FINISH_DAY_TOOLTIP": "Arvioi päivää, siirrä kaikki valmiit tehtävät arkistoon (valinnainen) ja/tai suunnittele seuraava päivä.",
     "HELP_PROCRASTINATION": "Apua, minä vitkuttelen!",
     "MOVE_DONE_TO_ARCHIVE": "Siirrä valmiit arkistoon",
     "NO_DONE_TASKS": "Tällä hetkellä ei ole valmiita tehtäviä",
@@ -2195,8 +2219,8 @@
     "RESET_BREAK_TIMER": "Nollaa ilman taukoajastinta",
     "TIME_ESTIMATED": "Arvioitu aika:",
     "TODAY_REMAINING": "Tänään jäljellä:",
-    "WITHOUT_BREAK": "Ilman taukoa:",
-    "WORKING_TODAY": "Työskentely tänään:",
-    "WORKING_TODAY_ARCHIVED": "Tänään työskennelty aika arkistoiduissa tehtävissä"
+    "WITHOUT_BREAK": "Tauoton työskentely:",
+    "WORKING_TODAY": "Työskennelty tänään:",
+    "WORKING_TODAY_ARCHIVED": "Arkistoituihin tehtäviin käytetty aika tänään"
   }
 }

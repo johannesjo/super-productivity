@@ -38,6 +38,7 @@ import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 import { TaskLog } from '../../../core/log';
+import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -70,6 +71,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _store = inject(Store);
   private _issueService = inject(IssueService);
   private _taskViewCustomizerService = inject(TaskViewCustomizerService);
+  private _scheduleExternalDragService = inject(ScheduleExternalDragService);
   dropListService = inject(DropListService);
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -120,10 +122,19 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList()!);
+    this._scheduleExternalDragService.setActiveTask(null);
   }
 
   trackByFn(i: number, task: Task): string {
     return task.id;
+  }
+
+  onDragStarted(task: TaskWithSubTasks): void {
+    this._scheduleExternalDragService.setActiveTask(task);
+  }
+
+  onDragEnded(): void {
+    this._scheduleExternalDragService.setActiveTask(null);
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {

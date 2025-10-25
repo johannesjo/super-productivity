@@ -1,0 +1,24 @@
+
+### Bug Fixes
+
+* errors
+* get rid of double done button
+* **schedule:** labels
+### Features
+
+* add complete button to reminder dialog modal
+* add complete button to reminder dialog modal
+* add translation keys for complete button in reminder dialog
+* add translation keys for complete button in reminder dialog
+* add warning when simple counter buttons are active
+* also fix missing new entities in data repair #5234
+* **boards:** limit new sort setting to columns that include due tasks specifically
+* **electron:** improve idle handling for snap
+* enable hardware acceleration again
+* polish
+* **schedule:** add drag and drop and resize to schedule
+* **schedule:** add missing translation
+* **schedule:** allow resizing for normal tasks
+* **schedule:** better preview element height for split tasks
+* **schedule:** make drag to schedule work for touch devices
+* **schedule:** make preview work again for day planning mode

@@ -24,10 +24,9 @@ export const BASIC_TAG_CONFIG_FORM_CONFIG: ConfigFormSection<Tag> = {
     },
     {
       key: 'color',
-      type: 'input',
+      type: 'color',
       templateOptions: {
         label: T.F.TAG.FORM_BASIC.L_COLOR,
-        type: 'color',
       },
     },
   ],

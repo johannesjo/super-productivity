@@ -25,6 +25,21 @@
 }
 
 <button
+  (click)="shareTasksAsMarkdown()"
+  mat-menu-item
+>
+  <mat-icon>{{ shareSupport === 'none' ? 'content_copy' : 'ios_share' }}</mat-icon>
+  <span class="text">
+    {{
+      (shareSupport === 'none'
+        ? T.MH.COPY_TASK_LIST_MARKDOWN
+        : T.MH.SHARE_TASK_LIST_MARKDOWN
+      ) | translate
+    }}
+  </span>
+</button>
+
+<button
   [routerLink]="[base, contextId, 'settings']"
   mat-menu-item
 >

@@ -135,8 +135,45 @@
 // ----
 // @import "shepherd.js/dist/css/shepherd.css";
 
+.shepherd-button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Hover state - similar to Material button hover
+  &:hover:not(:disabled) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: currentColor;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+  }
+
+  // Active/pressed state - similar to Material button active
+  &:active:not(:disabled) {
+    &::before {
+      opacity: 0.12;
+    }
+  }
+
+  // Focus state
+  &:focus:not(:disabled) {
+    outline: 2px solid var(--c-accent, var(--c-primary));
+    outline-offset: 2px;
+  }
+}
+
 .shepherd-button:disabled {
   cursor: not-allowed;
+  opacity: 0.5;
 }
 
 .shepherd-footer {

@@ -78,7 +78,11 @@ const handleScheduleTaskWithTime = (
   ]);
 };
 
-const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
+const handleUnScheduleTask = (
+  state: RootState,
+  taskId: string,
+  isLeaveInToday = false,
+): RootState => {
   // First, update the task entity to clear scheduling data
   const updatedState = {
     ...state,
@@ -96,8 +100,7 @@ const handleUnScheduleTask = (state: RootState, taskId: string): RootState => {
 
   // Then, handle today tag updates
   const todayTag = getTag(updatedState, TODAY_TAG.id);
-
-  if (!todayTag.taskIds.includes(taskId)) {
+  if (!todayTag.taskIds.includes(taskId) || isLeaveInToday) {
     return updatedState;
   }
 
@@ -245,8 +248,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     return handleScheduleTaskWithTime(state, task, dueWithTime);
   },
   [TaskSharedActions.unscheduleTask.type]: () => {
-    const { id } = action as ReturnType<typeof TaskSharedActions.unscheduleTask>;
-    return handleUnScheduleTask(state, id);
+    const { id, isLeaveInToday } = action as ReturnType<
+      typeof TaskSharedActions.unscheduleTask
+    >;
+    return handleUnScheduleTask(state, id, isLeaveInToday);
   },
   [TaskSharedActions.dismissReminderOnly.type]: () => {
     const { id } = action as ReturnType<typeof TaskSharedActions.dismissReminderOnly>;

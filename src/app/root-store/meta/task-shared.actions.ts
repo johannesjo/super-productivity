@@ -69,6 +69,7 @@ export const TaskSharedActions = createActionGroup({
       id: string;
       reminderId?: string;
       isSkipToast?: boolean;
+      isLeaveInToday?: boolean;
     }>(),
 
     dismissReminderOnly: props<{

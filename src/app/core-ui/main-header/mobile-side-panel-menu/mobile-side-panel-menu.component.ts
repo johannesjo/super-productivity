@@ -3,9 +3,11 @@ import { CommonModule } from '@angular/common';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
 import { TranslateModule } from '@ngx-translate/core';
 import { LayoutService } from '../../layout/layout.service';
 import { TaskViewCustomizerService } from '../../../features/task-view-customizer/task-view-customizer.service';
+import { TaskViewCustomizerPanelComponent } from '../../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { T } from '../../../t.const';
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
@@ -31,8 +33,10 @@ import { BreakpointObserver } from '@angular/cdk/layout';
     MatIconModule,
     MatButtonModule,
     MatTooltipModule,
+    MatMenuModule,
     TranslateModule,
     PluginIconComponent,
+    TaskViewCustomizerPanelComponent,
   ],
   template: `
     <div class="mobile-dropdown-wrapper">
@@ -68,14 +72,15 @@ import { BreakpointObserver } from '@angular/cdk/layout';
         <button
           mat-mini-fab
           color=""
-          [class.active]="isShowTaskViewCustomizerPanel()"
           [class.isCustomized]="taskViewCustomizerService.isCustomized()"
           [disabled]="!isWorkViewPage()"
-          (click)="toggleTaskViewCustomizer()"
+          [matMenuTriggerFor]="customizerPanel.menu"
           [matTooltip]="T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL | translate"
         >
           <mat-icon>filter_list</mat-icon>
         </button>
+
+        <task-view-customizer-panel #customizerPanel></task-view-customizer-panel>
 
         <!-- Issue Panel -->
         <button
@@ -196,11 +201,6 @@ export class MobileSidePanelMenuComponent {
     }
 
     // Close mobile menu after action
-    this.isShowMobileMenu.set(false);
-  }
-
-  toggleTaskViewCustomizer(): void {
-    this.layoutService.toggleTaskViewCustomizerPanel();
     this.isShowMobileMenu.set(false);
   }
 

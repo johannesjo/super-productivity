@@ -158,6 +158,7 @@ There is another older – the app looks and feels much better now ;) – [artic
 
 ### Keyboard shortcuts (most important)
 
+- `Shift`+`P`: Open create project dialog
 - `Shift`+`A`: Open add task bar
 - `Enter`: Edit currently focussed task title
 - `Arrow keys`: Navigate around task list

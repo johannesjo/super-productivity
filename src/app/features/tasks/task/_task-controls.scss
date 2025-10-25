@@ -351,7 +351,6 @@ progress-bar {
   //justify-content: center;
   //align-items: center;
   position: relative;
-
   // fixes drag and drop on mobile
   touch-action: none;
   pointer-events: all;
@@ -394,12 +393,7 @@ progress-bar {
   }
 
   .drag-handle-ico {
-    @include mq(xs) {
-      opacity: 0.15;
-      //.first-line:hover & {
-      //opacity: 0.3;
-      //}
-    }
+    opacity: 0.15;
 
     :host.isCurrent & {
       opacity: 0;

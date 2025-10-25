@@ -71,10 +71,9 @@
   .task-input-container {
     position: absolute;
     inset: 0;
-    padding: 8px;
+    padding: 0 8px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
     overflow: hidden;
 
     @include mq(xs, max) {
@@ -91,6 +90,7 @@
     select-task-minimal {
       flex: 1;
       min-height: 0;
+      //flex: 1 0 auto;
     }
 
     .task-type-indicator {
@@ -148,9 +148,7 @@
       line-height: 1;
       opacity: 0.8;
       margin-top: auto;
-      margin-bottom: -5px;
       border-top: 1px dashed var(--extra-border-color);
-      padding-top: 3px;
 
       @include mq(xs, max) {
         font-size: 11px;

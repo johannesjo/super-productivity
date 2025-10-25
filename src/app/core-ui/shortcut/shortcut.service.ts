@@ -8,6 +8,7 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
+import { DialogCreateProjectComponent } from '../../features/project/dialogs/create-project/dialog-create-project.component';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
@@ -134,6 +135,11 @@ export class ShortcutService {
     } else if (checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.showAddTaskBar();
       ev.preventDefault();
+    } else if (checkKeyCombo(ev, keys.addNewProject)) {
+      if (this._matDialog.openDialogs.length === 0) {
+        this._matDialog.open(DialogCreateProjectComponent, { restoreFocus: true });
+        ev.preventDefault();
+      }
     } else if (checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogAddNoteComponent, {

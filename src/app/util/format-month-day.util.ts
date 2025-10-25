@@ -22,10 +22,10 @@ export const formatMonthDay = (date: Date, locale: string): string => {
       return '';
     }
 
-    // Use the browser's native Intl.DateTimeFormat for proper locale support
+    // Use the browser's native Intl.DateTimeFormat for proper locale support, use en-US as fallback
     // This is more reliable than Angular's DatePipe for getting locale-specific formatting
     try {
-      const formatter = new Intl.DateTimeFormat(locale, {
+      const formatter = new Intl.DateTimeFormat([locale, 'en-US'], {
         month: 'numeric',
         day: 'numeric',
       });

@@ -13,8 +13,8 @@ test.describe('Work View', () => {
     await expect(task).toBeVisible();
 
     // Verify task content (accounting for test prefix)
-    const taskTextarea = task.locator('textarea');
-    await expect(taskTextarea).toHaveValue(/.*0 test task koko/);
+    const taskTitle = task.locator('task-title');
+    await expect(taskTitle).toContainText(/.*0 test task koko/);
   });
 
   test.skip('should still show created task after reload', async ({
@@ -103,10 +103,12 @@ test.describe('Work View', () => {
     await expect(tasks).toHaveCount(2);
 
     // NOTE: global adds to top rather than bottom
-    await expect(tasks.nth(0).locator('textarea')).toHaveValue(
+    await expect(tasks.nth(0).locator('task-title')).toContainText(
       /.*5 some other task xoxo/,
     );
-    await expect(tasks.nth(1).locator('textarea')).toHaveValue(/.*4 test task hohoho/);
+    await expect(tasks.nth(1).locator('task-title')).toContainText(
+      /.*4 test task hohoho/,
+    );
   });
 
   test('should add 2 tasks from initial bar', async ({ page, workViewPage }) => {
@@ -124,16 +126,18 @@ test.describe('Work View', () => {
     const tasks = page.locator('task');
     await expect(tasks).toHaveCount(2, { timeout: 8000 }); // Reduced from 10s to 8s
 
-    // Get all task textareas and their values
-    const taskTextareas = await tasks.locator('textarea').all();
+    // Get all task titles and their values
+    const taskTitles = await tasks.locator('task-title').all();
     const taskContents: string[] = [];
 
-    for (const textarea of taskTextareas) {
+    for (const title of taskTitles) {
       try {
-        const value = await textarea.inputValue();
-        taskContents.push(value);
+        const value = await title.textContent();
+        if (value) {
+          taskContents.push(value);
+        }
       } catch (e) {
-        // console.log('Failed to get textarea value:', e);
+        // console.log('Failed to get title text:', e);
       }
     }
 

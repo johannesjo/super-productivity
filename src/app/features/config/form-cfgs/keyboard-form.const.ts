@@ -70,6 +70,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'addNewProject',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.ADD_NEW_PROJECT,
+      },
+    },
+    {
       key: 'addNewNote',
       type: 'keyboard',
       templateOptions: {

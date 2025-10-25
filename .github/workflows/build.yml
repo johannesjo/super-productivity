@@ -233,6 +233,14 @@ jobs:
         #  if: steps.npm-cache.outputs.cache-hit != 'true'
         run: npm i
 
+      - name: Setup Chrome
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v1
+
+      - name: Export Chrome path for Karma
+        shell: pwsh
+        run: echo "CHROME_BIN=${{ steps.setup-chrome.outputs.chrome-path }}" >> $env:GITHUB_ENV
+
       - run: npm run env # Generate env.generated.ts
 
       - name: Lint

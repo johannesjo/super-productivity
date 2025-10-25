@@ -1,0 +1,23 @@
+<div
+  #dropZone
+  class="schedule-day-drop-zone"
+  (pointerenter)="onDragMove($event)"
+  (mousemove)="onDragMove($event)"
+  (touchmove)="onDragMove($event)"
+>
+  @if (hasNoEvents()) {
+    <div class="empty-state">
+      <div class="empty-state-text">Drop tasks here to schedule them</div>
+    </div>
+  }
+  <schedule-week
+    #scheduleWeek
+    [isInPanel]="true"
+    [events]="events()"
+    [beyondBudget]="[]"
+    [daysToShow]="daysToShow()"
+    [workStartEnd]="workStartEnd() || null"
+    [currentTimeRow]="currentTimeRow()"
+    [isTaskDragActive]="isDragging()"
+  ></schedule-week>
+</div>

@@ -8,4 +8,5 @@ export const DEFAULT_METRIC_FOR_DAY: Omit<Metric, 'id'> = {
   improvementsTomorrow: [],
   mood: undefined,
   productivity: undefined,
+  focusSessions: [],
 };

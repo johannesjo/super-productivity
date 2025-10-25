@@ -1,11 +1,11 @@
 import {
-  AfterContentInit,
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
   computed,
   effect,
   ElementRef,
+  afterNextRender,
   inject,
   input,
   OnDestroy,
@@ -19,6 +19,7 @@ import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
 import { ActivatedRoute } from '@angular/router';
 import {
+  animationFrameScheduler,
   from,
   fromEvent,
   Observable,
@@ -28,7 +29,7 @@ import {
   zip,
 } from 'rxjs';
 import { TaskWithSubTasks } from '../tasks/task.model';
-import { delay, filter, map, switchMap } from 'rxjs/operators';
+import { delay, filter, map, observeOn, switchMap } from 'rxjs/operators';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
 import { PlanningModeService } from '../planning-mode/planning-mode.service';
 import { T } from '../../t.const';
@@ -51,7 +52,6 @@ import { AsyncPipe, CommonModule } from '@angular/common';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import {
-  flattenTasks,
   selectLaterTodayTasksWithSubTasks,
   selectOverdueTasksWithSubTasks,
 } from '../tasks/store/task.selectors';
@@ -94,7 +94,7 @@ import { FinishDayBtnComponent } from './finish-day-btn/finish-day-btn.component
     FinishDayBtnComponent,
   ],
 })
-export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
+export class WorkViewComponent implements OnInit, OnDestroy {
   taskService = inject(TaskService);
   takeABreakService = inject(TakeABreakService);
   planningModeService = inject(PlanningModeService);
@@ -157,7 +157,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       filter((isChanging) => !isChanging),
       delay(50),
       switchMap(() => this.splitTopEl$),
-      switchMap((el) => fromEvent(el, 'scroll')),
+      switchMap((el) =>
+        // Defer scroll reactions to the next frame so layoutService.isScrolled
+        // toggles happen in sync with the browser repaint.
+        fromEvent(el, 'scroll').pipe(observeOn(animationFrameScheduler)),
+      ),
     );
 
   private _subs: Subscription = new Subscription();
@@ -177,29 +181,18 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
       const currentSelectedId = this.selectedTaskId();
       if (!currentSelectedId) return;
 
-      const undoneArr = flattenTasks(this.undoneTasks());
-      if (undoneArr.some((t) => t.id === currentSelectedId)) return;
-
-      const doneArr = flattenTasks(this.doneTasks());
-      if (doneArr.some((t) => t.id === currentSelectedId)) return;
-
-      if (
-        this.laterTodayTasks().some(
-          (t) => t.id === currentSelectedId || t.subTaskIds.includes(currentSelectedId),
-        )
-      )
-        return;
+      if (this._hasTaskInList(this.undoneTasks(), currentSelectedId)) return;
+      if (this._hasTaskInList(this.doneTasks(), currentSelectedId)) return;
+      if (this._hasTaskInList(this.laterTodayTasks(), currentSelectedId)) return;
 
       if (
         this.workContextService.activeWorkContextId === TODAY_TAG.id &&
-        this.overdueTasks().length > 0 &&
-        flattenTasks(this.overdueTasks()).some((t) => t.id === currentSelectedId)
+        this._hasTaskInList(this.overdueTasks(), currentSelectedId)
       )
         return;
 
       // Check if task is in backlog
-      const backlogArr = flattenTasks(this.backlogTasks());
-      if (backlogArr.some((t) => t.id === currentSelectedId)) return;
+      if (this._hasTaskInList(this.backlogTasks(), currentSelectedId)) return;
 
       // if task really is gone
       this.taskService.setSelectedId(null);
@@ -231,6 +224,8 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         localStorage.removeItem(LS.OVERDUE_TASKS_HIDDEN);
       }
     });
+
+    afterNextRender(() => this._initScrollTracking());
   }
 
   ngOnInit(): void {
@@ -251,22 +246,11 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
     );
   }
 
-  ngAfterContentInit(): void {
-    this._subs.add(
-      this.upperContainerScroll$.subscribe(({ target }) => {
-        if ((target as HTMLElement).scrollTop !== 0) {
-          this.layoutService.isScrolled.set(true);
-        } else {
-          this.layoutService.isScrolled.set(false);
-        }
-      }),
-    );
-  }
-
   ngOnDestroy(): void {
     if (this._switchListAnimationTimeout) {
       window.clearTimeout(this._switchListAnimationTimeout);
     }
+    this._subs.unsubscribe();
     this.layoutService.isScrolled.set(false);
   }
 
@@ -322,5 +306,47 @@ export class WorkViewComponent implements OnInit, OnDestroy, AfterContentInit {
         taskIds: overdueTasks.map((t) => t.id),
       }),
     );
+  }
+
+  private _initScrollTracking(): void {
+    this._subs.add(
+      this.upperContainerScroll$.subscribe(({ target }) => {
+        if ((target as HTMLElement).scrollTop !== 0) {
+          this.layoutService.isScrolled.set(true);
+        } else {
+          this.layoutService.isScrolled.set(false);
+        }
+      }),
+    );
+  }
+
+  private _hasTaskInList(
+    taskList: TaskWithSubTasks[] | null | undefined,
+    taskId: string,
+  ): boolean {
+    if (!taskList || !taskList.length) {
+      return false;
+    }
+
+    for (const task of taskList) {
+      if (!task) {
+        continue;
+      }
+
+      if (task.id === taskId) {
+        return true;
+      }
+
+      const subTasks = task.subTasks;
+      if (Array.isArray(subTasks) && subTasks.length) {
+        for (const subTask of subTasks) {
+          if (subTask && subTask.id === taskId) {
+            return true;
+          }
+        }
+      }
+    }
+
+    return false;
   }
 }

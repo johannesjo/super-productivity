@@ -85,8 +85,9 @@ main {
 }
 
 .focus-mode-select-mode {
-  margin-bottom: auto;
-  margin-top: 16px;
+  width: min(100%, 560px);
+  margin-top: var(--s2);
+  margin-bottom: calc(-1 * var(--s4));
 }
 
 focus-mode-task-selection,

@@ -11,6 +11,7 @@ export type KeyboardConfig = Readonly<{
   // goToDailyAgenda?: string|null,
   goToSettings?: string | null;
   addNewTask?: string | null;
+  addNewProject?: string | null;
   globalToggleTaskStart?: string | null;
   showHelp?: string | null;
   showSearchBar?: string | null;

@@ -11,10 +11,11 @@ import { ScheduleEventComponent } from '../schedule-event/schedule-event.compone
 import { DatePipe, formatDate } from '@angular/common';
 import { T } from '../../../t.const';
 import { ScheduleService } from '../schedule.service';
+import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 
 @Component({
   selector: 'schedule-month',
-  imports: [ScheduleEventComponent, DatePipe],
+  imports: [ScheduleEventComponent, DatePipe, LocaleDatePipe],
   templateUrl: './schedule-month.component.html',
   styleUrl: './schedule-month.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
