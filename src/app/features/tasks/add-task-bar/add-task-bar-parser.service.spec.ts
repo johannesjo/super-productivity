@@ -122,6 +122,7 @@ describe('AddTaskBarParserService', () => {
           spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -156,6 +157,7 @@ describe('AddTaskBarParserService', () => {
           spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -187,6 +189,7 @@ describe('AddTaskBarParserService', () => {
           spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -587,6 +590,7 @@ describe('AddTaskBarParserService', () => {
         spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -618,6 +622,7 @@ describe('AddTaskBarParserService', () => {
         spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -651,6 +656,7 @@ describe('AddTaskBarParserService', () => {
         spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -682,6 +688,7 @@ describe('AddTaskBarParserService', () => {
         spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -712,6 +719,7 @@ describe('AddTaskBarParserService', () => {
         spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 

@@ -3,6 +3,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   inject,
   viewChild,
 } from '@angular/core';
@@ -52,6 +53,7 @@ import { MatSelect } from '@angular/material/select';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { Log } from '../../../core/log';
+import { GlobalConfigService } from '../../config/global-config.service';
 
 const DEFAULT_TIME = '09:00';
 
@@ -94,6 +96,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _taskService = inject(TaskService);
   private _reminderService = inject(ReminderService);
   private _translateService = inject(TranslateService);
+  private _globalConfigService = inject(GlobalConfigService);
   private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
 
   T: typeof T = T;
@@ -116,6 +119,14 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevQuickAccessAction: number | null = null;
   private _timeCheckVal: string | null = null;
 
+  private _defaultTaskRemindCfgId = computed(
+    () =>
+      (this._globalConfigService.cfg()?.reminder
+        ?.defaultTaskRemindOption as TaskReminderOptionId) ||
+      // Fallback is a hard-coded default carryover from within this component
+      TaskReminderOptionId.AtStart,
+  );
+
   async ngAfterViewInit(): Promise<void> {
     // Handle case when task is provided
     if (this.data.task) {
@@ -131,7 +142,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
         }
         // for tasks without anything scheduled
       } else if (!this.data.task.dueWithTime) {
-        this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
+        this.selectedReminderCfgId = this._defaultTaskRemindCfgId();
       } else {
         this.selectedReminderCfgId = TaskReminderOptionId.DoNotRemind;
       }
@@ -155,8 +166,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
           : null;
       }
     } else {
-      // When no task is provided (select-only mode), set default reminder to "When it starts"
-      this.selectedReminderCfgId = TaskReminderOptionId.AtStart;
+      this.selectedReminderCfgId = this._defaultTaskRemindCfgId();
     }
 
     if (this.data.targetDay) {
@@ -234,7 +244,15 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     }
   }
 
-  close(result: boolean | { date: Date | null; time: string | null } = false): void {
+  close(
+    result:
+      | boolean
+      | {
+          date: Date | null;
+          time: string | null;
+          remindOption: TaskReminderOptionId | null;
+        } = false,
+  ): void {
     this._matDialogRef.close(result);
   }
 
@@ -331,6 +349,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.close({
         date: this.selectedDate as Date,
         time: this.selectedTime,
+        remindOption: this.selectedReminderCfgId,
       });
       return;
     }

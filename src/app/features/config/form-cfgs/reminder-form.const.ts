@@ -1,4 +1,5 @@
 import { ConfigFormSection, ReminderConfig } from '../global-config.model';
+import { TASK_REMINDER_OPTIONS } from '../../planner/dialog-schedule-task/task-reminder-options.const';
 import { T } from '../../../t.const';
 
 export const REMINDER_FORM_CFG: ConfigFormSection<ReminderConfig> = {
@@ -21,6 +22,15 @@ export const REMINDER_FORM_CFG: ConfigFormSection<ReminderConfig> = {
         required: true,
         label: T.GCF.REMINDER.COUNTDOWN_DURATION,
         description: T.G.DURATION_DESCRIPTION,
+      },
+    },
+    {
+      key: 'defaultTaskRemindOption',
+      type: 'select',
+      templateOptions: {
+        required: true,
+        label: T.GCF.REMINDER.DEFAULT_TASK_REMIND_OPTION,
+        options: TASK_REMINDER_OPTIONS,
       },
     },
   ],
