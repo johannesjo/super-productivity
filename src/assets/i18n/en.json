@@ -623,7 +623,17 @@
         "PRODUCTIVITY": "How efficient did you work?",
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
         "PRODUCTIVITY_SCORE": "Productivity Score",
-        "REMIND_TOMORROW": "Remind me tomorrow"
+        "REMIND_TOMORROW": "Remind me tomorrow",
+        "SUSTAINABILITY_SCORE": "Sustainability Score",
+        "EXHAUSTION": "How exhausted do you feel?",
+        "EXHAUSTION_HINT": "1: Energized – 5: Completely drained",
+        "TOTAL_WORK_TIME": "Total work time today",
+        "TARGET_DEEP_WORK_TIME": "Target deep work time",
+        "DAILY_STATE": "Daily State",
+        "DAILY_STATE_DEEP_FLOW": "Deep Flow",
+        "DAILY_STATE_OVERDRIVE": "Overdrive",
+        "DAILY_STATE_RECOVERY": "Recovery",
+        "DAILY_STATE_DRIFT": "Drift"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"

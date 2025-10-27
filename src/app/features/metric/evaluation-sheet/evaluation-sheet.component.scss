@@ -36,29 +36,86 @@ mat-form-field {
   }
 }
 
-.productivity-score {
+.scores-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--s2);
   margin: var(--s3) 0;
-  padding: var(--s3);
+}
+
+.score-card {
+  padding: var(--s2);
   background: linear-gradient(135deg, var(--bg-lightest) 0%, var(--bg-lighter) 100%);
-  border-radius: 24px;
+  border-radius: 16px;
   text-align: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   border: 2px solid var(--bg-lightest);
 
   .label {
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 500;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: var(--s);
+  }
+
+  .score {
+    font-size: 36px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  &.productivity .score {
+    color: var(--accent);
+  }
+
+  &.sustainability .score {
+    color: var(--success);
+  }
+}
+
+.daily-state-indicator {
+  margin: var(--s3) 0;
+  padding: var(--s3);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+
+  .state-label {
+    font-size: 13px;
     font-weight: 500;
     opacity: 0.8;
     text-transform: uppercase;
     letter-spacing: 1px;
+    margin-bottom: var(--s);
   }
 
-  .score {
-    margin-top: var(--s);
-    font-size: 48px;
+  .state-value {
+    font-size: 28px;
     font-weight: 700;
-    color: var(--accent);
-    line-height: 1;
+    letter-spacing: 1px;
+  }
+
+  &[data-state='DEEP_FLOW'] {
+    background: linear-gradient(135deg, #4caf50 0%, #66bb6a 100%);
+    color: white;
+  }
+
+  &[data-state='OVERDRIVE'] {
+    background: linear-gradient(135deg, #ff9800 0%, #ffb74d 100%);
+    color: white;
+  }
+
+  &[data-state='RECOVERY'] {
+    background: linear-gradient(135deg, #2196f3 0%, #64b5f6 100%);
+    color: white;
+  }
+
+  &[data-state='DRIFT'] {
+    background: linear-gradient(135deg, #9e9e9e 0%, #bdbdbd 100%);
+    color: white;
   }
 }
 

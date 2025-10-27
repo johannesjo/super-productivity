@@ -19,11 +19,18 @@ export interface MetricCopy {
   impactOfWork?: number | null;
   notes?: string | null;
   remindTomorrow?: boolean;
+
+  // Productivity and sustainability scoring fields
+  exhaustion?: number | null; // 1-5 scale
+  totalWorkMinutes?: number | null; // Total work time in minutes
+  targetMinutes?: number | null; // Target deep work minutes
 }
 
 export type Metric = Readonly<MetricCopy>;
 
 export type MetricState = EntityState<Metric>;
+
+export type DailyState = 'DEEP_FLOW' | 'OVERDRIVE' | 'RECOVERY' | 'DRIFT';
 
 export type PieChartData = ChartData<'pie', number[], string>;
 export type LineChartData = ChartData<'line', (number | undefined)[], string>;

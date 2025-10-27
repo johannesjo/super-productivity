@@ -8,7 +8,7 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import { MetricCopy } from '../metric.model';
+import { DailyState, MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
 import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
@@ -133,24 +133,102 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ focusSessions: [milliseconds] });
   }
 
+  updateExhaustion(exhaustion: number): void {
+    this._update({ exhaustion });
+  }
+
+  updateTotalWorkMinutes(milliseconds: number): void {
+    // Convert from milliseconds to minutes for storage
+    const totalWorkMinutes = milliseconds / (1000 * 60);
+    this._update({ totalWorkMinutes });
+  }
+
+  updateTargetMinutes(milliseconds: number): void {
+    // Convert from milliseconds to minutes for storage
+    const targetMinutes = milliseconds / (1000 * 60);
+    this._update({ targetMinutes });
+  }
+
+  get totalWorkTimeMs(): number {
+    return (this.metricForDay?.totalWorkMinutes ?? 0) * 60 * 1000;
+  }
+
+  get targetMinutesMs(): number {
+    return (this.metricForDay?.targetMinutes ?? 240) * 60 * 1000;
+  }
+
   get deepWorkTime(): number {
     const focusSessions = this.metricForDay?.focusSessions ?? [];
     return focusSessions.reduce((acc, val) => acc + val, 0);
   }
 
+  get deepWorkMinutes(): number {
+    return this.deepWorkTime / (1000 * 60);
+  }
+
   get productivityScore(): number {
     const focusQuality = this.metricForDay?.focusQuality ?? 0;
-    const impactOfWork = this.metricForDay?.impactOfWork ?? 0;
-    const deepWorkHours = this.deepWorkTime / (1000 * 60 * 60);
+    const impact = this.metricForDay?.impactOfWork ?? 0;
+    const deepWorkMinutes = this.deepWorkMinutes;
+    const targetMinutes = this.metricForDay?.targetMinutes ?? 240; // Default 4 hours
 
-    // Simple productivity score calculation
-    // Score = (Focus Quality * 20) + (Impact * 20) + (Deep Work Hours * 10)
-    // Max score: 100 (5 * 20 + 5 * 20 + 6 * 10)
-    const focusScore = focusQuality * 20;
-    const impactScore = impactOfWork * 20;
-    const deepWorkScore = deepWorkHours * 10;
-    const score = focusScore + impactScore + deepWorkScore;
-    return Math.round(Math.min(score, 100));
+    // Normalize each component to 0-1 range
+    const focusQualityNorm = focusQuality / 5; // 1-5 scale
+    const impactNorm = impact / 5; // 1-5 scale
+    const deepWorkRatio = Math.min(deepWorkMinutes / targetMinutes, 1); // Cap at 1
+
+    // Weighted sum (0.4 + 0.4 + 0.2 = 1.0)
+    const focusComponent = focusQualityNorm * 0.4;
+    const impactComponent = impactNorm * 0.4;
+    const deepWorkComponent = deepWorkRatio * 0.2;
+    const score = focusComponent + impactComponent + deepWorkComponent;
+
+    // Scale to 0-100
+    return Math.round(score * 100);
+  }
+
+  get sustainabilityScore(): number {
+    const exhaustion = this.metricForDay?.exhaustion ?? 0;
+    const deepWorkMinutes = this.deepWorkMinutes;
+    const totalWorkMinutes = this.metricForDay?.totalWorkMinutes ?? deepWorkMinutes;
+    const maxRecommendedDailyWork = 480; // 8 hours in minutes
+
+    // Component 1: Low exhaustion is good (1 - exhaustion/5)
+    const exhaustionRatio = exhaustion / 5;
+    const exhaustionComponent = exhaustion > 0 ? 1 - exhaustionRatio : 0.5; // Default 0.5 if not set
+
+    // Component 2: High deep work ratio is good
+    const deepWorkRatio =
+      totalWorkMinutes > 0 ? Math.min(deepWorkMinutes / totalWorkMinutes, 1) : 0;
+
+    // Component 3: Not working too much is good (1 - overwork ratio)
+    const overworkRatio = totalWorkMinutes / maxRecommendedDailyWork;
+    const workloadComponent = totalWorkMinutes > 0 ? Math.max(0, 1 - overworkRatio) : 0.5;
+
+    // Weighted sum (0.4 + 0.3 + 0.3 = 1.0)
+    const exhaustionScore = exhaustionComponent * 0.4;
+    const deepWorkScore = deepWorkRatio * 0.3;
+    const workloadScore = workloadComponent * 0.3;
+    const score = exhaustionScore + deepWorkScore + workloadScore;
+
+    // Scale to 0-100
+    return Math.round(score * 100);
+  }
+
+  get dailyState(): DailyState {
+    const productivity = this.productivityScore;
+    const sustainability = this.sustainabilityScore;
+    const threshold = 50; // Threshold for high/low classification
+
+    if (productivity >= threshold && sustainability >= threshold) {
+      return 'DEEP_FLOW';
+    } else if (productivity >= threshold && sustainability < threshold) {
+      return 'OVERDRIVE';
+    } else if (productivity < threshold && sustainability >= threshold) {
+      return 'RECOVERY';
+    } else {
+      return 'DRIFT';
+    }
   }
 
   addObstruction(v: string): void {
