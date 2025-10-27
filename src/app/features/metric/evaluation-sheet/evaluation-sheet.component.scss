@@ -4,23 +4,77 @@
   position: relative;
   padding: var(--s2);
   border-radius: var(--card-border-radius);
-
+  text-align: left;
   background: var(--bg-lighter);
 }
 
 mat-form-field {
-  margin-bottom: var(--s);
   width: 100%;
+  margin-bottom: var(--s3);
 }
 
-.row {
-  @include mq(xs) {
-    display: flex;
-    justify-content: space-between;
-    padding-bottom: var(--s);
+.radio-group {
+  margin-bottom: var(--s2);
 
-    > * {
-      width: 48%;
-    }
+  > label {
+    display: block;
+    margin-bottom: var(--s);
+    text-align: left;
+    font-weight: 500;
+  }
+
+  mat-radio-group {
+    display: flex;
+    gap: var(--s);
+  }
+
+  .hint {
+    text-align: left;
+    margin-top: var(--s);
+    font-size: 0.8em;
+    opacity: 0.65;
+  }
+}
+
+.productivity-score {
+  margin: var(--s3) 0;
+  padding: var(--s3);
+  background: linear-gradient(135deg, var(--bg-lightest) 0%, var(--bg-lighter) 100%);
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 2px solid var(--bg-lightest);
+
+  .label {
+    font-size: 14px;
+    font-weight: 500;
+    opacity: 0.8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .score {
+    margin-top: var(--s);
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+}
+
+.checkbox-container {
+  margin-top: var(--s);
+}
+
+.notes-for-tomorrow {
+  margin-top: var(--s4);
+  padding-top: var(--s3);
+  border-top: 1px solid var(--bg-lightest);
+
+  .section-title {
+    margin: 0 0 var(--s2) 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--fg-primary);
   }
 }

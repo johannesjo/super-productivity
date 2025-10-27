@@ -602,20 +602,28 @@
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
+        "FOCUS_WORK_TIME": "Focussed work time",
         "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day",
         "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
+        "FOCUS_QUALITY": "How do you rate the quality of your focussed work sessions?",
+        "FOCUS_QUALITY_HINT": "1: Very distracted – 5: Deeply focused",
         "HELP_H1": "Why should I care?",
         "HELP_LINK_TXT": "Go to metrics section",
         "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
         "HELP_P2": "This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.",
+        "IMPACT_OF_WORK": "How do you rate the impact of your work today?",
+        "IMPACT_OF_WORK_HINT": "1: No meaningful progress – 5: Significant impact",
         "IMPROVEMENTS": "What improved your productivity?",
         "IMPROVEMENTS_TOMORROW": "What could you do to improve tomorrow?",
         "MOOD": "How do you feel?",
         "MOOD_HINT": "1: Awful – 10: Splendid",
         "NOTES": "Notes for tomorrow",
+        "NOTES_SECTION_TITLE": "Notes for Tomorrow",
         "OBSTRUCTIONS": "What hindered your productivity?",
         "PRODUCTIVITY": "How efficient did you work?",
-        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
+        "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient",
+        "PRODUCTIVITY_SCORE": "Productivity Score",
+        "REMIND_TOMORROW": "Remind me tomorrow"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"

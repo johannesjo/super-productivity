@@ -15,79 +15,82 @@
       name="form"
       novalidate
     >
-      <div class="row">
-        <mat-form-field>
-          <mat-label>{{ T.F.METRIC.EVAL_FORM.MOOD | translate }}</mat-label>
-          <input
-            #mood="ngModel"
-            (ngModelChange)="updateMood($event)"
-            [ngModel]="metricForDay.mood"
-            matInput
-            max="10"
-            maxlength="2"
-            min="1"
-            name="mood"
-            required
-            type="number"
-          />
-          <mat-hint>{{ T.F.METRIC.EVAL_FORM.MOOD_HINT | translate }}</mat-hint>
-          @if (mood.invalid && (mood.dirty || mood.touched)) {
-            <mat-error> {{ T.V.E_1TO10 | translate }} </mat-error>
+      <mat-form-field style="width: 100%">
+        <mat-label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</mat-label>
+        <input
+          #focusWorkTime="ngModel"
+          (ngModelChange)="updateDeepWorkTime($event)"
+          [ngModel]="deepWorkTime"
+          inputDuration
+          matInput
+          name="focusWorkTime"
+        />
+      </mat-form-field>
+
+      <div class="radio-group">
+        <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_QUALITY | translate }}</label>
+        <mat-radio-group
+          #focusQuality="ngModel"
+          (ngModelChange)="updateFocusQuality($event)"
+          [ngModel]="metricForDay.focusQuality"
+          name="focusQuality"
+        >
+          @for (value of [1, 2, 3, 4, 5]; track value) {
+            <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
           }
-        </mat-form-field>
-        <mat-form-field>
-          <mat-label>{{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY | translate }}</mat-label>
-          <input
-            #productivity="ngModel"
-            (ngModelChange)="updateProductivity($event)"
-            [ngModel]="metricForDay.productivity"
-            matInput
-            max="10"
-            maxlength="2"
-            min="1"
-            name="productivity"
-            required
-            type="number"
-          />
-          <mat-hint>{{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_HINT | translate }}</mat-hint>
-          @if (productivity.invalid && (productivity.dirty || productivity.touched)) {
-            <mat-error> {{ T.V.E_1TO10 | translate }} </mat-error>
-          }
-        </mat-form-field>
+        </mat-radio-group>
+        <div class="hint">{{ T.F.METRIC.EVAL_FORM.FOCUS_QUALITY_HINT | translate }}</div>
       </div>
-      <chip-list-input
-        (addItem)="addObstruction($event)"
-        (addNewItem)="addNewObstruction($event)"
-        (removeItem)="removeObstruction($event)"
-        [label]="T.F.METRIC.EVAL_FORM.OBSTRUCTIONS | translate"
-        [model]="metricForDay.obstructions"
-        [suggestions]="obstructionService.obstructions$ | async"
-      ></chip-list-input>
-      <chip-list-input
-        (addItem)="addImprovement($event)"
-        (addNewItem)="addNewImprovement($event)"
-        (removeItem)="removeImprovement($event)"
-        [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS | translate"
-        [model]="metricForDay.improvements"
-        [suggestions]="improvementService.improvements$ | async"
-      ></chip-list-input>
-      <chip-list-input
-        (addItem)="addImprovementTomorrow($event)"
-        (addNewItem)="addNewImprovementTomorrow($event)"
-        (additionalAction)="toggleImprovementRepeat($event)"
-        (removeItem)="removeImprovementTomorrow($event)"
-        [additionalActionTooltipUnToggle]="
-          T.F.METRIC.EVAL_FORM.DISABLE_REPEAT_EVERY_DAY | translate
-        "
-        [additionalActionTooltip]="
-          T.F.METRIC.EVAL_FORM.ENABLE_REPEAT_EVERY_DAY | translate
-        "
-        [label]="T.F.METRIC.EVAL_FORM.IMPROVEMENTS_TOMORROW | translate"
-        [model]="metricForDay.improvementsTomorrow"
-        [suggestions]="improvementService.improvements$ | async"
-        [toggledItems]="improvementService.repeatedImprovementIds$ | async"
-        additionalActionIcon="repeat"
-      ></chip-list-input>
+
+      <div class="radio-group">
+        <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
+        <mat-radio-group
+          #impactOfWork="ngModel"
+          (ngModelChange)="updateImpactOfWork($event)"
+          [ngModel]="metricForDay.impactOfWork"
+          name="impactOfWork"
+        >
+          @for (value of [1, 2, 3, 4, 5]; track value) {
+            <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
+          }
+        </mat-radio-group>
+        <div class="hint">{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK_HINT | translate }}</div>
+      </div>
+
+      <div class="productivity-score">
+        <div class="label">
+          {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}:
+        </div>
+        <div class="score">{{ productivityScore }}</div>
+      </div>
+
+      <section class="notes-for-tomorrow">
+        <h3 class="section-title">
+          {{ T.F.METRIC.EVAL_FORM.NOTES_SECTION_TITLE | translate }}
+        </h3>
+        <mat-form-field>
+          <mat-label>{{ T.F.METRIC.EVAL_FORM.NOTES | translate }}</mat-label>
+          <textarea
+            #notes="ngModel"
+            (ngModelChange)="updateNotes($event)"
+            [ngModel]="metricForDay.notes"
+            matInput
+            name="notes"
+            rows="4"
+          ></textarea>
+        </mat-form-field>
+
+        <div class="checkbox-container">
+          <mat-checkbox
+            #remindTomorrow="ngModel"
+            (ngModelChange)="updateRemindTomorrow($event)"
+            [ngModel]="metricForDay.remindTomorrow"
+            name="remindTomorrow"
+          >
+            {{ T.F.METRIC.EVAL_FORM.REMIND_TOMORROW | translate }}
+          </mat-checkbox>
+        </div>
+      </section>
     </form>
   }
 </div>

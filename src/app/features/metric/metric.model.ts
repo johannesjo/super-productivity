@@ -13,6 +13,12 @@ export interface MetricCopy {
   mood?: number | null;
   productivity?: number | null;
   focusSessions?: number[];
+
+  // New evaluation fields
+  focusQuality?: number | null;
+  impactOfWork?: number | null;
+  notes?: string | null;
+  remindTomorrow?: boolean;
 }
 
 export type Metric = Readonly<MetricCopy>;

@@ -132,7 +132,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly isIncludeYesterday: boolean;
   isTimeSheetExported: boolean = true;
   showSuccessAnimation: boolean = false;
-  selectedTabIndex: number = 0;
+  selectedTabIndex: number = 1;
   isForToday: boolean = true;
 
   // TODO remove one?

@@ -29,8 +29,12 @@ import { MinDirective } from '../../../ui/validation/min.directive';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -51,8 +55,13 @@ import { TranslatePipe } from '@ngx-translate/core';
     ChipListInputComponent,
     MatButton,
     MatIcon,
+    MatRadioGroup,
+    MatRadioButton,
+    MatCheckbox,
     AsyncPipe,
     TranslatePipe,
+    MsToStringPipe,
+    InputDurationDirective,
   ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
@@ -101,6 +110,47 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
 
   updateProductivity(productivity: number): void {
     this._update({ productivity });
+  }
+
+  updateFocusQuality(focusQuality: number): void {
+    this._update({ focusQuality });
+  }
+
+  updateImpactOfWork(impactOfWork: number): void {
+    this._update({ impactOfWork });
+  }
+
+  updateNotes(notes: string): void {
+    this._update({ notes });
+  }
+
+  updateRemindTomorrow(remindTomorrow: boolean): void {
+    this._update({ remindTomorrow });
+  }
+
+  updateDeepWorkTime(milliseconds: number): void {
+    // Replace focusSessions with a single manual entry
+    this._update({ focusSessions: [milliseconds] });
+  }
+
+  get deepWorkTime(): number {
+    const focusSessions = this.metricForDay?.focusSessions ?? [];
+    return focusSessions.reduce((acc, val) => acc + val, 0);
+  }
+
+  get productivityScore(): number {
+    const focusQuality = this.metricForDay?.focusQuality ?? 0;
+    const impactOfWork = this.metricForDay?.impactOfWork ?? 0;
+    const deepWorkHours = this.deepWorkTime / (1000 * 60 * 60);
+
+    // Simple productivity score calculation
+    // Score = (Focus Quality * 20) + (Impact * 20) + (Deep Work Hours * 10)
+    // Max score: 100 (5 * 20 + 5 * 20 + 6 * 10)
+    const focusScore = focusQuality * 20;
+    const impactScore = impactOfWork * 20;
+    const deepWorkScore = deepWorkHours * 10;
+    const score = focusScore + impactScore + deepWorkScore;
+    return Math.round(Math.min(score, 100));
   }
 
   addObstruction(v: string): void {
