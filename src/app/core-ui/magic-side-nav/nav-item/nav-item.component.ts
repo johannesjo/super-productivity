@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
@@ -62,6 +63,13 @@ import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model'
 })
 export class NavItemComponent {
   private readonly _globalThemeService = inject(GlobalThemeService);
+  private readonly _iconRegistrationEffect = effect(() => {
+    const svgUrl = this.svgIcon();
+    if (svgUrl && svgUrl.startsWith('assets/')) {
+      const iconName = this._generateIconName(svgUrl);
+      this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+    }
+  });
   private readonly _store = inject(Store);
   private static readonly _registeredIcons = new Set<string>();
 
@@ -146,27 +154,42 @@ export class NavItemComponent {
     return iconValue ? isSingleEmoji(iconValue) : false;
   });
 
+  private _generateIconName(svgUrl: string): string {
+    console.log({ svgUrl });
+    const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
+    if (match) {
+      const pluginId = match[1];
+      const fileName = match[2].replace('.svg', '');
+      return `plugin-${pluginId}-${fileName}`;
+    }
+    return svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
+  }
+
   namedSvgIcon = computed<string | undefined>(() => {
     const svgUrl = this.svgIcon();
-    if (svgUrl && svgUrl.startsWith('assets/')) {
-      const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
-      let iconName: string;
-      if (match) {
-        // Prefix icon names with plugin ID to avoid collision.
-        // Not strictly required, but without this, two plugins
-        // could register the same icons and override each other.
-        const pluginId = match[1];
-        const fileName = match[2].replace('.svg', '');
-        iconName = `plugin-${pluginId}-${fileName}`;
-      } else {
-        iconName = svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
-      }
-      if (!NavItemComponent._registeredIcons.has(iconName)) {
-        this._globalThemeService.registerSvgIcon(iconName, svgUrl);
-        NavItemComponent._registeredIcons.add(iconName);
-      }
-      return iconName;
-    }
-    return undefined;
+    return svgUrl && svgUrl.startsWith('assets/')
+      ? this._generateIconName(svgUrl)
+      : undefined;
+
+    // if (svgUrl && svgUrl.startsWith('assets/')) {
+    //   const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
+    //   let iconName: string;
+    //   if (match) {
+    //     // Prefix icon names with plugin ID to avoid collision.
+    //     // Not strictly required, but without this, two plugins
+    //     // could register the same icons and override each other.
+    //     const pluginId = match[1];
+    //     const fileName = match[2].replace('.svg', '');
+    //     iconName = `plugin-${pluginId}-${fileName}`;
+    //   } else {
+    //     iconName = svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
+    //   }
+    //   if (!NavItemComponent._registeredIcons.has(iconName)) {
+    //     this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+    //     NavItemComponent._registeredIcons.add(iconName);
+    //   }
+    //   return iconName;
+    // }
+    // return undefined;
   });
 }
