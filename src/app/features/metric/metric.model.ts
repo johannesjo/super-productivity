@@ -14,16 +14,25 @@ export interface MetricCopy {
   productivity?: number | null;
   focusSessions?: number[];
 
-  // New evaluation fields
-  focusQuality?: number | null;
-  impactOfWork?: number | null;
+  // Evaluation fields
   notes?: string | null;
   remindTomorrow?: boolean;
 
-  // Productivity and sustainability scoring fields
-  exhaustion?: number | null; // 1-5 scale
+  // v2.4 Productivity scoring fields (impact-driven)
+  impactOfWork?: number | null; // 1-5 scale (REQUIRED for productivity score, primary driver at 45%)
+
+  // v2.3 Sustainability scoring fields
+  exhaustion?: number | null; // 1-5 scale (detailed energy assessment)
+  energyCheckin?: number | null; // 1-3 scale (simple: 1=exhausted, 2=ok, 3=good)
   totalWorkMinutes?: number | null; // Total work time in minutes
-  targetMinutes?: number | null; // Target deep work minutes
+  targetMinutes?: number | null; // Target deep work minutes (default 240)
+
+  // Optional task completion tracking (for future use in productivity)
+  completedTasks?: number | null;
+  plannedTasks?: number | null;
+
+  // Deprecated fields (v1, kept for backward compatibility)
+  focusQuality?: number | null; // Replaced by density calculation in v2.4
 }
 
 export type Metric = Readonly<MetricCopy>;

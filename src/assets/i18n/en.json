@@ -627,6 +627,8 @@
         "SUSTAINABILITY_SCORE": "Sustainability Score",
         "EXHAUSTION": "How exhausted do you feel mentally?",
         "EXHAUSTION_HINT": "1: Energized – 5: Completely drained",
+        "ENERGY_LEVEL": "How's your energy?",
+        "ENERGY_LEVEL_HINT": "😫 Exhausted – 😐 OK – 😊 Good",
         "TOTAL_WORK_TIME": "Total work time today",
         "TARGET_DEEP_WORK_TIME": "Target deep work time",
         "DAILY_STATE": "Daily State",

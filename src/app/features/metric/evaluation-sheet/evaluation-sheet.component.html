@@ -42,21 +42,6 @@
       </div>
 
       <div class="radio-group">
-        <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_QUALITY | translate }}</label>
-        <mat-radio-group
-          #focusQuality="ngModel"
-          (ngModelChange)="updateFocusQuality($event)"
-          [ngModel]="metricForDay.focusQuality"
-          name="focusQuality"
-        >
-          @for (value of [1, 2, 3, 4, 5]; track value) {
-            <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
-          }
-        </mat-radio-group>
-        <div class="hint">{{ T.F.METRIC.EVAL_FORM.FOCUS_QUALITY_HINT | translate }}</div>
-      </div>
-
-      <div class="radio-group">
         <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
         <mat-radio-group
           #impactOfWork="ngModel"
@@ -72,18 +57,18 @@
       </div>
 
       <div class="radio-group">
-        <label>{{ T.F.METRIC.EVAL_FORM.EXHAUSTION | translate }}</label>
+        <label>{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL | translate }}</label>
         <mat-radio-group
-          #exhaustion="ngModel"
-          (ngModelChange)="updateExhaustion($event)"
-          [ngModel]="metricForDay.exhaustion"
-          name="exhaustion"
+          #energyCheckin="ngModel"
+          (ngModelChange)="updateEnergyCheckin($event)"
+          [ngModel]="metricForDay.energyCheckin"
+          name="energyCheckin"
         >
-          @for (value of [1, 2, 3, 4, 5]; track value) {
-            <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
-          }
+          <mat-radio-button [value]="1">😫</mat-radio-button>
+          <mat-radio-button [value]="2">😐</mat-radio-button>
+          <mat-radio-button [value]="3">😊</mat-radio-button>
         </mat-radio-group>
-        <div class="hint">{{ T.F.METRIC.EVAL_FORM.EXHAUSTION_HINT | translate }}</div>
+        <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
       </div>
 
       <div class="scores-container">

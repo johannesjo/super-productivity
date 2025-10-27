@@ -170,6 +170,18 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ exhaustion });
   }
 
+  updateEnergyCheckin(energyCheckin: number): void {
+    this._update({ energyCheckin });
+  }
+
+  updateCompletedTasks(completedTasks: number): void {
+    this._update({ completedTasks });
+  }
+
+  updatePlannedTasks(plannedTasks: number): void {
+    this._update({ plannedTasks });
+  }
+
   updateTotalWorkMinutes(milliseconds: number): void {
     // Convert from milliseconds to minutes for storage
     const totalWorkMinutes = milliseconds / (1000 * 60);
@@ -200,25 +212,38 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   }
 
   get productivityScore(): number {
-    const focusQuality = this.metricForDay?.focusQuality ?? 0;
-    const impact = this.metricForDay?.impactOfWork ?? 0;
-    const deepWorkMinutes = this.deepWorkMinutes;
-    const targetMinutes = this.metricForDay?.targetMinutes ?? 240;
+    const impactRating = this.metricForDay?.impactOfWork ?? 3; // Default to neutral (3) if not set
+    const focusedMinutes = this.deepWorkMinutes;
+    const totalWorkMinutes =
+      this.metricForDay?.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
+    const targetFocusedMinutes = this.metricForDay?.targetMinutes ?? 240;
+    const completedTasks = this.metricForDay?.completedTasks ?? undefined;
+    const plannedTasks = this.metricForDay?.plannedTasks ?? undefined;
 
     return calculateProductivityScore(
-      focusQuality,
-      impact,
-      deepWorkMinutes,
-      targetMinutes,
+      impactRating,
+      focusedMinutes,
+      totalWorkMinutes,
+      targetFocusedMinutes,
+      completedTasks,
+      plannedTasks,
     );
   }
 
   get sustainabilityScore(): number {
-    const exhaustion = this.metricForDay?.exhaustion ?? 0;
-    const deepWorkMinutes = this.deepWorkMinutes;
-    const totalWorkMinutes = this.metricForDay?.totalWorkMinutes ?? deepWorkMinutes;
+    const focusedMinutes = this.deepWorkMinutes;
+    const totalWorkMinutes =
+      this.metricForDay?.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
+    const energyCheckin = this.metricForDay?.energyCheckin ?? undefined;
+    const exhaustion = this.metricForDay?.exhaustion ?? undefined;
 
-    return calculateSustainabilityScore(exhaustion, deepWorkMinutes, totalWorkMinutes);
+    return calculateSustainabilityScore(
+      focusedMinutes,
+      totalWorkMinutes,
+      600, // workloadLinearZeroAt: 10h → score 0
+      energyCheckin,
+      exhaustion,
+    );
   }
 
   get dailyState(): DailyState {
