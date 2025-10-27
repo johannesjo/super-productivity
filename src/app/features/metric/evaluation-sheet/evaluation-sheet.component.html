@@ -15,30 +15,28 @@
       name="form"
       novalidate
     >
-      <div class="row">
-        <mat-form-field>
-          <mat-label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</mat-label>
-          <input
-            #focusWorkTime="ngModel"
-            (ngModelChange)="updateDeepWorkTime($event)"
-            [ngModel]="deepWorkTime"
-            inputDuration
-            matInput
-            name="focusWorkTime"
-          />
-        </mat-form-field>
+      <div class="time-summary">
+        <div class="time-item">
+          <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</label>
+          <inline-input
+            (changed)="updateDeepWorkTime($event)"
+            [displayValue]="deepWorkTime | msToClockString"
+            [type]="'duration'"
+            [value]="deepWorkTime"
+          >
+          </inline-input>
+        </div>
 
-        <mat-form-field>
-          <mat-label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</mat-label>
-          <input
-            #totalWorkMinutes="ngModel"
-            (ngModelChange)="updateTotalWorkMinutes($event)"
-            [ngModel]="totalWorkTimeMs"
-            inputDuration
-            matInput
-            name="totalWorkMinutes"
-          />
-        </mat-form-field>
+        <div class="time-item">
+          <label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</label>
+          <inline-input
+            (changed)="updateTotalWorkMinutes($event)"
+            [displayValue]="totalWorkTimeMs | msToClockString"
+            [type]="'duration'"
+            [value]="totalWorkTimeMs"
+          >
+          </inline-input>
+        </div>
       </div>
 
       <div class="radio-group">

@@ -41,7 +41,9 @@ import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
+import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -68,7 +70,9 @@ import { InputDurationDirective } from '../../../ui/duration/input-duration.dire
     AsyncPipe,
     TranslatePipe,
     MsToStringPipe,
+    MsToClockStringPipe,
     InputDurationDirective,
+    InlineInputComponent,
   ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {

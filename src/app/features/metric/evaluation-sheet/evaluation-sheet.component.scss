@@ -13,14 +13,30 @@ mat-form-field {
   margin-bottom: var(--s3);
 }
 
-.row {
+.time-summary {
   display: flex;
-  gap: var(--s2);
-  margin-bottom: var(--s);
+  gap: var(--s4);
+  margin-bottom: var(--s3);
+  padding: var(--s2);
+  background: var(--bg-lightest);
+  border-radius: var(--card-border-radius);
 
-  > mat-form-field {
+  .time-item {
     flex: 1;
-    margin-bottom: 0;
+    text-align: left;
+
+    > label {
+      display: block;
+      font-size: 0.85em;
+      opacity: 0.7;
+      margin-bottom: var(--s);
+    }
+
+    inline-input {
+      font-size: 1.2em;
+      font-weight: 500;
+      color: var(--fg-primary);
+    }
   }
 }
 
