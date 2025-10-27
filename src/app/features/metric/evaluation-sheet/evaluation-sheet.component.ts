@@ -8,8 +8,15 @@ import {
   OnInit,
   output,
 } from '@angular/core';
-import { DailyState, MetricCopy } from '../metric.model';
+import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
+import {
+  calculateDailyState,
+  calculateProductivityScore,
+  calculateSustainabilityScore,
+  DailyState,
+  getScoreColorGradient,
+} from '../metric-scoring.util';
 import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
@@ -76,6 +83,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   readonly save = output<any>();
   T: typeof T = T;
   metricForDay?: MetricCopy;
+  private _timeWorkedToday: number | null = null;
   day$: BehaviorSubject<string> = new BehaviorSubject(this._dateService.todayStr());
   private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(
     switchMap((day) =>
@@ -91,10 +99,35 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this.day$.next(val);
   }
 
+  @Input() set timeWorkedToday(val: number | null) {
+    this._timeWorkedToday = val;
+    // Pre-fill total work time if not already set
+    if (
+      val &&
+      this.metricForDay &&
+      (!this.metricForDay.totalWorkMinutes || this.metricForDay.totalWorkMinutes === 0)
+    ) {
+      const totalWorkMinutes = val / (1000 * 60);
+      this._update({ totalWorkMinutes });
+    }
+  }
+
   ngOnInit(): void {
     this._subs.add(
       this._metricForDay$.subscribe((metric) => {
         this.metricForDay = metric;
+        // Pre-fill total work time if not already set and we have time worked data
+        if (
+          this._timeWorkedToday &&
+          (!metric.totalWorkMinutes || metric.totalWorkMinutes === 0)
+        ) {
+          const totalWorkMinutes = this._timeWorkedToday / (1000 * 60);
+          this.metricForDay = {
+            ...metric,
+            totalWorkMinutes,
+          };
+          this._metricService.upsertMetric(this.metricForDay as MetricCopy);
+        }
         this._cd.detectChanges();
       }),
     );
@@ -170,65 +203,38 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     const focusQuality = this.metricForDay?.focusQuality ?? 0;
     const impact = this.metricForDay?.impactOfWork ?? 0;
     const deepWorkMinutes = this.deepWorkMinutes;
-    const targetMinutes = this.metricForDay?.targetMinutes ?? 240; // Default 4 hours
+    const targetMinutes = this.metricForDay?.targetMinutes ?? 240;
 
-    // Normalize each component to 0-1 range
-    const focusQualityNorm = focusQuality / 5; // 1-5 scale
-    const impactNorm = impact / 5; // 1-5 scale
-    const deepWorkRatio = Math.min(deepWorkMinutes / targetMinutes, 1); // Cap at 1
-
-    // Weighted sum (0.4 + 0.4 + 0.2 = 1.0)
-    const focusComponent = focusQualityNorm * 0.4;
-    const impactComponent = impactNorm * 0.4;
-    const deepWorkComponent = deepWorkRatio * 0.2;
-    const score = focusComponent + impactComponent + deepWorkComponent;
-
-    // Scale to 0-100
-    return Math.round(score * 100);
+    return calculateProductivityScore(
+      focusQuality,
+      impact,
+      deepWorkMinutes,
+      targetMinutes,
+    );
   }
 
   get sustainabilityScore(): number {
     const exhaustion = this.metricForDay?.exhaustion ?? 0;
     const deepWorkMinutes = this.deepWorkMinutes;
     const totalWorkMinutes = this.metricForDay?.totalWorkMinutes ?? deepWorkMinutes;
-    const maxRecommendedDailyWork = 480; // 8 hours in minutes
 
-    // Component 1: Low exhaustion is good (1 - exhaustion/5)
-    const exhaustionRatio = exhaustion / 5;
-    const exhaustionComponent = exhaustion > 0 ? 1 - exhaustionRatio : 0.5; // Default 0.5 if not set
-
-    // Component 2: High deep work ratio is good
-    const deepWorkRatio =
-      totalWorkMinutes > 0 ? Math.min(deepWorkMinutes / totalWorkMinutes, 1) : 0;
-
-    // Component 3: Not working too much is good (1 - overwork ratio)
-    const overworkRatio = totalWorkMinutes / maxRecommendedDailyWork;
-    const workloadComponent = totalWorkMinutes > 0 ? Math.max(0, 1 - overworkRatio) : 0.5;
-
-    // Weighted sum (0.4 + 0.3 + 0.3 = 1.0)
-    const exhaustionScore = exhaustionComponent * 0.4;
-    const deepWorkScore = deepWorkRatio * 0.3;
-    const workloadScore = workloadComponent * 0.3;
-    const score = exhaustionScore + deepWorkScore + workloadScore;
-
-    // Scale to 0-100
-    return Math.round(score * 100);
+    return calculateSustainabilityScore(exhaustion, deepWorkMinutes, totalWorkMinutes);
   }
 
   get dailyState(): DailyState {
-    const productivity = this.productivityScore;
-    const sustainability = this.sustainabilityScore;
-    const threshold = 50; // Threshold for high/low classification
+    return calculateDailyState(this.productivityScore, this.sustainabilityScore);
+  }
 
-    if (productivity >= threshold && sustainability >= threshold) {
-      return 'DEEP_FLOW';
-    } else if (productivity >= threshold && sustainability < threshold) {
-      return 'OVERDRIVE';
-    } else if (productivity < threshold && sustainability >= threshold) {
-      return 'RECOVERY';
-    } else {
-      return 'DRIFT';
-    }
+  get isProductivityHigh(): boolean {
+    return this.productivityScore >= 50;
+  }
+
+  get isSustainabilityHigh(): boolean {
+    return this.sustainabilityScore >= 50;
+  }
+
+  getScoreColor(score: number): string {
+    return getScoreColorGradient(score);
   }
 
   addObstruction(v: string): void {
@@ -319,5 +325,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       ...updateData,
     } as MetricCopy;
     this._metricService.upsertMetric(this.metricForDay as MetricCopy);
+    this._cd.markForCheck();
   }
 }

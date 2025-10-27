@@ -198,6 +198,7 @@
           <evaluation-sheet
             (save)="onEvaluationSave()"
             [day]="dayStr$ | async"
+            [timeWorkedToday]="timeWorked$ | async"
           ></evaluation-sheet>
         </section>
       </mat-tab>

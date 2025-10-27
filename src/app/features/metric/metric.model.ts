@@ -30,8 +30,6 @@ export type Metric = Readonly<MetricCopy>;
 
 export type MetricState = EntityState<Metric>;
 
-export type DailyState = 'DEEP_FLOW' | 'OVERDRIVE' | 'RECOVERY' | 'DRIFT';
-
 export type PieChartData = ChartData<'pie', number[], string>;
 export type LineChartData = ChartData<'line', (number | undefined)[], string>;
 

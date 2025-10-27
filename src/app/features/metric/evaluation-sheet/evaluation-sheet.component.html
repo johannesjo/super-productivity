@@ -15,17 +15,31 @@
       name="form"
       novalidate
     >
-      <mat-form-field style="width: 100%">
-        <mat-label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</mat-label>
-        <input
-          #focusWorkTime="ngModel"
-          (ngModelChange)="updateDeepWorkTime($event)"
-          [ngModel]="deepWorkTime"
-          inputDuration
-          matInput
-          name="focusWorkTime"
-        />
-      </mat-form-field>
+      <div class="row">
+        <mat-form-field>
+          <mat-label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</mat-label>
+          <input
+            #focusWorkTime="ngModel"
+            (ngModelChange)="updateDeepWorkTime($event)"
+            [ngModel]="deepWorkTime"
+            inputDuration
+            matInput
+            name="focusWorkTime"
+          />
+        </mat-form-field>
+
+        <mat-form-field>
+          <mat-label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</mat-label>
+          <input
+            #totalWorkMinutes="ngModel"
+            (ngModelChange)="updateTotalWorkMinutes($event)"
+            [ngModel]="totalWorkTimeMs"
+            inputDuration
+            matInput
+            name="totalWorkMinutes"
+          />
+        </mat-form-field>
+      </div>
 
       <div class="radio-group">
         <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_QUALITY | translate }}</label>
@@ -57,18 +71,6 @@
         <div class="hint">{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK_HINT | translate }}</div>
       </div>
 
-      <mat-form-field style="width: 100%">
-        <mat-label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</mat-label>
-        <input
-          #totalWorkMinutes="ngModel"
-          (ngModelChange)="updateTotalWorkMinutes($event)"
-          [ngModel]="totalWorkTimeMs"
-          inputDuration
-          matInput
-          name="totalWorkMinutes"
-        />
-      </mat-form-field>
-
       <div class="radio-group">
         <label>{{ T.F.METRIC.EVAL_FORM.EXHAUSTION | translate }}</label>
         <mat-radio-group
@@ -85,28 +87,24 @@
       </div>
 
       <div class="scores-container">
-        <div class="score-card productivity">
+        <div
+          class="score-card productivity"
+          [style.background]="getScoreColor(productivityScore)"
+        >
           <div class="label">
             {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}
           </div>
           <div class="score">{{ productivityScore }}</div>
         </div>
 
-        <div class="score-card sustainability">
+        <div
+          class="score-card sustainability"
+          [style.background]="getScoreColor(sustainabilityScore)"
+        >
           <div class="label">
             {{ T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE | translate }}
           </div>
           <div class="score">{{ sustainabilityScore }}</div>
-        </div>
-      </div>
-
-      <div
-        class="daily-state-indicator"
-        [attr.data-state]="dailyState"
-      >
-        <div class="state-label">{{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}</div>
-        <div class="state-value">
-          {{ T.F.METRIC.EVAL_FORM['DAILY_STATE_' + dailyState] | translate }}
         </div>
       </div>
 
