@@ -219,8 +219,10 @@
       "BACK_TO_PLANNING": "Back to Planning",
       "CONGRATS": "Congrats for completing this session!",
       "COUNTDOWN": "Countdown",
+      "COUNTDOWN_HINT": "Focus until the clock hits zero",
       "FINISH_TASK_AND_SELECT_NEXT": "Finish task and select next",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Flexible pacing without strict timers",
       "FOR_TASK": "for task",
       "GET_READY": "Get ready for your focus session!",
       "GO_TO_PROCRASTINATION": "Get help, when procrastinating",
@@ -229,6 +231,7 @@
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
       "POMODORO": "Pomodoro",
+      "POMODORO_HINT": "Structured sprints with planned breaks",
       "POMODORO_BACK": "Back",
       "POMODORO_DISABLE": "Disable Pomodoro",
       "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
@@ -237,6 +240,7 @@
       "PREP_STRETCH": "Do some mild stretching",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
+      "SELECT_MODE": "Choose your focus mode",
       "SESSION_COMPLETED": "Focus Session Completed!",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
@@ -575,6 +579,7 @@
         "CHECK": "I did it!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Activity Heatmap",
         "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
         "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
         "AVG_TIME_SPENT_ON_BREAKS": "Avg. time spent on breaks",
@@ -585,6 +590,7 @@
         "GLOBAL_METRICS": "Global Metrics",
         "IMPROVEMENT_SELECTION_COUNT": "Number of times an improvement factor was selected",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
+        "FOCUS_SESSION_TRENDS": "Focus sessions over time",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
         "OBSTRUCTION_SELECTION_COUNT": "Number of times an obstructing factor was selected",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
@@ -865,6 +871,24 @@
       "TOOLTIP_CREATE": "Create project folder",
       "TOOLTIP_VISIBILITY": "Show/hide projects"
     },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Create folder",
+        "EDIT_TITLE": "Edit folder",
+        "NAME_LABEL": "Folder name",
+        "NAME_PLACEHOLDER": "Enter folder name",
+        "NAME_REQUIRED": "Folder name is required",
+        "PARENT_LABEL": "Parent folder",
+        "NO_PARENT": "No parent (root level)"
+      },
+      "SELECT": {
+        "LABEL": "Folder",
+        "PLACEHOLDER": "Select folder",
+        "NO_PARENT": "No folder (root level)"
+      },
+      "CONFIRM_DELETE": "Are you sure you want to delete the folder \"{{title}}\"? All tags in this folder will be moved to the root level.",
+      "TOOLTIP_CREATE": "Create tag folder"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "No data for current year",
       "PAGE_TITLE": "Quick History",
@@ -920,8 +944,10 @@
       "MONTH": "Month",
       "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
       "NOW": "Now",
-      "PLAN_END_DAY": "Plan at end of day",
-      "PLAN_START_DAY": "Plan at start of day",
+      "INSERT_BEFORE": "Before",
+      "PLAN_END_DAY": "End of {{date}}",
+      "PLAN_START_DAY": "Start of {{date}}",
+      "SHIFT_KEY_INFO": "Hold Shift to toggle day planning mode",
       "START": "Work Start",
       "TASK_PROJECTION_INFO": "Future projection of a scheduled repeatable task",
       "WEEK": "Week"
@@ -1264,6 +1290,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Add all to today",
         "ADD_TO_TODAY": "Add to today",
+        "COMPLETE": "Complete",
+        "COMPLETE_ALL": "Complete all",
         "DONE": "Done",
         "DUE_TASK": "Reminder for planned task",
         "DUE_TASKS": "Reminder for planned tasks",
@@ -1311,7 +1339,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Add new entry for {{date}}",
         "DATE": "Date for new entry",
-        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes",
+        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes<br> 1.5h => 1 hour and 30 minutes<br> 03:15 => 3 hours and 15 minutes",
         "TINE_SPENT": "Time Spent",
         "TITLE": "Add for Day"
       },
@@ -1429,6 +1457,11 @@
         "WEDNESDAY": "Wednesday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
         "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
+        "REPEAT_FROM_COMPLETION_DATE": "Repeat, when done",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "The next task is created from your completion date, not from start date. (e.g., 'Every 7 days' = 7 days after completion)",
+        "SCHEDULE_TYPE_LABEL": "Schedule type",
+        "SCHEDULE_TYPE_FIXED": "Fixed schedule (e.g., every Monday, 1st of month)",
+        "SCHEDULE_TYPE_FLEXIBLE": "After completion (e.g., 7 days after I finish)",
         "REMOVE_INSTANCE": "Remove today",
         "REMOVE_FOR_DATE": "Remove for {{date}}",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Disable auto-updating subtasks",
@@ -1437,8 +1470,8 @@
     },
     "TASK_VIEW": {
       "CUSTOMIZER": {
-        "ENTER_PROJECT": "Enter project",
-        "ENTER_TAG": "Enter tag",
+        "ENTER_PROJECT": "Filter Projects",
+        "ENTER_TAG": "Filter Tag",
         "ESTIMATED_TIME": "Estimated Time",
         "FILTER_BY": "Filter By",
         "FILTER_DEFAULT": "No Filter",
@@ -1498,7 +1531,9 @@
         "SKIP": "Skip",
         "SPLIT_TIME": "Split time into multiples tasks and breaks",
         "TASK": "Task",
-        "TRACK_TO": "Track to"
+        "TRACK_TO": "Track to",
+        "WARN_SIMPLE_COUNTER": "Time will be counted towards the activated simple counter buttons.",
+        "WARN_SIMPLE_COUNTER_BREAK": "Time will STILL be counted on the activated simple counter buttons."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Create</em> and track to",
@@ -1562,7 +1597,8 @@
       "WEEK": {
         "EXPORT": "Export Week Data",
         "NO_DATA": "No tasks this week yet.",
-        "TITLE": "Title"
+        "TITLE": "Title",
+        "FOCUS_SUMMARY": "Focus sessions (nr / time)"
       }
     }
   },
@@ -1671,6 +1707,7 @@
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Add new note",
       "ADD_NEW_TASK": "Add New Task",
+      "ADD_NEW_PROJECT": "Add new project",
       "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
       "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
       "EXPAND_SUB_TASKS": "Expand Sub Tasks",
@@ -1778,7 +1815,6 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Disable productivity tips on app start",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
@@ -1906,6 +1942,10 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "NO_TASKS_TO_COPY": "No tasks to copy",
+    "SHARE_UNAVAILABLE_FALLBACK": "Copied to clipboard.",
+    "SHARE_FAILED_FALLBACK": "Sharing failed. Copied to clipboard instead.",
+    "SHARE_FAILED": "Sharing failed. Please copy manually.",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -1972,6 +2012,8 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "Sync!",
+    "SHARE_TASK_LIST_MARKDOWN": "Share Task List",
+    "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "WORKLOG": "Worklog",
     "SIDE_PANEL_MENU": "Side Panel Menu"
   },
@@ -1986,6 +2028,7 @@
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
     "BACK": "Wait I forgot something!",
     "BREAK_LABEL": "Breaks (nr / time)",
+    "FOCUS_SUMMARY": "Focus (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {

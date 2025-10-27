@@ -1,13 +1,103 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable, Signal } from '@angular/core';
 import { DateService } from '../../core/date/date.service';
-import { ScheduleEvent } from './schedule.model';
+import { interval } from 'rxjs';
+import {
+  ScheduleCalendarMapEntry,
+  ScheduleDay,
+  ScheduleEvent,
+  ScheduleLunchBreakCfg,
+  ScheduleWorkStartEndCfg,
+} from './schedule.model';
 import { SVEType } from './schedule.const';
+import { PlannerDayMap } from '../planner/planner.model';
+import { TaskWithDueTime, TaskWithSubTasks } from '../tasks/task.model';
+import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
+import { ScheduleConfig } from '../config/global-config.model';
+import { mapToScheduleDays } from './map-schedule-data/map-to-schedule-days';
+import { Store } from '@ngrx/store';
+import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
+import { selectPlannerDayMap } from '../planner/store/planner.selectors';
+import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { selectTimelineConfig } from '../config/store/global-config.reducer';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { TaskService } from '../tasks/task.service';
+import { startWith } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class ScheduleService {
   private _dateService = inject(DateService);
+  private _store = inject(Store);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _taskService = inject(TaskService);
+
+  private _timelineTasks = toSignal(this._store.select(selectTimelineTasks));
+  private _taskRepeatCfgs = toSignal(
+    this._store.select(selectTaskRepeatCfgsWithAndWithoutStartTime),
+  );
+  private _timelineConfig = toSignal(this._store.select(selectTimelineConfig));
+  private _plannerDayMap = toSignal(this._store.select(selectPlannerDayMap));
+  private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
+    initialValue: [],
+  });
+  scheduleRefreshTick = toSignal(interval(2 * 60 * 1000).pipe(startWith(0)), {
+    initialValue: 0,
+  });
+
+  createScheduleDaysComputed(daysToShow: Signal<string[]>): Signal<ScheduleDay[]> {
+    return computed(() => {
+      this.scheduleRefreshTick();
+      const timelineTasks = this._timelineTasks();
+      const taskRepeatCfgs = this._taskRepeatCfgs();
+      const timelineCfg = this._timelineConfig();
+      const plannerDayMap = this._plannerDayMap();
+      const icalEvents = this._icalEvents();
+      const currentTaskId = this._taskService.currentTaskId() ?? null;
+
+      return this.buildScheduleDays({
+        daysToShow: daysToShow(),
+        timelineTasks,
+        taskRepeatCfgs,
+        icalEvents,
+        plannerDayMap,
+        timelineCfg,
+        currentTaskId,
+      });
+    });
+  }
+
+  buildScheduleDays(params: BuildScheduleDaysParams): ScheduleDay[] {
+    const {
+      now = Date.now(),
+      daysToShow,
+      timelineTasks,
+      taskRepeatCfgs,
+      icalEvents,
+      plannerDayMap,
+      timelineCfg,
+      currentTaskId = null,
+    } = params;
+
+    if (!timelineTasks || !taskRepeatCfgs || !plannerDayMap) {
+      return [];
+    }
+
+    return mapToScheduleDays(
+      now,
+      daysToShow,
+      timelineTasks.unPlanned,
+      timelineTasks.planned,
+      taskRepeatCfgs.withStartTime,
+      taskRepeatCfgs.withoutStartTime,
+      icalEvents ?? [],
+      currentTaskId,
+      plannerDayMap,
+      timelineCfg?.isWorkStartEndEnabled ? createWorkStartEndCfg(timelineCfg) : undefined,
+      timelineCfg?.isLunchBreakEnabled ? createLunchBreakCfg(timelineCfg) : undefined,
+    );
+  }
 
   getDaysToShow(nrOfDaysToShow: number): string[] {
     const today = new Date().getTime();
@@ -19,18 +109,24 @@ export class ScheduleService {
     return daysToShow;
   }
 
-  getMonthDaysToShow(numberOfWeeks: number): string[] {
+  getMonthDaysToShow(numberOfWeeks: number, firstDayOfWeek: number = 0): string[] {
     const today = new Date();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
-    const firstSunday = new Date(firstDayOfMonth);
-    firstSunday.setDate(firstDayOfMonth.getDate() - firstDayOfMonth.getDay());
+    // Calculate the first day to show based on firstDayOfWeek setting
+    // firstDayOfWeek: 0=Sunday, 1=Monday, 2=Tuesday, etc.
+    const firstDayToShow = new Date(firstDayOfMonth);
+    const monthStartDay = firstDayOfMonth.getDay(); // 0=Sunday, 1=Monday, etc.
+
+    // Calculate how many days to go back from the first of the month
+    const daysToGoBack = (monthStartDay - firstDayOfWeek + 7) % 7;
+    firstDayToShow.setDate(firstDayOfMonth.getDate() - daysToGoBack);
 
     const totalDays = numberOfWeeks * 7;
     const daysToShow: string[] = [];
     for (let i = 0; i < totalDays; i++) {
-      const currentDate = new Date(firstSunday);
-      currentDate.setDate(firstSunday.getDate() + i);
+      const currentDate = new Date(firstDayToShow);
+      currentDate.setDate(firstDayToShow.getDate() + i);
       daysToShow.push(this._dateService.todayStr(currentDate.getTime()));
     }
 
@@ -165,4 +261,35 @@ export class ScheduleService {
       return eventDay === day;
     });
   }
+}
+
+const createWorkStartEndCfg = (timelineCfg: ScheduleConfig): ScheduleWorkStartEndCfg => ({
+  startTime: timelineCfg.workStart,
+  endTime: timelineCfg.workEnd,
+});
+
+const createLunchBreakCfg = (timelineCfg: ScheduleConfig): ScheduleLunchBreakCfg => ({
+  startTime: timelineCfg.lunchBreakStart,
+  endTime: timelineCfg.lunchBreakEnd,
+});
+
+type TimelineTasks = {
+  planned: TaskWithDueTime[];
+  unPlanned: TaskWithSubTasks[];
+};
+
+type TaskRepeatCfgBuckets = {
+  withStartTime: TaskRepeatCfg[];
+  withoutStartTime: TaskRepeatCfg[];
+};
+
+export interface BuildScheduleDaysParams {
+  now?: number;
+  daysToShow: string[];
+  timelineTasks: TimelineTasks | undefined | null;
+  taskRepeatCfgs: TaskRepeatCfgBuckets | undefined | null;
+  icalEvents: ScheduleCalendarMapEntry[] | undefined | null;
+  plannerDayMap: PlannerDayMap | undefined | null;
+  timelineCfg?: ScheduleConfig | null;
+  currentTaskId?: string | null;
 }

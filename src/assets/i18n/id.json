@@ -1133,6 +1133,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tambahkan semua ke hari ini",
         "ADD_TO_TODAY": "Tambah ke hari ini",
+        "COMPLETE": "Selesai",
+        "COMPLETE_ALL": "Selesaikan semua",
         "DONE": "Selesai",
         "DUE_TASK": "Tugas yang harus diselesaikan",
         "DUE_TASKS": "Tugas-tugas yang harus diselesaikan",
@@ -1178,7 +1180,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Tambahkan entri baru untuk {{date}}",
         "DATE": "Tanggal untuk entri baru",
-        "HELP": "Contoh:<br> 30m => 30 minutes<br> 2h => 2 hours <br> 2h 30m => 2 hours dan 30 minutes (Satuan dalam bahasa Inggris)",
+        "HELP": "Contoh:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours dan 30 minutes<br> 1.5h => 1 hour dan 30 minutes<br> 03:15 => 3 hours dan 15 minutes (Satuan dalam bahasa Inggris)",
         "TINE_SPENT": "Waktu yang dihabiskan",
         "TITLE": "Tambahkan untuk hari"
       },

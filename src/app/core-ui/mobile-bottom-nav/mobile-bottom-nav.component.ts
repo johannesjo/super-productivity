@@ -10,7 +10,6 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map, startWith } from 'rxjs/operators';
 
 import { LayoutService } from '../layout/layout.service';
-import { TaskViewCustomizerService } from '../../features/task-view-customizer/task-view-customizer.service';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { PluginIconComponent } from '../../plugins/ui/plugin-icon/plugin-icon.component';
 import { Store } from '@ngrx/store';
@@ -43,7 +42,6 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 export class MobileBottomNavComponent {
   private readonly _router = inject(Router);
   private readonly _layoutService = inject(LayoutService);
-  private readonly _taskViewCustomizerService = inject(TaskViewCustomizerService);
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _store = inject(Store);
   private readonly _workContextService = inject(WorkContextService);
@@ -55,7 +53,6 @@ export class MobileBottomNavComponent {
 
   // Services for template access
   readonly layoutService = this._layoutService;
-  readonly taskViewCustomizerService = this._taskViewCustomizerService;
 
   // Output events
   toggleMobileNavEvent = output<void>();
@@ -88,20 +85,9 @@ export class MobileBottomNavComponent {
     { initialValue: true },
   );
 
-  readonly isWorkViewPage = toSignal(
-    this._router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
-      startWith(!!this._router.url.match(/tasks$/)),
-    ),
-    { initialValue: !!this._router.url.match(/tasks$/) },
-  );
-
   // Panel state signals from layout service
   readonly isShowNotes = this._layoutService.isShowNotes;
   readonly isShowIssuePanel = this._layoutService.isShowIssuePanel;
-  readonly isShowTaskViewCustomizerPanel =
-    this._layoutService.isShowTaskViewCustomizerPanel;
 
   // Navigation methods
   showAddTaskBar(): void {
@@ -124,10 +110,6 @@ export class MobileBottomNavComponent {
     if (button.onClick) {
       button.onClick();
     }
-  }
-
-  toggleTaskViewCustomizer(): void {
-    this._layoutService.toggleTaskViewCustomizerPanel();
   }
 
   toggleIssuePanel(): void {

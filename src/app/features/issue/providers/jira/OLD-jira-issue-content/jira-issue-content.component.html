@@ -150,10 +150,7 @@
       <tr>
         <th>{{ T.F.JIRA.ISSUE_CONTENT.COMMENTS | translate }}</th>
         <td>
-          @for (
-            comment of issue?.comments | sort: 'created';
-            track trackByIndex($index, comment)
-          ) {
+          @for (comment of sortedComments; track trackByIndex($index, comment)) {
             <div class="comment">
               <img
                 [src]="comment.author.avatarUrl"

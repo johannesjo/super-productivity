@@ -173,12 +173,17 @@
         @if (customizedUndoneTasks(); as customized) {
           @if (customized.grouped) {
             @for (group of customized.grouped | keyvalue; track group.key) {
-              <h3>{{ group.key }}</h3>
-              <task-list
-                [tasks]="group.value"
-                listId="PARENT"
-                listModelId="UNDONE"
-              ></task-list>
+              <collapsible
+                [title]="group.key"
+                [isIconBefore]="true"
+                [isExpanded]="true"
+              >
+                <task-list
+                  [tasks]="group.value"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              </collapsible>
             }
           } @else {
             <task-list
@@ -260,7 +265,7 @@
           </div>
         }
 
-        @if (!isPlanningMode() || hasDoneTasks()) {
+        @if (hasDoneTasks()) {
           @let nrOfDoneArchived =
             doneTasks()?.length === 0
               ? (workContextService.doneTodayArchived$ | async)
@@ -305,10 +310,11 @@
                 }
               </div>
             </collapsible>
-            @if (isOnTodayList()) {
-              <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
-            }
           </div>
+        }
+
+        @if (!isPlanningMode() && isOnTodayList()) {
+          <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
         }
       </div>
     </div>

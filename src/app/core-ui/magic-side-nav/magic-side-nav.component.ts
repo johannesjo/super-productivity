@@ -10,9 +10,10 @@ import {
   OnInit,
   output,
   signal,
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavListTreeComponent } from './nav-list/nav-list-tree.component';
 import { NavItem } from './magic-side-nav.model';
@@ -24,9 +25,18 @@ import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
 import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../layout/layout.service';
 import { magicSideNavAnimations } from './magic-side-nav.animations';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { ScheduleExternalDragService } from '../../features/schedule/schedule-week/schedule-external-drag.service';
+import { Log } from '../../core/log';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { DragDropRegistry } from '@angular/cdk/drag-drop';
+import { WorkContextType } from '../../features/work-context/work-context.model';
 
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
+const FOCUS_DELAY_MS = 10;
 
 @Component({
   selector: 'magic-side-nav',
@@ -48,13 +58,19 @@ const MOBILE_NAV_WIDTH = 300;
   },
   animations: magicSideNavAnimations,
 })
-export class MagicSideNavComponent implements OnInit, OnDestroy {
+export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _sideNavConfigService = inject(MagicNavConfigService);
   private readonly _taskService = inject(TaskService);
   private readonly _layoutService = inject(LayoutService);
+  private readonly _router = inject(Router);
+  private _dragDropRegistry = inject(DragDropRegistry);
+  private _externalDragService = inject(ScheduleExternalDragService);
+  private _pointerUpSubscription: Subscription | null = null;
+
   // Use service's computed signal directly
   readonly config = this._sideNavConfigService.navConfig;
+  readonly WorkContextType = WorkContextType;
 
   activeWorkContextId = input<string | null>(null);
 
@@ -122,7 +138,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       if (trigger > 0) {
         // Small delay to ensure DOM is ready
         window.setTimeout(() => {
-          this.focusFirstNavEntry();
+          this.toggleNavFocus();
         });
       }
     });
@@ -132,12 +148,28 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     this._destroyRef.onDestroy(() => {
       window.removeEventListener('resize', resizeListener);
     });
+
+    this._router.events
+      .pipe(
+        filter((event): event is NavigationStart => event instanceof NavigationStart),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(() => {
+        if (this.isMobile() && this.showMobileMenuOverlay()) {
+          this.showMobileMenuOverlay.set(false);
+        }
+      });
   }
 
   ngOnDestroy(): void {
     if (this._animateTimeoutId != null) {
       window.clearTimeout(this._animateTimeoutId);
       this._animateTimeoutId = null;
+    }
+
+    if (this._pointerUpSubscription) {
+      this._pointerUpSubscription.unsubscribe();
+      this._pointerUpSubscription = null;
     }
   }
 
@@ -167,6 +199,13 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       this.isFullMode.set(this.config().fullModeByDefault);
       this.currentWidth.set(this.config().defaultWidth);
     }
+  }
+
+  ngAfterViewInit(): void {
+    // Listen for global pointer releases while a drag is active
+    this._pointerUpSubscription = this._dragDropRegistry.pointerUp.subscribe((event) => {
+      this._handlePointerUp(event);
+    });
   }
 
   onNavKeyDown(event: KeyboardEvent): void {
@@ -425,29 +464,56 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       event.preventDefault();
       event.stopPropagation();
 
-      // Unfocus the navigation element
-      if (activeElement && typeof activeElement.blur === 'function') {
-        activeElement.blur();
-      }
-
-      // Focus the first task if available
-      setTimeout(() => {
-        this._taskService.focusFirstTaskIfVisible();
-      }, 10);
+      this._unfocusNavAndFocusTask();
     }
   }
 
-  // Public method to focus the first nav entry (for keyboard shortcuts)
-  focusFirstNavEntry(): void {
-    if (this.isMobile() && !this.showMobileMenuOverlay()) {
-      this.showMobileMenuOverlay.set(true);
-      setTimeout(() => {
-        this._focusFirstNavElement();
-      });
+  private _unfocusNavAndFocusTask(): void {
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement?.blur) {
+      activeElement.blur();
+    }
+    setTimeout(() => {
+      this._taskService.focusFirstTaskIfVisible();
+    }, FOCUS_DELAY_MS);
+  }
+
+  // Public method to toggle nav focus (for keyboard shortcuts)
+  toggleNavFocus(): void {
+    // Check if any nav element is currently focused
+    const activeElement = document.activeElement as HTMLElement;
+    const navSidebar = document.querySelector('.nav-sidenav');
+    const isNavFocused = navSidebar && navSidebar.contains(activeElement);
+
+    // If on mobile
+    if (this.isMobile()) {
+      if (this.showMobileMenuOverlay()) {
+        // If mobile overlay is open and nav is focused, close it
+        if (isNavFocused) {
+          this.showMobileMenuOverlay.set(false);
+          this._unfocusNavAndFocusTask();
+        } else {
+          // Mobile overlay is open but nav not focused, focus it
+          this._focusFirstNavElement();
+        }
+      } else {
+        // Mobile overlay is closed, open it and focus
+        this.showMobileMenuOverlay.set(true);
+        setTimeout(() => {
+          this._focusFirstNavElement();
+        });
+      }
       return;
     }
 
-    this._focusFirstNavElement();
+    // Desktop behavior: toggle focus
+    if (isNavFocused) {
+      // Nav is already focused, unfocus it
+      this._unfocusNavAndFocusTask();
+    } else {
+      // Nav is not focused, focus it
+      this._focusFirstNavElement();
+    }
   }
 
   private _focusFirstNavElement(): void {
@@ -455,5 +521,64 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     if (focusableElements.length > 0) {
       focusableElements[0].focus();
     }
+  }
+
+  private _handlePointerUp(event: MouseEvent | TouchEvent): void {
+    const draggedTask = this._externalDragService.activeTask();
+
+    // exclude subtasks and recurring tasks
+    if (!draggedTask || draggedTask.parentId || draggedTask.repeatCfgId) {
+      return;
+    }
+
+    const pointerPos = this._getPointerPosition(event);
+    if (!pointerPos) {
+      return;
+    }
+
+    const navItemElement = document
+      .elementFromPoint(pointerPos.x, pointerPos.y)
+      ?.closest('nav-item');
+    if (!navItemElement) {
+      return;
+    }
+
+    if (navItemElement.hasAttribute('data-project-id')) {
+      // Task is dropped on a project
+      const projectId = navItemElement.getAttribute('data-project-id');
+      Log.debug('Task dropped on Project', { draggedTask, projectId });
+      this._taskService.moveToProject(draggedTask, projectId!);
+    } else if (navItemElement.hasAttribute('data-tag-id')) {
+      // Task is dropped on a tag
+      const tagId = navItemElement.getAttribute('data-tag-id');
+      Log.debug('Task dropped on Tag', { draggedTask, tagId });
+
+      // Special case: "Today" tag means to schedule task for today
+      if (tagId === TODAY_TAG.id) {
+        this._taskService.addToToday(draggedTask);
+      } else {
+        if (!draggedTask.tagIds.includes(tagId!)) {
+          // tag not yet assigned to task, add it
+          this._taskService.updateTags(draggedTask, [...draggedTask.tagIds, tagId!]);
+        } else {
+          // tag already assigned to task, remove it
+          this._taskService.updateTags(
+            draggedTask,
+            draggedTask.tagIds.filter((t) => t !== tagId),
+          );
+        }
+      }
+    }
+  }
+
+  private _getPointerPosition(
+    event: MouseEvent | TouchEvent,
+  ): { x: number; y: number } | null {
+    if (!('touches' in event)) {
+      return { x: event.clientX, y: event.clientY };
+    }
+
+    const touch = event.touches[0] ?? event.changedTouches?.[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
   }
 }

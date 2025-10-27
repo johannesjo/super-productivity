@@ -1,26 +1,54 @@
-import { ChangeDetectionStrategy, Component, inject, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  input,
+  LOCALE_ID,
+} from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { DatePipe } from '@angular/common';
+import { DatePipe, formatDate } from '@angular/common';
 import { T } from '../../../t.const';
-import { DateService } from '../../../core/date/date.service';
 import { ScheduleService } from '../schedule.service';
+import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 
 @Component({
   selector: 'schedule-month',
-  imports: [ScheduleEventComponent, DatePipe],
+  imports: [ScheduleEventComponent, DatePipe, LocaleDatePipe],
   templateUrl: './schedule-month.component.html',
   styleUrl: './schedule-month.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
 })
 export class ScheduleMonthComponent {
-  private _dateService = inject(DateService);
   private _scheduleService = inject(ScheduleService);
+  private _locale = inject(LOCALE_ID);
 
-  @Input() events: ScheduleEvent[] | null = [];
-  @Input() daysToShow: string[] = [];
-  @Input() weeksToShow: number = 6;
+  readonly events = input<ScheduleEvent[] | null>([]);
+  readonly daysToShow = input<string[]>([]);
+  readonly weeksToShow = input<number>(6);
+  readonly firstDayOfWeek = input<number>(1);
+
+  // Generate weekday headers based on firstDayOfWeek setting
+  readonly weekdayHeaders = computed(() => {
+    const firstDay = this.firstDayOfWeek();
+    const headers: string[] = [];
+
+    // Create a date for each day of week (using a week starting on Sunday)
+    // January 2, 2000 was a Sunday
+    const sundayDate = new Date(2000, 0, 2);
+
+    for (let i = 0; i < 7; i++) {
+      const dayIndex = (firstDay + i) % 7;
+      const date = new Date(sundayDate);
+      date.setDate(sundayDate.getDate() + dayIndex);
+      // 'EEE' format gives abbreviated day name (e.g., 'Mon', 'Tue')
+      headers.push(formatDate(date, 'EEE', this._locale));
+    }
+
+    return headers;
+  });
 
   T: typeof T = T;
 
@@ -37,11 +65,11 @@ export class ScheduleMonthComponent {
   }
 
   hasEventsForDay(day: string): boolean {
-    return this._scheduleService.hasEventsForDay(day, this.events || []);
+    return this._scheduleService.hasEventsForDay(day, this.events() || []);
   }
 
   getEventsForDay(day: string): ScheduleEvent[] {
-    return this._scheduleService.getEventsForDay(day, this.events || []);
+    return this._scheduleService.getEventsForDay(day, this.events() || []);
   }
 
   getEventDayStr(ev: ScheduleEvent): string | null {

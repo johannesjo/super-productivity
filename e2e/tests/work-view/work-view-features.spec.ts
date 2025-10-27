@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK = 'task';
-const TASK_TEXTAREA = 'task textarea';
+const TASK_TITLE = 'task task-title';
 const FIRST_TASK = 'task:first-of-type';
 const UNDONE_TASK_LIST = 'task-list[listmodelid="UNDONE"]';
 const DONE_TASK_LIST = 'task-list[listmodelid="DONE"]';
@@ -95,16 +95,16 @@ test.describe('Work View Features', () => {
     await page.waitForTimeout(500);
 
     // Verify order (newest first)
-    await expect(page.locator('task:nth-of-type(1) textarea')).toHaveValue(
+    await expect(page.locator('task:nth-of-type(1) task-title')).toContainText(
       /Fourth created/,
     );
-    await expect(page.locator('task:nth-of-type(2) textarea')).toHaveValue(
+    await expect(page.locator('task:nth-of-type(2) task-title')).toContainText(
       /Third created/,
     );
-    await expect(page.locator('task:nth-of-type(3) textarea')).toHaveValue(
+    await expect(page.locator('task:nth-of-type(3) task-title')).toContainText(
       /Second created/,
     );
-    await expect(page.locator('task:nth-of-type(4) textarea')).toHaveValue(
+    await expect(page.locator('task:nth-of-type(4) task-title')).toContainText(
       /First created/,
     );
   });
@@ -126,6 +126,6 @@ test.describe('Work View Features', () => {
     await expect(page.locator('task-list').first()).toBeVisible();
 
     // Verify task is still there
-    await expect(page.locator(TASK_TEXTAREA).first()).toHaveValue(/Persistent task/);
+    await expect(page.locator(TASK_TITLE).first()).toContainText(/Persistent task/);
   });
 });

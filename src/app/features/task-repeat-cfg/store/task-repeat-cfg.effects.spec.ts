@@ -12,6 +12,8 @@ import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../tasks/task.model';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { addSubTask } from '../../tasks/store/task.actions';
 import { TestScheduler } from 'rxjs/testing';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
   let actions$: Observable<Action>;
@@ -206,6 +208,75 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
           subTaskTemplates: [],
         },
       );
+    });
+  });
+
+  describe('updateStartDateOnComplete$', () => {
+    it('should update startDate and lastTaskCreationDay when completing a repeat-on-complete task', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = TaskSharedActions.updateTask({
+          task: { id: 'parent-task-id', changes: { isDone: true } },
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // full task with repeatCfgId
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+
+        // repeat cfg with repeatOnComplete true
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+          of({ ...mockRepeatCfg, repeatFromCompletionDate: true }),
+        );
+
+        const today = getDbDateStr();
+        const expectedAction = updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: 'repeat-cfg-id',
+            changes: { startDate: today, lastTaskCreationDay: today },
+          },
+        });
+
+        expectObservable(effects.updateStartDateOnComplete$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should not emit when task has no repeatCfgId', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = TaskSharedActions.updateTask({
+          task: { id: 'no-repeat-task-id', changes: { isDone: true } },
+        });
+
+        const taskWithoutRepeat: Task = {
+          ...DEFAULT_TASK,
+          id: 'no-repeat-task-id',
+          title: 'No Repeat',
+        } as Task;
+
+        actions$ = hot('-a', { a: action });
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithoutRepeat));
+
+        expectObservable(effects.updateStartDateOnComplete$).toBe('--');
+      });
+    });
+
+    it('should not emit when repeatOnComplete is false', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = TaskSharedActions.updateTask({
+          task: { id: 'parent-task-id', changes: { isDone: true } },
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+          of({ ...mockRepeatCfg, repeatFromCompletionDate: false }),
+        );
+
+        expectObservable(effects.updateStartDateOnComplete$).toBe('--');
+      });
     });
   });
 

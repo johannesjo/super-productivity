@@ -7,7 +7,14 @@
     "allowSyntheticDefaultImports": true
   },
   "files": ["main.ts", "polyfills.ts"],
-  "include": ["**/*.d.ts"],
+  "include": ["app/**/*.ts"],
+  "exclude": [
+    "**/*.spec.ts",
+    "**/*.worker.ts",
+    "**/__mocks__/**",
+    "**/test-utils.ts",
+    "app/util/**/*.ts"
+  ],
   "angularCompilerOptions": {
     "fullTemplateTypeCheck": true,
     "strictInjectionParameters": true

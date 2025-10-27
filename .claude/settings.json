@@ -17,9 +17,9 @@
       "Bash(git diff:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(find *)",
-      "Bash(grep *)",
-      "Bash(rg *)"
+      "Bash(find :*)",
+      "Bash(grep :*)",
+      "Bash(rg :*)"
     ],
     "deny": ["Bash(rm:*)", "Bash(curl:*)", "Bash(git push:*)"]
   },

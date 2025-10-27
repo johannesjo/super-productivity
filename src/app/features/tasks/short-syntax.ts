@@ -66,7 +66,13 @@ customDateParser.refiners.push({
   },
 });
 
-const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(`\\${CH_PRO}[^${ALL_SPECIAL}]+`, 'gi');
+// The following project name extraction pattern attempts to improve on the
+// previous version by not immediately terminating upon encountering a short
+// syntax delimiting character and looks ahead to consider usage context
+const SHORT_SYNTAX_PROJECT_REG_EX = new RegExp(
+  `\\${CH_PRO}((?:(?!\\s+(?:\\${CH_TAG}|\\${CH_DUE}|t?\\d+[mh]\\b)).)+)`,
+  'i',
+);
 const SHORT_SYNTAX_TAGS_REG_EX = new RegExp(`\\${CH_TAG}[^${ALL_SPECIAL}|\\s]+`, 'gi');
 
 // Literal notation: /\@[^\+|\#|\@]/gi
@@ -181,7 +187,7 @@ const parseProjectChanges = (
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
-    const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
+    const projectTitleToMatch = projectTitle.replaceAll(' ', '').toLowerCase();
     const indexBeforePlus =
       task.title.toLowerCase().lastIndexOf(CH_PRO + projectTitleToMatch) - 1;
     const charBeforePlus = task.title.charAt(indexBeforePlus);
@@ -191,14 +197,23 @@ const parseProjectChanges = (
       return {};
     }
 
-    const existingProject = allProjects.find(
+    // Prefer shortest prefix-based project title match
+    const sortedAllProjects = allProjects
+      .slice()
+      .sort((p1, p2) => p1.title.length - p2.title.length);
+
+    const existingProject = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch) ===
+        0,
     );
 
     if (existingProject) {
       return {
-        title: task.title?.replace(`${CH_PRO}${projectTitle}`, '').trim(),
+        title: task.title
+          ?.replace(`${CH_PRO}${projectTitle}`, '')
+          .trim()
+          .replace('  ', ' '),
         projectId: existingProject.id,
       };
     }
@@ -206,9 +221,10 @@ const parseProjectChanges = (
     // also try only first word after special char
     const projectTitleFirstWordOnly = projectTitle.split(' ')[0];
     const projectTitleToMatch2 = projectTitleFirstWordOnly.replace(' ', '').toLowerCase();
-    const existingProjectForFirstWordOnly = allProjects.find(
+    const existingProjectForFirstWordOnly = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch2) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch2) ===
+        0,
     );
 
     if (existingProjectForFirstWordOnly) {

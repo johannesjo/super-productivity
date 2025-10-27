@@ -113,6 +113,16 @@
                     [activeWorkContextId]="activeWorkContextId() || ''"
                     [variant]="'nav'"
                     [showLabels]="showText()"
+                    [attr.data-project-id]="
+                      item.workContextType === WorkContextType.PROJECT
+                        ? item.workContext.id
+                        : null
+                    "
+                    [attr.data-tag-id]="
+                      item.workContextType === WorkContextType.TAG
+                        ? item.workContext.id
+                        : null
+                    "
                     (clicked)="onItemClick(item)"
                   ></nav-item>
                 }

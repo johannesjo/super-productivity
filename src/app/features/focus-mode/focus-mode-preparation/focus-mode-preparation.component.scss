@@ -1,15 +1,53 @@
-.action-msg {
+.preparation {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   text-align: center;
+  gap: var(--s2);
+  position: relative;
+  line-height: 1.2;
+}
+
+.message-stack {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prep-content.is-hidden {
+  visibility: hidden;
+}
+
+.action-msg {
   font-size: 22px;
   font-weight: bold;
 }
 
-.countdown-timer {
-  font-size: 34px;
-  text-align: center;
-  margin: var(--s4);
+.go-msg {
+  font-size: 28px;
+  letter-spacing: 1px;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100%;
 }
 
-:host li {
-  font-size: 18px;
+ol {
+  margin: 0;
+  padding-inline-start: var(--s3);
+  text-align: left;
+
+  li {
+    font-size: 18px;
+    margin-bottom: var(--s);
+  }
+}
+
+.countdown-timer {
+  font-size: 36px;
+  font-weight: bold;
+  margin-top: var(--s3);
 }

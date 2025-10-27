@@ -65,26 +65,23 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
     items: [
       {
         key: 'primary',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_PRIMARY,
-          type: 'color',
         },
       },
       {
         key: 'accent',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_ACCENT,
-          type: 'color',
         },
       },
       {
         key: 'warn',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_WARN,
-          type: 'color',
         },
       },
       {

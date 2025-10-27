@@ -8,6 +8,8 @@ import {
   toggleIssuePanel,
   toggleShowNotes,
   toggleTaskViewCustomizerPanel,
+  toggleScheduleDayPanel,
+  hideScheduleDayPanel,
 } from './store/layout.actions';
 import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -17,12 +19,12 @@ import {
   selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowTaskViewCustomizerPanel,
+  selectIsShowScheduleDayPanel,
 } from './store/layout.reducer';
 import { map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { IS_MOBILE } from '../../util/is-mobile';
-import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { IS_SHOW_MOBILE_BOTTOM_NAV } from '../../util/is-mobile';
 
 const XS_BREAKPOINT = 600;
 const XXXS_BREAKPOINT = 398;
@@ -38,7 +40,7 @@ export class LayoutService {
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
 
-  readonly isShowMobileBottomNav = IS_MOBILE && IS_TOUCH_PRIMARY;
+  readonly isShowMobileBottomNav = IS_SHOW_MOBILE_BOTTOM_NAV;
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -84,6 +86,11 @@ export class LayoutService {
   );
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
+
+  readonly isShowScheduleDayPanel = toSignal(
+    this._store$.pipe(select(selectIsShowScheduleDayPanel)),
+    { initialValue: false },
+  );
 
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
@@ -137,5 +144,14 @@ export class LayoutService {
   focusSideNav(): void {
     // Trigger the focus signal - components listening to this signal will handle the focus
     this._focusSideNavTrigger.update((value) => value + 1);
+  }
+
+  // Schedule Day Panel controls
+  toggleScheduleDayPanel(): void {
+    this._store$.dispatch(toggleScheduleDayPanel());
+  }
+
+  hideScheduleDayPanel(): void {
+    this._store$.dispatch(hideScheduleDayPanel());
   }
 }

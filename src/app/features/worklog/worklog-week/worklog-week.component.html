@@ -34,6 +34,7 @@
                     &nbsp;
                     <mat-icon>list</mat-icon>
                     <strong>{{ day.value.logEntries.length }}</strong>
+
                     @if (day.value.workStart) {
                       <em
                         ><span class="spacer"></span
@@ -42,6 +43,18 @@
                       >
                     }
                     <div class="simple-counter-items">
+                      @if (focusSummaryFor(day.value.dateStr); as focusSummary) {
+                        <div
+                          class="simple-counter-item focus-summary-item"
+                          [attr.title]="T.F.WORKLOG.WEEK.FOCUS_SUMMARY | translate"
+                        >
+                          <mat-icon inline="true">center_focus_strong</mat-icon>
+                          <div class="count">
+                            {{ focusSummary.count }} /
+                            {{ focusSummary.total | msToMinuteClockString }}
+                          </div>
+                        </div>
+                      }
                       @for (
                         sc of simpleCounterService.enabledSimpleCounters$ | async;
                         track sc

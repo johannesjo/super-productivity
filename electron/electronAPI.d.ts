@@ -70,6 +70,13 @@ export interface ElectronAPI {
     data: string,
   ): Promise<{ success: boolean; path?: string }>;
 
+  shareNative(payload: {
+    text?: string;
+    url?: string;
+    title?: string;
+    files?: string[];
+  }): Promise<{ success: boolean; error?: string }>;
+
   isLinux(): boolean;
 
   isMacOS(): boolean;

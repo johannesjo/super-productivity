@@ -64,17 +64,6 @@
 
   <button
     mat-menu-item
-    [disabled]="!isWorkViewPage()"
-    [class.active]="isShowTaskViewCustomizerPanel()"
-    [class.isCustomized]="taskViewCustomizerService.isCustomized()"
-    (click)="toggleTaskViewCustomizer()"
-  >
-    <mat-icon>filter_list</mat-icon>
-    <span>{{ T.BN.SHOW_TASK_VIEW_CUSTOMIZER_PANEL | translate }}</span>
-  </button>
-
-  <button
-    mat-menu-item
     [disabled]="!isRouteWithSidePanel()"
     [class.active]="isShowIssuePanel()"
     (click)="toggleIssuePanel()"

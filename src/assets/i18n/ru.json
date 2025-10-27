@@ -1153,6 +1153,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Добавить все на сегодня",
         "ADD_TO_TODAY": "Добавить сегодня",
+        "COMPLETE": "Завершить",
+        "COMPLETE_ALL": "Завершить все",
         "DONE": "Готово",
         "DUE_TASK": "Запланированная задача",
         "DUE_TASKS": "Запланированные задачи",
@@ -1198,7 +1200,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "Добавить новую запись для {{date}}",
         "DATE": "Дата новой записи",
-        "HELP": "Примеры:<br> 30m => 30 минут<br> 2h => 2 часа<br> 2h 30m => 2 часа 30 минут",
+        "HELP": "Примеры:<br> 30m => 30 минут<br> 2h => 2 часа<br> 2h 30m => 2 часа 30 минут<br> 1.5h => 1 час и 30 минут<br> 03:15 => 3 часа и 15 минут",
         "TINE_SPENT": "Времени потрачено",
         "TITLE": "Назначить на день"
       },
@@ -1354,34 +1356,34 @@
     "TIME_TRACKING": {
       "B": {
         "ALREADY_DID": "Я уже сделал",
-        "SNOOZE": "Отложить {{time}}"
+        "SNOOZE": "Отложить на {{time}}"
       },
       "B_TTR": {
         "ADD_TO_TASK": "Добавить в задачу",
-        "MSG": "Вы не отслеживали время для {{time}}"
+        "MSG": "Вы не отслеживали время {{time}}"
       },
       "D_IDLE": {
         "ADD_ENTRY": "Добавить запись для отслеживания",
         "BREAK": "Перерыв",
-        "CREATE_AND_TRACK": "<em>Создать</em> и отследить до:",
+        "CREATE_AND_TRACK": "<em>Создать</em> и отследить в:",
         "IDLE_FOR": "Вы были без дела:",
         "RESET_BREAK_REMINDER_TIMER": "Сбросить таймер перерыва",
         "SIMPLE_CONFIRM_COUNTER_CANCEL": "Пропустить",
         "SIMPLE_CONFIRM_COUNTER_OK": "Отследить",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Вы выбрали \"Пропустить\", но активировали кнопки простого счетчика ({{nr}}). Хотите отследить в него время простоя?",
-        "SIMPLE_COUNTER_TOOLTIP": "Нажмите, чтобы отслеживать до {{title}}",
-        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Нажмите, чтобы НЕ отслеживать до {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP": "Нажмите, чтобы отслеживать в {{title}}",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": "Нажмите, чтобы НЕ отслеживать в {{title}}",
         "SKIP": "Пропустить",
         "SPLIT_TIME": "Разделить время на несколько задач и/или перерывов",
         "TASK": "Задача",
-        "TRACK_TO": "Отследить до:"
+        "TRACK_TO": "Отследить в:"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Создать</em> и отслеживать",
         "IDLE_FOR": "Вы были без дела:",
         "NOTIFICATION_TITLE": "Следите за своим временем!",
         "TASK": "Задача",
-        "TRACK_TO": "Отследить до:",
+        "TRACK_TO": "Отследить в:",
         "UNTRACKED_TIME": "Не отслеженное время:"
       }
     },

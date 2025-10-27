@@ -96,7 +96,10 @@
   ></context-menu>
 
   <ng-template #folderContextMenu>
-    <folder-context-menu [folderId]="folderId()!"></folder-context-menu>
+    <folder-context-menu
+      [folderId]="folderId()!"
+      [treeKind]="treeKind()"
+    ></folder-context-menu>
   </ng-template>
 } @else {
   <!-- Container + presentational row unified here -->

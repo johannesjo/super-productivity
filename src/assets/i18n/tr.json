@@ -846,6 +846,43 @@
         "UPDATED": "Güncellenen proje ayarları"
       }
     },
+    "PROJECT_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Klasör oluştur",
+        "EDIT_TITLE": "Klasörü düzenle",
+        "NAME_LABEL": "Klasör adı",
+        "NAME_PLACEHOLDER": "Klasör adını girin",
+        "NAME_REQUIRED": "Klasör adı gereklidir",
+        "PARENT_LABEL": "Ana klasör",
+        "NO_PARENT": "Ana klasör yok (kök düzey)"
+      },
+      "SELECT": {
+        "LABEL": "Klasör",
+        "PLACEHOLDER": "Klasör seçin",
+        "NO_PARENT": "Klasör yok (kök düzey)"
+      },
+      "CONFIRM_DELETE": "\"{{title}}\" adlı klasörü silmek istediğinizden emin misiniz? Bu klasördeki tüm projeler kök düzeye taşınacaktır.",
+      "TOOLTIP_CREATE": "Proje klasörü oluştur",
+      "TOOLTIP_VISIBILITY": "Projeleri göster/gizle"
+    },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Klasör oluştur",
+        "EDIT_TITLE": "Klasörü düzenle",
+        "NAME_LABEL": "Klasör adı",
+        "NAME_PLACEHOLDER": "Klasör adını girin",
+        "NAME_REQUIRED": "Klasör adı gereklidir",
+        "PARENT_LABEL": "Ana klasör",
+        "NO_PARENT": "Ana klasör yok (kök düzey)"
+      },
+      "SELECT": {
+        "LABEL": "Klasör",
+        "PLACEHOLDER": "Klasör seçin",
+        "NO_PARENT": "Klasör yok (kök düzey)"
+      },
+      "CONFIRM_DELETE": "\"{{title}}\" adlı klasörü silmek istediğinizden emin misiniz? Bu klasördeki tüm etiketler kök düzeye taşınacaktır.",
+      "TOOLTIP_CREATE": "Etiket klasörü oluştur"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "Bu yıl için veri yok",
       "PAGE_TITLE": "Hızlı Geçmiş",
@@ -1245,6 +1282,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
         "ADD_TO_TODAY": "Bugüne ekle",
+        "COMPLETE": "Tamamla",
+        "COMPLETE_ALL": "Tümünü tamamla",
         "DONE": "Bitti",
         "DUE_TASK": "Yapılacak görev",
         "DUE_TASKS": "Yapılacak görevler",
@@ -1292,7 +1331,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": " {{date}} için yeni giriş ekle",
         "DATE": "Yeni giriş tarihi",
-        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika",
+        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika<br> 1.5h => 1 saat ve 30 dakika<br> 03:15 => 3 saat ve 15 dakika",
         "TINE_SPENT": "Harcanan zaman",
         "TITLE": "Güne Ekle"
       },
@@ -1357,6 +1396,10 @@
         "MSG": "Tekrar yapılandırmasının kaldırılması, bu görevin önceki tüm örneklerini yalnızca normal görevlere dönüştürecektir. Devam etmek istediğinizden emin misiniz?",
         "OK": "Tamamen kaldır"
       },
+      "D_DELETE_INSTANCE": {
+        "MSG": "Tekrarlanan görevin {{date}} tarihindeki örneğini kaldırmak istiyor musunuz? Bu yalnızca görevin bu tarihte oluşturulmasını engelleyecektir.",
+        "OK": "Örneği Kaldır"
+      },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "CANCEL": "Yalnızca gelecekteki görevler",
         "MSG": "Bu tekrarlanabilir görev için oluşturulmuş {{tasksNr}} örnek var. Hepsini yeni varsayılanlarla mı yoksa yalnızca gelecekteki görevlerle mi güncellemek istiyorsunuz?",
@@ -1406,6 +1449,8 @@
         "WEDNESDAY": "Çarşamba",
         "INHERIT_SUBTASKS": "Alt görevleri devral",
         "INHERIT_SUBTASKS_DESCRIPTION": "Etkinleştirildiğinde, en son görev örneğindeki alt görevler tekrarlayan görevle birlikte yeniden oluşturulur",
+        "REMOVE_INSTANCE": "Bugünkü örneği kaldır",
+        "REMOVE_FOR_DATE": "{{date}} için kaldır",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Alt görevlerin otomatik güncellenmesini devre dışı bırak",
         "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "En yeni örnek değiştiğinde devralınan alt görevleri otomatik olarak güncelleme"
       }
@@ -1574,6 +1619,7 @@
     "DELETE": "Sil",
     "DISMISS": "Görmezden gel",
     "DO_IT": "Yap!",
+    "DONT_SHOW_AGAIN": "Tekrar gösterme",
     "DURATION_DESCRIPTION": "Örneğin. \"5h 23m\", yani 5 saat 23 dakika",
     "EDIT": "Düzenle",
     "ENABLED": "Etkin",
@@ -1756,7 +1802,6 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Panel gösterge penceresini etkinleştir (masaüstü linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
-      "IS_USE_MINIMAL_SIDE_NAV": "Minimal gezinme çubuğunu kullan (sadece ikonları göster)",
       "START_OF_NEXT_DAY": "Ertesi günün başlama saati",
       "START_OF_NEXT_DAY_HINT": "Ertesi günün başladığı saati saymak istediğiniz andan itibaren (saat cinsinden). Varsayılan gece yarısıdır, yani 0'dır.",
       "TASK_NOTES_TPL": "Görev açıklama şablonu",

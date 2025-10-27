@@ -198,7 +198,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   onKeyDownOnCalendar(ev: KeyboardEvent): void {
     this._timeCheckVal = null;
     // Log.log(ev.key, ev.keyCode);
-    if (ev.key === 'Enter' || ev.keyCode === 32) {
+    if (ev.code === 'Enter' || ev.code === 'Space') {
       this.isShowEnterMsg = true;
       // Log.log(
       //   'check to submit',

@@ -9,7 +9,10 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
-import { MenuTreeFolderNode } from '../../features/menu-tree/store/menu-tree.model';
+import {
+  MenuTreeFolderNode,
+  MenuTreeKind,
+} from '../../features/menu-tree/store/menu-tree.model';
 
 @Component({
   selector: 'folder-context-menu',
@@ -25,7 +28,7 @@ export class FolderContextMenuComponent {
   private readonly _menuTreeService = inject(MenuTreeService);
 
   @Input() folderId!: string;
-  @Input() treeType: 'project' | 'tag' = 'project';
+  @Input() treeKind: MenuTreeKind = MenuTreeKind.PROJECT;
 
   readonly T = T;
 
@@ -33,32 +36,35 @@ export class FolderContextMenuComponent {
     const folder = this._loadFolder(this.folderId);
     if (!folder) return;
 
+    const folderNs =
+      this.treeKind === MenuTreeKind.PROJECT ? T.F.PROJECT_FOLDER : T.F.TAG_FOLDER;
+
     const dialogRef = this._matDialog.open(DialogPromptComponent, {
       restoreFocus: true,
       data: {
-        txtLabel: this._translateService.instant(T.F.PROJECT_FOLDER.DIALOG.NAME_LABEL),
+        txtLabel: this._translateService.instant(folderNs.DIALOG.NAME_LABEL),
         txtValue: folder.name,
-        placeholder: this._translateService.instant(
-          T.F.PROJECT_FOLDER.DIALOG.NAME_PLACEHOLDER,
-        ),
+        placeholder: this._translateService.instant(folderNs.DIALOG.NAME_PLACEHOLDER),
       },
     });
 
     dialogRef
       .afterClosed()
       .pipe(take(1))
-      .subscribe((result: string) => {
-        if (result && result.trim() !== folder.name) {
-          // Extract folder ID (remove the "folder-" prefix if present)
-          const cleanId = this.folderId.startsWith('folder-')
-            ? this.folderId.substring(7)
-            : this.folderId;
+      .subscribe((result: string | null) => {
+        const trimmed = result?.trim();
+        if (!trimmed || trimmed === folder.name) {
+          return;
+        }
+        // Extract folder ID (remove the "folder-" prefix if present)
+        const cleanId = this.folderId.startsWith('folder-')
+          ? this.folderId.substring(7)
+          : this.folderId;
 
-          if (this.treeType === 'project') {
-            this._menuTreeService.updateFolderInProject(cleanId, result.trim());
-          } else {
-            this._menuTreeService.updateFolderInTag(cleanId, result.trim());
-          }
+        if (this.treeKind === MenuTreeKind.PROJECT) {
+          this._menuTreeService.updateFolderInProject(cleanId, trimmed);
+        } else {
+          this._menuTreeService.updateFolderInTag(cleanId, trimmed);
         }
       });
   }
@@ -67,7 +73,12 @@ export class FolderContextMenuComponent {
     const folder = this._loadFolder(this.folderId);
     if (!folder) return;
 
-    const message = this._translateService.instant(T.F.PROJECT_FOLDER.CONFIRM_DELETE, {
+    const confirmKey =
+      this.treeKind === MenuTreeKind.PROJECT
+        ? T.F.PROJECT_FOLDER.CONFIRM_DELETE
+        : T.F.TAG_FOLDER.CONFIRM_DELETE;
+
+    const message = this._translateService.instant(confirmKey, {
       title: folder.name,
     });
 
@@ -86,7 +97,7 @@ export class FolderContextMenuComponent {
             ? this.folderId.substring(7)
             : this.folderId;
 
-          if (this.treeType === 'project') {
+          if (this.treeKind === MenuTreeKind.PROJECT) {
             this._menuTreeService.deleteFolderFromProject(cleanId);
           } else {
             this._menuTreeService.deleteFolderFromTag(cleanId);
@@ -103,8 +114,8 @@ export class FolderContextMenuComponent {
     const tagTree = this._menuTreeService.tagTree();
 
     // Search in the appropriate tree first, then fallback to the other
-    const primaryTree = this.treeType === 'project' ? projectTree : tagTree;
-    const secondaryTree = this.treeType === 'project' ? tagTree : projectTree;
+    const primaryTree = this.treeKind === MenuTreeKind.PROJECT ? projectTree : tagTree;
+    const secondaryTree = this.treeKind === MenuTreeKind.PROJECT ? tagTree : projectTree;
 
     return (
       this._menuTreeService.findFolderInTree(cleanId, primaryTree) ||

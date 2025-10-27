@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK_SEL = 'task';
-const TASK_TEXTAREA = 'task textarea';
+const TASK_TITLE = 'task task-title';
 const TASK_DONE_BTN = '.task-done-btn';
 const FINISH_DAY_BTN = '.e2e-finish-day';
 const FIRST_TASK = 'task:nth-child(1)';
@@ -22,7 +22,7 @@ test.describe('Finish Day Quick History With Subtasks', () => {
 
     await workViewPage.addTask('Main Task with Subtasks');
     await page.waitForSelector(TASK_SEL, { state: 'visible' });
-    await expect(page.locator(TASK_TEXTAREA).first()).toHaveValue(
+    await expect(page.locator(TASK_TITLE).first()).toContainText(
       /Main Task with Subtasks/,
     );
 
@@ -34,9 +34,13 @@ test.describe('Finish Day Quick History With Subtasks', () => {
     await expect(page.locator(FIRST_TASK)).toBeVisible();
     await expect(page.locator(SECOND_TASK)).toBeVisible();
     await expect(page.locator(THIRD_TASK)).toBeVisible();
-    await expect(page.locator(`${FIRST_TASK} textarea`)).toHaveValue(/Second Subtask/);
-    await expect(page.locator(`${SECOND_TASK} textarea`)).toHaveValue(/First Subtask/);
-    await expect(page.locator(`${THIRD_TASK} textarea`)).toHaveValue(
+    await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(
+      /Second Subtask/,
+    );
+    await expect(page.locator(`${SECOND_TASK} task-title`)).toContainText(
+      /First Subtask/,
+    );
+    await expect(page.locator(`${THIRD_TASK} task-title`)).toContainText(
       /Main Task with Subtasks/,
     );
 

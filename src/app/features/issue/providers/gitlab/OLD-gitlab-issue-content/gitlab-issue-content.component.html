@@ -74,10 +74,7 @@
 
     @if (issue?.comments) {
       <div>
-        @for (
-          comment of issue?.comments | sort: 'created_at';
-          track trackByIndex($index, comment)
-        ) {
+        @for (comment of sortedComments; track trackByIndex($index, comment)) {
           <div class="comment">
             <div class="name-and-comment-content">
               <div>

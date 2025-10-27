@@ -20,7 +20,7 @@ export type MiscConfig = Readonly<{
   taskNotesTpl: string;
   isDisableAnimations: boolean;
   // optional because it was added later
-  isDisableProductivityTips?: boolean;
+  isShowProductivityTipLonger?: boolean;
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
   customTheme?: string;

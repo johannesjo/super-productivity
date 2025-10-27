@@ -27,6 +27,7 @@ import {
   initializeProtocolHandling,
   processPendingProtocolUrls,
 } from './protocol-handler';
+import { getIsQuiting, setIsLocked } from './shared-state';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -39,18 +40,12 @@ let customUrl: string;
 let isDisableTray = false;
 let forceDarkTray = false;
 let wasUserDataDirSet = false;
-let forceX11 = false;
 
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
 }
 
-interface MyApp extends App {
-  isQuiting?: boolean;
-  isLocked?: boolean;
-}
-
-const appIN: MyApp = app;
+const appIN: App = app;
 
 let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
@@ -78,30 +73,6 @@ export const startApp = (): void => {
   // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch('gtk-version', '3');
 
-  // Wayland compatibility fixes
-  // Force X11 backend on Wayland to avoid rendering issues
-  if (process.platform === 'linux') {
-    // Check if running on Wayland or if X11 is forced
-    const isWayland =
-      process.env.WAYLAND_DISPLAY || process.env.XDG_SESSION_TYPE === 'wayland';
-
-    if (isWayland || forceX11) {
-      log('Applying X11/Wayland compatibility fixes');
-      // Force Ozone platform to X11
-      app.commandLine.appendSwitch('ozone-platform', 'x11');
-
-      // Disable GPU vsync to fix GetVSyncParametersIfAvailable() errors
-      app.commandLine.appendSwitch('disable-gpu-vsync');
-
-      // Additional flags to improve compatibility
-      app.commandLine.appendSwitch('disable-features', 'UseOzonePlatform');
-      app.commandLine.appendSwitch('enable-features', 'UseSkiaRenderer');
-
-      // Set GDK backend to X11 which is needed for idle handling to work it seems
-      process.env.GDK_BACKEND = 'x11';
-    }
-  }
-
   // NOTE: needs to be executed before everything else
   process.argv.forEach((val) => {
     if (val && val.includes('--disable-tray')) {
@@ -115,7 +86,10 @@ export const startApp = (): void => {
     }
 
     if (val && val.includes('--user-data-dir=')) {
-      const customUserDir = val.replace('--user-data-dir=', '').trim();
+      const customUserDir = val
+        .replace('--user-data-dir=', '')
+        .trim()
+        .replace(/[\/\\]+$/, ''); // Remove trailing slashes
       log('Using custom directory for user data', customUserDir);
       app.setPath('userData', customUserDir);
       wasUserDataDirSet = true;
@@ -128,11 +102,6 @@ export const startApp = (): void => {
 
     if (val && val.includes('--dev-tools')) {
       isShowDevTools = true;
-    }
-
-    if (val && val.includes('--force-x11')) {
-      forceX11 = true;
-      log('Forcing X11 mode');
     }
   });
 
@@ -212,70 +181,81 @@ export const startApp = (): void => {
     // causing timeouts and subsequent 0ms readings, which looks like “only one
     // idle event was ever sent”. This ensures at most one check runs at a time.
     let isCheckingIdle = false;
-    const sendIdleMsgIfOverMin = (idleTime: number): void => {
+    const sendIdleMsgIfOverMin = (
+      idleTime: number,
+    ): { sent: boolean; reason?: string } => {
       // sometimes when starting a second instance we get here although we don't want to
       if (!mainWin) {
         info(
           'special case occurred when trackTimeFn is called even though, this is a second instance of the app',
         );
-        return;
+        return { sent: false, reason: 'no-window' };
       }
 
-      // don't update if the user is about to close
-      if (!appIN.isQuiting && idleTime > CONFIG.MIN_IDLE_TIME) {
-        log(
-          `✅ Sending idle time to frontend: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, method: ${idleTimeHandler.currentMethod})`,
-        );
-        mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
-      } else {
-        log(
-          // eslint-disable-next-line max-len
-          `❌ NOT sending idle time: ${idleTime}ms (threshold: ${CONFIG.MIN_IDLE_TIME}ms, isQuiting: ${appIN.isQuiting}, method: ${idleTimeHandler.currentMethod})`,
-        );
+      if (getIsQuiting()) {
+        return { sent: false, reason: 'quitting' };
       }
+
+      if (idleTime <= CONFIG.MIN_IDLE_TIME) {
+        return { sent: false, reason: 'below-threshold' };
+      }
+
+      mainWin.webContents.send(IPC.IDLE_TIME, idleTime);
+      return { sent: true };
     };
 
-    const checkIdle = async (): Promise<void> => {
+    // --------IDLE HANDLING---------
+    let consecutiveFailures = 0;
+    // init time tracking interval
+    log(
+      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
+    );
+    const stopIdleChecks: () => void = lazySetInterval(async (): Promise<void> => {
       // Skip if a previous check is still in flight
       if (isCheckingIdle) {
         return;
       }
       isCheckingIdle = true;
+      const startTime = Date.now();
       try {
-        const startTime = Date.now();
-        const idleTime = await idleTimeHandler.getIdleTimeWithFallbacks();
+        const idleTime = await idleTimeHandler.getIdleTime();
         const checkDuration = Date.now() - startTime;
 
-        log(
-          `🔍 Idle check completed in ${checkDuration}ms: ${idleTime}ms (method: ${idleTimeHandler.currentMethod})`,
-        );
-        sendIdleMsgIfOverMin(idleTime);
+        consecutiveFailures = 0;
+        const sendResult = sendIdleMsgIfOverMin(idleTime);
+        const actionSummary = sendResult.sent
+          ? 'sent'
+          : `skipped:${sendResult.reason ?? 'unknown'}`;
+        const logParts = [
+          `idle=${idleTime}ms`,
+          `method=${idleTimeHandler.currentMethod}`,
+          `duration=${checkDuration}ms`,
+          `threshold=${CONFIG.MIN_IDLE_TIME}ms`,
+          `action=${actionSummary}`,
+        ];
+        log(`🕘 Idle check (${logParts.join(', ')})`);
       } catch (error) {
+        consecutiveFailures += 1;
         log('💥 Error getting idle time, falling back to powerMonitor:', error);
-        const fallbackIdleTime = powerMonitor.getSystemIdleTime() * 1000;
-        log(`🔄 Fallback powerMonitor idle time: ${fallbackIdleTime}ms`);
-        sendIdleMsgIfOverMin(fallbackIdleTime);
+        if (consecutiveFailures >= 3) {
+          stopIdleChecks();
+        }
       } finally {
         isCheckingIdle = false;
       }
-    };
-
-    // init time tracking interval
-    log(
-      `🚀 Starting idle time tracking (interval: ${CONFIG.IDLE_PING_INTERVAL}ms, threshold: ${CONFIG.MIN_IDLE_TIME}ms)`,
-    );
-    lazySetInterval(checkIdle, CONFIG.IDLE_PING_INTERVAL);
+    }, CONFIG.IDLE_PING_INTERVAL);
+    // --------END IDLE HANDLING---------
 
     powerMonitor.on('suspend', () => {
       log('powerMonitor: System suspend detected');
-      appIN.isLocked = true;
+      setIsLocked(true);
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('lock-screen', () => {
       log('powerMonitor: Screen lock detected');
-      appIN.isLocked = true;
+      setIsLocked(true);
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
@@ -283,7 +263,7 @@ export const startApp = (): void => {
     powerMonitor.on('resume', () => {
       const idleTime = Date.now() - suspendStart;
       log(`powerMonitor: System resume detected. Idle time: ${idleTime}ms`);
-      appIN.isLocked = false;
+      setIsLocked(false);
       sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
@@ -291,7 +271,7 @@ export const startApp = (): void => {
     powerMonitor.on('unlock-screen', () => {
       const idleTime = Date.now() - suspendStart;
       log(`powerMonitor: Screen unlock detected. Idle time: ${idleTime}ms`);
-      appIN.isLocked = false;
+      setIsLocked(false);
       sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });

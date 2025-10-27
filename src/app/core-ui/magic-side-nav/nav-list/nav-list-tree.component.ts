@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   effect,
   inject,
   input,
@@ -20,6 +21,7 @@ import { NavItem, NavTreeItem } from '../magic-side-nav.model';
 import { MagicNavConfigService } from '../magic-nav-config.service';
 import { T } from '../../../t.const';
 import {
+  MenuTreeKind,
   MenuTreeViewFolderNode,
   MenuTreeViewNode,
   MenuTreeViewProjectNode,
@@ -63,11 +65,13 @@ export class NavListTreeComponent {
   readonly T = T;
   readonly WorkContextType = WorkContextType;
   readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
+  readonly MenuTreeKind = MenuTreeKind;
 
   // Access to service methods and data for visibility menu
   readonly allProjectsExceptInbox = this._navConfigService.allProjectsExceptInbox;
 
   readonly treeNodes = signal<TreeNode<MenuTreeViewNode>[]>([]);
+  readonly treeKind = computed<MenuTreeKind>(() => this.item().treeKind);
 
   constructor() {
     effect(() => {
@@ -84,17 +88,17 @@ export class NavListTreeComponent {
     const data = node.data;
     if (!data) return;
 
-    if (data.kind === 'folder') {
+    if (data.k === MenuTreeKind.FOLDER) {
       this._toggleFolder(node.id);
       return;
     }
 
-    if (data.kind === 'project') {
+    if (data.k === MenuTreeKind.PROJECT) {
       this.itemClick.emit(this._toProjectNavItem(data));
       return;
     }
 
-    if (data.kind === 'tag') {
+    if (data.k === MenuTreeKind.TAG) {
       this.itemClick.emit(this._toTagNavItem(data));
     }
   }
@@ -127,7 +131,7 @@ export class NavListTreeComponent {
     // TODO: Implement folder context menu
     console.log(
       'Folder context menu for:',
-      node.data?.kind === 'folder' ? node.data.name : 'unknown',
+      node.data?.k === MenuTreeKind.FOLDER ? node.data.name : 'unknown',
     );
   }
 
@@ -138,7 +142,10 @@ export class NavListTreeComponent {
         return {
           ...node,
           expanded: isExpanded,
-          data: node.data?.kind === 'folder' ? { ...node.data, isExpanded } : node.data,
+          data:
+            node.data?.k === MenuTreeKind.FOLDER
+              ? { ...node.data, isExpanded }
+              : node.data,
         };
       }
       return node;
@@ -157,7 +164,7 @@ export class NavListTreeComponent {
   }
 
   private _toTreeNode(node: MenuTreeViewNode): TreeNode<MenuTreeViewNode> {
-    if (node.kind === 'folder') {
+    if (node.k === MenuTreeKind.FOLDER) {
       const children = node.children.map((child) => this._toTreeNode(child));
       // Always expand empty folders
       const shouldExpand = children.length === 0 ? true : node.isExpanded;
@@ -170,7 +177,7 @@ export class NavListTreeComponent {
         children,
       } satisfies TreeNode<MenuTreeViewNode>;
     }
-    if (node.kind === 'project') {
+    if (node.k === MenuTreeKind.PROJECT) {
       return {
         id: `project-${node.project.id}`,
         isFolder: false,
@@ -191,16 +198,16 @@ export class NavListTreeComponent {
         if (!data) {
           return null;
         }
-        if (data.kind === 'folder') {
+        if (data.k === MenuTreeKind.FOLDER) {
           return {
-            kind: 'folder',
+            k: MenuTreeKind.FOLDER,
             id: data.id,
             name: data.name,
             isExpanded: node.expanded ?? data.isExpanded,
             children: this._treeNodesToViewNodes(node.children ?? []),
           } satisfies MenuTreeViewFolderNode;
         }
-        if (data.kind === 'project') {
+        if (data.k === MenuTreeKind.PROJECT) {
           return data satisfies MenuTreeViewProjectNode;
         }
         return data satisfies MenuTreeViewTagNode;

@@ -1,7 +1,7 @@
 import { expect, test } from '../../fixtures/test.fixture';
 
 const TASK_SEL = 'task';
-const TASK_TEXTAREA = 'task textarea';
+const TASK_TITLE = 'task task-title';
 const FINISH_DAY_BTN = '.e2e-finish-day';
 const SAVE_AND_GO_HOME_BTN =
   'daily-summary button[mat-flat-button][color="primary"]:last-of-type';
@@ -21,8 +21,8 @@ test.describe.serial('Finish Day Quick History', () => {
     const taskName = `${testPrefix}-Task for Quick History`;
     await workViewPage.addTask(taskName);
     await page.waitForSelector(TASK_SEL, { state: 'visible' });
-    const taskTextarea = page.locator(TASK_TEXTAREA);
-    await expect(taskTextarea).toHaveValue(new RegExp(taskName));
+    const taskTitle = page.locator(TASK_TITLE);
+    await expect(taskTitle).toContainText(new RegExp(taskName));
 
     // Mark task as done
     await page.waitForSelector(TASK_SEL, { state: 'visible' });
@@ -80,10 +80,10 @@ test.describe.serial('Finish Day Quick History', () => {
 
     // Confirm task is in the table
     await page.waitForSelector(TABLE_ROWS, { state: 'visible' });
-    const taskTitle = page.locator('table > tr:nth-child(1) > td.title > span');
-    await taskTitle.waitFor({ state: 'visible' });
+    const tableTaskTitle = page.locator('table > tr:nth-child(1) > td.title > span');
+    await tableTaskTitle.waitFor({ state: 'visible' });
 
     // Verify the task title is present in the table
-    await expect(taskTitle).toContainText(taskName);
+    await expect(tableTaskTitle).toContainText(taskName);
   });
 });

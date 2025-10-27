@@ -27,6 +27,7 @@ import { selectAllDoneIds } from '../../../features/tasks/store/task.selectors';
 import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
+import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model';
 
 @Component({
   selector: 'nav-item',
@@ -82,6 +83,7 @@ export class NavItemComponent {
   // Folder inputs
 
   folderId = input<string | null>(null);
+  treeKind = input<MenuTreeKind>(MenuTreeKind.PROJECT);
   // Variant styling to integrate into magic-side-nav without deep selectors
   showMoreButton = input<boolean>(true);
 

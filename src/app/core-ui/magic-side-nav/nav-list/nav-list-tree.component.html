@@ -66,11 +66,14 @@
           <nav-item
             [mode]="'folder'"
             [expanded]="expanded"
-            [label]="node.data?.kind === 'folder' ? node.data.name : node.data.label"
+            [label]="
+              node.data?.k === MenuTreeKind.FOLDER ? node.data.name : node.data.label
+            "
             [variant]="'nav'"
             [showLabels]="showLabels()"
             (clicked)="onChildClick(node)"
             [folderId]="node.id"
+            [treeKind]="treeKind()"
           ></nav-item>
         </div>
       </ng-template>
@@ -82,14 +85,10 @@
       >
         <div
           class="nav-child-item"
-          [class.draggable]="node.data?.kind !== 'tag'"
-          [attr.data-project-id]="
-            node.data?.kind === 'project' ? node.data.project.id : null
-          "
-          [attr.data-tag-id]="node.data?.kind === 'tag' ? node.data.tag.id : null"
+          [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
         >
-          @switch (node.data?.kind) {
-            @case ('project') {
+          @switch (node.data?.k) {
+            @case (MenuTreeKind.PROJECT) {
               <nav-item
                 [workContext]="node.data.project"
                 [type]="WorkContextType.PROJECT"
@@ -97,10 +96,11 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
+                [attr.data-project-id]="node.data.project.id"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
-            @case ('tag') {
+            @case (MenuTreeKind.TAG) {
               <nav-item
                 [workContext]="node.data.tag"
                 [type]="WorkContextType.TAG"
@@ -108,6 +108,7 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
+                [attr.data-tag-id]="node.data.tag.id"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
@@ -142,9 +143,9 @@
             {{ data.isFolder ? 'folder' : 'assignment' }}
           </mat-icon>
           <span>{{
-            data.node.data?.kind === 'folder'
+            data.node.data?.k === MenuTreeKind.FOLDER
               ? data.node.data.name
-              : data.node.data?.kind === 'project'
+              : data.node.data?.k === MenuTreeKind.PROJECT
                 ? data.node.data.project.title
                 : data.node.data?.tag.title
           }}</span>

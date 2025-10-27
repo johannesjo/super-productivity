@@ -6,6 +6,7 @@ import { Project } from '../project/project.model';
 import { Tag } from '../tag/tag.model';
 import {
   MenuTreeFolderNode,
+  MenuTreeKind,
   MenuTreeProjectNode,
   MenuTreeTagNode,
   MenuTreeTreeNode,
@@ -56,7 +57,7 @@ export class MenuTreeService {
 
   initializeProjectTree(projects: Project[]): void {
     const tree = projects.map<MenuTreeProjectNode>((project) => ({
-      kind: 'project',
+      k: MenuTreeKind.PROJECT,
       id: project.id,
       projectId: project.id,
     }));
@@ -65,7 +66,7 @@ export class MenuTreeService {
 
   initializeTagTree(tags: Tag[]): void {
     const tree = tags.map<MenuTreeTagNode>((tag) => ({
-      kind: 'tag',
+      k: MenuTreeKind.TAG,
       id: tag.id,
       tagId: tag.id,
     }));
@@ -78,10 +79,10 @@ export class MenuTreeService {
       items: projects,
       getId: (project) => project.id,
       createViewNode: (project): MenuTreeViewProjectNode => ({
-        kind: 'project',
+        k: MenuTreeKind.PROJECT,
         project,
       }),
-      itemType: 'project',
+      itemType: MenuTreeKind.PROJECT,
     });
   }
 
@@ -91,10 +92,10 @@ export class MenuTreeService {
       items: tags,
       getId: (tag) => tag.id,
       createViewNode: (tag): MenuTreeViewTagNode => ({
-        kind: 'tag',
+        k: MenuTreeKind.TAG,
         tag,
       }),
-      itemType: 'tag',
+      itemType: MenuTreeKind.TAG,
     });
   }
 
@@ -107,52 +108,47 @@ export class MenuTreeService {
   }
 
   persistProjectViewTree(viewNodes: MenuTreeViewNode[]): void {
-    const stored = this._viewToStoredTree(viewNodes, 'project');
+    const stored = this._viewToStoredTree(viewNodes, MenuTreeKind.PROJECT);
     this.setProjectTree(stored);
   }
 
   persistTagViewTree(viewNodes: MenuTreeViewNode[]): void {
-    const stored = this._viewToStoredTree(viewNodes, 'tag');
+    const stored = this._viewToStoredTree(viewNodes, MenuTreeKind.TAG);
     this.setTagTree(stored);
   }
 
   createProjectFolder(name: string, parentFolderId?: string | null): void {
-    const trimmed = name.trim();
-    if (!trimmed) {
-      return;
-    }
+    this._createFolder({
+      name,
+      parentFolderId: parentFolderId ?? null,
+      treeKind: MenuTreeKind.PROJECT,
+    });
+  }
 
-    const newFolder: MenuTreeFolderNode = {
-      kind: 'folder',
-      id: this._createFolderId(),
-      name: trimmed,
-      isExpanded: true,
-      children: [],
-    };
-
-    const currentTree = this.projectTree();
-    const nextTree = this._insertFolderNode(
-      currentTree,
-      newFolder,
-      parentFolderId ?? null,
-    );
-    this.setProjectTree(nextTree);
+  createTagFolder(name: string, parentFolderId?: string | null): void {
+    this._createFolder({
+      name,
+      parentFolderId: parentFolderId ?? null,
+      treeKind: MenuTreeKind.TAG,
+    });
   }
 
   deleteFolderFromProject(folderId: string): void {
-    this._store.dispatch(deleteFolder({ folderId, treeType: 'project' }));
+    this._store.dispatch(deleteFolder({ folderId, treeType: MenuTreeKind.PROJECT }));
   }
 
   deleteFolderFromTag(folderId: string): void {
-    this._store.dispatch(deleteFolder({ folderId, treeType: 'tag' }));
+    this._store.dispatch(deleteFolder({ folderId, treeType: MenuTreeKind.TAG }));
   }
 
   updateFolderInProject(folderId: string, name: string): void {
-    this._store.dispatch(updateFolder({ folderId, name, treeType: 'project' }));
+    this._store.dispatch(
+      updateFolder({ folderId, name, treeType: MenuTreeKind.PROJECT }),
+    );
   }
 
   updateFolderInTag(folderId: string, name: string): void {
-    this._store.dispatch(updateFolder({ folderId, name, treeType: 'tag' }));
+    this._store.dispatch(updateFolder({ folderId, name, treeType: MenuTreeKind.TAG }));
   }
 
   findFolderInTree(
@@ -160,10 +156,10 @@ export class MenuTreeService {
     tree: MenuTreeTreeNode[],
   ): MenuTreeFolderNode | null {
     for (const node of tree) {
-      if (node.id === folderId && node.kind === 'folder') {
+      if (node.id === folderId && node.k === MenuTreeKind.FOLDER) {
         return node;
       }
-      if (node.kind === 'folder') {
+      if (node.k === MenuTreeKind.FOLDER) {
         const found = this.findFolderInTree(folderId, node.children);
         if (found) {
           return found;
@@ -178,19 +174,19 @@ export class MenuTreeService {
     items: T[];
     getId: (item: T) => string;
     createViewNode: (item: T) => MenuTreeViewNode;
-    itemType: 'project' | 'tag';
+    itemType: MenuTreeKind;
   }): MenuTreeViewNode[] {
     const { storedTree, items, getId, createViewNode, itemType } = options;
     const itemMap = new Map(items.map((item) => [getId(item), item]));
     const usedIds = new Set<string>();
 
     const mapNode = (node: MenuTreeTreeNode): MenuTreeViewNode | null => {
-      if (node.kind === 'folder') {
+      if (node.k === MenuTreeKind.FOLDER) {
         const children = node.children
           .map((child) => mapNode(child))
           .filter((child): child is MenuTreeViewNode => child !== null);
         return {
-          kind: 'folder',
+          k: MenuTreeKind.FOLDER,
           id: node.id,
           name: node.name,
           isExpanded: node.isExpanded ?? true,
@@ -198,7 +194,7 @@ export class MenuTreeService {
         } satisfies MenuTreeViewFolderNode;
       }
 
-      if (itemType === 'project' && node.kind === 'project') {
+      if (itemType === MenuTreeKind.PROJECT && node.k === MenuTreeKind.PROJECT) {
         const project = itemMap.get(node.id);
         if (!project) {
           return null;
@@ -207,7 +203,7 @@ export class MenuTreeService {
         return createViewNode(project) as MenuTreeViewProjectNode;
       }
 
-      if (itemType === 'tag' && node.kind === 'tag') {
+      if (itemType === MenuTreeKind.TAG && node.k === MenuTreeKind.TAG) {
         const tag = itemMap.get(node.id);
         if (!tag) {
           return null;
@@ -236,15 +232,15 @@ export class MenuTreeService {
 
   private _viewToStoredTree(
     nodes: MenuTreeViewNode[],
-    itemType: 'project' | 'tag',
+    itemType: MenuTreeKind,
   ): MenuTreeTreeNode[] {
     const mapNode = (node: MenuTreeViewNode): MenuTreeTreeNode | null => {
-      if (node.kind === 'folder') {
+      if (node.k === MenuTreeKind.FOLDER) {
         const children = node.children
           .map((child) => mapNode(child))
           .filter((child): child is MenuTreeTreeNode => child !== null);
         return {
-          kind: 'folder',
+          k: MenuTreeKind.FOLDER,
           id: node.id,
           name: node.name,
           isExpanded: node.isExpanded,
@@ -252,16 +248,16 @@ export class MenuTreeService {
         } satisfies MenuTreeFolderNode;
       }
 
-      if (itemType === 'project' && node.kind === 'project') {
+      if (itemType === MenuTreeKind.PROJECT && node.k === MenuTreeKind.PROJECT) {
         return {
-          kind: 'project',
+          k: MenuTreeKind.PROJECT,
           id: node.project.id,
         } satisfies MenuTreeProjectNode;
       }
 
-      if (itemType === 'tag' && node.kind === 'tag') {
+      if (itemType === MenuTreeKind.TAG && node.k === MenuTreeKind.TAG) {
         return {
-          kind: 'tag',
+          k: MenuTreeKind.TAG,
           id: node.tag.id,
         } satisfies MenuTreeTagNode;
       }
@@ -280,7 +276,7 @@ export class MenuTreeService {
     const result: Array<{ id: string; name: string }> = [];
     const walk = (list: MenuTreeTreeNode[]): void => {
       list.forEach((node) => {
-        if (node.kind === 'folder') {
+        if (node.k === MenuTreeKind.FOLDER) {
           result.push({ id: node.id, name: node.name });
           walk(node.children);
         }
@@ -312,9 +308,9 @@ export class MenuTreeService {
 
   private _cloneTree(tree: MenuTreeTreeNode[]): MenuTreeTreeNode[] {
     return tree.map((node) =>
-      node.kind === 'folder'
+      node.k === MenuTreeKind.FOLDER
         ? {
-            kind: 'folder',
+            k: MenuTreeKind.FOLDER,
             id: node.id,
             name: node.name,
             isExpanded: node.isExpanded,
@@ -326,7 +322,7 @@ export class MenuTreeService {
 
   private _findFolder(tree: MenuTreeTreeNode[], id: string): MenuTreeFolderNode | null {
     for (const node of tree) {
-      if (node.kind === 'folder') {
+      if (node.k === MenuTreeKind.FOLDER) {
         if (node.id === id) {
           return node;
         }
@@ -344,5 +340,38 @@ export class MenuTreeService {
       return crypto.randomUUID();
     }
     return `folder-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
+
+  private _createFolder(options: {
+    name: string;
+    parentFolderId: string | null;
+    treeKind: MenuTreeKind;
+  }): void {
+    const trimmed = options.name.trim();
+    if (!trimmed) {
+      return;
+    }
+
+    const newFolder: MenuTreeFolderNode = {
+      k: MenuTreeKind.FOLDER,
+      id: this._createFolderId(),
+      name: trimmed,
+      isExpanded: true,
+      children: [],
+    };
+
+    const currentTree =
+      options.treeKind === MenuTreeKind.PROJECT ? this.projectTree() : this.tagTree();
+    const nextTree = this._insertFolderNode(
+      currentTree,
+      newFolder,
+      options.parentFolderId,
+    );
+
+    if (options.treeKind === MenuTreeKind.PROJECT) {
+      this.setProjectTree(nextTree);
+    } else {
+      this.setTagTree(nextTree);
+    }
   }
 }

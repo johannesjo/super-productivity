@@ -74,6 +74,7 @@ import {
   SimpleCounterSummaryItem,
   SimpleCounterSummaryItemComponent,
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
+import { MetricService } from '../../features/metric/metric.service';
 
 const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
@@ -123,6 +124,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
   private readonly _simpleCounterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
+  private readonly _metricService = inject(MetricService);
 
   T: typeof T = T;
   _onDestroy$ = new Subject<void>();
@@ -172,6 +174,24 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   hasTasksForToday$: Observable<boolean> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     map((tasks) => tasks && !!tasks.length),
   );
+
+  focusSessionSummary$ = this.dayStr$.pipe(
+    switchMap((dayStr) =>
+      this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(dayStr),
+    ),
+    map((metric) => {
+      const focusSessions = metric.focusSessions ?? [];
+      const total = focusSessions.reduce((acc, val) => acc + val, 0);
+      return {
+        count: focusSessions.length,
+        total,
+      };
+    }),
+  );
+
+  focusSessionCount$ = this.focusSessionSummary$.pipe(map((summary) => summary.count));
+
+  focusSessionDuration$ = this.focusSessionSummary$.pipe(map((summary) => summary.total));
 
   nrOfDoneTasks$: Observable<number> = this.tasksWorkedOnOrDoneOrRepeatableFlat$.pipe(
     map((tasks) => tasks && tasks.filter((task) => !!task.isDone).length),

@@ -140,19 +140,18 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
 
-  // Observables
-  projects$ = this._projectService.list$.pipe(
-    map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
-  );
+  // Computed signals for projects and tags (sorted for consistency)
+  projects = this._projectService.listSortedForUI;
+  // Observable version for compatibility with existing code
+  projects$ = toObservable(this.projects);
   tags$ = this._tagService.tags$;
   suggestions$!: Observable<AddTaskSuggestion[]>;
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
 
-  // Computed values depending on projects$
+  // Computed values
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
-  projectsSignal = toSignal(this.projects$, { initialValue: [] });
   currentProject = computed(() =>
-    this.projectsSignal().find((p) => p.id === this.stateService.state().projectId),
+    this.projects().find((p) => p.id === this.stateService.state().projectId),
   );
   nrOfRightBtns = computed(() => {
     let count = 2;
@@ -219,8 +218,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tagMentions$: Observable<ShortSyntaxTag[]> = this.stateService.inputTxt$.pipe(
     filter((val) => typeof val === 'string'),
     withLatestFrom(
-      this._tagService.tagsNoMyDayAndNoList$,
-      this._projectService.list$,
+      this._tagService.tagsNoMyDayAndNoListSorted$,
+      this._projectService.listSorted$,
       this._workContextService.activeWorkContext$,
       this._globalConfigService.shortSyntax$,
     ),
@@ -238,8 +237,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   mentionCfg$ = combineLatest([
     this._globalConfigService.shortSyntax$,
-    this._tagService.tagsNoMyDayAndNoList$,
-    this._projectService.list$.pipe(map((ps) => ps.filter((p) => !p.isHiddenFromMenu))),
+    this._tagService.tagsNoMyDayAndNoListSorted$,
+    this._projectService.listSortedForUI$,
   ]).pipe(
     map(([cfg, tagSuggestions, projectSuggestions]) => {
       const mentions: Mentions[] = [];
@@ -609,7 +608,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     // Handle Enter key
     if (event.key === 'Enter') {
       event.preventDefault();
-      void this.addTask();
+      if (!this.isSearchMode()) {
+        void this.addTask();
+      }
       return;
     }
 

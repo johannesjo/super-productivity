@@ -87,13 +87,10 @@ export class GlobalThemeService {
     this._initThemeWatchers();
 
     // Set up dark mode persistence effect
-    effect(
-      () => {
-        const darkMode = this.darkMode();
-        localStorage.setItem(LS.DARK_MODE, darkMode);
-      },
-      { allowSignalWrites: false },
-    );
+    effect(() => {
+      const darkMode = this.darkMode();
+      localStorage.setItem(LS.DARK_MODE, darkMode);
+    });
 
     // Set up reactive custom theme updates
     this._setupCustomThemeEffect();

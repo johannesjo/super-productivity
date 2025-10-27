@@ -38,6 +38,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'dialog-idle',
@@ -50,17 +51,16 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
     MatIconButton,
     MatTooltip,
     MatIcon,
-
     MatMiniFabButton,
     MatCheckbox,
     MatDialogActions,
     MatButton,
     AsyncPipe,
-
     TranslatePipe,
     SelectTaskComponent,
     MsToStringPipe,
   ],
+  animations: [expandAnimation],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
   configService = inject(GlobalConfigService);
@@ -199,5 +199,9 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
         },
       ],
     });
+  }
+
+  hasActiveSimpleCounterTimerButton(): boolean {
+    return this.simpleCounterToggleBtns.some((btn) => btn.isTrackTo);
   }
 }

@@ -10,8 +10,8 @@ import {
   Renderer2,
   viewChild,
 } from '@angular/core';
-import { fromEvent, Subscription } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
+import { animationFrameScheduler, fromEvent, Subscription } from 'rxjs';
+import { observeOn, takeUntil } from 'rxjs/operators';
 import { isTouchOnly } from '../../../util/is-touch-only';
 import { MatFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -80,7 +80,11 @@ export class SplitComponent implements AfterViewInit {
     this.eventSubs = touchend$.subscribe(() => this.onMoveEnd());
 
     const touchmove$ = fromEvent(document, 'touchmove')
-      .pipe(takeUntil(touchend$))
+      .pipe(
+        takeUntil(touchend$),
+        // Run drag calculations at most once per frame to avoid layout thrash.
+        observeOn(animationFrameScheduler),
+      )
       .subscribe((e: Event) => this.onMove(e as TouchEvent));
 
     this.eventSubs.add(touchmove$);
@@ -92,7 +96,11 @@ export class SplitComponent implements AfterViewInit {
     this.eventSubs = mouseup$.subscribe(() => this.onMoveEnd());
 
     const mousemove$ = fromEvent(document, 'mousemove')
-      .pipe(takeUntil(mouseup$))
+      .pipe(
+        takeUntil(mouseup$),
+        // Run drag calculations at most once per frame to avoid layout thrash.
+        observeOn(animationFrameScheduler),
+      )
       .subscribe((e: Event) => this.onMove(e as MouseEvent));
 
     this.eventSubs.add(mousemove$);

@@ -15,6 +15,8 @@ import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
 import { fromEvent, merge, of, timer } from 'rxjs';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+import { IS_SHOW_MOBILE_BOTTOM_NAV } from '../../util/is-mobile';
 
 const PRIMARY_CLASSES =
   'mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary mat-mdc-button-base';
@@ -77,8 +79,8 @@ export const SHEPHERD_STEPS = (
     // ------------------------------
     {
       id: TourId.Welcome,
-      title: 'Welcome to Super Productivity!!',
-      text: "<p>Super Productivity is a ToDo app that helps you to organize yourself and to improve your personal workflows.</p><p>Let's do a little tour! 🎉</p>",
+      title: 'Welcome to Super Productivity!',
+      text: '<p>Do you want a tour of the most important features?</p>',
       buttons: [
         CANCEL_BTN(shepherdService),
         {
@@ -429,7 +431,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Projects,
       title: 'Projects',
-      text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects. You can find projects in the menu (<span class="material-icons">menu</span>).',
+      text: `If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects. You can find projects in the menu ${IS_ANDROID_WEB_VIEW ? '(<span class="material-icons">menu</span>)' : 'on the left'}.`,
       buttons: [{ ...NEXT_BTN, text: 'Good to know!' }],
     },
 
@@ -470,34 +472,39 @@ export const SHEPHERD_STEPS = (
       text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choice</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
       buttons: [{ ...NEXT_BTN, text: "Let's go!" }],
     },
-    {
-      title: 'Configure Sync',
-      attachTo: {
-        element: '.tour-burgerTrigger',
-        on: 'bottom',
-      },
-      beforeShowPromise: () => {
-        return router.navigate(['']).then(() => {
-          // If nav is always visible, skip this step
-          if (!layoutService.isShowMobileBottomNav) {
-            setTimeout(() => shepherdService.next(), 0);
-          }
-        });
-      },
-      text: 'Open the menu (<span class="material-icons">menu</span>)',
-      when: {
-        show: () => {
-          // TODO better implementation
-          setTimeout(() => shepherdService.next(), 8000);
-        },
-      },
-    },
+    // Only show "Open menu" step on mobile where menu is hidden
+    ...(IS_SHOW_MOBILE_BOTTOM_NAV
+      ? [
+          {
+            title: 'Configure Sync',
+            attachTo: {
+              element: '.tour-burgerTrigger',
+              on: 'bottom' as any,
+            },
+            beforeShowPromise: () => router.navigate(['']),
+            text: 'Open the menu (<span class="material-icons">menu</span>)',
+            when: {
+              show: () => {
+                // TODO better implementation
+                setTimeout(() => shepherdService.next(), 8000);
+              },
+            },
+          },
+        ]
+      : []),
     {
       title: 'Configure Sync',
       text: `${CLICK_B} on <span class="material-icons">settings</span> <strong>Settings</strong>!`,
       attachTo: {
         element: '.tour-settingsMenuBtn',
         on: 'top',
+      },
+      beforeShowPromise: () => {
+        // Navigate to home first on desktop since we skipped the menu step
+        if (!IS_SHOW_MOBILE_BOTTOM_NAV) {
+          return router.navigate(['']);
+        }
+        return Promise.resolve();
       },
       when: nextOnObs(
         router.events.pipe(

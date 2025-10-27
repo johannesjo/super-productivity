@@ -34,6 +34,7 @@ export const isContinuedTaskType = (
 export const isDraggableSE = (se: ScheduleEvent): se is ScheduleEvent => {
   return (
     se.type === SVEType.Task ||
+    se.type === SVEType.ScheduledTask ||
     se.type === SVEType.SplitTask ||
     se.type === SVEType.TaskPlannedForDay ||
     se.type === SVEType.SplitTaskPlannedForDay

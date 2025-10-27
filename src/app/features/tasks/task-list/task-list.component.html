@@ -19,9 +19,7 @@
 }
 
 <div
-  #listEl
   cdkDropList
-  #dropList="cdkDropList"
   [cdkDropListConnectedTo]="dropListService.dropLists | async"
   [cdkDropListSortingDisabled]="isSortingDisabled()"
   [cdkDropListEnterPredicate]="enterPredicate"
@@ -41,6 +39,8 @@
       cdkDrag
       [cdkDragDisabled]="listModelId() === 'LATER_TODAY'"
       [cdkDragData]="task"
+      (cdkDragStarted)="onDragStarted(task)"
+      (cdkDragEnded)="onDragEnded()"
     >
     </task>
   }

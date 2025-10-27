@@ -65,7 +65,10 @@ export class BoardsComponent {
     // NOTE: since the index number does not change (the add tab index is at the same index as the newly added tab) we need to do this in two steps
     const newIndex = (this.boards()?.length || 1) - 1;
     setTimeout(() => {
-      this.selectedTabIndex.set(newIndex);
+      this.selectedTabIndex.set(newIndex + 1);
+      setTimeout(() => {
+        this.selectedTabIndex.set(newIndex);
+      }, 10);
     });
   }
 

@@ -733,6 +733,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "全部添加到今天",
         "ADD_TO_TODAY": "添加到今天",
+        "COMPLETE": "完成",
+        "COMPLETE_ALL": "全部完成",
         "DONE": "完成",
         "DUE_TASK": "到期任務",
         "DUE_TASKS": "到期任務",
@@ -757,7 +759,7 @@
       "D_TIME_FOR_DAY": {
         "ADD_ENTRY_FOR": "為 {{date}} 添加新條目",
         "DATE": "新條目的日期",
-        "HELP": "範例：<br>30m => 30分鐘<br><br> 2h => 2小時<br><br> 2h 30m => 2小時30分鐘",
+        "HELP": "範例：<br> 30m => 30分鐘<br> 2h => 2小時<br> 2h 30m => 2小時30分鐘<br> 1.5h => 1小時30分鐘<br> 03:15 => 3小時15分鐘",
         "TINE_SPENT": "所花費的時間",
         "TITLE": "添加今天任務"
       },

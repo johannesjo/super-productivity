@@ -158,6 +158,7 @@ There is another older – the app looks and feels much better now ;) – [artic
 
 ### Keyboard shortcuts (most important)
 
+- `Shift`+`P`: Open create project dialog
 - `Shift`+`A`: Open add task bar
 - `Enter`: Edit currently focussed task title
 - `Arrow keys`: Navigate around task list
@@ -301,9 +302,13 @@ You can find the Android app here:
 
 The sources can be [found here](/android).
 
-## :hearts: Contributing
+## Community
 
-Please check out the [CONTRIBUTING.md](CONTRIBUTING.md)
+The development of Super Productivity is driven by a wonderful community of users and contributors. Thank you all so much for your support!
+
+### :hearts: Contributing
+
+If you want to get involved, please check out the [CONTRIBUTING.md](CONTRIBUTING.md)
 
 There are several ways to help.
 
@@ -332,7 +337,19 @@ There are several ways to help.
 
 10. **[Create custom plugins](docs/plugin-development.md)**: Extend Super Productivity with your own features and integrations by developing custom plugins.
 
-### Running the development server
+### Special Thanks to our Sponsors!!!
+
+Recently support for Super Productivity has been growing! A big thank you to all our sponsors, especially the ones below!
+
+<p style="font-size:21px; color:black;">Browser testing via 
+        <a href="https://www.lambdatest.com/?utm_source=superproductivity&utm_medium=sponsor" target="_blank">
+            <img src="https://www.lambdatest.com/blue-logo.png" style="vertical-align: middle;" width="250" height="45" />
+        </a>
+    </p>
+
+_(If you are, intend to or have been a sponsor and want to be shown here, [please let me know](mailto:contact@super-productivity.com)!)_
+
+## Running the development server
 
 If you don't want or cannot use Codespaces for any reason, here are the instructions for local development.
 

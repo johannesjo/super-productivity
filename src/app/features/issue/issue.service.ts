@@ -49,6 +49,7 @@ import { getErrorTxt } from '../../util/get-error-text';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
 import typia from 'typia';
+import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 
 @Injectable({
   providedIn: 'root',
@@ -70,6 +71,7 @@ export class IssueService {
   private _projectService = inject(ProjectService);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _store = inject(Store);
+  private _globalProgressBarService = inject(GlobalProgressBarService);
 
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
@@ -141,6 +143,10 @@ export class IssueService {
   ): Observable<SearchResultItemWithProviderId[]> {
     return this._store.select(selectEnabledIssueProviders).pipe(
       switchMap((enabledProviders) => {
+        if (enabledProviders.length === 0) {
+          return of([]);
+        }
+
         const searchObservables = enabledProviders.map((provider) =>
           from(
             this.searchIssues(searchTerm, provider.id, provider.issueProviderKey),
@@ -328,25 +334,27 @@ export class IssueService {
         'POLLING CHANGES FOR ' + providerKey,
         tasksIssueIdsByIssueProviderKey[providerKey],
       );
-      this._snackService.open({
-        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
-        msg: T.F.ISSUE.S.POLLING_CHANGES,
-        isSpinner: true,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
-          issuesStr: this._translateService.instant(
-            ISSUE_STR_MAP[providerKey].ISSUES_STR,
-          ),
-        },
+      const pollingLabelParams = {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+        issuesStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUES_STR),
+      };
+
+      this._globalProgressBarService.countUp('POLL', {
+        labelParams: pollingLabelParams,
       });
 
-      const updates: {
+      let updates: {
         task: Task;
         taskChanges: Partial<Task>;
         issue: IssueData;
-      }[] = await this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks(
-        tasksIssueIdsByIssueProviderKey[providerKey],
-      );
+      }[] = [];
+      try {
+        updates = await this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks(
+          tasksIssueIdsByIssueProviderKey[providerKey],
+        );
+      } finally {
+        this._globalProgressBarService.countDown();
+      }
 
       if (updates.length > 0) {
         for (const update of updates) {

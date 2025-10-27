@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>Share</h2>
+
+<div mat-dialog-content>
+  <div class="share-options">
+    <!-- Native Share Button (if available) -->
+    @if (data.showNative) {
+      <button
+        mat-raised-button
+        color="primary"
+        class="share-target-button native-button"
+        (click)="shareNative()"
+      >
+        <mat-icon>share</mat-icon>
+        <span>System Share</span>
+      </button>
+    }
+
+    <!-- Social Media Share Buttons -->
+    @for (shareTarget of shareTargets; track shareTarget.target) {
+      <button
+        mat-stroked-button
+        class="share-target-button"
+        (click)="shareToTarget(shareTarget.target)"
+      >
+        <mat-icon>{{ shareTarget.icon }}</mat-icon>
+        <span>{{ shareTarget.label }}</span>
+      </button>
+    }
+  </div>
+
+  <!-- Mastodon Instance Input -->
+  <div class="mastodon-instance">
+    <mat-form-field appearance="outline">
+      <mat-label>Mastodon Instance</mat-label>
+      <input
+        matInput
+        [(ngModel)]="mastodonInstance"
+        placeholder="mastodon.social"
+      />
+      <mat-icon matPrefix>language</mat-icon>
+    </mat-form-field>
+  </div>
+
+  <!-- Clipboard Actions -->
+  <div class="clipboard-actions">
+    <button
+      mat-button
+      (click)="copyText()"
+    >
+      <mat-icon>content_copy</mat-icon>
+      <span>Copy Text</span>
+    </button>
+  </div>
+</div>
+
+<div
+  mat-dialog-actions
+  align="end"
+>
+  <button
+    mat-button
+    (click)="close()"
+  >
+    Cancel
+  </button>
+</div>

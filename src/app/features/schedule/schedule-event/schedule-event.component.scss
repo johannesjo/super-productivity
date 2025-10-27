@@ -6,10 +6,11 @@
   --split-extra-border-radius: 20px;
   --margin-bottom: 6px;
   --margin-right: 10px;
-  --offset: 40px;
+  --offset: 20px;
   --offset-short-event: 15px;
+  --standard-border-radius: 6px;
 
-  border-radius: 6px;
+  border-radius: var(--standard-border-radius);
   margin: 0 var(--margin-right) var(--margin-bottom) 0;
   scroll-margin-top: 120px;
   scroll-padding-top: 120px;
@@ -19,14 +20,25 @@
   align-items: flex-start;
   border: 1px solid var(--separator-color);
   border-left: 3px solid var(--project-color, var(--separator-color));
-  background: var(--card-bg);
+  background: var(--schedule-event-bg);
   color: var(--text-color);
   position: relative;
   z-index: 2;
   user-select: none;
+
+  // Bring hovered events above others
+  &:hover {
+    z-index: 10;
+  }
+
   // has to be for after elements
   overflow: visible !important;
   min-width: 0;
+
+  // Ensure resize handle has space and is clickable
+  &.resizable {
+    margin-bottom: calc(var(--margin-bottom) + 4px);
+  }
 
   &.very-short-event {
     align-items: center;
@@ -95,6 +107,11 @@
     display: block;
   }
 
+  &.resizable::before {
+    // Don't extend bottom for resizable events to avoid covering resize handle
+    bottom: 0;
+  }
+
   &.CalendarEvent,
   &.RepeatProjection,
   &.RepeatProjectionSplit,
@@ -103,11 +120,8 @@
   &.ScheduledRepeatProjection {
     border-style: dashed;
     border-left-style: solid;
-    background: var(--bg-lighter);
-
-    > * {
-      opacity: 0.7;
-    }
+    opacity: 0.7;
+    background: var(--schedule-event-bg);
   }
 
   &.CalendarEvent {
@@ -148,7 +162,6 @@
 }
 
 :host-context(.is-not-dragging) {
-  :host.ScheduledTask,
   :host.CalendarEvent,
   :host.RepeatProjection,
   :host.RepeatProjectionSplit,
@@ -198,11 +211,6 @@
 
   :host.very-short-event & {
     margin-top: -4px;
-  }
-
-  :host-context(.is-not-dragging):hover & {
-    border-color: var(--c-accent);
-    color: var(--c-accent);
   }
 }
 
@@ -322,7 +330,7 @@
   }
 }
 
-:host-context(.is-dragging) {
+:host-context(.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -331,7 +339,7 @@
   }
 }
 
-:host-context(.isDarkTheme.is-dragging) {
+:host-context(.isDarkTheme.is-dragging.isShiftKeyPressed) {
   :host.TaskPlannedForDay,
   :host.SplitTaskPlannedForDay,
   :host.Task,
@@ -341,35 +349,109 @@
 }
 
 :host.drag-over {
-  transform: translateY(var(--offset));
   z-index: 3;
-
-  &:after {
-    content: '';
-    position: absolute;
-    transform: translateY(calc(-1 * var(--offset)));
-    top: calc(-1 * var(--margin-bottom));
-    height: calc(var(--offset) + var(--margin-bottom));
-    left: 0;
-    right: calc(-1 * (var(--margin-right) + 4px));
-    z-index: 3;
-  }
-
-  &.very-short-event {
-    transform: translateY(var(--offset-short-event));
-
-    &:after {
-      transform: translateY(calc(-1 * var(--offset-short-event)));
-      height: calc(var(--offset-short-event) + var(--margin-bottom));
-    }
-  }
+  transform: translateX(16px);
+  //transform: translateY(var(--offset));
+  //
+  //&:after {
+  //  content: '';
+  //  position: absolute;
+  //  transform: translateY(calc(-1 * var(--offset)));
+  //  top: calc(-1 * var(--margin-bottom));
+  //  height: calc(var(--offset) + var(--margin-bottom));
+  //  left: 0;
+  //  right: calc(-1 * (var(--margin-right) + 4px));
+  //  z-index: 3;
+  //}
+  //
+  //&.very-short-event {
+  //  transform: translateY(var(--offset-short-event));
+  //
+  //  &:after {
+  //    transform: translateY(calc(-1 * var(--offset-short-event)));
+  //    height: calc(var(--offset-short-event) + var(--margin-bottom));
+  //  }
+  //}
 }
 
 :host.draggable {
   cursor: grab;
 
+  // Ensure the ::before pseudo-element also shows the cursor
+  &::before {
+    cursor: grab;
+  }
+
   &:active {
     cursor: grabbing;
     transition: none;
+
+    &::before {
+      cursor: grabbing;
+    }
+  }
+}
+
+// Resize functionality
+.resize-handle {
+  position: absolute;
+  bottom: -6px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  cursor: ns-resize;
+  z-index: 4;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .resize-grip {
+    position: absolute;
+    bottom: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 4px;
+      right: 4px;
+      height: 3px;
+      background: var(--separator-color);
+      border-radius: 1px;
+    }
+  }
+}
+
+:host:hover .resize-handle {
+  opacity: 0.7;
+}
+
+:host.is-resizing {
+  transition: none !important;
+  user-select: none;
+  z-index: 20 !important; // Ensure resizing events appear above all others
+  border-color: var(--c-accent);
+
+  .ico {
+    color: var(--c-accent);
+  }
+
+  .resize-handle {
+    opacity: 1;
+  }
+
+  .resize-grip {
+    &::before {
+      background: var(--c-accent);
+    }
   }
 }

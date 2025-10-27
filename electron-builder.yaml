@@ -8,6 +8,10 @@ files:
   - '!electron/**/*.js.map'
   - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
+  # Exclude Nx binaries - they're build tools, not runtime dependencies
+  - '!**/@nx/nx-darwin-*/**'
+  - '!**/@nx/nx-linux-*/**'
+  - '!**/@nx/nx-win32-*/**'
 #afterSign: ./tools/notarizeMacApp.js
 
 directories:
@@ -37,6 +41,8 @@ appx:
   identityName: ___johannesjo.SuperProductivity
 
 linux:
+  # Fix for issue #5259: Set executable name without spaces for snap compatibility
+  executableName: superproductivity
   category: Office;ProjectManagement
   target:
     - AppImage
@@ -66,6 +72,20 @@ snap:
     - password-manager-service
     - system-observe
     - login-session-observe
+
+flatpak:
+  runtimeVersion: '23.08'
+  finishArgs:
+    - --share=network
+    - --share=ipc
+    - --socket=x11
+    - --socket=wayland
+    - --socket=fallback-x11
+    - --socket=pulseaudio
+    - --device=dri
+    - --filesystem=home
+    - --talk-name=org.gnome.Mutter.IdleMonitor
+    - --system-talk-name=org.freedesktop.login1
 
 mac:
   appId: com.super-productivity.app

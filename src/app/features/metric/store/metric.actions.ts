@@ -7,6 +7,7 @@ enum MetricActionTypes {
   'UpdateMetric' = '[Metric] Update Metric',
   'UpsertMetric' = '[Metric] Upsert Metric',
   'DeleteMetric' = '[Metric] Delete Metric',
+  'LogFocusSession' = '[Metric] Log Focus Session',
 }
 
 export const addMetric = createAction(
@@ -27,4 +28,9 @@ export const upsertMetric = createAction(
 export const deleteMetric = createAction(
   MetricActionTypes.DeleteMetric,
   props<{ id: string }>(),
+);
+
+export const logFocusSession = createAction(
+  MetricActionTypes.LogFocusSession,
+  props<{ day: string; duration: number }>(),
 );

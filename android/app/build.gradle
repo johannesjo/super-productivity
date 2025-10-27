@@ -20,8 +20,8 @@ android {
         minSdkVersion 24
         targetSdkVersion 35
         compileSdk 35
-        versionCode 15_00_03_0000
-        versionName "15.0.3"
+        versionCode 16_01_00_0000
+        versionName "16.1.0"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         manifestPlaceholders = [
                 hostName       : "app.super-productivity.com",
@@ -104,6 +104,16 @@ dependencies {
     playImplementation "com.google.android.gms:play-services-auth:21.3.0"
 
     implementation project(':capacitor-android')
+
+    // Force androidx.webkit to 1.11.0 for better API 28 compatibility
+    // This avoids NoClassDefFoundError for WebViewRenderProcessClient on Android 9
+    // while retaining audio controls and URL utils added in 1.11.0
+    // See: https://github.com/johannesjo/super-productivity/issues/5285
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.webkit:webkit:1.11.0"
+        }
+    }
 
     testImplementation "junit:junit:4.13.2"
 

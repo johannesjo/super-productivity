@@ -1,0 +1,31 @@
+<div
+  class="segmented-button-group"
+  role="radiogroup"
+  [attr.aria-label]="ariaLabel() || null"
+>
+  @for (option of options(); track option.id; let index = $index) {
+    <button
+      #segmentButton
+      type="button"
+      class="segment"
+      [class.is-active]="isActive(option)"
+      [class.is-disabled]="option.disabled"
+      role="radio"
+      [attr.aria-checked]="isActive(option)"
+      [disabled]="option.disabled"
+      (click)="onSelect(option.id)"
+      (keydown)="handleKeyDown($event, index)"
+      [matTooltip]="option.hintKey | translate"
+    >
+      @if (option.icon) {
+        <mat-icon
+          class="segment-icon"
+          aria-hidden="true"
+        >
+          {{ option.icon }}
+        </mat-icon>
+      }
+      <span class="segment-label">{{ option.labelKey | translate }}</span>
+    </button>
+  }
+</div>

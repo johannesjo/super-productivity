@@ -73,16 +73,91 @@ describe('processDurationInput', () => {
       expect(result.milliseconds).toBe(45 * 60 * 1000);
       expect(result.shouldUpdate).toBe(true);
     });
-  });
 
-  describe('inputs that should not update', () => {
-    it('should not update for incomplete typing like "2"', () => {
-      const result = processDurationInput('2');
+    it('should handle fractional values', () => {
+      const result = processDurationInput('1.5h');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 60 * 60 * 1000;
+      const minutesInMs = 30 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle fractional values as hours if "h" postfix is omitted', () => {
+      const result = processDurationInput('1.5');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 60 * 60 * 1000;
+      const minutesInMs = 30 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle fractional values with comma as separator', () => {
+      const result = processDurationInput('1,5h');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 60 * 60 * 1000;
+      const minutesInMs = 30 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle fractional values with comma as separator and omitted postfix', () => {
+      const result = processDurationInput('1,5');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 60 * 60 * 1000;
+      const minutesInMs = 30 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle hh:mm input', () => {
+      const result = processDurationInput('01:45');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 60 * 60 * 1000;
+      const minutesInMs = 45 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle h:mm input', () => {
+      const result = processDurationInput('2:15');
+      expect(result.isValid).toBe(true);
+      const hoursInMs = 2 * 60 * 60 * 1000;
+      const minutesInMs = 15 * 60 * 1000;
+      expect(result.milliseconds).toBe(hoursInMs + minutesInMs);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should handle h:m input', () => {
+      const result = processDurationInput('1:5');
       expect(result.isValid).toBe(false);
       expect(result.milliseconds).toBe(null);
       expect(result.shouldUpdate).toBe(false);
     });
 
+    it('should treat plain numbers up to and including 8 as hours', () => {
+      const result = processDurationInput('8');
+      expect(result.isValid).toBe(true);
+      expect(result.milliseconds).toBe(8 * 60 * 60 * 1000);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should treat plain numbers larger than 8 as minutes', () => {
+      const result = processDurationInput('15');
+      expect(result.isValid).toBe(true);
+      expect(result.milliseconds).toBe(15 * 60 * 1000);
+      expect(result.shouldUpdate).toBe(true);
+    });
+
+    it('should treat plain numbers larger than 60 as minutes', () => {
+      const result = processDurationInput('90');
+      expect(result.isValid).toBe(true);
+      expect(result.milliseconds).toBe(90 * 60 * 1000);
+      expect(result.shouldUpdate).toBe(true);
+    });
+  });
+
+  describe('inputs that should not update', () => {
     it('should not update for incomplete typing like "2h 3"', () => {
       const result = processDurationInput('2h 3');
       expect(result.isValid).toBe(false);
@@ -146,9 +221,9 @@ describe('processDurationInput', () => {
   describe('with seconds enabled', () => {
     it('should handle seconds when allowed', () => {
       const result = processDurationInput('30s', true);
-      expect(result.isValid).toBe(false); // Still false because regex doesn't allow seconds
-      expect(result.milliseconds).toBe(null);
-      expect(result.shouldUpdate).toBe(false);
+      expect(result.isValid).toBe(true);
+      expect(result.milliseconds).toBe(30 * 1000);
+      expect(result.shouldUpdate).toBe(true);
     });
   });
 });

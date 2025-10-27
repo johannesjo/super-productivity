@@ -7,6 +7,10 @@ files:
   - '!electron/**/*.js.map'
   - dist/**/*
   - 'embedded.provisionprofile'
+  # Exclude Nx binaries - they're build tools, not runtime dependencies
+  - '!**/@nx/nx-darwin-*/**'
+  - '!**/@nx/nx-linux-*/**'
+  - '!**/@nx/nx-win32-*/**'
 directories:
   output: './app-builds'
 
