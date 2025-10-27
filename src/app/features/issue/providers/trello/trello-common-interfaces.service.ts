@@ -94,7 +94,6 @@ export class TrelloCommonInterfacesService implements IssueServiceInterface {
       .getIssueById$(task.issueId, cfg)
       .toPromise()) as TrelloIssue;
 
-    // @see https://developer.atlassian.com/cloud/jira/platform/jira-expressions-type-reference/#date
     const newUpdated = new Date(issue.updated).getTime();
     const wasUpdated = newUpdated > (task.issueLastUpdated || 0);
 

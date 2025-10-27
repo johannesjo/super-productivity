@@ -101,6 +101,14 @@ export class TrelloApiService {
     );
   }
 
+  // list all projects from user
+  getBoards$(cfg: TrelloCfg): Observable<any> {
+    return this._request$('/members/me/boards', cfg, {
+      filter: 'open',
+      fields: 'name,id',
+    });
+  }
+
   getIssueById$(issueId: string, cfg: TrelloCfg): Observable<TrelloIssue> {
     return this._request$<TrelloCardResponse>(`/cards/${issueId}`, cfg, {
       fields: `${DEFAULT_CARD_FIELDS},labels`,

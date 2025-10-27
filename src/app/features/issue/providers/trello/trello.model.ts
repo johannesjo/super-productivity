@@ -8,4 +8,7 @@ export interface TrelloCfg extends BaseIssueProviderCfg {
   apiKey: string | null;
   token: string | null;
   boardId: string | null;
+
+  // experimental: board - add board name
+  boardName?: string | null;
 }

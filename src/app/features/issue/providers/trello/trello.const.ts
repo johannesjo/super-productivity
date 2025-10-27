@@ -26,7 +26,8 @@ export const TRELLO_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderTrello>[]
     type: 'input',
     props: {
       label: 'Trello API key',
-      description: 'Create or copy an API key from https://trello.com/app-key.',
+      description:
+        'Follow this guide: https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/ to get API key and token.',
       type: 'text',
       required: true,
     },
@@ -37,22 +38,12 @@ export const TRELLO_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderTrello>[]
     props: {
       label: 'Trello API token',
       description:
-        'Generate a token via the Trello developer tools after logging in with your account.',
+        'Follow this guide: https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/ to get API key and token.',
       type: 'password',
       required: true,
     },
   },
-  {
-    key: 'boardId',
-    type: 'input',
-    props: {
-      label: 'Trello board ID',
-      description:
-        'Paste the board ID (from the board URL) that should be used for search and auto-import.',
-      type: 'text',
-      required: true,
-    },
-  },
+  // search boards
   {
     type: 'collapsible',
     props: { label: 'Advanced Config' },
