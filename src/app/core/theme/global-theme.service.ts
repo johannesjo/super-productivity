@@ -36,6 +36,7 @@ export class GlobalThemeService {
   private _workContextService = inject(WorkContextService);
   private _globalConfigService = inject(GlobalConfigService);
   private _matIconRegistry = inject(MatIconRegistry);
+  private readonly _registeredPluginIcons = new Set<string>();
   private _domSanitizer = inject(DomSanitizer);
   private _chartThemeService = inject(NgChartThemeService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
@@ -187,10 +188,13 @@ export class GlobalThemeService {
   }
 
   registerSvgIcon(iconName: string, url: string): void {
+    // Plugin icon is already registered, skip
+    if (this._registeredPluginIcons.has(iconName)) return;
     this._matIconRegistry.addSvgIcon(
       iconName,
       this._domSanitizer.bypassSecurityTrustResourceUrl(url),
     );
+    this._registeredPluginIcons.add(iconName);
   }
 
   private _initThemeWatchers(): void {
