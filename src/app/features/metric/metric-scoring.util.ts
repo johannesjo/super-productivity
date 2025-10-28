@@ -143,8 +143,8 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
  * @returns Productivity score from 0-100
  *
  * @example
- * // High impact, met target = excellent score
- * calculateProductivityScore(4, 240, 360, 240) // Returns ~97
+ * // High impact, met target = perfect score
+ * calculateProductivityScore(4, 240, 360, 240) // Returns 100
  *
  * @example
  * // Medium impact, typical day
@@ -152,7 +152,7 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
  *
  * @example
  * // Low impact despite good focus = moderate score
- * calculateProductivityScore(1, 240, 360, 240) // Returns ~41
+ * calculateProductivityScore(1, 240, 360, 240) // Returns ~48
  */
 export const calculateProductivityScore = (
   impactRating: number,
@@ -162,12 +162,17 @@ export const calculateProductivityScore = (
   completedTasks?: number,
   plannedTasks?: number,
 ): number => {
-  // Impact: User's reflection on work value (1-5 scale normalized to 0-1)
+  // Impact: User's reflection on work value (1-4 scale normalized to 0-1)
   const impact = clamp(impactRating / SCALE_CONVERSIONS.IMPACT_SCALE_MAX);
 
-  // Progress to Target (soft-capped for diminishing returns beyond goal)
+  // Progress to Target:
+  // - Linear growth from 0 to target (0-1.0)
+  // - Soft-cap for diminishing returns beyond target (>1.0)
   const progressRatio = safeDiv(focusedMinutes, targetFocusedMinutes, 0);
-  const targetProgress = softCap(progressRatio);
+  const targetProgress =
+    progressRatio <= 1.0
+      ? progressRatio // Linear up to target: full credit for meeting goal
+      : softCap(progressRatio); // Soft-cap beyond target: diminishing returns
 
   // Optional: Task completion (currently not weighted, but available for future use)
   // const completion = completedTasks != null && plannedTasks != null
