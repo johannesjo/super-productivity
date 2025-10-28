@@ -112,11 +112,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ impactOfWork });
   }
 
-  updateDeepWorkTime(milliseconds: number): void {
-    // Replace focusSessions with a single manual entry
-    this._update({ focusSessions: [milliseconds] });
-  }
-
   updateEnergyCheckin(energyCheckin: number): void {
     this._update({ energyCheckin });
   }

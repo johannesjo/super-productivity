@@ -15,24 +15,6 @@
       name="form"
       novalidate
     >
-      <div class="time-summary">
-        <div class="time-item">
-          <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</label>
-          <inline-input
-            (changed)="updateDeepWorkTime($event)"
-            [displayValue]="deepWorkTime | msToClockString"
-            [type]="'duration'"
-            [value]="deepWorkTime"
-          >
-          </inline-input>
-        </div>
-
-        <div class="time-item">
-          <label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</label>
-          <span class="time-display">{{ totalWorkTimeMs | msToClockString }}</span>
-        </div>
-      </div>
-
       <div class="radio-group">
         <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
         <mat-radio-group
@@ -61,6 +43,18 @@
           <mat-radio-button [value]="3">😊</mat-radio-button>
         </mat-radio-group>
         <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
+      </div>
+
+      <div class="time-summary">
+        <div class="time-item">
+          <label>{{ T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate }}</label>
+          <span class="time-display">{{ deepWorkTime | msToClockString }}</span>
+        </div>
+
+        <div class="time-item">
+          <label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</label>
+          <span class="time-display">{{ totalWorkTimeMs | msToClockString }}</span>
+        </div>
       </div>
 
       <div class="scores-container">

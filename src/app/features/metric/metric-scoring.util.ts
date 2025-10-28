@@ -84,9 +84,9 @@ export const DEFAULTS = {
 export const COLOR_GRADIENT = {
   HUE_MIN: 0, // Red (poor score)
   HUE_MAX: 120, // Green (excellent score)
-  SATURATION: 70, // Saturation percentage
-  LIGHTNESS_START: 50, // Lightness for gradient start
-  LIGHTNESS_END: 60, // Lightness for gradient end
+  SATURATION: 60, // Saturation percentage
+  LIGHTNESS_START: 40, // Lightness for gradient start
+  LIGHTNESS_END: 40, // Lightness for gradient end
 } as const;
 
 // ==================== HELPER FUNCTIONS ====================
