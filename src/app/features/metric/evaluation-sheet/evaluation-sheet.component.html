@@ -1,16 +1,17 @@
 @if (metricForDay) {
   <div class="radio-group">
     <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
-    <mat-radio-group
+    <impact-stars
       #impactOfWork="ngModel"
       (ngModelChange)="updateImpactOfWork($event)"
-      [ngModel]="metricForDay.impactOfWork"
+      [ngModel]="metricForDay.impactOfWork || 0"
       name="impactOfWork"
-    >
-      @for (value of [1, 2, 3, 4]; track value) {
-        <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
-      }
-    </mat-radio-group>
+      [maxStars]="4"
+      ariaLabel="How impactful was your work today?"
+      zeroLabel="No impact"
+      lowLabel="Low impact"
+      highLabel="High impact"
+    ></impact-stars>
     <div class="hint">{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK_HINT | translate }}</div>
   </div>
 

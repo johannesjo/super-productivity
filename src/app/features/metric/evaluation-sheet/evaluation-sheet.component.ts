@@ -36,6 +36,7 @@ import { AsyncPipe, NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { DailyStateInfo, getDailyStateInfo } from '../utils/get-daily-state-info.util';
+import { ImpactStarsComponent } from '../impact-stars/impact-stars.component';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -55,6 +56,7 @@ import { DailyStateInfo, getDailyStateInfo } from '../utils/get-daily-state-info
     NgClass,
     TranslatePipe,
     MsToClockStringPipe,
+    ImpactStarsComponent,
   ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
@@ -161,7 +163,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   }
 
   get hasProductivityData(): boolean {
-    return !!this.metricForDay?.impactOfWork;
+    // impactOfWork can be 0-4, show card if > 0
+    return !!this.metricForDay?.impactOfWork && this.metricForDay.impactOfWork > 0;
   }
 
   get hasSustainabilityData(): boolean {
@@ -169,7 +172,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   }
 
   get productivityScore(): number {
-    const impactRating = this.metricForDay?.impactOfWork ?? 3; // Default to neutral (3) if not set
+    const impactRating = this.metricForDay?.impactOfWork ?? 0;
     const focusedMinutes = this.deepWorkMinutes;
     return calculateProductivityScore(impactRating, focusedMinutes);
   }
