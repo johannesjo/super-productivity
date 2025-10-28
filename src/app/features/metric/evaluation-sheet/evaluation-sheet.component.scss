@@ -90,6 +90,12 @@
     text-transform: uppercase;
     opacity: 0.85;
     text-align: center;
+    cursor: help;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   .score-row {
@@ -126,6 +132,12 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--fg-secondary);
+    cursor: help;
+    transition: opacity 0.2s ease;
+
+    &:hover {
+      opacity: 0.8;
+    }
   }
 
   .daily-state-title {

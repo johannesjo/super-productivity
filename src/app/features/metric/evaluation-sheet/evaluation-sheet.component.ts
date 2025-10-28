@@ -31,6 +31,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
+import { MatTooltip } from '@angular/material/tooltip';
 import { AsyncPipe, NgClass } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
@@ -49,6 +50,7 @@ import { DailyStateInfo, getDailyStateInfo } from '../utils/get-daily-state-info
     MatIcon,
     MatRadioGroup,
     MatRadioButton,
+    MatTooltip,
     AsyncPipe,
     NgClass,
     TranslatePipe,
