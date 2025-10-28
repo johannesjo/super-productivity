@@ -79,6 +79,17 @@
         </div>
       </div>
 
+      <div class="daily-state-card">
+        <div class="daily-state-label">
+          {{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}
+        </div>
+        <div class="daily-state-title">
+          <span class="daily-state-icon">{{ dailyStateInfo.icon }}</span>
+          <span>{{ dailyStateInfo.headlineKey | translate }}</span>
+        </div>
+        <div class="daily-state-hint">{{ dailyStateInfo.hintKey | translate }}</div>
+      </div>
+
       @if (sevenDayAverage$ | async; as sevenDayAverage) {
         <button
           type="button"

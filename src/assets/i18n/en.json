@@ -628,7 +628,15 @@
         "DAILY_STATE_DEEP_FLOW": "Deep Flow",
         "DAILY_STATE_OVERDRIVE": "Overdrive",
         "DAILY_STATE_RECOVERY": "Recovery",
-        "DAILY_STATE_DRIFT": "Drift"
+        "DAILY_STATE_DRIFT": "Drift",
+        "STATE_DEEP_FLOW_HEADLINE": "Deep Flow: Excellent focus and sustainable pace.",
+        "STATE_DEEP_FLOW_HINT": "You’re in the sweet spot — reflect on what made this combination possible.",
+        "STATE_OVERDRIVE_HEADLINE": "Overdrive: Productive, but at a cost.",
+        "STATE_OVERDRIVE_HINT": "You got a lot done — now make sure to recharge before burnout sneaks in.",
+        "STATE_RECOVERY_HEADLINE": "Recovery: Resting and recharging.",
+        "STATE_RECOVERY_HINT": "You’re giving your mind space to recover. Tomorrow you’ll have the energy to dive deeper again.",
+        "STATE_DRIFT_HEADLINE": "Drift: Low focus and low energy.",
+        "STATE_DRIFT_HINT": "That’s okay. Reflect on what distracted you and adjust gently — every reset is a chance to learn."
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"

@@ -100,6 +100,43 @@ mat-form-field {
   }
 }
 
+.daily-state-card {
+  margin: var(--s2) 0;
+  padding: var(--s2);
+  border-radius: var(--card-border-radius);
+  background: var(--bg-lightest);
+  border-left: 4px solid var(--accent);
+  display: flex;
+  flex-direction: column;
+  gap: var(--s);
+
+  .daily-state-label {
+    font-size: 0.75em;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--fg-secondary);
+  }
+
+  .daily-state-title {
+    display: flex;
+    align-items: center;
+    gap: var(--s);
+    font-weight: 600;
+    color: var(--fg-primary);
+  }
+
+  .daily-state-icon {
+    font-size: 20px;
+    line-height: 1;
+  }
+
+  .daily-state-hint {
+    color: var(--fg-secondary);
+    font-size: 0.95em;
+    line-height: 1.4;
+  }
+}
+
 .seven-day-summary {
   display: flex;
   align-items: center;
