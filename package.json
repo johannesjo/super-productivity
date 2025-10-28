@@ -185,7 +185,7 @@
     "@ngx-formly/material": "7.0.0",
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
-    "@playwright/test": "^1.54.1",
+    "@playwright/test": "^1.56.1",
     "@schematics/angular": "^20.1.4",
     "@types/electron": "^1.4.38",
     "@types/electron-localshortcut": "^3.1.3",
