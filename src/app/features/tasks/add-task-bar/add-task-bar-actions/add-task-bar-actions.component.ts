@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   LOCALE_ID,
@@ -47,6 +48,7 @@ import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
   ],
 })
 export class AddTaskBarActionsComponent {
+  private _destroyRef = inject(DestroyRef);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _matDialog = inject(MatDialog);
@@ -189,6 +191,10 @@ export class AddTaskBarActionsComponent {
 
   // Private helper methods for DRY menu handling
   private _handleMenuClick(menuType: 'project' | 'tags' | 'estimate'): void {
+    if (this._destroyRef.destroyed) {
+      return;
+    }
+
     const { menuSignal, trigger } = this._getMenuRefs(menuType);
     menuSignal.set(true);
 
@@ -201,6 +207,10 @@ export class AddTaskBarActionsComponent {
   }
 
   private _openMenuProgrammatically(menuType: 'project' | 'tags' | 'estimate'): void {
+    if (this._destroyRef.destroyed) {
+      return;
+    }
+
     const { menuSignal, trigger } = this._getMenuRefs(menuType);
 
     if (trigger) {
