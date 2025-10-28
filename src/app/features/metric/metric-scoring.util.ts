@@ -9,11 +9,11 @@
 /**
  * Productivity Score Weights (must sum to 1.0)
  * Impact is the primary driver to ensure reflection on work value.
+ * Note: Density removed to eliminate confounding with progress (both used focused_minutes).
  */
 export const PRODUCTIVITY_WEIGHTS = {
-  IMPACT: 0.45, // User's assessment of work significance (primary driver)
-  DENSITY: 0.35, // Portion of total work time spent in focused work
-  PROGRESS: 0.2, // Progress toward deep work target (soft-capped)
+  IMPACT: 0.7, // User's assessment of work significance (primary driver)
+  PROGRESS: 0.3, // Progress toward deep work target (soft-capped)
 } as const;
 
 /**
@@ -113,33 +113,35 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
 /**
  * Calculates a productivity score (0-100) with impact rating as the primary driver.
  *
- * v2.4 - Impact-driven model (mandatory daily reflection):
- * - 45% Impact Rating: User's assessment of work value/significance (1-5, required)
- * - 35% Focus Density: Portion of total work time spent in focused work
- * - 20% Target Progress: Progress toward deep work goal (soft-capped for diminishing returns)
+ * v2.5 - Simplified impact-driven model (removed density to eliminate confounding):
+ * - 70% Impact Rating: User's assessment of work value/significance (1-5, required)
+ * - 30% Target Progress: Progress toward deep work goal (soft-capped for diminishing returns)
  *
  * Making impact rating mandatory ensures users reflect on work value, not just time spent.
  * This prevents "busywork scoring high" and emphasizes meaningful output.
  *
+ * Density removed because it was highly correlated with progress (both use focused_minutes),
+ * creating confounding. This simplification improves score interpretability.
+ *
  * @param impactRating - User's assessment of work impact (1-5 scale, REQUIRED)
  * @param focusedMinutes - Total focused time for the day (in minutes)
- * @param totalWorkMinutes - Total work time including meetings, emails, etc. (in minutes)
+ * @param totalWorkMinutes - Total work time (unused in v2.5, kept for API compatibility)
  * @param targetFocusedMinutes - Target deep work goal (in minutes, default 240 = 4 hours)
  * @param completedTasks - Number of tasks completed (optional, currently unused but kept for future)
  * @param plannedTasks - Number of tasks planned (optional, currently unused but kept for future)
  * @returns Productivity score from 0-100
  *
  * @example
- * // High impact, good focus, met target = excellent score
- * calculateProductivityScore(5, 240, 360, 240) // Returns ~85-90
+ * // High impact, met target = excellent score
+ * calculateProductivityScore(5, 240, 360, 240) // Returns ~88
  *
  * @example
  * // Medium impact, typical day
- * calculateProductivityScore(3, 180, 360, 240) // Returns ~55-60
+ * calculateProductivityScore(3, 180, 360, 240) // Returns ~60
  *
  * @example
  * // Low impact despite good focus = moderate score
- * calculateProductivityScore(2, 240, 360, 240) // Returns ~50-55
+ * calculateProductivityScore(2, 240, 360, 240) // Returns ~48
  */
 export const calculateProductivityScore = (
   impactRating: number,
@@ -152,9 +154,6 @@ export const calculateProductivityScore = (
   // Impact: User's reflection on work value (1-5 scale normalized to 0-1)
   const impact = clamp(impactRating / SCALE_CONVERSIONS.IMPACT_SCALE_MAX);
 
-  // Focus Density: What portion of work time was focused
-  const density = clamp(safeDiv(focusedMinutes, Math.max(totalWorkMinutes, 1), 0));
-
   // Progress to Target (soft-capped for diminishing returns beyond goal)
   const progressRatio = safeDiv(focusedMinutes, targetFocusedMinutes, 0);
   const targetProgress = softCap(progressRatio);
@@ -162,14 +161,13 @@ export const calculateProductivityScore = (
   // Optional: Task completion (currently not weighted, but available for future use)
   // const completion = completedTasks != null && plannedTasks != null
   //   ? clamp(safeDiv(completedTasks, Math.max(plannedTasks, 1), 0))
-  //   : density;
+  //   : targetProgress;
 
   // Weighted components (sum = 1.0)
   const impactComponent = impact * PRODUCTIVITY_WEIGHTS.IMPACT;
-  const densityComponent = density * PRODUCTIVITY_WEIGHTS.DENSITY;
   const progressComponent = targetProgress * PRODUCTIVITY_WEIGHTS.PROGRESS;
 
-  const score = impactComponent + densityComponent + progressComponent;
+  const score = impactComponent + progressComponent;
 
   // Scale to 0-100 range
   return Math.round(score * 100);
