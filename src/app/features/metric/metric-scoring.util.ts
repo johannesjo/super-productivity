@@ -123,6 +123,22 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
   denominator > 0 ? numerator / denominator : fallback;
 
 /**
+ * Converts a list of focus session durations (ms) into total minutes.
+ */
+export const focusSessionsToMinutes = (focusSessions: number[]): number => {
+  if (!focusSessions || focusSessions.length === 0) {
+    return 0;
+  }
+  const totalMs = focusSessions.reduce((sum, session) => sum + session, 0);
+  return totalMs / (1000 * 60);
+};
+
+export interface ProductivityScoreDerivationOptions {
+  getTotalWorkMinutes?: (metric: Metric, focusedMinutes: number) => number;
+  getTargetFocusedMinutes?: (metric: Metric, focusedMinutes: number) => number;
+}
+
+/**
  * Calculates a productivity score (0-100) with impact rating as the primary driver.
  *
  * v2.6 - Simplified impact-driven model with 1-4 scale:
@@ -351,7 +367,10 @@ export const getScoreColorGradient = (score: number): string => {
  * @param metrics - Array of metrics to average
  * @returns Average productivity score (0-100) or null if insufficient data
  */
-export const calculateAverageProductivityScore = (metrics: Metric[]): number | null => {
+export const calculateAverageProductivityScore = (
+  metrics: Metric[],
+  options: ProductivityScoreDerivationOptions = {},
+): number | null => {
   const scores: number[] = [];
 
   for (const metric of metrics) {
@@ -364,10 +383,14 @@ export const calculateAverageProductivityScore = (metrics: Metric[]): number | n
       continue;
     }
 
-    const focusedMinutes =
-      metric.focusSessions.reduce((sum, session) => sum + session, 0) / (1000 * 60);
-    const totalWorkMinutes = metric.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
-    const targetFocusedMinutes = metric.targetMinutes ?? 240;
+    const focusedMinutes = focusSessionsToMinutes(metric.focusSessions);
+    const totalWorkMinutes =
+      options.getTotalWorkMinutes?.(metric, focusedMinutes) ??
+      metric.totalWorkMinutes ??
+      Math.max(focusedMinutes, 1);
+    const targetFocusedMinutes =
+      options.getTargetFocusedMinutes?.(metric, focusedMinutes) ??
+      focusSessionsToMinutes(metric.focusSessions);
 
     const score = calculateProductivityScore(
       metric.impactOfWork,
@@ -405,9 +428,10 @@ export interface TrendIndicator {
 export const calculateProductivityTrend = (
   currentPeriodMetrics: Metric[],
   previousPeriodMetrics: Metric[],
+  options: ProductivityScoreDerivationOptions = {},
 ): TrendIndicator | null => {
-  const currentAvg = calculateAverageProductivityScore(currentPeriodMetrics);
-  const previousAvg = calculateAverageProductivityScore(previousPeriodMetrics);
+  const currentAvg = calculateAverageProductivityScore(currentPeriodMetrics, options);
+  const previousAvg = calculateAverageProductivityScore(previousPeriodMetrics, options);
 
   if (currentAvg === null || previousAvg === null) {
     return null;

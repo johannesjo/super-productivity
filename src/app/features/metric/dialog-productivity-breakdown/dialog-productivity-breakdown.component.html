@@ -1,0 +1,45 @@
+<h2 mat-dialog-title>7-Day Productivity Breakdown</h2>
+
+<div mat-dialog-content>
+  <ng-container *ngIf="breakdown$ | async as breakdown; else noData">
+    <table class="breakdown-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Score</th>
+          <th>Impact</th>
+          <th>Focused (min)</th>
+          <th>Total Work (min)</th>
+          <th>Target (min)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of breakdown">
+          <td>{{ item.day }}</td>
+          <td>{{ item.score }}</td>
+          <td>{{ item.impactRating }}</td>
+          <td>{{ item.focusedMinutes | number: '1.0-1' }}</td>
+          <td>{{ item.totalWorkMinutes | number: '1.0-1' }}</td>
+          <td>{{ item.targetMinutes | number: '1.0-1' }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </ng-container>
+</div>
+
+<ng-template #noData>
+  <div class="no-data">No productivity data available for the selected range.</div>
+</ng-template>
+
+<div
+  mat-dialog-actions
+  align="end"
+>
+  <button
+    mat-flat-button
+    color="primary"
+    (click)="close()"
+  >
+    Close
+  </button>
+</div>

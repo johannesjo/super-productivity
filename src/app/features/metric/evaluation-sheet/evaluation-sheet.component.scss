@@ -35,6 +35,13 @@ mat-form-field {
       font-weight: 500;
       color: var(--fg-primary);
     }
+
+    .time-display {
+      display: inline-block;
+      font-size: 1.2em;
+      font-weight: 500;
+      color: var(--fg-primary);
+    }
   }
 }
 
@@ -96,13 +103,23 @@ mat-form-field {
 .seven-day-summary {
   display: flex;
   align-items: center;
-  //gap: var(--s2);
   gap: var(--s4);
   padding: var(--s2);
   margin: var(--s2) 0;
   background: var(--bg-lightest);
   border-radius: var(--card-border-radius);
   border-left: 4px solid var(--accent);
+  border: none;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  color: inherit;
+  appearance: none;
+
+  &:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
 
   .summary-label {
     font-weight: 600;

@@ -1,0 +1,28 @@
+.breakdown-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    padding: 8px;
+    text-align: left;
+  }
+
+  thead {
+    background: var(--bg-lightest);
+
+    th {
+      font-weight: 600;
+      border-bottom: 1px solid var(--bg-lighter);
+    }
+  }
+
+  tbody tr:nth-child(even) {
+    background: var(--bg-lightest);
+  }
+}
+
+.no-data {
+  padding: 12px 0;
+  color: var(--fg-secondary);
+}

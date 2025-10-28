@@ -29,13 +29,7 @@
 
         <div class="time-item">
           <label>{{ T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate }}</label>
-          <inline-input
-            (changed)="updateTotalWorkMinutes($event)"
-            [displayValue]="totalWorkTimeMs | msToClockString"
-            [type]="'duration'"
-            [value]="totalWorkTimeMs"
-          >
-          </inline-input>
+          <span class="time-display">{{ totalWorkTimeMs | msToClockString }}</span>
         </div>
       </div>
 
@@ -92,7 +86,11 @@
       </div>
 
       @if (sevenDayAverage$ | async; as sevenDayAverage) {
-        <div class="seven-day-summary">
+        <button
+          type="button"
+          class="seven-day-summary"
+          (click)="openProductivityBreakdown()"
+        >
           <div class="summary-label">7-Day Average:</div>
           <div class="summary-value">{{ sevenDayAverage }}</div>
           @if (productivityTrend$ | async; as trend) {
@@ -112,7 +110,7 @@
               }
             </div>
           }
-        </div>
+        </button>
       }
 
       <!--      <section class="notes-for-tomorrow">-->

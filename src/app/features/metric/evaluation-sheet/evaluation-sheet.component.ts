@@ -25,6 +25,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
+import { DialogProductivityBreakdownComponent } from '../dialog-productivity-breakdown/dialog-productivity-breakdown.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
@@ -61,6 +62,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   private _matDialog = inject(MatDialog);
   private _cd = inject(ChangeDetectorRef);
   private _dateService = inject(DateService);
+  private _currentDay: string = this._dateService.todayStr();
 
   readonly save = output<any>();
   T: typeof T = T;
@@ -84,38 +86,19 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set day(val: string) {
-    this.day$.next(val);
+    const nextDay = val || this._dateService.todayStr();
+    this._currentDay = nextDay;
+    this.day$.next(nextDay);
   }
 
   @Input() set timeWorkedToday(val: number | null) {
     this._timeWorkedToday = val;
-    // Pre-fill total work time if not already set
-    if (
-      val &&
-      this.metricForDay &&
-      (!this.metricForDay.totalWorkMinutes || this.metricForDay.totalWorkMinutes === 0)
-    ) {
-      const totalWorkMinutes = val / (1000 * 60);
-      this._update({ totalWorkMinutes });
-    }
   }
 
   ngOnInit(): void {
     this._subs.add(
       this._metricForDay$.subscribe((metric) => {
         this.metricForDay = metric;
-        // Pre-fill total work time if not already set and we have time worked data
-        if (
-          this._timeWorkedToday &&
-          (!metric.totalWorkMinutes || metric.totalWorkMinutes === 0)
-        ) {
-          const totalWorkMinutes = this._timeWorkedToday / (1000 * 60);
-          this.metricForDay = {
-            ...metric,
-            totalWorkMinutes,
-          };
-          this._metricService.upsertMetric(this.metricForDay as MetricCopy);
-        }
         this._cd.detectChanges();
       }),
     );
@@ -138,14 +121,20 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ energyCheckin });
   }
 
-  updateTotalWorkMinutes(milliseconds: number): void {
-    // Convert from milliseconds to minutes for storage
-    const totalWorkMinutes = milliseconds / (1000 * 60);
-    this._update({ totalWorkMinutes });
+  get totalWorkTimeMs(): number {
+    if (this._timeWorkedToday != null) {
+      return this._timeWorkedToday;
+    }
+    const legacyMinutes = this.metricForDay?.totalWorkMinutes;
+    if (typeof legacyMinutes === 'number' && !Number.isNaN(legacyMinutes)) {
+      return legacyMinutes * 60 * 1000;
+    }
+    return this.deepWorkTime;
   }
 
-  get totalWorkTimeMs(): number {
-    return (this.metricForDay?.totalWorkMinutes ?? 0) * 60 * 1000;
+  get totalWorkMinutes(): number {
+    const totalMs = this.totalWorkTimeMs;
+    return totalMs > 0 ? totalMs / (1000 * 60) : 0;
   }
 
   get deepWorkTime(): number {
@@ -157,12 +146,24 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     return this.deepWorkTime / (1000 * 60);
   }
 
+  get targetFocusedMinutes(): number {
+    const focusSessions = this.metricForDay?.focusSessions ?? [];
+    if (focusSessions.length > 0) {
+      const totalMs = focusSessions.reduce((acc, val) => acc + val, 0);
+      return totalMs / (1000 * 60);
+    }
+    const legacyTarget = this.metricForDay?.targetMinutes;
+    if (typeof legacyTarget === 'number' && !Number.isNaN(legacyTarget)) {
+      return legacyTarget;
+    }
+    return 0;
+  }
+
   get productivityScore(): number {
     const impactRating = this.metricForDay?.impactOfWork ?? 3; // Default to neutral (3) if not set
     const focusedMinutes = this.deepWorkMinutes;
-    const totalWorkMinutes =
-      this.metricForDay?.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
-    const targetFocusedMinutes = this.metricForDay?.targetMinutes ?? 240;
+    const totalWorkMinutes = this.totalWorkMinutes;
+    const targetFocusedMinutes = this.targetFocusedMinutes;
     const completedTasks = this.metricForDay?.completedTasks ?? undefined;
     const plannedTasks = this.metricForDay?.plannedTasks ?? undefined;
 
@@ -178,8 +179,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
 
   get sustainabilityScore(): number {
     const focusedMinutes = this.deepWorkMinutes;
-    const totalWorkMinutes =
-      this.metricForDay?.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
+    const totalWorkMinutes = this.totalWorkMinutes;
     const energyCheckin = this.metricForDay?.energyCheckin ?? undefined;
 
     return calculateSustainabilityScore(
@@ -192,6 +192,16 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
 
   getScoreColor(score: number): string {
     return getScoreColorGradient(score);
+  }
+
+  openProductivityBreakdown(): void {
+    this._matDialog.open(DialogProductivityBreakdownComponent, {
+      data: {
+        days: 7,
+        endDate: this._currentDay,
+      },
+      width: '640px',
+    });
   }
 
   addObstruction(v: string): void {

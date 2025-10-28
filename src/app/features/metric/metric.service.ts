@@ -31,11 +31,26 @@ import {
 import { DateService } from 'src/app/core/date/date.service';
 import {
   calculateAverageProductivityScore,
+  calculateProductivityScore,
   calculateProductivityTrend,
+  focusSessionsToMinutes,
+  ProductivityScoreDerivationOptions,
   TrendIndicator,
 } from './metric-scoring.util';
+import { WorklogService } from '../worklog/worklog.service';
+import { Worklog } from '../worklog/worklog.model';
+import { getTimeSpentForDay } from '../worklog/util/get-time-spent-for-day.util';
 
 const MIN_FOCUS_SESSION_DURATION = 1000;
+
+export interface ProductivityBreakdownItem {
+  day: string;
+  score: number;
+  impactRating: number;
+  focusedMinutes: number;
+  totalWorkMinutes: number;
+  targetMinutes: number;
+}
 
 @Injectable({
   providedIn: 'root',
@@ -43,6 +58,7 @@ const MIN_FOCUS_SESSION_DURATION = 1000;
 export class MetricService {
   private _store$ = inject<Store<MetricState>>(Store);
   private _dateService = inject(DateService);
+  private _worklogService = inject(WorklogService);
 
   hasData = toSignal(this._store$.pipe(select(selectMetricHasData)), {
     initialValue: false,
@@ -163,6 +179,81 @@ export class MetricService {
     return this.focusSessionsByDay()[day];
   }
 
+  private _createProductivityOptions(
+    worklog: Worklog,
+  ): ProductivityScoreDerivationOptions {
+    return {
+      getTotalWorkMinutes: (metric, focusedMinutes) =>
+        this._deriveTotalWorkMinutes(worklog, metric, focusedMinutes),
+      getTargetFocusedMinutes: (metric, focusedMinutes) =>
+        this._deriveTargetMinutes(metric, focusedMinutes),
+    };
+  }
+
+  private _deriveTotalWorkMinutes(
+    worklog: Worklog,
+    metric: Metric,
+    focusedMinutes: number,
+  ): number {
+    const timeSpentMs = getTimeSpentForDay(worklog, metric.id);
+    if (timeSpentMs !== undefined) {
+      return timeSpentMs / (1000 * 60);
+    }
+    if (metric.totalWorkMinutes != null) {
+      return metric.totalWorkMinutes;
+    }
+    return Math.max(focusedMinutes, 0);
+  }
+
+  private _deriveTargetMinutes(metric: Metric, focusedMinutes: number): number {
+    const focusSessions = metric.focusSessions ?? [];
+    if (focusSessions.length > 0) {
+      const totalMs = focusSessions.reduce((acc, val) => acc + val, 0);
+      return totalMs / (1000 * 60);
+    }
+    if (metric.targetMinutes != null) {
+      return metric.targetMinutes;
+    }
+    return focusedMinutes;
+  }
+
+  private _mapToBreakdown(
+    metric: Metric,
+    options: ProductivityScoreDerivationOptions,
+  ): ProductivityBreakdownItem | null {
+    const focusSessions = metric.focusSessions ?? [];
+    if (!metric.impactOfWork || focusSessions.length === 0) {
+      return null;
+    }
+
+    const focusedMinutes = focusSessionsToMinutes(focusSessions);
+    const totalWorkMinutes =
+      options.getTotalWorkMinutes?.(metric, focusedMinutes) ??
+      metric.totalWorkMinutes ??
+      Math.max(focusedMinutes, 1);
+    const targetMinutes =
+      options.getTargetFocusedMinutes?.(metric, focusedMinutes) ??
+      focusSessionsToMinutes(focusSessions);
+
+    const score = calculateProductivityScore(
+      metric.impactOfWork,
+      focusedMinutes,
+      totalWorkMinutes,
+      targetMinutes,
+      metric.completedTasks ?? undefined,
+      metric.plannedTasks ?? undefined,
+    );
+
+    return {
+      day: metric.id,
+      score,
+      impactRating: metric.impactOfWork,
+      focusedMinutes,
+      totalWorkMinutes,
+      targetMinutes,
+    };
+  }
+
   /**
    * Gets the average productivity score for the last N days.
    * @param days Number of days to include in average (default 7)
@@ -173,9 +264,17 @@ export class MetricService {
     days: number = 7,
     endDate?: string,
   ): Observable<number | null> {
-    return this._store$
-      .pipe(select(selectLastNDaysMetrics, { days, endDate }))
-      .pipe(map((metrics) => calculateAverageProductivityScore(metrics)));
+    return combineLatest([
+      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
+      this._worklogService.worklog$,
+    ]).pipe(
+      map(([metrics, worklog]) =>
+        calculateAverageProductivityScore(
+          metrics,
+          this._createProductivityOptions(worklog),
+        ),
+      ),
+    );
   }
 
   /**
@@ -196,10 +295,32 @@ export class MetricService {
           endDate: this._getPreviousPeriodDate(days, endDate),
         }),
       ),
+      this._worklogService.worklog$,
     ]).pipe(
-      map(([currentPeriod, previousPeriod]) =>
-        calculateProductivityTrend(currentPeriod, previousPeriod),
+      map(([currentPeriod, previousPeriod, worklog]) =>
+        calculateProductivityTrend(
+          currentPeriod,
+          previousPeriod,
+          this._createProductivityOptions(worklog),
+        ),
       ),
+    );
+  }
+
+  getProductivityBreakdown$(
+    days: number = 7,
+    endDate?: string,
+  ): Observable<ProductivityBreakdownItem[]> {
+    return combineLatest([
+      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
+      this._worklogService.worklog$,
+    ]).pipe(
+      map(([metrics, worklog]) => {
+        const options = this._createProductivityOptions(worklog);
+        return metrics
+          .map((metric) => this._mapToBreakdown(metric, options))
+          .filter((item): item is ProductivityBreakdownItem => !!item);
+      }),
     );
   }
 
