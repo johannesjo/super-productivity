@@ -45,10 +45,11 @@ const MIN_FOCUS_SESSION_DURATION = 1000;
 
 export interface ProductivityBreakdownItem {
   day: string;
-  score: number;
-  impactRating: number;
+  score: number | null;
+  impactRating: number | null;
   focusedMinutes: number;
   totalWorkMinutes: number;
+  energyCheckin: number | null;
 }
 
 @Injectable({
@@ -193,15 +194,8 @@ export class MetricService {
     return Math.max(focusedMinutes, 0);
   }
 
-  private _mapToBreakdown(
-    metric: Metric,
-    worklog: Worklog,
-  ): ProductivityBreakdownItem | null {
+  private _mapToBreakdown(metric: Metric, worklog: Worklog): ProductivityBreakdownItem {
     const focusSessions = metric.focusSessions ?? [];
-    if (!metric.impactOfWork || focusSessions.length === 0) {
-      return null;
-    }
-
     const focusedMinutes = focusSessionsToMinutes(focusSessions);
     const totalWorkMinutes = this._deriveTotalWorkMinutes(
       worklog,
@@ -209,14 +203,19 @@ export class MetricService {
       focusedMinutes,
     );
 
-    const score = calculateProductivityScore(metric.impactOfWork, focusedMinutes);
+    // Only calculate score if we have required data
+    const score =
+      metric.impactOfWork && focusSessions.length > 0
+        ? calculateProductivityScore(metric.impactOfWork, focusedMinutes)
+        : null;
 
     return {
       day: metric.id,
       score,
-      impactRating: metric.impactOfWork,
+      impactRating: metric.impactOfWork ?? null,
       focusedMinutes,
       totalWorkMinutes,
+      energyCheckin: metric.energyCheckin ?? null,
     };
   }
 
@@ -269,9 +268,7 @@ export class MetricService {
       this._worklogService.worklog$,
     ]).pipe(
       map(([metrics, worklog]) => {
-        return metrics
-          .map((metric) => this._mapToBreakdown(metric, worklog))
-          .filter((item): item is ProductivityBreakdownItem => !!item);
+        return metrics.map((metric) => this._mapToBreakdown(metric, worklog));
       }),
     );
   }
@@ -350,7 +347,8 @@ export class MetricService {
 
   private _calculateSustainabilityScore(metric: Metric, worklog: Worklog): number | null {
     const focusSessions = metric.focusSessions ?? [];
-    if (focusSessions.length === 0) {
+    // Only calculate if we have both focus sessions and energy checkin data
+    if (focusSessions.length === 0 || metric.energyCheckin == null) {
       return null;
     }
 
@@ -360,14 +358,13 @@ export class MetricService {
       metric,
       focusedMinutes,
     );
-    const energyCheckin = metric.energyCheckin ?? undefined;
 
-    const score = calculateSustainabilityScore(
+    // calculateSustainabilityScore already returns a rounded value
+    return calculateSustainabilityScore(
       focusedMinutes,
       totalWorkMinutes,
       600,
-      energyCheckin,
+      metric.energyCheckin,
     );
-    return Math.round(score);
   }
 }

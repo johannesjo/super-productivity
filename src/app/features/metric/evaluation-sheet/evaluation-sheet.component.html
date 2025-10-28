@@ -1,165 +1,148 @@
-<div class="wrapper mat-elevation-z1">
-  <help-section>
-    <p>{{ T.F.METRIC.EVAL_FORM.HELP_P1 | translate }}</p>
-    <p>
-      <a routerLink="/metrics">{{ T.F.METRIC.EVAL_FORM.HELP_LINK_TXT | translate }}</a>
-    </p>
-
-    <h3 class="mat-h3">{{ T.F.METRIC.EVAL_FORM.HELP_H1 | translate }}</h3>
-    <p>{{ T.F.METRIC.EVAL_FORM.HELP_P2 | translate }}</p>
-  </help-section>
-
-  @if (metricForDay) {
-    <form
-      #f="ngForm"
-      name="form"
-      novalidate
+@if (metricForDay) {
+  <div class="radio-group">
+    <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
+    <mat-radio-group
+      #impactOfWork="ngModel"
+      (ngModelChange)="updateImpactOfWork($event)"
+      [ngModel]="metricForDay.impactOfWork"
+      name="impactOfWork"
     >
-      <div class="radio-group">
-        <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
-        <mat-radio-group
-          #impactOfWork="ngModel"
-          (ngModelChange)="updateImpactOfWork($event)"
-          [ngModel]="metricForDay.impactOfWork"
-          name="impactOfWork"
-        >
-          @for (value of [1, 2, 3, 4]; track value) {
-            <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
-          }
-        </mat-radio-group>
-        <div class="hint">{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK_HINT | translate }}</div>
-      </div>
+      @for (value of [1, 2, 3, 4]; track value) {
+        <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
+      }
+    </mat-radio-group>
+    <div class="hint">{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK_HINT | translate }}</div>
+  </div>
 
-      <div class="radio-group">
-        <label>{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL | translate }}</label>
-        <mat-radio-group
-          #energyCheckin="ngModel"
-          (ngModelChange)="updateEnergyCheckin($event)"
-          [ngModel]="metricForDay.energyCheckin"
-          name="energyCheckin"
-        >
-          <mat-radio-button [value]="1">😫</mat-radio-button>
-          <mat-radio-button [value]="2">😐</mat-radio-button>
-          <mat-radio-button [value]="3">😊</mat-radio-button>
-        </mat-radio-group>
-        <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
-      </div>
+  <div class="radio-group">
+    <label>{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL | translate }}</label>
+    <mat-radio-group
+      #energyCheckin="ngModel"
+      (ngModelChange)="updateEnergyCheckin($event)"
+      [ngModel]="metricForDay.energyCheckin"
+      name="energyCheckin"
+    >
+      <mat-radio-button [value]="1">😫</mat-radio-button>
+      <mat-radio-button [value]="2">😐</mat-radio-button>
+      <mat-radio-button [value]="3">😊</mat-radio-button>
+    </mat-radio-group>
+    <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
+  </div>
 
-      <div class="scores-container">
-        <div
-          class="score-card productivity"
-          [style.background]="getScoreColor(productivityScore)"
-        >
-          <div class="label">
-            {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}
+  <div class="scores-container">
+    <div
+      class="score-card productivity"
+      [style.background]="getScoreColor(productivityScore)"
+    >
+      <div class="label">
+        {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}
+      </div>
+      <div class="score-row">
+        <div class="score">{{ productivityScore }}</div>
+      </div>
+      @if (productivitySummary$ | async; as summary) {
+        @if (summary.average !== null) {
+          <div class="trend-row">
+            <button
+              type="button"
+              class="trend-pill"
+              (click)="openProductivityBreakdown()"
+              [ngClass]="getTrendClass(summary.trend)"
+            >
+              <span class="pill-title">7d</span>
+              <span class="pill-value">{{ summary.average }}</span>
+              <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
+            </button>
           </div>
-          <div class="score-row">
-            <div class="score">{{ productivityScore }}</div>
-          </div>
-          @if (productivitySummary$ | async; as summary) {
-            @if (summary.average !== null) {
-              <div class="trend-row">
-                <button
-                  type="button"
-                  class="trend-pill"
-                  (click)="openProductivityBreakdown()"
-                  [ngClass]="getTrendClass(summary.trend)"
-                >
-                  <span class="pill-title">7d</span>
-                  <span class="pill-value">{{ summary.average }}</span>
-                  <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
-                </button>
-              </div>
-            }
-          }
-        </div>
+        }
+      }
+    </div>
 
-        <div
-          class="score-card sustainability"
-          [style.background]="getScoreColor(sustainabilityScore)"
-        >
-          <div class="label">
-            {{ T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE | translate }}
-          </div>
-          <div class="score-row">
-            <div class="score">{{ sustainabilityScore }}</div>
-          </div>
-          @if (sustainabilitySummary$ | async; as summary) {
-            @if (summary.average !== null) {
-              <div class="trend-row">
-                <button
-                  type="button"
-                  class="trend-pill"
-                  (click)="openProductivityBreakdown()"
-                  [ngClass]="getTrendClass(summary.trend)"
-                >
-                  <span class="pill-title">7d</span>
-                  <span class="pill-value">{{ summary.average }}</span>
-                  <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
-                </button>
-              </div>
-            }
-          }
-        </div>
+    <div
+      class="score-card sustainability"
+      [style.background]="getScoreColor(sustainabilityScore)"
+    >
+      <div class="label">
+        {{ T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE | translate }}
       </div>
-
-      <div class="daily-state-card">
-        <div class="daily-state-label">
-          {{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}
-        </div>
-        <div class="daily-state-title">
-          <span class="daily-state-icon">{{ dailyStateInfo.icon }}</span>
-          <span>{{ dailyStateInfo.headlineKey | translate }}</span>
-        </div>
-        <div class="daily-state-hint">{{ dailyStateInfo.hintKey | translate }}</div>
+      <div class="score-row">
+        <div class="score">{{ sustainabilityScore }}</div>
       </div>
+      @if (sustainabilitySummary$ | async; as summary) {
+        @if (summary.average !== null) {
+          <div class="trend-row">
+            <button
+              type="button"
+              class="trend-pill"
+              (click)="openProductivityBreakdown()"
+              [ngClass]="getTrendClass(summary.trend)"
+            >
+              <span class="pill-title">7d</span>
+              <span class="pill-value">{{ summary.average }}</span>
+              <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
+            </button>
+          </div>
+        }
+      }
+    </div>
+  </div>
 
-      <div class="time-summary">
-        <div class="time-item">
-          <span class="time-label">{{
-            T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate
-          }}</span>
-          <span class="time-value">{{ deepWorkTime | msToClockString }}</span>
-        </div>
+  <div class="daily-state-card">
+    <div class="daily-state-label">
+      {{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}
+    </div>
+    <div class="daily-state-title">
+      <span class="daily-state-icon">{{ dailyStateInfo.icon }}</span>
+      <span>{{ dailyStateInfo.headlineKey | translate }}</span>
+    </div>
+    <div class="daily-state-hint">{{ dailyStateInfo.hintKey | translate }}</div>
+  </div>
 
-        <div class="time-item">
-          <span class="time-label">{{
-            T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate
-          }}</span>
-          <span class="time-value">{{ totalWorkTimeMs | msToClockString }}</span>
-        </div>
-      </div>
+  <div class="time-summary">
+    <div class="time-item">
+      <span class="time-label">{{
+        T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate
+      }}</span>
+      <span class="time-value">{{ deepWorkTime | msToClockString }}</span>
+    </div>
 
-      <!--      <section class="notes-for-tomorrow">-->
-      <!--        <h3 class="section-title">-->
-      <!--          {{ T.F.METRIC.EVAL_FORM.NOTES_SECTION_TITLE | translate }}-->
-      <!--        </h3>-->
-      <!--        <mat-form-field>-->
-      <!--          <mat-label>{{ T.F.METRIC.EVAL_FORM.NOTES | translate }}</mat-label>-->
-      <!--          <textarea-->
-      <!--            #notes="ngModel"-->
-      <!--            (ngModelChange)="updateNotes($event)"-->
-      <!--            [ngModel]="metricForDay.notes"-->
-      <!--            matInput-->
-      <!--            name="notes"-->
-      <!--            rows="4"-->
-      <!--          ></textarea>-->
-      <!--        </mat-form-field>-->
+    <div class="time-item">
+      <span class="time-label">{{
+        T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate
+      }}</span>
+      <span class="time-value">{{ totalWorkTimeMs | msToClockString }}</span>
+    </div>
+  </div>
 
-      <!--        <div class="checkbox-container">-->
-      <!--          <mat-checkbox-->
-      <!--            #remindTomorrow="ngModel"-->
-      <!--            (ngModelChange)="updateRemindTomorrow($event)"-->
-      <!--            [ngModel]="metricForDay.remindTomorrow"-->
-      <!--            name="remindTomorrow"-->
-      <!--          >-->
-      <!--            {{ T.F.METRIC.EVAL_FORM.REMIND_TOMORROW | translate }}-->
-      <!--          </mat-checkbox>-->
-      <!--        </div>-->
-      <!--      </section>-->
-    </form>
-  }
-</div>
+  <!--      <section class="notes-for-tomorrow">-->
+  <!--        <h3 class="section-title">-->
+  <!--          {{ T.F.METRIC.EVAL_FORM.NOTES_SECTION_TITLE | translate }}-->
+  <!--        </h3>-->
+  <!--        <mat-form-field>-->
+  <!--          <mat-label>{{ T.F.METRIC.EVAL_FORM.NOTES | translate }}</mat-label>-->
+  <!--          <textarea-->
+  <!--            #notes="ngModel"-->
+  <!--            (ngModelChange)="updateNotes($event)"-->
+  <!--            [ngModel]="metricForDay.notes"-->
+  <!--            matInput-->
+  <!--            name="notes"-->
+  <!--            rows="4"-->
+  <!--          ></textarea>-->
+  <!--        </mat-form-field>-->
+
+  <!--        <div class="checkbox-container">-->
+  <!--          <mat-checkbox-->
+  <!--            #remindTomorrow="ngModel"-->
+  <!--            (ngModelChange)="updateRemindTomorrow($event)"-->
+  <!--            [ngModel]="metricForDay.remindTomorrow"-->
+  <!--            name="remindTomorrow"-->
+  <!--          >-->
+  <!--            {{ T.F.METRIC.EVAL_FORM.REMIND_TOMORROW | translate }}-->
+  <!--          </mat-checkbox>-->
+  <!--        </div>-->
+  <!--      </section>-->
+}
+
 @if (workContextService.isActiveWorkContextProject$ | async) {
   <div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
     <button

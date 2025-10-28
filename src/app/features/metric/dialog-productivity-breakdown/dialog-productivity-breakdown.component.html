@@ -8,6 +8,7 @@
           <th>Date</th>
           <th>Score</th>
           <th>Impact</th>
+          <th>Energy</th>
           <th>Focused (min)</th>
           <th>Total Work (min)</th>
         </tr>
@@ -15,8 +16,19 @@
       <tbody>
         <tr *ngFor="let item of breakdown">
           <td>{{ item.day }}</td>
-          <td>{{ item.score }}</td>
-          <td>{{ item.impactRating }}</td>
+          <td>{{ item.score ?? '-' }}</td>
+          <td>{{ item.impactRating ?? '-' }}</td>
+          <td>
+            @if (item.energyCheckin === 1) {
+              😫
+            } @else if (item.energyCheckin === 2) {
+              😐
+            } @else if (item.energyCheckin === 3) {
+              😊
+            } @else {
+              -
+            }
+          </td>
           <td>{{ item.focusedMinutes | number: '1.0-1' }}</td>
           <td>{{ item.totalWorkMinutes | number: '1.0-1' }}</td>
         </tr>

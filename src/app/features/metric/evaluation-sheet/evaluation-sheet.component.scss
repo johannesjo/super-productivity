@@ -1,24 +1,28 @@
 @use '../../../../styles/_globals.scss' as *;
 
-.wrapper {
-  position: relative;
-  padding: var(--s2);
-  border-radius: var(--card-border-radius);
+:host {
+  --eval-card-gap: 12px;
+  --eval-border-radius: var(--card-border-radius);
+  box-shadow: none;
+  gap: var(--eval-card-gap);
+  display: flex !important;
+  flex-direction: column;
   text-align: left;
-  background: var(--bg-lighter);
 }
 
-mat-form-field {
-  width: 100%;
-  margin-bottom: var(--s3);
+.radio-group,
+.time-item,
+.score-card,
+.daily-state-card {
+  padding: 12px;
+  border-radius: var(--eval-border-radius);
+  box-shadow: var(--whiteframe-shadow-3dp);
+  background-color: var(--card-bg);
 }
 
 .time-summary {
   display: flex;
-  gap: var(--s3);
-  margin-top: var(--s3);
-  padding: var(--s2);
-  opacity: 0.8;
+  gap: var(--eval-card-gap);
 
   .time-item {
     flex: 1;
@@ -40,7 +44,7 @@ mat-form-field {
 }
 
 .radio-group {
-  margin-bottom: var(--s2);
+  padding: 12px;
 
   > label {
     display: block;
@@ -57,29 +61,27 @@ mat-form-field {
   .hint {
     text-align: left;
     margin-top: var(--s);
-    font-size: 0.8em;
-    opacity: 0.65;
+    font-size: 0.75em;
+    opacity: 0.6;
   }
 }
 
 .scores-container {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--s2);
-  margin: var(--s4) 0 0;
+  //grid-template-columns: 3fr 2fr;
+  grid-template-columns: 2fr 2fr;
+  gap: var(--eval-card-gap);
 }
 
 .score-card {
   padding: 12px;
-  //border-radius: 16px;
-  border-radius: 64px;
   text-align: left;
   display: flex;
   flex-direction: column;
   gap: var(--s);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   color: white;
+  border: 2px solid var(--card-bg);
 
   .label {
     font-size: 0.75em;
@@ -111,11 +113,9 @@ mat-form-field {
 }
 
 .daily-state-card {
-  margin: var(--s3) 0 var(--s2);
   padding: var(--s2);
-  border-radius: var(--card-border-radius);
   background: var(--bg-lightest);
-  border-left: 4px solid var(--accent);
+  border-left: 4px solid var(--c-accent);
   display: flex;
   flex-direction: column;
   gap: var(--s);
@@ -129,7 +129,6 @@ mat-form-field {
 
   .daily-state-title {
     display: flex;
-    align-items: center;
     gap: var(--s);
     font-weight: 600;
     color: var(--fg-primary);
@@ -190,22 +189,5 @@ mat-form-field {
 
   &.trend-stable {
     background: rgba(255, 255, 255, 0.2);
-  }
-}
-
-.checkbox-container {
-  margin-top: var(--s);
-}
-
-.notes-for-tomorrow {
-  margin-top: var(--s4);
-  padding-top: var(--s3);
-  border-top: 1px solid var(--bg-lightest);
-
-  .section-title {
-    margin: 0 0 var(--s2) 0;
-    font-size: 16px;
-    font-weight: 600;
-    color: var(--fg-primary);
   }
 }
