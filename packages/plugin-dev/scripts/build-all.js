@@ -190,7 +190,7 @@ async function buildPlugin(plugin) {
         log(`  Installing dependencies...`, colors.yellow);
         try {
           // Try to install dependencies
-          await execAsync(`cd ${plugin.path} && npm install`);
+          await execAsync(`cd ${plugin.path} && npm install --include=dev`);
         } catch (installError) {
           // If install fails, check if node_modules exists and continue
           if (fs.existsSync(nodeModulesPath)) {
