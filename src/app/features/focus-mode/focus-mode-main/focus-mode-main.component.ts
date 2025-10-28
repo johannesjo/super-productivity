@@ -18,6 +18,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
+  completeFocusSession,
   completeTask,
   selectFocusTask,
   setFocusSessionDuration,
@@ -208,6 +209,10 @@ export class FocusModeMainComponent implements OnDestroy {
           setFocusSessionDuration({ focusSessionDuration: extendedDuration }),
         );
       });
+  }
+
+  completeFocusSession(): void {
+    this._store.dispatch(completeFocusSession({ isManual: true }));
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

@@ -48,6 +48,15 @@
     >
       <mat-icon>done</mat-icon>
     </button>
+
+    <button
+      mat-icon-button
+      [matTooltip]="'Complete focus session' | translate"
+      (click)="completeFocusSession()"
+    >
+      <mat-icon>done_all</mat-icon>
+    </button>
+
     @if (task.issueId && task.issueType !== ICAL_TYPE) {
       <a
         mat-icon-button
