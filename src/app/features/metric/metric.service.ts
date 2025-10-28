@@ -33,6 +33,7 @@ import {
   calculateAverageProductivityScore,
   calculateProductivityScore,
   calculateProductivityTrend,
+  calculateSustainabilityScore,
   focusSessionsToMinutes,
   TrendIndicator,
 } from './metric-scoring.util';
@@ -275,10 +276,98 @@ export class MetricService {
     );
   }
 
+  getAverageSustainabilityScore$(
+    days: number = 7,
+    endDate?: string,
+  ): Observable<number | null> {
+    return combineLatest([
+      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
+      this._worklogService.worklog$,
+    ]).pipe(
+      map(([metrics, worklog]) => this._calculateSustainabilityAverage(metrics, worklog)),
+    );
+  }
+
+  getSustainabilityTrend$(
+    days: number = 7,
+    endDate?: string,
+  ): Observable<TrendIndicator | null> {
+    return combineLatest([
+      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
+      this._store$.pipe(
+        select(selectLastNDaysMetrics, {
+          days,
+          endDate: this._getPreviousPeriodDate(days, endDate),
+        }),
+      ),
+      this._worklogService.worklog$,
+    ]).pipe(
+      map(([currentPeriod, previousPeriod, worklog]) => {
+        const currentAvg = this._calculateSustainabilityAverage(currentPeriod, worklog);
+        const previousAvg = this._calculateSustainabilityAverage(previousPeriod, worklog);
+
+        if (currentAvg === null || previousAvg === null) {
+          return null;
+        }
+
+        const change = currentAvg - previousAvg;
+        const roundedChange = Math.round(change);
+        const changePercent =
+          previousAvg !== 0 ? Math.round((change / previousAvg) * 100) : 0;
+        const direction = Math.abs(change) < 2 ? 'stable' : change > 0 ? 'up' : 'down';
+
+        return {
+          direction,
+          change: roundedChange,
+          changePercent,
+        } as TrendIndicator;
+      }),
+    );
+  }
+
   private _getPreviousPeriodDate(days: number, endDate?: string): string {
     const end = endDate ? new Date(endDate) : new Date();
     // Go back by the number of days to get the end of the previous period
     end.setDate(end.getDate() - days);
     return end.toISOString().split('T')[0];
+  }
+
+  private _calculateSustainabilityAverage(
+    metrics: Metric[],
+    worklog: Worklog,
+  ): number | null {
+    const scores = metrics
+      .map((metric) => this._calculateSustainabilityScore(metric, worklog))
+      .filter((score): score is number => score != null);
+
+    if (!scores.length) {
+      return null;
+    }
+
+    const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+    return Math.round(average);
+  }
+
+  private _calculateSustainabilityScore(metric: Metric, worklog: Worklog): number | null {
+    const focusSessions = metric.focusSessions ?? [];
+    if (focusSessions.length === 0) {
+      return null;
+    }
+
+    const focusedMinutes = focusSessionsToMinutes(focusSessions);
+    const totalWorkMinutes = this._deriveTotalWorkMinutes(
+      worklog,
+      metric,
+      focusedMinutes,
+    );
+    const energyCheckin = metric.energyCheckin ?? undefined;
+
+    const score = calculateSustainabilityScore(
+      focusedMinutes,
+      totalWorkMinutes,
+      600,
+      energyCheckin,
+    );
+    return Math.round(score);
   }
 }

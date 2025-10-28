@@ -18,8 +18,8 @@ import {
   TrendIndicator,
 } from '../metric-scoring.util';
 import { ImprovementService } from '../improvement/improvement.service';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
+import { map as rxMap, switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { DialogAddNoteComponent } from '../../note/dialog-add-note/dialog-add-note.component';
 import { MatDialog } from '@angular/material/dialog';
@@ -78,11 +78,28 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
   private _subs: Subscription = new Subscription();
 
-  // 7-day average and trend
+  // Scores & trends
   sevenDayAverage$: Observable<number | null> =
     this._metricService.getAverageProductivityScore$(7);
   productivityTrend$: Observable<TrendIndicator | null> =
     this._metricService.getProductivityTrend$(7);
+  productivitySummary$: Observable<{
+    average: number | null;
+    trend: TrendIndicator | null;
+  }> = combineLatest([this.sevenDayAverage$, this.productivityTrend$]).pipe(
+    rxMap(([average, trend]) => ({ average, trend })),
+  );
+
+  sustainabilityAverage$: Observable<number | null> =
+    this._metricService.getAverageSustainabilityScore$(7);
+  sustainabilityTrend$: Observable<TrendIndicator | null> =
+    this._metricService.getSustainabilityTrend$(7);
+  sustainabilitySummary$: Observable<{
+    average: number | null;
+    trend: TrendIndicator | null;
+  }> = combineLatest([this.sustainabilityAverage$, this.sustainabilityTrend$]).pipe(
+    rxMap(([average, trend]) => ({ average, trend })),
+  );
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
@@ -163,6 +180,23 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
 
   getScoreColor(score: number): string {
     return getScoreColorGradient(score);
+  }
+
+  getTrendDelta(trend: TrendIndicator | null): string {
+    if (!trend || trend.direction === 'stable') {
+      return '±0';
+    }
+    const change = trend.change;
+    return change > 0 ? `+${change}` : `${change}`;
+  }
+
+  getTrendClass(
+    trend: TrendIndicator | null,
+  ): 'trend-up' | 'trend-down' | 'trend-stable' {
+    if (!trend || trend.direction === 'stable') {
+      return 'trend-stable';
+    }
+    return trend.direction === 'up' ? 'trend-up' : 'trend-down';
   }
 
   get dailyStateInfo(): { icon: string; headlineKey: string; hintKey: string } {
