@@ -231,7 +231,6 @@ export const calculateSustainabilityScore = (
   totalWorkMinutes: number,
   workloadLinearZeroAt: number = TIME_TARGETS.DEFAULT_WORKLOAD_LINEAR_ZERO_AT,
   energyCheckin?: number,
-  exhaustion?: number,
 ): number => {
   // Freshness: Energy level normalized to 0-1
   // Priority: energyCheckin (simpler) > exhaustion (detailed) > neutral fallback
@@ -241,12 +240,7 @@ export const calculateSustainabilityScore = (
     freshness =
       (energyCheckin - SCALE_CONVERSIONS.ENERGY_CHECKIN_MIN) /
       SCALE_CONVERSIONS.ENERGY_CHECKIN_DIVISOR;
-  } else if (exhaustion !== undefined) {
-    // exhaustion: 1-5 (higher = worse) → invert to 0-1
-    const exhaustionNorm = exhaustion / SCALE_CONVERSIONS.EXHAUSTION_SCALE_MAX;
-    freshness = 1 - exhaustionNorm;
   }
-
   // Workload: Sigmoid function centered at 8h (480 min)
   // Formula: 2 / (1 + exp(steepness × (minutes - inflection))) - 1
   // At 0h: ~1.0, at 8h: 0.0, at 16h: ~-1.0 (clamped to 0)

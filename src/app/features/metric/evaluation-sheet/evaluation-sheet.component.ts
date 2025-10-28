@@ -11,14 +11,11 @@ import {
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
 import {
-  calculateDailyState,
   calculateProductivityScore,
   calculateSustainabilityScore,
-  DailyState,
   getScoreColorGradient,
   TrendIndicator,
 } from '../metric-scoring.util';
-import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
 import { BehaviorSubject, Observable, Subscription } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
@@ -30,20 +27,12 @@ import { DateService } from 'src/app/core/date/date.service';
 import { HelpSectionComponent } from '../../../ui/help-section/help-section.component';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { MatError, MatFormField, MatHint, MatLabel } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
-import { MaxDirective } from '../../../ui/validation/max.directive';
-import { MinDirective } from '../../../ui/validation/min.directive';
-import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
-import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
-import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
-import { InputDurationDirective } from '../../../ui/duration/input-duration.directive';
 import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
 
 @Component({
@@ -55,29 +44,17 @@ import { InlineInputComponent } from '../../../ui/inline-input/inline-input.comp
     HelpSectionComponent,
     RouterLink,
     FormsModule,
-    MatFormField,
-    MatLabel,
-    MatInput,
-    MaxDirective,
-    MinDirective,
-    MatHint,
-    MatError,
-    ChipListInputComponent,
     MatButton,
     MatIcon,
     MatRadioGroup,
     MatRadioButton,
-    MatCheckbox,
     AsyncPipe,
     TranslatePipe,
-    MsToStringPipe,
     MsToClockStringPipe,
-    InputDurationDirective,
     InlineInputComponent,
   ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  obstructionService = inject(ObstructionService);
   improvementService = inject(ImprovementService);
   workContextService = inject(WorkContextService);
   private _metricService = inject(MetricService);
@@ -148,28 +125,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._subs.unsubscribe();
   }
 
-  updateMood(mood: number): void {
-    this._update({ mood });
-  }
-
-  updateProductivity(productivity: number): void {
-    this._update({ productivity });
-  }
-
-  updateFocusQuality(focusQuality: number): void {
-    this._update({ focusQuality });
-  }
-
   updateImpactOfWork(impactOfWork: number): void {
     this._update({ impactOfWork });
-  }
-
-  updateNotes(notes: string): void {
-    this._update({ notes });
-  }
-
-  updateRemindTomorrow(remindTomorrow: boolean): void {
-    this._update({ remindTomorrow });
   }
 
   updateDeepWorkTime(milliseconds: number): void {
@@ -177,20 +134,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ focusSessions: [milliseconds] });
   }
 
-  updateExhaustion(exhaustion: number): void {
-    this._update({ exhaustion });
-  }
-
   updateEnergyCheckin(energyCheckin: number): void {
     this._update({ energyCheckin });
-  }
-
-  updateCompletedTasks(completedTasks: number): void {
-    this._update({ completedTasks });
-  }
-
-  updatePlannedTasks(plannedTasks: number): void {
-    this._update({ plannedTasks });
   }
 
   updateTotalWorkMinutes(milliseconds: number): void {
@@ -199,18 +144,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     this._update({ totalWorkMinutes });
   }
 
-  updateTargetMinutes(milliseconds: number): void {
-    // Convert from milliseconds to minutes for storage
-    const targetMinutes = milliseconds / (1000 * 60);
-    this._update({ targetMinutes });
-  }
-
   get totalWorkTimeMs(): number {
     return (this.metricForDay?.totalWorkMinutes ?? 0) * 60 * 1000;
-  }
-
-  get targetMinutesMs(): number {
-    return (this.metricForDay?.targetMinutes ?? 240) * 60 * 1000;
   }
 
   get deepWorkTime(): number {
@@ -246,27 +181,13 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     const totalWorkMinutes =
       this.metricForDay?.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
     const energyCheckin = this.metricForDay?.energyCheckin ?? undefined;
-    const exhaustion = this.metricForDay?.exhaustion ?? undefined;
 
     return calculateSustainabilityScore(
       focusedMinutes,
       totalWorkMinutes,
       600, // workloadLinearZeroAt: 10h → score 0
       energyCheckin,
-      exhaustion,
     );
-  }
-
-  get dailyState(): DailyState {
-    return calculateDailyState(this.productivityScore, this.sustainabilityScore);
-  }
-
-  get isProductivityHigh(): boolean {
-    return this.productivityScore >= 50;
-  }
-
-  get isSustainabilityHigh(): boolean {
-    return this.sustainabilityScore >= 50;
   }
 
   getScoreColor(score: number): string {
@@ -279,68 +200,10 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     });
   }
 
-  addNewObstruction(v: string): void {
-    const id = this.obstructionService.addObstruction(v);
-    this._update({
-      obstructions: [...(this.metricForDay as MetricCopy).obstructions, id],
-    });
-  }
-
-  removeObstruction(idToRemove: string): void {
-    this._update({
-      obstructions: (this.metricForDay as MetricCopy).obstructions.filter(
-        (id) => id !== idToRemove,
-      ),
-    });
-  }
-
   addImprovement(v: string): void {
     this._update({
       improvements: [...(this.metricForDay as MetricCopy).improvements, v],
     });
-  }
-
-  addNewImprovement(v: string): void {
-    const id = this.improvementService.addImprovement(v);
-    this._update({
-      improvements: [...(this.metricForDay as MetricCopy).improvements, id],
-    });
-  }
-
-  removeImprovement(idToRemove: string): void {
-    this._update({
-      improvements: (this.metricForDay as MetricCopy).improvements.filter(
-        (id) => id !== idToRemove,
-      ),
-    });
-  }
-
-  addImprovementTomorrow(v: string): void {
-    this._update({
-      improvementsTomorrow: [
-        ...(this.metricForDay as MetricCopy).improvementsTomorrow,
-        v,
-      ],
-    });
-  }
-
-  addNewImprovementTomorrow(v: string): void {
-    const id = this.improvementService.addImprovement(v);
-    this._update({
-      improvementsTomorrow: [
-        ...(this.metricForDay as MetricCopy).improvementsTomorrow,
-        id,
-      ],
-    });
-  }
-
-  removeImprovementTomorrow(idToRemove: string): void {
-    this._update({
-      improvementsTomorrow: (this.metricForDay as MetricCopy).improvementsTomorrow.filter(
-        (id) => id !== idToRemove,
-      ),
-    });
-    // this.improvementService.disableImprovementRepeat(idToRemove);
   }
 
   toggleImprovementRepeat(improvementId: string): void {

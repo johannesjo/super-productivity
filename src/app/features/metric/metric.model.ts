@@ -6,12 +6,17 @@ export interface MetricCopy {
   // string date of day
   id: string;
 
-  // used as id
+  // TODO remove
   obstructions: string[];
+  // TODO remove
   improvements: string[];
+  // TODO remove
   improvementsTomorrow: string[];
+  // TODO remove
   mood?: number | null;
+  // TODO remove
   productivity?: number | null;
+
   focusSessions?: number[];
 
   // Evaluation fields
@@ -19,11 +24,12 @@ export interface MetricCopy {
   remindTomorrow?: boolean;
 
   // v2.4 Productivity scoring fields (impact-driven)
-  impactOfWork?: number | null; // 1-5 scale (REQUIRED for productivity score, primary driver at 45%)
+  impactOfWork?: number | null; // 1-4 scale
 
   // v2.3 Sustainability scoring fields
-  exhaustion?: number | null; // 1-5 scale (detailed energy assessment)
   energyCheckin?: number | null; // 1-3 scale (simple: 1=exhausted, 2=ok, 3=good)
+
+  // TODO remove
   totalWorkMinutes?: number | null; // Total work time in minutes
   targetMinutes?: number | null; // Target deep work minutes (default 240)
 

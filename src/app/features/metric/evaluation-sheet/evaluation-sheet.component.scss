@@ -70,7 +70,7 @@ mat-form-field {
 
 .score-card {
   padding: var(--s2);
-  border-radius: 16px;
+  //border-radius: 16px;
   border-radius: 64px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -96,7 +96,7 @@ mat-form-field {
 .seven-day-summary {
   display: flex;
   align-items: center;
-  gap: var(--s2);
+  //gap: var(--s2);
   gap: var(--s4);
   padding: var(--s2);
   margin: var(--s2) 0;
