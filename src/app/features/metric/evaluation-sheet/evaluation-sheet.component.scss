@@ -119,6 +119,7 @@
   display: flex;
   flex-direction: column;
   gap: var(--s);
+  transition: all 0.3s ease;
 
   .daily-state-label {
     font-size: 0.75em;
@@ -132,11 +133,13 @@
     gap: var(--s);
     font-weight: 600;
     color: var(--fg-primary);
+    transition: transform 0.2s ease;
   }
 
   .daily-state-icon {
     font-size: 20px;
     line-height: 1;
+    transition: transform 0.2s ease;
   }
 
   .daily-state-hint {

@@ -158,6 +158,14 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     return this.deepWorkTime / (1000 * 60);
   }
 
+  get hasProductivityData(): boolean {
+    return !!this.metricForDay?.impactOfWork;
+  }
+
+  get hasSustainabilityData(): boolean {
+    return !!this.metricForDay?.energyCheckin;
+  }
+
   get productivityScore(): number {
     const impactRating = this.metricForDay?.impactOfWork ?? 3; // Default to neutral (3) if not set
     const focusedMinutes = this.deepWorkMinutes;

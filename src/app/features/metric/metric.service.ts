@@ -346,12 +346,12 @@ export class MetricService {
   }
 
   private _calculateSustainabilityScore(metric: Metric, worklog: Worklog): number | null {
-    const focusSessions = metric.focusSessions ?? [];
-    // Only calculate if we have both focus sessions and energy checkin data
-    if (focusSessions.length === 0 || metric.energyCheckin == null) {
+    // Only calculate if we have energy checkin data (focus time can be 0)
+    if (metric.energyCheckin == null) {
       return null;
     }
 
+    const focusSessions = metric.focusSessions ?? [];
     const focusedMinutes = focusSessionsToMinutes(focusSessions);
     const totalWorkMinutes = this._deriveTotalWorkMinutes(
       worklog,
