@@ -146,35 +146,10 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     return this.deepWorkTime / (1000 * 60);
   }
 
-  get targetFocusedMinutes(): number {
-    const focusSessions = this.metricForDay?.focusSessions ?? [];
-    if (focusSessions.length > 0) {
-      const totalMs = focusSessions.reduce((acc, val) => acc + val, 0);
-      return totalMs / (1000 * 60);
-    }
-    const legacyTarget = this.metricForDay?.targetMinutes;
-    if (typeof legacyTarget === 'number' && !Number.isNaN(legacyTarget)) {
-      return legacyTarget;
-    }
-    return 0;
-  }
-
   get productivityScore(): number {
     const impactRating = this.metricForDay?.impactOfWork ?? 3; // Default to neutral (3) if not set
     const focusedMinutes = this.deepWorkMinutes;
-    const totalWorkMinutes = this.totalWorkMinutes;
-    const targetFocusedMinutes = this.targetFocusedMinutes;
-    const completedTasks = this.metricForDay?.completedTasks ?? undefined;
-    const plannedTasks = this.metricForDay?.plannedTasks ?? undefined;
-
-    return calculateProductivityScore(
-      impactRating,
-      focusedMinutes,
-      totalWorkMinutes,
-      targetFocusedMinutes,
-      completedTasks,
-      plannedTasks,
-    );
+    return calculateProductivityScore(impactRating, focusedMinutes);
   }
 
   get sustainabilityScore(): number {

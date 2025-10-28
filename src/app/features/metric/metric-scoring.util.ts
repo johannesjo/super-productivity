@@ -104,7 +104,7 @@ const clamp = (value: number, min: number = 0, max: number = 1): number =>
 /**
  * Helper: Soft-cap function that provides diminishing returns above target.
  * Uses exponential decay: 1 - exp(-k * clamp(x))
- * @param x - Input value (typically a ratio like focusedMinutes/targetMinutes)
+ * @param x - Input value (typically a ratio like focusedMinutes to target minutes)
  * @param k - Decay constant (uses SOFT_CAP.K_VALUE by default)
  * @returns Soft-capped value between 0 and ~1
  */
@@ -133,11 +133,6 @@ export const focusSessionsToMinutes = (focusSessions: number[]): number => {
   return totalMs / (1000 * 60);
 };
 
-export interface ProductivityScoreDerivationOptions {
-  getTotalWorkMinutes?: (metric: Metric, focusedMinutes: number) => number;
-  getTargetFocusedMinutes?: (metric: Metric, focusedMinutes: number) => number;
-}
-
 /**
  * Calculates a productivity score (0-100) with impact rating as the primary driver.
  *
@@ -154,31 +149,25 @@ export interface ProductivityScoreDerivationOptions {
  *
  * @param impactRating - User's assessment of work impact (1-4 scale, REQUIRED)
  * @param focusedMinutes - Total focused time for the day (in minutes)
- * @param totalWorkMinutes - Total work time (unused in v2.6, kept for API compatibility)
  * @param targetFocusedMinutes - Target deep work goal (in minutes, default 240 = 4 hours)
- * @param completedTasks - Number of tasks completed (optional, currently unused but kept for future)
- * @param plannedTasks - Number of tasks planned (optional, currently unused but kept for future)
  * @returns Productivity score from 0-100
  *
  * @example
- * // High impact, met target = perfect score
- * calculateProductivityScore(4, 240, 360, 240) // Returns 100
+ * // High impact, met default target = perfect score
+ * calculateProductivityScore(4, 240) // Returns 100
  *
  * @example
  * // Medium impact, typical day
- * calculateProductivityScore(2, 180, 360, 240) // Returns ~60
+ * calculateProductivityScore(2, 180) // Returns ~60
  *
  * @example
  * // Low impact despite good focus = moderate score
- * calculateProductivityScore(1, 240, 360, 240) // Returns ~48
+ * calculateProductivityScore(1, 240) // Returns ~48
  */
 export const calculateProductivityScore = (
   impactRating: number,
   focusedMinutes: number,
-  totalWorkMinutes: number,
   targetFocusedMinutes: number = TIME_TARGETS.DEFAULT_TARGET_FOCUSED_MINUTES,
-  completedTasks?: number,
-  plannedTasks?: number,
 ): number => {
   // Impact: User's reflection on work value (1-4 scale normalized to 0-1)
   const impact = clamp(impactRating / SCALE_CONVERSIONS.IMPACT_SCALE_MAX);
@@ -191,11 +180,6 @@ export const calculateProductivityScore = (
     progressRatio <= 1.0
       ? progressRatio // Linear up to target: full credit for meeting goal
       : softCap(progressRatio); // Soft-cap beyond target: diminishing returns
-
-  // Optional: Task completion (currently not weighted, but available for future use)
-  // const completion = completedTasks != null && plannedTasks != null
-  //   ? clamp(safeDiv(completedTasks, Math.max(plannedTasks, 1), 0))
-  //   : targetProgress;
 
   // Weighted components (sum = 1.0)
   const impactComponent = impact * PRODUCTIVITY_WEIGHTS.IMPACT;
@@ -367,10 +351,7 @@ export const getScoreColorGradient = (score: number): string => {
  * @param metrics - Array of metrics to average
  * @returns Average productivity score (0-100) or null if insufficient data
  */
-export const calculateAverageProductivityScore = (
-  metrics: Metric[],
-  options: ProductivityScoreDerivationOptions = {},
-): number | null => {
+export const calculateAverageProductivityScore = (metrics: Metric[]): number | null => {
   const scores: number[] = [];
 
   for (const metric of metrics) {
@@ -384,22 +365,7 @@ export const calculateAverageProductivityScore = (
     }
 
     const focusedMinutes = focusSessionsToMinutes(metric.focusSessions);
-    const totalWorkMinutes =
-      options.getTotalWorkMinutes?.(metric, focusedMinutes) ??
-      metric.totalWorkMinutes ??
-      Math.max(focusedMinutes, 1);
-    const targetFocusedMinutes =
-      options.getTargetFocusedMinutes?.(metric, focusedMinutes) ??
-      focusSessionsToMinutes(metric.focusSessions);
-
-    const score = calculateProductivityScore(
-      metric.impactOfWork,
-      focusedMinutes,
-      totalWorkMinutes,
-      targetFocusedMinutes,
-      metric.completedTasks ?? undefined,
-      metric.plannedTasks ?? undefined,
-    );
+    const score = calculateProductivityScore(metric.impactOfWork, focusedMinutes);
 
     scores.push(score);
   }
@@ -428,10 +394,9 @@ export interface TrendIndicator {
 export const calculateProductivityTrend = (
   currentPeriodMetrics: Metric[],
   previousPeriodMetrics: Metric[],
-  options: ProductivityScoreDerivationOptions = {},
 ): TrendIndicator | null => {
-  const currentAvg = calculateAverageProductivityScore(currentPeriodMetrics, options);
-  const previousAvg = calculateAverageProductivityScore(previousPeriodMetrics, options);
+  const currentAvg = calculateAverageProductivityScore(currentPeriodMetrics);
+  const previousAvg = calculateAverageProductivityScore(previousPeriodMetrics);
 
   if (currentAvg === null || previousAvg === null) {
     return null;

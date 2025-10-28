@@ -31,8 +31,6 @@ export interface MetricCopy {
 
   // TODO remove
   totalWorkMinutes?: number | null; // Total work time in minutes
-  targetMinutes?: number | null; // Target deep work minutes (default 240)
-
   // Optional task completion tracking (for future use in productivity)
   completedTasks?: number | null;
   plannedTasks?: number | null;

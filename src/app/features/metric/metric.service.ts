@@ -34,7 +34,6 @@ import {
   calculateProductivityScore,
   calculateProductivityTrend,
   focusSessionsToMinutes,
-  ProductivityScoreDerivationOptions,
   TrendIndicator,
 } from './metric-scoring.util';
 import { WorklogService } from '../worklog/worklog.service';
@@ -49,7 +48,6 @@ export interface ProductivityBreakdownItem {
   impactRating: number;
   focusedMinutes: number;
   totalWorkMinutes: number;
-  targetMinutes: number;
 }
 
 @Injectable({
@@ -179,17 +177,6 @@ export class MetricService {
     return this.focusSessionsByDay()[day];
   }
 
-  private _createProductivityOptions(
-    worklog: Worklog,
-  ): ProductivityScoreDerivationOptions {
-    return {
-      getTotalWorkMinutes: (metric, focusedMinutes) =>
-        this._deriveTotalWorkMinutes(worklog, metric, focusedMinutes),
-      getTargetFocusedMinutes: (metric, focusedMinutes) =>
-        this._deriveTargetMinutes(metric, focusedMinutes),
-    };
-  }
-
   private _deriveTotalWorkMinutes(
     worklog: Worklog,
     metric: Metric,
@@ -205,21 +192,9 @@ export class MetricService {
     return Math.max(focusedMinutes, 0);
   }
 
-  private _deriveTargetMinutes(metric: Metric, focusedMinutes: number): number {
-    const focusSessions = metric.focusSessions ?? [];
-    if (focusSessions.length > 0) {
-      const totalMs = focusSessions.reduce((acc, val) => acc + val, 0);
-      return totalMs / (1000 * 60);
-    }
-    if (metric.targetMinutes != null) {
-      return metric.targetMinutes;
-    }
-    return focusedMinutes;
-  }
-
   private _mapToBreakdown(
     metric: Metric,
-    options: ProductivityScoreDerivationOptions,
+    worklog: Worklog,
   ): ProductivityBreakdownItem | null {
     const focusSessions = metric.focusSessions ?? [];
     if (!metric.impactOfWork || focusSessions.length === 0) {
@@ -227,22 +202,13 @@ export class MetricService {
     }
 
     const focusedMinutes = focusSessionsToMinutes(focusSessions);
-    const totalWorkMinutes =
-      options.getTotalWorkMinutes?.(metric, focusedMinutes) ??
-      metric.totalWorkMinutes ??
-      Math.max(focusedMinutes, 1);
-    const targetMinutes =
-      options.getTargetFocusedMinutes?.(metric, focusedMinutes) ??
-      focusSessionsToMinutes(focusSessions);
-
-    const score = calculateProductivityScore(
-      metric.impactOfWork,
+    const totalWorkMinutes = this._deriveTotalWorkMinutes(
+      worklog,
+      metric,
       focusedMinutes,
-      totalWorkMinutes,
-      targetMinutes,
-      metric.completedTasks ?? undefined,
-      metric.plannedTasks ?? undefined,
     );
+
+    const score = calculateProductivityScore(metric.impactOfWork, focusedMinutes);
 
     return {
       day: metric.id,
@@ -250,7 +216,6 @@ export class MetricService {
       impactRating: metric.impactOfWork,
       focusedMinutes,
       totalWorkMinutes,
-      targetMinutes,
     };
   }
 
@@ -264,17 +229,9 @@ export class MetricService {
     days: number = 7,
     endDate?: string,
   ): Observable<number | null> {
-    return combineLatest([
-      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
-      this._worklogService.worklog$,
-    ]).pipe(
-      map(([metrics, worklog]) =>
-        calculateAverageProductivityScore(
-          metrics,
-          this._createProductivityOptions(worklog),
-        ),
-      ),
-    );
+    return this._store$
+      .pipe(select(selectLastNDaysMetrics, { days, endDate }))
+      .pipe(map((metrics) => calculateAverageProductivityScore(metrics)));
   }
 
   /**
@@ -295,14 +252,9 @@ export class MetricService {
           endDate: this._getPreviousPeriodDate(days, endDate),
         }),
       ),
-      this._worklogService.worklog$,
     ]).pipe(
-      map(([currentPeriod, previousPeriod, worklog]) =>
-        calculateProductivityTrend(
-          currentPeriod,
-          previousPeriod,
-          this._createProductivityOptions(worklog),
-        ),
+      map(([currentPeriod, previousPeriod]) =>
+        calculateProductivityTrend(currentPeriod, previousPeriod),
       ),
     );
   }
@@ -316,9 +268,8 @@ export class MetricService {
       this._worklogService.worklog$,
     ]).pipe(
       map(([metrics, worklog]) => {
-        const options = this._createProductivityOptions(worklog);
         return metrics
-          .map((metric) => this._mapToBreakdown(metric, options))
+          .map((metric) => this._mapToBreakdown(metric, worklog))
           .filter((item): item is ProductivityBreakdownItem => !!item);
       }),
     );
