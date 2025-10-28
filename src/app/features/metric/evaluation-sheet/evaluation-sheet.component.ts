@@ -16,6 +16,7 @@ import {
   calculateSustainabilityScore,
   DailyState,
   getScoreColorGradient,
+  TrendIndicator,
 } from '../metric-scoring.util';
 import { ObstructionService } from '../obstruction/obstruction.service';
 import { ImprovementService } from '../improvement/improvement.service';
@@ -96,6 +97,12 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   );
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
   private _subs: Subscription = new Subscription();
+
+  // 7-day average and trend
+  sevenDayAverage$: Observable<number | null> =
+    this._metricService.getAverageProductivityScore$(7);
+  productivityTrend$: Observable<TrendIndicator | null> =
+    this._metricService.getProductivityTrend$(7);
 
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.

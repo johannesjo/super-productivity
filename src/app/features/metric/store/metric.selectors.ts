@@ -134,6 +134,33 @@ export const selectMetricById = createSelector(
   },
 );
 
+/**
+ * Selects metrics for the last N days from a given date.
+ * Returns array of metrics ordered chronologically (oldest to newest).
+ */
+export const selectLastNDaysMetrics = createSelector(
+  selectMetricFeatureState,
+  (state: MetricState, props: { days: number; endDate?: string }): Metric[] => {
+    const ids = state.ids as string[];
+    const sorted = sortWorklogDates(ids);
+
+    // Find the index of the end date (or use today if not specified)
+    const endDate = props.endDate || new Date().toISOString().split('T')[0];
+    const endIndex = sorted.indexOf(endDate);
+
+    // If end date not found, use the latest date
+    const actualEndIndex = endIndex >= 0 ? endIndex : sorted.length - 1;
+
+    // Get the last N days (inclusive)
+    const startIndex = Math.max(0, actualEndIndex - props.days + 1);
+    const selectedIds = sorted.slice(startIndex, actualEndIndex + 1);
+
+    return selectedIds
+      .map((id) => state.entities[id])
+      .filter((metric): metric is Metric => metric != null);
+  },
+);
+
 // STATISTICS
 // ...
 export const selectImprovementCountsPieChartData = createSelector(

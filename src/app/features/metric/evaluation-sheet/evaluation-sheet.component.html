@@ -47,7 +47,7 @@
           [ngModel]="metricForDay.impactOfWork"
           name="impactOfWork"
         >
-          @for (value of [1, 2, 3, 4, 5]; track value) {
+          @for (value of [1, 2, 3, 4]; track value) {
             <mat-radio-button [value]="value">{{ value }}</mat-radio-button>
           }
         </mat-radio-group>
@@ -91,33 +91,57 @@
         </div>
       </div>
 
-      <section class="notes-for-tomorrow">
-        <h3 class="section-title">
-          {{ T.F.METRIC.EVAL_FORM.NOTES_SECTION_TITLE | translate }}
-        </h3>
-        <mat-form-field>
-          <mat-label>{{ T.F.METRIC.EVAL_FORM.NOTES | translate }}</mat-label>
-          <textarea
-            #notes="ngModel"
-            (ngModelChange)="updateNotes($event)"
-            [ngModel]="metricForDay.notes"
-            matInput
-            name="notes"
-            rows="4"
-          ></textarea>
-        </mat-form-field>
-
-        <div class="checkbox-container">
-          <mat-checkbox
-            #remindTomorrow="ngModel"
-            (ngModelChange)="updateRemindTomorrow($event)"
-            [ngModel]="metricForDay.remindTomorrow"
-            name="remindTomorrow"
-          >
-            {{ T.F.METRIC.EVAL_FORM.REMIND_TOMORROW | translate }}
-          </mat-checkbox>
+      @if (sevenDayAverage$ | async; as sevenDayAverage) {
+        <div class="seven-day-summary">
+          <div class="summary-label">7-Day Average:</div>
+          <div class="summary-value">{{ sevenDayAverage }}</div>
+          @if (productivityTrend$ | async; as trend) {
+            <div
+              class="trend-indicator"
+              [class]="'trend-' + trend.direction"
+            >
+              @if (trend.direction === 'up') {
+                <mat-icon>trending_up</mat-icon>
+                <span>+{{ trend.change }} ({{ trend.changePercent }}%)</span>
+              } @else if (trend.direction === 'down') {
+                <mat-icon>trending_down</mat-icon>
+                <span>{{ trend.change }} ({{ trend.changePercent }}%)</span>
+              } @else {
+                <mat-icon>trending_flat</mat-icon>
+                <span>Stable</span>
+              }
+            </div>
+          }
         </div>
-      </section>
+      }
+
+      <!--      <section class="notes-for-tomorrow">-->
+      <!--        <h3 class="section-title">-->
+      <!--          {{ T.F.METRIC.EVAL_FORM.NOTES_SECTION_TITLE | translate }}-->
+      <!--        </h3>-->
+      <!--        <mat-form-field>-->
+      <!--          <mat-label>{{ T.F.METRIC.EVAL_FORM.NOTES | translate }}</mat-label>-->
+      <!--          <textarea-->
+      <!--            #notes="ngModel"-->
+      <!--            (ngModelChange)="updateNotes($event)"-->
+      <!--            [ngModel]="metricForDay.notes"-->
+      <!--            matInput-->
+      <!--            name="notes"-->
+      <!--            rows="4"-->
+      <!--          ></textarea>-->
+      <!--        </mat-form-field>-->
+
+      <!--        <div class="checkbox-container">-->
+      <!--          <mat-checkbox-->
+      <!--            #remindTomorrow="ngModel"-->
+      <!--            (ngModelChange)="updateRemindTomorrow($event)"-->
+      <!--            [ngModel]="metricForDay.remindTomorrow"-->
+      <!--            name="remindTomorrow"-->
+      <!--          >-->
+      <!--            {{ T.F.METRIC.EVAL_FORM.REMIND_TOMORROW | translate }}-->
+      <!--          </mat-checkbox>-->
+      <!--        </div>-->
+      <!--      </section>-->
     </form>
   }
 </div>

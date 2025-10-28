@@ -18,12 +18,10 @@ mat-form-field {
   gap: var(--s4);
   margin-bottom: var(--s3);
   padding: var(--s2);
-  background: var(--bg-lightest);
-  border-radius: var(--card-border-radius);
 
   .time-item {
     flex: 1;
-    text-align: left;
+    text-align: center;
 
     > label {
       display: block;
@@ -73,6 +71,7 @@ mat-form-field {
 .score-card {
   padding: var(--s2);
   border-radius: 16px;
+  border-radius: 64px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
@@ -91,6 +90,62 @@ mat-form-field {
     font-size: 36px;
     font-weight: 700;
     line-height: 1;
+  }
+}
+
+.seven-day-summary {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  gap: var(--s4);
+  padding: var(--s2);
+  margin: var(--s2) 0;
+  background: var(--bg-lightest);
+  border-radius: var(--card-border-radius);
+  border-left: 4px solid var(--accent);
+
+  .summary-label {
+    font-weight: 600;
+    color: var(--fg-primary);
+  }
+
+  .summary-value {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--accent);
+    min-width: 40px;
+  }
+
+  .trend-indicator {
+    display: flex;
+    align-items: center;
+    gap: var(--s);
+    margin-left: auto;
+    padding: var(--s) var(--s2);
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 500;
+
+    mat-icon {
+      font-size: 20px;
+      height: 20px;
+      width: 20px;
+    }
+
+    &.trend-up {
+      background: rgba(76, 175, 80, 0.15);
+      color: #4caf50;
+    }
+
+    &.trend-down {
+      background: rgba(244, 67, 54, 0.15);
+      color: #f44336;
+    }
+
+    &.trend-stable {
+      background: rgba(158, 158, 158, 0.15);
+      color: #9e9e9e;
+    }
   }
 }
 

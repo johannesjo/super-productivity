@@ -5,6 +5,8 @@
  * Includes robust fallbacks and heuristics for missing data.
  */
 
+import { Metric } from './metric.model';
+
 // ==================== SCORING CONSTANTS ====================
 
 /**
@@ -344,4 +346,88 @@ export const getScoreColorGradient = (score: number): string => {
   const lightStart = COLOR_GRADIENT.LIGHTNESS_START;
   const lightEnd = COLOR_GRADIENT.LIGHTNESS_END;
   return `linear-gradient(135deg, hsl(${hue}, ${sat}%, ${lightStart}%) 0%, hsl(${hue}, ${sat}%, ${lightEnd}%) 100%)`;
+};
+
+// ==================== TREND & AVERAGE CALCULATIONS ====================
+
+/**
+ * Calculates the average productivity score for a list of metrics.
+ * Only includes days with complete data (impactOfWork and focus sessions).
+ *
+ * @param metrics - Array of metrics to average
+ * @returns Average productivity score (0-100) or null if insufficient data
+ */
+export const calculateAverageProductivityScore = (metrics: Metric[]): number | null => {
+  const scores: number[] = [];
+
+  for (const metric of metrics) {
+    // Skip metrics without required data
+    if (
+      !metric.impactOfWork ||
+      !metric.focusSessions ||
+      metric.focusSessions.length === 0
+    ) {
+      continue;
+    }
+
+    const focusedMinutes =
+      metric.focusSessions.reduce((sum, session) => sum + session, 0) / (1000 * 60);
+    const totalWorkMinutes = metric.totalWorkMinutes ?? Math.max(focusedMinutes, 1);
+    const targetFocusedMinutes = metric.targetMinutes ?? 240;
+
+    const score = calculateProductivityScore(
+      metric.impactOfWork,
+      focusedMinutes,
+      totalWorkMinutes,
+      targetFocusedMinutes,
+      metric.completedTasks ?? undefined,
+      metric.plannedTasks ?? undefined,
+    );
+
+    scores.push(score);
+  }
+
+  if (scores.length === 0) {
+    return null;
+  }
+
+  const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+  return Math.round(average);
+};
+
+/**
+ * Calculates trend indicator by comparing current period average to previous period.
+ *
+ * @param currentPeriodMetrics - Metrics for current period (e.g., last 7 days)
+ * @param previousPeriodMetrics - Metrics for previous period (e.g., days 8-14)
+ * @returns Trend object with direction, change amount, and percentage
+ */
+export interface TrendIndicator {
+  direction: 'up' | 'down' | 'stable';
+  change: number; // Absolute change in score
+  changePercent: number; // Percentage change
+}
+
+export const calculateProductivityTrend = (
+  currentPeriodMetrics: Metric[],
+  previousPeriodMetrics: Metric[],
+): TrendIndicator | null => {
+  const currentAvg = calculateAverageProductivityScore(currentPeriodMetrics);
+  const previousAvg = calculateAverageProductivityScore(previousPeriodMetrics);
+
+  if (currentAvg === null || previousAvg === null) {
+    return null;
+  }
+
+  const change = currentAvg - previousAvg;
+  const changePercent = previousAvg !== 0 ? (change / previousAvg) * 100 : 0;
+
+  // Threshold for "stable" is ±2 points (to avoid noise)
+  const direction = Math.abs(change) < 2 ? 'stable' : change > 0 ? 'up' : 'down';
+
+  return {
+    direction,
+    change: Math.round(change),
+    changePercent: Math.round(changePercent),
+  };
 };

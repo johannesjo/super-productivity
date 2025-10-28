@@ -20,6 +20,7 @@ import {
   selectProductivityHappinessLineChartData,
   selectSimpleCounterClickCounterLineChartData,
   selectSimpleCounterStopWatchLineChartData,
+  selectLastNDaysMetrics,
 } from './store/metric.selectors';
 import { map, switchMap } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
@@ -28,6 +29,11 @@ import {
   selectRepeatedImprovementIds,
 } from './improvement/store/improvement.reducer';
 import { DateService } from 'src/app/core/date/date.service';
+import {
+  calculateAverageProductivityScore,
+  calculateProductivityTrend,
+  TrendIndicator,
+} from './metric-scoring.util';
 
 const MIN_FOCUS_SESSION_DURATION = 1000;
 
@@ -155,5 +161,52 @@ export class MetricService {
 
   getFocusSummaryForDay(day: string): { count: number; total: number } | undefined {
     return this.focusSessionsByDay()[day];
+  }
+
+  /**
+   * Gets the average productivity score for the last N days.
+   * @param days Number of days to include in average (default 7)
+   * @param endDate Optional end date (default today)
+   * @returns Observable of average score or null if insufficient data
+   */
+  getAverageProductivityScore$(
+    days: number = 7,
+    endDate?: string,
+  ): Observable<number | null> {
+    return this._store$
+      .pipe(select(selectLastNDaysMetrics, { days, endDate }))
+      .pipe(map((metrics) => calculateAverageProductivityScore(metrics)));
+  }
+
+  /**
+   * Gets the productivity trend comparing current period to previous period.
+   * @param days Number of days per period (default 7)
+   * @param endDate Optional end date (default today)
+   * @returns Observable of trend indicator or null if insufficient data
+   */
+  getProductivityTrend$(
+    days: number = 7,
+    endDate?: string,
+  ): Observable<TrendIndicator | null> {
+    return combineLatest([
+      this._store$.pipe(select(selectLastNDaysMetrics, { days, endDate })),
+      this._store$.pipe(
+        select(selectLastNDaysMetrics, {
+          days,
+          endDate: this._getPreviousPeriodDate(days, endDate),
+        }),
+      ),
+    ]).pipe(
+      map(([currentPeriod, previousPeriod]) =>
+        calculateProductivityTrend(currentPeriod, previousPeriod),
+      ),
+    );
+  }
+
+  private _getPreviousPeriodDate(days: number, endDate?: string): string {
+    const end = endDate ? new Date(endDate) : new Date();
+    // Go back by the number of days to get the end of the previous period
+    end.setDate(end.getDate() - days);
+    return end.toISOString().split('T')[0];
   }
 }
