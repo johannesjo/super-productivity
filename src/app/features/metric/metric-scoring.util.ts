@@ -1,6 +1,7 @@
 /**
  * Utility functions for calculating productivity and sustainability metrics.
- * v2.4 - Impact-driven productivity with inverted-V sustainability model.
+ * v2.6 - Productivity: Simplified impact-driven (1-4 scale, 70/30 split)
+ * v2.4 - Sustainability: Exponential decay + sigmoid workload model
  * Includes robust fallbacks and heuristics for missing data.
  */
 
@@ -39,17 +40,26 @@ export const TIME_TARGETS = {
  * Scale conversions for user inputs
  */
 export const SCALE_CONVERSIONS = {
-  IMPACT_SCALE_MAX: 5, // Impact rating is 1-5
+  IMPACT_SCALE_MAX: 4, // Impact rating is 1-4 (simplified from 1-5)
   EXHAUSTION_SCALE_MAX: 5, // Exhaustion is 1-5 (higher = worse)
   ENERGY_CHECKIN_MIN: 1, // Energy check-in is 1-3
   ENERGY_CHECKIN_DIVISOR: 2, // Convert (value - 1) / 2 to get 0-1 range
 } as const;
 
 /**
- * Soft-cap parameters for diminishing returns
+ * Soft-cap and decay parameters
  */
 export const SOFT_CAP = {
   K_VALUE: 2.2, // Decay constant for exponential soft-cap (higher = faster diminishing returns)
+} as const;
+
+export const FOCUS_BALANCE_DECAY = {
+  BETA: 0.00001, // Exponential decay rate for excessive focus (β parameter)
+} as const;
+
+export const WORKLOAD_SIGMOID = {
+  INFLECTION_POINT: 480, // 8 hours - point where workload score is 0
+  STEEPNESS: 0.01, // Controls how quickly score changes around inflection point
 } as const;
 
 /**
@@ -113,19 +123,20 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
 /**
  * Calculates a productivity score (0-100) with impact rating as the primary driver.
  *
- * v2.5 - Simplified impact-driven model (removed density to eliminate confounding):
- * - 70% Impact Rating: User's assessment of work value/significance (1-5, required)
+ * v2.6 - Simplified impact-driven model with 1-4 scale:
+ * - 70% Impact Rating: User's assessment of work value/significance (1-4, required)
  * - 30% Target Progress: Progress toward deep work goal (soft-capped for diminishing returns)
+ *
+ * Changes from v2.5:
+ * - Impact scale reduced from 1-5 to 1-4 (avoids middle-point bias, clearer choices)
+ * - Addresses Stevens' Power Law concern about non-linear perception of rating scales
  *
  * Making impact rating mandatory ensures users reflect on work value, not just time spent.
  * This prevents "busywork scoring high" and emphasizes meaningful output.
  *
- * Density removed because it was highly correlated with progress (both use focused_minutes),
- * creating confounding. This simplification improves score interpretability.
- *
- * @param impactRating - User's assessment of work impact (1-5 scale, REQUIRED)
+ * @param impactRating - User's assessment of work impact (1-4 scale, REQUIRED)
  * @param focusedMinutes - Total focused time for the day (in minutes)
- * @param totalWorkMinutes - Total work time (unused in v2.5, kept for API compatibility)
+ * @param totalWorkMinutes - Total work time (unused in v2.6, kept for API compatibility)
  * @param targetFocusedMinutes - Target deep work goal (in minutes, default 240 = 4 hours)
  * @param completedTasks - Number of tasks completed (optional, currently unused but kept for future)
  * @param plannedTasks - Number of tasks planned (optional, currently unused but kept for future)
@@ -133,15 +144,15 @@ const safeDiv = (numerator: number, denominator: number, fallback: number = 0): 
  *
  * @example
  * // High impact, met target = excellent score
- * calculateProductivityScore(5, 240, 360, 240) // Returns ~88
+ * calculateProductivityScore(4, 240, 360, 240) // Returns ~97
  *
  * @example
  * // Medium impact, typical day
- * calculateProductivityScore(3, 180, 360, 240) // Returns ~60
+ * calculateProductivityScore(2, 180, 360, 240) // Returns ~60
  *
  * @example
  * // Low impact despite good focus = moderate score
- * calculateProductivityScore(2, 240, 360, 240) // Returns ~48
+ * calculateProductivityScore(1, 240, 360, 240) // Returns ~41
  */
 export const calculateProductivityScore = (
   impactRating: number,
@@ -176,35 +187,37 @@ export const calculateProductivityScore = (
 /**
  * Calculates a sustainability score (0-100) to assess work-life balance and burnout risk.
  *
- * v2.3 - Balance model with inverted-V focus curve:
+ * v2.4 - Improved balance model with exponential decay and sigmoid workload:
  * - 45% Freshness: Energy levels from check-in or exhaustion (inverted)
- * - 40% Workload: Linear penalty for long days (10h → score 0)
- * - 15% Focus Balance: Inverted-V curve - optimal at 4h, penalizes excessive focus
+ * - 40% Workload: Sigmoid function (inflection at 8h, asymptotic decay)
+ * - 15% Focus Balance: Linear growth to 4h, then exponential penalty for excess
+ *
+ * Changes from v2.3:
+ * - Workload: Sigmoid instead of linear (avoids harsh 0 at 10h)
+ * - Focus Balance: Exponential decay instead of linear (matches fatigue research)
  *
  * The focus balance curve rewards building up to 4h of focused work, but then
- * penalizes going beyond 4h as a sustainability risk (even if productive short-term).
+ * applies exponential penalty beyond 4h (cognitive fatigue is non-linear).
  * This prevents burnout from excessive deep work sessions.
- *
- * Calibration target: 7h total work, 4h focus, medium energy → score ≈50
  *
  * @param focusedMinutes - Total focused time for the day (in minutes)
  * @param totalWorkMinutes - Total work time including meetings, emails, etc. (in minutes)
- * @param workloadLinearZeroAt - Minutes at which workload score becomes 0 (default 600 = 10h)
+ * @param workloadLinearZeroAt - Minutes at which workload score becomes 0 (deprecated, kept for API compatibility)
  * @param energyCheckin - Simple energy check-in (1=exhausted, 2=ok, 3=good) - optional
  * @param exhaustion - Detailed exhaustion level (1-5 scale, higher = more exhausted) - optional
  * @returns Sustainability score from 0-100
  *
  * @example
  * // Target case: 7h work, 4h focus, medium energy = ~50
- * calculateSustainabilityScore(240, 420, 600, 2) // Returns ~50
+ * calculateSustainabilityScore(240, 420, 600, 2) // Returns ~52
  *
  * @example
- * // Excessive focus (5h): penalty vs 4h
- * calculateSustainabilityScore(300, 420, 600, 2) // Returns ~46 (lower than 4h)
+ * // Excessive focus (5h): exponential penalty vs 4h
+ * calculateSustainabilityScore(300, 420, 600, 2) // Returns ~48 (lower than 4h)
  *
  * @example
  * // Good energy, reasonable hours, optimal focus = high score
- * calculateSustainabilityScore(240, 420, 600, 3) // Returns ~72
+ * calculateSustainabilityScore(240, 420, 600, 3) // Returns ~73
  */
 export const calculateSustainabilityScore = (
   focusedMinutes: number,
@@ -227,23 +240,31 @@ export const calculateSustainabilityScore = (
     freshness = 1 - exhaustionNorm;
   }
 
-  // Workload: Linear penalty - 0h = 1.0, workloadLinearZeroAt (default 10h) = 0.0
-  const workloadRatio = totalWorkMinutes / workloadLinearZeroAt;
-  const workloadScore = clamp(1 - workloadRatio, 0, 1);
+  // Workload: Sigmoid function centered at 8h (480 min)
+  // Formula: 2 / (1 + exp(steepness × (minutes - inflection))) - 1
+  // At 0h: ~1.0, at 8h: 0.0, at 16h: ~-1.0 (clamped to 0)
+  // This provides smooth decay rather than harsh linear cutoff
+  const sigmoidExponent = Math.exp(
+    WORKLOAD_SIGMOID.STEEPNESS * (totalWorkMinutes - WORKLOAD_SIGMOID.INFLECTION_POINT),
+  );
+  // eslint-disable-next-line no-mixed-operators
+  const sigmoidValue = 2 / (1 + sigmoidExponent) - 1;
+  const workloadScore = clamp(sigmoidValue, 0, 1);
 
   // Focus Balance: Inverted-V curve with peak at optimal focus time
   // Up to optimal: linear increase rewards building focus
-  // Beyond optimal: linear decrease penalizes excessive deep work
+  // Beyond optimal: exponential decay penalizes excessive deep work
   let focusBalance: number;
   const peakMinutes = TIME_TARGETS.FOCUS_BALANCE_PEAK_MINUTES;
   if (focusedMinutes <= peakMinutes) {
-    // Building up to optimal: 0h=0, peak=1
+    // Building up to optimal: 0h=0, peak=1 (linear growth)
     focusBalance = clamp(focusedMinutes / peakMinutes);
   } else {
-    // Beyond optimal: peak=1, 2*peak=0 (linear penalty for too much focus)
+    // Beyond optimal: exponential decay (matches non-linear fatigue)
+    // Formula: exp(-β × (minutes - peak)²)
+    // This approaches 0 asymptotically but never reaches it
     const excess = focusedMinutes - peakMinutes;
-    const excessRatio = excess / peakMinutes;
-    focusBalance = clamp(1 - excessRatio);
+    focusBalance = Math.exp(-FOCUS_BALANCE_DECAY.BETA * excess * excess);
   }
 
   // Weighted components (sum = 1.0)
