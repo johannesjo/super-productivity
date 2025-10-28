@@ -13,7 +13,6 @@ import { MetricService } from '../metric.service';
 import {
   calculateProductivityScore,
   calculateSustainabilityScore,
-  DAILY_STATE,
   getScoreColorGradient,
   TrendIndicator,
 } from '../metric-scoring.util';
@@ -36,6 +35,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
+import { DailyStateInfo, getDailyStateInfo } from '../utils/get-daily-state-info.util';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -199,46 +199,12 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
     return trend.direction === 'up' ? 'trend-up' : 'trend-down';
   }
 
-  get dailyStateInfo(): { icon: string; headlineKey: string; hintKey: string } {
-    const threshold = DAILY_STATE.THRESHOLD;
-    const productivity = this.productivityScore;
-    const sustainability = this.sustainabilityScore;
-
-    let stateKey: 'DEEP_FLOW' | 'OVERDRIVE' | 'RECOVERY' | 'DRIFT';
-    if (productivity >= threshold && sustainability >= threshold) {
-      stateKey = 'DEEP_FLOW';
-    } else if (productivity >= threshold) {
-      stateKey = 'OVERDRIVE';
-    } else if (sustainability >= threshold) {
-      stateKey = 'RECOVERY';
-    } else {
-      stateKey = 'DRIFT';
-    }
-
-    const map = {
-      DEEP_FLOW: {
-        icon: '🪄',
-        headlineKey: this.T.F.METRIC.EVAL_FORM.STATE_DEEP_FLOW_HEADLINE,
-        hintKey: this.T.F.METRIC.EVAL_FORM.STATE_DEEP_FLOW_HINT,
-      },
-      OVERDRIVE: {
-        icon: '⚡',
-        headlineKey: this.T.F.METRIC.EVAL_FORM.STATE_OVERDRIVE_HEADLINE,
-        hintKey: this.T.F.METRIC.EVAL_FORM.STATE_OVERDRIVE_HINT,
-      },
-      RECOVERY: {
-        icon: '🌱',
-        headlineKey: this.T.F.METRIC.EVAL_FORM.STATE_RECOVERY_HEADLINE,
-        hintKey: this.T.F.METRIC.EVAL_FORM.STATE_RECOVERY_HINT,
-      },
-      DRIFT: {
-        icon: '🌊',
-        headlineKey: this.T.F.METRIC.EVAL_FORM.STATE_DRIFT_HEADLINE,
-        hintKey: this.T.F.METRIC.EVAL_FORM.STATE_DRIFT_HINT,
-      },
-    } as const;
-
-    return map[stateKey];
+  get dailyStateInfo(): DailyStateInfo {
+    return getDailyStateInfo(
+      this.metricForDay,
+      this.productivityScore,
+      this.sustainabilityScore,
+    );
   }
 
   openProductivityBreakdown(): void {

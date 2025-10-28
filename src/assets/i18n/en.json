@@ -629,6 +629,8 @@
         "DAILY_STATE_OVERDRIVE": "Overdrive",
         "DAILY_STATE_RECOVERY": "Recovery",
         "DAILY_STATE_DRIFT": "Drift",
+        "DAILY_STATE_STEADY": "Steady",
+        "DAILY_STATE_IMPACT_MISMATCH": "Mismatch",
         "STATE_DEEP_FLOW_HEADLINE": "Deep Flow: Excellent focus and sustainable pace.",
         "STATE_DEEP_FLOW_HINT": "You’re in the sweet spot — reflect on what made this combination possible.",
         "STATE_OVERDRIVE_HEADLINE": "Overdrive: Productive, but at a cost.",
@@ -636,7 +638,11 @@
         "STATE_RECOVERY_HEADLINE": "Recovery: Resting and recharging.",
         "STATE_RECOVERY_HINT": "You’re giving your mind space to recover. Tomorrow you’ll have the energy to dive deeper again.",
         "STATE_DRIFT_HEADLINE": "Drift: Low focus and low energy.",
-        "STATE_DRIFT_HINT": "That’s okay. Reflect on what distracted you and adjust gently — every reset is a chance to learn."
+        "STATE_DRIFT_HINT": "That’s okay. Reflect on what distracted you and adjust gently — every reset is a chance to learn.",
+        "STATE_STEADY_HEADLINE": "Steady Rhythm: Consistent, sustainable progress.",
+        "STATE_STEADY_HINT": "Nice balance. You’re keeping momentum without overextending — keep nourishing what makes this pace work.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Low Impact: Plenty of focus, little payoff.",
+        "STATE_IMPACT_MISMATCH_HINT": "You invested solid focus — now direct it toward higher-impact work to feel the difference."
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"

@@ -66,7 +66,7 @@ mat-form-field {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s2);
-  margin: var(--s3) 0;
+  margin: var(--s4) 0;
 }
 
 .score-card {
@@ -80,21 +80,19 @@ mat-form-field {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.3s ease;
   color: white;
-  justify-content: center;
 
   .label {
     font-size: 0.75em;
     font-weight: 600;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    text-align: center;
-    opacity: 0.9;
+    opacity: 0.85;
   }
 
   .score-row {
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-between;
     gap: var(--s2);
 
     .score {
@@ -106,7 +104,7 @@ mat-form-field {
 }
 
 .daily-state-card {
-  margin: var(--s2) 0;
+  margin: var(--s3) 0 var(--s2);
   padding: var(--s2);
   border-radius: var(--card-border-radius);
   background: var(--bg-lightest);
