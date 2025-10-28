@@ -55,8 +55,10 @@
           </div>
           <div class="score-row">
             <div class="score">{{ productivityScore }}</div>
-            @if (productivitySummary$ | async; as summary) {
-              @if (summary.average !== null) {
+          </div>
+          @if (productivitySummary$ | async; as summary) {
+            @if (summary.average !== null) {
+              <div class="trend-row">
                 <button
                   type="button"
                   class="trend-pill"
@@ -67,9 +69,9 @@
                   <span class="pill-value">{{ summary.average }}</span>
                   <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
                 </button>
-              }
+              </div>
             }
-          </div>
+          }
         </div>
 
         <div
@@ -81,8 +83,10 @@
           </div>
           <div class="score-row">
             <div class="score">{{ sustainabilityScore }}</div>
-            @if (sustainabilitySummary$ | async; as summary) {
-              @if (summary.average !== null) {
+          </div>
+          @if (sustainabilitySummary$ | async; as summary) {
+            @if (summary.average !== null) {
+              <div class="trend-row">
                 <button
                   type="button"
                   class="trend-pill"
@@ -93,9 +97,9 @@
                   <span class="pill-value">{{ summary.average }}</span>
                   <span class="pill-delta">{{ getTrendDelta(summary.trend) }}</span>
                 </button>
-              }
+              </div>
             }
-          </div>
+          }
         </div>
       </div>
 

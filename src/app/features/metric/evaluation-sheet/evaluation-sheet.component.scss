@@ -66,11 +66,11 @@ mat-form-field {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--s2);
-  margin: var(--s4) 0;
+  margin: var(--s4) 0 0;
 }
 
 .score-card {
-  padding: var(--s2);
+  padding: 12px;
   //border-radius: 16px;
   border-radius: 64px;
   text-align: left;
@@ -87,12 +87,13 @@ mat-form-field {
     letter-spacing: 0.08em;
     text-transform: uppercase;
     opacity: 0.85;
+    text-align: center;
   }
 
   .score-row {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center;
     gap: var(--s2);
 
     .score {
@@ -100,6 +101,12 @@ mat-form-field {
       font-weight: 700;
       line-height: 1;
     }
+  }
+
+  .trend-row {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--s);
   }
 }
 
