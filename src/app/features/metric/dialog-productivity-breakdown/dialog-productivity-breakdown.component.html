@@ -2,6 +2,20 @@
 
 <div mat-dialog-content>
   <ng-container *ngIf="breakdown$ | async as breakdown; else noData">
+    @if (chartData$ | async; as chartData) {
+      <div class="chart-section">
+        <lazy-chart
+          [type]="lineChartType"
+          [datasets]="chartData.datasets"
+          [labels]="chartData.labels"
+          [options]="lineChartOptions"
+          [legend]="true"
+          height="300px"
+          [shareFileName]="'7-day-scores.png'"
+        ></lazy-chart>
+      </div>
+    }
+
     <table class="breakdown-table">
       <thead>
         <tr>
