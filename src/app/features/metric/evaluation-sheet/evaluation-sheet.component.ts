@@ -4,9 +4,8 @@ import {
   computed,
   inject,
   input,
-  output,
 } from '@angular/core';
-import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
 import {
@@ -19,7 +18,6 @@ import { switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { DateService } from 'src/app/core/date/date.service';
 import { DialogProductivityBreakdownComponent } from '../dialog-productivity-breakdown/dialog-productivity-breakdown.component';
 import { FormsModule } from '@angular/forms';
 import { MatRadioButton, MatRadioGroup } from '@angular/material/radio';
@@ -29,6 +27,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { getDailyStateInfo } from '../utils/get-daily-state-info.util';
 import { ImpactStarsComponent } from '../impact-stars/impact-stars.component';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
   selector: 'evaluation-sheet',
@@ -50,20 +49,15 @@ export class EvaluationSheetComponent {
   readonly workContextService = inject(WorkContextService);
   private readonly _metricService = inject(MetricService);
   private readonly _matDialog = inject(MatDialog);
-  private readonly _dateService = inject(DateService);
+  private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
-  // Inputs
-  readonly day = input<string>(this._dateService.todayStr());
   readonly timeWorkedToday = input<number | null>(null);
 
-  // Output
-  readonly save = output<any>();
-
-  // Constants
   readonly T = T;
-
   // Internal signals
-  private readonly _day$ = toObservable(this.day);
+
+  private readonly _day$ = this._globalTrackingIntervalService.todayDateStr$;
+  readonly day = toSignal(this._day$);
 
   // Metric data for the selected day
   readonly metricForDay = toSignal<MetricCopy | undefined>(

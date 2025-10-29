@@ -326,10 +326,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     window.clearInterval(this._celebrationIntervalId);
   }
 
-  onEvaluationSave(): void {
-    this.selectedTabIndex = 1;
-  }
-
   async finishDay(): Promise<void> {
     await this._beforeFinishDayService.executeActions();
     if (IS_ELECTRON && this.isForToday) {
