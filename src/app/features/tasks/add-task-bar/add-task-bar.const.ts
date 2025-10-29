@@ -1,10 +1,12 @@
 import { INBOX_PROJECT } from '../../project/project.const';
+import { TimeSpentOnDay } from '../task.model';
 
 export interface AddTaskBarState {
   projectId: string;
   tagIds: string[];
   date: string | null;
   time: string | null;
+  spent: TimeSpentOnDay | null;
   estimate: number | null;
   newTagTitles: string[];
   cleanText: string | null;
@@ -26,6 +28,7 @@ export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
   tagIds: [],
   date: null,
   time: null,
+  spent: null,
   estimate: null,
   newTagTitles: [],
   cleanText: null,

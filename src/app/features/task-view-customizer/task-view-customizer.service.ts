@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { Observable, combineLatest } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, animationFrameScheduler, combineLatest } from 'rxjs';
+import { map, observeOn } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { selectAllProjects } from '../project/store/project.selectors';
 import { selectAllTags } from './../tag/store/tag.reducer';
@@ -66,11 +66,26 @@ export class TaskViewCustomizerService {
       toObservable(this.selectedFilter),
       toObservable(this.filterInputValue),
     ]).pipe(
+      observeOn(animationFrameScheduler),
       map(([undone, sort, group, filter, filterVal]) => {
-        const filtered = this.applyFilter(undone, filter, filterVal);
-        const sorted = this.applySort(filtered, sort);
-        const grouped =
-          group !== 'default' ? this.applyGrouping(sorted, group) : undefined;
+        const normalizedFilterVal =
+          typeof filterVal === 'string' ? filterVal.trim() : filterVal;
+        const filterValueToUse =
+          typeof normalizedFilterVal === 'string' ? normalizedFilterVal : '';
+
+        const isDefaultFilter = filter === 'default' || !filterValueToUse;
+        const isDefaultSort = sort === 'default';
+        const isDefaultGroup = group === 'default';
+
+        if (isDefaultFilter && isDefaultSort && isDefaultGroup) {
+          return { list: undone };
+        }
+
+        const filtered = isDefaultFilter
+          ? undone
+          : this.applyFilter(undone, filter, filterValueToUse);
+        const sorted = isDefaultSort ? filtered : this.applySort(filtered, sort);
+        const grouped = !isDefaultGroup ? this.applyGrouping(sorted, group) : undefined;
         return { list: sorted, grouped };
       }),
     );

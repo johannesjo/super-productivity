@@ -18,7 +18,6 @@ import { taskDetailPanelTaskChangeAnimation } from '../tasks/task-detail-panel/t
 import { IssuePanelComponent } from '../issue-panel/issue-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
-import { TaskViewCustomizerPanelComponent } from '../task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { PluginService } from '../../plugins/plugin.service';
 import { PluginPanelContainerComponent } from '../../plugins/ui/plugin-panel-container/plugin-panel-container.component';
 import { ScheduleDayPanelComponent } from '../schedule/schedule-day-panel/schedule-day-panel.component';
@@ -56,7 +55,6 @@ export type RightPanelContentPanelType = PanelContentType;
     IssuePanelComponent,
     NotesComponent,
     TaskDetailPanelComponent,
-    TaskViewCustomizerPanelComponent,
     PluginPanelContainerComponent,
     ScheduleDayPanelComponent,
   ],

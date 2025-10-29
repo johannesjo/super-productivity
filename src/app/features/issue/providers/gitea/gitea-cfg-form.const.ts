@@ -27,7 +27,7 @@ export const GITEA_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitea>[] =
     type: 'input',
     templateOptions: {
       label: T.F.GITEA.FORM.HOST,
-      type: 'text',
+      type: 'url',
       pattern: /^.+\/.+?$/i,
       required: true,
     },

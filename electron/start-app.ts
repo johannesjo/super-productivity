@@ -27,6 +27,7 @@ import {
   initializeProtocolHandling,
   processPendingProtocolUrls,
 } from './protocol-handler';
+import { getIsQuiting, setIsLocked } from './shared-state';
 
 const ICONS_FOLDER = __dirname + '/assets/icons/';
 const IS_MAC = process.platform === 'darwin';
@@ -44,12 +45,7 @@ if (IS_DEV) {
   log('Starting in DEV Mode!!!');
 }
 
-interface MyApp extends App {
-  isQuiting?: boolean;
-  isLocked?: boolean;
-}
-
-const appIN: MyApp = app;
+const appIN: App = app;
 
 let mainWin: BrowserWindow;
 let idleTimeHandler: IdleTimeHandler;
@@ -90,7 +86,10 @@ export const startApp = (): void => {
     }
 
     if (val && val.includes('--user-data-dir=')) {
-      const customUserDir = val.replace('--user-data-dir=', '').trim();
+      const customUserDir = val
+        .replace('--user-data-dir=', '')
+        .trim()
+        .replace(/[\/\\]+$/, ''); // Remove trailing slashes
       log('Using custom directory for user data', customUserDir);
       app.setPath('userData', customUserDir);
       wasUserDataDirSet = true;
@@ -193,7 +192,7 @@ export const startApp = (): void => {
         return { sent: false, reason: 'no-window' };
       }
 
-      if (appIN.isQuiting) {
+      if (getIsQuiting()) {
         return { sent: false, reason: 'quitting' };
       }
 
@@ -249,14 +248,14 @@ export const startApp = (): void => {
 
     powerMonitor.on('suspend', () => {
       log('powerMonitor: System suspend detected');
-      appIN.isLocked = true;
+      setIsLocked(true);
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
 
     powerMonitor.on('lock-screen', () => {
       log('powerMonitor: Screen lock detected');
-      appIN.isLocked = true;
+      setIsLocked(true);
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
     });
@@ -264,7 +263,7 @@ export const startApp = (): void => {
     powerMonitor.on('resume', () => {
       const idleTime = Date.now() - suspendStart;
       log(`powerMonitor: System resume detected. Idle time: ${idleTime}ms`);
-      appIN.isLocked = false;
+      setIsLocked(false);
       sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });
@@ -272,7 +271,7 @@ export const startApp = (): void => {
     powerMonitor.on('unlock-screen', () => {
       const idleTime = Date.now() - suspendStart;
       log(`powerMonitor: Screen unlock detected. Idle time: ${idleTime}ms`);
-      appIN.isLocked = false;
+      setIsLocked(false);
       sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
     });

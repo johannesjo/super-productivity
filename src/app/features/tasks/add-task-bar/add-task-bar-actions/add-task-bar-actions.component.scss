@@ -1,4 +1,5 @@
 @use '../../../../../styles/_globals.scss' as *;
+@use '../../shared-tag-project-styles';
 
 .clear-btn {
   opacity: 0.5;
@@ -22,29 +23,6 @@
   &:hover {
     opacity: 1;
   }
-}
-
-.tag-ico {
-  margin-right: 4px;
-
-  @include mq(xs, max) {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    line-height: 16px;
-    margin-right: 4px;
-  }
-}
-
-.tag-ico-emoji {
-  display: inline-block;
-  font-size: 12px;
-  line-height: 1;
-  text-align: center;
-  vertical-align: middle;
-  width: 16px;
-  height: 16px;
-  margin-right: 4px;
 }
 
 .project-icon-emoji {

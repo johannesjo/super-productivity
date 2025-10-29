@@ -141,8 +141,8 @@ export class ScheduleComponent implements AfterViewInit {
   beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
 
   currentTimeRow = computed(() => {
-    // Trigger re-computation
-    this.scheduleDays();
+    // Trigger re-computation every 2 minutes
+    this.scheduleService.scheduleRefreshTick();
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();

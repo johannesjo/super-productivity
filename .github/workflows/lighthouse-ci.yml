@@ -41,5 +41,3 @@ jobs:
           temporaryPublicStorage: true
           # Run 3 times for consistency
           runs: 3
-          # Configure budgets
-          budgetPath: './tools/lighthouse/budget.json'

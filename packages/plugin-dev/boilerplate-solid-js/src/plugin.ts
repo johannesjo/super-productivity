@@ -1,10 +1,10 @@
 import {
   AnyTaskUpdatePayload,
   PluginAPI,
-  PluginHooks,
   TaskCompletePayload,
   TaskUpdatePayload,
 } from '@super-productivity/plugin-api';
+import type { PluginHooks } from '@super-productivity/plugin-api';
 
 declare const plugin: PluginAPI;
 

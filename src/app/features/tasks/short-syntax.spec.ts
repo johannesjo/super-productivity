@@ -242,6 +242,25 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, { ...CONFIG, isEnableDue: false });
       expect(r).toEqual(undefined);
     });
+
+    it('with time spent only', () => {
+      const t = {
+        ...TASK,
+        title: 'Task description 30m/',
+      };
+      const r = shortSyntax(t, CONFIG);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Task description',
+          timeSpentOnDay: {
+            [getDbDateStr()]: 1800000,
+          },
+        },
+      });
+    });
   });
 
   describe('should recognize short syntax for date', () => {

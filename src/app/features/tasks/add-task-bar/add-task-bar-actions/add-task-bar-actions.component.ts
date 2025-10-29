@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   inject,
   input,
   LOCALE_ID,
@@ -13,7 +14,7 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { first, map } from 'rxjs/operators';
+import { first } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -23,7 +24,6 @@ import { AddTaskBarParserService } from '../add-task-bar-parser.service';
 import { ESTIMATE_OPTIONS } from '../add-task-bar.const';
 import { stringToMs } from '../../../../ui/duration/string-to-ms.pipe';
 import { msToString } from '../../../../ui/duration/ms-to-string.pipe';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { T } from '../../../../t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
@@ -48,6 +48,7 @@ import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
   ],
 })
 export class AddTaskBarActionsComponent {
+  private _destroyRef = inject(DestroyRef);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _matDialog = inject(MatDialog);
@@ -76,21 +77,12 @@ export class AddTaskBarActionsComponent {
   hasNewTags = computed(() => this.state().newTagTitles.length > 0);
   isAutoDetected = computed(() => this.stateService.isAutoDetected());
 
-  // Observables
-  allProjects = toSignal(
-    this._projectService.list$.pipe(
-      map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
-    ),
-    { initialValue: [] },
-  );
+  // Signals for projects and tags (sorted for consistency)
+  allProjects = this._projectService.listSortedForUI;
   selectedProject = computed(() =>
     this.allProjects().find((p) => p.id === this.state().projectId),
   );
-  allTags = toSignal(
-    this._tagService.tagsNoMyDayAndNoList$,
-
-    { initialValue: [] },
-  );
+  allTags = this._tagService.tagsNoMyDayAndNoListSorted;
   selectedTags = computed(() =>
     this.allTags().filter((t) => this.state().tagIds.includes(t.id)),
   );
@@ -199,6 +191,10 @@ export class AddTaskBarActionsComponent {
 
   // Private helper methods for DRY menu handling
   private _handleMenuClick(menuType: 'project' | 'tags' | 'estimate'): void {
+    if (this._destroyRef.destroyed) {
+      return;
+    }
+
     const { menuSignal, trigger } = this._getMenuRefs(menuType);
     menuSignal.set(true);
 
@@ -211,6 +207,10 @@ export class AddTaskBarActionsComponent {
   }
 
   private _openMenuProgrammatically(menuType: 'project' | 'tags' | 'estimate'): void {
+    if (this._destroyRef.destroyed) {
+      return;
+    }
+
     const { menuSignal, trigger } = this._getMenuRefs(menuType);
 
     if (trigger) {

@@ -1,0 +1,35 @@
+@use '../../../styles/_globals.scss' as *;
+
+// Shared styles for tag and project display across add task bar and task context menu
+// This ensures consistent styling for tags and projects throughout the task UI
+
+.tag-ico {
+  margin-right: 4px;
+
+  @include mq(xs, max) {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    margin-right: 4px;
+  }
+}
+
+.tag-ico-emoji {
+  display: inline-block;
+  font-size: 12px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  width: 16px;
+  height: 16px;
+  margin-right: 4px;
+}
+
+.check-ico {
+  margin-right: 16px;
+
+  @include mq(xs, max) {
+    margin-right: 12px;
+  }
+}

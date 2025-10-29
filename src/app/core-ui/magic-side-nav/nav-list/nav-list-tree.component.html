@@ -86,10 +86,6 @@
         <div
           class="nav-child-item"
           [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
-          [attr.data-project-id]="
-            node.data?.k === MenuTreeKind.PROJECT ? node.data.project.id : null
-          "
-          [attr.data-tag-id]="node.data?.k === MenuTreeKind.TAG ? node.data.tag.id : null"
         >
           @switch (node.data?.k) {
             @case (MenuTreeKind.PROJECT) {
@@ -100,6 +96,7 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
+                [attr.data-project-id]="node.data.project.id"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }
@@ -111,6 +108,7 @@
                 [activeWorkContextId]="activeWorkContextId() || ''"
                 [variant]="'nav'"
                 [showLabels]="showLabels()"
+                [attr.data-tag-id]="node.data.tag.id"
                 (clicked)="onChildClick(node)"
               ></nav-item>
             }

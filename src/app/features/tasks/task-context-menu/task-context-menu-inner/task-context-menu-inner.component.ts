@@ -148,9 +148,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
+    switchMap((pid) => this._projectService.getProjectsWithoutIdSorted$(pid || null)),
   );
-  toggleTagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
+  toggleTagList = this._tagService.tagsNoMyDayAndNoListSorted;
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
   //   take(1),
@@ -439,6 +439,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     } else if (!this.task.repeatCfgId) {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
       this._taskService.moveToProject(taskWithSubTasks, projectId);
+      this.onClose();
     } else {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
 
@@ -475,6 +476,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
                   projectId,
                 });
                 this._taskService.moveToProject(taskWithSubTasks, projectId);
+                this.onClose();
                 return EMPTY;
               }
 
@@ -523,7 +525,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             },
           ),
         )
-        .subscribe(() => this.focusRelatedTaskOrNext());
+        .subscribe(() => this.onClose());
     }
   }
 

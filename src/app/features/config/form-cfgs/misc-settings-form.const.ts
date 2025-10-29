@@ -127,10 +127,10 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
-      key: 'isDisableProductivityTips',
+      key: 'isShowProductivityTipLonger',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.MISC.IS_DISABLE_PRODUCTIVITY_TIPS,
+        label: T.GCF.MISC.IS_SHOW_TIP_LONGER,
       },
     },
     {

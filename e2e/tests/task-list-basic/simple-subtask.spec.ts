@@ -13,7 +13,7 @@ test.describe('Simple Subtask', () => {
     await subTask.waitFor({ state: 'visible' });
 
     // Verify subtask was created with correct content
-    const subtaskTextarea = subTask.locator('textarea');
-    await expect(subtaskTextarea).toHaveValue('SubTask 1');
+    const subtaskTitle = subTask.locator('task-title');
+    await expect(subtaskTitle).toContainText('SubTask 1');
   });
 });

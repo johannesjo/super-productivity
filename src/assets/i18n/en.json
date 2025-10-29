@@ -579,6 +579,7 @@
         "CHECK": "I did it!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Activity Heatmap",
         "AVG_BREAKS_PER_DAY": "Avg. breaks per day",
         "AVG_TASKS_PER_DAY_WORKED": "Avg. tasks per day worked",
         "AVG_TIME_SPENT_ON_BREAKS": "Avg. time spent on breaks",
@@ -1456,6 +1457,11 @@
         "WEDNESDAY": "Wednesday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
         "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the repeating task",
+        "REPEAT_FROM_COMPLETION_DATE": "Repeat, when done",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "The next task is created from your completion date, not from start date. (e.g., 'Every 7 days' = 7 days after completion)",
+        "SCHEDULE_TYPE_LABEL": "Schedule type",
+        "SCHEDULE_TYPE_FIXED": "Fixed schedule (e.g., every Monday, 1st of month)",
+        "SCHEDULE_TYPE_FLEXIBLE": "After completion (e.g., 7 days after I finish)",
         "REMOVE_INSTANCE": "Remove today",
         "REMOVE_FOR_DATE": "Remove for {{date}}",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Disable auto-updating subtasks",
@@ -1464,8 +1470,8 @@
     },
     "TASK_VIEW": {
       "CUSTOMIZER": {
-        "ENTER_PROJECT": "Enter project",
-        "ENTER_TAG": "Enter tag",
+        "ENTER_PROJECT": "Filter Projects",
+        "ENTER_TAG": "Filter Tag",
         "ESTIMATED_TIME": "Estimated Time",
         "FILTER_BY": "Filter By",
         "FILTER_DEFAULT": "No Filter",
@@ -1809,7 +1815,6 @@
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
-      "IS_DISABLE_PRODUCTIVITY_TIPS": "Disable productivity tips on app start",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
@@ -1937,6 +1942,10 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "NO_TASKS_TO_COPY": "No tasks to copy",
+    "SHARE_UNAVAILABLE_FALLBACK": "Copied to clipboard.",
+    "SHARE_FAILED_FALLBACK": "Sharing failed. Copied to clipboard instead.",
+    "SHARE_FAILED": "Sharing failed. Please copy manually.",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -2003,6 +2012,8 @@
     "TOGGLE_SHOW_NOTES": "Show/Hide Project Notes",
     "TOGGLE_TRACK_TIME": "Start/Stop tracking time",
     "TRIGGER_SYNC": "Sync!",
+    "SHARE_TASK_LIST_MARKDOWN": "Share Task List",
+    "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "WORKLOG": "Worklog",
     "SIDE_PANEL_MENU": "Side Panel Menu"
   },

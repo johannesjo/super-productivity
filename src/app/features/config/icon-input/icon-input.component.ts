@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, signal } from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
@@ -29,7 +29,7 @@ import { isSingleEmoji } from '../../../util/extract-first-emoji';
     MatTooltip,
   ],
 })
-export class IconInputComponent extends FieldType<FormlyFieldConfig> {
+export class IconInputComponent extends FieldType<FormlyFieldConfig> implements OnInit {
   filteredIcons = signal<string[]>([]);
   isEmoji = signal(false);
 
@@ -38,6 +38,10 @@ export class IconInputComponent extends FieldType<FormlyFieldConfig> {
 
   get type(): string {
     return this.to.type || 'text';
+  }
+
+  ngOnInit(): void {
+    this.isEmoji.set(containsEmoji(this.formControl.value));
   }
 
   trackByIndex(i: number, p: any): number {

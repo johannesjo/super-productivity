@@ -30,6 +30,8 @@
   (optionSelected)="selected($event)"
 >
   @for (suggestion of filteredSuggestions(); track suggestion.id) {
-    <mat-option [value]="suggestion.id">{{ suggestion.title }}</mat-option>
+    <mat-option [value]="suggestion.id">
+      <tag [tag]="suggestion"></tag>
+    </mat-option>
   }
 </mat-autocomplete>

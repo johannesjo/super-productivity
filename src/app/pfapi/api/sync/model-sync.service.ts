@@ -192,6 +192,23 @@ export class ModelSyncService<MD extends ModelCfgs> {
         Object.keys(mainModelData),
       );
 
+      // Check for unregistered models before processing to prevent data loss
+      const unregisteredModels: string[] = [];
+      Object.keys(mainModelData).forEach((modelId) => {
+        if (!this.m[modelId]) {
+          unregisteredModels.push(modelId);
+        }
+      });
+
+      if (unregisteredModels.length > 0) {
+        throw new ModelIdWithoutCtrlError(
+          `Remote metadata contains models not registered locally: ${unregisteredModels.join(', ')}. ` +
+            `This may indicate a version mismatch between synced devices. ` +
+            `To prevent data loss, sync has been blocked. ` +
+            `Please ensure all devices are running the same version of the app.`,
+        );
+      }
+
       Object.keys(mainModelData).forEach((modelId) => {
         if (modelId in mainModelData) {
           this.m[modelId].save(

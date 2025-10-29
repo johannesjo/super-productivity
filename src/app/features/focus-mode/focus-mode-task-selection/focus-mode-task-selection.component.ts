@@ -85,6 +85,14 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   }
 
   onTaskChange(taskOrNewTask: Task | string): void {
+    if (typeof taskOrNewTask === 'string') {
+      const normalizedTitle = taskOrNewTask.trim();
+      this.selectedTask = normalizedTitle
+        ? taskOrNewTask
+        : (this.initialTask() as Task | undefined);
+      return;
+    }
+
     this.selectedTask = taskOrNewTask;
   }
 

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  viewChildren,
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -55,6 +61,7 @@ const MINUTES_TO_MILLISECONDS = 1000 * 60;
   ],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {
+  private _menuTriggers = viewChildren(MatMenuTrigger);
   private _matDialogRef =
     inject<MatDialogRef<DialogViewTaskRemindersComponent>>(MatDialogRef);
   private _taskService = inject(TaskService);
@@ -318,6 +325,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   }
 
   private _close(): void {
+    this._menuTriggers().forEach((trigger) => {
+      trigger.closeMenu();
+    });
     this._matDialogRef.close();
   }
 

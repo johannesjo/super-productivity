@@ -53,6 +53,8 @@ export interface TaskRepeatCfgCopy {
   notes: string | undefined;
   // ... possible sub tasks & attachments
   shouldInheritSubtasks?: boolean;
+  // Base new start date on completion date
+  repeatFromCompletionDate?: boolean;
   // new UX: disable auto update checkbox (auto-update is default)
   disableAutoUpdateSubtasks?: boolean;
   subTaskTemplates?: {
@@ -84,6 +86,7 @@ export const DEFAULT_TASK_REPEAT_CFG: Omit<TaskRepeatCfgCopy, 'id'> = {
   isPaused: false,
   quickSetting: 'DAILY',
   repeatCycle: 'WEEKLY',
+  repeatFromCompletionDate: false,
   monday: true,
   tuesday: true,
   wednesday: true,

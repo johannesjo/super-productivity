@@ -42,13 +42,13 @@ export class ScheduleService {
   private _icalEvents = toSignal(this._calendarIntegrationService.icalEvents$, {
     initialValue: [],
   });
-  private _scheduleRefreshTick = toSignal(interval(2 * 60 * 1000).pipe(startWith(0)), {
+  scheduleRefreshTick = toSignal(interval(2 * 60 * 1000).pipe(startWith(0)), {
     initialValue: 0,
   });
 
   createScheduleDaysComputed(daysToShow: Signal<string[]>): Signal<ScheduleDay[]> {
     return computed(() => {
-      this._scheduleRefreshTick();
+      this.scheduleRefreshTick();
       const timelineTasks = this._timelineTasks();
       const taskRepeatCfgs = this._taskRepeatCfgs();
       const timelineCfg = this._timelineConfig();

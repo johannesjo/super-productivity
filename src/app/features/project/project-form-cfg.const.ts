@@ -57,10 +57,9 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project>
     },
     {
       key: 'theme.primary' as any,
-      type: 'input',
+      type: 'color',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        type: 'color',
       },
     },
     {
