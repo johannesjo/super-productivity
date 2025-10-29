@@ -66,6 +66,12 @@ export class PluginIconComponent {
     const iconsMap = this._pluginService.getPluginIconsSignal()();
     const iconContent = iconsMap.get(pluginId);
 
+    console.log('[plugin-icon] Looking up icon:', {
+      pluginId,
+      hasIcon: !!iconContent,
+      availablePluginIds: Array.from(iconsMap.keys()),
+    });
+
     if (!iconContent) {
       return null;
     }

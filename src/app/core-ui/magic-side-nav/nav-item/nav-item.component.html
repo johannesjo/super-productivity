@@ -113,7 +113,13 @@
       [class]="tourClass()"
       (click)="clicked.emit()"
     >
-      @if (svgIcon()) {
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
@@ -149,7 +155,13 @@
       [class.expanded]="expanded()"
       (click)="clicked.emit()"
     >
-      @if (svgIcon()) {
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
@@ -186,7 +198,13 @@
       [class]="tourClass()"
       (click)="clicked.emit()"
     >
-      @if (svgIcon()) {
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
         <mat-icon
           class="nav-icon"
           [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
