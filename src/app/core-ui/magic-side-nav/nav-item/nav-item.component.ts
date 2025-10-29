@@ -185,12 +185,6 @@ export class NavItemComponent {
     if (!svgUrl) return null;
 
     const match = svgUrl.match(/^plugin-(.+)-icon$/);
-    if (match) {
-      console.log('[nav-item] Detected custom plugin icon:', {
-        svgUrl,
-        extractedPluginId: match[1],
-      });
-    }
     return match ? match[1] : null;
   });
 }

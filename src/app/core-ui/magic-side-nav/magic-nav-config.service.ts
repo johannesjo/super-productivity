@@ -361,26 +361,19 @@ export class MagicNavConfigService {
     const pluginIcons = this._pluginService.getPluginIconsSignal()();
 
     return pluginEntries.map((entry) => {
-      const pluginState = pluginStates.get(entry.pluginId);
-      const isUploadedPlugin = pluginState?.type === 'uploaded';
-
-      // Check if the entry.icon is an SVG file path
-      const isIconSvgPath = /\.svg$/i.test(entry.icon || '');
-
-      // Check if this plugin has a custom SVG icon registered
+      // Prefer custom SVG icon if available, otherwise check if entry.icon is SVG path
       const hasCustomSvgIcon = pluginIcons.has(entry.pluginId);
+      const isIconSvgPath = /\.svg$/i.test(entry.icon || '');
+      const isUploadedPlugin = pluginStates.get(entry.pluginId)?.type === 'uploaded';
 
-      // Prefer custom SVG icon if available, otherwise use the provided icon
       let svgIcon: string | undefined;
       if (hasCustomSvgIcon) {
-        // Use the registered custom icon name
         svgIcon = `plugin-${entry.pluginId}-icon`;
       } else if (isIconSvgPath && !isUploadedPlugin) {
-        // Bundled plugin with SVG path in entry.icon
         svgIcon = `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`;
       }
 
-      const navItem: NavItem = {
+      return {
         type: 'plugin' as const,
         id: `plugin-${entry.pluginId}-${entry.label}`,
         label: entry.label,
@@ -389,7 +382,6 @@ export class MagicNavConfigService {
         pluginId: entry.pluginId,
         action: entry.onClick,
       };
-      return navItem;
     });
   }
 
