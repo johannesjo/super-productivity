@@ -1,0 +1,28 @@
+<div
+  class="impact-stars"
+  role="radiogroup"
+  [attr.aria-label]="ariaLabel"
+  (keydown)="onKeydown($event)"
+  [class.is-disabled]="disabled"
+  [class.is-readonly]="readonly"
+  tabindex="0"
+>
+  <!-- 1..maxStars -->
+  <button
+    *ngFor="let idx of stars(); trackBy: track"
+    type="button"
+    class="impact-stars__star"
+    role="radio"
+    [attr.aria-checked]="value() === idx"
+    [attr.aria-label]="idx + ' ' + starLabel(idx)"
+    [disabled]="disabled"
+    (click)="handleClick(idx)"
+    (mouseenter)="preview(idx)"
+    (mouseleave)="preview(null)"
+  >
+    <!-- Material icons -->
+    <mat-icon>
+      {{ isActive(idx) ? activeIcon : inactiveIcon }}
+    </mat-icon>
+  </button>
+</div>

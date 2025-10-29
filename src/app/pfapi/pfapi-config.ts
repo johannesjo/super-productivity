@@ -78,6 +78,7 @@ export type PfapiAllModelCfg = {
 
   // Metric models
   metric: ModelCfg<MetricState>;
+  // TODO: Remove improvement and obstruction in future version after data migration
   improvement: ModelCfg<ImprovementState>;
   obstruction: ModelCfg<ObstructionState>;
 

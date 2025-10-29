@@ -20,8 +20,6 @@ import { selectProjectFeatureState } from '../../features/project/store/project.
 import { selectTagFeatureState } from '../../features/tag/store/tag.reducer';
 import { selectPlannerState } from '../../features/planner/store/planner.selectors';
 import { selectSimpleCounterFeatureState } from '../../features/simple-counter/store/simple-counter.reducer';
-import { selectImprovementFeatureState } from '../../features/metric/improvement/store/improvement.reducer';
-import { selectObstructionFeatureState } from '../../features/metric/obstruction/store/obstruction.reducer';
 import { selectMetricFeatureState } from '../../features/metric/store/metric.selectors';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { RootState } from '../root-state';
@@ -40,7 +38,6 @@ import { environment } from '../../../environments/environment';
 import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
 import { TaskSharedActions } from '../meta/task-shared.actions';
 import { loadAllData } from '../meta/load-all-data.action';
-import { clearHiddenImprovements } from '../../features/metric/improvement/store/improvement.actions';
 import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../core/log';
 import { selectMenuTreeState } from '../../features/menu-tree/store/menu-tree.selectors';
@@ -68,7 +65,6 @@ export class SaveToDbEffects {
   issueProvider$ = this.createSaveEffect(selectIssueProviderState, 'issueProvider');
   note$ = this.createSaveEffect(selectNoteFeatureState, 'note');
   metric$ = this.createSaveEffect(selectMetricFeatureState, 'metric');
-  obstruction$ = this.createSaveEffect(selectObstructionFeatureState, 'obstruction');
   simpleCounter$ = this.createSaveEffect(
     selectSimpleCounterFeatureState,
     'simpleCounter',
@@ -76,12 +72,6 @@ export class SaveToDbEffects {
   taskRepeatCfg$ = this.createSaveEffect(
     selectTaskRepeatCfgFeatureState,
     'taskRepeatCfg',
-  );
-
-  improvement$ = this.createSaveEffectWithFilter(
-    selectImprovementFeatureState,
-    'improvement',
-    [clearHiddenImprovements.type],
   );
 
   // ---------------------------------------------------

@@ -130,7 +130,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   _onDestroy$ = new Subject<void>();
 
   readonly isIncludeYesterday: boolean;
-  isTimeSheetExported: boolean = true;
   showSuccessAnimation: boolean = false;
   selectedTabIndex: number = 0;
   isForToday: boolean = true;
@@ -176,9 +175,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   );
 
   focusSessionSummary$ = this.dayStr$.pipe(
-    switchMap((dayStr) =>
-      this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(dayStr),
-    ),
+    switchMap((dayStr) => this._metricService.getMetricForDay$(dayStr)),
     map((metric) => {
       const focusSessions = metric.focusSessions ?? [];
       const total = focusSessions.reduce((acc, val) => acc + val, 0);
@@ -327,10 +324,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     window.clearTimeout(this._successAnimationTimeout);
     window.clearTimeout(this._startCelebrationTimeout);
     window.clearInterval(this._celebrationIntervalId);
-  }
-
-  onEvaluationSave(): void {
-    this.selectedTabIndex = 1;
   }
 
   async finishDay(): Promise<void> {
