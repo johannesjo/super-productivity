@@ -3,6 +3,7 @@ import { Tag } from '../../tag/tag.model';
 import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SS } from '../../../core/persistence/storage-keys.const';
+import { TimeSpentOnDay } from '../task.model';
 
 @Injectable()
 export class AddTaskBarStateService {
@@ -37,6 +38,10 @@ export class AddTaskBarStateService {
 
   updateTime(time: string | null): void {
     this._taskInputState.update((state) => ({ ...state, time }));
+  }
+
+  updateSpent(spent: TimeSpentOnDay | null): void {
+    this._taskInputState.update((state) => ({ ...state, spent }));
   }
 
   updateEstimate(estimate: number | null): void {

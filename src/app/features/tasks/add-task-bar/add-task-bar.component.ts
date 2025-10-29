@@ -433,6 +433,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       timeEstimate: state.estimate || 0,
     };
 
+    if (state.spent) {
+      taskData.timeSpentOnDay = state.spent;
+    }
+
     if (state.date) {
       // Parse date components to create date in local timezone
       // This avoids timezone issues when parsing date strings like "2024-01-15"
