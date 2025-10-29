@@ -41,12 +41,19 @@ interface TrelloBoard {
   ],
 
   // dynamic template
+  // TODO: possibly need to add translation here
   template: `
     <mat-form-field
       appearance="outline"
       style="width: 100%;"
     >
-      <mat-label>Trello Board</mat-label>
+      <!--label for showing that this is the board-->
+      @let isLoading = isLoading$ | async;
+      @if (isLoading) {
+        <mat-label>No boards found (yet)...</mat-label>
+      } @else {
+        <mat-label>Select Board</mat-label>
+      }
       <mat-select
         [(ngModel)]="selectedBoardId"
         (ngModelChange)="onBoardSelect($event)"
@@ -87,14 +94,15 @@ export class TrelloAdditionalCfgComponent implements OnInit, OnDestroy {
   isCredentialsComplete = false;
 
   boards$: Observable<TrelloBoard[]>;
-  isLoading$ = new BehaviorSubject<boolean>(false);
+  // lets make it true at first (since we load data when user first change their board)
+  isLoading$ = new BehaviorSubject<boolean>(true);
 
   private _subs = new Subscription();
 
   constructor() {
     // Initialize boards$ with proper debounce and switchMap
     this.boards$ = this._credentialsChanged$.pipe(
-      debounceTime(3000), // Wait 3 seconds after user stops typing
+      debounceTime(1000), // Wait 1 seconds after user stops typing
       switchMap((cfg) => {
         // Check if we have minimum required credentials (apiKey and token)
         if (!cfg || !cfg.apiKey || !cfg.token) {

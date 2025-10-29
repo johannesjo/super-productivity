@@ -215,8 +215,9 @@ export class TrelloApiService {
       throwHandledError('Trello: Not enough settings');
     }
 
-    // Validate boardId format (should be alphanumeric, typically 24 chars for Trello)
-    if (cfg.boardId && !/^[a-zA-Z0-9]+$/.test(cfg.boardId)) {
+    // Validate boardId format (should be alphanumeric, typically 24 chars for Trello - reference: https://community.developer.atlassian.com/t/uniqueness-of-trello-board-ids/67032/2)
+    const boardIdRegex = /^[a-zA-Z0-9]+$/;
+    if (cfg.boardId && !boardIdRegex.test(cfg.boardId)) {
       this._snackService.open({
         type: 'ERROR',
         msg: `${ISSUE_PROVIDER_HUMANIZED[TRELLO_TYPE]}: Invalid board ID format`,
