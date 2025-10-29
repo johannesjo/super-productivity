@@ -16,7 +16,6 @@ import {
   getScoreColorGradient,
   TrendIndicator,
 } from '../metric-scoring.util';
-import { ImprovementService } from '../improvement/improvement.service';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
 import { map as rxMap, switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
@@ -60,7 +59,6 @@ import { ImpactStarsComponent } from '../impact-stars/impact-stars.component';
   ],
 })
 export class EvaluationSheetComponent implements OnDestroy, OnInit {
-  improvementService = inject(ImprovementService);
   workContextService = inject(WorkContextService);
   private _metricService = inject(MetricService);
   private _matDialog = inject(MatDialog);
@@ -74,9 +72,7 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   private _timeWorkedToday: number | null = null;
   day$: BehaviorSubject<string> = new BehaviorSubject(this._dateService.todayStr());
   private _metricForDay$: Observable<MetricCopy> = this.day$.pipe(
-    switchMap((day) =>
-      this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(day),
-    ),
+    switchMap((day) => this._metricService.getMetricForDay$(day)),
   );
   // isForToday$: Observable<boolean> = this.day$.pipe(map(day => day === getWorklogStr()));
   private _subs: Subscription = new Subscription();
@@ -228,22 +224,6 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
       },
       width: '640px',
     });
-  }
-
-  addObstruction(v: string): void {
-    this._update({
-      obstructions: [...(this.metricForDay as MetricCopy).obstructions, v],
-    });
-  }
-
-  addImprovement(v: string): void {
-    this._update({
-      improvements: [...(this.metricForDay as MetricCopy).improvements, v],
-    });
-  }
-
-  toggleImprovementRepeat(improvementId: string): void {
-    this.improvementService.toggleImprovementRepeat(improvementId);
   }
 
   addNote(): void {

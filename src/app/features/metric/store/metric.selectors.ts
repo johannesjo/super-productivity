@@ -1,24 +1,12 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
-import { LineChartData, Metric, MetricState, PieChartData } from '../metric.model';
+import { LineChartData, Metric, MetricState } from '../metric.model';
 import { sortWorklogDates } from '../../../util/sortWorklogDates';
 import { METRIC_FEATURE_NAME, metricAdapter } from './metric.reducer';
-import {
-  selectAllImprovementIds,
-  selectImprovementFeatureState,
-  selectRepeatedImprovementIds,
-} from '../improvement/store/improvement.reducer';
-import { Improvement, ImprovementState } from '../improvement/improvement.model';
-import {
-  selectAllObstructionIds,
-  selectObstructionFeatureState,
-} from '../obstruction/store/obstruction.reducer';
-import { ObstructionState } from '../obstruction/obstruction.model';
-import { unique } from '../../../util/unique';
-import { Log } from '../../../core/log';
 import {
   selectAllSimpleCounters,
   selectSimpleCounterFeatureState,
 } from '../../simple-counter/store/simple-counter.reducer';
+import { unique } from '../../../util/unique';
 import {
   SimpleCounter,
   SimpleCounterState,
@@ -43,83 +31,6 @@ export const selectLastTrackedMetric = createSelector(
 export const selectMetricHasData = createSelector(
   selectMetricFeatureState,
   (state) => state && !!state.ids.length,
-);
-
-export const selectImprovementBannerImprovements = createSelector(
-  selectLastTrackedMetric,
-  selectImprovementFeatureState,
-  selectRepeatedImprovementIds,
-  (
-    metric: Metric | null,
-    improvementState: ImprovementState,
-    repeatedImprovementIds: string[],
-  ): Improvement[] | null => {
-    if (!improvementState.ids.length) {
-      return null;
-    }
-    const hiddenIds = improvementState.hiddenImprovementBannerItems || [];
-
-    const selectedTomorrowIds = (metric && metric.improvementsTomorrow) || [];
-    const all = unique(repeatedImprovementIds.concat(selectedTomorrowIds)).filter(
-      (id: string) => !hiddenIds.includes(id),
-    );
-    return (
-      all
-        .map((id: string) => improvementState.entities[id] as Improvement)
-        // NOTE: we need to check, because metric and improvement state might be out of sync for some milliseconds
-        // @see #978
-        .filter((improvement) => !!improvement)
-    );
-  },
-);
-
-export const selectHasLastTrackedImprovements = createSelector(
-  selectImprovementBannerImprovements,
-  (improvements): boolean => !!improvements && improvements.length > 0,
-);
-
-export const selectAllUsedImprovementIds = createSelector(
-  selectAllMetrics,
-  (metrics: Metric[]): string[] => {
-    return unique(
-      metrics.reduce(
-        (acc: string[], metric: Metric): string[] => [
-          ...acc,
-          ...metric.improvements,
-          ...metric.improvementsTomorrow,
-        ],
-        [],
-      ),
-    );
-  },
-);
-
-export const selectUnusedImprovementIds = createSelector(
-  selectAllUsedImprovementIds,
-  selectAllImprovementIds,
-  (usedIds: string[], allIds: string[] | number[]): string[] => {
-    return (allIds as string[]).filter((id) => !usedIds.includes(id));
-  },
-);
-
-export const selectAllUsedObstructionIds = createSelector(
-  selectAllMetrics,
-  (metrics: Metric[]): string[] => {
-    return unique(
-      metrics.reduce(
-        (acc: string[], metric: Metric): string[] => [...acc, ...metric.obstructions],
-        [],
-      ),
-    );
-  },
-);
-
-export const selectUnusedObstructionIds = createSelector(
-  selectAllUsedObstructionIds,
-  selectAllObstructionIds,
-  (usedIds: string[], allIds: string[] | number[]): string[] => {
-    return (allIds as string[]).filter((id) => !usedIds.includes(id));
-  },
 );
 
 // DYNAMIC
@@ -163,68 +74,6 @@ export const selectLastNDaysMetrics = createSelector(
 
 // STATISTICS
 // ...
-export const selectImprovementCountsPieChartData = createSelector(
-  selectAllMetrics,
-  selectImprovementFeatureState,
-  (metrics: Metric[], improvementState: ImprovementState): PieChartData | null => {
-    if (!metrics.length || !improvementState.ids.length) {
-      return null;
-    }
-
-    const counts: { [key: string]: number } = {};
-    metrics.forEach((metric: Metric) => {
-      metric.improvements.forEach((improvementId: string) => {
-        counts[improvementId] = counts[improvementId] ? counts[improvementId] + 1 : 1;
-      });
-    });
-    const chart: PieChartData = {
-      labels: [],
-      datasets: [{ data: [] }],
-    };
-    Object.keys(counts).forEach((id) => {
-      const imp = improvementState.entities[id];
-      if (imp) {
-        chart.labels?.push(imp.title);
-        chart.datasets[0].data.push(counts[id]);
-      } else {
-        Log.err('No improvement entity found');
-      }
-    });
-    return chart;
-  },
-);
-
-export const selectObstructionCountsPieChartData = createSelector(
-  selectAllMetrics,
-  selectObstructionFeatureState,
-  (metrics: Metric[], obstructionState: ObstructionState): PieChartData | null => {
-    if (!metrics.length || !obstructionState.ids.length) {
-      return null;
-    }
-
-    const counts: { [key: string]: number } = {};
-    metrics.forEach((metric: Metric) => {
-      metric.obstructions.forEach((obstructionId: string) => {
-        counts[obstructionId] = counts[obstructionId] ? counts[obstructionId] + 1 : 1;
-      });
-    });
-    const chart: PieChartData = {
-      labels: [],
-      datasets: [{ data: [] }],
-    };
-    Object.keys(counts).forEach((id) => {
-      const obstr = obstructionState.entities[id];
-      if (obstr) {
-        chart.labels?.push(obstr.title);
-        chart.datasets[0].data.push(counts[id]);
-      } else {
-        Log.err('No obstruction entity found');
-      }
-    });
-    return chart;
-  },
-);
-
 export const selectProductivityHappinessLineChartDataComplete = createSelector(
   selectMetricFeatureState,
   (state: MetricState): LineChartData => {

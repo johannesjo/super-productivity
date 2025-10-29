@@ -72,6 +72,7 @@ interface PersistenceEntityModelCfgs {
 export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
   globalConfig: {
     appDataKey: 'globalConfig',
+    // TODO remove this everywhere
     modelVersion: 99,
     migrateFn: (v) => v,
   },
@@ -134,6 +135,8 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     reducerFn: metricReducer as any,
     migrateFn: (v) => v,
   },
+  // TODO: Remove improvement and obstruction in future version after data migration
+  // These are kept for backward compatibility with existing data
   improvement: {
     appDataKey: 'improvement',
     modelVersion: 99,

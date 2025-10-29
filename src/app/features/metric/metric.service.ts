@@ -8,13 +8,11 @@ import {
   upsertMetric,
   logFocusSession,
 } from './store/metric.actions';
-import { combineLatest, Observable, of } from 'rxjs';
+import { combineLatest, Observable } from 'rxjs';
 import { LineChartData, Metric, MetricState } from './metric.model';
 import {
-  selectImprovementCountsPieChartData,
   selectMetricById,
   selectMetricHasData,
-  selectObstructionCountsPieChartData,
   selectFocusSessionLineChartData,
   selectFocusSessionsByDay,
   selectProductivityHappinessLineChartData,
@@ -22,12 +20,8 @@ import {
   selectSimpleCounterStopWatchLineChartData,
   selectLastNDaysMetrics,
 } from './store/metric.selectors';
-import { map, switchMap } from 'rxjs/operators';
+import { map } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
-import {
-  selectCheckedImprovementIdsForDay,
-  selectRepeatedImprovementIds,
-} from './improvement/store/improvement.reducer';
 import { DateService } from 'src/app/core/date/date.service';
 import {
   calculateAverageProductivityScore,
@@ -63,51 +57,24 @@ export class MetricService {
   hasData = toSignal(this._store$.pipe(select(selectMetricHasData)), {
     initialValue: false,
   });
-  improvementCountsPieChartData = toSignal(
-    this._store$.pipe(select(selectImprovementCountsPieChartData)),
-    { initialValue: null },
-  );
-
-  obstructionCountsPieChartData = toSignal(
-    this._store$.pipe(select(selectObstructionCountsPieChartData)),
-    { initialValue: null },
-  );
 
   focusSessionsByDay = toSignal(this._store$.pipe(select(selectFocusSessionsByDay)), {
     initialValue: {} as Record<string, { count: number; total: number }>,
   });
 
-  // getMetricForDay$(id: string = getWorklogStr()): Observable<Metric> {
-  //   if (!id) {
-  //     throw new Error('No valid id provided');
-  //   }
-  //   return this._store$.pipe(select(selectMetricById, {id}), take(1));
-  // }
-
-  getMetricForDayOrDefaultWithCheckedImprovements$(
-    day: string = this._dateService.todayStr(),
-  ): Observable<Metric> {
+  getMetricForDay$(day: string = this._dateService.todayStr()): Observable<Metric> {
     return this._store$.pipe(select(selectMetricById, { id: day })).pipe(
-      switchMap((metric) => {
+      map((metric) => {
         return metric
-          ? of({
+          ? {
               ...metric,
               focusSessions: metric.focusSessions ?? [],
-            })
-          : combineLatest([
-              this._store$.pipe(select(selectCheckedImprovementIdsForDay, { day })),
-              this._store$.pipe(select(selectRepeatedImprovementIds)),
-            ]).pipe(
-              map(([checkedImprovementIds, repeatedImprovementIds]) => {
-                return {
-                  id: day,
-                  ...DEFAULT_METRIC_FOR_DAY,
-                  improvements: checkedImprovementIds || [],
-                  improvementsTomorrow: repeatedImprovementIds || [],
-                  focusSessions: [],
-                };
-              }),
-            );
+            }
+          : {
+              id: day,
+              ...DEFAULT_METRIC_FOR_DAY,
+              focusSessions: [],
+            };
       }),
     );
   }
