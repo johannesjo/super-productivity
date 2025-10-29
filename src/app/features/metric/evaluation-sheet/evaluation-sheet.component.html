@@ -1,10 +1,10 @@
-@if (metricForDay) {
+@if (metricForDay(); as metric) {
   <div class="radio-group">
     <label>{{ T.F.METRIC.EVAL_FORM.IMPACT_OF_WORK | translate }}</label>
     <impact-stars
       #impactOfWork="ngModel"
       (ngModelChange)="updateImpactOfWork($event)"
-      [ngModel]="metricForDay.impactOfWork || 0"
+      [ngModel]="metric.impactOfWork || 0"
       name="impactOfWork"
       [maxStars]="4"
       ariaLabel="How impactful was your work today?"
@@ -20,7 +20,7 @@
     <mat-radio-group
       #energyCheckin="ngModel"
       (ngModelChange)="updateEnergyCheckin($event)"
-      [ngModel]="metricForDay.energyCheckin"
+      [ngModel]="metric.energyCheckin"
       name="energyCheckin"
     >
       <mat-radio-button [value]="1">😫</mat-radio-button>
@@ -30,12 +30,12 @@
     <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
   </div>
 
-  @if (hasProductivityData || hasSustainabilityData) {
+  @if (hasProductivityData() || hasSustainabilityData()) {
     <div class="scores-container">
-      @if (hasProductivityData) {
+      @if (hasProductivityData()) {
         <div
           class="score-card productivity"
-          [style.background]="getScoreColor(productivityScore)"
+          [style.background]="getScoreColor(productivityScore())"
         >
           <div
             class="label"
@@ -45,9 +45,9 @@
             {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}
           </div>
           <div class="score-row">
-            <div class="score">{{ productivityScore }}</div>
+            <div class="score">{{ productivityScore() }}</div>
           </div>
-          @if (productivitySummary$ | async; as summary) {
+          @if (productivitySummary(); as summary) {
             @if (summary.average !== null) {
               <div class="trend-row">
                 <button
@@ -66,10 +66,10 @@
         </div>
       }
 
-      @if (hasSustainabilityData) {
+      @if (hasSustainabilityData()) {
         <div
           class="score-card sustainability"
-          [style.background]="getScoreColor(sustainabilityScore)"
+          [style.background]="getScoreColor(sustainabilityScore())"
         >
           <div
             class="label"
@@ -79,9 +79,9 @@
             {{ T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE | translate }}
           </div>
           <div class="score-row">
-            <div class="score">{{ sustainabilityScore }}</div>
+            <div class="score">{{ sustainabilityScore() }}</div>
           </div>
-          @if (sustainabilitySummary$ | async; as summary) {
+          @if (sustainabilitySummary(); as summary) {
             @if (summary.average !== null) {
               <div class="trend-row">
                 <button
@@ -102,7 +102,7 @@
     </div>
   }
 
-  @if (hasProductivityData || hasSustainabilityData) {
+  @if (hasProductivityData() || hasSustainabilityData()) {
     <div class="daily-state-card">
       <div
         class="daily-state-label"
@@ -112,10 +112,10 @@
         {{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}
       </div>
       <div class="daily-state-title">
-        <span class="daily-state-icon">{{ dailyStateInfo.icon }}</span>
-        <span>{{ dailyStateInfo.headlineKey | translate }}</span>
+        <span class="daily-state-icon">{{ dailyStateInfo().icon }}</span>
+        <span>{{ dailyStateInfo().headlineKey | translate }}</span>
       </div>
-      <div class="daily-state-hint">{{ dailyStateInfo.hintKey | translate }}</div>
+      <div class="daily-state-hint">{{ dailyStateInfo().hintKey | translate }}</div>
     </div>
   }
 
@@ -124,14 +124,14 @@
       <span class="time-label">{{
         T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate
       }}</span>
-      <span class="time-value">{{ deepWorkTime | msToClockString }}</span>
+      <span class="time-value">{{ deepWorkTime() | msToClockString }}</span>
     </div>
 
     <div class="time-item">
       <span class="time-label">{{
         T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate
       }}</span>
-      <span class="time-value">{{ totalWorkTimeMs | msToClockString }}</span>
+      <span class="time-value">{{ totalWorkTimeMs() | msToClockString }}</span>
     </div>
   </div>
 
@@ -162,16 +162,4 @@
   <!--          </mat-checkbox>-->
   <!--        </div>-->
   <!--      </section>-->
-}
-
-@if (workContextService.isActiveWorkContextProject$ | async) {
-  <div style="text-align: center; margin-top: 8px; margin-bottom: 16px">
-    <button
-      (click)="addNote()"
-      mat-button
-    >
-      <mat-icon>add</mat-icon>
-      {{ T.F.METRIC.EVAL_FORM.ADD_NOTE_FOR_TOMORROW | translate }}
-    </button>
-  </div>
 }
