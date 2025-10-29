@@ -240,21 +240,27 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
 
   /** Handle "back" button to hide mobile menu overlay */
   @HostListener('window:popstate') onBack(): void {
-    if (this.showMobileMenuOverlay()) this.toggleMobileNav();
+    if (this.isMobile() && this.showMobileMenuOverlay()) this.toggleMobileNav();
   }
 
   /** Synchronize window history state with the visibility of the mobile menu overlay */
   syncMobileNavHistory(isVisible: boolean): void {
+    if (!this.isMobile()) return;
+
     const hasState = window.history.state[HISTORY_STATE.MOBILE_NAVIGATION] !== undefined;
+
+    // Mobile menu is hidden and already no state in history - nothing to do
     if (!isVisible && !hasState) return;
 
+    // Mobile menu is visible - update history state
     if (isVisible) {
       const args = { state: { [HISTORY_STATE.MOBILE_NAVIGATION]: true }, title: '' };
       if (!hasState) window.history.pushState(args.state, args.title);
       else window.history.replaceState(args.state, args.title);
-    } else {
-      window.history.back();
     }
+
+    // Mobile menu is visible but still has state in history - restore it
+    else window.history.back();
   }
 
   toggleSideNavMode(): void {
