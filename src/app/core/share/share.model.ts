@@ -25,7 +25,8 @@ export type ShareTarget =
   | 'email'
   | 'mastodon'
   | 'clipboard-text'
-  | 'native';
+  | 'native'
+  | 'download';
 
 /**
  * Result of a share operation
@@ -39,6 +40,10 @@ export interface ShareResult {
   target?: ShareTarget;
   /** Whether native share was attempted */
   usedNative?: boolean;
+  /** Optional local filesystem path for download results */
+  path?: string;
+  /** Optional URI for native downloads */
+  uri?: string;
 }
 
 /**
@@ -65,4 +70,31 @@ export interface ShareDialogOptions {
   showNative?: boolean;
   /** Pre-selected Mastodon instance */
   mastodonInstance?: string;
+}
+
+/**
+ * Options for sharing a canvas element as an image
+ */
+export interface ShareCanvasImageParams {
+  /** Canvas element that should be shared */
+  canvas: HTMLCanvasElement;
+  /** Output filename including extension */
+  filename?: string;
+  /** Optional title to use for share dialogs */
+  shareTitle?: string;
+  /** Optional tagline configuration appended below the canvas */
+  tagline?: ShareCanvasTagline;
+  /** Disable download fallback when sharing is unavailable */
+  fallbackToDownload?: boolean;
+  /** Sharing mode, defaults to auto */
+  mode?: 'auto' | 'download-only';
+}
+
+export interface ShareCanvasTagline {
+  /** Tagline text rendered below the canvas image */
+  text: string;
+  /** Optional tagline area height; defaults to 48 */
+  height?: number;
+  /** Optional text color */
+  color?: string;
 }
