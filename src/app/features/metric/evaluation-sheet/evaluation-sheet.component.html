@@ -39,7 +39,7 @@
         >
           <div
             class="label"
-            matTooltip="65% Impact (1-4 scale) • 30% Focus toward 4h target • 5% total work (capped at 10h)"
+            [matTooltip]="T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE_TOOLTIP | translate"
             matTooltipPosition="above"
           >
             {{ T.F.METRIC.EVAL_FORM.PRODUCTIVITY_SCORE | translate }}
@@ -53,7 +53,7 @@
                 <button
                   type="button"
                   class="trend-pill"
-                  (click)="openProductivityBreakdown()"
+                  (click)="openScoreBreakdown('productivity')"
                   [ngClass]="getTrendClass(summary.trend)"
                 >
                   <span class="pill-title">7d</span>
@@ -73,7 +73,7 @@
         >
           <div
             class="label"
-            matTooltip="45% Energy Level + 40% Reasonable Work Hours (0 at 10h) + 15% Focus Balance (optimal at 4h). Prevents burnout and promotes sustainable work habits."
+            [matTooltip]="T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE_TOOLTIP | translate"
             matTooltipPosition="above"
           >
             {{ T.F.METRIC.EVAL_FORM.SUSTAINABILITY_SCORE | translate }}
@@ -87,7 +87,7 @@
                 <button
                   type="button"
                   class="trend-pill"
-                  (click)="openProductivityBreakdown()"
+                  (click)="openScoreBreakdown('sustainability')"
                   [ngClass]="getTrendClass(summary.trend)"
                 >
                   <span class="pill-title">7d</span>
@@ -106,7 +106,7 @@
     <div class="daily-state-card">
       <div
         class="daily-state-label"
-        matTooltip="Quadrant system based on both scores (≥50 is high): Deep Flow (high/high), Overdrive (high/low), Recovery (low/high), Drift (low/low)"
+        [matTooltip]="T.F.METRIC.EVAL_FORM.DAILY_STATE_TOOLTIP | translate"
         matTooltipPosition="above"
       >
         {{ T.F.METRIC.EVAL_FORM.DAILY_STATE | translate }}

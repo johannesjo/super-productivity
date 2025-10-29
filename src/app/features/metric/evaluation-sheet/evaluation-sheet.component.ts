@@ -194,11 +194,12 @@ export class EvaluationSheetComponent {
     return trend.direction === 'up' ? 'trend-up' : 'trend-down';
   }
 
-  openProductivityBreakdown(): void {
+  openScoreBreakdown(focus: 'productivity' | 'sustainability'): void {
     this._matDialog.open(DialogProductivityBreakdownComponent, {
       data: {
         days: 7,
         endDate: this.day(),
+        focus,
       },
       width: '640px',
     });

@@ -9,10 +9,13 @@ import { MetricService, ProductivityBreakdownItem } from '../metric.service';
 import { LazyChartComponent } from '../lazy-chart/lazy-chart.component';
 import { ChartConfiguration, ChartType, ChartData } from 'chart.js';
 import { calculateSustainabilityScore } from '../metric-scoring.util';
+import { T } from '../../../t.const';
+import { TranslatePipe } from '@ngx-translate/core';
 
 interface DialogProductivityBreakdownData {
   days: number;
   endDate?: string;
+  focus?: 'productivity' | 'sustainability';
 }
 
 @Component({
@@ -28,6 +31,7 @@ interface DialogProductivityBreakdownData {
     AsyncPipe,
     DecimalPipe,
     LazyChartComponent,
+    TranslatePipe,
   ],
 })
 export class DialogProductivityBreakdownComponent {
@@ -35,6 +39,12 @@ export class DialogProductivityBreakdownComponent {
   private _dialogRef =
     inject<MatDialogRef<DialogProductivityBreakdownComponent>>(MatDialogRef);
   private _data = inject<DialogProductivityBreakdownData>(MAT_DIALOG_DATA);
+  readonly T = T;
+  readonly focus = this._data.focus ?? 'productivity';
+  readonly titleKey =
+    this.focus === 'sustainability'
+      ? T.F.METRIC.EVAL_FORM.SCORE_BREAKDOWN_TITLE_SUSTAINABILITY
+      : T.F.METRIC.EVAL_FORM.SCORE_BREAKDOWN_TITLE_PRODUCTIVITY;
 
   breakdown$: Observable<ProductivityBreakdownItem[]> =
     this._metricService.getProductivityBreakdown$(this._data.days, this._data.endDate);

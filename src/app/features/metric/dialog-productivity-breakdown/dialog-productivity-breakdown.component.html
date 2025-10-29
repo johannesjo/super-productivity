@@ -1,4 +1,4 @@
-<h2 mat-dialog-title>7-Day Productivity Breakdown</h2>
+<h2 mat-dialog-title>{{ titleKey | translate }}</h2>
 
 <div mat-dialog-content>
   <ng-container *ngIf="breakdown$ | async as breakdown; else noData">

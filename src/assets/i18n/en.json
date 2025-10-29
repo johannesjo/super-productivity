@@ -605,11 +605,14 @@
         "IMPACT_OF_WORK": "How do you rate the impact of your work today?",
         "IMPACT_OF_WORK_HINT": "1: No meaningful progress – 4: Significant impact",
         "PRODUCTIVITY_SCORE": "Productivity Score",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65% Impact (1-4 scale) • 30% Focus toward 4h target • 5% total work (capped at 10h)",
         "SUSTAINABILITY_SCORE": "Sustainability Score",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45% Energy level • 40% Reasonable work hours (0 at 10h) • 15% Focus balance (optimal at 4h)",
         "ENERGY_LEVEL": "How's your energy?",
         "ENERGY_LEVEL_HINT": "😫 Exhausted – 😐 OK – 😊 Good",
         "TOTAL_WORK_TIME": "Total work time today",
         "DAILY_STATE": "Daily State",
+        "DAILY_STATE_TOOLTIP": "Quadrant system based on both scores (≥50 is high): Deep Flow (high/high), Overdrive (high/low), Recovery (low/high), Drift (low/low)",
         "STATE_DEEP_FLOW_HEADLINE": "Deep Flow: Excellent focus and sustainable pace.",
         "STATE_DEEP_FLOW_HINT": "You’re in the sweet spot — reflect on what made this combination possible.",
         "STATE_OVERDRIVE_HEADLINE": "Overdrive: Productive, but at a cost.",
@@ -621,7 +624,9 @@
         "STATE_STEADY_HEADLINE": "Steady Rhythm: Consistent, sustainable progress.",
         "STATE_STEADY_HINT": "Nice balance. You’re keeping momentum without overextending — keep nourishing what makes this pace work.",
         "STATE_IMPACT_MISMATCH_HEADLINE": "Low Impact: Plenty of focus, little payoff.",
-        "STATE_IMPACT_MISMATCH_HINT": "You invested solid focus — now direct it toward higher-impact work to feel the difference."
+        "STATE_IMPACT_MISMATCH_HINT": "You invested solid focus — now direct it toward higher-impact work to feel the difference.",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-Day Productivity Breakdown",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7-Day Sustainability Breakdown"
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"
