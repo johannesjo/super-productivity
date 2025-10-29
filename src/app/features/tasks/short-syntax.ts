@@ -18,9 +18,13 @@ type DueChanges = {
   dueWithTime?: number;
 };
 
-const SHORT_SYNTAX_TIME_REG_EX =
-  /(?:\s|^)t?((\d+(?:\.\d+)?[mhd])(?:\s*\/\s*(\d+(?:\.\d+)?[mhd]))?(?=\s|$))/i;
-// NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
+const CH_TSP = '/';
+export const SHORT_SYNTAX_TIME_REG_EX = new RegExp(
+  String.raw`(?:\s|^)t?(\d+(?:\.\d+)?[mhd])(?:\s*` +
+    `\\${CH_TSP}` +
+    String.raw`(:?\s*(\d+(?:\.\d+)?[mhd]))?)?(?=\s|$)`,
+  'i',
+);
 
 const CH_PRO = '+';
 const CH_TAG = '#';
@@ -107,11 +111,10 @@ export const shortSyntax = (
   let changesForTag: TagChanges = {};
 
   if (config.isEnableDue) {
-    // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
     taskChanges = parseTimeSpentChanges(task);
     taskChanges = {
       ...taskChanges,
-      ...parseScheduledDate(task, now),
+      ...parseScheduledDate({ ...task, title: taskChanges.title || task.title }, now),
     };
   }
 
@@ -136,15 +139,6 @@ export const shortSyntax = (
     taskChanges = {
       ...taskChanges,
       ...(changesForTag.taskChanges || {}),
-    };
-  }
-
-  if (config.isEnableDue) {
-    taskChanges = {
-      ...taskChanges,
-      // NOTE: because we pass the new taskChanges here we need to assignments...
-      ...parseTimeSpentChanges(taskChanges),
-      // title: taskChanges.title?.trim(),
     };
   }
 
@@ -389,28 +383,24 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
   }
 
   const matches = SHORT_SYNTAX_TIME_REG_EX.exec(task.title);
-  if (matches && matches.length >= 3) {
-    const full = matches[0];
-    const timeSpent = matches[2]; // First part (before slash)
-    const timeEstimate = matches[3]; // Second part (after slash)
-    // If no slash, use the single value as timeEstimate only
-    const hasSlashFormat = matches[3] !== undefined;
-    return {
-      ...(hasSlashFormat && timeSpent
-        ? {
-            timeSpentOnDay: {
-              ...(task.timeSpentOnDay || {}),
-              [getDbDateStr()]: stringToMs(timeSpent),
-            },
-          }
-        : {}),
-      ...(timeEstimate
-        ? { timeEstimate: stringToMs(timeEstimate) }
-        : timeSpent
-          ? { timeEstimate: stringToMs(timeSpent) }
-          : {}),
-      title: task.title.replace(full, '').trim(),
-    };
+  if (!matches) {
+    return {};
   }
-  return {};
+
+  const [matchSpan, preSplit, postSplit] = matches;
+  const timeSpent = matchSpan.includes(CH_TSP) ? preSplit : null;
+  const timeEstimate = timeSpent === null ? preSplit : postSplit;
+
+  return {
+    ...(typeof timeSpent === 'string' && {
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [getDbDateStr()]: stringToMs(timeSpent),
+      },
+    }),
+    ...(typeof timeEstimate === 'string' && {
+      timeEstimate: stringToMs(timeEstimate),
+    }),
+    title: task.title.replace(matchSpan, '').trim(),
+  };
 };
