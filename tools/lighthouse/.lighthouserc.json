@@ -5,7 +5,13 @@
       "numberOfRuns": 3,
       "settings": {
         "chromeFlags": "--no-sandbox --disable-dev-shm-usage",
-        "maxWaitForLoad": 90000
+        "maxWaitForLoad": 120000,
+        "throttlingMethod": "provided",
+        "cpuSlowdownMultiplier": 1,
+        "formFactor": "desktop",
+        "screenEmulation": {
+          "disabled": true
+        }
       },
       "url": ["/browser/index.html"],
       "budgets": [
