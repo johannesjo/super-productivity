@@ -15,53 +15,53 @@ const expectApproximately = (
 describe('metric-scoring.util', () => {
   describe('calculateProductivityScore', () => {
     it('returns a lower score for low impact days even with solid focus time', () => {
-      const score = calculateProductivityScore(1, 240);
+      const score = calculateProductivityScore(1, 240, 240);
       expectApproximately(score, 48, 3);
     });
 
     it('captures medium-low impact days accurately', () => {
-      const score = calculateProductivityScore(2, 180);
-      expectApproximately(score, 57, 3);
+      const score = calculateProductivityScore(2, 180, 300);
+      expectApproximately(score, 58, 3);
     });
 
     it('rewards medium-high impact once the focus target is met', () => {
-      const score = calculateProductivityScore(3, 240);
-      expectApproximately(score, 83, 3);
+      const score = calculateProductivityScore(3, 240, 360);
+      expectApproximately(score, 82, 3);
     });
 
     it('awards the maximum score for high impact days that meet the focus target', () => {
-      const score = calculateProductivityScore(4, 240);
+      const score = calculateProductivityScore(4, 240, 600);
       expect(score).toBe(100);
     });
 
     it('penalizes busywork days with low impact and low focus', () => {
-      const score = calculateProductivityScore(1, 120, 240);
-      expectApproximately(score, 32, 3);
+      const score = calculateProductivityScore(1, 120, 200, 240);
+      expectApproximately(score, 33, 3);
     });
 
     it('treats efficient high-impact days with slightly less focus as excellent', () => {
-      const score = calculateProductivityScore(4, 180, 240);
-      expectApproximately(score, 93, 2);
+      const score = calculateProductivityScore(4, 180, 240, 240);
+      expectApproximately(score, 90, 2);
     });
 
     it('keeps impact as the primary driver when focus time is constant', () => {
-      const low = calculateProductivityScore(1, 240);
-      const high = calculateProductivityScore(4, 240);
-      expect(high - low).toBeGreaterThanOrEqual(51);
-      expect(high - low).toBeLessThanOrEqual(61);
+      const low = calculateProductivityScore(1, 240, 240);
+      const high = calculateProductivityScore(4, 240, 600);
+      expect(high - low).toBeGreaterThanOrEqual(50);
+      expect(high - low).toBeLessThanOrEqual(55);
     });
 
     it('soft-caps focus beyond the target to avoid perfect scores from overwork', () => {
-      const score = calculateProductivityScore(4, 360);
+      const score = calculateProductivityScore(4, 360, 600);
       expect(score).toBeGreaterThanOrEqual(97);
       expect(score).toBeLessThan(100);
     });
 
     it('keeps progress as a secondary factor relative to consistent impact', () => {
-      const lowFocus = calculateProductivityScore(2, 120);
-      const highFocus = calculateProductivityScore(2, 240);
-      expect(highFocus - lowFocus).toBeGreaterThanOrEqual(12);
-      expect(highFocus - lowFocus).toBeLessThanOrEqual(18);
+      const lowFocus = calculateProductivityScore(2, 120, 180);
+      const highFocus = calculateProductivityScore(2, 240, 360);
+      expect(highFocus - lowFocus).toBeGreaterThanOrEqual(14);
+      expect(highFocus - lowFocus).toBeLessThanOrEqual(20);
     });
   });
 

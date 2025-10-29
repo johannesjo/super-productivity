@@ -1,6 +1,6 @@
 /**
  * Utility functions for calculating productivity and sustainability metrics.
- * v2.6 - Productivity: Simplified impact-driven (1-4 scale, 70/30 split)
+ * v2.7 - Productivity: Impact-driven with recognition for non-focus work (65/30/5 split)
  * v2.4 - Sustainability: Exponential decay + sigmoid workload model
  * Includes robust fallbacks and heuristics for missing data.
  */
@@ -9,14 +9,10 @@ import { Metric } from './metric.model';
 
 // ==================== SCORING CONSTANTS ====================
 
-/**
- * Productivity Score Weights (must sum to 1.0)
- * Impact is the primary driver to ensure reflection on work value.
- * Note: Density removed to eliminate confounding with progress (both used focused_minutes).
- */
 export const PRODUCTIVITY_WEIGHTS = {
-  IMPACT: 0.7, // User's assessment of work significance (primary driver)
-  PROGRESS: 0.3, // Progress toward deep work target (soft-capped)
+  IMPACT: 0.65, // User's assessment of work significance (primary driver)
+  FOCUS: 0.3, // Progress toward deep work target (soft-capped)
+  TOTAL_WORK: 0.05, // Credit for overall effort (capped at 10h)
 } as const;
 
 /**
@@ -136,38 +132,39 @@ export const focusSessionsToMinutes = (focusSessions: number[]): number => {
 /**
  * Calculates a productivity score (0-100) with impact rating as the primary driver.
  *
- * v2.6 - Simplified impact-driven model with 1-4 scale:
- * - 70% Impact Rating: User's assessment of work value/significance (1-4, required)
- * - 30% Target Progress: Progress toward deep work goal (soft-capped for diminishing returns)
+ * v2.7 - Impact-driven model with recognition for non-focus work:
+ * - 65% Impact Rating: User's assessment of work value/significance (1-4, required)
+ * - 30% Focus Progress: Progress toward deep work goal (soft-capped for diminishing returns)
+ * - 5% Total Work: Credit for overall effort (capped at 10 hours)
  *
- * Changes from v2.5:
- * - Impact scale reduced from 1-5 to 1-4 (avoids middle-point bias, clearer choices)
- * - Addresses Stevens' Power Law concern about non-linear perception of rating scales
- *
- * Making impact rating mandatory ensures users reflect on work value, not just time spent.
- * This prevents "busywork scoring high" and emphasizes meaningful output.
+ * Making impact rating mandatory ensures users reflect on work value, not just time spent,
+ * while still rewarding meaningful focus time and broader contributions beyond deep work.
  *
  * @param impactRating - User's assessment of work impact (1-4 scale, REQUIRED)
  * @param focusedMinutes - Total focused time for the day (in minutes)
+ * @param totalWorkMinutes - Total work time including non-focus tasks (in minutes)
  * @param targetFocusedMinutes - Target deep work goal (in minutes, default 240 = 4 hours)
+ * @param maxWorkMinutes - Cap for total work contribution (in minutes, default 600 = 10 hours)
  * @returns Productivity score from 0-100
  *
  * @example
  * // High impact, met default target = perfect score
- * calculateProductivityScore(4, 240) // Returns 100
+ * calculateProductivityScore(4, 240, 600) // Returns 100
  *
  * @example
  * // Medium impact, typical day
- * calculateProductivityScore(2, 180) // Returns ~60
+ * calculateProductivityScore(2, 180, 360) // Returns ~60
  *
  * @example
  * // Low impact despite good focus = moderate score
- * calculateProductivityScore(1, 240) // Returns ~48
+ * calculateProductivityScore(1, 240, 360) // Returns ~48
  */
 export const calculateProductivityScore = (
   impactRating: number,
   focusedMinutes: number,
+  totalWorkMinutes: number = focusedMinutes,
   targetFocusedMinutes: number = TIME_TARGETS.DEFAULT_TARGET_FOCUSED_MINUTES,
+  maxWorkMinutes: number = TIME_TARGETS.DEFAULT_WORKLOAD_LINEAR_ZERO_AT,
 ): number => {
   // Impact: User's reflection on work value (1-4 scale normalized to 0-1)
   const impact = clamp(impactRating / SCALE_CONVERSIONS.IMPACT_SCALE_MAX);
@@ -181,11 +178,16 @@ export const calculateProductivityScore = (
       ? progressRatio // Linear up to target: full credit for meeting goal
       : softCap(progressRatio); // Soft-cap beyond target: diminishing returns
 
+  // Total work contribution (capped at maxWorkMinutes to avoid rewarding overwork)
+  const totalWorkRatioRaw = safeDiv(totalWorkMinutes, maxWorkMinutes, 0);
+  const totalWorkContribution = clamp(totalWorkRatioRaw);
+
   // Weighted components (sum = 1.0)
   const impactComponent = impact * PRODUCTIVITY_WEIGHTS.IMPACT;
-  const progressComponent = targetProgress * PRODUCTIVITY_WEIGHTS.PROGRESS;
+  const focusComponent = targetProgress * PRODUCTIVITY_WEIGHTS.FOCUS;
+  const totalWorkComponent = totalWorkContribution * PRODUCTIVITY_WEIGHTS.TOTAL_WORK;
 
-  const score = impactComponent + progressComponent;
+  const score = impactComponent + focusComponent + totalWorkComponent;
 
   // Scale to 0-100 range
   return Math.round(score * 100);
@@ -365,7 +367,12 @@ export const calculateAverageProductivityScore = (metrics: Metric[]): number | n
     }
 
     const focusedMinutes = focusSessionsToMinutes(metric.focusSessions);
-    const score = calculateProductivityScore(metric.impactOfWork, focusedMinutes);
+    const totalWorkMinutes = metric.totalWorkMinutes ?? focusedMinutes;
+    const score = calculateProductivityScore(
+      metric.impactOfWork,
+      focusedMinutes,
+      totalWorkMinutes,
+    );
 
     scores.push(score);
   }

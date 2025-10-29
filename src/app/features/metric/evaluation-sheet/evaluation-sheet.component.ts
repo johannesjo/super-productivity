@@ -174,7 +174,8 @@ export class EvaluationSheetComponent implements OnDestroy, OnInit {
   get productivityScore(): number {
     const impactRating = this.metricForDay?.impactOfWork ?? 0;
     const focusedMinutes = this.deepWorkMinutes;
-    return calculateProductivityScore(impactRating, focusedMinutes);
+    const totalWorkMinutes = this.totalWorkMinutes;
+    return calculateProductivityScore(impactRating, focusedMinutes, totalWorkMinutes);
   }
 
   get sustainabilityScore(): number {

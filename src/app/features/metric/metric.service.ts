@@ -206,7 +206,11 @@ export class MetricService {
     // Only calculate score if we have required data
     const score =
       metric.impactOfWork && focusSessions.length > 0
-        ? calculateProductivityScore(metric.impactOfWork, focusedMinutes)
+        ? calculateProductivityScore(
+            metric.impactOfWork,
+            focusedMinutes,
+            totalWorkMinutes,
+          )
         : null;
 
     return {
