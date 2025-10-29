@@ -62,7 +62,7 @@ export class OpenProjectApiService {
         params: {
           pageSize: 100,
           // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify(filters),
+          filters: JSON.stringify(filters.concat(this._getScopeParamFilter(cfg))),
           // Default: [["id", "asc"]]
           sortBy: '[["updatedAt","desc"]]',
         },
