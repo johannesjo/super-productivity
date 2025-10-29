@@ -7,11 +7,7 @@
         "chromeFlags": "--no-sandbox --disable-dev-shm-usage",
         "maxWaitForLoad": 120000,
         "throttlingMethod": "provided",
-        "cpuSlowdownMultiplier": 1,
-        "formFactor": "desktop",
-        "screenEmulation": {
-          "disabled": true
-        }
+        "cpuSlowdownMultiplier": 1
       },
       "url": ["/browser/index.html"],
       "budgets": [
