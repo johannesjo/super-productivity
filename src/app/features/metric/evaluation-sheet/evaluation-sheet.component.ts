@@ -5,7 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { MetricCopy } from '../metric.model';
 import { MetricService } from '../metric.service';
 import {
@@ -14,7 +14,8 @@ import {
   getScoreColorGradient,
   TrendIndicator,
 } from '../metric-scoring.util';
-import { switchMap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { shareReplay, switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -51,13 +52,20 @@ export class EvaluationSheetComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
+  readonly dayStr$ = input<Observable<string> | null>(null);
   readonly timeWorkedToday = input<number | null>(null);
 
   readonly T = T;
   // Internal signals
 
-  private readonly _day$ = this._globalTrackingIntervalService.todayDateStr$;
-  readonly day = toSignal(this._day$);
+  private readonly _resolvedDay$ = toObservable(this.dayStr$).pipe(
+    switchMap((custom$) => custom$ ?? this._globalTrackingIntervalService.todayDateStr$),
+    shareReplay({ bufferSize: 1, refCount: true }),
+  );
+  private readonly _day$ = this._resolvedDay$;
+  readonly day = toSignal(this._day$, {
+    initialValue: this._globalTrackingIntervalService.todayDateStr(),
+  });
 
   // Metric data for the selected day
   readonly metricForDay = toSignal<MetricCopy | undefined>(
