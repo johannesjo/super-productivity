@@ -184,6 +184,7 @@ export class PluginService implements OnDestroy {
 
           if (cachedPlugin.icon) {
             this._pluginIcons.set(cachedPlugin.id, cachedPlugin.icon);
+            this._registerPluginIcon(cachedPlugin.id, cachedPlugin.icon);
             this._updatePluginIcons();
           }
         } catch (error) {
@@ -217,6 +218,11 @@ export class PluginService implements OnDestroy {
 
   private _updatePluginIcons(): void {
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
+  }
+
+  private _registerPluginIcon(pluginId: string, iconContent: string): void {
+    const iconName = `plugin-${pluginId}-icon`;
+    this._globalThemeService.registerSvgIconFromContent(iconName, iconContent);
   }
 
   private _setPluginState(pluginId: string, state: PluginState): void {
@@ -435,6 +441,7 @@ export class PluginService implements OnDestroy {
       }
       if (icon) {
         this._pluginIcons.set(manifest.id, icon);
+        this._registerPluginIcon(manifest.id, icon);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
@@ -916,6 +923,7 @@ export class PluginService implements OnDestroy {
       // Store icon content if it exists
       if (iconContent) {
         this._pluginIcons.set(manifest.id, iconContent);
+        this._registerPluginIcon(manifest.id, iconContent);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
@@ -1189,6 +1197,7 @@ export class PluginService implements OnDestroy {
       }
       if (icon) {
         this._pluginIcons.set(manifest.id, icon);
+        this._registerPluginIcon(manifest.id, icon);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 

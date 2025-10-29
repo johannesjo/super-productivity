@@ -20,6 +20,7 @@ import {
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginService } from '../../plugins/plugin.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
 import {
@@ -37,6 +38,7 @@ export class MagicNavConfigService {
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginService = inject(PluginService);
   private readonly _menuTreeService = inject(MenuTreeService);
 
   // Simple state signals
@@ -355,16 +357,22 @@ export class MagicNavConfigService {
 
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
+    const pluginStates = this._pluginService.getAllPluginStates();
 
     return pluginEntries.map((entry) => {
       const hasSvgIcon = /\.svg$/i.test(entry.icon || '');
+      const pluginState = pluginStates.get(entry.pluginId);
+      const isUploadedPlugin = pluginState?.type === 'uploaded';
+
       return {
         type: 'plugin',
         id: `plugin-${entry.pluginId}-${entry.label}`,
         label: entry.label,
         icon: entry.icon || 'extension',
         ...(hasSvgIcon && {
-          svgIcon: `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`,
+          svgIcon: isUploadedPlugin
+            ? `plugin-${entry.pluginId}-icon`
+            : `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`,
         }),
         pluginId: entry.pluginId,
         action: entry.onClick,
