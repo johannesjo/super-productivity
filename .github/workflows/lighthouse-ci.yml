@@ -28,8 +28,8 @@ jobs:
 
       - run: npm run env # Generate env.generated.ts
 
-      - name: Build production web app
-        run: npm run buildFrontend:prodWeb
+      - name: Build production web app (no service worker)
+        run: npm run buildFrontend:prodWeb:no-sw
 
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
@@ -40,4 +40,4 @@ jobs:
           uploadArtifacts: true
           temporaryPublicStorage: true
           # Run 3 times for consistency
-          runs: 3
+          runs: 1
