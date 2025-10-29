@@ -43,6 +43,8 @@ interface TrelloBoard {
   // dynamic template
   // TODO: possibly need to add translation here
   template: `
+    <!--section for selecting board-->
+    <p style="margin-top: 12px;">Select a Trello Board for searching issues.</p>
     <mat-form-field
       appearance="outline"
       style="width: 100%;"
@@ -51,8 +53,6 @@ interface TrelloBoard {
       @let isLoading = isLoading$ | async;
       @if (isLoading) {
         <mat-label>No boards found (yet)...</mat-label>
-      } @else {
-        <mat-label>Select Board</mat-label>
       }
       <mat-select
         [(ngModel)]="selectedBoardId"
