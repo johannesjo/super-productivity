@@ -193,20 +193,14 @@ export class ProjectService {
       .pipe(take(1))
       .toPromise();
     const subTaskIdsForProject: string[] = [];
-    const allParentTaskIds = [
-      ...project.taskIds,
-      ...project.backlogTaskIds,
-    ];
+    const allParentTaskIds = [...project.taskIds, ...project.backlogTaskIds];
     allParentTaskIds.forEach((id) => {
       const task = getTaskById(id, taskState);
       if (task.projectId && task.subTaskIds.length > 0) {
         subTaskIdsForProject.push(...task.subTaskIds);
       }
     });
-    const allTaskIds = [
-      ...allParentTaskIds,
-      ...subTaskIdsForProject,
-    ];
+    const allTaskIds = [...allParentTaskIds, ...subTaskIdsForProject];
     this._store$.dispatch(TaskSharedActions.deleteProject({ project, allTaskIds }));
   }
 
