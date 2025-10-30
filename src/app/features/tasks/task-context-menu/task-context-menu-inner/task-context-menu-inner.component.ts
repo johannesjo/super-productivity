@@ -201,10 +201,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
-    // we have a race condition
-    window.setTimeout(() => {
-      this._taskFocusService.focusedTaskId.set(this.task.id);
-    });
   }
 
   focusRelatedTaskOrNext(): void {
