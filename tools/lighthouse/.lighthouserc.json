@@ -2,7 +2,7 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "numberOfRuns": 3,
+      "numberOfRuns": 1,
       "url": ["/browser/index.html"],
       "settings": {
         "disableServiceWorker": true,
