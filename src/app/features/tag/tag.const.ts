@@ -15,7 +15,7 @@ export const TODAY_TAG: Tag = {
   id: 'TODAY',
   theme: {
     ...WORK_CONTEXT_DEFAULT_THEME,
-    isAutoContrast: false,
+    isAutoContrast: true,
     huePrimary: '400',
     hueAccent: '500',
     hueWarn: '500',
