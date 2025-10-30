@@ -1,0 +1,55 @@
+<div class="focus-btn-wrapper">
+  @if (isSessionRunning()) {
+    <svg
+      class="progress-ring"
+      viewBox="0 0 48 48"
+    >
+      <circle
+        class="progress-ring-bg"
+        cx="24"
+        cy="24"
+        r="22"
+        fill="none"
+        stroke-width="2"
+      />
+      @if (mode() === 'COUNTDOWN' || mode() === 'POMODORO') {
+        <circle
+          class="progress-ring-circle"
+          cx="24"
+          cy="24"
+          r="22"
+          fill="none"
+          stroke-width="2"
+          [style.stroke-dasharray]="138.23"
+          [style.stroke-dashoffset]="138.23 * (1 - progress())"
+        />
+      } @else {
+        <!-- Flowtime mode: pulsing circle -->
+        <circle
+          class="progress-ring-pulse"
+          cx="24"
+          cy="24"
+          r="22"
+          fill="none"
+          stroke-width="2"
+        />
+      }
+    </svg>
+  }
+
+  <button
+    mat-icon-button
+    matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
+      kb().goToFocusMode ? '[' + kb().goToFocusMode + ']' : ''
+    }}"
+    (click)="enableFocusMode()"
+  >
+    <mat-icon>center_focus_strong</mat-icon>
+  </button>
+
+  @if (focusSummaryToday()?.total) {
+    <div class="focus-label">
+      {{ focusSummaryToday()?.total | msToMinuteClockString }}
+    </div>
+  }
+</div>

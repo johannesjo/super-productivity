@@ -1,0 +1,56 @@
+@use '../../../../styles/_globals.scss' as *;
+
+.focus-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.progress-ring {
+  position: absolute;
+  width: 48px;
+  height: 48px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) rotate(-90deg);
+  pointer-events: none;
+}
+
+.progress-ring-bg {
+  stroke: var(--c-accent);
+  opacity: 0.2;
+}
+
+.progress-ring-circle {
+  stroke: var(--c-accent);
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.progress-ring-pulse {
+  stroke: var(--c-accent);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    stroke-width: 2;
+  }
+  50% {
+    opacity: 1;
+    stroke-width: 3;
+  }
+}
+
+.focus-label {
+  position: absolute;
+  bottom: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 9px;
+  white-space: nowrap;
+  background: var(--c-bg);
+  padding: 0 2px;
+  border-radius: 2px;
+}

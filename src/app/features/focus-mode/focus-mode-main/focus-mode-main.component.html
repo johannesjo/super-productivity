@@ -6,6 +6,28 @@
     [value]="task.title"
     class="task-title"
   ></task-title>
+
+  <button
+    mat-icon-button
+    [matMenuTriggerFor]="taskMenu"
+    [matTooltip]="'Switch task' | translate"
+    class="task-switch-btn"
+  >
+    <mat-icon>swap_horiz</mat-icon>
+  </button>
+
+  <mat-menu #taskMenu="matMenu">
+    @for (startableTask of startableTasks$ | async; track startableTask.id) {
+      <button
+        mat-menu-item
+        (click)="switchToTask(startableTask.id)"
+        [disabled]="startableTask.id === task.id"
+      >
+        <span>{{ startableTask.title }}</span>
+      </button>
+    }
+  </mat-menu>
+
   <div class="progress-wrapper">
     @if (isCountDown) {
       <progress-circle [progress]="focusModeService.progress()"></progress-circle>
@@ -13,6 +35,14 @@
       <breathing-dot></breathing-dot>
     }
     <div class="progress-label-wrapper">
+      <button
+        mat-icon-button
+        [matTooltip]="'Remove 1 minute' | translate"
+        (click)="adjustTime(-60000)"
+        class="time-adjust-btn"
+      >
+        <mat-icon>remove</mat-icon>
+      </button>
       <div
         class="focus-time"
         [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
@@ -23,6 +53,14 @@
           {{ timeElapsed() | msToMinuteClockString }}
         }
       </div>
+      <button
+        mat-icon-button
+        [matTooltip]="'Add 1 minute' | translate"
+        (click)="adjustTime(60000)"
+        class="time-adjust-btn"
+      >
+        <mat-icon>add</mat-icon>
+      </button>
     </div>
   </div>
   @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {

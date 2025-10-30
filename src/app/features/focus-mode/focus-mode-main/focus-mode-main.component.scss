@@ -21,6 +21,22 @@
   flex-direction: column;
 }
 
+.task-switch-btn {
+  margin-bottom: var(--s2);
+
+  @include mousePrimaryDevice {
+    transition: all var(--transition-leave);
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+
+  :host:hover & {
+    transition: all var(--transition-enter);
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 .task-title {
   text-align: center;
   font-size: 30px;
@@ -84,10 +100,31 @@ breathing-dot {
   left: 50%;
   transform: translate(-50%, -50%);
   text-align: center;
+  display: flex;
+  align-items: center;
+  gap: var(--s);
 
   .focus-time {
     font-size: 24px;
     font-weight: bold;
+  }
+
+  .time-adjust-btn {
+    @include mousePrimaryDevice {
+      transition: all var(--transition-leave);
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    :host:hover & {
+      transition: all var(--transition-enter);
+      opacity: 0.7;
+      transform: scale(1);
+
+      &:hover {
+        opacity: 1;
+      }
+    }
   }
 }
 

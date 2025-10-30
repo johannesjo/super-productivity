@@ -231,6 +231,37 @@ export const focusModeReducer = createReducer(
     ...state,
     currentCycle: 1,
   })),
+
+  // Adjust remaining time by modifying elapsed
+  on(a.adjustRemainingTime, (state, { amountMs }) => {
+    if (!state.timer.isRunning || state.timer.purpose !== 'work') {
+      return state;
+    }
+
+    // Negative amount adds time (reduces elapsed), positive removes time (increases elapsed)
+    const newElapsed = state.timer.elapsed - amountMs;
+
+    // Ensure elapsed is never negative
+    const clampedElapsed = Math.max(0, newElapsed);
+
+    // For countdown modes, ensure elapsed doesn't exceed duration
+    const finalElapsed =
+      state.timer.duration > 0
+        ? Math.min(clampedElapsed, state.timer.duration)
+        : clampedElapsed;
+
+    // Adjust startedAt to maintain the correct elapsed time
+    const newStartedAt = state.timer.startedAt ? Date.now() - finalElapsed : Date.now();
+
+    return {
+      ...state,
+      timer: {
+        ...state.timer,
+        elapsed: finalElapsed,
+        startedAt: newStartedAt,
+      },
+    };
+  }),
 );
 
 // For backward compatibility, export the old State interface name

@@ -18,6 +18,7 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
+  adjustRemainingTime,
   completeFocusSession,
   completeTask,
   selectFocusTask,
@@ -44,6 +45,8 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 
 @Component({
   selector: 'focus-mode-main',
@@ -67,6 +70,9 @@ import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.c
     IssueIconPipe,
     SimpleCounterButtonComponent,
     MatMiniFabButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {
@@ -81,6 +87,8 @@ export class FocusModeMainComponent implements OnDestroy {
 
   timeElapsed = this.focusModeService.timeElapsed;
   isCountTimeDown = this.focusModeService.isCountTimeDown;
+
+  startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -213,6 +221,14 @@ export class FocusModeMainComponent implements OnDestroy {
 
   completeFocusSession(): void {
     this._store.dispatch(completeFocusSession({ isManual: true }));
+  }
+
+  adjustTime(amountMs: number): void {
+    this._store.dispatch(adjustRemainingTime({ amountMs }));
+  }
+
+  switchToTask(taskId: string): void {
+    this.taskService.setCurrentId(taskId);
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;
