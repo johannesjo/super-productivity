@@ -352,6 +352,60 @@ TODO configure more restrictive Content-Security-Policy
       var randomIndex = Math.floor(Math.random() * productivityTips.length);
       document.getElementById('heading').innerText = productivityTips[randomIndex][0];
       document.getElementById('text').innerText = productivityTips[randomIndex][1];
+
+      (function () {
+        var MIN_CHROME_VERSION = 110;
+        var buildWarning = function (version) {
+          var wrapper = document.createElement('div');
+          wrapper.style.position = 'fixed';
+          wrapper.style.inset = '0';
+          wrapper.style.display = 'flex';
+          wrapper.style.flexDirection = 'column';
+          wrapper.style.alignItems = 'center';
+          wrapper.style.justifyContent = 'center';
+          wrapper.style.padding = '24px';
+          wrapper.style.background = '#111';
+          wrapper.style.color = '#fff';
+          wrapper.style.fontFamily = 'sans-serif';
+          wrapper.style.zIndex = '9999';
+          wrapper.innerHTML =
+            '<div style="max-width:640px;width:100%;text-align:center;border:1px solid rgba(255,255,255,0.2);border-radius:12px;padding:32px;background:#1c1c1c;box-shadow:0 16px 40px rgba(0,0,0,0.4);">' +
+            '<h1 style="margin:0 0 16px;font-size:24px;">Please update Android System WebView</h1>' +
+            '<p style="margin:0 0 12px;font-size:16px;line-height:1.5;">Your current WebView/Chrome version (' +
+            version +
+            ') is too old for Super Productivity. Please update it to version ' +
+            MIN_CHROME_VERSION +
+            ' or newer via the Google Play Store.</p>' +
+            '<button type="button" style="margin-top:16px;padding:12px 20px;border:none;border-radius:6px;background:#4a90e2;color:#fff;font-size:15px;cursor:pointer;">Update</button>' +
+            '</div>';
+          var button = wrapper.querySelector('button');
+          if (button) {
+            button.addEventListener('click', function () {
+              window.open(
+                'https://play.google.com/store/apps/details?id=com.google.android.webview',
+                '_blank',
+              );
+            });
+          }
+          return wrapper;
+        };
+
+        // Detect the Chrome major version from the WebView UA string
+        var ua = navigator.userAgent || '';
+        var match = ua.match(/Chrome\/(\d+)/);
+        if (!match) {
+          return;
+        }
+        var major = parseInt(match[1], 10);
+
+        if (!Number.isNaN(major) && major < MIN_CHROME_VERSION) {
+          var appRoot = document.querySelector('app-root');
+          if (appRoot) {
+            appRoot.style.display = 'none';
+          }
+          document.body.appendChild(buildWarning(String(major)));
+        }
+      })();
     </script>
   </body>
 </html>
