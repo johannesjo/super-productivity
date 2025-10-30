@@ -58,12 +58,19 @@ export const applyMatMenuTouchMonkeyPatch = (): void => {
     // On touch devices, prevent clicks that happen too quickly after menu opens
     if (event.isTrusted && timeSinceMenuOpen < TOUCH_DELAY_MS) {
       event.preventDefault();
-      event.stopPropagation();
+      // Don't call stopPropagation() - we need the event to bubble for menu closing
 
       // Retry the click after the delay period
+      const element = (this as any)._elementRef?.nativeElement;
       setTimeout(() => {
-        if (!this.disabled) {
-          originalHandleClick.call(this, event);
+        if (!this.disabled && element) {
+          // Create a new click event that can properly bubble
+          const newEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+          });
+          element.dispatchEvent(newEvent);
         }
       }, TOUCH_DELAY_MS - timeSinceMenuOpen);
 
