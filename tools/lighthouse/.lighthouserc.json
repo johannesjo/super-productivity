@@ -3,7 +3,11 @@
     "collect": {
       "staticDistDir": "./dist",
       "numberOfRuns": 3,
-      "url": ["/browser/index.html"]
+      "url": ["/browser/index.html"],
+      "settings": {
+        "disableServiceWorker": true,
+        "maxWaitForLoad": 45000
+      }
     },
     "assert": {
       "preset": "lighthouse:no-pwa",
