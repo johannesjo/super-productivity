@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -20,7 +19,7 @@ import { PluginBridgeService } from '../plugin-bridge.service';
     }
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIconButton, MatIcon, MatTooltip],
+  imports: [MatIconButton, MatIcon, MatTooltip],
 })
 export class PluginHeaderBtnsComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);

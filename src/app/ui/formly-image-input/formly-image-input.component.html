@@ -8,15 +8,16 @@
     matInput
     placeholder="https://... or file://..."
   />
-  <button
-    mat-stroked-button
-    type="button"
-    (click)="openUnsplashPicker()"
-    [disabled]="props.readonly || !isUnsplashAvailable"
-    class="unsplash-button"
-    *ngIf="isUnsplashAvailable"
-  >
-    <mat-icon>image</mat-icon>
-    Load from Unsplash
-  </button>
+  @if (isUnsplashAvailable) {
+    <button
+      mat-stroked-button
+      type="button"
+      (click)="openUnsplashPicker()"
+      [disabled]="props.readonly || !isUnsplashAvailable"
+      class="unsplash-button"
+    >
+      <mat-icon>image</mat-icon>
+      Load from Unsplash
+    </button>
+  }
 </div>

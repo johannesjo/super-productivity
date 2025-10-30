@@ -40,22 +40,23 @@ import { Log } from '../../core/log';
       [class.mention-menu]="!styleOff"
       [class.mention-dropdown]="!styleOff && dropUp"
     >
-      <li
-        *ngFor="let item of items; let i = index"
-        [class.active]="activeIndex == i"
-        [class.mention-active]="!styleOff && activeIndex == i"
-      >
-        <a
-          class="dropdown-item"
-          [class.mention-item]="!styleOff"
-          (mousedown)="activeIndex = i; itemClick.emit(); $event.preventDefault()"
+      @for (item of items; track item; let i = $index) {
+        <li
+          [class.active]="activeIndex == i"
+          [class.mention-active]="!styleOff && activeIndex == i"
         >
-          <ng-template
-            [ngTemplateOutlet]="itemTemplate"
-            [ngTemplateOutletContext]="{ item: item }"
-          ></ng-template>
-        </a>
-      </li>
+          <a
+            class="dropdown-item"
+            [class.mention-item]="!styleOff"
+            (mousedown)="activeIndex = i; itemClick.emit(); $event.preventDefault()"
+          >
+            <ng-template
+              [ngTemplateOutlet]="itemTemplate"
+              [ngTemplateOutletContext]="{ item: item }"
+            ></ng-template>
+          </a>
+        </li>
+      }
     </ul>
   `,
   standalone: true,
