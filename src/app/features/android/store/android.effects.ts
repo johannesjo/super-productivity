@@ -95,6 +95,9 @@ export class AndroidEffects {
                 notifications: reminders.map((reminder) => {
                   // since the ids are temporary we can use just Math.random()
                   const id = Math.round(Math.random() * 10000000);
+                  const now = Date.now();
+                  const scheduleAt =
+                    reminder.remindAt <= now ? now + 1000 : reminder.remindAt; // push overdue reminders into the immediate future
                   const mapped: LocalNotificationSchema = {
                     id,
                     title: reminder.title,
@@ -104,7 +107,7 @@ export class AndroidEffects {
                     },
                     schedule: {
                       // eslint-disable-next-line no-mixed-operators
-                      at: new Date(reminder.remindAt),
+                      at: new Date(scheduleAt),
                       allowWhileIdle: true,
                       repeats: false,
                       every: undefined,
