@@ -375,18 +375,8 @@ TODO configure more restrictive Content-Security-Policy
             version +
             ') is too old for Super Productivity. Please update it to version ' +
             MIN_CHROME_VERSION +
-            ' or newer via the Google Play Store.</p>' +
-            '<button type="button" style="margin-top:16px;padding:12px 20px;border:none;border-radius:6px;background:#4a90e2;color:#fff;font-size:15px;cursor:pointer;">Update</button>' +
+            ' or newer.</p>' +
             '</div>';
-          var button = wrapper.querySelector('button');
-          if (button) {
-            button.addEventListener('click', function () {
-              window.open(
-                'https://play.google.com/store/apps/details?id=com.google.android.webview',
-                '_blank',
-              );
-            });
-          }
           return wrapper;
         };
 
