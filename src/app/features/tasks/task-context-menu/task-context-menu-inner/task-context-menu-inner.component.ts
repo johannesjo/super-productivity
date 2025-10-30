@@ -209,14 +209,20 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
   focusRelatedTaskOrNext(): void {
     // Focus the task element after context menu closes
-    const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
-    if (taskElement) {
-      taskElement.focus();
-    }
+    // Use setTimeout to ensure menu has fully closed and DOM is settled
+    setTimeout(() => {
+      const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
+      if (taskElement) {
+        taskElement.focus();
+        // Ensure focusedTaskId is set even if focus event doesn't fire
+        this._taskFocusService.focusedTaskId.set(this.task.id);
+      }
+    }, 0);
   }
 
   onClose(): void {
-    this._taskFocusService.focusedTaskId.set(null);
+    // Don't manually set focusedTaskId to null here - let the task component's
+    // focus/blur handlers manage it automatically to avoid race conditions
     this.focusRelatedTaskOrNext();
     this.close.emit();
   }
