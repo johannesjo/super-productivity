@@ -82,117 +82,124 @@
       </button>
     </div>
   } @else {
-    <div class="progress-label-wrapper not-running">
-      @if (isEditingDuration()) {
+    @if (isEditingDuration()) {
+      <div class="progress-label-wrapper">
         <div class="duration-editor">
           <input-duration-slider
             [model]="displayDuration()"
             (modelChange)="onDurationChange($event)"
           ></input-duration-slider>
           <button
-            mat-stroked-button
+            mat-icon-button
             (click)="closeDurationPicker()"
-            style="margin-top: 16px"
+            class="done-btn"
+            [matTooltip]="'Done' | translate"
           >
-            {{ 'Done' | translate }}
+            <mat-icon>check</mat-icon>
           </button>
         </div>
-      } @else {
+      </div>
+    } @else {
+      <div class="progress-label-wrapper">
         <div
           class="focus-time"
-          [class.clickable]="mode() === 'COUNTDOWN'"
+          [class.clickable]="mode() === FocusModeMode.Countdown"
           [matTooltip]="
-            mode() === 'COUNTDOWN' ? ('Click to edit duration' | translate) : ''
+            mode() === FocusModeMode.Countdown
+              ? ('Click to edit duration' | translate)
+              : ''
           "
-          (click)="mode() === 'COUNTDOWN' && openDurationPicker()"
+          (click)="mode() === FocusModeMode.Countdown && openDurationPicker()"
           [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
         >
           {{ displayDuration() | msToMinuteClockString }}
         </div>
-        <button
-          mat-fab
-          color="accent"
-          [matTooltip]="'Start focus session' | translate"
-          (click)="startSession()"
-          class="play-button"
-        >
-          <mat-icon>play_arrow</mat-icon>
-        </button>
-      }
-    </div>
+      </div>
+    }
+    <button
+      mat-fab
+      color="accent"
+      [matTooltip]="'Start focus session' | translate"
+      (click)="startSession()"
+      class="play-button"
+    >
+      <mat-icon>play_arrow</mat-icon>
+    </button>
   }
 </div>
-@if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
-  @if (enabledSimpleCounters.length) {
-    <section class="simple-counter-buttons">
-      @for (
-        simpleCounter of enabledSimpleCounters;
-        track trackById($index, simpleCounter)
-      ) {
-        <simple-counter-button
-          [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
-          [simpleCounter]="simpleCounter"
-        ></simple-counter-button>
-      }
-    </section>
+@if (!isSessionRunning()) {
+  @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
+    @if (enabledSimpleCounters.length) {
+      <section class="simple-counter-buttons">
+        @for (
+          simpleCounter of enabledSimpleCounters;
+          track trackById($index, simpleCounter)
+        ) {
+          <simple-counter-button
+            [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
+            [simpleCounter]="simpleCounter"
+          ></simple-counter-button>
+        }
+      </section>
+    }
   }
+  <section class="controls">
+    @if (currentTask) {
+      <button
+        mat-icon-button
+        [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
+        (click)="finishCurrentTask()"
+      >
+        <mat-icon>done</mat-icon>
+      </button>
+    }
+
+    <button
+      mat-icon-button
+      [matTooltip]="'Complete focus session' | translate"
+      (click)="completeFocusSession()"
+    >
+      <mat-icon>done_all</mat-icon>
+    </button>
+
+    @if (currentTask && currentTask.issueId && currentTask.issueType !== ICAL_TYPE) {
+      <a
+        mat-icon-button
+        [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER | translate"
+        target="_blank"
+        [href]="issueUrl$ | async"
+      >
+        @if (currentTask.issuePoints) {
+          <div class="mini-badge bgc-primary">{{ currentTask.issuePoints }}</div>
+        }
+        <mat-icon [svgIcon]="currentTask.issueType | issueIcon"></mat-icon>
+      </a>
+    }
+    @if (isCountDown) {
+      <button
+        mat-icon-button
+        [matTooltip]="'Add 5 minutes'"
+        (click)="extendSession()"
+      >
+        <mat-icon>add_circle</mat-icon>
+      </button>
+    }
+    <button
+      (click)="isShowNotes = !isShowNotes"
+      [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
+      class="ico-btn show-additional-info-btn"
+      color=""
+      mat-icon-button
+    >
+      @if (!isShowNotes) {
+        <mat-icon>chat</mat-icon>
+      }
+      @if (isShowNotes) {
+        <mat-icon>expand_less</mat-icon>
+      }
+    </button>
+  </section>
 }
-<section class="controls">
-  @if (currentTask) {
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
-      (click)="finishCurrentTask()"
-    >
-      <mat-icon>done</mat-icon>
-    </button>
-  }
-
-  <button
-    mat-icon-button
-    [matTooltip]="'Complete focus session' | translate"
-    (click)="completeFocusSession()"
-  >
-    <mat-icon>done_all</mat-icon>
-  </button>
-
-  @if (currentTask && currentTask.issueId && currentTask.issueType !== ICAL_TYPE) {
-    <a
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER | translate"
-      target="_blank"
-      [href]="issueUrl$ | async"
-    >
-      @if (currentTask.issuePoints) {
-        <div class="mini-badge bgc-primary">{{ currentTask.issuePoints }}</div>
-      }
-      <mat-icon [svgIcon]="currentTask.issueType | issueIcon"></mat-icon>
-    </a>
-  }
-  @if (isCountDown) {
-    <button
-      mat-icon-button
-      [matTooltip]="'Add 5 minutes'"
-      (click)="extendSession()"
-    >
-      <mat-icon>add_circle</mat-icon>
-    </button>
-  }
-  <button
-    (click)="isShowNotes = !isShowNotes"
-    [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
-    class="ico-btn show-additional-info-btn"
-    color=""
-    mat-icon-button
-  >
-    @if (!isShowNotes) {
-      <mat-icon>chat</mat-icon>
-    }
-    @if (isShowNotes) {
-      <mat-icon>expand_less</mat-icon>
-    }
-  </button>
-</section>
 @if (currentTask && isShowNotes) {
   <div
     style="height: 100px"

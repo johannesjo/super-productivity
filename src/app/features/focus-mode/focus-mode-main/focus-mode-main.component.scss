@@ -126,14 +126,6 @@ breathing-dot {
   align-items: center;
   gap: var(--s);
 
-  &.not-running {
-    position: static;
-    transform: none;
-    flex-direction: column;
-    margin-top: var(--s2);
-    gap: var(--s3);
-  }
-
   .focus-time {
     font-size: 24px;
     font-weight: bold;
@@ -172,6 +164,7 @@ breathing-dot {
 .play-button {
   width: 64px;
   height: 64px;
+  margin-top: var(--s3);
 
   mat-icon {
     font-size: 36px;
@@ -181,11 +174,34 @@ breathing-dot {
 }
 
 .duration-editor {
-  width: 300px;
-  max-width: 90vw;
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--s);
+  max-width: 140px;
+
+  @media (min-height: 800px) and (min-width: 500px) {
+    max-width: 160px;
+  }
+  @media (min-height: 900px) and (min-width: 600px) {
+    max-width: 200px;
+  }
+
+  input-duration-slider {
+    width: 100%;
+  }
+
+  .done-btn {
+    width: 32px;
+    height: 32px;
+    line-height: 32px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
 }
 
 .simple-counter-buttons {

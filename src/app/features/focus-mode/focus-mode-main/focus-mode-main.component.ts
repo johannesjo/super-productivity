@@ -54,6 +54,7 @@ import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-fro
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { FocusModeMode } from '../focus-mode.model';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 import {
   FocusModePreparationRocketComponent,
@@ -103,6 +104,7 @@ export class FocusModeMainComponent implements OnDestroy {
 
   focusModeService = inject(FocusModeService);
 
+  FocusModeMode = FocusModeMode;
   timeElapsed = this.focusModeService.timeElapsed;
   isCountTimeDown = this.focusModeService.isCountTimeDown;
   isSessionRunning = this.focusModeService.isSessionRunning;

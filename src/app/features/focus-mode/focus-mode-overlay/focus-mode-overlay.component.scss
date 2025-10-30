@@ -85,9 +85,12 @@ main {
 }
 
 .focus-mode-select-mode {
+  position: absolute;
+  top: var(--s3);
+  left: 50%;
+  transform: translateX(-50%);
   width: min(100%, 560px);
-  margin-top: var(--s2);
-  margin-bottom: calc(-1 * var(--s4));
+  z-index: 10;
 }
 
 focus-mode-task-selection,
