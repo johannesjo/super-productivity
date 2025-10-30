@@ -37,7 +37,8 @@
   }
 }
 
-.task-title {
+.task-title,
+.task-title-placeholder {
   text-align: center;
   font-size: 30px;
   line-height: 1.1;
@@ -45,16 +46,6 @@
   margin-top: var(--s3);
   margin-bottom: var(--s3);
   border-radius: 4px;
-  //padding: 4px;
-
-  ::ng-deep textarea {
-    text-align: center;
-  }
-
-  &.is-focused {
-    // add extra outline on focus
-    outline: 1px solid var(--c-accent);
-  }
 
   @media (max-width: 499px) {
     font-size: 24px;
@@ -71,8 +62,39 @@
   }
 }
 
+.task-title {
+  ::ng-deep textarea {
+    text-align: center;
+  }
+
+  &.is-focused {
+    // add extra outline on focus
+    outline: 1px solid var(--c-accent);
+  }
+}
+
+.task-title-placeholder {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity var(--transition-enter);
+  padding: 4px;
+  border: 2px dashed var(--c-accent);
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
 .progress-wrapper {
   position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.rocket-animation {
+  margin-bottom: var(--s2);
+  z-index: 10;
 }
 
 progress-circle,
@@ -104,9 +126,28 @@ breathing-dot {
   align-items: center;
   gap: var(--s);
 
+  &.not-running {
+    position: static;
+    transform: none;
+    flex-direction: column;
+    margin-top: var(--s2);
+    gap: var(--s3);
+  }
+
   .focus-time {
     font-size: 24px;
     font-weight: bold;
+
+    &.clickable {
+      cursor: pointer;
+      padding: var(--s);
+      border-radius: 4px;
+      transition: background-color var(--transition-enter);
+
+      &:hover {
+        background-color: var(--c-bg-raised);
+      }
+    }
   }
 
   .time-adjust-btn {
@@ -126,6 +167,25 @@ breathing-dot {
       }
     }
   }
+}
+
+.play-button {
+  width: 64px;
+  height: 64px;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+.duration-editor {
+  width: 300px;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 .simple-counter-buttons {

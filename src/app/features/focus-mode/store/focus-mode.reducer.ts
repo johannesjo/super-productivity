@@ -23,7 +23,7 @@ const createIdleTimer = (): TimerState => ({
 
 export const initialState: FocusModeState = {
   timer: createIdleTimer(),
-  currentScreen: FocusScreen.TaskSelection,
+  currentScreen: FocusScreen.Main,
   isOverlayShown: false,
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as FocusModeMode)
@@ -82,7 +82,7 @@ export const focusModeReducer = createReducer(
   // Screen navigation
   on(a.selectFocusTask, (state) => ({
     ...state,
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
   })),
 
   on(a.selectFocusDuration, (state) => ({

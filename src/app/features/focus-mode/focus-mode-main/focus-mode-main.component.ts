@@ -6,10 +6,11 @@ import {
   HostListener,
   inject,
   OnDestroy,
+  signal,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { from, Observable, of, Subject } from 'rxjs';
+import { from, Observable, of, Subject, timer } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { first, switchMap, take, takeUntil } from 'rxjs/operators';
@@ -23,6 +24,7 @@ import {
   completeTask,
   selectFocusTask,
   setFocusSessionDuration,
+  startFocusSession,
 } from '../store/focus-mode.actions';
 import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -31,7 +33,13 @@ import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import { MatIconAnchor, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import {
+  MatIconAnchor,
+  MatIconButton,
+  MatMiniFabButton,
+  MatFabButton,
+  MatButton,
+} from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
@@ -47,6 +55,12 @@ import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
+import {
+  FocusModePreparationRocketComponent,
+  type RocketState,
+} from '../focus-mode-preparation/focus-mode-preparation-rocket.component';
+import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 @Component({
   selector: 'focus-mode-main',
@@ -73,6 +87,10 @@ import { selectStartableTasksActiveContextFirst } from '../../work-context/store
     MatMenuTrigger,
     MatMenu,
     MatMenuItem,
+    FocusModePreparationRocketComponent,
+    MatFabButton,
+    InputDurationSliderComponent,
+    MatButton,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {
@@ -87,8 +105,15 @@ export class FocusModeMainComponent implements OnDestroy {
 
   timeElapsed = this.focusModeService.timeElapsed;
   isCountTimeDown = this.focusModeService.isCountTimeDown;
+  isSessionRunning = this.focusModeService.isSessionRunning;
+  mode = this.focusModeService.mode;
 
   startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
+
+  showRocket = signal(false);
+  rocketState = signal<RocketState>('pulse-5');
+  displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
+  isEditingDuration = signal(false);
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -124,10 +149,22 @@ export class FocusModeMainComponent implements OnDestroy {
     });
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
-      if (!task) {
-        this._store.dispatch(selectFocusTask());
-      }
     });
+
+    // Initialize display duration from store or localStorage
+    const lastDuration = localStorage.getItem(LS.LAST_COUNTDOWN_DURATION);
+    if (lastDuration) {
+      this.displayDuration.set(parseInt(lastDuration, 10));
+    }
+
+    this._store
+      .select(selectTimeDuration)
+      .pipe(takeUntil(this._onDestroy$))
+      .subscribe((duration) => {
+        if (duration > 0) {
+          this.displayDuration.set(duration);
+        }
+      });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
@@ -229,6 +266,42 @@ export class FocusModeMainComponent implements OnDestroy {
 
   switchToTask(taskId: string): void {
     this.taskService.setCurrentId(taskId);
+  }
+
+  startSession(): void {
+    const COUNTDOWN_DURATION = 5;
+    this.showRocket.set(true);
+    this.rocketState.set('pulse-5');
+
+    timer(0, 1000)
+      .pipe(takeUntil(this._onDestroy$), take(COUNTDOWN_DURATION + 1))
+      .subscribe((tick) => {
+        const remaining = COUNTDOWN_DURATION - tick;
+
+        if (remaining > 0) {
+          this.rocketState.set(`pulse-${remaining}` as RocketState);
+        } else {
+          this.rocketState.set('launch');
+          window.setTimeout(() => {
+            this.showRocket.set(false);
+            this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+          }, 900);
+        }
+      });
+  }
+
+  openDurationPicker(): void {
+    this.isEditingDuration.set(true);
+  }
+
+  onDurationChange(duration: number): void {
+    this.displayDuration.set(duration);
+    localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, duration.toString());
+    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
+  }
+
+  closeDurationPicker(): void {
+    this.isEditingDuration.set(false);
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;
