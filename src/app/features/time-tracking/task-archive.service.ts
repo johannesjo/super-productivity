@@ -1,8 +1,10 @@
 import { inject, Injectable } from '@angular/core';
+import { Action } from '@ngrx/store';
 import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TASK_FEATURE_NAME, taskReducer } from '../tasks/store/task.reducer';
 import { taskSharedCrudMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/task-shared-crud.reducer';
+import { tagSharedMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/tag-shared.reducer';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive, TaskState } from '../tasks/task.model';
 import { RoundTimeOption } from '../project/project.model';
@@ -359,13 +361,13 @@ export class TaskArchiveService {
     action: TaskArchiveAction,
   ): TaskState {
     // Create a wrapped reducer that combines taskReducer with the meta-reducer
-    const wrappedReducer = taskSharedCrudMetaReducer((state: RootState, act: any) => {
-      // Only update the task feature state
-      return {
-        ...state,
-        [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
-      };
+    const baseReducer = (state: RootState, act: Action): RootState => ({
+      ...state,
+      [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
     });
+
+    const reducerWithCrud = taskSharedCrudMetaReducer(baseReducer);
+    const reducerWithTags = tagSharedMetaReducer(reducerWithCrud);
 
     // Create root state with the actual archive task state
     const rootStateWithArchiveTasks: RootState = {
@@ -374,7 +376,7 @@ export class TaskArchiveService {
     };
 
     // Apply the action through the wrapped reducer
-    const updatedRootState = wrappedReducer(rootStateWithArchiveTasks, action);
+    const updatedRootState = reducerWithTags(rootStateWithArchiveTasks, action);
 
     // Extract and return the updated task state
     return updatedRootState[TASK_FEATURE_NAME];
