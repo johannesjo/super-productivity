@@ -9,6 +9,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
 import { DroidLog } from '../../../core/log';
+import { generateNotificationId } from '../android-notification-id.util';
 
 // TODO send message to electron when current task changes here
 
@@ -93,8 +94,8 @@ export class AndroidEffects {
               // Re-schedule the full set so the native alarm manager is always in sync.
               await LocalNotifications.schedule({
                 notifications: reminders.map((reminder) => {
-                  // since the ids are temporary we can use just Math.random()
-                  const id = Math.round(Math.random() * 10000000);
+                  // Use deterministic ID based on reminder's relatedId to prevent duplicate notifications
+                  const id = generateNotificationId(reminder.relatedId);
                   const now = Date.now();
                   const scheduleAt =
                     reminder.remindAt <= now ? now + 1000 : reminder.remindAt; // push overdue reminders into the immediate future
