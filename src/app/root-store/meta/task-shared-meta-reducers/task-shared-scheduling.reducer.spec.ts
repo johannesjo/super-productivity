@@ -178,6 +178,105 @@ describe('taskSharedSchedulingMetaReducer', () => {
       expect(updatedState.planner.days['2024-01-01']).toEqual(['keep-task']);
       expect(updatedState.planner.days['2024-01-02']).toEqual(['other-task']);
     });
+
+    it('should preserve dueWithTime when task is scheduled for today', () => {
+      const now = Date.now();
+      const testState = createStateWithExistingTasks([], [], [], []);
+      // Create task with dueWithTime for today
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueWithTime: now,
+      });
+      testState[TASK_FEATURE_NAME].ids.push('task1');
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      expect(updatedTask.dueWithTime).toBe(now);
+      expect(updatedTask.dueDay).toBeDefined();
+    });
+
+    it('should clear dueWithTime when task is scheduled for a different day', () => {
+      // eslint-disable-next-line no-mixed-operators
+      const tomorrow = Date.now() + 24 * 60 * 60 * 1000;
+      const testState = createStateWithExistingTasks([], [], [], []);
+      // Create task with dueWithTime for tomorrow
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueWithTime: tomorrow,
+      });
+      testState[TASK_FEATURE_NAME].ids.push('task1');
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      expect(updatedTask.dueWithTime).toBeUndefined();
+      expect(updatedTask.dueDay).toBeDefined();
+    });
+
+    it('should handle tasks without dueWithTime (backward compatibility)', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueWithTime: undefined,
+        dueDay: undefined,
+      });
+      testState[TASK_FEATURE_NAME].ids.push('task1');
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      expect(updatedTask.dueWithTime).toBeUndefined();
+      expect(updatedTask.dueDay).toBeDefined();
+    });
+
+    it('should preserve dueWithTime for multiple tasks scheduled for today', () => {
+      const now = Date.now();
+      const testState = createStateWithExistingTasks([], [], [], []);
+      // Create multiple tasks with dueWithTime for today
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueWithTime: now,
+      });
+      testState[TASK_FEATURE_NAME].entities.task2 = createMockTask({
+        id: 'task2',
+        // eslint-disable-next-line no-mixed-operators
+        dueWithTime: now + 60 * 60 * 1000, // 1 hour later
+      });
+      testState[TASK_FEATURE_NAME].ids.push('task1', 'task2');
+
+      const action = TaskSharedActions.planTasksForToday({
+        taskIds: ['task1', 'task2'],
+        parentTaskMap: {},
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const updatedTask1 = updatedState[TASK_FEATURE_NAME].entities.task1;
+      const updatedTask2 = updatedState[TASK_FEATURE_NAME].entities.task2;
+
+      expect(updatedTask1.dueWithTime).toBe(now);
+      // eslint-disable-next-line no-mixed-operators
+      expect(updatedTask2.dueWithTime).toBe(now + 60 * 60 * 1000);
+    });
   });
 
   describe('removeTasksFromTodayTag action', () => {
