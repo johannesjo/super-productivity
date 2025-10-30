@@ -84,7 +84,7 @@
           svgIcon="drag_handle"
         ></mat-icon>
         @if (isCurrent()) {
-          <mat-icon class="play-icon-indicator">play_arrow </mat-icon>
+          <mat-icon class="play-icon-indicator">play_arrow</mat-icon>
         }
 
         <div class="type-ico-wrapper">
@@ -158,24 +158,27 @@
           </div>
         }
         @if (t.subTasks?.length) {
-          <div class="time">
-            <div class="time-val">
-              <mat-icon
-                inline="true"
-                style="margin-top: -6px"
-                >functions
-              </mat-icon>
-              <span [innerHTML]="t.subTasks | subTaskTotalTimeSpent | msToString"></span>
+          @let subTaskTimeSpent = t.subTasks | subTaskTotalTimeSpent;
+          @if (t.timeEstimate || subTaskTimeSpent) {
+            <div class="time">
+              <div class="time-val">
+                <mat-icon
+                  inline="true"
+                  style="margin-top: -6px"
+                  >functions
+                </mat-icon>
+                <span [innerHTML]="subTaskTimeSpent | msToString"></span>
+              </div>
+              <div class="separator">/</div>
+              <div class="time-val">
+                <mat-icon
+                  svgIcon="estimate_remaining"
+                  inline="true"
+                ></mat-icon>
+                {{ t.timeEstimate | msToString }}
+              </div>
             </div>
-            <div class="separator">/</div>
-            <div class="time-val">
-              <mat-icon
-                svgIcon="estimate_remaining"
-                inline="true"
-              ></mat-icon>
-              {{ t.timeEstimate | msToString }}
-            </div>
-          </div>
+          }
         }
       </div>
 
@@ -302,7 +305,7 @@
           mat-mini-fab
         >
           @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
-            <mat-icon>add </mat-icon>
+            <mat-icon>add</mat-icon>
           }
           @if (t._hideSubTasksMode !== ShowSubTasksMode.HideAll) {
             <mat-icon
