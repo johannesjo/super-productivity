@@ -18,6 +18,12 @@
   }
 }
 
+:host-context(.summary-point) {
+  .inline-input-wrapper {
+    min-width: 35px;
+  }
+}
+
 .inline-input-wrapper {
   display: inline-block;
   position: relative;
