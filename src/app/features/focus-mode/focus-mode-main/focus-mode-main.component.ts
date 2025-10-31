@@ -137,15 +137,17 @@ export class FocusModeMainComponent implements OnDestroy {
   isShowTaskActions = computed(() => true);
   isShowModeSelector = computed(() => this._isPreparation());
   isShowSimpleCounters = computed(() => this._isInProgress());
-  isShowTimeAdjustButtons = computed(() => this._isInProgress());
   isShowPauseButton = computed(() => this._isInProgress());
   isShowCompleteSessionButton = computed(() => this._isInProgress());
   isShowBottomControls = computed(() => this._isInProgress());
   isShowCountdown = computed(() => this._isCountdown());
+  isShowPlayButton = computed(() => this._isPreparation());
   isShowDurationSlider = computed(
     () => this._isPreparation() && this.mode() === FocusModeMode.Countdown,
   );
-  isShowPlayButton = computed(() => this._isPreparation());
+  isShowTimeAdjustButtons = computed(
+    () => this._isInProgress() && this.mode() !== FocusModeMode.Flowtime,
+  );
 
   startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
 
