@@ -12,6 +12,8 @@
   flex-direction: column;
   padding-top: var(--s2);
   padding-bottom: var(--s2);
+
+  --muted-opacity: 0;
 }
 
 // Mode selector at the top (Preparation state)
@@ -21,6 +23,8 @@
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
+  margin: 0 16px;
+  max-width: 600px;
 }
 
 // ========== CENTER BLOCK (Preparation & In Progress) ==========
@@ -37,8 +41,24 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: var(--s);
   position: relative;
+  flex-direction: column;
+  margin: var(--s);
+
+  &:hover button {
+    opacity: 1;
+  }
+
+  button {
+    opacity: var(--muted-opacity);
+    transition: var(--transition-standard);
+    pointer-events: auto;
+
+    @media (hover: none) and (pointer: coarse) {
+      /* styles for primary touch devices go here */
+      opacity: 1;
+    }
+  }
 }
 
 // ========== TASK ACTIONS (below title) ==========
@@ -47,18 +67,6 @@
   gap: var(--s);
   justify-content: center;
   margin-bottom: var(--s2);
-
-  .task-action-btn {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
-  }
 }
 
 .task-title,
@@ -66,19 +74,14 @@
   text-align: center;
   font-size: 30px;
   line-height: 1.1;
-  margin: var(--s);
-  margin-top: var(--s3);
-  margin-bottom: var(--s3);
   border-radius: 4px;
 
   @media (max-width: 499px) {
     font-size: 24px;
-    margin-bottom: var(--s2);
   }
 
   @media (max-height: 250px) {
     font-size: 18px;
-    margin-bottom: var(--s);
   }
 
   @media (max-width: 333px) {
@@ -101,7 +104,6 @@
   opacity: 0.6;
   transition: opacity var(--transition-enter);
   padding: 4px;
-  border: 2px dashed var(--c-accent);
 
   &:hover {
     opacity: 1;
@@ -183,27 +185,25 @@ breathing-dot {
   place-items: center;
   text-align: center;
 
+  &:hover button {
+    opacity: 1;
+  }
+
+  button {
+    opacity: var(--muted-opacity);
+    transition: var(--transition-standard);
+    pointer-events: auto;
+
+    @media (hover: none) and (pointer: coarse) {
+      /* styles for primary touch devices go here */
+      opacity: 1;
+    }
+  }
+
   .time-adjust-btn {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
-    pointer-events: auto;
-
-    @include mousePrimaryDevice {
-      transition: all var(--transition-leave);
-      opacity: 0;
-      transform: translateY(-50%) scale(0.8);
-    }
-
-    :host:hover & {
-      transition: all var(--transition-enter);
-      opacity: 0.7;
-      transform: translateY(-50%) scale(1);
-
-      &:hover {
-        opacity: 1;
-      }
-    }
   }
 
   .time-adjust-btn--decrease {
@@ -220,29 +220,6 @@ breathing-dot {
     top: 10px;
     left: 50%;
     transform: translateX(-50%);
-    pointer-events: auto;
-
-    @include mousePrimaryDevice {
-      transition: all var(--transition-leave);
-      opacity: 0;
-      transform: translateX(-50%) scale(0.8);
-    }
-
-    :host:hover & {
-      transition: all var(--transition-enter);
-      opacity: 0.7;
-      transform: translateX(-50%) scale(1);
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
   }
 
   // Complete session button inside the circle (bottom center)
@@ -251,29 +228,6 @@ breathing-dot {
     bottom: 10px;
     left: 50%;
     transform: translateX(-50%);
-    pointer-events: auto;
-
-    @include mousePrimaryDevice {
-      transition: all var(--transition-leave);
-      opacity: 0;
-      transform: translateX(-50%) scale(0.8);
-    }
-
-    :host:hover & {
-      transition: all var(--transition-enter);
-      opacity: 0.7;
-      transform: translateX(-50%) scale(1);
-
-      &:hover {
-        opacity: 1;
-      }
-    }
-
-    mat-icon {
-      font-size: 24px;
-      width: 24px;
-      height: 24px;
-    }
   }
 }
 

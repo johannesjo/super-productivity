@@ -1,8 +1,8 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  effect,
   computed,
+  effect,
   HostBinding,
   HostListener,
   inject,
@@ -23,10 +23,13 @@ import {
   adjustRemainingTime,
   completeFocusSession,
   completeTask,
+  pauseFocusSession,
   selectFocusTask,
+  setFocusModeMode,
   setFocusSessionDuration,
   startFocusPreparation,
   startFocusSession,
+  unPauseFocusSession,
 } from '../store/focus-mode.actions';
 import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -36,11 +39,10 @@ import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 import {
+  MatFabButton,
   MatIconAnchor,
   MatIconButton,
   MatMiniFabButton,
-  MatFabButton,
-  MatButton,
 } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -65,11 +67,6 @@ import {
   SegmentedButtonGroupComponent,
   SegmentedButtonOption,
 } from '../../../ui/segmented-button-group/segmented-button-group.component';
-import {
-  setFocusModeMode,
-  pauseFocusSession,
-  unPauseFocusSession,
-} from '../store/focus-mode.actions';
 
 @Component({
   selector: 'focus-mode-main',
@@ -99,9 +96,12 @@ import {
     FocusModeCountdownComponent,
     MatFabButton,
     InputDurationSliderComponent,
-    MatButton,
     SegmentedButtonGroupComponent,
   ],
+  host: {
+    ['[class.isSessionRunning]']: 'isSessionRunning()',
+    ['[class.isSessionNotRunning]']: '!isSessionRunning()',
+  },
 })
 export class FocusModeMainComponent implements OnDestroy {
   private readonly _globalConfigService = inject(GlobalConfigService);
@@ -133,8 +133,9 @@ export class FocusModeMainComponent implements OnDestroy {
 
   displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
 
+  // TODO remove if always true
+  isShowTaskActions = computed(() => true);
   isShowModeSelector = computed(() => this._isPreparation());
-  isShowTaskActions = computed(() => this._isInProgress());
   isShowSimpleCounters = computed(() => this._isInProgress());
   isShowTimeAdjustButtons = computed(() => this._isInProgress());
   isShowPauseButton = computed(() => this._isInProgress());
@@ -333,7 +334,7 @@ export class FocusModeMainComponent implements OnDestroy {
     this._store.dispatch(unPauseFocusSession());
   }
 
-  selectMode(mode: FocusModeMode | string): void {
+  selectMode(mode: FocusModeMode | string | number): void {
     if (!Object.values(FocusModeMode).includes(mode as FocusModeMode)) {
       return;
     }

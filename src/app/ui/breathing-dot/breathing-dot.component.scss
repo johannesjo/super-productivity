@@ -15,6 +15,10 @@
   border-radius: 50%;
   animation: breathe 8s ease-in-out infinite;
   box-shadow: 0 0 40px var(--c-primary);
+
+  &.is-paused {
+    animation-play-state: paused;
+  }
 }
 
 @keyframes breathe {
