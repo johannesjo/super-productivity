@@ -28,10 +28,10 @@ export class FocusModeCountdownComponent implements OnInit, OnDestroy {
   readonly countdownComplete = output<void>();
 
   readonly T = T;
-  countdownValue = signal<number>(5);
+  countdownValue = signal<number>(1);
   rocketState = signal<RocketState>('pulse-5');
 
-  private readonly COUNTDOWN_DURATION = 5;
+  private readonly COUNTDOWN_DURATION = 1;
   private _onDestroy$ = new Subject<void>();
 
   ngOnInit(): void {

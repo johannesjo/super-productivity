@@ -54,7 +54,6 @@
       <div
         class="task-title-placeholder"
         [matMenuTriggerFor]="taskMenu"
-        [matTooltip]="'Click to select a task' | translate"
       >
         {{ 'Select Task to Focus' | translate }}
       </div>
@@ -121,7 +120,6 @@
       <!-- Clock time display -->
       <div
         class="clock-time"
-        [class.clickable]="isShowDurationSlider()"
         [matTooltip]="
           isShowDurationSlider() ? ('Click to edit duration' | translate) : ''
         "
@@ -198,7 +196,7 @@
 
   <!-- Bottom control buttons (In Progress state) -->
   @if (isShowBottomControls()) {
-    <section class="controls">
+    <section class="bottom-controls">
       @if (currentTask && currentTask.issueId && currentTask.issueType !== ICAL_TYPE) {
         <a
           mat-icon-button
