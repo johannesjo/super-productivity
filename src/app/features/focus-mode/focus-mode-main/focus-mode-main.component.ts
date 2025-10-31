@@ -1,13 +1,14 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   HostBinding,
   HostListener,
   inject,
   signal,
-  DestroyRef,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
@@ -53,9 +54,9 @@ import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import {
+  FOCUS_MODE_DEFAULTS,
   FocusMainUIState,
   FocusModeMode,
-  FOCUS_MODE_DEFAULTS,
 } from '../focus-mode.model';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 import { FocusModeCountdownComponent } from '../focus-mode-countdown/focus-mode-countdown.component';
@@ -66,13 +67,24 @@ import {
 } from '../../../ui/segmented-button-group/segmented-button-group.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
+import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
 
 @Component({
   selector: 'focus-mode-main',
   templateUrl: './focus-mode-main.component.html',
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, slideInOutFromBottomAni],
+  animations: [
+    trigger('modeSwitchFade', [
+      transition('* => *', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate(ANI_STANDARD_TIMING, style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+    ]),
+    expandAnimation,
+    fadeAnimation,
+    slideInOutFromBottomAni,
+  ],
   imports: [
     TaskTitleComponent,
     ProgressCircleComponent,

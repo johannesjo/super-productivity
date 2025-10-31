@@ -121,24 +121,52 @@
   flex-direction: column;
   align-items: center;
   margin-bottom: var(--s2);
+  &__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: var(--s1);
+  }
 }
 
-progress-circle,
-breathing-dot {
-  width: 150px;
-  height: 150px;
+.clock-face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --clock-face-size: 150px;
+  width: var(--clock-face-size);
+  height: var(--clock-face-size);
+
   @media (min-height: 800px) and (min-width: 500px) {
-    width: 180px;
-    height: 180px;
+    --clock-face-size: 180px;
   }
+
   @media (min-height: 900px) and (min-width: 600px) {
-    width: 220px;
-    height: 220px;
+    --clock-face-size: 220px;
   }
 
   @media (max-height: 500px) {
-    width: 90px;
-    height: 90px;
+    --clock-face-size: 90px;
+  }
+
+  &__layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: var(--transition-standard);
+
+    &.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
   }
 }
 
@@ -228,6 +256,7 @@ breathing-dot {
 
 // ========== PLAY BUTTON ==========
 .play-button {
+  margin-top: 16px;
   width: 64px;
   height: 64px;
 
