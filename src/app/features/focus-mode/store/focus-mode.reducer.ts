@@ -243,33 +243,32 @@ export const focusModeReducer = createReducer(
     currentCycle: 1,
   })),
 
-  // Adjust remaining time by modifying elapsed
+  // Adjust remaining time by modifying goal duration (work sessions only)
   on(a.adjustRemainingTime, (state, { amountMs }) => {
-    if (!state.timer.isRunning || state.timer.purpose !== 'work') {
+    if (state.timer.purpose !== 'work') {
       return state;
     }
 
-    // Negative amount adds time (reduces elapsed), positive removes time (increases elapsed)
-    const newElapsed = state.timer.elapsed - amountMs;
+    if (state.mode === FocusModeMode.Flowtime) {
+      return state;
+    }
 
-    // Ensure elapsed is never negative
-    const clampedElapsed = Math.max(0, newElapsed);
+    const currentDuration = state.timer.duration;
+    if (typeof currentDuration !== 'number') {
+      return state;
+    }
 
-    // For countdown modes, ensure elapsed doesn't exceed duration
-    const finalElapsed =
-      state.timer.duration > 0
-        ? Math.min(clampedElapsed, state.timer.duration)
-        : clampedElapsed;
+    const updatedDuration = Math.max(0, currentDuration + amountMs);
 
-    // Adjust startedAt to maintain the correct elapsed time
-    const newStartedAt = state.timer.startedAt ? Date.now() - finalElapsed : Date.now();
+    if (updatedDuration === currentDuration) {
+      return state;
+    }
 
     return {
       ...state,
       timer: {
         ...state.timer,
-        elapsed: finalElapsed,
-        startedAt: newStartedAt,
+        duration: updatedDuration,
       },
     };
   }),

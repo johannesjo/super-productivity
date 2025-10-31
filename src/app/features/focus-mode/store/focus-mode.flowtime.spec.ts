@@ -296,6 +296,13 @@ describe('FocusMode Flowtime behavior', () => {
     let store: MockStore;
     let actions$: Subject<Action>;
     let storageService: jasmine.SpyObj<FocusModeStorageService>;
+    const timerTemplate = {
+      isRunning: true,
+      startedAt: Date.now(),
+      elapsed: 60_000,
+      duration: 45_000,
+      purpose: 'work' as const,
+    };
 
     beforeEach(() => {
       actions$ = new Subject<Action>();
@@ -352,6 +359,7 @@ describe('FocusMode Flowtime behavior', () => {
 
     it('should persist duration when mode is Countdown', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectTimer, timerTemplate as any);
       store.refreshState();
 
       actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 45_000 }));
@@ -361,6 +369,7 @@ describe('FocusMode Flowtime behavior', () => {
 
     it('should not persist duration for non-countdown modes', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectors.selectTimer, timerTemplate as any);
       store.refreshState();
 
       actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 45_000 }));
@@ -370,11 +379,28 @@ describe('FocusMode Flowtime behavior', () => {
 
     it('should ignore non-positive durations', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectTimer, {
+        ...timerTemplate,
+        duration: 0,
+      } as any);
       store.refreshState();
 
       actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 0 }));
 
       expect(storageService.setLastCountdownDuration).not.toHaveBeenCalled();
+    });
+
+    it('should persist adjusted countdown duration', () => {
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.overrideSelector(selectors.selectTimer, {
+        ...timerTemplate,
+        duration: 30_000,
+      } as any);
+      store.refreshState();
+
+      actions$.next(actions.adjustRemainingTime({ amountMs: -15_000 }));
+
+      expect(storageService.setLastCountdownDuration).toHaveBeenCalledWith(30_000);
     });
   });
 

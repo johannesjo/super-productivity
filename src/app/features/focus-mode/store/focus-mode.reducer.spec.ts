@@ -423,6 +423,55 @@ describe('FocusModeReducer', () => {
     });
   });
 
+  describe('adjustRemainingTime', () => {
+    const baseTimer = {
+      isRunning: true,
+      startedAt: Date.now() - 60000,
+      elapsed: 60000,
+      duration: 25 * 60 * 1000,
+      purpose: 'work' as const,
+    };
+
+    it('should decrease session goal without affecting elapsed', () => {
+      const state = {
+        ...initialState,
+        mode: FocusModeMode.Countdown,
+        timer: { ...baseTimer },
+      };
+
+      const result = focusModeReducer(state, a.adjustRemainingTime({ amountMs: -60000 }));
+
+      expect(result.timer.duration).toBe(baseTimer.duration - 60000);
+      expect(result.timer.elapsed).toBe(baseTimer.elapsed);
+      expect(result.timer.startedAt).toBe(baseTimer.startedAt);
+    });
+
+    it('should increase session goal when adding time', () => {
+      const state = {
+        ...initialState,
+        mode: FocusModeMode.Pomodoro,
+        timer: { ...baseTimer },
+      };
+
+      const result = focusModeReducer(state, a.adjustRemainingTime({ amountMs: 120000 }));
+
+      expect(result.timer.duration).toBe(baseTimer.duration + 120000);
+      expect(result.timer.elapsed).toBe(baseTimer.elapsed);
+    });
+
+    it('should not change duration for flowtime mode', () => {
+      const state = {
+        ...initialState,
+        mode: FocusModeMode.Flowtime,
+        timer: { ...baseTimer, duration: 0 },
+      };
+
+      const result = focusModeReducer(state, a.adjustRemainingTime({ amountMs: 60000 }));
+
+      expect(result).toBe(state);
+    });
+  });
+
   describe('duration setting', () => {
     it('should set focus session duration', () => {
       const customDuration = 30 * 60 * 1000; // 30 minutes
