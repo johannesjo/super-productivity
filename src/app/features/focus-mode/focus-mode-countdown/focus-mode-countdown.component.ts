@@ -16,7 +16,9 @@ import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import {
   FocusModePreparationRocketComponent,
   type RocketState,
-} from '../focus-mode-preparation/focus-mode-preparation-rocket.component';
+} from './rocket/focus-mode-preparation-rocket.component';
+
+const COUNTDOWN_DURATION = 5 as const;
 
 @Component({
   selector: 'focus-mode-countdown',
@@ -30,10 +32,10 @@ export class FocusModeCountdownComponent implements OnInit {
   readonly countdownComplete = output<void>();
 
   readonly T = T;
-  countdownValue = signal<number>(1);
+  countdownValue = signal<number>(COUNTDOWN_DURATION);
   rocketState = signal<RocketState>('pulse-5');
 
-  private readonly COUNTDOWN_DURATION = 5;
+  private readonly COUNTDOWN_DURATION = COUNTDOWN_DURATION;
   private readonly _destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {

@@ -36,7 +36,8 @@ $rocket-pulse-values: 0, 1, 2, 3, 4, 5;
   }
 
   &.launch {
-    animation: rocket-launch 0.85s forwards ease-in;
+    animation: rocket-launch 0.8s forwards ease-in !important;
+    //animation: rocket-launch 0.8s forwards cubic-bezier(0.25, 0, 0.9, 1);
   }
 }
 
@@ -88,8 +89,12 @@ $rocket-pulse-values: 0, 1, 2, 3, 4, 5;
   0% {
     transform: translateY(0);
   }
+  60% {
+    opacity: 1;
+    transform: translateY(-20vh) scale(1.1, 1);
+  }
   100% {
-    transform: translateY(-240px);
+    transform: translateY(-70vh) scale(0.6, 1.2);
     opacity: 0;
   }
 }

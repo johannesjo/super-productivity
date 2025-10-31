@@ -22,7 +22,7 @@
   top: var(--s2);
   left: 50%;
   transform: translateX(-50%);
-  z-index: 2;
+  z-index: var(--z-focus-mode-main-selector);
   margin: 0 16px;
   max-width: 600px;
 }
@@ -159,7 +159,7 @@ breathing-dot {
   width: 200px;
   display: flex;
   justify-content: center;
-  z-index: 2;
+  z-index: var(--z-focus-mode-duration-slider);
 
   @media (max-width: 499px) {
     width: 160px;
@@ -245,7 +245,7 @@ breathing-dot {
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 4;
+  z-index: var(--z-focus-mode-simple-counter);
   gap: 8px;
 
   simple-counter-button.isHiddenWithoutFocus {
@@ -417,12 +417,12 @@ breathing-dot {
   align-items: center;
   font-weight: bold;
   display: flex;
-  z-index: 31;
+  z-index: var(--z-focus-mode-drag-over);
 }
 
 .hide-notes-btn {
   position: absolute;
-  z-index: 2;
+  z-index: var(--z-focus-mode-hide-notes);
   top: -10px;
   left: 50%;
   transform: translateX(-50%);

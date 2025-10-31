@@ -13,6 +13,7 @@
   text-align: center;
   gap: var(--s3);
   padding: var(--s4);
+  z-index: var(--z-focus-mode-countdown);
 }
 
 .message-stack {
@@ -62,6 +63,8 @@ ol {
 }
 
 .countdown-timer {
+  margin-top: 32px;
+  line-height: 1;
   font-size: 48px;
   font-weight: 700;
 }

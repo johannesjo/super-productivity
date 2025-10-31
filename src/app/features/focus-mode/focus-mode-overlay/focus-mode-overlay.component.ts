@@ -17,13 +17,9 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
 import { BannerComponent } from '../../../core/banner/banner/banner.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { FocusModeTaskSelectionComponent } from '../focus-mode-task-selection/focus-mode-task-selection.component';
-import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-selection/focus-mode-duration-selection.component';
-import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
 import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
 import { FocusModeSessionDoneComponent } from '../focus-mode-session-done/focus-mode-session-done.component';
 import { FocusModeBreakComponent } from '../focus-mode-break/focus-mode-break.component';
-import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -41,15 +37,11 @@ import { FocusScreen } from '../focus-mode.model';
     BannerComponent,
     MatIconButton,
     MatIcon,
-    FocusModeTaskSelectionComponent,
-    FocusModeDurationSelectionComponent,
-    FocusModePreparationComponent,
     FocusModeMainComponent,
     FocusModeSessionDoneComponent,
     FocusModeBreakComponent,
     MatButton,
     TranslatePipe,
-    NgTemplateOutlet,
   ],
 })
 export class FocusModeOverlayComponent implements OnDestroy {

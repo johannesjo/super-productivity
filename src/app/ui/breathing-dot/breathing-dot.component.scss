@@ -22,13 +22,13 @@
 }
 
 @keyframes breathe {
-  0%,
-  100% {
+  50% {
     transform: scale(0.4);
     opacity: 0.1;
     box-shadow: 0 0 10px var(--c-primary);
   }
-  50% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.4;
     box-shadow:
