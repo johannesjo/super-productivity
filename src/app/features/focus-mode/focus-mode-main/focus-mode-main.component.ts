@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   effect,
+  computed,
   HostBinding,
   HostListener,
   inject,
@@ -10,7 +11,7 @@ import {
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { from, Observable, of, Subject, timer } from 'rxjs';
+import { from, Observable, of, Subject } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { switchMap, take, takeUntil } from 'rxjs/operators';
@@ -24,6 +25,7 @@ import {
   completeTask,
   selectFocusTask,
   setFocusSessionDuration,
+  startFocusPreparation,
   startFocusSession,
 } from '../store/focus-mode.actions';
 import { selectTimeDuration } from '../store/focus-mode.selectors';
@@ -54,15 +56,11 @@ import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-fro
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { FocusModeMode } from '../focus-mode.model';
+import { FocusMainUIState, FocusModeMode } from '../focus-mode.model';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
-import {
-  FocusModePreparationRocketComponent,
-  type RocketState,
-} from '../focus-mode-preparation/focus-mode-preparation-rocket.component';
+import { FocusModeCountdownComponent } from '../focus-mode-countdown/focus-mode-countdown.component';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import {
   SegmentedButtonGroupComponent,
   SegmentedButtonOption,
@@ -72,13 +70,6 @@ import {
   pauseFocusSession,
   unPauseFocusSession,
 } from '../store/focus-mode.actions';
-
-// UI State enum for the main screen
-enum FocusMainUIState {
-  Preparation = 'Preparation',
-  Countdown = 'Countdown',
-  InProgress = 'InProgress',
-}
 
 @Component({
   selector: 'focus-mode-main',
@@ -105,42 +96,57 @@ enum FocusMainUIState {
     MatMenuTrigger,
     MatMenu,
     MatMenuItem,
-    FocusModePreparationRocketComponent,
+    FocusModeCountdownComponent,
     MatFabButton,
     InputDurationSliderComponent,
     MatButton,
-    SelectTaskComponent,
     SegmentedButtonGroupComponent,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {
-  // Expose enums to template
-  FocusMainUIState = FocusMainUIState;
-  readonly simpleCounterService = inject(SimpleCounterService);
   private readonly _globalConfigService = inject(GlobalConfigService);
-  readonly taskService = inject(TaskService);
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
 
-  focusModeService = inject(FocusModeService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  readonly taskService = inject(TaskService);
+  readonly focusModeService = inject(FocusModeService);
 
-  FocusModeMode = FocusModeMode;
+  readonly FocusModeMode = FocusModeMode;
+
   timeElapsed = this.focusModeService.timeElapsed;
   isCountTimeDown = this.focusModeService.isCountTimeDown;
   isSessionRunning = this.focusModeService.isSessionRunning;
   mode = this.focusModeService.mode;
+  mainState = this.focusModeService.mainState;
 
-  startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
-
-  // UI State management
-  uiState = signal<FocusMainUIState>(FocusMainUIState.Preparation);
-
-  // Countdown state
-  countdownValue = signal<number>(5);
-  rocketState = signal<RocketState>('pulse-5');
+  private readonly _isPreparation = computed(
+    () => this.mainState() === FocusMainUIState.Preparation,
+  );
+  private readonly _isCountdown = computed(
+    () => this.mainState() === FocusMainUIState.Countdown,
+  );
+  private readonly _isInProgress = computed(
+    () => this.mainState() === FocusMainUIState.InProgress,
+  );
 
   displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
+
+  isShowModeSelector = computed(() => this._isPreparation());
+  isShowTaskActions = computed(() => this._isInProgress());
+  isShowSimpleCounters = computed(() => this._isInProgress());
+  isShowTimeAdjustButtons = computed(() => this._isInProgress());
+  isShowPauseButton = computed(() => this._isInProgress());
+  isShowCompleteSessionButton = computed(() => this._isInProgress());
+  isShowBottomControls = computed(() => this._isInProgress());
+  isShowCountdown = computed(() => this._isCountdown());
+  isShowDurationSlider = computed(
+    () => this._isPreparation() && this.mode() === FocusModeMode.Countdown,
+  );
+  isShowPlayButton = computed(() => this._isPreparation());
+
+  startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
 
   // Mode selector options
   readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
@@ -215,27 +221,6 @@ export class FocusModeMainComponent implements OnDestroy {
           this.displayDuration.set(duration);
         }
       });
-
-    // Watch session state to update UI state
-    effect(() => {
-      const isRunning = this.isSessionRunning();
-      const isPaused = this.focusModeService.isSessionPaused
-        ? this.focusModeService.isSessionPaused()
-        : false;
-
-      // Stay in InProgress if session is running OR paused
-      if (isRunning || isPaused) {
-        // Only transition to InProgress if we're not already there
-        if (this.uiState() !== FocusMainUIState.InProgress) {
-          this.uiState.set(FocusMainUIState.InProgress);
-        }
-      } else {
-        // When session completely ends (not just paused), go back to Preparation
-        if (this.uiState() === FocusMainUIState.InProgress) {
-          this.uiState.set(FocusMainUIState.Preparation);
-        }
-      }
-    });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
@@ -332,29 +317,12 @@ export class FocusModeMainComponent implements OnDestroy {
       return;
     }
 
-    // Transition to Countdown state
-    this.uiState.set(FocusMainUIState.Countdown);
+    this._store.dispatch(startFocusPreparation());
+  }
 
-    const COUNTDOWN_DURATION = 5;
-    this.countdownValue.set(COUNTDOWN_DURATION);
-    this.rocketState.set('pulse-5');
-
-    timer(0, 1000)
-      .pipe(takeUntil(this._onDestroy$), take(COUNTDOWN_DURATION + 1))
-      .subscribe((tick) => {
-        const remaining = COUNTDOWN_DURATION - tick;
-        this.countdownValue.set(remaining);
-
-        if (remaining > 0) {
-          this.rocketState.set(`pulse-${remaining}` as RocketState);
-        } else {
-          this.rocketState.set('launch');
-          window.setTimeout(() => {
-            this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
-            // uiState will be set to InProgress automatically by the effect watching isSessionRunning
-          }, 900);
-        }
-      });
+  onCountdownComplete(): void {
+    this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+    // Main UI state transitions are now handled by the store
   }
 
   pauseSession(): void {
@@ -370,10 +338,6 @@ export class FocusModeMainComponent implements OnDestroy {
       return;
     }
     this._store.dispatch(setFocusModeMode({ mode: mode as FocusModeMode }));
-  }
-
-  openDurationDialog(): void {
-    // Duration is edited inline via the slider overlay in Preparation state
   }
 
   onDurationChange(duration: number): void {

@@ -10,6 +10,7 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { IssueService } from '../../issue/issue.service';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { FocusModeService } from '../focus-mode.service';
+import { FocusMainUIState } from '../focus-mode.model';
 import { TaskCopy } from '../../tasks/task.model';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import * as actions from '../store/focus-mode.actions';
@@ -76,6 +77,7 @@ describe('FocusModeMainComponent', () => {
       isBreakActive: jasmine.createSpy().and.returnValue(false),
       currentCycle: jasmine.createSpy().and.returnValue(1),
       mode: jasmine.createSpy().and.returnValue('Pomodoro'),
+      mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
     });
 
     await TestBed.configureTestingModule({

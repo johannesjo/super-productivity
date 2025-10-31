@@ -289,60 +289,6 @@ breathing-dot {
   }
 }
 
-// ========== COUNTDOWN STATE ==========
-.countdown-state {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
-
-.message-stack {
-  position: absolute;
-  top: 20%;
-  left: 50%;
-  transform: translateX(-50%);
-  text-align: center;
-  z-index: 1;
-  width: 80%;
-  max-width: 500px;
-}
-
-.prep-content {
-  transition: opacity var(--transition-leave);
-
-  &.is-hidden {
-    opacity: 0;
-    pointer-events: none;
-  }
-}
-
-.action-msg {
-  font-size: 24px;
-  font-weight: 500;
-  margin-bottom: var(--s2);
-
-  &.go-msg {
-    font-size: 48px;
-    font-weight: bold;
-    color: var(--c-accent);
-  }
-}
-
-.countdown-timer {
-  font-size: 72px;
-  font-weight: bold;
-  color: var(--c-accent);
-  margin-top: var(--s2);
-}
-
-focus-mode-preparation-rocket {
-  z-index: 10;
-}
-
 // ========== SIMPLE COUNTER BUTTONS (In Progress) ==========
 .simple-counter-buttons {
   display: flex;

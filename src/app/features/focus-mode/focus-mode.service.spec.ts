@@ -4,7 +4,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { FocusModeService } from './focus-mode.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusScreen, FocusModeMode } from './focus-mode.model';
+import { FocusScreen, FocusModeMode, FocusMainUIState } from './focus-mode.model';
 import * as selectors from './store/focus-mode.selectors';
 import * as actions from './store/focus-mode.actions';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
@@ -36,7 +36,10 @@ describe('FocusModeService', () => {
     // Setup store selectors before TestBed configuration
     storeSpy.select.and.callFake((selector) => {
       if (selector === selectors.selectCurrentScreen) {
-        return of(FocusScreen.TaskSelection);
+        return of(FocusScreen.Main);
+      }
+      if (selector === selectors.selectMainState) {
+        return of(FocusMainUIState.Preparation);
       }
       if (selector === selectors.selectMode) {
         return of(FocusModeMode.Pomodoro);
@@ -105,9 +108,12 @@ describe('FocusModeService', () => {
 
   describe('signals', () => {
     it('should initialize currentScreen signal', () => {
-      expect(service.currentScreen()).toBe(FocusScreen.TaskSelection);
+      expect(service.currentScreen()).toBe(FocusScreen.Main);
     });
 
+    it('should initialize mainState signal', () => {
+      expect(service.mainState()).toBe(FocusMainUIState.Preparation);
+    });
     it('should initialize mode signal', () => {
       expect(service.mode()).toBe(FocusModeMode.Pomodoro);
     });

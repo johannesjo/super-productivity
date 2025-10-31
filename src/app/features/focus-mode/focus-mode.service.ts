@@ -1,7 +1,6 @@
 import { computed, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, tap } from 'rxjs/operators';
 import * as actions from './store/focus-mode.actions';
 import * as selectors from './store/focus-mode.selectors';
@@ -19,36 +18,36 @@ export class FocusModeService {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
 
   // State signals
-  currentScreen = toSignal(this._store.select(selectors.selectCurrentScreen));
-  mode = toSignal(this._store.select(selectors.selectMode));
-  isOverlayShown = toSignal(this._store.select(selectors.selectIsOverlayShown));
-  currentCycle = toSignal(this._store.select(selectors.selectCurrentCycle));
+  currentScreen = this._store.selectSignal(selectors.selectCurrentScreen);
+  mainState = this._store.selectSignal(selectors.selectMainState);
+  mode = this._store.selectSignal(selectors.selectMode);
+  isOverlayShown = this._store.selectSignal(selectors.selectIsOverlayShown);
+  currentCycle = this._store.selectSignal(selectors.selectCurrentCycle);
 
   // Timer signals
-  isRunning = toSignal(this._store.select(selectors.selectIsRunning));
-  timeElapsed = toSignal(this._store.select(selectors.selectTimeElapsed));
-  timeRemaining = toSignal(this._store.select(selectors.selectTimeRemaining));
-  progress = toSignal(this._store.select(selectors.selectProgress));
+  isRunning = this._store.selectSignal(selectors.selectIsRunning);
+  timeElapsed = this._store.selectSignal(selectors.selectTimeElapsed);
+  timeRemaining = this._store.selectSignal(selectors.selectTimeRemaining);
+  progress = this._store.selectSignal(selectors.selectProgress);
 
   // Session signals
-  isSessionRunning = toSignal(this._store.select(selectors.selectIsSessionRunning));
-  isSessionPaused = toSignal(this._store.select(selectors.selectIsSessionPaused));
+  isSessionRunning = this._store.selectSignal(selectors.selectIsSessionRunning);
+  isSessionPaused = this._store.selectSignal(selectors.selectIsSessionPaused);
 
   // Break signals
-  isBreakActive = toSignal(this._store.select(selectors.selectIsBreakActive));
-  isLongBreak = toSignal(this._store.select(selectors.selectIsLongBreak));
+  isBreakActive = this._store.selectSignal(selectors.selectIsBreakActive);
+  isLongBreak = this._store.selectSignal(selectors.selectIsLongBreak);
 
   // Config signals
   pomodoroConfig = this._globalConfigService.pomodoroConfig;
-  focusModeConfig = toSignal(this._store.select(selectFocusModeConfig));
+  focusModeConfig = this._store.selectSignal(selectFocusModeConfig);
 
   // Compatibility aliases (TODO: remove when components are updated)
   isBreakLong = this.isLongBreak;
 
   // Additional compatibility signals
-  lastSessionTotalDurationOrTimeElapsedFallback = toSignal(
-    this._store.select(selectors.selectLastSessionDuration),
-    { initialValue: 0 },
+  lastSessionTotalDurationOrTimeElapsedFallback = this._store.selectSignal(
+    selectors.selectLastSessionDuration,
   );
 
   // UI helper signals

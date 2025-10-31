@@ -4,7 +4,12 @@ import {
   FOCUS_MODE_FEATURE_KEY,
 } from './focus-mode.reducer';
 import * as a from './focus-mode.actions';
-import { FocusModeMode, FocusScreen, FOCUS_MODE_DEFAULTS } from '../focus-mode.model';
+import {
+  FocusMainUIState,
+  FocusModeMode,
+  FocusScreen,
+  FOCUS_MODE_DEFAULTS,
+} from '../focus-mode.model';
 
 describe('FocusModeReducer', () => {
   beforeEach(() => {
@@ -28,8 +33,12 @@ describe('FocusModeReducer', () => {
       expect(initialState.timer.purpose).toBeNull();
     });
 
-    it('should initialize with TaskSelection screen', () => {
-      expect(initialState.currentScreen).toBe(FocusScreen.TaskSelection);
+    it('should initialize with Main screen', () => {
+      expect(initialState.currentScreen).toBe(FocusScreen.Main);
+    });
+
+    it('should initialize with preparation state', () => {
+      expect(initialState.mainState).toBe(FocusMainUIState.Preparation);
     });
 
     it('should initialize with overlay hidden', () => {
@@ -76,33 +85,37 @@ describe('FocusModeReducer', () => {
   });
 
   describe('screen navigation actions', () => {
-    it('should navigate to task selection screen', () => {
+    it('should reset to preparation state on task selection', () => {
       const state = { ...initialState, currentScreen: FocusScreen.Main };
       const action = a.selectFocusTask();
       const result = focusModeReducer(state, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.TaskSelection);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
     });
 
-    it('should navigate to duration selection screen', () => {
+    it('should stay on main screen for duration selection', () => {
       const action = a.selectFocusDuration();
       const result = focusModeReducer(initialState, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.DurationSelection);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
     });
 
-    it('should navigate to preparation screen', () => {
+    it('should enter countdown state when preparation starts', () => {
       const action = a.startFocusPreparation();
       const result = focusModeReducer(initialState, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.Preparation);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Countdown);
     });
 
-    it('should navigate to main screen', () => {
+    it('should navigate to main screen with preparation state', () => {
       const action = a.navigateToMainScreen();
       const result = focusModeReducer(initialState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
     });
   });
 
@@ -112,6 +125,7 @@ describe('FocusModeReducer', () => {
       const result = focusModeReducer(initialState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.InProgress);
       expect(result.timer.isRunning).toBe(true);
       expect(result.timer.purpose).toBe('work');
       expect(result.timer.duration).toBe(FOCUS_MODE_DEFAULTS.SESSION_DURATION);
@@ -125,6 +139,7 @@ describe('FocusModeReducer', () => {
       const result = focusModeReducer(initialState, action);
 
       expect(result.timer.duration).toBe(customDuration);
+      expect(result.mainState).toBe(FocusMainUIState.InProgress);
     });
 
     it('should pause focus session', () => {
@@ -197,6 +212,7 @@ describe('FocusModeReducer', () => {
       const result = focusModeReducer(runningState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.SessionDone);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
       expect(result.timer.isRunning).toBe(false);
       expect(result.timer.purpose).toBeNull();
       expect(result.lastCompletedDuration).toBe(60000);
@@ -219,7 +235,8 @@ describe('FocusModeReducer', () => {
       const action = a.cancelFocusSession();
       const result = focusModeReducer(runningState, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.TaskSelection);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
       expect(result.timer.isRunning).toBe(false);
       expect(result.timer.purpose).toBeNull();
       expect(result.isOverlayShown).toBe(false);
@@ -232,6 +249,7 @@ describe('FocusModeReducer', () => {
       const result = focusModeReducer(initialState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Break);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
       expect(result.timer.isRunning).toBe(true);
       expect(result.timer.purpose).toBe('break');
       expect(result.timer.duration).toBe(FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION);
@@ -265,7 +283,8 @@ describe('FocusModeReducer', () => {
       const action = a.skipBreak();
       const result = focusModeReducer(breakState, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.TaskSelection);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
       expect(result.timer.isRunning).toBe(false);
       expect(result.timer.purpose).toBeNull();
     });
@@ -286,7 +305,8 @@ describe('FocusModeReducer', () => {
       const action = a.completeBreak();
       const result = focusModeReducer(breakState, action);
 
-      expect(result.currentScreen).toBe(FocusScreen.TaskSelection);
+      expect(result.currentScreen).toBe(FocusScreen.Main);
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
       expect(result.timer.isRunning).toBe(false);
       expect(result.timer.purpose).toBeNull();
     });
