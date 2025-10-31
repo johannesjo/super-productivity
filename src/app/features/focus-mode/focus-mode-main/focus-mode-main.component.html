@@ -144,7 +144,7 @@
 
           <!-- Pause/Resume button (In Progress state) -->
           @if (isShowPauseButton()) {
-            @if (focusModeService.isSessionPaused && focusModeService.isSessionPaused()) {
+            @if (focusModeService.isSessionPaused()) {
               <button
                 mat-icon-button
                 [matTooltip]="'Resume session' | translate"

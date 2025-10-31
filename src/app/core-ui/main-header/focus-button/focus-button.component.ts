@@ -12,6 +12,7 @@ import { showFocusOverlay } from '../../../features/focus-mode/store/focus-mode.
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
 import { DateService } from '../../../core/date/date.service';
+import { FocusModeMode } from '../../../features/focus-mode/focus-mode.model';
 
 @Component({
   selector: 'focus-button',
@@ -36,6 +37,7 @@ export class FocusButtonComponent {
   isSessionRunning = this.focusModeService.isSessionRunning;
   progress = this.focusModeService.progress;
   mode = this.focusModeService.mode;
+  readonly FocusModeMode = FocusModeMode;
 
   focusSummaryToday = computed(() =>
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),

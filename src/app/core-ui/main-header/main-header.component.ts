@@ -43,7 +43,6 @@ import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-pa
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
-import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
 
 @Component({
@@ -65,7 +64,6 @@ import { FocusButtonComponent } from './focus-button/focus-button.component';
     PageTitleComponent,
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
-    MsToMinuteClockStringPipe,
     FocusButtonComponent,
   ],
 })
