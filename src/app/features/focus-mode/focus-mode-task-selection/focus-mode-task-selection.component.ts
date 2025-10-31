@@ -60,11 +60,6 @@ export class FocusModeTaskSelectionComponent implements AfterViewInit, OnDestroy
   currentCycle = this._focusModeService.currentCycle;
   isFocusSessionRunning = this._focusModeService.isSessionRunning;
 
-  // Timer-related properties
-  timeElapsed = this._focusModeService.timeElapsed;
-  sessionProgress$ = this._focusModeService.sessionProgress$;
-  timeToGo$ = this._focusModeService.timeToGo$;
-
   selectedTask: string | Task | undefined;
   initialTask = this.taskService.firstStartableTask;
   focusTimeout = 0;

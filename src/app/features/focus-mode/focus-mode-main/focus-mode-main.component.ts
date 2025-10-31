@@ -13,7 +13,7 @@ import { TaskCopy } from '../../tasks/task.model';
 import { from, Observable, of, Subject, timer } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, switchMap, take, takeUntil } from 'rxjs/operators';
+import { switchMap, take, takeUntil } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
@@ -62,6 +62,23 @@ import {
 } from '../focus-mode-preparation/focus-mode-preparation-rocket.component';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
 import { LS } from '../../../core/persistence/storage-keys.const';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
+import {
+  SegmentedButtonGroupComponent,
+  SegmentedButtonOption,
+} from '../../../ui/segmented-button-group/segmented-button-group.component';
+import {
+  setFocusModeMode,
+  pauseFocusSession,
+  unPauseFocusSession,
+} from '../store/focus-mode.actions';
+
+// UI State enum for the main screen
+enum FocusMainUIState {
+  Preparation = 'Preparation',
+  Countdown = 'Countdown',
+  InProgress = 'InProgress',
+}
 
 @Component({
   selector: 'focus-mode-main',
@@ -92,9 +109,13 @@ import { LS } from '../../../core/persistence/storage-keys.const';
     MatFabButton,
     InputDurationSliderComponent,
     MatButton,
+    SelectTaskComponent,
+    SegmentedButtonGroupComponent,
   ],
 })
 export class FocusModeMainComponent implements OnDestroy {
+  // Expose enums to template
+  FocusMainUIState = FocusMainUIState;
   readonly simpleCounterService = inject(SimpleCounterService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   readonly taskService = inject(TaskService);
@@ -112,10 +133,36 @@ export class FocusModeMainComponent implements OnDestroy {
 
   startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
 
-  showRocket = signal(false);
+  // UI State management
+  uiState = signal<FocusMainUIState>(FocusMainUIState.Preparation);
+
+  // Countdown state
+  countdownValue = signal<number>(5);
   rocketState = signal<RocketState>('pulse-5');
+
   displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
-  isEditingDuration = signal(false);
+
+  // Mode selector options
+  readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
+    {
+      id: FocusModeMode.Flowtime,
+      icon: 'auto_awesome',
+      labelKey: T.F.FOCUS_MODE.FLOWTIME,
+      hintKey: T.F.FOCUS_MODE.FLOWTIME_HINT,
+    },
+    {
+      id: FocusModeMode.Pomodoro,
+      icon: 'timer',
+      labelKey: T.F.FOCUS_MODE.POMODORO,
+      hintKey: T.F.FOCUS_MODE.POMODORO_HINT,
+    },
+    {
+      id: FocusModeMode.Countdown,
+      icon: 'hourglass_bottom',
+      labelKey: T.F.FOCUS_MODE.COUNTDOWN,
+      hintKey: T.F.FOCUS_MODE.COUNTDOWN_HINT,
+    },
+  ];
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -149,6 +196,7 @@ export class FocusModeMainComponent implements OnDestroy {
         this.defaultTaskNotes = misc.taskNotesTpl;
       }
     });
+
     this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
       this.task = task;
     });
@@ -167,6 +215,27 @@ export class FocusModeMainComponent implements OnDestroy {
           this.displayDuration.set(duration);
         }
       });
+
+    // Watch session state to update UI state
+    effect(() => {
+      const isRunning = this.isSessionRunning();
+      const isPaused = this.focusModeService.isSessionPaused
+        ? this.focusModeService.isSessionPaused()
+        : false;
+
+      // Stay in InProgress if session is running OR paused
+      if (isRunning || isPaused) {
+        // Only transition to InProgress if we're not already there
+        if (this.uiState() !== FocusMainUIState.InProgress) {
+          this.uiState.set(FocusMainUIState.InProgress);
+        }
+      } else {
+        // When session completely ends (not just paused), go back to Preparation
+        if (this.uiState() === FocusMainUIState.InProgress) {
+          this.uiState.set(FocusMainUIState.Preparation);
+        }
+      }
+    });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
@@ -232,7 +301,7 @@ export class FocusModeMainComponent implements OnDestroy {
     }
   }
 
-  trackById(i: number, item: SimpleCounter): string {
+  trackById(_i: number, item: SimpleCounter): string {
     return item.id;
   }
 
@@ -243,19 +312,6 @@ export class FocusModeMainComponent implements OnDestroy {
       }
       this.taskService.update(this.task.id, { title: newTitle });
     }
-  }
-
-  extendSession(): void {
-    this._store
-      .select(selectTimeDuration)
-      .pipe(first())
-      .subscribe((currentDuration) => {
-        const fiveMinutesInMs = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const extendedDuration = currentDuration + fiveMinutesInMs;
-        this._store.dispatch(
-          setFocusSessionDuration({ focusSessionDuration: extendedDuration }),
-        );
-      });
   }
 
   completeFocusSession(): void {
@@ -271,39 +327,59 @@ export class FocusModeMainComponent implements OnDestroy {
   }
 
   startSession(): void {
+    // Task must be selected via the task menu before starting
+    if (!this.task) {
+      return;
+    }
+
+    // Transition to Countdown state
+    this.uiState.set(FocusMainUIState.Countdown);
+
     const COUNTDOWN_DURATION = 5;
-    this.showRocket.set(true);
+    this.countdownValue.set(COUNTDOWN_DURATION);
     this.rocketState.set('pulse-5');
 
     timer(0, 1000)
       .pipe(takeUntil(this._onDestroy$), take(COUNTDOWN_DURATION + 1))
       .subscribe((tick) => {
         const remaining = COUNTDOWN_DURATION - tick;
+        this.countdownValue.set(remaining);
 
         if (remaining > 0) {
           this.rocketState.set(`pulse-${remaining}` as RocketState);
         } else {
           this.rocketState.set('launch');
           window.setTimeout(() => {
-            this.showRocket.set(false);
             this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+            // uiState will be set to InProgress automatically by the effect watching isSessionRunning
           }, 900);
         }
       });
   }
 
-  openDurationPicker(): void {
-    this.isEditingDuration.set(true);
+  pauseSession(): void {
+    this._store.dispatch(pauseFocusSession());
+  }
+
+  resumeSession(): void {
+    this._store.dispatch(unPauseFocusSession());
+  }
+
+  selectMode(mode: FocusModeMode | string): void {
+    if (!Object.values(FocusModeMode).includes(mode as FocusModeMode)) {
+      return;
+    }
+    this._store.dispatch(setFocusModeMode({ mode: mode as FocusModeMode }));
+  }
+
+  openDurationDialog(): void {
+    // Duration is edited inline via the slider overlay in Preparation state
   }
 
   onDurationChange(duration: number): void {
     this.displayDuration.set(duration);
     localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, duration.toString());
     this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
-  }
-
-  closeDurationPicker(): void {
-    this.isEditingDuration.set(false);
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

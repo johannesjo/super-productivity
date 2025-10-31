@@ -14,20 +14,7 @@
         <mat-icon>close</mat-icon>
       </button>
 
-      @if (
-        !isSessionRunning() &&
-        (activePage() === FocusScreen.TaskSelection ||
-          activePage() === FocusScreen.DurationSelection ||
-          activePage() === FocusScreen.Main)
-      ) {
-        <segmented-button-group
-          class="focus-mode-select-mode"
-          [options]="modeOptions"
-          [selectedId]="selectedMode()"
-          [ariaLabel]="T.F.FOCUS_MODE.SELECT_MODE | translate"
-          (selectionChange)="selectMode($event)"
-        ></segmented-button-group>
-      }
+      <!-- Mode selector is now integrated into focus-mode-main component -->
 
       <!-- -->
       @switch (activePage()) {

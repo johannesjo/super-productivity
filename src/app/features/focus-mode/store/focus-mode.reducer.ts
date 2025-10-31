@@ -149,7 +149,7 @@ export const focusModeReducer = createReducer(
   on(a.cancelFocusSession, (state) => ({
     ...state,
     timer: createIdleTimer(),
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
     isOverlayShown: false,
   })),
 
@@ -170,7 +170,7 @@ export const focusModeReducer = createReducer(
   on(a.skipBreak, a.completeBreak, (state) => ({
     ...state,
     timer: createIdleTimer(),
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
   })),
 
   // Timer updates - much simpler!

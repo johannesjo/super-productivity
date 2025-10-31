@@ -14,26 +14,50 @@
   padding-bottom: var(--s2);
 }
 
-.wrapper {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
+// Mode selector at the top (Preparation state)
+.focus-mode-select-mode {
+  position: absolute;
+  top: var(--s2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 2;
 }
 
-.task-switch-btn {
+// ========== CENTER BLOCK (Preparation & In Progress) ==========
+.center-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+// ========== TASK SECTION ==========
+.task-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--s);
+  position: relative;
+}
+
+// ========== TASK ACTIONS (below title) ==========
+.task-actions {
+  display: flex;
+  gap: var(--s);
+  justify-content: center;
   margin-bottom: var(--s2);
 
-  @include mousePrimaryDevice {
-    transition: all var(--transition-leave);
-    opacity: 0;
-    transform: translateY(-10px);
-  }
+  .task-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
 
-  :host:hover & {
-    transition: all var(--transition-enter);
-    opacity: 1;
-    transform: translateY(0);
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
   }
 }
 
@@ -68,7 +92,6 @@
   }
 
   &.is-focused {
-    // add extra outline on focus
     outline: 1px solid var(--c-accent);
   }
 }
@@ -85,16 +108,15 @@
   }
 }
 
-.progress-wrapper {
+// Task switch button no longer needed in task section (moved to task-actions)
+
+// ========== CLOCK DISPLAY ==========
+.clock-display {
   position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-.rocket-animation {
   margin-bottom: var(--s2);
-  z-index: 10;
 }
 
 progress-circle,
@@ -116,55 +138,149 @@ breathing-dot {
   }
 }
 
-.progress-label-wrapper {
+.clock-time {
+  font-size: 24px;
+  font-weight: bold;
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  text-align: center;
-  display: flex;
-  align-items: center;
-  gap: var(--s);
 
-  .focus-time {
-    font-size: 24px;
-    font-weight: bold;
+  &.clickable {
+    cursor: pointer;
+    padding: var(--s);
+    border-radius: 4px;
+    transition: background-color var(--transition-enter);
 
-    &.clickable {
-      cursor: pointer;
-      padding: var(--s);
-      border-radius: 4px;
-      transition: background-color var(--transition-enter);
-
-      &:hover {
-        background-color: var(--c-bg-raised);
-      }
+    &:hover {
+      background-color: var(--c-bg-raised);
     }
   }
+}
+
+.duration-slider-overlay {
+  position: absolute;
+  bottom: -60px;
+  width: 200px;
+  display: flex;
+  justify-content: center;
+
+  @media (max-width: 499px) {
+    width: 160px;
+    bottom: -50px;
+  }
+}
+
+// ========== CLOCK WRAPPER (In Progress state) ==========
+.clock-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
 
   .time-adjust-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: auto;
+
     @include mousePrimaryDevice {
       transition: all var(--transition-leave);
       opacity: 0;
-      transform: scale(0.8);
+      transform: translateY(-50%) scale(0.8);
     }
 
     :host:hover & {
       transition: all var(--transition-enter);
       opacity: 0.7;
-      transform: scale(1);
+      transform: translateY(-50%) scale(1);
 
       &:hover {
         opacity: 1;
       }
     }
   }
+
+  .time-adjust-btn--decrease {
+    left: var(--s);
+  }
+
+  .time-adjust-btn--increase {
+    right: var(--s);
+  }
+
+  // Pause/Resume button inside the circle (top center)
+  .pause-resume-btn {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+
+    @include mousePrimaryDevice {
+      transition: all var(--transition-leave);
+      opacity: 0;
+      transform: translateX(-50%) scale(0.8);
+    }
+
+    :host:hover & {
+      transition: all var(--transition-enter);
+      opacity: 0.7;
+      transform: translateX(-50%) scale(1);
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  // Complete session button inside the circle (bottom center)
+  .complete-session-btn {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    pointer-events: auto;
+
+    @include mousePrimaryDevice {
+      transition: all var(--transition-leave);
+      opacity: 0;
+      transform: translateX(-50%) scale(0.8);
+    }
+
+    :host:hover & {
+      transition: all var(--transition-enter);
+      opacity: 0.7;
+      transform: translateX(-50%) scale(1);
+
+      &:hover {
+        opacity: 1;
+      }
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
 }
 
+// ========== PLAY BUTTON ==========
 .play-button {
   width: 64px;
   height: 64px;
-  margin-top: var(--s3);
 
   mat-icon {
     font-size: 36px;
@@ -173,86 +289,104 @@ breathing-dot {
   }
 }
 
-.duration-editor {
+// ========== COUNTDOWN STATE ==========
+.countdown-state {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--s);
-  max-width: 140px;
+  justify-content: center;
+  position: relative;
+}
 
-  @media (min-height: 800px) and (min-width: 500px) {
-    max-width: 160px;
-  }
-  @media (min-height: 900px) and (min-width: 600px) {
-    max-width: 200px;
-  }
+.message-stack {
+  position: absolute;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  z-index: 1;
+  width: 80%;
+  max-width: 500px;
+}
 
-  input-duration-slider {
-    width: 100%;
-  }
+.prep-content {
+  transition: opacity var(--transition-leave);
 
-  .done-btn {
-    width: 32px;
-    height: 32px;
-    line-height: 32px;
-
-    mat-icon {
-      font-size: 20px;
-      width: 20px;
-      height: 20px;
-    }
+  &.is-hidden {
+    opacity: 0;
+    pointer-events: none;
   }
 }
 
+.action-msg {
+  font-size: 24px;
+  font-weight: 500;
+  margin-bottom: var(--s2);
+
+  &.go-msg {
+    font-size: 48px;
+    font-weight: bold;
+    color: var(--c-accent);
+  }
+}
+
+.countdown-timer {
+  font-size: 72px;
+  font-weight: bold;
+  color: var(--c-accent);
+  margin-top: var(--s2);
+}
+
+focus-mode-preparation-rocket {
+  z-index: 10;
+}
+
+// ========== SIMPLE COUNTER BUTTONS (In Progress) ==========
 .simple-counter-buttons {
   display: flex;
   position: absolute;
   top: 14px;
   left: 50%;
   transform: translateX(-50%);
-  // needs to be higher than task title
   z-index: 4;
   gap: 8px;
 
   simple-counter-button.isHiddenWithoutFocus {
     @include mousePrimaryDevice {
       transition: all var(--transition-leave);
-      //visibility: hidden;
       opacity: 0;
       transform: translateY(-10px);
     }
 
     :host:hover & {
       transition: all var(--transition-enter);
-      //visibility: visible;
       opacity: 1;
       transform: translateY(0);
     }
   }
 }
 
+// ========== CONTROLS (In Progress) ==========
 .controls {
   margin-top: var(--s2);
-  // to fix weird a + mat-icon behavior
   display: flex;
   justify-content: center;
   align-items: center;
 
   @include mousePrimaryDevice {
     transition: all var(--transition-leave);
-    //visibility: hidden;
     opacity: 0;
     transform: translateY(10px);
   }
 
   :host:hover & {
     transition: all var(--transition-enter);
-    //visibility: visible;
     opacity: 1;
     transform: translateY(0);
   }
 
-  // to fix weird a + mat-icon behavior
   a {
     justify-content: center;
     align-items: center;
@@ -267,7 +401,7 @@ breathing-dot {
     position: relative;
 
     mat-icon {
-      font-size: 32px !important; //make it bigger, the default being 24px.
+      font-size: 32px !important;
       width: 32px !important;
       height: 32px !important;
     }
@@ -291,6 +425,7 @@ breathing-dot {
   }
 }
 
+// ========== NOTES AND ATTACHMENTS ==========
 .notes-and-attachments {
   display: flex;
   flex-direction: column;

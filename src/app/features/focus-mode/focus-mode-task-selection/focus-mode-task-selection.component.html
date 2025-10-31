@@ -2,6 +2,7 @@
   (submit)="$event.preventDefault(); onSubmit($event)"
   novalidate
 >
+  <h1>XXXXXXXXXXXXXXXXXXXXXX</h1>
   <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
   @if (isFocusSessionRunning()) {
@@ -10,21 +11,17 @@
       <div class="progress-wrapper">
         @if (isCountDown) {
           <progress-circle [progress]="focusModeService.progress()"></progress-circle>
+          <div class="progress-label-wrapper">
+            <div
+              class="focus-time"
+              [title]="T.F.FOCUS_MODE.CURRENT_SESSION_TIME_TOOLTIP | translate"
+            >
+              {{ focusModeService.timeRemaining() | msToMinuteClockString }}
+            </div>
+          </div>
         } @else {
           <breathing-dot></breathing-dot>
         }
-        <div class="progress-label-wrapper">
-          <div
-            class="focus-time"
-            [title]="T.F.FOCUS_MODE.CURRENT_SESSION_TIME_TOOLTIP | translate"
-          >
-            @if (isCountDown) {
-              {{ focusModeService.timeRemaining() | msToMinuteClockString }}
-            } @else {
-              {{ timeElapsed() | msToMinuteClockString }}
-            }
-          </div>
-        </div>
       </div>
     </div>
   }
