@@ -14,6 +14,7 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
 import { MetricService } from '../../metric/metric.service';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 describe('FocusMode Flowtime behavior', () => {
   describe('Reducer: startFocusSession', () => {
@@ -88,8 +89,8 @@ describe('FocusMode Flowtime behavior', () => {
 
   describe('Effects: detectSessionCompletion$', () => {
     let store: MockStore;
-    let effects: FocusModeEffects;
     let actions$: Subject<Action>;
+    let storageService: jasmine.SpyObj<FocusModeStorageService>;
 
     beforeEach(() => {
       actions$ = new Subject<Action>();
@@ -119,10 +120,24 @@ describe('FocusMode Flowtime behavior', () => {
               logFocusSession: () => {},
             },
           },
+          {
+            provide: FocusModeStorageService,
+            useValue: jasmine.createSpyObj('FocusModeStorageService', [
+              'getLastCountdownDuration',
+              'setLastCountdownDuration',
+            ]),
+          },
         ],
       });
       store = TestBed.inject(MockStore);
-      effects = TestBed.inject(FocusModeEffects);
+      TestBed.inject(FocusModeEffects);
+      storageService = TestBed.inject(
+        FocusModeStorageService,
+      ) as jasmine.SpyObj<FocusModeStorageService>;
+      storageService.getLastCountdownDuration.and.returnValue(null);
+      storageService.setLastCountdownDuration.calls.reset();
+      storageService.getLastCountdownDuration.and.returnValue(null);
+      storageService.setLastCountdownDuration.calls.reset();
     });
 
     afterEach(() => {
@@ -274,6 +289,216 @@ describe('FocusMode Flowtime behavior', () => {
       expect(state.timer.isRunning).toBe(false);
       expect(state.currentScreen).toBe('SessionDone');
       expect(state.lastCompletedDuration).toBeGreaterThanOrEqual(thirtyFiveMinutes);
+    });
+  });
+
+  describe('Effects: persistCountdownDuration$', () => {
+    let store: MockStore;
+    let actions$: Subject<Action>;
+    let storageService: jasmine.SpyObj<FocusModeStorageService>;
+
+    beforeEach(() => {
+      actions$ = new Subject<Action>();
+
+      TestBed.configureTestingModule({
+        providers: [
+          provideMockStore({}),
+          provideMockActions(() => actions$),
+          FocusModeEffects,
+          { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
+          { provide: GlobalConfigService, useValue: { sound: () => ({ volume: 0 }) } },
+          { provide: TaskService, useValue: { currentTaskId$: of(null) } },
+          {
+            provide: FocusModeStrategyFactory,
+            useValue: {
+              getStrategy: () => ({
+                shouldStartBreakAfterSession: false,
+                initialSessionDuration: 0,
+                shouldAutoStartNextSession: false,
+                getBreakDuration: () => null,
+              }),
+            },
+          },
+          {
+            provide: MetricService,
+            useValue: {
+              logFocusSession: () => {},
+            },
+          },
+          {
+            provide: FocusModeStorageService,
+            useValue: jasmine.createSpyObj('FocusModeStorageService', [
+              'getLastCountdownDuration',
+              'setLastCountdownDuration',
+            ]),
+          },
+        ],
+      });
+
+      store = TestBed.inject(MockStore);
+      effects = TestBed.inject(FocusModeEffects);
+      storageService = TestBed.inject(
+        FocusModeStorageService,
+      ) as jasmine.SpyObj<FocusModeStorageService>;
+      storageService.getLastCountdownDuration.and.returnValue(null);
+      storageService.setLastCountdownDuration.calls.reset();
+    });
+
+    afterEach(() => {
+      if (store && 'resetSelectors' in store) {
+        (store as any).resetSelectors();
+      }
+    });
+
+    it('should persist duration when mode is Countdown', () => {
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.refreshState();
+
+      actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 45_000 }));
+
+      expect(storageService.setLastCountdownDuration).toHaveBeenCalledWith(45_000);
+    });
+
+    it('should not persist duration for non-countdown modes', () => {
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.refreshState();
+
+      actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 45_000 }));
+
+      expect(storageService.setLastCountdownDuration).not.toHaveBeenCalled();
+    });
+
+    it('should ignore non-positive durations', () => {
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
+      store.refreshState();
+
+      actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 0 }));
+
+      expect(storageService.setLastCountdownDuration).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Effects: syncDurationWithMode$', () => {
+    let store: MockStore;
+    let effects: FocusModeEffects;
+    let actions$: Subject<Action>;
+    let getStrategySpy: jasmine.Spy;
+
+    beforeEach(() => {
+      actions$ = new Subject<Action>();
+      getStrategySpy = jasmine
+        .createSpy('getStrategy')
+        .and.callFake((mode: FocusModeMode) => ({
+          initialSessionDuration: mode === FocusModeMode.Pomodoro ? 42_000 : 12_000,
+          shouldStartBreakAfterSession: false,
+          shouldAutoStartNextSession: false,
+          getBreakDuration: () => null,
+        }));
+
+      TestBed.configureTestingModule({
+        providers: [
+          provideMockStore({}),
+          provideMockActions(() => actions$),
+          FocusModeEffects,
+          { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
+          { provide: GlobalConfigService, useValue: { sound: () => ({ volume: 0 }) } },
+          { provide: TaskService, useValue: { currentTaskId$: of(null) } },
+          {
+            provide: FocusModeStrategyFactory,
+            useValue: {
+              getStrategy: getStrategySpy,
+            },
+          },
+          {
+            provide: MetricService,
+            useValue: {
+              logFocusSession: () => {},
+            },
+          },
+          {
+            provide: FocusModeStorageService,
+            useValue: jasmine.createSpyObj('FocusModeStorageService', [
+              'getLastCountdownDuration',
+              'setLastCountdownDuration',
+            ]),
+          },
+        ],
+      });
+
+      store = TestBed.inject(MockStore);
+      effects = TestBed.inject(FocusModeEffects);
+
+      store.overrideSelector(selectors.selectTimer, {
+        purpose: null,
+        isRunning: false,
+        duration: 0,
+        elapsed: 0,
+        startedAt: null,
+      } as any);
+      store.refreshState();
+    });
+
+    afterEach(() => {
+      actions$.complete();
+      if (store && 'resetSelectors' in store) {
+        (store as any).resetSelectors();
+      }
+    });
+
+    it('should emit setFocusSessionDuration when switching to Pomodoro while idle', (done) => {
+      const expectedDuration = 42_000;
+
+      getStrategySpy.and.callFake((mode: FocusModeMode) => ({
+        initialSessionDuration:
+          mode === FocusModeMode.Pomodoro ? expectedDuration : 12_000,
+        shouldStartBreakAfterSession: false,
+        shouldAutoStartNextSession: false,
+        getBreakDuration: () => null,
+      }));
+
+      effects.syncDurationWithMode$.pipe(take(1)).subscribe((action) => {
+        expect(action).toEqual(
+          actions.setFocusSessionDuration({ focusSessionDuration: expectedDuration }),
+        );
+        done();
+      });
+
+      actions$.next(actions.setFocusModeMode({ mode: FocusModeMode.Pomodoro }));
+    });
+
+    it('should emit setFocusSessionDuration when switching to Countdown while idle', (done) => {
+      effects.syncDurationWithMode$.pipe(take(1)).subscribe((action) => {
+        expect(action).toEqual(
+          actions.setFocusSessionDuration({ focusSessionDuration: 12_000 }),
+        );
+        done();
+      });
+
+      actions$.next(actions.setFocusModeMode({ mode: FocusModeMode.Countdown }));
+    });
+
+    it('should not emit when a timer is active', (done) => {
+      store.overrideSelector(selectors.selectTimer, {
+        purpose: 'break',
+        isRunning: true,
+        duration: 5_000,
+        elapsed: 1_000,
+        startedAt: Date.now(),
+      } as any);
+      store.refreshState();
+
+      const sub = effects.syncDurationWithMode$.subscribe({
+        next: () => fail('Should not emit duration update while timer is active'),
+        error: (error) => fail(String(error)),
+      });
+
+      actions$.next(actions.setFocusModeMode({ mode: FocusModeMode.Pomodoro }));
+
+      setTimeout(() => {
+        sub.unsubscribe();
+        expect(getStrategySpy).not.toHaveBeenCalled();
+        done();
+      }, 50);
     });
   });
 });

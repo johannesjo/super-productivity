@@ -1,19 +1,19 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  DestroyRef,
   inject,
-  OnDestroy,
   signal,
 } from '@angular/core';
 import { startFocusSession } from '../store/focus-mode.actions';
 import { Store } from '@ngrx/store';
-import { Subject, timer } from 'rxjs';
-import { takeUntil, take } from 'rxjs/operators';
+import { timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs/operators';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { T } from 'src/app/t.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { selectTimeDuration } from '../store/focus-mode.selectors';
-import { FocusModeService } from '../focus-mode.service';
 import {
   FocusModePreparationRocketComponent,
   type RocketState,
@@ -29,20 +29,19 @@ const COUNTDOWN_DURATION = 5;
   animations: [fadeAnimation],
   imports: [TranslatePipe, FocusModePreparationRocketComponent],
 })
-export class FocusModePreparationComponent implements OnDestroy {
+export class FocusModePreparationComponent {
   private readonly _store = inject(Store);
-  private readonly _focusModeService = inject(FocusModeService);
+  private readonly _destroyRef = inject(DestroyRef);
 
   T: typeof T = T;
 
-  private _onDestroy$ = new Subject<void>();
   readonly countdown = signal<number>(COUNTDOWN_DURATION);
   readonly rocketState = signal<RocketState>('pulse-5');
   private _hasLaunched = false;
 
   constructor() {
     timer(0, 1000)
-      .pipe(takeUntil(this._onDestroy$), take(COUNTDOWN_DURATION + 1))
+      .pipe(takeUntilDestroyed(this._destroyRef), take(COUNTDOWN_DURATION + 1))
       .subscribe((tick) => {
         const remaining = COUNTDOWN_DURATION - tick;
         this.countdown.set(remaining);
@@ -62,10 +61,5 @@ export class FocusModePreparationComponent implements OnDestroy {
   startSession(): void {
     const duration = this._store.selectSignal(selectTimeDuration)();
     this._store.dispatch(startFocusSession({ duration }));
-  }
-
-  ngOnDestroy(): void {
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
   }
 }

@@ -18,6 +18,7 @@ form {
   justify-content: center;
   align-items: center;
   width: 100%;
+  gap: var(--s2);
 }
 
 select-task {
@@ -55,4 +56,9 @@ breathing-dot {
     font-weight: bold;
     text-align: center;
   }
+}
+
+.action-buttons {
+  display: flex;
+  gap: var(--s2);
 }

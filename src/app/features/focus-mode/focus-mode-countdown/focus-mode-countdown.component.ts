@@ -1,13 +1,15 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  OnDestroy,
+  DestroyRef,
   OnInit,
+  inject,
   output,
   signal,
 } from '@angular/core';
-import { Subject, timer } from 'rxjs';
-import { take, takeUntil } from 'rxjs/operators';
+import { timer } from 'rxjs';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { take } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { TranslatePipe } from '@ngx-translate/core';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
@@ -24,23 +26,18 @@ import {
   animations: [fadeAnimation],
   imports: [TranslatePipe, FocusModePreparationRocketComponent],
 })
-export class FocusModeCountdownComponent implements OnInit, OnDestroy {
+export class FocusModeCountdownComponent implements OnInit {
   readonly countdownComplete = output<void>();
 
   readonly T = T;
   countdownValue = signal<number>(1);
   rocketState = signal<RocketState>('pulse-5');
 
-  private readonly COUNTDOWN_DURATION = 1;
-  private _onDestroy$ = new Subject<void>();
+  private readonly COUNTDOWN_DURATION = 5;
+  private readonly _destroyRef = inject(DestroyRef);
 
   ngOnInit(): void {
     this.startCountdown();
-  }
-
-  ngOnDestroy(): void {
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
   }
 
   private startCountdown(): void {
@@ -48,7 +45,7 @@ export class FocusModeCountdownComponent implements OnInit, OnDestroy {
     this.rocketState.set('pulse-5');
 
     timer(0, 1000)
-      .pipe(takeUntil(this._onDestroy$), take(this.COUNTDOWN_DURATION + 1))
+      .pipe(takeUntilDestroyed(this._destroyRef), take(this.COUNTDOWN_DURATION + 1))
       .subscribe((tick) => {
         const remaining = this.COUNTDOWN_DURATION - tick;
         this.countdownValue.set(remaining);

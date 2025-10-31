@@ -2,7 +2,6 @@
   (submit)="$event.preventDefault(); onSubmit($event)"
   novalidate
 >
-  <h1>XXXXXXXXXXXXXXXXXXXXXX</h1>
   <h1>{{ T.F.FOCUS_MODE.SELECT_TASK | translate }}</h1>
 
   @if (isFocusSessionRunning()) {
@@ -32,11 +31,9 @@
     [isIncludeDoneTasks]="false"
   >
   </select-task>
-  <br />
-  <br />
 
   @if (isFocusSessionRunning()) {
-    <div style="display: flex; gap: 16px">
+    <div class="action-buttons">
       <button
         type="button"
         mat-stroked-button

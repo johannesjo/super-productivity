@@ -6,15 +6,15 @@ import {
   HostBinding,
   HostListener,
   inject,
-  OnDestroy,
   signal,
+  DestroyRef,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { from, Observable, of, Subject } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { switchMap, take, takeUntil } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
@@ -31,19 +31,13 @@ import {
   startFocusSession,
   unPauseFocusSession,
 } from '../store/focus-mode.actions';
-import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import {
-  MatFabButton,
-  MatIconAnchor,
-  MatIconButton,
-  MatMiniFabButton,
-} from '@angular/material/button';
+import { MatFabButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
@@ -58,15 +52,20 @@ import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-fro
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { FocusMainUIState, FocusModeMode } from '../focus-mode.model';
+import {
+  FocusMainUIState,
+  FocusModeMode,
+  FOCUS_MODE_DEFAULTS,
+} from '../focus-mode.model';
 import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 import { FocusModeCountdownComponent } from '../focus-mode-countdown/focus-mode-countdown.component';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
-import { LS } from '../../../core/persistence/storage-keys.const';
 import {
   SegmentedButtonGroupComponent,
   SegmentedButtonOption,
 } from '../../../ui/segmented-button-group/segmented-button-group.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 @Component({
   selector: 'focus-mode-main',
@@ -81,7 +80,6 @@ import {
     MatIconButton,
     MatTooltip,
     MatIcon,
-    MatIconAnchor,
     InlineMarkdownComponent,
     TaskAttachmentListComponent,
     AsyncPipe,
@@ -103,11 +101,13 @@ import {
     ['[class.isSessionNotRunning]']: '!isSessionRunning()',
   },
 })
-export class FocusModeMainComponent implements OnDestroy {
+export class FocusModeMainComponent {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _focusModeStorage = inject(FocusModeStorageService);
 
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly taskService = inject(TaskService);
@@ -194,7 +194,6 @@ export class FocusModeMainComponent implements OnDestroy {
     take(1),
   );
 
-  private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
 
   constructor() {
@@ -206,24 +205,28 @@ export class FocusModeMainComponent implements OnDestroy {
       }
     });
 
-    this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
-      this.task = task;
-    });
-
-    // Initialize display duration from store or localStorage
-    const lastDuration = localStorage.getItem(LS.LAST_COUNTDOWN_DURATION);
-    if (lastDuration) {
-      this.displayDuration.set(parseInt(lastDuration, 10));
-    }
-
-    this._store
-      .select(selectTimeDuration)
-      .pipe(takeUntil(this._onDestroy$))
-      .subscribe((duration) => {
-        if (duration > 0) {
-          this.displayDuration.set(duration);
-        }
+    this.taskService.currentTask$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((task) => {
+        this.task = task;
       });
+
+    effect(() => {
+      const duration = this.focusModeService.sessionDuration();
+      const mode = this.mode();
+
+      if (duration > 0) {
+        this.displayDuration.set(duration);
+        return;
+      }
+
+      if (mode === FocusModeMode.Countdown) {
+        const stored =
+          this._focusModeStorage.getLastCountdownDuration() ??
+          FOCUS_MODE_DEFAULTS.SESSION_DURATION;
+        this.displayDuration.set(stored);
+      }
+    });
   }
 
   @HostListener('dragenter', ['$event']) onDragEnter(ev: DragEvent): void {
@@ -248,11 +251,6 @@ export class FocusModeMainComponent implements OnDestroy {
     this._taskAttachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
-  }
-
-  ngOnDestroy(): void {
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
   }
 
   changeTaskNotes($event: string): void {
@@ -345,7 +343,6 @@ export class FocusModeMainComponent implements OnDestroy {
 
   onDurationChange(duration: number): void {
     this.displayDuration.set(duration);
-    localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, duration.toString());
     this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
   }
 

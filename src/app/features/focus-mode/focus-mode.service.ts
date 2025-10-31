@@ -29,6 +29,7 @@ export class FocusModeService {
   timeElapsed = this._store.selectSignal(selectors.selectTimeElapsed);
   timeRemaining = this._store.selectSignal(selectors.selectTimeRemaining);
   progress = this._store.selectSignal(selectors.selectProgress);
+  sessionDuration = this._store.selectSignal(selectors.selectTimeDuration);
 
   // Session signals
   isSessionRunning = this._store.selectSignal(selectors.selectIsSessionRunning);

@@ -15,7 +15,11 @@ describe('FocusModeService', () => {
   let tickSubject: BehaviorSubject<number>;
 
   beforeEach(() => {
-    const storeSpy = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    const storeSpy = jasmine.createSpyObj('Store', [
+      'select',
+      'dispatch',
+      'selectSignal',
+    ]);
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       pomodoroConfig: jasmine.createSpy().and.returnValue({
         duration: 1500000,
@@ -86,6 +90,58 @@ describe('FocusModeService', () => {
       return of(null);
     });
 
+    storeSpy.selectSignal.and.callFake((selector) => {
+      if (selector === selectors.selectCurrentScreen) {
+        return () => FocusScreen.Main;
+      }
+      if (selector === selectors.selectMainState) {
+        return () => FocusMainUIState.Preparation;
+      }
+      if (selector === selectors.selectMode) {
+        return () => FocusModeMode.Pomodoro;
+      }
+      if (selector === selectors.selectIsOverlayShown) {
+        return () => false;
+      }
+      if (selector === selectors.selectCurrentCycle) {
+        return () => 0;
+      }
+      if (selector === selectors.selectIsRunning) {
+        return () => false;
+      }
+      if (selector === selectors.selectTimeElapsed) {
+        return () => 0;
+      }
+      if (selector === selectors.selectTimeRemaining) {
+        return () => 1_500_000;
+      }
+      if (selector === selectors.selectProgress) {
+        return () => 0;
+      }
+      if (selector === selectors.selectIsSessionRunning) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsSessionPaused) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsBreakActive) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsLongBreak) {
+        return () => false;
+      }
+      if (selector === selectors.selectLastSessionDuration) {
+        return () => 0;
+      }
+      if (selector === selectors.selectTimeDuration) {
+        return () => 300_000;
+      }
+      if (selector === selectFocusModeConfig) {
+        return () => ({});
+      }
+      return () => null;
+    });
+
     TestBed.configureTestingModule({
       providers: [
         FocusModeService,
@@ -131,6 +187,7 @@ describe('FocusModeService', () => {
       expect(service.timeElapsed()).toBe(0);
       expect(service.timeRemaining()).toBe(1500000);
       expect(service.progress()).toBe(0);
+      expect(service.sessionDuration()).toBe(300000);
     });
 
     it('should initialize session signals', () => {

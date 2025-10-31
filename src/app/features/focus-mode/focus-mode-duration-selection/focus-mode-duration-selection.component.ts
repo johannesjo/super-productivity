@@ -14,8 +14,6 @@ import {
   selectFocusTask,
 } from '../store/focus-mode.actions';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
-import { Subject } from 'rxjs';
-import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
 import { AsyncPipe } from '@angular/common';
@@ -24,25 +22,19 @@ import { T } from '../../../t.const';
 import { FocusModeService } from '../focus-mode.service';
 import { MatIcon } from '@angular/material/icon';
 import { FocusModeMode, FOCUS_MODE_DEFAULTS } from '../focus-mode.model';
-import { LS } from '../../../core/persistence/storage-keys.const';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 @Component({
   selector: 'focus-mode-duration-selection',
   templateUrl: './focus-mode-duration-selection.component.html',
   styleUrls: ['./focus-mode-duration-selection.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    FormsModule,
-    MatButton,
-    InputDurationSliderComponent,
-    AsyncPipe,
-    TranslatePipe,
-    MatIcon,
-  ],
+  imports: [MatButton, InputDurationSliderComponent, AsyncPipe, TranslatePipe, MatIcon],
 })
 export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDestroy {
   private readonly _store = inject(Store);
   private readonly _focusModeService = inject(FocusModeService);
+  private readonly _focusModeStorage = inject(FocusModeStorageService);
 
   T: typeof T = T;
   sessionDuration$ = this._store.select(selectTimeDuration);
@@ -52,14 +44,12 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
   cfg = this._focusModeService.focusModeConfig;
   selectedMode = this._focusModeService.mode;
 
-  private _onDestroy$ = new Subject<void>();
-
   ngAfterViewInit(): void {
     // Initialize duration from localStorage or use default
-    const lastDuration = localStorage.getItem(LS.LAST_COUNTDOWN_DURATION);
-    if (lastDuration) {
-      this.updatedFocusModeDuration = parseInt(lastDuration, 10);
-    }
+    const storedDuration =
+      this._focusModeStorage.getLastCountdownDuration() ??
+      FOCUS_MODE_DEFAULTS.SESSION_DURATION;
+    this.updatedFocusModeDuration = storedDuration;
 
     this.focusTimeout = window.setTimeout(() => {
       const el = document.querySelector('input');
@@ -70,8 +60,6 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
 
   ngOnDestroy(): void {
     window.clearTimeout(this.focusTimeout);
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
   }
 
   onFocusModeDurationChanged(duration: number): void {
@@ -82,10 +70,7 @@ export class FocusModeDurationSelectionComponent implements AfterViewInit, OnDes
     $event?.preventDefault();
     if (this.updatedFocusModeDuration) {
       // Save the duration to localStorage for next time
-      localStorage.setItem(
-        LS.LAST_COUNTDOWN_DURATION,
-        this.updatedFocusModeDuration.toString(),
-      );
+      this._focusModeStorage.setLastCountdownDuration(this.updatedFocusModeDuration);
 
       this._store.dispatch(
         setFocusSessionDuration({ focusSessionDuration: this.updatedFocusModeDuration }),
