@@ -218,7 +218,7 @@ export class TrelloApiService {
     // Validate boardId format (should be alphanumeric, typically 24 chars for Trello - reference: https://community.developer.atlassian.com/t/uniqueness-of-trello-board-ids/67032/2)
     // const boardIdRegex = /^[a-zA-Z0-9]+$/;
     // remove this for now in favor of the trello board picker.
-    if (cfg.boardId) {
+    if (cfg.boardId && cfg.boardId.length !== 24) {
       this._snackService.open({
         type: 'ERROR',
         msg: `${ISSUE_PROVIDER_HUMANIZED[TRELLO_TYPE]}: Invalid board ID format`,
