@@ -1,0 +1,57 @@
+<mat-dialog-content>
+  <div class="content">
+    <h2>{{ T.F.TAG.D_CREATE.CREATE | translate }}</h2>
+  </div>
+
+  <form
+    #formEl="ngForm"
+    (ngSubmit)="formEl.valid && close(true)"
+  >
+    <mat-form-field>
+      <mat-label>{{ T.F.TAG.FORM_BASIC.L_TITLE | translate }}</mat-label>
+      <input
+        [(ngModel)]="title"
+        name="title"
+        matInput
+        required
+        type="text"
+        autofocus
+      />
+    </mat-form-field>
+
+    <mat-form-field>
+      <mat-label>{{ T.F.TAG.FORM_BASIC.L_COLOR | translate }}</mat-label>
+      <input
+        [(ngModel)]="color"
+        name="color"
+        matInput
+        type="color"
+      />
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button
+      (click)="close(false)"
+      class="btn btn-primary submit-button"
+      mat-button
+      type="button"
+    >
+      <mat-icon>close</mat-icon>
+      {{ T.G.CANCEL | translate }}
+    </button>
+
+    <button
+      (click)="close(true)"
+      class="btn btn-primary submit-button"
+      color="primary"
+      mat-stroked-button
+      [disabled]="!title.trim()"
+    >
+      <mat-icon>check</mat-icon>
+      {{ T.G.SAVE | translate }}
+    </button>
+  </div>
+</mat-dialog-actions>
