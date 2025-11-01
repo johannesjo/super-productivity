@@ -159,7 +159,7 @@ jobs:
       - name: Test Unit
         run: npm run test
 
-      #      - uses: browser-actions/setup-chrome@v1
+      #      - uses: browser-actions/setup-chrome@v2
       #        id: setup-chrome
       #      - run: |
       #          echo Installed chromium version: ${{ steps.setup-chrome.outputs.chrome-version }}
@@ -235,7 +235,7 @@ jobs:
 
       - name: Setup Chrome
         id: setup-chrome
-        uses: browser-actions/setup-chrome@v1
+        uses: browser-actions/setup-chrome@v2
 
       - name: Export Chrome path for Karma
         shell: pwsh
