@@ -11,7 +11,6 @@ import { MatDialogContent, MatDialogRef, MatDialogTitle } from '@angular/materia
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject } from 'rxjs';
 import { debounceTime, distinctUntilChanged, switchMap, takeUntil } from 'rxjs/operators';
@@ -24,7 +23,6 @@ import { T } from '../../t.const';
   selector: 'dialog-unsplash-picker',
   standalone: true,
   imports: [
-    CommonModule,
     FormsModule,
     MatDialogContent,
     MatDialogTitle,

@@ -1,144 +1,151 @@
 <h1>{{ T.F.QUICK_HISTORY.PAGE_TITLE | translate }}</h1>
 
-<div
-  *ngIf="worklogService.quickHistoryWeeks$ | async as weeks; else spinner"
-  [@fadeInSlow]
->
-  <div
-    class="no-data"
-    *ngIf="weeks?.length === 0"
-  >
-    {{ T.F.QUICK_HISTORY.NO_DATA | translate }}
-  </div>
-
-  <div *ngFor="let week of weeks; let j = index">
-    <h2>
-      {{
-        T.F.QUICK_HISTORY.WEEK_TITLE
-          | translate: { nr: week.weekNr, timeSpent: (week.timeSpent | msToString) }
-      }}
-    </h2>
-
-    <div class="days">
-      <div
-        *ngFor="
-          let day of week?.ent | keyvalue: sortDays;
-          trackBy: trackByDay;
-          let i = index
-        "
-        class="day"
-      >
-        <div class="material-table">
-          <div
-            (click)="visibility[i + j * 100] = !visibility[i + j * 100]"
-            class="caption"
-            mat-ripple
-          >
-            <div>
-              <span
-                *ngIf="visibility[i + j * 100]"
-                [@fade]
-                >{{ T.F.WORKLOG.WEEK.TITLE | translate }}</span
-              >
-            </div>
-            <div class="center-box">
-              <div class="title">
-                <h3 class="mat-h3">{{ day.value.dayStr }}</h3>
+@if (worklogService.quickHistoryWeeks$ | async; as weeks) {
+  <div [@fadeInSlow]>
+    @if (weeks?.length === 0) {
+      <div class="no-data">
+        {{ T.F.QUICK_HISTORY.NO_DATA | translate }}
+      </div>
+    }
+    @for (week of weeks; track week; let j = $index) {
+      <div>
+        <h2>
+          {{
+            T.F.QUICK_HISTORY.WEEK_TITLE
+              | translate: { nr: week.weekNr, timeSpent: (week.timeSpent | msToString) }
+          }}
+        </h2>
+        <div class="days">
+          @for (
+            day of week?.ent | keyvalue: sortDays;
+            track trackByDay(i, day);
+            let i = $index
+          ) {
+            <div class="day">
+              <div class="material-table">
                 <div
-                  *ngIf="!visibility[i + j * 100]"
-                  [@expandFade]
-                  class="icon-indicator-bar"
+                  (click)="visibility[i + j * 100] = !visibility[i + j * 100]"
+                  class="caption"
+                  mat-ripple
                 >
-                  <strong>∑ {{ day.value.timeSpent | msToClockString }}</strong>
-                  &nbsp;
-                  <mat-icon>list</mat-icon>
-                  <strong>{{ day.value.logEntries.length }}</strong>
-                  <em *ngIf="day.value.workStart"
-                    ><span class="spacer"></span
-                    >{{ day.value.workStart | momentFormat: 'HH:mm' }} -
-                    {{ day.value.workEnd | momentFormat: 'HH:mm' }}</em
-                  >
-
-                  <div class="simple-counter-items">
-                    <div
-                      *ngFor="
-                        let sc of simpleCounterService.enabledSimpleCounters$ | async
-                      "
-                      class="simple-counter-item"
-                    >
-                      <mat-icon inline="true">{{ sc.icon }}</mat-icon>
-                      @if (sc.type === 'StopWatch') {
-                        <div class="count">
-                          {{
-                            sc.countOnDay[day.value.dateStr] || 0 | msToMinuteClockString
-                          }}
-                        </div>
-                      } @else {
-                        <div class="count">
-                          {{ sc.countOnDay[day.value.dateStr] || 0 }}
+                  <div>
+                    @if (visibility[i + j * 100]) {
+                      <span [@fade]>{{ T.F.WORKLOG.WEEK.TITLE | translate }}</span>
+                    }
+                  </div>
+                  <div class="center-box">
+                    <div class="title">
+                      <h3 class="mat-h3">{{ day.value.dayStr }}</h3>
+                      @if (!visibility[i + j * 100]) {
+                        <div
+                          [@expandFade]
+                          class="icon-indicator-bar"
+                        >
+                          <strong>∑ {{ day.value.timeSpent | msToClockString }}</strong>
+                          &nbsp;
+                          <mat-icon>list</mat-icon>
+                          <strong>{{ day.value.logEntries.length }}</strong>
+                          @if (day.value.workStart) {
+                            <em
+                              ><span class="spacer"></span
+                              >{{ day.value.workStart | momentFormat: 'HH:mm' }} -
+                              {{ day.value.workEnd | momentFormat: 'HH:mm' }}</em
+                            >
+                          }
+                          <div class="simple-counter-items">
+                            @for (
+                              sc of simpleCounterService.enabledSimpleCounters$ | async;
+                              track sc
+                            ) {
+                              <div class="simple-counter-item">
+                                <mat-icon inline="true">{{ sc.icon }}</mat-icon>
+                                @if (sc.type === 'StopWatch') {
+                                  <div class="count">
+                                    {{
+                                      sc.countOnDay[day.value.dateStr] || 0
+                                        | msToMinuteClockString
+                                    }}
+                                  </div>
+                                } @else {
+                                  <div class="count">
+                                    {{ sc.countOnDay[day.value.dateStr] || 0 }}
+                                  </div>
+                                }
+                              </div>
+                            }
+                          </div>
                         </div>
                       }
                     </div>
                   </div>
+                  <div class="with-icon">
+                    @if (visibility[i + j * 100]) {
+                      <mat-icon [@fade]>timer </mat-icon>
+                    }
+                  </div>
                 </div>
+                @if (visibility[i + j * 100]) {
+                  <table
+                    [@expandFade]
+                    class="task-summary-table"
+                  >
+                    @for (
+                      logEntry of filterWorklogDataForDay(day.value.logEntries);
+                      track trackByLogEntry($index, logEntry)
+                    ) {
+                      <tr>
+                        <td
+                          [class.isSubTask]="logEntry.task.parentId"
+                          class="title"
+                          colspan
+                        >
+                          <span class="task-title">{{ logEntry.task.title }}</span>
+                        </td>
+                        <td class="worked">
+                          @if (
+                            logEntry.task.subTaskIds &&
+                            logEntry.task.subTaskIds.length > 0
+                          ) {
+                            <span
+                              >∑
+                              {{
+                                logEntry.task.timeSpentOnDay[day.value.dateStr]
+                                  | msToClockString
+                              }}</span
+                            >
+                          }
+                          @if (
+                            !logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length
+                          ) {
+                            <inline-input
+                              (changed)="
+                                updateTimeSpentTodayForTask(
+                                  logEntry.task,
+                                  day.value.dateStr,
+                                  $event
+                                )
+                              "
+                              [displayValue]="
+                                logEntry.task.timeSpentOnDay[day.value.dateStr]
+                                  | msToClockString
+                              "
+                              [type]="'duration'"
+                              [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
+                            >
+                            </inline-input>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </table>
+                }
               </div>
             </div>
-            <div class="with-icon">
-              <mat-icon
-                *ngIf="visibility[i + j * 100]"
-                [@fade]
-                >timer
-              </mat-icon>
-            </div>
-          </div>
-
-          <table
-            *ngIf="visibility[i + j * 100]"
-            [@expandFade]
-            class="task-summary-table"
-          >
-            <tr
-              *ngFor="
-                let logEntry of filterWorklogDataForDay(day.value.logEntries);
-                trackBy: trackByLogEntry
-              "
-            >
-              <td
-                [class.isSubTask]="logEntry.task.parentId"
-                class="title"
-                colspan
-              >
-                <span class="task-title">{{ logEntry.task.title }}</span>
-              </td>
-              <td class="worked">
-                <span
-                  *ngIf="logEntry.task.subTaskIds && logEntry.task.subTaskIds.length > 0"
-                  >∑
-                  {{
-                    logEntry.task.timeSpentOnDay[day.value.dateStr] | msToClockString
-                  }}</span
-                >
-                <inline-input
-                  (changed)="
-                    updateTimeSpentTodayForTask(logEntry.task, day.value.dateStr, $event)
-                  "
-                  *ngIf="!logEntry.task.subTaskIds || !logEntry.task.subTaskIds.length"
-                  [displayValue]="
-                    logEntry.task.timeSpentOnDay[day.value.dateStr] | msToClockString
-                  "
-                  [type]="'duration'"
-                  [value]="logEntry.task.timeSpentOnDay[day.value.dateStr]"
-                >
-                </inline-input>
-              </td>
-            </tr>
-          </table>
+          }
         </div>
       </div>
-    </div>
+    }
   </div>
-</div>
-
-<ng-template #spinner>
+} @else {
   <full-page-spinner></full-page-spinner>
-</ng-template>
+}

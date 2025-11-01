@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
@@ -69,14 +68,7 @@ import { PluginLog } from '../../../core/log';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [
-    CommonModule,
-    MatButton,
-    MatIcon,
-    MatDialogActions,
-    MatDialogContent,
-    MatDialogTitle,
-  ],
+  imports: [MatButton, MatIcon, MatDialogActions, MatDialogContent, MatDialogTitle],
 })
 export class PluginDialogComponent {
   private readonly _dialogRef = inject(MatDialogRef<PluginDialogComponent>);

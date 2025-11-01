@@ -1,7 +1,7 @@
 <h2 mat-dialog-title>{{ titleKey | translate }}</h2>
 
 <div mat-dialog-content>
-  <ng-container *ngIf="breakdown$ | async as breakdown; else noData">
+  @if (breakdown$ | async; as breakdown) {
     @if (chartData$ | async; as chartData) {
       <div class="chart-section">
         <lazy-chart
@@ -28,32 +28,32 @@
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let item of breakdown">
-          <td>{{ item.day }}</td>
-          <td>{{ item.score ?? '-' }}</td>
-          <td>{{ item.impactRating ?? '-' }}</td>
-          <td>
-            @if (item.energyCheckin === 1) {
-              😫
-            } @else if (item.energyCheckin === 2) {
-              😐
-            } @else if (item.energyCheckin === 3) {
-              😊
-            } @else {
-              -
-            }
-          </td>
-          <td>{{ item.focusedMinutes | number: '1.0-1' }}</td>
-          <td>{{ item.totalWorkMinutes | number: '1.0-1' }}</td>
-        </tr>
+        @for (item of breakdown; track item) {
+          <tr>
+            <td>{{ item.day }}</td>
+            <td>{{ item.score ?? '-' }}</td>
+            <td>{{ item.impactRating ?? '-' }}</td>
+            <td>
+              @if (item.energyCheckin === 1) {
+                😫
+              } @else if (item.energyCheckin === 2) {
+                😐
+              } @else if (item.energyCheckin === 3) {
+                😊
+              } @else {
+                -
+              }
+            </td>
+            <td>{{ item.focusedMinutes | number: '1.0-1' }}</td>
+            <td>{{ item.totalWorkMinutes | number: '1.0-1' }}</td>
+          </tr>
+        }
       </tbody>
     </table>
-  </ng-container>
+  } @else {
+    <div class="no-data">No productivity data available for the selected range.</div>
+  }
 </div>
-
-<ng-template #noData>
-  <div class="no-data">No productivity data available for the selected range.</div>
-</ng-template>
 
 <div
   mat-dialog-actions

@@ -11,7 +11,6 @@ import { filter } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { selectActivePluginId } from '../../../core-ui/layout/store/layout.reducer';
 import { PluginIndexComponent } from '../plugin-index/plugin-index.component';
-import { CommonModule } from '@angular/common';
 import { PluginLog } from '../../../core/log';
 
 /**
@@ -21,7 +20,7 @@ import { PluginLog } from '../../../core/log';
 @Component({
   selector: 'plugin-panel-container',
   standalone: true,
-  imports: [CommonModule, PluginIndexComponent],
+  imports: [PluginIndexComponent],
   template: `
     @if (activePluginId()) {
       <plugin-index

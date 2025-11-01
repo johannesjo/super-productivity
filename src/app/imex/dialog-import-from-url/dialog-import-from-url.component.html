@@ -12,9 +12,11 @@
       required
       #urlCtrl="ngModel"
     />
-    <mat-error *ngIf="urlCtrl.invalid && (urlCtrl.dirty || urlCtrl.touched)">
-      {{ T.FILE_IMEX.S_ERR_INVALID_URL | translate }}
-    </mat-error>
+    @if (urlCtrl.invalid && (urlCtrl.dirty || urlCtrl.touched)) {
+      <mat-error>
+        {{ T.FILE_IMEX.S_ERR_INVALID_URL | translate }}
+      </mat-error>
+    }
   </mat-form-field>
 </mat-dialog-content>
 <mat-dialog-actions align="end">

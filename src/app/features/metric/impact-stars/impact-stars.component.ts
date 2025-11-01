@@ -9,14 +9,13 @@ import {
   computed,
   effect,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   standalone: true,
   selector: 'impact-stars',
-  imports: [CommonModule, MatIconModule],
+  imports: [MatIconModule],
   templateUrl: './impact-stars.component.html',
   styleUrls: ['./impact-stars.component.scss'],
   providers: [

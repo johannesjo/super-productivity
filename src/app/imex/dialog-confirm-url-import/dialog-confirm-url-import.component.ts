@@ -1,7 +1,6 @@
 import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef, MatDialogModule } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
-import { CommonModule } from '@angular/common'; // For *ngIf, etc.
 import { TranslateModule } from '@ngx-translate/core'; // For translate pipe
 import { T } from '../../t.const';
 import { Log } from '../../core/log';
@@ -16,7 +15,6 @@ export interface DialogConfirmUrlImportData {
   styleUrls: ['./dialog-confirm-url-import.component.scss'],
   standalone: true,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     TranslateModule, // Add TranslateModule for the pipe

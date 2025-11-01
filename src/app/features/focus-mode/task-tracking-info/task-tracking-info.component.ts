@@ -6,7 +6,6 @@ import {
   input,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
@@ -19,7 +18,7 @@ import { TaskService } from '../../tasks/task.service';
 @Component({
   selector: 'task-tracking-info',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatTooltipModule, MsToStringPipe],
+  imports: [MatIcon, MatTooltipModule, MsToStringPipe],
   template: `
     @if (currentTask() && (showTitle() || currentTaskTimeToday() > 0)) {
       <div

@@ -6,22 +6,13 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { DialogUnsplashPickerComponent } from '../dialog-unsplash-picker/dialog-unsplash-picker.component';
 import { UnsplashService } from '../../core/unsplash/unsplash.service';
 
 @Component({
   selector: 'formly-image-input',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    ReactiveFormsModule,
-    FormlyModule,
-    MatInput,
-    MatButton,
-    MatIcon,
-  ],
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule, MatInput, MatButton, MatIcon],
   templateUrl: './formly-image-input.component.html',
   styleUrls: ['./formly-image-input.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,

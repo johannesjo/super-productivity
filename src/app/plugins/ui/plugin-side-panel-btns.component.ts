@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { PluginSidePanelBtnCfg } from '../plugin-api.model';
-import { CommonModule } from '@angular/common';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIconButton } from '@angular/material/button';
 import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
@@ -24,7 +23,7 @@ import { PluginLog } from '../../core/log';
 @Component({
   selector: 'plugin-side-panel-btns',
   standalone: true,
-  imports: [CommonModule, MatTooltip, MatIconButton, PluginIconComponent],
+  imports: [MatTooltip, MatIconButton, PluginIconComponent],
   template: `
     @for (button of sidePanelButtons(); track button.pluginId) {
       <button

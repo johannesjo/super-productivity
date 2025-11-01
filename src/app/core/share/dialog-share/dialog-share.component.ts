@@ -5,7 +5,6 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { ShareService } from '../share.service';
 import { ShareDialogOptions, ShareResult, ShareTarget } from '../share.model';
 import { ShareFormatter } from '../share-formatter';
@@ -23,7 +22,6 @@ interface ShareTargetButton {
   styleUrls: ['./dialog-share.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatDialogModule,
     MatButtonModule,
     MatIconModule,

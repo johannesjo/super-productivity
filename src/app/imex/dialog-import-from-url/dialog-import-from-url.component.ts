@@ -7,7 +7,6 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule } from '@angular/material/dialog'; // Import MatDialogModule
 import { T } from '../../t.const';
 import { TranslatePipe } from '@ngx-translate/core';
-import { NgIf } from '@angular/common'; // For potential translations
 import { Log } from '../../core/log';
 
 @Component({
@@ -23,7 +22,6 @@ import { Log } from '../../core/log';
     MatDialogModule, // Ensure MatDialogModule is imported here for standalone
     // CommonModule will be automatically available for standalone components for ngIf, ngFor, etc.
     TranslatePipe, // If you use it in the template, import it
-    NgIf,
   ],
 })
 export class DialogImportFromUrlComponent {

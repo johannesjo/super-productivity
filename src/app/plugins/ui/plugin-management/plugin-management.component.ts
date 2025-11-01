@@ -11,7 +11,6 @@ import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.serv
 import { PluginCacheService } from '../../plugin-cache.service';
 import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
-import { CommonModule } from '@angular/common';
 import {
   MatCard,
   MatCardActions,
@@ -40,7 +39,6 @@ import { PluginLog } from '../../../core/log';
   styleUrls: ['./plugin-management.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCard,
     MatCardActions,
     MatCardHeader,

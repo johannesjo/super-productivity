@@ -5,7 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { CommonModule, DatePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { TaskCopy } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
 import { IssueFieldConfig } from '../../issue-content.model';
@@ -14,7 +14,7 @@ import { IssueFieldConfig } from '../../issue-content.model';
   selector: 'caldav-time',
   templateUrl: './caldav-time.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [],
 })
 export class CaldavTimeComponent {
   private _datePipe = inject(DatePipe);

@@ -7,7 +7,7 @@ import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { WorklogDataForDay, WorklogDay } from '../worklog/worklog.model';
 import { T } from 'src/app/t.const';
-import { AsyncPipe, KeyValue, KeyValuePipe, NgForOf, NgIf } from '@angular/common';
+import { AsyncPipe, KeyValue, KeyValuePipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { MsToStringPipe } from '../../ui/duration/ms-to-string.pipe';
 import { MsToClockStringPipe } from '../../ui/duration/ms-to-clock-string.pipe';
@@ -27,8 +27,6 @@ import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-s
     TranslatePipe,
     AsyncPipe,
     MsToStringPipe,
-    NgForOf,
-    NgIf,
     MsToClockStringPipe,
     MomentFormatPipe,
     MsToMinuteClockStringPipe,

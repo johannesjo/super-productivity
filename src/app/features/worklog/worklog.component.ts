@@ -25,7 +25,7 @@ import { Subscription } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { selectAllProjectColorsAndTitles } from '../project/store/project.selectors';
 import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
-import { AsyncPipe, KeyValuePipe, NgFor, NgIf } from '@angular/common';
+import { AsyncPipe, KeyValue, KeyValuePipe } from '@angular/common';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -51,8 +51,6 @@ import { Log } from '../../core/log';
   ],
   imports: [
     FullPageSpinnerComponent,
-    NgIf,
-    NgFor,
     MatMiniFabButton,
     MatIcon,
     MatTooltip,
@@ -101,14 +99,14 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
 
   exportData(
     monthData: WorklogMonth,
-    year: number,
+    year: string | number,
     month: string | number,
     week?: number,
   ): void {
     const { rangeStart, rangeEnd } =
       typeof week === 'number'
-        ? getDateRangeForWeek(year, week, +month)
-        : getDateRangeForMonth(year, +month);
+        ? getDateRangeForWeek(+year, week, +month)
+        : getDateRangeForMonth(+year, +month);
 
     this._matDialog.open(DialogWorklogExportComponent, {
       restoreFocus: true,
@@ -149,15 +147,32 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sortWorklogItems(a: { key: number }, b: { key: number }): number {
-    return b.key - a.key;
+  sortWorklogItems<
+    T extends KeyValue<K, V>,
+    K extends string | number = string,
+    V = unknown,
+  >(a: T, b: T): number {
+    if (typeof a.key === 'number' && typeof b.key === 'number') {
+      return b.key - a.key;
+    }
+    return b.key < a.key ? 1 : -1;
   }
 
-  sortWorklogItemsReverse(a: { key: number }, b: { key: number }): number {
-    return a.key - b.key;
+  sortWorklogItemsReverse<
+    T extends KeyValue<K, V>,
+    K extends string | number = string,
+    V = unknown,
+  >(a: T, b: T): number {
+    if (typeof a.key === 'number' && typeof b.key === 'number') {
+      return a.key - b.key;
+    }
+    return a.key < b.key ? 1 : -1;
   }
 
-  trackByKey(i: number, val: { key: number; val: unknown }): number {
+  trackByKey<T extends KeyValue<K, V>, K extends string | number = string, V = unknown>(
+    i: number,
+    val: T,
+  ): K {
     return val.key;
   }
 

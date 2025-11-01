@@ -22,7 +22,6 @@ import {
   handlePluginMessage,
   cleanupPluginIframeUrl,
 } from '../../util/plugin-iframe.util';
-import { CommonModule } from '@angular/common';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
@@ -43,7 +42,6 @@ import { PluginLog } from '../../../core/log';
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
   imports: [
-    CommonModule,
     MatButton,
     MatIcon,
     MatProgressSpinner,

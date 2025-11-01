@@ -12,7 +12,6 @@ import {
   signal,
   AfterViewInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavListTreeComponent } from './nav-list/nav-list-tree.component';
@@ -42,7 +41,6 @@ const FOCUS_DELAY_MS = 10;
   selector: 'magic-side-nav',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     NavItemComponent,
     NavListTreeComponent,
