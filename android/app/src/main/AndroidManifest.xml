@@ -65,5 +65,10 @@
       android:launchMode="singleTask"
       android:theme="@style/AppTheme.NoActionBarLaunch"
       android:windowSoftInputMode="adjustResize" />
+
+    <activity
+      android:name=".webview.WebViewBlockActivity"
+      android:exported="false"
+      android:theme="@style/AppTheme" />
   </application>
 </manifest>
