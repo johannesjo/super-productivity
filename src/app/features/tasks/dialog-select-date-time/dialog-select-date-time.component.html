@@ -1,0 +1,57 @@
+<h2 mat-dialog-title>{{ T.F.TASK.D_SELECT_DATE_AND_TIME.TITLE | translate }}</h2>
+<mat-dialog-content>
+  <mat-form-field>
+    <mat-label>{{ T.F.TASK.D_SELECT_DATE_AND_TIME.DATE | translate }}</mat-label>
+    <input
+      matInput
+      required
+      [matDatepicker]="datepicker"
+      [ngModel]="dateTime()"
+      [ngModelOptions]="{ updateOn: 'blur' }"
+      (ngModelChange)="onDateTimeChange($event)"
+      #datepickerInput="ngModel"
+    />
+    <mat-datepicker-toggle
+      matPrefix
+      [for]="datepicker"
+    />
+    <mat-datepicker #datepicker />
+  </mat-form-field>
+  <mat-form-field>
+    <mat-label>{{ T.F.TASK.D_SELECT_DATE_AND_TIME.TIME | translate }}</mat-label>
+    <input
+      matInput
+      required
+      [matTimepicker]="timepicker"
+      [matTimepickerOpenOnClick]="false"
+      [ngModel]="dateTime()"
+      [ngModelOptions]="{ updateOn: 'blur' }"
+      (ngModelChange)="onDateTimeChange($event)"
+      #timepickerInput="ngModel"
+    />
+    <mat-timepicker-toggle
+      matPrefix
+      [for]="timepicker"
+    />
+    <mat-timepicker #timepicker />
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    type="button"
+    color="primary"
+    mat-dialog-close
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+  <button
+    mat-stroked-button
+    type="submit"
+    color="primary"
+    [disabled]="!hasDateTime()"
+    [mat-dialog-close]="this.dateTime()?.getTime()"
+  >
+    <mat-icon>save</mat-icon>{{ T.G.SAVE | translate }}
+  </button>
+</mat-dialog-actions>

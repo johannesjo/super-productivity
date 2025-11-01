@@ -68,6 +68,7 @@ import { IssueContentComponent } from '../../issue/issue-content/issue-content.c
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
+import { DialogSelectDateTimeComponent } from '../dialog-select-date-time/dialog-select-date-time.component';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
@@ -488,6 +489,34 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
         this.taskService.focusTaskIfPossible(this.task().id);
       });
     }
+  }
+
+  editCompleted(): void {
+    const dialogRef = this._matDialog.open(DialogSelectDateTimeComponent, {
+      data: {
+        dateTime: this.task().doneOn,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((doneOn) => {
+      if (typeof doneOn === 'number') {
+        this.taskService.update(this.task().id, { doneOn });
+      }
+    });
+  }
+
+  editCreated(): void {
+    const dialogRef = this._matDialog.open(DialogSelectDateTimeComponent, {
+      data: {
+        dateTime: this.task().created,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((created) => {
+      if (typeof created === 'number') {
+        this.taskService.update(this.task().id, { created });
+      }
+    });
   }
 
   onItemKeyPress(ev: KeyboardEvent): void {
