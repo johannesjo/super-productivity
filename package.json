@@ -150,7 +150,7 @@
     "@angular/cdk": "^20.2.10",
     "@angular/cli": "^20.3.7",
     "@angular/common": "^20.3.7",
-    "@angular/compiler": "^20.3.7",
+    "@angular/compiler": "^20.3.9",
     "@angular/compiler-cli": "^20.3.7",
     "@angular/core": "^20.3.7",
     "@angular/forms": "^20.3.7",
