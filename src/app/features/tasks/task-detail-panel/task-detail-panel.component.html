@@ -317,17 +317,44 @@
     </ng-container>
   </task-detail-item>
 
-  <div class="date-info">
-    <div>Created on {{ task().created | localeDate: 'short' }}</div>
-    @if (task().doneOn) {
-      <div>Completed on {{ task().doneOn | localeDate: 'short' }}</div>
-    }
-  </div>
-</div>
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (keyPress)="onItemKeyPress($event)"
+    (editActionTriggered)="editCreated()"
+    inputIcon="edit"
+    class="input-item"
+  >
+    <ng-container input-title>
+      <mat-icon>edit_calendar</mat-icon>
+      <span>Created</span>
+    </ng-container>
+    <ng-container input-value>
+      <div>{{ task().created | localeDate: 'short' }}</div>
+    </ng-container>
+  </task-detail-item>
 
-@if (panelState.isDragOver()) {
-  <div class="bgc-accent drag-over-msg">
-    <mat-icon>add</mat-icon>
-    {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: task().title } }}
-  </div>
-}
+  @if (task().doneOn) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (keyPress)="onItemKeyPress($event)"
+      (editActionTriggered)="editCompleted()"
+      inputIcon="edit"
+      class="input-item"
+    >
+      <ng-container input-title>
+        <mat-icon>edit_calendar</mat-icon>
+        <span>Completed</span>
+      </ng-container>
+      <ng-container input-value>
+        <div>{{ task().doneOn | localeDate: 'short' }}</div>
+      </ng-container>
+    </task-detail-item>
+  }
+
+  @if (panelState.isDragOver()) {
+    <div class="bgc-accent drag-over-msg">
+      <mat-icon>add</mat-icon>
+      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: task().title } }}
+    </div>
+  }
+</div>

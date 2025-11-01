@@ -1354,6 +1354,11 @@
         "TINE_SPENT": "Time Spent",
         "TITLE": "Add for Day"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "Date",
+        "TIME": "Time",
+        "TITLE": "Select Date and Time"
+      },
       "N": {
         "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
         "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
