@@ -1,5 +1,6 @@
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
+import { TaskReminderOptionId } from '../tasks/task.model';
 import { GlobalConfigState } from './global-config.model';
 
 const minute = 60 * 1000;
@@ -162,6 +163,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   reminder: {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,
+    defaultTaskRemindOption: TaskReminderOptionId.AtStart, // The hard-coded default prior to this changeable setting
   },
   schedule: {
     isWorkStartEndEnabled: true,

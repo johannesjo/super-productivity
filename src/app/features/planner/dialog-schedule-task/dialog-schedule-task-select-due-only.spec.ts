@@ -115,6 +115,7 @@ describe('DialogScheduleTaskComponent - Select Due Only Mode', () => {
       expect(dialogRefSpy.close).toHaveBeenCalledWith({
         date: testDate,
         time: testTime,
+        remindOption: TaskReminderOptionId.AtStart,
       });
       expect(taskServiceSpy.scheduleTask).not.toHaveBeenCalled();
     });
@@ -130,6 +131,7 @@ describe('DialogScheduleTaskComponent - Select Due Only Mode', () => {
       expect(dialogRefSpy.close).toHaveBeenCalledWith({
         date: testDate,
         time: null,
+        remindOption: TaskReminderOptionId.AtStart,
       });
     });
 

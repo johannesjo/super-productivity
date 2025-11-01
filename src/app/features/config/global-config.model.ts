@@ -4,6 +4,7 @@ import { LanguageCode } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { KeyboardConfig } from './keyboard-config.model';
+import { TaskReminderOptionId } from '../tasks/task.model';
 
 export type MiscConfig = Readonly<{
   isAutMarkParentAsDone: boolean;
@@ -151,6 +152,7 @@ export type ScheduleConfig = Readonly<{
 export type ReminderConfig = Readonly<{
   isCountdownBannerEnabled: boolean;
   countdownDuration: number;
+  defaultTaskRemindOption: TaskReminderOptionId;
 }>;
 
 export type TrackingReminderConfigOld = Readonly<{
