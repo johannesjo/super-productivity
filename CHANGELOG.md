@@ -1,3 +1,13 @@
+## [16.2.1](https://github.com/johannesjo/super-productivity/compare/v16.2.0...v16.2.1) (2025-11-01)
+
+### Bug Fixes
+
+- handle web view compatability check in android rather than in index.html ([4d9d0d1](https://github.com/johannesjo/super-productivity/commit/4d9d0d1d2a9242d1fd46248ad3e17394089472b2))
+
+### Features
+
+- improve webview fallback experience ([a9828ed](https://github.com/johannesjo/super-productivity/commit/a9828ed5da5497f85e112d5c67f80a70441ffd53))
+
 # [16.2.0](https://github.com/johannesjo/super-productivity/compare/v16.1.0...v16.2.0) (2025-10-31)
 
 ### Bug Fixes
