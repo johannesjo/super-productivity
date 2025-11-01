@@ -1,0 +1,404 @@
+import { inject, Injectable, Injector, signal } from '@angular/core';
+import { DEFAULT_PROFILE_ID, ProfileMetadata, UserProfile } from './user-profile.model';
+import { UserProfileStorageService } from './user-profile-storage.service';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { Log } from '../../core/log';
+import { nanoid } from 'nanoid';
+import { SnackService } from '../../core/snack/snack.service';
+
+/**
+ * Core service for user profile management
+ * Handles profile CRUD operations and switching
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class UserProfileService {
+  private readonly _storageService = inject(UserProfileStorageService);
+  private readonly _pfapiService = inject(PfapiService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _injector = inject(Injector);
+
+  // Current profile metadata
+  private readonly _metadata = signal<ProfileMetadata | null>(null);
+  readonly metadata = this._metadata.asReadonly();
+
+  // Currently active profile
+  readonly activeProfile = signal<UserProfile | null>(null);
+
+  // All available profiles
+  readonly profiles = signal<UserProfile[]>([]);
+
+  /**
+   * Initialize the profile system
+   * Called during app startup
+   */
+  async initialize(): Promise<void> {
+    Log.log('UserProfileService: Initializing profile system');
+
+    try {
+      // Load existing profile metadata
+      let metadata = await this._storageService.loadProfileMetadata();
+
+      // If no metadata exists, check if there's existing user data
+      if (!metadata) {
+        Log.log('UserProfileService: No profile metadata found, migrating existing data');
+        metadata = await this._migrateExistingDataToDefaultProfile();
+      }
+      // NOTE: We do NOT load profile data here!
+      // Profile data is only loaded when switching between profiles.
+      // On normal startup, the app loads from its regular database.
+      // The profile storage is just a backup copy for switching.
+
+      // Set metadata and update signals
+      this._metadata.set(metadata);
+      this.profiles.set(metadata.profiles);
+
+      // Set active profile
+      const activeProfile = metadata.profiles.find(
+        (p) => p.id === metadata.activeProfileId,
+      );
+      if (activeProfile) {
+        this.activeProfile.set(activeProfile);
+        Log.log(
+          `UserProfileService: Active profile set to "${activeProfile.name}" (${activeProfile.id})`,
+        );
+      } else {
+        Log.warn(
+          'UserProfileService: Active profile not found in metadata, using first profile',
+        );
+        this.activeProfile.set(metadata.profiles[0]);
+      }
+    } catch (error) {
+      Log.err('UserProfileService: Failed to initialize', error);
+      // Don't throw - create a default profile and continue
+      const defaultMetadata = this._storageService.createDefaultProfileMetadata();
+      this._metadata.set(defaultMetadata);
+      this.profiles.set(defaultMetadata.profiles);
+      this.activeProfile.set(defaultMetadata.profiles[0]);
+    }
+  }
+
+  /**
+   * Create a new profile
+   */
+  async createProfile(name: string): Promise<UserProfile> {
+    const metadata = this._metadata();
+    if (!metadata) {
+      throw new Error('Profile system not initialized');
+    }
+
+    // Validate name
+    if (!name || name.trim().length === 0) {
+      throw new Error('Profile name cannot be empty');
+    }
+
+    // Check for duplicate names
+    if (metadata.profiles.some((p) => p.name === name)) {
+      throw new Error('A profile with this name already exists');
+    }
+
+    const newProfile: UserProfile = {
+      id: nanoid(),
+      name: name.trim(),
+      createdAt: Date.now(),
+      lastUsedAt: Date.now(),
+    };
+
+    // Add to metadata
+    const updatedProfiles = [...metadata.profiles, newProfile];
+    const updatedMetadata: ProfileMetadata = {
+      ...metadata,
+      profiles: updatedProfiles,
+    };
+
+    // Save metadata
+    await this._storageService.saveProfileMetadata(updatedMetadata);
+
+    // Create empty profile data (will be populated on first switch)
+    // We don't create profile data here to avoid saving an empty state
+
+    // Update signals
+    this._metadata.set(updatedMetadata);
+    this.profiles.set(updatedProfiles);
+
+    Log.log(`UserProfileService: Created new profile "${name}" (${newProfile.id})`);
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: `Profile "${name}" created successfully`,
+    });
+
+    return newProfile;
+  }
+
+  /**
+   * Rename an existing profile
+   */
+  async renameProfile(profileId: string, newName: string): Promise<void> {
+    const metadata = this._metadata();
+    if (!metadata) {
+      throw new Error('Profile system not initialized');
+    }
+
+    // Validate name
+    if (!newName || newName.trim().length === 0) {
+      throw new Error('Profile name cannot be empty');
+    }
+
+    // Check for duplicate names (excluding current profile)
+    if (metadata.profiles.some((p) => p.id !== profileId && p.name === newName.trim())) {
+      throw new Error('A profile with this name already exists');
+    }
+
+    // Find and update profile
+    const updatedProfiles = metadata.profiles.map((p) =>
+      p.id === profileId ? { ...p, name: newName.trim() } : p,
+    );
+
+    const updatedMetadata: ProfileMetadata = {
+      ...metadata,
+      profiles: updatedProfiles,
+    };
+
+    // Save metadata
+    await this._storageService.saveProfileMetadata(updatedMetadata);
+
+    // Update signals
+    this._metadata.set(updatedMetadata);
+    this.profiles.set(updatedProfiles);
+
+    // Update active profile if it's the one being renamed
+    if (this.activeProfile()?.id === profileId) {
+      const updated = updatedProfiles.find((p) => p.id === profileId);
+      if (updated) {
+        this.activeProfile.set(updated);
+      }
+    }
+
+    Log.log(`UserProfileService: Renamed profile ${profileId} to "${newName}"`);
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: `Profile renamed to "${newName}"`,
+    });
+  }
+
+  /**
+   * Delete a profile
+   */
+  async deleteProfile(profileId: string): Promise<void> {
+    const metadata = this._metadata();
+    if (!metadata) {
+      throw new Error('Profile system not initialized');
+    }
+
+    // Prevent deleting the last profile
+    if (metadata.profiles.length === 1) {
+      throw new Error('Cannot delete the last profile');
+    }
+
+    // Prevent deleting the active profile
+    if (metadata.activeProfileId === profileId) {
+      throw new Error(
+        'Cannot delete the active profile. Switch to another profile first.',
+      );
+    }
+
+    // Remove profile from metadata
+    const updatedProfiles = metadata.profiles.filter((p) => p.id !== profileId);
+    const updatedMetadata: ProfileMetadata = {
+      ...metadata,
+      profiles: updatedProfiles,
+    };
+
+    // Delete profile data
+    await this._storageService.deleteProfileData(profileId);
+
+    // Save updated metadata
+    await this._storageService.saveProfileMetadata(updatedMetadata);
+
+    // Update signals
+    this._metadata.set(updatedMetadata);
+    this.profiles.set(updatedProfiles);
+
+    Log.log(`UserProfileService: Deleted profile ${profileId}`);
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: 'Profile deleted successfully',
+    });
+  }
+
+  /**
+   * Switch to a different profile
+   * This will:
+   * 1. Trigger sync for current profile
+   * 2. Save current profile data
+   * 3. Load target profile data
+   * 4. Reload the application
+   */
+  async switchProfile(targetProfileId: string): Promise<void> {
+    const metadata = this._metadata();
+    if (!metadata) {
+      throw new Error('Profile system not initialized');
+    }
+
+    const currentProfile = this.activeProfile();
+    if (!currentProfile) {
+      throw new Error('No active profile');
+    }
+
+    // Check if trying to switch to same profile
+    if (currentProfile.id === targetProfileId) {
+      Log.log('UserProfileService: Already on target profile, no switch needed');
+      return;
+    }
+
+    const targetProfile = metadata.profiles.find((p) => p.id === targetProfileId);
+    if (!targetProfile) {
+      throw new Error('Target profile not found');
+    }
+
+    Log.log(
+      `UserProfileService: Switching from "${currentProfile.name}" to "${targetProfile.name}"`,
+    );
+
+    try {
+      // Step 1: Trigger sync for current profile using pfapi directly
+      Log.log('UserProfileService: Triggering sync before profile switch');
+      try {
+        const syncProvider = this._pfapiService.pf.getActiveSyncProvider();
+        if (syncProvider) {
+          await this._pfapiService.pf.sync();
+          Log.log('UserProfileService: Sync completed successfully');
+        } else {
+          Log.log('UserProfileService: No active sync provider, skipping sync');
+        }
+      } catch (syncError) {
+        Log.warn(
+          'UserProfileService: Sync failed, continuing with profile switch',
+          syncError,
+        );
+        // Continue with profile switch even if sync fails
+      }
+
+      // Step 2: Save current profile data
+      Log.log('UserProfileService: Saving current profile data');
+      const currentData = await this._pfapiService.pf.loadCompleteBackup();
+      await this._storageService.saveProfileData(currentProfile.id, currentData);
+
+      // Step 3: Load target profile data
+      Log.log('UserProfileService: Loading target profile data');
+      const targetData = await this._storageService.loadProfileData(targetProfileId);
+
+      // If target profile has no data (newly created), use empty state
+      if (!targetData) {
+        Log.log('UserProfileService: Target profile has no data, will use empty state');
+        // The app will initialize with default empty state
+      }
+
+      // Step 4: Update metadata with new active profile
+      const updatedMetadata: ProfileMetadata = {
+        ...metadata,
+        activeProfileId: targetProfileId,
+        profiles: metadata.profiles.map((p) =>
+          p.id === targetProfileId ? { ...p, lastUsedAt: Date.now() } : p,
+        ),
+      };
+      await this._storageService.saveProfileMetadata(updatedMetadata);
+
+      // Step 5: Import target profile data if it exists
+      if (targetData) {
+        Log.log('UserProfileService: Importing target profile data');
+        await this._pfapiService.importCompleteBackup(targetData);
+      }
+
+      // Step 6: Update signals
+      this._metadata.set(updatedMetadata);
+      this.profiles.set(updatedMetadata.profiles);
+      this.activeProfile.set(targetProfile);
+
+      // Step 7: Reload the application
+      Log.log('UserProfileService: Reloading application');
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: `Switched to profile "${targetProfile.name}"`,
+      });
+
+      // Give the snackbar time to show
+      setTimeout(() => {
+        window.location.reload();
+      }, 500);
+    } catch (error) {
+      Log.err('UserProfileService: Failed to switch profile', error);
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Failed to switch profile. Please try again.',
+      });
+      throw error;
+    }
+  }
+
+  /**
+   * Export a profile as JSON file
+   */
+  async exportProfile(profileId: string): Promise<void> {
+    const profile = this.profiles().find((p) => p.id === profileId);
+    if (!profile) {
+      throw new Error('Profile not found');
+    }
+
+    // Load profile data
+    const data = await this._storageService.loadProfileData(profileId);
+    if (!data) {
+      throw new Error('Profile data not found');
+    }
+
+    // Download as JSON
+    const { download } = await import('../../util/download');
+    const filename = `profile-${profile.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
+    await download(filename, JSON.stringify(data));
+
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: `Profile "${profile.name}" exported successfully`,
+    });
+  }
+
+  /**
+   * Migrate existing user data to default profile
+   * Called when no profile metadata exists but user has data
+   */
+  private async _migrateExistingDataToDefaultProfile(): Promise<ProfileMetadata> {
+    Log.log('UserProfileService: Migrating existing data to default profile');
+
+    // Create default metadata
+    const metadata = this._storageService.createDefaultProfileMetadata();
+
+    // Check if there's existing user data in the database
+    try {
+      const existingData = await this._pfapiService.pf.loadCompleteBackup();
+
+      // Only save if there's actual data (check if any model has data)
+      const hasData = existingData && Object.keys(existingData.data || {}).length > 0;
+
+      if (hasData) {
+        Log.log('UserProfileService: Found existing data, saving to default profile');
+        await this._storageService.saveProfileData(DEFAULT_PROFILE_ID, existingData);
+      } else {
+        Log.log(
+          'UserProfileService: No existing data found, creating empty default profile',
+        );
+      }
+    } catch (error) {
+      Log.warn(
+        'UserProfileService: Could not load existing data during migration',
+        error,
+      );
+      // Continue with empty default profile
+    }
+
+    // Save metadata
+    await this._storageService.saveProfileMetadata(metadata);
+
+    return metadata;
+  }
+}

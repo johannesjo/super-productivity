@@ -44,6 +44,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
 
 @Component({
   selector: 'main-header',
@@ -65,6 +66,7 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
     MsToMinuteClockStringPipe,
+    UserProfileButtonComponent,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {

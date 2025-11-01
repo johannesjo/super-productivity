@@ -1,0 +1,139 @@
+<h2 mat-dialog-title>Manage User Profiles</h2>
+
+<mat-dialog-content>
+  <div class="profile-info">
+    <p>
+      User profiles allow you to maintain separate instances of Super Productivity with
+      different settings, tasks, and sync configurations.
+    </p>
+  </div>
+
+  <!-- Create New Profile -->
+  <div class="create-profile-section">
+    <h3>Create New Profile</h3>
+    <div class="create-profile-form">
+      <mat-form-field class="profile-name-input">
+        <mat-label>Profile Name</mat-label>
+        <input
+          matInput
+          [(ngModel)]="newProfileName"
+          (keydown.enter)="createProfile()"
+          placeholder="e.g., Work, Personal"
+        />
+      </mat-form-field>
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="createProfile()"
+        [disabled]="!newProfileName() || isCreating()"
+      >
+        <mat-icon>add</mat-icon>
+        Create
+      </button>
+    </div>
+  </div>
+
+  <!-- Existing Profiles -->
+  <div class="profiles-list-section">
+    <h3>Existing Profiles</h3>
+    <div class="profiles-list">
+      @for (profile of profileService.profiles(); track profile.id) {
+        <div
+          class="profile-item"
+          [class.active-profile]="profile.id === profileService.activeProfile()?.id"
+        >
+          @if (editingProfileId() === profile.id) {
+            <!-- Edit Mode -->
+            <mat-form-field class="profile-name-edit">
+              <input
+                matInput
+                [(ngModel)]="editingProfileName"
+                (keydown.enter)="saveEdit(profile.id)"
+                (keydown.escape)="cancelEdit()"
+              />
+            </mat-form-field>
+            <div class="profile-actions">
+              <button
+                mat-icon-button
+                (click)="saveEdit(profile.id)"
+                matTooltip="Save"
+              >
+                <mat-icon>check</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="cancelEdit()"
+                matTooltip="Cancel"
+              >
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
+          } @else {
+            <!-- View Mode -->
+            <div class="profile-info-section">
+              <div class="profile-name">
+                <strong>{{ profile.name }}</strong>
+                @if (profile.id === profileService.activeProfile()?.id) {
+                  <span class="active-badge">Active</span>
+                }
+              </div>
+              <div class="profile-meta">
+                Created: {{ profile.createdAt | date: 'medium' }}
+              </div>
+            </div>
+            <div class="profile-actions">
+              <button
+                mat-icon-button
+                (click)="startEdit(profile)"
+                matTooltip="Rename"
+                [disabled]="profileService.profiles().length === 1"
+              >
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="exportProfile(profile)"
+                matTooltip="Export Profile"
+              >
+                <mat-icon>download</mat-icon>
+              </button>
+              <button
+                mat-icon-button
+                (click)="deleteProfile(profile)"
+                matTooltip="Delete Profile"
+                [disabled]="
+                  profile.id === profileService.activeProfile()?.id ||
+                  profileService.profiles().length === 1
+                "
+                color="warn"
+              >
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  @if (isElectron) {
+    <div class="profile-folder-section">
+      <button
+        mat-stroked-button
+        (click)="openProfileFolder()"
+      >
+        <mat-icon>folder_open</mat-icon>
+        Open Profiles Folder
+      </button>
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    (click)="close()"
+  >
+    Close
+  </button>
+</mat-dialog-actions>
