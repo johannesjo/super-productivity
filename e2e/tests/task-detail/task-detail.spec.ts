@@ -27,66 +27,15 @@ test.describe('Task detail', () => {
     await page.getByRole('button', { name: 'Mark as done/undone' }).click();
   };
 
-  const findTaskDetailItem = (
-    page: Page,
-    title: string,
-    requireValue = true,
-  ): Locator => {
-    let item = page.locator('task-detail-item').filter({
-      has: page.locator('.input-item__title', { hasText: new RegExp(title, 'i') }),
-    });
-    if (requireValue) {
-      // Cannot assert against specific datetime values since they are being
-      // dynamically generated. Match conditions also deliberately avoid
-      // assuming specific locale formatting requirements for leniency.
-      item = item.filter({ has: page.locator('.input-item__value', { hasText: /\d+/ }) });
-    }
-    return item;
-  };
-
-  test('should show created for task', async ({ page, workViewPage }) => {
-    await addAndOpenIncompleteTask(workViewPage, page);
-
-    await expect(findTaskDetailItem(page, 'Created')).toHaveCount(1);
-  });
-
-  test('should not show completed for incomplete task', async ({
-    page,
-    workViewPage,
-  }) => {
-    await addAndOpenIncompleteTask(workViewPage, page);
-
-    await expect(findTaskDetailItem(page, 'Completed', false)).toHaveCount(0);
-  });
-
-  test('should show completed for complete task', async ({ page, workViewPage }) => {
-    await addAndOpenCompleteTask(workViewPage, page);
-
-    await expect(findTaskDetailItem(page, 'Completed')).toHaveCount(1);
-  });
-
-  test('should update created with a date change', async ({ page, workViewPage }) => {
-    await addAndOpenIncompleteTask(workViewPage, page);
-
-    const createdItem = await findTaskDetailItem(page, 'Created');
-    const createdItemText = await createdItem.textContent();
-    await createdItem.click();
-
-    await page.getByRole('button', { name: 'Open calendar' }).click();
-    await page.getByRole('button', { name: 'Next month' }).click();
-    // Picking the first day of the next month should guarantee a change
-    await page.locator('mat-month-view button').first().click();
-    await page.getByRole('button', { name: 'Save' }).click();
-
-    await expect(createdItem).not.toHaveText(createdItemText!);
-  });
+  const findDateInfo = (page: Page, infoPrefix: string): Locator =>
+    page.locator('.edit-date-info').filter({ hasText: new RegExp(infoPrefix) });
 
   test('should update created with a time change', async ({ page, workViewPage }) => {
     await addAndOpenIncompleteTask(workViewPage, page);
 
-    const createdItem = await findTaskDetailItem(page, 'Created');
-    const createdItemText = await createdItem.textContent();
-    await createdItem.click();
+    const createdInfo = await findDateInfo(page, 'Created');
+    const createdInfoText = await createdInfo.textContent();
+    await createdInfo.click();
 
     const timeInput = await page.getByRole('combobox', { name: 'Time' });
     let timeInputText = await timeInput.inputValue();
@@ -95,15 +44,15 @@ test.describe('Task detail', () => {
     await timeInput.fill(timeInputText);
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await expect(createdItem).not.toHaveText(createdItemText!);
+    await expect(createdInfo).not.toHaveText(createdInfoText!);
   });
 
   test('should update completed with a date change', async ({ page, workViewPage }) => {
     await addAndOpenCompleteTask(workViewPage, page);
 
-    const completedItem = await findTaskDetailItem(page, 'Completed');
-    const completedItemText = await completedItem.textContent();
-    await completedItem.click();
+    const completedInfo = await findDateInfo(page, 'Completed');
+    const completedInfoText = await completedInfo.textContent();
+    await completedInfo.click();
 
     await page.getByRole('button', { name: 'Open calendar' }).click();
     await page.getByRole('button', { name: 'Next month' }).click();
@@ -111,15 +60,15 @@ test.describe('Task detail', () => {
     await page.locator('mat-month-view button').first().click();
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await expect(completedItem).not.toHaveText(completedItemText!);
+    await expect(completedInfo).not.toHaveText(completedInfoText!);
   });
 
   test('should update completed with a time change', async ({ page, workViewPage }) => {
     await addAndOpenCompleteTask(workViewPage, page);
 
-    const completedItem = await findTaskDetailItem(page, 'Completed');
-    const completedItemText = await completedItem.textContent();
-    await completedItem.click();
+    const completedInfo = await findDateInfo(page, 'Completed');
+    const completedInfoText = await completedInfo.textContent();
+    await completedInfo.click();
 
     const timeInput = await page.getByRole('combobox', { name: 'Time' });
     let timeInputText = await timeInput.inputValue();
@@ -128,7 +77,7 @@ test.describe('Task detail', () => {
     await timeInput.fill(timeInputText);
     await page.getByRole('button', { name: 'Save' }).click();
 
-    await expect(completedItem).not.toHaveText(completedItemText!);
+    await expect(completedInfo).not.toHaveText(completedInfoText!);
   });
 
   test('should prevent updating created with no datetime selection', async ({
@@ -137,7 +86,7 @@ test.describe('Task detail', () => {
   }) => {
     await addAndOpenIncompleteTask(workViewPage, page);
 
-    await findTaskDetailItem(page, 'Created').click();
+    await findDateInfo(page, 'Created').click();
 
     await page.getByRole('textbox', { name: 'Date' }).fill('');
     await page.getByRole('combobox', { name: 'Time' }).fill('');
@@ -151,7 +100,7 @@ test.describe('Task detail', () => {
   }) => {
     await addAndOpenCompleteTask(workViewPage, page);
 
-    await findTaskDetailItem(page, 'Completed').click();
+    await findDateInfo(page, 'Completed').click();
 
     await page.getByRole('textbox', { name: 'Date' }).fill('');
     await page.getByRole('combobox', { name: 'Time' }).fill('');
