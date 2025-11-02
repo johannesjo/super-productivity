@@ -92,6 +92,7 @@ import { INBOX_PROJECT } from '../project/project.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
 import { devError } from '../../util/dev-error';
+import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 
 @Injectable({
   providedIn: 'root',
@@ -308,11 +309,17 @@ export class TaskService {
     title: string | null,
     additional: Partial<Task> = {},
     due: number,
-    remindCfg: TaskReminderOptionId = TaskReminderOptionId.AtStart,
+    remindCfg?: TaskReminderOptionId,
   ): Promise<string> {
     const id = this.add(title, undefined, additional, undefined);
     const task = await this.getByIdOnce$(id).toPromise();
-    this.scheduleTask(task, due, remindCfg);
+    this.scheduleTask(
+      task,
+      due,
+      remindCfg ??
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+        DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
+    );
     return id;
   }
 

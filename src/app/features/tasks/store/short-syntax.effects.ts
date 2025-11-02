@@ -13,7 +13,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { TaskReminderOptionId } from '../task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
@@ -161,7 +160,8 @@ export class ShortSyntaxEffects {
               dueWithTime: dueWithTime,
               remindAt: remindOptionToMilliseconds(
                 dueWithTime,
-                TaskReminderOptionId.AtStart,
+                this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+                  DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
               ),
               isMoveToBacklog: false,
             });

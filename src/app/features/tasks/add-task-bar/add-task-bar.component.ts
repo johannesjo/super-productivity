@@ -25,7 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { TaskCopy, TaskReminderOptionId } from '../task.model';
+import { TaskCopy } from '../task.model';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -71,6 +71,7 @@ import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { Log } from '../../../core/log';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { BodyClass } from '../../../app.constants';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 @Component({
   selector: 'add-task-bar',
@@ -475,7 +476,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this._taskService.scheduleTask(
             task,
             taskData.dueWithTime!,
-            state.remindOption ?? TaskReminderOptionId.DoNotRemind,
+            state.remindOption ??
+              this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+              DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
             this.isAddToBacklog(),
           );
         });

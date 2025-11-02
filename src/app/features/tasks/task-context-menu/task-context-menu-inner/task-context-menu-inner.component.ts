@@ -19,7 +19,7 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { Task, TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskCopy, TaskWithSubTasks } from '../../task.model';
 import { EMPTY, forkJoin, from, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
@@ -74,6 +74,7 @@ import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 import { TaskLog } from '../../../../core/log';
 import { isTouchEventInstance } from '../../../../util/is-touch-event.util';
 import { TaskFocusService } from '../../task-focus.service';
+import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -624,7 +625,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
-        TaskReminderOptionId.AtStart,
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+          DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
         false,
       );
     } else {

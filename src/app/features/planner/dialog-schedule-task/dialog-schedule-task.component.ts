@@ -54,6 +54,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatInput } from '@angular/material/input';
 import { Log } from '../../../core/log';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 const DEFAULT_TIME = '09:00';
 
@@ -122,9 +123,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _defaultTaskRemindCfgId = computed(
     () =>
       (this._globalConfigService.cfg()?.reminder
-        ?.defaultTaskRemindOption as TaskReminderOptionId) ||
-      // Fallback is a hard-coded default carryover from within this component
-      TaskReminderOptionId.AtStart,
+        ?.defaultTaskRemindOption as TaskReminderOptionId) ??
+      DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
   );
 
   async ngAfterViewInit(): Promise<void> {
