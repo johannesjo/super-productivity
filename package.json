@@ -16,18 +16,13 @@
   },
   "license": "MIT",
   "author": "Johannes Millan <contact@super-productivity.com> (http://super-productivity.com)",
-  "husky": {
-    "hooks": {
-      "pre-commit": "pretty-quick --staged && npm run lint",
-      "pre-push": "npm run lint && npm run test"
-    }
-  },
   "main": "./electron/main.js",
   "scripts": {
     "env": "node ./tools/load-env.js",
     "assemble:android:prod": "cd android && ./gradlew assembleRelease && cd ..",
     "assemble:android:stage": "cd android && ./gradlew assembleDebug && cd ..",
     "prebuild": "npm run env && node ./tools/git-version.js && npm run build:packages",
+    "prepare": "husky && ts-patch install && npm run plugin-api:build",
     "build": "npm run buildAllElectron:noTests:prod",
     "build:packages": "node ./packages/build-packages.js",
     "buildAllElectron:noTests:prod": "npm run lint && npm run buildFrontend:prod:es6 && npm run electron:build",
@@ -108,7 +103,6 @@
     "test:date-utils": "cross-env TZ='Europe/Berlin' ng test --watch=false --include='src/app/util/**/format-*.spec.ts' --include='src/app/util/**/date-*.spec.ts'",
     "test:date-utils:tz": "npm run test:date-utils && cross-env TZ='America/Los_Angeles' npm run test:date-utils && cross-env TZ='Asia/Tokyo' npm run test:date-utils",
     "version": "npm run prebuild && npm run release.changelog && node ./tools/bump-android-version.js && git add -A",
-    "prepare": "ts-patch install && npm run plugin-api:build",
     "prettier": "pretty-quick",
     "prettier:file": "prettier --write",
     "lint:file": "ng lint --lint-file-patterns",
@@ -219,7 +213,7 @@
     "fflate": "^0.8.2",
     "file-saver": "^2.0.5",
     "glob": "^9.3.5",
-    "husky": "^4.2.5",
+    "husky": "^9.1.7",
     "ical.js": "^2.1.0",
     "idb": "^8.0.3",
     "jasmine-core": "^5.10.0",
