@@ -1,39 +1,33 @@
 import {
-  Component,
-  Input,
-  ViewChild,
-  ElementRef,
-  OnInit,
-  OnDestroy,
-  OnChanges,
-  SimpleChanges,
-  inject,
-  ChangeDetectorRef,
-  Output,
-  EventEmitter,
   ChangeDetectionStrategy,
-  signal,
+  Component,
+  DestroyRef,
+  ElementRef,
+  EventEmitter,
   computed,
   effect,
-  EffectRef,
+  inject,
+  input,
+  signal,
+  viewChild,
 } from '@angular/core';
 import type {
-  ChartType,
-  ChartData,
-  ChartOptions,
   ActiveElement,
-  ChartEvent,
   Chart as ChartJS,
   ChartConfiguration,
+  ChartData,
   ChartDataset,
+  ChartEvent,
+  ChartOptions,
+  ChartType,
   DefaultDataPoint,
 } from 'chart.js';
-import { ChartLazyLoaderService } from '../chart-lazy-loader.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatRadioGroup, MatRadioButton, MatRadioChange } from '@angular/material/radio';
+import { MatRadioButton, MatRadioChange, MatRadioGroup } from '@angular/material/radio';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ChartLazyLoaderService } from '../chart-lazy-loader.service';
 import { ShareService } from '../../../core/share/share.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
@@ -83,48 +77,41 @@ const TIMEFRAME_OPTIONS: ReadonlyArray<TimeframeOption> = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
-  @Input({ required: true }) type!: ChartType;
-  @Input() datasets: ChartData['datasets'] = [];
-  @Input() labels?: ChartData['labels'];
-  @Input() options?: ChartOptions;
-  @Input() legend = true;
-  @Input() height = '400px';
-  @Input() shareFileName = 'chart.png';
-  @Input() enableTimeframeSelector = false;
-
-  @Output() chartClick = new EventEmitter<ChartClickEvent>();
-
-  @ViewChild('canvas', { static: false })
-  canvasRef?: ElementRef<HTMLCanvasElement>;
+export class LazyChartComponent {
   private readonly chartLoaderService = inject(ChartLazyLoaderService);
-  private readonly cdr = inject(ChangeDetectorRef);
   private readonly shareService = inject(ShareService);
   private readonly snackService = inject(SnackService);
+  private readonly destroyRef = inject(DestroyRef);
 
-  isLoaded = false;
-  isSharing = false;
-  private chartInstance?: ChartJS;
+  readonly type = input.required<ChartType>();
+  readonly datasets = input<ChartData['datasets']>([]);
+  readonly labels = input<ChartData['labels'] | undefined>(undefined);
+  readonly options = input<ChartOptions | undefined>(undefined);
+  readonly legend = input(true);
+  readonly height = input('400px');
+  readonly shareFileName = input('chart.png');
+  readonly enableTimeframeSelector = input(false);
+
+  readonly chartClick = new EventEmitter<ChartClickEvent>();
+
+  private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
+
+  readonly isModuleLoaded = signal(false);
+  readonly isSharing = signal(false);
   readonly timeframeOptions = TIMEFRAME_OPTIONS;
-  private readonly datasetsSignal = signal<ChartData['datasets']>([]);
-  private readonly labelsSignal = signal<ChartData['labels'] | undefined>(undefined);
-  private readonly optionsSignal = signal<ChartOptions | undefined>(undefined);
-  private readonly legendSignal = signal(true);
-  private readonly enableSelectorSignal = signal(false);
-  readonly selectedTimeframe = signal<LazyChartTimeframe>('twoWeeks');
+
+  readonly selectedTimeframe = signal<LazyChartTimeframe>('max');
   private readonly activeTimeframe = computed<LazyChartTimeframe>(() =>
-    this.enableSelectorSignal() ? this.selectedTimeframe() : 'max',
+    this.enableTimeframeSelector() ? this.selectedTimeframe() : 'max',
   );
+
   private readonly filteredChartData = computed<ChartData<ChartType>>(() =>
-    this.buildFilteredChartData(
-      this.labelsSignal(),
-      this.datasetsSignal(),
-      this.activeTimeframe(),
-    ),
+    this.buildFilteredChartData(this.labels(), this.datasets(), this.activeTimeframe()),
   );
+
   private readonly resolvedChartOptions = computed<ChartOptions>(() => {
-    const baseOptions = this.optionsSignal();
-    const legendDisplay = this.legendSignal();
+    const baseOptions = this.options();
+    const legendDisplay = this.legend();
     return {
       responsive: true,
       maintainAspectRatio: false,
@@ -138,109 +125,55 @@ export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
       },
     };
   });
+
   private readonly chartOptionsWithHandlers = computed<ChartOptions>(() =>
-    this.buildChartOptions(this.resolvedChartOptions(), this.optionsSignal()),
+    this.buildChartOptions(this.resolvedChartOptions(), this.options()),
   );
-  private readonly chartUpdateEffectRef: EffectRef;
+
+  private chartInstance: ChartJS | null = null;
+
+  private readonly chartUpdateEffect = effect(() => {
+    const isLoaded = this.isModuleLoaded();
+    const canvas = this.canvasRef();
+
+    if (!isLoaded || !canvas) {
+      return;
+    }
+
+    if (!this.chartInstance) {
+      this.initChart(canvas);
+      return;
+    }
+
+    const data = this.filteredChartData();
+    const options = this.chartOptionsWithHandlers();
+    this.applyChartUpdate(data, options);
+  });
+
+  private readonly selectorEnabledState = signal(false);
 
   constructor() {
-    this.chartUpdateEffectRef = effect(() => {
-      const data = this.filteredChartData();
-      const options = this.chartOptionsWithHandlers();
-      if (!this.chartInstance) {
-        return;
-      }
-      this.applyChartUpdate(data, options);
+    effect(
+      () => {
+        const isEnabled = this.enableTimeframeSelector();
+        const wasEnabled = this.selectorEnabledState();
+        if (isEnabled && !wasEnabled && this.selectedTimeframe() === 'max') {
+          this.selectedTimeframe.set('twoWeeks');
+        } else if (!isEnabled && wasEnabled && this.selectedTimeframe() !== 'max') {
+          this.selectedTimeframe.set('max');
+        }
+        this.selectorEnabledState.set(isEnabled);
+      },
+      { allowSignalWrites: true },
+    );
+
+    void this.loadChartModule();
+
+    this.destroyRef.onDestroy(() => {
+      this.chartUpdateEffect.destroy();
+      this.chartInstance?.destroy();
+      this.chartInstance = null;
     });
-  }
-
-  async ngOnInit(): Promise<void> {
-    this.datasetsSignal.set(this.datasets ?? []);
-    this.labelsSignal.set(this.labels);
-    this.optionsSignal.set(this.options);
-    this.legendSignal.set(this.legend);
-    const selectorEnabled = !!this.enableTimeframeSelector;
-    this.enableSelectorSignal.set(selectorEnabled);
-    this.selectedTimeframe.set(selectorEnabled ? 'twoWeeks' : 'max');
-
-    try {
-      await this.chartLoaderService.loadChartModule();
-      this.isLoaded = true;
-      this.cdr.markForCheck();
-
-      // Wait for next tick to ensure canvas is rendered
-      await this.waitForNextTick();
-      await this.initChart();
-    } catch (error) {
-      console.error('Failed to load chart module:', error);
-    }
-  }
-
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['datasets']) {
-      this.datasetsSignal.set(this.datasets ?? []);
-    }
-    if (changes['labels']) {
-      this.labelsSignal.set(this.labels);
-    }
-    if (changes['options']) {
-      this.optionsSignal.set(this.options);
-    }
-    if (changes['legend']) {
-      this.legendSignal.set(this.legend);
-    }
-    if (changes['enableTimeframeSelector']) {
-      const enabledNow = !!this.enableTimeframeSelector;
-      const wasEnabled = this.enableSelectorSignal();
-      this.enableSelectorSignal.set(enabledNow);
-      if (!wasEnabled && enabledNow) {
-        this.selectedTimeframe.set('twoWeeks');
-      } else if (wasEnabled && !enabledNow) {
-        this.selectedTimeframe.set('max');
-      }
-    }
-  }
-
-  private async waitForNextTick(): Promise<void> {
-    return new Promise((resolve) => setTimeout(resolve, 0));
-  }
-
-  private async initChart(): Promise<void> {
-    if (!this.canvasRef?.nativeElement) {
-      console.warn('Canvas element not available');
-      return;
-    }
-
-    const chartModule = this.chartLoaderService.getChartModule();
-    if (!chartModule) {
-      console.error('Chart module not loaded');
-      return;
-    }
-
-    const { Chart } = chartModule;
-
-    const chartOptions = this.chartOptionsWithHandlers();
-    const filteredData = this.filteredChartData();
-
-    const chartConfig: ChartConfiguration = {
-      type: this.type,
-      data: filteredData,
-      options: chartOptions,
-    };
-
-    try {
-      this.chartInstance = new Chart(this.canvasRef.nativeElement, chartConfig);
-    } catch (error) {
-      console.error('Failed to initialize chart:', error);
-    }
-  }
-
-  ngOnDestroy(): void {
-    this.chartUpdateEffectRef.destroy();
-    if (this.chartInstance) {
-      this.chartInstance.destroy();
-      this.chartInstance = undefined;
-    }
   }
 
   onTimeframeChange(timeframe: LazyChartTimeframe): void {
@@ -248,7 +181,6 @@ export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
       return;
     }
     this.selectedTimeframe.set(timeframe);
-    this.cdr.markForCheck();
   }
 
   onTimeframeRadioChange(event: MatRadioChange): void {
@@ -261,18 +193,18 @@ export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
   }
 
   async shareChart(): Promise<void> {
-    if (!this.chartInstance?.canvas) {
+    if (!this.chartInstance?.canvas || this.isSharing()) {
       return;
     }
 
-    this.isSharing = true;
-    this.cdr.markForCheck();
+    this.isSharing.set(true);
 
     try {
+      const shareFile = this.shareFileName();
       const result = await this.shareService.shareCanvasImage({
         canvas: this.chartInstance.canvas,
-        filename: this.shareFileName,
-        shareTitle: this.shareFileName,
+        filename: shareFile,
+        shareTitle: shareFile,
         tagline: {
           text: 'With the Super Productivity App',
         },
@@ -306,8 +238,38 @@ export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
     } catch (error) {
       console.error('Share failed:', error);
     } finally {
-      this.isSharing = false;
-      this.cdr.markForCheck();
+      this.isSharing.set(false);
+    }
+  }
+
+  private async loadChartModule(): Promise<void> {
+    try {
+      await this.chartLoaderService.loadChartModule();
+      this.isModuleLoaded.set(true);
+    } catch (error) {
+      console.error('Failed to load chart module:', error);
+    }
+  }
+
+  private initChart(canvas: ElementRef<HTMLCanvasElement>): void {
+    const chartModule = this.chartLoaderService.getChartModule();
+    if (!chartModule) {
+      console.error('Chart module not loaded');
+      return;
+    }
+
+    const { Chart } = chartModule;
+    const chartConfig: ChartConfiguration = {
+      type: this.type(),
+      data: this.filteredChartData(),
+      options: this.chartOptionsWithHandlers(),
+    };
+
+    try {
+      this.chartInstance?.destroy();
+      this.chartInstance = new Chart(canvas.nativeElement, chartConfig);
+    } catch (error) {
+      console.error('Failed to initialize chart:', error);
     }
   }
 

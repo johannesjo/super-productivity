@@ -1,6 +1,6 @@
 <div class="chart-wrapper">
   <div class="chart-toolbar">
-    @if (enableTimeframeSelector) {
+    @if (enableTimeframeSelector()) {
       <div class="timeframe-selector">
         <span class="timeframe-label">
           {{ 'F.METRIC.CMP.TIME_FRAME_LABEL' | translate }}
@@ -25,23 +25,23 @@
       tabIndex="-1"
       type="button"
       (click)="shareChart()"
-      [disabled]="!isLoaded || isSharing"
+      [disabled]="!isModuleLoaded() || isSharing()"
       [matTooltip]="'Share Chart' | translate"
     >
-      @if (isSharing) {
+      @if (isSharing()) {
         <mat-icon>hourglass_empty</mat-icon>
       } @else {
         <mat-icon>share</mat-icon>
       }
     </button>
   </div>
-  @if (!isLoaded) {
+  @if (!isModuleLoaded()) {
     <div class="chart-loading">Loading chart...</div>
   }
-  @if (isLoaded) {
+  @if (isModuleLoaded()) {
     <div
       class="chart-container"
-      [style.height]="height"
+      [style.height]="height()"
     >
       <canvas #canvas></canvas>
     </div>
