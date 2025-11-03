@@ -37,7 +37,6 @@ import { SimpleCounterService } from '../../simple-counter/simple-counter.servic
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
-import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 import { MatFabButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
@@ -87,7 +86,6 @@ import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
   ],
   imports: [
     TaskTitleComponent,
-    ProgressCircleComponent,
     BreathingDotComponent,
     MatIconButton,
     MatTooltip,

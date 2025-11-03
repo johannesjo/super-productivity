@@ -171,6 +171,25 @@
   }
 }
 
+.focus-progress-circle {
+  width: 100%;
+  height: 100%;
+
+  &__bg {
+    fill: none;
+    stroke: var(--progress-bg, rgba(255, 255, 255, 0.15));
+    stroke-width: 1.8;
+  }
+
+  &__progress {
+    fill: none;
+    stroke: var(--c-primary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.3s ease;
+  }
+}
+
 .clock-time {
   font-size: 24px;
   font-weight: bold;

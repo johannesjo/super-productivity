@@ -1,19 +1,37 @@
 <svg
-  viewBox="0 0 36 36"
-  class="svg"
+  class="progress-circle__svg"
+  [attr.viewBox]="viewBox"
+  [attr.width]="size"
+  [attr.height]="size"
 >
-  <path
-    class="circle-bg"
-    d="M18 2.0845
-          a 15.9155 15.9155 0 0 1 0 31.831
-          a 15.9155 15.9155 0 0 1 0 -31.831"
-  />
-  <path
-    #progressCircle
-    class="progress-circle"
-    stroke-dasharray="0, 100"
-    d="M18 2.0845
-          a 15.9155 15.9155 0 0 1 0 31.831
-          a 15.9155 15.9155 0 0 1 0 -31.831"
-  />
+  <circle
+    class="progress-circle__bg"
+    [attr.cx]="center"
+    [attr.cy]="center"
+    [attr.r]="radius"
+    fill="none"
+    [attr.stroke-width]="strokeWidth"
+  ></circle>
+
+  @if (showProgress) {
+    <circle
+      class="progress-circle__progress"
+      [attr.cx]="center"
+      [attr.cy]="center"
+      [attr.r]="radius"
+      fill="none"
+      [attr.stroke-width]="strokeWidth"
+      [attr.stroke-dasharray]="circumference"
+      [attr.stroke-dashoffset]="dashOffset"
+    ></circle>
+  } @else if (isPulsing) {
+    <circle
+      class="progress-circle__pulse"
+      [attr.cx]="center"
+      [attr.cy]="center"
+      [attr.r]="radius"
+      fill="none"
+      [attr.stroke-width]="strokeWidth"
+    ></circle>
+  }
 </svg>

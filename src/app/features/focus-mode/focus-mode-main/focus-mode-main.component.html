@@ -25,8 +25,10 @@
   @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
     @if (enabledSimpleCounters.length) {
       <section class="simple-counter-buttons">
-        @for (simpleCounter of enabledSimpleCounters;
-          track trackById($index, simpleCounter)) {
+        @for (
+          simpleCounter of enabledSimpleCounters;
+          track trackById($index, simpleCounter)
+        ) {
           <simple-counter-button
             [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
             [simpleCounter]="simpleCounter"
@@ -91,11 +93,25 @@
         class="clock-face"
         [@modeSwitchFade]="mode()"
       >
-        <progress-circle
-          class="clock-face__layer"
+        <svg
+          class="clock-face__layer focus-progress-circle"
+          viewBox="0 0 36 36"
           [class.is-hidden]="!isCountDown"
-          [progress]="focusModeService.progress()"
-        ></progress-circle>
+        >
+          <path
+            class="focus-progress-circle__bg"
+            d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <path
+            class="focus-progress-circle__progress"
+            [attr.stroke-dasharray]="(focusModeService.progress() || 0) + ', 100'"
+            d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+        </svg>
         <breathing-dot
           class="clock-face__layer"
           [class.is-hidden]="isCountDown"
@@ -179,11 +195,10 @@
 
       <!-- Duration slider (Preparation state, Countdown mode only) -->
       @if (isShowDurationSlider()) {
-        <div class="duration-slider-overlay-wrapper"
-        >
-          <div class="duration-slider-overlay"
-               [@modeSwitchFade]="mode()"
-
+        <div class="duration-slider-overlay-wrapper">
+          <div
+            class="duration-slider-overlay"
+            [@modeSwitchFade]="mode()"
           >
             <input-duration-slider
               [model]="displayDuration()"
@@ -304,7 +319,7 @@
   @if (currentTask && isDragOver) {
     <div class="bgc-accent drag-over-msg">
       <mat-icon>add</mat-icon>
-      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: {title: currentTask.title} }}
+      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: currentTask.title } }}
     </div>
   }
 </div>

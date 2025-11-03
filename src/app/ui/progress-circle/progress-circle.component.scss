@@ -1,24 +1,44 @@
 :host {
-  display: block;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  display: inline-flex;
+  width: 40px;
+  height: 40px;
+  color: var(--progress-circle-color, var(--c-accent));
 }
 
-.svg {
-  display: block;
-  stroke: var(--c-primary);
+.progress-circle__svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
 }
 
-.circle-bg {
-  fill: none;
-  stroke: var(--progress-bg);
-  stroke-width: 1.8;
+.progress-circle__bg {
+  stroke: currentColor;
+  opacity: 0.2;
 }
 
-.progress-circle {
-  fill: none;
-  stroke-width: 2;
-  stroke-linecap: round;
-  animation: progress 1s ease-out forwards;
-  stroke-dashoffset: 0;
-  stroke-dasharray: 0, 100;
-  transition: all 1s;
+.progress-circle__progress {
+  stroke: currentColor;
+  transition: stroke-dashoffset 0.3s ease;
+}
+
+.progress-circle__pulse {
+  stroke: currentColor;
+  animation: progress-circle-pulse 2s ease-in-out infinite;
+}
+
+@keyframes progress-circle-pulse {
+  0%,
+  100% {
+    opacity: 0.5;
+    stroke-width: 2;
+  }
+  50% {
+    opacity: 1;
+    stroke-width: 3;
+  }
 }

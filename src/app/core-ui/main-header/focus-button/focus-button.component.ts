@@ -13,13 +13,21 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
 import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
 import { DateService } from '../../../core/date/date.service';
 import { FocusModeMode } from '../../../features/focus-mode/focus-mode.model';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 
 @Component({
   selector: 'focus-button',
   templateUrl: './focus-button.component.html',
   styleUrls: ['./focus-button.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [MatIconButton, MatTooltip, MatIcon, MsToMinuteClockStringPipe, TranslatePipe],
+  imports: [
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MsToMinuteClockStringPipe,
+    TranslatePipe,
+    ProgressCircleComponent,
+  ],
 })
 export class FocusButtonComponent {
   private readonly _store = inject(Store);
