@@ -1,9 +1,17 @@
 @use '../../../../styles/_globals.scss' as *;
+@use '../../../../styles/components/badge' as badge;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  height: var(--header-button-size, 48px);
+}
 
 .focus-btn-wrapper {
   position: relative;
   display: inline-flex;
   align-items: center;
+  height: 100%;
 }
 
 .progress-ring {
@@ -44,13 +52,5 @@
 }
 
 .focus-label {
-  position: absolute;
-  bottom: -4px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 9px;
-  white-space: nowrap;
-  background: var(--c-bg);
-  padding: 0 2px;
-  border-radius: 2px;
+  @include badge.inline-badge;
 }

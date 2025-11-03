@@ -15,6 +15,8 @@
   position: relative;
   user-select: none;
   -webkit-user-select: none; /* Safari */
+  --header-nav-button-gap: var(--s-half);
+  --header-button-size: var(--mat-mini-fab-size);
 }
 
 :host-context(.isMac.isElectron) {
@@ -25,6 +27,7 @@
   .wrapper {
     -webkit-app-region: drag;
   }
+
   &:active {
     cursor: grabbing;
   }
@@ -63,6 +66,7 @@
     position: relative;
     z-index: 1;
   }
+
   &:hover,
   .current-work-context-title:hover + & {
     opacity: 1;
@@ -84,19 +88,11 @@ button.isActive2 {
   margin-left: auto;
   display: flex;
   align-items: center;
+  gap: var(--header-nav-button-gap);
 
   :host-context([dir='rtl']) & {
     margin-left: 0;
     margin-right: auto;
-  }
-
-  simple-counter-button,
-  .focus-btn-wrapper,
-  button {
-    margin-left: var(--s-quarter);
-    @include mq(xs) {
-      margin-left: var(--s);
-    }
   }
 }
 
@@ -113,9 +109,6 @@ button.isActive2 {
 
 .play-btn-wrapper {
   position: relative;
-  @include mq(xs) {
-    margin-left: var(--s);
-  }
 
   .pulse-circle {
     width: 48px;
@@ -136,6 +129,7 @@ button.isActive2 {
     margin-left: 0;
     // make sure it is above the label of our focus button
     z-index: 4;
+
     .circle-svg {
       transform: rotate(-90deg);
       position: absolute;
@@ -144,6 +138,7 @@ button.isActive2 {
       right: -8px;
       pointer-events: none;
     }
+
     .mat-icon {
       position: relative;
       z-index: 2;
@@ -175,6 +170,7 @@ button.isActive2 {
     left: 50%;
     transform: translateX(-50%);
     pointer-events: none;
+
     &:after {
       content: '';
       position: absolute;
@@ -184,6 +180,7 @@ button.isActive2 {
 
   &:hover .pomodoro-controls {
     pointer-events: all;
+
     .pomodoro-btn {
       transform: translateY(0);
       opacity: 1;
@@ -193,6 +190,7 @@ button.isActive2 {
   .pomodoro-btn {
     @include btn-transition;
     transform: translateY(-100%);
+
     &:nth-child(2) {
       transform: translateY(-200%);
     }
@@ -244,12 +242,15 @@ button.isActive2 {
   position: relative;
   transition: all 0.2s;
   overflow: visible !important;
+
   &.isActive {
     background: transparent;
+
     .mat-icon {
       transition: all 0.2s;
       transform: rotate(45deg);
     }
+
     &::after {
       border-radius: 4px;
       box-shadow: 0 -2px 3px var(--separator-alpha);
@@ -263,17 +264,21 @@ button.isActive2 {
       left: 1px;
       z-index: -1;
     }
+
     &.isCustomized::after {
       background: var(--c-accent);
     }
   }
+
   &:hover:not(.isActive):not(:disabled) {
     background: var(--hover-color, rgba(0, 0, 0, 0.04));
   }
+
   &:disabled {
     opacity: 0.5;
     cursor: not-allowed;
     background: transparent !important;
+
     &::after {
       background: transparent !important;
     }
@@ -379,6 +384,7 @@ button.isActive2 {
     display: none;
   }
 }
+
 .focus-btn-wrapper {
   position: relative;
   display: inline-flex;
