@@ -89,6 +89,35 @@ $summary-point-inner-margin: var(--s);
   //flex-grow: 1;
   flex-basis: 160px;
   position: relative;
+
+  .summary-val {
+    display: flex;
+    justify-content: center;
+
+    :first-child {
+      justify-content: right;
+      padding-right: var(--s-half);
+    }
+
+    :not(:first-child) {
+      justify-content: left;
+      padding-left: var(--s-half);
+    }
+  }
+
+  inline-input {
+    ::ng-deep .inline-input-wrapper {
+      display: flex;
+      justify-content: inherit;
+      width: auto;
+      min-width: 35px;
+      height: 100%;
+    }
+
+    ::ng-deep input[type='text'] {
+      width: 100%;
+    }
+  }
 }
 
 .summary-val {
