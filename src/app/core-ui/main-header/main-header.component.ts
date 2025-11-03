@@ -154,6 +154,11 @@ export class MainHeaderComponent implements OnDestroy {
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
   );
 
+  isUserProfilesEnabled = toSignal(
+    this.globalConfigService.misc$.pipe(map((misc) => misc.isEnableUserProfiles)),
+    { initialValue: false },
+  );
+
   private _subs: Subscription = new Subscription();
 
   selectedTimeView = computed(() => this.layoutService.selectedTimeView());

@@ -5,6 +5,7 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { Log } from '../../core/log';
 import { nanoid } from 'nanoid';
 import { SnackService } from '../../core/snack/snack.service';
+import { GlobalConfigService } from '../config/global-config.service';
 
 /**
  * Core service for user profile management
@@ -18,6 +19,7 @@ export class UserProfileService {
   private readonly _pfapiService = inject(PfapiService);
   private readonly _snackService = inject(SnackService);
   private readonly _injector = inject(Injector);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   // Current profile metadata
   private readonly _metadata = signal<ProfileMetadata | null>(null);
@@ -45,10 +47,9 @@ export class UserProfileService {
         Log.log('UserProfileService: No profile metadata found, migrating existing data');
         metadata = await this._migrateExistingDataToDefaultProfile();
       }
-      // NOTE: We do NOT load profile data here!
       // Profile data is only loaded when switching between profiles.
       // On normal startup, the app loads from its regular database.
-      // The profile storage is just a backup copy for switching.
+      // The profile storage is just a backup copy for switching, leveraging existing import/export functions.
 
       // Set metadata and update signals
       this._metadata.set(metadata);
@@ -71,7 +72,7 @@ export class UserProfileService {
       }
     } catch (error) {
       Log.err('UserProfileService: Failed to initialize', error);
-      // Don't throw - create a default profile and continue
+      // create a default profile and continue
       const defaultMetadata = this._storageService.createDefaultProfileMetadata();
       this._metadata.set(defaultMetadata);
       this.profiles.set(defaultMetadata.profiles);
@@ -88,12 +89,10 @@ export class UserProfileService {
       throw new Error('Profile system not initialized');
     }
 
-    // Validate name
     if (!name || name.trim().length === 0) {
       throw new Error('Profile name cannot be empty');
     }
 
-    // Check for duplicate names
     if (metadata.profiles.some((p) => p.name === name)) {
       throw new Error('A profile with this name already exists');
     }
@@ -116,8 +115,6 @@ export class UserProfileService {
     await this._storageService.saveProfileMetadata(updatedMetadata);
 
     // Create empty profile data (will be populated on first switch)
-    // We don't create profile data here to avoid saving an empty state
-
     // Update signals
     this._metadata.set(updatedMetadata);
     this.profiles.set(updatedProfiles);
@@ -289,12 +286,6 @@ export class UserProfileService {
       Log.log('UserProfileService: Loading target profile data');
       const targetData = await this._storageService.loadProfileData(targetProfileId);
 
-      // If target profile has no data (newly created), use empty state
-      if (!targetData) {
-        Log.log('UserProfileService: Target profile has no data, will use empty state');
-        // The app will initialize with default empty state
-      }
-
       // Step 4: Update metadata with new active profile
       const updatedMetadata: ProfileMetadata = {
         ...metadata,
@@ -305,25 +296,55 @@ export class UserProfileService {
       };
       await this._storageService.saveProfileMetadata(updatedMetadata);
 
-      // Step 5: Import target profile data if it exists
-      if (targetData) {
-        Log.log('UserProfileService: Importing target profile data');
-        await this._pfapiService.importCompleteBackup(targetData);
-      }
-
-      // Step 6: Update signals
+      // Step 5: Update signals BEFORE importing/clearing data
+      // This ensures metadata is consistent if something fails
       this._metadata.set(updatedMetadata);
       this.profiles.set(updatedMetadata.profiles);
       this.activeProfile.set(targetProfile);
 
-      // Step 7: Reload the application
+      // Step 6: Handle target profile data
+      if (targetData) {
+        // Profile has existing data - import it
+        Log.log('UserProfileService: Importing target profile data');
+        // Use isSkipReload=true to handle reload ourselves with proper timing
+        await this._pfapiService.importCompleteBackup(
+          targetData,
+          false, // isSkipLegacyWarnings
+          true, // isSkipReload
+        );
+      } else {
+        // Profile is empty (newly created) - clear the database and set up with profiles enabled
+        Log.log(
+          'UserProfileService: Target profile has no data, clearing database for fresh start',
+        );
+        await this._pfapiService.pf.db.clearDatabase();
+
+        // IMPORTANT: Enable user profiles in the new profile's config
+        // Otherwise the user won't see the profile button to switch back
+        // We directly write to the database to avoid race conditions with NgRx
+        Log.log('UserProfileService: Enabling user profiles in new profile config');
+        const defaultConfig = await this._pfapiService.pf.m.globalConfig.load();
+        await this._pfapiService.pf.m.globalConfig.save({
+          ...defaultConfig,
+          misc: {
+            ...defaultConfig.misc,
+            isEnableUserProfiles: true,
+          },
+        });
+
+        Log.log(
+          'UserProfileService: Database cleared and profiles enabled, app will initialize with clean state',
+        );
+      }
+
+      // Step 7: Show success message and reload
       Log.log('UserProfileService: Reloading application');
       this._snackService.open({
         type: 'SUCCESS',
         msg: `Switched to profile "${targetProfile.name}"`,
       });
 
-      // Give the snackbar time to show
+      // Give the snackbar time to show before reloading
       setTimeout(() => {
         window.location.reload();
       }, 500);
@@ -400,5 +421,26 @@ export class UserProfileService {
     await this._storageService.saveProfileMetadata(metadata);
 
     return metadata;
+  }
+
+  /**
+   * Check if there are multiple profiles (more than just the default)
+   */
+  hasMultipleProfiles(): boolean {
+    const profiles = this.profiles();
+    return profiles.length > 1;
+  }
+
+  /**
+   * Get information about profile storage for user guidance
+   */
+  getProfileStorageInfo(): { location: string; profiles: UserProfile[] } {
+    const profiles = this.profiles();
+    const activeProfile = this.activeProfile();
+
+    return {
+      location: 'Profile data is stored in the application data folder',
+      profiles: profiles.filter((p) => p.id !== activeProfile?.id),
+    };
   }
 }

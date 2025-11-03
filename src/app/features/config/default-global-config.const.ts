@@ -34,6 +34,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 `,
     isOverlayIndicatorEnabled: false,
     customTheme: 'default',
+    isEnableUserProfiles: false,
   },
   shortSyntax: {
     isEnableProject: true,

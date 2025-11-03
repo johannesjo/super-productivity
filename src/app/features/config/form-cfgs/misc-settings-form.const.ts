@@ -149,6 +149,14 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       hideExpression: (model: any) => !model?.isTrayShowCurrentTask,
     },
     {
+      key: 'isEnableUserProfiles',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_ENABLE_USER_PROFILES,
+        description: T.GCF.MISC.IS_ENABLE_USER_PROFILES_HINT,
+      },
+    },
+    {
       key: 'customTheme',
       type: 'select',
       templateOptions: {
