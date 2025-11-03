@@ -1,17 +1,17 @@
-<h2 mat-dialog-title>Manage User Profiles</h2>
+<h2 mat-dialog-title>{{ 'USER_PROFILES.DIALOG_TITLE' | translate }}</h2>
 
 <mat-dialog-content>
   <!-- Create New Profile -->
   <div class="create-profile-section">
-    <h3>Create New Profile</h3>
+    <h3>{{ 'USER_PROFILES.CREATE_NEW_PROFILE' | translate }}</h3>
     <div class="create-profile-form">
       <mat-form-field class="profile-name-input">
-        <mat-label>Profile Name</mat-label>
+        <mat-label>{{ 'USER_PROFILES.PROFILE_NAME' | translate }}</mat-label>
         <input
           matInput
           [(ngModel)]="newProfileName"
           (keydown.enter)="createProfile()"
-          placeholder="e.g., Work, Personal"
+          [placeholder]="'USER_PROFILES.PROFILE_NAME_PLACEHOLDER' | translate"
         />
       </mat-form-field>
       <button
@@ -21,14 +21,14 @@
         [disabled]="!newProfileName() || isCreating()"
       >
         <mat-icon>add</mat-icon>
-        Create
+        {{ 'USER_PROFILES.CREATE' | translate }}
       </button>
     </div>
   </div>
 
   <!-- Existing Profiles -->
   <div class="profiles-list-section">
-    <h3>Existing Profiles</h3>
+    <h3>{{ 'USER_PROFILES.EXISTING_PROFILES' | translate }}</h3>
     <div class="profiles-list">
       @for (profile of profileService.profiles(); track profile.id) {
         <div
@@ -49,14 +49,14 @@
               <button
                 mat-icon-button
                 (click)="saveEdit(profile.id)"
-                matTooltip="Save"
+                [matTooltip]="'USER_PROFILES.SAVE' | translate"
               >
                 <mat-icon>check</mat-icon>
               </button>
               <button
                 mat-icon-button
                 (click)="cancelEdit()"
-                matTooltip="Cancel"
+                [matTooltip]="'USER_PROFILES.CANCEL' | translate"
               >
                 <mat-icon>close</mat-icon>
               </button>
@@ -67,18 +67,21 @@
               <div class="profile-name">
                 <strong>{{ profile.name }}</strong>
                 @if (profile.id === profileService.activeProfile()?.id) {
-                  <span class="active-badge">Active</span>
+                  <span class="active-badge">{{
+                    'USER_PROFILES.ACTIVE' | translate
+                  }}</span>
                 }
               </div>
               <div class="profile-meta">
-                Created: {{ profile.createdAt | date: 'medium' }}
+                {{ 'USER_PROFILES.CREATED' | translate }}
+                {{ profile.createdAt | date: 'medium' }}
               </div>
             </div>
             <div class="profile-actions">
               <button
                 mat-icon-button
                 (click)="startEdit(profile)"
-                matTooltip="Rename"
+                [matTooltip]="'USER_PROFILES.RENAME' | translate"
                 [disabled]="profileService.profiles().length === 1"
               >
                 <mat-icon>edit</mat-icon>
@@ -86,14 +89,14 @@
               <button
                 mat-icon-button
                 (click)="exportProfile(profile)"
-                matTooltip="Export Profile"
+                [matTooltip]="'USER_PROFILES.EXPORT_PROFILE' | translate"
               >
                 <mat-icon>download</mat-icon>
               </button>
               <button
                 mat-icon-button
                 (click)="deleteProfile(profile)"
-                matTooltip="Delete Profile"
+                [matTooltip]="'USER_PROFILES.DELETE_PROFILE' | translate"
                 [disabled]="
                   profile.id === profileService.activeProfile()?.id ||
                   profileService.profiles().length === 1
@@ -116,7 +119,7 @@
         (click)="openProfileFolder()"
       >
         <mat-icon>folder_open</mat-icon>
-        Open Profiles Folder
+        {{ 'USER_PROFILES.OPEN_PROFILES_FOLDER' | translate }}
       </button>
     </div>
   }
@@ -127,6 +130,6 @@
     mat-button
     (click)="close()"
   >
-    Close
+    {{ 'USER_PROFILES.CLOSE' | translate }}
   </button>
 </mat-dialog-actions>

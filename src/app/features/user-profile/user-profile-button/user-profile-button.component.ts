@@ -8,6 +8,7 @@ import { UserProfileService } from '../user-profile.service';
 import { DialogUserProfileManagementComponent } from '../dialog-user-profile-management/dialog-user-profile-management.component';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'user-profile-button',
@@ -21,6 +22,7 @@ import { MatDivider } from '@angular/material/divider';
     MatMenuItem,
     MatMenuTrigger,
     MatDivider,
+    TranslatePipe,
   ],
   template: `
     <button
@@ -58,7 +60,7 @@ import { MatDivider } from '@angular/material/divider';
         (click)="openManagementDialog()"
       >
         <mat-icon>settings</mat-icon>
-        <span>Manage Profiles...</span>
+        <span>{{ 'USER_PROFILES.MANAGE_PROFILES' | translate }}</span>
       </button>
     </mat-menu>
   `,

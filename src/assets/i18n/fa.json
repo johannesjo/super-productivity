@@ -1895,6 +1895,24 @@
     "E_PATTERN": "ورودی اشتباه",
     "E_REQUIRED": "این فیلد اجباری است"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "مدیریت پروفایل های کاربری",
+    "CREATE_NEW_PROFILE": "ایجاد پروفایل جدید",
+    "PROFILE_NAME": "نام پروفایل",
+    "PROFILE_NAME_PLACEHOLDER": "مثلا کار، شخصی",
+    "CREATE": "ایجاد",
+    "EXISTING_PROFILES": "پروفایل های موجود",
+    "ACTIVE": "فعال",
+    "CREATED": "ایجاد شده:",
+    "SAVE": "ذخیره",
+    "CANCEL": "لغو",
+    "RENAME": "تغییر نام",
+    "EXPORT_PROFILE": "صادرات پروفایل",
+    "DELETE_PROFILE": "حذف پروفایل",
+    "OPEN_PROFILES_FOLDER": "باز کردن پوشه پروفایل ها",
+    "CLOSE": "بستن",
+    "MANAGE_PROFILES": "مدیریت پروفایل ها..."
+  },
   "WW": {
     "ADD_MORE": "اضافه کردن موارد بیشتر",
     "ADD_SCHEDULED_FOR_TOMORROW": "اضافه کردن کارهایی که برای فردا برنامه ریزی شده است ({{nr}})",

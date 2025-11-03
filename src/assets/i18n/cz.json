@@ -1435,6 +1435,24 @@
     "E_PATTERN": "Neplatný vstup",
     "E_REQUIRED": "Toto pole je povinné"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Spravovat uživatelské profily",
+    "CREATE_NEW_PROFILE": "Vytvořit nový profil",
+    "PROFILE_NAME": "Název profilu",
+    "PROFILE_NAME_PLACEHOLDER": "např. Práce, Osobní",
+    "CREATE": "Vytvořit",
+    "EXISTING_PROFILES": "Existující profily",
+    "ACTIVE": "Aktivní",
+    "CREATED": "Vytvořeno:",
+    "SAVE": "Uložit",
+    "CANCEL": "Zrušit",
+    "RENAME": "Přejmenovat",
+    "EXPORT_PROFILE": "Exportovat profil",
+    "DELETE_PROFILE": "Smazat profil",
+    "OPEN_PROFILES_FOLDER": "Otevřít složku profilů",
+    "CLOSE": "Zavřít",
+    "MANAGE_PROFILES": "Spravovat profily..."
+  },
   "WW": {
     "ADD_MORE": "Přidat další",
     "ADD_SCHEDULED_FOR_TOMORROW": "Přidat úkoly naplánované na zítra ({{nr}})",

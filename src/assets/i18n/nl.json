@@ -1619,6 +1619,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Toon huidige countdown in de tray / statusmenu (alleen desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
+      "IS_ENABLE_USER_PROFILES": "Gebruikersprofielen inschakelen (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Maakt het mogelijk om verschillende gebruikersprofielen te maken en er tussen te schakelen, elk met afzonderlijke instellingen, taken en synchronisatieconfiguraties. De profielbeheerknop verschijnt in de rechterbovenhoek wanneer ingeschakeld. Opmerking: het uitschakelen van deze functie verbergt de gebruikersinterface, maar behoudt uw profielgegevens (bètafunctie, geen garanties. Zorg ervoor dat u een back-up hebt).",
       "IS_USE_MINIMAL_SIDE_NAV": "Gebruik een minimale navigatiebalk (toon alleen pictogrammen)",
       "START_OF_NEXT_DAY": "Starttijd van de volgende dag",
       "START_OF_NEXT_DAY_HINT": "vanaf wanneer (in uur) je wilt tellen dat de volgende dag is begonnen. standaard is middernacht wat 0 is.",
@@ -1894,6 +1896,24 @@
     "E_MIN_LENGTH": "Moet ten minste {{val}} tekens lang zijn",
     "E_PATTERN": "Ongeldige invoer",
     "E_REQUIRED": "dit veld is verplicht"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Gebruikersprofielen beheren",
+    "CREATE_NEW_PROFILE": "Nieuw profiel aanmaken",
+    "PROFILE_NAME": "Profielnaam",
+    "PROFILE_NAME_PLACEHOLDER": "bijv. Werk, Persoonlijk",
+    "CREATE": "Aanmaken",
+    "EXISTING_PROFILES": "Bestaande profielen",
+    "ACTIVE": "Actief",
+    "CREATED": "Aangemaakt:",
+    "SAVE": "Opslaan",
+    "CANCEL": "Annuleren",
+    "RENAME": "Hernoemen",
+    "EXPORT_PROFILE": "Profiel exporteren",
+    "DELETE_PROFILE": "Profiel verwijderen",
+    "OPEN_PROFILES_FOLDER": "Profielmap openen",
+    "CLOSE": "Sluiten",
+    "MANAGE_PROFILES": "Profielen beheren..."
   },
   "WW": {
     "ADD_MORE": "Voeg meer toe",

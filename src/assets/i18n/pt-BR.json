@@ -1423,6 +1423,8 @@
       "IS_MINIMIZE_TO_TRAY": "Minimizar para a bandeja (somente desktop)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostrar tarefa atual na bandeja/menu de status (somente desktop Mac/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Desativar análise de markdown para notas de tarefas",
+      "IS_ENABLE_USER_PROFILES": "Ativar perfis de usuário (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Permite criar e alternar entre diferentes perfis de usuário, cada um com configurações, tarefas e configurações de sincronização separadas. O botão de gerenciamento de perfil aparecerá no canto superior direito quando ativado. Nota: desativar esse recurso ocultará a interface do usuário, mas preservará os dados do seu perfil (recurso Beta, sem garantias. Certifique-se de ter um backup).",
       "IS_USE_MINIMAL_SIDE_NAV": "Use a barra de navegação mínima (mostrar apenas ícones)",
       "START_OF_NEXT_DAY": "Hora de início do dia seguinte",
       "START_OF_NEXT_DAY_HINT": "a partir de quando (em horas) você deseja contar o dia seguinte começou. o padrão é meia-noite, que é 0.",
@@ -1654,6 +1656,24 @@
     "E_MIN_LENGTH": "Deve ter pelo menos {{val}} caracteres",
     "E_PATTERN": "Entrada inválida",
     "E_REQUIRED": "Este campo é obrigatório"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Gerenciar perfis de usuário",
+    "CREATE_NEW_PROFILE": "Criar novo perfil",
+    "PROFILE_NAME": "Nome do perfil",
+    "PROFILE_NAME_PLACEHOLDER": "ex. Trabalho, Pessoal",
+    "CREATE": "Criar",
+    "EXISTING_PROFILES": "Perfis existentes",
+    "ACTIVE": "Ativo",
+    "CREATED": "Criado:",
+    "SAVE": "Salvar",
+    "CANCEL": "Cancelar",
+    "RENAME": "Renomear",
+    "EXPORT_PROFILE": "Exportar perfil",
+    "DELETE_PROFILE": "Excluir perfil",
+    "OPEN_PROFILES_FOLDER": "Abrir pasta de perfis",
+    "CLOSE": "Fechar",
+    "MANAGE_PROFILES": "Gerenciar perfis..."
   },
   "WW": {
     "ADD_MORE": "Adicionar mais",

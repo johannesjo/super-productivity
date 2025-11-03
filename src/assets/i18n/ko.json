@@ -1619,6 +1619,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "트레이/상태 메뉴에 현재 카운트다운 표시(데스크톱 Mac만 해당)",
       "IS_TRAY_SHOW_CURRENT_TASK": "트레이 / 상태 메뉴에 현재 작업 표시 (데스크톱 전용)",
       "IS_TURN_OFF_MARKDOWN": "노트에 대한 마크 다운 파싱 끄기",
+      "IS_ENABLE_USER_PROFILES": "사용자 프로필 활성화 (베타)",
+      "IS_ENABLE_USER_PROFILES_HINT": "각각 별도의 설정, 작업 및 동기화 구성을 가진 다른 사용자 프로필을 생성하고 전환할 수 있습니다. 활성화되면 프로필 관리 버튼이 오른쪽 상단에 나타납니다. 참고: 이 기능을 비활성화하면 UI가 숨겨지지만 프로필 데이터는 유지됩니다 (베타 기능, 보증 없음. 백업이 있는지 확인하십시오).",
       "IS_USE_MINIMAL_SIDE_NAV": "최소한의 탐색 모음 사용(아이콘만 표시)",
       "START_OF_NEXT_DAY": "다음 날 시작 시간",
       "START_OF_NEXT_DAY_HINT": "다음 날을 계산하려는 시점(시간 단위)부터 시작됩니다. 기본값은 0인 자정입니다.",
@@ -1894,6 +1896,24 @@
     "E_MIN_LENGTH": "최소 {{val}} 자 이상이어야합니다.",
     "E_PATTERN": "잘못된 입력",
     "E_REQUIRED": "이 입력란은 필수 항목입니다."
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "사용자 프로필 관리",
+    "CREATE_NEW_PROFILE": "새 프로필 만들기",
+    "PROFILE_NAME": "프로필 이름",
+    "PROFILE_NAME_PLACEHOLDER": "예: 직장, 개인",
+    "CREATE": "만들기",
+    "EXISTING_PROFILES": "기존 프로필",
+    "ACTIVE": "활성",
+    "CREATED": "생성됨:",
+    "SAVE": "저장",
+    "CANCEL": "취소",
+    "RENAME": "이름 변경",
+    "EXPORT_PROFILE": "프로필 내보내기",
+    "DELETE_PROFILE": "프로필 삭제",
+    "OPEN_PROFILES_FOLDER": "프로필 폴더 열기",
+    "CLOSE": "닫기",
+    "MANAGE_PROFILES": "프로필 관리..."
   },
   "WW": {
     "ADD_MORE": "더 추가하기",

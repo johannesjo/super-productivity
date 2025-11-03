@@ -1621,6 +1621,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mostrar cuenta regresiva actual en la bandeja / menú de estado (solo mac de escritorio)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostrar la tarea actual en el menú de bandeja / estado (solo escritorio)",
       "IS_TURN_OFF_MARKDOWN": "Desactivar la sintaxis markdown para las notas",
+      "IS_ENABLE_USER_PROFILES": "Habilitar perfiles de usuario (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Permite crear y cambiar entre diferentes perfiles de usuario, cada uno con configuraciones, tareas y configuraciones de sincronización separadas. El botón de administración de perfiles aparecerá en la esquina superior derecha cuando esté habilitado. Nota: Deshabilitar esta función ocultará la interfaz de usuario pero conservará los datos de su perfil (función Beta, sin garantías. Asegúrese de tener una copia de seguridad).",
       "IS_USE_MINIMAL_SIDE_NAV": "Utilice una barra de navegación mínima (muestre sólo iconos)",
       "START_OF_NEXT_DAY": "Hora de inicio del día siguiente",
       "START_OF_NEXT_DAY_HINT": "a partir de cuándo (en hora) quiere contar que ha empezado el día siguiente. por defecto es medianoche que es 0.",
@@ -1896,6 +1898,24 @@
     "E_MIN_LENGTH": "Debe tener al menos {{val}} caracteres",
     "E_PATTERN": "Entrada inválida",
     "E_REQUIRED": "Este campo es requerido"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Administrar perfiles de usuario",
+    "CREATE_NEW_PROFILE": "Crear nuevo perfil",
+    "PROFILE_NAME": "Nombre del perfil",
+    "PROFILE_NAME_PLACEHOLDER": "p. ej. Trabajo, Personal",
+    "CREATE": "Crear",
+    "EXISTING_PROFILES": "Perfiles existentes",
+    "ACTIVE": "Activo",
+    "CREATED": "Creado:",
+    "SAVE": "Guardar",
+    "CANCEL": "Cancelar",
+    "RENAME": "Renombrar",
+    "EXPORT_PROFILE": "Exportar perfil",
+    "DELETE_PROFILE": "Eliminar perfil",
+    "OPEN_PROFILES_FOLDER": "Abrir carpeta de perfiles",
+    "CLOSE": "Cerrar",
+    "MANAGE_PROFILES": "Administrar perfiles..."
   },
   "WW": {
     "ADD_MORE": "Agregar más",

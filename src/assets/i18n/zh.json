@@ -1831,6 +1831,8 @@
             "IS_TRAY_SHOW_CURRENT_TASK": "在托盘/状态菜单中显示当前任务（仅限桌面 Mac/Windows）",
             "IS_OVERLAY_INDICATOR_ENABLED": "启用覆盖指示器窗口（桌面 Linux/Gnome）",
             "IS_TURN_OFF_MARKDOWN": "关闭任务描述的 Markdown 解析",
+            "IS_ENABLE_USER_PROFILES": "启用用户配置文件（测试版）",
+            "IS_ENABLE_USER_PROFILES_HINT": "允许您创建和切换不同的用户配置文件，每个配置文件具有单独的设置、任务和同步配置。启用后，配置文件管理按钮将出现在右上角。注意：禁用此功能将隐藏用户界面，但会保留您的配置文件数据（测试版功能，不保证。确保您有备份）。",
             "START_OF_NEXT_DAY": "下一天的开始时间",
             "START_OF_NEXT_DAY_HINT": "从何时（小时）开始计算下一天已经开始。默认是午夜，即 0。",
             "TASK_NOTES_TPL": "任务描述模板",
@@ -2229,6 +2231,24 @@
         "E_MIN_LENGTH": "应至少 {{val}} 个字符",
         "E_PATTERN": "输入无效",
         "E_REQUIRED": "此字段是必需的"
+    },
+    "USER_PROFILES": {
+        "DIALOG_TITLE": "管理用户配置文件",
+        "CREATE_NEW_PROFILE": "创建新配置文件",
+        "PROFILE_NAME": "配置文件名称",
+        "PROFILE_NAME_PLACEHOLDER": "例如 工作、个人",
+        "CREATE": "创建",
+        "EXISTING_PROFILES": "现有配置文件",
+        "ACTIVE": "活跃",
+        "CREATED": "创建于：",
+        "SAVE": "保存",
+        "CANCEL": "取消",
+        "RENAME": "重命名",
+        "EXPORT_PROFILE": "导出配置文件",
+        "DELETE_PROFILE": "删除配置文件",
+        "OPEN_PROFILES_FOLDER": "打开配置文件文件夹",
+        "CLOSE": "关闭",
+        "MANAGE_PROFILES": "管理配置文件..."
     },
     "WW": {
         "ADD_MORE": "添加更多",

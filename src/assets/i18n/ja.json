@@ -1619,6 +1619,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "トレイ/ステータスメニューに現在のカウントダウンを表示する(デスクトップMacのみ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
       "IS_TURN_OFF_MARKDOWN": "ノートのマークダウン解析をオフにする",
+      "IS_ENABLE_USER_PROFILES": "ユーザープロファイルを有効にする（ベータ版）",
+      "IS_ENABLE_USER_PROFILES_HINT": "異なる設定、タスク、同期設定を持つ複数のユーザープロファイルを作成して切り替えることができます。有効にすると、プロファイル管理ボタンが右上隅に表示されます。注意：この機能を無効にするとUIは非表示になりますが、プロファイルデータは保持されます（ベータ機能、保証なし。必ずバックアップを取ってください）。",
       "IS_USE_MINIMAL_SIDE_NAV": "最小限のナビゲーションバーを使用する（アイコンのみを表示する）",
       "START_OF_NEXT_DAY": "翌日の開始時間",
       "START_OF_NEXT_DAY_HINT": "いつ（時間単位）から翌日が始まったかをカウントする。デフォルトは0時で、0となる。",
@@ -1894,6 +1896,24 @@
     "E_MIN_LENGTH": "少なくとも {{val}} 文字にする必要があります",
     "E_PATTERN": "無効入力",
     "E_REQUIRED": "この項目は必須です"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "ユーザープロファイルを管理",
+    "CREATE_NEW_PROFILE": "新しいプロファイルを作成",
+    "PROFILE_NAME": "プロファイル名",
+    "PROFILE_NAME_PLACEHOLDER": "例：仕事、個人",
+    "CREATE": "作成",
+    "EXISTING_PROFILES": "既存のプロファイル",
+    "ACTIVE": "アクティブ",
+    "CREATED": "作成日:",
+    "SAVE": "保存",
+    "CANCEL": "キャンセル",
+    "RENAME": "名前を変更",
+    "EXPORT_PROFILE": "プロファイルをエクスポート",
+    "DELETE_PROFILE": "プロファイルを削除",
+    "OPEN_PROFILES_FOLDER": "プロファイルフォルダを開く",
+    "CLOSE": "閉じる",
+    "MANAGE_PROFILES": "プロファイルを管理..."
   },
   "WW": {
     "ADD_MORE": "さらに追加",

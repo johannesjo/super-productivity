@@ -1895,6 +1895,24 @@
     "E_PATTERN": "Masukan tidak valid",
     "E_REQUIRED": "Bagian ini diperlukan"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Kelola profil pengguna",
+    "CREATE_NEW_PROFILE": "Buat profil baru",
+    "PROFILE_NAME": "Nama profil",
+    "PROFILE_NAME_PLACEHOLDER": "mis. Kerja, Pribadi",
+    "CREATE": "Buat",
+    "EXISTING_PROFILES": "Profil yang ada",
+    "ACTIVE": "Aktif",
+    "CREATED": "Dibuat:",
+    "SAVE": "Simpan",
+    "CANCEL": "Batal",
+    "RENAME": "Ganti nama",
+    "EXPORT_PROFILE": "Ekspor profil",
+    "DELETE_PROFILE": "Hapus profil",
+    "OPEN_PROFILES_FOLDER": "Buka folder profil",
+    "CLOSE": "Tutup",
+    "MANAGE_PROFILES": "Kelola profil..."
+  },
   "WW": {
     "ADD_MORE": "Tambahkan lebih banyak",
     "ADD_SCHEDULED_FOR_TOMORROW": "Tambahkan tugas yang direncanakan untuk besok ({{nr}})",

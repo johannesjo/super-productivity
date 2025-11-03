@@ -1895,6 +1895,24 @@
     "E_PATTERN": "Invalid input",
     "E_REQUIRED": "This field is required"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Spravovať používateľské profily",
+    "CREATE_NEW_PROFILE": "Vytvoriť nový profil",
+    "PROFILE_NAME": "Názov profilu",
+    "PROFILE_NAME_PLACEHOLDER": "napr. Práca, Osobné",
+    "CREATE": "Vytvoriť",
+    "EXISTING_PROFILES": "Existujúce profily",
+    "ACTIVE": "Aktívny",
+    "CREATED": "Vytvorené:",
+    "SAVE": "Uložiť",
+    "CANCEL": "Zrušiť",
+    "RENAME": "Premenovať",
+    "EXPORT_PROFILE": "Exportovať profil",
+    "DELETE_PROFILE": "Odstrániť profil",
+    "OPEN_PROFILES_FOLDER": "Otvoriť priečinok profilov",
+    "CLOSE": "Zavrieť",
+    "MANAGE_PROFILES": "Spravovať profily..."
+  },
   "WW": {
     "ADD_MORE": "Add more",
     "ADD_SCHEDULED_FOR_TOMORROW": "Add tasks planned for tomorrow ({{nr}})",
