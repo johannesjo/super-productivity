@@ -38,18 +38,43 @@ export class FocusButtonComponent {
 
   T: typeof T = T;
 
-  kb = computed<KeyboardConfig>(() => {
+  readonly kb = computed<KeyboardConfig>(() => {
     return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   });
 
-  isSessionRunning = this.focusModeService.isSessionRunning;
-  progress = this.focusModeService.progress;
-  mode = this.focusModeService.mode;
+  readonly isSessionRunning = this.focusModeService.isSessionRunning;
+  readonly progress = this.focusModeService.progress;
+  readonly mode = this.focusModeService.mode;
   readonly FocusModeMode = FocusModeMode;
 
-  focusSummaryToday = computed(() =>
+  readonly focusSummaryToday = computed(() =>
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
   );
+
+  readonly tooltipSuffix = computed(() => {
+    const shortcut = this.kb().goToFocusMode;
+    return shortcut ? ` [${shortcut}]` : '';
+  });
+
+  readonly circleVisible = computed(() => this.isSessionRunning());
+
+  readonly circleProgress = computed<number | null>(() => {
+    if (!this.circleVisible()) {
+      return null;
+    }
+    const mode = this.mode();
+    if (mode === FocusModeMode.Countdown || mode === FocusModeMode.Pomodoro) {
+      const progress = this.progress();
+      return typeof progress === 'number' ? Math.min(100, Math.max(0, progress)) : 0;
+    }
+    return null;
+  });
+
+  readonly circleShouldPulse = computed(
+    () => this.circleVisible() && this.mode() === FocusModeMode.Flowtime,
+  );
+
+  readonly buttonColor = computed(() => (this.circleVisible() ? 'accent' : undefined));
 
   enableFocusMode(): void {
     this._store.dispatch(showFocusOverlay());

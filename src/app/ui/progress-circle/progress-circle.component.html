@@ -13,7 +13,7 @@
     [attr.stroke-width]="strokeWidth"
   ></circle>
 
-  @if (showProgress) {
+  @if (showProgress()) {
     <circle
       class="progress-circle__progress"
       [attr.cx]="center"
@@ -22,9 +22,9 @@
       fill="none"
       [attr.stroke-width]="strokeWidth"
       [attr.stroke-dasharray]="circumference"
-      [attr.stroke-dashoffset]="dashOffset"
+      [attr.stroke-dashoffset]="dashOffset()"
     ></circle>
-  } @else if (isPulsing) {
+  } @else if (isPulsing()) {
     <circle
       class="progress-circle__pulse"
       [attr.cx]="center"

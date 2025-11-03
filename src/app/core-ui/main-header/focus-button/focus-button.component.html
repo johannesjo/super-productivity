@@ -1,21 +1,15 @@
 <div class="focus-btn-wrapper">
-  @if (isSessionRunning()) {
+  @if (circleVisible()) {
     <progress-circle
-      [progress]="
-        mode() === FocusModeMode.Countdown || mode() === FocusModeMode.Pomodoro
-          ? progress()
-          : null
-      "
-      [isPulsing]="mode() === FocusModeMode.Flowtime"
+      [progress]="circleProgress()"
+      [isPulsing]="circleShouldPulse()"
     ></progress-circle>
   }
 
   <button
     mat-icon-button
-    matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
-      kb().goToFocusMode ? '[' + kb().goToFocusMode + ']' : ''
-    }}"
-    [color]="isSessionRunning() ? 'accent' : ''"
+    matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }}{{ tooltipSuffix() }}"
+    [color]="buttonColor()"
     (click)="enableFocusMode()"
   >
     <mat-icon>center_focus_strong</mat-icon>

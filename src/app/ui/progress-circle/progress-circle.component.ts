@@ -1,7 +1,32 @@
-import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  booleanAttribute,
+  computed,
+  input,
+} from '@angular/core';
 
 const STROKE_WIDTH = 2;
-const VIEWBOX_SIZE = 40;
+const VIEWBOX_SIZE = 44;
+
+const clampProgress = (value: number | null | undefined): number | null => {
+  if (typeof value === 'number' && Number.isFinite(value)) {
+    if (value < 0) {
+      return 0;
+    }
+    if (value > 100) {
+      return 100;
+    }
+    return value;
+  }
+  return null;
+};
+
+const HOST_COLOR_VAR = '[style.--progress-circle-color]' as const;
+
+const HOST_BINDINGS = {
+  [HOST_COLOR_VAR]: 'colorValue()',
+} as const;
 
 @Component({
   selector: 'progress-circle',
@@ -9,53 +34,40 @@ const VIEWBOX_SIZE = 40;
   templateUrl: './progress-circle.component.html',
   styleUrls: ['./progress-circle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: HOST_BINDINGS,
 })
 export class ProgressCircleComponent {
-  private _progress: number | null = null;
-  private _color: string | null = null;
+  readonly progress = input<number | null, number | null | undefined>(null, {
+    transform: clampProgress,
+  });
+  readonly isPulsing = input<boolean, unknown>(false, {
+    transform: booleanAttribute,
+  });
+  readonly color = input<string | null, string | null | undefined>(null, {
+    transform: (value) => value ?? null,
+  });
 
   readonly size = VIEWBOX_SIZE;
   readonly strokeWidth = STROKE_WIDTH;
   readonly center = VIEWBOX_SIZE / 2;
   readonly radius = this.center - STROKE_WIDTH;
   readonly circumference = 2 * Math.PI * this.radius;
+  readonly viewBox = `0 0 ${VIEWBOX_SIZE} ${VIEWBOX_SIZE}`;
 
-  @Input()
-  set progress(value: number | null | undefined) {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      this._progress = Math.min(100, Math.max(0, value));
-    } else {
-      this._progress = null;
-    }
-  }
-  get progress(): number | null {
-    return this._progress;
-  }
+  readonly showProgress = computed(() => this.progress() !== null && !this.isPulsing());
 
-  @Input() isPulsing = false;
+  readonly progressRatio = computed(() => {
+    const value = this.progress();
+    return value === null ? null : value / 100;
+  });
 
-  @Input()
-  set color(value: string | null | undefined) {
-    this._color = value ?? null;
-  }
-  get color(): string | null {
-    return this._color;
-  }
-
-  @HostBinding('style.--progress-circle-color')
-  get hostColor(): string | null {
-    return this._color;
-  }
-
-  get showProgress(): boolean {
-    return this._progress !== null && !this.isPulsing;
-  }
-
-  get dashOffset(): number {
-    if (this._progress === null) {
+  readonly dashOffset = computed(() => {
+    const ratio = this.progressRatio();
+    if (ratio === null) {
       return this.circumference;
     }
-    const progressRatio = this._progress / 100;
-    return this.circumference * (1 - progressRatio);
-  }
+    return this.circumference * (1 - ratio);
+  });
+
+  readonly colorValue = computed(() => this.color());
 }
