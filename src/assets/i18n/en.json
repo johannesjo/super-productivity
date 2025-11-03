@@ -597,7 +597,11 @@
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Counters over time",
         "TASKS_DONE_CREATED": "Tasks (done/created)",
         "TIME_ESTIMATED": "Time Estimated",
-        "TIME_SPENT": "Time Spent"
+        "TIME_SPENT": "Time Spent",
+        "TIME_FRAME_LABEL": "Time frame",
+        "TIME_FRAME_2_WEEKS": "2 weeks",
+        "TIME_FRAME_1_MONTH": "1 month",
+        "TIME_FRAME_MAX": "Max"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
