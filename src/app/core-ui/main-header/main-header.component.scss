@@ -16,7 +16,7 @@
   user-select: none;
   -webkit-user-select: none; /* Safari */
   --header-nav-button-gap: var(--s-half);
-  --header-button-size: var(--mat-mini-fab-size);
+  --header-button-size: 40px;
 }
 
 :host-context(.isMac.isElectron) {

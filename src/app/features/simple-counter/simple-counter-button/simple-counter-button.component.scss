@@ -6,7 +6,7 @@
 :host {
   display: inline-flex;
   align-items: center;
-  height: var(--header-button-size, 48px);
+  height: var(--header-button-size);
 }
 
 .wrapper {

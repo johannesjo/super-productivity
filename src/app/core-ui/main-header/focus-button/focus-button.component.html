@@ -2,22 +2,22 @@
   @if (isSessionRunning()) {
     <svg
       class="progress-ring"
-      viewBox="0 0 48 48"
+      viewBox="0 0 40 40"
     >
       <circle
         class="progress-ring-bg"
-        cx="24"
-        cy="24"
-        r="22"
+        cx="20"
+        cy="20"
+        r="18"
         fill="none"
         stroke-width="2"
       />
       @if (mode() === FocusModeMode.Countdown || mode() === FocusModeMode.Pomodoro) {
         <circle
           class="progress-ring-circle"
-          cx="24"
-          cy="24"
-          r="22"
+          cx="20"
+          cy="20"
+          r="18"
           fill="none"
           stroke-width="2"
           [style.stroke-dasharray]="138.23"
@@ -27,9 +27,9 @@
         <!-- Flowtime mode: pulsing circle -->
         <circle
           class="progress-ring-pulse"
-          cx="24"
-          cy="24"
-          r="22"
+          cx="20"
+          cy="20"
+          r="18"
           fill="none"
           stroke-width="2"
         />
