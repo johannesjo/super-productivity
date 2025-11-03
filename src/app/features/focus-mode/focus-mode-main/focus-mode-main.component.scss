@@ -121,6 +121,7 @@
   flex-direction: column;
   align-items: center;
   margin-bottom: var(--s2);
+
   &__content {
     position: relative;
     display: flex;
@@ -179,12 +180,15 @@
   transform: translate(-50%, -50%);
 }
 
-.duration-slider-overlay {
+.duration-slider-overlay-wrapper {
   position: absolute;
   top: 50%;
+  width: 200px;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 200px;
+}
+
+.duration-slider-overlay {
   display: flex;
   justify-content: center;
   z-index: var(--z-focus-mode-duration-slider);

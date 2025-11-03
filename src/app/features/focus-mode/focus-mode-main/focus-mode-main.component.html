@@ -25,10 +25,8 @@
   @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
     @if (enabledSimpleCounters.length) {
       <section class="simple-counter-buttons">
-        @for (
-          simpleCounter of enabledSimpleCounters;
-          track trackById($index, simpleCounter)
-        ) {
+        @for (simpleCounter of enabledSimpleCounters;
+          track trackById($index, simpleCounter)) {
           <simple-counter-button
             [class.isHiddenWithoutFocus]="!simpleCounter.isOn"
             [simpleCounter]="simpleCounter"
@@ -181,11 +179,17 @@
 
       <!-- Duration slider (Preparation state, Countdown mode only) -->
       @if (isShowDurationSlider()) {
-        <div class="duration-slider-overlay">
-          <input-duration-slider
-            [model]="displayDuration()"
-            (modelChange)="onDurationChange($event)"
-          ></input-duration-slider>
+        <div class="duration-slider-overlay-wrapper"
+        >
+          <div class="duration-slider-overlay"
+               [@modeSwitchFade]="mode()"
+
+          >
+            <input-duration-slider
+              [model]="displayDuration()"
+              (modelChange)="onDurationChange($event)"
+            ></input-duration-slider>
+          </div>
         </div>
       }
     </div>
@@ -300,7 +304,7 @@
   @if (currentTask && isDragOver) {
     <div class="bgc-accent drag-over-msg">
       <mat-icon>add</mat-icon>
-      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: currentTask.title } }}
+      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: {title: currentTask.title} }}
     </div>
   }
 </div>
