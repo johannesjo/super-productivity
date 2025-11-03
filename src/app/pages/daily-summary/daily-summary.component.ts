@@ -382,12 +382,31 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     const nr = parseInt(value);
     if (!isNaN(nr)) {
       this.workContextService.updateBreakNrForActiveContext(this.dayStr, nr);
+
+      if (nr === 0) {
+        this.workContextService.updateBreakTimeForActiveContext(this.dayStr, 0);
+      }
     }
   }
 
   updateBreakTime(time: number): void {
     if (!isNaN(time)) {
       this.workContextService.updateBreakTimeForActiveContext(this.dayStr, time);
+
+      if (time === 0) {
+        this.workContextService.updateBreakNrForActiveContext(this.dayStr, 0);
+      } else {
+        // if break time was set to a non-zero value ensure that nr is > 0
+        this.breakNr$
+          .pipe(first())
+          .toPromise()
+          .then((nr) => {
+            const currentNr = nr || 0;
+            if (currentNr === 0) {
+              this.workContextService.updateBreakNrForActiveContext(this.dayStr, 1);
+            }
+          });
+      }
     }
   }
 
