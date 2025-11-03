@@ -1,15 +1,3 @@
-.profile-info {
-  margin-bottom: 24px;
-  padding: 12px;
-  background: rgba(0, 0, 0, 0.04);
-  border-radius: 4px;
-
-  p {
-    margin: 0;
-    color: rgba(0, 0, 0, 0.6);
-  }
-}
-
 .create-profile-section {
   margin-bottom: 32px;
 
@@ -83,7 +71,7 @@
 
         .profile-meta {
           font-size: 12px;
-          color: rgba(0, 0, 0, 0.6);
+          opacity: 0.6;
         }
       }
 
