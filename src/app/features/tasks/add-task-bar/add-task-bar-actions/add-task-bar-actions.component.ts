@@ -147,6 +147,8 @@ export class AddTaskBarActionsComponent {
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
         this.stateService.updateDate(getDbDateStr(result.date), result.time);
+        // No UI access to reminder without a time being set
+        this.stateService.updateRemindOption(result.remindOption);
       }
       this.refocus.emit();
     });

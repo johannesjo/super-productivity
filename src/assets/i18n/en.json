@@ -1868,6 +1868,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
       "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
+      "DEFAULT_TASK_REMIND_OPTION": "Default remind option selected when creating tasks",
       "TITLE": "Reminders"
     },
     "SCHEDULE": {

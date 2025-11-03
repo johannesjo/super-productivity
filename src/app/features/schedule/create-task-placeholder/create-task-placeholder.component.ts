@@ -16,7 +16,7 @@ import {
 } from '@angular/core';
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
-import { Task, TaskReminderOptionId } from '../../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import { DatePipe } from '@angular/common';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
@@ -25,6 +25,8 @@ import { ShortTimeHtmlPipe } from '../../../ui/pipes/short-time-html.pipe';
 import { SelectTaskMinimalComponent } from '../../tasks/select-task/select-task-minimal/select-task-minimal.component';
 import { devError } from '../../../util/dev-error';
 import { SnackService } from '../../../core/snack/snack.service';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 type Timeout = NodeJS.Timeout | number | undefined;
 
@@ -39,6 +41,7 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
   private _taskService = inject(TaskService);
   private _store = inject(Store);
   private readonly _snackService = inject(SnackService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   isEditMode = input.required<boolean>();
   time = input<string>();
@@ -255,7 +258,8 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
             timeEstimate: 30 * 60 * 1000,
           },
           this.due(),
-          TaskReminderOptionId.AtStart,
+          this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+            DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
         );
       }
     } catch (error) {
@@ -278,7 +282,12 @@ export class CreateTaskPlaceholderComponent implements OnDestroy {
       );
     } else {
       // Schedule existing task with specific time
-      this._taskService.scheduleTask(task, this.due(), TaskReminderOptionId.AtStart);
+      this._taskService.scheduleTask(
+        task,
+        this.due(),
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+          DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
+      );
     }
   }
 
