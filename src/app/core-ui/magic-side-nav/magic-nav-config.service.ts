@@ -14,12 +14,17 @@ import { DialogCreateProjectComponent } from '../../features/project/dialogs/cre
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
+  DialogCreateTagComponent,
+  CreateTagData,
+} from '../../ui/dialog-create-tag/dialog-create-tag.component';
+import {
   selectAllProjectsExceptInbox,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginService } from '../../plugins/plugin.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
 import {
@@ -37,6 +42,7 @@ export class MagicNavConfigService {
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginService = inject(PluginService);
   private readonly _menuTreeService = inject(MenuTreeService);
 
   // Simple state signals
@@ -355,17 +361,28 @@ export class MagicNavConfigService {
 
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
+    const pluginStates = this._pluginService.getAllPluginStates();
+    const pluginIcons = this._pluginService.getPluginIconsSignal()();
 
     return pluginEntries.map((entry) => {
-      const hasSvgIcon = /\.svg$/i.test(entry.icon || '');
+      // Prefer custom SVG icon if available, otherwise check if entry.icon is SVG path
+      const hasCustomSvgIcon = pluginIcons.has(entry.pluginId);
+      const isIconSvgPath = /\.svg$/i.test(entry.icon || '');
+      const isUploadedPlugin = pluginStates.get(entry.pluginId)?.type === 'uploaded';
+
+      let svgIcon: string | undefined;
+      if (hasCustomSvgIcon) {
+        svgIcon = `plugin-${entry.pluginId}-icon`;
+      } else if (isIconSvgPath && !isUploadedPlugin) {
+        svgIcon = `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`;
+      }
+
       return {
-        type: 'plugin',
+        type: 'plugin' as const,
         id: `plugin-${entry.pluginId}-${entry.label}`,
         label: entry.label,
         icon: entry.icon || 'extension',
-        ...(hasSvgIcon && {
-          svgIcon: `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`,
-        }),
+        ...(svgIcon && { svgIcon }),
         pluginId: entry.pluginId,
         action: entry.onClick,
       };
@@ -445,15 +462,16 @@ export class MagicNavConfigService {
 
   private _createNewTag(): void {
     this._matDialog
-      .open(DialogPromptComponent, {
-        data: {
-          placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
-        },
+      .open(DialogCreateTagComponent, {
+        restoreFocus: true,
       })
       .afterClosed()
-      .subscribe((title) => {
-        if (title && title.trim()) {
-          this._tagService.addTag({ title: title.trim() });
+      .subscribe((result: CreateTagData) => {
+        if (result && result.title) {
+          this._tagService.addTag({
+            title: result.title,
+            color: result.color,
+          });
         }
       });
   }

@@ -25,6 +25,7 @@ import { throwHandledError } from '../../../../util/throw-handled-error';
 import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 import { devError } from '../../../../util/dev-error';
 import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
+import { OpenProjectFilterItem } from './open-project-filter.model';
 
 @Injectable({
   providedIn: 'root',
@@ -49,6 +50,11 @@ export class OpenProjectApiService {
     searchText: string,
     cfg: OpenProjectCfg,
   ): Observable<SearchResultItem[]> {
+    // OpenProject does not allow empty filter for subjectOrId, only send when searchText is present
+    const filters: [OpenProjectFilterItem] = [{ status: { operator: 'o', values: [] } }];
+    if (searchText?.trim()) {
+      filters.push({ subjectOrId: { operator: '**', values: [searchText] } });
+    }
     return this._sendRequest$(
       {
         // see https://www.openproject.org/docs/api/endpoints/work-packages/
@@ -56,13 +62,7 @@ export class OpenProjectApiService {
         params: {
           pageSize: 100,
           // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify(
-            [
-              { subjectOrId: { operator: '**', values: [searchText] } },
-              // only list open issues
-              { status: { operator: 'o', values: [] } },
-            ].concat(this._getScopeParamFilter(cfg)),
-          ),
+          filters: JSON.stringify(filters.concat(this._getScopeParamFilter(cfg))),
           // Default: [["id", "asc"]]
           sortBy: '[["updatedAt","desc"]]',
         },

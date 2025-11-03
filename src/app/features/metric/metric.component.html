@@ -80,19 +80,22 @@
     <section class="metric-metrics">
       <h1>{{ T.F.METRIC.CMP.GLOBAL_METRICS | translate }}</h1>
       <section class="line-charts">
-        @if (productivityHappiness(); as productivityHappiness) {
-          <section>
-            <h3>{{ T.F.METRIC.CMP.MOOD_PRODUCTIVITY_OVER_TIME | translate }}</h3>
-            <lazy-chart
-              [type]="lineChartType"
-              [datasets]="productivityHappiness.datasets"
-              [labels]="productivityHappiness.labels"
-              [legend]="true"
-              [options]="lineChartOptions"
-              height="400px"
-              [shareFileName]="'mood-productivity-over-time.png'"
-            ></lazy-chart>
-          </section>
+        @if (productivityBreakdownChartData(); as breakdownChart) {
+          @if (breakdownChart) {
+            <section>
+              <h3>{{ T.F.METRIC.CMP.PRODUCTIVITY_BREAKDOWN_OVER_TIME | translate }}</h3>
+              <lazy-chart
+                [type]="lineChartType"
+                [datasets]="breakdownChart.datasets"
+                [labels]="breakdownChart.labels"
+                [legend]="true"
+                [options]="lineChartOptions"
+                height="400px"
+                [shareFileName]="'productivity-sustainability-breakdown.png'"
+              >
+              </lazy-chart>
+            </section>
+          }
         }
         @if (focusSessionData(); as focusSessions) {
           @if (focusSessions.labels?.length) {
@@ -109,39 +112,6 @@
               ></lazy-chart>
             </section>
           }
-        }
-      </section>
-
-      <section class="pie-charts">
-        @if (metricService.improvementCountsPieChartData(); as improvementCounts) {
-          <section>
-            <h3>{{ T.F.METRIC.CMP.IMPROVEMENT_SELECTION_COUNT | translate }}</h3>
-            <lazy-chart
-              [type]="pieChartType"
-              [datasets]="improvementCounts.datasets"
-              [labels]="improvementCounts.labels"
-              [legend]="improvementCounts?.datasets[0].data.length < 12"
-              [options]="pieChartOptions"
-              height="300px"
-              [shareFileName]="'improvement-selection-count.png'"
-            >
-            </lazy-chart>
-          </section>
-        }
-        @if (metricService.obstructionCountsPieChartData(); as obstructionCounts) {
-          <section>
-            <h3>{{ T.F.METRIC.CMP.OBSTRUCTION_SELECTION_COUNT | translate }}</h3>
-            <lazy-chart
-              [type]="pieChartType"
-              [datasets]="obstructionCounts.datasets"
-              [labels]="obstructionCounts.labels"
-              [legend]="obstructionCounts?.datasets[0].data.length < 12"
-              [options]="pieChartOptions"
-              height="300px"
-              [shareFileName]="'obstruction-selection-count.png'"
-            >
-            </lazy-chart>
-          </section>
         }
       </section>
     </section>

@@ -197,6 +197,16 @@ export class GlobalThemeService {
     this._registeredPluginIcons.add(iconName);
   }
 
+  registerSvgIconFromContent(iconName: string, svgContent: string): void {
+    // Plugin icon is already registered, skip
+    if (this._registeredPluginIcons.has(iconName)) return;
+    this._matIconRegistry.addSvgIconLiteral(
+      iconName,
+      this._domSanitizer.bypassSecurityTrustHtml(svgContent),
+    );
+    this._registeredPluginIcons.add(iconName);
+  }
+
   private _initThemeWatchers(): void {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>

@@ -220,6 +220,14 @@ export const APP_ROUTES: Routes = [
     data: { page: 'plugin-index' },
     canActivate: [FocusOverlayOpenGuard],
   },
+  {
+    path: 'contrast-test',
+    loadComponent: () =>
+      import('./pages/contrast-test/contrast-test.component').then(
+        (m) => m.ContrastTestComponent,
+      ),
+    data: { page: 'contrast-test' },
+  },
 
   { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },
 ];

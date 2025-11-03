@@ -32,6 +32,7 @@ import { LazyChartComponent } from '../../metric/lazy-chart/lazy-chart.component
 
 const CHART_DAYS = 28;
 const CHART_COLOR = '#4bc0c0';
+const GOAL_LINE_COLOR = '#9e9e9e';
 
 @Component({
   selector: 'dialog-simple-counter-edit',
@@ -95,17 +96,38 @@ export class DialogSimpleCounterEditComponent {
     });
 
     const labels = dates.map((date) => this._formatChartLabel(date, counter));
+    const goalValueRaw = counter.streakMinValue;
+    const goalValue =
+      goalValueRaw == null
+        ? null
+        : counter.type === SimpleCounterType.StopWatch
+          ? Math.round(goalValueRaw / 60000)
+          : goalValueRaw;
+
+    const datasets: LineChartData['datasets'] = [
+      {
+        data: values,
+        label: counter.type === SimpleCounterType.StopWatch ? 'Duration' : 'Count',
+        fill: false,
+        borderColor: CHART_COLOR,
+      },
+    ];
+
+    if (goalValue != null) {
+      datasets.push({
+        data: dates.map(() => goalValue),
+        label: 'Daily goal',
+        fill: false,
+        borderColor: GOAL_LINE_COLOR,
+        borderDash: [6, 6],
+        pointRadius: 0,
+        pointHitRadius: 0,
+      });
+    }
 
     return {
       labels,
-      datasets: [
-        {
-          data: values,
-          label: counter.type === SimpleCounterType.StopWatch ? 'Duration' : 'Count',
-          fill: false,
-          borderColor: CHART_COLOR,
-        },
-      ],
+      datasets,
     };
   });
 

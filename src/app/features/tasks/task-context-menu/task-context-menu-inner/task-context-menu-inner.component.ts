@@ -19,7 +19,7 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { Task, TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskCopy, TaskWithSubTasks } from '../../task.model';
 import { EMPTY, forkJoin, from, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
@@ -74,6 +74,7 @@ import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 import { TaskLog } from '../../../../core/log';
 import { isTouchEventInstance } from '../../../../util/is-touch-event.util';
 import { TaskFocusService } from '../../task-focus.service';
+import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -201,22 +202,24 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
-    // we have a race condition
-    window.setTimeout(() => {
-      this._taskFocusService.focusedTaskId.set(this.task.id);
-    });
   }
 
   focusRelatedTaskOrNext(): void {
     // Focus the task element after context menu closes
-    const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
-    if (taskElement) {
-      taskElement.focus();
-    }
+    // Use setTimeout to ensure menu has fully closed and DOM is settled
+    setTimeout(() => {
+      const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
+      if (taskElement) {
+        taskElement.focus();
+        // Ensure focusedTaskId is set even if focus event doesn't fire
+        this._taskFocusService.focusedTaskId.set(this.task.id);
+      }
+    }, 0);
   }
 
   onClose(): void {
-    this._taskFocusService.focusedTaskId.set(null);
+    // Don't manually set focusedTaskId to null here - let the task component's
+    // focus/blur handlers manage it automatically to avoid race conditions
     this.focusRelatedTaskOrNext();
     this.close.emit();
   }
@@ -622,7 +625,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
-        TaskReminderOptionId.AtStart,
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+          DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
         false,
       );
     } else {

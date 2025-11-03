@@ -14,7 +14,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { T } from '../../../t.const';
-import { CommonModule } from '@angular/common';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { SyncLog } from '../../../core/log';
 
@@ -23,7 +22,7 @@ import { SyncLog } from '../../../core/log';
   templateUrl: './sync-safety-backups.component.html',
   styleUrls: ['./sync-safety-backups.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIcon, MatButton, MatTooltip, TranslatePipe],
+  imports: [MatIcon, MatButton, MatTooltip, TranslatePipe],
 })
 export class SyncSafetyBackupsComponent implements OnInit, OnDestroy {
   private _syncSafetyBackupService = inject(SyncSafetyBackupService);

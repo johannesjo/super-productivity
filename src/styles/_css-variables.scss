@@ -223,7 +223,11 @@ body {
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 1.25);
   --sidenav-hover: rgba(205, 205, 205, 0.35);
-  --sidenav-active-text: var(--palette-primary-800);
+  --sidenav-active-text: var(
+    --palette-primary-600
+  ); // Darker for better contrast on light bg
+  --sidenav-text: var(--text-color);
+  --sidenav-text-secondary: var(--text-color-muted);
   --sidebar-border: var(--divider-color);
   --sidebar-hover: var(--palette-background-hover);
   --sidebar-text: var(--text-color);
@@ -366,7 +370,11 @@ body.isDarkTheme {
   --sidenav-bg-mobile: var(--bg);
   --sidenav-active: rgba(255, 255, 255, 0.075);
   --sidenav-hover: rgba(255, 255, 255, 0.05);
-  --sidenav-active-text: var(--c-primary);
+  --sidenav-active-text: var(
+    --palette-primary-400
+  ); // Much lighter for better contrast on dark bg
+  --sidenav-text: var(--text-color);
+  --sidenav-text-secondary: var(--text-color-muted);
   --sidebar-border: var(--divider-color);
   --sidebar-hover: var(--palette-background-hover);
   --sidebar-text: var(--text-color);

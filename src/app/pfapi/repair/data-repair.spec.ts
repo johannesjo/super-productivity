@@ -1,7 +1,7 @@
 import { createAppDataCompleteMock } from '../../util/app-data-mock';
 import { dataRepair } from './data-repair';
 import { fakeEntityStateFromArray } from '../../util/fake-entity-state-from-array';
-import { DEFAULT_TASK, Task } from '../../features/tasks/task.model';
+import { DEFAULT_TASK, Task, TaskArchive } from '../../features/tasks/task.model';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { Tag, TagState } from '../../features/tag/tag.model';
 import { Project, ProjectState } from '../../features/project/project.model';
@@ -222,6 +222,46 @@ describe('dataRepair()', () => {
         } as any,
       },
     });
+  });
+
+  it('should remove non-existent tag ids from archived tasks', () => {
+    const existingTag: Tag = {
+      ...DEFAULT_TAG,
+      id: 'existingTag',
+      title: 'Existing Tag',
+      taskIds: [],
+    };
+
+    const tagState: TagState = {
+      ...fakeEntityStateFromArray<Tag>([TODAY_TAG, existingTag]),
+    } as TagState;
+
+    const archiveTask: Task = {
+      ...DEFAULT_TASK,
+      id: 'archived-1',
+      tagIds: ['existingTag', 'missingTag', TODAY_TAG.id],
+      projectId: '',
+    };
+
+    const archiveTaskState: TaskArchive = {
+      ids: [archiveTask.id],
+      entities: {
+        [archiveTask.id]: archiveTask,
+      },
+    };
+
+    const result = dataRepair({
+      ...mock,
+      tag: tagState,
+      archiveYoung: {
+        ...mock.archiveYoung,
+        task: archiveTaskState,
+      },
+    });
+
+    const repairedTask = result.archiveYoung.task.entities['archived-1'] as Task;
+
+    expect(repairedTask.tagIds).toEqual(['existingTag']);
   });
 
   it('should remove notes with missing data from the project lists', () => {

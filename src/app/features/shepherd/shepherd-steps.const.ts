@@ -33,7 +33,13 @@ const CANCEL_BTN: any = (shepherdService: ShepherdService) => ({
   classes: SECONDARY_CLASSES,
   text: 'No thanks',
   action: () => {
-    shepherdService.show(TourId.StartTourAgain);
+    const checkbox = document.getElementById(
+      'tour-show-on-startup-checkbox',
+    ) as HTMLInputElement;
+    if (checkbox && !checkbox.checked) {
+      localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
+    }
+    shepherdService.complete();
   },
 });
 
@@ -80,12 +86,32 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!',
-      text: '<p>Do you want a tour of the most important features?</p>',
+      text: `<p>Do you want a tour of the most important features?</p>
+        <p style="margin-top: 12px;">
+          <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+            <input
+              type="checkbox"
+              id="tour-show-on-startup-checkbox"
+              checked
+              style="margin-right: 8px; cursor: pointer;"
+            />
+            <span style="opacity: 0.9; font-size: 0.8em;">Show tour on startup</span>
+          </label>
+        </p>`,
       buttons: [
         CANCEL_BTN(shepherdService),
         {
           ...NEXT_BTN,
           text: "Let's go!",
+          action: () => {
+            const checkbox = document.getElementById(
+              'tour-show-on-startup-checkbox',
+            ) as HTMLInputElement;
+            if (checkbox && !checkbox.checked) {
+              localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
+            }
+            shepherdService.next();
+          },
         },
       ],
     },

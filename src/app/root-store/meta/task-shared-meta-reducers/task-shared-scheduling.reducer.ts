@@ -146,14 +146,21 @@ const handlePlanTasksForToday = (
   });
 
   // First, update the task entities with dueDay
-  const taskUpdates: Update<Task>[] = taskIds.map((taskId) => ({
-    id: taskId,
-    changes: {
-      dueDay: today,
-      // Ensure we never keep both a day and a time
-      dueWithTime: undefined,
-    },
-  }));
+  const taskUpdates: Update<Task>[] = taskIds.map((taskId) => {
+    const task = state[TASK_FEATURE_NAME].entities[taskId] as Task;
+
+    // Preserve dueWithTime if it matches today's date
+    // Only clear it if the task has a time scheduled for a different day
+    const shouldClearTime = task?.dueWithTime && !isToday(task.dueWithTime);
+
+    return {
+      id: taskId,
+      changes: {
+        dueDay: today,
+        ...(shouldClearTime ? { dueWithTime: undefined } : {}),
+      },
+    };
+  });
 
   const updatedState = {
     ...state,

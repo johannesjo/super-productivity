@@ -7,7 +7,7 @@ import {
   LOCALE_ID,
   signal,
 } from '@angular/core';
-import { Task, TaskReminderOptionId } from '../../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -46,6 +46,8 @@ import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -66,6 +68,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
   ],
 })
 export class DialogEditTaskRepeatCfgComponent {
+  private _globalConfigService = inject(GlobalConfigService);
   private _tagService = inject(TagService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
@@ -151,7 +154,10 @@ export class DialogEditTaskRepeatCfgComponent {
         ...DEFAULT_TASK_REPEAT_CFG,
         startDate: getDbDateStr(this._data.task.dueWithTime || undefined),
         startTime,
-        remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
+        remindAt: startTime
+          ? (this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+            DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!)
+          : undefined,
         title: this._data.task.title,
         notes: this._data.task.notes || undefined,
         tagIds: unique(this._data.task.tagIds),

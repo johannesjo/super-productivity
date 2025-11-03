@@ -9,10 +9,12 @@ import android.widget.Toast
 import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
+import com.superproductivity.superproductivity.plugins.SafBridgePlugin
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
-import com.superproductivity.superproductivity.plugins.SafBridgePlugin
+import com.superproductivity.superproductivity.webview.WebViewBlockActivity
+import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
 import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
 
 /**
@@ -20,9 +22,23 @@ import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
  */
 class CapacitorMainActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
+    private var webViewCompatibility: WebViewCompatibilityChecker.Result? = null
+    private var webViewBlocked = false
 
     private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
+
+    override fun load() {
+        val result = WebViewCompatibilityChecker.evaluate(this)
+        webViewCompatibility = result
+        if (result.isBlocked) {
+            webViewBlocked = true
+            WebViewBlockActivity.present(this, result)
+            finish()
+            return
+        }
+        super.load()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Register plugins before calling super.onCreate()
@@ -30,12 +46,25 @@ class CapacitorMainActivity : BridgeActivity() {
         registerPlugin(WebDavHttpPlugin::class.java)
 
         super.onCreate(savedInstanceState)
+        if (webViewBlocked) {
+            return
+        }
+
         printWebViewVersion(bridge.webView)
 
         // DEBUG ONLY
         if (BuildConfig.DEBUG) {
             Toast.makeText(this, "DEBUG: Offline Mode", Toast.LENGTH_SHORT).show()
             WebView.setWebContentsDebuggingEnabled(true)
+        }
+
+        webViewCompatibility?.let {
+            if (it.status == WebViewCompatibilityChecker.Status.WARN) {
+                Log.w(
+                    "SP-WebView",
+                    "WebView version ${it.majorVersion ?: "unknown"} below recommended ${WebViewCompatibilityChecker.RECOMMENDED_CHROMIUM_VERSION}",
+                )
+            }
         }
 
         // Hide the action bar

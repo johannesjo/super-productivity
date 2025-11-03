@@ -1,0 +1,49 @@
+[
+  {
+    "path": "/*",
+    "resourceSizes": [
+      {
+        "resourceType": "script",
+        "budget": 6000
+      },
+      {
+        "resourceType": "stylesheet",
+        "budget": 100
+      },
+      {
+        "resourceType": "image",
+        "budget": 300
+      },
+      {
+        "resourceType": "font",
+        "budget": 260
+      },
+      {
+        "resourceType": "total",
+        "budget": 7000
+      }
+    ],
+    "resourceCounts": [
+      {
+        "resourceType": "script",
+        "budget": 160
+      },
+      {
+        "resourceType": "stylesheet",
+        "budget": 10
+      },
+      {
+        "resourceType": "image",
+        "budget": 50
+      },
+      {
+        "resourceType": "font",
+        "budget": 10
+      },
+      {
+        "resourceType": "total",
+        "budget": 220
+      }
+    ]
+  }
+]

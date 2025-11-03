@@ -29,6 +29,7 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
 import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model';
+import { PluginIconComponent } from '../../../plugins/ui/plugin-icon/plugin-icon.component';
 
 @Component({
   selector: 'nav-item',
@@ -44,6 +45,7 @@ import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model'
     MatMenuItem,
     MatMenuModule,
     TranslatePipe,
+    PluginIconComponent,
   ],
   templateUrl: './nav-item.component.html',
   styleUrl: './nav-item.component.scss',
@@ -155,7 +157,6 @@ export class NavItemComponent {
   });
 
   private _generateIconName(svgUrl: string): string {
-    console.log({ svgUrl });
     const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
     if (match) {
       const pluginId = match[1];
@@ -167,29 +168,23 @@ export class NavItemComponent {
 
   namedSvgIcon = computed<string | undefined>(() => {
     const svgUrl = this.svgIcon();
-    return svgUrl && svgUrl.startsWith('assets/')
-      ? this._generateIconName(svgUrl)
-      : undefined;
+    if (!svgUrl) return undefined;
 
-    // if (svgUrl && svgUrl.startsWith('assets/')) {
-    //   const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
-    //   let iconName: string;
-    //   if (match) {
-    //     // Prefix icon names with plugin ID to avoid collision.
-    //     // Not strictly required, but without this, two plugins
-    //     // could register the same icons and override each other.
-    //     const pluginId = match[1];
-    //     const fileName = match[2].replace('.svg', '');
-    //     iconName = `plugin-${pluginId}-${fileName}`;
-    //   } else {
-    //     iconName = svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
-    //   }
-    //   if (!NavItemComponent._registeredIcons.has(iconName)) {
-    //     this._globalThemeService.registerSvgIcon(iconName, svgUrl);
-    //     NavItemComponent._registeredIcons.add(iconName);
-    //   }
-    //   return iconName;
-    // }
-    // return undefined;
+    // If it starts with 'assets/', generate a name and register it
+    if (svgUrl.startsWith('assets/')) {
+      return this._generateIconName(svgUrl);
+    }
+
+    // Otherwise, assume it's already a registered icon name (e.g., for custom plugins)
+    return svgUrl;
+  });
+
+  // Extract plugin ID from custom plugin icon name (pattern: plugin-${pluginId}-icon)
+  customPluginId = computed<string | null>(() => {
+    const svgUrl = this.svgIcon();
+    if (!svgUrl) return null;
+
+    const match = svgUrl.match(/^plugin-(.+)-icon$/);
+    return match ? match[1] : null;
   });
 }

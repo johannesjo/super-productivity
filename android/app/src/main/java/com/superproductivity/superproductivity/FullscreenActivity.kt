@@ -25,6 +25,8 @@ import com.superproductivity.superproductivity.app.LaunchDecider
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
+import com.superproductivity.superproductivity.webview.WebViewBlockActivity
+import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
 import com.superproductivity.superproductivity.webview.WebViewRequestHandler
 
 
@@ -47,6 +49,18 @@ class FullscreenActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         Log.v("TW", "FullScreenActivity: onCreate")
         super.onCreate(savedInstanceState)
+
+        val compatibility = WebViewCompatibilityChecker.evaluate(this)
+        if (compatibility.isBlocked) {
+            WebViewBlockActivity.present(this, compatibility)
+            finish()
+            return
+        } else if (compatibility.status == WebViewCompatibilityChecker.Status.WARN) {
+            Log.w(
+                "SP-WebView",
+                "WebView version ${compatibility.majorVersion ?: "unknown"} below recommended ${WebViewCompatibilityChecker.RECOMMENDED_CHROMIUM_VERSION}",
+            )
+        }
 
         // Determines which launch mode to use. (Online-old or Offline-new)
         val launchDecider = LaunchDecider(this)

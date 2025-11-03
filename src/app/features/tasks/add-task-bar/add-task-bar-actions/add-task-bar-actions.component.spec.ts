@@ -63,6 +63,7 @@ describe('AddTaskBarActionsComponent', () => {
     mockStateService = jasmine.createSpyObj('AddTaskBarStateService', [
       'updateDate',
       'updateEstimate',
+      'updateRemindOption',
       'clearDate',
       'clearTags',
       'clearEstimate',

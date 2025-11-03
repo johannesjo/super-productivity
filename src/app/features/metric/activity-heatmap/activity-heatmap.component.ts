@@ -21,6 +21,7 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { ShareService } from '../../../core/share/share.service';
 
 interface DayData {
   date: Date;
@@ -48,6 +49,7 @@ export class ActivityHeatmapComponent {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _shareService = inject(ShareService);
 
   T: typeof T = T;
   weeks: WeekData[] = [];
@@ -450,35 +452,43 @@ export class ActivityHeatmapComponent {
       const contextTitle = this._activeWorkContextTitle();
       const canvas = this._renderToCanvas(data, contextTitle);
 
-      // Convert to blob
-      const blob: Blob | null = await new Promise((resolve) => {
-        canvas.toBlob((b) => resolve(b), 'image/png', 1.0);
+      const result = await this._shareService.shareCanvasImage({
+        canvas,
+        filename: 'activity-heatmap.png',
+        shareTitle: 'Activity Heatmap',
       });
 
-      if (!blob) {
-        throw new Error('Failed to generate image');
-      }
-
-      const file = new File([blob], 'activity-heatmap.png', { type: 'image/png' });
-
-      // Try native share API first
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: 'Activity Heatmap',
+      if (result.success) {
+        if (result.target === 'download') {
+          const message = result.path
+            ? `Heatmap saved to ${result.path}`
+            : 'Heatmap saved to device storage';
+          const canOpen = this._shareService.canOpenDownloadResult(result);
+          const actionConfig = canOpen
+            ? {
+                actionStr: T.GLOBAL_SNACK.FILE_DOWNLOADED_BTN,
+                actionFn: () => {
+                  void this._shareService.openDownloadResult(result);
+                },
+              }
+            : {};
+          this._snackService.open({
+            type: 'SUCCESS',
+            msg: message,
+            isSkipTranslate: true,
+            ...actionConfig,
+          });
+        }
+      } else if (result.error && result.error !== 'Share cancelled') {
+        console.error('Share failed:', result.error);
+        this._snackService.open({
+          type: 'ERROR',
+          msg: 'Failed to share heatmap',
         });
-      } else {
-        // Fallback: Download the file
-        this._downloadFile(blob, 'activity-heatmap.png');
       }
-
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: 'Heatmap shared successfully',
-      });
     } catch (error: any) {
-      // User cancelled or error occurred
-      if (error?.name !== 'AbortError') {
+      const isAbort = error?.name === 'AbortError' || error?.error === 'Share cancelled';
+      if (!isAbort) {
         console.error('Share failed:', error);
         this._snackService.open({
           type: 'ERROR',
@@ -628,16 +638,5 @@ export class ActivityHeatmapComponent {
     ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
     ctx.fill();
-  }
-
-  private _downloadFile(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
   }
 }

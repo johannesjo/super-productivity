@@ -1,5 +1,5 @@
 import { INBOX_PROJECT } from '../../project/project.const';
-import { TimeSpentOnDay } from '../task.model';
+import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 
 export interface AddTaskBarState {
   projectId: string;
@@ -10,6 +10,7 @@ export interface AddTaskBarState {
   estimate: number | null;
   newTagTitles: string[];
   cleanText: string | null;
+  remindOption: TaskReminderOptionId | null;
 }
 export const ESTIMATE_OPTIONS = [
   { label: '5m', value: '5m' },
@@ -32,6 +33,7 @@ export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
   estimate: null,
   newTagTitles: [],
   cleanText: null,
+  remindOption: null,
 };
 
 export const CHRONO_SUGGESTIONS: string[] = [

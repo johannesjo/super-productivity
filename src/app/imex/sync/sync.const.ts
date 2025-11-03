@@ -46,7 +46,10 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
 
   // metric
   metric: initialMetricState,
+
+  // TODO remove completely
   improvement: initialImprovementState,
+  // TODO remove completely
   obstruction: initialObstructionState,
 };
 

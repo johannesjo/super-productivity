@@ -20,12 +20,14 @@ import type {
   Chart as ChartJS,
   ChartConfiguration,
 } from 'chart.js';
-import { CommonModule } from '@angular/common';
 import { ChartLazyLoaderService } from '../chart-lazy-loader.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
+import { ShareService } from '../../../core/share/share.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
 
 interface ChartClickEvent {
   active: ActiveElement[];
@@ -101,7 +103,7 @@ interface ChartClickEvent {
     `,
   ],
   standalone: true,
-  imports: [CommonModule, MatIconButton, MatTooltip, MatIcon, TranslatePipe],
+  imports: [MatIconButton, MatTooltip, MatIcon, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LazyChartComponent implements OnInit, OnDestroy {
@@ -120,6 +122,8 @@ export class LazyChartComponent implements OnInit, OnDestroy {
 
   private readonly chartLoaderService = inject(ChartLazyLoaderService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly shareService = inject(ShareService);
+  private readonly snackService = inject(SnackService);
 
   isLoaded = false;
   isSharing = false;
@@ -205,26 +209,39 @@ export class LazyChartComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     try {
-      const decoratedCanvas = this._createCanvasWithTagline(this.chartInstance.canvas);
-
-      const blob: Blob | null = await new Promise((resolve) => {
-        decoratedCanvas.toBlob((b) => resolve(b), 'image/png', 1.0);
+      const result = await this.shareService.shareCanvasImage({
+        canvas: this.chartInstance.canvas,
+        filename: this.shareFileName,
+        shareTitle: this.shareFileName,
+        tagline: {
+          text: 'With the Super Productivity App',
+        },
       });
 
-      if (!blob) {
-        throw new Error('Failed to export chart');
+      if (result.success && result.target === 'download') {
+        const message = result.path
+          ? `Chart image saved to ${result.path}`
+          : 'Chart image saved to device storage';
+        const canOpen = this.shareService.canOpenDownloadResult(result);
+        const actionConfig = canOpen
+          ? {
+              actionStr: T.GLOBAL_SNACK.FILE_DOWNLOADED_BTN,
+              actionFn: () => {
+                void this.shareService.openDownloadResult(result);
+              },
+            }
+          : {};
+
+        this.snackService.open({
+          type: 'SUCCESS',
+          msg: message,
+          isSkipTranslate: true,
+          ...actionConfig,
+        });
       }
 
-      const filename = this.shareFileName?.trim() || 'chart.png';
-      const file = new File([blob], filename, { type: 'image/png' });
-
-      if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        await navigator.share({
-          files: [file],
-          title: filename,
-        });
-      } else {
-        this._downloadFile(blob, filename);
+      if (!result.success && result.error && result.error !== 'Share cancelled') {
+        console.error('Share failed:', result.error);
       }
     } catch (error) {
       console.error('Share failed:', error);
@@ -232,46 +249,5 @@ export class LazyChartComponent implements OnInit, OnDestroy {
       this.isSharing = false;
       this.cdr.markForCheck();
     }
-  }
-
-  private _createCanvasWithTagline(sourceCanvas: HTMLCanvasElement): HTMLCanvasElement {
-    const taglineHeight = 48;
-    const newCanvas = document.createElement('canvas');
-    newCanvas.width = sourceCanvas.width;
-    newCanvas.height = sourceCanvas.height + taglineHeight;
-
-    const ctx = newCanvas.getContext('2d');
-    if (!ctx) {
-      return sourceCanvas;
-    }
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
-    ctx.drawImage(sourceCanvas, 0, 0);
-
-    const shareLabel = `With the Super Productivity App`;
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-
-    const baseFontSize = Math.max(20, Math.round(newCanvas.width / 40));
-    ctx.font = `${baseFontSize}px system-ui, -apple-system, sans-serif`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    const taglineOffset = taglineHeight / 2;
-    const taglineY = sourceCanvas.height + taglineOffset;
-    ctx.fillText(shareLabel, newCanvas.width / 2, taglineY);
-
-    return newCanvas;
-  }
-
-  private _downloadFile(blob: Blob, filename: string): void {
-    const url = URL.createObjectURL(blob);
-    const anchor = document.createElement('a');
-    anchor.href = url;
-    anchor.download = filename;
-    document.body.appendChild(anchor);
-    anchor.click();
-    document.body.removeChild(anchor);
-    URL.revokeObjectURL(url);
   }
 }

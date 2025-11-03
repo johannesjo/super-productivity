@@ -31,17 +31,21 @@ describe('TaskRepeatCfgService', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let dispatchSpy: jasmine.Spy;
 
+  const formatIsoDate = (d: Date): string =>
+    `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+
   const mockTaskRepeatCfg: TaskRepeatCfg = {
     ...DEFAULT_TASK_REPEAT_CFG,
     id: 'test-cfg-id',
     title: 'Test Repeat Task',
     projectId: 'test-project',
     repeatCycle: 'DAILY',
-    startDate: new Date().toISOString().split('T')[0], // Use today's date
-    // eslint-disable-next-line no-mixed-operators
-    lastTaskCreationDay: new Date(Date.now() - 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0], // Yesterday
+    startDate: formatIsoDate(new Date()), // Today
+    lastTaskCreationDay: (() => {
+      const prevNow = new Date();
+      prevNow.setDate(prevNow.getDate() - 1);
+      return formatIsoDate(prevNow);
+    })(), // Yesterday
     repeatEvery: 1,
     defaultEstimate: 3600000,
     notes: 'Test notes',

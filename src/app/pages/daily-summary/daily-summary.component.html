@@ -196,8 +196,8 @@
           style="max-width: 600px"
         >
           <evaluation-sheet
-            (save)="onEvaluationSave()"
-            [day]="dayStr$ | async"
+            [dayStr$]="dayStr$"
+            [timeWorkedToday]="timeWorked$ | async"
           ></evaluation-sheet>
         </section>
       </mat-tab>

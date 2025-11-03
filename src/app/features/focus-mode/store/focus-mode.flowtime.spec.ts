@@ -13,6 +13,7 @@ import { BannerService } from '../../../core/banner/banner.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
+import { MetricService } from '../../metric/metric.service';
 
 describe('FocusMode Flowtime behavior', () => {
   describe('Reducer: startFocusSession', () => {
@@ -110,6 +111,12 @@ describe('FocusMode Flowtime behavior', () => {
                 shouldAutoStartNextSession: false,
                 getBreakDuration: () => null,
               }),
+            },
+          },
+          {
+            provide: MetricService,
+            useValue: {
+              logFocusSession: () => {},
             },
           },
         ],

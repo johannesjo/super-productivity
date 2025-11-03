@@ -1,14 +1,24 @@
 import { Injectable, inject } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { Capacitor } from '@capacitor/core';
+import { Directory, Filesystem } from '@capacitor/filesystem';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SnackService } from '../snack/snack.service';
-import { SharePayload, ShareResult, ShareTarget, ShareTargetConfig } from './share.model';
-
-const FALLBACK_SHARE_URL = 'https://super-productivity.com';
+import {
+  ShareCanvasImageParams,
+  ShareCanvasTagline,
+  SharePayload,
+  ShareResult,
+  ShareTarget,
+  ShareTargetConfig,
+} from './share.model';
+import * as ShareTextUtil from './share-text.util';
+import * as ShareUrlBuilder from './share-url-builder.util';
+import * as ShareFileUtil from './share-file.util';
+import * as SharePlatformUtil from './share-platform.util';
 
 export type ShareOutcome = 'shared' | 'cancelled' | 'unavailable' | 'failed';
-export type ShareSupport = 'native' | 'web' | 'none';
+export type { ShareSupport } from './share-platform.util';
 
 interface ShareParams {
   title?: string | null;
@@ -24,7 +34,7 @@ interface ShareParams {
   providedIn: 'root',
 })
 export class ShareService {
-  private _shareSupportPromise?: Promise<ShareSupport>;
+  private _shareSupportPromise?: Promise<SharePlatformUtil.ShareSupport>;
 
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
@@ -54,13 +64,21 @@ export class ShareService {
     return 'failed';
   }
 
-  async getShareSupport(): Promise<ShareSupport> {
+  canOpenDownloadResult(result: ShareResult): boolean {
+    return ShareFileUtil.canOpenDownloadResult(result);
+  }
+
+  async openDownloadResult(result: ShareResult): Promise<void> {
+    return ShareFileUtil.openDownloadResult(result);
+  }
+
+  async getShareSupport(): Promise<SharePlatformUtil.ShareSupport> {
     if (typeof window === 'undefined') {
       return 'none';
     }
 
     if (!this._shareSupportPromise) {
-      this._shareSupportPromise = this._detectShareSupport();
+      this._shareSupportPromise = SharePlatformUtil.detectShareSupport();
     }
 
     return this._shareSupportPromise;
@@ -70,7 +88,7 @@ export class ShareService {
    * Main share method - automatically detects platform and uses best method.
    */
   async share(payload: SharePayload, target?: ShareTarget): Promise<ShareResult> {
-    const normalizedPayload = this._ensureShareText(payload);
+    const normalizedPayload = ShareTextUtil.ensureShareText(payload);
 
     if (!payload.text && !payload.url) {
       return {
@@ -95,14 +113,17 @@ export class ShareService {
    * Share to a specific target (public API for dialog component).
    */
   async shareToTarget(payload: SharePayload, target: ShareTarget): Promise<ShareResult> {
-    const normalized = this._ensureShareText(payload);
+    const normalized = ShareTextUtil.ensureShareText(payload);
 
     try {
       switch (target) {
         case 'native':
           return this.tryNativeShare(normalized);
         case 'clipboard-text':
-          return this.copyToClipboard(this.formatTextForClipboard(payload), 'Text');
+          return this.copyToClipboard(
+            ShareTextUtil.formatTextForClipboard(payload),
+            'Text',
+          );
         default:
           return this._openShareUrl(normalized, target);
       }
@@ -116,13 +137,75 @@ export class ShareService {
   }
 
   /**
+   * Share a canvas element as an image, supporting native, web, and download fallbacks.
+   */
+  async shareCanvasImage(params: ShareCanvasImageParams): Promise<ShareResult> {
+    if (typeof window === 'undefined' || !params?.canvas) {
+      return {
+        success: false,
+        error: 'Canvas not available',
+      };
+    }
+
+    const filename = ShareFileUtil.sanitizeFilename(
+      params.filename ?? 'shared-image.png',
+    );
+    const shareTitle = params.shareTitle ?? filename;
+    const canvasForExport = this._prepareCanvasForShare(params.canvas, params.tagline);
+    const dataUrl = canvasForExport.toDataURL('image/png', 1.0);
+    const base64 = ShareFileUtil.extractBase64(dataUrl);
+    const blob = await this._canvasToBlob(canvasForExport);
+    if (!blob) {
+      return {
+        success: false,
+        error: 'Failed to export image',
+      };
+    }
+
+    if (params.mode === 'download-only') {
+      return this._saveCanvasDownload({
+        blob,
+        base64,
+        filename,
+        dataUrl,
+      });
+    }
+
+    if (base64) {
+      const nativeResult = await this._shareCanvasViaNative(base64, filename, shareTitle);
+      if (nativeResult.success || nativeResult.error === 'Share cancelled') {
+        return nativeResult;
+      }
+    }
+
+    const webResult = await this._shareCanvasViaWeb(blob, filename, shareTitle, dataUrl);
+    if (webResult.success || webResult.error === 'Share cancelled') {
+      return webResult;
+    }
+
+    if (params.fallbackToDownload !== false) {
+      return this._saveCanvasDownload({
+        blob,
+        base64,
+        filename,
+        dataUrl,
+      });
+    }
+
+    return {
+      success: false,
+      error: 'Share not available',
+    };
+  }
+
+  /**
    * Try to use native share (Android, Web Share API).
    * Public API for dialog component.
    */
   async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
-    const normalized = this._ensureShareText(payload);
+    const normalized = ShareTextUtil.ensureShareText(payload);
 
-    const capacitorShare = await this._getCapacitorSharePlugin();
+    const capacitorShare = await SharePlatformUtil.getCapacitorSharePlugin();
     if (capacitorShare) {
       try {
         await capacitorShare.share({
@@ -212,7 +295,7 @@ export class ShareService {
         width: '500px',
         data: {
           payload,
-          showNative: await this._isSystemShareAvailable(),
+          showNative: await SharePlatformUtil.isSystemShareAvailable(),
         },
       });
 
@@ -241,8 +324,8 @@ export class ShareService {
     payload: SharePayload,
     target: ShareTarget,
   ): Promise<ShareResult> {
-    const normalized = this._ensureShareText(payload);
-    const url = this._buildShareUrl(normalized, target);
+    const normalized = ShareTextUtil.ensureShareText(payload);
+    const url = ShareUrlBuilder.buildShareUrl(normalized, target);
 
     window.open(url, '_blank', 'noopener,noreferrer');
 
@@ -252,52 +335,6 @@ export class ShareService {
       success: true,
       target,
     };
-  }
-
-  /**
-   * Build share URL for a specific target.
-   */
-  private _buildShareUrl(payload: SharePayload, target: ShareTarget): string {
-    const enc = encodeURIComponent;
-    const shareUrl = payload.url?.trim() || FALLBACK_SHARE_URL;
-    const baseTitle = this._getShareTitle(payload);
-
-    const providerText = this._buildProviderText(payload, target);
-    const providerTitle = this._buildProviderTitle(baseTitle, target);
-    const inlineText = this._inlineShareText(providerText || providerTitle);
-
-    const encodedUrl = enc(shareUrl);
-    const encodedText = enc(providerText || providerTitle || shareUrl);
-    const encodedInline = enc(inlineText || providerTitle || shareUrl);
-    const encodedTitle = enc(providerTitle || 'Check this out');
-
-    switch (target) {
-      case 'twitter':
-        return `https://twitter.com/intent/tweet?text=${encodedInline}`;
-      case 'linkedin':
-        // LinkedIn ignores summary/message params in the modern share dialog (policy
-        // to prevent prefilled spam). We still pass summary for legacy/preview rendering.
-        return `https://www.linkedin.com/shareArticle?mini=true&url=${encodedUrl}&title=${encodedTitle}&summary=${encodedText}`;
-      case 'reddit':
-        // New reddit drops text params. The legacy reddit (old.reddit.com) still honors
-        // them so we point there for best-effort prefill.
-        return `https://old.reddit.com/submit?title=${encodedTitle}&kind=self&text=${encodedText}`;
-      case 'facebook':
-        // Facebook ignores prefilled body text since 2018. quote= is preserved as a caption.
-        return `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
-      case 'whatsapp':
-        return `https://wa.me/?text=${this._encodeForWhatsApp(providerText || providerTitle || shareUrl)}`;
-      case 'telegram':
-        return `https://t.me/share/url?url=${encodedUrl}&text=${enc(providerText || providerTitle || shareUrl)}`;
-      case 'email':
-        return `mailto:?subject=${encodedTitle}&body=${encodedText}`;
-      case 'mastodon': {
-        const instance = 'mastodon.social';
-        return `https://${instance}/share?text=${enc(providerText || shareUrl)}`;
-      }
-      default:
-        throw new Error(`Unknown share target: ${target}`);
-    }
   }
 
   /**
@@ -340,47 +377,12 @@ export class ShareService {
    * Format payload as plain text for clipboard (public API for dialog component).
    */
   formatTextForClipboard(payload: SharePayload): string {
-    const parts: string[] = [];
-
-    if (payload.title) {
-      parts.push(payload.title);
-      parts.push('');
-    }
-
-    if (payload.text) {
-      parts.push(payload.text);
-    }
-
-    if (payload.url) {
-      if (payload.text) {
-        parts.push('');
-      }
-      parts.push(payload.url);
-    }
-
-    return parts.join('\n');
+    return ShareTextUtil.formatTextForClipboard(payload);
   }
 
   /**
    * Check if native/system share is available on current platform.
    */
-  private async _isSystemShareAvailable(): Promise<boolean> {
-    if (await this._isCapacitorShareAvailable()) {
-      return true;
-    }
-
-    if (IS_ANDROID_WEB_VIEW) {
-      const win = window as any;
-      return !!win.Capacitor?.Plugins?.Share;
-    }
-
-    if (typeof navigator !== 'undefined' && 'share' in navigator) {
-      return true;
-    }
-
-    return false;
-  }
-
   /**
    * Get available share targets with their configurations.
    */
@@ -436,223 +438,275 @@ export class ShareService {
     ];
   }
 
-  private _ensureShareText(payload: SharePayload): SharePayload {
-    const existingText = typeof payload.text === 'string' ? payload.text.trim() : '';
-    if (existingText.length > 0) {
-      if (payload.text === existingText) {
-        return payload;
-      }
+  private _prepareCanvasForShare(
+    canvas: HTMLCanvasElement,
+    tagline?: ShareCanvasTagline,
+  ): HTMLCanvasElement {
+    if (!tagline?.text) {
+      return canvas;
+    }
+
+    const taglineHeight = Math.max(1, tagline.height ?? 48);
+    const newCanvas = document.createElement('canvas');
+    newCanvas.width = canvas.width;
+    newCanvas.height = canvas.height + taglineHeight;
+
+    const ctx = newCanvas.getContext('2d');
+    if (!ctx) {
+      return canvas;
+    }
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, newCanvas.width, newCanvas.height);
+    ctx.drawImage(canvas, 0, 0);
+
+    ctx.fillStyle = tagline.color ?? 'rgba(0, 0, 0, 0.6)';
+    const baseFontSize = Math.max(20, Math.round(newCanvas.width / 40));
+    ctx.font = `${baseFontSize}px system-ui, -apple-system, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const taglineOffset = taglineHeight / 2;
+    const taglineY = canvas.height + taglineOffset;
+    ctx.fillText(tagline.text, newCanvas.width / 2, taglineY);
+
+    return newCanvas;
+  }
+
+  private _canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob | null> {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => resolve(blob), 'image/png', 1.0);
+    });
+  }
+
+  private async _shareCanvasViaNative(
+    base64: string,
+    filename: string,
+    title: string,
+  ): Promise<ShareResult> {
+    const sharePlugin = await SharePlatformUtil.getCapacitorSharePlugin();
+    if (!sharePlugin) {
       return {
-        ...payload,
-        text: existingText,
+        success: false,
+        error: 'Native share not available',
       };
     }
 
-    const fallbackParts: string[] = [];
-    const title = payload.title?.trim();
-    if (title) {
-      fallbackParts.push(title);
+    const sanitizedName = ShareFileUtil.sanitizeFilename(filename);
+    const relativePath = `shared-images/${Date.now()}-${sanitizedName}`;
+    let fileUrl: string | null = null;
+    let resolvedUri: string | null = null;
+
+    try {
+      const writeResult = await Filesystem.writeFile({
+        path: relativePath,
+        data: base64,
+        directory: Directory.Cache,
+        recursive: true,
+      });
+
+      resolvedUri =
+        writeResult.uri ??
+        (
+          await Filesystem.getUri({
+            directory: Directory.Cache,
+            path: relativePath,
+          })
+        ).uri;
+
+      if (!resolvedUri) {
+        throw new Error('Failed to resolve native share uri');
+      }
+
+      fileUrl = resolvedUri.startsWith('file://')
+        ? resolvedUri
+        : resolvedUri.startsWith('/')
+          ? `file://${resolvedUri}`
+          : `file:///${resolvedUri}`;
+
+      console.debug('[ShareService] shareCanvasViaNative', {
+        resolvedUri,
+        fileUrl,
+        relativePath,
+      });
+
+      try {
+        const stat = await Filesystem.stat({
+          path: relativePath,
+          directory: Directory.Cache,
+        });
+        console.debug('[ShareService] shareCanvasViaNative stat', stat);
+      } catch (statError) {
+        console.warn('[ShareService] stat failed for shared image', statError);
+      }
+
+      const canShare = (await sharePlugin.canShare?.())?.value ?? true;
+      if (!canShare) {
+        return {
+          success: false,
+          error: 'Native share not available',
+        };
+      }
+
+      await sharePlugin.share({
+        title,
+        text: '',
+        files: [fileUrl],
+        dialogTitle: 'Share via',
+      });
+
+      this._snackService.open('Shared successfully!');
+      ShareFileUtil.scheduleCacheCleanup(relativePath);
+      return {
+        success: true,
+        usedNative: true,
+        target: 'native',
+      };
+    } catch (error: any) {
+      if (error?.name === 'AbortError' || /Share canceled/i.test(error?.message)) {
+        return {
+          success: false,
+          error: 'Share cancelled',
+        };
+      }
+      console.warn('Native image share failed:', error, {
+        fileUrl: fileUrl ?? 'n/a',
+        resolvedUri: resolvedUri ?? 'n/a',
+        relativePath,
+      });
+      ShareFileUtil.scheduleCacheCleanup(relativePath);
+      return {
+        success: false,
+        error: 'Native share failed',
+      };
+    }
+  }
+
+  private async _shareCanvasViaWeb(
+    blob: Blob,
+    filename: string,
+    title: string,
+    dataUrl: string,
+  ): Promise<ShareResult> {
+    if (typeof navigator === 'undefined') {
+      return {
+        success: false,
+        error: 'Share not available',
+      };
     }
 
-    const url = payload.url?.trim();
-    if (url) {
-      fallbackParts.push(url);
-    }
+    try {
+      if (typeof File !== 'undefined') {
+        const file = new File([blob], filename, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title,
+          });
+          this._snackService.open('Shared successfully!');
+          return {
+            success: true,
+            usedNative: true,
+            target: 'native',
+          };
+        }
+      }
 
-    const fallbackText = fallbackParts.join('\n\n').trim();
-    if (!fallbackText) {
-      return payload;
+      if (typeof navigator.share === 'function') {
+        await navigator.share({
+          title,
+          url: dataUrl,
+        });
+        this._snackService.open('Shared successfully!');
+        return {
+          success: true,
+          usedNative: true,
+          target: 'native',
+        };
+      }
+    } catch (error: any) {
+      if (error?.name === 'AbortError') {
+        return {
+          success: false,
+          error: 'Share cancelled',
+        };
+      }
+      console.warn('Web Share API failed:', error);
     }
 
     return {
-      ...payload,
-      text: fallbackText,
+      success: false,
+      error: 'Share not available',
     };
   }
 
-  private _buildShareText(payload: SharePayload): string {
-    const text = payload.text?.trim() ?? '';
-    const url = payload.url?.trim() ?? '';
+  private async _saveCanvasDownload({
+    blob,
+    base64,
+    filename,
+    dataUrl,
+  }: {
+    blob: Blob;
+    base64?: string | null;
+    filename: string;
+    dataUrl: string;
+  }): Promise<ShareResult> {
+    if (base64 && (Capacitor.isNativePlatform() || IS_ANDROID_WEB_VIEW)) {
+      const sanitizedName = ShareFileUtil.sanitizeFilename(filename);
+      const relativePath = `shared-images/${Date.now()}-${sanitizedName}`;
+      try {
+        const writeResult = await Filesystem.writeFile({
+          path: relativePath,
+          data: base64,
+          directory: Directory.Documents,
+          recursive: true,
+        });
 
-    if (!text && !url) {
-      return '';
-    }
+        const uri =
+          writeResult.uri ??
+          (
+            await Filesystem.getUri({
+              directory: Directory.Documents,
+              path: relativePath,
+            })
+          ).uri;
 
-    if (!url) {
-      return text;
-    }
+        const storedPath = `Documents/${relativePath}`;
 
-    if (!text) {
-      return url;
-    }
-
-    if (text.includes(url)) {
-      return text;
-    }
-
-    return `${text}\n\n${url}`;
-  }
-
-  private _cleanupText(text: string): string {
-    if (!text) {
-      return '';
-    }
-
-    const lines = text.split(/\r?\n/);
-    const cleaned: string[] = [];
-    let pendingBlank = false;
-
-    for (const rawLine of lines) {
-      const normalizedLine = rawLine.replace(/\s{2,}/g, ' ').trim();
-      if (!normalizedLine) {
-        if (cleaned.length > 0) {
-          pendingBlank = true;
-        }
-        continue;
-      }
-      if (pendingBlank) {
-        cleaned.push('');
-        pendingBlank = false;
-      }
-      cleaned.push(normalizedLine);
-    }
-
-    return cleaned.join('\n').trim();
-  }
-
-  private _inlineShareText(text: string): string {
-    const normalized = this._cleanupText(text);
-    if (!normalized) {
-      return '';
-    }
-
-    return normalized
-      .split(/\r?\n+/)
-      .map((segment) => segment.trim())
-      .filter(Boolean)
-      .join(' ')
-      .replace(/\s{2,}/g, ' ')
-      .trim();
-  }
-
-  private _getShareTitle(payload: SharePayload): string {
-    const title = payload.title?.trim();
-    if (title) {
-      return title.slice(0, 300);
-    }
-
-    const text = payload.text?.trim();
-    if (text) {
-      const firstNonEmptyLine = text
-        .split(/\r?\n+/)
-        .map((line) => line.trim())
-        .find((line) => line.length > 0);
-      if (firstNonEmptyLine) {
-        return firstNonEmptyLine.slice(0, 300);
+        return {
+          success: true,
+          target: 'download',
+          usedNative: true,
+          path: storedPath,
+          uri,
+        };
+      } catch (error) {
+        console.warn('Native download failed, falling back to browser download:', error);
       }
     }
 
-    const url = payload.url?.trim();
-    if (url) {
-      return url;
+    const downloaded = ShareFileUtil.downloadBlob(blob, filename);
+    if (downloaded) {
+      return {
+        success: true,
+        target: 'download',
+      };
     }
 
-    return 'Check this out';
-  }
-
-  private _buildProviderText(payload: SharePayload, provider: ShareTarget): string {
-    let text = this._cleanupText(this._buildShareText(payload));
-
-    if (!text) {
-      return payload.url?.trim() || '';
-    }
-
-    if (provider !== 'twitter' && provider !== 'mastodon') {
-      text = this._cleanupText(this._stripHashtags(text));
-    }
-
-    if (provider === 'whatsapp') {
-      text = this._cleanupText(this._stripEmojis(text));
-    }
-
-    return text || payload.url?.trim() || '';
-  }
-
-  private _buildProviderTitle(baseTitle: string, provider: ShareTarget): string {
-    let title = baseTitle?.trim() || '';
-
-    if (!title) {
-      return title;
-    }
-
-    if (provider !== 'twitter' && provider !== 'mastodon') {
-      title = this._stripHashtags(title);
-    }
-
-    if (provider === 'whatsapp') {
-      title = this._stripEmojis(title);
-    }
-
-    return title.replace(/\s{2,}/g, ' ').trim();
-  }
-
-  private _encodeForWhatsApp(text: string): string {
-    const cleaned = this._cleanupText(text);
-    return encodeURIComponent(cleaned || FALLBACK_SHARE_URL);
-  }
-
-  private _stripHashtags(text: string): string {
-    if (!text) {
-      return '';
-    }
-
-    return text.replace(/(^|[\s])#[\p{L}\p{N}_-]+/gu, (match, prefix) => prefix);
-  }
-
-  private _stripEmojis(text: string): string {
-    if (!text) {
-      return '';
-    }
-
-    return text.replace(/\p{Extended_Pictographic}|\uFE0F|\uFE0E|\u200D/gu, '');
-  }
-
-  private async _detectShareSupport(): Promise<ShareSupport> {
-    if (await this._isCapacitorShareAvailable()) {
-      return 'native';
-    }
-
-    if (IS_ANDROID_WEB_VIEW) {
-      const win = window as any;
-      if (win.Capacitor?.Plugins?.Share) {
-        return 'native';
+    if (typeof window !== 'undefined' && dataUrl) {
+      try {
+        window.open(dataUrl, '_blank');
+        return {
+          success: true,
+          target: 'download',
+        };
+      } catch (error) {
+        console.warn('Opening image in new tab failed:', error);
       }
     }
 
-    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
-      return 'web';
-    }
-
-    return 'none';
-  }
-
-  private async _isCapacitorShareAvailable(): Promise<boolean> {
-    const sharePlugin = await this._getCapacitorSharePlugin();
-    return !!sharePlugin;
-  }
-
-  private async _getCapacitorSharePlugin(): Promise<any | null> {
-    if (!Capacitor.isNativePlatform() || typeof window === 'undefined') {
-      return null;
-    }
-
-    const win = window as any;
-    const sharePlugin = win.Capacitor?.Plugins?.Share;
-
-    if (sharePlugin && typeof sharePlugin.share === 'function') {
-      return sharePlugin;
-    }
-
-    return null;
+    return {
+      success: false,
+      error: 'Download failed',
+    };
   }
 }

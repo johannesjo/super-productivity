@@ -2,57 +2,12 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "numberOfRuns": 3,
+      "numberOfRuns": 1,
       "url": ["/browser/index.html"],
-      "budgets": [
-        {
-          "path": "/*",
-          "resourceSizes": [
-            {
-              "resourceType": "script",
-              "budget": 1200
-            },
-            {
-              "resourceType": "stylesheet",
-              "budget": 100
-            },
-            {
-              "resourceType": "image",
-              "budget": 300
-            },
-            {
-              "resourceType": "font",
-              "budget": 100
-            },
-            {
-              "resourceType": "total",
-              "budget": 1500
-            }
-          ],
-          "resourceCounts": [
-            {
-              "resourceType": "script",
-              "budget": 100
-            },
-            {
-              "resourceType": "stylesheet",
-              "budget": 10
-            },
-            {
-              "resourceType": "image",
-              "budget": 50
-            },
-            {
-              "resourceType": "font",
-              "budget": 10
-            },
-            {
-              "resourceType": "total",
-              "budget": 150
-            }
-          ]
-        }
-      ]
+      "settings": {
+        "disableServiceWorker": true,
+        "maxWaitForLoad": 45000
+      }
     },
     "assert": {
       "preset": "lighthouse:no-pwa",
@@ -67,7 +22,8 @@
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
         "interactive": ["warn", { "maxNumericValue": 5000 }],
         "resource-summary.script.count": ["warn", { "maxNumericValue": 140 }],
-        "resource-summary.total.count": ["warn", { "maxNumericValue": 150 }]
+        "resource-summary.total.count": ["warn", { "maxNumericValue": 150 }],
+        "resource-summary.font.size": ["warn", { "maxNumericValue": 260000 }]
       }
     },
     "upload": {

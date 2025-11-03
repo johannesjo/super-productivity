@@ -15,7 +15,7 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       # required because setting via env.TZ does not work on windows
@@ -58,7 +58,7 @@ jobs:
           release: false
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: WinBuildStuff
           path: .tmp/app-builds/*.exe
@@ -70,7 +70,7 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
 
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       - name: Echo is Release
@@ -158,7 +158,7 @@ jobs:
       #  if: always()
       # run: ls -la && cat notarization-error.log
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: dmg
           path: .tmp/app-builds/*.dmg

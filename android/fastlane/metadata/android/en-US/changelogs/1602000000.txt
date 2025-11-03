@@ -1,0 +1,68 @@
+
+### Bug Fixes
+
+* backlog subtasks are not removed when removing a project
+* bring back day as param for evaluation sheet to theoretically allow providing evaluation sheet data for past days
+* Change accent color on Nord Snow Storm theme to fix contrast issues
+* data validation error (7322af2), closes #5378
+* error with plugin icon
+* error with plugin icon 2
+* exclude backlog subtasks in boards when backlogs are excluded
+* **focusMode:** unable to change task selection when there is a current task
+* **i18n:** actualize zh-tw file structure
+* **i18n:** remove duplicated zh_tw file
+* lint
+* multiple notifications on android app #5367
+* NG0911
+* overdue tasks not showing a notification #5376
+* sharing on android
+* task schedule time not preserved when scheduled for another day (97b7267), closes #5374
+* **task:** focus behavior after context menu
+* **task:** focus behavior for context menu
+* **task:** inconsistent tag context menu behavior (3c5b912), closes #5342
+
+
+### Features
+
+* add line indicating daily goal to simple counter graph
+* add warning about android system webview (a6fd1db), closes #5384
+* **addTaskBar:** add time spent short syntax for new tasks (#5269)
+* **focusMode:** add anew complete focus session button
+* improve initial tour experience
+* improve on color contrast (16abcf1), closes #4989 #4988
+* improve on notifications #5376
+* improve on task created snack
+* **productivityScore:** add additional states
+* **productivityScore:** add averages
+* **productivityScore:** add back in impact of work
+* **productivityScore:** add daily state
+* **productivityScore:** add mat-hint explanation
+* **productivityScore:** add stars for impact rating
+* **productivityScore:** also consider total hours worked for productivity score
+* **productivityScore:** cleanup old translations
+* **productivityScore:** cleanup targetMinutes
+* **productivityScore:** connect metrics
+* **productivityScore:** improve algorithm
+* **productivityScore:** improve algorithm 2
+* **productivityScore:** improve dialog
+* **productivityScore:** improve ui
+* **productivityScore:** improve ux
+* **productivityScore:** outline overview dialog for past 7 days
+* **productivityScore:** outline ui for productivity score
+* **productivityScore:** outline ui for productivity score 2
+* **productivityScore:** polish
+* **productivityScore:** polish
+* **productivityScore:** polish
+* **productivityScore:** polish 2
+* **productivityScore:** polish 3
+* **productivityScore:** polish 4
+* **productivityScore:** prepare complete cleanup of improvement and obstruction model
+* **productivityScore:** remove total work time from productivity score calculation
+* remove button, since it is not helpful for f-droid (8db2449), closes #5384
+* **tags:** add color selection option to tag creation dialog
+### Reverts
+
+* Revert "build: attempt to fix lighthouse check"
+* Revert "build: try to fix lighthouse"
+* Revert "build: try to fix lighthouse 2"
+* Revert "build: try to fix lighthouse 3"
