@@ -1,9 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  DestroyRef,
   ElementRef,
   EventEmitter,
+  OnDestroy,
   computed,
   effect,
   inject,
@@ -77,11 +77,10 @@ const TIMEFRAME_OPTIONS: ReadonlyArray<TimeframeOption> = [
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class LazyChartComponent {
+export class LazyChartComponent implements OnDestroy {
   private readonly chartLoaderService = inject(ChartLazyLoaderService);
   private readonly shareService = inject(ShareService);
   private readonly snackService = inject(SnackService);
-  private readonly destroyRef = inject(DestroyRef);
 
   readonly type = input.required<ChartType>();
   readonly datasets = input<ChartData['datasets']>([]);
@@ -151,29 +150,22 @@ export class LazyChartComponent {
   });
 
   private readonly selectorEnabledState = signal(false);
+  private readonly timeframeEffect = effect(
+    () => {
+      const isEnabled = this.enableTimeframeSelector();
+      const wasEnabled = this.selectorEnabledState();
+      if (isEnabled && !wasEnabled && this.selectedTimeframe() === 'max') {
+        this.selectedTimeframe.set('twoWeeks');
+      } else if (!isEnabled && wasEnabled && this.selectedTimeframe() !== 'max') {
+        this.selectedTimeframe.set('max');
+      }
+      this.selectorEnabledState.set(isEnabled);
+    },
+    { allowSignalWrites: true },
+  );
 
   constructor() {
-    effect(
-      () => {
-        const isEnabled = this.enableTimeframeSelector();
-        const wasEnabled = this.selectorEnabledState();
-        if (isEnabled && !wasEnabled && this.selectedTimeframe() === 'max') {
-          this.selectedTimeframe.set('twoWeeks');
-        } else if (!isEnabled && wasEnabled && this.selectedTimeframe() !== 'max') {
-          this.selectedTimeframe.set('max');
-        }
-        this.selectorEnabledState.set(isEnabled);
-      },
-      { allowSignalWrites: true },
-    );
-
     void this.loadChartModule();
-
-    this.destroyRef.onDestroy(() => {
-      this.chartUpdateEffect.destroy();
-      this.chartInstance?.destroy();
-      this.chartInstance = null;
-    });
   }
 
   onTimeframeChange(timeframe: LazyChartTimeframe): void {
@@ -240,6 +232,13 @@ export class LazyChartComponent {
     } finally {
       this.isSharing.set(false);
     }
+  }
+
+  ngOnDestroy(): void {
+    this.chartUpdateEffect.destroy();
+    this.timeframeEffect.destroy();
+    this.chartInstance?.destroy();
+    this.chartInstance = null;
   }
 
   private async loadChartModule(): Promise<void> {
