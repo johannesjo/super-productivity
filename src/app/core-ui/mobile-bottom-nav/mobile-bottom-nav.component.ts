@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, output } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +25,6 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
   selector: 'mobile-bottom-nav',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     MatIconModule,
     MatButtonModule,

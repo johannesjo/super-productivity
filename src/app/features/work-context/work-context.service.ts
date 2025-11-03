@@ -633,6 +633,40 @@ export class WorkContextService {
     );
   }
 
+  async updateBreakNrForActiveContext(
+    date: string = this._dateService.todayStr(),
+    nrBreaks: number,
+  ): Promise<void> {
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { b: nrBreaks },
+      }),
+    );
+  }
+
+  async updateBreakTimeForActiveContext(
+    date: string = this._dateService.todayStr(),
+    breakTime: number,
+  ): Promise<void> {
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { bt: breakTime },
+      }),
+    );
+  }
+
   private _updateAdvancedCfgForCurrentContext(
     sectionKey: WorkContextAdvancedCfgKey,
     data: unknown,

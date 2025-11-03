@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { PluginBridgeService } from '../plugin-bridge.service';
 import { MatMenuItem } from '@angular/material/menu';
 import { PluginIconComponent } from './plugin-icon/plugin-icon.component';
@@ -48,7 +47,7 @@ import { NavigationEnd, Router } from '@angular/router';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatMenuItem, PluginIconComponent],
+  imports: [MatMenuItem, PluginIconComponent],
 })
 export class PluginMenuComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);

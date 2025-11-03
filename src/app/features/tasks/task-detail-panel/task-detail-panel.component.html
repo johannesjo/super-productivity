@@ -318,9 +318,21 @@
   </task-detail-item>
 
   <div class="date-info">
-    <div>Created on {{ task().created | localeDate: 'short' }}</div>
+    <div
+      class="edit-date-info"
+      [title]="T.G.EDIT | translate"
+      (click)="editCreated()"
+    >
+      Created on {{ task().created | localeDate: 'short' }}
+    </div>
     @if (task().doneOn) {
-      <div>Completed on {{ task().doneOn | localeDate: 'short' }}</div>
+      <div
+        class="edit-date-info"
+        [title]="T.G.EDIT | translate"
+        (click)="editCompleted()"
+      >
+        Completed on {{ task().doneOn | localeDate: 'short' }}
+      </div>
     }
   </div>
 </div>
