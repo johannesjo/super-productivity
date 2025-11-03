@@ -6,7 +6,7 @@ import {
   FOCUS_MODE_DEFAULTS,
 } from './focus-mode.model';
 import { GlobalConfigService } from '../config/global-config.service';
-import { LS } from '../../core/persistence/storage-keys.const';
+import { FocusModeStorageService } from './focus-mode-storage.service';
 
 @Injectable({ providedIn: 'root' })
 export class PomodoroStrategy implements FocusModeStrategy {
@@ -71,11 +71,10 @@ export class FlowtimeStrategy implements FocusModeStrategy {
 
 @Injectable({ providedIn: 'root' })
 export class CountdownStrategy implements FocusModeStrategy {
+  private storage = inject(FocusModeStorageService);
+
   get initialSessionDuration(): number {
-    const lastDuration = parseInt(
-      localStorage.getItem(LS.LAST_COUNTDOWN_DURATION) || '0',
-      10,
-    );
+    const lastDuration = this.storage.getLastCountdownDuration() ?? 0;
     return lastDuration || FOCUS_MODE_DEFAULTS.SESSION_DURATION;
   }
 

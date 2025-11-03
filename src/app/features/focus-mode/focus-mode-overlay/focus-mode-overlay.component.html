@@ -14,40 +14,11 @@
         <mat-icon>close</mat-icon>
       </button>
 
-      <ng-template #selectModeTpl>
-        <segmented-button-group
-          class="focus-mode-select-mode"
-          [options]="modeOptions"
-          [selectedId]="selectedMode()"
-          [ariaLabel]="T.F.FOCUS_MODE.SELECT_MODE | translate"
-          (selectionChange)="selectMode($event)"
-        ></segmented-button-group>
-      </ng-template>
+      <!-- Mode selector is now integrated into focus-mode-main component -->
 
       <!-- -->
       @switch (activePage()) {
         <!-- -->
-        @case (FocusScreen.TaskSelection) {
-          @if (!isSessionRunning()) {
-            <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
-          }
-          <focus-mode-task-selection
-            style="margin-bottom: auto; margin-top: auto"
-            @warpIn
-          ></focus-mode-task-selection>
-        }
-        @case (FocusScreen.DurationSelection) {
-          @if (!isSessionRunning()) {
-            <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
-          }
-          <focus-mode-duration-selection
-            style="margin-bottom: auto; margin-top: auto"
-            @warpIn
-          ></focus-mode-duration-selection>
-        }
-        @case (FocusScreen.Preparation) {
-          <focus-mode-preparation @warpIn></focus-mode-preparation>
-        }
         @case (FocusScreen.Main) {
           <focus-mode-main @warpIn></focus-mode-main>
         }

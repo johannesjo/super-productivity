@@ -64,25 +64,6 @@
       }
     </button>
 
-    @if (!isXxxs()) {
-      <div class="focus-btn-wrapper">
-        <button
-          mat-icon-button
-          matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
-            kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
-          }}"
-          (click)="enableFocusMode()"
-        >
-          <mat-icon>center_focus_strong</mat-icon>
-        </button>
-        @if (focusSummaryToday()?.total) {
-          <div class="focus-label">
-            {{ focusSummaryToday()?.total | msToMinuteClockString }}
-          </div>
-        }
-      </div>
-    }
-
     <plugin-header-btns></plugin-header-btns>
 
     <play-button
@@ -93,6 +74,10 @@
       [pomodoroIsBreak]="pomodoroIsBreak()"
       [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
     ></play-button>
+
+    @if (!isXxxs()) {
+      <focus-button></focus-button>
+    }
 
     <!-- Desktop: Show all buttons inline -->
     @if (showDesktopButtons()) {

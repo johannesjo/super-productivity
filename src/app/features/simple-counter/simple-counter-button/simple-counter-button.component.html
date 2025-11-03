@@ -1,6 +1,9 @@
 @if (simpleCounter(); as sc) {
   <div class="wrapper">
     @if (sc.type === SimpleCounterType.StopWatch) {
+      @if (sc.isOn) {
+        <progress-circle [isPulsing]="true"></progress-circle>
+      }
       <button
         (click)="toggleStopwatch()"
         (contextmenu)="edit($event)"
@@ -40,6 +43,13 @@
     }
     <!----->
     @if (sc.type === SimpleCounterType.RepeatedCountdownReminder) {
+      @if (sc.isOn) {
+        @if (countdownTime$ | async; as countdownTime) {
+          <progress-circle
+            [progress]="calcCountdownProgress(countdownTime, sc.countdownDuration)"
+          ></progress-circle>
+        }
+      }
       <button
         (click)="isTimeUp() ? countUpAndNextRepeatCountdownSession() : toggleStopwatch()"
         (contextmenu)="edit($event)"

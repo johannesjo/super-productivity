@@ -1,30 +1,27 @@
+@let currentTask = taskService.currentTask$ | async;
 @let isCountDown = isCountTimeDown();
-<!-- -->
-@if (taskService.currentTask$ | async; as task) {
-  <task-title
-    (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
-    [value]="task.title"
-    class="task-title"
-  ></task-title>
-  <div class="progress-wrapper">
-    @if (isCountDown) {
-      <progress-circle [progress]="focusModeService.progress()"></progress-circle>
-    } @else {
-      <breathing-dot></breathing-dot>
-    }
-    <div class="progress-label-wrapper">
-      <div
-        class="focus-time"
-        [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
-      >
-        @if (isCountDown) {
-          {{ focusModeService.timeRemaining() | msToMinuteClockString }}
-        } @else {
-          {{ timeElapsed() | msToMinuteClockString }}
-        }
-      </div>
-    </div>
-  </div>
+
+<!-- Countdown Animation -->
+@if (isShowCountdown()) {
+  <focus-mode-countdown
+    @fade
+    (countdownComplete)="onCountdownComplete()"
+  ></focus-mode-countdown>
+}
+
+<!-- Mode Selector (Preparation state) -->
+@if (isShowModeSelector()) {
+  <segmented-button-group
+    class="focus-mode-select-mode"
+    [options]="modeOptions"
+    [selectedId]="mode()"
+    [ariaLabel]="T.F.FOCUS_MODE.SELECT_MODE | translate"
+    (selectionChange)="selectMode($event)"
+  ></segmented-button-group>
+}
+
+<!-- Simple Counter Buttons (In Progress state) -->
+@if (isShowSimpleCounters()) {
   @if (simpleCounterService.enabledSimpleCounters$ | async; as enabledSimpleCounters) {
     @if (enabledSimpleCounters.length) {
       <section class="simple-counter-buttons">
@@ -40,61 +37,242 @@
       </section>
     }
   }
-  <section class="controls">
-    <button
-      mat-icon-button
-      [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
-      (click)="finishCurrentTask()"
-    >
-      <mat-icon>done</mat-icon>
-    </button>
+}
 
-    <button
-      mat-icon-button
-      [matTooltip]="'Complete focus session' | translate"
-      (click)="completeFocusSession()"
-    >
-      <mat-icon>done_all</mat-icon>
-    </button>
-
-    @if (task.issueId && task.issueType !== ICAL_TYPE) {
-      <a
-        mat-icon-button
-        [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER | translate"
-        target="_blank"
-        [href]="issueUrl$ | async"
+<!-- Main Content (visible in Preparation and In Progress states) -->
+<div class="center-block">
+  <!-- Task title -->
+  <div class="task-section">
+    @if (currentTask) {
+      <task-title
+        @fade
+        (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
+        [value]="currentTask.title"
+        class="task-title"
+      ></task-title>
+    } @else {
+      <div
+        class="task-title-placeholder"
+        [matMenuTriggerFor]="taskMenu"
       >
-        @if (task.issuePoints) {
-          <div class="mini-badge bgc-primary">{{ task.issuePoints }}</div>
-        }
-        <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
-      </a>
+        {{ 'Select Task to Focus' | translate }}
+      </div>
     }
-    @if (isCountDown) {
-      <button
-        mat-icon-button
-        [matTooltip]="'Add 5 minutes'"
-        (click)="extendSession()"
+
+    <!-- Task action buttons (below title) - In Progress state -->
+    @if (isShowTaskActions()) {
+      <div
+        class="task-actions"
+        @fade
       >
-        <mat-icon>add_circle</mat-icon>
+        <button
+          mat-icon-button
+          [matMenuTriggerFor]="taskMenu"
+          [matTooltip]="'Switch task' | translate"
+        >
+          <mat-icon>swap_horiz</mat-icon>
+        </button>
+
+        @if (currentTask) {
+          <button
+            mat-icon-button
+            [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
+            (click)="finishCurrentTask()"
+          >
+            <mat-icon>done</mat-icon>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Clock Display -->
+  <div class="clock-display">
+    <div class="clock-display__content">
+      <div
+        class="clock-face"
+        [@modeSwitchFade]="mode()"
+      >
+        <svg
+          class="clock-face__layer focus-progress-circle"
+          viewBox="0 0 36 36"
+          [class.is-hidden]="!isCountDown"
+        >
+          <path
+            class="focus-progress-circle__bg"
+            d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+          <path
+            class="focus-progress-circle__progress"
+            [attr.stroke-dasharray]="(focusModeService.progress() || 0) + ', 100'"
+            d="M18 2.0845
+                a 15.9155 15.9155 0 0 1 0 31.831
+                a 15.9155 15.9155 0 0 1 0 -31.831"
+          />
+        </svg>
+        <breathing-dot
+          class="clock-face__layer"
+          [class.is-hidden]="isCountDown"
+          [isPaused]="!isSessionRunning()"
+        ></breathing-dot>
+        <div class="clock-wrapper">
+          <!-- Time adjustment buttons (In Progress state) -->
+          @if (isShowTimeAdjustButtons()) {
+            <button
+              mat-icon-button
+              [matTooltip]="'Remove 1 minute' | translate"
+              (click)="adjustTime(-60000)"
+              class="time-adjust-btn time-adjust-btn--decrease"
+            >
+              <mat-icon>remove</mat-icon>
+            </button>
+          }
+
+          <!-- Clock time display -->
+          <div
+            class="clock-time"
+            [matTooltip]="
+              isShowDurationSlider() ? ('Click to edit duration' | translate) : ''
+            "
+            [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
+          >
+            @if (isCountDown) {
+              {{ focusModeService.timeRemaining() | msToMinuteClockString }}
+            } @else {
+              {{ timeElapsed() | msToMinuteClockString }}
+            }
+          </div>
+
+          @if (isShowTimeAdjustButtons()) {
+            <button
+              mat-icon-button
+              [matTooltip]="'Add 1 minute' | translate"
+              (click)="adjustTime(60000)"
+              class="time-adjust-btn time-adjust-btn--increase"
+            >
+              <mat-icon>add</mat-icon>
+            </button>
+          }
+
+          <!-- Pause/Resume button (In Progress state) -->
+          @if (isShowPauseButton()) {
+            @if (focusModeService.isSessionPaused()) {
+              <button
+                mat-icon-button
+                [matTooltip]="'Resume session' | translate"
+                (click)="resumeSession()"
+                class="pause-resume-btn"
+              >
+                <mat-icon>play_arrow</mat-icon>
+              </button>
+            } @else {
+              <button
+                mat-icon-button
+                [matTooltip]="'Pause session' | translate"
+                (click)="pauseSession()"
+                class="pause-resume-btn"
+              >
+                <mat-icon>pause</mat-icon>
+              </button>
+            }
+          }
+
+          <!-- Complete session button (In Progress state) -->
+          @if (isShowCompleteSessionButton()) {
+            <button
+              mat-icon-button
+              [matTooltip]="'Complete focus session' | translate"
+              (click)="completeFocusSession()"
+              class="complete-session-btn"
+            >
+              <mat-icon>done_all</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Duration slider (Preparation state, Countdown mode only) -->
+      @if (isShowDurationSlider()) {
+        <div class="duration-slider-overlay-wrapper">
+          <div
+            class="duration-slider-overlay"
+            [@modeSwitchFade]="mode()"
+          >
+            <input-duration-slider
+              [model]="displayDuration()"
+              (modelChange)="onDurationChange($event)"
+            ></input-duration-slider>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Play button (Preparation state) -->
+    @if (isShowPlayButton()) {
+      <button
+        mat-fab
+        color="primary"
+        [matTooltip]="'Start focus session' | translate"
+        (click)="startSession()"
+        [disabled]="!currentTask"
+        class="play-button"
+      >
+        <mat-icon>play_arrow</mat-icon>
       </button>
     }
-    <button
-      (click)="isShowNotes = !isShowNotes"
-      [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
-      class="ico-btn show-additional-info-btn"
-      color=""
-      mat-icon-button
-    >
-      @if (!isShowNotes) {
-        <mat-icon>chat</mat-icon>
-      }
-      @if (isShowNotes) {
-        <mat-icon>expand_less</mat-icon>
-      }
-    </button>
-  </section>
-  @if (isShowNotes) {
+
+    <!-- Bottom control buttons (In Progress state) -->
+    @if (isShowBottomControls()) {
+      <section class="bottom-controls">
+        @if (currentTask && currentTask.issueId && currentTask.issueType !== ICAL_TYPE) {
+          <a
+            mat-icon-button
+            [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER | translate"
+            target="_blank"
+            [href]="issueUrl$ | async"
+          >
+            @if (currentTask.issuePoints) {
+              <div class="mini-badge bgc-primary">{{ currentTask.issuePoints }}</div>
+            }
+            <mat-icon [svgIcon]="currentTask.issueType | issueIcon"></mat-icon>
+          </a>
+        }
+
+        <button
+          (click)="isShowNotes = !isShowNotes"
+          [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
+          class="ico-btn show-additional-info-btn"
+          color=""
+          mat-icon-button
+        >
+          @if (!isShowNotes) {
+            <mat-icon>chat</mat-icon>
+          }
+          @if (isShowNotes) {
+            <mat-icon>expand_less</mat-icon>
+          }
+        </button>
+      </section>
+    }
+  </div>
+
+  <!-- Task Menu (shared) -->
+  <mat-menu #taskMenu="matMenu">
+    @for (startableTask of startableTasks$ | async; track startableTask.id) {
+      <button
+        mat-menu-item
+        (click)="switchToTask(startableTask.id)"
+        [disabled]="currentTask && startableTask.id === currentTask.id"
+      >
+        <span>{{ startableTask.title }}</span>
+      </button>
+    }
+  </mat-menu>
+
+  <!-- Notes and Attachments (In Progress only) -->
+  @if (isShowBottomControls() && currentTask && isShowNotes) {
     <div
       style="height: 100px"
       @expand
@@ -120,26 +298,28 @@
           (changed)="changeTaskNotes($event); isFocusNotes = false"
           [isFocus]="isFocusNotes"
           [isShowControls]="true"
-          [model]="task.notes || defaultTaskNotes"
+          [model]="currentTask.notes || defaultTaskNotes"
         ></inline-markdown>
       </div>
-      @if (task.attachments.length) {
+      @if (currentTask.attachments.length) {
         <div
           class="attachment-list-wrapper"
           @fade
         >
           <task-attachment-list
-            [taskId]="task.id"
-            [attachments]="task.attachments"
+            [taskId]="currentTask.id"
+            [attachments]="currentTask.attachments"
           ></task-attachment-list>
         </div>
       }
     </div>
   }
-  @if (isDragOver) {
+
+  <!-- Drag Over Message -->
+  @if (currentTask && isDragOver) {
     <div class="bgc-accent drag-over-msg">
       <mat-icon>add</mat-icon>
-      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: task.title } }}
+      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: currentTask.title } }}
     </div>
   }
-}
+</div>

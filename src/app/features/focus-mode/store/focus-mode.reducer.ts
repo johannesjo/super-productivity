@@ -1,6 +1,7 @@
 import { createReducer, on } from '@ngrx/store';
 import * as a from './focus-mode.actions';
 import {
+  FocusMainUIState,
   FocusModeMode,
   FocusModeState,
   FocusScreen,
@@ -23,7 +24,8 @@ const createIdleTimer = (): TimerState => ({
 
 export const initialState: FocusModeState = {
   timer: createIdleTimer(),
-  currentScreen: FocusScreen.TaskSelection,
+  currentScreen: FocusScreen.Main,
+  mainState: FocusMainUIState.Preparation,
   isOverlayShown: false,
   mode: Object.values(FocusModeMode).includes(focusModeModeFromLS as any)
     ? (focusModeModeFromLS as FocusModeMode)
@@ -82,22 +84,26 @@ export const focusModeReducer = createReducer(
   // Screen navigation
   on(a.selectFocusTask, (state) => ({
     ...state,
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Preparation,
   })),
 
   on(a.selectFocusDuration, (state) => ({
     ...state,
-    currentScreen: FocusScreen.DurationSelection,
+    currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Preparation,
   })),
 
   on(a.startFocusPreparation, (state) => ({
     ...state,
-    currentScreen: FocusScreen.Preparation,
+    currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Countdown,
   })),
 
   on(a.navigateToMainScreen, (state) => ({
     ...state,
     currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Preparation,
   })),
 
   on(a.startFocusSession, (state, { duration }) => {
@@ -107,6 +113,7 @@ export const focusModeReducer = createReducer(
       ...state,
       timer,
       currentScreen: FocusScreen.Main,
+      mainState: FocusMainUIState.InProgress,
     };
   }),
 
@@ -142,6 +149,7 @@ export const focusModeReducer = createReducer(
       ...state,
       timer: createIdleTimer(),
       currentScreen: FocusScreen.SessionDone,
+      mainState: FocusMainUIState.Preparation,
       lastCompletedDuration: duration,
     };
   }),
@@ -149,7 +157,8 @@ export const focusModeReducer = createReducer(
   on(a.cancelFocusSession, (state) => ({
     ...state,
     timer: createIdleTimer(),
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Preparation,
     isOverlayShown: false,
   })),
 
@@ -164,13 +173,15 @@ export const focusModeReducer = createReducer(
       ...state,
       timer,
       currentScreen: FocusScreen.Break,
+      mainState: FocusMainUIState.Preparation,
     };
   }),
 
   on(a.skipBreak, a.completeBreak, (state) => ({
     ...state,
     timer: createIdleTimer(),
-    currentScreen: FocusScreen.TaskSelection,
+    currentScreen: FocusScreen.Main,
+    mainState: FocusMainUIState.Preparation,
   })),
 
   // Timer updates - much simpler!
@@ -231,6 +242,36 @@ export const focusModeReducer = createReducer(
     ...state,
     currentCycle: 1,
   })),
+
+  // Adjust remaining time by modifying goal duration (work sessions only)
+  on(a.adjustRemainingTime, (state, { amountMs }) => {
+    if (state.timer.purpose !== 'work') {
+      return state;
+    }
+
+    if (state.mode === FocusModeMode.Flowtime) {
+      return state;
+    }
+
+    const currentDuration = state.timer.duration;
+    if (typeof currentDuration !== 'number') {
+      return state;
+    }
+
+    const updatedDuration = Math.max(0, currentDuration + amountMs);
+
+    if (updatedDuration === currentDuration) {
+      return state;
+    }
+
+    return {
+      ...state,
+      timer: {
+        ...state.timer,
+        duration: updatedDuration,
+      },
+    };
+  }),
 );
 
 // For backward compatibility, export the old State interface name

@@ -29,6 +29,7 @@ import { showFocusOverlay } from './focus-mode.actions';
 import { cancelFocusSession } from './focus-mode.actions';
 import { combineLatest } from 'rxjs';
 import { MetricService } from '../../metric/metric.service';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
 
@@ -41,6 +42,7 @@ export class FocusModeEffects {
   private taskService = inject(TaskService);
   private bannerService = inject(BannerService);
   private metricService = inject(MetricService);
+  private storageService = inject(FocusModeStorageService);
 
   // Auto-show overlay when task is selected (if always use focus mode is enabled)
   autoShowOverlay$ = createEffect(() =>
@@ -224,6 +226,49 @@ export class FocusModeEffects {
         }),
       ),
     { dispatch: false },
+  );
+
+  persistCountdownDuration$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(actions.setFocusSessionDuration),
+        withLatestFrom(this.store.select(selectors.selectMode)),
+        tap(([{ focusSessionDuration }, mode]) => {
+          if (mode === FocusModeMode.Countdown && focusSessionDuration > 0) {
+            this.storageService.setLastCountdownDuration(focusSessionDuration);
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  syncDurationWithMode$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.setFocusModeMode),
+      withLatestFrom(this.store.select(selectors.selectTimer)),
+      switchMap(([{ mode }, timer]) => {
+        if (timer.purpose !== null) {
+          return EMPTY;
+        }
+
+        if (mode === FocusModeMode.Flowtime) {
+          return EMPTY;
+        }
+
+        const strategy = this.strategyFactory.getStrategy(mode);
+        const duration = strategy.initialSessionDuration;
+
+        if (
+          typeof duration !== 'number' ||
+          duration <= 0 ||
+          duration === timer.duration
+        ) {
+          return EMPTY;
+        }
+
+        return of(actions.setFocusSessionDuration({ focusSessionDuration: duration }));
+      }),
+    ),
   );
 
   // Electron-specific effects

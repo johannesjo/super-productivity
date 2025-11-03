@@ -51,3 +51,8 @@ export const setFocusSessionDuration = createAction(
 );
 
 export const completeTask = createAction('[FocusMode] Complete Task');
+
+export const adjustRemainingTime = createAction(
+  '[FocusMode] Adjust Remaining Time',
+  props<{ amountMs: number }>(),
+);

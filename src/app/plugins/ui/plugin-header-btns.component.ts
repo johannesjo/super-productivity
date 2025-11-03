@@ -12,12 +12,18 @@ import { PluginBridgeService } from '../plugin-bridge.service';
         mat-icon-button
         [matTooltip]="button.label"
         (click)="button.onClick()"
-        style="margin-left: 8px"
       >
         <mat-icon>{{ button.icon }}</mat-icon>
       </button>
     }
   `,
+  styles: [
+    `
+      :host {
+        display: contents;
+      }
+    `,
+  ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MatIconButton, MatIcon, MatTooltip],
 })

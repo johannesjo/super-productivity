@@ -7,7 +7,7 @@
 
 .segmented-button-group {
   display: flex;
-  gap: var(--s2);
+  gap: var(--s3);
   padding: var(--s);
   border-radius: var(--s4);
   //background: var(--bg-lightest);
@@ -21,7 +21,7 @@
   align-items: center;
   gap: var(--s-quarter);
   flex: 1 1 0;
-  border-radius: 32px;
+  border-radius: 16px;
   padding: var(--s) var(--s2);
   border: 1px solid var(--options-border-color);
   background: var(--bg-lighter);
@@ -42,14 +42,14 @@
     &:not(.is-active):hover {
       border-color: var(--options-border-color);
       transform: translateY(-1px);
-      box-shadow: 0 12px 28px var(--c-dark-20);
+      box-shadow: var(--whiteframe-shadow-8dp);
     }
   }
 
   &.is-active {
     border-color: var(--c-primary);
     border-width: 3px;
-    box-shadow: 0 12px 32px var(--c-dark-30);
+    box-shadow: var(--whiteframe-shadow-8dp);
     transform: scale(1.1);
   }
 }

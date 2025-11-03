@@ -13,6 +13,11 @@ export const selectCurrentScreen = createSelector(
   (state) => state.currentScreen,
 );
 
+export const selectMainState = createSelector(
+  selectFocusModeState,
+  (state) => state.mainState,
+);
+
 export const selectMode = createSelector(selectFocusModeState, (state) => state.mode);
 
 export const selectIsOverlayShown = createSelector(
