@@ -32,11 +32,7 @@ import { ChartLazyLoaderService } from '../chart-lazy-loader.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import {
-  MatButtonToggleGroup,
-  MatButtonToggle,
-  MatButtonToggleChange,
-} from '@angular/material/button-toggle';
+import { MatRadioGroup, MatRadioButton, MatRadioChange } from '@angular/material/radio';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ShareService } from '../../../core/share/share.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -74,123 +70,16 @@ const TIMEFRAME_OPTIONS: ReadonlyArray<TimeframeOption> = [
 
 @Component({
   selector: 'lazy-chart',
-  template: `
-    <div class="chart-wrapper">
-      <div class="chart-toolbar">
-        @if (enableTimeframeSelector) {
-          <div class="timeframe-selector">
-            <span class="timeframe-label">
-              {{ 'F.METRIC.CMP.TIME_FRAME_LABEL' | translate }}
-            </span>
-            <mat-button-toggle-group
-              class="timeframe-toggle"
-              [value]="selectedTimeframe()"
-              (change)="onTimeframeToggleChange($event)"
-              [multiple]="false"
-              [attr.aria-label]="'F.METRIC.CMP.TIME_FRAME_LABEL' | translate"
-            >
-              @for (option of timeframeOptions; track option.id) {
-                <mat-button-toggle [value]="option.id">
-                  {{ option.labelKey | translate }}
-                </mat-button-toggle>
-              }
-            </mat-button-toggle-group>
-          </div>
-        }
-        <button
-          mat-icon-button
-          class="share-btn"
-          tabIndex="-1"
-          type="button"
-          (click)="shareChart()"
-          [disabled]="!isLoaded || isSharing"
-          [matTooltip]="'Share Chart' | translate"
-        >
-          @if (isSharing) {
-            <mat-icon>hourglass_empty</mat-icon>
-          } @else {
-            <mat-icon>share</mat-icon>
-          }
-        </button>
-      </div>
-      @if (!isLoaded) {
-        <div class="chart-loading">Loading chart...</div>
-      }
-      @if (isLoaded) {
-        <div
-          class="chart-container"
-          [style.height]="height"
-        >
-          <canvas #canvas></canvas>
-        </div>
-      }
-    </div>
-  `,
-  styles: [
-    `
-      :host {
-        display: block;
-        width: 100%;
-      }
-      .chart-wrapper {
-        width: 100%;
-        position: relative;
-      }
-      .chart-toolbar {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-bottom: 12px;
-      }
-      .timeframe-selector {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-      .timeframe-label {
-        font-size: 0.875rem;
-        color: #666;
-      }
-      .timeframe-toggle {
-        display: flex;
-        gap: 4px;
-        flex-wrap: wrap;
-        align-items: center;
-      }
-      .chart-container {
-        position: relative;
-        width: 100%;
-      }
-      .chart-loading {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 200px;
-        color: #666;
-      }
-      .share-btn {
-        opacity: 0.8;
-        transition: opacity 0.2s;
-      }
-      .share-btn:hover:not(:disabled) {
-        opacity: 1;
-      }
-      .share-btn:disabled {
-        opacity: 0.3;
-      }
-    `,
-  ],
+  templateUrl: './lazy-chart.component.html',
+  styleUrls: ['./lazy-chart.component.scss'],
   standalone: true,
   imports: [
     MatIconButton,
     MatTooltip,
     MatIcon,
     TranslatePipe,
-    MatButtonToggleGroup,
-    MatButtonToggle,
+    MatRadioGroup,
+    MatRadioButton,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -362,7 +251,7 @@ export class LazyChartComponent implements OnInit, OnDestroy, OnChanges {
     this.cdr.markForCheck();
   }
 
-  onTimeframeToggleChange(event: MatButtonToggleChange): void {
+  onTimeframeRadioChange(event: MatRadioChange): void {
     const value = event.value as LazyChartTimeframe | null;
     if (!value) {
       event.source.value = this.selectedTimeframe();
