@@ -76,7 +76,20 @@
         <div class="summary-text">
           {{ T.PDS.BREAK_LABEL | translate }}
           <div class="summary-val">
-            {{ breakNr$ | async }} / {{ breakTime$ | async | msToClockString }}
+            <inline-input
+              (changed)="updateBreakNr($event)"
+              [type]="'text'"
+              [value]="breakNr$ | async"
+            >
+            </inline-input>
+            /
+            <inline-input
+              (changed)="updateBreakTime($event)"
+              [type]="'duration'"
+              [displayValue]="breakTime$ | async | msToClockString"
+              [value]="breakTime$ | async"
+            >
+            </inline-input>
           </div>
         </div>
       </div>

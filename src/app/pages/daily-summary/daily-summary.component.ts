@@ -378,6 +378,19 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  updateBreakNr(value: string): void {
+    const nr = parseInt(value);
+    if (!isNaN(nr)) {
+      this.workContextService.updateBreakNrForActiveContext(this.dayStr, nr);
+    }
+  }
+
+  updateBreakTime(time: number): void {
+    if (!isNaN(time)) {
+      this.workContextService.updateBreakTimeForActiveContext(this.dayStr, time);
+    }
+  }
+
   onTabIndexChange(i: number): void {
     this.selectedTabIndex = i;
   }
