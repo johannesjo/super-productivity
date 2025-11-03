@@ -58,12 +58,16 @@ export class FocusButtonComponent {
 
   readonly circleVisible = computed(() => this.isSessionRunning());
 
+  readonly isCountdownMode = computed(() => {
+    const mode = this.mode();
+    return mode === FocusModeMode.Countdown || mode === FocusModeMode.Pomodoro;
+  });
+
   readonly circleProgress = computed<number | null>(() => {
     if (!this.circleVisible()) {
       return null;
     }
-    const mode = this.mode();
-    if (mode === FocusModeMode.Countdown || mode === FocusModeMode.Pomodoro) {
+    if (this.isCountdownMode()) {
       const progress = this.progress();
       return typeof progress === 'number' ? Math.min(100, Math.max(0, progress)) : 0;
     }
@@ -75,6 +79,18 @@ export class FocusButtonComponent {
   );
 
   readonly buttonColor = computed(() => (this.circleVisible() ? 'accent' : undefined));
+
+  readonly runningTimeMs = computed<number | null>(() => {
+    if (!this.circleVisible()) {
+      return null;
+    }
+    if (this.isCountdownMode()) {
+      const remaining = this.focusModeService.timeRemaining();
+      return typeof remaining === 'number' ? Math.max(0, remaining) : 0;
+    }
+    const elapsed = this.focusModeService.timeElapsed();
+    return typeof elapsed === 'number' ? Math.max(0, elapsed) : 0;
+  });
 
   enableFocusMode(): void {
     this._store.dispatch(showFocusOverlay());
