@@ -64,8 +64,8 @@
       <div class="summary-text">
         {{ T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL | translate }}
         <div class="summary-val">
-          {{ timeWorked$ | async | msToClockString }} /
-          {{ estimatedOnTasksWorkedOn$ | async | msToClockString }}
+          <span [innerHtml]="timeWorked$ | async | msToClockString"></span> /
+          <span [innerHtml]="estimatedOnTasksWorkedOn$ | async | msToClockString"></span>
         </div>
       </div>
     </div>
