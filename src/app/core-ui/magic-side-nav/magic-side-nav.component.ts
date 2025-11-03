@@ -4,6 +4,7 @@ import {
   computed,
   DestroyRef,
   effect,
+  HostListener,
   inject,
   input,
   OnDestroy,
@@ -32,6 +33,7 @@ import { Log } from '../../core/log';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DragDropRegistry } from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../features/work-context/work-context.model';
+import { HISTORY_STATE } from '../../app.constants';
 
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
@@ -114,6 +116,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       if (this.isMobile()) {
         this.mobileVisibleChange.emit(this.showMobileMenuOverlay());
       }
+    });
+
+    // Sync history state with mobile menu visibility status
+    effect(() => {
+      this.syncMobileNavHistory(this.showMobileMenuOverlay());
     });
 
     effect(() => {
@@ -227,6 +234,31 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleMobileNav(): void {
     this.showMobileMenuOverlay.update((show) => !show);
+  }
+
+  /** Handle "back" button to hide mobile menu overlay */
+  @HostListener('window:popstate') onBack(): void {
+    if (this.isMobile() && this.showMobileMenuOverlay()) this.toggleMobileNav();
+  }
+
+  /** Synchronize window history state with the visibility of the mobile menu overlay */
+  syncMobileNavHistory(isVisible: boolean): void {
+    if (!this.isMobile()) return;
+
+    const hasState = window.history.state[HISTORY_STATE.MOBILE_NAVIGATION] !== undefined;
+
+    // Mobile menu is hidden and already no state in history - nothing to do
+    if (!isVisible && !hasState) return;
+
+    // Mobile menu is visible - update history state
+    if (isVisible) {
+      const args = { state: { [HISTORY_STATE.MOBILE_NAVIGATION]: true }, title: '' };
+      if (!hasState) window.history.pushState(args.state, args.title);
+      else window.history.replaceState(args.state, args.title);
+    }
+
+    // Mobile menu is visible but still has state in history - restore it
+    else window.history.back();
   }
 
   toggleSideNavMode(): void {

@@ -164,3 +164,13 @@ export enum THEME_COLOR_MAP {
 }
 
 export const HANDLED_ERROR_PROP_STR = 'HANDLED_ERROR_PROP';
+
+/**
+ * Constants representing history state keys.
+ * Used in the `window.history.pushState/replaceState` methods when opening an overlay
+ * that can later be closed by pressing the "back" button in the browser or mobile app.
+ */
+export const HISTORY_STATE = {
+  MOBILE_NAVIGATION: 'mobileSideNav',
+  TASK_DETAIL_PANEL: 'taskDetailPanel',
+};
