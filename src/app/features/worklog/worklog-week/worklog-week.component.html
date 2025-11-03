@@ -5,7 +5,7 @@
     <div class="days">
       @for (
         day of currentWeek!.ent | keyvalue: sortDays;
-        track trackByDay(i, day);
+        track trackByDay($index, day);
         let i = $index
       ) {
         <div class="day">
