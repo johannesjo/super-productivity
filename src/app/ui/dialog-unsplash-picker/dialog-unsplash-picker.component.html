@@ -16,46 +16,47 @@
     />
   </mat-form-field>
 
-  <div
-    class="loading-container"
-    *ngIf="isLoading()"
-  >
-    <mat-spinner diameter="40"></mat-spinner>
-  </div>
-
-  <div
-    class="image-grid"
-    *ngIf="!isLoading()"
-  >
-    <div
-      class="image-item"
-      *ngFor="let photo of photos()"
-      (click)="selectPhoto(photo)"
-    >
-      <img
-        [src]="getPhotoThumb(photo)"
-        [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
-      />
-      <div class="photographer">
-        {{ T.DIALOG_UNSPLASH_PICKER.BY | translate }}
-        <a
-          *ngIf="photo.user.links?.html"
-          [href]="getPhotographerUrl(photo)"
-          target="_blank"
-          (click)="$event.stopPropagation()"
-          style="color: inherit"
-        >
-          {{ photo.user.name }}
-        </a>
-        <span *ngIf="!photo.user.links?.html">{{ photo.user.name }}</span>
-      </div>
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
     </div>
-  </div>
+  }
 
-  <div
-    class="no-results"
-    *ngIf="showNoResults()"
-  >
-    {{ T.DIALOG_UNSPLASH_PICKER.NO_RESULTS | translate }}
-  </div>
+  @if (!isLoading()) {
+    <div class="image-grid">
+      @for (photo of photos(); track photo) {
+        <div
+          class="image-item"
+          (click)="selectPhoto(photo)"
+        >
+          <img
+            [src]="getPhotoThumb(photo)"
+            [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
+          />
+          <div class="photographer">
+            {{ T.DIALOG_UNSPLASH_PICKER.BY | translate }}
+            @if (photo.user.links?.html) {
+              <a
+                [href]="getPhotographerUrl(photo)"
+                target="_blank"
+                (click)="$event.stopPropagation()"
+                style="color: inherit"
+              >
+                {{ photo.user.name }}
+              </a>
+            }
+            @if (!photo.user.links?.html) {
+              <span>{{ photo.user.name }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showNoResults()) {
+    <div class="no-results">
+      {{ T.DIALOG_UNSPLASH_PICKER.NO_RESULTS | translate }}
+    </div>
+  }
 </mat-dialog-content>

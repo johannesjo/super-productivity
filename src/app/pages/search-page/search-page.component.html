@@ -11,14 +11,15 @@
         [formControl]="searchForm"
         [placeholder]="T.F.SEARCH_BAR.PLACEHOLDER | translate"
       />
-      <button
-        mat-icon-button
-        matSuffix
-        (click)="clearSearch()"
-        *ngIf="searchForm.value"
-      >
-        <mat-icon>clear</mat-icon>
-      </button>
+      @if (searchForm.value) {
+        <button
+          mat-icon-button
+          matSuffix
+          (click)="clearSearch()"
+        >
+          <mat-icon>clear</mat-icon>
+        </button>
+      }
     </mat-form-field>
   </div>
 

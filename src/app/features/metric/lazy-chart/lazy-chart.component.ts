@@ -20,7 +20,6 @@ import type {
   Chart as ChartJS,
   ChartConfiguration,
 } from 'chart.js';
-import { CommonModule } from '@angular/common';
 import { ChartLazyLoaderService } from '../chart-lazy-loader.service';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
@@ -104,7 +103,7 @@ interface ChartClickEvent {
     `,
   ],
   standalone: true,
-  imports: [CommonModule, MatIconButton, MatTooltip, MatIcon, TranslatePipe],
+  imports: [MatIconButton, MatTooltip, MatIcon, TranslatePipe],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LazyChartComponent implements OnInit, OnDestroy {

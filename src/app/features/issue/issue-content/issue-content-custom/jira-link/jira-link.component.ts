@@ -7,7 +7,6 @@ import {
   signal,
   effect,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { JiraCommonInterfacesService } from '../../../providers/jira/jira-common-interfaces.service';
 import { TaskCopy } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
@@ -18,7 +17,7 @@ import { IssueFieldConfig } from '../../issue-content.model';
   templateUrl: './jira-link.component.html',
   styleUrls: ['./jira-link.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule],
+  imports: [],
 })
 export class JiraLinkComponent {
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService, {
