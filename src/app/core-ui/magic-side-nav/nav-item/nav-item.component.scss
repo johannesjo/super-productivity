@@ -179,6 +179,19 @@ button[mat-menu-item].nav-link.active {
   font-family: 'Open Sans', sans-serif;
   font-weight: 400;
   letter-spacing: normal;
+
+  // Override Angular Material mat-menu-item default colors
+  &[mat-menu-item] {
+    color: var(--sidenav-text) !important;
+
+    .mat-mdc-menu-item-text {
+      color: inherit !important;
+    }
+
+    .mat-icon {
+      color: inherit !important;
+    }
+  }
   //justify-content: center;
   //
   //::ng-deep .mat-mdc-menu-item-text {
@@ -188,11 +201,22 @@ button[mat-menu-item].nav-link.active {
   &:focus,
   &:hover {
     background: var(--sidenav-hover-bg);
-    color: var(--sidenav-text);
+    color: var(--sidenav-text-hover) !important;
 
     .nav-icon,
     .nav-label {
-      color: var(--sidenav-text);
+      color: var(--sidenav-text-hover) !important;
+    }
+
+    // Ensure mat-menu-item uses hover color
+    &[mat-menu-item] {
+      .mat-mdc-menu-item-text {
+        color: inherit !important;
+      }
+
+      .mat-icon {
+        color: inherit !important;
+      }
     }
   }
 
@@ -269,6 +293,7 @@ button[mat-menu-item].nav-link.active {
     &:focus,
     &:hover {
       background: var(--sidenav-hover-bg);
+      color: var(--sidenav-text-hover);
     }
 
     &.active {

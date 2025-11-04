@@ -226,8 +226,8 @@ body {
   --sidenav-active-text: var(
     --palette-primary-600
   ); // Darker for better contrast on light bg
-  --sidenav-text: var(--text-color-muted);
-  --sidenav-text-hover: var(--text-color);
+  --sidenav-text: var(--text-color-less-intense);
+  --sidenav-text-hover: var(--text-color-most-intense);
   // task numbers and projects/tags expand and hover buttons on right
   --sidenav-text-secondary: var(--text-color-muted);
 
