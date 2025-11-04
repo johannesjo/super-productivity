@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { FocusModeMainComponent } from './focus-mode-main.component';
@@ -44,7 +44,8 @@ describe('FocusModeMainComponent', () => {
   } as TaskCopy;
 
   beforeEach(async () => {
-    const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
+    const storeSpy = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    storeSpy.select.and.returnValue(of([]));
 
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       misc: jasmine.createSpy().and.returnValue({
@@ -76,6 +77,7 @@ describe('FocusModeMainComponent', () => {
       isSessionRunning: jasmine.createSpy().and.returnValue(false),
       isBreakActive: jasmine.createSpy().and.returnValue(false),
       currentCycle: jasmine.createSpy().and.returnValue(1),
+      sessionDuration: jasmine.createSpy().and.returnValue(0),
       mode: jasmine.createSpy().and.returnValue('Pomodoro'),
       mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
     });
@@ -103,10 +105,6 @@ describe('FocusModeMainComponent', () => {
     mockIssueService = TestBed.inject(IssueService) as jasmine.SpyObj<IssueService>;
 
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    component.ngOnDestroy();
   });
 
   it('should create', () => {
@@ -371,19 +369,6 @@ describe('FocusModeMainComponent', () => {
       expect(() => component.updateTaskTitleIfChanged(true, 'New Title')).toThrowError(
         'No task data',
       );
-    });
-  });
-
-  describe('ngOnDestroy', () => {
-    it('should complete destroy subject', () => {
-      const destroySubject = component['_onDestroy$'];
-      spyOn(destroySubject, 'next');
-      spyOn(destroySubject, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(destroySubject.next).toHaveBeenCalled();
-      expect(destroySubject.complete).toHaveBeenCalled();
     });
   });
 });

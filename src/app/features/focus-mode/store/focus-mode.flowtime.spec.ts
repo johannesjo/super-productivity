@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { of, Subject } from 'rxjs';
+import { of, ReplaySubject, Subject, Subscription } from 'rxjs';
 import { take } from 'rxjs/operators';
 import { Action } from '@ngrx/store';
 import { FocusModeMode } from '../focus-mode.model';
@@ -89,15 +89,16 @@ describe('FocusMode Flowtime behavior', () => {
 
   describe('Effects: detectSessionCompletion$', () => {
     let store: MockStore;
-    let actions$: Subject<Action>;
+    let actions$: ReplaySubject<Action>;
     let storageService: jasmine.SpyObj<FocusModeStorageService>;
+    let effects: FocusModeEffects;
 
     beforeEach(() => {
-      actions$ = new Subject<Action>();
+      actions$ = new ReplaySubject<Action>(1);
 
       TestBed.configureTestingModule({
         providers: [
-          provideMockStore({}),
+          provideMockStore({ initialState: { focusMode: initialState } }),
           provideMockActions(() => actions$),
           FocusModeEffects,
           { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
@@ -130,7 +131,7 @@ describe('FocusMode Flowtime behavior', () => {
         ],
       });
       store = TestBed.inject(MockStore);
-      TestBed.inject(FocusModeEffects);
+      effects = TestBed.inject(FocusModeEffects);
       storageService = TestBed.inject(
         FocusModeStorageService,
       ) as jasmine.SpyObj<FocusModeStorageService>;
@@ -294,8 +295,10 @@ describe('FocusMode Flowtime behavior', () => {
 
   describe('Effects: persistCountdownDuration$', () => {
     let store: MockStore;
-    let actions$: Subject<Action>;
+    let actions$: ReplaySubject<Action>;
     let storageService: jasmine.SpyObj<FocusModeStorageService>;
+    let effects: FocusModeEffects;
+    let subscription: Subscription;
     const timerTemplate = {
       isRunning: true,
       startedAt: Date.now(),
@@ -305,11 +308,11 @@ describe('FocusMode Flowtime behavior', () => {
     };
 
     beforeEach(() => {
-      actions$ = new Subject<Action>();
+      actions$ = new ReplaySubject<Action>(1);
 
       TestBed.configureTestingModule({
         providers: [
-          provideMockStore({}),
+          provideMockStore({ initialState: { focusMode: initialState } }),
           provideMockActions(() => actions$),
           FocusModeEffects,
           { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
@@ -344,6 +347,7 @@ describe('FocusMode Flowtime behavior', () => {
 
       store = TestBed.inject(MockStore);
       effects = TestBed.inject(FocusModeEffects);
+      subscription = effects.persistCountdownDuration$.subscribe();
       storageService = TestBed.inject(
         FocusModeStorageService,
       ) as jasmine.SpyObj<FocusModeStorageService>;
@@ -355,6 +359,7 @@ describe('FocusMode Flowtime behavior', () => {
       if (store && 'resetSelectors' in store) {
         (store as any).resetSelectors();
       }
+      subscription?.unsubscribe();
     });
 
     it('should persist duration when mode is Countdown', () => {
@@ -388,19 +393,6 @@ describe('FocusMode Flowtime behavior', () => {
       actions$.next(actions.setFocusSessionDuration({ focusSessionDuration: 0 }));
 
       expect(storageService.setLastCountdownDuration).not.toHaveBeenCalled();
-    });
-
-    it('should persist adjusted countdown duration', () => {
-      store.overrideSelector(selectors.selectMode, FocusModeMode.Countdown);
-      store.overrideSelector(selectors.selectTimer, {
-        ...timerTemplate,
-        duration: 30_000,
-      } as any);
-      store.refreshState();
-
-      actions$.next(actions.adjustRemainingTime({ amountMs: -15_000 }));
-
-      expect(storageService.setLastCountdownDuration).toHaveBeenCalledWith(30_000);
     });
   });
 

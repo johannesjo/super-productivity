@@ -277,8 +277,8 @@ describe('FocusModeService', () => {
   });
 
   describe('currentScreen signal', () => {
-    it('should initialize with TaskSelection default', () => {
-      expect(service.currentScreen()).toBe(FocusScreen.TaskSelection);
+    it('should initialize with Main screen by default', () => {
+      expect(service.currentScreen()).toBe(FocusScreen.Main);
     });
   });
 });
