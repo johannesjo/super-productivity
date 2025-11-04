@@ -127,6 +127,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isDisableCelebration',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_DISABLE_CELEBRATION,
+      },
+    },
+    {
       key: 'isShowProductivityTipLonger',
       type: 'checkbox',
       templateOptions: {
