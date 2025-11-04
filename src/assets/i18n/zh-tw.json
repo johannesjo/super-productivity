@@ -1196,7 +1196,7 @@
         "EXAMPLE": "示例：\"某些任務標題+ projectName #一些標籤 #一些其他標籤10m/3h\"",
         "START": "再次按回車鍵開始",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "切換將任務添加到待辦/今天列表",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "切換將任務添加到列表的頂部或底部"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "切換將任務添加到列表的頂部或底部",
         "PLACEHOLDER_SEARCH": "Add existing task or issues...",
         "PLACEHOLDER_CREATE": "A task title #tag @16:00",
         "TOOLTIP_ADD_TASK": "Add task",
