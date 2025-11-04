@@ -15,6 +15,7 @@
   >
     <mat-icon
       class="nav-icon"
+      [style.color]="workContextIconColor() ?? null"
       [class.nav-icon-emoji]="isWorkContextEmojiIcon()"
       [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
       >{{ workContext()!.icon || defaultIcon() }}
