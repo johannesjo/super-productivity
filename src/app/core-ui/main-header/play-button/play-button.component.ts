@@ -158,10 +158,7 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
 
       .play-btn-wrapper {
         position: relative;
-
-        @media (min-width: 600px) {
-          margin-left: var(--s);
-        }
+        margin: 0 6px;
 
         .pulse-circle {
           width: 48px;

@@ -3,6 +3,7 @@ import {
   FocusScreen,
   FocusModeMode,
   FocusModeState,
+  FocusMainUIState,
   isTimerRunning,
   isWorkSession,
   isBreakSession,
@@ -197,6 +198,7 @@ describe('FocusModeModel', () => {
       const state: FocusModeState = {
         timer,
         currentScreen: FocusScreen.TaskSelection,
+        mainState: FocusMainUIState.Preparation,
         isOverlayShown: false,
         mode: FocusModeMode.Pomodoro,
         currentCycle: 0,
@@ -205,6 +207,7 @@ describe('FocusModeModel', () => {
 
       expect(state.timer).toEqual(timer);
       expect(state.currentScreen).toBe(FocusScreen.TaskSelection);
+      expect(state.mainState).toBe(FocusMainUIState.Preparation);
       expect(state.isOverlayShown).toBe(false);
       expect(state.mode).toBe(FocusModeMode.Pomodoro);
       expect(state.currentCycle).toBe(0);

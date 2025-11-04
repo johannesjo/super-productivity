@@ -45,6 +45,7 @@ import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
+import { FocusButtonComponent } from './focus-button/focus-button.component';
 
 @Component({
   selector: 'main-header',
@@ -67,6 +68,7 @@ import { UserProfileButtonComponent } from '../../features/user-profile/user-pro
     DesktopPanelButtonsComponent,
     MsToMinuteClockStringPipe,
     UserProfileButtonComponent,
+    FocusButtonComponent,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {

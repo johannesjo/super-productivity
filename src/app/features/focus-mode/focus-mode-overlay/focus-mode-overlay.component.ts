@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
 import { TaskService } from '../../tasks/task.service';
 import { Subject } from 'rxjs';
-import { first, takeUntil } from 'rxjs/operators';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { Store } from '@ngrx/store';
@@ -9,9 +8,6 @@ import { selectTimeElapsed } from '../store/focus-mode.selectors';
 import {
   cancelFocusSession,
   hideFocusOverlay,
-  selectFocusDuration,
-  selectFocusTask,
-  setFocusModeMode,
   showFocusOverlay,
 } from '../store/focus-mode.actions';
 import { fadeInAnimation } from '../../../ui/animations/fade.ani';
@@ -21,23 +17,15 @@ import { selectIsPomodoroEnabled } from '../../config/store/global-config.reduce
 import { BannerComponent } from '../../../core/banner/banner/banner.component';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { FocusModeTaskSelectionComponent } from '../focus-mode-task-selection/focus-mode-task-selection.component';
-import { FocusModeDurationSelectionComponent } from '../focus-mode-duration-selection/focus-mode-duration-selection.component';
-import { FocusModePreparationComponent } from '../focus-mode-preparation/focus-mode-preparation.component';
 import { FocusModeMainComponent } from '../focus-mode-main/focus-mode-main.component';
 import { FocusModeSessionDoneComponent } from '../focus-mode-session-done/focus-mode-session-done.component';
 import { FocusModeBreakComponent } from '../focus-mode-break/focus-mode-break.component';
-import { NgTemplateOutlet } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FocusModeService } from '../focus-mode.service';
-import { FocusModeMode, FocusScreen } from '../focus-mode.model';
-import {
-  SegmentedButtonGroupComponent,
-  SegmentedButtonOption,
-} from '../../../ui/segmented-button-group/segmented-button-group.component';
+import { FocusScreen } from '../focus-mode.model';
 
 @Component({
   selector: 'focus-mode-overlay',
@@ -49,16 +37,11 @@ import {
     BannerComponent,
     MatIconButton,
     MatIcon,
-    FocusModeTaskSelectionComponent,
-    FocusModeDurationSelectionComponent,
-    FocusModePreparationComponent,
     FocusModeMainComponent,
     FocusModeSessionDoneComponent,
     FocusModeBreakComponent,
     MatButton,
     TranslatePipe,
-    SegmentedButtonGroupComponent,
-    NgTemplateOutlet,
   ],
 })
 export class FocusModeOverlayComponent implements OnDestroy {
@@ -70,30 +53,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
   private readonly _store = inject(Store);
 
   FocusScreen: typeof FocusScreen = FocusScreen;
-  FocusModeMode: typeof FocusModeMode = FocusModeMode;
-
-  readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
-    {
-      id: FocusModeMode.Flowtime,
-      icon: 'auto_awesome',
-      labelKey: T.F.FOCUS_MODE.FLOWTIME,
-      hintKey: T.F.FOCUS_MODE.FLOWTIME_HINT,
-    },
-    {
-      id: FocusModeMode.Pomodoro,
-      icon: 'timer',
-      labelKey: T.F.FOCUS_MODE.POMODORO,
-      hintKey: T.F.FOCUS_MODE.POMODORO_HINT,
-    },
-    {
-      id: FocusModeMode.Countdown,
-      icon: 'hourglass_bottom',
-      labelKey: T.F.FOCUS_MODE.COUNTDOWN,
-      hintKey: T.F.FOCUS_MODE.COUNTDOWN_HINT,
-    },
-  ];
-
-  selectedMode = this.focusModeService.mode;
   activePage = this.focusModeService.currentScreen;
   isSessionRunning = this.focusModeService.isSessionRunning;
 
@@ -106,10 +65,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
   private _onDestroy$ = new Subject<void>();
   private _closeOnEscapeKeyListener = (ev: KeyboardEvent): void => {
     if (ev.key === 'Escape') {
-      if (
-        this.activePage() === FocusScreen.TaskSelection ||
-        this.activePage() === FocusScreen.DurationSelection
-      ) {
+      if (this.activePage() === FocusScreen.Main && !this.isSessionRunning()) {
         this.cancelFocusSession();
       }
     }
@@ -117,28 +73,10 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   constructor() {
     this.bannerService.dismiss(BannerId.FocusMode);
-
     document.addEventListener('keydown', this._closeOnEscapeKeyListener);
 
-    if (
-      this.activePage() === FocusScreen.SessionDone ||
-      this.isSessionRunning() ||
-      this.focusModeService.isBreakActive()
-    ) {
-      return;
-    } else {
-      this.taskService.currentTask$
-        .pipe(first(), takeUntil(this._onDestroy$))
-        .subscribe((task) => {
-          // If a session is already running or break is active, don't do anything - just show the current state
-
-          if (!task) {
-            this._store.dispatch(selectFocusTask());
-          } else {
-            this._store.dispatch(selectFocusDuration());
-          }
-        });
-    }
+    // No need to navigate anywhere - Main screen handles both pre-session and active session states
+    // Just stay on the current screen
   }
 
   ngOnDestroy(): void {
@@ -155,7 +93,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
     const isOnBreak = this.focusModeService.isBreakActive();
 
     if (this.isSessionRunning() || isOnBreak) {
-      const mode = this.selectedMode();
+      const mode = this.focusModeService.mode();
       const cycle = this.focusModeService.currentCycle();
 
       // Determine banner message based on session type
@@ -167,7 +105,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
       if (isOnBreak) {
         // Break is active
         translationKey =
-          mode === FocusModeMode.Pomodoro
+          mode === 'Pomodoro'
             ? T.F.FOCUS_MODE.B.POMODORO_BREAK_RUNNING
             : T.F.FOCUS_MODE.B.BREAK_RUNNING;
         icon = 'free_breakfast';
@@ -175,9 +113,9 @@ export class FocusModeOverlayComponent implements OnDestroy {
         progress$ = this.focusModeService.sessionProgress$;
       } else {
         // Work session is active
-        const isCountTimeUp = mode === FocusModeMode.Flowtime;
+        const isCountTimeUp = mode === 'Flowtime';
         translationKey =
-          mode === FocusModeMode.Pomodoro
+          mode === 'Pomodoro'
             ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
             : T.F.FOCUS_MODE.B.SESSION_RUNNING;
         icon = 'center_focus_strong';
@@ -187,8 +125,7 @@ export class FocusModeOverlayComponent implements OnDestroy {
         progress$ = isCountTimeUp ? undefined : this.focusModeService.sessionProgress$;
       }
 
-      const translateParams =
-        mode === FocusModeMode.Pomodoro ? { cycleNr: cycle || 1 } : undefined;
+      const translateParams = mode === 'Pomodoro' ? { cycleNr: cycle || 1 } : undefined;
 
       this.bannerService.open({
         id: BannerId.FocusMode,
@@ -216,13 +153,6 @@ export class FocusModeOverlayComponent implements OnDestroy {
 
   cancelFocusSession(): void {
     this._store.dispatch(cancelFocusSession());
-  }
-
-  selectMode(mode: FocusModeMode | string): void {
-    if (!Object.values(FocusModeMode).includes(mode as FocusModeMode)) {
-      return;
-    }
-    this._store.dispatch(setFocusModeMode({ mode: mode as FocusModeMode }));
   }
 
   deactivatePomodoro(): void {

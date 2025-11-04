@@ -7,10 +7,11 @@ import {
   FocusModeStrategyFactory,
 } from './focus-mode-strategies';
 import { FocusModeMode, FocusScreen, FOCUS_MODE_DEFAULTS } from './focus-mode.model';
-import { LS } from '../../core/persistence/storage-keys.const';
+import { FocusModeStorageService } from './focus-mode-storage.service';
 
 describe('FocusModeStrategies', () => {
   let mockGlobalConfigService: jasmine.SpyObj<GlobalConfigService>;
+  let focusModeStorage: jasmine.SpyObj<FocusModeStorageService>;
 
   beforeEach(() => {
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
@@ -29,15 +30,23 @@ describe('FocusModeStrategies', () => {
         CountdownStrategy,
         FocusModeStrategyFactory,
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
+        {
+          provide: FocusModeStorageService,
+          useValue: jasmine.createSpyObj('FocusModeStorageService', [
+            'getLastCountdownDuration',
+            'setLastCountdownDuration',
+          ]),
+        },
       ],
     });
 
     mockGlobalConfigService = TestBed.inject(
       GlobalConfigService,
     ) as jasmine.SpyObj<GlobalConfigService>;
-
-    // Clear localStorage before each test
-    localStorage.clear();
+    focusModeStorage = TestBed.inject(
+      FocusModeStorageService,
+    ) as jasmine.SpyObj<FocusModeStorageService>;
+    focusModeStorage.getLastCountdownDuration.and.returnValue(null);
   });
 
   describe('PomodoroStrategy', () => {
@@ -194,28 +203,21 @@ describe('FocusModeStrategies', () => {
     });
 
     describe('initialSessionDuration', () => {
-      it('should return duration from localStorage', () => {
-        localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, '1800000');
+      it('should return duration from storage when available', () => {
+        focusModeStorage.getLastCountdownDuration.and.returnValue(1_800_000);
 
-        expect(strategy.initialSessionDuration).toBe(1800000);
+        expect(strategy.initialSessionDuration).toBe(1_800_000);
+        expect(focusModeStorage.getLastCountdownDuration).toHaveBeenCalled();
       });
 
-      it('should return default when localStorage is empty', () => {
+      it('should return default when storage is empty', () => {
         expect(strategy.initialSessionDuration).toBe(
           FOCUS_MODE_DEFAULTS.SESSION_DURATION,
         );
       });
 
-      it('should return default when localStorage has invalid value', () => {
-        localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, 'invalid');
-
-        expect(strategy.initialSessionDuration).toBe(
-          FOCUS_MODE_DEFAULTS.SESSION_DURATION,
-        );
-      });
-
-      it('should return default when localStorage has zero value', () => {
-        localStorage.setItem(LS.LAST_COUNTDOWN_DURATION, '0');
+      it('should return default when storage returns non-positive value', () => {
+        focusModeStorage.getLastCountdownDuration.and.returnValue(0);
 
         expect(strategy.initialSessionDuration).toBe(
           FOCUS_MODE_DEFAULTS.SESSION_DURATION,

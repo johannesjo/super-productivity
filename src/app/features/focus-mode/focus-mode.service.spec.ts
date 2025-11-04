@@ -4,7 +4,7 @@ import { BehaviorSubject, of } from 'rxjs';
 import { FocusModeService } from './focus-mode.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
-import { FocusScreen, FocusModeMode } from './focus-mode.model';
+import { FocusScreen, FocusModeMode, FocusMainUIState } from './focus-mode.model';
 import * as selectors from './store/focus-mode.selectors';
 import * as actions from './store/focus-mode.actions';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
@@ -15,7 +15,11 @@ describe('FocusModeService', () => {
   let tickSubject: BehaviorSubject<number>;
 
   beforeEach(() => {
-    const storeSpy = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    const storeSpy = jasmine.createSpyObj('Store', [
+      'select',
+      'dispatch',
+      'selectSignal',
+    ]);
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       pomodoroConfig: jasmine.createSpy().and.returnValue({
         duration: 1500000,
@@ -36,7 +40,10 @@ describe('FocusModeService', () => {
     // Setup store selectors before TestBed configuration
     storeSpy.select.and.callFake((selector) => {
       if (selector === selectors.selectCurrentScreen) {
-        return of(FocusScreen.TaskSelection);
+        return of(FocusScreen.Main);
+      }
+      if (selector === selectors.selectMainState) {
+        return of(FocusMainUIState.Preparation);
       }
       if (selector === selectors.selectMode) {
         return of(FocusModeMode.Pomodoro);
@@ -83,6 +90,58 @@ describe('FocusModeService', () => {
       return of(null);
     });
 
+    storeSpy.selectSignal.and.callFake((selector) => {
+      if (selector === selectors.selectCurrentScreen) {
+        return () => FocusScreen.Main;
+      }
+      if (selector === selectors.selectMainState) {
+        return () => FocusMainUIState.Preparation;
+      }
+      if (selector === selectors.selectMode) {
+        return () => FocusModeMode.Pomodoro;
+      }
+      if (selector === selectors.selectIsOverlayShown) {
+        return () => false;
+      }
+      if (selector === selectors.selectCurrentCycle) {
+        return () => 0;
+      }
+      if (selector === selectors.selectIsRunning) {
+        return () => false;
+      }
+      if (selector === selectors.selectTimeElapsed) {
+        return () => 0;
+      }
+      if (selector === selectors.selectTimeRemaining) {
+        return () => 1_500_000;
+      }
+      if (selector === selectors.selectProgress) {
+        return () => 0;
+      }
+      if (selector === selectors.selectIsSessionRunning) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsSessionPaused) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsBreakActive) {
+        return () => false;
+      }
+      if (selector === selectors.selectIsLongBreak) {
+        return () => false;
+      }
+      if (selector === selectors.selectLastSessionDuration) {
+        return () => 0;
+      }
+      if (selector === selectors.selectTimeDuration) {
+        return () => 300_000;
+      }
+      if (selector === selectFocusModeConfig) {
+        return () => ({});
+      }
+      return () => null;
+    });
+
     TestBed.configureTestingModule({
       providers: [
         FocusModeService,
@@ -105,9 +164,12 @@ describe('FocusModeService', () => {
 
   describe('signals', () => {
     it('should initialize currentScreen signal', () => {
-      expect(service.currentScreen()).toBe(FocusScreen.TaskSelection);
+      expect(service.currentScreen()).toBe(FocusScreen.Main);
     });
 
+    it('should initialize mainState signal', () => {
+      expect(service.mainState()).toBe(FocusMainUIState.Preparation);
+    });
     it('should initialize mode signal', () => {
       expect(service.mode()).toBe(FocusModeMode.Pomodoro);
     });
@@ -125,6 +187,7 @@ describe('FocusModeService', () => {
       expect(service.timeElapsed()).toBe(0);
       expect(service.timeRemaining()).toBe(1500000);
       expect(service.progress()).toBe(0);
+      expect(service.sessionDuration()).toBe(300000);
     });
 
     it('should initialize session signals', () => {
@@ -214,8 +277,8 @@ describe('FocusModeService', () => {
   });
 
   describe('currentScreen signal', () => {
-    it('should initialize with TaskSelection default', () => {
-      expect(service.currentScreen()).toBe(FocusScreen.TaskSelection);
+    it('should initialize with Main screen by default', () => {
+      expect(service.currentScreen()).toBe(FocusScreen.Main);
     });
   });
 });

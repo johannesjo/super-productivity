@@ -25,6 +25,7 @@ import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 
 @Component({
   selector: 'simple-counter-button',
@@ -41,6 +42,7 @@ import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clo
     AsyncPipe,
     MsToMinuteClockStringPipe,
     MatIconButton,
+    ProgressCircleComponent,
   ],
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
@@ -116,6 +118,18 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
         }),
       );
     }
+  }
+
+  calcCountdownProgress(remaining: number, total?: number | null): number {
+    if (!total || total <= 0) {
+      return 0;
+    }
+    const elapsed = total - remaining;
+    if (!Number.isFinite(elapsed)) {
+      return 0;
+    }
+    const progress = (elapsed / total) * 100;
+    return Math.min(100, Math.max(0, progress));
   }
 
   ngOnDestroy(): void {

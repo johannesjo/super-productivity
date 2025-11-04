@@ -3,6 +3,7 @@ import {
   FocusModeState,
   FocusScreen,
   FocusModeMode,
+  FocusMainUIState,
   TimerState,
 } from '../focus-mode.model';
 
@@ -21,7 +22,8 @@ describe('FocusModeSelectors', () => {
   ): { focusMode: FocusModeState } => ({
     focusMode: {
       timer: createMockTimer(),
-      currentScreen: FocusScreen.TaskSelection,
+      currentScreen: FocusScreen.Main,
+      mainState: FocusMainUIState.Preparation,
       isOverlayShown: false,
       mode: FocusModeMode.Pomodoro,
       currentCycle: 1,
@@ -55,6 +57,15 @@ describe('FocusModeSelectors', () => {
       const result = selectors.selectCurrentScreen(state);
 
       expect(result).toBe(FocusScreen.Main);
+    });
+  });
+
+  describe('selectMainState', () => {
+    it('should select the main state', () => {
+      const state = createMockState({ mainState: FocusMainUIState.Countdown });
+      const result = selectors.selectMainState(state);
+
+      expect(result).toBe(FocusMainUIState.Countdown);
     });
   });
 

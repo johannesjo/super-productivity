@@ -1,36 +1,43 @@
+import { animate, style, transition, trigger } from '@angular/animations';
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
+  DestroyRef,
   effect,
   HostBinding,
   HostListener,
   inject,
-  OnDestroy,
+  signal,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { TaskCopy } from '../../tasks/task.model';
-import { from, Observable, of, Subject } from 'rxjs';
+import { from, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
-import { first, switchMap, take, takeUntil } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { IssueService } from '../../issue/issue.service';
 import { Store } from '@ngrx/store';
 import {
+  adjustRemainingTime,
   completeFocusSession,
   completeTask,
+  pauseFocusSession,
   selectFocusTask,
+  setFocusModeMode,
   setFocusSessionDuration,
+  startFocusPreparation,
+  startFocusSession,
+  unPauseFocusSession,
 } from '../store/focus-mode.actions';
-import { selectTimeDuration } from '../store/focus-mode.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { ICAL_TYPE } from '../../issue/issue.const';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
-import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
-import { MatIconAnchor, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatFabButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
@@ -44,21 +51,45 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import {
+  FOCUS_MODE_DEFAULTS,
+  FocusMainUIState,
+  FocusModeMode,
+} from '../focus-mode.model';
+import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
+import { FocusModeCountdownComponent } from '../focus-mode-countdown/focus-mode-countdown.component';
+import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
+import {
+  SegmentedButtonGroupComponent,
+  SegmentedButtonOption,
+} from '../../../ui/segmented-button-group/segmented-button-group.component';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
+import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
 
 @Component({
   selector: 'focus-mode-main',
   templateUrl: './focus-mode-main.component.html',
   styleUrls: ['./focus-mode-main.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [expandAnimation, fadeAnimation, slideInOutFromBottomAni],
+  animations: [
+    trigger('modeSwitchFade', [
+      transition('* => *', [
+        style({ opacity: 0, transform: 'scale(0.8)' }),
+        animate(ANI_STANDARD_TIMING, style({ opacity: 1, transform: 'scale(1)' })),
+      ]),
+    ]),
+    expandAnimation,
+    fadeAnimation,
+    slideInOutFromBottomAni,
+  ],
   imports: [
     TaskTitleComponent,
-    ProgressCircleComponent,
     BreathingDotComponent,
     MatIconButton,
     MatTooltip,
     MatIcon,
-    MatIconAnchor,
     InlineMarkdownComponent,
     TaskAttachmentListComponent,
     AsyncPipe,
@@ -67,20 +98,90 @@ import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.c
     IssueIconPipe,
     SimpleCounterButtonComponent,
     MatMiniFabButton,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    FocusModeCountdownComponent,
+    MatFabButton,
+    InputDurationSliderComponent,
+    SegmentedButtonGroupComponent,
   ],
+  host: {
+    ['[class.isSessionRunning]']: 'isSessionRunning()',
+    ['[class.isSessionNotRunning]']: '!isSessionRunning()',
+  },
 })
-export class FocusModeMainComponent implements OnDestroy {
-  readonly simpleCounterService = inject(SimpleCounterService);
+export class FocusModeMainComponent {
   private readonly _globalConfigService = inject(GlobalConfigService);
-  readonly taskService = inject(TaskService);
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
+  private readonly _destroyRef = inject(DestroyRef);
+  private readonly _focusModeStorage = inject(FocusModeStorageService);
 
-  focusModeService = inject(FocusModeService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  readonly taskService = inject(TaskService);
+  readonly focusModeService = inject(FocusModeService);
+
+  readonly FocusModeMode = FocusModeMode;
 
   timeElapsed = this.focusModeService.timeElapsed;
   isCountTimeDown = this.focusModeService.isCountTimeDown;
+  isSessionRunning = this.focusModeService.isSessionRunning;
+  mode = this.focusModeService.mode;
+  mainState = this.focusModeService.mainState;
+
+  private readonly _isPreparation = computed(
+    () => this.mainState() === FocusMainUIState.Preparation,
+  );
+  private readonly _isCountdown = computed(
+    () => this.mainState() === FocusMainUIState.Countdown,
+  );
+  private readonly _isInProgress = computed(
+    () => this.mainState() === FocusMainUIState.InProgress,
+  );
+
+  displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
+
+  // TODO remove if always true
+  isShowTaskActions = computed(() => true);
+  isShowModeSelector = computed(() => this._isPreparation());
+  isShowSimpleCounters = computed(() => this._isInProgress());
+  isShowPauseButton = computed(() => this._isInProgress());
+  isShowCompleteSessionButton = computed(() => this._isInProgress());
+  isShowBottomControls = computed(() => this._isInProgress());
+  isShowCountdown = computed(() => this._isCountdown());
+  isShowPlayButton = computed(() => this._isPreparation());
+  isShowDurationSlider = computed(
+    () => this._isPreparation() && this.mode() === FocusModeMode.Countdown,
+  );
+  isShowTimeAdjustButtons = computed(
+    () => this._isInProgress() && this.mode() !== FocusModeMode.Flowtime,
+  );
+
+  startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
+
+  // Mode selector options
+  readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
+    {
+      id: FocusModeMode.Flowtime,
+      icon: 'auto_awesome',
+      labelKey: T.F.FOCUS_MODE.FLOWTIME,
+      hintKey: T.F.FOCUS_MODE.FLOWTIME_HINT,
+    },
+    {
+      id: FocusModeMode.Pomodoro,
+      icon: 'timer',
+      labelKey: T.F.FOCUS_MODE.POMODORO,
+      hintKey: T.F.FOCUS_MODE.POMODORO_HINT,
+    },
+    {
+      id: FocusModeMode.Countdown,
+      icon: 'hourglass_bottom',
+      labelKey: T.F.FOCUS_MODE.COUNTDOWN,
+      hintKey: T.F.FOCUS_MODE.COUNTDOWN_HINT,
+    },
+  ];
 
   @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
 
@@ -103,7 +204,6 @@ export class FocusModeMainComponent implements OnDestroy {
     take(1),
   );
 
-  private _onDestroy$ = new Subject<void>();
   private _dragEnterTarget?: HTMLElement;
 
   constructor() {
@@ -114,10 +214,27 @@ export class FocusModeMainComponent implements OnDestroy {
         this.defaultTaskNotes = misc.taskNotesTpl;
       }
     });
-    this.taskService.currentTask$.pipe(takeUntil(this._onDestroy$)).subscribe((task) => {
-      this.task = task;
-      if (!task) {
-        this._store.dispatch(selectFocusTask());
+
+    this.taskService.currentTask$
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe((task) => {
+        this.task = task;
+      });
+
+    effect(() => {
+      const duration = this.focusModeService.sessionDuration();
+      const mode = this.mode();
+
+      if (duration > 0) {
+        this.displayDuration.set(duration);
+        return;
+      }
+
+      if (mode === FocusModeMode.Countdown) {
+        const stored =
+          this._focusModeStorage.getLastCountdownDuration() ??
+          FOCUS_MODE_DEFAULTS.SESSION_DURATION;
+        this.displayDuration.set(stored);
       }
     });
   }
@@ -144,11 +261,6 @@ export class FocusModeMainComponent implements OnDestroy {
     this._taskAttachmentService.createFromDrop(ev, this.task.id);
     ev.stopPropagation();
     this.isDragOver = false;
-  }
-
-  ngOnDestroy(): void {
-    this._onDestroy$.next();
-    this._onDestroy$.complete();
   }
 
   changeTaskNotes($event: string): void {
@@ -185,7 +297,7 @@ export class FocusModeMainComponent implements OnDestroy {
     }
   }
 
-  trackById(i: number, item: SimpleCounter): string {
+  trackById(_i: number, item: SimpleCounter): string {
     return item.id;
   }
 
@@ -198,21 +310,50 @@ export class FocusModeMainComponent implements OnDestroy {
     }
   }
 
-  extendSession(): void {
-    this._store
-      .select(selectTimeDuration)
-      .pipe(first())
-      .subscribe((currentDuration) => {
-        const fiveMinutesInMs = 5 * 60 * 1000; // 5 minutes in milliseconds
-        const extendedDuration = currentDuration + fiveMinutesInMs;
-        this._store.dispatch(
-          setFocusSessionDuration({ focusSessionDuration: extendedDuration }),
-        );
-      });
-  }
-
   completeFocusSession(): void {
     this._store.dispatch(completeFocusSession({ isManual: true }));
+  }
+
+  adjustTime(amountMs: number): void {
+    this._store.dispatch(adjustRemainingTime({ amountMs }));
+  }
+
+  switchToTask(taskId: string): void {
+    this.taskService.setCurrentId(taskId);
+  }
+
+  startSession(): void {
+    // Task must be selected via the task menu before starting
+    if (!this.task) {
+      return;
+    }
+
+    this._store.dispatch(startFocusPreparation());
+  }
+
+  onCountdownComplete(): void {
+    this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+    // Main UI state transitions are now handled by the store
+  }
+
+  pauseSession(): void {
+    this._store.dispatch(pauseFocusSession());
+  }
+
+  resumeSession(): void {
+    this._store.dispatch(unPauseFocusSession());
+  }
+
+  selectMode(mode: FocusModeMode | string | number): void {
+    if (!Object.values(FocusModeMode).includes(mode as FocusModeMode)) {
+      return;
+    }
+    this._store.dispatch(setFocusModeMode({ mode: mode as FocusModeMode }));
+  }
+
+  onDurationChange(duration: number): void {
+    this.displayDuration.set(duration);
+    this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;
