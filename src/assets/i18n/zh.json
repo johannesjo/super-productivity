@@ -78,7 +78,7 @@
                 "IMPORTANT": "重要",
                 "IN_PROGRESS": "进行中",
                 "KANBAN": "看板",
-                "NOT_URGENT_IMPORTANT": "不重要且紧急",
+                "NOT_URGENT_IMPORTANT": "不紧急但重要",
                 "NOT_URGENT_NOT_IMPORTANT": "不重要且不紧急",
                 "TO_DO": "待办",
                 "URGENT": "紧急",
