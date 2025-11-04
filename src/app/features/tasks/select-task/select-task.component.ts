@@ -23,7 +23,11 @@ import { Project } from '../../project/project.model';
 import { selectAllProjects } from '../../project/store/project.selectors';
 import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autocomplete';
+import {
+  MatAutocomplete,
+  MatAutocompleteSelectedEvent,
+  MatAutocompleteTrigger,
+} from '@angular/material/autocomplete';
 import { MatIcon } from '@angular/material/icon';
 import { MatOption } from '@angular/material/core';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -118,6 +122,13 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   displayWith(task?: Task): string | undefined {
     // NOTE: apparently task can be undefined for displayWith
     return task?.title;
+  }
+
+  onOptionSelected(event: MatAutocompleteSelectedEvent): void {
+    const selectedTask = event.option.value as Task;
+    if (selectedTask) {
+      this.taskChange.emit(selectedTask);
+    }
   }
 
   trackById(i: number, task: Task): string {

@@ -19,6 +19,7 @@
     #auto="matAutocomplete"
     [autoActiveFirstOption]="true"
     [displayWith]="displayWith"
+    (optionSelected)="onOptionSelected($event)"
   >
     @for (task of filteredTasks; track trackById($index, task)) {
       <mat-option
