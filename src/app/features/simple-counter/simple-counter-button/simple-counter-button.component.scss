@@ -1,7 +1,7 @@
 @use 'sass:math';
 
 @use '../../../../styles/_globals.scss' as *;
-@use '../../../../styles/components/badge' as badge;
+@use 'styles/components/number-badge' as badge;
 
 :host {
   display: inline-flex;
@@ -63,7 +63,7 @@
 
 .extra-label,
 .label {
-  @include badge.inline-badge;
+  @include badge.number-badge;
 
   .wrapper:hover .stopwatch & {
     opacity: 0;
