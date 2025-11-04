@@ -18,13 +18,17 @@
   align-items: stretch;
   position: relative;
   width: 100%;
-  color: var(--text-color);
+  color: var(--sidenav-text);
 
   button:first-of-type {
     white-space: nowrap;
     overflow: hidden;
     flex: 1;
     min-width: 0;
+    font-family: 'Open Sans', sans-serif;
+    font-weight: 400;
+    letter-spacing: normal;
+    color: var(--sidenav-text);
 
     // to make space for the task-count
     &.has-tasks {
@@ -32,7 +36,9 @@
     }
 
     .nav-label {
-      color: var(--text-color);
+      color: inherit;
+      font: inherit;
+      letter-spacing: inherit;
       overflow: hidden;
       text-overflow: ellipsis;
       // smooth collapse/expand for title
@@ -160,7 +166,7 @@ button[mat-menu-item].nav-link.active {
   align-items: center;
   gap: var(--s2);
   padding: var(--s) var(--s2);
-  color: var(--sidenav-text-secondary);
+  color: var(--sidenav-text);
   text-decoration: none;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -170,6 +176,9 @@ button[mat-menu-item].nav-link.active {
   width: 100%;
   text-align: left;
   font-size: 14px;
+  font-family: 'Open Sans', sans-serif;
+  font-weight: 400;
+  letter-spacing: normal;
   //justify-content: center;
   //
   //::ng-deep .mat-mdc-menu-item-text {
@@ -180,6 +189,11 @@ button[mat-menu-item].nav-link.active {
   &:hover {
     background: var(--sidenav-hover);
     color: var(--sidenav-text);
+
+    .nav-icon,
+    .nav-label {
+      color: var(--sidenav-text);
+    }
   }
 
   &.active {
@@ -201,6 +215,12 @@ button[mat-menu-item].nav-link.active {
     height: 24px;
     font-size: 18px;
   }
+
+  .nav-label {
+    font: inherit;
+    letter-spacing: inherit;
+    color: inherit;
+  }
 }
 
 // Navigation icon and chevron
@@ -211,7 +231,7 @@ button[mat-menu-item].nav-link.active {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--sidenav-text-secondary);
+  color: var(--sidenav-text);
   font-size: 18px;
   line-height: 1;
 

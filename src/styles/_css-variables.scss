@@ -373,7 +373,6 @@ body.isDarkTheme {
   --sidenav-active-text: var(
     --palette-primary-400
   ); // Much lighter for better contrast on dark bg
-  --sidenav-text: var(--text-color);
   --sidenav-text-secondary: var(--text-color-muted);
   --sidebar-border: var(--divider-color);
   --sidebar-hover: var(--palette-background-hover);

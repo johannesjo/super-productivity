@@ -15,11 +15,6 @@
   >
     <mat-icon
       class="nav-icon"
-      style="color: {{
-        defaultIcon() !== 'today' &&
-          defaultIcon() !== 'inbox' &&
-          workContext()?.theme.primary
-      }}"
       [class.nav-icon-emoji]="isWorkContextEmojiIcon()"
       [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
       >{{ workContext()!.icon || defaultIcon() }}
