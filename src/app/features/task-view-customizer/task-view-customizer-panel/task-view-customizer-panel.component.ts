@@ -128,6 +128,10 @@ export class TaskViewCustomizerPanelComponent implements OnInit {
     this.customizerService.setFilterInputValue(value);
   }
 
+  async onSortPermanentOption(sortValue: string): Promise<void> {
+    await this.customizerService.sortPermanent(sortValue);
+  }
+
   onResetAll(): void {
     this.customizerService.resetAll();
   }
