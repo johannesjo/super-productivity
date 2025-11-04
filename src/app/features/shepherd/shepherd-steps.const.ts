@@ -16,7 +16,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
 import { fromEvent, merge, of, timer } from 'rxjs';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { IS_SHOW_MOBILE_BOTTOM_NAV } from '../../util/is-mobile';
 
 const PRIMARY_CLASSES =
   'mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary mat-mdc-button-base';
@@ -499,7 +498,7 @@ export const SHEPHERD_STEPS = (
       buttons: [{ ...NEXT_BTN, text: "Let's go!" }],
     },
     // Only show "Open menu" step on mobile where menu is hidden
-    ...(IS_SHOW_MOBILE_BOTTOM_NAV
+    ...(layoutService.isShowMobileBottomNav()
       ? [
           {
             title: 'Configure Sync',
@@ -527,7 +526,7 @@ export const SHEPHERD_STEPS = (
       },
       beforeShowPromise: () => {
         // Navigate to home first on desktop since we skipped the menu step
-        if (!IS_SHOW_MOBILE_BOTTOM_NAV) {
+        if (!layoutService.isShowMobileBottomNav()) {
           return router.navigate(['']);
         }
         return Promise.resolve();

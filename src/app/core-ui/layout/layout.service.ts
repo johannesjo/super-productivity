@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -24,7 +24,6 @@ import {
 import { map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { IS_SHOW_MOBILE_BOTTOM_NAV } from '../../util/is-mobile';
 
 const XS_BREAKPOINT = 600;
 const XXXS_BREAKPOINT = 398;
@@ -39,8 +38,6 @@ export class LayoutService {
   private _store$ = inject<Store<LayoutState>>(Store);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
-
-  readonly isShowMobileBottomNav = IS_SHOW_MOBILE_BOTTOM_NAV;
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -71,6 +68,12 @@ export class LayoutService {
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
+
+  // Computed signal for mobile bottom nav visibility
+  // Shows bottom nav on small screens (< 600px)
+  readonly isShowMobileBottomNav = computed(() => {
+    return this.isXs();
+  });
 
   // private _isWorkViewUrl(url: string): boolean {
   //   return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');

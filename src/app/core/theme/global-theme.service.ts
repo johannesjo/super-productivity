@@ -274,7 +274,7 @@ export class GlobalThemeService {
 
     // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
     effect(() => {
-      if (this._layoutService.isShowMobileBottomNav) {
+      if (this._layoutService.isShowMobileBottomNav()) {
         this.document.body.classList.add(BodyClass.hasMobileBottomNav);
       } else {
         this.document.body.classList.remove(BodyClass.hasMobileBottomNav);
