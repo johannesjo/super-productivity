@@ -14,6 +14,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { ProjectService } from '../project/project.service';
 import { TagService } from '../tag/tag.service';
+import { getTimeLeftForTask } from '../../util/get-time-left-for-task';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
@@ -26,6 +27,7 @@ export class TaskViewCustomizerService {
   public selectedGroup = signal<string>('default');
   public selectedFilter = signal<string>('default');
   public filterInputValue = signal<string>('');
+  public lastPermanentSort = signal<string | null>(null);
 
   isCustomized = computed(
     () =>
@@ -254,11 +256,61 @@ export class TaskViewCustomizerService {
             : 0;
           return aSpent - bSpent;
         });
+      case 'bestFit':
+        return this.applyBestFitSort(tasks);
       default:
         return tasks;
     }
   }
 
+  /**
+   * Best Fit Sort Algorithm - Minimizes Task Splitting
+   *
+   * Optimizes task order to minimize task splitting and maximize completions.
+   *
+   * Core Strategy:
+   * Sort tasks by remaining time (shortest first), so shorter tasks complete
+   * BEFORE encountering blocked blocks (meetings, breaks), reducing the likelihood
+   * of task splitting across time boundaries.
+   *
+   * Why Shortest First Reduces Splitting:
+   * - Shorter tasks complete before hitting the next blocked block
+   * - Longer tasks naturally get scheduled after blocked blocks
+   * - More tasks finish within a single time block
+   * - Fewer tasks span across multiple time segments
+   *
+   * Example:
+   * Gap: 08:00-09:00 (1 hour before meeting)
+   *
+   * Bad order: 2h task → splits at meeting (08:00-09:00 part 1, 10:00-11:00 part 2)
+   * Good order: 30min + 25min tasks → both complete before meeting (no splits!)
+   *
+   * Benefits:
+   * - Fewer split tasks (primary goal)
+   * - Higher completion rate
+   * - Better time utilization
+   * - Psychological wins from completing more tasks
+   * - Cleaner schedule visualization
+   */
+  private applyBestFitSort(tasks: TaskWithSubTasks[]): TaskWithSubTasks[] {
+    const tasksWithRemainingTime = tasks.map((task) => ({
+      task,
+      remainingTime: getTimeLeftForTask(task),
+    }));
+
+    // Sort by remaining time (shortest first - SJF/Shortest Job First)
+    // This minimizes the likelihood of tasks being split by blocked blocks
+    tasksWithRemainingTime.sort((a, b) => {
+      // Primary: Sort by remaining time (shortest first)
+      if (a.remainingTime === b.remainingTime) {
+        // Tiebreaker: Use creation date (FIFO for equal durations)
+        return a.task.created - b.task.created;
+      }
+      return a.remainingTime - b.remainingTime;
+    });
+
+    return tasksWithRemainingTime.map((item) => item.task);
+  }
   private applyGrouping(
     tasks: TaskWithSubTasks[],
     group: string,
@@ -312,11 +364,15 @@ export class TaskViewCustomizerService {
     this.setGroup('default');
     this.setFilter('default');
     this.setFilterInputValue('');
+    // Note: We intentionally do NOT reset lastPermanentSort here
+    // because it represents the permanent sort that was applied to the task order
   }
 
   async sortPermanent(sortKeyOverride?: string): Promise<void> {
     const sortKey = sortKeyOverride ?? this.selectedSort();
     if (sortKey === 'default') {
+      // Clear permanent sort when explicitly sorting by default
+      this.lastPermanentSort.set(null);
       this.resetAll();
       return;
     }
@@ -358,6 +414,9 @@ export class TaskViewCustomizerService {
       (task, idx) => task.id !== newOrderedIds[idx],
     );
     if (!isOrderChanged) {
+      // Even if order didn't change, still record this as the permanent sort
+      // (e.g., user applies same sort twice, or tasks already in this order)
+      this.lastPermanentSort.set(sortKey);
       this.resetAll();
       return;
     }
@@ -368,6 +427,8 @@ export class TaskViewCustomizerService {
       this._tagService.updateTag(workContextId, { taskIds: newOrderedIds });
     }
 
+    // Store the sort type that was applied permanently
+    this.lastPermanentSort.set(sortKey);
     this.resetAll();
   }
 }

@@ -29,6 +29,7 @@ export const createScheduleDays = (
   blockerBlocksDayMap: BlockedBlockByDayMap,
   workStartEndCfg: ScheduleWorkStartEndCfg | undefined,
   now: number,
+  useBestFitPlacement?: boolean,
 ): ScheduleDay[] => {
   let viewEntriesPushedToNextDay: SVEEntryForNextDay[];
   let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks.map((task) => {
@@ -107,6 +108,7 @@ export const createScheduleDays = (
       within,
       blockerBlocksForDay,
       viewEntriesPushedToNextDay,
+      useBestFitPlacement,
     );
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
