@@ -221,17 +221,16 @@ body {
   // Navigation & Panel backgrounds
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
-  --sidenav-active: rgba(255, 255, 255, 1.25);
-  --sidenav-hover: rgba(205, 205, 205, 0.35);
+  --sidenav-item-active-bg: rgba(255, 255, 255, 1.25);
+  --sidenav-hover-bg: rgba(205, 205, 205, 0.35);
   --sidenav-active-text: var(
     --palette-primary-600
   ); // Darker for better contrast on light bg
-  --sidenav-text: var(--text-color);
+  --sidenav-text: var(--text-color-muted);
+  --sidenav-text-hover: var(--text-color);
+  // task numbers and projects/tags expand and hover buttons on right
   --sidenav-text-secondary: var(--text-color-muted);
-  --sidebar-border: var(--divider-color);
-  --sidebar-hover: var(--palette-background-hover);
-  --sidebar-text: var(--text-color);
-  --sidebar-text-secondary: var(--text-color-muted);
+
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
   --right-panel-bg: transparent;
   --right-panel-bg-mobile: #fff;
@@ -368,16 +367,10 @@ body.isDarkTheme {
   // Navigation & Panel backgrounds
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
-  --sidenav-active: rgba(255, 255, 255, 0.075);
-  --sidenav-hover: rgba(255, 255, 255, 0.05);
-  --sidenav-active-text: var(
-    --palette-primary-400
-  ); // Much lighter for better contrast on dark bg
-  --sidenav-text-secondary: var(--text-color-muted);
-  --sidebar-border: var(--divider-color);
-  --sidebar-hover: var(--palette-background-hover);
-  --sidebar-text: var(--text-color);
-  --sidebar-text-secondary: var(--text-color-muted);
+  --sidenav-item-active-bg: rgba(255, 255, 255, 0.075);
+  --sidenav-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidenav-active-text: var(--palette-primary-400);
+
   --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
   --right-panel-bg: transparent;
   --right-panel-bg-mobile: var(--bg);

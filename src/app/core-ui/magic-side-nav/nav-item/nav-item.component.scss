@@ -108,7 +108,7 @@
 //button[mat-menu-item].nav-link[routerlinkactive="active"],
 button[mat-menu-item].nav-link.active {
   color: var(--sidenav-active-text) !important;
-  background: var(--sidenav-active) !important;
+  background: var(--sidenav-item-active-bg) !important;
 
   .nav-label {
     color: var(--sidenav-active-text) !important;
@@ -131,7 +131,7 @@ button[mat-menu-item].nav-link.active {
 
     &:focus,
     &:hover {
-      background-color: var(--sidenav-hover);
+      background-color: var(--sidenav-hover-bg);
       color: var(--sidenav-text);
     }
   }
@@ -187,7 +187,7 @@ button[mat-menu-item].nav-link.active {
 
   &:focus,
   &:hover {
-    background: var(--sidenav-hover);
+    background: var(--sidenav-hover-bg);
     color: var(--sidenav-text);
 
     .nav-icon,
@@ -197,7 +197,7 @@ button[mat-menu-item].nav-link.active {
   }
 
   &.active {
-    background: var(--sidenav-active);
+    background: var(--sidenav-item-active-bg);
     color: var(--sidenav-active-text);
     box-shadow: var(--whiteframe-shadow-1dp);
 
@@ -268,12 +268,12 @@ button[mat-menu-item].nav-link.active {
 
     &:focus,
     &:hover {
-      background: var(--sidenav-hover);
+      background: var(--sidenav-hover-bg);
     }
 
     &.active {
       color: var(--sidenav-active-text) !important;
-      background: var(--sidenav-active) !important;
+      background: var(--sidenav-item-active-bg) !important;
       box-shadow: var(--whiteframe-shadow-1dp);
 
       &::after {
