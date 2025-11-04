@@ -12,6 +12,10 @@
   border-radius: var(--s4);
   //background: var(--bg-lightest);
   //box-shadow: 0 18px 45px var(--c-dark-20);
+
+  @include mq(xs, max) {
+    gap: var(--s2);
+  }
 }
 
 .segment {
@@ -37,6 +41,10 @@
     border-color var(--transition-duration-m) var(--ani-enter-timing),
     background var(--transition-duration-m) var(--ani-enter-timing),
     color var(--transition-duration-m) var(--ani-enter-timing);
+
+  @include mq(xs, max) {
+    padding: var(--s) var(--s);
+  }
 
   @include mousePrimaryDevice {
     &:not(.is-active):hover {

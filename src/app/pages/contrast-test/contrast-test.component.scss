@@ -38,36 +38,3 @@
 .tab-content {
   padding: 24px;
 }
-
-.nav-simulation {
-  background: var(--bg-lighter);
-  border-radius: 8px;
-  padding: 8px;
-  max-width: 300px;
-
-  .nav-link {
-    width: 100%;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px;
-    border-radius: 6px;
-    color: var(--sidenav-text-secondary);
-    text-align: left;
-
-    &:hover {
-      background: var(--sidenav-hover);
-      color: var(--sidenav-text);
-    }
-
-    &.active {
-      background: var(--sidenav-active);
-      color: var(--sidenav-active-text);
-      box-shadow: var(--whiteframe-shadow-1dp);
-    }
-  }
-
-  .nav-label {
-    flex: 1;
-  }
-}

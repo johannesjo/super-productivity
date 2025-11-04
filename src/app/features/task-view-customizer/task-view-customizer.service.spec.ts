@@ -8,9 +8,22 @@ import { selectAllProjects } from '../project/store/project.selectors';
 import { selectAllTags } from '../tag/store/tag.reducer';
 import { getTomorrow } from '../../util/get-tomorrow';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import { of } from 'rxjs';
+import { WorkContextType } from '../work-context/work-context.model';
+import { WorkContextService } from '../work-context/work-context.service';
+import { ProjectService } from '../project/project.service';
+import { TagService } from '../tag/tag.service';
 
 describe('TaskViewCustomizerService', () => {
   let service: TaskViewCustomizerService;
+  let mockWorkContextService: {
+    activeWorkContextId: string | null;
+    activeWorkContextType: WorkContextType | null;
+    todaysTasks$: ReturnType<typeof of<TaskWithSubTasks[]>>;
+    undoneTasks$: ReturnType<typeof of<TaskWithSubTasks[]>>;
+  };
+  let projectUpdateSpy: jasmine.Spy;
+  let tagUpdateSpy: jasmine.Spy;
 
   const todayStr = getDbDateStr(new Date());
   const tomorrowStr = getDbDateStr(getTomorrow());
@@ -87,9 +100,21 @@ describe('TaskViewCustomizerService', () => {
   ];
 
   beforeEach(() => {
+    mockWorkContextService = {
+      activeWorkContextId: null,
+      activeWorkContextType: null,
+      todaysTasks$: of([]),
+      undoneTasks$: of([]),
+    };
+    projectUpdateSpy = jasmine.createSpy('update');
+    tagUpdateSpy = jasmine.createSpy('updateTag');
+
     TestBed.configureTestingModule({
       providers: [
         TaskViewCustomizerService,
+        { provide: WorkContextService, useValue: mockWorkContextService },
+        { provide: ProjectService, useValue: { update: projectUpdateSpy } },
+        { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
         provideMockStore({
           selectors: [
             { selector: selectAllProjects, value: mockProjects },
@@ -237,5 +262,94 @@ describe('TaskViewCustomizerService', () => {
     expect(service.selectedGroup()).toBe('default');
     expect(service.selectedFilter()).toBe('default');
     expect(service.filterInputValue()).toBe('');
+  });
+
+  describe('sortPermanent', () => {
+    const createTask = (
+      id: string,
+      title: string,
+      projectId: string | null = 'project-sort',
+    ): TaskWithSubTasks =>
+      ({
+        id,
+        title,
+        projectId: projectId ?? undefined,
+        tagIds: [],
+        subTasks: [],
+        subTaskIds: [],
+        created: 0,
+        timeEstimate: 0,
+        timeSpent: 0,
+        timeSpentOnDay: {},
+        isDone: false,
+        attachments: [],
+      }) as TaskWithSubTasks;
+
+    beforeEach(() => {
+      projectUpdateSpy.calls.reset();
+      tagUpdateSpy.calls.reset();
+      service.resetAll();
+    });
+
+    it('should persist the sorted order for a project context and reset customizer state', async () => {
+      const taskA = createTask('a', 'Alpha');
+      const taskB = createTask('b', 'Bravo');
+      mockWorkContextService.activeWorkContextId = 'project-sort';
+      mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
+      mockWorkContextService.todaysTasks$ = of([taskB, taskA]);
+      mockWorkContextService.undoneTasks$ = of([taskB, taskA]);
+
+      service.setSort('name');
+      service.setFilter('tag');
+      service.setFilterInputValue('Tag One');
+      service.setGroup('project');
+
+      await service.sortPermanent('name');
+
+      expect(projectUpdateSpy).toHaveBeenCalledTimes(1);
+      expect(projectUpdateSpy).toHaveBeenCalledWith('project-sort', {
+        taskIds: ['a', 'b'],
+      });
+      expect(tagUpdateSpy).not.toHaveBeenCalled();
+      expect(service.selectedSort()).toBe('default');
+      expect(service.selectedGroup()).toBe('default');
+      expect(service.selectedFilter()).toBe('default');
+      expect(service.filterInputValue()).toBe('');
+    });
+
+    it('should persist the sorted order for a tag context', async () => {
+      const taskA = createTask('a', 'Alpha', null);
+      const taskB = createTask('b', 'Bravo', null);
+      mockWorkContextService.activeWorkContextId = 'tag-sort';
+      mockWorkContextService.activeWorkContextType = WorkContextType.TAG;
+      mockWorkContextService.todaysTasks$ = of([taskB, taskA]);
+      mockWorkContextService.undoneTasks$ = of([taskB, taskA]);
+
+      await service.sortPermanent('name');
+
+      expect(tagUpdateSpy).toHaveBeenCalledTimes(1);
+      expect(tagUpdateSpy).toHaveBeenCalledWith('tag-sort', {
+        taskIds: ['a', 'b'],
+      });
+      expect(projectUpdateSpy).not.toHaveBeenCalled();
+    });
+
+    it('should skip persistence when default sorting is requested but still reset', async () => {
+      mockWorkContextService.activeWorkContextId = 'project-sort';
+      mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
+      mockWorkContextService.todaysTasks$ = of([]);
+      mockWorkContextService.undoneTasks$ = of([]);
+
+      service.setSort('name');
+
+      await service.sortPermanent('default');
+
+      expect(projectUpdateSpy).not.toHaveBeenCalled();
+      expect(tagUpdateSpy).not.toHaveBeenCalled();
+      expect(service.selectedSort()).toBe('default');
+      expect(service.selectedGroup()).toBe('default');
+      expect(service.selectedFilter()).toBe('default');
+      expect(service.filterInputValue()).toBe('');
+    });
   });
 });

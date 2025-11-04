@@ -1,6 +1,6 @@
 import { Injectable, signal, inject } from '@angular/core';
 import { Observable, animationFrameScheduler, combineLatest } from 'rxjs';
-import { map, observeOn } from 'rxjs/operators';
+import { map, observeOn, take } from 'rxjs/operators';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { selectAllProjects } from '../project/store/project.selectors';
 import { selectAllTags } from './../tag/store/tag.reducer';
@@ -10,10 +10,17 @@ import { Tag } from '../tag/tag.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { computed } from '@angular/core';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import { WorkContextService } from '../work-context/work-context.service';
+import { WorkContextType } from '../work-context/work-context.model';
+import { ProjectService } from '../project/project.service';
+import { TagService } from '../tag/tag.service';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
   private store = inject(Store);
+  private _workContextService = inject(WorkContextService);
+  private _projectService = inject(ProjectService);
+  private _tagService = inject(TagService);
 
   public selectedSort = signal<string>('default');
   public selectedGroup = signal<string>('default');
@@ -305,5 +312,62 @@ export class TaskViewCustomizerService {
     this.setGroup('default');
     this.setFilter('default');
     this.setFilterInputValue('');
+  }
+
+  async sortPermanent(sortKeyOverride?: string): Promise<void> {
+    const sortKey = sortKeyOverride ?? this.selectedSort();
+    if (sortKey === 'default') {
+      this.resetAll();
+      return;
+    }
+
+    const workContextId = this._workContextService.activeWorkContextId;
+    const workContextType = this._workContextService.activeWorkContextType;
+    if (!workContextId || !workContextType) {
+      this.resetAll();
+      return;
+    }
+
+    const [todaysTasks, undoneTasks] = await Promise.all([
+      this._workContextService.todaysTasks$.pipe(take(1)).toPromise(),
+      this._workContextService.undoneTasks$.pipe(take(1)).toPromise(),
+    ]);
+
+    if (!todaysTasks?.length || !undoneTasks?.length) {
+      this.resetAll();
+      return;
+    }
+
+    const sortedTasks = this.applySort(undoneTasks, sortKey);
+    if (!sortedTasks.length) {
+      this.resetAll();
+      return;
+    }
+
+    const sortedIdQueue = sortedTasks.map((task) => task.id);
+    const sortedIdSet = new Set(sortedIdQueue);
+    const newOrderedIds = todaysTasks.map((task) => {
+      if (!sortedIdSet.has(task.id)) {
+        return task.id;
+      }
+      const nextId = sortedIdQueue.shift();
+      return nextId ?? task.id;
+    });
+
+    const isOrderChanged = todaysTasks.some(
+      (task, idx) => task.id !== newOrderedIds[idx],
+    );
+    if (!isOrderChanged) {
+      this.resetAll();
+      return;
+    }
+
+    if (workContextType === WorkContextType.PROJECT) {
+      this._projectService.update(workContextId, { taskIds: newOrderedIds });
+    } else if (workContextType === WorkContextType.TAG) {
+      this._tagService.updateTag(workContextId, { taskIds: newOrderedIds });
+    }
+
+    this.resetAll();
   }
 }

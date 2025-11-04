@@ -1,5 +1,5 @@
 @use '../../../../styles/_globals.scss' as *;
-@use '../../../../styles/components/badge' as badge;
+@use '../../../../styles/components/number-badge' as badge;
 
 :host {
   display: inline-flex;
@@ -14,5 +14,5 @@
   height: 100%;
 }
 .focus-label {
-  @include badge.inline-badge;
+  @include badge.number-badge;
 }

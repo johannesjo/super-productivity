@@ -20,7 +20,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MATERIAL_ANIMATIONS, MatNativeDateModule } from '@angular/material/core';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
@@ -65,6 +65,7 @@ import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 import { Log } from './app/core/log';
+import { GlobalConfigService } from './app/features/config/global-config.service';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -174,6 +175,15 @@ bootstrapApplication(AppComponent, {
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
     provideAnimations(),
+    {
+      provide: MATERIAL_ANIMATIONS,
+      deps: [GlobalConfigService],
+      useFactory: (globalConfigService: GlobalConfigService) => ({
+        get animationsDisabled(): boolean {
+          return globalConfigService.misc()?.isDisableAnimations ?? false;
+        },
+      }),
+    },
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
     provideZonelessChangeDetection(),

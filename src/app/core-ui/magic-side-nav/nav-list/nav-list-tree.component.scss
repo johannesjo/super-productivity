@@ -83,8 +83,8 @@
 
   &:focus,
   &:hover {
-    background-color: var(--sidenav-hover);
-    color: var(--sidenav-text);
+    background-color: var(--sidenav-hover-bg);
+    color: var(--sidenav-text-hover);
   }
 
   mat-icon {
@@ -178,7 +178,7 @@
   // Placeholder when item is being dragged
   &.drag-placeholder {
     opacity: 0.4;
-    background: var(--sidenav-hover);
+    background: var(--sidenav-hover-bg);
     border-radius: 4px;
     // Minimize repaint
     transform: translateZ(0);

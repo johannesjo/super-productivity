@@ -15,6 +15,7 @@ import {
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
 import { Project } from '../../../features/project/project.model';
+import { Tag } from '../../../features/tag/tag.model';
 import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { FolderContextMenuComponent } from '../../folder-context-menu/folder-context-menu.component';
@@ -148,6 +149,31 @@ export class NavItemComponent {
     if (!wc) return false;
     const icon = wc.icon || this.defaultIcon();
     return isSingleEmoji(icon);
+  });
+
+  workContextIconColor = computed<string | null>(() => {
+    if (this.mode() !== 'work') {
+      return null;
+    }
+    const wc = this.workContext();
+    const wcType = this.type();
+    if (!wc || !wcType) {
+      return null;
+    }
+    const defaultIcon = this.defaultIcon();
+    if (defaultIcon === 'today' || defaultIcon === 'inbox') {
+      return null;
+    }
+    const themeColor = wc.theme?.primary;
+    if (themeColor) {
+      return themeColor;
+    }
+
+    if (wcType === WorkContextType.TAG) {
+      const tag = wc as Tag;
+      return tag.color || null;
+    }
+    return null;
   });
 
   // Emoji detection for presentational icons

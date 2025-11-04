@@ -1,6 +1,6 @@
 @use '../_globals.scss' as *;
 
-@mixin inline-badge {
+@mixin number-badge {
   margin-left: 0;
   position: absolute;
   line-height: 1;
@@ -11,6 +11,7 @@
   font-weight: bold;
   border-radius: 8px;
   z-index: 4;
+  font-size: 12px;
   pointer-events: none;
   bottom: calc(-1 * var(--s-quarter));
   background: var(--bg-lighter);
