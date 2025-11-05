@@ -7,6 +7,7 @@ import {
   OnDestroy,
   OnInit,
   output,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
@@ -67,6 +68,8 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
   readonly taskChange = output<Task | string>();
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
+  @ViewChild(MatAutocompleteTrigger)
+  autocompleteTrigger?: MatAutocompleteTrigger;
   private _destroy$: Subject<boolean> = new Subject<boolean>();
 
   // TODO: Skipped for migration because:
@@ -133,5 +136,9 @@ export class SelectTaskComponent implements OnInit, OnDestroy {
 
   trackById(i: number, task: Task): string {
     return task.id;
+  }
+
+  isAutocompletePanelOpen(): boolean {
+    return !!this.autocompleteTrigger?.panelOpen;
   }
 }

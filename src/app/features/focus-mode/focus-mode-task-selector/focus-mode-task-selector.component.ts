@@ -34,6 +34,8 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
 
   @ViewChild(SelectTaskComponent, { read: ElementRef })
   selectTaskElementRef?: ElementRef;
+  @ViewChild(SelectTaskComponent)
+  selectTaskComponent?: SelectTaskComponent;
 
   private inputElement?: HTMLInputElement;
   private keydownHandler?: (event: KeyboardEvent) => void;
@@ -49,10 +51,8 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
         this.keydownHandler = (event: KeyboardEvent) => {
           if (event.key === 'Enter') {
             // Check if autocomplete panel is open
-            const autocompletePanel = document.querySelector('.mat-autocomplete-panel');
             const isPanelVisible =
-              autocompletePanel &&
-              window.getComputedStyle(autocompletePanel).visibility !== 'hidden';
+              this.selectTaskComponent?.isAutocompletePanelOpen() ?? false;
 
             // Only create task if autocomplete is not visible
             if (!isPanelVisible) {
@@ -84,6 +84,7 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
 
     // Task object selected from autocomplete
     if (taskOrString && typeof taskOrString === 'object') {
+      this.currentTaskInputText.set('');
       this.taskSelected.emit(taskOrString.id);
     }
   }
@@ -101,6 +102,7 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
     if (taskTitle) {
       const newTaskId = this._taskService.add(taskTitle, false, {});
       this.taskSelected.emit(newTaskId);
+      this.currentTaskInputText.set('');
     }
   }
 
