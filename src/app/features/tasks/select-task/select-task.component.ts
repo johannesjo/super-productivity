@@ -7,12 +7,13 @@ import {
   input,
   Input,
   output,
+  signal,
   ViewChild,
 } from '@angular/core';
 import { FormsModule, ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { Task } from '../task.model';
 import { combineLatest } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { startWith, switchMap } from 'rxjs/operators';
 import { T } from '../../../t.const';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Store } from '@ngrx/store';
@@ -92,39 +93,44 @@ export class SelectTaskComponent {
     { initialValue: [] as Task[] },
   );
 
-  private readonly _taskSelectValue = toSignal<Task | string | null | undefined>(
-    this.taskSelectCtrl.valueChanges,
-    {
-      initialValue: this.taskSelectCtrl.value ?? '',
-    },
+  private readonly _isPanelOpen = signal<boolean>(false);
+
+  private readonly _taskOrTitle = toSignal<Task | string | null>(
+    this.taskSelectCtrl.valueChanges.pipe(startWith(this.taskSelectCtrl.value ?? null)),
+    { requireSync: true },
   );
 
   readonly projectMap = computed(() => {
-    const map: { [key: string]: Project } = {};
+    const projectLookup: { [key: string]: Project } = {};
     for (const project of this._projects()) {
-      map[project.id] = project;
+      projectLookup[project.id] = project;
     }
-    return map;
+    return projectLookup;
   });
 
   readonly filteredTasks = computed(() => {
-    const taskOrTitle = this._taskSelectValue();
+    const taskOrTitle = this._taskOrTitle();
     if (typeof taskOrTitle === 'string') {
-      const search = taskOrTitle.toLowerCase();
-      return this._tasks().filter((task) => task.title.toLowerCase().includes(search));
+      const searchTerm = taskOrTitle.toLowerCase();
+      return this._tasks().filter((task) =>
+        task.title.toLowerCase().includes(searchTerm),
+      );
     }
     return [];
   });
 
   readonly isCreate = computed(() => {
-    const taskOrTitle = this._taskSelectValue();
+    if (this._isPanelOpen() && this.filteredTasks().length > 0) {
+      return false;
+    }
+    const taskOrTitle = this._taskOrTitle();
     return typeof taskOrTitle === 'string' && taskOrTitle.trim().length > 0;
   });
 
   constructor() {
     effect(() => {
-      const taskOrTitle = this._taskSelectValue();
-      if (taskOrTitle === null || taskOrTitle === undefined) {
+      const taskOrTitle = this._taskOrTitle();
+      if (taskOrTitle === null) {
         this.taskChange.emit('');
       } else {
         this.taskChange.emit(taskOrTitle);
@@ -135,8 +141,17 @@ export class SelectTaskComponent {
   // TODO: Skipped for migration because:
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input() set initialTask(task: Task) {
-    if ((task && !this.taskSelectCtrl.value) || this.taskSelectCtrl.value === '') {
-      this.taskSelectCtrl.setValue(task);
+    if (task) {
+      const currentValue = this.taskSelectCtrl.value;
+      const currentTaskId =
+        currentValue && typeof currentValue === 'object'
+          ? (currentValue as Task).id
+          : null;
+      if (currentTaskId !== task.id) {
+        this.taskSelectCtrl.setValue(task);
+      }
+    } else if (this.taskSelectCtrl.value) {
+      this.taskSelectCtrl.setValue('');
     }
   }
 
@@ -148,15 +163,26 @@ export class SelectTaskComponent {
   onOptionSelected(event: MatAutocompleteSelectedEvent): void {
     const selectedTask = event.option.value as Task;
     if (selectedTask) {
-      this.taskChange.emit(selectedTask);
+      if (this.taskSelectCtrl.value !== selectedTask) {
+        this.taskSelectCtrl.setValue(selectedTask);
+      }
+      this._isPanelOpen.set(false);
     }
+  }
+
+  onPanelClosed(): void {
+    this._isPanelOpen.set(false);
+  }
+
+  onPanelOpened(): void {
+    this._isPanelOpen.set(true);
   }
 
   trackById(i: number, task: Task): string {
     return task.id;
   }
 
-  isAutocompletePanelOpen(): boolean {
-    return !!this.autocompleteTrigger?.panelOpen;
+  isInCreateMode(): boolean {
+    return this.isCreate();
   }
 }

@@ -20,6 +20,8 @@
     [autoActiveFirstOption]="true"
     [displayWith]="displayWith"
     (optionSelected)="onOptionSelected($event)"
+    (opened)="onPanelOpened()"
+    (closed)="onPanelClosed()"
   >
     @for (task of filteredTasks(); track trackById($index, task)) {
       <mat-option

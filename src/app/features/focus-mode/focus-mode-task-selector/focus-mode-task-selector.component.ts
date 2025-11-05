@@ -3,8 +3,8 @@ import {
   ChangeDetectionStrategy,
   Component,
   ElementRef,
+  HostListener,
   inject,
-  OnDestroy,
   output,
   signal,
   ViewChild,
@@ -24,7 +24,7 @@ import { MatIcon } from '@angular/material/icon';
   animations: [fadeAnimation],
   imports: [SelectTaskComponent, MatIconButton, MatIcon, MatMiniFabButton],
 })
-export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy {
+export class FocusModeTaskSelectorComponent implements AfterViewInit {
   private readonly _taskService = inject(TaskService);
 
   readonly taskSelected = output<string>();
@@ -38,41 +38,13 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
   selectTaskComponent?: SelectTaskComponent;
 
   private inputElement?: HTMLInputElement;
-  private keydownHandler?: (event: KeyboardEvent) => void;
 
   ngAfterViewInit(): void {
-    // Focus the input after view initialization
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       this.inputElement =
         this.selectTaskElementRef?.nativeElement?.querySelector('input');
-      if (this.inputElement) {
-        this.inputElement.focus();
-        // Add keydown listener directly to input for Enter key handling
-        this.keydownHandler = (event: KeyboardEvent) => {
-          if (event.key === 'Enter') {
-            // Check if autocomplete panel is open
-            const isPanelVisible =
-              this.selectTaskComponent?.isAutocompletePanelOpen() ?? false;
-
-            // Only create task if autocomplete is not visible
-            if (!isPanelVisible) {
-              event.preventDefault();
-              this.createAndSelectTaskFromInput();
-            }
-          }
-        };
-        this.inputElement.addEventListener('keydown', this.keydownHandler, {
-          capture: true,
-        });
-      }
-    }, 100);
-  }
-
-  ngOnDestroy(): void {
-    // Clean up event listener
-    if (this.inputElement && this.keydownHandler) {
-      this.inputElement.removeEventListener('keydown', this.keydownHandler);
-    }
+      this.inputElement?.focus();
+    });
   }
 
   onTaskChange(taskOrString: Task | string | null): void {
@@ -86,6 +58,14 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit, OnDestroy 
     if (taskOrString && typeof taskOrString === 'object') {
       this.currentTaskInputText.set('');
       this.taskSelected.emit(taskOrString.id);
+    }
+  }
+
+  @HostListener('keydown.enter', ['$event'])
+  handleEnter(event: KeyboardEvent): void {
+    if (this.selectTaskComponent?.isInCreateMode()) {
+      event.preventDefault();
+      this.createAndSelectTaskFromInput();
     }
   }
 
