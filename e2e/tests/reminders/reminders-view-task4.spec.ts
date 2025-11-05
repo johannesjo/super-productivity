@@ -113,6 +113,9 @@ test.describe.serial('Reminders View Task 4', () => {
     await page.waitForSelector(DIALOG_SUBMIT, { state: 'visible' });
     await page.click(DIALOG_SUBMIT);
     await page.waitForSelector(DIALOG_CONTAINER, { state: 'hidden' });
+
+    // Wait for UI to fully settle after dialog closes
+    await page.waitForTimeout(500);
   };
 
   test('should manually empty list via add to today', async ({
@@ -139,7 +142,7 @@ test.describe.serial('Reminders View Task 4', () => {
     await page.waitForTimeout(2000); // Ensure second task is fully processed
 
     await addTaskWithReminder(page, workViewPage, task3Name, Date.now() + 5000);
-    await page.waitForTimeout(1000); // Allow final task to settle
+    await page.waitForTimeout(2000); // Ensure third task is fully processed
 
     // Wait for reminder dialog
     await page.waitForSelector(DIALOG, {
