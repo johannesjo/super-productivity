@@ -348,7 +348,7 @@ export const getScoreColorGradient = (score: number): string => {
 
 /**
  * Calculates the average productivity score for a list of metrics.
- * Only includes days with complete data (impactOfWork and focus sessions).
+ * Only includes days with impactOfWork data (focus sessions can be zero).
  *
  * @param metrics - Array of metrics to average
  * @returns Average productivity score (0-100) or null if insufficient data
@@ -357,16 +357,13 @@ export const calculateAverageProductivityScore = (metrics: Metric[]): number | n
   const scores: number[] = [];
 
   for (const metric of metrics) {
-    // Skip metrics without required data
-    if (
-      !metric.impactOfWork ||
-      !metric.focusSessions ||
-      metric.focusSessions.length === 0
-    ) {
+    // Skip metrics without required data (only impactOfWork is required)
+    if (!metric.impactOfWork) {
       continue;
     }
 
-    const focusedMinutes = focusSessionsToMinutes(metric.focusSessions);
+    const focusSessions = metric.focusSessions ?? [];
+    const focusedMinutes = focusSessionsToMinutes(focusSessions);
     const totalWorkMinutes = metric.totalWorkMinutes ?? focusedMinutes;
     const score = calculateProductivityScore(
       metric.impactOfWork,
