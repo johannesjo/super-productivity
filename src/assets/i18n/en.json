@@ -2049,6 +2049,7 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
+    "ARCHIVED_TASKS": "{{count}} done parent {{count, plural, one{task has} other{tasks have}}} been archived",
     "BACK": "Wait I forgot something!",
     "BREAK_LABEL": "Breaks (nr / time)",
     "FOCUS_SUMMARY": "Focus (nr / time)",
