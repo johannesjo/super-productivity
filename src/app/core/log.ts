@@ -25,11 +25,23 @@ const truncateSerialized = (value: string): string =>
   value.length > MAX_DATA_LENGTH ? 'short:' + value.substring(0, MAX_DATA_LENGTH) : value;
 
 const isDomRelatedObject = (value: unknown): boolean => {
-  return (
-    value instanceof HTMLCollection ||
-    value instanceof NodeList ||
-    value instanceof Element
-  );
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  // Check if DOM constructors exist before using instanceof
+  // This prevents crashes in non-DOM environments (workers, Electron main, SSR tests)
+  if (typeof HTMLCollection !== 'undefined' && value instanceof HTMLCollection) {
+    return true;
+  }
+  if (typeof NodeList !== 'undefined' && value instanceof NodeList) {
+    return true;
+  }
+  if (typeof Element !== 'undefined' && value instanceof Element) {
+    return true;
+  }
+
+  return false;
 };
 
 const formatDomObjectLabel = (value: { constructor?: { name?: string } }): string =>
