@@ -397,7 +397,9 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
     ...(typeof timeSpent === 'string' && {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
-        [getDbDateStr()]: timeSpent.split(/\s+/g).reduce((ms, s) => ms + stringToMs(s), 0),
+        [getDbDateStr()]: timeSpent
+          .split(/\s+/g)
+          .reduce((ms, s) => ms + stringToMs(s), 0),
       },
     }),
     ...(typeof timeEstimate === 'string' && {

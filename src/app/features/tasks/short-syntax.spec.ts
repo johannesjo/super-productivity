@@ -1157,13 +1157,19 @@ describe('shortSyntax', () => {
     ];
 
     for (const [title, timeEstimateMins, timeSpentMins] of testCases) {
-      const timeEstimate = typeof timeEstimateMins === 'number' ? timeEstimateMins * 60 * 1000 : undefined;
-      const timeSpentOnDay = typeof timeSpentMins === 'number' ? timeSpentMins * 60 * 1000 : undefined;
-      it(`should parse ${timeEstimate === undefined
-        ? 'no time estimate'
-        : 'time estimate of ' + timeEstimate} and ${timeSpentOnDay === undefined
+      const timeEstimate =
+        typeof timeEstimateMins === 'number' ? timeEstimateMins * 60 * 1000 : undefined;
+      const timeSpentOnDay =
+        typeof timeSpentMins === 'number' ? timeSpentMins * 60 * 1000 : undefined;
+      it(`should parse ${
+        timeEstimate === undefined
+          ? 'no time estimate'
+          : 'time estimate of ' + timeEstimate
+      } and ${
+        timeSpentOnDay === undefined
           ? 'no time spent on day'
-          : 'time spent on day of ' + timeSpentOnDay} from "${title}"`, () => {
+          : 'time spent on day of ' + timeSpentOnDay
+      } from "${title}"`, () => {
         const task = {
           ...TASK,
           title,
