@@ -59,7 +59,7 @@
       </main>
 
       <!-- Mobile Bottom Navigation -->
-      @if (isShowMobileButtonNav) {
+      @if (isShowMobileButtonNav()) {
         <mobile-bottom-nav
           (toggleMobileNavEvent)="magicSideNav.toggleMobileNav()"
         ></mobile-bottom-nav>
