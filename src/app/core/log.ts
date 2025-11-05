@@ -25,27 +25,10 @@ const truncateSerialized = (value: string): string =>
   value.length > MAX_DATA_LENGTH ? 'short:' + value.substring(0, MAX_DATA_LENGTH) : value;
 
 const isDomRelatedObject = (value: unknown): boolean => {
-  if (!value || typeof value !== 'object') {
-    return false;
-  }
-
-  type DomCtor = new (...args: unknown[]) => unknown;
-  const globalObj = globalThis as Record<string, unknown>;
-  const elementCtor =
-    typeof globalObj.Element === 'function' ? (globalObj.Element as DomCtor) : undefined;
-  const nodeListCtor =
-    typeof globalObj.NodeList === 'function'
-      ? (globalObj.NodeList as DomCtor)
-      : undefined;
-  const htmlCollectionCtor =
-    typeof globalObj.HTMLCollection === 'function'
-      ? (globalObj.HTMLCollection as DomCtor)
-      : undefined;
-
   return (
-    (!!elementCtor && value instanceof elementCtor) ||
-    (!!nodeListCtor && value instanceof nodeListCtor) ||
-    (!!htmlCollectionCtor && value instanceof htmlCollectionCtor)
+    value instanceof HTMLCollection ||
+    value instanceof NodeList ||
+    value instanceof Element
   );
 };
 
@@ -135,7 +118,7 @@ export class Log {
           } else {
             // Try to serialize objects to JSON
             const serialized = JSON.stringify(firstArg);
-            msg = typeof serialized === 'string' ? truncateSerialized(serialized) : '';
+            msg = truncateSerialized(serialized);
           }
         } else {
           msg = String(firstArg);
