@@ -14,15 +14,13 @@
       [isLimitToProject]="false"
     ></select-task>
 
-    <div class="task-selector-actions">
-      <button
-        mat-button
-        color="primary"
-        (click)="createAndSelectTaskFromInput()"
-        [disabled]="!currentTaskInputText().trim()"
-      >
-        {{ 'Create Task' | translate }}
-      </button>
-    </div>
+    <button
+      mat-mini-fab
+      color="primary"
+      (click)="createAndSelectTaskFromInput()"
+      [disabled]="!currentTaskInputText().trim()"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
   </div>
 </div>

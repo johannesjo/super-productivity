@@ -8,10 +8,10 @@
     matInput
     required
   />
-  @if (!isCreate) {
+  @if (!isCreate()) {
     <mat-icon matSuffix="">track_changes</mat-icon>
   }
-  @if (isCreate) {
+  @if (isCreate()) {
     <mat-icon matSuffix="">add</mat-icon>
   }
 
@@ -21,7 +21,7 @@
     [displayWith]="displayWith"
     (optionSelected)="onOptionSelected($event)"
   >
-    @for (task of filteredTasks; track trackById($index, task)) {
+    @for (task of filteredTasks(); track trackById($index, task)) {
       <mat-option
         [value]="task"
         [class.isDone]="task.isDone"
@@ -32,11 +32,11 @@
         <!---->
         @if (task.projectId) {
           <!---->
-          @if (!task.issueType && !projectMap[task.projectId]) {
+          @if (!task.issueType && !projectMap()[task.projectId]) {
             <mat-icon>library_books</mat-icon>
           }
-          @if (projectMap[task.projectId]) {
-            <tag [tag]="projectMap[task.projectId]"></tag>
+          @if (projectMap()[task.projectId]) {
+            <tag [tag]="projectMap()[task.projectId]"></tag>
           }
           <!---->
         }

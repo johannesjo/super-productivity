@@ -26,18 +26,12 @@
   overflow: auto;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: var(--s2);
 
   @media (max-width: 499px) {
     width: 95%;
     max-width: none;
   }
-}
-
-.task-selector-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: var(--s);
-  padding-top: var(--s);
-  border-top: 1px solid var(--c-border);
 }
