@@ -1144,4 +1144,34 @@ describe('shortSyntax', () => {
       expect(taskChanges?.timeEstimate).toEqual(minuteEstimate * 60 * 1000);
     });
   });
+
+  describe('time unit clusters', () => {
+    const testCases: [string, number | undefined, number | undefined][] = [
+      ['1h 30m', 90, undefined],
+      ['1d2h5m', 1565, undefined],
+      ['1h 30m /', undefined, 90],
+      ['1d2h5m/', undefined, 1565],
+      ['1h 30m / 1d 12h', 2160, 90],
+      ['1.25h / 0.5d 1h 4m', 784, 75],
+      ['1d2h5m/3d', 4320, 1565],
+    ];
+
+    for (const [title, timeEstimateMins, timeSpentMins] of testCases) {
+      const timeEstimate = typeof timeEstimateMins === 'number' ? timeEstimateMins * 60 * 1000 : undefined;
+      const timeSpentOnDay = typeof timeSpentMins === 'number' ? timeSpentMins * 60 * 1000 : undefined;
+      it(`should parse ${timeEstimate === undefined
+        ? 'no time estimate'
+        : 'time estimate of ' + timeEstimate} and ${timeSpentOnDay === undefined
+          ? 'no time spent on day'
+          : 'time spent on day of ' + timeSpentOnDay} from "${title}"`, () => {
+        const task = {
+          ...TASK,
+          title,
+        };
+        const result = shortSyntax(task, CONFIG, [], []);
+        expect(result?.taskChanges.timeEstimate).toBe(timeEstimate);
+        expect(result?.taskChanges.timeSpentOnDay?.[getDbDateStr()]).toBe(timeSpentOnDay);
+      });
+    }
+  });
 });
