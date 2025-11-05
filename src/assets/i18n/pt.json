@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirme antes de sair do aplicativo sem terminar o dia primeiro",
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
+      "IS_DISABLE_CELEBRATION": "Desativar celebração no resumo diário",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
       "IS_SHOW_TIP_LONGER": "Mostrar dica de produtividade no início do aplicativo um pouco mais",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Adicionar tarefas a partir de hoje",
-    "BACK": "Espere, eu esqueci uma coisa!",
     "BREAK_LABEL": "Pausa (nr / time)",
     "CELEBRATE": "Tome um momento para <i>comemorar!</i>",
     "CLEAR_ALL_CONTINUE": "Limpar tudos os concluídos e continuar",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Não, apenas limpe as tarefas",
-      "MSG": "Seu trabalho está feito. Hora de ir para casa!",
-      "OK": "Sim, sim! Desligar!"
+      "CANCEL": "Não, apenas limpar as tarefas",
+      "MSG": "Sair da aplicação?",
+      "OK": "Sair"
     },
     "ESTIMATE_TOTAL": "Estimativa total:",
     "EVALUATE_DAY": "Avaliar",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Arredonde todas as tarefas para 5 minutos",
     "ROUND_UP_15M": "Arredonde todas as tarefas para 15 minutos",
     "ROUND_UP_30M": "Arredonde todas as tarefas para 30 minutos",
-    "SAVE_AND_GO_HOME": "Salve e vá para inicio",
+    "SAVE_AND_GO_HOME": "Terminar o dia",
     "SAVE_AND_GO_HOME_TOOLTIP": "Mova todas as tarefas concluídas para o arquivo (registo de trabalho) e, opcionalmente, sincronize todos os dados e feche a aplicação.",
     "START_END": "Começar – Fim",
     "SUMMARY_FOR": "Resumo diário para {{dayStr}}",

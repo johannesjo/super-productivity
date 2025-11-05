@@ -1796,6 +1796,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Vahvista ennen sovelluksen poistumista tallentamatta päivää ensin",
       "IS_DARK_MODE": "Tumma tila",
       "IS_DISABLE_ANIMATIONS": "Poista kaikki animaatiot käytöstä",
+      "IS_DISABLE_CELEBRATION": "Poista juhlinta käytöstä päivän yhteenvedossa",
       "IS_HIDE_NAV": "Piilota navigointi, kunnes päänimikettä hoveroidaan (vain työpöytä)",
       "IS_MINIMIZE_TO_TRAY": "Pienennä tehtäväpalkkiin (vain työpöytä)",
       "IS_SHOW_TIP_LONGER": "Näytä tuottavuusvinkki sovelluksen käynnistyksessä hieman pidempään",
@@ -2004,15 +2005,14 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Lisää tehtäviä tänään",
-    "BACK": "Odota, unohdin jotain!",
     "BREAK_LABEL": "Tauot (määrä / aika)",
     "FOCUS_SUMMARY": "Keskittyminen (määrä / aika)",
     "CELEBRATE": "Ota hetki <i>juhlia!</i>",
     "CLEAR_ALL_CONTINUE": "Tyhjennä kaikki valmiit ja jatka",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Ei, tyhjennä vain tehtävät",
-      "MSG": "Työsi on tehty. Aika mennä kotiin!",
-      "OK": "Aye aye! Sammuta!"
+      "MSG": "Poistu sovelluksesta?",
+      "OK": "Poistu"
     },
     "ESTIMATE_TOTAL": "Arvio yhteensä:",
     "EVALUATE_DAY": "Arvioi",
@@ -2029,7 +2029,7 @@
     "ROUND_UP_5M": "Pyöristä YLÖS kaikki tehtävät 5 minuuttiin",
     "ROUND_UP_15M": "Pyöristä YLÖS kaikki tehtävät 15 minuuttiin",
     "ROUND_UP_30M": "Pyöristä YLÖS kaikki tehtävät 30 minuuttiin",
-    "SAVE_AND_GO_HOME": "Tallenna ja mene kotiin",
+    "SAVE_AND_GO_HOME": "Viimeistele päivä",
     "SAVE_AND_GO_HOME_TOOLTIP": "Siirrä kaikki valmiit tehtävät arkistoon (työloki) ja synkronoi kaikki tiedot ja sulje sovellus.",
     "START_END": "Alku – Loppu",
     "SUMMARY_FOR": "Päivittäinen yhteenveto {{dayStr}}",
