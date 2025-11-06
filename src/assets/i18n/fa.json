@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "قبل از خروج از برنامه بدون اتمام روز اول آن را تأیید کنید",
       "IS_DARK_MODE": "حالت تاریک",
       "IS_DISABLE_ANIMATIONS": "غیرفعال کردن تمام پویانمایی‌ها",
+      "IS_DISABLE_CELEBRATION": "غیرفعال کردن جشن‌ها در خلاصه روزانه",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "کوچک کردن به سینی (فقط دسک تاپ)",
       "IS_SHOW_TIP_LONGER": "نمایش نکته بهره وری در برنامه کمی طولانی تر شروع کنید",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "وظایف را از امروز اضافه کنید",
-    "BACK": "صبر کنید من چیزی را فراموش کردم!",
     "BREAK_LABEL": "Breaks (nr / time)",
     "CELEBRATE": "یک لحظه برای <i>جشن گرفتن</i> وقت بگذار!",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "نه، فقط وظایف را حذف کن",
-      "MSG": "کارتان تمام شده، وقت رفتن به خانه است!",
-      "OK": "Aye aye! Shutdown!"
+      "CANCEL": "نه، فقط وظایف را پاک کن",
+      "MSG": "خروج از برنامه؟",
+      "OK": "خروج"
     },
     "ESTIMATE_TOTAL": "برآورد کل:",
     "EVALUATE_DAY": "ارزیابی کنید",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "SAVE_AND_GO_HOME": "ذخیره کن و به صفحه اصلی برو",
+    "SAVE_AND_GO_HOME": "پایان روز",
     "SAVE_AND_GO_HOME_TOOLTIP": "همه کارهای انجام شده را به بایگانی (ورک لاگ) منتقل کنید و به صورت اختیاری همه داده ها را همگام کنید و برنامه را ببندید.",
     "START_END": "شروع - پایان",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",

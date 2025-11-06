@@ -302,7 +302,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.configService.misc()?.isDisableAnimations) {
+    if (
+      this.configService.misc()?.isDisableAnimations ||
+      this.configService.misc()?.isDisableCelebration
+    ) {
       return;
     }
 
