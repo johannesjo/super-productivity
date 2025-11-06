@@ -205,8 +205,15 @@ export class CalendarIntegrationService {
 
   private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {
     const now = Date.now();
+    const cached = loadFromRealLs(LS.CAL_EVENTS_CACHE);
+
+    // Validate that cached data is an array
+    if (!Array.isArray(cached)) {
+      return [];
+    }
+
     return (
-      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as ScheduleCalendarMapEntry[]) || [])
+      cached
         // filter out cached past entries
         .map((provider) => ({
           ...provider,
