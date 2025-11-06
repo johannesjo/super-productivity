@@ -53,7 +53,7 @@
     } @else {
       <div
         class="task-title-placeholder"
-        [matMenuTriggerFor]="taskMenu"
+        (click)="openTaskSelector(); $event.stopPropagation()"
       >
         {{ 'Select Task to Focus' | translate }}
       </div>
@@ -67,7 +67,7 @@
       >
         <button
           mat-icon-button
-          [matMenuTriggerFor]="taskMenu"
+          (click)="openTaskSelector(); $event.stopPropagation()"
           [matTooltip]="'Switch task' | translate"
         >
           <mat-icon>swap_horiz</mat-icon>
@@ -258,18 +258,13 @@
     }
   </div>
 
-  <!-- Task Menu (shared) -->
-  <mat-menu #taskMenu="matMenu">
-    @for (startableTask of startableTasks$ | async; track startableTask.id) {
-      <button
-        mat-menu-item
-        (click)="switchToTask(startableTask.id)"
-        [disabled]="currentTask && startableTask.id === currentTask.id"
-      >
-        <span>{{ startableTask.title }}</span>
-      </button>
-    }
-  </mat-menu>
+  <!-- Task Selector Overlay -->
+  @if (isTaskSelectorOpen()) {
+    <focus-mode-task-selector
+      (taskSelected)="onTaskSelected($event)"
+      (closed)="closeTaskSelector()"
+    ></focus-mode-task-selector>
+  }
 
   <!-- Notes and Attachments (In Progress only) -->
   @if (isShowBottomControls() && currentTask && isShowNotes) {

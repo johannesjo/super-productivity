@@ -219,8 +219,10 @@
       "BACK_TO_PLANNING": "Zurück zur Planung",
       "CONGRATS": "Herzlichen Glückwunsch zum Abschluss dieser Sitzung!",
       "COUNTDOWN": "Countdown",
+      "COUNTDOWN_HINT": "Konzentrieren Sie sich, bis die Uhr Null erreicht.",
       "FINISH_TASK_AND_SELECT_NEXT": "Beenden Sie die Aufgabe und wählen Sie „Weiter“.",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Flexible Zeitplanung ohne strenge Zeitvorgaben",
       "FOR_TASK": "für Aufgabe",
       "GET_READY": "Machen Sie sich bereit für Ihre Fokussitzung!",
       "GO_TO_PROCRASTINATION": "Holen Sie sich Hilfe, wenn Sie prokrastinieren",
@@ -229,6 +231,7 @@
       "ON": "An",
       "OPEN_ISSUE_IN_BROWSER": "Issue im Browser öffnen",
       "POMODORO": "Pomodoro",
+      "POMODORO_HINT": "Strukturierte Sprints mit geplanten Pausen",
       "POMODORO_BACK": "Zurück",
       "POMODORO_DISABLE": "Pomodoro deaktivieren",
       "POMODORO_INFO": "Fokussitzungen können nicht zusammen mit aktiviertem Pomodoro-Timer verwendet werden.",
@@ -237,6 +240,7 @@
       "PREP_STRETCH": "Machen Sie leichte Dehnübungen",
       "SELECT_ANOTHER_TASK": "Wählen Sie eine andere Aufgabe aus",
       "SELECT_TASK": "Wählen Sie die Aufgabe aus, auf die Sie sich konzentrieren möchten",
+      "SELECT_MODE": "Wählen Sie Ihren Fokusmodus",
       "SESSION_COMPLETED": "Fokussierungssitzung abgeschlossen!",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Legen Sie die Dauer der Fokussitzung fest",
@@ -575,6 +579,7 @@
         "CHECK": "Ich hab es geschafft!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Aktivitäts-Übersichten",
         "AVG_BREAKS_PER_DAY": "Durchschn. Pausen pro Tag",
         "AVG_TASKS_PER_DAY_WORKED": "Durchschn. Aufgaben pro Tag gearbeitet",
         "AVG_TIME_SPENT_ON_BREAKS": "Durchschn. Zeit für Pausen",
@@ -583,6 +588,7 @@
         "COUNTING_SUBTASKS": "(Zählen von Unteraufgaben)",
         "DAYS_WORKED": "Tage gearbeitet",
         "GLOBAL_METRICS": "Globale Metriken",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Produktivität und Nachhaltigkeit im Zeitverlauf",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stimmung und Produktivität im Laufe der Zeit",
         "FOCUS_SESSION_TRENDS": "Fokussitzung im Laufe der Zeit",
         "NO_ADDITIONAL_DATA_YET": "Es wurden noch keine zusätzlichen Daten gesammelt. Verwenden Sie dazu das Formular in der täglichen Zusammenfassung \"Bewertung\".",
@@ -591,24 +597,40 @@
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stoppuhrzähler im Laufe der Zeit",
         "TASKS_DONE_CREATED": "Aufgaben (erledigt / erstellt)",
         "TIME_ESTIMATED": "Geschätzte Zeit",
-        "TIME_SPENT": "Zeitaufwand"
+        "TIME_SPENT": "Zeitaufwand",
+        "TIME_FRAME_LABEL": "Zeitraum",
+        "TIME_FRAME_2_WEEKS": "2 Wochen",
+        "TIME_FRAME_1_MONTH": "1 Monat",
+        "TIME_FRAME_MAX": "Maximum"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Notiz für morgen hinzufügen",
-        "DISABLE_REPEAT_EVERY_DAY": "Deaktivieren Sie die tägliche Wiederholung",
-        "ENABLE_REPEAT_EVERY_DAY": "Jeden Tag wiederholen",
-        "HELP_H1": "Warum sollte es mich kümmern?",
-        "HELP_LINK_TXT": "Gehen Sie zum Abschnitt \"Kennzahlen\"",
-        "HELP_P1": "Zeit für eine kleine Selbsteinschätzung! Ihre Antworten hier werden gespeichert und liefern Ihnen ein paar Statistiken darüber, wie Sie im Abschnitt \"Metriken\" arbeiten. Darüber hinaus erscheinen die Vorschläge für morgen am nächsten Tag über Ihrer Aufgabenliste.",
-        "HELP_P2": "Hier geht es weniger darum, exakte Messdaten zu berechnen oder in allem so effizient wie eine Maschine zu werden, als vielmehr darum, Ihre Einstellung zu Ihrer Arbeit zu verbessern. Es kann hilfreich sein, die Schmerzpunkte in Ihrem Tagesablauf zu bewerten und Faktoren zu finden, die Ihnen helfen. Ein bisschen systematisch zu sein, hilft hoffentlich dabei, diese besser in den Griff zu bekommen und zu verbessern, was Sie können.",
-        "IMPROVEMENTS": "Was hat Ihre Produktivität verbessert?",
-        "IMPROVEMENTS_TOMORROW": "Was könnten Sie morgen tun, um sich zu verbessern?",
-        "MOOD": "Wie fühlen Sie sich?",
-        "MOOD_HINT": "1: Schrecklich - 10: Großartig",
-        "NOTES": "Notizen für morgen",
-        "OBSTRUCTIONS": "Was hat Ihre Produktivität beeinträchtigt?",
-        "PRODUCTIVITY": "Wie effizient haben Sie gearbeitet?",
-        "PRODUCTIVITY_HINT": "1: Noch nicht einmal angefangen - 10: Enorm effizient"
+        "FOCUS_WORK_TIME": "Konzentrierte Arbeitszeit",
+        "IMPACT_OF_WORK": "Wie schätzen Sie die Auswirkungen Ihrer heutigen Arbeit ein?",
+        "IMPACT_OF_WORK_HINT": "1: Keine nennenswerten Fortschritte – 4: Erhebliche Auswirkungen",
+        "PRODUCTIVITY_SCORE": "Produktivitätswert",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65 % Wirkung (Skala 1–4) • 30 % Fokus auf 4-Stunden-Ziel • 5 % Gesamtarbeitsaufwand (begrenzt auf 10 Stunden)",
+        "SUSTAINABILITY_SCORE": "Nachhaltigkeitsbewertung",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45 % Energiepegel • 40 % Angemessene Arbeitszeiten (0 bei 10 Stunden) • 15 % Konzentrationsbalance (optimal bei 4 Stunden)",
+        "ENERGY_LEVEL": "Wie steht es um Ihre Energie?",
+        "ENERGY_LEVEL_HINT": "😫 Erschöpft – 😐 OK – 😊 Gut",
+        "TOTAL_WORK_TIME": "Gesamtarbeitszeit heute",
+        "DAILY_STATE": "Täglicher Zustand",
+        "DAILY_STATE_TOOLTIP": "Quadrantensystem basierend auf beiden Werten (≥50 ist hoch): Tiefer Fluss (hoch/hoch), Übersteuerung (hoch/niedrig), Erholung (niedrig/hoch), Driften (niedrig/niedrig)",
+        "STATE_DEEP_FLOW_HEADLINE": "Tiefer Fluss: Hervorragende Konzentration und nachhaltiges Tempo.",
+        "STATE_DEEP_FLOW_HINT": "Sie befinden sich im Sweet Spot – denken Sie darüber nach, was diese Kombination möglich gemacht hat.",
+        "STATE_OVERDRIVE_HEADLINE": "Übersteuerung: Produktiv, aber mit Kosten verbunden.",
+        "STATE_OVERDRIVE_HINT": "Sie haben viel geschafft – jetzt sollten Sie sich unbedingt erholen, bevor Sie ein Burnout erwischt.",
+        "STATE_RECOVERY_HEADLINE": "Erholung: Ausruhen und neue Energie tanken.",
+        "STATE_RECOVERY_HINT": "Du gibst deinem Geist Raum, sich zu erholen. Morgen wirst du wieder die Energie haben, tiefer einzutauchen.",
+        "STATE_DRIFT_HEADLINE": "Driften: Geringe Konzentration und wenig Energie.",
+        "STATE_DRIFT_HINT": "Das ist in Ordnung. Denken Sie darüber nach, was Sie abgelenkt hat, und passen Sie sich behutsam an – jeder Neustart ist eine Chance, etwas zu lernen.",
+        "STATE_STEADY_HEADLINE": "Stetiger Rhythmus: Gleichmäßiger, nachhaltiger Fortschritt.",
+        "STATE_STEADY_HINT": "Gute Balance. Sie behalten Ihr Tempo bei, ohne sich zu überfordern – machen Sie weiter so, damit dieses Tempo auch weiterhin funktioniert.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Geringe Wirkung: Viel Aufwand, wenig Ertrag.",
+        "STATE_IMPACT_MISMATCH_HINT": "Sie haben sich intensiv konzentriert – richten Sie Ihre Energie nun auf wirkungsvollere Aufgaben, um den Unterschied zu spüren.",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-Tage-Produktivitätsaufschlüsselung",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7-Tage-Nachhaltigkeitsanalyse"
       },
       "S": {
         "SAVE_METRIC": "Metrik erfolgreich gespeichert"
@@ -937,6 +959,7 @@
       "MONTH": "Monat",
       "NO_TASKS": "Derzeit gibt es keine Aufgaben. Bitte fügen Sie einige Aufgaben über die Schaltfläche + in der oberen Leiste hinzu.",
       "NOW": "Jetzt",
+      "INSERT_BEFORE": "Vor",
       "PLAN_END_DAY": "Plan am Ende des Tages",
       "PLAN_START_DAY": "Plan zu Beginn des Tages",
       "SHIFT_KEY_INFO": "Halten Sie die Umschalttaste gedrückt, um in den Tagesplanungsmodus zu wechseln.",
@@ -1035,7 +1058,7 @@
         "CHANGES": "Änderungen",
         "CHANGES_SINCE_LAST_SYNC": "Änderungen seit der letzten Synchronisierung",
         "VECTOR_CLOCK_HEADING": "Vektor-Uhr",
-        "OVERWRITE_WARNING": "WARNUNG: Die {{targetName}} Daten enthalten ungefähr {{targetChanges}} Änderungen, während die {{sourceName}} Daten nur {{sourceChanges}} Änderungen enthalten. Sind Sie sicher, dass Sie die {{ZielName}} Daten mit der {{QuellName}} Version überschreiben wollen? Diese Aktion kann nicht rückgängig gemacht werden."
+        "OVERWRITE_WARNING": "WARNUNG: Die {{targetName}} Daten enthalten ungefähr {{targetChanges}} Änderungen, während die {{sourceName}} Daten nur {{sourceChanges}} Änderungen enthalten. Sind Sie sicher, dass Sie die {{targetName}} Daten mit der {{sourceName}} Version überschreiben wollen? Diese Aktion kann nicht rückgängig gemacht werden."
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Ändern und Remote überschreiben",
@@ -1141,7 +1164,7 @@
         "REASON_BEFORE_UPDATE": "Automatisches Backup vor der Synchronisierung",
         "LAST_CHANGE_PREFIX": "Letzte Änderung:",
         "RESTORE_CONFIRM_TITLE": "Backup wiederherstellen",
-        "RESTORE_CONFIRM_MSG": "Sind Sie sicher, dass Sie das Backup vom {{Zeitstempel}} wiederherstellen möchten?\n\nDamit werden alle Ihre aktuellen Daten VOLLSTÄNDIG ERSETZT!\n\nGrund: {{Grund}}\n\nKlicken Sie auf OK, um fortzufahren oder auf Abbrechen, um abzubrechen.",
+        "RESTORE_CONFIRM_MSG": "Sind Sie sicher, dass Sie das Backup vom {{timestamp}} wiederherstellen möchten?\n\nDamit werden alle Ihre aktuellen Daten VOLLSTÄNDIG ERSETZT!\n\nGrund: {{reason}}\n\nKlicken Sie auf OK, um fortzufahren oder auf Abbrechen, um abzubrechen.",
         "BACKUP_NOT_FOUND": "Backup mit ID {{backupId}} nicht gefunden",
         "RESTORE_FAILED": "Wiederherstellung des Backup fehlgeschlagen: {{error}}",
         "INVALID_ID_ERROR": "Ungültige Backup-ID erzeugt",
@@ -1335,6 +1358,11 @@
         "TINE_SPENT": "Zeitaufwand",
         "TITLE": "Für Tag hinzufügen"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "Datum",
+        "TIME": "Zeit",
+        "TITLE": "Datum und Uhrzeit auswählen"
+      },
       "N": {
         "ESTIMATE_EXCEEDED": "Zeitschätzung überschritten!",
         "ESTIMATE_EXCEEDED_BODY": "Sie haben Ihre geschätzte Zeit für \"{{title}}\" überschritten."
@@ -1347,6 +1375,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Die vorhandene Aufgabe <strong>{{title}}</strong> wurde in die Aufgabenliste von heute verschoben",
         "FOUND_MOVE_FROM_OTHER_LIST": "Aufgabe <strong>{{title}}</strong> von <strong>{{contextTitle}}</strong> zur aktuellen Liste hinzugefügt",
         "FOUND_RESTORE_FROM_ARCHIVE": "Zum Issue zugehörige Aufgabe <strong>{{title}}</strong> wurde aus dem Archiv wiederhergestellt",
+        "GO_TO_TASK": "Zur Aufgabe gehen",
         "LAST_TAG_DELETION_WARNING": "Sie versuchen, das letzte Stichwort einer Nicht-Projektaufgabe zu entfernen. Das ist nicht erlaubt!",
         "MOVED_TO_ARCHIVE": "{{nr}} Aufgaben in das Archiv verschoben",
         "MOVED_TO_PROJECT": "Aufgabe \"{{taskTitle}}\" in Projekt \"{{projectTitle}}\" verschoben",
@@ -1397,7 +1426,7 @@
         "OK": "Vollständig entfernen"
       },
       "D_DELETE_INSTANCE": {
-        "MSG": "Die Instanz der wiederkehrenden Aufgabe am {{Datum}} entfernen? Dadurch wird verhindert, dass die Aufgabe nur an diesem Datum erstellt wird.",
+        "MSG": "Die Instanz der wiederkehrenden Aufgabe am {{date}} entfernen? Dadurch wird verhindert, dass die Aufgabe nur an diesem Datum erstellt wird.",
         "OK": "Instanz entfernen"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
@@ -1449,6 +1478,11 @@
         "WEDNESDAY": "Mittwoch",
         "INHERIT_SUBTASKS": "Unteraufgaben vererben",
         "INHERIT_SUBTASKS_DESCRIPTION": "Wenn diese Option aktiviert ist, werden die Unteraufgaben der letzten Aufgabeninstanz mit der wiederkehrenden Aufgabe neu erstellt.",
+        "REPEAT_FROM_COMPLETION_DATE": "Wiederholen, wenn fertig",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "Die nächste Aufgabe wird anhand Ihres Fertigstellungsdatums erstellt, nicht anhand des Startdatums. (z. B. „Alle 7 Tage“ = 7 Tage nach Fertigstellung)",
+        "SCHEDULE_TYPE_LABEL": "Terminart",
+        "SCHEDULE_TYPE_FIXED": "Fester Zeitplan (z. B. jeden Montag, am 1. des Monats)",
+        "SCHEDULE_TYPE_FLEXIBLE": "Nach Fertigstellung (z. B. 7 Tage nach Fertigstellung)",
         "REMOVE_INSTANCE": "Heute entfernen",
         "REMOVE_FOR_DATE": "Entfernen für {{date}}",
         "DISABLE_AUTO_UPDATE_SUBTASKS": "Autom. Aktualisierung von Unteraufgaben deaktivieren",
@@ -1480,10 +1514,11 @@
         "SCHEDULED_THIS_WEEK": "Diese Woche",
         "SCHEDULED_TODAY": "Heute",
         "SCHEDULED_TOMORROW": "Morgen",
-        "SORT_BY": "Sortiere nach",
+        "SORT_TEMPORARY": "Sortieren (temporär)",
         "SORT_CREATION_DATE": "Erstellungsdatum",
         "SORT_DEFAULT": "Standard",
         "SORT_NAME": "Name",
+        "SORT_PERMANENT": "Sortieren (permanent)",
         "SORT_SCHEDULED_DATE": "Geplantes Datum",
         "TIME_1HOUR": "> 1 Stunde",
         "TIME_2HOUR": "> 2 Stunden",
@@ -1839,6 +1874,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "Zeigen Sie Banner vor der eigentlichen Erinnerung an",
       "IS_COUNTDOWN_BANNER_ENABLED": "Countdown-Banner anzeigen, bevor Erinnerungen fällig werden",
+      "DEFAULT_TASK_REMIND_OPTION": "Standardmäßig ausgewählte Erinnerungsoption beim Erstellen von Aufgaben",
       "TITLE": "Erinnerungen"
     },
     "SCHEDULE": {
@@ -1930,6 +1966,10 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "In die Zwischenablage kopiert",
+    "NO_TASKS_TO_COPY": "Keine Aufgaben zum Kopieren",
+    "SHARE_UNAVAILABLE_FALLBACK": "In die Zwischenablage kopiert.",
+    "SHARE_FAILED_FALLBACK": "Das Teilen ist fehlgeschlagen. Stattdessen in die Zwischenablage kopiert.",
+    "SHARE_FAILED": "Das Teilen ist fehlgeschlagen. Bitte kopieren Sie es manuell.",
     "ERR_COMPRESSION": "Fehler bei der Komprimierung",
     "FILE_DOWNLOADED": "{{fileName}} heruntergeladen",
     "FILE_DOWNLOADED_BTN": "Ordner öffnen",
@@ -1996,6 +2036,8 @@
     "TOGGLE_SHOW_NOTES": "Projektnotizen ein- / ausblenden",
     "TOGGLE_TRACK_TIME": "Tracking-Zeit starten / stoppen",
     "TRIGGER_SYNC": "Synchronisierung manuell auslösen",
+    "SHARE_TASK_LIST_MARKDOWN": "Aufgabenliste teilen",
+    "COPY_TASK_LIST_MARKDOWN": "In die Zwischenablage kopieren",
     "WORKLOG": "Worklog",
     "SIDE_PANEL_MENU": "Seitenleiste Menü"
   },
@@ -2008,6 +2050,8 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Aufgaben von heute hinzufügen",
+    "ARCHIVED_TASKS": "{{count}} erledigt übergeordnet {{count, plural, one{task has} other{tasks have}}} wurden archiviert",
+    "BACK": "Ich habe etwas vergessen!",
     "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
     "FOCUS_SUMMARY": "Fokussitzung (Nr / Zeit)",
     "CELEBRATE": "Nehmen Sie sich einen Moment Zeit, um <i>zu feiern!</i>",
