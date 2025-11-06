@@ -113,11 +113,11 @@ describe('FocusModeMainComponent', () => {
 
   describe('initialization', () => {
     it('should initialize with current task', () => {
-      expect(component.currentTask).toBe(mockTask);
+      expect(component.currentTask()).toBe(mockTask);
     });
 
     it('should set default task notes from config', () => {
-      expect(component.defaultTaskNotes).toBe('Default task notes template');
+      expect(component.defaultTaskNotes()).toBe('Default task notes template');
     });
 
     it('should initialize focus mode service properties', () => {
@@ -125,16 +125,12 @@ describe('FocusModeMainComponent', () => {
       expect(component.isCountTimeDown()).toBe(true);
     });
 
-    it('should initialize isShowNotes to false', () => {
-      expect(component.isShowNotes).toBe(false);
-    });
-
     it('should initialize isFocusNotes to false', () => {
-      expect(component.isFocusNotes).toBe(false);
+      expect(component.isFocusNotes()).toBe(false);
     });
 
     it('should initialize isDragOver to false', () => {
-      expect(component.isDragOver).toBe(false);
+      expect(component.isDragOver()).toBe(false);
     });
   });
 
@@ -196,7 +192,7 @@ describe('FocusModeMainComponent', () => {
       it('should set drag state and prevent default', () => {
         component.onDragEnter(mockDragEvent);
 
-        expect(component.isDragOver).toBe(true);
+        expect(component.isDragOver()).toBe(true);
         expect(mockDragEvent.preventDefault).toHaveBeenCalled();
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
       });
@@ -211,11 +207,11 @@ describe('FocusModeMainComponent', () => {
     describe('onDragLeave', () => {
       it('should reset drag state when leaving the same target', () => {
         component['_dragEnterTarget'] = mockTarget;
-        component.isDragOver = true;
+        component.isDragOver.set(true);
 
         component.onDragLeave(mockDragEvent);
 
-        expect(component.isDragOver).toBe(false);
+        expect(component.isDragOver()).toBe(false);
         expect(mockDragEvent.preventDefault).toHaveBeenCalled();
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
       });
@@ -223,11 +219,11 @@ describe('FocusModeMainComponent', () => {
       it('should not reset drag state when leaving different target', () => {
         const differentTarget = document.createElement('span');
         component['_dragEnterTarget'] = differentTarget;
-        component.isDragOver = true;
+        component.isDragOver.set(true);
 
         component.onDragLeave(mockDragEvent);
 
-        expect(component.isDragOver).toBe(true);
+        expect(component.isDragOver()).toBe(true);
       });
     });
 
@@ -240,11 +236,12 @@ describe('FocusModeMainComponent', () => {
           mockTask.id,
         );
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
-        expect(component.isDragOver).toBe(false);
+        expect(component.isDragOver()).toBe(false);
       });
 
       it('should not create attachment when no task', () => {
-        component.currentTask = null;
+        currentTaskSubject.next(null);
+        fixture.detectChanges();
 
         component.onDrop(mockDragEvent);
 
@@ -255,7 +252,7 @@ describe('FocusModeMainComponent', () => {
 
   describe('changeTaskNotes', () => {
     it('should update task notes when changed from default', () => {
-      component.defaultTaskNotes = 'Default template';
+      component.defaultTaskNotes.set('Default template');
 
       component.changeTaskNotes('New notes');
 
@@ -265,7 +262,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should not update when notes match default template', () => {
-      component.defaultTaskNotes = 'Default template';
+      component.defaultTaskNotes.set('Default template');
 
       component.changeTaskNotes('Default template');
 
@@ -281,7 +278,8 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.currentTask = null;
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
 
       expect(() => component.changeTaskNotes('New notes')).toThrowError(
         'Task is not loaded',
@@ -289,7 +287,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should handle whitespace differences in comparison', () => {
-      component.defaultTaskNotes = '  Default template  ';
+      component.defaultTaskNotes.set('  Default template  ');
 
       component.changeTaskNotes('Default template');
 
@@ -364,7 +362,8 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.currentTask = null;
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
 
       expect(() => component.updateTaskTitleIfChanged(true, 'New Title')).toThrowError(
         'No task data',
