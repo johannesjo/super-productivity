@@ -54,7 +54,7 @@
         class="task-title-placeholder"
         (click)="openTaskSelector(); $event.stopPropagation()"
       >
-        {{ 'Select Task to Focus' | translate }}
+        {{ T.F.FOCUS_MODE.SELECT_TASK_TO_FOCUS | translate }}
       </div>
     }
 
@@ -65,7 +65,7 @@
       <button
         mat-icon-button
         (click)="openTaskSelector(); $event.stopPropagation()"
-        [matTooltip]="'Switch task' | translate"
+        [matTooltip]="T.F.FOCUS_MODE.SWITCH_TASK | translate"
       >
         <mat-icon>swap_horiz</mat-icon>
       </button>
@@ -118,7 +118,7 @@
           @if (isShowTimeAdjustButtons()) {
             <button
               mat-icon-button
-              [matTooltip]="'Remove 1 minute' | translate"
+              [matTooltip]="T.F.FOCUS_MODE.REMOVE_TIME_MINUTE | translate"
               (click)="adjustTime(-60000)"
               class="time-adjust-btn time-adjust-btn--decrease"
             >
@@ -130,7 +130,9 @@
           <div
             class="clock-time"
             [matTooltip]="
-              isShowDurationSlider() ? ('Click to edit duration' | translate) : ''
+              isShowDurationSlider()
+                ? (T.F.FOCUS_MODE.CLICK_TO_EDIT_DURATION | translate)
+                : ''
             "
             [title]="T.F.FOCUS_MODE.FOCUS_TIME_TOOLTIP | translate"
           >
@@ -144,7 +146,7 @@
           @if (isShowTimeAdjustButtons()) {
             <button
               mat-icon-button
-              [matTooltip]="'Add 1 minute' | translate"
+              [matTooltip]="T.F.FOCUS_MODE.ADD_TIME_MINUTE | translate"
               (click)="adjustTime(60000)"
               class="time-adjust-btn time-adjust-btn--increase"
             >
@@ -157,7 +159,7 @@
             @if (focusModeService.isSessionPaused()) {
               <button
                 mat-icon-button
-                [matTooltip]="'Resume session' | translate"
+                [matTooltip]="T.F.FOCUS_MODE.RESUME_SESSION | translate"
                 (click)="resumeSession()"
                 class="pause-resume-btn"
               >
@@ -166,7 +168,7 @@
             } @else {
               <button
                 mat-icon-button
-                [matTooltip]="'Pause session' | translate"
+                [matTooltip]="T.F.FOCUS_MODE.PAUSE_SESSION | translate"
                 (click)="pauseSession()"
                 class="pause-resume-btn"
               >
@@ -179,7 +181,7 @@
           @if (isShowCompleteSessionButton()) {
             <button
               mat-icon-button
-              [matTooltip]="'Complete focus session' | translate"
+              [matTooltip]="T.F.FOCUS_MODE.COMPLETE_FOCUS_SESSION | translate"
               (click)="completeFocusSession()"
               class="complete-session-btn"
             >
@@ -210,7 +212,7 @@
       <button
         mat-fab
         color="primary"
-        [matTooltip]="'Start focus session' | translate"
+        [matTooltip]="T.F.FOCUS_MODE.START_FOCUS_SESSION | translate"
         (click)="startSession()"
         [disabled]="!ct"
         class="play-button"
