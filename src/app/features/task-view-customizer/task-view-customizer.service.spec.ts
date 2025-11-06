@@ -250,6 +250,62 @@ describe('TaskViewCustomizerService', () => {
     expect(grouped['Tag Two'][1].id).toBe('task3');
   });
 
+  it('should group by scheduledDate using dueDay', () => {
+    const grouped = service['applyGrouping'](mockTasks, 'scheduledDate');
+    expect(Object.keys(grouped)).toContain(todayStr);
+    expect(Object.keys(grouped)).toContain(tomorrowStr);
+    expect(grouped[tomorrowStr].length).toBe(1);
+    expect(grouped[todayStr].length).toBe(3);
+  });
+
+  it('should group by scheduledDate using dueWithTime when dueDay is not set', () => {
+    const tomorrowTimestamp = getTomorrow().getTime();
+    const taskWithTime: TaskWithSubTasks = {
+      id: 'task-with-time',
+      title: 'Task with time',
+      tagIds: [],
+      projectId: 'p1',
+      dueWithTime: tomorrowTimestamp,
+      timeEstimate: 0,
+      timeSpentOnDay: {},
+      created: 5,
+      subTasks: [],
+      subTaskIds: [],
+      timeSpent: 0,
+      isDone: false,
+      attachments: [],
+    } as TaskWithSubTasks;
+
+    const tasksWithTimeTask = [...mockTasks, taskWithTime];
+    const grouped = service['applyGrouping'](tasksWithTimeTask, 'scheduledDate');
+
+    expect(Object.keys(grouped)).toContain(tomorrowStr);
+    expect(grouped[tomorrowStr].length).toBe(2);
+    expect(grouped[tomorrowStr].some((t) => t.id === 'task-with-time')).toBe(true);
+  });
+
+  it('should group tasks with no schedule into "No date" group', () => {
+    const taskWithoutSchedule: TaskWithSubTasks = {
+      id: 'task-no-date',
+      title: 'Task without date',
+      tagIds: [],
+      projectId: 'p1',
+      timeEstimate: 0,
+      timeSpentOnDay: {},
+      created: 6,
+      subTasks: [],
+      subTaskIds: [],
+      timeSpent: 0,
+      isDone: false,
+      attachments: [],
+    } as TaskWithSubTasks;
+
+    const grouped = service['applyGrouping']([taskWithoutSchedule], 'scheduledDate');
+    expect(Object.keys(grouped)).toContain('No date');
+    expect(grouped['No date'].length).toBe(1);
+    expect(grouped['No date'][0].id).toBe('task-no-date');
+  });
+
   it('should reset all customizer values to default', () => {
     service.selectedSort.set('name');
     service.selectedGroup.set('tag');
