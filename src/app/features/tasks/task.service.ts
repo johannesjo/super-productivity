@@ -93,6 +93,7 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { TaskLog } from '../../core/log';
 import { devError } from '../../util/dev-error';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { TaskFocusService } from './task-focus.service';
 
 @Injectable({
   providedIn: 'root',
@@ -107,6 +108,7 @@ export class TaskService {
   private readonly _archiveService = inject(ArchiveService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _taskFocusService = inject(TaskFocusService);
 
   currentTaskId$: Observable<string | null> = this._store.pipe(
     select(selectCurrentTaskId),
@@ -622,7 +624,42 @@ export class TaskService {
       }),
     );
 
+    this._focusNewlyCreatedTask(task.id, !task.title?.trim().length);
+
     return task.id;
+  }
+
+  private _focusNewlyCreatedTask(taskId: string, shouldStartEditing: boolean): void {
+    // Tasks render asynchronously; retry focus a few times before giving up.
+    const MAX_ATTEMPTS = 5;
+    const attemptFocus = (attempt = 0): void => {
+      window.setTimeout(() => {
+        const taskElement = document.getElementById(`t-${taskId}`);
+        if (taskElement) {
+          taskElement.focus();
+
+          if (!shouldStartEditing) {
+            return;
+          }
+
+          const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
+          if (
+            taskComponent &&
+            taskComponent.task().id === taskId &&
+            !taskComponent.task().title?.trim().length
+          ) {
+            taskComponent.focusTitleForEdit();
+            return;
+          }
+        }
+
+        if (attempt < MAX_ATTEMPTS) {
+          attemptFocus(attempt + 1);
+        }
+      }, 50);
+    };
+
+    attemptFocus();
   }
 
   addTimeSpent(
