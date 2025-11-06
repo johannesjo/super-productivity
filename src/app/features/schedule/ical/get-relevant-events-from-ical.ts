@@ -5,6 +5,25 @@ import { Log } from '../../../core/log';
 
 // NOTE: this sucks and is slow, but writing a new ical parser would be very hard... :(
 
+/**
+ * Safely extracts a date value from an iCal property and converts it to timestamp.
+ * Returns null if the property is missing or invalid.
+ */
+const safeGetDateTimestamp = (vevent: any, propertyName: string): number | null => {
+  try {
+    const prop = vevent.getFirstPropertyValue(propertyName);
+    if (!prop) {
+      return null;
+    }
+    if (typeof prop.toJSDate !== 'function') {
+      return null;
+    }
+    return prop.toJSDate().getTime();
+  } catch (error) {
+    return null;
+  }
+};
+
 export const getRelevantEventsForCalendarIntegrationFromIcal = (
   icalData: string,
   calProviderId: string,
@@ -22,12 +41,13 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
         calendarIntegrationEvents = calendarIntegrationEvents.concat(
           getForRecurring(ve, calProviderId, startTimestamp, endTimestamp),
         );
-      } else if (
-        ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp
-      ) {
-        calendarIntegrationEvents.push(
-          convertVEventToCalendarIntegrationEvent(ve, calProviderId),
-        );
+      } else {
+        const dtstart = safeGetDateTimestamp(ve, 'dtstart');
+        if (dtstart !== null && dtstart < endTimestamp) {
+          calendarIntegrationEvents.push(
+            convertVEventToCalendarIntegrationEvent(ve, calProviderId),
+          );
+        }
       }
     } catch (error) {
       Log.warn(
@@ -70,6 +90,17 @@ const getForRecurring = (
     const title: string = vevent.getFirstPropertyValue('summary');
     const description = vevent.getFirstPropertyValue('description');
     const start = vevent.getFirstPropertyValue('dtstart');
+
+    // Handle missing or invalid dtstart for recurring events
+    if (!start || typeof start.toJSDate !== 'function') {
+      Log.warn(
+        'Recurring event missing valid dtstart:',
+        vevent.getFirstPropertyValue('uid'),
+        title,
+      );
+      return [];
+    }
+
     const startDate = start.toJSDate();
     const startTimeStamp = startDate.getTime();
     const baseId = vevent.getFirstPropertyValue('uid');
@@ -149,13 +180,40 @@ const getAllPossibleEventsAfterStartFromIcal = (icalData: string, start: Date): 
   }
   const vevents = ICAL.helpers.updateTimezones(comp).getAllSubcomponents('vevent');
 
-  const allPossibleFutureEvents = vevents.filter(
-    (ve: any) =>
-      ve.getFirstPropertyValue('dtstart').toJSDate() >= start ||
-      (ve.getFirstPropertyValue('rrule') &&
-        (!ve.getFirstPropertyValue('rrule')?.until?.toJSDate() ||
-          ve.getFirstPropertyValue('rrule')?.until?.toJSDate() > start)),
-  );
+  const allPossibleFutureEvents = vevents.filter((ve: any) => {
+    try {
+      const dtstart = ve.getFirstPropertyValue('dtstart');
+      // Skip events without valid dtstart
+      if (!dtstart || typeof dtstart.toJSDate !== 'function') {
+        return false;
+      }
+
+      const dtstartDate = dtstart.toJSDate();
+      if (dtstartDate >= start) {
+        return true;
+      }
+
+      // Check if it's a recurring event that might have future occurrences
+      const rrule = ve.getFirstPropertyValue('rrule');
+      if (rrule) {
+        const until = rrule?.until;
+        if (!until) {
+          // No end date means infinite recurrence
+          return true;
+        }
+        if (typeof until.toJSDate === 'function') {
+          return until.toJSDate() > start;
+        }
+        // If until exists but doesn't have toJSDate, include it to be safe
+        return true;
+      }
+
+      return false;
+    } catch (error) {
+      // Skip events that cause errors during filtering
+      return false;
+    }
+  });
 
   for (const tzid of tzAdded) {
     ICAL.TimezoneService.remove(tzid);

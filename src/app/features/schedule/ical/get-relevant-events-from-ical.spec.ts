@@ -335,5 +335,90 @@ END:VCALENDAR`;
         expect(event.duration).toBe(3600000);
       });
     });
+
+    it('should handle recurring all-day event without end time', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:recurring-allday-no-end
+DTSTART;VALUE=DATE:20250115
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:Recurring All Day No End
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      expect(events.length).toBe(3);
+      events.forEach((event) => {
+        expect(event.title).toBe('Recurring All Day No End');
+        expect(event.duration).toBe(0); // No duration specified
+      });
+    });
+
+    it('should gracefully skip event with null dtstart', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:event-missing-dtstart
+SUMMARY:Event Without Start Date
+DESCRIPTION:This event has no DTSTART
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should not crash, event should be skipped
+      expect(events).toBeDefined();
+      expect(events.length).toBe(0);
+    });
+
+    it('should handle mix of valid and invalid events gracefully', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:valid-event
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+SUMMARY:Valid Event
+END:VEVENT
+BEGIN:VEVENT
+UID:invalid-event-no-start
+SUMMARY:Invalid Event No Start
+END:VEVENT
+BEGIN:VEVENT
+UID:another-valid-event
+DTSTART:20250116T140000Z
+DURATION:PT30M
+SUMMARY:Another Valid Event
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should import 2 valid events and skip the invalid one
+      expect(events.length).toBe(2);
+      expect(events.find((e) => e.title === 'Valid Event')).toBeDefined();
+      expect(events.find((e) => e.title === 'Another Valid Event')).toBeDefined();
+      expect(events.find((e) => e.title === 'Invalid Event No Start')).toBeUndefined();
+    });
   });
 });
