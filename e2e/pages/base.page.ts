@@ -1,4 +1,5 @@
 import { type Locator, type Page } from '@playwright/test';
+import { waitForAngularStability } from '../utils/waits';
 
 export abstract class BasePage {
   protected page: Page;
@@ -11,60 +12,6 @@ export abstract class BasePage {
     this.routerWrapper = page.locator('.route-wrapper');
     this.backdrop = page.locator('.backdrop');
     this.testPrefix = testPrefix;
-  }
-
-  /**
-   * Wait for Angular to stabilize after an action
-   */
-  private async waitForAngularStability(timeout = 3000): Promise<void> {
-    try {
-      await this.page
-        .waitForFunction(
-          () => {
-            // Check if Angular is defined and stable
-            const ng = (window as any).ng;
-            if (!ng) return true; // No Angular, consider stable
-
-            // Check for pending tasks
-            const appRef = ng
-              ?.getComponent?.(document.body)
-              ?.injector?.get(ng.core?.ApplicationRef);
-            if (appRef) {
-              return appRef.isStable;
-            }
-            return true;
-          },
-          { timeout },
-        )
-        .catch(() => {
-          // Non-fatal: proceed even if we can't detect Angular stability
-        });
-    } catch {
-      // Fallback to simple timeout if Angular detection fails
-      await this.page.waitForTimeout(200);
-    }
-  }
-
-  /**
-   * Wait for element with better retry logic
-   */
-  private async waitForElement(
-    selector: string,
-    options: { timeout?: number; state?: 'visible' | 'attached' } = {},
-  ): Promise<void> {
-    const timeout = options.timeout || 10000;
-    const state = options.state || 'visible';
-
-    await this.page
-      .waitForSelector(selector, {
-        state,
-        timeout,
-      })
-      .catch(async (error) => {
-        // If failed, try waiting for network idle and retry once
-        await this.page.waitForLoadState('networkidle').catch(() => {});
-        await this.page.waitForSelector(selector, { state, timeout: 5000 });
-      });
   }
 
   async addTask(taskName: string, skipClose = false): Promise<void> {
@@ -95,7 +42,7 @@ export abstract class BasePage {
     await inputEl.first().waitFor({ state: 'attached', timeout: 5000 });
 
     // Wait for Angular to stabilize before interacting
-    await this.waitForAngularStability();
+    await waitForAngularStability(this.page);
 
     // Clear and fill input with retry logic
     let filled = false;
@@ -103,7 +50,7 @@ export abstract class BasePage {
       try {
         if (attempt > 0) {
           await this.page.waitForTimeout(500);
-          await this.waitForAngularStability();
+          await waitForAngularStability(this.page);
         }
 
         // Focus and select all before clearing to ensure old value is removed
@@ -151,7 +98,7 @@ export abstract class BasePage {
     await submitBtn.click();
 
     // Wait for Angular to process the submission
-    await this.waitForAngularStability();
+    await waitForAngularStability(this.page);
 
     // Check if a dialog appeared (e.g., create tag dialog)
     const dialogExists = await this.page
@@ -187,7 +134,7 @@ export abstract class BasePage {
 
       if (!taskCreated) {
         // Final attempt: wait for Angular stability and check again
-        await this.waitForAngularStability(5000);
+        await waitForAngularStability(this.page, 5000);
         await this.page.waitForTimeout(1000);
       }
     } else {

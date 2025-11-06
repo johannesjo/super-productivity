@@ -1,5 +1,6 @@
 import { Locator, Page } from '@playwright/test';
 import { BasePage } from './base.page';
+import { waitForAngularStability } from '../utils/waits';
 
 export class WorkViewPage extends BasePage {
   readonly addTaskGlobalInput: Locator;
@@ -33,23 +34,8 @@ export class WorkViewPage extends BasePage {
       // Non-fatal: proceed even if network doesn't fully idle
     });
 
-    // Wait for Angular to stabilize
-    await this.page
-      .waitForFunction(
-        () => {
-          const ng = (window as any).ng;
-          if (!ng) return true;
-
-          const appRef = ng
-            ?.getComponent?.(document.body)
-            ?.injector?.get(ng.core?.ApplicationRef);
-          return appRef ? appRef.isStable : true;
-        },
-        { timeout: 5000 },
-      )
-      .catch(() => {
-        // Non-fatal: proceed even if Angular stability check fails
-      });
+    // Wait for Angular to stabilize using shared helper
+    await waitForAngularStability(this.page);
 
     // If the global add-task bar is already open, wait for its input
     try {

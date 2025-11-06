@@ -1,6 +1,7 @@
 import { BrowserContext, test as base } from '@playwright/test';
 import { WorkViewPage } from '../pages/work-view.page';
 import { ProjectPage } from '../pages/project.page';
+import { waitForAppReady } from '../utils/waits';
 
 type TestFixtures = {
   workViewPage: WorkViewPage;
@@ -59,55 +60,7 @@ export const test = base.extend<TestFixtures>({
         }
       }
 
-      // Wait for app shell and navigation to be ready and stable
-      await page.waitForLoadState('domcontentloaded');
-      await page.waitForSelector('body', { state: 'visible', timeout: 10000 });
-
-      // Wait for Angular app to bootstrap
-      await page.waitForFunction(
-        () => {
-          const ng = (window as any).ng;
-          return !!ng || !!document.querySelector('magic-side-nav');
-        },
-        { timeout: 15000 },
-      );
-
-      await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 15000 });
-
-      // Ensure we are on a work-view route and the DOM is settled
-      await page
-        .waitForURL(/#\/(tag|project)\/.+\/tasks/, { timeout: 15000 })
-        .catch(() => {
-          // Non-fatal: might already be on correct route
-        });
-
-      // Wait for network to be idle and route wrapper to be visible
-      await page.waitForLoadState('networkidle', { timeout: 20000 }).catch(() => {
-        // Non-fatal: proceed even if network doesn't idle
-      });
-
-      await page.locator('.route-wrapper').first().waitFor({
-        state: 'visible',
-        timeout: 10000,
-      });
-
-      // Wait for Angular to stabilize
-      await page
-        .waitForFunction(
-          () => {
-            const ng = (window as any).ng;
-            if (!ng) return true;
-
-            const appRef = ng
-              ?.getComponent?.(document.body)
-              ?.injector?.get(ng.core?.ApplicationRef);
-            return appRef ? appRef.isStable : true;
-          },
-          { timeout: 5000 },
-        )
-        .catch(() => {
-          // Non-fatal: proceed even if Angular stability check fails
-        });
+      await waitForAppReady(page);
 
       // Only wait for the global add input if it's already present
       const addTaskInput = page.locator('add-task-bar.global input');
@@ -119,9 +72,6 @@ export const test = base.extend<TestFixtures>({
       } catch {
         // Non-fatal: not all routes show the global add input immediately
       }
-
-      // Small final wait to ensure everything is settled
-      await page.waitForTimeout(300);
 
       await use(page);
     } finally {
@@ -149,46 +99,10 @@ export const test = base.extend<TestFixtures>({
 
   waitForNav: async ({ page }, use) => {
     const waitForNav = async (selector?: string): Promise<void> => {
-      // Wait for navigation to complete
-      await page.waitForLoadState('domcontentloaded');
-
-      // Wait for network to be idle with timeout
-      await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {
-        // Non-fatal: proceed even if network doesn't idle
+      await waitForAppReady(page, {
+        ensureRoute: false,
+        selector,
       });
-
-      // Wait for Angular to stabilize
-      await page
-        .waitForFunction(
-          () => {
-            const ng = (window as any).ng;
-            if (!ng) return true;
-
-            const appRef = ng
-              ?.getComponent?.(document.body)
-              ?.injector?.get(ng.core?.ApplicationRef);
-            return appRef ? appRef.isStable : true;
-          },
-          { timeout: 5000 },
-        )
-        .catch(() => {
-          // Non-fatal: proceed even if Angular stability check fails
-        });
-
-      if (selector) {
-        await page.waitForSelector(selector, {
-          state: 'visible',
-          timeout: 10000,
-        });
-        await page.waitForTimeout(100);
-      } else {
-        // Wait for the main app container to be stable
-        await page.locator('.route-wrapper').waitFor({
-          state: 'visible',
-          timeout: 10000,
-        });
-        await page.waitForTimeout(300);
-      }
     };
     await use(waitForNav);
   },
