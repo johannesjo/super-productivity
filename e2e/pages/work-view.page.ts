@@ -19,17 +19,42 @@ export class WorkViewPage extends BasePage {
   }
 
   async waitForTaskList(): Promise<void> {
+    // Wait for task list to be visible
     await this.page.waitForSelector('task-list', {
       state: 'visible',
-      timeout: 6000, // Reduced from 8s to 6s
+      timeout: 10000,
     });
+
     // Ensure route wrapper is fully loaded
-    await this.routerWrapper.waitFor({ state: 'visible' });
-    // Wait for network to settle
-    await this.page.waitForLoadState('networkidle');
-    // If the global add-task bar is already open, wait for its input, otherwise don't block navigation
+    await this.routerWrapper.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Wait for network to settle with timeout
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {
+      // Non-fatal: proceed even if network doesn't fully idle
+    });
+
+    // Wait for Angular to stabilize
+    await this.page
+      .waitForFunction(
+        () => {
+          const ng = (window as any).ng;
+          if (!ng) return true;
+
+          const appRef = ng
+            ?.getComponent?.(document.body)
+            ?.injector?.get(ng.core?.ApplicationRef);
+          return appRef ? appRef.isStable : true;
+        },
+        { timeout: 5000 },
+      )
+      .catch(() => {
+        // Non-fatal: proceed even if Angular stability check fails
+      });
+
+    // If the global add-task bar is already open, wait for its input
     try {
-      if ((await this.addTaskGlobalInput.count()) > 0) {
+      const inputCount = await this.addTaskGlobalInput.count();
+      if (inputCount > 0) {
         await this.addTaskGlobalInput
           .first()
           .waitFor({ state: 'visible', timeout: 3000 });
@@ -37,6 +62,9 @@ export class WorkViewPage extends BasePage {
     } catch {
       // Non-fatal: some routes/tests don't show the global add bar immediately
     }
+
+    // Final small wait to ensure UI is fully settled
+    await this.page.waitForTimeout(200);
   }
 
   async addSubTask(task: Locator, subTaskName: string): Promise<void> {
