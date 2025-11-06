@@ -1,6 +1,7 @@
 // @ts-ignore
 import ICAL from 'ical.js';
 import { CalendarIntegrationEvent } from '../../calendar-integration/calendar-integration.model';
+import { Log } from '../../../core/log';
 
 // NOTE: this sucks and is slow, but writing a new ical parser would be very hard... :(
 
@@ -16,18 +17,47 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
     new Date(startTimestamp),
   );
   allPossibleFutureEvents.forEach((ve) => {
-    if (ve.getFirstPropertyValue('rrule')) {
-      calendarIntegrationEvents = calendarIntegrationEvents.concat(
-        getForRecurring(ve, calProviderId, startTimestamp, endTimestamp),
-      );
-    } else if (ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp) {
-      calendarIntegrationEvents.push(
-        convertVEventToCalendarIntegrationEvent(ve, calProviderId),
+    try {
+      if (ve.getFirstPropertyValue('rrule')) {
+        calendarIntegrationEvents = calendarIntegrationEvents.concat(
+          getForRecurring(ve, calProviderId, startTimestamp, endTimestamp),
+        );
+      } else if (
+        ve.getFirstPropertyValue('dtstart').toJSDate().getTime() < endTimestamp
+      ) {
+        calendarIntegrationEvents.push(
+          convertVEventToCalendarIntegrationEvent(ve, calProviderId),
+        );
+      }
+    } catch (error) {
+      Log.warn(
+        'Failed to process event:',
+        ve.getFirstPropertyValue('uid'),
+        ve.getFirstPropertyValue('summary'),
+        error,
       );
     }
   });
-  // console.timeEnd('TEST');
+  // Log.timeEnd('TEST');
   return calendarIntegrationEvents;
+};
+
+const calculateEventDuration = (vevent: any, startTimeStamp: number): number => {
+  // NOTE: Per RFC 2445, events can have either DTEND or DURATION, but not both
+  // If neither is present, the event ends at DTSTART (zero duration)
+  const dtend = vevent.getFirstPropertyValue('dtend');
+  if (dtend) {
+    return dtend.toJSDate().getTime() - startTimeStamp;
+  }
+
+  const durationProp = vevent.getFirstPropertyValue('duration');
+  if (durationProp) {
+    // ICAL.Duration provides toSeconds() method
+    return durationProp.toSeconds() * 1000;
+  }
+
+  // Default to zero duration if neither DTEND nor DURATION is present
+  return 0;
 };
 
 const getForRecurring = (
@@ -36,36 +66,48 @@ const getForRecurring = (
   startTimestamp: number,
   endTimeStamp: number,
 ): CalendarIntegrationEvent[] => {
-  const title: string = vevent.getFirstPropertyValue('summary');
-  const description = vevent.getFirstPropertyValue('decscription');
-  const start = vevent.getFirstPropertyValue('dtstart');
-  const startDate = start.toJSDate();
-  const startTimeStamp = startDate.getTime();
-  const end = vevent.getFirstPropertyValue('dtend').toJSDate().getTime();
-  const baseId = vevent.getFirstPropertyValue('uid');
-  const duration = end - startTimeStamp;
+  try {
+    const title: string = vevent.getFirstPropertyValue('summary');
+    const description = vevent.getFirstPropertyValue('description');
+    const start = vevent.getFirstPropertyValue('dtstart');
+    const startDate = start.toJSDate();
+    const startTimeStamp = startDate.getTime();
+    const baseId = vevent.getFirstPropertyValue('uid');
 
-  const recur = vevent.getFirstPropertyValue('rrule');
+    // Calculate duration from either dtend, DURATION property, or default to 0
+    // This follows RFC 2445 which allows either DTEND or DURATION (but not both)
+    const duration = calculateEventDuration(vevent, startTimeStamp);
 
-  const iter = recur.iterator(start);
+    const recur = vevent.getFirstPropertyValue('rrule');
 
-  const evs: CalendarIntegrationEvent[] = [];
-  for (let next = iter.next(); next; next = iter.next()) {
-    const nextTimestamp = next.toJSDate().getTime();
-    if (nextTimestamp <= endTimeStamp && nextTimestamp >= startTimestamp) {
-      evs.push({
-        title,
-        start: nextTimestamp,
-        duration,
-        id: baseId + '_' + next,
-        calProviderId,
-        description: description || undefined,
-      });
-    } else if (nextTimestamp > endTimeStamp) {
-      return evs;
+    const iter = recur.iterator(start);
+
+    const evs: CalendarIntegrationEvent[] = [];
+    for (let next = iter.next(); next; next = iter.next()) {
+      const nextTimestamp = next.toJSDate().getTime();
+      if (nextTimestamp <= endTimeStamp && nextTimestamp >= startTimestamp) {
+        evs.push({
+          title,
+          start: nextTimestamp,
+          duration,
+          id: baseId + '_' + next,
+          calProviderId,
+          description: description || undefined,
+        });
+      } else if (nextTimestamp > endTimeStamp) {
+        return evs;
+      }
     }
+    return evs;
+  } catch (error) {
+    Log.warn(
+      'Failed to process recurring event:',
+      vevent.getFirstPropertyValue('uid'),
+      vevent.getFirstPropertyValue('summary'),
+      error,
+    );
+    return [];
   }
-  return evs;
 };
 
 const convertVEventToCalendarIntegrationEvent = (
@@ -76,15 +118,14 @@ const convertVEventToCalendarIntegrationEvent = (
   // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
   // detailed comment in #1814:
   // https://github.com/johannesjo/super-productivity/issues/1814#issuecomment-1008132824
-  const endVal = vevent.getFirstPropertyValue('dtend');
-  const end = endVal ? endVal.toJSDate().getTime() : start;
+  const duration = calculateEventDuration(vevent, start);
 
   return {
     id: vevent.getFirstPropertyValue('uid'),
     title: vevent.getFirstPropertyValue('summary') || '',
     description: vevent.getFirstPropertyValue('description') || undefined,
     start,
-    duration: end - start,
+    duration,
     calProviderId,
   };
 };
