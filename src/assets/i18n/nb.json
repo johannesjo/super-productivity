@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bekreft før du avslutter appen uten å avslutte dagen først",
       "IS_DARK_MODE": "Mørk modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiver alle animasjoner",
+      "IS_DISABLE_CELEBRATION": "Deaktiver feiring i daglig oppsummering",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_MINIMIZE_TO_TRAY": "Minimere til skuffen (kun på skrivebordet)",
       "IS_SHOW_TIP_LONGER": "Vis produktivitetstips på appstart litt lenger",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Legg til oppgaver fra i dag",
-    "BACK": "Vent, jeg glemte noe!",
     "BREAK_LABEL": "Pause (nr / tid)",
     "CELEBRATE": "Ta deg tid til å <i>feire!</i>",
     "CLEAR_ALL_CONTINUE": "Fjern alt ferdig og fortsett",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Nei, bare fjern oppgavene",
-      "MSG": "Arbeidet ditt er gjort. På tide å gå hjem!",
-      "OK": "Jepp! Skru av!"
+      "MSG": "Avslutte applikasjonen?",
+      "OK": "Avslutt"
     },
     "ESTIMATE_TOTAL": "Totalt estimat:",
     "EVALUATE_DAY": "Evaluer",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Avrund opp alle oppgavene til 5 minutter",
     "ROUND_UP_15M": "Avrund opp alle oppgavene til 15 minutter",
     "ROUND_UP_30M": "Avrund opp alle oppgavene til 30 minutter",
-    "SAVE_AND_GO_HOME": "Lagre og dra hjem",
+    "SAVE_AND_GO_HOME": "Avslutt dagen",
     "SAVE_AND_GO_HOME_TOOLTIP": "Flytt alle utførte oppgaver til arkivet (arbeidsloggen), og synkroniser eventuelt alle data og lukk appen.",
     "START_END": "Start - Slutt",
     "SUMMARY_FOR": "Daglig sammendrag for {{dayStr}}",

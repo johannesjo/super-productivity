@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bevestig voordat u de app verlaat zonder eerst de dag af te sluiten",
       "IS_DARK_MODE": "Donkere modus",
       "IS_DISABLE_ANIMATIONS": "Alle animaties uitschakelen",
+      "IS_DISABLE_CELEBRATION": "Vieren uitschakelen in dagoverzicht",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_SHOW_TIP_LONGER": "Toon productiviteitstip op app-start iets langer",
@@ -1811,14 +1812,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Taken toevoegen vanaf vandaag",
-    "BACK": "Wacht, ik ben iets vergeten!",
     "BREAK_LABEL": "Pauzes (nr / tijd)",
     "CELEBRATE": "Neem even de tijd om <i>te vieren!</i>",
     "CLEAR_ALL_CONTINUE": "Alles wissen en doorgaan",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Nee, verwijder gewoon de taken",
-      "MSG": "Je werk is gedaan. Tijd om naar huis te gaan!",
-      "OK": "Aye aye! Afsluiten!"
+      "CANCEL": "Nee, alleen de taken opruimen",
+      "MSG": "Applicatie afsluiten?",
+      "OK": "Afsluiten"
     },
     "ESTIMATE_TOTAL": "Totale schatting:",
     "EVALUATE_DAY": "Evalueer",
@@ -1835,7 +1835,7 @@
     "ROUND_UP_5M": "Rond alle taken af op 5 minuten",
     "ROUND_UP_15M": "Rond alle taken af naar 15 minuten",
     "ROUND_UP_30M": "Rond alle taken af op 30 minuten",
-    "SAVE_AND_GO_HOME": "Opslaan en naar huis gaan",
+    "SAVE_AND_GO_HOME": "Dag afsluiten",
     "SAVE_AND_GO_HOME_TOOLTIP": "Verplaats alle uitgevoerde taken naar het archief (werklogboek) en synchroniseer optioneel alle gegevens en sluit de app.",
     "START_END": "Begin het einde",
     "SUMMARY_FOR": "Dagelijks overzicht voor {{dayStr}}",

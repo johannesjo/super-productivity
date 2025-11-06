@@ -21,6 +21,47 @@ const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.DEBUG;
 
 const MAX_DATA_LENGTH = 400;
 
+const truncateSerialized = (value: string): string =>
+  value.length > MAX_DATA_LENGTH ? 'short:' + value.substring(0, MAX_DATA_LENGTH) : value;
+
+const isDomRelatedObject = (value: unknown): boolean => {
+  if (!value || typeof value !== 'object') {
+    return false;
+  }
+
+  // Check if DOM constructors exist before using instanceof
+  // This prevents crashes in non-DOM environments (workers, Electron main, SSR tests)
+  if (typeof HTMLCollection !== 'undefined' && value instanceof HTMLCollection) {
+    return true;
+  }
+  if (typeof NodeList !== 'undefined' && value instanceof NodeList) {
+    return true;
+  }
+  if (typeof Element !== 'undefined' && value instanceof Element) {
+    return true;
+  }
+
+  return false;
+};
+
+const formatDomObjectLabel = (value: { constructor?: { name?: string } }): string =>
+  `[DOM: ${value.constructor?.name ?? 'unknown'}]`;
+
+const serializeErrorMessage = (error: Error): string => truncateSerialized(String(error));
+
+const serializeErrorArg = (error: Error): Record<string, unknown> => {
+  const result: Record<string, unknown> = {
+    name: error.name,
+    message: error.message,
+  };
+
+  if (error.stack) {
+    result.stack = error.stack;
+  }
+
+  return result;
+};
+
 // IMPORTANT: All Log class methods and context loggers (SyncLog, etc.) record logs to history
 // for later export. The trade-off is that line numbers will show log.ts instead of the
 // actual calling location. This is a fundamental limitation of JavaScript - any wrapper
@@ -73,11 +114,38 @@ export class Log {
 
   /** Record log entry to history */
   private static recordLog(level: string, context: string, args: unknown[]): void {
+    // Safely serialize the first argument for the message field
+    let msg = '';
+    if (args.length > 0) {
+      try {
+        const firstArg = args[0];
+        if (typeof firstArg === 'string') {
+          msg = firstArg;
+        } else if (firstArg instanceof Error) {
+          msg = serializeErrorMessage(firstArg);
+        } else if (typeof firstArg === 'object' && firstArg !== null) {
+          // Handle DOM objects (HTMLCollection, NodeList, etc.)
+          if (isDomRelatedObject(firstArg)) {
+            msg = formatDomObjectLabel(firstArg as { constructor?: { name?: string } });
+          } else {
+            // Try to serialize objects to JSON
+            const serialized = JSON.stringify(firstArg);
+            msg = truncateSerialized(serialized);
+          }
+        } else {
+          msg = String(firstArg);
+        }
+      } catch {
+        // Fallback for circular references or other serialization errors
+        msg = String(args[0]);
+      }
+    }
+
     const entry: LogEntry = {
       time: new Date().toISOString(),
       lvl: level,
       ctx: context,
-      msg: args.length > 0 ? String(args[0]) : '',
+      msg: msg,
       args: args.slice(1),
     };
 
@@ -169,6 +237,13 @@ export class Log {
       message: entry.msg,
       args: entry.args.map((arg) => {
         try {
+          // Handle DOM objects
+          if (isDomRelatedObject(arg)) {
+            return formatDomObjectLabel(arg as { constructor?: { name?: string } });
+          }
+          if (arg instanceof Error) {
+            return serializeErrorArg(arg);
+          }
           // Try to serialize each arg safely
           const r = JSON.stringify(arg);
           if (r.length > MAX_DATA_LENGTH) {

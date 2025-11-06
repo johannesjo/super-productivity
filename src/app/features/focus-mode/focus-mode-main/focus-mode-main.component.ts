@@ -67,6 +67,7 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
+import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
 
 @Component({
   selector: 'focus-mode-main',
@@ -105,6 +106,7 @@ import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
     MatFabButton,
     InputDurationSliderComponent,
     SegmentedButtonGroupComponent,
+    FocusModeTaskSelectorComponent,
   ],
   host: {
     ['[class.isSessionRunning]']: 'isSessionRunning()',
@@ -142,6 +144,7 @@ export class FocusModeMainComponent {
   );
 
   displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
+  isTaskSelectorOpen = signal(false);
 
   // TODO remove if always true
   isShowTaskActions = computed(() => true);
@@ -354,6 +357,19 @@ export class FocusModeMainComponent {
   onDurationChange(duration: number): void {
     this.displayDuration.set(duration);
     this._store.dispatch(setFocusSessionDuration({ focusSessionDuration: duration }));
+  }
+
+  openTaskSelector(): void {
+    this.isTaskSelectorOpen.set(true);
+  }
+
+  closeTaskSelector(): void {
+    this.isTaskSelectorOpen.set(false);
+  }
+
+  onTaskSelected(taskId: string): void {
+    this.switchToTask(taskId);
+    this.closeTaskSelector();
   }
 
   protected readonly ICAL_TYPE = ICAL_TYPE;

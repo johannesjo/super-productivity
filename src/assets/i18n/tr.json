@@ -1793,6 +1793,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Uygulamadan çıkmadan önce günü bitirmeden çıkış yaptığınızı onaylayın",
       "IS_DARK_MODE": "Karanlık mod",
       "IS_DISABLE_ANIMATIONS": "Tüm animasyonları devre dışı bırak",
+      "IS_DISABLE_CELEBRATION": "Günlük özet kutlamasını devre dışı bırak",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
@@ -2003,14 +2004,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Bugünden itibaren görev ekleme",
-    "BACK": "Bekle bir şey unuttum!",
     "BREAK_LABEL": "Molalar (saat / saat)",
     "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",
     "CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Hayır, sadece görevleri temizleyin",
-      "MSG": "Görevlerin bitti. Eve gitme zamanı!",
-      "OK": "Hay hay! Kapat!"
+      "CANCEL": "Hayır, sadece görevleri temizle",
+      "MSG": "Uygulamadan çıkılsın mı?",
+      "OK": "Çık"
     },
     "ESTIMATE_TOTAL": "Toplam tahmin:",
     "EVALUATE_DAY": "Değerlendir",
@@ -2027,7 +2027,7 @@
     "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
     "ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
     "ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
-    "SAVE_AND_GO_HOME": "Kaydet ve eve git",
+    "SAVE_AND_GO_HOME": "Günü bitir",
     "SAVE_AND_GO_HOME_TOOLTIP": "Yapılan tüm görevleri arşive (iş günlüğü) taşıyın ve isteğe bağlı olarak tüm verileri senkronize edip uygulamayı kapatın.",
     "START_END": "Başlangıç - Bitiş",
     "SUMMARY_FOR": " {{dayStr}} Günlük Özeti",

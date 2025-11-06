@@ -11,6 +11,7 @@
 
 <mat-autocomplete
   #auto="matAutocomplete"
+  [autoActiveFirstOption]="true"
   (optionSelected)="onOptionSelected($event)"
 >
   @for (task of filteredTasks$ | async; track task.id) {

@@ -1834,6 +1834,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Disable all animations",
+      "IS_DISABLE_CELEBRATION": "Disable celebration in daily summary",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
@@ -2051,15 +2052,15 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
-    "BACK": "Wait I forgot something!",
+    "ARCHIVED_TASKS": "{{count}} done parent {{count, plural, one{task has} other{tasks have}}} been archived",
     "BREAK_LABEL": "Breaks (nr / time)",
     "FOCUS_SUMMARY": "Focus (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "No, just clear the tasks",
-      "MSG": "Your work is done. Time to go home!",
-      "OK": "Aye aye! Shutdown!"
+      "MSG": "Exit the application?",
+      "OK": "Exit"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
     "EVALUATE_DAY": "Evaluate",
@@ -2076,7 +2077,7 @@
     "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "SAVE_AND_GO_HOME": "Save and go home",
+    "SAVE_AND_GO_HOME": "Finish the day",
     "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",

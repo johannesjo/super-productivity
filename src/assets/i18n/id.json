@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Konfirmasi sebelum keluar dari aplikasi tanpa menyelesaikan hari terlebih dahulu",
       "IS_DARK_MODE": "Mode Gelap",
       "IS_DISABLE_ANIMATIONS": "Nonaktifkan semua animasi",
+      "IS_DISABLE_CELEBRATION": "Nonaktifkan perayaan di ringkasan harian",
       "IS_HIDE_NAV": "Sembunyikan navigasi hingga header utama diarahkan (khusus desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalkan ke baki (hanya desktop)",
       "IS_SHOW_TIP_LONGER": "Tampilkan tip produktivitas saat aplikasi mulai sedikit lebih lama",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Tambahkan tugas mulai hari ini",
-    "BACK": "Tunggu aku melupakan sesuatu!",
     "BREAK_LABEL": "Istirahat (nr / time)",
     "CELEBRATE": "Luangkan waktu sejenak untuk <i>merayakan!</i>",
     "CLEAR_ALL_CONTINUE": "Hapus semua selesai dan lanjutkan",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Tidak, hapus saja tugasnya",
-      "MSG": "Pekerjaan Anda selesai. Saatnya pulang!",
-      "OK": "Ya, ya! Matikan!"
+      "CANCEL": "Tidak, hanya hapus tugas",
+      "MSG": "Keluar dari aplikasi?",
+      "OK": "Keluar"
     },
     "ESTIMATE_TOTAL": "Total perkiraan:",
     "EVALUATE_DAY": "Mengevaluasi",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Bulatkan semua tugas menjadi 5 menit",
     "ROUND_UP_15M": "Bulatkan semua tugas menjadi 15 menit",
     "ROUND_UP_30M": "Bulatkan semua tugas menjadi 30 menit",
-    "SAVE_AND_GO_HOME": "Simpan dan kembali",
+    "SAVE_AND_GO_HOME": "Selesaikan hari",
     "SAVE_AND_GO_HOME_TOOLTIP": "Pindahkan semua tugas yang sudah selesai ke arsip (log kerja) dan sinkronkan semua data secara opsional dan tutup aplikasi.",
     "START_END": "Mulai – Akhir",
     "SUMMARY_FOR": "Ringkasan Harian untuk {{dayStr}}",

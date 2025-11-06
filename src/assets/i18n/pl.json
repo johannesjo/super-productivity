@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potwierdź przed opuszczeniem aplikacji bez wcześniejszego zakończenia dnia.",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Wyłącz wszystkie animacje",
+      "IS_DISABLE_CELEBRATION": "Wyłącz świętowanie w podsumowaniu dnia",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Pokaż wskazówkę dotyczącą produktywności przy starcie aplikacji nieco dłużej",
@@ -1811,14 +1812,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Dodawanie zadań od dzisiaj",
-    "BACK": "Poczekaj! Zapomniałem czegoś...",
     "BREAK_LABEL": "Przewy (nr / czas)",
     "CELEBRATE": "Czas na <i>świętowanie!</i>",
     "CLEAR_ALL_CONTINUE": "Wyczyść wszystkie zakończone i kontynuuj",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Nie, tylko wyczyść zadania",
-      "MSG": "Twoja praca skończona, czas wracać do domu!",
-      "OK": "Tak, tak! Spadamy!"
+      "MSG": "Zamknąć aplikację?",
+      "OK": "Zamknij"
     },
     "ESTIMATE_TOTAL": "Łączna wartość szacunkowa:",
     "EVALUATE_DAY": "OCENA",
@@ -1835,7 +1835,7 @@
     "ROUND_UP_5M": "Zaokrągl czas zadań W GÓRĘ do 5 minut",
     "ROUND_UP_15M": "Zaokrągl czas zadań W GÓRĘ do 15 minut",
     "ROUND_UP_30M": "Zaokrągl czas zadań W GÓRĘ do 30 minut",
-    "SAVE_AND_GO_HOME": "Zapisz i idź do domu",
+    "SAVE_AND_GO_HOME": "Zakończ dzień",
     "SAVE_AND_GO_HOME_TOOLTIP": "Przenieś wszystkie wykonane zadania do archiwum (dziennika zadań) i opcjonalnie zsynchronizuj wszystkie dane, a następnie zamknij aplikację.",
     "START_END": "Start – Koniec",
     "SUMMARY_FOR": "Dzienne Podsumiwanie {{dayStr}}",
