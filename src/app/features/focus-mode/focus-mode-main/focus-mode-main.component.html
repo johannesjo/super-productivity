@@ -1,6 +1,5 @@
-@let currentTask = taskService.currentTask$ | async;
 @let isCountDown = isCountTimeDown();
-
+@let ct = currentTask();
 <!-- Countdown Animation -->
 @if (isShowCountdown()) {
   <focus-mode-countdown
@@ -43,11 +42,11 @@
 <div class="center-block">
   <!-- Task title -->
   <div class="task-section">
-    @if (currentTask) {
+    @if (ct) {
       <task-title
         @fade
         (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
-        [value]="currentTask.title"
+        [value]="ct.title"
         class="task-title"
       ></task-title>
     } @else {
@@ -59,31 +58,28 @@
       </div>
     }
 
-    <!-- Task action buttons (below title) - In Progress state -->
-    @if (isShowTaskActions()) {
-      <div
-        class="task-actions"
-        @fade
+    <div
+      class="task-actions"
+      @fade
+    >
+      <button
+        mat-icon-button
+        (click)="openTaskSelector(); $event.stopPropagation()"
+        [matTooltip]="'Switch task' | translate"
       >
+        <mat-icon>swap_horiz</mat-icon>
+      </button>
+
+      @if (ct) {
         <button
           mat-icon-button
-          (click)="openTaskSelector(); $event.stopPropagation()"
-          [matTooltip]="'Switch task' | translate"
+          [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
+          (click)="finishCurrentTask()"
         >
-          <mat-icon>swap_horiz</mat-icon>
+          <mat-icon>done</mat-icon>
         </button>
-
-        @if (currentTask) {
-          <button
-            mat-icon-button
-            [matTooltip]="T.F.FOCUS_MODE.FINISH_TASK_AND_SELECT_NEXT | translate"
-            (click)="finishCurrentTask()"
-          >
-            <mat-icon>done</mat-icon>
-          </button>
-        }
-      </div>
-    }
+      }
+    </div>
   </div>
 
   <!-- Clock Display -->
@@ -216,7 +212,7 @@
         color="primary"
         [matTooltip]="'Start focus session' | translate"
         (click)="startSession()"
-        [disabled]="!currentTask"
+        [disabled]="!ct"
         class="play-button"
       >
         <mat-icon>play_arrow</mat-icon>
@@ -226,31 +222,31 @@
     <!-- Bottom control buttons (In Progress state) -->
     @if (isShowBottomControls()) {
       <section class="bottom-controls">
-        @if (currentTask && currentTask.issueId && currentTask.issueType !== ICAL_TYPE) {
+        @if (ct && ct.issueId && ct.issueType !== ICAL_TYPE) {
           <a
             mat-icon-button
             [matTooltip]="T.F.FOCUS_MODE.OPEN_ISSUE_IN_BROWSER | translate"
             target="_blank"
             [href]="issueUrl$ | async"
           >
-            @if (currentTask.issuePoints) {
-              <div class="mini-badge bgc-primary">{{ currentTask.issuePoints }}</div>
+            @if (ct.issuePoints) {
+              <div class="mini-badge bgc-primary">{{ ct.issuePoints }}</div>
             }
-            <mat-icon [svgIcon]="currentTask.issueType | issueIcon"></mat-icon>
+            <mat-icon [svgIcon]="ct.issueType | issueIcon"></mat-icon>
           </a>
         }
 
         <button
-          (click)="isShowNotes = !isShowNotes"
+          (click)="isFocusNotes.set(!isFocusNotes())"
           [matTooltip]="T.F.FOCUS_MODE.SHOW_HIDE_NOTES_AND_ATTACHMENTS | translate"
           class="ico-btn show-additional-info-btn"
           color=""
           mat-icon-button
         >
-          @if (!isShowNotes) {
+          @if (!isFocusNotes()) {
             <mat-icon>chat</mat-icon>
           }
-          @if (isShowNotes) {
+          @if (isFocusNotes()) {
             <mat-icon>expand_less</mat-icon>
           }
         </button>
@@ -267,7 +263,7 @@
   }
 
   <!-- Notes and Attachments (In Progress only) -->
-  @if (isShowBottomControls() && currentTask && isShowNotes) {
+  @if (isShowBottomControls() && ct && isFocusNotes()) {
     <div
       style="height: 100px"
       @expand
@@ -278,7 +274,7 @@
       @slideInOutFromBottom
     >
       <button
-        (click)="isShowNotes = false"
+        (click)="isFocusNotes.set(false)"
         class="hide-notes-btn"
         color=""
         mat-mini-fab
@@ -288,22 +284,22 @@
 
       <div class="notes-panel">
         <inline-markdown
-          (blur)="isFocusNotes = false"
-          (blurred)="isFocusNotes = false"
-          (changed)="changeTaskNotes($event); isFocusNotes = false"
-          [isFocus]="isFocusNotes"
+          (blur)="isFocusNotes.set(false)"
+          (blurred)="isFocusNotes.set(false)"
+          (changed)="changeTaskNotes($event); isFocusNotes.set(false)"
+          [isFocus]="isFocusNotes()"
           [isShowControls]="true"
-          [model]="currentTask.notes || defaultTaskNotes"
+          [model]="ct.notes || defaultTaskNotes()"
         ></inline-markdown>
       </div>
-      @if (currentTask.attachments.length) {
+      @if (ct.attachments.length) {
         <div
           class="attachment-list-wrapper"
           @fade
         >
           <task-attachment-list
-            [taskId]="currentTask.id"
-            [attachments]="currentTask.attachments"
+            [taskId]="ct.id"
+            [attachments]="ct.attachments"
           ></task-attachment-list>
         </div>
       }
@@ -311,10 +307,10 @@
   }
 
   <!-- Drag Over Message -->
-  @if (currentTask && isDragOver) {
+  @if (ct && isDragOver()) {
     <div class="bgc-accent drag-over-msg">
       <mat-icon>add</mat-icon>
-      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: currentTask.title } }}
+      {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: ct.title } }}
     </div>
   }
 </div>

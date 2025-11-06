@@ -12,7 +12,7 @@ import {
 import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
 import { Task } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
-import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatMiniFabButton } from '@angular/material/button';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
 import { MatIcon } from '@angular/material/icon';
 
@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
   styleUrls: ['./focus-mode-task-selector.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation],
-  imports: [SelectTaskComponent, MatIconButton, MatIcon, MatMiniFabButton],
+  imports: [SelectTaskComponent, MatIcon, MatMiniFabButton],
 })
 export class FocusModeTaskSelectorComponent implements AfterViewInit {
   private readonly _taskService = inject(TaskService);

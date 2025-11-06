@@ -113,7 +113,7 @@ describe('FocusModeMainComponent', () => {
 
   describe('initialization', () => {
     it('should initialize with current task', () => {
-      expect(component.task).toBe(mockTask);
+      expect(component.currentTask).toBe(mockTask);
     });
 
     it('should set default task notes from config', () => {
@@ -244,7 +244,7 @@ describe('FocusModeMainComponent', () => {
       });
 
       it('should not create attachment when no task', () => {
-        component.task = null;
+        component.currentTask = null;
 
         component.onDrop(mockDragEvent);
 
@@ -281,7 +281,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.task = null;
+      component.currentTask = null;
 
       expect(() => component.changeTaskNotes('New notes')).toThrowError(
         'Task is not loaded',
@@ -364,7 +364,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.task = null;
+      component.currentTask = null;
 
       expect(() => component.updateTaskTitleIfChanged(true, 'New Title')).toThrowError(
         'No task data',
