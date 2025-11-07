@@ -29,7 +29,10 @@ import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
-import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
+import {
+  ScheduleCalendarMapEntry,
+  ScheduleFromCalendarEvent,
+} from '../schedule/schedule.model';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
@@ -57,15 +60,27 @@ export class CalendarIntegrationService {
           ? forkJoin(
               calendarProviders.map((calProvider) => {
                 if (!calProvider.isEnabled) {
-                  return of({ itemsForProvider: [], calProvider });
+                  return of({
+                    itemsForProvider: [] as CalendarIntegrationEvent[],
+                    calProvider,
+                    didError: false,
+                  });
                 }
 
-                return this.requestEventsForSchedule$(calProvider).pipe(
+                return this.requestEventsForSchedule$(calProvider, true).pipe(
                   first(),
                   map((itemsForProvider: CalendarIntegrationEvent[]) => ({
                     itemsForProvider,
                     calProvider,
+                    didError: false,
                   })),
+                  catchError(() =>
+                    of({
+                      itemsForProvider: [] as CalendarIntegrationEvent[],
+                      calProvider,
+                      didError: true,
+                    }),
+                  ),
                 );
               }),
             ).pipe(
@@ -78,16 +93,27 @@ export class CalendarIntegrationService {
                 ]).pipe(
                   // tap((val) => Log.log('selectAllCalendarTaskEventIds', val)),
                   map(([allCalendarTaskEventIds, skippedEventIds]) => {
-                    return resultForProviders.map(({ itemsForProvider, calProvider }) => {
-                      return {
-                        //   // filter out items already added as tasks
-                        items: itemsForProvider.filter(
-                          (calEv) =>
-                            !allCalendarTaskEventIds.includes(calEv.id) &&
-                            !skippedEventIds.includes(calEv.id),
-                        ),
-                      } as ScheduleCalendarMapEntry;
-                    });
+                    const cachedByProviderId = this._groupCachedEventsByProvider(
+                      this._getCalProviderFromCache(),
+                    );
+                    return resultForProviders.map(
+                      ({ itemsForProvider, calProvider, didError }) => {
+                        // Fall back to cached data when the live fetch errored so offline mode keeps showing events.
+                        const sourceItems: ScheduleFromCalendarEvent[] = (
+                          didError
+                            ? (cachedByProviderId.get(calProvider.id) ?? [])
+                            : itemsForProvider
+                        ) as ScheduleFromCalendarEvent[];
+                        return {
+                          // filter out items already added as tasks
+                          items: sourceItems.filter(
+                            (calEv) =>
+                              !allCalendarTaskEventIds.includes(calEv.id) &&
+                              !skippedEventIds.includes(calEv.id),
+                          ),
+                        } as ScheduleCalendarMapEntry;
+                      },
+                    );
                   }),
                 ),
               ),
@@ -220,5 +246,25 @@ export class CalendarIntegrationService {
           items: provider.items.filter((item) => item.start + item.duration >= now),
         }))
     );
+  }
+
+  private _groupCachedEventsByProvider(
+    cachedEntries: ScheduleCalendarMapEntry[],
+  ): Map<string, ScheduleFromCalendarEvent[]> {
+    // Pre-group cached entries for quick lookups per provider when we need fallback data.
+    const mapByProvider = new Map<string, ScheduleFromCalendarEvent[]>();
+
+    cachedEntries.forEach((entry) => {
+      entry.items.forEach((item) => {
+        const existing = mapByProvider.get(item.calProviderId);
+        if (existing) {
+          existing.push(item);
+        } else {
+          mapByProvider.set(item.calProviderId, [item]);
+        }
+      });
+    });
+
+    return mapByProvider;
   }
 }
