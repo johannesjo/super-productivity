@@ -1,0 +1,70 @@
+
+### Bug Fixes
+
+* avoid code error
+* bottom panel not opening when animations are dislabed
+* code error
+* correct trackBy function calls in @for loops
+* duplicate calendar entries for recurring (a3b0da0), closes #3837
+* **focusMode:** code errors
+* **focusMode:** mode selection buttons styling
+* **focusMode:** plus and minus affecting running session duration
+* **focusMode:** task selection
+* group by date not including dueWithTime (f18a7d8), closes #5429
+* **i18n:** fix json syntax in zh-tw locale
+* **i18n:** rename zh-tw translation file and fix signal call
+* ical import not working when not DEND is specified (5219941), closes #3834
+* ical issue #5418
+* improve on ical recurrence fix #3837
+* improve on ical recurrence fix 3 #3837
+* lazy chart component
+* lint errors for #5441
+* **logging:** improve object serialization in log history (ebf70a1), closes #5439
+* **logging:** restore defensive checks for non-DOM environments
+* make plugin notifications work in webview #5376
+* **metrics:** gap in productivity score
+* **mobileSideNav:** handle back button to hide side nav menu
+* repeatable tasks not created without restart (5d51046), closes #5391
+* retain orphan RECURRENCE-ID events and ensure unique IDs for modified instances #3837
+* select task component
+* show mobile bottom nav always when there is no other nav
+* side nav icon colors
+* sidenav text colors
+* task focus for added tasks not working as expected #5453
+* **test:** adjust derivation of days for repeat task fixture
+* webview check for third party webviews #5447
+### Features
+
+* add permanent sort
+* add time frames to lazy-chart component
+* adjust number badge font-size
+* adjust values for right panel #5385
+* **api:** implement methods for simple counters (25c6871), closes #5398
+* **focusMode:** add translations
+* **focusMode:** draft for new focus mode 1
+* **focusMode:** draft for new focus mode 2
+* **focusMode:** draft for new focus mode 3
+* **focusMode:** draft for new focus mode 4
+* **focusMode:** draft for new focus mode 5
+* **focusMode:** draft for new focus mode 6
+* **focusMode:** improve
+* **focusMode:** improve
+* **focusMode:** improve ani
+* **focusMode:** improve animation and focus mode in general
+* **focusMode:** improve focus mode button
+* **focusMode:** improve focus mode button and simple counter button
+* **focusMode:** improve focus rocket
+* **focusMode:** improve focus rocket 2
+* **focusMode:** improve on header buttons
+* **focusMode:** improve time selection
+* **focusMode:** make time selection work better and improve code quality
+* **focusMode:** outline better task selection
+* **focusMode:** show running time in button
+* improve lazy chart
+* improve offline handling for calendars #5440
+* improve offline handling for calendars 2 #5440
+* imrpve side nav colors
+* **reminder:** add default task reminder option setting (#5344)
+* remove unicorn from daily summary
+* **shortSyntax:** add support for time unit clusters (#2983)
+* **task:** add ability to edit task created and completed
