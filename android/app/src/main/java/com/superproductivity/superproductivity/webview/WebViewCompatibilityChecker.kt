@@ -22,6 +22,7 @@ object WebViewCompatibilityChecker {
         "com.android.chrome",
         "com.sec.android.app.sbrowser",
         "com.mi.globalbrowser",
+        "com.huawei.webview",
         "org.mozilla.firefox",
     )
 
@@ -82,8 +83,16 @@ object WebViewCompatibilityChecker {
         packageInfo: PackageInfo?,
         source: VersionSource,
     ): Result {
+        // Check if this is a third-party WebView with non-standard versioning
+        val isThirdPartyWebView = packageInfo?.packageName?.let { pkg ->
+            pkg !in listOf("com.google.android.webview", "com.android.webview", "com.android.chrome")
+        } ?: false
+
         val status = when {
             majorVersion == null -> Status.WARN
+            // For third-party WebViews with suspiciously low version numbers,
+            // be lenient and just warn instead of blocking (they may use different versioning)
+            isThirdPartyWebView && majorVersion < 50 -> Status.WARN
             majorVersion < MIN_CHROMIUM_VERSION -> Status.BLOCK
             majorVersion < RECOMMENDED_CHROMIUM_VERSION -> Status.WARN
             else -> Status.OK

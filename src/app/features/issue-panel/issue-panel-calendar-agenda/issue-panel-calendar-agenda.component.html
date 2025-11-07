@@ -1,8 +1,16 @@
+@if (isShowingCachedData()) {
+  <div class="offline-banner">
+    <mat-icon class="offline-banner__icon">warning</mat-icon>
+    <span class="offline-banner__message">
+      {{ T.F.ISSUE_PANEL.CALENDAR_AGENDA.OFFLINE_BANNER_MSG | translate }}
+    </span>
+  </div>
+}
 @if (isLoading()) {
   <div class="spinner">
     <mat-spinner diameter="50"></mat-spinner>
   </div>
-} @else if (error()) {
+} @else if (error() && !isShowingCachedData()) {
   <error-card
     [errorTxt]="error()"
     [actionAdvice]="'Check your config!'"

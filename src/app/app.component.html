@@ -10,6 +10,7 @@
     <add-task-bar
       (closed)="layoutService.hideAddTaskBar()"
       (done)="layoutService.hideAddTaskBar()"
+      (afterTaskAdd)="onTaskAdded($event)"
       [isGlobalBarVariant]="true"
       class="global"
     ></add-task-bar>

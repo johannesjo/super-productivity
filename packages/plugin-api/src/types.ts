@@ -396,6 +396,19 @@ export interface PluginAPI {
   isWindowFocused(): boolean;
 
   onWindowFocusChange?(handler: (isFocused: boolean) => void): void;
+
+  // simple counters
+  setCounter(id: string, value: number): Promise<void>;
+
+  getCounter(id: string): Promise<number | null>;
+
+  incrementCounter(id: string, incrementBy?: number): Promise<number>;
+
+  decrementCounter(id: string, decrementBy?: number): Promise<number>;
+
+  deleteCounter(id: string): Promise<void>;
+
+  getAllCounters(): Promise<{ [id: string]: number }>;
 }
 
 export interface PluginInstance {

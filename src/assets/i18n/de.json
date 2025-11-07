@@ -2052,7 +2052,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Aufgaben von heute hinzufügen",
-    "ARCHIVED_TASKS": "{{count}} erledigt übergeordnet {{count, plural, one{task has} other{tasks have}}} wurden archiviert",
+    "ARCHIVED_TASKS": {
+      "SINGULAR": "{{count}} erledigte übergeordnete Aufgabe wurde archiviert",
+      "PLURAL": "{{count}} erledigte übergeordnete Aufgaben wurden archiviert"
+    },
     "BACK": "Ich habe etwas vergessen!",
     "BREAK_LABEL": "Pausen (Anzahl / Zeit)",
     "FOCUS_SUMMARY": "Fokussitzung (Nr / Zeit)",

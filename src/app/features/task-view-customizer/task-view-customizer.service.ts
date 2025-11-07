@@ -283,7 +283,9 @@ export class TaskViewCustomizerService {
           acc[key] = acc[key] || [];
           acc[key].push(task);
         } else if (group === 'scheduledDate') {
-          const key = task.dueDay || 'No date';
+          const key =
+            task.dueDay ||
+            (task.dueWithTime ? getDbDateStr(task.dueWithTime) : 'No date');
           acc[key] = acc[key] || [];
           acc[key].push(task);
         }

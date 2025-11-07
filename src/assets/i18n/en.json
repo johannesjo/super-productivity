@@ -203,6 +203,11 @@
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Unable to generate PKCE challenge."
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Showing cached calendar results. Data might be outdated."
+      }
+    },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "There are {{nr}} done tasks in your today list not yet moved to the archive. Do you really want to quit without finishing your day?"
@@ -216,7 +221,10 @@
         "POMODORO_BREAK_RUNNING": "Break #{{cycleNr}} is running",
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
+      "ADD_TIME_MINUTE": "Add 1 minute",
       "BACK_TO_PLANNING": "Back to Planning",
+      "CLICK_TO_EDIT_DURATION": "Click to edit duration",
+      "COMPLETE_FOCUS_SESSION": "Complete focus session",
       "CONGRATS": "Congrats for completing this session!",
       "COUNTDOWN": "Countdown",
       "COUNTDOWN_HINT": "Focus until the clock hits zero",
@@ -230,6 +238,9 @@
       "NEXT": "Next",
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
+      "PAUSE_SESSION": "Pause session",
+      "PAUSE_TRACKING": "Pause tracking",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pause tracking for current task",
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Structured sprints with planned breaks",
       "POMODORO_BACK": "Back",
@@ -238,15 +249,19 @@
       "PREP_GET_MENTALLY_READY": "Get mentally ready to be focused and productive",
       "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
       "PREP_STRETCH": "Do some mild stretching",
+      "REMOVE_TIME_MINUTE": "Remove 1 minute",
+      "RESUME_SESSION": "Resume session",
       "SELECT_ANOTHER_TASK": "Select another Task",
       "SELECT_TASK": "Select Task to focus on",
+      "SELECT_TASK_TO_FOCUS": "Select Task to Focus",
       "SELECT_MODE": "Choose your focus mode",
       "SESSION_COMPLETED": "Focus Session Completed!",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "SET_FOCUS_SESSION_DURATION": "Set Focus Session Duration",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Show/hide task notes and attachments",
-      "START_FOCUS_SESSION": "Start Focus Session",
+      "START_FOCUS_SESSION": "Start focus session",
       "START_NEXT_FOCUS_SESSION": "Start next Focus Session",
+      "SWITCH_TASK": "Switch task",
       "WORKED_FOR": "You worked for",
       "BREAK_RELAX_MSG": "Take a moment to relax",
       "SKIP_BREAK": "Skip Break",
@@ -2052,7 +2067,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
-    "ARCHIVED_TASKS": "{{count}} done parent {{count, plural, one{task has} other{tasks have}}} been archived",
+    "ARCHIVED_TASKS": {
+      "SINGULAR": "{{count}} done parent task has been archived",
+      "PLURAL": "{{count}} done parent tasks have been archived"
+    },
     "BREAK_LABEL": "Breaks (nr / time)",
     "FOCUS_SUMMARY": "Focus (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",

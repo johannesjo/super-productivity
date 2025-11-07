@@ -38,11 +38,13 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
+import { ICalIssueReduced } from './providers/calendar/calendar.model';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { IssueProviderService } from './issue-provider.service';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { getCalendarEventIdCandidates } from '../calendar-integration/get-calendar-event-id-candidates';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
@@ -418,11 +420,17 @@ export class IssueService {
       throw new Error('No issueData');
     }
 
+    const issueIdCandidates = this._getIssueIdCandidates(
+      issueProviderKey,
+      issueDataReduced,
+    );
+
     if (
       await this._checkAndHandleIssueAlreadyAdded(
         issueProviderKey,
         issueProviderId,
         issueDataReduced.id.toString(),
+        { issueIdCandidates },
       )
     ) {
       return undefined;
@@ -505,7 +513,7 @@ export class IssueService {
       // TODO more elegant solution for skipped calendar events
       if (issueProviderKey === ICAL_TYPE) {
         this._calendarIntegrationService.skipCalendarEvent(
-          issueDataReduced.id.toString(),
+          issueDataReduced as ICalIssueReduced,
         );
       }
     }
@@ -548,12 +556,30 @@ export class IssueService {
     issueType: IssueProviderKey,
     issueProviderId: string,
     issueId: string,
+    opts?: { issueIdCandidates?: string[] },
   ): Promise<boolean> {
-    const res = await this._taskService.checkForTaskWithIssueEverywhere(
-      issueId,
-      issueType,
-      issueProviderId,
+    const idsToCheck = Array.from(
+      new Set(
+        opts?.issueIdCandidates && opts.issueIdCandidates.length
+          ? [issueId, ...opts.issueIdCandidates]
+          : [issueId],
+      ),
     );
+
+    let res: Awaited<
+      ReturnType<typeof this._taskService.checkForTaskWithIssueEverywhere>
+    > | null = null;
+    for (const candidateId of idsToCheck) {
+      res = await this._taskService.checkForTaskWithIssueEverywhere(
+        candidateId,
+        issueType,
+        issueProviderId,
+      );
+      if (res) {
+        break;
+      }
+    }
+
     if (res?.isFromArchive) {
       this._taskService.restoreTask(res.task, res.subTasks || []);
       this._snackService.open({
@@ -607,6 +633,16 @@ export class IssueService {
     const r = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueReduced);
     typia.assert<IssueTask>(r);
     return r;
+  }
+
+  private _getIssueIdCandidates(
+    issueProviderKey: IssueProviderKey,
+    issueDataReduced: IssueDataReduced,
+  ): string[] | undefined {
+    if (issueProviderKey !== ICAL_TYPE) {
+      return undefined;
+    }
+    return getCalendarEventIdCandidates(issueDataReduced as ICalIssueReduced);
   }
 
   // TODO if we need to refresh data on after add, this is how we would do it

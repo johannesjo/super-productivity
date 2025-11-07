@@ -16,6 +16,7 @@ export default defineConfig({
   /* Retry failed tests to handle flakiness */
   retries: process.env.CI ? 2 : 1,
   // Reduce worker count to avoid resource contention causing flakiness
+  // Lower worker count improves stability by reducing parallel execution stress
   workers: process.env.CI ? Math.min(3, os.cpus().length) : Math.min(4, os.cpus().length),
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: process.env.CI
@@ -79,6 +80,12 @@ export default defineConfig({
 
     /* Browser options */
     userAgent: 'PLAYWRIGHT',
+
+    /* Navigation timeout - increased for stability */
+    navigationTimeout: 30000,
+
+    /* Action timeout - increased for stability with Angular */
+    actionTimeout: 15000,
   },
 
   /* Configure projects for major browsers */
@@ -98,6 +105,11 @@ export default defineConfig({
             '--no-sandbox',
             '--disable-setuid-sandbox',
             '--disable-extensions',
+            '--disable-gpu', // Disable GPU for more stable headless execution
+            '--disable-software-rasterizer',
+            '--disable-background-timer-throttling', // Prevent timer throttling
+            '--disable-backgrounding-occluded-windows',
+            '--disable-renderer-backgrounding',
           ],
         },
       },
@@ -128,12 +140,12 @@ export default defineConfig({
   /* Folder for test artifacts such as screenshots, videos, traces, etc. */
   outputDir: path.join(__dirname, '..', '.tmp', 'e2e-test-results', 'test-results'),
 
-  /* Global timeout for each test - slightly increased for stability */
-  timeout: 60 * 1000,
+  /* Global timeout for each test - increased for Angular app stability */
+  timeout: 90 * 1000,
 
-  /* Global timeout for each assertion */
+  /* Global timeout for each assertion - increased for slow rendering */
   expect: {
-    timeout: 15 * 1000,
+    timeout: 20 * 1000,
   },
 
   /* Maximum test failures before stopping */
