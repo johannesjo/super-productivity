@@ -5,4 +5,5 @@ export interface CalendarIntegrationEvent {
   description?: string;
   start: number;
   duration: number;
+  legacyIds?: string[];
 }

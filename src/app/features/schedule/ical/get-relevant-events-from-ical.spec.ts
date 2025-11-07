@@ -682,9 +682,9 @@ END:VCALENDAR`;
       expect(events.length).toBe(1);
       expect(events[0].title).toBe('Series Ending Early (Moved)');
       expect(events[0].start).toBe(new Date('2025-01-20T15:00:00Z').getTime());
-      expect(events[0].id).toBe(
-        `orphan@test_${new Date('2025-01-02T10:00:00Z').getTime()}`,
-      );
+      const expectedId = `orphan@test_${new Date('2025-01-02T10:00:00Z').getTime()}`;
+      expect(events[0].id).toBe(expectedId);
+      expect(events[0].legacyIds).toEqual(['orphan@test']);
     });
 
     it('should not include cancelled orphan exception events', () => {
@@ -760,6 +760,11 @@ END:VCALENDAR`;
       const expectedEarlyId = `unique@test_${new Date('2025-01-17T08:00:00Z').getTime()}`;
       expect(ids).toContain(expectedLateId);
       expect(ids).toContain(expectedEarlyId);
+
+      const modifiedEvents = events.filter((e) => e.title !== 'Standup');
+      modifiedEvents.forEach((ev) => {
+        expect(ev.legacyIds).toEqual(['unique@test']);
+      });
     });
   });
 });

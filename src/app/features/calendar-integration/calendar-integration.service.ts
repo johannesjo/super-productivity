@@ -39,6 +39,7 @@ import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
 import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
 import { Log } from '../../core/log';
+import { matchesAnyCalendarEventId } from './get-calendar-event-id-candidates';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -99,17 +100,17 @@ export class CalendarIntegrationService {
                     return resultForProviders.map(
                       ({ itemsForProvider, calProvider, didError }) => {
                         // Fall back to cached data when the live fetch errored so offline mode keeps showing events.
-                        const sourceItems: ScheduleFromCalendarEvent[] = (
-                          didError
-                            ? (cachedByProviderId.get(calProvider.id) ?? [])
-                            : itemsForProvider
-                        ) as ScheduleFromCalendarEvent[];
+                        const sourceItems: ScheduleFromCalendarEvent[] = didError
+                          ? (cachedByProviderId.get(calProvider.id) ?? [])
+                          : (itemsForProvider as ScheduleFromCalendarEvent[]);
                         return {
                           // filter out items already added as tasks
                           items: sourceItems.filter(
                             (calEv) =>
-                              !allCalendarTaskEventIds.includes(calEv.id) &&
-                              !skippedEventIds.includes(calEv.id),
+                              !matchesAnyCalendarEventId(
+                                calEv,
+                                allCalendarTaskEventIds,
+                              ) && !matchesAnyCalendarEventId(calEv, skippedEventIds),
                           ),
                         } as ScheduleCalendarMapEntry;
                       },

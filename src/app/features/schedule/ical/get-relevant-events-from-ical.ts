@@ -146,12 +146,15 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
         exceptionStart >= startTimestamp &&
         exceptionStart < endTimestamp
       ) {
+        const baseUid = uid || exception.vevent.getFirstPropertyValue('uid');
+        const legacyIds = baseUid ? [baseUid] : undefined;
         calendarIntegrationEvents.push(
-          convertVEventToCalendarIntegrationEvent(
-            exception.vevent,
-            calProviderId,
-            `${uid}_${exception.recurrenceId}`,
-          ),
+          convertVEventToCalendarIntegrationEvent(exception.vevent, calProviderId, {
+            overrideId: baseUid
+              ? `${baseUid}_${exception.recurrenceId}`
+              : `${exception.recurrenceId}`,
+            legacyIds,
+          }),
         );
       }
     });
@@ -251,12 +254,16 @@ const getForRecurring = (
         exceptionStart >= startTimestamp &&
         exceptionStart < endTimeStamp
       ) {
+        const legacyIds = baseId ? [baseId] : undefined;
+        const overrideId =
+          baseId !== undefined
+            ? `${baseId}_${exception.recurrenceId}`
+            : `${exception.recurrenceId}`;
         evs.push(
-          convertVEventToCalendarIntegrationEvent(
-            exception.vevent,
-            calProviderId,
-            `${baseId}_${exception.recurrenceId}`,
-          ),
+          convertVEventToCalendarIntegrationEvent(exception.vevent, calProviderId, {
+            overrideId,
+            legacyIds,
+          }),
         );
       }
     }
@@ -273,10 +280,15 @@ const getForRecurring = (
   }
 };
 
+interface ConvertOptions {
+  overrideId?: string;
+  legacyIds?: string[];
+}
+
 const convertVEventToCalendarIntegrationEvent = (
   vevent: any,
   calProviderId: string,
-  overrideId?: string,
+  options?: ConvertOptions,
 ): CalendarIntegrationEvent => {
   // overrideId allows detached instances to re-use conversion while staying unique per occurrence
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
@@ -286,12 +298,13 @@ const convertVEventToCalendarIntegrationEvent = (
   const duration = calculateEventDuration(vevent, start);
 
   return {
-    id: overrideId || vevent.getFirstPropertyValue('uid'),
+    id: options?.overrideId || vevent.getFirstPropertyValue('uid'),
     title: vevent.getFirstPropertyValue('summary') || '',
     description: vevent.getFirstPropertyValue('description') || undefined,
     start,
     duration,
     calProviderId,
+    legacyIds: options?.legacyIds,
   };
 };
 
