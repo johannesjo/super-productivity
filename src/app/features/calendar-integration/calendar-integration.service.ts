@@ -39,7 +39,10 @@ import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
 import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
 import { Log } from '../../core/log';
-import { matchesAnyCalendarEventId } from './get-calendar-event-id-candidates';
+import {
+  getCalendarEventIdCandidates,
+  matchesAnyCalendarEventId,
+} from './get-calendar-event-id-candidates';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -168,12 +171,22 @@ export class CalendarIntegrationService {
       .then((result) => result ?? false);
   }
 
-  skipCalendarEvent(evId: string): void {
-    this.skippedEventIds$.next([...this.skippedEventIds$.getValue(), evId]);
-    localStorage.setItem(
-      LS.CALENDER_EVENTS_SKIPPED_TODAY,
-      JSON.stringify(this.skippedEventIds$.getValue()),
+  skipCalendarEvent(calEv: CalendarIntegrationEvent): void {
+    if (!calEv) {
+      return;
+    }
+
+    const idsToAdd = getCalendarEventIdCandidates(calEv).filter(
+      (id): id is string => typeof id === 'string' && id.length > 0,
     );
+    if (!idsToAdd.length) {
+      return;
+    }
+
+    const current = this.skippedEventIds$.getValue();
+    const updated = [...current, ...idsToAdd.filter((id) => !current.includes(id))];
+    this.skippedEventIds$.next(updated);
+    localStorage.setItem(LS.CALENDER_EVENTS_SKIPPED_TODAY, JSON.stringify(updated));
     localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getDbDateStr());
   }
 

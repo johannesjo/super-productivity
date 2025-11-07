@@ -1,6 +1,7 @@
 import {
   getCalendarEventIdCandidates,
   matchesAnyCalendarEventId,
+  shareCalendarEventId,
 } from './get-calendar-event-id-candidates';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
 
@@ -40,5 +41,25 @@ describe('matchesAnyCalendarEventId', () => {
 
   it('should not match when no ids overlap', () => {
     expect(matchesAnyCalendarEventId(baseEvent, ['x', 'y'])).toBe(false);
+  });
+});
+
+describe('shareCalendarEventId', () => {
+  it('should detect overlap via legacy ids', () => {
+    const newEvent: CalendarIntegrationEvent = {
+      ...baseEvent,
+      id: 'event_new',
+      legacyIds: ['event'],
+    };
+    expect(shareCalendarEventId(baseEvent, newEvent)).toBe(true);
+  });
+
+  it('should return false if no ids overlap', () => {
+    const otherEvent: CalendarIntegrationEvent = {
+      ...baseEvent,
+      id: 'other',
+      legacyIds: ['legacy'],
+    };
+    expect(shareCalendarEventId(baseEvent, otherEvent)).toBe(false);
   });
 });

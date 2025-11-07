@@ -19,3 +19,12 @@ export const matchesAnyCalendarEventId = (
     ids.includes(candidateId),
   );
 };
+
+export const shareCalendarEventId = (
+  a: CalendarIntegrationEvent,
+  b: CalendarIntegrationEvent,
+): boolean => {
+  const candidatesA = getCalendarEventIdCandidates(a);
+  const candidateSetB = new Set(getCalendarEventIdCandidates(b));
+  return candidatesA.some((id) => candidateSetB.has(id));
+};

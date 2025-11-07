@@ -497,7 +497,7 @@ export class PluginBridgeService implements OnDestroy {
       incrementBy,
       newValue,
     });
-    return newValue || incrementBy;
+    return newValue ?? incrementBy;
   }
 
   /**
@@ -516,7 +516,7 @@ export class PluginBridgeService implements OnDestroy {
       decrementBy,
       newValue,
     });
-    return newValue || -decrementBy;
+    return newValue ?? -decrementBy;
   }
 
   /**

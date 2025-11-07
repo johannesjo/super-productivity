@@ -21,6 +21,11 @@ import { IssueService } from '../../issue/issue.service';
 import { isToday } from '../../../util/is-today.util';
 import { TaskService } from '../../tasks/task.service';
 import { Log } from '../../../core/log';
+import {
+  getCalendarEventIdCandidates,
+  matchesAnyCalendarEventId,
+  shareCalendarEventId,
+} from '../get-calendar-event-id-candidates';
 
 const CHECK_TO_SHOW_INTERVAL = 60 * 1000;
 
@@ -72,7 +77,10 @@ export class CalendarIntegrationEffects {
                             calProvider.id,
                           );
                         allEventsToday.forEach((calEv) => {
-                          if (isToday(calEv.start) && !allIssueIds.includes(calEv.id)) {
+                          if (
+                            isToday(calEv.start) &&
+                            !matchesAnyCalendarEventId(calEv, allIssueIds)
+                          ) {
                             this._issueService.addTaskFromIssue({
                               issueProviderKey: 'ICAL',
                               issueProviderId: calProvider.id,
@@ -125,19 +133,23 @@ export class CalendarIntegrationEffects {
   ): void {
     const curVal = this._currentlyShownBanners$.getValue();
     Log.log('addEvToShow', curVal, calEv);
-    if (!curVal.map((val) => val.id).includes(calEv.id)) {
-      const newBanners = [...curVal, { id: calEv.id, calEv, calProvider }];
-      newBanners.sort((a, b) => a.calEv.start - b.calEv.start);
-      Log.log('UDATE _currentlyShownBanners$');
-
-      this._currentlyShownBanners$.next(newBanners);
+    if (curVal.some((val) => shareCalendarEventId(val.calEv, calEv))) {
+      return;
     }
+
+    const newBanners = [...curVal, { id: calEv.id, calEv, calProvider }];
+    newBanners.sort((a, b) => a.calEv.start - b.calEv.start);
+    Log.log('UDATE _currentlyShownBanners$');
+
+    this._currentlyShownBanners$.next(newBanners);
   }
 
-  private _skipEv(evId: string): void {
-    this._calendarIntegrationService.skipCalendarEvent(evId);
+  private _skipEv(calEv: CalendarIntegrationEvent): void {
+    this._calendarIntegrationService.skipCalendarEvent(calEv);
     this._currentlyShownBanners$.next(
-      this._currentlyShownBanners$.getValue().filter((v) => v.id !== evId),
+      this._currentlyShownBanners$
+        .getValue()
+        .filter((v) => !shareCalendarEventId(v.calEv, calEv)),
     );
   }
 
@@ -155,7 +167,10 @@ export class CalendarIntegrationEffects {
     }
     const { calEv, calProvider } = firstEntry;
     const taskForEvent = await this._store
-      .select(selectTaskByIssueId, { issueId: calEv.id })
+      .select(selectTaskByIssueId, {
+        issueId: calEv.id,
+        issueIdCandidates: getCalendarEventIdCandidates(calEv),
+      })
       .pipe(first())
       .toPromise();
 
@@ -183,21 +198,21 @@ export class CalendarIntegrationEffects {
       action: {
         label: T.G.DISMISS,
         fn: () => {
-          this._skipEv(calEv.id);
+          this._skipEv(calEv);
         },
       },
       action2: taskForEvent
         ? {
             label: T.F.CALENDARS.BANNER.FOCUS_TASK,
             fn: () => {
-              this._skipEv(calEv.id);
+              this._skipEv(calEv);
               this._navigateToTaskService.navigate(taskForEvent.id);
             },
           }
         : {
             label: T.F.CALENDARS.BANNER.ADD_AS_TASK,
             fn: () => {
-              this._skipEv(calEv.id);
+              this._skipEv(calEv);
               this._issueService.addTaskFromIssue({
                 issueProviderKey: 'ICAL',
                 issueProviderId: calProvider.id,
