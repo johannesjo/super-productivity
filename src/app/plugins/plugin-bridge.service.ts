@@ -1172,7 +1172,7 @@ export class PluginBridgeService implements OnDestroy {
    */
   async getCounter(key: string): Promise<number | undefined> {
     typia.assert<string>(key);
-    if (!/^[a-z0-9-]+$/.test(key)) {
+    if (!/^[A-Za-z0-9_-]+$/.test(key)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
     }
     const counters = await this.getAllCounters();
@@ -1182,7 +1182,7 @@ export class PluginBridgeService implements OnDestroy {
   async setCounter(key: string, value: number): Promise<void> {
     typia.assert<string>(key);
     typia.assert<number>(value);
-    if (!/^[a-z0-9-]+$/.test(key)) {
+    if (!/^[A-Za-z0-9_-]+$/.test(key)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
     }
     if (typeof value !== 'number' || !isFinite(value) || value < 0) {
