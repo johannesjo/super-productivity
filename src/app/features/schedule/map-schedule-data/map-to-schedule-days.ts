@@ -27,7 +27,6 @@ export const mapToScheduleDays = (
     endTime: '23:59',
   },
   lunchBreakCfg?: ScheduleLunchBreakCfg,
-  useBestFitPlacement?: boolean,
 ): ScheduleDay[] => {
   // NOTE to use for failing test cases
   // const params = {
@@ -91,7 +90,6 @@ export const mapToScheduleDays = (
     blockerBlocksDayMap,
     workStartEndCfg,
     now,
-    useBestFitPlacement,
   );
 
   return v;

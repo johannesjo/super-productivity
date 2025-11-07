@@ -22,7 +22,6 @@ import { selectTimelineConfig } from '../config/store/global-config.reducer';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
-import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { startWith } from 'rxjs/operators';
 
 @Injectable({
@@ -33,7 +32,6 @@ export class ScheduleService {
   private _store = inject(Store);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _taskService = inject(TaskService);
-  private _taskViewCustomizerService = inject(TaskViewCustomizerService);
 
   private _timelineTasks = toSignal(this._store.select(selectTimelineTasks));
   private _taskRepeatCfgs = toSignal(
@@ -58,12 +56,6 @@ export class ScheduleService {
       const icalEvents = this._icalEvents();
       const currentTaskId = this._taskService.currentTaskId() ?? null;
 
-      // Check if Best Fit is active either as temporary sort or permanent sort
-      const selectedSort = this._taskViewCustomizerService.selectedSort();
-      const lastPermanentSort = this._taskViewCustomizerService.lastPermanentSort();
-      const useBestFitPlacement =
-        selectedSort === 'bestFit' || lastPermanentSort === 'bestFit';
-
       return this.buildScheduleDays({
         daysToShow: daysToShow(),
         timelineTasks,
@@ -72,7 +64,6 @@ export class ScheduleService {
         plannerDayMap,
         timelineCfg,
         currentTaskId,
-        useBestFitPlacement,
       });
     });
   }
@@ -87,7 +78,6 @@ export class ScheduleService {
       plannerDayMap,
       timelineCfg,
       currentTaskId = null,
-      useBestFitPlacement = false,
     } = params;
 
     if (!timelineTasks || !taskRepeatCfgs || !plannerDayMap) {
@@ -106,7 +96,6 @@ export class ScheduleService {
       plannerDayMap,
       timelineCfg?.isWorkStartEndEnabled ? createWorkStartEndCfg(timelineCfg) : undefined,
       timelineCfg?.isLunchBreakEnabled ? createLunchBreakCfg(timelineCfg) : undefined,
-      useBestFitPlacement,
     );
   }
 
@@ -303,5 +292,4 @@ export interface BuildScheduleDaysParams {
   plannerDayMap: PlannerDayMap | undefined | null;
   timelineCfg?: ScheduleConfig | null;
   currentTaskId?: string | null;
-  useBestFitPlacement?: boolean;
 }

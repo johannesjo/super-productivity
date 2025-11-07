@@ -12,8 +12,6 @@ import {
 } from '../schedule.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
-import { placeTasksInGaps } from './place-tasks-in-gaps';
-import { createViewEntriesForBlock } from './create-view-entries-for-block';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
 
 export const createViewEntriesForDay = (
@@ -23,7 +21,6 @@ export const createViewEntriesForDay = (
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
   viewEntriesPushedToNextDay: SVEEntryForNextDay[],
-  useBestFitPlacement?: boolean,
 ): SVE[] => {
   let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
@@ -49,54 +46,16 @@ export const createViewEntriesForDay = (
   }
 
   if (nonScheduledTasksForDay.length) {
-    if (useBestFitPlacement) {
-      // Use bin-packing algorithm to place tasks in gaps
-      // Calculate end of day (23:59:59)
-      const dayEnd = new Date(initialStartTime);
-      dayEnd.setHours(23, 59, 59, 999);
-      const endTime = dayEnd.getTime();
-
-      const taskEntries = placeTasksInGaps(
-        nonScheduledTasksForDay,
-        blockedBlocksForDay,
-        startTime,
-        endTime,
-      );
-      viewEntries = viewEntries.concat(taskEntries);
-
-      // Add blocked block view entries without splitting tasks
-      blockedBlocksForDay.forEach((blockedBlock) => {
-        const blockEntries = createViewEntriesForBlock(blockedBlock, dayDate);
-        viewEntries = viewEntries.concat(blockEntries);
-      });
-    } else {
-      // Use traditional sequential placement
-      viewEntries = viewEntries.concat(
-        createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
-      );
-
-      // Insert blocked blocks and split tasks as needed
-      insertBlockedBlocksViewEntriesForSchedule(
-        viewEntries as SVETask[],
-        blockedBlocksForDay,
-        dayDate,
-      );
-    }
-  } else {
-    // No tasks, but still need to add blocked blocks
-    if (useBestFitPlacement) {
-      blockedBlocksForDay.forEach((blockedBlock) => {
-        const blockEntries = createViewEntriesForBlock(blockedBlock, dayDate);
-        viewEntries = viewEntries.concat(blockEntries);
-      });
-    } else {
-      insertBlockedBlocksViewEntriesForSchedule(
-        viewEntries as SVETask[],
-        blockedBlocksForDay,
-        dayDate,
-      );
-    }
+    viewEntries = viewEntries.concat(
+      createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
+    );
   }
+
+  insertBlockedBlocksViewEntriesForSchedule(
+    viewEntries as SVETask[],
+    blockedBlocksForDay,
+    dayDate,
+  );
 
   // CLEANUP
   // -------
