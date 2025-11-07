@@ -173,6 +173,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isLunchBreakEnabled: false,
     lunchBreakStart: '13:00',
     lunchBreakEnd: '14:00',
+    isAllowTaskSplitting: true,
+    taskPlacementStrategy: 'DEFAULT',
   },
 
   sync: {
