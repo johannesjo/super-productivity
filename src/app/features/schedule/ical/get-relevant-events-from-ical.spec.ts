@@ -421,4 +421,233 @@ END:VCALENDAR`;
       expect(events.find((e) => e.title === 'Invalid Event No Start')).toBeUndefined();
     });
   });
+
+  describe('RECURRENCE-ID handling (modified recurring events)', () => {
+    it('should not create duplicate when recurring event has one modified instance', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:recurring-event-modified@test
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:Daily Meeting
+END:VEVENT
+BEGIN:VEVENT
+UID:recurring-event-modified@test
+RECURRENCE-ID:20250116T100000Z
+DTSTART:20250116T140000Z
+DTEND:20250116T150000Z
+SUMMARY:Daily Meeting (Moved)
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should have exactly 3 events (not 4)
+      expect(events.length).toBe(3);
+
+      // Find the modified instance
+      const modifiedEvent = events.find((e) => e.title === 'Daily Meeting (Moved)');
+      expect(modifiedEvent).toBeDefined();
+      // Modified event should be at 14:00 not 10:00
+      expect(modifiedEvent!.start).toBe(new Date('2025-01-16T14:00:00Z').getTime());
+      expect(modifiedEvent!.duration).toBe(3600000); // 1 hour
+
+      // Other events should be unmodified
+      const unmodifiedEvents = events.filter((e) => e.title === 'Daily Meeting');
+      expect(unmodifiedEvents.length).toBe(2);
+    });
+
+    it('should handle multiple modified instances in recurring event', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:multi-modified@test
+DTSTART:20250115T100000Z
+DURATION:PT1H
+RRULE:FREQ=DAILY;COUNT=5
+SUMMARY:Standup
+END:VEVENT
+BEGIN:VEVENT
+UID:multi-modified@test
+RECURRENCE-ID:20250116T100000Z
+DTSTART:20250116T110000Z
+DURATION:PT1H
+SUMMARY:Standup (Late)
+END:VEVENT
+BEGIN:VEVENT
+UID:multi-modified@test
+RECURRENCE-ID:20250118T100000Z
+DTSTART:20250118T090000Z
+DURATION:PT30M
+SUMMARY:Standup (Early & Short)
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should have exactly 5 events (not 7)
+      expect(events.length).toBe(5);
+
+      // Verify modified instances
+      const lateEvent = events.find((e) => e.title === 'Standup (Late)');
+      expect(lateEvent).toBeDefined();
+      expect(lateEvent!.start).toBe(new Date('2025-01-16T11:00:00Z').getTime());
+
+      const earlyEvent = events.find((e) => e.title === 'Standup (Early & Short)');
+      expect(earlyEvent).toBeDefined();
+      expect(earlyEvent!.start).toBe(new Date('2025-01-18T09:00:00Z').getTime());
+      expect(earlyEvent!.duration).toBe(1800000); // 30 minutes
+
+      // Unmodified events
+      const unmodifiedEvents = events.filter((e) => e.title === 'Standup');
+      expect(unmodifiedEvents.length).toBe(3);
+    });
+
+    it('should handle cancelled instance in recurring event', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:event-with-cancel@test
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+RRULE:FREQ=DAILY;COUNT=4
+SUMMARY:Team Sync
+END:VEVENT
+BEGIN:VEVENT
+UID:event-with-cancel@test
+RECURRENCE-ID:20250117T100000Z
+DTSTART:20250117T100000Z
+DTEND:20250117T110000Z
+SUMMARY:Team Sync
+STATUS:CANCELLED
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should have 3 events (4 minus the cancelled one)
+      expect(events.length).toBe(3);
+
+      // Verify no event on the cancelled date
+      const cancelledDate = new Date('2025-01-17T10:00:00Z').getTime();
+      const eventOnCancelledDate = events.find((e) => e.start === cancelledDate);
+      expect(eventOnCancelledDate).toBeUndefined();
+    });
+
+    it('should handle all-day recurring event with DATE-based RECURRENCE-ID', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:allday-modified@test
+DTSTART;VALUE=DATE:20250115
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:All Day Event
+END:VEVENT
+BEGIN:VEVENT
+UID:allday-modified@test
+RECURRENCE-ID;VALUE=DATE:20250116
+DTSTART;VALUE=DATE:20250116
+SUMMARY:All Day Event (Modified)
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should have exactly 3 events (not 4)
+      expect(events.length).toBe(3);
+
+      const modifiedEvent = events.find((e) => e.title === 'All Day Event (Modified)');
+      expect(modifiedEvent).toBeDefined();
+
+      const unmodifiedEvents = events.filter((e) => e.title === 'All Day Event');
+      expect(unmodifiedEvents.length).toBe(2);
+    });
+
+    it('should handle recurring event without exceptions (no regression)', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:no-exceptions@test
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:Regular Recurring
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should still work correctly
+      expect(events.length).toBe(3);
+      events.forEach((event) => {
+        expect(event.title).toBe('Regular Recurring');
+      });
+    });
+
+    it('should handle exception outside time range gracefully', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:exception-out-of-range@test
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:Event Series
+END:VEVENT
+BEGIN:VEVENT
+UID:exception-out-of-range@test
+RECURRENCE-ID:20240101T100000Z
+DTSTART:20240101T140000Z
+DTEND:20240101T150000Z
+SUMMARY:Event Series (Old Modified)
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      // Should have 3 events from the RRULE (exception is outside range)
+      expect(events.length).toBe(3);
+      events.forEach((event) => {
+        expect(event.title).toBe('Event Series');
+      });
+    });
+  });
 });

@@ -24,6 +24,56 @@ const safeGetDateTimestamp = (vevent: any, propertyName: string): number | null 
   }
 };
 
+/**
+ * Exception event data for RECURRENCE-ID handling
+ */
+interface ExceptionEvent {
+  vevent: any;
+  recurrenceId: number;
+  isCancelled: boolean;
+}
+
+/**
+ * Map of UID to exception events for that recurring series
+ */
+type ExceptionMap = Map<string, ExceptionEvent[]>;
+
+/**
+ * Builds a map of exception events (modified/cancelled instances) grouped by UID.
+ * Exception events are identified by having a RECURRENCE-ID property.
+ */
+const buildExceptionMap = (vevents: any[]): ExceptionMap => {
+  const exceptionMap: ExceptionMap = new Map();
+
+  for (const ve of vevents) {
+    try {
+      const recurrenceId = safeGetDateTimestamp(ve, 'recurrence-id');
+      if (recurrenceId !== null) {
+        const uid = ve.getFirstPropertyValue('uid');
+        if (!uid) continue;
+
+        const status = ve.getFirstPropertyValue('status');
+        const isCancelled = status?.toUpperCase() === 'CANCELLED';
+
+        if (!exceptionMap.has(uid)) {
+          exceptionMap.set(uid, []);
+        }
+
+        exceptionMap.get(uid)!.push({
+          vevent: ve,
+          recurrenceId,
+          isCancelled,
+        });
+      }
+    } catch (error) {
+      // Skip malformed exception events
+      Log.warn('Failed to process exception event:', error);
+    }
+  }
+
+  return exceptionMap;
+};
+
 export const getRelevantEventsForCalendarIntegrationFromIcal = (
   icalData: string,
   calProviderId: string,
@@ -35,11 +85,25 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
     icalData,
     new Date(startTimestamp),
   );
+
+  // Build exception map from all events
+  const exceptionMap = buildExceptionMap(allPossibleFutureEvents);
+
   allPossibleFutureEvents.forEach((ve) => {
     try {
+      const recurrenceId = safeGetDateTimestamp(ve, 'recurrence-id');
+
+      // Skip exception events here - they'll be processed separately
+      if (recurrenceId !== null) {
+        return;
+      }
+
       if (ve.getFirstPropertyValue('rrule')) {
+        const uid = ve.getFirstPropertyValue('uid');
+        const exceptions = exceptionMap.get(uid) || [];
+
         calendarIntegrationEvents = calendarIntegrationEvents.concat(
-          getForRecurring(ve, calProviderId, startTimestamp, endTimestamp),
+          getForRecurring(ve, calProviderId, startTimestamp, endTimestamp, exceptions),
         );
       } else {
         const dtstart = safeGetDateTimestamp(ve, 'dtstart');
@@ -85,6 +149,7 @@ const getForRecurring = (
   calProviderId: string,
   startTimestamp: number,
   endTimeStamp: number,
+  exceptions: ExceptionEvent[] = [],
 ): CalendarIntegrationEvent[] => {
   try {
     const title: string = vevent.getFirstPropertyValue('summary');
@@ -113,9 +178,18 @@ const getForRecurring = (
 
     const iter = recur.iterator(start);
 
+    // Build set of exception timestamps for fast lookup
+    const exceptionTimestamps = new Set(exceptions.map((ex) => ex.recurrenceId));
+
     const evs: CalendarIntegrationEvent[] = [];
     for (let next = iter.next(); next; next = iter.next()) {
       const nextTimestamp = next.toJSDate().getTime();
+
+      // Skip this occurrence if there's an exception for it
+      if (exceptionTimestamps.has(nextTimestamp)) {
+        continue;
+      }
+
       if (nextTimestamp <= endTimeStamp && nextTimestamp >= startTimestamp) {
         evs.push({
           title,
@@ -126,9 +200,29 @@ const getForRecurring = (
           description: description || undefined,
         });
       } else if (nextTimestamp > endTimeStamp) {
-        return evs;
+        break;
       }
     }
+
+    // Add non-cancelled exception events
+    for (const exception of exceptions) {
+      if (exception.isCancelled) {
+        continue;
+      }
+
+      const exceptionStart = safeGetDateTimestamp(exception.vevent, 'dtstart');
+      // Only include exceptions within the time range
+      if (
+        exceptionStart !== null &&
+        exceptionStart >= startTimestamp &&
+        exceptionStart < endTimeStamp
+      ) {
+        evs.push(
+          convertVEventToCalendarIntegrationEvent(exception.vevent, calProviderId),
+        );
+      }
+    }
+
     return evs;
   } catch (error) {
     Log.warn(
