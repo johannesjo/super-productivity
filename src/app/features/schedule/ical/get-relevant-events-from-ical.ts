@@ -146,12 +146,12 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
         exceptionStart >= startTimestamp &&
         exceptionStart < endTimestamp
       ) {
-        const baseUid = uid || exception.vevent.getFirstPropertyValue('uid');
-        const legacyIds = baseUid ? [baseUid] : undefined;
+        const baseId = uid || exception.vevent.getFirstPropertyValue('uid');
+        const legacyIds = baseId ? [baseId] : undefined;
         calendarIntegrationEvents.push(
           convertVEventToCalendarIntegrationEvent(exception.vevent, calProviderId, {
-            overrideId: baseUid
-              ? `${baseUid}_${exception.recurrenceId}`
+            overrideId: baseId
+              ? `${baseId}_${exception.recurrenceId}`
               : `${exception.recurrenceId}`,
             legacyIds,
           }),
@@ -290,7 +290,8 @@ const convertVEventToCalendarIntegrationEvent = (
   calProviderId: string,
   options?: ConvertOptions,
 ): CalendarIntegrationEvent => {
-  // overrideId allows detached instances to re-use conversion while staying unique per occurrence
+  // options.overrideId allows detached instances to re-use conversion while staying unique per occurrence
+  // options.legacyIds preserves backward compatibility with previous ID schemes
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
   // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
   // detailed comment in #1814:
