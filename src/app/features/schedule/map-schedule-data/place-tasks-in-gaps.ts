@@ -20,32 +20,36 @@ interface TaskPlacement {
 }
 
 /**
- * Intelligently places tasks into gaps between blocked blocks to minimize/eliminate splitting.
+ * Intelligently places tasks into gaps between blocked blocks using Best Fit bin packing.
  *
  * Algorithm Strategy (Best Fit Bin Packing):
  * 1. Calculate all available gaps between blocked blocks
  * 2. Sort tasks by remaining time (shortest first for gap optimization)
  * 3. For each task, find the smallest gap that can fit it completely
  * 4. Place task in that gap, updating gap availability
- * 5. Tasks that don't fit in any gap are placed sequentially after (may split)
- *
- * This approach ELIMINATES splits for tasks that can fit in gaps,
- * and only allows splitting for tasks that truly cannot fit anywhere.
+ * 5. Tasks that don't fit in any gap:
+ *    - If splitting allowed: placed sequentially after last block (may split across blocks/days)
+ *    - If splitting NOT allowed: returned as tasksForNextDay
  *
  * @param tasks - Unscheduled tasks to place
  * @param blockedBlocks - Meetings, breaks, scheduled tasks, work boundaries
  * @param startTime - When to start scheduling (work start or current time)
  * @param endTime - Day boundary (usually end of work day)
- * @returns Schedule view entries with optimal placement
+ * @param allowSplitting - Whether tasks can be split across blocked blocks
+ * @returns Object with tasks that fit today and tasks to push to next day
  */
 export const placeTasksInGaps = (
   tasks: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocks: BlockedBlock[],
   startTime: number,
   endTime: number,
-): SVETask[] => {
+  allowSplitting: boolean = true,
+): {
+  viewEntries: SVETask[];
+  tasksForNextDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[];
+} => {
   if (tasks.length === 0) {
-    return [];
+    return { viewEntries: [], tasksForNextDay: [] };
   }
 
   // Step 1: Calculate available gaps between blocked blocks
@@ -64,6 +68,7 @@ export const placeTasksInGaps = (
   const placements: TaskPlacement[] = [];
   const remainingTasks: typeof tasksWithDuration = [];
   const availableGaps = [...gaps]; // Clone gaps to track remaining space
+  const tasksForNextDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[] = [];
 
   for (const { task, duration } of tasksWithDuration) {
     // Find the smallest gap that can fit this task completely
@@ -98,8 +103,14 @@ export const placeTasksInGaps = (
         availableGaps.splice(bestGapIndex, 1);
       }
     } else {
-      // No gap can fit this task - it will be placed sequentially after
-      remainingTasks.push({ task, duration });
+      // No gap can fit this task
+      if (allowSplitting) {
+        // If splitting is allowed, it will be placed sequentially after
+        remainingTasks.push({ task, duration });
+      } else {
+        // If splitting is NOT allowed, move to next day
+        tasksForNextDay.push(task);
+      }
     }
   }
 
@@ -141,7 +152,7 @@ export const placeTasksInGaps = (
   // Sort by start time for consistent ordering
   viewEntries.sort((a, b) => a.start - b.start);
 
-  return viewEntries;
+  return { viewEntries, tasksForNextDay };
 };
 
 /**
