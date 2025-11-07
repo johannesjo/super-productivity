@@ -1719,6 +1719,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Conferma prima di uscire dall'app senza prima terminare il giorno",
       "IS_DARK_MODE": "Tema scuro",
       "IS_DISABLE_ANIMATIONS": "Disabilita tutte le animazioni",
+      "IS_DISABLE_CELEBRATION": "Disattiva la celebrazione nel riepilogo giornaliero",
       "IS_HIDE_NAV": "Nascondi la navigazione mentre il cursore è sull'header principale (solo Desktop)",
       "IS_MINIMIZE_TO_TRAY": "Riduci a icona nel vassoio (solo desktop)",
       "IS_SHOW_TIP_LONGER": "Mostra consigli di produttività all'avvio dell'applicazione un po' più a lungo",
@@ -1927,14 +1928,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Aggiungi attività da oggi",
-    "BACK": "Apetta ho dimenticato qualcosa!",
     "BREAK_LABEL": "Pause (numero / tempo)",
     "CELEBRATE": "Prenditi un attimo per <i>celebrare!</i>",
     "CLEAR_ALL_CONTINUE": "Cancella tutte le attività fatte e continua",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "No, cancella solo le attività",
-      "MSG": "Il lavoro è compiuto. Ora di andare a casa!",
-      "OK": "Agli ordini! Spegnimento!"
+      "MSG": "Uscire dall'applicazione?",
+      "OK": "Esci"
     },
     "ESTIMATE_TOTAL": "Stima totale:",
     "EVALUATE_DAY": "Valutazione",
@@ -1951,7 +1951,7 @@
     "ROUND_UP_5M": "Arrotonda tutte le attività a 5 minuti",
     "ROUND_UP_15M": "Arrotonda tutte le attività a 15 minuti",
     "ROUND_UP_30M": "Arrotonda tutte le attività a 30 minuti",
-    "SAVE_AND_GO_HOME": "Salva e vai a casa",
+    "SAVE_AND_GO_HOME": "Termina la giornata",
     "SAVE_AND_GO_HOME_TOOLTIP": "Sposta tutte le attività fatte in archivio (registro di lavoro) e opzionalmente sincronizza tutti i dati e poi chiudi l'app.",
     "START_END": "Inizio – Fine",
     "SUMMARY_FOR": "Riepilogo giornaliero per {{dayStr}}",

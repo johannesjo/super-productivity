@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "最初に1日を終えずにアプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
       "IS_DISABLE_ANIMATIONS": "すべてのアニメーションを無効にする",
+      "IS_DISABLE_CELEBRATION": "日次サマリーの祝賀を無効にする",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
       "IS_SHOW_TIP_LONGER": "アプリの起動時に生産性のヒントを少し長く表示する",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "今日のタスクを追加",
-    "BACK": "待って！何か忘れてる！",
     "BREAK_LABEL": "休憩（回数/時間）",
     "CELEBRATE": " <i>お祝いしましょう！</i>",
     "CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "いいえ、タスクをクリアするだけです",
-      "MSG": "あなたの仕事は終わりました。家に帰る時間！",
-      "OK": "アイアイ！シャットダウンします！"
+      "CANCEL": "いいえ、タスクをクリアするだけ",
+      "MSG": "アプリケーションを終了しますか？",
+      "OK": "終了"
     },
     "ESTIMATE_TOTAL": "合計見積もり：",
     "EVALUATE_DAY": "評価",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
     "ROUND_UP_15M": "すべてのタスクを15分に切り上げ",
     "ROUND_UP_30M": "すべてのタスクを30分に切り上げ",
-    "SAVE_AND_GO_HOME": "保存して家に帰る",
+    "SAVE_AND_GO_HOME": "一日を終える",
     "SAVE_AND_GO_HOME_TOOLTIP": "完了したすべてのタスクをアーカイブ（ワークログ）に移動し、オプションですべてのデータを同期してアプリを終了します。",
     "START_END": "開始 - 終了",
     "SUMMARY_FOR": " {{dayStr}}の日別サマリー",

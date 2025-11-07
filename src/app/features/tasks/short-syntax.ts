@@ -19,10 +19,12 @@ type DueChanges = {
 };
 
 const CH_TSP = '/';
+// Due how this expression capture clusters of duration units, be mindful of
+// match boundary whitespace during processing
 export const SHORT_SYNTAX_TIME_REG_EX = new RegExp(
-  String.raw`(?:\s|^)t?(\d+(?:\.\d+)?[mhd])(?:\s*` +
+  String.raw`(?:\s|^)t?((?:\d+(?:\.\d+)?[mhd]\s*)+)(?:\s*` +
     `\\${CH_TSP}` +
-    String.raw`(:?\s*(\d+(?:\.\d+)?[mhd]))?)?(?=\s|$)`,
+    String.raw`((?:\s*\d+(?:\.\d+)?[mhd])+)?)?(?=\s|$)`,
   'i',
 );
 
@@ -395,11 +397,13 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
     ...(typeof timeSpent === 'string' && {
       timeSpentOnDay: {
         ...task.timeSpentOnDay,
-        [getDbDateStr()]: stringToMs(timeSpent),
+        [getDbDateStr()]: timeSpent
+          .split(/\s+/g)
+          .reduce((ms, s) => ms + stringToMs(s), 0),
       },
     }),
     ...(typeof timeEstimate === 'string' && {
-      timeEstimate: stringToMs(timeEstimate),
+      timeEstimate: timeEstimate.split(/\s+/g).reduce((ms, s) => ms + stringToMs(s), 0),
     }),
     title: task.title.replace(matchSpan, '').trim(),
   };

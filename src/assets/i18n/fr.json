@@ -1615,6 +1615,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirmez avant de quitter l'application sans terminer le jour en premier",
       "IS_DARK_MODE": "Mode sombre",
       "IS_DISABLE_ANIMATIONS": "Désactiver toutes les animations",
+      "IS_DISABLE_CELEBRATION": "Désactiver la célébration dans le résumé quotidien",
       "IS_HIDE_NAV": "Masquer la navigation jusqu'à ce que l'en-tête principal soit survolé (bureau uniquement)",
       "IS_MINIMIZE_TO_TRAY": "Réduire dans le bac (bureau uniquement)",
       "IS_SHOW_TIP_LONGER": "Afficher le conseil de productivité au démarrage de l'application un peu plus longtemps",
@@ -1811,14 +1812,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Ajouter des tâches d'aujourd'hui",
-    "BACK": "Attends j'ai oublié quelque chose!",
     "BREAK_LABEL": "Pauses (nr / heure)",
     "CELEBRATE": "Prenez un moment pour célébrer <i>!</i>",
     "CLEAR_ALL_CONTINUE": "Effacer tout et continuer",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Non, effacer seulement les tâches",
-      "MSG": "Votre journée de travail est terminée. Il est temps de rentrer à la maison!",
-      "OK": "Aye Aye ! Fermer !"
+      "MSG": "Quitter l'application ?",
+      "OK": "Quitter"
     },
     "ESTIMATE_TOTAL": "Estimation totale :",
     "EVALUATE_DAY": "Évaluer",
@@ -1835,7 +1835,7 @@
     "ROUND_UP_5M": "Arrondir à 5 minutes vers le haut",
     "ROUND_UP_15M": "Arrondir à 15 minutes vers le haut",
     "ROUND_UP_30M": "Arrondir à 30 minutes vers le haut",
-    "SAVE_AND_GO_HOME": "Enregistrer et rentrer à la maison",
+    "SAVE_AND_GO_HOME": "Terminer la journée",
     "SAVE_AND_GO_HOME_TOOLTIP": "Déplacer toutes les tâches terminées vers l'archive (journal de travail) et, si vous le souhaitez, synchroniser toutes les données et fermer l'application.",
     "START_END": "Début – Fin",
     "SUMMARY_FOR": "Récapitulatif quotidien pour {{dayStr}}",
