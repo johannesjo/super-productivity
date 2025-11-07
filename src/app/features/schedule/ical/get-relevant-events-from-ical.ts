@@ -128,7 +128,10 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
     }
   });
 
-  // Handle orphan exception events (master RRULE filtered out, e.g. moved far into the future)
+  // Handle orphan exception events where the master recurring event is outside the time range.
+  // This happens when a recurring series has ended or hasn't started yet, but one or more
+  // modified instances (RECURRENCE-ID) have been moved into our query window.
+  // Example: A daily meeting series ended on Jan 1, but the Jan 2 instance was rescheduled to Jan 20.
   exceptionMap.forEach((exceptions, uid) => {
     if (processedRecurringUids.has(uid)) {
       return;

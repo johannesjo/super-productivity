@@ -650,7 +650,7 @@ END:VCALENDAR`;
       });
     });
 
-    it('should keep orphan RECURRENCE-ID events when master is out of range', () => {
+    it('should include modified instances that are in range when master recurring series is out of range', () => {
       const icalData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -685,6 +685,39 @@ END:VCALENDAR`;
       expect(events[0].id).toBe(
         `orphan@test_${new Date('2025-01-02T10:00:00Z').getTime()}`,
       );
+    });
+
+    it('should not include cancelled orphan exception events', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:cancelled@test
+DTSTART:20250101T100000Z
+DTEND:20250101T110000Z
+RRULE:FREQ=DAILY;UNTIL=20250103T110000Z
+SUMMARY:Short Series
+END:VEVENT
+BEGIN:VEVENT
+UID:cancelled@test
+RECURRENCE-ID:20250102T100000Z
+DTSTART:20250120T150000Z
+DTEND:20250120T160000Z
+STATUS:CANCELLED
+SUMMARY:Short Series (Cancelled)
+END:VEVENT
+END:VCALENDAR`;
+
+      const laterStart = new Date('2025-01-10T00:00:00Z').getTime();
+      const laterEnd = new Date('2025-02-01T00:00:00Z').getTime();
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        laterStart,
+        laterEnd,
+      );
+
+      expect(events.length).toBe(0);
     });
 
     it('should generate unique IDs for modified instances', () => {
