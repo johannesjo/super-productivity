@@ -34,7 +34,7 @@ import { WorkContextService } from '../features/work-context/work-context.servic
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
-import { first } from 'rxjs/operators';
+import { first, take, map } from 'rxjs/operators';
 import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import { PluginConfigService } from './plugin-config.service';
@@ -50,6 +50,16 @@ import { Log, PluginLog } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
+
+// New imports for simple counters
+import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';
+import { SimpleCounter } from '../features/simple-counter/simple-counter.model';
+import {
+  upsertSimpleCounter,
+  updateSimpleCounter,
+  deleteSimpleCounter,
+  toggleSimpleCounterCounter,
+} from '../features/simple-counter/store/simple-counter.actions';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -110,7 +120,7 @@ export class PluginBridgeService implements OnDestroy {
   ): {
     persistDataSynced: (dataStr: string) => Promise<void>;
     loadPersistedData: () => Promise<string | null>;
-    getConfig: <T>() => Promise<T>;
+    getConfig: () => Promise<any>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
     registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
@@ -121,6 +131,19 @@ export class PluginBridgeService implements OnDestroy {
     executeNodeScript: (
       request: PluginNodeScriptRequest,
     ) => Promise<PluginNodeScriptResult>;
+    getAllCounters: () => Promise<{ [key: string]: number }>;
+    getCounter: (key: string) => Promise<number | undefined>;
+    setCounter: (key: string, value: number) => Promise<void>;
+    incrementCounter: (key: string, amount?: number) => Promise<void>;
+    decrementCounter: (key: string, amount?: number) => Promise<void>;
+    getAllSimpleCounters: () => Promise<SimpleCounter[]>;
+    getSimpleCounter: (id: string) => Promise<SimpleCounter | undefined>;
+    updateSimpleCounter: (id: string, updates: Partial<SimpleCounter>) => Promise<void>;
+    toggleSimpleCounter: (id: string) => Promise<void>;
+    setSimpleCounterEnabled: (id: string, isEnabled: boolean) => Promise<void>;
+    deleteSimpleCounter: (id: string) => Promise<void>;
+    setSimpleCounterToday: (id: string, value: number) => Promise<void>;
+    setSimpleCounterDate: (id: string, date: string, value: number) => Promise<void>;
     log: ReturnType<typeof Log.withContext>;
   } {
     return {
@@ -151,6 +174,27 @@ export class PluginBridgeService implements OnDestroy {
       // Node execution
       executeNodeScript: (request: PluginNodeScriptRequest) =>
         this._executeNodeScript(pluginId, manifest || null, request),
+
+      // Basic counter methods (existing)
+      getAllCounters: () => this.getAllCounters(),
+      getCounter: (key: string) => this.getCounter(key),
+      setCounter: (key: string, value: number) => this.setCounter(key, value),
+      incrementCounter: (key: string, amount = 1) => this.incrementCounter(key, amount),
+      decrementCounter: (key: string, amount = 1) => this.decrementCounter(key, amount),
+
+      // Full SimpleCounter methods (new)
+      getAllSimpleCounters: () => this.getAllSimpleCounters(),
+      getSimpleCounter: (id: string) => this.getSimpleCounter(id),
+      updateSimpleCounter: (id: string, updates: Partial<SimpleCounter>) =>
+        this.updateSimpleCounter(id, updates),
+      toggleSimpleCounter: (id: string) => this.toggleSimpleCounter(id),
+      setSimpleCounterEnabled: (id: string, isEnabled: boolean) =>
+        this.setSimpleCounterEnabled(id, isEnabled),
+      deleteSimpleCounter: (id: string) => this.deleteSimpleCounter(id),
+      setSimpleCounterToday: (id: string, value: number) =>
+        this.setSimpleCounterToday(id, value),
+      setSimpleCounterDate: (id: string, date: string, value: number) =>
+        this.setSimpleCounterDate(id, date, value),
 
       // Logging
       log: Log.withContext(`${pluginId}`),
@@ -1100,6 +1144,174 @@ export class PluginBridgeService implements OnDestroy {
 
     // Immediately notify the handler of the current state
     handler(this._isWindowFocused);
+  }
+
+  /**
+   * Gets all simple counters as { [key: string]: number }.
+   */
+  async getAllCounters(): Promise<{ [key: string]: number }> {
+    const today = new Date().toISOString().split('T')[0];
+    const countersArray = await this._store
+      .select(selectAllSimpleCounters)
+      .pipe(
+        take(1),
+        map((counters) =>
+          counters.reduce(
+            (acc, c) => ({ ...acc, [c.id]: c.countOnDay?.[today] ?? 0 }),
+            {} as { [key: string]: number },
+          ),
+        ),
+      )
+      .toPromise();
+    return countersArray || {};
+  }
+
+  /**
+   * Gets a single simple counter value (undefined if unset).
+   * @param key The counter key (e.g., 'daily-commits').
+   */
+  async getCounter(key: string): Promise<number | undefined> {
+    typia.assert<string>(key);
+    if (!/^[a-z0-9-]+$/.test(key)) {
+      throw new Error('Invalid counter key: must be alphanumeric with hyphens');
+    }
+    const counters = await this.getAllCounters();
+    return counters[key];
+  }
+
+  async setCounter(key: string, value: number): Promise<void> {
+    typia.assert<string>(key);
+    typia.assert<number>(value);
+    if (!/^[a-z0-9-]+$/.test(key)) {
+      throw new Error('Invalid counter key: must be alphanumeric with hyphens');
+    }
+    if (typeof value !== 'number' || !isFinite(value) || value < 0) {
+      throw new Error('Invalid counter value: must be a non-negative number');
+    }
+    const today = new Date().toISOString().split('T')[0];
+    // Upsert the counter (creates if not exists)
+    this._store.dispatch(
+      upsertSimpleCounter({
+        simpleCounter: {
+          id: key,
+          title: key,
+          isEnabled: true,
+          icon: null,
+          type: 'ClickCounter',
+          countOnDay: { [today]: value },
+          isOn: false,
+        } as SimpleCounter,
+      }),
+    );
+  }
+
+  async incrementCounter(key: string, amount = 1): Promise<void> {
+    typia.assert<string>(key);
+    typia.assert<number>(amount);
+    if (typeof amount !== 'number' || !isFinite(amount) || amount <= 0) {
+      throw new Error('Invalid increment amount: must be a positive number');
+    }
+    const current = (await this.getCounter(key)) ?? 0;
+    await this.setCounter(key, current + amount);
+  }
+
+  async decrementCounter(key: string, amount = 1): Promise<void> {
+    typia.assert<string>(key);
+    typia.assert<number>(amount);
+    if (typeof amount !== 'number' || !isFinite(amount) || amount <= 0) {
+      throw new Error('Invalid decrement amount: must be a positive number');
+    }
+    const current = (await this.getCounter(key)) ?? 0;
+    await this.setCounter(key, Math.max(0, current - amount));
+  }
+
+  /**
+   * Gets all simple counters as SimpleCounter[].
+   */
+  async getAllSimpleCounters(): Promise<SimpleCounter[]> {
+    return this._store.select(selectAllSimpleCounters).pipe(take(1)).toPromise();
+  }
+
+  /**
+   * Gets a single simple counter by ID.
+   * @param id The counter ID.
+   */
+  async getSimpleCounter(id: string): Promise<SimpleCounter | undefined> {
+    const all = await this.getAllSimpleCounters();
+    return all.find((c) => c.id === id);
+  }
+
+  /**
+   * Updates a simple counter (partial).
+   * @param id The counter ID.
+   * @param updates Partial updates.
+   */
+  async updateSimpleCounter(id: string, updates: Partial<SimpleCounter>): Promise<void> {
+    this._store.dispatch(
+      updateSimpleCounter({
+        simpleCounter: { id, changes: updates },
+      }),
+    );
+  }
+
+  /**
+   * Toggles a simple counter's isOn state.
+   * @param id The counter ID.
+   */
+  async toggleSimpleCounter(id: string): Promise<void> {
+    const counter = await this.getSimpleCounter(id);
+    if (counter) {
+      this._store.dispatch(toggleSimpleCounterCounter({ id }));
+    }
+    throw new Error(`Counter ${id} not found`);
+  }
+
+  /**
+   * Sets a simple counter's isEnabled state.
+   * @param id The counter ID.
+   * @param isEnabled Enabled state.
+   */
+  async setSimpleCounterEnabled(id: string, isEnabled: boolean): Promise<void> {
+    return this.updateSimpleCounter(id, { isEnabled });
+  }
+
+  /**
+   * Deletes a simple counter.
+   * @param id The counter ID.
+   */
+  async deleteSimpleCounter(id: string): Promise<void> {
+    this._store.dispatch(deleteSimpleCounter({ id }));
+  }
+
+  /**
+   * Sets a simple counter value for today.
+   * @param id The counter ID.
+   * @param value The numeric value.
+   */
+  async setSimpleCounterToday(id: string, value: number): Promise<void> {
+    const today = new Date().toISOString().split('T')[0];
+    return this.setSimpleCounterDate(id, today, value);
+  }
+
+  /**
+   * Sets a simple counter value for a specific date.
+   * @param id The counter ID.
+   * @param date The date (`YYYY-MM-DD`).
+   * @param value The numeric value.
+   */
+  async setSimpleCounterDate(id: string, date: string, value: number): Promise<void> {
+    if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      throw new Error('Invalid date format: use YYYY-MM-DD');
+    }
+    const counter = await this.getSimpleCounter(id);
+    if (!counter) {
+      throw new Error(`Counter ${id} not found`);
+    }
+    if (typeof value !== 'number' || !isFinite(value) || value < 0) {
+      throw new Error('Invalid counter value: must be a non-negative number');
+    }
+    const newCountOnDay = { ...counter.countOnDay, [date]: value };
+    return this.updateSimpleCounter(id, { countOnDay: newCountOnDay });
   }
 
   /**

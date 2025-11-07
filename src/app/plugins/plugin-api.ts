@@ -260,7 +260,7 @@ export class PluginAPI implements PluginAPIInterface {
     return this._boundMethods.loadPersistedData();
   }
 
-  async getConfig<T>(): Promise<T> {
+  async getConfig(): Promise<any> {
     PluginLog.log(`Plugin ${this._pluginId} requested configuration`);
     return this._boundMethods.getConfig();
   }
@@ -321,6 +321,142 @@ export class PluginAPI implements PluginAPIInterface {
    */
   onWindowFocusChange(handler: (isFocused: boolean) => void): void {
     this._pluginBridge.onWindowFocusChange(this._pluginId, handler);
+  }
+
+  /**
+   * Gets all simple counters as { [key: string]: number }.
+   */
+  async getAllCounters(): Promise<{ [key: string]: number }> {
+    PluginLog.log(`Plugin ${this._pluginId} requested all simple counters`);
+    return this._pluginBridge.getAllCounters();
+  }
+
+  /**
+   * Gets a single simple counter value (undefined if unset).
+   * @param key The counter key (e.g., 'daily-commits').
+   */
+  async getCounter(key: string): Promise<number | undefined> {
+    PluginLog.log(`Plugin ${this._pluginId} requested counter value for key: ${key}`);
+    return this._pluginBridge.getCounter(key);
+  }
+
+  /**
+   * Sets a simple counter value.
+   * @param key The counter key.
+   * @param value The numeric value.
+   */
+  async setCounter(key: string, value: number): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to set counter ${key} to ${value}`);
+    return this._pluginBridge.setCounter(key, value);
+  }
+
+  /**
+   * Increments a simple counter (default +1).
+   * @param key The counter key.
+   * @param amount Increment amount (default: 1).
+   */
+  async incrementCounter(key: string, amount = 1): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to increment counter ${key} by ${amount}`,
+    );
+    return this._pluginBridge.incrementCounter(key, amount);
+  }
+
+  /**
+   * Decrements a simple counter (floors at 0, default -1).
+   * @param key The counter key.
+   * @param amount Decrement amount (default: 1).
+   */
+  async decrementCounter(key: string, amount = 1): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to decrement counter ${key} by ${amount}`,
+    );
+    return this._pluginBridge.decrementCounter(key, amount);
+  }
+
+  /**
+   * Gets all simple counters as SimpleCounter[].
+   */
+  async getAllSimpleCounters(): Promise<any[]> {
+    PluginLog.log(`Plugin ${this._pluginId} requested all simple counters (full model)`);
+    return this._pluginBridge.getAllSimpleCounters();
+  }
+
+  /**
+   * Gets a single simple counter by ID.
+   * @param id The counter ID.
+   */
+  async getSimpleCounter(id: string): Promise<any | undefined> {
+    PluginLog.log(`Plugin ${this._pluginId} requested simple counter ${id}`);
+    return this._pluginBridge.getSimpleCounter(id);
+  }
+
+  /**
+   * Updates a simple counter (partial).
+   * @param id The counter ID.
+   * @param updates Partial updates.
+   */
+  async updateSimpleCounter(id: string, updates: Partial<any>): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to update simple counter ${id}`,
+      updates,
+    );
+    return this._pluginBridge.updateSimpleCounter(id, updates);
+  }
+
+  /**
+   * Toggles a simple counter's isOn state.
+   * @param id The counter ID.
+   */
+  async toggleSimpleCounter(id: string): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to toggle simple counter ${id}`);
+    return this._pluginBridge.toggleSimpleCounter(id);
+  }
+
+  /**
+   * Sets a simple counter's isEnabled state.
+   * @param id The counter ID.
+   * @param isEnabled Enabled state.
+   */
+  async setSimpleCounterEnabled(id: string, isEnabled: boolean): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to set simple counter ${id} enabled: ${isEnabled}`,
+    );
+    return this._pluginBridge.setSimpleCounterEnabled(id, isEnabled);
+  }
+
+  /**
+   * Deletes a simple counter.
+   * @param id The counter ID.
+   */
+  async deleteSimpleCounter(id: string): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to delete simple counter ${id}`);
+    return this._pluginBridge.deleteSimpleCounter(id);
+  }
+
+  /**
+   * Sets a simple counter value for today.
+   * @param id The counter ID.
+   * @param value The numeric value.
+   */
+  async setSimpleCounterToday(id: string, value: number): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to set simple counter ${id} today to ${value}`,
+    );
+    return this._pluginBridge.setSimpleCounterToday(id, value);
+  }
+
+  /**
+   * Sets a simple counter value for a specific date.
+   * @param id The counter ID.
+   * @param date The date (`YYYY-MM-DD`).
+   * @param value The numeric value.
+   */
+  async setSimpleCounterDate(id: string, date: string, value: number): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to set simple counter ${id} on ${date} to ${value}`,
+    );
+    return this._pluginBridge.setSimpleCounterDate(id, date, value);
   }
 
   /**
