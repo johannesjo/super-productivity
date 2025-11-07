@@ -96,7 +96,7 @@ const fakeScheduleConfig = (add?: Partial<ScheduleConfig>): ScheduleConfig => {
     isLunchBreakEnabled: false,
     lunchBreakStart: '13:00',
     lunchBreakEnd: '14:00',
-    isAllowTaskSplitting: false,
+    isAllowTaskSplitting: true,
     taskPlacementStrategy: 'DEFAULT',
     ...add,
   } as ScheduleConfig;
