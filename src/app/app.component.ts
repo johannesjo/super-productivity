@@ -422,6 +422,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return this._activeWorkContextId();
   }
 
+  onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
+    this.layoutService.setPendingFocusTaskId(taskId);
+  }
+
   changeBackgroundFromUnsplash(): void {
     const dialogRef = this._matDialog.open(DialogUnsplashPickerComponent, {
       width: '900px',

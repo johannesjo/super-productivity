@@ -43,10 +43,10 @@ import { PanelContentService } from '../panels/panel-content.service';
 // Right panel resize constants
 const RIGHT_PANEL_CONFIG = {
   DEFAULT_WIDTH: 320,
-  MIN_WIDTH: 280,
+  MIN_WIDTH: 250,
   MAX_WIDTH: '50%',
   RESIZABLE: true,
-  CLOSE_THRESHOLD: 100,
+  CLOSE_THRESHOLD: 200,
 } as const;
 
 // Performance and interaction constants
