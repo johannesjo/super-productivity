@@ -2065,7 +2065,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",
-    "ARCHIVED_TASKS": "{{count}} done parent {{count, plural, one{task has} other{tasks have}}} been archived",
+    "ARCHIVED_TASKS": {
+      "SINGULAR": "{{count}} done parent task has been archived",
+      "PLURAL": "{{count}} done parent tasks have been archived"
+    },
     "BREAK_LABEL": "Breaks (nr / time)",
     "FOCUS_SUMMARY": "Focus (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
