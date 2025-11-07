@@ -446,7 +446,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
     // Show snackbar notification
     this._snackService.open({
-      msg: T.PDS.ARCHIVED_TASKS,
+      msg:
+        parentTaskCount > 1 ? T.PDS.ARCHIVED_TASKS.PLURAL : T.PDS.ARCHIVED_TASKS.SINGULAR,
       translateParams: { count: parentTaskCount },
       type: 'SUCCESS',
       ico: 'archive',
