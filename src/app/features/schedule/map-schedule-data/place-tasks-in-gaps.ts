@@ -20,13 +20,19 @@ interface TaskPlacement {
 }
 
 /**
- * Intelligently places tasks into gaps between blocked blocks using Best Fit bin packing.
+ * Intelligently places tasks into gaps between blocked blocks using flexible Best Fit bin packing.
  *
- * Algorithm Strategy (Best Fit Bin Packing):
+ * Strategy:
+ * minimize total wasted space (fragmentation) between scheduled items, just like
+ * memory allocation in operating systems, but with flexible task ordering.
+ *
  * 1. Calculate all available gaps between blocked blocks
- * 2. Sort tasks by remaining time (shortest first for gap optimization)
- * 3. For each task, find the smallest gap that can fit it completely
- * 4. Place task in that gap, updating gap availability
+ * 2. Iteratively find the best task-gap pairing:
+ *    - For EACH unplaced task, find the gap where it would leave the smallest leftover space
+ *    - Select the task-gap combination with the absolute smallest waste across all possibilities
+ *    - This allows larger tasks to be placed before smaller ones if it minimizes total waste
+ * 3. Place the selected task in its best-fit gap and update available gaps
+ * 4. Repeat until all tasks are placed or no more gaps are available
  * 5. Tasks that don't fit in any gap:
  *    - If splitting allowed: placed sequentially after last block (may split across blocks/days)
  *    - If splitting NOT allowed: returned as tasksForNextDay
@@ -61,32 +67,59 @@ export const placeTasksInGaps = (
     duration: getTimeLeftForTask(task),
   }));
 
-  // Step 3: Sort tasks by duration (shortest first - better gap utilization)
-  tasksWithDuration.sort((a, b) => a.duration - b.duration);
-
-  // Step 4: Place tasks into gaps using Best Fit algorithm
+  // Step 3: Use flexible best-fit placement to minimize total wasted time
+  // This is more sophisticated than greedy shortest-first approach
   const placements: TaskPlacement[] = [];
   const remainingTasks: typeof tasksWithDuration = [];
   const availableGaps = [...gaps]; // Clone gaps to track remaining space
   const tasksForNextDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[] = [];
+  const unplacedTasks = [...tasksWithDuration];
 
-  for (const { task, duration } of tasksWithDuration) {
-    // Find the smallest gap that can fit this task completely
+  // Sort tasks by duration (shortest first) as a starting heuristic
+  unplacedTasks.sort((a, b) => a.duration - b.duration);
+
+  // Iteratively find the best task-gap pairing that minimizes waste
+  while (unplacedTasks.length > 0 && availableGaps.length > 0) {
+    let bestTaskIndex = -1;
     let bestGapIndex = -1;
-    let bestGapSize = Infinity;
+    let smallestWaste = Infinity;
 
-    for (let i = 0; i < availableGaps.length; i++) {
-      const gap = availableGaps[i];
-      // Task must fit completely in the gap
-      if (gap.duration >= duration && gap.duration < bestGapSize) {
-        bestGapIndex = i;
-        bestGapSize = gap.duration;
+    // For each task, find its best-fit gap
+    for (let taskIdx = 0; taskIdx < unplacedTasks.length; taskIdx++) {
+      const { duration } = unplacedTasks[taskIdx];
+
+      // Find the gap with smallest leftover space for this task
+      for (let gapIdx = 0; gapIdx < availableGaps.length; gapIdx++) {
+        const gap = availableGaps[gapIdx];
+
+        if (gap.duration >= duration) {
+          const leftoverSpace = gap.duration - duration;
+
+          // This pairing is better than any we've seen so far
+          if (leftoverSpace < smallestWaste) {
+            bestTaskIndex = taskIdx;
+            bestGapIndex = gapIdx;
+            smallestWaste = leftoverSpace;
+
+            // Perfect fit! Can't do better than this
+            if (leftoverSpace === 0) {
+              break;
+            }
+          }
+        }
+      }
+
+      // If we found a perfect fit, no need to check other tasks
+      if (smallestWaste === 0) {
+        break;
       }
     }
 
-    if (bestGapIndex !== -1) {
-      // Found a gap! Place the task
+    // If we found a task-gap pairing, place it
+    if (bestTaskIndex !== -1 && bestGapIndex !== -1) {
+      const { task, duration } = unplacedTasks[bestTaskIndex];
       const gap = availableGaps[bestGapIndex];
+
       placements.push({
         task,
         start: gap.start,
@@ -102,15 +135,23 @@ export const placeTasksInGaps = (
       if (gap.duration <= 0) {
         availableGaps.splice(bestGapIndex, 1);
       }
+
+      // Remove placed task from unplaced list
+      unplacedTasks.splice(bestTaskIndex, 1);
     } else {
-      // No gap can fit this task
-      if (allowSplitting) {
-        // If splitting is allowed, it will be placed sequentially after
-        remainingTasks.push({ task, duration });
-      } else {
-        // If splitting is NOT allowed, move to next day
-        tasksForNextDay.push(task);
-      }
+      // No more tasks can fit in any gaps - break out
+      break;
+    }
+  }
+
+  // Handle tasks that couldn't be placed in gaps
+  for (const { task, duration } of unplacedTasks) {
+    if (allowSplitting) {
+      // If splitting is allowed, it will be placed sequentially after
+      remainingTasks.push({ task, duration });
+    } else {
+      // If splitting is NOT allowed, move to next day
+      tasksForNextDay.push(task);
     }
   }
 

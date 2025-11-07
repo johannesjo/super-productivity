@@ -49,21 +49,21 @@ describe('placeTasksInGaps', () => {
     const result = placeTasksInGaps(tasks, blockedBlocks, startTime, endTime);
 
     // Assert
-    expect(result.length).toBe(3);
+    expect(result.viewEntries.length).toBe(3);
 
     // Task A (30min) should fit in first gap (08:00-09:00, 60min available)
-    const taskA = result.find((r) => r.id === 'task-a');
+    const taskA = result.viewEntries.find((r) => r.id === 'task-a');
     expect(taskA).toBeDefined();
     expect(taskA!.start).toBe(startTime); // 08:00
 
     // Task B (45min) should fit in first gap after Task A
-    const taskB = result.find((r) => r.id === 'task-b');
+    const taskB = result.viewEntries.find((r) => r.id === 'task-b');
     expect(taskB).toBeDefined();
     const thirtyMinutesInMs = 30 * 60 * 1000;
     expect(taskB!.start).toBe(startTime + thirtyMinutesInMs); // 08:30
 
     // Task C (60min) should fit in second gap (10:00-13:00, 180min available)
-    const taskC = result.find((r) => r.id === 'task-c');
+    const taskC = result.viewEntries.find((r) => r.id === 'task-c');
     expect(taskC).toBeDefined();
     expect(taskC!.start).toBe(new Date('2025-11-04T10:00:00').getTime());
   });
@@ -95,11 +95,132 @@ describe('placeTasksInGaps', () => {
     const result = placeTasksInGaps(tasks, blockedBlocks, startTime, endTime);
 
     // Assert
-    expect(result.length).toBe(1);
+    expect(result.viewEntries.length).toBe(1);
 
     // Large task should be placed after the block since it doesn't fit before
-    const taskLarge = result.find((r) => r.id === 'task-large');
+    const taskLarge = result.viewEntries.find((r) => r.id === 'task-large');
     expect(taskLarge).toBeDefined();
     expect(taskLarge!.start).toBe(new Date('2025-11-04T10:00:00').getTime());
+  });
+
+  it('should use true best-fit algorithm to minimize fragmentation', () => {
+    // Arrange
+    const startTime = new Date('2025-11-04T08:00:00').getTime();
+    const endTime = new Date('2025-11-04T17:00:00').getTime();
+
+    const tasks: TaskWithoutReminder[] = [
+      {
+        id: 'task-50min',
+        title: 'Task 50min',
+        timeEstimate: 50 * 60 * 1000, // 50 minutes
+        timeSpent: 0,
+        timeSpentOnDay: {},
+      } as TaskWithoutReminder,
+      {
+        id: 'task-30min',
+        title: 'Task 30min',
+        timeEstimate: 30 * 60 * 1000, // 30 minutes
+        timeSpent: 0,
+        timeSpentOnDay: {},
+      } as TaskWithoutReminder,
+    ];
+
+    const blockedBlocks: BlockedBlock[] = [
+      {
+        start: new Date('2025-11-04T09:00:00').getTime(), // Gap 1: 60min (08:00-09:00)
+        end: new Date('2025-11-04T10:00:00').getTime(),
+        entries: [],
+      },
+      {
+        start: new Date('2025-11-04T10:50:00').getTime(), // Gap 2: 50min (10:00-10:50)
+        end: new Date('2025-11-04T11:00:00').getTime(),
+        entries: [],
+      },
+    ];
+
+    // Act
+    const result = placeTasksInGaps(tasks, blockedBlocks, startTime, endTime);
+
+    // Assert
+    expect(result.viewEntries.length).toBe(2);
+
+    // Best-fit should prioritize perfect fits
+    // 50min task fits perfectly in 50min gap (0 waste)
+    // 30min task fits in 60min gap (30min waste)
+    const task50min = result.viewEntries.find((r) => r.id === 'task-50min');
+    expect(task50min).toBeDefined();
+    expect(task50min!.start).toBe(new Date('2025-11-04T10:00:00').getTime()); // Perfect fit in second gap
+
+    const task30min = result.viewEntries.find((r) => r.id === 'task-30min');
+    expect(task30min).toBeDefined();
+    expect(task30min!.start).toBe(startTime); // Placed in first gap (08:00)
+  });
+
+  it('should flexibly place larger tasks first if it minimizes total waste', () => {
+    // Arrange
+    const startTime = new Date('2025-11-04T08:00:00').getTime();
+    const endTime = new Date('2025-11-04T17:00:00').getTime();
+
+    const tasks: TaskWithoutReminder[] = [
+      {
+        id: 'task-20min',
+        title: 'Task 20min',
+        timeEstimate: 20 * 60 * 1000, // 20 minutes (smallest)
+        timeSpent: 0,
+        timeSpentOnDay: {},
+      } as TaskWithoutReminder,
+      {
+        id: 'task-90min',
+        title: 'Task 90min',
+        timeEstimate: 90 * 60 * 1000, // 90 minutes (largest)
+        timeSpent: 0,
+        timeSpentOnDay: {},
+      } as TaskWithoutReminder,
+      {
+        id: 'task-30min',
+        title: 'Task 30min',
+        timeEstimate: 30 * 60 * 1000, // 30 minutes
+        timeSpent: 0,
+        timeSpentOnDay: {},
+      } as TaskWithoutReminder,
+    ];
+
+    const blockedBlocks: BlockedBlock[] = [
+      {
+        start: new Date('2025-11-04T09:00:00').getTime(), // Gap 1: 60min (08:00-09:00)
+        end: new Date('2025-11-04T10:00:00').getTime(),
+        entries: [],
+      },
+      {
+        start: new Date('2025-11-04T11:30:00').getTime(), // Gap 2: 90min (10:00-11:30)
+        end: new Date('2025-11-04T12:00:00').getTime(),
+        entries: [],
+      },
+    ];
+
+    // Act
+    const result = placeTasksInGaps(tasks, blockedBlocks, startTime, endTime);
+
+    // Assert
+    expect(result.viewEntries.length).toBe(3);
+
+    // Optimal placement should be:
+    // - 90min task in 90min gap (0 waste - perfect fit!)
+    // - 30min task in 60min gap (30min waste)
+    // - 20min task fills remaining 30min in 60min gap (0 waste - perfect fit!)
+    // Total waste: 0min (perfect!)
+
+    const task90min = result.viewEntries.find((r) => r.id === 'task-90min');
+    expect(task90min).toBeDefined();
+    expect(task90min!.start).toBe(new Date('2025-11-04T10:00:00').getTime()); // Perfect fit in 90min gap
+
+    const task30min = result.viewEntries.find((r) => r.id === 'task-30min');
+    expect(task30min).toBeDefined();
+    expect(task30min!.start).toBe(startTime); // Placed in 60min gap first
+
+    const task20min = result.viewEntries.find((r) => r.id === 'task-20min');
+    expect(task20min).toBeDefined();
+    const thirtyMinutesInMs = 30 * 60 * 1000;
+    expect(task20min!.start).toBe(startTime + thirtyMinutesInMs); // Placed after 30min task
   });
 });

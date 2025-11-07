@@ -1893,13 +1893,13 @@
       "L_IS_ALLOW_TASK_SPLITTING": "Allow task splitting across time boundaries",
       "L_TASK_PLACEMENT_STRATEGY": "Strategy",
       "TASK_PLACEMENT_STRATEGY_DEFAULT": "Default (Sequential)",
-      "TASK_PLACEMENT_STRATEGY_BEST_FIT": "Best Fit (Experimental)",
+      "TASK_PLACEMENT_STRATEGY_BEST_FIT": "Best Fit (reduce gaps)",
       "TASK_PLACEMENT_STRATEGY_SHORTEST_FIRST": "Shortest Task First",
       "TASK_PLACEMENT_STRATEGY_LONGEST_FIRST": "Longest Task First",
       "TASK_PLACEMENT_STRATEGY_OLDEST_FIRST": "Oldest Task First",
       "TASK_PLACEMENT_STRATEGY_NEWEST_FIRST": "Newest Task First",
       "TASK_PLACEMENT_STRATEGY_DEFAULT_HELP": "Default: Uses simple sequential placement. Tasks are placed one after another in the order they appear in your task list, starting from the work start time or current time.",
-      "TASK_PLACEMENT_STRATEGY_BEST_FIT_HELP": "Best Fit: Uses best-fit bin packing algorithm to minimize task splitting by placing tasks into gaps between scheduled items. Tasks are sorted by remaining time (shortest first) for optimal gap utilization."
+      "TASK_PLACEMENT_STRATEGY_BEST_FIT_HELP": "Best Fit: Minimizes wasted time between tasks by intelligently placing tasks into gaps around scheduled items. Uses best-fit bin packing algorithm (like RAM allocation) to find the gap that results in the smallest leftover space. Only available when task splitting is disabled. Tasks are sorted shortest-first for optimal packing efficiency."
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",

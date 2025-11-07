@@ -118,6 +118,8 @@ export const SCHEDULE_FORM_CFG: ConfigFormSection<ScheduleConfig> = {
           {
             label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_BEST_FIT,
             value: 'BEST_FIT',
+            // Best-fit only makes sense when task splitting is disabled
+            hideExpression: (m, v, field) => field?.model.isAllowTaskSplitting,
           },
         ],
       },
