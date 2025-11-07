@@ -50,6 +50,7 @@ import { Log, PluginLog } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
+import { SimpleCounterService } from '../features/simple-counter/simple-counter.service';
 
 /**
  * PluginBridge acts as an intermediary layer between plugins and the main application services.
@@ -79,6 +80,7 @@ export class PluginBridgeService implements OnDestroy {
   private _injector = inject(Injector);
   private _translateService = inject(TranslateService);
   private _syncWrapperService = inject(SyncWrapperService);
+  private _simpleCounterService = inject(SimpleCounterService);
 
   // Track header buttons registered by plugins
   private readonly _headerButtons = signal<PluginHeaderBtnCfg[]>([]);
@@ -444,6 +446,113 @@ export class PluginBridgeService implements OnDestroy {
     // Update the tag using TagService (TagCopy is compatible with Tag)
     this._tagService.updateTag(tagId, updates);
     PluginLog.log('PluginBridge: Tag updated successfully', { tagId, updates });
+  }
+
+  /**
+   * Set a simple counter value for today
+   */
+  async setCounter(id: string, value: number): Promise<void> {
+    typia.assert<string>(id);
+    typia.assert<number>(value);
+
+    this._simpleCounterService.setCounterToday(id, value);
+    PluginLog.log('PluginBridge: Counter set successfully', { id, value });
+  }
+
+  /**
+   * Get a simple counter value for today
+   */
+  async getCounter(id: string): Promise<number | null> {
+    typia.assert<string>(id);
+
+    const counter = await this._simpleCounterService.simpleCounters$
+      .pipe(first())
+      .toPromise();
+    const simpleCounter = counter?.find((c) => c.id === id);
+
+    if (!simpleCounter) {
+      return null;
+    }
+
+    const dateService = this._injector.get(
+      await import('../core/date/date.service').then((m) => m.DateService),
+    );
+    const today = dateService.todayStr();
+    return simpleCounter.countOnDay[today] || 0;
+  }
+
+  /**
+   * Increment a simple counter value for today
+   */
+  async incrementCounter(id: string, incrementBy: number = 1): Promise<number> {
+    typia.assert<string>(id);
+    typia.assert<number>(incrementBy);
+
+    this._simpleCounterService.increaseCounterToday(id, incrementBy);
+
+    // Get the new value
+    const newValue = await this.getCounter(id);
+    PluginLog.log('PluginBridge: Counter incremented successfully', {
+      id,
+      incrementBy,
+      newValue,
+    });
+    return newValue || incrementBy;
+  }
+
+  /**
+   * Decrement a simple counter value for today
+   */
+  async decrementCounter(id: string, decrementBy: number = 1): Promise<number> {
+    typia.assert<string>(id);
+    typia.assert<number>(decrementBy);
+
+    this._simpleCounterService.decreaseCounterToday(id, decrementBy);
+
+    // Get the new value
+    const newValue = await this.getCounter(id);
+    PluginLog.log('PluginBridge: Counter decremented successfully', {
+      id,
+      decrementBy,
+      newValue,
+    });
+    return newValue || -decrementBy;
+  }
+
+  /**
+   * Delete a simple counter
+   */
+  async deleteCounter(id: string): Promise<void> {
+    typia.assert<string>(id);
+
+    this._simpleCounterService.deleteSimpleCounter(id);
+    PluginLog.log('PluginBridge: Counter deleted successfully', { id });
+  }
+
+  /**
+   * Get all simple counters with their values for today
+   */
+  async getAllCounters(): Promise<{ [id: string]: number }> {
+    const counters = await this._simpleCounterService.simpleCounters$
+      .pipe(first())
+      .toPromise();
+
+    if (!counters) {
+      return {};
+    }
+
+    const dateService = this._injector.get(
+      await import('../core/date/date.service').then((m) => m.DateService),
+    );
+    const today = dateService.todayStr();
+
+    const result: { [id: string]: number } = {};
+    counters.forEach((counter) => {
+      result[counter.id] = counter.countOnDay[today] || 0;
+    });
+
+    PluginLog.log('PluginBridge: Retrieved all counters', result);
+    return result;
   }
 
   /**

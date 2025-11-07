@@ -324,6 +324,58 @@ export class PluginAPI implements PluginAPIInterface {
   }
 
   /**
+   * Set a simple counter value for today
+   */
+  async setCounter(id: string, value: number): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to set counter ${id} to ${value}`);
+    return this._pluginBridge.setCounter(id, value);
+  }
+
+  /**
+   * Get a simple counter value for today
+   */
+  async getCounter(id: string): Promise<number | null> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to get counter ${id}`);
+    return this._pluginBridge.getCounter(id);
+  }
+
+  /**
+   * Increment a simple counter value for today
+   */
+  async incrementCounter(id: string, incrementBy: number = 1): Promise<number> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to increment counter ${id} by ${incrementBy}`,
+    );
+    return this._pluginBridge.incrementCounter(id, incrementBy);
+  }
+
+  /**
+   * Decrement a simple counter value for today
+   */
+  async decrementCounter(id: string, decrementBy: number = 1): Promise<number> {
+    PluginLog.log(
+      `Plugin ${this._pluginId} requested to decrement counter ${id} by ${decrementBy}`,
+    );
+    return this._pluginBridge.decrementCounter(id, decrementBy);
+  }
+
+  /**
+   * Delete a simple counter
+   */
+  async deleteCounter(id: string): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to delete counter ${id}`);
+    return this._pluginBridge.deleteCounter(id);
+  }
+
+  /**
+   * Get all simple counters with their values for today
+   */
+  async getAllCounters(): Promise<{ [id: string]: number }> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to get all counters`);
+    return this._pluginBridge.getAllCounters();
+  }
+
+  /**
    * Clean up all resources associated with this plugin API instance
    * Called when the plugin is being unloaded
    */
