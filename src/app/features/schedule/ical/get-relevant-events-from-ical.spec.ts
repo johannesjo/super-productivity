@@ -649,5 +649,84 @@ END:VCALENDAR`;
         expect(event.title).toBe('Event Series');
       });
     });
+
+    it('should keep orphan RECURRENCE-ID events when master is out of range', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:orphan@test
+DTSTART:20250101T100000Z
+DTEND:20250101T110000Z
+RRULE:FREQ=DAILY;UNTIL=20250103T110000Z
+SUMMARY:Series Ending Early
+END:VEVENT
+BEGIN:VEVENT
+UID:orphan@test
+RECURRENCE-ID:20250102T100000Z
+DTSTART:20250120T150000Z
+DTEND:20250120T160000Z
+SUMMARY:Series Ending Early (Moved)
+END:VEVENT
+END:VCALENDAR`;
+
+      const laterStart = new Date('2025-01-10T00:00:00Z').getTime();
+      const laterEnd = new Date('2025-02-01T00:00:00Z').getTime();
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        laterStart,
+        laterEnd,
+      );
+
+      expect(events.length).toBe(1);
+      expect(events[0].title).toBe('Series Ending Early (Moved)');
+      expect(events[0].start).toBe(new Date('2025-01-20T15:00:00Z').getTime());
+      expect(events[0].id).toBe(
+        `orphan@test_${new Date('2025-01-02T10:00:00Z').getTime()}`,
+      );
+    });
+
+    it('should generate unique IDs for modified instances', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:unique@test
+DTSTART:20250115T080000Z
+DTEND:20250115T090000Z
+RRULE:FREQ=DAILY;COUNT=3
+SUMMARY:Standup
+END:VEVENT
+BEGIN:VEVENT
+UID:unique@test
+RECURRENCE-ID:20250116T080000Z
+DTSTART:20250116T100000Z
+DTEND:20250116T110000Z
+SUMMARY:Standup (Late)
+END:VEVENT
+BEGIN:VEVENT
+UID:unique@test
+RECURRENCE-ID:20250117T080000Z
+DTSTART:20250118T070000Z
+DTEND:20250118T080000Z
+SUMMARY:Standup (Early)
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      const ids = events.map((e) => e.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      const expectedLateId = `unique@test_${new Date('2025-01-16T08:00:00Z').getTime()}`;
+      const expectedEarlyId = `unique@test_${new Date('2025-01-17T08:00:00Z').getTime()}`;
+      expect(ids).toContain(expectedLateId);
+      expect(ids).toContain(expectedEarlyId);
+    });
   });
 });

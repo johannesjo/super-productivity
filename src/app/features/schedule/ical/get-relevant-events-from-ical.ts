@@ -88,6 +88,8 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
 
   // Build exception map from all events
   const exceptionMap = buildExceptionMap(allPossibleFutureEvents);
+  // Track which recurring series we already processed via their master event
+  const processedRecurringUids = new Set<string>();
 
   allPossibleFutureEvents.forEach((ve) => {
     try {
@@ -101,6 +103,9 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
       if (ve.getFirstPropertyValue('rrule')) {
         const uid = ve.getFirstPropertyValue('uid');
         const exceptions = exceptionMap.get(uid) || [];
+        if (uid) {
+          processedRecurringUids.add(uid);
+        }
 
         calendarIntegrationEvents = calendarIntegrationEvents.concat(
           getForRecurring(ve, calProviderId, startTimestamp, endTimestamp, exceptions),
@@ -121,6 +126,32 @@ export const getRelevantEventsForCalendarIntegrationFromIcal = (
         error,
       );
     }
+  });
+
+  // Handle orphan exception events (master RRULE filtered out, e.g. moved far into the future)
+  exceptionMap.forEach((exceptions, uid) => {
+    if (processedRecurringUids.has(uid)) {
+      return;
+    }
+    exceptions.forEach((exception) => {
+      if (exception.isCancelled) {
+        return;
+      }
+      const exceptionStart = safeGetDateTimestamp(exception.vevent, 'dtstart');
+      if (
+        exceptionStart !== null &&
+        exceptionStart >= startTimestamp &&
+        exceptionStart < endTimestamp
+      ) {
+        calendarIntegrationEvents.push(
+          convertVEventToCalendarIntegrationEvent(
+            exception.vevent,
+            calProviderId,
+            `${uid}_${exception.recurrenceId}`,
+          ),
+        );
+      }
+    });
   });
   // Log.timeEnd('TEST');
   return calendarIntegrationEvents;
@@ -218,7 +249,11 @@ const getForRecurring = (
         exceptionStart < endTimeStamp
       ) {
         evs.push(
-          convertVEventToCalendarIntegrationEvent(exception.vevent, calProviderId),
+          convertVEventToCalendarIntegrationEvent(
+            exception.vevent,
+            calProviderId,
+            `${baseId}_${exception.recurrenceId}`,
+          ),
         );
       }
     }
@@ -238,7 +273,9 @@ const getForRecurring = (
 const convertVEventToCalendarIntegrationEvent = (
   vevent: any,
   calProviderId: string,
+  overrideId?: string,
 ): CalendarIntegrationEvent => {
+  // overrideId allows detached instances to re-use conversion while staying unique per occurrence
   const start = vevent.getFirstPropertyValue('dtstart').toJSDate().getTime();
   // NOTE: if dtend is missing, it defaults to dtstart; @see #1814 and RFC 2455
   // detailed comment in #1814:
@@ -246,7 +283,7 @@ const convertVEventToCalendarIntegrationEvent = (
   const duration = calculateEventDuration(vevent, start);
 
   return {
-    id: vevent.getFirstPropertyValue('uid'),
+    id: overrideId || vevent.getFirstPropertyValue('uid'),
     title: vevent.getFirstPropertyValue('summary') || '',
     description: vevent.getFirstPropertyValue('description') || undefined,
     start,
