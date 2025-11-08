@@ -241,7 +241,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     ) {
       const currentMiscConfig = this.globalCfg?.misc;
       // Only show dialog if we're actually changing from true to false
-      if (currentMiscConfig?.isEnableUserProfiles !== false) {
+      if (currentMiscConfig?.isEnableUserProfiles === true) {
         const confirmed = await this._showDisableProfilesDialog();
         if (!confirmed) {
           // User cancelled, don't save the change
