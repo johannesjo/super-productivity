@@ -89,7 +89,7 @@ export class UserProfileService {
       throw new Error('Profile system not initialized');
     }
 
-    if (!name || name.trim().length === 0) {
+    if (name.trim().length === 0) {
       throw new Error('Profile name cannot be empty');
     }
 
