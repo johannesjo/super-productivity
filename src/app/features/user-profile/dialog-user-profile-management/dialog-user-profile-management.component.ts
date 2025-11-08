@@ -53,11 +53,7 @@ export class DialogUserProfileManagementComponent {
   readonly isElectron = IS_ELECTRON;
 
   async createProfile(): Promise<void> {
-    const name = this.newProfileName().trim();
-    if (!name) {
-      this._snackService.open({ type: 'ERROR', msg: 'Profile name cannot be empty' });
-      return;
-    }
+    const name = this.newProfileName();
 
     this.isCreating.set(true);
     try {

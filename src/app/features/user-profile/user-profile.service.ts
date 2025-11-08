@@ -89,17 +89,18 @@ export class UserProfileService {
       throw new Error('Profile system not initialized');
     }
 
-    if (name.trim().length === 0) {
+    const trimmedName = name?.trim();
+    if (!trimmedName) {
       throw new Error('Profile name cannot be empty');
     }
 
-    if (metadata.profiles.some((p) => p.name === name)) {
+    if (metadata.profiles.some((p) => p.name === trimmedName)) {
       throw new Error('A profile with this name already exists');
     }
 
     const newProfile: UserProfile = {
       id: nanoid(),
-      name: name.trim(),
+      name: trimmedName,
       createdAt: Date.now(),
       lastUsedAt: Date.now(),
     };
