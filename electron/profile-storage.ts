@@ -10,8 +10,7 @@ const PROFILE_STORAGE_DIR = path.join(app.getPath('userData'), 'profiles');
  * Initialize profile storage IPC handlers
  * Profiles are stored in: <userData>/profiles/
  */
-// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function initProfileStorageAdapter(): void {
+export const initProfileStorageAdapter = (): void => {
   log('Profile storage directory:', PROFILE_STORAGE_DIR);
 
   // Ensure profile storage directory exists
@@ -79,4 +78,4 @@ export function initProfileStorageAdapter(): void {
       }
     },
   );
-}
+};

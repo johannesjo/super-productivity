@@ -77,11 +77,7 @@ export class DialogUserProfileManagementComponent {
   }
 
   async saveEdit(profileId: string): Promise<void> {
-    const newName = this.editingProfileName().trim();
-    if (!newName) {
-      this._snackService.open({ type: 'ERROR', msg: 'Profile name cannot be empty' });
-      return;
-    }
+    const newName = this.editingProfileName();
 
     try {
       await this.profileService.renameProfile(profileId, newName);

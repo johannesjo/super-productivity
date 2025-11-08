@@ -138,19 +138,19 @@ export class UserProfileService {
       throw new Error('Profile system not initialized');
     }
 
-    // Validate name
-    if (!newName || newName.trim().length === 0) {
+    const trimmedName = newName?.trim();
+    if (!trimmedName) {
       throw new Error('Profile name cannot be empty');
     }
 
     // Check for duplicate names (excluding current profile)
-    if (metadata.profiles.some((p) => p.id !== profileId && p.name === newName.trim())) {
+    if (metadata.profiles.some((p) => p.id !== profileId && p.name === trimmedName)) {
       throw new Error('A profile with this name already exists');
     }
 
     // Find and update profile
     const updatedProfiles = metadata.profiles.map((p) =>
-      p.id === profileId ? { ...p, name: newName.trim() } : p,
+      p.id === profileId ? { ...p, name: trimmedName } : p,
     );
 
     const updatedMetadata: ProfileMetadata = {
