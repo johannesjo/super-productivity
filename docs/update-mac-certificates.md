@@ -1,39 +1,85 @@
-# Update Mac OS certificates for electron builder
+# Update macOS certificates for electron-builder
 
-Mac access required!
+Mac access required! The instructions below refresh every asset used by the GitHub Actions/macOS runners for Mac App Store (MAS) and direct-download (DMG) builds.
 
 ## Certificates
 
-1. Use XCode to generate new certificates (Preferences/accounts/ManageCertificates... or do it from https://developer.apple.com/account/resources/certificates/list):
+### 1. Clean up old material
 
-- Apple Development => Local Dev
-- Apple Distribution => Distribute to store and dmg (?)
-- (???) Mac Installer Distribution => Distribute to store
+- In <https://developer.apple.com/account/resources/certificates/list>, revoke the expiring certificates so they cannot be downloaded again by accident.
+- Remove the matching identities from your local keychain (`Keychain Access → My Certificates` - `open -a "Keychain Access"` ) so you do not export the wrong private key later.
 
-2. Import new certificates into keychain
-3. Use mac "Keychain Access" app to generate `all-certs.cer` from all 4 certs and the 3 key private keys: `Mac Installer Submission`, `Apple Distribution`, `Apple Development`, `3rd Party Mac Developer Installer`, `Apple Distribution`, `Apple Development` and `Developer ID Application` (maybe 2 of the certs and 1 of the keys is not needed) and remember to copy certs password to GitHub ENV. ALSO DON'T WORRY! YOU NEED TO ENTER YOUR PASSWORD ABOUT 7 TIMES. HINT: Select "My Certificates" from tab-bar to show what certificate belongs to which key.
-4. `base64 -i all-certs.p12 -o all-certs.txt`
-5. Update `MAC_CERTS` with value
+### 2. Create a fresh CSR (once)
 
-# Profiles
+1. Open Keychain Access → Certificate Assistant → Request a Certificate From a Certificate Authority…
+2. Enter the Apple ID email tied to the team, select “Saved to disk”, and pick a location for `mac-dev-team.csr`.
+3. Repeat only if you need a CSR for a different Apple ID/team.
 
-IMPORTANT NOTE: These must be created after the certificate step, since they include the certificates!
+### 3. Generate the required certificates
 
-1. Go to https://developer.apple.com/account/resources/profiles/list
-2. Create new "Mac App Store Connect" (store) and "Developer ID" (dmg) Profile
-3. Download and move to tools/mac-profiles (HINT: take care that the IDE or editor does not mess up the white-spaces) and rename them to `dl.provisionprofile` and `mas.provisionprofile`.
-4. Use `base64 -i dl.provisionprofile -o dmg-profile.txt && base64 -i mas.provisionprofile -o MAS-profile.txt` to get string for CI
-5. Update `DL_PROVISION_PROFILE` and `MAS_PROVISION_PROFILE`
+Create the following certificates in the developer portal, using the CSR from step 2:
 
-See:
-https://www.electron.build/code-signing.html
-https://www.electronjs.org/docs/tutorial/mac-app-store-submission-guide
+- **Apple Development** – used for local development/debug builds.
+- **Apple Distribution** (Apple renamed “Mac App Distribution”) – used to sign the MAS app.
+- **Mac Installer Distribution** – used to sign the MAS `.pkg` that is uploaded via Transporter.
+- **Developer ID Application** – used to sign the notarized DMG build.
+- **Developer ID Installer** – used if you ship a signed installer `.pkg` for DMG distribution (still required by electron-builder when `dist:mac:dl` runs).
+  Download each resulting `.cer` file and note the exact label Apple shows so you can cross-check in CI logs later.
 
-# How to build dmg locally
+### 4. Install and export as PKCS#12
 
-Create app specific password at https://appleid.apple.com/account/manage
-Run:
+1. Double-click every downloaded `.cer` so it lands inside the login keychain under “My Certificates”. You should now see each certificate with a disclosure triangle that reveals the paired private key—if the triangle is missing, delete the cert and regenerate it so the private key attaches properly.
+2. Multi-select the identities listed above (adjust if you only target MAS or only Developer ID), right-click → **Export Items…**, save as `all-certs.p12`, and choose a strong password (this password becomes the `MAC_CERTS_PASSWORD`). Confirm the repeated macOS password prompts.
+   - Alternatively, run:
+     ```bash
+     security export -k ~/Library/Keychains/login.keychain-db \
+       -t identities -f pkcs12 -P "$MAC_CERTS_PASSWORD" \
+       -o all-certs.p12
+     ```
+3. Verify you can re-import `all-certs.p12` onto another Mac before proceeding.
 
-```
-APPLEID=XXX APPLEIDPASS=XXX rm -Rf app-builds; npm run build; npm run dist:mac:dl
-```
+### 5. Prepare CI secrets
+
+1. Base64 the exported file: `base64 -i all-certs.p12 -o all-certs.b64`.
+2. Update the GitHub Actions secret `MAC_CERTS` with the contents of `all-certs.b64` and the secret `MAC_CERTS_PASSWORD` with the password chosen above.
+3. Map those secrets to electron-builder’s expectations inside your workflow, for example:
+   ```yaml
+   CSC_LINK: ${{ secrets.MAC_CERTS }}
+   CSC_KEY_PASSWORD: ${{ secrets.MAC_CERTS_PASSWORD }}
+   CSC_IDENTITY_AUTO_DISCOVERY: true
+   ```
+   Use `CSC_INSTALLER_LINK`/`CSC_INSTALLER_KEY_PASSWORD` if you decide to store installer identities separately.
+4. If you prefer keeping separate secrets, repeat the export step per certificate and upload them with names such as `MAC_DISTRIBUTION_CERT`, but the current workflow expects a single bundle. Whatever approach you choose, ensure the CI job imports the PKCS#12 into an unlocked keychain before invoking electron-builder.
+
+## Provisioning profiles
+
+> Important: create/refresh profiles **after** the new certificates exist, otherwise downloading the profile will still pull the revoked certs.
+
+1. Go to <https://developer.apple.com/account/resources/profiles/list>.
+2. Create two new profiles:
+   - **Type “Mac App Store”** → select the `Apple Distribution` certificate → choose the MAS App ID → download as `mas.provisionprofile`.
+   - **Type “Developer ID Application”** → select the `Developer ID Application` certificate → choose the same App ID → download as `dl.provisionprofile` (optional for most Developer ID apps, but we keep it to satisfy older tooling and entitlements checks).
+3. Move the files into `tools/mac-profiles/mas.provisionprofile` and `tools/mac-profiles/dl.provisionprofile` (keep the exact filenames so the build scripts pick them up). If you skip the Developer ID profile, remove `tools/mac-profiles/dl.provisionprofile` and clear the `DL_PROVISION_PROFILE` secret so CI doesn’t look for it.
+4. Base64-encode them for CI:
+   ```bash
+   base64 -i tools/mac-profiles/dl.provisionprofile -o dmg-profile.b64
+   base64 -i tools/mac-profiles/mas.provisionprofile -o mas-profile.b64
+   ```
+5. Update the GitHub secrets `DL_PROVISION_PROFILE` (dmg) and `MAS_PROVISION_PROFILE` (store) with the encoded strings and ensure the workflows pass them to electron-builder (e.g., `build.mac.provisioningProfile`). Remember to keep hardened runtime enabled (`build.mac.hardenedRuntime=true`) and entitlements aligned for notarization.
+
+See also:
+
+- <https://www.electron.build/code-signing.html>
+- <https://www.electronjs.org/docs/tutorial/mac-app-store-submission-guide>
+
+## Build the DMG locally
+
+1. Create or refresh an app-specific password at <https://appleid.apple.com/account/manage> (use the same Apple ID as notarization).
+2. Confirm your scripts use `xcrun notarytool` (Apple blocked `altool` uploads as of 2023‑11‑01). electron-builder defaults to `notarytool` when it detects Xcode 14+, so avoid overriding that behavior.
+3. Run:
+   ```bash
+   APPLEID="you@example.com" \
+   APPLEIDPASS="app-specific-password" \
+   rm -Rf app-builds && npm run build && npm run dist:mac:dl
+   ```
+4. The script signs, notarizes (via `notarytool`), and staples the DMG using the new certificates and provisioning profiles. Validate with `spctl --assess -vv --type install path/to/app`.
