@@ -28,6 +28,11 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
 
+      - name: Install Apple WWDR intermediate certificate
+        run: |
+          curl -fsSL https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer -o /tmp/AppleWWDRCAG4.cer
+          sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/AppleWWDRCAG4.cer
+
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
