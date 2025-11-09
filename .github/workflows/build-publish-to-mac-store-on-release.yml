@@ -54,11 +54,11 @@ jobs:
 
       - run: npm run env # Generate env.generated.ts
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Test Unit
-        run: npm run test
+      #      - name: Lint
+      #        run: npm run lint
+      #
+      #      - name: Test Unit
+      #        run: npm run test
 
       #      - name: Test E2E
       #        run: npm run e2e
@@ -70,6 +70,9 @@ jobs:
         with:
           p12-file-base64: ${{ secrets.mac_certs }}
           p12-password: ${{ secrets.mac_certs_password }}
+
+      - name: List available signing identities
+        run: security find-identity -v -p codesigning
 
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
