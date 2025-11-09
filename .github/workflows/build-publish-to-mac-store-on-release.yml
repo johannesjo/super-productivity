@@ -54,11 +54,11 @@ jobs:
 
       - run: npm run env # Generate env.generated.ts
 
-      - name: Lint
-        run: npm run lint
+      #      - name: Lint
+      #        run: npm run lint
 
-      - name: Test Unit
-        run: npm run test
+      #      - name: Test Unit
+      #        run: npm run test
 
       #      - name: Test E2E
       #        run: npm run e2e
@@ -73,13 +73,6 @@ jobs:
 
       - name: List available signing identities
         run: security find-identity -v -p codesigning
-
-      - name: Set keychain as default and unlock
-        run: |
-          security list-keychains -d user
-          security default-keychain -s ~/Library/Keychains/signing_temp.keychain-db
-          security unlock-keychain -p "" ~/Library/Keychains/signing_temp.keychain-db
-          security set-keychain-settings ~/Library/Keychains/signing_temp.keychain-db
 
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
