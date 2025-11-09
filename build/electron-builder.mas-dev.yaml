@@ -32,5 +32,4 @@ mas:
   category: public.app-category.productivity
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
-  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
   icon: build/icon-mac.icns
