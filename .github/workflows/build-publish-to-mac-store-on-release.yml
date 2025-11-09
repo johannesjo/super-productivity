@@ -74,50 +74,14 @@ jobs:
       - name: List available signing identities
         run: security find-identity -v -p codesigning
 
-      - name: Dump provisioning profile entitlements
-        run: |
-          security cms -D -i embedded.provisionprofile > profile.plist
-          plutil -extract Entitlements xml1 profile.plist
-
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'true'
           DEBUG: electron-builder
 
-      - name: Re-sign with entitlements (workaround for CI)
-        run: |
-          APP_PATH=".tmp/app-builds/mas-universal/Super Productivity.app"
-          IDENTITY=$(security find-identity -v -p codesigning | grep "3rd Party Mac Developer Application" | head -1 | awk '{print $2}')
-          echo "Using identity: $IDENTITY"
-
-          # Re-sign all helpers with inherit entitlements
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.inherit.plist "$APP_PATH/Contents/Frameworks/Super Productivity Helper.app"
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.inherit.plist "$APP_PATH/Contents/Frameworks/Super Productivity Helper (GPU).app"
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.inherit.plist "$APP_PATH/Contents/Frameworks/Super Productivity Helper (Plugin).app"
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.inherit.plist "$APP_PATH/Contents/Frameworks/Super Productivity Helper (Renderer).app"
-
-          # Re-sign login helper
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.loginhelper.plist "$APP_PATH/Contents/Library/LoginItems/Super Productivity Login Helper.app"
-
-          # Re-sign main app
-          codesign --force --sign "$IDENTITY" --entitlements build/entitlements.mas.plist "$APP_PATH"
-
-          # Re-package
-          INSTALLER_IDENTITY=$(security find-identity -v -p codesigning | grep "3rd Party Mac Developer Installer" | head -1 | awk '{print $2}')
-          productbuild --component "$APP_PATH" /Applications --sign "$INSTALLER_IDENTITY" ".tmp/app-builds/mas-universal/superProductivity-universal.pkg"
-
       - run: ls .tmp/app-builds
         shell: bash
-
-      - name: Check entitlements on signed executables
-        run: |
-          echo "=== Main app entitlements ==="
-          codesign -d --entitlements :- ".tmp/app-builds/mas-universal/Super Productivity.app" || true
-          echo "=== Helper entitlements ==="
-          codesign -d --entitlements :- ".tmp/app-builds/mas-universal/Super Productivity.app/Contents/Frameworks/Super Productivity Helper.app" || true
-          echo "=== GPU Helper entitlements ==="
-          codesign -d --entitlements :- ".tmp/app-builds/mas-universal/Super Productivity.app/Contents/Frameworks/Super Productivity Helper (GPU).app" || true
 
       - name: Validate App
         run: ls .tmp/app-builds; ls .tmp/app-builds/mas-universal; xcrun altool --type macos --validate-app -f .tmp/app-builds/mas-universal/super*.pkg -u ${{secrets.APPLE_ID}} -p ${{secrets.APPLE_APP_SPECIFIC_PASSWORD}}
