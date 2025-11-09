@@ -3,15 +3,12 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  DestroyRef,
   effect,
-  HostBinding,
   HostListener,
   inject,
   signal,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { TaskCopy } from '../../tasks/task.model';
 import { from, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { TaskService } from '../../tasks/task.service';
@@ -51,20 +48,18 @@ import { TaskAttachmentListComponent } from '../../tasks/task-attachment/task-at
 import { slideInOutFromBottomAni } from '../../../ui/animations/slide-in-out-from-bottom.ani';
 import { FocusModeService } from '../focus-mode.service';
 import { BreathingDotComponent } from '../../../ui/breathing-dot/breathing-dot.component';
-import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import {
   FOCUS_MODE_DEFAULTS,
   FocusMainUIState,
   FocusModeMode,
 } from '../focus-mode.model';
-import { selectStartableTasksActiveContextFirst } from '../../work-context/store/work-context.selectors';
 import { FocusModeCountdownComponent } from '../focus-mode-countdown/focus-mode-countdown.component';
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
 import {
   SegmentedButtonGroupComponent,
   SegmentedButtonOption,
 } from '../../../ui/segmented-button-group/segmented-button-group.component';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { ANI_STANDARD_TIMING } from '../../../ui/animations/animation.const';
 import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
@@ -99,9 +94,6 @@ import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focu
     IssueIconPipe,
     SimpleCounterButtonComponent,
     MatMiniFabButton,
-    MatMenuTrigger,
-    MatMenu,
-    MatMenuItem,
     FocusModeCountdownComponent,
     MatFabButton,
     InputDurationSliderComponent,
@@ -118,7 +110,6 @@ export class FocusModeMainComponent {
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _issueService = inject(IssueService);
   private readonly _store = inject(Store);
-  private readonly _destroyRef = inject(DestroyRef);
   private readonly _focusModeStorage = inject(FocusModeStorageService);
 
   readonly simpleCounterService = inject(SimpleCounterService);
@@ -132,6 +123,7 @@ export class FocusModeMainComponent {
   isSessionRunning = this.focusModeService.isSessionRunning;
   mode = this.focusModeService.mode;
   mainState = this.focusModeService.mainState;
+  currentTask = toSignal(this.taskService.currentTask$);
 
   private readonly _isPreparation = computed(
     () => this.mainState() === FocusMainUIState.Preparation,
@@ -146,8 +138,6 @@ export class FocusModeMainComponent {
   displayDuration = signal(25 * 60 * 1000); // Default 25 minutes
   isTaskSelectorOpen = signal(false);
 
-  // TODO remove if always true
-  isShowTaskActions = computed(() => true);
   isShowModeSelector = computed(() => this._isPreparation());
   isShowSimpleCounters = computed(() => this._isInProgress());
   isShowPauseButton = computed(() => this._isInProgress());
@@ -161,8 +151,6 @@ export class FocusModeMainComponent {
   isShowTimeAdjustButtons = computed(
     () => this._isInProgress() && this.mode() !== FocusModeMode.Flowtime,
   );
-
-  startableTasks$ = this._store.select(selectStartableTasksActiveContextFirst);
 
   // Mode selector options
   readonly modeOptions: ReadonlyArray<SegmentedButtonOption> = [
@@ -186,15 +174,11 @@ export class FocusModeMainComponent {
     },
   ];
 
-  @HostBinding('class.isShowNotes') isShowNotes: boolean = false;
-
-  task: TaskCopy | null = null;
-  isFocusNotes = false;
-  isDragOver: boolean = false;
-
-  // defaultTaskNotes: string = '';
-  defaultTaskNotes: string = '';
+  isFocusNotes = signal(false);
+  isDragOver = signal(false);
+  defaultTaskNotes = signal('');
   T: typeof T = T;
+
   issueUrl$: Observable<string | null> = this.taskService.currentTask$.pipe(
     switchMap((v) => {
       if (!v) {
@@ -214,15 +198,9 @@ export class FocusModeMainComponent {
     effect(() => {
       const misc = this._globalConfigService.misc();
       if (misc) {
-        this.defaultTaskNotes = misc.taskNotesTpl;
+        this.defaultTaskNotes.set(misc.taskNotesTpl);
       }
     });
-
-    this.taskService.currentTask$
-      .pipe(takeUntilDestroyed(this._destroyRef))
-      .subscribe((task) => {
-        this.task = task;
-      });
 
     effect(() => {
       const duration = this.focusModeService.sessionDuration();
@@ -246,36 +224,38 @@ export class FocusModeMainComponent {
     this._dragEnterTarget = ev.target as HTMLElement;
     ev.preventDefault();
     ev.stopPropagation();
-    this.isDragOver = true;
+    this.isDragOver.set(true);
   }
 
   @HostListener('dragleave', ['$event']) onDragLeave(ev: DragEvent): void {
     if (this._dragEnterTarget === (ev.target as HTMLElement)) {
       ev.preventDefault();
       ev.stopPropagation();
-      this.isDragOver = false;
+      this.isDragOver.set(false);
     }
   }
 
   @HostListener('drop', ['$event']) onDrop(ev: DragEvent): void {
-    if (!this.task) {
+    const t = this.currentTask();
+    if (!t) {
       return;
     }
-    this._taskAttachmentService.createFromDrop(ev, this.task.id);
+    this._taskAttachmentService.createFromDrop(ev, t.id);
     ev.stopPropagation();
-    this.isDragOver = false;
+    this.isDragOver.set(false);
   }
 
   changeTaskNotes($event: string): void {
     if (
-      !this.defaultTaskNotes ||
+      !this.defaultTaskNotes() ||
       !$event ||
-      $event.trim() !== this.defaultTaskNotes.trim()
+      $event.trim() !== this.defaultTaskNotes().trim()
     ) {
-      if (this.task === null) {
+      const t = this.currentTask();
+      if (!t) {
         throw new Error('Task is not loaded');
       }
-      this.taskService.update(this.task.id, { notes: $event });
+      this.taskService.update(t.id, { notes: $event });
     }
   }
 
@@ -284,7 +264,8 @@ export class FocusModeMainComponent {
     // always go to task selection afterward
     this._store.dispatch(selectFocusTask());
 
-    const id = this.task && this.task.id;
+    const t = this.currentTask();
+    const id = t && t.id;
     if (id) {
       this._store.dispatch(
         TaskSharedActions.updateTask({
@@ -306,10 +287,11 @@ export class FocusModeMainComponent {
 
   updateTaskTitleIfChanged(isChanged: boolean, newTitle: string): void {
     if (isChanged) {
-      if (!this.task) {
+      const t = this.currentTask();
+      if (!t) {
         throw new Error('No task data');
       }
-      this.taskService.update(this.task.id, { title: newTitle });
+      this.taskService.update(t.id, { title: newTitle });
     }
   }
 
@@ -327,7 +309,7 @@ export class FocusModeMainComponent {
 
   startSession(): void {
     // Task must be selected via the task menu before starting
-    if (!this.task) {
+    if (!this.currentTask()) {
       return;
     }
 

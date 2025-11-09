@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Confirm before exiting the app without finishing day first",
       "IS_DARK_MODE": "Tmavý režim",
       "IS_DISABLE_ANIMATIONS": "Zakázať všetky animácie",
+      "IS_DISABLE_CELEBRATION": "Zakázať oslavy v dennom zhrnutí",
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Zobraziť tip na produktivitu pri spustení aplikácie o niečo dlhšie",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Pridanie úloh z dnešného dňa",
-    "BACK": "Wait I forgot something!",
     "BREAK_LABEL": "Breaks (nr / time)",
     "CELEBRATE": "Take a moment to <i>celebrate!</i>",
     "CLEAR_ALL_CONTINUE": "Clear all done and continue",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "No, just clear the tasks",
-      "MSG": "Your work is done. Time to go home!",
-      "OK": "Aye aye! Shutdown!"
+      "MSG": "Exit the application?",
+      "OK": "Exit"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
     "EVALUATE_DAY": "Vyhodnoťte",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Round UP all tasks to 5 minutes",
     "ROUND_UP_15M": "Round UP all tasks to 15 minutes",
     "ROUND_UP_30M": "Round UP all tasks to 30 minutes",
-    "SAVE_AND_GO_HOME": "Save and go home",
+    "SAVE_AND_GO_HOME": "Finish the day",
     "SAVE_AND_GO_HOME_TOOLTIP": "Move all done tasks to the archive (worklog) and optionally sync all data and close the app.",
     "START_END": "Start – End",
     "SUMMARY_FOR": "Daily Summary for {{dayStr}}",

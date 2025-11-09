@@ -99,7 +99,9 @@ test.describe('Drag Task to change project and labels', () => {
     await page.waitForSelector('task', { state: 'visible' });
 
     // create two tags
-    const tagNameInput = page.locator('dialog-create-tag input[type="text"]').first();
+    const dialogSelector = 'dialog-create-tag';
+    const tagNameInput = page.locator(`${dialogSelector} input[type="text"]`).first();
+    const tagDialog = page.locator(dialogSelector);
     const tagMenu = page
       .locator('nav-item')
       .filter({ hasText: 'Tags' })
@@ -117,27 +119,23 @@ test.describe('Drag Task to change project and labels', () => {
       .getByRole('menuitem')
       .filter({ hasText: `${testPrefix}-Tag2` });
 
-    await tagMenu.hover();
-    await createTagBtn.waitFor({ state: 'visible', timeout: 3000 });
-    await createTagBtn.click();
-    await page.waitForSelector('dialog-create-tag', { state: 'visible' });
-    await tagNameInput.waitFor({ state: 'visible', timeout: 5000 });
-    await tagNameInput.fill(`${testPrefix}-Tag1`);
-    await page.keyboard.press('Enter');
-    // Wait for dialog to close and nav item to appear
-    await page.waitForSelector('dialog-create-tag', { state: 'hidden', timeout: 7000 });
-    await tag1NavItem.waitFor({ state: 'visible', timeout: 7000 });
+    const saveTag = async (name: string, navItem: Locator): Promise<void> => {
+      await tagMenu.hover();
+      await createTagBtn.waitFor({ state: 'visible', timeout: 3000 });
+      await createTagBtn.click();
+      await tagDialog.waitFor({ state: 'visible', timeout: 10000 });
+      await tagNameInput.waitFor({ state: 'visible', timeout: 5000 });
+      await tagNameInput.fill(name);
+      const saveBtn = tagDialog.getByRole('button', { name: 'Save' });
+      await saveBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await expect(saveBtn).toBeEnabled({ timeout: 5000 });
+      await saveBtn.click();
+      await tagDialog.waitFor({ state: 'hidden', timeout: 10000 });
+      await navItem.waitFor({ state: 'visible', timeout: 10000 });
+    };
 
-    await tagMenu.hover();
-    await createTagBtn.waitFor({ state: 'visible', timeout: 3000 });
-    await createTagBtn.click();
-    await page.waitForSelector('dialog-create-tag', { state: 'visible' });
-    await tagNameInput.waitFor({ state: 'visible', timeout: 5000 });
-    await tagNameInput.fill(`${testPrefix}-Tag2`);
-    await page.keyboard.press('Enter');
-    // Wait for dialog to close and nav item to appear
-    await page.waitForSelector('dialog-create-tag', { state: 'hidden', timeout: 7000 });
-    await tag2NavItem.waitFor({ state: 'visible', timeout: 7000 });
+    await saveTag(`${testPrefix}-Tag1`, tag1NavItem);
+    await saveTag(`${testPrefix}-Tag2`, tag2NavItem);
 
     // find drag handle of task
     const firstTask = page.locator('task').first();

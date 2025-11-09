@@ -80,80 +80,78 @@ test.describe('Work View', () => {
 
     // Click the add button in the header to open global add task input
     const headerAddBtn = page.locator('.tour-addBtn');
+    await headerAddBtn.waitFor({ state: 'visible', timeout: 10000 });
     await headerAddBtn.click();
 
     // Wait for global input to be visible
-    await workViewPage.addTaskGlobalInput.waitFor({ state: 'visible' });
+    await workViewPage.addTaskGlobalInput.waitFor({ state: 'visible', timeout: 10000 });
 
     // Add first task
+    await workViewPage.addTaskGlobalInput.clear();
     await workViewPage.addTaskGlobalInput.fill('4 test task hohoho');
     await page.keyboard.press('Enter');
 
+    // Wait for first task to be created
+    await page.waitForFunction(() => document.querySelectorAll('task').length >= 1, {
+      timeout: 10000,
+    });
+    await page.waitForTimeout(300);
+
     // Add second task
+    await workViewPage.addTaskGlobalInput.clear();
     await workViewPage.addTaskGlobalInput.fill('5 some other task xoxo');
     await page.keyboard.press('Enter');
 
+    // Wait for second task to be created
+    await page.waitForFunction(() => document.querySelectorAll('task').length >= 2, {
+      timeout: 10000,
+    });
+
     // Close the input by clicking backdrop
-    if (await workViewPage.backdrop.isVisible()) {
+    const backdropVisible = await workViewPage.backdrop.isVisible().catch(() => false);
+    if (backdropVisible) {
       await workViewPage.backdrop.click();
+      await workViewPage.backdrop
+        .waitFor({ state: 'hidden', timeout: 2000 })
+        .catch(() => {});
     }
 
     // Verify both tasks are visible
     const tasks = page.locator('task');
-    await expect(tasks).toHaveCount(2);
+    await expect(tasks).toHaveCount(2, { timeout: 10000 });
 
     // NOTE: global adds to top rather than bottom
     await expect(tasks.nth(0).locator('task-title')).toContainText(
-      /.*5 some other task xoxo/,
+      '5 some other task xoxo',
+      { timeout: 5000 },
     );
-    await expect(tasks.nth(1).locator('task-title')).toContainText(
-      /.*4 test task hohoho/,
-    );
+    await expect(tasks.nth(1).locator('task-title')).toContainText('4 test task hohoho', {
+      timeout: 5000,
+    });
   });
 
   test('should add 2 tasks from initial bar', async ({ page, workViewPage }) => {
-    test.setTimeout(30000); // Increase timeout
-
     // Wait for work view to be ready
     await workViewPage.waitForTaskList();
-    await page.waitForTimeout(1000); // Give UI time to fully initialize
 
     // Add two tasks - the addTask method now properly waits for each one
     await workViewPage.addTask('test task hihi');
+
+    // Wait a bit between tasks to ensure proper state update
+    await page.waitForTimeout(500);
+
     await workViewPage.addTask('some other task here');
 
-    // Verify both tasks are visible
+    // Verify both tasks are visible with better error reporting
     const tasks = page.locator('task');
-    await expect(tasks).toHaveCount(2, { timeout: 8000 }); // Reduced from 10s to 8s
 
-    // Get all task titles and their values
-    const taskTitles = await tasks.locator('task-title').all();
-    const taskContents: string[] = [];
+    // Wait for the expected number of tasks
+    await expect(tasks).toHaveCount(2, { timeout: 15000 });
 
-    for (const title of taskTitles) {
-      try {
-        const value = await title.textContent();
-        if (value) {
-          taskContents.push(value);
-        }
-      } catch (e) {
-        // console.log('Failed to get title text:', e);
-      }
-    }
-
-    // Debug log to see what we actually have
-    // console.log('Number of tasks found:', await tasks.count());
-    // console.log('Task contents found:', taskContents);
-
-    // Check that both tasks are present (look for key parts that would be in any version)
-    const hasHihi = taskContents.some((v) => v.includes('hihi'));
-    const hasOther = taskContents.some((v) => v.includes('other task'));
-
-    // More detailed assertion for debugging
-    if (!hasHihi || !hasOther) {
-      // console.log('Missing expected tasks. Found:', taskContents);
-      // console.log('hasHihi:', hasHihi, 'hasOther:', hasOther);
-    }
+    // Verify both tasks exist (order doesn't matter)
+    const allTasksText = await tasks.allTextContents();
+    const hasHihi = allTasksText.some((text) => text.includes('hihi'));
+    const hasOther = allTasksText.some((text) => text.includes('other task'));
 
     expect(hasHihi).toBe(true);
     expect(hasOther).toBe(true);

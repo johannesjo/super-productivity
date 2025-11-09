@@ -28,30 +28,95 @@ test.describe('Default task reminder option', () => {
   test('should apply when scheduling a task using the due action', async ({
     page,
     waitForNav,
+    workViewPage,
   }) => {
-    await waitForNav();
+    await workViewPage.waitForTaskList();
     await changeDefaultTaskReminderOption(page);
 
     await page.getByRole('menuitem', { name: 'Inbox' }).click();
-    await page.getByRole('button', { name: 'Due' }).click();
-    // Click on the time input to reveal the reminder input
-    await page.getByText('Time', { exact: true }).click();
+    await waitForNav();
 
+    // First, add a task so the schedule button will be available
+    await workViewPage.addTask('test task');
+
+    // Wait for the task to be visible
+    const task = page.locator('task').filter({ hasText: 'test task' }).first();
+    await task.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Scroll into view and hover over the task to reveal action buttons
+    await task.scrollIntoViewIfNeeded();
+    await page.waitForTimeout(200);
+    await task.hover({ force: true });
+
+    // Open the detail panel to access the schedule action
+    const detailBtn = task.locator('.show-additional-info-btn').first();
+    await detailBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await detailBtn.click();
+
+    // Click on the schedule item in the detail panel
+    const scheduleItem = page
+      .locator(
+        'task-detail-item:has(mat-icon:text("alarm")), ' +
+          'task-detail-item:has(mat-icon:text("today")), ' +
+          'task-detail-item:has(mat-icon:text("schedule"))',
+      )
+      .first();
+    await scheduleItem.waitFor({ state: 'visible', timeout: 10000 });
+    await scheduleItem.click();
+
+    // Wait for the schedule dialog to appear
+    const scheduleDialog = page.locator('dialog-schedule-task');
+    await scheduleDialog.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Click on the time input in the schedule dialog to reveal the reminder input
+    const timeInput = scheduleDialog.locator('input[type="time"]');
+    await timeInput.waitFor({ state: 'visible', timeout: 10000 });
+    await timeInput.click();
+
+    // Wait for the reminder dropdown to appear and check the default option
+    await page.waitForTimeout(500);
     await expect(page.getByText(changedOptionText)).toBeVisible();
   });
 
   test('should apply when scheduling a task using short syntax', async ({
     page,
     waitForNav,
+    workViewPage,
   }) => {
-    await waitForNav();
+    await workViewPage.waitForTaskList();
     await changeDefaultTaskReminderOption(page);
 
     await page.getByRole('menuitem', { name: 'Inbox' }).click();
-    const addTaskInput = await page.locator('.input-section input');
+    await waitForNav();
+
+    // Click the add button to reveal the input if it's not already visible
+    const addTaskInput = page.locator('add-task-bar.global input');
+    const inputCount = await addTaskInput.count();
+    if (inputCount === 0) {
+      const addBtn = page.locator('.tour-addBtn');
+      await addBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await addBtn.click();
+      await page.waitForTimeout(300);
+    }
+
+    // Wait for the global add-task input to be available
+    await addTaskInput.waitFor({ state: 'visible', timeout: 15000 });
     await addTaskInput.fill('due task @at 1pm');
     await addTaskInput.press('Enter');
-    await page.getByTitle('Reschedule').click();
+
+    // Close the add-task bar by clicking the backdrop
+    const backdrop = page.locator('.backdrop');
+    const backdropVisible = await backdrop.isVisible().catch(() => false);
+    if (backdropVisible) {
+      await backdrop.click();
+      await backdrop.waitFor({ state: 'hidden', timeout: 5000 }).catch(() => {});
+    }
+
+    // Wait for task to be created and reschedule button to appear
+    await page.waitForTimeout(500);
+    const rescheduleBtn = page.getByTitle('Reschedule').first();
+    await rescheduleBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await rescheduleBtn.click();
 
     await expect(page.getByText(changedOptionText)).toBeVisible();
   });
