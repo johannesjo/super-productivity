@@ -40,6 +40,14 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-node-
 
+      - uses: apple-actions/import-codesign-certs@v5
+        with:
+          p12-file-base64: ${{ secrets.mac_certs }}
+          p12-password: ${{ secrets.mac_certs_password }}
+
+      - name: List available signing identities
+        run: security find-identity -v -p codesigning
+
       - name: Workaround for nx issue and dmg licence issue
         run: npm install @nx/nx-darwin-arm64 dmg-license
 
@@ -65,14 +73,6 @@ jobs:
 
       - name: Build Frontend & Electron
         run: npm run build
-
-      - uses: apple-actions/import-codesign-certs@v5
-        with:
-          p12-file-base64: ${{ secrets.mac_certs }}
-          p12-password: ${{ secrets.mac_certs_password }}
-
-      - name: List available signing identities
-        run: security find-identity -v -p codesigning
 
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
