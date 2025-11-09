@@ -71,13 +71,8 @@ jobs:
           p12-file-base64: ${{ secrets.mac_certs }}
           p12-password: ${{ secrets.mac_certs_password }}
 
-      - name: List available signing identities
-        run: security find-identity -v -p codesigning
-
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'true'
 
       - run: ls .tmp/app-builds
         shell: bash
