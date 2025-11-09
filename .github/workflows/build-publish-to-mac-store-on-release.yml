@@ -52,6 +52,9 @@ jobs:
         run: |
           CERT_PATH="$RUNNER_TEMP/mac-certs.p12"
           echo "$MAC_CERTS" | base64 --decode > "$CERT_PATH"
+          echo "=== DIAGNOSTIC: Decoded .p12 SHA256 ==="
+          shasum -a 256 "$CERT_PATH"
+          echo "========================================"
           security create-keychain -p "" build.keychain
           security set-keychain-settings -lut 21600 build.keychain
           security unlock-keychain -p "" build.keychain
