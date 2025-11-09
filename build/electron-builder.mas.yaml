@@ -30,4 +30,5 @@ mas:
   hardenedRuntime: false
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
+  entitlementsLoginHelper: build/entitlements.mas.loginhelper.plist
   provisioningProfile: embedded.provisionprofile
