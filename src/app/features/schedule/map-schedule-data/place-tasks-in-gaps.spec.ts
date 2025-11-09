@@ -52,29 +52,29 @@ describe('placeTasksInGaps', () => {
     expect(result.viewEntries.length).toBe(3);
 
     // With BEST_FIT algorithm, tasks are placed to minimize wasted space:
-    // - First gap (08:00-09:00): 60min available
-    //   * Task C (60min) - PERFECT FIT! 0 waste
-    // - Second gap (10:00-13:00): 180min available
-    //   * Task B (45min) + Task A (30min) = 75min used, 105min waste
-    // This is optimal because Task C perfectly fills the first gap
+    // Iteration 1: Task C (60min) perfectly fits first gap (08:00-09:00) - 0 waste
+    // Iteration 2: Task B (45min) has less waste than A in remaining gap:
+    //              B in gap(180min) = 135min waste vs A in gap(180min) = 150min waste
+    //              So B is placed at 10:00
+    // Iteration 3: Task A (30min) placed at 10:45 in remaining space
 
     // Task C (60min) should perfectly fit first gap (08:00-09:00)
     const taskC = result.viewEntries.find((r) => r.id === 'task-c');
     expect(taskC).toBeDefined();
     expect(taskC!.start).toBe(startTime); // 08:00
 
-    // Task A (30min) should be placed in second gap
-    const taskA = result.viewEntries.find((r) => r.id === 'task-a');
-    expect(taskA).toBeDefined();
-    expect(taskA!.start).toBe(new Date('2025-11-04T10:00:00').getTime()); // 10:00
-
-    // Task B (45min) should be placed after Task A in second gap
+    // Task B (45min) should be placed first in second gap (better fit than A)
     const taskB = result.viewEntries.find((r) => r.id === 'task-b');
     expect(taskB).toBeDefined();
-    const thirtyMinutesInMs = 30 * 60 * 1000;
-    expect(taskB!.start).toBe(
-      new Date('2025-11-04T10:00:00').getTime() + thirtyMinutesInMs,
-    ); // 10:30
+    expect(taskB!.start).toBe(new Date('2025-11-04T10:00:00').getTime()); // 10:00
+
+    // Task A (30min) should be placed after Task B in second gap
+    const taskA = result.viewEntries.find((r) => r.id === 'task-a');
+    expect(taskA).toBeDefined();
+    const fortyFiveMinutesInMs = 45 * 60 * 1000;
+    expect(taskA!.start).toBe(
+      new Date('2025-11-04T10:00:00').getTime() + fortyFiveMinutesInMs,
+    ); // 10:45
   });
 
   it('should place large tasks after blocks if they do not fit in gaps', () => {
