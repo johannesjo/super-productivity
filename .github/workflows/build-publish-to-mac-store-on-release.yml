@@ -65,6 +65,9 @@ jobs:
           security set-key-partition-list -S apple-tool:,apple: -k "" build.keychain
           security find-identity -v -p codesigning build.keychain
 
+      - name: List available signing identities
+        run: security find-identity -v -p codesigning
+
       - name: Workaround for nx issue and dmg licence issue
         run: npm install @nx/nx-darwin-arm64 dmg-license
 
