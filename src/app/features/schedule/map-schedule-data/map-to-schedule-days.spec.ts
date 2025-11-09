@@ -262,7 +262,10 @@ describe('mapToScheduleDays()', () => {
         workStart: '9:00',
         workEnd: '18:00',
       }),
-      undefined,
+      {
+        startTime: '9:00',
+        endTime: '18:00',
+      },
     );
     expect(r.length).toBe(2);
 
@@ -571,7 +574,10 @@ describe('mapToScheduleDays()', () => {
         workStart: '9:00',
         workEnd: '17:00',
       }),
-      undefined,
+      {
+        startTime: '9:00',
+        endTime: '17:00',
+      },
     );
 
     expect(r[0]).toEqual({

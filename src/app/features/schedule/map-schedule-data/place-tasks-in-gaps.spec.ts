@@ -51,21 +51,30 @@ describe('placeTasksInGaps', () => {
     // Assert
     expect(result.viewEntries.length).toBe(3);
 
-    // Task A (30min) should fit in first gap (08:00-09:00, 60min available)
+    // With BEST_FIT algorithm, tasks are placed to minimize wasted space:
+    // - First gap (08:00-09:00): 60min available
+    //   * Task C (60min) - PERFECT FIT! 0 waste
+    // - Second gap (10:00-13:00): 180min available
+    //   * Task B (45min) + Task A (30min) = 75min used, 105min waste
+    // This is optimal because Task C perfectly fills the first gap
+
+    // Task C (60min) should perfectly fit first gap (08:00-09:00)
+    const taskC = result.viewEntries.find((r) => r.id === 'task-c');
+    expect(taskC).toBeDefined();
+    expect(taskC!.start).toBe(startTime); // 08:00
+
+    // Task A (30min) should be placed in second gap
     const taskA = result.viewEntries.find((r) => r.id === 'task-a');
     expect(taskA).toBeDefined();
-    expect(taskA!.start).toBe(startTime); // 08:00
+    expect(taskA!.start).toBe(new Date('2025-11-04T10:00:00').getTime()); // 10:00
 
-    // Task B (45min) should fit in first gap after Task A
+    // Task B (45min) should be placed after Task A in second gap
     const taskB = result.viewEntries.find((r) => r.id === 'task-b');
     expect(taskB).toBeDefined();
     const thirtyMinutesInMs = 30 * 60 * 1000;
-    expect(taskB!.start).toBe(startTime + thirtyMinutesInMs); // 08:30
-
-    // Task C (60min) should fit in second gap (10:00-13:00, 180min available)
-    const taskC = result.viewEntries.find((r) => r.id === 'task-c');
-    expect(taskC).toBeDefined();
-    expect(taskC!.start).toBe(new Date('2025-11-04T10:00:00').getTime());
+    expect(taskB!.start).toBe(
+      new Date('2025-11-04T10:00:00').getTime() + thirtyMinutesInMs,
+    ); // 10:30
   });
 
   it('should place large tasks after blocks if they do not fit in gaps', () => {

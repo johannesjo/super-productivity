@@ -128,7 +128,18 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
+      {
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '17:00',
+        isLunchBreakEnabled: true,
+        lunchBreakStart: '11:00',
+        lunchBreakEnd: '11:30',
+        isAllowTaskSplitting: true,
+        taskPlacementStrategy: 'DEFAULT',
+      } as any,
       p.workStartEndCfg as any,
+      p.lunchBreakCfg as any,
     );
 
     expect(r[3]).toEqual({
