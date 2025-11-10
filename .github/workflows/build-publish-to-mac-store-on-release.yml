@@ -92,6 +92,34 @@ jobs:
         env:
           PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
 
+      - name: Verify provisioning profile certificate
+        run: |
+          security cms -D -i embedded.provisionprofile > /tmp/profile.plist
+          python3 << 'EOF'
+          import plistlib
+          import subprocess
+          import hashlib
+
+          with open('/tmp/profile.plist', 'rb') as f:
+              plist_data = plistlib.load(f)
+
+          cert_data = plist_data['DeveloperCertificates'][0]
+          fingerprint = hashlib.sha1(cert_data).hexdigest().upper()
+
+          # Write to temp file and extract subject
+          with open('/tmp/cert.der', 'wb') as f:
+              f.write(cert_data)
+
+          result = subprocess.run(['openssl', 'x509', '-in', '/tmp/cert.der', '-inform', 'DER',
+                                  '-noout', '-subject', '-fingerprint', '-sha1'],
+                                 capture_output=True, text=True)
+
+          print("=== PROVISIONING PROFILE CERTIFICATE ===")
+          print(result.stdout)
+          print(f"SHA1 Fingerprint: {fingerprint}")
+          print("========================================")
+          EOF
+
       - run: npm run env # Generate env.generated.ts
 
       #      - name: Lint

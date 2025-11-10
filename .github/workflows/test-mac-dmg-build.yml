@@ -53,6 +53,17 @@ jobs:
       - name: Install npm packages
         run: npm i
 
+      - name: Decode provisioning profile
+        shell: bash
+        env:
+          PROVISION_PROFILE: ${{ secrets.dl_provision_profile }}
+        run: |
+          if [ -z "$PROVISION_PROFILE" ]; then
+            echo "dl_provision_profile secret is missing"
+            exit 1
+          fi
+          echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile
+
       - name: Configure macOS signing keychain
         env:
           MAC_CERTS: ${{ secrets.mac_certs }}
@@ -78,13 +89,24 @@ jobs:
             echo "CSC_NAME=Developer ID Application: Johannes Millan (363FAFK383)"
           } >> "$GITHUB_ENV"
 
+      - name: Prepare for app notarization
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
+
       - name: Generate environment & build sources
         run: |
           npm run env
-          npm run buildAllElectron:noTests:prod
+          npm run build
 
       - name: Build Developer ID DMG
-        run: npm run dist:mac:dl
+        env:
+          API_KEY_ID: ${{ secrets.mac_api_key_id }}
+          API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: npx electron-builder --mac
 
       - name: Verify DMG signature
         run: |
