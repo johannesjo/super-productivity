@@ -11,7 +11,6 @@ jobs:
     env:
       UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
-      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
       CSC_NAME: 'Mac App Distribution: Johannes Millan (363FAFK383)'
       CSC_INSTALLER_NAME: 'Mac Installer Distribution: Johannes Millan (363FAFK383)'
 
