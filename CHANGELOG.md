@@ -1,3 +1,5 @@
+## [16.3.2](https://github.com/johannesjo/super-productivity/compare/v16.3.1...v16.3.2) (2025-11-10)
+
 ## [16.3.1](https://github.com/johannesjo/super-productivity/compare/v16.3.0...v16.3.1) (2025-11-10)
 
 ### Reverts
