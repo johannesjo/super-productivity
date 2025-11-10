@@ -51,5 +51,23 @@ export const TRELLO_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderTrello> 
   title: 'Trello',
   key: 'TRELLO',
   items: TRELLO_CONFIG_FORM,
-  help: 'Connect your Trello board to search for cards, open them from tasks, and keep card details in sync.',
+  helpArr: [
+    {
+      h: 'Getting Started',
+      p: 'To connect Super Productivity with Trello, you need to generate an API key and token from your Trello account. This allows Super Productivity to access your boards and cards.',
+    },
+    {
+      h: 'How to Get API Key & Token',
+      p: 'Visit https://trello.com/app-key and create a new app. Fills in necessary detail excluding icon. After creating the app, click on "Generate a new API key". This will allow you to view both your API key and a token as the system generates it. You will need both the key and token to configure the integration. See https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/ for more detail if you are unsure of what to do.',
+      p2: 'The token grants Super Productivity permission to read your Trello data. You can revoke it at any time from the Trello security page.',
+    },
+    {
+      h: 'Selecting Your Board',
+      p: 'After entering your API key and token, you will be able to select the Trello board you want to work with. Only cards from the selected board will be accessible in Super Productivity.',
+    },
+    {
+      h: 'Features',
+      p: 'Once configured, you can search for Trello cards, add them as tasks, view card details including attachments, and keep your task data in sync with Trello.',
+    },
+  ],
 };
