@@ -108,7 +108,7 @@ jobs:
 
       - name: Build Electron app
         env:
-          CSC_NAME: '3rd Party Mac Developer Application: Johannes Millan (363FAFK383)'
+          CSC_FINGERPRINT: '3731BEC0348920900D9DABE7B13BA64B3BAEB9B5'
         run: npm run dist:mac:mas:buildOnly
 
       - run: ls .tmp/app-builds
