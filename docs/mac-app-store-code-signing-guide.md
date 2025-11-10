@@ -54,9 +54,16 @@ Go to [Apple Developer Portal - Profiles](https://developer.apple.com/account/re
 
 1. Click **➕** to create a new profile
 2. Select: **Distribution** → **Mac App Store Connect**
-3. **Important**: Choose certificate: **"Johannes Millan (Distribution)"** (NOT "Mac App Distribution")
-   - "Distribution" = modern "Apple Distribution" certificate ✅
-   - "Mac App Distribution" = legacy "3rd Party Mac Developer Application" ❌
+3. **CRITICAL**: When selecting the certificate, choose:
+
+   - ✅ **"Johannes Millan (Distribution)"** - Shows "For use in Xcode 11 or later"
+   - ❌ NOT "Johannes Millan (Mac App Distribution)"
+
+   **Why this matters:**
+
+   - "Johannes Millan (Distribution)" = modern "Apple Distribution" certificate → What electron-builder will use ✅
+   - "Johannes Millan (Mac App Distribution)" = legacy "3rd Party Mac Developer Application" → Will cause mismatch ❌
+
 4. Select App ID: `com.super-productivity.app`
 5. Download as `mas.provisionprofile`
 
@@ -245,13 +252,13 @@ EOF
 
 ## Certificate Types Reference
 
-| Apple Portal Name                        | Internal Name                       | Electron-builder Preference | Use Case            |
-| ---------------------------------------- | ----------------------------------- | --------------------------- | ------------------- |
-| "Johannes Millan (Distribution)"         | Apple Distribution                  | ✅ Preferred                | MAS builds (modern) |
-| "Johannes Millan (Mac App Distribution)" | 3rd Party Mac Developer Application | ❌ Legacy                   | MAS builds (old)    |
-| "Developer ID Application"               | Developer ID Application            | N/A                         | Direct download DMG |
+| Apple Portal Name                        | Portal Description             | Internal Name                       | Electron-builder Preference | Use Case            |
+| ---------------------------------------- | ------------------------------ | ----------------------------------- | --------------------------- | ------------------- |
+| "Johannes Millan (Distribution)"         | "For use in Xcode 11 or later" | Apple Distribution                  | ✅ Preferred                | MAS builds (modern) |
+| "Johannes Millan (Mac App Distribution)" | No special description         | 3rd Party Mac Developer Application | ❌ Legacy                   | MAS builds (old)    |
+| "Developer ID Application"               | N/A                            | Developer ID Application            | N/A                         | Direct download DMG |
 
-**Key Insight:** Even though both "Distribution" and "Mac App Distribution" are for Mac App Store, electron-builder prefers the modern "Apple Distribution" certificate.
+**Key Insight:** In the Apple Developer Portal, look for the certificate that says **"For use in Xcode 11 or later"** - this is the modern "Apple Distribution" certificate that electron-builder will use. The one without this description is the legacy certificate.
 
 ## Annual Certificate Renewal
 
