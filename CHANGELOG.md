@@ -1,3 +1,13 @@
+## [16.3.1](https://github.com/johannesjo/super-productivity/compare/v16.3.0...v16.3.1) (2025-11-10)
+
+### Reverts
+
+- Revert "build: attempt to fix mas build by enabling auto discovery" ([ce2f227](https://github.com/johannesjo/super-productivity/commit/ce2f227aec9c67cedff6243d467021107f16fdcc))
+- Revert "build: attempt to fix mas build by loginhelper stuff" ([5c6b1ff](https://github.com/johannesjo/super-productivity/commit/5c6b1ffc73e7ed64e6e30134c3f96d576c26d1a5))
+- Revert "build: attempt to fix mas" ([a8f9c90](https://github.com/johannesjo/super-productivity/commit/a8f9c9089d78fbff4f67048bfffc47babfcf61d4))
+- Revert "build: attempt to fix mas 2" ([4857961](https://github.com/johannesjo/super-productivity/commit/48579614389bb3e7791b5c46c01867ac8a1e62dc))
+- Revert "build: attempt to fix mas 3 diagnostics" ([09be47f](https://github.com/johannesjo/super-productivity/commit/09be47f00cad7fbf841219e2bee11d4dbf1560ba))
+
 # [16.3.0](https://github.com/johannesjo/super-productivity/compare/v16.2.1...v16.3.0) (2025-11-07)
 
 ### Bug Fixes
