@@ -86,7 +86,6 @@ jobs:
             echo "CSC_KEYCHAIN=$KEYCHAIN_PATH"
             echo "CSC_LINK=file://$CERT_PATH"
             echo "CSC_KEY_PASSWORD=$MAC_CERTS_PASSWORD"
-            echo "CSC_NAME=Developer ID Application: Johannes Millan (363FAFK383)"
           } >> "$GITHUB_ENV"
 
       - name: Prepare for app notarization
