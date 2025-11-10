@@ -139,6 +139,27 @@ jobs:
           CSC_FINGERPRINT: '3731BEC0348920900D9DABE7B13BA64B3BAEB9B5'
         run: npm run dist:mac:mas:buildOnly
 
+      - name: Verify code signing used in built app
+        run: |
+          echo "=== Checking code signature of main executable ==="
+          codesign -dv --verbose=4 ".tmp/app-builds/mas-universal/Super Productivity.app" 2>&1 | grep -E "Authority|Identifier|Signature"
+          echo ""
+          echo "=== Checking provisioning profile embedded in app ==="
+          security cms -D -i ".tmp/app-builds/mas-universal/Super Productivity.app/Contents/embedded.provisionprofile" > /tmp/built-profile.plist
+          python3 << 'EOF'
+          import plistlib
+          import subprocess
+          import hashlib
+
+          with open('/tmp/built-profile.plist', 'rb') as f:
+              plist_data = plistlib.load(f)
+
+          cert_data = plist_data['DeveloperCertificates'][0]
+          fingerprint = hashlib.sha1(cert_data).hexdigest().upper()
+
+          print(f"Provisioning profile expects certificate: {fingerprint}")
+          EOF
+
       - run: ls .tmp/app-builds
         shell: bash
 
