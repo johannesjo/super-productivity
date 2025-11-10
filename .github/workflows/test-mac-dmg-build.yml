@@ -123,7 +123,12 @@ jobs:
           APP_PATH="$MOUNT_POINT/Super Productivity.app"
           /usr/bin/codesign --verify --deep --strict --verbose=4 "$APP_PATH"
           spctl --assess --verbose "$APP_PATH"
-          /usr/bin/codesign -dv "$APP_PATH" 2>&1 | grep Authority
+          AUTHORITY_OUTPUT=$(/usr/bin/codesign -dv "$APP_PATH" 2>&1 | grep Authority || true)
+          if [ -n "$AUTHORITY_OUTPUT" ]; then
+            echo "$AUTHORITY_OUTPUT"
+          else
+            echo "No Authority lines found in codesign -dv output"
+          fi
 
       - name: Upload DMG artifact
         uses: actions/upload-artifact@v5

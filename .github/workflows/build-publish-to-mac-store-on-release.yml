@@ -135,8 +135,6 @@ jobs:
         run: npm run build
 
       - name: Build Electron app
-        env:
-          CSC_NAME: '3rd Party Mac Developer Application: Johannes Millan (363FAFK383)'
         run: npm run dist:mac:mas:buildOnly
 
       - name: Verify code signing used in built app
