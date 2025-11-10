@@ -22,6 +22,7 @@ mac:
 
 mas:
   type: distribution
+  identity: '3rd Party Mac Developer Application: Johannes Millan (363FAFK383)'
   appId: com.super-productivity.app
   category: public.app-category.productivity
   icon: build/icon-mac.icns
