@@ -105,7 +105,7 @@ jobs:
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-        run: npx electron-builder --mac
+        run: npx electron-builder --mac --publish=never
 
       - name: Verify DMG signature
         run: |
