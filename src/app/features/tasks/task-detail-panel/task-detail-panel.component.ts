@@ -423,7 +423,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnDestroy(): void {
-    if (window.history.state[HISTORY_STATE.TASK_DETAIL_PANEL]) {
+    if (window.history.state?.[HISTORY_STATE.TASK_DETAIL_PANEL]) {
       window.history.back();
     }
     window.clearTimeout(this._focusTimeout);

@@ -171,7 +171,7 @@ export const HANDLED_ERROR_PROP_STR = 'HANDLED_ERROR_PROP';
  * that can later be closed by pressing the "back" button in the browser or mobile app.
  *
  * ATTENTION: `window.history.state` can be `null`.
- * So you should access the value this way: `window.history.state?.[HISTORY_STATE.MOBILE_NAVIGATION]` (ensuring it's not null).
+ * Always use optional chaining: `window.history.state?.[HISTORY_STATE.MOBILE_NAVIGATION]`
  */
 export const HISTORY_STATE = {
   MOBILE_NAVIGATION: 'mobileSideNav',
