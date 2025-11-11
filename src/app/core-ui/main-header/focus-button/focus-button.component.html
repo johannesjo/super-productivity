@@ -11,6 +11,8 @@
     matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }}{{ tooltipSuffix() }}"
     [color]="buttonColor()"
     (click)="enableFocusMode()"
+    (contextmenu)="openFocusSessionDialog(); $event.preventDefault()"
+    (longPress)="openFocusSessionDialog()"
   >
     <mat-icon>center_focus_strong</mat-icon>
   </button>
