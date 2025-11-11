@@ -138,14 +138,6 @@ const ea: ElectronAPI = {
       manifest,
       request,
     ) as Promise<PluginNodeScriptResult>,
-
-  // Profile Storage
-  profileStorageLoad: (filename: string) =>
-    _invoke('PROFILE_STORAGE_LOAD', filename) as Promise<string | null>,
-  profileStorageSave: (filename: string, data: string) =>
-    _invoke('PROFILE_STORAGE_SAVE', filename, data) as Promise<void>,
-  profileStorageDelete: (filename: string) =>
-    _invoke('PROFILE_STORAGE_DELETE', filename) as Promise<void>,
 };
 
 // Expose ea to window for ipc-event.ts using contextBridge for context isolation

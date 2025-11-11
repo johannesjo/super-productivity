@@ -33,7 +33,7 @@ export class UserProfileService {
 
   /**
    * Initialize the profile system
-   * Called during app startup
+   * Called during app startup (only if feature is enabled)
    */
   async initialize(): Promise<void> {
     Log.log('UserProfileService: Initializing profile system');
@@ -42,10 +42,13 @@ export class UserProfileService {
       // Load existing profile metadata
       let metadata = await this._storageService.loadProfileMetadata();
 
-      // If no metadata exists, check if there's existing user data
+      // Migration happens when user first switches profiles or explicitly enables feature
       if (!metadata) {
-        Log.log('UserProfileService: No profile metadata found, migrating existing data');
-        metadata = await this._migrateExistingDataToDefaultProfile();
+        Log.log(
+          'UserProfileService: No profile metadata found, creating default (no migration)',
+        );
+        metadata = this._storageService.createDefaultProfileMetadata();
+        await this._storageService.saveProfileMetadata(metadata);
       }
       // Profile data is only loaded when switching between profiles.
       // On normal startup, the app loads from its regular database.
@@ -281,11 +284,27 @@ export class UserProfileService {
       // Step 2: Save current profile data
       Log.log('UserProfileService: Saving current profile data');
       const currentData = await this._pfapiService.pf.loadCompleteBackup();
+      Log.log('UserProfileService: Current profile data structure:', {
+        hasData: !!currentData,
+        hasDataData: !!currentData?.data,
+        hasGlobalConfig: !!currentData?.data?.globalConfig,
+        taskCount: Object.keys(currentData?.data?.task || {}).length,
+        projectCount: Object.keys(currentData?.data?.project || {}).length,
+        crossModelVersion: currentData?.crossModelVersion,
+      });
       await this._storageService.saveProfileData(currentProfile.id, currentData);
 
       // Step 3: Load target profile data
       Log.log('UserProfileService: Loading target profile data');
       const targetData = await this._storageService.loadProfileData(targetProfileId);
+      Log.log('UserProfileService: Target profile data structure:', {
+        hasData: !!targetData,
+        hasDataData: !!targetData?.data,
+        hasGlobalConfig: !!targetData?.data?.globalConfig,
+        taskCount: Object.keys(targetData?.data?.task || {}).length,
+        projectCount: Object.keys(targetData?.data?.project || {}).length,
+        crossModelVersion: targetData?.crossModelVersion,
+      });
 
       // Step 4: Update metadata with new active profile
       const updatedMetadata: ProfileMetadata = {
@@ -303,16 +322,23 @@ export class UserProfileService {
       this.profiles.set(updatedMetadata.profiles);
       this.activeProfile.set(targetProfile);
 
-      // Step 6: Handle target profile data
+      // Step 6: Show success message BEFORE import (import will reload)
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: `Switching to profile "${targetProfile.name}"...`,
+      });
+
+      // Step 7: Handle target profile data
       if (targetData) {
         // Profile has existing data - import it
-        Log.log('UserProfileService: Importing target profile data');
-        // Use isSkipReload=true to handle reload ourselves with proper timing
+        // importCompleteBackup will reload the window automatically
+        Log.log('UserProfileService: Importing target profile data (will reload app)');
         await this._pfapiService.importCompleteBackup(
           targetData,
           false, // isSkipLegacyWarnings
-          true, // isSkipReload
+          false, // isSkipReload - let it reload automatically
         );
+        // App will reload here, no code after this will execute
       } else {
         // Profile is empty (newly created) - clear the database and set up with profiles enabled
         Log.log(
@@ -334,21 +360,14 @@ export class UserProfileService {
         });
 
         Log.log(
-          'UserProfileService: Database cleared and profiles enabled, app will initialize with clean state',
+          'UserProfileService: Database cleared and profiles enabled, reloading app',
         );
+
+        // Reload manually for empty profile case
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
       }
-
-      // Step 7: Show success message and reload
-      Log.log('UserProfileService: Reloading application');
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: `Switched to profile "${targetProfile.name}"`,
-      });
-
-      // Give the snackbar time to show before reloading
-      setTimeout(() => {
-        window.location.reload();
-      }, 500);
     } catch (error) {
       Log.err('UserProfileService: Failed to switch profile', error);
       this._snackService.open({
@@ -422,6 +441,39 @@ export class UserProfileService {
     await this._storageService.saveProfileMetadata(metadata);
 
     return metadata;
+  }
+
+  /**
+   * migrate data only when user explicitly enables the feature
+   * This is called from GlobalConfigEffects when isEnableUserProfiles changes to true
+   */
+  async migrateOnFirstEnable(): Promise<void> {
+    Log.log('UserProfileService: Migrating data on first enable');
+
+    try {
+      // Check if we already have profile metadata
+      const existingMetadata = await this._storageService.loadProfileMetadata();
+
+      if (existingMetadata) {
+        // Already migrated, just initialize
+        Log.log('UserProfileService: Metadata already exists, skipping migration');
+        await this.initialize();
+        return;
+      }
+
+      // Perform migration
+      const metadata = await this._migrateExistingDataToDefaultProfile();
+
+      // Update signals
+      this._metadata.set(metadata);
+      this.profiles.set(metadata.profiles);
+      this.activeProfile.set(metadata.profiles[0]);
+
+      Log.log('UserProfileService: Migration completed successfully');
+    } catch (error) {
+      Log.err('UserProfileService: Failed to migrate on first enable', error);
+      throw error;
+    }
   }
 
   /**

@@ -110,21 +110,6 @@ export class DialogUserProfileManagementComponent {
     }
   }
 
-  async openProfileFolder(): Promise<void> {
-    if (IS_ELECTRON) {
-      try {
-        const userDataPath = await window.ea.getUserDataPath();
-        const profilesPath = `${userDataPath}/profiles`;
-        window.ea.openPath(profilesPath);
-      } catch (error) {
-        this._snackService.open({
-          type: 'ERROR',
-          msg: 'Failed to open profiles folder',
-        });
-      }
-    }
-  }
-
   close(): void {
     this._matDialogRef.close();
   }

@@ -34,8 +34,16 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(): Promise<void> {
-    // Initialize profile system first (before loading data)
-    await this._userProfileService.initialize();
+    // localStorage check
+    // This check happens before ANY profile initialization code runs
+    const isProfilesEnabled =
+      typeof localStorage !== 'undefined' &&
+      localStorage.getItem('sp_user_profiles_enabled') === 'true';
+
+    if (isProfilesEnabled) {
+      // Only initialize profile system if explicitly enabled
+      await this._userProfileService.initialize();
+    }
 
     await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);

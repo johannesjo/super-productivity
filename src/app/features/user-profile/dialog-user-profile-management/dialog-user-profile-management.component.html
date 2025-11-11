@@ -111,18 +111,6 @@
       }
     </div>
   </div>
-
-  @if (isElectron) {
-    <div class="profile-folder-section">
-      <button
-        mat-stroked-button
-        (click)="openProfileFolder()"
-      >
-        <mat-icon>folder_open</mat-icon>
-        {{ 'USER_PROFILES.OPEN_PROFILES_FOLDER' | translate }}
-      </button>
-    </div>
-  }
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">

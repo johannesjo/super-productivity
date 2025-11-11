@@ -151,12 +151,4 @@ export interface ElectronAPI {
     manifest: PluginManifest,
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult>;
-
-  // PROFILE STORAGE
-  // ---------------
-  profileStorageLoad(filename: string): Promise<string | null>;
-
-  profileStorageSave(filename: string, data: string): Promise<void>;
-
-  profileStorageDelete(filename: string): Promise<void>;
 }
