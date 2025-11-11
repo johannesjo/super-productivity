@@ -271,25 +271,27 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
           );
         });
 
-      const matchingTagIds: string[] = [];
+      const tagIdsToAdd: string[] = [];
       regexTagTitlesTrimmedAndFiltered.forEach((newTagTitle) => {
         const existingTag = allTags.find(
           (tag) => newTagTitle.toLowerCase() === tag.title.toLowerCase(),
         );
         if (existingTag) {
-          matchingTagIds.push(existingTag.id);
+          if (!task.tagIds?.includes(existingTag.id)) {
+            tagIdsToAdd.push(existingTag.id);
+          }
         } else {
           newTagTitlesToCreate.push(newTagTitle);
         }
       });
 
-      if (task.tagIds.length !== matchingTagIds.length) {
-        taskChanges.tagIds = matchingTagIds;
+      if (tagIdsToAdd.length) {
+        taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
       }
 
       if (
         newTagTitlesToCreate.length ||
-        taskChanges.tagIds?.length ||
+        tagIdsToAdd.length ||
         regexTagTitlesTrimmedAndFiltered.length
       ) {
         taskChanges.title = initialTitle;
