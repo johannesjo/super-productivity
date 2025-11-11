@@ -78,8 +78,8 @@ export class AddTaskBarParserService {
       };
     } else {
       // Extract parsed values
-      const tagIds = parseResult.taskChanges.tagIds || currentState.tagIds;
-      const newTagTitles = parseResult.newTagTitles || currentState.newTagTitles;
+      const tagIds = parseResult.taskChanges.tagIds || [];
+      const newTagTitles = parseResult.newTagTitles || [];
 
       let dueDate: string | null = null;
       let dueTime: string | null = null;
