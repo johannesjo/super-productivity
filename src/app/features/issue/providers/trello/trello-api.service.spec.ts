@@ -153,7 +153,7 @@ describe('TrelloApiService', () => {
     });
 
     it('should accept valid alphanumeric board IDs', (done) => {
-      const validCfg = { ...mockCfg, boardId: 'abc123DEF456' };
+      const validCfg = { ...mockCfg, boardId: 'abc123DEF456abc123DEF456' };
 
       service.testConnection$(validCfg).subscribe(() => {
         done();
