@@ -225,14 +225,17 @@ describe('AddTaskBarComponent', () => {
 
   describe('onTaskSuggestionSelected', () => {
     it('plans existing tasks for the provided planner day instead of moving them to today', async () => {
-      component.planForDay.set('2024-05-20');
+      // Set component input using fixture.componentRef.setInput for planForDay
+      fixture.componentRef.setInput('planForDay', '2024-05-20');
+      // Set local signal directly for isAddToBottom
       component.isAddToBottom.set(true);
+      fixture.detectChanges();
 
       const task: TaskCopy = {
         id: 'task-1',
         title: 'Test task',
         subTaskIds: [],
-      } as TaskCopy;
+      } as Partial<TaskCopy> as TaskCopy;
 
       mockTaskService.getByIdOnce$.and.returnValue(of(task));
       const suggestion: AddTaskSuggestion = {
