@@ -147,27 +147,11 @@ export class WorklogComponent implements AfterViewInit, OnDestroy {
       });
   }
 
-  sortWorklogItems<
-    T extends KeyValue<K, V>,
-    K extends string | number = string,
-    V = unknown,
-  >(a: T, b: T): number {
-    if (typeof a.key === 'number' && typeof b.key === 'number') {
-      return b.key - a.key;
-    }
-    return b.key < a.key ? 1 : -1;
-  }
+  sortWorklogItems = <T extends KeyValue<string, unknown>>(a: T, b: T): number =>
+    +b.key - +a.key;
 
-  sortWorklogItemsReverse<
-    T extends KeyValue<K, V>,
-    K extends string | number = string,
-    V = unknown,
-  >(a: T, b: T): number {
-    if (typeof a.key === 'number' && typeof b.key === 'number') {
-      return a.key - b.key;
-    }
-    return a.key < b.key ? 1 : -1;
-  }
+  sortWorklogItemsReverse = <T extends KeyValue<string, unknown>>(a: T, b: T): number =>
+    -this.sortWorklogItems(a, b);
 
   trackByKey<T extends KeyValue<K, V>, K extends string | number = string, V = unknown>(
     i: number,

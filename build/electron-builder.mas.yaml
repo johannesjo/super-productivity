@@ -12,7 +12,7 @@ files:
   - '!**/@nx/nx-linux-*/**'
   - '!**/@nx/nx-win32-*/**'
 directories:
-  output: './app-builds'
+  output: './.tmp/app-builds'
 
 mac:
   target:
@@ -21,7 +21,7 @@ mac:
         - universal
 
 mas:
-  notarize: true
+  type: distribution
   appId: com.super-productivity.app
   category: public.app-category.productivity
   icon: build/icon-mac.icns

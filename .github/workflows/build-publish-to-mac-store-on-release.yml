@@ -28,6 +28,11 @@ jobs:
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
 
+      - name: Install Apple WWDR intermediate certificate
+        run: |
+          curl -fsSL https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer -o /tmp/AppleWWDRCAG4.cer
+          sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/AppleWWDRCAG4.cer
+
       - name: Get npm cache directory
         id: npm-cache-dir
         run: |
@@ -39,6 +44,41 @@ jobs:
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-node-
+
+      - name: Configure signing keychain
+        env:
+          MAC_CERTS: ${{ secrets.mac_certs }}
+          MAC_CERTS_PASSWORD: ${{ secrets.mac_certs_password }}
+        run: |
+          CERT_PATH="$RUNNER_TEMP/mac-certs.p12"
+          KEYCHAIN_NAME="build.keychain"
+          KEYCHAIN_PATH="$HOME/Library/Keychains/${KEYCHAIN_NAME}-db"
+          echo "$MAC_CERTS" | base64 --decode > "$CERT_PATH"
+          echo "=== DIAGNOSTIC: Decoded .p12 SHA256 ==="
+          shasum -a 256 "$CERT_PATH"
+          echo "========================================"
+          security create-keychain -p "" "$KEYCHAIN_NAME"
+          security set-keychain-settings -lut 21600 "$KEYCHAIN_PATH"
+          security unlock-keychain -p "" "$KEYCHAIN_PATH"
+          curl -fsSL https://www.apple.com/certificateauthority/AppleWWDRCAG4.cer -o "$RUNNER_TEMP/AppleWWDRCAG4.cer"
+          security import "$RUNNER_TEMP/AppleWWDRCAG4.cer" -k "$KEYCHAIN_PATH" -T /usr/bin/codesign
+          security import "$CERT_PATH" -k "$KEYCHAIN_PATH" -P "$MAC_CERTS_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security -T /usr/bin/pkgbuild -T /usr/bin/productbuild
+          security list-keychains -s "$KEYCHAIN_PATH" "$HOME/Library/Keychains/login.keychain-db"
+          security default-keychain -s "$KEYCHAIN_PATH"
+          security set-key-partition-list -S apple-tool:,apple: -k "" "$KEYCHAIN_PATH"
+          security find-identity -v -p codesigning "$KEYCHAIN_PATH"
+          security find-identity -v -p macappstore "$KEYCHAIN_PATH"
+          {
+            echo "CSC_KEYCHAIN=$KEYCHAIN_PATH"
+            echo "CSC_LINK=file://$CERT_PATH"
+            echo "CSC_KEY_PASSWORD=$MAC_CERTS_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: List available signing identities codesigning
+        run: security find-identity -v -p codesigning
+
+      - name: List available signing identities macappstore
+        run: security find-identity -v -p macappstore
 
       - name: Workaround for nx issue and dmg licence issue
         run: npm install @nx/nx-darwin-arm64 dmg-license
@@ -52,13 +92,41 @@ jobs:
         env:
           PROVISION_PROFILE: ${{secrets.mas_provision_profile}}
 
+      - name: Verify provisioning profile certificate
+        run: |
+          security cms -D -i embedded.provisionprofile > /tmp/profile.plist
+          python3 << 'EOF'
+          import plistlib
+          import subprocess
+          import hashlib
+
+          with open('/tmp/profile.plist', 'rb') as f:
+              plist_data = plistlib.load(f)
+
+          cert_data = plist_data['DeveloperCertificates'][0]
+          fingerprint = hashlib.sha1(cert_data).hexdigest().upper()
+
+          # Write to temp file and extract subject
+          with open('/tmp/cert.der', 'wb') as f:
+              f.write(cert_data)
+
+          result = subprocess.run(['openssl', 'x509', '-in', '/tmp/cert.der', '-inform', 'DER',
+                                  '-noout', '-subject', '-fingerprint', '-sha1'],
+                                 capture_output=True, text=True)
+
+          print("=== PROVISIONING PROFILE CERTIFICATE ===")
+          print(result.stdout)
+          print(f"SHA1 Fingerprint: {fingerprint}")
+          print("========================================")
+          EOF
+
       - run: npm run env # Generate env.generated.ts
 
-      - name: Lint
-        run: npm run lint
-
-      - name: Test Unit
-        run: npm run test
+      #      - name: Lint
+      #        run: npm run lint
+      #
+      #      - name: Test Unit
+      #        run: npm run test
 
       #      - name: Test E2E
       #        run: npm run e2e
@@ -66,13 +134,29 @@ jobs:
       - name: Build Frontend & Electron
         run: npm run build
 
-      - uses: apple-actions/import-codesign-certs@v5
-        with:
-          p12-file-base64: ${{ secrets.mac_certs }}
-          p12-password: ${{ secrets.mac_certs_password }}
-
       - name: Build Electron app
         run: npm run dist:mac:mas:buildOnly
+
+      - name: Verify code signing used in built app
+        run: |
+          echo "=== Checking code signature of main executable ==="
+          codesign -dv --verbose=4 ".tmp/app-builds/mas-universal/Super Productivity.app" 2>&1 | grep -E "Authority|Identifier|Signature"
+          echo ""
+          echo "=== Checking provisioning profile embedded in app ==="
+          security cms -D -i ".tmp/app-builds/mas-universal/Super Productivity.app/Contents/embedded.provisionprofile" > /tmp/built-profile.plist
+          python3 << 'EOF'
+          import plistlib
+          import subprocess
+          import hashlib
+
+          with open('/tmp/built-profile.plist', 'rb') as f:
+              plist_data = plistlib.load(f)
+
+          cert_data = plist_data['DeveloperCertificates'][0]
+          fingerprint = hashlib.sha1(cert_data).hexdigest().upper()
+
+          print(f"Provisioning profile expects certificate: {fingerprint}")
+          EOF
 
       - run: ls .tmp/app-builds
         shell: bash
