@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Component, signal } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
+import { Store } from '@ngrx/store';
 import { AddTaskBarComponent } from './add-task-bar.component';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -96,6 +97,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
     );
     const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    const storeSpy = jasmine.createSpyObj('Store', ['select', 'dispatch']);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -116,6 +118,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         },
         { provide: MatDialog, useValue: matDialogSpy },
         { provide: SnackService, useValue: snackServiceSpy },
+        { provide: Store, useValue: storeSpy },
       ],
     }).compileComponents();
 

@@ -18,6 +18,9 @@ import { MiscConfig } from '../../config/global-config.model';
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
+import { AddTaskSuggestion } from './add-task-suggestions.model';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { TaskCopy } from '../task.model';
 
 type ProjectServiceSignals = {
   list$: Observable<Project[]>;
@@ -145,6 +148,7 @@ describe('AddTaskBarComponent', () => {
       'add',
       'getByIdOnce$',
       'scheduleTask',
+      'moveToCurrentWorkContext',
     ]);
     mockWorkContextService = jasmine.createSpyObj('WorkContextService', [], {
       activeWorkContext$: new BehaviorSubject<WorkContext | null>(null),
@@ -217,6 +221,40 @@ describe('AddTaskBarComponent', () => {
 
     fixture = TestBed.createComponent(AddTaskBarComponent);
     component = fixture.componentInstance;
+  });
+
+  describe('onTaskSuggestionSelected', () => {
+    it('plans existing tasks for the provided planner day instead of moving them to today', async () => {
+      // Set component input using fixture.componentRef.setInput for planForDay
+      fixture.componentRef.setInput('planForDay', '2024-05-20');
+      // Set local signal directly for isAddToBottom
+      component.isAddToBottom.set(true);
+      fixture.detectChanges();
+
+      const task: TaskCopy = {
+        id: 'task-1',
+        title: 'Test task',
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      mockTaskService.getByIdOnce$.and.returnValue(of(task));
+      const suggestion: AddTaskSuggestion = {
+        title: 'Test task',
+        taskId: 'task-1',
+        projectId: 'project-1',
+      } as AddTaskSuggestion;
+
+      await component.onTaskSuggestionSelected(suggestion);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        PlannerActions.planTaskForDay({
+          task,
+          day: '2024-05-20',
+          isAddToTop: false,
+        }),
+      );
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+    });
   });
 
   describe('defaultProject$ observable', () => {
