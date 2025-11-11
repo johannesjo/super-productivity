@@ -245,7 +245,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
   syncMobileNavHistory(isVisible: boolean): void {
     if (!this.isMobile()) return;
 
-    const hasState = window.history.state[HISTORY_STATE.MOBILE_NAVIGATION] !== undefined;
+    const historyState = window.history.state?.[HISTORY_STATE.MOBILE_NAVIGATION];
+    const hasState = historyState !== undefined;
 
     // Mobile menu is hidden and already no state in history - nothing to do
     if (!isVisible && !hasState) return;
