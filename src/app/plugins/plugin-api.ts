@@ -335,7 +335,7 @@ export class PluginAPI implements PluginAPIInterface {
    * Gets a single simple counter value (undefined if unset).
    * @param key The counter key (e.g., 'daily-commits').
    */
-  async getCounter(key: string): Promise<number | undefined> {
+  async getCounter(key: string): Promise<number | any> {
     PluginLog.log(`Plugin ${this._pluginId} requested counter value for key: ${key}`);
     return this._pluginBridge.getCounter(key);
   }
@@ -355,7 +355,7 @@ export class PluginAPI implements PluginAPIInterface {
    * @param key The counter key.
    * @param amount Increment amount (default: 1).
    */
-  async incrementCounter(key: string, amount = 1): Promise<void> {
+  async incrementCounter(key: string, amount = 1): Promise<any> {
     PluginLog.log(
       `Plugin ${this._pluginId} requested to increment counter ${key} by ${amount}`,
     );
@@ -367,7 +367,7 @@ export class PluginAPI implements PluginAPIInterface {
    * @param key The counter key.
    * @param amount Decrement amount (default: 1).
    */
-  async decrementCounter(key: string, amount = 1): Promise<void> {
+  async decrementCounter(key: string, amount = 1): Promise<any> {
     PluginLog.log(
       `Plugin ${this._pluginId} requested to decrement counter ${key} by ${amount}`,
     );
