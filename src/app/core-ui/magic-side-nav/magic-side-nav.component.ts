@@ -600,6 +600,8 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
         }
       }
     }
+
+    this._externalDragService.setActiveTask(null);
   }
 
   private _getPointerPosition(
