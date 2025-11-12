@@ -58,7 +58,7 @@ export const TRELLO_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderTrello> 
     },
     {
       h: 'How to Get API Key & Token',
-      p: 'Visit https://trello.com/app-key and create a new app. Fills in necessary detail excluding icon. After creating the app, click on "Generate a new API key". This will allow you to view both your API key and a token as the system generates it. You will need both the key and token to configure the integration. See https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/ for more detail if you are unsure of what to do.',
+      p: 'Visit https://trello.com/power-ups/admin and create a new app. Fills in necessary detail excluding icon. After creating the app, click on "Generate a new API key". This will allow you to view your API key. Token can be generated upon clicking Token hyperlink in the API key section and you can copy it after you have done reviewing your application. You will need both the key and token to configure the integration. See https://developer.atlassian.com/cloud/trello/guides/rest-api/api-introduction/ for more detail if you are unsure of what to do.',
       p2: 'The token grants Super Productivity permission to read your Trello data. You can revoke it at any time from the Trello security page.',
     },
     {
