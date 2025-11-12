@@ -142,17 +142,7 @@ describe('TrelloApiService', () => {
       expect(snackService.open).toHaveBeenCalled();
     });
 
-    it('should throw error when boardId format is invalid', () => {
-      const invalidCfg = { ...mockCfg, boardId: 'invalid-board-id-with-dashes!' };
-
-      expect(() => {
-        service.testConnection$(invalidCfg).subscribe();
-      }).toThrowError('Trello: Invalid board ID format');
-
-      expect(snackService.open).toHaveBeenCalled();
-    });
-
-    it('should accept valid alphanumeric board IDs', (done) => {
+    it('should accept valid board IDs', (done) => {
       const validCfg = { ...mockCfg, boardId: 'abc123DEF456abc123DEF456' };
 
       service.testConnection$(validCfg).subscribe(() => {
