@@ -601,6 +601,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
+    this._externalDragService.activeDragRef()?.dispose();
     this._externalDragService.setActiveTask(null);
   }
 

@@ -1,15 +1,22 @@
 import { Injectable, signal } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
+import { DragRef } from '@angular/cdk/drag-drop';
 
 @Injectable({ providedIn: 'root' })
 export class ScheduleExternalDragService {
   private readonly _activeTask = signal<TaskWithSubTasks | null>(null);
+  private readonly _activeDragRef = signal<DragRef | null>(null);
 
   activeTask(): TaskWithSubTasks | null {
     return this._activeTask();
   }
 
-  setActiveTask(task: TaskWithSubTasks | null): void {
+  activeDragRef(): DragRef | null {
+    return this._activeDragRef();
+  }
+
+  setActiveTask(task: TaskWithSubTasks | null, dragRef: DragRef | null = null): void {
     this._activeTask.set(task);
+    this._activeDragRef.set(dragRef);
   }
 }

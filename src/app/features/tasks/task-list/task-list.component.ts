@@ -16,7 +16,7 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -129,8 +129,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     return task.id;
   }
 
-  onDragStarted(task: TaskWithSubTasks): void {
-    this._scheduleExternalDragService.setActiveTask(task);
+  onDragStarted(task: TaskWithSubTasks, event: CdkDragStart): void {
+    this._scheduleExternalDragService.setActiveTask(task, event.source._dragRef);
   }
 
   onDragEnded(): void {
