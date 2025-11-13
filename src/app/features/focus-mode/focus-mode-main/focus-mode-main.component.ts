@@ -115,6 +115,7 @@ export class FocusModeMainComponent {
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly taskService = inject(TaskService);
   readonly focusModeService = inject(FocusModeService);
+  readonly focusModeConfig = this.focusModeService.focusModeConfig;
 
   readonly FocusModeMode = FocusModeMode;
 
@@ -315,6 +316,14 @@ export class FocusModeMainComponent {
   startSession(): void {
     // Task must be selected via the task menu before starting
     if (!this.currentTask()) {
+      return;
+    }
+
+    const shouldSkipPreparation = this.focusModeConfig()?.isSkipPreparation || false;
+    if (shouldSkipPreparation) {
+      const duration =
+        this.mode() === FocusModeMode.Flowtime ? 0 : this.displayDuration();
+      this._store.dispatch(startFocusSession({ duration }));
       return;
     }
 

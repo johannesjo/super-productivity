@@ -10,7 +10,7 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { IssueService } from '../../issue/issue.service';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { FocusModeService } from '../focus-mode.service';
-import { FocusMainUIState } from '../focus-mode.model';
+import { FocusMainUIState, FocusModeMode } from '../focus-mode.model';
 import { TaskCopy } from '../../tasks/task.model';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import * as actions from '../store/focus-mode.actions';
@@ -23,6 +23,7 @@ describe('FocusModeMainComponent', () => {
   let mockTaskService: jasmine.SpyObj<TaskService>;
   let mockTaskAttachmentService: jasmine.SpyObj<TaskAttachmentService>;
   let mockIssueService: jasmine.SpyObj<IssueService>;
+  let focusModeServiceSpy: jasmine.SpyObj<FocusModeService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
 
   const mockTask: TaskCopy = {
@@ -69,7 +70,7 @@ describe('FocusModeMainComponent', () => {
 
     const simpleCounterServiceSpy = jasmine.createSpyObj('SimpleCounterService', ['']);
 
-    const focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', [], {
+    focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', [], {
       timeElapsed: jasmine.createSpy().and.returnValue(60000),
       isCountTimeDown: jasmine.createSpy().and.returnValue(true),
       progress: jasmine.createSpy().and.returnValue(0),
@@ -78,8 +79,12 @@ describe('FocusModeMainComponent', () => {
       isBreakActive: jasmine.createSpy().and.returnValue(false),
       currentCycle: jasmine.createSpy().and.returnValue(1),
       sessionDuration: jasmine.createSpy().and.returnValue(0),
-      mode: jasmine.createSpy().and.returnValue('Pomodoro'),
+      mode: jasmine.createSpy().and.returnValue(FocusModeMode.Pomodoro),
       mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
+      focusModeConfig: jasmine.createSpy().and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      }),
     });
 
     await TestBed.configureTestingModule({
@@ -333,6 +338,65 @@ describe('FocusModeMainComponent', () => {
       });
 
       expect(hasUpdateTaskAction).toBe(true);
+    });
+  });
+
+  describe('startSession', () => {
+    beforeEach(() => {
+      mockStore.dispatch.calls.reset();
+      focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Pomodoro);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      });
+    });
+
+    it('should dispatch startFocusPreparation when skip is disabled', () => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      });
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
+    });
+
+    it('should dispatch startFocusSession with duration when skip is enabled', () => {
+      component.displayDuration.set(900000);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: true,
+        isAlwaysUseFocusMode: false,
+      });
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 900000 }),
+      );
+    });
+
+    it('should use zero duration for Flowtime when skipping preparation', () => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: true,
+        isAlwaysUseFocusMode: false,
+      });
+      focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Flowtime);
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 0 }),
+      );
+    });
+
+    it('should not dispatch when no current task', () => {
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+
+      component.startSession();
+
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
   });
 
