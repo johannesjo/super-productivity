@@ -89,7 +89,7 @@ export class SelectTaskMinimalComponent
 
   private _isAutocompleteOpen = false;
 
-  constructor() {
+  ngOnInit(): void {
     // Set up autocomplete event listeners when autocomplete becomes available
     effect(() => {
       const autocomplete = this.autocomplete();
@@ -105,9 +105,7 @@ export class SelectTaskMinimalComponent
         });
       }
     });
-  }
 
-  ngOnInit(): void {
     // Use the same task selection logic as the original SelectTaskComponent
     const tasks$: Observable<Task[]> = this.isLimitToProject()
       ? this.isIncludeDoneTasks()
