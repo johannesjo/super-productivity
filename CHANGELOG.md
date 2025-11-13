@@ -1,3 +1,27 @@
+## [16.3.3](https://github.com/johannesjo/super-productivity/compare/v16.3.1...v16.3.3) (2025-11-13)
+
+### Bug Fixes
+
+- add task bar search mode not adding to the correct day from planner ([c0db68f](https://github.com/johannesjo/super-productivity/commit/c0db68f003227fe63cc8b92e32ec773e372f23e4))
+- day change not always detected [#5464](https://github.com/johannesjo/super-productivity/issues/5464) ([57c1db5](https://github.com/johannesjo/super-productivity/commit/57c1db50055be371d8eddf4f3f739e48c6347ea3))
+- ensure unique subTaskIds when merging task data ([3dda668](https://github.com/johannesjo/super-productivity/commit/3dda668ac8a6e54f8f64f10110efe48eebc35d11))
+- focus mode flow time counter ([277d77f](https://github.com/johannesjo/super-productivity/commit/277d77fd5f77312bed389216762554a0b266f7cb))
+- **focusMode:** flowtime timer stopping at 25 ([d15e6d1](https://github.com/johannesjo/super-productivity/commit/d15e6d1197b890af2613d8111e44d4ed73e62ce5)), closes [#5117](https://github.com/johannesjo/super-productivity/issues/5117)
+- **focusMode:** skip preparation screen not working ([7817a10](https://github.com/johannesjo/super-productivity/commit/7817a10ae8d995ae5e394f676b490b7ea4bd65f0)), closes [#5497](https://github.com/johannesjo/super-productivity/issues/5497)
+- inconsistent state on dragging tasks onto project [#5489](https://github.com/johannesjo/super-productivity/issues/5489) ([f69a7ac](https://github.com/johannesjo/super-productivity/commit/f69a7ac5f66e4c6a8d8b4d522cb4f1017a20f70a))
+- mac mas build ([c2d9335](https://github.com/johannesjo/super-productivity/commit/c2d93354d47c731d3c7e28c9114ab888e423dfc7))
+- **mobile-nav:** check history.state for null before access the key ([d6d5867](https://github.com/johannesjo/super-productivity/commit/d6d58671e0a369c6717514d62308cea057d22ce1))
+- type error [#5472](https://github.com/johannesjo/super-productivity/issues/5472) ([4aa592f](https://github.com/johannesjo/super-productivity/commit/4aa592f8cfa251fac29a3b0c0d09f27fcba7822d))
+- type error on race condition ([3d4b7fe](https://github.com/johannesjo/super-productivity/commit/3d4b7fe2e90771b303e288de4bb7fd209a426e3e)), closes [#5491](https://github.com/johannesjo/super-productivity/issues/5491)
+- unable to set due date of new task in add task bar [#5495](https://github.com/johannesjo/super-productivity/issues/5495) ([68cfe28](https://github.com/johannesjo/super-productivity/commit/68cfe28bbca01601185247a809c809b30258aa35))
+- **worklog:** revise comparators for key-value pipe ([#5465](https://github.com/johannesjo/super-productivity/issues/5465)) ([7725599](https://github.com/johannesjo/super-productivity/commit/772559960345a21c2498d23046e2b2a03eebe947))
+
+### Features
+
+- **focusMode:** add dialog to edit focus sessions ([86e0d1b](https://github.com/johannesjo/super-productivity/commit/86e0d1bbc5e81e76728604d47f1d7fa61100e125))
+- **focusMode:** show auto-complete suggestions right away ([877cf29](https://github.com/johannesjo/super-productivity/commit/877cf29a03fd8a26950de7f06261443ad9401e38)), closes [#5498](https://github.com/johannesjo/super-productivity/issues/5498)
+- **simpleCounter:** allow to edit settings directly from context dialog ([6b6f815](https://github.com/johannesjo/super-productivity/commit/6b6f8155a8f9477ac675f3baea3bf55434bdd57e))
+
 ## [16.3.2](https://github.com/johannesjo/super-productivity/compare/v16.3.1...v16.3.2) (2025-11-10)
 
 ## [16.3.1](https://github.com/johannesjo/super-productivity/compare/v16.3.0...v16.3.1) (2025-11-10)
