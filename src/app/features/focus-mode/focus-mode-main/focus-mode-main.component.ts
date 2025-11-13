@@ -317,7 +317,9 @@ export class FocusModeMainComponent {
   }
 
   onCountdownComplete(): void {
-    this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+    // For Flowtime mode, duration must be 0 to count indefinitely
+    const duration = this.mode() === FocusModeMode.Flowtime ? 0 : this.displayDuration();
+    this._store.dispatch(startFocusSession({ duration }));
     // Main UI state transitions are now handled by the store
   }
 
