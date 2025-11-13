@@ -1,10 +1,11 @@
 import { Injectable, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { TRACKING_INTERVAL } from '../../app.constants';
-import { interval, Observable, of } from 'rxjs';
+import { IS_ELECTRON, TRACKING_INTERVAL } from '../../app.constants';
+import { EMPTY, fromEvent, interval, merge, Observable } from 'rxjs';
 import {
-  concatMap,
+  debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   share,
   shareReplay,
@@ -44,14 +45,7 @@ export class GlobalTrackingIntervalService {
     share(),
   );
 
-  todayDateStr$: Observable<string> = this.globalInterval$.pipe(
-    startWith(this._dateService.todayStr()),
-    concatMap(() => of(this._dateService.todayStr())),
-    distinctUntilChanged(),
-    tap((v) => Log.log('DAY_CHANGE ' + v)),
-    // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
-    shareReplay(1),
-  );
+  todayDateStr$: Observable<string> = this._createTodayDateStrObservable();
 
   // Shared signal to avoid creating 200+ subscriptions in task components
   todayDateStr = toSignal(this.todayDateStr$, {
@@ -60,5 +54,50 @@ export class GlobalTrackingIntervalService {
 
   constructor() {
     this._currentTrackingStart = Date.now();
+  }
+
+  private _createTodayDateStrObservable(): Observable<string> {
+    const timerBased$ = this.globalInterval$.pipe(
+      map(() => this._dateService.todayStr()),
+    );
+
+    const focusBased$ =
+      typeof window !== 'undefined'
+        ? fromEvent(window, 'focus').pipe(
+            debounceTime(100),
+            map(() => this._dateService.todayStr()),
+          )
+        : EMPTY;
+
+    const visibilityBased$ =
+      typeof document !== 'undefined'
+        ? fromEvent(document, 'visibilitychange').pipe(
+            filter(() => !document.hidden),
+            debounceTime(100),
+            map(() => this._dateService.todayStr()),
+          )
+        : EMPTY;
+
+    const systemResumeBased$ =
+      IS_ELECTRON && typeof window !== 'undefined' && (window as any).electron?.on
+        ? new Observable<string>((subscriber) => {
+            const handler = (): void => {
+              subscriber.next(this._dateService.todayStr());
+            };
+            (window as any).electron.on('system-resume', handler);
+
+            return (): void => {
+              (window as any).electron?.off?.('system-resume', handler);
+            };
+          })
+        : EMPTY;
+
+    return merge(timerBased$, focusBased$, visibilityBased$, systemResumeBased$).pipe(
+      startWith(this._dateService.todayStr()),
+      distinctUntilChanged(),
+      tap((v) => Log.log('DAY_CHANGE ' + v)),
+      // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
+      shareReplay(1),
+    );
   }
 }
