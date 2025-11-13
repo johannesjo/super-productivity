@@ -31,7 +31,10 @@ const handleMoveToOtherProject = (
 ): RootState => {
   const taskState = state[TASK_FEATURE_NAME];
   const canonicalTask = taskState.entities[task.id] as Task | undefined;
-  const canonicalSubTaskIds = canonicalTask?.subTaskIds ?? task.subTaskIds;
+  const canonicalSubTaskIds = unique([
+    ...(canonicalTask?.subTaskIds ?? []),
+    ...(task.subTaskIds ?? []),
+  ]);
   const currentProjectId = canonicalTask?.projectId ?? task.projectId;
   const allTaskIds = unique([task.id, ...canonicalSubTaskIds]);
 
