@@ -17,7 +17,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { first } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
 import { AddTaskBarParserService } from '../add-task-bar-parser.service';
@@ -66,6 +66,7 @@ export class AddTaskBarActionsComponent {
   // Outputs
   estimateChanged = output<string>();
   refocus = output<void>();
+  scheduleDialogOpenChange = output<boolean>();
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
@@ -136,13 +137,20 @@ export class AddTaskBarActionsComponent {
 
   openScheduleDialog(): void {
     const state = this.state();
-    const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
-      data: {
-        targetDay: state.date || undefined,
-        targetTime: state.time || undefined,
-        isSelectDueOnly: true,
-      },
-    });
+    this.scheduleDialogOpenChange.emit(true);
+    let dialogRef!: MatDialogRef<DialogScheduleTaskComponent>;
+    try {
+      dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
+        data: {
+          targetDay: state.date || undefined,
+          targetTime: state.time || undefined,
+          isSelectDueOnly: true,
+        },
+      });
+    } catch (err) {
+      this.scheduleDialogOpenChange.emit(false);
+      throw err;
+    }
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
@@ -151,6 +159,11 @@ export class AddTaskBarActionsComponent {
         this.stateService.updateRemindOption(result.remindOption);
       }
       this.refocus.emit();
+      window.setTimeout(() => {
+        if (!this._destroyRef.destroyed) {
+          this.scheduleDialogOpenChange.emit(false);
+        }
+      });
     });
   }
 

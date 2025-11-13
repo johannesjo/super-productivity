@@ -496,6 +496,16 @@ describe('AddTaskBarActionsComponent', () => {
         expect(dialogConfig?.data?.isSelectDueOnly).toBe(true);
       });
     });
+
+    it('should emit dialog open state changes', async () => {
+      const emitSpy = spyOn(component.scheduleDialogOpenChange, 'emit');
+      component.openScheduleDialog();
+
+      expect(emitSpy).toHaveBeenCalledWith(true);
+
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(emitSpy).toHaveBeenCalledWith(false);
+    });
   });
 
   describe('Tag Operations', () => {
