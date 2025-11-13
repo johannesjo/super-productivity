@@ -579,16 +579,25 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       const projectId = navItemElement.getAttribute('data-project-id');
       Log.debug('Task dropped on Project', { draggedTask, projectId });
 
-      // wait for drag action to finish, then move to new project
+      // We do not want to change the order of the task list if we drop
+      // to a project or a tag in the main nav
+      // As there is no way to to cancel a cdk drag action properly,
+      // we mark the next drop action to be ignored
+      this._externalDragService.setCancelNextDrop(true);
+
+      // also we want the drag action to be finished, before we move the task
+      // to a different project, otherwise the drag action might throw an error,
+      // if the dom element is removed before the return animation has finished
       const dragref = this._externalDragService.activeDragRef();
       dragref?.ended.pipe(take(1)).subscribe(() => {
         this._taskService.moveToProject(draggedTask, projectId!);
       });
-      this._externalDragService.setCancelNextDrop(true);
     } else if (navItemElement.hasAttribute('data-tag-id')) {
       // Task is dropped on a tag
       const tagId = navItemElement.getAttribute('data-tag-id');
       Log.debug('Task dropped on Tag', { draggedTask, tagId });
+
+      this._externalDragService.setCancelNextDrop(true);
 
       // Special case: "Today" tag means to schedule task for today
       if (tagId === TODAY_TAG.id) {
