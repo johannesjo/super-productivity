@@ -1,0 +1,34 @@
+<form (ngSubmit)="save()">
+  <h1 mat-dialog-title>
+    {{ dialogData.simpleCounter.title }} – {{ T.MH.SETTINGS | translate }}
+  </h1>
+
+  <mat-dialog-content>
+    <formly-form
+      [fields]="fields"
+      [form]="form"
+      [(model)]="model"
+      [options]="formOptions"
+    >
+    </formly-form>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      (click)="close()"
+    >
+      {{ T.G.CANCEL | translate }}
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="submit"
+      [disabled]="form.invalid || !isDirty()"
+    >
+      <mat-icon>save</mat-icon>
+      {{ T.G.SAVE | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

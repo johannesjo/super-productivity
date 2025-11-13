@@ -45,6 +45,12 @@
   }
 }
 
+.settings-btn {
+  margin-top: 24px;
+  display: flex;
+  justify-content: flex-end;
+}
+
 :host-context([dir='rtl']) {
   direction: rtl;
 }

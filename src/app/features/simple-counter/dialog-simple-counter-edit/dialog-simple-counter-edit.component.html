@@ -1,8 +1,11 @@
 <form (submit)="$event.preventDefault(); save()">
-  <h1 mat-dialog-title>{{ dialogData.simpleCounter.title }}</h1>
+  <h1 mat-dialog-title>{{ localCounter().title }}</h1>
 
   <mat-dialog-content>
-    @if (dialogData.simpleCounter.isTrackStreaks) {
+    @let counter = localCounter();
+    @let chart = chartData();
+
+    @if (counter.isTrackStreaks) {
       <section class="streak-info">
         <div class="streak-current">
           <div class="label">
@@ -20,10 +23,10 @@
           <div class="label">{{ T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL | translate }}</div>
           <div class="value">
             <strong>
-              @if (dialogData.simpleCounter.type === SimpleCounterType.StopWatch) {
-                {{ dialogData.simpleCounter.streakMinValue | msToString }}
+              @if (counter.type === SimpleCounterType.StopWatch) {
+                {{ counter.streakMinValue | msToString }}
               } @else {
-                {{ dialogData.simpleCounter.streakMinValue }}
+                {{ counter.streakMinValue }}
               }
             </strong>
           </div>
@@ -31,13 +34,13 @@
       </section>
     }
 
-    @if (chartData()) {
+    @if (chart?.datasets?.length) {
       <section class="chart-section">
         <div class="chart-wrapper">
           <lazy-chart
             [type]="'line'"
-            [datasets]="chartData().datasets"
-            [labels]="chartData().labels"
+            [datasets]="chart.datasets"
+            [labels]="chart.labels"
             [options]="chartOptions"
             [legend]="false"
             height="200px"
@@ -51,7 +54,7 @@
     <div class="edit-section">
       <div class="date-label">Edit for {{ formatSelectedDate() }}</div>
 
-      @switch (dialogData.simpleCounter.type) {
+      @switch (counter.type) {
         @case (SimpleCounterType.StopWatch) {
           <mat-form-field>
             <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
@@ -79,6 +82,17 @@
           </mat-form-field>
         }
       }
+    </div>
+
+    <div class="settings-btn">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="openSettingsDialog()"
+      >
+        <mat-icon>tune</mat-icon>
+        {{ T.MH.SETTINGS | translate }}
+      </button>
     </div>
   </mat-dialog-content>
 
