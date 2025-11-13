@@ -26,7 +26,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../layout/layout.service';
 import { magicSideNavAnimations } from './magic-side-nav.animations';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { Subscription } from 'rxjs';
 import { ScheduleExternalDragService } from '../../features/schedule/schedule-week/schedule-external-drag.service';
 import { Log } from '../../core/log';
@@ -578,7 +578,12 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       // Task is dropped on a project
       const projectId = navItemElement.getAttribute('data-project-id');
       Log.debug('Task dropped on Project', { draggedTask, projectId });
-      this._taskService.moveToProject(draggedTask, projectId!);
+
+      // wait for drag action to finish, then move to new project
+      const dragref = this._externalDragService.activeDragRef();
+      dragref?.ended.pipe(take(1)).subscribe(() => {
+        this._taskService.moveToProject(draggedTask, projectId!);
+      });
     } else if (navItemElement.hasAttribute('data-tag-id')) {
       // Task is dropped on a tag
       const tagId = navItemElement.getAttribute('data-tag-id');
@@ -601,7 +606,6 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       }
     }
 
-    this._externalDragService.activeDragRef()?.dispose();
     this._externalDragService.setActiveTask(null);
   }
 
