@@ -206,6 +206,11 @@ export class FocusModeMainComponent {
       const duration = this.focusModeService.sessionDuration();
       const mode = this.mode();
 
+      if (mode === FocusModeMode.Flowtime) {
+        this.displayDuration.set(0);
+        return;
+      }
+
       if (duration > 0) {
         this.displayDuration.set(duration);
         return;
