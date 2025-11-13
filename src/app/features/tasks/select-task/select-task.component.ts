@@ -63,7 +63,7 @@ export class SelectTaskComponent {
   private readonly _store = inject(Store);
 
   T: typeof T = T;
-  readonly taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
+  readonly taskSelectCtrl: UntypedFormControl = new UntypedFormControl('');
   readonly taskChange = output<Task | string>();
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
@@ -180,6 +180,12 @@ export class SelectTaskComponent {
 
   trackById(i: number, task: Task): string {
     return task.id;
+  }
+
+  openPanel(): void {
+    if (this.autocompleteTrigger && !this.autocompleteTrigger.panelOpen) {
+      this.autocompleteTrigger.openPanel();
+    }
   }
 
   isInCreateMode(): boolean {
