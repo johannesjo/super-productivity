@@ -92,6 +92,12 @@ export class GlobalTrackingIntervalService {
           })
         : EMPTY;
 
+    // NOTE:
+    // Chromium/Electron aggressively throttles `setInterval` for hidden tabs and fully pauses it while a
+    // laptop sleeps. When that happens around midnight the timerBased$ stream simply stops emitting,
+    // so consumers never receive the day change (see #5464). We therefore merge in visibility/focus/resume
+    // events – all of which fire as soon as the app becomes interactive again – to force an immediate
+    // re-sampling of todayStr() even if the regular 1s interval is still suspended.
     return merge(timerBased$, focusBased$, visibilityBased$, systemResumeBased$).pipe(
       startWith(this._dateService.todayStr()),
       distinctUntilChanged(),
