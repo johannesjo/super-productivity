@@ -180,6 +180,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       filteredTasks: this.filteredTasks(),
     });
 
+    if (this._scheduleExternalDragService.isCancelNextDrop()) {
+      this._scheduleExternalDragService.setCancelNextDrop(false);
+      return;
+    }
+
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
     if ('issueData' in draggedTask) {

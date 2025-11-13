@@ -6,6 +6,15 @@ import { DragRef } from '@angular/cdk/drag-drop';
 export class ScheduleExternalDragService {
   private readonly _activeTask = signal<TaskWithSubTasks | null>(null);
   private _activeDragRef: DragRef | null = null;
+  private _cancelNextDrop: boolean = false;
+
+  setCancelNextDrop(val: boolean): void {
+    this._cancelNextDrop = val;
+  }
+
+  isCancelNextDrop(): boolean {
+    return this._cancelNextDrop;
+  }
 
   activeTask(): TaskWithSubTasks | null {
     return this._activeTask();

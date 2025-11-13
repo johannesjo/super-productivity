@@ -584,6 +584,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
       dragref?.ended.pipe(take(1)).subscribe(() => {
         this._taskService.moveToProject(draggedTask, projectId!);
       });
+      this._externalDragService.setCancelNextDrop(true);
     } else if (navItemElement.hasAttribute('data-tag-id')) {
       // Task is dropped on a tag
       const tagId = navItemElement.getAttribute('data-tag-id');
