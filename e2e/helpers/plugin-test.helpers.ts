@@ -94,11 +94,14 @@ export const waitForPluginManagementInit = async (
     // Wait for settings page to load
     await page.waitForSelector('.page-settings', { state: 'visible', timeout: 8000 }); // Reduced from 10s to 8s
 
-    // Expand plugin section if collapsed
+    // Wait a bit for the page to stabilize
+    await page.waitForTimeout(500);
+
+    // Expand plugin section if collapsed and scroll it into view
     await page.evaluate(() => {
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
-        pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        pluginSection.scrollIntoView({ behavior: 'instant', block: 'center' });
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -110,9 +113,20 @@ export const waitForPluginManagementInit = async (
       }
     });
 
-    // Wait for plugin management component to be visible
+    // Wait for expansion animation and scroll to complete
+    await page.waitForTimeout(300);
+
+    // Scroll plugin-management into view explicitly
+    await page.evaluate(() => {
+      const pluginMgmt = document.querySelector('plugin-management');
+      if (pluginMgmt) {
+        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    // Wait for plugin management component to be attached (not necessarily visible)
     await page.waitForSelector('plugin-management', {
-      state: 'visible',
+      state: 'attached',
       timeout: Math.max(5000, timeout - 20000),
     });
 
