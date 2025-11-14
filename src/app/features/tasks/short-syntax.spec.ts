@@ -350,6 +350,16 @@ describe('shortSyntax', () => {
       expect(r).toEqual(undefined);
     });
 
+    it('should not parse numeric tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#123 Task description',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
     it('should not trigger for tasks with starting # (e.g. github issues) when adding tags', () => {
       const t = {
         ...TASK,
@@ -376,6 +386,42 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
 
       expect(r).toEqual(undefined);
+    });
+
+    it('should add tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#blu Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id'],
+        },
+      });
+    });
+
+    it('should add multiple tags even if the first tag is at the beginning', () => {
+      const t = {
+        ...TASK,
+        title: '#blu #hihi Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'hihi_id'],
+        },
+      });
     });
 
     it('should work with tags', () => {

@@ -259,10 +259,15 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
             return false;
           }
 
+          const trimmedTitle = initialTitle.trim();
+          const tagStartIndex = trimmedTitle.lastIndexOf(`${CH_TAG}${newTagTitle}`);
+          const isNumericOnly = /^[0-9]+$/.test(newTagTitle);
+
           return (
             newTagTitle.length >= 1 &&
-            // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
-            initialTitle.trim().lastIndexOf(newTagTitle) > 4
+            tagStartIndex !== -1 &&
+            // NOTE: only block tags at the beginning if they are numeric (e.g. "#123 task")
+            (!isNumericOnly || tagStartIndex > 0)
           );
         });
 
