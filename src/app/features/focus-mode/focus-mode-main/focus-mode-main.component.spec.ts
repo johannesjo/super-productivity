@@ -390,13 +390,13 @@ describe('FocusModeMainComponent', () => {
       );
     });
 
-    it('should not dispatch when no current task', () => {
+    it('should dispatch even when no current task', () => {
       currentTaskSubject.next(null);
       fixture.detectChanges();
 
       component.startSession();
 
-      expect(mockStore.dispatch).not.toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
     });
   });
 

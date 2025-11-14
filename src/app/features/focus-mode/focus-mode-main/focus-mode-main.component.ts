@@ -314,11 +314,6 @@ export class FocusModeMainComponent {
   }
 
   startSession(): void {
-    // Task must be selected via the task menu before starting
-    if (!this.currentTask()) {
-      return;
-    }
-
     const shouldSkipPreparation = this.focusModeConfig()?.isSkipPreparation || false;
     if (shouldSkipPreparation) {
       const duration =
