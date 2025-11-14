@@ -1,3 +1,22 @@
+## [16.3.4](https://github.com/johannesjo/super-productivity/compare/v16.3.3...v16.3.4) (2025-11-14)
+
+### Bug Fixes
+
+- emoji icon showing twice in selector [#5242](https://github.com/johannesjo/super-productivity/issues/5242) ([25d5e8f](https://github.com/johannesjo/super-productivity/commit/25d5e8fb39570cd36f0585dfed4f2238c818aabb))
+- icon not loading properly ([ec715eb](https://github.com/johannesjo/super-productivity/commit/ec715ebd168f0fc3b0fd43f43f2be0452b6f54ae)), closes [#5506](https://github.com/johannesjo/super-productivity/issues/5506)
+- NoRevAPIError [#5423](https://github.com/johannesjo/super-productivity/issues/5423) ([2bcb036](https://github.com/johannesjo/super-productivity/commit/2bcb036363e93edfdbb58850a06b1e911a1b3404))
+- select task always showing auto-complete entries ([503da8f](https://github.com/johannesjo/super-productivity/commit/503da8fcba8aa9f5e5e9038636e9acc0e2269eca))
+- short syntax tag first case ([93b4399](https://github.com/johannesjo/super-productivity/commit/93b4399e8f9270a8a62872d981edb8707706ba35)), closes [#5442](https://github.com/johannesjo/super-productivity/issues/5442)
+- side panel resize issues ([5459eff](https://github.com/johannesjo/super-productivity/commit/5459efff3937276cc52ea340bd1652d7970f52c3)), closes [#5385](https://github.com/johannesjo/super-productivity/issues/5385)
+- task repeat issues ([9464a8f](https://github.com/johannesjo/super-productivity/commit/9464a8f780ea309719b84e83688633adb71295ce)), closes [#5502](https://github.com/johannesjo/super-productivity/issues/5502)
+- **task:** handle mouse events in quick access button clicks [#5495](https://github.com/johannesjo/super-productivity/issues/5495) ([22904aa](https://github.com/johannesjo/super-productivity/commit/22904aa684e826c91015abbc89c7bc795ed18e0c))
+- **task:** repeat value remaining shown in side panel ([a0b8082](https://github.com/johannesjo/super-productivity/commit/a0b8082f2f4562f767def0d5db0924dd7ed90c97)), closes [#5496](https://github.com/johannesjo/super-productivity/issues/5496)
+
+### Features
+
+- make task optional for focus mode [#5500](https://github.com/johannesjo/super-productivity/issues/5500) ([6ef0133](https://github.com/johannesjo/super-productivity/commit/6ef01331aa8918e230c1722f6e93e8ce05664a36))
+- **task:** bring back close button ([84ac3c3](https://github.com/johannesjo/super-productivity/commit/84ac3c34c250203ea9f91d58596b8576a79844b2))
+
 ## [16.3.3](https://github.com/johannesjo/super-productivity/compare/v16.3.1...v16.3.3) (2025-11-13)
 
 ### Bug Fixes
