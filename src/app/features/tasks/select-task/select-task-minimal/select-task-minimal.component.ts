@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -9,7 +10,6 @@ import {
   OnInit,
   output,
   viewChild,
-  effect,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -58,7 +58,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectTaskMinimalComponent
-  implements OnInit, OnDestroy, ControlValueAccessor
+  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor
 {
   private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
@@ -90,22 +90,6 @@ export class SelectTaskMinimalComponent
   private _isAutocompleteOpen = false;
 
   ngOnInit(): void {
-    // Set up autocomplete event listeners when autocomplete becomes available
-    effect(() => {
-      const autocomplete = this.autocomplete();
-      if (autocomplete) {
-        autocomplete.opened.pipe(takeUntil(this._destroy$)).subscribe(() => {
-          this._isAutocompleteOpen = true;
-          this.autocompleteOpened.emit();
-        });
-
-        autocomplete.closed.pipe(takeUntil(this._destroy$)).subscribe(() => {
-          this._isAutocompleteOpen = false;
-          this.autocompleteClosed.emit();
-        });
-      }
-    });
-
     // Use the same task selection logic as the original SelectTaskComponent
     const tasks$: Observable<Task[]> = this.isLimitToProject()
       ? this.isIncludeDoneTasks()
@@ -146,6 +130,23 @@ export class SelectTaskMinimalComponent
           this._onChange(value);
         }
       });
+  }
+
+  ngAfterViewInit(): void {
+    const autocomplete = this.autocomplete();
+    if (!autocomplete) {
+      return;
+    }
+
+    autocomplete.opened.pipe(takeUntil(this._destroy$)).subscribe(() => {
+      this._isAutocompleteOpen = true;
+      this.autocompleteOpened.emit();
+    });
+
+    autocomplete.closed.pipe(takeUntil(this._destroy$)).subscribe(() => {
+      this._isAutocompleteOpen = false;
+      this.autocompleteClosed.emit();
+    });
   }
 
   ngOnDestroy(): void {
