@@ -22,7 +22,6 @@ import {
   catchError,
   delay,
   distinctUntilChanged,
-  filter,
   map,
   shareReplay,
   skip,
@@ -184,8 +183,10 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   repeatCfgLabel = toSignal(
     this._repeatCfg$.pipe(
-      filter((cfg): cfg is NonNullable<typeof cfg> => !!cfg),
       map((repeatCfg) => {
+        if (!repeatCfg) {
+          return null;
+        }
         const [key, params] = getTaskRepeatInfoText(
           repeatCfg,
           this._locale,
