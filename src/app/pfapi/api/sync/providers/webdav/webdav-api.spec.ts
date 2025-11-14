@@ -218,6 +218,73 @@ describe('WebdavApi', () => {
       expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
     });
 
+    it('should fetch metadata when Last-Modified header is missing but ETag is present', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          etag: '"abc123"',
+        },
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          data: {
+            etag: '"abc123"',
+          },
+        }),
+      );
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(api.getFileMeta).toHaveBeenCalledWith('/test.txt', null, true);
+      expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+      expect(result.legacyRev).toBe('abc123');
+      expect(result.lastModified).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+    });
+
+    it('should set legacyRev from metadata when GET response omits both headers', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {},
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          data: {
+            etag: '"propfind-etag-456"',
+          },
+        }),
+      );
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+      expect(result.legacyRev).toBe('propfind-etag-456');
+      expect(result.lastModified).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+    });
+
     // Test removed: If-None-Match header functionality has been removed
     // Test removed: If-Modified-Since header functionality has been removed
     // Test removed: If-Modified-Since header functionality has been removed
