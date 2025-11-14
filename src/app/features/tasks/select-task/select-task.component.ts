@@ -67,6 +67,7 @@ export class SelectTaskComponent {
   readonly taskChange = output<Task | string>();
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
+  readonly isShowSuggestionsWithoutSearch = input<boolean>(false);
 
   @ViewChild(MatAutocompleteTrigger)
   autocompleteTrigger?: MatAutocompleteTrigger;
@@ -111,7 +112,15 @@ export class SelectTaskComponent {
   readonly filteredTasks = computed(() => {
     const taskOrTitle = this._taskOrTitle();
     if (typeof taskOrTitle === 'string') {
-      const searchTerm = taskOrTitle.toLowerCase();
+      const searchTerm = taskOrTitle.trim().toLowerCase();
+      if (!searchTerm && !this.isShowSuggestionsWithoutSearch()) {
+        return [];
+      }
+
+      if (!searchTerm) {
+        return this._tasks();
+      }
+
       return this._tasks().filter((task) =>
         task.title.toLowerCase().includes(searchTerm),
       );
