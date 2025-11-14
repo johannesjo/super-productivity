@@ -1,3 +1,9 @@
+## [16.3.5](https://github.com/johannesjo/super-productivity/compare/v16.3.4...v16.3.5) (2025-11-14)
+
+### Bug Fixes
+
+- effect errors and e2e tests ([db4dbb1](https://github.com/johannesjo/super-productivity/commit/db4dbb1aa9efce77d876e83d93d4be2c67ca288a))
+
 ## [16.3.4](https://github.com/johannesjo/super-productivity/compare/v16.3.3...v16.3.4) (2025-11-14)
 
 ### Bug Fixes
