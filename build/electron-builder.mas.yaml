@@ -5,7 +5,7 @@ files:
   - electron/**/*
   - '!electron/**/*.ts'
   - '!electron/**/*.js.map'
-  - dist/**/*
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
   # Exclude Nx binaries - they're build tools, not runtime dependencies
   - '!**/@nx/nx-darwin-*/**'
@@ -31,3 +31,5 @@ mas:
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist
   provisioningProfile: embedded.provisionprofile
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false
