@@ -1620,6 +1620,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Pokaż aktualne odliczanie w zasobniku / menu statusu (tylko na desktopie Mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
+      "IS_ENABLE_USER_PROFILES": "Włącz profile użytkowników (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Umożliwia tworzenie i przełączanie się między różnymi profilami użytkowników, każdy z oddzielnymi ustawieniami, zadaniami i konfiguracjami synchronizacji. Przycisk zarządzania profilami pojawi się w prawym górnym rogu po włączeniu. Uwaga: wyłączenie tej funkcji ukryje interfejs użytkownika, ale zachowa dane profilu (funkcja Beta, bez gwarancji. Upewnij się, że masz kopię zapasową).",
       "IS_USE_MINIMAL_SIDE_NAV": "Używaj minimalnego paska nawigacji (wyświetlaj tylko ikony)",
       "START_OF_NEXT_DAY": "Godzina rozpoczęcia następnego dnia",
       "START_OF_NEXT_DAY_HINT": "od kiedy (w godzinach) ma być liczony następny dzień. domyślnie jest to północ, czyli 0.",
@@ -1894,6 +1896,24 @@
     "E_MIN_LENGTH": "Should be at least {{val}} characters long",
     "E_PATTERN": "Invalid input",
     "E_REQUIRED": "This field is required"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Zarządzaj profilami użytkowników",
+    "CREATE_NEW_PROFILE": "Utwórz nowy profil",
+    "PROFILE_NAME": "Nazwa profilu",
+    "PROFILE_NAME_PLACEHOLDER": "np. Praca, Osobiste",
+    "CREATE": "Utwórz",
+    "EXISTING_PROFILES": "Istniejące profile",
+    "ACTIVE": "Aktywny",
+    "CREATED": "Utworzono:",
+    "SAVE": "Zapisz",
+    "CANCEL": "Anuluj",
+    "RENAME": "Zmień nazwę",
+    "EXPORT_PROFILE": "Eksportuj profil",
+    "DELETE_PROFILE": "Usuń profil",
+    "OPEN_PROFILES_FOLDER": "Otwórz folder profili",
+    "CLOSE": "Zamknij",
+    "MANAGE_PROFILES": "Zarządzaj profilami..."
   },
   "WW": {
     "ADD_MORE": "Dodaj więcej",

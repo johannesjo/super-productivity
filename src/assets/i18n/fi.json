@@ -1804,6 +1804,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Näytä nykyinen tehtävä tehtäväpalkissa / tilavalikossa (vain työpöytä mac/windows)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Ota päällekkäisyysindikaattori-ikkuna käyttöön (työpöytä linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Poista markdown-jäsennys käytöstä tehtävien muistiinpanoissa",
+      "IS_ENABLE_USER_PROFILES": "Ota käyttäjäprofiilit käyttöön (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Mahdollistaa erilaisten käyttäjäprofiilien luomisen ja niiden välillä vaihtamisen, jokainen omilla asetuksillaan, tehtävillään ja synkronointimäärityksillään. Profiilien hallintapainike ilmestyy oikeaan yläkulmaan, kun toiminto on käytössä. Huomautus: Tämän ominaisuuden poistaminen käytöstä piilottaa käyttöliittymän, mutta säilyttää profiilitietosi (Beta-ominaisuus, ei takeita. Varmista, että sinulla on varmuuskopio).",
       "START_OF_NEXT_DAY": "Seuraavan päivän alkamisaika",
       "START_OF_NEXT_DAY_HINT": "mistä tunnista alkaen haluat laskea seuraavan päivän alkaneen. oletus on keskiyö, joka on 0.",
       "TASK_NOTES_TPL": "Tehtävän kuvauksen mallipohja",
@@ -2195,6 +2197,24 @@
     "E_MIN_LENGTH": "Täytyy olla vähintään {{val}} merkkiä pitkä",
     "E_PATTERN": "Virheellinen syöte",
     "E_REQUIRED": "Tämä kenttä on pakollinen"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Hallinnoi käyttäjäprofiileja",
+    "CREATE_NEW_PROFILE": "Luo uusi profiili",
+    "PROFILE_NAME": "Profiilin nimi",
+    "PROFILE_NAME_PLACEHOLDER": "esim. Työ, Henkilökohtainen",
+    "CREATE": "Luo",
+    "EXISTING_PROFILES": "Olemassa olevat profiilit",
+    "ACTIVE": "Aktiivinen",
+    "CREATED": "Luotu:",
+    "SAVE": "Tallenna",
+    "CANCEL": "Peruuta",
+    "RENAME": "Nimeä uudelleen",
+    "EXPORT_PROFILE": "Vie profiili",
+    "DELETE_PROFILE": "Poista profiili",
+    "OPEN_PROFILES_FOLDER": "Avaa profiilikansiö",
+    "CLOSE": "Sulje",
+    "MANAGE_PROFILES": "Hallinnoi profiileja..."
   },
   "WW": {
     "ADD_MORE": "Lisää enemmän",

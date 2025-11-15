@@ -1622,6 +1622,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Afficher le compte à rebours actuel dans la barre d'état / menu (mac de bureau uniquement)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Afficher la tâche en cours dans la barre d'état / menu d'état (bureau uniquement)",
       "IS_TURN_OFF_MARKDOWN": "Désactiver l'analyse de démarquage pour les notes",
+      "IS_ENABLE_USER_PROFILES": "Activer les profils utilisateur (Bêta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Permet de créer et de basculer entre différents profils utilisateur, chacun avec des paramètres, des tâches et des configurations de synchronisation distincts. Le bouton de gestion des profils apparaîtra dans le coin supérieur droit lorsqu'il est activé. Remarque : la désactivation de cette fonctionnalité masquera l'interface utilisateur mais conservera vos données de profil (fonctionnalité bêta, aucune garantie. Assurez-vous d'avoir une sauvegarde).",
       "IS_USE_MINIMAL_SIDE_NAV": "Utiliser la barre minimale de navigation (affichage des icônes uniquement)",
       "START_OF_NEXT_DAY": "Heure de début le jour suivant",
       "START_OF_NEXT_DAY_HINT": "À partir de quelle heure souhaitez-vous considérer que le jour suivant commence. Par défaut, minuit correspond à 0 heure.",
@@ -1896,6 +1898,24 @@
     "E_MIN_LENGTH": "Doit contenir au moins {{val}} caractères",
     "E_PATTERN": "Entrée invalide",
     "E_REQUIRED": "Ce champ est requis"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Gérer les profils utilisateur",
+    "CREATE_NEW_PROFILE": "Créer un nouveau profil",
+    "PROFILE_NAME": "Nom du profil",
+    "PROFILE_NAME_PLACEHOLDER": "p. ex. Travail, Personnel",
+    "CREATE": "Créer",
+    "EXISTING_PROFILES": "Profils existants",
+    "ACTIVE": "Actif",
+    "CREATED": "Créé :",
+    "SAVE": "Enregistrer",
+    "CANCEL": "Annuler",
+    "RENAME": "Renommer",
+    "EXPORT_PROFILE": "Exporter le profil",
+    "DELETE_PROFILE": "Supprimer le profil",
+    "OPEN_PROFILES_FOLDER": "Ouvrir le dossier des profils",
+    "CLOSE": "Fermer",
+    "MANAGE_PROFILES": "Gérer les profils..."
   },
   "WW": {
     "ADD_MORE": "Ajouter plus",

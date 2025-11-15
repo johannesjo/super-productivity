@@ -1895,6 +1895,24 @@
     "E_PATTERN": "مدخل غير صالح",
     "E_REQUIRED": "هذه الخانة مطلوبه"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "إدارة ملفات تعريف المستخدم",
+    "CREATE_NEW_PROFILE": "إنشاء ملف تعريف جديد",
+    "PROFILE_NAME": "اسم الملف الشخصي",
+    "PROFILE_NAME_PLACEHOLDER": "مثلا العمل، شخصي",
+    "CREATE": "إنشاء",
+    "EXISTING_PROFILES": "الملفات الشخصية الموجودة",
+    "ACTIVE": "نشط",
+    "CREATED": "تم الإنشاء:",
+    "SAVE": "حفظ",
+    "CANCEL": "إلغاء",
+    "RENAME": "إعادة التسمية",
+    "EXPORT_PROFILE": "تصدير الملف الشخصي",
+    "DELETE_PROFILE": "حذف الملف الشخصي",
+    "OPEN_PROFILES_FOLDER": "فتح مجلد الملفات الشخصية",
+    "CLOSE": "إغلاق",
+    "MANAGE_PROFILES": "إدارة الملفات الشخصية..."
+  },
   "WW": {
     "ADD_MORE": "أضف المزيد",
     "ADD_SCHEDULED_FOR_TOMORROW": "إضافة المهام المخطط لها غدًا ({{nr}})",

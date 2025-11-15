@@ -8,6 +8,7 @@ import { DataRepairService } from '../data-repair/data-repair.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CROSS_MODEL_VERSION } from '../../pfapi/pfapi-config';
 import { DataInitStateService } from './data-init-state.service';
+import { UserProfileService } from '../../features/user-profile/user-profile.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
@@ -15,6 +16,7 @@ export class DataInitService {
   private _store$ = inject<Store<any>>(Store);
   private _dataRepairService = inject(DataRepairService);
   private _dataInitStateService = inject(DataInitStateService);
+  private _userProfileService = inject(UserProfileService);
 
   private _isAllDataLoadedInitially$: Observable<boolean> = from(this.reInit()).pipe(
     mapTo(true),
@@ -32,6 +34,17 @@ export class DataInitService {
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
   async reInit(): Promise<void> {
+    // localStorage check
+    // This check happens before ANY profile initialization code runs
+    const isProfilesEnabled =
+      typeof localStorage !== 'undefined' &&
+      localStorage.getItem('sp_user_profiles_enabled') === 'true';
+
+    if (isProfilesEnabled) {
+      // Only initialize profile system if explicitly enabled
+      await this._userProfileService.initialize();
+    }
+
     await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
     const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
     const validationResult = this._pfapiService.pf.validate(appDataComplete);

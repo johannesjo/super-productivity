@@ -1727,6 +1727,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra l'attività corrente nella barra delle applicazioni / menu di stato (solo desktop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Abilita finestra indicatore overlay (desktop linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Disattiva markdown per le note",
+      "IS_ENABLE_USER_PROFILES": "Abilita profili utente (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Consente di creare e passare tra diversi profili utente, ciascuno con impostazioni, attività e configurazioni di sincronizzazione separate. Il pulsante di gestione del profilo apparirà nell'angolo in alto a destra quando abilitato. Nota: la disabilitazione di questa funzione nasconderà l'interfaccia utente ma conserverà i dati del profilo (funzione Beta, nessuna garanzia. Assicurati di avere un backup).",
       "IS_USE_MINIMAL_SIDE_NAV": "Usa barra di navigazione minima (mostra solo icone)",
       "START_OF_NEXT_DAY": "Ora di inizio del prossimo giorno",
       "START_OF_NEXT_DAY_HINT": "da quando (in ora) vuoi contare che il prossimo giorno è iniziato. Il predefinito è mezzanotte cioè 0.",
@@ -2117,6 +2119,24 @@
     "E_MIN_LENGTH": "Deve essere almeno lungo {{val}} caratteri",
     "E_PATTERN": "Input non valido",
     "E_REQUIRED": "Questo campo è obbligatorio"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Gestisci profili utente",
+    "CREATE_NEW_PROFILE": "Crea nuovo profilo",
+    "PROFILE_NAME": "Nome del profilo",
+    "PROFILE_NAME_PLACEHOLDER": "es. Lavoro, Personale",
+    "CREATE": "Crea",
+    "EXISTING_PROFILES": "Profili esistenti",
+    "ACTIVE": "Attivo",
+    "CREATED": "Creato:",
+    "SAVE": "Salva",
+    "CANCEL": "Annulla",
+    "RENAME": "Rinomina",
+    "EXPORT_PROFILE": "Esporta profilo",
+    "DELETE_PROFILE": "Elimina profilo",
+    "OPEN_PROFILES_FOLDER": "Apri cartella profili",
+    "CLOSE": "Chiudi",
+    "MANAGE_PROFILES": "Gestisci profili..."
   },
   "WW": {
     "ADD_MORE": "Aggiungi altro",

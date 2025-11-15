@@ -1895,6 +1895,24 @@
     "E_PATTERN": "Ugyldig inndata",
     "E_REQUIRED": "Dette feltet er obligatorisk"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Administrer brukerprofiler",
+    "CREATE_NEW_PROFILE": "Opprett ny profil",
+    "PROFILE_NAME": "Profilnavn",
+    "PROFILE_NAME_PLACEHOLDER": "f.eks. Arbeid, Personlig",
+    "CREATE": "Opprett",
+    "EXISTING_PROFILES": "Eksisterende profiler",
+    "ACTIVE": "Aktiv",
+    "CREATED": "Opprettet:",
+    "SAVE": "Lagre",
+    "CANCEL": "Avbryt",
+    "RENAME": "Endre navn",
+    "EXPORT_PROFILE": "Eksporter profil",
+    "DELETE_PROFILE": "Slett profil",
+    "OPEN_PROFILES_FOLDER": "Åpne profilmappe",
+    "CLOSE": "Lukk",
+    "MANAGE_PROFILES": "Administrer profiler..."
+  },
   "WW": {
     "ADD_MORE": "Legg til mer",
     "ADD_SCHEDULED_FOR_TOMORROW": "Legg til oppgaver som er planlagt for i morgen ({{nr}})",
