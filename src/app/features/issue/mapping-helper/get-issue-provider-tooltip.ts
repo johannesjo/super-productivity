@@ -19,6 +19,10 @@ export const getIssueProviderTooltip = (issueProvider: IssueProvider): string =>
         return issueProvider.projectId;
       case 'OPEN_PROJECT':
         return issueProvider.projectId;
+      case 'TRELLO':
+        return issueProvider.boardName || issueProvider.boardId;
+      default:
+        return undefined;
     }
   })();
   return v || issueProvider.issueProviderKey;
@@ -82,6 +86,10 @@ export const getIssueProviderInitials = (
       return getRepoInitials(issueProvider.project);
     case 'GITEA':
       return getRepoInitials(issueProvider.repoFullname);
+    case 'TRELLO':
+      return (issueProvider.boardName || issueProvider.boardId)
+        ?.substring(0, 2)
+        ?.toUpperCase();
   }
   return undefined;
 };

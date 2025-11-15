@@ -117,6 +117,14 @@
           ></open-project-additional-cfg>
           <!-- -->
         }
+        @case ('TRELLO') {
+          <trello-additional-cfg
+            [section]="configFormSection"
+            [cfg]="model"
+            (modelChange)="customCfgCmpSave($event)"
+          ></trello-additional-cfg>
+          <!-- -->
+        }
       }
     }
   </mat-dialog-content>
