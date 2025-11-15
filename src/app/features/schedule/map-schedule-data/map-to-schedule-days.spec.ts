@@ -2,6 +2,7 @@ import { mapToScheduleDays } from './map-to-schedule-days';
 import { TaskCopy, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { ScheduleConfig } from '../../config/global-config.model';
 
 const NDS = '1970-01-01';
 const N = new Date(1970, 0, 1, 0, 0, 0, 0).getTime();
@@ -87,10 +88,36 @@ const fakeRepeatCfg = (
   } as Partial<TaskRepeatCfg> as TaskRepeatCfg;
 };
 
+const fakeScheduleConfig = (add?: Partial<ScheduleConfig>): ScheduleConfig => {
+  return {
+    isWorkStartEndEnabled: false,
+    workStart: '0:00',
+    workEnd: '23:59',
+    isLunchBreakEnabled: false,
+    lunchBreakStart: '13:00',
+    lunchBreakEnd: '14:00',
+    isAllowTaskSplitting: true,
+    taskPlacementStrategy: 'DEFAULT',
+    ...add,
+  } as ScheduleConfig;
+};
+
 describe('mapToScheduleDays()', () => {
   it('should work for empty case', () => {
     expect(
-      mapToScheduleDays(N, [], [], [], [], [], [], null, {}, undefined, undefined),
+      mapToScheduleDays(
+        N,
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        null,
+        {},
+        fakeScheduleConfig(),
+        undefined,
+      ),
     ).toEqual([]);
   });
 
@@ -109,7 +136,7 @@ describe('mapToScheduleDays()', () => {
         [],
         null,
         {},
-        undefined,
+        fakeScheduleConfig(),
         undefined,
       ),
     ).toEqual([
@@ -162,7 +189,7 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
     expect(r[0].entries.length).toBe(3);
@@ -230,8 +257,15 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      { startTime: '9:00', endTime: '18:00' },
-      undefined,
+      fakeScheduleConfig({
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '18:00',
+      }),
+      {
+        startTime: '9:00',
+        endTime: '18:00',
+      },
     );
     expect(r.length).toBe(2);
 
@@ -261,7 +295,7 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
     expect(r[0].entries.length).toBe(5);
@@ -332,7 +366,7 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
 
@@ -390,7 +424,7 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
 
@@ -469,7 +503,7 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
 
@@ -535,11 +569,15 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
+      fakeScheduleConfig({
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '17:00',
+      }),
       {
         startTime: '9:00',
         endTime: '17:00',
       },
-      undefined,
     );
 
     expect(r[0]).toEqual({
@@ -632,7 +670,7 @@ describe('mapToScheduleDays()', () => {
           fakeTaskEntry('FD4', { timeEstimate: h(0.5) }),
         ],
       },
-      undefined,
+      fakeScheduleConfig(),
       undefined,
     );
 
@@ -720,6 +758,14 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
+      fakeScheduleConfig({
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '17:00',
+        isLunchBreakEnabled: true,
+        lunchBreakStart: '12:00',
+        lunchBreakEnd: '13:00',
+      }),
       {
         startTime: '9:00',
         endTime: '17:00',
@@ -861,6 +907,14 @@ describe('mapToScheduleDays()', () => {
           fakeTaskEntry('FD4', { timeEstimate: h(0.5) }),
         ],
       },
+      fakeScheduleConfig({
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '17:00',
+        isLunchBreakEnabled: true,
+        lunchBreakStart: '12:00',
+        lunchBreakEnd: '13:00',
+      }),
       {
         startTime: '9:00',
         endTime: '17:00',

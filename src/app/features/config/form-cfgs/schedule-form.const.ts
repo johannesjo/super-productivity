@@ -81,5 +81,48 @@ export const SCHEDULE_FORM_CFG: ConfigFormSection<ScheduleConfig> = {
         },
       },
     },
+    {
+      key: 'isAllowTaskSplitting',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.SCHEDULE.L_IS_ALLOW_TASK_SPLITTING,
+      },
+    },
+    {
+      key: 'taskPlacementStrategy',
+      type: 'select',
+      templateOptions: {
+        label: T.GCF.SCHEDULE.L_TASK_PLACEMENT_STRATEGY,
+        required: true,
+        options: [
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_DEFAULT,
+            value: 'DEFAULT',
+          },
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_SHORTEST_FIRST,
+            value: 'SHORTEST_FIRST',
+          },
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_LONGEST_FIRST,
+            value: 'LONGEST_FIRST',
+          },
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_OLDEST_FIRST,
+            value: 'OLDEST_FIRST',
+          },
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_NEWEST_FIRST,
+            value: 'NEWEST_FIRST',
+          },
+          {
+            label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_BEST_FIT,
+            value: 'BEST_FIT',
+            // Best-fit only makes sense when task splitting is disabled
+            hideExpression: (m, v, field) => field?.model.isAllowTaskSplitting,
+          },
+        ],
+      },
+    },
   ],
 };

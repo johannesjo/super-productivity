@@ -21,6 +21,23 @@
       >
         {{ T.GCF.SCHEDULE.MONTH | translate }}
       </button>
+
+      <mat-form-field
+        class="task-placement-select"
+        appearance="outline"
+      >
+        <mat-label>{{ T.GCF.SCHEDULE.L_TASK_PLACEMENT_STRATEGY | translate }}</mat-label>
+        <mat-select
+          [value]="scheduleConfig()?.taskPlacementStrategy || 'DEFAULT'"
+          (selectionChange)="updateTaskPlacementStrategy($event.value)"
+        >
+          @for (strategy of taskPlacementStrategies; track strategy.value) {
+            <mat-option [value]="strategy.value">
+              {{ strategy.label | translate }}
+            </mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
     </div>
   }
 

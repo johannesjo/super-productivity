@@ -44,6 +44,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
+import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatOption, MatSelect } from '@angular/material/select';
+import { TaskPlacementStrategy } from '../../features/config/global-config.model';
 
 @Component({
   selector: 'main-header',
@@ -65,6 +68,10 @@ import { FocusButtonComponent } from './focus-button/focus-button.component';
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
     FocusButtonComponent,
+    MatFormField,
+    MatSelect,
+    MatOption,
+    MatLabel,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {
@@ -152,12 +159,37 @@ export class MainHeaderComponent implements OnDestroy {
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
   );
 
+  scheduleConfig = toSignal(
+    this.globalConfigService.cfg$.pipe(map((cfg) => cfg?.schedule)),
+  );
+
+  taskPlacementStrategies: { value: TaskPlacementStrategy; label: string }[] = [
+    { value: 'DEFAULT', label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_DEFAULT },
+    {
+      value: 'SHORTEST_FIRST',
+      label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_SHORTEST_FIRST,
+    },
+    {
+      value: 'LONGEST_FIRST',
+      label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_LONGEST_FIRST,
+    },
+    { value: 'OLDEST_FIRST', label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_OLDEST_FIRST },
+    { value: 'NEWEST_FIRST', label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_NEWEST_FIRST },
+    { value: 'BEST_FIT', label: T.GCF.SCHEDULE.TASK_PLACEMENT_STRATEGY_BEST_FIT },
+  ];
+
   private _subs: Subscription = new Subscription();
 
   selectedTimeView = computed(() => this.layoutService.selectedTimeView());
 
   selectTimeView(view: 'week' | 'month'): void {
     this.layoutService.selectedTimeView.set(view);
+  }
+
+  updateTaskPlacementStrategy(strategy: TaskPlacementStrategy): void {
+    this.globalConfigService.updateSection('schedule', {
+      taskPlacementStrategy: strategy,
+    });
   }
 
   ngOnDestroy(): void {
