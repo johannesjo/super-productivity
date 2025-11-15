@@ -1,3 +1,5 @@
+## [16.3.6](https://github.com/johannesjo/super-productivity/compare/v16.3.5...v16.3.6) (2025-11-15)
+
 ## [16.3.5](https://github.com/johannesjo/super-productivity/compare/v16.3.4...v16.3.5) (2025-11-14)
 
 ### Bug Fixes
