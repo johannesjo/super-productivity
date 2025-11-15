@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
 import { isInputElement } from '../../util/dom-element';
@@ -21,6 +22,11 @@ import { fromEvent, merge, Observable, of } from 'rxjs';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { TaskShortcutService } from '../../features/tasks/task-shortcut.service';
 
+// NOTE: Relying on Angular CDK overlay CSS class names keeps shortcut suppression simple.
+// If CDK changes these class names we only need to adjust the helpers below.
+const CDK_OVERLAY_CONTAINER_CLASS = 'cdk-overlay-container';
+const CDK_OVERLAY_PANE_CLASS = 'cdk-overlay-pane';
+
 @Injectable({
   providedIn: 'root',
 })
@@ -37,6 +43,7 @@ export class ShortcutService {
   private _store = inject(Store);
   private _pluginBridgeService = inject(PluginBridgeService);
   private _taskShortcutService = inject(TaskShortcutService);
+  private _overlayContainer = inject(OverlayContainer);
 
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
@@ -84,9 +91,17 @@ export class ShortcutService {
 
     const keys = cfg.keyboard;
     const el = ev.target as HTMLElement;
+    const hasBlockingOverlay =
+      this._matDialog.openDialogs.length > 0 || this._hasOpenCdkOverlay();
 
-    // Skip handling if no special keys are used and inside input elements
-    if (!ev.metaKey && isInputElement(el)) return;
+    // Skip handling if no special keys are used and inside input elements or overlays.
+    // Overlay detection intentionally keys off CDK CSS class names for now (see constants above).
+    if (
+      !ev.metaKey &&
+      (isInputElement(el) || hasBlockingOverlay || this._isEventFromOverlay(ev))
+    ) {
+      return;
+    }
 
     if (
       checkKeyCombo(ev, keys.toggleBacklog) &&
@@ -204,5 +219,29 @@ export class ShortcutService {
 
   private _focusSideNav(): void {
     this._layoutService.focusSideNav();
+  }
+
+  private _hasOpenCdkOverlay(): boolean {
+    const containerEl = this._overlayContainer.getContainerElement();
+    // NOTE: All CDK class name knowledge is encapsulated here to ease future updates.
+    return Array.from(containerEl.children).some((child) => {
+      return (
+        child.classList.contains(CDK_OVERLAY_PANE_CLASS) && child.childElementCount > 0
+      );
+    });
+  }
+
+  private _isEventFromOverlay(ev: KeyboardEvent): boolean {
+    const path = (typeof ev.composedPath === 'function' && ev.composedPath()) || [];
+    for (const node of path) {
+      if (
+        node instanceof HTMLElement &&
+        node.classList.contains(CDK_OVERLAY_PANE_CLASS)
+      ) {
+        return true;
+      }
+    }
+    const target = ev.target as HTMLElement | null;
+    return !!target?.closest(`.${CDK_OVERLAY_CONTAINER_CLASS}`);
   }
 }
