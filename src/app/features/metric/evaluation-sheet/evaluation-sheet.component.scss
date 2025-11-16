@@ -13,11 +13,22 @@
 .radio-group,
 .time-item,
 .score-card,
-.daily-state-card {
+.daily-state-card,
+reflection-note {
   padding: 12px;
   border-radius: var(--eval-border-radius);
   box-shadow: var(--whiteframe-shadow-3dp);
   background-color: var(--card-bg);
+}
+
+reflection-note {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s);
+
+  mat-form-field {
+    width: 100%;
+  }
 }
 
 .time-summary {
@@ -80,7 +91,6 @@
   flex-direction: column;
   gap: var(--s);
   transition: all 0.3s ease;
-  color: white;
   border: 2px solid var(--card-bg);
 
   .label {

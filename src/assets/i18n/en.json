@@ -660,6 +660,22 @@
         "ADD_SESSION": "Add Session",
         "NEW_SESSION_DURATION": "Duration",
         "ADD_BTN": "Add"
+      },
+      "REFLECTION": {
+        "TITLE": "Reflection Note",
+        "PLACEHOLDER_1": "What worked well today? What should change tomorrow?",
+        "PLACEHOLDER_2": "Small improvement for tomorrow?",
+        "PLACEHOLDER_3": "Where did focus slip - and how can you protect it?",
+        "PLACEHOLDER_4": "Which task gave you energy? Which drained it?",
+        "PLACEHOLDER_5": "One thing to repeat. One thing to change.",
+        "REMIND_LABEL": "Remind me tomorrow about this",
+        "HISTORY_BTN": "View past reflections",
+        "HISTORY_TITLE": "Reflection history",
+        "HISTORY_EMPTY": "No reflections saved yet. Capture today's note to start a streak.",
+        "REMINDER_TASK_TITLE": "Revisit reflection note",
+        "REMINDER_CREATED": "Reflection reminder scheduled for tomorrow",
+        "REMINDER_ERROR": "Could not schedule the reminder",
+        "REMINDER_NEEDS_TEXT": "Write a reflection before asking for a reminder"
       }
     },
     "NOTE": {
