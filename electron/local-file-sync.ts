@@ -138,7 +138,14 @@ export const initLocalFileSyncAdapter = (): void => {
 
   ipcMain.handle(IPC.PICK_DIRECTORY, async (): Promise<string | undefined> => {
     const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
-      properties: ['openDirectory'],
+      title: 'Select sync folder',
+      buttonLabel: 'Select Folder',
+      properties: [
+        'openDirectory',
+        'createDirectory',
+        'promptToCreate',
+        'dontAddToRecent',
+      ],
     });
     if (canceled) {
       return undefined;
