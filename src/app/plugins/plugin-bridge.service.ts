@@ -132,10 +132,10 @@ export class PluginBridgeService implements OnDestroy {
       request: PluginNodeScriptRequest,
     ) => Promise<PluginNodeScriptResult>;
     getAllCounters: () => Promise<{ [key: string]: number }>;
-    getCounter: (key: string) => Promise<number | undefined>;
-    setCounter: (key: string, value: number) => Promise<void>;
-    incrementCounter: (key: string, amount?: number) => Promise<void>;
-    decrementCounter: (key: string, amount?: number) => Promise<void>;
+    getCounter: (id: string) => Promise<number | null>;
+    setCounter: (id: string, value: number) => Promise<void>;
+    incrementCounter: (id: string, incrementBy?: number) => Promise<number>;
+    decrementCounter: (id: string, decrementBy?: number) => Promise<number>;
     getAllSimpleCounters: () => Promise<SimpleCounter[]>;
     getSimpleCounter: (id: string) => Promise<SimpleCounter | undefined>;
     updateSimpleCounter: (id: string, updates: Partial<SimpleCounter>) => Promise<void>;
@@ -177,10 +177,12 @@ export class PluginBridgeService implements OnDestroy {
 
       // Basic counter methods (existing)
       getAllCounters: () => this.getAllCounters(),
-      getCounter: (key: string) => this.getCounter(key),
-      setCounter: (key: string, value: number) => this.setCounter(key, value),
-      incrementCounter: (key: string, amount = 1) => this.incrementCounter(key, amount),
-      decrementCounter: (key: string, amount = 1) => this.decrementCounter(key, amount),
+      getCounter: (id: string) => this.getCounter(id),
+      setCounter: (id: string, value: number) => this.setCounter(id, value),
+      incrementCounter: (id: string, incrementBy = 1) =>
+        this.incrementCounter(id, incrementBy),
+      decrementCounter: (id: string, decrementBy = 1) =>
+        this.decrementCounter(id, decrementBy),
 
       // Full SimpleCounter methods (new)
       getAllSimpleCounters: () => this.getAllSimpleCounters(),
@@ -1155,7 +1157,7 @@ export class PluginBridgeService implements OnDestroy {
       .select(selectAllSimpleCounters)
       .pipe(
         take(1),
-        map((counters) =>
+        map((counters: SimpleCounter[]) =>
           counters.reduce(
             (acc, c) => ({ ...acc, [c.id]: c.countOnDay?.[today] ?? 0 }),
             {} as { [key: string]: number },
@@ -1170,19 +1172,21 @@ export class PluginBridgeService implements OnDestroy {
    * Gets a single simple counter value (undefined if unset).
    * @param key The counter key (e.g., 'daily-commits').
    */
-  async getCounter(key: string): Promise<number | undefined> {
-    typia.assert<string>(key);
-    if (!/^[A-Za-z0-9_-]+$/.test(key)) {
+  async getCounter(id: string): Promise<number | null> {
+    typia.assert<string>(id);
+    // Allow uppercase, lowercase, numbers, hyphens, underscores
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
     }
     const counters = await this.getAllCounters();
-    return counters[key];
+    return counters[id] ?? null;
   }
 
-  async setCounter(key: string, value: number): Promise<void> {
-    typia.assert<string>(key);
+  async setCounter(id: string, value: number): Promise<void> {
+    typia.assert<string>(id);
     typia.assert<number>(value);
-    if (!/^[A-Za-z0-9_-]+$/.test(key)) {
+    // Allow uppercase, lowercase, numbers, hyphens, underscores
+    if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
     }
     if (typeof value !== 'number' || !isFinite(value) || value < 0) {
@@ -1193,36 +1197,40 @@ export class PluginBridgeService implements OnDestroy {
     this._store.dispatch(
       upsertSimpleCounter({
         simpleCounter: {
-          id: key,
-          title: key,
-          isEnabled: true,
-          icon: null,
-          type: 'ClickCounter',
+          id: id,
+          //title: id,
+          //isEnabled: true,
+          //icon: null,
+          //type: 'ClickCounter',
           countOnDay: { [today]: value },
-          isOn: false,
+          //isOn: false,
         } as SimpleCounter,
       }),
     );
   }
 
-  async incrementCounter(key: string, amount = 1): Promise<void> {
-    typia.assert<string>(key);
-    typia.assert<number>(amount);
-    if (typeof amount !== 'number' || !isFinite(amount) || amount <= 0) {
+  async incrementCounter(id: string, incrementBy = 1): Promise<number> {
+    typia.assert<string>(id);
+    typia.assert<number>(incrementBy);
+    if (typeof incrementBy !== 'number' || !isFinite(incrementBy) || incrementBy <= 0) {
       throw new Error('Invalid increment amount: must be a positive number');
     }
-    const current = (await this.getCounter(key)) ?? 0;
-    await this.setCounter(key, current + amount);
+    const current = (await this.getCounter(id)) ?? 0;
+    const newValue = current + incrementBy;
+    await this.setCounter(id, newValue);
+    return newValue;
   }
 
-  async decrementCounter(key: string, amount = 1): Promise<void> {
-    typia.assert<string>(key);
-    typia.assert<number>(amount);
-    if (typeof amount !== 'number' || !isFinite(amount) || amount <= 0) {
+  async decrementCounter(id: string, decrementBy = 1): Promise<number> {
+    typia.assert<string>(id);
+    typia.assert<number>(decrementBy);
+    if (typeof decrementBy !== 'number' || !isFinite(decrementBy) || decrementBy <= 0) {
       throw new Error('Invalid decrement amount: must be a positive number');
     }
-    const current = (await this.getCounter(key)) ?? 0;
-    await this.setCounter(key, Math.max(0, current - amount));
+    const current = (await this.getCounter(id)) ?? 0;
+    const newValue = Math.max(0, current - decrementBy);
+    await this.setCounter(id, Math.max(0, newValue));
+    return newValue;
   }
 
   /**
@@ -1260,10 +1268,10 @@ export class PluginBridgeService implements OnDestroy {
    */
   async toggleSimpleCounter(id: string): Promise<void> {
     const counter = await this.getSimpleCounter(id);
-    if (counter) {
-      this._store.dispatch(toggleSimpleCounterCounter({ id }));
+    if (!counter) {
+      throw new Error(`Counter ${id} not found`);
     }
-    throw new Error(`Counter ${id} not found`);
+    this._store.dispatch(toggleSimpleCounterCounter({ id }));
   }
 
   /**
@@ -1302,6 +1310,10 @@ export class PluginBridgeService implements OnDestroy {
   async setSimpleCounterDate(id: string, date: string, value: number): Promise<void> {
     if (!date.match(/^\d{4}-\d{2}-\d{2}$/)) {
       throw new Error('Invalid date format: use YYYY-MM-DD');
+    }
+    const dateObj = new Date(date);
+    if (isNaN(dateObj.getTime())) {
+      throw new Error('Invalid date: must be valid YYYY-MM-DD');
     }
     const counter = await this.getSimpleCounter(id);
     if (!counter) {

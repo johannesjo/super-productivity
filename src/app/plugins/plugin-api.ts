@@ -333,45 +333,57 @@ export class PluginAPI implements PluginAPIInterface {
 
   /**
    * Gets a single simple counter value (undefined if unset).
-   * @param key The counter key (e.g., 'daily-commits').
+   * @param id The counter id (e.g., 'daily-commits').
    */
-  async getCounter(key: string): Promise<number | any> {
-    PluginLog.log(`Plugin ${this._pluginId} requested counter value for key: ${key}`);
-    return this._pluginBridge.getCounter(key);
+  async getCounter(id: string): Promise<number | null> {
+    PluginLog.log(`Plugin ${this._pluginId} requested counter value for id: ${id}`);
+    const value = await this._pluginBridge.getCounter(id);
+    return value ?? null;
   }
 
   /**
    * Sets a simple counter value.
-   * @param key The counter key.
+   * @param id The counter id.
    * @param value The numeric value.
    */
-  async setCounter(key: string, value: number): Promise<void> {
-    PluginLog.log(`Plugin ${this._pluginId} requested to set counter ${key} to ${value}`);
-    return this._pluginBridge.setCounter(key, value);
+  async setCounter(id: string, value: number): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to set counter ${id} to ${value}`);
+    return this._pluginBridge.setCounter(id, value);
   }
 
   /**
    * Increments a simple counter (default +1).
-   * @param key The counter key.
-   * @param amount Increment amount (default: 1).
+   * @param id The counter id.
+   * @param incrementBy Increment amount (default: 1).
    */
-  async incrementCounter(key: string, amount = 1): Promise<any> {
+  async incrementCounter(id: string, incrementBy = 1): Promise<number> {
     PluginLog.log(
-      `Plugin ${this._pluginId} requested to increment counter ${key} by ${amount}`,
+      `Plugin ${this._pluginId} requested to increment counter ${id} by ${incrementBy}`,
     );
-    return this._pluginBridge.incrementCounter(key, amount);
+    const newValue = await this._pluginBridge.incrementCounter(id, incrementBy);
+    return newValue;
   }
 
   /**
    * Decrements a simple counter (floors at 0, default -1).
-   * @param key The counter key.
-   * @param amount Decrement amount (default: 1).
+   * @param id The counter id.
+   * @param decrementBy Decrement amount (default: 1).
    */
-  async decrementCounter(key: string, amount = 1): Promise<any> {
+  async decrementCounter(id: string, decrementBy = 1): Promise<number> {
     PluginLog.log(
-      `Plugin ${this._pluginId} requested to decrement counter ${key} by ${amount}`,
+      `Plugin ${this._pluginId} requested to decrement counter ${id} by ${decrementBy}`,
     );
-    return this._pluginBridge.decrementCounter(key, amount);
+    const newValue = await this._pluginBridge.decrementCounter(id, decrementBy);
+    return newValue;
+  }
+
+  /**
+   * Deletes a simple counter.
+   * @param id The counter ID.
+   */
+  async deleteCounter(id: string): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to delete counter ${id}`);
+    return this._pluginBridge.deleteSimpleCounter(id);
   }
 
   /**

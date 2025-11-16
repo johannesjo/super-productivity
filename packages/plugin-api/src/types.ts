@@ -406,7 +406,7 @@ export interface PluginAPI {
 
   decrementCounter(id: string, decrementBy?: number): Promise<number>;
 
-  //deleteCounter(id: string): Promise<void>;
+  deleteCounter(id: string): Promise<void>;
 
   getAllCounters(): Promise<{ [id: string]: number }>;
 }
