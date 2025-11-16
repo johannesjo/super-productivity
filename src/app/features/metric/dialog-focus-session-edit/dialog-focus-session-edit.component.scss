@@ -1,0 +1,106 @@
+@use '../../../../styles/_globals.scss' as *;
+
+.chart-section {
+  margin-bottom: 24px;
+
+  .chart-wrapper {
+    height: 200px;
+    position: relative;
+    overflow: hidden;
+
+    @include mq(xs) {
+      min-width: 500px;
+    }
+    @include mq(sm) {
+      min-width: 740px;
+    }
+  }
+}
+
+.summary-section {
+  display: flex;
+  justify-content: space-around;
+  text-align: center;
+  margin-bottom: 24px;
+  padding: 16px;
+  background: rgba(0, 0, 0, 0.03);
+  border-radius: 4px;
+
+  .total-info {
+    .label {
+      font-size: 0.875rem;
+      opacity: 0.8;
+      margin-bottom: 4px;
+    }
+
+    .value {
+      font-size: 1.125rem;
+    }
+  }
+}
+
+.sessions-list-section {
+  margin-bottom: 24px;
+
+  h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 32px;
+    opacity: 0.6;
+    font-style: italic;
+  }
+
+  mat-list {
+    padding: 0;
+  }
+
+  mat-list-item {
+    height: auto;
+    padding: 8px 0;
+  }
+
+  .session-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+
+    .session-number {
+      min-width: 32px;
+      font-weight: 600;
+    }
+
+    .session-duration-field {
+      flex: 1;
+    }
+  }
+}
+
+.add-session-section {
+  margin-bottom: 16px;
+
+  h3 {
+    margin-bottom: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+  }
+
+  .add-session-form {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .add-session-field {
+      flex: 1;
+    }
+  }
+}
+
+:host-context([dir='rtl']) {
+  direction: rtl;
+}

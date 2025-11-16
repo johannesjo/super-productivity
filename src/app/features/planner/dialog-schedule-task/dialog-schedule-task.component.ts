@@ -440,7 +440,16 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     );
   }
 
-  quickAccessBtnClick(item: number): void {
+  quickAccessBtnClick(eventOrItem: MouseEvent | number, maybeItem?: number): void {
+    if (eventOrItem instanceof MouseEvent) {
+      eventOrItem.stopPropagation();
+    }
+
+    const item = typeof eventOrItem === 'number' ? eventOrItem : maybeItem;
+    if (!item) {
+      return;
+    }
+
     const tDate = new Date();
     tDate.setMinutes(0, 0, 0);
 

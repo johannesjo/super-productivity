@@ -649,6 +649,17 @@
       },
       "S": {
         "SAVE_METRIC": "Metric successfully saved"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "TITLE": "Focus Sessions",
+        "CHART_LABEL": "Focus Time (min)",
+        "TOTAL_SESSIONS": "Total Sessions",
+        "TOTAL_TIME": "Total Time",
+        "SESSIONS_LIST": "Sessions",
+        "NO_SESSIONS": "No focus sessions for this day",
+        "ADD_SESSION": "Add Session",
+        "NEW_SESSION_DURATION": "Duration",
+        "ADD_BTN": "Add"
       }
     },
     "NOTE": {

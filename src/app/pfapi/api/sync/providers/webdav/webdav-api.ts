@@ -95,29 +95,32 @@ export class WebdavApi {
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
       // Get ETag for legacy compatibility
-      let etag = response.headers['etag'] || response.headers['ETag'];
-      let legacyRev = etag ? this._cleanRev(etag) : undefined;
+      const etagHeader = response.headers['etag'] || response.headers['ETag'];
+      let legacyRev = etagHeader ? this._cleanRev(etagHeader) : undefined;
 
       let rev = lastModified || '';
+      const isLastModifiedMissing = !lastModified;
+      const isLegacyRevMissing = !legacyRev;
 
-      // Fallback: If Last-Modified and ETag are both missing, use PROPFIND to retrive them as it is defined by webDAV protocol
-      // Some servers (like OpenList/Alist) may not return these headers on GET
-      if (!lastModified && !etag) {
+      // Fallback: Some servers may omit Last-Modified on GET, so request metadata separately
+      if (isLastModifiedMissing) {
         PFLog.verbose(
-          `${WebdavApi.L}.download() missing Last-Modified/ETag, trying PROPFIND fallback for ${path}`,
+          `${WebdavApi.L}.download() missing Last-Modified header, trying metadata fallback for ${path}`,
         );
         try {
-          const meta = await this.getFileMeta(path, null, false);
+          const meta = await this.getFileMeta(path, null, true);
           if (!lastModified && meta.lastmod) {
             lastModified = meta.lastmod;
             rev = lastModified;
           }
-          if (!etag && meta.etag) {
-            etag = meta.etag;
-            legacyRev = this._cleanRev(etag);
+          if (isLegacyRevMissing) {
+            const metaEtag = meta.data?.etag;
+            if (metaEtag) {
+              legacyRev = this._cleanRev(metaEtag);
+            }
           }
         } catch (e) {
-          PFLog.warn(`${WebdavApi.L}.download() PROPFIND fallback failed for ${path}`, e);
+          PFLog.warn(`${WebdavApi.L}.download() metadata fallback failed for ${path}`, e);
         }
       }
 

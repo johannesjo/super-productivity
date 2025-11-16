@@ -39,6 +39,7 @@ import {
   moveSubTaskUp,
 } from '../../tasks/store/task.actions';
 import { EMPTY, forkJoin, from, Observable, of as rxOf } from 'rxjs';
+import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -324,6 +325,7 @@ export class TaskRepeatCfgEffects {
         ),
       ),
       filter(({ cfg }) => !!cfg && cfg.repeatFromCompletionDate === true),
+      filter(({ task, cfg }) => this._isLatestInstance(task, cfg)),
       map(({ cfg }) => {
         const today = getDbDateStr();
         return updateTaskRepeatCfg({
@@ -559,5 +561,19 @@ export class TaskRepeatCfgEffects {
       notes: st.notes,
       timeEstimate: st.timeEstimate,
     }));
+  }
+
+  private _isLatestInstance(task: Task, cfg: TaskRepeatCfgCopy): boolean {
+    const lastCreationDay = getEffectiveLastTaskCreationDay(cfg);
+    if (!lastCreationDay) {
+      return true;
+    }
+    // Only allow repeat-from-completion to advance configs when the finished task
+    // represents the most recently generated instance. Completing an archived/old
+    // copy previously skipped ahead incorrectly.
+    const taskDay =
+      task.dueDay ||
+      (task.dueWithTime ? getDbDateStr(task.dueWithTime) : getDbDateStr(task.created));
+    return taskDay === lastCreationDay;
   }
 }

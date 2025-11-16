@@ -115,6 +115,7 @@ export class FocusModeMainComponent {
   readonly simpleCounterService = inject(SimpleCounterService);
   readonly taskService = inject(TaskService);
   readonly focusModeService = inject(FocusModeService);
+  readonly focusModeConfig = this.focusModeService.focusModeConfig;
 
   readonly FocusModeMode = FocusModeMode;
 
@@ -205,6 +206,11 @@ export class FocusModeMainComponent {
     effect(() => {
       const duration = this.focusModeService.sessionDuration();
       const mode = this.mode();
+
+      if (mode === FocusModeMode.Flowtime) {
+        this.displayDuration.set(0);
+        return;
+      }
 
       if (duration > 0) {
         this.displayDuration.set(duration);
@@ -308,8 +314,11 @@ export class FocusModeMainComponent {
   }
 
   startSession(): void {
-    // Task must be selected via the task menu before starting
-    if (!this.currentTask()) {
+    const shouldSkipPreparation = this.focusModeConfig()?.isSkipPreparation || false;
+    if (shouldSkipPreparation) {
+      const duration =
+        this.mode() === FocusModeMode.Flowtime ? 0 : this.displayDuration();
+      this._store.dispatch(startFocusSession({ duration }));
       return;
     }
 
@@ -317,7 +326,9 @@ export class FocusModeMainComponent {
   }
 
   onCountdownComplete(): void {
-    this._store.dispatch(startFocusSession({ duration: this.displayDuration() }));
+    // For Flowtime mode, duration must be 0 to count indefinitely
+    const duration = this.mode() === FocusModeMode.Flowtime ? 0 : this.displayDuration();
+    this._store.dispatch(startFocusSession({ duration }));
     // Main UI state transitions are now handled by the store
   }
 

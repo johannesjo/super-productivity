@@ -1,7 +1,7 @@
 <div class="quick-access">
   <button
     mat-icon-button
-    (click)="quickAccessBtnClick(1)"
+    (click)="quickAccessBtnClick($event, 1)"
     [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TODAY | translate"
   >
     <mat-icon>wb_sunny</mat-icon>
@@ -9,21 +9,21 @@
 
   <button
     mat-icon-button
-    (click)="quickAccessBtnClick(2)"
+    (click)="quickAccessBtnClick($event, 2)"
     [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW | translate"
   >
     <mat-icon svgIcon="tomorrow"></mat-icon>
   </button>
   <button
     mat-icon-button
-    (click)="quickAccessBtnClick(3)"
+    (click)="quickAccessBtnClick($event, 3)"
     [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK | translate"
   >
     <mat-icon svgIcon="next_week"></mat-icon>
   </button>
   <button
     mat-icon-button
-    (click)="quickAccessBtnClick(4)"
+    (click)="quickAccessBtnClick($event, 4)"
     [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH | translate"
   >
     <mat-icon>bedtime</mat-icon>

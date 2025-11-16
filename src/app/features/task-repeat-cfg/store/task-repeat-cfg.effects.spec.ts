@@ -278,6 +278,33 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         expectObservable(effects.updateStartDateOnComplete$).toBe('--');
       });
     });
+
+    it('should not emit when completing a non-latest instance', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = TaskSharedActions.updateTask({
+          task: { id: 'parent-task-id', changes: { isDone: true } },
+        });
+
+        const oldTask: Task = {
+          ...mockTask,
+          created: new Date(2020, 0, 1).getTime(),
+          dueDay: '2020-01-01',
+        };
+
+        actions$ = hot('-a', { a: action });
+
+        taskService.getByIdOnce$.and.returnValue(of(oldTask));
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+          of({
+            ...mockRepeatCfg,
+            repeatFromCompletionDate: true,
+            lastTaskCreationDay: '2020-01-02',
+          }),
+        );
+
+        expectObservable(effects.updateStartDateOnComplete$).toBe('--');
+      });
+    });
   });
 
   describe('autoSyncSubtaskTemplatesFromNewest$', () => {

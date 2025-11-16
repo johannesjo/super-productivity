@@ -299,17 +299,27 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
       typeof RIGHT_PANEL_CONFIG.MAX_WIDTH === 'string' &&
       RIGHT_PANEL_CONFIG.MAX_WIDTH.endsWith('%')
     ) {
-      const currentWidth = this.currentWidth();
-      const newMaxWidthInPixels = getMaxWidthInPixels(RIGHT_PANEL_CONFIG.MAX_WIDTH);
-
-      // If current width exceeds new max width, clamp it
-      if (currentWidth > newMaxWidthInPixels) {
-        // Use requestAnimationFrame to ensure DOM update completes
+      // Defer measurement until after the layout settles to avoid reading stale widths
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          this.currentWidth.set(newMaxWidthInPixels);
-          this._saveWidthToStorage();
+          const newMaxWidthInPixels = getMaxWidthInPixels(RIGHT_PANEL_CONFIG.MAX_WIDTH);
+          if (newMaxWidthInPixels < RIGHT_PANEL_CONFIG.MIN_WIDTH) {
+            return;
+          }
+
+          const currentWidth = this.currentWidth();
+
+          // If current width exceeds new max width, clamp it
+          if (currentWidth > newMaxWidthInPixels) {
+            const clampedWidth = Math.max(
+              RIGHT_PANEL_CONFIG.MIN_WIDTH,
+              newMaxWidthInPixels,
+            );
+            this.currentWidth.set(clampedWidth);
+            this._saveWidthToStorage();
+          }
         });
-      }
+      });
     }
 
     // Debounce: wait 300ms after last resize event to unset flag
@@ -407,8 +417,9 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
 
     const deltaX = this._startX() - event.clientX;
     const potentialWidth = this._startWidth() + deltaX;
+    const isCollapsing = deltaX < 0;
 
-    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD) {
+    if (potentialWidth < RIGHT_PANEL_CONFIG.CLOSE_THRESHOLD && isCollapsing) {
       this.isResizing.set(false);
       this._isListenersAttached = false;
       this._detachResizeListeners();

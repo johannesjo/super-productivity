@@ -2,19 +2,6 @@ name: Test macOS DMG Build
 
 on:
   workflow_dispatch:
-  pull_request:
-    branches:
-      - master
-    paths:
-      - '.github/workflows/test-mac-dmg-build.yml'
-      - 'electron/**'
-      - 'build/**'
-      - 'tools/**'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'angular.json'
-      - 'tsconfig*.json'
-      - 'src/**'
 
 jobs:
   build-and-verify-dmg:

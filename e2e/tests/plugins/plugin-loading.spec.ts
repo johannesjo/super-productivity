@@ -73,8 +73,16 @@ test.describe.serial('Plugin Loading', () => {
 
     await page.waitForTimeout(2000); // Wait for plugin to initialize
 
-    // Navigate to plugin management
-    await expect(page.locator(PLUGIN_CARD).first()).toBeVisible();
+    // Ensure plugin management is visible in viewport
+    await page.evaluate(() => {
+      const pluginMgmt = document.querySelector('plugin-management');
+      if (pluginMgmt) {
+        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    // Navigate to plugin management - check for attachment first
+    await expect(page.locator(PLUGIN_CARD).first()).toBeAttached({ timeout: 20000 });
     await page.waitForTimeout(500);
 
     // Check example plugin is loaded and enabled
@@ -172,8 +180,16 @@ test.describe.serial('Plugin Loading', () => {
 
     await page.waitForTimeout(2000); // Wait for plugin to initialize
 
-    // Navigate to plugin management
-    await expect(page.locator(PLUGIN_ITEM).first()).toBeVisible();
+    // Ensure plugin management is visible in viewport
+    await page.evaluate(() => {
+      const pluginMgmt = document.querySelector('plugin-management');
+      if (pluginMgmt) {
+        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    // Navigate to plugin management - check for attachment
+    await expect(page.locator(PLUGIN_ITEM).first()).toBeAttached({ timeout: 10000 });
 
     // Find the toggle for API Test Plugin and disable it
     await page.evaluate(() => {

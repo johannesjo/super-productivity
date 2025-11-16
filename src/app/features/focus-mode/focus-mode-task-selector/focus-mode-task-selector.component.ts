@@ -44,6 +44,7 @@ export class FocusModeTaskSelectorComponent implements AfterViewInit {
       this.inputElement =
         this.selectTaskElementRef?.nativeElement?.querySelector('input');
       this.inputElement?.focus();
+      this.selectTaskComponent?.openPanel();
     });
   }
 

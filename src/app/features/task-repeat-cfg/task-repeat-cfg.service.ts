@@ -28,7 +28,6 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
-import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getDbDateStr } from '../../util/get-db-date-str';
@@ -179,18 +178,6 @@ export class TaskRepeatCfgService {
       throw new Error('No taskRepeatCfg.id');
     }
 
-    const isCreateNew =
-      existingTaskInstances.filter((taskI) => isSameDay(targetDayDate, taskI.created))
-        .length === 0;
-
-    if (!isCreateNew) {
-      return [];
-    }
-    // Check if this date is in the deleted instances list
-    const targetDateStr = getDbDateStr(new Date(targetDayDate));
-    if (taskRepeatCfg.deletedInstanceDates?.includes(targetDateStr)) {
-      return [];
-    }
     const targetCreated = getNewestPossibleDueDate(
       taskRepeatCfg,
       new Date(targetDayDate),
@@ -205,7 +192,34 @@ export class TaskRepeatCfgService {
       throw new Error('Unable to getNewestPossibleDueDate()');
     }
 
+    // IMPORTANT: compute the actual target day first and base all other checks on it.
+    // Using Date.now() caused duplicates when generating overdue instances because "today"
+    // differs from the repeat day we are about to create.
+    const targetDateStr = getDbDateStr(targetCreated);
+
+    const isCreateNew =
+      existingTaskInstances.filter((taskI) => {
+        const existingDateStr = taskI.dueDay || getDbDateStr(taskI.created);
+        return existingDateStr === targetDateStr;
+      }).length === 0;
+
+    if (!isCreateNew) {
+      return [];
+    }
+    // Check if this date is in the deleted instances list
+    // NOTE: needs to run after deriving targetDateStr so deletions for overdue instances work.
+    if (taskRepeatCfg.deletedInstanceDates?.includes(targetDateStr)) {
+      return [];
+    }
+
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
+    const taskWithTargetDates: Task = {
+      ...task,
+      // NOTE if moving this to top isCreateNew check above would not work as intended
+      // we use created also for the repeat day label for past tasks
+      created: targetCreated.getTime(),
+      dueDay: targetDateStr,
+    };
 
     const createNewActions: (
       | ReturnType<typeof TaskSharedActions.addTask>
@@ -214,13 +228,7 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof addSubTask>
     )[] = [
       TaskSharedActions.addTask({
-        task: {
-          ...task,
-          // NOTE if moving this to top isCreateNew check above would not work as intended
-          // we use created also for the repeat day label for past tasks
-          created: targetCreated.getTime(),
-          dueDay: getDbDateStr(targetCreated),
-        },
+        task: taskWithTargetDates,
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
         workContextId: this._workContextService.activeWorkContextId as string,
@@ -240,13 +248,14 @@ export class TaskRepeatCfgService {
 
     // Schedule if given
     if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
+      // NOTE: schedule tasks against the computed repeat day to avoid mismatched due dates.
       const dateTime = getDateTimeFromClockString(
         taskRepeatCfg.startTime as string,
-        targetDayDate,
+        targetCreated.getTime(),
       );
       createNewActions.push(
         TaskSharedActions.scheduleTaskWithTime({
-          task,
+          task: taskWithTargetDates,
           dueWithTime: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,

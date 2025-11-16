@@ -63,10 +63,11 @@ export class SelectTaskComponent {
   private readonly _store = inject(Store);
 
   T: typeof T = T;
-  readonly taskSelectCtrl: UntypedFormControl = new UntypedFormControl();
+  readonly taskSelectCtrl: UntypedFormControl = new UntypedFormControl('');
   readonly taskChange = output<Task | string>();
   readonly isLimitToProject = input<boolean>(false);
   readonly isIncludeDoneTasks = input<boolean>(false);
+  readonly isShowSuggestionsWithoutSearch = input<boolean>(false);
 
   @ViewChild(MatAutocompleteTrigger)
   autocompleteTrigger?: MatAutocompleteTrigger;
@@ -111,7 +112,15 @@ export class SelectTaskComponent {
   readonly filteredTasks = computed(() => {
     const taskOrTitle = this._taskOrTitle();
     if (typeof taskOrTitle === 'string') {
-      const searchTerm = taskOrTitle.toLowerCase();
+      const searchTerm = taskOrTitle.trim().toLowerCase();
+      if (!searchTerm && !this.isShowSuggestionsWithoutSearch()) {
+        return [];
+      }
+
+      if (!searchTerm) {
+        return this._tasks();
+      }
+
       return this._tasks().filter((task) =>
         task.title.toLowerCase().includes(searchTerm),
       );
@@ -180,6 +189,12 @@ export class SelectTaskComponent {
 
   trackById(i: number, task: Task): string {
     return task.id;
+  }
+
+  openPanel(): void {
+    if (this.autocompleteTrigger && !this.autocompleteTrigger.panelOpen) {
+      this.autocompleteTrigger.openPanel();
+    }
   }
 
   isInCreateMode(): boolean {
