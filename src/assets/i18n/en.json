@@ -687,6 +687,10 @@
         "VIEW_SPLIT": "View parsed and unparsed markdown in split view",
         "VIEW_TEXT_ONLY": "View as unparsed text"
       },
+      "B_STARTUP": {
+        "MSG": "Reflection Note: ({{date}}): {{content}}",
+        "ACTION_DISMISS": "Dismiss"
+      },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing for preview",
         "ENABLE_PARSE": "Enable markdown parse"
