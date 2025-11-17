@@ -29,6 +29,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
   let component: AddTaskBarComponent;
   let fixture: ComponentFixture<TestHostComponent>;
   let tagsSubject: BehaviorSubject<any>;
+  let miscSubject: BehaviorSubject<any>;
 
   const validTags: Tag[] = [
     { id: '1', title: 'UX', color: '#ff0000', theme: { primary: '#ff0000' } } as Tag,
@@ -63,6 +64,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
   ];
 
   beforeEach(async () => {
+    miscSubject = new BehaviorSubject({ defaultProjectId: null });
     const taskServiceSpy = jasmine.createSpyObj('TaskService', [
       'add',
       'getByIdOnce$',
@@ -93,6 +95,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         isEnableProject: true,
       }),
       lang: () => ({ timeLocale: DEFAULT_LOCALE }),
+      misc$: miscSubject,
     });
     const addTaskBarIssueSearchServiceSpy = jasmine.createSpyObj(
       'AddTaskBarIssueSearchService',

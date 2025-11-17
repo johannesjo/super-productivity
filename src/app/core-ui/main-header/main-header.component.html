@@ -8,18 +8,18 @@
         [class.active]="selectedTimeView() === 'week'"
         class="week-month-btn week-btn"
         matTooltip="View Week"
-        mat-button
+        mat-icon-button
       >
-        {{ T.GCF.SCHEDULE.WEEK | translate }}
+        <mat-icon>view_week</mat-icon>
       </button>
       <button
         (click)="selectTimeView('month')"
         [class.active]="selectedTimeView() === 'month'"
         class="week-month-btn month-btn"
         matTooltip="View Month"
-        mat-button
+        mat-icon-button
       >
-        {{ T.GCF.SCHEDULE.MONTH | translate }}
+        <mat-icon>calendar_month</mat-icon>
       </button>
     </div>
   }

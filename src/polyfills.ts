@@ -47,6 +47,8 @@ import 'core-js/es/set';*/
  * APPLICATION IMPORTS
  */
 
+import './app/rxjs-to-promise.polyfill';
+
 // fix ical.js
 // @see https://github.com/mozilla-comm/ical.js/issues/329
 (window as any).ICAL = {};

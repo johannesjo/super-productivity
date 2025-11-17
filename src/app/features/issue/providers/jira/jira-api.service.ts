@@ -23,7 +23,7 @@ import { JiraCfg } from './jira.model';
 import { IPC } from '../../../../../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../../app.constants';
-import { Observable, of, throwError } from 'rxjs';
+import { from, Observable, of, throwError } from 'rxjs';
 import { SearchResultItem } from '../../issue.model';
 import {
   catchError,
@@ -40,7 +40,6 @@ import { BannerService } from '../../../../core/banner/banner.service';
 import { BannerId } from '../../../../core/banner/banner.model';
 import { T } from '../../../../t.const';
 import { stringify } from 'query-string';
-import { fromPromise } from 'rxjs/internal-compatibility';
 import { getErrorTxt } from '../../../../util/get-error-text';
 import { isOnline } from '../../../../util/is-online';
 import { GlobalProgressBarService } from '../../../../core-ui/global-progress-bar/global-progress-bar.service';
@@ -515,7 +514,7 @@ export class JiraApiService {
         requestToSend,
       );
     } else if (IS_ANDROID_WEB_VIEW) {
-      return fromPromise(
+      return from(
         fetch(url, requestInit)
           .then((response) => response.body)
           .then(streamToJsonIfPossible as any)
@@ -541,7 +540,7 @@ export class JiraApiService {
     }
 
     this._globalProgressBarService.countUp(url);
-    return fromPromise(promise).pipe(
+    return from(promise).pipe(
       catchError((err) => {
         IssueLog.log(err);
         IssueLog.log(getErrorTxt(err));

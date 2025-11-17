@@ -660,6 +660,22 @@
         "ADD_SESSION": "Add Session",
         "NEW_SESSION_DURATION": "Duration",
         "ADD_BTN": "Add"
+      },
+      "REFLECTION": {
+        "TITLE": "Reflection Note",
+        "PLACEHOLDER_1": "What worked well today? What should change tomorrow?",
+        "PLACEHOLDER_2": "Small improvement for tomorrow?",
+        "PLACEHOLDER_3": "Where did focus slip - and how can you protect it?",
+        "PLACEHOLDER_4": "Which task gave you energy? Which drained it?",
+        "PLACEHOLDER_5": "One thing to repeat. One thing to change.",
+        "REMIND_LABEL": "Remind me tomorrow about this",
+        "HISTORY_BTN": "View past reflections",
+        "HISTORY_TITLE": "Reflection history",
+        "HISTORY_EMPTY": "No reflections saved yet. Capture today's note to start a streak.",
+        "REMINDER_TASK_TITLE": "Revisit reflection note",
+        "REMINDER_CREATED": "Reflection reminder scheduled for tomorrow",
+        "REMINDER_ERROR": "Could not schedule the reminder",
+        "REMINDER_NEEDS_TEXT": "Write a reflection before asking for a reminder"
       }
     },
     "NOTE": {
@@ -963,6 +979,10 @@
       "S": {
         "ERR_UNKNOWN": "Redmine: Unknown error {{statusCode}} {{errorMsg}}."
       }
+    },
+    "REFLECTION_NOTE": {
+      "MSG": "Reflection Note: ({{date}}): {{content}}",
+      "ACTION_DISMISS": "Dismiss"
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
@@ -2003,7 +2023,9 @@
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
+    "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today",
+    "NO_TASKS_TO_UNPLAN": "No tasks to unplan"
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -2054,6 +2076,7 @@
     "SEARCH": "Search",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
+    "UNPLAN_ALL_TASKS": "Unplan all tasks",
     "TAGS": "Tags",
     "TASK_LIST": "Task List",
     "TASKS": "Tasks",

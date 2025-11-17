@@ -11,6 +11,7 @@ export enum BannerId {
   ReminderCountdown = 'ReminderCountdown',
   FocusMode = 'FocusMode',
   SimpleCounterCountdownComplete = 'SimpleCounterCountdownComplete',
+  StartupNote = 'StartupNote',
 }
 
 export const BANNER_SORT_PRIO_MAP = {
@@ -21,6 +22,7 @@ export const BANNER_SORT_PRIO_MAP = {
   [BannerId.JiraUnblock]: 4,
   [BannerId.TimeEstimateExceeded]: 3,
   [BannerId.StartTrackingReminder]: 2,
+  [BannerId.StartupNote]: 2,
   [BannerId.FocusMode]: 1,
   [BannerId.Offline]: 0,
   [BannerId.InstallWebApp]: 0,

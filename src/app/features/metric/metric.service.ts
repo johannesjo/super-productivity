@@ -19,6 +19,7 @@ import {
   selectSimpleCounterClickCounterLineChartData,
   selectSimpleCounterStopWatchLineChartData,
   selectLastNDaysMetrics,
+  selectAllMetrics,
 } from './store/metric.selectors';
 import { map } from 'rxjs/operators';
 import { DEFAULT_METRIC_FOR_DAY } from './metric.const';
@@ -69,11 +70,13 @@ export class MetricService {
           ? {
               ...metric,
               focusSessions: metric.focusSessions ?? [],
+              reflections: metric.reflections ?? [],
             }
           : {
               id: day,
               ...DEFAULT_METRIC_FOR_DAY,
               focusSessions: [],
+              reflections: [],
             };
       }),
     );
@@ -140,6 +143,10 @@ export class MetricService {
 
   getFocusSessionMetrics$(howMany: number = 60): Observable<LineChartData> {
     return this._store$.select(selectFocusSessionLineChartData, { howMany });
+  }
+
+  getAllMetrics$(): Observable<Metric[]> {
+    return this._store$.select(selectAllMetrics);
   }
 
   getFocusSummaryForDay(day: string): { count: number; total: number } | undefined {
