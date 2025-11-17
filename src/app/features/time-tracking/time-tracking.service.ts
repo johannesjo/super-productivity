@@ -92,7 +92,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveYoung.save(archiveYoung, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveYoungUpdateTrigger$.next();
+      this._archiveYoungUpdateTrigger$.next(undefined);
     }
 
     if (projectId in archiveOld.timeTracking.project) {
@@ -100,7 +100,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveOld.save(archiveOld, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveOldUpdateTrigger$.next();
+      this._archiveOldUpdateTrigger$.next(undefined);
     }
   }
 
@@ -127,7 +127,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveYoung.save(archiveYoung, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveYoungUpdateTrigger$.next();
+      this._archiveYoungUpdateTrigger$.next(undefined);
     }
 
     if (tagId in archiveOld.timeTracking.tag) {
@@ -135,7 +135,7 @@ export class TimeTrackingService {
       await this._pfapiService.m.archiveOld.save(archiveOld, {
         isUpdateRevAndLastUpdate: true,
       });
-      this._archiveOldUpdateTrigger$.next();
+      this._archiveOldUpdateTrigger$.next(undefined);
     }
   }
 

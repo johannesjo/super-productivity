@@ -118,9 +118,7 @@ export class IssueService {
       this.ISSUE_REFRESH_MAP[issueProviderId][id] = new Subject<IssueData>();
     }
     return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
-      switchMap((issue) =>
-        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id]),
-      ),
+      switchMap((issue) => merge(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id])),
     );
   }
 

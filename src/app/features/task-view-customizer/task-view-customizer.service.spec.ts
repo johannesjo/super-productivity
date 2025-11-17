@@ -8,7 +8,7 @@ import { selectAllProjects } from '../project/store/project.selectors';
 import { selectAllTags } from '../tag/store/tag.reducer';
 import { getTomorrow } from '../../util/get-tomorrow';
 import { getDbDateStr } from '../../util/get-db-date-str';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
@@ -19,8 +19,8 @@ describe('TaskViewCustomizerService', () => {
   let mockWorkContextService: {
     activeWorkContextId: string | null;
     activeWorkContextType: WorkContextType | null;
-    todaysTasks$: ReturnType<typeof of<TaskWithSubTasks[]>>;
-    undoneTasks$: ReturnType<typeof of<TaskWithSubTasks[]>>;
+    todaysTasks$: Observable<TaskWithSubTasks[]>;
+    undoneTasks$: Observable<TaskWithSubTasks[]>;
   };
   let projectUpdateSpy: jasmine.Spy;
   let tagUpdateSpy: jasmine.Spy;
@@ -103,8 +103,8 @@ describe('TaskViewCustomizerService', () => {
     mockWorkContextService = {
       activeWorkContextId: null,
       activeWorkContextType: null,
-      todaysTasks$: of([]),
-      undoneTasks$: of([]),
+      todaysTasks$: of<TaskWithSubTasks[]>([]),
+      undoneTasks$: of<TaskWithSubTasks[]>([]),
     };
     projectUpdateSpy = jasmine.createSpy('update');
     tagUpdateSpy = jasmine.createSpy('updateTag');
@@ -352,8 +352,8 @@ describe('TaskViewCustomizerService', () => {
       const taskB = createTask('b', 'Bravo');
       mockWorkContextService.activeWorkContextId = 'project-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
-      mockWorkContextService.todaysTasks$ = of([taskB, taskA]);
-      mockWorkContextService.undoneTasks$ = of([taskB, taskA]);
+      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
+      mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
 
       service.setSort('name');
       service.setFilter('tag');
@@ -378,8 +378,8 @@ describe('TaskViewCustomizerService', () => {
       const taskB = createTask('b', 'Bravo', null);
       mockWorkContextService.activeWorkContextId = 'tag-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.TAG;
-      mockWorkContextService.todaysTasks$ = of([taskB, taskA]);
-      mockWorkContextService.undoneTasks$ = of([taskB, taskA]);
+      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
+      mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
 
       await service.sortPermanent('name');
 
@@ -393,8 +393,8 @@ describe('TaskViewCustomizerService', () => {
     it('should skip persistence when default sorting is requested but still reset', async () => {
       mockWorkContextService.activeWorkContextId = 'project-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
-      mockWorkContextService.todaysTasks$ = of([]);
-      mockWorkContextService.undoneTasks$ = of([]);
+      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([]);
+      mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([]);
 
       service.setSort('name');
 
