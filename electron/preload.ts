@@ -1,5 +1,5 @@
 import { ipcRenderer, IpcRendererEvent, webFrame, contextBridge } from 'electron';
-import { ElectronAPI } from './electronAPI.d';
+import { DirectoryDialogOptions, ElectronAPI } from './electronAPI.d';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
@@ -48,7 +48,8 @@ const ea: ElectronAPI = {
   checkDirExists: (dirPath) =>
     _invoke('CHECK_DIR_EXISTS', dirPath) as Promise<true | Error>,
 
-  pickDirectory: () => _invoke('PICK_DIRECTORY') as Promise<string | undefined>,
+  pickDirectory: (options?: DirectoryDialogOptions) =>
+    _invoke('PICK_DIRECTORY', options) as Promise<string | undefined>,
 
   // STANDARD
   // --------

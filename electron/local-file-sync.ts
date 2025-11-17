@@ -2,8 +2,13 @@ import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } from 'fs';
 import { error, log } from 'electron-log/main';
-import { dialog, ipcMain } from 'electron';
+import { dialog, ipcMain, OpenDialogOptions } from 'electron';
 import { getWin } from './main-window';
+
+type DirectoryDialogOptions = Pick<
+  OpenDialogOptions,
+  'defaultPath' | 'title' | 'message' | 'buttonLabel'
+>;
 
 export const initLocalFileSyncAdapter = (): void => {
   ipcMain.handle(
@@ -136,16 +141,19 @@ export const initLocalFileSyncAdapter = (): void => {
     },
   );
 
-  ipcMain.handle(IPC.PICK_DIRECTORY, async (): Promise<string | undefined> => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
-      properties: ['openDirectory'],
-    });
-    if (canceled) {
-      return undefined;
-    } else {
+  ipcMain.handle(
+    IPC.PICK_DIRECTORY,
+    async (_ev, options?: DirectoryDialogOptions): Promise<string | undefined> => {
+      const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
+        properties: ['openDirectory'],
+        ...options,
+      });
+      if (canceled) {
+        return undefined;
+      }
       return filePaths[0];
-    }
-  });
+    },
+  );
 };
 
 const getRev = (filePath: string): string => {

@@ -51,7 +51,7 @@ export interface ElectronAPI {
 
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
-  pickDirectory(): Promise<string | undefined>;
+  pickDirectory(options?: DirectoryDialogOptions): Promise<string | undefined>;
 
   // checkDirExists(dirPath: string): Promise<true | Error>;
 
@@ -151,4 +151,11 @@ export interface ElectronAPI {
     manifest: PluginManifest,
     request: PluginNodeScriptRequest,
   ): Promise<PluginNodeScriptResult>;
+}
+
+export interface DirectoryDialogOptions {
+  defaultPath?: string | null;
+  title?: string;
+  message?: string;
+  buttonLabel?: string;
 }
