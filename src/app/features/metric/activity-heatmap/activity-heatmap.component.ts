@@ -10,8 +10,8 @@ import { WorklogService } from '../../worklog/worklog.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
-import { defer, from } from 'rxjs';
-import { first, map, switchMap } from 'rxjs/operators';
+import { combineLatest, defer, from, Subject } from 'rxjs';
+import { first, map, startWith, switchMap } from 'rxjs/operators';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -50,6 +50,8 @@ export class ActivityHeatmapComponent {
   private readonly _snackService = inject(SnackService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _shareService = inject(ShareService);
+  private selectedPeriod: 'last365' | 'currentYear' = 'last365'; // Defaul to the last 365 days
+  private readonly _periodChange$ = new Subject<void>();
 
   T: typeof T = T;
   weeks: WeekData[] = [];
@@ -73,8 +75,11 @@ export class ActivityHeatmapComponent {
 
   // Raw data signals
   private readonly _rawHeatmapData = toSignal(
-    this._workContextService.activeWorkContext$.pipe(
-      switchMap((context) => {
+    combineLatest([
+      this._workContextService.activeWorkContext$,
+      this._periodChange$.pipe(startWith(null)), // Start with initial emission
+    ]).pipe(
+      switchMap(([context]) => {
         // Special case: TODAY tag shows ALL data from all tasks
         if (context.id === TODAY_TAG.id) {
           // Use defer to ensure the Promise is created fresh each time
@@ -139,11 +144,20 @@ export class ActivityHeatmapComponent {
   } | null {
     const dayMap = new Map<string, DayData>();
     const now = new Date();
-    const oneYearAgo = new Date(now);
-    oneYearAgo.setFullYear(now.getFullYear() - 1);
-
+    const period = this.selectedPeriod;
+    // Depending on the selected period, start dates are calculated differently
+    // but end dates is always today
+    let startDate: Date;
+    if (period === 'currentYear') {
+      const currentYear = now.getFullYear();
+      startDate = new Date(currentYear, 0, 1);
+    } else {
+      // start date is one year ago from today
+      startDate = new Date(now);
+      startDate.setFullYear(now.getFullYear() - 1);
+    }
     // Initialize all days in the past year
-    const currentDate = new Date(oneYearAgo);
+    const currentDate = new Date(startDate);
     while (currentDate <= now) {
       const dateStr = this._getDateStr(currentDate);
       dayMap.set(dateStr, {
@@ -215,7 +229,7 @@ export class ActivityHeatmapComponent {
 
     return {
       dayMap,
-      startDate: oneYearAgo,
+      startDate,
       endDate: now,
     };
   }
@@ -439,6 +453,14 @@ export class ActivityHeatmapComponent {
     return `${minutes}m`;
   }
 
+  getSelectedPeriod(): 'last365' | 'currentYear' {
+    return this.selectedPeriod;
+  }
+
+  onPeriodChange(period: 'last365' | 'currentYear'): void {
+    this.selectedPeriod = period;
+    this._periodChange$.next();
+  }
   async shareHeatmap(): Promise<void> {
     const data = this.heatmapData();
     if (!data) {
