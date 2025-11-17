@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { inject, Injectable, signal, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
@@ -139,7 +139,16 @@ export class PluginService implements OnDestroy {
           }
         }
       } catch (error) {
-        PluginLog.err(`Failed to discover plugin at ${path}:`, error);
+        if (
+          error instanceof HttpErrorResponse &&
+          (error.status === 0 || error.status === 404)
+        ) {
+          PluginLog.warn(
+            `Optional built-in plugin manifest missing at ${path} (status ${error.status}). Skipping.`,
+          );
+        } else {
+          PluginLog.err(`Failed to discover plugin at ${path}:`, error);
+        }
       }
     }
   }

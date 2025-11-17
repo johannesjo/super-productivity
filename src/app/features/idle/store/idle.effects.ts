@@ -126,7 +126,7 @@ export class IdleEffects {
   handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
       distinctUntilChanged(),
-      switchMap((isIdle) => iif(() => isIdle, of(isIdle))),
+      switchMap((isIdle) => iif(() => isIdle, of(isIdle), EMPTY)),
       withLatestFrom(
         this._store.select(selectIdleTime),
         this._simpleCounterService.enabledSimpleStopWatchCounters$,

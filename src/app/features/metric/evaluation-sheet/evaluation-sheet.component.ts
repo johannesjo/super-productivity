@@ -28,6 +28,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { MsToClockStringPipe } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { getDailyStateInfo } from '../utils/get-daily-state-info.util';
 import { ImpactStarsComponent } from '../impact-stars/impact-stars.component';
+import { ReflectionNoteComponent } from '../reflection-note/reflection-note.component';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 @Component({
@@ -44,6 +45,7 @@ import { GlobalTrackingIntervalService } from '../../../core/global-tracking-int
     TranslatePipe,
     MsToClockStringPipe,
     ImpactStarsComponent,
+    ReflectionNoteComponent,
   ],
 })
 export class EvaluationSheetComponent {

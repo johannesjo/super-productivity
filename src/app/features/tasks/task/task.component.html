@@ -256,7 +256,7 @@
         }
 
         <div>
-          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE)) {
+          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE) || isSelected()) {
             <button
               (click)="toggleShowDetailPanel()"
               title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }}  {{

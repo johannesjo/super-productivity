@@ -1,0 +1,18 @@
+
+### Bug Fixes
+
+* emoji icon showing twice in selector #5242
+* icon not loading properly (ec715eb), closes #5506
+* NoRevAPIError #5423
+* select task always showing auto-complete entries
+* short syntax tag first case (93b4399), closes #5442
+* side panel resize issues (5459eff), closes #5385
+* task repeat issues (9464a8f), closes #5502
+* **task:** handle mouse events in quick access button clicks #5495
+* **task:** repeat value remaining shown in side panel (a0b8082), closes #5496
+
+
+### Features
+
+* make task optional for focus mode #5500
+* **task:** bring back close button

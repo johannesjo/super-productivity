@@ -1,0 +1,32 @@
+<header class="reflection-header">
+  <div class="reflection-header__titles">
+    <div class="reflection-header__title">
+      {{ T.F.METRIC.REFLECTION.TITLE | translate }}
+    </div>
+    <!--    <div class="reflection-header__subline">-->
+    <!--      {{ T.F.METRIC.REFLECTION.SUBLINE | translate }}-->
+    <!--    </div>-->
+  </div>
+  <button
+    type="button"
+    mat-icon-button
+    (click)="openHistory()"
+    [matTooltip]="T.F.METRIC.REFLECTION.HISTORY_BTN | translate"
+    [attr.aria-label]="T.F.METRIC.REFLECTION.HISTORY_BTN | translate"
+  >
+    <mat-icon>history</mat-icon>
+  </button>
+</header>
+
+<mat-form-field appearance="outline">
+  <textarea
+    matInput
+    cdkTextareaAutosize
+    #autosize="cdkTextareaAutosize"
+    [placeholder]="placeholder()"
+    [ngModel]="reflectionText()"
+    (ngModelChange)="onReflectionChange($event)"
+    cdkAutosizeMinRows="3"
+    cdkAutosizeMaxRows="5"
+  ></textarea>
+</mat-form-field>

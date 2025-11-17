@@ -1,0 +1,4 @@
+
+### Bug Fixes
+
+* effect errors and e2e tests

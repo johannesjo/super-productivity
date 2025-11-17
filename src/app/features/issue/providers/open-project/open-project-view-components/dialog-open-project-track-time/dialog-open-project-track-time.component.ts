@@ -176,7 +176,7 @@ export class DialogOpenProjectTrackTimeComponent implements OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this._onDestroy$.next();
+    this._onDestroy$.next(undefined);
   }
 
   close(): void {

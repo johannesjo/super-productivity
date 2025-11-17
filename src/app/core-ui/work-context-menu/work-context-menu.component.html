@@ -24,6 +24,16 @@
   </button>
 }
 
+@if (contextId === TODAY_TAG_ID) {
+  <button
+    (click)="unplanAllTodayTasks()"
+    mat-menu-item
+  >
+    <mat-icon>event_busy</mat-icon>
+    <span class="text">{{ T.MH.UNPLAN_ALL_TASKS | translate }}</span>
+  </button>
+}
+
 <button
   (click)="shareTasksAsMarkdown()"
   mat-menu-item

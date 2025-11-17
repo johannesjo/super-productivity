@@ -2,6 +2,11 @@ import { EntityState } from '@ngrx/entity';
 // import { Label, SingleDataSet } from 'ng2-charts';
 import { ChartData } from 'chart.js';
 
+export interface ReflectionEntry {
+  text: string;
+  created: number;
+}
+
 export interface MetricCopy {
   // string date of day
   id: string;
@@ -22,6 +27,7 @@ export interface MetricCopy {
   // Evaluation fields
   notes?: string | null;
   remindTomorrow?: boolean;
+  reflections?: ReflectionEntry[];
 
   // v2.4 Productivity scoring fields (impact-driven)
   impactOfWork?: number | null; // 1-4 scale

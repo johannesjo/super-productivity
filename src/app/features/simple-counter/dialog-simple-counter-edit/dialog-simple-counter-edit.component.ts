@@ -14,7 +14,11 @@ import {
   MatDialogTitle,
 } from '@angular/material/dialog';
 import { T } from '../../../t.const';
-import { SimpleCounterCopy, SimpleCounterType } from '../simple-counter.model';
+import {
+  SimpleCounterCfgFields,
+  SimpleCounterCopy,
+  SimpleCounterType,
+} from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from 'src/app/core/date/date.service';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +33,8 @@ import { LineChartData } from '../../metric/metric.model';
 import { getSimpleCounterStreakDuration } from '../get-simple-counter-streak-duration';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { LazyChartComponent } from '../../metric/lazy-chart/lazy-chart.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogSimpleCounterEditSettingsComponent } from '../dialog-simple-counter-edit-settings/dialog-simple-counter-edit-settings.component';
 
 const CHART_DAYS = 28;
 const CHART_COLOR = '#4bc0c0';
@@ -56,6 +62,7 @@ const GOAL_LINE_COLOR = '#9e9e9e';
 })
 export class DialogSimpleCounterEditComponent {
   private readonly _dialogRef = inject(MatDialogRef<DialogSimpleCounterEditComponent>);
+  private readonly _matDialog = inject(MatDialog);
   private readonly _counterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
   private readonly _locale = inject(LOCALE_ID);
@@ -64,11 +71,24 @@ export class DialogSimpleCounterEditComponent {
   readonly T = T;
   readonly SimpleCounterType = SimpleCounterType;
   readonly todayStr = this._dateService.todayStr();
+  private readonly _settingsKeys: (keyof SimpleCounterCfgFields)[] = [
+    'title',
+    'isEnabled',
+    'icon',
+    'type',
+    'isTrackStreaks',
+    'streakMinValue',
+    'streakWeekDays',
+    'countdownDuration',
+  ];
 
   // State
   readonly localCounter = signal<SimpleCounterCopy>({
     ...this.dialogData.simpleCounter,
     countOnDay: { ...this.dialogData.simpleCounter.countOnDay },
+    streakWeekDays: this.dialogData.simpleCounter.streakWeekDays
+      ? { ...this.dialogData.simpleCounter.streakWeekDays }
+      : undefined,
   });
 
   selectedDateStr = signal(this.todayStr);
@@ -170,9 +190,30 @@ export class DialogSimpleCounterEditComponent {
     }));
   }
 
+  openSettingsDialog(): void {
+    this._matDialog
+      .open(DialogSimpleCounterEditSettingsComponent, {
+        data: { simpleCounter: this.localCounter() },
+        restoreFocus: true,
+        width: '600px',
+      })
+      .afterClosed()
+      .subscribe((settings?: Partial<SimpleCounterCopy>) => {
+        if (!settings || Object.keys(settings).length === 0) {
+          return;
+        }
+        this.localCounter.update((counter) => ({
+          ...counter,
+          ...settings,
+        }));
+        Object.assign(this.dialogData.simpleCounter, settings);
+      });
+  }
+
   save(): void {
     const localData = this.localCounter();
     const originalData = this.dialogData.simpleCounter;
+    const settingsChanges = this._getSettingsChanges(originalData, localData);
 
     // Only save changed values
     Object.entries(localData.countOnDay).forEach(([date, value]) => {
@@ -181,6 +222,10 @@ export class DialogSimpleCounterEditComponent {
         this._counterService.setCounterForDate(originalData.id, date, value);
       }
     });
+
+    if (Object.keys(settingsChanges).length > 0) {
+      this._counterService.updateSimpleCounter(originalData.id, settingsChanges);
+    }
 
     this.close();
   }
@@ -234,5 +279,41 @@ export class DialogSimpleCounterEditComponent {
     const value = counter.countOnDay[dateStr] || 0;
     const streakMet = value >= (counter.streakMinValue || 0);
     return `${baseLabel}${streakMet ? '🔥' : '❌'}`;
+  }
+
+  private _getSettingsChanges(
+    original: SimpleCounterCopy,
+    updated: SimpleCounterCopy,
+  ): Partial<SimpleCounterCopy> {
+    const changes: Partial<SimpleCounterCopy> = {};
+    this._settingsKeys.forEach((key) => {
+      if (!this._isFieldEqual(key, original[key], updated[key])) {
+        (changes as any)[key] = updated[key];
+      }
+    });
+
+    return changes;
+  }
+
+  private _isFieldEqual(
+    key: keyof SimpleCounterCfgFields,
+    originalValue: SimpleCounterCopy[keyof SimpleCounterCfgFields],
+    updatedValue: SimpleCounterCopy[keyof SimpleCounterCfgFields],
+  ): boolean {
+    if (key === 'streakWeekDays') {
+      const o = originalValue as Record<number, boolean> | undefined;
+      const u = updatedValue as Record<number, boolean> | undefined;
+      const allKeys = new Set([
+        ...(o ? Object.keys(o) : []),
+        ...(u ? Object.keys(u) : []),
+      ]);
+      for (const day of allKeys) {
+        if (Boolean(o?.[day as any]) !== Boolean(u?.[day as any])) {
+          return false;
+        }
+      }
+      return true;
+    }
+    return originalValue === updatedValue;
   }
 }

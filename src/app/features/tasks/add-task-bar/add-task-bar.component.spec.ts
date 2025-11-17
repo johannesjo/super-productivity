@@ -531,4 +531,33 @@ describe('AddTaskBarComponent', () => {
       expect(defaultProject).toBeUndefined();
     });
   });
+
+  describe('document click handling', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should emit done when clicking outside and no dialog is open', () => {
+      const doneSpy = spyOn(component.done, 'emit');
+      const event = {
+        target: document.createElement('div'),
+      } as unknown as MouseEvent;
+
+      component.onDocumentClick(event);
+
+      expect(doneSpy).toHaveBeenCalled();
+    });
+
+    it('should not emit done when schedule dialog is open', () => {
+      const doneSpy = spyOn(component.done, 'emit');
+      component.onScheduleDialogOpenChange(true);
+      const event = {
+        target: document.createElement('div'),
+      } as unknown as MouseEvent;
+
+      component.onDocumentClick(event);
+
+      expect(doneSpy).not.toHaveBeenCalled();
+    });
+  });
 });

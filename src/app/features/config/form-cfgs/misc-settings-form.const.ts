@@ -153,7 +153,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       templateOptions: {
         label: T.GCF.MISC.IS_OVERLAY_INDICATOR_ENABLED,
       },
-      hideExpression: (model: any) => !model?.isTrayShowCurrentTask,
     },
     {
       key: 'isEnableUserProfiles',

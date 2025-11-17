@@ -78,6 +78,7 @@ import { Log } from './core/log';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { NoteStartupBannerService } from './features/note/note-startup-banner.service';
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
@@ -152,6 +153,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _destroyRef = inject(DestroyRef);
+  private _noteStartupBannerService = inject(NoteStartupBannerService);
   private _ngZone = inject(NgZone);
   private _document = inject(DOCUMENT, { optional: true });
 
@@ -231,6 +233,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
     // basically init
     this._requestPersistence();
+
+    this.syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
+      .pipe(take(1))
+      .subscribe(() => {
+        void this._noteStartupBannerService.showLastNoteIfNeeded();
+      });
 
     // deferred init
     window.setTimeout(async () => {

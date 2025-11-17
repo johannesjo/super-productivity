@@ -143,6 +143,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
+  isScheduleDialogOpen = signal(false);
 
   // Computed signals for projects and tags (sorted for consistency)
   projects = this._projectService.listSortedForUI;
@@ -597,7 +598,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const overlayContainer = target.closest('.cdk-overlay-container');
 
     // If click is outside the component and not on autocomplete or menu options, close it
-    if (!component && !overlayContainer) {
+    if (!component && !overlayContainer && !this.isScheduleDialogOpen()) {
       this.done.emit();
     }
   }
@@ -760,5 +761,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   updateListShown(isShown: boolean): void {
     window.setTimeout(() => this.isMentionListShown.set(isShown));
+  }
+
+  onScheduleDialogOpenChange(isOpen: boolean): void {
+    this.isScheduleDialogOpen.set(isOpen);
   }
 }
