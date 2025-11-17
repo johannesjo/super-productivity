@@ -57,11 +57,13 @@ my-plugin/
 
 ```javascript
 console.log('Hello World plugin loaded!');
+
 // Show a notification
 PluginAPI.showSnack({
   msg: 'Hello from my plugin!',
   type: 'SUCCESS',
 });
+
 // Demo a simple counter
 await PluginAPI.setCounter('hello-count', 0);
 PluginAPI.registerHeaderButton({
@@ -250,20 +252,27 @@ Plugins that render custom UI in a sandboxed iframe.
 ## Available API Methods
 
 ### Data Operations
+
 #### Tasks
+
 - `getTasks()` - Get all active tasks
 - `getArchivedTasks()` - Get archived tasks
 - `getCurrentContextTasks()` - Get tasks in current context
 - `addTask(task)` - Create a new task
 - `updateTask(taskId, updates)` - Update existing task
+
 #### Projects
+
 - `getAllProjects()` - Get all projects
 - `addProject(project)` - Create new project
 - `updateProject(projectId, updates)` - Update project
+
 #### Tags
+
 - `getAllTags()` - Get all tags
 - `addTag(tag)` - Create new tag
 - `updateTag(tagId, updates)` - Update tag
+
 #### Simple Counters
 Simple counters let you track lightweight metrics (e.g., daily clicks or habits) that persist and sync with your data. There are two levels: **basic** (key-value pairs for today's count) and **full model** (full CRUD on `SimpleCounter` entities with date-specific values).
 
