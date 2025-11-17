@@ -143,7 +143,7 @@ export enum LanguageCode {
   tr = 'tr',
   uk = 'uk',
   zh = 'zh',
-  zhTw = 'zh-tw', // TODO протестировать
+  zhTw = 'zh-tw', // TODO retest
 }
 
 /**
@@ -169,18 +169,18 @@ export const AUTO_SWITCH_LNGS: LanguageCode[] = [
  */
 export const Locales = {
   ...LanguageCode,
-  en_gb: LanguageCode.en + '-GB',
-  en_us: LanguageCode.en + '-US',
-  tr_tr: LanguageCode.tr + '-TR', // TODO need retest
-  de_de: LanguageCode.de + '-DE',
-  fr_fr: LanguageCode.fr + '-FR',
-  es_es: LanguageCode.es + '-ES',
-  it_it: LanguageCode.it + '-IT',
-  pt_br: LanguageCode.pt + '-BR',
-  ru_ru: LanguageCode.ru + '-RU',
-  zh_cn: LanguageCode.zh + '-CN',
-  ja_jp: LanguageCode.ja + '-JP',
-  ko_kr: LanguageCode.ko + '-KR',
+  en_gb: `${LanguageCode.en}-GB`,
+  en_us: `${LanguageCode.en}-US`,
+  tr_tr: `${LanguageCode.tr}-TR`, // TODO retest
+  de_de: `${LanguageCode.de}-DE`,
+  fr_fr: `${LanguageCode.fr}-FR`,
+  es_es: `${LanguageCode.es}-ES`,
+  it_it: `${LanguageCode.it}-IT`,
+  pt_br: `${LanguageCode.pt}-BR`,
+  ru_ru: `${LanguageCode.ru}-RU`,
+  zh_cn: `${LanguageCode.zh}-CN`,
+  ja_jp: `${LanguageCode.ja}-JP`,
+  ko_kr: `${LanguageCode.ko}-KR`,
 } as const;
 
 export type Locale = (typeof Locales)[keyof typeof Locales];

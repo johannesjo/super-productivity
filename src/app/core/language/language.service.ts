@@ -4,7 +4,6 @@ import {
   AUTO_SWITCH_LNGS,
   DEFAULT_LANGUAGE,
   LanguageCode,
-  Locale,
   RTL_LANGUAGES,
 } from '../../app.constants';
 import { Log } from '../log';
@@ -50,7 +49,7 @@ export class LanguageService {
     this._isRTL.set(this._checkIsRTL(lng));
     this._translateService.use(lng);
 
-    this._dateTimeFormatService.setDateAdapterLocale(lng as Locale); // использую as т.к. LanguageCode это часть Locale
+    this._dateTimeFormatService.setDateAdapterLocale(lng);
   }
 
   private _checkIsRTL(lng: LanguageCode): boolean {
