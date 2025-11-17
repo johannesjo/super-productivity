@@ -32,7 +32,7 @@ export const createScheduleDays = (
   now: number,
   scheduleConfig: ScheduleConfig,
 ): ScheduleDay[] => {
-  let viewEntriesPushedToNextDay: SVEEntryForNextDay[];
+  let viewEntriesPushedToNextDay: SVEEntryForNextDay[] = [];
   let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks.map((task) => {
     if (task.timeEstimate === 0 && task.timeSpent === 0) {
       return {
@@ -112,7 +112,7 @@ export const createScheduleDays = (
       dayEnd = workEndTime;
     }
 
-    viewEntries = createViewEntriesForDay(
+    const { viewEntries: dayViewEntries, tasksForNextDay } = createViewEntriesForDay(
       dayDate,
       startTime,
       nonScheduledRepeatCfgsDueOnDay,
@@ -122,9 +122,13 @@ export const createScheduleDays = (
       scheduleConfig,
       dayEnd,
     );
+    viewEntries = dayViewEntries;
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
     flowTasksLeftAfterDay = [...nonSplitBeyondTasks];
+    if (tasksForNextDay.length) {
+      flowTasksLeftAfterDay = [...flowTasksLeftAfterDay, ...tasksForNextDay];
+    }
 
     // Handle task splitting prevention if configured
     if (!scheduleConfig.isAllowTaskSplitting) {
@@ -165,7 +169,7 @@ export const createScheduleDays = (
     }
 
     const viewEntriesToRenderForDay: SVE[] = [];
-    viewEntriesPushedToNextDay = [];
+    const nextDayEntries: SVEEntryForNextDay[] = [];
     viewEntries.forEach((entry) => {
       if (entry.plannedForDay && entry.type === SVEType.Task) {
         entry.type = SVEType.TaskPlannedForDay;
@@ -182,7 +186,7 @@ export const createScheduleDays = (
           entry.type === SVEType.RepeatProjectionSplitContinued ||
           entry.type === SVEType.RepeatProjectionSplitContinuedLast
         ) {
-          viewEntriesPushedToNextDay.push(entry);
+          nextDayEntries.push(entry);
         } else {
           Log.log('entry Start:', new Date(entry.start), { entry });
           Log.err('Entry start time after next day start', entry);
@@ -217,6 +221,8 @@ export const createScheduleDays = (
     //   beyond,
     //   isSomeTimeLeftForLastOverBudget,
     // });
+
+    viewEntriesPushedToNextDay = nextDayEntries;
 
     return {
       dayDate,

@@ -278,6 +278,30 @@ describe('mapToScheduleDays()', () => {
     expect(r[1].entries[0].duration).toBe(h(1));
   });
 
+  it('should move tasks to the next day when splitting is disabled and no time remains', () => {
+    const lateInDay = h(23.75);
+    const r = mapToScheduleDays(
+      lateInDay,
+      [NDS, '1970-01-02'],
+      [fakeTaskEntry('N1', { timeEstimate: h(1) })],
+      [],
+      [],
+      [],
+      [],
+      null,
+      {},
+      fakeScheduleConfig({
+        isAllowTaskSplitting: false,
+      }),
+      undefined,
+    );
+
+    expect(r[0].entries.length).toBe(0);
+    expect(r[1].entries.length).toBe(1);
+    expect(r[1].entries[0].id).toBe('N1');
+    expect(r[1].entries[0].start).toBe(hTz(24));
+  });
+
   it('should split multiple times', () => {
     const r = mapToScheduleDays(
       N,
