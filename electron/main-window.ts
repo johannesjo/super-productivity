@@ -82,6 +82,7 @@ export const createWindow = ({
     height: mainWindowState.height,
     minHeight: 240,
     minWidth: 300,
+    title: IS_DEV ? 'Super Productivity D' : 'Super Productivity',
     titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
