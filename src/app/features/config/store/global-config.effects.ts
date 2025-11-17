@@ -172,7 +172,14 @@ export class GlobalConfigEffects {
           ({ sectionCfg }) =>
             sectionCfg && (sectionCfg as MiscConfig).isEnableUserProfiles !== undefined,
         ),
-        tap(({ sectionCfg }) => {
+        withLatestFrom(this._store.select('globalConfig')),
+        filter(([{ sectionCfg }, globalConfig]) => {
+          const newValue = (sectionCfg as MiscConfig).isEnableUserProfiles;
+          const oldValue = globalConfig?.misc?.isEnableUserProfiles ?? false;
+          // Only proceed if the value actually changed
+          return newValue !== oldValue;
+        }),
+        tap(([{ sectionCfg }]) => {
           const isEnabled = (sectionCfg as MiscConfig).isEnableUserProfiles;
 
           // Update localStorage flag for fast startup check
