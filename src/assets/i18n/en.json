@@ -1937,7 +1937,7 @@
       "WEEK": "Week",
       "MONTH": "Month",
       "L_IS_ALLOW_TASK_SPLITTING": "Allow task splitting across time boundaries",
-      "L_TASK_PLACEMENT_STRATEGY": "Strategy",
+      "L_TASK_PLACEMENT_STRATEGY": "Sort tasks without a scheduled time (overwrites manual sorting)",
       "TASK_PLACEMENT_STRATEGY_DEFAULT": "Default (Sequential)",
       "TASK_PLACEMENT_STRATEGY_BEST_FIT": "Best Fit (reduce gaps)",
       "TASK_PLACEMENT_STRATEGY_SHORTEST_FIRST": "Shortest Task First",
