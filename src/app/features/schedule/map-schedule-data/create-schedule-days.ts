@@ -12,6 +12,7 @@ import {
   SVE,
   SVEEntryForNextDay,
 } from '../schedule.model';
+import { ScheduleConfig } from '../../config/global-config.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
 import { createViewEntriesForDay } from './create-view-entries-for-day';
@@ -29,6 +30,7 @@ export const createScheduleDays = (
   blockerBlocksDayMap: BlockedBlockByDayMap,
   workStartEndCfg: ScheduleWorkStartEndCfg | undefined,
   now: number,
+  scheduleConfig: ScheduleConfig,
 ): ScheduleDay[] => {
   let viewEntriesPushedToNextDay: SVEEntryForNextDay[];
   let flowTasksLeftAfterDay: TaskWithoutReminder[] = nonScheduledTasks.map((task) => {
@@ -100,6 +102,16 @@ export const createScheduleDays = (
       return beyond;
     })();
 
+    // Calculate day end time for task splitting prevention
+    let dayEnd = nextDayStart;
+    if (workStartEndCfg) {
+      const workEndTime = getDateTimeFromClockString(
+        workStartEndCfg.endTime,
+        dateStrToUtcDate(dayDate),
+      );
+      dayEnd = workEndTime;
+    }
+
     viewEntries = createViewEntriesForDay(
       dayDate,
       startTime,
@@ -107,10 +119,50 @@ export const createScheduleDays = (
       within,
       blockerBlocksForDay,
       viewEntriesPushedToNextDay,
+      scheduleConfig,
+      dayEnd,
     );
     // beyondBudgetTasks = beyond;
     beyondBudgetTasks = [];
     flowTasksLeftAfterDay = [...nonSplitBeyondTasks];
+
+    // Handle task splitting prevention if configured
+    if (!scheduleConfig.isAllowTaskSplitting) {
+      // Filter out tasks that would extend beyond day boundary
+      const tasksToKeep: SVE[] = [];
+      const tasksToMoveToNextDay: SVE[] = [];
+
+      viewEntries.forEach((entry) => {
+        if (
+          entry.type === SVEType.Task ||
+          entry.type === SVEType.TaskPlannedForDay ||
+          entry.type === SVEType.RepeatProjection
+        ) {
+          const taskEnd = entry.start + entry.duration;
+          if (taskEnd > dayEnd) {
+            // Task would split - move entire task to next day
+            tasksToMoveToNextDay.push(entry);
+          } else {
+            tasksToKeep.push(entry);
+          }
+        } else {
+          // Keep non-task entries (blocked blocks, etc.)
+          tasksToKeep.push(entry);
+        }
+      });
+
+      viewEntries = tasksToKeep;
+      // Add tasks that need to move to the next day entries
+      tasksToMoveToNextDay.forEach((task) => {
+        if (
+          task.type === SVEType.Task ||
+          task.type === SVEType.TaskPlannedForDay ||
+          task.type === SVEType.RepeatProjection
+        ) {
+          viewEntriesPushedToNextDay.push(task as SVEEntryForNextDay);
+        }
+      });
+    }
 
     const viewEntriesToRenderForDay: SVE[] = [];
     viewEntriesPushedToNextDay = [];

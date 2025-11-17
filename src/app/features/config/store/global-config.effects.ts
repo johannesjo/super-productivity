@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { filter, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, tap, withLatestFrom, map } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
 import { T } from '../../../t.const';
@@ -11,7 +11,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
-import { MiscConfig } from '../global-config.model';
+import { MiscConfig, ScheduleConfig } from '../global-config.model';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -159,4 +159,42 @@ export class GlobalConfigEffects {
         ),
       { dispatch: false },
     );
+
+  // Ensure BEST_FIT strategy is only used when task splitting is disabled
+  // If task splitting is enabled and BEST_FIT is selected, switch to DEFAULT strategy
+  enforceBestFitRequirements$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(updateGlobalConfigSection),
+      filter(({ sectionKey }) => sectionKey === 'schedule'),
+      withLatestFrom(this._store.select('globalConfig')),
+      filter(([action, globalConfig]) => {
+        const scheduleCfg = action.sectionCfg as ScheduleConfig;
+        const currentSchedule = globalConfig.schedule;
+
+        // Check if splitting is being enabled while BEST_FIT is active
+        const isSplittingEnabled = scheduleCfg.hasOwnProperty('isAllowTaskSplitting')
+          ? scheduleCfg.isAllowTaskSplitting
+          : currentSchedule.isAllowTaskSplitting;
+
+        const currentStrategy = scheduleCfg.hasOwnProperty('taskPlacementStrategy')
+          ? scheduleCfg.taskPlacementStrategy
+          : currentSchedule.taskPlacementStrategy;
+
+        return isSplittingEnabled && currentStrategy === 'BEST_FIT';
+      }),
+      map(() => {
+        this._snackService.open({
+          type: 'CUSTOM',
+          msg: 'Best Fit strategy requires task splitting to be disabled. Switching to Default strategy.',
+          ico: 'warning',
+        });
+
+        return updateGlobalConfigSection({
+          sectionKey: 'schedule',
+          sectionCfg: { taskPlacementStrategy: 'DEFAULT' },
+          isSkipSnack: true,
+        });
+      }),
+    ),
+  );
 }

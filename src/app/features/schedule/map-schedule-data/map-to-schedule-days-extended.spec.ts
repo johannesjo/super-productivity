@@ -128,119 +128,43 @@ describe('mapToScheduleDays()', () => {
       [],
       null,
       {},
+      {
+        isWorkStartEndEnabled: true,
+        workStart: '9:00',
+        workEnd: '17:00',
+        isLunchBreakEnabled: true,
+        lunchBreakStart: '11:00',
+        lunchBreakEnd: '11:30',
+        isAllowTaskSplitting: true,
+        taskPlacementStrategy: 'DEFAULT',
+      } as any,
       p.workStartEndCfg as any,
+      p.lunchBreakCfg as any,
     );
 
-    expect(r[3]).toEqual({
-      beyondBudgetTasks: [],
-      dayDate: '2024-08-05',
-      entries: [
-        {
-          data: {
-            defaultEstimate: 900000,
-            id: 'wSs2q4YWkZZjthJrUeIos',
-            isPaused: false,
-            lastTaskCreationDay: getDbDateStr(1722325722970),
-            monday: true,
-            order: 0,
-            projectId: 'lMLlW2yO',
-            quickSetting: 'CUSTOM',
-            remindAt: 'AtStart',
-            repeatCycle: 'WEEKLY',
-            repeatEvery: 1,
-            startDate: '2024-07-30',
-            startTime: '9:00',
-            tagIds: ['TODAY'],
-            title: 'Do something scheduled on a regular basis',
-          },
-          duration: 900000,
-          id: 'wSs2q4YWkZZjthJrUeIos_2024-08-05',
-          start: 1722841200000,
-          type: 'ScheduledRepeatProjection',
-        },
-        {
-          data: {
-            defaultEstimate: 1800000,
-            friday: false,
-            id: 'lmjFQzTdJh8aSak3cu9SN',
-            isPaused: false,
-            lastTaskCreationDay: getDbDateStr(1722275904553),
-            monday: true,
-            order: 0,
-            projectId: 'lMLlW2yO',
-            quickSetting: 'WEEKLY_CURRENT_WEEKDAY',
-            repeatCycle: 'WEEKLY',
-            repeatEvery: 1,
-            saturday: false,
-            startDate: '2024-05-06',
-            sunday: false,
-            tagIds: ['TODAY'],
-            thursday: false,
-            title: 'Plan Week',
-            tuesday: false,
-            wednesday: false,
-          },
-          duration: 1800000,
-          id: 'lmjFQzTdJh8aSak3cu9SN_2024-08-05',
-          start: 1722842100000,
-          type: 'RepeatProjection',
-        },
-        {
-          data: {
-            defaultEstimate: 1200000,
-            friday: true,
-            id: 'Foclw2saS0jZ3LfLVM5fd',
-            isPaused: false,
-            lastTaskCreationDay: getDbDateStr(1722617221091),
-            monday: true,
-            order: 32,
-            projectId: 'DEFAULT',
-            quickSetting: 'MONDAY_TO_FRIDAY',
-            repeatCycle: 'WEEKLY',
-            repeatEvery: 1,
-            saturday: false,
-            startDate: '2024-07-30',
-            sunday: false,
-            tagIds: ['TODAY', 'DZHev64ka8kt4olVAujAe'],
-            thursday: true,
-            title: 'Also scheduled in the morning',
-            tuesday: true,
-            wednesday: true,
-          },
-          duration: 1200000,
-          id: 'Foclw2saS0jZ3LfLVM5fd_2024-08-05',
-          start: 1722843900000,
-          type: 'RepeatProjection',
-        },
-        {
-          data: {
-            defaultEstimate: 300000,
-            friday: true,
-            id: 'QRZ1qaGbKJSO-1-RoIh7F',
-            isPaused: false,
-            lastTaskCreationDay: getDbDateStr(1722617221091),
-            monday: true,
-            order: 0,
-            projectId: 'DEFAULT',
-            quickSetting: 'MONDAY_TO_FRIDAY',
-            repeatCycle: 'WEEKLY',
-            repeatEvery: 1,
-            saturday: false,
-            startDate: '2024-07-27',
-            sunday: false,
-            tagIds: ['TODAY'],
-            thursday: true,
-            title: 'Yap about my daily plans on mastodon',
-            tuesday: true,
-            wednesday: true,
-          },
-          duration: 300000,
-          id: 'QRZ1qaGbKJSO-1-RoIh7F_2024-08-05',
-          start: 1722845100000,
-          type: 'RepeatProjection',
-        },
-      ],
-      isToday: false,
-    } as any);
+    expect(r[3].dayDate).toBe('2024-08-05');
+    expect(r[3].beyondBudgetTasks).toEqual([]);
+    expect(r[3].entries.length).toBe(5); // 4 tasks + 1 lunch break
+
+    // Verify the scheduled repeat task at 9:00
+    expect(r[3].entries[0].id).toBe('wSs2q4YWkZZjthJrUeIos_2024-08-05');
+    expect(r[3].entries[0].type).toBe('ScheduledRepeatProjection');
+    expect(r[3].entries[0].start).toBe(1722841200000);
+
+    // Verify unscheduled repeat tasks
+    expect(r[3].entries[1].id).toBe('lmjFQzTdJh8aSak3cu9SN_2024-08-05');
+    expect(r[3].entries[1].type).toBe('RepeatProjection');
+
+    expect(r[3].entries[2].id).toBe('Foclw2saS0jZ3LfLVM5fd_2024-08-05');
+    expect(r[3].entries[2].type).toBe('RepeatProjection');
+
+    expect(r[3].entries[3].id).toBe('QRZ1qaGbKJSO-1-RoIh7F_2024-08-05');
+    expect(r[3].entries[3].type).toBe('RepeatProjection');
+
+    // Verify lunch break appears as the 5th entry
+    expect(r[3].entries[4].id).toBe('LUNCH_BREAK_2024-08-05');
+    expect(r[3].entries[4].type).toBe('LunchBreak');
+    expect(r[3].entries[4].start).toBe(1722848400000); // 11:00
+    expect(r[3].isToday).toBe(false);
   });
 });

@@ -1,7 +1,7 @@
 import { Task } from '../features/tasks/task.model';
 
 export const getTimeLeftForTask = (task: Task): number => {
-  if (task.subTaskIds.length > 0) {
+  if (task.subTaskIds && task.subTaskIds.length > 0) {
     return task.timeEstimate;
   }
   return Math.max(0, task.timeEstimate - task.timeSpent) || 0;
@@ -12,7 +12,7 @@ export const getTimeLeftForTasks = (tasks: Task[]): number => {
 };
 
 export const getTimeLeftForTaskWithMinVal = (task: Task, minVal: number): number => {
-  if (task.subTaskIds.length > 0) {
+  if (task.subTaskIds && task.subTaskIds.length > 0) {
     return Math.max(minVal, task.timeEstimate);
   }
   if (typeof task.timeSpent !== 'number') {

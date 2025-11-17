@@ -141,6 +141,14 @@ export type SyncConfig = Readonly<{
   localFileSync?: LocalFileSyncConfig;
 }>;
 
+export type TaskPlacementStrategy =
+  | 'DEFAULT'
+  | 'BEST_FIT'
+  | 'SHORTEST_FIRST'
+  | 'LONGEST_FIRST'
+  | 'OLDEST_FIRST'
+  | 'NEWEST_FIRST';
+
 export type ScheduleConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
@@ -148,6 +156,8 @@ export type ScheduleConfig = Readonly<{
   isLunchBreakEnabled: boolean;
   lunchBreakStart: string;
   lunchBreakEnd: string;
+  isAllowTaskSplitting: boolean;
+  taskPlacementStrategy: TaskPlacementStrategy;
 }>;
 
 export type ReminderConfig = Readonly<{
