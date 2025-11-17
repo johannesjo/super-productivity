@@ -339,14 +339,13 @@ button.isActive2 {
 .week-month-btn {
   min-width: 48px;
   height: 36px;
-  padding: 0 var(--s);
-  font-size: 12px;
-  font-weight: 500;
+  padding: 0;
   border: none;
   border-radius: 0;
   transition: var(--transition-standard);
   cursor: pointer;
   position: relative;
+  margin-left: -8px;
 
   @include mq(xs, max) {
     min-width: 40px;
@@ -381,10 +380,16 @@ button.isActive2 {
     border-right: 1px solid rgba(255, 255, 255, 0.2);
     border-top-left-radius: var(--card-border-radius);
     border-bottom-left-radius: var(--card-border-radius);
+    margin-left: 0;
 
     @include darkTheme() {
       border-right-color: rgba(255, 255, 255, 0.1);
     }
+  }
+
+  &:last-of-type {
+    border-top-right-radius: var(--card-border-radius);
+    border-bottom-right-radius: var(--card-border-radius);
   }
 }
 
