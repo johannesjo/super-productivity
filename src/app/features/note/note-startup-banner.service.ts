@@ -47,14 +47,14 @@ export class NoteStartupBannerService {
 
     this._bannerService.open({
       id: BannerId.StartupNote,
-      msg: T.F.NOTE.B_STARTUP.MSG,
+      msg: T.F.REFLECTION_NOTE.MSG,
       ico: 'note',
       translateParams: {
         content,
         date: createdDate,
       },
       action: {
-        label: T.F.NOTE.B_STARTUP.ACTION_DISMISS,
+        label: T.F.REFLECTION_NOTE.ACTION_DISMISS,
         fn: () => this._setLastViewed(latestNote.id, todayStr),
       },
       isHideDismissBtn: true,
