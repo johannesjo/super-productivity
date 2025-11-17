@@ -311,51 +311,28 @@ button.isActive2 {
     margin-right: calc(var(--s) * 0.125);
     gap: calc(var(--s) * 0.5);
   }
+
+  .task-placement-btn {
+    padding: 4px;
+  }
 }
 
-.task-placement-select {
-  margin: 0;
-  font-size: 12px;
+// Menu panel lives in an overlay; use ::ng-deep for styling menu items
+:host ::ng-deep .task-placement-menu-item {
+  display: flex;
+  align-items: center;
 
-  ::ng-deep .mat-mdc-form-field-subscript-wrapper {
-    display: none;
+  .selected-icon {
+    margin-right: var(--s-half);
+    opacity: 0;
   }
 
-  ::ng-deep .mat-mdc-text-field-wrapper {
-    padding: 0;
-  }
+  &.active {
+    color: var(--c-accent);
 
-  ::ng-deep .mat-mdc-form-field-infix {
-    min-height: 36px;
-    padding: 6px 12px 6px 8px;
-  }
-
-  ::ng-deep .mat-mdc-select {
-    font-size: 12px;
-  }
-
-  ::ng-deep .mat-mdc-select-value {
-    padding-left: 4px;
-  }
-
-  ::ng-deep .mat-mdc-select-arrow-wrapper {
-    padding-right: 4px;
-  }
-
-  @include mq(xs, max) {
-    font-size: 11px;
-    ::ng-deep .mat-mdc-form-field-infix {
-      min-height: 32px;
-      padding: 4px 10px 4px 6px;
+    .selected-icon {
+      opacity: 1;
     }
-  }
-}
-
-// Style for dropdown panel options
-::ng-deep .mat-mdc-select-panel {
-  .mat-mdc-option {
-    padding-left: 16px;
-    padding-right: 16px;
   }
 }
 

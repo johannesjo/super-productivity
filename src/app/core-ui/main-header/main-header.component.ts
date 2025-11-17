@@ -44,9 +44,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
-import { MatOption, MatSelect } from '@angular/material/select';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { TaskPlacementStrategy } from '../../features/config/global-config.model';
+import { NgIf } from '@angular/common';
 
 @Component({
   selector: 'main-header',
@@ -68,10 +68,10 @@ import { TaskPlacementStrategy } from '../../features/config/global-config.model
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
     FocusButtonComponent,
-    MatFormField,
-    MatSelect,
-    MatOption,
-    MatLabel,
+    MatMenuTrigger,
+    MatMenu,
+    MatMenuItem,
+    NgIf,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {
@@ -161,6 +161,9 @@ export class MainHeaderComponent implements OnDestroy {
 
   scheduleConfig = toSignal(
     this.globalConfigService.cfg$.pipe(map((cfg) => cfg?.schedule)),
+  );
+  selectedTaskPlacementStrategy = computed(
+    () => this.scheduleConfig()?.taskPlacementStrategy || 'DEFAULT',
   );
 
   taskPlacementStrategies: { value: TaskPlacementStrategy; label: string }[] = [
