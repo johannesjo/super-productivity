@@ -13,7 +13,6 @@ import { PlannerDayMap } from '../planner/planner.model';
 import { TaskWithDueTime, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { ScheduleConfig } from '../config/global-config.model';
-import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { mapToScheduleDays } from './map-schedule-data/map-to-schedule-days';
 import { Store } from '@ngrx/store';
 import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
@@ -85,8 +84,6 @@ export class ScheduleService {
       return [];
     }
 
-    const scheduleConfig = timelineCfg || DEFAULT_GLOBAL_CONFIG.schedule;
-
     return mapToScheduleDays(
       now,
       daysToShow,
@@ -97,7 +94,6 @@ export class ScheduleService {
       icalEvents ?? [],
       currentTaskId,
       plannerDayMap,
-      scheduleConfig,
       timelineCfg?.isWorkStartEndEnabled ? createWorkStartEndCfg(timelineCfg) : undefined,
       timelineCfg?.isLunchBreakEnabled ? createLunchBreakCfg(timelineCfg) : undefined,
     );

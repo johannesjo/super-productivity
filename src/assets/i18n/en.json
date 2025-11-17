@@ -660,22 +660,6 @@
         "ADD_SESSION": "Add Session",
         "NEW_SESSION_DURATION": "Duration",
         "ADD_BTN": "Add"
-      },
-      "REFLECTION": {
-        "TITLE": "Reflection Note",
-        "PLACEHOLDER_1": "What worked well today? What should change tomorrow?",
-        "PLACEHOLDER_2": "Small improvement for tomorrow?",
-        "PLACEHOLDER_3": "Where did focus slip - and how can you protect it?",
-        "PLACEHOLDER_4": "Which task gave you energy? Which drained it?",
-        "PLACEHOLDER_5": "One thing to repeat. One thing to change.",
-        "REMIND_LABEL": "Remind me tomorrow about this",
-        "HISTORY_BTN": "View past reflections",
-        "HISTORY_TITLE": "Reflection history",
-        "HISTORY_EMPTY": "No reflections saved yet. Capture today's note to start a streak.",
-        "REMINDER_TASK_TITLE": "Revisit reflection note",
-        "REMINDER_CREATED": "Reflection reminder scheduled for tomorrow",
-        "REMINDER_ERROR": "Could not schedule the reminder",
-        "REMINDER_NEEDS_TEXT": "Write a reflection before asking for a reminder"
       }
     },
     "NOTE": {
@@ -686,10 +670,6 @@
         "VIEW_PARSED": "View as parsed (non editable) markdown",
         "VIEW_SPLIT": "View parsed and unparsed markdown in split view",
         "VIEW_TEXT_ONLY": "View as unparsed text"
-      },
-      "B_STARTUP": {
-        "MSG": "Reflection Note: ({{date}}): {{content}}",
-        "ACTION_DISMISS": "Dismiss"
       },
       "NOTE_CMP": {
         "DISABLE_PARSE": "Disable markdown parsing for preview",
@@ -1935,18 +1915,7 @@
       "TITLE": "Schedule",
       "WORK_START_END_DESCRIPTION": "e.g. 17:00",
       "WEEK": "Week",
-      "MONTH": "Month",
-      "L_IS_ALLOW_TASK_SPLITTING": "Allow task splitting across time boundaries",
-      "L_TASK_PLACEMENT_STRATEGY": "Sort tasks without a scheduled time (overwrites manual sorting)",
-      "TASK_PLACEMENT_STRATEGY_DEFAULT": "Default (Sequential)",
-      "TASK_PLACEMENT_STRATEGY_BEST_FIT": "Best Fit (reduce gaps)",
-      "TASK_PLACEMENT_STRATEGY_SHORTEST_FIRST": "Shortest Task First",
-      "TASK_PLACEMENT_STRATEGY_LONGEST_FIRST": "Longest Task First",
-      "TASK_PLACEMENT_STRATEGY_OLDEST_FIRST": "Oldest Task First",
-      "TASK_PLACEMENT_STRATEGY_NEWEST_FIRST": "Newest Task First",
-      "TASK_PLACEMENT_STRATEGY_DEFAULT_HELP": "Default: Uses simple sequential placement. Tasks are placed one after another in the order they appear in your task list, starting from the work start time or current time.",
-      "TASK_PLACEMENT_STRATEGY_BEST_FIT_HELP": "Best Fit: Minimizes wasted time between tasks by intelligently placing tasks into gaps around scheduled items. Uses best-fit bin packing algorithm (like RAM allocation) to find the gap that results in the smallest leftover space. Only available when task splitting is disabled. Tasks are sorted shortest-first for optimal packing efficiency.",
-      "BEST_FIT_REQUIRES_NO_SPLIT": "Best Fit requires task splitting to be disabled. Switching back to Default."
+      "MONTH": "Month"
     },
     "SHORT_SYNTAX": {
       "HELP": "<p>Here you can control short syntax options when creating a task</p>",

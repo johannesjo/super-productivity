@@ -297,11 +297,10 @@ button.isActive2 {
 
 .week-month-selector {
   display: flex;
-  align-items: center;
-  gap: var(--s);
   border-radius: var(--card-border-radius);
-  overflow: visible;
+  overflow: hidden;
   margin-right: calc(var(--s) * 0.25);
+  box-shadow: var(--whiteframe-shadow-2dp);
 
   @include mq(xs) {
     margin-right: var(--s);
@@ -309,43 +308,20 @@ button.isActive2 {
 
   @include mq(xs, max) {
     margin-right: calc(var(--s) * 0.125);
-    gap: calc(var(--s) * 0.5);
-  }
-
-  .task-placement-btn {
-    padding: 4px;
-  }
-}
-
-// Menu panel lives in an overlay; use ::ng-deep for styling menu items
-:host ::ng-deep .task-placement-menu-item {
-  display: flex;
-  align-items: center;
-
-  .selected-icon {
-    margin-right: var(--s-half);
-    opacity: 0;
-  }
-
-  &.active {
-    color: var(--c-accent);
-
-    .selected-icon {
-      opacity: 1;
-    }
   }
 }
 
 .week-month-btn {
   min-width: 48px;
   height: 36px;
-  padding: 0;
+  padding: 0 var(--s);
+  font-size: 12px;
+  font-weight: 500;
   border: none;
   border-radius: 0;
   transition: var(--transition-standard);
   cursor: pointer;
   position: relative;
-  margin-left: -8px;
 
   @include mq(xs, max) {
     min-width: 40px;
@@ -380,16 +356,10 @@ button.isActive2 {
     border-right: 1px solid rgba(255, 255, 255, 0.2);
     border-top-left-radius: var(--card-border-radius);
     border-bottom-left-radius: var(--card-border-radius);
-    margin-left: 0;
 
     @include darkTheme() {
       border-right-color: rgba(255, 255, 255, 0.1);
     }
-  }
-
-  &:last-of-type {
-    border-top-right-radius: var(--card-border-radius);
-    border-bottom-right-radius: var(--card-border-radius);
   }
 }
 

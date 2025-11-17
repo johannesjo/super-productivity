@@ -10,12 +10,8 @@ import {
   SVERepeatProjection,
   SVETask,
 } from '../schedule.model';
-import { ScheduleConfig } from '../../config/global-config.model';
 import { createScheduleViewEntriesForNormalTasks } from './create-schedule-view-entries-for-normal-tasks';
 import { insertBlockedBlocksViewEntriesForSchedule } from './insert-blocked-blocks-view-entries-for-schedule';
-import { placeTasksInGaps } from './place-tasks-in-gaps';
-import { placeTasksRespectingBlocks } from './place-tasks-respecting-blocks';
-import { sortTasksByStrategy } from './sort-tasks-by-strategy';
 import { SCHEDULE_VIEW_TYPE_ORDER, SVEType } from '../schedule.const';
 
 export const createViewEntriesForDay = (
@@ -25,8 +21,6 @@ export const createViewEntriesForDay = (
   nonScheduledTasksForDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[],
   blockedBlocksForDay: BlockedBlock[],
   viewEntriesPushedToNextDay: SVEEntryForNextDay[],
-  scheduleConfig: ScheduleConfig,
-  dayEndTime: number,
 ): SVE[] => {
   let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
@@ -52,42 +46,9 @@ export const createViewEntriesForDay = (
   }
 
   if (nonScheduledTasksForDay.length) {
-    const strategy = scheduleConfig.taskPlacementStrategy;
-    const allowSplitting = scheduleConfig.isAllowTaskSplitting;
-
-    if (strategy === 'BEST_FIT') {
-      // Use best-fit bin packing algorithm for optimal gap filling
-      const { viewEntries: placedEntries } = placeTasksInGaps(
-        nonScheduledTasksForDay,
-        blockedBlocksForDay,
-        startTime,
-        dayEndTime,
-        allowSplitting,
-      );
-      viewEntries = viewEntries.concat(placedEntries);
-      // Note: tasksForNextDay will be handled by task splitting prevention logic in create-schedule-days.ts
-    } else {
-      // Use strategy-based sequential placement
-      const sortedTasks = sortTasksByStrategy(nonScheduledTasksForDay, strategy);
-
-      if (!allowSplitting) {
-        // When splitting is not allowed, use gap-aware placement
-        const { viewEntries: placedEntries } = placeTasksRespectingBlocks(
-          sortedTasks,
-          blockedBlocksForDay,
-          startTime,
-          dayEndTime,
-          false,
-        );
-        viewEntries = viewEntries.concat(placedEntries);
-        // Note: tasksForNextDay will be handled by task splitting prevention logic in create-schedule-days.ts
-      } else {
-        // When splitting is allowed, use simple sequential placement
-        viewEntries = viewEntries.concat(
-          createScheduleViewEntriesForNormalTasks(startTime, sortedTasks),
-        );
-      }
-    }
+    viewEntries = viewEntries.concat(
+      createScheduleViewEntriesForNormalTasks(startTime, nonScheduledTasksForDay),
+    );
   }
 
   insertBlockedBlocksViewEntriesForSchedule(

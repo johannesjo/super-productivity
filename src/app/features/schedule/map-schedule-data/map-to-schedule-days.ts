@@ -8,7 +8,6 @@ import {
   ScheduleLunchBreakCfg,
   ScheduleWorkStartEndCfg,
 } from '../schedule.model';
-import { ScheduleConfig } from '../../config/global-config.model';
 import { createScheduleDays } from './create-schedule-days';
 import { createBlockedBlocksByDayMap } from './create-blocked-blocks-by-day-map';
 
@@ -23,7 +22,6 @@ export const mapToScheduleDays = (
   calenderWithItems: ScheduleCalendarMapEntry[],
   currentId: string | null,
   plannerDayMap: PlannerDayMap,
-  scheduleConfig: ScheduleConfig,
   workStartEndCfg: ScheduleWorkStartEndCfg = {
     startTime: '0:00',
     endTime: '23:59',
@@ -92,7 +90,6 @@ export const mapToScheduleDays = (
     blockerBlocksDayMap,
     workStartEndCfg,
     now,
-    scheduleConfig,
   );
 
   return v;
