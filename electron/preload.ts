@@ -1,5 +1,6 @@
 import { ipcRenderer, IpcRendererEvent, webFrame, contextBridge } from 'electron';
-import { DirectoryDialogOptions, ElectronAPI } from './electronAPI.d';
+import type { ElectronAPI } from './electronAPI.d';
+import type { DirectoryDialogOptions } from './directory-dialog-options';
 import { IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import { LocalBackupMeta } from '../src/app/imex/local-backup/local-backup.model';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
