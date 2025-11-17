@@ -46,10 +46,6 @@ export const mapToScheduleDays = (
   // };
   // Log.log(JSON.stringify(params));
 
-  const effectiveWorkStartEndCfg = scheduleConfig.isWorkStartEndEnabled
-    ? workStartEndCfg
-    : undefined;
-
   const plannerDayKeys = Object.keys(plannerDayMap);
   // const plannerDayTasks = plannerDayKeys
   //   .map((key) => {
@@ -83,7 +79,7 @@ export const mapToScheduleDays = (
     scheduledTasks,
     scheduledTaskRepeatCfgs,
     calenderWithItems,
-    effectiveWorkStartEndCfg,
+    workStartEndCfg,
     lunchBreakCfg,
     now,
   );
@@ -94,7 +90,7 @@ export const mapToScheduleDays = (
     dayDates,
     plannerDayMap,
     blockerBlocksDayMap,
-    effectiveWorkStartEndCfg,
+    workStartEndCfg,
     now,
     scheduleConfig,
   );

@@ -52,9 +52,6 @@ export const createScheduleDays = (
     todayStart.setHours(0, 0, 0, 0);
 
     let startTime = i == 0 ? now : todayStart.getTime();
-    if (i === 0 && startTime < todayStart.getTime()) {
-      startTime = todayStart.getTime();
-    }
     if (workStartEndCfg) {
       const startTimeToday = getDateTimeFromClockString(
         workStartEndCfg.startTime,
@@ -94,11 +91,8 @@ export const createScheduleDays = (
     const { beyond, within, isSomeTimeLeftForLastOverBudget } =
       getTasksWithinAndBeyondBudget(flowTasksForDay, nonScheduledBudgetForDay);
 
-    const isUseRemainingBudgetForOverBudgetTask =
-      scheduleConfig.isAllowTaskSplitting && within.length === 0;
-
     const nonSplitBeyondTasks = (() => {
-      if (isUseRemainingBudgetForOverBudgetTask && isSomeTimeLeftForLastOverBudget) {
+      if (isSomeTimeLeftForLastOverBudget) {
         const firstBeyond = beyond[0];
         if (firstBeyond) {
           within.push(firstBeyond as any);
