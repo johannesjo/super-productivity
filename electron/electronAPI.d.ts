@@ -14,6 +14,7 @@ import {
   PluginNodeScriptResult,
   PluginManifest,
 } from '../packages/plugin-api/src/types';
+import type { DirectoryDialogOptions } from './directory-dialog-options';
 
 export interface ElectronAPI {
   on(
@@ -153,9 +154,4 @@ export interface ElectronAPI {
   ): Promise<PluginNodeScriptResult>;
 }
 
-export interface DirectoryDialogOptions {
-  defaultPath?: string | null;
-  title?: string;
-  message?: string;
-  buttonLabel?: string;
-}
+export type { DirectoryDialogOptions } from './directory-dialog-options';

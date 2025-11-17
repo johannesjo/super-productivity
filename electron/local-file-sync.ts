@@ -2,13 +2,9 @@ import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SyncGetRevResult } from '../src/app/imex/sync/sync.model';
 import { readdirSync, readFileSync, statSync, writeFileSync, unlinkSync } from 'fs';
 import { error, log } from 'electron-log/main';
-import { dialog, ipcMain, OpenDialogOptions } from 'electron';
+import { dialog, ipcMain } from 'electron';
 import { getWin } from './main-window';
-
-type DirectoryDialogOptions = Pick<
-  OpenDialogOptions,
-  'defaultPath' | 'title' | 'message' | 'buttonLabel'
->;
+import type { DirectoryDialogOptions } from './directory-dialog-options';
 
 export const initLocalFileSyncAdapter = (): void => {
   ipcMain.handle(
