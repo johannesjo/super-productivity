@@ -71,6 +71,10 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, tagIds }));
   }
 
+  updateTagIdsFromTxt(tagIdsFromTxt: string[]): void {
+    this._taskInputState.update((state) => ({ ...state, tagIdsFromTxt }));
+  }
+
   updateNewTagTitles(newTagTitles: string[]): void {
     this._taskInputState.update((state) => ({ ...state, newTagTitles }));
   }
@@ -109,6 +113,7 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({
       ...state,
       tagIds: [],
+      tagIdsFromTxt: [],
       newTagTitles: [],
       cleanText: null,
     }));

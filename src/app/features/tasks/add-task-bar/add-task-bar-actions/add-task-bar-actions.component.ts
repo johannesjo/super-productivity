@@ -85,7 +85,13 @@ export class AddTaskBarActionsComponent {
   );
   allTags = this._tagService.tagsNoMyDayAndNoListSorted;
   selectedTags = computed(() =>
-    this.allTags().filter((t) => this.state().tagIds.includes(t.id)),
+    this.allTags().filter(
+      (t) =>
+        this.state().tagIds.includes(t.id) || this.state().tagIdsFromTxt.includes(t.id),
+    ),
+  );
+  hasTagsSelected = computed(
+    () => this.state().tagIds.length > 0 || this.state().tagIdsFromTxt.length > 0,
   );
 
   // Constants
@@ -184,6 +190,7 @@ export class AddTaskBarActionsComponent {
   }
 
   onTagsMenuClick(): void {
+    console.log(this.selectedTags());
     this._handleMenuClick('tags');
   }
 

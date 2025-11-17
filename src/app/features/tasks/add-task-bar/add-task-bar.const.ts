@@ -4,6 +4,7 @@ import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 export interface AddTaskBarState {
   projectId: string;
   tagIds: string[];
+  tagIdsFromTxt: string[];
   date: string | null;
   time: string | null;
   spent: TimeSpentOnDay | null;
@@ -27,6 +28,7 @@ export const ESTIMATE_OPTIONS = [
 export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
   projectId: INBOX_PROJECT.id,
   tagIds: [],
+  tagIdsFromTxt: [],
   date: null,
   time: null,
   spent: null,

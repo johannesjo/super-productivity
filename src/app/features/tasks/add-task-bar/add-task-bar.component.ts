@@ -411,7 +411,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!title) return;
 
     const state = this.stateService.state();
-    let finalTagIds = [...state.tagIds];
+    let finalTagIds = [...state.tagIds, ...state.tagIdsFromTxt];
 
     if (this.hasNewTags()) {
       const shouldCreateNewTags = await this._confirmNewTags();
@@ -586,6 +586,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // UI event handlers
   onInputChange(event: Event): void {
+    console.log(this.stateService.state());
     const target = event.target as HTMLInputElement;
     const value = target.value;
     this.stateService.updateInputTxt(value);
