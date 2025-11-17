@@ -2023,7 +2023,9 @@
     "PERSISTENCE_DISALLOWED": "Data will be not persisted permanently. Be aware that this can lead to data loss!!",
     "PERSISTENCE_ERROR": "Error when requesting to persist data: {{err}}",
     "RUNNING_X": "Running \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
+    "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today",
+    "NO_TASKS_TO_UNPLAN": "No tasks to unplan"
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -2074,6 +2076,7 @@
     "SEARCH": "Search",
     "SETTINGS": "Settings",
     "SHOW_SEARCH_BAR": "Show Search Bar",
+    "UNPLAN_ALL_TASKS": "Unplan all tasks",
     "TAGS": "Tags",
     "TASK_LIST": "Task List",
     "TASKS": "Tasks",
