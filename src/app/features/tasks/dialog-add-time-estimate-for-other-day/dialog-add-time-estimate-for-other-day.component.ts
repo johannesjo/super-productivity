@@ -24,7 +24,7 @@ import {
 import { InputDurationSliderComponent } from '../../../ui/duration/input-duration-slider/input-duration-slider.component';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 
 interface NewTimeEntry {
@@ -55,7 +55,7 @@ interface NewTimeEntry {
     MatButton,
     MatDialogClose,
     MatIcon,
-    DatePipe,
+    LocaleDatePipe,
     TranslatePipe,
   ],
 })

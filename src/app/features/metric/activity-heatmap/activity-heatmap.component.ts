@@ -20,8 +20,8 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SnackService } from '../../../core/snack/snack.service';
-import { GlobalConfigService } from '../../config/global-config.service';
 import { ShareService } from '../../../core/share/share.service';
+import { DateAdapter } from '@angular/material/core';
 
 interface DayData {
   date: Date;
@@ -48,8 +48,8 @@ export class ActivityHeatmapComponent {
   private readonly _taskService = inject(TaskService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
-  private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _shareService = inject(ShareService);
+  private readonly _dateAdapter = inject(DateAdapter);
 
   T: typeof T = T;
   weeks: WeekData[] = [];
@@ -59,15 +59,10 @@ export class ActivityHeatmapComponent {
     { initialValue: '' },
   );
 
-  // Get first day of week setting (0 = Sunday, 1 = Monday, etc.)
-  private readonly _firstDayOfWeek = computed(() => {
-    return this._globalConfigService.misc()?.firstDayOfWeek ?? 1;
-  });
-
   // Day labels adjusted for first day of week
   readonly dayLabels = computed(() => {
     const allDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-    const firstDay = this._firstDayOfWeek();
+    const firstDay = this._dateAdapter.getFirstDayOfWeek();
     return [...allDays.slice(firstDay), ...allDays.slice(0, firstDay)];
   });
 
@@ -95,7 +90,7 @@ export class ActivityHeatmapComponent {
   // Compute heatmap data - reacts to both data changes AND firstDayOfWeek setting changes
   heatmapData = computed(() => {
     const rawData = this._rawHeatmapData();
-    const firstDay = this._firstDayOfWeek();
+    const firstDay = this._dateAdapter.getFirstDayOfWeek();
 
     if (!rawData || !rawData.dayMap) {
       return null;

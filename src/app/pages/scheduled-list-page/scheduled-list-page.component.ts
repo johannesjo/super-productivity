@@ -19,7 +19,7 @@ import { MatRipple } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { FullPageSpinnerComponent } from '../../ui/full-page-spinner/full-page-spinner.component';
 import { AsyncPipe } from '@angular/common';
-import { LocaleDatePipe } from '../../ui/pipes/locale-date.pipe';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { HumanizeTimestampPipe } from '../../ui/pipes/humanize-timestamp.pipe';
 import { TagListComponent } from '../../features/tag/tag-list/tag-list.component';
 import { PlannerTaskComponent } from '../../features/planner/planner-task/planner-task.component';

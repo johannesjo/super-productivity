@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  LOCALE_ID,
   signal,
 } from '@angular/core';
 import {
@@ -35,6 +34,7 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { LazyChartComponent } from '../../metric/lazy-chart/lazy-chart.component';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogSimpleCounterEditSettingsComponent } from '../dialog-simple-counter-edit-settings/dialog-simple-counter-edit-settings.component';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 const CHART_DAYS = 28;
 const CHART_COLOR = '#4bc0c0';
@@ -65,7 +65,7 @@ export class DialogSimpleCounterEditComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _counterService = inject(SimpleCounterService);
   private readonly _dateService = inject(DateService);
-  private readonly _locale = inject(LOCALE_ID);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
 
   readonly dialogData = inject<{ simpleCounter: SimpleCounterCopy }>(MAT_DIALOG_DATA);
   readonly T = T;
@@ -238,7 +238,7 @@ export class DialogSimpleCounterEditComponent {
     const date = this.selectedDateStr();
     if (date === this.todayStr) return 'Today';
 
-    return new Date(date).toLocaleDateString(this._locale, {
+    return new Date(date).toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       day: 'numeric',
       month: 'numeric',
     });
@@ -267,7 +267,7 @@ export class DialogSimpleCounterEditComponent {
     const date = new Date(dateStr);
     const dayOfWeek = date.getDay();
 
-    const baseLabel = date.toLocaleDateString(this._locale, {
+    const baseLabel = date.toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       month: 'numeric',
       day: 'numeric',
     });

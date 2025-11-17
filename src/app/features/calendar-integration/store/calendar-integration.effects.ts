@@ -5,7 +5,7 @@ import { distinctUntilChanged, first, map, switchMap, tap } from 'rxjs/operators
 import { BehaviorSubject, EMPTY, forkJoin, timer } from 'rxjs';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { BannerService } from '../../../core/banner/banner.service';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { CalendarIntegrationEvent } from '../calendar-integration.model';
 import { isCalenderEventDue } from '../is-calender-event-due';
 import { CalendarIntegrationService } from '../calendar-integration.service';
@@ -35,7 +35,7 @@ export class CalendarIntegrationEffects {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _bannerService = inject(BannerService);
   private _taskService = inject(TaskService);
-  private _datePipe = inject(DatePipe);
+  private _datePipe = inject(LocaleDatePipe);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
   private _navigateToTaskService = inject(NavigateToTaskService);
   private _issueService = inject(IssueService);

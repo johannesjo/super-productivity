@@ -15,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE } from 'src/app/app.constants';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   template: `<add-task-bar></add-task-bar>`,
@@ -90,6 +92,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         isEnableDue: true,
         isEnableProject: true,
       }),
+      lang: () => ({ timeLocale: DEFAULT_LOCALE }),
     });
     const addTaskBarIssueSearchServiceSpy = jasmine.createSpyObj(
       'AddTaskBarIssueSearchService',
@@ -98,6 +101,10 @@ describe('AddTaskBarComponent Mentions Integration', () => {
     const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     const storeSpy = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    const dateAdapter = jasmine.createSpyObj<DateAdapter<Date>>('DateAdapter', [], {
+      getFirstDayOfWeek: () => DEFAULT_FIRST_DAY_OF_WEEK,
+      setLocale: () => {},
+    });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -112,6 +119,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         { provide: ProjectService, useValue: projectServiceSpy },
         { provide: TagService, useValue: tagServiceSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
+        { provide: DateAdapter, useValue: dateAdapter },
         {
           provide: AddTaskBarIssueSearchService,
           useValue: addTaskBarIssueSearchServiceSpy,

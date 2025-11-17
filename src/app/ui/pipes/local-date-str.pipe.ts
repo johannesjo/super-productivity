@@ -1,4 +1,4 @@
-import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
@@ -12,7 +12,6 @@ import { DateTimeFormatService } from '../../core/date-time-format/date-time-for
 })
 export class LocalDateStrPipe implements PipeTransform {
   private _dateTimeFormatService = inject(DateTimeFormatService);
-  private _defaultLocale = inject(LOCALE_ID);
   private translateService = inject(TranslateService);
 
   transform(
@@ -31,7 +30,7 @@ export class LocalDateStrPipe implements PipeTransform {
 
     const d = dateStrToUtcDate(value);
     // Use the configured locale if available, otherwise fall back to default
-    const locale = this._dateTimeFormatService.currentLocale || this._defaultLocale;
+    const locale = this._dateTimeFormatService.currentLocale;
     return formatMonthDay(d, locale);
   }
 }

@@ -8,7 +8,6 @@ import {
   HostListener,
   inject,
   input,
-  LOCALE_ID,
   OnDestroy,
   OnInit,
   signal,
@@ -28,7 +27,7 @@ import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
-import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { formatMonthDay } from '../../../util/format-month-day.util';
 import { ScheduleWeekDragService } from './schedule-week-drag.service';
 import { calculatePlaceholderForGridMove } from './schedule-week-placeholder.util';
@@ -64,7 +63,6 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   private readonly _service = inject(ScheduleWeekDragService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translateService = inject(TranslateService);
-  private _defaultLocale = inject(LOCALE_ID);
 
   isInPanel = input<boolean>(false);
   events = input<ScheduleEvent[] | null>([]);
@@ -336,12 +334,7 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     if (Number.isNaN(date.getTime())) {
       return dayStr;
     }
-    const locale =
-      this._dateTimeFormatService.currentLocale ||
-      this._translateService.currentLang ||
-      this._defaultLocale ||
-      'en-US';
-    return formatMonthDay(date, locale);
+    return formatMonthDay(date, this._dateTimeFormatService.currentLocale);
   }
 
   // Public methods for external preview control (used by schedule-day-panel)

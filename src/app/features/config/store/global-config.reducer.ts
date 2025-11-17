@@ -96,7 +96,6 @@ export const globalConfigReducer = createReducer<GlobalConfigState>(
   on(updateGlobalConfigSection, (state, { sectionKey, sectionCfg }) => ({
     ...state,
     [sectionKey]: {
-      // @ts-ignore
       ...state[sectionKey],
       ...sectionCfg,
     },
