@@ -185,7 +185,7 @@ export class GlobalConfigEffects {
       map(() => {
         this._snackService.open({
           type: 'CUSTOM',
-          msg: T.GCF.SCHEDULE.BEST_FIT_REQUIRES_NO_SPLIT,
+          msg: 'Best Fit strategy requires task splitting to be disabled. Switching to Default strategy.',
           ico: 'warning',
         });
 

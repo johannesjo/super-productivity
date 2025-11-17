@@ -27,13 +27,9 @@ export const createViewEntriesForDay = (
   viewEntriesPushedToNextDay: SVEEntryForNextDay[],
   scheduleConfig: ScheduleConfig,
   dayEndTime: number,
-): {
-  viewEntries: SVE[];
-  tasksForNextDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[];
-} => {
+): SVE[] => {
   let viewEntries: SVE[] = [];
   let startTime = initialStartTime;
-  let tasksForNextDay: (TaskWithoutReminder | TaskWithPlannedForDayIndication)[] = [];
 
   if (viewEntriesPushedToNextDay) {
     viewEntriesPushedToNextDay.forEach((ve) => {
@@ -61,16 +57,14 @@ export const createViewEntriesForDay = (
 
     if (strategy === 'BEST_FIT') {
       // Use best-fit bin packing algorithm for optimal gap filling
-      const { viewEntries: placedEntries, tasksForNextDay: nextDayTasks } =
-        placeTasksInGaps(
-          nonScheduledTasksForDay,
-          blockedBlocksForDay,
-          startTime,
-          dayEndTime,
-          allowSplitting,
-        );
+      const { viewEntries: placedEntries } = placeTasksInGaps(
+        nonScheduledTasksForDay,
+        blockedBlocksForDay,
+        startTime,
+        dayEndTime,
+        allowSplitting,
+      );
       viewEntries = viewEntries.concat(placedEntries);
-      tasksForNextDay = tasksForNextDay.concat(nextDayTasks);
       // Note: tasksForNextDay will be handled by task splitting prevention logic in create-schedule-days.ts
     } else {
       // Use strategy-based sequential placement
@@ -78,16 +72,14 @@ export const createViewEntriesForDay = (
 
       if (!allowSplitting) {
         // When splitting is not allowed, use gap-aware placement
-        const { viewEntries: placedEntries, tasksForNextDay: nextDayTasks } =
-          placeTasksRespectingBlocks(
-            sortedTasks,
-            blockedBlocksForDay,
-            startTime,
-            dayEndTime,
-            false,
-          );
+        const { viewEntries: placedEntries } = placeTasksRespectingBlocks(
+          sortedTasks,
+          blockedBlocksForDay,
+          startTime,
+          dayEndTime,
+          false,
+        );
         viewEntries = viewEntries.concat(placedEntries);
-        tasksForNextDay = tasksForNextDay.concat(nextDayTasks);
         // Note: tasksForNextDay will be handled by task splitting prevention logic in create-schedule-days.ts
       } else {
         // When splitting is allowed, use simple sequential placement
@@ -128,7 +120,7 @@ export const createViewEntriesForDay = (
   //   }
   // }
 
-  return { viewEntries, tasksForNextDay };
+  return viewEntries;
 
   // we could use this to group multiple
   // return viewEntries.map((ve, index) => {
