@@ -8,49 +8,20 @@
         [class.active]="selectedTimeView() === 'week'"
         class="week-month-btn week-btn"
         matTooltip="View Week"
-        mat-icon-button
+        mat-button
       >
-        <!--        {{ T.GCF.SCHEDULE.WEEK | translate }}-->
-        <mat-icon>view_week</mat-icon>
+        {{ T.GCF.SCHEDULE.WEEK | translate }}
       </button>
       <button
         (click)="selectTimeView('month')"
         [class.active]="selectedTimeView() === 'month'"
         class="week-month-btn month-btn"
         matTooltip="View Month"
-        mat-icon-button
+        mat-button
       >
-        <mat-icon>calendar_month</mat-icon>
+        {{ T.GCF.SCHEDULE.MONTH | translate }}
       </button>
     </div>
-
-    <button
-      mat-icon-button
-      [matMenuTriggerFor]="taskPlacementMenu"
-      [color]="selectedTaskPlacementStrategy() !== 'DEFAULT' ? 'accent' : undefined"
-      class="task-placement-btn"
-      matTooltip="{{ T.GCF.SCHEDULE.L_TASK_PLACEMENT_STRATEGY | translate }}"
-    >
-      <mat-icon>sort</mat-icon>
-    </button>
-
-    <mat-menu #taskPlacementMenu="matMenu">
-      @for (strategy of taskPlacementStrategies; track strategy.value) {
-        <button
-          mat-menu-item
-          (click)="updateTaskPlacementStrategy(strategy.value)"
-          [class.active]="selectedTaskPlacementStrategy() === strategy.value"
-          class="task-placement-menu-item"
-          role="menuitemradio"
-          [attr.aria-checked]="selectedTaskPlacementStrategy() === strategy.value"
-        >
-          @if (selectedTaskPlacementStrategy() === strategy.value) {
-            <mat-icon class="selected-icon"> check </mat-icon>
-          }
-          <span>{{ strategy.label | translate }}</span>
-        </button>
-      }
-    </mat-menu>
   }
 
   <nav class="action-nav">
