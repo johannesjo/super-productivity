@@ -47,6 +47,7 @@ describe('AddTaskBarActionsComponent', () => {
   const mockState = {
     projectId: mockProject.id, // Use mock project id by default
     tagIds: [],
+    tagIdsFromTxt: [],
     newTagTitles: [],
     date: null,
     time: null,
