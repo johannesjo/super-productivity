@@ -283,9 +283,7 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         }
       });
 
-      if (task.tagIds.length !== matchingTagIds.length) {
-        taskChanges.tagIds = matchingTagIds;
-      }
+      taskChanges.tagIds = matchingTagIds;
 
       if (
         newTagTitlesToCreate.length ||
