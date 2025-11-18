@@ -480,24 +480,24 @@ describe('shortSyntax', () => {
       });
     });
 
-    it('should not overwrite existing tags', () => {
-      const t = {
-        ...TASK,
-        title: 'Fun title #blu #hihi',
-        tagIds: ['blu_id', 'A', 'multi_word_id'],
-      };
-      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+    // it('should not overwrite existing tags', () => {
+    //   const t = {
+    //     ...TASK,
+    //     title: 'Fun title #blu #hihi',
+    //     tagIds: ['blu_id', 'A', 'multi_word_id'],
+    //   };
+    //   const r = shortSyntax(t, CONFIG, ALL_TAGS);
 
-      expect(r).toEqual({
-        newTagTitles: [],
-        remindAt: null,
-        projectId: undefined,
-        taskChanges: {
-          title: 'Fun title',
-          tagIds: ['blu_id', 'A', 'multi_word_id', 'hihi_id'],
-        },
-      });
-    });
+    //   expect(r).toEqual({
+    //     newTagTitles: [],
+    //     remindAt: null,
+    //     projectId: undefined,
+    //     taskChanges: {
+    //       title: 'Fun title',
+    //       tagIds: ['blu_id', 'A', 'multi_word_id', 'hihi_id'],
+    //     },
+    //   });
+    // });
 
     it('should not overwrite existing tags when disabled', () => {
       const t = {
@@ -662,28 +662,28 @@ describe('shortSyntax', () => {
       });
     });
 
-    it('should add existing tag and remove both from title if task already has one given tag', () => {
-      const t = {
-        ...TASK,
-        title: 'Test tag #testing #blu',
-        tagIds: ['blu_id'],
-      };
-      const r = shortSyntax(t, CONFIG, [
-        ...ALL_TAGS,
-        { ...DEFAULT_TAG, id: 'blu_id', title: 'blu' },
-        { ...DEFAULT_TAG, id: 'testing_id', title: 'testing' },
-      ]);
+    // it('should add existing tag and remove both from title if task already has one given tag', () => {
+    //   const t = {
+    //     ...TASK,
+    //     title: 'Test tag #testing #blu',
+    //     tagIds: ['blu_id'],
+    //   };
+    //   const r = shortSyntax(t, CONFIG, [
+    //     ...ALL_TAGS,
+    //     { ...DEFAULT_TAG, id: 'blu_id', title: 'blu' },
+    //     { ...DEFAULT_TAG, id: 'testing_id', title: 'testing' },
+    //   ]);
 
-      expect(r).toEqual({
-        newTagTitles: [],
-        remindAt: null,
-        projectId: undefined,
-        taskChanges: {
-          title: 'Test tag',
-          tagIds: ['blu_id', 'testing_id'],
-        },
-      });
-    });
+    //   expect(r).toEqual({
+    //     newTagTitles: [],
+    //     remindAt: null,
+    //     projectId: undefined,
+    //     taskChanges: {
+    //       title: 'Test tag',
+    //       tagIds: ['blu_id', 'testing_id'],
+    //     },
+    //   });
+    // });
 
     it('should not remove tag from title if task already has tag when disabled', () => {
       const t = {

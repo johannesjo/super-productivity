@@ -14,7 +14,7 @@ describe('AddTaskBarParserService', () => {
       'updateCleanText',
       'setAutoDetectedProjectId',
       'updateProjectId',
-      'updateTagIds',
+      'updateTagIdsFromTxt',
       'updateNewTagTitles',
       'updateSpent',
       'updateEstimate',
@@ -91,7 +91,7 @@ describe('AddTaskBarParserService', () => {
       mockStateService.updateDate.calls.reset();
       mockStateService.updateSpent.calls.reset();
       mockStateService.updateEstimate.calls.reset();
-      mockStateService.updateTagIds.calls.reset();
+      mockStateService.updateTagIdsFromTxt.calls.reset();
       mockStateService.updateNewTagTitles.calls.reset();
       mockStateService.setAutoDetectedProjectId.calls.reset();
       mockStateService.updateProjectId.calls.reset();
@@ -116,6 +116,7 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: null,
           time: null,
@@ -151,6 +152,7 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: currentDate,
           time: currentTime,
@@ -183,6 +185,7 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: currentDate,
           time: null,
@@ -320,7 +323,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTagIds).toHaveBeenCalled();
+        expect(mockStateService.updateTagIdsFromTxt).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -375,7 +378,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTagIds).toHaveBeenCalled();
+        expect(mockStateService.updateTagIdsFromTxt).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -584,6 +587,7 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: dateStr,
         time: timeStr,
@@ -616,6 +620,7 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -650,6 +655,7 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -682,6 +688,7 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
@@ -713,6 +720,7 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
