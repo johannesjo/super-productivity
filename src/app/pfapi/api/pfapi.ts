@@ -222,7 +222,12 @@ export class Pfapi<const MD extends ModelCfgs> {
     providerId: T,
     privateCfg: PrivateCfgByProviderId<T>,
   ): Promise<void> {
-    PFLog.normal(`${this.setPrivateCfgForSyncProvider.name}()`, providerId, privateCfg);
+    PFLog.normal(
+      `${this.setPrivateCfgForSyncProvider.name}()`,
+      providerId,
+      privateCfg &&
+        Object.keys(privateCfg).map((k) => k + ':' + typeof (privateCfg as any)[k]),
+    );
     const provider = this.syncProviders.find((sp) => sp.id === providerId);
     if (!provider) {
       throw new InvalidSyncProviderError();
