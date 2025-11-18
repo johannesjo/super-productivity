@@ -18,6 +18,7 @@ import { IssueProviderTrello } from 'src/app/features/issue/issue.model';
 import { ConfigFormSection } from 'src/app/features/config/global-config.model';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatSelect, MatOption } from '@angular/material/select';
+import { MatButton } from '@angular/material/button';
 import { AsyncPipe } from '@angular/common';
 import { BehaviorSubject, Observable, Subscription, of } from 'rxjs';
 import { catchError, map, tap, debounceTime, switchMap, startWith } from 'rxjs/operators';
@@ -37,6 +38,7 @@ interface TrelloBoard {
     MatLabel,
     MatSelect,
     MatOption,
+    MatButton,
     AsyncPipe,
   ],
 
@@ -45,12 +47,22 @@ interface TrelloBoard {
   template: `
     <!--section for selecting board-->
     <p style="margin-top: 12px;">Select a Trello Board for searching issues.</p>
+    @let isLoading = isLoading$ | async;
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      style="margin-bottom: 12px;"
+      (click)="reloadBoards()"
+      [disabled]="isLoading"
+    >
+      Load Trello Boards
+    </button>
     <mat-form-field
       appearance="outline"
       style="width: 100%;"
     >
       <!--label for showing that this is the board-->
-      @let isLoading = isLoading$ | async;
       @if (isLoading) {
         <mat-label>No boards found (yet)...</mat-label>
       }
@@ -190,5 +202,21 @@ export class TrelloAdditionalCfgComponent implements OnInit, OnDestroy {
       this._cfg = updated;
       this.modelChange.emit(updated);
     }
+  }
+
+  reloadBoards(): void {
+    if (!this._cfg || !this._cfg.apiKey || !this._cfg.token) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: 'Enter API key and token first.',
+        isSkipTranslate: true,
+      });
+      return;
+    }
+
+    this.isCredentialsComplete = true;
+    this.isLoading$.next(true);
+    this._credentialsChanged$.next({ ...this._cfg });
+    this._cdr.markForCheck();
   }
 }

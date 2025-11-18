@@ -38,6 +38,13 @@ export const TRELLO_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderTrello>[]
       type: 'password',
       required: true,
     },
+    validators: {
+      token: {
+        expression: (c: { value: string | undefined }) =>
+          !c.value || c.value.length >= 32,
+        message: 'Trello token is typically 32+ characters',
+      },
+    },
   },
   // search boards
   {
@@ -63,7 +70,7 @@ export const TRELLO_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderTrello> 
     },
     {
       h: 'Selecting Your Board',
-      p: 'After entering your API key and token, you will be able to select the Trello board you want to work with. Only cards from the selected board will be accessible in Super Productivity.',
+      p: 'After entering your API key and token, click "Load Trello Boards" and you will be able to select the Trello board you want to work with. Only cards from the selected board will be accessible in Super Productivity.',
     },
     {
       h: 'Features',
