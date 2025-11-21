@@ -266,6 +266,7 @@ export class WorkContextService {
   todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
     // tap((taskIds: string[]) => Log.log('[WorkContext] Today task IDs:', taskIds)),
     switchMap((taskIds: string[]) => this._getTasksByIds$(taskIds)),
+    map((tasks) => this._filterFutureScheduledTasksForToday(tasks)),
     // TODO find out why this is triggered so often
     // tap((tasks: TaskWithSubTasks[]) =>
     //   Log.log('[WorkContext] Today tasks loaded:', tasks.length, 'tasks'),
@@ -376,31 +377,9 @@ export class WorkContextService {
 
   undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
     map((tasks) =>
-      tasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        // Filter out tasks scheduled for later today
-        if (this.activeWorkContextId === TODAY_TAG.id) {
-          if (task.dueWithTime) {
-            const now = Date.now();
-            const todayEnd = new Date();
-            todayEnd.setHours(23, 59, 59, 999);
-
-            // If the task is scheduled for later today, exclude it
-            if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-              return false;
-            }
-          }
-
-          if (task.dueDay && task.dueDay > this._dateService.todayStr()) {
-            return false;
-          }
-        }
-
-        return true;
-      }),
+      this._filterFutureScheduledTasksForToday(tasks).filter(
+        (task) => task && !task.isDone,
+      ),
     ),
   );
 
@@ -703,6 +682,40 @@ export class WorkContextService {
       throw new Error('Invalid param provided for getByIds$ :(');
     }
     return this._store$.select(selectTasksWithSubTasksByIds, { ids });
+  }
+
+  private _filterFutureScheduledTasksForToday(
+    tasks: TaskWithSubTasks[],
+  ): TaskWithSubTasks[] {
+    if (!tasks) {
+      return [];
+    }
+    if (this.activeWorkContextId !== TODAY_TAG.id) {
+      return tasks;
+    }
+
+    const todayStr = this._dateService.todayStr();
+    const now = Date.now();
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    const todayEndTimestamp = todayEnd.getTime();
+
+    return tasks.filter((task) => {
+      if (!task) {
+        return false;
+      }
+      if (
+        task.dueWithTime &&
+        task.dueWithTime >= now &&
+        task.dueWithTime <= todayEndTimestamp
+      ) {
+        return false;
+      }
+      if (task.dueDay && task.dueDay > todayStr) {
+        return false;
+      }
+      return true;
+    });
   }
 
   // we don't want a circular dependency that's why we do it here...

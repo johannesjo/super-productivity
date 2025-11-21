@@ -12,6 +12,7 @@ import { DateService } from '../../core/date/date.service';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
+import { WorkContextType } from './work-context.model';
 
 describe('WorkContextService - undoneTasks$ filtering', () => {
   let tagServiceMock: jasmine.SpyObj<TagService>;
@@ -19,6 +20,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
   let dateServiceMock: jasmine.SpyObj<DateService>;
   let timeTrackingServiceMock: jasmine.SpyObj<TimeTrackingService>;
   let taskArchiveServiceMock: jasmine.SpyObj<TaskArchiveService>;
+  let service: WorkContextService;
 
   const createMockTask = (overrides: Partial<TaskWithSubTasks>): TaskWithSubTasks =>
     ({
@@ -127,7 +129,9 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
       ],
     });
 
-    TestBed.inject(WorkContextService);
+    service = TestBed.inject(WorkContextService);
+    service.activeWorkContextId = TODAY_TAG.id;
+    service.activeWorkContextType = WorkContextType.TAG;
   });
 
   afterEach(() => {
@@ -136,32 +140,13 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
 
   // Test the filtering logic directly instead of testing the full observable chain
   describe('filtering logic', () => {
-    const todayStr = '2023-06-13';
-
     const filterTasks = (tasks: TaskWithSubTasks[]): TaskWithSubTasks[] => {
-      return tasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        // Filter out tasks scheduled for later today
-        if (task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          // If the task is scheduled for later today, exclude it
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        if (task.dueDay && task.dueDay > todayStr) {
-          return false;
-        }
-
-        return true;
-      });
+      return (
+        (service as any)
+          ._filterFutureScheduledTasksForToday(tasks)
+          // The observable filters out done tasks afterwards
+          .filter((task: TaskWithSubTasks) => task && !task.isDone)
+      );
     };
 
     it('should filter out tasks scheduled for later today', () => {
@@ -242,6 +227,26 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
       const filteredTasks = filterTasks(mockTasks);
 
       expect(filteredTasks.length).toBe(0);
+    });
+
+    it('should not filter out future tasks when active context is not Today', () => {
+      service.activeWorkContextId = 'not-today';
+      service.activeWorkContextType = WorkContextType.TAG;
+
+      const futureDateStr = '2023-06-15';
+
+      const mockTasks: TaskWithSubTasks[] = [
+        createMockTask({
+          id: 'FUTURE_TASK',
+          title: 'Future task',
+          dueDay: futureDateStr,
+        }),
+      ];
+
+      const filteredTasks = filterTasks(mockTasks);
+
+      expect(filteredTasks.length).toBe(1);
+      expect(filteredTasks[0].id).toBe('FUTURE_TASK');
     });
 
     it('should handle edge case of task scheduled exactly at current time', () => {
