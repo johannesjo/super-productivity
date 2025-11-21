@@ -78,7 +78,7 @@ export class GlobalConfigEffects {
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
         filter(({ sectionKey, sectionCfg }) => sectionKey === 'localization'),
-        filter(({ sectionKey, sectionCfg }) => sectionCfg['lng'] !== undefined), // skip if `undefined` (language is not set yet)
+        filter(({ sectionKey, sectionCfg }) => sectionCfg['lng'] !== undefined), // skip if language has not been manually set yet
         tap(({ sectionKey, sectionCfg }) => {
           this._languageService.setLng(sectionCfg['lng']);
         }),

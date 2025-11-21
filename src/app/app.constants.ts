@@ -142,8 +142,8 @@ export enum LanguageCode {
   sk = 'sk',
   tr = 'tr',
   uk = 'uk',
-  zh = 'zh',
-  zhTw = 'zh-tw', // TODO retest
+  zh = 'zh', // "Simplified Chinese" form
+  zh_tw = 'zh-tw', // "Traditional Chinese" form
 }
 
 /**
@@ -152,7 +152,7 @@ export enum LanguageCode {
  */
 export const AUTO_SWITCH_LNGS: LanguageCode[] = [
   LanguageCode.zh,
-  LanguageCode.zhTw,
+  LanguageCode.zh_tw,
   LanguageCode.ar,
   LanguageCode.fa,
   LanguageCode.ja,
@@ -171,7 +171,7 @@ export const Locales = {
   ...LanguageCode,
   en_gb: `${LanguageCode.en}-GB`,
   en_us: `${LanguageCode.en}-US`,
-  tr_tr: `${LanguageCode.tr}-TR`, // TODO retest
+  tr_tr: `${LanguageCode.tr}-TR`,
   de_de: `${LanguageCode.de}-DE`,
   fr_fr: `${LanguageCode.fr}-FR`,
   es_es: `${LanguageCode.es}-ES`,
@@ -204,7 +204,7 @@ export const LocalesImports: Record<keyof typeof Locales, unknown> = {
   ja: localeJa,
   ko_kr: localeKo,
   ko: localeKo,
-  zhTw: localeZh,
+  zh_tw: localeZh,
   ar: localeAr,
   cz: localeCs,
   fa: localeFa,
