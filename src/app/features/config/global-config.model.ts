@@ -190,7 +190,7 @@ export type DailySummaryNote = Readonly<{
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
-  localization: LocalizationConfig; // TODO rename to "localization"
+  localization: LocalizationConfig;
   misc: MiscConfig;
   shortSyntax: ShortSyntaxConfig;
   evaluation: EvaluationConfig;
