@@ -1,5 +1,10 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpErrorResponse,
+  HttpParams,
+  HttpHeaders,
+} from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { TrelloCfg } from './trello.model';
@@ -170,9 +175,11 @@ export class TrelloApiService {
   ): Observable<T> {
     this._checkSettings(cfg);
     const httpParams = this._createParams(cfg, params);
+    const headers = new HttpHeaders().set('Authorization', `Bearer ${cfg.token}`);
     return this._http
       .get<T>(`${BASE_URL}${path}`, {
         params: httpParams,
+        headers,
       })
       .pipe(catchError((err) => this._handleError$(err)));
   }
