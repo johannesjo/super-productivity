@@ -20,6 +20,7 @@ import {
   ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  TRELLO_TYPE,
   REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
@@ -27,6 +28,7 @@ import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
+import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
@@ -59,6 +61,7 @@ import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/glob
 export class IssueService {
   private _taskService = inject(TaskService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
   private _githubCommonInterfacesService = inject(GithubCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
@@ -84,6 +87,9 @@ export class IssueService {
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
+
+    // trello
+    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
   };
 
   ISSUE_REFRESH_MAP: {
