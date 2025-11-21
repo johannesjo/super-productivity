@@ -37,7 +37,10 @@ import { getDbDateStr } from '../../util/get-db-date-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
-import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
+import {
+  CORS_SKIP_EXTRA_HEADERS,
+  IS_WEB_EXTENSION_REQUIRED_FOR_JIRA,
+} from '../../app.constants';
 import { Log } from '../../core/log';
 import {
   getCalendarEventIdCandidates,
@@ -198,6 +201,10 @@ export class CalendarIntegrationService {
   ): Observable<CalendarIntegrationEvent[]> {
     // Log.log('REQUEST EVENTS', calProvider, start, end);
 
+    // allow calendars to be disabled for web apps if CORS will fail to prevent errors
+    if (calProvider.isDisabledForWebApp && IS_WEB_EXTENSION_REQUIRED_FOR_JIRA) {
+      return of([]);
+    }
     return this._http
       .get(calProvider.icalUrl, {
         responseType: 'text',
