@@ -8,10 +8,7 @@
     [actionAdvice]="'Check your config!'"
   ></error-card>
 } @else if (!agendaItems()?.length) {
-  <div class="empty">
-    No items found. Ensure you have typed at least 3 characters (already added are not
-    shown).
-  </div>
+  <div class="empty">No items found.</div>
 } @else {
   <div class="agenda">
     @for (day of agendaItems(); track day.dayStr) {
