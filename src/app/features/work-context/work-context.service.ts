@@ -335,8 +335,19 @@ export class WorkContextService {
       switchMap((worklogStrDate) => this.getDoneTodayInArchive(worklogStrDate)),
     );
 
-  isHasTasksToWorkOn$: Observable<boolean> = this.mainListTasks$.pipe(
-    map((tasks) => this._filterFutureScheduledTasksForToday(tasks)),
+  isTodayList: boolean = false;
+  isTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
+    map((id) => id === TODAY_TAG.id),
+    shareReplay(1),
+  );
+
+  isHasTasksToWorkOn$: Observable<boolean> = combineLatest([
+    this.mainListTasks$,
+    this.isTodayList$,
+  ]).pipe(
+    map(([tasks, isToday]) =>
+      isToday ? this._filterFutureScheduledTasksForToday(tasks) : tasks,
+    ),
     map(hasTasksToWorkOn),
     distinctUntilChanged(),
   );
@@ -369,15 +380,12 @@ export class WorkContextService {
     }),
   );
 
-  isTodayList: boolean = false;
-  isTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
-    map((id) => id === TODAY_TAG.id),
-    shareReplay(1),
-  );
-
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.mainListTasks$.pipe(
-    map((tasks) =>
-      this._filterFutureScheduledTasksForToday(tasks).filter(
+  undoneTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
+    this.mainListTasks$,
+    this.isTodayList$,
+  ]).pipe(
+    map(([tasks, isTodayList]) =>
+      (isTodayList ? this._filterFutureScheduledTasksForToday(tasks) : tasks).filter(
         (task) => task && !task.isDone,
       ),
     ),
