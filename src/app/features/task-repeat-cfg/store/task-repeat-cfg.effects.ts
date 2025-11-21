@@ -63,10 +63,13 @@ export class TaskRepeatCfgEffects {
               devError(`Task with id ${taskId} not found`);
               return null; // Return null instead of EMPTY
             }
+            const targetDayTimestamp =
+              (task.dueDay && new Date(task.dueDay).getTime()) ||
+              task.dueWithTime ||
+              Date.now();
             const dateTime = getDateTimeFromClockString(
               startTime as string,
-              // Use current day for initial scheduling
-              new Date().getTime(),
+              targetDayTimestamp,
             );
             return TaskSharedActions.scheduleTaskWithTime({
               task,

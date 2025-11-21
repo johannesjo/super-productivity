@@ -73,7 +73,19 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
     this.response = response;
     this.body = body;
     const statusText = response.statusText || 'Unknown Status';
-    const bodyText = body ? ` - ${body.substring(0, 300)}` : '';
+    const safeBody =
+      typeof body === 'string'
+        ? body
+        : body !== undefined
+          ? (() => {
+              try {
+                return JSON.stringify(body);
+              } catch (e) {
+                return String(body);
+              }
+            })()
+          : '';
+    const bodyText = safeBody ? ` - ${safeBody.substring(0, 300)}` : '';
     this.message = `HttpNotOkAPIError: ${response.status} ${statusText}${bodyText}`;
   }
 }
