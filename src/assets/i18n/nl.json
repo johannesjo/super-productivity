@@ -17,12 +17,20 @@
       "MSG": "Wilt u Super Productivity als PWA installeren?"
     },
     "B_OFFLINE": "Je hebt geen verbinding met internet. Het synchroniseren en opvragen van probleemprovidergegevens werkt niet.",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "Achtergrond wijzigen"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity heeft een grote update gekregen! Sommige migraties voor uw gegevens zijn vereist. Houd er rekening mee dat hierdoor uw gegevens niet compatibel zijn met oudere versies van de app.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Geen modelupdate gekozen. Houd er rekening mee dat u ofwel moet downgraden naar de laatste versie, als u de modelupgrade niet wilt uitvoeren.",
     "UPDATE_WEB_APP": "Nieuwe versie beschikbaar. Nieuwe versie laden?"
   },
   "BL": {
     "NO_TASKS": "Er staan momenteel geen taken in uw backlog"
+  },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Probleempaneel weergeven",
+    "SHOW_NOTES": "Projectnotities weergeven",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Filter/Groep/Sorteren-paneel weergeven"
   },
   "CONFIRM": {
     "AUTO_FIX": "Uw gegevens lijken beschadigd te zijn. Wilt u proberen het automatisch op te lossen? Dit kan leiden tot gedeeltelijk gegevensverlies.",
@@ -37,6 +45,13 @@
     "PLACEHOLDER": "Selecteer een datum",
     "PRESS_ENTER_AGAIN": "Druk nogmaals op enter om op te slaan",
     "TOMORROW": "morgen"
+  },
+  "DIALOG_UNSPLASH_PICKER": {
+    "BY": "Door",
+    "NO_RESULTS": "Geen afbeeldingen gevonden. Probeer een andere zoekterm.",
+    "SEARCH_LABEL": "Afbeeldingen zoeken",
+    "SEARCH_PLACEHOLDER": "bijv. natuur, bergen, abstract",
+    "TITLE": "Selecteer achtergrondafbeelding van Unsplash"
   },
   "F": {
     "ATTACHMENT": {
@@ -142,10 +157,15 @@
       "BANNER": {
         "ADD_AS_TASK": "Als Taak toevoegen",
         "FOCUS_TASK": "Focus Taak",
+        "SHOW_TASK": "Taak weergeven",
         "TXT": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> begint om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)",
         "TXT_PAST": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> gestart om <strong>{{start}}</strong>!<br> (en {{nrOfOtherBanners}} andere taken zijn verschuldigd)"
+      },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "Evenement",
+        "EVENTS_STR": "Evenementen"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Fout: {{errTxt}}"
@@ -190,36 +210,66 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "1 minuut toevoegen",
       "B": {
+        "BREAK_RUNNING": "Pauze is bezig",
+        "POMODORO_BREAK_RUNNING": "Pauze #{{cycleNr}} is bezig",
+        "POMODORO_SESSION_RUNNING": "Pomodoro-sessie #{{cycleNr}} is bezig",
         "SESSION_RUNNING": "Focussessie is aan het draaien",
         "TO_FOCUS_OVERLAY": "Naar Focus Overlay"
       },
       "BACK_TO_PLANNING": "Terug naar Planning",
+      "BREAK_RELAX_MSG": "Neem een moment om te ontspannen",
+      "CLICK_TO_EDIT_DURATION": "Klik om duur te bewerken",
+      "COMPLETE_FOCUS_SESSION": "Volledige focus-sessie",
+      "COMPLETE_SESSION": "Sessie voltooien",
       "CONGRATS": "Gefeliciteerd met het afronden van deze sessie!",
       "CONTINUE_FOCUS_SESSION": "Focus Sessie Voortzetten",
+      "CONTINUE_SESSION": "Sessie voortzetten",
+      "CONTINUE_TO_NEXT_SESSION": "Doorgaan naar volgende sessie",
       "COUNTDOWN": "Aftelling",
+      "COUNTDOWN_HINT": "Focus tot de klok op nul staat",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Huidige sessietijd",
       "FINISH_TASK_AND_SELECT_NEXT": "Taak afmaken en volgende selecteren",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Flexibel tempo zonder strikte timers",
+      "FOCUS_TIME_TOOLTIP": "Focustijd",
       "FOR_TASK": "voor taak",
       "GET_READY": "Maak je klaar voor je focus sessie!",
       "GO_TO_PROCRASTINATION": "Krijg hulp als je aan het uitstellen bent",
       "GOGOGO": "Go, go, go!!!",
+      "LONG_BREAK": "Lange pauze",
+      "LONG_BREAK_TITLE": "Lange pauze - Cyclus {{cycle}}",
       "NEXT": "Volgende",
       "ON": "aan",
       "OPEN_ISSUE_IN_BROWSER": "Issue in Browser openen",
+      "PAUSE_SESSION": "Sessie pauzeren",
+      "PAUSE_TRACKING": "Tracking pauzeren",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Tracking pauzeren voor huidige taak",
+      "POMODORO": "Pomodoro ",
       "POMODORO_BACK": "Terug",
       "POMODORO_DISABLE": "Pomodoro uitschakelen",
+      "POMODORO_HINT": "Gestructureerde sprints met geplande pauzes",
       "POMODORO_INFO": "Focus sessies kunnen niet tegelijk gebruikt worden met pomodoro timer ingeschakeld.",
+      "POMODORO_SESSION_COMPLETED": "Pomodoro-sessie voltooid!",
       "PREP_GET_MENTALLY_READY": "Bereid je mentaal voor om gefocust en productief te zijn",
       "PREP_SIT_UPRIGHT": "Zit (of sta) rechtop",
       "PREP_STRETCH": "Doe wat lichte stretches",
+      "REMOVE_TIME_MINUTE": "1 minuut verwijderen",
+      "RESUME_SESSION": "Sessie hervatten",
       "SELECT_ANOTHER_TASK": "Selecteer een andere Taak",
+      "SELECT_MODE": "Kies je focusmodus",
       "SELECT_TASK": "Selecteer een Taak om op te focussen",
+      "SELECT_TASK_TO_FOCUS": "Selecteer taak om op te focussen",
       "SESSION_COMPLETED": "Focussessie Voltooid!",
       "SET_FOCUS_SESSION_DURATION": "Selecteer een Focus Sessie duur",
+      "SHORT_BREAK": "Korte pauze",
+      "SHORT_BREAK_TITLE": "Korte pauze - Cyclus {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Taaknotities en bijlagen tonen/verbergen",
+      "SKIP_BREAK": "Pauze overslaan",
       "START_FOCUS_SESSION": "Start Focus Sessie",
       "START_NEXT_FOCUS_SESSION": "Start volgende Focus Sessie",
+      "SWITCH_TASK": "Taak wisselen",
       "WORKED_FOR": "Je hebt gewerkt voor"
     },
     "GITEA": {
@@ -398,6 +448,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}: pollingwijzigingen voor {{issuesStr}}"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Gecachte kalenderresultaten worden weergegeven. Gegevens kunnen verouderd zijn."
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: Om te voorkomen dat api wordt afgesloten, is de toegang geblokkeerd door Super Productivity. U moet waarschijnlijk uw jira-instellingen controleren!",
@@ -541,6 +596,7 @@
         "CHECK": "Ik heb het gedaan!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Activiteit-heatmap",
         "AVG_BREAKS_PER_DAY": "Gem. pauzes per dag",
         "AVG_TASKS_PER_DAY_WORKED": "Gem. taken per gewerkte dag",
         "AVG_TIME_SPENT_ON_BREAKS": "Gem. tijd besteed aan pauzes",
@@ -548,24 +604,37 @@
         "AVG_TIME_SPENT_PER_TASK": "Gem. tijd besteed per taak",
         "COUNTING_SUBTASKS": "(subtaken tellen)",
         "DAYS_WORKED": "Dagen werkten",
+        "FOCUS_SESSION_TRENDS": "Focus-sessies in de tijd",
         "GLOBAL_METRICS": "Wereldwijde statistieken",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Stemming en productiviteit in de tijd",
         "NO_ADDITIONAL_DATA_YET": "Nog geen aanvullende gegevens verzameld. Gebruik hiervoor het formulier in het dagoverzicht \"Evaluatie\" -paneel.",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Productiviteit & duurzaamheid in de tijd",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klik op Tellers na verloop van tijd",
         "SIMPLE_COUNTERS": "Eenvoudige tellers",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stopwatch Tellers in de tijd",
         "TASKS_DONE_CREATED": "Taken (gedaan / gemaakt)",
         "TIME_ESTIMATED": "Tijd geschat",
+        "TIME_FRAME_1_MONTH": "1 maand",
+        "TIME_FRAME_2_WEEKS": "2 weken",
+        "TIME_FRAME_LABEL": "Tijdframe",
+        "TIME_FRAME_MAX": "Max",
         "TIME_SPENT": "Tijd besteed"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Notitie toevoegen voor morgen",
+        "DAILY_STATE": "Dagelijkse Staat",
+        "DAILY_STATE_TOOLTIP": "Kwadrantsysteem gebaseerd op beide scores (\u000250 is hoog): Diepe Flow (hoog/hoog), Overdrive (hoog/laag), Herstel (laag/hoog), Drift (laag/laag)",
         "DISABLE_REPEAT_EVERY_DAY": "Schakel elke dag herhalen uit",
         "ENABLE_REPEAT_EVERY_DAY": "Herhaal elke dag",
+        "ENERGY_LEVEL": "Hoe is je energie?",
+        "ENERGY_LEVEL_HINT": "\u001f62b Uitgeput \u001f610 Ok\u0000e9 \u001f60a Goed",
+        "FOCUS_WORK_TIME": "Gefocuste werktijd",
         "HELP_H1": "Waarom zou ik erom geven?",
         "HELP_LINK_TXT": "Ga naar de sectie metrische gegevens",
         "HELP_P1": "Tijd voor een beetje zelfevaluatie! Uw antwoorden hier worden opgeslagen en bieden u een klein beetje statistieken over hoe u werkt in de sectie metrische gegevens. Bovendien verschijnen de suggesties voor morgen de volgende dag boven uw takenlijst.",
         "HELP_P2": "Dit is niet bedoeld om het berekenen van exacte statistieken of om machine-efficiënt te worden in alles wat u doet, maar om het verbeteren van hoe u over uw werk denkt. Het kan nuttig zijn om pijnpunten in uw dagelijkse routine te evalueren, maar ook om factoren te vinden die u kunnen helpen. Gewoon een beetje systematisch zijn, helpt hopelijk om hier meer grip op te krijgen en om te verbeteren wat je kunt.",
+        "IMPACT_OF_WORK": "Hoe beoordeel je de impact van je werk vandaag?",
+        "IMPACT_OF_WORK_HINT": "1: Geen betekenisvolle vooruitgang \u001f610 4: Aanzienlijke impact",
         "IMPROVEMENTS": "Wat heeft uw productiviteit verbeterd?",
         "IMPROVEMENTS_TOMORROW": "Wat kun je morgen doen om te verbeteren?",
         "MOOD": "Hoe voel je je?",
@@ -573,7 +642,53 @@
         "NOTES": "Aantekeningen voor morgen",
         "OBSTRUCTIONS": "Wat belemmerde uw productiviteit?",
         "PRODUCTIVITY": "Hoe efficiënt heb je gewerkt?",
-        "PRODUCTIVITY_HINT": "1: ben nog niet eens begonnen - 10: enorm efficiënt"
+        "PRODUCTIVITY_HINT": "1: ben nog niet eens begonnen - 10: enorm efficiënt",
+        "PRODUCTIVITY_SCORE": "Productiviteitsscore",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65% Impact (1-4 schaal) \u001f4af 30% Focus op 4u doel \u001f4aa 5% totale werktijd (maximaal 10u)",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-daagse productiviteitsverdeling",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7-daagse duurzaamheidsverdeling",
+        "STATE_DEEP_FLOW_HEADLINE": "Diepe Flow: Uitstekende focus en duurzaam tempo.",
+        "STATE_DEEP_FLOW_HINT": "Je zit in de perfecte zone \u0000e2\u000e2\u0000ac\u0000a2 reflecteer op wat deze combinatie mogelijk maakte.",
+        "STATE_DRIFT_HEADLINE": "Drift: Lage focus en lage energie.",
+        "STATE_DRIFT_HINT": "Dat is ok\u0000e9. Reflecteer op wat je afleidde en pas voorzichtig aan \u0000e2\u000e2\u0000ac\u0000a2 elke reset is een kans om te leren.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Lage impact: Veel focus, weinig resultaat.",
+        "STATE_IMPACT_MISMATCH_HINT": "Je hebt solide focus geïnvesteerd \u0000e2\u000e2\u0000ac\u0000a2 richt het nu op werk met hogere impact om het verschil te voelen.",
+        "STATE_OVERDRIVE_HEADLINE": "Overdrive: Productief, maar tegen een prijs.",
+        "STATE_OVERDRIVE_HINT": "Je hebt veel gedaan \u0000e2\u000e2\u0000ac\u0000a2 zorg nu dat je oplaadt voordat burn-out toeslaat.",
+        "STATE_RECOVERY_HEADLINE": "Herstel: Rusten en opladen.",
+        "STATE_RECOVERY_HINT": "Je geeft je geest ruimte om te herstellen. Morgen heb je weer de energie om dieper te duiken.",
+        "STATE_STEADY_HEADLINE": "Gelijkmatig Ritme: Consistente, duurzame vooruitgang.",
+        "STATE_STEADY_HINT": "Mooi evenwicht. Je houdt het tempo vast zonder jezelf te overbelasten — blijf voeden wat dit tempo laat werken.",
+        "SUSTAINABILITY_SCORE": "Duurzaamheidsscore",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45% Energieniveau  40% Redelijke werkuren (0 bij 10u)  15% Focusbalans (optimaal bij 4u)",
+        "TOTAL_WORK_TIME": "Totale werktijd vandaag"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "Toevoegen",
+        "ADD_SESSION": "Sessie toevoegen",
+        "CHART_LABEL": "Focustijd (min)",
+        "NEW_SESSION_DURATION": "Duur",
+        "NO_SESSIONS": "Geen focus sessies voor deze dag",
+        "SESSIONS_LIST": "Sessies",
+        "TITLE": "Focussessies",
+        "TOTAL_SESSIONS": "Totaal aantal sessies",
+        "TOTAL_TIME": "Totale tijd"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "Bekijk eerdere reflecties",
+        "HISTORY_EMPTY": "Nog geen reflecties opgeslagen. Leg vandaag een notitie vast om een reeks te starten.",
+        "HISTORY_TITLE": "Reflectiegeschiedenis",
+        "PLACEHOLDER_1": "Wat ging er vandaag goed? Wat moet er morgen veranderen?",
+        "PLACEHOLDER_2": "Kleine verbetering voor morgen?",
+        "PLACEHOLDER_3": "Waar verslapte de focus - en hoe kun je die beschermen?",
+        "PLACEHOLDER_4": "Welke taak gaf je energie? Welke putte het uit?",
+        "PLACEHOLDER_5": "Eén ding om te herhalen. Eén ding om te veranderen.",
+        "REMIND_LABEL": "Herinner me hier morgen aan",
+        "REMINDER_CREATED": "Reflectieherinnering gepland voor morgen",
+        "REMINDER_ERROR": "Kon de herinnering niet plannen",
+        "REMINDER_NEEDS_TEXT": "Schrijf een reflectie voordat je om een herinnering vraagt",
+        "REMINDER_TASK_TITLE": "Bekijk reflectienotitie opnieuw",
+        "TITLE": "Reflectienotitie"
       },
       "S": {
         "SAVE_METRIC": "Statistiek opgeslagen"
@@ -810,6 +925,25 @@
         "UPDATED": "Bijgewerkte projectinstellingen"
       }
     },
+    "PROJECT_FOLDER": {
+      "CONFIRM_DELETE": "Weet je zeker dat je de map \"{{title}}\" wilt verwijderen? Alle projecten in deze map worden naar het hoofdniveau verplaatst.",
+      "DIALOG": {
+        "CREATE_TITLE": "Map aanmaken",
+        "EDIT_TITLE": "Map bewerken",
+        "NAME_LABEL": "Mapnaam",
+        "NAME_PLACEHOLDER": "Voer mapnaam in",
+        "NAME_REQUIRED": "Mapnaam is verplicht",
+        "NO_PARENT": "Geen bovenliggende map (hoofdniveau)",
+        "PARENT_LABEL": "Bovenliggende map"
+      },
+      "SELECT": {
+        "LABEL": "Map",
+        "NO_PARENT": "Geen map (hoofdniveau)",
+        "PLACEHOLDER": "Selecteer map"
+      },
+      "TOOLTIP_CREATE": "Projectmap aanmaken",
+      "TOOLTIP_VISIBILITY": "Projecten tonen/verbergen"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "Geen gegevens voor het huidige jaar",
       "PAGE_TITLE": "Snelle geschiedenis",
@@ -844,6 +978,10 @@
         "ERR_UNKNOWN": "Redmine: Onbekende fout {{statusCode}} {{errorMsg}}."
       }
     },
+    "REFLECTION_NOTE": {
+      "ACTION_DISMISS": "AFWIJZEN",
+      "MSG": "Reflectienota: ({{date}}): {{content}}"
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Verbergen",
@@ -861,13 +999,17 @@
         "TITLE": "Tijdlijn"
       },
       "END": "Einde van het werk",
+      "INSERT_BEFORE": "Voor",
       "LUNCH_BREAK": "Lunchpauze",
+      "MONTH": "Maand",
       "NO_TASKS": "Momenteel zijn er geen taken. Voeg een aantal taken toe via de + knop in de bovenste balk.",
       "NOW": "nu",
       "PLAN_END_DAY": "Plan aan het einde van de dag",
       "PLAN_START_DAY": "Plan aan het begin van de dag",
+      "SHIFT_KEY_INFO": "Houd Shift ingedrukt om dagplanningsmodus te wisselen",
       "START": "werk start",
-      "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak"
+      "TASK_PROJECTION_INFO": "Toekomstige projectie van een geplande herhaalbare taak",
+      "WEEK": "Week"
     },
     "SEARCH_BAR": {
       "INFO": "Klik op het lijstpictogram om te zoeken naar gearchiveerde taken",
@@ -916,6 +1058,7 @@
         "POSSIBLE_LEGACY_DATA": "Super Productivity heeft de synchronisatie verbeterd door nu twee aparte bestanden te gebruiken in plaats van één, waardoor veel minder gegevens hoeven te worden overgezet. Het wordt aanbevolen om alle instanties van Super Productivity bij te werken en eerst gegevens te synchroniseren van de app-instantie waar de gegevens het meest recent zijn. Als dit de gegevens van je lokale apparaat zijn, negeer dan deze waarschuwing en ga gewoon door met uploaden door het volgende dialoogvenster te bevestigen.",
         "REMOTE_MODEL_VERSION_NEWER": "De versie van het externe model is nieuwer dan de lokale. Werk uw lokale app bij naar de nieuwste versie!"
       },
+      "BTN_SYNC_NOW": "Nu synchroniseren",
       "C": {
         "EMPTY_SYNC": "U probeert een leeg gegevensobject te synchroniseren. Is dit uw allereerste synchronisatie van een (bijna) nieuwe app?",
         "FORCE_UPLOAD": "Lokale gegevens toch uploaden?",
@@ -932,17 +1075,34 @@
         "TITLE": "Inloggen: {{provider}}"
       },
       "D_CONFLICT": {
+        "ADDITIONAL_INFO": "Aanvullende info",
+        "CHANGES": "Wijzigingen",
+        "CHANGES_SINCE_LAST_SYNC": "Wijzigingen sinds laatste synchronisatie",
+        "COMPARISON_RESULT": "Vergelijkingsresultaat",
+        "DATE": "Datum",
         "LAMPORT_CLOCK": "Herziening",
         "LAST_CHANGE": "laatste wijziging:",
         "LAST_SYNC": "laatste synchronisatie:",
+        "LAST_SYNCED": "Laatst gesynchroniseerd",
+        "LAST_WRITE": "Laatste wijziging",
         "LOCAL": "Lokaal",
         "LOCAL_REMOTE": "lokaal -> op afstand",
+        "NEVER": "Nooit",
+        "OVERWRITE_WARNING": "WAARSCHUWING: De {{targetName}}-gegevens bevatten ongeveer {{targetChanges}} wijzigingen, terwijl de {{sourceName}}-gegevens slechts {{sourceChanges}} wijzigingen bevatten. Weet je zeker dat je de {{targetName}}-gegevens wilt overschrijven met de {{sourceName}}-versie? Deze actie kan niet ongedaan worden gemaakt.",
         "REMOTE": "afgelegen",
+        "RESULT": "Resultaat",
         "TEXT": "<p>Update vanuit Dropbox. Zowel lokale als externe gegevens lijken te zijn gewijzigd.</p>",
+        "TIME": "Tijd",
         "TIMESTAMP": "Tijdstempel",
         "TITLE": "Dropbox: tegenstrijdige gegevens",
         "USE_LOCAL": "Gebruik lokaal",
-        "USE_REMOTE": "Gebruik afstandsbediening"
+        "USE_REMOTE": "Gebruik afstandsbediening",
+        "VECTOR_CLOCK": "Vectorklok",
+        "VECTOR_CLOCK_HEADING": "Vectorklok",
+        "VECTOR_COMPARISON_CONCURRENT": "Gelijktijdig (Echt conflict)",
+        "VECTOR_COMPARISON_EQUAL": "Gelijk",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "Lokaal > Extern",
+        "VECTOR_COMPARISON_LOCAL_LESS": "Lokaal < Extern"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Wijzigen en overschrijven op afstand",
@@ -999,6 +1159,7 @@
         "TITLE": "Synchroniseren",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Experimenteel !!</strong> Om dit te laten werken, moet u CORS uitschakelen of beperken voor uw Nextcloud-instantie, wat negatieve gevolgen voor de veiligheid kan hebben! Raadpleeg <a href='https://github.com/nextcloud/server/issues/3131'>deze thread</a> voor meer informatie. Gebruik op eigen risico!",
+          "INFO": "WebDAV-implementaties verschillen helaas sterk. Super Productivity werkt goed met Nextcloud, <strong>maar het werkt mogelijk niet met jouw provider</strong>.",
           "L_BASE_URL": "Basis-URL",
           "L_PASSWORD": "Wachtwoord",
           "L_SYNC_FOLDER_PATH": "Map pad synchroniseren",
@@ -1023,6 +1184,13 @@
         "SUCCESS_VIA_BUTTON": "Gegevens succesvol gesynchroniseerd",
         "UNKNOWN_ERROR": "Onbekende fout tijdens het synchroniseren. Controleer de console.",
         "UPLOAD_ERROR": "Onbekende uploadfout (instellingen correct?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BTN_CLEAR_ALL": "Alles wissen",
+        "BTN_DELETE": "Verwijderen",
+        "BTN_REFRESH": "Vernieuwen",
+        "BTN_RESTORE": "Herstellen",
+        "LOADING": "Laden..."
       }
     },
     "TAG": {
@@ -1051,6 +1219,22 @@
         "ADD_NEW_TAG": "Nieuwe tag toevoegen"
       }
     },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Map aanmaken",
+        "EDIT_TITLE": "Map bewerken",
+        "NAME_LABEL": "Mapnaam",
+        "NAME_PLACEHOLDER": "Voer mapnaam in",
+        "NAME_REQUIRED": "Mapnaam is verplicht",
+        "NO_PARENT": "Geen bovenliggende map (hoofdniveau)",
+        "PARENT_LABEL": "Bovenliggende map"
+      },
+      "SELECT": {
+        "LABEL": "Map",
+        "NO_PARENT": "Geen map (hoofdniveau)",
+        "PLACEHOLDER": "Selecteer map"
+      }
+    },
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Voeg bestaande taak \"{{taskTitle}}\" toe",
@@ -1062,8 +1246,11 @@
         "CREATE_TASK": "Maak een nieuwe taak",
         "EXAMPLE": "Voorbeeld: \"Een taaktitel + projectnaam # een tag # een andere tag 10 m / 3 uur\"",
         "START": "Druk nogmaals op Enter om te beginnen",
+        "TAGS_BUTTON": "Tags",
+        "TODAY": "Vandaag",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Toggle taak toevoegen aan backlog / lijst van vandaag'.",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "Schakelen tussen het toevoegen van taken aan de boven- en onderkant van de lijst"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Schakelen tussen het toevoegen van taken aan de boven- en onderkant van de lijst",
+        "TOMORROW": "Morgen"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Voeg bijlage toe",
@@ -1093,6 +1280,7 @@
         "DELETE": "Taak verwijderen",
         "DELETE_REPEAT_INSTANCE": "Herhaalde taakinstantie verwijderen",
         "DROP_ATTACHMENT": "Zet hier neer om te koppelen aan \"{{title}}\"",
+        "DUPLICATE": "Duplicaat",
         "EDIT_SCHEDULED": "Herinnering bewerken",
         "EDIT_TAGS": "Bewerk-tags",
         "EDIT_TASK_TITLE": "Titel bewerken",
@@ -1166,6 +1354,10 @@
         "RO_START": "wanneer het begint",
         "SCHEDULE": "Schema",
         "UNSCHEDULE": "Ongepland"
+      },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "Datum",
+        "TIME": "Tijd"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Voeg tijd toe voor een andere dag",
@@ -1450,6 +1642,7 @@
     "ADVANCED_CFG": "Geavanceerde Configuratie",
     "CANCEL": "annuleren",
     "CLOSE": "Sluiten",
+    "COMPLETE": "Volledig",
     "CONFIRM": "Bevestigen",
     "DELETE": "Verwijderen",
     "DISMISS": "Afwijzen",
@@ -1604,6 +1797,10 @@
       "ZH_TW": "中文(繁體)"
     },
     "MISC": {
+      "DARK_MODE": "Donkere modus",
+      "DARK_MODE_DARK": "Donker",
+      "DARK_MODE_LIGHT": "Licht",
+      "DARK_MODE_SYSTEM": "SYSTEEM",
       "DEFAULT_PROJECT": "Standaardproject om te gebruiken voor taken als er geen is opgegeven",
       "FIRST_DAY_OF_WEEK": "Eerste dag van de week",
       "HELP": "<p><strong>Ziet u geen bureaubladmeldingen?</strong> Voor vensters wilt u misschien Systeem> Meldingen en acties controleren en controleren of de vereiste meldingen zijn ingeschakeld.</p>",
@@ -1614,18 +1811,19 @@
       "IS_DARK_MODE": "Donkere modus",
       "IS_DISABLE_ANIMATIONS": "Alle animaties uitschakelen",
       "IS_DISABLE_CELEBRATION": "Vieren uitschakelen in dagoverzicht",
+      "IS_ENABLE_USER_PROFILES": "Gebruikersprofielen inschakelen (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Maakt het mogelijk om verschillende gebruikersprofielen te maken en er tussen te schakelen, elk met afzonderlijke instellingen, taken en synchronisatieconfiguraties. De profielbeheerknop verschijnt in de rechterbovenhoek wanneer ingeschakeld. Opmerking: het uitschakelen van deze functie verbergt de gebruikersinterface, maar behoudt uw profielgegevens (bètafunctie, geen garanties. Zorg ervoor dat u een back-up hebt).",
       "IS_HIDE_NAV": "Verberg navigatie totdat de hoofdkop is opgehangen (alleen desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimaliseren naar lade (alleen desktop)",
       "IS_SHOW_TIP_LONGER": "Toon productiviteitstip op app-start iets langer",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Toon huidige countdown in de tray / statusmenu (alleen desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Toon huidige taak in het systeemvak / statusmenu (alleen desktop)",
       "IS_TURN_OFF_MARKDOWN": "Schakel markdown-parsering voor notities uit",
-      "IS_ENABLE_USER_PROFILES": "Gebruikersprofielen inschakelen (Beta)",
-      "IS_ENABLE_USER_PROFILES_HINT": "Maakt het mogelijk om verschillende gebruikersprofielen te maken en er tussen te schakelen, elk met afzonderlijke instellingen, taken en synchronisatieconfiguraties. De profielbeheerknop verschijnt in de rechterbovenhoek wanneer ingeschakeld. Opmerking: het uitschakelen van deze functie verbergt de gebruikersinterface, maar behoudt uw profielgegevens (bètafunctie, geen garanties. Zorg ervoor dat u een back-up hebt).",
       "IS_USE_MINIMAL_SIDE_NAV": "Gebruik een minimale navigatiebalk (toon alleen pictogrammen)",
       "START_OF_NEXT_DAY": "Starttijd van de volgende dag",
       "START_OF_NEXT_DAY_HINT": "vanaf wanneer (in uur) je wilt tellen dat de volgende dag is begonnen. standaard is middernacht wat 0 is.",
       "TASK_NOTES_TPL": "Taak omschrijving template",
+      "THEME": "Thema",
       "TITLE": "Diverse instellingen"
     },
     "POMODORO": {
@@ -1657,7 +1855,9 @@
       "L_WORK_END": "Einde van de werkdag",
       "L_WORK_START": "Start van de werkdag",
       "LUNCH_BREAK_START_END_DESCRIPTION": "bijv. 13:00",
+      "MONTH": "Maand",
       "TITLE": "Tijdlijn",
+      "WEEK": "Week",
       "WORK_START_END_DESCRIPTION": "bijv. 17:00"
     },
     "SHORT_SYNTAX": {
@@ -1742,6 +1942,7 @@
     "PERSISTENCE_DISALLOWED": "Gegevens worden niet permanent bewaard. Houd er rekening mee dat dit kan leiden tot gegevensverlies !!",
     "PERSISTENCE_ERROR": "Fout bij verzoek om gegevens te bewaren: {{err}}",
     "RUNNING_X": "\"{{Str}}\" wordt uitgevoerd.",
+    "SHARE_UNAVAILABLE_FALLBACK": "Gekopieerd naar klembord.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ingedrukt, maar de snelkoppeling naar bladwijzers openen is alleen beschikbaar in projectcontext."
   },
   "GPB": {
@@ -1761,6 +1962,7 @@
     "ADD_NEW_TASK": "Voeg nieuwe taak toe",
     "ALL_PLANNED_LIST": "Herhalen/ Gepland",
     "BOARDS": "Borden",
+    "COPY_TASK_LIST_MARKDOWN": "Kopiëren naar klembord",
     "CREATE_PROJECT": "Project maken",
     "CREATE_TAG": "Tag maken",
     "DELETE_PROJECT": "Project verwijderen",
@@ -1845,6 +2047,18 @@
     "TIME_SPENT_TODAY_BY_TAG": "Tijdsbesteding vandaag per label",
     "WEEK": "Week"
   },
+  "PLUGINS": {
+    "CANCEL": "Annuleren",
+    "CONFIGURE": "Configureren",
+    "DISABLED": "Uitgeschakeld",
+    "ENABLED": "Ingeschakeld",
+    "ERROR": "Fout",
+    "GO_BACK": "Ga terug",
+    "LOADING_PLUGIN": "Laden...",
+    "OK": "Oké",
+    "PERMISSIONS": "Machtigingen",
+    "REMOVE": "Verwijderen"
+  },
   "PM": {
     "TITLE": "Projectstatistieken"
   },
@@ -1855,11 +2069,13 @@
     "PRODUCTIVITY_HELPER": "Productiviteitshulp",
     "PROJECT_SETTINGS": "Projectspecifieke instellingen",
     "PROVIDE_FEEDBACK": "Geef feedback",
+    "RELOAD": "Opnieuw laden",
     "SYNC_EXPORT": "Synchroniseren en exporteren",
     "TAG_SETTINGS": "Label specifieke instellingen",
     "TOGGLE_DARK_MODE": "Schakel de donkere modus in"
   },
   "SCHEDULE": {
+    "NEXT": "Volgende",
     "NO_REPEATABLE_TASKS": "Er zijn momenteel geen herhaalde taken. Je kunt een taak inplannen door \"Taak herhalen\" te kiezen in het zijpaneel van de taak. Om het te openen klik je op het meest rechtse pictogram dat verschijnt wanneer je met de muis over een taak gaat (of tik gewoon op de taak op mobiel).",
     "NO_SCHEDULED": "Er zijn momenteel geen geplande taken. U kunt een taak plannen door \"Taak plannen\" te kiezen in het taakcontextmenu. Klik op de 3 kleine puntjes rechts van een taak om deze te openen.",
     "NO_SCHEDULED_TITLE": "Geplande taken voor de dag",
@@ -1886,6 +2102,24 @@
     "teal": "groenblauw",
     "yellow": "geel"
   },
+  "USER_PROFILES": {
+    "ACTIVE": "Actief",
+    "CANCEL": "Annuleren",
+    "CLOSE": "Sluiten",
+    "CREATE": "Aanmaken",
+    "CREATE_NEW_PROFILE": "Nieuw profiel aanmaken",
+    "CREATED": "Aangemaakt:",
+    "DELETE_PROFILE": "Profiel verwijderen",
+    "DIALOG_TITLE": "Gebruikersprofielen beheren",
+    "EXISTING_PROFILES": "Bestaande profielen",
+    "EXPORT_PROFILE": "Profiel exporteren",
+    "MANAGE_PROFILES": "Profielen beheren...",
+    "OPEN_PROFILES_FOLDER": "Profielmap openen",
+    "PROFILE_NAME": "Profielnaam",
+    "PROFILE_NAME_PLACEHOLDER": "bijv. Werk, Persoonlijk",
+    "RENAME": "Hernoemen",
+    "SAVE": "Opslaan"
+  },
   "V": {
     "E_1TO10": "Voer een waarde in tussen 1 en 10",
     "E_DATETIME": "De ingevoerde waarde is geen datetime!",
@@ -1896,24 +2130,6 @@
     "E_MIN_LENGTH": "Moet ten minste {{val}} tekens lang zijn",
     "E_PATTERN": "Ongeldige invoer",
     "E_REQUIRED": "dit veld is verplicht"
-  },
-  "USER_PROFILES": {
-    "DIALOG_TITLE": "Gebruikersprofielen beheren",
-    "CREATE_NEW_PROFILE": "Nieuw profiel aanmaken",
-    "PROFILE_NAME": "Profielnaam",
-    "PROFILE_NAME_PLACEHOLDER": "bijv. Werk, Persoonlijk",
-    "CREATE": "Aanmaken",
-    "EXISTING_PROFILES": "Bestaande profielen",
-    "ACTIVE": "Actief",
-    "CREATED": "Aangemaakt:",
-    "SAVE": "Opslaan",
-    "CANCEL": "Annuleren",
-    "RENAME": "Hernoemen",
-    "EXPORT_PROFILE": "Profiel exporteren",
-    "DELETE_PROFILE": "Profiel verwijderen",
-    "OPEN_PROFILES_FOLDER": "Profielmap openen",
-    "CLOSE": "Sluiten",
-    "MANAGE_PROFILES": "Profielen beheren..."
   },
   "WW": {
     "ADD_MORE": "Voeg meer toe",
