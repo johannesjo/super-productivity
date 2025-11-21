@@ -369,8 +369,8 @@ export class WorkContextService {
     }),
   );
 
-  isToday: boolean = false;
-  isToday$: Observable<boolean> = this.activeWorkContextId$.pipe(
+  isTodayList: boolean = false;
+  isTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
     map((id) => id === TODAY_TAG.id),
     shareReplay(1),
   );
@@ -383,7 +383,7 @@ export class WorkContextService {
     ),
   );
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.isToday$.pipe(
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.isTodayList$.pipe(
     switchMap((isToday) =>
       isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.mainListTasks$,
     ),
@@ -391,7 +391,7 @@ export class WorkContextService {
   );
 
   constructor() {
-    this.isToday$.subscribe((v) => (this.isToday = v));
+    this.isTodayList$.subscribe((v) => (this.isTodayList = v));
 
     this.activeWorkContextTypeAndId$.subscribe((v) => {
       this.activeWorkContextId = v.activeId;
@@ -442,7 +442,7 @@ export class WorkContextService {
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.isToday$.pipe(
+    return this.isTodayList$.pipe(
       switchMap((isToday) =>
         isToday
           ? this.getTimeWorkedForDayForAllNonArchiveTasks$(day)
@@ -454,7 +454,7 @@ export class WorkContextService {
   async getDoneTodayInArchive(
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
-    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const isToday = await this.isTodayList$.pipe(first()).toPromise();
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
@@ -485,7 +485,7 @@ export class WorkContextService {
   async getTimeWorkedForDayForTasksInArchiveYoung(
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
-    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const isToday = await this.isTodayList$.pipe(first()).toPromise();
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
