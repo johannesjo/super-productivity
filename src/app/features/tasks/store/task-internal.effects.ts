@@ -105,7 +105,7 @@ export class TaskInternalEffects {
       withLatestFrom(
         this._store$.pipe(select(selectConfigFeatureState)),
         this._store$.pipe(select(selectTaskFeatureState)),
-        this._workContextSession.todaysTaskIds$,
+        this._workContextSession.mainListTaskIds$,
         (action, globalCfg, state, todaysTaskIds) => ({
           action,
           state,

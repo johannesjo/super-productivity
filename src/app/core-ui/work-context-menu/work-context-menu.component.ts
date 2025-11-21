@@ -174,7 +174,7 @@ export class WorkContextMenuComponent implements OnInit {
       return;
     }
 
-    const todayTasks = ((await this._workContextService.todaysTasks$
+    const todayTasks = ((await this._workContextService.mainListTasks$
       .pipe(first())
       .toPromise()) || []) as TaskWithSubTasks[];
     const undoneTasks = todayTasks.filter((task) => !task.isDone);
