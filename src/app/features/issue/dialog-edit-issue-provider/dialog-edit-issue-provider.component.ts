@@ -29,11 +29,7 @@ import { IssueProviderActions } from '../store/issue-provider.actions';
 import { NgClass } from '@angular/common';
 import { OpenProjectAdditionalCfgComponent } from '../providers/open-project/open-project-view-components/openproject-cfg/open-project-additional-cfg.component';
 import { nanoid } from 'nanoid';
-import {
-  HelperClasses,
-  IS_ELECTRON,
-  IS_WEB_EXTENSION_REQUIRED_FOR_JIRA,
-} from '../../../app.constants';
+import { HelperClasses, IS_ELECTRON, IS_WEB_BROWSER } from '../../../app.constants';
 import { MatInputModule } from '@angular/material/input';
 import { IssueService } from '../issue.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -243,6 +239,5 @@ export class DialogEditIssueProviderComponent {
   protected readonly ICAL_TYPE = ICAL_TYPE;
   protected readonly IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
   protected readonly IS_ELECTRON = IS_ELECTRON;
-  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA =
-    IS_WEB_EXTENSION_REQUIRED_FOR_JIRA;
+  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = IS_WEB_BROWSER;
 }

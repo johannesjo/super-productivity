@@ -308,7 +308,7 @@ export class PluginBridgeService implements OnDestroy {
    * Get current context tasks
    */
   async getCurrentContextTasks(): Promise<TaskCopy[]> {
-    const contextTasks = await this._workContextService.todaysTasks$
+    const contextTasks = await this._workContextService.mainListTasks$
       .pipe(first())
       .toPromise();
     return contextTasks || [];

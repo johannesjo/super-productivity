@@ -162,7 +162,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: actions$.pipe(ofType(hideAddTaskBar)) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -179,7 +179,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: timer(4000) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -198,7 +198,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: taskService.currentTaskId$.pipe(filter((id) => !!id)) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -221,7 +221,7 @@ export const SHEPHERD_STEPS = (
           ),
         },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -242,7 +242,9 @@ export const SHEPHERD_STEPS = (
                 obs: waitForElObs$('task.shepherd-highlight .hover-controls'),
               },
               {
-                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                obs: workContextService.mainListTasks$.pipe(
+                  filter((tt) => tt.length < 1),
+                ),
                 backToId: TourId.AddTask,
               },
               shepherdService,
@@ -264,7 +266,7 @@ export const SHEPHERD_STEPS = (
               },
               {
                 obs: merge(
-                  workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                  workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
                   of(true).pipe(
                     switchMap(() => {
                       const btnEl = document.querySelector(
@@ -299,7 +301,9 @@ export const SHEPHERD_STEPS = (
                 ),
               },
               {
-                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                obs: workContextService.mainListTasks$.pipe(
+                  filter((tt) => tt.length < 1),
+                ),
                 backToId: TourId.AddTask,
               },
               shepherdService,
@@ -692,7 +696,9 @@ export const SHEPHERD_STEPS = (
           obs: actions$.pipe(
             ofType(TaskSharedActions.addTask),
             switchMap(() =>
-              workContextService.todaysTasks$.pipe(filter((tasks) => tasks.length >= 4)),
+              workContextService.mainListTasks$.pipe(
+                filter((tasks) => tasks.length >= 4),
+              ),
             ),
           ),
         },

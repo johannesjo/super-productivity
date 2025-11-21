@@ -1801,6 +1801,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Panel gösterge penceresini etkinleştir (masaüstü linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
+      "IS_ENABLE_USER_PROFILES": "Kullanıcı profillerini etkinleştir (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Her biri ayrı ayarlar, görevler ve senkronizasyon yapılandırmalarına sahip farklı kullanıcı profilleri oluşturmanıza ve aralarında geçiş yapmanıza olanak tanır. Etkinleştirildiğinde profil yönetimi düğmesi sağ üst köşede görünecektir. Not: Bu özelliği devre dışı bırakmak kullanıcı arayüzünü gizler ancak profil verilerinizi korur (Beta özelliği, garanti yok. Yedeğiniz olduğundan emin olun).",
       "START_OF_NEXT_DAY": "Ertesi günün başlama saati",
       "START_OF_NEXT_DAY_HINT": "Ertesi günün başladığı saati saymak istediğiniz andan itibaren (saat cinsinden). Varsayılan gece yarısıdır, yani 0'dır.",
       "TASK_NOTES_TPL": "Görev açıklama şablonu",
@@ -2191,6 +2193,24 @@
     "E_MIN_LENGTH": "En az {{val}} karakter uzunluğunda olmalı",
     "E_PATTERN": "Geçersiz Giriş",
     "E_REQUIRED": "Bu alan gereklidir"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Kullanıcı profillerini yönet",
+    "CREATE_NEW_PROFILE": "Yeni profil oluştur",
+    "PROFILE_NAME": "Profil adı",
+    "PROFILE_NAME_PLACEHOLDER": "örn. İş, Kişisel",
+    "CREATE": "Oluştur",
+    "EXISTING_PROFILES": "Mevcut profiller",
+    "ACTIVE": "Aktif",
+    "CREATED": "Oluşturuldu:",
+    "SAVE": "Kaydet",
+    "CANCEL": "İptal",
+    "RENAME": "Yeniden adlandır",
+    "EXPORT_PROFILE": "Profili dışa aktar",
+    "DELETE_PROFILE": "Profili sil",
+    "OPEN_PROFILES_FOLDER": "Profiller klasörünü aç",
+    "CLOSE": "Kapat",
+    "MANAGE_PROFILES": "Profilleri yönet..."
   },
   "WW": {
     "ADD_MORE": "Daha ekle",

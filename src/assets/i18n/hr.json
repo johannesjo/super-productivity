@@ -1884,6 +1884,24 @@
     "teal": "plavozelena",
     "yellow": "žuta"
   },
+  "USER_PROFILES": {
+    "ACTIVE": "Aktivan",
+    "CANCEL": "Odustani",
+    "CLOSE": "Zatvori",
+    "CREATE": "Kreiraj",
+    "CREATE_NEW_PROFILE": "Kreiraj novi profil",
+    "CREATED": "Kreirano:",
+    "DELETE_PROFILE": "Obriši profil",
+    "DIALOG_TITLE": "Upravljaj korisničkim profilima",
+    "EXISTING_PROFILES": "Postojeći profili",
+    "EXPORT_PROFILE": "Izvezi profil",
+    "MANAGE_PROFILES": "Upravljaj profilima...",
+    "OPEN_PROFILES_FOLDER": "Otvori mapu profila",
+    "PROFILE_NAME": "Ime profila",
+    "PROFILE_NAME_PLACEHOLDER": "npr. Posao, Osobno",
+    "RENAME": "Preimenuj",
+    "SAVE": "Spremi"
+  },
   "V": {
     "E_1TO10": "Upiši vrijednost između 1 i 10",
     "E_DATETIME": "Upisana vrijednost nije vrijeme/datum!",

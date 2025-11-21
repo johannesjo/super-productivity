@@ -4,7 +4,12 @@ import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 
 export const addTaskRepeatCfgToTask = createAction(
   '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
-  props<{ taskId: string; taskRepeatCfg: TaskRepeatCfg }>(),
+  props<{
+    taskId: string;
+    taskRepeatCfg: TaskRepeatCfg;
+    startTime?: string;
+    remindAt?: string;
+  }>(),
 );
 
 export const updateTaskRepeatCfg = createAction(

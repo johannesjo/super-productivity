@@ -301,6 +301,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
           this._snackService.open({
             msg: errMsg,
             type: 'ERROR',
+            isSkipTranslate: true,
           });
           Log.err(data);
         });

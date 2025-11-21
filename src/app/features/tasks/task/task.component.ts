@@ -149,7 +149,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   isTaskOnTodayList = computed(() =>
     this._taskService.todayList().includes(this.task().id),
   );
-  isTodayListActive = computed(() => this.workContextService.isToday);
+  isTodayListActive = computed(() => this.workContextService.isTodayList);
   taskIdWithPrefix = computed(() => 't-' + this.task().id);
   isRepeatTaskCreatedToday = computed(
     () => !!(this.task().repeatCfgId && isToday(this.task().created)),

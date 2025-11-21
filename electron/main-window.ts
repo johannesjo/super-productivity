@@ -82,6 +82,7 @@ export const createWindow = ({
     height: mainWindowState.height,
     minHeight: 240,
     minWidth: 300,
+    title: IS_DEV ? 'Super Productivity D' : 'Super Productivity',
     titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
@@ -155,6 +156,11 @@ export const createWindow = ({
         });
 
   mainWin.loadURL(url).then(() => {
+    // Set window title for dev mode
+    if (IS_DEV) {
+      mainWin.setTitle('Super Productivity D');
+    }
+
     // load custom stylesheet if any
     const CSS_FILE_PATH = app.getPath('userData') + '/styles.css';
     stat(app.getPath('userData') + '/styles.css', (err) => {

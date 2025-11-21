@@ -12,6 +12,7 @@ export const DEFAULT_CALENDAR_CFG: CalendarProviderCfg = {
   isAutoImportForCurrentDay: false,
   checkUpdatesEvery: 2 * 60 * 60000,
   showBannerBeforeThreshold: 2 * 60 * 60000,
+  isDisabledForWebApp: false,
 };
 
 export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
@@ -83,6 +84,16 @@ export const CALENDAR_FORM_CFG_NEW: ConfigFormSection<IssueProviderCalendar> = {
         // TODO translation
         // label: T.GCF.CALENDARS.CAL_PATH,
         label: 'Auto import events as tasks for current day',
+      },
+    },
+    {
+      type: 'checkbox',
+      key: 'isDisabledForWebApp',
+      templateOptions: {
+        type: 'url',
+        // TODO translation
+        // label: T.GCF.CALENDARS.CAL_PATH,
+        label: 'Disable when using web application',
       },
     },
     // {
