@@ -1842,6 +1842,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Aktuelle Aufgabe im Tray / Status-Menu zeigen (nur Desktop)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Deaktivieren Sie das Markdown-Parsing für Notizen",
+      "IS_ENABLE_USER_PROFILES": "Benutzerprofile aktivieren (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Ermöglicht das Erstellen und Wechseln zwischen verschiedenen Benutzerprofilen mit jeweils separaten Einstellungen, Aufgaben und Synchronisierungskonfigurationen. Die Profilverwaltungsschaltfläche wird in der oberen rechten Ecke angezeigt, wenn aktiviert. Hinweis: Das Deaktivieren dieser Funktion blendet die Benutzeroberfläche aus, behält aber Ihre Profildaten bei (Beta-Funktion, keine Garantien. Stellen Sie sicher, dass Sie ein Backup haben).",
       "START_OF_NEXT_DAY": "Startzeit des nächsten Tages",
       "START_OF_NEXT_DAY_HINT": "Ab wann (in Stunden) der nächste Tag beginnen. Der Standardwert ist Mitternacht, also 0.",
       "TASK_NOTES_TPL": "Aufgabenbeschreibungsvorlage",
@@ -2245,6 +2247,24 @@
     "E_MIN_LENGTH": "Sollte mindestens {{val}} Zeichen lang sein",
     "E_PATTERN": "Ungültige Eingabe",
     "E_REQUIRED": "Dieses Feld wird benötigt"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Benutzerprofile verwalten",
+    "CREATE_NEW_PROFILE": "Neues Profil erstellen",
+    "PROFILE_NAME": "Profilname",
+    "PROFILE_NAME_PLACEHOLDER": "z.B. Arbeit, Privat",
+    "CREATE": "Erstellen",
+    "EXISTING_PROFILES": "Vorhandene Profile",
+    "ACTIVE": "Aktiv",
+    "CREATED": "Erstellt:",
+    "SAVE": "Speichern",
+    "CANCEL": "Abbrechen",
+    "RENAME": "Umbenennen",
+    "EXPORT_PROFILE": "Profil exportieren",
+    "DELETE_PROFILE": "Profil löschen",
+    "OPEN_PROFILES_FOLDER": "Profilordner öffnen",
+    "CLOSE": "Schließen",
+    "MANAGE_PROFILES": "Profile verwalten..."
   },
   "WW": {
     "ADD_MORE": "Weitere hinzufügen",

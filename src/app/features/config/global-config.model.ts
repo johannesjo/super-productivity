@@ -27,6 +27,7 @@ export type MiscConfig = Readonly<{
   isOverlayIndicatorEnabled?: boolean;
   customTheme?: string;
   unsplashApiKey?: string | null;
+  isEnableUserProfiles?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{

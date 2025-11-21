@@ -1620,6 +1620,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mostrar contagem regressiva atual na bandeja / menu de status (apenas desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra a tarefa atual na bandeja / menu de status (somente desktop)",
       "IS_TURN_OFF_MARKDOWN": "Desativar a análise de markdown para anotações",
+      "IS_ENABLE_USER_PROFILES": "Ativar perfis de utilizador (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Permite criar e alternar entre diferentes perfis de utilizador, cada um com configurações, tarefas e configurações de sincronização separadas. O botão de gestão de perfil aparecerá no canto superior direito quando ativado. Nota: desativar este recurso ocultará a interface do utilizador, mas preservará os dados do seu perfil (recurso Beta, sem garantias. Certifique-se de ter uma cópia de segurança).",
       "IS_USE_MINIMAL_SIDE_NAV": "Use a barra de navegação mínima (mostrar apenas ícones)",
       "START_OF_NEXT_DAY": "Hora de início do dia seguinte",
       "START_OF_NEXT_DAY_HINT": "a partir de quando (em horas) você deseja contar o dia seguinte começou. o padrão é meia-noite, que é 0.",
@@ -1894,6 +1896,24 @@
     "E_MIN_LENGTH": "Deve ter pelo menos {{val}} caracteres",
     "E_PATTERN": "Entrada inválida",
     "E_REQUIRED": "Este campo é obrigatório"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Gerir perfis de utilizador",
+    "CREATE_NEW_PROFILE": "Criar novo perfil",
+    "PROFILE_NAME": "Nome do perfil",
+    "PROFILE_NAME_PLACEHOLDER": "p. ex. Trabalho, Pessoal",
+    "CREATE": "Criar",
+    "EXISTING_PROFILES": "Perfis existentes",
+    "ACTIVE": "Ativo",
+    "CREATED": "Criado:",
+    "SAVE": "Guardar",
+    "CANCEL": "Cancelar",
+    "RENAME": "Renomear",
+    "EXPORT_PROFILE": "Exportar perfil",
+    "DELETE_PROFILE": "Eliminar perfil",
+    "OPEN_PROFILES_FOLDER": "Abrir pasta de perfis",
+    "CLOSE": "Fechar",
+    "MANAGE_PROFILES": "Gerir perfis..."
   },
   "WW": {
     "ADD_MORE": "Adicione mais",

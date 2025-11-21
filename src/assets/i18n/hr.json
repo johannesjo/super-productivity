@@ -1895,6 +1895,24 @@
     "E_PATTERN": "Neispravan unos",
     "E_REQUIRED": "Ovo je obavezno polje"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Upravljaj korisničkim profilima",
+    "CREATE_NEW_PROFILE": "Kreiraj novi profil",
+    "PROFILE_NAME": "Ime profila",
+    "PROFILE_NAME_PLACEHOLDER": "npr. Posao, Osobno",
+    "CREATE": "Kreiraj",
+    "EXISTING_PROFILES": "Postojeći profili",
+    "ACTIVE": "Aktivan",
+    "CREATED": "Kreirano:",
+    "SAVE": "Spremi",
+    "CANCEL": "Odustani",
+    "RENAME": "Preimenuj",
+    "EXPORT_PROFILE": "Izvezi profil",
+    "DELETE_PROFILE": "Obriši profil",
+    "OPEN_PROFILES_FOLDER": "Otvori mapu profila",
+    "CLOSE": "Zatvori",
+    "MANAGE_PROFILES": "Upravljaj profilima..."
+  },
   "WW": {
     "ADD_MORE": "Dodaj još",
     "ADD_SCHEDULED_FOR_TOMORROW": "Dodaj za sutra planirane zadatke ({{nr}})",

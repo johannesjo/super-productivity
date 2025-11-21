@@ -1888,6 +1888,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
+      "IS_ENABLE_USER_PROFILES": "Enable user profiles (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Allows you to create and switch between different user profiles, each with separate settings, tasks, and sync configurations. The profile management button will appear in the top-right corner when enabled. Note: Disabling this feature will hide the UI but preserve your profile data (Beta feature, no guarantees. Make sure to have a backup).",
       "START_OF_NEXT_DAY": "Start time of the next day",
       "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
@@ -2293,6 +2295,24 @@
     "E_MIN_LENGTH": "Should be at least {{val}} characters long",
     "E_PATTERN": "Invalid input",
     "E_REQUIRED": "This field is required"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Manage User Profiles",
+    "CREATE_NEW_PROFILE": "Create New Profile",
+    "PROFILE_NAME": "Profile Name",
+    "PROFILE_NAME_PLACEHOLDER": "e.g., Work, Personal",
+    "CREATE": "Create",
+    "EXISTING_PROFILES": "Existing Profiles",
+    "ACTIVE": "Active",
+    "CREATED": "Created:",
+    "SAVE": "Save",
+    "CANCEL": "Cancel",
+    "RENAME": "Rename",
+    "EXPORT_PROFILE": "Export Profile",
+    "DELETE_PROFILE": "Delete Profile",
+    "OPEN_PROFILES_FOLDER": "Open Profiles Folder",
+    "CLOSE": "Close",
+    "MANAGE_PROFILES": "Manage Profiles..."
   },
   "WW": {
     "ADD_MORE": "Add more",
