@@ -694,7 +694,6 @@ export class WorkContextService {
       return tasks;
     }
 
-    const todayStr = this._dateService.todayStr();
     const now = Date.now();
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
@@ -709,9 +708,6 @@ export class WorkContextService {
         task.dueWithTime >= now &&
         task.dueWithTime <= todayEndTimestamp
       ) {
-        return false;
-      }
-      if (task.dueDay && task.dueDay > todayStr) {
         return false;
       }
       return true;

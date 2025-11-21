@@ -192,7 +192,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
       expect(filteredTasks.find((t) => t.id === 'DONE_TASK')).toBeUndefined();
     });
 
-    it('should filter out tasks scheduled for tomorrow', () => {
+    it('should NOT filter out tasks scheduled for tomorrow', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(14, 0, 0, 0);
@@ -210,10 +210,10 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
 
       const filteredTasks = filterTasks(mockTasks);
 
-      expect(filteredTasks.length).toBe(0);
+      expect(filteredTasks.length).toBe(1);
     });
 
-    it('should filter out tasks scheduled for future date via dueDay only', () => {
+    it('should NOT filter out tasks scheduled for future date via dueDay only', () => {
       const futureDateStr = '2023-06-15';
 
       const mockTasks: TaskWithSubTasks[] = [
@@ -226,7 +226,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
 
       const filteredTasks = filterTasks(mockTasks);
 
-      expect(filteredTasks.length).toBe(0);
+      expect(filteredTasks.length).toBe(1);
     });
 
     it('should not filter out future tasks when active context is not Today', () => {
