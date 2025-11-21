@@ -382,13 +382,19 @@ export class WorkContextService {
         }
 
         // Filter out tasks scheduled for later today
-        if (this.activeWorkContextId === TODAY_TAG.id && task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
+        if (this.activeWorkContextId === TODAY_TAG.id) {
+          if (task.dueWithTime) {
+            const now = Date.now();
+            const todayEnd = new Date();
+            todayEnd.setHours(23, 59, 59, 999);
 
-          // If the task is scheduled for later today, exclude it
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
+            // If the task is scheduled for later today, exclude it
+            if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
+              return false;
+            }
+          }
+
+          if (task.dueDay && task.dueDay > this._dateService.todayStr()) {
             return false;
           }
         }

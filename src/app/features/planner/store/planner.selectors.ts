@@ -158,7 +158,9 @@ const getPlannerDay = (
       : plannerState.days[dayDate] || [];
   const normalTasks = tIds
     .map((id) => taskState.entities[id] as TaskCopy)
-    .filter((t) => !!t);
+    .filter((t) => !!t)
+    // Filter out tasks with dueDay in future if it is Today's column
+    .filter((t) => !isTodayI || !t.dueDay || t.dueDay <= todayStr);
 
   const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
     getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);

@@ -136,6 +136,34 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
 
   // Test the filtering logic directly instead of testing the full observable chain
   describe('filtering logic', () => {
+    const todayStr = '2023-06-13';
+
+    const filterTasks = (tasks: TaskWithSubTasks[]): TaskWithSubTasks[] => {
+      return tasks.filter((task) => {
+        if (!task || task.isDone) {
+          return false;
+        }
+
+        // Filter out tasks scheduled for later today
+        if (task.dueWithTime) {
+          const now = Date.now();
+          const todayEnd = new Date();
+          todayEnd.setHours(23, 59, 59, 999);
+
+          // If the task is scheduled for later today, exclude it
+          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
+            return false;
+          }
+        }
+
+        if (task.dueDay && task.dueDay > todayStr) {
+          return false;
+        }
+
+        return true;
+      });
+    };
+
     it('should filter out tasks scheduled for later today', () => {
       const todayAt = (hours: number, minutes: number = 0): number => {
         const date = new Date();
@@ -170,26 +198,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
         }),
       ];
 
-      // Apply the same filtering logic as in the service
-      const filteredTasks = mockTasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        // Filter out tasks scheduled for later today
-        if (task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          // If the task is scheduled for later today, exclude it
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      const filteredTasks = filterTasks(mockTasks);
 
       expect(filteredTasks.length).toBe(2);
       expect(filteredTasks.find((t) => t.id === 'LATER_TODAY')).toBeUndefined();
@@ -198,40 +207,41 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
       expect(filteredTasks.find((t) => t.id === 'DONE_TASK')).toBeUndefined();
     });
 
-    it('should include tasks scheduled for tomorrow', () => {
+    it('should filter out tasks scheduled for tomorrow', () => {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(14, 0, 0, 0);
+      // Assuming 2023-06-14 is tomorrow relative to 2023-06-13
+      const tomorrowStr = '2023-06-14';
 
       const mockTasks: TaskWithSubTasks[] = [
         createMockTask({
           id: 'TOMORROW_TASK',
           title: 'Tomorrow meeting',
           dueWithTime: tomorrow.getTime(),
+          dueDay: tomorrowStr,
         }),
       ];
 
-      // Apply the filtering logic
-      const filteredTasks = mockTasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
+      const filteredTasks = filterTasks(mockTasks);
 
-        if (task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
+      expect(filteredTasks.length).toBe(0);
+    });
 
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
+    it('should filter out tasks scheduled for future date via dueDay only', () => {
+      const futureDateStr = '2023-06-15';
 
-        return true;
-      });
+      const mockTasks: TaskWithSubTasks[] = [
+        createMockTask({
+          id: 'FUTURE_TASK',
+          title: 'Future task',
+          dueDay: futureDateStr,
+        }),
+      ];
 
-      expect(filteredTasks.length).toBe(1);
-      expect(filteredTasks.find((t) => t.id === 'TOMORROW_TASK')).toBeDefined();
+      const filteredTasks = filterTasks(mockTasks);
+
+      expect(filteredTasks.length).toBe(0);
     });
 
     it('should handle edge case of task scheduled exactly at current time', () => {
@@ -245,24 +255,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
         }),
       ];
 
-      // Apply the filtering logic
-      const filteredTasks = mockTasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        if (task.dueWithTime) {
-          const currentNow = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          if (task.dueWithTime >= currentNow && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      const filteredTasks = filterTasks(mockTasks);
 
       // Task scheduled at exactly current time should be filtered out
       expect(filteredTasks.length).toBe(0);
@@ -285,24 +278,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
         }),
       ];
 
-      // Apply the filtering logic
-      const filteredTasks = mockTasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        if (task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      const filteredTasks = filterTasks(mockTasks);
 
       expect(filteredTasks.length).toBe(1);
       expect(filteredTasks[0].id).toBe('PARENT_TASK');
@@ -331,24 +307,7 @@ describe('WorkContextService - undoneTasks$ filtering', () => {
         }),
       ];
 
-      // Apply the filtering logic
-      const filteredTasks = mockTasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        if (task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        return true;
-      });
+      const filteredTasks = filterTasks(mockTasks);
 
       expect(filteredTasks.length).toBe(0);
     });
