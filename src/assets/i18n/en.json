@@ -156,7 +156,7 @@
     "CALENDARS": {
       "BANNER": {
         "ADD_AS_TASK": "Add as Task",
-        "FOCUS_TASK": "Focus Task",
+        "SHOW_TASK": "Show Task",
         "TXT": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other events are due)",
         "TXT_PAST": "<strong>{{title}}</strong> started at <strong>{{start}}</strong>!",
