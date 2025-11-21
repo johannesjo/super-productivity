@@ -198,12 +198,22 @@
   </mat-card>
 }
 
-<mat-card>
+<mat-card class="community-plugins-card">
   <mat-card-header>
     <mat-card-title>Community Plugins</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <p>These plugins are developed by the community. Install them at your own risk.</p>
+    <div
+      class="warning-content"
+      style="margin-bottom: 16px; color: var(--warn)"
+    >
+      <p>
+        <strong>⚠️ WARNING:</strong> These plugins are developed by the community and are
+        <strong>NOT</strong> reviewed or guaranteed by the Super Productivity team.
+        Install and use them at your own risk. They might contain malicious code or break
+        your application.
+      </p>
+    </div>
 
     <div class="community-plugins-list">
       @for (plugin of communityPlugins(); track plugin.name) {

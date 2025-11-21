@@ -1,7 +1,7 @@
 [
   {
-    "name": "Focus Mode Plugin",
-    "shortDescription": "Enhances focus mode with custom timers and blockers.",
-    "url": "https://github.com/johannesjo/super-productivity/tree/master/packages/plugin-dev/focus-mode"
+    "name": "Date Range Reporter Plugin",
+    "shortDescription": "Generates reports of completed tasks and tasks with work logs within a specified date range.",
+    "url": "https://github.com/dougcooper/sp-reporter"
   }
 ]

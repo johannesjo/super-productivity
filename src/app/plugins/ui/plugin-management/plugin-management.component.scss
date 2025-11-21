@@ -161,9 +161,14 @@ mat-error {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
   }
+}
+
+.community-plugins-card {
+  grid-column: 1 / -1;
 }
 
 .community-plugins-list {
