@@ -1,4 +1,6 @@
-@if (!task().isDone && !isCurrent() && !task().subTasks?.length) {
+@if (
+  isTimeTrackingEnabled() && !task().isDone && !isCurrent() && !task().subTasks?.length
+) {
   <button
     (click)="parent.startTask()"
     title="{{ T.F.TASK.CMP.TRACK_TIME | translate }} {{

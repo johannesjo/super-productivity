@@ -8,6 +8,16 @@ const defaultVoice = getDefaultVoice();
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
+  appFeatures: {
+    isTimeTrackingEnabled: true,
+    isFocusModeEnabled: true,
+    isSchedulerEnabled: true,
+    isPlannerEnabled: true,
+    isBoardsEnabled: true,
+    isScheduleDayPanelEnabled: true,
+    isIssuesPanelEnabled: true,
+    isProjectNotesEnabled: true,
+  },
   lang: {
     lng: null,
     timeLocale: undefined,
