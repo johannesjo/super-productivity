@@ -20,6 +20,18 @@
   </div>
 
   @if (heatmapData(); as data) {
+    <div class="select-menu">
+      <span>Date range:</span>
+      <select
+        class="custom-select"
+        [value]="getSelectedPeriod()"
+        (change)="onPeriodChange($event.target.value)"
+      >
+        <!-- <mat-label>Select</mat-label> -->
+        <option value="last365">Last 365 days</option>
+        <option value="currentYear">Current Year</option>
+      </select>
+    </div>
     <div class="heatmap-container">
       <div class="heatmap-grid">
         <div class="day-labels">
