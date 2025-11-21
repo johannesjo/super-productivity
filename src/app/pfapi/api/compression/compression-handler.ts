@@ -9,21 +9,18 @@ export async function compressWithGzipToString(input: string): Promise<string> {
     writer.write(new TextEncoder().encode(input));
     writer.close();
     const compressed = await new Response(stream.readable).arrayBuffer();
-    // Convert to Base64 without using spread operator
-    const bytes = new Uint8Array(compressed);
-    let binary = '';
-    for (let i = 0; i < bytes.byteLength; i++) {
-      binary += String.fromCharCode(bytes[i]);
-    }
-    const base64 = btoa(binary);
 
-    // PFLog.normal( 'Compression stats', {
-    //   inputLength: input.length,
-    //   compressedSize: compressed.byteLength,
-    //   base64Length: base64.length,
-    // });
-
-    return base64;
+    return await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64DataUrl = reader.result as string;
+        // Format is "data:[<mediatype>][;base64],<data>"
+        const base64 = base64DataUrl.split(',')[1];
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(new Blob([compressed]));
+    });
   } catch (error) {
     PFLog.err(error);
     throw new CompressError(error);
@@ -35,12 +32,11 @@ export async function decompressGzipFromString(
   compressedBase64: string,
 ): Promise<string> {
   try {
-    const binaryString = atob(compressedBase64);
-    // More efficient conversion
-    const compressedData = new Uint8Array(binaryString.length);
-    for (let i = 0; i < binaryString.length; i++) {
-      compressedData[i] = binaryString.charCodeAt(i);
-    }
+    // Use fetch to decode base64 efficiently
+    const response = await fetch(
+      `data:application/octet-stream;base64,${compressedBase64}`,
+    );
+    const compressedData = await response.arrayBuffer();
 
     const stream = new DecompressionStream('gzip');
     const writer = stream.writable.getWriter();
