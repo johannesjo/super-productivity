@@ -56,7 +56,7 @@ export class TaskRepeatCfgEffects {
     this._actions$.pipe(
       ofType(addTaskRepeatCfgToTask),
       filter(({ startTime, remindAt }) => !!startTime && !!remindAt),
-      concatMap(({ taskId, startTime, remindAt }) =>
+      concatMap(({ taskId, startTime, remindAt, taskRepeatCfg }) =>
         this._taskService.getByIdOnce$(taskId).pipe(
           map((task) => {
             if (!task) {
@@ -64,6 +64,7 @@ export class TaskRepeatCfgEffects {
               return null; // Return null instead of EMPTY
             }
             const targetDayTimestamp =
+              (taskRepeatCfg.startDate && new Date(taskRepeatCfg.startDate).getTime()) ||
               (task.dueDay && new Date(task.dueDay).getTime()) ||
               task.dueWithTime ||
               Date.now();
