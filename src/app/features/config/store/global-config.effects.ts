@@ -77,7 +77,7 @@ export class GlobalConfigEffects {
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
-        filter(({ sectionKey, sectionCfg }) => sectionKey === 'lang'),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'localization'),
         filter(({ sectionKey, sectionCfg }) => sectionCfg['lng'] !== undefined), // skip if `undefined` (language is not set yet)
         tap(({ sectionKey, sectionCfg }) => {
           this._languageService.setLng(sectionCfg['lng']);
@@ -92,7 +92,7 @@ export class GlobalConfigEffects {
         ofType(loadAllData),
         tap(({ appDataComplete }) => {
           const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
-          const lng = cfg.lang.lng;
+          const lng = cfg.localization.lng;
           const isInitial = lng === undefined; // language is not set manually by user yet
 
           if (isInitial) {

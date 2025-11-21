@@ -1,10 +1,10 @@
-import { ConfigFormSection, LanguageConfig } from '../global-config.model';
+import { ConfigFormSection, LocalizationConfig } from '../global-config.model';
 import { LanguageCode, Locales } from '../../../app.constants';
 import { T } from '../../../t.const';
 
-export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
+export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LocalizationConfig> = {
   title: T.GCF.LANG.TITLE,
-  key: 'lang',
+  key: 'localization',
   items: [
     {
       key: 'lng',
@@ -59,7 +59,7 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
       },
     },
     {
-      key: 'timeLocale',
+      key: 'dateTimeLocale',
       type: 'select',
       templateOptions: {
         label: T.GCF.LANG.TIME_LOCALE,

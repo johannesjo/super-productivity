@@ -14,7 +14,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../../project/project.model';
 import { WorkContext } from '../../work-context/work-context.model';
-import { LanguageConfig, MiscConfig } from '../../config/global-config.model';
+import { LocalizationConfig, MiscConfig } from '../../config/global-config.model';
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
@@ -104,7 +104,7 @@ describe('AddTaskBarComponent', () => {
     type: WorkContextType.TAG,
   } as WorkContext;
 
-  const mockLanguageConfig: LanguageConfig = {
+  const mockLocalizationConfig: LocalizationConfig = {
     firstDayOfWeek: 1,
   };
 
@@ -178,7 +178,7 @@ describe('AddTaskBarComponent', () => {
       ]),
     );
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
-      lang$: new BehaviorSubject<LanguageConfig>(mockLanguageConfig),
+      lang$: new BehaviorSubject<LocalizationConfig>(mockLocalizationConfig),
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
       shortSyntax$: of({}),
       lang: () => ({ timeLocale: DEFAULT_LOCALE }),
@@ -288,7 +288,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project in config
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -310,7 +310,7 @@ describe('AddTaskBarComponent', () => {
 
       // Ensure no default project is configured
       const configWithoutDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -332,7 +332,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set defaultProjectId to false
       const configWithFalseDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: false,
       };
@@ -354,7 +354,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a non-existent default project
       const configWithNonExistentDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'non-existent-project',
       };
@@ -376,7 +376,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a different default project in config
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -399,7 +399,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -427,7 +427,7 @@ describe('AddTaskBarComponent', () => {
 
       // Start with no default project
       const configWithoutDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -440,7 +440,7 @@ describe('AddTaskBarComponent', () => {
 
       // Change to configured default project
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -460,7 +460,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -537,7 +537,7 @@ describe('AddTaskBarComponent', () => {
       ).next(mockTagWorkContext);
 
       const configWithDefault: MiscConfig = {
-        ...mockLanguageConfig,
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };

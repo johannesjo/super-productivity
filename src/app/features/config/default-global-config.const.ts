@@ -8,9 +8,9 @@ const defaultVoice = getDefaultVoice();
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
-  lang: {
+  localization: {
     lng: undefined,
-    timeLocale: undefined,
+    dateTimeLocale: undefined,
     firstDayOfWeek: undefined,
   },
   misc: {

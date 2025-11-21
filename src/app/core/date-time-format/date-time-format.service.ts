@@ -12,7 +12,7 @@ export class DateTimeFormatService {
 
   // Signal for the locale to use
   private readonly _locale = computed(() => {
-    return this._globalConfigService.lang()?.timeLocale || DEFAULT_LOCALE;
+    return this._globalConfigService.localization()?.dateTimeLocale || DEFAULT_LOCALE;
   });
 
   private readonly _testFormats = computed(() => {
@@ -49,7 +49,7 @@ export class DateTimeFormatService {
 
     // Use effect to reactively update date adapter locale when config changes
     effect(() => {
-      const cfgValue = this._globalConfigService.lang()?.timeLocale;
+      const cfgValue = this._globalConfigService.localization()?.dateTimeLocale;
       if (cfgValue) this.setDateAdapterLocale(cfgValue);
     });
   }
@@ -59,7 +59,7 @@ export class DateTimeFormatService {
   private _initMonkeyPatchFirstDayOfWeek(): void {
     // Use effect to reactively update firstDayOfWeek when config changes
     effect(() => {
-      const cfgValue = this._globalConfigService.lang()?.firstDayOfWeek;
+      const cfgValue = this._globalConfigService.localization()?.firstDayOfWeek;
 
       // If not been setted or been reseted - use default
       if (!cfgValue) {

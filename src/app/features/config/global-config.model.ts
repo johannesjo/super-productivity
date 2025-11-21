@@ -118,12 +118,11 @@ export type LocalBackupConfig = Readonly<{
  * - `undefined` - that indicates value not been setted manually yet
  * - `null` - that indicates value manually reseted to app/system default
  *
- * TODO rename to "LocalizationConfig"
  */
-export type LanguageConfig = Readonly<{
+export type LocalizationConfig = Readonly<{
   lng?: LanguageCode | null;
   firstDayOfWeek?: number | null;
-  timeLocale?: Locale | null; // TODO 1. Need migration? 2. Rename to "dateTimeLocale"
+  dateTimeLocale?: Locale | null;
 }>;
 
 export type SoundConfig = Readonly<{
@@ -191,7 +190,7 @@ export type DailySummaryNote = Readonly<{
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
-  lang: LanguageConfig; // TODO rename to "localization"
+  localization: LocalizationConfig; // TODO rename to "localization"
   misc: MiscConfig;
   shortSyntax: ShortSyntaxConfig;
   evaluation: EvaluationConfig;

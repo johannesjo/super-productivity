@@ -1,4 +1,4 @@
-import { Locales } from '../app.constants';
+import { Locale, Locales } from '../app.constants';
 import { formatMonthDay } from './format-month-day.util';
 
 describe('formatMonthDay', () => {
@@ -169,7 +169,7 @@ describe('formatMonthDay', () => {
 
     it('should fallback to basic format when locale data is missing', () => {
       // Use a non-existent locale to trigger fallback
-      const result = formatMonthDay(testDate, 'xx-XX');
+      const result = formatMonthDay(testDate, 'xx-XX' as Locale);
       expect(result).toBe('25/12'); // Should fallback to d/M format
     });
   });
