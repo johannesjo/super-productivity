@@ -11,13 +11,19 @@ export const crossModelMigration4_4: CrossModelMigrateFn = ((
 
   // ! Rename globalConfig `lang` section to `lozalization`
   const oldLangSection = copy.globalConfig['lang'];
-  // @ts-ignore
-  copy.globalConfig.localization = oldLangSection;
+  if (oldLangSection) {
+    // @ts-ignore
+    copy.globalConfig.localization = oldLangSection;
+    delete copy.globalConfig['lang'];
+  }
 
   // ! Move globalConfig `misc.timeLocale` to `localization.dateTimeLocale`
   const oldTimeLocale = copy.globalConfig.misc['timeLocale'];
-  // @ts-ignore
-  if (oldTimeLocale) copy.globalConfig.localization.dateTimeLocale = oldTimeLocale;
+  if (oldTimeLocale) {
+    // @ts-ignore
+    copy.globalConfig.localization.dateTimeLocale = oldTimeLocale;
+    delete copy.globalConfig.misc['timeLocale'];
+  }
 
   PFLog.log(copy);
   return copy;
