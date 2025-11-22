@@ -27,7 +27,8 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { Store } from '@ngrx/store';
@@ -57,7 +58,7 @@ const MINUTES_TO_MILLISECONDS = 1000 * 60;
     AsyncPipe,
     TranslatePipe,
     TagListComponent,
-    DatePipe,
+    LocaleDatePipe,
   ],
 })
 export class DialogViewTaskRemindersComponent implements OnDestroy {

@@ -104,7 +104,7 @@
                     }}</span>
                     <span class="when">
                       {{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
-                      {{ getCommentCreated(lastComment(), cfg) | date: 'short' }}
+                      {{ getCommentCreated(lastComment(), cfg) | localeDate: 'short' }}
                     </span>
                   </div>
                   @if (getCommentBody(lastComment(), cfg); as body) {
@@ -137,7 +137,7 @@
                     <span class="author-name">{{ getCommentAuthor(comment, cfg) }}</span>
                     <span class="when">
                       {{ T.F.ISSUE.ISSUE_CONTENT.AT | translate }}
-                      {{ getCommentCreated(comment, cfg) | date: 'short' }}
+                      {{ getCommentCreated(comment, cfg) | localeDate: 'short' }}
                     </span>
                   </div>
                   @if (getCommentBody(comment, cfg); as body) {

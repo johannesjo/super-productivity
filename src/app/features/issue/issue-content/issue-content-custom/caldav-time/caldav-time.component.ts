@@ -5,7 +5,7 @@ import {
   inject,
   input,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TaskCopy } from '../../../../tasks/task.model';
 import { IssueData } from '../../../issue.model';
 import { IssueFieldConfig } from '../../issue-content.model';
@@ -17,7 +17,7 @@ import { IssueFieldConfig } from '../../issue-content.model';
   imports: [],
 })
 export class CaldavTimeComponent {
-  private _datePipe = inject(DatePipe);
+  private _datePipe = inject(LocaleDatePipe);
 
   readonly field = input.required<IssueFieldConfig>();
   readonly issue = input.required<IssueData>();

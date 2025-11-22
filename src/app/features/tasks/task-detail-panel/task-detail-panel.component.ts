@@ -7,7 +7,6 @@ import {
   HostListener,
   inject,
   input,
-  LOCALE_ID,
   OnDestroy,
   OnInit,
   signal,
@@ -68,7 +67,7 @@ import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-mark
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
 import { DialogSelectDateTimeComponent } from '../dialog-select-date-time/dialog-select-date-time.component';
-import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -116,7 +115,6 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   private _store = inject(Store);
   private _translateService = inject(TranslateService);
   private _destroyRef = inject(DestroyRef);
-  private _locale = inject(LOCALE_ID);
   private _dateTimeFormatService = inject(DateTimeFormatService);
 
   // Inputs
@@ -189,7 +187,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
         }
         const [key, params] = getTaskRepeatInfoText(
           repeatCfg,
-          this._locale,
+          this._dateTimeFormatService.currentLocale,
           this._dateTimeFormatService,
         );
         return this._translateService.instant(key, params);

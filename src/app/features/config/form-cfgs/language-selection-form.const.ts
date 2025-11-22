@@ -1,11 +1,10 @@
-/* eslint-disable max-len */
-import { ConfigFormSection, LanguageConfig } from '../global-config.model';
-import { LanguageCode } from '../../../app.constants';
+import { ConfigFormSection, LocalizationConfig } from '../global-config.model';
+import { LanguageCode, Locales } from '../../../app.constants';
 import { T } from '../../../t.const';
 
-export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
+export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LocalizationConfig> = {
   title: T.GCF.LANG.TITLE,
-  key: 'lang',
+  key: 'localization',
   items: [
     {
       key: 'lng',
@@ -13,6 +12,9 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
       templateOptions: {
         label: T.GCF.LANG.LABEL,
         options: [
+          // TODO sort by popular
+          // TODO add translation
+          { label: 'System default', value: null },
           { label: T.GCF.LANG.AR, value: LanguageCode.ar },
           { label: T.GCF.LANG.CZ, value: LanguageCode.cz },
           { label: T.GCF.LANG.DE, value: LanguageCode.de },
@@ -39,25 +41,44 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LanguageConfig> = {
       },
     },
     {
-      key: 'timeLocale',
+      key: 'firstDayOfWeek',
+      type: 'select',
+      templateOptions: {
+        label: T.GCF.MISC.FIRST_DAY_OF_WEEK,
+        options: [
+          // TODO add translation
+          { label: 'System default', value: null },
+          { label: T.F.TASK_REPEAT.F.SUNDAY, value: 0 },
+          { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },
+          { label: T.F.TASK_REPEAT.F.TUESDAY, value: 2 },
+          { label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3 },
+          { label: T.F.TASK_REPEAT.F.THURSDAY, value: 4 },
+          { label: T.F.TASK_REPEAT.F.FRIDAY, value: 5 },
+          { label: T.F.TASK_REPEAT.F.SATURDAY, value: 6 },
+        ],
+      },
+    },
+    {
+      key: 'dateTimeLocale',
       type: 'select',
       templateOptions: {
         label: T.GCF.LANG.TIME_LOCALE,
         description: T.GCF.LANG.TIME_LOCALE_DESCRIPTION,
         options: [
-          { label: T.GCF.LANG.TIME_LOCALE_AUTO, value: undefined },
-          { label: T.GCF.LANG.TIME_LOCALE_EN_US, value: 'en-US' },
-          { label: T.GCF.LANG.TIME_LOCALE_EN_GB, value: 'en-GB' },
-          { label: T.GCF.LANG.TIME_LOCALE_TR_TR, value: 'tr-TR' },
-          { label: T.GCF.LANG.TIME_LOCALE_DE_DE, value: 'de-DE' },
-          { label: T.GCF.LANG.TIME_LOCALE_FR_FR, value: 'fr-FR' },
-          { label: T.GCF.LANG.TIME_LOCALE_ES_ES, value: 'es-ES' },
-          { label: T.GCF.LANG.TIME_LOCALE_IT_IT, value: 'it-IT' },
-          { label: T.GCF.LANG.TIME_LOCALE_PT_BR, value: 'pt-BR' },
-          { label: T.GCF.LANG.TIME_LOCALE_RU_RU, value: 'ru-RU' },
-          { label: T.GCF.LANG.TIME_LOCALE_ZH_CN, value: 'zh-CN' },
-          { label: T.GCF.LANG.TIME_LOCALE_JA_JP, value: 'ja-JP' },
-          { label: T.GCF.LANG.TIME_LOCALE_KO_KR, value: 'ko-KR' },
+          // TODO sort by popular
+          { label: T.GCF.LANG.TIME_LOCALE_AUTO, value: null },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_US, value: Locales.en_us },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_GB, value: Locales.en_gb },
+          { label: T.GCF.LANG.TIME_LOCALE_TR_TR, value: Locales.tr_tr },
+          { label: T.GCF.LANG.TIME_LOCALE_DE_DE, value: Locales.de_de },
+          { label: T.GCF.LANG.TIME_LOCALE_FR_FR, value: Locales.fr_fr },
+          { label: T.GCF.LANG.TIME_LOCALE_ES_ES, value: Locales.es_es },
+          { label: T.GCF.LANG.TIME_LOCALE_IT_IT, value: Locales.it_it },
+          { label: T.GCF.LANG.TIME_LOCALE_PT_BR, value: Locales.pt_br },
+          { label: T.GCF.LANG.TIME_LOCALE_RU_RU, value: Locales.ru_ru },
+          { label: T.GCF.LANG.TIME_LOCALE_ZH_CN, value: Locales.zh_cn },
+          { label: T.GCF.LANG.TIME_LOCALE_JA_JP, value: Locales.ja_jp },
+          { label: T.GCF.LANG.TIME_LOCALE_KO_KR, value: Locales.ko_kr },
         ],
       },
     },

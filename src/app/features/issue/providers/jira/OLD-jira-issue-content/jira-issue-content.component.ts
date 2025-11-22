@@ -29,7 +29,8 @@ import { MatButton, MatAnchor } from '@angular/material/button';
 import { MatChipListbox, MatChipOption } from '@angular/material/chips';
 import { MarkdownComponent, MarkdownPipe } from 'ngx-markdown';
 import { MatIcon } from '@angular/material/icon';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { JiraToMarkdownPipe } from '../../../../../ui/pipes/jira-to-markdown.pipe';
 import { MsToStringPipe } from '../../../../../ui/duration/ms-to-string.pipe';
 import { TranslatePipe } from '@ngx-translate/core';
@@ -54,7 +55,7 @@ interface JiraSubtaskWithUrl extends JiraSubtask {
     MatAnchor,
     MatIcon,
     AsyncPipe,
-    DatePipe,
+    LocaleDatePipe,
     JiraToMarkdownPipe,
     MsToStringPipe,
     TranslatePipe,

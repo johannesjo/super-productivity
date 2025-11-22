@@ -15,16 +15,14 @@ import { MatDialog } from '@angular/material/dialog';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { DialogTimelineSetupComponent } from '../dialog-timeline-setup/dialog-timeline-setup.component';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import {
-  selectMiscConfig,
-  selectTimelineWorkStartEndHours,
-} from '../../config/store/global-config.reducer';
+import { selectTimelineWorkStartEndHours } from '../../config/store/global-config.reducer';
 import { FH } from '../schedule.const';
 import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
 import { ScheduleMonthComponent } from '../schedule-month/schedule-month.component';
 import { ScheduleService } from '../schedule.service';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   selector: 'schedule',
@@ -45,6 +43,7 @@ export class ScheduleComponent implements AfterViewInit {
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
+  private _dateAdapter = inject(DateAdapter);
 
   private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._currentTimeViewMode() === 'month');
@@ -95,25 +94,18 @@ export class ScheduleComponent implements AfterViewInit {
   daysToShow = computed(() => {
     const count = this._daysToShowCount();
     const selectedView = this._currentTimeViewMode();
-    const miscConfig = this._miscConfig();
     // Trigger re-computation when today changes
     this._todayDateStr();
 
     if (selectedView === 'month') {
-      const firstDayOfWeek = miscConfig?.firstDayOfWeek ?? 1; // Default to Monday
-      return this.scheduleService.getMonthDaysToShow(count, firstDayOfWeek);
+      return this.scheduleService.getMonthDaysToShow(count, this.firstDayOfWeek);
     }
     return this.scheduleService.getDaysToShow(count);
   });
 
   weeksToShow = computed(() => Math.ceil(this.daysToShow().length / 7));
 
-  firstDayOfWeek = computed(() => {
-    const miscConfig = this._miscConfig();
-    return miscConfig?.firstDayOfWeek ?? 1; // Default to Monday
-  });
-
-  private _miscConfig = toSignal(this._store.pipe(select(selectMiscConfig)));
+  firstDayOfWeek = this._dateAdapter.getFirstDayOfWeek();
 
   scheduleDays = this.scheduleService.createScheduleDaysComputed(this.daysToShow);
 

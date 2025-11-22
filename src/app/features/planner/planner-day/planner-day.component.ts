@@ -18,7 +18,8 @@ import { MatIcon } from '@angular/material/icon';
 import { PlannerTaskComponent } from '../planner-task/planner-task.component';
 import { PlannerRepeatProjectionComponent } from '../planner-repeat-projection/planner-repeat-projection.component';
 import { AddTaskInlineComponent } from '../add-task-inline/add-task-inline.component';
-import { DatePipe, NgClass } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
+import { NgClass } from '@angular/common';
 import { PlannerCalendarEventComponent } from '../planner-calendar-event/planner-calendar-event.component';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { RoundDurationPipe } from '../../../ui/pipes/round-duration.pipe';
@@ -41,7 +42,7 @@ import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.comp
     AddTaskInlineComponent,
     NgClass,
     PlannerCalendarEventComponent,
-    DatePipe,
+    LocaleDatePipe,
     MsToStringPipe,
     RoundDurationPipe,
     ShortTimeHtmlPipe,

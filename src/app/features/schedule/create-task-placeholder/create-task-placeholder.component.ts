@@ -17,7 +17,7 @@ import {
 import { MatIcon } from '@angular/material/icon';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { Store } from '@ngrx/store';
 import { getDbDateStr } from '../../../util/get-db-date-str';
@@ -32,7 +32,7 @@ type Timeout = NodeJS.Timeout | number | undefined;
 
 @Component({
   selector: 'create-task-placeholder',
-  imports: [MatIcon, DatePipe, ShortTimeHtmlPipe, SelectTaskMinimalComponent],
+  imports: [MatIcon, LocaleDatePipe, ShortTimeHtmlPipe, SelectTaskMinimalComponent],
   templateUrl: './create-task-placeholder.component.html',
   styleUrl: './create-task-placeholder.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

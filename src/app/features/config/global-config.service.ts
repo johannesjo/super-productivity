@@ -10,7 +10,7 @@ import {
   GlobalConfigState,
   GlobalSectionConfig,
   IdleConfig,
-  LanguageConfig,
+  LocalizationConfig,
   MiscConfig,
   PomodoroConfig,
   ScheduleConfig,
@@ -23,7 +23,7 @@ import {
   selectConfigFeatureState,
   selectEvaluationConfig,
   selectIdleConfig,
-  selectLanguageConfig,
+  selectLocalizationConfig,
   selectMiscConfig,
   selectPomodoroConfig,
   selectShortSyntaxConfig,
@@ -48,8 +48,8 @@ export class GlobalConfigService {
     shareReplay(1),
   );
 
-  lang$: Observable<LanguageConfig> = this._store.pipe(
-    select(selectLanguageConfig),
+  localization$: Observable<LocalizationConfig> = this._store.pipe(
+    select(selectLocalizationConfig),
     shareReplay(1),
   );
 
@@ -99,9 +99,10 @@ export class GlobalConfigService {
   readonly cfg: Signal<GlobalConfigState | undefined> = toSignal(this.cfg$, {
     initialValue: undefined,
   });
-  readonly lang: Signal<LanguageConfig | undefined> = toSignal(this.lang$, {
-    initialValue: undefined,
-  });
+  readonly localization: Signal<LocalizationConfig | undefined> = toSignal(
+    this.localization$,
+    { initialValue: undefined },
+  );
   readonly misc: Signal<MiscConfig | undefined> = toSignal(this.misc$, {
     initialValue: undefined,
   });

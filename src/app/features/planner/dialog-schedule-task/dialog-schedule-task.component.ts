@@ -23,7 +23,7 @@ import { MatCalendar } from '@angular/material/datepicker';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { SnackService } from '../../../core/snack/snack.service';
 import { removeReminderFromTask } from '../../tasks/store/task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -93,12 +93,12 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   private _cd = inject(ChangeDetectorRef);
   private _store = inject(Store);
   private _snackService = inject(SnackService);
-  private _datePipe = inject(DatePipe);
+  private _datePipe = inject(LocaleDatePipe);
   private _taskService = inject(TaskService);
   private _reminderService = inject(ReminderService);
   private _translateService = inject(TranslateService);
   private _globalConfigService = inject(GlobalConfigService);
-  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _dateAdapter = inject(DateAdapter);
 
   T: typeof T = T;
   minDate = new Date();

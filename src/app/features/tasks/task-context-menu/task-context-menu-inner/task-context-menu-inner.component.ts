@@ -11,7 +11,8 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatMenu,
@@ -97,7 +98,7 @@ import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-co
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class TaskContextMenuInnerComponent implements AfterViewInit {
-  private readonly _datePipe = inject(DatePipe);
+  private readonly _datePipe = inject(LocaleDatePipe);
   private readonly _taskService = inject(TaskService);
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _matDialog = inject(MatDialog);
@@ -108,7 +109,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private readonly _projectService = inject(ProjectService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
-  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _dateAdapter = inject(DateAdapter);
   private readonly _tagService = inject(TagService);
   private readonly _translateService = inject(TranslateService);
   private readonly _workContextService = inject(WorkContextService);

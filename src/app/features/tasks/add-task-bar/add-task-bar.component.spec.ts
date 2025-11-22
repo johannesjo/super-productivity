@@ -14,13 +14,15 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../../project/project.model';
 import { WorkContext } from '../../work-context/work-context.model';
-import { MiscConfig } from '../../config/global-config.model';
+import { LocalizationConfig, MiscConfig } from '../../config/global-config.model';
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskCopy } from '../task.model';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
+import { DEFAULT_LOCALE } from 'src/app/app.constants';
 
 type ProjectServiceSignals = {
   list$: Observable<Project[]>;
@@ -102,6 +104,10 @@ describe('AddTaskBarComponent', () => {
     type: WorkContextType.TAG,
   } as WorkContext;
 
+  const mockLocalizationConfig: LocalizationConfig = {
+    firstDayOfWeek: 1,
+  };
+
   const mockMiscConfig: MiscConfig = {
     defaultProjectId: null,
     isAutMarkParentAsDone: false,
@@ -111,7 +117,6 @@ describe('AddTaskBarComponent', () => {
     isAutoAddWorkedOnToToday: false,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: false,
-    firstDayOfWeek: 1,
     startOfNextDay: 4,
     taskNotesTpl: '',
     isDisableAnimations: false,
@@ -142,6 +147,8 @@ describe('AddTaskBarComponent', () => {
     };
   };
 
+  const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-']);
+
   beforeEach(async () => {
     // Create spies
     mockTaskService = jasmine.createSpyObj('TaskService', [
@@ -171,8 +178,10 @@ describe('AddTaskBarComponent', () => {
       ]),
     );
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
+      lang$: new BehaviorSubject<LocalizationConfig>(mockLocalizationConfig),
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
       shortSyntax$: of({}),
+      localization: () => ({ timeLocale: DEFAULT_LOCALE }),
     });
     mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -191,6 +200,7 @@ describe('AddTaskBarComponent', () => {
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: ProjectService, useValue: mockProjectService },
         { provide: TagService, useValue: mockTagService },
+        { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
         { provide: GlobalConfigService, useValue: mockGlobalConfigService },
         { provide: Store, useValue: mockStore },
         { provide: MatDialog, useValue: mockMatDialog },
@@ -278,6 +288,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project in config
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -299,6 +310,7 @@ describe('AddTaskBarComponent', () => {
 
       // Ensure no default project is configured
       const configWithoutDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -320,6 +332,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set defaultProjectId to false
       const configWithFalseDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: false,
       };
@@ -341,6 +354,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a non-existent default project
       const configWithNonExistentDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'non-existent-project',
       };
@@ -362,6 +376,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a different default project in config
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -384,6 +399,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -411,6 +427,7 @@ describe('AddTaskBarComponent', () => {
 
       // Start with no default project
       const configWithoutDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -423,6 +440,7 @@ describe('AddTaskBarComponent', () => {
 
       // Change to configured default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -442,6 +460,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -479,6 +498,7 @@ describe('AddTaskBarComponent', () => {
           { provide: ProjectService, useValue: mockProjectServiceEmpty },
           { provide: TagService, useValue: mockTagService },
           { provide: GlobalConfigService, useValue: mockGlobalConfigService },
+          { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
           { provide: Store, useValue: mockStore },
           { provide: MatDialog, useValue: mockMatDialog },
           { provide: SnackService, useValue: mockSnackService },
@@ -517,6 +537,7 @@ describe('AddTaskBarComponent', () => {
       ).next(mockTagWorkContext);
 
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };

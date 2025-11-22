@@ -18,7 +18,7 @@ import { T } from 'src/app/t.const';
 import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model';
 import { getErrorTxt } from 'src/app/util/get-error-text';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Log } from '../../../core/log';
@@ -33,7 +33,7 @@ import { TranslatePipe } from '@ngx-translate/core';
     ErrorCardComponent,
     IssuePreviewItemComponent,
     MatProgressSpinner,
-    DatePipe,
+    LocaleDatePipe,
     ShortTimePipe,
     MatIcon,
     TranslatePipe,

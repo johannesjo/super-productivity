@@ -2,6 +2,7 @@ import { mapArchiveToWorklogWeeks } from './map-archive-to-worklog-weeks';
 import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { taskAdapter } from '../../tasks/store/task.adapter';
+import { Locales } from 'src/app/app.constants';
 
 describe('mapArchiveToWorklogWeeks timezone test', () => {
   describe('_getTimeSpentOnDay function behavior', () => {
@@ -30,7 +31,7 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
         [],
         { workStart: {}, workEnd: {} },
         1,
-        'en-US',
+        Locales.en_us,
       );
 
       console.log('mapArchiveToWorklogWeeks task creation test:', {

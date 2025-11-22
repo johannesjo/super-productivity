@@ -107,7 +107,7 @@
                 <span class="author-name">{{ lastComment().user?.login }}</span>
                 <span class="when"
                   >{{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
-                  {{ lastComment().created_at | date: 'short' }}</span
+                  {{ lastComment().created_at | localeDate: 'short' }}</span
                 >
               </div>
               @if (lastComment().body) {
@@ -129,7 +129,7 @@
                   <span class="author-name">{{ comment.user?.login }}</span>
                   <span class="when"
                     >{{ T.F.GITHUB.ISSUE_CONTENT.AT | translate }}
-                    {{ comment.created_at | date: 'short' }}</span
+                    {{ comment.created_at | localeDate: 'short' }}</span
                   >
                 </div>
                 @if (comment.body) {

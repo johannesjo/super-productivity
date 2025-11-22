@@ -81,7 +81,7 @@
                 <span class="author-name">{{ comment.author?.username }}</span>
                 <span class="when"
                   >{{ T.F.GITLAB.ISSUE_CONTENT.AT | translate }}
-                  {{ comment.created_at | date: 'short' }}</span
+                  {{ comment.created_at | localeDate: 'short' }}</span
                 >
               </div>
               @if (comment.body) {

@@ -2,11 +2,17 @@ import { TestBed } from '@angular/core/testing';
 import { DateTimeFormatService } from './date-time-format.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
+import { DateAdapter } from '@angular/material/core';
+import { DEFAULT_FIRST_DAY_OF_WEEK } from 'src/app/app.constants';
 
 describe('DateTimeFormatService', () => {
   let service: DateTimeFormatService;
 
   beforeEach(() => {
+    const dateAdapter = jasmine.createSpyObj<DateAdapter<Date>>('DateAdapter', [], {
+      getFirstDayOfWeek: () => DEFAULT_FIRST_DAY_OF_WEEK,
+    });
+
     TestBed.configureTestingModule({
       providers: [
         DateTimeFormatService,
@@ -15,6 +21,7 @@ describe('DateTimeFormatService', () => {
             globalConfig: DEFAULT_GLOBAL_CONFIG,
           },
         }),
+        { provide: DateAdapter, useValue: dateAdapter },
       ],
     });
     service = TestBed.inject(DateTimeFormatService);

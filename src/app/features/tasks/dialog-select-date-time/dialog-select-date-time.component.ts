@@ -9,7 +9,6 @@ import {
 import { FormsModule, NgModel } from '@angular/forms';
 
 import { MatButton } from '@angular/material/button';
-import { provideNativeDateAdapter } from '@angular/material/core';
 import {
   MatDatepicker,
   MatDatepickerInput,
@@ -46,7 +45,6 @@ export interface DialogSelectDateTimeData {
   styleUrls: ['./dialog-select-date-time.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   standalone: true,
-  providers: [provideNativeDateAdapter()],
   imports: [
     FormsModule,
     MatButton,

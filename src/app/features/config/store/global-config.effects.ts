@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { IS_ELECTRON, LanguageCode } from '../../../app.constants';
+import { IS_ELECTRON } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { LanguageService } from '../../../core/language/language.service';
 import { DateService } from 'src/app/core/date/date.service';
@@ -23,7 +23,7 @@ export class GlobalConfigEffects {
   private _store = inject<Store<any>>(Store);
   private _userProfileService = inject(UserProfileService);
 
-  snackUpdate$: any = createEffect(
+  snackUpdate$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
@@ -44,7 +44,7 @@ export class GlobalConfigEffects {
     { dispatch: false },
   );
 
-  updateGlobalShortcut$: any = createEffect(
+  updateGlobalShortcut$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
@@ -57,7 +57,7 @@ export class GlobalConfigEffects {
     { dispatch: false },
   );
 
-  registerGlobalShortcutInitially$: any = createEffect(
+  registerGlobalShortcutInitially$ = createEffect(
     () =>
       this._actions$.pipe(
         ofType(loadAllData),
@@ -73,29 +73,34 @@ export class GlobalConfigEffects {
     { dispatch: false },
   );
 
-  selectLanguageOnChange: any = createEffect(
+  selectLanguageOnChange = createEffect(
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
-        filter(({ sectionKey, sectionCfg }) => sectionKey === 'lang'),
-        // eslint-disable-next-line
-        filter(({ sectionKey, sectionCfg }) => sectionCfg && (sectionCfg as any).lng),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'localization'),
+        filter(({ sectionKey, sectionCfg }) => sectionCfg['lng'] !== undefined), // skip if language has not been manually set yet
         tap(({ sectionKey, sectionCfg }) => {
-          // eslint-disable-next-line
           this._languageService.setLng(sectionCfg['lng']);
         }),
       ),
     { dispatch: false },
   );
 
-  selectLanguageOnLoad: any = createEffect(
+  selectLanguageOnLoad = createEffect(
     () =>
       this._actions$.pipe(
         ofType(loadAllData),
         tap(({ appDataComplete }) => {
           const cfg = appDataComplete.globalConfig || DEFAULT_GLOBAL_CONFIG;
-          const lng = cfg && cfg.lang && cfg.lang.lng;
-          this._languageService.setLng(lng as LanguageCode);
+          const lng = cfg.localization.lng;
+          const isInitial = lng === undefined; // language is not set manually by user yet
+
+          if (isInitial) {
+            // so we can try autoswitch if needed
+            const autoswitched = this._languageService.tryAutoswitch();
+            // or use user system language
+            if (!autoswitched) this._languageService.setLng();
+          } else this._languageService.setLng(lng);
         }),
       ),
     { dispatch: false },

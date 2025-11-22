@@ -7,7 +7,7 @@
     <span [innerHTML]="due() | shortTimeHtml"></span>
   } @else {
     <mat-icon>today</mat-icon>
-    <span>{{ date() | date: 'shortDate' }} </span>
+    <span>{{ date() | localeDate: 'shortDate' }} </span>
   }
 </div>
 

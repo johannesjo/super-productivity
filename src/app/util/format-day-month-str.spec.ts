@@ -1,26 +1,27 @@
+import { Locales } from '../app.constants';
 import { formatDayMonthStr } from './format-day-month-str';
 
 describe('formatDayMonthStr', () => {
   it('should format day and month strings correctly with en-US locale', () => {
-    const result1 = formatDayMonthStr('2023-01-15', 'en-US');
+    const result1 = formatDayMonthStr('2023-01-15', Locales.en_us);
     expect(result1).toBe('Sun 1/15');
 
-    const result2 = formatDayMonthStr('2023-02-16', 'en-US');
+    const result2 = formatDayMonthStr('2023-02-16', Locales.en_us);
     expect(result2).toBe('Thu 2/16');
 
-    const result3 = formatDayMonthStr('2023-12-25', 'en-US');
+    const result3 = formatDayMonthStr('2023-12-25', Locales.en_us);
     expect(result3).toBe('Mon 12/25');
 
-    const result4 = formatDayMonthStr('2023-10-01', 'en-US');
+    const result4 = formatDayMonthStr('2023-10-01', Locales.en_us);
     expect(result4).toBe('Sun 10/1');
 
-    const result5 = formatDayMonthStr('2023-07-04', 'en-US');
+    const result5 = formatDayMonthStr('2023-07-04', Locales.en_us);
     expect(result5).toBe('Tue 7/4');
   });
 
   it('should format day and month strings with locale', () => {
-    const result1 = formatDayMonthStr('2023-01-15', 'en-US');
-    const result2 = formatDayMonthStr('2023-02-16', 'en-US');
+    const result1 = formatDayMonthStr('2023-01-15', Locales.en_us);
+    const result2 = formatDayMonthStr('2023-02-16', Locales.en_us);
 
     // Test that locale parameter is used for day names at least
     expect(result1).toBe('Sun 1/15');
@@ -58,7 +59,7 @@ describe('formatDayMonthStr', () => {
 
     criticalTestCases.forEach(({ date, expectedUS, description }) => {
       it(`should format ${date} correctly (${description})`, () => {
-        const result = formatDayMonthStr(date, 'en-US');
+        const result = formatDayMonthStr(date, Locales.en_us);
         expect(result).toBe(expectedUS);
       });
     });
@@ -75,7 +76,7 @@ describe('formatDayMonthStr', () => {
 
     monthBoundaries.forEach(({ date, expectedUS }) => {
       it(`should handle month boundary ${date} correctly`, () => {
-        const result = formatDayMonthStr(date, 'en-US');
+        const result = formatDayMonthStr(date, Locales.en_us);
         expect(result).toBe(expectedUS);
       });
     });
@@ -83,21 +84,21 @@ describe('formatDayMonthStr', () => {
 
   describe('different locales', () => {
     it('should format with US locale consistently', () => {
-      expect(formatDayMonthStr('2024-01-15', 'en-US')).toBe('Mon 1/15');
-      expect(formatDayMonthStr('2024-12-25', 'en-US')).toBe('Wed 12/25');
+      expect(formatDayMonthStr('2024-01-15', Locales.en_us)).toBe('Mon 1/15');
+      expect(formatDayMonthStr('2024-12-25', Locales.en_us)).toBe('Wed 12/25');
     });
 
     // throws with wallaby :(
     // it('should handle locale-specific formatting', () => {
     //   // Test that function accepts different locales without throwing
-    //   expect(() => formatDayMonthStr('2024-01-15', 'en-GB')).not.toThrow();
-    //   expect(() => formatDayMonthStr('2024-01-15', 'fr-FR')).not.toThrow();
+    //   expect(() => formatDayMonthStr('2024-01-15', Locales.en_gb)).not.toThrow();
+    //   expect(() => formatDayMonthStr('2024-01-15', Locales.fr_fr)).not.toThrow();
     // });
   });
 
   describe('year removal', () => {
     it('should not contain year in formatted output', () => {
-      const result = formatDayMonthStr('2024-01-15', 'en-US');
+      const result = formatDayMonthStr('2024-01-15', Locales.en_us);
       expect(result).not.toContain('2024');
       expect(result).not.toContain('24');
     });

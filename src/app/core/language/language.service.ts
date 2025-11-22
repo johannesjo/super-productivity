@@ -1,83 +1,58 @@
-import { Injectable, inject, effect, signal } from '@angular/core';
+import { Injectable, inject, signal } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
-import { DateAdapter } from '@angular/material/core';
 import {
   AUTO_SWITCH_LNGS,
+  DEFAULT_LANGUAGE,
   LanguageCode,
-  LanguageCodeMomentMap,
   RTL_LANGUAGES,
 } from '../../app.constants';
-import { GlobalConfigService } from 'src/app/features/config/global-config.service';
-import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 import { Log } from '../log';
+import { DateTimeFormatService } from '../date-time-format/date-time-format.service';
 
 @Injectable({ providedIn: 'root' })
 export class LanguageService {
   private _translateService = inject(TranslateService);
-  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
-  private _globalConfigService = inject(GlobalConfigService);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   // I think a better approach is to add a field in every [lang].json file to specify the direction of the language
   private readonly _isRTL = signal<boolean>(false);
   readonly isLangRTL = this._isRTL.asReadonly();
 
-  // Temporary solution for knowing the rtl languages
-  private readonly rtlLanguages: LanguageCode[] = RTL_LANGUAGES;
-
-  constructor() {
-    this._initMonkeyPatchFirstDayOfWeek();
+  detect(): LanguageCode {
+    const detected = this._translateService.getBrowserLang();
+    return this.isValid(detected) ? detected : DEFAULT_LANGUAGE;
   }
 
-  setLng(lng: LanguageCode): void {
-    if (lng && Object.values(LanguageCode).includes(lng)) {
-      this._setFn(lng);
-    } else {
-      if (lng) {
-        Log.err('Invalid language code', lng);
-      } else {
-        Log.normal('No language code provided');
-      }
-      this.setFromBrowserLngIfAutoSwitchLng();
+  isValid(lang?: string): lang is LanguageCode {
+    return Object.values(LanguageCode).includes(lang as LanguageCode);
+  }
+
+  setLng(lng?: LanguageCode | null): void {
+    if (!lng) this._set(this.detect());
+    else if (this.isValid(lng)) this._set(lng);
+    else {
+      Log.err('Invalid language code', lng);
+      this.tryAutoswitch();
     }
   }
 
-  setDefault(lng: LanguageCode): void {
-    this._translateService.setDefaultLang(lng);
+  tryAutoswitch(): boolean {
+    const browserLng = this.detect();
+    const needAutoswitch = AUTO_SWITCH_LNGS.includes(browserLng);
+    if (!needAutoswitch) return false;
+
+    this._set(DEFAULT_LANGUAGE);
+    return true;
   }
 
-  setFromBrowserLngIfAutoSwitchLng(): void {
-    const browserLng = this._translateService.getBrowserLang() as LanguageCode;
-    if (AUTO_SWITCH_LNGS.includes(browserLng)) {
-      this._setFn(browserLng);
-    }
-  }
-
-  private _initMonkeyPatchFirstDayOfWeek(): void {
-    // Use effect to reactively update firstDayOfWeek when config changes
-    effect(() => {
-      const miscConfig = this._globalConfigService.misc();
-      const firstDayOfWeek =
-        miscConfig?.firstDayOfWeek ?? DEFAULT_GLOBAL_CONFIG.misc.firstDayOfWeek;
-
-      // default should be monday, if we have an invalid value for some reason
-      const validFirstDayOfWeek =
-        firstDayOfWeek === 0 || firstDayOfWeek > 0 ? firstDayOfWeek : 1;
-
-      // overwrites default method to make this configurable
-      this._dateAdapter.getFirstDayOfWeek = () => validFirstDayOfWeek;
-    });
-  }
-
-  private _setFn(lng: LanguageCode): void {
-    const momLng = LanguageCodeMomentMap[lng];
-
+  private _set(lng: LanguageCode): void {
     this._isRTL.set(this._checkIsRTL(lng));
     this._translateService.use(lng);
 
-    this._dateAdapter.setLocale(momLng);
+    this._dateTimeFormatService.setDateAdapterLocale(lng);
   }
 
   private _checkIsRTL(lng: LanguageCode): boolean {
-    return this.rtlLanguages.indexOf(lng) !== -1;
+    return RTL_LANGUAGES.indexOf(lng) !== -1;
   }
 }

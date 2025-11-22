@@ -13,7 +13,7 @@ import { ConflictData, VectorClock } from '../../../pfapi/api';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { MatTooltip } from '@angular/material/tooltip';
 import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import {
@@ -36,7 +36,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
     MatButton,
     MatIcon,
     TranslatePipe,
-    DatePipe,
+    LocaleDatePipe,
     ShortTimePipe,
     MatTooltip,
     CollapsibleComponent,
