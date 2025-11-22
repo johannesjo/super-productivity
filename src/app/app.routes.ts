@@ -7,14 +7,7 @@ import {
   ValidTagIdGuard,
 } from './app.guard';
 
-import { TODAY_TAG } from './features/tag/tag.const';
-import { INBOX_PROJECT } from './features/project/project.const';
 import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
-
-/* TODO: choose the start page using the setting */
-const defaultStartPageRoute = true
-  ? `tag/${TODAY_TAG.id}/tasks`
-  : `project/${INBOX_PROJECT.id}/tasks`;
 
 export const APP_ROUTES: Routes = [
   {
@@ -234,5 +227,9 @@ export const APP_ROUTES: Routes = [
       ),
     data: { page: 'contrast-test' },
   },
-  { path: '**', redirectTo: defaultStartPageRoute },
+  {
+    path: '**',
+    loadComponent: () =>
+      import('./pages/wildcard/wildcard.component').then((m) => m.WildcardComponent),
+  },
 ];
