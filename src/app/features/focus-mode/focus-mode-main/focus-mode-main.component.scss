@@ -91,6 +91,18 @@
   }
 }
 
+.parent-title {
+  text-align: center;
+  margin-bottom: 6px;
+  opacity: 0.8;
+  font-size: 12px;
+  line-height: 1.2;
+  max-width: 90%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .task-title {
   ::ng-deep textarea {
     text-align: center;
