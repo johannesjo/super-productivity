@@ -26,6 +26,7 @@ export type MiscConfig = Readonly<{
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
   customTheme?: string;
+  defaultStartPage?: number;
   unsplashApiKey?: string | null;
   isEnableUserProfiles?: boolean;
 }>;
