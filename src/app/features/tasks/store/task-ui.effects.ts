@@ -49,7 +49,7 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.addTask),
-        withLatestFrom(this._workContextService.todaysTaskIds$),
+        withLatestFrom(this._workContextService.mainListTaskIds$),
         switchMap(([{ task }, activeContextTaskIds]) => {
           if (task.projectId) {
             return this._store$
@@ -188,7 +188,7 @@ export class TaskUiEffects {
           ({ targetProjectId }) =>
             targetProjectId !== this._workContextService.activeWorkContextId,
         ),
-        withLatestFrom(this._workContextService.todaysTaskIds$),
+        withLatestFrom(this._workContextService.mainListTaskIds$),
         filter(
           ([{ task }, activeContextTaskIds]) => !activeContextTaskIds.includes(task.id),
         ),

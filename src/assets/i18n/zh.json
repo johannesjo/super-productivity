@@ -203,6 +203,11 @@
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: 无法生成 PKCE 挑战。"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "显示的是日历的缓存结果，数据可能不是最新。"
+      }
+    },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "您的今日列表中有 {{nr}} 个已完成的任务尚未移动到归档。您真的想不完成一天的工作就退出吗？"
@@ -216,7 +221,10 @@
         "POMODORO_BREAK_RUNNING": "休息 #{{cycleNr}} 正在进行",
         "TO_FOCUS_OVERLAY": "到专注覆盖"
       },
+      "ADD_TIME_MINUTE": "增加一分钟",
       "BACK_TO_PLANNING": "返回规划",
+      "CLICK_TO_EDIT_DURATION": "点击编辑时长",
+      "COMPLETE_FOCUS_SESSION": "完成专注会话",
       "CONGRATS": "恭喜完成此会话！",
       "COUNTDOWN": "倒计时",
       "COUNTDOWN_HINT": "专注直到时钟归零",
@@ -230,6 +238,9 @@
       "NEXT": "下一个",
       "ON": "在",
       "OPEN_ISSUE_IN_BROWSER": "在浏览器中打开问题",
+      "PAUSE_SESSION": "暂停会话",
+      "PAUSE_TRACKING": "暂停追踪",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "暂停追踪当前任务",
       "POMODORO": "番茄",
       "POMODORO_HINT": "有计划休息的结构化冲刺",
       "POMODORO_BACK": "返回",
@@ -238,13 +249,17 @@
       "PREP_GET_MENTALLY_READY": "在心理上做好准备，保持专注和高效",
       "PREP_SIT_UPRIGHT": "坐直（或站立）",
       "PREP_STRETCH": "做一些轻度拉伸",
+      "REMOVE_TIME_MINUTE": "减少一分钟",
+      "RESUME_SESSION": "恢复会话",
       "SELECT_ANOTHER_TASK": "选择另一个任务",
       "SELECT_TASK": "选择要专注的任务",
+      "SELECT_TASK_TO_FOCUS": "选择要专注的任务",
       "SELECT_MODE": "选择您的专注模式",
       "SESSION_COMPLETED": "专注会话已完成！",
       "POMODORO_SESSION_COMPLETED": "番茄会话已完成！",
       "SET_FOCUS_SESSION_DURATION": "设置专注会话持续时间",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "显示/隐藏任务备注和附件",
+      "SWITCH_TASK": "切换任务",
       "START_FOCUS_SESSION": "开始专注会话",
       "START_NEXT_FOCUS_SESSION": "开始下一个专注会话",
       "WORKED_FOR": "您工作了",
@@ -336,7 +351,8 @@
         "T_ALREADY_TRACKED": "已跟踪",
         "T_TITLE": "标题",
         "T_TO_BE_SUBMITTED": "待提交",
-        "TITLE": "向 GitLab 提交问题花费的时间"
+        "TITLE": "向 GitLab 提交问题花费的时间",
+        "TOTAL_MSG": "您今天将向 <em> 个不同的事项提交总计 <em> 的工作时间。"
       },
       "FORM": {
         "FILTER": "自定义筛选",
@@ -591,13 +607,16 @@
         "MOOD_PRODUCTIVITY_OVER_TIME": "情绪和生产率随时间的变化",
         "FOCUS_SESSION_TRENDS": "专注会话随时间的变化",
         "NO_ADDITIONAL_DATA_YET": "尚未收集额外数据。使用每日摘要 \"评估\" 看板上的表单进行操作。",
-        "OBSTRUCTION_SELECTION_COUNT": "选择阻碍因素的次数",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "点击计数器随时间的变化",
         "SIMPLE_COUNTERS": "简单计数器和习惯跟踪",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "秒表计数器随时间的变化",
         "TASKS_DONE_CREATED": "任务（已完成/已创建）",
         "TIME_ESTIMATED": "预计时间",
-        "TIME_SPENT": "花费时间"
+        "TIME_SPENT": "花费时间",
+        "TIME_FRAME_LABEL": "时间范围",
+        "TIME_FRAME_2_WEEKS": "两周",
+        "TIME_FRAME_1_MONTH": "一个月",
+        "TIME_FRAME_MAX": "全部"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "为明天添加备注",
@@ -630,6 +649,33 @@
       },
       "S": {
         "SAVE_METRIC": "指标已成功保存"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "TITLE": "专注会话",
+        "CHART_LABEL": "专注时长（分钟）",
+        "TOTAL_SESSIONS": "总会话数",
+        "TOTAL_TIME": "总时长",
+        "SESSIONS_LIST": "会话列表",
+        "NO_SESSIONS": "当日无专注会话",
+        "ADD_SESSION": "添加会话",
+        "NEW_SESSION_DURATION": "时长",
+        "ADD_BTN": "添加"
+      },
+      "REFLECTION": {
+        "TITLE": "反思笔记",
+        "PLACEHOLDER_1": "今天哪些地方做得好？明天需要改变什么？",
+        "PLACEHOLDER_2": "明天可以做出的小改进？",
+        "PLACEHOLDER_3": "注意力何时出现分散？如何保护它？",
+        "PLACEHOLDER_4": "哪项任务让你充满能量？哪项让你感到消耗？",
+        "PLACEHOLDER_5": "一个值得重复的做法。一个需要改变的地方。",
+        "REMIND_LABEL": "明天提醒我",
+        "HISTORY_BTN": "查看历史反思",
+        "HISTORY_TITLE": "反思历史",
+        "HISTORY_EMPTY": "暂无反思记录。写下今天的笔记以开启连续记录。",
+        "REMINDER_TASK_TITLE": "回顾反思笔记",
+        "REMINDER_CREATED": "已设置明天的反思提醒",
+        "REMINDER_ERROR": "无法设置提醒",
+        "REMINDER_NEEDS_TEXT": "请先写下反思内容，再设置提醒"
       }
     },
     "NOTE": {
@@ -933,6 +979,10 @@
       "S": {
         "ERR_UNKNOWN": "Redmine: 未知错误 {{statusCode}} {{errorMsg}}。"
       }
+    },
+    "REFLECTION_NOTE": {
+      "MSG": "反思笔记: ({{date}}): {{content}}",
+      "ACTION_DISMISS": "撤销"
     },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
@@ -1354,6 +1404,11 @@
         "TINE_SPENT": "花费时间",
         "TITLE": "为当天添加"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "日期",
+        "TIME": "时间",
+        "TITLE": "选择日期和时间"
+      },
       "N": {
         "ESTIMATE_EXCEEDED": "超出时间估计！",
         "ESTIMATE_EXCEEDED_BODY": "您超出了 \"{{title}}\" 的估计时间。"
@@ -1505,10 +1560,11 @@
         "SCHEDULED_THIS_WEEK": "本周",
         "SCHEDULED_TODAY": "今天",
         "SCHEDULED_TOMORROW": "明天",
-        "SORT_BY": "排序方式",
+        "SORT_TEMPORARY": "排序 （临时）",
         "SORT_CREATION_DATE": "创建日期",
         "SORT_DEFAULT": "默认",
         "SORT_NAME": "名称",
+        "SORT_PERMANENT": "排序 （永久）",
         "SORT_SCHEDULED_DATE": "计划日期",
         "TIME_1HOUR": "> 1 小时",
         "TIME_2HOUR": "> 2 小时",
@@ -1864,6 +1920,7 @@
     "REMINDER": {
       "COUNTDOWN_DURATION": "在实际提醒前 X 显示横幅",
       "IS_COUNTDOWN_BANNER_ENABLED": "提醒到期前显示倒计时横幅",
+      "DEFAULT_TASK_REMIND_OPTION": "创建任务时默认选中的提醒方式",
       "TITLE": "提醒"
     },
     "SCHEDULE": {
@@ -1966,7 +2023,9 @@
     "PERSISTENCE_DISALLOWED": "数据将不会永久保留。请注意，这可能导致数据丢失！！",
     "PERSISTENCE_ERROR": "请求持久化数据时出错：{{err}}",
     "RUNNING_X": "正在运行 \"{{str}}\"。",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "按下了 {{keyCombo}}，但在项目上下文中才可使用打开书签快捷键。"
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "按下了 {{keyCombo}}，但在项目上下文中才可使用打开书签快捷键。",
+    "UNPLANNED_TODAY_TASKS": "取消今日所有的任务",
+    "NO_TASKS_TO_UNPLAN": "没有任务需要取消"
   },
   "GPB": {
     "ASSETS": "正在加载资源...",
@@ -2007,7 +2066,7 @@
     "NO_TAG_INFO": "当前没有标签。您可以通过在添加或编辑任务时输入 `#yourTagName` 来添加标签。",
     "NOTES": "备注",
     "NOTES_PANEL_INFO": "只能从计划和常规任务列表视图中显示备注。",
-    "PLANNER": "规划器",
+    "PLANNER": "规划表",
     "PROCRASTINATE": "拖延",
     "PROJECT_MENU": "项目菜单",
     "PROJECT_SETTINGS": "项目设置",
@@ -2017,6 +2076,7 @@
     "SEARCH": "搜索",
     "SETTINGS": "设置",
     "SHOW_SEARCH_BAR": "显示搜索栏",
+    "UNPLAN_ALL_TASKS": "取消计划所有任务",
     "TAGS": "标签",
     "TASK_LIST": "任务列表",
     "TASKS": "任务",
@@ -2039,6 +2099,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "从今日添加任务",
+    "ARCHIVED_TASKS": {
+      "SINGULAR": "已有 {{count}} 个已完成的父任务被归档",
+      "PLURAL": "已有 {{count}} 个已完成的父任务被归档"
+    },
     "BREAK_LABEL": "休息（数量/时间）",
     "FOCUS_SUMMARY": "专注（数量/时间）",
     "CELEBRATE": "花一点时间来 <i>庆祝！</i>",

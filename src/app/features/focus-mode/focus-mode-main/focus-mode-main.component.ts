@@ -267,8 +267,6 @@ export class FocusModeMainComponent {
 
   finishCurrentTask(): void {
     this._store.dispatch(completeTask());
-    // always go to task selection afterward
-    this._store.dispatch(selectFocusTask());
 
     const t = this.currentTask();
     const id = t && t.id;
@@ -284,6 +282,12 @@ export class FocusModeMainComponent {
           },
         }),
       );
+    }
+
+    if (this.isSessionRunning()) {
+      this.openTaskSelector();
+    } else {
+      this._store.dispatch(selectFocusTask());
     }
   }
 

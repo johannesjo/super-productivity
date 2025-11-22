@@ -161,7 +161,47 @@ mat-error {
   from {
     transform: rotate(0deg);
   }
+
   to {
     transform: rotate(360deg);
+  }
+}
+
+.community-plugins-card {
+  grid-column: 1 / -1;
+}
+
+.community-plugins-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.community-plugin-item {
+  padding: 16px;
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  background: var(--c-bg-card);
+
+  .plugin-name {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: bold;
+
+    a {
+      color: var(--c-primary);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .plugin-desc {
+    margin: 0;
+    font-size: 14px;
+    color: var(--c-text-secondary);
   }
 }

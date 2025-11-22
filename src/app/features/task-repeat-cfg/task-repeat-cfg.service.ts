@@ -87,6 +87,8 @@ export class TaskRepeatCfgService {
           id: nanoid(),
         },
         taskId,
+        startTime: taskRepeatCfg.startTime,
+        remindAt: taskRepeatCfg.remindAt,
       }),
     );
   }

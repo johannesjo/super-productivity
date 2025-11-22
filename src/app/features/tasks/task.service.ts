@@ -433,7 +433,7 @@ export class TaskService {
     isBacklog: boolean,
   ): Promise<void> {
     const allMainTaskIds = [
-      ...(await this._workContextService.todaysTaskIds$.pipe(first()).toPromise()),
+      ...(await this._workContextService.mainListTaskIds$.pipe(first()).toPromise()),
       ...(await this._workContextService.backlogTaskIds$.pipe(first()).toPromise()),
     ];
     const isSubTaskAsMain = parentId && allMainTaskIds.includes(id);
@@ -486,7 +486,7 @@ export class TaskService {
     isBacklog: boolean,
   ): Promise<void> {
     const allMainTaskIds = [
-      ...(await this._workContextService.todaysTaskIds$.pipe(first()).toPromise()),
+      ...(await this._workContextService.mainListTaskIds$.pipe(first()).toPromise()),
       ...(await this._workContextService.backlogTaskIds$.pipe(first()).toPromise()),
     ];
     const isSubTaskAsMain = parentId && allMainTaskIds.includes(id);

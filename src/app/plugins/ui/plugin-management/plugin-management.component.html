@@ -198,4 +198,50 @@
   </mat-card>
 }
 
+<mat-card class="community-plugins-card">
+  <mat-card-header>
+    <mat-card-title>Community Plugins</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div
+      class="warning-content"
+      style="margin-bottom: 16px; color: var(--warn)"
+    >
+      <p>
+        <strong>⚠️ WARNING:</strong> These plugins are developed by the community and are
+        <strong>NOT</strong> reviewed or guaranteed by the Super Productivity team.
+        Install and use them at your own risk. They might contain malicious code or break
+        your application.
+      </p>
+    </div>
+
+    <div class="community-plugins-list">
+      @for (plugin of communityPlugins(); track plugin.name) {
+        <div class="community-plugin-item">
+          <h3 class="plugin-name">
+            <a
+              [href]="plugin.url"
+              target="_blank"
+              >{{ plugin.name }}</a
+            >
+          </h3>
+          <p class="plugin-desc">{{ plugin.shortDescription }}</p>
+        </div>
+      }
+    </div>
+
+    <div style="margin-top: 16px; text-align: center">
+      <a
+        href="https://github.com/johannesjo/super-productivity/blob/master/src/assets/community-plugins.json"
+        target="_blank"
+        mat-button
+        color="primary"
+      >
+        <mat-icon>add</mat-icon>
+        Get your plugin to show up here
+      </a>
+    </div>
+  </mat-card-content>
+</mat-card>
+
 <div class="bottom-bar"></div>

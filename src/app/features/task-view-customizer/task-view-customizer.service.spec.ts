@@ -19,7 +19,7 @@ describe('TaskViewCustomizerService', () => {
   let mockWorkContextService: {
     activeWorkContextId: string | null;
     activeWorkContextType: WorkContextType | null;
-    todaysTasks$: Observable<TaskWithSubTasks[]>;
+    mainListTasks$: Observable<TaskWithSubTasks[]>;
     undoneTasks$: Observable<TaskWithSubTasks[]>;
   };
   let projectUpdateSpy: jasmine.Spy;
@@ -103,7 +103,7 @@ describe('TaskViewCustomizerService', () => {
     mockWorkContextService = {
       activeWorkContextId: null,
       activeWorkContextType: null,
-      todaysTasks$: of<TaskWithSubTasks[]>([]),
+      mainListTasks$: of<TaskWithSubTasks[]>([]),
       undoneTasks$: of<TaskWithSubTasks[]>([]),
     };
     projectUpdateSpy = jasmine.createSpy('update');
@@ -352,7 +352,7 @@ describe('TaskViewCustomizerService', () => {
       const taskB = createTask('b', 'Bravo');
       mockWorkContextService.activeWorkContextId = 'project-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
-      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
+      mockWorkContextService.mainListTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
       mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
 
       service.setSort('name');
@@ -378,7 +378,7 @@ describe('TaskViewCustomizerService', () => {
       const taskB = createTask('b', 'Bravo', null);
       mockWorkContextService.activeWorkContextId = 'tag-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.TAG;
-      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
+      mockWorkContextService.mainListTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
       mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([taskB, taskA]);
 
       await service.sortPermanent('name');
@@ -393,7 +393,7 @@ describe('TaskViewCustomizerService', () => {
     it('should skip persistence when default sorting is requested but still reset', async () => {
       mockWorkContextService.activeWorkContextId = 'project-sort';
       mockWorkContextService.activeWorkContextType = WorkContextType.PROJECT;
-      mockWorkContextService.todaysTasks$ = of<TaskWithSubTasks[]>([]);
+      mockWorkContextService.mainListTasks$ = of<TaskWithSubTasks[]>([]);
       mockWorkContextService.undoneTasks$ = of<TaskWithSubTasks[]>([]);
 
       service.setSort('name');

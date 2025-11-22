@@ -12,6 +12,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
 import { MiscConfig } from '../global-config.model';
+import { UserProfileService } from '../../user-profile/user-profile.service';
 
 @Injectable()
 export class GlobalConfigEffects {
@@ -20,6 +21,7 @@ export class GlobalConfigEffects {
   private _dateService = inject(DateService);
   private _snackService = inject(SnackService);
   private _store = inject<Store<any>>(Store);
+  private _userProfileService = inject(UserProfileService);
 
   snackUpdate$: any = createEffect(
     () =>
@@ -159,4 +161,46 @@ export class GlobalConfigEffects {
         ),
       { dispatch: false },
     );
+
+  // Handle user profiles being enabled/disabled
+  handleUserProfilesToggle: any = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'misc'),
+        filter(
+          ({ sectionCfg }) =>
+            sectionCfg && (sectionCfg as MiscConfig).isEnableUserProfiles !== undefined,
+        ),
+        withLatestFrom(this._store.select('globalConfig')),
+        filter(([{ sectionCfg }, globalConfig]) => {
+          const newValue = (sectionCfg as MiscConfig).isEnableUserProfiles;
+          const oldValue = globalConfig?.misc?.isEnableUserProfiles ?? false;
+          // Only proceed if the value actually changed
+          return newValue !== oldValue;
+        }),
+        tap(([{ sectionCfg }]) => {
+          const isEnabled = (sectionCfg as MiscConfig).isEnableUserProfiles;
+
+          // Update localStorage flag for fast startup check
+          if (typeof localStorage !== 'undefined') {
+            if (isEnabled) {
+              localStorage.setItem('sp_user_profiles_enabled', 'true');
+
+              // When enabling for the first time, trigger migration
+              this._userProfileService.migrateOnFirstEnable().then(() => {
+                this._snackService.open({
+                  type: 'SUCCESS',
+                  msg: 'User profiles enabled. Reloading app...',
+                });
+                setTimeout(() => window.location.reload(), 1000);
+              });
+            } else {
+              localStorage.removeItem('sp_user_profiles_enabled');
+            }
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
 }

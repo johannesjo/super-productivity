@@ -5,6 +5,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
@@ -32,6 +34,12 @@ import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { PluginLog } from '../../../core/log';
+
+interface CommunityPlugin {
+  name: string;
+  shortDescription: string;
+  url: string;
+}
 
 @Component({
   selector: 'plugin-management',
@@ -64,6 +72,12 @@ export class PluginManagementComponent {
   private readonly _pluginConfigService = inject(PluginConfigService);
   private readonly _translateService = inject(TranslateService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _http = inject(HttpClient);
+
+  readonly communityPlugins = toSignal(
+    this._http.get<CommunityPlugin[]>('assets/community-plugins.json'),
+    { initialValue: [] },
+  );
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;

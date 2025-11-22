@@ -331,7 +331,7 @@ export class TaskViewCustomizerService {
     }
 
     const [todaysTasks, undoneTasks] = await Promise.all([
-      this._workContextService.todaysTasks$.pipe(take(1)).toPromise(),
+      this._workContextService.mainListTasks$.pipe(take(1)).toPromise(),
       this._workContextService.undoneTasks$.pipe(take(1)).toPromise(),
     ]);
 

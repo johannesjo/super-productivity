@@ -28,6 +28,7 @@ export type MiscConfig = Readonly<{
   customTheme?: string;
   defaultStartPage?: number;
   unsplashApiKey?: string | null;
+  isEnableUserProfiles?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{

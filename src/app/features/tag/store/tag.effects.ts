@@ -164,7 +164,7 @@ export class TagEffects {
       this._workContextService.activeWorkContextTypeAndId$.pipe(
         filter(({ activeType }) => activeType === WorkContextType.TAG),
         switchMap(({ activeType, activeId }) =>
-          this._workContextService.todaysTasks$.pipe(
+          this._workContextService.mainListTasks$.pipe(
             take(1),
             map((tasks) => ({
               allTasks: tasks,

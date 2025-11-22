@@ -47,11 +47,29 @@ function _handleError(
   if (_isReadyForFrontEndError()) {
     mainWin.webContents.send(IPC.ERROR, {
       error: e,
-      errorStr: e && String(e),
+      errorStr: _getErrorStr(e),
       stack,
     });
   } else {
     error('Electron Error: Frontend not loaded. Could not send error to renderer.');
     throw errObj;
   }
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function _getErrorStr(e: unknown): string {
+  if (typeof e === 'string') {
+    return e;
+  }
+  if (e instanceof Error) {
+    return e.toString();
+  }
+  if (typeof e === 'object' && e !== null) {
+    try {
+      return JSON.stringify(e);
+    } catch (err) {
+      return String(e);
+    }
+  }
+  return String(e);
 }

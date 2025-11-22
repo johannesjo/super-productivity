@@ -15,6 +15,19 @@ import { TaskCopy } from '../../tasks/task.model';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import * as actions from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { EffectsModule } from '@ngrx/effects';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
+
+@Component({
+  selector: 'focus-mode-task-selector',
+  template: '',
+  standalone: true,
+})
+class MockFocusModeTaskSelectorComponent {
+  @Output() taskSelected = new EventEmitter<string>();
+  @Output() closed = new EventEmitter<void>();
+}
 
 describe('FocusModeMainComponent', () => {
   let component: FocusModeMainComponent;
@@ -88,7 +101,12 @@ describe('FocusModeMainComponent', () => {
     });
 
     await TestBed.configureTestingModule({
-      imports: [FocusModeMainComponent, NoopAnimationsModule, TranslateModule.forRoot()],
+      imports: [
+        FocusModeMainComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+        EffectsModule.forRoot([]),
+      ],
       providers: [
         { provide: Store, useValue: storeSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
@@ -98,7 +116,12 @@ describe('FocusModeMainComponent', () => {
         { provide: SimpleCounterService, useValue: simpleCounterServiceSpy },
         { provide: FocusModeService, useValue: focusModeServiceSpy },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(FocusModeMainComponent, {
+        remove: { imports: [FocusModeTaskSelectorComponent] },
+        add: { imports: [MockFocusModeTaskSelectorComponent] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(FocusModeMainComponent);
     component = fixture.componentInstance;
@@ -110,6 +133,7 @@ describe('FocusModeMainComponent', () => {
     mockIssueService = TestBed.inject(IssueService) as jasmine.SpyObj<IssueService>;
 
     fixture.detectChanges();
+    mockStore.dispatch.calls.reset();
   });
 
   it('should create', () => {
@@ -322,11 +346,17 @@ describe('FocusModeMainComponent', () => {
     it('should set doneOn to current timestamp', () => {
       component.finishCurrentTask();
 
-      // Simply verify that all the required actions were dispatched
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
-
-      // Get all calls and verify the UpdateTask action
       const calls = mockStore.dispatch.calls.all();
+      const actionTypes = calls.map((c: any) => c.args[0].type);
+
+      // Verify exact actions dispatched
+      expect(actionTypes).toEqual([
+        '[FocusMode] Complete Task',
+        '[Task Shared] updateTask',
+        '[FocusMode] Select Task',
+      ]);
+
+      // Get all calls and verify the UpdateTask action details
       const hasUpdateTaskAction = calls.some((call: any) => {
         const action = call.args[0];
         return (
@@ -338,6 +368,26 @@ describe('FocusModeMainComponent', () => {
       });
 
       expect(hasUpdateTaskAction).toBe(true);
+    });
+
+    it('should open task selector and NOT dispatch selectFocusTask when session is running', () => {
+      focusModeServiceSpy.isSessionRunning.and.returnValue(true);
+      component.finishCurrentTask();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.completeTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(component.isTaskSelectorOpen()).toBe(true);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: {
+            id: mockTask.id,
+            changes: {
+              isDone: true,
+              doneOn: jasmine.any(Number) as any,
+            },
+          },
+        }),
+      );
     });
   });
 

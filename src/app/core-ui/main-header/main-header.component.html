@@ -66,6 +66,10 @@
 
     <plugin-header-btns></plugin-header-btns>
 
+    @if (isUserProfilesEnabled()) {
+      <user-profile-button></user-profile-button>
+    }
+
     <play-button
       [currentTask]="currentTask()"
       [currentTaskId]="currentTaskId()"

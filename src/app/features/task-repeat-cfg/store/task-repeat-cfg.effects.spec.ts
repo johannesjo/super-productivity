@@ -8,12 +8,19 @@ import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { addTaskRepeatCfgToTask, updateTaskRepeatCfg } from './task-repeat-cfg.actions';
-import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../tasks/task.model';
+import {
+  DEFAULT_TASK,
+  Task,
+  TaskWithSubTasks,
+  TaskReminderOptionId,
+} from '../../tasks/task.model';
 import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { addSubTask } from '../../tasks/store/task.actions';
 import { TestScheduler } from 'rxjs/testing';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 
 describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
   let actions$: Observable<Action>;
@@ -504,6 +511,93 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         expectObservable(effects.enableAutoUpdateOrInheritSnapshot$).toBe('--');
+      });
+    });
+  });
+
+  describe('addRepeatCfgToTaskUpdateTask$', () => {
+    it('should schedule task using taskRepeatCfg.startDate if present', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startDateStr = '2025-01-01';
+        const startTimeStr = '10:00';
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: { ...mockRepeatCfg, startDate: startDateStr },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // Task has a DIFFERENT due day to ensure we don't accidentally match
+        const taskWithDifferentDue: Task = {
+          ...mockTask,
+          dueDay: '2024-12-31',
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithDifferentDue));
+
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          new Date(startDateStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithDifferentDue,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback to task.dueDay if taskRepeatCfg.startDate is missing', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const dueDayStr = '2025-02-01';
+        const startTimeStr = '10:00';
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: { ...mockRepeatCfg, startDate: undefined },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithDueDay: Task = {
+          ...mockTask,
+          dueDay: dueDayStr,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
+
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          new Date(dueDayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithDueDay,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
       });
     });
   });

@@ -203,7 +203,7 @@ export class CalendarIntegrationEffects {
       },
       action2: taskForEvent
         ? {
-            label: T.F.CALENDARS.BANNER.FOCUS_TASK,
+            label: T.F.CALENDARS.BANNER.SHOW_TASK,
             fn: () => {
               this._skipEv(calEv);
               this._navigateToTaskService.navigate(taskForEvent.id);

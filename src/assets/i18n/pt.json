@@ -17,12 +17,20 @@
       "MSG": "Deseja instalar Super Productivity como PWA?"
     },
     "B_OFFLINE": "Você está desconectado da internet. A sincronização e solicitação de dados do provedor de problemas não funcionará.",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "Mudar Fundo"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity recebeu uma grande atualização! Algumas migrações para seus dados são necessárias. Observe que isso torna seus dados incompatíveis com versões mais antigas do aplicativo.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Nenhuma atualização de modelo escolhida. Note que você deve fazer o downgrade para a última versão, se não desejar executar a atualização do modelo.",
     "UPDATE_WEB_APP": "Nova versão disponível. Carregar nova versão?"
   },
   "BL": {
     "NO_TASKS": "Atualmente não há tarefas no seu backlog"
+  },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Mostrar Painel de Problemas",
+    "SHOW_NOTES": "Mostrar Notas do Projeto",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Mostrar Painel de Filtro/Grupo/Ordenar"
   },
   "CONFIRM": {
     "AUTO_FIX": "Seus dados parecem estar danificados. Quer tentar consertar automaticamente? Isso pode resultar em perda parcial de dados.",
@@ -37,6 +45,13 @@
     "PLACEHOLDER": "Por favor selecione uma data",
     "PRESS_ENTER_AGAIN": "Pressione enter novamente para salvar",
     "TOMORROW": "amanhã"
+  },
+  "DIALOG_UNSPLASH_PICKER": {
+    "BY": "por",
+    "NO_RESULTS": "Nenhuma imagem encontrada. Tente um termo de pesquisa diferente.",
+    "SEARCH_LABEL": "Pesquisar imagens",
+    "SEARCH_PLACEHOLDER": "ex., natureza, montanhas, abstrato",
+    "TITLE": "Selecionar Imagem de Fundo do Unsplash"
   },
   "F": {
     "ATTACHMENT": {
@@ -142,10 +157,15 @@
       "BANNER": {
         "ADD_AS_TASK": "Adicionar como Tarefa",
         "FOCUS_TASK": "Tarefa focada",
+        "SHOW_TASK": "Mostrar Tarefa",
         "TXT": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> começa em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)",
         "TXT_PAST": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> iniciou em <strong>{{start}}</strong>!<br> (e {{nrOfOtherBanners}} outros eventos estão pendentes)"
+      },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "Evento",
+        "EVENTS_STR": "Eventos"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Erro no provedor de calendário: {{errTxt}}"
@@ -190,36 +210,66 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "Adicionar 1 minuto",
       "B": {
+        "BREAK_RUNNING": "Pausa em andamento",
+        "POMODORO_BREAK_RUNNING": "Pausa #{{cycleNr}} em andamento",
+        "POMODORO_SESSION_RUNNING": "Sessão Pomodoro #{{cycleNr}} em andamento",
         "SESSION_RUNNING": "A Sessão de Foco está em execução",
         "TO_FOCUS_OVERLAY": "Para Sobreposição de Foco"
       },
       "BACK_TO_PLANNING": "Retornar ao Planejamento",
+      "BREAK_RELAX_MSG": "Tire um momento para relaxar",
+      "CLICK_TO_EDIT_DURATION": "Clique para editar a duração",
+      "COMPLETE_FOCUS_SESSION": "Completar sessão de foco",
+      "COMPLETE_SESSION": "Completar Sessão",
       "CONGRATS": "Parabéns por completar essa sessão!",
       "CONTINUE_FOCUS_SESSION": "Continuar Sessão de Foco",
+      "CONTINUE_SESSION": "Continuar sessão",
+      "CONTINUE_TO_NEXT_SESSION": "Continuar para a próxima Sessão",
       "COUNTDOWN": "Contagem regressiva",
+      "COUNTDOWN_HINT": "Focar até o relógio chegar a zero",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Tempo da sessão atual",
       "FINISH_TASK_AND_SELECT_NEXT": "Finalizar tarefa e selecionar a próxima",
       "FLOWTIME": "Flowtime",
+      "FLOWTIME_HINT": "Ritmo flexível sem temporizadores rígidos",
+      "FOCUS_TIME_TOOLTIP": "Tempo de foco",
       "FOR_TASK": "para a tarefa",
       "GET_READY": "Prepare-se para sua sessão de foco!",
       "GO_TO_PROCRASTINATION": "Busque ajuda quando procrastinar",
       "GOGOGO": "Vamos, vamos, vamos!",
+      "LONG_BREAK": "Pausa Longa",
+      "LONG_BREAK_TITLE": "Pausa Longa - Ciclo {{cycle}}",
       "NEXT": "Próxima",
       "ON": "Ativado",
       "OPEN_ISSUE_IN_BROWSER": "Abrir tarefa em um navegador",
+      "PAUSE_SESSION": "Pausar sessão",
+      "PAUSE_TRACKING": "Pausar acompanhamento",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pausar acompanhamento da tarefa atual",
+      "POMODORO": "Pomodoro",
       "POMODORO_BACK": "Retornar",
       "POMODORO_DISABLE": "Desativar Pomodoro",
+      "POMODORO_HINT": "Sprints estruturados com pausas planejadas",
       "POMODORO_INFO": "As sessões de foco não podem ser usadas com o Pomodoro ativado",
+      "POMODORO_SESSION_COMPLETED": "Sessão Pomodoro Concluída!",
       "PREP_GET_MENTALLY_READY": "Prepare-se mentalmente para focar e ser produtivo",
       "PREP_SIT_UPRIGHT": "Corrija sua postura (sentado ou em pé)",
       "PREP_STRETCH": "Faça alguns suaves alongamentos ",
+      "REMOVE_TIME_MINUTE": "Remover 1 minuto",
+      "RESUME_SESSION": "Retomar sessão",
       "SELECT_ANOTHER_TASK": "Selecione outra tarefa",
+      "SELECT_MODE": "Escolha seu modo de foco",
       "SELECT_TASK": "Selecione a tarefa que irá focar",
+      "SELECT_TASK_TO_FOCUS": "Selecionar Tarefa para Focar",
       "SESSION_COMPLETED": "Sessão de Foco Concluída!",
       "SET_FOCUS_SESSION_DURATION": "Definir duração de sessão",
+      "SHORT_BREAK": "Pausa Curta",
+      "SHORT_BREAK_TITLE": "Pausa Curta - Ciclo {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Mostrar/ocultar notas e anexos da tarefa",
+      "SKIP_BREAK": "Pular Pausa",
       "START_FOCUS_SESSION": "Iniciar Sessão de Foco",
       "START_NEXT_FOCUS_SESSION": "Iniciar próxima Sessão de Foco",
+      "SWITCH_TASK": "Mudar tarefa",
       "WORKED_FOR": "Você trabalhou por"
     },
     "GITEA": {
@@ -398,6 +448,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}: Alterações de sondagem para {{issuesStr}}"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Mostrando resultados de calendário em cache. Os dados podem estar desatualizados."
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: A fim de impedir o desligamento da API, o acesso foi bloqueado pelo Super Productivity. Você provavelmente deve verificar suas configurações do jira!",
@@ -541,6 +596,7 @@
         "CHECK": "Consegui!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Mapa de Calor de Atividade",
         "AVG_BREAKS_PER_DAY": "Intervalos médios por dia",
         "AVG_TASKS_PER_DAY_WORKED": "Média de tarefas por dia trabalhadas",
         "AVG_TIME_SPENT_ON_BREAKS": "Tempo médio gasto em pausas",
@@ -548,24 +604,37 @@
         "AVG_TIME_SPENT_PER_TASK": "Tempo médio gasto por tarefa",
         "COUNTING_SUBTASKS": "(contagem de subtarefas)",
         "DAYS_WORKED": "Dias trabalhados",
+        "FOCUS_SESSION_TRENDS": "Sessões de foco ao longo do tempo",
         "GLOBAL_METRICS": "Global Metrics",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Humor e produtividade ao longo do tempo",
         "NO_ADDITIONAL_DATA_YET": "Ainda não foram coletados dados adicionais. Use o formulário no painel Resumo diário \"Avaliação\" para fazer isso.",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Produtividade e Sustentabilidade ao longo do tempo",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Contadores de cliques ao longo do tempo",
         "SIMPLE_COUNTERS": "Contadores simples",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Contadores de cronômetro ao longo do tempo",
         "TASKS_DONE_CREATED": "Tarefas (concluídas / criadas)",
         "TIME_ESTIMATED": "Tempo estimado",
+        "TIME_FRAME_1_MONTH": "1 mês",
+        "TIME_FRAME_2_WEEKS": "2 semanas",
+        "TIME_FRAME_LABEL": "Período de tempo",
+        "TIME_FRAME_MAX": "Max",
         "TIME_SPENT": "Tempo gasto"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Adicionar nota para amanhã",
+        "DAILY_STATE": "Estado Diário",
+        "DAILY_STATE_TOOLTIP": "Sistema de quadrantes baseado em ambas as pontuações (\u000250 é alto): Fluxo Profundo (alto/alto), Sobrecarga (alto/baixo), Recupera\u0000e7\u0000e3o (baixo/alto), Deriva (baixo/baixo)",
         "DISABLE_REPEAT_EVERY_DAY": "Desativar repetição todos os dias",
         "ENABLE_REPEAT_EVERY_DAY": "Repita todos os dias",
+        "ENERGY_LEVEL": "Como est\u0000e1 a sua energia?",
+        "ENERGY_LEVEL_HINT": "\u001fExausto \u001f OK \u001f Bom",
+        "FOCUS_WORK_TIME": "Tempo de trabalho focado",
         "HELP_H1": "Por que devo me importar?",
         "HELP_LINK_TXT": "Vá para a seção de métricas",
         "HELP_P1": "Tempo para uma pequena auto-avaliação! Suas respostas aqui são salvas e fornecem um pouco de estatísticas sobre como você trabalha na seção de métricas. Além disso, as sugestões para amanhã aparecerão acima da sua lista de tarefas no dia seguinte.",
         "HELP_P2": "O objetivo é ser menos sobre calcular as métricas exatas ou tornar-se eficiente como uma máquina em tudo o que você faz, isso é sobre melhorar a maneira como você se sente em relação ao seu trabalho. Pode ser útil avaliar pontos de dificuldades em sua rotina diária, assim como encontrar fatores que o ajudem. Ser um pouco sistemático sobre o assunto ajuda a entender melhor essas questões e melhorar o que você pode.",
+        "IMPACT_OF_WORK": "Como avalia o impacto do seu trabalho hoje?",
+        "IMPACT_OF_WORK_HINT": "1: Nenhum progresso significativo \u001f 4: Impacto significativo",
         "IMPROVEMENTS": "O que melhorou sua produtividade?",
         "IMPROVEMENTS_TOMORROW": "O que você poderia fazer para melhorar amanhã?",
         "MOOD": "Como você se sente?",
@@ -573,7 +642,53 @@
         "NOTES": "Notas para amanhã",
         "OBSTRUCTIONS": "O que prejudicou sua produtividade?",
         "PRODUCTIVITY": "Quão eficiente você trabalhou?",
-        "PRODUCTIVITY_HINT": "1: nem começou - 10: enorme eficiência"
+        "PRODUCTIVITY_HINT": "1: nem começou - 10: enorme eficiência",
+        "PRODUCTIVITY_SCORE": "Pontua\u0000e7\u0000e3o de produtividade",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65% Impacto (escala de 1-4) \u001f 30% Foco para o alvo de 4h \u001f 5% trabalho total (limitado a 10h)",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "An\u0000e1lise de produtividade de 7 dias",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "An\u0000e1lise de sustentabilidade de 7 dias",
+        "STATE_DEEP_FLOW_HEADLINE": "Fluxo Profundo: Excelente foco e ritmo sustent\u0000e1vel.",
+        "STATE_DEEP_FLOW_HINT": "Est\u0000e1 no ponto ideal \u001f reflita sobre o que tornou esta combina\u0000e7\u0000e3o poss\u0000edvel.",
+        "STATE_DRIFT_HEADLINE": "Deriva: Baixo foco e baixa energia.",
+        "STATE_DRIFT_HINT": "Est\u0000e1 tudo bem. Reflita sobre o que o distraiu e ajuste-se suavemente \u001f cada rein\u0000edcio \u0000e9 uma oportunidade para aprender.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Baixo impacto: Muito foco, pouco retorno.",
+        "STATE_IMPACT_MISMATCH_HINT": "Investiu foco sólido \u001f agora direcione-o para trabalhos de maior impacto para sentir a diferen\u0000e7a.",
+        "STATE_OVERDRIVE_HEADLINE": "Sobrecarga: Produtivo, mas a um custo.",
+        "STATE_OVERDRIVE_HINT": "Fez muito \u001f agora certifique-se de recarregar antes que o esgotamento apare\u0000e7a.",
+        "STATE_RECOVERY_HEADLINE": "Recupera\u0000e7\u0000e3o: Descansando e recarregando.",
+        "STATE_RECOVERY_HINT": "Está a dar espaço à sua mente para recuperar. Amanhã terá energia para se aprofundar novamente.",
+        "STATE_STEADY_HEADLINE": "Ritmo Constante: Progresso consistente e sustentável.",
+        "STATE_STEADY_HINT": "Bom equilíbrio. Está a manter o ritmo sem se sobrecarregar — continue a nutrir o que faz este ritmo funcionar.",
+        "SUSTAINABILITY_SCORE": "Pontuação de Sustentabilidade",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45% Nível de energia  40% Horas de trabalho razoáveis (0 às 10h)  15% Equilíbrio de foco (ótimo às 4h)",
+        "TOTAL_WORK_TIME": "Tempo total de trabalho hoje"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "Adicionar",
+        "ADD_SESSION": "Adicionar sessão",
+        "CHART_LABEL": "Tempo de foco (min)",
+        "NEW_SESSION_DURATION": "Duração",
+        "NO_SESSIONS": "Nenhuma sessão de foco para este dia",
+        "SESSIONS_LIST": "Sessões",
+        "TITLE": "Sessões de foco",
+        "TOTAL_SESSIONS": "Total de sessões",
+        "TOTAL_TIME": "Tempo total"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "Ver reflexões passadas",
+        "HISTORY_EMPTY": "Ainda não há reflexões guardadas. Registe a nota de hoje para começar uma sequência.",
+        "HISTORY_TITLE": "Histórico de reflexões",
+        "PLACEHOLDER_1": "O que correu bem hoje? O que deve mudar amanhã?",
+        "PLACEHOLDER_2": "Pequena melhoria para amanhã?",
+        "PLACEHOLDER_3": "Onde o foco falhou - e como pode protegê-lo?",
+        "PLACEHOLDER_4": "Qual tarefa lhe deu energia? Qual a esgotou?",
+        "PLACEHOLDER_5": "Uma coisa para repetir. Uma coisa para mudar.",
+        "REMIND_LABEL": "Lembrar-me disto amanhã",
+        "REMINDER_CREATED": "Lembrete de reflexão agendado para amanhã",
+        "REMINDER_ERROR": "Não foi possível agendar o lembrete",
+        "REMINDER_NEEDS_TEXT": "Escreva uma reflexão antes de pedir um lembrete",
+        "REMINDER_TASK_TITLE": "Rever nota de reflexão",
+        "TITLE": "Nota de reflexão"
       },
       "S": {
         "SAVE_METRIC": "Métrica salva com sucesso"
@@ -810,6 +925,25 @@
         "UPDATED": "Configurações atualizadas do projeto"
       }
     },
+    "PROJECT_FOLDER": {
+      "CONFIRM_DELETE": "Tem a certeza de que pretende eliminar a pasta \"{{title}}\"? Todos os projetos nesta pasta serão movidos para o nível raiz.",
+      "DIALOG": {
+        "CREATE_TITLE": "Criar pasta",
+        "EDIT_TITLE": "Editar pasta",
+        "NAME_LABEL": "Nome da pasta",
+        "NAME_PLACEHOLDER": "Introduza o nome da pasta",
+        "NAME_REQUIRED": "O nome da pasta é obrigatório",
+        "NO_PARENT": "Sem pai (nível raiz)",
+        "PARENT_LABEL": "Pasta pai"
+      },
+      "SELECT": {
+        "LABEL": "Pasta",
+        "NO_PARENT": "Sem pasta (nível raiz)",
+        "PLACEHOLDER": "Selecionar pasta"
+      },
+      "TOOLTIP_CREATE": "Criar pasta de projeto",
+      "TOOLTIP_VISIBILITY": "Mostrar/ocultar projetos"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "Sem dados para o ano atual",
       "PAGE_TITLE": "História Rápida",
@@ -844,6 +978,10 @@
         "ERR_UNKNOWN": "Redmine: Erro desconhecido {{statusCode}} {{errorMsg}}."
       }
     },
+    "REFLECTION_NOTE": {
+      "ACTION_DISMISS": "Dispensar",
+      "MSG": "Nota de Reflexão: ({{date}}): {{content}}"
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Esconder",
@@ -861,13 +999,17 @@
         "TITLE": "Schedule"
       },
       "END": "Fim do trabalho",
+      "INSERT_BEFORE": "Antes",
       "LUNCH_BREAK": "Intervalo para o almoço",
+      "MONTH": "Mês",
       "NO_TASKS": "Atualmente não há tarefas. Adicione algumas tarefas através do botão + na barra superior.",
       "NOW": "agora",
       "PLAN_END_DAY": "Planeje no final do dia",
       "PLAN_START_DAY": "Planeje o início do dia",
+      "SHIFT_KEY_INFO": "Mantenha Shift para alternar o modo de planeamento diário",
       "START": "Início do Trabalho",
-      "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada"
+      "TASK_PROJECTION_INFO": "Projeção futura de uma tarefa repetível programada",
+      "WEEK": "Semana"
     },
     "SEARCH_BAR": {
       "INFO": "Clique no ícone da lista para procurar tarefas arquivadas",
@@ -916,6 +1058,7 @@
         "POSSIBLE_LEGACY_DATA": "O Super Productivity melhorou a sincronização usando agora dois arquivos separados em vez de um único, permitindo muito menos transferência de dados. É recomendado atualizar todas as instâncias do Super Productivity e primeiro sincronizar os dados da instância do aplicativo onde os dados são mais recentes. Se esses forem os dados do seu dispositivo local, ignore este aviso e prossiga para carregá-los confirmando o próximo diálogo.",
         "REMOTE_MODEL_VERSION_NEWER": "A versão do modelo remoto é mais recente que a local. Atualize seu aplicativo local para a versão mais recente!"
       },
+      "BTN_SYNC_NOW": "Sincronizar agora",
       "C": {
         "EMPTY_SYNC": "Você está tentando sincronizar um objeto de dados vazio. Esta é a sua primeira sincronização de um aplicativo (quase) virgem?",
         "FORCE_UPLOAD": "Enviar dados locais mesmo assim?",
@@ -932,17 +1075,34 @@
         "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
+        "ADDITIONAL_INFO": "Informação adicional",
+        "CHANGES": "Alterações",
+        "CHANGES_SINCE_LAST_SYNC": "Alterações desde a última sincronização",
+        "COMPARISON_RESULT": "Resultado da comparação",
+        "DATE": "Data",
         "LAMPORT_CLOCK": "Revisão",
         "LAST_CHANGE": "Última mudança:",
         "LAST_SYNC": "Última sincronização:",
+        "LAST_SYNCED": "Última sincronização",
+        "LAST_WRITE": "Última escrita",
         "LOCAL": "Local",
         "LOCAL_REMOTE": "Local -> Remoto",
+        "NEVER": "Nunca",
+        "OVERWRITE_WARNING": "AVISO: Os dados de {{targetName}} contêm aproximadamente {{targetChanges}} alterações enquanto os dados de {{sourceName}} têm apenas {{sourceChanges}} alterações. Tem a certeza de que pretende sobrescrever os dados de {{targetName}} com a versão de {{sourceName}}? Esta ação não pode ser desfeita.",
         "REMOTE": "Controlo remoto",
+        "RESULT": "Resultado",
         "TEXT": "<p>Atualização do Dropbox. Os dados locais e remotos parecem ter sido modificados.</p>",
+        "TIME": "Tempo",
         "TIMESTAMP": "Carimbo de data/hora",
         "TITLE": "Dropbox: dados conflitantes",
         "USE_LOCAL": "Use local",
-        "USE_REMOTE": "Usar controle remoto"
+        "USE_REMOTE": "Usar controle remoto",
+        "VECTOR_CLOCK": "Relógio Vetorial",
+        "VECTOR_CLOCK_HEADING": "Relógio Vetorial",
+        "VECTOR_COMPARISON_CONCURRENT": "Concorrente (Conflito Verdadeiro)",
+        "VECTOR_COMPARISON_EQUAL": "Igual",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "Local > Remoto",
+        "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remoto"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Alterar e substituir remoto",
@@ -999,6 +1159,7 @@
         "TITLE": "Sincronizar",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Experimental !!</strong> Para fazer isso funcionar, você precisa desabilitar ou limitar o CORS para sua instância Nextcloud, o que pode ter implicações de segurança negativas! Por favor, <a href='https://github.com/nextcloud/server/issues/3131'>consulte esta discussão</a> para obter mais informações. Use por sua conta e risco!",
+          "INFO": "As implementações WebDAV diferem muito, infelizmente. Sabe-se que o Super Productivity funciona bem com o Nextcloud, <strong>mas pode não funcionar com o seu fornecedor</strong>.",
           "L_BASE_URL": "Url Base",
           "L_PASSWORD": "Senha",
           "L_SYNC_FOLDER_PATH": "Caminho da pasta de sincronização",
@@ -1010,6 +1171,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Nenhuma alteração local – Já em sincronia",
         "BTN_CONFIGURE": "Configurar",
         "BTN_FORCE_OVERWRITE": "Forçar substituição",
+        "ERROR_CORS": "Erro de Sincronização WebDAV: Falha na solicitação de rede.\n\nIsto pode ser um problema de CORS. Por favor, assegure-se de que:\n\u001a O seu servidor WebDAV permite pedidos Cross-Origin\n\u001a O URL do servidor está correto e acessível\n\u001a Você tem uma conexão de internet funcional",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Dados remotos estão sendo gravados no momento",
         "ERROR_FALLBACK_TO_BACKUP": "Algo deu errado ao importar os dados. Retornando ao backup local.",
         "ERROR_INVALID_DATA": "Erro ao sincronizar. Dados inválidos",
@@ -1023,6 +1185,40 @@
         "SUCCESS_VIA_BUTTON": "Dados sincronizados com sucesso",
         "UNKNOWN_ERROR": "Erro desconhecido durante a sincronização. Verifique o console.",
         "UPLOAD_ERROR": "Erro de upload desconhecido (configurações corretas?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BACKUP_NOT_FOUND": "Backup com ID {{backupId}} não encontrado",
+        "BTN_CLEAR_ALL": "Limpar tudo",
+        "BTN_CREATE_MANUAL": "Criar Backup Manual",
+        "BTN_DELETE": "APAGAR",
+        "BTN_REFRESH": "Atualizar",
+        "BTN_RESTORE": "Restaurar",
+        "CLEAR_FAILED": "Falha ao limpar backups",
+        "CLEARED_SUCCESS": "Todos os backups foram limpos com sucesso",
+        "CREATE_FAILED": "Falha ao criar backup",
+        "CREATED_SUCCESS": "Backup manual criado com sucesso",
+        "DELETE_FAILED": "Falha ao eliminar backup",
+        "DELETED_SUCCESS": "Backup eliminado com sucesso",
+        "DESCRIPTION": "Backups automáticos são criados antes de descarregar dados do remoto durante operações de sincronização. Os backups são organizados em 4 slots inteligentes: 2 mais recentes, 1 primeiro de hoje, e 1 primeiro de um dia antes de hoje.",
+        "INVALID_ID_ERROR": "ID de backup inválido gerado",
+        "LAST_CHANGE_PREFIX": "Última alteração:",
+        "LOADING": "A carregar...",
+        "NO_BACKUPS": "Ainda não existem backups de segurança disponíveis. Os backups são criados automaticamente antes das operações de sincronização.",
+        "REASON_BEFORE_UPDATE": "Backup automático antes da sincronização",
+        "REASON_MANUAL": "Backup manual",
+        "RESTORE_CONFIRM_MSG": "Tem a certeza de que deseja restaurar o backup de {{timestamp}}?\n\nIsto irá SUBSTITUIR COMPLETAMENTE todos os seus dados atuais!\n\nMotivo: {{reason}}\n\nClique em OK para continuar ou Cancelar para abortar.",
+        "RESTORE_CONFIRM_TITLE": "Restaurar cópia de segurança",
+        "RESTORE_FAILED": "Falha ao restaurar a cópia de segurança: {{error}}",
+        "RESTORED_SUCCESS": "Cópia de segurança restaurada com sucesso",
+        "SLOT_BEFORE_TODAY": "Primeira cópia de segurança antes de hoje",
+        "SLOT_RECENT": "Cópia de segurança recente",
+        "SLOT_TODAY": "Primeira cópia de segurança de hoje",
+        "TITLE": "Sincronizar Cópias de Segurança de Segurança",
+        "TOOLTIP_CLEAR_ALL": "Eliminar todas as cópias de segurança de segurança",
+        "TOOLTIP_CREATE_MANUAL": "Criar uma cópia de segurança manual de todos os seus dados",
+        "TOOLTIP_DELETE": "Eliminar esta cópia de segurança",
+        "TOOLTIP_REFRESH": "Atualizar a lista de cópias de segurança",
+        "TOOLTIP_RESTORE": "Restaurar esta cópia de segurança (irá substituir todos os dados atuais)"
       }
     },
     "TAG": {
@@ -1051,6 +1247,24 @@
         "ADD_NEW_TAG": "Adicionar nova tag"
       }
     },
+    "TAG_FOLDER": {
+      "CONFIRM_DELETE": "Tem a certeza de que pretende eliminar a pasta \"{{title}}\"? Todas as etiquetas nesta pasta serão movidas para o nível raiz.",
+      "DIALOG": {
+        "CREATE_TITLE": "Criar pasta",
+        "EDIT_TITLE": "Editar pasta",
+        "NAME_LABEL": "Nome da pasta",
+        "NAME_PLACEHOLDER": "Introduza o nome da pasta",
+        "NAME_REQUIRED": "O nome da pasta é obrigatório",
+        "NO_PARENT": "Sem pai (nível raiz)",
+        "PARENT_LABEL": "Pasta pai"
+      },
+      "SELECT": {
+        "LABEL": "Pasta",
+        "NO_PARENT": "Sem pasta (nível raiz)",
+        "PLACEHOLDER": "Selecionar pasta"
+      },
+      "TOOLTIP_CREATE": "Criar pasta de etiquetas"
+    },
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Adicionar tarefa existente \"{{taskTitle}}\"",
@@ -1059,11 +1273,32 @@
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Adicionar tarefa ao final da lista",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Adicionar tarefa ao topo da lista de pendências",
         "ADD_TASK_TO_TOP_OF_TODAY": "Adicionar tarefa ao topo da lista",
+        "CREATE_NEW_TAGS": "Criar novas etiquetas",
         "CREATE_TASK": "Criar nova tarefa",
+        "DUE_BUTTON": "Devido",
+        "ESTIMATE_BUTTON": "Estimativa",
         "EXAMPLE": "Exemplo: \"Algum título da tarefa + nome do projeto # alguma tag # alguma outra tag 10m / 3h\"",
+        "NO_DATE": "Sem data",
+        "NO_TIME": "Sem Hora",
+        "PLACEHOLDER_CREATE": "Um título de tarefa #etiqueta @16:00",
+        "PLACEHOLDER_SEARCH": "Adicionar tarefa ou problemas existentes...",
+        "SEARCH_INFO_TEXT": "Pesquisar e adicionar problemas e tarefas do arquivo e de outros projetos",
         "START": "Pressione enter mais uma vez para iniciar",
+        "TAGS_BUTTON": "Etiquetas",
+        "TODAY": "Hoje",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Alternar adição de tarefa à lista de pendências/lista de hoje'",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "Alternar adição de tarefa ao topo e ao final da lista"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Alternar adição de tarefa ao topo e ao final da lista",
+        "TOMORROW": "Amanhã",
+        "TOOLTIP_ADD_TASK": "Adicionar Tarefa",
+        "TOOLTIP_ADD_TO_BACKLOG": "Adicionar ao backlog",
+        "TOOLTIP_ADD_TO_BOTTOM": "Adicionar ao fundo (Ctrl+1)",
+        "TOOLTIP_ADD_TO_TODAY": "Adicionar a hoje",
+        "TOOLTIP_ADD_TO_TOP": "Adicionar ao topo (Ctrl+1)",
+        "TOOLTIP_CLEAR_DATE": "Limpar data",
+        "TOOLTIP_CLEAR_ESTIMATE": "Limpar estimativa",
+        "TOOLTIP_CLEAR_TAGS": "Limpar etiquetas",
+        "TOOLTIP_DISABLE_SEARCH": "Desativar pesquisa de problemas (Ctrl+2)",
+        "TOOLTIP_ENABLE_SEARCH": "Ativar pesquisa de problemas (Ctrl+2)"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Juntar anexo",
@@ -1093,6 +1328,7 @@
         "DELETE": "Excluir tarefa",
         "DELETE_REPEAT_INSTANCE": "Excluir instância de tarefa repetida",
         "DROP_ATTACHMENT": "Solte aqui para anexar a \"{{title}}\"",
+        "DUPLICATE": "Duplicar",
         "EDIT_SCHEDULED": "Editar lembrete",
         "EDIT_TAGS": "Editar etiquetas",
         "EDIT_TASK_TITLE": "Editar título",
@@ -1133,6 +1369,8 @@
         "ADD_TO_TODAY": "Adicione hoje",
         "COMPLETE": "Completar",
         "COMPLETE_ALL": "Completar tudo",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Dispensar todos os lembretes (Manter em Hoje)",
+        "DISMISS_REMINDER_KEEP_TODAY": "Dispensar lembrete (Manter em Hoje)",
         "DONE": "Feito",
         "DUE_TASK": "Tarefa devida",
         "DUE_TASKS": "Tarefas devidas",
@@ -1167,6 +1405,11 @@
         "SCHEDULE": "Agendar",
         "UNSCHEDULE": "Cancelar agendamento"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "Data",
+        "TIME": "Tempo",
+        "TITLE": "Selecionar Data e Hora"
+      },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Adicione tempo gasto para outro dia",
         "DELETE_FOR": "Excluir entrada do dia",
@@ -1194,6 +1437,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Tarefa <strong>{{title}}</strong> movida do backlog para a lista de tarefas de hoje",
         "FOUND_MOVE_FROM_OTHER_LIST": "Tarefa adicionada <strong>{{title}}</strong> de <strong>{{contextTitle}}</strong> para a lista atual",
         "FOUND_RESTORE_FROM_ARCHIVE": "Tarefa <strong>{{title}}</strong> relacionada ao problema restaurada do arquivo",
+        "GO_TO_TASK": "Ir para a Tarefa",
         "LAST_TAG_DELETION_WARNING": "Você está tentando remover a última tag de uma tarefa que não é do projeto. Isso não é permitido!",
         "MOVED_TO_ARCHIVE": "Tarefas {{nr}} movidas para o arquivamento",
         "MOVED_TO_PROJECT": "Movida a tarefa \"{{taskTitle}}\" para o projeto \"{{projectTitle}}\"",
@@ -1248,6 +1492,10 @@
         "MSG": "Há {{tasksNr}} instâncias criadas para esta tarefa repetível. Você quer atualizar todas elas com os novos padrões ou apenas tarefas futuras?",
         "OK": "Atualizar todas as instancias"
       },
+      "D_DELETE_INSTANCE": {
+        "MSG": "Remover a instância da tarefa repetida em {{date}}? Isto impedirá que a tarefa seja criada apenas nesta data.",
+        "OK": "Remover Instância"
+      },
       "D_EDIT": {
         "ADD": "Adicionar configuração de repetição de tarefas",
         "ADVANCED_CFG": "Configuração avançada",
@@ -1264,7 +1512,11 @@
         "C_WEEK": "Semana",
         "C_YEAR": "Ano",
         "DEFAULT_ESTIMATE": "Estimativa padrão",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "Desativar atualização automática das subtarefas",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "Não atualizar automaticamente as subtarefas herdadas quando a instância mais recente mudar",
         "FRIDAY": "Sexta-feira",
+        "INHERIT_SUBTASKS": "Herdar subtarefas",
+        "INHERIT_SUBTASKS_DESCRIPTION": "Quando ativado, as subtarefas da instância de tarefa mais recente serão recriadas com a tarefa repetida",
         "IS_ADD_TO_BOTTOM": "Mover a tarefa para o final da lista",
         "MONDAY": "Segunda-feira",
         "NOTES": "Notas padrão",
@@ -1279,9 +1531,16 @@
         "QUICK_SETTING": "Repita a configuração",
         "REMIND_AT": "Lembre-se em",
         "REMIND_AT_PLACEHOLDER": "Selecione quando lembrar",
+        "REMOVE_FOR_DATE": "Remover para {{date}}",
+        "REMOVE_INSTANCE": "Remover hoje",
         "REPEAT_CYCLE": "Repetir ciclo",
         "REPEAT_EVERY": "Repetir cada",
+        "REPEAT_FROM_COMPLETION_DATE": "Repetir, quando concluído",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "A próxima tarefa é criada a partir da sua data de conclusão, não da data de início. (ex., 'A cada 7 dias' = 7 dias após a conclusão)",
         "SATURDAY": "Sábado",
+        "SCHEDULE_TYPE_FIXED": "Agenda fixa (ex., todas as segundas-feiras, 1º do mês)",
+        "SCHEDULE_TYPE_FLEXIBLE": "Após conclusão (ex., 7 dias após eu terminar)",
+        "SCHEDULE_TYPE_LABEL": "Tipo de agenda",
         "START_DATE": "Data de inicio",
         "START_TIME": "Horário de início agendado",
         "START_TIME_DESCRIPTION": "Por exemplo. 15:00. Deixe em branco para uma tarefa de dia inteiro",
@@ -1321,7 +1580,9 @@
         "SORT_CREATION_DATE": "Data de Criação",
         "SORT_DEFAULT": "Padrão",
         "SORT_NAME": "Nome",
+        "SORT_PERMANENT": "Ordenar (permanente)",
         "SORT_SCHEDULED_DATE": "Data Agendada",
+        "SORT_TEMPORARY": "Ordenar (temporário)",
         "TIME_1HOUR": "> 1 Hora",
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
@@ -1338,7 +1599,8 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "Adicionar à Tarefa",
-        "MSG": "Você não está monitorando o tempo de {{time}}"
+        "MSG": "Você não está monitorando o tempo de {{time}}",
+        "MSG_WITHOUT_TIME": "Você não tem registado tempo"
       },
       "D_IDLE": {
         "ADD_ENTRY": "Adicionar entrada para rastreamento",
@@ -1354,7 +1616,9 @@
         "SKIP": "Pular",
         "SPLIT_TIME": "Divida o tempo em múltiplas tarefas e intervalos",
         "TASK": "Tarefa",
-        "TRACK_TO": "Seguir para:"
+        "TRACK_TO": "Seguir para:",
+        "WARN_SIMPLE_COUNTER": "O tempo será contado para os botões de contador simples ativados.",
+        "WARN_SIMPLE_COUNTER_BREAK": "O tempo AINDA será contado nos botões de contador simples ativados."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Crie</em> e rastreie para",
@@ -1417,6 +1681,7 @@
       },
       "WEEK": {
         "EXPORT": "Exportar dados da semana",
+        "FOCUS_SUMMARY": "Sessões de foco (nº / tempo)",
         "NO_DATA": "Ainda não há tarefas nesta semana.",
         "TITLE": "Título"
       }
@@ -1450,10 +1715,12 @@
     "ADVANCED_CFG": "Configuração Avançada",
     "CANCEL": "Cancelar",
     "CLOSE": "Fechar",
+    "COMPLETE": "Completo",
     "CONFIRM": "Confirmar",
     "DELETE": "Excluir",
     "DISMISS": "Dispensar",
     "DO_IT": "Fazer isto!",
+    "DONT_SHOW_AGAIN": "Não mostrar novamente",
     "DURATION_DESCRIPTION": "por exemplo \"5h 23m\" que resulta em 5 horas em 23 minutos",
     "EDIT": "Editar",
     "ENABLED": "Ativado",
@@ -1524,6 +1791,7 @@
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Adicionar nova nota",
+      "ADD_NEW_PROJECT": "Adicionar Novo Projeto",
       "ADD_NEW_TASK": "Adicionar nova tarefa",
       "APP_WIDE_SHORTCUTS": "Atalhos globais (em todo o aplicativo)",
       "COLLAPSE_SUB_TASKS": "Recolher subtarefas",
@@ -1546,6 +1814,7 @@
       "MOVE_TO_BACKLOG": "Mover tarefa para o backlog de tarefas",
       "MOVE_TO_REGULARS_TASKS": "Mover tarefa para a lista de tarefas de hoje",
       "OPEN_PROJECT_NOTES": "Mostrar / ocultar notas do projeto",
+      "PLUGIN_SHORTCUTS": "Atalhos do Plugin",
       "SAVE_NOTE": "Salvar nota",
       "SELECT_NEXT_TASK": "Selecione a próxima tarefa",
       "SELECT_PREVIOUS_TASK": "Selecionar tarefa anterior",
@@ -1597,6 +1866,21 @@
       "PT": "Português",
       "RU": "Russo",
       "SK": "Eslovaco",
+      "TIME_LOCALE": "Local de formato de hora",
+      "TIME_LOCALE_AUTO": "Padrão do sistema",
+      "TIME_LOCALE_DE_DE": "Alemão - 24 horas",
+      "TIME_LOCALE_DESCRIPTION": "Escolha uma localidade para a formatação da hora. Diferentes localidades usam convenções diferentes (formato 12h vs 24h)",
+      "TIME_LOCALE_EN_GB": "Inglês (Reino Unido) - 24 horas",
+      "TIME_LOCALE_EN_US": "Inglês (EUA) - 12 horas AM/PM",
+      "TIME_LOCALE_ES_ES": "Espanhol - 24 horas",
+      "TIME_LOCALE_FR_FR": "Francês - 24 horas",
+      "TIME_LOCALE_IT_IT": "Italiano - 24 horas",
+      "TIME_LOCALE_JA_JP": "Japonês - 24 horas",
+      "TIME_LOCALE_KO_KR": "Coreano - 12 horas AM/PM",
+      "TIME_LOCALE_PT_BR": "Português (Brasil) - 24 horas",
+      "TIME_LOCALE_RU_RU": "Russo - 24 horas",
+      "TIME_LOCALE_TR_TR": "Turco - 24 horas",
+      "TIME_LOCALE_ZH_CN": "Chinês (Simplificado) - 24 horas",
       "TITLE": "Língua",
       "TR": "Türkçe",
       "UK": "Українська",
@@ -1604,6 +1888,11 @@
       "ZH_TW": "中文(繁體)"
     },
     "MISC": {
+      "DARK_MODE": "Modo escuro",
+      "DARK_MODE_ARIA_LABEL": "Seleção do modo escuro",
+      "DARK_MODE_DARK": "Escuro",
+      "DARK_MODE_LIGHT": "Luz",
+      "DARK_MODE_SYSTEM": "Sistema",
       "DEFAULT_PROJECT": "Projeto padrão a ser usado para tarefas se nenhum for especificado",
       "FIRST_DAY_OF_WEEK": "Primeiro dia da semana",
       "HELP": "<p><strong>Não está vendo as notificações da área de trabalho?</strong> Para janelas, convém verificar Sistema> Notificações e ações, e verificar se as notificações necessárias foram ativadas.</p>",
@@ -1614,8 +1903,11 @@
       "IS_DARK_MODE": "Modo escuro",
       "IS_DISABLE_ANIMATIONS": "Desativar todas as animações",
       "IS_DISABLE_CELEBRATION": "Desativar celebração no resumo diário",
+      "IS_ENABLE_USER_PROFILES": "Ativar perfis de utilizador (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Permite criar e alternar entre diferentes perfis de utilizador, cada um com configurações, tarefas e configurações de sincronização separadas. O botão de gestão de perfil aparecerá no canto superior direito quando ativado. Nota: desativar este recurso ocultará a interface do utilizador, mas preservará os dados do seu perfil (recurso Beta, sem garantias. Certifique-se de ter uma cópia de segurança).",
       "IS_HIDE_NAV": "Ocultar a navegação até passar o mouse no cabeçalho principal (somente na área de trabalho)",
       "IS_MINIMIZE_TO_TRAY": "Minimize para a bandeja (somente desktop)",
+      "IS_OVERLAY_INDICATOR_ENABLED": "Ativar janela indicadora sobreposta (desktop linux/gnome)",
       "IS_SHOW_TIP_LONGER": "Mostrar dica de produtividade no início do aplicativo um pouco mais",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mostrar contagem regressiva atual na bandeja / menu de status (apenas desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mostra a tarefa atual na bandeja / menu de status (somente desktop)",
@@ -1624,6 +1916,9 @@
       "START_OF_NEXT_DAY": "Hora de início do dia seguinte",
       "START_OF_NEXT_DAY_HINT": "a partir de quando (em horas) você deseja contar o dia seguinte começou. o padrão é meia-noite, que é 0.",
       "TASK_NOTES_TPL": "Modelo de descrição de tarefa",
+      "THEME": "Tema",
+      "THEME_EXPERIMENTAL": "Tema (experimental)",
+      "THEME_SELECT_LABEL": "Selecionar tema",
       "TITLE": "Configurações diversas"
     },
     "POMODORO": {
@@ -1631,6 +1926,7 @@
       "CYCLES_BEFORE_LONGER_BREAK": "Iniciar pausa mais longa após X sessões de trabalho",
       "DURATION": "Duração das sessões de trabalho",
       "HELP": "<p>O temporizador pomodoro pode ser configurado através de algumas configurações. A duração de cada sessão de trabalho, a duração das quebras normais, o número de sessões de trabalho a serem executadas antes do início de uma pausa mais longa e a duração dessa pausa mais longa.</p> <p>Você também pode definir se deseja exibir suas distrações durante seus intervalos de pomodoro.</p> <p>Configurar \"Pausar o rastreamento do tempo no intervalo do pomodoro\" também acompanhará seus intervalos como o tempo de trabalho gasto em uma tarefa. </p> <p>Habilitando \"Pausar a sessão pomodoro quando nenhuma tarefa ativa\" também pausará a sessão pomodoro, quando você pausar uma tarefa.</p>",
+      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Desativar início automático da sessão após pausa",
       "IS_ENABLED": "Ativar temporizador pomodoro",
       "IS_MANUAL_CONTINUE": "Confirmar manualmente o início da próxima sessão de pomodoro",
       "IS_MANUAL_CONTINUE_BREAK": "Confirme manualmente o início do próximo intervalo",
@@ -1643,6 +1939,7 @@
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Mostrar o banner X antes do lembrete real",
+      "DEFAULT_TASK_REMIND_OPTION": "Opção padrão de lembrete selecionada ao criar tarefas",
       "IS_COUNTDOWN_BANNER_ENABLED": "Mostrar uma faixa de contagem decrescente antes da data de vencimento dos lembretes",
       "TITLE": "Lembretes"
     },
@@ -1655,7 +1952,9 @@
       "L_WORK_END": "Fim do dia de trabalho",
       "L_WORK_START": "Início do dia de trabalho",
       "LUNCH_BREAK_START_END_DESCRIPTION": "ex: 13:00",
+      "MONTH": "Mês",
       "TITLE": "Schedule",
+      "WEEK": "Semana",
       "WORK_START_END_DESCRIPTION": "por exemplo. 17:00"
     },
     "SHORT_SYNTAX": {
@@ -1737,10 +2036,16 @@
     "FILE_DOWNLOADED": "{{fileName}} baixado",
     "FILE_DOWNLOADED_BTN": "Pasta aberta",
     "NAVIGATE_TO_TASK_ERR": "Não foi possível focar a tarefa. Apagou-a?",
+    "NO_TASKS_TO_COPY": "Sem tarefas para copiar",
+    "NO_TASKS_TO_UNPLAN": "Sem tarefas para desplanear",
     "PERSISTENCE_DISALLOWED": "Os dados não serão mantidos permanentemente. Esteja ciente de que isso pode levar à perda de dados!",
     "PERSISTENCE_ERROR": "Erro ao solicitar a persistência de dados: {{err}}",
     "RUNNING_X": "Rodando \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir favoritos só está disponível no contexto do projeto."
+    "SHARE_FAILED": "Falha ao partilhar. Por favor, copie manualmente.",
+    "SHARE_FAILED_FALLBACK": "Falha ao partilhar. Copiado para a área de transferência em vez disso.",
+    "SHARE_UNAVAILABLE_FALLBACK": "Copiado para a área de transferência.",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressionado, mas o atalho para abrir favoritos só está disponível no contexto do projeto.",
+    "UNPLANNED_TODAY_TASKS": "Desplanear todas as tarefas de Hoje"
   },
   "GPB": {
     "ASSETS": "Carregando recursos...",
@@ -1759,6 +2064,7 @@
     "ADD_NEW_TASK": "Adicionar nova tarefa",
     "ALL_PLANNED_LIST": "Repetir/Programado",
     "BOARDS": "Placas",
+    "COPY_TASK_LIST_MARKDOWN": "Copiar para a área de transferência",
     "CREATE_PROJECT": "Criar Projeto",
     "CREATE_TAG": "Criar tag",
     "DELETE_PROJECT": "Eliminar projeto",
@@ -1790,7 +2096,9 @@
     "SCHEDULE": "Horário",
     "SEARCH": "Pesquisar",
     "SETTINGS": "Configurações",
+    "SHARE_TASK_LIST_MARKDOWN": "Partilhar Lista de Tarefas",
     "SHOW_SEARCH_BAR": "Mostrar barra de pesquisa",
+    "SIDE_PANEL_MENU": "Menu do Painel Lateral",
     "TAGS": "Tag",
     "TASK_LIST": "Lista de tarefas",
     "TASKS": "Tarefas",
@@ -1799,6 +2107,7 @@
     "TOGGLE_SHOW_NOTES": "Mostrar/ocultar notas do projeto",
     "TOGGLE_TRACK_TIME": "Iniciar/parar rastreamento de tempo ",
     "TRIGGER_SYNC": "Acionar a sincronização manualmente",
+    "UNPLAN_ALL_TASKS": "Desplanear todas as tarefas",
     "WORKLOG": "Log de trabalho"
   },
   "MIGRATE": {
@@ -1810,6 +2119,10 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Adicionar tarefas a partir de hoje",
+    "ARCHIVED_TASKS": {
+      "PLURAL": "{{count}} tarefas principais concluídas foram arquivadas",
+      "SINGULAR": "{{count}} tarefa principal concluída foi arquivada"
+    },
     "BREAK_LABEL": "Pausa (nr / time)",
     "CELEBRATE": "Tome um momento para <i>comemorar!</i>",
     "CLEAR_ALL_CONTINUE": "Limpar tudos os concluídos e continuar",
@@ -1821,6 +2134,7 @@
     "ESTIMATE_TOTAL": "Estimativa total:",
     "EVALUATE_DAY": "Avaliar",
     "EXPORT_TASK_LIST": "Exportar lista de tarefas",
+    "FOCUS_SUMMARY": "Foco (nr / tempo)",
     "NO_TASKS": "Não há tarefas para este dia",
     "PLAN_TOMORROW": "Plano",
     "REVIEW_TASKS": "Revisão",
@@ -1843,21 +2157,126 @@
     "TIME_SPENT_TODAY_BY_TAG": "Tempo gasto hoje por etiqueta",
     "WEEK": "Semana"
   },
+  "PLUGINS": {
+    "ACTION_TYPE_NOT_ALLOWED": "Tipo de ação '{{type}}' não é permitido",
+    "ALREADY_INITIALIZED": "O plugin já está inicializado",
+    "CANCEL": "Cancelar",
+    "CAPABILITIES": {
+      "ACCESS_FILES": "Aceder e modificar ficheiros no seu sistema",
+      "RUN_COMMANDS": "Executar comandos do sistema",
+      "USE_NODE_APIS": "Usar APIs e módulos Node.js"
+    },
+    "CHOOSE_PLUGIN_FILE": "Escolher Ficheiro do Plugin",
+    "CLEAR_PLUGIN_CACHE": "Limpar Cache do Plugin",
+    "CODE_TOO_LARGE": "O código do plugin é demasiado grande (máx. {{maxSize}}MB)",
+    "CONFIGURATION": "Configuração",
+    "CONFIGURE": "Configurar",
+    "CONFIRM_REMOVE": "Tem a certeza de que pretende remover o plugin \"{{name}}\"?",
+    "DISABLED": "Desativado",
+    "ELECTRON_API_NOT_AVAILABLE": "API do Electron não está disponível",
+    "ENABLED": "Ativado",
+    "ERROR": "Erro",
+    "ERROR_LOADING_PLUGIN": "Erro ao carregar o plugin",
+    "EXPERIMENTAL_WARNING": "O sistema de plugins está numa fase experimental e deve ser usado com extrema cautela.",
+    "EXPERIMENTAL_WARNING_TITLE": "Funcionalidade Experimental - Aviso de Segurança",
+    "FAILED_TO_CLEAR_CACHE": "Falha ao limpar o cache do plugin",
+    "FAILED_TO_EXECUTE_SCRIPT": "Falha ao executar o script Node.js",
+    "FAILED_TO_EXTRACT_ZIP": "Falha ao extrair o ficheiro ZIP do plugin",
+    "FAILED_TO_INSTALL": "Falha ao instalar o plugin",
+    "FAILED_TO_LOAD": "Falha ao carregar o plugin",
+    "FAILED_TO_LOAD_CONFIG": "Falha ao carregar a configuração do plugin",
+    "FAILED_TO_REMOVE": "Falha ao remover o plugin",
+    "FAILED_TO_SAVE_CONFIG": "Falha ao guardar a configuração do plugin",
+    "FILE_TOO_LARGE": "Ficheiro demasiado grande ({{fileSize}}MB). O tamanho máximo é {{maxSize}}MB",
+    "GO_BACK": "Voltar",
+    "GRANT_PERMISSION": "Conceder Permissão",
+    "HOOKS": "Ganchos",
+    "ID": "ID:",
+    "INDEX_HTML_NOT_LOADED": "Index.html do plugin não carregado",
+    "INSTALL_PLUGIN": "Instalar Plugin",
+    "INSTALL_WARNING": "Antes de instalar um plugin, certifique-se de que confia na sua origem e compreende as permissões que solicita.",
+    "INSTALLING": "A instalar...",
+    "LOADING_INTERFACE": "A carregar a interface do plugin...",
+    "LOADING_PLUGIN": "A carregar...",
+    "MANIFEST_NOT_FOUND": "Manifesto do plugin (manifest.json) não encontrado no ficheiro ZIP",
+    "MANIFEST_TOO_LARGE": "Manifesto do plugin é demasiado grande (máx. {{maxSize}}KB)",
+    "MENU_ENTRY_ICON_STRING": "O ícone da entrada do menu deve ser uma string",
+    "MENU_ENTRY_LABEL_REQUIRED": "É necessário o rótulo da entrada do menu",
+    "MENU_ENTRY_ONCLICK_REQUIRED": "É necessário o manipulador onClick da entrada do menu",
+    "MIN_VERSION": "Versão Mín.:",
+    "NO_ADDITIONAL_INFO": "Nenhuma informação adicional disponível",
+    "NO_CONTENT_PROVIDED": "Nenhum conteúdo fornecido",
+    "NO_PLUGIN_CONTEXT_ACTION": "O plugin não tem permissão para executar ações",
+    "NO_PLUGIN_CONTEXT_HEADER_BUTTON": "O plugin não tem permissão para adicionar botões no cabeçalho",
+    "NO_PLUGIN_CONTEXT_LOADING": "O plugin não tem contexto para carregamento de dados",
+    "NO_PLUGIN_CONTEXT_MENU_ENTRY": "O plugin não tem permissão para adicionar entradas no menu",
+    "NO_PLUGIN_CONTEXT_NODE": "O plugin não tem permissão para executar código Node.js",
+    "NO_PLUGIN_CONTEXT_PERSISTENCE": "O plugin não tem permissão para persistir dados",
+    "NO_PLUGIN_CONTEXT_SHORTCUT": "O plugin não tem permissão para registar atalhos",
+    "NO_PLUGIN_CONTEXT_SIDE_PANEL": "O plugin não tem permissão para adicionar botões no painel lateral",
+    "NO_PLUGIN_CONTEXT_SYNC": "O plugin não tem permissão para usar sincronização",
+    "NO_PLUGIN_ID_PROVIDED_FOR_HTML": "ID do plugin não fornecido para conteúdo HTML",
+    "NO_PLUGIN_MANIFEST_NODE": "O manifesto do plugin não inclui módulo Node.js",
+    "NODE_EXECUTION_REQUIRED": "Este plugin requer execução Node.js que está disponível apenas na aplicação de ambiente de trabalho.",
+    "NODE_ONLY_DESKTOP": "A execução Node.js está disponível apenas na aplicação de ambiente de trabalho",
+    "OK": "Ok",
+    "PARENT_TASK_DOES_NOT_EXIST": "A tarefa pai não existe",
+    "PARENT_TASK_NOT_FOUND": "Tarefa pai não encontrada no contexto '{{contextId}}'",
+    "PERMISSIONS": "Permissões",
+    "PLEASE_SELECT_ZIP_FILE": "Por favor, selecione um ficheiro ZIP",
+    "PLUGIN_DIALOG_TITLE": "Mensagem do Plugin",
+    "PLUGIN_DOES_NOT_SUPPORT_IFRAME": "Este plugin não suporta interface iframe",
+    "PLUGIN_ID_NOT_PROVIDED": "ID do plugin não fornecido",
+    "PLUGIN_JS_NOT_FOUND": "Ficheiro JavaScript do plugin (plugin.js) não encontrado no ficheiro ZIP",
+    "PLUGIN_NOT_FOUND": "Plugin não encontrado",
+    "PLUGIN_SYSTEM_FAILED_INIT": "Falha ao inicializar o sistema de plugins",
+    "PROJECT_DOES_NOT_EXIST": "Projeto não existe",
+    "PROJECT_NOT_FOUND": "Projeto '{{contextId}}' não encontrado",
+    "RECOMMENDATION": "Instale plugins apenas de fontes confiáveis e revise o código deles, se possível. Faça sempre backup dos seus dados antes de instalar novos plugins.",
+    "REMEMBER_CHOICE": "Lembrar minha escolha para este plugin",
+    "REMOVE": "Remover",
+    "RISK_DATA_ACCESS": "Os plugins podem ler, modificar e eliminar TODAS as suas tarefas, projetos e dados pessoais",
+    "RISK_MALICIOUS_CODE": "Plugins maliciosos podem roubar informações sensíveis ou corromper seus dados",
+    "RISK_PERFORMANCE": "Plugins mal escritos podem causar problemas de desempenho ou falhas",
+    "RISK_SYSTEM_ACCESS": "Plugins de ambiente de trabalho com permissões Node.js podem executar comandos do sistema",
+    "SECURITY_WARNING": "Os plugins têm acesso significativo aos seus dados e sistema. Instalar plugins não confiáveis representa riscos sérios de segurança:",
+    "SIDE_PANEL_LABEL_REQUIRED": "É necessário o rótulo do botão do painel lateral",
+    "SIDE_PANEL_ONCLICK_REQUIRED": "É necessário o manipulador onClick do botão do painel lateral",
+    "SYSTEM_ACCESS_REQUEST_DESC": "Este plugin está solicitando permissão para executar código Node.js no seu sistema. Isso permitirá que ele:",
+    "SYSTEM_ACCESS_REQUEST_TITLE": "Solicitação de Acesso ao Sistema",
+    "TAGS_DO_NOT_EXIST": "Uma ou mais etiquetas não existem",
+    "TASK_NOT_FOUND": "Tarefa com ID '{{taskId}}' não encontrada",
+    "TASKS_NOT_IN_PROJECT": "Uma ou mais tarefas não estão no projeto '{{contextId}}'",
+    "TASKS_NOT_SUBTASKS": "Uma ou mais tarefas não são subtarefas de '{{contextId}}'",
+    "TOGGLE_PLUGIN": "Alternar {{pluginName}}",
+    "TRUST_WARNING": "Conceda permissão apenas se confiar neste plugin",
+    "TYPE": "Tipo: {{type}}",
+    "UNABLE_TO_PERSIST_DATA": "Não foi possível guardar dados no armazenamento do plugin",
+    "UNKNOWN_ERROR": "Ocorreu um erro desconhecido",
+    "UPLOAD_PLUGIN_INSTRUCTION": "Carregue um ficheiro ZIP do plugin para o instalar:",
+    "USER_DECLINED_NODE_PERMISSION": "O utilizador recusou a permissão de execução do Node.js",
+    "VALIDATION_FAILED": "Validação falhou"
+  },
   "PM": {
     "TITLE": "Métricas do projeto"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Configurações globais",
     "ISSUE_INTEGRATION": "Integração com gerenciadores de tarefas",
+    "NO_PLUGINS_INSTALLED": "Nenhum plugin está atualmente instalado",
+    "PLUGINS": "Plugins",
     "PRIVACY_POLICY": "Política Privada",
     "PRODUCTIVITY_HELPER": "Auxiliar de produtividade",
     "PROJECT_SETTINGS": "Configurações específicas do projeto",
     "PROVIDE_FEEDBACK": "Dar uma resposta",
+    "RELOAD": "Recarregar",
     "SYNC_EXPORT": "Sincronizar e exportar",
     "TAG_SETTINGS": "Configurações específicas de tags",
     "TOGGLE_DARK_MODE": "Alternar modo escuro"
   },
   "SCHEDULE": {
+    "LAST": "Último:",
+    "NEXT": "Seguinte",
     "NO_REPEATABLE_TASKS": "No momento, não há tarefas recorrentes. Você pode agendar uma tarefa escolhendo \"Repetir Tarefa\" no menu de contexto da tarefa. Para abrí-lo clique nos 3 pontinhos à direita de uma tarefa.",
     "NO_SCHEDULED": "No momento, não há tarefas agendadas. Você pode agendar uma tarefa escolhendo \"Agendar Tarefa\" no menu de contexto da tarefa. Para abrí-lo, clique nos 3 pontinhos à direita de uma tarefa.",
     "NO_SCHEDULED_TITLE": "Tarefas programadas para o dia",
@@ -1884,6 +2303,24 @@
     "teal": "Azul petróleo",
     "yellow": "Amarelo"
   },
+  "USER_PROFILES": {
+    "ACTIVE": "Ativo",
+    "CANCEL": "Cancelar",
+    "CLOSE": "Fechar",
+    "CREATE": "Criar",
+    "CREATE_NEW_PROFILE": "Criar novo perfil",
+    "CREATED": "Criado:",
+    "DELETE_PROFILE": "Eliminar perfil",
+    "DIALOG_TITLE": "Gerir perfis de utilizador",
+    "EXISTING_PROFILES": "Perfis existentes",
+    "EXPORT_PROFILE": "Exportar perfil",
+    "MANAGE_PROFILES": "Gerir perfis...",
+    "OPEN_PROFILES_FOLDER": "Abrir pasta de perfis",
+    "PROFILE_NAME": "Nome do perfil",
+    "PROFILE_NAME_PLACEHOLDER": "p. ex. Trabalho, Pessoal",
+    "RENAME": "Renomear",
+    "SAVE": "Guardar"
+  },
   "V": {
     "E_1TO10": "Digite um valor entre 1 e 10",
     "E_DATETIME": "O valor inserido não é um datetime!",
@@ -1907,6 +2344,7 @@
     "FINISH_DAY_FOR_TAG": "Dia de conclusão para esta etiqueta",
     "FINISH_DAY_TOOLTIP": "Avalie o seu dia, mova todas as tarefas concluídas para o arquivo (opcionalmente) e/ou planeie o seu dia seguinte.",
     "HELP_PROCRASTINATION": "Ajuda! Eu estou procrastinando!",
+    "LATER_TODAY": "Mais tarde hoje",
     "MOVE_DONE_TO_ARCHIVE": "Mover concluído para arquivar",
     "NO_DONE_TASKS": "No momento, não há tarefas concluídas",
     "NO_PLANNED_TASK_ALL_DONE": "Todas as tarefas concluídas",
