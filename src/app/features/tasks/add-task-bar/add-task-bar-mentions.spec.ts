@@ -94,7 +94,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         isEnableDue: true,
         isEnableProject: true,
       }),
-      lang: () => ({ timeLocale: DEFAULT_LOCALE }),
+      localization: () => ({ timeLocale: DEFAULT_LOCALE }),
       misc$: miscSubject,
     });
     const addTaskBarIssueSearchServiceSpy = jasmine.createSpyObj(

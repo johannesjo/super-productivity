@@ -181,7 +181,7 @@ describe('AddTaskBarComponent', () => {
       lang$: new BehaviorSubject<LocalizationConfig>(mockLocalizationConfig),
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
       shortSyntax$: of({}),
-      lang: () => ({ timeLocale: DEFAULT_LOCALE }),
+      localization: () => ({ timeLocale: DEFAULT_LOCALE }),
     });
     mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
