@@ -219,6 +219,28 @@ describe('AddTaskBarStateService', () => {
     });
   });
 
+  describe('updateTagIdsFromTxt', () => {
+    it('should replace all tags derived from short syntax', () => {
+      const mockTags: Tag[] = [
+        { id: '1', title: 'urgent' } as Tag,
+        { id: '2', title: 'important' } as Tag,
+      ];
+
+      service.updateTagIdsFromTxt(mockTags.map((t) => t.id));
+
+      expect(service.state().tagIdsFromTxt).toEqual(mockTags.map((t) => t.id));
+    });
+
+    it('should clear tags derived from short syntax when empty array passed', () => {
+      const mockTags: Tag[] = [{ id: '1', title: 'urgent' } as Tag];
+      service.updateTagIdsFromTxt(mockTags.map((t) => t.id));
+
+      service.updateTagIdsFromTxt([]);
+
+      expect(service.state().tagIdsFromTxt).toEqual([]);
+    });
+  });
+
   describe('updateNewTagTitles', () => {
     it('should update new tag titles', () => {
       const newTagTitles = ['new-tag', 'another-new'];
@@ -268,12 +290,15 @@ describe('AddTaskBarStateService', () => {
   describe('clearTags', () => {
     it('should clear tags and new tag titles', () => {
       const mockTags: Tag[] = [{ id: '1', title: 'urgent' } as Tag];
+      const mockTagsFromTxt: Tag[] = [{ id: 'blu_id', title: 'blu' } as Tag];
       service.updateTagIds(mockTags.map((t) => t.id));
+      service.updateTagIdsFromTxt(mockTagsFromTxt.map((t) => t.id));
       service.updateNewTagTitles(['new-tag']);
 
       service.clearTags();
 
       expect(service.state().tagIds).toEqual([]);
+      expect(service.state().tagIdsFromTxt).toEqual([]);
       expect(service.state().newTagTitles).toEqual([]);
     });
 

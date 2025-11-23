@@ -88,7 +88,12 @@ export class AddTaskBarStateService {
   }
 
   clearTags(cleanedInputTxt?: string): void {
-    this._taskInputState.update((state) => ({ ...state, tagIds: [], newTagTitles: [] }));
+    this._taskInputState.update((state) => ({
+      ...state,
+      tagIds: [],
+      tagIdsFromTxt: [],
+      newTagTitles: [],
+    }));
     if (cleanedInputTxt !== undefined) {
       this.inputTxt.set(cleanedInputTxt);
     }

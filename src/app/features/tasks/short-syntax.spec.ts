@@ -540,6 +540,36 @@ describe('shortSyntax', () => {
       expect(r).toEqual(undefined);
     });
 
+    it('should remove tags not existing on title', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'bla_id'],
+        },
+      });
+    });
+
+    it('should not remove tags not existing on title when disabled', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
+      };
+      const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
     it('should add new "asd #asd" tag', () => {
       const t = {
         ...TASK,
