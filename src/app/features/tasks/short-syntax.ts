@@ -283,7 +283,15 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         }
       });
 
-      taskChanges.tagIds = matchingTagIds;
+      // Check if arrays arent the same
+      if (
+        !(
+          task.tagIds.length === matchingTagIds.length &&
+          task.tagIds.every((val, i) => val === matchingTagIds[i])
+        )
+      ) {
+        taskChanges.tagIds = matchingTagIds;
+      }
 
       if (
         newTagTitlesToCreate.length ||
