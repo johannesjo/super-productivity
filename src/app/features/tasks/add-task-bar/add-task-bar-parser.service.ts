@@ -55,7 +55,7 @@ export class AddTaskBarParserService {
       allTags,
       allProjects,
       undefined,
-      true,
+      'replace',
     );
 
     // Create current parse result data structure

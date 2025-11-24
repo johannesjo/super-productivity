@@ -546,7 +546,7 @@ describe('shortSyntax', () => {
         title: 'Fun title #blu #bla',
         tagIds: ['blu_id', 'bla_id', 'hihi_id'],
       };
-      const r = shortSyntax(t, CONFIG, ALL_TAGS, undefined, undefined, true);
+      const r = shortSyntax(t, CONFIG, ALL_TAGS, undefined, undefined, 'replace');
 
       expect(r).toEqual({
         newTagTitles: [],

@@ -92,7 +92,7 @@ export const shortSyntax = (
   allTags?: Tag[],
   allProjects?: Project[],
   now = new Date(),
-  isReplaceTagIds: boolean = false,
+  mode: 'combine' | 'replace' = 'combine',
 ):
   | {
       taskChanges: Partial<Task>;
@@ -138,7 +138,7 @@ export const shortSyntax = (
     changesForTag = parseTagChanges(
       { ...task, title: taskChanges.title || task.title },
       allTags,
-      isReplaceTagIds,
+      mode,
     );
     taskChanges = {
       ...taskChanges,
@@ -243,7 +243,7 @@ const parseProjectChanges = (
 const parseTagChanges = (
   task: Partial<TaskCopy>,
   allTags?: Tag[],
-  isReplaceTagIds: boolean = false,
+  mode: 'combine' | 'replace' = 'combine',
 ): TagChanges => {
   const taskChanges: Partial<TaskCopy> = {};
 
@@ -289,7 +289,7 @@ const parseTagChanges = (
         }
       });
 
-      if (isReplaceTagIds) {
+      if (mode === 'replace') {
         // Check if arrays arent the same
         if (
           !(
