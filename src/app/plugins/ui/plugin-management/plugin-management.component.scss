@@ -202,3 +202,17 @@ mat-error {
     color: var(--c-text-secondary);
   }
 }
+
+.plugin-info-section {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+collapsible {
+  ::ng-deep .collapsible-title {
+    font-size: 14px;
+  }
+}

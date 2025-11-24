@@ -153,29 +153,32 @@
         }
       </table>
 
-      @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
-        <div>
-          <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
-          <div>
-            <mat-chip-set>
-              @for (hook of plugin.manifest.hooks; track hook) {
-                <mat-chip>{{ hook }}</mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        </div>
-      }
-      @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
-        <div>
-          <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
-          <div>
-            <mat-chip-set>
-              @for (permission of plugin.manifest.permissions; track permission) {
-                <mat-chip>{{ permission }}</mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        </div>
+      @if (
+        (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) ||
+        (plugin.manifest.permissions && plugin.manifest.permissions.length > 0)
+      ) {
+        <collapsible [title]="getPermissionsHooksTitle(plugin)">
+          @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+            <div class="plugin-info-section">
+              <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
+              <mat-chip-set>
+                @for (permission of plugin.manifest.permissions; track permission) {
+                  <mat-chip>{{ permission }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
+            <div class="plugin-info-section">
+              <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
+              <mat-chip-set>
+                @for (hook of plugin.manifest.hooks; track hook) {
+                  <mat-chip>{{ hook }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+        </collapsible>
       }
     </mat-card-content>
 

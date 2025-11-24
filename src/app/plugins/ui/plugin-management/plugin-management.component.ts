@@ -34,6 +34,7 @@ import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { PluginLog } from '../../../core/log';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 
 interface CommunityPlugin {
   name: string;
@@ -63,6 +64,7 @@ interface CommunityPlugin {
     MatTooltip,
     TranslatePipe,
     PluginIconComponent,
+    CollapsibleComponent,
   ],
 })
 export class PluginManagementComponent {
@@ -331,6 +333,21 @@ export class PluginManagementComponent {
     return features.length > 0
       ? features.join(' • ')
       : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
+  }
+
+  getPermissionsHooksTitle(plugin: PluginInstance): string {
+    const parts: string[] = [];
+    const pCount = plugin.manifest.permissions?.length || 0;
+    const hCount = plugin.manifest.hooks?.length || 0;
+
+    if (pCount > 0) {
+      parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
+    }
+    if (hCount > 0) {
+      parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
+    }
+
+    return parts.join(' / ');
   }
 
   async openConfigDialog(plugin: PluginInstance): Promise<void> {
