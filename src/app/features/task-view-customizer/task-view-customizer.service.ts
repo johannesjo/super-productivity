@@ -210,53 +210,71 @@ export class TaskViewCustomizerService {
     order?: SORT_ORDER,
   ): TaskWithSubTasks[] {
     const tasksCopy = [...tasks];
-    const factor = order === SORT_ORDER.ASC ? -1 : 1;
 
-    const sortByTitle = (a: TaskWithSubTasks, b: TaskWithSubTasks): number => {
-      return a.title.localeCompare(b.title);
+    // Factor for bidirectional for sorting
+    const factor = order === SORT_ORDER.DESC ? -1 : 1;
+
+    const sortByTitle = (a: string, b: string, multiplier = 1): number => {
+      return a.localeCompare(b) * multiplier;
     };
 
     const sortByTagTitle = (a: TaskWithSubTasks, b: TaskWithSubTasks): number => {
-      const getPrimaryTagTitle = (t: TaskWithSubTasks): string | null => {
-        if (!t.tagIds || t.tagIds.length === 0) return null;
+      // Helper function to get the first tag title from a task
+      const getFirstTagTitle = (t: TaskWithSubTasks): string | null => {
         const titles = t.tagIds
           .map((id) => this._allTags.find((tag) => tag.id === id)?.title)
-          .filter((v): v is string => !!v);
-        return titles.length ? titles.sort((x, y) => x.localeCompare(y))[0] : null;
+          .filter((v) => typeof v === 'string');
+
+        return titles.sort(sortByTitle)[0] ?? null;
       };
 
-      const aTitle = getPrimaryTagTitle(a);
-      const bTitle = getPrimaryTagTitle(b);
+      const aTitle = getFirstTagTitle(a);
+      const bTitle = getFirstTagTitle(b);
 
+      // If both with tags
       if (aTitle && bTitle) {
-        return aTitle.localeCompare(bTitle) || sortByTitle(a, b);
+        // If same - sort by task title
+        if (aTitle === bTitle) return sortByTitle(a.title, b.title, factor);
+
+        // Sort by tag title
+        return sortByTitle(aTitle, bTitle, factor);
       }
-      return aTitle ? -1 : bTitle ? 1 : sortByTitle(a, b);
+
+      // If both without tags - sort by task title
+      if (!aTitle && !bTitle) return sortByTitle(a.title, b.title, factor);
+
+      // If one task has a tag title, give it priority
+      return aTitle ? -1 * factor : 1 * factor;
     };
 
     switch (sortType) {
       case SORT_OPTION_TYPE.name:
-        return tasksCopy.sort(sortByTitle);
+        return tasksCopy.sort((a, b) => sortByTitle(a.title, b.title, factor));
 
       case SORT_OPTION_TYPE.tag:
-        return order === SORT_ORDER.ASC
-          ? tasksCopy.sort(sortByTagTitle)
-          : tasksCopy.sort(sortByTagTitle).reverse();
+        return tasksCopy.sort(sortByTagTitle);
 
       case SORT_OPTION_TYPE.creationDate:
         return tasksCopy.sort((a, b) => (a.created - b.created) * factor);
 
       case SORT_OPTION_TYPE.scheduledDate:
         return tasksCopy.sort((a, b) => {
-          if (a.dueWithTime && b.dueWithTime) {
-            return (a.dueWithTime - b.dueWithTime) * factor;
-          }
-          if (a.dueDay && b.dueDay) {
-            return a.dueDay.localeCompare(b.dueDay) * factor;
-          }
-          if (a.dueWithTime) return -1 * factor;
-          if (b.dueWithTime) return 1 * factor;
-          return 0;
+          const dateA = a.dueDay
+            ? new Date(a.dueDay)
+            : a.dueWithTime
+              ? new Date(a.dueWithTime)
+              : null;
+          const dateB = b.dueDay
+            ? new Date(b.dueDay)
+            : b.dueWithTime
+              ? new Date(b.dueWithTime)
+              : null;
+
+          if (dateA === null && dateB === null) return 0;
+          if (dateA === null) return 1 * factor;
+          if (dateB === null) return -1 * factor;
+
+          return (dateA.getTime() - dateB.getTime()) * factor;
         });
 
       case SORT_OPTION_TYPE.estimatedTime:
