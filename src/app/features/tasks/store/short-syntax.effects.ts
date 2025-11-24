@@ -110,7 +110,7 @@ export class ShortSyntaxEffects {
           tags,
           projects,
           undefined,
-          isReplaceTagIds,
+          isReplaceTagIds ? 'replace' : 'combine',
         );
         if (environment.production) {
           TaskLog.log('shortSyntax', r);
