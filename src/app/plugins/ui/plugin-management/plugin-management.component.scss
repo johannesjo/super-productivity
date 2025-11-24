@@ -76,9 +76,8 @@ mat-error {
   }
 }
 
-.warning-card {
+.info-card {
   grid-column: 1 / -1;
-  border: 1px solid var(--warn-50, #e57373);
   margin-bottom: 16px;
 
   mat-card-header {
@@ -87,14 +86,12 @@ mat-error {
   }
 
   .warning-icon {
-    color: var(--warn, #f44336);
     font-size: 32px;
     width: 32px;
     height: 32px;
   }
 
   mat-card-title {
-    color: var(--c-warn);
     margin: 0;
   }
 
