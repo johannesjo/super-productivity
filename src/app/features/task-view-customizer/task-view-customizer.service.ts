@@ -357,7 +357,6 @@ export class TaskViewCustomizerService {
     this.setFilter(DEFAULT_OPTIONS.filter);
   }
 
-  // TODO it doesn't really "permament"
   async sortPermanent(sort: SortOption | null): Promise<void> {
     if (!sort) {
       this.resetAll();
