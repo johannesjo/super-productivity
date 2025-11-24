@@ -190,7 +190,6 @@ export class AddTaskBarActionsComponent {
   }
 
   onTagsMenuClick(): void {
-    console.log(this.selectedTags());
     this._handleMenuClick('tags');
   }
 

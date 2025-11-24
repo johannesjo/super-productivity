@@ -92,6 +92,7 @@ export const shortSyntax = (
   allTags?: Tag[],
   allProjects?: Project[],
   now = new Date(),
+  isReplaceTagIds: boolean = false,
 ):
   | {
       taskChanges: Partial<Task>;
@@ -137,6 +138,7 @@ export const shortSyntax = (
     changesForTag = parseTagChanges(
       { ...task, title: taskChanges.title || task.title },
       allTags,
+      isReplaceTagIds,
     );
     taskChanges = {
       ...taskChanges,
@@ -238,7 +240,11 @@ const parseProjectChanges = (
   return {};
 };
 
-const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges => {
+const parseTagChanges = (
+  task: Partial<TaskCopy>,
+  allTags?: Tag[],
+  isReplaceTagIds: boolean = false,
+): TagChanges => {
   const taskChanges: Partial<TaskCopy> = {};
 
   const newTagTitlesToCreate: string[] = [];
@@ -283,14 +289,26 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
         }
       });
 
-      // Check if arrays arent the same
-      if (
-        !(
-          task.tagIds.length === matchingTagIds.length &&
-          task.tagIds.every((val, i) => val === matchingTagIds[i])
-        )
-      ) {
-        taskChanges.tagIds = matchingTagIds;
+      if (isReplaceTagIds) {
+        // Check if arrays arent the same
+        if (
+          !(
+            task.tagIds.length === matchingTagIds.length &&
+            task.tagIds.every((val, i) => val === matchingTagIds[i])
+          )
+        ) {
+          taskChanges.tagIds = matchingTagIds;
+        }
+      } else {
+        const tagIdsToAdd: string[] = [];
+        matchingTagIds.forEach((id) => {
+          if (!task.tagIds?.includes(id)) {
+            tagIdsToAdd.push(id);
+          }
+        });
+        if (tagIdsToAdd.length) {
+          taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
+        }
       }
 
       if (

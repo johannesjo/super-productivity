@@ -586,7 +586,6 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   // UI event handlers
   onInputChange(event: Event): void {
-    console.log(this.stateService.state());
     const target = event.target as HTMLInputElement;
     const value = target.value;
     this.stateService.updateInputTxt(value);

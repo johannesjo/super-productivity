@@ -54,6 +54,8 @@ export class AddTaskBarParserService {
       config,
       allTags,
       allProjects,
+      undefined,
+      true,
     );
 
     // Create current parse result data structure
