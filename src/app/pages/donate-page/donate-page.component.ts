@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { T } from '../../t.const';
 
 @Component({
   selector: 'donate-page',
@@ -10,4 +11,6 @@ import { MatIcon } from '@angular/material/icon';
   imports: [MatButton, MatIcon],
   standalone: true,
 })
-export class DonatePageComponent {}
+export class DonatePageComponent {
+  readonly T = T;
+}

@@ -53,6 +53,11 @@
     "SEARCH_PLACEHOLDER": "e.g., nature, mountains, abstract",
     "TITLE": "Select Background Image from Unsplash"
   },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "Donate via GitHub Sponsors",
+    "INTRO_1": "Super Productivity is funded entirely by the community. There is no tracking, no ads, and no data collection — your tasks stay on your device.",
+    "INTRO_2": "If you value this approach and want to keep the project healthy and evolving, a voluntary donation is greatly appreciated."
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
@@ -2051,6 +2056,7 @@
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
+    "DONATE": "Donate",
     "ENTER_FOCUS_MODE": "Enter Focus Mode",
     "GO_TO_TASK_LIST": "Go to task list",
     "HELP": "Help",
