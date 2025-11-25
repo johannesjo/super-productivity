@@ -181,6 +181,23 @@ const calculateEventDuration = (vevent: any, startTimeStamp: number): number => 
   return 0;
 };
 
+const getExDateTimestamps = (vevent: any): number[] => {
+  const exDates: number[] = [];
+  const exDateProps = vevent.getAllProperties('exdate');
+
+  for (const prop of exDateProps) {
+    // getValues() returns an array of ICAL.Time objects for multi-value properties (comma-separated)
+    // or an array with a single ICAL.Time for single-value properties
+    const values = prop.getValues();
+    for (const val of values) {
+      if (val && typeof val.toJSDate === 'function') {
+        exDates.push(val.toJSDate().getTime());
+      }
+    }
+  }
+  return exDates;
+};
+
 const getForRecurring = (
   vevent: any,
   calProviderId: string,
@@ -217,6 +234,10 @@ const getForRecurring = (
 
     // Build set of exception timestamps for fast lookup
     const exceptionTimestamps = new Set(exceptions.map((ex) => ex.recurrenceId));
+
+    // Add EXDATEs to exception timestamps
+    const exDateTimestamps = getExDateTimestamps(vevent);
+    exDateTimestamps.forEach((ts) => exceptionTimestamps.add(ts));
 
     const evs: CalendarIntegrationEvent[] = [];
     for (let next = iter.next(); next; next = iter.next()) {
