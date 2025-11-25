@@ -23,7 +23,7 @@
             {{ T.F.JIRA.ISSUE_CONTENT.CHANGED | translate }}
             <strong>{{ entry.field }}</strong>
             {{ T.F.JIRA.ISSUE_CONTENT.ON | translate }}
-            {{ entry.created | date: 'short' }}
+            {{ entry.created | localeDate: 'short' }}
           </li>
         }
       </ul>
@@ -161,7 +161,7 @@
                   <span class="author-name">{{ comment.author.displayName }}</span>
                   <span class="when"
                     >{{ T.F.JIRA.ISSUE_CONTENT.AT | translate }}
-                    {{ comment.created | date: 'short' }}</span
+                    {{ comment.created | localeDate: 'short' }}</span
                   >
                 </div>
                 @if (comment.body) {

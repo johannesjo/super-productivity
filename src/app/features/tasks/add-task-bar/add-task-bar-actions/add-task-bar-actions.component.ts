@@ -5,7 +5,6 @@ import {
   DestroyRef,
   inject,
   input,
-  LOCALE_ID,
   output,
   signal,
   viewChild,
@@ -30,6 +29,7 @@ import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isSingleEmoji } from '../../../../util/extract-first-emoji';
 import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -53,7 +53,7 @@ export class AddTaskBarActionsComponent {
   private _tagService = inject(TagService);
   private _matDialog = inject(MatDialog);
   private _parserService = inject(AddTaskBarParserService);
-  private _locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translateService = inject(TranslateService);
   stateService = inject(AddTaskBarStateService);
 
@@ -116,7 +116,7 @@ export class AddTaskBarActionsComponent {
     if (!state.time && this.isSameDate(date, tomorrow)) {
       return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TOMORROW);
     }
-    const dateStr = date.toLocaleDateString(this._locale, {
+    const dateStr = date.toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       month: 'short',
       day: 'numeric',
     });

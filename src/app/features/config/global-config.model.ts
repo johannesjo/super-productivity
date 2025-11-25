@@ -1,6 +1,6 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 
-import { LanguageCode } from '../../app.constants';
+import { LanguageCode, Locale } from '../../app.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { KeyboardConfig } from './keyboard-config.model';
@@ -16,7 +16,6 @@ export type MiscConfig = Readonly<{
   isTrayShowCurrentTask: boolean;
   // allow also false because of #569
   defaultProjectId?: string | null | false;
-  firstDayOfWeek: number;
   startOfNextDay: number;
   taskNotesTpl: string;
   isDisableAnimations: boolean;
@@ -114,9 +113,17 @@ export type LocalBackupConfig = Readonly<{
   isEnabled: boolean;
 }>;
 
-export type LanguageConfig = Readonly<{
-  lng: LanguageCode | null;
-  timeLocale?: string;
+/**
+ * App localization section
+ * If property value is:
+ * - `undefined` - that indicates value not been setted manually yet
+ * - `null` - that indicates value manually reseted to app/system default
+ *
+ */
+export type LocalizationConfig = Readonly<{
+  lng?: LanguageCode | null;
+  firstDayOfWeek?: number | null;
+  dateTimeLocale?: Locale | null;
 }>;
 
 export type SoundConfig = Readonly<{
@@ -184,7 +191,7 @@ export type DailySummaryNote = Readonly<{
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
-  lang: LanguageConfig;
+  localization: LocalizationConfig;
   misc: MiscConfig;
   shortSyntax: ShortSyntaxConfig;
   evaluation: EvaluationConfig;
