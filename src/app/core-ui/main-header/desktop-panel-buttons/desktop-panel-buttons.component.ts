@@ -21,7 +21,7 @@ import { GlobalConfigService } from '../../../features/config/global-config.serv
   template: `
     @if (isScheduleDayPanelEnabled()) {
       <button
-        class="panel-btn"
+        class="panel-btn e2e-toggle-schedule-day-panel"
         [disabled]="!isRouteWithSidePanel()"
         [class.isActive]="isShowScheduleDayPanel()"
         (click)="layoutService.toggleScheduleDayPanel()"
