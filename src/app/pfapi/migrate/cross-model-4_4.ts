@@ -30,7 +30,7 @@ export const crossModelMigration4_4: CrossModelMigrateFn = ((
   }
 
   // ! 3. Rename zh_tw language
-  const oldZhTwLang = oldLangSection.lng === 'zh_tw';
+  const oldZhTwLang = oldLangSection && oldLangSection.lng === 'zh_tw';
   if (oldZhTwLang) {
     // @ts-ignore
     copy.globalConfig.localization.lng = LanguageCode.zh_tw;
