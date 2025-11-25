@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import {
   ActiveWorkContextGuard,
+  DefaultStartPageGuard,
   FocusOverlayOpenGuard,
   ValidProjectIdGuard,
   ValidTagIdGuard,
@@ -229,7 +230,7 @@ export const APP_ROUTES: Routes = [
   },
   {
     path: '**',
-    loadComponent: () =>
-      import('./pages/wildcard/wildcard.component').then((m) => m.WildcardComponent),
+    canActivate: [DefaultStartPageGuard],
+    component: TagTaskPageComponent,
   },
 ];
