@@ -3,7 +3,6 @@ import {
   Component,
   computed,
   inject,
-  LOCALE_ID,
   signal,
 } from '@angular/core';
 import {
@@ -28,6 +27,7 @@ import { LineChartData } from '../metric.model';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { LazyChartComponent } from '../lazy-chart/lazy-chart.component';
 import { MatList, MatListItem } from '@angular/material/list';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 const CHART_DAYS = 28;
 const CHART_COLOR = '#4bc0c0';
@@ -64,7 +64,7 @@ export class DialogFocusSessionEditComponent {
   private readonly _dialogRef = inject(MatDialogRef<DialogFocusSessionEditComponent>);
   private readonly _metricService = inject(MetricService);
   private readonly _dateService = inject(DateService);
-  private readonly _locale = inject(LOCALE_ID);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _translateService = inject(TranslateService);
 
   readonly dialogData = inject<{ day: string; focusSessions: number[] }>(MAT_DIALOG_DATA);
@@ -172,7 +172,7 @@ export class DialogFocusSessionEditComponent {
     const date = this.selectedDateStr();
     if (date === this.todayStr) return 'Today';
 
-    return new Date(date).toLocaleDateString(this._locale, {
+    return new Date(date).toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       weekday: 'long',
       month: 'long',
       day: 'numeric',
@@ -194,7 +194,7 @@ export class DialogFocusSessionEditComponent {
 
   private _formatChartLabel(dateStr: string): string {
     const date = new Date(dateStr);
-    return date.toLocaleDateString(this._locale, {
+    return date.toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       month: 'numeric',
       day: 'numeric',
     });

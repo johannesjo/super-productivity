@@ -16,7 +16,7 @@ import {
 } from 'rxjs/operators';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { Store } from '@ngrx/store';
 import { BannerService } from '../../../core/banner/banner.service';
 import { Reminder } from '../reminder.model';
@@ -38,7 +38,7 @@ const COUNTDOWN_MAGIC_GAP = 500;
 export class ReminderCountdownEffects {
   private actions$ = inject(Actions);
   private _reminderService = inject(ReminderService);
-  private _datePipe = inject(DatePipe);
+  private _datePipe = inject(LocaleDatePipe);
   private _store = inject(Store);
   private _bannerService = inject(BannerService);
   private _dataInitStateService = inject(DataInitStateService);

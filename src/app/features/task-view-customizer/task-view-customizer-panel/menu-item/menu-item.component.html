@@ -1,0 +1,16 @@
+@for (option of options(); track option.type) {
+  <button
+    mat-menu-item
+    (click)="byClick.emit({ filterType: type(), preset: option.type })"
+    [class.active]="
+      selectedFilter().type === type() && selectedFilter().preset === option.type
+    "
+  >
+    <span class="menu-item-content">
+      <span>{{ option.label | translate }}</span>
+      @if (selectedFilter().type === type() && selectedFilter().preset === option.type) {
+        <mat-icon class="check-icon">check</mat-icon>
+      }
+    </span>
+  </button>
+}

@@ -17,7 +17,7 @@
         style="grid-row: {{ weekIndex + 2 }}; grid-column: {{ dayIndex + 1 }}"
       >
         <div class="month-day-header">
-          <span class="month-day-number">{{ day | date: 'd' }}</span>
+          <span class="month-day-number">{{ day | localeDate: 'd' }}</span>
           @if (hasEventsForDay(day)) {
             <span class="event-dot"></span>
           }

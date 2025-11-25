@@ -46,7 +46,7 @@ export class WorklogWeekComponent {
   readonly simpleCounterService = inject(SimpleCounterService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _taskService = inject(TaskService);
-  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private _dateAdapter = inject(DateAdapter);
   private readonly _metricService = inject(MetricService);
 
   visibility: boolean[] = [];

@@ -20,79 +20,6 @@ export const CORS_SKIP_EXTRA_HEADERS: { [name: string]: string } = IS_ANDROID_WE
   ? {}
   : {};
 
-import '@angular/common/locales/global/en';
-import '@angular/common/locales/global/es';
-import '@angular/common/locales/global/de';
-import '@angular/common/locales/global/ar';
-import '@angular/common/locales/global/cs';
-import '@angular/common/locales/global/fa';
-import '@angular/common/locales/global/fr';
-import '@angular/common/locales/global/ja';
-import '@angular/common/locales/global/ko';
-import '@angular/common/locales/global/ru';
-import '@angular/common/locales/global/sk';
-import '@angular/common/locales/global/tr';
-import '@angular/common/locales/global/zh';
-import '@angular/common/locales/global/zh-Hant';
-import '@angular/common/locales/global/it';
-import '@angular/common/locales/global/pl';
-import '@angular/common/locales/global/pt';
-import '@angular/common/locales/global/nl';
-import '@angular/common/locales/global/nb';
-import '@angular/common/locales/global/hr';
-import '@angular/common/locales/global/uk';
-import '@angular/common/locales/global/id';
-
-export enum LanguageCode {
-  ar = 'ar',
-  de = 'de',
-  cz = 'cz',
-  en = 'en',
-  es = 'es',
-  fa = 'fa',
-  fr = 'fr',
-  hr = 'hr',
-  id = 'id',
-  it = 'it',
-  ja = 'ja',
-  ko = 'ko',
-  nl = 'nl',
-  nb = 'nb',
-  pl = 'pl',
-  pt = 'pt',
-  ru = 'ru',
-  sk = 'sk',
-  tr = 'tr',
-  uk = 'uk',
-  zh = 'zh',
-  zh_tw = 'zh_tw',
-}
-
-export enum LanguageCodeMomentMap {
-  ar = 'ar',
-  de = 'de',
-  cz = 'cs',
-  en = 'en',
-  es = 'es',
-  fa = 'fa',
-  fr = 'fr',
-  hr = 'hr',
-  id = 'id',
-  it = 'it',
-  ja = 'ja',
-  ko = 'ko',
-  nl = 'nl',
-  nb = 'nb',
-  pl = 'pl',
-  pt = 'pt',
-  ru = 'ru',
-  sk = 'sk',
-  tr = 'tr',
-  uk = 'uk',
-  zh = 'zh-cn',
-  zh_tw = 'zh-tw',
-}
-
 export enum BodyClass {
   isElectron = 'isElectron',
   isWeb = 'isWeb',
@@ -125,21 +52,6 @@ export enum HelperClasses {
   isHideForAdvancedFeatures = 'isHideForAdvancedFeatures',
   isHideForNoAdvancedFeatures = 'isHideForNoAdvancedFeatures',
 }
-
-// we're assuming that the other language speakers are likely to speak english
-// and as english offers most likely the best experience, we use it as default
-export const AUTO_SWITCH_LNGS: LanguageCode[] = [
-  LanguageCode.zh,
-  LanguageCode.zh_tw,
-  LanguageCode.ar,
-  LanguageCode.fa,
-  LanguageCode.ja,
-  LanguageCode.ko,
-  LanguageCode.ru,
-  LanguageCode.tr,
-];
-
-export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa];
 
 /* eslint-disable @typescript-eslint/naming-convention */
 export enum THEME_COLOR_MAP {
@@ -177,3 +89,141 @@ export const HISTORY_STATE = {
   MOBILE_NAVIGATION: 'mobileSideNav',
   TASK_DETAIL_PANEL: 'taskDetailPanel',
 };
+
+// === Localization section ===
+// TODO move to separate file
+import localeEnUS from '@angular/common/locales/en';
+import localeEnGB from '@angular/common/locales/en-GB';
+import localeEs from '@angular/common/locales/es';
+import localeDe from '@angular/common/locales/de';
+import localeAr from '@angular/common/locales/ar';
+import localeCs from '@angular/common/locales/cs';
+import localeFa from '@angular/common/locales/fa';
+import localeFr from '@angular/common/locales/fr';
+import localeJa from '@angular/common/locales/ja';
+import localeKo from '@angular/common/locales/ko';
+import localeRu from '@angular/common/locales/ru';
+import localeSk from '@angular/common/locales/sk';
+import localeTr from '@angular/common/locales/tr';
+import localeZh from '@angular/common/locales/zh';
+import localeIt from '@angular/common/locales/it';
+import localePl from '@angular/common/locales/pl';
+import localePt from '@angular/common/locales/pt';
+import localeNl from '@angular/common/locales/nl';
+import localeNb from '@angular/common/locales/nb';
+import localeHr from '@angular/common/locales/hr';
+import localeUk from '@angular/common/locales/uk';
+import localeId from '@angular/common/locales/id';
+
+/**
+ * General code for the languages.
+ * ! It does not indicate a specific region and may include all language-speaking countries.
+ *
+ * Standard: ISO-639
+ */
+export enum LanguageCode {
+  ar = 'ar',
+  de = 'de',
+  cz = 'cz',
+  en = 'en',
+  es = 'es',
+  fa = 'fa',
+  fr = 'fr',
+  hr = 'hr',
+  id = 'id',
+  it = 'it',
+  ja = 'ja',
+  ko = 'ko',
+  nl = 'nl',
+  nb = 'nb',
+  pl = 'pl',
+  pt = 'pt',
+  ru = 'ru',
+  sk = 'sk',
+  tr = 'tr',
+  uk = 'uk',
+  zh = 'zh', // "Simplified Chinese" form
+  zh_tw = 'zh-tw', // "Traditional Chinese" form
+}
+
+/**
+ * We're assuming that the other language speakers are likely to speak english
+ * and as english offers most likely the best experience, we use it as default
+ */
+export const AUTO_SWITCH_LNGS: LanguageCode[] = [
+  LanguageCode.zh,
+  LanguageCode.zh_tw,
+  LanguageCode.ar,
+  LanguageCode.fa,
+  LanguageCode.ja,
+  LanguageCode.ko,
+  LanguageCode.ru,
+  LanguageCode.tr,
+];
+
+/**
+ * This is a specification for the language used in specific countries
+ * ! Indicates a specific region and includes language and formatting specifics for that region.
+ *
+ * Standard: ISO-639 + ISO-3166 combination
+ */
+export const Locales = {
+  ...LanguageCode,
+  en_gb: `${LanguageCode.en}-GB`,
+  en_us: `${LanguageCode.en}-US`,
+  tr_tr: `${LanguageCode.tr}-TR`,
+  de_de: `${LanguageCode.de}-DE`,
+  fr_fr: `${LanguageCode.fr}-FR`,
+  es_es: `${LanguageCode.es}-ES`,
+  it_it: `${LanguageCode.it}-IT`,
+  pt_br: `${LanguageCode.pt}-BR`,
+  ru_ru: `${LanguageCode.ru}-RU`,
+  zh_cn: `${LanguageCode.zh}-CN`,
+  ja_jp: `${LanguageCode.ja}-JP`,
+  ko_kr: `${LanguageCode.ko}-KR`,
+} as const;
+
+export type Locale = (typeof Locales)[keyof typeof Locales];
+
+export const LocalesImports: Record<keyof typeof Locales, unknown> = {
+  en: localeEnGB,
+  en_gb: localeEnGB,
+  en_us: localeEnUS,
+  tr_tr: localeTr,
+  de_de: localeDe,
+  de: localeDe,
+  fr_fr: localeFr,
+  es_es: localeEs,
+  es: localeEs,
+  it_it: localeIt,
+  pt_br: localePt,
+  ru_ru: localeRu,
+  ru: localeRu,
+  zh_cn: localeZh,
+  ja_jp: localeJa,
+  ja: localeJa,
+  ko_kr: localeKo,
+  ko: localeKo,
+  zh_tw: localeZh,
+  ar: localeAr,
+  cz: localeCs,
+  fa: localeFa,
+  fr: localeFr,
+  id: localeId,
+  it: localeIt,
+  pl: localePl,
+  pt: localePt,
+  nl: localeNl,
+  nb: localeNb,
+  hr: localeHr,
+  uk: localeUk,
+  sk: localeSk,
+  tr: localeTr,
+  zh: localeZh,
+};
+
+export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa];
+
+export const DEFAULT_LANGUAGE = LanguageCode.en;
+export const DEFAULT_LOCALE = Locales.en_gb;
+export const DEFAULT_FIRST_DAY_OF_WEEK = 1; // monday

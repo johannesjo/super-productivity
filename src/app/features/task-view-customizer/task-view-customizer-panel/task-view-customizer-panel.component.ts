@@ -1,5 +1,4 @@
 import { ChangeDetectionStrategy, Component, inject, ViewChild } from '@angular/core';
-import { OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
@@ -12,6 +11,16 @@ import { MatDividerModule } from '@angular/material/divider';
 import { TaskViewCustomizerService } from '../task-view-customizer.service';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
+import {
+  DEFAULT_OPTIONS,
+  FILTER_OPTION_TYPE,
+  FILTER_SCHEDULE,
+  FILTER_TIME,
+  FilterOption,
+  OPTIONS,
+  PRESETS,
+} from '../types';
+import { TaskViewCustomizerMenuItemComponent } from './menu-item/menu-item.component';
 
 @Component({
   selector: 'task-view-customizer-panel',
@@ -31,105 +40,41 @@ import { T } from 'src/app/t.const';
     MatIconModule,
     MatDividerModule,
     TranslatePipe,
+    TaskViewCustomizerMenuItemComponent,
   ],
 })
-export class TaskViewCustomizerPanelComponent implements OnInit {
+export class TaskViewCustomizerPanelComponent {
   customizerService = inject(TaskViewCustomizerService);
 
   @ViewChild('customizerMenu', { static: false })
   menu!: MatMenu;
 
-  T = T;
-  selectedSort: string = 'default';
-  selectedGroup: string = 'default';
-  selectedFilter: string = 'default';
-  filterInputValue: string = '';
+  readonly T = T;
+  readonly DEFAULT = DEFAULT_OPTIONS;
+  readonly OPTIONS = OPTIONS;
+  readonly PRESETS = PRESETS;
 
-  sortOptions = [
-    { value: 'default', label: T.F.TASK_VIEW.CUSTOMIZER.SORT_DEFAULT },
-    { value: 'name', label: T.F.TASK_VIEW.CUSTOMIZER.SORT_NAME },
-    { value: 'scheduledDate', label: T.F.TASK_VIEW.CUSTOMIZER.SORT_SCHEDULED_DATE },
-    { value: 'creationDate', label: T.F.TASK_VIEW.CUSTOMIZER.SORT_CREATION_DATE },
-    { value: 'estimatedTime', label: T.F.TASK_VIEW.CUSTOMIZER.ESTIMATED_TIME },
-    { value: 'timeSpent', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_SPENT },
-    // Reuse GROUP_TAG label for sorting by tag
-    { value: 'tag', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_TAG },
-  ];
-
-  groupOptions = [
-    { value: 'default', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_DEFAULT },
-    { value: 'tag', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_TAG },
-    { value: 'project', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_PROJECT },
-    { value: 'scheduledDate', label: T.F.TASK_VIEW.CUSTOMIZER.GROUP_SCHEDULED_DATE },
-  ];
-
-  filterOptions = [
-    { value: 'default', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_DEFAULT },
-    { value: 'tag', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_TAG },
-    { value: 'project', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_PROJECT },
-    { value: 'scheduledDate', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_SCHEDULED_DATE },
-    { value: 'estimatedTime', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_ESTIMATED_TIME },
-    { value: 'timeSpent', label: T.F.TASK_VIEW.CUSTOMIZER.FILTER_TIME_SPENT },
-  ];
-
-  scheduledPresets = [
-    { value: '0', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_DEFAULT },
-    { value: 'today', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_TODAY },
-    { value: 'tomorrow', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_TOMORROW },
-    { value: 'thisWeek', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_THIS_WEEK },
-    { value: 'nextWeek', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_NEXT_WEEK },
-    { value: 'thisMonth', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_THIS_MONTH },
-    { value: 'nextMonth', label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_NEXT_MONTH },
-  ];
-
-  timePresets = [
-    { value: '0', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_DEFAULT },
-    { value: '600000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_10MIN },
-    { value: '1800000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_30MIN },
-    { value: '3600000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_1HOUR },
-    { value: '7200000', label: T.F.TASK_VIEW.CUSTOMIZER.TIME_2HOUR },
-  ];
-
-  ngOnInit(): void {
-    this.selectedSort = this.customizerService.selectedSort();
-    this.selectedGroup = this.customizerService.selectedGroup();
-    this.selectedFilter = this.customizerService.selectedFilter();
-    this.filterInputValue = this.customizerService.filterInputValue();
+  onFilterSelect(filter: FilterOption): void {
+    this.customizerService.setFilter(filter);
   }
 
-  getSortLabel(value: string): string {
-    const option = this.sortOptions.find((opt) => opt.value === value);
-    return option ? option.label : '';
+  onFilterInputChange(filterType: FILTER_OPTION_TYPE, value: string | null): void {
+    if (!value) return this.customizerService.setFilter(DEFAULT_OPTIONS.filter);
+
+    const foundFilter = OPTIONS.filter.list.find((x) => x.type === filterType);
+    if (!foundFilter) return;
+
+    this.customizerService.setFilter({ ...foundFilter, preset: value });
   }
 
-  getGroupLabel(value: string): string {
-    const option = this.groupOptions.find((opt) => opt.value === value);
-    return option ? option.label : '';
-  }
+  onFilterWithValue(val: {
+    filterType: FILTER_OPTION_TYPE;
+    preset: FILTER_SCHEDULE | FILTER_TIME | null;
+  }): void {
+    const foundFilter = OPTIONS.filter.list.find((x) => x.type === val.filterType);
+    if (!foundFilter) return;
 
-  getFilterLabel(value: string): string {
-    const option = this.filterOptions.find((opt) => opt.value === value);
-    return option ? option.label : '';
-  }
-
-  onFilterSelect(filterType: string): void {
-    this.customizerService.setFilter(filterType);
-  }
-
-  onFilterInputChange(filterType: string, value: string): void {
-    if (this.customizerService.selectedFilter() !== filterType) {
-      this.customizerService.setFilter(filterType);
-    }
-    this.customizerService.setFilterInputValue(value);
-  }
-
-  onFilterWithValue(filterType: string, value: string): void {
-    this.customizerService.setFilter(filterType);
-    this.customizerService.setFilterInputValue(value);
-  }
-
-  async onSortPermanentOption(sortValue: string): Promise<void> {
-    await this.customizerService.sortPermanent(sortValue);
+    this.customizerService.setFilter({ ...foundFilter, preset: val.preset });
   }
 
   onResetAll(): void {

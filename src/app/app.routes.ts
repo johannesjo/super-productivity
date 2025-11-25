@@ -233,4 +233,13 @@ export const APP_ROUTES: Routes = [
     canActivate: [DefaultStartPageGuard],
     component: TagTaskPageComponent,
   },
+  {
+    path: 'donate',
+    loadComponent: () =>
+      import('./pages/donate-page/donate-page.component').then(
+        (m) => m.DonatePageComponent,
+      ),
+    data: { page: 'donate' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
 ];

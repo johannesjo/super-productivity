@@ -20,7 +20,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON, LanguageCode } from './app.constants';
+import { IS_ELECTRON } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -208,9 +208,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _intervalTimer?: NodeJS.Timeout;
 
   constructor() {
-    this._languageService.setDefault(LanguageCode.en);
-    this._languageService.setFromBrowserLngIfAutoSwitchLng();
-
     this._checkMigrationAndInitBackups();
 
     // Use effect to react to language RTL changes

@@ -1,9 +1,10 @@
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { Log } from '../core/log';
+import { DEFAULT_LOCALE, Locale } from '../app.constants';
 
 /**
  * Formats a date to show only month and day in locale-aware format.
- * Uses Angular's DatePipe for consistent formatting with the rest of the app.
+ * Uses LocaleDatePipe for consistent formatting with the rest of the app.
  *
  * Examples by locale:
  * - en-US: "12/25" (month/day)
@@ -15,17 +16,15 @@ import { Log } from '../core/log';
  * @param locale The locale string (e.g., 'en-US', 'de-DE')
  * @returns Formatted month/day string, or empty string if formatting fails
  */
-export const formatMonthDay = (date: Date, locale: string): string => {
+export const formatMonthDay = (date: Date, locale: Locale): string => {
   try {
     // Validate the date first
-    if (!date || isNaN(date.getTime())) {
-      return '';
-    }
+    if (!date || isNaN(date.getTime())) return '';
 
     // Use the browser's native Intl.DateTimeFormat for proper locale support, use en-US as fallback
-    // This is more reliable than Angular's DatePipe for getting locale-specific formatting
+    // This is more reliable than LocaleDatePipe for getting locale-specific formatting
     try {
-      const formatter = new Intl.DateTimeFormat([locale, 'en-US'], {
+      const formatter = new Intl.DateTimeFormat([locale, DEFAULT_LOCALE], {
         month: 'numeric',
         day: 'numeric',
       });
@@ -36,16 +35,14 @@ export const formatMonthDay = (date: Date, locale: string): string => {
       // This ensures "05/01" becomes "5/1", "05.01" becomes "5.1", etc.
       return formatted.replace(/\b0+(\d)/g, '$1');
     } catch (intlError) {
-      // If Intl.DateTimeFormat fails, fall back to DatePipe approach
+      // If Intl.DateTimeFormat fails, fall back to LocaleDatePipe approach
       Log.warn(
-        `Intl.DateTimeFormat failed for locale ${locale}, falling back to DatePipe`,
+        `Intl.DateTimeFormat failed for locale ${locale}, falling back to LocaleDatePipe`,
       );
 
-      const datePipe = new DatePipe(locale);
-      const shortDate = datePipe.transform(date, 'shortDate') || '';
-
+      const shortDate = new LocaleDatePipe().transform(date, 'shortDate', locale);
       if (!shortDate) {
-        throw new Error('DatePipe.transform returned null or empty string');
+        throw new Error('LocaleDatePipe.transform returned null or empty string');
       }
 
       // Remove year from various locale formats

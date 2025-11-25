@@ -20,7 +20,7 @@
               class="due-for"
               [class.emphasized]="(task.dueWithTime || 0) < overdueThreshold"
             >
-              {{ task.dueWithTime | date: 'short' }}
+              {{ task.dueWithTime | localeDate: 'short' }}
             </div>
             <div class="title">{{ task.title }}</div>
             <tag-list

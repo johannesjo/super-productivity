@@ -21,7 +21,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MarkdownModule } from 'ngx-markdown';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TaskService } from '../../tasks/task.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
 import { IssueContentCustomComponent } from './issue-content-custom/issue-content-custom.component';
@@ -44,7 +45,7 @@ import { devError } from '../../../util/dev-error';
     MatIconModule,
     MarkdownModule,
     AsyncPipe,
-    DatePipe,
+    LocaleDatePipe,
     MatProgressBarModule,
     JiraToMarkdownPipe,
     SortPipe,
