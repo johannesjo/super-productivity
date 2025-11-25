@@ -68,6 +68,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
   const mockRepeatCfg: TaskRepeatCfgCopy = {
     ...DEFAULT_TASK_REPEAT_CFG,
     id: 'repeat-cfg-id',
+    lastTaskCreationDay: getDbDateStr(),
     shouldInheritSubtasks: true,
     disableAutoUpdateSubtasks: false,
     subTaskTemplates: [],
