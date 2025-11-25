@@ -229,11 +229,6 @@ export const APP_ROUTES: Routes = [
     data: { page: 'contrast-test' },
   },
   {
-    path: '**',
-    canActivate: [DefaultStartPageGuard],
-    component: TagTaskPageComponent,
-  },
-  {
     path: 'donate',
     loadComponent: () =>
       import('./pages/donate-page/donate-page.component').then(
@@ -241,5 +236,10 @@ export const APP_ROUTES: Routes = [
       ),
     data: { page: 'donate' },
     canActivate: [FocusOverlayOpenGuard],
+  },
+  {
+    path: '**',
+    canActivate: [DefaultStartPageGuard],
+    component: TagTaskPageComponent,
   },
 ];
