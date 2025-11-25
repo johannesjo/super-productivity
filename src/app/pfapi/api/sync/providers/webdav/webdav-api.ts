@@ -406,14 +406,62 @@ export class WebdavApi {
       );
     }
 
-    // Ensure baseUrl doesn't end with / and path starts with /
-    const cleanBase = baseUrl.replace(/\/$/, '');
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    try {
+      // We need to robustly handle various combinations of encoded/unencoded baseUrls and paths,
+      // especially for providers like Mailbox.org that include spaces in the user's path.
+      // We also want to avoid double-encoding if the path is already encoded.
+      // See: https://github.com/johannesjo/super-productivity/issues/5508
+      let url: URL;
+      try {
+        url = new URL(baseUrl);
+      } catch (e) {
+        // Try to fix the base URL if it failed (likely due to spaces)
+        // We manually replace spaces to avoid messing up existing encoded characters (like %2F)
+        // which can happen with decodeURI/encodeURI roundtrips.
+        const fixedBase = baseUrl.replace(/ /g, '%20');
+        url = new URL(fixedBase);
+      }
 
-    // Additional validation: ensure the path doesn't try to escape the base path
-    const normalizedPath = cleanPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
+      // Remove trailing slash from base
+      const base = url.pathname === '/' ? '' : url.pathname.replace(/\/$/, '');
+      // Remove leading slash from path
+      const append = path.startsWith('/') ? path.substring(1) : path;
 
-    return `${cleanBase}${normalizedPath}`;
+      // Assigning to pathname handles encoding of unencoded characters (spaces)
+      // while preserving already encoded sequences.
+      url.pathname = `${base}/${append}`;
+      return url.href;
+    } catch (e) {
+      // Fallback for invalid Base URL (e.g. no protocol)
+      // Encode path/base segments while avoiding double-encoding
+      const cleanBase = baseUrl.replace(/\/$/, '');
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+      const encodeSegment = (segment: string): string => {
+        if (!segment) {
+          return segment;
+        }
+        try {
+          return encodeURIComponent(decodeURIComponent(segment));
+        } catch {
+          return encodeURIComponent(segment);
+        }
+      };
+
+      // Separate protocol to avoid collapsing the double slashes
+      const protocolMatch = cleanBase.match(/^([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)(.*)$/);
+      const protocol = protocolMatch ? protocolMatch[1] : '';
+      const baseWithoutProtocol = protocolMatch ? protocolMatch[2] : cleanBase;
+
+      const normalizedBase = baseWithoutProtocol
+        .split('/')
+        .filter((s, idx, arr) => !(idx === arr.length - 1 && s === ''))
+        .map(encodeSegment)
+        .join('/');
+      const normalizedPath = cleanPath.split('/').map(encodeSegment).join('/');
+
+      return `${protocol}${normalizedBase}${normalizedPath}`;
+    }
   }
 
   private _cleanRev(rev: string): string {

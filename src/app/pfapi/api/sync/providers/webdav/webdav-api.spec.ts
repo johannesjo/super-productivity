@@ -130,7 +130,7 @@ describe('WebdavApi', () => {
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          url: 'http://example.com/webdav/folder/file with spaces.txt',
+          url: 'http://example.com/webdav/folder/file%20with%20spaces.txt',
         }),
       );
     });
@@ -814,6 +814,37 @@ describe('WebdavApi', () => {
       expect(() =>
         (api as any)._buildFullPath('http://example.com/', '//secret'),
       ).toThrowError(/Invalid path/);
+    });
+
+    it('should encode path segments with spaces', () => {
+      expect(
+        (api as any)._buildFullPath('http://example.com/base', '/file with spaces.txt'),
+      ).toBe('http://example.com/base/file%20with%20spaces.txt');
+    });
+
+    it('should not double-encode already encoded paths', () => {
+      expect(
+        (api as any)._buildFullPath(
+          'http://example.com/base',
+          '/file%20with%20spaces.txt',
+        ),
+      ).toBe('http://example.com/base/file%20with%20spaces.txt');
+    });
+
+    it('should handle base URLs with spaces', () => {
+      expect(
+        (api as any)._buildFullPath('http://example.com/User Name', '/file.txt'),
+      ).toBe('http://example.com/User%20Name/file.txt');
+    });
+
+    it('should fallback gracefully for invalid URLs', () => {
+      // Fallback behavior verification
+      const invalidBase = 'not-a-valid-url';
+      const path = '/file.txt';
+      // The fallback just concatenates and tries to encode
+      expect((api as any)._buildFullPath(invalidBase, path)).toBe(
+        'not-a-valid-url/file.txt',
+      );
     });
   });
 
