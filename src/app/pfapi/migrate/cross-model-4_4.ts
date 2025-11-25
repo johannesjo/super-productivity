@@ -1,7 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn } from '../api';
 import { PFLog } from '../../core/log';
-import { LanguageCode } from 'src/app/app.constants';
+import { LanguageCode } from '../../app.constants';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const crossModelMigration4_4: CrossModelMigrateFn = ((
