@@ -2,12 +2,12 @@ import { Routes } from '@angular/router';
 
 import {
   ActiveWorkContextGuard,
+  DefaultStartPageGuard,
   FocusOverlayOpenGuard,
   ValidProjectIdGuard,
   ValidTagIdGuard,
 } from './app.guard';
 
-import { TODAY_TAG } from './features/tag/tag.const';
 import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
 
 export const APP_ROUTES: Routes = [
@@ -228,6 +228,9 @@ export const APP_ROUTES: Routes = [
       ),
     data: { page: 'contrast-test' },
   },
-
-  { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },
+  {
+    path: '**',
+    canActivate: [DefaultStartPageGuard],
+    component: TagTaskPageComponent,
+  },
 ];
