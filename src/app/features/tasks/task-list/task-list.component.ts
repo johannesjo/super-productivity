@@ -39,6 +39,7 @@ import { AsyncPipe } from '@angular/common';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 import { TaskLog } from '../../../core/log';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
+import { DEFAULT_OPTIONS } from '../../task-view-customizer/types';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -251,7 +252,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       newIds.map((p) => p.id),
     );
 
-    this._taskViewCustomizerService.setSort('default');
+    this._taskViewCustomizerService.setSort(DEFAULT_OPTIONS.sort);
   }
 
   async _addFromIssuePanel(
