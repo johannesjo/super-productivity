@@ -111,6 +111,7 @@ describe('dateStrToUtcDate', () => {
     });
 
     it('should return Invalid Date for malformed ISO string', () => {
+      (window.confirm as jasmine.Spy).and.returnValue(false);
       expect(dateStrToUtcDate('2024/01/15T00:00:00Z').toString()).toBe('Invalid Date');
     });
   });
@@ -140,6 +141,7 @@ describe('dateStrToUtcDate', () => {
     });
 
     it('should return Invalid Date for invalid inputs', () => {
+      (window.confirm as jasmine.Spy).and.returnValue(false);
       expect(dateStrToUtcDate('invalid-date').toString()).toBe('Invalid Date');
       expect(dateStrToUtcDate('2024-13-01').toString()).toBe('Invalid Date'); // Invalid month
       expect(dateStrToUtcDate('2024-01-32').toString()).toBe('Invalid Date'); // Invalid day
