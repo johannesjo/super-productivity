@@ -9,13 +9,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  height: var(--bottom-nav-height);
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
   background: var(--bottom-nav-bg);
   border-top: 1px solid var(--separator-color);
   box-shadow: var(--whiteframe-shadow-8dp);
   align-items: center;
   justify-content: space-between;
   padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom);
   z-index: var(--z-mobile-bottom-nav);
   display: flex;
 

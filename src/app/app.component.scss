@@ -26,7 +26,7 @@
 .has-mobile-bottom-nav {
   @include mq(xs, max) {
     .main-content {
-      padding-bottom: var(--bottom-nav-height);
+      padding-bottom: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
     }
   }
 }
