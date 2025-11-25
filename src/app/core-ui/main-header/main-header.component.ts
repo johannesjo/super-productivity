@@ -161,6 +161,9 @@ export class MainHeaderComponent implements OnDestroy {
   readonly isFocusModeEnabled = computed(() => {
     return this.globalConfigService.cfg()?.appFeatures.isFocusModeEnabled;
   });
+  readonly isSyncIconEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
+  });
 
   isUserProfilesEnabled = toSignal(
     this.globalConfigService.misc$.pipe(map((misc) => misc.isEnableUserProfiles)),

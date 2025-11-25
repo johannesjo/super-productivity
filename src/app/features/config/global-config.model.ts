@@ -15,6 +15,7 @@ export type AppFeaturesConfig = Readonly<{
   isScheduleDayPanelEnabled: boolean;
   isIssuesPanelEnabled: boolean;
   isProjectNotesEnabled: boolean;
+  isSyncIconEnabled: boolean;
 }>;
 
 export type MiscConfig = Readonly<{

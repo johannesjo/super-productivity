@@ -1994,7 +1994,8 @@
       "BOARDS": "Boards",
       "SCHEDULE_DAY_PANEL": "Schedule Day Panel",
       "ISSUES_PANEL": "Issues Panel",
-      "PROJECT_NOTES": "Project Notes"
+      "PROJECT_NOTES": "Project Notes",
+      "SYNC_ICON": "Sync Button"
     }
   },
   "GLOBAL_RELATIVE_TIME": {

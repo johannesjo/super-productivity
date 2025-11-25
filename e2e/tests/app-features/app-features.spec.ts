@@ -28,6 +28,10 @@ test.describe('App Features', () => {
       label: 'Project Notes',
       locator: (page: Page) => page.locator('.e2e-toggle-notes-btn'),
     },
+    {
+      label: 'Sync Button',
+      locator: (page: Page) => page.locator('.sync-btn'),
+    },
   ].forEach((feature) => {
     test(`Element assigned with App feature ${feature.label} is only visible if feature is enabled`, async ({
       page,

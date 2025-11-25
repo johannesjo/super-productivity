@@ -45,5 +45,10 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       type: 'checkbox',
       templateOptions: { label: T.GCF.APP_FEATURES.PROJECT_NOTES },
     },
+    {
+      key: 'isSyncIconEnabled',
+      type: 'checkbox',
+      templateOptions: { label: T.GCF.APP_FEATURES.SYNC_ICON },
+    },
   ],
 };

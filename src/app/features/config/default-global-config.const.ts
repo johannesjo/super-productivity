@@ -17,6 +17,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isScheduleDayPanelEnabled: true,
     isIssuesPanelEnabled: true,
     isProjectNotesEnabled: true,
+    isSyncIconEnabled: true,
   },
   lang: {
     lng: null,
