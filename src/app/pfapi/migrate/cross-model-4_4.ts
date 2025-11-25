@@ -13,27 +13,41 @@ export const crossModelMigration4_4: CrossModelMigrateFn = ((
   // Stack of operations to be performed at the end of migration.
   const finishingOperations: (() => void)[] = [];
 
-  // ! 1. Rename globalConfig `lang` section to `lozalization`
-  const oldLangSection = copy.globalConfig['lang'];
-  if (oldLangSection) {
+  // ! 1. Rename globalConfig `lang` section to `localization`
+  const oldLangSection = copy.globalConfig?.['lang'];
+  const hasLangSection = !!oldLangSection && typeof oldLangSection === 'object';
+
+  if (hasLangSection) {
     // @ts-ignore
-    copy.globalConfig.localization = oldLangSection;
+    copy.globalConfig.localization = {
+      ...copy.globalConfig.localization,
+      ...oldLangSection,
+    };
     finishingOperations.push(() => delete copy.globalConfig['lang']);
   }
 
   // ! 2. Move globalConfig `misc.timeLocale` to `localization.dateTimeLocale`
-  const oldTimeLocale = copy.globalConfig.misc['timeLocale'];
+  const oldTimeLocale = copy.globalConfig?.misc?.['timeLocale'];
   if (oldTimeLocale) {
     // @ts-ignore
-    copy.globalConfig.localization.dateTimeLocale = oldTimeLocale;
-    finishingOperations.push(() => delete copy.globalConfig.misc['timeLocale']);
+    copy.globalConfig.localization = {
+      ...copy.globalConfig.localization,
+      dateTimeLocale: oldTimeLocale,
+    };
+    finishingOperations.push(() => {
+      if (copy.globalConfig?.misc) {
+        delete copy.globalConfig.misc['timeLocale'];
+      }
+    });
   }
 
   // ! 3. Rename zh_tw language
-  const oldZhTwLang = oldLangSection && oldLangSection.lng === 'zh_tw';
-  if (oldZhTwLang) {
+  if (hasLangSection && oldLangSection?.lng === 'zh_tw') {
     // @ts-ignore
-    copy.globalConfig.localization.lng = LanguageCode.zh_tw;
+    copy.globalConfig.localization = {
+      ...copy.globalConfig.localization,
+      lng: LanguageCode.zh_tw,
+    };
   }
 
   finishingOperations.forEach((operation) => operation());

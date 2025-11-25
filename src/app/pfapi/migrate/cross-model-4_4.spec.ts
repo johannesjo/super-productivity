@@ -45,6 +45,29 @@ describe('crossModelMigration4_4', () => {
     expect(result.globalConfig.localization.lng).toBe(LanguageCode.zh_tw);
   });
 
+  it('should migrate timeLocale even if lang section is missing', () => {
+    const mockData = {
+      globalConfig: {
+        localization: {
+          lng: 'en',
+        },
+        misc: {
+          timeLocale: 'de-DE',
+        },
+      },
+    } as unknown as AppDataCompleteNew;
+
+    const result = crossModelMigration4_4(mockData) as any;
+
+    expect(result.globalConfig.localization).toEqual(
+      jasmine.objectContaining({
+        lng: 'en',
+        dateTimeLocale: 'de-DE',
+      }),
+    );
+    expect(result.globalConfig.misc['timeLocale']).toBeUndefined();
+  });
+
   it('should handle missing lang section gracefully', () => {
     const mockData = {
       globalConfig: {
