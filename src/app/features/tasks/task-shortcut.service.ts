@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { TaskFocusService } from './task-focus.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { checkKeyCombo } from '../../util/check-key-combo';
@@ -36,6 +36,9 @@ type TaskComponentMethod = keyof TaskComponent;
 export class TaskShortcutService {
   private readonly _taskFocusService = inject(TaskFocusService);
   private readonly _configService = inject(GlobalConfigService);
+  readonly isTimeTrackingEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isTimeTrackingEnabled,
+  );
 
   /**
    * Handles task-specific keyboard shortcuts if a task is currently focused.
@@ -191,7 +194,7 @@ export class TaskShortcutService {
     }
 
     // Toggle play/pause
-    if (checkKeyCombo(ev, keys.togglePlay)) {
+    if (checkKeyCombo(ev, keys.togglePlay) && this.isTimeTrackingEnabled()) {
       this._handleTaskShortcut(focusedTaskId, 'togglePlayPause');
       ev.preventDefault();
       return true;
