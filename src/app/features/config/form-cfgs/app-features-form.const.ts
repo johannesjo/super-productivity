@@ -18,7 +18,7 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
     {
       key: 'isSchedulerEnabled',
       type: 'checkbox',
-      templateOptions: { label: T.GCF.APP_FEATURES.SCHEDULER },
+      templateOptions: { label: T.GCF.APP_FEATURES.SCHEDULE },
     },
     {
       key: 'isPlannerEnabled',
