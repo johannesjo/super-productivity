@@ -228,6 +228,15 @@ export const APP_ROUTES: Routes = [
       ),
     data: { page: 'contrast-test' },
   },
+  {
+    path: 'donate',
+    loadComponent: () =>
+      import('./pages/donate-page/donate-page.component').then(
+        (m) => m.DonatePageComponent,
+      ),
+    data: { page: 'donate' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
 
   { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },
 ];

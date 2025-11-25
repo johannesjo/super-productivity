@@ -225,6 +225,13 @@ export class MagicNavConfigService {
 
       // Help Menu (rendered as mat-menu)
       {
+        type: 'route',
+        id: 'donate',
+        label: T.MH.DONATE,
+        icon: 'favorite',
+        route: '/donate',
+      },
+      {
         type: 'menu',
         id: 'help',
         label: T.MH.HELP,
