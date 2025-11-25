@@ -1882,6 +1882,7 @@
       "DARK_MODE_LIGHT": "Light",
       "DARK_MODE_SYSTEM": "System",
       "DEFAULT_PROJECT": "Default project to use for tasks if none is specified",
+      "DEFAULT_START_PAGE": "Default start page",
       "FIRST_DAY_OF_WEEK": "First day of the week",
       "HELP": "<p><strong>Not seeing Desktop Notifications?</strong> For windows you might want to check System > Notifications & actions and check if the required notifications have been enabled.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Automatically add today tag to worked on tasks",

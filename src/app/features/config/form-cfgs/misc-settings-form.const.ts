@@ -173,5 +173,17 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         })),
       },
     },
+    {
+      key: 'defaultStartPage',
+      type: 'select',
+      defaultValue: 0,
+      templateOptions: {
+        label: T.GCF.MISC.DEFAULT_START_PAGE,
+        options: [
+          { label: T.G.TODAY_TAG_TITLE, value: 0 },
+          { label: T.G.INBOX_PROJECT_TITLE, value: 1 },
+        ],
+      },
+    },
   ],
 };

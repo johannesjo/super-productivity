@@ -14,6 +14,9 @@ import { ProjectService } from './features/project/project.service';
 import { Store } from '@ngrx/store';
 import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
+import { GlobalConfigService } from './features/config/global-config.service';
+import { TODAY_TAG } from './features/tag/tag.const';
+import { INBOX_PROJECT } from './features/project/project.const';
 
 @Injectable({ providedIn: 'root' })
 export class ActiveWorkContextGuard {
@@ -83,6 +86,30 @@ export class ValidProjectIdGuard {
       concatMap(() => this._projectService.getByIdOnce$(id)),
       catchError(() => of(false)),
       map((project) => !!project),
+    );
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class DefaultStartPageGuard {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _router = inject(Router);
+
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<UrlTree> {
+    return this._globalConfigService.misc$.pipe(
+      take(1),
+      map((miscCfg) => {
+        const TODAY = 0;
+        const INBOX = 1;
+        if ((miscCfg?.defaultStartPage ?? TODAY) === INBOX) {
+          return this._router.parseUrl(`/project/${INBOX_PROJECT.id}/tasks`);
+        } else {
+          return this._router.parseUrl(`/tag/${TODAY_TAG.id}/tasks`);
+        }
+      }),
     );
   }
 }
