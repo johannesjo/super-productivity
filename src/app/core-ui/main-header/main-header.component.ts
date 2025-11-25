@@ -155,6 +155,15 @@ export class MainHeaderComponent implements OnDestroy {
   focusSummaryToday = computed(() =>
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
   );
+  readonly isTimeTrackingEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isTimeTrackingEnabled;
+  });
+  readonly isFocusModeEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isFocusModeEnabled;
+  });
+  readonly isSyncIconEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
+  });
 
   isUserProfilesEnabled = toSignal(
     this.globalConfigService.misc$.pipe(map((misc) => misc.isEnableUserProfiles)),

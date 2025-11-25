@@ -31,6 +31,7 @@ import {
   MenuTreeKind,
   MenuTreeViewNode,
 } from '../../features/menu-tree/store/menu-tree.model';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -44,6 +45,7 @@ export class MagicNavConfigService {
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _pluginService = inject(PluginService);
   private readonly _menuTreeService = inject(MenuTreeService);
+  private readonly _configService = inject(GlobalConfigService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -78,6 +80,15 @@ export class MagicNavConfigService {
     this._menuTreeService.buildTagViewTree(this._tags()),
   );
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
+  private readonly isSchedulerEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isSchedulerEnabled,
+  );
+  private readonly isPlannerEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isPlannerEnabled,
+  );
+  private readonly isBoardsEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isBoardsEnabled,
+  );
 
   constructor() {
     // TODO these should probably live in the _menuTreeService
@@ -106,29 +117,7 @@ export class MagicNavConfigService {
       // Separator
 
       // Main Routes
-      {
-        type: 'route',
-        id: 'schedule',
-        label: T.MH.SCHEDULE,
-        icon: 'early_on',
-        svgIcon: 'early_on',
-
-        route: '/schedule',
-      },
-      {
-        type: 'route',
-        id: 'planner',
-        label: T.MH.PLANNER,
-        icon: 'edit_calendar',
-        route: '/planner',
-      },
-      {
-        type: 'route',
-        id: 'boards',
-        label: T.MH.BOARDS,
-        icon: 'grid_view',
-        route: '/boards',
-      },
+      ...this._buildMainRoutesItems(),
 
       // Plugin entries
       ...this._buildPluginItems(),
@@ -360,6 +349,43 @@ export class MagicNavConfigService {
         workContext: inboxContext,
         workContextType: WorkContextType.PROJECT,
         defaultIcon: 'inbox',
+      });
+    }
+
+    return items;
+  }
+
+  private _buildMainRoutesItems(): NavItem[] {
+    const items: NavItem[] = [];
+
+    if (this.isSchedulerEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'schedule',
+        label: T.MH.SCHEDULE,
+        icon: 'early_on',
+        svgIcon: 'early_on',
+        route: '/schedule',
+      });
+    }
+
+    if (this.isPlannerEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'planner',
+        label: T.MH.PLANNER,
+        icon: 'edit_calendar',
+        route: '/planner',
+      });
+    }
+
+    if (this.isBoardsEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'boards',
+        label: T.MH.BOARDS,
+        icon: 'grid_view',
+        route: '/boards',
       });
     }
 

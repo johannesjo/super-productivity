@@ -38,31 +38,33 @@
       </button>
     }
 
-    <button
-      class="sync-btn"
-      matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
-      (click)="syncIsEnabledAndReady() ? sync() : setupSync()"
-      (longPress)="setupSync()"
-      (contextmenu)="$event.preventDefault(); setupSync()"
-      mat-icon-button
-    >
-      @if (syncIsEnabledAndReady()) {
-        @if (isOnline()) {
-          @if (syncState() === 'ERROR') {
-            <mat-icon>sync_problem</mat-icon>
+    @if (isSyncIconEnabled()) {
+      <button
+        class="sync-btn"
+        matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
+        (click)="syncIsEnabledAndReady() ? sync() : setupSync()"
+        (longPress)="setupSync()"
+        (contextmenu)="$event.preventDefault(); setupSync()"
+        mat-icon-button
+      >
+        @if (syncIsEnabledAndReady()) {
+          @if (isOnline()) {
+            @if (syncState() === 'ERROR') {
+              <mat-icon>sync_problem</mat-icon>
+            } @else {
+              <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
+            }
+            @if (syncState() === 'IN_SYNC') {
+              <mat-icon class="sync-state-ico">check</mat-icon>
+            }
           } @else {
-            <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
-          }
-          @if (syncState() === 'IN_SYNC') {
-            <mat-icon class="sync-state-ico">check</mat-icon>
+            <mat-icon>wifi_off</mat-icon>
           }
         } @else {
-          <mat-icon>wifi_off</mat-icon>
+          <mat-icon>sync_disabled</mat-icon>
         }
-      } @else {
-        <mat-icon>sync_disabled</mat-icon>
-      }
-    </button>
+      </button>
+    }
 
     <plugin-header-btns></plugin-header-btns>
 
@@ -70,16 +72,18 @@
       <user-profile-button></user-profile-button>
     }
 
-    <play-button
-      [currentTask]="currentTask()"
-      [currentTaskId]="currentTaskId()"
-      [currentTaskContext]="currentTaskContext()"
-      [pomodoroIsEnabled]="pomodoroIsEnabled()"
-      [pomodoroIsBreak]="pomodoroIsBreak()"
-      [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
-    ></play-button>
+    @if (isTimeTrackingEnabled()) {
+      <play-button
+        [currentTask]="currentTask()"
+        [currentTaskId]="currentTaskId()"
+        [currentTaskContext]="currentTaskContext()"
+        [pomodoroIsEnabled]="pomodoroIsEnabled()"
+        [pomodoroIsBreak]="pomodoroIsBreak()"
+        [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
+      ></play-button>
+    }
 
-    @if (!isXxxs()) {
+    @if (isFocusModeEnabled() && !isXxxs()) {
       <focus-button></focus-button>
     }
 

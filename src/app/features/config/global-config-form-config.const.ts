@@ -1,4 +1,5 @@
 import { MISC_SETTINGS_FORM_CFG } from './form-cfgs/misc-settings-form.const';
+import { APP_FEATURES_FORM_CFG } from './form-cfgs/app-features-form.const';
 import { KEYBOARD_SETTINGS_FORM_CFG } from './form-cfgs/keyboard-form.const';
 import { ConfigFormConfig, ConfigFormSection } from './global-config.model';
 import { POMODORO_FORM_CFG } from './form-cfgs/pomodoro-form.const';
@@ -27,6 +28,7 @@ const filterGlobalConfigForm = (cfg: ConfigFormSection<any>): boolean => {
 
 export const GLOBAL_CONFIG_FORM_CONFIG: ConfigFormConfig = [
   LANGUAGE_SELECTION_FORM_FORM,
+  APP_FEATURES_FORM_CFG,
   MISC_SETTINGS_FORM_CFG,
   SHORT_SYNTAX_FORM_CFG,
   IDLE_FORM_CFG,

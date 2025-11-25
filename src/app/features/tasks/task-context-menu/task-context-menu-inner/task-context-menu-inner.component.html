@@ -81,6 +81,7 @@
   </div>
 
   @if (
+    isTimeTrackingEnabled() &&
     ((isAdvancedControls() && IS_TOUCH_PRIMARY) || !isAdvancedControls()) &&
     !task.isDone &&
     !isCurrent &&
@@ -101,7 +102,11 @@
     </button>
   }
   @if (
-    isAdvancedControls() && !IS_TOUCH_PRIMARY && !task.isDone && !task.subTaskIds.length
+    isFocusModeEnabled() &&
+    isAdvancedControls() &&
+    !IS_TOUCH_PRIMARY &&
+    !task.isDone &&
+    !task.subTaskIds.length
   ) {
     <button
       (click)="goToFocusMode()"

@@ -1988,6 +1988,19 @@
       "L_TRACKING_INTERVAL": "Time tracking interval (EXPERIMENTAL)",
       "L_TRACKING_REMINDER_MIN_TIME": "Time to wait before showing tracking reminder Banner",
       "TITLE": "Time Tracking"
+    },
+    "APP_FEATURES": {
+      "HELP": "Enable or disable specific app features across the UI.",
+      "TITLE": "App Features",
+      "TIME_TRACKING": "Stopwatch Time Tracking",
+      "FOCUS_MODE": "Focus Mode",
+      "SCHEDULER": "Scheduler",
+      "PLANNER": "Planner",
+      "BOARDS": "Boards",
+      "SCHEDULE_DAY_PANEL": "Schedule Day Panel",
+      "ISSUES_PANEL": "Issues Panel",
+      "PROJECT_NOTES": "Project Notes",
+      "SYNC_ICON": "Sync Button"
     }
   },
   "GLOBAL_RELATIVE_TIME": {

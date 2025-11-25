@@ -6,6 +6,18 @@ import { ProjectCfgFormKey } from '../project/project.model';
 import { KeyboardConfig } from './keyboard-config.model';
 import { TaskReminderOptionId } from '../tasks/task.model';
 
+export type AppFeaturesConfig = Readonly<{
+  isTimeTrackingEnabled: boolean;
+  isFocusModeEnabled: boolean;
+  isSchedulerEnabled: boolean;
+  isPlannerEnabled: boolean;
+  isBoardsEnabled: boolean;
+  isScheduleDayPanelEnabled: boolean;
+  isIssuesPanelEnabled: boolean;
+  isProjectNotesEnabled: boolean;
+  isSyncIconEnabled: boolean;
+}>;
+
 export type MiscConfig = Readonly<{
   isAutMarkParentAsDone: boolean;
   isConfirmBeforeExit: boolean;
@@ -191,6 +203,7 @@ export type DailySummaryNote = Readonly<{
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
+  appFeatures: AppFeaturesConfig;
   localization: LocalizationConfig;
   misc: MiscConfig;
   shortSyntax: ShortSyntaxConfig;

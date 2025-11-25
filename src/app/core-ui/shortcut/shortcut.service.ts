@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { OverlayContainer } from '@angular/cdk/overlay';
 import { IS_ELECTRON } from '../../app.constants';
 import { checkKeyCombo } from '../../util/check-key-combo';
@@ -55,6 +55,9 @@ export class ShortcutService {
     }),
   );
   backlogPos?: number;
+  readonly isFocusModeEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isFocusModeEnabled,
+  );
 
   constructor() {
     this._activatedRoute.queryParams.subscribe((params) => {
@@ -121,7 +124,7 @@ export class ShortcutService {
       this._router.navigate(['/active/tasks'], {
         queryParams: { backlogPos },
       });
-    } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
+    } else if (checkKeyCombo(ev, keys.goToFocusMode) && this.isFocusModeEnabled()) {
       this._store.dispatch(showFocusOverlay());
     } else if (checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']).then(() => {

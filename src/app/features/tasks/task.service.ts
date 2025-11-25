@@ -1,7 +1,7 @@
 import { nanoid } from 'nanoid';
 import typia from 'typia';
 import { first, map, take, withLatestFrom } from 'rxjs/operators';
-import { computed, inject, Injectable } from '@angular/core';
+import { computed, effect, inject, Injectable, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
 import {
@@ -166,6 +166,10 @@ export class TaskService {
 
   allStartableTasks$: Observable<Task[]> = this._store.pipe(select(selectStartableTasks));
 
+  isTimeTrackingEnabled = computed(
+    () => this._globalConfigService.cfg()?.appFeatures.isTimeTrackingEnabled,
+  );
+
   // META FIELDS
   // -----------
   currentTaskProgress$: Observable<number> = this.currentTask$.pipe(
@@ -202,6 +206,12 @@ export class TaskService {
           this.addTimeSpent(currentTask, tick.duration, tick.date);
         }
       });
+
+    effect(() => {
+      if (!this.isTimeTrackingEnabled() && untracked(this.currentTaskId) != null) {
+        this.toggleStartTask();
+      }
+    });
   }
 
   getAllParentWithoutTag$(tagId: string): Observable<Task[]> {
@@ -799,7 +809,9 @@ export class TaskService {
   }
 
   toggleStartTask(): void {
-    this._store.dispatch(toggleStart());
+    if (this.isTimeTrackingEnabled() || this.currentTaskId() != null) {
+      this._store.dispatch(toggleStart());
+    }
   }
 
   restoreTask(task: Task, subTasks: Task[]): void {
