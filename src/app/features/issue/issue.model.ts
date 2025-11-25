@@ -15,6 +15,8 @@ import { GiteaCfg } from './providers/gitea/gitea.model';
 import { GiteaIssue } from './providers/gitea/gitea-issue.model';
 import { RedmineCfg } from './providers/redmine/redmine.model';
 import { RedmineIssue } from './providers/redmine/redmine-issue.model';
+import { TrelloCfg } from './providers/trello/trello.model';
+import { TrelloIssue, TrelloIssueReduced } from './providers/trello/trello-issue.model';
 import { EntityState } from '@ngrx/entity';
 import {
   CalendarProviderCfg,
@@ -26,6 +28,7 @@ export interface BaseIssueProviderCfg {
   isEnabled: boolean;
 }
 
+// Trello integration is available alongside other providers
 export type IssueProviderKey =
   | 'JIRA'
   | 'GITHUB'
@@ -34,6 +37,7 @@ export type IssueProviderKey =
   | 'ICAL'
   | 'OPEN_PROJECT'
   | 'GITEA'
+  | 'TRELLO'
   | 'REDMINE';
 
 export type IssueIntegrationCfg =
@@ -44,6 +48,7 @@ export type IssueIntegrationCfg =
   | CalendarProviderCfg
   | OpenProjectCfg
   | GiteaCfg
+  | TrelloCfg
   | RedmineCfg;
 
 export enum IssueLocalState {
@@ -60,6 +65,7 @@ export interface IssueIntegrationCfgs {
   CALDAV?: CaldavCfg;
   CALENDAR?: CalendarProviderCfg;
   OPEN_PROJECT?: OpenProjectCfg;
+  TRELLO?: TrelloCfg;
   GITEA?: GiteaCfg;
   REDMINE?: RedmineCfg;
 }
@@ -72,7 +78,8 @@ export type IssueData =
   | ICalIssue
   | OpenProjectWorkPackage
   | GiteaIssue
-  | RedmineIssue;
+  | RedmineIssue
+  | TrelloIssue;
 
 export type IssueDataReduced =
   | GithubIssueReduced
@@ -82,7 +89,8 @@ export type IssueDataReduced =
   | CaldavIssueReduced
   | ICalIssueReduced
   | GiteaIssue
-  | RedmineIssue;
+  | RedmineIssue
+  | TrelloIssueReduced;
 
 export type IssueDataReducedMap = {
   [K in IssueProviderKey]: K extends 'JIRA'
@@ -99,10 +107,14 @@ export type IssueDataReducedMap = {
               ? OpenProjectWorkPackageReduced
               : K extends 'GITEA'
                 ? GiteaIssue
-                : K extends 'REDMINE'
-                  ? RedmineIssue
-                  : never;
+                : K extends 'TRELLO'
+                  ? TrelloIssueReduced
+                  : K extends 'REDMINE'
+                    ? RedmineIssue
+                    : never;
 };
+
+// TODO: add issue model to the IssueDataReducedMap
 
 export interface SearchResultItem<
   T extends keyof IssueDataReducedMap = keyof IssueDataReducedMap,
@@ -172,6 +184,10 @@ export interface IssueProviderCalendar extends IssueProviderBase, CalendarProvid
   issueProviderKey: 'ICAL';
 }
 
+export interface IssueProviderTrello extends IssueProviderBase, TrelloCfg {
+  issueProviderKey: 'TRELLO';
+}
+
 export type IssueProvider =
   | IssueProviderJira
   | IssueProviderGithub
@@ -180,7 +196,8 @@ export type IssueProvider =
   | IssueProviderCalendar
   | IssueProviderOpenProject
   | IssueProviderGitea
-  | IssueProviderRedmine;
+  | IssueProviderRedmine
+  | IssueProviderTrello;
 
 export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
   ? IssueProviderJira
@@ -198,4 +215,6 @@ export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
               ? IssueProviderCaldav
               : T extends 'ICAL'
                 ? IssueProviderCalendar
-                : never;
+                : T extends 'TRELLO'
+                  ? IssueProviderTrello
+                  : never;
