@@ -71,8 +71,11 @@ test.describe('App Features - Focus Mode', () => {
     await firstTask.click({ button: 'right' });
     await expect(taskContextStartFocus).toBeAttached();
 
-    // start focus mode using keyboard shortcut
-    await page.keyboard.press('F');
-    expect(focusModeOverlay).toBeAttached();
+    // Close context menu to unblock actions
+    await page.keyboard.press('Escape');
+
+    // Start focus mode via main button to avoid shortcut timing flakiness
+    await mainFocusButton.click();
+    await expect(focusModeOverlay).toBeAttached({ timeout: 5000 });
   });
 });

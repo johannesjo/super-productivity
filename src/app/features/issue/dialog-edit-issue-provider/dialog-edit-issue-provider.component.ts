@@ -243,8 +243,5 @@ export class DialogEditIssueProviderComponent {
   protected readonly ICAL_TYPE = ICAL_TYPE;
   protected readonly IS_ANDROID_WEB_VIEW = IS_ANDROID_WEB_VIEW;
   protected readonly IS_ELECTRON = IS_ELECTRON;
-  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA =
-    IS_WEB_EXTENSION_REQUIRED_FOR_JIRA;
-  // TODO: trello
   protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = IS_WEB_BROWSER;
 }

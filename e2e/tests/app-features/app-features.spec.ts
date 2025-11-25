@@ -5,7 +5,7 @@ test.describe('App Features', () => {
   // check simple feature toggles which effectively just hide ui elements
   [
     {
-      label: 'Scheduler',
+      label: 'Schedule',
       locator: (page: Page) => page.getByRole('menuitem', { name: 'Schedule' }),
     },
     {
@@ -42,6 +42,7 @@ test.describe('App Features', () => {
       const appFeaturesSection = page.locator('collapsible', { hasText: 'App Features' });
       const featureSwitch = page.getByRole('switch', {
         name: feature.label,
+        exact: true,
       });
 
       // Go to settings page

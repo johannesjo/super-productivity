@@ -3,40 +3,8 @@ import { EntityState } from '@ngrx/entity';
 import { Task } from '../../tasks/task.model';
 import { taskAdapter } from '../../tasks/store/task.adapter';
 import { Locales } from 'src/app/app.constants';
-import { TestBed } from '@angular/core/testing';
-import { DateAdapter, NativeDateAdapter } from '@angular/material/core';
-import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
-import { GlobalConfigService } from 'src/app/features/config/global-config.service';
-import { DEFAULT_FIRST_DAY_OF_WEEK, Locale } from 'src/app/app.constants';
-
-class MockGlobalConfigService {
-  private _locale: Locale = Locales.en_us;
-  localization(): { dateTimeLocale: Locale; firstDayOfWeek: number } {
-    return {
-      dateTimeLocale: this._locale,
-      firstDayOfWeek: DEFAULT_FIRST_DAY_OF_WEEK,
-    };
-  }
-  setLocale(locale: Locale): void {
-    this._locale = locale;
-  }
-}
-
-const runMapArchive = (
-  fn: () => ReturnType<typeof mapArchiveToWorklogWeeks>,
-): ReturnType<typeof mapArchiveToWorklogWeeks> => TestBed.runInInjectionContext(fn);
 
 describe('mapArchiveToWorklogWeeks timezone test', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        DateTimeFormatService,
-        { provide: GlobalConfigService, useClass: MockGlobalConfigService },
-        { provide: DateAdapter, useClass: NativeDateAdapter },
-      ],
-    });
-  });
-
   describe('_getTimeSpentOnDay function behavior', () => {
     it('should handle task creation date correctly across timezones', () => {
       // Test case: Task created at a specific UTC time
@@ -58,14 +26,12 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
         taskAdapter.getInitialState(),
       );
 
-      const result = runMapArchive(() =>
-        mapArchiveToWorklogWeeks(
-          taskState,
-          [],
-          { workStart: {}, workEnd: {} },
-          1,
-          Locales.en_us,
-        ),
+      const result = mapArchiveToWorklogWeeks(
+        taskState,
+        [],
+        { workStart: {}, workEnd: {} },
+        1,
+        Locales.en_us,
       );
 
       console.log('mapArchiveToWorklogWeeks task creation test:', {
@@ -140,14 +106,12 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
         taskAdapter.getInitialState(),
       );
 
-      const result = runMapArchive(() =>
-        mapArchiveToWorklogWeeks(
-          taskState,
-          [],
-          { workStart: {}, workEnd: {} },
-          1,
-          'en-US',
-        ),
+      const result = mapArchiveToWorklogWeeks(
+        taskState,
+        [],
+        { workStart: {}, workEnd: {} },
+        1,
+        'en-US',
       );
 
       console.log('mapArchiveToWorklogWeeks parent task test:', {
@@ -195,14 +159,12 @@ describe('mapArchiveToWorklogWeeks timezone test', () => {
         taskAdapter.getInitialState(),
       );
 
-      const result = runMapArchive(() =>
-        mapArchiveToWorklogWeeks(
-          taskState,
-          [],
-          { workStart: {}, workEnd: {} },
-          1,
-          'en-US',
-        ),
+      const result = mapArchiveToWorklogWeeks(
+        taskState,
+        [],
+        { workStart: {}, workEnd: {} },
+        1,
+        'en-US',
       );
 
       const year2025 = result['2025'];

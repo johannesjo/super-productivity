@@ -1,59 +1,27 @@
 import { Locales } from '../app.constants';
 import { formatDayMonthStr } from './format-day-month-str';
-import { TestBed } from '@angular/core/testing';
-import { NativeDateAdapter } from '@angular/material/core';
-import { DateAdapter } from '@angular/material/core';
-import { DateTimeFormatService } from '../core/date-time-format/date-time-format.service';
-import { GlobalConfigService } from '../features/config/global-config.service';
-import { DEFAULT_FIRST_DAY_OF_WEEK, Locale } from '../app.constants';
-
-class MockGlobalConfigService {
-  private _locale: Locale = Locales.en_us;
-  localization(): { dateTimeLocale: Locale; firstDayOfWeek: number } {
-    return {
-      dateTimeLocale: this._locale,
-      firstDayOfWeek: DEFAULT_FIRST_DAY_OF_WEEK,
-    };
-  }
-  setLocale(locale: Locale): void {
-    this._locale = locale;
-  }
-}
-
-const runFormat = (date: string, locale: Locale): string =>
-  TestBed.runInInjectionContext(() => formatDayMonthStr(date, locale));
 
 describe('formatDayMonthStr', () => {
-  beforeEach(() => {
-    TestBed.configureTestingModule({
-      providers: [
-        DateTimeFormatService,
-        { provide: GlobalConfigService, useClass: MockGlobalConfigService },
-        { provide: DateAdapter, useClass: NativeDateAdapter },
-      ],
-    });
-  });
-
   it('should format day and month strings correctly with en-US locale', () => {
-    const result1 = runFormat('2023-01-15', Locales.en_us);
+    const result1 = formatDayMonthStr('2023-01-15', Locales.en_us);
     expect(result1).toBe('Sun 1/15');
 
-    const result2 = runFormat('2023-02-16', Locales.en_us);
+    const result2 = formatDayMonthStr('2023-02-16', Locales.en_us);
     expect(result2).toBe('Thu 2/16');
 
-    const result3 = runFormat('2023-12-25', Locales.en_us);
+    const result3 = formatDayMonthStr('2023-12-25', Locales.en_us);
     expect(result3).toBe('Mon 12/25');
 
-    const result4 = runFormat('2023-10-01', Locales.en_us);
+    const result4 = formatDayMonthStr('2023-10-01', Locales.en_us);
     expect(result4).toBe('Sun 10/1');
 
-    const result5 = runFormat('2023-07-04', Locales.en_us);
+    const result5 = formatDayMonthStr('2023-07-04', Locales.en_us);
     expect(result5).toBe('Tue 7/4');
   });
 
   it('should format day and month strings with locale', () => {
-    const result1 = runFormat('2023-01-15', Locales.en_us);
-    const result2 = runFormat('2023-02-16', Locales.en_us);
+    const result1 = formatDayMonthStr('2023-01-15', Locales.en_us);
+    const result2 = formatDayMonthStr('2023-02-16', Locales.en_us);
 
     // Test that locale parameter is used for day names at least
     expect(result1).toBe('Sun 1/15');
@@ -91,7 +59,7 @@ describe('formatDayMonthStr', () => {
 
     criticalTestCases.forEach(({ date, expectedUS, description }) => {
       it(`should format ${date} correctly (${description})`, () => {
-        const result = runFormat(date, Locales.en_us);
+        const result = formatDayMonthStr(date, Locales.en_us);
         expect(result).toBe(expectedUS);
       });
     });
@@ -108,7 +76,7 @@ describe('formatDayMonthStr', () => {
 
     monthBoundaries.forEach(({ date, expectedUS }) => {
       it(`should handle month boundary ${date} correctly`, () => {
-        const result = runFormat(date, Locales.en_us);
+        const result = formatDayMonthStr(date, Locales.en_us);
         expect(result).toBe(expectedUS);
       });
     });
@@ -116,8 +84,8 @@ describe('formatDayMonthStr', () => {
 
   describe('different locales', () => {
     it('should format with US locale consistently', () => {
-      expect(runFormat('2024-01-15', Locales.en_us)).toBe('Mon 1/15');
-      expect(runFormat('2024-12-25', Locales.en_us)).toBe('Wed 12/25');
+      expect(formatDayMonthStr('2024-01-15', Locales.en_us)).toBe('Mon 1/15');
+      expect(formatDayMonthStr('2024-12-25', Locales.en_us)).toBe('Wed 12/25');
     });
 
     // throws with wallaby :(
@@ -130,7 +98,7 @@ describe('formatDayMonthStr', () => {
 
   describe('year removal', () => {
     it('should not contain year in formatted output', () => {
-      const result = runFormat('2024-01-15', Locales.en_us);
+      const result = formatDayMonthStr('2024-01-15', Locales.en_us);
       expect(result).not.toContain('2024');
       expect(result).not.toContain('24');
     });
