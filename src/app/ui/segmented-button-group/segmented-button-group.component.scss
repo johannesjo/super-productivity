@@ -1,0 +1,100 @@
+@use '../../../styles/_globals.scss' as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.segmented-button-group {
+  display: flex;
+  gap: var(--s3);
+  padding: var(--s);
+  border-radius: var(--s4);
+  //background: var(--bg-lightest);
+  //box-shadow: 0 18px 45px var(--c-dark-20);
+
+  @include mq(xs, max) {
+    gap: var(--s2);
+  }
+}
+
+.segment {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s-quarter);
+  flex: 1 1 0;
+  border-radius: 16px;
+  padding: var(--s) var(--s2);
+  border: 1px solid var(--options-border-color);
+  background: var(--bg-lighter);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text-color);
+  text-align: left;
+  box-shadow: none;
+  border-width: 3px;
+  transition:
+    transform var(--transition-duration-m) var(--ani-enter-timing),
+    box-shadow var(--transition-duration-m) var(--ani-enter-timing),
+    border-color var(--transition-duration-m) var(--ani-enter-timing),
+    background var(--transition-duration-m) var(--ani-enter-timing),
+    color var(--transition-duration-m) var(--ani-enter-timing);
+
+  @include mq(xs, max) {
+    padding: var(--s) var(--s);
+  }
+
+  @include mousePrimaryDevice {
+    &:not(.is-active):hover {
+      border-color: var(--options-border-color);
+      transform: translateY(-1px);
+      box-shadow: var(--whiteframe-shadow-8dp);
+    }
+  }
+
+  &.is-active {
+    border-color: var(--c-primary);
+    border-width: 3px;
+    box-shadow: var(--whiteframe-shadow-8dp);
+    transform: scale(1.1);
+  }
+}
+
+.segment-icon {
+  font-size: 22px;
+  height: 22px;
+  width: 22px;
+  color: var(--text-color-more-intense);
+  transition: color var(--transition-duration-m) var(--ani-enter-timing);
+}
+
+.segment-label {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.segment-hint {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-color-muted);
+  letter-spacing: 0.015em;
+  transition:
+    color var(--transition-duration-m) var(--ani-enter-timing),
+    opacity var(--transition-duration-m) var(--ani-enter-timing);
+}
+
+.segment.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+:host([data-size='md']) .segment {
+  padding: var(--s-half) var(--s);
+}

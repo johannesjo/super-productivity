@@ -7,6 +7,8 @@ import { TranslateService } from '@ngx-translate/core';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { Log } from '../log';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { generateNotificationId } from '../../features/android/android-notification-id.util';
 
 @Injectable({
   providedIn: 'root',
@@ -52,7 +54,48 @@ export class NotifyService {
         });
       }
     } else if (IS_ANDROID_WEB_VIEW) {
-      // TODO maybe use capacitor plugin here as well though it probably doesn't make sense for most cases
+      try {
+        // Check permissions
+        const checkResult = await LocalNotifications.checkPermissions();
+        let displayPermissionGranted = checkResult.display === 'granted';
+
+        // Request permissions if not granted
+        if (!displayPermissionGranted) {
+          const requestResult = await LocalNotifications.requestPermissions();
+          displayPermissionGranted = requestResult.display === 'granted';
+          if (!displayPermissionGranted) {
+            Log.warn('NotifyService: Notification permission not granted');
+            return;
+          }
+        }
+
+        // Generate a deterministic notification ID from title and body
+        // Use a prefix to distinguish plugin notifications from reminders
+        const notificationKey = `plugin-notification:${title}:${body}`;
+        const notificationId = generateNotificationId(notificationKey);
+
+        // Schedule an immediate notification
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              id: notificationId,
+              title,
+              body,
+              schedule: {
+                at: new Date(Date.now() + 1000), // Show after 1 second
+                allowWhileIdle: true,
+              },
+            },
+          ],
+        });
+
+        Log.log('NotifyService: Android notification scheduled successfully', {
+          id: notificationId,
+          title,
+        });
+      } catch (error) {
+        Log.err('NotifyService: Failed to show Android notification', error);
+      }
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them

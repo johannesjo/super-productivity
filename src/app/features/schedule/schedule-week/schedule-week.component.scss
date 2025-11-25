@@ -1,9 +1,51 @@
 @use 'angular-material-css-vars' as mat-css-vars;
 @use '../../../../styles/_globals.scss' as *;
 
-.week-grid-container {
+:host {
   --schedule-time-width: 3em;
-  --schedule-row-height: 11px;
+
+  // State-based styles using host classes
+  &.isCtrlKeyPressed {
+    .current-time,
+    .work-start,
+    .work-end,
+    schedule-event,
+    schedule-event ::ng-deep * {
+      pointer-events: none !important;
+    }
+  }
+
+  // Show grabbing cursor during all drag operations
+  &.is-dragging {
+    cursor: grabbing !important;
+
+    .grid-container {
+      cursor: grabbing !important;
+    }
+  }
+
+  // When dragging without shift key, disable pointer events on schedule-events
+  // This prevents dropping tasks on other events (forces time-based scheduling)
+  &.is-dragging:not(.isShiftKeyPressed) {
+    .current-time,
+    .work-start,
+    .work-end,
+    schedule-event,
+    schedule-event ::ng-deep * {
+      pointer-events: none !important;
+    }
+
+    // Prevent CDK drag-drop from animating items out of the way in time mode.
+    // Keep the custom drag preview exempt so its scale transform remains applied.
+    schedule-event:not(.custom-drag-preview) {
+      transform: none !important;
+      transition: none !important;
+    }
+  }
+}
+
+.grid-container {
+  --schedule-row-height: 9px;
   --schedule-row-height-mobile: 7px;
   --schedule-fr: 12;
   --schedule-total-rows: calc(24 * var(--schedule-fr));
@@ -22,14 +64,78 @@
       var(--schedule-row-height-mobile)
     );
   }
+}
 
-  &.isCtrlKeyPressed {
-    schedule-event,
-    .work-start,
-    .work-end {
-      pointer-events: none !important;
+// TODO fix that this currently only shows inside schedule-day-panel
+// Fix drag placeholder to stay in original position and make it subtle
+.cdk-drag-placeholder {
+  opacity: 0.2 !important;
+  //transform: none !important;
+  //transition: none !important;
+  //position: static !important;
+}
+
+.week-header {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
+  box-shadow: var(--whiteframe-shadow-1dp);
+  z-index: 10;
+  color: var(--text-color);
+  background: var(--bg-lighter);
+
+  &.isInPanel {
+    //border: 0;
+    justify-content: center;
+    border-top: 0;
+    box-shadow: none;
+    background: transparent;
+    border: none;
+
+    * {
+      border: none !important;
+    }
+
+    .filler {
+      display: none;
     }
   }
+}
+
+.days {
+  grid-auto-flow: column;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  grid-auto-columns: 1fr;
+  grid-template-columns: var(--schedule-time-width) repeat(var(--nr-of-days), 1fr);
+}
+
+.day {
+  line-height: 32px;
+  font-size: 18px;
+  border-left: 1px solid var(--extra-border-color);
+
+  @include mq(xs, max) {
+    font-size: 14px;
+    line-height: 20px;
+  }
+}
+
+.day-num {
+  font-weight: 600;
+  display: inline;
+  padding-right: 6px;
+}
+
+.day-day {
+  display: inline;
+  font-weight: 100;
 }
 
 .time {
@@ -48,8 +154,9 @@
   grid-row: 1 / span var(--schedule-total-rows);
   grid-column: span 1;
 
-  &.drag-over {
-    background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+  // Only show drag-over background when shift is pressed (planning for day)
+  :host(.isShiftKeyPressed) &.drag-over {
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.05);
   }
 }
 
@@ -83,7 +190,7 @@
 }
 
 .drop-label {
-  display: none;
+  display: flex;
   top: 40px;
   position: sticky;
   line-height: 1.2;
@@ -98,10 +205,6 @@
   background: var(--c-primary);
   color: var(--palette-primary-contrast-500);
   pointer-events: none;
-
-  .drag-over & {
-    display: flex;
-  }
 }
 
 .excess-entries {
@@ -172,7 +275,7 @@
     background: var(--bg);
   }
 
-  .is-dragging & {
+  :host(.is-dragging) & {
     pointer-events: none;
   }
 }
@@ -186,12 +289,28 @@
   }
 }
 
-// prevent moving out the way
-schedule-event.cdk-drag-dragging + schedule-event {
-  transform: translateY(0);
+// Prevent CDK from moving items out of the way when not in shift mode
+:host(:not(.isShiftKeyPressed)) {
+  schedule-event.cdk-drag:not(.custom-drag-preview) {
+    transform: none !important;
+    transition: none !important;
+  }
 
-  &:after {
-    display: none;
+  schedule-event.cdk-drag-dragging + schedule-event:not(.custom-drag-preview) {
+    transform: none !important;
+
+    &:after {
+      display: none;
+    }
+  }
+}
+
+// In shift mode, allow minimal movement but control it
+:host(.isShiftKeyPressed) {
+  schedule-event.cdk-drag-dragging + schedule-event {
+    &:after {
+      display: none;
+    }
   }
 }
 
@@ -202,4 +321,116 @@ schedule-event.cdk-drag-dragging + schedule-event {
 
 .cdk-drag-animating {
   transition: none !important;
+}
+
+.drag-time-preview {
+  position: fixed;
+  transform: translate(-50%, -100%);
+  z-index: 2000;
+  pointer-events: none;
+  margin-top: -44px;
+
+  .time-badge {
+    background: var(--c-accent);
+    color: var(--text-on-accent);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    box-shadow: var(--whiteframe-shadow-8dp);
+    white-space: nowrap;
+    border: 2px solid var(--c-primary);
+  }
+}
+
+.shift-key-info {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+  pointer-events: none;
+  animation: fadeInOut 3s ease-in-out;
+
+  .info-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-darker);
+    color: var(--text-color);
+    padding: 12px 16px;
+    border-radius: 8px;
+    box-shadow: var(--whiteframe-shadow-12dp);
+    border: 1px solid var(--extra-border-color);
+    font-size: 14px;
+    white-space: nowrap;
+
+    mat-icon {
+      font-size: 18px;
+      height: 18px;
+      width: 18px;
+      color: var(--c-accent);
+    }
+
+    span {
+      font-weight: 500;
+    }
+  }
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+  20%,
+  80% {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-10px);
+  }
+}
+
+// Custom drag preview
+.custom-drag-preview {
+  --scale: 1.02;
+  pointer-events: none;
+  border: 2px solid var(--c-primary) !important;
+  z-index: 1000;
+  box-shadow: var(--whiteframe-shadow-8dp);
+  transform-origin: center top;
+  border-radius: 0;
+  transform: scale(var(--scale)) !important;
+
+  :host.is-dragging:not(.isShiftKeyPressed) & {
+    transform-origin: center top;
+    transform: scale(var(--scale)) !important;
+  }
+
+  &.isScheduleForDay {
+    border-radius: var(--card-border-radius);
+    border-radius: 12px;
+
+    //.drag-preview-time-badge {
+    //font-size: 13px;
+    //}
+  }
+
+  // NOTE has global styles in _overwrite-material.scss
+  .drag-preview-time-badge {
+    top: 0 !important;
+    right: -8px;
+    border-radius: 12px;
+  }
+
+  &.isShiftInsertPreview {
+    transform: translate(-16px, -50%) scale(var(--scale)) !important;
+  }
+}
+
+.cdk-drag-preview {
+  opacity: 0 !important;
 }

@@ -20,6 +20,7 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
+import { getIsLocked } from './shared-state';
 import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
 import { pluginNodeExecutor } from './plugin-node-executor';
 
@@ -79,8 +80,14 @@ export const initIpcInterfaces = (): void => {
     return { success: false };
   });
 
+  ipcMain.handle(IPC.SHARE_NATIVE, async () => {
+    // Desktop platforms use the share dialog instead of native share
+    // This allows for more flexibility and better UX with social media options
+    return { success: false, error: 'Native share not available on desktop' };
+  });
+
   ipcMain.on(IPC.LOCK_SCREEN, () => {
-    if ((app as any).isLocked) {
+    if (getIsLocked()) {
       return;
     }
 

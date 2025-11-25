@@ -13,6 +13,11 @@ export const selectCurrentScreen = createSelector(
   (state) => state.currentScreen,
 );
 
+export const selectMainState = createSelector(
+  selectFocusModeState,
+  (state) => state.mainState,
+);
+
 export const selectMode = createSelector(selectFocusModeState, (state) => state.mode);
 
 export const selectIsOverlayShown = createSelector(
@@ -72,4 +77,10 @@ export const selectProgress = createSelector(
 export const selectIsRunning = createSelector(
   selectTimer,
   (timer) => timer.isRunning && timer.purpose !== null,
+);
+
+// Session completed selector
+export const selectIsSessionCompleted = createSelector(
+  selectCurrentScreen,
+  (currentScreen) => currentScreen === 'SessionDone',
 );

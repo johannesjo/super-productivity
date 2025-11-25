@@ -40,6 +40,9 @@ test.describe('Plugin Lifecycle', () => {
     await page.locator('.page-settings').first().waitFor({ state: 'visible' });
     await page.waitForTimeout(50); // Small delay for UI settling
 
+    // Wait for page to stabilize
+    await page.waitForTimeout(300);
+
     await page.evaluate(() => {
       const configPage = document.querySelector('.page-settings');
       if (!configPage) {
@@ -48,7 +51,7 @@ test.describe('Plugin Lifecycle', () => {
 
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
-        pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        pluginSection.scrollIntoView({ behavior: 'instant', block: 'center' });
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -63,8 +66,19 @@ test.describe('Plugin Lifecycle', () => {
       }
     });
 
-    // Wait for plugin management section to be visible
-    await page.locator('plugin-management').waitFor({ state: 'visible', timeout: 5000 });
+    // Wait for expansion animation
+    await page.waitForTimeout(300);
+
+    // Scroll plugin-management into view
+    await page.evaluate(() => {
+      const pluginMgmt = document.querySelector('plugin-management');
+      if (pluginMgmt) {
+        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    // Wait for plugin management section to be attached
+    await page.locator('plugin-management').waitFor({ state: 'attached', timeout: 5000 });
     await page.waitForTimeout(50); // Small delay for UI settling
 
     // Enable the plugin
@@ -152,11 +166,14 @@ test.describe('Plugin Lifecycle', () => {
     await page.locator('.page-settings').first().waitFor({ state: 'visible' });
     await page.waitForTimeout(200); // Small delay for UI settling
 
+    // Wait for page to stabilize
+    await page.waitForTimeout(300);
+
     // Expand plugin section
     await page.evaluate(() => {
       const pluginSection = document.querySelector('.plugin-section');
       if (pluginSection) {
-        pluginSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        pluginSection.scrollIntoView({ behavior: 'instant', block: 'center' });
       }
 
       const collapsible = document.querySelector('.plugin-section collapsible');
@@ -168,8 +185,21 @@ test.describe('Plugin Lifecycle', () => {
       }
     });
 
-    // Wait for plugin management to be ready
-    await page.locator('plugin-management').waitFor({ state: 'visible', timeout: 10000 });
+    // Wait for expansion animation
+    await page.waitForTimeout(300);
+
+    // Scroll plugin-management into view
+    await page.evaluate(() => {
+      const pluginMgmt = document.querySelector('plugin-management');
+      if (pluginMgmt) {
+        pluginMgmt.scrollIntoView({ behavior: 'instant', block: 'center' });
+      }
+    });
+
+    // Wait for plugin management to be ready (attached, not necessarily visible)
+    await page
+      .locator('plugin-management')
+      .waitFor({ state: 'attached', timeout: 10000 });
     await page.waitForTimeout(500); // Give time for plugins to load
 
     // Check current state of the plugin and enable if needed

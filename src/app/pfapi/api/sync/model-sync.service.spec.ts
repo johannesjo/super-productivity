@@ -198,6 +198,25 @@ describe('ModelSyncService', () => {
         RevMismatchForModelError,
       );
     });
+
+    it('should allow download when remote revision is newer than expected', async () => {
+      const expectedRev = '2025-01-01T12:00:00.000Z';
+      // Remote file is NEWER than what we expected
+      const remoteRev = '2025-01-01T13:00:00.000Z';
+
+      mockSyncProvider.downloadFile.and.returnValue(
+        Promise.resolve({
+          rev: remoteRev,
+          dataStr: JSON.stringify({ data: 'remote-model-data' }),
+        }),
+      );
+
+      const result = await service.download('singleModel', expectedRev);
+      expect(result.rev).toBe(remoteRev);
+      expect(result.data).toEqual({
+        data: 'remote-model-data',
+      });
+    });
   });
 
   describe('updateLocalUpdated', () => {
@@ -278,6 +297,76 @@ describe('ModelSyncService', () => {
         ...remoteMeta,
       } as RemoteMeta);
 
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw error for unregistered models to prevent data loss', async () => {
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          unknownModel: { data: 'unknown-model-data' },
+        },
+      };
+
+      // Should throw ModelIdWithoutCtrlError
+      await expectAsync(
+        service.updateLocalMainModelsFromRemoteMetaFile({
+          ...remoteMeta,
+        } as RemoteMeta),
+      ).toBeRejectedWithError(/Remote metadata contains models not registered locally/);
+
+      // No saves should have been called due to early error
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw error listing all unregistered models', async () => {
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          unknownModel1: { data: 'unknown-1' },
+          unknownModel2: { data: 'unknown-2' },
+          unknownModel3: { data: 'unknown-3' },
+        },
+      };
+
+      // Should throw with all model IDs listed
+      await expectAsync(
+        service.updateLocalMainModelsFromRemoteMetaFile({
+          ...remoteMeta,
+        } as RemoteMeta),
+      ).toBeRejectedWithError(/unknownModel1, unknownModel2, unknownModel3/);
+
+      // No saves should have been called
+      expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
+      expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when mix of valid and invalid models to prevent partial sync', async () => {
+      const remoteMeta = {
+        revMap: {},
+        lastUpdate: 1000,
+        crossModelVersion: 1,
+        mainModelData: {
+          mainModel: { data: 'valid-main-model' },
+          unknownModel: { data: 'unknown-model-data' },
+          singleModel: { data: 'valid-single-model' },
+        },
+      };
+
+      // Should throw error even with valid models present
+      await expectAsync(
+        service.updateLocalMainModelsFromRemoteMetaFile({
+          ...remoteMeta,
+        } as RemoteMeta),
+      ).toBeRejectedWithError(/unknownModel/);
+
+      // No saves should have been called to prevent partial data sync
       expect(mockModelControllers.mainModel.save).not.toHaveBeenCalled();
       expect(mockModelControllers.singleModel.save).not.toHaveBeenCalled();
     });

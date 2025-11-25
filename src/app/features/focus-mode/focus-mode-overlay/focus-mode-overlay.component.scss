@@ -11,6 +11,15 @@
   flex-direction: column;
   height: 100%;
   -webkit-app-region: no-drag !important;
+  --z-focus-mode-drag-bar: 0;
+  --z-focus-mode-close-btn: 5;
+  --z-focus-mode-overlay-selector: 10;
+  --z-focus-mode-main-selector: 2;
+  --z-focus-mode-duration-slider: 2;
+  --z-focus-mode-simple-counter: 4;
+  --z-focus-mode-drag-over: 31;
+  --z-focus-mode-hide-notes: 2;
+  --z-focus-mode-countdown: 11;
 }
 
 .mac-os-drag-bar {
@@ -20,7 +29,7 @@
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 0;
+  z-index: var(--z-focus-mode-drag-bar);
   display: none;
 
   :host-context(.isMac) & {
@@ -50,7 +59,7 @@ main {
   right: var(--s);
   width: 56px;
   height: 56px;
-  z-index: 5;
+  z-index: var(--z-focus-mode-close-btn);
   @include mousePrimaryDevice {
     transition: opacity var(--transition-leave);
     //visibility: hidden;
@@ -85,8 +94,12 @@ main {
 }
 
 .focus-mode-select-mode {
-  margin-bottom: auto;
-  margin-top: 16px;
+  position: absolute;
+  top: var(--s3);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  z-index: var(--z-focus-mode-overlay-selector);
 }
 
 focus-mode-task-selection,

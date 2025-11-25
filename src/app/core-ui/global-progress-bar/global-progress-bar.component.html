@@ -3,7 +3,7 @@
     [@fadeOut]
     class="badge"
   >
-    {{ label | translate }}
+    {{ label.key | translate: label.params }}
   </div>
 }
 @if (globalProgressBarService.isShowGlobalProgressBar$ | async) {

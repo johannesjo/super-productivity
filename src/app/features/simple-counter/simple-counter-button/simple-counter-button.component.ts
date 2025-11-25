@@ -20,11 +20,12 @@ import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { distinctUntilChanged, filter, map, scan, switchMap } from 'rxjs/operators';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
-import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatIconButton } from '@angular/material/button';
 import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clock-string.pipe';
+import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 
 @Component({
   selector: 'simple-counter-button',
@@ -36,12 +37,12 @@ import { MsToMinuteClockStringPipe } from '../../../ui/duration/ms-to-minute-clo
     '[class.isSuccess]': 'isSuccess()',
   },
   imports: [
-    MatMiniFabButton,
     LongPressDirective,
     MatIcon,
     AsyncPipe,
     MsToMinuteClockStringPipe,
     MatIconButton,
+    ProgressCircleComponent,
   ],
 })
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
@@ -119,6 +120,18 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     }
   }
 
+  calcCountdownProgress(remaining: number, total?: number | null): number {
+    if (!total || total <= 0) {
+      return 0;
+    }
+    const elapsed = total - remaining;
+    if (!Number.isFinite(elapsed)) {
+      return 0;
+    }
+    const progress = (elapsed / total) * 100;
+    return Math.min(100, Math.max(0, progress));
+  }
+
   ngOnDestroy(): void {
     this._subs.unsubscribe();
   }
@@ -126,7 +139,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   countUpAndNextRepeatCountdownSession(): void {
     this._bannerService.dismiss(BannerId.SimpleCounterCountdownComplete);
     this.toggleCounter();
-    this._resetCountdown$.next();
+    this._resetCountdown$.next(undefined);
     this.isTimeUp.set(false);
   }
 

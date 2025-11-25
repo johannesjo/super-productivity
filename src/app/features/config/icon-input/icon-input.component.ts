@@ -1,4 +1,11 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  OnInit,
+  inject,
+  signal,
+} from '@angular/core';
 import { FieldType } from '@ngx-formly/material';
 import { MATERIAL_ICONS } from '../../../ui/material-icons.const';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
@@ -11,6 +18,8 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { MatTooltip } from '@angular/material/tooltip';
 import { containsEmoji, extractFirstEmoji } from '../../../util/extract-first-emoji';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
+import { startWith } from 'rxjs/operators';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'icon-input',
@@ -29,15 +38,24 @@ import { isSingleEmoji } from '../../../util/extract-first-emoji';
     MatTooltip,
   ],
 })
-export class IconInputComponent extends FieldType<FormlyFieldConfig> {
+export class IconInputComponent extends FieldType<FormlyFieldConfig> implements OnInit {
   filteredIcons = signal<string[]>([]);
   isEmoji = signal(false);
+  private readonly _destroyRef = inject(DestroyRef);
 
   protected readonly IS_ELECTRON = IS_ELECTRON;
   isLinux = IS_ELECTRON && window.ea.isLinux();
 
   get type(): string {
     return this.to.type || 'text';
+  }
+
+  ngOnInit(): void {
+    this.formControl.valueChanges
+      .pipe(startWith(this.formControl.value), takeUntilDestroyed(this._destroyRef))
+      .subscribe((val: string | null) => {
+        this.isEmoji.set(containsEmoji(val || ''));
+      });
   }
 
   trackByIndex(i: number, p: any): number {

@@ -242,6 +242,25 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, { ...CONFIG, isEnableDue: false });
       expect(r).toEqual(undefined);
     });
+
+    it('with time spent only', () => {
+      const t = {
+        ...TASK,
+        title: 'Task description 30m/',
+      };
+      const r = shortSyntax(t, CONFIG);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Task description',
+          timeSpentOnDay: {
+            [getDbDateStr()]: 1800000,
+          },
+        },
+      });
+    });
   });
 
   describe('should recognize short syntax for date', () => {
@@ -331,6 +350,16 @@ describe('shortSyntax', () => {
       expect(r).toEqual(undefined);
     });
 
+    it('should not parse numeric tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#123 Task description',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
     it('should not trigger for tasks with starting # (e.g. github issues) when adding tags', () => {
       const t = {
         ...TASK,
@@ -357,6 +386,42 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
 
       expect(r).toEqual(undefined);
+    });
+
+    it('should add tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#blu Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id'],
+        },
+      });
+    });
+
+    it('should add multiple tags even if the first tag is at the beginning', () => {
+      const t = {
+        ...TASK,
+        title: '#blu #hihi Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'hihi_id'],
+        },
+      });
     });
 
     it('should work with tags', () => {
@@ -469,6 +534,36 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Fun title #blu #idontexist',
         tagIds: [],
+      };
+      const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
+    it('should remove tags not existing on title', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS, undefined, undefined, 'replace');
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'bla_id'],
+        },
+      });
+    });
+
+    it('should not remove tags not existing on title when disabled', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
       };
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
 
@@ -892,6 +987,25 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, CONFIG, [], projects);
       expect(r).toEqual(undefined);
     });
+
+    it('should prefer shortest prefix full project title match', () => {
+      const t = {
+        ...TASK,
+        title: 'Task +print',
+      };
+      projects = ['printer', 'imprints', 'print', 'printable'].map(
+        (title) => ({ id: title, title }) as Project,
+      );
+      const r = shortSyntax(t, CONFIG, [], projects);
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: 'print',
+        taskChanges: {
+          title: 'Task',
+        },
+      });
+    });
   });
 
   describe('combined', () => {
@@ -1105,5 +1219,41 @@ describe('shortSyntax', () => {
       ).toBeTrue();
       expect(taskChanges?.timeEstimate).toEqual(minuteEstimate * 60 * 1000);
     });
+  });
+
+  describe('time unit clusters', () => {
+    const testCases: [string, number | undefined, number | undefined][] = [
+      ['1h 30m', 90, undefined],
+      ['1d2h5m', 1565, undefined],
+      ['1h 30m /', undefined, 90],
+      ['1d2h5m/', undefined, 1565],
+      ['1h 30m / 1d 12h', 2160, 90],
+      ['1.25h / 0.5d 1h 4m', 784, 75],
+      ['1d2h5m/3d', 4320, 1565],
+    ];
+
+    for (const [title, timeEstimateMins, timeSpentMins] of testCases) {
+      const timeEstimate =
+        typeof timeEstimateMins === 'number' ? timeEstimateMins * 60 * 1000 : undefined;
+      const timeSpentOnDay =
+        typeof timeSpentMins === 'number' ? timeSpentMins * 60 * 1000 : undefined;
+      it(`should parse ${
+        timeEstimate === undefined
+          ? 'no time estimate'
+          : 'time estimate of ' + timeEstimate
+      } and ${
+        timeSpentOnDay === undefined
+          ? 'no time spent on day'
+          : 'time spent on day of ' + timeSpentOnDay
+      } from "${title}"`, () => {
+        const task = {
+          ...TASK,
+          title,
+        };
+        const result = shortSyntax(task, CONFIG, [], []);
+        expect(result?.taskChanges.timeEstimate).toBe(timeEstimate);
+        expect(result?.taskChanges.timeSpentOnDay?.[getDbDateStr()]).toBe(timeSpentOnDay);
+      });
+    }
   });
 });

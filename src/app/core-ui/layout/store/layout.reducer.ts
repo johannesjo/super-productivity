@@ -9,6 +9,7 @@ import {
   toggleShowNotes,
   toggleTaskViewCustomizerPanel,
 } from './layout.actions';
+import { toggleScheduleDayPanel, hideScheduleDayPanel } from './layout.actions';
 import {
   Action,
   createFeatureSelector,
@@ -27,6 +28,7 @@ export interface LayoutState {
   isShowTaskViewCustomizerPanel: boolean;
   isShowPluginPanel: boolean;
   activePluginId: string | null;
+  isShowScheduleDayPanel: boolean;
 }
 
 export const INITIAL_LAYOUT_STATE: LayoutState = {
@@ -37,6 +39,7 @@ export const INITIAL_LAYOUT_STATE: LayoutState = {
   isShowTaskViewCustomizerPanel: false,
   isShowPluginPanel: false,
   activePluginId: null,
+  isShowScheduleDayPanel: false,
 };
 
 export const selectLayoutFeatureState =
@@ -77,12 +80,18 @@ export const selectActivePluginId = createSelector(
   (state) => state.activePluginId,
 );
 
+export const selectIsShowScheduleDayPanel = createSelector(
+  selectLayoutFeatureState,
+  (state) => state.isShowScheduleDayPanel,
+);
+
 const ALL_PANEL_CONTENT_HIDDEN: Partial<LayoutState> = {
   isShowNotes: false,
   isShowIssuePanel: false,
   isShowTaskViewCustomizerPanel: false,
   isShowPluginPanel: false,
   activePluginId: null,
+  isShowScheduleDayPanel: false,
 };
 
 const _reducer = createReducer<LayoutState>(
@@ -138,6 +147,16 @@ const _reducer = createReducer<LayoutState>(
       activePluginId: isCurrentlyActive ? null : pluginId,
     };
   }),
+  on(toggleScheduleDayPanel, (state) => ({
+    ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
+    isShowScheduleDayPanel: !state.isShowScheduleDayPanel,
+  })),
+  on(hideScheduleDayPanel, (state) => ({
+    ...state,
+    ...ALL_PANEL_CONTENT_HIDDEN,
+    isShowScheduleDayPanel: false,
+  })),
 );
 
 export const layoutReducer = (

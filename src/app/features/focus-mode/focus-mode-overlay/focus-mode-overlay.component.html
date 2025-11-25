@@ -14,49 +14,11 @@
         <mat-icon>close</mat-icon>
       </button>
 
-      <ng-template #selectModeTpl>
-        <mat-button-toggle-group
-          class="focus-mode-select-mode"
-          [value]="selectedMode()"
-          style="margin-bottom: -32px"
-          (change)="selectMode($event.value)"
-        >
-          <mat-button-toggle [value]="FocusModeMode.Flowtime"
-            >{{ T.F.FOCUS_MODE.FLOWTIME | translate }}
-          </mat-button-toggle>
-          <mat-button-toggle [value]="FocusModeMode.Pomodoro"
-            >{{ T.F.FOCUS_MODE.POMODORO | translate }}
-          </mat-button-toggle>
-          <mat-button-toggle [value]="FocusModeMode.Countdown"
-            >{{ T.F.FOCUS_MODE.COUNTDOWN | translate }}
-          </mat-button-toggle>
-        </mat-button-toggle-group>
-      </ng-template>
+      <!-- Mode selector is now integrated into focus-mode-main component -->
 
       <!-- -->
       @switch (activePage()) {
         <!-- -->
-        @case (FocusScreen.TaskSelection) {
-          @if (!isSessionRunning()) {
-            <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
-          }
-          <focus-mode-task-selection
-            style="margin-bottom: auto; margin-top: auto"
-            @warpIn
-          ></focus-mode-task-selection>
-        }
-        @case (FocusScreen.DurationSelection) {
-          @if (!isSessionRunning()) {
-            <ng-container *ngTemplateOutlet="selectModeTpl"></ng-container>
-          }
-          <focus-mode-duration-selection
-            style="margin-bottom: auto; margin-top: auto"
-            @warpIn
-          ></focus-mode-duration-selection>
-        }
-        @case (FocusScreen.Preparation) {
-          <focus-mode-preparation @warpIn></focus-mode-preparation>
-        }
         @case (FocusScreen.Main) {
           <focus-mode-main @warpIn></focus-mode-main>
         }

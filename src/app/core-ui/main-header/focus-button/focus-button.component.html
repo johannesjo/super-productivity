@@ -1,0 +1,29 @@
+<div class="focus-btn-wrapper">
+  @if (circleVisible()) {
+    <progress-circle
+      [progress]="circleProgress()"
+      [isPulsing]="circleShouldPulse()"
+    ></progress-circle>
+  }
+
+  <button
+    mat-icon-button
+    matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }}{{ tooltipSuffix() }}"
+    [color]="buttonColor()"
+    (click)="enableFocusMode()"
+    (contextmenu)="openFocusSessionDialog(); $event.preventDefault()"
+    (longPress)="openFocusSessionDialog()"
+  >
+    <mat-icon>center_focus_strong</mat-icon>
+  </button>
+
+  @if (runningTimeMs(); as runningMs) {
+    <div class="focus-label focus-running-label">
+      {{ runningMs | msToMinuteClockString }}
+    </div>
+  } @else if (focusSummaryToday()?.total) {
+    <div class="focus-label">
+      {{ focusSummaryToday()?.total | msToMinuteClockString }}
+    </div>
+  }
+</div>

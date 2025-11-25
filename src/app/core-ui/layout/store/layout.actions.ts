@@ -37,3 +37,8 @@ export const togglePluginPanel = createAction(
   '[Layout] Toggle PluginPanel',
   (pluginId: string) => ({ pluginId }),
 );
+
+// Schedule Day Panel
+export const toggleScheduleDayPanel = createAction('[Layout] Toggle ScheduleDayPanel');
+
+export const hideScheduleDayPanel = createAction('[Layout] Hide ScheduleDayPanel');

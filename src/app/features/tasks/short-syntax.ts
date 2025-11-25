@@ -18,9 +18,15 @@ type DueChanges = {
   dueWithTime?: number;
 };
 
-const SHORT_SYNTAX_TIME_REG_EX =
-  /(?:\s|^)t?((\d+(?:\.\d+)?[mhd])(?:\s*\/\s*(\d+(?:\.\d+)?[mhd]))?(?=\s|$))/i;
-// NOTE: should come after the time reg ex is executed so we don't have to deal with those strings too
+const CH_TSP = '/';
+// Due how this expression capture clusters of duration units, be mindful of
+// match boundary whitespace during processing
+export const SHORT_SYNTAX_TIME_REG_EX = new RegExp(
+  String.raw`(?:\s|^)t?((?:\d+(?:\.\d+)?[mhd]\s*)+)(?:\s*` +
+    `\\${CH_TSP}` +
+    String.raw`((?:\s*\d+(?:\.\d+)?[mhd])+)?)?(?=\s|$)`,
+  'i',
+);
 
 const CH_PRO = '+';
 const CH_TAG = '#';
@@ -86,6 +92,7 @@ export const shortSyntax = (
   allTags?: Tag[],
   allProjects?: Project[],
   now = new Date(),
+  mode: 'combine' | 'replace' = 'combine',
 ):
   | {
       taskChanges: Partial<Task>;
@@ -107,11 +114,10 @@ export const shortSyntax = (
   let changesForTag: TagChanges = {};
 
   if (config.isEnableDue) {
-    // NOTE: we do this twice... :-O ...it's weird, but required to make whitespaces work as separator and not as one
     taskChanges = parseTimeSpentChanges(task);
     taskChanges = {
       ...taskChanges,
-      ...parseScheduledDate(task, now),
+      ...parseScheduledDate({ ...task, title: taskChanges.title || task.title }, now),
     };
   }
 
@@ -132,19 +138,11 @@ export const shortSyntax = (
     changesForTag = parseTagChanges(
       { ...task, title: taskChanges.title || task.title },
       allTags,
+      mode,
     );
     taskChanges = {
       ...taskChanges,
       ...(changesForTag.taskChanges || {}),
-    };
-  }
-
-  if (config.isEnableDue) {
-    taskChanges = {
-      ...taskChanges,
-      // NOTE: because we pass the new taskChanges here we need to assignments...
-      ...parseTimeSpentChanges(taskChanges),
-      // title: taskChanges.title?.trim(),
     };
   }
 
@@ -187,7 +185,7 @@ const parseProjectChanges = (
 
   if (rr && rr[0]) {
     const projectTitle: string = rr[0].trim().replace(CH_PRO, '');
-    const projectTitleToMatch = projectTitle.replace(' ', '').toLowerCase();
+    const projectTitleToMatch = projectTitle.replaceAll(' ', '').toLowerCase();
     const indexBeforePlus =
       task.title.toLowerCase().lastIndexOf(CH_PRO + projectTitleToMatch) - 1;
     const charBeforePlus = task.title.charAt(indexBeforePlus);
@@ -197,9 +195,15 @@ const parseProjectChanges = (
       return {};
     }
 
-    const existingProject = allProjects.find(
+    // Prefer shortest prefix-based project title match
+    const sortedAllProjects = allProjects
+      .slice()
+      .sort((p1, p2) => p1.title.length - p2.title.length);
+
+    const existingProject = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch) ===
+        0,
     );
 
     if (existingProject) {
@@ -215,9 +219,10 @@ const parseProjectChanges = (
     // also try only first word after special char
     const projectTitleFirstWordOnly = projectTitle.split(' ')[0];
     const projectTitleToMatch2 = projectTitleFirstWordOnly.replace(' ', '').toLowerCase();
-    const existingProjectForFirstWordOnly = allProjects.find(
+    const existingProjectForFirstWordOnly = sortedAllProjects.find(
       (project) =>
-        project.title.replace(' ', '').toLowerCase().indexOf(projectTitleToMatch2) === 0,
+        project.title.replaceAll(' ', '').toLowerCase().indexOf(projectTitleToMatch2) ===
+        0,
     );
 
     if (existingProjectForFirstWordOnly) {
@@ -235,7 +240,11 @@ const parseProjectChanges = (
   return {};
 };
 
-const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges => {
+const parseTagChanges = (
+  task: Partial<TaskCopy>,
+  allTags?: Tag[],
+  mode: 'combine' | 'replace' = 'combine',
+): TagChanges => {
   const taskChanges: Partial<TaskCopy> = {};
 
   const newTagTitlesToCreate: string[] = [];
@@ -256,34 +265,55 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
             return false;
           }
 
+          const trimmedTitle = initialTitle.trim();
+          const tagStartIndex = trimmedTitle.lastIndexOf(`${CH_TAG}${newTagTitle}`);
+          const isNumericOnly = /^[0-9]+$/.test(newTagTitle);
+
           return (
             newTagTitle.length >= 1 &&
-            // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
-            initialTitle.trim().lastIndexOf(newTagTitle) > 4
+            tagStartIndex !== -1 &&
+            // NOTE: only block tags at the beginning if they are numeric (e.g. "#123 task")
+            (!isNumericOnly || tagStartIndex > 0)
           );
         });
 
-      const tagIdsToAdd: string[] = [];
+      const matchingTagIds: string[] = [];
       regexTagTitlesTrimmedAndFiltered.forEach((newTagTitle) => {
         const existingTag = allTags.find(
           (tag) => newTagTitle.toLowerCase() === tag.title.toLowerCase(),
         );
         if (existingTag) {
-          if (!task.tagIds?.includes(existingTag.id)) {
-            tagIdsToAdd.push(existingTag.id);
-          }
+          matchingTagIds.push(existingTag.id);
         } else {
           newTagTitlesToCreate.push(newTagTitle);
         }
       });
 
-      if (tagIdsToAdd.length) {
-        taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
+      if (mode === 'replace') {
+        // Check if arrays arent the same
+        if (
+          !(
+            task.tagIds.length === matchingTagIds.length &&
+            task.tagIds.every((val, i) => val === matchingTagIds[i])
+          )
+        ) {
+          taskChanges.tagIds = matchingTagIds;
+        }
+      } else {
+        const tagIdsToAdd: string[] = [];
+        matchingTagIds.forEach((id) => {
+          if (!task.tagIds?.includes(id)) {
+            tagIdsToAdd.push(id);
+          }
+        });
+        if (tagIdsToAdd.length) {
+          taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
+        }
       }
 
       if (
         newTagTitlesToCreate.length ||
-        tagIdsToAdd.length ||
+        taskChanges.tagIds?.length ||
         regexTagTitlesTrimmedAndFiltered.length
       ) {
         taskChanges.title = initialTitle;
@@ -382,28 +412,26 @@ const parseTimeSpentChanges = (task: Partial<TaskCopy>): Partial<Task> => {
   }
 
   const matches = SHORT_SYNTAX_TIME_REG_EX.exec(task.title);
-  if (matches && matches.length >= 3) {
-    const full = matches[0];
-    const timeSpent = matches[2]; // First part (before slash)
-    const timeEstimate = matches[3]; // Second part (after slash)
-    // If no slash, use the single value as timeEstimate only
-    const hasSlashFormat = matches[3] !== undefined;
-    return {
-      ...(hasSlashFormat && timeSpent
-        ? {
-            timeSpentOnDay: {
-              ...(task.timeSpentOnDay || {}),
-              [getDbDateStr()]: stringToMs(timeSpent),
-            },
-          }
-        : {}),
-      ...(timeEstimate
-        ? { timeEstimate: stringToMs(timeEstimate) }
-        : timeSpent
-          ? { timeEstimate: stringToMs(timeSpent) }
-          : {}),
-      title: task.title.replace(full, '').trim(),
-    };
+  if (!matches) {
+    return {};
   }
-  return {};
+
+  const [matchSpan, preSplit, postSplit] = matches;
+  const timeSpent = matchSpan.includes(CH_TSP) ? preSplit : null;
+  const timeEstimate = timeSpent === null ? preSplit : postSplit;
+
+  return {
+    ...(typeof timeSpent === 'string' && {
+      timeSpentOnDay: {
+        ...task.timeSpentOnDay,
+        [getDbDateStr()]: timeSpent
+          .split(/\s+/g)
+          .reduce((ms, s) => ms + stringToMs(s), 0),
+      },
+    }),
+    ...(typeof timeEstimate === 'string' && {
+      timeEstimate: timeEstimate.split(/\s+/g).reduce((ms, s) => ms + stringToMs(s), 0),
+    }),
+    title: task.title.replace(matchSpan, '').trim(),
+  };
 };

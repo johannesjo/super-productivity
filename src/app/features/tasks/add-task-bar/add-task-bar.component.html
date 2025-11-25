@@ -109,6 +109,7 @@
       [isHideTagBtn]="!!planForDay()"
       [isHideDueBtn]="!!planForDay()"
       (refocus)="focusInput()"
+      (scheduleDialogOpenChange)="onScheduleDialogOpenChange($event)"
     ></add-task-bar-actions>
   }
 </div>

@@ -13,7 +13,6 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { TaskReminderOptionId } from '../task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { unique } from '../../../util/unique';
 import { TaskService } from '../task.service';
@@ -103,12 +102,15 @@ export class ShortSyntaxEffects {
         ),
       ),
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
+        const isReplaceTagIds = originalAction.type === TaskSharedActions.updateTask.type;
         const r = shortSyntax(
           task,
           this._globalConfigService?.cfg()?.shortSyntax ||
             DEFAULT_GLOBAL_CONFIG.shortSyntax,
           tags,
           projects,
+          undefined,
+          isReplaceTagIds ? 'replace' : 'combine',
         );
         if (environment.production) {
           TaskLog.log('shortSyntax', r);
@@ -161,7 +163,8 @@ export class ShortSyntaxEffects {
               dueWithTime: dueWithTime,
               remindAt: remindOptionToMilliseconds(
                 dueWithTime,
-                TaskReminderOptionId.AtStart,
+                this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+                  DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
               ),
               isMoveToBacklog: false,
             });

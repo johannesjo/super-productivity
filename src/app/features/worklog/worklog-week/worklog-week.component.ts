@@ -12,7 +12,7 @@ import { TaskService } from '../../tasks/task.service';
 import { T } from '../../../t.const';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { DateAdapter, MatRipple } from '@angular/material/core';
-import { AsyncPipe, KeyValuePipe, NgFor } from '@angular/common';
+import { AsyncPipe, KeyValue, KeyValuePipe } from '@angular/common';
 import { MatIcon } from '@angular/material/icon';
 import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
 import { MatButton } from '@angular/material/button';
@@ -29,7 +29,6 @@ import { MetricService } from '../../metric/metric.service';
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation, expandFadeAnimation, fadeAnimation],
   imports: [
-    NgFor,
     MatRipple,
     MatIcon,
     InlineInputComponent,
@@ -47,15 +46,15 @@ export class WorklogWeekComponent {
   readonly simpleCounterService = inject(SimpleCounterService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _taskService = inject(TaskService);
-  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private _dateAdapter = inject(DateAdapter);
   private readonly _metricService = inject(MetricService);
 
   visibility: boolean[] = [];
   T: typeof T = T;
   keys: (o: Record<string, unknown>) => string[] = Object.keys;
 
-  sortDays(a: any, b: any): number {
-    return a.key - b.key;
+  sortDays<T extends KeyValue<string, V>, V = unknown>(a: T, b: T): number {
+    return b.key < a.key ? 1 : -1;
   }
 
   async exportData(): Promise<void> {
@@ -90,7 +89,7 @@ export class WorklogWeekComponent {
     this.worklogService.refreshWorklog();
   }
 
-  trackByDay(i: number, day: any): string {
+  trackByDay<T extends KeyValue<string, V>, V = unknown>(i: number, day: T): string {
     return day.key;
   }
 

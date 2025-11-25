@@ -4,15 +4,16 @@ import {
   computed,
   DestroyRef,
   effect,
+  HostListener,
   inject,
   input,
   OnDestroy,
   OnInit,
   output,
   signal,
+  AfterViewInit,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { NavigationStart, Router, RouterModule } from '@angular/router';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavListTreeComponent } from './nav-list/nav-list-tree.component';
 import { NavItem } from './magic-side-nav.model';
@@ -24,15 +25,24 @@ import { NavMatMenuComponent } from './nav-mat-menu/nav-mat-menu.component';
 import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../layout/layout.service';
 import { magicSideNavAnimations } from './magic-side-nav.animations';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter, take } from 'rxjs/operators';
+import { Subscription } from 'rxjs';
+import { ScheduleExternalDragService } from '../../features/schedule/schedule-week/schedule-external-drag.service';
+import { Log } from '../../core/log';
+import { TODAY_TAG } from '../../features/tag/tag.const';
+import { DragDropRegistry } from '@angular/cdk/drag-drop';
+import { WorkContextType } from '../../features/work-context/work-context.model';
+import { HISTORY_STATE } from '../../app.constants';
 
 const COLLAPSED_WIDTH = 64;
 const MOBILE_NAV_WIDTH = 300;
+const FOCUS_DELAY_MS = 10;
 
 @Component({
   selector: 'magic-side-nav',
   standalone: true,
   imports: [
-    CommonModule,
     RouterModule,
     NavItemComponent,
     NavListTreeComponent,
@@ -48,13 +58,19 @@ const MOBILE_NAV_WIDTH = 300;
   },
   animations: magicSideNavAnimations,
 })
-export class MagicSideNavComponent implements OnInit, OnDestroy {
+export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _sideNavConfigService = inject(MagicNavConfigService);
   private readonly _taskService = inject(TaskService);
   private readonly _layoutService = inject(LayoutService);
+  private readonly _router = inject(Router);
+  private _dragDropRegistry = inject(DragDropRegistry);
+  private _externalDragService = inject(ScheduleExternalDragService);
+  private _pointerUpSubscription: Subscription | null = null;
+
   // Use service's computed signal directly
   readonly config = this._sideNavConfigService.navConfig;
+  readonly WorkContextType = WorkContextType;
 
   activeWorkContextId = input<string | null>(null);
 
@@ -102,6 +118,11 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       }
     });
 
+    // Sync history state with mobile menu visibility status
+    effect(() => {
+      this.syncMobileNavHistory(this.showMobileMenuOverlay());
+    });
+
     effect(() => {
       const isFullMode = this.isFullMode();
       if (!this.isMobile()) {
@@ -122,7 +143,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       if (trigger > 0) {
         // Small delay to ensure DOM is ready
         window.setTimeout(() => {
-          this.focusFirstNavEntry();
+          this.toggleNavFocus();
         });
       }
     });
@@ -132,12 +153,28 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     this._destroyRef.onDestroy(() => {
       window.removeEventListener('resize', resizeListener);
     });
+
+    this._router.events
+      .pipe(
+        filter((event): event is NavigationStart => event instanceof NavigationStart),
+        takeUntilDestroyed(this._destroyRef),
+      )
+      .subscribe(() => {
+        if (this.isMobile() && this.showMobileMenuOverlay()) {
+          this.showMobileMenuOverlay.set(false);
+        }
+      });
   }
 
   ngOnDestroy(): void {
     if (this._animateTimeoutId != null) {
       window.clearTimeout(this._animateTimeoutId);
       this._animateTimeoutId = null;
+    }
+
+    if (this._pointerUpSubscription) {
+      this._pointerUpSubscription.unsubscribe();
+      this._pointerUpSubscription = null;
     }
   }
 
@@ -169,6 +206,13 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit(): void {
+    // Listen for global pointer releases while a drag is active
+    this._pointerUpSubscription = this._dragDropRegistry.pointerUp.subscribe((event) => {
+      this._handlePointerUp(event);
+    });
+  }
+
   onNavKeyDown(event: KeyboardEvent): void {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       this._handleArrowNavigation(event);
@@ -190,6 +234,32 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
 
   toggleMobileNav(): void {
     this.showMobileMenuOverlay.update((show) => !show);
+  }
+
+  /** Handle "back" button to hide mobile menu overlay */
+  @HostListener('window:popstate') onBack(): void {
+    if (this.isMobile() && this.showMobileMenuOverlay()) this.toggleMobileNav();
+  }
+
+  /** Synchronize window history state with the visibility of the mobile menu overlay */
+  syncMobileNavHistory(isVisible: boolean): void {
+    if (!this.isMobile()) return;
+
+    const historyState = window.history.state?.[HISTORY_STATE.MOBILE_NAVIGATION];
+    const hasState = historyState !== undefined;
+
+    // Mobile menu is hidden and already no state in history - nothing to do
+    if (!isVisible && !hasState) return;
+
+    // Mobile menu is visible - update history state
+    if (isVisible) {
+      const args = { state: { [HISTORY_STATE.MOBILE_NAVIGATION]: true }, title: '' };
+      if (!hasState) window.history.pushState(args.state, args.title);
+      else window.history.replaceState(args.state, args.title);
+    }
+
+    // Mobile menu is visible but still has state in history - restore it
+    else window.history.back();
   }
 
   toggleSideNavMode(): void {
@@ -425,20 +495,22 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
       event.preventDefault();
       event.stopPropagation();
 
-      // Unfocus the navigation element
-      if (activeElement && typeof activeElement.blur === 'function') {
-        activeElement.blur();
-      }
-
-      // Focus the first task if available
-      setTimeout(() => {
-        this._taskService.focusFirstTaskIfVisible();
-      }, 10);
+      this._unfocusNavAndFocusTask();
     }
   }
 
-  // Public method to focus the first nav entry (for keyboard shortcuts)
-  focusFirstNavEntry(): void {
+  private _unfocusNavAndFocusTask(): void {
+    const activeElement = document.activeElement as HTMLElement;
+    if (activeElement?.blur) {
+      activeElement.blur();
+    }
+    setTimeout(() => {
+      this._taskService.focusFirstTaskIfVisible();
+    }, FOCUS_DELAY_MS);
+  }
+
+  // Public method to toggle nav focus (for keyboard shortcuts)
+  toggleNavFocus(): void {
     // Check if any nav element is currently focused
     const activeElement = document.activeElement as HTMLElement;
     const navSidebar = document.querySelector('.nav-sidenav');
@@ -450,14 +522,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
         // If mobile overlay is open and nav is focused, close it
         if (isNavFocused) {
           this.showMobileMenuOverlay.set(false);
-          // Blur the active element
-          if (activeElement && typeof activeElement.blur === 'function') {
-            activeElement.blur();
-          }
-          // Focus the first task if available
-          setTimeout(() => {
-            this._taskService.focusFirstTaskIfVisible();
-          }, 10);
+          this._unfocusNavAndFocusTask();
         } else {
           // Mobile overlay is open but nav not focused, focus it
           this._focusFirstNavElement();
@@ -475,13 +540,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     // Desktop behavior: toggle focus
     if (isNavFocused) {
       // Nav is already focused, unfocus it
-      if (activeElement && typeof activeElement.blur === 'function') {
-        activeElement.blur();
-      }
-      // Focus the first task if available
-      setTimeout(() => {
-        this._taskService.focusFirstTaskIfVisible();
-      }, 10);
+      this._unfocusNavAndFocusTask();
     } else {
       // Nav is not focused, focus it
       this._focusFirstNavElement();
@@ -493,5 +552,81 @@ export class MagicSideNavComponent implements OnInit, OnDestroy {
     if (focusableElements.length > 0) {
       focusableElements[0].focus();
     }
+  }
+
+  private _handlePointerUp(event: MouseEvent | TouchEvent): void {
+    const draggedTask = this._externalDragService.activeTask();
+
+    // exclude subtasks and recurring tasks
+    if (!draggedTask || draggedTask.parentId || draggedTask.repeatCfgId) {
+      return;
+    }
+
+    const pointerPos = this._getPointerPosition(event);
+    if (!pointerPos) {
+      return;
+    }
+
+    const navItemElement = document
+      .elementFromPoint(pointerPos.x, pointerPos.y)
+      ?.closest('nav-item');
+    if (!navItemElement) {
+      return;
+    }
+
+    if (navItemElement.hasAttribute('data-project-id')) {
+      // Task is dropped on a project
+      const projectId = navItemElement.getAttribute('data-project-id');
+      Log.debug('Task dropped on Project', { draggedTask, projectId });
+
+      // We do not want to change the order of the task list if we drop
+      // to a project or a tag in the main nav
+      // As there is no way to to cancel a cdk drag action properly,
+      // we mark the next drop action to be ignored
+      this._externalDragService.setCancelNextDrop(true);
+
+      // also we want the drag action to be finished, before we move the task
+      // to a different project, otherwise the drag action might throw an error,
+      // if the dom element is removed before the return animation has finished
+      const dragref = this._externalDragService.activeDragRef();
+      dragref?.ended.pipe(take(1)).subscribe(() => {
+        this._taskService.moveToProject(draggedTask, projectId!);
+      });
+    } else if (navItemElement.hasAttribute('data-tag-id')) {
+      // Task is dropped on a tag
+      const tagId = navItemElement.getAttribute('data-tag-id');
+      Log.debug('Task dropped on Tag', { draggedTask, tagId });
+
+      this._externalDragService.setCancelNextDrop(true);
+
+      // Special case: "Today" tag means to schedule task for today
+      if (tagId === TODAY_TAG.id) {
+        this._taskService.addToToday(draggedTask);
+      } else {
+        if (!draggedTask.tagIds.includes(tagId!)) {
+          // tag not yet assigned to task, add it
+          this._taskService.updateTags(draggedTask, [...draggedTask.tagIds, tagId!]);
+        } else {
+          // tag already assigned to task, remove it
+          this._taskService.updateTags(
+            draggedTask,
+            draggedTask.tagIds.filter((t) => t !== tagId),
+          );
+        }
+      }
+    }
+
+    this._externalDragService.setActiveTask(null);
+  }
+
+  private _getPointerPosition(
+    event: MouseEvent | TouchEvent,
+  ): { x: number; y: number } | null {
+    if (!('touches' in event)) {
+      return { x: event.clientX, y: event.clientY };
+    }
+
+    const touch = event.touches[0] ?? event.changedTouches?.[0];
+    return touch ? { x: touch.clientX, y: touch.clientY } : null;
   }
 }

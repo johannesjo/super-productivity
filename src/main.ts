@@ -2,14 +2,13 @@ import {
   enableProdMode,
   ErrorHandler,
   importProvidersFrom,
-  LOCALE_ID,
   provideZonelessChangeDetection,
   SecurityContext,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { registerLocaleData } from '@angular/common';
 
 import { environment } from './environments/environment';
-import { IS_ELECTRON, LanguageCode } from './app/app.constants';
+import { DEFAULT_LANGUAGE, IS_ELECTRON, LocalesImports } from './app/app.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
@@ -20,7 +19,7 @@ import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http'
 import { MarkdownModule, MARKED_OPTIONS, provideMarkdown } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MATERIAL_ANIMATIONS, MatNativeDateModule } from '@angular/material/core';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
@@ -65,6 +64,8 @@ import { promiseTimeout } from './app/util/promise-timeout';
 import { PLUGIN_INITIALIZER_PROVIDER } from './app/plugins/plugin-initializer';
 import { initializeMatMenuTouchFix } from './app/features/tasks/task-context-menu/mat-menu-touch-monkey-patch';
 import { Log } from './app/core/log';
+import { GlobalConfigService } from './app/features/config/global-config.service';
+import { LocaleDatePipe } from './app/ui/pipes/locale-date.pipe';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -147,6 +148,7 @@ bootstrapApplication(AppComponent, {
         registrationStrategy: 'registerWhenStable:30000',
       }),
       TranslateModule.forRoot({
+        fallbackLang: DEFAULT_LANGUAGE,
         loader: {
           provide: TranslateLoader,
           useClass: TranslateHttpLoader,
@@ -154,18 +156,9 @@ bootstrapApplication(AppComponent, {
       }),
       CdkDropListGroup,
     ),
-    {
-      provide: LOCALE_ID,
-      // useValue: 'en-US', // to simulate other language
-      useValue: Object.values(LanguageCode).includes(
-        (navigator.language.split('-')[0] || navigator.language) as LanguageCode,
-      )
-        ? navigator.language
-        : 'en-US',
-    },
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
     provideHttpClient(withInterceptorsFromDi()),
-    DatePipe,
+    LocaleDatePipe,
     ShortTimeHtmlPipe,
     ShortTimePipe,
     provideMarkdown(),
@@ -174,6 +167,15 @@ bootstrapApplication(AppComponent, {
       useValue: { appearance: 'fill', subscriptSizing: 'dynamic' },
     },
     provideAnimations(),
+    {
+      provide: MATERIAL_ANIMATIONS,
+      deps: [GlobalConfigService],
+      useFactory: (globalConfigService: GlobalConfigService) => ({
+        get animationsDisabled(): boolean {
+          return globalConfigService.misc()?.isDisableAnimations ?? false;
+        },
+      }),
+    },
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
     provideZonelessChangeDetection(),
@@ -181,6 +183,11 @@ bootstrapApplication(AppComponent, {
 }).then(() => {
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
+
+  // Register all supported locales
+  Object.keys(LocalesImports).forEach((locale) => {
+    registerLocaleData(LocalesImports[locale], locale);
+  });
 
   // TODO make asset caching work for electron
 

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
 @Component({
   selector: 'breathing-dot',
@@ -8,5 +8,5 @@ import { ChangeDetectionStrategy, Component, HostBinding } from '@angular/core';
   imports: [],
 })
 export class BreathingDotComponent {
-  @HostBinding('class.breathing-dot') true = true;
+  readonly isPaused = input(false);
 }

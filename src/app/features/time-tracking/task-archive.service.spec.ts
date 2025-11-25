@@ -459,6 +459,42 @@ describe('TaskArchiveService', () => {
   });
 
   describe('removeTagsFromAllTasks', () => {
+    it('should remove provided tags from tasks in archiveYoung', async () => {
+      const taskWithTags = createMockTask('task1', { tagIds: ['tag1', 'tag2'] });
+      const archiveYoung = createMockArchiveModel([taskWithTags]);
+      const archiveOld = createMockArchiveModel([]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archiveYoung));
+      archiveOldMock.load.and.returnValue(Promise.resolve(archiveOld));
+
+      spyOn(service, 'deleteTasks').and.returnValue(Promise.resolve());
+
+      await service.removeTagsFromAllTasks(['tag1']);
+
+      const saveArgs = archiveYoungMock.save.calls.mostRecent().args;
+      const updatedTask = saveArgs[0].task.entities['task1'] as Task;
+
+      expect(updatedTask.tagIds).toEqual(['tag2']);
+    });
+
+    it('should remove provided tags from tasks in archiveOld', async () => {
+      const taskWithTags = createMockTask('task1', { tagIds: ['tag1', 'tag3'] });
+      const archiveYoung = createMockArchiveModel([]);
+      const archiveOld = createMockArchiveModel([taskWithTags]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(archiveYoung));
+      archiveOldMock.load.and.returnValue(Promise.resolve(archiveOld));
+
+      spyOn(service, 'deleteTasks').and.returnValue(Promise.resolve());
+
+      await service.removeTagsFromAllTasks(['tag1']);
+
+      const saveArgs = archiveOldMock.save.calls.mostRecent().args;
+      const updatedTask = saveArgs[0].task.entities['task1'] as Task;
+
+      expect(updatedTask.tagIds).toEqual(['tag3']);
+    });
+
     it('should remove tags from all tasks and delete orphaned tasks', async () => {
       // Create tasks with original state (before tag removal)
       const taskWithTag = createMockTask('task1', {

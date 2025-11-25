@@ -1,4 +1,11 @@
-import { effect, inject, Injectable, signal } from '@angular/core';
+import {
+  effect,
+  EnvironmentInjector,
+  inject,
+  Injectable,
+  runInInjectionContext,
+  signal,
+} from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
 import { IS_MAC } from '../../util/is-mac';
@@ -36,12 +43,15 @@ export class GlobalThemeService {
   private _workContextService = inject(WorkContextService);
   private _globalConfigService = inject(GlobalConfigService);
   private _matIconRegistry = inject(MatIconRegistry);
+  private readonly _registeredPluginIcons = new Set<string>();
   private _domSanitizer = inject(DomSanitizer);
   private _chartThemeService = inject(NgChartThemeService);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _imexMetaService = inject(ImexViewService);
   private _http = inject(HttpClient);
   private _customThemeService = inject(CustomThemeService);
+  private _environmentInjector = inject(EnvironmentInjector);
+  private _hasInitialized = false;
 
   darkMode = signal<DarkModeCfg>(
     (localStorage.getItem(LS.DARK_MODE) as DarkModeCfg) || 'system',
@@ -80,23 +90,27 @@ export class GlobalThemeService {
   backgroundImg = toSignal(this._backgroundImgObs$);
 
   init(): void {
-    // This is here to make web page reloads on non-work-context pages at least usable
-    this._setBackgroundTint(true);
-    this._initIcons();
-    this._initHandlersForInitialBodyClasses();
-    this._initThemeWatchers();
+    if (this._hasInitialized) {
+      return;
+    }
+    this._hasInitialized = true;
 
-    // Set up dark mode persistence effect
-    effect(
-      () => {
+    runInInjectionContext(this._environmentInjector, () => {
+      // This is here to make web page reloads on non-work-context pages at least usable
+      this._setBackgroundTint(true);
+      this._initIcons();
+      this._initHandlersForInitialBodyClasses();
+      this._initThemeWatchers();
+
+      // Set up dark mode persistence effect
+      effect(() => {
         const darkMode = this.darkMode();
         localStorage.setItem(LS.DARK_MODE, darkMode);
-      },
-      { allowSignalWrites: false },
-    );
+      });
 
-    // Set up reactive custom theme updates
-    this._setupCustomThemeEffect();
+      // Set up reactive custom theme updates
+      this._setupCustomThemeEffect();
+    });
   }
 
   private _setDarkTheme(isDarkTheme: boolean): void {
@@ -191,6 +205,26 @@ export class GlobalThemeService {
     return Promise.all(iconPromises);
   }
 
+  registerSvgIcon(iconName: string, url: string): void {
+    // Plugin icon is already registered, skip
+    if (this._registeredPluginIcons.has(iconName)) return;
+    this._matIconRegistry.addSvgIcon(
+      iconName,
+      this._domSanitizer.bypassSecurityTrustResourceUrl(url),
+    );
+    this._registeredPluginIcons.add(iconName);
+  }
+
+  registerSvgIconFromContent(iconName: string, svgContent: string): void {
+    // Plugin icon is already registered, skip
+    if (this._registeredPluginIcons.has(iconName)) return;
+    this._matIconRegistry.addSvgIconLiteral(
+      iconName,
+      this._domSanitizer.bypassSecurityTrustHtml(svgContent),
+    );
+    this._registeredPluginIcons.add(iconName);
+  }
+
   private _initThemeWatchers(): void {
     // init theme watchers
     this._workContextService.currentTheme$.subscribe((theme: WorkContextThemeCfg) =>
@@ -258,7 +292,7 @@ export class GlobalThemeService {
 
     // Add/remove has-mobile-bottom-nav class to body for snack bar positioning
     effect(() => {
-      if (this._layoutService.isShowMobileBottomNav) {
+      if (this._layoutService.isShowMobileBottomNav()) {
         this.document.body.classList.add(BodyClass.hasMobileBottomNav);
       } else {
         this.document.body.classList.remove(BodyClass.hasMobileBottomNav);

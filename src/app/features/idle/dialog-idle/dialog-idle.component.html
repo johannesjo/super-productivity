@@ -52,6 +52,17 @@
             <mat-icon>{{ simpleCounterBtn.icon }}</mat-icon>
           </button>
         }
+        @if (hasActiveSimpleCounterTimerButton()) {
+          <div
+            [@expand]
+            style="max-width: 340px; margin-top: 8px; font-size: 12px"
+          >
+            <p>
+              <mat-icon>info</mat-icon>
+              {{ T.F.TIME_TRACKING.D_IDLE.WARN_SIMPLE_COUNTER | translate }}
+            </p>
+          </div>
+        }
       </section>
       @if ((configService.takeABreak$ | async)?.isTakeABreakEnabled) {
         <div
@@ -86,6 +97,11 @@
       </button>
       <button
         (click)="trackAsBreak()"
+        [matTooltip]="
+          hasActiveSimpleCounterTimerButton()
+            ? (T.F.TIME_TRACKING.D_IDLE.WARN_SIMPLE_COUNTER_BREAK | translate)
+            : null
+        "
         color="primary"
         mat-stroked-button
         type="button"

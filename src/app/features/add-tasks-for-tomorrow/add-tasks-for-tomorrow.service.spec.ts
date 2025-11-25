@@ -111,6 +111,7 @@ describe('AddTasksForTomorrowService', () => {
     repeatEvery: 1,
     startDate: todayStr, // Valid start date
     notes: undefined,
+    repeatFromCompletionDate: false,
   } as TaskRepeatCfg;
 
   const mockRepeatCfg2: TaskRepeatCfg = {
@@ -126,6 +127,7 @@ describe('AddTasksForTomorrowService', () => {
     repeatEvery: 1,
     startDate: todayStr, // Valid start date
     notes: undefined,
+    repeatFromCompletionDate: false,
   } as TaskRepeatCfg;
 
   // Setup before each test

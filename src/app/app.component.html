@@ -10,6 +10,7 @@
     <add-task-bar
       (closed)="layoutService.hideAddTaskBar()"
       (done)="layoutService.hideAddTaskBar()"
+      (afterTaskAdd)="onTaskAdded($event)"
       [isGlobalBarVariant]="true"
       class="global"
     ></add-task-bar>
@@ -59,7 +60,7 @@
       </main>
 
       <!-- Mobile Bottom Navigation -->
-      @if (isShowMobileButtonNav) {
+      @if (isShowMobileButtonNav()) {
         <mobile-bottom-nav
           (toggleMobileNavEvent)="magicSideNav.toggleMobileNav()"
         ></mobile-bottom-nav>

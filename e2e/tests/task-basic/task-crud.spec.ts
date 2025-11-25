@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK = 'task';
-const TASK_TEXTAREA = 'task textarea';
+const TASK_TITLE = 'task task-title';
 const FIRST_TASK = 'task:first-child';
 const SECOND_TASK = 'task:nth-child(2)';
 const TASK_DONE_BTN = '.task-done-btn';
@@ -14,18 +14,19 @@ test.describe('Task CRUD Operations', () => {
     // Create first task
     await workViewPage.addTask('First task');
     await page.waitForSelector(TASK, { state: 'visible' });
-    await expect(page.locator(TASK_TEXTAREA).first()).toHaveValue(/First task/);
+    await expect(page.locator(TASK_TITLE).first()).toContainText(/First task/);
 
     // Create second task
     await workViewPage.addTask('Second task');
-    await expect(page.locator(`${FIRST_TASK} textarea`)).toHaveValue(/Second task/);
-    await expect(page.locator(`${SECOND_TASK} textarea`)).toHaveValue(/First task/);
+    await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(/Second task/);
+    await expect(page.locator(`${SECOND_TASK} task-title`)).toContainText(/First task/);
 
     // Edit first task (newest)
-    await page.click(`${FIRST_TASK} textarea`);
+    await page.click(`${FIRST_TASK} task-title`);
+    await page.waitForSelector(`${FIRST_TASK} textarea`, { state: 'visible' });
     await page.fill(`${FIRST_TASK} textarea`, 'Edited second task');
     await page.keyboard.press('Tab'); // Blur to save
-    await expect(page.locator(`${FIRST_TASK} textarea`)).toHaveValue(
+    await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(
       /Edited second task/,
     );
 
@@ -51,15 +52,19 @@ test.describe('Task CRUD Operations', () => {
     await page.waitForSelector(TASK, { state: 'visible' });
 
     // Update the task title multiple times
-    await page.click(`${FIRST_TASK} textarea`);
+    await page.click(`${FIRST_TASK} task-title`);
+    await page.waitForSelector(`${FIRST_TASK} textarea`, { state: 'visible' });
     await page.fill(`${FIRST_TASK} textarea`, 'Updated title 1');
     await page.keyboard.press('Tab');
-    await expect(page.locator(`${FIRST_TASK} textarea`)).toHaveValue(/Updated title 1/);
+    await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(
+      /Updated title 1/,
+    );
 
     // Update again
-    await page.click(`${FIRST_TASK} textarea`);
+    await page.click(`${FIRST_TASK} task-title`);
+    await page.waitForSelector(`${FIRST_TASK} textarea`, { state: 'visible' });
     await page.fill(`${FIRST_TASK} textarea`, 'Final title');
     await page.keyboard.press('Tab');
-    await expect(page.locator(`${FIRST_TASK} textarea`)).toHaveValue(/Final title/);
+    await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(/Final title/);
   });
 });

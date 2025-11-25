@@ -6,7 +6,6 @@ import {
   input,
 } from '@angular/core';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
-import { CommonModule } from '@angular/common';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatIcon } from '@angular/material/icon';
@@ -15,20 +14,21 @@ import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { getTodayStr } from '../../tasks/util/get-today-str';
 import { TaskService } from '../../tasks/task.service';
+import { T } from '../../../t.const';
 
 @Component({
   selector: 'task-tracking-info',
   standalone: true,
-  imports: [CommonModule, MatIcon, MatTooltipModule, MsToStringPipe],
+  imports: [MatIcon, MatTooltipModule, MsToStringPipe],
   template: `
     @if (currentTask() && (showTitle() || currentTaskTimeToday() > 0)) {
       <div
         class="task-tracking-info"
         (click)="onTaskClick()"
-        [matTooltip]="'Pause tracking'"
+        [matTooltip]="T.F.FOCUS_MODE.PAUSE_TRACKING"
         role="button"
         tabindex="0"
-        aria-label="Pause tracking for current task"
+        [attr.aria-label]="T.F.FOCUS_MODE.PAUSE_TRACKING_FOR_CURRENT_TASK"
         @expand
       >
         @if (showTitle()) {
@@ -50,6 +50,9 @@ import { TaskService } from '../../tasks/task.service';
 export class TaskTrackingInfoComponent {
   private readonly _store = inject(Store);
   private readonly _taskService = inject(TaskService);
+
+  // Make T available in template
+  protected readonly T = T;
 
   // Input to control whether to show the task title
   showTitle = input<boolean>(true);

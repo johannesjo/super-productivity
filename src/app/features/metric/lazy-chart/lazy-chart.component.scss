@@ -1,0 +1,76 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
+.chart-wrapper {
+  width: 100%;
+  position: relative;
+}
+
+.chart-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.timeframe-selector {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeframe-label {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+.timeframe-radios {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.timeframe-radios ::ng-deep .mdc-form-field {
+  margin-right: 8px;
+}
+
+.timeframe-radios ::ng-deep .mdc-radio {
+  padding: 4px;
+}
+
+.timeframe-radios ::ng-deep .mat-mdc-radio-button .mdc-label {
+  font-size: 0.75rem;
+  letter-spacing: 0;
+}
+
+.chart-container {
+  position: relative;
+  width: 100%;
+}
+
+.chart-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  color: #666;
+}
+
+.share-btn {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.share-btn:hover:not(:disabled) {
+  opacity: 1;
+}
+
+.share-btn:disabled {
+  opacity: 0.3;
+}

@@ -5,13 +5,14 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { HttpClient } from '@angular/common/http';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
 import { PluginCacheService } from '../../plugin-cache.service';
 import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
-import { CommonModule } from '@angular/common';
 import {
   MatCard,
   MatCardActions,
@@ -33,6 +34,13 @@ import { PluginIconComponent } from '../plugin-icon/plugin-icon.component';
 import { PluginConfigDialogComponent } from '../plugin-config-dialog/plugin-config-dialog.component';
 import { IS_ELECTRON } from '../../../app.constants';
 import { PluginLog } from '../../../core/log';
+import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
+
+interface CommunityPlugin {
+  name: string;
+  shortDescription: string;
+  url: string;
+}
 
 @Component({
   selector: 'plugin-management',
@@ -40,7 +48,6 @@ import { PluginLog } from '../../../core/log';
   styleUrls: ['./plugin-management.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    CommonModule,
     MatCard,
     MatCardActions,
     MatCardHeader,
@@ -57,6 +64,7 @@ import { PluginLog } from '../../../core/log';
     MatTooltip,
     TranslatePipe,
     PluginIconComponent,
+    CollapsibleComponent,
   ],
 })
 export class PluginManagementComponent {
@@ -66,6 +74,12 @@ export class PluginManagementComponent {
   private readonly _pluginConfigService = inject(PluginConfigService);
   private readonly _translateService = inject(TranslateService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _http = inject(HttpClient);
+
+  readonly communityPlugins = toSignal(
+    this._http.get<CommunityPlugin[]>('assets/community-plugins.json'),
+    { initialValue: [] },
+  );
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
@@ -319,6 +333,21 @@ export class PluginManagementComponent {
     return features.length > 0
       ? features.join(' • ')
       : this._translateService.instant(T.PLUGINS.NO_ADDITIONAL_INFO);
+  }
+
+  getPermissionsHooksTitle(plugin: PluginInstance): string {
+    const parts: string[] = [];
+    const pCount = plugin.manifest.permissions?.length || 0;
+    const hCount = plugin.manifest.hooks?.length || 0;
+
+    if (pCount > 0) {
+      parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
+    }
+    if (hCount > 0) {
+      parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
+    }
+
+    return parts.join(' / ');
   }
 
   async openConfigDialog(plugin: PluginInstance): Promise<void> {

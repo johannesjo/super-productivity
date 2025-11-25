@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { FocusModeMainComponent } from './focus-mode-main.component';
@@ -10,10 +10,24 @@ import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachme
 import { IssueService } from '../../issue/issue.service';
 import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
 import { FocusModeService } from '../focus-mode.service';
+import { FocusMainUIState, FocusModeMode } from '../focus-mode.model';
 import { TaskCopy } from '../../tasks/task.model';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import * as actions from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { EffectsModule } from '@ngrx/effects';
+import { Component, EventEmitter, Output } from '@angular/core';
+import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
+
+@Component({
+  selector: 'focus-mode-task-selector',
+  template: '',
+  standalone: true,
+})
+class MockFocusModeTaskSelectorComponent {
+  @Output() taskSelected = new EventEmitter<string>();
+  @Output() closed = new EventEmitter<void>();
+}
 
 describe('FocusModeMainComponent', () => {
   let component: FocusModeMainComponent;
@@ -22,6 +36,7 @@ describe('FocusModeMainComponent', () => {
   let mockTaskService: jasmine.SpyObj<TaskService>;
   let mockTaskAttachmentService: jasmine.SpyObj<TaskAttachmentService>;
   let mockIssueService: jasmine.SpyObj<IssueService>;
+  let focusModeServiceSpy: jasmine.SpyObj<FocusModeService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
 
   const mockTask: TaskCopy = {
@@ -43,7 +58,8 @@ describe('FocusModeMainComponent', () => {
   } as TaskCopy;
 
   beforeEach(async () => {
-    const storeSpy = jasmine.createSpyObj('Store', ['dispatch']);
+    const storeSpy = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    storeSpy.select.and.returnValue(of([]));
 
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       misc: jasmine.createSpy().and.returnValue({
@@ -67,7 +83,7 @@ describe('FocusModeMainComponent', () => {
 
     const simpleCounterServiceSpy = jasmine.createSpyObj('SimpleCounterService', ['']);
 
-    const focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', [], {
+    focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', [], {
       timeElapsed: jasmine.createSpy().and.returnValue(60000),
       isCountTimeDown: jasmine.createSpy().and.returnValue(true),
       progress: jasmine.createSpy().and.returnValue(0),
@@ -75,11 +91,22 @@ describe('FocusModeMainComponent', () => {
       isSessionRunning: jasmine.createSpy().and.returnValue(false),
       isBreakActive: jasmine.createSpy().and.returnValue(false),
       currentCycle: jasmine.createSpy().and.returnValue(1),
-      mode: jasmine.createSpy().and.returnValue('Pomodoro'),
+      sessionDuration: jasmine.createSpy().and.returnValue(0),
+      mode: jasmine.createSpy().and.returnValue(FocusModeMode.Pomodoro),
+      mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
+      focusModeConfig: jasmine.createSpy().and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      }),
     });
 
     await TestBed.configureTestingModule({
-      imports: [FocusModeMainComponent, NoopAnimationsModule, TranslateModule.forRoot()],
+      imports: [
+        FocusModeMainComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+        EffectsModule.forRoot([]),
+      ],
       providers: [
         { provide: Store, useValue: storeSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
@@ -89,7 +116,12 @@ describe('FocusModeMainComponent', () => {
         { provide: SimpleCounterService, useValue: simpleCounterServiceSpy },
         { provide: FocusModeService, useValue: focusModeServiceSpy },
       ],
-    }).compileComponents();
+    })
+      .overrideComponent(FocusModeMainComponent, {
+        remove: { imports: [FocusModeTaskSelectorComponent] },
+        add: { imports: [MockFocusModeTaskSelectorComponent] },
+      })
+      .compileComponents();
 
     fixture = TestBed.createComponent(FocusModeMainComponent);
     component = fixture.componentInstance;
@@ -101,10 +133,7 @@ describe('FocusModeMainComponent', () => {
     mockIssueService = TestBed.inject(IssueService) as jasmine.SpyObj<IssueService>;
 
     fixture.detectChanges();
-  });
-
-  afterEach(() => {
-    component.ngOnDestroy();
+    mockStore.dispatch.calls.reset();
   });
 
   it('should create', () => {
@@ -113,11 +142,11 @@ describe('FocusModeMainComponent', () => {
 
   describe('initialization', () => {
     it('should initialize with current task', () => {
-      expect(component.task).toBe(mockTask);
+      expect(component.currentTask()).toBe(mockTask);
     });
 
     it('should set default task notes from config', () => {
-      expect(component.defaultTaskNotes).toBe('Default task notes template');
+      expect(component.defaultTaskNotes()).toBe('Default task notes template');
     });
 
     it('should initialize focus mode service properties', () => {
@@ -125,16 +154,12 @@ describe('FocusModeMainComponent', () => {
       expect(component.isCountTimeDown()).toBe(true);
     });
 
-    it('should initialize isShowNotes to false', () => {
-      expect(component.isShowNotes).toBe(false);
-    });
-
     it('should initialize isFocusNotes to false', () => {
-      expect(component.isFocusNotes).toBe(false);
+      expect(component.isFocusNotes()).toBe(false);
     });
 
     it('should initialize isDragOver to false', () => {
-      expect(component.isDragOver).toBe(false);
+      expect(component.isDragOver()).toBe(false);
     });
   });
 
@@ -196,7 +221,7 @@ describe('FocusModeMainComponent', () => {
       it('should set drag state and prevent default', () => {
         component.onDragEnter(mockDragEvent);
 
-        expect(component.isDragOver).toBe(true);
+        expect(component.isDragOver()).toBe(true);
         expect(mockDragEvent.preventDefault).toHaveBeenCalled();
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
       });
@@ -211,11 +236,11 @@ describe('FocusModeMainComponent', () => {
     describe('onDragLeave', () => {
       it('should reset drag state when leaving the same target', () => {
         component['_dragEnterTarget'] = mockTarget;
-        component.isDragOver = true;
+        component.isDragOver.set(true);
 
         component.onDragLeave(mockDragEvent);
 
-        expect(component.isDragOver).toBe(false);
+        expect(component.isDragOver()).toBe(false);
         expect(mockDragEvent.preventDefault).toHaveBeenCalled();
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
       });
@@ -223,11 +248,11 @@ describe('FocusModeMainComponent', () => {
       it('should not reset drag state when leaving different target', () => {
         const differentTarget = document.createElement('span');
         component['_dragEnterTarget'] = differentTarget;
-        component.isDragOver = true;
+        component.isDragOver.set(true);
 
         component.onDragLeave(mockDragEvent);
 
-        expect(component.isDragOver).toBe(true);
+        expect(component.isDragOver()).toBe(true);
       });
     });
 
@@ -240,11 +265,12 @@ describe('FocusModeMainComponent', () => {
           mockTask.id,
         );
         expect(mockDragEvent.stopPropagation).toHaveBeenCalled();
-        expect(component.isDragOver).toBe(false);
+        expect(component.isDragOver()).toBe(false);
       });
 
       it('should not create attachment when no task', () => {
-        component.task = null;
+        currentTaskSubject.next(null);
+        fixture.detectChanges();
 
         component.onDrop(mockDragEvent);
 
@@ -255,7 +281,7 @@ describe('FocusModeMainComponent', () => {
 
   describe('changeTaskNotes', () => {
     it('should update task notes when changed from default', () => {
-      component.defaultTaskNotes = 'Default template';
+      component.defaultTaskNotes.set('Default template');
 
       component.changeTaskNotes('New notes');
 
@@ -265,7 +291,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should not update when notes match default template', () => {
-      component.defaultTaskNotes = 'Default template';
+      component.defaultTaskNotes.set('Default template');
 
       component.changeTaskNotes('Default template');
 
@@ -281,7 +307,8 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.task = null;
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
 
       expect(() => component.changeTaskNotes('New notes')).toThrowError(
         'Task is not loaded',
@@ -289,7 +316,7 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should handle whitespace differences in comparison', () => {
-      component.defaultTaskNotes = '  Default template  ';
+      component.defaultTaskNotes.set('  Default template  ');
 
       component.changeTaskNotes('Default template');
 
@@ -319,11 +346,17 @@ describe('FocusModeMainComponent', () => {
     it('should set doneOn to current timestamp', () => {
       component.finishCurrentTask();
 
-      // Simply verify that all the required actions were dispatched
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
-
-      // Get all calls and verify the UpdateTask action
       const calls = mockStore.dispatch.calls.all();
+      const actionTypes = calls.map((c: any) => c.args[0].type);
+
+      // Verify exact actions dispatched
+      expect(actionTypes).toEqual([
+        '[FocusMode] Complete Task',
+        '[Task Shared] updateTask',
+        '[FocusMode] Select Task',
+      ]);
+
+      // Get all calls and verify the UpdateTask action details
       const hasUpdateTaskAction = calls.some((call: any) => {
         const action = call.args[0];
         return (
@@ -335,6 +368,85 @@ describe('FocusModeMainComponent', () => {
       });
 
       expect(hasUpdateTaskAction).toBe(true);
+    });
+
+    it('should open task selector and NOT dispatch selectFocusTask when session is running', () => {
+      focusModeServiceSpy.isSessionRunning.and.returnValue(true);
+      component.finishCurrentTask();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.completeTask());
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(actions.selectFocusTask());
+      expect(component.isTaskSelectorOpen()).toBe(true);
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: {
+            id: mockTask.id,
+            changes: {
+              isDone: true,
+              doneOn: jasmine.any(Number) as any,
+            },
+          },
+        }),
+      );
+    });
+  });
+
+  describe('startSession', () => {
+    beforeEach(() => {
+      mockStore.dispatch.calls.reset();
+      focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Pomodoro);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      });
+    });
+
+    it('should dispatch startFocusPreparation when skip is disabled', () => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      });
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
+    });
+
+    it('should dispatch startFocusSession with duration when skip is enabled', () => {
+      component.displayDuration.set(900000);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: true,
+        isAlwaysUseFocusMode: false,
+      });
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 900000 }),
+      );
+    });
+
+    it('should use zero duration for Flowtime when skipping preparation', () => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: true,
+        isAlwaysUseFocusMode: false,
+      });
+      focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Flowtime);
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 0 }),
+      );
+    });
+
+    it('should dispatch even when no current task', () => {
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
+
+      component.startSession();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(actions.startFocusPreparation());
     });
   });
 
@@ -364,24 +476,12 @@ describe('FocusModeMainComponent', () => {
     });
 
     it('should throw error when no task loaded', () => {
-      component.task = null;
+      currentTaskSubject.next(null);
+      fixture.detectChanges();
 
       expect(() => component.updateTaskTitleIfChanged(true, 'New Title')).toThrowError(
         'No task data',
       );
-    });
-  });
-
-  describe('ngOnDestroy', () => {
-    it('should complete destroy subject', () => {
-      const destroySubject = component['_onDestroy$'];
-      spyOn(destroySubject, 'next');
-      spyOn(destroySubject, 'complete');
-
-      component.ngOnDestroy();
-
-      expect(destroySubject.next).toHaveBeenCalled();
-      expect(destroySubject.complete).toHaveBeenCalled();
     });
   });
 });

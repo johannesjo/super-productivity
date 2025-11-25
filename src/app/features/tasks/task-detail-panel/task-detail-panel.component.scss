@@ -84,6 +84,12 @@ progress-bar {
   color: var(--text-color-muted);
 }
 
+.edit-date-info {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
 .drag-over-msg {
   pointer-events: none;
   position: absolute;

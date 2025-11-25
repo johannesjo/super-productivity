@@ -5,7 +5,8 @@
 }
 
 h3 {
-  margin-top: var(--s3);
+  margin-top: var(--s4);
+  margin-bottom: var(--s);
 }
 
 .basic-stats {
@@ -13,6 +14,18 @@ h3 {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+}
+
+.metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+
+  h1 {
+    margin: 0;
+  }
 }
 
 table {

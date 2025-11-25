@@ -29,13 +29,20 @@ import { selectAllCalendarTaskEventIds } from '../tasks/store/task.selectors';
 import { loadFromRealLs, saveToRealLs } from '../../core/persistence/local-storage';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Store } from '@ngrx/store';
-import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
+import {
+  ScheduleCalendarMapEntry,
+  ScheduleFromCalendarEvent,
+} from '../schedule/schedule.model';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import { IssueProviderCalendar } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
-import { CORS_SKIP_EXTRA_HEADERS } from '../../app.constants';
+import { CORS_SKIP_EXTRA_HEADERS, IS_WEB_BROWSER } from '../../app.constants';
 import { Log } from '../../core/log';
+import {
+  getCalendarEventIdCandidates,
+  matchesAnyCalendarEventId,
+} from './get-calendar-event-id-candidates';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 
@@ -57,15 +64,27 @@ export class CalendarIntegrationService {
           ? forkJoin(
               calendarProviders.map((calProvider) => {
                 if (!calProvider.isEnabled) {
-                  return of({ itemsForProvider: [], calProvider });
+                  return of({
+                    itemsForProvider: [] as CalendarIntegrationEvent[],
+                    calProvider,
+                    didError: false,
+                  });
                 }
 
-                return this.requestEventsForSchedule$(calProvider).pipe(
+                return this.requestEventsForSchedule$(calProvider, true).pipe(
                   first(),
                   map((itemsForProvider: CalendarIntegrationEvent[]) => ({
                     itemsForProvider,
                     calProvider,
+                    didError: false,
                   })),
+                  catchError(() =>
+                    of({
+                      itemsForProvider: [] as CalendarIntegrationEvent[],
+                      calProvider,
+                      didError: true,
+                    }),
+                  ),
                 );
               }),
             ).pipe(
@@ -78,16 +97,27 @@ export class CalendarIntegrationService {
                 ]).pipe(
                   // tap((val) => Log.log('selectAllCalendarTaskEventIds', val)),
                   map(([allCalendarTaskEventIds, skippedEventIds]) => {
-                    return resultForProviders.map(({ itemsForProvider, calProvider }) => {
-                      return {
-                        //   // filter out items already added as tasks
-                        items: itemsForProvider.filter(
-                          (calEv) =>
-                            !allCalendarTaskEventIds.includes(calEv.id) &&
-                            !skippedEventIds.includes(calEv.id),
-                        ),
-                      } as ScheduleCalendarMapEntry;
-                    });
+                    const cachedByProviderId = this._groupCachedEventsByProvider(
+                      this._getCalProviderFromCache(),
+                    );
+                    return resultForProviders.map(
+                      ({ itemsForProvider, calProvider, didError }) => {
+                        // Fall back to cached data when the live fetch errored so offline mode keeps showing events.
+                        const sourceItems: ScheduleFromCalendarEvent[] = didError
+                          ? (cachedByProviderId.get(calProvider.id) ?? [])
+                          : (itemsForProvider as ScheduleFromCalendarEvent[]);
+                        return {
+                          // filter out items already added as tasks
+                          items: sourceItems.filter(
+                            (calEv) =>
+                              !matchesAnyCalendarEventId(
+                                calEv,
+                                allCalendarTaskEventIds,
+                              ) && !matchesAnyCalendarEventId(calEv, skippedEventIds),
+                          ),
+                        } as ScheduleCalendarMapEntry;
+                      },
+                    );
                   }),
                 ),
               ),
@@ -141,12 +171,22 @@ export class CalendarIntegrationService {
       .then((result) => result ?? false);
   }
 
-  skipCalendarEvent(evId: string): void {
-    this.skippedEventIds$.next([...this.skippedEventIds$.getValue(), evId]);
-    localStorage.setItem(
-      LS.CALENDER_EVENTS_SKIPPED_TODAY,
-      JSON.stringify(this.skippedEventIds$.getValue()),
+  skipCalendarEvent(calEv: CalendarIntegrationEvent): void {
+    if (!calEv) {
+      return;
+    }
+
+    const idsToAdd = getCalendarEventIdCandidates(calEv).filter(
+      (id): id is string => typeof id === 'string' && id.length > 0,
     );
+    if (!idsToAdd.length) {
+      return;
+    }
+
+    const current = this.skippedEventIds$.getValue();
+    const updated = [...current, ...idsToAdd.filter((id) => !current.includes(id))];
+    this.skippedEventIds$.next(updated);
+    localStorage.setItem(LS.CALENDER_EVENTS_SKIPPED_TODAY, JSON.stringify(updated));
     localStorage.setItem(LS.CALENDER_EVENTS_LAST_SKIP_DAY, getDbDateStr());
   }
 
@@ -158,6 +198,10 @@ export class CalendarIntegrationService {
   ): Observable<CalendarIntegrationEvent[]> {
     // Log.log('REQUEST EVENTS', calProvider, start, end);
 
+    // allow calendars to be disabled for web apps if CORS will fail to prevent errors
+    if (calProvider.isDisabledForWebApp && IS_WEB_BROWSER) {
+      return of([]);
+    }
     return this._http
       .get(calProvider.icalUrl, {
         responseType: 'text',
@@ -205,13 +249,40 @@ export class CalendarIntegrationService {
 
   private _getCalProviderFromCache(): ScheduleCalendarMapEntry[] {
     const now = Date.now();
+    const cached = loadFromRealLs(LS.CAL_EVENTS_CACHE);
+
+    // Validate that cached data is an array
+    if (!Array.isArray(cached)) {
+      return [];
+    }
+
     return (
-      ((loadFromRealLs(LS.CAL_EVENTS_CACHE) as ScheduleCalendarMapEntry[]) || [])
+      cached
         // filter out cached past entries
         .map((provider) => ({
           ...provider,
           items: provider.items.filter((item) => item.start + item.duration >= now),
         }))
     );
+  }
+
+  private _groupCachedEventsByProvider(
+    cachedEntries: ScheduleCalendarMapEntry[],
+  ): Map<string, ScheduleFromCalendarEvent[]> {
+    // Pre-group cached entries for quick lookups per provider when we need fallback data.
+    const mapByProvider = new Map<string, ScheduleFromCalendarEvent[]>();
+
+    cachedEntries.forEach((entry) => {
+      entry.items.forEach((item) => {
+        const existing = mapByProvider.get(item.calProviderId);
+        if (existing) {
+          existing.push(item);
+        } else {
+          mapByProvider.set(item.calProviderId, [item]);
+        }
+      });
+    });
+
+    return mapByProvider;
   }
 }

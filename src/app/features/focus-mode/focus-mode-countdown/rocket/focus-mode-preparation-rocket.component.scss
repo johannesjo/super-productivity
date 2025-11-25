@@ -1,0 +1,100 @@
+$rocket-pulse-values: 0, 1, 2, 3, 4, 5;
+
+@mixin rocket-bounce-frames($pulse) {
+  @at-root {
+    @keyframes rocket-bounce-#{$pulse} {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+      45% {
+        transform: translateY(-8px);
+      }
+    }
+  }
+}
+
+@mixin rocket-bounce-animation($pulse) {
+  &.pulse-#{$pulse} {
+    animation: rocket-bounce-#{$pulse} 0.32s ease-in-out;
+  }
+}
+
+.rocket-wrapper {
+  position: relative;
+  width: 80px;
+  height: 140px;
+  margin: var(--s2) auto 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  transform-origin: 50% 100%;
+
+  @each $pulse in $rocket-pulse-values {
+    @include rocket-bounce-animation($pulse);
+    @include rocket-bounce-frames($pulse);
+  }
+
+  &.launch {
+    animation: rocket-launch 0.8s forwards ease-in !important;
+    //animation: rocket-launch 0.8s forwards cubic-bezier(0.25, 0, 0.9, 1);
+  }
+}
+
+.rocket-svg {
+  width: 100%;
+  height: 100%;
+  color: var(--c-primary);
+}
+
+.rocket-body {
+  fill: currentColor;
+}
+
+.rocket-nozzle {
+  fill: var(--c-primary-dark);
+}
+
+.rocket-fin {
+  fill: currentColor;
+  opacity: 0.85;
+}
+
+.rocket-flame {
+  fill: url('#rocket-flame-gradient');
+  transform-origin: 30px 108px;
+  animation: flame-flicker 0.28s infinite alternate;
+  transition: opacity 0.2s ease;
+}
+
+@keyframes flame-flicker {
+  from {
+    transform: scaleY(1);
+  }
+  to {
+    transform: scaleY(0.65);
+  }
+}
+
+@keyframes flame-launch {
+  from {
+    transform: scaleY(1.15);
+  }
+  to {
+    transform: scaleY(1.4);
+  }
+}
+
+@keyframes rocket-launch {
+  0% {
+    transform: translateY(0);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(-20vh) scale(1.1, 1);
+  }
+  100% {
+    transform: translateY(-70vh) scale(0.6, 1.2);
+    opacity: 0;
+  }
+}

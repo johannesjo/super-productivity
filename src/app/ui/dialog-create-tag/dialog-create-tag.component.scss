@@ -1,0 +1,24 @@
+.content {
+  margin-bottom: 16px;
+  width: 20em;
+}
+
+.content h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+mat-form-field {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.wrap-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.submit-button {
+  min-width: 80px;
+}

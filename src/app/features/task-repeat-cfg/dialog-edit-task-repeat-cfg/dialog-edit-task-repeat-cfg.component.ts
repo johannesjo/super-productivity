@@ -4,10 +4,9 @@ import {
   computed,
   effect,
   inject,
-  LOCALE_ID,
   signal,
 } from '@angular/core';
-import { Task, TaskReminderOptionId } from '../../tasks/task.model';
+import { Task } from '../../tasks/task.model';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -46,6 +45,9 @@ import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
@@ -66,13 +68,14 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
   ],
 })
 export class DialogEditTaskRepeatCfgComponent {
+  private _globalConfigService = inject(GlobalConfigService);
   private _tagService = inject(TagService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
   private _matDialogRef =
     inject<MatDialogRef<DialogEditTaskRepeatCfgComponent>>(MatDialogRef);
   private _translateService = inject(TranslateService);
-  private _locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _data = inject<{
     task?: Task;
     repeatCfg?: TaskRepeatCfg;
@@ -109,7 +112,7 @@ export class DialogEditTaskRepeatCfgComponent {
     const date = isDBDateStr(this._data.targetDate)
       ? dateStrToUtcDate(this._data.targetDate)
       : new Date(this._data.targetDate);
-    const formattedDate = formatMonthDay(date, this._locale);
+    const formattedDate = formatMonthDay(date, this._dateTimeFormatService.currentLocale);
 
     return this._translateService.instant(T.F.TASK_REPEAT.F.REMOVE_FOR_DATE, {
       date: formattedDate,
@@ -151,7 +154,10 @@ export class DialogEditTaskRepeatCfgComponent {
         ...DEFAULT_TASK_REPEAT_CFG,
         startDate: getDbDateStr(this._data.task.dueWithTime || undefined),
         startTime,
-        remindAt: startTime ? TaskReminderOptionId.AtStart : undefined,
+        remindAt: startTime
+          ? (this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+            DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!)
+          : undefined,
         title: this._data.task.title,
         notes: this._data.task.notes || undefined,
         tagIds: unique(this._data.task.tagIds),
@@ -163,7 +169,7 @@ export class DialogEditTaskRepeatCfgComponent {
   }
 
   private _initializeFormConfig(): void {
-    const _locale = this._locale;
+    const _locale = this._dateTimeFormatService.currentLocale;
     const today = new Date();
     const weekdayStr = today.toLocaleDateString(_locale, {
       weekday: 'long',
@@ -294,7 +300,9 @@ export class DialogEditTaskRepeatCfgComponent {
         restoreFocus: true,
         data: {
           message: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.MSG, {
-            date: new Date(targetDate).toLocaleDateString(this._locale),
+            date: new Date(targetDate).toLocaleDateString(
+              this._dateTimeFormatService.currentLocale,
+            ),
           }),
           okTxt: this._translateService.instant(T.F.TASK_REPEAT.D_DELETE_INSTANCE.OK),
         },

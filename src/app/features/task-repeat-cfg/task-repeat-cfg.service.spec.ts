@@ -31,17 +31,21 @@ describe('TaskRepeatCfgService', () => {
   let taskService: jasmine.SpyObj<TaskService>;
   let dispatchSpy: jasmine.Spy;
 
+  const formatIsoDate = (d: Date): string =>
+    `${d.getFullYear()}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+
   const mockTaskRepeatCfg: TaskRepeatCfg = {
     ...DEFAULT_TASK_REPEAT_CFG,
     id: 'test-cfg-id',
     title: 'Test Repeat Task',
     projectId: 'test-project',
     repeatCycle: 'DAILY',
-    startDate: new Date().toISOString().split('T')[0], // Use today's date
-    // eslint-disable-next-line no-mixed-operators
-    lastTaskCreationDay: new Date(Date.now() - 24 * 60 * 60 * 1000)
-      .toISOString()
-      .split('T')[0], // Yesterday
+    startDate: formatIsoDate(new Date()), // Today
+    lastTaskCreationDay: (() => {
+      const prevNow = new Date();
+      prevNow.setDate(prevNow.getDate() - 1);
+      return formatIsoDate(prevNow);
+    })(), // Yesterday
     repeatEvery: 1,
     defaultEstimate: 3600000,
     notes: 'Test notes',
@@ -400,6 +404,50 @@ describe('TaskRepeatCfgService', () => {
 
       const actions = await service._getActionsForTaskRepeatCfg(
         mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should skip creation if computed target date already has an instance', async () => {
+      const targetDayDate = new Date(2020, 0, 4).getTime();
+      const targetDate = new Date(2020, 0, 3);
+      const cfgNeedingCatchUp: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: formatIsoDate(new Date(2020, 0, 1)),
+        lastTaskCreationDay: formatIsoDate(new Date(2019, 11, 30)),
+        repeatEvery: 2,
+      };
+      const existingTask: TaskWithSubTasks = {
+        ...mockTaskWithSubTasks,
+        created: targetDate.getTime(),
+        dueDay: formatIsoDate(targetDate),
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgNeedingCatchUp,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should respect deleted instances based on computed target date', async () => {
+      const targetDayDate = new Date(2020, 0, 4).getTime();
+      const deletedDate = formatIsoDate(new Date(2020, 0, 3));
+      const cfgWithDeleted: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: formatIsoDate(new Date(2020, 0, 1)),
+        lastTaskCreationDay: formatIsoDate(new Date(2019, 11, 30)),
+        repeatEvery: 2,
+        deletedInstanceDates: [deletedDate],
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithDeleted,
         targetDayDate,
       );
 

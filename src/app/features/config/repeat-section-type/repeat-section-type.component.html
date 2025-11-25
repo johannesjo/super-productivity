@@ -2,7 +2,11 @@
   [@standardList]="field.fieldGroup?.length"
   class="list-wrapper"
 >
-  @for (innerField of field.fieldGroup; track trackByFn(i, innerField); let i = $index) {
+  @for (
+    innerField of field.fieldGroup;
+    track trackByFn($index, innerField);
+    let i = $index
+  ) {
     <div class="row">
       <formly-field
         [field]="innerField"

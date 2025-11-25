@@ -3,6 +3,7 @@ import { createEffect } from '@ngrx/effects';
 import {
   concatMap,
   debounceTime,
+  distinctUntilChanged,
   filter,
   first,
   map,
@@ -35,10 +36,16 @@ export class TaskDueEffects {
       return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
         first(),
         switchMap(() =>
-          // This inner observable will keep running even after outer completes
+          // Keep listening for date changes throughout the app lifecycle
           this._globalTrackingIntervalService.todayDateStr$.pipe(
-            first(),
-            switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+            distinctUntilChanged(),
+            switchMap((dateStr) => {
+              TaskLog.log(
+                '[TaskDueEffects] Date changed, processing tasks for:',
+                dateStr,
+              );
+              return this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$;
+            }),
             // Add debounce to ensure sync has fully completed and status is updated
             debounceTime(1000),
             // Ensure we're not in the middle of another sync
@@ -62,9 +69,13 @@ export class TaskDueEffects {
     return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       first(),
       switchMap(() =>
-        // This inner observable will keep running even after outer completes
+        // Keep listening for date changes throughout the app lifecycle
         this._globalTrackingIntervalService.todayDateStr$.pipe(
-          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+          distinctUntilChanged(),
+          switchMap((dateStr) => {
+            TaskLog.log('[TaskDueEffects] Date changed, removing overdue for:', dateStr);
+            return this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$;
+          }),
           // Add debounce to ensure sync has fully completed and status is updated
           debounceTime(1000),
           // Ensure we're not in the middle of another sync
@@ -96,8 +107,13 @@ export class TaskDueEffects {
     return this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       first(),
       switchMap(() =>
+        // Keep listening for date changes throughout the app lifecycle
         this._globalTrackingIntervalService.todayDateStr$.pipe(
-          switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
+          distinctUntilChanged(),
+          switchMap((dateStr) => {
+            TaskLog.log('[TaskDueEffects] Date changed, ensuring tasks for:', dateStr);
+            return this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$;
+          }),
           debounceTime(2000), // Wait a bit longer to ensure all other effects have run
           switchMap(() => this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$),
           switchMap(() => {

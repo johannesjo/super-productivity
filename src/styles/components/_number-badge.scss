@@ -1,0 +1,19 @@
+@use '../_globals.scss' as *;
+
+@mixin number-badge {
+  margin-left: 0;
+  position: absolute;
+  line-height: 1;
+  padding: 2px 4px 1px;
+  width: auto;
+  left: 50%;
+  transform: translateX(-50%);
+  font-weight: bold;
+  border-radius: 8px;
+  z-index: 4;
+  font-size: 12px;
+  pointer-events: none;
+  bottom: calc(-1 * var(--s-quarter));
+  background: var(--bg-lighter);
+  color: var(--text-color-most-intense);
+}

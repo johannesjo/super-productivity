@@ -14,8 +14,9 @@ describe('AddTaskBarParserService', () => {
       'updateCleanText',
       'setAutoDetectedProjectId',
       'updateProjectId',
-      'updateTagIds',
+      'updateTagIdsFromTxt',
       'updateNewTagTitles',
+      'updateSpent',
       'updateEstimate',
       'updateDate',
       'isAutoDetected',
@@ -88,8 +89,9 @@ describe('AddTaskBarParserService', () => {
       // Reset all spy calls before each test
       mockStateService.updateCleanText.calls.reset();
       mockStateService.updateDate.calls.reset();
+      mockStateService.updateSpent.calls.reset();
       mockStateService.updateEstimate.calls.reset();
-      mockStateService.updateTagIds.calls.reset();
+      mockStateService.updateTagIdsFromTxt.calls.reset();
       mockStateService.updateNewTagTitles.calls.reset();
       mockStateService.setAutoDetectedProjectId.calls.reset();
       mockStateService.updateProjectId.calls.reset();
@@ -114,11 +116,14 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: null,
           time: null,
+          spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -147,11 +152,14 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: currentDate,
           time: currentTime,
+          spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -177,11 +185,14 @@ describe('AddTaskBarParserService', () => {
         const mockState = {
           projectId: mockDefaultProject.id,
           tagIds: [],
+          tagIdsFromTxt: [],
           newTagTitles: [],
           date: currentDate,
           time: null,
+          spent: null,
           estimate: null,
           cleanText: null,
+          remindOption: null,
         };
         mockStateService.state.and.returnValue(mockState);
 
@@ -276,6 +287,30 @@ describe('AddTaskBarParserService', () => {
 
         expect(mockStateService.updateEstimate).toHaveBeenCalledWith(null);
       });
+
+      it('should call updateSpent when parsing text', () => {
+        service.parseAndUpdateText(
+          'Task with potential time spent',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateSpent).toHaveBeenCalled();
+      });
+
+      it('should handle null time spent', () => {
+        service.parseAndUpdateText(
+          'Simple task',
+          mockConfig,
+          mockProjects,
+          mockTags,
+          mockDefaultProject,
+        );
+
+        expect(mockStateService.updateSpent).toHaveBeenCalledWith(null);
+      });
     });
 
     describe('Basic Parsing Tests', () => {
@@ -288,7 +323,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTagIds).toHaveBeenCalled();
+        expect(mockStateService.updateTagIdsFromTxt).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -343,7 +378,7 @@ describe('AddTaskBarParserService', () => {
           mockDefaultProject,
         );
 
-        expect(mockStateService.updateTagIds).toHaveBeenCalled();
+        expect(mockStateService.updateTagIdsFromTxt).toHaveBeenCalled();
         expect(mockStateService.updateNewTagTitles).toHaveBeenCalled();
       });
 
@@ -439,6 +474,9 @@ describe('AddTaskBarParserService', () => {
           { input: 'Task t1.5h', expected: 'Task' },
           { input: 'Task 45d', expected: 'Task' },
           { input: 'Task t30m other text', expected: 'Task other text' },
+          { input: 'Task 1h/', expected: 'Task' },
+          { input: 'Task 1h/ between', expected: 'Task between' },
+          { input: '1h/ Task', expected: 'Task' },
         ];
 
         testCases.forEach(({ input, expected }) => {
@@ -549,11 +587,14 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: dateStr,
         time: timeStr,
+        spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -579,11 +620,14 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
+        spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -611,11 +655,14 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
+        spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -641,11 +688,14 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
+        spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 
@@ -670,11 +720,14 @@ describe('AddTaskBarParserService', () => {
       const mockState = {
         projectId: mockDefaultProject.id,
         tagIds: [],
+        tagIdsFromTxt: [],
         newTagTitles: [],
         date: null,
         time: null,
+        spent: null,
         estimate: null,
         cleanText: null,
+        remindOption: null,
       };
       mockStateService.state.and.returnValue(mockState);
 

@@ -1,0 +1,44 @@
+.impact-stars {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  outline: none;
+  user-select: none;
+}
+.impact-stars:focus-visible {
+  outline: 2px solid var(--c-accent, #6aa9ff);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.impact-stars.is-disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.impact-stars.is-readonly button {
+  pointer-events: none;
+}
+
+.impact-stars__star {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  background: transparent;
+  border: none;
+  padding: 0;
+  transition: transform 0.2s ease;
+}
+.impact-stars__star:hover:not(:disabled) {
+  transform: scale(1.15);
+}
+.impact-stars__star mat-icon {
+  color: inherit;
+  font-size: 28px;
+  width: 28px;
+  height: 28px;
+  transition: all 0.2s ease;
+}
+
+:host-context(.isDarkTheme) .impact-stars__star mat-icon {
+  color: #fff;
+}

@@ -1,0 +1,8 @@
+
+### Reverts
+
+* Revert "build: attempt to fix mas build by enabling auto discovery"
+* Revert "build: attempt to fix mas build by loginhelper stuff"
+* Revert "build: attempt to fix mas"
+* Revert "build: attempt to fix mas 2"
+* Revert "build: attempt to fix mas 3 diagnostics"

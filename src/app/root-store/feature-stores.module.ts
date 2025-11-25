@@ -18,11 +18,6 @@ import {
 import { FocusModeEffects } from '../features/focus-mode/store/focus-mode.effects';
 import { IDLE_FEATURE_KEY, idleReducer } from '../features/idle/store/idle.reducer';
 import { IdleEffects } from '../features/idle/store/idle.effects';
-import {
-  IMPROVEMENT_FEATURE_NAME,
-  improvementReducer,
-} from '../features/metric/improvement/store/improvement.reducer';
-import { ImprovementEffects } from '../features/metric/improvement/store/improvement.effects';
 import { issueProvidersFeature } from '../features/issue/store/issue-provider.reducer';
 import { PollToBacklogEffects } from '../features/issue/store/poll-to-backlog.effects';
 import { PollIssueUpdatesEffects } from '../features/issue/store/poll-issue-updates.effects';
@@ -33,11 +28,6 @@ import {
 } from '../features/metric/store/metric.reducer';
 import { NOTE_FEATURE_NAME, noteReducer } from '../features/note/store/note.reducer';
 import { NoteEffects } from '../features/note/store/note.effects';
-import {
-  OBSTRUCTION_FEATURE_NAME,
-  obstructionReducer,
-} from '../features/metric/obstruction/store/obstruction.reducer';
-import { ObstructionEffects } from '../features/metric/obstruction/store/obstruction.effects';
 import {
   POMODORO_FEATURE_NAME,
   pomodoroReducer,
@@ -118,9 +108,6 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
     StoreModule.forFeature(IDLE_FEATURE_KEY, idleReducer),
     EffectsModule.forFeature([IdleEffects]),
 
-    StoreModule.forFeature(IMPROVEMENT_FEATURE_NAME, improvementReducer),
-    EffectsModule.forFeature([ImprovementEffects]),
-
     StoreModule.forFeature(issueProvidersFeature),
     EffectsModule.forFeature([
       PollToBacklogEffects,
@@ -132,9 +119,6 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
 
     StoreModule.forFeature(NOTE_FEATURE_NAME, noteReducer),
     EffectsModule.forFeature([NoteEffects]),
-
-    StoreModule.forFeature(OBSTRUCTION_FEATURE_NAME, obstructionReducer),
-    EffectsModule.forFeature([ObstructionEffects]),
 
     StoreModule.forFeature(POMODORO_FEATURE_NAME, pomodoroReducer),
     EffectsModule.forFeature([PomodoroEffects]),

@@ -21,7 +21,7 @@ import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
-import { FocusModeMode } from '../focus-mode.model';
+import { FocusModeMode, TimerState } from '../focus-mode.model';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
@@ -29,6 +29,7 @@ import { showFocusOverlay } from './focus-mode.actions';
 import { cancelFocusSession } from './focus-mode.actions';
 import { combineLatest } from 'rxjs';
 import { MetricService } from '../../metric/metric.service';
+import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
 
@@ -41,6 +42,7 @@ export class FocusModeEffects {
   private taskService = inject(TaskService);
   private bannerService = inject(BannerService);
   private metricService = inject(MetricService);
+  private storageService = inject(FocusModeStorageService);
 
   // Auto-show overlay when task is selected (if always use focus mode is enabled)
   autoShowOverlay$ = createEffect(() =>
@@ -226,6 +228,49 @@ export class FocusModeEffects {
     { dispatch: false },
   );
 
+  persistCountdownDuration$ = createEffect(
+    () =>
+      this.actions$.pipe(
+        ofType(actions.setFocusSessionDuration),
+        withLatestFrom(this.store.select(selectors.selectMode)),
+        tap(([{ focusSessionDuration }, mode]) => {
+          if (mode === FocusModeMode.Countdown && focusSessionDuration > 0) {
+            this.storageService.setLastCountdownDuration(focusSessionDuration);
+          }
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  syncDurationWithMode$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(actions.setFocusModeMode),
+      withLatestFrom(this.store.select(selectors.selectTimer)),
+      switchMap(([{ mode }, timer]) => {
+        if (timer.purpose !== null) {
+          return EMPTY;
+        }
+
+        if (mode === FocusModeMode.Flowtime) {
+          return EMPTY;
+        }
+
+        const strategy = this.strategyFactory.getStrategy(mode);
+        const duration = strategy.initialSessionDuration;
+
+        if (
+          typeof duration !== 'number' ||
+          duration <= 0 ||
+          duration === timer.duration
+        ) {
+          return EMPTY;
+        }
+
+        return of(actions.setFocusSessionDuration({ focusSessionDuration: duration }));
+      }),
+    ),
+  );
+
   // Electron-specific effects
   setTaskBarProgress$ =
     IS_ELECTRON &&
@@ -262,92 +307,131 @@ export class FocusModeEffects {
       combineLatest([
         this.store.select(selectors.selectIsSessionRunning),
         this.store.select(selectors.selectIsBreakActive),
+        this.store.select(selectors.selectIsSessionCompleted),
         this.store.select(selectors.selectMode),
         this.store.select(selectors.selectCurrentCycle),
         this.store.select(selectors.selectIsOverlayShown),
         this.store.select(selectors.selectTimer),
       ]).pipe(
-        tap(([isSessionRunning, isOnBreak, mode, cycle, isOverlayShown, timer]) => {
-          // Only show banner when overlay is hidden
-          if (isOverlayShown) {
-            this.bannerService.dismiss(BannerId.FocusMode);
-            return;
-          }
-
-          if (isSessionRunning || isOnBreak) {
-            // Determine banner message based on session type
-            let translationKey: string;
-            let icon: string;
-            let timer$;
-            let progress$;
-
-            if (isOnBreak) {
-              // Check if break time is up
-              const isBreakTimeUp =
-                timer.purpose === 'break' &&
-                !timer.isRunning &&
-                timer.duration > 0 &&
-                timer.elapsed >= timer.duration;
-
-              if (isBreakTimeUp) {
-                // Break is done - time is up
-                translationKey = T.F.POMODORO.BREAK_IS_DONE;
-                icon = 'notifications';
-                timer$ = undefined; // No timer needed for done state
-                progress$ = undefined; // No progress bar needed
-              } else {
-                // Break is still running
-                translationKey =
-                  mode === FocusModeMode.Pomodoro
-                    ? T.F.FOCUS_MODE.B.POMODORO_BREAK_RUNNING
-                    : T.F.FOCUS_MODE.B.BREAK_RUNNING;
-                icon = 'free_breakfast';
-                timer$ = this.store.select(selectors.selectTimeRemaining);
-                progress$ = this.store.select(selectors.selectProgress);
-              }
-            } else {
-              // Work session is active
-              const isCountTimeUp = mode === FocusModeMode.Flowtime;
-              translationKey =
-                mode === FocusModeMode.Pomodoro
-                  ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
-                  : T.F.FOCUS_MODE.B.SESSION_RUNNING;
-              icon = 'center_focus_strong';
-              timer$ = isCountTimeUp
-                ? this.store.select(selectors.selectTimeElapsed)
-                : this.store.select(selectors.selectTimeRemaining);
-              progress$ = isCountTimeUp
-                ? undefined
-                : this.store.select(selectors.selectProgress);
+        map(
+          (
+            values,
+          ): [boolean, boolean, boolean, FocusModeMode, number, boolean, TimerState] =>
+            values as [
+              boolean,
+              boolean,
+              boolean,
+              FocusModeMode,
+              number,
+              boolean,
+              TimerState,
+            ],
+        ),
+        tap(
+          ([
+            isSessionRunning,
+            isOnBreak,
+            isSessionCompleted,
+            mode,
+            cycle,
+            isOverlayShown,
+            timer,
+          ]) => {
+            // Only show banner when overlay is hidden
+            if (isOverlayShown) {
+              this.bannerService.dismiss(BannerId.FocusMode);
+              return;
             }
 
-            const translateParams =
-              mode === FocusModeMode.Pomodoro ? { cycleNr: cycle || 1 } : undefined;
+            if (isSessionRunning || isOnBreak || isSessionCompleted) {
+              // Determine banner message based on session type
+              let translationKey: string;
+              let icon: string;
+              let timer$;
+              let progress$;
 
-            this.bannerService.open({
-              id: BannerId.FocusMode,
-              ico: icon,
-              msg: translationKey,
-              translateParams,
-              timer$,
-              progress$,
-              action2: {
-                label: T.F.FOCUS_MODE.B.TO_FOCUS_OVERLAY,
-                fn: () => {
-                  this.store.dispatch(showFocusOverlay());
+              if (isSessionCompleted) {
+                // Session is completed
+                translationKey =
+                  mode === FocusModeMode.Pomodoro
+                    ? T.F.FOCUS_MODE.POMODORO_SESSION_COMPLETED
+                    : T.F.FOCUS_MODE.SESSION_COMPLETED;
+                icon = 'check_circle';
+                timer$ = undefined; // No timer needed for completed state
+                progress$ = undefined; // No progress bar needed
+              } else if (isOnBreak) {
+                // Check if break time is up
+                const isBreakTimeUp =
+                  timer.purpose === 'break' &&
+                  !timer.isRunning &&
+                  timer.duration > 0 &&
+                  timer.elapsed >= timer.duration;
+
+                if (isBreakTimeUp) {
+                  // Break is done - time is up
+                  translationKey = T.F.POMODORO.BREAK_IS_DONE;
+                  icon = 'notifications';
+                  timer$ = undefined; // No timer needed for done state
+                  progress$ = undefined; // No progress bar needed
+                } else {
+                  // Break is still running
+                  translationKey =
+                    mode === FocusModeMode.Pomodoro
+                      ? T.F.FOCUS_MODE.B.POMODORO_BREAK_RUNNING
+                      : T.F.FOCUS_MODE.B.BREAK_RUNNING;
+                  icon = 'free_breakfast';
+                  timer$ = this.store.select(selectors.selectTimeRemaining);
+                  progress$ = this.store.select(selectors.selectProgress);
+                }
+              } else {
+                // Work session is active
+                const isCountTimeUp = mode === FocusModeMode.Flowtime;
+                translationKey =
+                  mode === FocusModeMode.Pomodoro
+                    ? T.F.FOCUS_MODE.B.POMODORO_SESSION_RUNNING
+                    : T.F.FOCUS_MODE.B.SESSION_RUNNING;
+                icon = 'center_focus_strong';
+                timer$ = isCountTimeUp
+                  ? this.store.select(selectors.selectTimeElapsed)
+                  : this.store.select(selectors.selectTimeRemaining);
+                progress$ = isCountTimeUp
+                  ? undefined
+                  : this.store.select(selectors.selectProgress);
+              }
+
+              const translateParams =
+                mode === FocusModeMode.Pomodoro ? { cycleNr: cycle || 1 } : undefined;
+
+              this.bannerService.open({
+                id: BannerId.FocusMode,
+                ico: icon,
+                msg: translationKey,
+                translateParams,
+                timer$,
+                progress$,
+                action2: {
+                  label: T.F.FOCUS_MODE.B.TO_FOCUS_OVERLAY,
+                  fn: () => {
+                    this.store.dispatch(showFocusOverlay());
+                  },
                 },
-              },
-              action: {
-                label: T.G.CANCEL,
-                fn: () => {
-                  this.store.dispatch(cancelFocusSession());
-                },
-              },
-            });
-          } else {
-            this.bannerService.dismiss(BannerId.FocusMode);
-          }
-        }),
+                // Only show Cancel button when session is not completed
+                ...(isSessionCompleted
+                  ? {}
+                  : {
+                      action: {
+                        label: T.G.CANCEL,
+                        fn: () => {
+                          this.store.dispatch(cancelFocusSession());
+                        },
+                      },
+                    }),
+              });
+            } else {
+              this.bannerService.dismiss(BannerId.FocusMode);
+            }
+          },
+        ),
       ),
     { dispatch: false },
   );

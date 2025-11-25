@@ -7,7 +7,6 @@ import {
   HostListener,
   inject,
   input,
-  LOCALE_ID,
   OnDestroy,
   OnInit,
   signal,
@@ -22,7 +21,6 @@ import {
   catchError,
   delay,
   distinctUntilChanged,
-  filter,
   map,
   shareReplay,
   skip,
@@ -45,7 +43,7 @@ import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edi
 import { TaskDetailItemComponent } from './task-additional-info-item/task-detail-item.component';
 import { IssueData, IssueProviderJira } from '../../issue/issue.model';
 import { ICAL_TYPE, JIRA_TYPE } from '../../issue/issue.const';
-import { IS_ELECTRON } from '../../../app.constants';
+import { HISTORY_STATE, IS_ELECTRON } from '../../../app.constants';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import { devError } from '../../../util/dev-error';
 import { IS_MOBILE } from '../../../util/is-mobile';
@@ -68,7 +66,8 @@ import { IssueContentComponent } from '../../issue/issue-content/issue-content.c
 import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
 import { TaskAttachmentListComponent } from '../task-attachment/task-attachment-list/task-attachment-list.component';
 import { TagEditComponent } from '../../tag/tag-edit/tag-edit.component';
-import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
+import { DialogSelectDateTimeComponent } from '../dialog-select-date-time/dialog-select-date-time.component';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
 import { IssueIconPipe } from '../../issue/issue-icon/issue-icon.pipe';
 import { takeUntilDestroyed, toObservable, toSignal } from '@angular/core/rxjs-interop';
@@ -116,7 +115,6 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   private _store = inject(Store);
   private _translateService = inject(TranslateService);
   private _destroyRef = inject(DestroyRef);
-  private _locale = inject(LOCALE_ID);
   private _dateTimeFormatService = inject(DateTimeFormatService);
 
   // Inputs
@@ -183,11 +181,13 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
   repeatCfgLabel = toSignal(
     this._repeatCfg$.pipe(
-      filter((cfg): cfg is NonNullable<typeof cfg> => !!cfg),
       map((repeatCfg) => {
+        if (!repeatCfg) {
+          return null;
+        }
         const [key, params] = getTaskRepeatInfoText(
           repeatCfg,
-          this._locale,
+          this._dateTimeFormatService.currentLocale,
           this._dateTimeFormatService,
         );
         return this._translateService.instant(key, params);
@@ -397,7 +397,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnInit(): void {
-    window.history.pushState({ taskDetailPanel: true }, '');
+    window.history.pushState({ [HISTORY_STATE.TASK_DETAIL_PANEL]: true }, '');
   }
 
   ngAfterViewInit(): void {
@@ -422,7 +422,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   }
 
   ngOnDestroy(): void {
-    if (window.history.state.taskDetailPanel) {
+    if (window.history.state?.[HISTORY_STATE.TASK_DETAIL_PANEL]) {
       window.history.back();
     }
     window.clearTimeout(this._focusTimeout);
@@ -488,6 +488,34 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
         this.taskService.focusTaskIfPossible(this.task().id);
       });
     }
+  }
+
+  editCompleted(): void {
+    const dialogRef = this._matDialog.open(DialogSelectDateTimeComponent, {
+      data: {
+        dateTime: this.task().doneOn,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((doneOn) => {
+      if (typeof doneOn === 'number') {
+        this.taskService.update(this.task().id, { doneOn });
+      }
+    });
+  }
+
+  editCreated(): void {
+    const dialogRef = this._matDialog.open(DialogSelectDateTimeComponent, {
+      data: {
+        dateTime: this.task().created,
+      },
+    });
+
+    dialogRef.afterClosed().subscribe((created) => {
+      if (typeof created === 'number') {
+        this.taskService.update(this.task().id, { created });
+      }
+    });
   }
 
   onItemKeyPress(ev: KeyboardEvent): void {

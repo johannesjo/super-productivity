@@ -2,12 +2,12 @@ import { Routes } from '@angular/router';
 
 import {
   ActiveWorkContextGuard,
+  DefaultStartPageGuard,
   FocusOverlayOpenGuard,
   ValidProjectIdGuard,
   ValidTagIdGuard,
 } from './app.guard';
 
-import { TODAY_TAG } from './features/tag/tag.const';
 import { TagTaskPageComponent } from './pages/tag-task-page/tag-task-page.component';
 
 export const APP_ROUTES: Routes = [
@@ -220,6 +220,26 @@ export const APP_ROUTES: Routes = [
     data: { page: 'plugin-index' },
     canActivate: [FocusOverlayOpenGuard],
   },
-
-  { path: '**', redirectTo: `tag/${TODAY_TAG.id}/tasks` },
+  {
+    path: 'contrast-test',
+    loadComponent: () =>
+      import('./pages/contrast-test/contrast-test.component').then(
+        (m) => m.ContrastTestComponent,
+      ),
+    data: { page: 'contrast-test' },
+  },
+  {
+    path: '**',
+    canActivate: [DefaultStartPageGuard],
+    component: TagTaskPageComponent,
+  },
+  {
+    path: 'donate',
+    loadComponent: () =>
+      import('./pages/donate-page/donate-page.component').then(
+        (m) => m.DonatePageComponent,
+      ),
+    data: { page: 'donate' },
+    canActivate: [FocusOverlayOpenGuard],
+  },
 ];

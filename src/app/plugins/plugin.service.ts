@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { inject, Injectable, signal, OnDestroy } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
@@ -139,7 +139,16 @@ export class PluginService implements OnDestroy {
           }
         }
       } catch (error) {
-        PluginLog.err(`Failed to discover plugin at ${path}:`, error);
+        if (
+          error instanceof HttpErrorResponse &&
+          (error.status === 0 || error.status === 404)
+        ) {
+          PluginLog.warn(
+            `Optional built-in plugin manifest missing at ${path} (status ${error.status}). Skipping.`,
+          );
+        } else {
+          PluginLog.err(`Failed to discover plugin at ${path}:`, error);
+        }
       }
     }
   }
@@ -184,6 +193,7 @@ export class PluginService implements OnDestroy {
 
           if (cachedPlugin.icon) {
             this._pluginIcons.set(cachedPlugin.id, cachedPlugin.icon);
+            this._registerPluginIcon(cachedPlugin.id, cachedPlugin.icon);
             this._updatePluginIcons();
           }
         } catch (error) {
@@ -217,6 +227,11 @@ export class PluginService implements OnDestroy {
 
   private _updatePluginIcons(): void {
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
+  }
+
+  private _registerPluginIcon(pluginId: string, iconContent: string): void {
+    const iconName = `plugin-${pluginId}-icon`;
+    this._globalThemeService.registerSvgIconFromContent(iconName, iconContent);
   }
 
   private _setPluginState(pluginId: string, state: PluginState): void {
@@ -435,6 +450,7 @@ export class PluginService implements OnDestroy {
       }
       if (icon) {
         this._pluginIcons.set(manifest.id, icon);
+        this._registerPluginIcon(manifest.id, icon);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
@@ -916,6 +932,7 @@ export class PluginService implements OnDestroy {
       // Store icon content if it exists
       if (iconContent) {
         this._pluginIcons.set(manifest.id, iconContent);
+        this._registerPluginIcon(manifest.id, iconContent);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 
@@ -1189,6 +1206,7 @@ export class PluginService implements OnDestroy {
       }
       if (icon) {
         this._pluginIcons.set(manifest.id, icon);
+        this._registerPluginIcon(manifest.id, icon);
         this._pluginIconsSignal.set(new Map(this._pluginIcons));
       }
 

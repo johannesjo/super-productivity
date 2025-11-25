@@ -19,7 +19,7 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
       # required because setting via env.TZ does not work on windows
@@ -82,7 +82,7 @@ jobs:
           github_token: ${{ secrets.github_token }}
 
       - name: 'Upload Artifact'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: WinStoreRelease
           path: .tmp/app-builds/*.appx

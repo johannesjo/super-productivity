@@ -16,7 +16,7 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -38,6 +38,8 @@ import { TaskComponent } from '../task/task.component';
 import { AsyncPipe } from '@angular/common';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 import { TaskLog } from '../../../core/log';
+import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
+import { DEFAULT_OPTIONS } from '../../task-view-customizer/types';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -70,6 +72,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _store = inject(Store);
   private _issueService = inject(IssueService);
   private _taskViewCustomizerService = inject(TaskViewCustomizerService);
+  private _scheduleExternalDragService = inject(ScheduleExternalDragService);
   dropListService = inject(DropListService);
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -120,10 +123,19 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList()!);
+    this._scheduleExternalDragService.setActiveTask(null);
   }
 
   trackByFn(i: number, task: Task): string {
     return task.id;
+  }
+
+  onDragStarted(task: TaskWithSubTasks, event: CdkDragStart): void {
+    this._scheduleExternalDragService.setActiveTask(task, event.source._dragRef);
+  }
+
+  onDragEnded(): void {
+    this._scheduleExternalDragService.setActiveTask(null);
   }
 
   enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
@@ -168,6 +180,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       listModelId: this.listModelId(),
       filteredTasks: this.filteredTasks(),
     });
+
+    if (this._scheduleExternalDragService.isCancelNextDrop()) {
+      this._scheduleExternalDragService.setCancelNextDrop(false);
+      return;
+    }
 
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
@@ -235,7 +252,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       newIds.map((p) => p.id),
     );
 
-    this._taskViewCustomizerService.setSort('default');
+    this._taskViewCustomizerService.setSort(DEFAULT_OPTIONS.sort);
   }
 
   async _addFromIssuePanel(

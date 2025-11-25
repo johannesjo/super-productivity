@@ -3,7 +3,13 @@ import { WebdavApi } from './webdav-api';
 import { WebdavPrivateCfg } from './webdav.model';
 import { WebDavHttpAdapter } from './webdav-http-adapter';
 import { WebdavXmlParser } from './webdav-xml-parser';
-import { HttpNotOkAPIError } from '../../../errors/errors';
+import {
+  HttpNotOkAPIError,
+  InvalidDataSPError,
+  NoRevAPIError,
+  RemoteFileChangedUnexpectedly,
+  RemoteFileNotFoundAPIError,
+} from '../../../errors/errors';
 
 describe('WebdavApi', () => {
   let api: WebdavApi;
@@ -83,9 +89,7 @@ describe('WebdavApi', () => {
       mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
 
       await expectAsync(api.getFileMeta('/test.txt', null)).toBeRejectedWith(
-        jasmine.objectContaining({
-          name: ' RemoteFileNotFoundAPIError',
-        }),
+        jasmine.any(RemoteFileNotFoundAPIError),
       );
     });
 
@@ -99,9 +103,7 @@ describe('WebdavApi', () => {
       mockXmlParser.parseMultiplePropsFromXml.and.returnValue([]);
 
       await expectAsync(api.getFileMeta('/test.txt', null)).toBeRejectedWith(
-        jasmine.objectContaining({
-          name: ' RemoteFileNotFoundAPIError',
-        }),
+        jasmine.any(RemoteFileNotFoundAPIError),
       );
     });
 
@@ -128,9 +130,36 @@ describe('WebdavApi', () => {
 
       expect(mockHttpAdapter.request).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          url: 'http://example.com/webdav/folder/file with spaces.txt',
+          url: 'http://example.com/webdav/folder/file%20with%20spaces.txt',
         }),
       );
+    });
+
+    it('should fall back to HEAD metadata when PROPFIND fails and fallback is enabled', async () => {
+      const mockResponse = {
+        status: 500,
+        headers: {},
+        data: '',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+
+      const headMeta = {
+        filename: 'test.txt',
+        basename: 'test.txt',
+        lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        size: 42,
+        type: 'file',
+        etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
+        data: {},
+      };
+      const headSpy = spyOn<any>(api, '_getFileMetaViaHead').and.returnValue(
+        Promise.resolve(headMeta),
+      );
+
+      const result = await api.getFileMeta('/test.txt', null, true);
+
+      expect(headSpy).toHaveBeenCalledWith('http://example.com/webdav/test.txt');
+      expect(result).toEqual(headMeta);
     });
   });
 
@@ -216,6 +245,101 @@ describe('WebdavApi', () => {
       });
 
       expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+    });
+
+    it('should fetch metadata when Last-Modified header is missing but ETag is present', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {
+          etag: '"abc123"',
+        },
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          data: {
+            etag: '"meta-etag-should-not-override"',
+          },
+        }),
+      );
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(api.getFileMeta).toHaveBeenCalledWith('/test.txt', null, true);
+      expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+      expect(result.legacyRev).toBe('abc123');
+      expect(result.lastModified).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+    });
+
+    it('should set legacyRev from metadata when GET response omits both headers', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {},
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          size: 100,
+          type: 'file',
+          etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
+          data: {
+            etag: '"propfind-etag-456"',
+          },
+        }),
+      );
+
+      const result = await api.download({
+        path: '/test.txt',
+      });
+
+      expect(result.rev).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+      expect(result.legacyRev).toBe('propfind-etag-456');
+      expect(result.lastModified).toBe('Wed, 15 Jan 2025 10:00:00 GMT');
+    });
+
+    it('should throw NoRevAPIError if metadata fallback cannot provide a revision', async () => {
+      const mockResponse = {
+        status: 200,
+        headers: {},
+        data: 'file content',
+      };
+      mockHttpAdapter.request.and.returnValue(Promise.resolve(mockResponse));
+      mockXmlParser.validateResponseContent.and.stub();
+
+      spyOn(api, 'getFileMeta').and.returnValue(
+        Promise.resolve({
+          filename: 'test.txt',
+          basename: 'test.txt',
+          lastmod: '',
+          size: 0,
+          type: 'file',
+          etag: '',
+          data: {},
+        }),
+      );
+
+      await expectAsync(
+        api.download({
+          path: '/test.txt',
+        }),
+      ).toBeRejectedWith(jasmine.any(NoRevAPIError));
     });
 
     // Test removed: If-None-Match header functionality has been removed
@@ -353,11 +477,7 @@ describe('WebdavApi', () => {
           data: 'new content',
           expectedRev: 'oldrev',
         }),
-      ).toBeRejectedWith(
-        jasmine.objectContaining({
-          name: 'RemoteFileChangedUnexpectedly',
-        }),
-      );
+      ).toBeRejectedWith(jasmine.any(RemoteFileChangedUnexpectedly));
     });
 
     it('should handle 409 Conflict by creating parent directory', async () => {
@@ -625,6 +745,55 @@ describe('WebdavApi', () => {
     });
   });
 
+  describe('_getFileMetaViaHead', () => {
+    it('should parse HEAD response into FileMeta data', async () => {
+      const mockHeadResponse = {
+        status: 200,
+        headers: {
+          'last-modified': 'Wed, 15 Jan 2025 15:00:00 GMT',
+          'content-length': '128',
+          'content-type': 'application/json',
+        },
+        data: '',
+      };
+      const requestSpy = spyOn<any>(api, '_makeRequest').and.returnValue(
+        Promise.resolve(mockHeadResponse),
+      );
+
+      const result = await (api as any)._getFileMetaViaHead(
+        'http://example.com/webdav/test.json',
+      );
+
+      expect(requestSpy).toHaveBeenCalledWith({
+        url: 'http://example.com/webdav/test.json',
+        method: 'HEAD',
+      });
+      expect(result).toEqual({
+        filename: 'test.json',
+        basename: 'test.json',
+        lastmod: 'Wed, 15 Jan 2025 15:00:00 GMT',
+        size: 128,
+        type: 'application/json',
+        etag: 'Wed, 15 Jan 2025 15:00:00 GMT',
+        data: {},
+      });
+    });
+
+    it('should throw InvalidDataSPError when Last-Modified header missing', async () => {
+      spyOn<any>(api, '_makeRequest').and.returnValue(
+        Promise.resolve({
+          status: 200,
+          headers: {},
+          data: '',
+        }),
+      );
+
+      await expectAsync(
+        (api as any)._getFileMetaViaHead('http://example.com/webdav/test.json'),
+      ).toBeRejectedWith(jasmine.any(InvalidDataSPError));
+    });
+  });
+
   describe('_buildFullPath', () => {
     it('should build correct full paths', () => {
       expect((api as any)._buildFullPath('http://example.com/', '/file.txt')).toBe(
@@ -635,6 +804,46 @@ describe('WebdavApi', () => {
       );
       expect((api as any)._buildFullPath('http://example.com/', 'file.txt')).toBe(
         'http://example.com/file.txt',
+      );
+    });
+
+    it('should throw error for invalid path sequences', () => {
+      expect(() =>
+        (api as any)._buildFullPath('http://example.com/', '../secret'),
+      ).toThrowError(/Invalid path/);
+      expect(() =>
+        (api as any)._buildFullPath('http://example.com/', '//secret'),
+      ).toThrowError(/Invalid path/);
+    });
+
+    it('should encode path segments with spaces', () => {
+      expect(
+        (api as any)._buildFullPath('http://example.com/base', '/file with spaces.txt'),
+      ).toBe('http://example.com/base/file%20with%20spaces.txt');
+    });
+
+    it('should not double-encode already encoded paths', () => {
+      expect(
+        (api as any)._buildFullPath(
+          'http://example.com/base',
+          '/file%20with%20spaces.txt',
+        ),
+      ).toBe('http://example.com/base/file%20with%20spaces.txt');
+    });
+
+    it('should handle base URLs with spaces', () => {
+      expect(
+        (api as any)._buildFullPath('http://example.com/User Name', '/file.txt'),
+      ).toBe('http://example.com/User%20Name/file.txt');
+    });
+
+    it('should fallback gracefully for invalid URLs', () => {
+      // Fallback behavior verification
+      const invalidBase = 'not-a-valid-url';
+      const path = '/file.txt';
+      // The fallback just concatenates and tries to encode
+      expect((api as any)._buildFullPath(invalidBase, path)).toBe(
+        'not-a-valid-url/file.txt',
       );
     });
   });

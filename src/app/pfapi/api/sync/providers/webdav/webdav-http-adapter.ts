@@ -99,7 +99,7 @@ export class WebDavHttpAdapter {
       }
 
       // Check for common HTTP errors
-      this._checkHttpStatus(response.status, options.url);
+      this._checkHttpStatus(response.status, options.url, response.data);
 
       return response;
     } catch (e) {
@@ -156,7 +156,7 @@ export class WebDavHttpAdapter {
     };
   }
 
-  private _checkHttpStatus(status: number, url: string): void {
+  private _checkHttpStatus(status: number, url: string, body?: string): void {
     if (status === WebDavHttpStatus.NOT_MODIFIED) {
       // 304 Not Modified is not an error - let it pass through
       return;
@@ -180,7 +180,7 @@ export class WebDavHttpAdapter {
         status: status,
         statusText: `HTTP ${status} for ${url}`,
       });
-      throw new HttpNotOkAPIError(errorResponse);
+      throw new HttpNotOkAPIError(errorResponse, body);
     }
   }
 

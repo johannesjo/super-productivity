@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
+import { Store } from '@ngrx/store';
 import { AddTaskBarComponent } from './add-task-bar.component';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -14,6 +15,8 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE } from 'src/app/app.constants';
+import { DateAdapter } from '@angular/material/core';
 
 @Component({
   template: `<add-task-bar></add-task-bar>`,
@@ -26,6 +29,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
   let component: AddTaskBarComponent;
   let fixture: ComponentFixture<TestHostComponent>;
   let tagsSubject: BehaviorSubject<any>;
+  let miscSubject: BehaviorSubject<any>;
 
   const validTags: Tag[] = [
     { id: '1', title: 'UX', color: '#ff0000', theme: { primary: '#ff0000' } } as Tag,
@@ -60,6 +64,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
   ];
 
   beforeEach(async () => {
+    miscSubject = new BehaviorSubject({ defaultProjectId: null });
     const taskServiceSpy = jasmine.createSpyObj('TaskService', [
       'add',
       'getByIdOnce$',
@@ -72,11 +77,16 @@ describe('AddTaskBarComponent Mentions Integration', () => {
     });
     const projectServiceSpy = jasmine.createSpyObj('ProjectService', [], {
       list$: of(validProjects),
+      listSorted$: of(validProjects),
+      listSortedForUI$: of(validProjects),
+      listSortedForUI: signal(validProjects),
     });
     tagsSubject = new BehaviorSubject(validTags);
     const tagServiceSpy = jasmine.createSpyObj('TagService', ['addTag'], {
       tags$: of(validTags),
       tagsNoMyDayAndNoList$: tagsSubject,
+      tagsNoMyDayAndNoListSorted$: tagsSubject,
+      tagsNoMyDayAndNoListSorted: signal(validTags),
     });
     const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
       shortSyntax$: of({
@@ -84,6 +94,8 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         isEnableDue: true,
         isEnableProject: true,
       }),
+      localization: () => ({ timeLocale: DEFAULT_LOCALE }),
+      misc$: miscSubject,
     });
     const addTaskBarIssueSearchServiceSpy = jasmine.createSpyObj(
       'AddTaskBarIssueSearchService',
@@ -91,6 +103,11 @@ describe('AddTaskBarComponent Mentions Integration', () => {
     );
     const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    const storeSpy = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+    const dateAdapter = jasmine.createSpyObj<DateAdapter<Date>>('DateAdapter', [], {
+      getFirstDayOfWeek: () => DEFAULT_FIRST_DAY_OF_WEEK,
+      setLocale: () => {},
+    });
 
     await TestBed.configureTestingModule({
       imports: [
@@ -105,12 +122,14 @@ describe('AddTaskBarComponent Mentions Integration', () => {
         { provide: ProjectService, useValue: projectServiceSpy },
         { provide: TagService, useValue: tagServiceSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
+        { provide: DateAdapter, useValue: dateAdapter },
         {
           provide: AddTaskBarIssueSearchService,
           useValue: addTaskBarIssueSearchServiceSpy,
         },
         { provide: MatDialog, useValue: matDialogSpy },
         { provide: SnackService, useValue: snackServiceSpy },
+        { provide: Store, useValue: storeSpy },
       ],
     }).compileComponents();
 

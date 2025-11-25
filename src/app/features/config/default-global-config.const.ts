@@ -1,5 +1,6 @@
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
+import { TaskReminderOptionId } from '../tasks/task.model';
 import { GlobalConfigState } from './global-config.model';
 
 const minute = 60 * 1000;
@@ -7,9 +8,21 @@ const defaultVoice = getDefaultVoice();
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
-  lang: {
-    lng: null,
-    timeLocale: undefined,
+  appFeatures: {
+    isTimeTrackingEnabled: true,
+    isFocusModeEnabled: true,
+    isSchedulerEnabled: true,
+    isPlannerEnabled: true,
+    isBoardsEnabled: true,
+    isScheduleDayPanelEnabled: true,
+    isIssuesPanelEnabled: true,
+    isProjectNotesEnabled: true,
+    isSyncIconEnabled: true,
+  },
+  localization: {
+    lng: undefined,
+    dateTimeLocale: undefined,
+    firstDayOfWeek: undefined,
   },
   misc: {
     isConfirmBeforeExit: false,
@@ -21,10 +34,10 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTrayShowCurrentTask: true,
     isTrayShowCurrentCountdown: true,
     defaultProjectId: null,
-    firstDayOfWeek: 1,
     startOfNextDay: 0,
     isDisableAnimations: false,
-    isDisableProductivityTips: false,
+    isDisableCelebration: false,
+    isShowProductivityTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
 **What do I want?**
@@ -33,6 +46,8 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 `,
     isOverlayIndicatorEnabled: false,
     customTheme: 'default',
+    isEnableUserProfiles: false,
+    defaultStartPage: 0,
   },
   shortSyntax: {
     isEnableProject: true,
@@ -162,6 +177,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   reminder: {
     isCountdownBannerEnabled: true,
     countdownDuration: minute * 10,
+    defaultTaskRemindOption: TaskReminderOptionId.AtStart, // The hard-coded default prior to this changeable setting
   },
   schedule: {
     isWorkStartEndEnabled: true,

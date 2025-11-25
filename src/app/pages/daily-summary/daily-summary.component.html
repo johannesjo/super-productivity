@@ -1,26 +1,10 @@
 @let cfg = cfg$ | async;
 
 <div class="page-wrapper">
-  @if (isForToday) {
-    <div style="text-align: center">
-      <a
-        class="back-btn"
-        color="primary"
-        mat-button
-        routerLink="/active/tasks"
-      >
-        <mat-icon>chevron_left</mat-icon>
-        {{ T.PDS.BACK | translate }}
-        <!--<mat-icon>playlist_play</mat-icon>-->
-      </a>
-    </div>
-  }
-
   <h1 class="done-headline mat-headline-5">
-    @if (isForToday) {
+    @if (isForToday && !cfg?.misc?.isDisableCelebration) {
       <span [innerHTML]="T.PDS.CELEBRATE | translate"></span>
-    }
-    @if (!isForToday) {
+    } @else {
       <span>{{ T.PDS.SUMMARY_FOR | translate: { dayStr: dayStr } }}</span>
     }
   </h1>
@@ -64,8 +48,8 @@
       <div class="summary-text">
         {{ T.PDS.TIME_SPENT_AND_ESTIMATE_LABEL | translate }}
         <div class="summary-val">
-          {{ timeWorked$ | async | msToClockString }} /
-          {{ estimatedOnTasksWorkedOn$ | async | msToClockString }}
+          <span [innerHtml]="timeWorked$ | async | msToClockString"></span> /
+          <span [innerHtml]="estimatedOnTasksWorkedOn$ | async | msToClockString"></span>
         </div>
       </div>
     </div>
@@ -76,7 +60,20 @@
         <div class="summary-text">
           {{ T.PDS.BREAK_LABEL | translate }}
           <div class="summary-val">
-            {{ breakNr$ | async }} / {{ breakTime$ | async | msToClockString }}
+            <inline-input
+              (changed)="updateBreakNr($event)"
+              [type]="'text'"
+              [value]="breakNr$ | async"
+            >
+            </inline-input>
+            /
+            <inline-input
+              (changed)="updateBreakTime($event)"
+              [type]="'duration'"
+              [displayValue]="breakTime$ | async | msToClockString"
+              [value]="breakTime$ | async"
+            >
+            </inline-input>
           </div>
         </div>
       </div>
@@ -196,8 +193,8 @@
           style="max-width: 600px"
         >
           <evaluation-sheet
-            (save)="onEvaluationSave()"
-            [day]="dayStr$ | async"
+            [dayStr$]="dayStr$"
+            [timeWorkedToday]="timeWorked$ | async"
           ></evaluation-sheet>
         </section>
       </mat-tab>
@@ -242,15 +239,3 @@
     </div>
   </section>
 </div>
-
-@if (showSuccessAnimation) {
-  <div class="success-animation-wrapper">
-    <mat-icon>wb_sunny</mat-icon>
-    <div class="unicorn-wrapper">
-      <img
-        class="unicorn"
-        src="assets/unicorn.png"
-      />
-    </div>
-  </div>
-}

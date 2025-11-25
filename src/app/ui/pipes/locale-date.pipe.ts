@@ -1,4 +1,4 @@
-import { inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
 
@@ -13,7 +13,6 @@ import { DateTimeFormatService } from '../../core/date-time-format/date-time-for
 })
 export class LocaleDatePipe implements PipeTransform {
   private _dateTimeFormatService = inject(DateTimeFormatService);
-  private _defaultLocale = inject(LOCALE_ID);
   private _datePipe: DatePipe | null = null;
   private _lastLocale: string | undefined;
 
@@ -23,9 +22,8 @@ export class LocaleDatePipe implements PipeTransform {
     timezone?: string,
     locale?: string,
   ): string | null {
-    // Use explicitly provided locale, configured locale, or default
-    const effectiveLocale =
-      locale || this._dateTimeFormatService.currentLocale || this._defaultLocale;
+    // Use explicitly provided locale or configured locale
+    const effectiveLocale = locale || this._dateTimeFormatService.currentLocale;
 
     // Create or recreate DatePipe if locale changed
     if (!this._datePipe || this._lastLocale !== effectiveLocale) {
@@ -33,6 +31,6 @@ export class LocaleDatePipe implements PipeTransform {
       this._lastLocale = effectiveLocale;
     }
 
-    return this._datePipe.transform(value, format, timezone);
+    return this._datePipe.transform(value, format, timezone, effectiveLocale);
   }
 }

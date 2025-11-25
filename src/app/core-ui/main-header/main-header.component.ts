@@ -44,6 +44,8 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MetricService } from '../../features/metric/metric.service';
 import { DateService } from '../../core/date/date.service';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
+import { FocusButtonComponent } from './focus-button/focus-button.component';
 
 @Component({
   selector: 'main-header',
@@ -65,6 +67,8 @@ import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-
     PlayButtonComponent,
     DesktopPanelButtonsComponent,
     MsToMinuteClockStringPipe,
+    UserProfileButtonComponent,
+    FocusButtonComponent,
   ],
 })
 export class MainHeaderComponent implements OnDestroy {
@@ -128,13 +132,6 @@ export class MainHeaderComponent implements OnDestroy {
   );
   isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
 
-  private _isWorkViewPage$ = this._router.events.pipe(
-    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-    map((event) => !!event.urlAfterRedirects.match(/tasks$/)),
-    startWith(!!this._router.url.match(/tasks$/)),
-  );
-  isWorkViewPage = toSignal(this._isWorkViewPage$, { initialValue: false });
-
   // Convert more observables to signals
 
   currentTask = toSignal(this.taskService.currentTask$);
@@ -145,11 +142,9 @@ export class MainHeaderComponent implements OnDestroy {
   enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
     initialValue: [],
   });
-  isShowTaskViewCustomizerPanel = computed(() =>
-    this.layoutService.isShowTaskViewCustomizerPanel(),
-  );
   isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
   isShowNotes = computed(() => this.layoutService.isShowNotes());
+  isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
   syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
   syncState = toSignal(this.syncWrapperService.syncState$);
   isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
@@ -159,6 +154,20 @@ export class MainHeaderComponent implements OnDestroy {
   isOnline = toSignal(isOnline$);
   focusSummaryToday = computed(() =>
     this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
+  );
+  readonly isTimeTrackingEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isTimeTrackingEnabled;
+  });
+  readonly isFocusModeEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isFocusModeEnabled;
+  });
+  readonly isSyncIconEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
+  });
+
+  isUserProfilesEnabled = toSignal(
+    this.globalConfigService.misc$.pipe(map((misc) => misc.isEnableUserProfiles)),
+    { initialValue: false },
   );
 
   private _subs: Subscription = new Subscription();

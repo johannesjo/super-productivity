@@ -1,5 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { BehaviorSubject, of } from 'rxjs';
+import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -14,9 +14,34 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { Project } from '../../project/project.model';
 import { WorkContext } from '../../work-context/work-context.model';
-import { MiscConfig } from '../../config/global-config.model';
+import { LocalizationConfig, MiscConfig } from '../../config/global-config.model';
 import { first } from 'rxjs/operators';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { signal, Signal } from '@angular/core';
+import { AddTaskSuggestion } from './add-task-suggestions.model';
+import { PlannerActions } from '../../planner/store/planner.actions';
+import { TaskCopy } from '../task.model';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
+import { DEFAULT_LOCALE } from 'src/app/app.constants';
+
+type ProjectServiceSignals = {
+  list$: Observable<Project[]>;
+  listSorted$: Observable<Project[]>;
+  listSortedForUI$: Observable<Project[]>;
+  listSortedForUI: Signal<Project[]>;
+  listSorted: Signal<Project[]>;
+};
+
+type TagServiceSignals = {
+  tags$: Observable<any[]>;
+  tagsNoMyDayAndNoList$: Observable<any[]>;
+  tagsNoMyDayAndNoListSorted$: Observable<any[]>;
+  tagsSortedForUI$: Observable<any[]>;
+  tagsSorted$: Observable<any[]>;
+  tagsNoMyDayAndNoListSorted: Signal<any[]>;
+  tagsSorted: Signal<any[]>;
+  tagsSortedForUI: Signal<any[]>;
+};
 
 describe('AddTaskBarComponent', () => {
   let component: AddTaskBarComponent;
@@ -79,6 +104,10 @@ describe('AddTaskBarComponent', () => {
     type: WorkContextType.TAG,
   } as WorkContext;
 
+  const mockLocalizationConfig: LocalizationConfig = {
+    firstDayOfWeek: 1,
+  };
+
   const mockMiscConfig: MiscConfig = {
     defaultProjectId: null,
     isAutMarkParentAsDone: false,
@@ -88,11 +117,37 @@ describe('AddTaskBarComponent', () => {
     isAutoAddWorkedOnToToday: false,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: false,
-    firstDayOfWeek: 1,
     startOfNextDay: 4,
     taskNotesTpl: '',
     isDisableAnimations: false,
   };
+
+  const createProjectSignals = (projects: Project[]): ProjectServiceSignals => {
+    const projects$ = of(projects);
+    return {
+      list$: projects$,
+      listSorted$: projects$,
+      listSortedForUI$: projects$,
+      listSortedForUI: signal(projects),
+      listSorted: signal(projects),
+    };
+  };
+
+  const createTagSignals = (tags: any[]): TagServiceSignals => {
+    const tags$ = of(tags);
+    return {
+      tags$,
+      tagsNoMyDayAndNoList$: tags$,
+      tagsNoMyDayAndNoListSorted$: tags$,
+      tagsSortedForUI$: tags$,
+      tagsSorted$: tags$,
+      tagsNoMyDayAndNoListSorted: signal(tags),
+      tagsSorted: signal(tags),
+      tagsSortedForUI: signal(tags),
+    };
+  };
+
+  const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-']);
 
   beforeEach(async () => {
     // Create spies
@@ -100,15 +155,20 @@ describe('AddTaskBarComponent', () => {
       'add',
       'getByIdOnce$',
       'scheduleTask',
+      'moveToCurrentWorkContext',
     ]);
     mockWorkContextService = jasmine.createSpyObj('WorkContextService', [], {
       activeWorkContext$: new BehaviorSubject<WorkContext | null>(null),
     });
-    mockProjectService = jasmine.createSpyObj('ProjectService', [], {
-      list$: of(mockProjects),
-    });
-    mockTagService = jasmine.createSpyObj('TagService', [], {
-      tags$: of([
+    mockProjectService = jasmine.createSpyObj(
+      'ProjectService',
+      [],
+      createProjectSignals(mockProjects),
+    );
+    mockTagService = jasmine.createSpyObj(
+      'TagService',
+      [],
+      createTagSignals([
         {
           id: 'tag-1',
           title: 'Test Tag',
@@ -116,18 +176,12 @@ describe('AddTaskBarComponent', () => {
           icon: 'label',
         },
       ]),
-      tagsNoMyDayAndNoList$: of([
-        {
-          id: 'tag-1',
-          title: 'Test Tag',
-          theme: { primary: '#2196f3' },
-          icon: 'label',
-        },
-      ]),
-    });
+    );
     mockGlobalConfigService = jasmine.createSpyObj('GlobalConfigService', [], {
+      lang$: new BehaviorSubject<LocalizationConfig>(mockLocalizationConfig),
       misc$: new BehaviorSubject<MiscConfig>(mockMiscConfig),
       shortSyntax$: of({}),
+      localization: () => ({ timeLocale: DEFAULT_LOCALE }),
     });
     mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -146,6 +200,7 @@ describe('AddTaskBarComponent', () => {
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: ProjectService, useValue: mockProjectService },
         { provide: TagService, useValue: mockTagService },
+        { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
         { provide: GlobalConfigService, useValue: mockGlobalConfigService },
         { provide: Store, useValue: mockStore },
         { provide: MatDialog, useValue: mockMatDialog },
@@ -178,6 +233,40 @@ describe('AddTaskBarComponent', () => {
     component = fixture.componentInstance;
   });
 
+  describe('onTaskSuggestionSelected', () => {
+    it('plans existing tasks for the provided planner day instead of moving them to today', async () => {
+      // Set component input using fixture.componentRef.setInput for planForDay
+      fixture.componentRef.setInput('planForDay', '2024-05-20');
+      // Set local signal directly for isAddToBottom
+      component.isAddToBottom.set(true);
+      fixture.detectChanges();
+
+      const task: TaskCopy = {
+        id: 'task-1',
+        title: 'Test task',
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      mockTaskService.getByIdOnce$.and.returnValue(of(task));
+      const suggestion: AddTaskSuggestion = {
+        title: 'Test task',
+        taskId: 'task-1',
+        projectId: 'project-1',
+      } as AddTaskSuggestion;
+
+      await component.onTaskSuggestionSelected(suggestion);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        PlannerActions.planTaskForDay({
+          task,
+          day: '2024-05-20',
+          isAddToTop: false,
+        }),
+      );
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+    });
+  });
+
   describe('defaultProject$ observable', () => {
     it('should return current project when in project work context', async () => {
       // Set project work context
@@ -199,6 +288,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project in config
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -220,6 +310,7 @@ describe('AddTaskBarComponent', () => {
 
       // Ensure no default project is configured
       const configWithoutDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -241,6 +332,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set defaultProjectId to false
       const configWithFalseDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: false,
       };
@@ -262,6 +354,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a non-existent default project
       const configWithNonExistentDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'non-existent-project',
       };
@@ -283,6 +376,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set a different default project in config
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -305,6 +399,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -332,6 +427,7 @@ describe('AddTaskBarComponent', () => {
 
       // Start with no default project
       const configWithoutDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: null,
       };
@@ -344,6 +440,7 @@ describe('AddTaskBarComponent', () => {
 
       // Change to configured default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -363,6 +460,7 @@ describe('AddTaskBarComponent', () => {
 
       // Set default project
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -386,9 +484,11 @@ describe('AddTaskBarComponent', () => {
       TestBed.resetTestingModule();
 
       // Create a separate mock for empty projects list
-      mockProjectServiceEmpty = jasmine.createSpyObj('ProjectService', [], {
-        list$: of([]),
-      });
+      mockProjectServiceEmpty = jasmine.createSpyObj(
+        'ProjectService',
+        [],
+        createProjectSignals([]),
+      );
 
       await TestBed.configureTestingModule({
         imports: [AddTaskBarComponent, NoopAnimationsModule, TranslateModule.forRoot()],
@@ -398,6 +498,7 @@ describe('AddTaskBarComponent', () => {
           { provide: ProjectService, useValue: mockProjectServiceEmpty },
           { provide: TagService, useValue: mockTagService },
           { provide: GlobalConfigService, useValue: mockGlobalConfigService },
+          { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
           { provide: Store, useValue: mockStore },
           { provide: MatDialog, useValue: mockMatDialog },
           { provide: SnackService, useValue: mockSnackService },
@@ -436,6 +537,7 @@ describe('AddTaskBarComponent', () => {
       ).next(mockTagWorkContext);
 
       const configWithDefault: MiscConfig = {
+        ...mockLocalizationConfig,
         ...mockMiscConfig,
         defaultProjectId: 'default-project',
       };
@@ -448,6 +550,35 @@ describe('AddTaskBarComponent', () => {
         .toPromise();
 
       expect(defaultProject).toBeUndefined();
+    });
+  });
+
+  describe('document click handling', () => {
+    beforeEach(() => {
+      fixture.detectChanges();
+    });
+
+    it('should emit done when clicking outside and no dialog is open', () => {
+      const doneSpy = spyOn(component.done, 'emit');
+      const event = {
+        target: document.createElement('div'),
+      } as unknown as MouseEvent;
+
+      component.onDocumentClick(event);
+
+      expect(doneSpy).toHaveBeenCalled();
+    });
+
+    it('should not emit done when schedule dialog is open', () => {
+      const doneSpy = spyOn(component.done, 'emit');
+      component.onScheduleDialogOpenChange(true);
+      const event = {
+        target: document.createElement('div'),
+      } as unknown as MouseEvent;
+
+      component.onDocumentClick(event);
+
+      expect(doneSpy).not.toHaveBeenCalled();
     });
   });
 });

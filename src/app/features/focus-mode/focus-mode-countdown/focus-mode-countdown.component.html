@@ -1,0 +1,22 @@
+<div class="message-stack">
+  <div
+    class="prep-content"
+    [class.countdown-over]="countdownValue() <= 0"
+  >
+    <div class="action-msg">{{ T.F.FOCUS_MODE.GET_READY | translate }}</div>
+    <ol>
+      <li>{{ T.F.FOCUS_MODE.PREP_STRETCH | translate }}</li>
+      <li>{{ T.F.FOCUS_MODE.PREP_SIT_UPRIGHT | translate }}</li>
+      <li>{{ T.F.FOCUS_MODE.PREP_GET_MENTALLY_READY | translate }}</li>
+    </ol>
+    <div class="countdown-timer">
+      @if (countdownValue() <= 0) {
+        {{ T.F.FOCUS_MODE.GOGOGO | translate }}
+      } @else {
+        {{ countdownValue() }}
+      }
+    </div>
+  </div>
+</div>
+
+<focus-mode-preparation-rocket [state]="rocketState()"></focus-mode-preparation-rocket>

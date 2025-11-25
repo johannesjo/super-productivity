@@ -20,7 +20,7 @@
               class="due-for"
               [class.emphasized]="(task.dueWithTime || 0) < overdueThreshold"
             >
-              {{ task.dueWithTime | date: 'short' }}
+              {{ task.dueWithTime | localeDate: 'short' }}
             </div>
             <div class="title">{{ task.title }}</div>
             <tag-list
@@ -30,6 +30,15 @@
           </div>
           @if (isMultiple) {
             <div class="actions">
+              <button
+                (click)="markTaskAsDone(task)"
+                [title]="T.F.TASK.D_REMINDER_VIEW.COMPLETE | translate"
+                color=""
+                mat-icon-button
+                type="button"
+              >
+                <mat-icon>check</mat-icon>
+              </button>
               <button
                 [disabled]="!(task.projectId || task.parentId || task.tagIds.length > 0)"
                 (click)="dismiss(task)"
@@ -139,9 +148,21 @@
           ) | translate
         }}
       </button>
+      @if (isMultiple) {
+        <button
+          (click)="markAllAsDone()"
+          [disabled]="isDisableControls"
+          mat-button
+          color="primary"
+          type="button"
+        >
+          <mat-icon>check</mat-icon>
+          {{ T.F.TASK.D_REMINDER_VIEW.COMPLETE_ALL | translate }}
+        </button>
+      }
       @if (!isMultiple && (isSingleOnToday$ | async)) {
         <button
-          (click)="markAsDone()"
+          (click)="markSingleAsDone()"
           [disabled]="isDisableControls"
           color="primary"
           mat-stroked-button

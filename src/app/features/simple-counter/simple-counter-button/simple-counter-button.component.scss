@@ -1,11 +1,20 @@
 @use 'sass:math';
 
 @use '../../../../styles/_globals.scss' as *;
+@use '../../../../styles/components/number-badge' as badge;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  height: var(--header-button-size);
+}
 
 .wrapper {
   position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
 }
-
 .main-btn {
   position: relative;
   margin-left: 0;
@@ -54,21 +63,7 @@
 
 .extra-label,
 .label {
-  margin-left: 0;
-  position: absolute;
-  line-height: 1;
-  padding: 2px 4px 1px;
-  width: auto;
-  left: 50%;
-  transform: translateX(-50%);
-  font-weight: bold;
-  border-radius: 8px;
-  z-index: 4;
-  pointer-events: none;
-  bottom: calc(-1 * var(--s-quarter));
-
-  background: var(--bg-lighter);
-  color: var(--text-color-most-intense);
+  @include badge.number-badge;
 
   .wrapper:hover .stopwatch & {
     opacity: 0;

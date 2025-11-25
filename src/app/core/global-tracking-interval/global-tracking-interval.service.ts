@@ -1,9 +1,11 @@
 import { Injectable, inject } from '@angular/core';
-import { TRACKING_INTERVAL } from '../../app.constants';
-import { interval, Observable, of } from 'rxjs';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { IS_ELECTRON, TRACKING_INTERVAL } from '../../app.constants';
+import { EMPTY, fromEvent, interval, merge, Observable } from 'rxjs';
 import {
-  concatMap,
+  debounceTime,
   distinctUntilChanged,
+  filter,
   map,
   share,
   shareReplay,
@@ -43,16 +45,65 @@ export class GlobalTrackingIntervalService {
     share(),
   );
 
-  todayDateStr$: Observable<string> = this.globalInterval$.pipe(
-    startWith(this._dateService.todayStr()),
-    concatMap(() => of(this._dateService.todayStr())),
-    distinctUntilChanged(),
-    tap((v) => Log.log('DAY_CHANGE ' + v)),
-    // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
-    shareReplay(1),
-  );
+  todayDateStr$: Observable<string> = this._createTodayDateStrObservable();
+
+  // Shared signal to avoid creating 200+ subscriptions in task components
+  todayDateStr = toSignal(this.todayDateStr$, {
+    initialValue: this._dateService.todayStr(),
+  });
 
   constructor() {
     this._currentTrackingStart = Date.now();
+  }
+
+  private _createTodayDateStrObservable(): Observable<string> {
+    const timerBased$ = this.globalInterval$.pipe(
+      map(() => this._dateService.todayStr()),
+    );
+
+    const focusBased$ =
+      typeof window !== 'undefined'
+        ? fromEvent(window, 'focus').pipe(
+            debounceTime(100),
+            map(() => this._dateService.todayStr()),
+          )
+        : EMPTY;
+
+    const visibilityBased$ =
+      typeof document !== 'undefined'
+        ? fromEvent(document, 'visibilitychange').pipe(
+            filter(() => !document.hidden),
+            debounceTime(100),
+            map(() => this._dateService.todayStr()),
+          )
+        : EMPTY;
+
+    const systemResumeBased$ =
+      IS_ELECTRON && typeof window !== 'undefined' && (window as any).electron?.on
+        ? new Observable<string>((subscriber) => {
+            const handler = (): void => {
+              subscriber.next(this._dateService.todayStr());
+            };
+            (window as any).electron.on('system-resume', handler);
+
+            return (): void => {
+              (window as any).electron?.off?.('system-resume', handler);
+            };
+          })
+        : EMPTY;
+
+    // NOTE:
+    // Chromium/Electron aggressively throttles `setInterval` for hidden tabs and fully pauses it while a
+    // laptop sleeps. When that happens around midnight the timerBased$ stream simply stops emitting,
+    // so consumers never receive the day change (see #5464). We therefore merge in visibility/focus/resume
+    // events – all of which fire as soon as the app becomes interactive again – to force an immediate
+    // re-sampling of todayStr() even if the regular 1s interval is still suspended.
+    return merge(timerBased$, focusBased$, visibilityBased$, systemResumeBased$).pipe(
+      startWith(this._dateService.todayStr()),
+      distinctUntilChanged(),
+      tap((v) => Log.log('DAY_CHANGE ' + v)),
+      // needs to be shareReplay otherwise some instances will never receive an update until a change occurs
+      shareReplay(1),
+    );
   }
 }

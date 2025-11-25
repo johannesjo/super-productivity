@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
-      - uses: actions/setup-node@v5
+      - uses: actions/setup-node@v6
         with:
           node-version: 20
           cache: 'npm'
@@ -31,6 +31,17 @@ jobs:
       - name: Build production web app
         run: npm run buildFrontend:prodWeb
 
+      - name: Add swap space for Lighthouse
+        run: |
+          # Ensure Lighthouse/Chrome have enough memory on GitHub-hosted runners
+          sudo fallocate -l 4G /swapfile
+          sudo chmod 600 /swapfile
+          sudo mkswap /swapfile
+          sudo swapon /swapfile
+
+      - name: Strip service worker artifacts for Lighthouse
+        run: rm -f dist/browser/ngsw.json dist/browser/ngsw-worker.js dist/browser/safety-worker.js dist/browser/worker-basic.min.js
+
       - name: Run Lighthouse CI
         uses: treosh/lighthouse-ci-action@v12
         with:
@@ -39,7 +50,7 @@ jobs:
           # Upload results to temporary storage
           uploadArtifacts: true
           temporaryPublicStorage: true
-          # Run 3 times for consistency
-          runs: 3
+          # Run once to avoid long Chrome sessions on CI
+          runs: 1
           # Configure budgets
           budgetPath: './tools/lighthouse/budget.json'

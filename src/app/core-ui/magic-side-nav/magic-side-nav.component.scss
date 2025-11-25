@@ -43,7 +43,7 @@
 
   &:focus,
   &:hover {
-    background: var(--sidenav-hover);
+    background: var(--sidenav-hover-bg);
   }
 
   svg {
@@ -178,7 +178,7 @@
 
   &:focus,
   &:hover {
-    background: var(--sidenav-hover);
+    background: var(--sidenav-hover-bg);
     color: var(--sidenav-text);
   }
 }

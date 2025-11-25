@@ -1,0 +1,128 @@
+<form (submit)="$event.preventDefault(); save()">
+  <h1 mat-dialog-title>
+    {{ T.F.METRIC.FOCUS_SESSION_DIALOG.TITLE | translate }} - {{ formatSelectedDate() }}
+  </h1>
+
+  <mat-dialog-content>
+    @if (chartData()) {
+      <section class="chart-section">
+        <div class="chart-wrapper">
+          <lazy-chart
+            [type]="'line'"
+            [datasets]="chartData().datasets"
+            [labels]="chartData().labels"
+            [options]="chartOptions"
+            [legend]="false"
+            height="200px"
+          >
+          </lazy-chart>
+        </div>
+      </section>
+    }
+
+    <div class="summary-section">
+      <div class="total-info">
+        <div class="label">
+          {{ T.F.METRIC.FOCUS_SESSION_DIALOG.TOTAL_SESSIONS | translate }}
+        </div>
+        <div class="value">
+          <strong>{{ sessionList().length }}</strong>
+        </div>
+      </div>
+      <div class="total-info">
+        <div class="label">
+          {{ T.F.METRIC.FOCUS_SESSION_DIALOG.TOTAL_TIME | translate }}
+        </div>
+        <div class="value">
+          <strong>{{ totalDuration() | msToString }}</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="sessions-list-section">
+      <h3>{{ T.F.METRIC.FOCUS_SESSION_DIALOG.SESSIONS_LIST | translate }}</h3>
+
+      @if (sessionList().length === 0) {
+        <div class="empty-state">
+          {{ T.F.METRIC.FOCUS_SESSION_DIALOG.NO_SESSIONS | translate }}
+        </div>
+      } @else {
+        <mat-list>
+          @for (session of sessionList(); track session.index) {
+            <mat-list-item>
+              <div class="session-item">
+                <div class="session-number">{{ session.index + 1 }}.</div>
+                <mat-form-field class="session-duration-field">
+                  <input
+                    matInput
+                    inputDuration="optional"
+                    type="text"
+                    [ngModel]="session.duration"
+                    (ngModelChange)="updateSession(session.index, $event)"
+                    [name]="'session-' + session.index"
+                  />
+                  <mat-icon matPrefix>timer</mat-icon>
+                </mat-form-field>
+                <button
+                  mat-icon-button
+                  type="button"
+                  color="warn"
+                  (click)="deleteSession(session.index)"
+                  [attr.aria-label]="T.G.DELETE"
+                >
+                  <mat-icon>delete</mat-icon>
+                </button>
+              </div>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
+    </div>
+
+    <div class="add-session-section">
+      <h3>{{ T.F.METRIC.FOCUS_SESSION_DIALOG.ADD_SESSION | translate }}</h3>
+      <div class="add-session-form">
+        <mat-form-field class="add-session-field">
+          <mat-label>{{
+            T.F.METRIC.FOCUS_SESSION_DIALOG.NEW_SESSION_DURATION | translate
+          }}</mat-label>
+          <input
+            matInput
+            inputDuration="optional"
+            type="text"
+            name="newSession"
+            [(ngModel)]="newSessionDuration"
+          />
+          <mat-icon matPrefix>add</mat-icon>
+        </mat-form-field>
+        <button
+          mat-stroked-button
+          type="button"
+          (click)="addSession()"
+          [disabled]="newSessionDuration() <= 0"
+        >
+          <mat-icon>add</mat-icon>
+          {{ T.F.METRIC.FOCUS_SESSION_DIALOG.ADD_BTN | translate }}
+        </button>
+      </div>
+    </div>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button
+      mat-button
+      type="button"
+      (click)="close()"
+    >
+      {{ T.G.CANCEL | translate }}
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{ T.G.SAVE | translate }}
+    </button>
+  </mat-dialog-actions>
+</form>

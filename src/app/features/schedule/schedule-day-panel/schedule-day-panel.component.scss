@@ -1,0 +1,62 @@
+:host {
+  display: block;
+
+  > * {
+    inset: 4px;
+    margin: 4px;
+  }
+}
+
+.schedule-day-drop-zone {
+  position: relative;
+  height: 100%;
+}
+
+.empty-state {
+  position: sticky;
+  top: 50%;
+  margin-left: 40px;
+  margin-right: 8px;
+  transform: translate(0, -50%);
+  text-align: center;
+  pointer-events: none;
+  z-index: 100;
+  border-radius: var(--card-border-radius);
+  border: 1px solid var(--separator-color);
+  background: var(--bg-lightest);
+}
+
+.empty-state-text {
+  padding: 16px;
+  font-size: 16px;
+  color: var(--color-fg-less-important);
+  font-weight: 500;
+}
+
+//.drag-time-preview {
+//  position: fixed;
+//  transform: translate(-50%, -100%);
+//  z-index: 2000;
+//  pointer-events: none;
+//  margin-top: -44px;
+//
+//  .time-badge {
+//    background: var(--c-accent);
+//    color: var(--text-on-accent);
+//    padding: 8px 16px;
+//    border-radius: 20px;
+//    font-size: 14px;
+//    font-weight: 600;
+//    box-shadow: var(--whiteframe-shadow-8dp);
+//    white-space: nowrap;
+//    border: 2px solid var(--c-primary);
+//    max-width: 320px;
+//  }
+//}
+
+:host ::ng-deep .grid-container {
+  --schedule-time-width: 2em;
+  --nr-of-days: 1;
+  /* grid-template-columns uses these vars in schedule-week */
+  --schedule-event-bg: var(--schedule-event-bg-in-side-panel);
+}

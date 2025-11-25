@@ -2,11 +2,11 @@ import { app, BrowserWindow } from 'electron';
 import { info } from 'electron-log/main';
 import { getWin } from './main-window';
 import { hideOverlayWindow } from './overlay-indicator/overlay-indicator';
+import { setIsQuiting } from './shared-state';
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function quitApp(): void {
-  // tslint:disable-next-line
-  (app as any).isQuiting = true;
+  setIsQuiting(true);
   app.quit();
 }
 

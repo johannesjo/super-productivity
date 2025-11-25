@@ -66,10 +66,27 @@ export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
 export class HttpNotOkAPIError extends AdditionalLogErrorBase {
   override name = ' HttpNotOkAPIError';
   response: Response;
+  body?: string;
 
-  constructor(response: Response) {
-    super(response);
+  constructor(response: Response, body?: string) {
+    super(response, body);
     this.response = response;
+    this.body = body;
+    const statusText = response.statusText || 'Unknown Status';
+    const safeBody =
+      typeof body === 'string'
+        ? body
+        : body !== undefined
+          ? (() => {
+              try {
+                return JSON.stringify(body);
+              } catch (e) {
+                return String(body);
+              }
+            })()
+          : '';
+    const bodyText = safeBody ? ` - ${safeBody.substring(0, 300)}` : '';
+    this.message = `HttpNotOkAPIError: ${response.status} ${statusText}${bodyText}`;
   }
 }
 

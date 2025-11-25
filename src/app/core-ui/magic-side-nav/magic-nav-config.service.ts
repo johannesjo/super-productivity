@@ -14,18 +14,24 @@ import { DialogCreateProjectComponent } from '../../features/project/dialogs/cre
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
 import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import {
+  DialogCreateTagComponent,
+  CreateTagData,
+} from '../../ui/dialog-create-tag/dialog-create-tag.component';
+import {
   selectAllProjectsExceptInbox,
   selectUnarchivedVisibleProjects,
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem } from './magic-side-nav.model';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
+import { PluginService } from '../../plugins/plugin.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
 import {
   MenuTreeKind,
   MenuTreeViewNode,
 } from '../../features/menu-tree/store/menu-tree.model';
+import { GlobalConfigService } from '../../features/config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -37,7 +43,9 @@ export class MagicNavConfigService {
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginService = inject(PluginService);
   private readonly _menuTreeService = inject(MenuTreeService);
+  private readonly _configService = inject(GlobalConfigService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -72,6 +80,15 @@ export class MagicNavConfigService {
     this._menuTreeService.buildTagViewTree(this._tags()),
   );
   private readonly _pluginMenuEntries = this._pluginBridge.menuEntries;
+  private readonly isSchedulerEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isSchedulerEnabled,
+  );
+  private readonly isPlannerEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isPlannerEnabled,
+  );
+  private readonly isBoardsEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isBoardsEnabled,
+  );
 
   constructor() {
     // TODO these should probably live in the _menuTreeService
@@ -100,29 +117,7 @@ export class MagicNavConfigService {
       // Separator
 
       // Main Routes
-      {
-        type: 'route',
-        id: 'schedule',
-        label: T.MH.SCHEDULE,
-        icon: 'early_on',
-        svgIcon: 'early_on',
-
-        route: '/schedule',
-      },
-      {
-        type: 'route',
-        id: 'planner',
-        label: T.MH.PLANNER,
-        icon: 'edit_calendar',
-        route: '/planner',
-      },
-      {
-        type: 'route',
-        id: 'boards',
-        label: T.MH.BOARDS,
-        icon: 'grid_view',
-        route: '/boards',
-      },
+      ...this._buildMainRoutesItems(),
 
       // Plugin entries
       ...this._buildPluginItems(),
@@ -218,6 +213,13 @@ export class MagicNavConfigService {
       },
 
       // Help Menu (rendered as mat-menu)
+      {
+        type: 'route',
+        id: 'donate',
+        label: T.MH.DONATE,
+        icon: 'favorite',
+        route: '/donate',
+      },
       {
         type: 'menu',
         id: 'help',
@@ -353,17 +355,71 @@ export class MagicNavConfigService {
     return items;
   }
 
+  private _buildMainRoutesItems(): NavItem[] {
+    const items: NavItem[] = [];
+
+    if (this.isSchedulerEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'schedule',
+        label: T.MH.SCHEDULE,
+        icon: 'early_on',
+        svgIcon: 'early_on',
+        route: '/schedule',
+      });
+    }
+
+    if (this.isPlannerEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'planner',
+        label: T.MH.PLANNER,
+        icon: 'edit_calendar',
+        route: '/planner',
+      });
+    }
+
+    if (this.isBoardsEnabled()) {
+      items.push({
+        type: 'route',
+        id: 'boards',
+        label: T.MH.BOARDS,
+        icon: 'grid_view',
+        route: '/boards',
+      });
+    }
+
+    return items;
+  }
+
   private _buildPluginItems(): NavItem[] {
     const pluginEntries = this._pluginMenuEntries();
+    const pluginStates = this._pluginService.getAllPluginStates();
+    const pluginIcons = this._pluginService.getPluginIconsSignal()();
 
-    return pluginEntries.map((entry) => ({
-      type: 'plugin',
-      id: `plugin-${entry.pluginId}-${entry.label}`,
-      label: entry.label,
-      icon: entry.icon || 'extension',
-      pluginId: entry.pluginId,
-      action: entry.onClick,
-    }));
+    return pluginEntries.map((entry) => {
+      // Prefer custom SVG icon if available, otherwise check if entry.icon is SVG path
+      const hasCustomSvgIcon = pluginIcons.has(entry.pluginId);
+      const isIconSvgPath = /\.svg$/i.test(entry.icon || '');
+      const isUploadedPlugin = pluginStates.get(entry.pluginId)?.type === 'uploaded';
+
+      let svgIcon: string | undefined;
+      if (hasCustomSvgIcon) {
+        svgIcon = `plugin-${entry.pluginId}-icon`;
+      } else if (isIconSvgPath && !isUploadedPlugin) {
+        svgIcon = `assets/bundled-plugins/${entry.pluginId}/${entry.icon}`;
+      }
+
+      return {
+        type: 'plugin' as const,
+        id: `plugin-${entry.pluginId}-${entry.label}`,
+        label: entry.label,
+        icon: entry.icon || 'extension',
+        ...(svgIcon && { svgIcon }),
+        pluginId: entry.pluginId,
+        action: entry.onClick,
+      };
+    });
   }
 
   // Public computed signals for expansion state (for component to check)
@@ -439,15 +495,16 @@ export class MagicNavConfigService {
 
   private _createNewTag(): void {
     this._matDialog
-      .open(DialogPromptComponent, {
-        data: {
-          placeholder: T.F.TAG.TTL.ADD_NEW_TAG,
-        },
+      .open(DialogCreateTagComponent, {
+        restoreFocus: true,
       })
       .afterClosed()
-      .subscribe((title) => {
-        if (title && title.trim()) {
-          this._tagService.addTag({ title: title.trim() });
+      .subscribe((result: CreateTagData) => {
+        if (result && result.title) {
+          this._tagService.addTag({
+            title: result.title,
+            color: result.color,
+          });
         }
       });
   }

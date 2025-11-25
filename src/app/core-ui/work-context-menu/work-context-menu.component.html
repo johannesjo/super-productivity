@@ -24,6 +24,31 @@
   </button>
 }
 
+@if (contextId === TODAY_TAG_ID) {
+  <button
+    (click)="unplanAllTodayTasks()"
+    mat-menu-item
+  >
+    <mat-icon>event_busy</mat-icon>
+    <span class="text">{{ T.MH.UNPLAN_ALL_TASKS | translate }}</span>
+  </button>
+}
+
+<button
+  (click)="shareTasksAsMarkdown()"
+  mat-menu-item
+>
+  <mat-icon>{{ shareSupport === 'none' ? 'content_copy' : 'ios_share' }}</mat-icon>
+  <span class="text">
+    {{
+      (shareSupport === 'none'
+        ? T.MH.COPY_TASK_LIST_MARKDOWN
+        : T.MH.SHARE_TASK_LIST_MARKDOWN
+      ) | translate
+    }}
+  </span>
+</button>
+
 <button
   [routerLink]="[base, contextId, 'settings']"
   mat-menu-item

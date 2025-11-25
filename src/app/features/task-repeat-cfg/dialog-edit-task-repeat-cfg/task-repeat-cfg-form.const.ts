@@ -53,105 +53,153 @@ export const TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS: FormlyFieldConfig[] = [
     },
   },
 
-  // REPEAT CUSTOM CFG
+  // REPEAT CUSTOM CFG - Wrapped in container
   {
-    fieldGroupClassName: 'repeat-cycle',
+    fieldGroupClassName: 'repeat-config-container',
     hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
     fieldGroup: [
       {
-        key: 'repeatEvery',
-        type: 'input',
-        defaultValue: 1,
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
-          required: true,
-          min: 1,
-          max: 1000,
-          type: 'number',
-        },
+        fieldGroupClassName: 'repeat-cycle',
+        fieldGroup: [
+          {
+            key: 'repeatEvery',
+            type: 'input',
+            defaultValue: 1,
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.REPEAT_EVERY,
+              required: true,
+              min: 1,
+              max: 1000,
+              type: 'number',
+            },
+          },
+          {
+            key: 'repeatCycle',
+            type: 'select',
+            defaultValue: 'WEEKLY',
+            templateOptions: {
+              required: true,
+              label: T.F.TASK_REPEAT.F.REPEAT_CYCLE,
+              options: [
+                { value: 'DAILY', label: T.F.TASK_REPEAT.F.C_DAY },
+                { value: 'WEEKLY', label: T.F.TASK_REPEAT.F.C_WEEK },
+                { value: 'MONTHLY', label: T.F.TASK_REPEAT.F.C_MONTH },
+                { value: 'YEARLY', label: T.F.TASK_REPEAT.F.C_YEAR },
+              ],
+            },
+          },
+        ],
       },
+      // Schedule type: from due date or from completion
       {
-        key: 'repeatCycle',
+        key: 'repeatFromCompletionDate',
         type: 'select',
-        defaultValue: 'WEEKLY',
+        defaultValue: false,
+        hideExpression: (model: any) => {
+          // Hide for "every 1 day" (same as daily - no difference between fixed/flexible)
+          if (model.repeatCycle === 'DAILY' && model.repeatEvery === 1) {
+            return true;
+          }
+          // Hide for "every 1 week" (e.g., "every Monday" - inherently a fixed schedule)
+          if (model.repeatCycle === 'WEEKLY' && model.repeatEvery === 1) {
+            return true;
+          }
+          // Show for all other cases: "every X days/weeks/months/years" where X > 1
+          return false;
+        },
         templateOptions: {
+          label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_LABEL,
+          options: [],
+        },
+        expressionProperties: {
+          ['templateOptions.options']: (model: any) => {
+            const repeatEvery = model.repeatEvery || 1;
+            const cycleMap: Record<string, string> = {
+              DAILY: repeatEvery === 1 ? 'day' : 'days',
+              WEEKLY: repeatEvery === 1 ? 'week' : 'weeks',
+              MONTHLY: repeatEvery === 1 ? 'month' : 'months',
+              YEARLY: repeatEvery === 1 ? 'year' : 'years',
+            };
+            const cycleName = cycleMap[model.repeatCycle] || 'days';
+
+            return [
+              {
+                value: false,
+                label: `Fixed schedule (every ${repeatEvery} ${cycleName} from start date)`,
+              },
+              {
+                value: true,
+                label: `After completion (${repeatEvery} ${cycleName} after I finish)`,
+              },
+            ];
+          },
+        },
+      },
+      {
+        key: 'startDate',
+        type: 'input',
+        defaultValue: getDbDateStr(),
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.START_DATE,
           required: true,
-          label: T.F.TASK_REPEAT.F.REPEAT_CYCLE,
-          options: [
-            { value: 'DAILY', label: T.F.TASK_REPEAT.F.C_DAY },
-            { value: 'WEEKLY', label: T.F.TASK_REPEAT.F.C_WEEK },
-            { value: 'MONTHLY', label: T.F.TASK_REPEAT.F.C_MONTH },
-            { value: 'YEARLY', label: T.F.TASK_REPEAT.F.C_YEAR },
-          ],
-        },
-      },
-    ],
-  },
-  {
-    key: 'startDate',
-    type: 'input',
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
-    defaultValue: getDbDateStr(),
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.START_DATE,
-      required: true,
-      // min: getWorklogStr() as any,
-      type: 'date',
-    },
-  },
-  {
-    fieldGroupClassName: 'weekdays',
-    hideExpression: (model: any) =>
-      model.quickSetting !== 'CUSTOM' || model.repeatCycle !== 'WEEKLY',
-    fieldGroup: [
-      {
-        key: 'monday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.MONDAY,
+          // min: getWorklogStr() as any,
+          type: 'date',
         },
       },
       {
-        key: 'tuesday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.TUESDAY,
-        },
-      },
-      {
-        key: 'wednesday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.WEDNESDAY,
-        },
-      },
-      {
-        key: 'thursday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.THURSDAY,
-        },
-      },
-      {
-        key: 'friday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.FRIDAY,
-        },
-      },
-      {
-        key: 'saturday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.SATURDAY,
-        },
-      },
-      {
-        key: 'sunday',
-        type: 'checkbox',
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.SUNDAY,
-        },
+        fieldGroupClassName: 'weekdays',
+        hideExpression: (model: any) => model.repeatCycle !== 'WEEKLY',
+        fieldGroup: [
+          {
+            key: 'monday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.MONDAY,
+            },
+          },
+          {
+            key: 'tuesday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.TUESDAY,
+            },
+          },
+          {
+            key: 'wednesday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.WEDNESDAY,
+            },
+          },
+          {
+            key: 'thursday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.THURSDAY,
+            },
+          },
+          {
+            key: 'friday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.FRIDAY,
+            },
+          },
+          {
+            key: 'saturday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.SATURDAY,
+            },
+          },
+          {
+            key: 'sunday',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.F.TASK_REPEAT.F.SUNDAY,
+            },
+          },
+        ],
       },
     ],
   },

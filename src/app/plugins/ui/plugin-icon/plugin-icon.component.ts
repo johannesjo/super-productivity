@@ -8,7 +8,6 @@ import {
 import { DomSanitizer } from '@angular/platform-browser';
 import { PluginService } from '../../plugin.service';
 import { MatIcon } from '@angular/material/icon';
-import { CommonModule } from '@angular/common';
 
 @Component({
   selector: 'plugin-icon',
@@ -51,7 +50,7 @@ import { CommonModule } from '@angular/common';
     `,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [CommonModule, MatIcon],
+  imports: [MatIcon],
 })
 export class PluginIconComponent {
   private readonly _sanitizer = inject(DomSanitizer);

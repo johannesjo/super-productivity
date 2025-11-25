@@ -20,7 +20,7 @@ import { GlobalConfigService } from './features/config/global-config.service';
 import { LayoutService } from './core-ui/layout/layout.service';
 import { IPC } from '../../electron/shared-with-frontend/ipc-events.const';
 import { SnackService } from './core/snack/snack.service';
-import { IS_ELECTRON, LanguageCode } from './app.constants';
+import { IS_ELECTRON } from './app.constants';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { combineLatest, Observable, Subscription } from 'rxjs';
@@ -78,6 +78,7 @@ import { Log } from './core/log';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { DialogUnsplashPickerComponent } from './ui/dialog-unsplash-picker/dialog-unsplash-picker.component';
+import { NoteStartupBannerService } from './features/note/note-startup-banner.service';
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
@@ -152,6 +153,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _destroyRef = inject(DestroyRef);
+  private _noteStartupBannerService = inject(NoteStartupBannerService);
   private _ngZone = inject(NgZone);
   private _document = inject(DOCUMENT, { optional: true });
 
@@ -206,9 +208,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _intervalTimer?: NodeJS.Timeout;
 
   constructor() {
-    this._languageService.setDefault(LanguageCode.en);
-    this._languageService.setFromBrowserLngIfAutoSwitchLng();
-
     this._checkMigrationAndInitBackups();
 
     // Use effect to react to language RTL changes
@@ -232,6 +231,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     // basically init
     this._requestPersistence();
 
+    this.syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
+      .pipe(take(1))
+      .subscribe(() => {
+        void this._noteStartupBannerService.showLastNoteIfNeeded();
+      });
+
     // deferred init
     window.setTimeout(async () => {
       this._startTrackingReminderService.init();
@@ -240,7 +245,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       this._initOfflineBanner();
 
       const miscCfg = this._globalConfigService.misc();
-      if (!miscCfg?.isDisableProductivityTips && !this._isTourLikelyToBeShown()) {
+      if (miscCfg?.isShowProductivityTipLonger && !this._isTourLikelyToBeShown()) {
         this._snackService.open({
           ico: 'lightbulb',
           config: {
@@ -251,12 +256,6 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             w.productivityTips![w.randomIndex!][0] +
             ':</strong> ' +
             w.productivityTips![w.randomIndex!][1],
-          actionStr: T.G.DONT_SHOW_AGAIN,
-          actionFn: () => {
-            this._globalConfigService.updateSection('misc', {
-              isDisableProductivityTips: true,
-            });
-          },
         });
       }
 
@@ -302,6 +301,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
           this._snackService.open({
             msg: errMsg,
             type: 'ERROR',
+            isSkipTranslate: true,
           });
           Log.err(data);
         });
@@ -426,6 +426,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   getActiveWorkContextId(): string | null {
     return this._activeWorkContextId();
+  }
+
+  onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
+    this.layoutService.setPendingFocusTaskId(taskId);
   }
 
   changeBackgroundFromUnsplash(): void {

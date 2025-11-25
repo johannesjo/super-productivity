@@ -1,5 +1,5 @@
 @let t = task();
-@if (IS_TOUCH_PRIMARY) {
+@if (IS_TOUCH_PRIMARY && isPanHelperVisible()) {
   <div
     #blockLeftEl
     class="block-left bg-400"
@@ -77,8 +77,6 @@
     >
       <div
         (click)="focusSelf()"
-        [class.handle-par]="!isInSubTaskList()"
-        [class.handle-sub]="isInSubTaskList()"
         class="drag-handle"
       >
         <mat-icon
@@ -86,7 +84,7 @@
           svgIcon="drag_handle"
         ></mat-icon>
         @if (isCurrent()) {
-          <mat-icon class="play-icon-indicator">play_arrow </mat-icon>
+          <mat-icon class="play-icon-indicator">play_arrow</mat-icon>
         }
 
         <div class="type-ico-wrapper">
@@ -160,24 +158,27 @@
           </div>
         }
         @if (t.subTasks?.length) {
-          <div class="time">
-            <div class="time-val">
-              <mat-icon
-                inline="true"
-                style="margin-top: -6px"
-                >functions
-              </mat-icon>
-              <span [innerHTML]="t.subTasks | subTaskTotalTimeSpent | msToString"></span>
+          @let subTaskTimeSpent = t.subTasks | subTaskTotalTimeSpent;
+          @if (t.timeEstimate || subTaskTimeSpent) {
+            <div class="time">
+              <div class="time-val">
+                <mat-icon
+                  inline="true"
+                  style="margin-top: -6px"
+                  >functions
+                </mat-icon>
+                <span [innerHTML]="subTaskTimeSpent | msToString"></span>
+              </div>
+              <div class="separator">/</div>
+              <div class="time-val">
+                <mat-icon
+                  svgIcon="estimate_remaining"
+                  inline="true"
+                ></mat-icon>
+                {{ t.timeEstimate | msToString }}
+              </div>
             </div>
-            <div class="separator">/</div>
-            <div class="time-val">
-              <mat-icon
-                svgIcon="estimate_remaining"
-                inline="true"
-              ></mat-icon>
-              {{ t.timeEstimate | msToString }}
-            </div>
-          </div>
+          }
         }
       </div>
 
@@ -248,12 +249,14 @@
             } @else {
               <mat-icon>today</mat-icon>
             }
-            <div class="time-badge">{{ t.dueDay | localDateStr: todayStr() }}</div>
+            <div class="time-badge">
+              {{ t.dueDay | localDateStr: globalTrackingIntervalService.todayDateStr() }}
+            </div>
           </button>
         }
 
         <div>
-          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE)) {
+          @if (t.notes || (t.issueId && t.issueType !== ICAL_TYPE) || isSelected()) {
             <button
               (click)="toggleShowDetailPanel()"
               title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }}  {{
@@ -302,7 +305,7 @@
           mat-mini-fab
         >
           @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
-            <mat-icon>add </mat-icon>
+            <mat-icon>add</mat-icon>
           }
           @if (t._hideSubTasksMode !== ShowSubTasksMode.HideAll) {
             <mat-icon
@@ -336,24 +339,29 @@
 
 <!--*ngIf="isShowContextMenu"-->
 
-<task-context-menu
-  #taskContextMenu
-  [isAdvancedControls]="true"
-  [task]="t"
-></task-context-menu>
+@if (isContextMenuLoaded()) {
+  <task-context-menu
+    #taskContextMenu
+    [isAdvancedControls]="true"
+    [task]="t"
+  ></task-context-menu>
+}
 
 <mat-menu
   #projectMenu="matMenu"
   (closed)="focusSelf()"
+  (menuOpened)="_loadProjectListIfNeeded()"
 >
   <ng-template matMenuContent>
-    @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
-      <button
-        (click)="moveTaskToProject(project.id)"
-        mat-menu-item
-      >
-        {{ project.title }}
-      </button>
+    @if (moveToProjectList()) {
+      @for (project of moveToProjectList(); track trackByProjectId($index, project)) {
+        <button
+          (click)="moveTaskToProject(project.id)"
+          mat-menu-item
+        >
+          {{ project.title }}
+        </button>
+      }
     }
   </ng-template>
 </mat-menu>

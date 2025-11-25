@@ -2,7 +2,6 @@ import { AsyncPipe } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
   computed,
   inject,
@@ -42,6 +41,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { IS_ELECTRON } from '../../app.constants';
 import { ConfettiService } from '../../core/confetti/confetti.service';
 import { Log } from '../../core/log';
+import { SnackService } from '../../core/snack/snack.service';
 import { BeforeFinishDayService } from '../../features/before-finish-day/before-finish-day.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { EvaluationSheetComponent } from '../../features/metric/evaluation-sheet/evaluation-sheet.component';
@@ -76,7 +76,6 @@ import {
 } from './simple-counter-summary-item/simple-counter-summary-item.component';
 import { MetricService } from '../../features/metric/metric.service';
 
-const SUCCESS_ANIMATION_DURATION = 500;
 const MAGIC_YESTERDAY_MARGIN = 4 * 60 * 60 * 1000;
 
 @Component({
@@ -116,9 +115,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
   private readonly _router = inject(Router);
   private readonly _matDialog = inject(MatDialog);
+  private readonly _snackService = inject(SnackService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _worklogService = inject(WorklogService);
-  private readonly _cd = inject(ChangeDetectorRef);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _beforeFinishDayService = inject(BeforeFinishDayService);
@@ -130,8 +129,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   _onDestroy$ = new Subject<void>();
 
   readonly isIncludeYesterday: boolean;
-  isTimeSheetExported: boolean = true;
-  showSuccessAnimation: boolean = false;
   selectedTabIndex: number = 0;
   isForToday: boolean = true;
 
@@ -176,9 +173,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   );
 
   focusSessionSummary$ = this.dayStr$.pipe(
-    switchMap((dayStr) =>
-      this._metricService.getMetricForDayOrDefaultWithCheckedImprovements$(dayStr),
-    ),
+    switchMap((dayStr) => this._metricService.getMetricForDay$(dayStr)),
     map((metric) => {
       const focusSessions = metric.focusSessions ?? [];
       const total = focusSessions.reduce((acc, val) => acc + val, 0);
@@ -263,7 +258,6 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   cfg = toSignal(this.cfg$);
   dailySummaryNoteTxt = linkedSignal(() => this.cfg()?.dailySummaryNote?.txt);
 
-  private _successAnimationTimeout?: number;
   private _startCelebrationTimeout?: number;
   private _celebrationIntervalId?: number;
 
@@ -308,7 +302,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    if (this.configService.misc()?.isDisableAnimations) {
+    if (
+      this.configService.misc()?.isDisableAnimations ||
+      this.configService.misc()?.isDisableCelebration
+    ) {
       return;
     }
 
@@ -324,13 +321,8 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     this._onDestroy$.next();
     this._onDestroy$.complete();
     // should not happen, but just in case
-    window.clearTimeout(this._successAnimationTimeout);
     window.clearTimeout(this._startCelebrationTimeout);
     window.clearInterval(this._celebrationIntervalId);
-  }
-
-  onEvaluationSave(): void {
-    this.selectedTabIndex = 1;
   }
 
   async finishDay(): Promise<void> {
@@ -385,6 +377,38 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  updateBreakNr(value: string): void {
+    const nr = parseInt(value);
+    if (!isNaN(nr)) {
+      this.workContextService.updateBreakNrForActiveContext(this.dayStr, nr);
+
+      if (nr === 0) {
+        this.workContextService.updateBreakTimeForActiveContext(this.dayStr, 0);
+      }
+    }
+  }
+
+  updateBreakTime(time: number): void {
+    if (!isNaN(time)) {
+      this.workContextService.updateBreakTimeForActiveContext(this.dayStr, time);
+
+      if (time === 0) {
+        this.workContextService.updateBreakNrForActiveContext(this.dayStr, 0);
+      } else {
+        // if break time was set to a non-zero value ensure that nr is > 0
+        this.breakNr$
+          .pipe(first())
+          .toPromise()
+          .then((nr) => {
+            const currentNr = nr || 0;
+            if (currentNr === 0) {
+              this.workContextService.updateBreakNrForActiveContext(this.dayStr, 1);
+            }
+          });
+      }
+    }
+  }
+
   onTabIndexChange(i: number): void {
     this.selectedTabIndex = i;
   }
@@ -413,9 +437,21 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
+    // Count parent tasks only (not subtasks)
+    const parentTaskCount = doneTasks.filter((task) => !task.parentId).length;
+
     // Actually wait for the archive operation to complete
     await this._taskService.moveToArchive(doneTasks);
     Log.log('[DailySummary] Archive operation completed');
+
+    // Show snackbar notification
+    this._snackService.open({
+      msg:
+        parentTaskCount > 1 ? T.PDS.ARCHIVED_TASKS.PLURAL : T.PDS.ARCHIVED_TASKS.SINGULAR,
+      translateParams: { count: parentTaskCount },
+      type: 'SUCCESS',
+      ico: 'archive',
+    });
   }
 
   private async _finishDayForGood(cb?: () => void): Promise<void> {
@@ -424,19 +460,9 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     if (syncCfg?.isEnabled) {
       await this._syncWrapperService.sync();
     }
-    this._initSuccessAnimation(cb);
-  }
-
-  private _initSuccessAnimation(cb?: () => void): void {
-    this.showSuccessAnimation = true;
-    this._cd.detectChanges();
-    this._successAnimationTimeout = window.setTimeout(() => {
-      this.showSuccessAnimation = false;
-      this._cd.detectChanges();
-      if (cb) {
-        cb();
-      }
-    }, SUCCESS_ANIMATION_DURATION);
+    if (cb) {
+      cb();
+    }
   }
 
   private _getDailySummaryTasksFlat$(dayStr: string): Observable<Task[]> {

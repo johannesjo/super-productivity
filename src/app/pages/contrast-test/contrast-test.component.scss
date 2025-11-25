@@ -1,0 +1,40 @@
+.test-page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 24px;
+
+  h1 {
+    margin-bottom: 8px;
+  }
+
+  > p {
+    color: var(--text-color-muted);
+    margin-bottom: 32px;
+  }
+}
+
+.test-section {
+  margin-bottom: 48px;
+  padding: 24px;
+  background: var(--card-bg);
+  border-radius: 8px;
+  box-shadow: var(--card-shadow);
+
+  h2 {
+    margin-top: 0;
+    margin-bottom: 16px;
+    font-size: 18px;
+    font-weight: 500;
+  }
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+.tab-content {
+  padding: 24px;
+}

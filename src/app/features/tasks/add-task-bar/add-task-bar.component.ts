@@ -25,7 +25,7 @@ import { AsyncPipe } from '@angular/common';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { blendInOutAnimation } from 'src/app/ui/animations/blend-in-out.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { TaskCopy, TaskReminderOptionId } from '../task.model';
+import { TaskCopy } from '../task.model';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -71,6 +71,9 @@ import { DEFAULT_PROJECT_COLOR } from '../../work-context/work-context.const';
 import { Log } from '../../../core/log';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { BodyClass } from '../../../app.constants';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { Store } from '@ngrx/store';
+import { PlannerActions } from '../../planner/store/planner.actions';
 
 @Component({
   selector: 'add-task-bar',
@@ -110,6 +113,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _parserService = inject(AddTaskBarParserService);
   private readonly _destroyRef = inject(DestroyRef);
   private readonly _translateService = inject(TranslateService);
+  private readonly _store = inject(Store);
   readonly stateService = inject(AddTaskBarStateService);
 
   T = T;
@@ -139,20 +143,20 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isSearchLoading = signal(false);
   activatedSuggestion$ = new BehaviorSubject<AddTaskSuggestion | null>(null);
   isMentionListShown = signal(false);
+  isScheduleDialogOpen = signal(false);
 
-  // Observables
-  projects$ = this._projectService.list$.pipe(
-    map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
-  );
+  // Computed signals for projects and tags (sorted for consistency)
+  projects = this._projectService.listSortedForUI;
+  // Observable version for compatibility with existing code
+  projects$ = toObservable(this.projects);
   tags$ = this._tagService.tags$;
   suggestions$!: Observable<AddTaskSuggestion[]>;
   activatedIssueTask = toSignal(this.activatedSuggestion$, { initialValue: null });
 
-  // Computed values depending on projects$
+  // Computed values
   hasNewTags = computed(() => this.stateService.state().newTagTitles.length > 0);
-  projectsSignal = toSignal(this.projects$, { initialValue: [] });
   currentProject = computed(() =>
-    this.projectsSignal().find((p) => p.id === this.stateService.state().projectId),
+    this.projects().find((p) => p.id === this.stateService.state().projectId),
   );
   nrOfRightBtns = computed(() => {
     let count = 2;
@@ -219,8 +223,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   tagMentions$: Observable<ShortSyntaxTag[]> = this.stateService.inputTxt$.pipe(
     filter((val) => typeof val === 'string'),
     withLatestFrom(
-      this._tagService.tagsNoMyDayAndNoList$,
-      this._projectService.list$,
+      this._tagService.tagsNoMyDayAndNoListSorted$,
+      this._projectService.listSorted$,
       this._workContextService.activeWorkContext$,
       this._globalConfigService.shortSyntax$,
     ),
@@ -238,8 +242,8 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   mentionCfg$ = combineLatest([
     this._globalConfigService.shortSyntax$,
-    this._tagService.tagsNoMyDayAndNoList$,
-    this._projectService.list$.pipe(map((ps) => ps.filter((p) => !p.isHiddenFromMenu))),
+    this._tagService.tagsNoMyDayAndNoListSorted$,
+    this._projectService.listSortedForUI$,
   ]).pipe(
     map(([cfg, tagSuggestions, projectSuggestions]) => {
       const mentions: Mentions[] = [];
@@ -407,7 +411,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (!title) return;
 
     const state = this.stateService.state();
-    let finalTagIds = [...state.tagIds];
+    let finalTagIds = [...state.tagIds, ...state.tagIdsFromTxt];
 
     if (this.hasNewTags()) {
       const shouldCreateNewTags = await this._confirmNewTags();
@@ -433,6 +437,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       // needs to be 0
       timeEstimate: state.estimate || 0,
     };
+
+    if (state.spent) {
+      taskData.timeSpentOnDay = state.spent;
+    }
 
     if (state.date) {
       // Parse date components to create date in local timezone
@@ -472,7 +480,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           this._taskService.scheduleTask(
             task,
             taskData.dueWithTime!,
-            TaskReminderOptionId.AtStart,
+            state.remindOption ??
+              this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+              DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
             this.isAddToBacklog(),
           );
         });
@@ -501,8 +511,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
     let taskId: string | undefined;
 
+    const planForDay = this.planForDay();
+    let didPlanForDay = false;
+
     if (suggestion.taskId && suggestion.isFromOtherContextAndTagOnlySearch) {
-      if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
+      if (planForDay) {
+        await this._planTaskForCurrentDay(suggestion.taskId);
+        didPlanForDay = true;
+      } else if (this._workContextService.activeWorkContextType === WorkContextType.TAG) {
         const task = await this._taskService.getByIdOnce$(suggestion.taskId).toPromise();
         this._taskService.moveToCurrentWorkContext(task);
       }
@@ -518,9 +534,14 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       });
       taskId = suggestion.taskId;
     } else if (suggestion.taskId) {
-      this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
-        this._taskService.moveToCurrentWorkContext(task);
-      });
+      if (planForDay) {
+        await this._planTaskForCurrentDay(suggestion.taskId);
+        didPlanForDay = true;
+      } else {
+        this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
+          this._taskService.moveToCurrentWorkContext(task);
+        });
+      }
 
       if (suggestion.isArchivedTask) {
         this._snackService.open({
@@ -543,6 +564,11 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         this.isAddToBacklog(),
         true,
       );
+    }
+
+    if (taskId && planForDay && !didPlanForDay) {
+      await this._planTaskForCurrentDay(taskId);
+      didPlanForDay = true;
     }
 
     if (taskId) {
@@ -572,7 +598,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     const overlayContainer = target.closest('.cdk-overlay-container');
 
     // If click is outside the component and not on autocomplete or menu options, close it
-    if (!component && !overlayContainer) {
+    if (!component && !overlayContainer && !this.isScheduleDialogOpen()) {
       this.done.emit();
     }
   }
@@ -655,6 +681,27 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   }
 
   // Private helper methods
+  private async _planTaskForCurrentDay(taskId: string): Promise<void> {
+    const planForDay = this.planForDay();
+    if (!planForDay) {
+      return;
+    }
+
+    const task = await this._taskService.getByIdOnce$(taskId).toPromise();
+    if (!task) {
+      Log.error('Unable to load task for planning', taskId);
+      return;
+    }
+
+    this._store.dispatch(
+      PlannerActions.planTaskForDay({
+        task,
+        day: planForDay,
+        isAddToTop: !this.isAddToBottom(),
+      }),
+    );
+  }
+
   private async _confirmNewTags(): Promise<boolean> {
     const dialogRef = this._matDialog.open(DialogConfirmComponent, {
       data: {
@@ -714,5 +761,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
   updateListShown(isShown: boolean): void {
     window.setTimeout(() => this.isMentionListShown.set(isShown));
+  }
+
+  onScheduleDialogOpenChange(isOpen: boolean): void {
+    this.isScheduleDialogOpen.set(isOpen);
   }
 }

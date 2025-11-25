@@ -2,15 +2,17 @@ import { inject, Injectable } from '@angular/core';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
 import { AddTaskBarStateService } from './add-task-bar-state.service';
-import { shortSyntax } from '../short-syntax';
+import { SHORT_SYNTAX_TIME_REG_EX, shortSyntax } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import { TimeSpentOnDay } from '../task.model';
 
 interface PreviousParseResult {
   cleanText: string | null;
   projectId: string | null;
   tagIds: string[];
   newTagTitles: string[];
+  timeSpentOnDay: TimeSpentOnDay | null;
   timeEstimate: number | null;
   dueDate: string | null;
   dueTime: string | null;
@@ -45,12 +47,15 @@ export class AddTaskBarParserService {
       return;
     }
 
-    // Get current tags from state to pass as tagIds
+    // Get current tags from state to preserve pre-selected tags
+    const currentState = this._stateService.state();
     const parseResult = shortSyntax(
-      { title: text, tagIds: [] },
+      { title: text, tagIds: currentState.tagIdsFromTxt },
       config,
       allTags,
       allProjects,
+      undefined,
+      'replace',
     );
 
     // Create current parse result data structure
@@ -59,15 +64,15 @@ export class AddTaskBarParserService {
     if (!parseResult) {
       // No parse result means no short syntax found
       // Preserve current user-selected values instead of falling back to defaults
-      const currentState = this._stateService.state();
 
       currentResult = {
         cleanText: text,
         projectId: this._stateService.isAutoDetected()
           ? defaultProject?.id || null
           : null,
-        tagIds: [],
+        tagIds: currentState.tagIdsFromTxt, // Preserve pre-selected tags
         newTagTitles: [],
+        timeSpentOnDay: null,
         timeEstimate: null,
         // Preserve current date/time if user has selected them, otherwise use defaults
         dueDate: currentState.date || (defaultDate ? defaultDate : null),
@@ -75,8 +80,8 @@ export class AddTaskBarParserService {
       };
     } else {
       // Extract parsed values
-      const tagIds = parseResult.taskChanges.tagIds || [];
-      const newTagTitles = parseResult.newTagTitles || [];
+      const tagIds = parseResult.taskChanges.tagIds || currentState.tagIdsFromTxt;
+      const newTagTitles = parseResult.newTagTitles || currentState.newTagTitles;
 
       let dueDate: string | null = null;
       let dueTime: string | null = null;
@@ -104,6 +109,7 @@ export class AddTaskBarParserService {
         projectId: parseResult.projectId || null,
         tagIds: tagIds,
         newTagTitles: newTagTitles,
+        timeSpentOnDay: parseResult.taskChanges.timeSpentOnDay || null,
         timeEstimate: parseResult.taskChanges.timeEstimate || null,
         dueDate: dueDate,
         dueTime: dueTime,
@@ -138,7 +144,7 @@ export class AddTaskBarParserService {
       !this._previousParseResult ||
       !this._arraysEqual(this._previousParseResult.tagIds, currentResult.tagIds)
     ) {
-      this._stateService.updateTagIds(currentResult.tagIds);
+      this._stateService.updateTagIdsFromTxt(currentResult.tagIds);
     }
 
     if (
@@ -149,6 +155,25 @@ export class AddTaskBarParserService {
       )
     ) {
       this._stateService.updateNewTagTitles(currentResult.newTagTitles);
+    }
+
+    const prevTimeSpentOnDay = this._previousParseResult?.timeSpentOnDay || null;
+    const currTimeSpentOnDay = currentResult.timeSpentOnDay;
+
+    if (
+      !this._previousParseResult ||
+      // Check for field existence change
+      (prevTimeSpentOnDay === null) !== (currTimeSpentOnDay === null) ||
+      // Check for any discrepancy between all recorded time spent
+      (prevTimeSpentOnDay !== null &&
+        currTimeSpentOnDay !== null &&
+        (Object.keys(prevTimeSpentOnDay).length !==
+          Object.keys(currTimeSpentOnDay).length ||
+          Object.keys(prevTimeSpentOnDay).some(
+            (k) => prevTimeSpentOnDay[k] !== currTimeSpentOnDay[k],
+          )))
+    ) {
+      this._stateService.updateSpent(currentResult.timeSpentOnDay);
     }
 
     if (
@@ -203,9 +228,8 @@ export class AddTaskBarParserService {
 
       case 'estimate':
         // Remove estimate syntax (e.g., t30m, 1h, 30m/1h, t1.5h)
-        // This matches the SHORT_SYNTAX_TIME_REG_EX from short-syntax.ts
         cleanedInput = cleanedInput.replace(
-          /(?:\s|^)t?((\d+(?:\.\d+)?[mhd])(?:\s*\/\s*(\d+(?:\.\d+)?[mhd]))?)/gi,
+          new RegExp(SHORT_SYNTAX_TIME_REG_EX.source, 'gi'),
           ' ',
         );
         break;

@@ -26,6 +26,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isToday } from '../../../util/is-today.util';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Log } from '../../../core/log';
@@ -38,6 +39,10 @@ import {
   moveSubTaskUp,
 } from '../../tasks/store/task.actions';
 import { EMPTY, forkJoin, from, Observable, of as rxOf } from 'rxjs';
+import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
+import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
+import { devError } from '../../../util/dev-error';
+import { TaskReminderOptionId } from '../../tasks/task.model';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -46,6 +51,48 @@ export class TaskRepeatCfgEffects {
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
   private _taskArchiveService = inject(TaskArchiveService);
+
+  addRepeatCfgToTaskUpdateTask$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(addTaskRepeatCfgToTask),
+      filter(({ startTime, remindAt }) => !!startTime && !!remindAt),
+      concatMap(({ taskId, startTime, remindAt, taskRepeatCfg }) =>
+        this._taskService.getByIdOnce$(taskId).pipe(
+          map((task) => {
+            if (!task) {
+              devError(`Task with id ${taskId} not found`);
+              return null; // Return null instead of EMPTY
+            }
+            const targetDayTimestamp =
+              (taskRepeatCfg.startDate && new Date(taskRepeatCfg.startDate).getTime()) ||
+              (task.dueDay && new Date(task.dueDay).getTime()) ||
+              task.dueWithTime ||
+              Date.now();
+            const dateTime = getDateTimeFromClockString(
+              startTime as string,
+              targetDayTimestamp,
+            );
+            return TaskSharedActions.scheduleTaskWithTime({
+              task,
+              dueWithTime: dateTime,
+              remindAt: remindOptionToMilliseconds(
+                dateTime,
+                remindAt as TaskReminderOptionId,
+              ),
+              isMoveToBacklog: false,
+              isSkipAutoRemoveFromToday: true,
+            });
+          }),
+          filter(
+            (
+              action,
+            ): action is ReturnType<typeof TaskSharedActions.scheduleTaskWithTime> =>
+              action !== null,
+          ), // Filter out null
+        ),
+      ),
+    ),
+  );
 
   removeConfigIdFromTaskStateTasks$ = createEffect(() =>
     this._actions$.pipe(
@@ -305,6 +352,40 @@ export class TaskRepeatCfgEffects {
     ),
   );
 
+  // Update startDate when a task with repeatOnComplete is marked as done
+  updateStartDateOnComplete$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(TaskSharedActions.updateTask),
+      filter((a) => a.task.changes.isDone === true),
+      switchMap(({ task }) =>
+        this._taskService
+          .getByIdOnce$(task.id as string)
+          .pipe(map((fullTask) => fullTask)),
+      ),
+      filter((task) => !!task.repeatCfgId),
+      switchMap((task) =>
+        this._taskRepeatCfgService.getTaskRepeatCfgById$(task.repeatCfgId as string).pipe(
+          take(1),
+          map((cfg) => ({ task, cfg })),
+        ),
+      ),
+      filter(({ cfg }) => !!cfg && cfg.repeatFromCompletionDate === true),
+      filter(({ task, cfg }) => this._isLatestInstance(task, cfg)),
+      map(({ cfg }) => {
+        const today = getDbDateStr();
+        return updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: cfg.id as string,
+            changes: {
+              startDate: today,
+              lastTaskCreationDay: today,
+            },
+          },
+        });
+      }),
+    ),
+  );
+
   checkToUpdateAllTaskInstances$ = createEffect(
     () =>
       this._actions$.pipe(
@@ -525,5 +606,19 @@ export class TaskRepeatCfgEffects {
       notes: st.notes,
       timeEstimate: st.timeEstimate,
     }));
+  }
+
+  private _isLatestInstance(task: Task, cfg: TaskRepeatCfgCopy): boolean {
+    const lastCreationDay = getEffectiveLastTaskCreationDay(cfg);
+    if (!lastCreationDay) {
+      return true;
+    }
+    // Only allow repeat-from-completion to advance configs when the finished task
+    // represents the most recently generated instance. Completing an archived/old
+    // copy previously skipped ahead incorrectly.
+    const taskDay =
+      task.dueDay ||
+      (task.dueWithTime ? getDbDateStr(task.dueWithTime) : getDbDateStr(task.created));
+    return taskDay === lastCreationDay;
   }
 }

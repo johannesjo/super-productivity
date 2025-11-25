@@ -1,0 +1,50 @@
+
+### Bug Fixes
+
+* lint and test issues
+* pin webkit version to fix android 9 issue (73bdd10), closes #5285
+* **scheduleDayPanel:** animation
+* **schedule:** other day to today case
+* **scheduleRightPanel:** styling of create-task-placeholder.component.scss
+### Features
+
+* **electron:** further improve on idle handling
+* **electron:** further improve on idle handling 2
+* **electron:** stop idle handling if there is no working method
+* make polling message much more subtle #5289
+* outline help-box component
+* **schedule:** better handle resizing
+* **schedule:** better int for times
+* **schedule:** bring back drop onto to sort
+* **scheduleDayPanel:** add message for first time users
+* **schedule:** further improve ui
+* **schedule:** improve drag and drop behavior
+* **schedule:** improve drop before by updating label
+* **schedule:** improve on planning for end or start of day
+* **schedule:** improve on planning for end or start of day 2
+* **schedule:** improve on planning for end or start of day 3
+* **schedule:** improve on planning for end or start of day 4
+* **schedule:** improve on planning for end or start of day 5
+* **schedule:** improve on where the mouse cursos is in relation to preview element
+* **schedule:** make cursor work
+* **schedule:** reduce schedule height
+* **schedule:** remove resize observer stuff, add comments and better label
+* **scheduleRightPanel:** add first draft for schedule panel
+* **scheduleRightPanel:** alternative approach for draggint tasks onto day panel
+* **scheduleRightPanel:** consider current task in panel too
+* **scheduleRightPanel:** don't play task snapback ani
+* **scheduleRightPanel:** fix jumping header button
+* **scheduleRightPanel:** improve
+* **scheduleRightPanel:** improve drag over 1
+* **scheduleRightPanel:** improve drop before
+* **scheduleRightPanel:** improve on drag out to unschedule
+* **scheduleRightPanel:** improve on drag out to unschedule 2
+* **scheduleRightPanel:** improve preview for schedule-event dragged onto and out of cal
+* **scheduleRightPanel:** improve preview for task dragged onto cal
+* **scheduleRightPanel:** improve styling
+* **scheduleRightPanel:** improve styling
+* **scheduleRightPanel:** make drag task on schedule work better
+* **scheduleRightPanel:** make it work for touch
+* **scheduleRightPanel:** make scaling work
+* **scheduleRightPanel:** refresh panel every two minutes
+* **scheduleRightPanel:** use schedule-event as preview when dropping tasks

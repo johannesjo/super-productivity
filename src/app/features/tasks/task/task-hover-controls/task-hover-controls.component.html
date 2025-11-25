@@ -1,4 +1,6 @@
-@if (!task().isDone && !isCurrent() && !task().subTasks?.length) {
+@if (
+  isTimeTrackingEnabled() && !task().isDone && !isCurrent() && !task().subTasks?.length
+) {
   <button
     (click)="parent.startTask()"
     title="{{ T.F.TASK.CMP.TRACK_TIME | translate }} {{
@@ -77,12 +79,12 @@
     mat-icon-button
   >
     @if (!task().issueWasUpdated) {
-      <mat-icon>&#xe949;</mat-icon>
+      <mat-icon>vertical_split</mat-icon>
     }
     <!--            <mat-icon *ngIf="!task().issueWasUpdated">toc</mat-icon>-->
     <!--            <mat-icon *ngIf="!task().issueWasUpdated">chevron_right</mat-icon>-->
     @if (task().issueWasUpdated) {
-      <mat-icon color="accent">update </mat-icon>
+      <mat-icon color="accent">update</mat-icon>
     }
   </button>
 }

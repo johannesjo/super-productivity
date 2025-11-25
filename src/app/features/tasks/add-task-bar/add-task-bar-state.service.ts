@@ -3,6 +3,7 @@ import { Tag } from '../../tag/tag.model';
 import { AddTaskBarState, INITIAL_ADD_TASK_BAR_STATE } from './add-task-bar.const';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { SS } from '../../../core/persistence/storage-keys.const';
+import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
 
 @Injectable()
 export class AddTaskBarStateService {
@@ -39,6 +40,14 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, time }));
   }
 
+  updateSpent(spent: TimeSpentOnDay | null): void {
+    this._taskInputState.update((state) => ({ ...state, spent }));
+  }
+
+  updateRemindOption(remindOption: TaskReminderOptionId | null): void {
+    this._taskInputState.update((state) => ({ ...state, remindOption }));
+  }
+
   updateEstimate(estimate: number | null): void {
     this._taskInputState.update((state) => ({ ...state, estimate }));
   }
@@ -62,6 +71,10 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, tagIds }));
   }
 
+  updateTagIdsFromTxt(tagIdsFromTxt: string[]): void {
+    this._taskInputState.update((state) => ({ ...state, tagIdsFromTxt }));
+  }
+
   updateNewTagTitles(newTagTitles: string[]): void {
     this._taskInputState.update((state) => ({ ...state, newTagTitles }));
   }
@@ -75,7 +88,12 @@ export class AddTaskBarStateService {
   }
 
   clearTags(cleanedInputTxt?: string): void {
-    this._taskInputState.update((state) => ({ ...state, tagIds: [], newTagTitles: [] }));
+    this._taskInputState.update((state) => ({
+      ...state,
+      tagIds: [],
+      tagIdsFromTxt: [],
+      newTagTitles: [],
+    }));
     if (cleanedInputTxt !== undefined) {
       this.inputTxt.set(cleanedInputTxt);
     }
@@ -100,6 +118,7 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({
       ...state,
       tagIds: [],
+      tagIdsFromTxt: [],
       newTagTitles: [],
       cleanText: null,
     }));

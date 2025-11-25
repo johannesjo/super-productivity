@@ -116,14 +116,20 @@ export class MenuTouchFixDirective implements OnInit, OnDestroy {
     const timeSinceTouchStart = Date.now() - this._touchStartTime;
     if (this._preventNextClick || timeSinceTouchStart < 300) {
       event.preventDefault();
-      event.stopPropagation();
+      // Don't call stopPropagation() - we need the event to bubble for menu closing
       this._preventNextClick = false;
 
       // If this was a legitimate tap (not too quick), simulate the click after delay
       if (timeSinceTouchStart >= 100 && timeSinceTouchStart < 300) {
         setTimeout(() => {
           const target = event.target as HTMLElement;
-          target.click();
+          // Create a new click event that can properly bubble
+          const newEvent = new MouseEvent('click', {
+            bubbles: true,
+            cancelable: true,
+            view: window,
+          });
+          target.dispatchEvent(newEvent);
         }, 350 - timeSinceTouchStart);
       }
     }

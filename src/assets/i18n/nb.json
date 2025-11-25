@@ -17,12 +17,20 @@
       "MSG": "Vil du installere Super Productivity som en PWA?"
     },
     "B_OFFLINE": "Du er koblet fra internett. Synkronisering og å be om data fra leverandører fungerer ikke.",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "Endre bakgrunn"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivity har fått en stor oppdatering! Noen migrasjoner for dataene dine er påkrevd. Vær oppmerksom på at dette gjør dataene dine uforenlige med eldre versjoner av appen.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Ingen modelloppdatering valgt. Vær oppmerksom på at du må nedgradere til den siste versjonen, hvis du ikke vil utføre modelloppgraderingen.",
     "UPDATE_WEB_APP": "Ny versjon tilgjengelig. Last inn ny versjon?"
   },
   "BL": {
     "NO_TASKS": "Det er for øyeblikket ingen oppgaver i backloggen"
+  },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Vis problem-panel",
+    "SHOW_NOTES": "Vis prosjektnotater",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Vis filter-/gruppe-/sorteringspanel"
   },
   "CONFIRM": {
     "AUTO_FIX": "Dataene dine ser ut til å være skadet. Vil du prøve å fikse det automatisk? Dette kan føre til delvis tap av data.",
@@ -37,6 +45,13 @@
     "PLACEHOLDER": "Velg en dato",
     "PRESS_ENTER_AGAIN": "Trykk på Enter igjen for å lagre",
     "TOMORROW": "I morgen"
+  },
+  "DIALOG_UNSPLASH_PICKER": {
+    "BY": "av",
+    "NO_RESULTS": "Ingen bilder funnet. Prøv et annet søkeord.",
+    "SEARCH_LABEL": "Søk etter bilder",
+    "SEARCH_PLACEHOLDER": "f.eks., natur, fjell, abstrakt",
+    "TITLE": "Velg bakgrunnsbilde fra Unsplash"
   },
   "F": {
     "ATTACHMENT": {
@@ -142,10 +157,15 @@
       "BANNER": {
         "ADD_AS_TASK": "Legg til som oppgave",
         "FOCUS_TASK": "Fokusoppgave",
+        "SHOW_TASK": "Vis oppgave",
         "TXT": "<strong>{{title}}</strong> starter ved <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong> starter ved <strong>{{start}}</strong>!<br> (og {{nrOfOtherBanners}} andre hendelser forfaller)",
         "TXT_PAST": "<strong>{{title}}</strong> startet på <strong>{{start}}</strong>!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> startet på <strong>{{start}}</strong>!<br> (og {{nrOfOtherBanners}} andre hendelser forfaller)"
+      },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "Arrangement",
+        "EVENTS_STR": "Hendelser"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "Feil i kalenderleverandør: {{errTxt}}"
@@ -190,36 +210,66 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "Legg til 1 minutt",
       "B": {
+        "BREAK_RUNNING": "Pause pågår",
+        "POMODORO_BREAK_RUNNING": "Pause #{{cycleNr}} pågår",
+        "POMODORO_SESSION_RUNNING": "Pomodoro-økt #{{cycleNr}} pågår",
         "SESSION_RUNNING": "Fokusøkt pågår",
         "TO_FOCUS_OVERLAY": "Til fokusoverlegg"
       },
       "BACK_TO_PLANNING": "Tilbake til Planlegging",
+      "BREAK_RELAX_MSG": "Ta et øyeblikk for å slappe av",
+      "CLICK_TO_EDIT_DURATION": "Klikk for å redigere varighet",
+      "COMPLETE_FOCUS_SESSION": "Fullfør fokusøkt",
+      "COMPLETE_SESSION": "Fullfør økt",
       "CONGRATS": "Gratulerer med å ha fullført denne økten!",
       "CONTINUE_FOCUS_SESSION": "Fortsett fokusøkten",
+      "CONTINUE_SESSION": "Fortsett økt",
+      "CONTINUE_TO_NEXT_SESSION": "Fortsett til neste økt",
       "COUNTDOWN": "Nedtelling",
+      "COUNTDOWN_HINT": "Fokuser til klokken når null",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Nåværende øktid",
       "FINISH_TASK_AND_SELECT_NEXT": "Fullfør oppgaven og velg neste",
       "FLOWTIME": "Flytstid",
+      "FLOWTIME_HINT": "Fleksibel tempo uten strenge timere",
+      "FOCUS_TIME_TOOLTIP": "Fokustid",
       "FOR_TASK": "for oppgave",
       "GET_READY": "Gjør deg klar for fokusøkten!",
       "GO_TO_PROCRASTINATION": "Få hjelp når du utsetter ting",
       "GOGOGO": "Gå, gå, gå!!!",
+      "LONG_BREAK": "Lang pause",
+      "LONG_BREAK_TITLE": "Lang pause - syklus {{cycle}}",
       "NEXT": "Neste",
       "ON": "på",
       "OPEN_ISSUE_IN_BROWSER": "Åpne problemet i nettleseren",
+      "PAUSE_SESSION": "Sett økten på pause",
+      "PAUSE_TRACKING": "Sett sporing på pause",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "Sett sporing på pause for gjeldende oppgave",
+      "POMODORO": "Pomodoro",
       "POMODORO_BACK": "Tilbake",
       "POMODORO_DISABLE": "Deaktiver Pomodoro",
+      "POMODORO_HINT": "Strukturerte sprint med planlagte pauser",
       "POMODORO_INFO": "Fokusøkter kan ikke brukes sammen med pomodoro-timeren aktivert.",
+      "POMODORO_SESSION_COMPLETED": "Pomodoro-økt fullført!",
       "PREP_GET_MENTALLY_READY": "Gjør deg mentalt klar til å være fokusert og produktiv",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) oppreist",
       "PREP_STRETCH": "Gjør noen milde uttøyninger",
+      "REMOVE_TIME_MINUTE": "Fjern 1 minutt",
+      "RESUME_SESSION": "Gjenoppta økt",
       "SELECT_ANOTHER_TASK": "Velg en annen oppgave",
+      "SELECT_MODE": "Velg fokusmodus",
       "SELECT_TASK": "Velg oppgave å fokusere på",
+      "SELECT_TASK_TO_FOCUS": "Velg oppgave å fokusere på",
       "SESSION_COMPLETED": "Fokusøkt fullført!",
       "SET_FOCUS_SESSION_DURATION": "Angi fokusøktens varighet",
+      "SHORT_BREAK": "Kort pause",
+      "SHORT_BREAK_TITLE": "Kort pause - syklus {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Vis/skjul oppgavenotater og vedlegg",
+      "SKIP_BREAK": "Hopp over pause",
       "START_FOCUS_SESSION": "Start fokusøkten",
       "START_NEXT_FOCUS_SESSION": "Start neste fokusøkt",
+      "SWITCH_TASK": "Bytt oppgave",
       "WORKED_FOR": "Du jobbet for"
     },
     "GITEA": {
@@ -398,6 +448,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}: Pollingendringer for {{issuesStr}}"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "Viser bufrede kalenderresultater. Data kan være utdaterte."
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: For å forhindre at api er stengt, har tilgang blitt blokkert av Super Productivity. Du bør sannsynligvis sjekke Jira-innstillingene dine!",
@@ -541,6 +596,7 @@
         "CHECK": "Jeg gjorde det!"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "Aktivitetsvarmekart",
         "AVG_BREAKS_PER_DAY": "Gj.sn. pauser per dag",
         "AVG_TASKS_PER_DAY_WORKED": "Gj.sn. oppgaver per utført dag",
         "AVG_TIME_SPENT_ON_BREAKS": "Gj.sn. tid brukt på pauser",
@@ -548,26 +604,37 @@
         "AVG_TIME_SPENT_PER_TASK": "Gj.sn. tidsbruk per oppgave",
         "COUNTING_SUBTASKS": "(teller deloppgaver)",
         "DAYS_WORKED": "Dager jobbet",
+        "FOCUS_SESSION_TRENDS": "Fokusøkter over tid",
         "GLOBAL_METRICS": "Globale beregninger",
-        "IMPROVEMENT_SELECTION_COUNT": "Antall ganger en forbedringsfaktor ble valgt",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Humør og produktivitet over tid",
         "NO_ADDITIONAL_DATA_YET": "Ingen ytterligere data samlet inn ennå. Bruk skjemaet i det daglige sammendraget \"Evaluering\" -panel for å gjøre det.",
-        "OBSTRUCTION_SELECTION_COUNT": "Antall ganger en hindrende faktor ble valgt",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Produktivitet og bærekraft over tid",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Klikk-tellere over tid",
         "SIMPLE_COUNTERS": "Enkle tellere",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stoppeklokken teller over tid",
         "TASKS_DONE_CREATED": "Oppgaver (ferdig / opprettet)",
         "TIME_ESTIMATED": "Anslått tid",
+        "TIME_FRAME_1_MONTH": "1 måned",
+        "TIME_FRAME_2_WEEKS": "2 uker",
+        "TIME_FRAME_LABEL": "Tidsramme",
+        "TIME_FRAME_MAX": "Maks",
         "TIME_SPENT": "Tid brukt"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Legg til notat for i morgen",
+        "DAILY_STATE": "Daglig tilstand",
+        "DAILY_STATE_TOOLTIP": "Kvadrantsystem basert på begge poengsummene (\u00026550 er h\u0000f8y): Dyp flyt (h\u0000f8y/h\u0000f8y), Overdrive (h\u0000f8y/lav), Restitusjon (lav/h\u0000f8y), Driv (lav/lav)",
         "DISABLE_REPEAT_EVERY_DAY": "Deaktiver gjenta hver dag",
         "ENABLE_REPEAT_EVERY_DAY": "Gjenta hver dag",
+        "ENERGY_LEVEL": "Hvordan er energien din?",
+        "ENERGY_LEVEL_HINT": "\u001f62b Utslitt \u000210 OK \u0001f60a Bra",
+        "FOCUS_WORK_TIME": "Fokusert arbeidstid",
         "HELP_H1": "Hvorfor skal jeg bry meg?",
         "HELP_LINK_TXT": "Gå til beregningsdelen",
         "HELP_P1": "På tide med litt egenevaluering! Svarene dine her lagres og gir deg litt statistikk om hvordan du jobber i beregningsdelen. Videre vil forslagene til i morgen vises over oppgavelisten din neste dag.",
         "HELP_P2": "Dette er ment å være mindre om å beregne nøyaktige beregninger eller bli så effektiv som mulig i alt du gjør enn om å forbedre hvordan du føler deg om arbeidet ditt. Det kan være nyttig å evaluere smertepunkter i den daglige rutinen, så vel som å finne faktorer som hjelper deg. Å være litt systematisk om det hjelper forhåpentligvis å få bedre grep om disse og forbedre det du kan.",
+        "IMPACT_OF_WORK": "Hvordan vurderer du virkningen av arbeidet ditt i dag?",
+        "IMPACT_OF_WORK_HINT": "1: Ingen meningsfull fremgang \u000210 4: Betydelig innvirkning",
         "IMPROVEMENTS": "Hva forbedret produktiviteten din?",
         "IMPROVEMENTS_TOMORROW": "Hva kan du gjøre for å forbedre i morgen?",
         "MOOD": "Hvordan føler du deg?",
@@ -575,7 +642,53 @@
         "NOTES": "Merknader for i morgen",
         "OBSTRUCTIONS": "Hva hindret produktiviteten din?",
         "PRODUCTIVITY": "Hvor effektiv jobbet du?",
-        "PRODUCTIVITY_HINT": "1: Har ikke en gang startet - 10: Enormt effektiv"
+        "PRODUCTIVITY_HINT": "1: Har ikke en gang startet - 10: Enormt effektiv",
+        "PRODUCTIVITY_SCORE": "Produktivitetsscore",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65 % innvirkning (1-4 skala) \u00022 30 % fokus mot 4t m\u0000e5l \u00022 5 % totalt arbeid (begrenset til 10t)",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-dagers produktivitetsoversikt",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7-dagers bærekraftoversikt",
+        "STATE_DEEP_FLOW_HEADLINE": "Dyp flyt: Utmerket fokus og bærekraftig tempo.",
+        "STATE_DEEP_FLOW_HINT": "Du er i det perfekte punktet \u000210 reflekter over hva som gjorde denne kombinasjonen mulig.",
+        "STATE_DRIFT_HEADLINE": "Driv: Lavt fokus og lav energi.",
+        "STATE_DRIFT_HINT": "Det er greit. Reflekter over hva som distraherte deg og juster forsiktig \u000210 hver tilbakestilling er en sjanse til \u0000e5 l\u0000e6re.",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "Lav innvirkning: Masse fokus, liten gevinst.",
+        "STATE_IMPACT_MISMATCH_HINT": "Du investerte solid fokus \u000210 n\u0000e5 rett det mot arbeid med h\u0000f8yere innvirkning for \u0000e5 kjenne forskjellen.",
+        "STATE_OVERDRIVE_HEADLINE": "Overdrive: Produktiv, men til en kostnad.",
+        "STATE_OVERDRIVE_HINT": "Du fikk mye gjort \u000210 n\u0000e5 s\u0000e5 til \u0000e5 lade opp f\u0000f8r utbrenthet sniker seg inn.",
+        "STATE_RECOVERY_HEADLINE": "Restitusjon: Hviler og lader opp.",
+        "STATE_RECOVERY_HINT": "Du gir sinnet ditt rom til å komme seg. I morgen vil du ha energi til å dykke dypere igjen.",
+        "STATE_STEADY_HEADLINE": "Stadig rytme: Konsistent, bærekraftig fremgang.",
+        "STATE_STEADY_HINT": "Fin balanse. Du opprettholder momentum uten å overbelaste — fortsett å nære det som gjør at denne takten fungerer.",
+        "SUSTAINABILITY_SCORE": "Bærekraftpoeng",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45 % energinivå \u001f 40 % rimelige arbeidstimer (0 ved 10 t) \u001f 15 % fokusbalanse (optimalt ved 4 t)",
+        "TOTAL_WORK_TIME": "Total arbeidstid i dag"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "Legg til",
+        "ADD_SESSION": "Legg til økt",
+        "CHART_LABEL": "Fokustid (min)",
+        "NEW_SESSION_DURATION": "Varighet",
+        "NO_SESSIONS": "Ingen fokusøkter for denne dagen",
+        "SESSIONS_LIST": "Økter",
+        "TITLE": "Fokusøkter",
+        "TOTAL_SESSIONS": "Totale økter",
+        "TOTAL_TIME": "Total tid"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "Se tidligere refleksjoner",
+        "HISTORY_EMPTY": "Ingen refleksjoner lagret ennå. Skriv dagens notat for å starte en streak.",
+        "HISTORY_TITLE": "Refleksjonshistorikk",
+        "PLACEHOLDER_1": "Hva fungerte bra i dag? Hva bør endres i morgen?",
+        "PLACEHOLDER_2": "Liten forbedring for i morgen?",
+        "PLACEHOLDER_3": "Hvor glapp fokuset - og hvordan kan du beskytte det?",
+        "PLACEHOLDER_4": "Hvilken oppgave ga deg energi? Hvilken tappet den?",
+        "PLACEHOLDER_5": "En ting å gjenta. En ting å endre.",
+        "REMIND_LABEL": "Minne meg på dette i morgen",
+        "REMINDER_CREATED": "Påminnelse om refleksjon planlagt til i morgen",
+        "REMINDER_ERROR": "Kunne ikke planlegge påminnelsen",
+        "REMINDER_NEEDS_TEXT": "Skriv en refleksjon før du ber om en påminnelse",
+        "REMINDER_TASK_TITLE": "Gå gjennom refleksjonsnotatet igjen",
+        "TITLE": "Refleksjonsnotat"
       },
       "S": {
         "SAVE_METRIC": "Måling vellykket"
@@ -812,6 +925,25 @@
         "UPDATED": "Oppdaterte prosjektinnstillinger"
       }
     },
+    "PROJECT_FOLDER": {
+      "CONFIRM_DELETE": "Er du sikker på at du vil slette mappen \"{{title}}\"? Alle prosjekter i denne mappen vil bli flyttet til rotnivå.",
+      "DIALOG": {
+        "CREATE_TITLE": "Opprett mappe",
+        "EDIT_TITLE": "Rediger mappe",
+        "NAME_LABEL": "Mappenavn",
+        "NAME_PLACEHOLDER": "Skriv inn mappenavn",
+        "NAME_REQUIRED": "Mappenavn er påkrevd",
+        "NO_PARENT": "Ingen overordnet (rotnivå)",
+        "PARENT_LABEL": "Overordnet mappe"
+      },
+      "SELECT": {
+        "LABEL": "Mappe",
+        "NO_PARENT": "Ingen mappe (rotnivå)",
+        "PLACEHOLDER": "Velg mappe"
+      },
+      "TOOLTIP_CREATE": "Opprett prosjektmappe",
+      "TOOLTIP_VISIBILITY": "Vis/skjul prosjekter"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "Ingen data for inneværende år",
       "PAGE_TITLE": "Rask historie",
@@ -846,6 +978,10 @@
         "ERR_UNKNOWN": "Redmine: Ukjent feil {{statusCode}} {{errorMsg}}."
       }
     },
+    "REFLECTION_NOTE": {
+      "ACTION_DISMISS": "Avvis",
+      "MSG": "Refleksjonsnotat: ({{date}}): {{content}}"
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Skjul",
@@ -863,13 +999,17 @@
         "TITLE": "Tidsplan"
       },
       "END": "Arbeidets slutt",
+      "INSERT_BEFORE": "Før",
       "LUNCH_BREAK": "Lunsjpause",
+      "MONTH": "Måned",
       "NO_TASKS": "For øyeblikket finnes det ingen oppgaver. Vennligst legg til noen oppgaver via +-knappen i den øverste linjen.",
       "NOW": "Nå",
       "PLAN_END_DAY": "Plan ved dagens slutt",
       "PLAN_START_DAY": "Planlegg ved dagens begynnelse",
+      "SHIFT_KEY_INFO": "Hold Shift for å bytte dagplanleggingsmodus",
       "START": "Start på arbeidet",
-      "TASK_PROJECTION_INFO": "Fremtidig projeksjon av en planlagt repeterbar oppgave"
+      "TASK_PROJECTION_INFO": "Fremtidig projeksjon av en planlagt repeterbar oppgave",
+      "WEEK": "Uke"
     },
     "SEARCH_BAR": {
       "INFO": "Klikk på listeikonet for å søke etter arkiverte oppgaver",
@@ -918,6 +1058,7 @@
         "POSSIBLE_LEGACY_DATA": "Super Productivity har forbedret synkroniseringen ved at den nå bruker to separate filer i stedet for én enkelt, noe som gir mye mindre dataoverføring. Det anbefales å oppdatere alle forekomster av Super Productivity og først synkronisere data fra den appforekomsten der dataene er nyest. Hvis dette er dataene fra din lokale enhet, kan du ignorere denne advarselen og bare fortsette å laste dem opp ved å bekrefte neste dialogboks.",
         "REMOTE_MODEL_VERSION_NEWER": "Den eksterne modellversjonen er nyere enn den lokale. Oppdater din lokale app til den nyeste versjonen!"
       },
+      "BTN_SYNC_NOW": "Synkroniser nå",
       "C": {
         "EMPTY_SYNC": "Du prøver å synkronisere et tomt dataobjekt. Hvis du prøver å konfigurere synkronisering fra en ny appforekomst, trykker du bare på OK for å laste inn dataene fra serveren. Ellers må du sjekke dataene dine.",
         "FORCE_UPLOAD": "Laste opp lokale data likevel?",
@@ -934,17 +1075,34 @@
         "TITLE": "Logg inn: {{provider}}"
       },
       "D_CONFLICT": {
+        "ADDITIONAL_INFO": "Tilleggsinformasjon",
+        "CHANGES": "Endringer",
+        "CHANGES_SINCE_LAST_SYNC": "Endringer siden siste synkronisering",
+        "COMPARISON_RESULT": "Sammenligningsresultat",
+        "DATE": "Dato",
         "LAMPORT_CLOCK": "Revisjon",
         "LAST_CHANGE": "Siste endring:",
         "LAST_SYNC": "Siste synkronisering:",
+        "LAST_SYNCED": "Sist synkronisert",
+        "LAST_WRITE": "Sist skrevet",
         "LOCAL": "Lokalt",
         "LOCAL_REMOTE": "Lokal -> Ekstern",
+        "NEVER": "Aldri",
+        "OVERWRITE_WARNING": "ADVARSEL: {{targetName}}-dataene inneholder omtrent {{targetChanges}} endringer, mens {{sourceName}}-dataene bare har {{sourceChanges}} endringer. Er du sikker på at du vil overskrive {{targetName}}-dataene med {{sourceName}}-versjonen? Denne handlingen kan ikke angres.",
         "REMOTE": "Fjernstyrt",
+        "RESULT": "Resultat",
         "TEXT": "<p>Oppdatering fra fjern. Både lokale og eksterne data ser ut til å være endret.<\\/p>",
+        "TIME": "Tid",
         "TIMESTAMP": "Tidsstempel",
         "TITLE": "Synkronisering: Motstridende data",
         "USE_LOCAL": "Behold det lokale",
-        "USE_REMOTE": "Hold fjernkontrollen"
+        "USE_REMOTE": "Hold fjernkontrollen",
+        "VECTOR_CLOCK": "Vektorur",
+        "VECTOR_CLOCK_HEADING": "Vektorur",
+        "VECTOR_COMPARISON_CONCURRENT": "Samtidig (ekte konflikt)",
+        "VECTOR_COMPARISON_EQUAL": "Lik",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "Lokal > Fjern",
+        "VECTOR_COMPARISON_LOCAL_LESS": "Lokal < Fjern"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Endre og overskrive eksternt",
@@ -1001,6 +1159,7 @@
         "TITLE": "Synkroniser",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Få det til å fungere i nettleseren:<\\/strong> For å få dette til å fungere i nettleseren må du hviteliste Super Productivity for CORS-forespørselene til din Nextcloud-instans. Dette kan ha negative sikkerhetsimplikasjoner! Vennligst <a href='https:\\/\\/github.com\\/nextcloud\\/server\\/issues\\/3131'>se denne tråden for mer informasjon<\\/a>. En tilnærming for å få dette til å fungere på mobil er å hviteliste \"https:\\/\\/app.super-productivity.com\" via Nextcloud-appen <a href='https:\\/\\/apps.nextcloud.com\\/apps\\/webapppassword'>webapppassword<a>. Bruk på egen risiko!<\\/p>",
+          "INFO": "WebDAV-implementeringer varierer dessverre mye. Super Productivity er kjent for å fungere godt med Nextcloud, <strong>men det kan hende det ikke fungerer med din leverandør</strong>.",
           "L_BASE_URL": "Base Url",
           "L_PASSWORD": "Passord",
           "L_SYNC_FOLDER_PATH": "Synkroniseringsmappebane",
@@ -1012,6 +1171,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Ingen lokale endringer - allerede synkronisert",
         "BTN_CONFIGURE": "Konfigurer",
         "BTN_FORCE_OVERWRITE": "Tving overskriving",
+        "ERROR_CORS": "WebDAV-synkroniseringsfeil: Nettverksforespørsel mislyktes.\n\nDette kan være et CORS-problem. Vennligst sørg for:\n\u001f Ditt WebDAV-server tillater Cross-Origin-forespørsler\n\u001f Server-URL-en er korrekt og tilgjengelig\n\u001f Du har en fungerende internettforbindelse",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Eksterne data skrives for tiden",
         "ERROR_FALLBACK_TO_BACKUP": "Noe gikk galt under importen av dataene. Faller tilbake til lokal sikkerhetskopi.",
         "ERROR_INVALID_DATA": "Feil under synkronisering. Ugyldige data",
@@ -1025,6 +1185,40 @@
         "SUCCESS_VIA_BUTTON": "Data vellykket synkronisert",
         "UNKNOWN_ERROR": "Ukjent synkroniseringsfeil: {{err}}",
         "UPLOAD_ERROR": "Ukjent opplastingsfeil (riktige innstillinger?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BACKUP_NOT_FOUND": "Sikkerhetskopi med ID {{backupId}} ble ikke funnet",
+        "BTN_CLEAR_ALL": "Fjern alt",
+        "BTN_CREATE_MANUAL": "Opprett manuell sikkerhetskopi",
+        "BTN_DELETE": "Slett",
+        "BTN_REFRESH": "Oppdater",
+        "BTN_RESTORE": "Gjenopprett",
+        "CLEAR_FAILED": "Kunne ikke tømme sikkerhetskopier",
+        "CLEARED_SUCCESS": "Alle sikkerhetskopier ble tømt med suksess",
+        "CREATE_FAILED": "Kunne ikke opprette sikkerhetskopi",
+        "CREATED_SUCCESS": "Manuell sikkerhetskopi opprettet med suksess",
+        "DELETE_FAILED": "Kunne ikke slette sikkerhetskopi",
+        "DELETED_SUCCESS": "Sikkerhetskopi slettet med suksess",
+        "DESCRIPTION": "Automatiske sikkerhetskopier opprettes før nedlasting av data fra fjernserver under synkroniseringsoperasjoner. Sikkerhetskopier organiseres i 4 smarte plasser: 2 nyeste, 1 første fra i dag, og 1 første fra en dag før i dag.",
+        "INVALID_ID_ERROR": "Ugyldig sikkerhetskopi-ID generert",
+        "LAST_CHANGE_PREFIX": "Siste endring:",
+        "LOADING": "Laster...",
+        "NO_BACKUPS": "Ingen sikkerhetskopier tilgjengelig ennå. Sikkerhetskopier opprettes automatisk før synkroniseringsoperasjoner.",
+        "REASON_BEFORE_UPDATE": "Automatisk sikkerhetskopi før synkronisering",
+        "REASON_MANUAL": "Manuell sikkerhetskopi",
+        "RESTORE_CONFIRM_MSG": "Er du sikker på at du vil gjenopprette sikkerhetskopien fra {{timestamp}}?\n\nDette vil FULLSTENDIG ERSTATTE alle dine nåværende data!\n\nÅrsak: {{reason}}\n\nKlikk OK for å fortsette eller Avbryt for å avbryte.",
+        "RESTORE_CONFIRM_TITLE": "Gjenopprett sikkerhetskopi",
+        "RESTORE_FAILED": "Kunne ikke gjenopprette sikkerhetskopi: {{error}}",
+        "RESTORED_SUCCESS": "Sikkerhetskopi gjenopprettet",
+        "SLOT_BEFORE_TODAY": "Første sikkerhetskopi før i dag",
+        "SLOT_RECENT": "Nylig sikkerhetskopi",
+        "SLOT_TODAY": "Første sikkerhetskopi i dag",
+        "TITLE": "Synkroniser sikkerhetskopier",
+        "TOOLTIP_CLEAR_ALL": "Slett alle sikkerhetskopier",
+        "TOOLTIP_CREATE_MANUAL": "Lag en manuell sikkerhetskopi av alle dataene dine",
+        "TOOLTIP_DELETE": "Slett denne sikkerhetskopien",
+        "TOOLTIP_REFRESH": "Oppdater listen over sikkerhetskopier",
+        "TOOLTIP_RESTORE": "Gjenopprett denne sikkerhetskopien (vil erstatte alle nåværende data)"
       }
     },
     "TAG": {
@@ -1053,6 +1247,24 @@
         "ADD_NEW_TAG": "Legg til ny tag"
       }
     },
+    "TAG_FOLDER": {
+      "CONFIRM_DELETE": "Er du sikker på at du vil slette mappen \"{{title}}\"? Alle merker i denne mappen vil bli flyttet til rotnivå.",
+      "DIALOG": {
+        "CREATE_TITLE": "Opprett mappe",
+        "EDIT_TITLE": "Rediger mappe",
+        "NAME_LABEL": "Mappenavn",
+        "NAME_PLACEHOLDER": "Skriv inn mappenavn",
+        "NAME_REQUIRED": "Mappenavn er påkrevd",
+        "NO_PARENT": "Ingen overordnet (rotnivå)",
+        "PARENT_LABEL": "Overordnet mappe"
+      },
+      "SELECT": {
+        "LABEL": "Mappe",
+        "NO_PARENT": "Ingen mappe (rotnivå)",
+        "PLACEHOLDER": "Velg mappe"
+      },
+      "TOOLTIP_CREATE": "Opprett merkekatalog"
+    },
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Legg til eksisterende oppgave \"{{taskTitle}}\"",
@@ -1061,11 +1273,32 @@
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Legg til oppgave nederst på listen",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Legg til oppgaven øverst i etterslepet",
         "ADD_TASK_TO_TOP_OF_TODAY": "Legg til oppgaven øverst på listen",
+        "CREATE_NEW_TAGS": "Opprett nye merker",
         "CREATE_TASK": "Lag ny oppgave",
+        "DUE_BUTTON": "Forfall",
+        "ESTIMATE_BUTTON": "Estimert",
         "EXAMPLE": "Eksempel: \"Noen oppgavetittel + prosjektnavn #en tag #en annen tag 10m / 3h\"",
+        "NO_DATE": "Ingen dato",
+        "NO_TIME": "Ingen tid",
+        "PLACEHOLDER_CREATE": "En oppgavetittel #tag @16:00",
+        "PLACEHOLDER_SEARCH": "Legg til eksisterende oppgave eller saker...",
+        "SEARCH_INFO_TEXT": "Søk og legg til saker og oppgaver fra arkiv og andre prosjekter",
         "START": "Trykk enter en gang til for å starte",
+        "TAGS_BUTTON": "Merker",
+        "TODAY": "I dag",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "Veksle mellom å legge til oppgave i backlog / dagens liste'",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "Veksle mellom å legge til oppgaver øverst og nederst på listen"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Veksle mellom å legge til oppgaver øverst og nederst på listen",
+        "TOMORROW": "I morgen",
+        "TOOLTIP_ADD_TASK": "Legg til oppgave",
+        "TOOLTIP_ADD_TO_BACKLOG": "Legg til i backlog",
+        "TOOLTIP_ADD_TO_BOTTOM": "Legg til nederst (Ctrl+1)",
+        "TOOLTIP_ADD_TO_TODAY": "Legg til i dag",
+        "TOOLTIP_ADD_TO_TOP": "Legg til øverst (Ctrl+1)",
+        "TOOLTIP_CLEAR_DATE": "Fjern dato",
+        "TOOLTIP_CLEAR_ESTIMATE": "Fjern estimat",
+        "TOOLTIP_CLEAR_TAGS": "Fjern merker",
+        "TOOLTIP_DISABLE_SEARCH": "Deaktiver søk etter saker (Ctrl+2)",
+        "TOOLTIP_ENABLE_SEARCH": "Aktiver søk etter saker (Ctrl+2)"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Legg til vedlegg",
@@ -1095,6 +1328,7 @@
         "DELETE": "Slett oppgave",
         "DELETE_REPEAT_INSTANCE": "Slett gjentatte oppgaveforekomster",
         "DROP_ATTACHMENT": "Slipp her for å legge ved \"{{title}}\"",
+        "DUPLICATE": "Duplikat",
         "EDIT_SCHEDULED": "Rediger påminnelse",
         "EDIT_TAGS": "Rediger koder",
         "EDIT_TASK_TITLE": "Rediger tittel",
@@ -1133,6 +1367,10 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Legg alt til i dag",
         "ADD_TO_TODAY": "Legg til i dag",
+        "COMPLETE": "Fullfør",
+        "COMPLETE_ALL": "Fullfør alle",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Avvis alle påminnelser (Behold i dag)",
+        "DISMISS_REMINDER_KEEP_TODAY": "Avvis påminnelse (Behold i dag)",
         "DONE": "Ferdig",
         "DUE_TASK": "Forfalt oppgave",
         "DUE_TASKS": "Forfalte oppgaver",
@@ -1167,6 +1405,11 @@
         "SCHEDULE": "Legg til planlagt",
         "UNSCHEDULE": "Fjern fra planlagt"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "Dato",
+        "TIME": "Tid",
+        "TITLE": "Velg dato og tid"
+      },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Legg til tid brukt den andre dagen",
         "DELETE_FOR": "Slett oppføringen for dagen",
@@ -1194,6 +1437,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Flyttet oppgave <strong>{{title}}</strong> fra backlog til dagens oppgaveliste",
         "FOUND_MOVE_FROM_OTHER_LIST": "Lagt til oppgave <strong>{{title}}</strong> fra <strong>{{contextTitle}}</strong> til gjeldende liste",
         "FOUND_RESTORE_FROM_ARCHIVE": "Gjenopprettet oppgave <strong>{{title}}</strong> relatert til utgave fra arkivet",
+        "GO_TO_TASK": "Gå til oppgave",
         "LAST_TAG_DELETION_WARNING": "Du prøver å fjerne den siste taggen for en ikke-prosjektoppgave. Dette er ikke tillatt!",
         "MOVED_TO_ARCHIVE": "Flyttet {{nr}} oppgaver til arkiv",
         "MOVED_TO_PROJECT": "Flyttet oppgave \"{{taskTitle}}\" til prosjekt \"{{projectTitle}}\"",
@@ -1248,6 +1492,10 @@
         "MSG": "Det er {{tasksNr}} instanser opprettet for denne repeterbare oppgaven. Vil du oppdatere alle med de nye standardinnstillingene eller bare fremtidige oppgaver?",
         "OK": "Oppdater alle instanser"
       },
+      "D_DELETE_INSTANCE": {
+        "MSG": "Fjern gjentakende oppgaveinstans på {{date}}? Dette vil forhindre at oppgaven opprettes kun på denne datoen.",
+        "OK": "Fjern instans"
+      },
       "D_EDIT": {
         "ADD": "Legg til gjenta oppgavekonfigurasjon",
         "ADVANCED_CFG": "Avansert konfigurasjon",
@@ -1264,7 +1512,11 @@
         "C_WEEK": "Uke",
         "C_YEAR": "År",
         "DEFAULT_ESTIMATE": "Standard estimat",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "Deaktiver automatisk oppdatering av underoppgaver",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "Oppdater ikke arvede underoppgaver automatisk når den nyeste instansen endres",
         "FRIDAY": "fredag",
+        "INHERIT_SUBTASKS": "Arv underoppgaver",
+        "INHERIT_SUBTASKS_DESCRIPTION": "Når aktivert, vil underoppgaver fra den nyeste oppgaveinstansen bli gjenskapt med den gjentakende oppgaven",
         "IS_ADD_TO_BOTTOM": "Flytt oppgaven til bunnen av listen",
         "MONDAY": "mandag",
         "NOTES": "Misligholdte notater",
@@ -1279,9 +1531,16 @@
         "QUICK_SETTING": "Gjenta konfigurasjon",
         "REMIND_AT": "Minne på",
         "REMIND_AT_PLACEHOLDER": "Velg når du vil minne",
+        "REMOVE_FOR_DATE": "Fjern for {{date}}",
+        "REMOVE_INSTANCE": "Fjern i dag",
         "REPEAT_CYCLE": "Gjenta syklusen",
         "REPEAT_EVERY": "Gjenta hver",
+        "REPEAT_FROM_COMPLETION_DATE": "Gjenta, når ferdig",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "Neste oppgave opprettes fra fullføringsdatoen din, ikke fra startdato. (f.eks. 'Hver 7. dag' = 7 dager etter fullføring)",
         "SATURDAY": "lørdag",
+        "SCHEDULE_TYPE_FIXED": "Fast tidsplan (f.eks. hver mandag, 1. i måneden)",
+        "SCHEDULE_TYPE_FLEXIBLE": "Etter fullføring (f.eks. 7 dager etter at jeg er ferdig)",
+        "SCHEDULE_TYPE_LABEL": "Tidsplan type",
         "START_DATE": "Startdato",
         "START_TIME": "Planlagt starttidspunkt",
         "START_TIME_DESCRIPTION": "F.eks. 15:00. La stå tomt for en oppgave som varer hele dagen",
@@ -1321,7 +1580,9 @@
         "SORT_CREATION_DATE": "Opprettelsesdato",
         "SORT_DEFAULT": "Standard",
         "SORT_NAME": "Navn",
+        "SORT_PERMANENT": "Sorter (permanent)",
         "SORT_SCHEDULED_DATE": "Planlagt dato",
+        "SORT_TEMPORARY": "Sorter (midlertidig)",
         "TIME_1HOUR": "> 1 time",
         "TIME_2HOUR": "> 2 timer",
         "TIME_10MIN": "> 10 minutter",
@@ -1338,7 +1599,8 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "Legg til oppgave",
-        "MSG": "Du har ikke sporet tid for {{time}}"
+        "MSG": "Du har ikke sporet tid for {{time}}",
+        "MSG_WITHOUT_TIME": "Du har ikke sporet tid"
       },
       "D_IDLE": {
         "ADD_ENTRY": "Legg til oppføring for sporing",
@@ -1354,7 +1616,9 @@
         "SKIP": "Hopp over",
         "SPLIT_TIME": "Del opp tiden i flere oppgaver og pauser",
         "TASK": "Oppgave",
-        "TRACK_TO": "Spor til"
+        "TRACK_TO": "Spor til",
+        "WARN_SIMPLE_COUNTER": "Tid vil bli telt mot de aktiverte enkle telleknappene.",
+        "WARN_SIMPLE_COUNTER_BREAK": "Tid vil FORTSATT bli telt på de aktiverte enkle telleknappene."
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>Opprette</em> og spore til",
@@ -1417,6 +1681,7 @@
       },
       "WEEK": {
         "EXPORT": "Eksporter ukedata",
+        "FOCUS_SUMMARY": "Fokussesjoner (antall / tid)",
         "NO_DATA": "Ingen oppgaver denne uken ennå.",
         "TITLE": "Tittel"
       }
@@ -1450,10 +1715,12 @@
     "ADVANCED_CFG": "Avansert konfigurasjon",
     "CANCEL": "Avbryt",
     "CLOSE": "Lukk",
+    "COMPLETE": "Fullfør",
     "CONFIRM": "Bekreft",
     "DELETE": "Slett",
     "DISMISS": "Avvis",
     "DO_IT": "Gjør det!",
+    "DONT_SHOW_AGAIN": "Ikke vis igjen",
     "DURATION_DESCRIPTION": "f.eks. \"5h 23m\", som resulterer i 5 timer og 23 minutter",
     "EDIT": "Redigere",
     "ENABLED": "Aktivert",
@@ -1524,6 +1791,7 @@
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Legg til et nytt notat",
+      "ADD_NEW_PROJECT": "Legg til nytt prosjekt",
       "ADD_NEW_TASK": "Legg til ny oppgave",
       "APP_WIDE_SHORTCUTS": "Globale snarveier (applikasjonsbredt)",
       "COLLAPSE_SUB_TASKS": "Skjul underoppgaver",
@@ -1546,6 +1814,7 @@
       "MOVE_TO_BACKLOG": "Flytt oppgave til oppgavestandard",
       "MOVE_TO_REGULARS_TASKS": "Flytt oppgave til dagens oppgaveliste",
       "OPEN_PROJECT_NOTES": "Vis / skjul prosjektnotater",
+      "PLUGIN_SHORTCUTS": "Plugin-snarveier",
       "SAVE_NOTE": "Lagre notat",
       "SELECT_NEXT_TASK": "Velg neste oppgave",
       "SELECT_PREVIOUS_TASK": "Velg forrige oppgave",
@@ -1597,6 +1866,21 @@
       "PT": "Português",
       "RU": "Russisk",
       "SK": "Slovakisk",
+      "TIME_LOCALE": "Tidsformat lokalitet",
+      "TIME_LOCALE_AUTO": "Systemstandard",
+      "TIME_LOCALE_DE_DE": "Tysk - 24-timers",
+      "TIME_LOCALE_DESCRIPTION": "Velg et lokalområde for tidsformatering. Ulike lokalområder bruker forskjellige konvensjoner (12-timers vs 24-timers format)",
+      "TIME_LOCALE_EN_GB": "Engelsk (UK) - 24-timers",
+      "TIME_LOCALE_EN_US": "Engelsk (US) - 12-timers AM/PM",
+      "TIME_LOCALE_ES_ES": "Spansk - 24-timers",
+      "TIME_LOCALE_FR_FR": "Fransk - 24-timers",
+      "TIME_LOCALE_IT_IT": "Italiensk - 24-timers",
+      "TIME_LOCALE_JA_JP": "Japansk - 24-timers",
+      "TIME_LOCALE_KO_KR": "Koreansk - 12-timers AM/PM",
+      "TIME_LOCALE_PT_BR": "Portugisisk (Brasil) - 24-timers",
+      "TIME_LOCALE_RU_RU": "Russisk - 24-timers",
+      "TIME_LOCALE_TR_TR": "Tyrkisk - 24-timers",
+      "TIME_LOCALE_ZH_CN": "Kinesisk (forenklet) - 24-timers",
       "TITLE": "Språk",
       "TR": "Türkçe",
       "UK": "Українська",
@@ -1604,6 +1888,11 @@
       "ZH_TW": "中文(繁體)"
     },
     "MISC": {
+      "DARK_MODE": "Mørk modus",
+      "DARK_MODE_ARIA_LABEL": "Valg av mørk modus",
+      "DARK_MODE_DARK": "Mørk",
+      "DARK_MODE_LIGHT": "Lys",
+      "DARK_MODE_SYSTEM": "System",
       "DEFAULT_PROJECT": "Standard prosjekt som skal brukes til oppgaver hvis ingen er spesifisert",
       "FIRST_DAY_OF_WEEK": "Første ukedag",
       "HELP": "<p><strong>Ser du ikke skrivebordsvarsler?</strong> For Windows vil du kanskje sjekke System&gt; Varsler og handlinger og sjekke om de nødvendige varslene er aktivert.</p>",
@@ -1613,8 +1902,12 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Bekreft før du avslutter appen uten å avslutte dagen først",
       "IS_DARK_MODE": "Mørk modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiver alle animasjoner",
+      "IS_DISABLE_CELEBRATION": "Deaktiver feiring i daglig oppsummering",
+      "IS_ENABLE_USER_PROFILES": "Aktiver brukerprofiler (Beta)",
+      "IS_ENABLE_USER_PROFILES_HINT": "Lar deg opprette og bytte mellom forskjellige brukerprofiler, hver med separate innstillinger, oppgaver og synkroniseringskonfigurasjoner. Profilhåndteringsknappen vises øverst til høyre når aktivert. Merk: Deaktivering av denne funksjonen skjuler brukergrensesnittet, men bevarer profildataene dine (Beta-funksjon, ingen garantier. Sørg for å ha en sikkerhetskopi).",
       "IS_HIDE_NAV": "Skjul navigasjonen til hovedoverskriften er svevet (kun på skrivebordet)",
       "IS_MINIMIZE_TO_TRAY": "Minimere til skuffen (kun på skrivebordet)",
+      "IS_OVERLAY_INDICATOR_ENABLED": "Aktiver overleggindikatorvindu (desktop linux/gnome)",
       "IS_SHOW_TIP_LONGER": "Vis produktivitetstips på appstart litt lenger",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Vis nåværende nedtelling i systemstatusmenyen (kun desktop mac)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Vis gjeldende oppgave i skuffen / statusmenyen (kun desktop mac/windows)",
@@ -1623,6 +1916,9 @@
       "START_OF_NEXT_DAY": "Starttidspunkt neste dag",
       "START_OF_NEXT_DAY_HINT": "fra når (i timer) du ønsker å telle neste dag har startet. standard er midnatt, som er 0.",
       "TASK_NOTES_TPL": "Mal for oppgavebeskrivelse",
+      "THEME": "Tema",
+      "THEME_EXPERIMENTAL": "Tema (eksperimentell)",
+      "THEME_SELECT_LABEL": "Velg tema",
       "TITLE": "Diverse innstillinger"
     },
     "POMODORO": {
@@ -1630,6 +1926,7 @@
       "CYCLES_BEFORE_LONGER_BREAK": "Start lengre pause etter X-arbeidsøkter",
       "DURATION": "Varigheten av arbeidsøktene",
       "HELP": "<p>Pomodoro-timeren kan konfigureres via et par innstillinger. Varigheten av hver arbeidsøkt, varigheten av normale pauser, antall arbeidsøkter som skal kjøres før en lengre pause startes og varigheten av denne lengre pausen.</p><p> Du kan også angi om du vil vise distraksjoner i pomodoro-pausene dine.</p><p> Innstilling av &quot;Pause tidssporing på pomodoro pause&quot; vil også spore pausene dine som arbeidstid brukt på en oppgave.</p><p> Aktivering av &quot;Pause pomodoro-økt midlertidig når ingen aktiv oppgave er aktivert&quot; vil også pomodoro-økten pause når du setter en oppgave på pause.</p>",
+      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Deaktiver automatisk start av økt etter pause",
       "IS_ENABLED": "Aktiver pomodoro",
       "IS_MANUAL_CONTINUE": "Bekreft manuelt start av neste pomodoro-økt",
       "IS_MANUAL_CONTINUE_BREAK": "Bekreft manuelt at du starter neste pause",
@@ -1642,6 +1939,7 @@
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Vis banner X før den faktiske påminnelsen",
+      "DEFAULT_TASK_REMIND_OPTION": "Standard påminnelsesvalg valgt ved oppretting av oppgaver",
       "IS_COUNTDOWN_BANNER_ENABLED": "Vis nedtellingsbanner før påminnelser forfaller",
       "TITLE": "Påminnelser"
     },
@@ -1654,7 +1952,9 @@
       "L_WORK_END": "Arbeidsdagens slutt",
       "L_WORK_START": "Start på arbeidsdagen",
       "LUNCH_BREAK_START_END_DESCRIPTION": "f.eks. 13:00",
+      "MONTH": "Måned",
       "TITLE": "Planlegge",
+      "WEEK": "Uke",
       "WORK_START_END_DESCRIPTION": "f.eks. 17:00"
     },
     "SHORT_SYNTAX": {
@@ -1736,10 +2036,16 @@
     "FILE_DOWNLOADED": "{{fileName}} lastet ned",
     "FILE_DOWNLOADED_BTN": "Åpne mappe",
     "NAVIGATE_TO_TASK_ERR": "Kunne ikke fokusere på oppgaven. Har du slettet den?",
+    "NO_TASKS_TO_COPY": "Ingen oppgaver å kopiere",
+    "NO_TASKS_TO_UNPLAN": "Ingen oppgaver å fjerne planlegging for",
     "PERSISTENCE_DISALLOWED": "Data vil ikke vedvares permanent. Vær oppmerksom på at dette kan føre til tap av data !!",
     "PERSISTENCE_ERROR": "Feil ved forespørsel om å lagre data: {{err}}",
     "RUNNING_X": "Kjører \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ble trykket, men åpne bokmerkesnarvei er bare tilgjengelig i prosjektsammenheng."
+    "SHARE_FAILED": "Deling mislyktes. Vennligst kopier manuelt.",
+    "SHARE_FAILED_FALLBACK": "Deling mislyktes. Kopiert til utklippstavlen i stedet.",
+    "SHARE_UNAVAILABLE_FALLBACK": "Kopiert til utklippstavlen.",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} ble trykket, men åpne bokmerkesnarvei er bare tilgjengelig i prosjektsammenheng.",
+    "UNPLANNED_TODAY_TASKS": "Uplanlagte alle oppgaver fra i dag"
   },
   "GPB": {
     "ASSETS": "Laster inn ressurser ...",
@@ -1758,6 +2064,7 @@
     "ADD_NEW_TASK": "Legg til ny oppgave",
     "ALL_PLANNED_LIST": "Gjentatt/planlagt",
     "BOARDS": "Brett",
+    "COPY_TASK_LIST_MARKDOWN": "Kopier til utklippstavle",
     "CREATE_PROJECT": "Lag prosjekt",
     "CREATE_TAG": "Opprett tag",
     "DELETE_PROJECT": "Slett prosjekt",
@@ -1789,7 +2096,9 @@
     "SCHEDULE": "Planlegge",
     "SEARCH": "Søk",
     "SETTINGS": "Innstillinger",
+    "SHARE_TASK_LIST_MARKDOWN": "Del oppgaveliste",
     "SHOW_SEARCH_BAR": "Vis søkefelt",
+    "SIDE_PANEL_MENU": "Sidepanelmeny",
     "TAGS": "Merker",
     "TASK_LIST": "Oppgaveliste",
     "TASKS": "Oppgaver",
@@ -1798,6 +2107,7 @@
     "TOGGLE_SHOW_NOTES": "Vis / skjul prosjektnotater",
     "TOGGLE_TRACK_TIME": "Start / stopp sporingstid",
     "TRIGGER_SYNC": "Utløs synkronisering manuelt",
+    "UNPLAN_ALL_TASKS": "Uplanlegg alle oppgaver",
     "WORKLOG": "Arbeidslogg"
   },
   "MIGRATE": {
@@ -1809,18 +2119,22 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Legg til oppgaver fra i dag",
-    "BACK": "Vent, jeg glemte noe!",
+    "ARCHIVED_TASKS": {
+      "PLURAL": "{{count}} fullførte overordnede oppgaver er arkivert",
+      "SINGULAR": "{{count}} fullført overordnet oppgave er arkivert"
+    },
     "BREAK_LABEL": "Pause (nr / tid)",
     "CELEBRATE": "Ta deg tid til å <i>feire!</i>",
     "CLEAR_ALL_CONTINUE": "Fjern alt ferdig og fortsett",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Nei, bare fjern oppgavene",
-      "MSG": "Arbeidet ditt er gjort. På tide å gå hjem!",
-      "OK": "Jepp! Skru av!"
+      "MSG": "Avslutte applikasjonen?",
+      "OK": "Avslutt"
     },
     "ESTIMATE_TOTAL": "Totalt estimat:",
     "EVALUATE_DAY": "Evaluer",
     "EXPORT_TASK_LIST": "Eksporter oppgaveliste",
+    "FOCUS_SUMMARY": "Fokus (nr / tid)",
     "NO_TASKS": "Det er ingen oppgaver for denne dagen",
     "PLAN_TOMORROW": "Plan",
     "REVIEW_TASKS": "Anmeldelse",
@@ -1833,7 +2147,7 @@
     "ROUND_UP_5M": "Avrund opp alle oppgavene til 5 minutter",
     "ROUND_UP_15M": "Avrund opp alle oppgavene til 15 minutter",
     "ROUND_UP_30M": "Avrund opp alle oppgavene til 30 minutter",
-    "SAVE_AND_GO_HOME": "Lagre og dra hjem",
+    "SAVE_AND_GO_HOME": "Avslutt dagen",
     "SAVE_AND_GO_HOME_TOOLTIP": "Flytt alle utførte oppgaver til arkivet (arbeidsloggen), og synkroniser eventuelt alle data og lukk appen.",
     "START_END": "Start - Slutt",
     "SUMMARY_FOR": "Daglig sammendrag for {{dayStr}}",
@@ -1843,21 +2157,126 @@
     "TIME_SPENT_TODAY_BY_TAG": "Tid brukt i dag etter Tag",
     "WEEK": "Uke"
   },
+  "PLUGINS": {
+    "ACTION_TYPE_NOT_ALLOWED": "Handlingstype '{{type}}' er ikke tillatt",
+    "ALREADY_INITIALIZED": "Plugin er allerede initialisert",
+    "CANCEL": "Avbryt",
+    "CAPABILITIES": {
+      "ACCESS_FILES": "Få tilgang til og endre filer på systemet ditt",
+      "RUN_COMMANDS": "Utfør systemkommandoer",
+      "USE_NODE_APIS": "Bruk Node.js API-er og moduler"
+    },
+    "CHOOSE_PLUGIN_FILE": "Velg plugin-fil",
+    "CLEAR_PLUGIN_CACHE": "Tøm plugin-buffer",
+    "CODE_TOO_LARGE": "Plugin-koden er for stor (maks {{maxSize}}MB)",
+    "CONFIGURATION": "Konfigurasjon",
+    "CONFIGURE": "Konfigurer",
+    "CONFIRM_REMOVE": "Er du sikker på at du vil fjerne plugin \"{{name}}\"?",
+    "DISABLED": "Deaktivert",
+    "ELECTRON_API_NOT_AVAILABLE": "Electron API er ikke tilgjengelig",
+    "ENABLED": "Aktivert",
+    "ERROR": "Feil",
+    "ERROR_LOADING_PLUGIN": "Feil ved lasting av plugin",
+    "EXPERIMENTAL_WARNING": "Pluginsystemet er i en eksperimentell fase og bør brukes med ekstrem forsiktighet.",
+    "EXPERIMENTAL_WARNING_TITLE": "Eksperimentell funksjon - Sikkerhetsadvarsel",
+    "FAILED_TO_CLEAR_CACHE": "Kunne ikke tømme plugin-buffer",
+    "FAILED_TO_EXECUTE_SCRIPT": "Kunne ikke kjøre Node.js-skript",
+    "FAILED_TO_EXTRACT_ZIP": "Kunne ikke pakke ut plugin ZIP-fil",
+    "FAILED_TO_INSTALL": "Kunne ikke installere plugin",
+    "FAILED_TO_LOAD": "Kunne ikke laste plugin",
+    "FAILED_TO_LOAD_CONFIG": "Kunne ikke laste plugin-konfigurasjon",
+    "FAILED_TO_REMOVE": "Kunne ikke fjerne plugin",
+    "FAILED_TO_SAVE_CONFIG": "Kunne ikke lagre plugin-konfigurasjon",
+    "FILE_TOO_LARGE": "Fil for stor ({{fileSize}}MB). Maksimal størrelse er {{maxSize}}MB",
+    "GO_BACK": "Gå tilbake",
+    "GRANT_PERMISSION": "Gi tillatelse",
+    "HOOKS": "Hooks",
+    "ID": "ID:",
+    "INDEX_HTML_NOT_LOADED": "Plugin index.html ikke lastet",
+    "INSTALL_PLUGIN": "Installer plugin",
+    "INSTALL_WARNING": "Før du installerer en plugin, sørg for at du stoler på kilden og forstår tillatelsene den ber om.",
+    "INSTALLING": "Installerer...",
+    "LOADING_INTERFACE": "Laster plugin-grensesnitt...",
+    "LOADING_PLUGIN": "Laster...",
+    "MANIFEST_NOT_FOUND": "Plugin-manifest (manifest.json) ikke funnet i ZIP-fil",
+    "MANIFEST_TOO_LARGE": "Plugin-manifestet er for stort (maks {{maxSize}}KB)",
+    "MENU_ENTRY_ICON_STRING": "Menyikon må være en streng",
+    "MENU_ENTRY_LABEL_REQUIRED": "Menyetikett er påkrevd",
+    "MENU_ENTRY_ONCLICK_REQUIRED": "Menyens onClick-handler er påkrevd",
+    "MIN_VERSION": "Min. versjon:",
+    "NO_ADDITIONAL_INFO": "Ingen ytterligere informasjon tilgjengelig",
+    "NO_CONTENT_PROVIDED": "Ingen innhold oppgitt",
+    "NO_PLUGIN_CONTEXT_ACTION": "Plugin har ikke tillatelse til å utføre handlinger",
+    "NO_PLUGIN_CONTEXT_HEADER_BUTTON": "Plugin har ikke tillatelse til å legge til header-knapper",
+    "NO_PLUGIN_CONTEXT_LOADING": "Plugin har ikke kontekst for datalasting",
+    "NO_PLUGIN_CONTEXT_MENU_ENTRY": "Plugin har ikke tillatelse til å legge til menyoppføringer",
+    "NO_PLUGIN_CONTEXT_NODE": "Plugin har ikke tillatelse til å kjøre Node.js-kode",
+    "NO_PLUGIN_CONTEXT_PERSISTENCE": "Plugin har ikke tillatelse til å lagre data",
+    "NO_PLUGIN_CONTEXT_SHORTCUT": "Plugin har ikke tillatelse til å registrere snarveier",
+    "NO_PLUGIN_CONTEXT_SIDE_PANEL": "Plugin har ikke tillatelse til å legge til sidepanelknapper",
+    "NO_PLUGIN_CONTEXT_SYNC": "Plugin har ikke tillatelse til å bruke synkronisering",
+    "NO_PLUGIN_ID_PROVIDED_FOR_HTML": "Ingen plugin-ID oppgitt for HTML-innhold",
+    "NO_PLUGIN_MANIFEST_NODE": "Plugin-manifestet inkluderer ikke Node.js-modul",
+    "NODE_EXECUTION_REQUIRED": "Denne pluginen krever Node.js-kjøring som kun er tilgjengelig i skrivebordsappen.",
+    "NODE_ONLY_DESKTOP": "Node.js-kjøring er kun tilgjengelig i skrivebordsappen",
+    "OK": "OK",
+    "PARENT_TASK_DOES_NOT_EXIST": "Foreldretask eksisterer ikke",
+    "PARENT_TASK_NOT_FOUND": "Foreldretask ikke funnet i kontekst '{{contextId}}'",
+    "PERMISSIONS": "Tillatelser",
+    "PLEASE_SELECT_ZIP_FILE": "Vennligst velg en ZIP-fil",
+    "PLUGIN_DIALOG_TITLE": "Plugin-melding",
+    "PLUGIN_DOES_NOT_SUPPORT_IFRAME": "Denne pluginen støtter ikke iframe-grensesnitt",
+    "PLUGIN_ID_NOT_PROVIDED": "Plugin-ID ikke oppgitt",
+    "PLUGIN_JS_NOT_FOUND": "Plugin JavaScript-fil (plugin.js) ikke funnet i ZIP-filen",
+    "PLUGIN_NOT_FOUND": "Plugin ikke funnet",
+    "PLUGIN_SYSTEM_FAILED_INIT": "Plugin-systemet klarte ikke å initialisere",
+    "PROJECT_DOES_NOT_EXIST": "Prosjekt eksisterer ikke",
+    "PROJECT_NOT_FOUND": "Prosjekt '{{contextId}}' ikke funnet",
+    "RECOMMENDATION": "Installer kun plugins fra pålitelige kilder og gjennomgå koden deres hvis mulig. Ta alltid sikkerhetskopi av dataene dine før du installerer nye plugins.",
+    "REMEMBER_CHOICE": "Husk mitt valg for denne pluginen",
+    "REMOVE": "Fjern",
+    "RISK_DATA_ACCESS": "Plugins kan lese, endre og slette ALLE dine oppgaver, prosjekter og personlige data",
+    "RISK_MALICIOUS_CODE": "Ondsinnede plugins kan stjele sensitiv informasjon eller ødelegge dataene dine",
+    "RISK_PERFORMANCE": "Dårlig skrevne plugins kan forårsake ytelsesproblemer eller krasj",
+    "RISK_SYSTEM_ACCESS": "Skrivebords-plugins med Node.js-tillatelser kan utføre systemkommandoer",
+    "SECURITY_WARNING": "Plugins har betydelig tilgang til dataene og systemet ditt. Å installere upålitelige plugins medfører alvorlige sikkerhetsrisikoer:",
+    "SIDE_PANEL_LABEL_REQUIRED": "Etiketten for sidepanelknappen er påkrevd",
+    "SIDE_PANEL_ONCLICK_REQUIRED": "OnClick-håndterer for sidepanelknappen er påkrevd",
+    "SYSTEM_ACCESS_REQUEST_DESC": "Denne pluginen ber om tillatelse til å kjøre Node.js-kode på systemet ditt. Dette vil tillate den å:",
+    "SYSTEM_ACCESS_REQUEST_TITLE": "Forespørsel om systemtilgang",
+    "TAGS_DO_NOT_EXIST": "En eller flere tagger finnes ikke",
+    "TASK_NOT_FOUND": "Oppgave med ID '{{taskId}}' ikke funnet",
+    "TASKS_NOT_IN_PROJECT": "En eller flere oppgaver er ikke i prosjektet '{{contextId}}'",
+    "TASKS_NOT_SUBTASKS": "En eller flere oppgaver er ikke underoppgaver av '{{contextId}}'",
+    "TOGGLE_PLUGIN": "Bytt {{pluginName}}",
+    "TRUST_WARNING": "Gi kun tillatelse hvis du stoler på denne pluginen",
+    "TYPE": "Type: {{type}}",
+    "UNABLE_TO_PERSIST_DATA": "Kan ikke lagre data til plugin-lagring",
+    "UNKNOWN_ERROR": "En ukjent feil oppstod",
+    "UPLOAD_PLUGIN_INSTRUCTION": "Last opp en plugin ZIP-fil for å installere den:",
+    "USER_DECLINED_NODE_PERMISSION": "Bruker avslo tillatelse til å kjøre Node.js",
+    "VALIDATION_FAILED": "Validering mislyktes"
+  },
   "PM": {
     "TITLE": "Prosjektstatistikk"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Globale innstillinger",
     "ISSUE_INTEGRATION": "Problem integrering",
+    "NO_PLUGINS_INSTALLED": "Ingen plugins er installert for øyeblikket",
+    "PLUGINS": "Plugins",
     "PRIVACY_POLICY": "Privat policy",
     "PRODUCTIVITY_HELPER": "Produktivitetshjelper",
     "PROJECT_SETTINGS": "Prosjektspesifikke innstillinger",
     "PROVIDE_FEEDBACK": "Gi tilbakemelding",
+    "RELOAD": "Last inn på nytt",
     "SYNC_EXPORT": "Synkroniser og eksporter",
     "TAG_SETTINGS": "Merk spesifikke innstillinger",
     "TOGGLE_DARK_MODE": "Bytt mørk modus"
   },
   "SCHEDULE": {
+    "LAST": "Sist:",
+    "NEXT": "Neste",
     "NO_REPEATABLE_TASKS": "Det finnes for øyeblikket ingen gjentatte oppgaver. Du kan planlegge en oppgave ved å velge \"Gjenta oppgave\" i sidepanelet for oppgaven. Du åpner det ved å klikke på ikonet lengst til høyre som vises når du holder musepekeren over en oppgave (eller bare trykke på oppgaven på mobilen).",
     "NO_SCHEDULED": "Det er for øyeblikket ingen planlagte oppgaver. Du kan planlegge en oppgave ved å velge \"Planlegg oppgave\" i oppgavens kontekstmeny. For å åpne den, klikk på de tre små prikkene til høyre for en oppgave.",
     "NO_SCHEDULED_TITLE": "Planlagte oppgaver for dagen",
@@ -1884,6 +2303,24 @@
     "teal": "blågrønn",
     "yellow": "gul"
   },
+  "USER_PROFILES": {
+    "ACTIVE": "Aktiv",
+    "CANCEL": "Avbryt",
+    "CLOSE": "Lukk",
+    "CREATE": "Opprett",
+    "CREATE_NEW_PROFILE": "Opprett ny profil",
+    "CREATED": "Opprettet:",
+    "DELETE_PROFILE": "Slett profil",
+    "DIALOG_TITLE": "Administrer brukerprofiler",
+    "EXISTING_PROFILES": "Eksisterende profiler",
+    "EXPORT_PROFILE": "Eksporter profil",
+    "MANAGE_PROFILES": "Administrer profiler...",
+    "OPEN_PROFILES_FOLDER": "Åpne profilmappe",
+    "PROFILE_NAME": "Profilnavn",
+    "PROFILE_NAME_PLACEHOLDER": "f.eks. Arbeid, Personlig",
+    "RENAME": "Endre navn",
+    "SAVE": "Lagre"
+  },
   "V": {
     "E_1TO10": "Angi en verdi mellom 1 og 10",
     "E_DATETIME": "Den angitte verdien er ikke en datotid!",
@@ -1907,6 +2344,7 @@
     "FINISH_DAY_FOR_TAG": "Sluttdag for denne taggen",
     "FINISH_DAY_TOOLTIP": "Evaluer dagen, flytt alle utførte oppgaver til arkivet (valgfritt) og/eller planlegg neste dag.",
     "HELP_PROCRASTINATION": "Hjelp jeg utsetter!",
+    "LATER_TODAY": "Senere i dag",
     "MOVE_DONE_TO_ARCHIVE": "Flytt ferdig til arkiv",
     "NO_DONE_TASKS": "Det er for øyeblikket ingen utførte oppgaver",
     "NO_PLANNED_TASK_ALL_DONE": "alle oppgaver fullført",

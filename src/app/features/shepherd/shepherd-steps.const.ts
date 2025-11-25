@@ -15,6 +15,7 @@ import { KeyboardConfig } from '../config/keyboard-config.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ShepherdService } from './shepherd.service';
 import { fromEvent, merge, of, timer } from 'rxjs';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 const PRIMARY_CLASSES =
   'mdc-button mdc-button--unelevated mat-mdc-unelevated-button mat-primary mat-mdc-button-base';
@@ -31,7 +32,13 @@ const CANCEL_BTN: any = (shepherdService: ShepherdService) => ({
   classes: SECONDARY_CLASSES,
   text: 'No thanks',
   action: () => {
-    shepherdService.show(TourId.StartTourAgain);
+    const checkbox = document.getElementById(
+      'tour-show-on-startup-checkbox',
+    ) as HTMLInputElement;
+    if (checkbox && !checkbox.checked) {
+      localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
+    }
+    shepherdService.complete();
   },
 });
 
@@ -78,12 +85,32 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Welcome,
       title: 'Welcome to Super Productivity!',
-      text: '<p>Do you want a tour of the most important features?</p>',
+      text: `<p>Do you want a tour of the most important features?</p>
+        <p style="margin-top: 12px;">
+          <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
+            <input
+              type="checkbox"
+              id="tour-show-on-startup-checkbox"
+              checked
+              style="margin-right: 8px; cursor: pointer;"
+            />
+            <span style="opacity: 0.9; font-size: 0.8em;">Show tour on startup</span>
+          </label>
+        </p>`,
       buttons: [
         CANCEL_BTN(shepherdService),
         {
           ...NEXT_BTN,
           text: "Let's go!",
+          action: () => {
+            const checkbox = document.getElementById(
+              'tour-show-on-startup-checkbox',
+            ) as HTMLInputElement;
+            if (checkbox && !checkbox.checked) {
+              localStorage.setItem(LS.IS_SKIP_TOUR, 'true');
+            }
+            shepherdService.next();
+          },
         },
       ],
     },
@@ -135,7 +162,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: actions$.pipe(ofType(hideAddTaskBar)) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -152,7 +179,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: timer(4000) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -171,7 +198,7 @@ export const SHEPHERD_STEPS = (
       when: twoWayObs(
         { obs: taskService.currentTaskId$.pipe(filter((id) => !!id)) },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -194,7 +221,7 @@ export const SHEPHERD_STEPS = (
           ),
         },
         {
-          obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+          obs: workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
           backToId: TourId.AddTask,
         },
         shepherdService,
@@ -215,7 +242,9 @@ export const SHEPHERD_STEPS = (
                 obs: waitForElObs$('task.shepherd-highlight .hover-controls'),
               },
               {
-                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                obs: workContextService.mainListTasks$.pipe(
+                  filter((tt) => tt.length < 1),
+                ),
                 backToId: TourId.AddTask,
               },
               shepherdService,
@@ -237,7 +266,7 @@ export const SHEPHERD_STEPS = (
               },
               {
                 obs: merge(
-                  workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                  workContextService.mainListTasks$.pipe(filter((tt) => tt.length < 1)),
                   of(true).pipe(
                     switchMap(() => {
                       const btnEl = document.querySelector(
@@ -272,7 +301,9 @@ export const SHEPHERD_STEPS = (
                 ),
               },
               {
-                obs: workContextService.todaysTasks$.pipe(filter((tt) => tt.length < 1)),
+                obs: workContextService.mainListTasks$.pipe(
+                  filter((tt) => tt.length < 1),
+                ),
                 backToId: TourId.AddTask,
               },
               shepherdService,
@@ -429,7 +460,7 @@ export const SHEPHERD_STEPS = (
     {
       id: TourId.Projects,
       title: 'Projects',
-      text: 'If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects. You can find projects in the menu (<span class="material-icons">menu</span>).',
+      text: `If you have lots of tasks, you probably need more than a single task list. One way of creating different lists is by using projects. You can find projects in the menu ${IS_ANDROID_WEB_VIEW ? '(<span class="material-icons">menu</span>)' : 'on the left'}.`,
       buttons: [{ ...NEXT_BTN, text: 'Good to know!' }],
     },
 
@@ -470,34 +501,39 @@ export const SHEPHERD_STEPS = (
       text: '<p>With Super Productivity <strong>you can save and sync your data with a cloud provider of your choice</strong> or even host it in your own cloud.</p><p>Let me show you where to configure this!!</p>',
       buttons: [{ ...NEXT_BTN, text: "Let's go!" }],
     },
-    {
-      title: 'Configure Sync',
-      attachTo: {
-        element: '.tour-burgerTrigger',
-        on: 'bottom',
-      },
-      beforeShowPromise: () => {
-        return router.navigate(['']).then(() => {
-          // If nav is always visible, skip this step
-          if (!layoutService.isShowMobileBottomNav) {
-            setTimeout(() => shepherdService.next(), 0);
-          }
-        });
-      },
-      text: 'Open the menu (<span class="material-icons">menu</span>)',
-      when: {
-        show: () => {
-          // TODO better implementation
-          setTimeout(() => shepherdService.next(), 8000);
-        },
-      },
-    },
+    // Only show "Open menu" step on mobile where menu is hidden
+    ...(layoutService.isShowMobileBottomNav()
+      ? [
+          {
+            title: 'Configure Sync',
+            attachTo: {
+              element: '.tour-burgerTrigger',
+              on: 'bottom' as any,
+            },
+            beforeShowPromise: () => router.navigate(['']),
+            text: 'Open the menu (<span class="material-icons">menu</span>)',
+            when: {
+              show: () => {
+                // TODO better implementation
+                setTimeout(() => shepherdService.next(), 8000);
+              },
+            },
+          },
+        ]
+      : []),
     {
       title: 'Configure Sync',
       text: `${CLICK_B} on <span class="material-icons">settings</span> <strong>Settings</strong>!`,
       attachTo: {
         element: '.tour-settingsMenuBtn',
         on: 'top',
+      },
+      beforeShowPromise: () => {
+        // Navigate to home first on desktop since we skipped the menu step
+        if (!layoutService.isShowMobileBottomNav()) {
+          return router.navigate(['']);
+        }
+        return Promise.resolve();
       },
       when: nextOnObs(
         router.events.pipe(
@@ -660,7 +696,9 @@ export const SHEPHERD_STEPS = (
           obs: actions$.pipe(
             ofType(TaskSharedActions.addTask),
             switchMap(() =>
-              workContextService.todaysTasks$.pipe(filter((tasks) => tasks.length >= 4)),
+              workContextService.mainListTasks$.pipe(
+                filter((tasks) => tasks.length >= 4),
+              ),
             ),
           ),
         },

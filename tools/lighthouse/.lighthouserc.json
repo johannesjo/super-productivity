@@ -2,8 +2,12 @@
   "ci": {
     "collect": {
       "staticDistDir": "./dist",
-      "numberOfRuns": 3,
-      "url": ["http://localhost/browser/index.html"]
+      "numberOfRuns": 1,
+      "url": ["/browser/index.html"],
+      "settings": {
+        "disableServiceWorker": true,
+        "maxWaitForLoad": 45000
+      }
     },
     "assert": {
       "preset": "lighthouse:no-pwa",
@@ -18,7 +22,8 @@
         "total-blocking-time": ["warn", { "maxNumericValue": 300 }],
         "interactive": ["warn", { "maxNumericValue": 5000 }],
         "resource-summary.script.count": ["warn", { "maxNumericValue": 140 }],
-        "resource-summary.total.count": ["warn", { "maxNumericValue": 150 }]
+        "resource-summary.total.count": ["warn", { "maxNumericValue": 150 }],
+        "resource-summary.font.size": ["warn", { "maxNumericValue": 260000 }]
       }
     },
     "upload": {

@@ -77,6 +77,7 @@ TODO configure more restrictive Content-Security-Policy
 @see http://www.html5rocks.com/en/tutorials/security/content-security-policy/ -->
     <meta
       content="default-src * uploaded:;
+          connect-src * data: blob: filesystem: uploaded:;
           frame-src * data: blob:;
           font-src * data:;
           img-src * data: filesystem: file:;
@@ -352,6 +353,8 @@ TODO configure more restrictive Content-Security-Policy
       var randomIndex = Math.floor(Math.random() * productivityTips.length);
       document.getElementById('heading').innerText = productivityTips[randomIndex][0];
       document.getElementById('text').innerText = productivityTips[randomIndex][1];
+
+      (function () {})();
     </script>
   </body>
 </html>

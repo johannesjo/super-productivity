@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, signal } from '@angular/core';
 import {
   hideAddTaskBar,
   hideIssuePanel,
@@ -8,6 +8,8 @@ import {
   toggleIssuePanel,
   toggleShowNotes,
   toggleTaskViewCustomizerPanel,
+  toggleScheduleDayPanel,
+  hideScheduleDayPanel,
 } from './store/layout.actions';
 import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -17,12 +19,12 @@ import {
   selectIsShowIssuePanel,
   selectIsShowNotes,
   selectIsShowTaskViewCustomizerPanel,
+  selectIsShowScheduleDayPanel,
 } from './store/layout.reducer';
 import { map } from 'rxjs/operators';
 import { BreakpointObserver } from '@angular/cdk/layout';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { IS_MOBILE } from '../../util/is-mobile';
-import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { TaskService } from '../../features/tasks/task.service';
 
 const XS_BREAKPOINT = 600;
 const XXXS_BREAKPOINT = 398;
@@ -36,9 +38,9 @@ const initialXsMatch =
 export class LayoutService {
   private _store$ = inject<Store<LayoutState>>(Store);
   private _breakPointObserver = inject(BreakpointObserver);
+  private _taskService = inject(TaskService);
   private _previouslyFocusedElement: HTMLElement | null = null;
-
-  readonly isShowMobileBottomNav = IS_MOBILE && IS_TOUCH_PRIMARY;
+  private _pendingFocusTaskId: string | null = null; // store new task id until user closes the bar
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -70,6 +72,12 @@ export class LayoutService {
     { initialValue: false },
   );
 
+  // Computed signal for mobile bottom nav visibility
+  // Shows bottom nav on small screens (< 600px)
+  readonly isShowMobileBottomNav = computed(() => {
+    return this.isXs();
+  });
+
   // private _isWorkViewUrl(url: string): boolean {
   //   return url.includes('/active/') || url.includes('/tag/') || url.includes('/project/');
   // }
@@ -85,6 +93,11 @@ export class LayoutService {
 
   readonly isShowIssuePanel = toSignal(this.isShowIssuePanel$, { initialValue: false });
 
+  readonly isShowScheduleDayPanel = toSignal(
+    this._store$.pipe(select(selectIsShowScheduleDayPanel)),
+    { initialValue: false },
+  );
+
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
     const activeElement = document.activeElement as HTMLElement;
@@ -94,20 +107,41 @@ export class LayoutService {
     this._store$.dispatch(showAddTaskBar());
   }
 
-  hideAddTaskBar(): void {
+  setPendingFocusTaskId(taskId: string | null): void {
+    // Add-task bar can emit multiple creations before user closes it; remember the last one.
+    this._pendingFocusTaskId = taskId;
+  }
+
+  hideAddTaskBar(newTaskId?: string): void {
     this._store$.dispatch(hideAddTaskBar());
-    // Restore focus to previously focused task after a small delay
-    if (this._previouslyFocusedElement) {
-      window.setTimeout(() => {
-        if (
-          this._previouslyFocusedElement &&
-          document.body.contains(this._previouslyFocusedElement)
-        ) {
-          this._previouslyFocusedElement.focus();
+    const focusTaskId = newTaskId ?? this._pendingFocusTaskId ?? undefined;
+    this._pendingFocusTaskId = null;
+    // Wait a moment so the DOM can render the new task before we try to focus anything.
+    window.setTimeout(() => {
+      if (focusTaskId) {
+        const newTaskElement = document.getElementById(`t-${focusTaskId}`);
+        if (newTaskElement) {
+          // Highest priority: focus the task that was just created (either passed explicitly
+          // or remembered via setPendingFocusTaskId).
+          this._taskService.focusTaskIfPossible(focusTaskId);
           this._previouslyFocusedElement = null;
+          return;
         }
-      });
-    }
+      }
+
+      if (
+        this._previouslyFocusedElement &&
+        document.body.contains(this._previouslyFocusedElement)
+      ) {
+        // Fallback: restore the element that had focus before opening the add-task bar.
+        this._previouslyFocusedElement.focus();
+        this._previouslyFocusedElement = null;
+        return;
+      }
+
+      // Final fallback to keep keyboard navigation working even if nothing else is focusable.
+      this._taskService.focusFirstTaskIfVisible();
+    }, 50);
   }
 
   toggleNotes(): void {
@@ -137,5 +171,14 @@ export class LayoutService {
   focusSideNav(): void {
     // Trigger the focus signal - components listening to this signal will handle the focus
     this._focusSideNavTrigger.update((value) => value + 1);
+  }
+
+  // Schedule Day Panel controls
+  toggleScheduleDayPanel(): void {
+    this._store$.dispatch(toggleScheduleDayPanel());
+  }
+
+  hideScheduleDayPanel(): void {
+    this._store$.dispatch(hideScheduleDayPanel());
   }
 }

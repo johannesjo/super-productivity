@@ -12,8 +12,12 @@ import { TagService } from '../../../tag/tag.service';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { Project } from '../../../project/project.model';
 import { Tag } from '../../../tag/tag.model';
-import { signal, LOCALE_ID } from '@angular/core';
+import { signal } from '@angular/core';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
+import { Store } from '@ngrx/store';
+import { GlobalConfigService } from 'src/app/features/config/global-config.service';
+import { Locale, Locales } from 'src/app/app.constants';
 
 describe('AddTaskBarActionsComponent', () => {
   let component: AddTaskBarActionsComponent;
@@ -47,12 +51,21 @@ describe('AddTaskBarActionsComponent', () => {
   const mockState = {
     projectId: mockProject.id, // Use mock project id by default
     tagIds: [],
+    tagIdsFromTxt: [],
     newTagTitles: [],
     date: null,
     time: null,
     estimate: null,
     cleanText: null,
   };
+
+  const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
+  const mockConfigService = (locale: Locale): GlobalConfigService => {
+    return jasmine.createSpyObj('GlobalConfigService', [], {
+      localization: () => ({ timeLocale: locale }),
+    });
+  };
+  const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-']);
 
   beforeEach(async () => {
     // Create proper signal mocks
@@ -63,6 +76,7 @@ describe('AddTaskBarActionsComponent', () => {
     mockStateService = jasmine.createSpyObj('AddTaskBarStateService', [
       'updateDate',
       'updateEstimate',
+      'updateRemindOption',
       'clearDate',
       'clearTags',
       'clearEstimate',
@@ -94,11 +108,14 @@ describe('AddTaskBarActionsComponent', () => {
 
     mockProjectService = jasmine.createSpyObj('ProjectService', [], {
       list$: of([mockProject]),
+      listSortedForUI: signal([mockProject]),
+      listSorted: signal([mockProject]),
     });
 
     mockTagService = jasmine.createSpyObj('TagService', [], {
       tags$: of([mockTag]),
       tagsNoMyDayAndNoList$: of([mockTag]),
+      tagsNoMyDayAndNoListSorted: signal([mockTag]),
     });
 
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['afterClosed']);
@@ -116,10 +133,12 @@ describe('AddTaskBarActionsComponent', () => {
       providers: [
         { provide: AddTaskBarStateService, useValue: mockStateService },
         { provide: AddTaskBarParserService, useValue: mockParserService },
+        { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
+        { provide: GlobalConfigService, useValue: mockConfigService(Locales.en_us) },
+        { provide: Store, useValue: mockStore },
         { provide: ProjectService, useValue: mockProjectService },
         { provide: TagService, useValue: mockTagService },
         { provide: MatDialog, useValue: mockMatDialog },
-        { provide: LOCALE_ID, useValue: 'en-US' },
         TranslateService,
         TranslateStore,
       ],
@@ -307,12 +326,14 @@ describe('AddTaskBarActionsComponent', () => {
           TranslateModule.forRoot(),
         ],
         providers: [
+          { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
+          { provide: GlobalConfigService, useValue: mockConfigService(Locales.de_de) },
+          { provide: Store, useValue: mockStore },
           { provide: AddTaskBarStateService, useValue: mockStateService },
           { provide: AddTaskBarParserService, useValue: mockParserService },
           { provide: ProjectService, useValue: mockProjectService },
           { provide: TagService, useValue: mockTagService },
           { provide: MatDialog, useValue: mockMatDialog },
-          { provide: LOCALE_ID, useValue: 'de-DE' },
           TranslateService,
           TranslateStore,
         ],
@@ -491,6 +512,16 @@ describe('AddTaskBarActionsComponent', () => {
         const dialogConfig = call.args[1] as any;
         expect(dialogConfig?.data?.isSelectDueOnly).toBe(true);
       });
+    });
+
+    it('should emit dialog open state changes', async () => {
+      const emitSpy = spyOn(component.scheduleDialogOpenChange, 'emit');
+      component.openScheduleDialog();
+
+      expect(emitSpy).toHaveBeenCalledWith(true);
+
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(emitSpy).toHaveBeenCalledWith(false);
     });
   });
 

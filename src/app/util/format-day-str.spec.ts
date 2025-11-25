@@ -66,6 +66,7 @@ describe('formatDayStr', () => {
 
   describe('error handling', () => {
     it('should handle invalid date strings gracefully', () => {
+      (window.confirm as jasmine.Spy).and.returnValue(false);
       const result = formatDayStr('invalid-date', 'en-US');
       expect(result).toBe('Invalid Date');
     });

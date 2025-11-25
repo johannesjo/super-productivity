@@ -8,6 +8,12 @@ export interface TimerState {
   isLongBreak?: boolean;
 }
 
+export enum FocusMainUIState {
+  Preparation = 'Preparation',
+  Countdown = 'Countdown',
+  InProgress = 'InProgress',
+}
+
 // UI screens enum
 export enum FocusScreen {
   TaskSelection = 'TaskSelection',
@@ -31,6 +37,7 @@ export interface FocusModeState {
 
   // The UI - what screen to show
   currentScreen: FocusScreen;
+  mainState: FocusMainUIState;
   isOverlayShown: boolean;
 
   // Session metadata

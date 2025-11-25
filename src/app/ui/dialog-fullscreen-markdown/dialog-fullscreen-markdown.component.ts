@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  OnDestroy,
+  viewChild,
+} from '@angular/core';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { Subscription } from 'rxjs';
@@ -38,7 +44,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
 
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
-
+  readonly previewEl = viewChild<MarkdownComponent>('previewEl');
   private _subs: Subscription = new Subscription();
 
   constructor() {
@@ -86,5 +92,40 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
 
   onViewModeChange(): void {
     localStorage.setItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE, this.viewMode);
+  }
+
+  clickPreview($event: MouseEvent): void {
+    if (($event.target as HTMLElement).tagName === 'A') {
+      // links are already handled by the markdown component
+    } else if (
+      $event?.target &&
+      ($event.target as HTMLElement).classList.contains('checkbox')
+    ) {
+      this._handleCheckboxClick(
+        ($event.target as HTMLElement).parentElement as HTMLElement,
+      );
+    }
+  }
+
+  private _handleCheckboxClick(targetEl: HTMLElement): void {
+    const allCheckboxes =
+      this.previewEl()?.element.nativeElement.querySelectorAll('.checkbox-wrapper');
+
+    const checkIndex = Array.from(allCheckboxes || []).findIndex((el) => el === targetEl);
+    if (checkIndex !== -1 && this.data.content) {
+      const allLines = this.data.content.split('\n');
+      const todoAllLinesIndexes = allLines
+        .map((line, index) => (line.includes('- [') ? index : null))
+        .filter((i) => i !== null);
+
+      const itemIndex = todoAllLinesIndexes[checkIndex];
+      if (typeof itemIndex === 'number' && itemIndex > -1) {
+        const item = allLines[itemIndex];
+        allLines[itemIndex] = item.includes('[ ]')
+          ? item.replace('[ ]', '[x]').replace('[]', '[x]')
+          : item.replace('[x]', '[ ]');
+        this.data.content = allLines.join('\n');
+      }
+    }
   }
 }

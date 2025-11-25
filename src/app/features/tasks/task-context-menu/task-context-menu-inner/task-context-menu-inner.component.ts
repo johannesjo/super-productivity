@@ -11,7 +11,8 @@ import {
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
-import { AsyncPipe, DatePipe } from '@angular/common';
+import { AsyncPipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { MatIcon } from '@angular/material/icon';
 import {
   MatMenu,
@@ -19,7 +20,7 @@ import {
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { Task, TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskCopy, TaskWithSubTasks } from '../../task.model';
 import { EMPTY, forkJoin, from, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   concatMap,
@@ -74,6 +75,7 @@ import { MenuTouchFixDirective } from '../menu-touch-fix.directive';
 import { TaskLog } from '../../../../core/log';
 import { isTouchEventInstance } from '../../../../util/is-touch-event.util';
 import { TaskFocusService } from '../../task-focus.service';
+import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-config.const';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -96,7 +98,7 @@ import { TaskFocusService } from '../../task-focus.service';
   encapsulation: ViewEncapsulation.Emulated,
 })
 export class TaskContextMenuInnerComponent implements AfterViewInit {
-  private readonly _datePipe = inject(DatePipe);
+  private readonly _datePipe = inject(LocaleDatePipe);
   private readonly _taskService = inject(TaskService);
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _matDialog = inject(MatDialog);
@@ -107,7 +109,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   private readonly _projectService = inject(ProjectService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
-  private readonly _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _dateAdapter = inject(DateAdapter);
   private readonly _tagService = inject(TagService);
   private readonly _translateService = inject(TranslateService);
   private readonly _workContextService = inject(WorkContextService);
@@ -119,6 +121,12 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   isAdvancedControls = input<boolean>(false);
   todayList = toSignal(this._store.select(selectTodayTagTaskIds), { initialValue: [] });
   isOnTodayList = computed(() => this.todayList().includes(this.task.id));
+  readonly isTimeTrackingEnabled = computed(
+    () => this._globalConfigService.cfg()?.appFeatures.isTimeTrackingEnabled,
+  );
+  readonly isFocusModeEnabled = computed(
+    () => this._globalConfigService.cfg()?.appFeatures.isFocusModeEnabled,
+  );
 
   // eslint-disable-next-line @angular-eslint/no-output-native
   close = output();
@@ -148,9 +156,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   moveToProjectList$: Observable<Project[]> = this._task$.pipe(
     map((t) => t.projectId),
     distinctUntilChanged(),
-    switchMap((pid) => this._projectService.getProjectsWithoutId$(pid || null)),
+    switchMap((pid) => this._projectService.getProjectsWithoutIdSorted$(pid || null)),
   );
-  toggleTagList = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
+  toggleTagList = this._tagService.tagsNoMyDayAndNoListSorted;
 
   // isShowMoveFromAndToBacklogBtns$: Observable<boolean> = this._task$.pipe(
   //   take(1),
@@ -201,22 +209,24 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
 
     this._isOpenedFromKeyboard = isOpenedFromKeyBoard;
     this.contextMenuTrigger()?.openMenu();
-    // we have a race condition
-    window.setTimeout(() => {
-      this._taskFocusService.focusedTaskId.set(this.task.id);
-    });
   }
 
   focusRelatedTaskOrNext(): void {
     // Focus the task element after context menu closes
-    const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
-    if (taskElement) {
-      taskElement.focus();
-    }
+    // Use setTimeout to ensure menu has fully closed and DOM is settled
+    setTimeout(() => {
+      const taskElement = document.querySelector(`#t-${this.task.id}`) as HTMLElement;
+      if (taskElement) {
+        taskElement.focus();
+        // Ensure focusedTaskId is set even if focus event doesn't fire
+        this._taskFocusService.focusedTaskId.set(this.task.id);
+      }
+    }, 0);
   }
 
   onClose(): void {
-    this._taskFocusService.focusedTaskId.set(null);
+    // Don't manually set focusedTaskId to null here - let the task component's
+    // focus/blur handlers manage it automatically to avoid race conditions
     this.focusRelatedTaskOrNext();
     this.close.emit();
   }
@@ -250,6 +260,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
   }
 
   goToFocusMode(): void {
+    this._taskService.setCurrentId(this.task.id);
     this._taskService.setSelectedId(this.task.id);
     this._store.dispatch(showFocusOverlay());
   }
@@ -439,6 +450,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     } else if (!this.task.repeatCfgId) {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
       this._taskService.moveToProject(taskWithSubTasks, projectId);
+      this.onClose();
     } else {
       const taskWithSubTasks = await this._getTaskWithSubtasks();
 
@@ -475,6 +487,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
                   projectId,
                 });
                 this._taskService.moveToProject(taskWithSubTasks, projectId);
+                this.onClose();
                 return EMPTY;
               }
 
@@ -523,7 +536,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
             },
           ),
         )
-        .subscribe(() => this.focusRelatedTaskOrNext());
+        .subscribe(() => this.onClose());
     }
   }
 
@@ -620,7 +633,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
       this._taskService.scheduleTask(
         task,
         newDate.getTime(),
-        TaskReminderOptionId.AtStart,
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+          DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
         false,
       );
     } else {

@@ -409,10 +409,8 @@
         "COUNTING_SUBTASKS": "(počítání podúkolů)",
         "DAYS_WORKED": "Odpracované dny",
         "GLOBAL_METRICS": "Celosvětová měřítka",
-        "IMPROVEMENT_SELECTION_COUNT": "Počet vybraných zlepšujících faktorů",
         "MOOD_PRODUCTIVITY_OVER_TIME": "Nálada a produktivita v čase",
         "NO_ADDITIONAL_DATA_YET": "Zatím nebyla shromážděna žádná další data. Použijte formulář na panelu „Hodnocení“ denního souhrnu k tomu.",
-        "OBSTRUCTION_SELECTION_COUNT": "Počet vybraných překážkových faktorů",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Počítadla kliknutí v čase",
         "SIMPLE_COUNTERS": "Jednoduchá počítadla",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Počítadla stopky v čase",
@@ -876,6 +874,8 @@
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Přidat vše do dneška",
         "ADD_TO_TODAY": "Přidat do dneška",
+        "COMPLETE": "Dokončit",
+        "COMPLETE_ALL": "Dokončit vše",
         "DONE": "Hotovo",
         "DUE_TASK": "Úkol k dokončení",
         "DUE_TASKS": "Plánované úkoly",
@@ -1251,6 +1251,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdit před ukončením aplikace bez dokončení dne",
       "IS_DARK_MODE": "Temný režim",
       "IS_DISABLE_ANIMATIONS": "Vypnout všechny animace",
+      "IS_DISABLE_CELEBRATION": "Vypnout oslavy v denním přehledu",
       "IS_HIDE_NAV": "Skrýt navigaci, dokud není nadpis záhlaví aktivován (pouze pro desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimalizovat do oznamovací oblasti (pouze pro desktop)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Zobrazit aktuální úkol v oznamovací oblasti/menu stavu (pouze pro desktop Mac/Windows)",
@@ -1355,14 +1356,13 @@
     "WORKLOG": "Pracovní záznam"
   },
   "PDS": {
-    "BACK": "Počkej, zapomněl jsem na něco!",
     "BREAK_LABEL": "Přestávky (číslo / čas)",
     "CELEBRATE": "Najděte si chvíli na <i>oslavu!</i>",
     "CLEAR_ALL_CONTINUE": "Vyčistit vše hotové a pokračovat",
     "D_CONFIRM_APP_CLOSE": {
       "CANCEL": "Ne, jen vyčisti úkoly",
-      "MSG": "Vaše práce je hotová. Čas jít domů!",
-      "OK": "Ano, vypnout!"
+      "MSG": "Ukončit aplikaci?",
+      "OK": "Ukončit"
     },
     "ESTIMATE_TOTAL": "Celkový odhad:",
     "EXPORT_TASK_LIST": "Exportovat seznam úkolů",
@@ -1376,7 +1376,7 @@
     "ROUND_UP_5M": "Zaokrouhlit NAHORU všechny úkoly na 5 minut",
     "ROUND_UP_15M": "Zaokrouhlit NAHORU všechny úkoly na 15 minut",
     "ROUND_UP_30M": "Zaokrouhlit NAHORU všechny úkoly na 30 minut",
-    "SAVE_AND_GO_HOME": "Uložit a jít domů",
+    "SAVE_AND_GO_HOME": "Dokončit den",
     "SAVE_AND_GO_HOME_TOOLTIP": "Přesunout všechny hotové úkoly do archivu (pracovního záznamu) a volitelně synchronizovat všechna data a zavřít aplikaci.",
     "START_END": "Začátek – Konec",
     "SUMMARY_FOR": "Denní shrnutí pro {{dayStr}}",
@@ -1434,6 +1434,24 @@
     "E_MIN_LENGTH": "Mělo by být minimálně {{val}} znaků dlouhé",
     "E_PATTERN": "Neplatný vstup",
     "E_REQUIRED": "Toto pole je povinné"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Spravovat uživatelské profily",
+    "CREATE_NEW_PROFILE": "Vytvořit nový profil",
+    "PROFILE_NAME": "Název profilu",
+    "PROFILE_NAME_PLACEHOLDER": "např. Práce, Osobní",
+    "CREATE": "Vytvořit",
+    "EXISTING_PROFILES": "Existující profily",
+    "ACTIVE": "Aktivní",
+    "CREATED": "Vytvořeno:",
+    "SAVE": "Uložit",
+    "CANCEL": "Zrušit",
+    "RENAME": "Přejmenovat",
+    "EXPORT_PROFILE": "Exportovat profil",
+    "DELETE_PROFILE": "Smazat profil",
+    "OPEN_PROFILES_FOLDER": "Otevřít složku profilů",
+    "CLOSE": "Zavřít",
+    "MANAGE_PROFILES": "Spravovat profily..."
   },
   "WW": {
     "ADD_MORE": "Přidat další",

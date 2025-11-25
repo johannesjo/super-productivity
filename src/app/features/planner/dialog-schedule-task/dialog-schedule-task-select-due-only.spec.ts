@@ -10,7 +10,7 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { SnackService } from '../../../core/snack/snack.service';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { TaskService } from '../../../features/tasks/task.service';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import { of } from 'rxjs';
@@ -77,7 +77,7 @@ describe('DialogScheduleTaskComponent - Select Due Only Mode', () => {
         { provide: WorkContextService, useValue: workContextServiceSpy },
         TranslateService,
         TranslateStore,
-        DatePipe,
+        LocaleDatePipe,
       ],
     }).compileComponents();
   });
@@ -115,6 +115,7 @@ describe('DialogScheduleTaskComponent - Select Due Only Mode', () => {
       expect(dialogRefSpy.close).toHaveBeenCalledWith({
         date: testDate,
         time: testTime,
+        remindOption: TaskReminderOptionId.AtStart,
       });
       expect(taskServiceSpy.scheduleTask).not.toHaveBeenCalled();
     });
@@ -130,6 +131,7 @@ describe('DialogScheduleTaskComponent - Select Due Only Mode', () => {
       expect(dialogRefSpy.close).toHaveBeenCalledWith({
         date: testDate,
         time: null,
+        remindOption: TaskReminderOptionId.AtStart,
       });
     });
 

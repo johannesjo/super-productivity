@@ -2,17 +2,20 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
   input,
   output,
 } from '@angular/core';
 import { RouterLink, RouterModule } from '@angular/router';
 
+import { GlobalThemeService } from '../../../core/theme/global-theme.service';
 import {
   WorkContextCommon,
   WorkContextType,
 } from '../../../features/work-context/work-context.model';
 import { Project } from '../../../features/project/project.model';
+import { Tag } from '../../../features/tag/tag.model';
 import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
 import { WorkContextMenuComponent } from '../../work-context-menu/work-context-menu.component';
 import { FolderContextMenuComponent } from '../../folder-context-menu/folder-context-menu.component';
@@ -27,6 +30,7 @@ import { Store } from '@ngrx/store';
 import { TranslatePipe } from '@ngx-translate/core';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
 import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model';
+import { PluginIconComponent } from '../../../plugins/ui/plugin-icon/plugin-icon.component';
 
 @Component({
   selector: 'nav-item',
@@ -42,6 +46,7 @@ import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model'
     MatMenuItem,
     MatMenuModule,
     TranslatePipe,
+    PluginIconComponent,
   ],
   templateUrl: './nav-item.component.html',
   styleUrl: './nav-item.component.scss',
@@ -60,7 +65,16 @@ import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model'
   standalone: true,
 })
 export class NavItemComponent {
+  private readonly _globalThemeService = inject(GlobalThemeService);
+  private readonly _iconRegistrationEffect = effect(() => {
+    const svgUrl = this.svgIcon();
+    if (svgUrl && svgUrl.startsWith('assets/')) {
+      const iconName = this._generateIconName(svgUrl);
+      this._globalThemeService.registerSvgIcon(iconName, svgUrl);
+    }
+  });
   private readonly _store = inject(Store);
+  private static readonly _registeredIcons = new Set<string>();
 
   mode = input<'work' | 'folder' | 'row'>('work');
   variant = input<'default' | 'nav'>('default');
@@ -137,9 +151,66 @@ export class NavItemComponent {
     return isSingleEmoji(icon);
   });
 
+  workContextIconColor = computed<string | null>(() => {
+    if (this.mode() !== 'work') {
+      return null;
+    }
+    const wc = this.workContext();
+    const wcType = this.type();
+    if (!wc || !wcType) {
+      return null;
+    }
+    const defaultIcon = this.defaultIcon();
+    if (defaultIcon === 'today' || defaultIcon === 'inbox') {
+      return null;
+    }
+    const themeColor = wc.theme?.primary;
+    if (themeColor) {
+      return themeColor;
+    }
+
+    if (wcType === WorkContextType.TAG) {
+      const tag = wc as Tag;
+      return tag.color || null;
+    }
+    return null;
+  });
+
   // Emoji detection for presentational icons
   isPresentationalEmojiIcon = computed<boolean>(() => {
     const iconValue = this.icon();
     return iconValue ? isSingleEmoji(iconValue) : false;
+  });
+
+  private _generateIconName(svgUrl: string): string {
+    const match = svgUrl.match(/bundled-plugins\/([^\/]+)\/([^\/]+\.svg)$/);
+    if (match) {
+      const pluginId = match[1];
+      const fileName = match[2].replace('.svg', '');
+      return `plugin-${pluginId}-${fileName}`;
+    }
+    return svgUrl.replace(/\//g, '_').replace(/\.svg$/, '');
+  }
+
+  namedSvgIcon = computed<string | undefined>(() => {
+    const svgUrl = this.svgIcon();
+    if (!svgUrl) return undefined;
+
+    // If it starts with 'assets/', generate a name and register it
+    if (svgUrl.startsWith('assets/')) {
+      return this._generateIconName(svgUrl);
+    }
+
+    // Otherwise, assume it's already a registered icon name (e.g., for custom plugins)
+    return svgUrl;
+  });
+
+  // Extract plugin ID from custom plugin icon name (pattern: plugin-${pluginId}-icon)
+  customPluginId = computed<string | null>(() => {
+    const svgUrl = this.svgIcon();
+    if (!svgUrl) return null;
+
+    const match = svgUrl.match(/^plugin-(.+)-icon$/);
+    return match ? match[1] : null;
   });
 }

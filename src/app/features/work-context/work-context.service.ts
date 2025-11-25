@@ -11,7 +11,7 @@ import {
   WorkContextType,
 } from './work-context.model';
 import { setActiveWorkContext } from './store/work-context.actions';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationEnd, NavigationStart, Router } from '@angular/router';
 import {
   concatMap,
   delayWhen,
@@ -81,6 +81,10 @@ export class WorkContextService {
   private _translateService = inject(TranslateService);
   private _timeTrackingService = inject(TimeTrackingService);
   private _taskArchiveService = inject(TaskArchiveService);
+  private _pendingNavigationUrl: string | null = null;
+  private readonly _navigationMeasureName = 'work-view-route';
+  private readonly _navigationStartMark = 'work-view-route:start';
+  private readonly _navigationEndMark = 'work-view-route:end';
 
   // here because to avoid circular dependencies
   // should be treated as private
@@ -247,7 +251,7 @@ export class WorkContextService {
 
   // TASK LEVEL
   // ----------
-  todaysTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
+  mainListTaskIds$: Observable<string[]> = this.activeWorkContext$.pipe(
     map((ac) => ac.taskIds),
     distinctUntilChanged(distinctUntilChangedSimpleArray),
     shareReplay(1),
@@ -259,7 +263,7 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  todaysTasks$: Observable<TaskWithSubTasks[]> = this.todaysTaskIds$.pipe(
+  mainListTasks$: Observable<TaskWithSubTasks[]> = this.mainListTaskIds$.pipe(
     // tap((taskIds: string[]) => Log.log('[WorkContext] Today task IDs:', taskIds)),
     switchMap((taskIds: string[]) => this._getTasksByIds$(taskIds)),
     // TODO find out why this is triggered so often
@@ -270,7 +274,7 @@ export class WorkContextService {
     shareReplay(1),
   );
 
-  todaysTasksInProject$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
+  mainListTasksInProject$: Observable<TaskWithSubTasks[]> = this.mainListTasks$.pipe(
     map((tasks) =>
       tasks
         .filter(
@@ -299,7 +303,7 @@ export class WorkContextService {
   );
 
   allTasksForCurrentContext$: Observable<TaskWithSubTasks[]> = combineLatest([
-    this.todaysTasks$,
+    this.mainListTasks$,
     this.backlogTasks$,
   ]).pipe(map(([today, backlog]) => [...today, ...backlog]));
 
@@ -331,17 +335,29 @@ export class WorkContextService {
       switchMap((worklogStrDate) => this.getDoneTodayInArchive(worklogStrDate)),
     );
 
-  isHasTasksToWorkOn$: Observable<boolean> = this.todaysTasks$.pipe(
+  isTodayList: boolean = false;
+  isTodayList$: Observable<boolean> = this.activeWorkContextId$.pipe(
+    map((id) => id === TODAY_TAG.id),
+    shareReplay(1),
+  );
+
+  isHasTasksToWorkOn$: Observable<boolean> = combineLatest([
+    this.mainListTasks$,
+    this.isTodayList$,
+  ]).pipe(
+    map(([tasks, isToday]) =>
+      isToday ? this._filterFutureScheduledTasksForToday(tasks) : tasks,
+    ),
     map(hasTasksToWorkOn),
     distinctUntilChanged(),
   );
 
-  estimateRemainingToday$: Observable<number> = this.todaysTasks$.pipe(
+  estimateRemainingToday$: Observable<number> = this.mainListTasks$.pipe(
     map(mapEstimateRemainingFromTasks),
     distinctUntilChanged(),
   );
 
-  todayRemainingInProject$: Observable<number> = this.todaysTasksInProject$.pipe(
+  todayRemainingInProject$: Observable<number> = this.mainListTasksInProject$.pipe(
     map(mapEstimateRemainingFromTasks),
     distinctUntilChanged(),
   );
@@ -356,7 +372,7 @@ export class WorkContextService {
   //   ]))
   // );
 
-  flatDoneTodayNr$: Observable<number> = this.todaysTasks$.pipe(
+  flatDoneTodayNr$: Observable<number> = this.mainListTasks$.pipe(
     map((tasks) => flattenTasks(tasks)),
     map((tasks) => {
       const done = tasks.filter((task) => task.isDone);
@@ -364,50 +380,35 @@ export class WorkContextService {
     }),
   );
 
-  isToday: boolean = false;
-  isToday$: Observable<boolean> = this.activeWorkContextId$.pipe(
-    map((id) => id === TODAY_TAG.id),
-    shareReplay(1),
-  );
-
-  undoneTasks$: Observable<TaskWithSubTasks[]> = this.todaysTasks$.pipe(
-    map((tasks) =>
-      tasks.filter((task) => {
-        if (!task || task.isDone) {
-          return false;
-        }
-
-        // Filter out tasks scheduled for later today
-        if (this.activeWorkContextId === TODAY_TAG.id && task.dueWithTime) {
-          const now = Date.now();
-          const todayEnd = new Date();
-          todayEnd.setHours(23, 59, 59, 999);
-
-          // If the task is scheduled for later today, exclude it
-          if (task.dueWithTime >= now && task.dueWithTime <= todayEnd.getTime()) {
-            return false;
-          }
-        }
-
-        return true;
-      }),
+  undoneTasks$: Observable<TaskWithSubTasks[]> = combineLatest([
+    this.mainListTasks$,
+    this.isTodayList$,
+  ]).pipe(
+    map(([tasks, isTodayList]) =>
+      (isTodayList ? this._filterFutureScheduledTasksForToday(tasks) : tasks).filter(
+        (task) => task && !task.isDone,
+      ),
     ),
   );
 
-  doneTasks$: Observable<TaskWithSubTasks[]> = this.isToday$.pipe(
+  doneTasks$: Observable<TaskWithSubTasks[]> = this.isTodayList$.pipe(
     switchMap((isToday) =>
-      isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.todaysTasks$,
+      isToday ? this._store$.select(selectAllTasksWithSubTasks) : this.mainListTasks$,
     ),
     map((tasks) => tasks.filter((task) => task && task.isDone)),
   );
 
   constructor() {
-    this.isToday$.subscribe((v) => (this.isToday = v));
+    this.isTodayList$.subscribe((v) => (this.isTodayList = v));
 
     this.activeWorkContextTypeAndId$.subscribe((v) => {
       this.activeWorkContextId = v.activeId;
       this.activeWorkContextType = v.activeType;
     });
+
+    this._router.events
+      .pipe(filter((event): event is NavigationStart => event instanceof NavigationStart))
+      .subscribe((event) => this._markNavigationStart(event.url));
 
     // we need all data to be loaded before we dispatch a setActiveContext action
     this._router.events
@@ -427,6 +428,8 @@ export class WorkContextService {
         ),
       )
       .subscribe(({ urlAfterRedirects }: NavigationEnd) => {
+        this._markNavigationEnd(urlAfterRedirects);
+
         const split = urlAfterRedirects.split('/');
         const id = split[2];
 
@@ -447,7 +450,7 @@ export class WorkContextService {
 
   // TODO could be done better
   getTimeWorkedForDay$(day: string = this._dateService.todayStr()): Observable<number> {
-    return this.isToday$.pipe(
+    return this.isTodayList$.pipe(
       switchMap((isToday) =>
         isToday
           ? this.getTimeWorkedForDayForAllNonArchiveTasks$(day)
@@ -459,7 +462,7 @@ export class WorkContextService {
   async getDoneTodayInArchive(
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
-    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const isToday = await this.isTodayList$.pipe(first()).toPromise();
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
@@ -490,7 +493,7 @@ export class WorkContextService {
   async getTimeWorkedForDayForTasksInArchiveYoung(
     day: string = this._dateService.todayStr(),
   ): Promise<number> {
-    const isToday = await this.isToday$.pipe(first()).toPromise();
+    const isToday = await this.isTodayList$.pipe(first()).toPromise();
     const { activeId, activeType } = await this.activeWorkContextTypeAndId$
       .pipe(first())
       .toPromise();
@@ -534,7 +537,7 @@ export class WorkContextService {
   }
 
   getTimeWorkedForDayTodaysTasks$(day: string): Observable<number> {
-    return this.todaysTasks$.pipe(
+    return this.mainListTasks$.pipe(
       map((tasks) => getTimeSpentForDay(tasks, day)),
       distinctUntilChanged(),
     );
@@ -623,6 +626,40 @@ export class WorkContextService {
     );
   }
 
+  async updateBreakNrForActiveContext(
+    date: string = this._dateService.todayStr(),
+    nrBreaks: number,
+  ): Promise<void> {
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { b: nrBreaks },
+      }),
+    );
+  }
+
+  async updateBreakTimeForActiveContext(
+    date: string = this._dateService.todayStr(),
+    breakTime: number,
+  ): Promise<void> {
+    if (!this.activeWorkContextId || !this.activeWorkContextType) {
+      throw new Error('Invalid active work context');
+    }
+
+    this._store$.dispatch(
+      TimeTrackingActions.updateWorkContextData({
+        ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
+        date,
+        updates: { bt: breakTime },
+      }),
+    );
+  }
+
   private _updateAdvancedCfgForCurrentContext(
     sectionKey: WorkContextAdvancedCfgKey,
     data: unknown,
@@ -655,6 +692,36 @@ export class WorkContextService {
     return this._store$.select(selectTasksWithSubTasksByIds, { ids });
   }
 
+  private _filterFutureScheduledTasksForToday(
+    tasks: TaskWithSubTasks[],
+  ): TaskWithSubTasks[] {
+    if (!tasks) {
+      return [];
+    }
+    if (this.activeWorkContextId !== TODAY_TAG.id) {
+      return tasks;
+    }
+
+    const now = Date.now();
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
+    const todayEndTimestamp = todayEnd.getTime();
+
+    return tasks.filter((task) => {
+      if (!task) {
+        return false;
+      }
+      if (
+        task.dueWithTime &&
+        task.dueWithTime >= now &&
+        task.dueWithTime <= todayEndTimestamp
+      ) {
+        return false;
+      }
+      return true;
+    });
+  }
+
   // we don't want a circular dependency that's why we do it here...
   private _getNotesByIds$(ids: string[]): Observable<Note[]> {
     if (!Array.isArray(ids)) {
@@ -667,5 +734,65 @@ export class WorkContextService {
   // NOTE: NEVER call this from some place other than the route change stuff
   private _setActiveContext(activeId: string, activeType: WorkContextType): void {
     this._store$.dispatch(setActiveWorkContext({ activeId, activeType }));
+  }
+
+  private _markNavigationStart(url: string): void {
+    if (!this._isPerformanceApiAvailable() || !this._shouldTrackNavigation(url)) {
+      return;
+    }
+
+    this._pendingNavigationUrl = url;
+    performance.mark(this._navigationStartMark);
+  }
+
+  private _markNavigationEnd(url: string): void {
+    if (
+      !this._isPerformanceApiAvailable() ||
+      !this._pendingNavigationUrl ||
+      !this._shouldTrackNavigation(url)
+    ) {
+      return;
+    }
+
+    performance.mark(this._navigationEndMark);
+    try {
+      performance.measure(
+        this._navigationMeasureName,
+        this._navigationStartMark,
+        this._navigationEndMark,
+      );
+    } catch {
+      // ignore measure errors (e.g. start mark missing)
+    } finally {
+      this._clearNavigationMarks();
+      this._pendingNavigationUrl = null;
+    }
+  }
+
+  private _clearNavigationMarks(): void {
+    if (!this._isPerformanceApiAvailable()) {
+      return;
+    }
+    try {
+      performance.clearMarks(this._navigationStartMark);
+      performance.clearMarks(this._navigationEndMark);
+      performance.clearMeasures(this._navigationMeasureName);
+    } catch {
+      // ignore cleanup errors
+    }
+  }
+
+  private _shouldTrackNavigation(url: string): boolean {
+    return /(tag|project)\/.+\/tasks/.test(url);
+  }
+
+  private _isPerformanceApiAvailable(): boolean {
+    return (
+      typeof performance !== 'undefined' &&
+      typeof performance.mark === 'function' &&
+      typeof performance.measure === 'function' &&
+      typeof performance.clearMarks === 'function' &&
+      typeof performance.clearMeasures === 'function'
+    );
   }
 }

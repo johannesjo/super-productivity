@@ -8,18 +8,18 @@
         [class.active]="selectedTimeView() === 'week'"
         class="week-month-btn week-btn"
         matTooltip="View Week"
-        mat-button
+        mat-icon-button
       >
-        {{ T.GCF.SCHEDULE.WEEK | translate }}
+        <mat-icon>view_week</mat-icon>
       </button>
       <button
         (click)="selectTimeView('month')"
         [class.active]="selectedTimeView() === 'month'"
         class="week-month-btn month-btn"
         matTooltip="View Month"
-        mat-button
+        mat-icon-button
       >
-        {{ T.GCF.SCHEDULE.MONTH | translate }}
+        <mat-icon>calendar_month</mat-icon>
       </button>
     </div>
   }
@@ -38,61 +38,54 @@
       </button>
     }
 
-    <button
-      class="sync-btn"
-      matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
-      (click)="syncIsEnabledAndReady() ? sync() : setupSync()"
-      (longPress)="setupSync()"
-      (contextmenu)="$event.preventDefault(); setupSync()"
-      mat-icon-button
-    >
-      @if (syncIsEnabledAndReady()) {
-        @if (isOnline()) {
-          @if (syncState() === 'ERROR') {
-            <mat-icon>sync_problem</mat-icon>
+    @if (isSyncIconEnabled()) {
+      <button
+        class="sync-btn"
+        matTooltip="{{ T.MH.TRIGGER_SYNC | translate }}"
+        (click)="syncIsEnabledAndReady() ? sync() : setupSync()"
+        (longPress)="setupSync()"
+        (contextmenu)="$event.preventDefault(); setupSync()"
+        mat-icon-button
+      >
+        @if (syncIsEnabledAndReady()) {
+          @if (isOnline()) {
+            @if (syncState() === 'ERROR') {
+              <mat-icon>sync_problem</mat-icon>
+            } @else {
+              <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
+            }
+            @if (syncState() === 'IN_SYNC') {
+              <mat-icon class="sync-state-ico">check</mat-icon>
+            }
           } @else {
-            <mat-icon [class.spin]="isSyncInProgress()">sync</mat-icon>
-          }
-          @if (syncState() === 'IN_SYNC') {
-            <mat-icon class="sync-state-ico">check</mat-icon>
+            <mat-icon>wifi_off</mat-icon>
           }
         } @else {
-          <mat-icon>wifi_off</mat-icon>
+          <mat-icon>sync_disabled</mat-icon>
         }
-      } @else {
-        <mat-icon>sync_disabled</mat-icon>
-      }
-    </button>
-
-    @if (!isXxxs()) {
-      <div class="focus-btn-wrapper">
-        <button
-          mat-icon-button
-          matTooltip="{{ T.MH.ENTER_FOCUS_MODE | translate }} {{
-            kb.goToFocusMode ? '[' + kb.goToFocusMode + ']' : ''
-          }}"
-          (click)="enableFocusMode()"
-        >
-          <mat-icon>center_focus_strong</mat-icon>
-        </button>
-        @if (focusSummaryToday()?.total) {
-          <div class="focus-label">
-            {{ focusSummaryToday()?.total | msToMinuteClockString }}
-          </div>
-        }
-      </div>
+      </button>
     }
 
     <plugin-header-btns></plugin-header-btns>
 
-    <play-button
-      [currentTask]="currentTask()"
-      [currentTaskId]="currentTaskId()"
-      [currentTaskContext]="currentTaskContext()"
-      [pomodoroIsEnabled]="pomodoroIsEnabled()"
-      [pomodoroIsBreak]="pomodoroIsBreak()"
-      [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
-    ></play-button>
+    @if (isUserProfilesEnabled()) {
+      <user-profile-button></user-profile-button>
+    }
+
+    @if (isTimeTrackingEnabled()) {
+      <play-button
+        [currentTask]="currentTask()"
+        [currentTaskId]="currentTaskId()"
+        [currentTaskContext]="currentTaskContext()"
+        [pomodoroIsEnabled]="pomodoroIsEnabled()"
+        [pomodoroIsBreak]="pomodoroIsBreak()"
+        [pomodoroCurrentSessionTime]="pomodoroCurrentSessionTime()"
+      ></play-button>
+    }
+
+    @if (isFocusModeEnabled() && !isXxxs()) {
+      <focus-button></focus-button>
+    }
 
     <!-- Desktop: Show all buttons inline -->
     @if (showDesktopButtons()) {
@@ -112,8 +105,7 @@
       <desktop-panel-buttons
         [kb]="kb"
         [isRouteWithSidePanel]="isRouteWithSidePanel()"
-        [isWorkViewPage]="isWorkViewPage()"
-        [isShowTaskViewCustomizerPanel]="isShowTaskViewCustomizerPanel()"
+        [isShowScheduleDayPanel]="isShowScheduleDayPanel()"
         [isShowIssuePanel]="isShowIssuePanel()"
         [isShowNotes]="isShowNotes()"
       ></desktop-panel-buttons>
