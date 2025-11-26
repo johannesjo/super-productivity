@@ -14,6 +14,7 @@ import { environment } from '../../../environments/environment';
 const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
   [SyncProviderId.LocalFile]: 'localFileSync',
   [SyncProviderId.WebDAV]: 'webDav',
+  [SyncProviderId.SuperSync]: 'superSync',
   [SyncProviderId.Dropbox]: null,
 };
 
@@ -21,6 +22,13 @@ const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
 // when providers expect string values (e.g., WebDAV API calls fail with undefined URLs)
 const PROVIDER_FIELD_DEFAULTS: Record<SyncProviderId, Record<string, string>> = {
   [SyncProviderId.WebDAV]: {
+    baseUrl: '',
+    userName: '',
+    password: '',
+    syncFolderPath: '',
+    encryptKey: '',
+  },
+  [SyncProviderId.SuperSync]: {
     baseUrl: '',
     userName: '',
     password: '',
@@ -90,6 +98,7 @@ export class SyncConfigService {
         // Reset provider-specific configs to defaults first
         localFileSync: DEFAULT_GLOBAL_CONFIG.sync.localFileSync,
         webDav: DEFAULT_GLOBAL_CONFIG.sync.webDav,
+        superSync: DEFAULT_GLOBAL_CONFIG.sync.superSync,
       };
 
       // Add current provider config if applicable

@@ -1,0 +1,19 @@
+{
+  "name": "@super-productivity/super-sync-server",
+  "version": "1.0.0",
+  "description": "Reference WebDAV server for SuperSync",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "webdav-server": "^2.6.2"
+  },
+  "devDependencies": {
+    "@types/node": "^18.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.0"
+  }
+}

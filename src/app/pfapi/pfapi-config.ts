@@ -36,6 +36,7 @@ import { initialSimpleCounterState } from '../features/simple-counter/store/simp
 import { initialTaskRepeatCfgState } from '../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
+import { SuperSyncProvider } from './api/sync/providers/super-sync/super-sync';
 import { isDataRepairPossible } from './repair/is-data-repair-possible.util';
 import {
   getLastValidityError,
@@ -244,6 +245,7 @@ export const PFAPI_SYNC_PROVIDERS = [
     basePath: environment.production ? `/` : `/DEV/`,
   }),
   new Webdav(environment.production ? undefined : `/DEV`),
+  new SuperSyncProvider(environment.production ? undefined : `/DEV`),
   ...(IS_ELECTRON ? [fileSyncElectron] : []),
   ...(IS_ANDROID_WEB_VIEW ? [fileSyncDroid] : []),
 ];

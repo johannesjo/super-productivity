@@ -28,6 +28,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         options: [
           { label: LegacySyncProvider.Dropbox, value: LegacySyncProvider.Dropbox },
           { label: LegacySyncProvider.WebDAV, value: LegacySyncProvider.WebDAV },
+          { label: LegacySyncProvider.SuperSync, value: LegacySyncProvider.SuperSync },
           ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
             ? [
                 {
@@ -83,6 +84,71 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
+      fieldGroup: [
+        {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.WEB_DAV.INFO,
+          },
+        },
+        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+          ? [
+              {
+                type: 'tpl',
+                templateOptions: {
+                  tag: 'p',
+                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+                },
+              },
+            ]
+          : []),
+        {
+          key: 'baseUrl',
+          type: 'input',
+          className: 'e2e-baseUrl',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+            description:
+              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
+          },
+        },
+        {
+          key: 'userName',
+          type: 'input',
+          className: 'e2e-userName',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+          },
+        },
+        {
+          key: 'password',
+          type: 'input',
+          className: 'e2e-password',
+          templateOptions: {
+            type: 'password',
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+          },
+        },
+        {
+          key: 'syncFolderPath',
+          type: 'input',
+          className: 'e2e-syncFolderPath',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+          },
+        },
+      ],
+    },
+
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
+      key: 'superSync',
       fieldGroup: [
         {
           type: 'tpl',
