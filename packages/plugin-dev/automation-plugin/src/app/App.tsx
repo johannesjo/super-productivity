@@ -75,9 +75,9 @@ function App() {
       <header class="app-header">
         <h1>Automation Rules</h1>
       </header>
-      <main class="app-main">
+      <main class="container">
         {isLoading() ? (
-          <p>Loading...</p>
+          <article aria-busy="true"></article>
         ) : view() === 'list' ? (
           <RuleList rules={rules()} onEdit={handleEdit} onCreate={handleCreate} />
         ) : (

@@ -10,26 +10,37 @@ export function ActionInput(props: ActionInputProps) {
   const types: ActionType[] = ['createTask', 'addTag'];
 
   return (
-    <div class="action-input">
-      <select
-        value={props.action.type}
-        onChange={(e) =>
-          props.onChange({ ...props.action, type: e.currentTarget.value as ActionType })
-        }
-      >
-        {types.map((t) => (
-          <option value={t}>{t}</option>
-        ))}
-      </select>
-      <input
-        type="text"
-        value={props.action.value}
-        onInput={(e) => props.onChange({ ...props.action, value: e.currentTarget.value })}
-        placeholder="Value"
-      />
-      <button class="remove-btn" onClick={props.onRemove}>
-        🗑️
-      </button>
+    <div class="grid" style={{ 'margin-bottom': '0.5rem' }}>
+      <div>
+        <select
+          value={props.action.type}
+          onChange={(e) =>
+            props.onChange({ ...props.action, type: e.currentTarget.value as ActionType })
+          }
+        >
+          {types.map((t) => (
+            <option value={t}>{t}</option>
+          ))}
+        </select>
+      </div>
+      <div>
+        <input
+          type="text"
+          value={props.action.value}
+          onInput={(e) => props.onChange({ ...props.action, value: e.currentTarget.value })}
+          placeholder="Value"
+        />
+      </div>
+      <div style={{ width: 'auto', flex: '0' }}>
+        <button
+          class="secondary outline"
+          onClick={props.onRemove}
+          style={{ width: 'auto' }}
+          title="Remove Action"
+        >
+          ✕
+        </button>
+      </div>
     </div>
   );
 }

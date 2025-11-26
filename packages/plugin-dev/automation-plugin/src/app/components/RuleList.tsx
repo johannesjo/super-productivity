@@ -10,23 +10,47 @@ interface RuleListProps {
 export function RuleList(props: RuleListProps) {
   return (
     <div class="rule-list-container">
-      <div class="header-actions">
-        <h2>Automation Rules</h2>
-        <button class="create-btn" onClick={props.onCreate}>
-          + New Rule
-        </button>
+      <div class="grid">
+        <div>
+          <h2>Automation Rules</h2>
+        </div>
+        <div style={{ 'text-align': 'right' }}>
+          <button onClick={props.onCreate}>+ New Rule</button>
+        </div>
       </div>
 
       <div class="rule-list">
-        <For each={props.rules} fallback={<p>No rules found.</p>}>
+        <For
+          each={props.rules}
+          fallback={<article>No rules found. Create one to get started!</article>}
+        >
           {(rule) => (
-            <div class="rule-item" onClick={() => props.onEdit(rule)}>
-              <div class="rule-info">
-                <span class="rule-name">{rule.name}</span>
-                <span class="rule-trigger">Trigger: {rule.trigger.type}</span>
+            <article class="rule-item" style={{ 'margin-bottom': '1rem' }}>
+              <header>
+                <div class="grid">
+                  <div>
+                    <strong>{rule.name}</strong>
+                  </div>
+                  <div style={{ 'text-align': 'right' }}>
+                    {rule.isEnabled ? (
+                      <span data-tooltip="Enabled">✅</span>
+                    ) : (
+                      <span data-tooltip="Disabled">❌</span>
+                    )}
+                  </div>
+                </div>
+              </header>
+              <div class="grid">
+                <div>
+                  <small>Trigger: {rule.trigger.type}</small>
+                </div>
+                <div style={{ 'text-align': 'right' }}>
+                  <button class="outline secondary" onClick={() => props.onEdit(rule)}>
+                    Edit
+                  </button>
+                </div>
               </div>
-              <div class="rule-status">{rule.isEnabled ? '✅' : '❌'}</div>
-            </div>
+            </article>
           )}
         </For>
       </div>
