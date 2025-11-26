@@ -160,6 +160,8 @@ export type SyncConfig = Readonly<{
   /* NOTE: view model for form only*/
   webDav?: WebDavConfig;
   /* NOTE: view model for form only*/
+  superSync?: WebDavConfig;
+  /* NOTE: view model for form only*/
   localFileSync?: LocalFileSyncConfig;
 }>;
 
