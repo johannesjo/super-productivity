@@ -50,18 +50,23 @@ async function getPlugins() {
 
       try {
         await fs.access(packageJsonPath);
-        // It's a valid package
+        const packageJson = JSON.parse(await fs.readFile(packageJsonPath, 'utf8'));
 
         // Skip boilerplate
         if (entry.name === 'boilerplate-solid-js') continue;
 
+        const buildScript = packageJson.scripts && packageJson.scripts.build;
+        // Check if it's a real build script or just a placeholder
+        const hasRealBuildScript =
+          buildScript && !buildScript.includes("echo 'No build needed");
+
         plugins.push({
           name: entry.name,
           path: `packages/plugin-dev/${entry.name}`,
-          buildCommand: 'npm run build',
+          buildCommand: hasRealBuildScript ? 'npm run build' : undefined,
           // Standard files to copy for bundled plugins
           files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
-          sourcePath: 'dist',
+          sourcePath: hasRealBuildScript ? 'dist' : '.',
         });
       } catch (e) {
         // Not a package, skip
@@ -82,16 +87,18 @@ async function ensureDir(dir) {
 
 async function copyFile(src, dest) {
   try {
+    // console.log(`Copying ${src} to ${dest}`);
     await fs.copyFile(src, dest);
     return true;
   } catch (error) {
-    if (error.code !== 'ENOENT') {
-      // Only log if it's not a "file not found" error, as some plugins might not have all assets
-      // e.g. no index.html or icon.svg
-      // But for bundled plugins we generally expect them.
-      // Let's be silent about ENOENT for optional files
+    if (error.code === 'ENOENT') {
+      log(`  ❌ Missing expected file: ${path.basename(src)} (path: ${src})`, colors.red);
+      // We want to fail if a file is missing
+      throw new Error(`Missing expected file: ${path.basename(src)}`);
+    } else {
+      log(`  ❌ Failed to copy ${path.basename(src)}: ${error.message}`, colors.red);
+      throw error;
     }
-    return false;
   }
 }
 
@@ -144,8 +151,13 @@ async function buildPlugin(plugin) {
       for (const file of filesToCopy) {
         const src = path.join(sourcePath, file);
         const dest = path.join(targetDir, file);
-        if (await copyFile(src, dest)) {
-          copiedCount++;
+        try {
+          if (await copyFile(src, dest)) {
+            copiedCount++;
+          }
+        } catch (e) {
+          // If copy fails (e.g. missing file), we stop and fail the build for this plugin
+          throw e;
         }
       }
 
