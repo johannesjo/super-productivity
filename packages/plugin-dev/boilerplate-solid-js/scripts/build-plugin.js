@@ -1,48 +1,58 @@
 import fs from 'fs';
 import path from 'path';
 import archiver from 'archiver';
+import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const rootDir = path.resolve(__dirname, '..');
-const distDir = path.resolve(rootDir, 'dist');
-const packageJson = JSON.parse(
-  fs.readFileSync(path.resolve(rootDir, 'package.json'), 'utf8'),
-);
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const projectRoot = path.resolve(__dirname, '..');
+const distDir = path.join(projectRoot, 'dist');
+const manifestPath = path.join(projectRoot, 'src/manifest.json');
 
-// Ensure dist exists
-if (!fs.existsSync(distDir)) {
-  console.error('❌ dist directory not found. Run npm run build first.');
-  process.exit(1);
+function ensureBuild() {
+  execSync('npm run build', { cwd: projectRoot, stdio: 'inherit' });
 }
 
-const zipName = `${packageJson.name}.zip`;
-const output = fs.createWriteStream(path.join(rootDir, zipName));
-const archive = archiver('zip', {
-  zlib: { level: 9 }, // Sets the compression level.
-});
-
-output.on('close', function () {
-  console.log(
-    `✅ Plugin packaged successfully: ${zipName} (${archive.pointer()} total bytes)`,
-  );
-});
-
-archive.on('warning', function (err) {
-  if (err.code === 'ENOENT') {
-    console.warn(err);
-  } else {
-    throw err;
+function packagePlugin() {
+  if (!fs.existsSync(manifestPath)) {
+    throw new Error('manifest.json not found in src/');
   }
+
+  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+  const outputFileName = `${manifest.id}-v${manifest.version}.zip`;
+  const output = fs.createWriteStream(path.join(projectRoot, outputFileName));
+  const archive = archiver('zip', { zlib: { level: 9 } });
+
+  output.on('close', () => {
+    console.log(
+      `Plugin packaged successfully: ${outputFileName} (${(archive.pointer() / 1024).toFixed(
+        2,
+      )} KB)`,
+    );
+  });
+
+  archive.on('error', (err) => {
+    throw err;
+  });
+
+  archive.pipe(output);
+
+  if (!fs.existsSync(distDir)) {
+    throw new Error('dist folder not found. Run the build step first.');
+  }
+
+  archive.directory(distDir, false);
+
+  return archive.finalize();
+}
+
+async function run() {
+  ensureBuild();
+  await packagePlugin();
+}
+
+run().catch((err) => {
+  console.error(err);
+  process.exit(1);
 });
-
-archive.on('error', function (err) {
-  throw err;
-});
-
-archive.pipe(output);
-
-// Append files from dist directory
-archive.directory(distDir, false);
-
-archive.finalize();

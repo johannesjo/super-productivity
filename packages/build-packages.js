@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+// eslint-env node, es2021
+
 const { exec } = require('child_process');
 const { promisify } = require('util');
 const fs = require('fs').promises;
@@ -19,6 +21,15 @@ const colors = {
 
 function log(message, color = '') {
   console.log(`${color}${message}${colors.reset}`);
+}
+
+async function pathExists(p) {
+  try {
+    await fs.access(p);
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function getPlugins() {
@@ -66,7 +77,7 @@ async function getPlugins() {
           buildCommand: hasRealBuildScript ? 'npm run build' : undefined,
           // Standard files to copy for bundled plugins
           files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
-          sourcePath: hasRealBuildScript ? 'dist' : '.',
+          sourcePath: hasRealBuildScript ? 'dist' : undefined,
         });
       } catch (e) {
         // Not a package, skip
@@ -140,31 +151,61 @@ async function buildPlugin(plugin) {
     // Copy files to assets if not skipped
     if (!plugin.skipCopy) {
       const targetDir = path.join('src/assets/bundled-plugins', plugin.name);
+      await fs.rm(targetDir, { recursive: true, force: true });
       await ensureDir(targetDir);
 
       const filesToCopy = plugin.files || [];
-      const sourcePath = plugin.sourcePath
-        ? path.join(pluginPath, plugin.sourcePath)
-        : pluginPath;
 
-      let copiedCount = 0;
-      for (const file of filesToCopy) {
-        const src = path.join(sourcePath, file);
-        const dest = path.join(targetDir, file);
-        try {
-          if (await copyFile(src, dest)) {
-            copiedCount++;
+      // Prefer dist if it exists, otherwise fall back to plugin root (for simple plugins)
+      const preferredSourcePath = plugin.sourcePath
+        ? path.join(pluginPath, plugin.sourcePath)
+        : path.join(pluginPath, 'dist');
+      const distExists = await pathExists(preferredSourcePath);
+      const sourcePath = distExists ? preferredSourcePath : pluginPath;
+
+      const requiredFiles = plugin.requiredFiles || filesToCopy;
+      const missingFiles = [];
+
+      if (distExists) {
+        // Copy the full dist to preserve all chunks/assets
+        await fs.cp(sourcePath, targetDir, { recursive: true });
+      } else {
+        // Simple plugins: copy listed files from the root
+        for (const file of filesToCopy) {
+          const src = path.join(sourcePath, file);
+          const dest = path.join(targetDir, file);
+          try {
+            if (!(await copyFile(src, dest))) {
+              missingFiles.push(file);
+            }
+          } catch (e) {
+            throw e;
           }
-        } catch (e) {
-          // If copy fails (e.g. missing file), we stop and fail the build for this plugin
-          throw e;
         }
       }
 
-      log(
-        `  ✅ Copied ${copiedCount}/${filesToCopy.length} files to assets`,
-        colors.green,
-      );
+      // Validate required files exist after copy
+      for (const file of requiredFiles) {
+        const dest = path.join(targetDir, file);
+        if (!(await pathExists(dest))) {
+          missingFiles.push(file);
+        }
+      }
+
+      if (missingFiles.length) {
+        throw new Error(
+          `Missing required asset(s) for ${plugin.name}: ${missingFiles.join(', ')}`,
+        );
+      }
+
+      if (distExists) {
+        log(`  ✅ Copied dist to assets (${plugin.name})`, colors.green);
+      } else {
+        log(
+          `  ✅ Copied ${filesToCopy.length}/${filesToCopy.length} files to assets`,
+          colors.green,
+        );
+      }
     }
 
     const duration = ((Date.now() - startTime) / 1000).toFixed(1);
