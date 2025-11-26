@@ -21,46 +21,56 @@ function log(message, color = '') {
   console.log(`${color}${message}${colors.reset}`);
 }
 
-// Plugin configurations
-const plugins = [
-  {
+async function getPlugins() {
+  const pluginDevDir = path.join(__dirname, 'plugin-dev');
+  const entries = await fs.readdir(pluginDevDir, { withFileTypes: true });
+
+  const plugins = [];
+
+  // Add plugin-api first as it's a dependency
+  plugins.push({
     name: 'plugin-api',
     path: 'packages/plugin-api',
     buildCommand: 'npm run build',
-    skipCopy: true, // TypeScript definitions, no need to copy
-  },
-  {
-    name: 'api-test-plugin',
-    path: 'packages/plugin-dev/api-test-plugin',
-    files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg', 'config-schema.json'],
-  },
-  {
-    name: 'procrastination-buster',
-    path: 'packages/plugin-dev/procrastination-buster',
+    skipCopy: true,
+  });
+
+  // Add vite-plugin second as it's a build dependency
+  plugins.push({
+    name: 'vite-plugin',
+    path: 'packages/vite-plugin',
     buildCommand: 'npm run build',
-    skipCopy: true, // inline-assets.js handles the copying with inlined assets
-  },
-  {
-    name: 'yesterday-tasks-plugin',
-    path: 'packages/plugin-dev/yesterday-tasks-plugin',
-    files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
-  },
-  {
-    name: 'sync-md',
-    path: 'packages/plugin-dev/sync-md',
-    buildCommand: 'npm run build',
-    distFiles: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
-    sourcePath: 'dist',
-  },
-  {
-    name: 'ai-productivity-prompts',
-    path: 'packages/plugin-dev/ai-productivity-prompts',
-    buildCommand: 'npm run build',
-    skipCopy: true, // inline-assets.js handles the copying with inlined assets
-  },
-  // Explicitly excluding:
-  // - boilerplate-solid-js
-];
+    skipCopy: true,
+  });
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      const pluginPath = path.join(pluginDevDir, entry.name);
+      const packageJsonPath = path.join(pluginPath, 'package.json');
+
+      try {
+        await fs.access(packageJsonPath);
+        // It's a valid package
+
+        // Skip boilerplate
+        if (entry.name === 'boilerplate-solid-js') continue;
+
+        plugins.push({
+          name: entry.name,
+          path: `packages/plugin-dev/${entry.name}`,
+          buildCommand: 'npm run build',
+          // Standard files to copy for bundled plugins
+          files: ['manifest.json', 'plugin.js', 'index.html', 'icon.svg'],
+          sourcePath: 'dist',
+        });
+      } catch (e) {
+        // Not a package, skip
+      }
+    }
+  }
+
+  return plugins;
+}
 
 async function ensureDir(dir) {
   try {
@@ -76,7 +86,10 @@ async function copyFile(src, dest) {
     return true;
   } catch (error) {
     if (error.code !== 'ENOENT') {
-      log(`  ⚠️  Failed to copy ${path.basename(src)}: ${error.message}`, colors.yellow);
+      // Only log if it's not a "file not found" error, as some plugins might not have all assets
+      // e.g. no index.html or icon.svg
+      // But for bundled plugins we generally expect them.
+      // Let's be silent about ENOENT for optional files
     }
     return false;
   }
@@ -122,7 +135,7 @@ async function buildPlugin(plugin) {
       const targetDir = path.join('src/assets/bundled-plugins', plugin.name);
       await ensureDir(targetDir);
 
-      const filesToCopy = plugin.distFiles || plugin.files || [];
+      const filesToCopy = plugin.files || [];
       const sourcePath = plugin.sourcePath
         ? path.join(pluginPath, plugin.sourcePath)
         : pluginPath;
@@ -156,6 +169,8 @@ async function buildPlugin(plugin) {
 async function buildAll() {
   log('🚀 Building all packages...', colors.bright);
   const startTime = Date.now();
+
+  const plugins = await getPlugins();
 
   // Build plugins sequentially to avoid conflicts
   const results = [];
