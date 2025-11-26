@@ -8,16 +8,16 @@ import type { PluginHooks } from '@super-productivity/plugin-api';
 
 declare const plugin: PluginAPI;
 
-import { AutomationService } from './automation.service';
+import { AutomationManager } from './core/automation-manager';
 
 // Plugin initialization
 plugin.log.info('Automation plugin initialized');
 
-const automationService = new AutomationService(plugin);
+const automationManager = new AutomationManager(plugin);
 
 // Hook into task completion
 plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
-  automationService.onTaskEvent({
+  automationManager.onTaskEvent({
     type: 'taskCompleted',
     task: payload.task,
   });
@@ -25,7 +25,7 @@ plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
 
 // Hook into task updates
 plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
-  automationService.onTaskEvent({
+  automationManager.onTaskEvent({
     type: 'taskUpdated',
     task: payload.task,
     previousTaskState: undefined, // TODO: How to get previous state? Payload changes only has partial.
@@ -58,7 +58,7 @@ plugin.registerHook('anyTaskUpdate' as any, (payload: AnyTaskUpdatePayload) => {
   // This is a guess on the action name, need to verify or be defensive.
   // Common Redux/NgRx actions: '[Task] Add Task'
   if (payload.action === '[Task] Add Task' && payload.task) {
-    automationService.onTaskEvent({
+    automationManager.onTaskEvent({
       type: 'taskCreated',
       task: payload.task,
     });
