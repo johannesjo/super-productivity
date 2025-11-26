@@ -2000,7 +2000,8 @@
       "SCHEDULE_DAY_PANEL": "Schedule Day Panel",
       "ISSUES_PANEL": "Issues Panel",
       "PROJECT_NOTES": "Project Notes",
-      "SYNC_ICON": "Sync Button"
+      "SYNC_BUTTON": "Sync Button",
+      "DONATE_PAGE": "Enable Donate Page"
     }
   },
   "GLOBAL_RELATIVE_TIME": {

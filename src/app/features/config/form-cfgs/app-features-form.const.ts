@@ -48,12 +48,12 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
     {
       key: 'isSyncIconEnabled',
       type: 'checkbox',
-      templateOptions: { label: T.GCF.APP_FEATURES.SYNC_ICON },
+      templateOptions: { label: T.GCF.APP_FEATURES.SYNC_BUTTON },
     },
     {
       key: 'isDonatePageEnabled',
       type: 'checkbox',
-      templateOptions: { label: 'Enable Donate Page' },
+      templateOptions: { label: T.GCF.APP_FEATURES.DONATE_PAGE },
     },
   ],
 };
