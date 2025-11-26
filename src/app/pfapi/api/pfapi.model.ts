@@ -184,7 +184,9 @@ export type PrivateCfgByProviderId<T extends SyncProviderId> =
       ? WebdavPrivateCfg
       : T extends SyncProviderId.Dropbox
         ? DropboxPrivateCfg
-        : never;
+        : T extends SyncProviderId.SuperSync
+          ? WebdavPrivateCfg
+          : never;
 
 // Define all possible event names
 export type PfapiEvents =

@@ -3,6 +3,7 @@ export enum SyncProviderId {
   'Dropbox' = 'Dropbox',
   'WebDAV' = 'WebDAV',
   'LocalFile' = 'LocalFile',
+  'SuperSync' = 'SuperSync',
 }
 
 export enum SyncStatus {
