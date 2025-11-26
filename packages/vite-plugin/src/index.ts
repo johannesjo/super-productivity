@@ -53,6 +53,7 @@ export function superProductivityPlugin(
         const manifestSrc = path.resolve(process.cwd(), 'src/manifest.json');
         const manifestDest = path.join(distDir, 'manifest.json');
         if (fs.existsSync(manifestSrc)) {
+          if (!fs.existsSync(distDir)) fs.mkdirSync(distDir, { recursive: true });
           fs.copyFileSync(manifestSrc, manifestDest);
         }
 
