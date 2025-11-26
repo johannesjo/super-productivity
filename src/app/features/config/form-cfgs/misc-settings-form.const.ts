@@ -139,14 +139,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
-      key: 'isEnableUserProfiles',
-      type: 'checkbox',
-      templateOptions: {
-        label: T.GCF.MISC.IS_ENABLE_USER_PROFILES,
-        description: T.GCF.MISC.IS_ENABLE_USER_PROFILES_HINT,
-      },
-    },
-    {
       key: 'customTheme',
       type: 'select',
       templateOptions: {

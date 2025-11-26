@@ -115,4 +115,22 @@ describe('crossModelMigration4_4', () => {
     expect(result.globalConfig.appFeatures.isDonatePageEnabled).toBe(true);
     expect(result.globalConfig.appFeatures.isSyncIconEnabled).toBe(true);
   });
+
+  it('should migrate isEnableUserProfiles from misc to appFeatures', () => {
+    const mockData = {
+      globalConfig: {
+        misc: {
+          isEnableUserProfiles: false,
+        },
+        appFeatures: {
+          isSyncIconEnabled: true,
+        },
+      },
+    } as unknown as AppDataCompleteNew;
+
+    const result = crossModelMigration4_4(mockData) as any;
+
+    expect(result.globalConfig.appFeatures.isEnableUserProfiles).toBe(false);
+    expect(result.globalConfig.misc.isEnableUserProfiles).toBeUndefined();
+  });
 });

@@ -63,6 +63,25 @@ export const crossModelMigration4_4: CrossModelMigrateFn = ((
     };
   }
 
+  // ! 5. Migrate User Profiles
+  if (
+    copy.globalConfig &&
+    copy.globalConfig.misc &&
+    // @ts-ignore
+    typeof copy.globalConfig.misc.isEnableUserProfiles === 'boolean'
+  ) {
+    if (copy.globalConfig.appFeatures) {
+      // @ts-ignore
+      copy.globalConfig.appFeatures = {
+        ...copy.globalConfig.appFeatures,
+        // @ts-ignore
+        isEnableUserProfiles: copy.globalConfig.misc.isEnableUserProfiles,
+      };
+    }
+    // @ts-ignore
+    delete copy.globalConfig.misc.isEnableUserProfiles;
+  }
+
   finishingOperations.forEach((operation) => operation());
 
   PFLog.log(copy);

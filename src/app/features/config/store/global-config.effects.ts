@@ -11,7 +11,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { KeyboardConfig } from '../keyboard-config.model';
 import { updateGlobalConfigSection } from './global-config.actions';
-import { MiscConfig } from '../global-config.model';
+import { AppFeaturesConfig, MiscConfig } from '../global-config.model';
 import { UserProfileService } from '../../user-profile/user-profile.service';
 
 @Injectable()
@@ -172,20 +172,21 @@ export class GlobalConfigEffects {
     () =>
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
-        filter(({ sectionKey, sectionCfg }) => sectionKey === 'misc'),
+        filter(({ sectionKey, sectionCfg }) => sectionKey === 'appFeatures'),
         filter(
           ({ sectionCfg }) =>
-            sectionCfg && (sectionCfg as MiscConfig).isEnableUserProfiles !== undefined,
+            sectionCfg &&
+            (sectionCfg as AppFeaturesConfig).isEnableUserProfiles !== undefined,
         ),
         withLatestFrom(this._store.select('globalConfig')),
         filter(([{ sectionCfg }, globalConfig]) => {
-          const newValue = (sectionCfg as MiscConfig).isEnableUserProfiles;
-          const oldValue = globalConfig?.misc?.isEnableUserProfiles ?? false;
+          const newValue = (sectionCfg as AppFeaturesConfig).isEnableUserProfiles;
+          const oldValue = globalConfig?.appFeatures?.isEnableUserProfiles ?? false;
           // Only proceed if the value actually changed
           return newValue !== oldValue;
         }),
         tap(([{ sectionCfg }]) => {
-          const isEnabled = (sectionCfg as MiscConfig).isEnableUserProfiles;
+          const isEnabled = (sectionCfg as AppFeaturesConfig).isEnableUserProfiles;
 
           // Update localStorage flag for fast startup check
           if (typeof localStorage !== 'undefined') {

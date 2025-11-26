@@ -19,6 +19,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isProjectNotesEnabled: true,
     isSyncIconEnabled: true,
     isDonatePageEnabled: true,
+    isEnableUserProfiles: false,
   },
   localization: {
     lng: undefined,
@@ -47,7 +48,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 `,
     isOverlayIndicatorEnabled: false,
     customTheme: 'default',
-    isEnableUserProfiles: false,
     defaultStartPage: 0,
   },
   shortSyntax: {

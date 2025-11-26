@@ -353,8 +353,8 @@ export class UserProfileService {
         const defaultConfig = await this._pfapiService.pf.m.globalConfig.load();
         await this._pfapiService.pf.m.globalConfig.save({
           ...defaultConfig,
-          misc: {
-            ...defaultConfig.misc,
+          appFeatures: {
+            ...defaultConfig.appFeatures,
             isEnableUserProfiles: true,
           },
         });

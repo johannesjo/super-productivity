@@ -165,10 +165,9 @@ export class MainHeaderComponent implements OnDestroy {
     return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
   });
 
-  isUserProfilesEnabled = toSignal(
-    this.globalConfigService.misc$.pipe(map((misc) => misc.isEnableUserProfiles)),
-    { initialValue: false },
-  );
+  isUserProfilesEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isEnableUserProfiles;
+  });
 
   private _subs: Subscription = new Subscription();
 

@@ -1892,8 +1892,7 @@
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Disable all animations",
       "IS_DISABLE_CELEBRATION": "Disable celebration in daily summary",
-      "IS_ENABLE_USER_PROFILES": "Enable user profiles (Beta)",
-      "IS_ENABLE_USER_PROFILES_HINT": "Allows you to create and switch between different user profiles, each with separate settings, tasks, and sync configurations. The profile management button will appear in the top-right corner when enabled. Note: Disabling this feature will hide the UI but preserve your profile data (Beta feature, no guarantees. Make sure to have a backup).",
+
       "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Enable overlay indicator window (desktop linux/gnome)",
@@ -2001,7 +2000,9 @@
       "ISSUES_PANEL": "Issues Panel",
       "PROJECT_NOTES": "Project Notes",
       "SYNC_BUTTON": "Sync Button",
-      "DONATE_PAGE": "Enable Donate Page"
+      "DONATE_PAGE": "Donate Page",
+      "USER_PROFILES": "User profiles (Experimental)",
+      "USER_PROFILES_HINT": "Allows you to create and switch between different user profiles, each with separate settings, tasks, and sync configurations. The profile management button will appear in the top-right corner when enabled. Note: Disabling this feature will hide the UI but preserve your profile data (Experimental feature, no guarantees. Make sure to have a backup)."
     }
   },
   "GLOBAL_RELATIVE_TIME": {
@@ -2071,7 +2072,7 @@
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
-    "DONATE": "Donate",
+    "DONATE": "Support us",
     "ENTER_FOCUS_MODE": "Enter Focus Mode",
     "GO_TO_TASK_LIST": "Go to task list",
     "HELP": "Help",

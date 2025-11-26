@@ -1848,7 +1848,7 @@
       "PL": "波兰语",
       "PT": "葡萄牙语",
       "RU": "俄语",
-      "SK": "斯洛伐克语",      
+      "SK": "斯洛伐克语",
       "TIME_LOCALE": "时间格式区域",
       "TIME_LOCALE_AUTO": "系统默认",
       "TIME_LOCALE_DE_DE": "德语 - 24 小时",
@@ -1886,8 +1886,8 @@
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_DISABLE_CELEBRATION": "在每日摘要中禁用庆祝",
-      "IS_ENABLE_USER_PROFILES": "启用用户配置文件（测试版）",
-      "IS_ENABLE_USER_PROFILES_HINT": "允许您创建并切换不同的用户配置文件，每个配置文件拥有独立的设置、任务和同步配置。启用后，配置文件管理按钮将出现在右上角。注意：关闭此功能会隐藏界面，但您的配置文件数据将被保留（测试版功能，无法保证稳定性，请务必提前备份）。",
+      "USER_PROFILES": "启用用户配置文件（测试版）",
+      "USER_PROFILES_HINT": "允许您创建并切换不同的用户配置文件，每个配置文件拥有独立的设置、任务和同步配置。启用后，配置文件管理按钮将出现在右上角。注意：关闭此功能会隐藏界面，但您的配置文件数据将被保留（测试版功能，无法保证稳定性，请务必提前备份）。",
       "IS_HIDE_NAV": "隐藏导航栏，直到鼠标悬停在标题栏上（仅限桌面端）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_SHOW_TIP_LONGER": "在应用启动时显示生产力提示更长一点",
@@ -2139,14 +2139,14 @@
     "TIME_SPENT_TODAY_BY_TAG": "今天按标签花费时间",
     "WEEK": "周"
   },
-    "PLUGINS": {
+  "PLUGINS": {
     "ACTION_TYPE_NOT_ALLOWED": "不允许的操作类型“{{type}}”",
     "ALREADY_INITIALIZED": "插件已初始化",
     "CANCEL": "取消",
     "CAPABILITIES": {
       "ACCESS_FILES": "访问并修改系统中的文件",
       "RUN_COMMANDS": "执行系统命令",
-      "USE_NODE_APIS": "使用 Node.js API 与模块"     
+      "USE_NODE_APIS": "使用 Node.js API 与模块"
     },
     "CHOOSE_PLUGIN_FILE": "选择插件文件",
     "CLEAR_PLUGIN_CACHE": "清除插件缓存",
@@ -2238,11 +2238,11 @@
     "UPLOAD_PLUGIN_INSTRUCTION": "上传插件 ZIP 文件以进行安装：",
     "USER_DECLINED_NODE_PERMISSION": "用户拒绝了 Node.js 执行权限",
     "VALIDATION_FAILED": "验证失败"
-    },
-    "PM": {
+  },
+  "PM": {
     "TITLE": "项目指标"
-    },
-   "PS": {
+  },
+  "PS": {
     "GLOBAL_SETTINGS": "全局设置",
     "ISSUE_INTEGRATION": "集成问题",
     "NO_PLUGINS_INSTALLED": "当前未安装任何插件",
@@ -2285,23 +2285,23 @@
     "teal": "蓝绿色",
     "yellow": "黄色"
   },
-    "USER_PROFILES": {
-        "ACTIVE": "当前使用",
-        "CANCEL": "取消",
-        "CLOSE": "关闭",
-        "CREATE": "新建",
-        "CREATE_NEW_PROFILE": "创建新配置",
-        "CREATED": "创建时间：",
-        "DELETE_PROFILE": "删除配置",
-        "DIALOG_TITLE": "管理用户配置",
-        "EXISTING_PROFILES": "已有配置",
-        "EXPORT_PROFILE": "导出配置",
-        "MANAGE_PROFILES": "管理配置…",
-        "OPEN_PROFILES_FOLDER": "打开配置文件夹",
-        "PROFILE_NAME": "配置名称",
-        "PROFILE_NAME_PLACEHOLDER": "例如：工作、个人",
-        "RENAME": "重命名",
-        "SAVE": "保存"
+  "USER_PROFILES": {
+    "ACTIVE": "当前使用",
+    "CANCEL": "取消",
+    "CLOSE": "关闭",
+    "CREATE": "新建",
+    "CREATE_NEW_PROFILE": "创建新配置",
+    "CREATED": "创建时间：",
+    "DELETE_PROFILE": "删除配置",
+    "DIALOG_TITLE": "管理用户配置",
+    "EXISTING_PROFILES": "已有配置",
+    "EXPORT_PROFILE": "导出配置",
+    "MANAGE_PROFILES": "管理配置…",
+    "OPEN_PROFILES_FOLDER": "打开配置文件夹",
+    "PROFILE_NAME": "配置名称",
+    "PROFILE_NAME_PLACEHOLDER": "例如：工作、个人",
+    "RENAME": "重命名",
+    "SAVE": "保存"
   },
   "V": {
     "E_1TO10": "请输入 1 到 10 之间的值",

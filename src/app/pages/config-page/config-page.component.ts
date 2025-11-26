@@ -235,13 +235,13 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
     // Check if user is trying to disable user profiles when multiple profiles exist
     if (
-      sectionKey === 'misc' &&
+      sectionKey === 'appFeatures' &&
       config.isEnableUserProfiles === false &&
       this._userProfileService.hasMultipleProfiles()
     ) {
-      const currentMiscConfig = this.globalCfg?.misc;
+      const appFeatures = this.globalCfg?.appFeatures;
       // Only show dialog if we're actually changing from true to false
-      if (currentMiscConfig?.isEnableUserProfiles === true) {
+      if (appFeatures?.isEnableUserProfiles === true) {
         const confirmed = await this._showDisableProfilesDialog();
         if (!confirmed) {
           // User cancelled, don't save the change

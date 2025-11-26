@@ -16,7 +16,8 @@ export type AppFeaturesConfig = Readonly<{
   isIssuesPanelEnabled: boolean;
   isProjectNotesEnabled: boolean;
   isSyncIconEnabled: boolean;
-  isDonatePageEnabled?: boolean;
+  isDonatePageEnabled: boolean;
+  isEnableUserProfiles: boolean;
 }>;
 
 export type MiscConfig = Readonly<{
@@ -40,7 +41,6 @@ export type MiscConfig = Readonly<{
   customTheme?: string;
   defaultStartPage?: number;
   unsplashApiKey?: string | null;
-  isEnableUserProfiles?: boolean;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{

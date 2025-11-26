@@ -55,5 +55,13 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       type: 'checkbox',
       templateOptions: { label: T.GCF.APP_FEATURES.DONATE_PAGE },
     },
+    {
+      key: 'isEnableUserProfiles',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.APP_FEATURES.USER_PROFILES,
+        description: T.GCF.APP_FEATURES.USER_PROFILES_HINT,
+      },
+    },
   ],
 };
