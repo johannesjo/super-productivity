@@ -136,6 +136,7 @@ export class PluginBridgeService implements OnDestroy {
     setCounter: (id: string, value: number) => Promise<void>;
     incrementCounter: (id: string, incrementBy?: number) => Promise<number>;
     decrementCounter: (id: string, decrementBy?: number) => Promise<number>;
+    deleteCounter: (id: string) => Promise<void>;
     getAllSimpleCounters: () => Promise<SimpleCounter[]>;
     getSimpleCounter: (id: string) => Promise<SimpleCounter | undefined>;
     updateSimpleCounter: (id: string, updates: Partial<SimpleCounter>) => Promise<void>;
@@ -183,6 +184,7 @@ export class PluginBridgeService implements OnDestroy {
         this.incrementCounter(id, incrementBy),
       decrementCounter: (id: string, decrementBy = 1) =>
         this.decrementCounter(id, decrementBy),
+      deleteCounter: (id: string) => this.deleteSimpleCounter(id),
 
       // Full SimpleCounter methods (new)
       getAllSimpleCounters: () => this.getAllSimpleCounters(),
