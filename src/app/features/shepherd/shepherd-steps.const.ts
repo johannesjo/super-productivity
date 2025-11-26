@@ -84,8 +84,9 @@ export const SHEPHERD_STEPS = (
     // ------------------------------
     {
       id: TourId.Welcome,
-      title: 'Welcome to Super Productivity!',
-      text: `<p>Do you want a tour of the most important features?</p>
+      title: 'Welcome to Super Productivity! 🚀',
+      text: `<p>Super Productivity is a ToDo List / Time Tracker app.</p>
+        <p>Do you want a quick tour of the most important features?</p>
         <p style="margin-top: 12px;">
           <label style="display: flex; align-items: center; cursor: pointer; user-select: none;">
             <input
@@ -116,7 +117,7 @@ export const SHEPHERD_STEPS = (
     },
     {
       id: TourId.AddTask,
-      title: "Let's add your first task!",
+      title: "Let's add your first task! ⚡",
       text: IS_MOUSE_PRIMARY
         ? `<em>Click</em> on this button or press ${KEY_COMBO('addNewTask')}.`
         : '<em>Tap</em> on the button with the +',
@@ -189,7 +190,7 @@ export const SHEPHERD_STEPS = (
     },
 
     {
-      title: 'Time Tracking',
+      title: 'Time Tracking ⏱️',
       text: '<p>Pressing the play button in the top right corner will start your first time tracking session.</p><p>Time tracking is useful as it allows you to get a better idea on how you spend your time. It will enable you to make better estimates and can improve how you work.</p>',
       attachTo: {
         element: '.tour-playBtn',
@@ -492,9 +493,9 @@ export const SHEPHERD_STEPS = (
     // ------------------------------
     {
       id: TourId.Sync,
-      title: 'Syncing & Data Privacy',
-      text: "<p>Super Productivity takes your data privacy very seriously. This means that <strong>you decide what will be saved and where</strong>. <strong>The app does NOT collect any data </strong> and there are no user accounts or registration required.</p><p>It's free and open source and always will be.</p><p>This is important since data is often sold for marketing purposes and leaks happen more often than you would think.</p>",
-      buttons: [{ ...NEXT_BTN, text: 'That is cool, I guess' }],
+      title: 'Data Privacy & Syncing 🔒',
+      text: '<p><strong>Super Productivity does NOT collect any data.</strong> There are no user accounts or registration required.</p><p>This means you are in full control of your data. You can choose to save it locally or sync it with a provider of your choice (like Dropbox, WebDAV, or a local file).</p>',
+      buttons: [{ ...NEXT_BTN, text: 'Great!' }],
     },
     {
       title: 'Syncing & Data Privacy',
