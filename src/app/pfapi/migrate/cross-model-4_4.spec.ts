@@ -78,4 +78,41 @@ describe('crossModelMigration4_4', () => {
     const result = crossModelMigration4_4(mockData) as any;
     expect(result.globalConfig.localization).toBeUndefined();
   });
+  it('should initialize appFeatures if missing', () => {
+    const mockData = {
+      globalConfig: {},
+    } as unknown as AppDataCompleteNew;
+
+    const result = crossModelMigration4_4(mockData) as any;
+
+    expect(result.globalConfig.appFeatures).toEqual(
+      jasmine.objectContaining({
+        isTimeTrackingEnabled: true,
+        isFocusModeEnabled: true,
+        isSchedulerEnabled: true,
+        isPlannerEnabled: true,
+        isBoardsEnabled: true,
+        isScheduleDayPanelEnabled: true,
+        isIssuesPanelEnabled: true,
+        isProjectNotesEnabled: true,
+        isSyncIconEnabled: true,
+        isDonatePageEnabled: true,
+      }),
+    );
+  });
+
+  it('should add isDonatePageEnabled to existing appFeatures', () => {
+    const mockData = {
+      globalConfig: {
+        appFeatures: {
+          isSyncIconEnabled: true,
+        },
+      },
+    } as unknown as AppDataCompleteNew;
+
+    const result = crossModelMigration4_4(mockData) as any;
+
+    expect(result.globalConfig.appFeatures.isDonatePageEnabled).toBe(true);
+    expect(result.globalConfig.appFeatures.isSyncIconEnabled).toBe(true);
+  });
 });

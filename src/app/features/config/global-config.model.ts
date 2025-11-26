@@ -16,6 +16,7 @@ export type AppFeaturesConfig = Readonly<{
   isIssuesPanelEnabled: boolean;
   isProjectNotesEnabled: boolean;
   isSyncIconEnabled: boolean;
+  isDonatePageEnabled?: boolean;
 }>;
 
 export type MiscConfig = Readonly<{

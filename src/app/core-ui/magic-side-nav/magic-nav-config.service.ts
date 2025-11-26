@@ -89,6 +89,9 @@ export class MagicNavConfigService {
   private readonly isBoardsEnabled = computed(
     () => this._configService.cfg()?.appFeatures.isBoardsEnabled,
   );
+  private readonly isDonatePageEnabled = computed(
+    () => this._configService.cfg()?.appFeatures.isDonatePageEnabled,
+  );
 
   constructor() {
     // TODO these should probably live in the _menuTreeService
@@ -213,13 +216,17 @@ export class MagicNavConfigService {
       },
 
       // Help Menu (rendered as mat-menu)
-      {
-        type: 'route',
-        id: 'donate',
-        label: T.MH.DONATE,
-        icon: 'favorite',
-        route: '/donate',
-      },
+      ...(this.isDonatePageEnabled()
+        ? [
+            {
+              type: 'route',
+              id: 'donate',
+              label: T.MH.DONATE,
+              icon: 'favorite',
+              route: '/donate',
+            } as NavItem,
+          ]
+        : []),
       {
         type: 'menu',
         id: 'help',

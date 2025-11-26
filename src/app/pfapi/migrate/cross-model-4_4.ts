@@ -2,6 +2,7 @@ import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn } from '../api';
 import { PFLog } from '../../core/log';
 import { LanguageCode } from '../../app.constants';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const crossModelMigration4_4: CrossModelMigrateFn = ((
@@ -47,6 +48,18 @@ export const crossModelMigration4_4: CrossModelMigrateFn = ((
     copy.globalConfig.localization = {
       ...copy.globalConfig.localization,
       lng: LanguageCode.zh_tw,
+    };
+  }
+
+  // ! 4. Initialize App Features
+  if (copy.globalConfig && !copy.globalConfig.appFeatures) {
+    // @ts-ignore
+    copy.globalConfig.appFeatures = DEFAULT_GLOBAL_CONFIG.appFeatures;
+  } else if (copy.globalConfig && copy.globalConfig.appFeatures) {
+    // @ts-ignore
+    copy.globalConfig.appFeatures = {
+      ...DEFAULT_GLOBAL_CONFIG.appFeatures,
+      ...copy.globalConfig.appFeatures,
     };
   }
 

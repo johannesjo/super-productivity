@@ -18,6 +18,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isIssuesPanelEnabled: true,
     isProjectNotesEnabled: true,
     isSyncIconEnabled: true,
+    isDonatePageEnabled: true,
   },
   localization: {
     lng: undefined,
