@@ -3,6 +3,7 @@ import { TaskEvent } from '../types';
 import { RuleRegistry } from './rule-registry';
 import { ConditionEvaluator } from './condition-evaluator';
 import { ActionExecutor } from './action-executor';
+import { lazySetInterval } from './lazy-set-interval';
 
 import { RateLimiter } from './rate-limiter';
 import { DialogCfg } from '@super-productivity/plugin-api';
@@ -13,12 +14,65 @@ export class AutomationManager {
   private actionExecutor: ActionExecutor;
   private rateLimiter: RateLimiter;
   private pendingDialogs: Set<string> = new Set();
+  private lastExecutionTimes: Map<string, number> = new Map();
+  private clearTimeCheck?: () => void;
 
   constructor(private plugin: PluginAPI) {
     this.ruleRegistry = new RuleRegistry(plugin);
     this.conditionEvaluator = new ConditionEvaluator(plugin);
     this.actionExecutor = new ActionExecutor(plugin);
     this.rateLimiter = new RateLimiter(5, 1000); // 5 executions per second
+    this.initTimeCheck();
+  }
+
+  private initTimeCheck() {
+    // Check every 10 seconds
+    this.clearTimeCheck = lazySetInterval(() => {
+      this.checkTimeBasedRules();
+    }, 10000);
+  }
+
+  destroy() {
+    if (this.clearTimeCheck) {
+      this.clearTimeCheck();
+      this.clearTimeCheck = undefined;
+    }
+  }
+
+  private async checkTimeBasedRules() {
+    const rules = this.ruleRegistry.getEnabledRules();
+    const now = new Date();
+    const currentHours = now.getHours();
+    const currentMinutes = now.getMinutes();
+    const currentTimeStr = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+
+    for (const rule of rules) {
+      if (rule.trigger.type !== 'timeBased' || !rule.trigger.value) continue;
+
+      if (rule.trigger.value === currentTimeStr) {
+        const lastRun = this.lastExecutionTimes.get(rule.id) || 0;
+        // Prevent multiple executions within the same minute
+        if (now.getTime() - lastRun < 60000) continue;
+
+        // Check conditions (even for time-based rules, though most conditions require a task)
+        // We pass a dummy event. The evaluator must handle missing tasks gracefully.
+        const event: TaskEvent = {
+          type: 'timeBased',
+          task: undefined,
+        };
+
+        const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
+        if (!matches) continue;
+
+        this.lastExecutionTimes.set(rule.id, now.getTime());
+        this.plugin.log.info(`[Automation] Time-based rule matched: ${rule.name}`);
+
+        // Execute actions
+        await this.actionExecutor.executeAll(rule.actions, {
+          type: 'timeBased',
+        });
+      }
+    }
   }
 
   async onTaskEvent(event: TaskEvent) {

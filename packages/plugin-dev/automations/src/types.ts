@@ -1,14 +1,15 @@
 import { Task } from '@super-productivity/plugin-api';
 
-export type AutomationTriggerType = 'taskCompleted' | 'taskCreated' | 'taskUpdated';
+export type AutomationTriggerType = 'taskCompleted' | 'taskCreated' | 'taskUpdated' | 'timeBased';
 
 export interface AutomationTrigger {
   type: AutomationTriggerType;
+  value?: string; // For timeBased: "HH:MM" (24h format)
 }
 
 export interface TaskEvent {
   type: AutomationTriggerType;
-  task: Task;
+  task?: Task;
   previousTaskState?: Task; // only used for "updated"
 }
 

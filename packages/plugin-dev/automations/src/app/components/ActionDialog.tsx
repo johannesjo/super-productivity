@@ -7,22 +7,26 @@ interface ActionDialogProps {
   onClose: () => void;
   onSave: (action: Action) => void;
   initialAction?: Action;
+  allowedTypes?: ActionType[];
 }
 
 export function ActionDialog(props: ActionDialogProps) {
   const [action, setAction] = createSignal<Action>({ type: 'createTask', value: '' });
+
+  const allTypes: ActionType[] = ['createTask', 'addTag'];
+  const availableTypes = () =>
+    props.allowedTypes ? allTypes.filter((t) => props.allowedTypes!.includes(t)) : allTypes;
 
   createEffect(() => {
     if (props.isOpen) {
       if (props.initialAction) {
         setAction({ ...props.initialAction });
       } else {
-        setAction({ type: 'createTask', value: '' });
+        const firstType = availableTypes()[0] || 'createTask';
+        setAction({ type: firstType, value: '' });
       }
     }
   });
-
-  const types: ActionType[] = ['createTask', 'addTag'];
 
   return (
     <Dialog
@@ -44,7 +48,7 @@ export function ActionDialog(props: ActionDialogProps) {
           value={action().type}
           onChange={(e) => setAction({ ...action(), type: e.currentTarget.value as ActionType })}
         >
-          {types.map((t) => (
+          {availableTypes().map((t) => (
             <option value={t}>{t}</option>
           ))}
         </select>

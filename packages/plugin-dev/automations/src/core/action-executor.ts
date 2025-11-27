@@ -15,12 +15,18 @@ export class ActionExecutor {
       case 'createTask':
         await this.plugin.addTask({
           title: action.value,
-          projectId: event.task.projectId, // Inherit project? Or make configurable? MVP: inherit if implicit context
+          projectId: event.task?.projectId, // Inherit project? Or make configurable? MVP: inherit if implicit context
         });
         this.plugin.log.info(`[Automation] Action: Created task "${action.value}"`);
         break;
 
       case 'addTag':
+        if (!event.task) {
+          this.plugin.log.warn(
+            `[Automation] Cannot add tag "${action.value}" without a task context.`,
+          );
+          return;
+        }
         // Find tag by title first
         const tags = await this.plugin.getAllTags();
         let tagId = tags.find((t) => t.title === action.value)?.id;

@@ -54,7 +54,24 @@ export function RuleEditor(props: RuleEditorProps) {
     props.onSave(localRule());
   };
 
-  const triggerTypes: AutomationTriggerType[] = ['taskCreated', 'taskUpdated', 'taskCompleted'];
+  const triggerTypes: AutomationTriggerType[] = [
+    'taskCreated',
+    'taskUpdated',
+    'taskCompleted',
+    'timeBased',
+  ];
+
+  const isTimeBased = () => localRule().trigger.type === 'timeBased';
+
+  const allowedConditionTypes = (): import('../../types').ConditionType[] => {
+    if (isTimeBased()) return [];
+    return ['titleContains', 'projectIs', 'hasTag'];
+  };
+
+  const allowedActionTypes = (): import('../../types').ActionType[] => {
+    if (isTimeBased()) return ['createTask'];
+    return ['createTask', 'addTag'];
+  };
 
   // Condition handlers
   const handleSaveCondition = (condition: Condition) => {
@@ -150,6 +167,33 @@ export function RuleEditor(props: RuleEditorProps) {
             </select>
           </label>
 
+          {localRule().trigger.type === 'timeBased' && (
+            <>
+              <label>
+                Time (24h format)
+                <input
+                  type="time"
+                  value={localRule().trigger.value || ''}
+                  onInput={(e) =>
+                    setLocalRule({
+                      ...localRule(),
+                      trigger: { ...localRule().trigger, value: e.currentTarget.value },
+                    })
+                  }
+                  required
+                />
+              </label>
+              <div class="warning-box">
+                <small>
+                  <strong>Warning:</strong> Time-based triggers only work if the app is running.
+                  They might not work reliably if the app is in the background.
+                  <br />
+                  <em>Note: Conditions and some actions are restricted for time-based triggers.</em>
+                </small>
+              </div>
+            </>
+          )}
+
           <hr />
 
           <div class="section">
@@ -163,6 +207,12 @@ export function RuleEditor(props: RuleEditorProps) {
                     setEditingConditionIndex(-1);
                     setIsConditionDialogOpen(true);
                   }}
+                  disabled={allowedConditionTypes().length === 0}
+                  title={
+                    allowedConditionTypes().length === 0
+                      ? 'No conditions available for this trigger'
+                      : ''
+                  }
                 >
                   + Add
                 </button>
@@ -277,6 +327,7 @@ export function RuleEditor(props: RuleEditorProps) {
         initialCondition={
           editingConditionIndex() >= 0 ? localRule().conditions[editingConditionIndex()] : undefined
         }
+        allowedTypes={allowedConditionTypes()}
       />
 
       <ActionDialog
@@ -286,6 +337,7 @@ export function RuleEditor(props: RuleEditorProps) {
         initialAction={
           editingActionIndex() >= 0 ? localRule().actions[editingActionIndex()] : undefined
         }
+        allowedTypes={allowedActionTypes()}
       />
     </>
   );

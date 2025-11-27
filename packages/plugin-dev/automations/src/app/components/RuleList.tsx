@@ -12,11 +12,11 @@ interface RuleListProps {
 export function RuleList(props: RuleListProps) {
   return (
     <div class="rule-list-container">
-      <div className="grid">
+      <div class="grid">
         <div>
           <h2>Automation Rules</h2>
         </div>
-        <div className="warning-box">
+        <div class="warning-box">
           <strong>Warning:</strong> The plugin is very powerful and using it can destroy your data.
           Use at your own risk!
         </div>
@@ -52,7 +52,10 @@ export function RuleList(props: RuleListProps) {
               {(rule) => (
                 <tr>
                   <td>{rule.name}</td>
-                  <td>{rule.trigger.type}</td>
+                  <td>
+                    {rule.trigger.type}
+                    {rule.trigger.value ? ` (${rule.trigger.value})` : ''}
+                  </td>
                   <td style={{ 'text-align': 'right', 'white-space': 'nowrap' }}>
                     <label>
                       <input

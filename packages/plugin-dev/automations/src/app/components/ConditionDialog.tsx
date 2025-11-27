@@ -9,22 +9,27 @@ interface ConditionDialogProps {
   initialCondition?: Condition;
   projects?: any[];
   tags?: any[];
+  allowedTypes?: ConditionType[];
 }
 
 export function ConditionDialog(props: ConditionDialogProps) {
   const [condition, setCondition] = createSignal<Condition>({ type: 'titleContains', value: '' });
+
+  const allTypes: ConditionType[] = ['titleContains', 'projectIs', 'hasTag'];
+  const availableTypes = () =>
+    props.allowedTypes ? allTypes.filter((t) => props.allowedTypes!.includes(t)) : allTypes;
 
   createEffect(() => {
     if (props.isOpen) {
       if (props.initialCondition) {
         setCondition({ ...props.initialCondition });
       } else {
-        setCondition({ type: 'titleContains', value: '' });
+        // Default to first available type
+        const firstType = availableTypes()[0] || 'titleContains';
+        setCondition({ type: firstType, value: '' });
       }
     }
   });
-
-  const types: ConditionType[] = ['titleContains', 'projectIs', 'hasTag'];
 
   return (
     <Dialog
@@ -48,7 +53,7 @@ export function ConditionDialog(props: ConditionDialogProps) {
             setCondition({ ...condition(), type: e.currentTarget.value as ConditionType })
           }
         >
-          {types.map((t) => (
+          {availableTypes().map((t) => (
             <option value={t}>{t}</option>
           ))}
         </select>

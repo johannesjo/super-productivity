@@ -15,6 +15,7 @@ export class ConditionEvaluator {
 
   private async checkCondition(condition: Condition, event: TaskEvent): Promise<boolean> {
     const task = event.task;
+    if (!task) return false; // Cannot check task conditions without a task
 
     switch (condition.type) {
       case 'titleContains':
