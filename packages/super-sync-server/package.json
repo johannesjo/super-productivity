@@ -18,7 +18,8 @@
     "fastify": "^5.6.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.11",
-    "webdav-server": "^2.6.2"
+    "webdav-server": "^2.6.2",
+    "zod": "^4.1.13"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
