@@ -9,9 +9,18 @@
     "dev": "ts-node src/index.ts"
   },
   "dependencies": {
+    "@fastify/cors": "^11.1.0",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.4.6",
+    "dotenv": "^17.2.3",
+    "fastify": "^5.6.2",
+    "jsonwebtoken": "^9.0.2",
     "webdav-server": "^2.6.2"
   },
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^18.0.0",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0"

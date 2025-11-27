@@ -1,3 +1,4 @@
+import 'dotenv/config';
 import { createServer } from './server';
 import * as path from 'path';
 import { Logger } from './logger';
@@ -46,18 +47,15 @@ process.on('unhandledRejection', (reason, promise) => {
 
 // Start the server
 start()
-  .then((httpServer) => {
-    const address = httpServer.address();
-    const serverPort = typeof address === 'string' ? address : address?.port;
-
+  .then((address) => {
     Logger.info('');
     Logger.info('🚀 SuperSync Server is running!');
-    Logger.info(`   URL: http://localhost:${serverPort}`);
+    Logger.info(`   URL: ${address}`);
     Logger.info('');
     Logger.info('Press Ctrl+C to stop the server');
     Logger.info('');
   })
-  .catch((err) => {
+  .catch((err: any) => {
     // Provide user-friendly error messages for common errors
     if (err.code === 'EADDRINUSE') {
       Logger.error(`❌ Port is already in use. Try a different port with PORT=xxxx`);
