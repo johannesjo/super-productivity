@@ -2136,9 +2136,9 @@
       "OK": "Exit"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
-    "EVALUATE_DAY": "Evaluate",
-    "EXPORT_TASK_LIST": "Export Task List",
-    "FOCUS_SUMMARY": "Focus (nr / time)",
+    "EVALUATE_DAY": "2. Evaluate Day",
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "You can use this space to write down your own end of days rituals, you want to be reminded of.",
+    "FOCUS_SUMMARY": "Focus Sessions",
     "NO_TASKS": "There are no tasks for this day",
     "PLAN_TOMORROW": "Plan",
     "REVIEW_TASKS": "Review",
