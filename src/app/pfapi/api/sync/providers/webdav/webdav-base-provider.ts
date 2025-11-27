@@ -117,7 +117,7 @@ export abstract class WebdavBaseProvider<
   }
 
   protected _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
-    const parts = [cfg.syncFolderPath];
+    const parts = cfg.syncFolderPath ? [cfg.syncFolderPath] : [];
     if (this._extraPath) {
       parts.push(this._extraPath);
     }
