@@ -5,6 +5,7 @@ import { RuleEditor } from './components/RuleEditor';
 import { AutomationRule } from '../types';
 import { exportRules } from '../utils/export-rules';
 import { sendMessage } from '../utils/messaging';
+import { validateRule } from '../utils/rule-validator';
 
 function App() {
   const [isLoading, setIsLoading] = createSignal(true);
@@ -109,18 +110,37 @@ function App() {
         const json = JSON.parse(e.target?.result as string);
         const rulesToImport = Array.isArray(json) ? json : [json];
 
+        const validRules: AutomationRule[] = [];
+        const invalidRules: any[] = [];
+
         for (const rule of rulesToImport) {
-          // Basic validation
-          if (!rule.name || !rule.trigger) {
-            console.warn('Skipping invalid rule:', rule);
-            continue;
+          if (validateRule(rule)) {
+            validRules.push(rule);
+          } else {
+            invalidRules.push(rule);
           }
+        }
+
+        if (invalidRules.length > 0) {
+          console.warn(`Skipping ${invalidRules.length} invalid rules during import.`);
+        }
+
+        for (const rule of validRules) {
           // Always generate a new ID to ensure we add to existing rules instead of overwriting
           const ruleToSave = { ...rule, id: Math.random().toString(36).substr(2, 9) };
           await sendMessage('saveRule', ruleToSave);
         }
         await fetchRules();
-        alert(`Successfully imported ${rulesToImport.length} rules.`);
+
+        if (validRules.length > 0) {
+          let msg = `Successfully imported ${validRules.length} rules.`;
+          if (invalidRules.length > 0) {
+            msg += ` (${invalidRules.length} rules were skipped due to invalid format)`;
+          }
+          alert(msg);
+        } else if (invalidRules.length > 0) {
+          alert('No valid rules found to import.');
+        }
       } catch (err) {
         console.error('Import failed:', err);
         alert('Failed to import rules. Invalid JSON file.');
