@@ -1,18 +1,16 @@
-import { createServer, loadConfigFromEnv } from './server';
+import { createServer } from './server';
 import * as path from 'path';
 
-// Load configuration
-const config = loadConfigFromEnv({
-  dataDir: process.env.DATA_DIR || path.join(process.cwd(), 'data'),
+// Create server instance with config overrides
+// The server will load additional config from environment variables
+const { start, stop } = createServer({
+  dataDir: path.join(process.cwd(), 'data'),
 });
-
-// Create server instance
-const { start, stop } = createServer(config);
 
 // Graceful shutdown handling
 let isShuttingDown = false;
 
-async function shutdown(signal: string): Promise<void> {
+const shutdown = async (signal: string): Promise<void> => {
   if (isShuttingDown) {
     console.log('Shutdown already in progress...');
     return;
@@ -28,7 +26,7 @@ async function shutdown(signal: string): Promise<void> {
     console.error('❌ Error during shutdown:', err);
     process.exit(1);
   }
-}
+};
 
 // Register signal handlers for graceful shutdown
 process.on('SIGTERM', () => shutdown('SIGTERM'));
@@ -54,22 +52,20 @@ start()
     console.log('');
     console.log('🚀 SuperSync Server is running!');
     console.log(`   URL: http://localhost:${serverPort}`);
-    console.log(`   Data directory: ${config.dataDir}`);
     console.log('');
-
-    if (config.users.length === 0) {
-      console.log('⚠️  No users configured!');
-      console.log('   Set USERS environment variable: USERS="username:password"');
-      console.log('');
-    } else {
-      console.log(`👥 ${config.users.length} user(s) configured`);
-      console.log('');
-    }
-
     console.log('Press Ctrl+C to stop the server');
     console.log('');
   })
   .catch((err) => {
-    console.error('❌ Failed to start server:', err);
+    // Provide user-friendly error messages for common errors
+    if (err.code === 'EADDRINUSE') {
+      console.error(`❌ Port is already in use. Try a different port with PORT=xxxx`);
+    } else if (err.code === 'EACCES') {
+      console.error(
+        `❌ Permission denied. Try a port > 1024 or run with elevated privileges`,
+      );
+    } else {
+      console.error('❌ Failed to start server:', err);
+    }
     process.exit(1);
   });
