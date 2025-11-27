@@ -12,28 +12,20 @@ interface RuleListProps {
 export function RuleList(props: RuleListProps) {
   return (
     <div class="rule-list-container">
-      <div class="grid">
+      <div className="grid">
         <div>
           <h2>Automation Rules</h2>
         </div>
+        <div className="warning-box">
+          <strong>Warning:</strong> The plugin is very powerful and using it can destroy your data.
+          Use at your own risk!
+        </div>
+
         <div style={{ 'text-align': 'right' }}>
           <button class="outline" onClick={props.onCreate}>
             + New Rule
           </button>
         </div>
-      </div>
-
-      <div
-        style={{
-          'background-color': 'var(--pico-color-amber-100)',
-          color: 'var(--pico-color-amber-900)',
-          padding: '1rem',
-          'margin-bottom': '1rem',
-          'border-radius': 'var(--pico-border-radius)',
-          border: '1px solid var(--pico-color-amber-200)',
-        }}
-      >
-        <strong>Warning:</strong> The plugin is very powerful and using it can destroy ones data
       </div>
 
       <figure>
@@ -61,7 +53,7 @@ export function RuleList(props: RuleListProps) {
                 <tr>
                   <td>{rule.name}</td>
                   <td>{rule.trigger.type}</td>
-                  <td>
+                  <td style={{ 'text-align': 'right', 'white-space': 'nowrap' }}>
                     <label>
                       <input
                         type="checkbox"
@@ -71,7 +63,7 @@ export function RuleList(props: RuleListProps) {
                       {rule.isEnabled ? ' Enabled' : ' Disabled'}
                     </label>
                   </td>
-                  <td style={{ 'text-align': 'right' }}>
+                  <td style={{ 'text-align': 'right', 'white-space': 'nowrap' }}>
                     <button
                       class="outline"
                       onClick={() => props.onEdit(rule)}

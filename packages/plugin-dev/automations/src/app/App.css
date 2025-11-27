@@ -125,3 +125,19 @@ table {
 [data-theme='dark'] .app-header {
   border-bottom-color: #444;
 }
+
+/* Warning box styles */
+.warning-box {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  border-radius: var(--pico-border-radius);
+  border: 1px solid #ffeeba;
+}
+
+[data-theme='dark'] .warning-box {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #ffca28;
+  border-color: rgba(255, 193, 7, 0.3);
+}
