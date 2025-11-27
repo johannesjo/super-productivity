@@ -28,7 +28,8 @@ export const registerUser = async (
   const db = getDb();
   const passwordHash = bcrypt.hashSync(password, 12);
   const verificationToken = randomBytes(32).toString('hex');
-  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+  const expiresAt = Date.now() + TWENTY_FOUR_HOURS_MS;
 
   try {
     const info = db
@@ -103,8 +104,8 @@ export const loginUser = (
 
   // Timing attack mitigation: always perform a comparison
   // Use a dummy hash so the comparison takes roughly the same time
-  // $2a$12$ is bcrypt prefix for 12 rounds
-  const dummyHash = '$2a$12$e0MyzXyjpJS7dAC5B5S3.O/p.u.m.u.m.u.m.u.m.u.m.u.m.u.m.';
+  // This is a valid bcrypt hash (12 rounds) of the string "dummy"
+  const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
   const hashToCompare = user ? user.password_hash : dummyHash;
 
   const isMatch = bcrypt.compareSync(password, hashToCompare);

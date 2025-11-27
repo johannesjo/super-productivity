@@ -33,63 +33,99 @@ const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
 
 export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
-  fastify.post<{ Body: RegisterBody }>('/register', async (req, reply) => {
-    try {
-      // Validate input
-      const parseResult = RegisterSchema.safeParse(req.body);
-      if (!parseResult.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parseResult.error.issues,
-        });
+  // Stricter rate limiting for registration (5 attempts per 15 minutes)
+  fastify.post<{ Body: RegisterBody }>(
+    '/register',
+    {
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        // Validate input
+        const parseResult = RegisterSchema.safeParse(req.body);
+        if (!parseResult.success) {
+          return reply.status(400).send({
+            error: 'Validation failed',
+            details: parseResult.error.issues,
+          });
+        }
+        const { email, password } = parseResult.data;
+
+        const result = await registerUser(email, password);
+        return reply.status(201).send(result);
+      } catch (err) {
+        Logger.error(`Registration error: ${errorMessage(err)}`);
+        // Generic error message to avoid leaking implementation details (e.g. specific DB errors)
+        // unless it's a known business logic error (which we might want to refine later)
+        return reply.status(400).send({ error: errorMessage(err) });
       }
-      const { email, password } = parseResult.data;
+    },
+  );
 
-      const result = await registerUser(email, password);
-      return reply.status(201).send(result);
-    } catch (err) {
-      Logger.error(`Registration error: ${errorMessage(err)}`);
-      // Generic error message to avoid leaking implementation details (e.g. specific DB errors)
-      // unless it's a known business logic error (which we might want to refine later)
-      return reply.status(400).send({ error: errorMessage(err) });
-    }
-  });
+  // Moderate rate limiting for email verification (20 attempts per 15 minutes)
+  fastify.post<{ Body: VerifyEmailBody }>(
+    '/verify-email',
+    {
+      config: {
+        rateLimit: {
+          max: 20,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const parseResult = VerifyEmailSchema.safeParse(req.body);
+        if (!parseResult.success) {
+          return reply.status(400).send({
+            error: 'Validation failed',
+            details: parseResult.error.issues,
+          });
+        }
+        const { token } = parseResult.data;
 
-  fastify.post<{ Body: VerifyEmailBody }>('/verify-email', async (req, reply) => {
-    try {
-      const parseResult = VerifyEmailSchema.safeParse(req.body);
-      if (!parseResult.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parseResult.error.issues,
-        });
+        verifyEmail(token);
+        return reply.send({ message: 'Email verified successfully' });
+      } catch (err) {
+        Logger.error(`Verification error: ${errorMessage(err)}`);
+        return reply.status(400).send({ error: errorMessage(err) });
       }
-      const { token } = parseResult.data;
+    },
+  );
 
-      verifyEmail(token);
-      return reply.send({ message: 'Email verified successfully' });
-    } catch (err) {
-      Logger.error(`Verification error: ${errorMessage(err)}`);
-      return reply.status(400).send({ error: errorMessage(err) });
-    }
-  });
+  // Stricter rate limiting for login (10 attempts per 15 minutes)
+  fastify.post<{ Body: LoginBody }>(
+    '/login',
+    {
+      config: {
+        rateLimit: {
+          max: 10,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const parseResult = LoginSchema.safeParse(req.body);
+        if (!parseResult.success) {
+          return reply.status(400).send({
+            error: 'Validation failed',
+            details: parseResult.error.issues,
+          });
+        }
+        const { email, password } = parseResult.data;
 
-  fastify.post<{ Body: LoginBody }>('/login', async (req, reply) => {
-    try {
-      const parseResult = LoginSchema.safeParse(req.body);
-      if (!parseResult.success) {
-        return reply.status(400).send({
-          error: 'Validation failed',
-          details: parseResult.error.issues,
-        });
+        const result = loginUser(email, password);
+        return reply.send(result);
+      } catch (err) {
+        Logger.error(`Login error: ${errorMessage(err)}`);
+        return reply.status(401).send({ error: errorMessage(err) });
       }
-      const { email, password } = parseResult.data;
-
-      const result = loginUser(email, password);
-      return reply.send(result);
-    } catch (err) {
-      Logger.error(`Login error: ${errorMessage(err)}`);
-      return reply.status(401).send({ error: errorMessage(err) });
-    }
-  });
+    },
+  );
 };
