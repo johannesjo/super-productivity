@@ -5,6 +5,79 @@ import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.mode
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
 import { fileSyncDroid, fileSyncElectron } from '../../../pfapi/pfapi-config';
+import { FormlyFieldConfig } from '@ngx-formly/core';
+
+/**
+ * Creates form fields for WebDAV-based sync providers.
+ * Reusable for both standard WebDAV and SuperSync.
+ *
+ * @param options - Configuration options for the form fields
+ * @returns Array of Formly field configurations
+ */
+const createWebdavFormFields = (options: {
+  infoText: string;
+  corsInfoText: string;
+  baseUrlDescription: string;
+}): FormlyFieldConfig[] => {
+  return [
+    {
+      type: 'tpl',
+      templateOptions: {
+        tag: 'p',
+        text: options.infoText,
+      },
+    },
+    ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+      ? [
+          {
+            type: 'tpl',
+            templateOptions: {
+              tag: 'p',
+              text: options.corsInfoText,
+            },
+          },
+        ]
+      : []),
+    {
+      key: 'baseUrl',
+      type: 'input',
+      className: 'e2e-baseUrl',
+      templateOptions: {
+        required: true,
+        label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+        description: options.baseUrlDescription,
+      },
+    },
+    {
+      key: 'userName',
+      type: 'input',
+      className: 'e2e-userName',
+      templateOptions: {
+        required: true,
+        label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+      },
+    },
+    {
+      key: 'password',
+      type: 'input',
+      className: 'e2e-password',
+      templateOptions: {
+        type: 'password',
+        required: true,
+        label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+      },
+    },
+    {
+      key: 'syncFolderPath',
+      type: 'input',
+      className: 'e2e-syncFolderPath',
+      templateOptions: {
+        required: true,
+        label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+      },
+    },
+  ];
+};
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -80,134 +153,29 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       ],
     },
 
+    // WebDAV provider form fields
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
-      fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: T.F.SYNC.FORM.WEB_DAV.INFO,
-          },
-        },
-        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
-          ? [
-              {
-                type: 'tpl',
-                templateOptions: {
-                  tag: 'p',
-                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-                },
-              },
-            ]
-          : []),
-        {
-          key: 'baseUrl',
-          type: 'input',
-          className: 'e2e-baseUrl',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
-            description:
-              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
-          },
-        },
-        {
-          key: 'userName',
-          type: 'input',
-          className: 'e2e-userName',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
-          },
-        },
-        {
-          key: 'password',
-          type: 'input',
-          className: 'e2e-password',
-          templateOptions: {
-            type: 'password',
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
-          },
-        },
-        {
-          key: 'syncFolderPath',
-          type: 'input',
-          className: 'e2e-syncFolderPath',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
-          },
-        },
-      ],
+      fieldGroup: createWebdavFormFields({
+        infoText: T.F.SYNC.FORM.WEB_DAV.INFO,
+        corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+        baseUrlDescription:
+          '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
+      }),
     },
 
+    // SuperSync provider form fields (uses same fields as WebDAV with different description)
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
       key: 'superSync',
-      fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: T.F.SYNC.FORM.WEB_DAV.INFO,
-          },
-        },
-        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
-          ? [
-              {
-                type: 'tpl',
-                templateOptions: {
-                  tag: 'p',
-                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-                },
-              },
-            ]
-          : []),
-        {
-          key: 'baseUrl',
-          type: 'input',
-          className: 'e2e-baseUrl',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
-            description:
-              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
-          },
-        },
-        {
-          key: 'userName',
-          type: 'input',
-          className: 'e2e-userName',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
-          },
-        },
-        {
-          key: 'password',
-          type: 'input',
-          className: 'e2e-password',
-          templateOptions: {
-            type: 'password',
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
-          },
-        },
-        {
-          key: 'syncFolderPath',
-          type: 'input',
-          className: 'e2e-syncFolderPath',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
-          },
-        },
-      ],
+      fieldGroup: createWebdavFormFields({
+        infoText: T.F.SYNC.FORM.WEB_DAV.INFO,
+        corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+        baseUrlDescription: '* http://localhost:1900/',
+      }),
     },
 
     {
