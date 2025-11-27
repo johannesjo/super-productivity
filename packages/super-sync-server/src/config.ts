@@ -1,10 +1,8 @@
 import * as path from 'path';
-import { Logger } from './logger';
 
 export interface ServerConfig {
   port: number;
   dataDir: string;
-  users: Array<{ username: string; password: string; isAdmin?: boolean }>;
   cors: {
     enabled: boolean;
     allowedOrigins?: string[];
@@ -14,10 +12,9 @@ export interface ServerConfig {
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
   dataDir: './data',
-  users: [],
   cors: {
-    enabled: false,
-    allowedOrigins: [],
+    enabled: true,
+    allowedOrigins: ['*'],
   },
 };
 
@@ -56,39 +53,6 @@ export const loadConfigFromEnv = (
   } else {
     // Resolve default data dir relative to cwd
     config.dataDir = path.resolve(config.dataDir);
-  }
-
-  // Parse users from environment variable
-  // Format: "user1:password1,user2:password2:admin"
-  if (process.env.USERS) {
-    config.users = process.env.USERS.split(',')
-      .map((userStr) => {
-        const parts = userStr.trim().split(':');
-        if (parts.length < 2) {
-          Logger.warn(`Skipping invalid user entry (missing password): ${userStr}`);
-          return null;
-        }
-
-        const username = parts[0]?.trim();
-        if (!username) {
-          Logger.warn('Skipping user entry with empty username');
-          return null;
-        }
-
-        const rest = parts.slice(1);
-        let isAdmin = false;
-
-        // Check if the last token is 'admin'
-        if (rest.length > 0 && rest[rest.length - 1] === 'admin') {
-          isAdmin = true;
-          rest.pop(); // Remove 'admin' flag from password parts
-        }
-
-        const password = rest.join(':');
-
-        return { username, password, isAdmin };
-      })
-      .filter((user): user is NonNullable<typeof user> => user !== null);
   }
 
   // CORS configuration

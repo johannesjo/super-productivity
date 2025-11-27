@@ -10,9 +10,11 @@ SuperSync is a custom sync server solution built on top of WebDAV, designed to p
 
 Working WebDAV clone implemented and works both on server and client side with multi-file sync just as WebDAV would.
 
-### 2. Authentication and Registration
+### 2. Authentication and Registration ✓
 
-We need to implement user authentication and registration to secure access to the sync server.
+- We need to implement user authentication and registration to secure access to the sync server.
+- We should move to an auth token rather than basic auth for better security.
+- We should provide Google and GitHub and Apple OAuth login options for easier access.
 
 ### 3. Safer Sync with Sync Completion Detection
 
