@@ -9,6 +9,7 @@ export interface User {
   password_hash: string;
   is_verified: number; // 0 or 1
   verification_token: string | null;
+  verification_token_expires_at: number | null; // Unix timestamp
   created_at: string;
 }
 
@@ -32,9 +33,21 @@ export const initDb = (dataDir: string) => {
       password_hash TEXT NOT NULL,
       is_verified INTEGER DEFAULT 0,
       verification_token TEXT,
+      verification_token_expires_at INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
+
+  // Migration: Check if verification_token_expires_at exists
+  const columns = db.pragma('table_info(users)') as { name: string }[];
+  const hasExpiresAt = columns.some(
+    (col) => col.name === 'verification_token_expires_at',
+  );
+
+  if (!hasExpiresAt) {
+    Logger.info('Migrating database: adding verification_token_expires_at column');
+    db.exec('ALTER TABLE users ADD COLUMN verification_token_expires_at INTEGER');
+  }
 
   Logger.info(`Database initialized at ${dbPath}`);
 };

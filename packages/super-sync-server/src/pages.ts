@@ -6,6 +6,16 @@ import { Logger } from './logger';
 const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
 
+// Basic HTML escape
+const escapeHtml = (unsafe: string): string => {
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+};
+
 interface VerifyEmailQuery {
   token?: string;
 }
@@ -41,7 +51,9 @@ export async function pageRoutes(fastify: FastifyInstance) {
       `);
     } catch (err) {
       Logger.error(`Verification error: ${errorMessage(err)}`);
-      return reply.status(400).send(`Verification failed: ${errorMessage(err)}`);
+      // Escape the error message to prevent XSS
+      const safeError = escapeHtml(errorMessage(err));
+      return reply.status(400).send(`Verification failed: ${safeError}`);
     }
   });
 }

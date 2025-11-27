@@ -2,6 +2,7 @@ import { v2 as webdav } from 'webdav-server';
 import * as fs from 'fs';
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import rateLimit from '@fastify/rate-limit';
 import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import { loadConfigFromEnv, ServerConfig } from './config';
@@ -131,6 +132,14 @@ export const createServer = (
         logger: false, // We use our own logger
       });
 
+      // Rate Limiting (prevent brute force)
+      // 100 requests per 15 minutes globally is a safe default
+      // We can tighten this for specific routes if needed
+      await fastifyServer.register(rateLimit, {
+        max: 100,
+        timeWindow: '15 minutes',
+      });
+
       // CORS Configuration
       if (fullConfig.cors.enabled) {
         await fastifyServer.register(cors, {
@@ -228,6 +237,18 @@ export const createServer = (
         const normalizedUrl = originalUrl.startsWith('/')
           ? originalUrl
           : `/${originalUrl}`;
+
+        // Path Traversal Protection
+        // Ensure path does not contain ".." segments
+        if (
+          normalizedUrl.includes('/../') ||
+          normalizedUrl.endsWith('/..') ||
+          normalizedUrl.includes('\\..\\')
+        ) {
+          reply.status(400).send({ error: 'Invalid path: Path traversal not allowed' });
+          return;
+        }
+
         const userScopedUrl = `/${userSegment}${normalizedUrl}`.replace(/\/{2,}/g, '/');
 
         req.raw.url = userScopedUrl;
