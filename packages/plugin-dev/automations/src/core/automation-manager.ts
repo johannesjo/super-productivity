@@ -150,7 +150,7 @@ export class AutomationManager {
               const dialogCfg: DialogCfg = {
                 htmlContent: `
               <h3>High Automation Activity Detected</h3>
-              <p>The rule <strong>"${rule.name}"</strong> is triggering too frequently (infinite loop protection).</p>
+              <p>The rule <strong>"${this.escapeHtml(rule.name)}"</strong> is triggering too frequently (infinite loop protection).</p>
               <p>Do you want to disable this rule or continue execution?</p>
             `,
                 buttons: [
@@ -189,6 +189,17 @@ export class AutomationManager {
       this.plugin.log.error(`[Automation] Error in onTaskEvent: ${e}`);
     }
   }
+
+  // Minimal HTML escape to prevent rule-provided strings from injecting markup in dialogs.
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
   getRegistry(): RuleRegistry {
     return this.ruleRegistry;
   }

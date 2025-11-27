@@ -17,6 +17,46 @@ plugin.log.info('Automation plugin initialized');
 
 const automationManager = new AutomationManager(plugin);
 
+// Deduplicate creation handling across multiple hooks (taskUpdate + anyTaskUpdate)
+// because there is no dedicated taskCreated hook in the Plugin API.
+const handledCreations = new Set<string>();
+const markCreationHandled = (taskId?: string) => {
+  if (!taskId) {
+    return false;
+  }
+  if (handledCreations.has(taskId)) {
+    return true;
+  }
+  handledCreations.add(taskId);
+  // Avoid unbounded growth while still deduplicating bursts
+  setTimeout(() => handledCreations.delete(taskId), 5000);
+  return false;
+};
+
+const handleTaskCreated = (task: TaskUpdatePayload['task']) => {
+  if (!task) {
+    plugin.log.warn('Received taskCreated event without task data');
+    return;
+  }
+  if (markCreationHandled(task.id)) {
+    return;
+  }
+  automationManager.onTaskEvent({
+    type: 'taskCreated',
+    task,
+  });
+};
+
+// Be defensive about action names from different sources/import paths.
+const isAddTaskAction = (action: string | undefined) => {
+  if (!action) return false;
+  return (
+    action === TASK_SHARED_ADD_TASK_ACTION ||
+    action.toLowerCase().includes('addtask') ||
+    action.toLowerCase().includes('add task')
+  );
+};
+
 // Hook into task completion
 plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
   if (!payload.task) {
@@ -37,7 +77,8 @@ plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
   }
   const isCreationEvent = !payload.changes || Object.keys(payload.changes).length === 0;
   if (isCreationEvent) {
-    plugin.log.info('[Automation] Skipping taskUpdate hook for creation event');
+    plugin.log.info('[Automation] Detected creation via taskUpdate hook');
+    handleTaskCreated(payload.task);
     return;
   }
   automationManager.onTaskEvent({
@@ -69,17 +110,10 @@ plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
 // If `action` is 'ADD', that might be it.
 
 plugin.registerHook('anyTaskUpdate' as any, (payload: AnyTaskUpdatePayload) => {
-  // Check for creation
-  // This is a guess on the action name, need to verify or be defensive.
-  // Common Redux/NgRx actions: '[Task] Add Task'
-  // Log all actions for debugging
   plugin.log.info(`[Automation] anyTaskUpdate action: ${payload.action}`);
 
-  if (payload.action === TASK_SHARED_ADD_TASK_ACTION && payload.task) {
-    automationManager.onTaskEvent({
-      type: 'taskCreated',
-      task: payload.task,
-    });
+  if (isAddTaskAction(payload.action) && payload.task) {
+    handleTaskCreated(payload.task);
   }
 });
 
