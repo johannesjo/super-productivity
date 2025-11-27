@@ -64,7 +64,7 @@ function createCorsMiddleware(
 
     // Handle OPTIONS preflight requests
     if (req.method === 'OPTIONS') {
-      res.statusCode = 204;
+      res.statusCode = 200;
       res.end();
       return;
     }
@@ -163,12 +163,6 @@ export function createServer(config: Partial<ServerConfig> = {}): {
         : undefined,
   });
 
-  // Add CORS middleware
-  const corsMiddleware = createCorsMiddleware(fullConfig.cors);
-  server.beforeRequest((ctx, next) => {
-    corsMiddleware(ctx.request.request, ctx.response.response, next);
-  });
-
   // Mount physical file system
   server.setFileSystem(
     '/',
@@ -190,13 +184,23 @@ export function createServer(config: Partial<ServerConfig> = {}): {
     start: (): Promise<http.Server> => {
       return new Promise((resolve, reject) => {
         try {
-          server.start((s) => {
-            if (!s) {
-              reject(new Error('Server failed to start'));
-              return;
-            }
-            httpServer = s;
-            resolve(s);
+          const corsMiddleware = createCorsMiddleware(fullConfig.cors);
+
+          httpServer = http.createServer((req, res) => {
+            // Apply CORS middleware
+            corsMiddleware(req, res, () => {
+              // If middleware calls next(), pass to WebDAV server
+              server.executeRequest(req, res);
+            });
+          });
+
+          httpServer.listen(fullConfig.port, () => {
+            console.log(`🚀 Server started on port ${fullConfig.port}`);
+            resolve(httpServer!);
+          });
+
+          httpServer.on('error', (err) => {
+            reject(err);
           });
         } catch (err) {
           reject(err);
