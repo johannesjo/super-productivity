@@ -64,7 +64,7 @@ function createCorsMiddleware(
 
     // Handle OPTIONS preflight requests
     if (req.method === 'OPTIONS') {
-      res.statusCode = 200;
+      res.statusCode = 204; // No Content is more appropriate for preflight
       res.end();
       return;
     }
@@ -94,14 +94,22 @@ export function loadConfigFromEnv(overrides: Partial<ServerConfig> = {}): Server
   // Parse users from environment variable
   // Format: "user1:password1,user2:password2:admin"
   if (process.env.USERS) {
-    config.users = process.env.USERS.split(',').map((userStr) => {
-      const parts = userStr.trim().split(':');
-      return {
-        username: parts[0],
-        password: parts[1] || '',
-        isAdmin: parts[2] === 'admin',
-      };
-    });
+    config.users = process.env.USERS.split(',')
+      .map((userStr) => {
+        const parts = userStr.trim().split(':');
+        const username = parts[0]?.trim();
+        const password = parts[1] || '';
+        const isAdmin = parts[2] === 'admin';
+
+        // Skip entries with empty username
+        if (!username) {
+          console.warn('⚠️  Skipping user entry with empty username');
+          return null;
+        }
+
+        return { username, password, isAdmin };
+      })
+      .filter((user): user is NonNullable<typeof user> => user !== null);
   }
 
   // CORS configuration
