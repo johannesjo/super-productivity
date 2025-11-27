@@ -185,8 +185,34 @@ export class PluginHooksEffects {
         ),
         withLatestFrom(this.store.pipe(select(selectTaskFeatureState))),
         tap(([action, taskState]) => {
+          let task: Task | undefined;
+          let taskId: string | undefined;
+
+          if ('task' in action) {
+            taskId = typeof action.task.id === 'string' ? action.task.id : undefined;
+            // Check if it's a full Task object (has title) vs Update<Task>
+            if ('title' in action.task) {
+              task = action.task as Task;
+            }
+          } else if ('taskId' in action) {
+            taskId = action.taskId;
+          } else if ('id' in action) {
+            taskId = action.id;
+          } else if ('taskIds' in action) {
+            if (action.taskIds.length === 1) {
+              taskId = action.taskIds[0];
+            }
+          }
+
+          // If we have an ID but no task object (e.g. updateTask, move actions), try to get it from state
+          if (!task && taskId) {
+            task = taskState.entities[taskId];
+          }
+
           this.pluginService.dispatchHook(PluginHooks.ANY_TASK_UPDATE, {
             action: action.type,
+            task,
+            taskId,
             taskState,
           });
         }),

@@ -16,6 +16,10 @@ export class AutomationManager {
   }
 
   async onTaskEvent(event: TaskEvent) {
+    if (!event.task) {
+      this.plugin.log.warn(`[Automation] Event ${event.type} received without task data`);
+      return;
+    }
     this.plugin.log.info(`[Automation] Event received: ${event.type}`, event.task.title);
 
     const rules = this.ruleRegistry.getEnabledRules();

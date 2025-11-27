@@ -1,12 +1,23 @@
 :root {
-  --bg-color: #ffffff;
-  --text-color: #333333;
-  --primary-color: #3f51b5;
-}
+  /* Map host variables to local variables */
+  --bg-color: var(--bg);
+  --text-color: var(--text-color);
+  --primary-color: var(--c-primary);
 
-[data-theme='dark'] {
-  --bg-color: #303030;
-  --text-color: #ffffff;
+  /* Map host variables to Pico CSS variables */
+  --pico-background-color: var(--bg);
+  --pico-color: var(--text-color);
+  --pico-primary: var(--c-primary);
+  --pico-primary-background: var(--c-primary);
+  --pico-primary-hover: var(--c-accent);
+  --pico-primary-focus: var(--c-accent);
+  --pico-card-background-color: var(--card-bg);
+  --pico-border-color: var(--divider-color);
+
+  /* Additional Pico overrides for better integration */
+  --pico-form-element-background-color: var(--bg-darker);
+  --pico-form-element-border-color: var(--divider-color);
+  --pico-form-element-color: var(--text-color);
 }
 
 body {

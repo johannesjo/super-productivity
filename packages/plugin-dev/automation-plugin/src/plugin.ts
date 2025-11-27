@@ -17,6 +17,10 @@ const automationManager = new AutomationManager(plugin);
 
 // Hook into task completion
 plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
+  if (!payload.task) {
+    plugin.log.warn('Received taskComplete hook without task data');
+    return;
+  }
   automationManager.onTaskEvent({
     type: 'taskCompleted',
     task: payload.task,
@@ -25,6 +29,10 @@ plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
 
 // Hook into task updates
 plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
+  if (!payload.task) {
+    plugin.log.warn('Received taskUpdate hook without task data');
+    return;
+  }
   automationManager.onTaskEvent({
     type: 'taskUpdated',
     task: payload.task,
@@ -57,7 +65,10 @@ plugin.registerHook('anyTaskUpdate' as any, (payload: AnyTaskUpdatePayload) => {
   // Check for creation
   // This is a guess on the action name, need to verify or be defensive.
   // Common Redux/NgRx actions: '[Task] Add Task'
-  if (payload.action === '[Task] Add Task' && payload.task) {
+  // Log all actions for debugging
+  plugin.log.info(`[Automation] anyTaskUpdate action: ${payload.action}`);
+
+  if (payload.action === '[Task Shared] addTask' && payload.task) {
     automationManager.onTaskEvent({
       type: 'taskCreated',
       task: payload.task,
