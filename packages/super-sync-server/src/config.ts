@@ -3,6 +3,11 @@ import * as path from 'path';
 export interface ServerConfig {
   port: number;
   dataDir: string;
+  /**
+   * Publicly reachable base URL used for links in emails.
+   * Should point to the reverse-proxied address users can access.
+   */
+  publicUrl: string;
   cors: {
     enabled: boolean;
     allowedOrigins?: string[];
@@ -20,6 +25,7 @@ export interface ServerConfig {
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
   dataDir: './data',
+  publicUrl: 'http://localhost:1900',
   cors: {
     enabled: true,
     allowedOrigins: ['*'],
@@ -61,6 +67,17 @@ export const loadConfigFromEnv = (
   } else {
     // Resolve default data dir relative to cwd
     config.dataDir = path.resolve(config.dataDir);
+  }
+
+  // Public URL (for email links)
+  if (process.env.PUBLIC_URL) {
+    const trimmed = process.env.PUBLIC_URL.trim();
+    if (!/^https?:\/\//i.test(trimmed)) {
+      throw new Error('PUBLIC_URL must start with http:// or https://');
+    }
+    config.publicUrl = trimmed.replace(/\/+$/, '');
+  } else {
+    config.publicUrl = `http://localhost:${config.port}`;
   }
 
   // CORS configuration

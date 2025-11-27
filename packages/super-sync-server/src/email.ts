@@ -4,7 +4,7 @@ import { loadConfigFromEnv } from './config';
 
 let transporter: nodemailer.Transporter | null = null;
 
-const getTransporter = async () => {
+const getTransporter = async (): Promise<nodemailer.Transporter> => {
   if (transporter) return transporter;
 
   const config = loadConfigFromEnv();
@@ -41,18 +41,18 @@ const getTransporter = async () => {
   return transporter;
 };
 
-export const sendVerificationEmail = async (to: string, token: string) => {
+export const sendVerificationEmail = async (
+  to: string,
+  token: string,
+): Promise<boolean> => {
   try {
-    const transporter = await getTransporter();
+    const mailTransporter = await getTransporter();
     const config = loadConfigFromEnv();
     const from = config.smtp?.from || '"SuperSync" <noreply@example.com>';
 
-    // In a real app, this URL should be configurable
-    // For now, we assume the server is running on the same host
-    // or we can use a configured PUBLIC_URL
-    const verificationLink = `http://localhost:${config.port}/verify-email?token=${token}`;
+    const verificationLink = `${config.publicUrl}/verify-email?token=${token}`;
 
-    const info = await transporter.sendMail({
+    const info = await mailTransporter.sendMail({
       from,
       to,
       subject: 'Verify your SuperSync account',
@@ -61,8 +61,15 @@ export const sendVerificationEmail = async (to: string, token: string) => {
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Welcome to SuperSync!</h2>
           <p>Please verify your account by clicking the button below:</p>
-          <a href="${verificationLink}" style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;">Verify Email</a>
-          <p style="margin-top: 20px; font-size: 12px; color: #666;">If the button doesn't work, copy and paste this link into your browser:</p>
+          <a
+            href="${verificationLink}"
+            style="display: inline-block; padding: 10px 20px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 5px;"
+          >
+            Verify Email
+          </a>
+          <p style="margin-top: 20px; font-size: 12px; color: #666;">
+            If the button doesn't work, copy and paste this link into your browser:
+          </p>
           <p style="font-size: 12px; color: #666;">${verificationLink}</p>
           <p style="font-size: 12px; color: #666;">Token: ${token}</p>
         </div>

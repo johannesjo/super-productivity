@@ -27,6 +27,7 @@ All configuration is done via environment variables. Copy `.env.example` to `.en
 | -------------- | -------- | --------------------------------------------------- |
 | `PORT`         | `1900`   | Server port                                         |
 | `DATA_DIR`     | `./data` | Directory for storing sync data                     |
+| `PUBLIC_URL`   | -        | Publicly reachable URL used for email links         |
 | `JWT_SECRET`   | -        | **Required in production.** Secret for signing JWTs |
 | `CORS_ENABLED` | `true`   | Enable CORS for browser clients                     |
 | `CORS_ORIGINS` | `*`      | Allowed origins (comma-separated)                   |
@@ -54,8 +55,7 @@ Response:
 {
   "message": "User registered. Please verify your email.",
   "id": 1,
-  "email": "user@example.com",
-  "verificationToken": "abc123..."
+  "email": "user@example.com"
 }
 ```
 
