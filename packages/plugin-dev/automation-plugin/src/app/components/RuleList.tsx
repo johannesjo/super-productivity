@@ -15,45 +15,49 @@ export function RuleList(props: RuleListProps) {
           <h2>Automation Rules</h2>
         </div>
         <div style={{ 'text-align': 'right' }}>
-          <button onClick={props.onCreate}>+ New Rule</button>
+          <button class="btn-sm" onClick={props.onCreate}>
+            + New Rule
+          </button>
         </div>
       </div>
 
-      <div class="rule-list">
-        <For
-          each={props.rules}
-          fallback={<article>No rules found. Create one to get started!</article>}
-        >
-          {(rule) => (
-            <article class="rule-item" style={{ 'margin-bottom': '1rem' }}>
-              <header>
-                <div class="grid">
-                  <div>
-                    <strong>{rule.name}</strong>
-                  </div>
-                  <div style={{ 'text-align': 'right' }}>
-                    {rule.isEnabled ? (
-                      <span data-tooltip="Enabled">✅</span>
-                    ) : (
-                      <span data-tooltip="Disabled">❌</span>
-                    )}
-                  </div>
-                </div>
-              </header>
-              <div class="grid">
-                <div>
-                  <small>Trigger: {rule.trigger.type}</small>
-                </div>
-                <div style={{ 'text-align': 'right' }}>
-                  <button class="outline secondary" onClick={() => props.onEdit(rule)}>
-                    Edit
-                  </button>
-                </div>
-              </div>
-            </article>
-          )}
-        </For>
-      </div>
+      <figure>
+        <table role="grid">
+          <thead>
+            <tr>
+              <th scope="col">Name</th>
+              <th scope="col">Trigger</th>
+              <th scope="col">Status</th>
+              <th scope="col" style={{ 'text-align': 'right' }}>
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <For
+              each={props.rules}
+              fallback={
+                <tr>
+                  <td colspan={4}>No rules found. Create one to get started!</td>
+                </tr>
+              }
+            >
+              {(rule) => (
+                <tr>
+                  <td>{rule.name}</td>
+                  <td>{rule.trigger.type}</td>
+                  <td>{rule.isEnabled ? '✅ Enabled' : '❌ Disabled'}</td>
+                  <td style={{ 'text-align': 'right' }}>
+                    <button class="outline secondary btn-sm" onClick={() => props.onEdit(rule)}>
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              )}
+            </For>
+          </tbody>
+        </table>
+      </figure>
     </div>
   );
 }

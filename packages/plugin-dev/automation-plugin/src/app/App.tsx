@@ -23,9 +23,9 @@ const sendMessage = async (type: string, payload?: any) => {
 
 function App() {
   const [isLoading, setIsLoading] = createSignal(true);
-  const [view, setView] = createSignal<'list' | 'editor'>('list');
   const [rules, setRules] = createSignal<AutomationRule[]>([]);
   const [editingRule, setEditingRule] = createSignal<AutomationRule | null>(null);
+  const [isEditorOpen, setIsEditorOpen] = createSignal(false);
 
   onMount(async () => {
     // Mock data for now, later fetch from plugin
@@ -44,7 +44,7 @@ function App() {
 
   const handleEdit = (rule: AutomationRule) => {
     setEditingRule(JSON.parse(JSON.stringify(rule))); // Deep clone
-    setView('editor');
+    setIsEditorOpen(true);
   };
 
   const handleCreate = () => {
@@ -56,7 +56,7 @@ function App() {
       conditions: [],
       actions: [],
     });
-    setView('editor');
+    setIsEditorOpen(true);
   };
 
   const handleSave = (rule: AutomationRule) => {
@@ -66,29 +66,30 @@ function App() {
       const newRule = { ...rule, id: Math.random().toString(36).substr(2, 9) };
       setRules([...rules(), newRule]);
     }
-    setView('list');
+    setIsEditorOpen(false);
     setEditingRule(null);
   };
 
   return (
     <div class="app">
-      <header class="app-header">
-        <h1>Automation Rules</h1>
-      </header>
       <main class="container">
         {isLoading() ? (
           <article aria-busy="true"></article>
-        ) : view() === 'list' ? (
-          <RuleList rules={rules()} onEdit={handleEdit} onCreate={handleCreate} />
         ) : (
-          <RuleEditor
-            rule={editingRule()!}
-            onSave={handleSave}
-            onCancel={() => {
-              setView('list');
-              setEditingRule(null);
-            }}
-          />
+          <>
+            <RuleList rules={rules()} onEdit={handleEdit} onCreate={handleCreate} />
+            {editingRule() && (
+              <RuleEditor
+                isOpen={isEditorOpen()}
+                rule={editingRule()!}
+                onSave={handleSave}
+                onCancel={() => {
+                  setIsEditorOpen(false);
+                  setEditingRule(null);
+                }}
+              />
+            )}
+          </>
         )}
       </main>
     </div>
