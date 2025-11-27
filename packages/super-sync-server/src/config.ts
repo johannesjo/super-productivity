@@ -80,6 +80,11 @@ export const loadConfigFromEnv = (
     config.publicUrl = `http://localhost:${config.port}`;
   }
 
+  // Enforce HTTPS for PUBLIC_URL in production
+  if (process.env.NODE_ENV === 'production' && !config.publicUrl.startsWith('https://')) {
+    throw new Error('PUBLIC_URL must use HTTPS in production');
+  }
+
   // CORS configuration
   if (process.env.CORS_ENABLED !== undefined) {
     config.cors.enabled = process.env.CORS_ENABLED === 'true';

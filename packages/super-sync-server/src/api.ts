@@ -120,7 +120,8 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
         const { email, password } = parseResult.data;
 
-        const result = loginUser(email, password);
+        const result = await loginUser(email, password);
+
         return reply.send(result);
       } catch (err) {
         Logger.error(`Login error: ${errorMessage(err)}`);

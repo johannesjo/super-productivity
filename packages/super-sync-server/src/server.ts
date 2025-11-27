@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
 import rateLimit from '@fastify/rate-limit';
+import helmet from '@fastify/helmet';
 import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import { loadConfigFromEnv, ServerConfig } from './config';
@@ -132,6 +133,11 @@ export const createServer = (
         logger: false, // We use our own logger
       });
 
+      // Security Headers
+      await fastifyServer.register(helmet, {
+        contentSecurityPolicy: false, // Disable CSP for now to avoid conflicts with WebDAV clients/browsers
+      });
+
       // Rate Limiting (prevent brute force)
       // 100 requests per 15 minutes globally is a safe default
       // We can tighten this for specific routes if needed
@@ -191,6 +197,11 @@ export const createServer = (
         prefix: '/',
       });
 
+      // Health Check
+      fastifyServer.get('/health', async () => {
+        return { status: 'ok' };
+      });
+
       // API Routes
       await fastifyServer.register(apiRoutes, { prefix: '/api' });
 
@@ -210,7 +221,8 @@ export const createServer = (
         const urlPath = req.url.split('?')[0];
         if (
           (req.method === 'GET' && staticFiles.includes(urlPath)) ||
-          urlPath === '/verify-email'
+          urlPath === '/verify-email' ||
+          urlPath === '/health'
         ) {
           done();
           return;

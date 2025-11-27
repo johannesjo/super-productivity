@@ -26,7 +26,7 @@ export const registerUser = async (
   // Password strength validation is handled by Zod in api.ts
 
   const db = getDb();
-  const passwordHash = bcrypt.hashSync(password, 12);
+  const passwordHash = await bcrypt.hash(password, 12);
   const verificationToken = randomBytes(32).toString('hex');
   const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
   const expiresAt = Date.now() + TWENTY_FOUR_HOURS_MS;
@@ -92,10 +92,10 @@ export const verifyEmail = (token: string): boolean => {
   return true;
 };
 
-export const loginUser = (
+export const loginUser = async (
   email: string,
   password: string,
-): { token: string; user: { id: number; email: string } } => {
+): Promise<{ token: string; user: { id: number; email: string } }> => {
   const db = getDb();
 
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as
@@ -108,7 +108,7 @@ export const loginUser = (
   const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
   const hashToCompare = user ? user.password_hash : dummyHash;
 
-  const isMatch = bcrypt.compareSync(password, hashToCompare);
+  const isMatch = await bcrypt.compare(password, hashToCompare);
 
   if (!user || !isMatch) {
     throw new Error('Invalid credentials');
