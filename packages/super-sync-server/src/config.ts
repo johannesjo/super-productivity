@@ -77,10 +77,14 @@ export const loadConfigFromEnv = (
 
   // SMTP Configuration
   if (process.env.SMTP_HOST) {
+    const port = parseInt(process.env.SMTP_PORT || '587', 10);
     config.smtp = {
       host: process.env.SMTP_HOST,
-      port: parseInt(process.env.SMTP_PORT || '587', 10),
-      secure: process.env.SMTP_SECURE === 'true',
+      port,
+      secure:
+        process.env.SMTP_SECURE !== undefined
+          ? process.env.SMTP_SECURE === 'true'
+          : port === 465,
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
       from: process.env.SMTP_FROM || '"SuperSync" <noreply@example.com>',

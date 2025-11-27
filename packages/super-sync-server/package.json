@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/index.js",
-    "dev": "ts-node src/index.ts"
+    "dev": "ts-node src/index.ts",
+    "delete-user": "ts-node scripts/delete-user.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
