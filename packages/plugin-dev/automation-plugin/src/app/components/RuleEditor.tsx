@@ -8,6 +8,7 @@ interface RuleEditorProps {
   isOpen: boolean;
   rule: AutomationRule;
   onSave: (rule: AutomationRule) => void;
+  onDelete: (rule: AutomationRule) => void;
   onCancel: () => void;
 }
 
@@ -99,10 +100,23 @@ export function RuleEditor(props: RuleEditorProps) {
         title={localRule().id ? 'Edit Rule' : 'New Rule'}
         footer={
           <div class="grid">
-            <button class="secondary outline" onClick={props.onCancel}>
-              Cancel
-            </button>
-            <button onClick={saveLocalRule}>Save Rule</button>
+            <div style={{ 'text-align': 'left' }}>
+              {localRule().id && (
+                <button class="outline contrast" onClick={() => props.onDelete(localRule())}>
+                  Delete Rule
+                </button>
+              )}
+            </div>
+            <div style={{ 'text-align': 'right' }}>
+              <button
+                class="secondary outline"
+                onClick={props.onCancel}
+                style={{ 'margin-right': '0.5rem' }}
+              >
+                Cancel
+              </button>
+              <button onClick={saveLocalRule}>Save Rule</button>
+            </div>
           </div>
         }
       >

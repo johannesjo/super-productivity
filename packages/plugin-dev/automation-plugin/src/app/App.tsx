@@ -70,6 +70,14 @@ function App() {
     setEditingRule(null);
   };
 
+  const handleDelete = (rule: AutomationRule) => {
+    if (confirm(`Are you sure you want to delete "${rule.name}"?`)) {
+      setRules(rules().filter((r) => r.id !== rule.id));
+      setIsEditorOpen(false);
+      setEditingRule(null);
+    }
+  };
+
   return (
     <div class="app">
       <main class="container">
@@ -77,12 +85,18 @@ function App() {
           <article aria-busy="true"></article>
         ) : (
           <>
-            <RuleList rules={rules()} onEdit={handleEdit} onCreate={handleCreate} />
+            <RuleList
+              rules={rules()}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onCreate={handleCreate}
+            />
             {editingRule() && (
               <RuleEditor
                 isOpen={isEditorOpen()}
                 rule={editingRule()!}
                 onSave={handleSave}
+                onDelete={handleDelete}
                 onCancel={() => {
                   setIsEditorOpen(false);
                   setEditingRule(null);

@@ -4,6 +4,7 @@ import { AutomationRule } from '../../types';
 interface RuleListProps {
   rules: AutomationRule[];
   onEdit: (rule: AutomationRule) => void;
+  onDelete: (rule: AutomationRule) => void;
   onCreate: () => void;
 }
 
@@ -48,8 +49,15 @@ export function RuleList(props: RuleListProps) {
                   <td>{rule.trigger.type}</td>
                   <td>{rule.isEnabled ? '✅ Enabled' : '❌ Disabled'}</td>
                   <td style={{ 'text-align': 'right' }}>
-                    <button class="outline secondary btn-sm" onClick={() => props.onEdit(rule)}>
+                    <button
+                      class="outline secondary btn-sm"
+                      onClick={() => props.onEdit(rule)}
+                      style={{ 'margin-right': '0.5rem' }}
+                    >
                       Edit
+                    </button>
+                    <button class="outline contrast btn-sm" onClick={() => props.onDelete(rule)}>
+                      Delete
                     </button>
                   </td>
                 </tr>
