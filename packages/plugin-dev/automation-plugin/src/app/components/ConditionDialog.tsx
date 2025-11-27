@@ -57,7 +57,13 @@ export function ConditionDialog(props: ConditionDialogProps) {
           type="text"
           value={condition().value}
           onInput={(e) => setCondition({ ...condition(), value: e.currentTarget.value })}
-          placeholder="Value"
+          placeholder={
+            condition().type === 'titleContains'
+              ? 'e.g. "bug"'
+              : condition().type === 'projectIs'
+                ? 'e.g. "Project A"'
+                : 'e.g. "urgent"'
+          }
         />
       </label>
     </Dialog>

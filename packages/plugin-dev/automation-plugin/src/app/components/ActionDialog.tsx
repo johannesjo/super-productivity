@@ -55,7 +55,9 @@ export function ActionDialog(props: ActionDialogProps) {
           type="text"
           value={action().value}
           onInput={(e) => setAction({ ...action(), value: e.currentTarget.value })}
-          placeholder="Value"
+          placeholder={
+            action().type === 'createTask' ? 'e.g. "Follow up task"' : 'e.g. "review-needed"'
+          }
         />
       </label>
     </Dialog>

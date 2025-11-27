@@ -50,7 +50,7 @@ function App() {
   const handleCreate = () => {
     setEditingRule({
       id: '',
-      name: 'New Rule',
+      name: '',
       isEnabled: true,
       trigger: { type: 'taskCreated' },
       conditions: [],
