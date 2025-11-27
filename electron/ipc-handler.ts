@@ -1,11 +1,13 @@
 import { log } from 'electron-log/main';
 import { pluginNodeExecutor } from './plugin-node-executor';
-import { initAppDataIpc } from './ipc-handlers/app-data';
-import { initAppControlIpc } from './ipc-handlers/app-control';
-import { initSystemIpc } from './ipc-handlers/system';
-import { initJiraIpc } from './ipc-handlers/jira';
-import { initGlobalShortcutsIpc } from './ipc-handlers/global-shortcuts';
-import { initExecIpc } from './ipc-handlers/exec';
+import {
+  initAppControlIpc,
+  initAppDataIpc,
+  initExecIpc,
+  initGlobalShortcutsIpc,
+  initJiraIpc,
+  initSystemIpc,
+} from './ipc-handlers';
 
 export const initIpcInterfaces = (): void => {
   // Initialize plugin node executor (registers IPC handlers)

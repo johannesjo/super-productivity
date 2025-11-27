@@ -21,7 +21,7 @@ const execWithFrontendErrorHandlerInform = async (
   const allowedCommands: string[] = (existingData[COMMAND_MAP_PROP] as string[]) || [];
 
   if (!Array.isArray(allowedCommands)) {
-    throw new Error('allowedCommands is no array ???');
+    throw new Error('Invalid configuration: allowedCommands must be an array');
   }
   if (allowedCommands.includes(command)) {
     exec(command, (err) => {

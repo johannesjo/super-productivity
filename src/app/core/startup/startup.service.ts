@@ -37,6 +37,9 @@ import { SyncSafetyBackupService } from '../../imex/sync/sync-safety-backup.serv
 
 const w = window as Window & { productivityTips?: string[][]; randomIndex?: number };
 
+/** Delay before running deferred initialization tasks (plugins, storage checks, etc.) */
+const DEFERRED_INIT_DELAY_MS = 1000;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -114,7 +117,7 @@ export class StartupService {
 
       this._handleAppStartRating();
       await this._initPlugins();
-    }, 1000);
+    }, DEFERRED_INIT_DELAY_MS);
 
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
