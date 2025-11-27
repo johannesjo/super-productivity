@@ -10,7 +10,11 @@ SuperSync is a custom sync server solution built on top of WebDAV, designed to p
 
 Working WebDAV clone implemented and works both on server and client side with multi-file sync just as WebDAV would.
 
-### 2. Safer Sync with Sync Completion Detection
+### 2. Authentication and Registration
+
+We need to implement user authentication and registration to secure access to the sync server.
+
+### 3. Safer Sync with Sync Completion Detection
 
 Server detects incomplete syncs using the **existing meta file lock mechanism** (no extra requests needed).
 
@@ -29,7 +33,7 @@ Server detects incomplete syncs using the **existing meta file lock mechanism** 
 
 **Zero extra requests** - reuses existing client behavior.
 
-### 3. Automatic Backups
+### 4. Automatic Backups
 
 The server automatically creates backups of complete datasets before they are overwritten or deleted, allowing clients to restore previous versions if needed.
 
@@ -40,13 +44,13 @@ The server automatically creates backups of complete datasets before they are ov
 - Last valid state from yesterday
 - Last valid from last week
 
-### 4. Improve UX
+### 5. Improve UX
 
 - Login and register experience is improved and simplified
 - Better error messages and sync status feedback
 - Connection testing before sync
 
-### 5. Incremental File Updates
+### 6. Incremental File Updates
 
 - instead of uploading entire files we try to derive deltas and upload those
   _– needs concept –_
