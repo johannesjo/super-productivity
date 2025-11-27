@@ -1,8 +1,13 @@
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { Action, TaskEvent } from '../types';
+import { AutomationRegistry } from './registry';
+import { AutomationContext } from './definitions';
 
 export class ActionExecutor {
-  constructor(private plugin: PluginAPI) {}
+  constructor(
+    private plugin: PluginAPI,
+    private registry: AutomationRegistry,
+  ) {}
 
   async executeAll(actions: Action[], event: TaskEvent) {
     for (const action of actions) {
@@ -11,67 +16,17 @@ export class ActionExecutor {
   }
 
   private async executeAction(action: Action, event: TaskEvent) {
-    switch (action.type) {
-      case 'createTask':
-        await this.plugin.addTask({
-          title: action.value,
-          projectId: event.task?.projectId, // Inherit project? Or make configurable? MVP: inherit if implicit context
-        });
-        this.plugin.log.info(`[Automation] Action: Created task "${action.value}"`);
-        break;
+    const actionImpl = this.registry.getAction(action.type);
+    if (!actionImpl) {
+      this.plugin.log.warn(`[Automation] Unknown action type: ${action.type}`);
+      return;
+    }
 
-      case 'addTag':
-        if (!event.task) {
-          this.plugin.log.warn(
-            `[Automation] Cannot add tag "${action.value}" without a task context.`,
-          );
-          return;
-        }
-        // Find tag by title first
-        const tags = await this.plugin.getAllTags();
-        let tagId = tags.find((t) => t.title === action.value)?.id;
-
-        // Create tag if it doesn't exist? MVP: Assume it exists or fail gracefully
-        if (!tagId) {
-          this.plugin.log.warn(`[Automation] Tag "${action.value}" not found.`);
-          return;
-        }
-
-        // Avoid adding duplicate tags
-        if (event.task.tagIds.includes(tagId)) return;
-
-        await this.plugin.updateTask(event.task.id, {
-          tagIds: [...event.task.tagIds, tagId],
-        });
-        this.plugin.log.info(`[Automation] Action: Added tag "${action.value}"`);
-        break;
-
-      case 'displaySnack':
-        this.plugin.showSnack({ msg: action.value, type: 'SUCCESS' });
-        this.plugin.log.info(`[Automation] Action: Displayed snack "${action.value}"`);
-        break;
-
-      case 'displayDialog':
-        await this.plugin.openDialog({
-          htmlContent: `<p>${action.value}</p>`,
-          buttons: [{ label: 'OK', onClick: () => {} }],
-        });
-        this.plugin.log.info(`[Automation] Action: Displayed dialog "${action.value}"`);
-        break;
-
-      case 'webhook':
-        try {
-          // Simple POST with task data
-          await fetch(action.value, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(event),
-          });
-          this.plugin.log.info(`[Automation] Action: Webhook sent to "${action.value}"`);
-        } catch (e) {
-          this.plugin.log.error(`[Automation] Webhook failed: ${e}`);
-        }
-        break;
+    const context: AutomationContext = { plugin: this.plugin };
+    try {
+      await actionImpl.execute(context, event, action.value);
+    } catch (e) {
+      this.plugin.log.error(`[Automation] Action ${action.type} failed: ${e}`);
     }
   }
 }

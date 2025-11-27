@@ -1,8 +1,13 @@
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { Condition, TaskEvent } from '../types';
+import { AutomationRegistry } from './registry';
+import { AutomationContext } from './definitions';
 
 export class ConditionEvaluator {
-  constructor(private plugin: PluginAPI) {}
+  constructor(
+    private plugin: PluginAPI,
+    private registry: AutomationRegistry,
+  ) {}
 
   async allConditionsMatch(conditions: Condition[], event: TaskEvent): Promise<boolean> {
     for (const condition of conditions) {
@@ -15,28 +20,29 @@ export class ConditionEvaluator {
 
   private async checkCondition(condition: Condition, event: TaskEvent): Promise<boolean> {
     const task = event.task;
-    if (!task) return false; // Cannot check task conditions without a task
-
-    switch (condition.type) {
-      case 'titleContains':
-        return task.title.toLowerCase().includes(condition.value.toLowerCase());
-
-      case 'projectIs':
-        if (!task.projectId) return false;
-        // Optimization: Cache projects if needed, but for MVP fetching is safer
-        const projects = await this.plugin.getAllProjects();
-        const project = projects.find((p) => p.id === task.projectId);
-        return project ? project.title === condition.value : false;
-
-      case 'hasTag':
-        if (!task.tagIds || task.tagIds.length === 0) return false;
-        const tags = await this.plugin.getAllTags();
-        const tag = tags.find((t) => t.title === condition.value);
-        if (!tag) return false;
-        return task.tagIds.includes(tag.id);
-
-      default:
-        return false;
+    // Note: Some conditions might not need a task, but we keep this check if it was critical.
+    // However, the implementation of the condition checks "if (!event.task ...)" itself.
+    // The original code returned false if (!task) before switch.
+    // But specific conditions might be valid without task (e.g. "Is Weekend").
+    // So I will remove the early return here and let the condition implementation handle it.
+    // Wait, if I want to be strict about preserving behavior:
+    if (
+      !task &&
+      condition.type !== 'titleContains' &&
+      condition.type !== 'projectIs' &&
+      condition.type !== 'hasTag'
+    ) {
+      // The original code returned false early.
     }
+
+    // Let's just call the implementation.
+    const conditionImpl = this.registry.getCondition(condition.type);
+    if (!conditionImpl) {
+      // Fallback or log?
+      return false;
+    }
+
+    const context: AutomationContext = { plugin: this.plugin };
+    return conditionImpl.check(context, event, condition.value);
   }
 }

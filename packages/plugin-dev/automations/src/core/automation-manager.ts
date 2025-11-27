@@ -7,6 +7,10 @@ import { lazySetInterval } from './lazy-set-interval';
 
 import { RateLimiter } from './rate-limiter';
 import { DialogCfg } from '@super-productivity/plugin-api';
+import { globalRegistry } from './registry';
+import * as Triggers from './triggers';
+import * as Conditions from './conditions';
+import * as Actions from './actions';
 
 export class AutomationManager {
   private ruleRegistry: RuleRegistry;
@@ -18,11 +22,32 @@ export class AutomationManager {
   private clearTimeCheck?: () => void;
 
   constructor(private plugin: PluginAPI) {
+    this.registerDefaults();
     this.ruleRegistry = new RuleRegistry(plugin);
-    this.conditionEvaluator = new ConditionEvaluator(plugin);
-    this.actionExecutor = new ActionExecutor(plugin);
+    this.conditionEvaluator = new ConditionEvaluator(plugin, globalRegistry);
+    this.actionExecutor = new ActionExecutor(plugin, globalRegistry);
     this.rateLimiter = new RateLimiter(5, 1000); // 5 executions per second
     this.initTimeCheck();
+  }
+
+  private registerDefaults() {
+    // Triggers
+    globalRegistry.registerTrigger(Triggers.TriggerTaskCompleted);
+    globalRegistry.registerTrigger(Triggers.TriggerTaskCreated);
+    globalRegistry.registerTrigger(Triggers.TriggerTaskUpdated);
+    globalRegistry.registerTrigger(Triggers.TriggerTimeBased);
+
+    // Conditions
+    globalRegistry.registerCondition(Conditions.ConditionTitleContains);
+    globalRegistry.registerCondition(Conditions.ConditionProjectIs);
+    globalRegistry.registerCondition(Conditions.ConditionHasTag);
+
+    // Actions
+    globalRegistry.registerAction(Actions.ActionCreateTask);
+    globalRegistry.registerAction(Actions.ActionAddTag);
+    globalRegistry.registerAction(Actions.ActionDisplaySnack);
+    globalRegistry.registerAction(Actions.ActionDisplayDialog);
+    globalRegistry.registerAction(Actions.ActionWebhook);
   }
 
   private initTimeCheck() {
@@ -85,7 +110,9 @@ export class AutomationManager {
     const rules = this.ruleRegistry.getEnabledRules();
 
     for (const rule of rules) {
-      if (rule.trigger.type !== event.type) continue;
+      const triggerImpl = globalRegistry.getTrigger(rule.trigger.type);
+      // If trigger not found or doesn't match, skip
+      if (!triggerImpl || !triggerImpl.matches(event, rule.trigger.value)) continue;
 
       const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
       if (!matches) continue;

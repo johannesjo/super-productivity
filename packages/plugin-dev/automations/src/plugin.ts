@@ -9,6 +9,7 @@ import type { PluginHooks } from '@super-productivity/plugin-api';
 declare const plugin: PluginAPI;
 
 import { AutomationManager } from './core/automation-manager';
+import { globalRegistry } from './core/registry';
 
 // Plugin initialization
 plugin.log.info('Automation plugin initialized');
@@ -82,6 +83,18 @@ if (plugin.onMessage) {
     switch (message?.type) {
       case 'getRules':
         return automationManager.getRegistry().getRules();
+      case 'getDefinitions':
+        return {
+          triggers: globalRegistry
+            .getTriggers()
+            .map((t) => ({ id: t.id, name: t.name, description: t.description })),
+          conditions: globalRegistry
+            .getConditions()
+            .map((c) => ({ id: c.id, name: c.name, description: c.description })),
+          actions: globalRegistry
+            .getActions()
+            .map((a) => ({ id: a.id, name: a.name, description: a.description })),
+        };
       case 'saveRule':
         await automationManager.getRegistry().addOrUpdateRule(message.payload);
         return { success: true };

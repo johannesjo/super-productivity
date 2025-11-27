@@ -171,6 +171,15 @@ export function RuleEditor(props: RuleEditorProps) {
 
           {localRule().trigger.type === 'timeBased' && (
             <>
+              <div class="warning-box">
+                <small>
+                  <strong>Warning:</strong> Time-based triggers only work if the app is running.
+                  They might not work reliably if the app is in the background.
+                  <br />
+                  <em>Note: Conditions and some actions are restricted for time-based triggers.</em>
+                </small>
+              </div>
+
               <label>
                 Time (24h format)
                 <input
@@ -185,14 +194,6 @@ export function RuleEditor(props: RuleEditorProps) {
                   required
                 />
               </label>
-              <div class="warning-box">
-                <small>
-                  <strong>Warning:</strong> Time-based triggers only work if the app is running.
-                  They might not work reliably if the app is in the background.
-                  <br />
-                  <em>Note: Conditions and some actions are restricted for time-based triggers.</em>
-                </small>
-              </div>
             </>
           )}
 
