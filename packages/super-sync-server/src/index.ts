@@ -1,19 +1,75 @@
-import { createServer } from './server';
+import { createServer, loadConfigFromEnv } from './server';
 import * as path from 'path';
 
-const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 1900;
-const dataDir = process.env.DATA_DIR || path.join(process.cwd(), 'data');
+// Load configuration
+const config = loadConfigFromEnv({
+  dataDir: process.env.DATA_DIR || path.join(process.cwd(), 'data'),
+});
 
-const server = createServer(port, dataDir);
+// Create server instance
+const { start, stop } = createServer(config);
 
-server.start((s) => {
-  if (!s) {
-    console.error('Server failed to start');
+// Graceful shutdown handling
+let isShuttingDown = false;
+
+async function shutdown(signal: string): Promise<void> {
+  if (isShuttingDown) {
+    console.log('Shutdown already in progress...');
     return;
   }
-  const address = s.address();
-  const serverPort = typeof address === 'string' ? address : address?.port;
-  console.log(`SuperSync Server running on http://localhost:${serverPort}`);
-  console.log(`Data directory: ${dataDir}`);
-  console.log(`Default credentials: user / password`);
+  isShuttingDown = true;
+  console.log(`\n📴 Received ${signal}, shutting down gracefully...`);
+
+  try {
+    await stop();
+    console.log('✅ Server stopped successfully');
+    process.exit(0);
+  } catch (err) {
+    console.error('❌ Error during shutdown:', err);
+    process.exit(1);
+  }
+}
+
+// Register signal handlers for graceful shutdown
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
+process.on('SIGHUP', () => shutdown('SIGHUP'));
+
+// Handle uncaught exceptions
+process.on('uncaughtException', (err) => {
+  console.error('❌ Uncaught exception:', err);
+  shutdown('uncaughtException').catch(() => process.exit(1));
 });
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
+});
+
+// Start the server
+start()
+  .then((httpServer) => {
+    const address = httpServer.address();
+    const serverPort = typeof address === 'string' ? address : address?.port;
+
+    console.log('');
+    console.log('🚀 SuperSync Server is running!');
+    console.log(`   URL: http://localhost:${serverPort}`);
+    console.log(`   Data directory: ${config.dataDir}`);
+    console.log('');
+
+    if (config.users.length === 0) {
+      console.log('⚠️  No users configured!');
+      console.log('   Set USERS environment variable: USERS="username:password"');
+      console.log('');
+    } else {
+      console.log(`👥 ${config.users.length} user(s) configured`);
+      console.log('');
+    }
+
+    console.log('Press Ctrl+C to stop the server');
+    console.log('');
+  })
+  .catch((err) => {
+    console.error('❌ Failed to start server:', err);
+    process.exit(1);
+  });
