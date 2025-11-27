@@ -26,9 +26,9 @@ const DEFAULT_CONFIG: ServerConfig = {
  * Create CORS middleware for handling cross-origin requests.
  * This is required for web browser clients to access the WebDAV server.
  */
-function createCorsMiddleware(
+const createCorsMiddleware = (
   config: ServerConfig['cors'],
-): (req: http.IncomingMessage, res: http.ServerResponse, next: () => void) => void {
+): ((req: http.IncomingMessage, res: http.ServerResponse, next: () => void) => void) => {
   return (
     req: http.IncomingMessage,
     res: http.ServerResponse,
@@ -71,13 +71,15 @@ function createCorsMiddleware(
 
     next();
   };
-}
+};
 
 /**
  * Load configuration from environment variables.
  * Environment variables take precedence over defaults.
  */
-export function loadConfigFromEnv(overrides: Partial<ServerConfig> = {}): ServerConfig {
+export const loadConfigFromEnv = (
+  overrides: Partial<ServerConfig> = {},
+): ServerConfig => {
   const config: ServerConfig = {
     ...DEFAULT_CONFIG,
     ...overrides,
@@ -123,7 +125,7 @@ export function loadConfigFromEnv(overrides: Partial<ServerConfig> = {}): Server
   }
 
   return config;
-}
+};
 
 /**
  * Creates and configures a WebDAV server with the provided configuration.
@@ -131,21 +133,21 @@ export function loadConfigFromEnv(overrides: Partial<ServerConfig> = {}): Server
  * @param config - Server configuration
  * @returns Configured WebDAV server instance
  */
-export function createServer(config: Partial<ServerConfig> = {}): {
+export const createServer = (
+  config: Partial<ServerConfig> = {},
+): {
   server: webdav.WebDAVServer;
   httpServer?: http.Server;
   start: () => Promise<http.Server>;
   stop: () => Promise<void>;
-} {
+} => {
   const fullConfig = loadConfigFromEnv(config);
 
   // Validate configuration
   if (fullConfig.users.length === 0) {
-    console.warn(
-      '⚠️  Warning: No users configured. Server will not accept any connections.',
+    throw new Error(
+      'No users configured. Authentication is required. Set USERS env var or pass users in config (e.g. USERS="user:password").',
     );
-    console.warn('   Set USERS environment variable or pass users in config.');
-    console.warn('   Format: USERS="user1:password1,user2:password2"');
   }
 
   // Ensure data directory exists
@@ -161,14 +163,16 @@ export function createServer(config: Partial<ServerConfig> = {}): {
     console.log(`👤 Added user: ${user.username}${user.isAdmin ? ' (admin)' : ''}`);
   }
 
+  const httpAuthentication = new webdav.HTTPBasicAuthentication(
+    userManager,
+    'SuperSync Realm',
+  );
+
   // Create WebDAV server
   const server = new webdav.WebDAVServer({
     port: fullConfig.port,
-    requireAuthentification: fullConfig.users.length > 0,
-    httpAuthentication:
-      fullConfig.users.length > 0
-        ? new webdav.HTTPBasicAuthentication(userManager, 'SuperSync Realm')
-        : undefined,
+    requireAuthentification: true,
+    httpAuthentication,
   });
 
   // Mount physical file system
@@ -232,4 +236,4 @@ export function createServer(config: Partial<ServerConfig> = {}): {
       });
     },
   };
-}
+};
