@@ -8,6 +8,7 @@ import { loadConfigFromEnv, ServerConfig } from './config';
 import { Logger } from './logger';
 import { initDb } from './db';
 import { apiRoutes } from './api';
+import { pageRoutes } from './pages';
 import { verifyToken } from './auth';
 
 export { ServerConfig, loadConfigFromEnv };
@@ -162,6 +163,9 @@ export const createServer = (
       // API Routes
       await fastifyServer.register(apiRoutes, { prefix: '/api' });
 
+      // Page Routes
+      await fastifyServer.register(pageRoutes, { prefix: '/' });
+
       // WebDAV Handler (Catch-all via hook)
       // We use a hook because Fastify's router validates HTTP methods and might not support all WebDAV methods
       fastifyServer.addHook('onRequest', (req, reply, done) => {
@@ -170,10 +174,13 @@ export const createServer = (
           return;
         }
 
-        // Allow static files to be handled by Fastify
+        // Allow static files and verify-email route to be handled by Fastify
         const staticFiles = ['/', '/index.html', '/style.css', '/app.js', '/favicon.ico'];
         const urlPath = req.url.split('?')[0];
-        if (req.method === 'GET' && staticFiles.includes(urlPath)) {
+        if (
+          (req.method === 'GET' && staticFiles.includes(urlPath)) ||
+          urlPath === '/verify-email'
+        ) {
           done();
           return;
         }
