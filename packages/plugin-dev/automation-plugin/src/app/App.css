@@ -13,11 +13,54 @@
   --pico-primary-focus: var(--c-accent);
   --pico-card-background-color: var(--card-bg);
   --pico-border-color: var(--divider-color);
+  /* Tighten default control padding to avoid oversized buttons */
+  --pico-form-element-spacing-vertical: 0.35rem;
+  --pico-form-element-spacing-horizontal: 0.75rem;
 
   /* Additional Pico overrides for better integration */
   --pico-form-element-background-color: var(--bg-darker);
   --pico-form-element-border-color: var(--divider-color);
   --pico-form-element-color: var(--text-color);
+}
+
+/* Force primary button color */
+button:not(.outline):not(.secondary):not(.contrast):not(.close-btn) {
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+  color: #fff;
+}
+
+/* Primary outline buttons */
+button.outline:not(.secondary):not(.contrast),
+button.outline.secondary {
+  background-color: transparent !important;
+  color: var(--c-primary) !important;
+  border-color: var(--c-primary) !important;
+}
+button.outline:not(.secondary):not(.contrast):hover,
+button.outline.secondary:hover {
+  background-color: var(--c-primary) !important;
+  color: #fff !important;
+}
+
+/* Make secondary outlines look like primary outlines for cancel buttons */
+/* Force warn color for delete buttons (using contrast class) */
+button.contrast {
+  background-color: var(--c-warn);
+  border-color: var(--c-warn);
+  color: #fff;
+}
+button.outline.contrast {
+  background-color: transparent !important;
+  border-color: var(--c-warn) !important;
+  color: var(--c-warn) !important;
+}
+
+/* Checkboxes */
+input[type='checkbox']:checked {
+  background-color: var(--c-primary);
+  border-color: var(--c-primary);
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='M6 10l3 3l6-6'/%3e%3c/svg%3e");
 }
 
 body {
@@ -37,15 +80,14 @@ main.container {
   max-width: 960px !important;
 }
 
-/* Small button utility */
-button.btn-sm,
-a[role='button'].btn-sm,
-input[type='submit'].btn-sm,
-input[type='button'].btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.875rem;
-  width: auto;
-  margin-bottom: 0;
+/* Reduce button height globally */
+button,
+[role='button'],
+input[type='submit'],
+input[type='button'],
+input[type='reset'] {
+  min-height: auto;
+  padding: var(--pico-form-element-spacing-vertical) var(--pico-form-element-spacing-horizontal);
 }
 
 /* Dialog styles */
@@ -58,26 +100,6 @@ dialog article header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-}
-
-/* Icon-only close button */
-button.close-btn {
-  background: transparent;
-  border: none;
-  padding: 0;
-  margin: 0;
-  width: auto;
-  color: var(--text-color);
-  opacity: 0.7;
-  cursor: pointer;
-  font-size: 1.5rem;
-  line-height: 1;
-}
-
-button.close-btn:hover {
-  background: transparent;
-  opacity: 1;
-  color: var(--primary-color);
 }
 
 /* Table styles */

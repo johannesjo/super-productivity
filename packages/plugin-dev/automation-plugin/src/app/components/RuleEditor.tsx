@@ -111,7 +111,7 @@ export function RuleEditor(props: RuleEditorProps) {
             </div>
             <div style={{ 'text-align': 'right' }}>
               <button
-                class="secondary outline"
+                class="outline secondary"
                 onClick={props.onCancel}
                 style={{ 'margin-right': '0.5rem' }}
               >
@@ -159,7 +159,6 @@ export function RuleEditor(props: RuleEditorProps) {
               </div>
               <div style={{ 'text-align': 'right' }}>
                 <button
-                  class="btn-sm outline"
                   onClick={() => {
                     setEditingConditionIndex(-1);
                     setIsConditionDialogOpen(true);
@@ -189,7 +188,7 @@ export function RuleEditor(props: RuleEditorProps) {
                       </td>
                       <td style={{ 'text-align': 'right' }}>
                         <button
-                          class="btn-sm outline secondary"
+                          class="outline"
                           onClick={() => {
                             setEditingConditionIndex(i());
                             setIsConditionDialogOpen(true);
@@ -198,10 +197,7 @@ export function RuleEditor(props: RuleEditorProps) {
                         >
                           Edit
                         </button>
-                        <button
-                          class="btn-sm outline contrast"
-                          onClick={() => handleRemoveCondition(i())}
-                        >
+                        <button class="outline contrast" onClick={() => handleRemoveCondition(i())}>
                           ✕
                         </button>
                       </td>
@@ -221,7 +217,6 @@ export function RuleEditor(props: RuleEditorProps) {
               </div>
               <div style={{ 'text-align': 'right' }}>
                 <button
-                  class="btn-sm outline"
                   onClick={() => {
                     setEditingActionIndex(-1);
                     setIsActionDialogOpen(true);
@@ -251,7 +246,7 @@ export function RuleEditor(props: RuleEditorProps) {
                       </td>
                       <td style={{ 'text-align': 'right' }}>
                         <button
-                          class="btn-sm outline secondary"
+                          class="outline"
                           onClick={() => {
                             setEditingActionIndex(i());
                             setIsActionDialogOpen(true);
@@ -260,10 +255,7 @@ export function RuleEditor(props: RuleEditorProps) {
                         >
                           Edit
                         </button>
-                        <button
-                          class="btn-sm outline contrast"
-                          onClick={() => handleRemoveAction(i())}
-                        >
+                        <button class="outline contrast" onClick={() => handleRemoveAction(i())}>
                           ✕
                         </button>
                       </td>

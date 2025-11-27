@@ -4,7 +4,12 @@ import solidPlugin from 'vite-plugin-solid';
 import { superProductivityPlugin } from '@super-productivity/vite-plugin';
 
 export default defineConfig({
-  plugins: [solidPlugin(), superProductivityPlugin()],
+  plugins: [
+    solidPlugin(),
+    superProductivityPlugin({
+      copyTo: '../../../src/assets/bundled-plugins/automation-plugin',
+    }),
+  ],
   test: {
     environment: 'jsdom',
     globals: true,

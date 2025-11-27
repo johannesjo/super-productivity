@@ -1,4 +1,4 @@
-import { Plugin, UserConfig } from 'vite';
+import { Plugin } from 'vite';
 import path from 'path';
 import fs from 'fs';
 
@@ -9,18 +9,21 @@ export interface SuperProductivityPluginOptions {
    * Default: true
    */
   inlineAssets?: boolean;
+  /**
+   * Directory to copy the build output to.
+   * Useful for watching and auto-updating the plugin in the main app.
+   */
+  copyTo?: string;
 }
 
-export function superProductivityPlugin(
+export const superProductivityPlugin = (
   options: SuperProductivityPluginOptions = {},
-): Plugin {
-  const { inlineAssets = true } = options;
-  let config: UserConfig;
+): Plugin => {
+  const { inlineAssets = true, copyTo } = options;
 
   return {
     name: 'super-productivity-plugin',
-    config(userConfig) {
-      config = userConfig;
+    config: () => {
       return {
         build: {
           outDir: 'dist',
@@ -46,7 +49,7 @@ export function superProductivityPlugin(
     },
     closeBundle: {
       order: 'post',
-      handler() {
+      handler: () => {
         const distDir = path.resolve(process.cwd(), 'dist');
 
         // 1. Copy manifest.json
@@ -115,7 +118,35 @@ export function superProductivityPlugin(
           fs.writeFileSync(htmlPath, html);
           console.log('✅ Assets inlined successfully');
         }
+
+        // 4. Copy to destination if specified
+        if (copyTo) {
+          const destDir = path.resolve(process.cwd(), copyTo);
+          if (!fs.existsSync(destDir)) {
+            fs.mkdirSync(destDir, { recursive: true });
+          }
+
+          // Recursive copy function
+          const copyRecursive = (src: string, dest: string): void => {
+            const entries = fs.readdirSync(src, { withFileTypes: true });
+            if (!fs.existsSync(dest)) fs.mkdirSync(dest);
+
+            for (const entry of entries) {
+              const srcPath = path.join(src, entry.name);
+              const destPath = path.join(dest, entry.name);
+
+              if (entry.isDirectory()) {
+                copyRecursive(srcPath, destPath);
+              } else {
+                fs.copyFileSync(srcPath, destPath);
+              }
+            }
+          };
+
+          copyRecursive(distDir, destDir);
+          console.log(`✅ Copied build to ${copyTo}`);
+        }
       },
     },
   };
-}
+};

@@ -17,7 +17,7 @@ export function RuleList(props: RuleListProps) {
           <h2>Automation Rules</h2>
         </div>
         <div style={{ 'text-align': 'right' }}>
-          <button class="btn-sm" onClick={props.onCreate}>
+          <button class="outline" onClick={props.onCreate}>
             + New Rule
           </button>
         </div>
@@ -60,13 +60,13 @@ export function RuleList(props: RuleListProps) {
                   </td>
                   <td style={{ 'text-align': 'right' }}>
                     <button
-                      class="outline secondary btn-sm"
+                      class="outline"
                       onClick={() => props.onEdit(rule)}
                       style={{ 'margin-right': '0.5rem' }}
                     >
                       Edit
                     </button>
-                    <button class="outline contrast btn-sm" onClick={() => props.onDelete(rule)}>
+                    <button class="outline contrast" onClick={() => props.onDelete(rule)}>
                       Delete
                     </button>
                   </td>

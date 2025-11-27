@@ -31,7 +31,7 @@ export function ActionDialog(props: ActionDialogProps) {
       title={props.initialAction ? 'Edit Action' : 'Add Action'}
       footer={
         <div class="grid">
-          <button class="secondary outline" onClick={props.onClose}>
+          <button class="outline secondary" onClick={props.onClose}>
             Cancel
           </button>
           <button onClick={() => props.onSave(action())}>Save</button>
