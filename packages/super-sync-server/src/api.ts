@@ -6,7 +6,13 @@ import { Logger } from './logger';
 // Zod Schemas
 const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
-  password: z.string().min(8, 'Password must be at least 8 characters long'),
+  password: z
+    .string()
+    .min(12, 'Password must be at least 12 characters long')
+    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
+    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
+    .regex(/\d/, 'Password must contain at least one number')
+    .regex(/[\W_]/, 'Password must contain at least one special character'),
 });
 
 const LoginSchema = z.object({
@@ -40,9 +46,7 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const { email, password } = parseResult.data;
 
       const result = await registerUser(email, password);
-      return reply
-        .status(201)
-        .send({ message: 'User registered. Please verify your email.', ...result });
+      return reply.status(201).send(result);
     } catch (err) {
       Logger.error(`Registration error: ${errorMessage(err)}`);
       // Generic error message to avoid leaking implementation details (e.g. specific DB errors)

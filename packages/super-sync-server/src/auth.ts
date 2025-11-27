@@ -11,67 +11,57 @@ const getJwtSecret = (): string => {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('JWT_SECRET environment variable is required in production');
     }
-    Logger.warn('JWT_SECRET not set - using insecure default for development only');
-    return 'dev-only-insecure-secret';
+    Logger.warn('JWT_SECRET not set - using random secret for development');
+    return randomBytes(64).toString('hex');
   }
   return secret;
 };
 
 const JWT_SECRET = getJwtSecret();
 
-// Simple email validation regex
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-const isValidEmail = (email: string): boolean => EMAIL_REGEX.test(email);
-
 export const registerUser = async (
   email: string,
   password: string,
-): Promise<{ id: number | bigint; email: string }> => {
-  // Validate email format
-  if (!isValidEmail(email)) {
-    throw new Error('Invalid email format');
-  }
-
-  // Validate password length
-  if (password.length < 8) {
-    throw new Error('Password must be at least 8 characters');
-  }
+): Promise<{ message: string }> => {
+  // Password strength validation is handled by Zod in api.ts
 
   const db = getDb();
-
-  // Check if user exists
-  const existingUser = db.prepare('SELECT * FROM users WHERE email = ?').get(email);
-  if (existingUser) {
-    throw new Error('User already exists');
-  }
-
-  const passwordHash = bcrypt.hashSync(password, 10);
+  const passwordHash = bcrypt.hashSync(password, 12);
   const verificationToken = randomBytes(32).toString('hex');
+  const expiresAt = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
 
-  const info = db
-    .prepare(
-      `
-    INSERT INTO users (email, password_hash, verification_token)
-    VALUES (?, ?, ?)
-  `,
-    )
-    .run(email, passwordHash, verificationToken);
+  try {
+    const info = db
+      .prepare(
+        `
+      INSERT INTO users (email, password_hash, verification_token, verification_token_expires_at)
+      VALUES (?, ?, ?, ?)
+    `,
+      )
+      .run(email, passwordHash, verificationToken, expiresAt);
 
-  Logger.info(`User registered: ${email} (ID: ${info.lastInsertRowid})`);
+    Logger.info(`User registered: ${email} (ID: ${info.lastInsertRowid})`);
 
-  // Send verification email asynchronously
-  const emailSent = await sendVerificationEmail(email, verificationToken);
-  if (!emailSent) {
-    // Clean up the newly created account to prevent unusable, un-verifiable entries
-    db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
-    throw new Error('Failed to send verification email. Please try again later.');
+    // Send verification email asynchronously
+    const emailSent = await sendVerificationEmail(email, verificationToken);
+    if (!emailSent) {
+      // Clean up the newly created account to prevent unusable, un-verifiable entries
+      db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
+      throw new Error('Failed to send verification email. Please try again later.');
+    }
+  } catch (err: any) {
+    // If unique constraint violation (user exists), we swallow the error
+    // to prevent email enumeration.
+    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+      Logger.info(`Registration attempt for existing email: ${email}`);
+      // In a real system, we might want to send a "You already have an account" email here
+    } else {
+      throw err;
+    }
   }
 
   return {
-    id: info.lastInsertRowid,
-    email,
-    // verificationToken, // Don't return token in response for security, user must check email
+    message: 'Registration successful. Please check your email to verify your account.',
   };
 };
 
@@ -86,8 +76,15 @@ export const verifyEmail = (token: string): boolean => {
     throw new Error('Invalid verification token');
   }
 
+  if (
+    user.verification_token_expires_at &&
+    user.verification_token_expires_at < Date.now()
+  ) {
+    throw new Error('Verification token has expired');
+  }
+
   db.prepare(
-    'UPDATE users SET is_verified = 1, verification_token = NULL WHERE id = ?',
+    'UPDATE users SET is_verified = 1, verification_token = NULL, verification_token_expires_at = NULL WHERE id = ?',
   ).run(user.id);
 
   Logger.info(`User verified: ${user.email}`);
@@ -104,11 +101,15 @@ export const loginUser = (
     | User
     | undefined;
 
-  if (!user) {
-    throw new Error('Invalid credentials');
-  }
+  // Timing attack mitigation: always perform a comparison
+  // Use a dummy hash so the comparison takes roughly the same time
+  // $2a$12$ is bcrypt prefix for 12 rounds
+  const dummyHash = '$2a$12$e0MyzXyjpJS7dAC5B5S3.O/p.u.m.u.m.u.m.u.m.u.m.u.m.u.m.';
+  const hashToCompare = user ? user.password_hash : dummyHash;
 
-  if (!bcrypt.compareSync(password, user.password_hash)) {
+  const isMatch = bcrypt.compareSync(password, hashToCompare);
+
+  if (!user || !isMatch) {
     throw new Error('Invalid credentials');
   }
 
@@ -117,7 +118,7 @@ export const loginUser = (
   }
 
   const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '7d',
   });
 
   return { token, user: { id: user.id, email: user.email } };
