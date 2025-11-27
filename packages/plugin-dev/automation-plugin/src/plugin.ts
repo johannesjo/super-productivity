@@ -93,6 +93,10 @@ if (plugin.onMessage) {
           .getRegistry()
           .toggleRuleStatus(message.payload.id, message.payload.isEnabled);
         return { success: true };
+      case 'getProjects':
+        return await plugin.getAllProjects();
+      case 'getTags':
+        return await plugin.getAllTags();
       default:
         return { error: 'Unknown message type' };
     }

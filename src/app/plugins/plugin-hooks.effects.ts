@@ -50,7 +50,10 @@ export class PluginHooksEffects {
             take(1),
             tap((task: Task | undefined) => {
               if (task) {
-                this.pluginService.dispatchHook(PluginHooks.TASK_COMPLETE, task);
+                this.pluginService.dispatchHook(PluginHooks.TASK_COMPLETE, {
+                  taskId: task.id,
+                  task,
+                });
               }
             }),
             map(() => EMPTY),
@@ -85,7 +88,11 @@ export class PluginHooksEffects {
             take(1),
             tap((task: Task | undefined) => {
               if (task) {
-                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, task);
+                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, {
+                  taskId: task.id,
+                  task,
+                  changes: action.task.changes,
+                });
               }
             }),
             map(() => EMPTY),
@@ -132,7 +139,11 @@ export class PluginHooksEffects {
             filter((task) => !!task),
             tap((task: Task | undefined) => {
               if (task) {
-                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, task);
+                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, {
+                  taskId: task.id,
+                  task,
+                  changes: {}, // Initial add, no changes diff
+                });
               }
             }),
             map(() => EMPTY),

@@ -41,13 +41,29 @@ function App() {
   const [editingRule, setEditingRule] = createSignal<AutomationRule | null>(null);
   const [isEditorOpen, setIsEditorOpen] = createSignal(false);
 
+  const [projects, setProjects] = createSignal<any[]>([]);
+  const [tags, setTags] = createSignal<any[]>([]);
+
   const fetchRules = async () => {
     const fetchedRules = (await sendMessage('getRules')) as AutomationRule[];
     setRules(fetchedRules);
   };
 
+  const fetchData = async () => {
+    try {
+      const [fetchedProjects, fetchedTags] = await Promise.all([
+        sendMessage('getProjects'),
+        sendMessage('getTags'),
+      ]);
+      setProjects(fetchedProjects as any[]);
+      setTags(fetchedTags as any[]);
+    } catch (e) {
+      console.error('Failed to fetch data', e);
+    }
+  };
+
   onMount(async () => {
-    await fetchRules();
+    await Promise.all([fetchRules(), fetchData()]);
     setIsLoading(false);
 
     // Theme detection
@@ -129,6 +145,8 @@ function App() {
               <RuleEditor
                 isOpen={isEditorOpen()}
                 rule={editingRule()!}
+                projects={projects()}
+                tags={tags()}
                 onSave={handleSave}
                 onDelete={handleDelete}
                 onCancel={() => {

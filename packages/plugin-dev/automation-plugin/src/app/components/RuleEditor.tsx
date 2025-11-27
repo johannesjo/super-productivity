@@ -7,6 +7,8 @@ import { ActionDialog } from './ActionDialog';
 interface RuleEditorProps {
   isOpen: boolean;
   rule: AutomationRule;
+  projects?: any[];
+  tags?: any[];
   onSave: (rule: AutomationRule) => void;
   onDelete: (rule: AutomationRule) => void;
   onCancel: () => void;
@@ -278,6 +280,8 @@ export function RuleEditor(props: RuleEditorProps) {
         isOpen={isConditionDialogOpen()}
         onClose={() => setIsConditionDialogOpen(false)}
         onSave={handleSaveCondition}
+        projects={props.projects}
+        tags={props.tags}
         initialCondition={
           editingConditionIndex() >= 0 ? localRule().conditions[editingConditionIndex()] : undefined
         }

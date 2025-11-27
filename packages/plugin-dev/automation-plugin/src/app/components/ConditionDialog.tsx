@@ -7,6 +7,8 @@ interface ConditionDialogProps {
   onClose: () => void;
   onSave: (condition: Condition) => void;
   initialCondition?: Condition;
+  projects?: any[];
+  tags?: any[];
 }
 
 export function ConditionDialog(props: ConditionDialogProps) {
@@ -53,18 +55,40 @@ export function ConditionDialog(props: ConditionDialogProps) {
       </label>
       <label>
         Value
-        <input
-          type="text"
-          value={condition().value}
-          onInput={(e) => setCondition({ ...condition(), value: e.currentTarget.value })}
-          placeholder={
-            condition().type === 'titleContains'
-              ? 'e.g. "bug"'
-              : condition().type === 'projectIs'
-                ? 'e.g. "Project A"'
-                : 'e.g. "urgent"'
-          }
-        />
+        {condition().type === 'projectIs' && props.projects ? (
+          <select
+            value={condition().value}
+            onChange={(e) => setCondition({ ...condition(), value: e.currentTarget.value })}
+          >
+            <option value="">Select Project</option>
+            {props.projects.map((p) => (
+              <option value={p.title}>{p.title}</option>
+            ))}
+          </select>
+        ) : condition().type === 'hasTag' && props.tags ? (
+          <select
+            value={condition().value}
+            onChange={(e) => setCondition({ ...condition(), value: e.currentTarget.value })}
+          >
+            <option value="">Select Tag</option>
+            {props.tags.map((t) => (
+              <option value={t.title}>{t.title}</option>
+            ))}
+          </select>
+        ) : (
+          <input
+            type="text"
+            value={condition().value}
+            onInput={(e) => setCondition({ ...condition(), value: e.currentTarget.value })}
+            placeholder={
+              condition().type === 'titleContains'
+                ? 'e.g. "bug"'
+                : condition().type === 'projectIs'
+                  ? 'e.g. "Project A"'
+                  : 'e.g. "urgent"'
+            }
+          />
+        )}
       </label>
     </Dialog>
   );
