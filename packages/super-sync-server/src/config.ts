@@ -7,6 +7,14 @@ export interface ServerConfig {
     enabled: boolean;
     allowedOrigins?: string[];
   };
+  smtp?: {
+    host: string;
+    port: number;
+    secure: boolean;
+    user?: string;
+    pass?: string;
+    from: string;
+  };
 }
 
 const DEFAULT_CONFIG: ServerConfig = {
@@ -65,6 +73,18 @@ export const loadConfigFromEnv = (
     if (process.env.CORS_ENABLED === undefined) {
       config.cors.enabled = true;
     }
+  }
+
+  // SMTP Configuration
+  if (process.env.SMTP_HOST) {
+    config.smtp = {
+      host: process.env.SMTP_HOST,
+      port: parseInt(process.env.SMTP_PORT || '587', 10),
+      secure: process.env.SMTP_SECURE === 'true',
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
+      from: process.env.SMTP_FROM || '"SuperSync" <noreply@example.com>',
+    };
   }
 
   // Validation

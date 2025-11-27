@@ -2,6 +2,8 @@ import { v2 as webdav } from 'webdav-server';
 import * as fs from 'fs';
 import Fastify, { FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
+import fastifyStatic from '@fastify/static';
+import * as path from 'path';
 import { loadConfigFromEnv, ServerConfig } from './config';
 import { Logger } from './logger';
 import { initDb } from './db';
@@ -151,6 +153,12 @@ export const createServer = (
         });
       }
 
+      // Serve static files
+      await fastifyServer.register(fastifyStatic, {
+        root: path.join(__dirname, '../public'),
+        prefix: '/',
+      });
+
       // API Routes
       await fastifyServer.register(apiRoutes, { prefix: '/api' });
 
@@ -158,6 +166,14 @@ export const createServer = (
       // We use a hook because Fastify's router validates HTTP methods and might not support all WebDAV methods
       fastifyServer.addHook('onRequest', (req, reply, done) => {
         if (req.url.startsWith('/api')) {
+          done();
+          return;
+        }
+
+        // Allow static files to be handled by Fastify
+        const staticFiles = ['/', '/index.html', '/style.css', '/app.js', '/favicon.ico'];
+        const urlPath = req.url.split('?')[0];
+        if (req.method === 'GET' && staticFiles.includes(urlPath)) {
           done();
           return;
         }
