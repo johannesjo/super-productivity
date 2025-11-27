@@ -13,7 +13,7 @@ export interface WebdavPrivateCfg extends SyncProviderPrivateCfgBase {
   baseUrl: string;
   userName: string;
   password: string;
-  syncFolderPath: string;
+  syncFolderPath?: string;
 
   /**
    * Server capabilities configuration. If not provided, capabilities will be
