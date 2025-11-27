@@ -51,11 +51,58 @@ export const registerUser = async (
       throw new Error('Failed to send verification email. Please try again later.');
     }
   } catch (err: any) {
-    // If unique constraint violation (user exists), we swallow the error
-    // to prevent email enumeration.
     if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      Logger.info(`Registration attempt for existing email: ${email}`);
-      // In a real system, we might want to send a "You already have an account" email here
+      const existingUser = db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .get(email) as User | undefined;
+
+      if (!existingUser) {
+        Logger.warn(`Unique constraint hit but user not found for email: ${email}`);
+      } else if (existingUser.is_verified === 1) {
+        Logger.info(`Registration attempt for verified email: ${email}`);
+      } else if (existingUser.verification_resend_count >= 1) {
+        Logger.info(`Verification resend already sent for email: ${email}`);
+      } else {
+        const tokenStillValid =
+          !!existingUser.verification_token &&
+          !!existingUser.verification_token_expires_at &&
+          existingUser.verification_token_expires_at > Date.now();
+
+        const newToken =
+          tokenStillValid && existingUser.verification_token
+            ? existingUser.verification_token
+            : randomBytes(32).toString('hex');
+        const newExpiresAt = tokenStillValid
+          ? existingUser.verification_token_expires_at
+          : Date.now() + TWENTY_FOUR_HOURS_MS;
+
+        const previousToken = existingUser.verification_token;
+        const previousExpiresAt = existingUser.verification_token_expires_at;
+        const previousResendCount = existingUser.verification_resend_count;
+
+        db.prepare(
+          `
+            UPDATE users
+            SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = verification_resend_count + 1
+            WHERE id = ?
+          `,
+        ).run(newToken, newExpiresAt, existingUser.id);
+
+        const emailSent = await sendVerificationEmail(email, newToken);
+        if (!emailSent) {
+          db.prepare(
+            `
+              UPDATE users
+              SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = ?
+              WHERE id = ?
+            `,
+          ).run(previousToken, previousExpiresAt, previousResendCount, existingUser.id);
+
+          throw new Error('Failed to send verification email. Please try again later.');
+        }
+
+        Logger.info(`Resent verification email for: ${email}`);
+      }
     } else {
       throw err;
     }
@@ -85,7 +132,11 @@ export const verifyEmail = (token: string): boolean => {
   }
 
   db.prepare(
-    'UPDATE users SET is_verified = 1, verification_token = NULL, verification_token_expires_at = NULL WHERE id = ?',
+    `
+      UPDATE users
+      SET is_verified = 1, verification_token = NULL, verification_token_expires_at = NULL, verification_resend_count = 0
+      WHERE id = ?
+    `,
   ).run(user.id);
 
   Logger.info(`User verified: ${user.email}`);

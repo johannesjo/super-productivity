@@ -10,12 +10,13 @@ export interface User {
   is_verified: number; // 0 or 1
   verification_token: string | null;
   verification_token_expires_at: number | null; // Unix timestamp
+  verification_resend_count: number; // number of times verification mail was resent
   created_at: string;
 }
 
 let db: Database.Database;
 
-export const initDb = (dataDir: string) => {
+export const initDb = (dataDir: string): void => {
   const dbPath = path.join(dataDir, 'database.sqlite');
 
   // Ensure data directory exists
@@ -34,6 +35,7 @@ export const initDb = (dataDir: string) => {
       is_verified INTEGER DEFAULT 0,
       verification_token TEXT,
       verification_token_expires_at INTEGER,
+      verification_resend_count INTEGER DEFAULT 0,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -56,10 +58,17 @@ export const initDb = (dataDir: string) => {
     db.exec('ALTER TABLE users ADD COLUMN verification_token_expires_at INTEGER');
   }
 
+  const hasResendCount = columns.some((col) => col.name === 'verification_resend_count');
+
+  if (!hasResendCount) {
+    Logger.info('Migrating database: adding verification_resend_count column');
+    db.exec('ALTER TABLE users ADD COLUMN verification_resend_count INTEGER DEFAULT 0');
+  }
+
   Logger.info(`Database initialized at ${dbPath}`);
 };
 
-export const getDb = () => {
+export const getDb = (): Database.Database => {
   if (!db) {
     throw new Error('Database not initialized');
   }
