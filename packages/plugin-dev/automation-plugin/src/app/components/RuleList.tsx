@@ -5,6 +5,7 @@ interface RuleListProps {
   rules: AutomationRule[];
   onEdit: (rule: AutomationRule) => void;
   onDelete: (rule: AutomationRule) => void;
+  onToggleStatus: (rule: AutomationRule) => void;
   onCreate: () => void;
 }
 
@@ -47,7 +48,16 @@ export function RuleList(props: RuleListProps) {
                 <tr>
                   <td>{rule.name}</td>
                   <td>{rule.trigger.type}</td>
-                  <td>{rule.isEnabled ? '✅ Enabled' : '❌ Disabled'}</td>
+                  <td>
+                    <label>
+                      <input
+                        type="checkbox"
+                        checked={rule.isEnabled}
+                        onChange={() => props.onToggleStatus(rule)}
+                      />
+                      {rule.isEnabled ? ' Enabled' : ' Disabled'}
+                    </label>
+                  </td>
                   <td style={{ 'text-align': 'right' }}>
                     <button
                       class="outline secondary btn-sm"

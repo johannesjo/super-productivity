@@ -70,8 +70,18 @@ if (plugin.onMessage) {
   plugin.onMessage(async (message: any) => {
     switch (message?.type) {
       case 'getRules':
-        // TODO: expose rules
-        return [];
+        return automationManager.getRegistry().getRules();
+      case 'saveRule':
+        await automationManager.getRegistry().addOrUpdateRule(message.payload);
+        return { success: true };
+      case 'deleteRule':
+        await automationManager.getRegistry().deleteRule(message.payload.id);
+        return { success: true };
+      case 'toggleRuleStatus':
+        await automationManager
+          .getRegistry()
+          .toggleRuleStatus(message.payload.id, message.payload.isEnabled);
+        return { success: true };
       default:
         return { error: 'Unknown message type' };
     }

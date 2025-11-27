@@ -1,13 +1,31 @@
 import { AutomationRule } from '../types';
+import { PluginAPI } from '@super-productivity/plugin-api';
 
 export class RuleRegistry {
   private rules: AutomationRule[] = [];
+  private plugin: PluginAPI;
 
-  constructor() {
-    this.initRules();
+  constructor(plugin: PluginAPI) {
+    this.plugin = plugin;
+    this.loadRules();
   }
 
-  private initRules() {
+  private async loadRules() {
+    try {
+      const data = await this.plugin.loadSyncedData();
+      if (data) {
+        this.rules = JSON.parse(data);
+      } else {
+        this.initDefaultRules();
+        this.saveRules();
+      }
+    } catch (e) {
+      this.plugin.log.error('Failed to load rules', e);
+      this.initDefaultRules();
+    }
+  }
+
+  private initDefaultRules() {
     // Hardcoded example rules for MVP
     this.rules = [
       {
@@ -45,6 +63,14 @@ export class RuleRegistry {
     ];
   }
 
+  async saveRules() {
+    try {
+      await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+    } catch (e) {
+      this.plugin.log.error('Failed to save rules', e);
+    }
+  }
+
   getRules(): AutomationRule[] {
     return this.rules;
   }
@@ -53,5 +79,26 @@ export class RuleRegistry {
     return this.rules.filter((r) => r.isEnabled);
   }
 
-  // Future: addRule, updateRule, deleteRule, save/load
+  async addOrUpdateRule(rule: AutomationRule) {
+    const index = this.rules.findIndex((r) => r.id === rule.id);
+    if (index !== -1) {
+      this.rules[index] = rule;
+    } else {
+      this.rules.push(rule);
+    }
+    await this.saveRules();
+  }
+
+  async deleteRule(ruleId: string) {
+    this.rules = this.rules.filter((r) => r.id !== ruleId);
+    await this.saveRules();
+  }
+
+  async toggleRuleStatus(ruleId: string, isEnabled: boolean) {
+    const rule = this.rules.find((r) => r.id === ruleId);
+    if (rule) {
+      rule.isEnabled = isEnabled;
+      await this.saveRules();
+    }
+  }
 }

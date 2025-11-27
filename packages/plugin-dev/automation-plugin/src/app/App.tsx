@@ -6,18 +6,32 @@ import { AutomationRule } from '../types';
 
 // Communication with plugin.js
 const sendMessage = async (type: string, payload?: any) => {
-  return new Promise((resolve) => {
+  return new Promise((resolve, reject) => {
     const messageId = Math.random().toString(36).substr(2, 9);
 
     const handler = (event: MessageEvent) => {
-      if (event.data.messageId === messageId) {
+      const data = event.data;
+      if (data.type === 'PLUGIN_MESSAGE_RESPONSE' && data.messageId === messageId) {
         window.removeEventListener('message', handler);
-        resolve(event.data.response);
+        resolve(data.result);
+      } else if (data.type === 'PLUGIN_MESSAGE_ERROR' && data.messageId === messageId) {
+        window.removeEventListener('message', handler);
+        reject(new Error(data.error));
       }
     };
 
     window.addEventListener('message', handler);
-    window.parent.postMessage({ type, payload, messageId }, '*');
+    window.parent.postMessage(
+      {
+        type: 'PLUGIN_MESSAGE',
+        messageId,
+        message: {
+          type,
+          payload,
+        },
+      },
+      '*',
+    );
   });
 };
 
@@ -27,18 +41,13 @@ function App() {
   const [editingRule, setEditingRule] = createSignal<AutomationRule | null>(null);
   const [isEditorOpen, setIsEditorOpen] = createSignal(false);
 
+  const fetchRules = async () => {
+    const fetchedRules = (await sendMessage('getRules')) as AutomationRule[];
+    setRules(fetchedRules);
+  };
+
   onMount(async () => {
-    // Mock data for now, later fetch from plugin
-    setRules([
-      {
-        id: '1',
-        name: 'Automatic Onboarding Tasks',
-        isEnabled: true,
-        trigger: { type: 'taskCreated' },
-        conditions: [{ type: 'titleContains', value: 'feature' }],
-        actions: [{ type: 'createTask', value: 'Write acceptance criteria' }],
-      },
-    ]);
+    await fetchRules();
     setIsLoading(false);
   });
 
@@ -59,23 +68,31 @@ function App() {
     setIsEditorOpen(true);
   };
 
-  const handleSave = (rule: AutomationRule) => {
-    if (rule.id) {
-      setRules(rules().map((r) => (r.id === rule.id ? rule : r)));
-    } else {
-      const newRule = { ...rule, id: Math.random().toString(36).substr(2, 9) };
-      setRules([...rules(), newRule]);
-    }
+  const handleSave = async (rule: AutomationRule) => {
+    // If it's a new rule, generate ID here or let backend do it.
+    // Backend (RuleRegistry) expects ID for updates, but for new rules it pushes.
+    // However, RuleRegistry logic is: if index != -1 update, else push.
+    // So we should probably generate ID here if it's missing, to ensure uniqueness.
+    const ruleToSave = rule.id ? rule : { ...rule, id: Math.random().toString(36).substr(2, 9) };
+
+    await sendMessage('saveRule', ruleToSave);
+    await fetchRules();
     setIsEditorOpen(false);
     setEditingRule(null);
   };
 
-  const handleDelete = (rule: AutomationRule) => {
+  const handleDelete = async (rule: AutomationRule) => {
     if (confirm(`Are you sure you want to delete "${rule.name}"?`)) {
-      setRules(rules().filter((r) => r.id !== rule.id));
+      await sendMessage('deleteRule', { id: rule.id });
+      await fetchRules();
       setIsEditorOpen(false);
       setEditingRule(null);
     }
+  };
+
+  const handleToggleStatus = async (rule: AutomationRule) => {
+    await sendMessage('toggleRuleStatus', { id: rule.id, isEnabled: !rule.isEnabled });
+    await fetchRules();
   };
 
   return (
@@ -89,6 +106,7 @@ function App() {
               rules={rules()}
               onEdit={handleEdit}
               onDelete={handleDelete}
+              onToggleStatus={handleToggleStatus}
               onCreate={handleCreate}
             />
             {editingRule() && (

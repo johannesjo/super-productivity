@@ -10,7 +10,7 @@ export class AutomationManager {
   private actionExecutor: ActionExecutor;
 
   constructor(private plugin: PluginAPI) {
-    this.ruleRegistry = new RuleRegistry();
+    this.ruleRegistry = new RuleRegistry(plugin);
     this.conditionEvaluator = new ConditionEvaluator(plugin);
     this.actionExecutor = new ActionExecutor(plugin);
   }
@@ -29,5 +29,8 @@ export class AutomationManager {
       this.plugin.log.info(`[Automation] Rule matched: ${rule.name}`);
       await this.actionExecutor.executeAll(rule.actions, event);
     }
+  }
+  getRegistry(): RuleRegistry {
+    return this.ruleRegistry;
   }
 }
