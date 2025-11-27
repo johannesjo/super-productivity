@@ -15,18 +15,10 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
  * @returns Array of Formly field configurations
  */
 const createWebdavFormFields = (options: {
-  infoText: string;
   corsInfoText: string;
   baseUrlDescription: string;
 }): FormlyFieldConfig[] => {
   return [
-    {
-      type: 'tpl',
-      templateOptions: {
-        tag: 'p',
-        text: options.infoText,
-      },
-    },
     ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
       ? [
           {
@@ -159,23 +151,38 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
       key: 'webDav',
       fieldGroup: createWebdavFormFields({
-        infoText: T.F.SYNC.FORM.WEB_DAV.INFO,
         corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
         baseUrlDescription:
           '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
       }),
     },
 
-    // SuperSync provider form fields (uses same fields as WebDAV with different description)
+    // SuperSync provider form fields
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
       key: 'superSync',
-      fieldGroup: createWebdavFormFields({
-        infoText: T.F.SYNC.FORM.WEB_DAV.INFO,
-        corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-        baseUrlDescription: '* http://localhost:1900/',
-      }),
+      fieldGroup: [
+        {
+          key: 'userName',
+          type: 'input',
+          className: 'e2e-userName',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+          },
+        },
+        {
+          key: 'password',
+          type: 'input',
+          className: 'e2e-password',
+          templateOptions: {
+            type: 'password',
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+          },
+        },
+      ],
     },
 
     {
@@ -196,6 +203,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       type: 'collapsible',
       props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
+        {
+          key: 'superSync.baseUrl',
+          type: 'input',
+          hideExpression: (model) => model.syncProvider !== LegacySyncProvider.SuperSync,
+          className: 'e2e-baseUrl',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+          },
+        },
         {
           key: 'isCompressionEnabled',
           type: 'checkbox',

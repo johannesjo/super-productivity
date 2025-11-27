@@ -1,3 +1,4 @@
+import { environment } from '../../../environments/environment';
 import { TRACKING_INTERVAL } from '../../app.constants';
 import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
 import { TaskReminderOptionId } from '../tasks/task.model';
@@ -196,10 +197,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     },
 
     superSync: {
-      baseUrl: null,
+      baseUrl: environment.production
+        ? 'https://sync.super-productivity.com'
+        : 'http://localhost:1900',
       userName: null,
       password: null,
-      syncFolderPath: 'super-productivity',
+      syncFolderPath: null,
     },
 
     localFileSync: {
