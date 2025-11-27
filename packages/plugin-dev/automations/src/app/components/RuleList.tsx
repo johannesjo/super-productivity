@@ -23,6 +23,19 @@ export function RuleList(props: RuleListProps) {
         </div>
       </div>
 
+      <div
+        style={{
+          'background-color': 'var(--pico-color-amber-100)',
+          color: 'var(--pico-color-amber-900)',
+          padding: '1rem',
+          'margin-bottom': '1rem',
+          'border-radius': 'var(--pico-border-radius)',
+          border: '1px solid var(--pico-color-amber-200)',
+        }}
+      >
+        <strong>Warning:</strong> The plugin is very powerful and using it can destroy ones data
+      </div>
+
       <figure>
         <table role="grid">
           <thead>

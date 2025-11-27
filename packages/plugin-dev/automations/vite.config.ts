@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [
     solidPlugin(),
     superProductivityPlugin({
-      copyTo: '../../../src/assets/bundled-plugins/automation-plugin',
+      copyTo: '../../../src/assets/bundled-plugins/automations',
     }),
   ],
   test: {

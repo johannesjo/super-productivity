@@ -1,6 +1,6 @@
 {
-  "id": "automation-plugin",
-  "name": "Automation Plugin",
+  "id": "automations",
+  "name": "Automations",
   "version": "1.0.0",
   "manifestVersion": 1,
   "minSupVersion": "8.0.0",
