@@ -52,8 +52,15 @@ export const ActionDisplayDialog: IAutomationAction = {
   name: 'Display Dialog',
   execute: async (ctx, event, value) => {
     if (!value) return;
+    const escapedValue = value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
     await ctx.plugin.openDialog({
-      htmlContent: `<p>${value}</p>`,
+      htmlContent: `<p>${escapedValue}</p>`,
       buttons: [{ label: 'OK', onClick: () => {} }],
     });
     ctx.plugin.log.info(`[Automation] Action: Displayed dialog "${value}"`);
@@ -66,11 +73,16 @@ export const ActionWebhook: IAutomationAction = {
   execute: async (ctx, event, value) => {
     if (!value) return;
     try {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 5000);
+
       await fetch(value, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(event),
+        signal: controller.signal,
       });
+      clearTimeout(timeoutId);
       ctx.plugin.log.info(`[Automation] Action: Webhook sent to "${value}"`);
     } catch (e) {
       ctx.plugin.log.error(`[Automation] Webhook failed: ${e}`);

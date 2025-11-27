@@ -14,6 +14,11 @@ import * as Actions from './actions';
 import { DataCache } from './data-cache';
 
 export class AutomationManager {
+  private static readonly RATE_LIMIT_MAX = 5;
+  private static readonly RATE_LIMIT_WINDOW_MS = 1000;
+  private static readonly CHECK_INTERVAL_MS = 10000;
+  private static readonly TIME_RULE_COOLDOWN_MS = 60000;
+
   private ruleRegistry: RuleRegistry;
   private conditionEvaluator: ConditionEvaluator;
   private actionExecutor: ActionExecutor;
@@ -29,7 +34,10 @@ export class AutomationManager {
     this.ruleRegistry = new RuleRegistry(plugin);
     this.conditionEvaluator = new ConditionEvaluator(plugin, globalRegistry, this.dataCache);
     this.actionExecutor = new ActionExecutor(plugin, globalRegistry, this.dataCache);
-    this.rateLimiter = new RateLimiter(5, 1000); // 5 executions per second
+    this.rateLimiter = new RateLimiter(
+      AutomationManager.RATE_LIMIT_MAX,
+      AutomationManager.RATE_LIMIT_WINDOW_MS,
+    );
     this.initTimeCheck();
   }
 
@@ -54,10 +62,9 @@ export class AutomationManager {
   }
 
   private initTimeCheck() {
-    // Check every 10 seconds
     this.clearTimeCheck = lazySetInterval(() => {
       this.checkTimeBasedRules();
-    }, 10000);
+    }, AutomationManager.CHECK_INTERVAL_MS);
   }
 
   destroy() {
@@ -68,38 +75,49 @@ export class AutomationManager {
   }
 
   private async checkTimeBasedRules() {
-    const rules = await this.ruleRegistry.getEnabledRules();
-    const now = new Date();
-    const currentHours = now.getHours();
-    const currentMinutes = now.getMinutes();
-    const currentTimeStr = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
+    try {
+      const rules = await this.ruleRegistry.getEnabledRules();
+      const now = new Date();
+      const currentHours = now.getHours();
+      const currentMinutes = now.getMinutes();
+      const currentTimeStr = `${currentHours.toString().padStart(2, '0')}:${currentMinutes.toString().padStart(2, '0')}`;
 
-    for (const rule of rules) {
-      if (rule.trigger.type !== 'timeBased' || !rule.trigger.value) continue;
+      for (const rule of rules) {
+        try {
+          if (rule.trigger.type !== 'timeBased' || !rule.trigger.value) continue;
 
-      if (rule.trigger.value === currentTimeStr) {
-        const lastRun = this.lastExecutionTimes.get(rule.id) || 0;
-        // Prevent multiple executions within the same minute
-        if (now.getTime() - lastRun < 60000) continue;
+          if (rule.trigger.value === currentTimeStr) {
+            const lastRun = this.lastExecutionTimes.get(rule.id) || 0;
+            // Prevent multiple executions within the same minute
+            if (now.getTime() - lastRun < AutomationManager.TIME_RULE_COOLDOWN_MS) continue;
 
-        // Check conditions (even for time-based rules, though most conditions require a task)
-        // We pass a dummy event. The evaluator must handle missing tasks gracefully.
-        const event: TaskEvent = {
-          type: 'timeBased',
-          task: undefined,
-        };
+            // Check conditions (even for time-based rules, though most conditions require a task)
+            // We pass a dummy event. The evaluator must handle missing tasks gracefully.
+            const event: TaskEvent = {
+              type: 'timeBased',
+              task: undefined,
+            };
 
-        const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
-        if (!matches) continue;
+            const matches = await this.conditionEvaluator.allConditionsMatch(
+              rule.conditions,
+              event,
+            );
+            if (!matches) continue;
 
-        this.lastExecutionTimes.set(rule.id, now.getTime());
-        this.plugin.log.info(`[Automation] Time-based rule matched: ${rule.name}`);
+            this.lastExecutionTimes.set(rule.id, now.getTime());
+            this.plugin.log.info(`[Automation] Time-based rule matched: ${rule.name}`);
 
-        // Execute actions
-        await this.actionExecutor.executeAll(rule.actions, {
-          type: 'timeBased',
-        });
+            // Execute actions
+            await this.actionExecutor.executeAll(rule.actions, {
+              type: 'timeBased',
+            });
+          }
+        } catch (e) {
+          this.plugin.log.error(`[Automation] Error processing time-based rule ${rule.name}: ${e}`);
+        }
       }
+    } catch (e) {
+      this.plugin.log.error(`[Automation] Error in checkTimeBasedRules: ${e}`);
     }
   }
 
@@ -110,57 +128,65 @@ export class AutomationManager {
     }
     this.plugin.log.info(`[Automation] Event received: ${event.type}`, event.task.title);
 
-    const rules = await this.ruleRegistry.getEnabledRules();
+    try {
+      const rules = await this.ruleRegistry.getEnabledRules();
 
-    for (const rule of rules) {
-      const triggerImpl = globalRegistry.getTrigger(rule.trigger.type);
-      // If trigger not found or doesn't match, skip
-      if (!triggerImpl || !triggerImpl.matches(event, rule.trigger.value)) continue;
+      for (const rule of rules) {
+        try {
+          const triggerImpl = globalRegistry.getTrigger(rule.trigger.type);
+          // If trigger not found or doesn't match, skip
+          if (!triggerImpl || !triggerImpl.matches(event, rule.trigger.value)) continue;
 
-      const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
-      if (!matches) continue;
+          const matches = await this.conditionEvaluator.allConditionsMatch(rule.conditions, event);
+          if (!matches) continue;
 
-      // Check rate limit
-      if (!this.rateLimiter.check(rule.id)) {
-        this.plugin.log.warn(`[Automation] Rate limit exceeded for rule: ${rule.name}`);
+          // Check rate limit
+          if (!this.rateLimiter.check(rule.id)) {
+            this.plugin.log.warn(`[Automation] Rate limit exceeded for rule: ${rule.name}`);
 
-        if (!this.pendingDialogs.has(rule.id)) {
-          this.pendingDialogs.add(rule.id);
+            if (!this.pendingDialogs.has(rule.id)) {
+              this.pendingDialogs.add(rule.id);
 
-          const dialogCfg: DialogCfg = {
-            htmlContent: `
+              const dialogCfg: DialogCfg = {
+                htmlContent: `
               <h3>High Automation Activity Detected</h3>
               <p>The rule <strong>"${rule.name}"</strong> is triggering too frequently (infinite loop protection).</p>
               <p>Do you want to disable this rule or continue execution?</p>
             `,
-            buttons: [
-              {
-                label: 'Disable Rule',
-                color: 'warn',
-                onClick: async () => {
-                  await this.ruleRegistry.toggleRuleStatus(rule.id, false);
-                  this.plugin.showSnack({ msg: `Rule "${rule.name}" disabled`, type: 'INFO' });
-                  this.pendingDialogs.delete(rule.id);
-                },
-              },
-              {
-                label: 'Continue',
-                color: 'primary',
-                onClick: () => {
-                  this.rateLimiter.reset(rule.id);
-                  this.pendingDialogs.delete(rule.id);
-                },
-              },
-            ],
-          };
+                buttons: [
+                  {
+                    label: 'Disable Rule',
+                    color: 'warn',
+                    onClick: async () => {
+                      await this.ruleRegistry.toggleRuleStatus(rule.id, false);
+                      this.plugin.showSnack({ msg: `Rule "${rule.name}" disabled`, type: 'INFO' });
+                      this.pendingDialogs.delete(rule.id);
+                    },
+                  },
+                  {
+                    label: 'Continue',
+                    color: 'primary',
+                    onClick: () => {
+                      this.rateLimiter.reset(rule.id);
+                      this.pendingDialogs.delete(rule.id);
+                    },
+                  },
+                ],
+              };
 
-          await this.plugin.openDialog(dialogCfg);
+              await this.plugin.openDialog(dialogCfg);
+            }
+            continue;
+          }
+
+          this.plugin.log.info(`[Automation] Rule matched: ${rule.name}`);
+          await this.actionExecutor.executeAll(rule.actions, event);
+        } catch (e) {
+          this.plugin.log.error(`[Automation] Error processing rule ${rule.name}: ${e}`);
         }
-        continue;
       }
-
-      this.plugin.log.info(`[Automation] Rule matched: ${rule.name}`);
-      await this.actionExecutor.executeAll(rule.actions, event);
+    } catch (e) {
+      this.plugin.log.error(`[Automation] Error in onTaskEvent: ${e}`);
     }
   }
   getRegistry(): RuleRegistry {

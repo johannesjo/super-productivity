@@ -8,13 +8,13 @@ interface CacheItem<T> {
 export class DataCache {
   private projectsCache: CacheItem<any[]> | null = null;
   private tagsCache: CacheItem<any[]> | null = null;
-  private readonly TTL = 60000; // 60 seconds
+  private static readonly CACHE_TTL_MS = 60000;
 
   constructor(private plugin: PluginAPI) {}
 
   async getProjects(): Promise<any[]> {
     const now = Date.now();
-    if (this.projectsCache && now - this.projectsCache.timestamp < this.TTL) {
+    if (this.projectsCache && now - this.projectsCache.timestamp < DataCache.CACHE_TTL_MS) {
       return this.projectsCache.data;
     }
 
@@ -25,7 +25,7 @@ export class DataCache {
 
   async getTags(): Promise<any[]> {
     const now = Date.now();
-    if (this.tagsCache && now - this.tagsCache.timestamp < this.TTL) {
+    if (this.tagsCache && now - this.tagsCache.timestamp < DataCache.CACHE_TTL_MS) {
       return this.tagsCache.data;
     }
 

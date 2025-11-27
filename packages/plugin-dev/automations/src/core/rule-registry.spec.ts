@@ -24,7 +24,7 @@ describe('RuleRegistry', () => {
     // Since loadRules is called in constructor without await, we need to wait for promises.
     await new Promise(process.nextTick);
 
-    expect(registry.getRules()).toEqual([]);
+    expect(await registry.getRules()).toEqual([]);
   });
 
   it('should load existing rules', async () => {
@@ -43,7 +43,7 @@ describe('RuleRegistry', () => {
     registry = new RuleRegistry(mockPlugin);
     await new Promise(process.nextTick);
 
-    expect(registry.getRules()).toEqual(rules);
+    expect(await registry.getRules()).toEqual(rules);
   });
 
   it('should add rule and persist', async () => {
@@ -61,7 +61,7 @@ describe('RuleRegistry', () => {
 
     await registry.addOrUpdateRule(newRule);
 
-    expect(registry.getRules()).toContainEqual(newRule);
+    expect(await registry.getRules()).toContainEqual(newRule);
     expect(mockPlugin.persistDataSynced).toHaveBeenCalledWith(JSON.stringify([newRule]));
   });
 
@@ -81,8 +81,9 @@ describe('RuleRegistry', () => {
     const updatedRule = { ...rule, name: 'Updated Rule' };
     await registry.addOrUpdateRule(updatedRule);
 
-    expect(registry.getRules()).toHaveLength(1);
-    expect(registry.getRules()[0].name).toBe('Updated Rule');
+    const rules = await registry.getRules();
+    expect(rules).toHaveLength(1);
+    expect(rules[0].name).toBe('Updated Rule');
   });
 
   it('should delete rule', async () => {
@@ -99,7 +100,7 @@ describe('RuleRegistry', () => {
     await new Promise(process.nextTick);
 
     await registry.deleteRule('r1');
-    expect(registry.getRules()).toHaveLength(0);
+    expect(await registry.getRules()).toHaveLength(0);
     expect(mockPlugin.persistDataSynced).toHaveBeenCalledWith(JSON.stringify([]));
   });
 
@@ -126,7 +127,8 @@ describe('RuleRegistry', () => {
     registry = new RuleRegistry(mockPlugin);
     await new Promise(process.nextTick);
 
-    expect(registry.getEnabledRules()).toHaveLength(1);
-    expect(registry.getEnabledRules()[0].id).toBe('r1');
+    const enabledRules = await registry.getEnabledRules();
+    expect(enabledRules).toHaveLength(1);
+    expect(enabledRules[0].id).toBe('r1');
   });
 });

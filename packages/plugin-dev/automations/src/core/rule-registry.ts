@@ -5,6 +5,7 @@ export class RuleRegistry {
   private rules: AutomationRule[] = [];
   private plugin: PluginAPI;
   private initPromise: Promise<void>;
+  private saveQueue: Promise<void> = Promise.resolve();
 
   constructor(plugin: PluginAPI) {
     this.plugin = plugin;
@@ -18,7 +19,7 @@ export class RuleRegistry {
         this.rules = JSON.parse(data);
       } else {
         this.initDefaultRules();
-        this.saveRules();
+        await this.saveRules();
       }
     } catch (e) {
       this.plugin.log.error('Failed to load rules', e);
@@ -31,12 +32,15 @@ export class RuleRegistry {
     this.rules = [];
   }
 
-  async saveRules() {
-    try {
-      await this.plugin.persistDataSynced(JSON.stringify(this.rules));
-    } catch (e) {
-      this.plugin.log.error('Failed to save rules', e);
-    }
+  private async saveRules() {
+    this.saveQueue = this.saveQueue.then(async () => {
+      try {
+        await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+      } catch (e) {
+        this.plugin.log.error('Failed to save rules', e);
+      }
+    });
+    await this.saveQueue;
   }
 
   async getRules(): Promise<AutomationRule[]> {
@@ -51,27 +55,48 @@ export class RuleRegistry {
 
   async addOrUpdateRule(rule: AutomationRule) {
     await this.initPromise;
-    const index = this.rules.findIndex((r) => r.id === rule.id);
-    if (index !== -1) {
-      this.rules[index] = rule;
-    } else {
-      this.rules.push(rule);
-    }
-    await this.saveRules();
+    this.saveQueue = this.saveQueue.then(async () => {
+      const index = this.rules.findIndex((r) => r.id === rule.id);
+      if (index !== -1) {
+        this.rules[index] = rule;
+      } else {
+        this.rules.push(rule);
+      }
+      try {
+        await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+      } catch (e) {
+        this.plugin.log.error('Failed to save rules', e);
+      }
+    });
+    await this.saveQueue;
   }
 
   async deleteRule(ruleId: string) {
     await this.initPromise;
-    this.rules = this.rules.filter((r) => r.id !== ruleId);
-    await this.saveRules();
+    this.saveQueue = this.saveQueue.then(async () => {
+      this.rules = this.rules.filter((r) => r.id !== ruleId);
+      try {
+        await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+      } catch (e) {
+        this.plugin.log.error('Failed to save rules', e);
+      }
+    });
+    await this.saveQueue;
   }
 
   async toggleRuleStatus(ruleId: string, isEnabled: boolean) {
     await this.initPromise;
-    const rule = this.rules.find((r) => r.id === ruleId);
-    if (rule) {
-      rule.isEnabled = isEnabled;
-      await this.saveRules();
-    }
+    this.saveQueue = this.saveQueue.then(async () => {
+      const rule = this.rules.find((r) => r.id === ruleId);
+      if (rule) {
+        rule.isEnabled = isEnabled;
+        try {
+          await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+        } catch (e) {
+          this.plugin.log.error('Failed to save rules', e);
+        }
+      }
+    });
+    await this.saveQueue;
   }
 }
