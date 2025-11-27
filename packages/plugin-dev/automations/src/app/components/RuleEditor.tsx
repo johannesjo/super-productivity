@@ -197,69 +197,70 @@ export function RuleEditor(props: RuleEditorProps) {
             </>
           )}
 
-          <hr />
+          {allowedConditionTypes().length > 0 && (
+            <>
+              <hr />
 
-          <div class="section">
-            <div class="grid">
-              <div>
-                <h4>Conditions</h4>
-              </div>
-              <div style={{ 'text-align': 'right' }}>
-                <button
-                  onClick={() => {
-                    setEditingConditionIndex(-1);
-                    setIsConditionDialogOpen(true);
-                  }}
-                  disabled={allowedConditionTypes().length === 0}
-                  title={
-                    allowedConditionTypes().length === 0
-                      ? 'No conditions available for this trigger'
-                      : ''
-                  }
-                >
-                  + Add
-                </button>
-              </div>
-            </div>
+              <div class="section">
+                <div class="grid">
+                  <div>
+                    <h4>Conditions</h4>
+                  </div>
+                  <div style={{ 'text-align': 'right' }}>
+                    <button
+                      onClick={() => {
+                        setEditingConditionIndex(-1);
+                        setIsConditionDialogOpen(true);
+                      }}
+                    >
+                      + Add
+                    </button>
+                  </div>
+                </div>
 
-            <table role="grid">
-              <tbody>
-                <For
-                  each={localRule().conditions}
-                  fallback={
-                    <tr>
-                      <td colspan={2}>
-                        <small>No conditions</small>
-                      </td>
-                    </tr>
-                  }
-                >
-                  {(condition, i) => (
-                    <tr>
-                      <td>
-                        {condition.type}: {condition.value}
-                      </td>
-                      <td style={{ 'text-align': 'right' }}>
-                        <button
-                          class="outline"
-                          onClick={() => {
-                            setEditingConditionIndex(i());
-                            setIsConditionDialogOpen(true);
-                          }}
-                          style={{ 'margin-right': '0.5rem' }}
-                        >
-                          Edit
-                        </button>
-                        <button class="outline contrast" onClick={() => handleRemoveCondition(i())}>
-                          ✕
-                        </button>
-                      </td>
-                    </tr>
-                  )}
-                </For>
-              </tbody>
-            </table>
-          </div>
+                <table role="grid">
+                  <tbody>
+                    <For
+                      each={localRule().conditions}
+                      fallback={
+                        <tr>
+                          <td colspan={2}>
+                            <small>No conditions</small>
+                          </td>
+                        </tr>
+                      }
+                    >
+                      {(condition, i) => (
+                        <tr>
+                          <td>
+                            {condition.type}: {condition.value}
+                          </td>
+                          <td style={{ 'text-align': 'right' }}>
+                            <button
+                              class="outline"
+                              onClick={() => {
+                                setEditingConditionIndex(i());
+                                setIsConditionDialogOpen(true);
+                              }}
+                              style={{ 'margin-right': '0.5rem' }}
+                            >
+                              Edit
+                            </button>
+                            <button
+                              class="outline contrast"
+                              onClick={() => handleRemoveCondition(i())}
+                            >
+                              ✕
+                            </button>
+                          </td>
+                        </tr>
+                      )}
+                    </For>
+                  </tbody>
+                </table>
+              </div>
+            </>
+          )}
 
           <hr />
 
