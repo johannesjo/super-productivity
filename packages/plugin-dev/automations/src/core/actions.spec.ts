@@ -9,10 +9,12 @@ import {
 import { AutomationContext } from './definitions';
 import { TaskEvent } from '../types';
 import { PluginAPI } from '@super-productivity/plugin-api';
+import { DataCache } from './data-cache';
 
 describe('Actions', () => {
   let mockPlugin: PluginAPI;
   let mockContext: AutomationContext;
+  let mockDataCache: DataCache;
 
   beforeEach(() => {
     mockPlugin = {
@@ -28,7 +30,12 @@ describe('Actions', () => {
       },
     } as unknown as PluginAPI;
 
-    mockContext = { plugin: mockPlugin };
+    mockDataCache = {
+      getProjects: vi.fn(),
+      getTags: vi.fn(),
+    } as unknown as DataCache;
+
+    mockContext = { plugin: mockPlugin, dataCache: mockDataCache };
   });
 
   describe('ActionCreateTask', () => {
@@ -50,7 +57,7 @@ describe('Actions', () => {
 
   describe('ActionAddTag', () => {
     it('should add a tag if it exists and is not already present', async () => {
-      (mockPlugin.getAllTags as any).mockResolvedValue([{ id: 't1', title: 'Urgent' }]);
+      (mockDataCache.getTags as any).mockResolvedValue([{ id: 't1', title: 'Urgent' }]);
       const event = {
         task: { id: 'task1', tagIds: [] },
       } as unknown as TaskEvent;
@@ -71,7 +78,7 @@ describe('Actions', () => {
     });
 
     it('should warn if tag not found', async () => {
-      (mockPlugin.getAllTags as any).mockResolvedValue([]);
+      (mockDataCache.getTags as any).mockResolvedValue([]);
       const event = {
         task: { id: 'task1', tagIds: [] },
       } as unknown as TaskEvent;
@@ -82,7 +89,7 @@ describe('Actions', () => {
     });
 
     it('should do nothing if tag already present', async () => {
-      (mockPlugin.getAllTags as any).mockResolvedValue([{ id: 't1', title: 'Urgent' }]);
+      (mockDataCache.getTags as any).mockResolvedValue([{ id: 't1', title: 'Urgent' }]);
       const event = {
         task: { id: 'task1', tagIds: ['t1'] },
       } as unknown as TaskEvent;

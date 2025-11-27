@@ -2,11 +2,13 @@ import { PluginAPI } from '@super-productivity/plugin-api';
 import { Condition, TaskEvent } from '../types';
 import { AutomationRegistry } from './registry';
 import { AutomationContext } from './definitions';
+import { DataCache } from './data-cache';
 
 export class ConditionEvaluator {
   constructor(
     private plugin: PluginAPI,
     private registry: AutomationRegistry,
+    private dataCache: DataCache,
   ) {}
 
   async allConditionsMatch(conditions: Condition[], event: TaskEvent): Promise<boolean> {
@@ -42,7 +44,7 @@ export class ConditionEvaluator {
       return false;
     }
 
-    const context: AutomationContext = { plugin: this.plugin };
+    const context: AutomationContext = { plugin: this.plugin, dataCache: this.dataCache };
     return conditionImpl.check(context, event, condition.value);
   }
 }

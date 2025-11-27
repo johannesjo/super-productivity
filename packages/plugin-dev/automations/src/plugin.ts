@@ -10,6 +10,7 @@ declare const plugin: PluginAPI;
 
 import { AutomationManager } from './core/automation-manager';
 import { globalRegistry } from './core/registry';
+import { TASK_SHARED_ADD_TASK_ACTION } from './core/definitions';
 
 // Plugin initialization
 plugin.log.info('Automation plugin initialized');
@@ -69,7 +70,7 @@ plugin.registerHook('anyTaskUpdate' as any, (payload: AnyTaskUpdatePayload) => {
   // Log all actions for debugging
   plugin.log.info(`[Automation] anyTaskUpdate action: ${payload.action}`);
 
-  if (payload.action === '[Task Shared] addTask' && payload.task) {
+  if (payload.action === TASK_SHARED_ADD_TASK_ACTION && payload.task) {
     automationManager.onTaskEvent({
       type: 'taskCreated',
       task: payload.task,

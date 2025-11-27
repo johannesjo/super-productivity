@@ -85,6 +85,18 @@ export function ActionDialog(props: ActionDialogProps) {
           placeholder={getPlaceholder()}
         />
       </label>
+      {action().type === 'webhook' && (
+        <p
+          style={{
+            color: 'var(--pico-del-color)',
+            'font-size': '0.875rem',
+            'margin-top': '0.5rem',
+          }}
+        >
+          ⚠️ Warning: Your full task data (including title, description, etc.) will be sent to this
+          URL. Ensure the endpoint is secure.
+        </p>
+      )}
     </Dialog>
   );
 }

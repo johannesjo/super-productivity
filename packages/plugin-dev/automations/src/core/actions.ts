@@ -21,7 +21,7 @@ export const ActionAddTag: IAutomationAction = {
       ctx.plugin.log.warn(`[Automation] Cannot add tag "${value}" without task context.`);
       return;
     }
-    const tags = await ctx.plugin.getAllTags();
+    const tags = await ctx.dataCache.getTags();
     let tagId = tags.find((t) => t.title === value)?.id;
 
     if (!tagId) {

@@ -2,11 +2,13 @@ import { PluginAPI } from '@super-productivity/plugin-api';
 import { Action, TaskEvent } from '../types';
 import { AutomationRegistry } from './registry';
 import { AutomationContext } from './definitions';
+import { DataCache } from './data-cache';
 
 export class ActionExecutor {
   constructor(
     private plugin: PluginAPI,
     private registry: AutomationRegistry,
+    private dataCache: DataCache,
   ) {}
 
   async executeAll(actions: Action[], event: TaskEvent) {
@@ -22,7 +24,7 @@ export class ActionExecutor {
       return;
     }
 
-    const context: AutomationContext = { plugin: this.plugin };
+    const context: AutomationContext = { plugin: this.plugin, dataCache: this.dataCache };
     try {
       await actionImpl.execute(context, event, action.value);
     } catch (e) {

@@ -7,6 +7,7 @@ import { ActionExecutor } from './action-executor';
 import { RateLimiter } from './rate-limiter';
 import { globalRegistry } from './registry';
 import { TaskEvent } from '../types';
+import { DataCache } from './data-cache';
 
 // Mock dependencies
 vi.mock('./rule-registry', () => ({
@@ -20,6 +21,9 @@ vi.mock('./action-executor', () => ({
 }));
 vi.mock('./rate-limiter', () => ({
   RateLimiter: vi.fn(),
+}));
+vi.mock('./data-cache', () => ({
+  DataCache: vi.fn(),
 }));
 vi.mock('./registry', async () => {
   const actual = await vi.importActual<typeof import('./registry')>('./registry');
@@ -44,6 +48,7 @@ describe('AutomationManager', () => {
   let mockConditionEvaluator: any;
   let mockActionExecutor: any;
   let mockRateLimiter: any;
+  let mockDataCache: any;
 
   beforeEach(() => {
     mockPlugin = {
@@ -85,6 +90,14 @@ describe('AutomationManager', () => {
     };
     (RateLimiter as unknown as Mock).mockImplementation(function () {
       return mockRateLimiter;
+    });
+
+    mockDataCache = {
+      getProjects: vi.fn(),
+      getTags: vi.fn(),
+    };
+    (DataCache as unknown as Mock).mockImplementation(function () {
+      return mockDataCache;
     });
 
     manager = new AutomationManager(mockPlugin);

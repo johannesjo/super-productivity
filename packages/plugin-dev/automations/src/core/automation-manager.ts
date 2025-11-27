@@ -11,21 +11,24 @@ import { globalRegistry } from './registry';
 import * as Triggers from './triggers';
 import * as Conditions from './conditions';
 import * as Actions from './actions';
+import { DataCache } from './data-cache';
 
 export class AutomationManager {
   private ruleRegistry: RuleRegistry;
   private conditionEvaluator: ConditionEvaluator;
   private actionExecutor: ActionExecutor;
   private rateLimiter: RateLimiter;
+  private dataCache: DataCache;
   private pendingDialogs: Set<string> = new Set();
   private lastExecutionTimes: Map<string, number> = new Map();
   private clearTimeCheck?: () => void;
 
   constructor(private plugin: PluginAPI) {
     this.registerDefaults();
+    this.dataCache = new DataCache(plugin);
     this.ruleRegistry = new RuleRegistry(plugin);
-    this.conditionEvaluator = new ConditionEvaluator(plugin, globalRegistry);
-    this.actionExecutor = new ActionExecutor(plugin, globalRegistry);
+    this.conditionEvaluator = new ConditionEvaluator(plugin, globalRegistry, this.dataCache);
+    this.actionExecutor = new ActionExecutor(plugin, globalRegistry, this.dataCache);
     this.rateLimiter = new RateLimiter(5, 1000); // 5 executions per second
     this.initTimeCheck();
   }

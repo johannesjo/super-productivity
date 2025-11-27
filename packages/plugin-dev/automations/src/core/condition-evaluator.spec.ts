@@ -3,19 +3,22 @@ import { ConditionEvaluator } from './condition-evaluator';
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { AutomationRegistry } from './registry';
 import { Condition, TaskEvent } from '../types';
+import { DataCache } from './data-cache';
 
 describe('ConditionEvaluator', () => {
   let evaluator: ConditionEvaluator;
   let mockPlugin: PluginAPI;
   let mockRegistry: AutomationRegistry;
+  let mockDataCache: DataCache;
 
   beforeEach(() => {
     mockPlugin = {} as PluginAPI;
     mockRegistry = {
       getCondition: vi.fn(),
     } as unknown as AutomationRegistry;
+    mockDataCache = {} as DataCache;
 
-    evaluator = new ConditionEvaluator(mockPlugin, mockRegistry);
+    evaluator = new ConditionEvaluator(mockPlugin, mockRegistry, mockDataCache);
   });
 
   it('should return true if there are no conditions', async () => {

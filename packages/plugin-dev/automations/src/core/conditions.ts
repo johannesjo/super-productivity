@@ -14,7 +14,7 @@ export const ConditionProjectIs: IAutomationCondition = {
   name: 'Project is',
   check: async (ctx, event, value) => {
     if (!event.task || !event.task.projectId || !value) return false;
-    const projects = await ctx.plugin.getAllProjects();
+    const projects = await ctx.dataCache.getProjects();
     const project = projects.find((p) => p.id === event.task?.projectId);
     return project ? project.title === value : false;
   },
@@ -25,7 +25,7 @@ export const ConditionHasTag: IAutomationCondition = {
   name: 'Has tag',
   check: async (ctx, event, value) => {
     if (!event.task || !event.task.tagIds || !value) return false;
-    const tags = await ctx.plugin.getAllTags();
+    const tags = await ctx.dataCache.getTags();
     const tag = tags.find((t) => t.title === value);
     return tag ? event.task.tagIds.includes(tag.id) : false;
   },

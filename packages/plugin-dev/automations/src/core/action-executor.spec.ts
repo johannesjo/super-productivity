@@ -3,10 +3,12 @@ import { ActionExecutor } from './action-executor';
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { AutomationRegistry } from './registry';
 import { Action, TaskEvent } from '../types';
+import { DataCache } from './data-cache';
 
 describe('ActionExecutor', () => {
   let mockPlugin: PluginAPI;
   let mockRegistry: AutomationRegistry;
+  let mockDataCache: DataCache;
   let executor: ActionExecutor;
 
   beforeEach(() => {
@@ -22,7 +24,9 @@ describe('ActionExecutor', () => {
       getAction: vi.fn(),
     } as unknown as AutomationRegistry;
 
-    executor = new ActionExecutor(mockPlugin, mockRegistry);
+    mockDataCache = {} as DataCache;
+
+    executor = new ActionExecutor(mockPlugin, mockRegistry, mockDataCache);
   });
 
   it('should execute all provided actions', async () => {

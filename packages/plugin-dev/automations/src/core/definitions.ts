@@ -1,8 +1,10 @@
 import { PluginAPI } from '@super-productivity/plugin-api';
 import { TaskEvent } from '../types';
+import { DataCache } from './data-cache';
 
 export interface AutomationContext {
   plugin: PluginAPI;
+  dataCache: DataCache;
 }
 
 export interface IAutomationTrigger {
@@ -26,3 +28,5 @@ export interface IAutomationAction {
   description?: string;
   execute(context: AutomationContext, event: TaskEvent, value?: string): Promise<void>;
 }
+
+export const TASK_SHARED_ADD_TASK_ACTION = '[Task Shared] addTask';
