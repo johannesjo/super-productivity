@@ -4,10 +4,11 @@ import { PluginAPI } from '@super-productivity/plugin-api';
 export class RuleRegistry {
   private rules: AutomationRule[] = [];
   private plugin: PluginAPI;
+  private initPromise: Promise<void>;
 
   constructor(plugin: PluginAPI) {
     this.plugin = plugin;
-    this.loadRules();
+    this.initPromise = this.loadRules();
   }
 
   private async loadRules() {
@@ -38,15 +39,18 @@ export class RuleRegistry {
     }
   }
 
-  getRules(): AutomationRule[] {
+  async getRules(): Promise<AutomationRule[]> {
+    await this.initPromise;
     return this.rules;
   }
 
-  getEnabledRules(): AutomationRule[] {
+  async getEnabledRules(): Promise<AutomationRule[]> {
+    await this.initPromise;
     return this.rules.filter((r) => r.isEnabled);
   }
 
   async addOrUpdateRule(rule: AutomationRule) {
+    await this.initPromise;
     const index = this.rules.findIndex((r) => r.id === rule.id);
     if (index !== -1) {
       this.rules[index] = rule;
@@ -57,11 +61,13 @@ export class RuleRegistry {
   }
 
   async deleteRule(ruleId: string) {
+    await this.initPromise;
     this.rules = this.rules.filter((r) => r.id !== ruleId);
     await this.saveRules();
   }
 
   async toggleRuleStatus(ruleId: string, isEnabled: boolean) {
+    await this.initPromise;
     const rule = this.rules.find((r) => r.id === ruleId);
     if (rule) {
       rule.isEnabled = isEnabled;

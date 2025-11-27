@@ -68,7 +68,7 @@ export class AutomationManager {
   }
 
   private async checkTimeBasedRules() {
-    const rules = this.ruleRegistry.getEnabledRules();
+    const rules = await this.ruleRegistry.getEnabledRules();
     const now = new Date();
     const currentHours = now.getHours();
     const currentMinutes = now.getMinutes();
@@ -110,7 +110,7 @@ export class AutomationManager {
     }
     this.plugin.log.info(`[Automation] Event received: ${event.type}`, event.task.title);
 
-    const rules = this.ruleRegistry.getEnabledRules();
+    const rules = await this.ruleRegistry.getEnabledRules();
 
     for (const rule of rules) {
       const triggerImpl = globalRegistry.getTrigger(rule.trigger.type);

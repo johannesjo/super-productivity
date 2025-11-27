@@ -35,6 +35,11 @@ plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
     plugin.log.warn('Received taskUpdate hook without task data');
     return;
   }
+  const isCreationEvent = !payload.changes || Object.keys(payload.changes).length === 0;
+  if (isCreationEvent) {
+    plugin.log.info('[Automation] Skipping taskUpdate hook for creation event');
+    return;
+  }
   automationManager.onTaskEvent({
     type: 'taskUpdated',
     task: payload.task,
@@ -83,7 +88,7 @@ if (plugin.onMessage) {
   plugin.onMessage(async (message: any) => {
     switch (message?.type) {
       case 'getRules':
-        return automationManager.getRegistry().getRules();
+        return await automationManager.getRegistry().getRules();
       case 'getDefinitions':
         return {
           triggers: globalRegistry
