@@ -21,7 +21,7 @@ interface VerifyEmailBody {
 const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
 
-export async function apiRoutes(fastify: FastifyInstance) {
+export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
   fastify.post<{ Body: RegisterBody }>('/register', async (req, reply) => {
     try {
       const { email, password } = req.body;
@@ -29,7 +29,7 @@ export async function apiRoutes(fastify: FastifyInstance) {
         return reply.status(400).send({ error: 'Email and password are required' });
       }
 
-      const result = registerUser(email, password);
+      const result = await registerUser(email, password);
       return reply
         .status(201)
         .send({ message: 'User registered. Please verify your email.', ...result });
@@ -68,4 +68,4 @@ export async function apiRoutes(fastify: FastifyInstance) {
       return reply.status(401).send({ error: errorMessage(err) });
     }
   });
-}
+};

@@ -24,7 +24,10 @@ const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const isValidEmail = (email: string): boolean => EMAIL_REGEX.test(email);
 
-export const registerUser = (email: string, password: string) => {
+export const registerUser = async (
+  email: string,
+  password: string,
+): Promise<{ id: number | bigint; email: string }> => {
   // Validate email format
   if (!isValidEmail(email)) {
     throw new Error('Invalid email format');
@@ -58,9 +61,12 @@ export const registerUser = (email: string, password: string) => {
   Logger.info(`User registered: ${email} (ID: ${info.lastInsertRowid})`);
 
   // Send verification email asynchronously
-  sendVerificationEmail(email, verificationToken).catch((err) => {
-    Logger.error(`Failed to send verification email to ${email}:`, err);
-  });
+  const emailSent = await sendVerificationEmail(email, verificationToken);
+  if (!emailSent) {
+    // Clean up the newly created account to prevent unusable, un-verifiable entries
+    db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
+    throw new Error('Failed to send verification email. Please try again later.');
+  }
 
   return {
     id: info.lastInsertRowid,
@@ -69,7 +75,7 @@ export const registerUser = (email: string, password: string) => {
   };
 };
 
-export const verifyEmail = (token: string) => {
+export const verifyEmail = (token: string): boolean => {
   const db = getDb();
 
   const user = db
@@ -88,7 +94,10 @@ export const verifyEmail = (token: string) => {
   return true;
 };
 
-export const loginUser = (email: string, password: string) => {
+export const loginUser = (
+  email: string,
+  password: string,
+): { token: string; user: { id: number; email: string } } => {
   const db = getDb();
 
   const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as
@@ -114,7 +123,7 @@ export const loginUser = (email: string, password: string) => {
   return { token, user: { id: user.id, email: user.email } };
 };
 
-export const verifyToken = (token: string) => {
+export const verifyToken = (token: string): { userId: number; email: string } | null => {
   try {
     return jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
   } catch (err) {

@@ -27,16 +27,17 @@ const getAuthHeader = (ctx: webdav.HTTPRequestContext): string | undefined => {
 
 // Custom JWT Authentication for WebDAV
 class JWTAuthentication implements webdav.HTTPAuthentication {
-  askForAuthentication(_ctx: webdav.HTTPRequestContext) {
+  askForAuthentication(_ctx: webdav.HTTPRequestContext): Record<string, string> {
+    const headerKey = 'WWW-Authenticate';
     return {
-      'WWW-Authenticate': 'Bearer realm="SuperSync"',
+      [headerKey]: 'Bearer realm="SuperSync"',
     };
   }
 
   getUser(
     ctx: webdav.HTTPRequestContext,
     callback: (error: Error, user?: webdav.IUser) => void,
-  ) {
+  ): void {
     const authHeader = getAuthHeader(ctx);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
@@ -79,6 +80,13 @@ export const createServer = (
     Logger.info(`Created data directory: ${fullConfig.dataDir}`);
   }
 
+  // Dedicated storage root to keep user files separate from DB and other artifacts
+  const storageRoot = path.join(fullConfig.dataDir, 'storage');
+  if (!fs.existsSync(storageRoot)) {
+    fs.mkdirSync(storageRoot, { recursive: true });
+    Logger.info(`Created storage root: ${storageRoot}`);
+  }
+
   // Create WebDAV server with JWT Auth
   // Note: port is not needed as Fastify handles HTTP listening
   const webdavServer = new webdav.WebDAVServer({
@@ -86,16 +94,30 @@ export const createServer = (
     httpAuthentication: new JWTAuthentication(),
   });
 
-  // Mount physical file system
-  webdavServer.setFileSystem(
-    '/',
-    new webdav.PhysicalFileSystem(fullConfig.dataDir),
-    (success) => {
-      if (!success) {
-        Logger.error(`Failed to mount physical file system at ${fullConfig.dataDir}`);
+  // Map of mounted user file systems to avoid re-registering
+  const userFileSystems = new Map<string, webdav.PhysicalFileSystem>();
+
+  const ensureUserFileSystem = (userId: number): string => {
+    const userSegment = `user-${userId}`;
+    if (!userFileSystems.has(userSegment)) {
+      const userPath = path.join(storageRoot, userSegment);
+      if (!fs.existsSync(userPath)) {
+        fs.mkdirSync(userPath, { recursive: true });
       }
-    },
-  );
+
+      const fsInstance = new webdav.PhysicalFileSystem(userPath);
+      webdavServer.setFileSystem(`/${userSegment}`, fsInstance, (success) => {
+        if (!success) {
+          Logger.error(`Failed to mount file system for user ${userSegment}`);
+        } else {
+          Logger.info(`Mounted file system for ${userSegment} at ${userPath}`);
+        }
+      });
+      userFileSystems.set(userSegment, fsInstance);
+    }
+
+    return userSegment;
+  };
 
   let fastifyServer: FastifyInstance | undefined;
 
@@ -184,6 +206,32 @@ export const createServer = (
           done();
           return;
         }
+
+        const authHeader = req.headers.authorization as string | undefined;
+
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+          reply.status(401).send({ error: 'Missing or invalid Authorization header' });
+          return;
+        }
+
+        const token = authHeader.split(' ')[1];
+        const payload = verifyToken(token);
+
+        if (!payload) {
+          reply.status(401).send({ error: 'Invalid token' });
+          return;
+        }
+
+        // Ensure user-specific file system exists and scope requests to it
+        const userSegment = ensureUserFileSystem(payload.userId);
+        const originalUrl = req.raw.url || req.url || '/';
+        const normalizedUrl = originalUrl.startsWith('/')
+          ? originalUrl
+          : `/${originalUrl}`;
+        const userScopedUrl = `/${userSegment}${normalizedUrl}`.replace(/\/{2,}/g, '/');
+
+        req.raw.url = userScopedUrl;
+        (req as unknown as { url: string }).url = userScopedUrl;
 
         // Bypass Fastify and let WebDAV server handle the raw request
         reply.hijack();
