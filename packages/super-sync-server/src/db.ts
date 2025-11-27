@@ -38,6 +38,13 @@ export const initDb = (dataDir: string) => {
     )
   `);
 
+  // Create index for verification token lookups
+  db.exec(`
+    CREATE INDEX IF NOT EXISTS idx_users_verification_token 
+    ON users(verification_token) 
+    WHERE verification_token IS NOT NULL
+  `);
+
   // Migration: Check if verification_token_expires_at exists
   const columns = db.pragma('table_info(users)') as { name: string }[];
   const hasExpiresAt = columns.some(
