@@ -3,6 +3,7 @@ import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from './logger';
 import { randomBytes } from 'crypto';
+import { sendVerificationEmail } from './email';
 
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
@@ -55,12 +56,16 @@ export const registerUser = (email: string, password: string) => {
     .run(email, passwordHash, verificationToken);
 
   Logger.info(`User registered: ${email} (ID: ${info.lastInsertRowid})`);
-  Logger.info(`Verification token for ${email}: ${verificationToken}`); // In real app, send email
+
+  // Send verification email asynchronously
+  sendVerificationEmail(email, verificationToken).catch((err) => {
+    Logger.error(`Failed to send verification email to ${email}:`, err);
+  });
 
   return {
     id: info.lastInsertRowid,
     email,
-    verificationToken, // Return it for now since we don't have email sending
+    // verificationToken, // Don't return token in response for security, user must check email
   };
 };
 

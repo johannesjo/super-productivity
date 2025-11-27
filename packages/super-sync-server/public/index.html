@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>SuperSync Server</title>
+    <link
+      rel="stylesheet"
+      href="style.css"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.googleapis.com"
+    />
+    <link
+      rel="preconnect"
+      href="https://fonts.gstatic.com"
+      crossorigin
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="background-gradient"></div>
+
+    <div class="container">
+      <header>
+        <div class="logo">
+          <svg
+            width="32"
+            height="32"
+            viewBox="0 0 24 24"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 4L12 20M12 4L8 8M12 4L16 8"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M4 12L20 12M4 12L8 8M4 12L8 16"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            />
+          </svg>
+          <span>SuperSync Server</span>
+        </div>
+        <div class="status-indicator">
+          <span class="dot"></span>
+          <span class="text">Server Online</span>
+        </div>
+      </header>
+
+      <main>
+        <section class="hero">
+          <h1>Your Data.<br />Synchronized.</h1>
+          <p>Secure, private, and fast synchronization for Super Productivity.</p>
+        </section>
+
+        <section class="auth-card">
+          <div class="tabs">
+            <button
+              class="tab active"
+              data-tab="login"
+            >
+              Login
+            </button>
+            <button
+              class="tab"
+              data-tab="register"
+            >
+              Register
+            </button>
+          </div>
+
+          <div
+            class="form-container"
+            id="login-form"
+          >
+            <form id="login">
+              <div class="input-group">
+                <label for="login-email">Email</label>
+                <input
+                  type="email"
+                  id="login-email"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div class="input-group">
+                <label for="login-password">Password</label>
+                <input
+                  type="password"
+                  id="login-password"
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn-primary"
+              >
+                <span class="btn-text">Log In</span>
+                <div class="loader hidden"></div>
+              </button>
+            </form>
+          </div>
+
+          <div
+            class="form-container hidden"
+            id="register-form"
+          >
+            <form id="register">
+              <div class="input-group">
+                <label for="register-email">Email</label>
+                <input
+                  type="email"
+                  id="register-email"
+                  required
+                  placeholder="you@example.com"
+                />
+              </div>
+              <div class="input-group">
+                <label for="register-password">Password</label>
+                <input
+                  type="password"
+                  id="register-password"
+                  required
+                  placeholder="••••••••"
+                />
+                <small>Minimum 6 characters</small>
+              </div>
+              <div class="input-group">
+                <label for="register-confirm-password">Confirm Password</label>
+                <input
+                  type="password"
+                  id="register-confirm-password"
+                  required
+                  placeholder="••••••••"
+                />
+              </div>
+              <button
+                type="submit"
+                class="btn-primary"
+              >
+                <span class="btn-text">Create Account</span>
+                <div class="loader hidden"></div>
+              </button>
+            </form>
+          </div>
+
+          <div
+            id="message-area"
+            class="message hidden"
+          ></div>
+        </section>
+      </main>
+
+      <footer>
+        <p>&copy; 2025 Super Productivity. Open Source.</p>
+      </footer>
+    </div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
