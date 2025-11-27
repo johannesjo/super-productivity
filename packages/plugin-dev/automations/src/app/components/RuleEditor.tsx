@@ -69,8 +69,10 @@ export function RuleEditor(props: RuleEditorProps) {
   };
 
   const allowedActionTypes = (): import('../../types').ActionType[] => {
-    if (isTimeBased()) return ['createTask'];
-    return ['createTask', 'addTag'];
+    if (isTimeBased()) {
+      return ['createTask', 'displaySnack', 'displayDialog', 'webhook'];
+    }
+    return ['createTask', 'addTag', 'displaySnack', 'displayDialog', 'webhook'];
   };
 
   // Condition handlers

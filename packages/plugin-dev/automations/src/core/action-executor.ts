@@ -45,6 +45,33 @@ export class ActionExecutor {
         });
         this.plugin.log.info(`[Automation] Action: Added tag "${action.value}"`);
         break;
+
+      case 'displaySnack':
+        this.plugin.showSnack({ msg: action.value, type: 'SUCCESS' });
+        this.plugin.log.info(`[Automation] Action: Displayed snack "${action.value}"`);
+        break;
+
+      case 'displayDialog':
+        await this.plugin.openDialog({
+          htmlContent: `<p>${action.value}</p>`,
+          buttons: [{ label: 'OK', onClick: () => {} }],
+        });
+        this.plugin.log.info(`[Automation] Action: Displayed dialog "${action.value}"`);
+        break;
+
+      case 'webhook':
+        try {
+          // Simple POST with task data
+          await fetch(action.value, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(event),
+          });
+          this.plugin.log.info(`[Automation] Action: Webhook sent to "${action.value}"`);
+        } catch (e) {
+          this.plugin.log.error(`[Automation] Webhook failed: ${e}`);
+        }
+        break;
     }
   }
 }

@@ -20,7 +20,7 @@ export interface Condition {
   value: string;
 }
 
-export type ActionType = 'createTask' | 'addTag';
+export type ActionType = 'createTask' | 'addTag' | 'displaySnack' | 'displayDialog' | 'webhook';
 
 export interface Action {
   type: ActionType;

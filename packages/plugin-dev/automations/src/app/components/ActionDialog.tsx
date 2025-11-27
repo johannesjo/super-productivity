@@ -13,7 +13,13 @@ interface ActionDialogProps {
 export function ActionDialog(props: ActionDialogProps) {
   const [action, setAction] = createSignal<Action>({ type: 'createTask', value: '' });
 
-  const allTypes: ActionType[] = ['createTask', 'addTag'];
+  const allTypes: ActionType[] = [
+    'createTask',
+    'addTag',
+    'displaySnack',
+    'displayDialog',
+    'webhook',
+  ];
   const availableTypes = () =>
     props.allowedTypes ? allTypes.filter((t) => props.allowedTypes!.includes(t)) : allTypes;
 
@@ -27,6 +33,23 @@ export function ActionDialog(props: ActionDialogProps) {
       }
     }
   });
+
+  const getPlaceholder = () => {
+    switch (action().type) {
+      case 'createTask':
+        return 'e.g. "Follow up task"';
+      case 'addTag':
+        return 'e.g. "review-needed"';
+      case 'displaySnack':
+        return 'e.g. "Task completed!"';
+      case 'displayDialog':
+        return 'e.g. "Please remember to..."';
+      case 'webhook':
+        return 'e.g. "https://hooks.slack.com/..."';
+      default:
+        return '';
+    }
+  };
 
   return (
     <Dialog
@@ -59,9 +82,7 @@ export function ActionDialog(props: ActionDialogProps) {
           type="text"
           value={action().value}
           onInput={(e) => setAction({ ...action(), value: e.currentTarget.value })}
-          placeholder={
-            action().type === 'createTask' ? 'e.g. "Follow up task"' : 'e.g. "review-needed"'
-          }
+          placeholder={getPlaceholder()}
         />
       </label>
     </Dialog>
