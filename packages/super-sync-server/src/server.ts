@@ -1,131 +1,11 @@
 import { v2 as webdav } from 'webdav-server';
 import * as fs from 'fs';
 import * as http from 'http';
+import { loadConfigFromEnv, ServerConfig } from './config';
+import { createCorsMiddleware } from './middleware/cors';
+import { Logger } from './logger';
 
-export interface ServerConfig {
-  port: number;
-  dataDir: string;
-  users: Array<{ username: string; password: string; isAdmin?: boolean }>;
-  cors?: {
-    enabled: boolean;
-    allowedOrigins?: string[];
-  };
-}
-
-const DEFAULT_CONFIG: ServerConfig = {
-  port: 1900,
-  dataDir: './data',
-  users: [],
-  cors: {
-    enabled: true,
-    allowedOrigins: ['*'],
-  },
-};
-
-/**
- * Create CORS middleware for handling cross-origin requests.
- * This is required for web browser clients to access the WebDAV server.
- */
-const createCorsMiddleware = (
-  config: ServerConfig['cors'],
-): ((req: http.IncomingMessage, res: http.ServerResponse, next: () => void) => void) => {
-  return (
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-    next: () => void,
-  ): void => {
-    if (!config?.enabled) {
-      next();
-      return;
-    }
-
-    const origin = req.headers.origin || '*';
-    const allowedOrigins = config.allowedOrigins || ['*'];
-
-    // Check if origin is allowed
-    const isAllowed = allowedOrigins.includes('*') || allowedOrigins.includes(origin);
-    const allowOrigin = isAllowed ? origin : allowedOrigins[0] || '*';
-
-    res.setHeader('Access-Control-Allow-Origin', allowOrigin);
-    res.setHeader(
-      'Access-Control-Allow-Methods',
-      'GET, PUT, POST, DELETE, OPTIONS, PROPFIND, PROPPATCH, MKCOL, COPY, MOVE, LOCK, UNLOCK',
-    );
-    res.setHeader(
-      'Access-Control-Allow-Headers',
-      'Authorization, Content-Type, Depth, If-Modified-Since, If-Unmodified-Since, Lock-Token, Timeout, Destination, Overwrite, X-Requested-With',
-    );
-    res.setHeader(
-      'Access-Control-Expose-Headers',
-      'ETag, Last-Modified, Content-Length, Content-Type, DAV',
-    );
-    res.setHeader('Access-Control-Allow-Credentials', 'true');
-    res.setHeader('Access-Control-Max-Age', '86400');
-
-    // Handle OPTIONS preflight requests
-    if (req.method === 'OPTIONS') {
-      res.statusCode = 204; // No Content is more appropriate for preflight
-      res.end();
-      return;
-    }
-
-    next();
-  };
-};
-
-/**
- * Load configuration from environment variables.
- * Environment variables take precedence over defaults.
- */
-export const loadConfigFromEnv = (
-  overrides: Partial<ServerConfig> = {},
-): ServerConfig => {
-  const config: ServerConfig = {
-    ...DEFAULT_CONFIG,
-    ...overrides,
-  };
-
-  // Override with environment variables
-  if (process.env.PORT) {
-    config.port = parseInt(process.env.PORT, 10);
-  }
-  if (process.env.DATA_DIR) {
-    config.dataDir = process.env.DATA_DIR;
-  }
-
-  // Parse users from environment variable
-  // Format: "user1:password1,user2:password2:admin"
-  if (process.env.USERS) {
-    config.users = process.env.USERS.split(',')
-      .map((userStr) => {
-        const parts = userStr.trim().split(':');
-        const username = parts[0]?.trim();
-        const password = parts[1] || '';
-        const isAdmin = parts[2] === 'admin';
-
-        // Skip entries with empty username
-        if (!username) {
-          console.warn('⚠️  Skipping user entry with empty username');
-          return null;
-        }
-
-        return { username, password, isAdmin };
-      })
-      .filter((user): user is NonNullable<typeof user> => user !== null);
-  }
-
-  // CORS configuration
-  if (process.env.CORS_ENABLED !== undefined) {
-    config.cors = config.cors || { enabled: true };
-    config.cors.enabled = process.env.CORS_ENABLED === 'true';
-  }
-  if (process.env.CORS_ORIGINS) {
-    config.cors = config.cors || { enabled: true };
-    config.cors.allowedOrigins = process.env.CORS_ORIGINS.split(',').map((o) => o.trim());
-  }
-
-  return config;
-};
+export { ServerConfig, loadConfigFromEnv };
 
 /**
  * Creates and configures a WebDAV server with the provided configuration.
@@ -153,14 +33,14 @@ export const createServer = (
   // Ensure data directory exists
   if (!fs.existsSync(fullConfig.dataDir)) {
     fs.mkdirSync(fullConfig.dataDir, { recursive: true });
-    console.log(`📁 Created data directory: ${fullConfig.dataDir}`);
+    Logger.info(`Created data directory: ${fullConfig.dataDir}`);
   }
 
   // Set up user manager with configured users
   const userManager = new webdav.SimpleUserManager();
   for (const user of fullConfig.users) {
     userManager.addUser(user.username, user.password, user.isAdmin ?? false);
-    console.log(`👤 Added user: ${user.username}${user.isAdmin ? ' (admin)' : ''}`);
+    Logger.info(`Added user: ${user.username}${user.isAdmin ? ' (admin)' : ''}`);
   }
 
   const httpAuthentication = new webdav.HTTPBasicAuthentication(
@@ -181,7 +61,7 @@ export const createServer = (
     new webdav.PhysicalFileSystem(fullConfig.dataDir),
     (success) => {
       if (!success) {
-        console.error(`❌ Failed to mount physical file system at ${fullConfig.dataDir}`);
+        Logger.error(`Failed to mount physical file system at ${fullConfig.dataDir}`);
       }
     },
   );
@@ -207,7 +87,7 @@ export const createServer = (
           });
 
           httpServer.listen(fullConfig.port, () => {
-            console.log(`🚀 Server started on port ${fullConfig.port}`);
+            Logger.info(`Server started on port ${fullConfig.port}`);
             resolve(httpServer!);
           });
 

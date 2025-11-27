@@ -1,5 +1,6 @@
 import { createServer } from './server';
 import * as path from 'path';
+import { Logger } from './logger';
 
 // Create server instance with config overrides
 // The server will load additional config from environment variables
@@ -12,18 +13,18 @@ let isShuttingDown = false;
 
 const shutdown = async (signal: string): Promise<void> => {
   if (isShuttingDown) {
-    console.log('Shutdown already in progress...');
+    Logger.info('Shutdown already in progress...');
     return;
   }
   isShuttingDown = true;
-  console.log(`\n📴 Received ${signal}, shutting down gracefully...`);
+  Logger.info(`\n📴 Received ${signal}, shutting down gracefully...`);
 
   try {
     await stop();
-    console.log('✅ Server stopped successfully');
+    Logger.info('✅ Server stopped successfully');
     process.exit(0);
   } catch (err) {
-    console.error('❌ Error during shutdown:', err);
+    Logger.error('❌ Error during shutdown:', err);
     process.exit(1);
   }
 };
@@ -35,12 +36,12 @@ process.on('SIGHUP', () => shutdown('SIGHUP'));
 
 // Handle uncaught exceptions
 process.on('uncaughtException', (err) => {
-  console.error('❌ Uncaught exception:', err);
+  Logger.error('❌ Uncaught exception:', err);
   shutdown('uncaughtException').catch(() => process.exit(1));
 });
 
 process.on('unhandledRejection', (reason, promise) => {
-  console.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
+  Logger.error('❌ Unhandled rejection at:', promise, 'reason:', reason);
 });
 
 // Start the server
@@ -49,23 +50,23 @@ start()
     const address = httpServer.address();
     const serverPort = typeof address === 'string' ? address : address?.port;
 
-    console.log('');
-    console.log('🚀 SuperSync Server is running!');
-    console.log(`   URL: http://localhost:${serverPort}`);
-    console.log('');
-    console.log('Press Ctrl+C to stop the server');
-    console.log('');
+    Logger.info('');
+    Logger.info('🚀 SuperSync Server is running!');
+    Logger.info(`   URL: http://localhost:${serverPort}`);
+    Logger.info('');
+    Logger.info('Press Ctrl+C to stop the server');
+    Logger.info('');
   })
   .catch((err) => {
     // Provide user-friendly error messages for common errors
     if (err.code === 'EADDRINUSE') {
-      console.error(`❌ Port is already in use. Try a different port with PORT=xxxx`);
+      Logger.error(`❌ Port is already in use. Try a different port with PORT=xxxx`);
     } else if (err.code === 'EACCES') {
-      console.error(
+      Logger.error(
         `❌ Permission denied. Try a port > 1024 or run with elevated privileges`,
       );
     } else {
-      console.error('❌ Failed to start server:', err);
+      Logger.error('❌ Failed to start server:', err);
     }
     process.exit(1);
   });
