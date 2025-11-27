@@ -92,7 +92,7 @@ export class PluginService implements OnDestroy {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
       'assets/bundled-plugins/sync-md',
-      'assets/bundled-plugins/api-test-plugin',
+      ...(environment.production ? [] : ['assets/bundled-plugins/api-test-plugin']),
       'assets/bundled-plugins/procrastination-buster',
       'assets/bundled-plugins/ai-productivity-prompts',
     ];
@@ -157,7 +157,7 @@ export class PluginService implements OnDestroy {
     const pluginPaths = [
       'assets/bundled-plugins/yesterday-tasks-plugin',
       'assets/bundled-plugins/sync-md',
-      'assets/bundled-plugins/api-test-plugin',
+      ...(environment.production ? [] : ['assets/bundled-plugins/api-test-plugin']),
       'assets/bundled-plugins/procrastination-buster',
     ];
 
