@@ -110,6 +110,9 @@ if (plugin.onMessage) {
         return await plugin.getAllProjects();
       case 'getTags':
         return await plugin.getAllTags();
+      case 'downloadFile':
+        await plugin.downloadFile(message.payload.filename, message.payload.data);
+        return { success: true };
       default:
         return { error: 'Unknown message type' };
     }

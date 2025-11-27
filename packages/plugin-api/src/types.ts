@@ -386,6 +386,9 @@ export interface PluginAPI {
 
   getConfig<T = Record<string, unknown>>(): Promise<T | null>;
 
+  // download file
+  downloadFile(filename: string, data: string): Promise<void>;
+
   // node execution (only available in Electron with nodeExecution permission)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 

@@ -3,37 +3,8 @@ import './App.css';
 import { RuleList } from './components/RuleList';
 import { RuleEditor } from './components/RuleEditor';
 import { AutomationRule } from '../types';
-
-// Communication with plugin.js
-const sendMessage = async (type: string, payload?: any) => {
-  return new Promise((resolve, reject) => {
-    const messageId = Math.random().toString(36).substr(2, 9);
-
-    const handler = (event: MessageEvent) => {
-      const data = event.data;
-      if (data.type === 'PLUGIN_MESSAGE_RESPONSE' && data.messageId === messageId) {
-        window.removeEventListener('message', handler);
-        resolve(data.result);
-      } else if (data.type === 'PLUGIN_MESSAGE_ERROR' && data.messageId === messageId) {
-        window.removeEventListener('message', handler);
-        reject(new Error(data.error));
-      }
-    };
-
-    window.addEventListener('message', handler);
-    window.parent.postMessage(
-      {
-        type: 'PLUGIN_MESSAGE',
-        messageId,
-        message: {
-          type,
-          payload,
-        },
-      },
-      '*',
-    );
-  });
-};
+import { exportRules } from '../utils/export-rules';
+import { sendMessage } from '../utils/messaging';
 
 function App() {
   const [isLoading, setIsLoading] = createSignal(true);
@@ -127,6 +98,37 @@ function App() {
     await fetchRules();
   };
 
+  const handleExport = () => {
+    exportRules(rules());
+  };
+
+  const handleImport = async (file: File) => {
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      try {
+        const json = JSON.parse(e.target?.result as string);
+        const rulesToImport = Array.isArray(json) ? json : [json];
+
+        for (const rule of rulesToImport) {
+          // Basic validation
+          if (!rule.name || !rule.trigger) {
+            console.warn('Skipping invalid rule:', rule);
+            continue;
+          }
+          // Always generate a new ID to ensure we add to existing rules instead of overwriting
+          const ruleToSave = { ...rule, id: Math.random().toString(36).substr(2, 9) };
+          await sendMessage('saveRule', ruleToSave);
+        }
+        await fetchRules();
+        alert(`Successfully imported ${rulesToImport.length} rules.`);
+      } catch (err) {
+        console.error('Import failed:', err);
+        alert('Failed to import rules. Invalid JSON file.');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   return (
     <div class="app">
       <main class="container">
@@ -140,6 +142,8 @@ function App() {
               onDelete={handleDelete}
               onToggleStatus={handleToggleStatus}
               onCreate={handleCreate}
+              onExport={handleExport}
+              onImport={handleImport}
             />
             {editingRule() && (
               <RuleEditor

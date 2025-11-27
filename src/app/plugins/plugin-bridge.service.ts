@@ -121,6 +121,7 @@ export class PluginBridgeService implements OnDestroy {
     persistDataSynced: (dataStr: string) => Promise<void>;
     loadPersistedData: () => Promise<string | null>;
     getConfig: () => Promise<any>;
+    downloadFile: (filename: string, data: string) => Promise<void>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
     registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
@@ -152,6 +153,8 @@ export class PluginBridgeService implements OnDestroy {
       persistDataSynced: (dataStr: string) => this._persistDataSynced(pluginId, dataStr),
       loadPersistedData: () => this._loadPersistedData(pluginId),
       getConfig: () => this._getConfig(pluginId),
+      downloadFile: (filename: string, data: string) =>
+        this._downloadFile(filename, data),
 
       // UI registration
       registerHeaderButton: (cfg: PluginHeaderBtnCfg) =>
@@ -203,6 +206,17 @@ export class PluginBridgeService implements OnDestroy {
       // Logging
       log: Log.withContext(`${pluginId}`),
     };
+  }
+
+  /**
+   * Internal method to download file
+   */
+  private async _downloadFile(filename: string, data: string): Promise<void> {
+    typia.assert<string>(filename);
+    typia.assert<string>(data);
+
+    const { download } = await import('../util/download');
+    await download(filename, data);
   }
 
   /**
