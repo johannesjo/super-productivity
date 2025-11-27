@@ -8,7 +8,7 @@
     "build": "vite build",
     "watch": "vite build --watch",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
     "lint": "eslint .",
     "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
