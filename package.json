@@ -119,7 +119,8 @@
     "clean:translations": "node ./tools/clean-translations.js",
     "plugin-api:build": "cd packages/plugin-api && npm run build",
     "plugin-api:build:watch": "cd packages/plugin-api && npm run build:watch",
-    "plugins:build": "cd packages/plugin-dev && npm run build:all"
+    "vite-plugin:build": "cd packages/vite-plugin && npm run build",
+    "plugins:build": "npm run vite-plugin:build && cd packages/plugin-dev && npm run build:all"
   },
   "resolutions": {
     "sass": "1.32.6",
