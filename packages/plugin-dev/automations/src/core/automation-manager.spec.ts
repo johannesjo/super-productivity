@@ -63,7 +63,7 @@ describe('AutomationManager', () => {
 
     // Setup mocks
     mockRuleRegistry = {
-      getEnabledRules: vi.fn().mockReturnValue([]),
+      getEnabledRules: vi.fn().mockResolvedValue([]),
       toggleRuleStatus: vi.fn(),
     };
     (RuleRegistry as unknown as Mock).mockImplementation(function () {
@@ -126,7 +126,7 @@ describe('AutomationManager', () => {
         conditions: [],
         actions: [],
       };
-      mockRuleRegistry.getEnabledRules.mockReturnValue([rule]);
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
 
       const mockTrigger = { matches: vi.fn().mockReturnValue(true) };
       (globalRegistry.getTrigger as any).mockReturnValue(mockTrigger);
@@ -146,7 +146,7 @@ describe('AutomationManager', () => {
         id: 'r1',
         trigger: { type: 'taskCreated' }, // Different trigger
       };
-      mockRuleRegistry.getEnabledRules.mockReturnValue([rule]);
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
       const mockTrigger = { matches: vi.fn().mockReturnValue(false) };
       (globalRegistry.getTrigger as any).mockReturnValue(mockTrigger);
 
@@ -163,7 +163,7 @@ describe('AutomationManager', () => {
         name: 'Loop Rule',
         trigger: { type: 'taskCompleted' },
       };
-      mockRuleRegistry.getEnabledRules.mockReturnValue([rule]);
+      mockRuleRegistry.getEnabledRules.mockResolvedValue([rule]);
       const mockTrigger = { matches: vi.fn().mockReturnValue(true) };
       (globalRegistry.getTrigger as any).mockReturnValue(mockTrigger);
 

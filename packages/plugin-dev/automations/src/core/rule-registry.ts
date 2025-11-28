@@ -7,6 +7,8 @@ export class RuleRegistry {
   private initPromise: Promise<void>;
   private saveQueue: Promise<void> = Promise.resolve();
 
+  private initError: Error | null = null;
+
   constructor(plugin: PluginAPI) {
     this.plugin = plugin;
     this.initPromise = this.loadRules();
@@ -16,17 +18,27 @@ export class RuleRegistry {
     try {
       const data = await this.plugin.loadSyncedData();
       if (data) {
-        const parsed = JSON.parse(data);
-        const validated = this.validateRules(parsed);
-        if (validated) {
-          this.rules = validated;
-          return;
+        let parsed;
+        try {
+          parsed = JSON.parse(data);
+        } catch (e) {
+          this.plugin.log.warn('Corrupted JSON in automation rules, resetting.');
+          // We don't return here, we let it fall through to initDefaultRules to reset
         }
-        this.plugin.log.warn('Persisted automation rules are invalid, resetting to defaults.');
+
+        if (parsed) {
+          const validated = this.validateRules(parsed);
+          if (validated) {
+            this.rules = validated;
+            return;
+          }
+          this.plugin.log.warn('Persisted automation rules are invalid, resetting to defaults.');
+        }
       }
       this.initDefaultRules();
       await this.saveRules();
     } catch (e) {
+      this.initError = e instanceof Error ? e : new Error(String(e));
       this.plugin.log.error('Failed to load rules', e);
       this.initDefaultRules();
       await this.saveRules();
@@ -36,6 +48,10 @@ export class RuleRegistry {
   private initDefaultRules() {
     // Hardcoded example rules for MVP
     this.rules = [];
+  }
+
+  getInitializationError(): Error | null {
+    return this.initError;
   }
 
   // Guard against corrupted/foreign persisted data to keep automation runtime stable.

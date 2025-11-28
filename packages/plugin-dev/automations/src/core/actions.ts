@@ -72,6 +72,27 @@ export const ActionWebhook: IAutomationAction = {
   name: 'Webhook',
   execute: async (ctx, event, value) => {
     if (!value) return;
+    if (!value.startsWith('http://') && !value.startsWith('https://')) {
+      ctx.plugin.log.warn(
+        `[Automation] Invalid webhook URL: "${value}". Must start with http:// or https://`,
+      );
+      return;
+    }
+
+    // Sanitize event data to avoid leaking all task details
+    const sanitizedEvent = {
+      type: event.type,
+      task: event.task
+        ? {
+            id: event.task.id,
+            title: event.task.title,
+            projectId: event.task.projectId,
+            isDone: event.task.isDone,
+            tagIds: event.task.tagIds,
+          }
+        : undefined,
+    };
+
     try {
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 5000);
@@ -79,7 +100,7 @@ export const ActionWebhook: IAutomationAction = {
       await fetch(value, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(event),
+        body: JSON.stringify(sanitizedEvent),
         signal: controller.signal,
       });
       clearTimeout(timeoutId);

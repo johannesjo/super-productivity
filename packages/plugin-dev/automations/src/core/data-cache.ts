@@ -1,4 +1,4 @@
-import { PluginAPI } from '@super-productivity/plugin-api';
+import { PluginAPI, Project, Tag } from '@super-productivity/plugin-api';
 
 interface CacheItem<T> {
   data: T;
@@ -6,13 +6,13 @@ interface CacheItem<T> {
 }
 
 export class DataCache {
-  private projectsCache: CacheItem<any[]> | null = null;
-  private tagsCache: CacheItem<any[]> | null = null;
+  private projectsCache: CacheItem<Project[]> | null = null;
+  private tagsCache: CacheItem<Tag[]> | null = null;
   private static readonly CACHE_TTL_MS = 60000;
 
   constructor(private plugin: PluginAPI) {}
 
-  async getProjects(): Promise<any[]> {
+  async getProjects(): Promise<Project[]> {
     const now = Date.now();
     if (this.projectsCache && now - this.projectsCache.timestamp < DataCache.CACHE_TTL_MS) {
       return this.projectsCache.data;
@@ -23,7 +23,7 @@ export class DataCache {
     return projects;
   }
 
-  async getTags(): Promise<any[]> {
+  async getTags(): Promise<Tag[]> {
     const now = Date.now();
     if (this.tagsCache && now - this.tagsCache.timestamp < DataCache.CACHE_TTL_MS) {
       return this.tagsCache.data;
