@@ -9,6 +9,7 @@ export interface FileMeta {
   type: string;
   etag: string;
   data: Record<string, string>;
+  path: string; // Full path/href from response
 }
 
 export class WebdavXmlParser {
@@ -198,6 +199,7 @@ export class WebdavXmlParser {
         etag: etag, // Keep original etag in data for reference
         href: decodedHref,
       },
+      path: decodedHref,
     };
   }
 }
