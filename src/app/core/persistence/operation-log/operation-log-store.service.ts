@@ -107,7 +107,7 @@ export class OperationLogStoreService {
   async getAppliedOpIds(): Promise<Set<string>> {
     // This might be heavy if log is huge. But log is compacted.
     const keys = await this.db.getAllKeysFromIndex('ops', 'byId');
-    return new Set(keys as string[]);
+    return new Set(keys as unknown as string[]);
   }
 
   async markApplied(id: string): Promise<void> {

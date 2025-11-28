@@ -36,6 +36,9 @@ import { promiseTimeout } from '../../util/promise-timeout';
 import { PFEventEmitter } from './util/events';
 import { MigrationService } from './migration/migration.service';
 import { IValidation } from 'typia';
+import { OperationLogSyncService } from '../../core/persistence/operation-log/operation-log-sync.service';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { inject } from '@angular/core'; // Inject is used here
 
 export class Pfapi<const MD extends ModelCfgs> {
   private static _wasInstanceCreated = false;
@@ -62,6 +65,8 @@ export class Pfapi<const MD extends ModelCfgs> {
   public readonly m: ModelCfgToModelCtrl<MD>;
   public readonly ev = new PFEventEmitter();
   public readonly migrationService: MigrationService<MD>;
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  private _operationLogSyncService = inject(OperationLogSyncService); // Inject the service here
 
   constructor(
     modelCfgs: MD,
