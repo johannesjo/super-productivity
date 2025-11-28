@@ -25,8 +25,8 @@ import { chunkArray } from '../../../util/chunk-array';
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { OperationApplierService } from './operation-applier.service';
+import { ConflictResolutionService } from './conflict-resolution.service'; // NEW IMPORT
 
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
@@ -46,6 +46,8 @@ export class OperationLogSyncService {
   private lockService = inject(LockService);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private dependencyResolver = inject(DependencyResolverService);
+  private operationApplier = inject(OperationApplierService); // THIS IS ADDED IN THE REPLACE
+  private conflictResolutionService = inject(ConflictResolutionService); // NEW INJECTION
 
   private _getSyncProvider(): SyncProviderServiceInterface<SyncProviderId> | undefined {
     const syncProvider = this.pfapiService.pf.getActiveSyncProvider();
@@ -232,7 +234,7 @@ export class OperationLogSyncService {
           `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
           conflicts,
         );
-        // TODO: Conflict resolution UI (as per plan Section 4.3.2)
+        await this.conflictResolutionService.presentConflicts(conflicts); // Call conflict resolution UI
       }
 
       PFLog.normal(
