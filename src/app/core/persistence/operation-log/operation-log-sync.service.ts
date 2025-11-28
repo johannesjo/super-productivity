@@ -88,35 +88,61 @@ export class OperationLogSyncService {
         return;
       }
 
-      // TODO: Download manifest.json (as per plan Section 4.3.2)
-      // For now, assume a simple list of op files.
-      // This will need actual file listing and manifest handling.
-      // For MVP, just assume we can list "ops_*.json" files from remote.
-      // This will require an extension to the SyncProviderServiceInterface to list files.
-      // Or we will get manifest.json from existing sync service.
+      // Check if syncProvider supports listFiles
+      if (!syncProvider.listFiles) {
+        PFLog.warn(
+          'OperationLogSyncService: Active sync provider does not support listFiles. Skipping OL download.',
+        );
+        return;
+      }
 
-      // Placeholder: For now, we will skip manifest and just log.
-      PFLog.warn(
-        'OperationLogSyncService: Skipping manifest download. Actual implementation will need manifest.',
-      );
+      const OPS_DIR = 'ops/';
+      let remoteOpFileNames: string[] = [];
+      try {
+        remoteOpFileNames = await syncProvider.listFiles(OPS_DIR);
+        // Filter only relevant op files
+        remoteOpFileNames = remoteOpFileNames.filter(
+          (name) => name.startsWith('ops_') && name.endsWith('.json'),
+        );
+      } catch (e) {
+        PFLog.error('OperationLogSyncService: Failed to list remote operation files', e);
+        return;
+      }
 
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      if (remoteOpFileNames.length === 0) {
+        PFLog.normal('OperationLogSyncService: No remote operation files found.');
+        return;
+      }
+
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
       const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
 
-      // Placeholder for fetching remote op files
-      // In a real scenario, this would involve downloading files referenced in the manifest.
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const remoteOpFiles: string[] = []; // e.g., ['ops_clientX_123.json', 'ops_clientY_456.json']
-      const newOps: Operation[] = []; // Populated from downloaded remoteOpFiles
+      const allRemoteOps: Operation[] = [];
+      for (const filename of remoteOpFileNames) {
+        try {
+          const fileContent = await syncProvider.downloadFile(OPS_DIR + filename);
+          const chunk = JSON.parse(fileContent.dataStr) as OperationLogEntry[];
+          // Filter already applied ops from this chunk before adding to allRemoteOps
+          const newOpsInChunk = chunk.filter((entry) => !appliedOpIds.has(entry.op.id));
+          allRemoteOps.push(...newOpsInChunk.map((entry) => entry.op));
+        } catch (e) {
+          PFLog.error(
+            `OperationLogSyncService: Failed to download or parse remote op file ${filename}`,
+            e,
+          );
+          // Continue with next file
+        }
+      }
 
-      if (newOps.length === 0) {
-        PFLog.normal('OperationLogSyncService: No new remote operations to download.');
+      if (allRemoteOps.length === 0) {
+        PFLog.normal(
+          'OperationLogSyncService: No new remote operations to download after filtering.',
+        );
         return;
       }
 
       const { nonConflicting, conflicts } = await this.detectConflicts(
-        newOps,
+        allRemoteOps,
         appliedFrontierByEntity,
       );
 
@@ -128,13 +154,12 @@ export class OperationLogSyncService {
 
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const action = convertOpToAction(op);
-        // Dispatching action will be handled by a dedicated apply service in Phase 3/4
+        // TODO: Dispatching action will be handled by a dedicated apply service in Phase 3/4
         // For now, just logging
         PFLog.verbose(
           `OperationLogSyncService: Dispatching non-conflicting remote op: ${op.id}`,
         );
         // this.store.dispatch(action); // Actual dispatch happens here in a dedicated service
-        // Mark applied
         await this.opLogStore.markApplied(op.id);
       }
 

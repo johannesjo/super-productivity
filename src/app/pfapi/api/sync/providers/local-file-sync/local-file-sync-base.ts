@@ -24,7 +24,7 @@ export abstract class LocalFileSyncBase
   readonly isUploadForcePossible: boolean = false;
   readonly maxConcurrentRequests = 10;
   // since we cannot guarantee the order of files, we need to mush all our data into a single file
-  readonly isLimitedToSingleFileSync = true;
+  // removed as operation log requires multiple files
 
   public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.LocalFile>;
 
@@ -37,6 +37,16 @@ export abstract class LocalFileSyncBase
   ): Promise<void>;
 
   protected abstract getFilePath(targetPath: string): Promise<string>;
+
+  async listFiles(dirPath: string): Promise<string[]> {
+    PFLog.normal(`${LocalFileSyncBase.LB}.${this.listFiles.name}()`, { dirPath });
+    if (!this.fileAdapter.listFiles) {
+      throw new Error('FileAdapter does not support listFiles');
+    }
+    // Assume getFilePath can correctly interpret dirPath as a directory
+    const fullPath = await this.getFilePath(dirPath);
+    return this.fileAdapter.listFiles(fullPath);
+  }
 
   async getFileRev(targetPath: string, localRev: string): Promise<{ rev: string }> {
     PFLog.normal(`${LocalFileSyncBase.LB}.${this.getFileRev.name}`, {

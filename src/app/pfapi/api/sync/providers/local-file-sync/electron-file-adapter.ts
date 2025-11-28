@@ -40,6 +40,16 @@ export class ElectronFileAdapter implements FileAdapter {
     }
   }
 
+  async listFiles(dirPath: string): Promise<string[]> {
+    const result = await this.ea.fileSyncListFiles({
+      dirPath,
+    });
+    if (result instanceof Error) {
+      throw result;
+    }
+    return result;
+  }
+
   // async checkDirExists(dirPath: string): Promise<boolean> {
   //   try {
   //     const result = await this.ea.checkDirExists({

@@ -49,6 +49,8 @@ export interface ElectronAPI {
 
   fileSyncRemove(args: { filePath: string }): Promise<unknown | Error>;
 
+  fileSyncListFiles(args: { dirPath: string }): Promise<string[] | Error>; // NEW
+
   checkDirExists(args: { dirPath: string }): Promise<true | Error>;
 
   pickDirectory(): Promise<string | undefined>;
