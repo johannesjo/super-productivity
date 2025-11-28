@@ -72,8 +72,10 @@ export interface Operation {
 
   // CAUSALITY & ORDERING
   clientId: string; // Device generating the op (reuse existing from vector-clock)
-  vectorClock: VectorClock; // State of the world AFTER this Op
-  timestamp: number; // Wall clock time (ISO 8601 or epoch ms)
+  entityVersion: number; // Monotonic per-entity version after applying this op
+  causalDeps: Record<string, number>; // Map of entityKey -> version required (for ordering/merge)
+  globalVectorClock?: VectorClock; // Optional: for cross-entity ordering during sync
+  timestamp: number; // Wall clock time (ISO 8601 or epoch ms), only as tiebreaker
 
   // META
   schemaVersion: number; // For future migrations
@@ -312,25 +314,28 @@ sequenceDiagram
 
 @Injectable({ providedIn: 'root' })
 export class OperationLogHydratorService {
+  constructor(private replayContext: ReplayContextService) {}
+
   async hydrateStore(): Promise<void> {
-    // 1. Load snapshot
     const snapshot = await this.opLogStore.loadStateCache();
 
-    if (snapshot) {
-      // 2. Hydrate NgRx with snapshot
-      this.store.dispatch(hydrateFromSnapshot({ state: snapshot.state }));
+    this.replayContext.enterReplayMode();
+    try {
+      if (snapshot) {
+        this.store.dispatch(hydrateFromSnapshot({ state: snapshot.state }));
 
-      // 3. Replay tail operations
-      const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
-
-      for (const entry of tailOps) {
-        const action = this.opToActionConverter.convert(entry.op);
-        action.meta.isRemote = true; // Prevent re-logging
-        this.store.dispatch(action);
+        const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
+        for (const entry of tailOps) {
+          const action = this.opToActionConverter.convert(entry.op);
+          action.meta.isRemote = true; // Prevent re-logging
+          action.meta.isReplay = true; // Signal effects to skip
+          this.store.dispatch(action);
+        }
+      } else {
+        await this.handleFreshInstallOrMigration();
       }
-    } else {
-      // Fresh install or migration - no snapshot exists
-      await this.handleFreshInstallOrMigration();
+    } finally {
+      this.replayContext.exitReplayMode();
     }
   }
 }
@@ -350,14 +355,17 @@ async uploadPendingOps(): Promise<void> {
   const chunks = chunkArray(pendingOps, 100);
 
   for (const chunk of chunks) {
-    const filename = `ops_${this.clientId}_${chunk[0].op.timestamp}.json`;
-    await this.syncProvider.uploadFile(filename, JSON.stringify(chunk));
+    const payload = JSON.stringify(chunk);
+    const hash = await hashPayload(payload);
+    const filename = `ops_${hash}.json`;
 
-    // Mark as synced
+    await this.syncProvider.uploadFile(filename, payload);
+
+    // Mark as synced locally; manifest is updated after all files succeed
     await this.opLogStore.markSynced(chunk.map(e => e.seq));
   }
 
-  // Update remote manifest
+  // Update remote manifest LAST (content-addressable entries, latest snapshot id)
   await this.updateRemoteManifest();
 }
 ```
@@ -402,39 +410,38 @@ async downloadRemoteOps(): Promise<void> {
 
 ```typescript
 async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
-  const localPendingOps = await this.opLogStore.getUnsyncedByEntity();
+  const pendingByEntity = await this.opLogStore.getUnsyncedByEntity();
+  const appliedFrontier = await this.opLogStore.getEntityFrontiers(); // entityKey -> lastAppliedVersion
   const conflicts: EntityConflict[] = [];
   const nonConflicting: Operation[] = [];
 
   for (const remoteOp of remoteOps) {
     const entityKey = `${remoteOp.entityType}:${remoteOp.entityId}`;
-    const localOpsForEntity = localPendingOps.get(entityKey) || [];
+    const localPending = pendingByEntity.get(entityKey) || [];
+    const localAppliedVersion = appliedFrontier.get(entityKey) ?? 0;
 
-    if (localOpsForEntity.length === 0) {
-      // No local changes to this entity - no conflict
-      nonConflicting.push(remoteOp);
-      continue;
-    }
-
-    // Check if ops are concurrent (vector clock comparison)
-    const vcComparison = compareVectorClocks(
-      localOpsForEntity[0].vectorClock,
-      remoteOp.vectorClock
+    const isConcurrentWithPending = localPending.some(
+      (op) => op.entityVersion === remoteOp.entityVersion ||
+        this.areCausalDepsConcurrent(op.causalDeps, remoteOp.causalDeps),
     );
 
-    if (vcComparison === VectorClockComparison.CONCURRENT) {
-      // True conflict - same entity modified independently
+    const isConcurrentWithApplied =
+      remoteOp.entityVersion <= localAppliedVersion
+        ? false
+        : this.isConcurrentWithFrontier(remoteOp.causalDeps, appliedFrontier);
+
+    if (isConcurrentWithPending || isConcurrentWithApplied) {
       conflicts.push({
         entityType: remoteOp.entityType,
         entityId: remoteOp.entityId,
-        localOps: localOpsForEntity,
+        localOps: localPending,
         remoteOps: [remoteOp],
-        suggestedResolution: this.suggestResolution(localOpsForEntity, remoteOp),
+        suggestedResolution: this.suggestResolution(localPending, remoteOp),
       });
-    } else {
-      // One happened before the other - can be auto-resolved
-      nonConflicting.push(remoteOp);
+      continue;
     }
+
+    nonConflicting.push(remoteOp);
   }
 
   return { nonConflicting, conflicts };
@@ -443,30 +450,40 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
 
 ### 4.4. Multi-Tab Concurrency
 
-We use the **Web Locks API** and **BroadcastChannel** for coordination.
+Use **Web Locks** + **BroadcastChannel** when available, and fall back to an IndexedDB mutex + storage-event channel. IndexedDB remains the source of truth; broadcasts are only hints.
 
 ```typescript
-// In src/app/core/persistence/operation-log/multi-tab-coordinator.service.ts
-
 @Injectable({ providedIn: 'root' })
 export class MultiTabCoordinatorService {
-  private broadcastChannel = new BroadcastChannel('sp_op_log');
+  private channel = this.createChannel();
 
   constructor() {
-    this.broadcastChannel.onmessage = (event) => {
-      if (event.data.type === 'NEW_OP') {
-        // Another tab wrote an operation - reload from DB
-        this.handleRemoteTabOp(event.data.op);
-      }
-    };
+    this.channel.onSignal(async () => {
+      await this.pullAndApplyNewOps();
+    });
   }
 
   async writeOperation(op: Operation): Promise<void> {
-    await navigator.locks.request('sp_op_log_write', async () => {
+    await this.withMutex('sp_op_log_write', async () => {
       await this.opLogStore.append(op);
-      // Notify other tabs
-      this.broadcastChannel.postMessage({ type: 'NEW_OP', op });
+      await this.channel.signal(); // hint other tabs
     });
+  }
+
+  private async pullAndApplyNewOps(): Promise<void> {
+    const newEntries = await this.opLogStore.getOpsAfterSeq(this.lastAppliedSeq);
+    for (const entry of newEntries) {
+      if (entry.op.clientId !== this.clientId || entry.source === 'remote') {
+        await this.applyOp(entry.op);
+      }
+      this.lastAppliedSeq = entry.seq;
+    }
+  }
+
+  private withMutex<T>(name: string, fn: () => Promise<T>) {
+    return supportsWebLocks()
+      ? navigator.locks.request(name, fn)
+      : this.idbMutex.runExclusive(fn);
   }
 }
 ```
@@ -501,9 +518,27 @@ async compact(): Promise<void> {
       compactedAt: Date.now(),
     });
 
-    // 4. Delete old operations (keep recent for conflict resolution window)
-    const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
-    await this.opLogStore.deleteOpsOlderThan(Date.now() - retentionWindowMs);
+    // 4. Publish snapshot remotely BEFORE deleting ops
+    const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days (configurable)
+    const snapshot: RemoteSnapshot = {
+      state: currentState,
+      vectorClock: currentVectorClock,
+      lastAppliedOpSeq: lastSeq,
+      snapshotId: uuidv7(),
+      createdAt: Date.now(),
+      oldestRetainedOpTimestamp: Date.now() - retentionWindowMs,
+    };
+    await this.syncProvider.uploadFile(
+      `snapshots/snapshot_${snapshot.snapshotId}.json`,
+      JSON.stringify(snapshot),
+    );
+    await this.updateRemoteManifest({
+      latestSnapshot: snapshot.snapshotId,
+      retainedFrom: snapshot.oldestRetainedOpTimestamp,
+    });
+
+    // 5. Delete old operations (keep recent for conflict resolution window)
+    await this.opLogStore.deleteOpsOlderThan(snapshot.oldestRetainedOpTimestamp);
   });
 }
 ```
@@ -914,42 +949,42 @@ async detectMigrationNeeded(): Promise<MigrationType> {
 }
 ```
 
-### 7.2. Genesis Operation
+### 7.2. Migration Operations
 
-For existing users upgrading from the current snapshot-based system:
+For existing users upgrading from the current snapshot-based system, emit per-entity CREATE ops sharing one frontier and align an initial snapshot.
 
 ```typescript
 async migrateFromLegacy(): Promise<void> {
-  // 1. Load all legacy data
   const legacyState = await this.pfapi.getAllSyncModelData();
+  const entities = this.flattenToEntities(legacyState);
+  const frontierClock = { [this.clientId]: entities.length };
 
-  // 2. Create genesis operation
-  const genesisOp: Operation = {
-    id: uuidv7(),
-    actionType: '[Migration] Genesis Import',
-    opType: OpType.Batch,
-    entityType: 'MIGRATION' as EntityType,
-    entityId: '*',
-    payload: legacyState,
-    clientId: this.clientId,
-    vectorClock: { [this.clientId]: 1 },
-    timestamp: Date.now(),
-    schemaVersion: CURRENT_SCHEMA_VERSION,
-  };
+  let seq = 0;
+  for (const entity of entities) {
+    seq++;
+    const op: Operation = {
+      id: uuidv7(),
+      actionType: `[${entity.type}] Add ${entity.type}`,
+      opType: OpType.Create,
+      entityType: entity.type,
+      entityId: entity.id,
+      payload: entity.data,
+      clientId: this.clientId,
+      entityVersion: seq,
+      causalDeps: {},
+      globalVectorClock: { [this.clientId]: seq },
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+    await this.opLogStore.append(op);
+  }
 
-  // 3. Write genesis op
-  await this.opLogStore.append(genesisOp);
-
-  // 4. Create initial state cache
   await this.opLogStore.saveStateCache({
     state: legacyState,
-    lastAppliedOpSeq: 1,
-    vectorClock: genesisOp.vectorClock,
+    lastAppliedOpSeq: entities.length,
+    vectorClock: frontierClock,
     compactedAt: Date.now(),
   });
-
-  // 5. Mark legacy as migrated (don't delete yet)
-  await this.legacyStore.markMigrated();
 }
 ```
 
@@ -1081,81 +1116,15 @@ This section identifies fundamental architectural problems that must be resolved
 
 ### 10.1. CRITICAL: Vector Clock Scope Mismatch
 
-**Problem:** The plan stores a global vector clock on each operation (line 75), but conflict detection is per-entity. This creates false positives.
+**Problem (original plan):** Using a single global vector clock per op caused false per-entity conflicts.
 
-**Example scenario:**
-
-- Client A modifies Task 1 → VC: `{A: 1}`
-- Client B modifies Task 2 (concurrently) → VC: `{B: 1}`
-- When syncing, the VCs are CONCURRENT, but there's NO actual conflict because they're different entities
-
-**Impact:** Users see conflict dialogs when no conflict exists.
-
-**Required Fix:** Use per-ENTITY vector clocks, not per-operation global clocks:
-
-```typescript
-// INSTEAD OF:
-interface Operation {
-  vectorClock: VectorClock; // Global clock - WRONG
-}
-
-// USE:
-interface Operation {
-  entityVersion: number; // Monotonic version for THIS entity
-  causalDependencies: {
-    // Which entity versions this op depends on
-    [entityKey: string]: number;
-  };
-}
-
-// Or hybrid approach: keep global VC for sync ordering, but use entity-specific version for conflict detection
-interface Operation {
-  globalVectorClock: VectorClock; // For causal ordering of sync
-  entityVersion: number; // For entity-level conflict detection
-}
-```
+**Resolution:** Section 2.2/4.3.3 now define per-entity versions + causal deps for conflict detection, with an optional global vector clock only for sync ordering. Keep this separation in implementation.
 
 ### 10.2. CRITICAL: No Remote Snapshot Publishing
 
-**Problem:** Compaction deletes local ops older than 7 days (line 505), but there's no mechanism to publish snapshots to remote storage.
+**Problem (original plan):** Local compaction deleted ops without publishing a remote snapshot, stranding new devices.
 
-**Scenario that breaks:**
-
-1. Client A compacts and deletes ops older than 7 days
-2. New Client C is set up for the first time
-3. Client C downloads op files from remote
-4. Client C is missing the ops that A deleted before publishing
-5. Client C has corrupted/incomplete state
-
-**Impact:** New devices cannot properly bootstrap. Offline devices returning after extended periods lose data.
-
-**Required Fix:** Add explicit remote snapshot publishing:
-
-```typescript
-// ADD to compaction process:
-async compact(): Promise<void> {
-  // ... existing local compaction ...
-
-  // MUST publish snapshot to remote BEFORE deleting ops
-  const snapshot: RemoteSnapshot = {
-    state: currentState,
-    vectorClock: currentVectorClock,
-    snapshotId: uuidv7(),
-    createdAt: Date.now(),
-    oldestRetainedOpTimestamp: Date.now() - retentionWindowMs,
-  };
-
-  await this.syncProvider.uploadFile(
-    `snapshots/snapshot_${snapshot.snapshotId}.json`,
-    JSON.stringify(snapshot)
-  );
-
-  // Update manifest with new snapshot reference
-  await this.updateManifest({ latestSnapshot: snapshot.snapshotId });
-
-  // NOW safe to delete local ops
-}
-```
+**Resolution:** Section 4.5 now requires publishing a remote snapshot + manifest update (with retained range) before deleting local ops. Implementation must keep this contract.
 
 ### 10.3. CRITICAL: Genesis Operation is an Anti-Pattern
 
@@ -1207,43 +1176,9 @@ async migrateFromLegacy(): Promise<void> {
 
 ### 10.4. CRITICAL: Effect Side Effects During Replay
 
-**Problem:** When replaying ops at startup (lines 326-330), `isRemote: true` only prevents re-logging. Other effects still fire.
+**Problem (original plan):** Replaying ops would still trigger effects/notifications.
 
-**Scenario:**
-
-1. User creates reminder for a task
-2. App closes
-3. App reopens, replays the ops
-4. Reminder creation effect fires AGAIN, creating duplicate reminders
-
-**Impact:** Duplicate notifications, duplicate syncs, duplicate analytics, corrupted state.
-
-**Required Fix:** Implement a global replay guard:
-
-```typescript
-// Create a replay context service
-@Injectable({ providedIn: 'root' })
-export class ReplayContextService {
-  private _isReplaying = new BehaviorSubject<boolean>(false);
-  isReplaying$ = this._isReplaying.asObservable();
-
-  enterReplayMode(): void {
-    this._isReplaying.next(true);
-  }
-  exitReplayMode(): void {
-    this._isReplaying.next(false);
-  }
-}
-
-// ALL effects with side effects must check:
-someEffect$ = createEffect(() =>
-  this.actions$.pipe(
-    filter(() => !this.replayContext.isReplaying$.value), // Skip during replay
-    ofType(someAction),
-    // ... effect logic
-  ),
-);
-```
+**Resolution:** Section 4.2 shows a replay context with `isReplay` to bypass effects. All side-effectful effects must check replay context or be dispatched through a replay-safe channel.
 
 ### 10.5. HIGH: Reducer Non-Determinism
 
@@ -1341,35 +1276,9 @@ interface EntitySyncState {
 
 ### 10.8. HIGH: Multi-Tab State Divergence
 
-**Problem:** Each tab has its own NgRx store. BroadcastChannel notifies other tabs, but:
+**Problem (original plan):** BroadcastChannel alone could miss ops if a tab crashed between DB write and broadcast.
 
-- What if Tab A crashes between IndexedDB write and broadcast?
-- What if Tab B is in the middle of an action when it receives broadcast?
-
-**Scenario:**
-
-1. Tab A starts writing op to IndexedDB
-2. Tab A crashes before BroadcastChannel.postMessage
-3. Tab B never knows about the op
-4. Tab B makes conflicting change
-5. When Tab B reloads, it sees both ops and has a conflict with itself
-
-**Required Fix:** Use IndexedDB as the coordination point, not broadcast:
-
-```typescript
-// Instead of broadcasting ops, broadcast "ops changed" signal
-// Each tab polls/subscribes to IndexedDB changes
-async onNewOpSignal(): Promise<void> {
-  const opsAfterMyLastSeq = await this.opLogStore.getOpsAfterSeq(this.lastAppliedSeq);
-  for (const entry of opsAfterMyLastSeq) {
-    if (entry.source !== 'local' || entry.op.clientId !== this.clientId) {
-      // Apply op from other tab or remote
-      await this.applyOp(entry.op);
-    }
-  }
-  this.lastAppliedSeq = opsAfterMyLastSeq[opsAfterMyLastSeq.length - 1]?.seq;
-}
-```
+**Resolution:** Section 4.4 keeps IndexedDB as the source of truth with mutex + "ops changed" signalling; tabs pull `getOpsAfterSeq` on signal to recover missed writes.
 
 ### 10.9. MEDIUM: Operation Idempotency Not Guaranteed
 
@@ -1396,17 +1305,9 @@ payload: {
 
 ### 10.10. MEDIUM: WebDAV Upload Atomicity
 
-**Problem:** Line 353-361 uploads op files then updates manifest. If upload succeeds but manifest fails:
+**Problem (original plan):** Upload-before-manifest risked orphaned files and missing ops.
 
-- Other clients don't see the ops
-- Retrying might create orphaned files
-
-**Required Fix:**
-
-1. Use content-addressable filenames (hash of content)
-2. On sync, reconcile all files in `/ops/` directory against manifest
-3. Manifest update should be the last step
-4. Orphaned files are ignored but eventually cleaned up
+**Resolution:** Section 4.3.1 now uses content-hash filenames, marks ops synced locally, and writes the manifest last; startup reconciliation should still scan `/ops/` and reconcile orphaned files.
 
 ### 10.11. MEDIUM: Vector Clock Unbounded Growth
 
@@ -1545,7 +1446,7 @@ interface SyncSnapshot {
 ### Phase 6: Migration & Rollout (1-2 weeks)
 
 - [ ] Implement legacy detection
-- [ ] Implement genesis operation migration
+- [ ] Implement per-entity migration ops + aligned initial snapshot
 - [ ] Implement rollback mechanism
 - [ ] Feature flag for gradual rollout
 - [ ] E2E tests for migration scenarios
