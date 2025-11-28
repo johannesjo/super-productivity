@@ -3,6 +3,7 @@ import { Store } from '@ngrx/store';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { convertOpToAction } from './operation-converter.util';
+import { OperationLogMigrationService } from './operation-log-migration.service';
 
 /**
  * Handles the hydration (loading) of the application state from the operation log
@@ -15,10 +16,18 @@ import { convertOpToAction } from './operation-converter.util';
 export class OperationLogHydratorService {
   private store = inject(Store);
   private opLogStore = inject(OperationLogStoreService);
+  private migrationService = inject(OperationLogMigrationService);
 
   async hydrateStore(): Promise<void> {
     // 1. Load snapshot
-    const snapshot = await this.opLogStore.loadStateCache();
+    let snapshot = await this.opLogStore.loadStateCache();
+
+    if (!snapshot) {
+      // Fresh install or migration - no snapshot exists
+      await this.migrationService.checkAndMigrate();
+      // Try loading again after potential migration
+      snapshot = await this.opLogStore.loadStateCache();
+    }
 
     if (snapshot) {
       // 2. Hydrate NgRx with snapshot
@@ -32,9 +41,6 @@ export class OperationLogHydratorService {
         const action = convertOpToAction(entry.op);
         this.store.dispatch(action);
       }
-    } else {
-      // Fresh install or migration - no snapshot exists
-      // Handled by legacy system or future migration step
     }
   }
 }
