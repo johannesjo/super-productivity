@@ -22,6 +22,7 @@ export class RuleRegistry {
         try {
           parsed = JSON.parse(data);
         } catch (e) {
+          this.initError = new Error('Corrupted JSON in automation rules');
           this.plugin.log.warn('Corrupted JSON in automation rules, resetting.');
           // We don't return here, we let it fall through to initDefaultRules to reset
         }
@@ -32,6 +33,7 @@ export class RuleRegistry {
             this.rules = validated;
             return;
           }
+          this.initError = new Error('Persisted automation rules are invalid');
           this.plugin.log.warn('Persisted automation rules are invalid, resetting to defaults.');
         }
       }
