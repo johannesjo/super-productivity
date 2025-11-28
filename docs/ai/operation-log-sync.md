@@ -1,5 +1,7 @@
 # Architecture V2: Operation Log & Event Sourcing
 
+> ⚠️ **CRITICAL REVIEW NEEDED**: See Section 15 for fundamental questions about whether this approach is the right one.
+
 ## 1. Executive Summary
 
 **Goal:** Transition `super-productivity` from a state-snapshot sync model to an operation-based (event sourcing) model.
@@ -161,15 +163,15 @@ graph TD
     end
 ```
 
-### 3.2. The Action Contract (Whitelisting)
+### 3.2. The Action Contract (Blacklisting)
 
-Not all NgRx actions should be persisted. We need an explicit contract.
+By default, most state-modifying actions in NgRx should be persisted. Instead of maintaining a massive whitelist, we employ a **Blacklisting** strategy. Actions are persistent unless explicitly excluded or if they lack the necessary metadata context.
 
 ```typescript
 // In src/app/core/persistence/operation-log/persistent-action.interface.ts
 
 export interface PersistentActionMeta {
-  isPersistent: true; // MUST be true to be recorded
+  // isPersistent is REMOVED; assumption is true unless blacklisted
   entityType: EntityType;
   entityId: string;
   opType: OpType;
@@ -179,54 +181,54 @@ export interface PersistentActionMeta {
 
 export interface PersistentAction<P = unknown> extends Action {
   type: string; // Standard NgRx action type
-  meta: PersistentActionMeta;
+  meta?: PersistentActionMeta; // Optional, but needed for Entity tracking
   payload?: P;
 }
 
 // Helper type guard
 export function isPersistentAction(action: Action): action is PersistentAction {
-  return (action as PersistentAction).meta?.isPersistent === true;
+  const a = action as PersistentAction;
+  // Must have meta AND not be blacklisted
+  return !!a.meta && !ACTION_BLACKLIST.has(a.type);
 }
 ```
 
-### 3.3. Action Whitelist Registry
+### 3.3. Action Blacklist Registry
+
+We explicitly exclude transient UI state and high-frequency updates that shouldn't flood the operation log.
 
 ```typescript
-// In src/app/core/persistence/operation-log/action-whitelist.ts
+// In src/app/core/persistence/operation-log/action-blacklist.ts
 
-export const PERSISTENT_ACTION_TYPES: Set<string> = new Set([
-  // Task actions
-  '[Task] Add Task',
-  '[Task] Update Task',
-  '[Task] Delete Task',
-  '[Task] Move',
-  '[Task] Add SubTask',
-  '[Task] Toggle Start',
+export const ACTION_BLACKLIST: Set<string> = new Set([
+  // UI / View State
+  '[App] Set Current Worklog Task',
+  '[Layout] Toggle Sidebar',
+  '[Focus Mode] Enter/Exit',
+  '[Layout] Toggle Show Notes',
 
-  // Project actions
-  '[Project] Add Project',
-  '[Project] Update Project',
-  '[Project] Delete Project',
-
-  // Tag actions
-  '[Tag] Add Tag',
-  '[Tag] Update Tag',
-  '[Tag] Delete Tag',
-
-  // Note actions
-  '[Note] Add Note',
-  '[Note] Update Note',
-  '[Note] Delete Note',
-
-  // Config (global)
-  '[Global Config] Update Config Section',
-
-  // Explicitly EXCLUDED (not persisted):
-  // - '[App] Set Current Worklog Task' (UI state)
-  // - '[Layout] Toggle Sidebar' (UI state)
-  // - '[Focus Mode] Enter/Exit' (transient)
+  // High-Frequency Updates (Handled via Throttling - see 3.4)
+  '[TimeTracking] Add Time Spent', // Tick every second
 ]);
 ```
+
+### 3.4. Handling High-Frequency Updates (Time Tracking)
+
+Time tracking produces a state change every second (`[TimeTracking] Add Time Spent`). Persisting every tick would result in ~28,000 operations for an 8-hour workday, bloating the log and slowing down sync.
+
+**Strategy:**
+
+1.  **Blacklist:** The raw tick action `[TimeTracking] Add Time Spent` is in the `ACTION_BLACKLIST`. It updates the in-memory store (UI updates immediately) but writes nothing to the Operation Log.
+2.  **Accumulate:** The application tracks the "uncommitted" time spent in memory.
+3.  **Periodic Flush:** A new action `[TimeTracking] Sync Time` (or `Commit Time`) is dispatched periodically.
+    - **Triggers:**
+      - Every X minutes (e.g., 5 minutes).
+      - User pauses the timer.
+      - User switches tasks.
+      - App is closed/unloaded.
+4.  **Persist:** This `Sync Time` action IS persisted. It contains the aggregated time diff since the last sync.
+
+**Result:** 8 hours of work = ~100 operations (vs 28,000), maintaining sync efficiency while keeping the UI reactive.
 
 ---
 
@@ -238,7 +240,7 @@ export const PERSISTENT_ACTION_TYPES: Set<string> = new Set([
 2. Component dispatches `TaskActions.update({ id, changes: { isDone: true } })`.
 3. **Reducer:** Updates memory state immediately (optimistic UI).
 4. **OperationLogEffect** (new):
-   - Listens for actions matching `PERSISTENT_ACTION_TYPES` or with `meta.isPersistent: true`.
+   - Listens for actions satisfying `isPersistentAction` (i.e., has metadata and NOT blacklisted).
    - **Ignores** actions with `meta.isRemote: true`.
    - Converts Action → [`Operation`](#22-the-operation-schema) object.
    - Increments local vector clock counter.
@@ -1488,7 +1490,7 @@ interface SyncSnapshot {
 
 ---
 
-## 14. References
+## 16. References
 
 - [Event Sourcing Pattern (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [CRDT Primer](https://crdt.tech/)
