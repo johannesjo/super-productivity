@@ -75,11 +75,11 @@ export class DependencyResolverService {
   private async checkEntityExists(type: EntityType, id: string): Promise<boolean> {
     switch (type) {
       case 'TASK':
-        const task = await firstValueFrom(this.store.select(selectTaskById({ id })));
+        const task = await firstValueFrom(this.store.select(selectTaskById, { id }));
         return !!task;
       case 'PROJECT':
         const project = await firstValueFrom(
-          this.store.select(selectProjectById({ id })),
+          this.store.select(selectProjectById, { id }),
         );
         return !!project;
       // Implement others
