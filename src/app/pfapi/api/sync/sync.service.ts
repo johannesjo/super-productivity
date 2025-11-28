@@ -99,8 +99,15 @@ export class SyncService<const MD extends ModelCfgs> {
       // --- NEW: Operation Log Sync Phase ---
       // This will upload local pending operations and download remote operations,
       // including conflict detection at the operation level.
-      await this._operationLogSyncService.uploadPendingOps();
-      await this._operationLogSyncService.downloadRemoteOps();
+      const currentSyncProvider = this._currentSyncProvider$.value;
+      if (currentSyncProvider) {
+        await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+        await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+      } else {
+        PFLog.warn(
+          `${SyncService.L}: No active sync provider found for operation log sync.`,
+        );
+      }
       // --- END NEW ---
 
       const localMeta0 = await this._metaModelCtrl.load();

@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { LockService } from './lock.service';
 import {
   ConflictResult,
@@ -26,7 +25,7 @@ import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
 import { OperationApplierService } from './operation-applier.service';
-import { ConflictResolutionService } from './conflict-resolution.service'; // NEW IMPORT
+import { ConflictResolutionService } from './conflict-resolution.service';
 
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
@@ -42,21 +41,11 @@ const MANIFEST_VERSION = 1;
 })
 export class OperationLogSyncService {
   private opLogStore = inject(OperationLogStoreService);
-  private pfapiService = inject(PfapiService);
   private lockService = inject(LockService);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private dependencyResolver = inject(DependencyResolverService);
-  private operationApplier = inject(OperationApplierService); // THIS IS ADDED IN THE REPLACE
-  private conflictResolutionService = inject(ConflictResolutionService); // NEW INJECTION
-
-  private _getSyncProvider(): SyncProviderServiceInterface<SyncProviderId> | undefined {
-    const syncProvider = this.pfapiService.pf.getActiveSyncProvider();
-    if (!syncProvider) {
-      PFLog.warn('OperationLogSyncService: No active sync provider available.');
-      return undefined;
-    }
-    return syncProvider;
-  }
+  private operationApplier = inject(OperationApplierService);
+  private conflictResolutionService = inject(ConflictResolutionService);
 
   private _getManifestFileName(): string {
     return MANIFEST_FILE_NAME;
@@ -94,7 +83,14 @@ export class OperationLogSyncService {
     );
   }
 
-  async uploadPendingOps(): Promise<void> {
+  async uploadPendingOps(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    if (!syncProvider) {
+      PFLog.warn('OperationLogSyncService: No active sync provider passed for upload.');
+      return;
+    }
+
     PFLog.normal('OperationLogSyncService: Uploading pending operations...');
     await this.lockService.request('sp_op_log_upload', async () => {
       const pendingOps = await this.opLogStore.getUnsynced();
@@ -103,9 +99,6 @@ export class OperationLogSyncService {
         PFLog.normal('OperationLogSyncService: No pending operations to upload.');
         return;
       }
-
-      const syncProvider = this._getSyncProvider();
-      if (!syncProvider) return;
 
       const remoteManifest = await this._loadRemoteManifest(syncProvider);
       const updatedManifestFiles: string[] = [...remoteManifest.operationFiles];
@@ -150,12 +143,16 @@ export class OperationLogSyncService {
     });
   }
 
-  async downloadRemoteOps(): Promise<void> {
+  async downloadRemoteOps(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    if (!syncProvider) {
+      PFLog.warn('OperationLogSyncService: No active sync provider passed for download.');
+      return;
+    }
+
     PFLog.normal('OperationLogSyncService: Downloading remote operations...');
     await this.lockService.request('sp_op_log_download', async () => {
-      const syncProvider = this._getSyncProvider();
-      if (!syncProvider) return;
-
       const remoteManifest = await this._loadRemoteManifest(syncProvider);
       let remoteOpFileNames: string[] = remoteManifest.operationFiles;
 
