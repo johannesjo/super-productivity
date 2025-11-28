@@ -1,0 +1,66 @@
+<h1 mat-dialog-title>{{ 'SYNC.CONFLICT_RESOLUTION.TITLE' | translate }}</h1>
+
+<div mat-dialog-content>
+  <p>{{ 'SYNC.CONFLICT_RESOLUTION.INTRO' | translate }}</p>
+
+  @for (conflict of data.conflicts; track conflict.entityId) {
+    <div class="conflict-item">
+      <h3>{{ conflict.entityType }}: {{ conflict.entityId }}</h3>
+
+      <div class="conflict-sides">
+        <div class="local-side">
+          <h4>{{ 'SYNC.CONFLICT_RESOLUTION.LOCAL' | translate }}</h4>
+          <p>Ops: {{ conflict.localOps.length }}</p>
+          <p>
+            Last:
+            {{
+              conflict.localOps[conflict.localOps.length - 1].timestamp | date: 'short'
+            }}
+          </p>
+          <button
+            mat-stroked-button
+            (click)="resolve($index, 'local')"
+          >
+            {{ 'SYNC.CONFLICT_RESOLUTION.USE_LOCAL' | translate }}
+          </button>
+        </div>
+
+        <div class="remote-side">
+          <h4>{{ 'SYNC.CONFLICT_RESOLUTION.REMOTE' | translate }}</h4>
+          <p>Ops: {{ conflict.remoteOps.length }}</p>
+          <p>
+            Last:
+            {{
+              conflict.remoteOps[conflict.remoteOps.length - 1].timestamp | date: 'short'
+            }}
+          </p>
+          <button
+            mat-stroked-button
+            (click)="resolve($index, 'remote')"
+          >
+            {{ 'SYNC.CONFLICT_RESOLUTION.USE_REMOTE' | translate }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>
+
+<div
+  mat-dialog-actions
+  align="end"
+>
+  <button
+    mat-button
+    (click)="resolveAll('local')"
+  >
+    {{ 'SYNC.CONFLICT_RESOLUTION.USE_ALL_LOCAL' | translate }}
+  </button>
+  <button
+    mat-button
+    color="primary"
+    (click)="resolveAll('remote')"
+  >
+    {{ 'SYNC.CONFLICT_RESOLUTION.USE_ALL_REMOTE' | translate }}
+  </button>
+</div>
