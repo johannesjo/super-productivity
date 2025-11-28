@@ -218,7 +218,7 @@ Time tracking produces a state change every second (`[TimeTracking] Add Time Spe
 
 **Strategy:**
 
-1.  **Blacklist:** The raw tick action `[TimeTracking] Add Time Spent` is in the `ACTION_BLACKLIST`. It updates the in-memory store (UI updates immediately) but writes nothing to the Operation Log.
+1.  **Blacklist:** The raw tick action `[TimeTracking] Add Time Spent` is in the `ACTION_BLACKLIST`. It updates the in-memory store (Task `timeSpent`, Project `timeSpent`, Tag `timeSpent`, and global `TimeTracking` state) immediately, ensuring the UI remains reactive.
 2.  **Accumulate:** The application tracks the "uncommitted" time spent in memory.
 3.  **Periodic Flush:** A new action `[TimeTracking] Sync Time` (or `Commit Time`) is dispatched periodically.
     - **Triggers:**
@@ -226,7 +226,8 @@ Time tracking produces a state change every second (`[TimeTracking] Add Time Spe
       - User pauses the timer.
       - User switches tasks.
       - App is closed/unloaded.
-4.  **Persist:** This `Sync Time` action IS persisted. It contains the aggregated time diff since the last sync.
+4.  **Persist:** This `Sync Time` action IS persisted. It contains the aggregated time diffs for **all affected entities** (Task, Project, Tag) since the last sync.
+5.  **Model Updates:** When `Sync Time` is replayed on another device, it updates the `timeSpent` values for the specific Task, Project, and Tag entities referenced in the payload, ensuring consistent state across all models without flooding the log with granular ticks.
 
 **Result:** 8 hours of work = ~100 operations (vs 28,000), maintaining sync efficiency while keeping the UI reactive.
 
@@ -555,39 +556,63 @@ Super Productivity has several cross-model relationships that require special ha
 
 ```mermaid
 erDiagram
-    TASK ||--o| PROJECT : "belongs to"
+    TASK ||--o| PROJECT : "belongs to (optional)"
     TASK }|--o{ TAG : "has many"
     TASK ||--o| TASK : "parent/child"
-    NOTE ||--o| PROJECT : "belongs to"
-    TASK_REPEAT_CFG ||--o| PROJECT : "belongs to"
-    ISSUE_PROVIDER ||--o| PROJECT : "belongs to"
+    TASK ||--o| REMINDER : "has one (optional)"
+    TASK ||--o| TASK_REPEAT_CFG : "created from (optional)"
+
+    NOTE }|--|| PROJECT : "belongs to (via projectId)"
+    PROJECT |o--|{ NOTE : "lists (via noteIds)"
+
+    TASK_REPEAT_CFG ||--o| PROJECT : "belongs to (optional)"
+    TASK_REPEAT_CFG }|--o{ TAG : "has many"
+
+    ISSUE_PROVIDER ||--o{ PROJECT : "integrated in (via issueIntegrationCfgs)"
+    ISSUE_PROVIDER |o--|{ PROJECT : "default for (via defaultProjectId)"
 
     TASK {
         string id PK
         string projectId FK
         string parentId FK
         array tagIds FK
+        string reminderId FK
+        string repeatCfgId FK
     }
     PROJECT {
         string id PK
         array taskIds
         array backlogTaskIds
+        array noteIds FK
+        object issueIntegrationCfgs
     }
     TAG {
         string id PK
         array taskIds
     }
+    NOTE {
+        string id PK
+        string projectId FK
+    }
+    TASK_REPEAT_CFG {
+        string id PK
+        string projectId FK
+        array tagIds FK
+    }
 ```
 
 ### 5.2. Reference Types & Handling Strategies
 
-| Relationship            | Reference Field  | On Foreign Delete                  | On Missing Reference                |
-| ----------------------- | ---------------- | ---------------------------------- | ----------------------------------- |
-| Task → Project          | `task.projectId` | Orphan (keep task, null projectId) | Queue op, apply when project exists |
-| Task → Tag              | `task.tagIds[]`  | Remove from array                  | Skip missing tag, log warning       |
-| Task → Parent Task      | `task.parentId`  | Cascade delete subtask             | Queue op, apply when parent exists  |
-| Note → Project          | `note.projectId` | Orphan (keep note)                 | Queue op, apply when project exists |
-| TaskRepeatCfg → Project | `cfg.projectId`  | Orphan or delete cfg               | Queue op                            |
+| Relationship        | Reference Field    | On Foreign Delete                  | On Missing Reference                |
+| ------------------- | ------------------ | ---------------------------------- | ----------------------------------- |
+| Task → Project      | `task.projectId`   | Orphan (keep task, null projectId) | Queue op, apply when project exists |
+| Task → Tag          | `task.tagIds[]`    | Remove from array                  | Skip missing tag, log warning       |
+| Task → Parent Task  | `task.parentId`    | Cascade delete subtask             | Queue op, apply when parent exists  |
+| Task → Reminder     | `task.reminderId`  | Set null (orphan reminder cleaned) | Skip                                |
+| Task → RepeatCfg    | `task.repeatCfgId` | Keep reference (audit trail)       | Skip                                |
+| Note → Project      | `note.projectId`   | Orphan (keep note)                 | Queue op, apply when project exists |
+| RepeatCfg → Project | `cfg.projectId`    | Orphan or delete cfg               | Queue op                            |
+| RepeatCfg → Tag     | `cfg.tagIds[]`     | Remove from array                  | Skip                                |
 
 ### 5.3. Operation Ordering & Dependencies
 
@@ -886,46 +911,74 @@ const ORPHAN_HANDLING_POLICY: Record<string, OrphanHandling> = {
 
 ---
 
-## 6. Integration with Existing pfapi
+## 6. Migration Strategy: From PFAPI to Event Sourcing
 
-### 6.1. Coexistence Strategy
+⚠️ **Architectural Shift Required**: The current `pfapi` architecture (Persistence & Feature API) is built around a "Save Snapshot" paradigm, where services directly trigger saving the entire state of a model to IndexedDB/File.
 
-The operation log can be introduced **alongside** the existing sync system, not as a replacement:
+To support Event Sourcing, `pfapi` must be fundamentally refactored or replaced by a Facade that interacts with the Operation Log.
 
-```
-Phase 1: Operation logging only (local persistence, no sync changes)
-Phase 2: Dual-write (log ops + maintain current snapshot sync)
-Phase 3: Operation-based sync (read from log for sync)
-Phase 4: Remove snapshot sync (operation log is primary)
-```
+### 6.1. Current vs. Target Architecture
 
-### 6.2. pfapi Integration Points
+| Feature                 | Current PFAPI                                    | Target Event Sourcing                                    |
+| :---------------------- | :----------------------------------------------- | :------------------------------------------------------- |
+| **Persistence Trigger** | Explicit `save()` called by Effects/Services     | Automatic via `OperationLogEffects` listening to Actions |
+| **Data Format**         | Full State Snapshot (JSON)                       | Discrete Operations (Log) + Rolling Snapshot             |
+| **Source of Truth**     | Database / File                                  | NgRx Store (InMemory) + OpLog (History)                  |
+| **Sync Logic**          | Compare "Last Modified" timestamps of full files | Exchange Operations, Merge, Replay                       |
 
-| Existing Component                                                       | Integration Approach          |
-| ------------------------------------------------------------------------ | ----------------------------- |
-| [`MetaModelCtrl`](../../src/app/pfapi/api/model-ctrl/meta-model-ctrl.ts) | Add op log sequence to meta   |
-| [`ModelSyncService`](../../src/app/pfapi/api/sync/model-sync.service.ts) | Keep for snapshot backup      |
-| [`SyncService.sync()`](../../src/app/pfapi/api/sync/sync.service.ts:91)  | Add operation exchange phase  |
-| Vector Clock utilities                                                   | Reuse existing implementation |
+### 6.2. Transformation Plan
 
-### 6.3. Remote Storage Format
+1.  **Invert Control:**
 
-For compatibility with existing WebDAV/Dropbox providers:
+    - **OLD:** Service -> `pfapi.save(modelData)` -> DB.
+    - **NEW:** Service -> Dispatch Action -> `OperationLogEffects` -> OpLog -> `pfapi` (optional backup).
 
-```
-/superproductivity/
-├── main.json              # Legacy: Full state snapshot (kept for backup)
-├── meta.json              # Legacy: Metadata with vector clock
-├── ops/                   # NEW: Operation logs directory
-│   ├── manifest.json      # Index of all op files + last compaction
-│   ├── ops_clientA_1700000000.json
-│   ├── ops_clientA_1700001000.json
-│   ├── ops_clientB_1700000500.json
-│   └── ...
-└── snapshots/             # NEW: Periodic full snapshots
-    ├── snapshot_1700000000.json
-    └── ...
-```
+2.  **Deprecate Direct Saves:**
+
+    - Modify `pfapi.save()` to be a no-op or a "backup only" operation during the transition.
+    - Eventually remove `pfapi.save()` calls from feature effects.
+
+3.  **Hydration Facade:**
+
+    - Repurpose `pfapi.load()` to fetch the latest "State Cache" from the Operation Log system instead of raw model tables.
+    - `pfapi` becomes the "Read Side" adapter for the Event Sourcing engine.
+
+4.  **Legacy Support:**
+    - Maintain the `pfapi` interface for Plugins and existing components, but redirect the implementation to the new internal services (`OperationLogStore`, `SnapshotStore`).
+
+### 6.3. Migration Phases
+
+1.  **Parallel Write (Phase 1):**
+
+    - Keep existing `pfapi` saving for safety.
+    - Enable `OperationLogEffects` to record operations in the background.
+    - Verify Log integrity against Snapshots.
+
+2.  **Switch Read (Phase 2):**
+
+    - Change app hydration to load from `OperationLogHydrator` (Snapshot + Op Replay).
+    - If hydration fails, fallback to `pfapi` legacy snapshots.
+
+3.  **Cutover (Phase 3):**
+    - Disable `pfapi` writes.
+    - Make `OperationLog` the primary persistence.
+    - `pfapi` services become read-only wrappers around the store state.
+
+---
+
+├── main.json # Legacy: Full state snapshot (kept for backup)
+├── meta.json # Legacy: Metadata with vector clock
+├── ops/ # NEW: Operation logs directory
+│ ├── manifest.json # Index of all op files + last compaction
+│ ├── ops_clientA_1700000000.json
+│ ├── ops_clientA_1700001000.json
+│ ├── ops_clientB_1700000500.json
+│ └── ...
+└── snapshots/ # NEW: Periodic full snapshots
+├── snapshot_1700000000.json
+└── ...
+
+````
 
 ---
 
@@ -949,7 +1002,7 @@ async detectMigrationNeeded(): Promise<MigrationType> {
   }
   return MigrationType.ALREADY_MIGRATED;
 }
-```
+````
 
 ### 7.2. Migration Operations
 
@@ -987,29 +1040,6 @@ async migrateFromLegacy(): Promise<void> {
     vectorClock: frontierClock,
     compactedAt: Date.now(),
   });
-}
-```
-
-### 7.3. Rollback Strategy
-
-If issues are detected after migration:
-
-```typescript
-async rollbackToLegacy(): Promise<void> {
-  // 1. Check if legacy backup exists
-  const legacyBackup = await this.legacyStore.getBackup();
-  if (!legacyBackup) {
-    throw new Error('No legacy backup available for rollback');
-  }
-
-  // 2. Restore legacy data
-  await this.pfapi.importAllSycModelData({ data: legacyBackup });
-
-  // 3. Clear operation log
-  await this.opLogStore.clearAll();
-
-  // 4. Update migration status
-  await this.legacyStore.markRolledBack();
 }
 ```
 
