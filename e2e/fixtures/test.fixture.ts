@@ -13,13 +13,15 @@ type TestFixtures = {
 
 export const test = base.extend<TestFixtures>({
   // Create isolated context for each test
-  isolatedContext: async ({ browser }, use, testInfo) => {
+  isolatedContext: async ({ browser, baseURL }, use, testInfo) => {
+    const url = baseURL || testInfo.project.use.baseURL || 'http://localhost:4242';
     // Create a new context with isolated storage
     const context = await browser.newContext({
       // Each test gets its own storage state
       storageState: undefined,
       // Preserve the base userAgent and add worker index for debugging
       userAgent: `PLAYWRIGHT PLAYWRIGHT-WORKER-${testInfo.workerIndex}`,
+      baseURL: url,
     });
 
     await use(context);

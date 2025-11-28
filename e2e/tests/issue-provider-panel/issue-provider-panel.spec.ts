@@ -44,7 +44,7 @@ test.describe('Issue Provider Panel', () => {
         if (dialogOpened) {
           await page.click(CANCEL_BTN);
           // Wait for dialog to close
-          await page.waitForTimeout(500);
+          await page.waitForSelector(CANCEL_BTN, { state: 'detached' });
         }
       }
     }

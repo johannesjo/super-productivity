@@ -28,7 +28,12 @@ test.describe('Plugin Lifecycle', () => {
 
     await workViewPage.waitForTaskList();
 
-    await waitForPluginManagementInit(page);
+    const initSuccess = await waitForPluginManagementInit(page);
+    if (!initSuccess) {
+      throw new Error(
+        'Plugin management failed to initialize (timeout waiting for plugin cards)',
+      );
+    }
 
     // Enable API Test Plugin
     const settingsBtn = page.locator(SETTINGS_BTN);

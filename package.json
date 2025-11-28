@@ -49,6 +49,7 @@
     "dist:win:only": "electron-builder --win",
     "dist:win:store": "git pull && npm run && copy electron-builder.win-store.yaml electron-builder.yaml && npm run dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
     "droid": "npm run buildFrontend:stageWeb:unminified && npx cap sync",
+    "pree2e": "npm run plugins:build",
     "e2e": "npx playwright test --config e2e/playwright.config.ts --reporter=line",
     "e2e:ui": "npx playwright test --config e2e/playwright.config.ts --ui",
     "e2e:file": "npx playwright test --config e2e/playwright.config.ts --reporter=list",

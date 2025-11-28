@@ -28,7 +28,12 @@ test.describe.serial('Plugin Enable Verify', () => {
 
     await workViewPage.waitForTaskList();
 
-    await waitForPluginManagementInit(page);
+    const initSuccess = await waitForPluginManagementInit(page);
+    if (!initSuccess) {
+      throw new Error(
+        'Plugin management failed to initialize (timeout waiting for plugin cards)',
+      );
+    }
 
     // Navigate to plugin settings
     await page.click(SETTINGS_BTN);
