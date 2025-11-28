@@ -5,6 +5,8 @@ import { IssueDataReduced } from '../../features/issue/issue.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { Project } from '../../features/project/project.model';
 import { BatchOperation } from '@super-productivity/plugin-api';
+import { PersistentActionMeta } from '../../core/persistence/operation-log/persistent-action.interface';
+import { OpType } from '../../core/persistence/operation-log/operation.types';
 
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)
@@ -14,7 +16,7 @@ export const TaskSharedActions = createActionGroup({
   source: 'Task Shared',
   events: {
     // Task Management
-    addTask: props<{
+    addTask: (taskProps: {
       task: Task;
       issue?: IssueDataReduced;
       workContextId: string;
@@ -22,7 +24,15 @@ export const TaskSharedActions = createActionGroup({
       isAddToBacklog: boolean;
       isAddToBottom: boolean;
       isIgnoreShortSyntax?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Create,
+      } as PersistentActionMeta,
+    }),
 
     convertToMainTask: props<{
       task: Task;
@@ -30,13 +40,26 @@ export const TaskSharedActions = createActionGroup({
       isPlanForToday?: boolean;
     }>(),
 
-    deleteTask: props<{
-      task: TaskWithSubTasks;
-    }>(),
+    deleteTask: (taskProps: { task: TaskWithSubTasks }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Delete,
+      } as PersistentActionMeta,
+    }),
 
-    deleteTasks: props<{
-      taskIds: string[];
-    }>(),
+    deleteTasks: (taskProps: { taskIds: string[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: taskProps.taskIds,
+        opType: OpType.Delete,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
     moveToArchive: props<{
@@ -78,10 +101,15 @@ export const TaskSharedActions = createActionGroup({
     }>(),
 
     // Task Updates
-    updateTask: props<{
-      task: Update<Task>;
-      isIgnoreShortSyntax?: boolean;
-    }>(),
+    updateTask: (taskProps: { task: Update<Task>; isIgnoreShortSyntax?: boolean }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id as string,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
     // Project Management
     moveToOtherProject: props<{

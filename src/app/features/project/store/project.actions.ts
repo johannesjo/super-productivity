@@ -3,6 +3,8 @@ import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 import { DropListModelSource } from '../../tasks/task.model';
+import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
+import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
 export const setCurrentProject = createAction(
   '[Project] SetCurrentProject',
@@ -16,7 +18,15 @@ export const loadProjects = createAction(
 
 export const addProject = createAction(
   '[Project] Add Project',
-  props<{ project: Project }>(),
+  (projectProps: { project: Project }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.project.id,
+      opType: OpType.Create,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const upsertProject = createAction(
@@ -31,7 +41,15 @@ export const addProjects = createAction(
 
 export const updateProject = createAction(
   '[Project] Update Project',
-  props<{ project: Update<Project> }>(),
+  (projectProps: { project: Update<Project> }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.project.id as string,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const updateProjectAdvancedCfg = createAction(
@@ -55,17 +73,41 @@ export const updateProjectOrder = createAction(
 
 export const archiveProject = createAction(
   '[Project] Archive Project',
-  props<{ id: string }>(),
+  (projectProps: { id: string }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.id,
+      opType: OpType.Update, // Archiving is an update
+    } as PersistentActionMeta,
+  }),
 );
 
 export const unarchiveProject = createAction(
   '[Project] Unarchive Project',
-  props<{ id: string }>(),
+  (projectProps: { id: string }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.id,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const toggleHideFromMenu = createAction(
   '[Project] Toggle hide from menu',
-  props<{ id: string }>(),
+  (projectProps: { id: string }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.id,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
 
 // MOVE TASK ACTIONS

@@ -82,11 +82,13 @@ import { AppStateEffects } from './app-state/app-state.effects';
 import { appStateFeature } from './app-state/app-state.reducer';
 import { SaveToDbEffects } from './shared/save-to-db.effects';
 import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
+import { OperationLogEffects } from '../core/persistence/operation-log/operation-log.effects';
 
 @NgModule({
   declarations: [],
   imports: [
     EffectsModule.forFeature([SaveToDbEffects]),
+    EffectsModule.forFeature([OperationLogEffects]),
 
     StoreModule.forFeature(appStateFeature),
     EffectsModule.forFeature([AppStateEffects]),
