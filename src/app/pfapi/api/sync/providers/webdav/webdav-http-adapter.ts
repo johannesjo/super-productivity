@@ -176,8 +176,10 @@ export class WebDavHttpAdapter {
 
     if (status < 200 || status >= 300) {
       // Create a fake Response object for the error
+      // Ensure status is valid (200-599) for Response constructor
+      const safeStatus = status >= 200 && status <= 599 ? status : 500;
       const errorResponse = new Response('', {
-        status: status,
+        status: safeStatus,
         statusText: `HTTP ${status} for ${url}`,
       });
       throw new HttpNotOkAPIError(errorResponse, body);

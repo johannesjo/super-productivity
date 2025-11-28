@@ -54,17 +54,35 @@ export class WebdavApi {
           return meta;
         }
       }
-
-      // If PROPFIND fails or returns no data, try HEAD request as fallback
-      if (useGetFallback) {
-        return await this._getFileMetaViaHead(fullPath);
-      }
-
-      throw new RemoteFileNotFoundAPIError(path);
     } catch (e) {
+      // If PROPFIND fails and fallback is enabled, try HEAD
+      if (useGetFallback) {
+        PFLog.verbose(
+          `${WebdavApi.L}.getFileMeta() PROPFIND failed, trying HEAD fallback`,
+          e,
+        );
+        try {
+          return await this._getFileMetaViaHead(fullPath);
+        } catch (headErr) {
+          PFLog.warn(
+            `${WebdavApi.L}.getFileMeta() HEAD fallback failed for ${path}`,
+            headErr,
+          );
+          // If HEAD also fails, throw the original error (or maybe the HEAD error?)
+          // Usually the original PROPFIND error is more informative about connectivity
+        }
+      }
       PFLog.error(`${WebdavApi.L}.getFileMeta() error`, { path, error: e });
       throw e;
     }
+
+    // If we get here, PROPFIND worked but returned no data (or not MULTI_STATUS)
+    // Try HEAD request as fallback if enabled
+    if (useGetFallback) {
+      return await this._getFileMetaViaHead(fullPath);
+    }
+
+    throw new RemoteFileNotFoundAPIError(path);
   }
 
   async download({ path }: { path: string }): Promise<{
@@ -507,6 +525,8 @@ export class WebdavApi {
       );
     }
 
+    const etag = headers['etag'] || headers['ETag'] || '';
+
     return {
       filename,
       basename: filename,
@@ -514,7 +534,16 @@ export class WebdavApi {
       size,
       type: contentType || 'application/octet-stream',
       etag: lastModified, // Use lastmod as etag for consistency
-      data: {},
+      data: {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        'content-type': contentType,
+        'content-length': contentLength,
+        'last-modified': lastModified,
+        /* eslint-enable @typescript-eslint/naming-convention */
+        etag: etag,
+        href: fullPath,
+      },
+      path: fullPath, // NEW: Populate the required path property
     };
   }
 }
