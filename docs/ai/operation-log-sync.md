@@ -1075,32 +1075,79 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 10. Implementation Phases
+## 10. MVP Guardrails and Scope
+
+**Replay without side effects**
+
+- Introduce a replay dispatcher (or global guard) that prevents effects/notifications from firing for `meta.isRemote`/`meta.isReplay`.
+- Add tests asserting hydration/sync replays do not call effects.
+
+**Canonical operation codecs**
+
+- Per-entity Typia codecs that normalize payloads to minimal diffs (no derived arrays or redundant fields).
+- Persist the normalized patch shape, not raw action payloads.
+
+**Deterministic reducers**
+
+- Audit reducers for randomness/time or hidden side effects; refactor or exclude non-deterministic actions from persistence.
+- Property-test: random op streams applied via replay vs. direct reducer baseline must match.
+
+**Conflict frontier**
+
+- Track last-applied op/vector per entity; conflict detection compares remote ops against both unsynced local ops and the applied frontier (not just pending uploads).
+- Order application by vector-clock comparison + local seq; do not rely on timestamps.
+
+**Snapshot/manifest contract**
+
+- Before deleting ops, publish a snapshot (state + vector clock + retained op range) to remote storage.
+- Keep ops from that snapshot forward; new devices hydrate from the latest published snapshot + tail.
+
+**Atomic multi-entity application**
+
+- Add a batch/transaction path so grouped ops apply atomically (or rollback) instead of partial state on crash.
+
+**Dependency handling with bounds**
+
+- Queue missing-dependency ops with retry budget/diagnostics; process via topological order that tolerates concurrent creates/updates; move exhausted items to a “stuck” queue.
+
+**Cross-platform coordination**
+
+- Feature-detect Web Locks/BroadcastChannel; provide IndexedDB mutex + storage-event (or equivalent) fallback for Electron/Capacitor.
+
+**Upload/idempotency robustness**
+
+- Use content-hash filenames; write manifest last; reconcile uploaded-but-unmanifested files on startup; dedupe by op ID regardless of file overlap.
+
+**Migration slicing**
+
+- Emit per-entity genesis create ops sharing one frontier instead of a single huge batch payload; align the initial snapshot to that frontier.
+
+## 11. Implementation Phases
 
 ### Phase 1: Local Operation Logging (2-3 weeks)
 
 - [ ] Create `OperationLogStore` (IndexedDB adapter)
-- [ ] Create `Operation` types and validators (Typia)
-- [ ] Create `OperationLogEffects` (listen to persistent actions)
+- [ ] Create `Operation` types and per-entity codecs (Typia) with normalization
+- [ ] Create `OperationLogEffects` (listen to persistent actions) with replay guard for effects
 - [ ] Create action whitelist registry
 - [ ] Add `isPersistent` meta to 10-15 core actions
-- [ ] Create `OperationLogHydrator` for startup
-- [ ] Create compaction service
-- [ ] Unit tests for all components
+- [ ] Create `OperationLogHydrator` for startup (side-effect-safe replay path)
+- [ ] Create compaction service with snapshot/manifest contract
+- [ ] Unit tests + replay determinism property test
 
 ### Phase 2: Multi-Tab Coordination (1 week)
 
 - [ ] Implement Web Locks for write coordination
-- [ ] Implement BroadcastChannel for cross-tab notification
+- [ ] Implement BroadcastChannel for cross-tab notification with fallbacks
 - [ ] Handle tab crash/unexpected close
 - [ ] Integration tests
 
 ### Phase 3: Dependency & Relationship Handling (1-2 weeks)
 
-- [ ] Implement dependency resolver for operation ordering
+- [ ] Implement dependency resolver for operation ordering with bounded retries
 - [ ] Implement orphan handling policies
 - [ ] Implement cascade operation generation
-- [ ] Implement atomic operation groups
+- [ ] Implement atomic operation groups/batch apply with rollback
 - [ ] Unit tests for cross-model scenarios
 
 ### Phase 4: Conflict Detection (1-2 weeks)
@@ -1136,7 +1183,7 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 11. Open Questions
+## 12. Open Questions
 
 1. **Payload Size Limits:** Should we split large payloads (e.g., long notes) into separate operations?
 2. **Selective Sync:** Can users choose which entities to sync (e.g., only project A)?
@@ -1154,7 +1201,7 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 12. References
+## 13. References
 
 - [Event Sourcing Pattern (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [CRDT Primer](https://crdt.tech/)
