@@ -1,9 +1,9 @@
 {
   "id": "automations",
-  "name": "Automations",
+  "name": "Automations (experimental)",
   "version": "1.0.0",
   "manifestVersion": 1,
-  "minSupVersion": "8.0.0",
+  "minSupVersion": "16.0.0",
   "description": "Simple rule-based automation for Super Productivity",
   "author": "Super Productivity",
   "homepage": "",
