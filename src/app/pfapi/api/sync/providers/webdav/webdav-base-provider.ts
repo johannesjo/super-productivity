@@ -116,6 +116,12 @@ export abstract class WebdavBaseProvider<
     await this._api.remove(filePath);
   }
 
+  async listFiles(dirPath: string): Promise<string[]> {
+    SyncLog.debug(this.logLabel, 'listFiles', { dirPath });
+    const { filePath } = await this._getConfigAndPath(dirPath);
+    return this._api.listFiles(filePath);
+  }
+
   protected _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
     const parts = cfg.syncFolderPath ? [cfg.syncFolderPath] : [];
     if (this._extraPath) {
