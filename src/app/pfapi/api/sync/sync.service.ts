@@ -36,6 +36,7 @@ import {
   sanitizeVectorClock,
 } from '../util/vector-clock';
 import { getVectorClock } from '../util/backwards-compat';
+import { OperationLogSyncService } from '../../../core/persistence/operation-log/operation-log-sync.service';
 
 /**
  * Sync Service for Super Productivity
@@ -61,6 +62,7 @@ export class SyncService<const MD extends ModelCfgs> {
     private _currentSyncProvider$: MiniObservable<SyncProviderServiceInterface<SyncProviderId> | null>,
     _encryptAndCompressCfg$: MiniObservable<EncryptAndCompressCfg>,
     _encryptAndCompressHandler: EncryptAndCompressHandlerService,
+    private _operationLogSyncService: OperationLogSyncService,
   ) {
     this._metaFileSyncService = new MetaSyncService(
       _metaModelCtrl,
@@ -93,6 +95,14 @@ export class SyncService<const MD extends ModelCfgs> {
       if (!(await this._isReadyForSync())) {
         return { status: SyncStatus.NotConfigured };
       }
+
+      // --- NEW: Operation Log Sync Phase ---
+      // This will upload local pending operations and download remote operations,
+      // including conflict detection at the operation level.
+      await this._operationLogSyncService.uploadPendingOps();
+      await this._operationLogSyncService.downloadRemoteOps();
+      // --- END NEW ---
+
       const localMeta0 = await this._metaModelCtrl.load();
 
       PFLog.normal(`${SyncService.L}.${this.sync.name}(): Initial meta check`, {

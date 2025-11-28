@@ -1,4 +1,5 @@
 import { VectorClock } from '../../../pfapi/api/util/vector-clock';
+export { VectorClock };
 
 export enum OpType {
   Create = 'CRT',
@@ -54,4 +55,18 @@ export interface OperationLogEntry {
   appliedAt: number; // When this op was applied locally (epoch ms)
   source: 'local' | 'remote'; // Origin of this operation
   syncedAt?: number; // When successfully synced to remote (null if pending)
+}
+
+export interface EntityConflict {
+  entityType: EntityType;
+  entityId: string;
+  localOps: Operation[]; // Local ops affecting this entity
+  remoteOps: Operation[]; // Remote ops affecting the same entity
+  suggestedResolution: 'local' | 'remote' | 'merge' | 'manual';
+  mergedPayload?: unknown; // If auto-mergeable
+}
+
+export interface ConflictResult {
+  nonConflicting: Operation[];
+  conflicts: EntityConflict[];
 }
