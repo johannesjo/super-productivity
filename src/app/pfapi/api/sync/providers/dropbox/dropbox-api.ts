@@ -51,6 +51,32 @@ export class DropboxApi {
   // ==============================
 
   /**
+   * List folder contents
+   */
+  async listFiles(path: string): Promise<string[]> {
+    PFLog.normal(`${DropboxApi.L}.listFiles() for path: ${path}`);
+    try {
+      const response = await this._request({
+        method: 'POST',
+        url: 'https://api.dropboxapi.com/2/files/list_folder',
+        headers: { 'Content-Type': 'application/json' },
+        data: { path },
+      });
+      const result = await response.json();
+      if (!result || !result.entries) {
+        return [];
+      }
+      return result.entries
+        .filter((entry: any) => entry['.tag'] === 'file') // Only return files
+        .map((entry: any) => entry.path_lower); // Return full path in lower case
+    } catch (e) {
+      PFLog.critical(`${DropboxApi.L}.listFiles() error for path: ${path}`, e);
+      this._checkCommonErrors(e, path);
+      throw e;
+    }
+  }
+
+  /**
    * Retrieve metadata for a file or folder
    */
   async getMetaData(path: string, localRev: string): Promise<DropboxFileMetadata> {

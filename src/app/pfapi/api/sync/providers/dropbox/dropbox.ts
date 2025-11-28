@@ -213,6 +213,31 @@ export class Dropbox implements SyncProviderServiceInterface<SyncProviderId.Drop
     }
   }
 
+  async listFiles(dirPath: string): Promise<string[]> {
+    PFLog.normal(`${Dropbox.L}.${this.listFiles.name}()`, { dirPath });
+    try {
+      // DropboxApi.listFiles now returns full paths, so no need to prepend _getPath
+      return await this._api.listFiles(this._getPath(dirPath));
+    } catch (e) {
+      if (this._isTokenError(e)) {
+        PFLog.critical('EXPIRED or INVALID TOKEN, trying to refresh');
+        await this._api.updateAccessTokenFromRefreshTokenIfAvailable();
+        return this.listFiles(dirPath);
+      }
+
+      if (this._isPathNotFoundError(e)) {
+        // If the directory doesn't exist, return empty array
+        return [];
+      }
+
+      if (this._isUnauthorizedError(e)) {
+        throw new AuthFailSPError('Dropbox 401 listFiles', dirPath);
+      }
+
+      throw e;
+    }
+  }
+
   /**
    * Gets authentication helper for OAuth flow
    * @returns Promise with auth helper object
