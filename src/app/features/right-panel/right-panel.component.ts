@@ -366,6 +366,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     if (!RIGHT_PANEL_CONFIG.RESIZABLE || this._isListenersAttached) return;
 
     this.isResizing.set(true);
+    this._layoutService.isPanelResizing.set(true);
     this._activePointerId = event.pointerId;
     this._startX.set(event.clientX);
     this._startWidth.set(this.currentWidth());
@@ -393,6 +394,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     if (!this.isResizing() && !this._isListenersAttached) return;
 
     this.isResizing.set(false);
+    this._layoutService.isPanelResizing.set(false);
     this._isListenersAttached = false;
     this._detachResizeListeners();
 
@@ -439,6 +441,7 @@ export class RightPanelComponent implements AfterViewInit, OnDestroy {
     if (!this.isResizing() && !this._isListenersAttached) return;
 
     this.isResizing.set(false);
+    this._layoutService.isPanelResizing.set(false);
     this._isListenersAttached = false;
     this._activePointerId = null;
     if (this._activePointerCaptureEl) {

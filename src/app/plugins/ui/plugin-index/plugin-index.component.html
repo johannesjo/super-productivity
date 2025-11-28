@@ -60,7 +60,10 @@
 
   <!-- Plugin iframe -->
   @if (iframeSrc() && !error()) {
-    <div class="iframe-container">
+    <div
+      class="iframe-container"
+      [class.is-resizing]="isResizing()"
+    >
       <iframe
         #iframe
         [src]="iframeSrc()"
