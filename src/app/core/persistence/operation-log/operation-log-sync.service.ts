@@ -15,6 +15,7 @@ import {
 } from '../../../pfapi/api/util/vector-clock';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
+// import { chunkArray } from '../../../util/chunk-array'; // Removed as not used
 import { chunkArray } from '../../../util/chunk-array';
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
