@@ -4,11 +4,7 @@ import { LockService } from './lock.service';
 import {
   ConflictResult,
   EntityConflict,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  EntityType,
   Operation,
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  OperationLogEntry,
   OperationLogManifest,
   VectorClock,
 } from './operation.types';
@@ -20,7 +16,6 @@ import {
 import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
 import { chunkArray } from '../../../util/chunk-array';
-// import { convertOpToAction } from './operation-converter.util'; // Removed as no longer directly used here
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
