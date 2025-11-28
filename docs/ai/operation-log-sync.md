@@ -1,7 +1,5 @@
 # Architecture V2: Operation Log & Event Sourcing
 
-> ⚠️ **CRITICAL REVIEW NEEDED**: See Section 15 for fundamental questions about whether this approach is the right one.
-
 ## 1. Executive Summary
 
 **Goal:** Transition `super-productivity` from a state-snapshot sync model to an operation-based (event sourcing) model.
@@ -70,14 +68,14 @@ export interface Operation {
   entityId: string; // ID of the affected entity (or '*' for global config)
 
   // DATA
-  payload: unknown; // The partial update / diff (validated by Typia)
+  // Validated by Typia.
+  // For large text fields (Notes), consider storing diffs instead of full content in future iterations.
+  payload: unknown;
 
   // CAUSALITY & ORDERING
   clientId: string; // Device generating the op (reuse existing from vector-clock)
-  entityVersion: number; // Monotonic per-entity version after applying this op
-  causalDeps: Record<string, number>; // Map of entityKey -> version required (for ordering/merge)
-  globalVectorClock?: VectorClock; // Optional: for cross-entity ordering during sync
-  timestamp: number; // Wall clock time (ISO 8601 or epoch ms), only as tiebreaker
+  vectorClock: VectorClock; // State of the world AFTER this Op
+  timestamp: number; // Wall clock time (ISO 8601 or epoch ms)
 
   // META
   schemaVersion: number; // For future migrations
@@ -93,7 +91,8 @@ export type EntityType =
   | 'SIMPLE_COUNTER'
   | 'WORK_CONTEXT'
   | 'TASK_REPEAT_CFG'
-  | 'ISSUE_PROVIDER';
+  | 'ISSUE_PROVIDER'
+  | 'MIGRATION';
 ```
 
 ### 2.3. The Persistent Log Entry
@@ -107,6 +106,41 @@ export interface OperationLogEntry {
   appliedAt: number; // When this op was applied locally (epoch ms)
   source: 'local' | 'remote'; // Origin of this operation
   syncedAt?: number; // When successfully synced to remote (null if pending)
+}
+
+export interface OperationLogStore {
+  // Core read/write
+  append(op: Operation, source?: 'local' | 'remote'): Promise<void>;
+  hasOp(id: string): Promise<boolean>;
+  getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]>;
+  getUnsynced(): Promise<OperationLogEntry[]>;
+  getUnsyncedByEntity(): Promise<Map<string, Operation[]>>;
+  getAppliedOpIds(): Promise<Set<string>>;
+  markApplied(id: string): Promise<void>;
+  markSynced(seqs: number[]): Promise<void>;
+
+  // Compaction helpers
+  deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void>;
+  getLastSeq(): Promise<number>;
+  saveStateCache(snapshot: {
+    state: unknown;
+    lastAppliedOpSeq: number;
+    vectorClock: VectorClock;
+    compactedAt: number;
+  }): Promise<void>;
+  loadStateCache(): Promise<{
+    state: unknown;
+    lastAppliedOpSeq: number;
+    vectorClock: VectorClock;
+    compactedAt: number;
+  } | null>;
+
+  // Frontiers
+  getEntityFrontier(
+    entityType?: EntityType,
+    entityId?: string,
+  ): Promise<Map<string, VectorClock>>;
+  getCurrentVectorClock(): Promise<VectorClock>;
 }
 ```
 
@@ -143,7 +177,7 @@ graph TD
 
     subgraph Persistence Layer
         Action -.->|Effect: isPersistent| OpConverter[Operation Converter]
-        OpConverter -->|Web Locks| OpLog[(IndexedDB: op_log)]
+        OpConverter -->|Web Locks / Mutex| OpLog[(IndexedDB: op_log)]
         OpLog -->|Compaction Trigger| StateCache[(IndexedDB: state_cache)]
     end
 
@@ -163,15 +197,15 @@ graph TD
     end
 ```
 
-### 3.2. The Action Contract (Blacklisting)
+### 3.2. The Action Contract (Whitelisting)
 
-By default, most state-modifying actions in NgRx should be persisted. Instead of maintaining a massive whitelist, we employ a **Blacklisting** strategy. Actions are persistent unless explicitly excluded or if they lack the necessary metadata context.
+Not all NgRx actions should be persisted. We need an explicit contract.
 
 ```typescript
 // In src/app/core/persistence/operation-log/persistent-action.interface.ts
 
 export interface PersistentActionMeta {
-  // isPersistent is REMOVED; assumption is true unless blacklisted
+  isPersistent?: boolean; // When false, the action is blacklisted and not persisted
   entityType: EntityType;
   entityId: string;
   opType: OpType;
@@ -181,55 +215,30 @@ export interface PersistentActionMeta {
 
 export interface PersistentAction<P = unknown> extends Action {
   type: string; // Standard NgRx action type
-  meta?: PersistentActionMeta; // Optional, but needed for Entity tracking
+  meta: PersistentActionMeta;
   payload?: P;
 }
 
 // Helper type guard
 export function isPersistentAction(action: Action): action is PersistentAction {
-  const a = action as PersistentAction;
-  // Must have meta AND not be blacklisted
-  return !!a.meta && !ACTION_BLACKLIST.has(a.type);
+  return (action as PersistentAction).meta?.isPersistent !== false;
 }
 ```
 
 ### 3.3. Action Blacklist Registry
 
-We explicitly exclude transient UI state and high-frequency updates that shouldn't flood the operation log.
+**Maintenance Note:** To prevent developers from forgetting to blacklist new actions that should not be persisted, or unintentionally blacklisting actions that should, we should implement a unit test that scans all NgRx action definitions and asserts they are either explicitly listed in `BLACKLISTED_ACTION_TYPES` or are intended to be persistent.
 
 ```typescript
-// In src/app/core/persistence/operation-log/action-blacklist.ts
+// In src/app/core/persistence/operation-log/action-whitelist.ts
 
-export const ACTION_BLACKLIST: Set<string> = new Set([
-  // UI / View State
-  '[App] Set Current Worklog Task',
-  '[Layout] Toggle Sidebar',
-  '[Focus Mode] Enter/Exit',
-  '[Layout] Toggle Show Notes',
-
-  // High-Frequency Updates (Handled via Throttling - see 3.4)
-  '[TimeTracking] Add Time Spent', // Tick every second
+export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
+  // Explicitly EXCLUDED (not persisted):
+  '[App] Set Current Worklog Task', // UI state
+  '[Layout] Toggle Sidebar', // UI state
+  '[Focus Mode] Enter/Exit', // transient
 ]);
 ```
-
-### 3.4. Handling High-Frequency Updates (Time Tracking)
-
-Time tracking produces a state change every second (`[TimeTracking] Add Time Spent`). Persisting every tick would result in ~28,000 operations for an 8-hour workday, bloating the log and slowing down sync.
-
-**Strategy:**
-
-1.  **Blacklist:** The raw tick action `[TimeTracking] Add Time Spent` is in the `ACTION_BLACKLIST`. It updates the in-memory store (Task `timeSpent`, Project `timeSpent`, Tag `timeSpent`, and global `TimeTracking` state) immediately, ensuring the UI remains reactive.
-2.  **Accumulate:** The application tracks the "uncommitted" time spent in memory.
-3.  **Periodic Flush:** A new action `[TimeTracking] Sync Time` (or `Commit Time`) is dispatched periodically.
-    - **Triggers:**
-      - Every X minutes (e.g., 5 minutes).
-      - User pauses the timer.
-      - User switches tasks.
-      - App is closed/unloaded.
-4.  **Persist:** This `Sync Time` action IS persisted. It contains the aggregated time diffs for **all affected entities** (Task, Project, Tag) since the last sync.
-5.  **Model Updates:** When `Sync Time` is replayed on another device, it updates the `timeSpent` values for the specific Task, Project, and Tag entities referenced in the payload, ensuring consistent state across all models without flooding the log with granular ticks.
-
-**Result:** 8 hours of work = ~100 operations (vs 28,000), maintaining sync efficiency while keeping the UI reactive.
 
 ---
 
@@ -241,11 +250,11 @@ Time tracking produces a state change every second (`[TimeTracking] Add Time Spe
 2. Component dispatches `TaskActions.update({ id, changes: { isDone: true } })`.
 3. **Reducer:** Updates memory state immediately (optimistic UI).
 4. **OperationLogEffect** (new):
-   - Listens for actions satisfying `isPersistentAction` (i.e., has metadata and NOT blacklisted).
+   - Listens for actions matching `PERSISTENT_ACTION_TYPES` or with `meta.isPersistent: true`.
    - **Ignores** actions with `meta.isRemote: true`.
    - Converts Action → [`Operation`](#22-the-operation-schema) object.
    - Increments local vector clock counter.
-   - Writes to IndexedDB using **Web Locks API**.
+   - Writes to IndexedDB using **LockService**.
 
 ```typescript
 // In src/app/core/persistence/operation-log/operation-log.effects.ts
@@ -257,33 +266,40 @@ export class OperationLogEffects {
   persistOperation$ = createEffect(
     () =>
       this.actions$.pipe(
-        filter(isPersistentAction),
-        filter((action) => !action.meta.isRemote),
+        filter((action) => (action as PersistentAction).meta?.isPersistent !== false), // Check for explicit opt-out
+        filter((action) => !BLACKLISTED_ACTION_TYPES.has(action.type)), // Check against global blacklist
+        filter((action) => !(action as PersistentAction).meta?.isRemote), // Always ignore remote actions
         concatMap((action) => this.writeOperation(action)),
       ),
     { dispatch: false },
   );
 
   private async writeOperation(action: PersistentAction): Promise<void> {
-    await navigator.locks.request('sp_op_log_write', async () => {
-      const currentClock = await this.opLogStore.getCurrentVectorClock();
-      const newClock = incrementVectorClock(currentClock, this.clientId);
+    try {
+      await this.lockService.request('sp_op_log_write', async () => {
+        const currentClock = await this.opLogStore.getCurrentVectorClock();
+        const newClock = incrementVectorClock(currentClock, this.clientId);
 
-      const op: Operation = {
-        id: uuidv7(),
-        actionType: action.type,
-        opType: action.meta.opType,
-        entityType: action.meta.entityType,
-        entityId: action.meta.entityId,
-        payload: action.payload,
-        clientId: this.clientId,
-        vectorClock: newClock,
-        timestamp: Date.now(),
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-      };
+        const op: Operation = {
+          id: uuidv7(),
+          actionType: action.type,
+          opType: action.meta.opType,
+          entityType: action.meta.entityType,
+          entityId: action.meta.entityId,
+          payload: action.payload,
+          clientId: this.clientId,
+          vectorClock: newClock,
+          timestamp: Date.now(),
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        };
 
-      await this.opLogStore.append(op);
-    });
+        await this.opLogStore.append(op);
+      });
+    } catch (e) {
+      // 4.1.1 Error Handling for Optimistic Updates
+      console.error('Failed to persist operation', e);
+      this.notifyUserAndTriggerRollback(action);
+    }
   }
 }
 ```
@@ -317,28 +333,25 @@ sequenceDiagram
 
 @Injectable({ providedIn: 'root' })
 export class OperationLogHydratorService {
-  constructor(private replayContext: ReplayContextService) {}
-
   async hydrateStore(): Promise<void> {
+    // 1. Load snapshot
     const snapshot = await this.opLogStore.loadStateCache();
 
-    this.replayContext.enterReplayMode();
-    try {
-      if (snapshot) {
-        this.store.dispatch(hydrateFromSnapshot({ state: snapshot.state }));
+    if (snapshot) {
+      // 2. Hydrate NgRx with snapshot
+      this.store.dispatch(hydrateFromSnapshot({ state: snapshot.state }));
 
-        const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
-        for (const entry of tailOps) {
-          const action = this.opToActionConverter.convert(entry.op);
-          action.meta.isRemote = true; // Prevent re-logging
-          action.meta.isReplay = true; // Signal effects to skip
-          this.store.dispatch(action);
-        }
-      } else {
-        await this.handleFreshInstallOrMigration();
+      // 3. Replay tail operations
+      const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
+
+      for (const entry of tailOps) {
+        const action = this.opToActionConverter.convert(entry.op);
+        action.meta.isRemote = true; // Prevent re-logging
+        this.store.dispatch(action);
       }
-    } finally {
-      this.replayContext.exitReplayMode();
+    } else {
+      // Fresh install or migration - no snapshot exists
+      await this.handleFreshInstallOrMigration();
     }
   }
 }
@@ -358,17 +371,14 @@ async uploadPendingOps(): Promise<void> {
   const chunks = chunkArray(pendingOps, 100);
 
   for (const chunk of chunks) {
-    const payload = JSON.stringify(chunk);
-    const hash = await hashPayload(payload);
-    const filename = `ops_${hash}.json`;
+    const filename = `ops_${this.clientId}_${chunk[0].op.timestamp}.json`;
+    await this.syncProvider.uploadFile(filename, JSON.stringify(chunk));
 
-    await this.syncProvider.uploadFile(filename, payload);
-
-    // Mark as synced locally; manifest is updated after all files succeed
+    // Mark as synced
     await this.opLogStore.markSynced(chunk.map(e => e.seq));
   }
 
-  // Update remote manifest LAST (content-addressable entries, latest snapshot id)
+  // Update remote manifest
   await this.updateRemoteManifest();
 }
 ```
@@ -379,6 +389,7 @@ async uploadPendingOps(): Promise<void> {
 async downloadRemoteOps(): Promise<void> {
   const manifest = await this.syncProvider.downloadFile('manifest.json');
   const appliedOpIds = await this.opLogStore.getAppliedOpIds();
+  const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier(); // latest applied vector per entity
 
   // Find new remote op files
   const newFiles = manifest.opFiles.filter(f => !this.isFileFullyApplied(f, appliedOpIds));
@@ -391,13 +402,21 @@ async downloadRemoteOps(): Promise<void> {
     const newOps = remoteOps.filter(op => !appliedOpIds.has(op.id));
 
     // Check for conflicts at entity level
-    const { nonConflicting, conflicts } = await this.detectConflicts(newOps);
+    const { nonConflicting, conflicts } = await this.detectConflicts(newOps, appliedFrontierByEntity);
 
     // Apply non-conflicting ops
     for (const op of nonConflicting) {
+      // Persist remote op first so the log/frontier stays canonical
+      // append must be idempotent or guarded
+      if (!(await this.opLogStore.hasOp(op.id))) {
+        await this.opLogStore.append(op, 'remote');
+      }
+
       const action = this.opToActionConverter.convert(op);
       action.meta.isRemote = true;
       this.store.dispatch(action);
+
+      // markApplied assumes the op is already in the log
       await this.opLogStore.markApplied(op.id);
     }
 
@@ -412,81 +431,92 @@ async downloadRemoteOps(): Promise<void> {
 #### 4.3.3. Conflict Detection Algorithm
 
 ```typescript
-async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
-  const pendingByEntity = await this.opLogStore.getUnsyncedByEntity();
-  const appliedFrontier = await this.opLogStore.getEntityFrontiers(); // entityKey -> lastAppliedVersion
+async detectConflicts(
+  remoteOps: Operation[],
+  appliedFrontierByEntity: Map<string, VectorClock>,
+): Promise<ConflictResult> {
+  const localPendingOps = await this.opLogStore.getUnsyncedByEntity();
   const conflicts: EntityConflict[] = [];
   const nonConflicting: Operation[] = [];
 
   for (const remoteOp of remoteOps) {
     const entityKey = `${remoteOp.entityType}:${remoteOp.entityId}`;
-    const localPending = pendingByEntity.get(entityKey) || [];
-    const localAppliedVersion = appliedFrontier.get(entityKey) ?? 0;
+    const localOpsForEntity = localPendingOps.get(entityKey) || [];
+    const appliedFrontier = appliedFrontierByEntity.get(entityKey);
 
-    const isConcurrentWithPending = localPending.some(
-      (op) => op.entityVersion === remoteOp.entityVersion ||
-        this.areCausalDepsConcurrent(op.causalDeps, remoteOp.causalDeps),
-    );
+    // Build the frontier from everything we know locally (applied + pending)
+    const localFrontier = mergeVectorClocks([
+      ...(appliedFrontier ? [appliedFrontier] : []),
+      ...localOpsForEntity.map((op) => op.vectorClock),
+    ]);
 
-    const isConcurrentWithApplied =
-      remoteOp.entityVersion <= localAppliedVersion
-        ? false
-        : this.isConcurrentWithFrontier(remoteOp.causalDeps, appliedFrontier);
+    // Check if ops are concurrent (vector clock comparison)
+    const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
-    if (isConcurrentWithPending || isConcurrentWithApplied) {
+    if (vcComparison === VectorClockComparison.CONCURRENT) {
+      // True conflict - same entity modified independently
       conflicts.push({
         entityType: remoteOp.entityType,
         entityId: remoteOp.entityId,
-        localOps: localPending,
+        localOps: localOpsForEntity,
         remoteOps: [remoteOp],
-        suggestedResolution: this.suggestResolution(localPending, remoteOp),
+        suggestedResolution: this.suggestResolution(localOpsForEntity, remoteOp),
       });
-      continue;
+    } else {
+      // One happened before the other - can be auto-resolved
+      nonConflicting.push(remoteOp);
     }
-
-    nonConflicting.push(remoteOp);
   }
 
   return { nonConflicting, conflicts };
 }
 ```
 
-### 4.4. Multi-Tab Concurrency
+### 4.4. Multi-Tab & Cross-Process Coordination
 
-Use **Web Locks** + **BroadcastChannel** when available, and fall back to an IndexedDB mutex + storage-event channel. IndexedDB remains the source of truth; broadcasts are only hints.
+We need a robust `LockService` that abstracts the locking mechanism, as `navigator.locks` (Web Locks API) is not reliable in all environments (e.g., older Android WebViews, some Capacitor configs).
+
+**Locking Strategy:**
+
+1. **Primary:** `navigator.locks` (Web Locks API) - Best performance, dead-lock free.
+2. **Fallback:** `localStorage` mutex with timeout or simple file locks (for Electron if native locks fail).
 
 ```typescript
+// In src/app/core/persistence/operation-log/lock.service.ts
+// Pseudocode for the service
+
+@Injectable({ providedIn: 'root' })
+export class LockService {
+  async request(lockName: string, callback: () => Promise<void>): Promise<void> {
+    if (navigator.locks) {
+      return navigator.locks.request(lockName, callback);
+    } else {
+      // Fallback implementation using localStorage polling or similar
+      return this.acquireFallbackLock(lockName, callback);
+    }
+  }
+}
+
+// In src/app/core/persistence/operation-log/multi-tab-coordinator.service.ts
 @Injectable({ providedIn: 'root' })
 export class MultiTabCoordinatorService {
-  private channel = this.createChannel();
+  private broadcastChannel = new BroadcastChannel('sp_op_log');
 
-  constructor() {
-    this.channel.onSignal(async () => {
-      await this.pullAndApplyNewOps();
-    });
+  constructor(private lockService: LockService) {
+    this.broadcastChannel.onmessage = (event) => {
+      if (event.data.type === 'NEW_OP') {
+        // Another tab wrote an operation - reload from DB
+        this.handleRemoteTabOp(event.data.op);
+      }
+    };
   }
 
   async writeOperation(op: Operation): Promise<void> {
-    await this.withMutex('sp_op_log_write', async () => {
+    await this.lockService.request('sp_op_log_write', async () => {
       await this.opLogStore.append(op);
-      await this.channel.signal(); // hint other tabs
+      // Notify other tabs
+      this.broadcastChannel.postMessage({ type: 'NEW_OP', op });
     });
-  }
-
-  private async pullAndApplyNewOps(): Promise<void> {
-    const newEntries = await this.opLogStore.getOpsAfterSeq(this.lastAppliedSeq);
-    for (const entry of newEntries) {
-      if (entry.op.clientId !== this.clientId || entry.source === 'remote') {
-        await this.applyOp(entry.op);
-      }
-      this.lastAppliedSeq = entry.seq;
-    }
-  }
-
-  private withMutex<T>(name: string, fn: () => Promise<T>) {
-    return supportsWebLocks()
-      ? navigator.locks.request(name, fn)
-      : this.idbMutex.runExclusive(fn);
   }
 }
 ```
@@ -503,9 +533,11 @@ To prevent the log from growing infinitely.
 
 **Process:**
 
+> Guardrail: never delete an operation that has not been confirmed as synced to remote storage, even if it is older than the retention window. Keep a trailing window (by `seq`) for conflict detection/hydration and require `syncedAt` before pruning.
+
 ```typescript
 async compact(): Promise<void> {
-  await navigator.locks.request('sp_op_log_compact', async () => {
+  await this.lockService.request('sp_op_log_compact', async () => {
     // 1. Get current NgRx state
     const currentState = await firstValueFrom(this.store.select(selectAllSyncState));
 
@@ -521,30 +553,25 @@ async compact(): Promise<void> {
       compactedAt: Date.now(),
     });
 
-    // 4. Publish snapshot remotely BEFORE deleting ops
-    const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days (configurable)
-    const snapshot: RemoteSnapshot = {
-      state: currentState,
-      vectorClock: currentVectorClock,
-      lastAppliedOpSeq: lastSeq,
-      snapshotId: uuidv7(),
-      createdAt: Date.now(),
-      oldestRetainedOpTimestamp: Date.now() - retentionWindowMs,
-    };
-    await this.syncProvider.uploadFile(
-      `snapshots/snapshot_${snapshot.snapshotId}.json`,
-      JSON.stringify(snapshot),
+    // 4. Delete old operations (keep recent for conflict resolution window)
+    const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
+    await this.opLogStore.deleteOpsWhere(
+      (entry) =>
+        !!entry.syncedAt && // never drop unsynced ops
+        entry.appliedAt < Date.now() - retentionWindowMs &&
+        entry.seq <= lastSeq, // keep tail for conflict frontier
     );
-    await this.updateRemoteManifest({
-      latestSnapshot: snapshot.snapshotId,
-      retainedFrom: snapshot.oldestRetainedOpTimestamp,
-    });
-
-    // 5. Delete old operations (keep recent for conflict resolution window)
-    await this.opLogStore.deleteOpsOlderThan(snapshot.oldestRetainedOpTimestamp);
   });
 }
 ```
+
+#### 4.5.1. Remote Storage Cleanup
+
+When performing a full snapshot upload to remote storage, we must also efficiently manage the remote file list.
+
+- Create a new `snapshot_TIMESTAMP.json` on remote.
+- Identify `ops/` files that are fully contained within this new snapshot.
+- Delete those old `ops/` files from the remote provider to prevent directory listing performance degradation (WebDAV/Dropbox are slow with 1000+ files).
 
 ---
 
@@ -556,63 +583,39 @@ Super Productivity has several cross-model relationships that require special ha
 
 ```mermaid
 erDiagram
-    TASK ||--o| PROJECT : "belongs to (optional)"
+    TASK ||--o| PROJECT : "belongs to"
     TASK }|--o{ TAG : "has many"
     TASK ||--o| TASK : "parent/child"
-    TASK ||--o| REMINDER : "has one (optional)"
-    TASK ||--o| TASK_REPEAT_CFG : "created from (optional)"
-
-    NOTE }|--|| PROJECT : "belongs to (via projectId)"
-    PROJECT |o--|{ NOTE : "lists (via noteIds)"
-
-    TASK_REPEAT_CFG ||--o| PROJECT : "belongs to (optional)"
-    TASK_REPEAT_CFG }|--o{ TAG : "has many"
-
-    ISSUE_PROVIDER ||--o{ PROJECT : "integrated in (via issueIntegrationCfgs)"
-    ISSUE_PROVIDER |o--|{ PROJECT : "default for (via defaultProjectId)"
+    NOTE ||--o| PROJECT : "belongs to"
+    TASK_REPEAT_CFG ||--o| PROJECT : "belongs to"
+    ISSUE_PROVIDER ||--o| PROJECT : "belongs to"
 
     TASK {
         string id PK
         string projectId FK
         string parentId FK
         array tagIds FK
-        string reminderId FK
-        string repeatCfgId FK
     }
     PROJECT {
         string id PK
         array taskIds
         array backlogTaskIds
-        array noteIds FK
-        object issueIntegrationCfgs
     }
     TAG {
         string id PK
         array taskIds
     }
-    NOTE {
-        string id PK
-        string projectId FK
-    }
-    TASK_REPEAT_CFG {
-        string id PK
-        string projectId FK
-        array tagIds FK
-    }
 ```
 
 ### 5.2. Reference Types & Handling Strategies
 
-| Relationship        | Reference Field    | On Foreign Delete                  | On Missing Reference                |
-| ------------------- | ------------------ | ---------------------------------- | ----------------------------------- |
-| Task → Project      | `task.projectId`   | Orphan (keep task, null projectId) | Queue op, apply when project exists |
-| Task → Tag          | `task.tagIds[]`    | Remove from array                  | Skip missing tag, log warning       |
-| Task → Parent Task  | `task.parentId`    | Cascade delete subtask             | Queue op, apply when parent exists  |
-| Task → Reminder     | `task.reminderId`  | Set null (orphan reminder cleaned) | Skip                                |
-| Task → RepeatCfg    | `task.repeatCfgId` | Keep reference (audit trail)       | Skip                                |
-| Note → Project      | `note.projectId`   | Orphan (keep note)                 | Queue op, apply when project exists |
-| RepeatCfg → Project | `cfg.projectId`    | Orphan or delete cfg               | Queue op                            |
-| RepeatCfg → Tag     | `cfg.tagIds[]`     | Remove from array                  | Skip                                |
+| Relationship            | Reference Field  | On Foreign Delete                  | On Missing Reference                |
+| ----------------------- | ---------------- | ---------------------------------- | ----------------------------------- |
+| Task → Project          | `task.projectId` | Orphan (keep task, null projectId) | Queue op, apply when project exists |
+| Task → Tag              | `task.tagIds[]`  | Remove from array                  | Skip missing tag, log warning       |
+| Task → Parent Task      | `task.parentId`  | Cascade delete subtask             | Queue op, apply when parent exists  |
+| Note → Project          | `note.projectId` | Orphan (keep note)                 | Queue op, apply when project exists |
+| TaskRepeatCfg → Project | `cfg.projectId`  | Orphan or delete cfg               | Queue op                            |
 
 ### 5.3. Operation Ordering & Dependencies
 
@@ -909,76 +912,61 @@ const ORPHAN_HANDLING_POLICY: Record<string, OrphanHandling> = {
 };
 ```
 
----
+### 5.9. Undo/Redo Handling
 
-## 6. Migration Strategy: From PFAPI to Event Sourcing
+In an Event Sourcing architecture, "Undo" cannot simply revert the application state, as this would break the operation history chain and vector clocks.
 
-⚠️ **Architectural Shift Required**: The current `pfapi` architecture (Persistence & Feature API) is built around a "Save Snapshot" paradigm, where services directly trigger saving the entire state of a model to IndexedDB/File.
+**Strategy: Compensating Transactions (Inverse Operations)**
 
-To support Event Sourcing, `pfapi` must be fundamentally refactored or replaced by a Facade that interacts with the Operation Log.
-
-### 6.1. Current vs. Target Architecture
-
-| Feature                 | Current PFAPI                                    | Target Event Sourcing                                    |
-| :---------------------- | :----------------------------------------------- | :------------------------------------------------------- |
-| **Persistence Trigger** | Explicit `save()` called by Effects/Services     | Automatic via `OperationLogEffects` listening to Actions |
-| **Data Format**         | Full State Snapshot (JSON)                       | Discrete Operations (Log) + Rolling Snapshot             |
-| **Source of Truth**     | Database / File                                  | NgRx Store (InMemory) + OpLog (History)                  |
-| **Sync Logic**          | Compare "Last Modified" timestamps of full files | Exchange Operations, Merge, Replay                       |
-
-### 6.2. Transformation Plan
-
-1.  **Invert Control:**
-
-    - **OLD:** Service -> `pfapi.save(modelData)` -> DB.
-    - **NEW:** Service -> Dispatch Action -> `OperationLogEffects` -> OpLog -> `pfapi` (optional backup).
-
-2.  **Deprecate Direct Saves:**
-
-    - Modify `pfapi.save()` to be a no-op or a "backup only" operation during the transition.
-    - Eventually remove `pfapi.save()` calls from feature effects.
-
-3.  **Hydration Facade:**
-
-    - Repurpose `pfapi.load()` to fetch the latest "State Cache" from the Operation Log system instead of raw model tables.
-    - `pfapi` becomes the "Read Side" adapter for the Event Sourcing engine.
-
-4.  **Legacy Support:**
-    - Maintain the `pfapi` interface for Plugins and existing components, but redirect the implementation to the new internal services (`OperationLogStore`, `SnapshotStore`).
-
-### 6.3. Migration Phases
-
-1.  **Parallel Write (Phase 1):**
-
-    - Keep existing `pfapi` saving for safety.
-    - Enable `OperationLogEffects` to record operations in the background.
-    - Verify Log integrity against Snapshots.
-
-2.  **Switch Read (Phase 2):**
-
-    - Change app hydration to load from `OperationLogHydrator` (Snapshot + Op Replay).
-    - If hydration fails, fallback to `pfapi` legacy snapshots.
-
-3.  **Cutover (Phase 3):**
-    - Disable `pfapi` writes.
-    - Make `OperationLog` the primary persistence.
-    - `pfapi` services become read-only wrappers around the store state.
+- When the user triggers "Undo", we identify the last operation(s) performed by the current client.
+- We generate a new **Inverse Operation** that reverses the effect.
+  - _Original:_ `Create Task A` → _Undo:_ `Delete Task A`
+  - _Original:_ `Update Task A (title: 'Foo')` [prev: 'Bar'] → _Undo:_ `Update Task A (title: 'Bar')`
+- This inverse operation is appended to the log with a new ID and updated vector clock.
+- It syncs naturally to other devices like any other operation.
 
 ---
 
-├── main.json # Legacy: Full state snapshot (kept for backup)
-├── meta.json # Legacy: Metadata with vector clock
-├── ops/ # NEW: Operation logs directory
-│ ├── manifest.json # Index of all op files + last compaction
-│ ├── ops_clientA_1700000000.json
-│ ├── ops_clientA_1700001000.json
-│ ├── ops_clientB_1700000500.json
-│ └── ...
-└── snapshots/ # NEW: Periodic full snapshots
-├── snapshot_1700000000.json
-└── ...
+## 6. Integration with Existing pfapi
 
-````
+### 6.1. Coexistence Strategy
+
+The operation log can be introduced **alongside** the existing sync system, not as a replacement:
+
+```
+Phase 1: Operation logging only (local persistence, no sync changes)
+Phase 2: Dual-write (log ops + maintain current snapshot sync)
+Phase 3: Operation-based sync (read from log for sync)
+Phase 4: Remove snapshot sync (operation log is primary)
+```
+
+### 6.2. pfapi Integration Points
+
+| Existing Component                                                       | Integration Approach          |
+| ------------------------------------------------------------------------ | ----------------------------- |
+| [`MetaModelCtrl`](../../src/app/pfapi/api/model-ctrl/meta-model-ctrl.ts) | Add op log sequence to meta   |
+| [`ModelSyncService`](../../src/app/pfapi/api/sync/model-sync.service.ts) | Keep for snapshot backup      |
+| [`SyncService.sync()`](../../src/app/pfapi/api/sync/sync.service.ts:91)  | Add operation exchange phase  |
+| Vector Clock utilities                                                   | Reuse existing implementation |
+
+### 6.3. Remote Storage Format
+
+For compatibility with existing WebDAV/Dropbox providers:
+
+```
+/superproductivity/
+├── main.json              # Legacy: Full state snapshot (kept for backup)
+├── meta.json              # Legacy: Metadata with vector clock
+├── ops/                   # NEW: Operation logs directory
+│   ├── manifest.json      # Index of all op files + last compaction
+│   ├── ops_clientA_1700000000.json
+│   ├── ops_clientA_1700001000.json
+│   ├── ops_clientB_1700000500.json
+│   └── ...
+└── snapshots/             # NEW: Periodic full snapshots
+    ├── snapshot_1700000000.json
+    └── ...
+```
 
 ---
 
@@ -1002,44 +990,67 @@ async detectMigrationNeeded(): Promise<MigrationType> {
   }
   return MigrationType.ALREADY_MIGRATED;
 }
-````
+```
 
-### 7.2. Migration Operations
+### 7.2. Genesis Operation
 
-For existing users upgrading from the current snapshot-based system, emit per-entity CREATE ops sharing one frontier and align an initial snapshot.
+For existing users upgrading from the current snapshot-based system:
 
 ```typescript
 async migrateFromLegacy(): Promise<void> {
+  // 1. Load all legacy data
   const legacyState = await this.pfapi.getAllSyncModelData();
-  const entities = this.flattenToEntities(legacyState);
-  const frontierClock = { [this.clientId]: entities.length };
 
-  let seq = 0;
-  for (const entity of entities) {
-    seq++;
-    const op: Operation = {
-      id: uuidv7(),
-      actionType: `[${entity.type}] Add ${entity.type}`,
-      opType: OpType.Create,
-      entityType: entity.type,
-      entityId: entity.id,
-      payload: entity.data,
-      clientId: this.clientId,
-      entityVersion: seq,
-      causalDeps: {},
-      globalVectorClock: { [this.clientId]: seq },
-      timestamp: Date.now(),
-      schemaVersion: CURRENT_SCHEMA_VERSION,
-    };
-    await this.opLogStore.append(op);
-  }
+  // 2. Create genesis operation
+  const genesisOp: Operation = {
+    id: uuidv7(),
+    actionType: '[Migration] Genesis Import',
+    opType: OpType.Batch,
+    entityType: 'MIGRATION' as EntityType,
+    entityId: '*',
+    payload: legacyState,
+    clientId: this.clientId,
+    vectorClock: { [this.clientId]: 1 },
+    timestamp: Date.now(),
+    schemaVersion: CURRENT_SCHEMA_VERSION,
+  };
 
+  // 3. Write genesis op
+  await this.opLogStore.append(genesisOp);
+
+  // 4. Create initial state cache
   await this.opLogStore.saveStateCache({
     state: legacyState,
-    lastAppliedOpSeq: entities.length,
-    vectorClock: frontierClock,
+    lastAppliedOpSeq: 1,
+    vectorClock: genesisOp.vectorClock,
     compactedAt: Date.now(),
   });
+
+  // 5. Mark legacy as migrated (don't delete yet)
+  await this.legacyStore.markMigrated();
+}
+```
+
+### 7.3. Rollback Strategy
+
+If issues are detected after migration:
+
+```typescript
+async rollbackToLegacy(): Promise<void> {
+  // 1. Check if legacy backup exists
+  const legacyBackup = await this.legacyStore.getBackup();
+  if (!legacyBackup) {
+    throw new Error('No legacy backup available for rollback');
+  }
+
+  // 2. Restore legacy data
+  await this.pfapi.importAllSyncModelData({ data: legacyBackup });
+
+  // 3. Clear operation log
+  await this.opLogStore.clearAll();
+
+  // 4. Update migration status
+  await this.legacyStore.markRolledBack();
 }
 ```
 
@@ -1049,10 +1060,11 @@ async migrateFromLegacy(): Promise<void> {
 
 | Risk                      | Severity | Mitigation                                                    |
 | :------------------------ | :------: | :------------------------------------------------------------ |
-| **Infinite Loops**        |   High   | Strict `isRemote` flag + action type whitelist + tests        |
+| **Infinite Loops**        |   High   | Strict `isRemote` flag + action type blacklist + tests        |
 | **Startup Slowness**      |  Medium  | Aggressive compaction (default: 500 ops, 7 day retention)     |
-| **Lost Updates (Tabs)**   |   High   | Web Locks API + BroadcastChannel coordination                 |
-| **Data Bloat**            |  Medium  | Whitelist only essential actions + automatic compaction       |
+| **Lost Updates (Tabs)**   |   High   | Web Locks API + BroadcastChannel + Fallbacks                  |
+| **Data Bloat**            |  Medium  | Blacklist non-essential actions + automatic compaction        |
+| **Remote File Explosion** |  Medium  | Aggressive cleanup of remote op files during snapshot uploads |
 | **Ordering Glitches**     |  Medium  | Vector clocks + UUID v7 (time-ordered) + deterministic sort   |
 | **Memory Pressure**       |  Medium  | Streaming replay for large op sets + pagination               |
 | **Sync Provider Limits**  |   Low    | Chunk ops into max 1MB files + manifest index                 |
@@ -1067,7 +1079,7 @@ async migrateFromLegacy(): Promise<void> {
 
 ## 9. Testing Strategy
 
-### 8.1. Unit Tests
+### 9.1. Unit Tests
 
 ```typescript
 describe('OperationLogStore', () => {
@@ -1081,6 +1093,10 @@ describe('OperationLogEffects', () => {
   it('should convert persistent actions to operations');
   it('should ignore remote actions (isRemote: true)');
   it('should increment vector clock on each operation');
+});
+
+describe('ActionBlacklist', () => {
+  it('should ensure every ActionType is either blacklisted or implicitly persistent');
 });
 
 describe('ConflictDetector', () => {
@@ -1104,7 +1120,7 @@ describe('CascadeOperations', () => {
 });
 ```
 
-### 8.2. Integration Tests
+### 9.2. Integration Tests
 
 ```typescript
 describe('Multi-Tab Sync', () => {
@@ -1119,6 +1135,7 @@ describe('Remote Sync', () => {
   it('should detect and present conflicts');
   it('should handle operations referencing entities that arrive later');
   it('should resolve related entity conflicts together');
+  it('should cleanup old remote op files after snapshotting');
 });
 
 describe('Cross-Model Integrity', () => {
@@ -1129,7 +1146,7 @@ describe('Cross-Model Integrity', () => {
 });
 ```
 
-### 8.3. E2E Tests
+### 9.3. E2E Tests
 
 ```typescript
 describe('Operation Log E2E', () => {
@@ -1142,249 +1159,7 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 10. Critical Design Flaws & Required Fixes
-
-This section identifies fundamental architectural problems that must be resolved before implementation.
-
-### 10.1. CRITICAL: Vector Clock Scope Mismatch
-
-**Problem (original plan):** Using a single global vector clock per op caused false per-entity conflicts.
-
-**Resolution:** Section 2.2/4.3.3 now define per-entity versions + causal deps for conflict detection, with an optional global vector clock only for sync ordering. Keep this separation in implementation.
-
-### 10.2. CRITICAL: No Remote Snapshot Publishing
-
-**Problem (original plan):** Local compaction deleted ops without publishing a remote snapshot, stranding new devices.
-
-**Resolution:** Section 4.5 now requires publishing a remote snapshot + manifest update (with retained range) before deleting local ops. Implementation must keep this contract.
-
-### 10.3. CRITICAL: Genesis Operation is an Anti-Pattern
-
-**Problem:** The migration creates one giant operation containing the entire legacy state (lines 927-938).
-
-**Issues:**
-
-- Single op can be megabytes for power users (10k+ tasks)
-- Cannot be conflict-resolved at entity level
-- Creates a "special case" that violates per-entity operation semantics
-- If this genesis op conflicts with remote ops, resolution is impossible
-
-**Required Fix:** Emit per-entity Create operations:
-
-```typescript
-async migrateFromLegacy(): Promise<void> {
-  const legacyState = await this.pfapi.getAllSyncModelData();
-  const genesisVectorClock = { [this.clientId]: 1 };
-
-  // Emit one CREATE op per entity
-  const entities = this.flattenToEntities(legacyState);
-
-  for (let i = 0; i < entities.length; i++) {
-    const entity = entities[i];
-    const op: Operation = {
-      id: uuidv7(),
-      actionType: `[${entity.type}] Add ${entity.type}`,
-      opType: OpType.Create,
-      entityType: entity.type,
-      entityId: entity.id,
-      payload: entity.data,
-      clientId: this.clientId,
-      vectorClock: { [this.clientId]: i + 1 },
-      timestamp: Date.now(),
-      schemaVersion: CURRENT_SCHEMA_VERSION,
-    };
-    await this.opLogStore.append(op);
-  }
-
-  // Create snapshot aligned with final vector clock
-  await this.opLogStore.saveStateCache({
-    state: legacyState,
-    lastAppliedOpSeq: entities.length,
-    vectorClock: { [this.clientId]: entities.length },
-    compactedAt: Date.now(),
-  });
-}
-```
-
-### 10.4. CRITICAL: Effect Side Effects During Replay
-
-**Problem (original plan):** Replaying ops would still trigger effects/notifications.
-
-**Resolution:** Section 4.2 shows a replay context with `isReplay` to bypass effects. All side-effectful effects must check replay context or be dispatched through a replay-safe channel.
-
-### 10.5. HIGH: Reducer Non-Determinism
-
-**Problem:** Reducers may use `Date.now()`, `uuid()`, or calculate derived state. Replaying the same ops on different clients may produce different states.
-
-**Examples in Super Productivity:**
-
-- `created` timestamp on new tasks
-- Derived `Project.taskIds` arrays
-- Calculated `timeSpentToday`
-
-**Required Fix:**
-
-1. All timestamps/IDs must be in the operation payload, not generated by reducers
-2. Derived state must be calculable from the operation stream, not stored
-3. Add property-based tests: `reduce(initialState, ops) === deserialize(serialize(reduce(initialState, ops)))`
-
-```typescript
-// BAD - non-deterministic:
-case addTask.type:
-  return {
-    ...state,
-    entities: {
-      ...,
-      [action.task.id]: {
-        ...action.task,
-        created: Date.now(), // NON-DETERMINISTIC!
-      }
-    }
-  };
-
-// GOOD - deterministic:
-case addTask.type:
-  return {
-    ...state,
-    entities: {
-      ...,
-      [action.task.id]: {
-        ...action.task,
-        created: action.task.created, // From payload
-      }
-    }
-  };
-```
-
-### 10.6. HIGH: Derived State Reconstruction Problem
-
-**Problem:** `Project.taskIds` and `Tag.taskIds` are derived from tasks, but ops only update `Task.projectId`.
-
-**Scenario:**
-
-1. Op: "Update Task A, set projectId = Project X"
-2. Reducer updates Task A's projectId
-3. But Project X's `taskIds` array must also be updated
-4. On different clients, the order of tasks in `taskIds` might differ
-
-**Required Fix:** Either:
-
-- **Option A:** Don't persist derived arrays. Recompute on hydration/access
-- **Option B:** Emit explicit ops for derived state changes (two ops for moveToProject)
-- **Option C:** Use denormalized reducers that always recompute derived arrays from source of truth
-
-Recommended: **Option A** - never persist derived state in ops.
-
-### 10.7. HIGH: Conflict Window vs Retention Window Mismatch
-
-**Problem:** Compaction deletes ops after 7 days (line 505), but conflict detection only checks against unsynced local ops (line 405).
-
-**Scenario:**
-
-1. Client A syncs, all ops are marked "synced"
-2. Client B makes changes, syncs
-3. Client A makes changes to the same entity, hasn't synced yet
-4. 8 days pass
-5. Client A compacts, deleting the "synced" ops that show the baseline
-6. Client A syncs - cannot detect if B's changes conflict with A's baseline
-
-**Impact:** Silent data loss - conflicts not detected.
-
-**Required Fix:** Maintain per-entity "last known synced version" separate from op log:
-
-```typescript
-interface EntitySyncState {
-  entityType: EntityType;
-  entityId: string;
-  lastSyncedVersion: number;
-  lastSyncedAt: number;
-  lastSyncedVectorClock: VectorClock;
-}
-
-// Conflict detection must check:
-// 1. Remote op version vs local pending ops (current)
-// 2. Remote op version vs lastSyncedVersion (NEW)
-```
-
-### 10.8. HIGH: Multi-Tab State Divergence
-
-**Problem (original plan):** BroadcastChannel alone could miss ops if a tab crashed between DB write and broadcast.
-
-**Resolution:** Section 4.4 keeps IndexedDB as the source of truth with mutex + "ops changed" signalling; tabs pull `getOpsAfterSeq` on signal to recover missed writes.
-
-### 10.9. MEDIUM: Operation Idempotency Not Guaranteed
-
-**Problem:** The plan doesn't require operations to be idempotent. If the same op is applied twice:
-
-**Non-idempotent examples:**
-
-- "Add 5 minutes to timeSpent" → Applying twice = +10 minutes (WRONG)
-- "Toggle isDone" → Applying twice = original state (WRONG)
-
-**Required Fix:** All operations must be idempotent (set-based, not delta-based):
-
-```typescript
-// BAD - not idempotent:
-payload: {
-  addTimeSpent: 300000;
-}
-
-// GOOD - idempotent:
-payload: {
-  timeSpent: 1500000;
-} // Absolute value
-```
-
-### 10.10. MEDIUM: WebDAV Upload Atomicity
-
-**Problem (original plan):** Upload-before-manifest risked orphaned files and missing ops.
-
-**Resolution:** Section 4.3.1 now uses content-hash filenames, marks ops synced locally, and writes the manifest last; startup reconciliation should still scan `/ops/` and reconcile orphaned files.
-
-### 10.11. MEDIUM: Vector Clock Unbounded Growth
-
-**Problem:** Every client adds an entry to the vector clock forever. No pruning strategy.
-
-For long-running installations with many devices over years:
-
-- Vector clocks grow to hundreds of entries
-- Each operation carries the full clock
-- Performance degrades
-
-**Required Fix:** Use existing vector clock pruning, apply to ops:
-
-```typescript
-// Prune inactive clients (no activity in 90 days) from vector clock
-// When compacting, normalize vector clocks to remove pruned clients
-```
-
-### 10.12. MEDIUM: Snapshot State Serialization
-
-**Problem:** Line 490 snapshots NgRx state, but NgRx state may contain:
-
-- Entity adapter internal structures
-- Non-serializable objects
-- UI state (selectedId, etc.)
-
-**Required Fix:** Define explicit snapshot schema separate from NgRx internal structure:
-
-```typescript
-interface SyncSnapshot {
-  version: number;
-  entities: {
-    tasks: Record<string, Task>;
-    projects: Record<string, Project>;
-    tags: Record<string, Tag>;
-    // ... only sync-relevant entities
-  };
-  vectorClock: VectorClock;
-  // NO UI state, NO derived state
-}
-```
-
----
-
-## 11. MVP Guardrails and Scope
+## 10. MVP Guardrails and Scope
 
 **Replay without side effects**
 
@@ -1394,7 +1169,8 @@ interface SyncSnapshot {
 **Canonical operation codecs**
 
 - Per-entity Typia codecs that normalize payloads to minimal diffs (no derived arrays or redundant fields).
-- Persist the normalized patch shape, not raw action payloads.
+- Persist the normalized patch shape, not raw action payloads. Ensure only non-blacklisted actions are persisted.
+- **Typia Integration:** Ensure `ts-patch` is correctly configured for all build targets (Electron/Capacitor).
 
 **Deterministic reducers**
 
@@ -1417,11 +1193,12 @@ interface SyncSnapshot {
 
 **Dependency handling with bounds**
 
-- Queue missing-dependency ops with retry budget/diagnostics; process via topological order that tolerates concurrent creates/updates; move exhausted items to a "stuck" queue.
+- Queue missing-dependency ops with retry budget/diagnostics; process via topological order that tolerates concurrent creates/updates; move exhausted items to a “stuck” queue.
 
-**Cross-platform coordination**
+**Cross-platform coordination (Critical)**
 
-- Feature-detect Web Locks/BroadcastChannel; provide IndexedDB mutex + storage-event (or equivalent) fallback for Electron/Capacitor.
+- Feature-detect `navigator.locks`.
+- **Mandatory Fallback:** Provide robust fallback (IndexedDB polling / LocalStorage mutex) for environments where Web Locks are flaky (WebView/iOS).
 
 **Upload/idempotency robustness**
 
@@ -1431,22 +1208,23 @@ interface SyncSnapshot {
 
 - Emit per-entity genesis create ops sharing one frontier instead of a single huge batch payload; align the initial snapshot to that frontier.
 
-## 12. Implementation Phases
+## 11. Implementation Phases
 
 ### Phase 1: Local Operation Logging (2-3 weeks)
 
 - [ ] Create `OperationLogStore` (IndexedDB adapter)
 - [ ] Create `Operation` types and per-entity codecs (Typia) with normalization
+- [ ] **Implement `LockService` with robust fallbacks**
 - [ ] Create `OperationLogEffects` (listen to persistent actions) with replay guard for effects
-- [ ] Create action whitelist registry
-- [ ] Add `isPersistent` meta to 10-15 core actions
+- [ ] Create action blacklist registry with Type Safety tests
+- [ ] Add `isPersistent: false` meta to 10-15 core actions that should not be persisted
 - [ ] Create `OperationLogHydrator` for startup (side-effect-safe replay path)
 - [ ] Create compaction service with snapshot/manifest contract
 - [ ] Unit tests + replay determinism property test
 
 ### Phase 2: Multi-Tab Coordination (1 week)
 
-- [ ] Implement Web Locks for write coordination
+- [ ] Integrate `LockService` for write coordination
 - [ ] Implement BroadcastChannel for cross-tab notification with fallbacks
 - [ ] Handle tab crash/unexpected close
 - [ ] Integration tests
@@ -1472,13 +1250,14 @@ interface SyncSnapshot {
 - [ ] Extend sync providers with op file support
 - [ ] Implement op manifest handling
 - [ ] Implement bidirectional op sync
+- [ ] Implement remote storage cleanup (delete old op files)
 - [ ] Handle partial sync failures
 - [ ] Integrate with existing `SyncService`
 
 ### Phase 6: Migration & Rollout (1-2 weeks)
 
 - [ ] Implement legacy detection
-- [ ] Implement per-entity migration ops + aligned initial snapshot
+- [ ] Implement genesis operation migration
 - [ ] Implement rollback mechanism
 - [ ] Feature flag for gradual rollout
 - [ ] E2E tests for migration scenarios
@@ -1492,35 +1271,21 @@ interface SyncSnapshot {
 
 ---
 
-## 13. Open Questions
+## 12. Open Questions
 
-1. **Payload Size Limits:** Should we split large payloads (e.g., long notes) into separate operations?
-   _Answer: No (KISS principle)._
+1. **Payload Size Limits:** Should we split large payloads (e.g., long notes) into separate operations? _Strategy: Monitor during MVP. Implement diffing for notes if bloat occurs._
 2. **Selective Sync:** Can users choose which entities to sync (e.g., only project A)?
-   _Answer: No (KISS principle)._
 3. **Audit Trail:** Should we expose the operation log as a user-visible feature (activity history)?
-   _Answer: No (KISS principle)._
-4. **Rate Limiting:** How do we handle rapid-fire operations (e.g., typing in a text field)?
-   _Answer: These should never be persisted as ops (debounce at action level)._
-5. **Encryption:** Should individual operations be encrypted, or only the full op files?
-   _Answer: We need full e2e encryption, so per-op encryption is likely needed._
-6. **Cascade Delete Policy:** When deleting a project, should tasks be:
-   - Moved to Inbox (orphaned)?
-   - Deleted along with the project?
-   - User prompted to choose?
-     _Answer: Removed completely._
-7. **Relationship Validation:** Should we validate referential integrity on every operation, or trust the client?
-   _Answer: Since we are using Dropbox/WebDAV as storage, we have to rely on the client. Maybe for our own Super Sync implementation we can check integrity later on._
-8. **Partial Relationship Sync:** If a task references 3 tags but only 2 exist remotely, how do we handle the third?
-   _Answer: We skip missing references and log a warning._
-9. **Ordering Guarantees:** Do we need strict causal ordering for related entities, or is eventual consistency acceptable?
-   _Answer: Eventual consistency is acceptable._
-10. **Cross-Client Consistency:** How do we handle the case where Client A deletes a project while Client B creates a task in that project (both offline)?
-    _Answer: We undo the project delete on Client A when syncing Client B's task._
+4. **Encryption:** Should individual operations be encrypted, or only the full op files?
+5. **Cascade Delete Policy:** When deleting a project, should tasks be orphaned or deleted? _Current decision: Orphan tasks to Inbox._
+6. **Relationship Validation:** Should we validate referential integrity on every operation, or trust the client?
+7. **Partial Relationship Sync:** If a task references 3 tags but only 2 exist remotely, how do we handle the third?
+8. **Ordering Guarantees:** Do we need strict causal ordering for related entities, or is eventual consistency acceptable?
+9. **Cross-Client Consistency:** How do we handle the case where Client A deletes a project while Client B creates a task in that project (both offline)?
 
 ---
 
-## 16. References
+## 13. References
 
 - [Event Sourcing Pattern (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [CRDT Primer](https://crdt.tech/)
