@@ -115,6 +115,7 @@ export class Pfapi<const MD extends ModelCfgs> {
       this._activeSyncProvider$,
       this._encryptAndCompressCfg$,
       new EncryptAndCompressHandlerService(),
+      this._operationLogSyncService, // Pass the new service here
     );
 
     this.wasDataMigratedInitiallyPromise = this.migrationService.checkAndMigrateLocalDB();
