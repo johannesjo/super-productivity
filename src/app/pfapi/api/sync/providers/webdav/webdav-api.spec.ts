@@ -775,7 +775,13 @@ describe('WebdavApi', () => {
         size: 128,
         type: 'application/json',
         etag: 'Wed, 15 Jan 2025 15:00:00 GMT',
-        data: {},
+        data: {
+          'content-type': 'application/json',
+          'content-length': '128',
+          'last-modified': 'Wed, 15 Jan 2025 15:00:00 GMT',
+          etag: '',
+          href: 'http://example.com/webdav/test.json',
+        },
       });
     });
 
