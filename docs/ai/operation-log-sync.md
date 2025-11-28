@@ -1075,7 +1075,383 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 10. MVP Guardrails and Scope
+## 10. Critical Design Flaws & Required Fixes
+
+This section identifies fundamental architectural problems that must be resolved before implementation.
+
+### 10.1. CRITICAL: Vector Clock Scope Mismatch
+
+**Problem:** The plan stores a global vector clock on each operation (line 75), but conflict detection is per-entity. This creates false positives.
+
+**Example scenario:**
+
+- Client A modifies Task 1 → VC: `{A: 1}`
+- Client B modifies Task 2 (concurrently) → VC: `{B: 1}`
+- When syncing, the VCs are CONCURRENT, but there's NO actual conflict because they're different entities
+
+**Impact:** Users see conflict dialogs when no conflict exists.
+
+**Required Fix:** Use per-ENTITY vector clocks, not per-operation global clocks:
+
+```typescript
+// INSTEAD OF:
+interface Operation {
+  vectorClock: VectorClock; // Global clock - WRONG
+}
+
+// USE:
+interface Operation {
+  entityVersion: number; // Monotonic version for THIS entity
+  causalDependencies: {
+    // Which entity versions this op depends on
+    [entityKey: string]: number;
+  };
+}
+
+// Or hybrid approach: keep global VC for sync ordering, but use entity-specific version for conflict detection
+interface Operation {
+  globalVectorClock: VectorClock; // For causal ordering of sync
+  entityVersion: number; // For entity-level conflict detection
+}
+```
+
+### 10.2. CRITICAL: No Remote Snapshot Publishing
+
+**Problem:** Compaction deletes local ops older than 7 days (line 505), but there's no mechanism to publish snapshots to remote storage.
+
+**Scenario that breaks:**
+
+1. Client A compacts and deletes ops older than 7 days
+2. New Client C is set up for the first time
+3. Client C downloads op files from remote
+4. Client C is missing the ops that A deleted before publishing
+5. Client C has corrupted/incomplete state
+
+**Impact:** New devices cannot properly bootstrap. Offline devices returning after extended periods lose data.
+
+**Required Fix:** Add explicit remote snapshot publishing:
+
+```typescript
+// ADD to compaction process:
+async compact(): Promise<void> {
+  // ... existing local compaction ...
+
+  // MUST publish snapshot to remote BEFORE deleting ops
+  const snapshot: RemoteSnapshot = {
+    state: currentState,
+    vectorClock: currentVectorClock,
+    snapshotId: uuidv7(),
+    createdAt: Date.now(),
+    oldestRetainedOpTimestamp: Date.now() - retentionWindowMs,
+  };
+
+  await this.syncProvider.uploadFile(
+    `snapshots/snapshot_${snapshot.snapshotId}.json`,
+    JSON.stringify(snapshot)
+  );
+
+  // Update manifest with new snapshot reference
+  await this.updateManifest({ latestSnapshot: snapshot.snapshotId });
+
+  // NOW safe to delete local ops
+}
+```
+
+### 10.3. CRITICAL: Genesis Operation is an Anti-Pattern
+
+**Problem:** The migration creates one giant operation containing the entire legacy state (lines 927-938).
+
+**Issues:**
+
+- Single op can be megabytes for power users (10k+ tasks)
+- Cannot be conflict-resolved at entity level
+- Creates a "special case" that violates per-entity operation semantics
+- If this genesis op conflicts with remote ops, resolution is impossible
+
+**Required Fix:** Emit per-entity Create operations:
+
+```typescript
+async migrateFromLegacy(): Promise<void> {
+  const legacyState = await this.pfapi.getAllSyncModelData();
+  const genesisVectorClock = { [this.clientId]: 1 };
+
+  // Emit one CREATE op per entity
+  const entities = this.flattenToEntities(legacyState);
+
+  for (let i = 0; i < entities.length; i++) {
+    const entity = entities[i];
+    const op: Operation = {
+      id: uuidv7(),
+      actionType: `[${entity.type}] Add ${entity.type}`,
+      opType: OpType.Create,
+      entityType: entity.type,
+      entityId: entity.id,
+      payload: entity.data,
+      clientId: this.clientId,
+      vectorClock: { [this.clientId]: i + 1 },
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+    await this.opLogStore.append(op);
+  }
+
+  // Create snapshot aligned with final vector clock
+  await this.opLogStore.saveStateCache({
+    state: legacyState,
+    lastAppliedOpSeq: entities.length,
+    vectorClock: { [this.clientId]: entities.length },
+    compactedAt: Date.now(),
+  });
+}
+```
+
+### 10.4. CRITICAL: Effect Side Effects During Replay
+
+**Problem:** When replaying ops at startup (lines 326-330), `isRemote: true` only prevents re-logging. Other effects still fire.
+
+**Scenario:**
+
+1. User creates reminder for a task
+2. App closes
+3. App reopens, replays the ops
+4. Reminder creation effect fires AGAIN, creating duplicate reminders
+
+**Impact:** Duplicate notifications, duplicate syncs, duplicate analytics, corrupted state.
+
+**Required Fix:** Implement a global replay guard:
+
+```typescript
+// Create a replay context service
+@Injectable({ providedIn: 'root' })
+export class ReplayContextService {
+  private _isReplaying = new BehaviorSubject<boolean>(false);
+  isReplaying$ = this._isReplaying.asObservable();
+
+  enterReplayMode(): void {
+    this._isReplaying.next(true);
+  }
+  exitReplayMode(): void {
+    this._isReplaying.next(false);
+  }
+}
+
+// ALL effects with side effects must check:
+someEffect$ = createEffect(() =>
+  this.actions$.pipe(
+    filter(() => !this.replayContext.isReplaying$.value), // Skip during replay
+    ofType(someAction),
+    // ... effect logic
+  ),
+);
+```
+
+### 10.5. HIGH: Reducer Non-Determinism
+
+**Problem:** Reducers may use `Date.now()`, `uuid()`, or calculate derived state. Replaying the same ops on different clients may produce different states.
+
+**Examples in Super Productivity:**
+
+- `created` timestamp on new tasks
+- Derived `Project.taskIds` arrays
+- Calculated `timeSpentToday`
+
+**Required Fix:**
+
+1. All timestamps/IDs must be in the operation payload, not generated by reducers
+2. Derived state must be calculable from the operation stream, not stored
+3. Add property-based tests: `reduce(initialState, ops) === deserialize(serialize(reduce(initialState, ops)))`
+
+```typescript
+// BAD - non-deterministic:
+case addTask.type:
+  return {
+    ...state,
+    entities: {
+      ...,
+      [action.task.id]: {
+        ...action.task,
+        created: Date.now(), // NON-DETERMINISTIC!
+      }
+    }
+  };
+
+// GOOD - deterministic:
+case addTask.type:
+  return {
+    ...state,
+    entities: {
+      ...,
+      [action.task.id]: {
+        ...action.task,
+        created: action.task.created, // From payload
+      }
+    }
+  };
+```
+
+### 10.6. HIGH: Derived State Reconstruction Problem
+
+**Problem:** `Project.taskIds` and `Tag.taskIds` are derived from tasks, but ops only update `Task.projectId`.
+
+**Scenario:**
+
+1. Op: "Update Task A, set projectId = Project X"
+2. Reducer updates Task A's projectId
+3. But Project X's `taskIds` array must also be updated
+4. On different clients, the order of tasks in `taskIds` might differ
+
+**Required Fix:** Either:
+
+- **Option A:** Don't persist derived arrays. Recompute on hydration/access
+- **Option B:** Emit explicit ops for derived state changes (two ops for moveToProject)
+- **Option C:** Use denormalized reducers that always recompute derived arrays from source of truth
+
+Recommended: **Option A** - never persist derived state in ops.
+
+### 10.7. HIGH: Conflict Window vs Retention Window Mismatch
+
+**Problem:** Compaction deletes ops after 7 days (line 505), but conflict detection only checks against unsynced local ops (line 405).
+
+**Scenario:**
+
+1. Client A syncs, all ops are marked "synced"
+2. Client B makes changes, syncs
+3. Client A makes changes to the same entity, hasn't synced yet
+4. 8 days pass
+5. Client A compacts, deleting the "synced" ops that show the baseline
+6. Client A syncs - cannot detect if B's changes conflict with A's baseline
+
+**Impact:** Silent data loss - conflicts not detected.
+
+**Required Fix:** Maintain per-entity "last known synced version" separate from op log:
+
+```typescript
+interface EntitySyncState {
+  entityType: EntityType;
+  entityId: string;
+  lastSyncedVersion: number;
+  lastSyncedAt: number;
+  lastSyncedVectorClock: VectorClock;
+}
+
+// Conflict detection must check:
+// 1. Remote op version vs local pending ops (current)
+// 2. Remote op version vs lastSyncedVersion (NEW)
+```
+
+### 10.8. HIGH: Multi-Tab State Divergence
+
+**Problem:** Each tab has its own NgRx store. BroadcastChannel notifies other tabs, but:
+
+- What if Tab A crashes between IndexedDB write and broadcast?
+- What if Tab B is in the middle of an action when it receives broadcast?
+
+**Scenario:**
+
+1. Tab A starts writing op to IndexedDB
+2. Tab A crashes before BroadcastChannel.postMessage
+3. Tab B never knows about the op
+4. Tab B makes conflicting change
+5. When Tab B reloads, it sees both ops and has a conflict with itself
+
+**Required Fix:** Use IndexedDB as the coordination point, not broadcast:
+
+```typescript
+// Instead of broadcasting ops, broadcast "ops changed" signal
+// Each tab polls/subscribes to IndexedDB changes
+async onNewOpSignal(): Promise<void> {
+  const opsAfterMyLastSeq = await this.opLogStore.getOpsAfterSeq(this.lastAppliedSeq);
+  for (const entry of opsAfterMyLastSeq) {
+    if (entry.source !== 'local' || entry.op.clientId !== this.clientId) {
+      // Apply op from other tab or remote
+      await this.applyOp(entry.op);
+    }
+  }
+  this.lastAppliedSeq = opsAfterMyLastSeq[opsAfterMyLastSeq.length - 1]?.seq;
+}
+```
+
+### 10.9. MEDIUM: Operation Idempotency Not Guaranteed
+
+**Problem:** The plan doesn't require operations to be idempotent. If the same op is applied twice:
+
+**Non-idempotent examples:**
+
+- "Add 5 minutes to timeSpent" → Applying twice = +10 minutes (WRONG)
+- "Toggle isDone" → Applying twice = original state (WRONG)
+
+**Required Fix:** All operations must be idempotent (set-based, not delta-based):
+
+```typescript
+// BAD - not idempotent:
+payload: {
+  addTimeSpent: 300000;
+}
+
+// GOOD - idempotent:
+payload: {
+  timeSpent: 1500000;
+} // Absolute value
+```
+
+### 10.10. MEDIUM: WebDAV Upload Atomicity
+
+**Problem:** Line 353-361 uploads op files then updates manifest. If upload succeeds but manifest fails:
+
+- Other clients don't see the ops
+- Retrying might create orphaned files
+
+**Required Fix:**
+
+1. Use content-addressable filenames (hash of content)
+2. On sync, reconcile all files in `/ops/` directory against manifest
+3. Manifest update should be the last step
+4. Orphaned files are ignored but eventually cleaned up
+
+### 10.11. MEDIUM: Vector Clock Unbounded Growth
+
+**Problem:** Every client adds an entry to the vector clock forever. No pruning strategy.
+
+For long-running installations with many devices over years:
+
+- Vector clocks grow to hundreds of entries
+- Each operation carries the full clock
+- Performance degrades
+
+**Required Fix:** Use existing vector clock pruning, apply to ops:
+
+```typescript
+// Prune inactive clients (no activity in 90 days) from vector clock
+// When compacting, normalize vector clocks to remove pruned clients
+```
+
+### 10.12. MEDIUM: Snapshot State Serialization
+
+**Problem:** Line 490 snapshots NgRx state, but NgRx state may contain:
+
+- Entity adapter internal structures
+- Non-serializable objects
+- UI state (selectedId, etc.)
+
+**Required Fix:** Define explicit snapshot schema separate from NgRx internal structure:
+
+```typescript
+interface SyncSnapshot {
+  version: number;
+  entities: {
+    tasks: Record<string, Task>;
+    projects: Record<string, Project>;
+    tags: Record<string, Tag>;
+    // ... only sync-relevant entities
+  };
+  vectorClock: VectorClock;
+  // NO UI state, NO derived state
+}
+```
+
+---
+
+## 11. MVP Guardrails and Scope
 
 **Replay without side effects**
 
@@ -1108,7 +1484,7 @@ describe('Operation Log E2E', () => {
 
 **Dependency handling with bounds**
 
-- Queue missing-dependency ops with retry budget/diagnostics; process via topological order that tolerates concurrent creates/updates; move exhausted items to a “stuck” queue.
+- Queue missing-dependency ops with retry budget/diagnostics; process via topological order that tolerates concurrent creates/updates; move exhausted items to a "stuck" queue.
 
 **Cross-platform coordination**
 
@@ -1122,7 +1498,7 @@ describe('Operation Log E2E', () => {
 
 - Emit per-entity genesis create ops sharing one frontier instead of a single huge batch payload; align the initial snapshot to that frontier.
 
-## 11. Implementation Phases
+## 12. Implementation Phases
 
 ### Phase 1: Local Operation Logging (2-3 weeks)
 
@@ -1183,7 +1559,7 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 12. Open Questions
+## 13. Open Questions
 
 1. **Payload Size Limits:** Should we split large payloads (e.g., long notes) into separate operations?
 2. **Selective Sync:** Can users choose which entities to sync (e.g., only project A)?
@@ -1201,7 +1577,7 @@ describe('Operation Log E2E', () => {
 
 ---
 
-## 13. References
+## 14. References
 
 - [Event Sourcing Pattern (Martin Fowler)](https://martinfowler.com/eaaDev/EventSourcing.html)
 - [CRDT Primer](https://crdt.tech/)
