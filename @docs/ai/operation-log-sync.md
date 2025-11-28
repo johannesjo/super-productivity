@@ -107,6 +107,16 @@ export interface OperationLogEntry {
   source: 'local' | 'remote'; // Origin of this operation
   syncedAt?: number; // When successfully synced to remote (null if pending)
 }
+
+export interface OperationLogStore {
+  // ... existing methods
+  append(op: Operation, source?: 'local' | 'remote'): Promise<void>;
+  getEntityFrontier(
+    entityType?: EntityType,
+    entityId?: string,
+  ): Promise<Map<string, VectorClock>>;
+  hasOp(id: string): Promise<boolean>;
+}
 ```
 
 ### 2.4. Entity-Level Conflict Tracking
@@ -372,15 +382,16 @@ async downloadRemoteOps(): Promise<void> {
     // Apply non-conflicting ops
     for (const op of nonConflicting) {
       // Persist remote op first so the log/frontier stays canonical
-      await this.opLogStore.append({
-        op,
-        source: 'remote',
-      });
+      // append must be idempotent or guarded
+      if (!(await this.opLogStore.hasOp(op.id))) {
+        await this.opLogStore.append(op, 'remote');
+      }
 
       const action = this.opToActionConverter.convert(op);
       action.meta.isRemote = true;
       this.store.dispatch(action);
-      // markApplied assumes the op is already in the log; otherwise it is a no-op
+
+      // markApplied assumes the op is already in the log
       await this.opLogStore.markApplied(op.id);
     }
 
