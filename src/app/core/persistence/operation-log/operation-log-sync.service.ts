@@ -5,6 +5,7 @@ import {
   ConflictResult,
   EntityConflict,
   Operation,
+  OperationLogEntry,
   OperationLogManifest,
   VectorClock,
 } from './operation.types';
