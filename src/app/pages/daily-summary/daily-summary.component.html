@@ -113,6 +113,7 @@
         [isShowChecklistToggle]="true"
         (changed)="updateDailySummaryTxt($event)"
         [model]="dailySummaryNoteTxt()"
+        [placeholderTxt]="T.PDS.END_OF_DAYS_RITUALS_PLACEHOLDER | translate"
       >
         <button
           [matTooltip]="'Remove daily summary note'"
