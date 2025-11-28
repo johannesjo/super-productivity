@@ -91,7 +91,8 @@ export type EntityType =
   | 'SIMPLE_COUNTER'
   | 'WORK_CONTEXT'
   | 'TASK_REPEAT_CFG'
-  | 'ISSUE_PROVIDER';
+  | 'ISSUE_PROVIDER'
+  | 'MIGRATION';
 ```
 
 ### 2.3. The Persistent Log Entry
@@ -427,10 +428,10 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
     }
 
     // Check if ops are concurrent (vector clock comparison)
-    const vcComparison = compareVectorClocks(
-      localOpsForEntity[0].vectorClock,
-      remoteOp.vectorClock
-    );
+    const localFrontier = mergeVectorClocks(
+      localOpsForEntity.map((op) => op.vectorClock),
+    ); // use the latest local knowledge, not just the first op
+    const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
     if (vcComparison === VectorClockComparison.CONCURRENT) {
       // True conflict - same entity modified independently
@@ -512,6 +513,8 @@ To prevent the log from growing infinitely.
 
 **Process:**
 
+> Guardrail: never delete an operation that has not been confirmed as synced to remote storage, even if it is older than the retention window. Keep a trailing window (by `seq`) for conflict detection/hydration and require `syncedAt` before pruning.
+
 ```typescript
 async compact(): Promise<void> {
   await this.lockService.request('sp_op_log_compact', async () => {
@@ -532,7 +535,12 @@ async compact(): Promise<void> {
 
     // 4. Delete old operations (keep recent for conflict resolution window)
     const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
-    await this.opLogStore.deleteOpsOlderThan(Date.now() - retentionWindowMs);
+    await this.opLogStore.deleteOpsWhere(
+      (entry) =>
+        !!entry.syncedAt && // never drop unsynced ops
+        entry.appliedAt < Date.now() - retentionWindowMs &&
+        entry.seq <= lastSeq, // keep tail for conflict frontier
+    );
   });
 }
 ```
@@ -1016,7 +1024,7 @@ async rollbackToLegacy(): Promise<void> {
   }
 
   // 2. Restore legacy data
-  await this.pfapi.importAllSycModelData({ data: legacyBackup });
+  await this.pfapi.importAllSyncModelData({ data: legacyBackup });
 
   // 3. Clear operation log
   await this.opLogStore.clearAll();
@@ -1051,7 +1059,7 @@ async rollbackToLegacy(): Promise<void> {
 
 ## 9. Testing Strategy
 
-### 8.1. Unit Tests
+### 9.1. Unit Tests
 
 ```typescript
 describe('OperationLogStore', () => {
@@ -1092,7 +1100,7 @@ describe('CascadeOperations', () => {
 });
 ```
 
-### 8.2. Integration Tests
+### 9.2. Integration Tests
 
 ```typescript
 describe('Multi-Tab Sync', () => {
@@ -1118,7 +1126,7 @@ describe('Cross-Model Integrity', () => {
 });
 ```
 
-### 8.3. E2E Tests
+### 9.3. E2E Tests
 
 ```typescript
 describe('Operation Log E2E', () => {
