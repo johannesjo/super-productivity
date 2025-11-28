@@ -24,6 +24,56 @@ export class WebdavApi {
     this.httpAdapter = new WebDavHttpAdapter();
   }
 
+  // ==============================
+  // File Operations
+  // ==============================
+
+  async listFiles(dirPath: string): Promise<string[]> {
+    const cfg = await this._getCfgOrError();
+    const fullPath = this._buildFullPath(cfg.baseUrl, dirPath);
+
+    try {
+      const response = await this._makeRequest({
+        url: fullPath,
+        method: WebDavHttpMethod.PROPFIND,
+        body: WebdavXmlParser.PROPFIND_XML,
+        headers: {
+          [WebDavHttpHeader.CONTENT_TYPE]: 'application/xml; charset=utf-8',
+          [WebDavHttpHeader.DEPTH]: '1', // Get direct children
+        },
+      });
+
+      if (response.status === WebDavHttpStatus.MULTI_STATUS) {
+        const filesAndFolders = this.xmlParser.parseMultiplePropsFromXml(
+          response.data,
+          dirPath,
+        );
+        // Filter out directories and the current folder itself, return only file paths
+        return filesAndFolders
+          .filter(
+            (item) => item.type === 'file' && item.path !== dirPath, // Don't include the folder itself
+          )
+          .map((item) => item.path);
+      } else if (response.status === WebDavHttpStatus.NOT_FOUND) {
+        return []; // Directory not found, return empty list
+      }
+      throw new HttpNotOkAPIError(response); // Other errors
+    } catch (e) {
+      PFLog.error(`${WebdavApi.L}.listFiles() error for path: ${dirPath}`, e);
+      // Handle "Not Found" error specifically to return empty array
+      if (
+        e instanceof HttpNotOkAPIError &&
+        e.response?.status === WebDavHttpStatus.NOT_FOUND
+      ) {
+        return [];
+      }
+      throw e;
+    }
+  }
+
+  /**
+   * Retrieve metadata for a file or folder
+   */
   async getFileMeta(
     path: string,
     _localRev: string | null,
