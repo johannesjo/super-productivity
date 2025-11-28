@@ -44,7 +44,6 @@ import { TrackingReminderService } from './features/tracking-reminder/tracking-r
 import { map, take } from 'rxjs/operators';
 import { IS_MOBILE } from './util/is-mobile';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
-import { GlobalConfigState } from './features/config/global-config.model';
 import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
@@ -307,13 +306,15 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         });
       });
 
-      this._uiHelperService.initElectron();
-
-      window.ea.on(IPC.TRANSFER_SETTINGS_REQUESTED, () => {
-        window.ea.sendAppSettingsToElectron(
-          this._globalConfigService.cfg() as GlobalConfigState,
-        );
+      // Sync settings to electron on change
+      effect(() => {
+        const cfg = this._globalConfigService.cfg();
+        if (cfg) {
+          window.ea.sendAppSettingsToElectron(cfg);
+        }
       });
+
+      this._uiHelperService.initElectron();
     } else {
       // WEB VERSION
       window.addEventListener('beforeunload', (e) => {

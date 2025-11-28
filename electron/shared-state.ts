@@ -5,6 +5,7 @@
 
 let isQuiting = false;
 let isLocked = false;
+let isMinimizeToTray = false;
 
 export const getIsQuiting = (): boolean => isQuiting;
 
@@ -16,4 +17,10 @@ export const getIsLocked = (): boolean => isLocked;
 
 export const setIsLocked = (value: boolean): void => {
   isLocked = value;
+};
+
+export const getIsMinimizeToTray = (): boolean => isMinimizeToTray;
+
+export const setIsMinimizeToTray = (value: boolean): void => {
+  isMinimizeToTray = value;
 };

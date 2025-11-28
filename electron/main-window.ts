@@ -13,17 +13,15 @@ import * as path from 'path';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log/main';
-import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { IS_MAC } from './common.const';
 import {
   destroyOverlayWindow,
   hideOverlayWindow,
   showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
-import { getIsQuiting, setIsQuiting } from './shared-state';
+import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state';
 
 let mainWin: BrowserWindow;
 
@@ -325,20 +323,18 @@ const appCloseHandler = (app: App): void => {
     log('close, isQuiting:', getIsQuiting());
     if (!getIsQuiting()) {
       event.preventDefault();
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg && appCfg.misc.isMinimizeToTray && !getIsQuiting()) {
-          mainWin.hide();
-          showOverlayWindow();
-          return;
-        }
+      if (getIsMinimizeToTray()) {
+        mainWin.hide();
+        showOverlayWindow();
+        return;
+      }
 
-        if (ids.length > 0) {
-          log('Actions to wait for ', ids);
-          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
-        } else {
-          _quitApp();
-        }
-      });
+      if (ids.length > 0) {
+        log('Actions to wait for ', ids);
+        mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+      } else {
+        _quitApp();
+      }
     }
   });
 
@@ -364,19 +360,17 @@ const appMinimizeHandler = (app: App): void => {
     // TODO find reason for the typing error
     // @ts-ignore
     mainWin.on('minimize', (event: Event) => {
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg.misc.isMinimizeToTray) {
-          event.preventDefault();
-          mainWin.hide();
-          showOverlayWindow();
-        } else {
-          // For regular minimize (not to tray), also show overlay
-          showOverlayWindow();
-          if (IS_MAC) {
-            app.dock?.show();
-          }
+      if (getIsMinimizeToTray()) {
+        event.preventDefault();
+        mainWin.hide();
+        showOverlayWindow();
+      } else {
+        // For regular minimize (not to tray), also show overlay
+        showOverlayWindow();
+        if (IS_MAC) {
+          app.dock?.show();
         }
-      });
+      }
     });
   }
 };

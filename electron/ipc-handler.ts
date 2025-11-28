@@ -20,9 +20,10 @@ import { exec } from 'child_process';
 import { getWin } from './main-window';
 import { quitApp, showOrFocus } from './various-shared';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
-import { getIsLocked } from './shared-state';
+import { getIsLocked, setIsMinimizeToTray } from './shared-state';
 import { BACKUP_DIR, BACKUP_DIR_WINSTORE } from './backup';
 import { pluginNodeExecutor } from './plugin-node-executor';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 
 export const initIpcInterfaces = (): void => {
   // Initialize plugin node executor (registers IPC handlers)
@@ -62,6 +63,9 @@ export const initIpcInterfaces = (): void => {
   ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
   ipcMain.on(IPC.OPEN_PATH, (ev, path: string) => shell.openPath(path));
   ipcMain.on(IPC.OPEN_EXTERNAL, (ev, url: string) => shell.openExternal(url));
+  ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, (ev, cfg: GlobalConfigState) => {
+    setIsMinimizeToTray(cfg.misc.isMinimizeToTray);
+  });
 
   ipcMain.handle(IPC.SAVE_FILE_DIALOG, async (ev, { filename, data }) => {
     const result = await dialog.showSaveDialog(getWin(), {
