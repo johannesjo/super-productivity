@@ -53,8 +53,8 @@ export class TagEffects {
       this._actions$.pipe(
         ofType(updateTag),
         tap(
-          ({ isSkipSnack }) =>
-            !isSkipSnack &&
+          (action) =>
+            !action.isSkipSnack &&
             this._snackService.open({
               type: 'SUCCESS',
               msg: T.F.TAG.S.UPDATED,
