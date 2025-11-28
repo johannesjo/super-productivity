@@ -37,12 +37,12 @@ import { Injectable } from '@angular/core';
 // import { environment } from '../../../environments/environment';
 // import { selectTimeTrackingState } from '../../features/time-tracking/store/time-tracking.selectors';
 // import { TaskSharedActions } from '../meta/task-shared.actions';
-import { loadAllData } from '../meta/load-all-data.action';
+// import { loadAllData } from '../meta/load-all-data.action';
 // import { selectTaskRepeatCfgFeatureState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 // import { Log } from '../../core/log';
 // import { selectMenuTreeState } from '../../features/menu-tree/store/menu-tree.selectors';
 
-const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
+// const ALWAYS_IGNORED_ACTIONS = [loadAllData.type];
 
 @Injectable()
 export class SaveToDbEffects {
@@ -50,12 +50,10 @@ export class SaveToDbEffects {
   // private _actions = inject(Actions);
   // private _pfapiService = inject(PfapiService);
   // private _dataInitStateService = inject(DataInitStateService);
-
   // --------------------------------------------------
   // NOTE: Legacy saves are disabled for the new Operation Log architecture.
   // The code is kept commented out for reference and potential rollback/migration needs if any.
   // --------------------------------------------------
-
   // tag$ = this.createSaveEffect(selectTagFeatureState, 'tag');
   // project$ = this.createSaveEffect(selectProjectFeatureState, 'project');
   // menuTree$ = this.createSaveEffect(selectMenuTreeState, 'menuTree');
@@ -73,9 +71,7 @@ export class SaveToDbEffects {
   //   selectTaskRepeatCfgFeatureState,
   //   'taskRepeatCfg',
   // );
-
   // // ---------------------------------------------------
-
   // task$ = this.createSaveEffectWithFilter(selectTaskFeatureState, 'task', [
   //   TimeTrackingActions.addTimeSpent.type,
   //   setCurrentTask.type,
@@ -86,7 +82,6 @@ export class SaveToDbEffects {
   //   toggleStart.type,
   //   TaskSharedActions.removeTasksFromTodayTag.type,
   // ]);
-
   // updateTaskAuditTime$ = createEffect(
   //   () =>
   //     this._actions.pipe(
@@ -100,7 +95,6 @@ export class SaveToDbEffects {
   //         this._pfapiService.m.task.save(
   //           {
   //             ...taskState,
-
   //             // make sure those are never set to something
   //             selectedTaskId: environment.production ? null : taskState.selectedTaskId,
   //             currentTaskId: null,
@@ -111,15 +105,12 @@ export class SaveToDbEffects {
   //     ),
   //   { dispatch: false },
   // );
-
   // // ---------------------------------------------------
-
   // timeTracking$ = this.createSaveEffectWithFilter(
   //   selectTimeTrackingState,
   //   'timeTracking',
   //   [TimeTrackingActions.addTimeSpent.type],
   // );
-
   // updateTimeTrackingStorageAuditTime$ = createEffect(
   //   () =>
   //     this._actions.pipe(
@@ -134,77 +125,74 @@ export class SaveToDbEffects {
   //     ),
   //   { dispatch: false },
   // );
-
   // ---------------------------------------------------
-
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  private createSaveEffect<K extends keyof typeof this._pfapiService.m>(
-    selector: MemoizedSelector<
-      RootState,
-      Parameters<(typeof this._pfapiService.m)[K]['save']>[0]
-    >,
-    modelKey: K,
-  ) {
-    return createEffect(
-      () =>
-        this._dataInitStateService.isAllDataLoadedInitially$.pipe(
-          switchMap(() => this._store.select(selector)),
-          skip(1),
-          switchMap((state) =>
-            // thankfully the next action after is the action that triggered the change
-            this._actions.pipe(
-              first(),
-              map((a) => [state, a]),
-            ),
-          ),
-          filter(([state, action]) => !ALWAYS_IGNORED_ACTIONS.includes(action.type)),
-          switchMap(([state]) =>
-            this._pfapiService.m[modelKey].save(state, {
-              isUpdateRevAndLastUpdate: true,
-            }),
-          ),
-        ),
-      { dispatch: false },
-    );
-  }
-
+  // private createSaveEffect<K extends keyof typeof this._pfapiService.m>(
+  //   selector: MemoizedSelector<
+  //     RootState,
+  //     Parameters<(typeof this._pfapiService.m)[K]['save']>[0]
+  //   >,
+  //   modelKey: K,
+  // ) {
+  //   return createEffect(
+  //     () =>
+  //       this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+  //         switchMap(() => this._store.select(selector)),
+  //         skip(1),
+  //         switchMap((state) =>
+  //           // thankfully the next action after is the action that triggered the change
+  //           this._actions.pipe(
+  //             first(),
+  //             map((a) => [state, a]),
+  //           ),
+  //         ),
+  //         filter(([state, action]) => !ALWAYS_IGNORED_ACTIONS.includes(action.type)),
+  //         switchMap(([state]) =>
+  //           this._pfapiService.m[modelKey].save(state, {
+  //             isUpdateRevAndLastUpdate: true,
+  //           }),
+  //         ),
+  //       ),
+  //     { dispatch: false },
+  //   );
+  // }
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  private createSaveEffectWithFilter<K extends keyof typeof this._pfapiService.m>(
-    selector: MemoizedSelector<
-      RootState,
-      Parameters<(typeof this._pfapiService.m)[K]['save']>[0]
-    >,
-    modelKey: K,
-    ignoredActionsTypes: string[],
-  ) {
-    const ignoredActionTypesToUse = [...ALWAYS_IGNORED_ACTIONS, ...ignoredActionsTypes];
-    return createEffect(
-      () =>
-        this._dataInitStateService.isAllDataLoadedInitially$.pipe(
-          switchMap(() => this._store.select(selector)),
-          skip(1),
-          switchMap((state) =>
-            // thankfully the next action after is the action that triggered the change
-            this._actions.pipe(
-              first(),
-              map((a) => [state, a]),
-            ),
-          ),
-          tap(([state, action]) =>
-            Log.log(
-              `__DB_S_${modelKey}__`,
-              !ignoredActionTypesToUse.includes(action.type),
-              action.type,
-            ),
-          ),
-          filter(([state, action]) => !ignoredActionTypesToUse.includes(action.type)),
-          switchMap(([state]) =>
-            this._pfapiService.m[modelKey].save(state, {
-              isUpdateRevAndLastUpdate: true,
-            }),
-          ),
-        ),
-      { dispatch: false },
-    );
-  }
+  // private createSaveEffectWithFilter<K extends keyof typeof this._pfapiService.m>(
+  //   selector: MemoizedSelector<
+  //     RootState,
+  //     Parameters<(typeof this._pfapiService.m)[K]['save']>[0]
+  //   >,
+  //   modelKey: K,
+  //   ignoredActionsTypes: string[],
+  // ) {
+  //   const ignoredActionTypesToUse = [...ALWAYS_IGNORED_ACTIONS, ...ignoredActionsTypes];
+  //   return createEffect(
+  //     () =>
+  //       this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+  //         switchMap(() => this._store.select(selector)),
+  //         skip(1),
+  //         switchMap((state) =>
+  //           // thankfully the next action after is the action that triggered the change
+  //           this._actions.pipe(
+  //             first(),
+  //             map((a) => [state, a]),
+  //           ),
+  //         ),
+  //         tap(([state, action]) =>
+  //           Log.log(
+  //             `__DB_S_${modelKey}__`,
+  //             !ignoredActionTypesToUse.includes(action.type),
+  //             action.type,
+  //           ),
+  //         ),
+  //         filter(([state, action]) => !ignoredActionTypesToUse.includes(action.type)),
+  //         switchMap(([state]) =>
+  //           this._pfapiService.m[modelKey].save(state, {
+  //             isUpdateRevAndLastUpdate: true,
+  //           }),
+  //         ),
+  //       ),
+  //     { dispatch: false },
+  //   );
+  // }
 }
