@@ -55,8 +55,20 @@ export class OperationLogHydratorService {
       PFLog.normal('OperationLogHydratorService: Hydration complete.');
     } else {
       PFLog.warn(
-        'OperationLogHydratorService: No snapshot found even after migration check.',
+        'OperationLogHydratorService: No snapshot found. Replaying all operations from start.',
       );
+      // No snapshot means we might be in a fresh install state or post-migration-check with no legacy data.
+      // We must replay ALL operations from the beginning of the log.
+      const allOps = await this.opLogStore.getOpsAfterSeq(0);
+      PFLog.normal(
+        `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
+      );
+
+      for (const entry of allOps) {
+        const action = convertOpToAction(entry.op);
+        this.store.dispatch(action);
+      }
+      PFLog.normal('OperationLogHydratorService: Full replay complete.');
     }
   }
 }
