@@ -34,6 +34,7 @@ export class OperationLogSyncService {
   private opLogStore = inject(OperationLogStoreService);
   private pfapiService = inject(PfapiService);
   private lockService = inject(LockService);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private dependencyResolver = inject(DependencyResolverService);
 
   async uploadPendingOps(): Promise<void> {

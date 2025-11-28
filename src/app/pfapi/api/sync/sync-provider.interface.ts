@@ -83,6 +83,13 @@ export interface SyncProviderServiceInterface<PID extends SyncProviderId> {
   removeFile(targetPath: string): Promise<void>;
 
   /**
+   * Lists files in a directory
+   * @param targetPath Path to the directory to list
+   * @returns List of file names/paths
+   */
+  listFiles?(targetPath: string): Promise<string[]>;
+
+  /**
    * Checks if the provider is ready to perform sync operations
    * @returns True if the provider is authenticated and ready
    */
