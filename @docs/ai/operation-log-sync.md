@@ -170,7 +170,7 @@ Not all NgRx actions should be persisted. We need an explicit contract.
 // In src/app/core/persistence/operation-log/persistent-action.interface.ts
 
 export interface PersistentActionMeta {
-  isPersistent: true; // MUST be true to be recorded
+  isPersistent?: boolean; // When false, the action is blacklisted and not persisted
   entityType: EntityType;
   entityId: string;
   opType: OpType;
@@ -186,48 +186,22 @@ export interface PersistentAction<P = unknown> extends Action {
 
 // Helper type guard
 export function isPersistentAction(action: Action): action is PersistentAction {
-  return (action as PersistentAction).meta?.isPersistent === true;
+  return (action as PersistentAction).meta?.isPersistent !== false;
 }
 ```
 
-### 3.3. Action Whitelist Registry
+### 3.3. Action Blacklist Registry
 
-**Maintenance Note:** To prevent developers from forgetting to register new actions, we should implement a unit test that scans all NgRx action definitions and asserts they are either explicitly in `PERSISTENT_ACTION_TYPES` or in a `IGNORED_ACTION_TYPES` list.
+**Maintenance Note:** To prevent developers from forgetting to blacklist new actions that should not be persisted, or unintentionally blacklisting actions that should, we should implement a unit test that scans all NgRx action definitions and asserts they are either explicitly listed in `BLACKLISTED_ACTION_TYPES` or are intended to be persistent.
 
 ```typescript
 // In src/app/core/persistence/operation-log/action-whitelist.ts
 
-export const PERSISTENT_ACTION_TYPES: Set<string> = new Set([
-  // Task actions
-  '[Task] Add Task',
-  '[Task] Update Task',
-  '[Task] Delete Task',
-  '[Task] Move',
-  '[Task] Add SubTask',
-  '[Task] Toggle Start',
-
-  // Project actions
-  '[Project] Add Project',
-  '[Project] Update Project',
-  '[Project] Delete Project',
-
-  // Tag actions
-  '[Tag] Add Tag',
-  '[Tag] Update Tag',
-  '[Tag] Delete Tag',
-
-  // Note actions
-  '[Note] Add Note',
-  '[Note] Update Note',
-  '[Note] Delete Note',
-
-  // Config (global)
-  '[Global Config] Update Config Section',
-
+export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
   // Explicitly EXCLUDED (not persisted):
-  // - '[App] Set Current Worklog Task' (UI state)
-  // - '[Layout] Toggle Sidebar' (UI state)
-  // - '[Focus Mode] Enter/Exit' (transient)
+  '[App] Set Current Worklog Task', // UI state
+  '[Layout] Toggle Sidebar', // UI state
+  '[Focus Mode] Enter/Exit', // transient
 ]);
 ```
 
@@ -257,8 +231,9 @@ export class OperationLogEffects {
   persistOperation$ = createEffect(
     () =>
       this.actions$.pipe(
-        filter(isPersistentAction),
-        filter((action) => !action.meta.isRemote),
+        filter((action) => (action as PersistentAction).meta?.isPersistent !== false), // Check for explicit opt-out
+        filter((action) => !BLACKLISTED_ACTION_TYPES.has(action.type)), // Check against global blacklist
+        filter((action) => !(action as PersistentAction).meta?.isRemote), // Always ignore remote actions
         concatMap((action) => this.writeOperation(action)),
       ),
     { dispatch: false },
@@ -379,6 +354,7 @@ async uploadPendingOps(): Promise<void> {
 async downloadRemoteOps(): Promise<void> {
   const manifest = await this.syncProvider.downloadFile('manifest.json');
   const appliedOpIds = await this.opLogStore.getAppliedOpIds();
+  const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier(); // latest applied vector per entity
 
   // Find new remote op files
   const newFiles = manifest.opFiles.filter(f => !this.isFileFullyApplied(f, appliedOpIds));
@@ -391,13 +367,20 @@ async downloadRemoteOps(): Promise<void> {
     const newOps = remoteOps.filter(op => !appliedOpIds.has(op.id));
 
     // Check for conflicts at entity level
-    const { nonConflicting, conflicts } = await this.detectConflicts(newOps);
+    const { nonConflicting, conflicts } = await this.detectConflicts(newOps, appliedFrontierByEntity);
 
     // Apply non-conflicting ops
     for (const op of nonConflicting) {
+      // Persist remote op first so the log/frontier stays canonical
+      await this.opLogStore.append({
+        op,
+        source: 'remote',
+      });
+
       const action = this.opToActionConverter.convert(op);
       action.meta.isRemote = true;
       this.store.dispatch(action);
+      // markApplied assumes the op is already in the log; otherwise it is a no-op
       await this.opLogStore.markApplied(op.id);
     }
 
@@ -412,7 +395,10 @@ async downloadRemoteOps(): Promise<void> {
 #### 4.3.3. Conflict Detection Algorithm
 
 ```typescript
-async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
+async detectConflicts(
+  remoteOps: Operation[],
+  appliedFrontierByEntity: Map<string, VectorClock>,
+): Promise<ConflictResult> {
   const localPendingOps = await this.opLogStore.getUnsyncedByEntity();
   const conflicts: EntityConflict[] = [];
   const nonConflicting: Operation[] = [];
@@ -420,17 +406,15 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
   for (const remoteOp of remoteOps) {
     const entityKey = `${remoteOp.entityType}:${remoteOp.entityId}`;
     const localOpsForEntity = localPendingOps.get(entityKey) || [];
+    const appliedFrontier = appliedFrontierByEntity.get(entityKey);
 
-    if (localOpsForEntity.length === 0) {
-      // No local changes to this entity - no conflict
-      nonConflicting.push(remoteOp);
-      continue;
-    }
+    // Build the frontier from everything we know locally (applied + pending)
+    const localFrontier = mergeVectorClocks([
+      ...(appliedFrontier ? [appliedFrontier] : []),
+      ...localOpsForEntity.map((op) => op.vectorClock),
+    ]);
 
     // Check if ops are concurrent (vector clock comparison)
-    const localFrontier = mergeVectorClocks(
-      localOpsForEntity.map((op) => op.vectorClock),
-    ); // use the latest local knowledge, not just the first op
     const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
     if (vcComparison === VectorClockComparison.CONCURRENT) {
@@ -1040,10 +1024,10 @@ async rollbackToLegacy(): Promise<void> {
 
 | Risk                      | Severity | Mitigation                                                    |
 | :------------------------ | :------: | :------------------------------------------------------------ |
-| **Infinite Loops**        |   High   | Strict `isRemote` flag + action type whitelist + tests        |
+| **Infinite Loops**        |   High   | Strict `isRemote` flag + action type blacklist + tests        |
 | **Startup Slowness**      |  Medium  | Aggressive compaction (default: 500 ops, 7 day retention)     |
 | **Lost Updates (Tabs)**   |   High   | Web Locks API + BroadcastChannel + Fallbacks                  |
-| **Data Bloat**            |  Medium  | Whitelist only essential actions + automatic compaction       |
+| **Data Bloat**            |  Medium  | Blacklist non-essential actions + automatic compaction        |
 | **Remote File Explosion** |  Medium  | Aggressive cleanup of remote op files during snapshot uploads |
 | **Ordering Glitches**     |  Medium  | Vector clocks + UUID v7 (time-ordered) + deterministic sort   |
 | **Memory Pressure**       |  Medium  | Streaming replay for large op sets + pagination               |
@@ -1075,8 +1059,8 @@ describe('OperationLogEffects', () => {
   it('should increment vector clock on each operation');
 });
 
-describe('ActionWhitelist', () => {
-  it('should ensure every ActionType is explicitly categorized (persisted or ignored)');
+describe('ActionBlacklist', () => {
+  it('should ensure every ActionType is either blacklisted or implicitly persistent');
 });
 
 describe('ConflictDetector', () => {
@@ -1149,7 +1133,7 @@ describe('Operation Log E2E', () => {
 **Canonical operation codecs**
 
 - Per-entity Typia codecs that normalize payloads to minimal diffs (no derived arrays or redundant fields).
-- Persist the normalized patch shape, not raw action payloads.
+- Persist the normalized patch shape, not raw action payloads. Ensure only non-blacklisted actions are persisted.
 - **Typia Integration:** Ensure `ts-patch` is correctly configured for all build targets (Electron/Capacitor).
 
 **Deterministic reducers**
@@ -1196,8 +1180,8 @@ describe('Operation Log E2E', () => {
 - [ ] Create `Operation` types and per-entity codecs (Typia) with normalization
 - [ ] **Implement `LockService` with robust fallbacks**
 - [ ] Create `OperationLogEffects` (listen to persistent actions) with replay guard for effects
-- [ ] Create action whitelist registry with Type Safety tests
-- [ ] Add `isPersistent` meta to 10-15 core actions
+- [ ] Create action blacklist registry with Type Safety tests
+- [ ] Add `isPersistent: false` meta to 10-15 core actions that should not be persisted
 - [ ] Create `OperationLogHydrator` for startup (side-effect-safe replay path)
 - [ ] Create compaction service with snapshot/manifest contract
 - [ ] Unit tests + replay determinism property test
