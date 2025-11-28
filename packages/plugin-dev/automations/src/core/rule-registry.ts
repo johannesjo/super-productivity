@@ -63,7 +63,7 @@ export class RuleRegistry {
     }
 
     const validTriggers = new Set(['taskCompleted', 'taskCreated', 'taskUpdated', 'timeBased']);
-    const validConditions = new Set(['titleContains', 'projectIs', 'hasTag']);
+    const validConditions = new Set(['titleContains', 'projectIs', 'hasTag', 'weekdayIs']);
     const validActions = new Set([
       'createTask',
       'addTag',
@@ -116,13 +116,18 @@ export class RuleRegistry {
   }
 
   private async saveRules() {
-    this.saveQueue = this.saveQueue.then(async () => {
-      try {
-        await this.plugin.persistDataSynced(JSON.stringify(this.rules));
-      } catch (e) {
-        this.plugin.log.error('Failed to save rules', e);
-      }
-    });
+    this.saveQueue = this.saveQueue
+      .then(async () => {
+        try {
+          await this.plugin.persistDataSynced(JSON.stringify(this.rules));
+        } catch (e) {
+          this.plugin.log.error('Failed to save rules', e);
+        }
+      })
+      .catch(() => {
+        // Catch any errors from the promise chain itself to prevent blocking future saves
+        this.plugin.log.error('Critical error in save queue');
+      });
     await this.saveQueue;
   }
 

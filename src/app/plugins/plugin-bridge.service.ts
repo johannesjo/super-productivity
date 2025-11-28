@@ -15,6 +15,7 @@ import {
   PluginNodeScriptResult,
   PluginShortcutCfg,
   PluginSidePanelBtnCfg,
+  Task,
 } from './plugin-api.model';
 
 import {
@@ -363,10 +364,10 @@ export class PluginBridgeService implements OnDestroy {
       taskData.parentId,
     );
 
-    // Check if this is a subtask
+    let createdTask: Task;
     if (taskData.parentId) {
       // For subtasks, we need to use the addSubTask action to properly update parent
-      const task = this._taskService.createNewTaskWithDefaults({
+      const newTask = this._taskService.createNewTaskWithDefaults({
         title: taskData.title,
         additional: {
           notes: taskData.notes || '',
@@ -380,16 +381,18 @@ export class PluginBridgeService implements OnDestroy {
       // Dispatch the addSubTask action which properly updates parent's subTaskIds
       this._store.dispatch(
         addSubTask({
-          task,
+          task: newTask,
           parentId: taskData.parentId,
         }),
       );
+      createdTask = newTask;
 
       PluginLog.log('PluginBridge: Subtask added successfully', {
-        taskId: task.id,
+        taskId: createdTask.id,
         taskData,
       });
-      return task.id;
+
+      return createdTask.id;
     } else {
       // For main tasks, use the regular add method
       const additional: Partial<TaskCopy> = {

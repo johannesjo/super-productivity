@@ -10,10 +10,10 @@ export interface AutomationTrigger {
 export interface TaskEvent {
   type: AutomationTriggerType;
   task?: Task;
-  previousTaskState?: Task; // only used for "updated"
+  previousTaskState?: unknown; // only used for "updated"
 }
 
-export type ConditionType = 'titleContains' | 'projectIs' | 'hasTag';
+export type ConditionType = 'titleContains' | 'projectIs' | 'hasTag' | 'weekdayIs';
 
 export interface Condition {
   type: ConditionType;

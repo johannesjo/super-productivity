@@ -52,6 +52,7 @@ export class AutomationManager {
     globalRegistry.registerCondition(Conditions.ConditionTitleContains);
     globalRegistry.registerCondition(Conditions.ConditionProjectIs);
     globalRegistry.registerCondition(Conditions.ConditionHasTag);
+    globalRegistry.registerCondition(Conditions.ConditionWeekdayIs);
 
     // Actions
     globalRegistry.registerAction(Actions.ActionCreateTask);
@@ -77,6 +78,10 @@ export class AutomationManager {
   private async checkTimeBasedRules() {
     try {
       const rules = await this.ruleRegistry.getEnabledRules();
+
+      // Cleanup execution times for deleted rules to prevent memory leaks
+      this.syncExecutionTimes(rules.map((r) => r.id));
+
       const now = new Date();
       const currentHours = now.getHours();
       const currentMinutes = now.getMinutes();
@@ -118,6 +123,15 @@ export class AutomationManager {
       }
     } catch (e) {
       this.plugin.log.error(`[Automation] Error in checkTimeBasedRules: ${e}`);
+    }
+  }
+
+  private syncExecutionTimes(activeRuleIds: string[]) {
+    const activeSet = new Set(activeRuleIds);
+    for (const id of this.lastExecutionTimes.keys()) {
+      if (!activeSet.has(id)) {
+        this.lastExecutionTimes.delete(id);
+      }
     }
   }
 

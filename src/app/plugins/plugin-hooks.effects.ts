@@ -22,6 +22,7 @@ import {
   moveSubTaskDown,
   moveSubTaskToTop,
   moveSubTaskToBottom,
+  addSubTask, // Added
 } from '../features/tasks/store/task.actions';
 import * as projectActions from '../features/project/store/project.actions';
 import { updateProject } from '../features/project/store/project.actions';
@@ -131,7 +132,7 @@ export class PluginHooksEffects {
   taskAdd$ = createEffect(
     () =>
       this.actions$.pipe(
-        ofType(TaskSharedActions.addTask),
+        ofType(TaskSharedActions.addTask, addSubTask),
         switchMap((action) =>
           this.store.pipe(
             select(selectTaskById, { id: action.task.id }),
@@ -139,11 +140,13 @@ export class PluginHooksEffects {
             filter((task) => !!task),
             tap((task: Task | undefined) => {
               if (task) {
-                this.pluginService.dispatchHook(PluginHooks.TASK_UPDATE, {
+                this.pluginService.dispatchHook(PluginHooks.TASK_CREATED, {
                   taskId: task.id,
                   task,
-                  changes: {}, // Initial add, no changes diff
                 });
+                // Also dispatch legacy update for backward compatibility if needed,
+                // but generally TASK_CREATED should be preferred.
+                // Leaving TASK_UPDATE out as 'taskCreated' is the specific hook now.
               }
             }),
             map(() => EMPTY),

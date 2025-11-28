@@ -9,6 +9,7 @@ export interface PluginMenuEntryCfg {
 }
 
 export enum PluginHooks {
+  TASK_CREATED = 'taskCreated',
   TASK_COMPLETE = 'taskComplete',
   TASK_UPDATE = 'taskUpdate',
   TASK_DELETE = 'taskDelete',
@@ -30,7 +31,7 @@ export interface PluginBaseCfg {
   isDev: boolean;
   lang?: {
     code: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -118,6 +119,11 @@ export interface PluginManifest {
 }
 
 // Hook payload types
+export interface TaskCreatedPayload {
+  taskId: string;
+  task: Task;
+}
+
 export interface TaskCompletePayload {
   taskId: string;
   task: Task;
@@ -145,7 +151,7 @@ export interface FinishDayPayload {
 export interface LanguageChangePayload {
   code: string;
 
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface PersistedDataUpdatePayload {
@@ -154,7 +160,7 @@ export interface PersistedDataUpdatePayload {
 
 export interface ActionPayload {
   action: string;
-  payload?: any;
+  payload?: unknown;
 }
 
 export interface AnyTaskUpdatePayload {
@@ -173,6 +179,7 @@ export interface ProjectListUpdatePayload {
 
 // Map hook types to their payload types
 export interface HookPayloadMap {
+  [PluginHooks.TASK_CREATED]: TaskCreatedPayload;
   [PluginHooks.TASK_COMPLETE]: TaskCompletePayload;
   [PluginHooks.TASK_UPDATE]: TaskUpdatePayload;
   [PluginHooks.TASK_DELETE]: TaskDeletePayload;

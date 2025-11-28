@@ -3,6 +3,7 @@ import {
   PluginAPI,
   TaskCompletePayload,
   TaskUpdatePayload,
+  TaskCreatedPayload,
 } from '@super-productivity/plugin-api';
 import type { PluginHooks } from '@super-productivity/plugin-api';
 
@@ -10,52 +11,23 @@ declare const plugin: PluginAPI;
 
 import { AutomationManager } from './core/automation-manager';
 import { globalRegistry } from './core/registry';
-import { TASK_SHARED_ADD_TASK_ACTION } from './core/definitions';
 
 // Plugin initialization
 plugin.log.info('Automation plugin initialized');
 
 const automationManager = new AutomationManager(plugin);
 
-// Deduplicate creation handling across multiple hooks (taskUpdate + anyTaskUpdate)
-// because there is no dedicated taskCreated hook in the Plugin API.
-const handledCreations = new Set<string>();
-const markCreationHandled = (taskId?: string) => {
-  if (!taskId) {
-    return false;
-  }
-  if (handledCreations.has(taskId)) {
-    return true;
-  }
-  handledCreations.add(taskId);
-  // Avoid unbounded growth while still deduplicating bursts
-  setTimeout(() => handledCreations.delete(taskId), 5000);
-  return false;
-};
-
-const handleTaskCreated = (task: TaskUpdatePayload['task']) => {
-  if (!task) {
-    plugin.log.warn('Received taskCreated event without task data');
-    return;
-  }
-  if (markCreationHandled(task.id)) {
+// Hook into task creation
+plugin.registerHook('taskCreated' as any, (payload: TaskCreatedPayload) => {
+  if (!payload.task) {
+    plugin.log.warn('Received taskCreated hook without task data');
     return;
   }
   automationManager.onTaskEvent({
     type: 'taskCreated',
-    task,
+    task: payload.task,
   });
-};
-
-// Be defensive about action names from different sources/import paths.
-const isAddTaskAction = (action: string | undefined) => {
-  if (!action) return false;
-  return (
-    action === TASK_SHARED_ADD_TASK_ACTION ||
-    action.toLowerCase().includes('addtask') ||
-    action.toLowerCase().includes('add task')
-  );
-};
+});
 
 // Hook into task completion
 plugin.registerHook('taskComplete' as any, (payload: TaskCompletePayload) => {
@@ -75,46 +47,12 @@ plugin.registerHook('taskUpdate' as any, (payload: TaskUpdatePayload) => {
     plugin.log.warn('Received taskUpdate hook without task data');
     return;
   }
-  const isCreationEvent = !payload.changes || Object.keys(payload.changes).length === 0;
-  if (isCreationEvent) {
-    plugin.log.info('[Automation] Detected creation via taskUpdate hook');
-    handleTaskCreated(payload.task);
-    return;
-  }
+  // We no longer need to heuristically detect creation here
   automationManager.onTaskEvent({
     type: 'taskUpdated',
     task: payload.task,
     previousTaskState: undefined, // TODO: How to get previous state? Payload changes only has partial.
   });
-});
-
-// Hook into task creation?
-// There is no explicit TASK_CREATE hook in PluginHooks enum from types.ts (Step 23).
-// We might need to infer it or use ANY_TASK_UPDATE or check if there is a missing hook.
-// Looking at types.ts: TASK_COMPLETE, TASK_UPDATE, TASK_DELETE, CURRENT_TASK_CHANGE, FINISH_DAY, ...
-// Wait, is there no TASK_CREATE?
-// Let's check if ANY_TASK_UPDATE covers creation.
-// Or maybe we need to request a new hook.
-// For now, let's assume we can't easily detect creation unless we monitor ANY_TASK_UPDATE and check if it's new?
-// Actually, `addTask` returns a promise with ID.
-// But if the user creates a task via UI, the plugin needs to know.
-// Let's check if `TASK_UPDATE` is fired on creation? Usually creation is separate.
-// If TASK_CREATE is missing, I should note it.
-// However, the user request explicitly asked for "Task created" trigger.
-// I will use `ANY_TASK_UPDATE` and check if I can detect creation, or just leave a comment.
-// Actually, let's look at `PluginHooks` again.
-// Step 23: TASK_COMPLETE, TASK_UPDATE, TASK_DELETE, CURRENT_TASK_CHANGE, FINISH_DAY, LANGUAGE_CHANGE, PERSISTED_DATA_UPDATE, ACTION, ANY_TASK_UPDATE, PROJECT_LIST_UPDATE.
-// No TASK_CREATE.
-// Maybe `ANY_TASK_UPDATE` with a specific action?
-// `AnyTaskUpdatePayload` has `action`, `taskId`, `task`, `changes`.
-// If `action` is 'ADD', that might be it.
-
-plugin.registerHook('anyTaskUpdate' as any, (payload: AnyTaskUpdatePayload) => {
-  plugin.log.info(`[Automation] anyTaskUpdate action: ${payload.action}`);
-
-  if (isAddTaskAction(payload.action) && payload.task) {
-    handleTaskCreated(payload.task);
-  }
 });
 
 // Register UI commands
