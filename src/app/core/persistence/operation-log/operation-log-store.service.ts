@@ -54,11 +54,25 @@ export class OperationLogStoreService {
   }
 
   private get db(): IDBPDatabase<OpLogDB> {
-    if (!this._db) throw new Error('OperationLogStore not initialized');
+    if (!this._db) {
+      // We can't make this async, so we throw if accessed before init.
+      // However, to fix the issue of it not being initialized, we should call init() eagerly
+      // or make methods async-ready (they are already async).
+      // But we can't await in a getter.
+      // Let's change the pattern: check in every method.
+      throw new Error('OperationLogStore not initialized. Ensure init() is called.');
+    }
     return this._db;
   }
 
+  private async _ensureInit(): Promise<void> {
+    if (!this._db) {
+      await this.init();
+    }
+  }
+
   async append(op: Operation, source: 'local' | 'remote' = 'local'): Promise<void> {
+    await this._ensureInit();
     const entry: Omit<OperationLogEntry, 'seq'> = {
       op,
       appliedAt: Date.now(),
@@ -70,25 +84,30 @@ export class OperationLogStoreService {
   }
 
   async hasOp(id: string): Promise<boolean> {
+    await this._ensureInit();
     const entry = await this.db.getFromIndex('ops', 'byId', id);
     return !!entry;
   }
 
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
+    await this._ensureInit();
     return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
   }
 
   async getOpsAfterSeqDirect(seq: number): Promise<OperationLogEntry[]> {
+    await this._ensureInit();
     return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
   }
 
   async getUnsynced(): Promise<OperationLogEntry[]> {
+    await this._ensureInit();
     // Scan all ops and filter. Optimized later if needed.
     const all = await this.db.getAll('ops');
     return all.filter((e) => !e.syncedAt);
   }
 
   async getUnsyncedByEntity(): Promise<Map<string, Operation[]>> {
+    await this._ensureInit();
     const unsynced = await this.getUnsynced();
     const map = new Map<string, Operation[]>();
     for (const entry of unsynced) {
@@ -103,12 +122,14 @@ export class OperationLogStoreService {
   }
 
   async getAppliedOpIds(): Promise<Set<string>> {
+    await this._ensureInit();
     // This might be heavy if log is huge. But log is compacted.
     const keys = await this.db.getAllKeysFromIndex('ops', 'byId');
     return new Set(keys as unknown as string[]);
   }
 
   async markApplied(id: string): Promise<void> {
+    await this._ensureInit();
     // Ops are assumed applied when appended locally.
     // For remote ops, they are appended then applied.
     // This method in the plan might be for tracking which remote ops are applied if we download them but don't apply immediately?
@@ -126,6 +147,7 @@ export class OperationLogStoreService {
   }
 
   async markSynced(seqs: number[]): Promise<void> {
+    await this._ensureInit();
     const tx = this.db.transaction('ops', 'readwrite');
     const store = tx.objectStore('ops');
     const now = Date.now();
@@ -140,6 +162,7 @@ export class OperationLogStoreService {
   }
 
   async deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void> {
+    await this._ensureInit();
     // This requires iterating and deleting.
     // Ideally we delete by range (older than X).
     // The predicate in plan: syncedAt && appliedAt < old && seq <= lastSeq
@@ -157,6 +180,7 @@ export class OperationLogStoreService {
   }
 
   async getLastSeq(): Promise<number> {
+    await this._ensureInit();
     const cursor = await this.db.transaction('ops').store.openCursor(null, 'prev');
     return cursor ? (cursor.key as number) : 0;
   }
@@ -167,6 +191,7 @@ export class OperationLogStoreService {
     vectorClock: VectorClock;
     compactedAt: number;
   }): Promise<void> {
+    await this._ensureInit();
     await this.db.put('state_cache', {
       id: 'current',
       ...snapshot,
@@ -179,11 +204,13 @@ export class OperationLogStoreService {
     vectorClock: VectorClock;
     compactedAt: number;
   } | null> {
+    await this._ensureInit();
     const cache = await this.db.get('state_cache', 'current');
     return cache || null;
   }
 
   async getCurrentVectorClock(): Promise<VectorClock> {
+    await this._ensureInit();
     // We need the max vector clock from cache + subsequent ops.
     // Or just the latest op's vector clock?
     // Ops are ordered by sequence, but vector clocks might be merged?
@@ -234,6 +261,7 @@ export class OperationLogStoreService {
     entityType?: EntityType,
     entityId?: string,
   ): Promise<Map<string, VectorClock>> {
+    await this._ensureInit();
     // Return map of "entityType:entityId" -> VectorClock
     // Used for conflict detection.
     // We need the latest VC for each entity.
