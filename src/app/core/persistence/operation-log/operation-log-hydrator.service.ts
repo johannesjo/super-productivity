@@ -4,6 +4,7 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { convertOpToAction } from './operation-converter.util';
 import { OperationLogMigrationService } from './operation-log-migration.service';
+import { PFLog } from '../../log';
 
 /**
  * Handles the hydration (loading) of the application state from the operation log
@@ -19,10 +20,14 @@ export class OperationLogHydratorService {
   private migrationService = inject(OperationLogMigrationService);
 
   async hydrateStore(): Promise<void> {
+    PFLog.normal('OperationLogHydratorService: Starting hydration...');
     // 1. Load snapshot
     let snapshot = await this.opLogStore.loadStateCache();
 
     if (!snapshot) {
+      PFLog.normal(
+        'OperationLogHydratorService: No snapshot found. Checking for migration...',
+      );
       // Fresh install or migration - no snapshot exists
       await this.migrationService.checkAndMigrate();
       // Try loading again after potential migration
@@ -30,17 +35,28 @@ export class OperationLogHydratorService {
     }
 
     if (snapshot) {
+      PFLog.normal('OperationLogHydratorService: Snapshot found. Hydrating state...', {
+        lastAppliedOpSeq: snapshot.lastAppliedOpSeq,
+      });
       // 2. Hydrate NgRx with snapshot
       // We cast state to any because AllSyncModels type is complex and we trust the cache
       this.store.dispatch(loadAllData({ appDataComplete: snapshot.state as any }));
 
       // 3. Replay tail operations
       const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
+      PFLog.normal(
+        `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
+      );
 
       for (const entry of tailOps) {
         const action = convertOpToAction(entry.op);
         this.store.dispatch(action);
       }
+      PFLog.normal('OperationLogHydratorService: Hydration complete.');
+    } else {
+      PFLog.warn(
+        'OperationLogHydratorService: No snapshot found even after migration check.',
+      );
     }
   }
 }
