@@ -1,3 +1,9 @@
+## [16.4.1](https://github.com/johannesjo/super-productivity/compare/v16.4.0...v16.4.1) (2025-11-28)
+
+### Bug Fixes
+
+- **build:** build vite-plugin before building plugins ([fa828f5](https://github.com/johannesjo/super-productivity/commit/fa828f5454c832622348d77ab5346a6961777148))
+
 # [16.4.0](https://github.com/johannesjo/super-productivity/compare/v16.3.6...v16.4.0) (2025-11-28)
 
 ### Bug Fixes
