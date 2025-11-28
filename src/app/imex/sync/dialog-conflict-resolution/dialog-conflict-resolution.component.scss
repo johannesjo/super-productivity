@@ -1,0 +1,19 @@
+.conflict-item {
+  border: 1px solid #ccc;
+  padding: 16px;
+  margin-bottom: 16px;
+  border-radius: 4px;
+}
+
+.conflict-sides {
+  display: flex;
+  gap: 16px;
+}
+
+.local-side,
+.remote-side {
+  flex: 1;
+  padding: 8px;
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 4px;
+}
