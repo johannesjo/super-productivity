@@ -21,10 +21,12 @@ import {
 import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
 import { chunkArray } from '../../../util/chunk-array';
-import { convertOpToAction } from './operation-converter.util';
+// import { convertOpToAction } from './operation-converter.util'; // Removed as no longer directly used here
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import { OperationApplierService } from './operation-applier.service';
 
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
@@ -222,21 +224,7 @@ export class OperationLogSyncService {
       );
 
       // Apply non-conflicting ops
-      for (const op of nonConflicting) {
-        if (!(await this.opLogStore.hasOp(op.id))) {
-          await this.opLogStore.append(op, 'remote');
-        }
-
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const action = convertOpToAction(op);
-        // TODO: Dispatching action will be handled by a dedicated apply service in Phase 3/4
-        // For now, just logging
-        PFLog.verbose(
-          `OperationLogSyncService: Dispatching non-conflicting remote op: ${op.id}`,
-        );
-        // this.store.dispatch(action); // Actual dispatch happens here in a dedicated service
-        await this.opLogStore.markApplied(op.id);
-      }
+      await this.operationApplier.applyOperations(nonConflicting);
 
       // Handle conflicts
       if (conflicts.length > 0) {
