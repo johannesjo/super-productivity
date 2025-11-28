@@ -274,50 +274,58 @@ Plugins that render custom UI in a sandboxed iframe.
 - `updateTag(tagId, updates)` - Update tag
 
 #### Simple Counters
+
 Simple counters let you track lightweight metrics (e.g., daily clicks or habits) that persist and sync with your data. There are two levels: **basic** (key-value pairs for today's count) and **full model** (full CRUD on `SimpleCounter` entities with date-specific values).
 
 ##### Basic Counters
+
 These treat counters as a simple `{ [id: string]: number }` map for today's values (auto-upserts via NgRx).
 
-| Method | Description | Example |
-|--------|-------------|---------|
-| `getAllCounters()` | Get all counters as `{ [id: string]: number }` | `const counters = await PluginAPI.getAllCounters(); console.log(counters['my-key']);` |
-| `getCounter(id)` | Get today's value for a counter (returns `null` if unset) | `const val = await PluginAPI.getCounter('daily-commits');` |
-| `setCounter(id, value)` | Set today's value (non-negative number; validates id regex `/^[A-Za-z0-9_-]+$/`) | `await PluginAPI.setCounter('daily-commits', 5);` |
-| `incrementCounter(id, incrementBy = 1)` | Increment and return new value (floors at 0) | `const newVal = await PluginAPI.incrementCounter('daily-commits', 2);` |
-| `decrementCounter(id, decrementBy = 1)` | Decrement and return new value (floors at 0) | `const newVal = await PluginAPI.decrementCounter('daily-commits');` |
-| `deleteCounter(id)` | Delete the counter | `await PluginAPI.deleteCounter('daily-commits');` |
+| Method                                  | Description                                                                      | Example                                                                               |
+| --------------------------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `getAllCounters()`                      | Get all counters as `{ [id: string]: number }`                                   | `const counters = await PluginAPI.getAllCounters(); console.log(counters['my-key']);` |
+| `getCounter(id)`                        | Get today's value for a counter (returns `null` if unset)                        | `const val = await PluginAPI.getCounter('daily-commits');`                            |
+| `setCounter(id, value)`                 | Set today's value (non-negative number; validates id regex `/^[A-Za-z0-9_-]+$/`) | `await PluginAPI.setCounter('daily-commits', 5);`                                     |
+| `incrementCounter(id, incrementBy = 1)` | Increment and return new value (floors at 0)                                     | `const newVal = await PluginAPI.incrementCounter('daily-commits', 2);`                |
+| `decrementCounter(id, decrementBy = 1)` | Decrement and return new value (floors at 0)                                     | `const newVal = await PluginAPI.decrementCounter('daily-commits');`                   |
+| `deleteCounter(id)`                     | Delete the counter                                                               | `await PluginAPI.deleteCounter('daily-commits');`                                     |
 
 **Example:**
+
 ```javascript
 // Track daily commits
-let commits = await PluginAPI.getCounter('daily-commits') ?? 0;
+let commits = (await PluginAPI.getCounter('daily-commits')) ?? 0;
 await PluginAPI.incrementCounter('daily-commits');
-PluginAPI.showSnack({ msg: `Commits today: ${await PluginAPI.getCounter('daily-commits')}`, type: 'INFO' });
+PluginAPI.showSnack({
+  msg: `Commits today: ${await PluginAPI.getCounter('daily-commits')}`,
+  type: 'INFO',
+});
 ```
 
 ##### Full SimpleCounter Model
+
 For advanced use: Full CRUD on counters with metadata (title, enabled state, date-specific values via `countOnDay: { [date: string]: number }`).
 
-| Method | Description | Example |
-|--------|-------------|---------|
-| `getAllSimpleCounters()` | Get all as `SimpleCounter[]` | `const all = await PluginAPI.getAllSimpleCounters();` |
-| `getSimpleCounter(id)` | Get one by id (returns `undefined` if not found) | `const counter = await PluginAPI.getSimpleCounter('my-id');` |
-| `updateSimpleCounter(id, updates)` | Partial update (e.g., `{ title: 'New Title', countOnDay: { '2025-11-17': 10 } }`) | `await PluginAPI.updateSimpleCounter('my-id', { isEnabled: false });` |
-| `toggleSimpleCounter(id)` | Toggle `isOn` state (throws if not found) | `await PluginAPI.toggleSimpleCounter('my-id');` |
-| `setSimpleCounterEnabled(id, isEnabled)` | Set enabled state | `await PluginAPI.setSimpleCounterEnabled('my-id', true);` |
-| `deleteSimpleCounter(id)` | Delete by id | `await PluginAPI.deleteSimpleCounter('my-id');` |
-| `setSimpleCounterToday(id, value)` | Set today's value (YYYY-MM-DD) | `await PluginAPI.setSimpleCounterToday('my-id', 10);` |
-| `setSimpleCounterDate(id, date, value)` | Set value for specific date (validates YYYY-MM-DD) | `await PluginAPI.setSimpleCounterDate('my-id', '2025-11-16', 5);` |
+| Method                                   | Description                                                                       | Example                                                               |
+| ---------------------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `getAllSimpleCounters()`                 | Get all as `SimpleCounter[]`                                                      | `const all = await PluginAPI.getAllSimpleCounters();`                 |
+| `getSimpleCounter(id)`                   | Get one by id (returns `undefined` if not found)                                  | `const counter = await PluginAPI.getSimpleCounter('my-id');`          |
+| `updateSimpleCounter(id, updates)`       | Partial update (e.g., `{ title: 'New Title', countOnDay: { '2025-11-17': 10 } }`) | `await PluginAPI.updateSimpleCounter('my-id', { isEnabled: false });` |
+| `toggleSimpleCounter(id)`                | Toggle `isOn` state (throws if not found)                                         | `await PluginAPI.toggleSimpleCounter('my-id');`                       |
+| `setSimpleCounterEnabled(id, isEnabled)` | Set enabled state                                                                 | `await PluginAPI.setSimpleCounterEnabled('my-id', true);`             |
+| `deleteSimpleCounter(id)`                | Delete by id                                                                      | `await PluginAPI.deleteSimpleCounter('my-id');`                       |
+| `setSimpleCounterToday(id, value)`       | Set today's value (YYYY-MM-DD)                                                    | `await PluginAPI.setSimpleCounterToday('my-id', 10);`                 |
+| `setSimpleCounterDate(id, date, value)`  | Set value for specific date (validates YYYY-MM-DD)                                | `await PluginAPI.setSimpleCounterDate('my-id', '2025-11-16', 5);`     |
 
 **Example:**
+
 ```javascript
 // Create/update a habit counter
 await PluginAPI.updateSimpleCounter('habit-streak', {
   title: 'Daily Streak',
   type: 'ClickCounter',
   isEnabled: true,
-  countOnDay: { '2025-11-17': 1 }  // Today's count
+  countOnDay: { '2025-11-17': 1 }, // Today's count
 });
 await PluginAPI.toggleSimpleCounter('habit-streak');
 const counter = await PluginAPI.getSimpleCounter('habit-streak');
@@ -579,8 +587,8 @@ async function testAPI() {
 - **Plugin Boilerplate**: [boilerplate-solid-js](../packages/plugin-dev/boilerplate-solid-js)
 - **Example Plugins**: [plugin-dev](../packages/plugin-dev)
 - **Community Plugins**:
-	- [counter-tester-plugin](https://github.com/Mustache-Games/counter-tester-plugin) by [Mustache Dev](https://github.com/Mustache-Games)
-	- [sp-reporter](https://github.com/dougcooper/sp-reporter) by [dougcooper](https://github.com/dougcooper)
+  - [counter-tester-plugin](https://github.com/Mustache-Games/counter-tester-plugin) by [Mustache Dev](https://github.com/Mustache-Games)
+  - [sp-reporter](https://github.com/dougcooper/sp-reporter) by [dougcooper](https://github.com/dougcooper)
 
 ## Contributing
 

@@ -108,10 +108,7 @@ function App() {
     <div class="app">
       <header class="app-header">
         <h1>🚀 Solid.js Boilerplate Plugin</h1>
-        <button
-          onClick={refreshData}
-          class="refresh-btn"
-        >
+        <button onClick={refreshData} class="refresh-btn">
           Refresh Data
         </button>
       </header>
@@ -158,10 +155,7 @@ function App() {
                     {(project) => <option value={project.id}>{project.title}</option>}
                   </For>
                 </select>
-                <button
-                  onClick={createTask}
-                  class="create-btn"
-                >
+                <button onClick={createTask} class="create-btn">
                   Create Task
                 </button>
               </div>
@@ -173,10 +167,7 @@ function App() {
               <div class="tasks-list">
                 <For each={tasks().slice(0, 10)}>
                   {(task) => (
-                    <div
-                      class="task-item"
-                      classList={{ completed: task.isDone }}
-                    >
+                    <div class="task-item" classList={{ completed: task.isDone }}>
                       <span class="task-title">{task.title}</span>
                       <Show when={task.projectId}>
                         <span class="task-project">
@@ -197,9 +188,7 @@ function App() {
                   <span>Theme:</span>
                   <select
                     value={settings().theme}
-                    onChange={(e) =>
-                      setSettings({ ...settings(), theme: e.currentTarget.value })
-                    }
+                    onChange={(e) => setSettings({ ...settings(), theme: e.currentTarget.value })}
                   >
                     <option value="light">Light</option>
                     <option value="dark">Dark</option>

@@ -15,6 +15,7 @@ import { Note } from '../note/note.model';
 import { environment } from '../../../environments/environment';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Log } from '../../core/log';
+import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,7 @@ export class ReminderService {
   private readonly _taskService = inject(TaskService);
   private readonly _noteService = inject(NoteService);
   private readonly _imexMetaService = inject(ImexViewService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
@@ -49,11 +51,6 @@ export class ReminderService {
   private _reminders: Reminder[] = [];
 
   constructor() {
-    // this._triggerPauseAfterUpdate$.subscribe((v) => Log.log('_triggerPauseAfterUpdate$', v));
-    // this._pauseAfterUpdate$.subscribe((v) => Log.log('_pauseAfterUpdate$', v));
-    // this._onRemindersActive$.subscribe((v) => Log.log('_onRemindersActive$', v));
-    // this.onRemindersActive$.subscribe((v) => Log.log('onRemindersActive$', v));
-
     if (typeof (Worker as any) === 'undefined') {
       throw new Error('No service workers supported :(');
     }
@@ -91,7 +88,6 @@ export class ReminderService {
     }
   }
 
-  // TODO maybe refactor to observable, because models can differ to sync value for yet unknown reasons
   getById(reminderId: string): ReminderCopy | null {
     const _foundReminder =
       this._reminders && this._reminders.find((reminder) => reminder.id === reminderId);
@@ -113,7 +109,6 @@ export class ReminderService {
     recurringConfig?: RecurringConfig,
     isWaitForReady: boolean = false,
   ): string {
-    // make sure that there is always only a single reminder with a particular relatedId as there might be race conditions
     this.removeReminderByRelatedIdIfSet(relatedId);
 
     const id = nanoid();
@@ -129,7 +124,6 @@ export class ReminderService {
       });
       return existingInstanceForEntry.id;
     } else {
-      // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders.push({
         id,
@@ -152,7 +146,6 @@ export class ReminderService {
   updateReminder(reminderId: string, reminderChanges: Partial<Reminder>): void {
     const i = this._reminders.findIndex((reminder) => reminder.id === reminderId);
     if (i > -1) {
-      // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders[i] = Object.assign({}, this._reminders[i], reminderChanges);
     }
@@ -163,12 +156,9 @@ export class ReminderService {
     const i = this._reminders.findIndex((reminder) => reminder.id === reminderIdToRemove);
 
     if (i > -1) {
-      // TODO find out why we need to do this
       this._reminders = dirtyDeepCopy(this._reminders);
       this._reminders.splice(i, 1);
       this._saveModel(this._reminders);
-    } else {
-      // throw new Error('Unable to find reminder with id ' + reminderIdToRemove);
     }
   }
 
@@ -194,32 +184,37 @@ export class ReminderService {
 
   private async _onReminderActivated(msg: MessageEvent): Promise<void> {
     const reminders = msg.data as Reminder[];
-    Log.log(`ReminderService: Worker activated ${reminders.length} reminder(s)`);
+    Log.log(`ReminderService: Worker activated  ${reminders.length} reminder(s)`);
+
+    if (this._globalConfigService.cfg()?.reminder?.disableReminders) {
+      Log.log('ReminderService: reminders are disabled, not sending to UI');
+      return;
+    }
 
     const remindersWithData: Reminder[] = (await Promise.all(
       reminders.map(async (reminder) => {
         const relatedModel = await this._getRelatedDataForReminder(reminder);
-        // Log.log('RelatedModel for Reminder', relatedModel);
-        // only show when not currently syncing and related model still exists
+
         if (!relatedModel) {
           Log.warn(
             `ReminderService: No related data found for reminder ${reminder.id} (${reminder.type}: ${reminder.relatedId}), removing...`,
           );
           this.removeReminder(reminder.id);
           return null;
-        } else {
-          // Check if task is already done (defensive check)
-          if (reminder.type === 'TASK' && (relatedModel as Task).isDone) {
-            Log.warn(
-              `ReminderService: Task ${relatedModel.id} is already done but reminder ${reminder.id} still exists, removing...`,
-            );
-            this.removeReminder(reminder.id);
-            return null;
-          }
-          return reminder;
         }
+
+        if (reminder.type === 'TASK' && (relatedModel as Task).isDone) {
+          Log.warn(
+            `ReminderService: Task ${relatedModel.id} is already done but reminder ${reminder.id} still exists, removing...`,
+          );
+          this.removeReminder(reminder.id);
+          return null;
+        }
+
+        return reminder;
       }),
     )) as Reminder[];
+
     const finalReminders = remindersWithData.filter((reminder) => !!reminder);
 
     Log.log(`ReminderService: ${finalReminders.length} valid reminder(s) to show`);
@@ -268,7 +263,6 @@ export class ReminderService {
       case 'NOTE':
         return await this._noteService.getByIdOnce$(reminder.relatedId).toPromise();
       case 'TASK':
-        // NOTE: remember we don't want archive tasks to pop up here
         return await this._taskService.getByIdOnce$(reminder.relatedId).toPromise();
     }
 
