@@ -57,7 +57,12 @@ export class WebdavApi {
       } else if (response.status === WebDavHttpStatus.NOT_FOUND) {
         return []; // Directory not found, return empty list
       }
-      throw new HttpNotOkAPIError(response); // Other errors
+      // Create a fake Response object for the error
+      const errorResponse = new Response(response.data, {
+        status: response.status,
+        statusText: `HTTP ${response.status}`,
+      });
+      throw new HttpNotOkAPIError(errorResponse); // Other errors
     } catch (e) {
       PFLog.error(`${WebdavApi.L}.listFiles() error for path: ${dirPath}`, e);
       // Handle "Not Found" error specifically to return empty array
