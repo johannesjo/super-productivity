@@ -2,6 +2,7 @@ import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { getIsTrayShowCurrentTask, getIsTrayShowCurrentCountdown } from './shared-state';
 import { TaskCopy } from '../src/app/features/tasks/task.model';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { release } from 'os';
 import {
   initOverlayIndicator,

@@ -128,7 +128,7 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
 
     // Try to extract JSON error
     try {
-      const jsonMatch = body.match(/\{.*\}/s);
+      const jsonMatch = body.match(/\{[\s\S]*\}/);
       if (jsonMatch) {
         const parsed = JSON.parse(jsonMatch[0]);
         if (parsed.error) {
