@@ -51,9 +51,7 @@ export function RuleList(props: RuleListProps) {
           <button class="outline" onClick={props.onExport} style={{ 'margin-right': '0.5rem' }}>
             Export
           </button>
-          <button class="outline" onClick={props.onCreate}>
-            + New Rule
-          </button>
+          <button onClick={props.onCreate}>+ New Rule</button>
         </div>
       </div>
 
