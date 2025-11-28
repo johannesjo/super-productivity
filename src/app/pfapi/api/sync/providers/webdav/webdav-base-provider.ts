@@ -1,5 +1,4 @@
 import { SyncProviderServiceInterface } from '../../sync-provider.interface';
-import { PrivateCfgByProviderId } from '../../../pfapi.model';
 import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavApi } from './webdav-api';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
@@ -11,33 +10,18 @@ import {
 import { WebdavPrivateCfg } from './webdav.model';
 import { SyncLog } from '../../../../../core/log';
 
-/**
- * Base class for WebDAV-based sync providers.
- * Provides common functionality for uploading, downloading, and managing files via WebDAV.
- * Extend this class to create specialized WebDAV providers (e.g., SuperSync).
- */
-export abstract class WebdavBaseProvider<
-  T extends SyncProviderId.WebDAV | SyncProviderId.SuperSync,
-> implements SyncProviderServiceInterface<T>
-{
-  abstract readonly id: T;
+export class Webdav implements SyncProviderServiceInterface<SyncProviderId.WebDAV> {
+  private static readonly L = 'Webdav';
+
+  readonly id = SyncProviderId.WebDAV;
   readonly isUploadForcePossible = false;
   readonly maxConcurrentRequests = 10;
 
-  protected readonly _api: WebdavApi;
-  public privateCfg!: SyncProviderPrivateCfgStore<T>;
+  private readonly _api: WebdavApi = new WebdavApi(() => this._cfgOrError());
 
-  constructor(protected _extraPath?: string) {
-    this._api = new WebdavApi(() => this._cfgOrError());
-  }
+  public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.WebDAV>;
 
-  /**
-   * Returns a label for logging purposes.
-   * Override in subclasses for more specific logging.
-   */
-  protected get logLabel(): string {
-    return 'WebdavBaseProvider';
-  }
+  constructor(private _extraPath?: string) {}
 
   async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();
@@ -51,7 +35,7 @@ export abstract class WebdavBaseProvider<
   }
 
   async setPrivateCfg(privateCfg: WebdavPrivateCfg): Promise<void> {
-    await this.privateCfg.setComplete(privateCfg as PrivateCfgByProviderId<T>);
+    await this.privateCfg.setComplete(privateCfg);
   }
 
   async getFileRev(
@@ -60,8 +44,7 @@ export abstract class WebdavBaseProvider<
   ): Promise<{ rev: string }> {
     const { filePath } = await this._getConfigAndPath(targetPath);
     const meta = await this._api.getFileMeta(filePath, localRev, true);
-    // Fallback to etag if lastmod is missing (some servers might behavior unexpectedly)
-    return { rev: meta.lastmod || meta.data?.etag || '' };
+    return { rev: meta.lastmod };
   }
 
   async uploadFile(
@@ -70,11 +53,7 @@ export abstract class WebdavBaseProvider<
     localRev: string,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    SyncLog.debug(this.logLabel, 'uploadFile', {
-      targetPath,
-      localRev,
-      isForceOverwrite,
-    });
+    SyncLog.debug(Webdav.L, 'uploadFile', { targetPath, localRev, isForceOverwrite });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
     const result = await this._api.upload({
@@ -94,7 +73,7 @@ export abstract class WebdavBaseProvider<
   async downloadFile(
     targetPath: string,
   ): Promise<{ rev: string; legacyRev?: string; dataStr: string }> {
-    SyncLog.debug(this.logLabel, 'downloadFile', { targetPath });
+    SyncLog.debug(Webdav.L, 'downloadFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
 
     const result = await this._api.download({
@@ -112,19 +91,13 @@ export abstract class WebdavBaseProvider<
   }
 
   async removeFile(targetPath: string): Promise<void> {
-    SyncLog.debug(this.logLabel, 'removeFile', { targetPath });
+    SyncLog.debug(Webdav.L, 'removeFile', { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
     await this._api.remove(filePath);
   }
 
-  async listFiles(dirPath: string): Promise<string[]> {
-    SyncLog.debug(this.logLabel, 'listFiles', { dirPath });
-    const { filePath } = await this._getConfigAndPath(dirPath);
-    return this._api.listFiles(filePath);
-  }
-
-  protected _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
-    const parts = cfg.syncFolderPath ? [cfg.syncFolderPath] : [];
+  private _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
+    const parts = [cfg.syncFolderPath];
     if (this._extraPath) {
       parts.push(this._extraPath);
     }
@@ -132,7 +105,7 @@ export abstract class WebdavBaseProvider<
     return parts.join('/').replace(/\/+/g, '/');
   }
 
-  protected async _cfgOrError(): Promise<WebdavPrivateCfg> {
+  private async _cfgOrError(): Promise<WebdavPrivateCfg> {
     const cfg = await this.privateCfg.load();
     if (!cfg) {
       throw new MissingCredentialsSPError();
@@ -140,7 +113,7 @@ export abstract class WebdavBaseProvider<
     return cfg;
   }
 
-  protected async _getConfigAndPath(
+  private async _getConfigAndPath(
     targetPath: string,
   ): Promise<{ cfg: WebdavPrivateCfg; filePath: string }> {
     const cfg = await this._cfgOrError();

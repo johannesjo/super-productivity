@@ -543,7 +543,6 @@ export class WebdavApi {
         etag: etag,
         href: fullPath,
       },
-      path: fullPath, // NEW: Populate the required path property
     };
   }
 }
