@@ -10,6 +10,7 @@ import {
   Operation,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   OperationLogEntry,
+  OperationLogManifest,
   VectorClock,
 } from './operation.types';
 import {
@@ -21,6 +22,13 @@ import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
 import { chunkArray } from '../../../util/chunk-array';
 import { convertOpToAction } from './operation-converter.util';
+import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
+import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
+import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
+
+const OPS_DIR = 'ops/';
+const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
+const MANIFEST_VERSION = 1;
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -37,6 +45,51 @@ export class OperationLogSyncService {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private dependencyResolver = inject(DependencyResolverService);
 
+  private _getSyncProvider(): SyncProviderServiceInterface<SyncProviderId> | undefined {
+    const syncProvider = this.pfapiService.pf.getActiveSyncProvider();
+    if (!syncProvider) {
+      PFLog.warn('OperationLogSyncService: No active sync provider available.');
+      return undefined;
+    }
+    return syncProvider;
+  }
+
+  private _getManifestFileName(): string {
+    return MANIFEST_FILE_NAME;
+  }
+
+  private async _loadRemoteManifest(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<OperationLogManifest> {
+    try {
+      const fileContent = await syncProvider.downloadFile(this._getManifestFileName());
+      const manifest = JSON.parse(fileContent.dataStr) as OperationLogManifest;
+      PFLog.normal('OperationLogSyncService: Loaded remote manifest', manifest);
+      return manifest;
+    } catch (e) {
+      if (e instanceof RemoteFileNotFoundAPIError) {
+        PFLog.normal('OperationLogSyncService: Remote manifest not found. Creating new.');
+        return { version: MANIFEST_VERSION, operationFiles: [] };
+      }
+      PFLog.error('OperationLogSyncService: Failed to load remote manifest', e);
+      throw e;
+    }
+  }
+
+  private async _uploadRemoteManifest(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    manifest: OperationLogManifest,
+  ): Promise<void> {
+    PFLog.normal('OperationLogSyncService: Uploading remote manifest', manifest);
+    // Note: revToMatch is null, we always overwrite the manifest for simplicity
+    await syncProvider.uploadFile(
+      this._getManifestFileName(),
+      JSON.stringify(manifest),
+      null,
+      true, // Force overwrite is important for manifest
+    );
+  }
+
   async uploadPendingOps(): Promise<void> {
     PFLog.normal('OperationLogSyncService: Uploading pending operations...');
     await this.lockService.request('sp_op_log_upload', async () => {
@@ -47,33 +100,48 @@ export class OperationLogSyncService {
         return;
       }
 
+      const syncProvider = this._getSyncProvider();
+      if (!syncProvider) return;
+
+      const remoteManifest = await this._loadRemoteManifest(syncProvider);
+      const updatedManifestFiles: string[] = [...remoteManifest.operationFiles];
+      let newFilesUploaded = 0;
+
       // Batch into chunks (e.g., 100 ops per file for WebDAV)
-      // Max file size for some providers is limited, also too many files slow down directory listing
       const MAX_OPS_PER_FILE = 100;
       const chunks = chunkArray(pendingOps, MAX_OPS_PER_FILE);
-      const syncProvider = this.pfapiService.pf.getActiveSyncProvider();
-
-      if (!syncProvider) {
-        PFLog.warn('OperationLogSyncService: No active sync provider for upload.');
-        return;
-      }
 
       for (const chunk of chunks) {
         // Filename format: ops_CLIENTID_TIMESTAMP.json
         const filename = `ops_${chunk[0].op.clientId}_${chunk[0].op.timestamp}.json`;
-        PFLog.normal(
-          `OperationLogSyncService: Uploading ${chunk.length} ops to ${filename}`,
-        );
-        await syncProvider.uploadFile(filename, JSON.stringify(chunk), null);
+        const fullFilePath = OPS_DIR + filename;
 
-        // Mark as synced
-        await this.opLogStore.markSynced(chunk.map((e) => e.seq));
+        // Only upload if file isn't already in the manifest (simple dedupe for now)
+        if (!updatedManifestFiles.includes(fullFilePath)) {
+          PFLog.normal(
+            `OperationLogSyncService: Uploading ${chunk.length} ops to ${fullFilePath}`,
+          );
+          // revToMatch is null, as these are new files
+          await syncProvider.uploadFile(fullFilePath, JSON.stringify(chunk), null);
+          updatedManifestFiles.push(fullFilePath);
+          newFilesUploaded++;
+        } else {
+          PFLog.normal(
+            `OperationLogSyncService: Skipping upload for existing file ${fullFilePath}`,
+          );
+        }
+        await this.opLogStore.markSynced(chunk.map((e) => e.seq)); // Always mark as synced if already present remotely or just uploaded
       }
 
-      // TODO: Update remote manifest (as per plan Section 4.3.1)
-      // This will be part of the actual sync provider integration later.
+      if (newFilesUploaded > 0) {
+        // Sort files for deterministic manifest content
+        updatedManifestFiles.sort();
+        remoteManifest.operationFiles = updatedManifestFiles;
+        await this._uploadRemoteManifest(syncProvider, remoteManifest);
+      }
+
       PFLog.normal(
-        `OperationLogSyncService: Successfully uploaded ${pendingOps.length} operations.`,
+        `OperationLogSyncService: Successfully uploaded ${newFilesUploaded} new operation files (${pendingOps.length} ops).`,
       );
     });
   }
@@ -81,32 +149,39 @@ export class OperationLogSyncService {
   async downloadRemoteOps(): Promise<void> {
     PFLog.normal('OperationLogSyncService: Downloading remote operations...');
     await this.lockService.request('sp_op_log_download', async () => {
-      const syncProvider = this.pfapiService.pf.getActiveSyncProvider();
+      const syncProvider = this._getSyncProvider();
+      if (!syncProvider) return;
 
-      if (!syncProvider) {
-        PFLog.warn('OperationLogSyncService: No active sync provider for download.');
-        return;
-      }
+      const remoteManifest = await this._loadRemoteManifest(syncProvider);
+      let remoteOpFileNames: string[] = remoteManifest.operationFiles;
 
-      // Check if syncProvider supports listFiles
-      if (!syncProvider.listFiles) {
+      // Fallback if manifest is empty or listFiles is supported and more files are found
+      if (remoteOpFileNames.length === 0 && syncProvider.listFiles) {
+        PFLog.normal(
+          'OperationLogSyncService: Manifest is empty, falling back to listFiles to discover ops.',
+        );
+        try {
+          // listFiles returns full paths like ops/ops_CLIENTID_TIMESTAMP.json
+          const discoveredFiles = await syncProvider.listFiles(OPS_DIR);
+          remoteOpFileNames = discoveredFiles.filter(
+            (name) => name.startsWith(OPS_DIR + 'ops_') && name.endsWith('.json'),
+          );
+          // If we discovered files, create/update the manifest for future syncs
+          if (remoteOpFileNames.length > 0) {
+            remoteManifest.operationFiles = remoteOpFileNames.sort();
+            await this._uploadRemoteManifest(syncProvider, remoteManifest);
+          }
+        } catch (e) {
+          PFLog.error(
+            'OperationLogSyncService: Failed to list remote operation files during fallback',
+            e,
+          );
+          return;
+        }
+      } else if (!syncProvider.listFiles) {
         PFLog.warn(
-          'OperationLogSyncService: Active sync provider does not support listFiles. Skipping OL download.',
+          'OperationLogSyncService: Provider does not support listFiles. Relying solely on manifest.',
         );
-        return;
-      }
-
-      const OPS_DIR = 'ops/';
-      let remoteOpFileNames: string[] = [];
-      try {
-        remoteOpFileNames = await syncProvider.listFiles(OPS_DIR);
-        // Filter only relevant op files
-        remoteOpFileNames = remoteOpFileNames.filter(
-          (name) => name.startsWith('ops_') && name.endsWith('.json'),
-        );
-      } catch (e) {
-        PFLog.error('OperationLogSyncService: Failed to list remote operation files', e);
-        return;
       }
 
       if (remoteOpFileNames.length === 0) {
@@ -118,16 +193,16 @@ export class OperationLogSyncService {
       const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
 
       const allRemoteOps: Operation[] = [];
-      for (const filename of remoteOpFileNames) {
+      for (const fullFilePath of remoteOpFileNames) {
         try {
-          const fileContent = await syncProvider.downloadFile(OPS_DIR + filename);
+          const fileContent = await syncProvider.downloadFile(fullFilePath);
           const chunk = JSON.parse(fileContent.dataStr) as OperationLogEntry[];
           // Filter already applied ops from this chunk before adding to allRemoteOps
           const newOpsInChunk = chunk.filter((entry) => !appliedOpIds.has(entry.op.id));
           allRemoteOps.push(...newOpsInChunk.map((entry) => entry.op));
         } catch (e) {
           PFLog.error(
-            `OperationLogSyncService: Failed to download or parse remote op file ${filename}`,
+            `OperationLogSyncService: Failed to download or parse remote op file ${fullFilePath}`,
             e,
           );
           // Continue with next file

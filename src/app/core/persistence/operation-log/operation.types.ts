@@ -70,3 +70,10 @@ export interface ConflictResult {
   nonConflicting: Operation[];
   conflicts: EntityConflict[];
 }
+
+export interface OperationLogManifest {
+  version: number; // For future migrations of manifest structure
+  operationFiles: string[]; // List of all uploaded operation files
+  lastCompactedSeq?: number; // The sequence number of the last op included in a full state snapshot
+  lastCompactedSnapshotFile?: string; // Reference to the last full state snapshot file
+}
