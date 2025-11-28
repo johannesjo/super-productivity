@@ -286,6 +286,12 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     if (IS_ELECTRON) {
       window.ea.informAboutAppReady();
 
+      // Push initial settings to Electron immediately to avoid tray/title races
+      const initialCfg = this._globalConfigService.cfg();
+      if (initialCfg) {
+        window.ea.sendAppSettingsToElectron(initialCfg);
+      }
+
       // Initialize electron error handler in an effect
       effect(() => {
         window.ea.on(IPC.ERROR, (ev: IpcRendererEvent, ...args: unknown[]) => {
