@@ -109,13 +109,38 @@ export interface OperationLogEntry {
 }
 
 export interface OperationLogStore {
-  // ... existing methods
+  // Core read/write
   append(op: Operation, source?: 'local' | 'remote'): Promise<void>;
+  hasOp(id: string): Promise<boolean>;
+  getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]>;
+  getUnsynced(): Promise<OperationLogEntry[]>;
+  getUnsyncedByEntity(): Promise<Map<string, Operation[]>>;
+  getAppliedOpIds(): Promise<Set<string>>;
+  markApplied(id: string): Promise<void>;
+  markSynced(seqs: number[]): Promise<void>;
+
+  // Compaction helpers
+  deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void>;
+  getLastSeq(): Promise<number>;
+  saveStateCache(snapshot: {
+    state: unknown;
+    lastAppliedOpSeq: number;
+    vectorClock: VectorClock;
+    compactedAt: number;
+  }): Promise<void>;
+  loadStateCache(): Promise<{
+    state: unknown;
+    lastAppliedOpSeq: number;
+    vectorClock: VectorClock;
+    compactedAt: number;
+  } | null>;
+
+  // Frontiers
   getEntityFrontier(
     entityType?: EntityType,
     entityId?: string,
   ): Promise<Map<string, VectorClock>>;
-  hasOp(id: string): Promise<boolean>;
+  getCurrentVectorClock(): Promise<VectorClock>;
 }
 ```
 

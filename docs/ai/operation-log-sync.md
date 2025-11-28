@@ -1463,18 +1463,28 @@ interface SyncSnapshot {
 ## 13. Open Questions
 
 1. **Payload Size Limits:** Should we split large payloads (e.g., long notes) into separate operations?
+   _Answer: No (KISS principle)._
 2. **Selective Sync:** Can users choose which entities to sync (e.g., only project A)?
+   _Answer: No (KISS principle)._
 3. **Audit Trail:** Should we expose the operation log as a user-visible feature (activity history)?
+   _Answer: No (KISS principle)._
 4. **Rate Limiting:** How do we handle rapid-fire operations (e.g., typing in a text field)?
+   _Answer: These should never be persisted as ops (debounce at action level)._
 5. **Encryption:** Should individual operations be encrypted, or only the full op files?
+   _Answer: We need full e2e encryption, so per-op encryption is likely needed._
 6. **Cascade Delete Policy:** When deleting a project, should tasks be:
    - Moved to Inbox (orphaned)?
    - Deleted along with the project?
    - User prompted to choose?
+     _Answer: Removed completely._
 7. **Relationship Validation:** Should we validate referential integrity on every operation, or trust the client?
+   _Answer: Since we are using Dropbox/WebDAV as storage, we have to rely on the client. Maybe for our own Super Sync implementation we can check integrity later on._
 8. **Partial Relationship Sync:** If a task references 3 tags but only 2 exist remotely, how do we handle the third?
+   _Answer: We skip missing references and log a warning._
 9. **Ordering Guarantees:** Do we need strict causal ordering for related entities, or is eventual consistency acceptable?
+   _Answer: Eventual consistency is acceptable._
 10. **Cross-Client Consistency:** How do we handle the case where Client A deletes a project while Client B creates a task in that project (both offline)?
+    _Answer: We undo the project delete on Client A when syncing Client B's task._
 
 ---
 
