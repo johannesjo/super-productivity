@@ -75,9 +75,7 @@ export class OperationLogStoreService {
   }
 
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
-    return this.db.getAllFromIndex('ops', 'seq', IDBKeyRange.lowerBound(seq, true));
-    // Note: 'seq' is the key path, so getAll(range) works on the store directly
-    // return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
+    return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
   }
 
   async getOpsAfterSeqDirect(seq: number): Promise<OperationLogEntry[]> {

@@ -1,6 +1,6 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
-import { createReducer, on } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import {
   WorkContextAdvancedCfg,
   WorkContextType,
@@ -61,6 +61,15 @@ export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
 
 export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Project>();
+export const selectProjectFeatureState =
+  createFeatureSelector<ProjectState>(PROJECT_FEATURE_NAME);
+export const { selectIds, selectEntities, selectAll } = projectAdapter.getSelectors();
+
+export const selectProjectById = createSelector(
+  selectProjectFeatureState,
+  (state: ProjectState, props: { id: string }): Project | undefined =>
+    state.entities[props.id],
+);
 
 // DEFAULT
 // -------
