@@ -4,7 +4,7 @@
 
 This document outlines the implementation plan for a **Per-Entity Delta Sync** mechanism. This approach is proposed as a lightweight, robust alternative to the complex "Operation Log" architecture. It addresses the core requirements of **data loss prevention**, **conflict minimization**, and **bandwidth efficiency** without the overhead of event sourcing, replay logic, or dual data models.
 
-**Core Philosophy:** Keep the current snapshot-based model but make synchronization "entity-aware" rather than "file-aware".
+**Core Philosophy:** Keep the current snapshot-based model but make synchronization "entity-aware" rather than "file-aware". Use **Batched Deltas** to solve the "many small files" performance problem.
 
 ## 2. Problem Statement
 
@@ -14,107 +14,58 @@ The current "whole-file" sync approach suffers from:
 2.  **Bandwidth Inefficiency:** Changing one character in a task requires re-uploading the entire database.
 3.  **Conflict Rigidity:** Merging is difficult because the granularity is too coarse (the whole file).
 
-The "Operation Log" proposal solves these but introduces:
-
-- Massive complexity (replaying events, managing two data models).
-- Features not currently required (Audit trails, Undo/Redo across sessions).
+The "Operation Log" proposal solves these but introduces complexity (replaying events) and features not currently required (audit trails).
 
 ## 3. Proposed Architecture: Per-Entity Delta Sync
 
 ### 3.1. Data Model Extensions
 
-We do not need a separate "Operation" database. We simply augment the existing entity models with version metadata.
+We track version metadata on every entity.
 
 #### 3.1.1. Entity Metadata
 
-Every syncable entity (Task, Project, Tag, Metric) will implement a versioning interface:
+Every syncable entity (Task, Project, Tag, Note) will implement a versioning interface:
 
 ```typescript
 interface EntitySyncMetadata {
   id: string;
   // Monotonic counter, incremented on every local update
   version: number;
-  // Timestamp of last update (wall clock, for informational/conflict heurstics)
+  // Timestamp of last update (wall clock, for informational/conflict heuristics)
   lastModifiedAt: number;
-  // ID of the device that made the last change (helps avoid echoing back own changes)
+  // ID of the device that made the last change
   lastModifiedBy: string;
-  // Optional: Deleted flag for soft deletes
+  // Deleted flag (soft delete is REQUIRED for delta sync)
   isDeleted?: boolean;
-}
-
-// Example Task
-interface Task extends EntitySyncMetadata {
-  title: string;
-  isDone: boolean;
-  // ... other fields
 }
 ```
 
 #### 3.1.2. Global Sync Metadata (`meta.json`)
 
-Instead of checking the modification time of the huge `main.json`, clients first check a lightweight `meta.json` on the remote provider (WebDAV, Dropbox, etc.).
+Clients first check a lightweight `meta.json` on the remote provider.
 
 ```typescript
 interface RemoteSyncMeta {
-  // A global logical clock (or vector clock) to quickly check "has anything changed?"
-  globalUpdateCount: number;
-
   // Map of EntityID -> Version.
-  // This allows O(1) lookup to see if a specific entity is stale locally.
   entityVersions: {
     [entityId: string]: number;
   };
-
-  // Timestamp of the last successful sync that updated this meta file
+  // Timestamp of the last successful sync
   lastSyncTimestamp: number;
+  // Pointer to the "Base State" file (full backup)
+  baseStateFile: string;
 }
 ```
 
-### 3.2. Remote Storage Structure
+### 3.2. Batched Storage Strategy (The "Middle Way")
 
-To support delta sync, we must be able to read/write parts of the state. We have two options:
+To avoid the performance penalty of thousands of small files (WebDAV latency) while maintaining delta capabilities:
 
-**Option A: Split Files (Recommended for scalability)**
-Store entities in separate files or chunks.
-
-```
-/sup-claude-sync/
-  meta.json
-  /entities/
-    task_123.json
-    task_456.json
-    project_abc.json
-```
-
-_Pros:_ True delta transfers. Reading one task doesn't require parsing the DB.
-_Cons:_ Many small files can be slow on some WebDAV servers.
-
-**Option B: Monolithic with Range/Patch support (Complexity)**
-Keep `main.json` but use intelligent patching.
-_Cons:_ Hard to implement safely with simple file storage APIs.
-
-**Option C: Hybrid / Chunked (Pragmatic)**
-Keep `main.json` for the "base state" but use a `updates/` folder for recent changes since the last base rewrite.
-_Decision:_ For the "Per-Entity Delta Sync" phase, we will likely stick to **Option A (Split Files)** or a **"Batch" approach** where we upload `changes_[timestamp].json` containing only changed entities, which clients merge.
-
-_Refined Decision for Phase 1:_ To avoid managing thousands of files immediately, we can implement a **"Diff-based"** approach on top of the current file.
-
-1. Download `meta.json`.
-2. Identify needed entities.
-3. Download `main.json` (if we stick to one file) OR specific entity files (if we split).
-
-_Better Approach for MVP:_
-**"Split-Lite"**:
-
-- `meta.json`: Contains versions.
-- `data.json`: The full state (backup/bootstrap).
-- `deltas/`: Folder containing small JSON files for recent updates (e.g., `delta_{deviceId}_{timestamp}.json`) containing an array of updated entities.
-- **Compaction**: Periodically, a client merges deltas into `data.json` and clears the `deltas/` folder.
-
-_Actually, the Critique proposed a cleaner pure split or just entity-aware sync. Let's stick to the Critique's implication:_
-**The critique implies we still sync state, just smartly.**
-Let's assume **Logical Split** implies we treat data as a collection of entities, even if stored in one file, or we actually split the files.
-**Decision**: We will assume **File Splitting** (Option A) is the target goal for maximum efficiency, but **Smart Merging** is the immediate goal.
+1.  **Base State:** `main.json` (or `snapshot_TIMESTAMP.json`) exists as a fallback/bootstrap.
+2.  **Delta Batches:** When a client syncs, it uploads a **single** JSON file containing _only_ the entities that changed.
+    - Filename: `delta_{deviceId}_{timestamp}.json`
+    - Content: `{ tasks: [TaskA, TaskB], projects: [ProjectX] }`
+3.  **Compaction:** Periodically (e.g., every 10 deltas or once a week), a client downloads the Base + all Deltas, merges them, and uploads a new Base State, deleting old deltas.
 
 ### 3.3. Synchronization Algorithm
 
@@ -123,92 +74,114 @@ Let's assume **Logical Split** implies we treat data as a collection of entities
     - User updates Task A.
     - App increments `TaskA.version`.
     - App updates local `meta.entityVersions['TaskA']`.
-    - App marks Task A as "dirty" (needs sync).
 
 2.  **Sync Process (Initiator)**:
-    - **Lock**: Acquire remote lock (optional, but good for safety).
+    - **Lock**: Acquire remote lock.
     - **Read Remote Meta**: Download `meta.json`.
-    - **Compare**:
-      - `Remote.ver > Local.ver`: **Incoming Change**. Add to download queue.
-      - `Local.ver > Remote.ver`: **Outgoing Change**. Add to upload queue.
-      - `Local.ver != Remote.ver` AND both changed (requires tracking "last synced ver"): **Conflict**.
-    - **Process Incoming**:
-      - Download the specific entity files (or the full file if monolithic).
-      - Update local store.
-    - **Process Outgoing**:
-      - Upload changed entity files.
-      - Update `meta.json` with new versions.
-      - Upload new `meta.json`.
+    - **Diff**: Identify entities where `Remote.ver > Local.ver` (Incoming) and `Local.ver > Remote.ver` (Outgoing).
+    - **Download Step (Incoming)**:
+      - Identify which `delta_*.json` files contain the needed incoming entities (requires `meta.json` to map ID->File, or just download all new delta files since last sync).
+      - **Apply Incoming**: Merge entities into local DB. **Apply in Topological Order** (Projects first, then Tasks) to satisfy dependencies.
+    - **Upload Step (Outgoing)**:
+      - Bundle all local dirty entities into **one** `delta_{myId}_{now}.json`.
+      - Upload the file.
+      - Update `meta.json` with new versions and add the new delta file to the list.
     - **Unlock**.
 
-## 4. Conflict Resolution Strategies
+## 4. Cross-Model Relationships & Integrity
 
-Since we track versions per entity, conflicts are scoped to a single task/project.
+Unlike strict SQL databases, our client-side logic must handle referential integrity manually during the sync merge.
 
-1.  **Field-Level Merging**:
+### 4.1. Dependency Order (Topological Apply)
 
-    - If Task A has a conflict, compare the fields.
-    - _Device 1_ changed `title`. _Device 2_ changed `isDone`.
-    - **Result**: Apply both. Update version to `max(v1, v2) + 1`.
+When applying a batch of incoming changes, order matters.
 
-2.  **Last-Write-Wins (LWW) Fallback**:
-    - If both changed `title`, use `lastModifiedAt` to pick the winner.
-    - Save a "Conflict Copy" of the loser for manual review if needed (optional).
+1.  **Projects** (Must exist before Tasks assigned to them)
+2.  **Tags** (Must exist before being referenced)
+3.  **Tasks** (Parent tasks first, then Subtasks)
+4.  **Notes** (Attached to Projects/Tasks)
 
-## 5. Implementation Plan
+_Implementation:_ The `applyDelta()` function must sort the incoming entities by type before upserting to IndexedDB.
 
-### Phase 0: Preparation & Data Model
+### 4.2. Cascading Deletes (Client-Side Responsibility)
 
-1.  **Audit Models**: Ensure all syncable models (Project, Task, etc.) have stable IDs.
-2.  **Add Versioning**: Update TypeScript interfaces to include `EntitySyncMetadata`.
-3.  **Migration**: Create a migration script that assigns `version: 1` to all existing local data.
+In an Operation Log, a "Delete Project" event triggers a reducer that deletes tasks. In Delta Sync, the **deleting client** acts as the reducer.
 
-### Phase 1: The "Meta" Layer
+- **Scenario:** User deletes "Project A".
+- **Client A Logic:**
+  1.  Mark "Project A" as `isDeleted: true`.
+  2.  Find all Tasks in "Project A".
+  3.  **Update them:** Set `projectId = null` (Inbox) or mark `isDeleted: true` (depending on app policy).
+  4.  Sync: Uploads a Delta containing { ProjectA (deleted), Task1 (updated), Task2 (updated) }.
+- **Client B Logic:**
+  1.  Receives the Delta.
+  2.  Upserts the entities. "Project A" is removed/hidden. "Task 1" moves to Inbox.
+  3.  _Benefit:_ Client B doesn't need complex cascade logic; it just trusts the state.
 
-1.  **Meta Generation**: Implement logic to generate `entityVersions` map from the current local database.
-2.  **Meta Upload/Download**: Implement `RemotesService` methods to read/write `meta.json`.
-3.  **Sync Logic v1**:
-    - On Sync, download `meta.json`.
-    - Compare with local state.
-    - Log what _would_ be transferred. (Dry run).
+### 4.3. Orphan Handling
 
-### Phase 2: Entity-Aware Storage (The Split)
+If Client B receives a Task pointing to "Project Z" which it doesn't have (e.g., partial sync failure or out-of-order arrival):
 
-_Goal: Move away from single `main.json` to allow granular reads/writes._
+- **Soft Dependency (Tags):** Ignore the missing tag reference.
+- **Hard Dependency (Parent Task):**
+  - _Option 1:_ Queue the orphan until parent arrives.
+  - _Option 2 (Simpler):_ Display as a top-level task until parent arrives (self-healing).
 
-1.  **Storage Adapter**: Create an abstraction that can read/write individual entities to the remote provider (e.g., `adapter.writeEntity('tasks', 'id', data)`).
-2.  **Batching**: Ensure we don't fire 1000 HTTP requests. Use parallel uploads or zip batching if the provider supports it.
+## 5. Conflict Resolution
 
-### Phase 3: The Sync Loop
+Since we track versions per entity, conflicts are scoped to a single entity.
 
-1.  **Implement the Algorithm**: Connect the comparison logic to the Storage Adapter.
-2.  **Conflict Handler**: Implement the field-level merge function.
+### 5.1. Entity-Level Conflict
 
-### Phase 4: Cleanup
+- **Scenario:** Device A renames Task 1. Device B completes Task 1.
+- **Resolution:** **Field-Level Merge**.
+  - Result: Task 1 is renamed AND completed.
+  - Version: `max(vA, vB) + 1`.
 
-1.  **Disable Legacy Sync**: Remove the "overwrite whole file" logic.
-2.  **UI Feedback**: Show precise sync status (e.g., "Synced 5 tasks").
+### 5.2. Relational Conflict (The "Zombie" Case)
 
-## 6. Comparison with Operation Log
+- **Scenario:** Device A edits "Task 1" (in "Project X"). Device B deletes "Project X".
+- **Result:**
+  - Device A syncs: "Task 1" (v2) points to "Project X".
+  - Device B syncs: "Project X" (deleted).
+  - **Outcome:** "Task 1" is now an orphan (points to non-existent project).
+- **Fix:** The App's "Consistency Check" (run on startup/sync completion) detects tasks pointing to missing projects and moves them to **Inbox**.
 
-| Feature        | Per-Entity Delta Sync   | Operation Log                                                     |
-| :------------- | :---------------------- | :---------------------------------------------------------------- |
-| **Complexity** | Medium                  | Very High                                                         |
-| **State**      | State-based (Snapshots) | Event-based (Sourcing)                                            |
-| **History**    | Current state only      | Full history (theoretically)                                      |
-| **Conflicts**  | Field-level merge       | Deterministic Replay / CRDT-like                                  |
-| **Data Size**  | Proportional to state   | Proportional to _changes_ (grows indefinitely without compaction) |
-| **Dev Time**   | ~2-3 Weeks              | ~3 Months                                                         |
+## 6. Implementation Plan
 
-## 7. Technical Risks & Mitigations
+### Phase 0: Preparation
 
-1.  **Remote Performance**: Many small files can be slow.
-    - _Mitigation_: Use "Batch Files" (zip or grouped JSONs) for initial sync or large updates.
-2.  **Atomicity**: What if `meta.json` updates but entity file upload fails?
-    - _Mitigation_: Upload entities _first_, then update `meta.json` pointing to them. If meta update fails, the entities are "orphaned" but harmless (will be overwritten or referenced next time).
-3.  **Race Conditions**: Two clients syncing at exact same time.
-    - _Mitigation_: Optimistic locking on `meta.json` (using ETag or `If-Match` header if available), or a simple "lock file" mechanism.
+1.  **Data Audit:** Ensure `id` is stable.
+2.  **Schema Update:** Add `version`, `lastModifiedAt`, `isDeleted` to `Task`, `Project`, `Tag`.
+
+### Phase 1: The "Batched Delta" Storage
+
+1.  **Delta Writer:** Create service to dump "dirty" entities to a JSON file.
+2.  **Delta Reader:** Create service to read a JSON file and upsert entities to NgRx/IndexedDB.
+3.  **Ordering Logic:** Ensure `DeltaReader` applies `Projects` -> `Tags` -> `Tasks`.
+
+### Phase 2: The Sync Loop
+
+1.  **Meta Sync:** Read/Write `meta.json` containing `entityVersions`.
+2.  **Integration:** Hook into existing `sync.service.ts`. Replace "Overwrite All" with "Upload Delta + Update Meta".
+
+### Phase 3: Integrity & Cleanup
+
+1.  **Cascade Logic:** Ensure UI "Delete" actions explicitly update related entities (moving tasks to Inbox) before syncing.
+2.  **Orphan Sweeper:** Implement a startup check to move orphaned tasks to Inbox.
+3.  **Compaction:** Logic to merge `base.json` + `delta_1..10.json` -> new `base.json`.
+
+## 7. Comparison vs Operation Log
+
+| Feature        | Per-Entity Delta Sync               | Operation Log                          |
+| :------------- | :---------------------------------- | :------------------------------------- |
+| **State**      | **Smart Snapshots** (Current State) | **Events** (History of Actions)        |
+| **Files**      | Base + Batched Deltas (Low Count)   | Many Op Files (High Count)             |
+| **Logic**      | "Dumb" Merge (Trust the data)       | Replay Reducer (Calculate state)       |
+| **Relations**  | Source Client calculates cascades   | Destination Client calculates cascades |
+| **Conflict**   | Field-level merge + Last Write Wins | User Intent Preservation               |
+| **Complexity** | **Medium**                          | **Very High**                          |
 
 ## 8. Conclusion
 
-The **Per-Entity Delta Sync** is the pragmatic choice for a single-user, multi-device scenario. It solves the data loss issue of the current implementation without incurring the engineering debt of a full event-sourcing system.
+The **Batched Per-Entity Delta Sync** solves the bandwidth and data-loss problems while adhering to the "File Count" constraints. By shifting the responsibility of "Cascade Deletes" to the _source_ client (recording the effects, not the cause), we avoid the complexity of an Event Sourcing replay engine.
