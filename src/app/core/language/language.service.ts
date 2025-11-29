@@ -5,7 +5,7 @@ import {
   DEFAULT_LANGUAGE,
   LanguageCode,
   RTL_LANGUAGES,
-} from '../../app.constants';
+} from '../../core/locale.constants';
 import { Log } from '../log';
 import { DateTimeFormatService } from '../date-time-format/date-time-format.service';
 
@@ -19,12 +19,12 @@ export class LanguageService {
   readonly isLangRTL = this._isRTL.asReadonly();
 
   detect(): LanguageCode {
-    const detected = this._translateService.getBrowserLang();
+    const detected = this._translateService.getBrowserCultureLang()?.toLocaleLowerCase();
     return this.isValid(detected) ? detected : DEFAULT_LANGUAGE;
   }
 
   isValid(lang?: string): lang is LanguageCode {
-    return Object.values(LanguageCode).includes(lang as LanguageCode);
+    return Object.values(LanguageCode).includes(lang?.toLowerCase() as LanguageCode);
   }
 
   setLng(lng?: LanguageCode | null): void {

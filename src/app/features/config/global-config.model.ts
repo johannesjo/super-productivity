@@ -1,6 +1,6 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 
-import { LanguageCode, Locale } from '../../app.constants';
+import { LanguageCode, DateTimeLocale } from '../../core/locale.constants';
 import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { ProjectCfgFormKey } from '../project/project.model';
 import { KeyboardConfig } from './keyboard-config.model';
@@ -136,7 +136,7 @@ export type LocalBackupConfig = Readonly<{
 export type LocalizationConfig = Readonly<{
   lng?: LanguageCode | null;
   firstDayOfWeek?: number | null;
-  dateTimeLocale?: Locale | null;
+  dateTimeLocale?: DateTimeLocale | null;
 }>;
 
 export type SoundConfig = Readonly<{
