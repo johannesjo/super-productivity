@@ -41,6 +41,8 @@ import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { TranslateService } from '@ngx-translate/core';
+import { T } from 'src/app/t.const';
 import { sortByTitle } from '../../util/sort-by-title';
 
 @Injectable({
@@ -52,6 +54,7 @@ export class ProjectService {
   private readonly _actions$ = inject(Actions);
   private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _taskService = inject(TaskService);
+  private readonly _translate = inject(TranslateService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
   list = toSignal(this.list$, { initialValue: [] });
@@ -251,7 +254,7 @@ export class ProjectService {
     // Create new project with copied basic cfg but empty task lists (tasks are duplicated separately)
     const newProjectId = this.add({
       ...template,
-      title: `${template.title} (copia)`,
+      title: `${template.title}${this._translate.instant(T.GLOBAL.COPY_SUFFIX)}`,
       taskIds: [],
       backlogTaskIds: [],
       noteIds: [],

@@ -119,7 +119,7 @@ export class WorkContextMenuComponent implements OnInit {
 
   async duplicateProject(): Promise<void> {
     try {
-      const newId = await this._projectService.duplicateProject(this.contextId);
+      await this._projectService.duplicateProject(this.contextId);
       this._snackService.open('Proyecto duplicado');
     } catch (err) {
       this._snackService.open({ msg: 'No se pudo duplicar el proyecto', type: 'ERROR' });

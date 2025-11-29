@@ -1874,6 +1874,9 @@
     "SHARE_UNAVAILABLE_FALLBACK": "Copiado al portapapeles.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el atajo a marcadores abiertos solo está disponible en el contexto del proyecto."
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copia)"
+  },
   "GPB": {
     "ASSETS": "Cargando activos ...",
     "DBX_DOWNLOAD": "Dropbox: Descargar archivo ...",
@@ -1893,6 +1896,7 @@
     "BOARDS": "Tableros",
     "COPY_TASK_LIST_MARKDOWN": "Copiar al portapapeles",
     "CREATE_PROJECT": "Crear proyecto",
+    "DUPLICATE_PROJECT": "Duplicar",
     "CREATE_TAG": "Crear etiqueta",
     "DELETE_PROJECT": "Eliminar proyecto",
     "DELETE_TAG": "Eliminar etiqueta",
