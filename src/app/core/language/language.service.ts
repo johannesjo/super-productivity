@@ -18,29 +18,40 @@ export class LanguageService {
   private readonly _isRTL = signal<boolean>(false);
   readonly isLangRTL = this._isRTL.asReadonly();
 
+  /** Detect user system lanuage */
   detect(): LanguageCode {
-    const detected = this._translateService.getBrowserCultureLang()?.toLocaleLowerCase();
-    return this.isValid(detected) ? detected : DEFAULT_LANGUAGE;
+    // Use culture language (e.g. `pt-BR`) if supported
+    const locale = this._translateService.getBrowserCultureLang()?.toLocaleLowerCase();
+    if (this.isSupported(locale)) return locale;
+
+    // Use language (e.g. `pt`) if supported
+    const language = this._translateService.getBrowserLang()?.toLocaleLowerCase();
+    if (this.isSupported(language)) return language;
+
+    // Fallback - use default language
+    return DEFAULT_LANGUAGE;
   }
 
-  isValid(lang?: string): lang is LanguageCode {
+  /** Check if language is supported by the app */
+  isSupported(lang?: string): lang is LanguageCode {
     return Object.values(LanguageCode).includes(lang?.toLowerCase() as LanguageCode);
   }
 
   setLng(lng?: LanguageCode | null): void {
     if (!lng) this._set(this.detect());
-    else if (this.isValid(lng)) this._set(lng);
+    else if (this.isSupported(lng)) this._set(lng);
     else {
-      Log.err('Invalid language code', lng);
+      Log.err('Not supported language code', lng);
       this.tryAutoswitch();
     }
   }
 
   tryAutoswitch(): boolean {
-    const browserLng = this.detect();
-    const needAutoswitch = AUTO_SWITCH_LNGS.includes(browserLng);
+    const lang = this.detect();
+    const needAutoswitch = AUTO_SWITCH_LNGS.includes(lang);
     if (!needAutoswitch) return false;
 
+    // Switch to default language
     this._set(DEFAULT_LANGUAGE);
     return true;
   }

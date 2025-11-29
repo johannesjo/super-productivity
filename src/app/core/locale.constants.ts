@@ -47,8 +47,8 @@ export enum LanguageCode {
   sk = 'sk',
   tr = 'tr',
   uk = 'uk',
-  zh = 'zh', // "Simplified Chinese" form
-  zh_tw = 'zh-tw', // "Traditional Chinese" form
+  zh = 'zh', // Chinese (Simplified)
+  zh_tw = 'zh-tw', // Chinese (Traditional)
 }
 
 /**
