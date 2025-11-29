@@ -19,7 +19,7 @@ export const crossModelMigration4_5: CrossModelMigrateFn = ((
     };
   }
 
-  // ! 1. Convert globalConfig `dateTimeLocale` to lowercase
+  // ! 2. Convert globalConfig `dateTimeLocale` to lowercase
   const oldDateTimeLocale = copy.globalConfig?.localization?.dateTimeLocale;
   if (oldDateTimeLocale) {
     // @ts-ignore
