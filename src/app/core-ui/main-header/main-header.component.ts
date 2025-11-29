@@ -46,6 +46,7 @@ import { DateService } from '../../core/date/date.service';
 import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
 import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
+import { UserProfileService } from '../../features/user-profile/user-profile.service';
 
 @Component({
   selector: 'main-header',
@@ -165,8 +166,12 @@ export class MainHeaderComponent implements OnDestroy {
     return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
   });
 
+  private readonly _userProfileService = inject(UserProfileService);
   isUserProfilesEnabled = computed(() => {
-    return this.globalConfigService.cfg()?.appFeatures.isEnableUserProfiles;
+    return (
+      this.globalConfigService.cfg()?.appFeatures.isEnableUserProfiles &&
+      this._userProfileService.isInitialized()
+    );
   });
 
   private _subs: Subscription = new Subscription();

@@ -178,15 +178,16 @@ export class GlobalConfigEffects {
             sectionCfg &&
             (sectionCfg as AppFeaturesConfig).isEnableUserProfiles !== undefined,
         ),
-        withLatestFrom(this._store.select('globalConfig')),
-        filter(([{ sectionCfg }, globalConfig]) => {
-          const newValue = (sectionCfg as AppFeaturesConfig).isEnableUserProfiles;
-          const oldValue = globalConfig?.appFeatures?.isEnableUserProfiles ?? false;
-          // Only proceed if the value actually changed
-          return newValue !== oldValue;
-        }),
-        tap(([{ sectionCfg }]) => {
+        tap(({ sectionCfg }) => {
           const isEnabled = (sectionCfg as AppFeaturesConfig).isEnableUserProfiles;
+          const wasEnabled =
+            typeof localStorage !== 'undefined' &&
+            localStorage.getItem('sp_user_profiles_enabled') === 'true';
+
+          if (isEnabled === wasEnabled) {
+            // No change, skip
+            return;
+          }
 
           // Update localStorage flag for fast startup check
           if (typeof localStorage !== 'undefined') {
@@ -194,13 +195,22 @@ export class GlobalConfigEffects {
               localStorage.setItem('sp_user_profiles_enabled', 'true');
 
               // When enabling for the first time, trigger migration
-              this._userProfileService.migrateOnFirstEnable().then(() => {
-                this._snackService.open({
-                  type: 'SUCCESS',
-                  msg: 'User profiles enabled. Reloading app...',
+              this._userProfileService
+                .migrateOnFirstEnable()
+                .then(() => {
+                  this._snackService.open({
+                    type: 'SUCCESS',
+                    msg: 'User profiles enabled. Reloading app...',
+                  });
+                  setTimeout(() => window.location.reload(), 1000);
+                })
+                .catch((err) => {
+                  console.error('Failed to migrate user profiles:', err);
+                  this._snackService.open({
+                    type: 'ERROR',
+                    msg: 'Failed to enable user profiles. Please try again.',
+                  });
                 });
-                setTimeout(() => window.location.reload(), 1000);
-              });
             } else {
               localStorage.removeItem('sp_user_profiles_enabled');
             }
