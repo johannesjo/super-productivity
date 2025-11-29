@@ -12,6 +12,10 @@ import {
   BreakTimeCopy,
   WorkContextType,
 } from '../work-context/work-context.model';
+import { TaskService } from '../tasks/task.service';
+import { selectAllTasksWithSubTasks } from '../tasks/store/task.selectors';
+import { addSubTask } from '../tasks/store/task.actions';
+import { Task } from '../tasks/task.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import {
   addProject,
@@ -47,6 +51,7 @@ export class ProjectService {
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _actions$ = inject(Actions);
   private readonly _timeTrackingService = inject(TimeTrackingService);
+  private readonly _taskService = inject(TaskService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
   list = toSignal(this.list$, { initialValue: [] });
@@ -231,5 +236,91 @@ export class ProjectService {
 
   updateOrder(ids: string[]): void {
     this._store$.dispatch(updateProjectOrder({ ids }));
+  }
+
+  async duplicateProject(templateProjectId: string): Promise<string> {
+    if (!templateProjectId) {
+      throw new Error('No template project id given');
+    }
+
+    const template = await this.getByIdOnce$(templateProjectId).pipe(take(1)).toPromise();
+    if (!template) {
+      throw new Error('Template project not found');
+    }
+
+    // Create new project with copied basic cfg but empty task lists (tasks are duplicated separately)
+    const newProjectId = this.add({
+      ...template,
+      title: `${template.title} (copia)`,
+      taskIds: [],
+      backlogTaskIds: [],
+      noteIds: [],
+    });
+
+    // Fetch all tasks with subtask data and filter by project
+    const allTasks = await this._store$
+      .select(selectAllTasksWithSubTasks)
+      .pipe(take(1))
+      .toPromise();
+
+    const parentTasks = (allTasks || []).filter(
+      (t) => t.projectId === templateProjectId && !t.parentId,
+    );
+
+    // For each parent task create a copy in the new project and then copy its subtasks
+    for (const p of parentTasks) {
+      // copy and remove meta fields we don't want to pass as "additional"
+      const rest = { ...(p as unknown as Task) } as any;
+      delete rest.id;
+      delete rest.parentId;
+      delete rest.subTaskIds;
+      delete rest.subTasks;
+      delete rest.projectId;
+      delete rest.created;
+
+      const isBacklog = template.backlogTaskIds.includes((p as any).id);
+
+      const newParentTask = this._taskService.createNewTaskWithDefaults({
+        title: p.title,
+        additional: rest as Partial<Task>,
+        workContextType: WorkContextType.PROJECT,
+        workContextId: newProjectId,
+      });
+
+      // dispatch addTask for the parent task
+      this._store$.dispatch(
+        TaskSharedActions.addTask({
+          task: newParentTask,
+          workContextId: newProjectId,
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: isBacklog,
+          isAddToBottom: true,
+        }),
+      );
+
+      // create subtasks
+      if (p.subTasks && p.subTasks.length > 0) {
+        for (const st of p.subTasks) {
+          const restSt = { ...(st as unknown as Task) } as any;
+          delete restSt.id;
+          delete restSt.parentId;
+          delete restSt.subTaskIds;
+          delete restSt.subTasks;
+          delete restSt.projectId;
+          delete restSt.created;
+
+          const newSub = this._taskService.createNewTaskWithDefaults({
+            title: st.title,
+            additional: restSt as Partial<Task>,
+            workContextType: WorkContextType.PROJECT,
+            workContextId: newProjectId,
+          });
+
+          this._store$.dispatch(addSubTask({ task: newSub, parentId: newParentTask.id }));
+        }
+      }
+    }
+
+    return newProjectId;
   }
 }
