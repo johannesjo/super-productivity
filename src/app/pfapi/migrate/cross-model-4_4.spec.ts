@@ -1,6 +1,6 @@
 import { crossModelMigration4_4 } from './cross-model-4_4';
 import { AppDataCompleteNew } from '../pfapi-config';
-import { LanguageCode } from '../../app.constants';
+import { LanguageCode } from '../../core/locale.constants';
 
 describe('crossModelMigration4_4', () => {
   it('should migrate globalConfig correctly', () => {

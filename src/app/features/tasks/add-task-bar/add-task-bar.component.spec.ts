@@ -22,7 +22,7 @@ import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskCopy } from '../task.model';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
-import { DEFAULT_LOCALE } from 'src/app/app.constants';
+import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 
 type ProjectServiceSignals = {
   list$: Observable<Project[]>;

@@ -1,6 +1,7 @@
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { Log } from '../core/log';
-import { DEFAULT_LOCALE, Locale } from '../app.constants';
+import { DateTimeLocale } from '../core/locale.constants';
+import { dateTimeFormatter } from './datetime-formatter';
 
 /**
  * Formats a date to show only month and day in locale-aware format.
@@ -16,7 +17,7 @@ import { DEFAULT_LOCALE, Locale } from '../app.constants';
  * @param locale The locale string (e.g., 'en-US', 'de-DE')
  * @returns Formatted month/day string, or empty string if formatting fails
  */
-export const formatMonthDay = (date: Date, locale: Locale): string => {
+export const formatMonthDay = (date: Date, locale: DateTimeLocale): string => {
   try {
     // Validate the date first
     if (!date || isNaN(date.getTime())) return '';
@@ -24,12 +25,7 @@ export const formatMonthDay = (date: Date, locale: Locale): string => {
     // Use the browser's native Intl.DateTimeFormat for proper locale support, use en-US as fallback
     // This is more reliable than LocaleDatePipe for getting locale-specific formatting
     try {
-      const formatter = new Intl.DateTimeFormat([locale, DEFAULT_LOCALE], {
-        month: 'numeric',
-        day: 'numeric',
-      });
-
-      const formatted = formatter.format(date);
+      const formatted = dateTimeFormatter(locale).format(date);
 
       // Remove zero-padding for consistency across all locales
       // This ensures "05/01" becomes "5/1", "05.01" becomes "5.1", etc.

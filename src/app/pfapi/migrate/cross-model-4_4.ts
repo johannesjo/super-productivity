@@ -1,7 +1,7 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn } from '../api';
 import { PFLog } from '../../core/log';
-import { LanguageCode } from '../../app.constants';
+import { LanguageCode } from '../../core/locale.constants';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 // eslint-disable-next-line @typescript-eslint/naming-convention

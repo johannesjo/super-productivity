@@ -1,7 +1,11 @@
 import { computed, effect, inject, Injectable } from '@angular/core';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { DateAdapter } from '@angular/material/core';
-import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE, Locale } from 'src/app/app.constants';
+import {
+  DEFAULT_FIRST_DAY_OF_WEEK,
+  DEFAULT_LOCALE,
+  DateTimeLocale,
+} from 'src/app/core/locale.constants';
 
 @Injectable({
   providedIn: 'root',
@@ -30,7 +34,7 @@ export class DateTimeFormatService {
   });
 
   // Get the current locale being used
-  get currentLocale(): Locale {
+  get currentLocale(): DateTimeLocale {
     return this._locale();
   }
 
@@ -75,7 +79,7 @@ export class DateTimeFormatService {
     });
   }
 
-  setDateAdapterLocale(locale: Locale): void {
+  setDateAdapterLocale(locale: DateTimeLocale): void {
     this._dateAdapter.setLocale(locale);
   }
 

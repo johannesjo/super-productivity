@@ -17,7 +17,7 @@ import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 import { Store } from '@ngrx/store';
 import { GlobalConfigService } from 'src/app/features/config/global-config.service';
-import { Locale, Locales } from 'src/app/app.constants';
+import { DateTimeLocale, DateTimeLocales } from 'src/app/core/locale.constants';
 
 describe('AddTaskBarActionsComponent', () => {
   let component: AddTaskBarActionsComponent;
@@ -60,7 +60,7 @@ describe('AddTaskBarActionsComponent', () => {
   };
 
   const mockStore = jasmine.createSpyObj('Store', ['select', 'dispatch']);
-  const mockConfigService = (locale: Locale): GlobalConfigService => {
+  const mockConfigService = (locale: DateTimeLocale): GlobalConfigService => {
     return jasmine.createSpyObj('GlobalConfigService', [], {
       localization: () => ({ timeLocale: locale }),
     });
@@ -134,7 +134,10 @@ describe('AddTaskBarActionsComponent', () => {
         { provide: AddTaskBarStateService, useValue: mockStateService },
         { provide: AddTaskBarParserService, useValue: mockParserService },
         { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
-        { provide: GlobalConfigService, useValue: mockConfigService(Locales.en_us) },
+        {
+          provide: GlobalConfigService,
+          useValue: mockConfigService(DateTimeLocales.en_us),
+        },
         { provide: Store, useValue: mockStore },
         { provide: ProjectService, useValue: mockProjectService },
         { provide: TagService, useValue: mockTagService },
@@ -327,7 +330,10 @@ describe('AddTaskBarActionsComponent', () => {
         ],
         providers: [
           { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
-          { provide: GlobalConfigService, useValue: mockConfigService(Locales.de_de) },
+          {
+            provide: GlobalConfigService,
+            useValue: mockConfigService(DateTimeLocales.de_de),
+          },
           { provide: Store, useValue: mockStore },
           { provide: AddTaskBarStateService, useValue: mockStateService },
           { provide: AddTaskBarParserService, useValue: mockParserService },

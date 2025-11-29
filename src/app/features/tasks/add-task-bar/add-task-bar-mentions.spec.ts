@@ -15,7 +15,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { Tag } from '../../tag/tag.model';
 import { Project } from '../../project/project.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE } from 'src/app/app.constants';
+import { DEFAULT_FIRST_DAY_OF_WEEK, DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateAdapter } from '@angular/material/core';
 
 @Component({

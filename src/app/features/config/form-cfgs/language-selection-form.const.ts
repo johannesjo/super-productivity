@@ -1,5 +1,5 @@
 import { ConfigFormSection, LocalizationConfig } from '../global-config.model';
-import { LanguageCode, Locales } from '../../../app.constants';
+import { LanguageCode, DateTimeLocales } from '../../../core/locale.constants';
 import { T } from '../../../t.const';
 
 export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LocalizationConfig> = {
@@ -31,6 +31,7 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LocalizationConfig>
           { label: T.GCF.LANG.NL, value: LanguageCode.nl },
           { label: T.GCF.LANG.PL, value: LanguageCode.pl },
           { label: T.GCF.LANG.PT, value: LanguageCode.pt },
+          { label: T.GCF.LANG.PT_BR, value: LanguageCode.pt_br },
           { label: T.GCF.LANG.RU, value: LanguageCode.ru },
           { label: T.GCF.LANG.SK, value: LanguageCode.sk },
           { label: T.GCF.LANG.TR, value: LanguageCode.tr },
@@ -67,18 +68,18 @@ export const LANGUAGE_SELECTION_FORM_FORM: ConfigFormSection<LocalizationConfig>
         options: [
           // TODO sort by popular
           { label: T.GCF.LANG.TIME_LOCALE_AUTO, value: null },
-          { label: T.GCF.LANG.TIME_LOCALE_EN_US, value: Locales.en_us },
-          { label: T.GCF.LANG.TIME_LOCALE_EN_GB, value: Locales.en_gb },
-          { label: T.GCF.LANG.TIME_LOCALE_TR_TR, value: Locales.tr_tr },
-          { label: T.GCF.LANG.TIME_LOCALE_DE_DE, value: Locales.de_de },
-          { label: T.GCF.LANG.TIME_LOCALE_FR_FR, value: Locales.fr_fr },
-          { label: T.GCF.LANG.TIME_LOCALE_ES_ES, value: Locales.es_es },
-          { label: T.GCF.LANG.TIME_LOCALE_IT_IT, value: Locales.it_it },
-          { label: T.GCF.LANG.TIME_LOCALE_PT_BR, value: Locales.pt_br },
-          { label: T.GCF.LANG.TIME_LOCALE_RU_RU, value: Locales.ru_ru },
-          { label: T.GCF.LANG.TIME_LOCALE_ZH_CN, value: Locales.zh_cn },
-          { label: T.GCF.LANG.TIME_LOCALE_JA_JP, value: Locales.ja_jp },
-          { label: T.GCF.LANG.TIME_LOCALE_KO_KR, value: Locales.ko_kr },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_US, value: DateTimeLocales.en_us },
+          { label: T.GCF.LANG.TIME_LOCALE_EN_GB, value: DateTimeLocales.en_gb },
+          { label: T.GCF.LANG.TIME_LOCALE_TR_TR, value: DateTimeLocales.tr_tr },
+          { label: T.GCF.LANG.TIME_LOCALE_DE_DE, value: DateTimeLocales.de_de },
+          { label: T.GCF.LANG.TIME_LOCALE_FR_FR, value: DateTimeLocales.fr_fr },
+          { label: T.GCF.LANG.TIME_LOCALE_ES_ES, value: DateTimeLocales.es_es },
+          { label: T.GCF.LANG.TIME_LOCALE_IT_IT, value: DateTimeLocales.it_it },
+          { label: T.GCF.LANG.TIME_LOCALE_PT_BR, value: DateTimeLocales.pt_br },
+          { label: T.GCF.LANG.TIME_LOCALE_RU_RU, value: DateTimeLocales.ru_ru },
+          { label: T.GCF.LANG.TIME_LOCALE_ZH_CN, value: DateTimeLocales.zh_cn },
+          { label: T.GCF.LANG.TIME_LOCALE_JA_JP, value: DateTimeLocales.ja_jp },
+          { label: T.GCF.LANG.TIME_LOCALE_KO_KR, value: DateTimeLocales.ko_kr },
         ],
       },
     },

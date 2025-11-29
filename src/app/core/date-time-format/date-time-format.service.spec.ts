@@ -3,7 +3,7 @@ import { DateTimeFormatService } from './date-time-format.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { DateAdapter } from '@angular/material/core';
-import { DEFAULT_FIRST_DAY_OF_WEEK } from 'src/app/app.constants';
+import { DEFAULT_FIRST_DAY_OF_WEEK } from 'src/app/core/locale.constants';
 
 describe('DateTimeFormatService', () => {
   let service: DateTimeFormatService;
