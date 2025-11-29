@@ -15,6 +15,7 @@ import { Note } from '../note/note.model';
 import { environment } from '../../../environments/environment';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Log } from '../../core/log';
+import { GlobalConfigService } from '../config/global-config.service';
 
 @Injectable({
   providedIn: 'root',
@@ -25,6 +26,7 @@ export class ReminderService {
   private readonly _taskService = inject(TaskService);
   private readonly _noteService = inject(NoteService);
   private readonly _imexMetaService = inject(ImexViewService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   private _onRemindersActive$: Subject<Reminder[]> = new Subject<Reminder[]>();
   onRemindersActive$: Observable<Reminder[]> = this._onRemindersActive$.pipe(
@@ -194,7 +196,12 @@ export class ReminderService {
 
   private async _onReminderActivated(msg: MessageEvent): Promise<void> {
     const reminders = msg.data as Reminder[];
-    Log.log(`ReminderService: Worker activated ${reminders.length} reminder(s)`);
+    Log.log(`ReminderService: Worker activated  ${reminders.length} reminder(s)`);
+
+    if (this._globalConfigService.cfg()?.reminder?.disableReminders) {
+      Log.log('ReminderService: reminders are disabled, not sending to UI');
+      return;
+    }
 
     const remindersWithData: Reminder[] = (await Promise.all(
       reminders.map(async (reminder) => {

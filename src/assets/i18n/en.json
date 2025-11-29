@@ -1928,7 +1928,8 @@
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
       "DEFAULT_TASK_REMIND_OPTION": "Default remind option selected when creating tasks",
       "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
-      "TITLE": "Reminders"
+      "TITLE": "Reminders",
+      "DISABLE_REMINDERS": "Disable all reminders"
     },
     "SCHEDULE": {
       "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
