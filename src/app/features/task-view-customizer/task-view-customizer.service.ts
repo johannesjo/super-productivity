@@ -27,11 +27,13 @@ import {
   SORT_ORDER,
   FILTER_TIME,
 } from './types';
+import { DateAdapter } from '@angular/material/core';
 
 @Injectable({ providedIn: 'root' })
 export class TaskViewCustomizerService {
   private store = inject(Store);
   private _workContextService = inject(WorkContextService);
+  private _dateAdapter = inject(DateAdapter);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
 
@@ -140,6 +142,7 @@ export class TaskViewCustomizerService {
         }
 
         const _today = new Date(); // ! Don't modify this date
+        const _firstDayOfWeek = this._dateAdapter.getFirstDayOfWeek();
 
         const todayStr = getDbDateStr(_today);
         const tomorrowStr = getDbDateStr(
@@ -161,7 +164,7 @@ export class TaskViewCustomizerService {
 
             // From today to end of week
             case FILTER_SCHEDULE.thisWeek: {
-              const weekRange = getWeekRange(_today, 1);
+              const weekRange = getWeekRange(_today, _firstDayOfWeek);
               // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
               // which is lexicographically sortable. This avoids timezone conversion issues.
               return (
@@ -174,7 +177,7 @@ export class TaskViewCustomizerService {
               const nextWeekStartDate = new Date(
                 new Date().setDate(_today.getDate() + 7),
               );
-              const weekRange = getWeekRange(nextWeekStartDate, 1);
+              const weekRange = getWeekRange(nextWeekStartDate, _firstDayOfWeek);
               // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
               // which is lexicographically sortable. This avoids timezone conversion issues.
               return (
