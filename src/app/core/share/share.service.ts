@@ -205,7 +205,7 @@ export class ShareService {
   async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
     const normalized = ShareTextUtil.ensureShareText(payload);
 
-    const capacitorShare = await SharePlatformUtil.getCapacitorSharePlugin();
+    const capacitorShare = SharePlatformUtil.getCapacitorSharePlugin();
     if (capacitorShare) {
       try {
         await capacitorShare.share({
@@ -461,7 +461,7 @@ export class ShareService {
     filename: string,
     title: string,
   ): Promise<ShareResult> {
-    const sharePlugin = await SharePlatformUtil.getCapacitorSharePlugin();
+    const sharePlugin = SharePlatformUtil.getCapacitorSharePlugin();
     if (!sharePlugin) {
       return {
         success: false,
