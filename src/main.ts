@@ -8,7 +8,8 @@ import {
 import { registerLocaleData } from '@angular/common';
 
 import { environment } from './environments/environment';
-import { DEFAULT_LANGUAGE, IS_ELECTRON, LocalesImports } from './app/app.constants';
+import { IS_ELECTRON } from './app/app.constants';
+import { DEFAULT_LANGUAGE, LocalesImports } from './app/core/locale.constants';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts

@@ -21,6 +21,8 @@ export class UserProfileService {
   private readonly _injector = inject(Injector);
   private readonly _globalConfigService = inject(GlobalConfigService);
 
+  readonly isInitialized = signal(false);
+
   // Current profile metadata
   private readonly _metadata = signal<ProfileMetadata | null>(null);
   readonly metadata = this._metadata.asReadonly();
@@ -73,6 +75,8 @@ export class UserProfileService {
         );
         this.activeProfile.set(metadata.profiles[0]);
       }
+
+      this.isInitialized.set(true);
     } catch (error) {
       Log.err('UserProfileService: Failed to initialize', error);
       // create a default profile and continue
@@ -80,6 +84,7 @@ export class UserProfileService {
       this._metadata.set(defaultMetadata);
       this.profiles.set(defaultMetadata.profiles);
       this.activeProfile.set(defaultMetadata.profiles[0]);
+      this.isInitialized.set(true);
     }
   }
 
@@ -396,12 +401,14 @@ export class UserProfileService {
     // Download as JSON
     const { download } = await import('../../util/download');
     const filename = `profile-${profile.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
-    await download(filename, JSON.stringify(data));
+    const result = await download(filename, JSON.stringify(data));
 
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: `Profile "${profile.name}" exported successfully`,
-    });
+    if (!result.wasCanceled) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: `Profile "${profile.name}" exported successfully`,
+      });
+    }
   }
 
   /**
@@ -468,6 +475,7 @@ export class UserProfileService {
       this._metadata.set(metadata);
       this.profiles.set(metadata.profiles);
       this.activeProfile.set(metadata.profiles[0]);
+      this.isInitialized.set(true);
 
       Log.log('UserProfileService: Migration completed successfully');
     } catch (error) {

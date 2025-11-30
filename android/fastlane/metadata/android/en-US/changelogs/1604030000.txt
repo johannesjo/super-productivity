@@ -1,0 +1,12 @@
+
+### Bug Fixes
+
+* **android:** correctly handle export cancellation to avoid misleading success toast
+* **android:** prevent crash by making share plugin detection synchronous
+* **android:** restore broken metric sharing
+* **android:** use Share API for export to avoid permission issues #5607
+* evaluate day string on daily summary
+* **localization:** make "pt-br" locale allowed as app language
+### Features
+
+* add error handling for download operations

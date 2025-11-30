@@ -196,7 +196,7 @@ export class FileImexComponent implements OnInit {
   async downloadBackup(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
     const result = await download('super-productivity-backup.json', JSON.stringify(data));
-    if (IS_ANDROID_WEB_VIEW || result.isSnap) {
+    if ((IS_ANDROID_WEB_VIEW && !result.wasCanceled) || result.isSnap) {
       this._snackService.open({
         type: 'SUCCESS',
         msg: result.path
@@ -210,7 +210,7 @@ export class FileImexComponent implements OnInit {
   async privacyAppDataDownload(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
     const result = await download('super-productivity-backup.json', privacyExport(data));
-    if (IS_ANDROID_WEB_VIEW || result.isSnap) {
+    if ((IS_ANDROID_WEB_VIEW && !result.wasCanceled) || result.isSnap) {
       this._snackService.open({
         type: 'SUCCESS',
         msg: result.path

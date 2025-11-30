@@ -1,4 +1,5 @@
 import { Capacitor } from '@capacitor/core';
+import { Share } from '@capacitor/share';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 
 export type ShareSupport = 'native' | 'web' | 'none';
@@ -7,15 +8,12 @@ export type ShareSupport = 'native' | 'web' | 'none';
  * Detect available share support on current platform.
  */
 export const detectShareSupport = async (): Promise<ShareSupport> => {
-  if (await isCapacitorShareAvailable()) {
+  if (isCapacitorShareAvailable()) {
     return 'native';
   }
 
   if (IS_ANDROID_WEB_VIEW) {
-    const win = window as any;
-    if (win.Capacitor?.Plugins?.Share) {
-      return 'native';
-    }
+    return 'native';
   }
 
   if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
@@ -29,13 +27,12 @@ export const detectShareSupport = async (): Promise<ShareSupport> => {
  * Check if native/system share is available on current platform.
  */
 export const isSystemShareAvailable = async (): Promise<boolean> => {
-  if (await isCapacitorShareAvailable()) {
+  if (isCapacitorShareAvailable()) {
     return true;
   }
 
   if (IS_ANDROID_WEB_VIEW) {
-    const win = window as any;
-    return !!win.Capacitor?.Plugins?.Share;
+    return true;
   }
 
   if (typeof navigator !== 'undefined' && 'share' in navigator) {
@@ -48,33 +45,17 @@ export const isSystemShareAvailable = async (): Promise<boolean> => {
 /**
  * Check if Capacitor Share plugin is available.
  */
-export const isCapacitorShareAvailable = async (): Promise<boolean> => {
-  const sharePlugin = await getCapacitorSharePlugin();
+export const isCapacitorShareAvailable = (): boolean => {
+  const sharePlugin = getCapacitorSharePlugin();
   return !!sharePlugin;
 };
 
 /**
  * Get Capacitor Share plugin if available.
  */
-export const getCapacitorSharePlugin = async (): Promise<any | null> => {
-  if (typeof window === 'undefined') {
-    return null;
-  }
-
-  const win = window as any;
-
-  if (Capacitor.isNativePlatform()) {
-    const nativePlugin = win.Capacitor?.Plugins?.Share;
-    if (nativePlugin && typeof nativePlugin.share === 'function') {
-      return nativePlugin;
-    }
-  }
-
-  if (IS_ANDROID_WEB_VIEW) {
-    const webViewPlugin = win.Capacitor?.Plugins?.Share;
-    if (webViewPlugin && typeof webViewPlugin.share === 'function') {
-      return webViewPlugin;
-    }
+export const getCapacitorSharePlugin = (): typeof Share | null => {
+  if (Capacitor.isNativePlatform() || IS_ANDROID_WEB_VIEW) {
+    return Share;
   }
 
   return null;

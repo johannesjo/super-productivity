@@ -1,5 +1,6 @@
 import { saveAs } from 'file-saver';
 import { Directory, Encoding, Filesystem, WriteFileResult } from '@capacitor/filesystem';
+import { Share } from '@capacitor/share';
 import { IS_ANDROID_WEB_VIEW } from './is-android-web-view';
 import { Log } from '../core/log';
 // Type definitions for window.ea are in ../core/window-ea.d.ts
@@ -11,10 +12,38 @@ const isRunningInSnap = (): boolean => {
 export const download = async (
   filename: string,
   stringData: string,
-): Promise<{ isSnap?: boolean; path?: string }> => {
+): Promise<{ isSnap?: boolean; path?: string; wasCanceled?: boolean }> => {
   if (IS_ANDROID_WEB_VIEW) {
-    await saveStringAsFile(filename, stringData);
-    return {};
+    try {
+      const fileResult = await Filesystem.writeFile({
+        path: filename,
+        data: stringData,
+        directory: Directory.Cache,
+        encoding: Encoding.UTF8,
+        recursive: true,
+      });
+
+      try {
+        await Share.share({
+          title: filename,
+          files: [fileResult.uri],
+        });
+      } catch (shareError: any) {
+        const isCanceled =
+          shareError === 'Share canceled' ||
+          shareError?.message === 'Share canceled' ||
+          shareError?.name === 'AbortError';
+        if (isCanceled) {
+          return { wasCanceled: true };
+        } else {
+          throw shareError;
+        }
+      }
+    } catch (e) {
+      Log.error(e);
+      await saveStringAsFile(filename, stringData);
+    }
+    return { wasCanceled: false };
   } else if (isRunningInSnap() && window.ea?.saveFileDialog) {
     // Use native dialog for snap to avoid AppArmor permission issues
     const result = await window.ea.saveFileDialog(filename, stringData);

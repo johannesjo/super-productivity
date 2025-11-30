@@ -1,4 +1,5 @@
-import { DEFAULT_LOCALE, Locale } from '../app.constants';
+import { DateTimeLocale } from '../core/locale.constants';
+import { dateTimeFormatter } from './datetime-formatter';
 
 /**
  * Formats a date as day string with short date in locale-aware format
@@ -6,16 +7,13 @@ import { DEFAULT_LOCALE, Locale } from '../app.constants';
  * @param locale - The locale string (e.g., 'en-US', 'de-DE')
  * @returns The formatted day and date string in the specified locale
  */
-export const formatDayMonthStr = (dateStr: string, locale: Locale): string => {
+export const formatDayMonthStr = (dateStr: string, locale: DateTimeLocale): string => {
   // Parse the date string as local date parts to avoid timezone issues
   const [year, month, day] = dateStr.split('-').map(Number);
   const date = new Date(year, month - 1, day);
 
   const dayName = date.toLocaleDateString(locale, { weekday: 'short' });
-  const monthDay = new Intl.DateTimeFormat([locale, DEFAULT_LOCALE], {
-    month: 'numeric',
-    day: 'numeric',
-  })
+  const monthDay = dateTimeFormatter(locale)
     .format(date)
     // Remove zero-padding for consistency across locales
     .replace(/\b0+(\d)/g, '$1');

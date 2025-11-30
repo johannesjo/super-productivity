@@ -1852,6 +1852,7 @@
       "NL": "Nederlands",
       "PL": "Polish",
       "PT": "Português",
+      "PT_BR": "Português (Brazil)",
       "RU": "Русский",
       "SK": "Slovak",
       "TITLE": "Localization",
@@ -2136,7 +2137,7 @@
       "OK": "Exit"
     },
     "ESTIMATE_TOTAL": "Total estimate:",
-    "EVALUATE_DAY": "2. Evaluate Day",
+    "EVALUATE_DAY": "Evaluate Day",
     "EXPORT_TASK_LIST": "Export Task List",
     "END_OF_DAYS_RITUALS_PLACEHOLDER": "You can use this space to write down your own end of days rituals, you want to be reminded of.",
     "FOCUS_SUMMARY": "Focus Sessions",
