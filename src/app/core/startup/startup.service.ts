@@ -171,7 +171,11 @@ export class StartupService {
         !IS_ANDROID_WEB_VIEW &&
         confirm(this._translateService.instant(T.MIGRATE.C_DOWNLOAD_BACKUP))
       ) {
-        download('sp-legacy-backup.json', JSON.stringify(legacyData));
+        try {
+          await download('sp-legacy-backup.json', JSON.stringify(legacyData));
+        } catch (e) {
+          Log.error(e);
+        }
       }
       try {
         await this._pfapiService.importCompleteBackup(
