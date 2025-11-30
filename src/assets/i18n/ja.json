@@ -1569,7 +1569,7 @@
         "GROUP_SCHEDULED_DATE": "開催予定日",
         "GROUP_TAG": "タグ",
         "RESET_ALL": "すべてリセット",
-        "SCHEDULED_DEFAULT": "任意の日付",
+        "SCHEDULED_NULL": "指定されていない",
         "SCHEDULED_NEXT_MONTH": "来月",
         "SCHEDULED_NEXT_WEEK": "来週",
         "SCHEDULED_THIS_MONTH": "今月",
@@ -1587,7 +1587,7 @@
         "TIME_2HOUR": "> 2時間",
         "TIME_10MIN": "> 10分間",
         "TIME_30MIN": ">30分",
-        "TIME_DEFAULT": "任意の期間",
+        "TIME_NULL": "指定されていない",
         "TIME_SPENT": "滞在時間",
         "TITLE": "タスクビューのカスタマイズ"
       }

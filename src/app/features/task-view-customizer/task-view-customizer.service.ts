@@ -10,6 +10,7 @@ import { Tag } from '../tag/tag.model';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { computed } from '@angular/core';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import { getWeekRange } from '../../util/get-week-range';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { ProjectService } from '../project/project.service';
@@ -24,6 +25,7 @@ import {
   FILTER_OPTION_TYPE,
   FILTER_SCHEDULE,
   SORT_ORDER,
+  FILTER_TIME,
 } from './types';
 
 @Injectable({ providedIn: 'root' })
@@ -117,7 +119,7 @@ export class TaskViewCustomizerService {
     type: FILTER_OPTION_TYPE | null,
     value: string,
   ): TaskWithSubTasks[] {
-    if (!type || !value) return tasks;
+    if (!type) return tasks;
 
     switch (type) {
       case FILTER_OPTION_TYPE.tag:
@@ -133,54 +135,63 @@ export class TaskViewCustomizerService {
         if (!project) return [];
         return tasks.filter((task) => task.projectId === project.id);
       case FILTER_OPTION_TYPE.scheduledDate:
-        return tasks.filter((task) => {
-          if (!task.dueDay) return false;
+        if (value === FILTER_SCHEDULE.NULL) {
+          return tasks.filter((task) => !task.dueDay && !task.dueWithTime);
+        }
 
-          const todayStr = getDbDateStr();
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          const tomorrowStr = getDbDateStr(tomorrow);
+        const _today = new Date(); // ! Don't modify this date
+
+        const todayStr = getDbDateStr(_today);
+        const tomorrowStr = getDbDateStr(
+          new Date(new Date().setDate(_today.getDate() + 1)),
+        );
+
+        return tasks.filter((task) => {
+          const due = task.dueDay || task.dueWithTime;
+          if (!due) return false;
+
+          const dueStr = getDbDateStr(new Date(due));
 
           switch (value) {
             case FILTER_SCHEDULE.today:
-              return task.dueDay === todayStr;
+              return dueStr.startsWith(todayStr);
 
             case FILTER_SCHEDULE.tomorrow:
-              return task.dueDay === tomorrowStr;
+              return dueStr.startsWith(tomorrowStr);
 
+            // From today to end of week
             case FILTER_SCHEDULE.thisWeek: {
-              const now = new Date();
-              const endOfWeek = new Date(now);
-              endOfWeek.setDate(now.getDate() + (7 - now.getDay()));
-              const endOfWeekStr = getDbDateStr(endOfWeek);
+              const weekRange = getWeekRange(_today, 1);
               // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
               // which is lexicographically sortable. This avoids timezone conversion issues.
-              return task.dueDay >= todayStr && task.dueDay <= endOfWeekStr;
+              return (
+                dueStr >= getDbDateStr(weekRange.start) &&
+                dueStr <= getDbDateStr(weekRange.end)
+              );
             }
 
             case FILTER_SCHEDULE.nextWeek: {
-              const now = new Date();
-              const startNextWeek = new Date(now);
-              startNextWeek.setDate(now.getDate() + (7 - now.getDay()) + 1);
-              const startNextWeekStr = getDbDateStr(startNextWeek);
-              const endNextWeek = new Date(startNextWeek);
-              endNextWeek.setDate(startNextWeek.getDate() + 6);
-              const endNextWeekStr = getDbDateStr(endNextWeek);
-              return task.dueDay >= startNextWeekStr && task.dueDay <= endNextWeekStr;
+              const nextWeekStartDate = new Date(
+                new Date().setDate(_today.getDate() + 7),
+              );
+              const weekRange = getWeekRange(nextWeekStartDate, 1);
+              // Note: String comparison works correctly here because dueDay is in YYYY-MM-DD format
+              // which is lexicographically sortable. This avoids timezone conversion issues.
+              return (
+                dueStr >= getDbDateStr(weekRange.start) &&
+                dueStr <= getDbDateStr(weekRange.end)
+              );
             }
 
             case FILTER_SCHEDULE.thisMonth: {
-              const now = new Date();
-              const yearMonth = getDbDateStr(now).substring(0, 7); // YYYY-MM
-              return task.dueDay.startsWith(yearMonth);
+              const yearMonth = getDbDateStr(_today).substring(0, 7); // YYYY-MM
+              return dueStr.startsWith(yearMonth);
             }
 
             case FILTER_SCHEDULE.nextMonth: {
-              const now = new Date();
-              const nextMonth = new Date(now);
-              nextMonth.setMonth(now.getMonth() + 1);
+              const nextMonth = new Date(new Date().setMonth(_today.getMonth() + 1));
               const yearMonth = getDbDateStr(nextMonth).substring(0, 7); // YYYY-MM
-              return task.dueDay.startsWith(yearMonth);
+              return dueStr.startsWith(yearMonth);
             }
 
             default:
@@ -188,11 +199,16 @@ export class TaskViewCustomizerService {
           }
         });
       case FILTER_OPTION_TYPE.estimatedTime:
+        if (value === FILTER_TIME.NULL) {
+          return tasks.filter((task) => task.timeEstimate === 0);
+        }
+
         return tasks.filter((task) => task.timeEstimate >= +value);
       case FILTER_OPTION_TYPE.timeSpent:
-        if (!value || isNaN(+value)) {
-          return tasks; // Show all tasks if filterVal is empty or not a number
+        if (value === FILTER_TIME.NULL) {
+          return tasks.filter((task) => task.timeSpent === 0);
         }
+
         return tasks.filter((task) => {
           const spent = task.timeSpentOnDay
             ? Object.values(task.timeSpentOnDay).reduce((a, b) => a + b, 0)

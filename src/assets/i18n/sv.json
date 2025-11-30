@@ -1553,7 +1553,7 @@
         "GROUP_SCHEDULED_DATE": "Planerat datum",
         "GROUP_TAG": "Tagg",
         "RESET_ALL": "Återställ alla",
-        "SCHEDULED_DEFAULT": "Valfritt datum",
+        "SCHEDULED_NULL": "Inte specificerat",
         "SCHEDULED_NEXT_MONTH": "Nästa månad",
         "SCHEDULED_NEXT_WEEK": "Nästa vecka",
         "SCHEDULED_THIS_MONTH": "Denna månad",
@@ -1570,7 +1570,7 @@
         "TIME_2HOUR": "> 2 Timmar",
         "TIME_10MIN": "> 10 Minuter",
         "TIME_30MIN": "> 30 Minuter",
-        "TIME_DEFAULT": "Valfri varaktighet",
+        "TIME_NULL": "Inte specificerat",
         "TIME_SPENT": "Tid som spenderats",
         "TITLE": "Anpassa uppgiftsvy"
       }

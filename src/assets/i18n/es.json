@@ -1430,7 +1430,7 @@
         "GROUP_SCHEDULED_DATE": "Fecha programada",
         "GROUP_TAG": "Etiqueta",
         "RESET_ALL": "Restablecer todo",
-        "SCHEDULED_DEFAULT": "Cualquier fecha",
+        "SCHEDULED_NULL": "Não especificado",
         "SCHEDULED_NEXT_MONTH": "Próximo mes",
         "SCHEDULED_NEXT_WEEK": "Próxima semana",
         "SCHEDULED_THIS_MONTH": "Este mes",
@@ -1446,7 +1446,7 @@
         "TIME_2HOUR": "> 2 horas",
         "TIME_10MIN": "> 10 minutos",
         "TIME_30MIN": "> 30 minutos",
-        "TIME_DEFAULT": "Cualquier duración",
+        "TIME_NULL": "Não especificado",
         "TIME_SPENT": "Tiempo gastado",
         "TITLE": "Personalizar vista de tareas"
       }

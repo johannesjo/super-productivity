@@ -51,7 +51,7 @@ export enum FILTER_OPTION_TYPE {
 }
 
 export enum FILTER_SCHEDULE {
-  default = '0',
+  NULL = '0',
   today = 'today',
   tomorrow = 'tomorrow',
   thisWeek = 'thisWeek',
@@ -61,7 +61,7 @@ export enum FILTER_SCHEDULE {
 }
 
 export enum FILTER_TIME {
-  default = '0',
+  NULL = '0',
   MIN_10 = '600000',
   MIN_30 = '1800000',
   MIN_60 = '3600000',
@@ -169,8 +169,8 @@ const filterOptions: FilterOption[] = [
 
 const scheduledPresets: BaseOption<FILTER_SCHEDULE>[] = [
   {
-    type: FILTER_SCHEDULE.default,
-    label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_DEFAULT,
+    type: FILTER_SCHEDULE.NULL,
+    label: T.F.TASK_VIEW.CUSTOMIZER.SCHEDULED_NULL,
   },
   {
     type: FILTER_SCHEDULE.today,
@@ -199,7 +199,7 @@ const scheduledPresets: BaseOption<FILTER_SCHEDULE>[] = [
 ];
 
 const timePresets: BaseOption<FILTER_TIME>[] = [
-  { type: FILTER_TIME.default, label: T.F.TASK_VIEW.CUSTOMIZER.TIME_DEFAULT },
+  { type: FILTER_TIME.NULL, label: T.F.TASK_VIEW.CUSTOMIZER.TIME_NULL },
   { type: FILTER_TIME.MIN_10, label: T.F.TASK_VIEW.CUSTOMIZER.TIME_10MIN },
   { type: FILTER_TIME.MIN_30, label: T.F.TASK_VIEW.CUSTOMIZER.TIME_30MIN },
   { type: FILTER_TIME.MIN_60, label: T.F.TASK_VIEW.CUSTOMIZER.TIME_1HOUR },

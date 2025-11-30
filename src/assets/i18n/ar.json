@@ -1569,7 +1569,7 @@
         "GROUP_SCHEDULED_DATE": "التاريخ المحدد",
         "GROUP_TAG": "العلامه",
         "RESET_ALL": "إعادة تعيين الكل",
-        "SCHEDULED_DEFAULT": "أي تاريخ",
+        "SCHEDULED_NULL": "غير محدد",
         "SCHEDULED_NEXT_MONTH": "الشهر المقبل",
         "SCHEDULED_NEXT_WEEK": "الأسبوع القادم",
         "SCHEDULED_THIS_MONTH": "هذا الشهر",
@@ -1587,7 +1587,7 @@
         "TIME_2HOUR": "> 2 ساعة",
         "TIME_10MIN": "> 10 دقائق",
         "TIME_30MIN": "> 30 دقيقة",
-        "TIME_DEFAULT": "أي مدة",
+        "TIME_NULL": "غير محدد",
         "TIME_SPENT": "الوقت المستغرق",
         "TITLE": "تخصيص عرض المهام"
       }
