@@ -396,12 +396,14 @@ export class UserProfileService {
     // Download as JSON
     const { download } = await import('../../util/download');
     const filename = `profile-${profile.name.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.json`;
-    await download(filename, JSON.stringify(data));
+    const result = await download(filename, JSON.stringify(data));
 
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: `Profile "${profile.name}" exported successfully`,
-    });
+    if (!result.wasCanceled) {
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: `Profile "${profile.name}" exported successfully`,
+      });
+    }
   }
 
   /**

@@ -12,7 +12,7 @@ const isRunningInSnap = (): boolean => {
 export const download = async (
   filename: string,
   stringData: string,
-): Promise<{ isSnap?: boolean; path?: string }> => {
+): Promise<{ isSnap?: boolean; path?: string; wasCanceled?: boolean }> => {
   if (IS_ANDROID_WEB_VIEW) {
     try {
       const fileResult = await Filesystem.writeFile({
@@ -20,6 +20,7 @@ export const download = async (
         data: stringData,
         directory: Directory.Cache,
         encoding: Encoding.UTF8,
+        recursive: true,
       });
 
       try {
@@ -32,7 +33,9 @@ export const download = async (
           shareError === 'Share canceled' ||
           shareError?.message === 'Share canceled' ||
           shareError?.name === 'AbortError';
-        if (!isCanceled) {
+        if (isCanceled) {
+          return { wasCanceled: true };
+        } else {
           throw shareError;
         }
       }
@@ -40,7 +43,7 @@ export const download = async (
       Log.error(e);
       await saveStringAsFile(filename, stringData);
     }
-    return {};
+    return { wasCanceled: false };
   } else if (isRunningInSnap() && window.ea?.saveFileDialog) {
     // Use native dialog for snap to avoid AppArmor permission issues
     const result = await window.ea.saveFileDialog(filename, stringData);
