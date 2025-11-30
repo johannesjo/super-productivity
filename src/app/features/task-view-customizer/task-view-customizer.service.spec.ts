@@ -16,6 +16,7 @@ import { TagService } from '../tag/tag.service';
 import {
   DEFAULT_OPTIONS,
   FILTER_OPTION_TYPE,
+  FILTER_SCHEDULE,
   FilterOption,
   GROUP_OPTION_TYPE,
   GroupOption,
@@ -179,10 +180,37 @@ describe('TaskViewCustomizerService', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.scheduledDate,
-      'tomorrow',
+      FILTER_SCHEDULE.tomorrow,
     );
     expect(filtered.length).toBe(1);
     expect(filtered[0].id).toBe('Alpha(Tag A)');
+  });
+
+  it('should filter by empty schedule date', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.scheduledDate,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(0);
+  });
+
+  it('should filter by empty timeSpent', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.timeSpent,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(1);
+  });
+
+  it('should filter by empty estimatedTime', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.estimatedTime,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(1);
   });
 
   it('should sort by name', () => {

@@ -121,20 +121,16 @@ export class TaskViewCustomizerService {
     type: FILTER_OPTION_TYPE | null,
     value: string,
   ): TaskWithSubTasks[] {
-    if (!type) return tasks;
+    if (!type || !value) return tasks;
 
     switch (type) {
       case FILTER_OPTION_TYPE.tag:
-        if (!value) return tasks;
-
         const tag = this._allTags.find((t) =>
           t.title.toLowerCase().includes(value.toLowerCase().trim()),
         );
         if (!tag) return [];
         return tasks.filter((task) => task.tagIds?.includes(tag.id));
       case FILTER_OPTION_TYPE.project:
-        if (!value) return tasks;
-
         const project = this._allProjects.find((p) =>
           p.title.toLowerCase().includes(value.toLowerCase().trim()),
         );
