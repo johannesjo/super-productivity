@@ -1,3 +1,18 @@
+## [16.4.3](https://github.com/johannesjo/super-productivity/compare/v16.4.1...v16.4.3) (2025-11-30)
+
+### Bug Fixes
+
+- **android:** correctly handle export cancellation to avoid misleading success toast ([e7ccc10](https://github.com/johannesjo/super-productivity/commit/e7ccc10c2999fe5eb79bdf04696246deb72806ce))
+- **android:** prevent crash by making share plugin detection synchronous ([939264e](https://github.com/johannesjo/super-productivity/commit/939264e3d3ea67fcc07d259e67faa7960694d5e4))
+- **android:** restore broken metric sharing ([4ddb868](https://github.com/johannesjo/super-productivity/commit/4ddb868a299cecc255cc1846753117e889b136c8))
+- **android:** use Share API for export to avoid permission issues [#5607](https://github.com/johannesjo/super-productivity/issues/5607) ([1f3941e](https://github.com/johannesjo/super-productivity/commit/1f3941edc52d74bd1e540e9f9e06f646cb427102))
+- evaluate day string on daily summary ([bde73ab](https://github.com/johannesjo/super-productivity/commit/bde73abb65e5b3078be79a0bfc6a86d11362a868))
+- **localization:** make "pt-br" locale allowed as app language ([cbd5cf6](https://github.com/johannesjo/super-productivity/commit/cbd5cf61c39983a9db352ca2a5edaef6c92ad88f))
+
+### Features
+
+- add error handling for download operations ([d72859b](https://github.com/johannesjo/super-productivity/commit/d72859b57bd69926a47ad306cf3e43320410bedd))
+
 ## [16.4.2](https://github.com/johannesjo/super-productivity/compare/v16.4.1...v16.4.2) (2025-11-30)
 
 ### Bug Fixes
