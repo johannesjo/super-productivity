@@ -23,6 +23,8 @@ import {
   SORT_ORDER,
   SortOption,
 } from './types';
+import { DateAdapter } from '@angular/material/core';
+import { DEFAULT_FIRST_DAY_OF_WEEK } from 'src/app/core/locale.constants';
 
 describe('TaskViewCustomizerService', () => {
   let service: TaskViewCustomizerService;
@@ -118,10 +120,14 @@ describe('TaskViewCustomizerService', () => {
     };
     projectUpdateSpy = jasmine.createSpy('update');
     tagUpdateSpy = jasmine.createSpy('updateTag');
+    const dateAdapter = jasmine.createSpyObj<DateAdapter<Date>>('DateAdapter', [], {
+      getFirstDayOfWeek: () => DEFAULT_FIRST_DAY_OF_WEEK,
+    });
 
     TestBed.configureTestingModule({
       providers: [
         TaskViewCustomizerService,
+        { provide: DateAdapter, useValue: dateAdapter },
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: ProjectService, useValue: { update: projectUpdateSpy } },
         { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
