@@ -8,7 +8,7 @@ export type ShareSupport = 'native' | 'web' | 'none';
  * Detect available share support on current platform.
  */
 export const detectShareSupport = async (): Promise<ShareSupport> => {
-  if (await isCapacitorShareAvailable()) {
+  if (isCapacitorShareAvailable()) {
     return 'native';
   }
 
@@ -27,7 +27,7 @@ export const detectShareSupport = async (): Promise<ShareSupport> => {
  * Check if native/system share is available on current platform.
  */
 export const isSystemShareAvailable = async (): Promise<boolean> => {
-  if (await isCapacitorShareAvailable()) {
+  if (isCapacitorShareAvailable()) {
     return true;
   }
 
@@ -45,15 +45,15 @@ export const isSystemShareAvailable = async (): Promise<boolean> => {
 /**
  * Check if Capacitor Share plugin is available.
  */
-export const isCapacitorShareAvailable = async (): Promise<boolean> => {
-  const sharePlugin = await getCapacitorSharePlugin();
+export const isCapacitorShareAvailable = (): boolean => {
+  const sharePlugin = getCapacitorSharePlugin();
   return !!sharePlugin;
 };
 
 /**
  * Get Capacitor Share plugin if available.
  */
-export const getCapacitorSharePlugin = async (): Promise<typeof Share | null> => {
+export const getCapacitorSharePlugin = (): typeof Share | null => {
   if (Capacitor.isNativePlatform() || IS_ANDROID_WEB_VIEW) {
     return Share;
   }
