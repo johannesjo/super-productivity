@@ -153,7 +153,7 @@
     "@angular/language-service": "^20.3.7",
     "@angular/material": "^20.2.10",
     "@angular/platform-browser": "^20.3.7",
-    "@angular/platform-browser-dynamic": "^20.3.7",
+    "@angular/platform-browser-dynamic": "^21.0.2",
     "@angular/platform-server": "^20.3.7",
     "@angular/router": "^20.3.7",
     "@angular/service-worker": "^20.3.7",
