@@ -76,6 +76,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _scheduleExternalDragService = inject(ScheduleExternalDragService);
   private _taskDragDropService = inject(TaskDragDropService);
   dropListService = inject(DropListService);
+  
+  private _isShiftPressed = false;
 
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
@@ -121,12 +123,32 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
+    
+    // Listen for Shift key to allow promotion
+    window.addEventListener('keydown', this._handleKeyDown);
+    window.addEventListener('keyup', this._handleKeyUp);
   }
 
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList()!);
     this._scheduleExternalDragService.setActiveTask(null);
+    
+    // Remove Shift key listeners
+    window.removeEventListener('keydown', this._handleKeyDown);
+    window.removeEventListener('keyup', this._handleKeyUp);
   }
+  
+  private _handleKeyDown = (event: KeyboardEvent): void => {
+    if (event.key === 'Shift') {
+      this._isShiftPressed = true;
+    }
+  };
+  
+  private _handleKeyUp = (event: KeyboardEvent): void => {
+    if (event.key === 'Shift') {
+      this._isShiftPressed = false;
+    }
+  };
 
   trackByFn(i: number, task: Task): string {
     return task.id;
@@ -161,6 +183,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       sourceModelId,
       targetModelId,
       listId: this.listId(),
+      isShiftPressed: this._isShiftPressed,
     });
 
     // Block OVERDUE and LATER_TODAY
@@ -168,9 +191,15 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       return false;
     }
     
-    // KEY LOGIC: If dragging a subtask FROM its own subtask list,
-    // ONLY allow dropping back into the SAME subtask list (reordering)
+    // KEY LOGIC: If dragging a subtask FROM its own subtask list
     if (isSubtask && sourceModelId === task.parentId) {
+      // If Shift is pressed, allow promotion to parent lists
+      if (this._isShiftPressed && PARENT_ALLOWED_LISTS.includes(targetModelId)) {
+        console.log('[ENTER PREDICATE DEBUG] Shift pressed - ALLOW PROMOTION');
+        return true;
+      }
+      
+      // Otherwise, only allow dropping in same parent (reordering)
       const allowDrop = targetModelId === task.parentId;
       console.log('[ENTER PREDICATE DEBUG] Subtask from own list - allow only same parent:', allowDrop);
       return allowDrop;
