@@ -140,33 +140,56 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     this._scheduleExternalDragService.setActiveTask(null);
   }
 
-  enterPredicate(drag: CdkDrag, drop: CdkDropList): boolean {
-    // TODO this gets called very often for nested lists. Maybe there are possibilities to optimize
+  enterPredicate = (drag: CdkDrag, drop: CdkDropList): boolean => {
     const task = drag.data;
-    // const targetModelId = drag.dropContainer.data.listModelId;
-    const targetModelId = drop.data.listModelId;
-    const isSubtask = !!task.parentId;
-    // TaskLog.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
-    // return true;
-
-    // Allow drop in conversion zone for subtasks only
-    if (targetModelId === 'DROP_CONVERT_TO_TASK') {
-      return !!isSubtask;
+    const sourceData = drag.dropContainer?.data;
+    const targetData = drop.data;
+    
+    // Safety check
+    if (!sourceData || !targetData) {
+      console.warn('[ENTER PREDICATE] Missing data', { sourceData, targetData });
+      return false;
     }
+    
+    const sourceModelId = sourceData.listModelId;
+    const targetModelId = targetData.listModelId;
+    const isSubtask = !!task.parentId;
+    
+    console.log('[ENTER PREDICATE DEBUG]', {
+      taskId: task.id,
+      isSubtask,
+      sourceModelId,
+      targetModelId,
+      listId: this.listId(),
+    });
 
+    // Block OVERDUE and LATER_TODAY
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
-    } else if (isSubtask) {
-      // Allow subtasks to be moved to any list, promoting them to parent tasks if needed.
-      // The drop handler will take care of the rest.
-      return true;
-    } else {
-      if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        return true;
-      }
     }
+    
+    // KEY LOGIC: If dragging a subtask FROM its own subtask list,
+    // ONLY allow dropping back into the SAME subtask list (reordering)
+    if (isSubtask && sourceModelId === task.parentId) {
+      const allowDrop = targetModelId === task.parentId;
+      console.log('[ENTER PREDICATE DEBUG] Subtask from own list - allow only same parent:', allowDrop);
+      return allowDrop;
+    }
+    
+    // For subtask lists: allow subtasks
+    if (this.listId() === 'SUB') {
+      console.log('[ENTER PREDICATE DEBUG] SUB list - allow subtasks');
+      return isSubtask;
+    }
+    
+    // For parent lists: allow all tasks
+    if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
+      console.log('[ENTER PREDICATE DEBUG] PARENT list - allow all');
+      return true;
+    }
+    
     return false;
-  }
+  };
 
   async drop(
     srcFilteredTasks: TaskWithSubTasks[],
@@ -179,6 +202,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const srcListData = ev.previousContainer.data;
     const targetListData = ev.container.data;
     const draggedTask = ev.item.data;
+    
+    // Safety check
+    if (!srcListData || !targetListData) {
+      console.error('[DROP] Missing data', { srcListData, targetListData });
+      return;
+    }
+    
     TaskLog.log({
       ev,
       srcListData,
