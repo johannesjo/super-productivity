@@ -1774,6 +1774,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
+    "DUPLICATE_PROJECT_ERROR": "No se pudo duplicar el proyecto",
+    "DUPLICATE_PROJECT_SUCCESS": "Proyecto duplicado",
     "ERR_COMPRESSION": "Error de la interfaz de compresión",
     "FILE_DOWNLOADED": "{{fileName}} descargado",
     "FILE_DOWNLOADED_BTN": "Abrir carpeta",
