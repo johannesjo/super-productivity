@@ -40,6 +40,7 @@ import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-
 import { TaskLog } from '../../../core/log';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 import { DEFAULT_OPTIONS } from '../../task-view-customizer/types';
+import { TaskDragDropService } from '../task-drag-drop.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -73,6 +74,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _issueService = inject(IssueService);
   private _taskViewCustomizerService = inject(TaskViewCustomizerService);
   private _scheduleExternalDragService = inject(ScheduleExternalDragService);
+  private _taskDragDropService = inject(TaskDragDropService);
   dropListService = inject(DropListService);
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -146,6 +148,12 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const isSubtask = !!task.parentId;
     // TaskLog.log(drag.data.id, { isSubtask, targetModelId, drag, drop });
     // return true;
+
+    // Allow drop in conversion zone for subtasks only
+    if (targetModelId === 'DROP_CONVERT_TO_TASK') {
+      return !!isSubtask;
+    }
+
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
     } else if (isSubtask) {
@@ -186,7 +194,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
+    let targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
     if ('issueData' in draggedTask) {
       return this._addFromIssuePanel(draggedTask, srcListData as string);
@@ -194,15 +202,78 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       throw new Error('Should not happen 2');
     }
 
+    // NOTE: draggedTask is now guaranteed to be a Task
     if (targetTask && targetTask.id === draggedTask.id) {
+      targetTask = targetListData.filteredTasks[ev.currentIndex - 1] as TaskCopy;
+    }
+
+    if (!targetTask || (targetTask && targetTask.id === draggedTask.id)) {
       return;
     }
 
+    // At this point draggedTask is a TaskWithSubTasks (not SearchResultItem)
+    const task = draggedTask as TaskWithSubTasks;
+
+    // Detect drop zone: top, bottom-left (reorder), or bottom-right (convert to subtask)
+    const dropZoneType = this._getDropZoneType(ev);
+
+    console.log('[DROP HANDLER]', {
+      dropZoneType,
+      targetTaskId: targetTask?.id,
+      draggedTaskId: task.id,
+      canDrop: targetTask
+        ? this.canDropOnTask(task, targetTask as TaskWithSubTasks)
+        : false,
+      isAncestor: targetTask ? this._isTaskAncestorOf(task.id, targetTask.id) : false,
+    });
+
+    // If drop is bottom-right AND target is valid, convert to subtask
+    if (
+      dropZoneType === 'bottom-right' &&
+      targetTask &&
+      this.canDropOnTask(task, targetTask as TaskWithSubTasks) &&
+      !this._isTaskAncestorOf(task.id, targetTask.id)
+    ) {
+      console.log('[DROP HANDLER] Converting to subtask');
+      console.log('[NESTING BEFORE]', {
+        parentTask: {
+          id: targetTask.id,
+          subTaskIds: (targetTask as TaskWithSubTasks).subTaskIds || [],
+        },
+        taskToNest: {
+          id: task.id,
+          parentId: task.parentId,
+        },
+      });
+      this.dropListService.blockAniTrigger$.next();
+      this._taskDragDropService.makeSubtask(task.id, targetTask.id);
+      this._taskViewCustomizerService.setSort(DEFAULT_OPTIONS.sort);
+
+      // Log after the action is dispatched
+      setTimeout(() => {
+        const updatedParentTask = this.tasks().find((t) => t.id === targetTask.id);
+        const updatedTask = this.tasks().find((t) => t.id === task.id);
+        console.log('[NESTING AFTER]', {
+          parentTask: {
+            id: updatedParentTask?.id,
+            subTaskIds: (updatedParentTask as TaskWithSubTasks)?.subTaskIds || [],
+          },
+          nestedTask: {
+            id: updatedTask?.id,
+            parentId: updatedTask?.parentId,
+          },
+        });
+      }, 100);
+      return;
+    }
+
+    console.log('[DROP HANDLER] Proceeding with reorder');
+    // Otherwise, proceed with normal reordering (top or bottom-left)
     const newIds =
-      targetTask && targetTask.id !== draggedTask.id
+      targetTask && targetTask.id !== task.id
         ? (() => {
             const currentDraggedIndex = targetListData.filteredTasks.findIndex(
-              (t) => t.id === draggedTask.id,
+              (t) => t.id === task.id,
             );
             const currentTargetIndex = targetListData.filteredTasks.findIndex(
               (t) => t.id === targetTask.id,
@@ -215,38 +286,35 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
             if (isDraggingDown) {
               // When dragging down, place AFTER the target item
               const filtered = targetListData.filteredTasks.filter(
-                (t) => t.id !== draggedTask.id,
+                (t) => t.id !== task.id,
               );
               const targetIndexInFiltered = filtered.findIndex(
                 (t) => t.id === targetTask.id,
               );
               const result = [...filtered];
-              result.splice(targetIndexInFiltered + 1, 0, draggedTask);
+              result.splice(targetIndexInFiltered + 1, 0, task);
               return result;
             } else {
               // When dragging up or from another list, place BEFORE the target item
               return [
                 ...moveItemBeforeItem(
                   targetListData.filteredTasks,
-                  draggedTask,
+                  task,
                   targetTask as TaskWithSubTasks,
                 ),
               ];
             }
           })()
-        : [
-            ...targetListData.filteredTasks.filter((t) => t.id !== draggedTask.id),
-            draggedTask,
-          ];
+        : [...targetListData.filteredTasks.filter((t) => t.id !== task.id), task];
     TaskLog.log(srcListData.listModelId, '=>', targetListData.listModelId, {
       targetTask,
-      draggedTask,
+      task,
       newIds,
     });
 
     this.dropListService.blockAniTrigger$.next();
     this._move(
-      draggedTask.id,
+      task.id,
       srcListData.listModelId,
       targetListData.listModelId,
       newIds.map((p) => p.id),
@@ -268,6 +336,51 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       issueProviderId: issueProviderId,
       issueProviderKey: item.issueType,
     });
+  }
+
+  private _getDropZoneType(
+    event: CdkDragDrop<
+      DropModelDataForList,
+      DropModelDataForList | string,
+      TaskWithSubTasks | SearchResultItem
+    >,
+  ): 'top' | 'bottom-left' | 'bottom-right' {
+    const dropElement = event.container.element.nativeElement;
+    const rect = dropElement.getBoundingClientRect();
+
+    // Use dropPoint which is the actual drop position from CDK
+    const dropPointX = event.dropPoint.x;
+    const dropPointY = event.dropPoint.y;
+
+    // Calculate relative position within the drop element
+    const relativeY = dropPointY - rect.top;
+    const relativeX = dropPointX - rect.left;
+
+    const elementHeight = rect.height;
+    const elementWidth = rect.width;
+
+    // Threshold: 50% from top is "top", rest is "bottom"
+    const topThreshold = elementHeight * 0.5;
+
+    const zone =
+      relativeY < topThreshold
+        ? 'top'
+        : relativeX < elementWidth * 0.66
+          ? 'bottom-left'
+          : 'bottom-right';
+
+    console.log('[DROP ZONE DEBUG]', {
+      dropPointX,
+      dropPointY,
+      rect: { top: rect.top, left: rect.left, height: rect.height, width: rect.width },
+      relativeX,
+      relativeY,
+      topThreshold,
+      leftThreshold: elementWidth * 0.5,
+      zone,
+    });
+
+    return zone;
   }
 
   private _move(
@@ -360,5 +473,35 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     this._taskService.showSubTasks(pid);
     // note this might be executed from the task detail panel, where this is not possible
     this._taskService.focusTaskIfPossible(pid);
+  }
+
+  canDropOnTask(draggedTask: TaskWithSubTasks, targetTask: TaskWithSubTasks): boolean {
+    if (draggedTask.id === targetTask.id) {
+      return false;
+    }
+
+    if (this._isTaskAncestorOf(draggedTask.id, targetTask.id)) {
+      return false;
+    }
+
+    if (draggedTask.parentId === targetTask.id) {
+      return false;
+    }
+
+    return targetTask.projectId === draggedTask.projectId;
+  }
+
+  private _isTaskAncestorOf(potentialAncestorId: string, taskId: string): boolean {
+    const allTasks = this.tasks();
+    let currentTask = allTasks.find((t) => t.id === taskId);
+
+    while (currentTask?.parentId) {
+      if (currentTask.parentId === potentialAncestorId) {
+        return true;
+      }
+      currentTask = allTasks.find((t) => t.id === currentTask?.parentId);
+    }
+
+    return false;
   }
 }
