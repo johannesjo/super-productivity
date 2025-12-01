@@ -94,6 +94,10 @@ body {
       display: none !important;
     }
   }
+
+  &.isObsidianStyleHeader.isElectron {
+    border: 1px solid var(--divider-color);
+  }
 }
 
 .page-wrapper {

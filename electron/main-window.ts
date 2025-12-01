@@ -2,6 +2,7 @@ import windowStateKeeper from 'electron-window-state';
 import {
   App,
   BrowserWindow,
+  BrowserWindowConstructorOptions,
   ipcMain,
   Menu,
   MenuItem,
@@ -22,6 +23,8 @@ import {
   showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
 import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state';
+import { loadSimpleStoreAll } from './simple-store';
+import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 
 let mainWin: BrowserWindow;
 
@@ -44,7 +47,7 @@ export const getIsAppReady = (): boolean => {
   return mainWinModule.isAppReady;
 };
 
-export const createWindow = ({
+export const createWindow = async ({
   IS_DEV,
   ICONS_FOLDER,
   quitApp,
@@ -56,7 +59,7 @@ export const createWindow = ({
   quitApp: () => void;
   app: App;
   customUrl?: string;
-}): BrowserWindow => {
+}): Promise<BrowserWindow> => {
   // make sure the main window isn't already created
   if (mainWin) {
     errorHandlerWithFrontendInform('Main window already exists');
@@ -73,6 +76,24 @@ export const createWindow = ({
     defaultHeight: 800,
   });
 
+  const simpleStore = await loadSimpleStoreAll();
+  const persistedIsUseCustomWindowTitleBar =
+    simpleStore[SimpleStoreKey.IS_USE_CUSTOM_WINDOW_TITLE_BAR];
+  const legacyIsUseObsidianStyleHeader =
+    simpleStore[SimpleStoreKey.LEGACY_IS_USE_OBSIDIAN_STYLE_HEADER];
+  const isUseCustomWindowTitleBar =
+    persistedIsUseCustomWindowTitleBar ?? legacyIsUseObsidianStyleHeader ?? true;
+  const titleBarStyle: BrowserWindowConstructorOptions['titleBarStyle'] =
+    isUseCustomWindowTitleBar || IS_MAC ? 'hidden' : 'default';
+  const titleBarOverlay: BrowserWindowConstructorOptions['titleBarOverlay'] =
+    isUseCustomWindowTitleBar && !IS_MAC
+      ? {
+          color: '#00000000',
+          symbolColor: '#fff',
+          height: 44,
+        }
+      : undefined;
+
   mainWin = new BrowserWindow({
     x: mainWindowState.x,
     y: mainWindowState.y,
@@ -81,7 +102,8 @@ export const createWindow = ({
     minHeight: 240,
     minWidth: 300,
     title: IS_DEV ? 'Super Productivity D' : 'Super Productivity',
-    titleBarStyle: IS_MAC ? 'hidden' : 'default',
+    titleBarStyle,
+    titleBarOverlay,
     show: false,
     webPreferences: {
       scrollBounce: true,
@@ -99,7 +121,7 @@ export const createWindow = ({
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
     // Wayland compatibility: disable transparent/frameless features that can cause issues
-    // transparent: false,
+    transparent: false,
     // frame: true,
   });
 

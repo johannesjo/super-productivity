@@ -5,8 +5,9 @@ import { log } from 'electron-log/main';
 import { loadSimpleStoreAll, saveSimpleStore } from '../simple-store';
 import { getWin } from '../main-window';
 import { errorHandlerWithFrontendInform } from '../error-handler-with-frontend-inform';
+import { SimpleStoreKey } from '../shared-with-frontend/simple-store.const';
 
-const COMMAND_MAP_PROP = 'allowedCommands';
+const COMMAND_MAP_PROP = SimpleStoreKey.ALLOWED_COMMANDS;
 
 export const initExecIpc = (): void => {
   ipcMain.on(IPC.EXEC, execWithFrontendErrorHandlerInform);

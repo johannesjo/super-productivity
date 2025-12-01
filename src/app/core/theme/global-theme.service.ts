@@ -281,6 +281,15 @@ export class GlobalThemeService {
       }
     });
 
+    effect(() => {
+      const misc = this._globalConfigService.misc();
+      if (misc?.isUseCustomWindowTitleBar !== false) {
+        this.document.body.classList.add(BodyClass.isObsidianStyleHeader);
+      } else {
+        this.document.body.classList.remove(BodyClass.isObsidianStyleHeader);
+      }
+    });
+
     // Add/remove hasBgImage class to body when background image changes
     effect(() => {
       if (this.backgroundImg()) {

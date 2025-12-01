@@ -22,17 +22,17 @@
   --z-focus-mode-countdown: 11;
 }
 
-.mac-os-drag-bar {
+.electron-drag-bar {
   -webkit-app-region: drag;
   height: 50px;
-  width: 160px;
+  width: 100%;
   position: absolute;
   top: 0;
   left: 0;
   z-index: var(--z-focus-mode-drag-bar);
   display: none;
 
-  :host-context(.isMac) & {
+  :host-context(.isElectron) & {
     display: block;
   }
 }
@@ -70,6 +70,10 @@ main {
     transition: opacity var(--transition-enter);
     //visibility: visible;
     opacity: 1;
+  }
+
+  :host-context(.isObsidianStyleHeader.isElectron.isNoMac) & {
+    top: calc(var(--s) + 40px);
   }
 
   mat-icon {

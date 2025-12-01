@@ -11,6 +11,8 @@ import {
 import { lockscreen } from '../lockscreen';
 import { errorHandlerWithFrontendInform } from '../error-handler-with-frontend-inform';
 import { GlobalConfigState } from '../../src/app/features/config/global-config.model';
+import { saveSimpleStore } from '../simple-store';
+import { SimpleStoreKey } from '../shared-with-frontend/simple-store.const';
 
 export const initAppControlIpc = (): void => {
   ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
@@ -19,10 +21,17 @@ export const initAppControlIpc = (): void => {
   ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
   ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
 
-  ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, (ev, cfg: GlobalConfigState) => {
+  ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, async (ev, cfg: GlobalConfigState) => {
     setIsMinimizeToTray(cfg.misc.isMinimizeToTray);
     setIsTrayShowCurrentTask(cfg.misc.isTrayShowCurrentTask);
     setIsTrayShowCurrentCountdown(cfg.misc.isTrayShowCurrentCountdown);
+
+    if (cfg.misc.isUseCustomWindowTitleBar !== undefined) {
+      await saveSimpleStore(
+        SimpleStoreKey.IS_USE_CUSTOM_WINDOW_TITLE_BAR,
+        cfg.misc.isUseCustomWindowTitleBar,
+      );
+    }
   });
 
   ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
