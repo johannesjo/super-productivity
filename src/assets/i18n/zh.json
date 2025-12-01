@@ -451,6 +451,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}: 轮询 {{issuesStr}} 的更改"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "显示的是缓存的日历结果，数据可能已过期。"
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: 为了防止被 API 封锁，超级生产力已阻止访问。您可能应该检查您的 jira 设置！",
@@ -666,7 +671,7 @@
         "PLACEHOLDER_1": "今天哪些地方做得好？明天需要改变什么？",
         "PLACEHOLDER_2": "明天可以做出的小改进？",
         "PLACEHOLDER_3": "注意力何时出现分散？如何保护它？",
-        "PLACEHOLDER_4": "哪项任务让你充满能量？哪项让你感到消耗？",
+        "PLACEHOLDER_4": "哪项任务让您充满能量？哪项让您感到消耗？",
         "PLACEHOLDER_5": "一个值得重复的做法。一个需要改变的地方。",
         "REMIND_LABEL": "明天提醒我",
         "HISTORY_BTN": "查看历史反思",
@@ -927,24 +932,6 @@
       "CONFIRM_DELETE": "您确定要删除文件夹 \"{{title}}\" 吗？此文件夹中的所有项目都将移动到根级别。",
       "TOOLTIP_CREATE": "创建项目文件夹",
       "TOOLTIP_VISIBILITY": "显示/隐藏项目"
-    },
-    "TAG_FOLDER": {
-      "DIALOG": {
-        "CREATE_TITLE": "创建文件夹",
-        "EDIT_TITLE": "编辑文件夹",
-        "NAME_LABEL": "文件夹名称",
-        "NAME_PLACEHOLDER": "输入文件夹名称",
-        "NAME_REQUIRED": "文件夹名称是必需的",
-        "PARENT_LABEL": "父文件夹",
-        "NO_PARENT": "无父级（根级别）"
-      },
-      "SELECT": {
-        "LABEL": "文件夹",
-        "PLACEHOLDER": "选择文件夹",
-        "NO_PARENT": "无文件夹（根级别）"
-      },
-      "CONFIRM_DELETE": "您确定要删除文件夹 \"{{title}}\" 吗？此文件夹中的所有标签都将移动到根级别。",
-      "TOOLTIP_CREATE": "创建标签文件夹"
     },
     "QUICK_HISTORY": {
       "NO_DATA": "当前年份没有数据",
@@ -1248,6 +1235,24 @@
       "TTL": {
         "ADD_NEW_TAG": "添加新标签"
       }
+    },
+    "TAG_FOLDER": {
+      "CONFIRM_DELETE": "您确定要删除文件夹 \"{{title}}\" 吗？该文件夹中的所有标签都将被移至根级别。",
+      "DIALOG": {
+        "CREATE_TITLE": "创建文件夹",
+        "EDIT_TITLE": "编辑文件夹",
+        "NAME_LABEL": "文件夹名称",
+        "NAME_PLACEHOLDER": "输入文件夹名称",
+        "NAME_REQUIRED": "文件夹名称是必需的",
+        "NO_PARENT": "无父级（根级别）"
+        "PARENT_LABEL": "父文件夹",
+      },
+      "SELECT": {
+        "LABEL": "文件夹",
+        "PLACEHOLDER": "选择文件夹",
+        "NO_PARENT": "无文件夹（根级别）"
+      },
+      "TOOLTIP_CREATE": "创建标签文件夹"
     },
     "TASK": {
       "ADD_TASK_BAR": {
@@ -1831,44 +1836,45 @@
     },
     "LANG": {
       "AR": "عربى",
-      "CZ": "捷克语",
-      "DE": "德语",
-      "EN": "英语",
-      "ES": "西班牙语",
+      "CZ": "Czech",
+      "DE": "Deutsch",
+      "EN": "English",
+      "ES": "Español",
       "FA": "فارسی",
-      "FR": "法语",
-      "HR": "克罗地亚语",
-      "ID": "印度尼西亚语",
-      "IT": "意大利语",
-      "JA": "日语",
-      "KO": "韩语",
-      "LABEL": "应用语言",
-      "NB": "挪威语（博克马尔）",
-      "NL": "荷兰语",
-      "PL": "波兰语",
-      "PT": "葡萄牙语",
-      "RU": "俄语",
-      "SK": "斯洛伐克语",
+      "FR": "français",
+      "HR": "Hrvatski",
+      "ID": "Indonesian",
+      "IT": "Italiano",
+      "JA": "日本語",
+      "KO": "한국어",
+      "LABEL": "Language",
+      "NB": "Norsk Bokmål",
+      "NL": "Nederlands",
+      "PL": "Polish",
+      "PT": "Português",
+      "PT_BR": "Português (Brazil)",
+      "RU": "Русский",
+      "SK": "Slovak",
+      "TITLE": "Localization",
+      "TR": "Türkçe",
+      "UK": "Українська",
+      "ZH": "中文(简体)",
+      "ZH_TW": "中文(繁體)",
       "TIME_LOCALE": "时间格式区域",
+      "TIME_LOCALE_DESCRIPTION": "注意：这些选项现在无法改变时间输入格式（12/24 小时），因为它由您的操作系统控制",
       "TIME_LOCALE_AUTO": "系统默认",
-      "TIME_LOCALE_DE_DE": "德语 - 24 小时",
-      "TIME_LOCALE_DESCRIPTION": "选择一个区域进行时间格式化。不同的区域使用不同的惯例（12 小时与 24 小时格式）",
-      "TIME_LOCALE_EN_US": "英语（美国）- 12 小时 AM/PM",
-      "TIME_LOCALE_EN_GB": "英语（英国）- 24 小时",
-      "TIME_LOCALE_FR_FR": "法语 - 24 小时",
-      "TIME_LOCALE_ES_ES": "西班牙语 - 24 小时",
-      "TIME_LOCALE_IT_IT": "意大利语 - 24 小时",
-      "TIME_LOCALE_JA_JP": "日语 - 24 小时",
-      "TIME_LOCALE_KO_KR": "韩语 - 12 小时 AM/PM",
-      "TIME_LOCALE_PT_BR": "葡萄牙语（巴西）- 24 小时",
-      "TIME_LOCALE_RU_RU": "俄语 - 24 小时",
-      "TIME_LOCALE_TR_TR": "土耳其语 - 24 小时",
-      "TIME_LOCALE_ZH_CN": "中文（简体）- 24 小时",
-      "TITLE": "语言与区域",
-      "TR": "土耳其语",
-      "UK": "乌克兰语",
-      "ZH": "中文（简体）",
-      "ZH_TW": "中文（繁体）"
+      "TIME_LOCALE_EN_US": "美式英语：12小时制（上午/下午），月/日/年",
+      "TIME_LOCALE_EN_GB": "英式英语：24小时制，日/月/年",
+      "TIME_LOCALE_TR_TR": "土耳其语：24小时制，日.月.年",
+      "TIME_LOCALE_DE_DE": "德语：24小时制，日.月.年",
+      "TIME_LOCALE_FR_FR": "法语：24小时制，日/月/年",
+      "TIME_LOCALE_ES_ES": "西班牙语：24小时制，日/月/年",
+      "TIME_LOCALE_IT_IT": "意大利语：24小时制，日/月/年",
+      "TIME_LOCALE_PT_BR": "巴西葡萄牙语：24小时制，日/月/年",
+      "TIME_LOCALE_RU_RU": "俄语：24小时制，日.月.年",
+      "TIME_LOCALE_ZH_CN": "简体中文：24小时制，年/月/日",
+      "TIME_LOCALE_JA_JP": "日语：24小时制，年/月/日",
+      "TIME_LOCALE_KO_KR": "韩语：12小时制（上午/下午），年. 月. 日",
     },
     "MISC": {
       "DARK_MODE": "深色模式",
@@ -1982,6 +1988,22 @@
       "L_TRACKING_INTERVAL": "时间跟踪间隔（实验性）",
       "L_TRACKING_REMINDER_MIN_TIME": "在显示跟踪提醒横幅前等待的时间",
       "TITLE": "时间跟踪"
+    },
+    "APP_FEATURES": {
+      "HELP": "启用或禁用整个界面中的特定应用功能。",
+      "TITLE": "应用功能",
+      "TIME_TRACKING": "秒表时间追踪",
+      "FOCUS_MODE": "专注模式",
+      "SCHEDULE": "日程",
+      "PLANNER": "规划器",
+      "BOARDS": "看板",
+      "SCHEDULE_DAY_PANEL": "日程日面板",
+      "ISSUES_PANEL": "问题面板",
+      "PROJECT_NOTES": "项目笔记",
+      "SYNC_BUTTON": "同步按钮",
+      "DONATE_PAGE": "捐赠页面",
+      "USER_PROFILES": "用户配置文件（实验性）",
+      "USER_PROFILES_HINT": "允许您创建并切换不同的用户配置文件，每个配置文件拥有独立的设置、任务和同步配置。启用后，配置文件管理按钮将出现在右上角。注意：关闭此功能会隐藏界面，但您的配置文件数据将被保留（实验性功能，无法保证稳定性，请务必提前备份）。"
     }
   },
   "GLOBAL_RELATIVE_TIME": {
@@ -2051,6 +2073,7 @@
     "CREATE_TAG": "创建标签",
     "DELETE_PROJECT": "删除项目",
     "DELETE_TAG": "删除标签",
+    "DONATE": "支持我们",
     "ENTER_FOCUS_MODE": "进入专注模式",
     "GO_TO_TASK_LIST": "转到任务列表",
     "HELP": "帮助",
@@ -2106,7 +2129,6 @@
       "PLURAL": "已有 {{count}} 个已完成的父任务被归档"
     },
     "BREAK_LABEL": "休息（数量/时间）",
-    "FOCUS_SUMMARY": "专注（数量/时间）",
     "CELEBRATE": "花一点时间来 <i>庆祝！</i>",
     "CLEAR_ALL_CONTINUE": "清除所有已完成并继续",
     "D_CONFIRM_APP_CLOSE": {
@@ -2117,6 +2139,8 @@
     "ESTIMATE_TOTAL": "总估计：",
     "EVALUATE_DAY": "评估",
     "EXPORT_TASK_LIST": "导出任务列表",
+    "END_OF_DAYS_RITUALS_PLACEHOLDER": "您可以在这里写下自己想被提醒的“一日结束”仪式。",
+    "FOCUS_SUMMARY": "专注会话",
     "NO_TASKS": "今天没有任务",
     "PLAN_TOMORROW": "计划",
     "REVIEW_TASKS": "检查",
