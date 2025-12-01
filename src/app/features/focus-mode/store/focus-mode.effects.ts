@@ -244,10 +244,23 @@ export class FocusModeEffects {
 
   syncDurationWithMode$ = createEffect(() =>
     this.actions$.pipe(
-      ofType(actions.setFocusModeMode),
-      withLatestFrom(this.store.select(selectors.selectTimer)),
-      switchMap(([{ mode }, timer]) => {
+      ofType(actions.setFocusModeMode, actions.focusModeLoaded),
+      withLatestFrom(
+        this.store.select(selectors.selectTimer),
+        this.store.select(selectors.selectMode),
+      ),
+      switchMap(([action, timer, storeMode]) => {
+        const mode =
+          action.type === actions.setFocusModeMode.type
+            ? (action as ReturnType<typeof actions.setFocusModeMode>).mode
+            : storeMode;
+
         if (timer.purpose !== null) {
+          return EMPTY;
+        }
+
+        // Only sync on load if duration is not set (0) to avoid overwriting manual changes
+        if (action.type === actions.focusModeLoaded.type && timer.duration > 0) {
           return EMPTY;
         }
 
