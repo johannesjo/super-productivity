@@ -181,7 +181,7 @@
     "@ngx-translate/core": "^17.0.0",
     "@ngx-translate/http-loader": "^17.0.0",
     "@playwright/test": "^1.56.1",
-    "@schematics/angular": "^20.1.4",
+    "@schematics/angular": "^21.0.1",
     "@types/electron": "^1.4.38",
     "@types/electron-localshortcut": "^3.1.3",
     "@types/file-saver": "^2.0.5",
