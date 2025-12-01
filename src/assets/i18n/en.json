@@ -2051,6 +2051,9 @@
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today"
   },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copy)"
+  },
   "GPB": {
     "ASSETS": "Loading assets...",
     "DBX_DOWNLOAD": "Dropbox: Download file...",
@@ -2070,6 +2073,7 @@
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "CREATE_PROJECT": "Create Project",
+    "DUPLICATE_PROJECT": "Duplicate",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",
