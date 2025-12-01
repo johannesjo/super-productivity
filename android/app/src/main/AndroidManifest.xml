@@ -64,7 +64,13 @@
       android:label="@string/title_activity_fullscreen"
       android:launchMode="singleTask"
       android:theme="@style/AppTheme.NoActionBarLaunch"
-      android:windowSoftInputMode="adjustResize" />
+      android:windowSoftInputMode="adjustResize">
+      <intent-filter>
+        <action android:name="android.intent.action.SEND" />
+        <category android:name="android.intent.category.DEFAULT" />
+        <data android:mimeType="text/*" />
+      </intent-filter>
+    </activity>
 
     <activity
       android:name=".webview.WebViewBlockActivity"

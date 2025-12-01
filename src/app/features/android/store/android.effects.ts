@@ -1,6 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
+import { createEffect } from '@ngrx/effects';
 import { switchMap, tap } from 'rxjs/operators';
 import { timer } from 'rxjs';
 import { ReminderService } from '../../reminder/reminder.service';
@@ -10,6 +9,9 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
 import { DroidLog } from '../../../core/log';
 import { generateNotificationId } from '../android-notification-id.util';
+import { androidInterface } from '../android-interface';
+import { TaskService } from '../../tasks/task.service';
+import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 
 // TODO send message to electron when current task changes here
 
@@ -18,10 +20,10 @@ const DELAY_SCHEDULE = 5000;
 
 @Injectable()
 export class AndroidEffects {
-  private _actions$ = inject(Actions);
-  private _store$ = inject<Store<any>>(Store);
   private _reminderService = inject(ReminderService);
   private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  private _taskAttachmentService = inject(TaskAttachmentService);
   // Single-shot guard so we don’t spam the user with duplicate warnings.
   private _hasShownNotificationWarning = false;
   private _hasCheckedExactAlarm = false;
@@ -129,6 +131,31 @@ export class AndroidEffects {
       {
         dispatch: false,
       },
+    );
+
+  handleShare$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        androidInterface.onShareWithAttachment$.pipe(
+          tap((shareData) => {
+            const truncatedTitle = shareData.title.substring(0, 100);
+            const taskTitle = `Check: ${truncatedTitle}`;
+            const taskId = this._taskService.add(taskTitle);
+            this._taskAttachmentService.addAttachment(taskId, {
+              title: shareData.title,
+              type: shareData.type,
+              path: shareData.path,
+              icon: 'link',
+              id: null,
+            });
+            this._snackService.open({
+              type: 'SUCCESS',
+              msg: 'Task created from share',
+            });
+          }),
+        ),
+      { dispatch: false },
     );
 
   // markTaskAsDone$ = createEffect(() =>

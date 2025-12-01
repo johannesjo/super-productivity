@@ -1,7 +1,10 @@
 package com.superproductivity.superproductivity
 
+import android.content.Intent
 import android.graphics.Rect
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import android.view.View
 import android.webkit.WebView
@@ -16,6 +19,7 @@ import com.superproductivity.superproductivity.webview.WebHelper
 import com.superproductivity.superproductivity.webview.WebViewBlockActivity
 import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
 import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
+import org.json.JSONObject
 
 /**
  * All new Super-Productivity main activity, based on Capacitor to support offline use of the entire application
@@ -116,6 +120,40 @@ class CapacitorMainActivity : BridgeActivity() {
                 callJSInterfaceFunctionIfExists("next", "isKeyboardShown$", "false")
             }
         }
+
+        
+        // Handle initial intent (cold start)
+        // Delay to ensure WebView is loaded
+        Handler(Looper.getMainLooper()).postDelayed({
+            handleIntent(intent)
+        }, 3000)
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        handleIntent(intent)
+    }
+
+    private fun handleIntent(intent: Intent) {
+        Log.d("SP_SHARE", "handleIntent action: ${intent.action} type: ${intent.type}")
+        if (Intent.ACTION_SEND == intent.action && intent.type != null) {
+            if (intent.type?.startsWith("text/") == true) {
+                val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)
+                val sharedTitle = intent.getStringExtra(Intent.EXTRA_TITLE) ?: "Shared Content"
+                Log.d("SP_SHARE", "Shared text: $sharedText")
+                Log.d("SP_SHARE", "Shared title: $sharedTitle")
+
+                if (sharedText != null) {
+                    val json = JSONObject()
+                    json.put("title", sharedTitle)
+                    json.put("type", "LINK")
+                    json.put("path", sharedText)
+
+                    Log.d("SP_SHARE", "Calling JS interface with: $json")
+                    callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
+                }
+            }
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -149,6 +187,10 @@ class CapacitorMainActivity : BridgeActivity() {
         objectPath: String,
         fnParam: String = ""
     ) {
+        if (!::javaScriptInterface.isInitialized) {
+            Log.w("CapacitorMainActivity", "javaScriptInterface not initialized yet. Skipping JS call.")
+            return
+        }
         val fnFullName =
             "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath.$fnName"
         val fullObjectPath = "window.${FullscreenActivity.WINDOW_INTERFACE_PROPERTY}.$objectPath"

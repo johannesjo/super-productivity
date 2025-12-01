@@ -1,6 +1,6 @@
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { nanoid } from 'nanoid';
-import { BehaviorSubject, merge, Observable, Subject } from 'rxjs';
+import { BehaviorSubject, merge, Observable, ReplaySubject, Subject } from 'rxjs';
 import { mapTo } from 'rxjs/operators';
 import { DroidLog } from '../../core/log';
 
@@ -42,6 +42,12 @@ export interface AndroidInterface {
   isInBackground$: Observable<boolean>;
   isKeyboardShown$: Subject<boolean>;
 
+  onShareWithAttachment$: Subject<{
+    title: string;
+    type: 'FILE' | 'LINK' | 'IMG' | 'COMMAND' | 'NOTE';
+    path: string;
+  }>;
+
   // onPauseCurrentTask$: Subject<void>;
   // onMarkCurrentTaskAsDone$: Subject<void>;
   // onAddNewTask$: Subject<void>;
@@ -63,6 +69,7 @@ if (IS_ANDROID_WEB_VIEW) {
   // androidInterface.onPauseCurrentTask$ = new Subject();
   // androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
   // androidInterface.onAddNewTask$ = new Subject();
+  androidInterface.onShareWithAttachment$ = new ReplaySubject(1);
   androidInterface.isKeyboardShown$ = new BehaviorSubject(false);
 
   androidInterface.isInBackground$ = merge(
