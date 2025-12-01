@@ -174,7 +174,7 @@
     "@ngrx/effects": "^20.0.0",
     "@ngrx/entity": "^20.0.0",
     "@ngrx/schematics": "^20.1.0",
-    "@ngrx/store": "20.0.0",
+    "@ngrx/store": "20.1.0",
     "@ngrx/store-devtools": "^20.0.0",
     "@ngx-formly/core": "7.0.0",
     "@ngx-formly/material": "7.0.0",
