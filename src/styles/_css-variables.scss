@@ -12,6 +12,15 @@
   --s: 8px;
   --s-quarter: 2px;
   --s-half: 4px;
+
+  // -----------------------------
+  // Fonts
+  // -----------------------------
+  --font-primary-stack:
+    'Open Sans', 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
   --s2: 16px; // 2 * 8px
   --s3: 24px; // 3 * 8px
   --s4: 32px; // 4 * 8px
