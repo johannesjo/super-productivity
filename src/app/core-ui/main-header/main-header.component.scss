@@ -41,6 +41,7 @@
   }
 
   .current-work-context-title,
+  ::ng-deep .current-task-title,
   button,
   a,
   ::ng-deep button,
@@ -389,7 +390,7 @@ button.isActive2 {
 
 :host:hover ::ng-deep {
   .current-task-title {
-    display: none;
+    opacity: 0;
   }
 }
 
