@@ -1,0 +1,18 @@
+@use '../../../../styles/_globals.scss' as *;
+@use '../../../../styles/components/number-badge' as badge;
+
+:host {
+  display: inline-flex;
+  align-items: center;
+  height: var(--header-button-size);
+}
+
+.focus-btn-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+}
+.focus-label {
+  @include badge.number-badge;
+}

@@ -1,41 +1,54 @@
-# builds the app and runs the webversion inside a docker container
+# Build stage
+FROM --platform=$BUILDPLATFORM node:20 AS build
 
-### build ###
+# Accept build arguments for environment variables with defaults
+ARG UNSPLASH_KEY=DUMMY_UNSPLASH_KEY
+ARG UNSPLASH_CLIENT_ID=DUMMY_UNSPLASH_CLIENT_ID
 
-# base image
-FROM node:16 as build
+# Set as environment variables for the build
+ENV UNSPLASH_KEY=$UNSPLASH_KEY
+ENV UNSPLASH_CLIENT_ID=$UNSPLASH_CLIENT_ID
 
-# add app
-COPY . /app
-
-# set working directory
 WORKDIR /app
 
-# add `/app/node_modules/.bin` to $PATH
-ENV PATH /app/node_modules/.bin:$PATH
+# Install git and configure for HTTPS
+# Use single apt-get command to avoid GPG issues
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    --no-install-recommends \
+    git \
+    ca-certificates \
+    && rm -rf /var/lib/apt/lists/* \
+    && git config --global url."https://github.com/".insteadOf ssh://git@github.com/
 
-RUN npm i
-RUN npm i -g @angular/cli
+# Copy and install dependencies
+COPY package*.json ./
+COPY packages/plugin-api/package*.json ./packages/plugin-api/
+COPY packages/plugin-api/tsconfig.json ./packages/plugin-api/
+COPY packages/plugin-api/src ./packages/plugin-api/src
+COPY tsconfig.json ./
+RUN npm ci --ignore-scripts || npm i --ignore-scripts
+RUN npm run prepare
 
-# run linter
-RUN npm run lint
+# Copy source and build
+COPY . .
+# Pass build args as environment variables for the build commands
+RUN UNSPLASH_KEY=$UNSPLASH_KEY UNSPLASH_CLIENT_ID=$UNSPLASH_CLIENT_ID npm run env && npm run lint && npm run buildFrontend:prodWeb
 
-# generate build
-RUN npm run buildFrontend:prodWeb
-
-### serve ###
-
-# base image
+# Production stage
 FROM nginx:1-alpine
 
-# environmental variables
 ENV PORT=80
 
-# copy artifact build from the 'build environment'
-COPY --from=build /app/dist /usr/share/nginx/html
+# Install runtime dependencies
+RUN apk add --no-cache jq
 
-# expose port: defaults to 80
+# Copy built app and configs
+COPY --from=build /app/dist/browser /usr/share/nginx/html
+COPY ./nginx/default.conf.template /etc/nginx/templates/default.conf.template
+COPY ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+
 EXPOSE $PORT
+WORKDIR /usr/share/nginx/html
 
-# run nginx
-CMD ["nginx", "-g", "daemon off;"]
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

@@ -1,0 +1,43 @@
+@if (type === 'input' || type === 'fullSizeInput') {
+  <section
+    (click)="type === 'input' && onInputItemClick()"
+    class="input-item"
+    [class.standard-size]="type === 'input'"
+    [class.full-size]="type === 'fullSizeInput'"
+  >
+    @if (type === 'input') {
+      <div
+        class="ripple"
+        mat-ripple
+      ></div>
+    }
+    <div class="input-item__title">
+      <ng-content select="[input-title]"></ng-content>
+    </div>
+    <div class="input-item__value">
+      <ng-content select="[input-value]"></ng-content>
+    </div>
+    @if (inputIcon) {
+      <button
+        class="input-item__edit-btn"
+        color="accent"
+        mat-icon-button
+      >
+        <mat-icon>{{ inputIcon }}</mat-icon>
+      </button>
+    }
+    <ng-content select="[input-additional]"></ng-content>
+  </section>
+}
+@if (type === 'panel') {
+  <mat-expansion-panel [expanded]="expanded">
+    <mat-expansion-panel-header (click)="focusEl()">
+      <mat-panel-title>
+        <ng-content select="[panel-header]"></ng-content>
+      </mat-panel-title>
+    </mat-expansion-panel-header>
+    <div class="panel-content-wrapper">
+      <ng-content select="[panel-content]"></ng-content>
+    </div>
+  </mat-expansion-panel>
+}

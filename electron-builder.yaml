@@ -1,13 +1,21 @@
 appId: superProductivity
-afterSign: electron-builder-notarize
+productName: Super Productivity
+artifactName: ${name}-${arch}.${ext}
+
 files:
   - electron/**/*
   - '!electron/**/*.ts'
   - '!electron/**/*.js.map'
-  - dist/**/*
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
+  # Exclude Nx binaries - they're build tools, not runtime dependencies
+  - '!**/@nx/nx-darwin-*/**'
+  - '!**/@nx/nx-linux-*/**'
+  - '!**/@nx/nx-win32-*/**'
+#afterSign: ./tools/notarizeMacApp.js
+
 directories:
-  output: './app-builds'
+  output: './.tmp/app-builds'
 
 win:
   target:
@@ -22,9 +30,9 @@ win:
   publish:
     - github
 nsis:
-  artifactName: ${productName} Setup ${version}-${arch}.${ext}
+  artifactName: ${productName} Setup-${arch}.${ext}
 portable:
-  artifactName: ${productName}-${version}-${arch}.${ext}
+  artifactName: ${name}-${arch}.${ext}
 appx:
   applicationId: SuperProductivity
   displayName: Super Productivity
@@ -33,7 +41,9 @@ appx:
   identityName: ___johannesjo.SuperProductivity
 
 linux:
-  category: Utility
+  # Fix for issue #5259: Set executable name without spaces for snap compatibility
+  executableName: superproductivity
+  category: Office;ProjectManagement
   target:
     - AppImage
     - deb
@@ -41,9 +51,41 @@ linux:
     - rpm
   publish:
     - github
+# leads to Error: Please specify executable name as linux.executableName instead of linux.desktop.Exec
+#  desktop:
+#    Name: Super Productivity
+#    Comment: A todo list and time tracking app
+#    Exec: superProductivity
+#    Terminal: false
+#    Type: Application
+#    Icon: build/icon.png
+#    GenericName: ToDo List and Time Tracker
+
 snap:
   grade: stable
   allowNativeWayland: true
+  autoStart: true
+  base: core22
+  confinement: strict
+  plugs:
+    - default
+    - password-manager-service
+    - system-observe
+    - login-session-observe
+
+flatpak:
+  runtimeVersion: '23.08'
+  finishArgs:
+    - --share=network
+    - --share=ipc
+    - --socket=x11
+    - --socket=wayland
+    - --socket=fallback-x11
+    - --socket=pulseaudio
+    - --device=dri
+    - --filesystem=home
+    - --talk-name=org.gnome.Mutter.IdleMonitor
+    - --system-talk-name=org.freedesktop.login1
 
 mac:
   appId: com.super-productivity.app
@@ -51,22 +93,26 @@ mac:
   category: public.app-category.productivity
   entitlements: build/entitlements.mac.plist
   entitlementsInherit: build/entitlements.mac.plist
-  icon: build/icon.icns
+  icon: build/icon-mac.icns
   hardenedRuntime: true
   gatekeeperAssess: false
   provisioningProfile: embedded.provisionprofile
   darkModeSupport: true
+  notarize: true
+  extendInfo:
+    ITSAppUsesNonExemptEncryption: false
   publish:
     - github
   target:
-    - zip
+    #    - zip
     - target: dmg
       arch:
         - arm64
         - x64
+        - universal
 
 dmg:
-  sign: false
+  sign: true
   publish:
     - github
 

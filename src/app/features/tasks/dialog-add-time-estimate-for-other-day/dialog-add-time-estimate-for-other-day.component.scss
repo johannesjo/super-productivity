@@ -1,10 +1,10 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 .wrap-time {
   display: flex;
   justify-content: space-around;
   flex-wrap: wrap;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 
   @include mq(xs, max) {
     margin-left: -20px;
@@ -13,5 +13,5 @@
 }
 
 .side-info {
-  margin-top: $s;
+  margin-top: var(--s);
 }

@@ -1,24 +1,32 @@
 appId: com.super-productivity.app
-afterSign: electron-builder-notarize
 productName: Super Productivity
+artifactName: ${name}-${arch}.${ext}
 files:
   - electron/**/*
-  - "!electron/**/*.ts"
-  - "!electron/**/*.js.map"
-  - dist/**/*
+  - '!electron/**/*.ts'
+  - '!electron/**/*.js.map'
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
+  # Exclude Nx binaries - they're build tools, not runtime dependencies
+  - '!**/@nx/nx-darwin-*/**'
+  - '!**/@nx/nx-linux-*/**'
+  - '!**/@nx/nx-win32-*/**'
 directories:
-  output: "./app-builds"
+  output: './.tmp/app-builds'
+
+mac:
+  target:
+    - target: mas
+      arch:
+        - universal
 
 mas:
+  type: distribution
   appId: com.super-productivity.app
   category: public.app-category.productivity
-  icon: build/icon.icns
+  icon: build/icon-mac.icns
   gatekeeperAssess: false
   darkModeSupport: true
-  target:
-    - mas
-
   hardenedRuntime: false
   entitlements: build/entitlements.mas.plist
   entitlementsInherit: build/entitlements.mas.inherit.plist

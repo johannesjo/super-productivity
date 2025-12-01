@@ -1,14 +1,27 @@
-@import '../../../../../variables';
+@use '../../../../../styles/_globals.scss' as *;
 
 :host p {
   text-align: center;
+}
+
+:host {
+  ::ng-deep {
+    mat-pseudo-checkbox {
+      display: none !important;
+    }
+
+    .mat-button-toggle-checked
+      .mat-button-toggle-button:has(.mat-button-toggle-checkbox-wrapper) {
+      padding-left: 0;
+    }
+  }
 }
 
 .time {
   font-size: 20px;
   text-align: center;
   font-weight: bold;
-  margin-bottom: $s * 2;
+  margin-bottom: var(--s2);
 }
 
 .track-to-item {
@@ -17,13 +30,9 @@
   justify-content: center;
   flex-direction: row;
   flex-wrap: nowrap;
-  padding-top: $s * 2;
-  padding-bottom: $s;
-  border-top: 1px solid $light-theme-extra-border-color;
-
-  @include darkTheme() {
-    border-color: $dark-theme-extra-border-color;
-  }
+  padding-top: var(--s2);
+  padding-bottom: var(--s);
+  border-top: 1px solid var(--extra-border-color);
 
   &:first-of-type {
     border-top: none !important;
@@ -39,7 +48,7 @@
   }
 
   select-task {
-    margin: 0 $s * 2;
+    margin: 0 var(--s2);
     width: 220px;
 
     &.isDisabled {
@@ -54,6 +63,6 @@
 }
 
 .simple-counter {
-  margin: 0 $s * 0.5;
+  margin: 0 var(--s-half);
   box-shadow: none !important;
 }

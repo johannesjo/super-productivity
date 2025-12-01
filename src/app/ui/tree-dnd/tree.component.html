@@ -1,0 +1,113 @@
+<div
+  class="tree"
+  role="tree"
+  aria-label="Tree"
+  [class.is-dragging]="draggingId()"
+  [class.is-drag-invalid]="isDragInvalid()"
+  cdkDropListGroup
+>
+  <div
+    class="list list--root"
+    cdkDropList
+    [cdkDropListData]="{ parentId: 'root', items: nodes() }"
+    [cdkDropListEnterPredicate]="canEnterList"
+    (cdkDropListDropped)="onDrop($event)"
+  >
+    @for (node of nodes(); track node.id) {
+      <ng-container
+        *ngTemplateOutlet="nodeTpl; context: { $implicit: node, level: 0 }"
+      ></ng-container>
+    }
+    <div
+      class="root-drop"
+      data-drop-zone="root"
+      [class.is-root-over]="isRootOver()"
+    ></div>
+  </div>
+
+  @if (draggingId()) {
+    <div
+      class="indicator"
+      [ngStyle]="indicatorStyle()"
+    >
+      <span class="indicator-dot"></span>
+      <span class="indicator-line"></span>
+    </div>
+  }
+</div>
+
+<ng-template
+  #nodeTpl
+  let-node
+  let-level="level"
+>
+  @let folder = node.children !== undefined;
+  @let overInside = isOver(node.id, 'inside');
+  @let overBefore = isOver(node.id, 'before');
+  @let overAfter = isOver(node.id, 'after');
+  @let indentPx = level * indent();
+
+  <div
+    class="item"
+    cdkDrag
+    [cdkDragData]="node.id"
+    [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+    [ngClass]="{
+      'is-folder': folder,
+      'is-dragging': draggingId() === node.id,
+      'was-just-dropped': justDroppedId() === node.id,
+      'is-over-inside': overInside,
+      'is-over-before': overBefore,
+      'is-over-after': overAfter,
+    }"
+    [attr.data-node-id]="node.id"
+    [style.--tree-indent.px]="indentPx"
+    (cdkDragStarted)="onDragStarted(node.id)"
+    (cdkDragEnded)="onDragEnded($event)"
+    (cdkDragMoved)="onDragMoved($event)"
+    data-drop-zone="inside"
+    [attr.role]="'treeitem'"
+    [attr.aria-level]="level + 1"
+    [attr.aria-expanded]="folder ? node.expanded : null"
+  >
+    @if (folder) {
+      @if (folderTpl(); as tpl) {
+        <ng-container
+          *ngTemplateOutlet="
+            tpl;
+            context: {
+              $implicit: node,
+              expanded: node.expanded,
+              toggle: toggle.bind(this),
+              dragOver: overInside,
+            }
+          "
+        ></ng-container>
+      }
+    } @else {
+      @if (itemTpl(); as tpl) {
+        <ng-container
+          *ngTemplateOutlet="tpl; context: { $implicit: node }"
+        ></ng-container>
+      }
+    }
+  </div>
+
+  @if (folder && node.expanded) {
+    @let childLevel = level + 1;
+    <div
+      class="folder-content"
+      cdkDropList
+      [@expandCollapse]
+      [cdkDropListData]="{ parentId: node.id, items: node.children ?? [] }"
+      [cdkDropListEnterPredicate]="canEnterList"
+      (cdkDropListDropped)="onDrop($event)"
+    >
+      @for (child of node.children ?? []; track child.id) {
+        <ng-container
+          *ngTemplateOutlet="nodeTpl; context: { $implicit: child, level: childLevel }"
+        ></ng-container>
+      }
+    </div>
+  }
+</ng-template>

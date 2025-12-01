@@ -1,0 +1,62 @@
+/** 
+ * The internal mention styles can be disabled using the configuration setting leading to these 
+ * possible states:
+ *  
+ *   bootstrap not present; disableStyle false; (new default - use internal styles)
+ *   bootstrap not present; disableStyle true;  (no style - so user can add their own styles)
+ *   bootstrap present;     disableStyle true;  (original behavior - use bs styles)
+ *   bootstrap present;     disableStyle false; (mixes internal style with bs)
+ **/
+
+.mention-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 1000;
+  display: none;
+  float: left;
+  min-width: 11em;
+  padding: 0.5em 0;
+  margin: 0.125em 0 0;
+  font-size: 1em;
+  color: #212529;
+  text-align: left;
+  list-style: none;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  border-radius: 0.25em;
+}
+.mention-item {
+  display: block;
+  padding: 0.2em 1.5em;
+  line-height: 1.5em;
+  clear: both;
+  font-weight: 400;
+  color: #212529;
+  text-align: inherit;
+  white-space: nowrap;
+  background-color: transparent;
+  border: 0;
+}
+.mention-active > a {
+  color: #fff;
+  text-decoration: none;
+  background-color: #337ab7;
+  outline: 0;
+}
+.scrollable-menu {
+  display: block;
+  height: auto;
+  max-height: 292px; /* fits 11 items with 14px font-size */
+  overflow: auto;
+}
+[hidden] {
+  display: none;
+}
+
+.mention-dropdown {
+  bottom: 100%;
+  top: auto;
+  margin-bottom: 2px;
+}

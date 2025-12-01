@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>
+  {{ T.DIALOG_UNSPLASH_PICKER.TITLE | translate }}
+</h2>
+
+<mat-dialog-content>
+  <mat-form-field
+    appearance="outline"
+    style="width: 100%; margin-bottom: 1rem; margin-top: 4px"
+  >
+    <mat-label>{{ T.DIALOG_UNSPLASH_PICKER.SEARCH_LABEL | translate }}</mat-label>
+    <input
+      matInput
+      [ngModel]="searchQuery()"
+      (ngModelChange)="onSearchChange($event)"
+      [placeholder]="T.DIALOG_UNSPLASH_PICKER.SEARCH_PLACEHOLDER | translate"
+    />
+  </mat-form-field>
+
+  @if (isLoading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  }
+
+  @if (!isLoading()) {
+    <div class="image-grid">
+      @for (photo of photos(); track photo) {
+        <div
+          class="image-item"
+          (click)="selectPhoto(photo)"
+        >
+          <img
+            [src]="getPhotoThumb(photo)"
+            [alt]="photo.alt_description || photo.description || 'Unsplash photo'"
+          />
+          <div class="photographer">
+            {{ T.DIALOG_UNSPLASH_PICKER.BY | translate }}
+            @if (photo.user.links?.html) {
+              <a
+                [href]="getPhotographerUrl(photo)"
+                target="_blank"
+                (click)="$event.stopPropagation()"
+                style="color: inherit"
+              >
+                {{ photo.user.name }}
+              </a>
+            }
+            @if (!photo.user.links?.html) {
+              <span>{{ photo.user.name }}</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (showNoResults()) {
+    <div class="no-results">
+      {{ T.DIALOG_UNSPLASH_PICKER.NO_RESULTS | translate }}
+    </div>
+  }
+</mat-dialog-content>

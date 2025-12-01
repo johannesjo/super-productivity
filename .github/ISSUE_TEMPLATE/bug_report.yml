@@ -1,0 +1,98 @@
+name: 🚨 Bug Report
+description: Report a bug you encountered
+title: '🚨 '
+labels: [bug]
+assignees:
+  - '' # Ensure indentation uses regular spaces
+
+body: # Ensure indentation uses regular spaces
+  - type: input
+    id: environment-version
+    attributes:
+      label: Version Used
+      description: Version number and package type (e.g., exe, snap, deb, installer).
+      placeholder: "e.g. 'v7.12.0 snap' or 'v2.2.1 firefox'"
+    validations:
+      required: true
+
+  # --- Remaining fields ---
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: Tell us what should happen.
+      placeholder: "e.g. When I click the 'Save' button, the data should be saved without errors."
+    validations:
+      required: true
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: Current Behavior
+      description: Tell us what happens instead of the expected behavior.
+      placeholder: "e.g. When I click the 'Save' button, the application crashes / nothing happens / an error message appears."
+    validations:
+      required: true
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Provide a clear set of steps to reproduce this bug.
+      placeholder: |
+        1. Go to '...'
+        2. Click on '....'
+        3. Scroll down to '....'
+        4. See error
+    validations:
+      required: true
+  - type: dropdown
+    id: reliability
+    attributes:
+      label: Can you reproduce this reliably?
+      description: Was this a one-time occurrence, or can you make it happen every time by following the steps?
+      options:
+        - 'Yes, I can reproduce it reliably.'
+        - "Sometimes, it's intermittent."
+        - 'No, it only happened once.'
+    validations:
+      required: true
+  - type: textarea
+    id: console-output
+    attributes:
+      label: Console Output
+      description: Is there any output if you press `Ctrl+Shift+i` (or `Cmd+Alt+i` on Mac) and check the 'Console' tab? If so, please paste it here.
+      placeholder: 'Paste any relevant console logs here...'
+      render: shell # Use 'shell' or 'log' for better formatting of code/logs
+    validations:
+      required: false
+#  - type: textarea
+#    id: error-log-info # ID is optional for markdown but kept for consistency
+#    attributes:
+#      # Correctly combines label/description into the value using Markdown formatting
+#      label: Error Log File (Desktop only)
+#      description: |
+#        For the desktop versions, there might also be an error log file if there's no useful console output. Please check the following locations:
+#
+#        * **macOS:** `~/Library/Logs/superProductivity/main.log`
+#        * **Windows:** `%USERPROFILE%\AppData\Roaming\superProductivity\logs\main.log`
+#        * **Linux:** `~/.config/superProductivity/logs/main.log`
+#        * **Linux (Snap):** `~/snap/superproductivity/common/.config/superProductivity/logs`
+#        * **Linux (Flatpak):** `~/.var/app/com.super_productivity.SuperProductivity/config/superProductivity/logs`
+#
+#        **If you find logs and don't feel comfortable posting them publicly, you can email them to:** contact@super-productivity.com
+#
+#  - type: input
+#    id: environment-de
+#    attributes:
+#      label: Desktop Environment (Linux only)
+#      description: If you are using Linux, please specify your Desktop Environment.
+#      placeholder: "e.g., GNOME 42, KDE Plasma 5.27, XFCE 4.18"
+#    validations:
+#      required: false # Often not applicable or known
+#  - type: input
+#    id: environment-browser
+#    attributes:
+#      label: Browser Name and Version (Web version only)
+#      description: If you are using the web version, specify your browser.
+#      placeholder: "e.g., Chrome 123, Firefox 124"
+#    validations:
+#      required: false # Only required for web version usage

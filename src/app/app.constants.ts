@@ -1,94 +1,24 @@
-export const WORKLOG_DATE_STR_FORMAT = 'YYYY-MM-DD';
+import { IS_ANDROID_WEB_VIEW } from './util/is-android-web-view';
+
 export const IS_ELECTRON = navigator.userAgent.toLowerCase().indexOf(' electron/') > -1;
+// effectively IS_BROWSER
+export const IS_WEB_BROWSER = !IS_ELECTRON && !IS_ANDROID_WEB_VIEW;
+
 export const TRACKING_INTERVAL = 1000;
+export const TIME_TRACKING_TO_DB_INTERVAL = 15000;
 
-export const MODEL_VERSION_KEY = '__modelVersion';
+export const DRAG_DELAY_FOR_TOUCH = 100;
 
-import '@angular/common/locales/global/en';
-import '@angular/common/locales/global/es';
-import '@angular/common/locales/global/de';
-import '@angular/common/locales/global/ar';
-import '@angular/common/locales/global/fa';
-import '@angular/common/locales/global/fr';
-import '@angular/common/locales/global/ja';
-import '@angular/common/locales/global/ko';
-import '@angular/common/locales/global/ru';
-import '@angular/common/locales/global/sk';
-import '@angular/common/locales/global/tr';
-import '@angular/common/locales/global/zh';
-import '@angular/common/locales/global/zh-Hant';
-import '@angular/common/locales/global/it';
-import '@angular/common/locales/global/pl';
-import '@angular/common/locales/global/pt';
-import '@angular/common/locales/global/nl';
-import '@angular/common/locales/global/nb';
-import '@angular/common/locales/global/hr';
-
-export const DAY_STARTS_AT: string = '9:00';
-
-export const ALL_THEMES: string[] = [
-  'blue',
-  'blue-grey',
-  'light-blue',
-  'indigo',
-  'pink',
-  'purple',
-  'deep-purple',
-  'cyan',
-  'teal',
-  'green',
-  'light-green',
-  'lime',
-  'yellow',
-  'amber',
-  'deep-orange',
-];
-
-export enum LanguageCode {
-  ar = 'ar',
-  de = 'de',
-  en = 'en',
-  es = 'es',
-  fa = 'fa',
-  fr = 'fr',
-  hr = 'hr',
-  id = 'id',
-  it = 'it',
-  ja = 'ja',
-  ko = 'ko',
-  nl = 'nl',
-  nb = 'nb',
-  pl = 'pl',
-  pt = 'pt',
-  ru = 'ru',
-  sk = 'sk',
-  tr = 'tr',
-  zh = 'zh',
-  zh_tw = 'zh_tw',
-}
-
-export enum LanguageCodeMomentMap {
-  ar = 'ar',
-  de = 'de',
-  en = 'en',
-  es = 'es',
-  fa = 'fa',
-  fr = 'fr',
-  hr = 'hr',
-  id = 'id',
-  it = 'it',
-  ja = 'ja',
-  ko = 'ko',
-  nl = 'nl',
-  nb = 'nb',
-  pl = 'pl',
-  pt = 'pt',
-  ru = 'ru',
-  sk = 'sk',
-  tr = 'tr',
-  zh = 'zh-cn',
-  zh_tw = 'zh-tw',
-}
+// TODO use
+// const CORS_SKIP_EXTRA_HEADER_PROP = 'sp_cors_skip' as const;
+// export const CORS_SKIP_EXTRA_HEADERS: { [name: string]: string } = IS_ANDROID_WEB_VIEW
+//   ? ({
+//       [CORS_SKIP_EXTRA_HEADER_PROP]: 'true',
+//     } as const)
+//   : {};
+export const CORS_SKIP_EXTRA_HEADERS: { [name: string]: string } = IS_ANDROID_WEB_VIEW
+  ? {}
+  : {};
 
 export enum BodyClass {
   isElectron = 'isElectron',
@@ -101,17 +31,21 @@ export enum BodyClass {
   isNoAdvancedFeatures = 'isNoAdvancedFeatures',
   isTouchOnly = 'isTouchOnly',
   isNoTouchOnly = 'isNoTouchOnly',
+
+  isTouchPrimary = 'isTouchPrimary',
+  isMousePrimary = 'isMousePrimary',
   isLightTheme = 'isLightTheme',
   isDarkTheme = 'isDarkTheme',
-  isDisableBackgroundGradient = 'isDisableBackgroundGradient',
+  isDisableBackgroundTint = 'isDisableBackgroundTint',
   isEnabledBackgroundGradient = 'isEnabledBackgroundGradient',
   isDisableAnimations = 'isDisableAnimations',
   isDataImportInProgress = 'isDataImportInProgress',
-}
+  hasBgImage = 'hasBgImage',
+  hasMobileBottomNav = 'hasMobileBottomNav',
 
-export enum MainContainerClass {
-  isSmallMainContainer = 'isSmallMainContainer',
-  isVerySmallMainContainer = 'isVerySmallMainContainer',
+  isAndroidKeyboardShown = 'isAndroidKeyboardShown',
+  isAndroidKeyboardHidden = 'isAndroidKeyboardHidden',
+  isAddTaskBarOpen = 'isAddTaskBarOpen',
 }
 
 export enum HelperClasses {
@@ -119,21 +53,7 @@ export enum HelperClasses {
   isHideForNoAdvancedFeatures = 'isHideForNoAdvancedFeatures',
 }
 
-// we're assuming that the other language speakers are likely to speak english
-// and as english offers most likely the best experience, we use it as default
-export const AUTO_SWITCH_LNGS: LanguageCode[] = [
-  LanguageCode.zh,
-  LanguageCode.zh_tw,
-  LanguageCode.ar,
-  LanguageCode.fa,
-  LanguageCode.ja,
-  LanguageCode.ko,
-  LanguageCode.ru,
-  LanguageCode.tr,
-];
-
-export const RTL_LANGUAGES: LanguageCode[] = [LanguageCode.ar, LanguageCode.fa];
-
+/* eslint-disable @typescript-eslint/naming-convention */
 export enum THEME_COLOR_MAP {
   'light-blue' = '#03a9f4',
   'pink' = '#e91e63',
@@ -156,3 +76,16 @@ export enum THEME_COLOR_MAP {
 }
 
 export const HANDLED_ERROR_PROP_STR = 'HANDLED_ERROR_PROP';
+
+/**
+ * Constants representing history state keys.
+ * Used in the `window.history.pushState/replaceState` methods when opening an overlay
+ * that can later be closed by pressing the "back" button in the browser or mobile app.
+ *
+ * ATTENTION: `window.history.state` can be `null`.
+ * Always use optional chaining: `window.history.state?.[HISTORY_STATE.MOBILE_NAVIGATION]`
+ */
+export const HISTORY_STATE = {
+  MOBILE_NAVIGATION: 'mobileSideNav',
+  TASK_DETAIL_PANEL: 'taskDetailPanel',
+};

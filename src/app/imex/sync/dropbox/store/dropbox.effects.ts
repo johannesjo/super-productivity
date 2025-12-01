@@ -1,67 +1,48 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-
-import { DropboxApiService } from '../dropbox-api.service';
-import { DataInitService } from '../../../../core/data-init/data-init.service';
-import { SnackService } from '../../../../core/snack/snack.service';
-import { EMPTY, from, Observable, of } from 'rxjs';
-import { filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
-import { SyncProvider } from '../../sync-provider.model';
-import { triggerDropboxAuthDialog } from './dropbox.actions';
-import { GlobalConfigService } from '../../../../features/config/global-config.service';
 import { updateGlobalConfigSection } from '../../../../features/config/store/global-config.actions';
+import { environment } from '../../../../../environments/environment';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { DropboxPrivateCfg, SyncProviderId } from '../../../../pfapi/api';
 
 @Injectable()
 export class DropboxEffects {
-  updateTokensFromDialog$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(triggerDropboxAuthDialog.type),
-      withLatestFrom(this._globalConfigService.sync$),
-      switchMap(([, sync]) => {
-        return from(this._dropboxApiService.getAccessTokenViaDialog()).pipe(
-          mergeMap((res) =>
-            res
-              ? of(
-                  updateGlobalConfigSection({
-                    sectionKey: 'sync',
-                    sectionCfg: {
-                      ...sync,
-                      dropboxSync: {
-                        ...sync.dropboxSync,
-                        accessToken: res.accessToken,
-                        refreshToken: res.refreshToken,
-                        _tokenExpiresAt: res.expiresAt,
-                      },
-                    } as SyncConfig,
-                  }),
-                )
-              : EMPTY,
-          ),
-        );
-      }),
-    ),
-  );
+  private _actions$ = inject(Actions);
+  private _pfapiService = inject(PfapiService);
 
-  triggerTokenDialog$: Observable<unknown> = createEffect(() =>
-    this._actions$.pipe(
-      ofType(updateGlobalConfigSection),
-      filter(
-        ({ sectionKey, sectionCfg }): boolean =>
-          sectionKey === 'sync' &&
-          (sectionCfg as SyncConfig).syncProvider === SyncProvider.Dropbox,
+  askToDeleteTokensOnDisable$: Observable<unknown> = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(updateGlobalConfigSection),
+        filter(
+          ({ sectionKey, sectionCfg }): boolean =>
+            sectionKey === 'sync' && (sectionCfg as SyncConfig).isEnabled === false,
+        ),
+        withLatestFrom(this._pfapiService.currentProviderPrivateCfg$),
+        tap(async ([, provider]) => {
+          if (
+            provider?.providerId === SyncProviderId.Dropbox &&
+            (provider.privateCfg as DropboxPrivateCfg)?.accessToken
+          ) {
+            if (!environment.production && !confirm('DEV: Delete Dropbox Tokens?')) {
+              return;
+            }
+            alert('Delete tokens');
+            const existingConfig = provider.privateCfg as DropboxPrivateCfg;
+            await this._pfapiService.pf.setPrivateCfgForSyncProvider(
+              SyncProviderId.Dropbox,
+              {
+                ...existingConfig,
+                accessToken: '',
+                refreshToken: '',
+              },
+            );
+          }
+        }),
       ),
-      withLatestFrom(this._dropboxApiService.isTokenAvailable$),
-      filter(([, isTokenAvailable]) => !isTokenAvailable),
-      map(() => triggerDropboxAuthDialog()),
-    ),
+    { dispatch: false },
   );
-
-  constructor(
-    private _actions$: Actions,
-    private _dropboxApiService: DropboxApiService,
-    private _globalConfigService: GlobalConfigService,
-    private _snackService: SnackService,
-    private _dataInitService: DataInitService,
-  ) {}
 }

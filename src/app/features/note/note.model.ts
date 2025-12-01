@@ -1,5 +1,4 @@
 import { EntityState } from '@ngrx/entity';
-import { MODEL_VERSION_KEY } from '../../app.constants';
 
 export interface Note {
   id: string;
@@ -16,5 +15,4 @@ export interface Note {
 export interface NoteState extends EntityState<Note> {
   ids: string[];
   todayOrder: string[];
-  [MODEL_VERSION_KEY]?: number;
 }

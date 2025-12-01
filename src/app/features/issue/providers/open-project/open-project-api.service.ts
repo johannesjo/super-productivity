@@ -1,14 +1,8 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { OpenProjectCfg } from './open-project.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-} from '@angular/common/http';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
 import {
   OpenProjectOriginalStatus,
   OpenProjectOriginalWorkPackageReduced,
@@ -19,23 +13,26 @@ import {
   mapOpenProjectIssueFull,
   mapOpenProjectIssueReduced,
   mapOpenProjectIssueToSearchResult,
-} from './open-project-issue/open-project-issue-map.util';
+} from './open-project-issue-map.util';
 import {
+  OpenProjectAttachment,
   OpenProjectWorkPackage,
   OpenProjectWorkPackageReduced,
-} from './open-project-issue/open-project-issue.model';
+} from './open-project-issue.model';
 import { SearchResultItem } from '../../issue.model';
-import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
 import { throwHandledError } from '../../../../util/throw-handled-error';
 import { ISSUE_PROVIDER_HUMANIZED, OPEN_PROJECT_TYPE } from '../../issue.const';
 import { devError } from '../../../../util/dev-error';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
+import { OpenProjectFilterItem } from './open-project-filter.model';
 
 @Injectable({
   providedIn: 'root',
 })
 export class OpenProjectApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   getById$(
     workPackageId: number,
@@ -53,6 +50,11 @@ export class OpenProjectApiService {
     searchText: string,
     cfg: OpenProjectCfg,
   ): Observable<SearchResultItem[]> {
+    // OpenProject does not allow empty filter for subjectOrId, only send when searchText is present
+    const filters: [OpenProjectFilterItem] = [{ status: { operator: 'o', values: [] } }];
+    if (searchText?.trim()) {
+      filters.push({ subjectOrId: { operator: '**', values: [searchText] } });
+    }
     return this._sendRequest$(
       {
         // see https://www.openproject.org/docs/api/endpoints/work-packages/
@@ -60,13 +62,7 @@ export class OpenProjectApiService {
         params: {
           pageSize: 100,
           // see: https://www.openproject.org/docs/api/filters/
-          filters: JSON.stringify(
-            [
-              { subjectOrId: { operator: '**', values: [searchText] } },
-              // only list open issues
-              { status: { operator: 'o', values: [] } },
-            ].concat(this._getScopeParamFilter(cfg)),
-          ),
+          filters: JSON.stringify(filters.concat(this._getScopeParamFilter(cfg))),
           // Default: [["id", "asc"]]
           sortBy: '[["updatedAt","desc"]]',
         },
@@ -235,6 +231,31 @@ export class OpenProjectApiService {
     );
   }
 
+  uploadAttachment$(
+    cfg: OpenProjectCfg,
+    workPackageId: number | string,
+    file: File,
+    title: string,
+  ): Observable<OpenProjectAttachment> {
+    const formData = new FormData();
+    formData.append('metadata', JSON.stringify({ fileName: title }));
+    formData.append('file', file, file.name);
+
+    return this._sendRequest$(
+      {
+        method: 'POST',
+        url: `${cfg.host}/api/v3/work_packages/${workPackageId}/attachments`,
+        data: formData,
+        // NOTE: By passing an empty object for headers, we ensure that
+        // _sendRequest$ does not set a default Content-Type, allowing
+        // Angular's HttpClient to correctly set it for FormData (multipart/form-data with boundary).
+        // The Authorization header will still be added by _sendRequest$ if a token is present.
+        headers: {},
+      },
+      cfg,
+    ).pipe(map((res) => res as OpenProjectAttachment));
+  }
+
   private _getScopeParamFilter(cfg: OpenProjectCfg): any[] {
     if (!cfg.scope) {
       return [];
@@ -301,49 +322,12 @@ export class OpenProjectApiService {
     ];
     const req = new HttpRequest(p.method, p.url, ...allArgs);
     return this._http.request(req).pipe(
-      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
       filter((res) => !(res === Object(res) && res.type === 0)),
       map((res: any) => (res && res.body ? res.body : res)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$(OPEN_PROJECT_TYPE, this._snackService, err),
+      ),
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): ObservableInput<unknown> {
-    console.log(error);
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[OPEN_PROJECT_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
-      });
-    }
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'OpenProject: ' + error.message });
-    }
-
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'OpenProject: Api request failed.' });
   }
 }

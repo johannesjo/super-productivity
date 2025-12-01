@@ -1,0 +1,38 @@
+{
+  "id": "sync-md",
+  "manifestVersion": 1,
+  "name": "sync.md",
+  "version": "2.0.0",
+  "description": "Sync markdown files with SuperProductivity projects",
+  "author": "SuperProductivity",
+  "homepage": "https://github.com/johannesjo/super-productivity",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johannesjo/super-productivity.git"
+  },
+  "minSupVersion": "10.0.0",
+  "permissions": [
+    "getTasks",
+    "updateTask",
+    "addTask",
+    "deleteTask",
+    "getAllProjects",
+    "nodeExecution",
+    "persistDataSynced",
+    "loadSyncedData",
+    "reorderTasks",
+    "registerHook",
+    "onMessage",
+    "showSnack",
+    "batchUpdateForProject"
+  ],
+  "nodeScriptConfig": {
+    "timeout": 30000,
+    "memoryLimit": "256MB"
+  },
+  "supportsIndexHtml": true,
+  "iFrame": true,
+  "isSkipMenuEntry": false,
+  "hooks": ["anyTaskUpdate"],
+  "icon": "icon.svg"
+}

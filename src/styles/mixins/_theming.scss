@@ -4,12 +4,12 @@
     .isDarkTheme & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isDarkTheme) {
+  } @else if ($sel and $sel == ':host') {
+    @at-root :host-context(.isDarkTheme) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isDarkTheme) & {
+  } @else if ($sel and $sel != '') {
+    @at-root :host-context(.isDarkTheme) & {
       @content;
     }
   } @else {
@@ -25,12 +25,12 @@
     .isLightTheme & {
       @content;
     }
-  } @else if ($sel and $sel ==':host') {
-    @at-root  :host-context(.isLightTheme) {
+  } @else if ($sel and $sel == ':host') {
+    @at-root :host-context(.isLightTheme) {
       @content;
     }
-  } @else if ($sel and $sel !='') {
-    @at-root  :host-context(.isLightTheme) & {
+  } @else if ($sel and $sel != '') {
+    @at-root :host-context(.isLightTheme) & {
       @content;
     }
   } @else {
@@ -41,80 +41,42 @@
 }
 
 @mixin standardThemeTextColor {
-  @include darkTheme() {
-    color: $dark-theme-text-color;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color;
-  }
+  color: var(--text-color);
 }
-
 
 @mixin standardThemeTextColorLessIntense {
-  @include darkTheme() {
-    color: $dark-theme-text-color-less-intense;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  color: var(--text-color-less-intense);
 }
-
 
 @mixin standardThemeTextColorMostIntense {
-  @include darkTheme() {
-    color: $dark-theme-text-color-most-intense;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-most-intense;
-  }
+  color: var(--text-color-most-intense);
 }
 
-
-@mixin extraBorder($sideSuffix:'') {
-  @include darkTheme {
-    #{'border'+$sideSuffix}: 1px solid $dark-theme-extra-border-color;
-  }
-  @include lightTheme {
-    #{'border'+$sideSuffix}: 1px solid $light-theme-extra-border-color;
-  }
+@mixin extraBorder($sideSuffix: '') {
+  #{'border'+$sideSuffix}: 1px solid var(--extra-border-color);
 }
 
 // e.g. cards and tasks
 @mixin layerTextAndBgHigher {
-  @include darkTheme() {
-    color: $dark-theme-text-color-less-intense;
-    background-color: $dark-theme-bg-lighter;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  color: var(--text-color-less-intense);
+  background-color: var(--bg-lighter);
 }
-
 
 // e.g. nested cards / tabs etc
 @mixin layerTextAndBgHighest {
-  @include darkTheme() {
-    // NOTE: needs to be more intense than light color, because we have a lighter background
-    color: $dark-theme-text-color-more-intense;
-    background-color: $dark-theme-bg-lightest;
-  }
-  @include lightTheme() {
-    color: $light-theme-text-color-less-intense;
-  }
+  // NOTE: needs to be more intense than light color, because we have a lighter background
+  color: var(--text-color-more-intense);
+  background-color: var(--bg-lightest);
 }
 
 @mixin dividerBorderColor($border-width: 0 0 1px 0, $is-global: false) {
   border-style: solid;
   border-width: $border-width;
-
-  @include lightTheme($is-global) {
-    border-color: rgba(var(--palette-foreground-divider), var(--palette-foreground-divider-alpha, 1));
-  }
-  @include darkTheme($is-global) {
-    border-color: rgba(255, 255, 255, 0.12);
-  }
+  border-color: var(--divider-color);
 }
 
 @mixin flatBox($is-global: false) {
-  @include dividerBorderColor(1px, $is-global);
+  border:
+    1px,
+    $is-global solid var(--divider-color);
 }

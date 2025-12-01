@@ -1,0 +1,84 @@
+<nav class="mobile-bottom-nav">
+  <button
+    mat-button
+    class="nav-button"
+    (click)="toggleMobileNav()"
+  >
+    <mat-icon>menu</mat-icon>
+  </button>
+
+  <button
+    mat-button
+    class="nav-button"
+    [class.active]="currentRoute().includes('/tag/' + todayTagId + '/tasks')"
+    [routerLink]="todayRoute"
+  >
+    <mat-icon>wb_sunny</mat-icon>
+  </button>
+
+  <button
+    mat-fab
+    class="add-task-button"
+    [class.smaller]="hasProjectBacklog()"
+    color="primary"
+    (click)="showAddTaskBar()"
+  >
+    <mat-icon>add</mat-icon>
+  </button>
+
+  <button
+    mat-button
+    class="nav-button"
+    [class.active]="currentRoute() === '/planner'"
+    routerLink="/planner"
+  >
+    <mat-icon>edit_calendar</mat-icon>
+  </button>
+
+  <button
+    mat-button
+    class="nav-button"
+    [matMenuTriggerFor]="panelsMenu"
+  >
+    <mat-icon>view_sidebar</mat-icon>
+  </button>
+</nav>
+
+<mat-menu
+  #panelsMenu="matMenu"
+  class="mobile-bottom-nav-panels-menu"
+>
+  @for (button of sidePanelButtons(); track button.pluginId) {
+    <button
+      mat-menu-item
+      (click)="onPluginButtonClick(button)"
+      [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
+    >
+      <plugin-icon
+        [pluginId]="button.pluginId"
+        [fallbackIcon]="button.icon || 'extension'"
+      ></plugin-icon>
+      <span>{{ button.label }}</span>
+    </button>
+  }
+
+  <button
+    mat-menu-item
+    [disabled]="!isRouteWithSidePanel()"
+    [class.active]="isShowIssuePanel()"
+    (click)="toggleIssuePanel()"
+  >
+    <mat-icon>dashboard_customize</mat-icon>
+    <span>{{ T.BN.SHOW_ISSUE_PANEL | translate }}</span>
+  </button>
+
+  <button
+    mat-menu-item
+    [disabled]="!isRouteWithSidePanel()"
+    [class.active]="isShowNotes()"
+    (click)="toggleNotes()"
+  >
+    <mat-icon>comment</mat-icon>
+    <span>{{ T.BN.SHOW_NOTES | translate }}</span>
+  </button>
+</mat-menu>

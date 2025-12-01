@@ -1,39 +1,59 @@
+import { TRACKING_INTERVAL } from '../../app.constants';
+import { getDefaultVoice } from '../domina-mode/getAvailableVoices';
+import { TaskReminderOptionId } from '../tasks/task.model';
 import { GlobalConfigState } from './global-config.model';
-import { IS_MAC } from '../../util/is-mac';
-
-export const IS_USE_DARK_THEME_AS_DEFAULT: boolean =
-  !IS_MAC ||
-  !window.matchMedia ||
-  window.matchMedia('(prefers-color-scheme: dark)').matches;
 
 const minute = 60 * 1000;
+const defaultVoice = getDefaultVoice();
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
-  lang: {
-    lng: null,
+  appFeatures: {
+    isTimeTrackingEnabled: true,
+    isFocusModeEnabled: true,
+    isSchedulerEnabled: true,
+    isPlannerEnabled: true,
+    isBoardsEnabled: true,
+    isScheduleDayPanelEnabled: true,
+    isIssuesPanelEnabled: true,
+    isProjectNotesEnabled: true,
+    isSyncIconEnabled: true,
+    isDonatePageEnabled: true,
+    isEnableUserProfiles: false,
+  },
+  localization: {
+    lng: undefined,
+    dateTimeLocale: undefined,
+    firstDayOfWeek: undefined,
   },
   misc: {
-    isDarkMode: IS_USE_DARK_THEME_AS_DEFAULT,
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
-    isNotifyWhenTimeEstimateExceeded: true,
     isAutMarkParentAsDone: false,
-    isAutoStartNextTask: true,
     isTurnOffMarkdown: false,
     isAutoAddWorkedOnToToday: true,
     isMinimizeToTray: false,
     isTrayShowCurrentTask: true,
+    isTrayShowCurrentCountdown: true,
     defaultProjectId: null,
-    firstDayOfWeek: 1,
     startOfNextDay: 0,
     isDisableAnimations: false,
+    isDisableCelebration: false,
+    isShowProductivityTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
 **What do I want?**
 
 **Why do I want it?**
 `,
+    isOverlayIndicatorEnabled: false,
+    customTheme: 'default',
+    defaultStartPage: 0,
+  },
+  shortSyntax: {
+    isEnableProject: true,
+    isEnableDue: true,
+    isEnableTag: true,
   },
   evaluation: {
     isHideEvaluationSheet: false,
@@ -42,7 +62,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isOnlyOpenIdleWhenCurrentTask: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
-    isUnTrackedIdleResetsBreakTimer: true,
   },
   takeABreak: {
     isTakeABreakEnabled: true,
@@ -62,6 +81,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     interval: 5 * minute,
     volume: 75,
     text: 'Your current task is: ${currentTaskTitle}',
+    voice: defaultVoice,
+  },
+  focusMode: {
+    isAlwaysUseFocusMode: false,
+    isSkipPreparation: false,
   },
   pomodoro: {
     isEnabled: false,
@@ -71,6 +95,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     cyclesBeforeLongerBreak: 4,
     isStopTrackingOnBreak: true,
     isStopTrackingOnLongBreak: true,
+    isDisableAutoStartAfterBreak: false,
     isManualContinue: false,
     isManualContinueBreak: false,
     isPlaySound: true,
@@ -84,14 +109,17 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     globalAddNote: null,
     globalAddTask: null,
     addNewTask: 'Shift+A',
-    addNewNote: 'n',
+    addNewProject: 'Shift+P',
+    addNewNote: 'N',
     openProjectNotes: 'Shift+N',
-    toggleSideNav: 'Shift+D',
+    toggleTaskViewCustomizerPanel: 'C',
+    toggleIssuePanel: 'P',
+    focusSideNav: 'Shift+D',
     showHelp: '?',
     showSearchBar: 'Shift+F',
-    toggleBookmarks: 'Shift+V',
-    toggleBacklog: 'b',
-    goToWorkView: 'w',
+    toggleBacklog: 'B',
+    goToFocusMode: 'F',
+    goToWorkView: 'W',
     goToScheduledView: 'Shift+S',
     goToTimeline: 'Shift+T',
     // goToDailyAgenda: null,
@@ -100,25 +128,30 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     zoomIn: 'Ctrl++',
     zoomOut: 'Ctrl+-',
     zoomDefault: 'Ctrl+0',
+    saveNote: 'Ctrl+S',
+    triggerSync: 'Ctrl+S',
     taskEditTitle: null,
-    taskToggleAdditionalInfoOpen: 'i',
-    taskOpenEstimationDialog: 't',
-    taskSchedule: 's',
-    taskToggleDone: 'd',
-    taskAddSubTask: 'a',
+    taskToggleDetailPanelOpen: 'I',
+    taskOpenEstimationDialog: 'T',
+    taskSchedule: 'S',
+    taskToggleDone: 'D',
+    taskAddSubTask: 'A',
+    taskAddAttachment: 'L',
     taskDelete: 'Backspace',
-    taskMoveToProject: 'e',
-    taskOpenContextMenu: 'q',
-    selectPreviousTask: 'k',
-    selectNextTask: 'j',
+    taskMoveToProject: 'E',
+    taskOpenContextMenu: 'Q',
+    selectPreviousTask: 'K',
+    selectNextTask: 'J',
     moveTaskUp: 'Ctrl+Shift+ArrowUp',
     moveTaskDown: 'Ctrl+Shift+ArrowDown',
+    moveTaskToTop: 'Ctrl+Alt+ArrowUp',
+    moveTaskToBottom: 'Ctrl+Alt+ArrowDown',
     moveToBacklog: 'Shift+B',
     moveToTodaysTasks: 'Shift+T',
     expandSubTasks: null,
     collapseSubTasks: null,
-    togglePlay: 'y',
-    taskEditTags: 'g',
+    togglePlay: 'Y',
+    taskEditTags: 'G',
   },
   localBackup: {
     isEnabled: true,
@@ -126,43 +159,54 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   sound: {
     volume: 75,
     isIncreaseDoneSoundPitch: true,
-    doneSound: 'done2.mp3',
+    doneSound: 'ding-small-bell.mp3',
     breakReminderSound: null,
+    trackTimeSound: null,
   },
-  trackingReminder: {
-    isEnabled: true,
-    isShowOnMobile: false,
-    minTime: minute * 2,
+  timeTracking: {
+    trackingInterval: TRACKING_INTERVAL,
+    defaultEstimate: 0,
+    defaultEstimateSubTasks: 0,
+    isNotifyWhenTimeEstimateExceeded: true,
+    isAutoStartNextTask: false,
+    isTrackingReminderEnabled: false,
+    isTrackingReminderShowOnMobile: false,
+    trackingReminderMinTime: 5 * minute,
+    isTrackingReminderNotify: false, // Show desktop notification when tracking reminder is triggered
+    isTrackingReminderFocusWindow: false, // Focus the application window when tracking reminder is triggered
   },
-  timeline: {
+  reminder: {
+    isCountdownBannerEnabled: true,
+    countdownDuration: minute * 10,
+    defaultTaskRemindOption: TaskReminderOptionId.AtStart, // The hard-coded default prior to this changeable setting
+  },
+  schedule: {
     isWorkStartEndEnabled: true,
     workStart: DEFAULT_DAY_START,
     workEnd: '17:00',
-    calendarProviders: [],
+    isLunchBreakEnabled: false,
+    lunchBreakStart: '13:00',
+    lunchBreakEnd: '14:00',
   },
 
   sync: {
     isEnabled: false,
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
+    isEncryptionEnabled: false,
+    encryptKey: null,
     syncProvider: null,
     syncInterval: minute,
-
-    dropboxSync: {
-      accessToken: null,
-      refreshToken: null,
-      _tokenExpiresAt: undefined,
-    },
 
     webDav: {
       baseUrl: null,
       userName: null,
       password: null,
-      syncFilePath: 'super-productivity-backup.json',
+      syncFolderPath: 'super-productivity',
     },
 
     localFileSync: {
-      syncFilePath: 'super-productivity-sync.json',
+      syncFolderPath: '',
     },
   },
-};
+} as const;

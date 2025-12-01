@@ -1,8 +1,8 @@
 {
   "ANDROID": {
     "NOTIFICATIONS": {
-      "SYNC_CONFLICT_TITLE": "Bir senkronizasyon çakışması oldu.",
-      "SYNC_CONFLICT_MSG": "Lütfen kontrol edin ve ne yapacağınıza karar verin."
+      "SYNC_CONFLICT_MSG": "Lütfen kontrol edin ve ne yapacağınıza karar verin.",
+      "SYNC_CONFLICT_TITLE": "Bir senkronizasyon çakışması oldu."
     },
     "PERMANENT_NOTIFICATION_MSGS": {
       "INITIAL": "Eğer etkinse, senkronizasyonu kabul etmek için arka planda çalışır.",
@@ -12,79 +12,103 @@
   },
   "APP": {
     "B_INSTALL": {
-      "IGNORE": "Görmezden gel",
-      "INSTALL": "Kur",
+      "IGNORE": "Yoksay",
+      "INSTALL": "Yükle",
       "MSG": "Süper Verimliliği PWA olarak kurmak ister misiniz?"
     },
     "B_OFFLINE": "İnternet bağlantınız kesildi. Verileri senkronize etmek ve sağlayıcıdan sorunları istemek işe yaramaz.",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "Arka planı Değiştir"
+    },
     "UPDATE_MAIN_MODEL": "Süper Verimlilik büyük bir güncelleme aldı! Verileriniz için bazı taşıma işlemleri gerekiyor. Bunun verilerinizi uygulamanın eski sürümleriyle uyumsuz hale getirdiğini lütfen unutmayın.",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "Hiçbir model güncellemesi seçilmedi. Model yükseltmesini gerçekleştirmek istemiyorsanız, son sürüme geçmek zorunda olduğunuzu lütfen unutmayın.",
     "UPDATE_WEB_APP": "Yeni sürüm mevcut. Yeni Sürüm Yüklensin Mi?"
+  },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "Sorun Panelini Göster",
+    "SHOW_NOTES": "Proje Notlarını Göster",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "Filtre/Grup/Sırala Panelini Göster"
   },
   "BL": {
     "NO_TASKS": "Birikmiş işler günlüğünüzde şu anda görev yok"
   },
   "CONFIRM": {
     "AUTO_FIX": "Verileriniz zarar görmüş görünüyor (\"{{validityError}}\"). Otomatik olarak düzeltmeyi denemek ister misiniz? Bu, kısmi veri kaybına neden olabilir.",
-    "DELETE_STRAY_BACKUP": "Bu iletişim kutusunu görmemek için arka tarafı silmek istiyor musunuz?",
     "RELOAD_AFTER_IDB_ERROR": "Veritabanına erişilemiyor :( Olası nedenler, arka planda uygulama güncellemesi veya düşük disk alanıdır.Eğer uygulamayı linux da snap aracılığıyla yüklediyseniz, onlar bu sorunu kendi taraflarında çözene kadar haberdar olma yenilemesini 'snap set core experimental.refresh-app-awareness=true' etkinleştirmeyi isteyebilirsiniz. Uygulamayı yeniden yüklemek için Tamam'a basın (bazı platformlarda uygulamanın manuel olarak yeniden başlatılması gerekebilir).",
     "RESTORE_FILE_BACKUP": "HİÇ VERİ YOK gibi görünüyor, ancak \"{{dir}}\" adresinde yedeklemeler var. En son yedeklemeyi {{from}}kaynağından geri yüklemek istiyor musunuz?",
     "RESTORE_FILE_BACKUP_ANDROID": "HİÇ VERİ yok gibi görünüyor, ancak bir yedek mevcut. Yüklemek istiyor musun?",
     "RESTORE_STRAY_BACKUP": "Son senkronizasyon sırasında bazı hatalar olabilir. Son yedeği geri yüklemek istiyor musunuz?"
   },
-  "DATETIME_INPUT": {
-    "IN": "{{time}} içinde",
-    "TOMORROW": "yarın {{time}}"
-  },
   "DATETIME_SCHEDULE": {
     "LATER_TODAY": "Bugün Daha Sonra",
-    "NEXT_WEEK": "Gelecek hafta",
+    "NEXT_WEEK": "Gelecek Hafta",
     "PLACEHOLDER": "Lütfen bir tarih seçin",
     "PRESS_ENTER_AGAIN": "Kaydetmek için tekrar enter tuşuna basın",
     "TOMORROW": "Yarın"
   },
+  "DIALOG_UNSPLASH_PICKER": {
+    "TITLE": "Unsplash'tan Arka Plan Resmi Seçin",
+    "SEARCH_LABEL": "Resim Ara",
+    "SEARCH_PLACEHOLDER": "örn. doğa, dağ, soyut",
+    "NO_RESULTS": "Görüntü bulunamadı. Lütfen başka arama terimi deneyin.",
+    "BY": "tarafından"
+  },
   "F": {
     "ATTACHMENT": {
       "DIALOG_EDIT": {
-        "ADD_ATTACHMENT": "Eklenti ekle",
+        "ADD_ATTACHMENT": "Ek Ekle",
         "EDIT_ATTACHMENT": "Eki Düzenle",
         "LABELS": {
-          "FILE": "Dosya yolu",
+          "FILE": "Dosya Yolu",
           "IMG": "Resim",
-          "LINK": "Url"
+          "LINK": "Bağlantı"
         },
         "SELECT_TYPE": "Bir tür seçin",
         "TYPES": {
-          "FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
+          "FILE": "Dosya (varsayılan sistem uygulaması ile açılır)",
           "IMG": "Resim (küçük resim olarak gösterilir)",
           "LINK": "Bağlantı (tarayıcıda açılır)"
         }
       }
     },
-    "BOOKMARK": {
-      "BAR": {
-        "ADD": "İmi eklemek",
-        "DROP": "Yer imi eklemek için buraya bırakın",
-        "EDIT": "Yer İşaretlerini Düzenle",
-        "NO_BOOKMARKS": "Proje yer imleriniz yok. Sürükle ve bırak yöntemiyle veya '' simgesini tıklatarak ekleyin."
+    "BOARDS": {
+      "DEFAULT": {
+        "DONE": "Tamamlandı",
+        "EISENHAUER_MATRIX": "Eisenhower Matrisi",
+        "IMPORTANT": "Önemli",
+        "IN_PROGRESS": "Devam Ediyor",
+        "KANBAN": "Kanban",
+        "NOT_URGENT_IMPORTANT": "Acil Değil & Önemli",
+        "NOT_URGENT_NOT_IMPORTANT": "Acil Değil & Önemli Değil",
+        "TO_DO": "Yapılacak",
+        "URGENT": "Acil",
+        "URGENT_IMPORTANT": "Acil & Önemli",
+        "URGENT_NOT_IMPORTANT": "Acil & Önemsiz"
       },
-      "DIALOG_EDIT": {
-        "ADD_BOOKMARK": "Yer imini ekle",
-        "EDIT_BOOKMARK": "Yer imini Düzenle",
-        "LABELS": {
-          "COMMAND": "Komut",
-          "FILE": "Dosya yolu",
-          "IMG": "Resim",
-          "LINK": "Url"
-        },
-        "SELECT_ICON": "Bir ikon seçin",
-        "SELECT_TYPE": "Bir tür seçin",
-        "TYPES": {
-          "COMMAND": "Komut (özel kabuk komutu)",
-          "FILE": "Dosya (varsayılan sistem uygulaması tarafından açıldı)",
-          "IMG": "Resim (küçük resim olarak gösterilir)",
-          "LINK": "Bağlantı (tarayıcıda açılır)"
-        }
+      "FORM": {
+        "ADD_NEW_PANEL": "Yeni Panel Ekle",
+        "BACKLOG_TASK_FILTER_ALL": "Hepsi",
+        "BACKLOG_TASK_FILTER_NO_BACKLOG": "Dışlamak",
+        "BACKLOG_TASK_FILTER_ONLY_BACKLOG": "Yalnızca biriktirme listesi",
+        "BACKLOG_TASK_FILTER_TYPE": "Kapsam görevleri",
+        "COLUMNS": "Sütunlar",
+        "TAGS_EXCLUDED": "Hariç Tutulan Etiketler",
+        "TAGS_REQUIRED": "Gerekli Etiketler",
+        "TASK_DONE_STATE": "Görev Tamamlandı Durumu",
+        "TASK_DONE_STATE_ALL": "Tümü",
+        "TASK_DONE_STATE_DONE": "Tamamlandı",
+        "TASK_DONE_STATE_UNDONE": "Tamamlanmadı"
+      },
+      "V": {
+        "ADD_NEW_BOARD": "Yeni pano ekle",
+        "CONFIRM_DELETE": "Bu panoyu gerçekten silmek istiyor musunuz?",
+        "CREATE_NEW_TAG_BTN": "Etiket oluştur",
+        "CREATE_NEW_TAG_MSG": "Bu panonun çalışması için 1 yeni etiket oluşturulması gerekiyor",
+        "CREATE_NEW_TAGS_BTN": "Etiketler Oluştur",
+        "CREATE_NEW_TAGS_MSG": "Bu panonun çalışması için {{nr}} yeni etiket oluşturulması gerekiyor",
+        "EDIT_BOARD": "Panoyı Düzenle",
+        "NO_PANELS_BTN": "Panoyı Yapılandır",
+        "NO_PANELS_MSG": "Bu panoda yapılandırılmış panel yok. Buna bazı paneller ekleyin."
       }
     },
     "CALDAV": {
@@ -97,9 +121,6 @@
         "CALDAV_RESOURCE": "CalDav kaynağının adı (takvim)",
         "CALDAV_URL": "CalDav URL'si (temel URL)",
         "CALDAV_USER": "CalDav kullanıcı adınız",
-        "IS_AUTO_IMPORT_ISSUES": "Tamamlanmamış CalDav yapılacaklarını görev biriktirme listesine otomatik olarak ekleyin",
-        "IS_AUTO_POLL": "Değişiklikler için içe aktarılan görevleri otomatik olarak yoklayın",
-        "IS_SEARCH_ISSUES_FROM_CALDAV": "Yeni görevler eklerken tamamlanmamış CalDav yapılacaklarını öneri olarak göster",
         "IS_TRANSITION_ISSUES_ENABLED": "Görev tamamlandığında CalDav yapılacaklarını otomatik olarak tamamlayın"
       },
       "FORM_SECTION": {
@@ -107,11 +128,24 @@
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
+        "ASSIGNEE": "Atanan",
+        "AT": "üzerinde",
+        "ATTACHMENTS": "Ekler",
+        "CHANGED": "değiştirildi",
+        "COMMENTS": "Yorumlar",
+        "COMPONENTS": "Bileşenler",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Kategoriler",
-        "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
+        "LIST_OF_CHANGES": "Değişiklikler listesi",
+        "MARK_AS_CHECKED": "Güncellemeleri işaretlendi olarak işaretle",
+        "ON": "üzerinde",
+        "RELATED": "İlgili",
         "STATUS": "Durum",
-        "SUMMARY": "Özet"
+        "STORY_POINTS": "Hikaye Puanları",
+        "SUB_TASKS": "Alt Görevler",
+        "SUMMARY": "Özet",
+        "WORKLOG": "Çalışma kaydı",
+        "WRITE_A_COMMENT": "Bir yorum yaz"
       },
       "S": {
         "CALENDAR_NOT_FOUND": "CalDav: \"{{calendarName}}\" takvimi bulunamadı",
@@ -119,9 +153,43 @@
         "ISSUE_NOT_FOUND": "CalDav: Yapılacak \"{{issueId}}\" sunucudan silinmiş görünüyor."
       }
     },
+    "CALENDARS": {
+      "BANNER": {
+        "ADD_AS_TASK": "Görev Olarak Ekle",
+        "FOCUS_TASK": "Odaklanma Görevi",
+        "TXT": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başlıyor!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)",
+        "TXT_PAST": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!",
+        "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong> <strong>{{start}}</strong>'da başladı!<br> (ve {{nrOfOfOtherBanners}} diğer etkinlik sona eriyor)"
+      },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "etknilik",
+        "EVENTS_STR": "etkinlikler"
+      },
+      "S": {
+        "CAL_PROVIDER_ERROR": "Takvim Sağlayıcı Hatası: {{errTxt}}"
+      }
+    },
     "CONFIG": {
       "S": {
         "UPDATE_SECTION": " <strong>{{sectionKey}}</strong>için güncellenmiş ayarlar"
+      }
+    },
+    "D_RATE": {
+      "A_HOW": "Nasıl ve nerede değerlendirilir",
+      "BTN_DONT_BOTHER": "Beni bir daha rahatsız etme",
+      "TITLE": "🙈 Lütfen bizi affedin ama...",
+      "TXT": "Beğenirseniz, <strong>iyi bir puan vererek projeye son derece yardımcı olursunuz!</strong>"
+    },
+    "DOMINA_MODE": {
+      "FORM": {
+        "HELP": "Bir göreve ilişkin süreyi izlerken, yapılandırılmış cümleyi her X'te tekrarlar.",
+        "L_INTERVAL": "İfadeyi tekrarlama aralığı",
+        "L_TEXT": "Metin",
+        "L_TEXT_DESCRIPTION": "Örn.: \"${currentTaskTitle} üzerinde çalış!\"",
+        "L_VOICE": "Bir Ses Seçin",
+        "L_VOICE_DESCRIPTION": "Bir Ses Seçin",
+        "TITLE": "Domina Modu"
       }
     },
     "DROPBOX": {
@@ -131,7 +199,8 @@
         "AUTH_ERROR": "Dropbox: Geçersiz erişim jetonu sağlandı",
         "AUTH_ERROR_ACTION": "Jeton Değiştir",
         "OFFLINE": "Dropbox: Senkronize edilemiyor, çünkü çevrimdışı",
-        "SYNC_ERROR": "Dropbox: Senkronizasyon sırasında hata"
+        "SYNC_ERROR": "Dropbox: Senkronizasyon sırasında hata",
+        "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: PKCE meydan okuması oluşturulamıyor."
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
@@ -139,32 +208,75 @@
         "FINISH_DAY_BEFORE_EXIT": "Bugün listenizde henüz arşive taşınmamış {{nr}} tamamlanmış görev var. Gününüzü bitirmeden gerçekten çıkış yapmak istiyor musunuz?"
       }
     },
+    "FOCUS_MODE": {
+      "B": {
+        "SESSION_RUNNING": "Odaklanma oturumu çalışıyor",
+        "POMODORO_SESSION_RUNNING": "Pomodoro seansı #{{cycleNr}} çalışıyor",
+        "BREAK_RUNNING": "Mola çalışıyor",
+        "POMODORO_BREAK_RUNNING": "Mola #{{cycleNr}} çalışıyor",
+        "TO_FOCUS_OVERLAY": "Oturuma odaklan"
+      },
+      "BACK_TO_PLANNING": "Planlamaya Geri Dön",
+      "CONGRATS": "Bu oturumu tamamladığınız için tebrikler!",
+      "COUNTDOWN": "Geri sayım",
+      "FINISH_TASK_AND_SELECT_NEXT": "Görevi bitirin ve sonrakini seçin",
+      "FLOWTIME": "Akış Zamanı",
+      "FOR_TASK": "görev için",
+      "GET_READY": "Odaklanma oturumunuza hazır olun!",
+      "GO_TO_PROCRASTINATION": "Ertelediğinizde yardım alın",
+      "GOGOGO": "Hadi hadi hadi!!!",
+      "NEXT": "Sonraki",
+      "ON": "on",
+      "OPEN_ISSUE_IN_BROWSER": "Sorunu Tarayıcıda aç",
+      "POMODORO": "Pomodoro",
+      "POMODORO_BACK": "Geri",
+      "POMODORO_DISABLE": "Pomodoro'yu devre dışı bırak",
+      "POMODORO_INFO": "Odaklanma oturumları pomodoro zamanlayıcı etkinken birlikte kullanılamaz.",
+      "PREP_GET_MENTALLY_READY": "Odaklanmaya ve üretken olmaya zihinsel olarak hazır olun",
+      "PREP_SIT_UPRIGHT": "Dik durun",
+      "PREP_STRETCH": "Hafifçe esneme hareketleri yapın",
+      "SELECT_ANOTHER_TASK": "Başka bir Görev seç",
+      "SELECT_TASK": "Odaklanmak için Görevi seçin",
+      "SESSION_COMPLETED": "Odak Oturumu Tamamlandı!",
+      "POMODORO_SESSION_COMPLETED": "Pomodoro Oturumu Tamamlandı!",
+      "SET_FOCUS_SESSION_DURATION": "Odaklanma Oturumu Süresini Ayarlayın",
+      "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "Görev notlarını ve eklerini göster/gizle",
+      "START_FOCUS_SESSION": "Odaklanma Oturumunu Başlat",
+      "START_NEXT_FOCUS_SESSION": "Sonraki Odak Oturumunu başlat",
+      "WORKED_FOR": "Şunun için çalıştın",
+      "BREAK_RELAX_MSG": "Rahatlamak için bir dakika ayırın",
+      "SKIP_BREAK": "Molayı Atla",
+      "CONTINUE_TO_NEXT_SESSION": "Bir sonraki oturuma devam et",
+      "FOCUS_TIME_TOOLTIP": "Odaklanma süresi",
+      "CURRENT_SESSION_TIME_TOOLTIP": "Şu anki oturum süresi",
+      "COMPLETE_SESSION": "Oturumu tamamla",
+      "CONTINUE_SESSION": "Oturumu devam ettir",
+      "LONG_BREAK": "Uzun Mola",
+      "SHORT_BREAK": "Kısa Mola",
+      "LONG_BREAK_TITLE": "Uzun Mola - Döngü {{cycle}}",
+      "SHORT_BREAK_TITLE": "Kısa Mola - Döngü {{cycle}}"
+    },
     "GITEA": {
       "DIALOG_INITIAL": {
-        "TITLE": "Proje için Gitea Kurulumu"
+        "TITLE": "Proje için Gitea'yı Kur"
       },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
-        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
-        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
-        "TOKEN": "Erişim Jetonu",
-        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli",
         "HOST": "Sağlayıcı (örneğin: https://try.gitea.io)",
         "REPO_FULL_NAME": "Kullanıcı adı veya Organizasyon adı/projesi",
         "REPO_FULL_NAME_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Hepsi",
-        "SCOPE_ASSIGNED": "Beni görevlendirdi",
-        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
+        "SCOPE_ASSIGNED": "Bana atanan",
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
+        "TOKEN": "Erişim Jetonu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada SuperProductivity'yi, günlük planlama görünümündeki görev oluşturma panelinde belirli bir depo için açık Gitea sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili bir bağlantının yanı sıra konuyla ilgili daha fazla bilgi sağlayacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listenize ekleyebilir ve senkronize edebilirsiniz.</p><p>Kullanım sınırlarını aşmak ve erişim sağlamak için bir erişim jetonu sağlayabilirsiniz.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Vekil",
+        "ASSIGNEE": "Atanan",
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
@@ -178,80 +290,58 @@
         "ERR_UNKNOWN": "Gitea: Bilinmeyen hata {{statusCode}} {{errorMsg}}. Api Oranı limiti aşıldı mı?"
       }
     },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Proje için Redmine Kurulumu"
-      },
-      "FORM": {
-        "PROJECT_ID": "Proje Tanımlayıcı",
-        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
-        "HOST": "Sağlayıcı (e.g.: https://redmine.org)",
-        "API_KEY": "API erişim anahtarı",
-        "SCOPE": "Kapsam",
-        "SCOPE_ALL": "Hepsi",
-        "SCOPE_ASSIGNED": "Bana görevlendirildi",
-        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
-        "IS_AUTO_POLL": "Değişiklikler için içe aktarılan redmine sorunlarını otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Yeni görevler eklerken, redmine'deki sorunları öneri olarak göster",
-        "IS_AUTO_IMPORT_ISSUES": "Açık sorunları redmine'den görev biriktirme listesine otomatik olarak ekle"
-      },
-      "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Burada, günlük planlama görünümündeki görev oluşturma panelinde belirli bir proje için açık Redmine (çevrimiçi sürümü veya şirket içinde barındırılan bir örnek) sorunlarını listelemek için SuperProductivity'yi yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili bir bağlantının yanı sıra konuyla ilgili daha fazla bilgi sağlayacaklar.</p><p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listenize ekleyebilir ve senkronize edebilirsiniz.</p>"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Yaratıcı",
-        "STATUS": "Durum",
-        "PRIORITY": "Öncelik",
-        "DESCRIPTION": "Açıklama",
-        "MARK_AS_CHECKED": "Güncellemeleri kontrol edildi olarak işaretle"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Bilinmeyen hata {{statusCode}} {{errorMsg}}."
-      }
-    },
     "GITHUB": {
       "DIALOG_INITIAL": {
         "TITLE": "Proje için Github Kurulumu"
       },
       "FORM": {
-        "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
-        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
-        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\"",
-        "TOKEN": "Erişim Jetonu",
-        "TOKEN_DESCRIPTION": "Özel depo erişimi için gerekli"
+        "FILTER_USER": "Kullanıcı adı (örneğin değişiklikleri kendiniz filtrelemek için)",
+        "INVALID_TOKEN_MESSAGE": "Geçerli bir GitHub belirteci değil. \"ghp_\" ile başlamalıdır.",
+        "IS_ASSIGNEE_FILTER": "Yalnızca bana atanan sorunları birikmiş iş listesine aktar",
+        "REPO": "kullanıcı adı/depoAdı",
+        "TOKEN": "Erişim Simgesi"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada Süper Verimliliği, günlük planlama görünümünde görev oluşturma panelinde belirli bir depo için açık GitHub sorunlarını listeleyecek şekilde yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili daha fazla bilgi sunacaklar.</p> <p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listesine ekleyebilir ve senkronize edebilirsiniz.</p>",
         "TITLE": "GitHub"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
+        "ASSIGNEE": "Atanan",
         "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
+        "LAST_COMMENT": "Son yorum",
+        "LOAD_ALL_COMMENTS": "{{nr}} yorumun tümünü yükle",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Açıklama ve tüm yorumları yükle",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ERR_UNKNOWN": "GitHub: Bilinmeyen hata {{statusCode}} {{errorMsg}}"
+        "CONFIG_ERROR": "GitHub: Veri eşlenirken hata oluştu. Depo adınız doğru mu?",
+        "ERR_UNKNOWN": "GitHub: Bilinmeyen hata {{statusCode}} {{errorMsg}}. Api Hızı sınırı aşıldı?"
       }
     },
     "GITLAB": {
       "DIALOG_INITIAL": {
         "TITLE": "Project için GitLab Kurulumu"
       },
+      "DIALOG_SUBMIT_WORKLOG": {
+        "PAST_DAY_INFO": "Önceden doldurulmuş süre, geçmiş günlere ait izlenmeyen verileri içeriyor.",
+        "T_ALREADY_TRACKED": "Zaten Takip Edildi",
+        "T_TITLE": "Başlık",
+        "T_TO_BE_SUBMITTED": "Gönderilecek",
+        "TITLE": "Sorunlara Harcanan Zamanı GitLab'a Gönderin",
+        "TOTAL_MSG": "Bugünkü toplam <em>{{totalTimeToSubmit}</em> çalışma süresini <em>{{nrOfTasksToSubmit}</em> farklı sorunlara göndereceksiniz."
+      },
       "FORM": {
+        "FILTER": "Özel Filtre",
+        "FILTER_DESCRIPTION": "Bkz. https://docs.gitlab.com/ee/api/issues.html#list-issues.Birden çok '&' işaretiyle birleştirilebilir ",
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "GITLAB_BASE_URL": "Özel GitLab temel URL'si",
-        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitLab'dan görev biriktirme listesine ekle",
-        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_GITLAB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
         "PROJECT": "Proje ID veya kullanıcı adı/projesi",
+        "PROJECT_HINT": "örn. johannesjo/süper-üretkenlik",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Herşey",
         "SCOPE_ASSIGNED": "Beni görevlendirdi",
@@ -259,7 +349,9 @@
         "SOURCE": "Kaynak",
         "SOURCE_GLOBAL": "Herşey",
         "SOURCE_GROUP": "Grup",
-        "SOURCE_PROJECT": "proje",
+        "SOURCE_PROJECT": "Proje",
+        "SUBMIT_TIMELOGS": "Zaman günlüklerini Gitlab'a gönderin",
+        "SUBMIT_TIMELOGS_DESCRIPTION": "Bitiş gününe tıkladıktan sonra Zaman İzleme İletişim Kutusunu göster",
         "TOKEN": "Erişim Jetonu"
       },
       "FORM_SECTION": {
@@ -267,12 +359,12 @@
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
-        "AT": "en",
+        "ASSIGNEE": "Atanan",
+        "AT": "de",
         "DESCRIPTION": "Açıklama",
         "LABELS": "Etiketler",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
-        "PROJECT": "proje",
+        "PROJECT": "Proje",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
@@ -281,32 +373,50 @@
         "ERR_UNKNOWN": "GitLab: Bilinmeyen hata {{statusCode}} {{errorMsg}}"
       }
     },
-    "GOOGLE": {
-      "BANNER": {
-        "AUTH_FAIL": "GoogleApi: Kimlik doğrulaması başarısız oldu, lütfen tekrar giriş yapmayı deneyin!"
-      },
-      "DIALOG": {
-        "CREATE_SYNC_FILE": "Google Drive: <strong>\"{{fileName}}\"</strong> adında bir dosya bulunamadı. <strong>Oluştur</strong> Google Drive’da senkronizasyon dosyası olarak?",
-        "USE_EXISTING_SYNC_FILE": "Google Drive: Senkronizasyon dosyası olarak <strong>var olan</strong> dosyayı <strong>\"{{fileName}}\"</strong> kullanıyor musunuz? Değilse, lütfen Eşitleme dosya adını değiştirin."
-      },
-      "S": {
-        "MULTIPLE_SYNC_FILES_WITH_SAME_NAME": "\"{{newFileName}}\" adında birden fazla dosya bulundu. Lütfen birini hariç tümünü silin veya farklı bir ad seçin.",
-        "SYNC_FILE_CREATION_ERROR": "Google Drive: Senkronizasyon dosyası oluşturulurken hata meydana geldi. {{err}}",
-        "UPDATED_SYNC_FILE_NAME": "Google Drive: Güncellenmiş senkronizasyon dosyası adı"
-      },
-      "S_API": {
-        "ERR": "GoogleApi Hatası: {{errStr}}",
-        "ERR_NO_FILE_ID": "GoogleApi: Belirtilen dosya kimliği yok",
-        "ERR_NO_FILE_NAME": "GoogleApi: Belirtilen dosya adı yok",
-        "SUCCESS_LOGIN": "GoogleApi: Giriş başarılı"
-      }
-    },
     "ISSUE": {
+      "CROSS_ORIGIN_BROWSER_WARNING": "Bu entegrasyon muhtemelen tarayıcınızda çalışmayacaktır. Lütfen Super Productivity'nin Masaüstü veya Android sürümünü indirin!",
       "DEFAULT": {
-        "ISSUES_STR": "Sorunlar",
-        "ISSUE_STR": "Konu"
+        "ISSUE_STR": "Sorun",
+        "ISSUES_STR": "Sorunlar"
+      },
+      "DEFAULT_PROJECT_DESCRIPTION": "Sorunlardan oluşturulan görevlere atanan proje.",
+      "DEFAULT_PROJECT_LABEL": "Varsayılan Super Productivity Projesi",
+      "HOW_TO_GET_A_TOKEN": "Bir token nasıl alınır?",
+      "ISSUE_CONTENT": {
+        "ASSIGNEE": "Atanan",
+        "AT": "üzerinde",
+        "ATTACHMENTS": "Ekler",
+        "AUTHOR": "Yazar",
+        "CATEGORY": "Kategori",
+        "CHANGED": "Değiştirildi",
+        "COMMENTS": "Yorumlar",
+        "COMPONENTS": "Bileşenler",
+        "DESCRIPTION": "Açıklama",
+        "DONE_RATIO": "Tamamlanma Oranı",
+        "DUE_DATE": "Son Tarih",
+        "LABELS": "Etiketler",
+        "LAST_COMMENT": "Son yorum",
+        "LIST_OF_CHANGES": "Değişiklikler listesi",
+        "LOAD_ALL_COMMENTS": "Tüm {{nr}} yorumu yükle",
+        "LOAD_DESCRIPTION_AND_ALL_COMMENTS": "Açıklamayı ve tüm yorumları yükle",
+        "LOCATION": "Konum",
+        "MARK_AS_CHECKED": "Güncellemeleri kontrol edildi olarak işaretle",
+        "ON": "üzerinde",
+        "PRIORITY": "Öncelik",
+        "RELATED": "İlgili",
+        "START": "Başla",
+        "STATUS": "Durum",
+        "STORY_POINTS": "Hikaye Puanları",
+        "SUB_TASKS": "Alt Görevler",
+        "SUMMARY": "Özet",
+        "TIME_SPENT": "Geçen Zaman",
+        "TYPE": "Tür",
+        "VERSION": "Sürüm",
+        "WORKLOG": "Çalışma kaydı",
+        "WRITE_A_COMMENT": "Bir yorum yaz"
       },
       "S": {
+        "ERR_GENERIC": "{{issueProviderName}} Hata: {{errTxt}}",
         "ERR_NETWORK": "{{issueProviderName}}: İstemci tarafı ağ hatası nedeniyle istek başarısız oldu",
         "ERR_NOT_CONFIGURED": "{{issueProviderName}}: Düzgün yapılandırılmamış",
         "IMPORTED_MULTIPLE_ISSUES": "{{issueProviderName}}: {{nr}} yeni {{issuesStr}} görev biriktirme listesine aktarıldı",
@@ -325,12 +435,12 @@
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira: Api'nin kapatılmasını önlemek için erişim Super Productivity tarafından engellendi. Muhtemelen jira ayarlarınızı kontrol etmelisiniz!",
-        "BLOCK_ACCESS_UNBLOCK": "engeli kaldırmak"
+        "BLOCK_ACCESS_UNBLOCK": "Engeli kaldır"
       },
       "CFG_CMP": {
         "ALWAYS_ASK": "Her zaman iletişim kutusunu aç",
-        "DONE": "Görevi tamamlama Durumu",
         "DO_NOT": "Geçiş yapma",
+        "DONE": "Görevi tamamlama Durumu",
         "ENABLE": "Jira entegrasyonunu etkinleştir",
         "ENABLE_TRANSITIONS": "Geçiş İşlemini Etkinleştir",
         "IN_PROGRESS": "Başlangıç görevi için Durum",
@@ -339,7 +449,8 @@
         "MAP_CUSTOM_FIELDS_INFO": "Ne yazık ki, Jira'nın verilerinin bir kısmı, her kurulum için farklı olan özel alanlar altında saklanmaktadır. Bu verileri dahil etmek istiyorsanız, bunun için uygun özel alanı seçmeniz gerekir.",
         "OPEN": "Duraklatma görevinin Durumu",
         "SELECT_ISSUE_FOR_TRANSITIONS": "Kullanılabilir geçişleri yüklemek için sorun seç",
-        "STORY_POINTS": "Öykü Noktaları"
+        "STORY_POINTS": "Öykü Noktaları",
+        "TRANSITION": "Geçiş İdaresi"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
         "MSG": "<strong>{{summary}}</strong> şu anda <strong>{{assignee}}</strong>için atanmıştır. Kendine atamak ister misin?",
@@ -350,8 +461,8 @@
       },
       "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Atanacak Durumu seçin",
-        "CURRENT_ASSIGNEE": "Güncel Görevli:",
-        "CURRENT_STATUS": "Şu anki Durum:",
+        "CURRENT_ASSIGNEE": "Mevcut Atanan:",
+        "CURRENT_STATUS": "Mevcut Durum:",
         "TASK_NAME": "Görev adı:",
         "TITLE": "Jira: Güncelleme Durumu",
         "UPDATE_STATUS": "Güncelleme Durumu"
@@ -372,17 +483,9 @@
         "TIME_SPENT_TOOLTIP": "Farklı zamanlar ekle",
         "TITLE": "Jira: İş günlüğü Gönder"
       },
-      "FORM": {
-        "IS_AUTO_IMPORT_ISSUES": "Çözülmeyen sorunları otomatik olarak GitHub'dan görev biriktirme listesine ekle",
-        "IS_AUTO_POLL": "İçe aktarılan git sorunlarını değişiklikler için otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_GITHUB": "Yeni görevler eklerken git'in önerilerini öneri olarak göster",
-        "REPO": "İzlemek istediğiniz git deposu için \"username / repositoryName\""
-      },
       "FORM_ADV": {
         "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL, görevler listesine otomatik olarak görev eklemek için kullanılır",
         "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Alt görev tamamlandığında iş günlüğünü jira'ya göndermek için iletişim kutusunu aç",
-        "IS_AUTO_IMPORT_ISSUES": "Jira görev biriktirme listesine otomatik olarak sorun ekleme",
-        "IS_AUTO_POLL_TICKETS": "İçe aktarılan sorunları otomatik olarak kontrol et ve bildir",
         "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Halen çalışılmakta olan sorun geçerli kullanıcıya atanmış mı kontrol edin",
         "IS_WORKLOG_ENABLED": "Görev tamamlandığında çalışma günlüğünü jira'ya göndermek için iletişim kutusunu aç",
         "SEARCH_JQL_QUERY": "Arama görevlerini sınırlamak için JQL Sorgusu",
@@ -394,18 +497,17 @@
       },
       "FORM_CRED": {
         "ALLOW_SELF_SIGNED": "Kendinden imzalı sertifikaya izin ver",
-        "HOST": "Ev sahibi (örneğin: http://my-host.de:1234)",
+        "HOST": "Host (örneğin: http://my-host.de:1234)",
         "PASSWORD": "Jeton / Şifre",
-        "USER_NAME": "Email / Kullanıcı Adı",
         "USE_PAT": "Şifre yerine Kişisel Erişim Jetonu kullanın",
+        "USER_NAME": "Email / Kullanıcı Adı",
         "WONKY_COOKIE_MODE": "Wonky Cookie Yedek Kimlik Doğrulaması (yalnızca masaüstü uygulaması)"
       },
       "FORM_SECTION": {
         "ADV_CFG": "Gelişmiş Yapılandırma",
-        "CREDENTIALS": "Kimlik bilgileri",
         "HELP_ARR": {
           "H1": "Temel yapılandırma",
-          "H2": "Worklog ayarları",
+          "H2": "İş Günlüğü ayarları",
           "H3": "Varsayılan geçişler",
           "P1_1": "Herhangi bir nedenden bir tane oluşturamazsanız lütfen bir giriş adı (profil sayfanızda bulunabilir) ve bir <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API belirteci</a> veya şifre belirtin. Lütfen jira'nın yeni sürümlerinin bazen yalnızca belirteçle çalıştığını unutmayın.",
           "P1_2": "Ayrıca, Jira'dan görev eklemek için önerilerde kullanılacak bir JQL sorgusu belirtmeniz gerekir. Yardıma ihtiyacınız varsa bu bağlantıyı <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">kontrol edin https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>",
@@ -418,24 +520,26 @@
         }
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
-        "AT": "en",
+        "ASSIGNEE": "Atanan",
+        "AT": "de",
         "ATTACHMENTS": "Ekler",
-        "CHANGED": "değişmiş",
-        "COMMENTS": "yorumlar",
+        "CHANGED": "Değişmiş",
+        "COMMENTS": "Yorumlar",
         "COMPONENTS": "Bileşenler",
         "DESCRIPTION": "Açıklama",
         "LIST_OF_CHANGES": "Değişikliklerin listesi",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "ON": "üzerinde",
+        "RELATED": "İlgili",
         "STATUS": "Durum",
         "STORY_POINTS": "Öykü Noktaları",
+        "SUB_TASKS": "Alt görevler",
         "SUMMARY": "Özet",
-        "WORKLOG": "iş günlüğü",
+        "WORKLOG": "İş Günlüğü",
         "WRITE_A_COMMENT": "Bir yorum Yaz"
       },
       "S": {
-        "ADDED_WORKLOG_FOR": "Jira: {{issueKey}}için çalışma grubu eklendi",
+        "ADDED_WORKLOG_FOR": "Jira: {{issueKey}} için İş Günlüğüne eklendi",
         "EXTENSION_NOT_LOADED": "Süper Verimlilik Uzantısı yüklenmedi. Sayfayı yeniden yüklemek yardımcı olabilir",
         "INSUFFICIENT_SETTINGS": "Jira için Yetersiz Ayarlar",
         "INVALID_RESPONSE": "Jira: Yanıt geçersiz veriler içeriyor",
@@ -446,8 +550,8 @@
         "NO_VALID_TRANSITION": "Jira: Geçerli bir geçiş yapılandırılmadı",
         "TIMED_OUT": "Jira: İstek zaman aşımına uğradı",
         "TRANSITION": "Jira: \"{{issueKey}}\" sayısını \"{{name}}\" olarak ayarla",
-        "TRANSITIONS_LOADED": "Jira: Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın",
         "TRANSITION_SUCCESS": "Jira: {{issueKey}} sayısını <strong>{{chosenTransition}}</strong>olarak ayarla",
+        "TRANSITIONS_LOADED": "Jira: Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın",
         "UNABLE_TO_REASSIGN": "Jira: Bir kullanıcı adı belirtmedin, çünkü kendine bilet atama. Lütfen ayarları ziyaret edin."
       },
       "STEPPER": {
@@ -458,38 +562,44 @@
         "WELCOME_USER": "Hoş geldiniz {{user}}!"
       }
     },
+    "MARKDOWN_PASTE": {
+      "CONFIRM_ADD_TO_SUB_TASK_NOTES": "Yapıştırılan markdown listesini \"{{parentTaskTitle}}\" alt görev notlarına ekleyelim mi?",
+      "CONFIRM_PARENT_TASKS": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni görev oluşturulsun mu? </strong>",
+      "CONFIRM_PARENT_TASKS_WITH_SUBS": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni görev ve {{subTasksCount}} alt görev oluşturulsun mu? </strong>",
+      "CONFIRM_SUB_TASKS": "Yapıştırılan markdown listesinden {{tasksCount}} yeni alt görev oluşturulsun mu?",
+      "CONFIRM_SUB_TASKS_WITH_PARENT": "Yapıştırılan markdown listesinden <strong>{{tasksCount}} yeni alt görevi \"{{parentTaskTitle}}\" altında oluşturalım mı? </strong>",
+      "DIALOG_TITLE": "Yapıştırılan Markdown Listesi tespit edildi!"
+    },
     "METRIC": {
       "BANNER": {
         "CHECK": "Yaptım!"
       },
       "CMP": {
-        "AVG_BREAKS_PER_DAY": "Ort. günde molalar",
-        "AVG_TASKS_PER_DAY_WORKED": "Ort. günde görevler çalıştı",
+        "AVG_BREAKS_PER_DAY": "Ort. günlük molalar",
+        "AVG_TASKS_PER_DAY_WORKED": "Ort. çalışılan günlük görevler",
         "AVG_TIME_SPENT_ON_BREAKS": "Ort. molalara harcanan zaman",
         "AVG_TIME_SPENT_PER_DAY": "Ort. günde harcanan zaman",
         "AVG_TIME_SPENT_PER_TASK": "Ort. görev başına harcanan zaman",
         "COUNTING_SUBTASKS": "(alt görevler sayılıyor)",
-        "DAYS_WORKED": "Günler çalıştı",
-        "GLOBAL_METRICS": "Global Metrikler",
-        "IMPROVEMENT_SELECTION_COUNT": "Bir iyileştirme faktörü seçilme sayısı",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içinde ruh hali ve verimlilik",
+        "DAYS_WORKED": "Çalışılan günler",
+        "GLOBAL_METRICS": "Küresel İstatistikler",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Zaman içindeki ruh hali ve verimlilik",
         "NO_ADDITIONAL_DATA_YET": "Henüz ek veri toplanmadı. Bunu yapmak için günlük değerlendirme \"Değerlendirme\" panelindeki formu kullanın.",
-        "OBSTRUCTION_SELECTION_COUNT": "Engelleyici bir faktörün seçilme sayısı",
-        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Zamanla Sayaçlar'ı tıklayın",
+        "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Zaman içindeki Sayaçlar'a tıklayın",
         "SIMPLE_COUNTERS": "Basit Sayaçlar",
-        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Zaman içinde kronometre Sayaçları",
-        "TASKS_DONE_CREATED": "Görevler (yapıldı / oluşturuldu)",
+        "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Zaman içindeki kronometre Sayaçları",
+        "TASKS_DONE_CREATED": "Görevler (yapıldı/oluşturuldu)",
         "TIME_ESTIMATED": "Tahmini Süre",
         "TIME_SPENT": "Harcanan zaman"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "Yarın için not ekle",
-        "DISABLE_REPEAT_EVERY_DAY": "Her gün tekrarı devre dışı bırak",
+        "DISABLE_REPEAT_EVERY_DAY": "Her gün tekrarlamayı devre dışı bırak",
         "ENABLE_REPEAT_EVERY_DAY": "Her gün tekrarla",
         "HELP_H1": "Neden umursayayım?",
-        "HELP_LINK_TXT": "Metrikler bölümüne git",
+        "HELP_LINK_TXT": "İstatistikler bölümüne git",
         "HELP_P1": "Küçük bir öz değerlendirme zamanı! Buradaki cevaplarınız kaydedilir ve ölçümler bölümünde nasıl çalıştığınızla ilgili size biraz istatistik sunar. Ayrıca, yarın için öneriler ertesi gün görev listenizin üstünde görünecektir.",
-        "HELP_P2": "Bu, kesin ölçümleri hesaplamak veya yaptığınız her işte makine gibi verimli olmaktan, işiniz hakkında nasıl hissettiğinizi geliştirmekten daha az olması amaçlanmıştır. Günlük rutininizdeki ağrı noktalarını değerlendirmek ve ayrıca size yardımcı olacak faktörleri bulmak yararlı olabilir. Bu konuda biraz sistematik olmak umarım bunları daha iyi kavramak ve yapabileceklerinizi geliştirmek için yardımcı olur.",
+        "HELP_P2": "Bunun amacı, kesin ölçümleri hesaplamak veya yaptığınız her şeyde makine gibi verimli olmak değil, işinizle ilgili duygularınızı iyileştirmektir. Günlük rutininizdeki sıkıntılı/dertli noktaları değerlendirmenin yanı sıra size yardımcı olacak faktörleri bulmak da yararlı olabilir. Bu konuda biraz sistematik olmanın, bunları daha iyi kavramanıza ve yapabileceklerinizi geliştirmenize yardımcı olacağını umuyoruz.",
         "IMPROVEMENTS": "Verimliliğinizi ne arttırdı?",
         "IMPROVEMENTS_TOMORROW": "Yarını geliştirmek için ne yapabilirsin?",
         "MOOD": "Nasıl hissediyorsun?",
@@ -500,25 +610,44 @@
         "PRODUCTIVITY_HINT": "1: Başlamadım bile - 10: Son derece verimli"
       },
       "S": {
-        "SAVE_METRIC": "Metrik başarıyla kaydedildi"
+        "SAVE_METRIC": "İstatistik başarıyla kaydedildi"
       }
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Not olarak kaydetmek için bir metin girin ..."
+        "NOTE_LABEL": "Not olarak kaydetmek için bir metin girin (markdown kullanabilirsiniz)..."
       },
-      "EDIT_FULLSCREEN": "Tam ekranda düzenle",
+      "D_FULLSCREEN": {
+        "VIEW_PARSED": "Ayrıştırılmış (düzenlenemez) markdown olarak görüntüle",
+        "VIEW_SPLIT": "Ayrıştırılmış ve ayrıştırılmamış markdown'ı bölünmüş görünümde görüntüleyin",
+        "VIEW_TEXT_ONLY": "Ayrıştırılmamış metin olarak görüntüle"
+      },
+      "NOTE_CMP": {
+        "DISABLE_PARSE": "Önizleme için markdown ayrıştırmayı devre dışı bırak",
+        "ENABLE_PARSE": "Markdown ayrıştırmayı etkinleştir"
+      },
       "NOTES_CMP": {
         "ADD_BTN": "Yeni not ekle",
         "DROP_TO_ADD": "Yeni not eklemek için buraya bırakın",
         "NO_NOTES": "Şu anda not yok"
       },
-      "NOTE_CMP": {
-        "DISABLE_PARSE": "Marka aşağı ayrıştırmayı devre dışı bırak",
-        "ENABLE_PARSE": "Markdown ayrıştırmayı etkinleştir"
+      "S": {
+        "NOTE_ADDED": "Not kaydedildi"
       }
     },
     "OPEN_PROJECT": {
+      "CFG_CMP": {
+        "ALWAYS_ASK": "İletişim kutusunu her zaman aç",
+        "DO_NOT": "Geçiş yapma",
+        "DONE": " Görevi tamamlama durumu ",
+        "ENABLE": "Openproject entegrasyonunu etkinleştir",
+        "ENABLE_TRANSITIONS": "Geçiş İdaresini Etkinleştir",
+        "IN_PROGRESS": "Görev başlatma durumu",
+        "OPEN": "Görevi duraklatma durumu",
+        "PROGRESS_ON_SAVE": "Kaydetme sırasında varsayılan ilerleme",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Mevcut geçişleri yüklemek için sorunu seçin",
+        "TRANSITION": "Geçiş İdaresi"
+      },
       "DIALOG_INITIAL": {
         "TITLE": "OpenProject for Project Kurulumu"
       },
@@ -532,92 +661,136 @@
         "TIME_SPENT": "Harcanan zaman",
         "TITLE": "OpenProject: İş Günlüğünü Gönder"
       },
+      "DIALOG_TRANSITION": {
+        "CHOOSE_STATUS": "Atanacak durumu seçin",
+        "CURRENT_ASSIGNEE": "Mevcut Atanan:",
+        "CURRENT_STATUS": "Şu anki durum:",
+        "PERCENTAGE_DONE": "İlerleme:",
+        "TASK_NAME": "Görev adı:",
+        "TITLE": "OpenProject: Durumu Güncelle",
+        "UPDATE_STATUS": "Durumu Güncelle"
+      },
       "FORM": {
         "FILTER_USER": "Kullanıcı adı (örneğin, değişiklikleri kendiniz filtrelemek için)",
         "HOST": "Ana bilgisayar (ör.: https://www.openproject.org/)",
-        "IS_AUTO_IMPORT_ISSUES": "Çözümlenmemiş iş paketlerini OpenProject'ten görev biriktirme listesine otomatik olarak ekleyin",
-        "IS_AUTO_POLL": "Değişiklikler için içe aktarılan OpenProject iş paketlerini otomatik olarak yokla",
-        "IS_SEARCH_ISSUES_FROM_OPEN_PROJECT": "Yeni görevler eklerken iş paketlerini öneri olarak göster",
         "IS_SHOW_TIME_TRACKING_DIALOG": "OpenProject'e rapor vermek için zaman izleme iletişim kutusunu göster",
         "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "OpenProject projesi için etkinleştirilecek zaman izleme modülünü gerektirir",
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Alt görevler tamamlandığında zaman izleme iletişim kutusunu göster",
         "PROJECT_ID": "Proje Kimliği",
         "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
-        "TOKEN": "Erişim Jetonu",
         "SCOPE": "Kapsam",
         "SCOPE_ALL": "Herşey",
-        "SCOPE_ASSIGNED": "Beni görevlendirdi",
-        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
+        "SCOPE_ASSIGNED": "Bana Atanan",
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu",
+        "TOKEN": "Erişim Jetonu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Burada SuperProductivity'yi açık OpenProject iş paketlerini listeleyecek şekilde yapılandırabilirsiniz. Lütfen bunun tarayıcıda çalışması için, app.super-productivity.com adresinden erişime izin vermek üzere OpenProject sunucunuz için CORS'u yapılandırmanız gerektiğini unutmayın</p>",
         "TITLE": "OpenProject"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "vekil",
+        "ASSIGNEE": "Atanan",
+        "ATTACHMENTS": "Ekler",
         "DESCRIPTION": "Açıklama",
         "MARK_AS_CHECKED": "Güncellemeleri işaretli olarak işaretle",
         "STATUS": "Durum",
         "SUMMARY": "Özet",
-        "TYPE": "tip"
+        "TYPE": "Tip",
+        "UPLOAD_ATTACHMENT": "Göreve yükle"
       },
       "ISSUE_STRINGS": {
-        "ISSUES_STR": "iş paketleri",
-        "ISSUE_STR": "calisma paketi"
+        "ISSUE_STR": "iş paketi",
+        "ISSUES_STR": "iş paketleri"
       },
       "S": {
+        "ERR_NO_FILE": "Dosya seçilmedi",
         "ERR_UNKNOWN": "OpenProject: Bilinmeyen hata {{statusCode}} {{errorMsg}}. CORS, sunucu için uygun şekilde yapılandırılmış mı?",
-        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi"
+        "POST_TIME_SUCCESS": "OpenProject: {{issueTitle}}için başarıyla oluşturulan zaman girişi",
+        "TRANSITION": "OpenProject: \"{{issueKey}}\" sorununu \"{{name}}\" olarak ayarlayın",
+        "TRANSITION_SUCCESS": "OpenProject: {{issueKey}} sorununu <strong>{{chosenTransition}}</strong> olarak ayarlayın",
+        "TRANSITIONS_LOADED": "Geçişler yüklendi. Bunları atamak için aşağıdaki seçimleri kullanın"
       }
     },
+    "PLANNER": {
+      "D": {
+        "ADD_PLANNED": {
+          "ADD_TO_TODAY": "Bugüne Ekle",
+          "RE_PLAN_ALL": "Tümünü yeniden planla",
+          "TITLE": "Planlanmış görevleri Bugüne Ekle"
+        }
+      },
+      "EDIT_REPEATED_TASK": "Tekrarlanan görevi '{{taskName}}' düzenle",
+      "NO_TASKS": "Görev yok",
+      "PLAN_VIEW": {
+        "NO_SCHEDULED_ITEMS": "Planlanmış öğe yok"
+      },
+      "S": {
+        "REMOVED_PLAN_DATE": "'{{taskTitle}}' görevi için plan tarihi kaldırıldı",
+        "TASK_ALREADY_PLANNED": "Görev zaten {{date}} için planlandı",
+        "TASK_PLANNED_FOR": "Görev <strong>{{date}}</strong>{{extra}} için planlandı"
+      },
+      "TASK_DRAWER": "Görev Çekmecesi"
+    },
     "POMODORO": {
-      "BACK_TO_WORK": "İşe geri dön!",
-      "BREAK_IS_DONE": "Mola bitti!",
-      "ENJOY_YOURSELF": "Keyfinize bakın, harekete geçin, geri gelin:",
-      "FINISH_SESSION_X": " <strong>{{nr}}</strong>oturumunu başarıyla tamamladınız!",
+      "BACK_TO_WORK": "Çalışmaya geri dön!",
+      "BREAK_IS_DONE": "Molan bitti!",
+      "ENJOY_YOURSELF": "Eğlenin, harekete geçin, tekrar gelin:",
+      "FINISH_SESSION_X": " <strong>{{nr}}</strong> oturumunu başarıyla tamamladınız!",
       "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: Arası {{nr}} başladı!",
-        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için önce görevler eklemeniz gerekir.",
+        "BREAK_TIME": "Pomodoro: Mola zamanı {{nr}}!",
+        "BREAK_X_START": "Pomodoro: {{nr}} molası başladı!",
+        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için görevleri eklemeniz gerekir.",
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       },
       "S": {
+        "RESET": "İlk Pomodoro Oturumuna Sıfırla",
+        "SESSION_SKIP": "Mevcut Pomodoro Oturumunun sonuna atla",
         "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
       },
-      "SKIP_BREAK": "Arayı atla"
+      "SKIP_BREAK": "Molayı atla",
+      "START_BREAK": "Molayı başlat"
     },
     "PROCRASTINATION": {
-      "BACK_TO_WORK": "İşe geri dön!",
+      "BACK_TO_WORK": "Çalışmaya geri dön!",
       "COMP": {
-        "INTRO": "Kendine biraz şefkat göstermek her zaman harika bir fikir. Kendine değer hissini arttırır, olumlu duyguları teşvik eder ve erteleme, elbette ertelemeye yardımcı olabilir. Biraz egzersiz yapmayı deneyin:",
-        "L1": "Biraz otur ve kendini biraz uzat, istersen biraz sakin ol",
+        "INTRO": "Erteleme düzeyi yüksek olan kişilerin öz-şefkati genellikle düşüktür. O halde pratik yapın! Kendinize verdiğiniz değer duygusunu geliştirir, olumlu duyguları teşvik eder ve elbette ertelemenin üstesinden gelmenize yardımcı olabilir. Biraz egzersiz yapmayı deneyin:",
+        "L1": "Biraz otur ve kendini biraz esnet, istersen biraz sakin ol",
         "L2": "Ortaya çıkan düşünce ve duyguları dinlemeye çalışın",
-        "L3": "Bir arkadaşınıza cevap verecek şekilde kendinize cevap mı veriyorsunuz?",
-        "L4": "Cevabınız hayır ise, Durumunuzu arkadaşınızı düşünün. Onlara ne söyleyeceksin? Onlar için ne yapardın?",
+        "L3": "Kendinize bir arkadaşınıza yanıt vereceğiniz şekilde yanıt veriyor musunuz?",
+        "L4": "Cevabınız hayırsa arkadaşınızın sizin durumunuzda olduğunu hayal edin. Onlara ne söylerdin? Onlar için ne yapardın?",
         "OUTRO": "Daha fazla <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">alıştırması burada</a> veya <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>sitesinde bulunabilir.",
-        "TITLE": "Kendinden Şefkat"
+        "TITLE": "Öz Şefkat"
       },
       "CUR": {
-        "INTRO": "Erteleme ilginç, değil mi? Bunu yapmak mantıklı değil. Hiç uzun vadeli ilginize değil. Ama yine de herkes yapıyor. Zevk ve keşfetmek!",
-        "L1": "Ertelemek için hangi duyguları uyandırıyorsunuz?",
-        "L2": "Onları vücudunda nerede hissediyorsun?",
+        "INTRO": "Ertelemek ilginç değil mi? Uzun vadede sizin çıkarınıza hiç uygun olmadığından, bunu yapmanın bir anlamı yok gibi görünüyor. Ama yine de herkes bunu yapıyor. Kişisel olarak sizin için nasıl çalıştığını keşfetmenize ve daha iyi anlamanıza yardımcı olur! Kendinize sormanız gereken bazı temel sorular şunlar olabilir:",
+        "L1": "Hangi duygular erteleme isteğinizi ortaya çıkarıyor?",
+        "L2": "Onları vücudunuzun neresinde hissediyorsunuz?",
         "L3": "Size neyi hatırlatıyorlar?",
-        "L4": "Bunu izlerken, erteleme düşüncesine ne olur? Yoğunlaşıyor mu? Dağıtmak? Diğer duyguların ortaya çıkmasına neden olur mu?",
-        "L5": "Farkındalığınızı dinlendirmeye devam ederken vücudunuzdaki duygular nasıl değişiyor?",
+        "L4": "Gözlemlediğinizde erteleme düşüncesine ne olur? Yoğunlaşıyor mu? Kayboluyor mu? Başka duyguların ortaya çıkmasına neden mi oluyor?",
+        "L5": "Farkındalığınızı onlara dayandırmaya devam ettikçe bedeninizdeki hisler nasıl değişiyor?",
+        "PROCRASTINATION_TRIGGERS_TEXT": "Bir diğer çok etkili yöntem, erteleme isteğinizi neyin tetiklediğini kaydetmektir. Örneğin, ben şahsen tarayıcı pencerem odaklandığında genellikle hemen reddit'e veya en sevdiğim haber sitesine gitme isteği duyuyorum. Tetikleyicilerimi basit, boş bir metin belgesine yazmaya başladığımdan beri, bu kalıbın ne kadar yerleşik olduğunu fark ettim ve farklı karşı önlemler denememe yardımcı oldu.",
+        "PROCRASTINATION_TRIGGERS_TITLE": "Erteleme tetikleyicilerinizi yazmak",
         "TITLE": "Merak"
       },
-      "H1": "Kendine biraz gevşek ol!",
-      "P1": "Her şeyden önce rahatla! Herkes arada bir yapar. Yapmanız gerekeni yapmıyorsanız, en azından tadını çıkarmalısınız! Sonra yararlı bir şey için aşağıdaki bölümleri kontrol edin.",
-      "P2": "Unutmayın: Erteleme bir zaman yönetimi problemi değil bir duygu düzenleme sorunudur.",
+      "H1": "Kendini biraz rahat bırak!",
+      "INTRO": {
+        "AVOIDING": "Görevden kaçınmak",
+        "FEAR": "Başarısızlık korkusu",
+        "STRESSED": "İşleri tamamlayamama konusunda stresli",
+        "TITLE": "Giriş"
+      },
+      "P1": "Her şeyden önce: Rahatlayın! Herkes arada bir erteler. Ve eğer yapmanız gerekeni yapmıyorsanız, en azından bundan keyif almalısınız!",
+      "P2": "Unutmayın: <b>Erteleme bir zaman yönetimi sorunu değil, bir duygu düzenleme sorunudur.</b> Bu, kendinizi hırpalamanın çözüm olmadığı, sorunun bir parçası olduğu anlamına gelir. Bunu iyice anlayın ve daha fazla yardım için buradaki diğer sekmeleri kontrol edin.",
       "REFRAME": {
-        "INTRO": "Göreve rağmen görevde neyin olumlu olabileceğini düşünün.",
-        "TITLE": "çerçeveye oturtmak",
-        "TL1": "Bu konuda ilginç ne olabilir?",
+        "INTRO": "Kusurlarına rağmen görevle ilgili neyin olumlu olabileceğini düşünün.",
+        "TITLE": "Yeniden Çerçeveleme",
+        "TL1": "Bunda ilginç olan ne olabilir?",
         "TL2": "Tamamlarsan ne kazanacaksın?",
         "TL3": "Tamamlarsan nasıl hissedeceksin?"
       },
       "SPLIT_UP": {
         "INTRO": "Görevi, olabildiğince küçük parçalara bölün.",
-        "OUTRO": "Bitti? O zaman düşün. Ne olur - kesinlikle teorik - eğer</i> görev üzerinde çalışmaya başlarsanız <i>ilk yapacağınız şey? Bunun hakkında düşün...",
+        "OUTRO": "Yaptın? O zaman bir düşün. Eğer görev üzerinde çalışmaya başlasaydınız, kesinlikle teorik olarak yapacağınız ilk şey ne olurdu? Bunun hakkında düşün...",
         "TITLE": "Ayır!"
       }
     },
@@ -625,15 +798,21 @@
       "D_CREATE": {
         "CREATE": "Proje Yarat",
         "EDIT": "Projeyi Düzenle",
-        "SETUP_CALDAV": "Caldav Entegrasyonunu Kurun",
+        "SETUP_CALDAV": "Caldav Entegrasyonunu Kur",
         "SETUP_GIT": "GitHub Entegrasyonunu Ayarla",
+        "SETUP_GITEA_PROJECT": "Gitea Entegrasyonunu Kur",
         "SETUP_GITLAB": "GitLab Entegrasyonunu Ayarla",
         "SETUP_JIRA": "Jira Entegrasyonunu Kur",
-        "SETUP_OPEN_PROJECT": "OpenProject Entegrasyonunu Kurma"
+        "SETUP_OPEN_PROJECT": "OpenProject Entegrasyonunu Kur",
+        "SETUP_REDMINE_PROJECT": "Redmine Entegrasyonunu Kur"
+      },
+      "D_DELETE": {
+        "MSG": "\"{{title}}\" projesini silmek istediğinizden emin misiniz?"
       },
       "FORM_BASIC": {
+        "L_ENABLE_BACKLOG": "Proje İş Biriktirme Listesini Etkinleştir",
         "L_IS_HIDDEN_FROM_MENU": "Menüden projeyi gizle",
-        "L_TITLE": "proje Adı",
+        "L_TITLE": "Proje Adı",
         "TITLE": "Temel ayarlar"
       },
       "FORM_THEME": {
@@ -648,11 +827,11 @@
         "L_HUE_PRIMARY": "Ana renk arka planında koyu metin eşiği",
         "L_HUE_WARN": "Uyar renk arka plan üzerinde koyu metin için eşik",
         "L_IS_AUTO_CONTRAST": "En iyi okunabilirlik için otomatik metin renkleri ayarlama",
-        "L_IS_DISABLE_BACKGROUND_GRADIENT": "Renkli arka plan gradyanını devre dışı bırak",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Renkli arka plan gradyanını devre dışı bırak",
         "L_IS_REDUCED_THEME": "Azaltılmış kullanıcı arayüzü kullanın (görevlerin etrafında kutu yok)",
         "L_THEME_COLOR": "Tema Rengi",
         "L_TITLE": "Başlık",
-        "TITLE": "tema"
+        "TITLE": "Tema"
       },
       "S": {
         "ARCHIVED": "Arşivlenmiş Proje",
@@ -660,22 +839,113 @@
         "DELETED": "Silinmiş Proje",
         "E_EXISTS": "\"{{title}}\" projesi zaten var",
         "E_INVALID_FILE": "Proje dosyası için geçersiz veri",
-        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong>için güncellenmiş proje ayarları",
+        "ISSUE_PROVIDER_UPDATED": " <strong>{{issueProviderKey}}</strong> için güncellenmiş proje ayarları",
         "UNARCHIVED": "Arşivlenmemiş proje",
         "UPDATED": "Güncellenen proje ayarları"
       }
     },
+    "PROJECT_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Klasör oluştur",
+        "EDIT_TITLE": "Klasörü düzenle",
+        "NAME_LABEL": "Klasör adı",
+        "NAME_PLACEHOLDER": "Klasör adını girin",
+        "NAME_REQUIRED": "Klasör adı gereklidir",
+        "PARENT_LABEL": "Ana klasör",
+        "NO_PARENT": "Ana klasör yok (kök düzey)"
+      },
+      "SELECT": {
+        "LABEL": "Klasör",
+        "PLACEHOLDER": "Klasör seçin",
+        "NO_PARENT": "Klasör yok (kök düzey)"
+      },
+      "CONFIRM_DELETE": "\"{{title}}\" adlı klasörü silmek istediğinizden emin misiniz? Bu klasördeki tüm projeler kök düzeye taşınacaktır.",
+      "TOOLTIP_CREATE": "Proje klasörü oluştur",
+      "TOOLTIP_VISIBILITY": "Projeleri göster/gizle"
+    },
+    "TAG_FOLDER": {
+      "DIALOG": {
+        "CREATE_TITLE": "Klasör oluştur",
+        "EDIT_TITLE": "Klasörü düzenle",
+        "NAME_LABEL": "Klasör adı",
+        "NAME_PLACEHOLDER": "Klasör adını girin",
+        "NAME_REQUIRED": "Klasör adı gereklidir",
+        "PARENT_LABEL": "Ana klasör",
+        "NO_PARENT": "Ana klasör yok (kök düzey)"
+      },
+      "SELECT": {
+        "LABEL": "Klasör",
+        "PLACEHOLDER": "Klasör seçin",
+        "NO_PARENT": "Klasör yok (kök düzey)"
+      },
+      "CONFIRM_DELETE": "\"{{title}}\" adlı klasörü silmek istediğinizden emin misiniz? Bu klasördeki tüm etiketler kök düzeye taşınacaktır.",
+      "TOOLTIP_CREATE": "Etiket klasörü oluştur"
+    },
     "QUICK_HISTORY": {
-      "NO_DATA": "Cari yıl için veri yok",
+      "NO_DATA": "Bu yıl için veri yok",
       "PAGE_TITLE": "Hızlı Geçmiş",
-      "WEEK_TITLE": " {{nr}} . Hafta ({{timeSpent}})"
+      "WEEK_TITLE": " {{nr}}. Hafta ({{timeSpent}})"
+    },
+    "REDMINE": {
+      "DIALOG_INITIAL": {
+        "TITLE": "Proje için Redmine Kurulumu"
+      },
+      "FORM": {
+        "API_KEY": "API erişim anahtarı",
+        "HOST": "Sağlayıcı (e.g.: https://redmine.org)",
+        "PROJECT_ID": "Proje Tanımlayıcı",
+        "PROJECT_ID_DESCRIPTION": "Projeyi Tarayıcıda görüntülerken url'nin bir parçası olarak bulunabilir.",
+        "SCOPE": "Kapsam",
+        "SCOPE_ALL": "Hepsi",
+        "SCOPE_ASSIGNED": "Bana atanan",
+        "SCOPE_CREATED": "Benim tarafımdan oluşturuldu"
+      },
+      "FORM_SECTION": {
+        "HELP": "<p>Burada, günlük planlama görünümündeki görev oluşturma panelinde belirli bir proje için açık Redmine (çevrimiçi sürümü veya şirket içinde barındırılan bir örnek) sorunlarını listelemek için SuperProductivity'yi yapılandırabilirsiniz. Öneriler olarak listelenecekler ve konuyla ilgili bir bağlantının yanı sıra konuyla ilgili daha fazla bilgi sağlayacaklar.</p><p>Ek olarak, tüm açık sorunları otomatik olarak görev biriktirme listenize ekleyebilir ve senkronize edebilirsiniz.</p>",
+        "TITLE": "Redmine"
+      },
+      "ISSUE_CONTENT": {
+        "AUTHOR": "Yaratıcı",
+        "DESCRIPTION": "Açıklama",
+        "MARK_AS_CHECKED": "Güncellemeleri kontrol edildi olarak işaretle",
+        "PRIORITY": "Öncelik",
+        "STATUS": "Durum"
+      },
+      "S": {
+        "ERR_UNKNOWN": "Redmine: Bilinmeyen hata {{statusCode}} {{errorMsg}}."
+      }
     },
     "REMINDER": {
+      "COUNTDOWN_BANNER": {
+        "HIDE": "Gizle",
+        "START_NOW": "Şimdi başla",
+        "TXT": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!",
+        "TXT_MULTIPLE": "<strong>{{title}}</strong>  <strong>ile başlar {{start}}</strong>!<br> (ve {{nrOfOtherBanners}} diğer görevlerin zamanı geldi)"
+      },
+      "S_ACTIVE_TASK_DUE": "Şu anda üzerinde çalıştığınız görevin süresi doldu!<br/> ({{title}})",
       "S_REMINDER_ERR": "Hatırlatma arayüzü hatası"
+    },
+    "SCHEDULE": {
+      "CONTINUED": "Devam eden",
+      "D_INITIAL": {
+        "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
+        "TITLE": "Zaman çizelgesi"
+      },
+      "END": "İş Bitişi",
+      "LUNCH_BREAK": "Öğle Arası",
+      "MONTH": "Ay",
+      "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
+      "NOW": "Şimdi",
+      "PLAN_END_DAY": "Günün sonunda planla",
+      "PLAN_START_DAY": "Günün başında planla",
+      "START": "İş Başlangıcı",
+      "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu",
+      "WEEK": "Hafta"
     },
     "SEARCH_BAR": {
       "INFO": "Arşivlenmiş görevleri aramak için liste simgesine tıklayın",
       "INFO_ARCHIVED": "Normal görevleri aramak için arşiv simgesine tıklayın",
+      "NO_RESULTS": "Aramanızla eşleşen görev bulunamadı",
       "PLACEHOLDER": "Görev veya görev tanımını arayın",
       "PLACEHOLDER_ARCHIVED": "Arşivlenmiş görevleri arayın",
       "TOO_MANY_RESULTS": "Çok fazla sonuç, lütfen aramanızı daraltın"
@@ -686,34 +956,48 @@
         "OK": "Yap!"
       },
       "D_EDIT": {
-        "L_COUNTER": "saymak",
-        "TITLE": "Basit Sayacı Düzenle"
+        "CURRENT_STREAK": "Güncel Seri",
+        "DAILY_GOAL": "Günlük Hedef",
+        "DAYS": "Gün",
+        "L_COUNTER": "Sayım"
       },
       "FORM": {
         "ADD_NEW": "Basit sayaç ekle",
         "HELP": "Burada sağ üstte görünecek basit düğmeleri yapılandırabilirsiniz. Ya zamanlayıcılar ya da sadece sayılan basit bir sayaç olabilirler.",
-        "L_AUTO_COUNT_UP": "İçin otomatik tetikleme sayımı",
-        "L_AUTO_SWITCH_OFF": "İçin otomatik tetik kapatma",
-        "L_AUTO_SWITCH_ON": "İçin otomatik tetik anahtarı açık",
-        "L_ICON": "ikon",
+        "L_COUNTDOWN_DURATION": "Geri sayım süresi",
+        "L_DAILY_GOAL": "Başarılı bir seri için günlük hedef",
+        "L_ICON": "İkon",
         "L_ICON_ON": "Değiştirildiğinde simge",
         "L_IS_ENABLED": "Etkin",
         "L_TITLE": "Başlık",
-        "L_TYPE": "tip",
+        "L_TRACK_STREAKS": "Pist Çizgileri",
+        "L_TYPE": "Tip",
+        "L_WEEKDAYS": "Çizgiyi kontrol etmek için hafta içi günler",
         "TITLE": "Basit Sayaçlar",
         "TYPE_CLICK_COUNTER": "Tıklama Sayacı",
+        "TYPE_REPEATED_COUNTDOWN": "Tekrarlanan Geri Sayım",
         "TYPE_STOPWATCH": "Kronometre"
+      },
+      "S": {
+        "GOAL_REACHED_1": "Bugünkü hedefinize ulaştınız!",
+        "GOAL_REACHED_2": "Mevcut seri süresi:"
       }
     },
     "SYNC": {
+      "A": {
+        "ARCHIVE_ONLY_UPLOADED": "Verileriniz yalnızca kısmen yüklendi. Lütfen daha sonra tekrar deneyin! Aksi takdirde verilerinizi diğer cihazlarla senkronize edemezsiniz.",
+        "POSSIBLE_LEGACY_DATA": "Super Productivity artık tek bir dosya yerine iki ayrı dosya kullanarak senkronizasyonu geliştirdi ve bu da çok daha az veri aktarımına olanak sağladı. Super Productivity'nin tüm örneklerini güncellemeniz ve önce verilerin en yeni olduğu uygulama örneğinden verileri senkronize etmeniz önerilir. Bu veriler yerel cihazınızdan geliyorsa lütfen bu uyarıyı görmezden gelin ve bir sonraki iletişim kutusunu onaylayarak yüklemeye devam edin.",
+        "REMOTE_MODEL_VERSION_NEWER": "Uzak model sürümü, yerel sürümden daha yenidir. Lütfen yerel uygulamanızı en yeni sürüme güncelleyin!"
+      },
+      "BTN_SYNC_NOW": "Şimdi Senkronize Et",
       "C": {
         "EMPTY_SYNC": "Boş bir veri nesnesini senkronize etmeye çalışıyorsunuz. Bu, (neredeyse) bakir bir uygulamanın ilk senkronizasyonunuz mu?",
-        "FORCE_IMPORT": "Yine de uzak veriler içe aktarılsın mı?",
-        "FORCE_UPLOAD": "Yine de yerel veriler yüklensin mi?",
-        "FORCE_UPLOAD_AFTER_ERROR": "Yerel verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
+        "FORCE_UPLOAD": "Yine de Lokal veriler yüklensin mi?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Lokal verilerinizi yüklerken bir hata oluştu. Güncellemeyi zorlamaya mı çalışıyorsunuz?",
         "MIGRATE_LEGACY": "İçe aktarılırken eski veriler algılandı, taşımayı denemek istiyor musunuz?",
-        "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a yerel yüklensin mi?",
-        "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?"
+        "NO_REMOTE_DATA": "Uzak veri bulunamadı. Uzak'a Lokal yüklensin mi?",
+        "TRY_LOAD_REMOTE_AGAIN": "Verileri bir kez daha uzaktan kumandadan yeniden yüklemeyi mi deneyin?",
+        "UNABLE_TO_LOAD_REMOTE_DATA": "Uzaktan veri yüklenemiyor. Uzaktaki verileri yerel verilerinizle üzerine yazmayı denemek ister misiniz? İşlem sırasında tüm uzak veriler kaybolacak."
       },
       "D_AUTH_CODE": {
         "FOLLOW_LINK": "Lütfen aşağıdaki bağlantıyı açın ve orada verilen kimlik doğrulama kodunu aşağıdaki giriş alanına kopyalayın.",
@@ -722,50 +1006,150 @@
         "TITLE": "Giriş: {{provider}}"
       },
       "D_CONFLICT": {
-        "LAST_CHANGE": "son değişiklik:",
-        "LAST_SYNC": "son senkronizasyon:",
-        "LOCAL": "yerel",
-        "LOCAL_REMOTE": "yerel -> uzaktan",
-        "REMOTE": "uzak",
-        "TEXT": "<p>Dropbox'tan güncelleme. Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor.</p>",
-        "TITLE": "Dropbox: Çakışan Veriler",
-        "USE_LOCAL": "Yerel kullan",
-        "USE_REMOTE": "Uzaktan kumandayı kullan"
+        "COMPARISON_RESULT": "Karşılaştırma Sonucu",
+        "LAMPORT_CLOCK": "Revizyon",
+        "LAST_CHANGE": "Son Değişiklik:",
+        "LAST_SYNC": "Son Senkronizasyon:",
+        "LAST_SYNCED": "Son Senkronize Edilen",
+        "LAST_WRITE": "Son Yazma:",
+        "LOCAL": "Lokal",
+        "LOCAL_REMOTE": "Lokal -> Uzak",
+        "NEVER": "Asla",
+        "REMOTE": "Uzak",
+        "TEXT": "<p>Hem yerel hem de uzak veriler değiştirilmiş gibi görünüyor. Uzaktan güncelleyin.</p>",
+        "TIMESTAMP": "Zaman Damgası",
+        "TITLE": "Senkronizasyon: Veri Çakışması",
+        "USE_LOCAL": "Local'ı kullan",
+        "USE_REMOTE": "Uzak'ı kullan",
+        "ADDITIONAL_INFO": "Ek Bilgi",
+        "VECTOR_COMPARISON_CONCURRENT": "Concurrent (True Conflict)",
+        "VECTOR_COMPARISON_EQUAL": "Eşit",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "Lokal > Uzak",
+        "VECTOR_COMPARISON_LOCAL_LESS": "Lokal < Uzak",
+        "DATE": "Tarih",
+        "TIME": "Zaman",
+        "VECTOR_CLOCK": "Vektör Saati",
+        "RESULT": "Sonuç",
+        "CHANGES": "Değişiklikler",
+        "CHANGES_SINCE_LAST_SYNC": "Son senkronizasyondan bu yana değişiklikler",
+        "VECTOR_CLOCK_HEADING": "Vektör Saati",
+        "OVERWRITE_WARNING": "UYARI: {{targetName}} verileri yaklaşık olarak {{targetChanges}} değişiklik içerirken, {{sourceName}} verileri yalnızca {{sourceChanges}} değişikliğe sahiptir. {{targetName}} verisinin üzerine {{sourceName}} verisini yazmak istediğinizden emin misiniz? Bu eylem geri alınamaz."
+      },
+      "D_DECRYPT_ERROR": {
+        "BTN_OVER_WRITE_REMOTE": "Uzaktan kumandayı değiştirme ve üzerine yazma",
+        "CHANGE_PW_AND_DECRYPT": "Değiştir ve Şifreyi Çözmeyi Deneyin",
+        "P1": "Verileriniz şifrelenir ve şifre çözme başarısız olur. Lütfen doğru şifreyi giriniz!",
+        "P2": "Ayrıca, tüm uzak verilerin üzerine yazacak olan şifrenizi de değiştirebilirsiniz.",
+        "PASSWORD": "Şifre"
+      },
+      "D_INCOMPLETE_SYNC": {
+        "BTN_CLOSE_APP": "Uygulamayı Kapat",
+        "BTN_DOWNLOAD_BACKUP": "Yerel Yedeklemeyi İndir",
+        "BTN_FORCE_UPLOAD": "Yerel Yüklemeyi Zorla",
+        "P1": "Uzaktan senkronizasyon verileri tutarsız!",
+        "P2": "Etkilenen model:",
+        "P3": "2 Seçeneğiniz var:",
+        "P4": "1. Diğer cihazınıza gidin ve orada tam bir senkronizasyon yapmayı deneyin.",
+        "P5": "2. Uzak verilerin üzerine yerel verilerinizle yazın. Tüm uzak değişiklikler kaybolacak!",
+        "P6": "Üzerine yazdığınız verilerin yedeğini oluşturmanız önerilir!!",
+        "T1": "Son senkronizasyon tamamlanmadı!",
+        "T2": "Arşiv verileriniz son senkronizasyon sırasında düzgün şekilde yüklenmedi:",
+        "T3": "2 Seçeneğiniz var:",
+        "T4": "1. Diğer cihazınıza gidin ve senkronizasyonu orada tamamlayın.",
+        "T5": "2. Veya uzak verileri yerel verilerinizle üzerine yazabilirsiniz. Tüm uzak değişiklikler\n   kaybolacaktır!",
+        "T6": "Üzerine yazdığınız verilerin bir yedeğini oluşturmanız önerilir!!!"
+      },
+      "D_INITIAL_CFG": {
+        "SAVE_AND_ENABLE": "Kaydet & Senkronizasyonu Etkinleştir",
+        "TITLE": "Senkronizasyonu Yapılandır"
+      },
+      "D_PERMISSION": {
+        "DISABLE_SYNC": "Senkronizasyonu devre dışı bırak",
+        "PERM_FILE": "İzin ver",
+        "TEXT": "<p>Lokal senkronizasyona ilişkin dosya izniniz iptal edildi.</p>",
+        "TITLE": "Senkronizasyon: Lokal dosya izni reddedildi"
       },
       "FORM": {
         "DROPBOX": {
-          "L_ACCESS_TOKEN": "Erişim Jetonu (Kimlik Doğrulama Kodundan üretilir)"
+          "L_ACCESS_TOKEN": "Erişim Jetonu (Yetkilendirme Kodundan oluşturulan)"
         },
         "GOOGLE": {
-          "L_IS_COMPRESS_DATA": "Veriyi Sıkıştır",
           "L_SYNC_FILE_NAME": "Dosya adını senkronize et"
         },
-        "LOCAL_FILE": {
-          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
-          "L_SYNC_FILE_PATH_DESCRIPTION": "Senkronizasyon için kullanılması gereken (oluşturulacak) dosyanın mutlak yolu."
-        },
-        "L_ENABLE_SYNCING": "Eşitlemeyi Etkinleştir",
-        "L_SYNC_INTERVAL": "Senkron aralığı",
+        "L_ENABLE_COMPRESSION": "Sıkıştırmayı Etkinleştir (daha hızlı veri aktarımı)",
+        "L_ENABLE_ENCRYPTION": "Uçtan uca şifrelemeyi etkinleştirin (deneysel) – Verilerinizi senkronizasyon sağlayıcınız için erişilemez hale getirin",
+        "L_ENABLE_SYNCING": "Senkronizasyonu Etkinleştir",
+        "L_ENCRYPTION_NOTES": "ÖNEMLİ NOTLAR: Her şeyin çalışması için bir sonraki senkronizasyondan <strong>ÖNCE</strong> diğer cihazlarınızda da aynı parolayı ayarlamanız gerekecektir. Lütfen güvenli bir parola seçin. Ayrıca, bu parolayı unutursanız <strong>verilerinize erişemeyeceğinizi</strong> lütfen unutmayın. Anahtar yalnızca sizde olduğundan kurtarma mümkün DEĞİLDİR</strong>. Şifreleme muhtemelen çoğu saldırganı engellemek için yeterince iyi olacaktır, ancak <strong>bir garanti yoktur.</strong>",
+        "L_ENCRYPTION_PASSWORD": "Şifreleme Şifresi (UNUTMAYIN)",
+        "L_SYNC_INTERVAL": "Senkron Aralığı",
         "L_SYNC_PROVIDER": "Senkronizasyon Sağlayıcı",
-        "TITLE": "Sync",
+        "LOCAL_FILE": {
+          "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Dosya erişim izni gerekir",
+          "L_SYNC_FOLDER_PATH": "Dosya Yolunu Senkronize Et"
+        },
+        "TITLE": "Senkronize et",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Deneysel !!</strong> Bunun çalışmasını sağlamak için, Nextcloud örneğiniz için CORS'u devre dışı bırakmanız veya sınırlamanız gerekir; bu, olumsuz güvenlik sonuçlarına neden olabilir! Daha fazla bilgi için lütfen <a href='https://github.com/nextcloud/server/issues/3131'>bu konu başlığına bakın</a> . Kendi sorumluluğunuzdadır kullanın!",
+          "CORS_INFO": "<strong>Tarayıcıda çalışmasını sağlamak:</strong> Bunun tarayıcıda çalışmasını sağlamak için Nextcloud örneğiniz için CORS isteklerine yönelik Süper Üretkenliği beyaz listeye almanız gerekir. Bunun olumsuz güvenlik etkileri olabilir! Lütfen <a href='https://github.com/nextcloud/server/issues/3131'>daha fazla bilgi için bu konuya bakın</a>. Bunun mobil cihazlarda çalışmasını sağlamanın bir yolu, nextcloud uygulaması <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword aracılığıyla \"https://app.super-productivity.com\" adresini beyaz listeye eklemektir. <a>. Kullanım riski size aittir!</p>",
+          "INFO": "WebDAV uygulamaları ne yazık ki çılgınca farklılık gösteriyor. Süper Verimliliğin Nextcloud ile iyi çalıştığı biliniyor, <strong> ancak sağlayıcınızla çalışmayabilir</strong>.",
           "L_BASE_URL": "Temel URL",
           "L_PASSWORD": "Parola",
-          "L_SYNC_FILE_PATH": "Dosya Yolunu Senkronize Et",
+          "L_SYNC_FOLDER_PATH": "Dosya Yolunu Senkronize Et",
           "L_USER_NAME": "Kullanıcı adı"
         }
       },
       "S": {
-        "ERROR_FALLBACK_TO_BACKUP": "Veriler alınırken bir şeyler ters gitti. Yerel yedeklemeye geri dönüyorum.",
+        "ALREADY_IN_SYNC": "Zaten senkronize",
+        "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "Yerel değişiklik yok – Zaten senkronize",
+        "BTN_CONFIGURE": "Yapılandırmak",
+        "BTN_FORCE_OVERWRITE": "Üzerine Yazmaya Zorla",
+        "ERROR_CORS": "WebDAV Senkronizasyon Hatası: Ağ isteği başarısız oldu.\n\nBu bir CORS sorunu olabilir. Lütfen emin olun:\n• WebDAV sunucunuz Çapraz Kaynak isteklerine izin verir\n• Sunucu URL'si doğru ve erişilebilirdir\n• Çalışan bir internet bağlantınız var",
+        "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Uzak Veri şu anda yazılıyor",
+        "ERROR_FALLBACK_TO_BACKUP": "Veriler içe aktarılırken bir sorun oluştu. Yerel yedeklemeye geri dönülüyor.",
         "ERROR_INVALID_DATA": "Senkronizasyon sırasında hata oluştu. Geçersiz veri",
-        "IMPORTING": "Veri alınıyor",
+        "ERROR_NO_REV": "Uzak dosya için geçerli bir rev yok",
+        "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Senkronizasyon sırasında hata oluştu. Uzak veriler okunamıyor. Belki şifrelemeyi etkinleştirdiniz ve yerel parolanız uzak verileri şifrelemek için kullanılan parolayla eşleşmiyor?",
+        "IMPORTING": "Veriler içeri aktarılıyor",
         "INCOMPLETE_CFG": "Senkronizasyon için kimlik doğrulama başarısız oldu. Lütfen Yapılandırmanızı kontrol edin!",
         "INITIAL_SYNC_ERROR": "İlk Senkronizasyon başarısız oldu",
+        "SUCCESS_DOWNLOAD": "Uzaktan kumandadan senkronize edilen veriler",
         "SUCCESS_IMPORT": "Alınan veri",
         "SUCCESS_VIA_BUTTON": "Veriler başarıyla senkronize edildi",
-        "UNKNOWN_ERROR": "Senkronizasyon sırasında bilinmeyen hata. Lütfen konsolu kontrol edin.",
+        "UNKNOWN_ERROR": "Bilinmeyen senkronizasyon hatası: {{err}}",
         "UPLOAD_ERROR": "Bilinmeyen Yükleme Hatası (Ayarlar doğru mu?): {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "TITLE": "Senkronizasyon Güvenlik Yedekleri",
+        "DESCRIPTION": "Uzaktan veri indirme işlemleri sırasında senkronizasyon öncesinde otomatik olarak yedekler oluşturulur. Yedekler 4 akıllı yuvada düzenlenir: 2 en yeni, 1 ilk bugünden ve 1 ilk önce bugünden bir gün önce",
+        "BTN_CREATE_MANUAL": "Manuel Yedek Oluştur",
+        "BTN_REFRESH": "Yenile",
+        "BTN_CLEAR_ALL": "Tümünü Temizle",
+        "BTN_RESTORE": "Geri Yükle",
+        "BTN_DELETE": "Sil",
+        "LOADING": "Yükleniyor...",
+        "NO_BACKUPS": "Henüz güvenlik yedeği yok. Yedekler senkronizasyon işlemleri öncesinde otomatik olarak oluşturulur.",
+        "TOOLTIP_CREATE_MANUAL": "Tüm verilerinizin manuel yedeğini oluşturun",
+        "TOOLTIP_REFRESH": "Yedek listesini yenile",
+        "TOOLTIP_CLEAR_ALL": "Tüm güvenlik yedeklerini sil",
+        "TOOLTIP_RESTORE": "Bu yedeği geri yükle (tüm mevcut verileri değiştirecek)",
+        "TOOLTIP_DELETE": "Bu yedeği sil",
+        "SLOT_RECENT": "Son yedek",
+        "SLOT_TODAY": "Bugünün ilk yedeği",
+        "SLOT_BEFORE_TODAY": "Dünden önceki ilk yedek",
+        "REASON_MANUAL": "Manuel yedek",
+        "REASON_BEFORE_UPDATE": "Senkronizasyon öncesi otomatik yedek",
+        "LAST_CHANGE_PREFIX": "Son değişiklik:",
+        "RESTORE_CONFIRM_TITLE": "Yedeği Geri Yükle",
+        "RESTORE_CONFIRM_MSG": "Yedeği {{timestamp}} tarihinden geri yüklemek istediğinizden emin misiniz?\n\nBu işlem TÜM mevcut verilerinizi TAMAMEN DEĞİŞTİRECEK!\n\nSebep: {{reason}}\n\nDevam etmek için Tamam'a, iptal etmek için İptal'e tıklayın.",
+        "BACKUP_NOT_FOUND": "{{backupId}} kimliğine sahip yedek bulunamadı",
+        "RESTORE_FAILED": "Yedek geri yüklenemedi: {{error}}",
+        "INVALID_ID_ERROR": "Geçersiz yedek kimliği oluşturuldu",
+        "CREATED_SUCCESS": "Manuel yedek başarıyla oluşturuldu",
+        "RESTORED_SUCCESS": "Yedek başarıyla geri yüklendi",
+        "DELETED_SUCCESS": "Yedek başarıyla silindi",
+        "CLEARED_SUCCESS": "Tüm yedekler başarıyla temizlendi",
+        "CREATE_FAILED": "Yedek oluşturulamadı",
+        "DELETE_FAILED": "Yedek silinemedi",
+        "CLEAR_FAILED": "Yedekler temizlenemedi"
       }
     },
     "TAG": {
@@ -777,125 +1161,175 @@
         "CONFIRM_MSG": "\"{{tagName}}\" etiketini gerçekten silmek istiyor musunuz? Tüm görevlerden kaldırılacak. Bu geri alınamaz."
       },
       "D_EDIT": {
-        "ADD": "\"{{title}}\" için etiket ekle",
+        "ADD": "\"{{title}}\" için etiketler ekle",
         "EDIT": "\"{{title}}\" için etiketleri düzenleyin",
         "LABEL": "Etiketler"
       },
       "FORM_BASIC": {
         "L_COLOR": "Renk (tanımlanmamış ana tema rengi kullanılıyorsa)",
-        "L_ICON": "ikon",
+        "L_ICON": "İkon",
         "L_TITLE": "Etiket adı",
         "TITLE": "Temel ayarlar"
       },
       "S": {
         "UPDATED": "Etiket Ayarları güncellendi"
+      },
+      "TTL": {
+        "ADD_NEW_TAG": "Yeni Etiket Ekle"
       }
     },
     "TASK": {
-      "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Eklenti ekle",
-        "ADD_SUB_TASK": "Alt Görev ekle",
-        "ATTACHMENTS": "Ekler {{nr}}",
-        "FROM_PARENT": "(Ebeveynden)",
-        "LOCAL_ATTACHMENTS": "Yerel Ekler",
-        "NOTES": "Notlar",
-        "PARENT": "ebeveyn",
-        "REMINDER": "Hatırlatma",
-        "REPEAT": "Tekrar et",
-        "SCHEDULE_TASK": "Görev Takvimi",
-        "SUB_TASKS": "Alt Görevler ({{nr}})",
-        "TIME": "zaman"
-      },
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "Mevcut \"{{taskTitle}}\" görevini ekle",
-        "ADD_ISSUE_TASK": " {{issueType}}kaynaklı{{issueNr}} numaralı sorunu ekleyin",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "İş listesinin altına görev ekle",
+        "ADD_ISSUE_TASK": "{{issueType}}'dan {{issueNr}} numaralı sayıyı ekle",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Biriktirme listesinin altına görev ekle",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Listenin en altına görev ekle",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Biriktirme listesinin en üstüne görev ekle",
         "ADD_TASK_TO_TOP_OF_TODAY": "Listenin başına görev ekle",
         "CREATE_TASK": "Yeni görev oluştur",
-        "EXAMPLE": "Örnek: \"Bazı görev başlığı + projeAdı # bazı etiket # bazı diğer etiket 10a / 3sa\"",
-        "START": "Başlamak için bir kez daha enter tuşuna basın"
+        "EXAMPLE": "Örnek: \"Bir görev başlığı @friday 4pm +projeAdı #bir etiket #başka bir etiket 10m/3h\"",
+        "START": "Başlamak için bir kez daha enter tuşuna basın",
+        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Görevi biriktirme listesine/bugünün listesine eklemeyi aç/kapat'",
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "Görev eklemeyi listenin en üstüne ve en altına değiştir",
+        "PLACEHOLDER_SEARCH": "Mevcut görev veya sorunları ekle...",
+        "PLACEHOLDER_CREATE": "Bir görev başlığı #etiket @16:00",
+        "TOOLTIP_ADD_TASK": "Görev ekle",
+        "TOOLTIP_ADD_TO_TOP": "En üste ekle (Ctrl+1)",
+        "TOOLTIP_ADD_TO_BOTTOM": "En alta ekle (Ctrl+1)",
+        "TOOLTIP_ADD_TO_TODAY": "Bugüne ekle",
+        "TOOLTIP_ADD_TO_BACKLOG": "Biriktirme listesine ekle",
+        "TOOLTIP_ENABLE_SEARCH": "Sorun aramayı etkinleştir (Ctrl+2)",
+        "TOOLTIP_DISABLE_SEARCH": "Sorun aramayı devre dışı bırak (Ctrl+2)",
+        "SEARCH_INFO_TEXT": "Arşivden ve diğer projelerden sorunları ve görevleri arayın ve ekleyin",
+        "DUE_BUTTON": "Son Tarih",
+        "TAGS_BUTTON": "Etiketler",
+        "ESTIMATE_BUTTON": "Tahmin",
+        "TOOLTIP_CLEAR_DATE": "Tarihi temizle",
+        "TOOLTIP_CLEAR_TAGS": "Etiketleri temizle",
+        "TOOLTIP_CLEAR_ESTIMATE": "Tahmini temizle",
+        "NO_DATE": "Tarih Yok",
+        "NO_TIME": "Zaman Yok",
+        "TODAY": "Bugün",
+        "TOMORROW": "Yarın",
+        "CREATE_NEW_TAGS": "Yeni etiketler oluştur"
+      },
+      "ADDITIONAL_INFO": {
+        "ADD_ATTACHMENT": "Eklenti ekle",
+        "ADD_SUB_TASK": "Alt Görev ekle",
+        "ATTACHMENTS": "Ekler {{nr}}",
+        "DUE": "Planlandı",
+        "FROM_PARENT": "(Ana görevden)",
+        "LOCAL_ATTACHMENTS": "Lokal Ekler",
+        "NOTES": "Notlar",
+        "PARENT": "Ana",
+        "REMINDER": "Hatırlatma",
+        "REPEAT": "Tekrar et",
+        "SCHEDULE_TASK": "Görev Takvimi",
+        "SUB_TASKS": "Alt Görevler ({{nr}})",
+        "TIME": "Zaman",
+        "TITLE_PLACEHOLDER": "Bir başlık girin"
       },
       "B": {
-        "ADD_HALF_HOUR": "1/2 hou ekle",
+        "ADD_HALF_HOUR": "1/2 saat ekle",
         "ESTIMATE_EXCEEDED": "\"{{title}}\" için zaman tahmini aşıldı"
       },
       "CMP": {
         "ADD_SUB_TASK": "Alt Görev ekle",
         "ADD_TO_MY_DAY": "Günüme Ekle",
         "ADD_TO_PROJECT": "Bir Projeye Ekle",
-        "CONVERT_TO_PARENT_TASK": "Üst Göreve Dönüştür",
+        "CONVERT_TO_PARENT_TASK": "Ana Göreve Dönüştür",
         "DELETE": "Görevi Sil",
+        "DELETE_REPEAT_INSTANCE": "Tekrarlanan Görev Örneğini Sil",
         "DROP_ATTACHMENT": "\"{{title}}\" öğesine eklemek için buraya bırakın",
-        "EDIT_REMINDER": "Hatırlatıcıyı düzenle",
+        "DUPLICATE": "Çoğalt",
+        "EDIT_SCHEDULED": "Hatırlatıcıyı düzenle",
         "EDIT_TAGS": "Etiketleri düzenle",
-        "MARK_DONE": "tamamlandı olarak işaretle",
-        "MARK_UNDONE": "Bitti olarak işaretle",
-        "MOVE_TO_BACKLOG": "görev biriktirme listesine taşı",
+        "EDIT_TASK_TITLE": "Başlığı düzenle",
+        "FOCUS_SESSION": "Odak Oturumunu Başlat",
+        "MARK_DONE": "Tamamlandı olarak işaretle",
+        "MARK_UNDONE": "Tamamlanmadı olarak işaretle",
+        "MOVE_TO_BACKLOG": "Görev biriktirme listesine taşı",
         "MOVE_TO_OTHER_PROJECT": "Diğer Projeye Taşı",
-        "MOVE_TO_TODAY": "Bugünün listesine git",
+        "MOVE_TO_REGULAR": "Bugünün listesine git",
+        "MOVE_TO_TOP": "Listenin en üstüne taşı",
         "OPEN_ATTACH": "Dosya veya bağlantı ekle",
-        "OPEN_ISSUE": "Sorunu yeni bir tarayıcı sekmesinde aç",
-        "OPEN_TIME": "Tahmini süre / Harcanan zamanı ekle",
+        "OPEN_ISSUE": "Tarayıcıda aç",
+        "OPEN_TIME": "Zaman Takibi",
         "REMOVE_FROM_MY_DAY": "Günümden Kaldır",
         "REPEAT_EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
-        "SCHEDULE": "Görev Takvimi",
+        "SCHEDULE": "Görevi Planla",
         "SHOW_UPDATES": "Güncellemeleri göster",
-        "TOGGLE_ADDITIONAL": "Ek bilgileri göster / gizle",
-        "TOGGLE_ATTACHMENTS": "Ekleri Göster / Gizle",
-        "TOGGLE_DONE": "Yapıldı / tamamlandı olarak işaretle",
+        "TOGGLE_ATTACHMENTS": "Ekleri Göster/Gizle",
+        "TOGGLE_DETAIL_PANEL": "Ek bilgileri göster/gizle",
+        "TOGGLE_DONE": "Yapıldı/Yapılmadı olarak işaretle",
         "TOGGLE_SUB_TASK_VISIBILITY": "Alt görev görünürlüğünü değiştir",
+        "TOGGLE_TAGS": "Etiketleri Aç/Kapat",
         "TRACK_TIME": "İzlemeye başla",
         "TRACK_TIME_STOP": "İzleme zamanını duraklat",
+        "UNSCHEDULE_TASK": "Görevin zamanlamasını kaldır",
         "UPDATE_ISSUE_DATA": "Sorun verilerini güncelle"
       },
-      "D_REMINDER_ADD": {
-        "CONFIRM_REPEAT_OK": "program",
-        "CONFIRM_REPEAT_TXT": "Bu tekrarlanan görevi başka bir güne planlamaya çalışıyorsunuz. Tekrarlanan görevler genellikle belirli günlerde yeniden oluşturulur ve yalnızca o gün planlanır. Yine de devam etmek istiyor musun?",
-        "DATETIME_FOR": "Hatırlatıcı için Datetime",
-        "EDIT": "Hatırlatıcıyı düzenle",
-        "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi günlüğe kaydetme",
-        "REMIND_AT": "Şurada hatırlat:",
-        "RO_10M": "Başlamadan 10 dakika önce",
-        "RO_15M": "Başlamadan 15 dakika önce",
-        "RO_1H": "Başlamadan 1 saat önce",
-        "RO_30M": "Başlamadan 30 dakika önce",
-        "RO_5M": "Başlamadan 5 dakika önce",
-        "RO_START": "başladığında",
-        "SCHEDULE": "program",
-        "UNSCHEDULE": "Unschedule"
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
+        "MSG": "Yeni {{tagsTxt}} etiketini oluşturmak istiyor musunuz?",
+        "OK": "Etiket oluştur"
+      },
+      "D_CONFIRM_SHORT_SYNTAX_NEW_TAGS": {
+        "MSG": "{{tagsTxt}} etiketlerini oluşturmak istiyor musunuz?",
+        "OK": "Etiketleri oluştur"
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Tümünü bugüne ekle",
         "ADD_TO_TODAY": "Bugüne ekle",
-        "DISMISS": "Hatırlatmayı Sil",
-        "DISMISS_ALL": "Hepsini reddet",
-        "DONE": "tamam",
-        "DUE_TASK": "Son görev",
-        "DUE_TASKS": "Teslim edilecek görevler",
-        "FOR_CURRENT": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
-        "FOR_OTHER": "Görev kaynaklanmaktadır. Üzerinde çalışmaya başlamak ister misiniz?",
+        "COMPLETE": "Tamamla",
+        "COMPLETE_ALL": "Tümünü tamamla",
+        "DONE": "Bitti",
+        "DUE_TASK": "Yapılacak görev",
+        "DUE_TASKS": "Yapılacak görevler",
+        "FOR_CURRENT": "Görevin zamanı geldi. Üzerinde çalışmaya başlamak ister misin?",
+        "FOR_OTHER": "Görevin zamanı geldi. Üzerinde çalışmaya başlamak ister misin?",
         "FROM_PROJECT": "Projeden",
         "FROM_TAG": "Etiketten: \"{{title}}\"",
-        "RESCHEDULE_UNTIL_TOMORROW": "Yarına kadar",
-        "SNOOZE": "Erteleme",
+        "RESCHEDULE_EDIT": "Düzenle (Yeniden planla)",
+        "RESCHEDULE_UNTIL_TOMORROW": "Yarın için yeniden planla",
+        "SNOOZE": "Ertele",
         "SNOOZE_ALL": "Tümünü ertele",
-        "START": "Görevi Başlat",
-        "SWITCH_CONTEXT_START": "Bağlam Değiştir ve Başlat"
+        "START": "Başla",
+        "SWITCH_CONTEXT_START": "Kaynak Değiştir ve Başlat",
+        "UNSCHEDULE": "Programı Kaldır",
+        "UNSCHEDULE_ALL": "Tümünü planlamayı kaldır",
+        "DISMISS_REMINDER_KEEP_TODAY": "Hatırlatıcıyı Kapat (Bugün de Kalsın)",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "Tüm Hatırlatıcıları Kapat (Bugün de Kalsın)"
+      },
+      "D_SCHEDULE_TASK": {
+        "MOVE_TO_BACKLOG": "Zamanlanana kadar görevi biriktirme günlüğüne kaydet",
+        "QA_NEXT_MONTH": "Gelecek Ay'ı Planla",
+        "QA_NEXT_WEEK": "Gelecek Hafta'yı Planla",
+        "QA_REMOVE_TODAY": "Görevi bugünden kaldır",
+        "QA_TODAY": "Bugün Planla",
+        "QA_TOMORROW": "Yarın Planla",
+        "REMIND_AT": "Şu saatte hatırlat:",
+        "RO_1H": "Başlamadan 1 saat önce",
+        "RO_5M": "Başlamadan 5 dakika önce",
+        "RO_10M": "Başlamadan 10 dakika önce",
+        "RO_15M": "Başlamadan 15 dakika önce",
+        "RO_30M": "Başlamadan 30 dakika önce",
+        "RO_NEVER": "Asla",
+        "RO_START": "başladığında",
+        "SCHEDULE": "Planla",
+        "UNSCHEDULE": "Planlamayı iptal et"
       },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "Diğer gün için harcanan zamanı ekle",
         "DELETE_FOR": "Günün girişini sil",
-        "ESTIMATE": "Tahmin",
+        "ESTIMATE": "Tahmini",
         "TIME_SPENT": "Harcanan zaman",
         "TIME_SPENT_ON": "Harcanan Zaman {{date}}",
-        "TITLE": "Harcanan Zaman / Tahminler"
+        "TITLE": "Harcanan süre / Tahminler"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": " {{date}}için yeni giriş ekle",
+        "ADD_ENTRY_FOR": " {{date}} için yeni giriş ekle",
         "DATE": "Yeni giriş tarihi",
-        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika",
+        "HELP": "Örnekler:<br> 30m => 30 dakika<br> 2h => 2 saat<br> 2h 30m => 2 saat ve 30 dakika<br> 1.5h => 1 saat ve 30 dakika<br> 03:15 => 3 saat ve 15 dakika",
         "TINE_SPENT": "Harcanan zaman",
         "TITLE": "Güne Ekle"
       },
@@ -904,11 +1338,17 @@
         "ESTIMATE_EXCEEDED_BODY": "\"{{title}}\" için tahmini sürenizi aştınız."
       },
       "S": {
+        "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Tekrarlanabilir görevler için kısa sözdizimi yoluyla proje atanamıyor!",
+        "CREATED_FOR_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "CREATED_FOR_PROJECT_ACTION": "Projeye Git",
         "DELETED": "\"{{title}}\" görevi silindi",
         "FOUND_MOVE_FROM_BACKLOG": " <strong>{{title}}</strong> görevini bugünkü görev listesine taşıdı",
         "FOUND_MOVE_FROM_OTHER_LIST": " <strong>{{contextTitle}}</strong> 'den geçerli listeye <strong>{{title}}</strong> görevi eklendi",
-        "FOUND_RESTORE_FROM_ARCHIVE": "Geri yüklenen görev <strong>{{title}}</strong> arşivden konu ile ilgili",
+        "FOUND_RESTORE_FROM_ARCHIVE": "Arşivdeki sorunla ilgili <strong>{{title}</strong> görevi geri yüklendi",
         "LAST_TAG_DELETION_WARNING": "Proje dışı bir görevin son etiketini kaldırmaya çalışıyorsunuz. Buna izin verilmiyor!",
+        "MOVED_TO_ARCHIVE": " {{nr}} görevler arşive taşındı",
+        "MOVED_TO_PROJECT": "\"{{taskTitle}}\" görevini \"{{projectTitle}}\" projesine taşıdı",
+        "MOVED_TO_PROJECT_ACTION": "Projeye Git",
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
@@ -916,20 +1356,56 @@
       },
       "SELECT_OR_CREATE": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {
-        "ESTIMATE": "Tahmin",
-        "SPENT_TODAY": "Bugün Harcandı",
-        "SPENT_TOTAL": "Harcanan Toplam",
-        "TASK": "görev",
-        "TOGGLE_DONE": "yapılan / işaretini kaldır"
+        "ESTIMATE": "Tahmini",
+        "SPENT_TODAY": "Bugün Harcanan",
+        "SPENT_TOTAL": "Toplam Harcanan",
+        "TASK": "Görev",
+        "TOGGLE_DONE": "tamamlandı olarak işaretle/kaldır"
       }
     },
     "TASK_REPEAT": {
+      "ADD_INFO_PANEL": {
+        "CUSTOM": "Özel tekrarlama yapılandırması",
+        "CUSTOM_AND_TIME": "Özel, {{timeStr}}",
+        "CUSTOM_WEEKLY": "{{daysStr}}",
+        "CUSTOM_WEEKLY_AND_TIME": "{{daysStr}}, {{timeStr}}",
+        "DAILY": "Her gün",
+        "DAILY_AND_TIME": "Her gün, {{timeStr}}",
+        "EVERY_X_DAILY": "Her {{x}} günde bir",
+        "EVERY_X_DAILY_AND_TIME": "Her {{x}} günlerinde, {{timeStr}}",
+        "EVERY_X_MONTHLY": "Her {{x}} ayda bir",
+        "EVERY_X_MONTHLY_AND_TIME": "Her {{x}} aylarında, {{timeStr}}",
+        "EVERY_X_YEARLY": "Her {{x}} yılda bir",
+        "EVERY_X_YEARLY_AND_TIME": "Her {{x}} yıllarında, {{timeStr}}",
+        "MONDAY_TO_FRIDAY": "Pzt-Cum",
+        "MONDAY_TO_FRIDAY_AND_TIME": "Pzt-Cum, {{timeStr}}",
+        "MONTHLY_CURRENT_DATE": "Her ayın {{dateDayStr}}. günü",
+        "MONTHLY_CURRENT_DATE_AND_TIME": "Her ayın {{dateDayStr}}, {{timeStr}} günü",
+        "WEEKLY_CURRENT_WEEKDAY": "Haftalık olarak {{weekdayStr}} günü",
+        "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Haftalık olarak {{weekdayStr}} günü, {{timeStr}}",
+        "YEARLY_CURRENT_DATE": "Her yıl {{dayAndMonthStr}} tarihinde",
+        "YEARLY_CURRENT_DATE_AND_TIME": "Yıllık {{dayAndMonthStr}}, {{timeStr}}"
+      },
+      "D_CONFIRM_MOVE_TO_PROJECT": {
+        "MSG": "Bu tekrarlanabilir görev için oluşturulmuş {{tasksNr}} örnek var. Hepsini \"{{projectName}}\" projesine taşımak istiyor musunuz?",
+        "OK": "Tüm örnekleri güncelle"
+      },
       "D_CONFIRM_REMOVE": {
-        "MSG": "Yineleme yapılandırmasını kaldırmak, bu görevin tüm eski örneklerini yalnızca normal görevlere dönüştürür. Devam etmek istediğinden emin misin?",
-        "OK": "Tamamen kaldırmak"
+        "MSG": "Tekrar yapılandırmasının kaldırılması, bu görevin önceki tüm örneklerini yalnızca normal görevlere dönüştürecektir. Devam etmek istediğinizden emin misiniz?",
+        "OK": "Tamamen kaldır"
+      },
+      "D_DELETE_INSTANCE": {
+        "MSG": "Tekrarlanan görevin {{date}} tarihindeki örneğini kaldırmak istiyor musunuz? Bu yalnızca görevin bu tarihte oluşturulmasını engelleyecektir.",
+        "OK": "Örneği Kaldır"
+      },
+      "D_CONFIRM_UPDATE_INSTANCES": {
+        "CANCEL": "Yalnızca gelecekteki görevler",
+        "MSG": "Bu tekrarlanabilir görev için oluşturulmuş {{tasksNr}} örnek var. Hepsini yeni varsayılanlarla mı yoksa yalnızca gelecekteki görevlerle mi güncellemek istiyorsunuz?",
+        "OK": "Tüm örnekleri güncelle"
       },
       "D_EDIT": {
         "ADD": "Tekrar Görev Yapısı Ekle",
+        "ADVANCED_CFG": "Gelişmiş Yapılandırma",
         "EDIT": "Yinelenen Görev Yapılandırmasını Düzenle",
         "HELP1": "Tekrarlanan görevler günlük işler, örneğin: \"Organizasyon\", \"Günlük Toplantı\", \"Kod İnceleme\", \"E-postaları Kontrol Etme\" veya tekrar tekrar gerçekleşmesi muhtemel benzer işler içindir.",
         "HELP2": "Yapılandırıldıktan sonra, projenizi açar açmaz aşağıda seçilen her gün tekrarlanan bir görev yeniden oluşturulur ve günün sonunda otomatik olarak tamamlanır olarak işaretlenir. Farklı örnekler olarak ele alınacaklar. Böylece serbestçe alt görevler vb ekleyebilirsiniz.",
@@ -938,97 +1414,145 @@
         "TAG_LABEL": "Eklenecek etiketler"
       },
       "F": {
+        "C_DAY": "Gün",
+        "C_MONTH": "Ay",
+        "C_WEEK": "Hafta",
+        "C_YEAR": "Yıl",
         "DEFAULT_ESTIMATE": "Varsayılan Tahmini",
         "FRIDAY": "Cuma",
         "IS_ADD_TO_BOTTOM": "Görevi listenin altına taşı",
         "MONDAY": "Pazartesi",
+        "NOTES": "Varsayılan notlar",
         "ORDER": "Sipariş",
         "ORDER_DESCRIPTION": "Tekrarlanabilir görevlerin oluşturulma sırası. Yalnızca aynı anda oluşturulan tekrarlanabilir görevleri etkiler. Daha düşük bir değer, bir görevin listenin yukarısında oluşturulacağı, daha düşük bir sayı ise daha aşağıda olacağı anlamına gelir. 0'dan büyük bir değer, öğelerin normal görevlerin altında oluşturulduğu anlamına gelir.",
-        "REMIND_AT": "Şurada hatırlat:",
+        "Q_CUSTOM": "Özel tekrar yapılandırması",
+        "Q_DAILY": "Her gün",
+        "Q_MONDAY_TO_FRIDAY": "Her pazartesiden cumaya",
+        "Q_MONTHLY_CURRENT_DATE": "Her ayın {{dateDayStr}}. günü",
+        "Q_WEEKLY_CURRENT_WEEKDAY": "Her hafta {{weekdayStr}} günü",
+        "Q_YEARLY_CURRENT_DATE": "Her yıl {{dayAndMonthStr}} tarihinde",
+        "QUICK_SETTING": "Yapılandırmayı Tekrarla",
+        "REMIND_AT": "Şu saatte hatırlat:",
         "REMIND_AT_PLACEHOLDER": "Ne zaman hatırlatılacağını seçin",
+        "REPEAT_CYCLE": "Döngüyü tekrarla",
+        "REPEAT_EVERY": "Yinelenme sıklığı",
         "SATURDAY": "Cumartesi",
+        "START_DATE": "Başlangıç tarihi",
         "START_TIME": "Planlanan başlangıç zamanı",
         "START_TIME_DESCRIPTION": "Örneğin. 15:00. Tüm gün süren bir görev için boş bırakın",
         "SUNDAY": "Pazar",
         "THURSDAY": "Perşembe",
-        "TITLE": "Görev Başlığı",
+        "TITLE": "Görevin Başlığı",
         "TUESDAY": "Salı",
-        "WEDNESDAY": "Çarşamba"
+        "WEDNESDAY": "Çarşamba",
+        "INHERIT_SUBTASKS": "Alt görevleri devral",
+        "INHERIT_SUBTASKS_DESCRIPTION": "Etkinleştirildiğinde, en son görev örneğindeki alt görevler tekrarlayan görevle birlikte yeniden oluşturulur",
+        "REMOVE_INSTANCE": "Bugünkü örneği kaldır",
+        "REMOVE_FOR_DATE": "{{date}} için kaldır",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "Alt görevlerin otomatik güncellenmesini devre dışı bırak",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "En yeni örnek değiştiğinde devralınan alt görevleri otomatik olarak güncelleme"
       }
     },
-    "TIMELINE": {
-      "CONTINUED": "devam etti",
-      "D_INITIAL": {
-        "TEXT": "<p>Zaman Çizelgesi'nin amacı, planlanan görevlerin zaman içinde nasıl sonuçlanacağına dair daha iyi bir resim sağlamaktır. Görevlerinizden otomatik olarak oluşturulur ve iki farklı şeyi ayırt eder: Planlandıkları zamanda gösterilen <strong>Zamanlanmış Görevler</strong>ve bu sabit olayların etrafında akması gereken <strong>Normal Görevler</strong> . Tüm görevler, onlara atadığınız zaman tahminlerini dikkate alır.</p><p>Buna ek olarak, bir iş başlangıç ve bitiş zamanı da sağlayabilirsiniz. Yapılandırılmışsa, normal görevler asla bunların dışında görünmez. Zaman çizelgesinin yalnızca önümüzdeki 30 günü içerdiğini lütfen unutmayın.</p>",
-        "TITLE": "Zaman çizelgesi"
-      },
-      "END": "İş Bitişi",
-      "MENU_TITLE": "Zaman çizelgesi",
-      "NOW": "şimdi",
-      "NO_TASKS": "Şu anda görev yok. Lütfen üst çubuktaki + Düğmesi aracılığıyla bazı görevler ekleyin.",
-      "S": {
-        "CAL_PROVIDER_ERROR": "Zaman Çizelgesi Cal Sağlayıcı Hatası: {{errTxt}}"
-      },
-      "START": "İş Başlangıcı",
-      "TASK_PROJECTION_INFO": "Zamanlanmış tekrarlanabilir bir görevin gelecek projeksiyonu"
+    "TASK_VIEW": {
+      "CUSTOMIZER": {
+        "ENTER_PROJECT": "Proje girin",
+        "ENTER_TAG": "Etiket girin",
+        "ESTIMATED_TIME": "Tahmini Zaman",
+        "FILTER_BY": "Filtrele",
+        "FILTER_DEFAULT": "Filtre Yok",
+        "FILTER_ESTIMATED_TIME": "Tahmini Zaman",
+        "FILTER_PROJECT": "Proje",
+        "FILTER_SCHEDULED_DATE": "Planlanan Tarih",
+        "FILTER_TAG": "Etiket",
+        "FILTER_TIME_SPENT": "Geçen Zaman",
+        "GROUP_BY": "Grupla",
+        "GROUP_DEFAULT": "Gruplama Yok",
+        "GROUP_PROJECT": "Proje",
+        "GROUP_SCHEDULED_DATE": "Planlanan Tarih",
+        "GROUP_TAG": "Etiket",
+        "RESET_ALL": "Tümünü Sıfırla",
+        "SCHEDULED_DEFAULT": "Herhangi Bir Tarih",
+        "SCHEDULED_NEXT_MONTH": "Gelecek ay",
+        "SCHEDULED_NEXT_WEEK": "Gelecek hafta",
+        "SCHEDULED_THIS_MONTH": "Bu ay",
+        "SCHEDULED_THIS_WEEK": "Bu hafta",
+        "SCHEDULED_TODAY": "Bugün",
+        "SCHEDULED_TOMORROW": "Yarın",
+        "SORT_BY": "Sırala",
+        "SORT_CREATION_DATE": "Oluşturma Tarihi",
+        "SORT_DEFAULT": "Varsayılan",
+        "SORT_NAME": "Ad",
+        "SORT_SCHEDULED_DATE": "Planlanan Tarih",
+        "TIME_1HOUR": "> 1 Saat",
+        "TIME_2HOUR": "> 2 Saat",
+        "TIME_10MIN": "> 10 Dakika",
+        "TIME_30MIN": "> 30 Dakika",
+        "TIME_DEFAULT": "Herhangi Bir Süre",
+        "TIME_SPENT": "Geçen Zaman",
+        "TITLE": "Görev Görünümünü Özelleştir"
+      }
     },
     "TIME_TRACKING": {
       "B": {
-        "ALREADY_DID": "zaten yaptım",
-        "SNOOZE": "Erteleme {{time}}"
+        "ALREADY_DID": "Zaten yaptım",
+        "SNOOZE": "{{time}} ertele"
       },
       "B_TTR": {
         "ADD_TO_TASK": "Göreve Ekle",
-        "MSG": " {{time}}için zamanı takip etmiyorsunuz"
+        "MSG": "{{time}} süredir, süreyi takip etmiyorsunuz",
+        "MSG_WITHOUT_TIME": "Süreyi takip etmiyorsunuz"
       },
       "D_IDLE": {
-        "BREAK": "mola",
-        "CREATE_AND_TRACK": "<em></em> oluşturun ve takip edin:",
-        "IDLE_FOR": "Boşta kaldınız:",
-        "SIMPLE_CONFIRM_COUNTER_CANCEL": "atlamak",
-        "SIMPLE_CONFIRM_COUNTER_OK": "Izlemek",
+        "ADD_ENTRY": "İzleme için giriş ekleyin",
+        "BREAK": "Mola",
+        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin:",
+        "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
+        "RESET_BREAK_REMINDER_TIMER": "Mola hatırlatma zamanlayıcısını sıfırla",
+        "SIMPLE_CONFIRM_COUNTER_CANCEL": "Atla",
+        "SIMPLE_CONFIRM_COUNTER_OK": "İzle",
         "SIMPLE_COUNTER_CONFIRM_TXT": "Atlamayı seçtiniz, ancak {{nr}} basit sayaç düğmesini etkinleştirdiniz. Onlara boşta kalma süresini izlemek istiyor musunuz?",
-        "SIMPLE_COUNTER_TOOLTIP": " {{title}}için takip etmek için tıklayın",
-        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}}TAKİP ETMEMEK için tıklayın",
-        "SKIP": "atlamak",
-        "TASK": "görev",
-        "TASK_BREAK": "Görev Arası",
+        "SIMPLE_COUNTER_TOOLTIP": " {{title}}'i takip etmek için tıklayın",
+        "SIMPLE_COUNTER_TOOLTIP_DISABLE": " {{title}} TAKİP ETMEMEK için tıklayın",
+        "SKIP": "Atla",
+        "SPLIT_TIME": "Zamanı çoklu görevlere ve molalara bölün",
+        "TASK": "Görev",
         "TRACK_TO": "Takip et:"
       },
       "D_TRACKING_REMINDER": {
-        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve izleyin",
-        "IDLE_FOR": "Boşta kaldınız:",
-        "TASK": "görev",
+        "CREATE_AND_TRACK": "<em>Oluşturun</em> ve takip edin",
+        "IDLE_FOR": "Şu süre boyunca boşta kaldınız:",
+        "NOTIFICATION_TITLE": "Süre İzlemeyi Başlat!",
+        "TASK": "Görev",
         "TRACK_TO": "Takip et:",
         "UNTRACKED_TIME": "İzlenmeyen süre:"
       }
     },
     "WORKLOG": {
       "CMP": {
-        "DAYS_WORKED": "Günler çalıştı:",
-        "MONTH_WORKED": "Ay çalıştı:",
+        "DAYS_WORKED": "Çalışılan günler:",
+        "MONTH_WORKED": "Çalışılan ay:",
         "REPEATING_TASK": "Tekrar eden görev",
         "RESTORE_TASK_FROM_ARCHIVE": "Görevi Arşivden Geri Yükle",
         "TASKS": "Görevler",
         "TOTAL_TIME": "Toplam harcanan zaman:",
         "WEEK_NR": "{{nr}} haftası",
-        "WORKED": "işlenmiş"
+        "WORKED": "Çalışılmış"
       },
       "D_CONFIRM_RESTORE": " <strong>\"{{title}}\"</strong> görevini bugünün görev listenize taşımak istediğinizden emin misiniz?",
-      "D_EXPORT_TITLE": " {{start}}-{{end}}Worklog Dışa Aktarma",
-      "D_EXPORT_TITLE_SINGLE": "Worklog Dışa Aktarma {{day}}",
+      "D_EXPORT_TITLE": " {{start}}-{{end}}Görev Günlüğünü Dışa Aktarma",
+      "D_EXPORT_TITLE_SINGLE": "Görev Günlüğünü Dışa Aktarma {{day}}",
       "EXPORT": {
         "ADD_COL": "Sütun ekle",
         "COPY_TO_CLIPBOARD": "Panoya kopyala",
-        "DONT_ROUND": "yuvarlama",
+        "DONT_ROUND": "Yuvarlama",
         "EDIT_COL": "Sütunu düzenle",
         "GROUP_BY": "Grupla",
         "O": {
-          "DATE": "tarih",
+          "DATE": "Tarih",
           "ENDED_WORKING": "Çalışmaya Son Verildi",
-          "ESTIMATE_AS_CLOCK": "Saat olarak tahmin et (ör. 5:23)",
+          "ESTIMATE_AS_CLOCK": "Saat olarak tahmin et (örn. 5:23)",
           "ESTIMATE_AS_MILLISECONDS": "Milisaniye olarak tahmin et",
-          "ESTIMATE_AS_STRING": "Dize olarak tahmin et (ör. 5sa 23m)",
+          "ESTIMATE_AS_STRING": "Dize olarak tahmin et (örn. 5sa 23m)",
           "FULL_HALF_HOURS": "tam yarım saat",
           "FULL_HOURS": "tam saatler",
           "FULL_QUARTERS": "tam çeyrek",
@@ -1039,11 +1563,11 @@
           "STARTED_WORKING": "Çalışmaya başladım",
           "TAGS": "Etiketler",
           "TASK_SUBTASK": "Görev / alt görev",
-          "TIME_AS_CLOCK": "Saat olarak zaman (ör. 5:23)",
+          "TIME_AS_CLOCK": "Saat olarak zaman (örn. 5:23)",
           "TIME_AS_MILLISECONDS": "Milisaniye olarak zaman",
-          "TIME_AS_STRING": "Dize olarak geçen süre (örneğin, 5sa 23m)",
+          "TIME_AS_STRING": "Dize olarak geçen süre (örn. 5sa 23m)",
           "TITLES_AND_SUB_TASK_TITLES": "Başlıklar ve Alt Görev Başlıkları",
-          "WORKLOG": "worklog"
+          "WORKLOG": "Görev Günlüğü"
         },
         "OPTIONS": "Seçenekler",
         "ROUND_END_TIME_TO": "Gidiş zamanı",
@@ -1054,41 +1578,74 @@
         "SHOW_AS_TEXT": "Metin olarak göster"
       },
       "WEEK": {
-        "EXPORT": "İhracat Haftası Verileri",
-        "NO_DATA": "Henüz bu hafta görev yok.",
+        "EXPORT": "Haftalık veriyi dışa aktar",
+        "NO_DATA": "Henüz bu haftanın görevleri yok.",
         "TITLE": "Başlık"
       }
     }
   },
   "FILE_IMEX": {
+    "DIALOG_CONFIRM_URL_IMPORT": {
+      "INITIATED_MSG": "Otomatik veri içe aktarma başlatıldı.",
+      "SOURCE_URL_DOMAIN": "Kaynak Alan Adı",
+      "TITLE": "URL'den Veri İçe Aktarmayı Onayla",
+      "WARNING_MSG": "Devam etmek, mevcut uygulama verilerinizi ve yapılandırmanızı belirtilen URL'deki içerikle üzerine yazacaktır. Bu işlem geri alınamaz.",
+      "WARNING_TITLE": "Uyarı"
+    },
     "EXPORT_DATA": "Verileri Dışa Aktar",
     "IMPORT_FROM_FILE": "Dosyadan içe aktar",
-    "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON"
+    "IMPORT_FROM_URL": "URL'den İçe Aktar",
+    "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Lütfen içe aktarmak istediğiniz Super Productivity yedek JSON dosyasının tam URL'sini girin.",
+    "IMPORT_FROM_URL_DIALOG_TITLE": "URL'den İçe Aktar",
+    "OPEN_IMPORT_FROM_URL_DIALOG": "URL'den İçe Aktar",
+    "PRIVACY_EXPORT": "Anonimleştirilmiş verileri dışa aktarın (hata ayıklama için contact@super-productivity.com adresine göndermek üzere)",
+    "S_BACKUP_DOWNLOADED": "Android belgeler klasörüne indirilen yedekleme",
+    "S_ERR_IMPORT_FAILED": "Verileri içeri aktarma başarısız oldu",
+    "S_ERR_INVALID_DATA": "İçe aktarma başarısız oldu: Geçersiz JSON",
+    "S_ERR_INVALID_URL": "İçe aktarma başarısız oldu: Geçersiz URL sağlandı",
+    "S_ERR_NETWORK": "İçe aktarma başarısız oldu: URL'den veri alınırken ağ hatası oluştu",
+    "S_IMPORT_FROM_URL_ERR_DECODE": "Hata: İçe aktarma için URL parametresi çözümlenemedi. Lütfen doğru biçimlendirildiğinden emin olun.",
+    "URL_PLACEHOLDER": "İçe aktarmak için URL girin"
   },
   "G": {
-    "CANCEL": "İptal etmek",
-    "CLICK_TO_EDIT": "düzenlemek için tıkla",
+    "ADD": "Ekle",
+    "ADVANCED_CFG": "Gelişmiş yapılandırma",
+    "CANCEL": "İptal",
     "CLOSE": "Kapat",
-    "DELETE": "silmek",
-    "DISMISS": "Reddet",
+    "COMPLETE": "Tamamla",
+    "CONFIRM": "Onayla",
+    "DELETE": "Sil",
+    "DISMISS": "Görmezden gel",
     "DO_IT": "Yap!",
+    "DONT_SHOW_AGAIN": "Tekrar gösterme",
+    "DURATION_DESCRIPTION": "Örneğin. \"5h 23m\", yani 5 saat 23 dakika",
     "EDIT": "Düzenle",
     "ENABLED": "Etkin",
-    "EXTENSION_INFO": "Jira Api ve Idle Time Handling ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+    "EXAMPLE_VAL": "Düzenlemek için tıkla",
+    "EXTENSION_INFO": "Jira Api ve Boş Vakit Takibi ile iletişime izin vermek için lütfen <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> krom uzantısını</a> indirin. Bunun mobil cihazlar için işe yaramadığını unutmayın.",
+    "HIDE": "Gizle",
+    "ICON_INP_DESCRIPTION": "Tüm utf-8 emojileri de destekleniyor!",
+    "INBOX_PROJECT_TITLE": "Gelen kutusu",
     "LOGIN": "Oturum aç",
     "LOGOUT": "Çıkış Yap",
     "MINUTES": "{{m}} dakika",
+    "MOVE_BACKWARD": "Geri Hareket Et",
+    "MOVE_FORWARD": "İleri Hareket Et",
     "NEXT": "Sonraki",
-    "NONE": "Yok",
     "NO_CON": "Şu anda çevrimdışısınız. Lütfen internete tekrar bağlanın.",
-    "OK": "tamam",
+    "NONE": "Yok",
+    "OK": "Tamam",
+    "OVERDUE": "Gecik -miş",
     "PREVIOUS": "Önceki",
     "REMOVE": "Kaldır",
-    "RESET": "Reset",
-    "SAVE": "Kayıt etmek",
+    "RESET": "Sıfırla",
+    "SAVE": "Kaydet",
+    "SUBMIT": "Gönder",
     "TITLE": "Başlık",
-    "UNDO": "Geri alma",
-    "UPDATE": "Güncelleştirme",
+    "TODAY_TAG_TITLE": "Bugün",
+    "TRACKING_INTERVAL_DESCRIPTION": "Bu aralığı milisaniye cinsinden kullanarak zamanı izleyin. Disk yazmalarını azaltmak için bunu değiştirmek isteyebilirsiniz. Sorun #2355'e bakın.",
+    "UNDO": "Geri Al",
+    "UPDATE": "Güncelle",
     "WITHOUT_PROJECT": "Proje Olmadan",
     "YESTERDAY": "Dün"
   },
@@ -1099,21 +1656,35 @@
       "LOCATION_INFO": "Yedekler şuraya kaydedilir:",
       "TITLE": "Otomatik Yedeklemeler"
     },
+    "CALENDARS": {
+      "BROWSER_WARNING": "Çapraz kaynak kısıtlamaları nedeniyle <b>bu muhtemelen Super Productivity'nin Tarayıcı sürümüyle ÇALIŞMAYACAKTIR.<br /> Bu özelliği kullanmak için lütfen <a href=\"https://super-productivity.com/download/\">masaüstü sürümünü indirin</a>!</b>",
+      "CAL_PATH": "iCal kaynağının URL'si",
+      "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
+      "CHECK_UPDATES": "Her X'te bir uzaktan güncellemeleri kontrol edin",
+      "DEFAULT_PROJECT": "Eklenen takvim görevleri için Varsayılan Proje",
+      "HELP": "Hatırlatılacak takvimleri entegre edebilir ve bunları Super Productivity içinde görev olarak ekleyebilirsiniz. Entegrasyon iCal biçimini kullanarak çalışır. Bunun çalışması için takvimlerinizin internet üzerinden veya dosya sistemi aracılığıyla erişilebilir olması gerekir.",
+      "SHOW_BANNER_THRESHOLD": "Etkinlikten önce bir bildirim X göster (devre dışı bırakmak için boş)"
+    },
     "EVALUATION": {
-      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme Özetini günlük Özette gizle",
-      "TITLE": "Değerlendirme ve Metrikler"
+      "IS_HIDE_EVALUATION_SHEET": "Değerlendirme özetini günlük özette gizle",
+      "TITLE": "Değerlendirme ve İstatistikler"
+    },
+    "FOCUS_MODE": {
+      "HELP": "Odak Modu, mevcut görevinize odaklanmanıza yardımcı olmak için dikkatinizi dağıtmayan bir ekran açar.",
+      "L_ALWAYS_OPEN_FOCUS_MODE": "İzleme sırasında her zaman odak modunu açın",
+      "L_SKIP_PREPARATION_SCREEN": "Hazırlık ekranını atlayın (esnetme vb.)",
+      "TITLE": "Odak modu"
     },
     "IDLE": {
       "HELP": "<div><p>Boşta kalma süresi işleme etkinleştirildiğinde, boşta olduğunuzda, hangi görevi ve zamanınızı izlemek istediğinizi kontrol etmek için belirli bir süre sonra bir iletişim kutusu açılır.</p></div>",
       "IS_ENABLE_IDLE_TIME_TRACKING": "Boşta kalma süresini işlemeyi etkinleştir",
       "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Yalnızca geçerli bir görev seçildiğinde boşta kalma zamanını tetikle",
-      "IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER": "İzlenmeyen rölanti süresi sıfırlama zamanlayıcısı",
-      "MIN_IDLE_TIME": "X'ten sonra boşta tetikleme",
-      "TITLE": "Boşta Taşıma"
+      "MIN_IDLE_TIME": "X'ten sonra boşta tektikle",
+      "TITLE": "Boş vakit takibi"
     },
     "IMEX": {
       "HELP": "<p>Burada tüm verilerinizi yedeklemeler için <strong>JSON</strong> olarak dışa aktarabilirsiniz, ancak farklı bir bağlamda da kullanabilirsiniz (örneğin, projelerinizi tarayıcıda dışa aktarabilir ve bunları masaüstü sürümüne alabilirsiniz. ). </p> <p>Alma, geçerli JSON'un metin alanına kopyalanmasını bekler. <strong>NOT: İçe aktar düğmesine bastığınızda mevcut ayarların ve verilerin üzerine yazılır!</strong></p>",
-      "TITLE": "İthalat ihracat"
+      "TITLE": "İçe Aktar/Dışa Aktar"
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Yeni not ekle",
@@ -1127,20 +1698,24 @@
       "GLOBAL_TOGGLE_TASK_START": "Son etkin görev için zaman izlemesini değiştir",
       "GO_TO_DAILY_AGENDA": "Gündeme Git",
       "GO_TO_FOCUS_MODE": "Odak Moduna Git",
+      "GO_TO_SCHEDULE": "Zaman Çizelgesine git",
       "GO_TO_SCHEDULED_VIEW": "Planlanmış Görevlere git",
       "GO_TO_SETTINGS": "Ayarlara git",
-      "GO_TO_TIMELINE": "Zaman Çizelgesine git",
       "GO_TO_WORK_VIEW": "İş Görünümüne Git",
       "HELP": "<p>Burada tüm klavye kısayollarını yapılandırabilirsiniz.</p> <p>Metin girişine tıklayın ve istediğiniz klavye kombinasyonunu girin. Kaydetmek için Enter'a, iptal etmek için Escape'e basın.</p> <p>Üç tür kısayol vardır:</p> <ul> <li> <strong>Genel kısayollar:</strong> Uygulama çalışırken, uygulama diğer tüm uygulamalardan eylemi tetikler. </li> <li> <strong>Uygulama düzeyinde kısayollar:</strong> Uygulamanın her ekranından tetiklenir, ancak şu anda bir metin alanı düzenliyorsanız değil. </li> <li> <strong>Görev seviyesi kısayolları:</strong> Yalnızca fare veya klavye yoluyla bir görev seçtiyseniz tetiklenirler ve genellikle bu görevle ilgili bir eylemi tetiklerler. </li> </ul>",
       "MOVE_TASK_DOWN": "Görevi Listede Aşağı Taşı",
+      "MOVE_TASK_TO_BOTTOM": "Görevi Listenin en altına taşı",
+      "MOVE_TASK_TO_TOP": "Görevi Listenin en üstüne taşı",
       "MOVE_TASK_UP": "Listede Görevi Yukarı Taşı",
-      "MOVE_TO_BACKLOG": "Görevi Görev Listesine Taşı",
-      "MOVE_TO_TODAYS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
+      "MOVE_TO_BACKLOG": "Görevi biriktirme listesine taşı",
+      "MOVE_TO_REGULARS_TASKS": "Görevi Bugünün Görev Listesine Taşı",
       "OPEN_PROJECT_NOTES": "Proje Notlarını Göster / Gizle",
+      "SAVE_NOTE": "Notu kaydet",
       "SELECT_NEXT_TASK": "Sonraki görevi seç",
       "SELECT_PREVIOUS_TASK": "Önceki Görevi Seç",
       "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
-      "SYSTEM_SHORTCUTS": "Global Kısayollar (sistem genelinde)",
+      "SYSTEM_SHORTCUTS": "Genel Kısayollar (sistem genelinde)",
+      "TASK_ADD_ATTACHMENT": "Dosya veya bağlantı ekle",
       "TASK_ADD_SUB_TASK": "Alt Görev ekle",
       "TASK_DELETE": "Görevi Sil",
       "TASK_EDIT_TAGS": "Etiketleri düzenle",
@@ -1148,58 +1723,98 @@
       "TASK_MOVE_TO_PROJECT": "Görevi proje menüsüne taşı",
       "TASK_OPEN_CONTEXT_MENU": "Görev bağlam menüsünü aç",
       "TASK_OPEN_ESTIMATION_DIALOG": "Tahmini / harcanan zamanı düzenle",
+      "TASK_PLAN_FORDAY": "Gün için planla",
       "TASK_SCHEDULE": "Görev Takvimi",
       "TASK_SHORTCUTS": "Görevler",
       "TASK_SHORTCUTS_INFO": "Seçili görev için aşağıdaki kısayollar geçerlidir (sekme veya fare ile seçilir).",
-      "TASK_TOGGLE_ADDITIONAL_INFO_OPEN": "Ek görev bilgilerini göster / gizle",
+      "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Ek görev bilgilerini göster / gizle",
       "TASK_TOGGLE_DONE": "Geçiş Yapıldı",
       "TITLE": "Klavye kısayolları",
       "TOGGLE_BACKLOG": "Görev Listesini Göster / Gizle",
       "TOGGLE_BOOKMARKS": "Yer İşareti Çubuğunu Göster / Gizle",
+      "TOGGLE_ISSUE_PANEL": "Sorun Panelini Göster/Gizle",
       "TOGGLE_PLAY": "Görevi Başlat / Durdur",
-      "TOGGLE_SIDE_NAV": "Göster ve Odaklan / Sidenav'ı Gizle",
+      "TOGGLE_SIDE_NAV": "Yan navigasyon çubuğunu Göster ve Odakla/Gizle",
+      "TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL": "Filtre/Grupla/Sırala Panelini Değiştir",
+      "TRIGGER_SYNC": "Senkronizasyonu tetikle (yapılandırılmışsa)",
       "ZOOM_DEFAULT": "Varsayılan yakınlaştırma (Yalnızca masaüstü)",
       "ZOOM_IN": "Yakınlaştır (Yalnızca masaüstü)",
-      "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)"
+      "ZOOM_OUT": "Uzaklaştır (Yalnızca masaüstü)",
+      "PLUGIN_SHORTCUTS": "Eklenti Kısayolları"
     },
     "LANG": {
-      "AR": "Arapça",
-      "DE": "Almanca",
-      "EN": "ingilizce",
-      "ES": "İspanyol",
-      "FA": "Farsça",
-      "FR": "Fransızca",
-      "IT": "İtalyan",
-      "JA": "Japonca",
-      "KO": "Koreli",
+      "AR": "عربى",
+      "CZ": "Czech",
+      "DE": "Deutsch",
+      "EN": "English",
+      "ES": "Español",
+      "FA": "فارسی",
+      "FR": "français",
+      "HR": "Hrvatski",
+      "ID": "Indonesian",
+      "IT": "Italiano",
+      "JA": "日本語",
+      "KO": "한국어",
       "LABEL": "Lütfen bir dil seçin",
-      "NB": "Norveççe Bokmål",
-      "NL": "Flemenkçe",
-      "PL": "Lehçe",
-      "PT": "Portekizce",
-      "RU": "Rusça",
-      "TITLE": "dil",
-      "TR": "Türk",
-      "ZH": "Çince (Basitleştirilmiş)",
-      "ZH_TW": "Çince (Geleneksel)"
+      "NB": "Norsk Bokmål",
+      "NL": "Nederlands",
+      "PL": "Polish",
+      "PT": "Português",
+      "RU": "Russian",
+      "SK": "Slovak",
+      "TITLE": "Dil",
+      "TR": "Türkçe",
+      "UK": "Українська",
+      "ZH": "中文(简体)",
+      "ZH_TW": "中文(繁體)",
+      "TIME_LOCALE": "Zaman formatı yerel ayarı",
+      "TIME_LOCALE_DESCRIPTION": "Zaman formatı için bir yerel ayar seçin. Farklı yerel ayarlar farklı gelenekler kullanır (12sa vs 24sa formatı)",
+      "TIME_LOCALE_AUTO": "Sistem varsayılanı",
+      "TIME_LOCALE_EN_US": "İngiliz (ABD) - 12-saat AM/PM",
+      "TIME_LOCALE_EN_GB": "İngiliz (İngiltere) - 24-saat",
+      "TIME_LOCALE_TR_TR": "Türk - 24-saat",
+      "TIME_LOCALE_DE_DE": "Alman - 24-saat",
+      "TIME_LOCALE_FR_FR": "Fransız - 24-saat",
+      "TIME_LOCALE_ES_ES": "İspanyol - 24-saat",
+      "TIME_LOCALE_IT_IT": "İtalyan - 24-saat",
+      "TIME_LOCALE_PT_BR": "Portekiz (Brezilya) - 24-saat",
+      "TIME_LOCALE_RU_RU": "Rus - 24-saat",
+      "TIME_LOCALE_ZH_CN": "Çin (Basit) - 24-saat",
+      "TIME_LOCALE_JA_JP": "Japon - 24-saat",
+      "TIME_LOCALE_KO_KR": "Kore - 12-saat AM/PM"
     },
     "MISC": {
-      "DEFAULT_PROJECT": "Hiçbiri belirtilmezse görevler için kullanılacak varsayılan proje",
+      "DEFAULT_PROJECT": "Proje belirtilmezse görevler için kullanılacak varsayılan proje",
       "FIRST_DAY_OF_WEEK": "Haftanın ilk günü",
       "HELP": "<p><strong>Masaüstü Bildirimleri'ni göremiyor musunuz?</strong> Pencereler için Sistem> Bildirimler ve eylemleri kontrol etmek ve gerekli bildirimlerin etkin olup olmadığını kontrol etmek isteyebilirsiniz.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Çalışılan görevlere bugün etiketini otomatik olarak ekle",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Tüm alt görevler tamamlandığında ana görevi yapıldığı gibi işaretle",
-      "IS_AUTO_START_NEXT_TASK": "Akımı tamam olarak işaretlerken bir sonraki görevi izlemeye başla",
       "IS_CONFIRM_BEFORE_EXIT": "Uygulamadan çıkmadan önce onayla",
-      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Önce günü bitirmeden uygulamadan çıkmadan önce onaylayın",
-      "IS_DARK_MODE": "Karanlık modu",
+      "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Uygulamadan çıkmadan önce günü bitirmeden çıkış yaptığınızı onaylayın",
+      "IS_DARK_MODE": "Karanlık mod",
+      "IS_DISABLE_ANIMATIONS": "Tüm animasyonları devre dışı bırak",
+      "IS_DISABLE_CELEBRATION": "Günlük özet kutlamasını devre dışı bırak",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
-      "IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman hesaplamasının ne zaman aşıldığını bildir",
+      "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
+      "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Mevcut geri sayımı tepsi / durum menüsünde göster (sadece masaüstü mac için)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
+      "IS_OVERLAY_INDICATOR_ENABLED": "Panel gösterge penceresini etkinleştir (masaüstü linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
+      "USER_PROFILES": "Kullanıcı profillerini etkinleştir (Beta)",
+      "USER_PROFILES_HINT": "Her biri ayrı ayarlar, görevler ve senkronizasyon yapılandırmalarına sahip farklı kullanıcı profilleri oluşturmanıza ve aralarında geçiş yapmanıza olanak tanır. Etkinleştirildiğinde profil yönetimi düğmesi sağ üst köşede görünecektir. Not: Bu özelliği devre dışı bırakmak kullanıcı arayüzünü gizler ancak profil verilerinizi korur (Beta özelliği, garanti yok. Yedeğiniz olduğundan emin olun).",
+      "START_OF_NEXT_DAY": "Ertesi günün başlama saati",
+      "START_OF_NEXT_DAY_HINT": "Ertesi günün başladığı saati saymak istediğiniz andan itibaren (saat cinsinden). Varsayılan gece yarısıdır, yani 0'dır.",
       "TASK_NOTES_TPL": "Görev açıklama şablonu",
-      "TITLE": "Diğer ayarlar"
+      "TITLE": "Diğer ayarlar",
+      "DARK_MODE": "Karanlık Mod",
+      "DARK_MODE_SYSTEM": "Sistem",
+      "DARK_MODE_DARK": "Karanlık",
+      "DARK_MODE_LIGHT": "Aydınlık",
+      "DARK_MODE_ARIA_LABEL": "Karanlık mod seçimi",
+      "THEME": "Tema",
+      "THEME_EXPERIMENTAL": "Tema (Deneysel)",
+      "THEME_SELECT_LABEL": "Tema seç"
     },
     "POMODORO": {
       "BREAK_DURATION": "Kısa molaların süresi",
@@ -1208,57 +1823,113 @@
       "HELP": "<p>Pomodoro zamanlayıcı birkaç ayar yoluyla yapılandırılabilir. Her iş oturumunun süresi, normal araların süresi, daha uzun bir ara başlamadan önce çalıştırılacak iş oturumlarının sayısı ve bu uzun aralığın süresi.</p> <p>Ayrıca pomodoro molalarınız sırasında dikkatinizi dağıtmak isteyip istemediğinizi de ayarlayabilirsiniz.</p> <p>\"Pomodoro molasında zaman izlemesini duraklat\" ayarı aynı zamanda molalarınızı bir görev için harcanan iş zamanı olarak izleyecektir. </p> <p>\"Etkin görev olmadığında pomodoro oturumunu duraklat\" seçeneğinin etkinleştirilmesi, bir görevi duraklattığınızda pomodoro oturumunu duraklatır.</p>",
       "IS_ENABLED": "Pomodoro zamanlayıcıyı etkinleştir",
       "IS_MANUAL_CONTINUE": "Bir sonraki pomodoro oturumunun başladığını elle onayla",
+      "IS_MANUAL_CONTINUE_BREAK": "Sonraki molanın başlamasını elle onaylayın",
       "IS_PLAY_SOUND": "Oturum bittiğinde ses çal",
       "IS_PLAY_SOUND_AFTER_BREAK": "Mola bittiğinde ses çal",
-      "IS_PLAY_TICK": "Her saniye kene sesini çal",
+      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Mola sonrası oturumun otomatik başlamasını devre dışı bırak",
+      "IS_PLAY_TICK": "Her saniye saat sesini çal",
       "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
       "LONGER_BREAK_DURATION": "Uzun molaların süresi",
-      "TITLE": "Pomodoro Zamanlayıcı"
+      "TITLE": "Pomodoro Zamanlayıcı (eski)"
+    },
+    "REMINDER": {
+      "COUNTDOWN_DURATION": "Gerçek hatırlatıcıdan önce X başlığını göster",
+      "IS_COUNTDOWN_BANNER_ENABLED": "Hatırlatıcıların son teslim tarihinden önce geri sayım afişini göster",
+      "TITLE": "Hatırlatıcılar"
+    },
+    "SCHEDULE": {
+      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/schedule'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
+      "L_IS_LUNCH_BREAK_ENABLED": "Öğle arasını etkinleştir",
+      "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
+      "L_LUNCH_BREAK_END": "Öğle arası sonu",
+      "L_LUNCH_BREAK_START": "Öğle arası başlangıcı",
+      "L_WORK_END": "İş Günü Sonu",
+      "L_WORK_START": "İş Günü Başlangıcı",
+      "LUNCH_BREAK_START_END_DESCRIPTION": "örn. 13:00",
+      "TITLE": "Zaman çizelgesi",
+      "WORK_START_END_DESCRIPTION": "örn. 17:00",
+      "WEEK": "Hafta",
+      "MONTH": "Ay"
+    },
+    "SHORT_SYNTAX": {
+      "HELP": "<p>Görev oluştururken kısa sözdizimi seçeneklerini buradan kontrol edebilirsiniz</p>",
+      "IS_ENABLE_DUE": "Zamanı gelmiş kısa sözdizimini etkinleştir (@<Yapılacak zaman>)",
+      "IS_ENABLE_PROJECT": "Proje kısa sözdizimini etkinleştir (+<Proje adı>)",
+      "IS_ENABLE_TAG": "Etiket kısa sözdizimini etkinleştir (#<Etiket>)",
+      "TITLE": "Kısa Sözdizimi"
     },
     "SOUND": {
+      "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
       "DONE_SOUND": "Görev tamamlandı sesi",
-      "IS_INCREASE_DONE_PITCH": "Yapılan her görev için perdeyi artırın",
-      "IS_PLAY_DONE_SOUND": "Görev tamamlandı olarak işaretlendiğinde ses çal",
+      "IS_INCREASE_DONE_PITCH": "Yapılan her görev için ses seviyesini artırın",
       "TITLE": "Ses",
-      "VOLUME": "hacim"
+      "TRACK_TIME_SOUND": "Zaman izleme hatırlatma sesi",
+      "VOLUME": "Ses Seviyesi"
     },
     "TAKE_A_BREAK": {
+      "ADD_NEW_IMG": "Motive edici resim ekle",
+      "FULL_SCREEN_BLOCKER_DURATION": "Tam ekran penceresini görüntüleme süresi (yalnızca masaüstü)",
       "HELP": "<div> <p>Mola vermeden belirli bir süre çalıştığınızda tekrar eden bir hatırlatıcı yapılandırmanıza izin verir.</p> <p>Görüntülenen mesajı değiştirebilirsiniz. ${duration} , ara vermeden harcadığınız zamanla değiştirilecektir.</p> </div>",
       "IS_ENABLED": "Ara ver hatırlatma yapmayı etkinleştir",
       "IS_FOCUS_WINDOW": "Hatırlatıcı aktifken uygulama penceresine odaklan (yalnızca masaüstü)",
+      "IS_FULL_SCREEN_BLOCKER": "Mesajı tam ekran pencerede görüntüle (yalnızca masaüstü)",
       "IS_LOCK_SCREEN": "Bir mola verilmesi gerektiğinde ekranı kilitle (yalnızca masaüstü)",
-      "MESSAGE": "Bir ara mesajı al",
-      "MIN_WORKING_TIME": "Tetiksiz, X'in bir olmadan çalıştıktan sonra bir mola bildirimi almasını sağlar",
+      "MESSAGE": "Bir mola mesajı al",
+      "MIN_WORKING_TIME": "X bir tane olmadan çalıştıktan sonra bir mola verme bildirimini tetikleyin",
       "MOTIVATIONAL_IMGS": "Motivasyonel resim (web url'si)",
       "NOTIFICATION_TITLE": "Ara ver!",
-      "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı erteleme",
-      "TITLE": "Hatırlatma Arası"
+      "SNOOZE_TIME": "Mola vermeniz istendiğinde zamanı ertele",
+      "TITLE": "Mola Hatırlatması"
     },
-    "TIMELINE": {
-      "CAL_PROVIDERS": "Takvim sağlayıcıları (deneysel ve isteğe bağlı)",
-      "CAL_PROVIDERS_ADD": "ical kaynağı ekle",
-      "CAL_PROVIDERS_INFO": "İsteğe bağlı olarak zaman çizelgesini, iCal'den (ör. Google Takvim) verileri de yükleyecek ve görüntüleyecek şekilde yapılandırabilirsiniz.",
-      "HELP": "Zaman çizelgesi özelliği, planlanan görevlerinizin zaman içinde nasıl oynandığına dair size hızlı bir genel bakış sağlamalıdır. Bunu sol taraftaki menüde <a href='#/timeline'>\"Zaman çizelgesi\"</a>altında bulabilirsiniz.",
-      "L_CAL_PATH": "ICAL takvimi için URL/Dosya yolu (isteğe bağlı)",
-      "L_IS_WORK_START_END_ENABLED": "Planlanmamış görev akışını belirli çalışma süreleriyle sınırlandırın",
-      "L_WORK_END": "İş Günü Sonu",
-      "L_WORK_START": "İş Günü Başlangıcı",
-      "TITLE": "Zaman çizelgesi",
-      "WORK_START_END_DESCRIPTION": "Örneğin. 17:00"
-    },
-    "TRACKING_REMINDER": {
+    "TIME_TRACKING": {
       "HELP": "Zaman izlemeyi başlatmayı unutmanız Durumunda görünecek bir başlık yapılandırın.",
-      "L_IS_ENABLED": "Etkin",
-      "L_IS_SHOW_ON_MOBILE": "Mobil uygulamada göster",
-      "L_MIN_TIME": "Banner göstermeden önce bekleme süresi",
-      "TITLE": "Zaman İzleme Hatırlatıcısı"
+      "L_DEFAULT_ESTIMATE": "Yeni görevler için varsayılan zaman tahmini",
+      "L_DEFAULT_ESTIMATE_SUB_TASKS": "Yeni alt görevler için varsayılan zaman tahmini",
+      "L_IS_AUTO_START_NEXT_TASK": "Şu anki görevi tamamlanmış olarak işaretlerken bir sonraki görevi izlemeye başla",
+      "L_IS_NOTIFY_WHEN_TIME_ESTIMATE_EXCEEDED": "Zaman tahmini aşıldığında bildir",
+      "L_IS_TRACKING_REMINDER_ENABLED": "İzleme Hatırlatıcısı Etkin",
+      "L_IS_TRACKING_REMINDER_FOCUS_WINDOW": "İzleme hatırlatıcısı aktifken uygulama penceresine odaklan",
+      "L_IS_TRACKING_REMINDER_NOTIFY": "İzleme hatırlatıcısı aktifken bildirim gönder",
+      "L_IS_TRACKING_REMINDER_SHOW_ON_MOBILE": "Zaman izleyiciyi mobil uygulamada göster",
+      "L_TRACKING_INTERVAL": "Zaman izleme aralığı (DENEYSEL)",
+      "L_TRACKING_REMINDER_MIN_TIME": "Banner göstermeden önce bekleme süresi",
+      "TITLE": "Zaman İzleyici"
+    }
+  },
+  "GLOBAL_RELATIVE_TIME": {
+    "FUTURE": {
+      "A_DAY": "bir gün içinde",
+      "A_MINUTE": "bir dakika içinde",
+      "A_MONTH": "Bir ay içinde",
+      "A_YEAR": "bir yıl içinde",
+      "AN_HOUR": "bir saat içinde",
+      "DAYS": "{{count}} gün içinde",
+      "FEW_SECONDS": "birkaç saniye içinde",
+      "HOURS": "{{count}} saat içinde",
+      "MINUTES": "{{count}} dakika içinde",
+      "MONTHS": "{{count}} ay içinde",
+      "YEARS": "{{count}} yıl içinde"
+    },
+    "PAST": {
+      "A_DAY": "Bir gün önce",
+      "A_MINUTE": "bir dakika önce",
+      "A_MONTH": "Bir ay önce",
+      "A_YEAR": "bir yıl önce",
+      "AN_HOUR": "bir saat önce",
+      "DAYS": "{{count}} gün önce",
+      "FEW_SECONDS": "birkaç saniye önce",
+      "HOURS": "{{count}} saat önce",
+      "MINUTES": "{{count}} dakika önce",
+      "MONTHS": "{{count}} ay önce",
+      "YEARS": "{{count}} yıl önce"
     }
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Panoya kopyalandı",
     "ERR_COMPRESSION": "Sıkıştırma arayüzü için hata",
     "FILE_DOWNLOADED": "{{fileName}} indirildi",
-    "FILE_DOWNLOADED_BTN": "Açık dosya",
+    "FILE_DOWNLOADED_BTN": "Açılan dosya",
+    "NAVIGATE_TO_TASK_ERR": "Göreve odaklanılamadı. Sildiniz mi?",
     "PERSISTENCE_DISALLOWED": "Veri kalıcı olarak sürdürülmeyecek. Bunun veri kaybına neden olabileceğini unutmayın!",
     "PERSISTENCE_ERROR": "Verilerin kalıcı hale getirilmesi istenirken hata oluştu: {{err}}",
     "RUNNING_X": "\"{{str}}\" çalıştırılıyor.",
@@ -1270,142 +1941,252 @@
     "DBX_GEN_TOKEN": "Dropbox: Jeton oluştur ...",
     "DBX_META": "Dropbox: Dosya meta al ...",
     "DBX_UPLOAD": "Dropbox: Dosya yükle ...",
-    "GDRIVE_DOWNLOAD": "Google Drive: Dosya indir ...",
-    "GDRIVE_UPLOAD": "Google Drive: Dosya yükle ...",
     "GITHUB_LOAD_ISSUE": "GitHub: Sorun verilerini yükle ...",
     "JIRA_LOAD_ISSUE": "Jira: Sorun verilerini yükle ...",
+    "SYNC": "Veriler senkronize ediliyor...",
     "UNKNOWN": "Uzak verileri yükleme",
     "WEB_DAV_DOWNLOAD": "WebDAV: Veriler indiriliyor ...",
     "WEB_DAV_UPLOAD": "WebDAV: Veriler yükleniyor ..."
   },
   "MH": {
     "ADD_NEW_TASK": "Yeni Görev ekle",
+    "ALL_PLANNED_LIST": "Tekrar/Planlanmış",
+    "BOARDS": "Panolar",
     "CREATE_PROJECT": "Proje Yarat",
     "CREATE_TAG": "Etiket Oluştur",
+    "DELETE_PROJECT": "Projeyi Sil",
     "DELETE_TAG": "Etiketi Sil",
+    "ENTER_FOCUS_MODE": "Odak Moduna Geç",
     "GO_TO_TASK_LIST": "Görev listesine git",
-    "MANAGE_PROJECTS": "Projeleri Yönet",
-    "METRICS": "Metrik",
+    "HELP": "Yardım",
+    "HM": {
+      "CALENDARS": "Nasıl Yapılır: Takvim eşleştirme",
+      "CONTRIBUTE": "Katkıda bulun",
+      "GET_HELP_ONLINE": "Online yardım al",
+      "KEYBOARD": "Nasıl Yapılır: Gelişmiş Klavye",
+      "REDDIT_COMMUNITY": "Reddit Topluluğu",
+      "REPORT_A_PROBLEM": "Sorun bildir",
+      "START_WELCOME": "Hoşgeldin turunu başlat",
+      "SYNC": "Nasıl Yapılır: Eşitleme ayarlamak"
+    },
+    "METRICS": "İstatistikler",
+    "NO_PROJECT_INFO": "Mevcut proje yok. \"Proje Oluştur\" butonuna tıklayarak yeni bir proje oluşturabilirsiniz.",
+    "NO_TAG_INFO": "Şu anda hiçbir etiket yok. Görev eklerken veya düzenlerken `#EtiketAdınız` girerek etiket ekleyebilirsiniz.",
     "NOTES": "Notlar",
-    "PROCRASTINATE": "ertelemek",
-    "PROJECTS": "Projeler",
+    "NOTES_PANEL_INFO": "Notlar yalnızca zaman çizelgesinden ve normal görev listesi görünümlerinden gösterilebilir.",
+    "PLANNER": "Planlayıcı",
+    "PROCRASTINATE": "Ertelemek",
     "PROJECT_MENU": "Proje Menüsü",
-    "PROJECT_SETTINGS": "Proje ayarları",
+    "PROJECT_SETTINGS": "Proje Ayarları",
+    "PROJECTS": "Projeler",
     "QUICK_HISTORY": "Hızlı Geçmiş",
-    "SCHEDULED": "tarifeli",
-    "SETTINGS": "ayarlar",
+    "SCHEDULE": "Takvim",
+    "SEARCH": "Arama",
+    "SETTINGS": "Ayarlar",
     "SHOW_SEARCH_BAR": "Arama çubuğunu göster",
     "TAGS": "Etiketler",
-    "TASKS": "Görevler",
     "TASK_LIST": "Görev listesi",
+    "TASKS": "Görevler",
     "TOGGLE_SHOW_BOOKMARKS": "Yer İşaretlerini Göster / Gizle",
+    "TOGGLE_SHOW_ISSUE_PANEL": "Göster/Gizle Sorun Paneli",
     "TOGGLE_SHOW_NOTES": "Proje Notlarını Göster / Gizle",
     "TOGGLE_TRACK_TIME": "Başlat / Durdur takip süresi",
     "TRIGGER_SYNC": "Senkronizasyonu manuel olarak tetikle",
-    "WORKLOG": "worklog"
+    "WORKLOG": "Görev günlüğü",
+    "SIDE_PANEL_MENU": "Yan Panel Menüsü"
+  },
+  "MIGRATE": {
+    "C_DOWNLOAD_BACKUP": "Eski verilerinizin bir yedeğini indirmek istiyor musunuz (Süper Üretkenlik'in eski sürümleriyle kullanılabilir)?",
+    "DETECTED_LEGACY": "Algılanan eski veriler. Sizin için taşıyacağız!",
+    "E_MIGRATION_FAILED": "Geçiş başarısız oldu! Hatalı:",
+    "E_RESTART_FAILED": "Otomatik yeniden başlatma başarısız oldu. Lütfen uygulamayı manuel olarak yeniden başlatın!",
+    "SUCCESS": "Göç tamam! Uygulama şimdi yeniden başlatılıyor..."
   },
   "PDS": {
-    "BACK": "Bekle bir şey unuttum!",
-    "BREAK_LABEL": "Sonları (saat / saat)",
-    "CELEBRATE": " <i>kutlamak için bir dakikanızı ayırın!</i>",
+    "ADD_TASKS_FROM_TODAY": "Bugünden itibaren görev ekleme",
+    "BREAK_LABEL": "Molalar (saat / saat)",
+    "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",
     "CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Hayır, sadece görevleri temizleyin",
-      "MSG": "Sen iş bitti Eve gitme zamanı!",
-      "OK": "Hay hay! Kapat!"
+      "CANCEL": "Hayır, sadece görevleri temizle",
+      "MSG": "Uygulamadan çıkılsın mı?",
+      "OK": "Çık"
     },
     "ESTIMATE_TOTAL": "Toplam tahmin:",
-    "EVALUATION": "Değerlendirme",
+    "EVALUATE_DAY": "Değerlendir",
     "EXPORT_TASK_LIST": "Görev Listesini Dışa Aktar",
-    "NO_TASKS": "Bu gün için görev yok",
-    "PLAN": "Plan",
+    "NO_TASKS": "Bugün için görev yok",
+    "PLAN_TOMORROW": "Plan",
+    "REVIEW_TASKS": "İnceleme",
+    "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
     "ROUND_15M": "Tüm görevleri 15 dakikaya yuvarlayın",
     "ROUND_30M": "Tüm görevleri 30 dakikaya yuvarlayın",
-    "ROUND_5M": "Tüm görevleri 5 dakikaya yuvarlayın",
     "ROUND_TIME_SPENT": "Geçen Zaman Harcandı",
     "ROUND_TIME_SPENT_TITLE": "Tüm görevlere zaman ayırdı. Dikkatli ol! Bunu geri alamazsınız!",
     "ROUND_TIME_WARNING": "!!! Dikkatli olun bu geri alınamaz !!!",
+    "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
     "ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
     "ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
-    "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
-    "SAVE_AND_GO_HOME": "Kaydet ve eve git",
+    "SAVE_AND_GO_HOME": "Günü bitir",
+    "SAVE_AND_GO_HOME_TOOLTIP": "Yapılan tüm görevleri arşive (iş günlüğü) taşıyın ve isteğe bağlı olarak tüm verileri senkronize edip uygulamayı kapatın.",
     "START_END": "Başlangıç - Bitiş",
-    "SUMMARY_FOR": " {{dayStr}}Günlük Özeti",
+    "SUMMARY_FOR": " {{dayStr}} Günlük Özeti",
     "TASKS_COMPLETED": "Tamamlanan Görevler",
-    "TASK_LIST": "Görev listesi",
     "TIME_SPENT_AND_ESTIMATE_LABEL": "Harcanan Zaman / Tahmini",
     "TIME_SPENT_ESTIMATE_TITLE": "Harcanan Zaman: Bugün harcanan toplam süre. Arşivlenmiş görevler dahil değildir. - Tahmini Süre: Günümüzde çalışılan görevler için tahmini süre eksi diğer günlerde onlarla harcanan zaman.",
-    "TODAY": "Bugün",
+    "TIME_SPENT_TODAY_BY_TAG": "Etikete Göre Bugün Harcanan Zaman",
     "WEEK": "Hafta"
   },
   "PM": {
-    "TITLE": "Proje Metrikleri"
-  },
-  "PP": {
-    "ARCHIVED_PROJECTS": "Arşivlenmiş Projeler",
-    "ARCHIVE_PROJECT": "Arşiv Projesi",
-    "CLICK_TO_HIDE": "Projeyi menüden gizlemek için tıklayın",
-    "CLICK_TO_SHOW": "Projeyi menüde göstermek için tıklayın",
-    "DELETE_PROJECT": "Projeyi Sil",
-    "D_CONFIRM_ARCHIVE": {
-      "MSG": "Bu projeyi arşivlemek istediğinize emin misiniz? Arşivlenmiş Projeler artık menüde gösterilmeyecek ve verilerinin hiçbirini geri yüklemeden erişemezsiniz. Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "arşiv"
-    },
-    "D_CONFIRM_DELETE": {
-      "MSG": "Bu projeyi silmek istediğinize emin misiniz? Bunu yapmadan önce verilerinizi yedeklemeniz önerilir.",
-      "OK": "silmek"
-    },
-    "D_CONFIRM_UNARCHIVE": {
-      "MSG": "Bu projeyi silahsızlandırmak istediğinize emin misiniz?",
-      "OK": "Arşivden Çıkar"
-    },
-    "EDIT_PROJECT": "Projeyi Düzenle",
-    "EXPORT_PROJECT": "İhracat Projesi",
-    "GITHUB_CONFIGURED": "GitHub Entegrasyonu Yapılandırıldı",
-    "GITLAB_CONFIGURED": "GitLab Entegrasyonu Yapılandırıldı",
-    "IMPORT_FROM_FILE": "Dosyadan içe aktar",
-    "JIRA_CONFIGURED": "Jira Entegrasyonu Yapılandırıldı",
-    "OPEN_PROJECT_CONFIGURED": "OpenProject Entegrasyonu Yapılandırıldı",
-    "S_INVALID_JSON": "Proje dosyası için geçersiz json",
-    "TITLE": "Projeye Genel Bakış",
-    "UN_ARCHIVE_PROJECT": "Silahsız Proje"
+    "TITLE": "Proje İstatistikleri"
   },
   "PS": {
     "GLOBAL_SETTINGS": "Genel Ayarlar",
     "ISSUE_INTEGRATION": "Sorun Entegrasyonu",
-    "PRIVACY_POLICY": "Özel politika",
+    "NO_PLUGINS_INSTALLED": "Şu an yüklenmiş eklenti yok.",
+    "PLUGINS": "Eklentiler",
+    "PRIVACY_POLICY": "Gizlilik sözleşmesi",
     "PRODUCTIVITY_HELPER": "Verimlilik Yardımcısı",
     "PROJECT_SETTINGS": "Projeye Özel Ayarlar",
-    "PROVIDE_FEEDBACK": "Geribildirim sağlamak",
+    "PROVIDE_FEEDBACK": "Geribildirim sağlayın",
+    "RELOAD": "Yeniden Yükle",
     "SYNC_EXPORT": "Senkronize Et ve Dışa Aktar",
-    "TAG_SETTINGS": "Etikete Özgü Ayarlar",
+    "TAG_SETTINGS": "Etiket Ayarları",
     "TOGGLE_DARK_MODE": "Koyu Modu Değiştir"
   },
+  "PLUGINS": {
+    "INSTALL_PLUGIN": "Eklenti Yükle",
+    "UPLOAD_PLUGIN_INSTRUCTION": "Yüklemek için bir eklenti ZIP dosyası yükleyin:",
+    "CHOOSE_PLUGIN_FILE": "Eklenti Dosyası Seç",
+    "INSTALLING": "Yükleniyor...",
+    "CLEAR_PLUGIN_CACHE": "Eklenti Önbelleğini Temizle",
+    "REMOVE": "Kaldır",
+    "HOOKS": "Kancalar",
+    "PERMISSIONS": "İzinler",
+    "ID": "Kimlik:",
+    "MIN_VERSION": "Min. Sürüm:",
+    "NODE_EXECUTION_REQUIRED": "Bu eklenti, yalnızca masaüstü uygulamasında mevcut olan Node.js çalıştırmasını gerektirir.",
+    "TOGGLE_PLUGIN": "{{pluginName}} Aç/Kapat",
+    "EXPERIMENTAL_WARNING_TITLE": "Deneysel Özellik - Güvenlik Uyarısı",
+    "EXPERIMENTAL_WARNING": "Eklenti sistemi deneysel aşamadadır ve son derece dikkatli kullanılmalıdır.",
+    "SECURITY_WARNING": "Eklentiler verilerinize ve sisteminize önemli erişimlere sahiptir. Güvenilmeyen eklentilerin yüklenmesi ciddi güvenlik riskleri taşır:",
+    "RISK_DATA_ACCESS": "Eklentiler TÜM görevlerinizi, projelerinizi ve kişisel verilerinizi okuyabilir, değiştirebilir ve silebilir",
+    "RISK_MALICIOUS_CODE": "Kötü amaçlı eklentiler hassas bilgileri çalabilir veya verilerinizi bozabilir",
+    "RISK_SYSTEM_ACCESS": "Node.js izinli masaüstü eklentileri sistem komutları çalıştırabilir",
+    "RISK_PERFORMANCE": "Kötü yazılmış eklentiler performans sorunlarına veya çökmelere neden olabilir",
+    "RECOMMENDATION": "Yalnızca güvenilir kaynaklardan eklenti yükleyin ve mümkünse kodlarını inceleyin. Yeni eklentileri yüklemeden önce her zaman verilerinizi yedekleyin.",
+    "CONFIGURATION": "Konfigürasyon",
+    "CONFIGURE": "Yapılandır",
+    "INSTALL_WARNING": "Bir eklenti yüklemeden önce, kaynağına güvendiğinizden ve talep ettiği izinleri anladığınızdan emin olun.",
+    "SYSTEM_ACCESS_REQUEST_TITLE": "Sistem Erişim Talebi",
+    "SYSTEM_ACCESS_REQUEST_DESC": "Bu eklenti, sisteminizde Node.js kodu çalıştırma izni istiyor. Bu izin, aşağıdakilere olanak tanıyacaktır:",
+    "GRANT_PERMISSION": "İzin Ver",
+    "CANCEL": "İptal",
+    "REMEMBER_CHOICE": "Bu eklenti için seçimimi hatırla",
+    "TRUST_WARNING": "Yalnızca bu eklentiye güveniyorsanız izin verin",
+    "CAPABILITIES": {
+      "ACCESS_FILES": "Sisteminizdeki dosyalara erişme ve değiştirme",
+      "RUN_COMMANDS": "Sistem komutlarını çalıştırma",
+      "USE_NODE_APIS": "Node.js API'lerini ve modüllerini kullanma"
+    },
+    "ERROR": "Hata",
+    "LOADING_PLUGIN": "Eklenti yükleniyor...",
+    "ENABLED": "Etkin",
+    "DISABLED": "Devre Dışı",
+    "PLEASE_SELECT_ZIP_FILE": "Lütfen bir ZIP dosyası seçin",
+    "FILE_TOO_LARGE": "Dosya çok büyük ({{fileSize}}MB). Maksimum boyut {{maxSize}}MB",
+    "FAILED_TO_INSTALL": "Eklenti yüklenemedi",
+    "FAILED_TO_CLEAR_CACHE": "Eklenti önbelleği temizlenemedi",
+    "CONFIRM_REMOVE": "\"{{name}}\" eklentisini kaldırmak istediğinize emin misiniz?",
+    "FAILED_TO_REMOVE": "Eklenti kaldırılamadı",
+    "TYPE": "Tür: {{type}}",
+    "NO_ADDITIONAL_INFO": "Ek bilgi yok",
+    "NO_PLUGIN_ID_PROVIDED_FOR_HTML": "HTML içeriği için eklenti kimliği sağlanmadı",
+    "PROJECT_NOT_FOUND": "'{{contextId}}' projesi bulunamadı",
+    "TASKS_NOT_IN_PROJECT": "Bir veya daha fazla görev '{{contextId}}' projesinde değil",
+    "PARENT_TASK_NOT_FOUND": "'{{contextId}}' bağlamında üst görev bulunamadı",
+    "TASK_NOT_FOUND": "{{taskId}} kimliğine sahip görev bulunamadı",
+    "TASKS_NOT_SUBTASKS": "Bir veya daha fazla görev '{{contextId}}' alt görevi değil",
+    "NO_PLUGIN_CONTEXT_PERSISTENCE": "Eklentinin veri kalıcılığı izni yok",
+    "UNABLE_TO_PERSIST_DATA": "Eklenti deposuna veri kaydedilemedi",
+    "NO_PLUGIN_CONTEXT_LOADING": "Eklenti verileri yüklemek için bağlam iznine sahip değil",
+    "NO_PLUGIN_CONTEXT_SYNC": "Eklentinin senkronizasyon izni yok",
+    "NO_PLUGIN_CONTEXT_HEADER_BUTTON": "Eklentinin üst başlığa buton ekleme izni yok",
+    "NO_PLUGIN_CONTEXT_MENU_ENTRY": "Eklentinin menü girdisi ekleme izni yok",
+    "MENU_ENTRY_LABEL_REQUIRED": "Menü girdisi etiketi gereklidir",
+    "MENU_ENTRY_ONCLICK_REQUIRED": "Menü girdisi onClick işleyicisi gereklidir",
+    "MENU_ENTRY_ICON_STRING": "Menü simgesi bir metin (string) olmalıdır",
+    "NO_PLUGIN_CONTEXT_SIDE_PANEL": "Eklentinin yan panel butonu ekleme izni yok",
+    "SIDE_PANEL_LABEL_REQUIRED": "Yan panel buton etiketi gereklidir",
+    "SIDE_PANEL_ONCLICK_REQUIRED": "Yan panel buton onClick işleyicisi gereklidir",
+    "NO_PLUGIN_CONTEXT_SHORTCUT": "Eklentinin kısayol kaydetme izni yok",
+    "PROJECT_DOES_NOT_EXIST": "Proje mevcut değil",
+    "TAGS_DO_NOT_EXIST": "Bir veya daha fazla etiket mevcut değil",
+    "PARENT_TASK_DOES_NOT_EXIST": "Üst görev mevcut değil",
+    "VALIDATION_FAILED": "Doğrulama başarısız oldu",
+    "NO_PLUGIN_CONTEXT_ACTION": "Eklentinin işlem yapma izni yok",
+    "ACTION_TYPE_NOT_ALLOWED": "'{{type}}' işlem türüne izin verilmiyor",
+    "NODE_ONLY_DESKTOP": "Node.js çalıştırması yalnızca masaüstü uygulamasında kullanılabilir",
+    "NO_PLUGIN_CONTEXT_NODE": "Eklentinin Node.js kodu çalıştırma izni yok",
+    "NO_PLUGIN_MANIFEST_NODE": "Eklenti manifest dosyası Node.js modülünü içermiyor",
+    "ELECTRON_API_NOT_AVAILABLE": "Electron API'si kullanılamıyor",
+    "FAILED_TO_EXECUTE_SCRIPT": "Node.js betiği çalıştırılamadı",
+    "ALREADY_INITIALIZED": "Eklenti zaten başlatıldı",
+    "USER_DECLINED_NODE_PERMISSION": "Kullanıcı Node.js çalıştırma iznini reddetti",
+    "FAILED_TO_EXTRACT_ZIP": "Eklenti ZIP dosyası çıkarılamadı",
+    "MANIFEST_NOT_FOUND": "ZIP dosyasında eklenti manifesti (manifest.json) bulunamadı",
+    "MANIFEST_TOO_LARGE": "Eklenti manifesti çok büyük (maksimum {{maxSize}}KB)",
+    "PLUGIN_JS_NOT_FOUND": "Eklenti JavaScript dosyası (plugin.js) ZIP içinde bulunamadı",
+    "CODE_TOO_LARGE": "Eklenti kodu çok büyük (maksimum {{maxSize}}MB)",
+    "UNKNOWN_ERROR": "Bilinmeyen bir hata oluştu",
+    "PLUGIN_DIALOG_TITLE": "Eklenti Mesajı",
+    "NO_CONTENT_PROVIDED": "İçerik sağlanmadı",
+    "OK": "Tamam",
+    "LOADING_INTERFACE": "Eklenti arayüzü yükleniyor...",
+    "ERROR_LOADING_PLUGIN": "Eklenti yüklenirken hata oluştu",
+    "GO_BACK": "Geri Dön",
+    "FAILED_TO_LOAD": "Eklenti yüklenemedi",
+    "FAILED_TO_LOAD_CONFIG": "Eklenti yapılandırması yüklenemedi",
+    "FAILED_TO_SAVE_CONFIG": "Eklenti yapılandırması kaydedilemedi",
+    "PLUGIN_ID_NOT_PROVIDED": "Eklenti kimliği sağlanmadı",
+    "PLUGIN_SYSTEM_FAILED_INIT": "Eklenti sistemi başlatılamadı",
+    "PLUGIN_NOT_FOUND": "Eklenti bulunamadı",
+    "PLUGIN_DOES_NOT_SUPPORT_IFRAME": "Bu eklenti iframe arayüzünü desteklemiyor",
+    "INDEX_HTML_NOT_LOADED": "Eklenti index.html yüklenemedi"
+  },
   "SCHEDULE": {
+    "LAST": "Son:",
+    "NEXT": "Sonraki:",
+    "NO_REPEATABLE_TASKS": "Şu anda tekrarlanan görev yok. Görev yan panelinde \"Görevi Tekrarla\"yı seçerek bir görevi zamanlayabilirsiniz. Açmak için, bir görevin üzerine gelindiğinde görünen en sağdaki simgeye tıklayın (veya mobil cihazda yalnızca göreve dokunun).",
     "NO_SCHEDULED": "Şu anda zamanlanmış görev yok. Görev bağlamı menüsünde \"Görevi Zamanla\" seçeneğini seçerek bir görevi zamanlayabilirsiniz. Açmak için görevin sağındaki 3 küçük noktaya tıklayın.",
+    "NO_SCHEDULED_TITLE": "Gün İçin Zamanlanmış Görevler",
+    "REPEATED_TASKS": "Tekrarlanan görevler",
+    "SCHEDULED_TASKS": "Zamanlanmış görevler",
+    "SCHEDULED_TASKS_WITH_TIME": "Hatırlatıcılı zamanlanmış görevler",
     "START_TASK": "Görevi şimdi başlat ve anımsatıcıyı kaldır"
   },
   "THEMES": {
-    "SELECT_THEME": "Tema seçin",
     "amber": "kehribar",
     "blue": "mavi",
-    "blue-grey": "Mavi gri",
+    "blue-grey": "Mavi-gri",
     "cyan": "camgöbeği",
-    "deep-orange": "Derin-turuncu",
+    "deep-orange": "koyu turuncu",
     "deep-purple": "koyu mor",
     "green": "yeşil",
-    "indigo": "çivit",
+    "indigo": "çivit mavisi",
     "light-blue": "açık mavi",
     "light-green": "açık yeşil",
-    "lime": "Misket Limonu",
+    "lime": "kireç yeşili",
     "pink": "pembe",
     "purple": "mor",
-    "teal": "çamurcun",
-    "yellow": "Sarı"
+    "SELECT_THEME": "Tema seçin",
+    "teal": "turkuaz",
+    "yellow": "sarı"
   },
   "V": {
     "E_1TO10": "Lütfen 1 ile 10 arasında bir değer girin",
     "E_DATETIME": "Girilen değer bir tarih değil!",
+    "E_DURATION": "Lütfen geçerli bir süre girin (ör. 1 saat)",
     "E_MAX": " {{val}}'dan büyük olmamalıdır",
     "E_MAX_LENGTH": "Maksimum {{val}} karakter uzunluğunda olmalı",
     "E_MIN": " {{val}}'dan küçük olmalı",
@@ -1413,21 +2194,47 @@
     "E_PATTERN": "Geçersiz Giriş",
     "E_REQUIRED": "Bu alan gereklidir"
   },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Kullanıcı profillerini yönet",
+    "CREATE_NEW_PROFILE": "Yeni profil oluştur",
+    "PROFILE_NAME": "Profil adı",
+    "PROFILE_NAME_PLACEHOLDER": "örn. İş, Kişisel",
+    "CREATE": "Oluştur",
+    "EXISTING_PROFILES": "Mevcut profiller",
+    "ACTIVE": "Aktif",
+    "CREATED": "Oluşturuldu:",
+    "SAVE": "Kaydet",
+    "CANCEL": "İptal",
+    "RENAME": "Yeniden adlandır",
+    "EXPORT_PROFILE": "Profili dışa aktar",
+    "DELETE_PROFILE": "Profili sil",
+    "OPEN_PROFILES_FOLDER": "Profiller klasörünü aç",
+    "CLOSE": "Kapat",
+    "MANAGE_PROFILES": "Profilleri yönet..."
+  },
   "WW": {
     "ADD_MORE": "Daha ekle",
-    "ADD_SCHEDULED_FOR_TODAY": "Bugün için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SCHEDULED_FOR_TOMORROW": "Yarın için planlanan görevleri ekleyin ({{nr}})",
     "ADD_SOME_TASKS": "Gününüzü planlamak için bazı görevler ekleyin!",
-    "COMPLETED_TASKS": "Tamamlanan Görevler",
-    "ESTIMATE_REMAINING": "Kalan tahmini:",
-    "FINISH_DAY": "Bitiş günü",
-    "HELP_PROCRASTINATION": "Erteliyorum yardım ediyorum!",
-    "NO_COMPLETED_TASKS": "Şu anda tamamlanmış bir görev yok.",
+    "DONE_TASKS": "Yapılan Görevler",
+    "DONE_TASKS_IN_ARCHIVE": "Burada şu anda tamamlanmış görev yok, ancak bazıları zaten arşivlendi.",
+    "ESTIMATE_REMAINING": "Tahmini kalan süre:",
+    "LATER_TODAY": "Bugün Daha Sonra",
+    "FINISH_DAY": "Günü bitir",
+    "FINISH_DAY_FOR_PROJECT": "Günü bu proje için bitir",
+    "FINISH_DAY_FOR_TAG": "Günü bu etiket için bitir",
+    "FINISH_DAY_TOOLTIP": "Gününüzü değerlendirin, yapılan tüm görevleri arşive taşıyın (isteğe bağlı olarak) ve/veya bir sonraki gününüzü planlayın.",
+    "HELP_PROCRASTINATION": "Erteliyorum yardım et!",
+    "MOVE_DONE_TO_ARCHIVE": "Arşive taşıma işlemi tamamlandı",
+    "NO_DONE_TASKS": "Şu anda yapılmış bir görev yok",
+    "NO_PLANNED_TASK_ALL_DONE": "tüm görevler tamamlandı",
     "NO_PLANNED_TASKS": "Planlanmış görev yok",
     "READY_TO_WORK": "Çalışmaya hazır!",
-    "RESET_BREAK_TIMER": "Ara zamanlayıcı olmadan sıfırla",
+    "RESET_BREAK_TIMER": "Mola zamanlayıcısı olmadan sıfırla",
     "TIME_ESTIMATED": "Tahmini Süre:",
-    "WITHOUT_BREAK": "Ara vermeden:",
-    "WORKING_TODAY": "Bugün çalışıyorum:"
+    "TODAY_REMAINING": "Bugün kalan:",
+    "WITHOUT_BREAK": "Mola vermeden:",
+    "WORKING_TODAY": "Bugün çalışıyorum:",
+    "WORKING_TODAY_ARCHIVED": "Arşivlenen görevlerde bugün çalışılan süre"
   }
 }

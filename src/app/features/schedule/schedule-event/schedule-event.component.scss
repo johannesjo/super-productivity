@@ -1,0 +1,457 @@
+@use '../../../../styles/_globals.scss' as *;
+
+// TODO split up into more manageable bits
+
+:host {
+  --split-extra-border-radius: 20px;
+  --margin-bottom: 6px;
+  --margin-right: 10px;
+  --offset: 20px;
+  --offset-short-event: 15px;
+  --standard-border-radius: 6px;
+
+  border-radius: var(--standard-border-radius);
+  margin: 0 var(--margin-right) var(--margin-bottom) 0;
+  scroll-margin-top: 120px;
+  scroll-padding-top: 120px;
+  line-height: 1;
+  min-height: 20px;
+  display: flex;
+  align-items: flex-start;
+  border: 1px solid var(--separator-color);
+  border-left: 3px solid var(--project-color, var(--separator-color));
+  background: var(--schedule-event-bg);
+  color: var(--text-color);
+  position: relative;
+  z-index: 2;
+  user-select: none;
+
+  // Bring hovered events above others
+  &:hover {
+    z-index: 10;
+  }
+
+  // has to be for after elements
+  overflow: visible !important;
+  min-width: 0;
+
+  // Ensure resize handle has space and is clickable
+  &.resizable {
+    margin-bottom: calc(var(--margin-bottom) + 4px);
+  }
+
+  &.very-short-event {
+    align-items: center;
+  }
+
+  &.split-start {
+    border-radius: var(--split-extra-border-radius) var(--split-extra-border-radius) 0 0;
+    border-bottom-style: dashed;
+  }
+
+  &.split-continued {
+    border-radius: 0 var(--split-extra-border-radius) 0 0;
+    border-style: dashed solid dashed solid;
+    min-height: 8px;
+  }
+
+  &.split-continued-last {
+    border-radius: 0 0 var(--split-extra-border-radius) var(--split-extra-border-radius);
+    border-top-style: dashed;
+    min-height: 8px;
+  }
+
+  &.split-continued,
+  &.split-continued-last {
+    .title {
+      opacity: 0.4;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      text-align: center;
+      font-style: italic;
+      line-height: 0.4;
+    }
+  }
+
+  &.LunchBreak {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    margin-top: 2px;
+    border: none !important;
+    box-shadow: none !important;
+    z-index: 1;
+
+    .title {
+      flex: 0 1 auto;
+      column-width: auto;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .ico-wrapper {
+      margin-top: 0;
+    }
+  }
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: calc(-1 * (var(--margin-bottom) + 1px));
+    left: 0;
+    right: calc(-1 * (var(--margin-right) + 4px));
+    z-index: 3;
+    display: block;
+  }
+
+  &.resizable::before {
+    // Don't extend bottom for resizable events to avoid covering resize handle
+    bottom: 0;
+  }
+
+  &.CalendarEvent,
+  &.RepeatProjection,
+  &.RepeatProjectionSplit,
+  &.RepeatProjectionSplitContinued,
+  &.RepeatProjectionSplitContinuedLast,
+  &.ScheduledRepeatProjection {
+    border-style: dashed;
+    border-left-style: solid;
+    opacity: 0.7;
+    background: var(--schedule-event-bg);
+  }
+
+  &.CalendarEvent {
+    border-left: 1px solid var(--extra-border-color);
+  }
+
+  &.ScheduledRepeatProjection .ico {
+    color: var(--c-primary);
+  }
+
+  &.ScheduledTask {
+    border-radius: 0;
+
+    .ico {
+      color: var(--c-primary);
+      font-size: 24px;
+      height: 24px;
+      min-width: 24px;
+      line-height: 24px;
+      font-weight: normal;
+      opacity: 1;
+    }
+
+    .ico-wrapper {
+      margin: 4px 4px 0 6px;
+      opacity: 1;
+
+      @include mq(xs, max) {
+        margin: 1px 0 0 1px;
+      }
+    }
+
+    .time-badge {
+      color: var(--text-color);
+      border-color: var(--c-primary);
+    }
+  }
+}
+
+:host-context(.is-not-dragging) {
+  :host.CalendarEvent,
+  :host.RepeatProjection,
+  :host.RepeatProjectionSplit,
+  :host.ScheduledRepeatProjection {
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+      border-color: var(--c-accent);
+
+      &.CalendarEvent {
+        color: var(--c-accent);
+      }
+
+      .ico {
+        color: var(--c-accent);
+      }
+
+      > * {
+        opacity: 1;
+      }
+    }
+  }
+}
+
+.time-badge {
+  opacity: 1 !important;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, 0);
+  font-size: 10px;
+  z-index: 1;
+  line-height: 1;
+  height: 13px;
+  text-align: center;
+  padding: 1px;
+  border: 1px solid var(--extra-border-color);
+  border-radius: var(--card-border-radius);
+  color: var(--text-color);
+  background: var(--bg-lighter);
+
+  @include mq(xs, max) {
+    font-size: 9px;
+    height: 11px;
+  }
+
+  :host.very-short-event & {
+    margin-top: -4px;
+  }
+}
+
+:host > * {
+  pointer-events: none;
+}
+
+.ico-wrapper {
+  position: relative;
+  margin: 8px 0 0 6px;
+
+  @include mq(xs, max) {
+    margin-top: 4px;
+  }
+
+  :host.very-short-event & {
+    margin-top: 0;
+  }
+
+  :host.ScheduledRepeatProjection & {
+    margin-right: 2px;
+  }
+
+  mat-icon {
+    display: block;
+
+    & + mat-icon {
+      display: none;
+    }
+  }
+
+  :host:hover & mat-icon {
+    &:first-of-type:not(:last-of-type) {
+      display: none;
+    }
+
+    &:nth-child(2) {
+      display: block;
+    }
+  }
+}
+
+.ico {
+  font-size: 15px;
+  height: 15px;
+  line-height: 15px;
+  min-width: 15px;
+  opacity: 0.6;
+  text-align: center;
+
+  @include mq(xs, max) {
+    font-size: 12px;
+    height: 12px;
+    line-height: 12px;
+    min-width: 12px;
+  }
+}
+
+.day-of-month {
+  z-index: 1;
+  text-align: center;
+  padding-top: 1px;
+  font-size: 9px;
+  line-height: 10px;
+  min-width: 14px;
+  width: auto;
+  font-weight: 900;
+  border: 1px solid var(--text-color-muted);
+  border-top-width: 3px;
+  border-radius: 2px;
+  position: relative;
+  color: var(--text-color-muted);
+
+  @include mq(xs, max) {
+    border-radius: 1px;
+    border-left: 0;
+    border-right: 0;
+    min-width: 12px;
+    font-size: 8px;
+    line-height: 8px;
+    border-top-width: 2px;
+  }
+}
+
+.title {
+  font-size: 14px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 1 1 auto;
+  padding: 6px;
+  font-weight: 400;
+  line-height: 1.4;
+  max-height: 100%;
+  text-align: left;
+  column-width: 250px;
+
+  @include mq(xs, max) {
+    column-width: 120px;
+    font-size: 11px;
+    line-height: 1.3;
+    padding: 4px;
+  }
+
+  @include mq(xxs, max) {
+    font-size: 10px;
+  }
+
+  :host.very-short-event & {
+    padding: 1px 6px 2px;
+  }
+
+  :host.SplitTaskContinued &,
+  :host.RepeatProjectionSplitContinued &,
+  :host.SplitTaskContinuedLast &,
+  :host.RepeatProjectionSplitContinuedLast & {
+    line-clamp: 1;
+  }
+}
+
+:host-context(.is-dragging.isShiftKeyPressed) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask {
+    box-shadow: var(--whiteframe-shadow-6dp);
+  }
+}
+
+:host-context(.isDarkTheme.is-dragging.isShiftKeyPressed) {
+  :host.TaskPlannedForDay,
+  :host.SplitTaskPlannedForDay,
+  :host.Task,
+  :host.SplitTask {
+    background: var(--bg-lightest);
+  }
+}
+
+:host.drag-over {
+  z-index: 3;
+  transform: translateX(16px);
+  //transform: translateY(var(--offset));
+  //
+  //&:after {
+  //  content: '';
+  //  position: absolute;
+  //  transform: translateY(calc(-1 * var(--offset)));
+  //  top: calc(-1 * var(--margin-bottom));
+  //  height: calc(var(--offset) + var(--margin-bottom));
+  //  left: 0;
+  //  right: calc(-1 * (var(--margin-right) + 4px));
+  //  z-index: 3;
+  //}
+  //
+  //&.very-short-event {
+  //  transform: translateY(var(--offset-short-event));
+  //
+  //  &:after {
+  //    transform: translateY(calc(-1 * var(--offset-short-event)));
+  //    height: calc(var(--offset-short-event) + var(--margin-bottom));
+  //  }
+  //}
+}
+
+:host.draggable {
+  cursor: grab;
+
+  // Ensure the ::before pseudo-element also shows the cursor
+  &::before {
+    cursor: grab;
+  }
+
+  &:active {
+    cursor: grabbing;
+    transition: none;
+
+    &::before {
+      cursor: grabbing;
+    }
+  }
+}
+
+// Resize functionality
+.resize-handle {
+  position: absolute;
+  bottom: -6px;
+  left: -2px;
+  right: -2px;
+  height: 12px;
+  cursor: ns-resize;
+  z-index: 4;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  pointer-events: auto;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  .resize-grip {
+    position: absolute;
+    bottom: 1px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 32px;
+    height: 4px;
+    border-radius: 2px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: -5px;
+      left: 4px;
+      right: 4px;
+      height: 3px;
+      background: var(--separator-color);
+      border-radius: 1px;
+    }
+  }
+}
+
+:host:hover .resize-handle {
+  opacity: 0.7;
+}
+
+:host.is-resizing {
+  transition: none !important;
+  user-select: none;
+  z-index: 20 !important; // Ensure resizing events appear above all others
+  border-color: var(--c-accent);
+
+  .ico {
+    color: var(--c-accent);
+  }
+
+  .resize-handle {
+    opacity: 1;
+  }
+
+  .resize-grip {
+    &::before {
+      background: var(--c-accent);
+    }
+  }
+}

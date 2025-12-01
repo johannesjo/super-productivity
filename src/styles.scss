@@ -1,14 +1,18 @@
-@import '../node_modules/@fontsource/roboto/400.css';
-@import '../node_modules/@fontsource/roboto/400-italic.css';
-@import '../node_modules/@fontsource/roboto/700.css';
-@import '../node_modules/@fontsource/roboto/300.css';
-@import 'styles/font/material-icons';
+@use 'sass:meta';
+@use 'styles/font/material-icons';
 
-@import '_variables';
-@import 'styles/themes';
-@import 'styles/page';
-@import 'styles/util';
-@import 'styles/components/components';
+@use 'sass:math';
+
+@import '../node_modules/@fontsource/open-sans/400.css';
+@import '../node_modules/@fontsource/open-sans/400-italic.css';
+@import '../node_modules/@fontsource/open-sans/700.css';
+@import '../node_modules/@fontsource/open-sans/300.css';
+
+@include meta.load-css('styles/_css-variables');
+@include meta.load-css('styles/themes');
+@include meta.load-css('styles/page');
+@include meta.load-css('styles/util');
+@include meta.load-css('styles/components/components');
 
 * {
   //box-shadow: none !important;

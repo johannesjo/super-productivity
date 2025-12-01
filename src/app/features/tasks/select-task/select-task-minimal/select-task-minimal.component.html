@@ -1,0 +1,22 @@
+<input
+  #input
+  [formControl]="taskSelectCtrl"
+  [placeholder]="placeholder() || 'Enter task name...'"
+  [matAutocomplete]="auto"
+  (blur)="onBlur()"
+  (keydown)="onKeyDown($event)"
+  matInput
+  autocomplete="off"
+/>
+
+<mat-autocomplete
+  #auto="matAutocomplete"
+  [autoActiveFirstOption]="true"
+  (optionSelected)="onOptionSelected($event)"
+>
+  @for (task of filteredTasks$ | async; track task.id) {
+    <mat-option [value]="task">
+      {{ task.title }}
+    </mat-option>
+  }
+</mat-autocomplete>

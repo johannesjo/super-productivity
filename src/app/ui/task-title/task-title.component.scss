@@ -1,0 +1,142 @@
+@use '../../../styles/_globals.scss' as *;
+//@import '../../../tasks/task/task.component.mixins';
+
+// TODO rename to task title component
+
+:host {
+  display: flex;
+  align-items: center;
+  text-align: start;
+  outline: none;
+  margin-left: 1px;
+  background: inherit;
+  overflow: visible;
+  // needed for z-index to work
+  position: relative;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  border-radius: 4px;
+  //z-index: var(--z-task-title);
+  z-index: 4;
+  border: 1px solid transparent;
+  transition: var(--transition-leave);
+  padding: 3px 3px 3px 5px;
+  cursor: text;
+
+  &:focus {
+    outline: none !important;
+  }
+
+  &.is-focused {
+    transition: var(--transition-enter);
+    //z-index: var(--z-task-title-focus) !important;
+    z-index: 32 !important;
+    border: 1px solid var(--c-accent);
+    @include inlineEditElevation();
+    box-shadow: var(--whiteframe-shadow-4dp);
+  }
+}
+
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+.display-value {
+  position: absolute;
+  inset: 0;
+  display: block;
+  padding: 0;
+  opacity: 1;
+  transition: opacity var(--transition-standard);
+  white-space: pre-wrap;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  text-wrap-mode: wrap;
+  text-indent: 0;
+}
+
+.display-value.is-placeholder {
+  opacity: 0.6;
+  font-style: italic;
+}
+
+.wrapper > textarea {
+  appearance: none;
+  //background: var(--c-dark-50);
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
+  cursor: text;
+  padding: 0;
+
+  &:focus {
+    user-select: text;
+    -webkit-user-select: text; /* Safari */
+    outline: none;
+    // NOTE: needed to overwrite color for current task
+
+    color: var(--text-color-most-intense);
+  }
+}
+
+.wrapper > textarea,
+.display-value {
+  position: absolute;
+  inset: 0;
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-family: inherit;
+  border-radius: inherit;
+  outline: none;
+  color: inherit;
+  margin: 0;
+  max-width: 100%;
+  display: block;
+  appearance: none;
+  background: transparent;
+  resize: none;
+  width: 100%;
+  overflow: hidden;
+  min-height: 20px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  white-space-collapse: preserve;
+  border: none;
+  text-wrap-mode: wrap;
+  text-indent: 0;
+}
+
+.height-measure {
+  position: static;
+  visibility: hidden;
+  pointer-events: none;
+  display: block;
+  font-size: inherit;
+  letter-spacing: inherit;
+  font-family: inherit;
+  border-radius: inherit;
+  outline: none;
+  color: inherit;
+  margin: 0;
+  max-width: 100%;
+  appearance: none;
+  background: transparent;
+  resize: none;
+  width: 100%;
+  overflow: hidden;
+  min-height: 20px;
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  white-space-collapse: preserve;
+  border: none;
+  text-wrap-mode: wrap;
+  text-indent: 0;
+}
+
+.is-editing .display-value {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}

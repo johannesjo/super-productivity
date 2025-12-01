@@ -1,43 +1,46 @@
 <form
-  (submit)="save()"
+  (submit)="$event.preventDefault(); save()"
   class="dialog-help-wrapper"
 >
   <h1 mat-dialog-title>
-    {{isEdit ? (T.F.TASK_REPEAT.D_EDIT.EDIT|translate) :
-    (T.F.TASK_REPEAT.D_EDIT.ADD|translate)}}
+    {{
+      isEdit()
+        ? (T.F.TASK_REPEAT.D_EDIT.EDIT | translate)
+        : (T.F.TASK_REPEAT.D_EDIT.ADD | translate)
+    }}
   </h1>
 
   <mat-dialog-content>
     <!--    <h3 class="mat-h3">{{task.title}}</h3>-->
     <help-section>
-      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP1|translate}}</p>
-      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP2|translate}}</p>
-      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP3|translate}}</p>
-      <p>{{T.F.TASK_REPEAT.D_EDIT.HELP4|translate}}</p>
+      <p>{{ T.F.TASK_REPEAT.D_EDIT.HELP1 | translate }}</p>
+      <p>{{ T.F.TASK_REPEAT.D_EDIT.HELP2 | translate }}</p>
+      <p>{{ T.F.TASK_REPEAT.D_EDIT.HELP3 | translate }}</p>
+      <p>{{ T.F.TASK_REPEAT.D_EDIT.HELP4 | translate }}</p>
     </help-section>
 
     <div class="form-wrapper">
       <formly-form
-        (modelChange)="repeatCfg=$event"
-        [form]="formGroup1"
-        [fields]="TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS"
-        [model]="repeatCfg"
+        (modelChange)="repeatCfg.set($event)"
+        [form]="formGroup1()"
+        [fields]="TASK_REPEAT_CFG_FORM_CFG_BEFORE_TAGS()"
+        [model]="repeatCfg()"
       ></formly-form>
       <chip-list-input
         (addItem)="addTag($event)"
         (addNewItem)="addNewTag($event)"
         (removeItem)="removeTag($event)"
-        [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL|translate"
-        [model]="repeatCfg.tagIds"
-        [suggestions]="(tagSuggestions$|async)"
+        [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL | translate"
+        [model]="repeatCfg().tagIds"
+        [suggestions]="tagSuggestions()"
       ></chip-list-input>
 
       <!--      <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG|translate">-->
       <formly-form
-        (modelChange)="repeatCfg=$event"
-        [form]="formGroup2"
-        [fields]="TASK_REPEAT_CFG_ADVANCED_FORM_CFG"
-        [model]="repeatCfg"
+        (modelChange)="repeatCfg.set($event)"
+        [form]="formGroup2()"
+        [fields]="TASK_REPEAT_CFG_ADVANCED_FORM_CFG()"
+        [model]="repeatCfg()"
       ></formly-form>
       <!--            </collapsible>-->
     </div>
@@ -50,28 +53,40 @@
       mat-button
       type="button"
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
 
-    <button
-      (click)="remove()"
-      *ngIf="isEdit"
-      color="primary"
-      mat-stroked-button
-      type="button"
-    >
-      <mat-icon>delete_forever</mat-icon>
-      {{T.G.REMOVE|translate}}
-    </button>
+    @if (isEdit()) {
+      @if (canRemoveInstance()) {
+        <button
+          (click)="deleteInstance()"
+          color="primary"
+          mat-stroked-button
+          type="button"
+        >
+          <mat-icon>event_busy</mat-icon>
+          {{ removeInstanceButtonText() }}
+        </button>
+      }
+      <button
+        (click)="remove()"
+        color="primary"
+        mat-stroked-button
+        type="button"
+      >
+        <mat-icon>delete_forever</mat-icon>
+        {{ T.G.REMOVE | translate }}
+      </button>
+    }
 
     <button
-      [disabled]="!formGroup1.valid || !formGroup2.valid"
+      [disabled]="!formGroup1().valid || !formGroup2().valid"
       color="primary"
       mat-stroked-button
       type="submit"
     >
       <mat-icon>save</mat-icon>
-      {{T.G.SAVE|translate}}
+      {{ T.G.SAVE | translate }}
     </button>
   </mat-dialog-actions>
 </form>

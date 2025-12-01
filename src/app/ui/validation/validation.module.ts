@@ -4,8 +4,7 @@ import { MinDirective } from './min.directive';
 import { MaxDirective } from './max.directive';
 
 @NgModule({
-  imports: [CommonModule],
-  declarations: [MinDirective, MaxDirective],
+  imports: [CommonModule, MinDirective, MaxDirective],
   exports: [MinDirective, MaxDirective],
 })
 export class ValidationModule {}

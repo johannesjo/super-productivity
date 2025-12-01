@@ -1,0 +1,23 @@
+@use '../mixins/_media-queries';
+
+.fab-wrapper {
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  z-index: 333;
+
+  @include media-queries.mq(xs, max) {
+    right: 50%;
+    transform: translateX(50%);
+    bottom: 16px;
+  }
+
+  > button:nth-child(1n + 1) {
+    margin-left: 8px;
+  }
+
+  // hide the fab when the keyboard is visible
+  .isAndroidKeyboardVisible & {
+    display: none;
+  }
+}

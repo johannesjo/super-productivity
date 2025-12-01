@@ -1,0 +1,41 @@
+@use '../../../styles/_globals.scss' as *;
+
+// Shared task styling mixins and utilities
+@mixin task-box-base() {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1px;
+  top: 1px;
+  transition: var(--transition-standard);
+  transition-property: transform, box-shadow;
+  border: 1px solid transparent;
+  background: var(--task-c-bg);
+}
+
+@mixin task-icon-button() {
+  margin: 0 var(--task-button-spacer);
+  padding: 0;
+  z-index: var(--z-btn);
+  opacity: var(--task-icon-default-opacity);
+  transition: transform var(--transition-fast);
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+    z-index: var(--z-btn-hover);
+    outline: none;
+  }
+}
+
+@mixin responsive-text($default, $medium, $small) {
+  font-size: $default;
+
+  @include mq(sm) {
+    font-size: $medium;
+  }
+
+  @include mq(xs) {
+    font-size: $small;
+  }
+}

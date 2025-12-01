@@ -1,26 +1,65 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
+
+import { LanguageCode, DateTimeLocale } from '../../core/locale.constants';
+import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 import { ProjectCfgFormKey } from '../project/project.model';
-import { LanguageCode, MODEL_VERSION_KEY } from '../../app.constants';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
 import { KeyboardConfig } from './keyboard-config.model';
+import { TaskReminderOptionId } from '../tasks/task.model';
+
+export type AppFeaturesConfig = Readonly<{
+  isTimeTrackingEnabled: boolean;
+  isFocusModeEnabled: boolean;
+  isSchedulerEnabled: boolean;
+  isPlannerEnabled: boolean;
+  isBoardsEnabled: boolean;
+  isScheduleDayPanelEnabled: boolean;
+  isIssuesPanelEnabled: boolean;
+  isProjectNotesEnabled: boolean;
+  isSyncIconEnabled: boolean;
+  isDonatePageEnabled: boolean;
+  isEnableUserProfiles: boolean;
+}>;
 
 export type MiscConfig = Readonly<{
-  isDarkMode: boolean;
   isAutMarkParentAsDone: boolean;
-  isAutoStartNextTask: boolean;
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
-  isNotifyWhenTimeEstimateExceeded: boolean;
   isTurnOffMarkdown: boolean;
   isAutoAddWorkedOnToToday: boolean;
   isMinimizeToTray: boolean;
   isTrayShowCurrentTask: boolean;
   // allow also false because of #569
-  defaultProjectId: string | null | false;
-  firstDayOfWeek: number;
+  defaultProjectId?: string | null | false;
   startOfNextDay: number;
   taskNotesTpl: string;
   isDisableAnimations: boolean;
+  // optional because it was added later
+  isDisableCelebration?: boolean;
+  isShowProductivityTipLonger?: boolean;
+  isTrayShowCurrentCountdown?: boolean;
+  isOverlayIndicatorEnabled?: boolean;
+  customTheme?: string;
+  defaultStartPage?: number;
+  unsplashApiKey?: string | null;
+}>;
+
+export type ShortSyntaxConfig = Readonly<{
+  isEnableProject: boolean;
+  isEnableDue: boolean;
+  isEnableTag: boolean;
+}>;
+
+export type TimeTrackingConfig = Readonly<{
+  trackingInterval?: number | null;
+  defaultEstimate?: number | null;
+  defaultEstimateSubTasks?: number | null;
+  isAutoStartNextTask: boolean;
+  isNotifyWhenTimeEstimateExceeded: boolean;
+  isTrackingReminderEnabled: boolean;
+  isTrackingReminderShowOnMobile: boolean;
+  trackingReminderMinTime: number;
+  isTrackingReminderNotify?: boolean;
+  isTrackingReminderFocusWindow?: boolean;
 }>;
 
 export type EvaluationConfig = Readonly<{
@@ -29,7 +68,6 @@ export type EvaluationConfig = Readonly<{
 
 export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
-  isUnTrackedIdleResetsBreakTimer: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
 }>;
@@ -43,85 +81,104 @@ export type TakeABreakConfig = Readonly<{
   takeABreakMessage: string;
   takeABreakMinWorkingTime: number;
   takeABreakSnoozeTime: number;
-  motivationalImgs: string[];
+  // due to ngx-formly inconsistency they also can be undefined or null even
+  motivationalImgs: (string | undefined | null)[];
 }>;
 
 export type PomodoroConfig = Readonly<{
-  isEnabled: boolean;
-  isStopTrackingOnBreak: boolean;
-  isStopTrackingOnLongBreak: boolean;
-  isManualContinue: boolean;
-  isManualContinueBreak: boolean;
-  isPlaySound: boolean;
-  isPlaySoundAfterBreak: boolean;
-  // isGoToWorkView: boolean;
-  isPlayTick: boolean;
+  isEnabled?: boolean;
+  isStopTrackingOnBreak?: boolean;
+  isStopTrackingOnLongBreak?: boolean;
+  isDisableAutoStartAfterBreak?: boolean;
+  isManualContinue?: boolean;
+  isManualContinueBreak?: boolean;
+  isPlaySound?: boolean;
+  isPlaySoundAfterBreak?: boolean;
+  // isGoToWorkView?: boolean;
+  isPlayTick?: boolean;
 
-  duration: number;
-  breakDuration: number;
-  longerBreakDuration: number;
+  // due to formly not being reliable here we need to be more lenient
+  duration?: number | null;
+  breakDuration?: number | null;
+  longerBreakDuration?: number | null;
   cyclesBeforeLongerBreak: number;
 }>;
 
 // NOTE: needs to be writable due to how we use it
-
-export interface DropboxSyncConfig {
-  accessToken: string | null;
-  refreshToken: string | null;
-  _tokenExpiresAt?: number;
-}
+// export type DropboxSyncConfig = object;
 
 export interface WebDavConfig {
-  baseUrl: string | null;
-  userName: string | null;
-  password: string | null;
-  syncFilePath: string | null;
+  baseUrl?: string | null;
+  userName?: string | null;
+  password?: string | null;
+  // TODO remove and migrate
+  syncFilePath?: string | null;
+  syncFolderPath?: string | null;
 }
 
 export interface LocalFileSyncConfig {
-  syncFilePath: string | null;
+  // TODO remove and migrate
+  syncFilePath?: string | null;
+  syncFolderPath?: string | null;
 }
 
 export type LocalBackupConfig = Readonly<{
   isEnabled: boolean;
 }>;
 
-export type LanguageConfig = Readonly<{
-  lng: LanguageCode | null;
+/**
+ * App localization section
+ * If property value is:
+ * - `undefined` - that indicates value not been setted manually yet
+ * - `null` - that indicates value manually reseted to app/system default
+ *
+ */
+export type LocalizationConfig = Readonly<{
+  lng?: LanguageCode | null;
+  firstDayOfWeek?: number | null;
+  dateTimeLocale?: DateTimeLocale | null;
 }>;
 
 export type SoundConfig = Readonly<{
   isIncreaseDoneSoundPitch: boolean;
   doneSound: string | null;
   breakReminderSound: string | null;
+  trackTimeSound?: string | null;
   volume: number;
 }>;
 
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
-  isCompressionEnabled: boolean;
-  syncProvider: SyncProvider | null;
+  isEncryptionEnabled?: boolean;
+  isCompressionEnabled?: boolean;
+  // TODO migrate to SyncProviderId
+  syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
-  dropboxSync: DropboxSyncConfig;
-  webDav: WebDavConfig;
-  localFileSync: LocalFileSyncConfig;
+  /* NOTE: view model for form only*/
+  encryptKey?: string | null;
+  /* NOTE: view model for form only*/
+  webDav?: WebDavConfig;
+  /* NOTE: view model for form only*/
+  localFileSync?: LocalFileSyncConfig;
 }>;
 
-export type TimelineCalendarProvider = Readonly<{
-  icalUrl: string;
-  icon: string | null;
-  isEnabled: boolean;
-}>;
-
-export type TimelineConfig = Readonly<{
+export type ScheduleConfig = Readonly<{
   isWorkStartEndEnabled: boolean;
   workStart: string;
   workEnd: string;
-  calendarProviders: TimelineCalendarProvider[];
+  isLunchBreakEnabled: boolean;
+  lunchBreakStart: string;
+  lunchBreakEnd: string;
 }>;
 
-export type TrackingReminderConfig = Readonly<{
+export type ReminderConfig = Readonly<{
+  isCountdownBannerEnabled: boolean;
+  countdownDuration: number;
+  defaultTaskRemindOption?: TaskReminderOptionId;
+}>;
+
+export type TrackingReminderConfigOld = Readonly<{
   isEnabled: boolean;
   isShowOnMobile: boolean;
   minTime: number;
@@ -132,12 +189,25 @@ export type DominaModeConfig = Readonly<{
   text: string;
   interval: number;
   volume: number;
+  voice?: string | null;
+}>;
+
+export type FocusModeConfig = Readonly<{
+  isAlwaysUseFocusMode: boolean;
+  isSkipPreparation: boolean;
+}>;
+
+export type DailySummaryNote = Readonly<{
+  txt?: string;
+  lastUpdateDayStr?: string;
 }>;
 
 // NOTE: config properties being undefined always means that they should be overwritten with the default value
 export type GlobalConfigState = Readonly<{
-  lang: LanguageConfig;
+  appFeatures: AppFeaturesConfig;
+  localization: LocalizationConfig;
   misc: MiscConfig;
+  shortSyntax: ShortSyntaxConfig;
   evaluation: EvaluationConfig;
   idle: IdleConfig;
   takeABreak: TakeABreakConfig;
@@ -145,13 +215,14 @@ export type GlobalConfigState = Readonly<{
   keyboard: KeyboardConfig;
   localBackup: LocalBackupConfig;
   sound: SoundConfig;
-  trackingReminder: TrackingReminderConfig;
-  timeline: TimelineConfig;
+  timeTracking: TimeTrackingConfig;
+  reminder: ReminderConfig;
+  schedule: ScheduleConfig;
   dominaMode: DominaModeConfig;
+  focusMode: FocusModeConfig;
 
   sync: SyncConfig;
-
-  [MODEL_VERSION_KEY]?: number;
+  dailySummaryNote?: DailySummaryNote;
 }>;
 
 export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
@@ -160,7 +231,9 @@ export type GlobalSectionConfig =
   | MiscConfig
   | PomodoroConfig
   | KeyboardConfig
-  | TimelineConfig
+  | ScheduleConfig
+  | ReminderConfig
+  | DailySummaryNote
   | SyncConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
@@ -171,6 +244,7 @@ export interface LimitedFormlyFieldConfig<FormModel>
 
 export type CustomCfgSection =
   | 'FILE_IMPORT_EXPORT'
+  | 'SYNC_SAFETY_BACKUPS'
   | 'JIRA_CFG'
   | 'SIMPLE_COUNTER_CFG'
   | 'OPENPROJECT_CFG';
@@ -184,6 +258,7 @@ export interface ConfigFormSection<FormModel> {
   customSection?: CustomCfgSection;
   items?: LimitedFormlyFieldConfig<FormModel>[];
   isElectronOnly?: boolean;
+  isHideForAndroidApp?: boolean;
 }
 
 export interface GenericConfigFormSection

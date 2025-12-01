@@ -1,0 +1,106 @@
+@use '../../../../styles/_globals.scss' as *;
+@use '../task/task.component.mixins' as *;
+
+:host {
+  position: relative;
+  z-index: 1;
+  display: block;
+  padding-bottom: var(--s);
+
+  task-list {
+    padding: 0;
+    margin-bottom: 0;
+  }
+}
+
+progress-bar {
+  position: absolute !important;
+  bottom: 0;
+}
+
+.wrapper {
+  transition: var(--transition-standard);
+
+  @media (max-width: #{$layout-xs}) {
+    margin: var(--s-half);
+    margin-bottom: var(--s);
+  }
+}
+
+.task-title-wrapper {
+  min-height: var(--bar-height);
+  display: flex;
+  align-items: center;
+  z-index: 44;
+  border-radius: var(--card-border-radius);
+  margin: 8px;
+  border-bottom: 2px solid var(--c-primary) !important;
+
+  ::ng-deep textarea {
+    border: 2px solid red;
+    font-weight: 600 !important;
+  }
+
+  task-title {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: 0;
+    color: var(--text-color);
+  }
+}
+
+.task-title.task-title {
+  font-weight: bold;
+  transform-origin: top center;
+  padding: var(--s);
+  margin: 0;
+  flex-grow: 1;
+  margin-top: 4px;
+  line-height: 1.4;
+  min-height: 40px;
+  font-size: 17px;
+
+  @include mq(xs) {
+    font-size: 15px;
+  }
+
+  &:focus {
+    transform: scale(1);
+  }
+
+  &[contenteditable='true']:empty:before {
+    content: attr(placeholder);
+    pointer-events: none;
+    display: block;
+    opacity: 0.4;
+  }
+}
+
+.created,
+.date-info {
+  padding: var(--s);
+  opacity: 0.5;
+  text-align: center;
+  color: var(--text-color-muted);
+}
+
+.edit-date-info {
+  &:hover {
+    cursor: pointer;
+  }
+}
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: calc(-1 * var(--s));
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: 2;
+}

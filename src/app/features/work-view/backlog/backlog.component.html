@@ -1,18 +1,16 @@
 <div class="wrapper">
-  <div
-    class="task-list-wrapper"
-    *ngIf="(ready$|async) else spinner"
-  >
-    <task-list
-      [isBacklog]="true"
-      [noTasksMsg]="T.BL.NO_TASKS|translate"
-      [tasks]="backlogTasks"
-      class="isHidePlayBtn"
-      listId="PARENT"
-      listModelId="BACKLOG"
-    ></task-list>
-  </div>
-  <ng-template #spinner>
+  @if (ready$ | async) {
+    <div class="task-list-wrapper">
+      <task-list
+        [isBacklog]="true"
+        [noTasksMsg]="T.BL.NO_TASKS | translate"
+        [tasks]="backlogTasks()"
+        class="isHidePlayBtn"
+        listId="PARENT"
+        listModelId="BACKLOG"
+      ></task-list>
+    </div>
+  } @else {
     <full-page-spinner></full-page-spinner>
-  </ng-template>
+  }
 </div>

@@ -1,0 +1,342 @@
+@use 'angular-material-css-vars' as mat-css-vars;
+@use '../../../../styles/_globals.scss' as *;
+
+.month-header {
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+  right: 0;
+  border-top: 1px solid var(--extra-border-color);
+  border-bottom: 1px solid var(--extra-border-color);
+  box-shadow: var(--whiteframe-shadow-1dp);
+  z-index: 10;
+  color: var(--text-color);
+  background: var(--bg-lighter);
+  align-items: center;
+  justify-content: center;
+  padding: 8px 16px 6px 16px;
+
+  .month-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin-bottom: 6px;
+
+    @include mq(xs, max) {
+      font-size: 16px;
+      margin-bottom: 3px;
+    }
+  }
+
+  @include mq(xs, max) {
+    padding: 6px 12px 3px 12px;
+  }
+}
+
+.month-grid-container {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto repeat(var(--nr-of-weeks), 1fr);
+  gap: 1px;
+  height: calc(100vh - 120px);
+  background: var(--grid-color);
+
+  .cdk-drag-dragging {
+    z-index: 1000;
+    transform: rotate(2deg);
+  }
+
+  .cdk-drag-placeholder {
+    opacity: 0.3;
+  }
+}
+
+.weekday-header {
+  text-align: center;
+  font-weight: 600;
+  padding: 6px;
+  background: var(--bg);
+  color: var(--text-color);
+  border: 1px solid var(--grid-color);
+  grid-row: 1;
+
+  @include mq(xs, max) {
+    padding: 3px;
+    font-size: 11px;
+  }
+
+  &:nth-child(1) {
+    grid-column: 1;
+  } // Sun
+  &:nth-child(2) {
+    grid-column: 2;
+  } // Mon
+  &:nth-child(3) {
+    grid-column: 3;
+  } // Tue
+  &:nth-child(4) {
+    grid-column: 4;
+  } // Wed
+  &:nth-child(5) {
+    grid-column: 5;
+  } // Thu
+  &:nth-child(6) {
+    grid-column: 6;
+  } // Fri
+  &:nth-child(7) {
+    grid-column: 7;
+  } // Sat
+}
+
+.month-day-cell {
+  background: var(--bg);
+  border: 1px solid var(--grid-color);
+  display: flex;
+  flex-direction: column;
+  min-height: 80px;
+  position: relative;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+
+  :host[style*='--nr-of-weeks: 3'] & {
+    min-height: 120px;
+  }
+
+  :host[style*='--nr-of-weeks: 4'] & {
+    min-height: 100px;
+  }
+
+  :host[style*='--nr-of-weeks: 5'] & {
+    min-height: 85px;
+  }
+
+  :host[style*='--nr-of-weeks: 6'] & {
+    min-height: 70px;
+  }
+
+  @include mq(xs, max) {
+    min-height: 50px;
+
+    :host[style*='--nr-of-weeks: 3'] & {
+      min-height: 80px;
+    }
+
+    :host[style*='--nr-of-weeks: 4'] & {
+      min-height: 65px;
+    }
+
+    :host[style*='--nr-of-weeks: 5'] & {
+      min-height: 55px;
+    }
+
+    :host[style*='--nr-of-weeks: 6'] & {
+      min-height: 50px;
+    }
+  }
+
+  &.other-month {
+    opacity: 0.4;
+    background: var(--bg-lighter);
+  }
+
+  &.today {
+    .month-day-number {
+      background: var(--c-primary);
+      color: white;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      @include mq(xs, max) {
+        width: 20px;
+        height: 20px;
+        font-size: 12px;
+      }
+    }
+  }
+
+  // Hover effect
+  &:hover {
+    background: var(--bg-lighter);
+  }
+
+  // Drag over effect
+  &.drag-over {
+    background: mat-css-vars.mat-css-color-primary($opacity: 0.1);
+    border-color: mat-css-vars.mat-css-color-primary();
+  }
+}
+
+.month-day-header {
+  padding: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--grid-color);
+
+  @include mq(xs, max) {
+    padding: 4px;
+  }
+
+  .month-day-number {
+    font-weight: 600;
+    font-size: 14px;
+
+    @include mq(xs, max) {
+      font-size: 12px;
+    }
+  }
+}
+
+.month-day-events {
+  flex: 1;
+  padding: 4px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  max-height: calc(100% - 35px);
+  width: 100%;
+  box-sizing: border-box;
+
+  @include mq(xs, max) {
+    padding: 2px;
+    max-height: calc(100% - 25px);
+  }
+
+  :host[style*='--nr-of-weeks: 3'] & .month-event:nth-child(n + 8) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 4'] & .month-event:nth-child(n + 6) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 5'] & .month-event:nth-child(n + 4) {
+    display: none;
+  }
+
+  :host[style*='--nr-of-weeks: 6'] & .month-event:nth-child(n + 3) {
+    display: none;
+  }
+
+  @include mq(xs, max) {
+    :host[style*='--nr-of-weeks: 3'] & .month-event:nth-child(n + 4) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 4'] & .month-event:nth-child(n + 3) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 5'] & .month-event:nth-child(n + 2) {
+      display: none;
+    }
+
+    :host[style*='--nr-of-weeks: 6'] & .month-event:nth-child(n + 2) {
+      display: none;
+    }
+  }
+
+  .month-event:nth-child(n + 4) {
+    display: none;
+
+    @media (min-height: 800px) {
+      display: block;
+    }
+
+    @media (min-height: 800px) and (max-width: 768px) {
+      &:nth-child(n + 3) {
+        display: none;
+      }
+    }
+  }
+
+  &::after {
+    content: attr(data-more-events);
+    display: none;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.54);
+    padding: 2px;
+
+    @include darkTheme() {
+      color: rgba(255, 255, 255, 0.54);
+    }
+  }
+}
+
+.month-event {
+  margin-bottom: 1px;
+
+  .month-schedule-event {
+    font-size: 11px;
+    padding: 2px 4px;
+    border-radius: 3px;
+    cursor: pointer;
+    display: flex;
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    box-sizing: border-box;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+      padding: 1px 2px;
+    }
+
+    //&.Task {
+    //  background: mat-css-vars.mat-css-color-primary($opacity: 0.2);
+    //  border-left: 3px solid mat-css-vars.mat-css-color-primary();
+    //}
+
+    //&.SplitTask {
+    //  background: mat-css-vars.mat-css-color-accent($opacity: 0.2);
+    //  border-left: 3px solid mat-css-vars.mat-css-color-accent();
+    //}
+
+    //&.TaskPlannedForDay {
+    //  background: mat-css-vars.mat-css-color-warn($opacity: 0.2);
+    //  border-left: 3px solid mat-css-vars.mat-css-color-warn();
+    //}
+
+    // Hover effect
+    &:hover {
+      opacity: 0.8;
+      transform: scale(1.02);
+      transition: all 0.2s ease;
+    }
+  }
+}
+
+@include mq(xs, max) {
+  .month-grid-container {
+    height: calc(100vh - 150px);
+    gap: 0.5px;
+  }
+
+  .month-day-cell {
+    min-height: 60px;
+  }
+
+  .month-day-events .month-event:nth-child(n + 3) {
+    display: none;
+  }
+
+  ::ng-deep schedule-event .ico-wrapper {
+    display: none;
+  }
+}
+
+.event-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  background: var(--c-accent);
+  border-radius: 50%;
+  margin-left: 4px;
+  vertical-align: middle;
+}

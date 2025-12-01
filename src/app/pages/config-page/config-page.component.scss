@@ -1,4 +1,4 @@
-@import '../../../variables';
+@use '../../../styles/_globals.scss' as *;
 
 .page-settings {
   text-align: start;
@@ -10,19 +10,18 @@
   .section-wrapper {
     //display: grid;
     //grid-template-columns: 50% 50%;
-    //grid-gap: 0 $s*2;
+    //grid-gap: 0 var(--s2);
   }
 
   .config-section {
-    @include dividerBorderColor(1px);
+    border: 1px solid var(--divider-color);
     break-inside: avoid;
     margin-bottom: 10px;
-    border-radius: $card-border-radius;
-    background: #ffffff;
+    border-radius: var(--card-border-radius);
+    background: var(--card-bg);
 
-    @include darkTheme {
-      background-color: $dark-theme-card-bg;
-    }
+    background-color: var(--card-bg);
+    //background-color: var(--bg-slightly-lighter);
 
     .md-title {
       margin-top: 0;
@@ -34,11 +33,8 @@
 
     ::ng-deep .isExpanded .collapsible-header {
       font-weight: bold;
-      border-color: $light-theme-extra-border-color;
 
-      @include darkTheme {
-        border-color: $dark-theme-extra-border-color;
-      }
+      border-color: var(--extra-border-color);
     }
   }
 
@@ -61,13 +57,29 @@
   margin-top: auto;
   text-align: center;
   font-style: italic;
-  padding: $s * 3;
+  padding: var(--s3);
 }
 
-.dark-mode-toggle {
-  margin: 20px 0;
+:host .config-section ::ng-deep {
+  $this-panel-padding-left-right: 12px;
 
-  :host-context(.isMac.isElectron) & {
-    display: none;
+  .collapsible-header {
+    font-size: 16px;
+    margin-top: 0;
+    padding: 10px $this-panel-padding-left-right;
+  }
+
+  .collapsible-panel {
+    //border-top: 1px solid black;
+    overflow: visible;
+
+    > * {
+      // for help icon positioning
+      // does not work because of translate on the slide down ani element
+      // position: static;
+
+      // add a padding
+      padding: 0 $this-panel-padding-left-right;
+    }
   }
 }

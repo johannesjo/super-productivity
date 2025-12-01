@@ -1,0 +1,57 @@
+<mat-tab-group
+  mat-stretch-tabs="false"
+  dynamicHeight="true"
+  cdkScrollable
+  (selectedIndexChange)="onTabChange($event)"
+  [selectedIndex]="selectedTabIndex()"
+>
+  @for (board of boards(); track board.id; let i = $index) {
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <span #tabLabel>{{ board.title | translate }}</span>
+      </ng-template>
+      <ng-template matTabContent>
+        <board
+          [boardCfg]="board"
+          cdkDropListGroup
+        ></board>
+      </ng-template>
+    </mat-tab>
+    <!-- Context menu will be handled outside the loop -->
+  }
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-header-item">
+        <mat-icon>add_circle</mat-icon>
+      </div>
+    </ng-template>
+
+    <ng-template matTabContent>
+      <div class="board-add-wrapper">
+        <h2>{{ T.F.BOARDS.V.ADD_NEW_BOARD | translate }}</h2>
+        <board-edit
+          [boardCfg]="DEFAULT_BOARD_CFG"
+          (afterSave)="goToLastIndex()"
+        ></board-edit>
+      </div>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>
+
+<!-- Simple context menu attached to the whole component -->
+<context-menu
+  [rightClickTriggerEl]="componentElement"
+  [allowedSelectors]="'.mat-mdc-tab-label, span'"
+  [contextMenu]="boardContextMenuTemplate"
+></context-menu>
+
+<ng-template #boardContextMenuTemplate>
+  <button
+    mat-menu-item
+    (click)="duplicateBoard()"
+  >
+    Duplicate Board
+  </button>
+  <!--  <button mat-menu-item>Rename</button>-->
+</ng-template>

@@ -1,42 +1,24 @@
-import { Inject, LOCALE_ID, Pipe, PipeTransform } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { inject, Pipe, PipeTransform } from '@angular/core';
 import { isToday } from '../../util/is-today.util';
+import { ShortTimeHtmlPipe } from './short-time-html.pipe';
+import { formatMonthDay } from '../../util/format-month-day.util';
+import { DateTimeFormatService } from '../../core/date-time-format/date-time-format.service';
 
-@Pipe({
-  name: 'shortPlannedAt',
-})
+@Pipe({ name: 'shortPlannedAt', standalone: true })
 export class ShortPlannedAtPipe implements PipeTransform {
-  constructor(private datePipe: DatePipe, @Inject(LOCALE_ID) private locale: string) {}
+  private _shortTimeHtmlPipe = inject(ShortTimeHtmlPipe);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
-  transform(value: number | null, ...args: unknown[]): string | null {
+  transform(value?: number | null, timeOnly?: boolean): string | null {
     if (typeof value !== 'number') {
       return null;
     }
 
-    const locale = this.locale;
-
-    if (isToday(value)) {
-      const str = `${new Date(value).toLocaleTimeString(locale, {
-        hour: 'numeric',
-        minute: 'numeric',
-      })}`;
-      // fallback as 12:00 PM is too long
-      if (str.length >= 7) {
-        return this.datePipe.transform(value, 'H:mm');
-      }
-      return str;
+    if (isToday(value) || timeOnly) {
+      return this._shortTimeHtmlPipe.transform(value);
     } else {
-      const str = `${new Date(value).toLocaleDateString(locale, {
-        month: 'numeric',
-        day: 'numeric',
-      })}`;
-
-      const lastChar = str.slice(-1);
-
-      if (isNaN(lastChar as any)) {
-        return str.slice(0, -1);
-      }
-      return str;
+      const locale = this._dateTimeFormatService.currentLocale;
+      return formatMonthDay(new Date(value), locale);
     }
   }
 }

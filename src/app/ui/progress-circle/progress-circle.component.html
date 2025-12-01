@@ -1,0 +1,37 @@
+<svg
+  class="progress-circle__svg"
+  [attr.viewBox]="viewBox"
+  [attr.width]="size"
+  [attr.height]="size"
+>
+  <circle
+    class="progress-circle__bg"
+    [attr.cx]="center"
+    [attr.cy]="center"
+    [attr.r]="radius"
+    fill="none"
+    [attr.stroke-width]="strokeWidth"
+  ></circle>
+
+  @if (showProgress()) {
+    <circle
+      class="progress-circle__progress"
+      [attr.cx]="center"
+      [attr.cy]="center"
+      [attr.r]="radius"
+      fill="none"
+      [attr.stroke-width]="strokeWidth"
+      [attr.stroke-dasharray]="circumference"
+      [attr.stroke-dashoffset]="dashOffset()"
+    ></circle>
+  } @else if (isPulsing()) {
+    <circle
+      class="progress-circle__pulse"
+      [attr.cx]="center"
+      [attr.cy]="center"
+      [attr.r]="radius"
+      fill="none"
+      [attr.stroke-width]="strokeWidth"
+    ></circle>
+  }
+</svg>

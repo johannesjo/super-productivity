@@ -1,51 +1,11 @@
-@mixin smallMainContainer($is-global: false) {
-  $sel: #{&};
-  @if ($is-global) {
-    .isSmallMainContainer & {
-      @content;
-    }
-  } @else if ($sel and $sel ==':host') {
-    @at-root :host-context(.isSmallMainContainer) {
-      @content;
-    }
-  } @else if ($sel and $sel !='') {
-    @at-root
-    .isSmallMainContainer &,
-    :host::ng-deep .isSmallMainContainer &,
-    :host-context(.isSmallMainContainer) & {
-      //border: 2px solid red !important;
-      @content;
-    }
-  } @else {
-    :host-context(.isSmallMainContainer) {
-      //border: 2px solid lightblue !important;
-      @content;
-    }
+@mixin smallMainContainer() {
+  @container main-content (max-width: 499px) {
+    @content;
   }
 }
 
-@mixin verySmallMainContainer($is-global: false) {
-  $sel: #{&};
-  @if ($is-global) {
-    .isVerySmallMainContainer & {
-      @content;
-    }
-  } @else if ($sel and $sel ==':host') {
-    @at-root :host-context(.isVerySmallMainContainer) {
-      @content;
-    }
-  } @else if ($sel and $sel !='') {
-    @at-root
-    .isVerySmallMainContainer &,
-    :host::ng-deep .isVerySmallMainContainer &,
-    :host-context(.isVerySmallMainContainer) & {
-      //border: 2px solid greenyellow !important;
-      @content;
-    }
-  } @else {
-    :host-context(.isVerySmallMainContainer) {
-      @content;
-    }
+@mixin verySmallMainContainer() {
+  @container main-content (max-width: 360px) {
+    @content;
   }
 }
-

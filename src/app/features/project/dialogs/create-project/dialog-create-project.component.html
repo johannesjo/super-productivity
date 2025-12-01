@@ -1,10 +1,14 @@
 <h1 mat-dialog-title>
-  <span *ngIf="projectData.id">{{T.F.PROJECT.D_CREATE.EDIT|translate}}</span>
-  <span *ngIf="!projectData.id">{{T.F.PROJECT.D_CREATE.CREATE|translate}}</span>
+  @if (projectData.id) {
+    <span>{{ T.F.PROJECT.D_CREATE.EDIT | translate }}</span>
+  }
+  @if (!projectData.id) {
+    <span>{{ T.F.PROJECT.D_CREATE.CREATE | translate }}</span>
+  }
 </h1>
 
 <form
-  (ngSubmit)="submit()"
+  (ngSubmit)="$event.preventDefault(); submit()"
   [formGroup]="formTheme"
 >
   <mat-dialog-content>
@@ -16,136 +20,6 @@
       [options]="formOptionsBasic"
     >
     </formly-form>
-
-    <div class="issue-provider-cfg">
-      <div class="item">
-        <button
-          (click)="openJiraCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!jiraCfg?.isEnabled"
-            svgIcon="jira"
-          ></mat-icon>
-          <mat-icon *ngIf="jiraCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_JIRA|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openGithubCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!githubCfg?.isEnabled"
-            svgIcon="github"
-          ></mat-icon>
-          <mat-icon *ngIf="githubCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_GIT|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openRedmineCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!redmineCfg?.isEnabled"
-            svgIcon="redmine"
-          ></mat-icon>
-          <mat-icon *ngIf="redmineCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_REDMINE_PROJECT|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openGitlabCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!gitlabCfg?.isEnabled"
-            svgIcon="gitlab"
-          ></mat-icon>
-          <mat-icon *ngIf="gitlabCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_GITLAB|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openCaldavCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!caldavCfg?.isEnabled"
-            svgIcon="caldav"
-          ></mat-icon>
-          <mat-icon *ngIf="caldavCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_CALDAV|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openOpenProjectCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!openProjectCfg?.isEnabled"
-            svgIcon="open_project"
-          ></mat-icon>
-          <mat-icon *ngIf="openProjectCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_OPEN_PROJECT|translate}}</span
-          >
-        </button>
-      </div>
-      <div class="item">
-        <button
-          (click)="openGiteaCfg()"
-          color="primary"
-          mat-button
-          type="button"
-        >
-          <mat-icon
-            *ngIf="!giteaCfg?.isEnabled"
-            svgIcon="gitea"
-          ></mat-icon>
-          <mat-icon *ngIf="giteaCfg?.isEnabled">checkmark</mat-icon>
-          <span style="padding-left: 8px"
-            >{{T.F.PROJECT.D_CREATE.SETUP_GITEA_PROJECT|translate}}</span
-          >
-        </button>
-      </div>
-      <!--<div class="item">-->
-      <!--<button mat-raised-button color=primary-->
-      <!--type="button">-->
-      <!--<mat-icon *ngIf="!projectData?.issueIntegrationCfgs?.GITHUB">card_giftcard</mat-icon>-->
-      <!--<mat-icon *ngIf="projectData?.issueIntegrationCfgs?.GITHUB">checkmark</mat-icon>-->
-      <!--Setup Github Issue Integration-->
-      <!--</button>-->
-      <!--</div>-->
-    </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
@@ -157,7 +31,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
       <button
         [disabled]="!formBasic.valid"
@@ -166,7 +40,7 @@
         mat-stroked-button
         type="submit"
       >
-        {{T.G.SAVE|translate}}
+        {{ T.G.SAVE | translate }}
       </button>
     </div>
   </mat-dialog-actions>

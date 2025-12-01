@@ -1,0 +1,211 @@
+/**
+ * Dark Base Theme for Super Productivity
+ * Minimal dark theme with enhanced accessibility and smooth transitions
+ */
+
+/* Remove all shadows for minimal aesthetic */
+* {
+  box-shadow: none !important;
+}
+
+/* Smooth transitions for better UX */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* Dark theme variables */
+body.isDarkTheme {
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds - improved contrast */
+  --bg: #0a0a0a;
+  --bg-darker: #050505;
+  --bg-slightly-lighter: #141414;
+  --bg-lighter: #1a1a1a;
+  --bg-lightest: #242424;
+  --bg-super-light: #2e2e2e;
+
+  /* Component backgrounds */
+  --card-bg: #141414;
+  --sidenav-bg: #0f0f0f;
+  --selected-task-bg-color: #1f1f1f;
+  --banner-bg: #1a1a1a;
+
+  /* Task backgrounds with better hierarchy */
+  --task-c-bg: #141414;
+  --task-c-selected-bg: #1f1f1f;
+  --sub-task-c-bg: #0f0f0f;
+  --sub-task-c-bg-done: #0a0a0a;
+  --task-c-bg-done: #0a0a0a;
+  --task-c-current-bg: #242424;
+  --task-c-drag-drop-bg: #2e2e2e;
+  --sub-task-c-bg-in-selected: #1a1a1a;
+
+  /* Note backgrounds */
+  --standard-note-bg: #1a1a1a;
+  --standard-note-bg-hovered: #242424;
+
+  /* ===============================
+   * TEXT COLORS - WCAG AA compliant
+   * ===============================*/
+
+  --text-color: #e0e0e0;
+  --text-color-less-intense: rgba(224, 224, 224, 0.87);
+  --text-color-muted: rgba(224, 224, 224, 0.54);
+  --text-color-more-intense: #f5f5f5;
+  --text-color-most-intense: #ffffff;
+
+  /* Note text */
+  --standard-note-fg: #e0e0e0;
+
+  /* Task detail */
+  --task-detail-value-color: rgba(224, 224, 224, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: #2a2a2a;
+  --separator-color: rgba(255, 255, 255, 0.08);
+  --divider-color: #1f1f1f;
+
+  /* Chip borders */
+  --chip-outline-color: rgba(224, 224, 224, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* High contrast pink accent */
+  --palette-accent-500: #ff4081;
+  --c-accent: #ff4081;
+  --palette-accent-100: #ff80ab;
+  --palette-accent-200: #ff669a;
+  --palette-accent-300: #ff4d88;
+  --palette-accent-400: #ff3377;
+  --palette-accent-600: #e63771;
+  --palette-accent-700: #cc2b60;
+  --palette-accent-800: #b31f50;
+  --palette-accent-900: #991340;
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - improved visibility */
+  --scrollbar-thumb: #3a3a3a;
+  --scrollbar-thumb-hover: #4a4a4a;
+  --scrollbar-track: #0a0a0a;
+
+  /* Close button */
+  --close-btn-bg: #2e2e2e;
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(255, 64, 129, 0.12);
+  --options-border-color: rgba(255, 64, 129, 0.2);
+
+  /* Attachments */
+  --attachment-bg: #1a1a1a;
+  --attachment-border: transparent;
+  --attachment-control-bg: rgba(0, 0, 0, 0.4);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.8);
+
+  /* Grid */
+  --grid-color: rgba(255, 255, 255, 0.06);
+
+  /* Progress */
+  --progress-bg: rgba(255, 255, 255, 0.12);
+
+  /* Improvement banner */
+  --improvement-text: #f5f5f5;
+  --improvement-border: rgba(255, 64, 129, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* ===============================
+   * SHADOWS - DISABLED
+   * ===============================*/
+
+  --shadow-key-umbra-opacity: 0;
+  --shadow-key-penumbra-opacity: 0;
+  --shadow-ambient-shadow-opacity: 0;
+  --task-current-shadow: none;
+  --task-selected-shadow: none;
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+}
+
+/* Hide gradient backgrounds */
+body::before,
+body .first-line:hover .hover-controls::before {
+  display: none !important;
+}
+
+/* Apply background and text colors */
+body,
+body.isDarkTheme {
+  background-color: var(--bg);
+  color: var(--text-color);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Page wrapper */
+body .page-wrapper,
+body.isDarkTheme .page-wrapper {
+  color: var(--text-color);
+}
+
+/* Links */
+a,
+body a[href],
+body.isDarkTheme a[href] {
+  color: var(--c-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover,
+body a[href]:hover,
+body.isDarkTheme a[href]:hover {
+  opacity: 0.8;
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides */
+body.isDarkTheme {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+}

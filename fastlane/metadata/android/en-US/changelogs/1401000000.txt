@@ -1,0 +1,81 @@
+
+### Bug Fixes
+
+* can't add task in android app (d0146c2), closes #4675
+* ensure planned tasks appear in today view (#4708)
+* **log:** make export work better for android
+* **log:** make export work better for json
+* **logs:** improve log download for Android and fix test failures
+* opening task from backlog leading to error (da9ed3b), closes #4716 #4705
+* persist encryption password for WebDAV sync provider
+* **play-button:** fix progress pie circle display and calculation
+* **plugins:** replace any types with proper types and refactor message strings to enum
+* **plugins:** resolve TypeScript errors in plugin logging implementation
+* prevent submission of invalid forms #4725
+* remove duplicate Log imports
+* remove duplicate PFLog imports
+* resolve failing unit tests related to MockStore and meta-reducers
+* set duration formly value to undefined rather than null on invalid value in the hopes it does something #4725
+* **sync-md:** fix all failing tests in sync-md package
+* **sync-md:** fix failing tests after parser changes
+* **sync-md:** fix subtask cleanup when tasks change parents
+* **sync-md:** fix task duplication by improving indent detection
+* **sync-md:** fix TypeScript typing issues in parent-child-duplication test
+* **sync-md:** fix window focus immediate sync trigger
+* **sync-md:** handle parent task gaining new subtasks correctly
+* **sync-md:** prevent parent-child relationship duplication in task sync
+* **sync-md:** prevent state inconsistency with comprehensive relationship cleanup
+* **sync-md:** remove extra blank lines between tasks in markdown output
+* **sync-md:** sync file changes immediately when window is focused
+* **sync-md:** use proper ParsedTask interface in performance benchmarks
+* **sync:** afterCurrentSyncDoneOrSyncDisabled$ not working correctly
+* **syncMd:** separate debounce timers for MD to SP and SP to MD sync
+* **sync:** prevent overwrite form sync when importing safety backup
+* **sync:** vector clock edge case when vector clients differ
+* **sync:** wait for real initial sync instead of just loaded data and current sync to be done
+* **task-batch-reducer:** add comprehensive cleanup of deleted task references
+* **task-batch-update:** respect explicit subTaskIds updates in batch operations
+* **task-consistency:** simplify orphaned subtask deletion logic
+* use _reduceForArchive consistently in task-archive.service
+* weird no window error
+### Features
+
+* add helper function for reducing for archive
+* add modified date to task model
+* add npm commands for single file operations with minified output
+* add strategic logs for task due effects and add tasks service
+* add Turkish translations for plugin system and theme
+* adjust log path
+* **core:** add subTaskIds support to batch update reducer
+* improve styling for work-view sections
+* **log:** add way to download logs from error and from settings page
+* **log:** adjust logs
+* **log:** filter log.ts from stacktraces
+* **log:** fine tune logging
+* **log:** implement new log system
+* **log:** improve readability
+* **log:** record history
+* move overdue before later today
+* move overdue below
+* persist overdue & later today toggle state
+* **plugin-api:** add subTaskIds support to BatchTaskUpdate interface
+* **plugin:** make svg menu icon work
+* **plugins:** pass Log class through plugin system to sync-md
+* **plugins:** update plugin infrastructure and cleanup
+* re-implement task-archive restoring
+* **sync-md:** extract validate-and-fix-data-consistency-after-batch-update.ts
+* **sync-md:** general improvements
+* **sync-md:** general improvements
+* **sync-md:** handle multiple subtasks to parent case
+* **sync-md:** improve task-batch-update.reducer.ts
+* **sync-md:** new approach and make it work better
+* **sync-md:** update meta data
+* **sync:** improve clientId
+* **sync:** improve first sync experience (6b3ff3e), closes #4566
+* **sync:** improve first sync experience (584b195), closes #4566
+* **sync:** improve logging and change comparison to always conflict when one of the clocks is empty
+* **syncMd:** add comprehensive test suite and development configuration
+* **syncMd:** implement 10-second debounce for MD to SP sync with focus-aware triggering
+* **syncMd:** implement core markdown sync plugin with bidirectional synchronization
+* **syncMd:** update build configuration and archive old implementation
+* **sync:** preserve existing config (e.g. encryption password) when configuring auth for sync provider #4642

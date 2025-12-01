@@ -1,0 +1,16 @@
+.wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  mat-icon {
+    margin-bottom: 8px;
+  }
+}
+
+.error-txt {
+  overflow: auto;
+  width: 100%;
+  white-space: pre-wrap;
+}

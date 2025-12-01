@@ -1,5 +1,6 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject, EMPTY, Observable, of, timer } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
+import { toObservable } from '@angular/core/rxjs-interop';
+import { EMPTY, Observable, of, timer } from 'rxjs';
 import {
   delay,
   distinctUntilChanged,
@@ -10,12 +11,27 @@ import {
 } from 'rxjs/operators';
 import { PROGRESS_BAR_LABEL_MAP } from './global-progress-bar.const';
 import { T } from '../../t.const';
+import { Log } from '../../core/log';
 
 const DELAY = 100;
 
+export interface GlobalProgressBarLabel {
+  key: string;
+  params?: Record<string, unknown>;
+}
+
+interface CountUpOptions {
+  labelParams?: Record<string, unknown>;
+}
+
 @Injectable({ providedIn: 'root' })
 export class GlobalProgressBarService {
-  nrOfRequests$: BehaviorSubject<number> = new BehaviorSubject(0);
+  // Use signals internally
+  private _nrOfRequests = signal(0);
+  private _label = signal<GlobalProgressBarLabel | null>(null);
+
+  // Expose as observables for backward compatibility
+  nrOfRequests$ = toObservable(this._nrOfRequests);
   isShowGlobalProgressBar$: Observable<boolean> = this.nrOfRequests$.pipe(
     map((nr) => nr > 0),
     distinctUntilChanged(),
@@ -25,14 +41,14 @@ export class GlobalProgressBarService {
     delay(0),
   );
 
-  // We don't wan the spinner to appear forever, after 30000 seconds we just assume something
+  // We don't want the spinner to appear forever, after 60 seconds we just assume something
   // was not counted down correctly
   private _dirtyCountdown$ = this.isShowGlobalProgressBar$.pipe(
     switchMap((isShow) => {
       return isShow
-        ? timer(30 * 1000).pipe(
+        ? timer(60 * 1000).pipe(
             tap(() => {
-              console.error('Global spinner was shown forever (30s). Forcing countDown!');
+              Log.err('Global spinner was shown forever (60s). Forcing countDown!');
               this.countDown();
             }),
           )
@@ -40,13 +56,10 @@ export class GlobalProgressBarService {
     }),
   );
 
-  private _label$: BehaviorSubject<string | null> = new BehaviorSubject<string | null>(
-    null,
-  );
-  label$: Observable<string | null> = this._label$.pipe(
-    distinctUntilChanged(),
-    switchMap((label: string | null) =>
-      !!label ? of(label) : of(null).pipe(delay(DELAY)),
+  label$: Observable<GlobalProgressBarLabel | null> = toObservable(this._label).pipe(
+    distinctUntilChanged((prev, curr) => this._areLabelsEqual(prev, curr)),
+    switchMap((label: GlobalProgressBarLabel | null) =>
+      label ? of(label) : of(null).pipe(delay(DELAY)),
     ),
     // @see https://blog.angular-university.io/angular-debugging/
     delay(0),
@@ -56,28 +69,68 @@ export class GlobalProgressBarService {
     this._dirtyCountdown$.subscribe();
   }
 
-  countUp(url: string): void {
-    this.nrOfRequests$.next(this.nrOfRequests$.getValue() + 1);
-    this._label$.next(this._urlToLabel(url));
+  countUp(url: string, options?: CountUpOptions): void {
+    this._nrOfRequests.update((nr) => nr + 1);
+    this._label.set(this._urlToLabel(url, options?.labelParams));
   }
 
   countDown(): void {
-    this.nrOfRequests$.next(Math.max(this.nrOfRequests$.getValue() - 1, 0));
-    if (this.nrOfRequests$.getValue() - 1 <= 0) {
-      this._label$.next(null);
+    this._nrOfRequests.update((nr) => Math.max(nr - 1, 0));
+    if (this._nrOfRequests() <= 0) {
+      this._label.set(null);
     }
   }
 
-  private _urlToLabel(url: string): string {
+  private _urlToLabel(
+    url: string,
+    labelParams?: Record<string, unknown>,
+  ): GlobalProgressBarLabel {
     const [urlWithoutParams]: string[] = url.split('?');
 
     if (PROGRESS_BAR_LABEL_MAP[url]) {
-      return PROGRESS_BAR_LABEL_MAP[url];
+      return {
+        key: PROGRESS_BAR_LABEL_MAP[url],
+        params: labelParams,
+      };
     } else {
       const key = Object.keys(PROGRESS_BAR_LABEL_MAP).find((keyIn) =>
         urlWithoutParams.includes(keyIn),
       );
-      return key ? PROGRESS_BAR_LABEL_MAP[key] : T.GPB.UNKNOWN;
+      return {
+        key: key ? PROGRESS_BAR_LABEL_MAP[key] : T.GPB.UNKNOWN,
+        params: labelParams,
+      };
     }
+  }
+
+  private _areLabelsEqual(
+    prev: GlobalProgressBarLabel | null,
+    curr: GlobalProgressBarLabel | null,
+  ): boolean {
+    if (prev === curr) {
+      return true;
+    }
+    if (!prev || !curr) {
+      return !prev && !curr;
+    }
+    return prev.key === curr.key && this._areParamsEqual(prev.params, curr.params);
+  }
+
+  private _areParamsEqual(
+    prev?: Record<string, unknown>,
+    curr?: Record<string, unknown>,
+  ): boolean {
+    if (prev === curr) {
+      return true;
+    }
+    if (!prev || !curr) {
+      return !prev && !curr;
+    }
+    const prevKeys = Object.keys(prev);
+    const currKeys = Object.keys(curr);
+    if (prevKeys.length !== currKeys.length) {
+      return false;
+    }
+    return prevKeys.every((key) => prev[key] === curr[key]);
   }
 }

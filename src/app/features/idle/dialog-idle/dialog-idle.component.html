@@ -1,104 +1,128 @@
-<form
-  (submit)="track()"
-  *ngIf="isTaskDataLoadedIfNeeded"
->
-  <div
-    class="dialog-content"
-    mat-dialog-content
-  >
-    <p>{{T.F.TIME_TRACKING.D_IDLE.IDLE_FOR|translate}}</p>
-    <div class="time">{{idleTime$|async|msToString:true}}</div>
-
+@if (isTaskDataLoadedIfNeeded) {
+  <form (submit)="$event.preventDefault(); track()">
     <div
-      class="split-btn"
-      style="text-align: center"
+      class="dialog-content"
+      mat-dialog-content
+    >
+      <p>{{ T.F.TIME_TRACKING.D_IDLE.IDLE_FOR | translate }}</p>
+      <div class="time">{{ idleTime$ | async | msToString: true }}</div>
+      <div
+        class="split-btn"
+        style="text-align: center"
+      >
+        <button
+          mat-icon-button
+          [matTooltip]="T.F.TIME_TRACKING.D_IDLE.SPLIT_TIME | translate"
+          (click)="showSplit()"
+          type="button"
+        >
+          <mat-icon>call_split</mat-icon>
+        </button>
+      </div>
+      <div class="track-to-label">
+        @if (!isCreate) {
+          <span>{{ T.F.TIME_TRACKING.D_IDLE.TRACK_TO | translate }}</span>
+        }
+        @if (isCreate) {
+          <span
+            [innerHTML]="T.F.TIME_TRACKING.D_IDLE.CREATE_AND_TRACK | translate"
+          ></span>
+        }
+      </div>
+      <select-task
+        (taskChange)="onTaskChange($event)"
+        [isIncludeDoneTasks]="true"
+        [initialTask]="selectedTask"
+      ></select-task>
+      <section class="simple-counter-section">
+        @for (simpleCounterBtn of simpleCounterToggleBtns; track simpleCounterBtn) {
+          <button
+            mat-mini-fab
+            class="simple-counter"
+            type="button"
+            (click)="simpleCounterBtn.isTrackTo = !simpleCounterBtn.isTrackTo"
+            [matTooltip]="
+              (simpleCounterBtn.isTrackTo
+                ? T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP_DISABLE
+                : T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP
+              ) | translate: { title: simpleCounterBtn.title }
+            "
+            [color]="simpleCounterBtn.isTrackTo ? 'primary' : ''"
+          >
+            <mat-icon>{{ simpleCounterBtn.icon }}</mat-icon>
+          </button>
+        }
+        @if (hasActiveSimpleCounterTimerButton()) {
+          <div
+            [@expand]
+            style="max-width: 340px; margin-top: 8px; font-size: 12px"
+          >
+            <p>
+              <mat-icon>info</mat-icon>
+              {{ T.F.TIME_TRACKING.D_IDLE.WARN_SIMPLE_COUNTER | translate }}
+            </p>
+          </div>
+        }
+      </section>
+      @if ((configService.takeABreak$ | async)?.isTakeABreakEnabled) {
+        <div
+          style="
+            display: flex;
+            justify-content: center;
+            margin-top: 16px;
+            margin-bottom: -8px;
+          "
+        >
+          <mat-checkbox
+            [(ngModel)]="isResetBreakTimer"
+            [ngModelOptions]="{ standalone: true }"
+          >
+            {{ T.F.TIME_TRACKING.D_IDLE.RESET_BREAK_REMINDER_TIMER | translate }}
+          </mat-checkbox>
+        </div>
+      }
+    </div>
+    <div
+      align="center"
+      mat-dialog-actions
     >
       <button
-        mat-icon-button
-        [matTooltip]="T.F.TIME_TRACKING.D_IDLE.SPLIT_TIME|translate"
-        (click)="showSplit()"
+        (click)="skipTrack()"
+        color=""
+        mat-button
         type="button"
       >
-        <mat-icon>call_split</mat-icon>
+        <mat-icon>skip_next</mat-icon>
+        {{ T.F.TIME_TRACKING.D_IDLE.SKIP | translate }}
       </button>
-    </div>
-
-    <div class="track-to-label">
-      <span *ngIf="!isCreate">{{T.F.TIME_TRACKING.D_IDLE.TRACK_TO|translate}}</span>
-      <span
-        *ngIf="isCreate"
-        [innerHTML]="T.F.TIME_TRACKING.D_IDLE.CREATE_AND_TRACK|translate"
-      ></span>
-    </div>
-
-    <select-task
-      (taskChange)="onTaskChange($event)"
-      [initialTask]="selectedTask"
-    ></select-task>
-
-    <section class="simple-counter-section">
       <button
-        mat-mini-fab
-        class="simple-counter"
+        (click)="trackAsBreak()"
+        [matTooltip]="
+          hasActiveSimpleCounterTimerButton()
+            ? (T.F.TIME_TRACKING.D_IDLE.WARN_SIMPLE_COUNTER_BREAK | translate)
+            : null
+        "
+        color="primary"
+        mat-stroked-button
         type="button"
-        *ngFor="let simpleCounterBtn of simpleCounterToggleBtns"
-        (click)="simpleCounterBtn.isTrackTo=!simpleCounterBtn.isTrackTo"
-        [matTooltip]="(simpleCounterBtn.isTrackTo ? T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP_DISABLE : T.F.TIME_TRACKING.D_IDLE.SIMPLE_COUNTER_TOOLTIP)|translate:{ title: simpleCounterBtn.title }"
-        [color]="simpleCounterBtn.isTrackTo ? 'primary' : ''"
       >
-        <mat-icon>{{simpleCounterBtn.icon}}</mat-icon>
+        <mat-icon>free_breakfast</mat-icon>
+        {{ T.F.TIME_TRACKING.D_IDLE.BREAK | translate }}
       </button>
-    </section>
-  </div>
-
-  <div
-    align="center"
-    mat-dialog-actions
-  >
-    <button
-      (click)="skipTrack()"
-      color=""
-      mat-button
-      type="button"
-    >
-      <mat-icon>skip_next</mat-icon>
-      {{T.F.TIME_TRACKING.D_IDLE.SKIP|translate}}
-    </button>
-
-    <button
-      (click)="trackAsBreak()"
-      color="primary"
-      mat-stroked-button
-      type="button"
-    >
-      <mat-icon>free_breakfast</mat-icon>
-      {{T.F.TIME_TRACKING.D_IDLE.BREAK|translate}}
-    </button>
-
-    <button
-      [disabled]="!(selectedTask||newTaskTitle)"
-      color="primary"
-      mat-stroked-button
-      type="submit"
-    >
-      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
-      <mat-icon *ngIf="isCreate">add</mat-icon>
-      {{T.F.TIME_TRACKING.D_IDLE.TASK|translate}}
-    </button>
-
-    <button
-      (click)="track(true)"
-      *ngIf="(configService.idle$|async)?.isUnTrackedIdleResetsBreakTimer"
-      [disabled]="!(selectedTask||newTaskTitle)"
-      color="primary"
-      mat-stroked-button
-      type="button"
-    >
-      <mat-icon *ngIf="!isCreate">track_changes</mat-icon>
-      <mat-icon *ngIf="isCreate">add</mat-icon>
-      <!--      <mat-icon style="margin-left: -4px;">free_breakfast</mat-icon>-->
-      {{T.F.TIME_TRACKING.D_IDLE.TASK_BREAK|translate}}
-      <mat-icon>free_breakfast</mat-icon>
-    </button>
-  </div>
-</form>
+      <button
+        [disabled]="!(selectedTask || newTaskTitle)"
+        color="primary"
+        mat-stroked-button
+        type="submit"
+      >
+        @if (!isCreate) {
+          <mat-icon>track_changes</mat-icon>
+        }
+        @if (isCreate) {
+          <mat-icon>add</mat-icon>
+        }
+        {{ T.F.TIME_TRACKING.D_IDLE.TASK | translate }}
+      </button>
+    </div>
+  </form>
+}

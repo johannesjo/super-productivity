@@ -4,7 +4,12 @@ import { TaskRepeatCfg } from '../task-repeat-cfg.model';
 
 export const addTaskRepeatCfgToTask = createAction(
   '[TaskRepeatCfg][Task] Add TaskRepeatCfg to Task',
-  props<{ taskId: string; taskRepeatCfg: TaskRepeatCfg }>(),
+  props<{
+    taskId: string;
+    taskRepeatCfg: TaskRepeatCfg;
+    startTime?: string;
+    remindAt?: string;
+  }>(),
 );
 
 export const updateTaskRepeatCfg = createAction(
@@ -33,4 +38,9 @@ export const deleteTaskRepeatCfg = createAction(
 export const deleteTaskRepeatCfgs = createAction(
   '[TaskRepeatCfg] Delete multiple TaskRepeatCfgs',
   props<{ ids: string[] }>(),
+);
+
+export const deleteTaskRepeatCfgInstance = createAction(
+  '[TaskRepeatCfg] Delete Single Instance',
+  props<{ repeatCfgId: string; dateStr: string }>(),
 );

@@ -1,0 +1,198 @@
+<div class="action-bar">
+  <button
+    #projectMenuTrigger
+    mat-button
+    class="action-btn"
+    [matMenuTriggerFor]="projectMenu"
+    [class.has-value]="selectedProject()"
+    [class.auto-detected]="isAutoDetected() && !!selectedProject()"
+    [class.menu-open]="isProjectMenuOpen()"
+    (click)="onProjectMenuClick()"
+  >
+    @if (isProjectEmojiIcon()) {
+      <span
+        class="project-icon-emoji"
+        [style.color]="selectedProject()?.theme?.primary"
+      >
+        {{ selectedProject()?.icon || DEFAULT_PROJECT_ICON }}
+      </span>
+    } @else {
+      <mat-icon [style.color]="selectedProject()?.theme?.primary">
+        {{ selectedProject()?.icon || DEFAULT_PROJECT_ICON }}
+      </mat-icon>
+    }
+    <span>{{ selectedProject()?.title }}</span>
+  </button>
+
+  @if (!isHideDueBtn()) {
+    <button
+      mat-button
+      class="action-btn"
+      data-test="add-task-bar-due-btn"
+      (click)="openScheduleDialog()"
+      [class.has-value]="state().date"
+    >
+      <mat-icon>{{ state().time ? 'schedule' : 'event' }}</mat-icon>
+      <span>{{ dateDisplay() || (T.F.TASK.ADD_TASK_BAR.DUE_BUTTON | translate) }}</span>
+    </button>
+
+    @if (state().date) {
+      <button
+        mat-button
+        class="clear-btn"
+        data-test="add-task-bar-clear-due-btn"
+        (click)="clearDateWithSyntax(); $event.stopPropagation()"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_DATE | translate"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  }
+
+  @if (!isHideTagBtn() && allTags().length) {
+    <button
+      #tagsMenuTrigger
+      mat-button
+      class="action-btn"
+      [class.tags-mode]="hasTagsSelected() || state().newTagTitles.length > 0"
+      [matMenuTriggerFor]="tagsMenu"
+      [class.has-value]="hasTagsSelected() || hasNewTags()"
+      [class.has-new-tags]="hasNewTags()"
+      [class.menu-open]="isTagsMenuOpen()"
+      (click)="onTagsMenuClick()"
+    >
+      <!-- NOTE: we do it this way, since mat-button puts it inside the label otherwise leading to vertical alignment issues -->
+      <mat-icon [class.hide]="hasTagsSelected() || state().newTagTitles.length > 0"
+        >label</mat-icon
+      >
+
+      @if (!hasTagsSelected() && state().newTagTitles.length === 0) {
+        <ng-container>
+          <span>{{ T.F.TASK.ADD_TASK_BAR.TAGS_BUTTON | translate }}</span>
+        </ng-container>
+      } @else {
+        <div class="tags-display">
+          @for (tag of selectedTags(); track tag.id) {
+            <div class="tag-item">
+              <mat-icon [style.color]="tag.color || tag.theme?.primary">
+                {{ tag.icon || 'label' }}
+              </mat-icon>
+              <span class="tag-title">{{ tag.title }}</span>
+            </div>
+          }
+          @for (newTag of state().newTagTitles; track newTag) {
+            <div class="tag-item new-tag">
+              <mat-icon>new_releases</mat-icon>
+              <span class="tag-title">{{ newTag }}</span>
+            </div>
+          }
+        </div>
+      }
+    </button>
+
+    @if (hasTagsSelected() || hasNewTags()) {
+      <button
+        mat-button
+        class="clear-btn"
+        (click)="clearTagsWithSyntax(); $event.stopPropagation()"
+        [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_TAGS | translate"
+        matTooltipPosition="above"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    }
+  }
+
+  <button
+    #estimateMenuTrigger
+    mat-button
+    class="action-btn estimate-btn"
+    [matMenuTriggerFor]="estimateMenu"
+    [class.has-value]="state().estimate"
+    [class.menu-open]="isEstimateMenuOpen()"
+    (click)="onEstimateMenuClick()"
+  >
+    <mat-icon>timer</mat-icon>
+    <span>{{
+      estimateDisplay() || (T.F.TASK.ADD_TASK_BAR.ESTIMATE_BUTTON | translate)
+    }}</span>
+  </button>
+
+  @if (state().estimate) {
+    <button
+      mat-button
+      class="clear-btn"
+      (click)="clearEstimateWithSyntax(); $event.stopPropagation()"
+      [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_ESTIMATE | translate"
+      matTooltipPosition="above"
+    >
+      <mat-icon>close</mat-icon>
+    </button>
+  }
+</div>
+
+<!-------------- Menus ------------------->
+<mat-menu #projectMenu="matMenu">
+  @for (project of allProjects(); track project.id) {
+    <button
+      mat-menu-item
+      (click)="stateService.updateProjectId(project.id)"
+    >
+      @if (isTagEmojiIcon(project)) {
+        <span
+          class="menu-icon-emoji"
+          [style.color]="project.theme.primary"
+        >
+          {{ project.icon || DEFAULT_PROJECT_ICON }}
+        </span>
+      } @else {
+        <mat-icon [style.color]="project.theme.primary">
+          {{ project.icon || DEFAULT_PROJECT_ICON }}
+        </mat-icon>
+      }
+      {{ project.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #tagsMenu="matMenu">
+  @for (tag of allTags(); track tag.id) {
+    <button
+      mat-menu-item
+      (click)="toggleTagWithSyntax(tag)"
+      [class.selected]="hasSelectedTag(tag.id)"
+    >
+      @if (hasSelectedTag(tag.id)) {
+        <mat-icon class="check-ico">check_box</mat-icon>
+      } @else {
+        <mat-icon class="check-ico">check_box_outline_blank</mat-icon>
+      }
+      @if (isTagEmojiIcon(tag)) {
+        <span
+          [style.color]="tag.color || tag.theme.primary"
+          class="tag-ico tag-ico-emoji"
+          >{{ tag.icon || 'label' }}
+        </span>
+      } @else {
+        <mat-icon
+          [style.color]="tag.color || tag.theme.primary"
+          class="tag-ico"
+          >{{ tag.icon || 'label' }}
+        </mat-icon>
+      }
+      {{ tag.title }}
+    </button>
+  }
+</mat-menu>
+
+<mat-menu #estimateMenu="matMenu">
+  @for (option of ESTIMATE_OPTIONS; track option.value) {
+    <button
+      mat-menu-item
+      (click)="onEstimateInput(option.value)"
+    >
+      {{ option.label }}
+    </button>
+  }
+</mat-menu>

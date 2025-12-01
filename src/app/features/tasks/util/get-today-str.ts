@@ -1,6 +1,4 @@
-import { WORKLOG_DATE_STR_FORMAT } from '../../../app.constants';
-import * as moment from 'moment';
-// TODO maybe remove in favor of getWorklogStr
+import { getDbDateStr } from '../../../util/get-db-date-str';
+
 // NOTE: locale is important as it might break a lot of stuff for non arabic numbers
-export const getTodayStr = (): string =>
-  moment().locale('en').format(WORKLOG_DATE_STR_FORMAT);
+export const getTodayStr = (): string => getDbDateStr(new Date());

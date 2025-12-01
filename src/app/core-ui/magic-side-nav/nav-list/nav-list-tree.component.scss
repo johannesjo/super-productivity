@@ -1,0 +1,237 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  display: contents;
+}
+
+:host * {
+  -webkit-user-drag: none; /* Safari/Chrome */
+}
+
+.g-multi-btn-wrapper {
+  display: flex;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+
+  // Hide additional buttons by default on desktop
+  .additional-btns {
+    display: none;
+
+    @include touchPrimaryDevice() {
+      display: flex;
+    }
+  }
+
+  // Show additional buttons on focus/hover (desktop)
+  //&:focus-within .additional-btns,
+  &:hover .additional-btns {
+    display: flex;
+  }
+
+  // Folder header drop zone styling
+  &.folder-header-drop-zone {
+    border-radius: 4px;
+    transition: all 0.2s ease;
+
+    &.drop-target-active {
+      background: var(--palette-primary-50);
+      border: 2px dashed var(--c-primary);
+
+      // Add some padding to make the drop zone more visible
+      padding: 2px;
+      margin: -2px;
+    }
+  }
+}
+
+// Always show buttons on mobile/touch devices
+@media (hover: none) {
+  .additional-btns {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+}
+
+.additional-btns {
+  display: flex;
+  margin-left: auto;
+}
+
+.additional-btn {
+  flex-shrink: 0;
+  width: 32px !important;
+  height: 32px !important;
+  min-width: 32px !important;
+  padding: 4px !important;
+  margin-left: var(--s);
+  color: var(--sidenav-text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: 0 !important; // Override Material Design rounded corners
+  cursor: pointer;
+
+  // Override Material Design button styles
+  &.mat-mdc-icon-button {
+    --mdc-icon-button-state-layer-size: 32px;
+    --mdc-icon-button-icon-size: 18px;
+    border-radius: 0 !important;
+    width: 32px !important;
+    height: 32px !important;
+    padding: 4px !important;
+  }
+
+  &:focus,
+  &:hover {
+    background-color: var(--sidenav-hover-bg);
+    color: var(--sidenav-text-hover);
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.nav-children {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 8px 0;
+  position: relative; // For drop indicator positioning
+  // Angular animations handle expand/collapse - no CSS transitions needed
+}
+
+// Drop indicator styles - line with circle like Atlaskit examples
+.drop-indicator {
+  position: relative;
+  height: 2px;
+  background: var(--c-primary);
+  border-radius: 1px;
+  transition: opacity 0.2s ease;
+
+  // Circle at the start of the line
+  &::before {
+    content: '';
+    position: absolute;
+    left: -4px;
+    top: -3px;
+    width: 8px;
+    height: 8px;
+    background: var(--c-primary);
+    border: 2px solid var(--background-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 1px var(--c-primary);
+  }
+}
+
+.nav-child-item {
+  position: relative;
+
+  // Ensure nav-item fills the available space
+  nav-item {
+    width: 100%;
+    display: block;
+  }
+
+  &.draggable {
+    cursor: grab;
+    // Remove default transitions for better performance
+
+    &:active {
+      cursor: grabbing;
+    }
+
+    &.dragging {
+      opacity: 0.8;
+      transform: rotate(2deg);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      z-index: 1000;
+      cursor: grabbing;
+    }
+  }
+
+  &.folder-item {
+    &.draggable {
+      position: relative;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 4px;
+        border: 2px dashed transparent;
+        pointer-events: none;
+        transition: border-color 0.2s ease;
+      }
+
+      &.drop-target-active::before {
+        border-color: var(--c-primary);
+        background: var(--palette-primary-50);
+      }
+    }
+  }
+
+  // Placeholder when item is being dragged
+  &.drag-placeholder {
+    opacity: 0.4;
+    background: var(--sidenav-hover-bg);
+    border-radius: 4px;
+    // Minimize repaint
+    transform: translateZ(0);
+  }
+}
+
+// Drag performance optimizations - keep these for smooth drag operations
+.drag-active .nav-child-item:not(.dragging) {
+  transition: transform 200ms cubic-bezier(0.25, 0.8, 0.25, 1);
+  will-change: transform;
+}
+
+// Pragmatic drop indicators are now created dynamically in TypeScript
+.pragmatic-drop-indicator {
+  // All styling is applied via JavaScript for dynamic positioning
+  // This ensures proper positioning relative to the dragged elements
+}
+
+// Indentation for nested levels
+// Applies a small offset to each nested nav-list level
+:host-context(.nav-child-item) {
+  .g-multi-btn-wrapper {
+    padding-left: var(--s);
+  }
+  .nav-children {
+    margin-left: var(--s);
+  }
+}
+
+// CompactMode state behaviors inherited from parent sidenav
+:host-context(.nav-sidenav.compactMode) {
+  .g-multi-btn-wrapper {
+    justify-content: center;
+
+    // Hide additional buttons in compact mode, except on mobile
+    .additional-btns {
+      opacity: 0;
+
+      @media (hover: none) {
+        opacity: 1 !important;
+        position: static;
+        margin-top: 4px;
+      }
+    }
+
+    .additional-btn {
+      @media (hover: none) {
+        position: static;
+        margin: 0 2px;
+      }
+    }
+  }
+
+  // Angular animations will handle expand/collapse behavior
+  // The service handles filtering to show only active items when collapsed
+}

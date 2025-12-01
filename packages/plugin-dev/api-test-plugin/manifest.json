@@ -1,0 +1,30 @@
+{
+  "id": "api-test-plugin",
+  "name": "API Test Plugin",
+  "version": "1.0.0",
+  "manifestVersion": 1,
+  "minSupVersion": "7.0.0",
+  "description": "Plugin that demonstrates and tests all available API methods",
+  "author": "Super Productivity",
+  "iFrame": true,
+  "jsonSchemaCfg": "config-schema.json",
+  "permissions": [
+    "getTasks",
+    "getArchivedTasks",
+    "getCurrentContextTasks",
+    "updateTask",
+    "addTask",
+    "getAllProjects",
+    "addProject",
+    "updateProject",
+    "getAllTags",
+    "addTag",
+    "updateTag",
+    "showSnack",
+    "notify",
+    "openDialog",
+    "persistDataSynced",
+    "loadSyncedData"
+  ],
+  "hooks": ["taskComplete", "taskUpdate", "taskDelete", "currentTaskChange"]
+}

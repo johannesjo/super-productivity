@@ -1,5 +1,8 @@
+@use '../mixins/_scroll';
+
+.markdown-preview,
 .markdown {
-  @include scrollY;
+  @include scroll.scrollY;
   word-wrap: break-word;
   word-break: break-word;
   overflow-wrap: break-word;
@@ -17,7 +20,19 @@
   }
 
   ul {
-    padding-left: 20px;
+    margin: 0 var(--s);
+    padding-left: var(--s2);
+    padding-inline-start: 20px;
+  }
+
+  > ul {
+    padding-left: var(--s2);
+  }
+
+  ul ul {
+    padding-top: 0;
+    padding-left: var(--s2);
+    padding-inline-start: var(--s2);
   }
 
   h1,
@@ -28,6 +43,21 @@
   h6 {
     line-height: 1;
     margin-top: 16px;
+  }
+
+  h1,
+  h2,
+  h3 {
+    &,
+    .mat-typography & {
+      margin-bottom: var(--s);
+      margin-top: var(--s2);
+
+      &:first-child {
+        margin-top: 0;
+        padding-top: 0;
+      }
+    }
   }
 
   h1 {
@@ -43,7 +73,6 @@
   pre {
     max-width: 100%;
     overflow-x: auto;
-    overflow-x: overlay;
     // we need this, otherwise it might break inside tables
     white-space: pre-wrap;
 
@@ -52,8 +81,41 @@
     }
   }
 
-  input[type='checkbox'] {
-    margin-left: -20px;
-    pointer-events: none;
+  //input[type='checkbox'] {
+  //  margin-left: -20px;
+  //  pointer-events: none;
+  //}
+
+  .checkbox {
+    display: inline-block;
+    font-size: 20px;
+    width: 20px;
+    line-height: 1;
+    text-align: center;
+    margin-left: -28px;
+    vertical-align: middle;
+    padding-right: var(--s);
+    position: relative;
+    cursor: pointer;
+
+    &:after {
+      content: '';
+      position: absolute;
+      top: -4px;
+      right: -12px;
+      left: -12px;
+      bottom: -4px;
+    }
+  }
+
+  .checkbox-wrapper {
+    display: block;
+    list-style: none;
+    padding-bottom: var(--s);
+
+    &.done {
+      opacity: 0.6;
+      text-decoration: line-through;
+    }
   }
 }

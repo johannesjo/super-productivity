@@ -1,6 +1,6 @@
 import { Worklog } from '../worklog/worklog.model';
 import { Task } from '../tasks/task.model';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 import { SimpleMetrics } from './metric.model';
 import { BreakNr, BreakTime } from '../work-context/work-context.model';
 import { exists } from '../../util/exists';
@@ -15,7 +15,7 @@ export const mapSimpleMetrics = ([
 ]: [BreakNr, BreakTime, Worklog, number, Task[]]): SimpleMetrics => {
   const s = {
     start: 999999999999999,
-    end: getWorklogStr(),
+    end: getDbDateStr(),
     timeSpent: totalTimeSpent,
     breakTime: Object.keys(breakTime).reduce((acc, d) => acc + breakTime[d], 0),
     breakNr: Object.keys(breakNr).reduce((acc, d) => acc + breakNr[d], 0),
@@ -55,7 +55,7 @@ export const mapSimpleMetrics = ([
 
   return {
     ...s,
-    start: getWorklogStr(s.start),
+    start: getDbDateStr(s.start),
     avgBreakNr: s.breakNr / s.daysWorked,
     avgBreakTime: s.breakTime / s.daysWorked,
     avgTasksPerDay: s.nrOfMainTasks / s.daysWorked,

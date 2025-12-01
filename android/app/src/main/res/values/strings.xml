@@ -1,0 +1,10 @@
+<resources>
+  <string name="app_name">Super Productivity</string>
+  <string name="title_activity_fullscreen">Super Prod</string>
+  <string name="webview_block_message">Please update Android System WebView to version %1$d or newer.</string>
+  <string name="webview_block_detected_major">Detected Chromium major version: %1$d</string>
+  <string name="webview_block_detected_full">Detected WebView version: %1$s</string>
+  <string name="webview_block_provider">Provider package: %1$s</string>
+  <string name="webview_block_update">Update WebView</string>
+  <string name="webview_block_close">Close app</string>
+</resources>

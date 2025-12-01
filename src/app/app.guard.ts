@@ -1,22 +1,27 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import {
   ActivatedRouteSnapshot,
-  CanActivate,
   Router,
   RouterStateSnapshot,
   UrlTree,
 } from '@angular/router';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { Observable, of } from 'rxjs';
-import { concatMap, map, switchMap, take } from 'rxjs/operators';
+import { catchError, concatMap, map, switchMap, take } from 'rxjs/operators';
 import { WorkContextType } from './features/work-context/work-context.model';
 import { TagService } from './features/tag/tag.service';
 import { ProjectService } from './features/project/project.service';
-import { DataInitService } from './core/data-init/data-init.service';
+import { Store } from '@ngrx/store';
+import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
+import { DataInitStateService } from './core/data-init/data-init-state.service';
+import { GlobalConfigService } from './features/config/global-config.service';
+import { TODAY_TAG } from './features/tag/tag.const';
+import { INBOX_PROJECT } from './features/project/project.const';
 
 @Injectable({ providedIn: 'root' })
-export class ActiveWorkContextGuard implements CanActivate {
-  constructor(private _workContextService: WorkContextService, private _router: Router) {}
+export class ActiveWorkContextGuard {
+  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
 
   canActivate(
     next: ActivatedRouteSnapshot,
@@ -37,19 +42,18 @@ export class ActiveWorkContextGuard implements CanActivate {
 }
 
 @Injectable({ providedIn: 'root' })
-export class ValidTagIdGuard implements CanActivate {
-  constructor(
-    private _tagService: TagService,
-    private _dataInitService: DataInitService,
-  ) {}
+export class ValidTagIdGuard {
+  private _tagService = inject(TagService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
     const { id } = next.params;
-    return this._dataInitService.isAllDataLoadedInitially$.pipe(
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._tagService.getTagById$(id)),
+      catchError(() => of(false)),
       take(1),
       map((tag) => !!tag),
     );
@@ -57,20 +61,55 @@ export class ValidTagIdGuard implements CanActivate {
 }
 
 @Injectable({ providedIn: 'root' })
-export class ValidProjectIdGuard implements CanActivate {
-  constructor(
-    private _projectService: ProjectService,
-    private _dataInitService: DataInitService,
-  ) {}
+export class FocusOverlayOpenGuard {
+  private _store = inject(Store);
+
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<boolean> {
+    return this._store.select(selectIsOverlayShown).pipe(map((isShown) => !isShown));
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class ValidProjectIdGuard {
+  private _projectService = inject(ProjectService);
+  private _dataInitStateService = inject(DataInitStateService);
 
   canActivate(
     next: ActivatedRouteSnapshot,
     state: RouterStateSnapshot,
   ): Observable<boolean> {
     const { id } = next.params;
-    return this._dataInitService.isAllDataLoadedInitially$.pipe(
+    return this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() => this._projectService.getByIdOnce$(id)),
+      catchError(() => of(false)),
       map((project) => !!project),
+    );
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class DefaultStartPageGuard {
+  private _globalConfigService = inject(GlobalConfigService);
+  private _router = inject(Router);
+
+  canActivate(
+    next: ActivatedRouteSnapshot,
+    state: RouterStateSnapshot,
+  ): Observable<UrlTree> {
+    return this._globalConfigService.misc$.pipe(
+      take(1),
+      map((miscCfg) => {
+        const TODAY = 0;
+        const INBOX = 1;
+        if ((miscCfg?.defaultStartPage ?? TODAY) === INBOX) {
+          return this._router.parseUrl(`/project/${INBOX_PROJECT.id}/tasks`);
+        } else {
+          return this._router.parseUrl(`/tag/${TODAY_TAG.id}/tasks`);
+        }
+      }),
     );
   }
 }

@@ -1,15 +1,15 @@
 <div class="dialog-help-wrapper">
-  <h1 mat-dialog-title>{{T.F.TASK.D_TIME.TITLE|translate}}</h1>
+  <h1 mat-dialog-title>{{ T.F.TASK.D_TIME.TITLE | translate }}</h1>
 
   <form
-    (submit)="submit()"
+    (submit)="$event.preventDefault(); submit()"
     class="mat-body"
     name="time-estimate-form"
   >
     <mat-dialog-content>
       <help-section>
         <div
-          [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP|translate"
+          [innerHTML]="T.F.TASK.D_TIME_FOR_DAY.HELP | translate"
           class="side-info"
         ></div>
       </help-section>
@@ -17,55 +17,57 @@
       <div class="wrap-time">
         <input-duration-slider
           [(model)]="timeSpentOnDayCopy[todayStr]"
-          [label]="T.F.TASK.D_TIME.TIME_SPENT|translate"
+          [label]="T.F.TASK.D_TIME.TIME_SPENT | translate"
         >
         </input-duration-slider>
         <input-duration-slider
           [(model)]="taskCopy.timeEstimate"
-          [label]="T.F.TASK.D_TIME.ESTIMATE|translate"
+          [label]="T.F.TASK.D_TIME.ESTIMATE | translate"
         >
         </input-duration-slider>
       </div>
 
       <div class="other-days">
-        <div
-          *ngFor="let strDate of timeSpentOnDayCopy|keys:'reverse':todayStr;trackBy:trackByIndex"
-          class="other-day"
-        >
-          <mat-form-field>
-            <mat-label
-              >{{T.F.TASK.D_TIME.TIME_SPENT_ON|translate:{date: strDate} }}</mat-label
-            >
-            <input
-              [(ngModel)]="timeSpentOnDayCopy[strDate]"
-              inputDuration="optional"
-              matInput
-              name="timeSpentOnDay{{strDate}}"
-              type="text"
-            />
-
-            <mat-icon matPrefix>timer</mat-icon>
-          </mat-form-field>
-          <button
-            (click)="deleteValue(strDate)"
-            [title]="T.F.TASK.D_TIME.DELETE_FOR|translate"
-            color="warn"
-            mat-icon-button
-            type="button"
-          >
-            <mat-icon>delete_forever</mat-icon>
-          </button>
-        </div>
-
         <button
           (click)="showAddForAnotherDayForm()"
           color="primary"
+          style="margin-bottom: 16px"
           mat-button
           type="button"
         >
           <mat-icon>add</mat-icon>
-          {{T.F.TASK.D_TIME.ADD_FOR_OTHER_DAY|translate}}
+          {{ T.F.TASK.D_TIME.ADD_FOR_OTHER_DAY | translate }}
         </button>
+
+        @for (
+          strDate of timeSpentOnDayCopy | keys: 'reverse' : todayStr;
+          track trackByIndex($index, strDate)
+        ) {
+          <div class="other-day">
+            <mat-form-field>
+              <mat-label>{{
+                T.F.TASK.D_TIME.TIME_SPENT_ON | translate: { date: strDate }
+              }}</mat-label>
+              <input
+                [(ngModel)]="timeSpentOnDayCopy[strDate]"
+                inputDuration="optional"
+                matInput
+                name="timeSpentOnDay{{ strDate }}"
+                type="text"
+              />
+              <mat-icon matPrefix>timer</mat-icon>
+            </mat-form-field>
+            <button
+              (click)="deleteValue(strDate)"
+              [title]="T.F.TASK.D_TIME.DELETE_FOR | translate"
+              color="warn"
+              mat-icon-button
+              type="button"
+            >
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+          </div>
+        }
       </div>
     </mat-dialog-content>
 
@@ -76,7 +78,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
 
       <button
@@ -86,7 +88,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{T.G.SAVE|translate}}
+        {{ T.G.SAVE | translate }}
       </button>
     </mat-dialog-actions>
   </form>

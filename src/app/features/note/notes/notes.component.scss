@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 :host {
   background-color: inherit;
@@ -10,8 +10,8 @@
 }
 
 header {
-  margin-top: $s;
-  margin-bottom: 2 * $s;
+  margin-top: var(--s);
+  margin-bottom: var(--s2);
 
   @include mq(xs) {
     margin-bottom: 0;
@@ -19,12 +19,17 @@ header {
 }
 
 .notes {
-  padding: $s * 1.5;
+  padding: calc(var(--s) * 1.5);
+  // Add extra bottom padding to ensure last note is fully visible
+  padding-bottom: calc(var(--s) * 3);
+
+  // Remove max-height and overflow-y to prevent double scrollbars
+  // Let the parent bottom-panel-content handle scrolling instead
 }
 
 note {
   display: block;
-  margin-bottom: $s * 1.5;
+  margin-bottom: calc(var(--s) * 1.5);
 }
 
 .drag-over-msg {
@@ -39,4 +44,12 @@ note {
   font-weight: bold;
   display: flex;
   z-index: 2;
+}
+
+.drag-handle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: 0;
 }

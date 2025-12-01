@@ -1,19 +1,22 @@
 import {
   ChangeDetectionStrategy,
-  ChangeDetectorRef,
   Component,
+  effect,
   ElementRef,
-  EventEmitter,
-  Input,
+  inject,
+  input,
   OnDestroy,
   OnInit,
-  Output,
-  ViewChild,
+  output,
+  signal,
+  viewChild,
 } from '@angular/core';
 import { nanoid } from 'nanoid';
-import * as moment from 'moment';
 import { dotAnimation } from './dot.ani';
 import { T } from '../../../t.const';
+import { InputDurationDirective } from '../input-duration.directive';
+import { FormsModule } from '@angular/forms';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'input-duration-slider',
@@ -21,44 +24,60 @@ import { T } from '../../../t.const';
   styleUrls: ['./input-duration-slider.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [dotAnimation],
+  imports: [InputDurationDirective, FormsModule, TranslatePipe],
 })
 export class InputDurationSliderComponent implements OnInit, OnDestroy {
+  private _el = inject(ElementRef);
+
   T: typeof T = T;
-  minutesBefore: number = 0;
-  dots: any[] = [];
-  uid: string = 'duration-input-slider' + nanoid();
-  el: HTMLElement;
 
-  startHandler?: (ev: any) => void;
+  // Convert to signals
+  readonly minutesBefore = signal(0);
+  readonly dots = signal<number[]>([]);
+  readonly uid = 'duration-input-slider' + nanoid();
+  readonly el: HTMLElement;
+
+  // Input signals
+  readonly label = input('');
+  readonly model = input(0);
+
+  // Output remains the same
+  readonly modelChange = output<number>();
+
+  // Internal model signal
+  readonly _model = signal(0);
+
+  startHandler?: (ev: MouseEvent | TouchEvent) => void;
   endHandler?: () => void;
-  moveHandler?: (ev: any) => void;
+  moveHandler?: (ev: MouseEvent | TouchEvent) => void;
 
-  @ViewChild('circleEl', { static: true }) circleEl?: ElementRef;
+  readonly circleEl = viewChild<ElementRef>('circleEl');
 
-  @Input() label: string = '';
-  @Output() modelChange: EventEmitter<number> = new EventEmitter();
-
-  constructor(private _el: ElementRef, private _cd: ChangeDetectorRef) {
+  constructor() {
     this.el = this._el.nativeElement;
-  }
 
-  _model: number = 0;
-
-  @Input() set model(val: number) {
-    if (this._model !== val) {
-      this._model = val;
-      this.setRotationFromValue(val);
-    }
+    // Effect to handle model input changes
+    effect(() => {
+      const val = this.model();
+      const validVal = !Number.isFinite(val) || Number.isNaN(val) ? 0 : val;
+      if (this._model() !== validVal) {
+        this._model.set(validVal);
+        this.setRotationFromValue(validVal);
+      }
+    });
   }
 
   ngOnInit(): void {
     this.startHandler = (ev) => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
       // don't execute when clicked on label or input
-      if (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT') {
+      if (
+        (ev.target as HTMLElement)?.tagName === 'LABEL' ||
+        (ev.target as HTMLElement)?.tagName === 'INPUT'
+      ) {
         this.endHandler();
         return;
       }
@@ -75,11 +94,13 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     this.moveHandler = (ev) => {
       if (
         ev.type === 'click' &&
-        (ev.target.tagName === 'LABEL' || ev.target.tagName === 'INPUT')
+        ((ev.target as HTMLElement)?.tagName === 'LABEL' ||
+          (ev.target as HTMLElement)?.tagName === 'INPUT')
       ) {
         return;
       }
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      const circleEl = this.circleEl();
+      if (!this.endHandler || !this.moveHandler || !circleEl) {
         throw new Error();
       }
 
@@ -88,19 +109,21 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
 
       const convertThetaToCssDegrees = (thetaIN: number): number => 90 - thetaIN;
 
-      const centerX = this.circleEl.nativeElement.offsetWidth / 2;
-      const centerY = this.circleEl.nativeElement.offsetHeight / 2;
+      const centerX = circleEl.nativeElement.offsetWidth / 2;
+      const centerY = circleEl.nativeElement.offsetHeight / 2;
 
-      let offsetX;
+      let offsetX: number;
+      let offsetY: number;
 
-      let offsetY;
       if (ev.type === 'touchmove') {
-        const rect = ev.target.getBoundingClientRect();
-        offsetX = ev.targetTouches[0].pageX - rect.left;
-        offsetY = ev.targetTouches[0].pageY - rect.top;
+        const touchEv = ev as TouchEvent;
+        const rect = (ev.target as Element).getBoundingClientRect();
+        offsetX = touchEv.targetTouches[0].pageX - rect.left;
+        offsetY = touchEv.targetTouches[0].pageY - rect.top;
       } else {
-        offsetX = ev.offsetX;
-        offsetY = ev.offsetY;
+        const mouseEv = ev as MouseEvent;
+        offsetX = mouseEv.offsetX;
+        offsetY = mouseEv.offsetY;
       }
 
       const x = offsetX - centerX;
@@ -113,7 +136,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
     };
 
     this.endHandler = () => {
-      if (!this.endHandler || !this.moveHandler || !this.circleEl) {
+      if (!this.endHandler || !this.moveHandler || !this.circleEl()) {
         throw new Error();
       }
 
@@ -134,7 +157,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl) {
+    if (!this.endHandler || !this.moveHandler || !this.startHandler || !this.circleEl()) {
       throw new Error();
     }
 
@@ -150,13 +173,22 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
   }
 
   setCircleRotation(cssDegrees: number): void {
-    if (!this.circleEl) {
+    const circleEl = this.circleEl();
+    if (!circleEl) {
       throw new Error();
     }
-    this.circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
+    circleEl.nativeElement.style.transform = 'rotate(' + cssDegrees + 'deg)';
   }
 
   setDots(hours: number = 0): void {
+    // Ensure hours is a valid number
+    if (!Number.isFinite(hours) || Number.isNaN(hours)) {
+      hours = 0;
+    }
+
+    // Round to ensure we have an integer
+    hours = Math.floor(hours);
+
     if (hours > 12) {
       hours = 12;
     }
@@ -165,7 +197,7 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       hours = 0;
     }
 
-    this.dots = new Array(hours);
+    this.dots.set(new Array(hours));
   }
 
   setValueFromRotation(degrees: number): void {
@@ -185,15 +217,9 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       minutesFromDegrees = 0;
     }
 
-    let hours = Math.floor(
-      moment
-        .duration({
-          milliseconds: this._model,
-        })
-        .asHours(),
-    );
+    let hours = Math.floor(this._model() / (1000 * 60 * 60));
 
-    const minuteDelta = minutesFromDegrees - this.minutesBefore;
+    const minuteDelta = minutesFromDegrees - this.minutesBefore();
 
     if (minuteDelta > THRESHOLD) {
       hours--;
@@ -209,39 +235,36 @@ export class InputDurationSliderComponent implements OnInit, OnDestroy {
       this.setCircleRotation(minutesFromDegrees * 6);
     }
 
-    this.minutesBefore = minutesFromDegrees;
+    this.minutesBefore.set(minutesFromDegrees);
     this.setDots(hours);
-    this._model = moment
-      .duration({
-        hours,
-        minutes: minutesFromDegrees,
-      })
-      .asMilliseconds();
+    // eslint-disable-next-line no-mixed-operators
+    const newValue = hours * 60 * 60 * 1000 + minutesFromDegrees * 60 * 1000;
+    this._model.set(newValue);
 
-    this.modelChange.emit(this._model);
-    this._cd.detectChanges();
+    this.modelChange.emit(newValue);
   }
 
   onInputChange($event: number): void {
-    this._model = $event;
-    this.modelChange.emit(this._model);
+    this._model.set($event);
+    this.modelChange.emit($event);
     this.setRotationFromValue();
   }
 
-  setRotationFromValue(val: number = this._model): void {
-    const momentVal = moment.duration({
-      milliseconds: val,
-    });
+  setRotationFromValue(val?: number): void {
+    const valueToUse = val ?? this._model();
+    // Ensure val is a valid number, default to 0 if not
+    const validVal =
+      !Number.isFinite(valueToUse) || Number.isNaN(valueToUse) || valueToUse < 0
+        ? 0
+        : valueToUse;
 
-    const minutes = momentVal.minutes();
-    this.setDots(Math.floor(momentVal.asHours()));
+    const totalMinutes = Math.floor(validVal / (1000 * 60));
+    const minutes = totalMinutes % 60;
+    const hours = Math.floor(validVal / (1000 * 60 * 60));
+
+    this.setDots(hours);
     const degrees = (minutes * 360) / 60;
-    this.minutesBefore = minutes;
+    this.minutesBefore.set(minutes);
     this.setCircleRotation(degrees);
-    this._cd.detectChanges();
-  }
-
-  trackByIndex(i: number, p: any): number {
-    return i;
   }
 }

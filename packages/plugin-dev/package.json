@@ -1,0 +1,23 @@
+{
+  "name": "@super-productivity/plugin-dev",
+  "version": "1.0.0",
+  "description": "Plugin development workspace for Super Productivity",
+  "private": true,
+  "scripts": {
+    "build": "node scripts/build-all.js",
+    "build:all": "node scripts/build-all.js",
+    "clean": "rm -rf */node_modules */dist minimal-plugin.zip",
+    "clean:dist": "rm -rf */dist minimal-plugin.zip",
+    "install:all": "node scripts/install-all.js",
+    "test": "echo 'No tests configured yet'",
+    "list": "echo 'Available plugins:' && ls -d */ | grep -v node_modules | grep -v scripts"
+  },
+  "devDependencies": {
+    "@super-productivity/plugin-api": "file:../plugin-api"
+  },
+  "workspaces": [
+    "example-plugin",
+    "simple-typescript-plugin",
+    "procrastination-buster"
+  ]
+}

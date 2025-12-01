@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+  <!-- Left triangle -->
+  <path d="M11 18 L3 12 L11 6 L11 18 Z"/>
+
+  <!-- Right triangle -->
+  <path d="M21 18 L13 12 L21 6 L21 18 Z"/>
+</svg>

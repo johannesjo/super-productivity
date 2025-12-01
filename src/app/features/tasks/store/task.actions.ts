@@ -1,124 +1,61 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
-import { Task, TaskAdditionalInfoTargetPanel, TaskWithSubTasks } from '../task.model';
-import { IssueDataReduced } from '../../issue/issue.model';
+import { Task, TaskDetailTargetPanel } from '../task.model';
 import { RoundTimeOption } from '../../project/project.model';
-import { WorkContextType } from '../../work-context/work-context.model';
-
-enum TaskActionTypes {
-  'SetCurrentTask' = '[Task] SetCurrentTask',
-  'SetSelectedTask' = '[Task] SetSelectedTask',
-  'UnsetCurrentTask' = '[Task] UnsetCurrentTask',
-
-  // Task Actions
-  'AddTask' = '[Task][Issue] Add Task',
-  'UpdateTaskUi' = '[Task] Update Task Ui',
-  'UpdateTaskTags' = '[Task] Update Task Tags',
-  'RemoveTagsForAllTasks' = '[Task] Remove Tags from all Tasks',
-  'ToggleTaskShowSubTasks' = '[Task] Toggle Show Sub Tasks',
-  'UpdateTask' = '[Task] Update Task',
-  'UpdateTasks' = '[Task] Update Tasks',
-  'DeleteTask' = '[Task] Delete Task',
-  'DeleteTasks' = '[Task] Delete Tasks',
-  'DeleteMainTasks' = '[Task] Delete Main Tasks',
-  'UndoDeleteTask' = '[Task] Undo Delete Task',
-  'MoveSubTask' = '[Task] Move sub task',
-  'MoveSubTaskUp' = '[Task] Move up',
-  'MoveSubTaskDown' = '[Task] Move down',
-  'AddTimeSpent' = '[Task] Add time spent',
-  'RemoveTimeSpent' = '[Task] Remove time spent',
-
-  // Reminders & StartAt
-  'ScheduleTask' = '[Task] Schedule',
-  'UnScheduleTask' = '[Task] UnSchedule',
-  'ReScheduleTask' = '[Task] ReSchedule',
-
-  // Sub Task Actions
-  'AddSubTask' = '[Task] Add SubTask',
-  'ConvertToMainTask' = '[Task] Convert SubTask to main task',
-
-  // Other
-  'RestoreTask' = '[Task] Restore Task',
-  'MoveToArchive' = '[Task] Move to archive',
-  'MoveToOtherProject' = '[Task] Move tasks to other project',
-  'ToggleStart' = '[Task] Toggle start',
-  'RoundTimeSpentForDay' = '[Task] RoundTimeSpentForDay',
-}
 
 export const setCurrentTask = createAction(
-  TaskActionTypes.SetCurrentTask,
+  '[Task] SetCurrentTask',
   props<{
     id: string | null;
   }>(),
 );
 
 export const setSelectedTask = createAction(
-  TaskActionTypes.SetSelectedTask,
+  '[Task] SetSelectedTask',
   props<{
     id: string | null;
-    taskAdditionalInfoTargetPanel?: TaskAdditionalInfoTargetPanel;
+    taskDetailTargetPanel?: TaskDetailTargetPanel;
+    isSkipToggle?: boolean;
   }>(),
 );
 
-export const unsetCurrentTask = createAction(TaskActionTypes.UnsetCurrentTask);
+export const unsetCurrentTask = createAction('[Task] UnsetCurrentTask');
 
-export const addTask = createAction(
-  TaskActionTypes.AddTask,
+export const addReminderIdToTask = createAction(
+  '[Task] Add ReminderId to Task',
   props<{
-    task: Task;
-    issue?: IssueDataReduced;
-    workContextId: string;
-    workContextType: WorkContextType;
-    isAddToBacklog: boolean;
-    isAddToBottom: boolean;
+    taskId: string;
+    reminderId: string;
   }>(),
 );
 
-export const updateTask = createAction(
-  TaskActionTypes.UpdateTask,
-  props<{ task: Update<Task> }>(),
+export const __updateMultipleTaskSimple = createAction(
+  '[Task] Update multiple Tasks (simple)',
+  props<{
+    taskUpdates: Update<Task>[];
+    isIgnoreShortSyntax?: boolean;
+  }>(),
 );
 
 export const updateTaskUi = createAction(
-  TaskActionTypes.UpdateTaskUi,
+  '[Task] Update Task Ui',
   props<{ task: Update<Task> }>(),
 );
 
-export const updateTaskTags = createAction(
-  TaskActionTypes.UpdateTaskTags,
-  props<{ task: Task; newTagIds: string[]; oldTagIds: string[] }>(),
-);
-
 export const removeTagsForAllTasks = createAction(
-  TaskActionTypes.RemoveTagsForAllTasks,
+  '[Task] Remove Tags from all Tasks',
   props<{ tagIdsToRemove: string[] }>(),
 );
 
-export const toggleTaskShowSubTasks = createAction(
-  TaskActionTypes.ToggleTaskShowSubTasks,
+export const toggleTaskHideSubTasks = createAction(
+  '[Task] Toggle Show Sub Tasks',
   props<{ taskId: string; isShowLess: boolean; isEndless: boolean }>(),
 );
 
-export const updateTasks = createAction(
-  TaskActionTypes.UpdateTasks,
-  props<{ tasks: Update<Task>[] }>(),
-);
-
-export const deleteTask = createAction(
-  TaskActionTypes.DeleteTask,
-  props<{ task: TaskWithSubTasks }>(),
-);
-
-// NOTE: does not automatically account for sub tasks!!!
-export const deleteTasks = createAction(
-  TaskActionTypes.DeleteTasks,
-  props<{ taskIds: string[] }>(),
-);
-
-export const undoDeleteTask = createAction(TaskActionTypes.UndoDeleteTask);
+export const undoDeleteTask = createAction('[Task] Undo Delete Task');
 
 export const moveSubTask = createAction(
-  TaskActionTypes.MoveSubTask,
+  '[Task] Move sub task',
   props<{
     taskId: string;
     srcTaskId: string;
@@ -128,92 +65,55 @@ export const moveSubTask = createAction(
 );
 
 export const moveSubTaskUp = createAction(
-  TaskActionTypes.MoveSubTaskUp,
+  '[Task] Move up',
 
   props<{ id: string; parentId: string }>(),
 );
 
 export const moveSubTaskDown = createAction(
-  TaskActionTypes.MoveSubTaskDown,
+  '[Task] Move down',
+  props<{ id: string; parentId: string }>(),
+);
+
+export const moveSubTaskToTop = createAction(
+  '[Task] Move to top',
 
   props<{ id: string; parentId: string }>(),
 );
 
-export const addTimeSpent = createAction(
-  TaskActionTypes.AddTimeSpent,
+export const moveSubTaskToBottom = createAction(
+  '[Task] Move to bottom',
 
-  props<{ task: Task; date: string; duration: number }>(),
+  props<{ id: string; parentId: string }>(),
 );
 
 export const removeTimeSpent = createAction(
-  TaskActionTypes.RemoveTimeSpent,
+  '[Task] Remove time spent',
 
   props<{ id: string; date: string; duration: number }>(),
 );
 
-// Reminder Actions
-export const scheduleTask = createAction(
-  TaskActionTypes.ScheduleTask,
+export const removeReminderFromTask = createAction(
+  '[Task] Remove Reminder',
 
   props<{
-    task: Task;
-    plannedAt: number;
-    remindAt?: number;
-    isMoveToBacklog: boolean;
+    id: string;
+    reminderId: string;
+    isSkipToast?: boolean;
+    isLeaveDueTime?: boolean;
   }>(),
-);
-
-export const reScheduleTask = createAction(
-  TaskActionTypes.ReScheduleTask,
-
-  props<{
-    task: Task;
-    plannedAt: number;
-    isMoveToBacklog: boolean;
-    remindAt?: number;
-  }>(),
-);
-
-export const unScheduleTask = createAction(
-  TaskActionTypes.UnScheduleTask,
-
-  props<{ id: string; reminderId?: string; isSkipToast?: boolean }>(),
-);
-
-export const restoreTask = createAction(
-  TaskActionTypes.RestoreTask,
-
-  props<{ task: Task | TaskWithSubTasks; subTasks: Task[] }>(),
 );
 
 export const addSubTask = createAction(
-  TaskActionTypes.AddSubTask,
+  '[Task] Add SubTask',
 
   props<{ task: Task; parentId: string }>(),
 );
 
-export const convertToMainTask = createAction(
-  TaskActionTypes.ConvertToMainTask,
-
-  props<{ task: Task; parentTagIds: string[] }>(),
-);
-
-export const moveToArchive = createAction(
-  TaskActionTypes.MoveToArchive,
-
-  props<{ tasks: TaskWithSubTasks[] }>(),
-);
-
-export const moveToOtherProject = createAction(
-  TaskActionTypes.MoveToOtherProject,
-
-  props<{ task: TaskWithSubTasks; targetProjectId: string }>(),
-);
-
-export const toggleStart = createAction(TaskActionTypes.ToggleStart);
+export const toggleStart = createAction('[Task] Toggle start');
 
 export const roundTimeSpentForDay = createAction(
-  TaskActionTypes.RoundTimeSpentForDay,
+  '[Task] RoundTimeSpentForDay',
 
   props<{
     day: string;
@@ -221,5 +121,14 @@ export const roundTimeSpentForDay = createAction(
     roundTo: RoundTimeOption;
     isRoundUp: boolean;
     projectId?: string | null;
+  }>(),
+);
+
+export const addNewTagsFromShortSyntax = createAction(
+  '[Task] Add new tags from short syntax',
+
+  props<{
+    taskId: string;
+    newTitles: string[];
   }>(),
 );

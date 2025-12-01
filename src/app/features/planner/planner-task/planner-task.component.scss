@@ -1,0 +1,246 @@
+@use '../../../../styles/_globals.scss' as *;
+@use '../../tasks/task/task.component.mixins' as *;
+
+:host {
+  border-radius: var(--task-border-radius);
+  min-height: var(--planner-item-height);
+  display: flex;
+  align-items: stretch;
+  @include grabCursor();
+
+  color: var(--text-color);
+  background: var(--task-c-bg);
+  box-shadow: var(--task-shadow);
+  border: var(--task-border, none);
+
+  &.isDone {
+    opacity: var(--task-is-done-dim-opacity);
+
+    .title {
+      text-decoration: line-through;
+    }
+  }
+
+  // note: we use .tags-container, since we don't want margins for an empty list
+  ::ng-deep .tags-container {
+    // to match task title padding
+    margin-left: 3px;
+    margin-bottom: 2px;
+    margin-top: 2px;
+  }
+}
+
+:host-context(.isLightTheme).isCurrent {
+  border-color: var(--c-accent) !important;
+  border-width: 1px !important;
+  border-style: dashed;
+}
+
+:host-context(.isDarkTheme).isCurrent {
+  background: var(--task-c-current-bg);
+  box-shadow: var(--task-current-shadow);
+}
+
+.no-drag {
+  display: flex;
+  align-items: center;
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+  position: relative;
+  padding: 4px 0;
+
+  @include mq(xs) {
+    padding: 2px 0;
+  }
+}
+
+:host ::ng-deep .tag-title {
+  @include mq(xs) {
+    font-size: var(--planner-font-size-smaller) !important;
+  }
+}
+
+.play-icon-indicator {
+  color: var(--c-accent);
+  // NOTE: we do this since change detection does not immediately pick up on _taskService.currentTaskId
+  display: none;
+
+  :host.isCurrent & {
+    display: block;
+  }
+}
+
+.wrap {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 0;
+}
+
+.title {
+  padding-left: 4px;
+  padding-right: 4px;
+  // to have room for the coloured edit border
+  padding-top: 1px;
+  padding-bottom: 1px;
+
+  line-height: 1.5;
+  position: relative;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-grow: 1;
+  flex-shrink: 1;
+
+  @include mq(xs) {
+    font-size: var(--planner-font-size);
+  }
+}
+
+.parent-title {
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  text-overflow: ellipsis;
+  line-height: 1.1;
+  font-size: var(--planner-font-size-smaller-mobile);
+
+  @include mq(xs) {
+    font-size: var(--planner-font-size-smaller);
+  }
+}
+
+.planner-time-remaining-shared {
+  // we overwrite since we need to move down styles to inline-input
+  padding: 0;
+  border: 1px solid transparent;
+
+  &.hasNoTimeSpentOrEstimate {
+    text-align: center;
+  }
+
+  mat-icon {
+    display: inline-flex;
+  }
+
+  inline-input {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    min-width: 44px;
+    text-align: right;
+    padding-left: 4px;
+    padding-right: 8px;
+  }
+
+  inline-input ::ng-deep input {
+    line-height: 1.5;
+  }
+}
+
+.drag-handle {
+  width: 32px;
+  height: 32px;
+  margin-left: 4px;
+  min-width: 32px;
+  z-index: var(--z-drag-handle);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  // fixes drag and drop on mobile
+  touch-action: none;
+  align-self: center;
+
+  mat-ico {
+    font-size: 20px;
+  }
+
+  .drag-handle-ico {
+    opacity: 0.4;
+
+    @include mq(xs) {
+      opacity: 0.15;
+    }
+  }
+
+  > * {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .type-ico-wrapper {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    opacity: var(--task-icon-default-opacity);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    @include mq(xs, max) {
+      //display: none;
+    }
+
+    mat-icon {
+      margin-left: var(--s);
+      margin-right: var(--s);
+      opacity: 0.8;
+      font-size: var(--planner-item-ico-size);
+      height: var(--planner-item-ico-size);
+      width: var(--planner-item-ico-size);
+      min-width: var(--planner-item-ico-size);
+      max-width: var(--planner-item-ico-size);
+    }
+
+    :host.isCurrent &::ng-deep mat-icon {
+      transform: scale(1.4) !important;
+      transform-origin: center center;
+      opacity: 0.18;
+    }
+  }
+}
+
+.mini-badge {
+  line-height: var(--mini-badge-size);
+  width: var(--mini-badge-size);
+  height: var(--mini-badge-size);
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  text-align: center;
+  z-index: 2;
+}
+
+.repeat-date-badge {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  margin-top: 10px;
+  font-size: 10px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px 2px 0;
+  border: 1px solid var(--extra-border-color);
+  border-radius: var(--card-border-radius);
+
+  // avoid affecting drag handle
+  pointer-events: none;
+  background: var(--bg-lighter);
+}
+
+.original-time-remaining {
+  white-space: nowrap;
+  font-size: 10px;
+  margin-left: -6px;
+}
+
+:host ::ng-deep .due-date + .planner-time-remaining-shared {
+  display: none;
+}

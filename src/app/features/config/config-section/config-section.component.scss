@@ -1,20 +1,25 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 .form-wrapper {
   overflow: hidden;
-  padding: $s * 2 $s * 2 $s !important;
+  padding: var(--s2) var(--s2) var(--s) !important;
 
   config-form {
     display: block;
   }
 
   &.keyboard {
-    ::ng-deep formly-field {
+    ::ng-deep formly-field > formly-group {
       box-sizing: border-box;
-      padding: 0 $s;
-      width: 50%;
-      display: block;
-      float: left;
+      padding: 0 var(--s);
+      display: grid;
+      grid: auto-flow / 1fr;
+      gap: 0;
+
+      @include mq(xs) {
+        gap: 0 var(--s2);
+        grid: auto-flow / 1fr 1fr;
+      }
     }
   }
 }
@@ -32,9 +37,6 @@ $this-panel-padding-left-right: 12px;
   padding: 10px $this-panel-padding-left-right;
 }
 
-:host ::ng-deep .collapsible-expand-icon {
-}
-
 :host ::ng-deep .collapsible-panel {
   //border-top: 1px solid black;
   overflow: visible;
@@ -50,19 +52,22 @@ $this-panel-padding-left-right: 12px;
 }
 
 :host ::ng-deep .help-btn {
-  display: none;
   position: absolute;
   top: -40px;
   right: -2px;
-}
 
-:host ::ng-deep .help-btn {
   display: block;
-  animation: $transition-duration-m help-ico-animation $ani-standard-timing;
+  animation: var(--transition-duration-m) help-ico-animation var(--ani-standard-timing);
 }
 
 :host ::ng-deep .extra-margin-top {
-  margin-top: $s * 4;
+  margin-top: var(--s4);
+}
+
+:host ::ng-deep .footer {
+  margin: auto;
+  margin-top: var(--s2);
+  text-align: center;
 }
 
 @keyframes help-ico-animation {

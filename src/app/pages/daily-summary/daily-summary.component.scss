@@ -1,12 +1,37 @@
-@import '../../../variables';
+@use '../../../styles/_globals.scss' as *;
 
-$summary-point-inner-margin: $s;
+$summary-point-inner-margin: var(--s);
 
 :host {
-  ::ng-deep .mat-tab-labels {
-    justify-content: center !important;
+  evaluation-sheet {
+    display: block;
+  }
+
+  ::ng-deep {
+    .mat-mdc-tab .mdc-tab__text-label {
+      //color: var(--text-color);
+      //font-weight: 300;
+    }
+  }
+
+  ::ng-deep .mat-mdc-tab-list {
+    border-bottom: 1px solid var(--separator-color);
+
+    border-color: var(--separator-color);
+  }
+
+  ::ng-deep .mat-mdc-tab-labels {
+    justify-content: center;
+    align-items: center;
+  }
+
+  ::ng-deep .mat-mdc-tab {
+    flex-grow: 0 !important;
     user-select: none;
-    -webkit-user-select: none; /* Safari */
+
+    @include mq(xs) {
+      min-width: 200px;
+    }
   }
 
   // in case we every want to go sticky
@@ -26,13 +51,9 @@ $summary-point-inner-margin: $s;
 }
 
 .tab-inner {
-  padding: 0;
   margin: auto;
-  max-width: $component-max-width;
-
-  @include mq(xs) {
-    padding: $s;
-  }
+  max-width: var(--component-max-width);
+  padding: var(--s);
 
   &.full-width {
     max-width: none;
@@ -40,16 +61,16 @@ $summary-point-inner-margin: $s;
 }
 
 .back-btn {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
 }
 
 .done-headline {
-  margin-top: $s * 4;
-  margin-bottom: $s * 3 - $summary-point-inner-margin;
+  margin-top: var(--s4);
+  margin-bottom: calc(var(--s3) - var(--s));
 }
 
 .daily-summary-summary {
-  margin-bottom: $s * 2;
+  margin-bottom: var(--s5);
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
@@ -66,31 +87,58 @@ $summary-point-inner-margin: $s;
   text-align: center;
   margin: $summary-point-inner-margin;
   //flex-grow: 1;
-  flex-basis: 150px;
+  flex-basis: 160px;
   position: relative;
-}
 
-.summary-text {
+  .summary-val {
+    display: flex;
+    justify-content: center;
+
+    :first-child {
+      justify-content: right;
+      padding-right: var(--s-half);
+    }
+
+    :not(:first-child) {
+      justify-content: left;
+      padding-left: var(--s-half);
+    }
+  }
+
+  inline-input {
+    ::ng-deep .inline-input-wrapper {
+      display: flex;
+      justify-content: inherit;
+      width: auto;
+      min-width: 35px;
+      height: 100%;
+    }
+
+    ::ng-deep input[type='text'] {
+      width: 100%;
+    }
+  }
 }
 
 .summary-val {
   font-weight: bold;
 }
 
-.finish-day-opts {
-  margin-top: 10px;
-
-  mat-checkbox {
-    display: block;
+.tabs {
+  @include mq(xs) {
+    margin: 0;
   }
 }
 
-.tabs {
-  margin-left: -2 * $s;
-  margin-right: -2 * $s;
+.simple-counter-summary {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-bottom: var(--s6);
+  margin-top: calc(-1 * var(--s));
 
-  @include mq(xs) {
-    margin: 0;
+  simple-counter-summary-item {
+    flex-basis: 140px;
   }
 }
 
@@ -98,207 +146,53 @@ $summary-point-inner-margin: $s;
   margin-top: 30px;
 
   button {
-    margin: 0 $s * 0.5;
-
-    mat-icon + mat-icon {
-      //margin-left: -$s;
-    }
-  }
-}
-
-.success-animation-wrapper {
-  $this-ani-style: 1s linear infinite;
-  $this-ico-size: 128px;
-  clear: both;
-  display: block;
-  position: fixed;
-  z-index: 100;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  backface-visibility: hidden;
-
-  mat-icon {
-    width: $this-ico-size;
-    height: $this-ico-size;
-    display: block;
-    font-size: $this-ico-size;
-    color: $yellow;
-    //transform-origin: center center;
-    animation: success-animation-sun #{$this-ani-style};
-    backface-visibility: hidden;
-  }
-
-  .unicorn-wrapper {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .unicorn {
-    transform-origin: center center;
-    animation: success-animation-unicorn #{$this-ani-style};
+    margin: 0 var(--s-half);
   }
 }
 
 .tomorrows-note {
-  border-radius: $card-border-radius;
   display: inline-block;
   width: 500px;
   max-width: 100%;
 }
 
-@keyframes success-animation-sun {
-  0% {
-    transform: scale(0) rotate(-180deg);
-    opacity: 1;
-  }
-  50% {
-    opacity: 1;
-    transform: scale(5) rotate(0deg);
-  }
-  75% {
-    transform: scale(10) rotate(90deg);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(12) rotate(180deg);
-    opacity: 0;
-  }
-}
+.day-end-note {
+  margin-bottom: 48px;
+  //margin-top: -8px;
 
-@keyframes success-animation-unicorn {
-  0% {
-    opacity: 0;
-    transform: scale(0);
-  }
-  25% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 1;
-  }
-  55% {
-    transform: scale(2);
-  }
-  75% {
-    transform: scale(3);
-    opacity: 0;
-  }
-  100% {
-    opacity: 0;
-  }
-}
+  &::ng-deep inline-markdown {
+    max-width: 400px;
+    text-align: left;
+    margin: auto;
 
-$particles: 30;
-$width: 500;
-$height: 500;
+    &.isFocused {
+      border-color: transparent;
+    }
 
-// Create the explosion...
-$box-shadow: ();
-$box-shadow2: ();
-@for $i from 0 through $particles {
-  $box-shadow: $box-shadow,
-    random($width)-$width *
-      0.5 +
-      px
-      random($height) -
-      $height *
-      0.8333 +
-      px
-      hsl(random(360%), 100%, 50%);
-  $box-shadow2: $box-shadow2, 0 0 #fff;
-}
+    .markdown-wrapper {
+      min-height: 60px;
+      overflow: visible !important;
+      transition: var(--transition-standard);
 
-.pyro {
-  pointer-events: none;
-  position: fixed;
-  top: 0;
-  bottom: 0;
-  right: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  opacity: 0;
-  animation-delay: 5s;
-  animation: 0.4s fadeIn ease-in forwards;
+      //background: var(--bg);
+      //box-shadow: var(--whiteframe-shadow-1dp);
+      border: 1px solid var(--extra-border-color);
 
-  > .before,
-  > .after {
-    position: absolute;
-    width: 5px;
-    height: 5px;
-    //border-radius: 50%;
-    box-shadow: $box-shadow2;
-    animation: 1s bang ease-out infinite backwards, 1s gravity ease-in infinite backwards,
-      5s position linear infinite backwards;
-    opacity: 0;
-  }
+      &,
+      > * {
+        border-radius: calc(var(--card-border-radius) * 2);
+      }
+    }
 
-  > .after {
-    animation-delay: 1.25s, 1.25s, 1.25s;
-    animation-duration: 1.25s, 1.25s, 6.25s;
-  }
-}
+    &.isFocused .markdown-wrapper {
+      box-shadow: var(--whiteframe-shadow-2dp) !important;
+      border-color: transparent;
+    }
 
-@keyframes bang {
-  to {
-    box-shadow: $box-shadow;
-  }
-}
-
-@keyframes gravity {
-  0% {
-    opacity: 0;
-  }
-
-  10% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(200px);
-    opacity: 0;
-  }
-}
-
-@keyframes position {
-  0%,
-  19.9% {
-    margin-top: 10%;
-    margin-left: 40%;
-  }
-  20%,
-  39.9% {
-    margin-top: 40%;
-    margin-left: 30%;
-  }
-  40%,
-  59.9% {
-    margin-top: 20%;
-    margin-left: 70%;
-  }
-  60%,
-  79.9% {
-    margin-top: 30%;
-    margin-left: 20%;
-  }
-  80%,
-  99.9% {
-    margin-top: 30%;
-    margin-left: 80%;
-  }
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  1% {
-    visibility: visible;
-  }
-  100% {
-    opacity: 1;
+    .markdown-unparsed,
+    .markdown-parsed {
+      color: inherit;
+      background-color: inherit;
+    }
   }
 }

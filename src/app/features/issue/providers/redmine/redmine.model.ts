@@ -5,7 +5,7 @@ export interface RedmineCfg extends BaseIssueProviderCfg {
   host: string | null;
   api_key: string | null;
   scope: string | null;
-  isAutoPoll: boolean;
-  isSearchIssuesFromRedmine: boolean;
-  isAutoAddToBacklog: boolean;
+  isAutoPoll?: boolean;
+  isSearchIssuesFromRedmine?: boolean;
+  isAutoAddToBacklog?: boolean;
 }

@@ -1,0 +1,32 @@
+
+### Bug Fixes
+
+* added missing )
+* ai prompts icon
+* avoid non critical error
+* being unable to open detail panel for later today sub task
+* fixed URL sanitization
+* **focusMode:** flow time timer only going to 25 minutes
+* make mobile bottom nav work with backlog button (70f14eb), closes #5132
+* **mentions:** resolve TypeScript compilation errors
+* **mentions:** update function signatures to support TextInputElement
+* readonly error
+* set current tag as default for add task bar (493fb71), closes #5124
+* toggle side nav keyboard shortcut not working (6411782), closes #5115
+* unable to remove due for today (15768b2), closes #5092
+* z-index stuff
+### Features
+
+* add ability to delete single instances of repeated tasks (6b3675c), closes #4195
+* **focusMode:** improve idle handling
+* improve performance for events
+* improve tour for desktop
+* improvements for new delete repeat instance feature
+* make shepherd tour work better for mobile
+* simplify layout stuff
+* **task:** handle keyboard shortcuts globally for tasks
+* **task:** handle keyboard shortcuts globally for tasks 2
+* **task:** make task shortcuts work from context menu
+### Performance Improvements
+
+* prevent unnecessary change change detections with high-frequency listeners

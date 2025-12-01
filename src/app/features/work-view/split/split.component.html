@@ -1,5 +1,5 @@
 <div
-  [class.isHideShadow]="pos>10"
+  [class.isHideShadow]="pos > 10"
   class="handle bgc-600"
 >
   <button
@@ -7,15 +7,13 @@
     (dblclick)="toggle()"
     (mousedown)="onMouseDown()"
     (touchstart)="onTouchStart()"
-    [class.isAnimate]="isAnimateBtn"
+    [class.isAnimate]="isAnimateBtn()"
     color="primary"
     mat-fab
   >
-    <span
-      *ngIf="counter"
-      class="counter"
-      >{{counter}}</span
-    >
+    @if (counter) {
+      <span class="counter">{{ counter }}</span>
+    }
     <mat-icon>library_books</mat-icon>
   </button>
 </div>

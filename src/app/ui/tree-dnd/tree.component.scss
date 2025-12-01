@@ -1,0 +1,94 @@
+:host {
+  display: block;
+}
+
+.tree {
+  display: block;
+  position: relative;
+
+  &.is-dragging {
+    cursor: grabbing;
+
+    * {
+      cursor: grabbing !important;
+    }
+
+    &.is-drag-invalid {
+      //cursor: not-allowed;
+      //
+      //* {
+      //  cursor: not-allowed !important;
+      //}
+    }
+  }
+}
+
+.item {
+  position: relative;
+  padding-left: var(--tree-indent, 0);
+
+  &.is-dragging {
+    pointer-events: none;
+    z-index: var(--z-dragged-nav-item);
+
+    //&::ng-deep  nav-item {
+    //  opacity: 1;
+    //border-radius: var(--card-border-radius);
+    //border-radius: 10px;
+    //background: var(--bg-lightest) !important;
+    //box-shadow: var(--whiteframe-shadow-12dp);
+    //}
+  }
+
+  &.is-over-inside {
+    background: var(--c-primary);
+  }
+}
+
+.item.was-just-dropped {
+  background: var(--c-primary);
+}
+
+.expander {
+  width: 16px;
+  text-align: center;
+  user-select: none;
+}
+
+.folder-content {
+  margin-left: 0;
+}
+
+.root-drop {
+  position: relative;
+  z-index: 5;
+  height: 12px;
+}
+
+/* indicator */
+.indicator {
+  position: absolute;
+  height: 0;
+  pointer-events: none;
+  display: none;
+}
+
+.indicator-dot {
+  position: absolute;
+  top: -5px;
+  left: -7px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--c-primary);
+}
+
+.indicator-line {
+  display: block;
+  height: 2px;
+  background: var(--c-primary);
+  width: 100%;
+  position: absolute;
+  top: -1px;
+  left: 0;
+}

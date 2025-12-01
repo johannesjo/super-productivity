@@ -1,13 +1,15 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as moment from 'moment';
+import { formatDate } from '../../util/format-date';
 
-@Pipe({
-  name: 'momentFormat',
-})
+@Pipe({ name: 'momentFormat' })
 export class MomentFormatPipe implements PipeTransform {
-  transform(value: any, args: any): any {
+  transform(
+    value: number | Date | string | null | undefined,
+    args: string | null | undefined,
+  ): string | null {
     if (value && args) {
-      return moment(value).format(args);
+      const result = formatDate(value, args);
+      return result || null;
     }
     return null;
   }

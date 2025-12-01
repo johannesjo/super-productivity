@@ -1,0 +1,46 @@
+
+### Bug Fixes
+
+* add missing no list tag cleanup
+* banner z-index
+* build error
+* dialog titles styling
+* **issueProvider:** jira error
+* live reload for electron
+* tag ani not working
+### Features
+
+* add better handling for when trying to schedule to today task to today (sarah's case)
+* add info about total tasks planned for day when scheduling tasks
+* **android:** also make gitlab requests work
+* **android:** make jira get requests work for android
+* **android:** properly disable service worker for android as it does not always work
+* improve durations input format #3736
+* improve scheduled snack
+* improve snack
+* improve styling
+* **issueProvider:** add ani to issue list
+* **issueProvider:** add cross-origin warning
+* **issueProvider:** cleanup gitlab 1
+* **issueProvider:** hide project for gitlab issue
+* **issueProvider:** improve adjust order
+* **issueProvider:** improve error handling
+* **issueProvider:** improve gitlab config form
+* **issueProvider:** improve header manipulation and also change jira way of authentication
+* **issueProvider:** improve styling
+* **issueProvider:** improve styling 2
+* **issueProvider:** make basic gitlab stuff work again #3300
+* **issueProvider:** make issue provider sorting work better
+* **issueProvider:** make scroll bar styling work
+* **issueProvider:** make snack work
+* **issueProvider:** remove legacy issueIds for GitLab issue tasks
+* make context menu quick access schedule work similar to schedule dialog
+* only show project additional button, when there are projects
+* remove confirmation before migrating
+* **simpleCounter:** remove auto count stuff
+* **xLevelSubTasks:** add required parsers
+* **xLevelSubTasks:** add very basic sub sub task mode
+### Reverts
+
+* Revert "build: update dep"
+* Revert "build: downgrade dep again to fix build"

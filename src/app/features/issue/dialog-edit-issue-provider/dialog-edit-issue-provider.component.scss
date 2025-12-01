@@ -1,0 +1,66 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  @include mq(xxs) {
+    display: block;
+    width: 400px;
+  }
+
+  @include mq(xs) {
+    display: block;
+    width: 500px;
+  }
+
+  @include mq(sm) {
+    display: block;
+    width: 600px;
+  }
+
+  help-section {
+    margin: auto;
+  }
+
+  ::ng-deep {
+    //.help-btn {
+    //  position: relative !important;
+    //  left: 0 !important;
+    //  top: 0 !important;
+    //  display: block;
+    //  margin: 0 auto 16px !important;
+    //}
+  }
+}
+
+:host::ng-deep {
+  .tpl .warning-box {
+    margin: 16px;
+    margin-bottom: 32px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+
+    &:before {
+      @include materialIcon('warning');
+      margin-right: 8px;
+    }
+  }
+
+  .tpl hr {
+    margin-bottom: 32px;
+
+    border-color: var(--separator-color);
+  }
+
+  .sub-section-heading {
+    margin-top: 32px;
+  }
+
+  .sub-section-heading,
+  .sub-section-heading-first {
+    font-size: 19px;
+  }
+}
+
+.success-info {
+  margin: 0 16px;
+}

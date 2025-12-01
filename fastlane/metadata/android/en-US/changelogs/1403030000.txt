@@ -1,0 +1,57 @@
+
+### Bug Fixes
+
+* add fix for safari (294cedb), closes #4959
+* allow vertical scroll for new pan handler
+* **animations:** disable canvas-confetti when "Disable All Animations" is enabled
+* **archive:** ensure archive operation completes before app shutdown (265ca3a), closes #4884
+* build error
+* **calDav:** etag hashing
+* center badge text #4924
+* **create-task-placeholder:** adjust padding and visibility for small widths
+* dialog confirm error
+* **docker:** simplify env handling for Docker builds
+* error when navigating to settings
+* github api requests not working anymore
+* migrate constructor injection to inject() function for Angular 20
+* new pan directive not working as expected
+* remove progressbar on task complete in electron
+* resolve TranslateFakeLoader and test assertion issues
+* resolve TypeScript error in electron debug.ts
+* **schedule:** fixed task placeholder closing issue when selecting task suggestion via mouse click
+* typing issues
+* typing issues 2
+* unknown validity error #4897
+* update test.ts to use provideZonelessChangeDetection
+### Features
+
+* add .nvmrc file with Node.js v22.18.0
+* add everforest theme
+* **charts:** implement lazy loading for Chart.js to reduce initial bundle size
+* complete Angular 20 upgrade and fixes
+* **create-task-placeholder:** integrate SnackService for error notifications and improve timeout handling
+* implement progressBarMode none for electron
+* implement task selection component to enhance create task placeholder in schedule view
+* import more data form CalDAV and display all supported fields in details
+* improve context menu and limit to certain containers only
+* improve styling
+* make mobile side nav a little smaller
+* make unsplash utm stuff work
+* migrate to Angular 20 and update all dependencies
+* prepare for Angular 20 upgrade
+* replace hammerjs with custom swipe and pan directives
+* replace helpful-decorators and thus lodash with custom implementation to save a lot of space
+* **task:** improve swipe to action
+* **unsplash:** disable UI feature when API key not available
+* update Angular to v20.1.6
+* update NgRx to v20
+### Performance Improvements
+
+* enable critical CSS inlining for faster initial paint
+### BREAKING CHANGES
+
+* Requires Node.js v20.19+ or v22.12+
+* CreateTaskPlaceholderComponent now uses SelectTaskMinimalComponent
+
+
+

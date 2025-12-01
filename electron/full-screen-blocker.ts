@@ -24,7 +24,7 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         skipTaskbar: true,
         frame: false,
       });
-      const randomImgUrl = takeABreakCfg.motivationalImgs.length
+      const randomImgUrl = takeABreakCfg.motivationalImgs?.length
         ? takeABreakCfg.motivationalImgs[
             Math.floor(Math.random() * takeABreakCfg.motivationalImgs.length)
           ]
@@ -64,6 +64,14 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
           isFullScreenWindowOpen = false;
         } else {
           evI.preventDefault();
+        }
+      });
+
+      win.on('closed', () => {
+        // Clean up references
+        isFullScreenWindowOpen = false;
+        if (closeTimeout) {
+          clearTimeout(closeTimeout);
         }
       });
     },

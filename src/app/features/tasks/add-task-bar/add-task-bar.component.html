@@ -1,121 +1,153 @@
-<form
-  (submit)="addTask()"
+<div
+  class="add-task-container"
+  [class.isGlobalBarVariant]="isGlobalBarVariant()"
   @blendInOut
-  [class.isElevated]="isElevated"
-  [class.mat-elevation-z3]="!isElevated"
-  [class.mat-elevation-z4]="isElevated"
-  class="add-task-form"
 >
-  <div class="input-wrapper">
-    <div
-      *ngIf="(isLoading$|async)"
-      class="spinner"
-    >
-      <mat-spinner diameter="50"></mat-spinner>
-    </div>
-
+  <div class="input-section">
     <input
       #inputEl
-      [tabindex]="tabindex"
-      (blur)="onBlur($event)"
-      [formControl]="taskSuggestionsCtrl"
-      [matAutocomplete]="autoEl"
-      [placeholder]="(doubleEnterCount > 0)
-         ? (T.F.TASK.ADD_TASK_BAR.START|translate)
-         : isAddToBottom
-           ? isAddToBacklog
-            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_BACKLOG|translate)
-            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_BOTTOM_OF_TODAY|translate)
-           : isAddToBacklog
-            ? (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_BACKLOG|translate)
-            : (T.F.TASK.ADD_TASK_BAR.ADD_TASK_TO_TOP_OF_TODAY|translate)"
+      class="main-input nr-of-btns-{{ nrOfRightBtns() }}"
+      [(ngModel)]="stateService.inputTxt"
+      [tabindex]="tabindex()"
+      [mention]="tagMentions$ | async"
+      [mentionConfig]="mentionCfg$ | async"
+      (listShownChange)="updateListShown($event)"
+      [matAutocomplete]="taskAutoCompleteEl"
+      [placeholder]="
+        isSearchMode()
+          ? (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_SEARCH | translate)
+          : (T.F.TASK.ADD_TASK_BAR.PLACEHOLDER_CREATE | translate)
+      "
       matInput
+      spellcheck="false"
+      (keydown)="onInputKeydown($event)"
+      (input)="onInputChange($event)"
     />
 
-    <div class="button-controls">
+    <div class="right-button-controls">
+      @if (stateService.inputTxt() && !isSearchMode()) {
+        <div class="separator-box">
+          <button
+            mat-icon-button
+            class="switch-add-to-btn e2e-add-task-submit"
+            (click)="addTask()"
+            type="submit"
+            [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
+            matTooltipPosition="above"
+          >
+            <mat-icon>add</mat-icon>
+          </button>
+        </div>
+      }
+
       <button
-        (click)="isAddToBacklog=!isAddToBacklog"
-        class="switch-add-to-btn"
         mat-icon-button
-        type="button"
-      >
-        <mat-icon *ngIf="isAddToBacklog">library_add</mat-icon>
-        <mat-icon *ngIf="!isAddToBacklog">playlist_add</mat-icon>
-      </button>
-      <button
-        (click)="isAddToBottom=!isAddToBottom"
         class="switch-add-to-bot-btn"
-        mat-icon-button
-        type="button"
+        (click)="toggleIsAddToBottom()"
+        [matTooltip]="
+          isAddToBottom()
+            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TOP | translate)
+            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BOTTOM | translate)
+        "
+        matTooltipPosition="above"
       >
-        <mat-icon *ngIf="isAddToBottom">vertical_align_bottom</mat-icon>
-        <mat-icon *ngIf="!isAddToBottom">vertical_align_top</mat-icon>
+        <mat-icon
+          >{{ isAddToBottom() ? 'vertical_align_bottom' : 'vertical_align_top' }}
+        </mat-icon>
+      </button>
+
+      @if (currentProject()?.isEnableBacklog) {
+        <button
+          mat-icon-button
+          class="switch-add-to-btn"
+          (click)="toggleIsAddToBacklog()"
+          [matTooltip]="
+            isAddToBacklog()
+              ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_TODAY | translate)
+              : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TO_BACKLOG | translate)
+          "
+          matTooltipPosition="above"
+        >
+          <mat-icon>{{ isAddToBacklog() ? 'inbox' : 'today' }}</mat-icon>
+        </button>
+      }
+
+      <button
+        mat-icon-button
+        class="search-toggle-btn"
+        [class.active]="isSearchMode()"
+        (click)="toggleSearchMode()"
+        [matTooltip]="
+          isSearchMode()
+            ? (T.F.TASK.ADD_TASK_BAR.TOOLTIP_DISABLE_SEARCH | translate)
+            : (T.F.TASK.ADD_TASK_BAR.TOOLTIP_ENABLE_SEARCH | translate)
+        "
+        matTooltipPosition="above"
+      >
+        <mat-icon>search</mat-icon>
       </button>
     </div>
   </div>
 
-  <div class="info-bar">
-    <ng-container *ngIf="inputVal.length > 0">
-      <div
-        *ngIf="!activatedIssueTask && !shortSyntaxTags.length"
-        class="info-text"
-      >
-        {{T.F.TASK.ADD_TASK_BAR.CREATE_TASK|translate}}
+  @if (isSearchMode()) {
+    @if (activatedIssueTask() && activatedIssueTask()!.issueType === undefined) {
+      <div class="add-issue-info-text bold">
+        <mat-icon>playlist_add</mat-icon>
+        {{
+          T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK
+            | translate: { taskTitle: activatedIssueTask()!.title }
+        }}
       </div>
+    } @else {
+      <div class="add-issue-info-text">
+        <mat-icon>playlist_add</mat-icon>
+        {{ T.F.TASK.ADD_TASK_BAR.SEARCH_INFO_TEXT | translate }}
+      </div>
+    }
+  } @else {
+    <add-task-bar-actions
+      [isHideTagBtn]="!!planForDay()"
+      [isHideDueBtn]="!!planForDay()"
+      (refocus)="focusInput()"
+      (scheduleDialogOpenChange)="onScheduleDialogOpenChange($event)"
+    ></add-task-bar-actions>
+  }
+</div>
 
-      <ng-container *ngIf="activatedIssueTask">
-        <div
-          *ngIf="activatedIssueTask.issueType"
-          class="info-text"
-        >
-          {{T.F.TASK.ADD_TASK_BAR.ADD_ISSUE_TASK|translate:{ issueType:
-          activatedIssueTask.issueType, issueNr: activatedIssueTask.taskIssueId ||
-          activatedIssueTask.issueData?.id } }}
-        </div>
-        <div
-          *ngIf="activatedIssueTask.issueType=== undefined"
-          class="info-text"
-        >
-          {{T.F.TASK.ADD_TASK_BAR.ADD_EXISTING_TASK|translate: { taskTitle:
-          activatedIssueTask.title } }}
-        </div>
-      </ng-container>
-
-      <ng-container *ngIf="!activatedIssueTask && shortSyntaxTags.length">
+<mat-autocomplete
+  #taskAutoCompleteEl="matAutocomplete"
+  class="add-task-bar-panel"
+  (optionActivated)="onTaskSuggestionActivated($event?.option?.value)"
+  (optionSelected)="onTaskSuggestionSelected($event.option.value)"
+  [autoActiveFirstOption]="true"
+>
+  @for (
+    item of suggestions$ | async;
+    track item.taskId || (item.issueData && item.issueData.id)
+  ) {
+    <mat-option [value]="item">
+      @if (item.issueType) {
+        <mat-icon [svgIcon]="item.issueType | issueIcon"></mat-icon>
+      } @else if (item.taskId && item.isArchivedTask) {
+        <mat-icon>archive</mat-icon>
+      } @else if (item.taskId) {
+        <!--        <mat-icon>task</mat-icon>-->
+      } @else if (!item.ctx) {
+        <mat-icon>library_books</mat-icon>
+      }
+      @if (item.ctx) {
         <tag
-          *ngFor="let shortSyntaxTag of shortSyntaxTags; trackBy: trackById"
-          [tag]="shortSyntaxTag"
+          [tag]="item.ctx"
+          [isHideTitle]="isHideTagTitles()"
         ></tag>
-      </ng-container>
-    </ng-container>
-
-    <ng-container *ngIf="inputVal.length === 0">
-      <div class="info-text">{{T.F.TASK.ADD_TASK_BAR.EXAMPLE|translate}}</div>
-    </ng-container>
-  </div>
-
-  <!-- NOTE: [autoActiveFirstOption]="taskSuggestionsCtrl.value?.length <= 3"
-  causes optionActivated not to be fired :(--->
-  <mat-autocomplete
-    #autoEl="matAutocomplete"
-    (optionActivated)="onOptionActivated($event?.option?.value)"
-    (optionSelected)="addTask()"
-    [displayWith]="displayWith"
-  >
-    <mat-option
-      *ngFor="let item of (filteredIssueSuggestions$|async); trackBy:trackByFn"
-      [value]="item"
-    >
-      <mat-icon
-        *ngIf="item.issueType"
-        [svgIcon]="item.issueType|issueIcon"
-      ></mat-icon>
-      <mat-icon *ngIf="!item.issueType && !item.ctx">library_books</mat-icon>
-      <tag
-        *ngIf="item.ctx"
-        [tag]="item.ctx"
-      ></tag>
-      <span [innerHTML]="item?.titleHighlighted||item?.title"></span>
+      }
+      <span [innerHTML]="item?.titleHighlighted || item?.title"></span>
     </mat-option>
-  </mat-autocomplete>
-</form>
+  }
+</mat-autocomplete>
+
+@if (isSearchLoading()) {
+  <div class="spinner">
+    <mat-spinner diameter="24"></mat-spinner>
+  </div>
+}

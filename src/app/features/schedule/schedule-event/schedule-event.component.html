@@ -1,0 +1,102 @@
+<div class="ico-wrapper">
+  @switch (icoType()) {
+    <!-- -->
+    @case ('REPEAT') {
+      <mat-icon
+        svgIcon="repeat"
+        class="ico"
+        inline="true"
+      ></mat-icon>
+    }
+    @case ('PLANNED_FOR_DAY') {
+      <div class="day-of-month">{{ se().dayOfMonth }}</div>
+    }
+    @case ('SCHEDULED_TASK') {
+      @if (task()?.reminderId) {
+        <mat-icon
+          class="ico"
+          inline="true"
+          >alarm
+        </mat-icon>
+      } @else {
+        <mat-icon
+          class="ico"
+          inline="true"
+          >schedule
+        </mat-icon>
+      }
+    }
+    @case ('FLOW') {
+      <!--<div class="fake-ico">~</div>-->
+      <mat-icon
+        class="ico"
+        inline="true"
+        >wb_sunny
+      </mat-icon>
+    }
+    @case ('LUNCH_BREAK') {
+      <mat-icon
+        class="ico"
+        inline="true"
+        >restaurant
+      </mat-icon>
+    }
+    @case ('CAL_PROJECTION') {
+      <mat-icon>{{ $any(se().data)?.icon || 'event' }}</mat-icon>
+      <mat-icon>add</mat-icon>
+    }
+    <!--- --->
+    @default {}
+    <!--- --->
+  }
+  <!--- -->
+
+  @if (
+    se().type === SVEType.ScheduledTask || se().type === SVEType.ScheduledRepeatProjection
+  ) {
+    <div class="time-badge">{{ scheduledClockStr() }}</div>
+  }
+</div>
+<!-- -->
+
+<div class="title">
+  <!--  {{ se().data['plannedForDay'] }}-->
+  <!--  {{ scheduledClockStr }}-->
+  <!--  {{se().id}} __ {{se().data?.id}} __-->
+  <!-- -->
+
+  @if (
+    se().type === SVEType.SplitTaskContinuedLast ||
+    se().type === SVEType.SplitTaskContinued ||
+    se().type === SVEType.RepeatProjectionSplitContinued ||
+    se().type === SVEType.RepeatProjectionSplitContinuedLast
+  ) {
+    ...
+    <!-- -->
+  } @else {
+    @if (isMonthView()) {
+      {{ title() }}
+    } @else {
+      {{ title() }}
+    }
+  }
+</div>
+
+@if (task()) {
+  <task-context-menu
+    #taskContextMenu
+    [task]="task()"
+  ></task-context-menu>
+}
+
+@if (isResizable()) {
+  <div
+    class="resize-handle"
+    (mousedown)="onResizeStart($event)"
+    (touchstart)="onResizeStart($event)"
+  >
+    <div class="resize-grip"></div>
+  </div>
+}
+
+<ng-content></ng-content>

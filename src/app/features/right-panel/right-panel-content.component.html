@@ -1,0 +1,20 @@
+@if (panelContent() === 'ISSUE_PANEL') {
+  <issue-panel [@slideInFromRight]></issue-panel>
+} @else if (panelContent() === 'NOTES') {
+  <notes [@slideInFromRight]></notes>
+} @else if (panelContent() === 'PLUGIN') {
+  @for (key of pluginPanelKeys(); track key) {
+    <plugin-panel-container [@slideInFromRight]></plugin-panel-container>
+  }
+  <!-- Task content comes last so we can avoid an extra effect to unset selected task -->
+} @else if (panelContent() === 'SCHEDULE_DAY_PANEL') {
+  <schedule-day-panel [@slideInFromRight]></schedule-day-panel>
+} @else {
+  @if (selectedTaskWithDelayForNone(); as task) {
+    <task-detail-panel
+      [@taskDetailPanelTaskChange]="task.id"
+      [@.disabled]="isDisableTaskPanelAni()"
+      [task]="task"
+    ></task-detail-panel>
+  }
+}

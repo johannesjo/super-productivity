@@ -1,26 +1,19 @@
-import { Directive, HostListener, Input } from '@angular/core';
+import { Directive, HostListener, inject, input } from '@angular/core';
 import { IS_ELECTRON } from '../../../../app.constants';
 import { TaskAttachmentType } from '../task-attachment.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { IPC } from '../../../../../../electron/shared-with-frontend/ipc-events.const';
 import { T } from '../../../../t.const';
-import { ElectronService } from '../../../../core/electron/electron.service';
-import { ipcRenderer, shell } from 'electron';
 
-@Directive({
-  selector: '[taskAttachmentLink]',
-})
+@Directive({ selector: '[taskAttachmentLink]' })
 export class TaskAttachmentLinkDirective {
-  @Input() type?: TaskAttachmentType;
-  @Input() href?: string;
+  private _snackService = inject(SnackService);
 
-  constructor(
-    private _electronService: ElectronService,
-    private _snackService: SnackService,
-  ) {}
+  readonly type = input<TaskAttachmentType>();
+  readonly href = input<string>();
 
   @HostListener('click', ['$event']) onClick(ev: Event): void {
-    if (!this.href) {
+    const href = this.href();
+    if (!href) {
       throw new Error('No href');
     }
 
@@ -30,20 +23,21 @@ export class TaskAttachmentLinkDirective {
     }
     if (IS_ELECTRON) {
       ev.preventDefault();
-      if (!this.type || this.type === 'LINK') {
-        this._openExternalUrl(this.href);
-      } else if (this.type === 'FILE') {
-        (this._electronService.shell as typeof shell).openPath(this.href);
-      } else if (this.type === 'COMMAND') {
+      const type = this.type();
+      if (!type || type === 'LINK') {
+        this._openExternalUrl(href);
+      } else if (type === 'FILE') {
+        window.ea.openPath(href);
+      } else if (type === 'COMMAND') {
         this._snackService.open({
           msg: T.GLOBAL_SNACK.RUNNING_X,
-          translateParams: { str: this.href },
+          translateParams: { str: href },
           ico: 'laptop_windows',
         });
-        this._exec(this.href);
+        this._exec(href);
       }
-    } else if (this.type === 'LINK') {
-      this._openExternalUrl(this.href);
+    } else if (this.type() === 'LINK') {
+      this._openExternalUrl(href);
     }
   }
 
@@ -58,7 +52,7 @@ export class TaskAttachmentLinkDirective {
       .replace('http://http://', 'http://');
 
     if (IS_ELECTRON) {
-      (this._electronService.shell as typeof shell).openExternal(url);
+      window.ea.openExternalUrl(url);
     } else {
       const win = window.open(url, '_blank');
       if (win) {
@@ -68,6 +62,6 @@ export class TaskAttachmentLinkDirective {
   }
 
   private _exec(command: string): void {
-    (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.EXEC, command);
+    window.ea.exec(command);
   }
 }

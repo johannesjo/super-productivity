@@ -1,6 +1,6 @@
 <div class="table-wrapper mat-elevation-z1">
   <table
-    [dataSource]="flatTasks"
+    [dataSource]="flatTasks()"
     class="summary-table"
     mat-table
   >
@@ -9,7 +9,7 @@
         *matHeaderCellDef
         mat-header-cell
       >
-        {{T.F.TASK.SUMMARY_TABLE.TASK|translate}}
+        {{ T.F.TASK.SUMMARY_TABLE.TASK | translate }}
       </th>
       <td
         *matCellDef="let task"
@@ -20,12 +20,12 @@
           [class.isSubTask]="task.parentId"
           class="task-title"
         >
-          <mat-icon
-            *ngIf="task.repeatCfgId"
-            class="repeat-task-icon"
-            >repeat
-          </mat-icon>
-          <span *ngIf="task.parentId">–</span>
+          @if (task.repeatCfgId) {
+            <mat-icon class="repeat-task-icon">repeat </mat-icon>
+          }
+          @if (task.parentId) {
+            <span>–</span>
+          }
           <inline-input
             (changed)="updateTaskTitle(task, $event)"
             [value]="task.title"
@@ -41,23 +41,24 @@
         *matHeaderCellDef
         mat-header-cell
       >
-        {{T.F.TASK.SUMMARY_TABLE.SPENT_TODAY|translate}}
+        {{ T.F.TASK.SUMMARY_TABLE.SPENT_TODAY | translate }}
       </th>
       <td
         *matCellDef="let task"
         mat-cell
       >
-        <inline-input
-          (changed)="updateTimeSpentTodayForTask(task, $event)"
-          *ngIf="!task.subTaskIds?.length"
-          [displayValue]="task.timeSpentOnDay[day]|msToClockString"
-          [type]="'duration'"
-          [value]="task.timeSpentOnDay[day]"
-        >
-        </inline-input>
-        <span *ngIf="task.subTaskIds?.length"
-          >{{task.timeSpentOnDay[day]|msToClockString}}</span
-        >
+        @if (!task.subTaskIds?.length) {
+          <inline-input
+            (changed)="updateTimeSpentTodayForTask(task, $event)"
+            [displayValue]="task.timeSpentOnDay[day()] | msToClockString"
+            [type]="'duration'"
+            [value]="task.timeSpentOnDay[day()]"
+          >
+          </inline-input>
+        }
+        @if (task.subTaskIds?.length) {
+          <span>{{ task.timeSpentOnDay[day()] | msToClockString }}</span>
+        }
       </td>
     </ng-container>
 
@@ -66,13 +67,13 @@
         *matHeaderCellDef
         mat-header-cell
       >
-        {{T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL|translate}}
+        {{ T.F.TASK.SUMMARY_TABLE.SPENT_TOTAL | translate }}
       </th>
       <td
         *matCellDef="let task"
         mat-cell
       >
-        {{task.timeSpent|msToClockString}}
+        {{ task.timeSpent | msToClockString }}
       </td>
     </ng-container>
 
@@ -81,13 +82,13 @@
         *matHeaderCellDef
         mat-header-cell
       >
-        {{T.F.TASK.SUMMARY_TABLE.ESTIMATE|translate}}
+        {{ T.F.TASK.SUMMARY_TABLE.ESTIMATE | translate }}
       </th>
       <td
         *matCellDef="let task"
         mat-cell
       >
-        {{task.timeEstimate|msToClockString}}
+        {{ task.timeEstimate | msToClockString }}
       </td>
     </ng-container>
 
@@ -103,7 +104,7 @@
         <button
           (click)="toggleTaskDone(task)"
           [class.isDone]="task.isDone"
-          [title]="T.F.TASK.SUMMARY_TABLE.TOGGLE_DONE|translate"
+          [title]="T.F.TASK.SUMMARY_TABLE.TOGGLE_DONE | translate"
           class="check-done"
           mat-icon-button
         >
@@ -122,11 +123,20 @@
     </ng-container>
 
     <tr
-      *matHeaderRowDef="['title','timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']"
+      *matHeaderRowDef="[
+        'title',
+        'timeSpentToday',
+        'timeSpentTotal',
+        'timeEstimate',
+        'done',
+      ]"
       mat-header-row
     ></tr>
     <tr
-      *matRowDef="let row; columns: ['title','timeSpentToday', 'timeSpentTotal','timeEstimate', 'done']"
+      *matRowDef="
+        let row;
+        columns: ['title', 'timeSpentToday', 'timeSpentTotal', 'timeEstimate', 'done']
+      "
       mat-row
     ></tr>
   </table>

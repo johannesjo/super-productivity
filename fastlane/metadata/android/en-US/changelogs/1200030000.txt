@@ -1,0 +1,4 @@
+
+### Bug Fixes
+
+* **android:** status bar for android sdk 35 #4205

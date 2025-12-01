@@ -1,0 +1,9 @@
+
+### Bug Fixes
+
+* correct GitHub Actions workflow parameter names
+* electron snap issue #5252
+### Features
+
+* adjust tour text
+* don't show productivity snack tip when tour dialog is shown

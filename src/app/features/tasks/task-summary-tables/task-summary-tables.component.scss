@@ -1,8 +1,6 @@
-@import '../../../../variables';
-
 .project-section {
-  margin-top: $s;
-  margin-bottom: $s * 3;
+  margin-top: var(--s);
+  margin-bottom: var(--s3);
 }
 
 .project-title {
@@ -12,15 +10,10 @@
   flex-wrap: wrap;
   border-bottom: 2px solid;
 
-  @include lightTheme {
-    border-color: $light-theme-extra-border-color;
-  }
-  @include darkTheme {
-    border-color: $dark-theme-extra-border-color;
-  }
+  border-color: var(--extra-border-color);
 
   mat-icon {
-    margin: 0 $s * 0.5;
+    margin: 0 var(--s-half);
   }
 
   h2,

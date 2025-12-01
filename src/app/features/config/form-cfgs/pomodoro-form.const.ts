@@ -1,6 +1,6 @@
+import { T } from '../../../t.const';
 /* eslint-disable max-len */
 import { ConfigFormSection, PomodoroConfig } from '../global-config.model';
-import { T } from '../../../t.const';
 
 export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
   title: T.GCF.POMODORO.TITLE,
@@ -17,13 +17,23 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'isStopTrackingOnBreak',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_STOP_TRACKING_ON_BREAK,
       },
     },
     {
+      key: 'isDisableAutoStartAfterBreak',
+      type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
+      templateOptions: {
+        label: T.GCF.POMODORO.IS_DISABLE_AUTO_START_AFTER_BREAK,
+      },
+    },
+    {
       key: 'isManualContinue',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_MANUAL_CONTINUE,
       },
@@ -31,6 +41,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'isManualContinueBreak',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_MANUAL_CONTINUE_BREAK,
       },
@@ -38,6 +49,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'isPlaySound',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_PLAY_SOUND,
       },
@@ -45,6 +57,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'isPlaySoundAfterBreak',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_PLAY_SOUND_AFTER_BREAK,
       },
@@ -52,6 +65,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'isPlayTick',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.IS_PLAY_TICK,
       },
@@ -59,6 +73,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'duration',
       type: 'duration',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.DURATION,
@@ -68,6 +83,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'breakDuration',
       type: 'duration',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.BREAK_DURATION,
@@ -77,6 +93,7 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'longerBreakDuration',
       type: 'duration',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         required: true,
         label: T.GCF.POMODORO.LONGER_BREAK_DURATION,
@@ -86,10 +103,12 @@ export const POMODORO_FORM_CFG: ConfigFormSection<PomodoroConfig> = {
     {
       key: 'cyclesBeforeLongerBreak',
       type: 'input',
+      hideExpression: (model: any) => !model.isEnabled,
       templateOptions: {
         label: T.GCF.POMODORO.CYCLES_BEFORE_LONGER_BREAK,
         type: 'number',
         min: 1,
+        required: true,
       },
     },
   ],

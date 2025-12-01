@@ -1,0 +1,13 @@
+:host {
+  display: inline-flex;
+  align-items: baseline;
+  box-sizing: border-box;
+  width: 100%;
+
+  mat-icon {
+    margin-right: var(--s);
+    font-size: 16px;
+    height: 16px;
+    width: 16px;
+  }
+}

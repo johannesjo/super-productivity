@@ -1,0 +1,634 @@
+@use '../../../../styles/_globals.scss' as *;
+@use 'task.component.mixins' as *;
+
+// CONTROLS
+// --------
+.all-controls-wrapper {
+  display: flex;
+  flex-flow: row;
+  position: relative;
+  margin-left: var(--s);
+  margin-right: var(--s);
+  align-items: stretch;
+
+  //@include verySmallMainContainer {
+  //  flex-direction: column-reverse;
+  //  align-items: flex-end;
+  //  justify-content: center;
+  //}
+}
+
+.controls {
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  text-align: right;
+  margin-right: 2px;
+  position: relative;
+
+  button {
+    margin-top: auto;
+    margin-bottom: auto;
+    height: 100% !important;
+    min-height: 40px;
+    border-radius: var(--card-border-radius);
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple {
+        border-radius: var(--card-border-radius);
+      }
+    }
+
+    &:hover {
+      ////  background: var(--c-light-10);
+      //
+      //
+    }
+  }
+
+  @include mq(xs, max) {
+    white-space: normal;
+    margin-left: 5px;
+  }
+
+  //@include smallMainContainer {
+  //  white-space: normal;
+  //  margin-left: 5px;
+  //}
+
+  //@include verySmallMainContainer {
+  //  min-height: 40px;
+  //}
+}
+
+// OTHER UI ELEMENTS
+// -----------------
+.title-and-tags-wrapper {
+  flex-grow: 1;
+  flex-shrink: 1;
+  min-width: 180px;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
+
+  > * {
+    @include touchOnlyDevice {
+      pointer-events: none;
+    }
+  }
+
+  // note: we use .tags-container, since we don't want margins for an empty list
+  ::ng-deep .tags-container {
+    // to match task title padding
+    margin-left: 6px;
+    margin-bottom: 5px;
+  }
+}
+
+@mixin timeWrapperMinimalStyles() {
+  .time {
+    font-size: 13px;
+    flex-direction: column;
+  }
+
+  .separator {
+    border-top: 1px solid;
+    height: 1px;
+    opacity: 0.1;
+    width: 100%;
+  }
+}
+
+// TIME
+.time-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  margin-right: var(--s);
+  z-index: var(--z-time-wrapper);
+  // note: fixes styles for empty time for very small mobile
+  min-width: 25px;
+  //border: 1px solid red;
+
+  @include mq(xxs) {
+    min-width: 0;
+  }
+
+  @include verySmallMainContainer {
+    display: none;
+  }
+
+  &.isEditable {
+    cursor: pointer;
+
+    &:hover {
+      .time {
+        transition: var(--transition-standard);
+        opacity: 1 !important;
+      }
+    }
+  }
+
+  &.hasNoTimeSpentOrEstimate {
+    display: none;
+  }
+
+  .time {
+    font-style: italic;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    font-weight: 300;
+
+    @include mq(xs) {
+      opacity: 0.5;
+      flex-direction: row;
+    }
+  }
+
+  .time-val,
+  .separator {
+    display: block;
+    white-space: nowrap;
+  }
+
+  .time-val {
+    mat-icon {
+      display: inline-flex;
+      vertical-align: middle;
+      height: 16px;
+      margin-right: 2px;
+      margin-top: -2px;
+
+      @include mq(xs, max) {
+        margin-right: 2px;
+        height: 14px;
+      }
+    }
+
+    span:not(:last-child) {
+      margin-right: 2px;
+    }
+  }
+
+  .separator {
+    padding: 0 var(--s-half);
+  }
+
+  //@include smallMainContainer {
+  @include timeWrapperMinimalStyles;
+  //}
+
+  @include mq(xs, max) {
+    @at-root .time-wrapper {
+      margin-right: 0;
+      @include timeWrapperMinimalStyles;
+
+      @include isDoneForFirstLine {
+        opacity: calc(var(--task-is-done-dim-opacity) + 0.1);
+      }
+    }
+  }
+
+  //@include verySmallMainContainer {
+  //  flex-direction: row;
+  //  &:after {
+  //    display: none;
+  //  }
+  //  .time {
+  //    flex-direction: row;
+  //  }
+  //  .separator {
+  //    display: block;
+  //  }
+  //}
+}
+
+.additional-info {
+  display: block;
+  // required as sort of a clearfix (fixes padding issue)
+  overflow: hidden;
+}
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: var(--z-drag-over-msg);
+}
+
+.check-done {
+  opacity: 0.5;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  display: block;
+  z-index: var(--z-check-done);
+  transform: translate(-50%, -50%);
+  transition: var(--transition-standard);
+  border-radius: 50%;
+
+  &:hover {
+    opacity: 1 !important;
+
+    mat-icon {
+      animation: var(--transition-duration-m) success-btn-ani linear;
+    }
+
+    .check {
+      display: none;
+    }
+
+    .undo {
+      display: block;
+    }
+  }
+
+  mat-icon {
+    font-size: var(--task-icon-size);
+    height: var(--task-icon-size);
+    width: var(--task-icon-size);
+    line-height: var(--task-icon-size);
+
+    &.undo {
+      display: none;
+    }
+  }
+}
+
+// SWIPE BLOCKS
+.block-left,
+.block-right {
+  pointer-events: none;
+  color: var(--palette-primary-contrast-500);
+  position: absolute;
+  bottom: 2px;
+  top: 1px;
+  width: 0;
+  z-index: var(--z-swipe-block);
+  transition: var(--transition-standard);
+  border-radius: var(--task-border-radius);
+  overflow: hidden;
+
+  &.isActive {
+    background-color: var(--c-accent);
+  }
+
+  mat-icon {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scaleX(1);
+  }
+}
+
+.block-left {
+  left: 0;
+}
+
+.block-right {
+  right: 0;
+}
+
+progress-bar {
+  z-index: var(--z-progress-bar);
+}
+
+// BUTTON STYLES AND DRAG HANDLE
+// -----------------------------
+.toggle-sub-tasks-btn,
+.first-line ::ng-deep .ico-btn,
+.first-line .ico-btn {
+  margin: 0 var(--task-button-spacer);
+  padding: 0;
+  z-index: var(--z-btn);
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: var(--z-btn-hover);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.first-line .menu-trigger {
+  @include mq(xs) {
+    opacity: 0;
+  }
+}
+
+.first-line:hover .menu-trigger {
+  @include standardTaskOpacityChange;
+}
+
+.delete-btn {
+  mat-icon.delete-icon {
+    color: var(--c-warn) !important;
+  }
+}
+
+.drag-handle {
+  margin-left: var(--s);
+  margin-right: 0;
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  z-index: var(--z-drag-handle);
+  //display: flex;
+  //justify-content: center;
+  //align-items: center;
+  position: relative;
+  // fixes drag and drop on mobile
+  touch-action: none;
+  pointer-events: all;
+
+  @include grabCursor();
+
+  @include verySmallMainContainer {
+    width: 8px;
+    min-width: 0;
+    opacity: 0;
+  }
+
+  > * {
+    pointer-events: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .type-ico-wrapper {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    opacity: var(--task-icon-default-opacity);
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    @include mq(xs, max) {
+      display: none;
+    }
+
+    :host.isCurrent &::ng-deep mat-icon {
+      transform: scale(1.4) !important;
+      transform-origin: center center;
+      opacity: 0.18;
+    }
+  }
+
+  .drag-handle-ico {
+    opacity: 0.15;
+
+    :host.isCurrent & {
+      opacity: 0;
+    }
+  }
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // hit area
+  &:after {
+    content: '';
+    position: absolute;
+    top: calc(-1 * var(--s-quarter));
+    bottom: calc(-1 * var(--s-quarter));
+    left: calc(-1 * var(--s-quarter));
+    right: calc(-1 * var(--s-quarter));
+
+    @include mq(xs) {
+      top: calc(-1 * var(--s));
+      bottom: calc(-1 * var(--s));
+      left: calc(-1 * var(--s));
+      right: calc(-1 * var(--s-half));
+    }
+  }
+}
+
+//
+.play-icon-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: var(--c-accent);
+
+  height: var(--play-icon-size);
+  margin-top: 1px;
+  width: var(--play-icon-size);
+  font-size: var(--play-icon-size);
+  line-height: var(--play-icon-size);
+  opacity: 1 !important;
+  z-index: 3;
+  pointer-events: none;
+
+  @include mq(xs) {
+    margin-top: 0;
+    //left: 10px;
+  }
+
+  //.first-line:hover & {
+  //  display: none;
+  //}
+}
+
+.ico-btn {
+  color: inherit;
+
+  &.mat-accent {
+    color: var(--c-accent);
+  }
+}
+
+.toggle-sub-tasks-btn,
+.first-line .ico-btn {
+  margin: auto var(--task-button-spacer);
+  padding: 0;
+  z-index: var(--z-btn);
+
+  @extend %standardTaskOpacityChange;
+
+  &:hover {
+    z-index: var(--z-btn-hover);
+  }
+
+  &:focus {
+    outline: none;
+  }
+}
+
+.toggle-sub-tasks-btn.toggle-sub-tasks-btn {
+  position: absolute !important;
+  // overwrite any lower values set elsewhere
+  opacity: 1;
+  transform: translateY(-50%);
+  left: -24px;
+  top: 50%;
+  z-index: var(--z-toggle-sub-task-btn) !important;
+  min-width: 0;
+  min-height: 0;
+  width: 32px !important;
+  height: 32px !important;
+  margin-top: -1px !important;
+  transform-origin: left top;
+  transition-property: all;
+  box-shadow: var(--whiteframe-shadow-1dp);
+
+  :host-context(.isNoTouchOnly) & {
+    //opacity: 0;
+  }
+
+  :host:hover & {
+    opacity: 1;
+  }
+
+  mat-icon {
+    transition: var(--transition-standard);
+    opacity: var(--task-icon-default-opacity);
+
+    &.isHideDoneTasks {
+      transform: rotate(-45deg);
+    }
+  }
+}
+
+.attachment-btn,
+.show-additional-info-btn {
+  mat-icon {
+    transition: transform var(--transition-standard);
+  }
+}
+
+.updated-icon {
+  position: absolute;
+  transform: scale(1.5) translate(-50%, -50%);
+  transform-origin: top left;
+  top: 50%;
+  left: 50%;
+}
+
+.start-task-btn {
+  :host-context(.isHidePlayBtn) & {
+    display: none !important;
+  }
+}
+
+// ANIMATIONS ETC
+// --------------
+@keyframes success-btn-ani {
+  0% {
+    transform: scale(0.5) rotate(-180deg);
+  }
+  50% {
+    transform: scale(1) rotate(-90deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+.isPreventPointerEventsWhilePanning {
+  * {
+    user-select: none !important;
+    -webkit-user-select: none !important; /* Safari */
+    pointer-events: none !important;
+    transition: none !important;
+  }
+}
+
+.mini-badge {
+  line-height: var(--mini-badge-size);
+  width: var(--mini-badge-size);
+  height: var(--mini-badge-size);
+  font-size: 12px;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  border-radius: 50%;
+  text-align: center;
+}
+
+.parent-title {
+  display: flex;
+  align-items: center;
+  padding-left: var(--s);
+  padding-top: var(--s-half);
+  margin-bottom: -2px;
+
+  .title {
+    font-size: 12px;
+    text-overflow: ellipsis;
+  }
+}
+
+.schedule-btn {
+  position: relative;
+
+  &.mat-warn mat-icon {
+    color: var(--c-warn) !important;
+  }
+}
+
+.repeat-date-badge,
+.time-badge {
+  position: absolute;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  margin-top: 10px;
+  font-size: 12px;
+  z-index: 10;
+  line-height: 1;
+  text-align: center;
+  padding: 1px 2px 0;
+  border: 1px solid var(--extra-border-color);
+  border-radius: var(--card-border-radius);
+  white-space: nowrap;
+  background: #fff;
+
+  // avoid affecting drag handle
+  pointer-events: none;
+
+  @include darkTheme() {
+    border-color: var(--extra-border-color);
+    background: var(--bg-lighter);
+  }
+
+  ::ng-deep span {
+    font-size: 10px;
+  }
+}
+
+@media (min-width: #{$layout-sm}) and (max-width: #{$layout-xl - 1px}) {
+  .closeBtn {
+    min-width: 40px;
+    margin-right: -29px !important;
+  }
+}
+
+.tag-ico {
+  font-size: 20px;
+  line-height: 20px;
+  height: 20px;
+  width: 20px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 4px;
+}

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   selectAllSimpleCounters,
@@ -12,6 +12,7 @@ import {
   deleteSimpleCounter,
   deleteSimpleCounters,
   increaseSimpleCounterCounterToday,
+  setSimpleCounterCounterForDate,
   setSimpleCounterCounterToday,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
@@ -30,11 +31,16 @@ import { DateService } from 'src/app/core/date/date.service';
   providedIn: 'root',
 })
 export class SimpleCounterService {
+  private _store$ = inject<Store<SimpleCounterState>>(Store);
+  private _dateService = inject(DateService);
+
   simpleCounters$: Observable<SimpleCounter[]> = this._store$.pipe(
     select(selectAllSimpleCounters),
   );
   simpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
-    this.simpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
+    this.simpleCounters$.pipe(
+      distinctUntilChanged((a, b) => isEqualSimpleCounterCfg(a, b)),
+    );
 
   enabledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledSimpleCounters,
@@ -43,17 +49,9 @@ export class SimpleCounterService {
     selectEnabledSimpleStopWatchCounters,
   );
 
-  enabledSimpleCountersUpdatedOnCfgChange$: Observable<SimpleCounter[]> =
-    this.enabledSimpleCounters$.pipe(distinctUntilChanged(isEqualSimpleCounterCfg));
-
   enabledAndToggledSimpleCounters$: Observable<SimpleCounter[]> = this._store$.select(
     selectEnabledAndToggledSimpleCounters,
   );
-
-  constructor(
-    private _store$: Store<SimpleCounterState>,
-    private _dateService: DateService,
-  ) {}
 
   updateAll(items: SimpleCounter[]): void {
     this._store$.dispatch(updateAllSimpleCounters({ items }));
@@ -62,6 +60,10 @@ export class SimpleCounterService {
   setCounterToday(id: string, newVal: number): void {
     const today = this._dateService.todayStr();
     this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+  }
+
+  setCounterForDate(id: string, date: string, newVal: number): void {
+    this._store$.dispatch(setSimpleCounterCounterForDate({ id, newVal, date }));
   }
 
   increaseCounterToday(id: string, increaseBy: number): void {

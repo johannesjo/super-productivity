@@ -1,12 +1,5 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
-import {
-  selectAllTaskRepeatCfgs,
-  selectTaskRepeatCfgById,
-  selectTaskRepeatCfgByIdAllowUndefined,
-  selectTaskRepeatCfgsDueOnDay,
-  selectTaskRepeatCfgsWithStartTime,
-} from './store/task-repeat-cfg.reducer';
 import {
   addTaskRepeatCfgToTask,
   deleteTaskRepeatCfg,
@@ -14,6 +7,7 @@ import {
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
   upsertTaskRepeatCfg,
+  deleteTaskRepeatCfgInstance,
 } from './store/task-repeat-cfg.actions';
 import { Observable } from 'rxjs';
 import {
@@ -25,49 +19,59 @@ import { nanoid } from 'nanoid';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
-import { take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 import { TaskService } from '../tasks/task.service';
-import { TODAY_TAG } from '../tag/tag.const';
-import { Task, TaskPlanned } from '../tasks/task.model';
-import { addTask, scheduleTask } from '../tasks/store/task.actions';
+import { Task } from '../tasks/task.model';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
+import { addSubTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
-import { isSameDay } from '../../util/is-same-day';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
-import { sortRepeatableTaskCfgs } from './sort-repeatable-task-cfg';
+import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { TODAY_TAG } from '../tag/tag.const';
+import {
+  selectAllTaskRepeatCfgs,
+  selectTaskRepeatCfgById,
+  selectTaskRepeatCfgByIdAllowUndefined,
+  selectAllUnprocessedTaskRepeatCfgs,
+  selectTaskRepeatCfgsForExactDay,
+} from './store/task-repeat-cfg.selectors';
+import { devError } from '../../util/dev-error';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskRepeatCfgService {
+  private _store$ = inject<Store<TaskRepeatCfgState>>(Store);
+  private _matDialog = inject(MatDialog);
+  private _taskService = inject(TaskService);
+  private _workContextService = inject(WorkContextService);
+
   taskRepeatCfgs$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
     select(selectAllTaskRepeatCfgs),
   );
 
-  taskRepeatCfgsWithStartTime$: Observable<TaskRepeatCfg[]> = this._store$.pipe(
-    select(selectTaskRepeatCfgsWithStartTime),
-  );
+  getRepeatableTasksForExactDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
+    // ===> taskRepeatCfgs where calculated due date matches the specified day
+    return this._store$.select(selectTaskRepeatCfgsForExactDay, { dayDate });
+  }
 
-  constructor(
-    private _store$: Store<TaskRepeatCfgState>,
-    private _matDialog: MatDialog,
-    private _taskService: TaskService,
-    private _workContextService: WorkContextService,
-  ) {}
-
-  getRepeatTableTasksDueForDay$(dayDate: number): Observable<TaskRepeatCfg[]> {
+  getAllUnprocessedRepeatableTasks$(dayDate: number): Observable<TaskRepeatCfg[]> {
     // ===> taskRepeatCfgs scheduled for today and not yet created already
-    return this._store$.pipe(select(selectTaskRepeatCfgsDueOnDay, { dayDate }));
+    return this._store$
+      .select(selectAllUnprocessedTaskRepeatCfgs, { dayDate })
+      .pipe(first());
   }
 
   getTaskRepeatCfgById$(id: string): Observable<TaskRepeatCfg> {
-    return this._store$.pipe(select(selectTaskRepeatCfgById, { id }));
+    return this._store$.select(selectTaskRepeatCfgById, { id });
   }
 
   getTaskRepeatCfgByIdAllowUndefined$(id: string): Observable<TaskRepeatCfg | undefined> {
-    return this._store$.pipe(select(selectTaskRepeatCfgByIdAllowUndefined, { id }));
+    return this._store$.select(selectTaskRepeatCfgByIdAllowUndefined, { id });
   }
 
   addTaskRepeatCfgToTask(
@@ -83,6 +87,8 @@ export class TaskRepeatCfgService {
           id: nanoid(),
         },
         taskId,
+        startTime: taskRepeatCfg.startTime,
+        remindAt: taskRepeatCfg.remindAt,
       }),
     );
   }
@@ -116,14 +122,16 @@ export class TaskRepeatCfgService {
     this._store$.dispatch(upsertTaskRepeatCfg({ taskRepeatCfg }));
   }
 
+  deleteTaskRepeatCfgInstance(repeatCfgId: string, dateStr: string): void {
+    this._store$.dispatch(deleteTaskRepeatCfgInstance({ repeatCfgId, dateStr }));
+  }
+
   async createRepeatableTask(
     taskRepeatCfg: TaskRepeatCfg,
     targetDayDate: number,
-    currentTaskId: string | null,
   ): Promise<void> {
-    const actionsForRepeatCfg = await this.getActionsForTaskRepeatCfg(
+    const actionsForRepeatCfg = await this._getActionsForTaskRepeatCfg(
       taskRepeatCfg,
-      currentTaskId,
       targetDayDate,
     );
     actionsForRepeatCfg.forEach((act) => {
@@ -148,38 +156,17 @@ export class TaskRepeatCfgService {
       });
   }
 
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  async addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-    currentTaskId: string | null,
-    targetDay: number,
-  ): Promise<void> {
-    if (plannedTasks.length) {
-      await this._taskService.movePlannedTasksToToday(plannedTasks);
-    }
-    if (repeatableScheduledForTomorrow.length) {
-      console.log(repeatableScheduledForTomorrow.sort(sortRepeatableTaskCfgs));
-
-      const promises = repeatableScheduledForTomorrow
-        .sort(sortRepeatableTaskCfgs)
-        .map((repeatCfg) => {
-          return this.createRepeatableTask(repeatCfg, targetDay, currentTaskId);
-        });
-      await Promise.all(promises);
-    }
-  }
-
-  async getActionsForTaskRepeatCfg(
+  // NOTE: this is public for testing purposes only
+  async _getActionsForTaskRepeatCfg(
     taskRepeatCfg: TaskRepeatCfg,
-    currentTaskId: string | null,
     targetDayDate: number = Date.now(),
   ): // NOTE: updateTaskRepeatCfg missing as there is no way to declare it as action type
   Promise<
     (
-      | ReturnType<typeof addTask>
+      | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTask>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
+      | ReturnType<typeof addSubTask>
     )[]
   > {
     // NOTE: there might be multiple configs in case something went wrong
@@ -193,28 +180,57 @@ export class TaskRepeatCfgService {
       throw new Error('No taskRepeatCfg.id');
     }
 
+    const targetCreated = getNewestPossibleDueDate(
+      taskRepeatCfg,
+      new Date(targetDayDate),
+    );
+
+    // there is no creation date in the present
+    if (targetCreated === null) {
+      // not sure if we should always expect one when this is called, so we throw a dev error for evaluation
+      devError('No target creation date found for repeatable task');
+      return [];
+    } else if (!targetCreated) {
+      throw new Error('Unable to getNewestPossibleDueDate()');
+    }
+
+    // IMPORTANT: compute the actual target day first and base all other checks on it.
+    // Using Date.now() caused duplicates when generating overdue instances because "today"
+    // differs from the repeat day we are about to create.
+    const targetDateStr = getDbDateStr(targetCreated);
+
     const isCreateNew =
-      existingTaskInstances.filter((taskI) => isSameDay(targetDayDate, taskI.created))
-        .length === 0;
+      existingTaskInstances.filter((taskI) => {
+        const existingDateStr = taskI.dueDay || getDbDateStr(taskI.created);
+        return existingDateStr === targetDateStr;
+      }).length === 0;
 
     if (!isCreateNew) {
       return [];
     }
+    // Check if this date is in the deleted instances list
+    // NOTE: needs to run after deriving targetDateStr so deletions for overdue instances work.
+    if (taskRepeatCfg.deletedInstanceDates?.includes(targetDateStr)) {
+      return [];
+    }
 
     const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
+    const taskWithTargetDates: Task = {
+      ...task,
+      // NOTE if moving this to top isCreateNew check above would not work as intended
+      // we use created also for the repeat day label for past tasks
+      created: targetCreated.getTime(),
+      dueDay: targetDateStr,
+    };
 
     const createNewActions: (
-      | ReturnType<typeof addTask>
+      | ReturnType<typeof TaskSharedActions.addTask>
       | ReturnType<typeof updateTaskRepeatCfg>
-      | ReturnType<typeof scheduleTask>
+      | ReturnType<typeof TaskSharedActions.scheduleTaskWithTime>
+      | ReturnType<typeof addSubTask>
     )[] = [
-      addTask({
-        task: {
-          ...task,
-          // NOTE otherwise isCreateNew check above would not work as intended and
-          // we use created also for the repeat day label for past tasks
-          created: targetDayDate,
-        },
+      TaskSharedActions.addTask({
+        task: taskWithTargetDates,
         workContextType: this._workContextService
           .activeWorkContextType as WorkContextType,
         workContextId: this._workContextService.activeWorkContextId as string,
@@ -225,27 +241,55 @@ export class TaskRepeatCfgService {
         taskRepeatCfg: {
           id: taskRepeatCfg.id,
           changes: {
-            lastTaskCreation: targetDayDate,
+            lastTaskCreation: targetCreated.getTime(),
+            lastTaskCreationDay: getDbDateStr(targetCreated),
           },
         },
-        // TODO fix type
       }),
     ];
 
     // Schedule if given
     if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
+      // NOTE: schedule tasks against the computed repeat day to avoid mismatched due dates.
       const dateTime = getDateTimeFromClockString(
         taskRepeatCfg.startTime as string,
-        targetDayDate,
+        targetCreated.getTime(),
       );
       createNewActions.push(
-        scheduleTask({
-          task,
-          plannedAt: dateTime,
+        TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithTargetDates,
+          dueWithTime: dateTime,
           remindAt: remindOptionToMilliseconds(dateTime, taskRepeatCfg.remindAt),
           isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
         }),
       );
+    }
+
+    if (
+      taskRepeatCfg.shouldInheritSubtasks &&
+      taskRepeatCfg.subTaskTemplates &&
+      taskRepeatCfg.subTaskTemplates.length > 0
+    ) {
+      for (const subTask of taskRepeatCfg.subTaskTemplates) {
+        const newSubTask = this._taskService.createNewTaskWithDefaults({
+          title: subTask.title,
+          additional: {
+            notes: subTask.notes ?? '',
+            timeEstimate: subTask.timeEstimate ?? 0,
+            parentId: task.id,
+            projectId: taskRepeatCfg.projectId || undefined,
+            isDone: false, // Always start fresh
+          },
+        });
+
+        createNewActions.push(
+          addSubTask({
+            task: newSubTask,
+            parentId: task.id,
+          }),
+        );
+      }
     }
 
     return createNewActions;
@@ -255,17 +299,17 @@ export class TaskRepeatCfgService {
     task: Task;
     isAddToBottom: boolean;
   } {
-    const isAddToTodayAsFallback =
-      !taskRepeatCfg.projectId && !taskRepeatCfg.tagIds.length;
     return {
       task: this._taskService.createNewTaskWithDefaults({
         title: taskRepeatCfg.title,
         additional: {
           repeatCfgId: taskRepeatCfg.id,
-          timeEstimate: taskRepeatCfg.defaultEstimate,
-          projectId: taskRepeatCfg.projectId,
-          tagIds: isAddToTodayAsFallback ? [TODAY_TAG.id] : taskRepeatCfg.tagIds || [],
+          timeEstimate: taskRepeatCfg.defaultEstimate || 0,
+          projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
+          // always due for today
+          dueDay: getDbDateStr(),
+          tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),
       isAddToBottom: taskRepeatCfg.order > 0,

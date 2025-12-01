@@ -1,0 +1,86 @@
+$pad: 12px;
+
+:host {
+  margin-top: 0;
+  position: relative;
+  background: inherit;
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  max-width: 100%;
+  min-width: 260px;
+  overflow: hidden;
+}
+
+:host > * {
+  padding-left: $pad;
+  padding-right: $pad;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  margin-top: 16px;
+}
+
+.title,
+.arrow,
+.default-project {
+  opacity: 0.5;
+}
+
+.title,
+.default-project {
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.title {
+  white-space: nowrap;
+}
+
+.default-project {
+  min-width: 70px;
+}
+
+.arrow {
+  margin: 0 var(--s);
+  min-width: 24px;
+}
+
+.empty {
+  text-align: center;
+  font-style: italic;
+  margin-top: var(--s2);
+  margin-bottom: var(--s2);
+}
+
+.item-list {
+  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.spinner {
+  display: flex;
+  justify-content: center;
+  padding: 8px;
+}
+
+.keep-ico {
+  opacity: 0.8;
+
+  &:hover {
+    opacity: 1;
+  }
+
+  &:active {
+    transform: scale(1.3);
+  }
+
+  .active {
+    opacity: 1;
+  }
+}

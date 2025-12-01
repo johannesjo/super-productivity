@@ -5,9 +5,6 @@ export interface CaldavCfg extends BaseIssueProviderCfg {
   resourceName: string | null;
   username: string | null;
   password: string | null;
-  isAutoAddToBacklog: boolean;
-  isAutoPoll: boolean;
-  isSearchIssuesFromCaldav: boolean;
   isTransitionIssuesEnabled: boolean;
   categoryFilter: string | null;
 }

@@ -1,0 +1,94 @@
+@use '../../../styles/_globals.scss' as *;
+
+:host {
+  display: contents;
+}
+
+.mobile-bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: calc(var(--bottom-nav-height) + env(safe-area-inset-bottom));
+  box-sizing: border-box;
+  background: var(--bottom-nav-bg);
+  border-top: 1px solid var(--separator-color);
+  box-shadow: var(--whiteframe-shadow-8dp);
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 8px;
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: var(--z-mobile-bottom-nav);
+  display: flex;
+
+  //// Glass effect only when background image is present
+  :host-context(.hasBgImage) & {
+    //backdrop-filter: blur(10px);
+    //-webkit-backdrop-filter: blur(10px);
+  }
+
+  .nav-button {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: var(--bottom-nav-height);
+    min-width: 64px;
+    border-radius: 16px;
+    transition: all 0.2s ease;
+
+    &:hover {
+      background-color: var(--mat-surface-container-high);
+    }
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+      padding: 0;
+      margin: 0;
+    }
+  }
+
+  .add-task-button {
+    width: 56px;
+    height: 56px;
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-bottom: 24px;
+    box-shadow: var(--mat-fab-container-elevation-shadow);
+    transition: all 0.2s ease;
+
+    &:hover {
+      transform: scale(1.05);
+      box-shadow:
+        var(--mat-fab-container-elevation-shadow),
+        0 8px 16px rgba(0, 0, 0, 0.2);
+    }
+
+    &:active {
+      transform: scale(0.95);
+    }
+
+    &.smaller {
+      height: 40px;
+      margin-left: 8px;
+      margin-right: 8px;
+      margin-bottom: 0px;
+    }
+
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+    }
+  }
+}
+
+// Material Design touch target improvements
+.nav-button,
+.add-task-button {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}

@@ -1,53 +1,110 @@
-import { Injectable } from '@angular/core';
-import { DB, LS } from './storage-keys.const';
+import { inject, Injectable, signal } from '@angular/core';
+import { DB } from './storage-keys.const';
 import { DatabaseService } from './database.service';
-import { LocalSyncMetaModel } from '../../imex/sync/sync.model';
-import { SyncProvider } from '../../imex/sync/sync-provider.model';
+import { LocalSyncMetaForProvider, LocalSyncMetaModel } from '../../imex/sync/sync.model';
+import { LegacySyncProvider } from 'src/app/imex/sync/legacy-sync-provider.model';
+import { environment } from 'src/environments/environment';
+import { Log } from '../log';
+
+const DEFAULT_LOCAL_SYNC_META: LocalSyncMetaModel = {
+  [LegacySyncProvider.Dropbox]: {
+    rev: null,
+    lastSync: 0,
+    revTaskArchive: null,
+  },
+  [LegacySyncProvider.WebDAV]: { rev: null, lastSync: 0, revTaskArchive: null },
+  [LegacySyncProvider.LocalFile]: {
+    rev: null,
+    lastSync: 0,
+    revTaskArchive: null,
+  },
+};
 
 @Injectable({
   providedIn: 'root',
 })
 export class PersistenceLocalService {
-  constructor(private _databaseService: DatabaseService) {}
+  lastSyncModelChange = signal(0);
+  private _databaseService = inject(DatabaseService);
 
-  async save(data: LocalSyncMetaModel): Promise<any> {
+  constructor() {
+    // update val initially
+    this.loadLastSyncModelChange().then((val) => this.lastSyncModelChange.set(val));
+  }
+
+  async save(data: LocalSyncMetaModel): Promise<unknown> {
     return await this._databaseService.save(DB.LOCAL_NON_SYNC, data);
   }
 
   async load(): Promise<LocalSyncMetaModel> {
     const r = (await this._databaseService.load(DB.LOCAL_NON_SYNC)) as LocalSyncMetaModel;
+
     if (
       r &&
-      r[SyncProvider.Dropbox] &&
-      r[SyncProvider.WebDAV] &&
-      r[SyncProvider.LocalFile]
+      r[LegacySyncProvider.Dropbox] &&
+      r[LegacySyncProvider.WebDAV] &&
+      r[LegacySyncProvider.LocalFile]
     ) {
+      if (environment.production) {
+        Log.log(r);
+      }
       return r;
     }
-    return {
-      [SyncProvider.Dropbox]: {
-        rev: this._getLegacyLocalRev(SyncProvider.Dropbox) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.Dropbox) || 0,
-      },
-      [SyncProvider.WebDAV]: {
-        rev: this._getLegacyLocalRev(SyncProvider.WebDAV) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.WebDAV) || 0,
-      },
-      [SyncProvider.LocalFile]: {
-        rev: this._getLegacyLocalRev(SyncProvider.LocalFile) || null,
-        lastSync: this._getLegacyLocalLastSync(SyncProvider.LocalFile) || 0,
-      },
-      // Overwrite with existing if given
-      ...(r as any),
-    };
+    return DEFAULT_LOCAL_SYNC_META;
   }
 
-  private _getLegacyLocalRev(p: SyncProvider): string | null {
-    return localStorage.getItem(LS.SYNC_LAST_LOCAL_REVISION_PREFIX + p);
+  async updateDropboxSyncMeta(
+    dropboxSyncMeta: Partial<LocalSyncMetaForProvider>,
+  ): Promise<unknown> {
+    const localSyncMeta = await this.load();
+    return await this.save({
+      ...localSyncMeta,
+      Dropbox: {
+        ...localSyncMeta.Dropbox,
+        ...dropboxSyncMeta,
+      },
+    });
   }
 
-  private _getLegacyLocalLastSync(p: SyncProvider): number {
-    const it = +(localStorage.getItem(LS.SYNC_LOCAL_LAST_SYNC_PREFIX + p) as any);
-    return isNaN(it) ? 0 : it || 0;
+  async loadLastSyncModelChange(): Promise<number> {
+    const r = (await this._databaseService.load(
+      DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+      // get legacy value if non here
+      // TODO remove legacy value
+    )) as string;
+    return this._parseTS(r);
+  }
+
+  async loadLastArchiveChange(): Promise<number> {
+    return this._parseTS(
+      (await this._databaseService.load(DB.LOCAL_LAST_ARCHIVE_CHANGE)) as string,
+    );
+  }
+
+  async updateLastSyncModelChange(lastSyncModelChange: number): Promise<unknown> {
+    Log.log(lastSyncModelChange);
+    console.trace();
+    this.lastSyncModelChange.set(lastSyncModelChange);
+    return await this._databaseService.save(
+      DB.LOCAL_LAST_SYNC_MODEL_CHANGE,
+      lastSyncModelChange,
+    );
+  }
+
+  async updateLastArchiveChange(lastArchiveChange: number): Promise<unknown> {
+    return await this._databaseService.save(
+      DB.LOCAL_LAST_ARCHIVE_CHANGE,
+      lastArchiveChange,
+    );
+  }
+
+  private _parseTS(ts: number | string | null): number {
+    // NOTE: we need to parse because new Date('1570549698000') is "Invalid Date"
+    const laParsed = Number.isNaN(Number(ts)) ? ts : +(ts as string);
+    if (!laParsed) {
+      return 0;
+    }
+    // NOTE: to account for legacy string dates
+    return new Date(laParsed).getTime();
   }
 }

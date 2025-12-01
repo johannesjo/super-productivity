@@ -1,0 +1,125 @@
+plugins {
+
+    id "com.android.application"
+    id "org.jetbrains.kotlin.android"
+}
+
+// Apply the external configuration script
+apply from: "config.gradle"
+
+// Load the application configuration properties
+def appConfig = loadAppConfig()
+
+// Retrieve the build configuration fields for Debug and Release builds
+def debugConfigFields = getBuildConfigFields(appConfig, true)
+def releaseConfigFields = getBuildConfigFields(appConfig, false)
+
+android {
+    defaultConfig {
+        applicationId "com.superproductivity.superproductivity"
+        minSdkVersion 24
+        targetSdkVersion 35
+        compileSdk 35
+        versionCode 16_04_03_0000
+        versionName "16.4.3"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        manifestPlaceholders = [
+                hostName       : "app.super-productivity.com",
+                defaultUrl     : "https://app.super-productivity.com",
+                launcherName   : "Super Productivity",
+                assetStatements: '[{ "relation": ["delegate_permission/common.handle_all_urls"], ' +
+                        '"target": {"namespace": "web", "site": "https://app.super-productivity.com"}}]'
+        ]
+    }
+
+    signingConfigs{
+        release{
+            storeFile file("../../keystore.jks")
+            storePassword System.getenv("RELEASE_KEYSTORE_PASSWORD")
+            keyAlias System.getenv("RELEASE_KEYSTORE_ALIAS")
+            keyPassword System.getenv("RELEASE_KEY_PASSWORD")
+        }
+    }
+
+    // Configure the build types (Debug and Release)
+    buildTypes {
+        debug {
+            // Define each field in BuildConfig for the Debug build
+            debugConfigFields.each { key, value ->
+                buildConfigField "String", key, value.toString()
+            }
+        }
+        release {
+            // Define each field in BuildConfig for the Release build
+            releaseConfigFields.each { key, value ->
+                buildConfigField "String", key, value.toString()
+            }
+
+            signingConfig signingConfigs.release
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    flavorDimensions "version"
+    productFlavors {
+        play {
+            dimension "version"
+            Properties properties = new Properties()
+            file("google.properties").withInputStream {
+                properties.load(it)
+            }
+            buildConfigField "String", "CLIENT_ID_WEB", "\"" + properties.webToken + "\""
+        }
+        fdroid {
+            dimension "version"
+        }
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+    }
+    kotlinOptions {
+        jvmTarget = "21"
+    }
+
+    buildFeatures {
+        buildConfig = true
+    }
+
+    namespace "com.superproductivity.superproductivity"
+}
+
+dependencies {
+    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "com.google.androidbrowserhelper:androidbrowserhelper:2.5.0"
+    implementation "com.google.code.gson:gson:2.10.1"
+    implementation "androidx.core:core-ktx:1.16.0"
+    implementation 'androidx.lifecycle:lifecycle-process:2.8.7'
+    implementation 'androidx.preference:preference-ktx:1.2.1'
+    implementation "com.anggrayudi:storage:1.5.4"
+
+    playImplementation "com.google.android.gms:play-services-auth:21.3.0"
+
+    implementation project(':capacitor-android')
+
+    // Force androidx.webkit to 1.11.0 for better API 28 compatibility
+    // This avoids NoClassDefFoundError for WebViewRenderProcessClient on Android 9
+    // while retaining audio controls and URL utils added in 1.11.0
+    // See: https://github.com/johannesjo/super-productivity/issues/5285
+    configurations.all {
+        resolutionStrategy {
+            force "androidx.webkit:webkit:1.11.0"
+        }
+    }
+
+    testImplementation "junit:junit:4.13.2"
+
+    androidTestImplementation "androidx.test:rules:1.6.1"
+    androidTestImplementation "com.android.support.test:runner:1.0.2"
+    androidTestImplementation "com.android.support.test.espresso:espresso-core:3.0.2"
+}
+
+apply from: 'capacitor.build.gradle'

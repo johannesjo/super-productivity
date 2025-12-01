@@ -1,26 +1,44 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, merge, Observable } from 'rxjs';
-
-import { concatMap, filter, first, switchMap, takeUntil, tap } from 'rxjs/operators';
-import { ISSUE_PROVIDER_TYPES } from '../issue.const';
+import { merge, Observable, timer } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  filter,
+  first,
+  switchMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { IssueService } from '../issue.service';
 import { setActiveWorkContext } from '../../work-context/store/work-context.actions';
-import { updateProjectIssueProviderCfg } from '../../project/store/project.actions';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
+import { Store } from '@ngrx/store';
+import { selectEnabledIssueProviders } from './issue-provider.selectors';
+import { IssueProvider } from '../issue.model';
+import { SnackService } from '../../../core/snack/snack.service';
+import { getErrorTxt } from '../../../util/get-error-text';
+import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
+import { IssueLog } from '../../../core/log';
 
 @Injectable()
 export class PollToBacklogEffects {
+  private readonly _issueService = inject(IssueService);
+  private readonly _actions$ = inject(Actions);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _store = inject(Store);
+
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext, updateProjectIssueProviderCfg.type),
+    ofType(setActiveWorkContext),
   );
 
   pollToBacklogTriggerToProjectId$: Observable<string> =
     this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
       concatMap(() => this.pollToBacklogActions$),
       switchMap(() => this._workContextService.isActiveWorkContextProject$.pipe(first())),
-      // NOTE: it's important that the filter is on top level otherwise the subscription is not canceled
       filter((isProject) => isProject),
       switchMap(
         () =>
@@ -35,38 +53,48 @@ export class PollToBacklogEffects {
     () =>
       this.pollToBacklogTriggerToProjectId$.pipe(
         switchMap((pId) =>
-          merge(
-            ...ISSUE_PROVIDER_TYPES.map((providerKey) =>
-              this._issueService
-                .isBacklogPollEnabledForProjectOnce$(providerKey, pId)
-                .pipe(
-                  switchMap((isEnabled) => {
-                    return isEnabled
-                      ? this._issueService.getPollTimer$(providerKey).pipe(
-                          // NOTE: required otherwise timer stays alive for filtered actions
-                          takeUntil(this.pollToBacklogActions$),
-                          tap(() => console.log('POLL ' + providerKey)),
-                          switchMap(() =>
-                            this._issueService.checkAndImportNewIssuesToBacklogForProject(
-                              providerKey,
-                              pId,
-                            ),
-                          ),
-                        )
-                      : EMPTY;
-                  }),
-                ),
+          this._store.select(selectEnabledIssueProviders).pipe(
+            switchMap((enabledProviders: IssueProvider[]) =>
+              merge(
+                ...enabledProviders
+                  .filter(
+                    (provider) =>
+                      provider.defaultProjectId === pId && provider.isAutoAddToBacklog,
+                  )
+                  // filter out providers with 0 poll interval (no polling)
+                  .filter(
+                    (provider) =>
+                      this._issueService.getPollInterval(provider.issueProviderKey) > 0,
+                  )
+                  .map((provider) =>
+                    timer(
+                      DELAY_BEFORE_ISSUE_POLLING,
+                      this._issueService.getPollInterval(provider.issueProviderKey),
+                    ).pipe(
+                      takeUntil(this.pollToBacklogActions$),
+                      tap(() => IssueLog.log('POLL ' + provider.issueProviderKey)),
+                      switchMap(() =>
+                        this._issueService.checkAndImportNewIssuesToBacklogForProject(
+                          provider.issueProviderKey,
+                          provider.id,
+                        ),
+                      ),
+                      catchError((e) => {
+                        IssueLog.err(e);
+                        this._snackService.open({
+                          type: 'ERROR',
+                          // TODO translate
+                          msg: `${provider.issueProviderKey}: Failed to poll new issues for backlog import – \n ${getErrorTxt(e)}`,
+                        });
+                        return [];
+                      }),
+                    ),
+                  ),
+              ),
             ),
           ),
         ),
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private readonly _issueService: IssueService,
-    private readonly _actions$: Actions,
-    private readonly _workContextService: WorkContextService,
-    private readonly _syncTriggerService: SyncTriggerService,
-  ) {}
 }

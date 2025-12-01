@@ -1,6 +1,10 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 .dialog-content {
+  @include mq(xs) {
+    min-width: 400px;
+  }
+
   p,
   .track-to-label,
   .simple-counter-section,
@@ -12,24 +16,36 @@
 .time {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 }
 
 .track-to-label {
-  padding-top: $s * 3;
-  margin: $s $s * -3 $s;
+  padding-top: var(--s3);
+  margin: var(--s) calc(var(--s) * -3) var(--s);
   font-size: 22px;
-  border-top: 1px solid $dark-theme-extra-border-color;
-
-  @include lightTheme() {
-    border-color: $light-theme-extra-border-color;
-  }
-}
-
-.simple-counter-section {
+  border-top: 1px solid var(--extra-border-color);
 }
 
 .simple-counter {
-  margin: 0 $s * 0.5;
+  margin: 0 var(--s-half);
   box-shadow: none !important;
+
+  &.mat-primary {
+    animation: pulse 2s infinite;
+  }
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(0.95);
+  }
+  25% {
+    transform: scale(1.15);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+  100% {
+    transform: scale(0.95);
+  }
 }

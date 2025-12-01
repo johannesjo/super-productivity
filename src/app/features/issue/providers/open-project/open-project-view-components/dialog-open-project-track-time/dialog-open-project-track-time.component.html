@@ -1,5 +1,5 @@
 <form
-  (submit)="postTime()"
+  (submit)="$event.preventDefault(); postTime()"
   class="mat-body"
   name="time-estimate-form"
 >
@@ -8,31 +8,33 @@
       class="dialog-header-icon"
       svgIcon="open_project"
     ></mat-icon>
-    <span>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TITLE|translate}}</span>
+    <span>{{ T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TITLE | translate }}</span>
   </h1>
 
   <mat-dialog-content>
     <p>
-      {{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.SUBMIT_TIME_FOR|translate}}<br />
+      {{ T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.SUBMIT_TIME_FOR | translate }}<br />
       <strong>
         <a
           [href]="workPackage?.url"
           target="_blank"
         >
-          {{workPackage.id}} {{workPackage.subject}}</a
+          {{ workPackage.id }} {{ workPackage.subject }}</a
         ></strong
       >.
     </p>
     <p>
-      {{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.CURRENTLY_LOGGED|translate}}
-      <strong>{{(timeLoggedForWorkPackage)|msToString}}</strong>
+      {{ T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.CURRENTLY_LOGGED | translate }}
+      <strong>{{ timeLoggedForWorkPackage | msToString }}</strong>
     </p>
     <br />
     <br />
 
     <div class="form-wrapper">
       <mat-form-field>
-        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TIME_SPENT|translate}}</mat-label>
+        <mat-label>{{
+          T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.TIME_SPENT | translate
+        }}</mat-label>
         <input
           [(ngModel)]="timeSpent"
           inputDuration="optional"
@@ -45,7 +47,7 @@
           class="suffix-wrapper"
           matSuffix
           [matMenuTriggerFor]="contextMenu"
-          [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
+          [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP | translate"
         >
           <button
             mat-icon-button
@@ -64,28 +66,34 @@
 
       <mat-menu #contextMenu="matMenu">
         <ng-template matMenuContent>
-          <button
-            *ngFor="let opt of defaultTimeOptions"
-            mat-menu-item
-            type="button"
-            (click)="fill(opt.value)"
-          >
-            {{opt.label|translate}} ({{(getTimeToLogForMode(opt.value)|msToString)}})
-          </button>
+          @for (opt of defaultTimeOptions; track opt) {
+            <button
+              mat-menu-item
+              type="button"
+              (click)="fill(opt.value)"
+            >
+              {{ opt.label | translate }} ({{
+                getTimeToLogForMode(opt.value) | msToString
+              }})
+            </button>
+          }
         </ng-template>
       </mat-menu>
 
-      <mat-checkbox
-        *ngIf="defaultTimeCheckboxContent"
-        [@expandFade]
-        [checked]="defaultTimeCheckboxContent.isChecked"
-        (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
-        style="margin-bottom: 20px"
-        >{{defaultTimeCheckboxContent.label|translate}}
-      </mat-checkbox>
+      @if (defaultTimeCheckboxContent) {
+        <mat-checkbox
+          [@expandFade]
+          [checked]="defaultTimeCheckboxContent.isChecked"
+          (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
+          style="margin-bottom: 20px"
+          >{{ defaultTimeCheckboxContent.label | translate }}
+        </mat-checkbox>
+      }
 
       <mat-form-field>
-        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.STARTED|translate}}</mat-label>
+        <mat-label>{{
+          T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.STARTED | translate
+        }}</mat-label>
         <input
           [(ngModel)]="started"
           matInput
@@ -93,23 +101,22 @@
           required
           type="datetime-local"
         />
-        <mat-error
-          >{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.INVALID_DATE|translate}}</mat-error
-        >
+        <mat-error>{{
+          T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.INVALID_DATE | translate
+        }}</mat-error>
       </mat-form-field>
 
       <mat-form-field>
-        <mat-label>{{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY|translate}}</mat-label>
+        <mat-label>{{
+          T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.ACTIVITY | translate
+        }}</mat-label>
         <mat-select
           [(ngModel)]="activityId"
           name="activity"
         >
-          <mat-option
-            *ngFor="let activity of (activities$|async);"
-            [value]="activity.id"
-          >
-            {{activity.name}}
-          </mat-option>
+          @for (activity of activities$ | async; track activity) {
+            <mat-option [value]="activity.id"> {{ activity.name }} </mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
@@ -135,7 +142,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
       <button
         color="primary"
@@ -143,7 +150,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.POST_TIME|translate}}
+        {{ T.F.OPEN_PROJECT.DIALOG_TRACK_TIME.POST_TIME | translate }}
       </button>
     </div>
   </mat-dialog-actions>

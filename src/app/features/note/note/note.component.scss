@@ -1,9 +1,8 @@
-@import '../../../../variables';
-
-$noteFontSize: 14px;
-$noteFontSize: 12px;
+@use '../../../../styles/_globals.scss' as *;
 
 :host {
+  --note-font-size: 14px;
+
   display: block;
 
   :host-context([dir='rtl']) {
@@ -21,8 +20,8 @@ $noteFontSize: 12px;
     transform-origin: center center;
     position: relative;
     z-index: 4;
-    box-shadow: $whiteframe-shadow-3dp;
-    //outline: 2px dashed $c-accent;
+    box-shadow: var(--whiteframe-shadow-3dp);
+    //outline: 2px dashed var(--c-accent);
   }
 
   &.isFocused {
@@ -32,21 +31,17 @@ $noteFontSize: 12px;
   &.isImg {
     border: 0;
   }
-
-  :host.gu-mirror & {
-    box-shadow: $whiteframe-shadow-8dp !important;
-  }
 }
 
 .controls {
   position: absolute;
-  top: -$s * 0.75;
-  right: -$s * 0.75;
+  top: calc(var(--s) * -0.75);
+  right: calc(var(--s) * -0.75);
 
   :host-context([dir='rtl']) & {
     position: absolute;
     right: unset;
-    left: -$s * 0.75;
+    left: calc(var(--s) * -0.75);
   }
 
   // fixes drag and drop on mobile
@@ -54,7 +49,7 @@ $noteFontSize: 12px;
 
   @include mq(xs) {
     opacity: 0;
-    transition: $transition-standard;
+    transition: var(--transition-standard);
 
     .note:focus &,
     .note:hover & {
@@ -65,13 +60,13 @@ $noteFontSize: 12px;
 
 .note-img {
   max-width: 100%;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
   cursor: zoom-in;
 }
 
 .content {
   text-align: start;
-  font-size: $noteFontSize;
+  font-size: var(--note-font-size);
 
   inline-markdown ::ng-deep {
     .markdown-wrapper {
@@ -80,22 +75,18 @@ $noteFontSize: 12px;
 
     .markdown-unparsed,
     .markdown-parsed {
-      font-size: $noteFontSize;
-      border-radius: $card-border-radius;
-      background: #ffffff;
-      color: $standard-note-fg-light;
+      font-size: var(--note-font-size);
+      border-radius: var(--card-border-radius);
       box-sizing: border-box;
 
-      @include darkTheme {
-        background: $standard-note-bg-dark;
-        color: $standard-note-fg-dark;
-        border-color: #333333;
-      }
+      background: var(--standard-note-bg);
+      color: var(--standard-note-fg);
+      border-color: var(--extra-border-color);
     }
 
     .markdown-unparsed,
     .markdown-parsed > *:first-child {
-      padding-right: $s * 1.25;
+      padding-right: calc(var(--s) * 1.25);
     }
 
     .markdown-parsed > *:last-child {
@@ -107,14 +98,13 @@ $noteFontSize: 12px;
 // copied from inline-markdown component
 .markdown-preview {
   border: 0;
-  padding: $s $s * 2;
+  padding: var(--s) var(--s2);
   margin: 0;
   width: 100%;
   box-sizing: border-box;
   word-wrap: break-word;
   display: block;
   resize: none;
-  min-height: inherit;
   min-height: 40px;
   overflow: hidden;
   cursor: text;
@@ -131,22 +121,17 @@ $noteFontSize: 12px;
 .bottom-controls {
   display: flex;
   align-items: center;
-  transition: $transition-standard;
-  cursor: grab;
+  transition: var(--transition-standard);
   cursor: move;
-  border-top: 1px dashed $dark-theme-extra-border-color;
+  border-top: 1px dashed var(--extra-border-color);
   opacity: 0;
-
-  @include lightTheme() {
-    border-color: $light-theme-extra-border-color;
-  }
+  position: relative;
 
   @include touchOnlyDevice() {
     opacity: 1;
   }
 
   @include mq(xs) {
-    position: relative;
     z-index: 1;
     margin-top: -8px;
   }
@@ -178,7 +163,7 @@ $noteFontSize: 12px;
     margin-right: 0;
   }
 
-  .mat-icon-button {
+  .mat-mdc-icon-button {
     height: 36px;
     width: 36px;
     line-height: 36px;

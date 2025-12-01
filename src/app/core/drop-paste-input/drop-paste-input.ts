@@ -46,7 +46,9 @@ const _createTextBookmark = (text: string): null | DropPasteInput => {
 };
 
 const _createFileBookmark = (dataTransfer: DataTransfer): null | DropPasteInput => {
-  const path = dataTransfer.files[0] && dataTransfer.files[0].path;
+  const path =
+    dataTransfer.files[0] &&
+    ((dataTransfer.files[0] as any).path || dataTransfer.files[0].name);
   if (path) {
     return {
       title: _baseName(path),

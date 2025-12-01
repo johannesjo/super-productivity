@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { androidInterface } from '../../features/android/android-interface';
+import { DroidLog } from '../log';
 
 @Injectable({
   providedIn: 'root',
@@ -15,7 +16,7 @@ export class AndroidDbAdapterService {
 
   async load(key: string): Promise<unknown> {
     const data = await androidInterface.loadFromDbWrapped(key);
-    console.log('load', key, data);
+    DroidLog.log('load', key, data);
 
     return typeof data === 'string'
       ? JSON.parse((data as string).replace(/\n/g, '\\n'))
@@ -23,7 +24,7 @@ export class AndroidDbAdapterService {
   }
 
   async save(key: string, data: unknown): Promise<unknown> {
-    console.log('save', key, data);
+    DroidLog.log('save', key, data);
     return await androidInterface.saveToDbWrapped(key, JSON.stringify(data));
   }
 

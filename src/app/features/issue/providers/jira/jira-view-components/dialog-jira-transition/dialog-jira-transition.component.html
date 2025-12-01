@@ -3,37 +3,39 @@
     class="dialog-header-icon"
     svgIcon="jira"
   ></mat-icon>
-  <span>{{T.F.JIRA.DIALOG_TRANSITION.TITLE|translate}}</span>
+  <span>{{ T.F.JIRA.DIALOG_TRANSITION.TITLE | translate }}</span>
 </h1>
 
 <mat-dialog-content>
   <table>
     <tr>
-      <th>{{T.F.JIRA.DIALOG_TRANSITION.TASK_NAME|translate}}</th>
-      <td>{{data.task ? data.task?.title : '–'}}</td>
+      <th>{{ T.F.JIRA.DIALOG_TRANSITION.TASK_NAME | translate }}</th>
+      <td>{{ data.task ? data.task?.title : '–' }}</td>
     </tr>
     <tr>
-      <th>{{T.F.JIRA.DIALOG_TRANSITION.CURRENT_STATUS|translate}}</th>
-      <td>{{data.issue?.status ? data.issue?.status?.name : '–'}}</td>
+      <th>{{ T.F.JIRA.DIALOG_TRANSITION.CURRENT_STATUS | translate }}</th>
+      <td>{{ data.issue?.status ? data.issue?.status?.name : '–' }}</td>
     </tr>
     <tr>
-      <th>{{T.F.JIRA.DIALOG_TRANSITION.CURRENT_ASSIGNEE|translate}}</th>
-      <td>{{data.issue?.assignee ? data.issue?.assignee?.displayName : '–'}}</td>
+      <th>{{ T.F.JIRA.DIALOG_TRANSITION.CURRENT_ASSIGNEE | translate }}</th>
+      <td>{{ data.issue?.assignee ? data.issue?.assignee?.displayName : '–' }}</td>
     </tr>
   </table>
 
   <mat-form-field>
-    <label>{{T.F.JIRA.DIALOG_TRANSITION.CHOOSE_STATUS|translate}}</label>
+    <label>{{ T.F.JIRA.DIALOG_TRANSITION.CHOOSE_STATUS | translate }}</label>
     <mat-select [(ngModel)]="chosenTransition">
       <!--<mat-option value="DO_NOT">Don't transition</mat-option>-->
       <!--<mat-option value="ALWAYS_ASK">Always open dialog</mat-option>-->
-      <mat-option
-        *ngFor="let transition of (availableTransitions$|async); trackBy: trackByIndex"
-        [value]="transition"
-      >
-        <!--<img [src]="transition.to.iconUrl">-->
-        {{transition.name}}
-      </mat-option>
+      @for (
+        transition of availableTransitions$ | async;
+        track trackByIndex($index, transition)
+      ) {
+        <mat-option [value]="transition">
+          <!--<img [src]="transition.to.iconUrl">-->
+          {{ transition.name }}
+        </mat-option>
+      }
     </mat-select>
   </mat-form-field>
 </mat-dialog-content>
@@ -47,7 +49,7 @@
       mat-button
       type="button"
     >
-      {{T.G.CANCEL|translate}}
+      {{ T.G.CANCEL | translate }}
     </button>
     <button
       (click)="transitionIssue()"
@@ -55,7 +57,7 @@
       color="primary"
       mat-stroked-button
     >
-      {{T.F.JIRA.DIALOG_TRANSITION.TITLE|translate}}
+      {{ T.F.JIRA.DIALOG_TRANSITION.TITLE | translate }}
     </button>
   </div>
 </mat-dialog-actions>

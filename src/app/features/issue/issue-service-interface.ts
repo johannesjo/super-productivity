@@ -1,11 +1,10 @@
-import { Observable } from 'rxjs';
 import {
   IssueData,
   IssueDataReduced,
   IssueIntegrationCfg,
   SearchResultItem,
 } from './issue.model';
-import { Task } from '../tasks/task.model';
+import { IssueTask, Task } from '../tasks/task.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
 
 export interface IssueServiceInterface {
@@ -13,19 +12,17 @@ export interface IssueServiceInterface {
   // ---------
   isEnabled(cfg: IssueIntegrationCfg): boolean;
 
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean>;
+  testConnection(cfg: IssueIntegrationCfg): Promise<boolean>;
 
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean>;
+  pollInterval: number; // 0 means no polling
 
-  pollTimer$: Observable<number>;
+  issueLink(issueId: string | number, issueProviderId: string): Promise<string>;
 
-  issueLink$(issueId: string | number, projectId: string): Observable<string>;
+  getById(id: string | number, issueProviderId: string): Promise<IssueData | null>;
 
-  getById$(id: string | number, projectId: string): Observable<IssueData>;
+  getAddTaskData(issueData: IssueDataReduced): IssueTask;
 
-  getAddTaskData(issueData: IssueDataReduced): Partial<Task> & { title: string };
-
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]>;
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]>;
 
   // also used to determine if task is done
   getFreshDataForIssueTask(task: Task): Promise<{
@@ -47,7 +44,10 @@ export interface IssueServiceInterface {
   getMappedAttachments?(issueData: IssueData): TaskAttachment[];
 
   getNewIssuesToAddToBacklog?(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]>;
+
+  // TODO could be called when task is updated from issue, whenever task is updated
+  updateIssueFromTask?(task: Task): Promise<void>;
 }

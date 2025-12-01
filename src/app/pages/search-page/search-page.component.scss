@@ -1,0 +1,112 @@
+.search-page {
+  padding: 1rem;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+
+  .search-header {
+    margin-bottom: 1rem;
+    display: flex;
+    justify-content: center;
+
+    .search-field {
+      width: 100%;
+      max-width: 600px;
+    }
+  }
+
+  .search-results {
+    flex: 1;
+    overflow-y: auto;
+
+    mat-list-item {
+      cursor: pointer !important;
+
+      &:hover {
+        background-color: rgba(0, 0, 0, 0.04) !important;
+      }
+
+      &::ng-deep {
+        .search-result-content {
+          width: 100%;
+          cursor: pointer !important;
+
+          .task-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+
+            .context-tag {
+              flex-shrink: 0;
+            }
+
+            .task-title {
+              font-weight: 500;
+            }
+
+            .task-icons {
+              display: flex;
+              align-items: center;
+              gap: 0.25rem;
+
+              .issue-icon,
+              .archive-icon {
+                font-size: 1.2rem;
+                width: 1.2rem;
+                height: 1.2rem;
+                opacity: 0.7;
+              }
+
+              .archive-icon {
+                color: var(--text-color-muted);
+              }
+            }
+          }
+        }
+      }
+    }
+
+    .no-results,
+    .search-prompt {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      text-align: center;
+      opacity: 0.6;
+
+      mat-icon {
+        font-size: 3rem;
+        width: 3rem;
+        height: 3rem;
+        margin-bottom: 1rem;
+      }
+
+      p {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .search-page {
+    padding: 0.5rem;
+
+    .search-results {
+      .search-result-item {
+        .search-result-content {
+          .task-info {
+            .task-title {
+              font-size: 0.9rem;
+            }
+          }
+        }
+      }
+    }
+  }
+}

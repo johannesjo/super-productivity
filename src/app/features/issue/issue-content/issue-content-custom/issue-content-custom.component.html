@@ -1,0 +1,32 @@
+@switch (field().customTemplate) {
+  @case ('jira-link') {
+    <jira-link
+      [field]="field()"
+      [issue]="issue()"
+      [task]="task()"
+    ></jira-link>
+  }
+  @case ('jira-subtasks') {
+    <!-- TODO JIRA subtasks would need additional service integration -->
+  }
+  @case ('jira-related') {
+    <!-- TODO JIRA related issues would need additional service integration -->
+  }
+  @case ('open-project-spent-time') {
+    <span>{{ getFieldValue(field(), issue()) }}</span>
+  }
+  @case ('open-project-attachments') {
+    <open-project-attachments
+      [issue]="issue()"
+      [config]="config()"
+      [task]="task()"
+    ></open-project-attachments>
+  }
+  @case ('caldav-time') {
+    <caldav-time
+      [field]="field()"
+      [issue]="issue()"
+      [task]="task()"
+    ></caldav-time>
+  }
+}

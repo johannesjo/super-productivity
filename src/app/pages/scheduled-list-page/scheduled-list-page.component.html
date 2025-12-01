@@ -1,0 +1,144 @@
+<div class="page-wrapper">
+  @if (taskRepeatCfgs$ | async; as taskRepeatCfgs) {
+    <section
+      class="component-wrapper"
+      style="margin-top: 24px"
+    >
+      <h2>{{ T.SCHEDULE.REPEATED_TASKS | translate }}</h2>
+      @if (!taskRepeatCfgs?.length) {
+        <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_REPEATABLE_TASKS | translate }}</p>
+      }
+      <div
+        [@standardList]="taskRepeatCfgs?.length"
+        class="repeat-task-cfgs"
+      >
+        @for (taskRepeatCfg of taskRepeatCfgs; track taskRepeatCfg.id) {
+          <mat-card
+            appearance="outlined"
+            class="repeat-task-cfg"
+          >
+            <mat-card-content>
+              <div class="repeat-task-cfg-content">
+                <div class="task-info">
+                  <div class="title">
+                    <task-title
+                      (valueEdited)="
+                        updateRepeatableTitleIfChanged(
+                          $event.wasChanged,
+                          $event.newVal,
+                          taskRepeatCfg
+                        )
+                      "
+                      [value]="taskRepeatCfg.title"
+                      class="task-title"
+                    ></task-title>
+                    <tag-list
+                      [isShowProjectTagAlways]="true"
+                      [task]="taskRepeatCfg"
+                    ></tag-list>
+                  </div>
+
+                  <div
+                    (click)="editTaskRepeatCfg(taskRepeatCfg)"
+                    class="repeat-text-and-icon"
+                    [matTooltip]="
+                      T.SCHEDULE.NEXT +
+                      ' ' +
+                      (getNextOccurrence(taskRepeatCfg) | shortDate2) +
+                      ', ' +
+                      T.SCHEDULE.LAST +
+                      ' ' +
+                      (taskRepeatCfg.lastTaskCreationDay | shortDate2)
+                    "
+                    mat-ripple
+                  >
+                    <div class="repeat-text">{{ getRepeatInfoText(taskRepeatCfg) }}</div>
+                    <mat-icon svgIcon="repeat"></mat-icon>
+                  </div>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </div>
+    </section>
+  } @else {
+    <full-page-spinner></full-page-spinner>
+  }
+  @if (tasksPlannedWithTime$ | async; as allScheduledTasks) {
+    <section
+      class="component-wrapper"
+      style="margin-top: 24px"
+    >
+      <h2>{{ T.SCHEDULE.SCHEDULED_TASKS_WITH_TIME | translate }}</h2>
+      @if (!allScheduledTasks?.length) {
+        <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_SCHEDULED | translate }}</p>
+      }
+      <div
+        [@standardList]="allScheduledTasks?.length"
+        class="tasks"
+      >
+        @for (task of allScheduledTasks; track task.id) {
+          <planner-task [task]="task">
+            <div
+              (click)="editReminder(task, $event)"
+              class="due-date"
+              mat-ripple
+            >
+              <div class="date-and-time-left">
+                <div class="date hide-xs">
+                  {{ task.dueWithTime | localeDate: 'EE, d MMM, ' }}
+                  {{ task.dueWithTime | shortTime }}
+                </div>
+                <div class="date show-xs-only">
+                  {{ task.dueWithTime | localeDate: 'd MMM, ' }},
+                  {{ task.dueWithTime | shortTime }}
+                </div>
+                <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
+              </div>
+              @if (task.reminderId) {
+                <mat-icon>alarm</mat-icon>
+              } @else {
+                <mat-icon>schedule</mat-icon>
+              }
+            </div>
+          </planner-task>
+        }
+      </div>
+    </section>
+  } @else {
+    <full-page-spinner></full-page-spinner>
+  }
+  @if (tasksPlannedForDays$ | async; as allScheduledTasks) {
+    <section
+      class="component-wrapper"
+      style="margin-top: 24px"
+    >
+      <h2>{{ T.SCHEDULE.NO_SCHEDULED_TITLE | translate }}</h2>
+      @if (!allScheduledTasks?.length) {
+        <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_SCHEDULED | translate }}</p>
+      }
+      <div
+        [@standardList]="allScheduledTasks?.length"
+        class="tasks"
+      >
+        @for (task of allScheduledTasks; track task.id) {
+          <planner-task [task]="task">
+            <div
+              (click)="editReminder(task, $event)"
+              class="due-date"
+              mat-ripple
+            >
+              <div class="date-and-time-left">
+                <div class="date">{{ task.dueDay | localeDate: 'EE, d MMM' }}</div>
+              </div>
+              <mat-icon>today</mat-icon>
+            </div>
+          </planner-task>
+        }
+      </div>
+    </section>
+  } @else {
+    <full-page-spinner></full-page-spinner>
+  }
+</div>

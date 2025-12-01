@@ -1,0 +1,4 @@
+
+### Bug Fixes
+
+* **build:** build vite-plugin before building plugins

@@ -1,10 +1,7 @@
-import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  setCurrentTask,
-  toggleStart,
-  unsetCurrentTask,
-} from '../../tasks/store/task.actions';
+import { inject, Injectable } from '@angular/core';
+import { MatDialog } from '@angular/material/dialog';
+
+import { EMPTY, Observable, of } from 'rxjs';
 import {
   concatMap,
   filter,
@@ -14,6 +11,22 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
+
+import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { Action, select, Store } from '@ngrx/store';
+
+import { IS_ELECTRON } from '../../../app.constants';
+import { NotifyService } from '../../../core/notify/notify.service';
+import { SnackService } from '../../../core/snack/snack.service';
+import { T } from '../../../t.const';
+import {
+  setCurrentTask,
+  toggleStart,
+  unsetCurrentTask,
+} from '../../tasks/store/task.actions';
+import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
+import { TaskService } from '../../tasks/task.service';
+import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
 import { PomodoroService } from '../pomodoro.service';
 import {
   finishPomodoroSession,
@@ -24,22 +37,17 @@ import {
   startPomodoroBreak,
   stopPomodoro,
 } from './pomodoro.actions';
-import { MatDialog } from '@angular/material/dialog';
-import { DialogPomodoroBreakComponent } from '../dialog-pomodoro-break/dialog-pomodoro-break.component';
-import { Action, select, Store } from '@ngrx/store';
-import { selectCurrentTaskId } from '../../tasks/store/task.selectors';
-import { EMPTY, Observable, of } from 'rxjs';
-import { NotifyService } from '../../../core/notify/notify.service';
-import { IS_ELECTRON } from '../../../app.constants';
-import { T } from '../../../t.const';
-import { SnackService } from '../../../core/snack/snack.service';
-import { ElectronService } from '../../../core/electron/electron.service';
-import { ipcRenderer } from 'electron';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { TaskService } from '../../tasks/task.service';
 
 @Injectable()
 export class PomodoroEffects {
+  private _pomodoroService = inject(PomodoroService);
+  private _actions$ = inject(Actions);
+  private _notifyService = inject(NotifyService);
+  private _matDialog = inject(MatDialog);
+  private _snackService = inject(SnackService);
+  private _store$ = inject<Store<any>>(Store);
+  private _taskService = inject(TaskService);
+
   currentTaskId$: Observable<string | null> = this._store$.pipe(
     select(selectCurrentTaskId),
   );
@@ -95,8 +103,15 @@ export class PomodoroEffects {
           ? EMPTY
           : this._actions$.pipe(
               ofType(finishPomodoroSession, skipPomodoroBreak),
-              withLatestFrom(this._pomodoroService.isBreak$, this.currentTaskId$),
-              filter(([action, isBreak, currentTaskId]) => !isBreak && !currentTaskId),
+              withLatestFrom(
+                this._pomodoroService.isBreak$,
+                this.currentTaskId$,
+                this._pomodoroService.cfg$,
+              ),
+              filter(
+                ([action, isBreak, currentTaskId, cfg]) =>
+                  !isBreak && !currentTaskId && !cfg.isDisableAutoStartAfterBreak,
+              ),
               mapTo(toggleStart()),
             ),
       ),
@@ -113,6 +128,24 @@ export class PomodoroEffects {
     ),
   );
 
+  pauseTimeTrackingAfterBreakIsOptionEnabled$: Observable<unknown> = createEffect(() =>
+    this._pomodoroService.isEnabled$.pipe(
+      switchMap((isEnabledI) =>
+        !isEnabledI
+          ? EMPTY
+          : this._actions$.pipe(
+              ofType(finishPomodoroSession, skipPomodoroBreak),
+              withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
+              filter(
+                ([action, cfg, isBreak]) =>
+                  !!cfg.isDisableAutoStartAfterBreak && !isBreak,
+              ),
+              mapTo(unsetCurrentTask()),
+            ),
+      ),
+    ),
+  );
+
   pauseTimeTrackingIfOptionEnabled$: Observable<unknown> = createEffect(() =>
     this._pomodoroService.isEnabled$.pipe(
       switchMap((isEnabledI) =>
@@ -121,7 +154,7 @@ export class PomodoroEffects {
           : this._actions$.pipe(
               ofType(finishPomodoroSession),
               withLatestFrom(this._pomodoroService.cfg$, this._pomodoroService.isBreak$),
-              filter(([action, cfg, isBreak]) => cfg.isStopTrackingOnBreak && isBreak),
+              filter(([action, cfg, isBreak]) => !!cfg.isStopTrackingOnBreak && isBreak),
               mapTo(unsetCurrentTask()),
             ),
       ),
@@ -163,13 +196,13 @@ export class PomodoroEffects {
     { dispatch: false },
   );
 
-  pauseTimeTrackingForPause$: Observable<unknown> = createEffect(() =>
+  pauseTimeTrackingForBreak$: Observable<unknown> = createEffect(() =>
     this._pomodoroService.isEnabled$.pipe(
       switchMap((isEnabledI) =>
         !isEnabledI
           ? EMPTY
           : this._actions$.pipe(
-              ofType(pausePomodoro, pausePomodoroBreak),
+              ofType(startPomodoroBreak),
               withLatestFrom(this.currentTaskId$),
               filter(([, currentTaskId]) => !!currentTaskId),
               mapTo(unsetCurrentTask()),
@@ -261,26 +294,12 @@ export class PomodoroEffects {
           tap(([progress, isPause, isPauseBreak]: [number, boolean, boolean]) => {
             const progressBarMode: 'normal' | 'pause' =
               isPause || isPauseBreak ? 'pause' : 'normal';
-            (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-              IPC.SET_PROGRESS_BAR,
-              {
-                progress,
-                progressBarMode,
-              },
-            );
+            window.ea.setProgressBar({
+              progress,
+              progressBarMode,
+            });
           }),
         ),
       { dispatch: false },
     );
-
-  constructor(
-    private _pomodoroService: PomodoroService,
-    private _actions$: Actions,
-    private _notifyService: NotifyService,
-    private _matDialog: MatDialog,
-    private _electronService: ElectronService,
-    private _snackService: SnackService,
-    private _store$: Store<any>,
-    private _taskService: TaskService,
-  ) {}
 }

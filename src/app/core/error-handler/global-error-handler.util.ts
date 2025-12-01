@@ -1,15 +1,37 @@
-import { ElectronService } from '../electron/electron.service';
 import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../app.constants';
-import { environment } from '../../../environments/environment';
-import * as StackTrace from 'stacktrace-js';
-import * as pThrottle from 'p-throttle';
-import * as newGithubIssueUrl from 'new-github-issue-url';
+import StackTrace from 'stacktrace-js';
+import newGithubIssueUrl from 'new-github-issue-url';
 import { getBeforeLastErrorActionLog } from '../../util/action-logger';
-import { download } from '../../util/download';
-import { AppDataComplete } from '../../imex/sync/sync.model';
+import { download, downloadLogs } from '../../util/download';
 import { privacyExport } from '../../imex/file-imex/privacy-export';
+import { getAppVersionStr } from '../../util/get-app-version-str';
+import { Log } from '../log';
 
 let isWasErrorAlertCreated = false;
+
+// Simple throttle implementation to avoid FinalizationRegistry dependency
+const createSimpleThrottle = (limit: number, interval: number) => {
+  const timestamps: number[] = [];
+
+  return <T extends (...args: unknown[]) => unknown>(fn: T) => {
+    return ((...args: Parameters<T>) => {
+      const now = Date.now();
+
+      // Remove old timestamps outside the interval
+      while (timestamps.length > 0 && timestamps[0] <= now - interval) {
+        timestamps.shift();
+      }
+
+      // Check if we've exceeded the limit
+      if (timestamps.length >= limit) {
+        return Promise.resolve(''); // Return empty string for throttled calls
+      }
+
+      timestamps.push(now);
+      return fn(...args);
+    }) as T;
+  };
+};
 
 const _getStacktrace = async (err: Error | any): Promise<string> => {
   const isHttpError = err && (err.url || err.headers);
@@ -17,7 +39,9 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
 
   // Don't try to send stacktraces of HTTP errors as they are already logged on the server
   if (!isHttpError && isErrorWithStack && !isHandledError(err)) {
-    return StackTrace.fromError(err).then((stackframes) => {
+    return StackTrace.fromError(err, {
+      filter: (f) => f?.fileName !== 'log.ts',
+    }).then((stackframes) => {
       return stackframes
         .splice(0, 20)
         .map((sf) => {
@@ -26,12 +50,13 @@ const _getStacktrace = async (err: Error | any): Promise<string> => {
         .join('\n');
     });
   } else if (!isHandledError(err)) {
-    console.warn('Error without stack', err);
+    Log.err('Error without stack', err);
   }
   return Promise.resolve('');
 };
 
-const _getStacktraceThrottled = pThrottle(_getStacktrace, 2, 5000);
+const throttle = createSimpleThrottle(2, 5000);
+const _getStacktraceThrottled = throttle(_getStacktrace);
 
 export const logAdvancedStacktrace = (
   origErr: unknown,
@@ -39,6 +64,8 @@ export const logAdvancedStacktrace = (
 ): Promise<unknown> =>
   _getStacktraceThrottled(origErr)
     .then((stack) => {
+      document.getElementById('error-fetching-info-wrapper')?.remove();
+
       if (additionalLogFn) {
         additionalLogFn(stack);
       }
@@ -48,11 +75,14 @@ export const logAdvancedStacktrace = (
         stacktraceEl.innerText = stack;
       }
 
-      const githubIssueLink = document.getElementById('github-issue-url');
+      const githubIssueLinks = document.getElementsByClassName('github-issue-urlX');
+      Log.log(githubIssueLinks);
 
-      if (githubIssueLink) {
+      if (githubIssueLinks) {
         const errEscaped = _cleanHtml(origErr as string);
-        githubIssueLink.setAttribute('href', getGithubUrl(errEscaped, stack));
+        Array.from(githubIssueLinks).forEach((el) =>
+          el.setAttribute('href', getGithubErrorUrl(errEscaped, stack, origErr)),
+        );
       }
 
       // NOTE: there is an issue with this sometimes -> https://github.com/stacktracejs/stacktrace.js/issues/202
@@ -66,18 +96,17 @@ const _cleanHtml = (str: string): string => {
 };
 
 export const createErrorAlert = (
-  eSvc: ElectronService,
   err: string = '',
   stackTrace: string,
-  origErr: any,
-  userData?: AppDataComplete | undefined,
+  origErr: unknown,
+  userData?: unknown,
 ): void => {
   if (isWasErrorAlertCreated) {
     return;
   }
-  // it seems for whatever reasons, sometimes we get tags in our error which break the html
+  // it seems for whatever reason, sometimes we get tags in our error which break the html
   const errEscaped = _cleanHtml(err);
-  const githubUrl = getGithubUrl(errEscaped, stackTrace);
+  const githubUrl = getGithubErrorUrl(errEscaped, stackTrace, origErr);
 
   const errorAlert = document.createElement('div');
   errorAlert.classList.add('global-error-alert');
@@ -86,9 +115,14 @@ export const createErrorAlert = (
   errorAlert.innerHTML = `
     <div id="error-alert-inner-wrapper">
     <h2 style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2px;">${errEscaped}<h2>
-    <p><a href="${githubUrl}" id="github-issue-url" target="_blank">! Please copy & report !</a></p>
+    <p><a href="${githubUrl}" class="github-issue-urlX" target="_blank">! Please copy & report !</a></p>
     <!-- second error is needed, because it might be too long -->
-    <pre style="line-height: 1.3;">${errEscaped}</pre>
+    ${typeof origErr === 'object' && origErr && 'additionalLog' in origErr ? `<pre style="line-height: 1; font-size: 11px;">${origErr.additionalLog}</pre>` : ''}
+
+    <div id="error-fetching-info-wrapper">
+      <div>Trying to load more info...</div>
+      <div class="spinner"></div>
+    </div>
 
     <pre id="stack-trace"
          style="line-height: 1.3; text-align: left; max-height: 240px; font-size: 12px; overflow: auto;">${stackTrace}</pre>
@@ -105,23 +139,27 @@ export const createErrorAlert = (
   btnReload.innerText = 'Reload App';
   btnReload.addEventListener('click', () => {
     if (IS_ELECTRON) {
-      eSvc.remote.getCurrentWindow().webContents.reload();
+      window.ea.reloadMainWin();
     } else {
       window.location.reload();
     }
   });
   innerWrapper.append(btnReload);
 
-  console.log(userData);
+  Log.log(userData);
 
   if (userData) {
     const btnExport = document.createElement('BUTTON');
     btnExport.innerText = 'Export data';
-    btnExport.addEventListener('click', () => {
-      download(
-        'super-productivity-crash-user-data-export.json',
-        JSON.stringify(userData),
-      );
+    btnExport.addEventListener('click', async () => {
+      try {
+        await download(
+          'super-productivity-crash-user-data-export.json',
+          JSON.stringify(userData),
+        );
+      } catch (e) {
+        Log.error(e);
+      }
     });
     innerWrapper.append(btnExport);
 
@@ -129,20 +167,37 @@ export const createErrorAlert = (
     btnPrivacyExport.innerText = 'PE';
     btnPrivacyExport.title =
       'Export anonymized data (to send to contact@super-productivity.com for debugging)';
-    btnPrivacyExport.addEventListener('click', () => {
-      download(
-        'ANONYMIZED-super-productivity-crash-user-data-export.json',
-        privacyExport(userData),
-      );
+    btnPrivacyExport.addEventListener('click', async () => {
+      // Type assertion needed for privacy export function
+      try {
+        await download(
+          'ANONYMIZED-super-productivity-crash-user-data-export.json',
+          privacyExport(userData as Parameters<typeof privacyExport>[0]),
+        );
+      } catch (e) {
+        Log.error(e);
+      }
     });
     innerWrapper.append(btnPrivacyExport);
   }
+
+  const btnLogs = document.createElement('BUTTON');
+  btnLogs.innerText = 'Logs';
+  btnLogs.addEventListener('click', async () => {
+    try {
+      await downloadLogs();
+    } catch (e) {
+      Log.error(e);
+    }
+  });
+  innerWrapper.append(btnLogs);
 
   const tagReport = document.createElement('A');
   const btnReport = document.createElement('BUTTON');
   btnReport.innerText = 'Report';
   tagReport.append(btnReport);
   tagReport.setAttribute('href', githubUrl);
+  tagReport.setAttribute('class', 'github-issue-urlX');
   tagReport.setAttribute('target', '_blank');
   innerWrapper.append(tagReport);
 
@@ -155,15 +210,15 @@ export const createErrorAlert = (
   }, 1500);
 
   if (IS_ELECTRON) {
-    eSvc.remote.getCurrentWindow().webContents.openDevTools();
+    window.ea.openDevTools();
   }
 };
 
 export const getSimpleMeta = (): string => {
   const n = window.navigator;
-  return `META: SP${environment.version} ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
+  return `META: SP${getAppVersionStr()} __ ${IS_ELECTRON ? 'Electron' : 'Browser'} – ${
     n.language
-  } – ${n.platform} – ${n.userAgent}`;
+  } – ${n.platform} – ${n.language} – UA:${n.userAgent}`;
 };
 
 export const isHandledError = (err: unknown): boolean => {
@@ -182,49 +237,91 @@ export const isHandledError = (err: unknown): boolean => {
   );
 };
 
-const getGithubUrl = (errEscaped: string, stackTrace: string): string => {
+export const getGithubErrorUrl = (
+  title: string,
+  stackTrace?: string,
+  origErr?: Error | unknown,
+  isHideActionsBeforeError = false,
+): string => {
   return newGithubIssueUrl({
     user: 'johannesjo',
     repo: 'super-productivity',
-    title: errEscaped,
-    body: getGithubIssueErrorMarkdown(stackTrace),
+    title: '💥 ' + title,
+    template: 'in_app_bug_report.md',
+    body: getGithubIssueErrorMarkdown(stackTrace, origErr, isHideActionsBeforeError),
   });
 };
 
-const getGithubIssueErrorMarkdown = (stacktrace: string): string => {
+const getGithubIssueErrorMarkdown = (
+  stacktrace?: string,
+  origErr?: Error | unknown,
+  isHideActionsBeforeError = false,
+): string => {
   const code = '```';
-  return `### Steps to Reproduce
-<!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
+  let txt = `### Steps to Reproduce
 <!-- !!! Please provide an unambiguous set of steps to reproduce this bug! !!! -->
 1.
 2.
 3.
-4.
 
-
-
-### Error Log (Desktop only)
-<!-- For the desktop versions, there is also an error log file in case there is no console output.
-Usually, you can find it here:
-on Linux: ~/.config/superProductivity/logs/main.log
-on macOS: ~/Library/Logs/superProductivity/main.log
-on Windows: %USERPROFILE%/AppData/Roaming/superProductivity/logs/main.log
-. -->
-
-### Console Output
+### Additional Console Output
 <!-- Is there any output if you press Ctrl+Shift+i (Cmd+Alt+i for mac) in the console tab? If so please post it here. -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Url
+${window.location.href}
+
+${typeof origErr === 'object' && origErr && 'additionalLog' in origErr ? `### AL\n${origErr.additionalLog}` : ''}
+
+### Meta Info
+${getSimpleMeta()}
+`;
+
+  if (stacktrace) {
+    txt += `
 
 ### Stacktrace
 ${code}
 ${stacktrace}
 ${code}
+`;
+  }
 
-### Meta Info
-${getSimpleMeta()}
+  if (!isHideActionsBeforeError) {
+    txt += `
 
 ### Actions Before Error
 ${code}
 ${getBeforeLastErrorActionLog().join(' \n')}
-${code}
-`;
+${code}`;
+  }
+
+  return txt;
 };

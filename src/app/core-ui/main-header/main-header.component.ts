@@ -1,32 +1,52 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  ElementRef,
+  computed,
+  inject,
   OnDestroy,
-  OnInit,
-  Renderer2,
-  ViewChild,
+  signal,
 } from '@angular/core';
 import { ProjectService } from '../../features/project/project.service';
 import { LayoutService } from '../layout/layout.service';
-import { BookmarkService } from '../../features/bookmark/bookmark.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { PomodoroService } from '../../features/pomodoro/pomodoro.service';
 import { T } from '../../t.const';
 import { fadeAnimation } from '../../ui/animations/fade.ani';
-import { filter, first, map, startWith, switchMap } from 'rxjs/operators';
-import { Observable, of, Subscription } from 'rxjs';
+import { filter, map, startWith, switchMap } from 'rxjs/operators';
+import { of, Subscription } from 'rxjs';
 import { WorkContextService } from '../../features/work-context/work-context.service';
-import { TagService } from '../../features/tag/tag.service';
-import { Tag } from '../../features/tag/tag.model';
-import { Project } from '../../features/project/project.model';
 import { expandFadeHorizontalAnimation } from '../../ui/animations/expand.ani';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
 import { SimpleCounter } from '../../features/simple-counter/simple-counter.model';
-import { SyncProviderService } from '../../imex/sync/sync-provider.service';
-import { IS_TOUCH_ONLY } from 'src/app/util/is-touch-only';
+import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { NavigationEnd, Router } from '@angular/router';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { KeyboardConfig } from 'src/app/features/config/keyboard-config.model';
+import { MatIconButton, MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { DialogSyncInitialCfgComponent } from '../../imex/sync/dialog-sync-initial-cfg/dialog-sync-initial-cfg.component';
+import { LongPressDirective } from '../../ui/longpress/longpress.directive';
+import { isOnline$ } from '../../util/is-online';
+import { Store } from '@ngrx/store';
+import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
+import { SyncStatus } from '../../pfapi/api';
+import { PluginHeaderBtnsComponent } from '../../plugins/ui/plugin-header-btns.component';
+import { PluginSidePanelBtnsComponent } from '../../plugins/ui/plugin-side-panel-btns.component';
+import { PageTitleComponent } from './page-title/page-title.component';
+import { PlayButtonComponent } from './play-button/play-button.component';
+import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-panel-buttons.component';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { MetricService } from '../../features/metric/metric.service';
+import { DateService } from '../../core/date/date.service';
+import { MsToMinuteClockStringPipe } from '../../ui/duration/ms-to-minute-clock-string.pipe';
+import { UserProfileButtonComponent } from '../../features/user-profile/user-profile-button/user-profile-button.component';
+import { FocusButtonComponent } from './focus-button/focus-button.component';
+import { UserProfileService } from '../../features/user-profile/user-profile.service';
 
 @Component({
   selector: 'main-header',
@@ -34,84 +54,136 @@ import { NavigationEnd, Router } from '@angular/router';
   styleUrls: ['./main-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [fadeAnimation, expandFadeHorizontalAnimation],
+  imports: [
+    MatIconButton,
+    MatButton,
+    MatIcon,
+    MatTooltip,
+    TranslatePipe,
+    SimpleCounterButtonComponent,
+    LongPressDirective,
+    PluginHeaderBtnsComponent,
+    PluginSidePanelBtnsComponent,
+    PageTitleComponent,
+    PlayButtonComponent,
+    DesktopPanelButtonsComponent,
+    MsToMinuteClockStringPipe,
+    UserProfileButtonComponent,
+    FocusButtonComponent,
+  ],
 })
-export class MainHeaderComponent implements OnInit, OnDestroy {
+export class MainHeaderComponent implements OnDestroy {
+  readonly projectService = inject(ProjectService);
+  readonly matDialog = inject(MatDialog);
+  readonly workContextService = inject(WorkContextService);
+  readonly taskService = inject(TaskService);
+  readonly pomodoroService = inject(PomodoroService);
+  readonly layoutService = inject(LayoutService);
+  readonly simpleCounterService = inject(SimpleCounterService);
+  readonly syncWrapperService = inject(SyncWrapperService);
+  readonly globalConfigService = inject(GlobalConfigService);
+  private readonly _snackService = inject(SnackService);
+  private readonly _router = inject(Router);
+  private readonly _store = inject(Store);
+  private readonly _configService = inject(GlobalConfigService);
+  private readonly _metricService = inject(MetricService);
+  private readonly _dateService = inject(DateService);
+
   T: typeof T = T;
-  progressCircleRadius: number = 10;
-  circumference: number = this.progressCircleRadius * Math.PI * 2;
-  IS_TOUCH_ONLY: boolean = IS_TOUCH_ONLY;
-  isShowSimpleCounterBtnsMobile: boolean = false;
+  isShowSimpleCounterBtnsMobile = signal(false);
 
-  @ViewChild('circleSvg', { static: true }) circleSvg?: ElementRef;
+  isXs = this.layoutService.isXs;
+  isXxxs = this.layoutService.isXxxs;
 
-  currentTaskContext$: Observable<Project | Tag | null> =
-    this.taskService.currentTaskParentOrCurrent$.pipe(
-      filter((ct) => !!ct),
-      switchMap((currentTask) =>
-        this.workContextService.activeWorkContextId$.pipe(
-          filter((activeWorkContextId) => !!activeWorkContextId),
-          switchMap((activeWorkContextId) => {
-            if (
-              currentTask.projectId === activeWorkContextId ||
-              currentTask.tagIds.includes(activeWorkContextId as string)
-            ) {
-              return of(null);
-            }
-            return currentTask.projectId
-              ? this.projectService.getByIdOnce$(currentTask.projectId)
-              : this._tagService.getTagById$(currentTask.tagIds[0]).pipe(first());
-          }),
-        ),
+  showDesktopButtons = computed(() => !this.isXs());
+
+  private _currentTaskContext$ = this.taskService.currentTaskParentOrCurrent$.pipe(
+    filter((ct) => !!ct),
+    switchMap((currentTask) =>
+      this.workContextService.activeWorkContextId$.pipe(
+        filter((activeWorkContextId) => !!activeWorkContextId),
+        switchMap((activeWorkContextId) => {
+          if (
+            currentTask.projectId === activeWorkContextId ||
+            currentTask.tagIds.includes(activeWorkContextId as string)
+          ) {
+            return of(null);
+          }
+          return currentTask.projectId
+            ? this.projectService.getByIdOnce$(currentTask.projectId)
+            : of(null);
+        }),
       ),
-    );
+    ),
+  );
 
-  isRouteWithAdditionalInfoPanel$: Observable<boolean> = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.url.match(/(tasks|timeline|daily-summary)$/)),
-    startWith(!!this._router.url.match(/(tasks|timeline|daily-summary)$/)),
+  currentTaskContext = toSignal(this._currentTaskContext$);
+
+  private _isRouteWithSidePanel$ = this._router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => true), // Always true since right-panel is now global
+    startWith(true), // Always true since right-panel is now global
   );
-  isRouteWithSplitAddtionalInfoPanel$: Observable<boolean> = this._router.events.pipe(
-    filter((event: any) => event instanceof NavigationEnd),
-    map((event) => !!event.url.match(/(tasks|timeline)$/)),
-    startWith(!!this._router.url.match(/(tasks|timeline)$/)),
+  isRouteWithSidePanel = toSignal(this._isRouteWithSidePanel$, { initialValue: true });
+
+  private _isScheduleSection$ = this._router.events.pipe(
+    filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+    map((event) => !!event.urlAfterRedirects.match(/(schedule)$/)),
+    startWith(!!this._router.url.match(/(schedule)$/)),
   );
+  isScheduleSection = toSignal(this._isScheduleSection$, { initialValue: false });
+
+  // Convert more observables to signals
+
+  currentTask = toSignal(this.taskService.currentTask$);
+  currentTaskId = this.taskService.currentTaskId;
+  pomodoroIsEnabled = toSignal(this.pomodoroService.isEnabled$);
+  pomodoroIsBreak = toSignal(this.pomodoroService.isBreak$);
+  pomodoroCurrentSessionTime = toSignal(this.pomodoroService.currentSessionTime$);
+  enabledSimpleCounters = toSignal(this.simpleCounterService.enabledSimpleCounters$, {
+    initialValue: [],
+  });
+  isShowIssuePanel = computed(() => this.layoutService.isShowIssuePanel());
+  isShowNotes = computed(() => this.layoutService.isShowNotes());
+  isShowScheduleDayPanel = computed(() => this.layoutService.isShowScheduleDayPanel());
+  syncIsEnabledAndReady = toSignal(this.syncWrapperService.isEnabledAndReady$);
+  syncState = toSignal(this.syncWrapperService.syncState$);
+  isSyncInProgress = toSignal(this.syncWrapperService.isSyncInProgress$);
+  focusModeConfig = toSignal(
+    this.globalConfigService.cfg$.pipe(map((cfg) => cfg?.focusMode)),
+  );
+  isOnline = toSignal(isOnline$);
+  focusSummaryToday = computed(() =>
+    this._metricService.getFocusSummaryForDay(this._dateService.todayStr()),
+  );
+  readonly isTimeTrackingEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isTimeTrackingEnabled;
+  });
+  readonly isFocusModeEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isFocusModeEnabled;
+  });
+  readonly isSyncIconEnabled = computed(() => {
+    return this.globalConfigService.cfg()?.appFeatures.isSyncIconEnabled;
+  });
+
+  private readonly _userProfileService = inject(UserProfileService);
+  isUserProfilesEnabled = computed(() => {
+    return (
+      this.globalConfigService.cfg()?.appFeatures.isEnableUserProfiles &&
+      this._userProfileService.isInitialized()
+    );
+  });
 
   private _subs: Subscription = new Subscription();
 
-  constructor(
-    public readonly projectService: ProjectService,
-    public readonly workContextService: WorkContextService,
-    public readonly bookmarkService: BookmarkService,
-    public readonly taskService: TaskService,
-    public readonly pomodoroService: PomodoroService,
-    public readonly layoutService: LayoutService,
-    public readonly simpleCounterService: SimpleCounterService,
-    public readonly syncProviderService: SyncProviderService,
-    private readonly _tagService: TagService,
-    private readonly _renderer: Renderer2,
-    private readonly _snackService: SnackService,
-    private readonly _router: Router,
-  ) {}
+  selectedTimeView = computed(() => this.layoutService.selectedTimeView());
+
+  selectTimeView(view: 'week' | 'month'): void {
+    this.layoutService.selectedTimeView.set(view);
+  }
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
-  }
-
-  ngOnInit(): void {
-    this.taskService.currentTaskProgress$.subscribe((progressIN) => {
-      if (this.circleSvg) {
-        let progress = progressIN || 1;
-        if (progress > 1) {
-          progress = 1;
-        }
-        const dashOffset = this.circumference * -1 * progress;
-        this._renderer.setStyle(
-          this.circleSvg.nativeElement,
-          'stroke-dashoffset',
-          dashOffset,
-        );
-      }
-    });
   }
 
   trackById(i: number, item: SimpleCounter): string {
@@ -119,14 +191,46 @@ export class MainHeaderComponent implements OnInit, OnDestroy {
   }
 
   sync(): void {
-    this.syncProviderService.sync().then((r) => {
-      if (r === 'SUCCESS' || r === 'NO_UPDATE_REQUIRED') {
+    this.syncWrapperService.sync().then((r) => {
+      if (
+        r === SyncStatus.UpdateLocal ||
+        r === SyncStatus.UpdateRemoteAll ||
+        r === SyncStatus.UpdateRemote
+      ) {
         this._snackService.open({ type: 'SUCCESS', msg: T.F.SYNC.S.SUCCESS_VIA_BUTTON });
+      } else if (r === SyncStatus.InSync) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.SYNC.S.ALREADY_IN_SYNC,
+        });
       }
     });
   }
 
+  private dialogSyncCfgRef: MatDialogRef<DialogSyncInitialCfgComponent> | null = null;
+
+  setupSync(): void {
+    // to prevent multiple dialogs on longpress from android
+    if (this.dialogSyncCfgRef) {
+      return;
+    }
+    this.dialogSyncCfgRef = this.matDialog.open(DialogSyncInitialCfgComponent);
+    this._subs.add(
+      this.dialogSyncCfgRef.afterClosed().subscribe(() => {
+        this.dialogSyncCfgRef = null;
+      }),
+    );
+  }
+
   isCounterRunning(counters: SimpleCounter[]): boolean {
     return !!(counters && counters.find((counter) => counter.isOn));
+  }
+
+  enableFocusMode(): void {
+    this._store.dispatch(showFocusOverlay());
+  }
+
+  get kb(): KeyboardConfig {
+    return (this._configService.cfg()?.keyboard as KeyboardConfig) || {};
   }
 }

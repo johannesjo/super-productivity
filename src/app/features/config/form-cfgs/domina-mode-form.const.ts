@@ -2,6 +2,7 @@
 import { ConfigFormSection, DominaModeConfig } from '../global-config.model';
 import { T } from '../../../t.const';
 import { speak } from '../../../util/speak';
+import { getAvailableVoices } from '../../domina-mode/getAvailableVoices';
 
 export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
   title: T.F.DOMINA_MODE.FORM.TITLE,
@@ -40,18 +41,41 @@ export const DOMINA_MODE_FORM: ConfigFormSection<DominaModeConfig> = {
       key: 'volume',
       type: 'slider',
       hideExpression: '!model.isEnabled',
-      templateOptions: {
+      props: {
         type: 'number',
         min: 0,
         max: 100,
-        label: T.GCF.SOUND.VOLUME,
         required: true,
+        label: T.GCF.SOUND.VOLUME,
         change: ({ model }) => {
           let txt = model.text.replace('${currentTaskTitle}', 'current task title');
           if (txt.length <= 1) {
             txt = 'No text configured for domina mode';
           }
-          speak(txt, model.volume);
+          speak(txt, model.volume, model.voice);
+        },
+      },
+    },
+    {
+      key: 'voice',
+      type: 'select',
+      templateOptions: {
+        label: T.F.DOMINA_MODE.FORM.L_VOICE,
+        description: T.F.DOMINA_MODE.FORM.L_VOICE_DESCRIPTION,
+        required: false,
+      },
+      hooks: {
+        onInit: (field) => {
+          let voices: SpeechSynthesisVoice[] = getAvailableVoices() || [];
+          voices = getAvailableVoices();
+          //Log.log(voices);
+
+          if (field.templateOptions) {
+            field.templateOptions.options = voices.map((voiceName) => ({
+              label: voiceName.name,
+              value: voiceName.voiceURI,
+            }));
+          }
         },
       },
     },

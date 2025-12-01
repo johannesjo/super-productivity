@@ -76,3 +76,23 @@ export const arrayMoveRightUntil = <T>(
   }
   return arr;
 };
+
+export const arrayMoveToStart = <T>(arr: T[], val: T): T[] => {
+  if (!arr.includes(val)) {
+    return arr;
+  }
+
+  const oldIndex = arr.indexOf(val);
+
+  return arrayMove(arr, oldIndex, 0);
+};
+
+export const arrayMoveToEnd = <T>(arr: T[], val: T): T[] => {
+  if (!arr.includes(val)) {
+    return arr;
+  }
+
+  const oldIndex = arr.indexOf(val);
+
+  return arrayMove(arr, oldIndex, arr.length - 1);
+};

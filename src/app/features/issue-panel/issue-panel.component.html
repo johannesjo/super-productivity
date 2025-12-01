@@ -1,0 +1,54 @@
+@if (isShowIntro()) {
+  <issue-panel-intro></issue-panel-intro>
+}
+
+<mat-tab-group
+  mat-align-tabs="start"
+  mat-stretch-tabs="false"
+  dynamicHeight="true"
+  preserveContent="false"
+  cdkDropList
+  cdkDropListOrientation="horizontal"
+  (cdkDropListDropped)="drop($event)"
+  cdkDropListElementContainer=".mat-mdc-tab-labels"
+  class="example-drag-tabs"
+  [selectedIndex]="selectedTabIndex()"
+>
+  @for (entry of issueProvidersMapped(); track entry.issueProvider.id) {
+    <mat-tab>
+      <ng-template mat-tab-label>
+        <div
+          cdkDrag
+          cdkDragRootElement=".mat-mdc-tab"
+          cdkDragPreviewClass="issue-provider-drag-preview"
+          class="tab-header-item"
+          [class.disabled]="!entry.issueProvider.isEnabled"
+          (longPressIOS)="openEditIssueProvider(entry.issueProvider)"
+          (longPress)="openEditIssueProvider(entry.issueProvider)"
+        >
+          <mat-icon
+            [svgIcon]="entry.issueProvider.issueProviderKey | issueIcon"
+            [matTooltip]="entry.tooltip"
+            matTooltipPosition="above"
+          ></mat-icon>
+          <div class="initials">{{ entry.initials }}</div>
+        </div>
+      </ng-template>
+      <ng-template matTabContent>
+        <issue-provider-tab [issueProvider]="entry.issueProvider"></issue-provider-tab>
+      </ng-template>
+    </mat-tab>
+  }
+
+  <mat-tab>
+    <ng-template mat-tab-label>
+      <div class="tab-header-item">
+        <mat-icon>add_circle</mat-icon>
+      </div>
+    </ng-template>
+
+    <ng-template matTabContent>
+      <issue-provider-setup-overview></issue-provider-setup-overview>
+    </ng-template>
+  </mat-tab>
+</mat-tab-group>

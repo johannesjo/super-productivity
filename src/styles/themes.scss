@@ -1,97 +1,110 @@
 @use '@angular/material' as mat;
-@import '~angular-material-css-vars/src/lib/public-util';
-@import '~angular-material-css-vars/src/lib/main';
+@use 'angular-material-css-vars' as mat-css-vars;
 
-$custom-typography: mat.define-typography-config(
-  $font-family: null,
+$custom-typography: mat.m2-define-typography-config(
+  $font-family: 'Open Sans, sans-serif',
 );
-@include init-material-css-vars($typography-config: $custom-typography);
+@include mat-css-vars.init-material-css-vars($typography-config: $custom-typography);
 
 .bg-card {
-  background: #fff;
+  background: var(--card-bg);
 
   .isDarkTheme & {
-    background: $dark-theme-card-bg;
+    background: var(--card-bg);
   }
 }
 
 .bg-primary {
-  background-color: $c-primary;
+  background-color: var(--c-primary);
 }
 
 .bgc-primary {
-  @include mat-css-color-and-contrast-primary(500);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(500);
 }
 
 .bg-accent {
-  background-color: $c-accent;
+  background-color: var(--c-accent);
 }
 
 .bgc-accent {
-  @include mat-css-color-and-contrast-accent(500);
+  // todo fix
+  @include mat-css-vars.mat-css-color-and-contrast-accent(500);
 }
 
 .bg-100 {
-  background-color: $c-primary-100;
+  background-color: var(--palette-primary-100);
 }
 
 .bg-200 {
-  background-color: $c-primary-200;
+  background-color: var(--palette-primary-200);
 }
 
 .bg-400 {
-  background-color: $c-primary-400;
+  background-color: var(--palette-primary-400);
 }
 
 .bgc-400 {
-  @include mat-css-color-and-contrast-primary(400);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(400);
 }
 
 .bg-600 {
-  background-color: $c-primary-600;
+  background-color: var(--palette-primary-600);
 }
 
 .bgc-600 {
-  @include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .cc-600 {
-  color: $c-contrast-600;
+  color: var(--palette-primary-contrast-600);
 }
 
 .bg-600i {
-  background-color: $c-primary-600 !important;
+  background-color: var(--palette-primary-600) !important;
 }
 
 .bgc-800 {
-  @include mat-css-color-and-contrast-primary(800);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(800);
 }
 
 // for buttons
 .isDarkTheme .mat-lighter,
 .mat-lighter {
-  @include mat-css-color-and-contrast-primary(300);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(300);
 }
 
 .isDarkTheme .mat-darker,
 .mat-darker {
-  @include mat-css-color-and-contrast-primary(600);
+  @include mat-css-vars.mat-css-color-and-contrast-primary(600);
 }
 
 .color-contrast {
-  color: $c-contrast;
+  color: var(--palette-primary-contrast-500);
 }
 
 .color-primary {
-  color: $c-primary;
-  stroke: $c-primary;
+  color: var(--c-primary);
+  stroke: var(--c-primary);
 }
 
 .color-warn-i {
-  color: $c-warn !important;
-  stroke: $c-warn !important;
+  color: var(--c-warn) !important;
+  stroke: var(--c-warn) !important;
 }
 
 .border-color-primary {
-  border-color: $c-primary !important;
+  border-color: var(--c-primary) !important;
+}
+
+// Traffic light colors for progress bars
+.bg-success {
+  background-color: var(--color-success);
+}
+
+.bg-warning {
+  background-color: var(--color-warning);
+}
+
+.bg-danger {
+  background-color: var(--color-danger);
 }

@@ -1,0 +1,6 @@
+coverage/
+dist/
+node_modules/
+*.zip
+.build/
+tsconfig.build.json

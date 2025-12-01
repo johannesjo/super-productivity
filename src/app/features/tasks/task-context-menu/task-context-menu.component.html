@@ -1,0 +1,8 @@
+@if (isShowInner) {
+  <task-context-menu-inner
+    #taskContextMenuInner
+    [isAdvancedControls]="isAdvancedControls()"
+    (close)="isShowInner = false"
+    [task]="task()"
+  ></task-context-menu-inner>
+}

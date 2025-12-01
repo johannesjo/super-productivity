@@ -1,0 +1,18 @@
+{
+  "name": "@super-productivity/vite-plugin",
+  "version": "1.0.0",
+  "description": "Vite plugin for Super Productivity plugins",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "peerDependencies": {
+    "vite": "^5.0.0 || ^6.0.0 || ^7.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0",
+    "vite": "^6.0.0"
+  }
+}

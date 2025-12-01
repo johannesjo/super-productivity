@@ -1,0 +1,173 @@
+<div class="g-multi-btn-wrapper">
+  <nav-item
+    [container]="'group'"
+    [expanded]="isExpanded()"
+    [ariaControls]="'group-' + item().id"
+    [icon]="item().icon"
+    [svgIcon]="item().svgIcon"
+    [label]="item().label | translate"
+    [showLabels]="showLabels()"
+    (clicked)="onHeaderClick()"
+  ></nav-item>
+
+  @if (showLabels()) {
+    <div class="additional-btns">
+      @for (btn of item().additionalButtons; track btn.id) {
+        @if (!btn.hidden) {
+          @if (btn.id === 'project-visibility') {
+            <button
+              #visibilityBtn
+              class="additional-btn"
+              mat-icon-button
+              [matTooltip]="btn.tooltip | translate"
+              [matMenuTriggerFor]="visibilityMenu"
+            >
+              <mat-icon>{{ btn.icon }}</mat-icon>
+            </button>
+          } @else {
+            <button
+              class="additional-btn"
+              mat-icon-button
+              [matTooltip]="btn.tooltip | translate"
+              (click)="btn.action?.()"
+            >
+              <mat-icon>{{ btn.icon }}</mat-icon>
+            </button>
+          }
+        }
+      }
+    </div>
+  }
+</div>
+
+@if (isExpanded()) {
+  <div
+    class="nav-children"
+    role="list"
+    draggable="false"
+    [@expandCollapse]
+  >
+    <tree-dnd
+      [nodes]="treeNodes()"
+      (nodesChange)="onTreeUpdated($event)"
+      [indent]="16"
+    >
+      <!-- Template for folder nodes -->
+      <ng-template
+        #treeFolder
+        let-node
+        let-expanded="expanded"
+        let-toggle="toggle"
+      >
+        <div
+          class="nav-child-item folder-item draggable"
+          (contextmenu)="onFolderContextMenu($event, node)"
+        >
+          <nav-item
+            [mode]="'folder'"
+            [expanded]="expanded"
+            [label]="
+              node.data?.k === MenuTreeKind.FOLDER ? node.data.name : node.data.label
+            "
+            [variant]="'nav'"
+            [showLabels]="showLabels()"
+            (clicked)="onChildClick(node)"
+            [folderId]="node.id"
+            [treeKind]="treeKind()"
+          ></nav-item>
+        </div>
+      </ng-template>
+
+      <!-- Template for item nodes (projects and tags) -->
+      <ng-template
+        #treeItem
+        let-node
+      >
+        <div
+          class="nav-child-item"
+          [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
+        >
+          @switch (node.data?.k) {
+            @case (MenuTreeKind.PROJECT) {
+              <nav-item
+                [workContext]="node.data.project"
+                [type]="WorkContextType.PROJECT"
+                [defaultIcon]="node.data.project.icon || DEFAULT_PROJECT_ICON"
+                [activeWorkContextId]="activeWorkContextId() || ''"
+                [variant]="'nav'"
+                [showLabels]="showLabels()"
+                [attr.data-project-id]="node.data.project.id"
+                (clicked)="onChildClick(node)"
+              ></nav-item>
+            }
+            @case (MenuTreeKind.TAG) {
+              <nav-item
+                [workContext]="node.data.tag"
+                [type]="WorkContextType.TAG"
+                [defaultIcon]="node.data.tag.icon || 'label'"
+                [activeWorkContextId]="activeWorkContextId() || ''"
+                [variant]="'nav'"
+                [showLabels]="showLabels()"
+                [attr.data-tag-id]="node.data.tag.id"
+                (clicked)="onChildClick(node)"
+              ></nav-item>
+            }
+          }
+        </div>
+      </ng-template>
+
+      <!-- Custom drag preview template -->
+      <ng-template
+        #treeDragPreview
+        let-data
+      >
+        <div
+          class="custom-drag-preview"
+          [ngStyle]="{
+            background: 'var(--primary-color, #3f51b5)',
+            color: 'white',
+            'border-radius': '8px',
+            padding: '12px 16px',
+            'box-shadow': '0 4px 12px rgba(0,0,0,0.25)',
+            display: 'flex',
+            'align-items': 'center',
+            gap: '8px',
+            'font-weight': '500',
+            'max-width': '280px',
+            'white-space': 'nowrap',
+            overflow: 'hidden',
+            'text-overflow': 'ellipsis',
+          }"
+        >
+          <mat-icon [ngStyle]="{ 'font-size': '18px', width: '18px', height: '18px' }">
+            {{ data.isFolder ? 'folder' : 'assignment' }}
+          </mat-icon>
+          <span>{{
+            data.node.data?.k === MenuTreeKind.FOLDER
+              ? data.node.data.name
+              : data.node.data?.k === MenuTreeKind.PROJECT
+                ? data.node.data.project.title
+                : data.node.data?.tag.title
+          }}</span>
+        </div>
+      </ng-template>
+    </tree-dnd>
+  </div>
+}
+
+<!-- Project Visibility Menu -->
+<mat-menu #visibilityMenu="matMenu">
+  @for (project of allProjectsExceptInbox(); track project.id) {
+    <button
+      mat-menu-item
+      (click)="toggleProjectVisibility(project.id)"
+    >
+      @if (!project.isHiddenFromMenu) {
+        <mat-icon>visibility</mat-icon>
+      } @else {
+        <mat-icon>visibility_off</mat-icon>
+      }
+      <span>{{ project.title }}</span>
+    </button>
+  }
+</mat-menu>

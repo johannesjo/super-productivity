@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>Yesterday's Tasks</title>
+    <style>
+      body {
+        font-family: 'Open Sans', sans-serif;
+        margin: 0;
+        padding: 20px;
+        color: var(--text-color);
+      }
+
+      /* Light mode (default) */
+      :root {
+        --text-color: var(--text-color);
+        --border-color: var(--separator-color);
+        --primary-color: var(--c-primary);
+      }
+
+      /* Dark mode */
+
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .date {
+        font-size: 14px;
+        margin-bottom: 20px;
+        opacity: 0.7;
+      }
+
+      .loading,
+      .no-tasks {
+        text-align: center;
+        padding: 40px;
+        color: var(--text-secondary);
+      }
+
+      .task-item {
+        padding: 8px 0;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: flex-start;
+      }
+
+      .task-item:last-child {
+        border-bottom: none;
+      }
+
+      .task-title {
+        flex: 1;
+        margin-right: 16px;
+      }
+
+      .task-time {
+        font-weight: 400;
+        white-space: nowrap;
+        min-width: 60px;
+        text-align: right;
+      }
+
+      .project-tag {
+        display: inline-block;
+        padding: 2px 8px;
+        margin-left: 8px;
+        font-size: 12px;
+        opacity: 0.7;
+        border: 1px solid var(--border-color);
+        border-radius: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div
+        class="date"
+        id="yesterday-date"
+      ></div>
+
+      <div id="content">
+        <div class="loading">Loading tasks...</div>
+      </div>
+    </div>
+
+    <script>
+      // Helper function to get date range for a specific day
+      function getDateRange(daysBack = 1) {
+        const now = new Date();
+        const targetDate = new Date(now);
+        targetDate.setDate(targetDate.getDate() - daysBack);
+
+        // Set to start of day (00:00:00)
+        const startOfDay = new Date(targetDate);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        // Set to end of day (23:59:59)
+        const endOfDay = new Date(targetDate);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        return {
+          start: startOfDay.getTime(),
+          end: endOfDay.getTime(),
+          date: targetDate,
+          dateKey: targetDate.toISOString().split('T')[0],
+        };
+      }
+
+      // Helper function to get yesterday's date range (for backward compatibility)
+      function getYesterdayRange() {
+        return getDateRange(1);
+      }
+
+      // Function to format duration
+      function formatDuration(ms) {
+        if (!ms || ms === 0) return '0m';
+
+        const hours = Math.floor(ms / (1000 * 60 * 60));
+        const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
+
+        if (hours > 0) {
+          return hours + 'h ' + minutes + 'm';
+        }
+        return minutes + 'm';
+      }
+
+      // Wait for plugin API to be available
+      function waitForPlugin() {
+        if (typeof PluginAPI !== 'undefined') {
+          init();
+        } else {
+          setTimeout(waitForPlugin, 100);
+        }
+      }
+
+      // Function to get tasks for a specific date
+      function getTasksForDate(combinedTasks, range, dateKey) {
+        // Filter tasks that have time entries from the target date
+        const dateTasks = combinedTasks.filter((task) => {
+          if (!task.timeSpentOnDay) return false;
+
+          // Check if date key exists
+          if (task.timeSpentOnDay[dateKey]) {
+            return true;
+          }
+
+          // Also check timestamp-based entries
+          for (const taskDateKey in task.timeSpentOnDay) {
+            const entries = task.timeSpentOnDay[taskDateKey];
+            if (Array.isArray(entries)) {
+              for (const entry of entries) {
+                if (entry && entry.s >= range.start && entry.s <= range.end) {
+                  return true;
+                }
+              }
+            }
+          }
+          return false;
+        });
+
+        // Calculate time spent on target date for each task
+        const tasksWithTime = dateTasks.map((task) => {
+          let timeSpent = 0;
+
+          if (task.timeSpentOnDay) {
+            // First check for direct date key (YYYY-MM-DD format)
+            if (task.timeSpentOnDay[dateKey]) {
+              const timeValue = task.timeSpentOnDay[dateKey];
+              if (typeof timeValue === 'number') {
+                timeSpent = timeValue;
+              } else if (Array.isArray(timeValue)) {
+                // Handle array format
+                for (const entry of timeValue) {
+                  if (entry && entry.e && entry.s) {
+                    timeSpent += entry.e - entry.s;
+                  }
+                }
+              }
+            } else {
+              // Check timestamp-based entries
+              for (const taskDateKey in task.timeSpentOnDay) {
+                const entries = task.timeSpentOnDay[taskDateKey];
+                if (Array.isArray(entries)) {
+                  for (const entry of entries) {
+                    if (entry && entry.s >= range.start && entry.s <= range.end) {
+                      timeSpent += entry.e - entry.s || 0;
+                    }
+                  }
+                }
+              }
+            }
+          }
+
+          return {
+            ...task,
+            dateTimeSpent: timeSpent,
+            formattedTime: formatDuration(timeSpent),
+          };
+        });
+
+        // Sort by time spent (descending)
+        tasksWithTime.sort((a, b) => b.dateTimeSpent - a.dateTimeSpent);
+
+        return tasksWithTime;
+      }
+
+      async function getLastAvailableTasks() {
+        try {
+          const allTasks = await PluginAPI.getTasks();
+          const archivedTasks = await PluginAPI.getArchivedTasks();
+
+          // Combine all tasks
+          const combinedTasks = [...allTasks, ...archivedTasks];
+
+          console.log('Total tasks found:', combinedTasks.length);
+
+          // Try to find tasks starting from yesterday and going backwards
+          for (let daysBack = 1; daysBack <= 30; daysBack++) {
+            const range = getDateRange(daysBack);
+            console.log(`Checking ${daysBack} days back:`, range.dateKey);
+
+            const tasks = getTasksForDate(combinedTasks, range, range.dateKey);
+
+            if (tasks.length > 0) {
+              console.log(`Found ${tasks.length} tasks from ${range.dateKey}`);
+              return {
+                tasks,
+                date: range.date,
+                dateKey: range.dateKey,
+                daysBack,
+              };
+            }
+          }
+
+          // No tasks found in the last 30 days
+          console.log('No tasks found in the last 30 days');
+          return {
+            tasks: [],
+            date: new Date(),
+            dateKey: '',
+            daysBack: 0,
+          };
+        } catch (error) {
+          console.error('Error fetching tasks:', error);
+          return {
+            tasks: [],
+            date: new Date(),
+            dateKey: '',
+            daysBack: 0,
+          };
+        }
+      }
+
+      async function init() {
+        try {
+          const result = await getLastAvailableTasks();
+          const projects = await PluginAPI.getAllProjects();
+
+          // Update the date display based on what was found
+          const dateEl = document.getElementById('yesterday-date');
+          if (result.tasks.length > 0) {
+            const dateText = result.date.toLocaleDateString('en-US', {
+              weekday: 'long',
+              year: 'numeric',
+              month: 'long',
+              day: 'numeric',
+            });
+
+            if (result.daysBack === 1) {
+              dateEl.textContent = dateText + ' (Yesterday)';
+            } else {
+              dateEl.textContent = dateText + ` (${result.daysBack} days ago)`;
+            }
+          } else {
+            dateEl.textContent = 'No recent tasks found';
+          }
+
+          displayTasks(result.tasks, projects);
+        } catch (error) {
+          console.error('Error loading tasks:', error);
+          document.getElementById('content').innerHTML =
+            '<div class="no-tasks">Error loading tasks. Please try again.</div>';
+        }
+      }
+
+      function displayTasks(tasks, projects = []) {
+        const contentEl = document.getElementById('content');
+
+        if (tasks.length === 0) {
+          contentEl.innerHTML =
+            '<div class="no-tasks">No tasks tracked in the last 30 days.</div>';
+          return;
+        }
+
+        // Create project lookup map
+        const projectMap = {};
+        projects.forEach((project) => {
+          projectMap[project.id] = project.title;
+        });
+
+        // Build task list HTML
+        let html = '';
+
+        tasks.forEach((task) => {
+          const isDone = task.isDone ? 'task-done' : '';
+          const projectTitle =
+            task.projectId && projectMap[task.projectId]
+              ? projectMap[task.projectId]
+              : task.projectId;
+          const projectTag = projectTitle
+            ? `<span class="project-tag">${escapeHtml(projectTitle)}</span>`
+            : '';
+
+          html += `
+          <div class="task-item">
+            <div class="task-title ${isDone}">
+              ${escapeHtml(task.title)}${projectTag}
+            </div>
+            <div class="task-time">${task.formattedTime}</div>
+          </div>
+        `;
+        });
+
+        contentEl.innerHTML = html;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // Refresh function for hooks
+      async function refreshTasks() {
+        const result = await getLastAvailableTasks();
+        const projects = await PluginAPI.getAllProjects();
+
+        // Update the date display
+        const dateEl = document.getElementById('yesterday-date');
+        if (result.tasks.length > 0) {
+          const dateText = result.date.toLocaleDateString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+          });
+
+          if (result.daysBack === 1) {
+            dateEl.textContent = dateText + ' (Yesterday)';
+          } else {
+            dateEl.textContent = dateText + ` (${result.daysBack} days ago)`;
+          }
+        } else {
+          dateEl.textContent = 'No recent tasks found';
+        }
+
+        displayTasks(result.tasks, projects);
+      }
+
+      // Register hooks to refresh on task changes
+      function setupHooks() {
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_UPDATE, (taskData) => {
+          refreshTasks();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_COMPLETE, (taskData) => {
+          refreshTasks();
+        });
+        PluginAPI.registerHook(PluginAPI.Hooks.TASK_DELETE, (taskData) => {
+          refreshTasks();
+        });
+      }
+
+      // Start
+      function waitForPlugin() {
+        if (typeof PluginAPI !== 'undefined') {
+          init();
+          setupHooks();
+        } else {
+          setTimeout(waitForPlugin, 100);
+        }
+      }
+
+      waitForPlugin();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,19 @@
+<button
+  mat-icon-button
+  color=""
+  (click)="addIssue.emit(itemData())"
+>
+  <mat-icon>add</mat-icon>
+</button>
+
+<div class="title">{{ customTitleStr() || itemData().title }}</div>
+
+@if (itemData().issueType !== ICAL_TYPE) {
+  <button
+    class="open-issue"
+    mat-icon-button
+    (click)="openIssue()"
+  >
+    <mat-icon>open_in_new</mat-icon>
+  </button>
+}

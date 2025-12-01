@@ -1,0 +1,24 @@
+@if (!isShowAddTask) {
+  <div
+    style="text-align: center"
+    (click)="isShowAddTask = true"
+  >
+    <button mat-button>
+      <mat-icon>add</mat-icon>
+      {{ T.G.ADD | translate }}
+    </button>
+  </div>
+}
+@if (isShowAddTask) {
+  <add-task-bar
+    [isHideTagTitles]="true"
+    (closed)="isShowAddTask = false"
+    (done)="isShowAddTask = false"
+    (afterTaskAdd)="afterTaskAdd.emit($event)"
+    [planForDay]="planForDay()"
+    [taskIdsToExclude]="taskIdsToExclude()"
+    [additionalFields]="additionalFields()"
+    [tagsToRemove]="tagsToRemove()"
+    [isNoDefaults]="isNoDefaults()"
+  ></add-task-bar>
+}

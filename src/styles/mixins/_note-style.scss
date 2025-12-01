@@ -1,17 +1,13 @@
 @mixin noteStyle() {
-  background: #ffffff;
-  color: $standard-note-fg-light;
   box-sizing: border-box;
   position: relative;
-  border-radius: $card-border-radius;
-  box-shadow: $shadow-card-shadow;
-  transition: $transition-fast;
+  border-radius: var(--card-border-radius);
+  box-shadow: var(--card-shadow);
+  transition: var(--transition-fast);
   transition-property: transform, box-shadow;
-  //border: 1px solid #DADCE0;
+  //border: 1px solid var(--grid-color);
 
-  @include darkTheme {
-    background: $standard-note-bg-dark;
-    color: $standard-note-fg-dark;
-    //border-color: #333333;
-  }
+  background: var(--standard-note-bg);
+  color: var(--standard-note-fg);
+  //border-color: #333333;
 }

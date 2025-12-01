@@ -10,15 +10,13 @@ export const filterDoneTasks = (
   return isFilterDone
     ? tasks.filter((task) => !task.isDone)
     : isFilterAll
-    ? !!currentTaskId
-      ? tasks.filter((task) => task.id === currentTaskId)
-      : []
-    : tasks;
+      ? !!currentTaskId
+        ? tasks.filter((task) => task.id === currentTaskId)
+        : []
+      : tasks;
 };
 
-@Pipe({
-  name: 'filterDoneTasks',
-})
+@Pipe({ name: 'filterDoneTasks' })
 export class FilterDoneTasksPipe implements PipeTransform {
   transform: (value: any, ...args: any[]) => any = filterDoneTasks;
 }

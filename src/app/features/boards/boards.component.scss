@@ -1,0 +1,55 @@
+@use '../../../styles/_globals.scss' as *;
+
+:host {
+  ::ng-deep {
+    //.mat-mdc-tab-header {
+    //  @include mq(xs, max) {
+    //    margin-right: 50px;
+    //  }
+    //}
+
+    .mat-mdc-tab-body-wrapper {
+      min-height: 0;
+      height: 100%;
+    }
+
+    .mat-mdc-tab {
+      min-width: 40px !important;
+    }
+
+    .mat-tab-label:last-child {
+      opacity: 1;
+      min-width: 20px;
+      padding: 0;
+    }
+
+    .mat-mdc-tab-group {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .mat-mdc-tab-body-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+  }
+}
+
+.board-add-wrapper {
+  max-width: var(--component-max-width);
+  margin: 0 auto;
+  padding: 16px;
+  max-height: 100%;
+  overflow: auto;
+}

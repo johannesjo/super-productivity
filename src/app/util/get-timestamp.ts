@@ -1,5 +1,4 @@
-import * as moment from 'moment';
-
 export const getTimestamp = (dateStr: string): number => {
-  return moment(dateStr).toDate().getTime();
+  const date = new Date(dateStr);
+  return date.getTime();
 };

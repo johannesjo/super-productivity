@@ -15,11 +15,9 @@ const MAP = [
   'December',
 ];
 
-@Pipe({
-  name: 'numberToMonth',
-})
+@Pipe({ name: 'numberToMonth' })
 export class NumberToMonthPipe implements PipeTransform {
-  transform(value: any, args?: any): any {
-    return MAP[parseInt(value, 10) - 1];
+  transform(value: number | string, args?: unknown): string | undefined {
+    return MAP[parseInt(String(value), 10) - 1];
   }
 }

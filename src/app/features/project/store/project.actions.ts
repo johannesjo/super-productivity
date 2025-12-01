@@ -1,14 +1,8 @@
 import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Project } from '../project.model';
-import { IssueIntegrationCfg, IssueProviderKey } from '../../issue/issue.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
 import { DropListModelSource } from '../../tasks/task.model';
-
-export const loadProjectRelatedDataSuccess = createAction(
-  '[Project] Load Project related Data Success',
-  props<{ projectId: string }>(),
-);
 
 export const setCurrentProject = createAction(
   '[Project] SetCurrentProject',
@@ -40,21 +34,6 @@ export const updateProject = createAction(
   props<{ project: Update<Project> }>(),
 );
 
-export const updateProjectWorkStart = createAction(
-  '[Project] Update Work Start',
-  props<{ id: string; date: string; newVal: number }>(),
-);
-
-export const updateProjectWorkEnd = createAction(
-  '[Project] Update Work End',
-  props<{ id: string; date: string; newVal: number }>(),
-);
-
-export const addToProjectBreakTime = createAction(
-  '[Project] Add to Break Time',
-  props<{ id: string; date: string; valToAdd: number }>(),
-);
-
 export const updateProjectAdvancedCfg = createAction(
   '[Project] Update Project Advanced Cfg',
   props<{
@@ -64,25 +43,10 @@ export const updateProjectAdvancedCfg = createAction(
   }>(),
 );
 
-export const updateProjectIssueProviderCfg = createAction(
-  '[Project] Update Project Issue Provider Cfg',
-  props<{
-    projectId: string;
-    issueProviderKey: IssueProviderKey;
-    providerCfg: Partial<IssueIntegrationCfg>;
-    isOverwrite: boolean;
-  }>(),
-);
-
-export const deleteProject = createAction(
-  '[Project] Delete Project',
-  props<{ id: string }>(),
-);
-
-export const deleteProjects = createAction(
-  '[Project] Delete Projects',
-  props<{ ids: string[] }>(),
-);
+// export const deleteProjects = createAction(
+//   '[Project] Delete Projects',
+//   props<{ ids: string[] }>(),
+// );
 
 export const updateProjectOrder = createAction(
   '[Project] Update Project Order',
@@ -107,12 +71,12 @@ export const toggleHideFromMenu = createAction(
 // MOVE TASK ACTIONS
 // -----------------
 export const moveProjectTaskToBacklogListAuto = createAction(
-  '[Project] Auto Move Task from today to backlog',
+  '[Project] Auto Move Task from regular to backlog',
   props<{ taskId: string; projectId: string }>(),
 );
 
-export const moveProjectTaskToTodayListAuto = createAction(
-  '[Project] Auto Move Task from backlog to today',
+export const moveProjectTaskToRegularListAuto = createAction(
+  '[Project] Auto Move Task from backlog to regular',
   props<{ taskId: string; projectId: string; isMoveToTop: boolean }>(),
 );
 
@@ -126,18 +90,28 @@ export const moveProjectTaskDownInBacklogList = createAction(
   props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
 );
 
+export const moveProjectTaskToTopInBacklogList = createAction(
+  '[Project] Move Task to Top in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
+export const moveProjectTaskToBottomInBacklogList = createAction(
+  '[Project] Move Task to Bottom in Backlog',
+  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+);
+
 export const moveProjectTaskInBacklogList = createAction(
   '[Project] Move Task in Backlog',
   props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
 );
 
 export const moveProjectTaskToBacklogList = createAction(
-  '[Project] Move Task from today to backlog',
+  '[Project] Move Task from regular to backlog',
   props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
 );
 
-export const moveProjectTaskToTodayList = createAction(
-  '[Project] Move Task from backlog to today',
+export const moveProjectTaskToRegularList = createAction(
+  '[Project] Move Task from backlog to regular',
   props<{
     taskId: string;
     newOrderedIds: string[];
@@ -147,7 +121,7 @@ export const moveProjectTaskToTodayList = createAction(
   }>(),
 );
 
-export const moveAllProjectBacklogTasksToTodayList = createAction(
-  '[Project] Move all backlog tasks to today',
+export const moveAllProjectBacklogTasksToRegularList = createAction(
+  '[Project] Move all backlog tasks to regular',
   props<{ projectId: string }>(),
 );

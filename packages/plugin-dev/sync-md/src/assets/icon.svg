@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 24 24"
+     fill="currentColor">
+  <rect x="2"
+        y="4"
+        width="20"
+        height="16"
+        rx="2"
+        ry="2"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2" />
+  <text x="12"
+        y="15"
+        text-anchor="middle"
+        font-family="Arial, sans-serif"
+        font-size="10"
+        font-weight="bold"
+        fill="currentColor">MD
+  </text>
+</svg>

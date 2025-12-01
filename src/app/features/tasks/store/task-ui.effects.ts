@@ -1,10 +1,13 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { addTask, deleteTask, undoDeleteTask, updateTask } from './task.actions';
+import { undoDeleteTask } from './task.actions';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { select, Store } from '@ngrx/store';
 import {
   distinctUntilChanged,
   filter,
+  first,
+  map,
   skip,
   switchMap,
   tap,
@@ -25,31 +28,72 @@ import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
 import { Task } from '../task.model';
 import { EMPTY } from 'rxjs';
+import { selectProjectById } from '../../project/store/project.selectors';
+import { Router } from '@angular/router';
+import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 
 @Injectable()
 export class TaskUiEffects {
-  taskCreatedSnack$: any = createEffect(
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _notifyService = inject(NotifyService);
+  private _taskService = inject(TaskService);
+  private _router = inject(Router);
+  private _bannerService = inject(BannerService);
+  private _snackService = inject(SnackService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _workContextService = inject(WorkContextService);
+  private _navigateToTaskService = inject(NavigateToTaskService);
+
+  taskCreatedSnack$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(addTask),
-        tap(({ task }) =>
+        ofType(TaskSharedActions.addTask),
+        withLatestFrom(this._workContextService.mainListTaskIds$),
+        switchMap(([{ task }, activeContextTaskIds]) => {
+          if (task.projectId) {
+            return this._store$
+              .select(selectProjectById, { id: task.projectId as string })
+              .pipe(
+                first(),
+                map((project) => ({ project, task, activeContextTaskIds })),
+              );
+          } else {
+            return [{ project: null, task, activeContextTaskIds }];
+          }
+        }),
+        tap(({ project, task, activeContextTaskIds }) => {
+          const isTaskVisibleOnCurrentPage = activeContextTaskIds.includes(task.id);
+
           this._snackService.open({
             type: 'SUCCESS',
             translateParams: {
-              title: truncate(task.title),
+              taskTitle: truncate(task.title),
+              projectTitle: project ? truncate(project.title) : '',
             },
-            msg: T.F.TASK.S.TASK_CREATED,
+            msg:
+              task.projectId && !isTaskVisibleOnCurrentPage
+                ? T.F.TASK.S.CREATED_FOR_PROJECT
+                : T.F.TASK.S.TASK_CREATED,
             ico: 'add',
-          }),
-        ),
+            ...(task.projectId && !isTaskVisibleOnCurrentPage
+              ? {
+                  actionFn: () => {
+                    this._navigateToTaskService.navigate(task.id, false);
+                  },
+                  actionStr: T.F.TASK.S.GO_TO_TASK,
+                }
+              : {}),
+          });
+        }),
       ),
     { dispatch: false },
   );
 
-  snackDelete$: any = createEffect(
+  snackDelete$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(deleteTask),
+        ofType(TaskSharedActions.deleteTask),
         tap(({ task }) => {
           this._snackService.open({
             translateParams: {
@@ -65,11 +109,11 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  timeEstimateExceeded$: any = createEffect(
+  timeEstimateExceeded$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
-          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+          globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? // reset whenever the current taskId changes (but no the task data, which is polled afterwards)
               this._store$.pipe(select(selectCurrentTaskId)).pipe(
                 distinctUntilChanged(),
@@ -96,11 +140,11 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  timeEstimateExceededDismissBanner$: any = createEffect(
+  timeEstimateExceededDismissBanner$ = createEffect(
     () =>
       this._store$.pipe(select(selectConfigFeatureState)).pipe(
         switchMap((globalCfg) =>
-          globalCfg && globalCfg.misc.isNotifyWhenTimeEstimateExceeded
+          globalCfg && globalCfg.timeTracking.isNotifyWhenTimeEstimateExceeded
             ? this._bannerService.activeBanner$.pipe(
                 switchMap((activeBanner) =>
                   activeBanner?.id === BannerId.TimeEstimateExceeded
@@ -121,10 +165,10 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  taskDoneSound$: any = createEffect(
+  taskDoneSound$ = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(updateTask),
+        ofType(TaskSharedActions.updateTask),
         filter(({ task: { changes } }) => !!changes.isDone),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
@@ -136,16 +180,42 @@ export class TaskUiEffects {
     { dispatch: false },
   );
 
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _notifyService: NotifyService,
-    private _taskService: TaskService,
-    private _bannerService: BannerService,
-    private _snackService: SnackService,
-    private _globalConfigService: GlobalConfigService,
-    private _workContextService: WorkContextService,
-  ) {}
+  goToProjectSnack$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.moveToOtherProject),
+        filter(
+          ({ targetProjectId }) =>
+            targetProjectId !== this._workContextService.activeWorkContextId,
+        ),
+        withLatestFrom(this._workContextService.mainListTaskIds$),
+        filter(
+          ([{ task }, activeContextTaskIds]) => !activeContextTaskIds.includes(task.id),
+        ),
+        switchMap(([{ targetProjectId, task }]) =>
+          this._store$.select(selectProjectById, { id: targetProjectId }).pipe(
+            first(),
+            map((project) => ({ project, task })),
+          ),
+        ),
+        tap(({ project, task }) =>
+          this._snackService.open({
+            type: 'SUCCESS',
+            translateParams: {
+              taskTitle: truncate(task.title),
+              projectTitle: truncate(project.title),
+            },
+            msg: T.F.TASK.S.MOVED_TO_PROJECT,
+            ico: 'add',
+            actionFn: () => {
+              this._navigateToTaskService.navigate(task.id, false);
+            },
+            actionStr: T.F.TASK.S.GO_TO_TASK,
+          }),
+        ),
+      ),
+    { dispatch: false },
+  );
 
   private _notifyAboutTimeEstimateExceeded(currentTask: Task): void {
     const title = truncate(currentTask.title);
@@ -169,6 +239,9 @@ export class TaskUiEffects {
             timeEstimate: currentTask.timeSpent + (30 * 60000),
           }),
       },
+      hideWhen$: this._taskService.currentTaskId$.pipe(
+        filter((id) => id !== currentTask.id),
+      ),
     });
   }
 }

@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import { T } from '../../../t.const';
-import { ConfigFormSection, DropboxSyncConfig, SyncConfig } from '../global-config.model';
-import { SyncProvider } from '../../../imex/sync/sync-provider.model';
+import { ConfigFormSection, SyncConfig } from '../global-config.model';
+import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../../app.constants';
-import { androidInterface } from '../../android/android-interface';
+import { fileSyncDroid, fileSyncElectron } from '../../../pfapi/pfapi-config';
 
 export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   title: T.F.SYNC.FORM.TITLE,
@@ -12,18 +12,138 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
   items: [
     {
       key: 'isEnabled',
+      className: 'tour-isSyncEnabledToggle',
       type: 'checkbox',
       templateOptions: {
         label: T.F.SYNC.FORM.L_ENABLE_SYNCING,
       },
     },
+
     {
-      key: 'isCompressionEnabled',
-      type: 'checkbox',
+      key: 'syncProvider',
+      type: 'select',
       templateOptions: {
-        label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
+        label: T.F.SYNC.FORM.L_SYNC_PROVIDER,
+        required: true,
+        options: [
+          { label: LegacySyncProvider.Dropbox, value: LegacySyncProvider.Dropbox },
+          { label: LegacySyncProvider.WebDAV, value: LegacySyncProvider.WebDAV },
+          ...(IS_ELECTRON || IS_ANDROID_WEB_VIEW
+            ? [
+                {
+                  label: LegacySyncProvider.LocalFile,
+                  value: LegacySyncProvider.LocalFile,
+                },
+              ]
+            : []),
+        ],
       },
     },
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+        IS_ANDROID_WEB_VIEW,
+      key: 'localFileSync',
+      fieldGroup: [
+        {
+          type: 'btn',
+          key: 'syncFolderPath',
+          templateOptions: {
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            required: true,
+            onClick: () => {
+              return fileSyncElectron.pickDirectory();
+            },
+          },
+        },
+      ],
+    },
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
+        !IS_ANDROID_WEB_VIEW,
+      key: 'localFileSync',
+      fieldGroup: [
+        {
+          type: 'btn',
+          key: 'safFolderUri',
+          templateOptions: {
+            text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
+            required: true,
+            onClick: () => {
+              // NOTE: this actually sets the value in the model
+              return fileSyncDroid.setupSaf();
+            },
+          },
+        },
+      ],
+    },
+
+    {
+      hideExpression: (m, v, field) =>
+        field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
+      key: 'webDav',
+      fieldGroup: [
+        {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.WEB_DAV.INFO,
+          },
+        },
+        ...(!IS_ELECTRON && !IS_ANDROID_WEB_VIEW
+          ? [
+              {
+                type: 'tpl',
+                templateOptions: {
+                  tag: 'p',
+                  text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
+                },
+              },
+            ]
+          : []),
+        {
+          key: 'baseUrl',
+          type: 'input',
+          className: 'e2e-baseUrl',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
+            description:
+              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName/',
+          },
+        },
+        {
+          key: 'userName',
+          type: 'input',
+          className: 'e2e-userName',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+          },
+        },
+        {
+          key: 'password',
+          type: 'input',
+          className: 'e2e-password',
+          templateOptions: {
+            type: 'password',
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+          },
+        },
+        {
+          key: 'syncFolderPath',
+          type: 'input',
+          className: 'e2e-syncFolderPath',
+          templateOptions: {
+            required: true,
+            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+          },
+        },
+      ],
+    },
+
     {
       key: 'syncInterval',
       type: 'duration',
@@ -36,146 +156,43 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         description: T.G.DURATION_DESCRIPTION,
       },
     },
+
+    // COMMON SETTINGS
     {
-      key: 'syncProvider',
-      type: 'select',
-      templateOptions: {
-        label: T.F.SYNC.FORM.L_SYNC_PROVIDER,
-        required: true,
-        options: [
-          { label: SyncProvider.Dropbox, value: SyncProvider.Dropbox },
-          { label: SyncProvider.WebDAV, value: SyncProvider.WebDAV },
-          ...(IS_ELECTRON ||
-          (IS_ANDROID_WEB_VIEW &&
-            (androidInterface as any).grantFilePermission &&
-            androidInterface.isGrantedFilePermission)
-            ? [{ label: SyncProvider.LocalFile, value: SyncProvider.LocalFile }]
-            : []),
-        ],
-        change: (field) => {
-          if (
-            IS_ANDROID_WEB_VIEW &&
-            field.model.syncProvider === SyncProvider.LocalFile
-          ) {
-            androidInterface.grantFilePermissionWrapped().then(() => {
-              field.formControl?.updateValueAndValidity();
-            });
-          }
-        },
-      },
-      validators: {
-        validFileAccessPermission: {
-          expression: (c: any) => {
-            if (IS_ANDROID_WEB_VIEW && c.value === SyncProvider.LocalFile) {
-              return androidInterface.isGrantedFilePermission();
-            }
-            return true;
-          },
-          message: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_PERMISSION_VALIDATION,
-        },
-      },
-      validation: {
-        show: true,
-      },
-    },
-    {
-      // TODO animation maybe
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.Dropbox,
-      key: 'dropboxSync',
-      templateOptions: { label: 'Address' },
+      type: 'collapsible',
+      props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
         {
-          key: 'accessToken',
-          type: 'input',
-          hideExpression: (model: DropboxSyncConfig) => !model.accessToken,
+          key: 'isCompressionEnabled',
+          type: 'checkbox',
           templateOptions: {
-            label: T.F.SYNC.FORM.DROPBOX.L_ACCESS_TOKEN,
+            label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
           },
         },
-      ],
-    },
-    IS_ANDROID_WEB_VIEW
-      ? {
-          hideExpression: (m, v, field) =>
-            !IS_ANDROID_WEB_VIEW ||
-            field?.parent?.model.syncProvider !== SyncProvider.LocalFile ||
-            !androidInterface?.isGrantedFilePermission() ||
-            !androidInterface?.allowedFolderPath,
+        {
+          key: 'isEncryptionEnabled',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.SYNC.FORM.L_ENABLE_ENCRYPTION,
+          },
+        },
+        {
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
           type: 'tpl',
           className: `tpl`,
-          expressionProperties: {
-            template: () =>
-              // NOTE: hard to translate here, that's why we don't
-              `<div>Granted file access permission:<br />${
-                androidInterface.allowedFolderPath && androidInterface.allowedFolderPath()
-              }</div>`,
+          templateOptions: {
+            tag: 'div',
+            text: T.F.SYNC.FORM.L_ENCRYPTION_NOTES,
           },
-        }
-      : {},
-    {
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.LocalFile,
-      key: 'localFileSync',
-      fieldGroup: [
+        },
         {
-          key: 'syncFilePath',
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          key: 'encryptKey',
           type: 'input',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH,
-            description: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FILE_PATH_DESCRIPTION,
-          },
-        },
-      ],
-    },
-    {
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== SyncProvider.WebDAV,
-      key: 'webDav',
-      fieldGroup: [
-        {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            // text: `<p>Please open the following link and copy the auth code provided there</p>`,
-            text: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
-          },
-        },
-        {
-          key: 'baseUrl',
-          type: 'input',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
-            description:
-              '* https://your-next-cloud/nextcloud/remote.php/dav/files/yourUserName',
-          },
-        },
-        {
-          key: 'userName',
-          type: 'input',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
-          },
-        },
-        {
-          key: 'password',
-          type: 'input',
-          templateOptions: {
             type: 'password',
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
-          },
-        },
-        {
-          key: 'syncFilePath',
-          type: 'input',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FILE_PATH,
-            description: '* my-sync-file.json',
+            label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
           },
         },
       ],

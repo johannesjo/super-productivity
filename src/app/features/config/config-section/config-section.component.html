@@ -1,50 +1,45 @@
 <collapsible
   [isExpanded]="isExpanded"
   [isIconBefore]="true"
-  [title]="(section?.title|translate)"
+  [title]="section?.title | translate"
 >
   <!--[icon]="section?.icon"-->
 
-  <help-section *ngIf="section?.help||section?.helpArr">
-    <div
-      *ngIf="section?.help"
-      [innerHtml]="section?.help|translate"
-    ></div>
-    <ng-container *ngIf="section?.helpArr">
-      <ng-container *ngFor="let helpSection of section?.helpArr; trackBy: trackByIndex">
-        <div
-          *ngIf="helpSection.h"
-          class="mat-caption"
-        >
-          {{helpSection.h|translate}}
-        </div>
-        <p
-          *ngIf="helpSection.p"
-          [innerHTML]="helpSection.p|translate"
-        ></p>
-        <p
-          *ngIf="helpSection.p2"
-          [innerHTML]="helpSection.p2|translate"
-        ></p>
-        <p
-          *ngIf="helpSection.p3"
-          [innerHTML]="helpSection.p3|translate"
-        ></p>
-        <p
-          *ngIf="helpSection.p4"
-          [innerHTML]="helpSection.p4|translate"
-        ></p>
-      </ng-container>
-    </ng-container>
-  </help-section>
-  <div class="form-wrapper {{section?.key}}">
-    <config-form
-      (save)="onSave($event)"
-      *ngIf="section?.items && !section?.customSection"
-      [cfg]="cfg"
-      [formCfg]="section?.items"
-      [sectionKey]="section?.key"
-    ></config-form>
+  @if (section?.help || section?.helpArr) {
+    <help-section>
+      @if (section?.help) {
+        <div [innerHtml]="section?.help | translate"></div>
+      }
+      @if (section?.helpArr) {
+        @for (helpSection of section?.helpArr; track trackByIndex($index, helpSection)) {
+          @if (helpSection.h) {
+            <div class="mat-caption">{{ helpSection.h | translate }}</div>
+          }
+          @if (helpSection.p) {
+            <p [innerHTML]="helpSection.p | translate"></p>
+          }
+          @if (helpSection.p2) {
+            <p [innerHTML]="helpSection.p2 | translate"></p>
+          }
+          @if (helpSection.p3) {
+            <p [innerHTML]="helpSection.p3 | translate"></p>
+          }
+          @if (helpSection.p4) {
+            <p [innerHTML]="helpSection.p4 | translate"></p>
+          }
+        }
+      }
+    </help-section>
+  }
+  <div class="form-wrapper {{ section?.key }}">
+    @if (section?.items && !section?.customSection) {
+      <config-form
+        (save)="onSave($event)"
+        [cfg]="cfg"
+        [formCfg]="section?.items"
+        [sectionKey]="section?.key"
+      ></config-form>
+    }
 
     <ng-template
       #customForm

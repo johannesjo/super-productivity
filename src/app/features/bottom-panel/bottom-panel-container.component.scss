@@ -1,0 +1,72 @@
+// NOTE the parent el styles live in _bottom-panel.scss
+
+.bottom-panel-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.bottom-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  cursor: grab;
+  user-select: none;
+  touch-action: none; // prevent native scrolling while dragging
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  // Allow dragging anywhere on header by disabling pointer events on children
+  > * {
+    pointer-events: none;
+  }
+
+  .drag-handle {
+    width: 60px;
+    height: 6px;
+    background-color: var(--bottom-panel-handle);
+    border-radius: 3px;
+    transition: background-color 0.2s ease;
+
+    :host-context(.dragging) & {
+      background-color: var(--bottom-panel-handle-active);
+    }
+  }
+
+  .close-btn {
+    display: none; // Hidden for now
+  }
+}
+
+.bottom-panel-content {
+  flex: 1;
+  // For mobile bottom sheet, let parent handle overflow
+  // For desktop right panel, use overflow-y auto
+  overflow-y: auto;
+  padding: 0 8px 4px;
+
+  // Mobile bottom sheet specific styles
+  :host-context(.bottom-panel-sheet) & {
+    overflow: hidden;
+    padding: 0 4px;
+
+    > * {
+      height: 100%;
+      overflow-y: auto;
+    }
+  }
+
+  .ani-container {
+    &.isDisableAni {
+      &,
+      * {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  }
+}

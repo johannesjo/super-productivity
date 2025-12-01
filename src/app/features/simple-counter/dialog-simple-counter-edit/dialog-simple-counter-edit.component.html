@@ -1,53 +1,116 @@
-<form (submit)="submit()">
-  <h1 mat-dialog-title>{{ T.F.SIMPLE_COUNTER.D_EDIT.TITLE|translate }}</h1>
+<form (submit)="$event.preventDefault(); save()">
+  <h1 mat-dialog-title>{{ localCounter().title }}</h1>
 
   <mat-dialog-content>
-    <div class="form-wrapper">
-      <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.ClickCounter">
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-          matInput
-          name="count"
-          type="number"
-        />
-      </mat-form-field>
-      <mat-form-field *ngIf="data.simpleCounter.type === SimpleCounterType.StopWatch">
-        <input
-          (ngModelChange)="onModelChange($event)"
-          [ngModel]="val"
-          [placeholder]="T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER|translate"
-          inputDuration="optional"
-          matInput
-          name="count"
-          type="text"
-        />
-        <mat-icon matPrefix>timer</mat-icon>
-      </mat-form-field>
+    @let counter = localCounter();
+    @let chart = chartData();
+
+    @if (counter.isTrackStreaks) {
+      <section class="streak-info">
+        <div class="streak-current">
+          <div class="label">
+            {{ T.F.SIMPLE_COUNTER.D_EDIT.CURRENT_STREAK | translate }}
+          </div>
+          <div class="value">
+            <strong
+              >{{ currentStreak() }}
+              {{ T.F.SIMPLE_COUNTER.D_EDIT.DAYS | translate }}</strong
+            >
+          </div>
+        </div>
+
+        <div class="streak-goal">
+          <div class="label">{{ T.F.SIMPLE_COUNTER.D_EDIT.DAILY_GOAL | translate }}</div>
+          <div class="value">
+            <strong>
+              @if (counter.type === SimpleCounterType.StopWatch) {
+                {{ counter.streakMinValue | msToString }}
+              } @else {
+                {{ counter.streakMinValue }}
+              }
+            </strong>
+          </div>
+        </div>
+      </section>
+    }
+
+    @if (chart?.datasets?.length) {
+      <section class="chart-section">
+        <div class="chart-wrapper">
+          <lazy-chart
+            [type]="'line'"
+            [datasets]="chart.datasets"
+            [labels]="chart.labels"
+            [options]="chartOptions"
+            [legend]="false"
+            height="200px"
+            (chartClick)="onChartClick($event)"
+          >
+          </lazy-chart>
+        </div>
+      </section>
+    }
+
+    <div class="edit-section">
+      <div class="date-label">Edit for {{ formatSelectedDate() }}</div>
+
+      @switch (counter.type) {
+        @case (SimpleCounterType.StopWatch) {
+          <mat-form-field>
+            <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+            <input
+              matInput
+              inputDuration="optional"
+              type="text"
+              name="count"
+              [ngModel]="selectedValue()"
+              (ngModelChange)="updateValue($event)"
+            />
+            <mat-icon matPrefix>timer</mat-icon>
+          </mat-form-field>
+        }
+        @default {
+          <mat-form-field>
+            <mat-label>{{ T.F.SIMPLE_COUNTER.D_EDIT.L_COUNTER | translate }}</mat-label>
+            <input
+              matInput
+              type="number"
+              name="count"
+              [ngModel]="selectedValue()"
+              (ngModelChange)="updateValue($event)"
+            />
+          </mat-form-field>
+        }
+      }
+    </div>
+
+    <div class="settings-btn">
+      <button
+        mat-stroked-button
+        type="button"
+        (click)="openSettingsDialog()"
+      >
+        <mat-icon>tune</mat-icon>
+        {{ T.MH.SETTINGS | translate }}
+      </button>
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
-    <div class="wrap-buttons">
-      <button
-        (click)="close()"
-        class="btn btn-primary submit-button"
-        color="primary"
-        mat-button
-        type="button"
-      >
-        {{T.G.CANCEL|translate}}
-      </button>
-      <button
-        class="btn btn-primary submit-button"
-        color="primary"
-        mat-stroked-button
-        type="submit"
-      >
-        <mat-icon>save</mat-icon>
-        {{T.G.SAVE|translate}}
-      </button>
-    </div>
+    <button
+      mat-button
+      type="button"
+      (click)="close()"
+    >
+      {{ T.G.CANCEL | translate }}
+    </button>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="submit"
+    >
+      <mat-icon>save</mat-icon>
+      {{ T.G.SAVE | translate }}
+    </button>
   </mat-dialog-actions>
 </form>

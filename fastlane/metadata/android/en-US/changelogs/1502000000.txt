@@ -1,0 +1,25 @@
+
+### Bug Fixes
+
+* **addTaskBar:** search loading spinner always shown when no issueProviders
+* finish day button not always shown
+* handle error case more gracefully
+* **projectFolders:** tree cleanup on delete missing
+* resizing problems with right panel (a3d6abd), closes #5218
+* **schedule:** repeat projection styling
+* z-index
+### Features
+
+* **addTaskBar:** disable add task from search mode
+* change back task focus behavior
+* **focusMode:** add label of total session duration to focus button
+* **focusMode:** add little rocket for countdown first draft
+* **focusMode:** add little rocket for countdown second draft
+* **focusMode:** add little rocket for countdown third draft
+* **focusMode:** polish little rocket
+* **i18n:** add project and tag folder dialogs and related messages
+* improve sidenav styling for when there is a background
+* **metric:** add focus session to worklog-week
+* **metric:** record and show focus sessions
+* support multilanguage keyboard layouts in shortcut combinations
+* use standard icon buttons for simple counter buttons

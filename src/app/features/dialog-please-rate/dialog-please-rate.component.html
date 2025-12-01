@@ -1,0 +1,28 @@
+<h1 mat-dialog-title>{{ T.F.D_RATE.TITLE | translate }}</h1>
+
+<mat-dialog-content>
+  <div style="max-width: 400px">
+    <p [innerHTML]="T.F.D_RATE.TXT | translate"></p>
+
+    <p>
+      <a
+        mat-button
+        color="primary"
+        target="_blank"
+        href="https://github.com/johannesjo/super-productivity/blob/master/docs/how-to-rate.md"
+        ><mat-icon>open_in_new</mat-icon>
+        <strong>{{ T.F.D_RATE.A_HOW | translate }}</strong></a
+      >
+    </p>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    [mat-dialog-close]="true"
+    mat-stroked-button
+    color="primary"
+  >
+    {{ T.F.D_RATE.BTN_DONT_BOTHER | translate }}
+  </button>
+</mat-dialog-actions>

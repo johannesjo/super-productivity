@@ -1,4 +1,4 @@
-import { Injectable, NgZone } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SnackParams } from './snack.model';
 import { Observable, Subject } from 'rxjs';
@@ -9,25 +9,24 @@ import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
 import { Actions, ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
-import { debounce } from 'helpful-decorators';
+import { debounce } from '../../util/decorators';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SnackService {
-  private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
-  private _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
-    ofType(setActiveWorkContext),
-  );
+  private _store$ = inject(Store);
+  private _translateService = inject(TranslateService);
+  private _actions$ = inject(Actions);
+  private _matSnackBar = inject(MatSnackBar);
 
-  constructor(
-    private _store$: Store<any>,
-    private _translateService: TranslateService,
-    private _actions$: Actions,
-    private _matSnackBar: MatSnackBar,
-    private _ngZone: NgZone,
-  ) {
-    this._onWorkContextChange$.subscribe(() => {
+  private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;
+
+  constructor() {
+    const _onWorkContextChange$: Observable<unknown> = this._actions$.pipe(
+      ofType(setActiveWorkContext),
+    );
+    _onWorkContextChange$.subscribe(() => {
       this.close();
     });
   }
@@ -68,6 +67,7 @@ export class SnackService {
 
     const cfg = {
       ...DEFAULT_SNACK_CFG,
+      duration: type === 'ERROR' ? 8000 : DEFAULT_SNACK_CFG.duration,
       ...config,
       data: {
         ...params,
@@ -80,7 +80,7 @@ export class SnackService {
 
     if (showWhile$ || promise || isSpinner) {
       // TODO check if still needed
-      (cfg as any).panelClass = 'polling-snack';
+      (cfg as { panelClass: string }).panelClass = 'polling-snack';
     }
 
     switch (type) {
@@ -88,10 +88,8 @@ export class SnackService {
       case 'CUSTOM':
       case 'SUCCESS':
       default: {
-        // @see https://stackoverflow.com/questions/50101912/snackbar-position-wrong-when-use-errorhandler-in-angular-5-and-material
-        this._ngZone.run(() => {
-          this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
-        });
+        // Opening snackbar directly without NgZone
+        this._ref = this._matSnackBar.openFromComponent(SnackCustomComponent, cfg);
         break;
       }
     }

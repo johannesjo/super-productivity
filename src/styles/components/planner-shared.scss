@@ -1,0 +1,39 @@
+@use '../../_common';
+@use '../mixins/_media-queries';
+
+// to share between planner-task and planner-calendar-event
+.planner-time-remaining-shared {
+  min-width: 44px;
+  text-align: right;
+  padding-left: 4px;
+  padding-right: 8px;
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1;
+  margin-left: auto;
+  font-size: var(--planner-font-size-mobile);
+  color: var(--text-color-muted);
+
+  @include media-queries.mq(xs) {
+    font-size: var(--planner-font-size);
+  }
+
+  mat-icon {
+    vertical-align: middle;
+    margin-top: -2px;
+    height: 14px !important;
+
+    @include media-queries.mq(xs) {
+      height: 16px !important;
+      font-size: var(--planner-font-size);
+    }
+  }
+}
+
+.planner-drag-place-holder-shared {
+  min-height: var(--planner-item-height);
+  margin-bottom: 4px;
+  border-radius: 6px;
+  // NOTE bg color is set in material overwrite file since otherwise it does not seem to work
+  background: var(--c-light-05) !important;
+}

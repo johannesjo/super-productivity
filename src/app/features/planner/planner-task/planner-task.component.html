@@ -1,0 +1,85 @@
+<ng-content></ng-content>
+
+<div class="drag-handle">
+  <mat-icon
+    class="drag-handle-ico"
+    svgIcon="drag_handle"
+  ></mat-icon>
+  @if (isCurrent) {
+    <mat-icon class="play-icon-indicator">play_arrow </mat-icon>
+  }
+  <div class="type-ico-wrapper">
+    @if (task.repeatCfgId) {
+      <div>
+        @if (!isRepeatTaskCreatedToday) {
+          <div class="repeat-date-badge">{{ task.created | shortDate2 }}</div>
+        }
+        @if (task.repeatCfgId) {
+          <mat-icon
+            [style.transform]="isCurrent ? 'scale(1.4)' : ''"
+            svgIcon="repeat"
+          >
+          </mat-icon>
+        }
+      </div>
+    }
+    @if (task.issueId) {
+      <div>
+        @if (task.issuePoints) {
+          <div class="mini-badge bgc-primary">{{ task.issuePoints }}</div>
+        }
+        <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
+      </div>
+    }
+  </div>
+</div>
+
+<div
+  class="no-drag"
+  (longPressIOS)="openContextMenu($event)"
+  (contextmenu)="openContextMenu($event)"
+  (touchstart)="onTouchStart($event)"
+>
+  <div class="wrap">
+    @if (parentTitle) {
+      <div class="parent-title">{{ parentTitle }}</div>
+    }
+
+    <div class="title">{{ task.title }}</div>
+
+    <tag-list
+      [isShowProjectTagAlways]="true"
+      [tagsToHide]="tagsToHide()"
+      [task]="task"
+    ></tag-list>
+  </div>
+
+  <ng-content></ng-content>
+
+  <div
+    (click)="estimateTimeClick($event)"
+    [class.hasNoTimeSpentOrEstimate]="!task.timeSpent && !task.timeEstimate"
+    [style.pointer-events]="task.subTaskIds?.length && 'none'"
+    class="planner-time-remaining-shared"
+  >
+    @if (task.subTaskIds?.length) {
+      <mat-icon
+        svgIcon="estimate_remaining"
+        inline="true"
+      ></mat-icon>
+    }
+
+    <inline-input
+      (changed)="updateTimeEstimate($event)"
+      [displayValue]="timeEstimate | msToString"
+      [type]="'duration'"
+      [value]="timeEstimate"
+    >
+    </inline-input>
+  </div>
+</div>
+
+<task-context-menu
+  #taskContextMenu
+  [task]="task"
+></task-context-menu>

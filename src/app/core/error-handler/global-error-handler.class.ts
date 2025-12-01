@@ -1,63 +1,63 @@
-import { ErrorHandler, Inject, Injectable, Injector } from '@angular/core';
+import { ErrorHandler, inject, Injectable, Injector } from '@angular/core';
 import { isObject } from '../../util/is-object';
 import { getErrorTxt } from '../../util/get-error-text';
 import { IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from '../electron/electron.service';
 import {
   createErrorAlert,
   isHandledError,
   logAdvancedStacktrace,
 } from './global-error-handler.util';
 import { saveBeforeLastErrorActionLog } from '../../util/action-logger';
-import { AppDataComplete } from '../../imex/sync/sync.model';
-import { PersistenceService } from '../persistence/persistence.service';
+import { error } from 'electron-log/renderer';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { CompleteBackup } from '../../pfapi/api';
+import { Log } from '../log';
+
+let isErrorAlertShown = false;
 
 @Injectable()
 export class GlobalErrorHandler implements ErrorHandler {
-  private _electronLogger: any;
-
-  constructor(
-    private _electronService: ElectronService,
-    @Inject(Injector) private injector: Injector,
-  ) {
-    if (IS_ELECTRON) {
-      this._electronLogger = this._electronService.remote.require('electron-log');
-    }
-  }
+  private injector = inject<Injector>(Injector);
 
   // TODO Cleanup this mess
-  async handleError(err: any): Promise<void> {
-    const errStr = typeof err === 'string' ? err : err.toString();
+  async handleError(err: unknown): Promise<void> {
+    const errStr = typeof err === 'string' ? err : String(err);
     // eslint-disable-next-line
-    const simpleStack = err && err.stack;
-    console.error('GLOBAL_ERROR_HANDLER', err);
+    let simpleStack = '';
+    if (
+      err &&
+      typeof err === 'object' &&
+      'stack' in err &&
+      typeof err.stack === 'string'
+    ) {
+      simpleStack = err.stack;
+    }
+    Log.err('GLOBAL_ERROR_HANDLER', err);
 
     // if not our custom error handler we have a critical error on our hands
-    if (!isHandledError(err)) {
+    if (!isHandledError(err) && !isErrorAlertShown) {
+      // we only show the alert for the very first error, as it probably is the most helpful one
+      // NOTE we need to set isErrorAlertShow before any async action, since errors thrown at the same time might
+      // still show multiple dialogs
+      isErrorAlertShown = true;
       const errorStr = this._getErrorStr(err) || errStr;
       saveBeforeLastErrorActionLog();
-      createErrorAlert(
-        this._electronService,
-        errorStr,
-        simpleStack,
-        err,
-        await this._getUserData(),
-      );
+      createErrorAlert(errorStr, simpleStack, err, await this._getUserData());
     }
 
     if (IS_ELECTRON) {
-      this._electronLogger.error('Frontend Error:', err, simpleStack);
+      error('Frontend Error:', err, simpleStack);
     }
 
     const additionalLog = IS_ELECTRON
-      ? (stack: unknown) => this._electronLogger.error('Frontend Error Stack:', stack)
+      ? (stack: unknown) => error('Frontend Error Stack:', stack)
       : () => null;
 
     logAdvancedStacktrace(err, additionalLog).then();
 
     if (!isHandledError(err)) {
       // NOTE: rethrow the error otherwise it gets swallowed
-      throw new Error(err);
+      throw err;
     }
   }
 
@@ -68,16 +68,16 @@ export class GlobalErrorHandler implements ErrorHandler {
         ? str
         : 'Unable to parse error string. Please see console error';
     } else {
-      return (err as any).toString();
+      return String(err);
     }
   }
 
-  private async _getUserData(): Promise<AppDataComplete | undefined> {
+  private async _getUserData(): Promise<CompleteBackup<any> | undefined> {
     try {
-      return this.injector.get(PersistenceService).loadComplete();
+      return await this.injector.get(PfapiService).pf.loadCompleteBackup(true);
     } catch (e) {
-      console.log('Cannot load data');
-      console.error(e);
+      Log.err('Cannot load user data for error modal');
+      Log.err(e);
       return undefined;
     }
   }

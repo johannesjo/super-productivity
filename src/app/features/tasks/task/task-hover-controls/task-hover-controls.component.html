@@ -1,0 +1,90 @@
+@if (
+  isTimeTrackingEnabled() && !task().isDone && !isCurrent() && !task().subTasks?.length
+) {
+  <button
+    (click)="parent.startTask()"
+    title="{{ T.F.TASK.CMP.TRACK_TIME | translate }} {{
+      kb.togglePlay ? '[' + kb.togglePlay + ']' : ''
+    }}"
+    class="ico-btn start-task-btn"
+    color=""
+    mat-icon-button
+  >
+    <mat-icon
+      class="play-icon"
+      svgIcon="play"
+    ></mat-icon>
+  </button>
+}
+@if (!task().isDone && isCurrent() && !task().subTasks?.length) {
+  <button
+    (click)="parent.pauseTask()"
+    title="{{ T.F.TASK.CMP.TRACK_TIME_STOP | translate }} {{
+      kb.togglePlay ? '[' + kb.togglePlay + ']' : ''
+    }}"
+    class="ico-btn"
+    color="accent"
+    mat-icon-button
+  >
+    <mat-icon>pause</mat-icon>
+  </button>
+}
+@if (isShowAddToToday()) {
+  <button
+    (click)="parent.addToMyDay()"
+    title="{{ T.F.TASK.CMP.ADD_TO_MY_DAY | translate }} {{
+      kb.moveToTodaysTasks ? '[' + kb.moveToTodaysTasks + ']' : ''
+    }}"
+    class="ico-btn"
+    color=""
+    mat-icon-button
+  >
+    <mat-icon>wb_sunny</mat-icon>
+  </button>
+}
+@if (isShowRemoveFromToday()) {
+  <button
+    (click)="parent.unschedule()"
+    [title]="T.F.TASK.CMP.REMOVE_FROM_MY_DAY | translate"
+    class="ico-btn"
+    color=""
+    mat-icon-button
+  >
+    <mat-icon svgIcon="remove_today"></mat-icon>
+  </button>
+}
+@if (!task().isDone) {
+  <button
+    (click)="parent.toggleTaskDone()"
+    title="{{ T.F.TASK.CMP.TOGGLE_DONE | translate }} {{
+      kb.taskToggleDone ? '[' + kb.taskToggleDone + ']' : ''
+    }}"
+    class="ico-btn task-done-btn"
+    color=""
+    mat-icon-button
+  >
+    <mat-icon>check</mat-icon>
+  </button>
+}
+@if (
+  !task().notes && (!task().issueId || task().issueType === ICAL_TYPE) && !isSelected()
+) {
+  <button
+    (click)="parent.toggleShowDetailPanel()"
+    title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }} {{
+      kb.taskToggleDetailPanelOpen ? '[' + kb.taskToggleDetailPanelOpen + ']' : ''
+    }}"
+    class="ico-btn show-additional-info-btn"
+    color=""
+    mat-icon-button
+  >
+    @if (!task().issueWasUpdated) {
+      <mat-icon>vertical_split</mat-icon>
+    }
+    <!--            <mat-icon *ngIf="!task().issueWasUpdated">toc</mat-icon>-->
+    <!--            <mat-icon *ngIf="!task().issueWasUpdated">chevron_right</mat-icon>-->
+    @if (task().issueWasUpdated) {
+      <mat-icon color="accent">update</mat-icon>
+    }
+  </button>
+}

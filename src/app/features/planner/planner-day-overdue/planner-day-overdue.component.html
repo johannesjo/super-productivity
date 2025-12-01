@@ -1,0 +1,30 @@
+<header>
+  <div class="day-title">{{ T.G.OVERDUE | translate }}</div>
+  <div class="day-counts">
+    <span>{{ totalEstimate() | roundDuration | msToString }}</span>
+
+    @if ((overdueTasks() || []).length > 5) {
+      <mat-icon inline="true">task_alt</mat-icon>
+      <span>{{ (overdueTasks() || []).length }}</span>
+    }
+  </div>
+</header>
+
+<div class="normal-tasks">
+  <div
+    class="normal-tasks-items"
+    cdkDropList
+    [cdkDropListSortingDisabled]="true"
+    [cdkDropListEnterPredicate]="enterPredicate"
+    [cdkDropListData]="OVERDUE_LIST_ID"
+  >
+    @for (task of overdueTasks(); track task.id) {
+      <planner-task
+        cdkDrag
+        [cdkDragData]="task"
+        [task]="task"
+        [day]=""
+      ></planner-task>
+    }
+  </div>
+</div>

@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 :host {
   display: block;
@@ -19,13 +19,6 @@
   }
 }
 
-:host-context(.isSmallMainContainer) {
-  ::ng-deep task-list task-list {
-    margin: 1px 0 0 10px;
-  }
-}
-
-
 .done-task-box {
   text-align: center;
   display: flex;
@@ -39,6 +32,9 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 90%;
+
+  color: var(--text-color-muted);
 }
 
 .expand-tasks-btn {
@@ -46,5 +42,19 @@
 
   &:hover {
     opacity: 1;
+  }
+}
+
+.cdk-drag-placeholder,
+.cdk-drag-preview {
+  border-radius: var(--task-border-radius);
+  overflow: hidden;
+
+  ::ng-deep .controls {
+    display: none;
+  }
+  ::ng-deep .box {
+    display: none;
+    box-shadow: none !important;
   }
 }

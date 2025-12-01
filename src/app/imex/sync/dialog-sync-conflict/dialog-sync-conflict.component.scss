@@ -1,0 +1,88 @@
+.isHighlight {
+  font-weight: 600;
+}
+
+h3 {
+  margin-top: 20px;
+  margin-bottom: 10px;
+  font-size: 1.1em;
+  font-weight: 500;
+}
+
+table + table {
+  margin-top: 20px;
+}
+
+td span {
+  font-weight: normal;
+}
+
+td span.isHighlight {
+  font-weight: 800;
+}
+
+td,
+th {
+  padding: 2px 8px;
+  text-align: center;
+
+  &:first-child {
+    text-align: left;
+    padding-left: 0;
+  }
+
+  &:last-child {
+    padding-right: 0;
+  }
+}
+
+:host ::ng-deep .collapsible-title {
+  font-weight: bold;
+}
+
+// Mobile responsiveness
+@media (max-width: 600px) {
+  table {
+    font-size: 0.875rem;
+    width: 100%;
+  }
+
+  td,
+  th {
+    padding: 4px 4px;
+    word-break: break-word;
+    min-width: auto;
+
+    &:first-child {
+      padding-left: 0;
+      width: 30%;
+      text-align: left;
+    }
+
+    &:not(:first-child) {
+      text-align: right;
+    }
+
+    &:last-child {
+      padding-right: 0;
+    }
+  }
+}
+
+// Dialog container mobile layout
+:host ::ng-deep {
+  .mat-mdc-dialog-container {
+    @media (max-width: 600px) {
+      max-width: calc(100vw - 32px);
+      margin: 16px;
+    }
+  }
+
+  .mat-mdc-dialog-content {
+    @media (max-width: 600px) {
+      padding: 0 16px;
+      max-width: 100%;
+      overflow-x: hidden;
+    }
+  }
+}

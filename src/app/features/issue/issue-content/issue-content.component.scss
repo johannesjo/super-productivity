@@ -1,3 +1,107 @@
+@use '../../../../styles/_globals.scss' as *;
+
 :host {
   display: block;
+}
+
+/* Table styles */
+
+.table-wrapper {
+  padding: 8px;
+}
+
+.issue-table {
+  width: 100%;
+  border-collapse: collapse;
+
+  tr:first-of-type {
+    td {
+      font-weight: 500;
+    }
+  }
+
+  td {
+    vertical-align: top;
+
+    &.full-width {
+      width: 100%;
+    }
+  }
+
+  .markdown {
+    max-width: 600px;
+    width: 100%;
+  }
+
+  .description-row td {
+    padding-top: 12px;
+    padding-bottom: 12px;
+  }
+}
+
+.comment {
+  display: flex;
+  padding: 12px 0;
+  border-radius: 4px;
+  border-bottom: 1px dashed var(--extra-border-color);
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  .author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+
+  .name-and-comment-content {
+    flex: 1;
+    min-width: 0;
+
+    .author-name {
+      font-weight: 500;
+      margin-right: 8px;
+    }
+
+    .when {
+      color: var(--palette-text-secondary);
+      font-size: 0.875rem;
+    }
+
+    .markdown {
+      margin-top: 8px;
+
+      ::ng-deep p:last-child {
+        margin-bottom: 0;
+      }
+    }
+  }
+}
+
+.last-comment-headline {
+  margin-top: 24px;
+  margin-bottom: 12px;
+  text-align: center;
+  color: var(--palette-text-secondary);
+}
+
+.load-comments-and-all-data {
+  margin: 16px 0;
+}
+
+.write-a-comment {
+  margin-top: 16px;
+}
+
+mat-chip-listbox {
+  margin-top: 0;
+  margin-bottom: 0;
+  vertical-align: baseline;
+
+  mat-chip-option {
+    margin: 2px 4px 2px 0;
+  }
 }

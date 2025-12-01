@@ -1,0 +1,95 @@
+.create-profile-section {
+  margin-bottom: 32px;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .create-profile-form {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+
+    .profile-name-input {
+      flex: 1;
+    }
+  }
+}
+
+.profiles-list-section {
+  h3 {
+    margin-top: 0;
+    margin-bottom: 16px;
+  }
+
+  .profiles-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+
+    .profile-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px;
+      border: 1px solid rgba(0, 0, 0, 0.12);
+      border-radius: 4px;
+      transition: all 0.2s;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.02);
+      }
+
+      &.active-profile {
+        border-color: var(--c-accent);
+        background: rgba(var(--c-accent-rgb), 0.05);
+      }
+
+      .profile-info-section {
+        flex: 1;
+
+        .profile-name {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          margin-bottom: 4px;
+
+          strong {
+            font-size: 16px;
+          }
+
+          .active-badge {
+            padding: 2px 8px;
+            background: var(--c-accent);
+            color: white;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 500;
+          }
+        }
+
+        .profile-meta {
+          font-size: 12px;
+          opacity: 0.6;
+        }
+      }
+
+      .profile-name-edit {
+        flex: 1;
+        margin-right: 12px;
+      }
+
+      .profile-actions {
+        display: flex;
+        gap: 4px;
+      }
+    }
+  }
+}
+
+.profile-folder-section {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}

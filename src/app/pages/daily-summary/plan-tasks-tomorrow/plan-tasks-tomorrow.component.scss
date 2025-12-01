@@ -1,7 +1,9 @@
-@import '../../../../variables';
+:host ::ng-deep .wrap-add-planned {
+  margin-top: var(--s2);
+}
 
 .add-task-bar-wrapper {
-  margin: $s * 1.5 auto $s * 1.5;
+  margin: calc(var(--s) * 1.5) auto calc(var(--s) * 1.5);
   max-width: 628px;
 }
 
@@ -10,10 +12,6 @@
   .start-task-btn {
     display: none !important;
   }
-}
-
-.wrap-add-planned {
-  margin-top: 2 * $s;
 }
 
 .estimate-total {
@@ -27,13 +25,23 @@
   vertical-align: middle;
 
   .label {
-    margin-right: $s;
+    margin-right: var(--s);
   }
+
   .no-wrap {
-    display: inline-block;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
     justify-content: center;
   }
+}
+
+:host planner-day {
+  max-width: 100%;
+  width: auto;
+  text-align: left;
+}
+
+:host ::ng-deep add-task-inline {
+  display: none !important;
 }

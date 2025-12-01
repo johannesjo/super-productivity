@@ -1,0 +1,111 @@
+
+### Features
+
+* **issueProvider:** add basic edit dialog
+* **issueProvider:** add better url regex
+* **issueProvider:** add caption and shortcut
+* **issueProvider:** add collapsible section for github
+* **issueProvider:** add collapsible sections for more providers
+* **issueProvider:** add dedicated setup tab
+* **issueProvider:** add info about already added items
+* **issueProvider:** add info for jira extension
+* **issueProvider:** add initials to distinguish different issueProviders of the same type
+* **issueProvider:** add link to issue preview items
+* **issueProvider:** add loading spinner
+* **issueProvider:** add migration from project to issueProvider
+* **issueProvider:** add missing
+* **issueProvider:** add missing
+* **issueProvider:** add pin search query functionality
+* **issueProvider:** add search query info
+* **issueProvider:** add store stuff for issue provider feature
+* **issueProvider:** allow for basic config dialog
+* **issueProvider:** allow moving issue tasks to a different project
+* **issueProvider:** also poll issues for changes initially
+* **issueProvider:** also trigger search when issue provider config was updated
+* **issueProvider:** autofocus search bar
+* **issueProvider:** avoid error for jira
+* **issueProvider:** avoid potential issue
+* **issueProvider:** better browser experience
+* **issueProvider:** check to restore or move issue task before adding them
+* **issueProvider:** disable drag and drop for now
+* **issueProvider:** disable web security again
+* **issueProvider:** don't autofocus search bar on mobile
+* **issueProvider:** draft 1
+* **issueProvider:** draft 2
+* **issueProvider:** draft 3
+* **issueProvider:** draft 4
+* **issueProvider:** enable old electron jira approach again
+* **issueProvider:** extract common stuff of issue providers to shared model
+* **issueProvider:** feat add test button
+* **issueProvider:** feat make most basic issue add via drag and drop work
+* **issueProvider:** filter out already added issues
+* **issueProvider:** hide pin when there is no search term and no pinned search
+* **issueProvider:** improve adding to list
+* **issueProvider:** improve error handling
+* **issueProvider:** improve issue item styling
+* **issueProvider:** improve link
+* **issueProvider:** improve log for legacy
+* **issueProvider:** improve log for legacy
+* **issueProvider:** improve migrations
+* **issueProvider:** improve msg
+* **issueProvider:** improve performance and fix gitea initials
+* **issueProvider:** improve styling
+* **issueProvider:** improve ui
+* **issueProvider:** indicate done issues in list
+* **issueProvider:** make adding issues work
+* **issueProvider:** make adding issues work correctly
+* **issueProvider:** make auto import issues work
+* **issueProvider:** make auto poll changes more efficient
+* **issueProvider:** make build work again
+* **issueProvider:** make default project work and fix some quirks
+* **issueProvider:** make disabling issue providers work
+* **issueProvider:** make gitlab stuff work
+* **issueProvider:** make gitlab work again
+* **issueProvider:** make jira cfg work nicely
+* **issueProvider:** make jira nad open project cfgs work much better
+* **issueProvider:** make migration work better
+* **issueProvider:** make open issue button less prominent
+* **issueProvider:** make open project cfg work nicely
+* **issueProvider:** make open project dialogs standalone
+* **issueProvider:** make open project work
+* **issueProvider:** make other issue service stuff work again
+* **issueProvider:** make scroll work correctly
+* **issueProvider:** make scrolling work
+* **issueProvider:** make search work again
+* **issueProvider:** make setup dialog and help section work
+* **issueProvider:** make side panel behavior work as intended
+* **issueProvider:** make some of the jira stuff work
+* **issueProvider:** make very basic jira config work
+* **issueProvider:** migrate open project track time dialog
+* **issueProvider:** migrate various effects
+* **issueProvider:** only show no result when searchTerm
+* **issueProvider:** prepare auto poll to backlog
+* **issueProvider:** prepare jira fallback search
+* **issueProvider:** prepare jql search (although we won't use it)
+* **issueProvider:** proof of concept for dropping search items
+* **issueProvider:** reduce margins from issue table
+* **issueProvider:** remove all initial setup dialogs and remove issueProviders from project model
+* **issueProvider:** remove jira search syntax link
+* **issueProvider:** remove self-signed certificate option as it seems very edge case
+* **issueProvider:** render real providers
+* **issueProvider:** select current issue provider tab based on defaultProjectId
+* **issueProvider:** show default project
+* **issueProvider:** show real issues
+* **issueProvider:** simplify backlog import poll
+* **issueProvider:** simplify github integration 2
+* **issueProvider:** simplify polling
+* **issueProvider:** slightly improve github form
+* **issueProvider:** slightly improve jira form
+* **issueProvider:** slightly improve open project form
+* **issueProvider:** switch from projectId to issueProviderId for issue providers
+* **issueProvider:** unlink orphaned issue task data
+* **issueProvider:** unlink tasks from issueData on provider deletion
+* **issueProvider:** unset loading when search string is empty
+* **issueProvider:** update tour with new issue provider stuff
+* **issueProvider:** upgrade project model version number to force upgrade
+* **issueProvider:** use alternative approach for jira and electron
+* **issueProvider:** use assertTruthy() to catch errors earlier
+* **issueProvider:** use disabled instead of hideExpression for setting
+* **issueProvider:** use form ctrl instead of ngModel
+* update material icons
+* workaround typing issue

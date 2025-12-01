@@ -1,0 +1,252 @@
+:host {
+  --sidenav-width-expanded: var(--side-nav-width, 260px);
+  --mobile-breakpoint: 768px;
+  --sidenav-transition-duration: var(--transition-duration-m, 0.3s);
+  --sidenav-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  --mat-menu-item-spacing: 4px;
+  --sidenav-border-color: var(--separator-color);
+
+  // Ensure the component itself participates in layout and animates width
+  display: block;
+  flex: 0 0 auto;
+  transition: none;
+  will-change: width;
+  position: relative;
+  z-index: var(--z-side-nav);
+}
+
+// Enable host width transition only when toggling compactMode/fullMode
+:host(.animate) {
+  transition: width var(--sidenav-transition-duration) var(--sidenav-transition-timing);
+}
+
+// Disable host transition during resize drags
+:host(.resizing) {
+  transition: none !important;
+}
+
+// Mobile menu open button (only shows when menu is closed)
+.mobile-menu-open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  background: var(--sidenav-bg);
+  border: 1px solid var(--sidenav-border-color);
+  border-radius: 8px;
+  padding: 8px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  color: var(--text-color);
+
+  &:focus,
+  &:hover {
+    background: var(--sidenav-hover-bg);
+  }
+
+  svg {
+    color: var(--sidenav-text);
+  }
+}
+
+// Dark theme milkglass adjustments
+:host-context(.isDarkTheme.hasBgImage) :host {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+}
+
+// Mobile overlay
+.nav-backdrop-mobile {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100vw;
+  height: 100vh;
+  background: var(--overlay-bg);
+  z-index: var(--z-backdrop, 1001);
+  display: block;
+  opacity: 1;
+}
+
+// Main sidenav
+.nav-sidenav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--sidenav-width-expanded);
+  background: var(--sidenav-bg);
+  border-right: 1px solid var(--sidenav-border-color);
+  // Default: don't animate width
+  transition: none;
+  z-index: 1002;
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
+
+  &.animate {
+    transition: width var(--sidenav-transition-duration) var(--sidenav-transition-timing);
+  }
+
+  &.resizing {
+    transition: none !important;
+  }
+
+  // When resizing, also suppress label/text transitions inside entries
+  &.resizing .nav-label,
+  &.resizing .text {
+    transition: none !important;
+  }
+
+  // Milkglass effect when background image is present
+  // This will be applied when a CSS class is added to indicate background image presence
+  :host-context(.hasBgImage) {
+    background: rgba(255, 255, 255, 0.5);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); // Safari support
+  }
+
+  // CompactMode state (desktop)
+  &.compactMode {
+    scrollbar-width: none;
+    scrollbar-gutter: stable both-edges;
+
+    .mode-toggle {
+      right: auto;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  // Mobile specific
+  &.mobile {
+    width: var(--sidenav-width-expanded);
+    background: var(--sidenav-bg-mobile);
+    box-shadow: 4px 0 16px rgba(0, 0, 0, 0.3);
+    // Remove CSS transitions - let Angular animations handle it
+    transition: none !important;
+  }
+
+  // Position right
+  &.position-right {
+    left: auto;
+    right: 0;
+    border-right: none;
+    border-left: 1px solid var(--sidenav-border-color);
+
+    .mode-toggle {
+      left: 16px;
+      right: auto;
+    }
+  }
+
+  // Note: Theme colors are handled by CSS variables above
+}
+
+// Sidebar toggle button (desktop)
+.mode-toggle {
+  --top: 8px;
+  display: none;
+  position: absolute;
+  top: var(--top);
+  right: 8px;
+  background: transparent;
+  border: 1px solid var(--sidenav-border-color);
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  transition: var(--transition-standard);
+  color: var(--sidenav-text-secondary);
+
+  :host-context(.isMac.isElectron) & {
+    top: calc(var(--top) + var(--mac-title-bar-padding, 0px));
+  }
+
+  &.visible {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &:focus,
+  &:hover {
+    background: var(--sidenav-hover-bg);
+    color: var(--sidenav-text);
+  }
+}
+
+// Navigation list
+.nav-list {
+  --pt: 48px;
+  list-style: none;
+  //padding: 60px var(--s) var(--s2);
+  padding: 0;
+  padding-top: var(--pt);
+  margin: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+
+  @media (max-width: 600px) {
+    padding-top: 0;
+  }
+
+  :host-context(.isMac.isElectron) & {
+    padding-top: calc(var(--pt) + var(--mac-title-bar-padding, 0px));
+  }
+}
+
+.nav-item {
+  margin-bottom: 2px;
+
+  &.has-children {
+    margin-bottom: 4px;
+  }
+}
+
+// Separator styling
+.nav-separator {
+  height: 1px;
+  background: var(--sidenav-border-color);
+  margin: var(--s2) var(--s2);
+  border: none;
+  opacity: 1;
+  flex-shrink: 0;
+}
+
+// Resize handle (now positioned relative to host component)
+.resize-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  cursor: col-resize;
+  z-index: 1003; // Above the nav-sidenav
+  transition: background-color 0.2s ease;
+
+  &.position-left {
+    right: -2px;
+  }
+
+  &.position-right {
+    left: -2px;
+  }
+
+  &:focus,
+  &:hover {
+    background-color: var(--sidenav-active-text);
+  }
+
+  &:active {
+    background-color: var(--sidenav-active-text);
+  }
+}

@@ -1,1 +1,1 @@
-export const isObject = (obj: any): boolean => obj === Object(obj);
+export const isObject = (obj: unknown): obj is object => obj === Object(obj);

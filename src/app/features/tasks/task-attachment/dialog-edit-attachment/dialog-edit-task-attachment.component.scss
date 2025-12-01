@@ -1,5 +1,6 @@
-h1, mat-dialog-actions {
-  :host-context([dir=rtl]) & {
+h1,
+mat-dialog-actions {
+  :host-context([dir='rtl']) & {
     direction: rtl;
   }
 }
@@ -14,7 +15,7 @@ h1, mat-dialog-actions {
   display: flex;
   flex-direction: column;
 
-  @media(min-width: 600px) {
+  @media (min-width: 600px) {
     min-width: 500px;
   }
 }

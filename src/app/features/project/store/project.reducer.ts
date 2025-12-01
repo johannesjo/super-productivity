@@ -1,61 +1,51 @@
 import { createEntityAdapter, EntityAdapter, Update } from '@ngrx/entity';
 import { Project, ProjectState } from '../project.model';
 import { createReducer, on } from '@ngrx/store';
-import { FIRST_PROJECT } from '../project.const';
 import {
   WorkContextAdvancedCfg,
   WorkContextType,
 } from '../../work-context/work-context.model';
 import {
-  addTask,
-  convertToMainTask,
-  deleteTask,
-  moveToArchive,
-  moveToOtherProject,
-  restoreTask,
-} from '../../tasks/store/task.actions';
-import {
   moveTaskDownInTodayList,
   moveTaskInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
 import {
   moveItemInList,
   moveTaskForWorkContextLikeState,
 } from '../../work-context/store/work-context-meta.helper';
-import { arrayMoveLeftUntil, arrayMoveRightUntil } from '../../../util/array-move';
+import {
+  arrayMoveLeftUntil,
+  arrayMoveRightUntil,
+  arrayMoveToEnd,
+  arrayMoveToStart,
+} from '../../../util/array-move';
 import { filterOutId } from '../../../util/filter-out-id';
-import { unique } from '../../../util/unique';
 
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateProjectState } from '../migrate-projects-state.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { Task } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
   addProject,
   addProjects,
-  addToProjectBreakTime,
   archiveProject,
-  deleteProject,
-  deleteProjects,
   loadProjects,
-  moveAllProjectBacklogTasksToTodayList,
+  moveAllProjectBacklogTasksToRegularList,
   moveProjectTaskDownInBacklogList,
   moveProjectTaskInBacklogList,
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
-  moveProjectTaskToTodayList,
-  moveProjectTaskToTodayListAuto,
+  moveProjectTaskToBottomInBacklogList,
+  moveProjectTaskToRegularList,
+  moveProjectTaskToRegularListAuto,
+  moveProjectTaskToTopInBacklogList,
   moveProjectTaskUpInBacklogList,
   toggleHideFromMenu,
   unarchiveProject,
   updateProject,
   updateProjectAdvancedCfg,
-  updateProjectIssueProviderCfg,
   updateProjectOrder,
-  updateProjectWorkEnd,
-  updateProjectWorkStart,
   upsertProject,
 } from './project.actions';
 import {
@@ -64,7 +54,8 @@ import {
   moveNoteToOtherProject,
   updateNoteOrder,
 } from '../../note/store/note.actions';
-import { MODEL_VERSION } from '../../../core/model-version';
+import { INBOX_PROJECT } from '../project.const';
+import { Log } from '../../../core/log';
 
 export const PROJECT_FEATURE_NAME = 'projects';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.PROJECT;
@@ -73,13 +64,27 @@ export const projectAdapter: EntityAdapter<Project> = createEntityAdapter<Projec
 
 // DEFAULT
 // -------
-export const initialProjectState: ProjectState = projectAdapter.getInitialState({
-  ids: [FIRST_PROJECT.id],
-  entities: {
-    [FIRST_PROJECT.id]: FIRST_PROJECT,
-  },
-  [MODEL_VERSION_KEY]: MODEL_VERSION.PROJECT,
-});
+const _addInboxProjectIfNecessary = (state: ProjectState): ProjectState => {
+  if (state.ids && !(state.ids as string[]).includes(INBOX_PROJECT.id)) {
+    state = {
+      ...state,
+      ids: [INBOX_PROJECT.id, ...state.ids] as string[],
+      entities: {
+        ...state.entities,
+        [INBOX_PROJECT.id]: INBOX_PROJECT,
+      },
+    };
+  }
+
+  return state;
+};
+
+export const initialProjectState: ProjectState = _addInboxProjectIfNecessary(
+  projectAdapter.getInitialState({
+    ids: [],
+    entities: {},
+  }),
+);
 
 export const projectReducer = createReducer<ProjectState>(
   initialProjectState,
@@ -87,9 +92,9 @@ export const projectReducer = createReducer<ProjectState>(
   // META ACTIONS
   // ------------
   on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.project
-      ? migrateProjectState({ ...appDataComplete.project })
-      : oldState,
+    _addInboxProjectIfNecessary(
+      appDataComplete.project ? appDataComplete.project : oldState,
+    ),
   ),
 
   on(
@@ -145,8 +150,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(updateProject, (state, { project }) => projectAdapter.updateOne(project, state)),
 
-  on(deleteProject, (state, { id }) => projectAdapter.removeOne(id, state)),
-  on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
+  // on(deleteProjects, (state, { ids }) => projectAdapter.removeMany(ids, state)),
   on(loadProjects, (state, { projects }) => projectAdapter.setAll(projects, state)),
 
   on(toggleHideFromMenu, (state, { id }) =>
@@ -154,7 +158,7 @@ export const projectReducer = createReducer<ProjectState>(
       {
         id,
         changes: {
-          isHiddenFromMenu: !state.entities[id]?.isHiddenFromMenu,
+          isHiddenFromMenu: !(state.entities[id] as Project).isHiddenFromMenu,
         },
       },
       state,
@@ -185,60 +189,6 @@ export const projectReducer = createReducer<ProjectState>(
     ),
   ),
 
-  on(updateProjectWorkStart, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workStart: {
-            ...oldP.workStart,
-            [date]: newVal,
-          },
-        },
-      },
-      state,
-    );
-  }),
-  on(updateProjectWorkEnd, (state, { id, date, newVal }) => {
-    const oldP = state.entities[id] as Project;
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          workEnd: {
-            ...oldP.workEnd,
-            [date]: newVal,
-          },
-        },
-      },
-      state,
-    );
-  }),
-
-  on(addToProjectBreakTime, (state, { id, date, valToAdd }) => {
-    const oldP = state.entities[id] as Project;
-    const oldBreakTime = oldP.breakTime[date] || 0;
-    const oldBreakNr = oldP.breakNr[date] || 0;
-
-    return projectAdapter.updateOne(
-      {
-        id,
-        changes: {
-          breakNr: {
-            ...oldP.breakNr,
-            [date]: oldBreakNr + 1,
-          },
-          breakTime: {
-            ...oldP.breakTime,
-            [date]: oldBreakTime + valToAdd,
-          },
-        },
-      },
-      state,
-    );
-  }),
-
   on(updateProjectAdvancedCfg, (state, { projectId, sectionKey, data }) => {
     const currentProject = state.entities[projectId] as Project;
     const advancedCfg: WorkContextAdvancedCfg = Object.assign(
@@ -262,47 +212,39 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(
-    updateProjectIssueProviderCfg,
-    (state, { projectId, providerCfg, issueProviderKey, isOverwrite }) => {
-      const currentProject = state.entities[projectId] as Project;
-      return projectAdapter.updateOne(
-        {
-          id: projectId,
-          changes: {
-            issueIntegrationCfgs: {
-              ...currentProject.issueIntegrationCfgs,
-              [issueProviderKey]: {
-                ...(isOverwrite
-                  ? {}
-                  : currentProject.issueIntegrationCfgs[issueProviderKey]),
-                ...providerCfg,
-              },
-            },
-          },
-        },
-        state,
-      );
-    },
-  ),
   on(updateProjectOrder, (state, { ids }) => {
-    const currentIds = state.ids as string[];
-    let newIds: string[] = ids;
-    if (ids.length !== currentIds.length) {
-      const allP = currentIds.map((id) => state.entities[id]) as Project[];
+    const existingIds = state.ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+    let newIds: string[] = ids.filter((id) => id !== INBOX_PROJECT.id) as string[];
+
+    if (newIds.length !== existingIds.length) {
+      const allP = existingIds.map((id) => state.entities[id]) as Project[];
       const archivedIds = allP.filter((p) => p.isArchived).map((p) => p.id);
       const unarchivedIds = allP.filter((p) => !p.isArchived).map((p) => p.id);
+      const hiddenIds = allP.filter((p) => p.isHiddenFromMenu).map((p) => p.id);
+      const visibleUnarchivedIds = allP
+        .filter((p) => !p.isArchived && !p.isHiddenFromMenu)
+        .map((p) => p.id);
+
       if (
-        ids.length === unarchivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === visibleUnarchivedIds.length &&
+        newIds.length > 0 &&
+        visibleUnarchivedIds.includes(ids[0])
+      ) {
+        // Reordering visible unarchived projects - add back archived and hidden
+        newIds = [...ids, ...archivedIds, ...hiddenIds];
+      } else if (
+        newIds.length === unarchivedIds.length &&
+        newIds.length > 0 &&
         unarchivedIds.includes(ids[0])
       ) {
+        // Reordering all unarchived projects (including hidden) - add back archived
         newIds = [...ids, ...archivedIds];
       } else if (
-        ids.length === archivedIds.length &&
-        ids.length > 0 &&
+        newIds.length === archivedIds.length &&
+        newIds.length > 0 &&
         archivedIds.includes(ids[0])
       ) {
+        // Reordering archived projects - add back unarchived
         newIds = [...unarchivedIds, ...ids];
       } else {
         throw new Error('Invalid param given to UpdateProjectOrder');
@@ -313,7 +255,10 @@ export const projectReducer = createReducer<ProjectState>(
       throw new Error('Project ids are undefined');
     }
 
-    return { ...state, ids: newIds };
+    return {
+      ...state,
+      ids: state.entities[INBOX_PROJECT.id] ? [INBOX_PROJECT.id, ...newIds] : newIds,
+    };
   }),
 
   // MOVE TASK ACTIONS
@@ -321,7 +266,7 @@ export const projectReducer = createReducer<ProjectState>(
   on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
     const project = state.entities[workContextId] as Project;
     if (!project.isEnableBacklog) {
-      console.warn('Project backlog is disabled');
+      Log.err('Project backlog is disabled');
       return state;
     }
     const todaysTaskIdsBefore = project.taskIds;
@@ -342,7 +287,7 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(moveProjectTaskToTodayList, (state, { taskId, newOrderedIds, workContextId }) => {
+  on(moveProjectTaskToRegularList, (state, { taskId, newOrderedIds, workContextId }) => {
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
 
@@ -403,6 +348,40 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
+  on(moveTaskToTopInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? projectAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToStart(
+                (state.entities[workContextId] as Project).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
+  on(moveTaskToBottomInTodayList, (state, { taskId, workContextType, workContextId }) => {
+    return workContextType === WORK_CONTEXT_TYPE
+      ? projectAdapter.updateOne(
+          {
+            id: workContextId,
+            changes: {
+              taskIds: arrayMoveToEnd(
+                (state.entities[workContextId] as Project).taskIds,
+                taskId,
+              ),
+            },
+          },
+          state,
+        )
+      : state;
+  }),
+
   on(
     moveProjectTaskUpInBacklogList,
     (state, { taskId, workContextId, doneBacklogTaskIds }) => {
@@ -441,10 +420,43 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
+  on(
+    moveProjectTaskToTopInBacklogList,
+    (state, { taskId, workContextId, doneBacklogTaskIds }) => {
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            backlogTaskIds: arrayMoveToStart(
+              (state.entities[workContextId] as Project).backlogTaskIds,
+              taskId,
+            ),
+          },
+        },
+        state,
+      );
+    },
+  ),
+
+  on(moveProjectTaskToBottomInBacklogList, (state, { taskId, workContextId }) => {
+    return projectAdapter.updateOne(
+      {
+        id: workContextId,
+        changes: {
+          backlogTaskIds: arrayMoveToEnd(
+            (state.entities[workContextId] as Project).backlogTaskIds,
+            taskId,
+          ),
+        },
+      },
+      state,
+    );
+  }),
+
   on(moveProjectTaskToBacklogListAuto, (state, { taskId, projectId }) => {
     const project = state.entities[projectId] as Project;
     if (!project.isEnableBacklog) {
-      console.warn('Project backlog is disabled');
+      Log.err('Project backlog is disabled');
       return state;
     }
     const todaysTaskIdsBefore = project.taskIds;
@@ -463,10 +475,11 @@ export const projectReducer = createReducer<ProjectState>(
         );
   }),
 
-  on(moveProjectTaskToTodayListAuto, (state, { taskId, projectId, isMoveToTop }) => {
+  on(moveProjectTaskToRegularListAuto, (state, { taskId, projectId, isMoveToTop }) => {
     const todaysTaskIdsBefore = (state.entities[projectId] as Project).taskIds;
     const backlogIdsBefore = (state.entities[projectId] as Project).backlogTaskIds;
-    return todaysTaskIdsBefore.includes(taskId)
+    // we check if task was in backlog before to avoid moving up sub tasks
+    return todaysTaskIdsBefore.includes(taskId) || !backlogIdsBefore.includes(taskId)
       ? state
       : projectAdapter.updateOne(
           {
@@ -530,134 +543,6 @@ export const projectReducer = createReducer<ProjectState>(
 
   // Task Actions
   // ------------
-  on(addTask, (state, { task, isAddToBottom, isAddToBacklog }) => {
-    const affectedProject = task.projectId && state.entities[task.projectId];
-    if (!affectedProject) return state; // if there is no projectId, no changes are needed
-
-    const prop: 'backlogTaskIds' | 'taskIds' =
-      isAddToBacklog && affectedProject.isEnableBacklog ? 'backlogTaskIds' : 'taskIds';
-
-    const changes: { [x: string]: any[] } = {};
-    if (isAddToBottom) {
-      changes[prop] = [...affectedProject[prop], task.id];
-    } else {
-      // TODO #1382 get the currentTaskId from a different part of the state tree or via payload or _taskService
-      // const currentTaskId = payload.currentTaskId || this._taskService.currentTaskId
-      // const isAfterRunningTask = prop==='taskIds' && currentTaskId
-      // console.log('isAfterRunningTask?',isAfterRunningTask,'currentTaskId',currentTaskId);
-      // if (isAfterRunningTask) add the new task in the list after currentTaskId
-      // else { // add to the top
-      changes[prop] = [task.id, ...affectedProject[prop]];
-      //}
-    }
-    return projectAdapter.updateOne(
-      {
-        id: task.projectId as string,
-        changes,
-      },
-      state,
-    );
-  }),
-
-  on(convertToMainTask, (state, { task }) => {
-    const affectedEntity = task.projectId && state.entities[task.projectId];
-    return affectedEntity
-      ? projectAdapter.updateOne(
-          {
-            id: task.projectId as string,
-            changes: {
-              taskIds: [task.id, ...affectedEntity.taskIds],
-            },
-          },
-          state,
-        )
-      : state;
-  }),
-
-  on(deleteTask, (state, { task }) => {
-    const project = task.projectId && (state.entities[task.projectId] as Project);
-    return project
-      ? projectAdapter.updateOne(
-          {
-            id: task.projectId as string,
-            changes: {
-              taskIds: project.taskIds.filter((ptId) => ptId !== task.id),
-              backlogTaskIds: project.backlogTaskIds.filter((ptId) => ptId !== task.id),
-            },
-          },
-          state,
-        )
-      : state;
-  }),
-
-  on(moveToArchive, (state, { tasks }) => {
-    const taskIdsToMoveToArchive = tasks.map((t: Task) => t.id);
-    const projectIds = unique<string>(
-      tasks
-        .map((t: Task) => t.projectId)
-        .filter((pid: string | null) => !!pid) as string[],
-    );
-    const updates: Update<Project>[] = projectIds.map((pid: string) => ({
-      id: pid,
-      changes: {
-        taskIds: (state.entities[pid] as Project).taskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-        backlogTaskIds: (state.entities[pid] as Project).backlogTaskIds.filter(
-          (taskId) => !taskIdsToMoveToArchive.includes(taskId),
-        ),
-      },
-    }));
-    return projectAdapter.updateMany(updates, state);
-  }),
-  on(restoreTask, (state, { task }) => {
-    if (!task.projectId) {
-      return state;
-    }
-
-    return projectAdapter.updateOne(
-      {
-        id: task.projectId,
-        changes: {
-          taskIds: [...(state.entities[task.projectId] as Project).taskIds, task.id],
-        },
-      },
-      state,
-    );
-  }),
-  on(moveToOtherProject, (state, { task, targetProjectId }) => {
-    const srcProjectId = task.projectId;
-    const updates: Update<Project>[] = [];
-
-    if (srcProjectId === targetProjectId) {
-      devError('Moving task from same project to same project.');
-      return state;
-    }
-
-    if (srcProjectId) {
-      updates.push({
-        id: srcProjectId,
-        changes: {
-          taskIds: (state.entities[srcProjectId] as Project).taskIds.filter(
-            (id) => id !== task.id,
-          ),
-          backlogTaskIds: (state.entities[srcProjectId] as Project).backlogTaskIds.filter(
-            (id) => id !== task.id,
-          ),
-        },
-      });
-    }
-    if (targetProjectId) {
-      updates.push({
-        id: targetProjectId,
-        changes: {
-          taskIds: [...(state.entities[targetProjectId] as Project).taskIds, task.id],
-        },
-      });
-    }
-
-    return projectAdapter.updateMany(updates, state);
-  }),
 
   on(moveNoteToOtherProject, (state, { note, targetProjectId }) => {
     const srcProjectId = note.projectId;
@@ -689,7 +574,7 @@ export const projectReducer = createReducer<ProjectState>(
 
     return projectAdapter.updateMany(updates, state);
   }),
-  on(moveAllProjectBacklogTasksToTodayList, (state, { projectId }) => {
+  on(moveAllProjectBacklogTasksToRegularList, (state, { projectId }) => {
     const project = state.entities[projectId] as Project;
     return projectAdapter.updateOne(
       {

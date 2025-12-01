@@ -1,0 +1,881 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>API Test Plugin Dashboard</title>
+    <style>
+      body {
+        font-family: monospace;
+        margin: 0;
+        padding: 20px;
+        /* Use injected CSS variables for theming */
+        background: var(--bg, transparent);
+        color: var(--text-color, #ccc);
+      }
+
+      h1 {
+        font-size: 18px;
+        margin: 0 0 20px 0;
+      }
+
+      h2 {
+        font-size: 14px;
+        margin: 0 0 10px 0;
+      }
+
+      h3 {
+        font-size: 12px;
+        margin: 0 0 8px 0;
+      }
+
+      .test-section {
+        margin-bottom: 20px;
+        border-left: 2px solid var(--divider-color, #666);
+        padding-left: 10px;
+      }
+
+      .button-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      button {
+        padding: 6px 12px;
+        border: 1px solid var(--divider-color, #666);
+        background: var(--card-bg, transparent);
+        color: var(--text-color, #ccc);
+        font-size: 12px;
+        font-family: monospace;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background: var(--select-hover-bg, rgba(255, 255, 255, 0.1));
+        border-color: var(--c-primary, #999);
+      }
+
+      .run-all {
+        display: block;
+        width: 100%;
+        margin-bottom: 20px;
+        border-color: var(--color-success, #4caf50);
+        color: var(--color-success, #4caf50);
+      }
+
+      .run-all:hover {
+        background: var(--color-overlay-light-10, rgba(76, 175, 80, 0.1));
+      }
+
+      .console {
+        background: var(--card-bg, rgba(0, 0, 0, 0.3));
+        color: var(--text-color, #ccc);
+        padding: 10px;
+        font-size: 11px;
+        max-height: 200px;
+        overflow-y: auto;
+        margin-top: 20px;
+        border: 1px solid var(--divider-color, #333);
+      }
+
+      .console-entry {
+        margin: 2px 0;
+      }
+
+      .console-entry.success {
+        color: var(--color-success, #4caf50);
+      }
+
+      .console-entry.error {
+        color: var(--color-danger, #f44336);
+      }
+
+      .console-entry.info {
+        color: var(--text-color-muted, #999);
+      }
+
+      .api-info {
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 1px solid var(--divider-color, #333);
+      }
+
+      .api-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 8px;
+      }
+
+      .api-item {
+        padding: 4px 8px;
+        border: 1px solid var(--divider-color, #444);
+        font-size: 11px;
+        color: var(--text-color-muted, #999);
+      }
+    </style>
+  </head>
+  <body>
+    <h1>API Test Plugin</h1>
+
+    <div class="api-info">
+      <h3>Available API Methods</h3>
+      <div class="api-list">
+        <div class="api-item">getTasks()</div>
+        <div class="api-item">getArchivedTasks()</div>
+        <div class="api-item">getCurrentContextTasks()</div>
+        <div class="api-item">addTask(data)</div>
+        <div class="api-item">updateTask(id, data)</div>
+        <div class="api-item">getAllProjects()</div>
+        <div class="api-item">addProject(data)</div>
+        <div class="api-item">updateProject(id, data)</div>
+        <div class="api-item">getAllTags()</div>
+        <div class="api-item">addTag(data)</div>
+        <div class="api-item">updateTag(id, data)</div>
+        <div class="api-item">showSnack(config)</div>
+        <div class="api-item">notify(config)</div>
+        <div class="api-item">openDialog(config)</div>
+        <div class="api-item">persistDataSynced(data)</div>
+        <div class="api-item">loadSyncedData()</div>
+        <div class="api-item">registerHook(hook, handler)</div>
+        <div class="api-item">registerHeaderButton(config)</div>
+        <div class="api-item">registerMenuEntry(config)</div>
+        <div class="api-item">registerShortcut(config)</div>
+        <div class="api-item">setCounter(key, value)</div>
+        <div class="api-item">getCounter(key)</div>
+        <div class="api-item">incrementCounter(key, amount)</div>
+        <div class="api-item">decrementCounter(key, amount)</div>
+        <div class="api-item">deleteCounter(key)</div>
+        <div class="api-item">getAllCounters()</div>
+      </div>
+    </div>
+
+    <button
+      class="run-all"
+      onclick="runAllTests()"
+    >
+      Run All API Tests
+    </button>
+
+    <div class="test-section">
+      <h2>Data Persistence Tests</h2>
+      <div class="button-grid">
+        <button onclick="testPersistData()">Test Save Data</button>
+        <button onclick="testLoadData()">Test Load Data</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Task Operations</h2>
+      <div class="button-grid">
+        <button onclick="testGetTasks()">Get All Tasks</button>
+        <button onclick="testGetArchivedTasks()">Get Archived Tasks</button>
+        <button onclick="testGetContextTasks()">Get Context Tasks</button>
+        <button onclick="testCreateTask()">Create Test Task</button>
+        <button onclick="testUpdateTask()">Update Last Task</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Project & Tag Operations</h2>
+      <div class="button-grid">
+        <button onclick="testGetProjects()">Get All Projects</button>
+        <button onclick="testCreateProject()">Create Test Project</button>
+        <button onclick="testGetTags()">Get All Tags</button>
+        <button onclick="testCreateTag()">Create Test Tag</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>UI Operations</h2>
+      <div class="button-grid">
+        <button onclick="testSnackSuccess()">Success Snack</button>
+        <button onclick="testSnackError()">Error Snack</button>
+        <button onclick="testSnackCustom()">Info Snack</button>
+        <button onclick="testNotification()">Show Notification</button>
+        <button onclick="testDialog()">Open Dialog</button>
+      </div>
+    </div>
+
+    <div class="test-section">
+      <h2>Advanced Dialog Examples</h2>
+      <div class="button-grid">
+        <button onclick="showTaskPlannerDialog()">Task Planner</button>
+        <button onclick="showAnalyticsDialog()">Analytics Dashboard</button>
+      </div>
+    </div>
+
+    <div
+      class="console"
+      id="console"
+    >
+      <div class="console-entry info">Console output will appear here...</div>
+    </div>
+
+    <script>
+      let lastTaskId = null;
+      let lastProjectId = null;
+      let lastTagId = null;
+
+      // Console logging
+      function log(message, type = 'info') {
+        const console = document.getElementById('console');
+        const entry = document.createElement('div');
+        entry.className = `console-entry ${type}`;
+        entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+        console.appendChild(entry);
+        console.scrollTop = console.scrollHeight;
+      }
+
+      // Clear console
+      function clearConsole() {
+        document.getElementById('console').innerHTML =
+          '<div class="console-entry info">Console cleared. Starting new test run...</div>';
+      }
+
+      // Test functions
+      async function testPersistData() {
+        try {
+          const testData = {
+            timestamp: new Date().toISOString(),
+            randomValue: Math.floor(Math.random() * 1000),
+            message: 'Test data from iframe',
+          };
+          await PluginAPI.persistDataSynced(JSON.stringify(testData));
+          log('Data saved successfully: ' + JSON.stringify(testData), 'success');
+        } catch (error) {
+          log('Failed to save data: ' + error.message, 'error');
+        }
+      }
+
+      async function testLoadData() {
+        try {
+          const data = await PluginAPI.loadSyncedData();
+          if (data) {
+            const parsed = JSON.parse(data);
+            log('Data loaded successfully: ' + JSON.stringify(parsed), 'success');
+          } else {
+            log('No saved data found', 'info');
+          }
+        } catch (error) {
+          log('Failed to load data: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetTasks() {
+        try {
+          const tasks = await PluginAPI.getTasks();
+          log(`Found ${tasks.length} tasks`, 'success');
+          if (tasks.length > 0) {
+            lastTaskId = tasks[0].id;
+            log(`Sample task: "${tasks[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetArchivedTasks() {
+        try {
+          const tasks = await PluginAPI.getArchivedTasks();
+          log(`Found ${tasks.length} archived tasks`, 'success');
+        } catch (error) {
+          log('Failed to get archived tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetContextTasks() {
+        try {
+          const tasks = await PluginAPI.getCurrentContextTasks();
+          log(`Found ${tasks.length} tasks in current context`, 'success');
+        } catch (error) {
+          log('Failed to get context tasks: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateTask() {
+        try {
+          const taskData = {
+            title: 'Test Task from iFrame - ' + new Date().toLocaleTimeString(),
+            notes: 'Created from the API Test Plugin dashboard',
+            timeEstimate: 1800000, // 30 minutes
+          };
+          lastTaskId = await PluginAPI.addTask(taskData);
+          log(`Task created with ID: ${lastTaskId}`, 'success');
+        } catch (error) {
+          log('Failed to create task: ' + error.message, 'error');
+        }
+      }
+
+      async function testUpdateTask() {
+        if (!lastTaskId) {
+          log('No task ID available. Create a task first!', 'error');
+          return;
+        }
+        try {
+          await PluginAPI.updateTask(lastTaskId, {
+            notes: 'Updated from dashboard at ' + new Date().toLocaleTimeString(),
+          });
+          log(`Task ${lastTaskId} updated successfully`, 'success');
+        } catch (error) {
+          log('Failed to update task: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetProjects() {
+        try {
+          const projects = await PluginAPI.getAllProjects();
+          log(`Found ${projects.length} projects`, 'success');
+          if (projects.length > 0) {
+            lastProjectId = projects[0].id;
+            log(`Sample project: "${projects[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get projects: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateProject() {
+        try {
+          const project = await PluginAPI.addProject({
+            title: 'Test Project - ' + new Date().toLocaleDateString(),
+            themeColor: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          });
+          lastProjectId = project.id;
+          log(`Project created: "${project.title}"`, 'success');
+        } catch (error) {
+          log('Failed to create project: ' + error.message, 'error');
+        }
+      }
+
+      // Counter test functions
+      async function testSetCounter() {
+        try {
+          const value = Math.floor(Math.random() * 100);
+          await PluginAPI.setCounter('testCounter', value);
+          log(`Counter 'testCounter' set to ${value}`, 'success');
+        } catch (error) {
+          log('Failed to set counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetCounter() {
+        try {
+          const value = await PluginAPI.getCounter('testCounter');
+          if (value !== null) {
+            log(`Counter 'testCounter' value: ${value}`, 'success');
+          } else {
+            log("Counter 'testCounter' not found", 'info');
+          }
+        } catch (error) {
+          log('Failed to get counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testIncrementCounter() {
+        try {
+          const newValue = await PluginAPI.incrementCounter('testCounter', 5);
+          log(
+            `Counter 'testCounter' incremented by 5, new value: ${newValue}`,
+            'success',
+          );
+        } catch (error) {
+          log('Failed to increment counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testDecrementCounter() {
+        try {
+          const newValue = await PluginAPI.decrementCounter('testCounter', 3);
+          log(
+            `Counter 'testCounter' decremented by 3, new value: ${newValue}`,
+            'success',
+          );
+        } catch (error) {
+          log('Failed to decrement counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testDeleteCounter() {
+        try {
+          await PluginAPI.deleteCounter('testCounter');
+          log("Counter 'testCounter' deleted", 'success');
+        } catch (error) {
+          log('Failed to delete counter: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetAllCounters() {
+        try {
+          // Create some test counters first
+          await PluginAPI.setCounter('counter1', 10);
+          await PluginAPI.setCounter('counter2', 20);
+          await PluginAPI.setCounter('counter3', 30);
+
+          const counters = await PluginAPI.getAllCounters();
+          log('All counters: ' + JSON.stringify(counters), 'success');
+        } catch (error) {
+          log('Failed to get all counters: ' + error.message, 'error');
+        }
+      }
+
+      async function testGetTags() {
+        try {
+          const tags = await PluginAPI.getAllTags();
+          log(`Found ${tags.length} tags`, 'success');
+          if (tags.length > 0) {
+            lastTagId = tags[0].id;
+            log(`Sample tag: "${tags[0].title}"`, 'info');
+          }
+        } catch (error) {
+          log('Failed to get tags: ' + error.message, 'error');
+        }
+      }
+
+      async function testCreateTag() {
+        try {
+          const tag = await PluginAPI.addTag({
+            title: 'Test Tag - ' + Date.now(),
+            color: '#' + Math.floor(Math.random() * 16777215).toString(16),
+          });
+          lastTagId = tag.id;
+          log(`Tag created: "${tag.title}"`, 'success');
+        } catch (error) {
+          log('Failed to create tag: ' + error.message, 'error');
+        }
+      }
+
+      function testSnackSuccess() {
+        PluginAPI.showSnack({
+          msg: 'This is a success message',
+          type: 'SUCCESS',
+          ico: 'check_circle',
+        });
+        log('Success snack shown', 'success');
+      }
+
+      function testSnackError() {
+        PluginAPI.showSnack({
+          msg: 'This is an error message',
+          type: 'ERROR',
+          ico: 'error',
+        });
+        log('Error snack shown', 'success');
+      }
+
+      function testSnackCustom() {
+        PluginAPI.showSnack({
+          msg: 'This is an info message',
+          type: 'INFO',
+          ico: 'info',
+        });
+        log('Info snack shown', 'success');
+      }
+
+      function testNotification() {
+        PluginAPI.notify({
+          title: 'API Test Notification',
+          body: 'This notification was triggered from the plugin dashboard!',
+        });
+        log('Notification sent', 'success');
+      }
+
+      function testDialog() {
+        PluginAPI.openDialog({
+          title: 'Test Dialog from iFrame',
+          htmlContent: `
+                    <div style="padding: 20px; color: #ccc; font-family: monospace;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 14px;">Test Dialog</h3>
+                        <p style="margin: 5px 0; font-size: 12px;">Dialog opened from plugin dashboard</p>
+                        <p style="margin: 5px 0; font-size: 12px; color: #999;">${new Date().toLocaleString()}</p>
+                    </div>
+                `,
+          buttons: [
+            {
+              label: 'Awesome',
+              icon: 'thumb_up',
+              color: 'primary',
+              onClick: () => {
+                log('Dialog button clicked', 'success');
+              },
+            },
+          ],
+        });
+        log('Dialog opened', 'success');
+      }
+
+      function testThemeInfo() {
+        try {
+          const themeInfo = PluginAPI.getThemeInfo();
+          log('Theme Info:', 'info');
+          log('  Dark Theme: ' + themeInfo.isDarkTheme, 'info');
+          log('  Primary Color: ' + themeInfo.primaryColor, 'info');
+          log('  Accent Color: ' + themeInfo.accentColor, 'info');
+          log('  Warn Color: ' + themeInfo.warnColor, 'info');
+          log('  Background: ' + themeInfo.backgroundColor, 'info');
+          log('  Text Color: ' + themeInfo.textColor, 'info');
+
+          // Also show in a dialog
+          PluginAPI.openDialog({
+            title: 'Current Theme Information',
+            htmlContent: `
+              <div style="padding: 20px; font-family: monospace;">
+                <h3 style="margin: 0 0 15px 0;">Theme Variables</h3>
+                <table style="width: 100%; border-collapse: collapse;">
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
+                    <td style="padding: 8px;">Dark Theme</td>
+                    <td style="padding: 8px; text-align: right;">${themeInfo.isDarkTheme ? 'Yes' : 'No'}</td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
+                    <td style="padding: 8px;">Primary Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.primaryColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
+                      ${themeInfo.primaryColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
+                    <td style="padding: 8px;">Accent Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.accentColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
+                      ${themeInfo.accentColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
+                    <td style="padding: 8px;">Warn Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.warnColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
+                      ${themeInfo.warnColor}
+                    </td>
+                  </tr>
+                  <tr style="border-bottom: 1px solid var(--divider-color, #333);">
+                    <td style="padding: 8px;">Background</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.backgroundColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
+                      ${themeInfo.backgroundColor}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px;">Text Color</td>
+                    <td style="padding: 8px; text-align: right;">
+                      <span style="display: inline-block; width: 20px; height: 20px; background: ${themeInfo.textColor}; vertical-align: middle; margin-right: 8px; border: 1px solid var(--divider-color, #333);"></span>
+                      ${themeInfo.textColor}
+                    </td>
+                  </tr>
+                </table>
+                <p style="margin-top: 15px; font-size: 12px; color: var(--text-color-muted, #999);">
+                  Plugins automatically receive all CSS variables from the host application, allowing seamless theme integration.
+                </p>
+              </div>
+            `,
+            buttons: [
+              {
+                label: 'Close',
+                color: 'primary',
+              },
+            ],
+          });
+        } catch (error) {
+          log('Failed to get theme info: ' + error.message, 'error');
+        }
+      }
+
+      async function runAllTests() {
+        clearConsole();
+        log('Starting comprehensive API test suite...', 'info');
+
+        // Run all tests with delays
+        await testPersistData();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testLoadData();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetArchivedTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetContextTasks();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateTask();
+        await new Promise((r) => setTimeout(r, 500));
+
+        if (lastTaskId) {
+          await testUpdateTask();
+          await new Promise((r) => setTimeout(r, 500));
+        }
+
+        await testGetProjects();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateProject();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetTags();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testCreateTag();
+        await new Promise((r) => setTimeout(r, 500));
+
+        // Test counter API
+        await testSetCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testIncrementCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testDecrementCounter();
+        await new Promise((r) => setTimeout(r, 500));
+
+        await testGetAllCounters();
+        await new Promise((r) => setTimeout(r, 500));
+
+        testSnackSuccess();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testSnackError();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testSnackCustom();
+        await new Promise((r) => setTimeout(r, 1500));
+
+        testNotification();
+        await new Promise((r) => setTimeout(r, 1000));
+
+        testDialog();
+
+        log('All tests completed! Check console for detailed results.', 'success');
+      }
+
+      // Advanced Dialog Examples
+      function showTaskPlannerDialog() {
+        PluginAPI.openDialog({
+          title: 'AI Task Planner (Demo)',
+          htmlContent: `
+            <div style="padding: 20px; max-width: 700px;">
+              <div style="display: flex; gap: 20px;">
+                <div style="flex: 1;">
+                  <h4 style="margin-top: 0;">Describe Your Goal</h4>
+                  <textarea style="width: 100%; min-height: 100px; padding: 10px; border: 1px solid #ddd; border-radius: 4px; font-family: inherit;" placeholder="E.g., 'Launch a new mobile app by Q3 2024'">Build a comprehensive plugin system for Super Productivity that allows users to extend functionality</textarea>
+
+                  <h4 style="margin-top: 20px;">Constraints & Preferences</h4>
+                  <div style="margin-bottom: 10px;">
+                    <label>
+                      <input type="checkbox" checked> Break down into weekly milestones
+                    </label>
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <label>
+                      <input type="checkbox" checked> Include time estimates
+                    </label>
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <label>
+                      <input type="checkbox"> Add dependencies between tasks
+                    </label>
+                  </div>
+                  <div style="margin-bottom: 10px;">
+                    <label>
+                      <input type="checkbox" checked> Prioritize by impact
+                    </label>
+                  </div>
+                </div>
+
+                <div style="flex: 1; background: #f9f9f9; padding: 15px; border-radius: 8px;">
+                  <h4 style="margin-top: 0;">Generated Task Breakdown</h4>
+                  <div style="max-height: 300px; overflow-y: auto;">
+                    <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #4caf50;">
+                      <div style="font-weight: bold;">📋 Design Plugin Architecture</div>
+                      <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 8h | Priority: High</div>
+                      <div style="font-size: 0.85em; margin-top: 5px;">Define API surface, security model, and manifest structure</div>
+                    </div>
+                    <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #ff9800;">
+                      <div style="font-weight: bold;">🔧 Implement Core Plugin Loader</div>
+                      <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 16h | Priority: High</div>
+                      <div style="font-size: 0.85em; margin-top: 5px;">Build sandboxed execution environment and API bridge</div>
+                    </div>
+                    <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #2196f3;">
+                      <div style="font-weight: bold;">🎨 Create Plugin UI Components</div>
+                      <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 12h | Priority: Medium</div>
+                      <div style="font-size: 0.85em; margin-top: 5px;">Design settings UI, permission dialogs, and plugin store</div>
+                    </div>
+                    <div style="margin-bottom: 15px; padding: 10px; background: white; border-radius: 4px; border-left: 4px solid #9c27b0;">
+                      <div style="font-weight: bold;">📚 Write Documentation</div>
+                      <div style="font-size: 0.9em; color: #666; margin-top: 5px;">Est: 6h | Priority: Medium</div>
+                      <div style="font-size: 0.85em; margin-top: 5px;">Create plugin development guide and API reference</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div style="margin-top: 20px; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 4px;">
+                <strong>🤖 AI Analysis:</strong> This project would take approximately 42 hours (5-6 days) with the current breakdown. Consider adding a testing phase and security audit.
+              </div>
+            </div>
+          `,
+          buttons: [
+            {
+              label: 'Regenerate',
+              icon: 'refresh',
+              onClick: async () => {
+                await PluginAPI.showSnack({
+                  msg: 'Regenerating task breakdown...',
+                  type: 'INFO',
+                  ico: 'refresh',
+                });
+              },
+            },
+            {
+              label: 'Create All Tasks',
+              icon: 'add_task',
+              color: 'primary',
+              onClick: async () => {
+                await PluginAPI.showSnack({
+                  msg: 'Would create 4 tasks in your project',
+                  type: 'SUCCESS',
+                });
+              },
+            },
+          ],
+        });
+        log('Task planner dialog opened', 'success');
+      }
+
+      function showAnalyticsDialog() {
+        PluginAPI.openDialog({
+          title: 'Productivity Analytics',
+          htmlContent: `
+            <div style="padding: 20px; max-width: 800px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 20px;">
+                <div>
+                  <h3 style="margin: 0;">Weekly Performance</h3>
+                  <p style="margin: 5px 0; color: #666;">Dec 11 - Dec 17, 2023</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                  <button style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Week</button>
+                  <button style="padding: 8px 16px; border: 1px solid #4caf50; background: #4caf50; color: white; border-radius: 4px; cursor: pointer;">Month</button>
+                  <button style="padding: 8px 16px; border: 1px solid #ddd; background: white; border-radius: 4px; cursor: pointer;">Year</button>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; margin-bottom: 30px;">
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 8px;">
+                  <div style="font-size: 2em; font-weight: bold;">147</div>
+                  <div style="opacity: 0.9;">Tasks Completed</div>
+                  <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↑ 23% from last week</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 20px; border-radius: 8px;">
+                  <div style="font-size: 2em; font-weight: bold;">42.5h</div>
+                  <div style="opacity: 0.9;">Time Tracked</div>
+                  <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↑ 5% from last week</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 20px; border-radius: 8px;">
+                  <div style="font-size: 2em; font-weight: bold;">89%</div>
+                  <div style="opacity: 0.9;">Focus Score</div>
+                  <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">↓ 2% from last week</div>
+                </div>
+                <div style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white; padding: 20px; border-radius: 8px;">
+                  <div style="font-size: 2em; font-weight: bold;">12</div>
+                  <div style="opacity: 0.9;">Streaks Active</div>
+                  <div style="font-size: 0.9em; margin-top: 5px; opacity: 0.8;">Keep it up! 🔥</div>
+                </div>
+              </div>
+
+              <div style="background: #f9f9f9; padding: 20px; border-radius: 8px;">
+                <h4 style="margin-top: 0;">Daily Activity Heatmap</h4>
+                <div style="display: grid; grid-template-columns: auto repeat(7, 1fr); gap: 10px; font-size: 0.9em;">
+                  <div></div>
+                  <div style="text-align: center;">Mon</div>
+                  <div style="text-align: center;">Tue</div>
+                  <div style="text-align: center;">Wed</div>
+                  <div style="text-align: center;">Thu</div>
+                  <div style="text-align: center;">Fri</div>
+                  <div style="text-align: center;">Sat</div>
+                  <div style="text-align: center;">Sun</div>
+
+                  <div>Morning</div>
+                  <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+
+                  <div>Afternoon</div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #2e7d32; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+
+                  <div>Evening</div>
+                  <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #a5d6a7; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #c8e6c9; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #e8f5e9; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #81c784; height: 40px; border-radius: 4px;"></div>
+                  <div style="background: #4caf50; height: 40px; border-radius: 4px;"></div>
+                </div>
+                <div style="margin-top: 15px; text-align: center; color: #666;">
+                  <span style="display: inline-block; width: 12px; height: 12px; background: #e8f5e9; margin-right: 5px;"></span> Low
+                  <span style="display: inline-block; width: 12px; height: 12px; background: #81c784; margin: 0 5px 0 20px;"></span> Medium
+                  <span style="display: inline-block; width: 12px; height: 12px; background: #4caf50; margin: 0 5px 0 20px;"></span> High
+                  <span style="display: inline-block; width: 12px; height: 12px; background: #2e7d32; margin: 0 5px 0 20px;"></span> Very High
+                </div>
+              </div>
+            </div>
+          `,
+          buttons: [
+            {
+              label: 'Export Report',
+              icon: 'download',
+              onClick: async () => {
+                await PluginAPI.showSnack({
+                  msg: 'Generating productivity report...',
+                  type: 'INFO',
+                  ico: 'download',
+                });
+              },
+            },
+            {
+              label: 'Share',
+              icon: 'share',
+              onClick: async () => {
+                await PluginAPI.showSnack({
+                  msg: 'Sharing options would appear here',
+                  type: 'INFO',
+                  ico: 'share',
+                });
+              },
+            },
+            {
+              label: 'Close',
+              icon: 'close',
+              color: 'primary',
+            },
+          ],
+        });
+        log('Analytics dialog opened', 'success');
+      }
+
+      // Initial message
+      log(
+        'API Test Plugin Dashboard loaded. Click buttons to test individual APIs or run all tests.',
+        'info',
+      );
+    </script>
+  </body>
+</html>

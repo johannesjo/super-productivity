@@ -3,7 +3,7 @@ on:
   release:
     types: [published]
   workflow_dispatch:
-    inputs: null
+    inputs: {}
 
 jobs:
   aur-release:
@@ -12,18 +12,19 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
 
-      - run: PACKAGE_VERSION=$(cat ./package.json | grep version | head -1 | sed 's/[^0-9.]*//g') && echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
+      - run: PACKAGE_VERSION=$(cat ./package.json | grep version | head -1 | awk -F '"' '{print $4}') && echo "package_version=$PACKAGE_VERSION" >> $GITHUB_ENV
       - run: sed "s/PACKAGE_VERSION/${package_version}/g" build/linux/PKGBUILD_template > build/linux/PKGBUILD
 
       - name: Publish AUR package
-        uses: KSXGitHub/github-actions-deploy-aur@v2.7.0
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.1
         with:
           pkgname: superproductivity-bin
           pkgbuild: build/linux/PKGBUILD
+          updpkgsums: true
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}
           ssh_private_key: ${{ secrets.AUR_SSH_PRIVATE_KEY }}
           commit_message: Update AUR package
-          ssh_keyscan_types: rsa,dsa,ecdsa,ed25519
+          ssh_keyscan_types: rsa,ecdsa,ed25519

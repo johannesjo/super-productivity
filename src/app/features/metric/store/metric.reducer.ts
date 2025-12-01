@@ -1,17 +1,20 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { addMetric, deleteMetric, updateMetric, upsertMetric } from './metric.actions';
+import {
+  addMetric,
+  deleteMetric,
+  updateMetric,
+  upsertMetric,
+  logFocusSession,
+} from './metric.actions';
 import { Metric, MetricState } from '../metric.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateMetricState } from '../migrate-metric-states.util';
 import { createReducer, on } from '@ngrx/store';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
+import { DEFAULT_METRIC_FOR_DAY } from '../metric.const';
 
 export const METRIC_FEATURE_NAME = 'metric';
 export const metricAdapter: EntityAdapter<Metric> = createEntityAdapter<Metric>();
 
 export const initialMetricState: MetricState = metricAdapter.getInitialState({
-  [MODEL_VERSION_KEY]: MODEL_VERSION.METRIC,
   // additional entity state properties
 });
 
@@ -19,7 +22,7 @@ export const metricReducer = createReducer<MetricState>(
   initialMetricState,
 
   on(loadAllData, (state, { appDataComplete }) =>
-    appDataComplete.metric?.ids ? appDataComplete.metric : migrateMetricState(state),
+    appDataComplete.metric?.ids ? appDataComplete.metric : state,
   ),
 
   on(addMetric, (state, { metric }) => metricAdapter.addOne(metric, state)),
@@ -29,4 +32,31 @@ export const metricReducer = createReducer<MetricState>(
   on(upsertMetric, (state, { metric }) => metricAdapter.upsertOne(metric, state)),
 
   on(deleteMetric, (state, { id }) => metricAdapter.removeOne(id, state)),
+
+  on(logFocusSession, (state, { day, duration }) => {
+    if (duration <= 0) {
+      return state;
+    }
+
+    const existing = state.entities[day];
+    if (existing) {
+      const focusSessions = existing.focusSessions ?? [];
+      return metricAdapter.updateOne(
+        {
+          id: day,
+          changes: {
+            focusSessions: [...focusSessions, duration],
+          },
+        },
+        state,
+      );
+    }
+
+    const newMetric: Metric = {
+      id: day,
+      ...DEFAULT_METRIC_FOR_DAY,
+      focusSessions: [duration],
+    };
+    return metricAdapter.upsertOne(newMetric, state);
+  }),
 );

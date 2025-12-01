@@ -1,0 +1,56 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  display: block;
+  padding: 0 12px;
+}
+.items {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: auto auto;
+
+  > button {
+    min-height: 50px;
+  }
+}
+
+h4 {
+  text-align: center;
+  margin-top: 16px;
+}
+
+// keep in sync with src/app/features/issue-panel/issue-panel.component.scss#
+// TODO or extract as component
+.tab-header-item {
+  min-width: 52px;
+  min-height: 48px;
+  padding-left: 8px;
+  padding-right: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  @include grabCursor();
+
+  &.disabled {
+    opacity: 0.5;
+  }
+}
+
+.initials {
+  margin-top: 1px;
+  font-size: 12px;
+
+  color: var(--text-color-most-intense);
+}
+
+.provider-items {
+  display: flex;
+  //flex-direction: column;
+  justify-content: space-around;
+  align-items: center;
+  overflow: auto;
+  gap: 12px;
+  margin: 4px;
+  margin-bottom: 16px;
+}

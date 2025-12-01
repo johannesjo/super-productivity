@@ -1,0 +1,276 @@
+/**
+ * Nord Polar Night Theme for Super Productivity
+ * Dark theme based on Nord Polar Night color scheme
+ * Enhanced with better contrast and smooth transitions
+ */
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* Nord Polar Night theme variables */
+body.isDarkTheme {
+  /* ===============================
+   * NORD COLOR PALETTE
+   * ===============================*/
+
+  /* Polar Night */
+  --nord0: #2e3440;
+  --nord1: #3b4252;
+  --nord2: #434c5e;
+  --nord3: #4c566a;
+
+  /* Snow Storm */
+  --nord4: #d8dee9;
+  --nord5: #e5e9f0;
+  --nord6: #eceff4;
+
+  /* Frost */
+  --nord7: #8fbcbb;
+  --nord8: #88c0d0;
+  --nord9: #81a1c1;
+  --nord10: #5e81ac;
+
+  /* Aurora */
+  --nord11: #bf616a;
+  --nord12: #d08770;
+  --nord13: #ebcb8b;
+  --nord14: #a3be8c;
+  --nord15: #b48ead;
+
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: var(--nord1);
+  --bg-darker: var(--nord0);
+  --bg-slightly-lighter: #3e4757;
+  --bg-lighter: var(--nord2);
+  --bg-lightest: var(--nord3);
+  --bg-super-light: var(--nord10);
+
+  /* Component backgrounds */
+  --card-bg: var(--nord2);
+  --sidenav-bg: var(--nord0);
+  --selected-task-bg-color: var(--nord3);
+  --banner-bg: var(--nord3);
+
+  /* Task backgrounds with better hierarchy */
+  --task-c-bg: #3e4757;
+  --task-c-selected-bg: var(--nord3);
+  --sub-task-c-bg: #3e4757;
+  --sub-task-c-bg-done: #373e4d;
+  --task-c-bg-done: #373e4d;
+  --task-c-current-bg: var(--nord3);
+  --task-c-drag-drop-bg: var(--nord3);
+  --sub-task-c-bg-in-selected: #424954;
+
+  /* Note backgrounds */
+  --standard-note-bg: var(--nord2);
+  --standard-note-bg-hovered: var(--nord3);
+
+  /* Planner specific */
+  --planner-task-bg: var(--nord0);
+  --planner-days-bg: #262b35;
+
+  /* ===============================
+   * TEXT COLORS
+   * ===============================*/
+
+  --text-color: var(--nord6);
+  --text-color-less-intense: rgba(236, 239, 244, 0.87);
+  --text-color-muted: rgba(236, 239, 244, 0.54);
+  --text-color-more-intense: var(--nord4);
+  --text-color-most-intense: #ffffff;
+
+  /* Note text */
+  --standard-note-fg: var(--nord6);
+
+  /* Task detail */
+  --task-detail-value-color: rgba(236, 239, 244, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: var(--nord0);
+  --separator-color: rgba(46, 52, 64, 0.6);
+  --divider-color: var(--nord0);
+
+  /* Chip borders */
+  --chip-outline-color: rgba(236, 239, 244, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* Nord frost blue accent */
+  --palette-accent-500: var(--nord10);
+  --c-accent: var(--nord10);
+  --palette-accent-100: #c7d9ec;
+  --palette-accent-200: #afc7e1;
+  --palette-accent-300: #97b5d6;
+  --palette-accent-400: #7fa3cb;
+  --palette-accent-600: #547399;
+  --palette-accent-700: #4a6587;
+  --palette-accent-800: #405775;
+  --palette-accent-900: #364963;
+
+  /* Secondary colors */
+  --c-success: var(--nord14);
+  --c-warning: var(--nord13);
+  --c-error: var(--nord11);
+  --c-info: var(--nord8);
+
+  /* Alternative accent */
+  --nord-purple: var(--nord15);
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - Nord styled */
+  --scrollbar-thumb: var(--nord3);
+  --scrollbar-thumb-hover: var(--nord10);
+  --scrollbar-track: var(--nord1);
+
+  /* Close button */
+  --close-btn-bg: var(--nord3);
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(94, 129, 172, 0.12);
+  --options-border-color: rgba(94, 129, 172, 0.2);
+
+  /* Attachments */
+  --attachment-bg: var(--nord2);
+  --attachment-border: transparent;
+  --attachment-control-bg: rgba(0, 0, 0, 0.3);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.7);
+
+  /* Grid */
+  --grid-color: rgba(236, 239, 244, 0.08);
+
+  /* Progress */
+  --progress-bg: rgba(236, 239, 244, 0.15);
+
+  /* Improvement banner */
+  --improvement-text: var(--nord6);
+  --improvement-border: rgba(94, 129, 172, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* Special backgrounds */
+  --color-background-color-options: #373b45;
+  --color-background-text-field: rgba(199, 217, 244, 0.1);
+  --color-background-dark: #24272d;
+  --color-background-notes: #3e4757;
+  --color-background-inline-markdown: #373e4d;
+  --color-background-button-shadow: #6182bc;
+
+  /* ===============================
+   * SHADOWS - SUBTLE
+   * ===============================*/
+
+  /* Subtle shadows for Nord theme */
+  --shadow-key-umbra-opacity: 0.15;
+  --shadow-key-penumbra-opacity: 0.1;
+  --shadow-ambient-shadow-opacity: 0.08;
+
+  /* Task shadows */
+  --task-current-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  --task-selected-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: 1px solid rgba(94, 129, 172, 0.3);
+  --hover-controls-border-opacity: 0.3;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+}
+
+/* Apply background and text colors */
+body,
+body.isDarkTheme {
+  background-color: var(--bg);
+  color: var(--text-color) !important;
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Page wrapper */
+body .page-wrapper,
+body.isDarkTheme .page-wrapper {
+  color: var(--text-color) !important;
+}
+
+/* Links with Nord accent */
+a,
+body a[href],
+body.isDarkTheme a[href] {
+  color: var(--c-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover,
+body a[href]:hover,
+body.isDarkTheme a[href]:hover {
+  opacity: 0.8;
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides for Nord theme */
+body.isDarkTheme {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--nord10);
+  --mat-fab-small-container-color: var(--c-accent);
+  --mat-sys-primary-container: var(--c-accent);
+}
+
+/* Special Nord styling */
+.frost-accent {
+  color: var(--nord10);
+}
+.aurora-red {
+  color: var(--nord11);
+}
+.aurora-orange {
+  color: var(--nord12);
+}
+.aurora-yellow {
+  color: var(--nord13);
+}
+.aurora-green {
+  color: var(--nord14);
+}
+.aurora-purple {
+  color: var(--nord15);
+}

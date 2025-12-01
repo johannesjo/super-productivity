@@ -1,23 +1,37 @@
-<!-- TODO make this work -->
-<!--<mat-icon matSuffix="">{{formControl.value}}</mat-icon>-->
+<mat-icon [style.visibility]="isEmoji() ? 'hidden' : 'visible'">{{
+  formControl.value
+}}</mat-icon>
 
 <input
-  [formControl]="formControl"
+  [ngModel]="formControl.value"
+  (ngModelChange)="onInputValueChange($event)"
+  (paste)="onPaste($event)"
   [formlyAttributes]="field"
   [matAutocomplete]="auto"
   matInput
   type="text"
 />
+<!--<span matPrefix>+1 &nbsp;</span>-->
 
 <mat-autocomplete
   #auto="matAutocomplete"
+  (optionSelected)="onIconSelect($event.option.value)"
   [autoActiveFirstOption]="false"
 >
-  <mat-option
-    *ngFor="let icon of (filteredIcons$|async); trackBy: trackByIndex"
-    [value]="icon"
-  >
-    <mat-icon>{{icon}}</mat-icon>
-    <span>{{icon}}</span>
-  </mat-option>
+  @for (icon of filteredIcons(); track trackByIndex($index, icon)) {
+    <mat-option [value]="icon">
+      <mat-icon>{{ icon }}</mat-icon>
+      <span>{{ icon }}</span>
+    </mat-option>
+  }
 </mat-autocomplete>
+
+@if (IS_ELECTRON && !isLinux) {
+  <mat-icon
+    matSuffix
+    type="button"
+    [matTooltip]="'Open system emoji picker if any'"
+    (click)="openEmojiPicker()"
+    >add_reaction</mat-icon
+  >
+}

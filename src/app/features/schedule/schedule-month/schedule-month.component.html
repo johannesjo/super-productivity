@@ -1,0 +1,42 @@
+<header class="month-header">
+  <div class="month-title">{{ daysToShow()[14] | localeDate: 'MMMM yyyy' }}</div>
+</header>
+
+<div class="month-grid-container">
+  @for (header of weekdayHeaders(); track $index) {
+    <div class="weekday-header">{{ header }}</div>
+  }
+
+  @for (day of daysToShow(); track $index) {
+    @let weekIndex = getWeekIndex($index);
+    @let dayIndex = getDayIndex($index);
+    @if (weekIndex < weeksToShow()) {
+      <div
+        class="month-day-cell {{ getDayClass(day) }}"
+        [attr.data-day]="day"
+        style="grid-row: {{ weekIndex + 2 }}; grid-column: {{ dayIndex + 1 }}"
+      >
+        <div class="month-day-header">
+          <span class="month-day-number">{{ day | localeDate: 'd' }}</span>
+          @if (hasEventsForDay(day)) {
+            <span class="event-dot"></span>
+          }
+        </div>
+        <div class="month-day-events">
+          @for (ev of getEventsForDay(day); track ev.id) {
+            <div
+              class="month-event"
+              [class]="ev.type"
+            >
+              <schedule-event
+                [event]="ev"
+                [isMonthView]="true"
+                class="month-schedule-event"
+              ></schedule-event>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>

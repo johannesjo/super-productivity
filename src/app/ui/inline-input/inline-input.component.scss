@@ -1,4 +1,4 @@
-@import '../../../_variables.scss';
+@use '../../../styles/_globals.scss' as *;
 
 :host {
   display: inline-block;
@@ -38,15 +38,16 @@ input {
   top: 50%;
   transform: translate(-50%, -50%) scaleX(0);
   opacity: 0;
-  //transition: $transition-fast;
-  background: #fff;
-  color: $light-theme-text-color;
-  padding: $s * 0.5 $s * 0.5;
+  //transition: var(--transition-fast);
+  background: var(--card-bg);
+  color: var(--text-color);
+  padding: var(--s-half) var(--s-half);
   text-align: center;
   font-size: 14px;
   min-height: 100%;
 
   @include inlineEditElevation();
+  z-index: 999999;
 
   &.duration-input {
     width: 100%;

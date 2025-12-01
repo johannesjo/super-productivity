@@ -1,0 +1,99 @@
+@use '../../../../../styles/_globals.scss' as *;
+@use '../task.component.mixins' as *;
+
+:host {
+  transform-origin: right center;
+  position: absolute;
+  right: 100%;
+  top: 0;
+  bottom: 0;
+  z-index: var(--z-hover-controls);
+  display: none;
+  border-radius: var(--card-border-radius);
+
+  &:before {
+    content: '';
+    border-left: var(--hover-controls-border);
+    width: 1px;
+    height: 90%;
+    position: absolute;
+    left: 0;
+    top: 5%;
+    opacity: var(--hover-controls-border-opacity);
+
+    :host-context([dir='rtl']) & {
+      right: 0;
+    }
+  }
+
+  :host-context([dir='rtl']) & {
+    position: absolute;
+    transform-origin: left center;
+    left: 100%;
+    right: unset;
+  }
+
+  @include mq(xs, max) {
+    :host-context(.isTouchOnly) & {
+      display: none !important;
+    }
+  }
+
+  button {
+    height: 100% !important;
+    border-radius: var(--card-border-radius) !important;
+    margin-top: auto;
+    margin-bottom: auto;
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple {
+        border-radius: var(--card-border-radius);
+      }
+    }
+  }
+
+  :host-context(.first-line:hover) & {
+    display: flex;
+
+    background: var(--task-c-bg);
+
+    :host-context(.isLightTheme .isSelected) & {
+      background: var(--task-c-selected-bg);
+    }
+
+    :host-context(.isDarkTheme .isSelected) & {
+      background: var(--task-c-selected-bg);
+    }
+
+    :host-context(.isDarkTheme .isCurrent) & {
+      background: var(--task-c-current-bg);
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks) ::ng-deep & {
+      background: var(--sub-task-c-bg);
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks .isSelected) ::ng-deep & {
+      background: var(--task-c-selected-bg);
+    }
+
+    :host-context(.isDarkTheme .sub-tasks.sub-tasks .isCurrent) ::ng-deep & {
+      background: var(--task-c-current-bg);
+    }
+  }
+
+  // extra hitarea
+  &:after {
+    position: absolute;
+    top: calc(-1 * var(--s) * 1.5);
+    right: 0;
+    left: calc(-1 * var(--s) * 1.5);
+    bottom: calc(-1 * var(--s) * 1.5);
+    content: '';
+
+    :host-context([dir='rtl']) & {
+      right: calc(-1 * var(--s) * 1.5);
+      left: 0;
+    }
+  }
+}

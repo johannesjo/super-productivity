@@ -1,0 +1,20 @@
+<!--  <div class="title">February 2019 Week 6</div>-->
+
+<div class="scroll-wrapper">
+  @if (isMonthView()) {
+    <schedule-month
+      [events]="events()"
+      [daysToShow]="daysToShow()"
+      [weeksToShow]="weeksToShow()"
+      [firstDayOfWeek]="firstDayOfWeek"
+    ></schedule-month>
+  } @else {
+    <schedule-week
+      [events]="events()"
+      [beyondBudget]="beyondBudget()"
+      [daysToShow]="daysToShow()"
+      [workStartEnd]="workStartEnd() || null"
+      [currentTimeRow]="currentTimeRow()"
+    ></schedule-week>
+  }
+</div>

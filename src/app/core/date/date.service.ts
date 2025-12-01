@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { getWorklogStr } from '../../util/get-work-log-str';
+import { getDbDateStr } from '../../util/get-db-date-str';
 
 @Injectable({ providedIn: 'root' })
 export class DateService {
@@ -13,6 +13,6 @@ export class DateService {
     if (!date) {
       date = new Date(Date.now() - this.startOfNextDayDiff);
     }
-    return getWorklogStr(date);
+    return getDbDateStr(date);
   }
 }

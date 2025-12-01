@@ -29,6 +29,7 @@ describe('getCompleteStateForWorkContext', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT',
         id: 'PT',
         tagIds: [TAG_ID],
@@ -36,12 +37,14 @@ describe('getCompleteStateForWorkContext', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'PT',
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_C',
         id: 'SUB_C',
         parentId: 'PT',
@@ -57,6 +60,7 @@ describe('getCompleteStateForWorkContext', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT_TODAY',
         id: 'PT_TODAY',
         tagIds: [TAG_ID],
@@ -65,6 +69,7 @@ describe('getCompleteStateForWorkContext', () => {
     const archiveS = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT',
         id: 'PT',
         tagIds: [TAG_ID],
@@ -72,12 +77,14 @@ describe('getCompleteStateForWorkContext', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'PT',
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_C',
         id: 'SUB_C',
         parentId: 'PT',

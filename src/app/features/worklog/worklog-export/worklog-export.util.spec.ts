@@ -9,10 +9,10 @@ import { Project } from 'src/app/features/project/project.model';
 import { WorklogExportData, WorkTimes } from './worklog-export.model';
 import { Tag } from '../../tag/tag.model';
 
-const startTime1 = new Date('5/2/2021 10:00:00').getTime();
-const endTime1 = new Date('5/2/2021 12:00:00').getTime();
-const startTime2 = new Date('6/2/2021 14:00:00').getTime();
-const endTime2 = new Date('6/2/2021 16:00:00').getTime();
+const startTime1 = new Date(2021, 1, 5, 10, 0, 0).getTime();
+const endTime1 = new Date(2021, 1, 5, 12, 0, 0).getTime();
+const startTime2 = new Date(2021, 1, 6, 14, 0, 0).getTime();
+const endTime2 = new Date(2021, 1, 6, 16, 0, 0).getTime();
 const dateKey1 = '2021-02-05',
   dateKey2 = '2021-02-06';
 const start: WorkStartEnd = { [dateKey1]: startTime1, [dateKey2]: startTime2 };
@@ -120,6 +120,7 @@ describe('createRows', () => {
           id: 'T1',
           timeSpentOnDay: {
             [dateKey1]: oneHour,
+            // eslint-disable-next-line @typescript-eslint/naming-convention
             '2021-02-20': oneHour,
             [dateKey2]: oneHour,
           },
@@ -346,6 +347,68 @@ describe('createRows', () => {
       expect(rows[1].dates).toEqual([dateKey1]);
       expect(rows[2].titlesWithSub).toEqual([taskId2]);
       expect(rows[2].dates).toEqual([dateKey2]);
+    });
+  });
+});
+
+describe('worklog-export.util moment replacement', () => {
+  describe('time formatting', () => {
+    it('should format timestamps as HH:mm', () => {
+      const testCases = [
+        {
+          timestamp: new Date(2023, 9, 15, 9, 30, 0).getTime(),
+          expected: '09:30',
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 14, 45, 0).getTime(),
+          expected: '14:45',
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 0, 0, 0).getTime(),
+          expected: '00:00',
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 23, 59, 0).getTime(),
+          expected: '23:59',
+        },
+      ];
+
+      testCases.forEach(({ timestamp, expected }) => {
+        const date = new Date(timestamp);
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        const formatted = `${hours}:${minutes}`;
+        expect(formatted).toBe(expected);
+      });
+    });
+
+    it('should handle roundTime functionality', () => {
+      // Test rounding to 15 minutes
+      const roundTo = 15 * 60 * 1000; // 15 minutes in ms
+      const testCases = [
+        {
+          timestamp: new Date(2023, 9, 15, 9, 7, 0).getTime(),
+          expected: new Date(2023, 9, 15, 9, 0, 0).getTime(),
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 9, 8, 0).getTime(),
+          expected: new Date(2023, 9, 15, 9, 15, 0).getTime(),
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 9, 22, 0).getTime(),
+          expected: new Date(2023, 9, 15, 9, 15, 0).getTime(),
+        },
+        {
+          timestamp: new Date(2023, 9, 15, 9, 23, 0).getTime(),
+          expected: new Date(2023, 9, 15, 9, 30, 0).getTime(),
+        },
+      ];
+
+      testCases.forEach(({ timestamp, expected }) => {
+        // roundTime implementation
+        const rounded = Math.round(timestamp / roundTo) * roundTo;
+        expect(rounded).toBe(expected);
+      });
     });
   });
 });

@@ -1,31 +1,18 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 import { TaskWithSubTasks } from '../../tasks/task.model';
-import {
-  CALDAV_TYPE,
-  GITEA_TYPE,
-  GITHUB_TYPE,
-  GITLAB_TYPE,
-  REDMINE_TYPE,
-  JIRA_TYPE,
-  OPEN_PROJECT_TYPE,
-} from '../issue.const';
+import { ISSUE_PROVIDER_HUMANIZED, ISSUE_PROVIDER_ICON_MAP } from '../issue.const';
+import { MatIcon } from '@angular/material/icon';
 
 @Component({
   selector: 'issue-header',
   templateUrl: './issue-header.component.html',
   styleUrls: ['./issue-header.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [MatIcon],
 })
 export class IssueHeaderComponent {
-  @Input() task?: TaskWithSubTasks;
+  task = input.required<TaskWithSubTasks>();
 
-  readonly GITLAB_TYPE: string = GITLAB_TYPE;
-  readonly GITHUB_TYPE: string = GITHUB_TYPE;
-  readonly REDMINE_TYPE: string = REDMINE_TYPE;
-  readonly JIRA_TYPE: string = JIRA_TYPE;
-  readonly CALDAV_TYPE: string = CALDAV_TYPE;
-  readonly OPEN_PROJECT_TYPE: string = OPEN_PROJECT_TYPE;
-  readonly GITEA_TYPE: string = GITEA_TYPE;
-
-  constructor() {}
+  readonly ISSUE_PROVIDER_ICON_MAP = ISSUE_PROVIDER_ICON_MAP;
+  readonly ISSUE_PROVIDER_HUMANIZED = ISSUE_PROVIDER_HUMANIZED;
 }

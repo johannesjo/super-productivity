@@ -1,54 +1,58 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  EventEmitter,
-  Input,
-  Output,
+  computed,
+  input,
+  output,
 } from '@angular/core';
-import { FormlyFieldConfig, FormlyFormOptions } from '@ngx-formly/core';
-import { UntypedFormGroup } from '@angular/forms';
+import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/core';
+import { FormsModule, ReactiveFormsModule, UntypedFormGroup } from '@angular/forms';
 import { GlobalConfigSectionKey } from '../global-config.model';
 import { ProjectCfgFormKey } from '../../project/project.model';
 import { T } from '../../../t.const';
 import { exists } from '../../../util/exists';
+import { adjustToLiveFormlyForm } from '../../../util/adjust-to-live-formly-form';
+import { Log } from '../../../core/log';
 
 @Component({
   selector: 'config-form',
   templateUrl: './config-form.component.html',
   styleUrls: ['./config-form.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [FormsModule, ReactiveFormsModule, FormlyModule],
 })
 export class ConfigFormComponent {
   T: typeof T = T;
-  config?: Record<string, unknown>;
-  @Input() sectionKey?: GlobalConfigSectionKey | ProjectCfgFormKey;
-  @Output() save: EventEmitter<{
+  cfg = input.required<Record<string, unknown>>();
+  formCfg = input.required<FormlyFieldConfig[]>();
+  sectionKey = input<GlobalConfigSectionKey | ProjectCfgFormKey>();
+  fields = computed(() => adjustToLiveFormlyForm(this.formCfg()));
+
+  save = output<{
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: unknown;
-  }> = new EventEmitter();
-  fields?: FormlyFieldConfig[];
+  }>();
   form: UntypedFormGroup = new UntypedFormGroup({});
   options: FormlyFormOptions = {};
 
-  constructor() {}
+  updateCfg(cfg: Record<string, unknown>): void {
+    if (!cfg) {
+      throw new Error('No config for ' + this.sectionKey());
+    }
 
-  @Input() set cfg(cfg: Record<string, unknown>) {
-    this.config = { ...cfg };
-  }
+    // Mark all fields as touched to show validation errors
+    this.form.markAllAsTouched();
+    this.form.updateValueAndValidity();
 
-  // somehow needed for the form to work
-  @Input() set formCfg(val: FormlyFieldConfig[]) {
-    this.fields = val && [...val];
-  }
-
-  submit(): void {
-    if (!this.config) {
-      throw new Error('No config for ' + this.sectionKey);
-    } else {
+    if (this.form.valid) {
       this.save.emit({
-        sectionKey: exists(this.sectionKey),
-        config: this.config,
+        sectionKey: exists(this.sectionKey()),
+        config: cfg,
       });
+    } else {
+      // Update validity to ensure error messages are shown
+      this.form.updateValueAndValidity();
+      Log.err('Form is invalid, not saving config:', this.form.errors);
     }
   }
 }

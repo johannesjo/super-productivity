@@ -1,4 +1,5 @@
 // CHECK SWAGGER EXPORT IF MORE ARE NEEDED!!!
+/* eslint-disable @typescript-eslint/naming-convention */
 
 // Standard API responses
 export type JiraOriginalComponent = Readonly<{
@@ -165,16 +166,16 @@ export type JiraOriginalTransition = Readonly<{
     id: string;
     statusCategory: {
       self: string;
-      id: 2;
+      id: number;
       key: string;
       colorName: string;
       name: string;
     };
   };
-  hasScreen: false;
-  isGlobal: true;
-  isInitial: false;
-  isConditional: false;
+  hasScreen: boolean;
+  isGlobal: boolean;
+  isInitial: boolean;
+  isConditional: boolean;
   fields: Record<string, unknown>;
 }>;
 

@@ -1,12 +1,21 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import { TaskService } from '../../../features/tasks/task.service';
 import { T } from 'src/app/t.const';
-import { TaskPlanned } from '../../../features/tasks/task.model';
-import { Observable } from 'rxjs';
-import { TaskRepeatCfg } from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { TaskRepeatCfgService } from '../../../features/task-repeat-cfg/task-repeat-cfg.service';
 import { expandAnimation } from '../../../ui/animations/expand.ani';
+import { AsyncPipe } from '@angular/common';
+import { PlannerDayComponent } from '../../../features/planner/planner-day/planner-day.component';
+import { PlannerService } from '../../../features/planner/planner.service';
+import { AddTaskBarComponent } from '../../../features/tasks/add-task-bar/add-task-bar.component';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { Store } from '@ngrx/store';
+import { selectUndoneTodayTaskIds } from '../../../features/work-context/store/work-context.selectors';
+import { PlannerActions } from '../../../features/planner/store/planner.actions';
+import { first } from 'rxjs/operators';
+import { selectTasksWithSubTasksByIds } from '../../../features/tasks/store/task.selectors';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'plan-tasks-tomorrow',
@@ -14,30 +23,45 @@ import { expandAnimation } from '../../../ui/animations/expand.ani';
   styleUrls: ['./plan-tasks-tomorrow.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [expandAnimation],
+  imports: [
+    AsyncPipe,
+    PlannerDayComponent,
+    AddTaskBarComponent,
+    MatButton,
+    MatIcon,
+    TranslatePipe,
+  ],
 })
 export class PlanTasksTomorrowComponent {
+  workContextService = inject(WorkContextService);
+  taskService = inject(TaskService);
+  _store = inject(Store);
+  plannerService = inject(PlannerService);
+  leftOverTodayIds$ = this._store.select(selectUndoneTodayTaskIds);
+
   T: typeof T = T;
-  // eslint-disable-next-line no-mixed-operators
-  private _tomorrow: number = Date.now() + 24 * 60 * 60 * 1000;
-  repeatableScheduledForTomorrow$: Observable<TaskRepeatCfg[]> =
-    this._taskRepeatCfgService.getRepeatTableTasksDueForDay$(this._tomorrow);
 
-  constructor(
-    public workContextService: WorkContextService,
-    public taskService: TaskService,
-    public _taskRepeatCfgService: TaskRepeatCfgService,
-  ) {}
-
-  // NOTE: there is a duplicate of this in plan-tasks-tomorrow.component
-  addAllPlannedToDayAndCreateRepeatable(
-    plannedTasks: TaskPlanned[],
-    repeatableScheduledForTomorrow: TaskRepeatCfg[],
-  ): void {
-    this._taskRepeatCfgService.addAllPlannedToDayAndCreateRepeatable(
-      plannedTasks,
-      repeatableScheduledForTomorrow,
-      this.taskService.currentTaskId,
-      this._tomorrow,
-    );
+  async planAllTodayTomorrow(): Promise<void> {
+    const todayStr = getDbDateStr();
+    const tomorrow = await this.plannerService.tomorrow$.pipe(first()).toPromise();
+    const ids = await this.leftOverTodayIds$.pipe(first()).toPromise();
+    const tasks = await this._store
+      .select(selectTasksWithSubTasksByIds, { ids })
+      .pipe(first())
+      .toPromise();
+    tasks.forEach((task) => {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({ day: tomorrow!.dayDate, task }),
+      );
+      if (task.subTasks) {
+        task.subTasks.forEach((subTask) => {
+          if (subTask.dueDay && subTask.dueDay === todayStr) {
+            this._store.dispatch(
+              PlannerActions.planTaskForDay({ day: tomorrow!.dayDate, task: subTask }),
+            );
+          }
+        });
+      }
+    });
   }
 }

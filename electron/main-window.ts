@@ -1,4 +1,4 @@
-import * as windowStateKeeper from 'electron-window-state';
+import windowStateKeeper from 'electron-window-state';
 import {
   App,
   BrowserWindow,
@@ -9,14 +9,19 @@ import {
   shell,
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
+import * as path from 'path';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
-import { error, log } from 'electron-log';
-import { GlobalConfigState } from '../src/app/features/config/global-config.model';
-import { enable as enableRemote } from '@electron/remote/main';
+import { error, log } from 'electron-log/main';
+import { IS_MAC } from './common.const';
+import {
+  destroyOverlayWindow,
+  hideOverlayWindow,
+  showOverlayWindow,
+} from './overlay-indicator/overlay-indicator';
+import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state';
 
 let mainWin: BrowserWindow;
 
@@ -42,14 +47,12 @@ export const getIsAppReady = (): boolean => {
 export const createWindow = ({
   IS_DEV,
   ICONS_FOLDER,
-  IS_MAC,
   quitApp,
   app,
   customUrl,
 }: {
   IS_DEV: boolean;
   ICONS_FOLDER: string;
-  IS_MAC: boolean;
   quitApp: () => void;
   app: App;
   customUrl?: string;
@@ -77,35 +80,85 @@ export const createWindow = ({
     height: mainWindowState.height,
     minHeight: 240,
     minWidth: 300,
+    title: IS_DEV ? 'Super Productivity D' : 'Super Productivity',
     titleBarStyle: IS_MAC ? 'hidden' : 'default',
     show: false,
     webPreferences: {
       scrollBounce: true,
       backgroundThrottling: false,
-      webSecurity: !IS_DEV,
-      nodeIntegration: true,
+      webSecurity: false,
+      preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration: false,
       // make remote module work with those two settings
-      contextIsolation: false,
+      contextIsolation: true,
+      // Additional settings for better Linux/Wayland compatibility
+      enableBlinkFeatures: 'OverlayScrollbar',
+      // Disable spell checker to prevent connections to Google services (#5314)
+      // This maintains our "offline-first with zero data collection" promise
+      spellcheck: false,
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
+    // Wayland compatibility: disable transparent/frameless features that can cause issues
+    // transparent: false,
+    // frame: true,
   });
 
-  // enable remote module
-  enableRemote(mainWin.webContents);
+  // see: https://pratikpc.medium.com/bypassing-cors-with-electron-ab7eaf331605
+  mainWin.webContents.session.webRequest.onBeforeSendHeaders((details, callback) => {
+    const { requestHeaders } = details;
+    removeKeyInAnyCase(requestHeaders, 'Origin');
+    removeKeyInAnyCase(requestHeaders, 'Referer');
+    removeKeyInAnyCase(requestHeaders, 'Cookie');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua-mobile');
+    removeKeyInAnyCase(requestHeaders, 'sec-ch-ua-platform');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-dest');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-mode');
+    removeKeyInAnyCase(requestHeaders, 'sec-fetch-site');
+    removeKeyInAnyCase(requestHeaders, 'accept-encoding');
+    removeKeyInAnyCase(requestHeaders, 'accept-language');
+    removeKeyInAnyCase(requestHeaders, 'priority');
+    removeKeyInAnyCase(requestHeaders, 'accept');
+
+    // NOTE this is needed for GitHub api requests to work :(
+    // office365 needs a User-Agent as well (#4677)
+    if (
+      new URL(details.url).hostname in ['github.com', 'office365.com', 'outlook.live.com']
+    ) {
+      removeKeyInAnyCase(requestHeaders, 'User-Agent');
+    }
+    callback({ requestHeaders });
+  });
+
+  mainWin.webContents.session.webRequest.onHeadersReceived((details, callback) => {
+    const { responseHeaders } = details;
+    upsertKeyValue(responseHeaders, 'Access-Control-Allow-Origin', ['*']);
+    upsertKeyValue(responseHeaders, 'Access-Control-Allow-Headers', ['*']);
+    upsertKeyValue(responseHeaders, 'Access-Control-Allow-Methods', ['*']);
+
+    callback({
+      responseHeaders,
+    });
+  });
 
   mainWindowState.manage(mainWin);
 
   const url = customUrl
     ? customUrl
     : IS_DEV
-    ? 'http://localhost:4200'
-    : format({
-        pathname: normalize(join(__dirname, '../dist/index.html')),
-        protocol: 'file:',
-        slashes: true,
-      });
+      ? 'http://localhost:4200'
+      : format({
+          pathname: normalize(join(__dirname, '../.tmp/angular-dist/browser/index.html')),
+          protocol: 'file:',
+          slashes: true,
+        });
 
   mainWin.loadURL(url).then(() => {
+    // Set window title for dev mode
+    if (IS_DEV) {
+      mainWin.setTitle('Super Productivity D');
+    }
+
     // load custom stylesheet if any
     const CSS_FILE_PATH = app.getPath('userData') + '/styles.css';
     stat(app.getPath('userData') + '/styles.css', (err) => {
@@ -114,7 +167,12 @@ export const createWindow = ({
       } else {
         log('Loading custom styles from ' + CSS_FILE_PATH);
         const styles = readFileSync(CSS_FILE_PATH, { encoding: 'utf8' });
-        mainWin.webContents.insertCSS(styles).then(log).catch(error);
+        try {
+          mainWin.webContents.insertCSS(styles);
+          log('Custom styles loaded successfully');
+        } catch (cssError) {
+          error('Failed to load custom styles:', cssError);
+        }
       }
     });
   });
@@ -145,7 +203,7 @@ export const createWindow = ({
 };
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-function initWinEventListeners(app: any): void {
+function initWinEventListeners(app: Electron.App): void {
   const openUrlInBrowser = (url: string): void => {
     // needed for mac; especially for jira urls we might have a host like this www.host.de//
     const urlObj = new URL(url);
@@ -159,17 +217,37 @@ function initWinEventListeners(app: any): void {
 
   // open new window links in browser
   mainWin.webContents.on('will-navigate', (ev, url) => {
-    ev.preventDefault();
-    openUrlInBrowser(url);
+    if (!url.includes('localhost')) {
+      ev.preventDefault();
+      openUrlInBrowser(url);
+    }
   });
   mainWin.webContents.setWindowOpenHandler((details) => {
     openUrlInBrowser(details.url);
     return { action: 'deny' };
   });
 
-  // TODO refactor quiting mess
+  // TODO refactor quitting mess
   appCloseHandler(app);
   appMinimizeHandler(app);
+
+  // Handle restore and show events to hide overlay
+  mainWin.on('restore', () => {
+    hideOverlayWindow();
+  });
+
+  mainWin.on('show', () => {
+    hideOverlayWindow();
+  });
+
+  mainWin.on('focus', () => {
+    hideOverlayWindow();
+  });
+
+  // Handle hide event to show overlay
+  mainWin.on('hide', () => {
+    showOverlayWindow();
+  });
 }
 
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
@@ -218,7 +296,9 @@ const appCloseHandler = (app: App): void => {
   let ids: string[] = [];
 
   const _quitApp = (): void => {
-    (app as any).isQuiting = true;
+    setIsQuiting(true);
+    // Destroy overlay window before closing main window to ensure window-all-closed fires
+    destroyOverlayWindow();
     mainWin.close();
   };
 
@@ -232,41 +312,100 @@ const appCloseHandler = (app: App): void => {
     ids = ids.filter((idIn) => idIn !== id);
     log(IPC.BEFORE_CLOSE_DONE, id, ids);
     if (ids.length === 0) {
+      // Destroy overlay window before closing main window
+      destroyOverlayWindow();
       mainWin.close();
     }
   });
 
   mainWin.on('close', (event) => {
     // NOTE: this might not work if we run a second instance of the app
-    log('close, isQuiting:', (app as any).isQuiting);
-    if (!(app as any).isQuiting) {
+    log('close, isQuiting:', getIsQuiting());
+    if (!getIsQuiting()) {
       event.preventDefault();
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg && appCfg.misc.isMinimizeToTray && !(app as any).isQuiting) {
-          mainWin.hide();
-          return;
-        }
+      if (getIsMinimizeToTray()) {
+        mainWin.hide();
+        showOverlayWindow();
+        return;
+      }
 
-        if (ids.length > 0) {
-          log('Actions to wait for ', ids);
-          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
-        } else {
-          _quitApp();
-        }
-      });
+      if (ids.length > 0) {
+        log('Actions to wait for ', ids);
+        mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+      } else {
+        _quitApp();
+      }
+    }
+  });
+
+  mainWin.on('closed', () => {
+    // Dereference the window object
+    mainWin = null;
+    mainWinModule.win = null;
+  });
+
+  mainWin.webContents.on('render-process-gone', (event, detailed) => {
+    log('!crashed, reason: ' + detailed.reason + ', exitCode = ' + detailed.exitCode);
+    if (detailed.reason == 'crashed') {
+      process.exit(detailed.exitCode);
+      // relaunch app
+      // app.relaunch({ args: process.argv.slice(1).concat(['--relaunch']) });
+      // app.exit(0);
     }
   });
 };
 
 const appMinimizeHandler = (app: App): void => {
-  if (!(app as any).isQuiting) {
+  if (!getIsQuiting()) {
+    // TODO find reason for the typing error
+    // @ts-ignore
     mainWin.on('minimize', (event: Event) => {
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg.misc.isMinimizeToTray) {
-          event.preventDefault();
-          mainWin.hide();
+      if (getIsMinimizeToTray()) {
+        event.preventDefault();
+        mainWin.hide();
+        showOverlayWindow();
+      } else {
+        // For regular minimize (not to tray), also show overlay
+        showOverlayWindow();
+        if (IS_MAC) {
+          app.dock?.show();
         }
-      });
+      }
     });
   }
+};
+
+const upsertKeyValue = <T extends Record<string, any> | undefined>(
+  obj: T,
+  keyToChange: string,
+  value: string[],
+): T => {
+  if (!obj) return obj;
+  const keyToChangeLower = keyToChange.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === keyToChangeLower) {
+      // Reassign old key
+      (obj as any)[key] = value;
+      // Done
+      return obj;
+    }
+  }
+  // Insert at end instead
+  (obj as any)[keyToChange] = value;
+  return obj;
+};
+
+const removeKeyInAnyCase = <T extends Record<string, any> | undefined>(
+  obj: T,
+  keyToRemove: string,
+): T => {
+  if (!obj) return obj;
+  const keyToRemoveLower = keyToRemove.toLowerCase();
+  for (const key of Object.keys(obj)) {
+    if (key.toLowerCase() === keyToRemoveLower) {
+      delete (obj as any)[key];
+      return obj;
+    }
+  }
+  return obj;
 };

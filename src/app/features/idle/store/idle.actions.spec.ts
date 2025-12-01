@@ -1,4 +1,4 @@
-// import * as fromIdle from './idle.actions';
+// import fromIdle from './idle.actions';
 //
 // describe('loadIdles', () => {
 //   it('should return an action', () => {

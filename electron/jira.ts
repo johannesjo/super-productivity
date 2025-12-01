@@ -4,7 +4,7 @@ import { session } from 'electron';
 import { JiraCfg } from '../src/app/features/issue/providers/jira/jira.model';
 import fetch, { RequestInit } from 'node-fetch';
 import { Agent } from 'https';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 
 export const sendJiraRequest = ({
   requestId,
@@ -32,19 +32,26 @@ export const sendJiraRequest = ({
         }
       : {}),
   } as RequestInit)
-    .then((response: any) => {
+    .then(async (response) => {
       // log('JIRA_RAW_RESPONSE', response);
       if (!response.ok) {
         error('Jira Error Error Response ELECTRON: ', response);
         try {
           log(JSON.stringify(response));
         } catch (e) {}
-        throw Error(response.statusText);
+
+        let errText;
+        try {
+          errText = await response.text();
+        } catch (e2) {
+          throw Error(response.statusText);
+        }
+        throw Error(errText || response.statusText);
       }
       return response;
     })
-    .then((res: any) => res.text())
-    .then((text: any) => {
+    .then((res) => res.text())
+    .then((text) => {
       try {
         return text ? JSON.parse(text) : {};
       } catch (e) {
@@ -54,13 +61,13 @@ export const sendJiraRequest = ({
         return text;
       }
     })
-    .then((response: any) => {
+    .then((response) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         response,
         requestId,
       });
     })
-    .catch((err: any) => {
+    .catch((err: unknown) => {
       mainWin.webContents.send(IPC.JIRA_CB_EVENT, {
         error: err,
         requestId,
@@ -69,10 +76,7 @@ export const sendJiraRequest = ({
 };
 
 // TODO simplify and do encoding in frontend service
-export const setupRequestHeadersForImages = (
-  jiraCfg: JiraCfg,
-  wonkyCookie?: string,
-): void => {
+export const setupRequestHeadersForImages = (jiraCfg: JiraCfg): void => {
   const { host, protocol } = parseHostAndPort(jiraCfg);
 
   // TODO export to util fn
@@ -84,18 +88,10 @@ export const setupRequestHeadersForImages = (
     urls: [`${protocol}://${host}/*`],
   };
 
-  if (jiraCfg.isWonkyCookieMode && !wonkyCookie) {
-    session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-      callback({ cancel: true });
-    });
-  }
-
   // thankfully only the last attached listener will be used
   // @see: https://electronjs.org/docs/api/web-request
   session.defaultSession.webRequest.onBeforeSendHeaders(filter, (details, callback) => {
-    if (wonkyCookie && jiraCfg.isWonkyCookieMode) {
-      details.requestHeaders.Cookie = wonkyCookie;
-    } else if (jiraCfg.usePAT) {
+    if (jiraCfg.usePAT) {
       details.requestHeaders.authorization = `Bearer ${jiraCfg.password}`;
     } else {
       details.requestHeaders.authorization = `Basic ${encoded}`;

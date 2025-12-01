@@ -1,0 +1,412 @@
+<div
+  #contextMenuTriggerEl
+  [style.left]="contextMenuPosition.x"
+  [style.top]="contextMenuPosition.y"
+  style="visibility: hidden; position: fixed"
+  [matMenuTriggerFor]="contextMenu"
+></div>
+
+<mat-menu
+  #contextMenu="matMenu"
+  yPosition="below"
+  xPosition="after"
+  (close)="onClose()"
+>
+  <div
+    mat-menu-item
+    style="height: 0; padding: 0; margin: 0; border: none; min-height: 0"
+    (focus)="focusFirstBtn($event)"
+  ></div>
+  <div
+    class="quick-access"
+    (keydown)="quickAccessKeydown($event)"
+  >
+    <button
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(1)"
+      [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TODAY | translate"
+    >
+      <mat-icon>wb_sunny</mat-icon>
+    </button>
+
+    <button
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(2)"
+      [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW | translate"
+    >
+      <mat-icon svgIcon="tomorrow"></mat-icon>
+    </button>
+    <button
+      mat-icon-button
+      tabindex="0"
+      (click)="quickAccessBtnClick(3)"
+      [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK | translate"
+    >
+      <mat-icon svgIcon="next_week"></mat-icon>
+    </button>
+    <!--      <button-->
+    <!--        mat-icon-button-->
+    <!--        tabindex="0"-->
+    <!--        (click)="quickAccessBtnClick(3)"-->
+    <!--        [matTooltip]="(T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_MONTH|translate)"-->
+    <!--      >-->
+    <!--        <mat-icon>bedtime</mat-icon>-->
+    <!--      </button>-->
+    <button
+      mat-icon-button
+      tabindex="0"
+      [matTooltip]="
+        (task.dueWithTime || task.dueDay
+          ? (T.F.TASK.CMP.EDIT_SCHEDULED | translate)
+          : (T.F.TASK.CMP.SCHEDULE | translate)) +
+        (kb.taskSchedule ? ' [' + kb.taskSchedule + ']' : '')
+      "
+      (click)="scheduleTask()"
+    >
+      <mat-icon>today</mat-icon>
+    </button>
+
+    @if (task.dueWithTime || task.dueDay) {
+      <button
+        mat-icon-button
+        tabindex="0"
+        (click)="unscheduleTask()"
+        [matTooltip]="T.F.TASK.CMP.UNSCHEDULE_TASK | translate"
+      >
+        <mat-icon>event_busy</mat-icon>
+      </button>
+    }
+  </div>
+
+  @if (
+    isTimeTrackingEnabled() &&
+    ((isAdvancedControls() && IS_TOUCH_PRIMARY) || !isAdvancedControls()) &&
+    !task.isDone &&
+    !isCurrent &&
+    !task.subTaskIds.length
+  ) {
+    <button
+      (click)="startTask()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon
+          class="play-icon"
+          svgIcon="play"
+        ></mat-icon>
+        {{ T.F.TASK.CMP.TRACK_TIME | translate }}
+      </span>
+      <span class="key-i">{{ kb.togglePlay }}</span>
+    </button>
+  }
+  @if (
+    isFocusModeEnabled() &&
+    isAdvancedControls() &&
+    !IS_TOUCH_PRIMARY &&
+    !task.isDone &&
+    !task.subTaskIds.length
+  ) {
+    <button
+      (click)="goToFocusMode()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>center_focus_strong</mat-icon>
+        {{ T.F.TASK.CMP.FOCUS_SESSION | translate }}
+      </span>
+      <!--    <span class="key-i">{{ kb.goToFocusMode }}</span>-->
+    </button>
+  }
+  @if (
+    isAdvancedControls() &&
+    IS_TOUCH_PRIMARY &&
+    !task.isDone &&
+    isCurrent &&
+    !task.subTaskIds.length
+  ) {
+    <button
+      (click)="pauseTask()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>pause</mat-icon>
+        {{ T.F.TASK.CMP.TRACK_TIME_STOP | translate }}
+      </span>
+      <span class="key-i">{{ kb.togglePlay }}</span>
+    </button>
+  }
+  @if (IS_TOUCH_PRIMARY || !isAdvancedControls()) {
+    <button
+      (click)="toggleTaskDone()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        @if (task.isDone) {
+          <mat-icon>undo</mat-icon>
+        } @else {
+          <mat-icon>check</mat-icon>
+        }
+        {{ (task.isDone ? T.F.TASK.CMP.MARK_DONE : T.F.TASK.CMP.MARK_DONE) | translate }}
+      </span>
+      <span class="key-i">{{ kb.taskToggleDone }}</span>
+    </button>
+  }
+
+  @if (!task.subTaskIds.length) {
+    <button
+      (click)="estimateTime()"
+      class="hide-xs"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>timer</mat-icon>
+        {{ T.F.TASK.CMP.OPEN_TIME | translate }}
+      </span>
+      <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
+    </button>
+  }
+
+  <!--    <button-->
+  <!--      (click)="scheduleTask()"-->
+  <!--      mat-menu-item-->
+  <!--    >-->
+  <!--      <ng-container *ngIf="!task.reminderId">-->
+  <!--        <span>-->
+  <!--          <mat-icon>alarm_add</mat-icon>-->
+  <!--          {{ T.F.TASK.CMP.SCHEDULE|translate }}-->
+  <!--        </span>-->
+  <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+  <!--      </ng-container>-->
+  <!--      <ng-container *ngIf="task.reminderId">-->
+  <!--        <span>-->
+  <!--          <mat-icon>alarm</mat-icon>-->
+  <!--          {{ T.F.TASK.CMP.EDIT_SCHEDULED|translate }}-->
+  <!--        </span>-->
+  <!--        <span class="key-i">{{ kb.taskSchedule }}</span>-->
+  <!--      </ng-container>-->
+  <!--    </button>-->
+
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
+      (click)="moveToTop()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_upward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_TOP | translate }}
+      </span>
+    </button>
+  }
+  <!-- Only show the duplicate command if it is a parent unfinished task -->
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
+      (click)="duplicate()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>file_copy</mat-icon>
+        {{ T.F.TASK.CMP.DUPLICATE | translate }}
+      </span>
+    </button>
+  }
+
+  @if (isAdvancedControls() && !task.parentId && !task.isDone) {
+    <button
+      (click)="addSubTask()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>playlist_add</mat-icon>
+        {{ T.F.TASK.CMP.ADD_SUB_TASK | translate }}
+      </span>
+      <span class="key-i">{{ kb.taskAddSubTask }}</span>
+    </button>
+  }
+
+  <button
+    (click)="addAttachment()"
+    class="hide-xs"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon>attachment</mat-icon>
+      {{ T.F.TASK.CMP.OPEN_ATTACH | translate }}
+    </span>
+    <span class="key-i">{{ kb.taskAddAttachment }}</span>
+  </button>
+
+  <!--TODO maybe handle dynamically -->
+  @if (task.issueId && task.issueType !== ICAL_TYPE) {
+    <a
+      [href]="issueUrl$ | async"
+      mat-menu-item
+      style="color: inherit"
+      target="_blank"
+    >
+      <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
+      {{ T.F.TASK.CMP.OPEN_ISSUE | translate }}
+    </a>
+  }
+  @if (task.issueId && task.issueType !== ICAL_TYPE) {
+    <button
+      (click)="updateIssueData()"
+      mat-menu-item
+    >
+      <mat-icon [svgIcon]="task.issueType | issueIcon"></mat-icon>
+      {{ T.F.TASK.CMP.UPDATE_ISSUE_DATA | translate }}
+    </button>
+  }
+  @if (
+    isAdvancedControls() &&
+    !task.parentId &&
+    !isBacklog &&
+    task.projectId &&
+    (isShowMoveFromAndToBacklogBtns$ | async)
+  ) {
+    <button
+      (click)="moveToBacklog()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_downward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_BACKLOG | translate }}
+      </span>
+      <span class="key-i">{{ kb.moveToBacklog }}</span>
+    </button>
+  }
+  @if (
+    isAdvancedControls() &&
+    !task.parentId &&
+    isBacklog &&
+    task.projectId &&
+    (isShowMoveFromAndToBacklogBtns$ | async)
+  ) {
+    <button
+      (click)="moveToToday()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>arrow_upward</mat-icon>
+        {{ T.F.TASK.CMP.MOVE_TO_REGULAR | translate }}
+      </span>
+      <span class="key-i">{{ kb.moveToTodaysTasks }}</span>
+    </button>
+  }
+
+  <button
+    [matMenuTriggerFor]="tagMenu"
+    mat-menu-item
+    menuTouchFix
+  >
+    <span class="menuItemLeft">
+      <mat-icon>label</mat-icon>
+      {{ T.F.TASK.CMP.TOGGLE_TAGS | translate }}
+    </span>
+    <span class="key-i">{{ kb.taskEditTags }}</span>
+  </button>
+
+  @if (!task.parentId && ((moveToProjectList$ | async)?.length || 0) > 0) {
+    <button
+      [matMenuTriggerFor]="projectMenu"
+      mat-menu-item
+      menuTouchFix
+    >
+      <span class="menuItemLeft">
+        <mat-icon>forward</mat-icon>
+        {{
+          (task.projectId
+            ? T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT
+            : T.F.TASK.CMP.ADD_TO_PROJECT
+          ) | translate
+        }}
+      </span>
+      <span class="key-i">{{ kb.taskMoveToProject }}</span>
+    </button>
+  }
+  @if (task.parentId) {
+    <button
+      (click)="convertToMainTask()"
+      mat-menu-item
+    >
+      <mat-icon>subdirectory_arrow_left</mat-icon>
+      {{ T.F.TASK.CMP.CONVERT_TO_PARENT_TASK | translate }}
+    </button>
+  }
+
+  <button
+    (click)="deleteTask()"
+    class="color-warn"
+    mat-menu-item
+  >
+    <span class="menuItemLeft">
+      <mat-icon class="color-warn-i">delete_forever</mat-icon>
+      {{
+        (task.repeatCfgId ? T.F.TASK.CMP.DELETE_REPEAT_INSTANCE : T.F.TASK.CMP.DELETE)
+          | translate
+      }}
+    </span>
+    <span class="key-i">{{ kb.taskDelete }}</span>
+  </button>
+</mat-menu>
+
+<mat-menu
+  #projectMenu="matMenu"
+  (closed)="focusRelatedTaskOrNext()"
+>
+  <ng-template matMenuContent>
+    @for (
+      project of moveToProjectList$ | async;
+      track trackByProjectId($index, project)
+    ) {
+      <button
+        (click)="moveTaskToProject(project.id)"
+        mat-menu-item
+        menuTouchFix
+      >
+        <mat-icon
+          [style.color]="project.theme.primary"
+          class="tag-ico"
+          >{{ project.icon || 'list' }}</mat-icon
+        >
+        {{ project.title }}
+      </button>
+    }
+  </ng-template>
+</mat-menu>
+
+<mat-menu
+  #tagMenu="matMenu"
+  (closed)="focusRelatedTaskOrNext()"
+>
+  <ng-template matMenuContent>
+    @for (tag of toggleTagList(); track $index) {
+      <button
+        (click)="toggleTag(tag.id)"
+        mat-menu-item
+        menuTouchFix
+      >
+        @if (task.tagIds.includes(tag.id)) {
+          <mat-icon class="check-ico">check_box</mat-icon>
+        } @else {
+          <mat-icon class="check-ico">check_box_outline_blank</mat-icon>
+        }
+        <mat-icon
+          [style.color]="tag.color || tag.theme.primary"
+          class="tag-ico"
+          >{{ tag.icon || 'label' }}</mat-icon
+        >
+        {{ tag.title }}
+      </button>
+    }
+    <button
+      mat-menu-item
+      (click)="openAddNewTag()"
+      menuTouchFix
+    >
+      <mat-icon>add</mat-icon>
+      {{ T.F.TAG.TTL.ADD_NEW_TAG | translate }}
+    </button>
+  </ng-template>
+</mat-menu>

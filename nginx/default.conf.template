@@ -1,0 +1,36 @@
+# Load environment variables
+map "" $webdav_backend {
+    default "$WEBDAV_BACKEND";
+}
+
+server {
+    listen       80;
+    server_name  localhost;
+
+    # serve super-productivity as static files at the path /
+    location / {
+        root   /usr/share/nginx/html;
+        index  index.html index.htm;
+    }
+
+    # forward requests starting with "/webdav/" to $WEBDAV_BACKEND
+    # note: the prefix "/webdav" is removed during forwarding
+    location = /webdav {
+        return 302 /webdav/;
+    }
+    location /webdav/ {
+        if ($webdav_backend = "") {
+            return 404;
+        }
+
+        resolver 127.0.0.11;  # resolve webdav_backend by docker internal DNS
+        rewrite ^/webdav/(.*)$ /$1 break;   # remove the `/webdav/` prefix
+        proxy_pass $webdav_backend;
+    }
+
+    # redirect server error pages to the static page /50x.html
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /usr/share/nginx/html;
+    }
+}

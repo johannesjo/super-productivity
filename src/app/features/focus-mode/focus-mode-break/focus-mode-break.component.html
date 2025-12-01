@@ -1,0 +1,56 @@
+<div class="focus-mode-break">
+  <h1>
+    {{
+      (focusModeService.isBreakLong()
+        ? T.F.FOCUS_MODE.LONG_BREAK_TITLE
+        : T.F.FOCUS_MODE.SHORT_BREAK_TITLE
+      ) | translate: { cycle: focusModeService.currentCycle() }
+    }}
+  </h1>
+
+  <div class="timer-container">
+    <mat-progress-spinner
+      mode="determinate"
+      [value]="progressPercentage()"
+      diameter="160"
+      strokeWidth="6"
+    >
+    </mat-progress-spinner>
+    <div class="timer-text">
+      {{ remainingTime() | msToClockString: true }}
+    </div>
+  </div>
+
+  <task-tracking-info></task-tracking-info>
+
+  <p class="break-message">{{ T.F.FOCUS_MODE.BREAK_RELAX_MSG | translate }}</p>
+
+  @if (remainingTime() > 0) {
+    <button
+      mat-stroked-button
+      (click)="skipBreak()"
+    >
+      <mat-icon>skip_next</mat-icon>
+      {{ T.F.FOCUS_MODE.SKIP_BREAK | translate }}
+    </button>
+  } @else {
+    <div class="button-row">
+      <button
+        mat-stroked-button
+        (click)="completeBreak()"
+      >
+        <mat-icon>done_all</mat-icon>
+        {{ T.G.COMPLETE | translate }}
+      </button>
+
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="completeBreak()"
+      >
+        <mat-icon>arrow_forward</mat-icon>
+        {{ T.F.FOCUS_MODE.CONTINUE_TO_NEXT_SESSION | translate }}
+      </button>
+    </div>
+  }
+</div>

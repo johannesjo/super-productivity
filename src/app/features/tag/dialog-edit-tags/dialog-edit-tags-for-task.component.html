@@ -1,6 +1,9 @@
 <h1 mat-dialog-title>
-  {{isEdit ? (T.F.TAG.D_EDIT.EDIT|translate:{title: title}) :
-  (T.F.TAG.D_EDIT.ADD|translate:{title: title})}}
+  {{
+    isEdit
+      ? (T.F.TAG.D_EDIT.EDIT | translate: { title: title })
+      : (T.F.TAG.D_EDIT.ADD | translate: { title: title })
+  }}
 </h1>
 
 <mat-dialog-content>
@@ -12,9 +15,9 @@
       (addNewItem)="addNewTag($event)"
       (removeItem)="removeTag($event)"
       autoFocus
-      [label]="T.F.TAG.D_EDIT.LABEL|translate"
+      [label]="T.F.TAG.D_EDIT.LABEL | translate"
       [model]="tagIds"
-      [suggestions]="(tagSuggestions$|async)"
+      [suggestions]="tagSuggestions$ | async"
       (ctrlEnterSubmit)="close()"
     ></chip-list-input>
   </div>
@@ -28,6 +31,6 @@
     type="submit"
   >
     <mat-icon>close</mat-icon>
-    {{T.G.CLOSE|translate}}
+    {{ T.G.CLOSE | translate }}
   </button>
 </mat-dialog-actions>

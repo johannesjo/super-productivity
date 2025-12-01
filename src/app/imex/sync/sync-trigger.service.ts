@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { EMPTY, fromEvent, merge, Observable, of, ReplaySubject, timer } from 'rxjs';
 import {
   auditTime,
@@ -6,6 +6,7 @@ import {
   debounceTime,
   distinctUntilChanged,
   filter,
+  first,
   map,
   mapTo,
   shareReplay,
@@ -15,25 +16,27 @@ import {
   take,
   tap,
   throttleTime,
+  withLatestFrom,
 } from 'rxjs/operators';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { isOnline$ } from '../../util/is-online';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import {
   SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME,
   SYNC_DEFAULT_AUDIT_TIME,
+  SYNC_MIN_INTERVAL,
 } from './sync.const';
-import { AllowedDBKeys } from '../../core/persistence/storage-keys.const';
 import { IdleService } from '../../features/idle/idle.service';
 import { IS_ELECTRON } from '../../app.constants';
-import { ElectronService } from '../../core/electron/electron.service';
-import { IpcRenderer } from 'electron';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
-import { IS_TOUCH_ONLY } from '../../util/is-touch-only';
+import { ipcResume$, ipcSuspend$ } from '../../core/ipc-events';
+import { IS_TOUCH_PRIMARY } from '../../util/is-mouse-primary';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { Store } from '@ngrx/store';
+import { selectCurrentTaskId } from '../../features/tasks/store/task.selectors';
+import { SyncLog } from '../../core/log';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -43,17 +46,13 @@ const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
   providedIn: 'root',
 })
 export class SyncTriggerService {
-  private _onUpdateLocalDataTrigger$: Observable<{
-    appDataKey: AllowedDBKeys;
-    data: any;
-    isDataImport: boolean;
-    projectId?: string;
-  }> = this._persistenceService.onAfterSave$.pipe(
-    filter(
-      ({ appDataKey, data, isDataImport, isSyncModelChange }) =>
-        !!data && !isDataImport && isSyncModelChange,
-    ),
-  );
+  private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _dataInitStateService = inject(DataInitStateService);
+  private readonly _idleService = inject(IdleService);
+  private readonly _pfapiService = inject(PfapiService);
+  private readonly _store = inject(Store);
+
+  private _onUpdateLocalDataTrigger$ = this._pfapiService.onLocalMetaUpdate$;
 
   // IMMEDIATE TRIGGERS
   // ----------------------
@@ -77,19 +76,19 @@ export class SyncTriggerService {
             ),
           )
         : // FALLBACK we check if there was any kind of user interaction
-        // (otherwise sync might never be checked if there are no local data changes)
-        IS_TOUCH_ONLY
-        ? merge(
-            fromEvent(window, 'touchstart'),
-            fromEvent(window, 'visibilitychange'),
-          ).pipe(
-            mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          )
-        : fromEvent(window, 'focus').pipe(
-            mapTo('I_FOCUS_THROTTLED'),
-            throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
-          ),
+          // (otherwise sync might never be checked if there are no local data changes)
+          IS_TOUCH_PRIMARY
+          ? merge(
+              fromEvent(window, 'touchstart'),
+              fromEvent(document, 'visibilitychange'),
+            ).pipe(
+              mapTo('I_MOUSE_TOUCH_MOVE_OR_VISIBILITYCHANGE'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            )
+          : fromEvent(window, 'focus').pipe(
+              mapTo('I_FOCUS_THROTTLED'),
+              throttleTime(USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME),
+            ),
     ),
   );
 
@@ -104,18 +103,29 @@ export class SyncTriggerService {
   );
 
   private _onElectronResumeTrigger$: Observable<string | never> = IS_ELECTRON
-    ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.RESUME).pipe(
+    ? ipcResume$.pipe(
+        // because ipcEvents live forever
         mapTo('I_IPC_RESUME'),
       )
     : EMPTY;
+  private _beforeGoingToSleepTriggers$: Observable<string | never> = IS_ELECTRON
+    ? ipcSuspend$.pipe(
+        // because ipcEvents live forever
+        mapTo('I_IPC_SUSPEND'),
+        throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME),
+      )
+    : EMPTY;
 
-  private _beforeGoingToSleepTriggers$: Observable<string> = merge(
-    IS_ELECTRON
-      ? fromEvent(this._electronService.ipcRenderer as IpcRenderer, IPC.SUSPEND).pipe(
-          mapTo('I_IPC_SUSPEND'),
-        )
-      : EMPTY,
-  ).pipe(throttleTime(SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME));
+  private _onBlurWhenNotTracking$: Observable<string | never> = fromEvent(
+    window,
+    'blur',
+  ).pipe(
+    withLatestFrom(this._store.select(selectCurrentTaskId)),
+    filter(([, currentTaskId]) => !currentTaskId),
+    mapTo('I_BLUR_WHILE_NOT_TRACKING'),
+    // we throttle this to prevent lots of updates
+    throttleTime(10 * 60 * 1000),
+  );
 
   private _isOnlineTrigger$: Observable<string> = isOnline$.pipe(
     // skip initial online which always fires on page load
@@ -127,7 +137,7 @@ export class SyncTriggerService {
   // OTHER INITIAL SYNC STUFF
   // ------------------------
   private _isInitialSyncEnabled$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       switchMap(() => this._globalConfigService.cfg$),
       map((cfg: GlobalConfigState) => cfg.sync.isEnabled),
       distinctUntilChanged(),
@@ -147,26 +157,16 @@ export class SyncTriggerService {
       filter((isDone) => isDone),
       take(1),
       // should normally be already loaded, but if there is NO initial sync we need to wait here
-      concatMap(() => this._dataInitService.isAllDataLoadedInitially$),
+      concatMap(() => this._dataInitStateService.isAllDataLoadedInitially$),
     );
 
+  // NOTE: can be called multiple times apparently
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,
-    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)).pipe(shareReplay(1)),
-  );
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
+  ).pipe(first(), shareReplay(1));
 
-  constructor(
-    private readonly _globalConfigService: GlobalConfigService,
-    private readonly _dataInitService: DataInitService,
-    private readonly _idleService: IdleService,
-    private readonly _persistenceService: PersistenceService,
-    private readonly _electronService: ElectronService,
-  ) {}
-
-  getSyncTrigger$(
-    syncInterval: number = SYNC_DEFAULT_AUDIT_TIME,
-    minSyncInterval: number = 5000,
-  ): Observable<unknown> {
+  getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME): Observable<unknown> {
     const _immediateSyncTrigger$: Observable<string> = IS_ANDROID_WEB_VIEW
       ? // ANDROID ONLY
         merge(
@@ -191,11 +191,11 @@ export class SyncTriggerService {
           this._isOnlineTrigger$,
           this._onIdleTrigger$,
           this._onElectronResumeTrigger$,
+          this._onBlurWhenNotTracking$,
         );
-
     return merge(
       // once immediately
-      _immediateSyncTrigger$.pipe(tap((v) => console.log('immediate sync trigger', v))),
+      _immediateSyncTrigger$.pipe(tap((v) => SyncLog.log('immediate sync trigger', v))),
 
       // and once we reset the sync interval for all other triggers
       // we do this to reset the audit time to avoid sync checks in short succession
@@ -206,12 +206,10 @@ export class SyncTriggerService {
         switchMap(() =>
           // NOTE: interval changes are only ever executed, if local data was changed
           this._onUpdateLocalDataTrigger$.pipe(
-            // tap((ev) => console.log('__trigger_sync__', ev.appDataKey, ev)),
-            tap((ev) => console.log('__trigger_sync__', ev.appDataKey)),
-            auditTime(Math.max(syncInterval, minSyncInterval)),
-            // tap((ev) =>
-            //   console.log('__trigger_sync after auditTime__', ev.appDataKey, ev),
-            // ),
+            // tap((ev) => Log.log('__trigger_sync__', ev.appDataKey, ev)),
+            // tap((ev) => Log.log('__trigger_sync__', 'I_ON_UPDATE_LOCAL_DATA', ev)),
+            auditTime(Math.max(syncInterval, SYNC_MIN_INTERVAL)),
+            // tap((ev) => alert('__trigger_sync after auditTime__')),
           ),
         ),
       ),

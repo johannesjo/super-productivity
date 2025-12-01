@@ -1,12 +1,12 @@
 import { getIsAppReady, getWin } from './main-window';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { error, log } from 'electron-log';
+import { error, log } from 'electron-log/main';
 
 const WAIT_FOR_WIN_TIMEOUT_DURATION = 4000;
 
 export const errorHandlerWithFrontendInform = (
   e: Error | unknown | string = 'UNDEFINED ERROR',
-  additionalLogInfo?: any,
+  additionalLogInfo?: unknown,
 ): void => {
   const errObj = new Error(e as string);
 
@@ -30,8 +30,8 @@ function _isReadyForFrontEndError(): boolean {
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 function _handleError(
   e: Error | unknown | string,
-  additionalLogInfo: any,
-  errObj: any,
+  additionalLogInfo: unknown,
+  errObj: Error,
 ): void {
   const mainWin = getWin();
   const stack = errObj.stack;
@@ -47,11 +47,29 @@ function _handleError(
   if (_isReadyForFrontEndError()) {
     mainWin.webContents.send(IPC.ERROR, {
       error: e,
-      errorStr: e && (e as any).toString(),
+      errorStr: _getErrorStr(e),
       stack,
     });
   } else {
     error('Electron Error: Frontend not loaded. Could not send error to renderer.');
     throw errObj;
   }
+}
+
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function _getErrorStr(e: unknown): string {
+  if (typeof e === 'string') {
+    return e;
+  }
+  if (e instanceof Error) {
+    return e.toString();
+  }
+  if (typeof e === 'object' && e !== null) {
+    try {
+      return JSON.stringify(e);
+    } catch (err) {
+      return String(e);
+    }
+  }
+  return String(e);
 }

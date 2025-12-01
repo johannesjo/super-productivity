@@ -1,20 +1,22 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  Inject,
+  inject,
   OnDestroy,
   OnInit,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialog, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialog,
+  MatDialogActions,
+  MatDialogContent,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, Subscription } from 'rxjs';
 import { Task } from '../../tasks/task.model';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { T } from '../../../t.const';
-import { ipcRenderer } from 'electron';
-import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.const';
-import { SimpleCounterService } from '../../simple-counter/simple-counter.service';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { IS_ELECTRON } from '../../../app.constants';
 import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import { Store } from '@ngrx/store';
@@ -27,14 +29,48 @@ import {
   SimpleCounterIdleBtn,
 } from './dialog-idle.model';
 import { DialogIdleSplitComponent } from './dialog-idle-split-mode/dialog-idle-split.component';
+import { FormsModule } from '@angular/forms';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatIcon } from '@angular/material/icon';
+import { MatCheckbox } from '@angular/material/checkbox';
+import { AsyncPipe } from '@angular/common';
+import { TranslatePipe } from '@ngx-translate/core';
+import { SelectTaskComponent } from '../../tasks/select-task/select-task.component';
+import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
+import { expandAnimation } from '../../../ui/animations/expand.ani';
 
 @Component({
   selector: 'dialog-idle',
   templateUrl: './dialog-idle.component.html',
   styleUrls: ['./dialog-idle.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  imports: [
+    FormsModule,
+    MatDialogContent,
+    MatIconButton,
+    MatTooltip,
+    MatIcon,
+    MatMiniFabButton,
+    MatCheckbox,
+    MatDialogActions,
+    MatButton,
+    AsyncPipe,
+    TranslatePipe,
+    SelectTaskComponent,
+    MsToStringPipe,
+  ],
+  animations: [expandAnimation],
 })
 export class DialogIdleComponent implements OnInit, OnDestroy {
+  configService = inject(GlobalConfigService);
+  private _taskService = inject(TaskService);
+  private _matDialogRef =
+    inject<MatDialogRef<DialogIdleComponent, DialogIdleReturnData>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  data = inject<DialogIdlePassedData>(MAT_DIALOG_DATA);
+
   T: typeof T = T;
 
   lastCurrentTask$: Observable<Task> = this.data.lastCurrentTaskId
@@ -42,38 +78,31 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     : EMPTY;
 
   idleTime$ = this._store.select(selectIdleTime);
-
   selectedTask: Task | null = null;
   newTaskTitle?: string;
   isCreate?: boolean;
-  isSplitMode: boolean = false;
 
   simpleCounterToggleBtns: SimpleCounterIdleBtn[] = [];
   isTaskDataLoadedIfNeeded: boolean = !this.data.lastCurrentTaskId;
+  isResetBreakTimer: boolean = false;
 
   private _subs = new Subscription();
 
-  constructor(
-    public configService: GlobalConfigService,
-    private _taskService: TaskService,
-    private _matDialogRef: MatDialogRef<DialogIdleComponent, DialogIdleReturnData>,
-    private _matDialog: MatDialog,
-    private _electronService: ElectronService,
-    private _store: Store,
-    private _simpleCounterService: SimpleCounterService,
-    @Inject(MAT_DIALOG_DATA) public data: DialogIdlePassedData,
-  ) {
+  constructor() {
+    const _matDialogRef = this._matDialogRef;
+    const data = this.data;
+
     this.simpleCounterToggleBtns = (
       data.enabledSimpleStopWatchCounters as SimpleCounter[]
     ).map(
-      ({ id, icon, iconOn, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
+      ({ id, icon, title, isOn }: SimpleCounter): SimpleCounterIdleBtn =>
         ({
           id,
-          icon: iconOn || icon,
+          icon: icon,
           title,
           isTrackTo: isOn,
           isWasEnabledBefore: isOn,
-        } as SimpleCounterIdleBtn),
+        }) as SimpleCounterIdleBtn,
     );
     _matDialogRef.disableClose = true;
   }
@@ -88,9 +117,7 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     );
 
     if (IS_ELECTRON) {
-      (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-        IPC.FLASH_PROGRESS_BAR,
-      );
+      window.ea.flashFrame();
     }
   }
 
@@ -115,7 +142,9 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
       .subscribe((res) => {
         if (res) {
           this._matDialogRef.close({
+            isResetBreakTimer: this.isResetBreakTimer,
             trackItems: res.trackItems,
+            wasFocusSessionRunning: this.data.wasFocusSessionRunning,
           });
         }
       });
@@ -134,13 +163,17 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
 
   skipTrack(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
       trackItems: [],
       simpleCounterToggleBtnsWhenNoTrackItems: this.simpleCounterToggleBtns,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
     });
   }
 
   trackAsBreak(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
       trackItems: [
         {
           type: 'BREAK',
@@ -151,11 +184,13 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
     });
   }
 
-  track(isTrackAsBreak: boolean = false): void {
+  track(): void {
     this._matDialogRef.close({
+      isResetBreakTimer: this.isResetBreakTimer,
+      wasFocusSessionRunning: this.data.wasFocusSessionRunning,
       trackItems: [
         {
-          type: isTrackAsBreak ? 'TASK_AND_BREAK' : 'TASK',
+          type: 'TASK',
           time: 'IDLE_TIME',
           simpleCounterToggleBtns: this.simpleCounterToggleBtns,
           ...(this.isCreate
@@ -164,5 +199,9 @@ export class DialogIdleComponent implements OnInit, OnDestroy {
         },
       ],
     });
+  }
+
+  hasActiveSimpleCounterTimerButton(): boolean {
+    return this.simpleCounterToggleBtns.some((btn) => btn.isTrackTo);
   }
 }

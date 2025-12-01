@@ -10,3 +10,21 @@
     @content;
   }
 }
+
+@mixin touchPrimaryDevice {
+  :host-context(.isTouchPrimary) & {
+    @content;
+  }
+}
+
+@mixin mousePrimaryDevice($isGlobal: false) {
+  @if $isGlobal {
+    .isMousePrimary & {
+      @content;
+    }
+  } @else {
+    :host-context(.isMousePrimary) & {
+      @content;
+    }
+  }
+}

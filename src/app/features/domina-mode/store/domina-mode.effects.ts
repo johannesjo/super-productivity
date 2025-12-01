@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { EMPTY, Observable, timer } from 'rxjs';
 import { distinctUntilChanged, switchMap, tap, withLatestFrom } from 'rxjs/operators';
@@ -9,12 +9,15 @@ import { speak } from '../../../util/speak';
 
 @Injectable()
 export class DominaModeEffects {
+  private actions$ = inject(Actions);
+  private _store$ = inject(Store);
+
   dominaMode$: Observable<unknown> = createEffect(
     () =>
       this._store$.select(selectIsDominaModeConfig).pipe(
         distinctUntilChanged(),
         switchMap((cfg) =>
-          cfg.isEnabled
+          cfg.isEnabled && cfg.voice
             ? timer(1000, cfg.interval || 10000).pipe(
                 withLatestFrom(this._store$.select(selectCurrentTask)),
                 tap(([, currentTask]) => {
@@ -23,7 +26,9 @@ export class DominaModeEffects {
                     if (txt.length <= 1) {
                       txt = currentTask.title;
                     }
-                    speak(txt, cfg.volume);
+                    if (cfg.voice) {
+                      speak(txt, cfg.volume, cfg.voice);
+                    }
                   }
                 }),
               )
@@ -32,6 +37,4 @@ export class DominaModeEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(private actions$: Actions, private _store$: Store) {}
 }

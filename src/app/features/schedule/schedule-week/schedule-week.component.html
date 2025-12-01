@@ -1,0 +1,186 @@
+<header
+  class="week-header"
+  [class.isInPanel]="isInPanel()"
+>
+  <div class="days">
+    <div class="filler"><!--for time --></div>
+    @for (day of daysToShow(); track $index) {
+      <div class="day">
+        @if ($index === 0) {
+          <mat-icon>wb_sunny</mat-icon>
+        }
+        <div class="day-num">{{ day | localeDate: 'd' }}</div>
+        <div class="day-day">{{ day | localeDate: 'EEE' }}</div>
+      </div>
+    }
+  </div>
+</header>
+
+<div
+  #gridContainer
+  class="grid-container"
+  (click)="onGridClick($event)"
+  (mousemove)="onMoveOverGrid($event)"
+>
+  <!-- Time -->
+  @for (time of times(); track $index) {
+    <div
+      class="time"
+      style="grid-row: {{ $index * FH + 1 }}"
+    >
+      {{ time }}
+    </div>
+  }
+
+  <!-- Grid Rows -->
+  @for (row of rowsByNr; track $index) {
+    <div
+      class="row"
+      style="grid-row: {{ row + 1 }}"
+    ></div>
+  }
+
+  <!-- Grid Cols -->
+  @for (day of daysToShow(); track $index) {
+    <div
+      class="col"
+      [attr.data-day]="day"
+      style="grid-column: {{ $index + 2 }}; grid-row: 1 / span {{
+        ($index === 0 ? currentTimeRow() : endOfDayColRowStart()) - 1
+      }}"
+    ></div>
+    <div
+      class="col end-of-day"
+      [attr.data-day]="day"
+      style="grid-column: {{ $index + 2 }}; grid-row: {{
+        $index === 0 ? currentTimeRow() : endOfDayColRowStart()
+      }} / span {{
+        totalRows - ($index === 0 ? currentTimeRow() : endOfDayColRowStart())
+      }}"
+    ></div>
+  }
+
+  <!-- Work Start and End -->
+  @if (workStartEnd()) {
+    <div
+      id="work-start"
+      class="work-start"
+      style="grid-row: {{ workStartEnd()!.workStartRow }}"
+    >
+      <div>{{ T.F.SCHEDULE.START | translate }}</div>
+    </div>
+    <div
+      class="work-end"
+      style="grid-row: {{ workStartEnd()!.workEndRow }}"
+    >
+      <div>{{ T.F.SCHEDULE.END | translate }}</div>
+    </div>
+  }
+
+  <div
+    id="current-time"
+    class="current-time"
+    style="grid-column: 2;  grid-row: {{ currentTimeRow() }} / span 1"
+  >
+    <div class="circle"></div>
+  </div>
+
+  <!-- Events -->
+  @for (ev of safeEvents(); track ev.id) {
+    @if (isDraggableSE(ev)) {
+      <schedule-event
+        class="draggable"
+        [cdkDragData]="ev"
+        (cdkDragMoved)="dragMoved($event)"
+        (cdkDragStarted)="dragStarted($event)"
+        (cdkDragReleased)="dragReleased($event)"
+        [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? 75 : 0"
+        [event]="ev"
+      ></schedule-event>
+    } @else {
+      <schedule-event
+        [event]="ev"
+        [cdkDragDisabled]="true"
+      ></schedule-event>
+    }
+  }
+
+  <!-- Excess tasks planned for day -->
+  @for (beyondBudgetDay of safeBeyondBudget(); track i; let i = $index) {
+    @if (beyondBudgetDay.length > 0) {
+      <div
+        class="excess-entries"
+        style="grid-column: {{ i + 2 }}"
+      >
+        <div
+          class="excess-entries-header"
+          [matTooltipPosition]="'above'"
+          [matTooltip]="
+            'Tasks planned for day, but that are beyond the available time budget'
+          "
+        >
+          <mat-icon>hourglass_disabled</mat-icon>
+          {{ beyondBudgetDay.length }}
+        </div>
+        @for (ev of beyondBudgetDay; track ev.id) {
+          @if (isDraggableSE(ev)) {
+            <schedule-event
+              [event]="ev"
+              class="draggable"
+              [cdkDragData]="ev"
+              (cdkDragMoved)="dragMoved($event)"
+              (cdkDragStarted)="dragStarted($event)"
+              (cdkDragReleased)="dragReleased($event)"
+              [cdkDragStartDelay]="IS_TOUCH_PRIMARY ? DRAG_DELAY_FOR_TOUCH : 0"
+            ></schedule-event>
+          } @else {
+            <schedule-event
+              [event]="ev"
+              [cdkDragDisabled]="true"
+            ></schedule-event>
+          }
+        }
+      </div>
+    }
+  }
+
+  @if (
+    (!isTaskDragActive() || isCtrlPressed()) && newTaskPlaceholder();
+    as newTaskPlaceholder
+  ) {
+    <create-task-placeholder
+      [isEditMode]="isCreateTaskActive()"
+      [time]="newTaskPlaceholder.time"
+      [date]="newTaskPlaceholder.date"
+      (editEnd)="isCreateTaskActive.set(false); this.newTaskPlaceholder.set(null)"
+      [style]="newTaskPlaceholder.style"
+      [style.opacity]="isCtrlPressed() ? 1 : null"
+    >
+    </create-task-placeholder>
+  }
+
+  @if (isDragging() && currentDragEvent() && dragPreviewStyle()) {
+    <schedule-event
+      class="custom-drag-preview"
+      [event]="currentDragEvent()!"
+      [style]="dragPreviewStyle()!"
+      [class.isShiftInsertPreview]="dragPreviewContext()?.kind === 'shift-task'"
+      [class.isScheduleForDay]="isShiftNoScheduleMode()"
+    >
+      @if (dragPreviewLabel()) {
+        <div class="drag-preview-time-badge">
+          {{ dragPreviewLabel() }}
+        </div>
+      }
+    </schedule-event>
+  }
+</div>
+
+@if (showShiftKeyInfo()) {
+  <div class="shift-key-info">
+    <div class="info-content">
+      <mat-icon>info</mat-icon>
+      <span>{{ T.F.SCHEDULE.SHIFT_KEY_INFO | translate }}</span>
+    </div>
+  </div>
+}

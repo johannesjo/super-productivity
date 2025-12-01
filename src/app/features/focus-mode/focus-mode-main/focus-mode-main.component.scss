@@ -1,0 +1,481 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  padding-top: var(--s2);
+  padding-bottom: var(--s2);
+
+  --muted-opacity: 0;
+}
+
+// Mode selector at the top (Preparation state)
+.focus-mode-select-mode {
+  position: absolute;
+  top: var(--s2);
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-focus-mode-main-selector);
+  padding: 0 16px;
+  max-width: 600px;
+}
+
+// ========== CENTER BLOCK (Preparation & In Progress) ==========
+.center-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+// ========== TASK SECTION ==========
+.task-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  flex-direction: column;
+  margin: var(--s);
+
+  &:hover button {
+    opacity: 1;
+  }
+
+  button {
+    opacity: var(--muted-opacity);
+    transition: var(--transition-standard);
+    pointer-events: auto;
+
+    @media (hover: none) and (pointer: coarse) {
+      /* styles for primary touch devices go here */
+      opacity: 1;
+    }
+  }
+}
+
+// ========== TASK ACTIONS (below title) ==========
+.task-actions {
+  display: flex;
+  gap: var(--s);
+  justify-content: center;
+}
+
+.task-title,
+.task-title-placeholder {
+  text-align: center;
+  font-size: 30px;
+  line-height: 1.5;
+  border-radius: 4px;
+  border: 1px solid transparent;
+  margin: 0;
+  padding: 4px;
+
+  @media (max-width: 499px) {
+    font-size: 24px;
+  }
+
+  @media (max-height: 250px) {
+    font-size: 18px;
+  }
+
+  @media (max-width: 333px) {
+    font-size: 18px;
+  }
+}
+
+.task-title {
+  ::ng-deep textarea {
+    text-align: center;
+  }
+
+  &.is-focused {
+    outline: 1px solid var(--c-accent);
+  }
+}
+
+.task-title-placeholder {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: var(--transition-standard);
+  padding: 4px;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+// Task switch button no longer needed in task section (moved to task-actions)
+
+// ========== CLOCK DISPLAY ==========
+.clock-display {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: var(--s2);
+
+  &__content {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    gap: var(--s1);
+  }
+}
+
+.clock-face {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  --clock-face-size: 150px;
+  width: var(--clock-face-size);
+  height: var(--clock-face-size);
+
+  @media (min-height: 800px) and (min-width: 500px) {
+    --clock-face-size: 180px;
+  }
+
+  @media (min-height: 900px) and (min-width: 600px) {
+    --clock-face-size: 220px;
+  }
+
+  @media (max-height: 500px) {
+    --clock-face-size: 90px;
+  }
+
+  &__layer {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    opacity: 1;
+    transition: var(--transition-standard);
+
+    &.is-hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+  }
+}
+
+.focus-progress-circle {
+  width: 100%;
+  height: 100%;
+
+  &__bg {
+    fill: none;
+    stroke: var(--progress-bg, rgba(255, 255, 255, 0.15));
+    stroke-width: 1.8;
+  }
+
+  &__progress {
+    fill: none;
+    stroke: var(--c-primary);
+    stroke-width: 2;
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.3s ease;
+  }
+}
+
+.clock-time {
+  font-size: 24px;
+  font-weight: bold;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.duration-slider-overlay-wrapper {
+  position: absolute;
+  top: 50%;
+  width: 200px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.duration-slider-overlay {
+  display: flex;
+  justify-content: center;
+  z-index: var(--z-focus-mode-duration-slider);
+
+  @media (max-width: 499px) {
+    width: 160px;
+    bottom: -50px;
+  }
+}
+
+// ========== CLOCK WRAPPER (In Progress state) ==========
+.clock-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  --control-offset: var(--s2);
+
+  &:hover button {
+    opacity: 1;
+  }
+
+  button {
+    opacity: var(--muted-opacity);
+    transition: var(--transition-standard);
+    pointer-events: auto;
+
+    @media (hover: none) and (pointer: coarse) {
+      /* styles for primary touch devices go here */
+      opacity: 1;
+    }
+  }
+
+  .time-adjust-btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+  }
+
+  .time-adjust-btn--decrease {
+    left: var(--control-offset);
+  }
+
+  .time-adjust-btn--increase {
+    right: var(--control-offset);
+  }
+
+  // Pause/Resume button inside the circle (top center)
+  .pause-resume-btn {
+    position: absolute;
+    top: var(--control-offset);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  // Complete session button inside the circle (bottom center)
+  .complete-session-btn {
+    position: absolute;
+    bottom: var(--control-offset);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+}
+
+// ========== PLAY BUTTON ==========
+.play-button {
+  margin-top: 16px;
+  width: 64px;
+  height: 64px;
+
+  mat-icon {
+    font-size: 36px;
+    width: 36px;
+    height: 36px;
+  }
+}
+
+// ========== SIMPLE COUNTER BUTTONS (In Progress) ==========
+.simple-counter-buttons {
+  display: flex;
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: var(--z-focus-mode-simple-counter);
+  gap: 8px;
+
+  simple-counter-button.isHiddenWithoutFocus {
+    @include mousePrimaryDevice {
+      transition: var(--transition-standard);
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+
+    :host:hover & {
+      transition: var(--transition-standard);
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+// ========== CONTROLS (In Progress) ==========
+.bottom-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: fixed;
+  bottom: var(--s2);
+  left: 50%;
+  transform: translateX(-50%);
+
+  @include mousePrimaryDevice {
+    transition: all var(--transition-leave);
+    opacity: 0;
+  }
+
+  :host:hover & {
+    transition: all var(--transition-enter);
+    opacity: 1;
+  }
+
+  a {
+    justify-content: center;
+    align-items: center;
+    display: inline-flex;
+    color: inherit;
+  }
+
+  a,
+  button {
+    width: 56px !important;
+    height: 56px !important;
+    position: relative;
+
+    mat-icon {
+      font-size: 32px !important;
+      width: 32px !important;
+      height: 32px !important;
+    }
+
+    .extend-label {
+      position: absolute;
+      bottom: 4px;
+      right: 4px;
+      background: var(--c-accent);
+      color: var(--c-on-accent);
+      border-radius: 50%;
+      width: 18px;
+      height: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      line-height: 1;
+    }
+  }
+}
+
+// ========== NOTES AND ATTACHMENTS ==========
+.notes-and-attachments {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  position: absolute;
+  bottom: 0;
+}
+
+.notes-panel {
+  border-radius: 4px;
+  margin: auto;
+  padding: var(--s2);
+  width: 100%;
+  flex-grow: 1;
+  max-width: var(--component-max-width);
+  min-height: 60px;
+  max-height: 50vh;
+  display: flex;
+
+  inline-markdown {
+    max-height: 100%;
+    width: 100%;
+    @include noteStyle;
+    display: flex;
+
+    ::ng-deep .markdown-wrapper {
+      width: 100%;
+      overflow: auto;
+      height: auto !important;
+    }
+
+    ::ng-deep .markdown-parsed,
+    ::ng-deep textarea {
+      min-height: 60px;
+    }
+
+    ::ng-deep textarea {
+      width: 100%;
+      background: inherit;
+      color: inherit;
+      border: none;
+      box-sizing: border-box;
+      word-wrap: break-word;
+      display: block;
+      resize: none;
+      min-height: 60px;
+      overflow: auto;
+      padding: var(--s) var(--s2);
+
+      &:focus {
+        outline: none;
+      }
+    }
+  }
+}
+
+.attachment-list-wrapper {
+  margin-top: var(--s);
+  max-width: 100vw;
+  padding: 0 var(--s);
+  overflow-x: auto;
+  min-height: 111px;
+
+  @include mousePrimaryDevice {
+    visibility: hidden;
+  }
+
+  :host:hover & {
+    visibility: visible;
+  }
+
+  ::ng-deep ul {
+    display: block;
+    white-space: nowrap;
+    text-align: center;
+    margin: 0;
+
+    li {
+      display: inline-block;
+    }
+  }
+}
+
+.drag-over-msg {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  opacity: 1;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  display: flex;
+  z-index: var(--z-focus-mode-drag-over);
+}
+
+.hide-notes-btn {
+  position: absolute;
+  z-index: var(--z-focus-mode-hide-notes);
+  top: -10px;
+  left: 50%;
+  transform: translateX(-50%);
+}

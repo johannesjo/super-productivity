@@ -1,11 +1,15 @@
-import { Injectable } from '@angular/core';
-import { Observable, of, timer } from 'rxjs';
-import { catchError, first, map, switchMap } from 'rxjs/operators';
-import { ProjectService } from 'src/app/features/project/project.service';
+import { Injectable, inject } from '@angular/core';
+import { Observable, of } from 'rxjs';
+import { first, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { IssueServiceInterface } from '../../issue-service-interface';
-import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
-import { GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL } from './gitea.const';
+import {
+  IssueData,
+  IssueDataReduced,
+  IssueProviderGitea,
+  SearchResultItem,
+} from '../../issue.model';
+import { GITEA_POLL_INTERVAL } from './gitea.const';
 import {
   formatGiteaIssueTitle,
   formatGiteaIssueTitleForSnack,
@@ -13,45 +17,56 @@ import {
 import { GiteaCfg } from './gitea.model';
 import { isGiteaEnabled } from './is-gitea-enabled.util';
 import { GiteaApiService } from '../gitea/gitea-api.service';
-import { GiteaIssue } from './gitea-issue/gitea-issue.model';
+import { GiteaIssue } from './gitea-issue.model';
+import { IssueProviderService } from '../../issue-provider.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GiteaCommonInterfacesService implements IssueServiceInterface {
-  constructor(
-    private readonly _giteaApiService: GiteaApiService,
-    private readonly _projectService: ProjectService,
-  ) {}
+  private readonly _giteaApiService = inject(GiteaApiService);
+  private readonly _issueProviderService = inject(IssueProviderService);
+
+  pollInterval: number = GITEA_POLL_INTERVAL;
 
   isEnabled(cfg: GiteaCfg): boolean {
     return isGiteaEnabled(cfg);
   }
-  isBacklogPollingEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoAddToBacklog),
-    );
-  }
-  isIssueRefreshEnabledForProjectOnce$(projectId: string): Observable<boolean> {
-    return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => this.isEnabled(cfg) && cfg.isAutoPoll),
-    );
+
+  testConnection(cfg: GiteaCfg): Promise<boolean> {
+    return this._giteaApiService
+      .searchIssueForRepo$('', cfg)
+      .pipe(
+        map((res) => Array.isArray(res)),
+        first(),
+      )
+      .toPromise()
+      .then((result) => result ?? false);
   }
 
-  pollTimer$: Observable<number> = timer(GITEA_INITIAL_POLL_DELAY, GITEA_POLL_INTERVAL);
+  issueLink(issueNumber: string | number, issueProviderId: string): Promise<string> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`))
+      .toPromise()
+      .then((result) => result ?? '');
+  }
 
-  issueLink$(issueNumber: string | number, projectId: string): Observable<string> {
-    return this._getCfgOnce$(projectId).pipe(
-      map((cfg) => `${cfg.host}/${cfg.repoFullname}/issues/${issueNumber}`),
-    );
+  getById(id: string | number, issueProviderId: string): Promise<IssueData> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg: GiteaCfg) =>
+          this._giteaApiService.getById$(id as number, giteaCfg),
+        ),
+      )
+      .toPromise()
+      .then((result) => {
+        if (!result) {
+          throw new Error('Failed to get Gitea issue');
+        }
+        return result;
+      });
   }
-  getById$(id: string | number, projectId: string): Observable<IssueData> {
-    return this._getCfgOnce$(projectId).pipe(
-      switchMap((giteaCfg: GiteaCfg) =>
-        this._giteaApiService.getById$(id as number, giteaCfg),
-      ),
-    );
-  }
+
   getAddTaskData(issue: GiteaIssue): Partial<Readonly<TaskCopy>> & { title: string } {
     return {
       title: formatGiteaIssueTitle(issue),
@@ -59,29 +74,32 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
       issueLastUpdated: new Date(issue.updated_at).getTime(),
     };
   }
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    return this._getCfgOnce$(projectId).pipe(
-      switchMap((giteaCfg) =>
-        this.isEnabled(giteaCfg) && giteaCfg.isSearchIssuesFromGitea
-          ? this._giteaApiService
-              .searchIssueForRepo$(searchTerm, giteaCfg)
-              .pipe(catchError(() => []))
-          : of([]),
-      ),
-    );
+
+  searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
+    return this._getCfgOnce$(issueProviderId)
+      .pipe(
+        switchMap((giteaCfg) =>
+          this.isEnabled(giteaCfg)
+            ? this._giteaApiService.searchIssueForRepo$(searchTerm, giteaCfg)
+            : of([]),
+        ),
+      )
+      .toPromise()
+      .then((result) => result ?? []);
   }
+
   async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
     issue: GiteaIssue;
     issueTitle: string;
   } | null> {
-    if (!task.projectId) {
-      throw new Error('No projectId');
+    if (!task.issueProviderId) {
+      throw new Error('No issueProviderId');
     }
     if (!task.issueId) {
       throw new Error('No issueId');
     }
-    const cfg = await this._getCfgOnce$(task.projectId).toPromise();
+    const cfg = await this._getCfgOnce$(task.issueProviderId).toPromise();
     const issue = await this._giteaApiService.getById$(+task.issueId, cfg).toPromise();
 
     const lastRemoteUpdate = new Date(issue.updated_at).getTime();
@@ -131,14 +149,14 @@ export class GiteaCommonInterfacesService implements IssueServiceInterface {
   }
 
   async getNewIssuesToAddToBacklog?(
-    projectId: string,
+    issueProviderId: string,
     allExistingIssueIds: number[] | string[],
   ): Promise<IssueDataReduced[]> {
-    const cfg = await this._getCfgOnce$(projectId).toPromise();
+    const cfg = await this._getCfgOnce$(issueProviderId).toPromise();
     return await this._giteaApiService.getLast100IssuesFor$(cfg).toPromise();
   }
 
-  private _getCfgOnce$(projectId: string): Observable<GiteaCfg> {
-    return this._projectService.getGiteaCfgForProject$(projectId).pipe(first());
+  private _getCfgOnce$(issueProviderId: string): Observable<IssueProviderGitea> {
+    return this._issueProviderService.getCfgOnce$(issueProviderId, 'GITEA');
   }
 }

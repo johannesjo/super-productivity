@@ -6,7 +6,6 @@ import { PomodoroEffects } from './pomodoro.effects';
 import { provideMockStore } from '@ngrx/store/testing';
 import { NotifyService } from '../../../core/notify/notify.service';
 import { MatDialog } from '@angular/material/dialog';
-import { ElectronService } from '../../../core/electron/electron.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PomodoroService } from '../pomodoro.service';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
@@ -34,7 +33,7 @@ describe('PomodoroEffects', () => {
     isEnabled$ = new BehaviorSubject<boolean>(true);
     currentSessionTime$ = new BehaviorSubject<number>(5000);
     isBreak$ = new BehaviorSubject<boolean>(false);
-    allStartableTasks$ = new BehaviorSubject([]);
+    allStartableTasks$ = new BehaviorSubject<any[]>([]);
     TestBed.configureTestingModule({
       providers: [
         PomodoroEffects,
@@ -58,7 +57,6 @@ describe('PomodoroEffects', () => {
         },
         { provide: MatDialog, useValue: {} },
         { provide: NotifyService, useValue: {} },
-        { provide: ElectronService, useValue: {} },
         { provide: SnackService, useValue: { open: () => undefined } },
       ],
     });

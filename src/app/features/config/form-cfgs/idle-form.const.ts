@@ -7,6 +7,7 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
   title: T.GCF.IDLE.TITLE,
   key: 'idle',
   help: T.GCF.IDLE.HELP,
+  isHideForAndroidApp: true,
   items: [
     {
       type: 'tpl',
@@ -43,15 +44,6 @@ export const IDLE_FORM_CFG: ConfigFormSection<IdleConfig> = {
       hideExpression: '!model.isEnableIdleTimeTracking',
       templateOptions: {
         label: T.GCF.IDLE.IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK,
-      },
-    },
-    {
-      key: 'isUnTrackedIdleResetsBreakTimer',
-      className: HelperClasses.isHideForNoAdvancedFeatures,
-      type: 'checkbox',
-      hideExpression: '!model.isEnableIdleTimeTracking',
-      templateOptions: {
-        label: T.GCF.IDLE.IS_UN_TRACKED_IDLE_RESETS_BREAK_TIMER,
       },
     },
   ],

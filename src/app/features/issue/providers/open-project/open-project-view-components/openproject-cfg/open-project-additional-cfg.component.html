@@ -1,0 +1,106 @@
+<form [formGroup]="form">
+  <h3 class="sub-section-heading">
+    {{ T.F.OPEN_PROJECT.CFG_CMP.TRANSITION | translate }}
+  </h3>
+  <mat-slide-toggle
+    [ngModel]="cfg.isTransitionIssuesEnabled"
+    (ngModelChange)="partialModelChange({ isTransitionIssuesEnabled: $event })"
+    [ngModelOptions]="{ standalone: true }"
+    name="isTransitionIssuesEnabled"
+    style="margin-bottom: 8px"
+  >
+    {{ T.F.OPEN_PROJECT.CFG_CMP.ENABLE_TRANSITIONS | translate }}
+  </mat-slide-toggle>
+
+  @if (cfg.isTransitionIssuesEnabled) {
+    <section @expand>
+      <mat-form-field>
+        <mat-label>
+          {{ T.F.OPEN_PROJECT.CFG_CMP.SELECT_ISSUE_FOR_TRANSITIONS | translate }}
+        </mat-label>
+        <input
+          [formControl]="issueSuggestionsCtrl"
+          [matAutocomplete]="autoEl"
+          class="border-color-primary"
+          matInput
+        />
+        <mat-autocomplete
+          #autoEl="matAutocomplete"
+          (optionSelected)="updateTransitionOptions()"
+          [autoActiveFirstOption]="true"
+          [displayWith]="displayIssueWith"
+        >
+          @if (isLoading$ | async) {
+            <mat-option
+              [value]="issueSuggestionsCtrl.value"
+              class="is-loading"
+            >
+              <mat-spinner diameter="50"></mat-spinner>
+            </mat-option>
+          }
+          @for (issue of filteredIssueSuggestions$ | async; track issue.issueData.id) {
+            <mat-option [value]="issue"
+              ><span>{{ issue?.title }}</span>
+            </mat-option>
+          }
+        </mat-autocomplete>
+      </mat-form-field>
+      @for (opt of transitionConfigOpts; track opt.key) {
+        <div>
+          <mat-form-field>
+            <!--        @if (opt.key==='OPEN') {-->
+            <!--        <label> {{ T.F.OPEN_PROJECT.CFG_CMP.OPEN|translate }} </label>-->
+            <!--        } -->
+            @if (opt.key === 'IN_PROGRESS') {
+              <label> {{ T.F.OPEN_PROJECT.CFG_CMP.IN_PROGRESS | translate }} </label>
+            }
+            @if (opt.key === 'DONE') {
+              <label> {{ T.F.OPEN_PROJECT.CFG_CMP.DONE | translate }} </label>
+            }
+            <mat-select
+              (ngModelChange)="setTransition(opt.key, $event)"
+              [ngModelOptions]="{ standalone: true }"
+              [ngModel]="getTransition(opt.key)"
+            >
+              <mat-option value="DO_NOT">
+                {{ T.F.OPEN_PROJECT.CFG_CMP.DO_NOT | translate }}
+              </mat-option>
+              <mat-option value="ALWAYS_ASK">
+                {{ T.F.OPEN_PROJECT.CFG_CMP.ALWAYS_ASK | translate }}
+              </mat-option>
+              @for (transition of cfg.availableTransitions; track transition.id) {
+                <mat-option [value]="transition"> {{ transition.name }} </mat-option>
+              }
+            </mat-select>
+          </mat-form-field>
+          @if (showSetProgressOption(opt.key)) {
+            <div>
+              <mat-checkbox
+                [ngModel]="this.cfg.isSetProgressOnTaskDone"
+                (ngModelChange)="partialModelChange({ isSetProgressOnTaskDone: $event })"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                {{ T.F.OPEN_PROJECT.CFG_CMP.PROGRESS_ON_SAVE | translate }}
+              </mat-checkbox>
+              <!-- TODO: The 'tickInterval' property no longer exists -->
+              @if (this.cfg.isSetProgressOnTaskDone) {
+                <mat-slider
+                  thumbLabel
+                  [displayWith]="displayThumbWith"
+                  min="0"
+                  max="100"
+                  step="5"
+                  aria-label="units"
+                  [ngModel]="this.cfg.progressOnDone"
+                  (ngModelChange)="partialModelChange({ progressOnDone: $event })"
+                  [ngModelOptions]="{ standalone: true }"
+                  ><input matSliderThumb
+                /></mat-slider>
+              }
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</form>

@@ -5,11 +5,9 @@ import {
   SimpleCounterType,
 } from '../../simple-counter/simple-counter.model';
 import { T } from '../../../t.const';
-import {
-  EMPTY_SIMPLE_COUNTER,
-  SIMPLE_COUNTER_TRIGGER_ACTIONS,
-} from '../../simple-counter/simple-counter.const';
+import { EMPTY_SIMPLE_COUNTER } from '../../simple-counter/simple-counter.const';
 import { nanoid } from 'nanoid';
+import { FormlyFieldConfig } from '@ngx-formly/core/lib/models/fieldconfig';
 
 export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
   title: T.F.SIMPLE_COUNTER.FORM.TITLE,
@@ -20,6 +18,7 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
     {
       key: 'counters',
       type: 'repeat',
+      className: 'simple-counters',
       templateOptions: {
         addText: T.F.SIMPLE_COUNTER.FORM.ADD_NEW,
         getInitialValue: () => ({
@@ -31,17 +30,17 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
       fieldArray: {
         fieldGroup: [
           {
-            type: 'checkbox',
-            key: 'isEnabled',
-            templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
-            },
-          },
-          {
             type: 'input',
             key: 'title',
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_TITLE,
+            },
+          },
+          {
+            type: 'checkbox',
+            key: 'isEnabled',
+            templateOptions: {
+              label: T.F.SIMPLE_COUNTER.FORM.L_IS_ENABLED,
             },
           },
           {
@@ -59,6 +58,10 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
                   label: T.F.SIMPLE_COUNTER.FORM.TYPE_CLICK_COUNTER,
                   value: SimpleCounterType.ClickCounter,
                 },
+                {
+                  label: T.F.SIMPLE_COUNTER.FORM.TYPE_REPEATED_COUNTDOWN,
+                  value: SimpleCounterType.RepeatedCountdownReminder,
+                },
               ],
             },
           },
@@ -67,61 +70,86 @@ export const SIMPLE_COUNTER_FORM: ConfigFormSection<SimpleCounterConfig> = {
             key: 'icon',
             templateOptions: {
               label: T.F.SIMPLE_COUNTER.FORM.L_ICON,
+              description: T.G.ICON_INP_DESCRIPTION,
             },
           },
           {
-            type: 'icon',
-            key: 'iconOn',
+            key: 'countdownDuration',
+            type: 'duration',
             hideExpression: (model: any) => {
-              return model.type !== SimpleCounterType.StopWatch;
+              return model.type !== SimpleCounterType.RepeatedCountdownReminder;
+            },
+            hooks: {
+              onInit: (field) => {
+                if (!field?.formControl?.value && field?.formControl?.value !== null) {
+                  field?.formControl?.setValue(30 * 60000);
+                }
+              },
             },
             templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_ICON_ON,
+              required: false,
+              isAllowSeconds: false,
+              label: T.F.SIMPLE_COUNTER.FORM.L_COUNTDOWN_DURATION,
+              description: T.G.DURATION_DESCRIPTION,
             },
           },
           {
-            key: 'triggerOnActions',
-            type: 'select',
-            hideExpression: (model: any) => {
-              return model.type !== SimpleCounterType.ClickCounter;
-            },
+            type: 'checkbox',
+            key: 'isTrackStreaks',
             templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_COUNT_UP,
-              multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-                label: actionStr,
-                value: actionStr,
-              })),
+              label: T.F.SIMPLE_COUNTER.FORM.L_TRACK_STREAKS,
             },
           },
           {
-            key: 'triggerOnActions',
-            type: 'select',
-            hideExpression: (model: any) => {
-              return model.type !== SimpleCounterType.StopWatch;
+            key: 'streakMinValue',
+            type: 'input',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) =>
+                fCfg.model.type === SimpleCounterType.StopWatch ||
+                !fCfg.model.isTrackStreaks,
             },
             templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_ON,
-              multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-                label: actionStr,
-                value: actionStr,
-              })),
+              label: T.F.SIMPLE_COUNTER.FORM.L_DAILY_GOAL,
+              type: 'number',
+              min: 1,
+              required: true,
+              getInitialValue: () => 1,
             },
           },
           {
-            key: 'triggerOffActions',
-            type: 'select',
-            hideExpression: (model: any) => {
-              return model.type !== SimpleCounterType.StopWatch;
+            key: 'streakMinValue',
+            type: 'duration',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) =>
+                fCfg.model.type !== SimpleCounterType.StopWatch ||
+                !fCfg.model.isTrackStreaks,
             },
             templateOptions: {
-              label: T.F.SIMPLE_COUNTER.FORM.L_AUTO_SWITCH_OFF,
-              multiple: true,
-              options: SIMPLE_COUNTER_TRIGGER_ACTIONS.map((actionStr) => ({
-                label: actionStr,
-                value: actionStr,
-              })),
+              label: T.F.SIMPLE_COUNTER.FORM.L_DAILY_GOAL,
+              min: 60 * 1000,
+              required: true,
+              description: T.G.DURATION_DESCRIPTION,
+              getInitialValue: () => 10 * 60 * 1000,
+            },
+          },
+          {
+            key: 'streakWeekDays',
+            type: 'multicheckbox',
+            expressions: {
+              hide: (fCfg: FormlyFieldConfig) => !fCfg.model.isTrackStreaks,
+            },
+            templateOptions: {
+              label: T.F.SIMPLE_COUNTER.FORM.L_WEEKDAYS,
+              required: true,
+              options: [
+                { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },
+                { label: T.F.TASK_REPEAT.F.TUESDAY, value: 2 },
+                { label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3 },
+                { label: T.F.TASK_REPEAT.F.THURSDAY, value: 4 },
+                { label: T.F.TASK_REPEAT.F.FRIDAY, value: 5 },
+                { label: T.F.TASK_REPEAT.F.SATURDAY, value: 6 },
+                { label: T.F.TASK_REPEAT.F.SUNDAY, value: 0 },
+              ],
             },
           },
         ],

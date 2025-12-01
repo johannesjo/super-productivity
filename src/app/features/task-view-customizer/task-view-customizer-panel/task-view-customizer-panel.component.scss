@@ -1,0 +1,11 @@
+// Menu styles are in global styles: src/styles/components/_customizer-menu.scss
+// This is necessary because mat-menu renders in a global overlay container
+
+.menu-input-wrapper {
+  padding: 8px 16px;
+  min-width: 250px;
+
+  .menu-input {
+    width: 100%;
+  }
+}

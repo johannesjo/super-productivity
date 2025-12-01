@@ -1,0 +1,118 @@
+/**
+ * Rainbow Theme for Super Productivity
+ * Colorful and playful theme with vibrant gradients and rainbow backgrounds
+ * Designed for enhanced visual appeal and productivity engagement
+ */
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+* {
+  font-family: 'Chilanka', 'Comic Sans MS', 'URW Chancery L', 'Dancing Script', cursive;
+}
+
+body {
+  /* ===============================
+ * RAINBOW COLOR PALETTE
+ * ===============================*/
+
+  --rainbow-primary: #0079bf; /* Trello blue - trust and productivity */
+  --rainbow-accent: #ff6b6b; /* Coral - warm and approachable */
+  --rainbow-success: #27ae60; /* Green - completion and growth */
+  --rainbow-warning: #f39c12; /* Orange - attention and energy */
+  --rainbow-error: #e74c3c; /* Red - urgent items */
+  --rainbow-info: #3498db; /* Light blue - information */
+  --rainbow-purple: #9b59b6; /* Purple - creativity and categories */
+  --rainbow-pink: #e91e63; /* Pink - highlights and favorites */
+  --rainbow-teal: #1abc9c; /* Teal - secondary actions */
+  --rainbow-yellow: #f1c40f; /* Yellow - achievements and rewards */
+  --rainbow-mint: #2ecc71; /* Mint - progress and balance */
+  --rainbow-lavender: #af7ac5; /* Lavender - soft accent */
+
+  /* ===============================
+ * ACCENT & THEME COLORS
+ * ===============================*/
+
+  /* Primary accent (rainbow coral) */
+  --palette-accent-500: var(--rainbow-accent);
+  --c-accent: var(--rainbow-accent);
+  --palette-accent-100: #ffe3e3;
+  --palette-accent-200: #ffcfcf;
+  --palette-accent-300: #ffbbbb;
+  --palette-accent-400: #ff9393;
+  --palette-accent-600: #ff5757;
+  --palette-accent-700: #ff4343;
+  --palette-accent-800: #ff2f2f;
+  --palette-accent-900: #ff1b1b;
+
+  /* Semantic colors using rainbow palette */
+  --c-success: var(--rainbow-success);
+  --c-warning: var(--rainbow-warning);
+  --c-error: var(--rainbow-error);
+  --c-info: var(--rainbow-info);
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - colorful */
+  --scrollbar-thumb: var(--rainbow-primary);
+  --scrollbar-thumb-hover: var(--rainbow-accent);
+  --scrollbar-track: var(--bg);
+
+  --task-border-radius: 16px;
+}
+
+/* Rainbow theme variables */
+body.isDarkTheme {
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds with subtle colorful tints */
+  --bg: #1a1a1a;
+  --bg-darker: #0f0f0f;
+  --bg-slightly-lighter: #2d2d2d;
+  --bg-lighter: #3a3a3a;
+  --bg-lightest: #474747;
+  --bg-super-light: #545454;
+
+  /* Component backgrounds */
+  --card-bg: #2d2d2d;
+  --sidenav-bg: #0f0f0f;
+}
+
+body.isDarkTheme mat-sidenav-content {
+  background:
+    radial-gradient(circle at 20% 80%, rgba(0, 121, 191, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(155, 89, 182, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 60% 60%, rgba(26, 188, 156, 0.15) 0%, transparent 50%),
+    linear-gradient(
+      135deg,
+      rgba(0, 121, 191, 0.06) 0%,
+      rgba(255, 107, 107, 0.06) 25%,
+      rgba(155, 89, 182, 0.06) 50%,
+      rgba(26, 188, 156, 0.06) 75%,
+      rgba(241, 196, 15, 0.06) 100%
+    ) !important;
+}
+
+body mat-sidenav-content {
+  background:
+    radial-gradient(circle at 20% 80%, rgba(0, 121, 191, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 107, 107, 0.18) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(155, 89, 182, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 60% 60%, rgba(26, 188, 156, 0.15) 0%, transparent 50%),
+    linear-gradient(
+      135deg,
+      rgba(0, 121, 191, 0.06) 0%,
+      rgba(255, 107, 107, 0.06) 25%,
+      rgba(155, 89, 182, 0.06) 50%,
+      rgba(26, 188, 156, 0.06) 75%,
+      rgba(241, 196, 15, 0.06) 100%
+    ) !important;
+}

@@ -1,11 +1,11 @@
-@import './../../../_variables';
+@use '../../../styles/_globals.scss' as *;
 
 :host {
   overflow: hidden !important;
 }
 
 add-task-bar {
-  margin: 0 auto $s * 2;
+  margin: 0 auto var(--s2);
   max-width: 628px;
 
   ::ng-deep input {
@@ -14,7 +14,7 @@ add-task-bar {
 }
 
 h1 {
-  margin: $s * 2 0;
+  margin: var(--s2) 0;
   text-align: center;
 }
 
@@ -28,25 +28,25 @@ h2 {
   position: absolute;
   top: 0;
   left: 0;
-  transition: $transition-enter;
+  transition: var(--transition-enter);
   overflow: hidden;
 
   &.isFadeOut {
-    transition: $transition-ultra-fast;
+    transition: var(--transition-duration-xs) var(--ani-standard-timing);
     opacity: 0;
   }
 }
 
 .work-view-header {
-  padding: 0.5 * $s;
+  padding: var(--s-half);
 
   position: relative;
-  min-height: $bar-height-small;
+  min-height: var(--bar-height-small);
   display: flex;
   justify-content: center;
   align-items: center;
   @include mq(xs) {
-    padding: 2 * $s 0;
+    padding: var(--s2) 0;
   }
 
   @include smallMainContainer() {
@@ -70,12 +70,18 @@ h2 {
 }
 
 .completed-tasks-heading {
-  margin: $s;
-  margin-top: $s * 2;
+  margin: var(--s);
+  margin-top: var(--s2);
+  //text-align: left;
+  font-size: 16px;
+  //border-bottom: 1px solid var(--extra-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .backlog-heading {
-  margin: $s;
+  margin: var(--s);
 }
 
 .status-bar {
@@ -88,26 +94,22 @@ h2 {
   -webkit-user-select: none; /* Safari */
 
   .item {
-    margin: 0 1.5 * $s;
+    margin: 0 calc(1.5 * var(--s));
     text-align: center;
     position: relative;
   }
 
   .controls {
     text-align: center;
-    margin: $s 0;
+    margin: var(--s) 0;
     white-space: nowrap;
   }
 
   .label {
-    margin-right: $s;
-  }
-
-  .time-val {
+    margin-right: var(--s);
   }
 
   .no-wrap {
-    display: inline-block;
     white-space: nowrap;
     display: inline-flex;
     align-items: center;
@@ -122,7 +124,7 @@ h2 {
   right: -8px;
   z-index: 4;
   transform: translateY(-50%) scale(0);
-  transition: $transition-standard;
+  transition: var(--transition-standard);
   opacity: 0;
   visibility: hidden;
   @include mq(xs) {
@@ -140,13 +142,16 @@ h2 {
   transform: rotate(90deg);
 }
 
+finish-day-btn,
 .finish-day-button-wrapper {
   text-align: center;
-  margin: $s * 2 0 $s;
+  margin: var(--s2) 0 var(--s);
+  padding-top: 8px;
+  display: block;
   white-space: nowrap;
 
   button {
-    margin: 0 $s;
+    margin: 0 var(--s);
   }
 }
 
@@ -159,7 +164,7 @@ h2 {
   width: 100%;
 
   &.isAnimatable {
-    transition: $transition-standard;
+    transition: var(--transition-standard);
   }
 
   task-list {
@@ -176,6 +181,8 @@ h2 {
   @include scrollYImportant();
   top: 0;
   bottom: 0;
+  // make space for add task bar button not overlapping 'finish day' button
+  padding-bottom: 64px;
 }
 
 .backlog {
@@ -207,10 +214,10 @@ h2 {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding-bottom: 2 * $s;
-  margin: $s;
+  padding-bottom: var(--s2);
+  margin: var(--s);
 
-  @include mq('xs') {
+  @include mq(xs) {
     margin: 0;
   }
 
@@ -221,20 +228,17 @@ h2 {
 
 .add-more-or-finish {
   text-align: center;
-  padding-bottom: $s;
+  padding-bottom: var(--s);
 
   .btn-wrapper {
     display: block;
-    align-items: center;
-    justify-content: center;
-    flex-wrap: wrap;
 
     button {
       min-width: 160px;
       overflow: hidden;
       text-overflow: ellipsis;
-      margin-left: $s;
-      margin-bottom: $s;
+      margin-left: var(--s);
+      margin-bottom: var(--s);
 
       &:first-child {
         margin-left: 0;
@@ -244,26 +248,85 @@ h2 {
 }
 
 .add-scheduled {
-  margin-top: $s;
+  margin-top: var(--s);
 }
 
 .ready-to-work-btn {
-  margin-top: $s * 2;
+  margin-top: var(--s2);
 
   @include mq(xs) {
-    margin-top: $s * 3;
+    margin-top: var(--s3);
   }
 }
 
-.add-task-btn {
-  z-index: 45;
-  position: fixed;
-  right: 50%;
-  bottom: $s * 2;
-  transform: translateX(50%);
+.no-tasks-illu-wrapper {
+  position: relative;
+  margin-bottom: 32px;
 
-  &.isRight {
-    transform: none;
-    right: $s * 2;
+  img {
+    width: 500px;
+    display: block;
+    margin: auto;
+    border-radius: 8px;
+    max-width: 100%;
   }
+
+  .no-tasks-label {
+    font-size: 17px;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    font-weight: 400;
+    color: #333;
+
+    @include darkTheme() {
+      color: var(--text-color-most-intense);
+      font-weight: 500;
+      text-shadow:
+        0 0 2px black,
+        0 0 5px black;
+    }
+  }
+}
+
+// Unified collapsible section styles
+.collapsible-section {
+  margin-top: 16px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+:host ::ng-deep .collapsible-header {
+  font-size: 16px;
+  margin-top: 0;
+  padding: 12px 8px;
+  justify-content: center;
+  border-bottom: 2px solid transparent;
+
+  .collapsible-title {
+    flex-grow: 0;
+    margin-left: -10px;
+    opacity: 0.8;
+  }
+}
+
+:host collapsible.isExpanded ::ng-deep .collapsible-header {
+  border-bottom: 1px solid var(--extra-border-color);
+}
+
+.overdue-tasks {
+  margin-top: 16px;
+}
+
+.overdue-btn-wrapper {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  align-items: center;
+  padding-bottom: 8px;
+  padding-top: 8px;
 }

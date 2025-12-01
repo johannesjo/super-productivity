@@ -1,315 +1,351 @@
-<right-panel
-  *ngIf="!(workContextService.isContextChangingWithDelay$|async)"
-  @projectChange
->
+@if (!(workContextService.isContextChangingWithDelay$ | async)) {
   <div
     #containerEl
     class="wrapper"
+    cdkDropListGroup
+    @projectChange
   >
     <div
       #splitTopEl
       class="today"
+      cdkScrollable
     >
       <header class="work-view-header">
-        <div
-          *ngIf="!(planningModeService.isPlanningMode$|async)"
-          @fade
-          class="status-bar"
-        >
-          <div class="item">
-            <span class="label">{{T.WW.ESTIMATE_REMAINING|translate}}</span>
-            <span class="no-wrap">
-              ~<strong class="time-val"
-                >{{workContextService.estimateRemainingToday$|async|msToString}}</strong
-              >
-              <mat-icon
-                style="margin-left: 2px"
-                svgIcon="estimate_remaining"
-              ></mat-icon>
-            </span>
-          </div>
-
-          <div class="item">
-            <span class="label">{{T.WW.WORKING_TODAY|translate}}</span>
-            <span class="no-wrap">
-              <strong class="time-val"
-                >{{workContextService.workingToday$|async|msToString}}</strong
-              >
-              <mat-icon svgIcon="working_today"></mat-icon>
-            </span>
-          </div>
-
+        @if (!isPlanningMode() && (estimateRemainingToday() || workingToday())) {
           <div
-            *ngIf="isShowTimeWorkedWithoutBreak"
-            class="item"
-          >
-            <span class="label">{{T.WW.WITHOUT_BREAK|translate}} </span>
-            <span class="no-wrap">
-              <strong class="time-val"
-                >{{takeABreakService.timeWorkingWithoutABreak$|async|msToString}}</strong
-              ><mat-icon>timer</mat-icon>
-            </span>
-            <div
-              [matTooltip]="T.WW.RESET_BREAK_TIMER|translate"
-              class="take-a-break-reset-btn"
-            >
-              <button
-                (click)="resetBreakTimer()"
-                color="lighter"
-                mat-mini-fab
-              >
-                <mat-icon>timer_off</mat-icon>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          *ngIf="(planningModeService.isPlanningMode$|async)"
-          class="planning-mode-header"
-        >
-          <h3
-            *ngIf="!(undoneTasks?.length)"
-            class="planning-mode-header mat-h3"
-          >
-            {{T.WW.ADD_SOME_TASKS|translate}}
-          </h3>
-          <div
-            *ngIf="undoneTasks?.length"
+            @fade
             class="status-bar"
           >
-            <div class="item">
-              <span class="label">{{T.WW.TIME_ESTIMATED|translate}}</span>
+            <div
+              class="item"
+              matTooltip="{{ T.WW.TODAY_REMAINING | translate }} ~{{
+                todayRemainingInProject() | msToString
+              }}"
+              [matTooltipDisabled]="
+                !(workContextService.isActiveWorkContextProject$ | async)
+              "
+              matTooltipPosition="above"
+            >
+              <span class="label">{{ T.WW.ESTIMATE_REMAINING | translate }}</span>
               <span class="no-wrap">
-                <strong class="time-val"
-                  >~{{workContextService.estimateRemainingToday$|async|msToString}}</strong
-                >
-                <mat-icon>timer</mat-icon>
+                ~<strong class="time-val">{{
+                  estimateRemainingToday() | msToString
+                }}</strong>
+                <mat-icon
+                  style="margin-left: 2px"
+                  svgIcon="estimate_remaining"
+                ></mat-icon>
               </span>
             </div>
+            <div class="item">
+              <span class="label">{{ T.WW.WORKING_TODAY | translate }}</span>
+              <span class="no-wrap">
+                <strong class="time-val">{{ workingToday() | msToString }}</strong>
+                @if (
+                  workContextService.workingTodayArchived$ | async;
+                  as workingTodayArchived
+                ) {
+                  <span [matTooltip]="T.WW.WORKING_TODAY_ARCHIVED | translate"
+                    >(+{{ workingTodayArchived | msToString }})</span
+                  >
+                }
+                <mat-icon svgIcon="working_today"></mat-icon>
+              </span>
+            </div>
+            @if (isShowTimeWorkedWithoutBreak) {
+              <div class="item hide-xs">
+                <span class="label">{{ T.WW.WITHOUT_BREAK | translate }} </span>
+                <span class="no-wrap">
+                  <strong class="time-val">{{
+                    takeABreakService.timeWorkingWithoutABreak$ | async | msToString
+                  }}</strong
+                  ><mat-icon>timer</mat-icon>
+                </span>
+                <div
+                  [matTooltip]="T.WW.RESET_BREAK_TIMER | translate"
+                  class="take-a-break-reset-btn"
+                >
+                  <button
+                    (click)="resetBreakTimer()"
+                    color="lighter"
+                    mat-mini-fab
+                  >
+                    <mat-icon>timer_off</mat-icon>
+                  </button>
+                </div>
+              </div>
+            }
           </div>
-        </div>
+        }
+        @if (isPlanningMode()) {
+          <div class="planning-mode-header">
+            @if (!undoneTasks()?.length) {
+              <h3 class="planning-mode-header mat-h3">
+                {{ T.WW.ADD_SOME_TASKS | translate }}
+              </h3>
+            }
+            @if (undoneTasks()?.length) {
+              <div class="status-bar">
+                <div class="item">
+                  <span class="label">{{ T.WW.TIME_ESTIMATED | translate }}</span>
+                  <span class="no-wrap">
+                    <strong class="time-val"
+                      >~{{
+                        workContextService.estimateRemainingToday$ | async | msToString
+                      }}</strong
+                    >
+                    <mat-icon>timer</mat-icon>
+                  </span>
+                </div>
+              </div>
+            }
+          </div>
+        }
       </header>
 
-      <improvement-banner
-        *ngIf="(improvementService.hasLastTrackedImprovements$|async)"
-        [@expandFade]
-      ></improvement-banner>
-
       <div class="task-list-wrapper">
-        <div
-          *ngIf="!(planningModeService.isPlanningMode$|async) && !(workContextService.isHasTasksToWorkOn$|async)"
-          @expandFade
-          class="add-more-or-finish"
-        >
-          <h2>{{T.WW.NO_PLANNED_TASKS|translate}}</h2>
-
-          <div class="btn-wrapper">
-            <button
-              (click)="planMore()"
-              color=""
-              mat-flat-button
-              tabindex="1"
-            >
-              <mat-icon>playlist_add</mat-icon>
-              {{T.WW.ADD_MORE|translate}}
-            </button>
-
-            <button
-              *ngIf="(workContextService.isToday$|async)"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
-              color="primary"
-              mat-flat-button
-              routerLink="/active/daily-summary"
-              tabindex="1"
-            >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY|translate}}
-            </button>
-
-            <button
-              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='PROJECT')"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
-              color="primary"
-              mat-flat-button
-              routerLink="/active/daily-summary"
-              tabindex="1"
-            >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
-            </button>
-
-            <button
-              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='TAG')"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
-              color="primary"
-              mat-flat-button
-              routerLink="/active/daily-summary"
-              tabindex="1"
-            >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
-            </button>
-          </div>
-        </div>
-
-        <div
-          *ngIf="(planningModeService.isPlanningMode$|async)"
-          @expandFade
-          class="planning-mode-content"
-        >
-          <add-task-bar
-            (done)="startWork()"
-            [tabindex]="1"
-            [isDoubleEnterMode]="true"
-          ></add-task-bar>
-
-          <!-- NOTE workContextService.isToday should work as we only need the initial value -->
-          <ng-container
-            *ngIf="workContextService.isToday && (taskService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
+        @if (!isPlanningMode() && !(workContextService.isHasTasksToWorkOn$ | async)) {
+          <div
+            @expandFade
+            class="add-more-or-finish"
           >
-            <button
-              *ngIf="plannedForToday?.length"
-              (click)="taskService.movePlannedTasksToToday(plannedForToday)"
-              class="add-scheduled"
-              color=""
-              mat-stroked-button
-              tabindex="1"
-            >
-              <mat-icon>playlist_add</mat-icon>
-              {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
-            </button>
+            <div class="no-tasks-illu-wrapper">
+              <div class="inline-block-container">
+                <img
+                  class="show-light-only"
+                  src="assets/illu/horizon.svg"
+                  alt="illu"
+                />
+                <img
+                  class="show-dark-only"
+                  src="assets/illu/horizon-dark.svg"
+                  alt="illu"
+                />
+              </div>
+              <h2 class="no-tasks-label">
+                @if (hasDoneTasks() || (workContextService.doneTodayArchived$ | async)) {
+                  {{ T.WW.NO_PLANNED_TASK_ALL_DONE | translate }}
+                } @else {
+                  {{ T.WW.NO_PLANNED_TASKS | translate }}
+                }
+              </h2>
+            </div>
 
-            <ng-container
-              *ngIf="plannedForToday.length === 0 && (taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
-            >
-              <ng-container
-                *ngIf="(repeatableScheduledForTomorrow$|async) as repeatableScheduledForTomorrow"
-              >
+            @if (!overdueTasks().length) {
+              <div class="btn-wrapper">
                 <button
-                  *ngIf="plannedForTomorrow.length || repeatableScheduledForTomorrow.length"
-                  (click)="addAllPlannedToDayAndCreateRepeatable(plannedForTomorrow, repeatableScheduledForTomorrow)"
-                  class="add-scheduled"
+                  (click)="planMore()"
                   color=""
                   mat-stroked-button
                   tabindex="1"
                 >
                   <mat-icon>playlist_add</mat-icon>
-                  {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr:
-                  plannedForTomorrow.length + repeatableScheduledForTomorrow.length } }}
+                  {{ T.WW.ADD_MORE | translate }}
                 </button>
-              </ng-container>
-            </ng-container>
-          </ng-container>
-
-          <button
-            (click)="startWork()"
-            class="ready-to-work-btn"
-            color="primary"
-            mat-flat-button
-            tabindex="1"
+              </div>
+            }
+          </div>
+        }
+        @if (isPlanningMode()) {
+          <div
+            @expandFade
+            class="planning-mode-content"
           >
-            <mat-icon>check</mat-icon>
-            {{T.WW.READY_TO_WORK|translate}}
-          </button>
-        </div>
-        <task-list
-          [tasks]="undoneTasks"
-          listId="PARENT"
-          listModelId="UNDONE"
-        ></task-list>
+            <add-task-bar
+              (done)="startWork()"
+              [tabindex]="1"
+            ></add-task-bar>
 
-        <div
-          *ngIf="!(planningModeService.isPlanningMode$|async) || (doneTasks)?.length"
-          @expand
-        >
-          <h2 class="mat-h2 completed-tasks-heading">
-            {{T.WW.COMPLETED_TASKS|translate}}
-          </h2>
-          <task-list
-            [noTasksMsg]="T.WW.NO_COMPLETED_TASKS|translate"
-            [tasks]="doneTasks"
-            listId="PARENT"
-            listModelId="DONE"
-          ></task-list>
-          <div class="finish-day-button-wrapper">
-            <!-- NOTE: tabindex is same as for tasks -->
-            <button
-              *ngIf="(workContextService.isToday$|async)"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
-              color="primary"
-              mat-flat-button
-              routerLink="/active/daily-summary"
-              tabindex="1"
-            >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY|translate}}
-            </button>
+            <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>
 
             <button
-              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='PROJECT')"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
+              (click)="startWork()"
+              class="ready-to-work-btn"
               color="primary"
               mat-flat-button
-              routerLink="/active/daily-summary"
               tabindex="1"
             >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_PROJECT|translate}}
-            </button>
-
-            <button
-              *ngIf="!(workContextService.isToday$|async) && (workContextService.activeWorkContextType==='TAG')"
-              [matTooltip]="T.WW.FINISH_DAY_TOOLTIP|translate"
-              color="primary"
-              mat-flat-button
-              routerLink="/active/daily-summary"
-              tabindex="1"
-            >
-              <mat-icon>done_all</mat-icon>
-              {{T.WW.FINISH_DAY_FOR_TAG|translate}}
+              <mat-icon>check</mat-icon>
+              {{ T.WW.READY_TO_WORK | translate }}
             </button>
           </div>
-        </div>
+        }
+        @if (customizedUndoneTasks(); as customized) {
+          @if (customized.grouped) {
+            @for (group of customized.grouped | keyvalue; track group.key) {
+              <collapsible
+                [title]="group.key"
+                [isIconBefore]="true"
+                [isExpanded]="true"
+              >
+                <task-list
+                  [tasks]="group.value"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+              </collapsible>
+            }
+          } @else {
+            <task-list
+              class="tour-undoneList"
+              [tasks]="customized.list"
+              listId="PARENT"
+              listModelId="UNDONE"
+            ></task-list>
+          }
+        }
+
+        @if (isShowOverduePanel()) {
+          <section
+            class="overdue-tasks"
+            @expandFade
+          >
+            <!-- OVERDUE Outline -->
+            <collapsible
+              [title]="(T.G.OVERDUE | translate) + ' (' + overdueTasks().length + ')'"
+              [isExpanded]="!isOverdueHidden()"
+              (isExpandedChange)="isOverdueHidden.set(!$event)"
+              [isIconBefore]="true"
+            >
+              <div class="overdue-btn-wrapper">
+                <button
+                  mat-stroked-button
+                  color="primary"
+                  tabindex="1"
+                  (click)="addAllOverdueToMyDay()"
+                >
+                  <mat-icon>wb_sunny</mat-icon>
+                  {{ T.F.TASK.CMP.ADD_TO_MY_DAY | translate }}
+                </button>
+                <!--                <button-->
+                <!--                  mat-stroked-button-->
+                <!--                  color="primary"-->
+                <!--                  tabindex="1"-->
+                <!--                >-->
+                <!--                  <mat-icon>edit_calendar</mat-icon>-->
+                <!--                  {{ T.F.PLANNER.D.ADD_PLANNED.RE_PLAN_ALL | translate }}-->
+                <!--                </button>-->
+              </div>
+
+              <div>
+                <task-list
+                  [tasks]="overdueTasks()"
+                  [isSortingDisabled]="true"
+                  listId="PARENT"
+                  listModelId="OVERDUE"
+                ></task-list>
+              </div>
+            </collapsible>
+          </section>
+        }
+
+        @if (laterTodayTasks().length > 0 && isOnTodayList()) {
+          <div
+            @expand
+            class="collapsible-section"
+          >
+            <collapsible
+              [title]="
+                (T.WW.LATER_TODAY | translate) +
+                ' (' +
+                (laterTodayTasks()?.length || 0) +
+                ')'
+              "
+              [isExpanded]="!isLaterTodayHidden()"
+              (isExpandedChange)="isLaterTodayHidden.set(!$event)"
+              [isIconBefore]="true"
+            >
+              <task-list
+                [tasks]="laterTodayTasks()"
+                [isSortingDisabled]="true"
+                listId="PARENT"
+                listModelId="LATER_TODAY"
+              ></task-list>
+            </collapsible>
+          </div>
+        }
+
+        @if (hasDoneTasks()) {
+          @let nrOfDoneArchived =
+            doneTasks()?.length === 0
+              ? (workContextService.doneTodayArchived$ | async)
+              : 0;
+          <div
+            @expand
+            class="collapsible-section"
+          >
+            <collapsible
+              [title]="
+                (T.WW.DONE_TASKS | translate) +
+                ' (' +
+                (doneTasks()?.length || 0) +
+                (nrOfDoneArchived ? ' + ' + nrOfDoneArchived : '') +
+                ')'
+              "
+              [isExpanded]="!isDoneHidden()"
+              (isExpandedChange)="isDoneHidden.set(!$event)"
+              [isIconBefore]="true"
+            >
+              <task-list
+                class="tour-doneList"
+                [noTasksMsg]="
+                  (nrOfDoneArchived ? T.WW.DONE_TASKS_IN_ARCHIVE : T.WW.NO_DONE_TASKS)
+                    | translate
+                "
+                [tasks]="doneTasks()"
+                listId="PARENT"
+                listModelId="DONE"
+              ></task-list>
+              <div class="finish-day-button-wrapper">
+                @if (!isOnTodayList() && hasDoneTasks()) {
+                  <button
+                    class="e2e-move-done-to-archive"
+                    mat-stroked-button
+                    (click)="moveDoneToArchive()"
+                    tabindex="1"
+                  >
+                    <mat-icon>done_all</mat-icon>
+                    {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
+                  </button>
+                }
+              </div>
+            </collapsible>
+          </div>
+        }
+
+        @if (!isPlanningMode() && isOnTodayList()) {
+          <finish-day-btn [hasDoneTasks]="hasDoneTasks()"></finish-day-btn>
+        }
       </div>
     </div>
 
-    <div
-      #splitBottomEl
-      *ngIf="isShowBacklog"
-      [style.user-focus]="(splitInputPos===100)? 'none':''"
-      class="backlog"
-    >
-      <split
-        (posChanged)="splitInputPos=$event"
-        [containerEl]="containerEl"
-        [counter]="backlogTasks?.length"
-        [isAnimateBtn]="isTriggerBacklogIconAni$|async"
-        [splitBottomEl]="splitBottomEl"
-        [splitPos]="splitInputPos"
-        [splitTopEl]="splitTopEl"
-      ></split>
+    @if (isShowBacklog()) {
       <div
-        *ngIf="splitInputPos!==100"
-        class="inner-wrapper"
-        style="user-select: none"
+        #splitBottomEl
+        [style.user-focus]="splitInputPos === 100 ? 'none' : ''"
+        class="backlog"
       >
-        <backlog
-          (closeBacklog)="splitInputPos=100"
-          [backlogTasks]="backlogTasks"
-        ></backlog>
+        <split
+          (posChanged)="splitInputPos = $event"
+          [containerEl]="containerEl"
+          [counter]="backlogTasks()?.length"
+          [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
+          [splitBottomEl]="splitBottomEl"
+          [splitPos]="splitInputPos"
+          [splitTopEl]="splitTopEl"
+        ></split>
+        @if (splitInputPos !== 100) {
+          <div
+            class="inner-wrapper"
+            style="user-select: none"
+          >
+            <backlog
+              (closeBacklog)="splitInputPos = 100"
+              [backlogTasks]="backlogTasks()"
+            ></backlog>
+          </div>
+        }
       </div>
-    </div>
+    }
   </div>
-</right-panel>
-
-<button
-  (click)="layoutService.showAddTaskBar()"
-  [class.isRight]="isShowBacklog"
-  [matTooltip]="T.MH.ADD_NEW_TASK|translate"
-  class="show-xs-only add-task-btn"
-  color="lighter"
-  mat-fab
->
-  <mat-icon>add</mat-icon>
-</button>
+}

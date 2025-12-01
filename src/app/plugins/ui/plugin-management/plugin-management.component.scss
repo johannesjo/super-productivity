@@ -1,0 +1,218 @@
+:host {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+th {
+  text-align: left;
+  padding-left: 0;
+}
+
+td {
+  padding-right: 0;
+}
+
+mat-card {
+  margin: 8px;
+}
+
+mat-card-header {
+  mat-slide-toggle {
+    margin-left: auto;
+  }
+
+  .plugin-controls {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+  }
+}
+
+plugin-icon {
+  width: 40px;
+  height: 40px;
+  margin-right: 8px;
+}
+
+.label {
+  font-weight: bold;
+  margin-top: 12px;
+}
+
+mat-card-subtitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  mat-chip {
+    margin-left: 8px;
+  }
+}
+
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+  }
+}
+
+mat-error {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 16px 0;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.info-card {
+  grid-column: 1 / -1;
+  margin-bottom: 16px;
+
+  mat-card-header {
+    align-items: center;
+    gap: 12px;
+  }
+
+  .warning-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+  }
+
+  mat-card-title {
+    margin: 0;
+  }
+
+  .warning-content {
+    padding: 8px 0;
+
+    p {
+      margin: 12px 0;
+
+      &:first-child {
+        margin-top: 0;
+      }
+    }
+
+    ul {
+      margin: 12px 0 12px 24px;
+      padding: 0;
+
+      li {
+        margin: 8px 0;
+        font-weight: bold;
+      }
+    }
+
+    .recommendation {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px;
+      background-color: var(--primary-50, rgba(63, 81, 181, 0.08));
+      border-radius: 4px;
+      margin-top: 16px;
+      margin-bottom: 0;
+
+      mat-icon {
+        color: var(--c-primary);
+      }
+    }
+  }
+}
+
+.install-warning {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-color: var(--c-primary);
+  border-radius: 4px;
+  margin-bottom: 16px;
+  border-width: 2px;
+  border-style: solid;
+
+  mat-icon {
+    color: var(--c-primary);
+  }
+}
+
+// Loading animation for plugins
+.loading-icon {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.community-plugins-card {
+  grid-column: 1 / -1;
+}
+
+.community-plugins-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.community-plugin-item {
+  padding: 16px;
+  border: 1px solid var(--c-border);
+  border-radius: 4px;
+  background: var(--c-bg-card);
+
+  .plugin-name {
+    margin: 0 0 8px;
+    font-size: 16px;
+    font-weight: bold;
+
+    a {
+      color: var(--c-primary);
+      text-decoration: none;
+
+      &:hover {
+        text-decoration: underline;
+      }
+    }
+  }
+
+  .plugin-desc {
+    margin: 0;
+    font-size: 14px;
+    color: var(--c-text-secondary);
+  }
+}
+
+.plugin-info-section {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+collapsible {
+  ::ng-deep .collapsible-title {
+    font-size: 14px;
+  }
+}

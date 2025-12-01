@@ -2,18 +2,20 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { WorkContext, WorkContextState, WorkContextType } from '../work-context.model';
 import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
 import {
+  mapSubTasksToTask,
   selectTaskEntities,
   selectTaskFeatureState,
 } from '../../tasks/store/task.selectors';
-import { Task, TaskPlanned } from '../../tasks/task.model';
+import { Task, TaskWithDueTime, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
 import {
-  projectSelectors,
   selectProjectById,
+  selectProjectFeatureState,
 } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
+import { TODAY_TAG } from '../../tag/tag.const';
 
-export const WORK_CONTEXT_FEATURE_NAME = 'context';
+export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
 
 export const selectContextFeatureState = createFeatureSelector<WorkContextState>(
   WORK_CONTEXT_FEATURE_NAME,
@@ -22,10 +24,7 @@ export const selectActiveContextId = createSelector(
   selectContextFeatureState,
   (state) => state.activeId,
 );
-export const selectActiveContextType = createSelector(
-  selectContextFeatureState,
-  (state) => state.activeType,
-);
+
 export const selectActiveContextTypeAndId = createSelector(
   selectContextFeatureState,
   (
@@ -42,7 +41,7 @@ export const selectActiveContextTypeAndId = createSelector(
 
 export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
-  projectSelectors,
+  selectProjectFeatureState,
   selectTagFeatureState,
   selectNoteTodayOrder,
   ({ activeId, activeType }, projectState, tagState, todayOrder): WorkContext => {
@@ -73,15 +72,21 @@ export const selectActiveWorkContext = createSelector(
   },
 );
 
-export const selectActiveContextTheme = createSelector(
-  selectActiveWorkContext,
-  (workContext) => workContext.theme,
-);
-export const selectStartableTasksForActiveContext = createSelector(
+const sortDoneLast = (a: Task, b: Task): number => {
+  if (a.isDone && !b.isDone) {
+    return 1;
+  }
+  if (!a.isDone && b.isDone) {
+    return -1;
+  }
+  return 0;
+};
+
+export const selectTrackableTasksForActiveContext = createSelector(
   selectActiveWorkContext,
   selectTaskEntities,
   (activeContext, entities): Task[] => {
-    let startableTasks: Task[] = [];
+    let trackableTasks: Task[] = [];
     activeContext.taskIds.forEach((id) => {
       const task: Task | undefined = entities[id];
       if (!task) {
@@ -90,18 +95,25 @@ export const selectStartableTasksForActiveContext = createSelector(
         // only use devError
         devError('Task not found');
       } else if (task.subTaskIds && task.subTaskIds.length) {
-        startableTasks = startableTasks.concat(
+        trackableTasks = trackableTasks.concat(
           task.subTaskIds.map((sid) => entities[sid] as Task),
         );
       } else {
-        startableTasks.push(task);
+        trackableTasks.push(task);
       }
     });
-    return startableTasks.filter((task) => !task.isDone);
+    return trackableTasks.sort(sortDoneLast);
   },
 );
 
-export const selectStartableTasksActiveContextFirst = createSelector(
+export const selectStartableTasksForActiveContext = createSelector(
+  selectTrackableTasksForActiveContext,
+  (trackableTasks): Task[] => {
+    return trackableTasks.filter((task) => !task.isDone);
+  },
+);
+
+export const selectTrackableTasksActiveContextFirst = createSelector(
   selectTaskFeatureState,
   selectStartableTasksForActiveContext,
   (s, forActiveContext): Task[] => {
@@ -110,11 +122,17 @@ export const selectStartableTasksActiveContextFirst = createSelector(
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
-          !task.isDone &&
           (!!task.parentId || task.subTaskIds.length === 0) &&
           !activeContextIds.includes(task.id),
       );
-    return [...forActiveContext, ...otherTasks];
+    return [...forActiveContext, ...otherTasks].sort(sortDoneLast);
+  },
+);
+
+export const selectStartableTasksActiveContextFirst = createSelector(
+  selectTrackableTasksActiveContextFirst,
+  (trackableTasks): Task[] => {
+    return trackableTasks.filter((task) => !task.isDone);
   },
 );
 
@@ -152,34 +170,40 @@ export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
   },
 );
 
+export const selectTodayTaskIds = createSelector(
+  selectTagFeatureState,
+  (tagState): string[] => {
+    return tagState.entities[TODAY_TAG.id]?.taskIds || [];
+  },
+);
+
+export const selectUndoneTodayTaskIds = createSelector(
+  selectTagFeatureState,
+  selectTaskFeatureState,
+  (tagState, taskState): string[] => {
+    return (tagState.entities[TODAY_TAG.id]?.taskIds || []).filter(
+      (taskId) => taskState.entities[taskId]?.isDone === false,
+    );
+  },
+);
+
 export const selectTimelineTasks = createSelector(
-  selectStartableTasksForActiveContext,
+  selectTodayTaskIds,
   selectTaskFeatureState,
   (
-    startableTasks,
+    todayIds,
     s,
   ): {
-    planned: TaskPlanned[];
-    unPlanned: Task[];
+    planned: TaskWithDueTime[];
+    unPlanned: TaskWithSubTasks[];
   } => {
-    const allPlannedTasks: TaskPlanned[] = [];
+    const allPlannedTasks: TaskWithDueTime[] = [];
     s.ids
       .map((id) => s.entities[id] as Task)
       .forEach((t) => {
         if (!t.isDone) {
-          if (
-            !!t.parentId &&
-            (s.entities[t.parentId] as Task).plannedAt &&
-            (s.entities[t.parentId] as Task).reminderId
-          ) {
-            allPlannedTasks.push({
-              ...t,
-              plannedAt:
-                t.plannedAt ||
-                ((s.entities[t.parentId as string] as Task).plannedAt as number),
-            });
-          } else if (t.subTaskIds.length === 0 && t.plannedAt && t.reminderId) {
-            allPlannedTasks.push(t as TaskPlanned);
+          if (t.dueWithTime) {
+            allPlannedTasks.push(t as TaskWithDueTime);
           }
         }
       });
@@ -187,7 +211,11 @@ export const selectTimelineTasks = createSelector(
 
     return {
       planned: allPlannedTasks,
-      unPlanned: startableTasks.filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+      unPlanned: todayIds
+        .map((id) => {
+          return mapSubTasksToTask(s.entities[id] as Task, s) as TaskWithSubTasks;
+        })
+        .filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
     };
   },
 );

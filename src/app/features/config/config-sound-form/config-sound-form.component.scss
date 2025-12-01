@@ -1,0 +1,43 @@
+.form-wrapper {
+  overflow: hidden;
+  padding: var(--s2) var(--s2) var(--s) !important;
+
+  config-form {
+    display: block;
+  }
+}
+
+.width100 {
+  width: 100%;
+}
+
+:host {
+  position: relative;
+  display: block;
+}
+
+$this-panel-padding-left-right: 12px;
+
+:host ::ng-deep .collapsible-header {
+  font-size: 16px;
+  margin-top: 0;
+  padding: 10px $this-panel-padding-left-right;
+}
+
+:host ::ng-deep .collapsible-panel {
+  //border-top: 1px solid black;
+  overflow: visible;
+
+  > * {
+    // for help icon positioning
+    // does not work because of translate on the slide down ani element
+    // position: static;
+
+    // add a padding
+    padding: 0 $this-panel-padding-left-right;
+  }
+}
+
+:host ::ng-deep .extra-margin-top {
+  margin-top: var(--s4);
+}

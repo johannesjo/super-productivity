@@ -1,12 +1,13 @@
 <input
-  [errorStateMatcher]="errorStateMatcher"
+  [name]="props.name"
+  [required]="!!props.required"
+  [readonly]="props.readonly"
   [formControl]="formControl"
   [formlyAttributes]="field"
-  [id]="id"
-  [isAllowSeconds]="field.templateOptions?.isAllowSeconds"
-  [placeholder]="to.placeholder"
-  [type]="'text'"
-  [isValidate]="field.templateOptions?.required"
   inputDuration
+  [isAllowSeconds]="field.templateOptions?.isAllowSeconds"
+  [isShowZeroVal]="field.templateOptions?.isShowZeroVal"
+  [isValidate]="!!field.templateOptions?.required"
+  (change)="onInputValueChange($event)"
   matInput
 />

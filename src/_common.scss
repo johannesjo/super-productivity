@@ -1,0 +1,10 @@
+@use 'angular-material-css-vars' as mat-css-vars;
+
+// Forward functions so they can be used without namespace
+@forward 'styles/functions/_ddivide';
+@use 'styles/functions/_ddivide';
+
+// Forward all mixins so they can be used without namespace
+@forward 'styles/mixins/_mixins';
+@use 'styles/mixins/_mixins';
+@use 'styles/extends/extends';

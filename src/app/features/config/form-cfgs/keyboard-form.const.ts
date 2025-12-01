@@ -8,6 +8,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
   title: T.GCF.KEYBOARD.TITLE,
   key: 'keyboard',
   help: T.GCF.KEYBOARD.HELP,
+  isHideForAndroidApp: true,
   items: [
     // SYSTEM WIDE
     ...((IS_ELECTRON
@@ -69,6 +70,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'addNewProject',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.ADD_NEW_PROJECT,
+      },
+    },
+    {
       key: 'addNewNote',
       type: 'keyboard',
       templateOptions: {
@@ -76,7 +84,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'toggleSideNav',
+      key: 'focusSideNav',
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.TOGGLE_SIDE_NAV,
@@ -87,6 +95,20 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.OPEN_PROJECT_NOTES,
+      },
+    },
+    {
+      key: 'toggleTaskViewCustomizerPanel',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TOGGLE_TASK_VIEW_CUSTOMIZER_PANEL,
+      },
+    },
+    {
+      key: 'toggleIssuePanel',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TOGGLE_ISSUE_PANEL,
       },
     },
     // {
@@ -104,13 +126,6 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'toggleBookmarks',
-      type: 'keyboard',
-      templateOptions: {
-        label: T.GCF.KEYBOARD.TOGGLE_BOOKMARKS,
-      },
-    },
-    {
       key: 'toggleBacklog',
       type: 'keyboard',
       templateOptions: {
@@ -125,10 +140,17 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'goToFocusMode',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.GO_TO_FOCUS_MODE,
+      },
+    },
+    {
       key: 'goToTimeline',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.GO_TO_TIMELINE,
+        label: T.GCF.KEYBOARD.GO_TO_SCHEDULE,
       },
     },
     {
@@ -180,6 +202,22 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
         label: T.GCF.KEYBOARD.ZOOM_DEFAULT,
       },
     },
+    // TODO implement somehow
+    // {
+    //   key: 'saveNote',
+    //   type: 'keyboard',
+    //   templateOptions: {
+    //     label: T.GCF.KEYBOARD.SAVE_NOTE,
+    //   },
+    // },
+    {
+      key: 'triggerSync',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TRIGGER_SYNC,
+      },
+    },
+
     // TASKS
     {
       type: 'tpl',
@@ -206,10 +244,10 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
-      key: 'taskToggleAdditionalInfoOpen',
+      key: 'taskToggleDetailPanelOpen',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.TASK_TOGGLE_ADDITIONAL_INFO_OPEN,
+        label: T.GCF.KEYBOARD.TASK_TOGGLE_DETAIL_PANEL_OPEN,
       },
     },
     {
@@ -238,6 +276,13 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       type: 'keyboard',
       templateOptions: {
         label: T.GCF.KEYBOARD.TASK_ADD_SUB_TASK,
+      },
+    },
+    {
+      key: 'taskAddAttachment',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.TASK_ADD_ATTACHMENT,
       },
     },
     {
@@ -290,6 +335,20 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       },
     },
     {
+      key: 'moveTaskToTop',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.MOVE_TASK_TO_TOP,
+      },
+    },
+    {
+      key: 'moveTaskToBottom',
+      type: 'keyboard',
+      templateOptions: {
+        label: T.GCF.KEYBOARD.MOVE_TASK_TO_BOTTOM,
+      },
+    },
+    {
       key: 'moveToBacklog',
       type: 'keyboard',
       templateOptions: {
@@ -300,7 +359,7 @@ export const KEYBOARD_SETTINGS_FORM_CFG: ConfigFormSection<KeyboardConfig> = {
       key: 'moveToTodaysTasks',
       type: 'keyboard',
       templateOptions: {
-        label: T.GCF.KEYBOARD.MOVE_TO_TODAYS_TASKS,
+        label: T.GCF.KEYBOARD.MOVE_TO_REGULARS_TASKS,
       },
     },
     {

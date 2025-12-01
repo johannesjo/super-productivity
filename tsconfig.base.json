@@ -5,19 +5,30 @@
     "outDir": "./dist/out-tsc",
     "sourceMap": true,
     "declaration": false,
-    "module": "ESNext",
+    "module": "es2022",
     "moduleResolution": "node",
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "strict": true,
     "strictNullChecks": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noUnusedLocals": false,
+    "noImplicitAny": false,
+    "noImplicitOverride": true,
     "strictPropertyInitialization": true,
-    "target": "ES2015",
+    "useDefineForClassFields": false,
+    "target": "ES2022",
     "resolveJsonModule": true,
     "typeRoots": ["node_modules/@types"],
-    "types": ["@types/moment-duration-format"],
-    "lib": ["es2017", "dom"]
+    "lib": ["es2022", "dom"],
+    "paths": {
+      "@super-productivity/plugin-api": ["packages/plugin-api/src/index.ts"]
+    },
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ]
   }
 }

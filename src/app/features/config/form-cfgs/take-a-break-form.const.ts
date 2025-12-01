@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 import { ConfigFormSection, TakeABreakConfig } from '../global-config.model';
 import { T } from '../../../t.const';
+/* eslint-disable @typescript-eslint/naming-convention */
 
 export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
   title: T.GCF.TAKE_A_BREAK.TITLE,
@@ -17,6 +18,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'isLockScreen',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_LOCK_SCREEN,
       },
@@ -24,6 +26,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'isTimedFullScreenBlocker',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_FULL_SCREEN_BLOCKER,
       },
@@ -31,12 +34,14 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'isFocusWindow',
       type: 'checkbox',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.IS_FOCUS_WINDOW,
       },
     },
     {
-      hideExpression: (model: any) => !model.isTimedFullScreenBlocker,
+      hideExpression: (model: any) =>
+        !model.isTakeABreakEnabled || !model.isTimedFullScreenBlocker,
       key: 'timedFullScreenBlockerDuration',
       type: 'duration',
       templateOptions: {
@@ -49,6 +54,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakMinWorkingTime',
       type: 'duration',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MIN_WORKING_TIME,
@@ -59,6 +65,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakSnoozeTime',
       type: 'duration',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.SNOOZE_TIME,
@@ -69,6 +76,7 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     {
       key: 'takeABreakMessage',
       type: 'textarea',
+      hideExpression: (model: any) => !model.isTakeABreakEnabled,
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       templateOptions: {
         label: T.GCF.TAKE_A_BREAK.MESSAGE,
@@ -76,6 +84,8 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     },
     {
       type: 'tpl',
+      // NOTE: does never show for repeat for some weird reason
+      // hideExpression: (model: any) => !model.isTakeABreakEnabled,
       className: 'tpl',
       templateOptions: {
         tag: 'h3',
@@ -85,12 +95,15 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
     },
     {
       key: 'motivationalImgs',
+      // NOTE: does never show for some weird reason
+      // hideExpression: (model: any) => !model.isTakeABreakEnabled,
       expressionProperties: { 'templateOptions.required': 'model.isTakeABreakEnabled' },
       type: 'repeat',
       templateOptions: {
         addText: T.GCF.TAKE_A_BREAK.ADD_NEW_IMG,
         required: true,
         defaultValue: '',
+        minLength: 3,
       },
       fieldArray: {
         type: 'input',

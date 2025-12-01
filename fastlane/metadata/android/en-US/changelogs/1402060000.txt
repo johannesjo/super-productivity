@@ -1,0 +1,17 @@
+### Bug Fixes
+
+- button only shown if there are any visible projects (1c6d1b8), closes #4883
+- drop attachment on task only working if not hitting textarea
+- exit behavior to be faster
+- input duration not accepting values like 90m
+- model validation error (600e7cd), closes #4881
+- only show non inbox projects for hide and show (8c6fe48), closes #4883
+- overlay indicator
+- reminder for done task being shown #4656
+- Send User-Agent to office365.com as it appearently needs it since a (0fbb25f), closes #4677
+- **styles:** fix CSS linting warnings and optimize SCSS files
+- sub-tasks getting duplicated on move to project (a7b0517), closes #4882
+- task focus border
+### Features
+
+- add task toggle start action to protocol handler

@@ -1,0 +1,35 @@
+address: 0.0.0.0
+port: 2345
+
+prefix: /
+permissions: CRUD
+
+# CORS configuration to allow all origins
+cors:
+  enabled: true
+  credentials: true
+  allowed_headers:
+    - '*'
+  allowed_hosts:
+    - '*'
+  allowed_methods:
+    - GET
+    - HEAD
+    - POST
+    - PUT
+    - DELETE
+    - OPTIONS
+    - PROPFIND
+    - PROPPATCH
+    - MKCOL
+    - COPY
+    - MOVE
+    - LOCK
+    - UNLOCK
+  exposed_headers:
+    - '*'
+
+users:
+  - username: admin
+    password: admin
+    directory: /data

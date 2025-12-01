@@ -1,18 +1,10 @@
-<div
-  *ngIf="(tags && tags.length) || (projectTag)"
-  [class.isDisableEdit]="isDisableEdit"
-  class="tags-container"
->
-  <div class="tags">
-    <tag
-      (click)="editTags()"
-      *ngIf=" projectTag"
-      [tag]="projectTag"
-    ></tag>
-    <tag
-      (click)="editTags()"
-      *ngFor="let tag of tags; trackBy: trackByFn"
-      [tag]="tag"
-    ></tag>
+@if (tags()?.length > 0) {
+  <div class="tags-container">
+    <div class="tags">
+      @for (tag of tags(); track tag.id) {
+        <!-- -->
+        <tag [tag]="tag"></tag>
+      }
+    </div>
   </div>
-</div>
+}

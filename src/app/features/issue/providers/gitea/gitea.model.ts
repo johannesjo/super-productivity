@@ -5,7 +5,4 @@ export interface GiteaCfg extends BaseIssueProviderCfg {
   host: string | null;
   token: string | null;
   scope: string | null;
-  isAutoPoll: boolean;
-  isSearchIssuesFromGitea: boolean;
-  isAutoAddToBacklog: boolean;
 }

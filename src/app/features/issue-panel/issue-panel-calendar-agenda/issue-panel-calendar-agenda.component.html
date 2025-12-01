@@ -1,0 +1,43 @@
+@if (isShowingCachedData()) {
+  <div class="offline-banner">
+    <mat-icon class="offline-banner__icon">warning</mat-icon>
+    <span class="offline-banner__message">
+      {{ T.F.ISSUE_PANEL.CALENDAR_AGENDA.OFFLINE_BANNER_MSG | translate }}
+    </span>
+  </div>
+}
+@if (isLoading()) {
+  <div class="spinner">
+    <mat-spinner diameter="50"></mat-spinner>
+  </div>
+} @else if (error() && !isShowingCachedData()) {
+  <error-card
+    [errorTxt]="error()"
+    [actionAdvice]="'Check your config!'"
+  ></error-card>
+} @else if (!agendaItems()?.length) {
+  <div class="empty">No items found.</div>
+} @else {
+  <div class="agenda">
+    @for (day of agendaItems(); track day.dayStr) {
+      <div class="agenda-day">
+        <h4>{{ day.dayStr | localeDate: 'shortDate' }}</h4>
+        <div
+          class="item-list"
+          [@standardList]="day.itemsForDay.length"
+        >
+          @for (item of day.itemsForDay; track item.issueData.id) {
+            <issue-preview-item
+              [issueProviderId]="issueProvider().id"
+              [itemData]="item"
+              [customTitleStr]="
+                (item.issueData?.start | shortTime) + ' – ' + item.issueData?.title
+              "
+              (addIssue)="addIssue($event)"
+            ></issue-preview-item>
+          }
+        </div>
+      </div>
+    }
+  </div>
+}

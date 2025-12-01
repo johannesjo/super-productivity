@@ -1,0 +1,80 @@
+<header>
+  <div class="title">{{ panelCfg().title | translate }}</div>
+  <div
+    class="tasks-total-estimate"
+    [title]="tasks().length"
+  >
+    {{ totalEstimate() | msToString }}
+    <mat-icon style="font-size: 14px; line-height: 14px; height: 14px; width: 14px"
+      >task_alt</mat-icon
+    >{{ this.tasks().length }}
+  </div>
+  <button
+    mat-icon-button
+    (click)="editBoard.emit()"
+  >
+    <mat-icon>edit</mat-icon>
+  </button>
+
+  <!--        <button mat-icon-button>-->
+  <!--          <mat-icon>more_vert</mat-icon>-->
+  <!--        </button>-->
+</header>
+
+<!--[cdkDropListData]="panelCfg()"-->
+<add-task-inline
+  style="margin-bottom: 8px"
+  [additionalFields]="additionalTaskFields()"
+  [tagsToRemove]="panelCfg().excludedTagIds"
+  [taskIdsToExclude]="panelCfg().taskIds"
+  [isNoDefaults]="true"
+  (afterTaskAdd)="afterTaskAdd($event)"
+></add-task-inline>
+
+<div
+  class="task-items"
+  cdkDropList
+  [cdkDropListData]="panelCfg()"
+  (cdkDropListDropped)="drop($event)"
+>
+  @for (task of tasks(); track task.id) {
+    <planner-task
+      cdkDrag
+      [cdkDragData]="task"
+      [task]="task"
+      [tagsToHide]="panelCfg().includedTagIds || []"
+    >
+      @if (task.reminderId) {
+        <button
+          (click)="scheduleTask(task, $event)"
+          [title]="T.F.TASK.CMP.EDIT_SCHEDULED | translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>alarm</mat-icon>
+          <div
+            class="time-badge"
+            [innerHTML]="task.dueWithTime | shortPlannedAt"
+          ></div>
+        </button>
+      }
+      @if (task.dueDay) {
+        <button
+          (click)="scheduleTask(task, $event)"
+          [title]="T.F.TASK.CMP.SCHEDULE | translate"
+          class="ico-btn schedule-btn"
+          color=""
+          mat-icon-button
+        >
+          <mat-icon>today</mat-icon>
+          <div class="time-badge">{{ task.dueDay | localDateStr }}</div>
+        </button>
+      }
+    </planner-task>
+  }
+
+  <!--  @if (tasks().length === 0) {-->
+  <!--    <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>-->
+  <!--  }-->
+</div>

@@ -1,0 +1,9 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  form {
+    @include mq(xs) {
+      width: 500px;
+    }
+  }
+}

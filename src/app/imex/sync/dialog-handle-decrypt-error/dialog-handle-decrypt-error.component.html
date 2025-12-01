@@ -1,0 +1,59 @@
+<mat-dialog-content>
+  <div class="content">
+    <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P1 | translate }}</p>
+
+    <p>{{ T.F.SYNC.D_DECRYPT_ERROR.P2 | translate }}</p>
+    <form
+      #formEl="ngForm"
+      (ngSubmit)="formEl.valid && updatePwAndResync()"
+    >
+      <mat-form-field>
+        <mat-label>{{ T.F.SYNC.D_DECRYPT_ERROR.PASSWORD | translate }}</mat-label>
+        <input
+          [(ngModel)]="passwordVal"
+          name="txtVal"
+          matInput
+          type="password"
+        />
+      </mat-form-field>
+
+      <div style="text-align: center; margin-top: 16px">
+        <button
+          class="btn btn-primary submit-button"
+          color="primary"
+          mat-stroked-button
+          (click)="formEl.valid && updatePwAndResync()"
+        >
+          <mat-icon>save</mat-icon>
+          {{ T.F.SYNC.D_DECRYPT_ERROR.CHANGE_PW_AND_DECRYPT | translate }}
+        </button>
+      </div>
+    </form>
+
+    <div style="text-align: center; margin-top: 16px">
+      <button
+        mat-stroked-button
+        color="warn"
+        type="button"
+        (click)="updatePWAndForceUpload()"
+      >
+        <mat-icon>cloud_upload</mat-icon>
+        {{ T.F.SYNC.D_DECRYPT_ERROR.BTN_OVER_WRITE_REMOTE | translate }}
+      </button>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <div class="wrap-buttons">
+    <button
+      (click)="cancel()"
+      class="btn btn-primary submit-button"
+      mat-button
+      type="button"
+    >
+      <mat-icon>close</mat-icon>
+      {{ T.G.CANCEL | translate }}
+    </button>
+  </div>
+</mat-dialog-actions>

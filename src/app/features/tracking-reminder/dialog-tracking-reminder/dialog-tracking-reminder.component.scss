@@ -1,4 +1,4 @@
-@import '../../../../variables';
+@use '../../../../styles/_globals.scss' as *;
 
 .dialog-content {
   // 600px
@@ -16,11 +16,11 @@
 .time {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: $s;
+  margin-bottom: var(--s);
 }
 
 .track-to-label {
-  margin-bottom: $s;
-  font-size: $s * 2;
+  margin-bottom: var(--s);
+  font-size: var(--s2);
   font-weight: bold;
 }

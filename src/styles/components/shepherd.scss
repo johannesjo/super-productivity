@@ -1,0 +1,280 @@
+@use '../mixins/_theming';
+
+//@import "shepherd.js/dist/css/shepherd.css";
+
+.shepherd-modal-overlay-container {
+  display: none;
+}
+
+.shepherd-highlight {
+  outline: 3px dotted var(--c-accent) !important;
+}
+
+.shepherd-highlight-inner {
+  border: 3px dotted var(--c-accent) !important;
+}
+
+.shepherd-text kbd {
+  background-color: var(--bg-lightest);
+  border-radius: 3px;
+  border: 1px solid var(--extra-border-color);
+  box-shadow:
+    0 1px 1px var(--c-dark-20),
+    0 2px 0 0 var(--c-light-70) inset;
+  color: var(--text-color);
+  display: inline-block;
+  font-size: 0.85em;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+.shepherd-nav-list {
+  li {
+    margin-bottom: var(--s);
+  }
+
+  a {
+    font-weight: bold;
+  }
+}
+
+.shepherd-header {
+  padding: var(--s) 1rem !important;
+  border-top-left-radius: 5px;
+  border-top-right-radius: 5px;
+  line-height: 2em;
+  position: relative;
+
+  @include theming.darkTheme(true) {
+    background: var(--dark8) !important;
+  }
+
+  h3 {
+    margin: 0;
+    font-weight: bold;
+  }
+}
+
+.shepherd-cancel-icon {
+  background: transparent;
+  border: none;
+  color: var(--text-color);
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: normal;
+  height: auto;
+  padding: 0;
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  width: auto;
+  opacity: 0.75;
+  transition: opacity 0.25s;
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.shepherd-element[data-popper-reference-hidden]:not(.shepherd-centered) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none;
+}
+
+.shepherd-colored-border {
+  border: 1px solid var(--c-primary);
+  padding: 0 4px;
+  color: var(--c-primary);
+  font-weight: bold;
+  border-radius: 4px;
+}
+
+.shepherd-title,
+.shepherd-text {
+  font-size: 16px;
+  line-height: 1.5;
+
+  color: var(--text-color);
+}
+
+.shepherd-element {
+  border-radius: 8px;
+  box-shadow: var(--whiteframe-shadow-24dp);
+  z-index: var(--z-tour);
+  max-width: 400px;
+  opacity: 0;
+  outline: none;
+  transition:
+    opacity 0.3s,
+    visibility 0.3s;
+  visibility: hidden;
+  width: 100%;
+
+  background: var(--bg-lightest) !important;
+
+  .material-icons {
+    vertical-align: middle;
+  }
+}
+
+.shepherd-arrow:before {
+  content: '';
+  transform: rotate(45deg);
+
+  background: var(--bg-lightest) !important;
+}
+
+.shepherd-footer button + button {
+  margin-left: 4px;
+}
+
+// BASE
+// ----
+// @import "shepherd.js/dist/css/shepherd.css";
+
+.shepherd-button {
+  position: relative;
+  overflow: hidden;
+  transition:
+    background-color 200ms cubic-bezier(0.4, 0, 0.2, 1),
+    box-shadow 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // Hover state - similar to Material button hover
+  &:hover:not(:disabled) {
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: currentColor;
+      opacity: 0.08;
+      pointer-events: none;
+    }
+  }
+
+  // Active/pressed state - similar to Material button active
+  &:active:not(:disabled) {
+    &::before {
+      opacity: 0.12;
+    }
+  }
+
+  // Focus state
+  &:focus:not(:disabled) {
+    outline: 2px solid var(--c-accent, var(--c-primary));
+    outline-offset: 2px;
+  }
+}
+
+.shepherd-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.shepherd-footer {
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 0.75rem 0.75rem;
+}
+
+.shepherd-footer .shepherd-button:last-child {
+  margin-right: 0;
+}
+
+.shepherd-has-title .shepherd-content .shepherd-header {
+  background: var(--bg-lighter);
+  padding: 1em;
+}
+
+.shepherd-text {
+  padding: 0.75em;
+}
+
+.shepherd-text p {
+  margin-top: 0;
+}
+
+.shepherd-text p:last-child {
+  margin-bottom: 0;
+}
+
+.shepherd-enabled.shepherd-element {
+  opacity: 1;
+  visibility: visible;
+}
+
+.shepherd-element,
+.shepherd-element *,
+.shepherd-element :after,
+.shepherd-element :before {
+  box-sizing: border-box;
+}
+
+.shepherd-arrow,
+.shepherd-arrow:before {
+  height: 16px;
+  position: absolute;
+  width: 16px;
+  z-index: -1;
+}
+
+.shepherd-element[data-popper-placement^='top'] > .shepherd-arrow {
+  bottom: -8px;
+}
+
+.shepherd-element[data-popper-placement^='bottom'] > .shepherd-arrow {
+  top: -8px;
+}
+
+.shepherd-element[data-popper-placement^='left'] > .shepherd-arrow {
+  right: -8px;
+}
+
+.shepherd-element[data-popper-placement^='right'] > .shepherd-arrow {
+  left: -8px;
+}
+
+.shepherd-element.shepherd-centered > .shepherd-arrow {
+  opacity: 0;
+}
+
+.shepherd-element.shepherd-has-title[data-popper-placement^='bottom']
+  > .shepherd-arrow:before {
+  background-color: var(--bg-lighter);
+}
+
+.shepherd-target-click-disabled.shepherd-enabled.shepherd-target,
+.shepherd-target-click-disabled.shepherd-enabled.shepherd-target * {
+  pointer-events: none;
+}
+
+//.shepherd-modal-overlay-container {
+//  height: 0;
+//  left: 0;
+//  opacity: 0;
+//  overflow: hidden;
+//  pointer-events: none;
+//  position: fixed;
+//  top: 0;
+//  transition: all .3s ease-out, height 0ms .3s, opacity .3s 0ms;
+//  width: 100vw;
+//  z-index: 9997
+//}
+//
+//.shepherd-modal-overlay-container.shepherd-modal-is-visible {
+//  height: 100vh;
+//  opacity: .5;
+//  transform: translateZ(0);
+//  transition: all .3s ease-out, height 0s 0s, opacity .3s 0s
+//}
+//
+//.shepherd-modal-overlay-container.shepherd-modal-is-visible path {
+//  pointer-events: all
+//}

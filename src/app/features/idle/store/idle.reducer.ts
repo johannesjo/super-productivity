@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store';
-import * as IdleActions from './idle.actions';
+import { resetIdle, setIdleTime, triggerIdle } from './idle.actions';
 
 export const IDLE_FEATURE_KEY = 'idle';
 
@@ -16,11 +16,11 @@ export const initialIdleState: IdleState = {
 export const idleReducer = createReducer(
   initialIdleState,
 
-  on(IdleActions.triggerIdle, (state, { idleTime }) => ({
+  on(triggerIdle, (state, { idleTime }) => ({
     ...state,
     isIdle: true,
     idleTime,
   })),
-  on(IdleActions.resetIdle, (state) => ({ ...state, isIdle: false, idleTime: 0 })),
-  on(IdleActions.setIdleTime, (state, { idleTime }) => ({ ...state, idleTime })),
+  on(resetIdle, (state) => ({ ...state, isIdle: false, idleTime: 0 })),
+  on(setIdleTime, (state, { idleTime }) => ({ ...state, idleTime })),
 );

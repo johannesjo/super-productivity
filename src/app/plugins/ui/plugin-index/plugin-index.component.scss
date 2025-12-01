@@ -1,0 +1,103 @@
+@use '../../../../styles/_globals.scss' as *;
+
+@use '../../../../styles/components/scrollbars';
+
+.plugin-index-container {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.loading-card,
+.error-card {
+  margin: 2rem;
+  max-width: 600px;
+  align-self: center;
+}
+
+.loading-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem;
+
+  p {
+    margin: 0;
+    color: var(--text-color-secondary);
+  }
+}
+
+.error-card {
+  .mat-card-header {
+    .mat-card-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--warn-color);
+    }
+  }
+
+  p {
+    margin-bottom: 1rem;
+    color: var(--text-color);
+  }
+}
+
+// Simple loading/error states for embedded use
+.simple-loading,
+.simple-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 16px;
+}
+
+.simple-error {
+  color: var(--warn-color, #f44336);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+  }
+}
+
+.simple-loading p,
+.simple-error p {
+  margin: 0;
+  opacity: 0.7;
+}
+
+.iframe-container {
+  flex: 1;
+  position: relative;
+  overflow: hidden;
+}
+
+.plugin-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: transparent;
+  @include scrollbars.scrollBarStyles;
+
+  &.hidden {
+    visibility: hidden;
+  }
+}
+
+// Dark theme support
+.dark-theme {
+  .header {
+    background: var(--background-dark);
+    border-color: var(--border-dark);
+  }
+
+  .plugin-iframe {
+    background: var(--background-dark);
+  }
+}

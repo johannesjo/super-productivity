@@ -1,0 +1,11 @@
+
+### Bug Fixes
+
+* overlay-indicator.ts not being cleaned up
+* vector clock edge cases
+### Features
+
+* improve overlay-indicator.ts cleanup
+* improve shutdown cleanup
+* make wayland idle time work again
+* **sync:** improve vector clock handling

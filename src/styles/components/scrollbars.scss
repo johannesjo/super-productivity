@@ -1,5 +1,7 @@
-@mixin _scrollBarStyles() {
-  scrollbar-color: #888 #f1f1f1;
+@use '../mixins/_media-queries';
+
+@mixin scrollBarStyles() {
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   scrollbar-width: 4px;
 
   ::-webkit-scrollbar {
@@ -9,52 +11,30 @@
 
   /* Track */
   ::-webkit-scrollbar-track {
-    background: #f1f1f1;
+    background: var(--scrollbar-track);
     border-radius: 4px;
   }
 
   /* Handle */
   ::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--scrollbar-thumb);
     border-radius: 16px;
   }
 
   /* Handle on hover */
   ::-webkit-scrollbar-thumb:hover {
-    background: #555;
-  }
-
-  &.isDarkTheme {
-    scrollbar-color: #333 #222;
-
-
-    ::-webkit-scrollbar-track {
-      background: #222;
-      border-radius: 4px;
-    }
-
-    /* Handle */
-    ::-webkit-scrollbar-thumb {
-      background: #333;
-      border-radius: 16px;
-    }
-
-    /* Handle on hover */
-    ::-webkit-scrollbar-thumb:hover {
-      background: #444;
-    }
-
+    background: var(--scrollbar-thumb-hover);
   }
 }
 
-@include mq(xs) {
+@include media-queries.mq(xs) {
   .isNoMac {
-    @include _scrollBarStyles;
+    @include scrollBarStyles;
   }
 }
 
-@include mq(xs, max) {
+@include media-queries.mq(xs, max) {
   .isNoTouchOnly {
-    @include _scrollBarStyles;
+    @include scrollBarStyles;
   }
 }

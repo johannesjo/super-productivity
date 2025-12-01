@@ -1,85 +1,120 @@
 <div class="page-settings page-wrapper">
-  <div *ngIf="globalCfg">
-    <div class="section-wrapper component-wrapper">
-      <h1 class="mat-h1">{{T.PS.GLOBAL_SETTINGS|translate}}</h1>
+  @if (globalCfg) {
+    <div>
+      <div class="section-wrapper component-wrapper">
+        <h1 class="mat-h1">{{ T.PS.GLOBAL_SETTINGS | translate }}</h1>
+        <theme-selector></theme-selector>
+        @for (section of globalConfigFormCfg; track section.key) {
+          <section class="config-section section-{{ section.key }}">
+            <config-section
+              (save)="saveGlobalCfg($event)"
+              [cfg]="getGlobalCfgSection(section.key)"
+              [section]="section"
+            ></config-section>
+          </section>
+        }
+        <section class="config-section">
+          <config-sound-form
+            [cfg]="getGlobalCfgSection('sound')"
+            (save)="saveGlobalCfg($event)"
+          ></config-sound-form>
+        </section>
 
-      <div class="dark-mode-toggle">
-        <mat-slide-toggle
-          (change)="toggleDarkMode($event)"
-          [checked]="(configService.misc$|async)?.isDarkMode"
+        <div>
+          <h2
+            class="mat-h2"
+            style="margin-top: 32px"
+          >
+            {{ T.PS.PLUGINS | translate }}
+          </h2>
+          <section class="config-section plugin-section">
+            <collapsible
+              [isIconBefore]="true"
+              [isExpanded]="false"
+              [title]="T.PS.PLUGINS | translate"
+            >
+              <plugin-management></plugin-management>
+            </collapsible>
+          </section>
+        </div>
+
+        <div class="tour-productivityHelper">
+          <h2
+            class="mat-h2"
+            style="margin-top: 32px"
+          >
+            {{ T.PS.PRODUCTIVITY_HELPER | translate }}
+          </h2>
+          @for (section of globalProductivityConfigFormCfg; track section.key) {
+            <section class="config-section">
+              <config-section
+                (save)="saveGlobalCfg($event)"
+                [cfg]="getGlobalCfgSection(section.key)"
+                [section]="section"
+              ></config-section>
+            </section>
+          }
+        </div>
+
+        <h2
+          class="mat-h2"
+          style="margin-top: 32px"
         >
-          {{T.PS.TOGGLE_DARK_MODE|translate}}
-        </mat-slide-toggle>
+          {{ T.PS.SYNC_EXPORT | translate }}
+        </h2>
+
+        <section class="config-section tour-syncSection">
+          <!-- NOTE: we need to debounce, as external updates end us in an endless loop -->
+          @let syncSettingsForm = syncSettingsService.syncSettingsForm$ | async;
+          @if (syncSettingsForm) {
+            <config-section
+              (save)="syncSettingsService.updateSettingsFromForm($event.config)"
+              [cfg]="syncSettingsForm"
+              [section]="globalSyncConfigFormCfg"
+            ></config-section>
+          }
+        </section>
+
+        @for (section of globalImexFormCfg; track section.key) {
+          <section class="config-section imex-section">
+            <config-section
+              (save)="saveGlobalCfg($event)"
+              [cfg]="getGlobalCfgSection(section.key)"
+              [section]="section"
+            ></config-section>
+          </section>
+        }
       </div>
-
-      <section
-        *ngFor="let section of globalConfigFormCfg; trackBy:trackBySectionKey;"
-        class="config-section"
-      >
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
-
-      <h2
-        class="mat-h2"
-        style="margin-top: 32px"
-      >
-        {{T.PS.PRODUCTIVITY_HELPER|translate}}
-      </h2>
-      <section
-        *ngFor="let section of globalProductivityConfigFormCfg; trackBy:trackBySectionKey;"
-        class="config-section"
-      >
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
-
-      <h2
-        class="mat-h2"
-        style="margin-top: 32px"
-      >
-        {{T.PS.SYNC_EXPORT|translate}}
-      </h2>
-      <section
-        *ngFor="let section of globalSyncProviderFormCfg; trackBy:trackBySectionKey;"
-        class="config-section"
-      >
-        <config-section
-          (save)="saveGlobalCfg($event)"
-          [cfg]="getGlobalCfgSection(section.key)"
-          [section]="section"
-        ></config-section>
-      </section>
     </div>
-  </div>
+  }
 </div>
 
 <footer
   class="version-footer"
-  title="Rev {{versions?.revision}} {{versions?.branch}} {{versions?.version}}"
+  title="Rev {{ versions?.revision }} {{ versions?.branch }} {{ versions?.version }}"
 >
   Super Productivity
   <a
     href="https://github.com/johannesjo/super-productivity/blob/master/CHANGELOG.md"
     target="_blank"
-    >{{appVersion}}</a
+    >{{ appVersion }}</a
   >
   –
   <a
-    href="https://super-productivity.com/private-policy"
+    (click)="downloadLogs(); $event?.preventDefault()"
+    href="#"
+    >Logs</a
+  >
+  –
+  <a
+    href="https://super-productivity.com/privacy/"
     target="_blank"
-    >{{T.PS.PRIVACY_POLICY|translate}}</a
+    >{{ T.PS.PRIVACY_POLICY | translate }}</a
   >
   –
   <a
     href="https://github.com/johannesjo/super-productivity/discussions/new"
     target="_blank"
-    >{{T.PS.PROVIDE_FEEDBACK|translate}}</a
+    >{{ T.PS.PROVIDE_FEEDBACK | translate }}</a
   >
 </footer>

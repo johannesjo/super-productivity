@@ -1,0 +1,13 @@
+<mat-card appearance="raised">
+  <mat-card-content>
+    <div class="wrap">
+      <mat-icon color="warn">error</mat-icon>
+      @if (actionAdvice()) {
+        <div>
+          <strong>{{ actionAdvice() }}</strong>
+        </div>
+      }
+      <pre class="error-txt"><code>{{ errorTxt() }}</code></pre>
+    </div>
+  </mat-card-content>
+</mat-card>

@@ -1,4 +1,4 @@
-@import '../../variables';
+@use '../_globals.scss' as *;
 
 .formly-row {
   @include mq(xs) {
@@ -6,7 +6,7 @@
 
     > * {
       width: 100%;
-      margin-left: $s * 2;
+      margin-left: var(--s2);
 
       &:first-child {
         margin-left: 0;

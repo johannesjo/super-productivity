@@ -1,0 +1,32 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  //@include grabCursor();
+  display: flex;
+  align-items: center;
+  padding: 0;
+  border-radius: 6px;
+  //border: 1px solid;
+
+  background: var(--task-c-bg);
+  box-shadow: var(--task-shadow);
+  color: var(--text-color);
+  //border-color: var(--extra-border-color);
+
+  &.isDone {
+    opacity: 0.7;
+
+    .title {
+      text-decoration: line-through;
+    }
+  }
+}
+
+.title {
+  flex-grow: 1;
+  padding: 4px 0;
+}
+
+.open-issue {
+  opacity: 0.6;
+}

@@ -1,28 +1,26 @@
 <div
-  (click)="toggleExpand();"
+  (click)="toggleExpand()"
   class="collapsible-header"
 >
-  <ng-container *ngIf="isIconBefore">
+  @if (isIconBefore()) {
     <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
-  </ng-container>
+  }
+  @if (icon) {
+    <mat-icon class="collapsible-additional-icon">{{ icon }} </mat-icon>
+  }
 
-  <mat-icon
-    *ngIf="icon"
-    class="collapsible-additional-icon"
-    >{{icon}}
-  </mat-icon>
+  <div class="collapsible-title">{{ title() }}</div>
 
-  <div class="collapsible-title">{{title}}</div>
-
-  <ng-container *ngIf="!isIconBefore">
+  @if (!isIconBefore()) {
     <mat-icon class="collapsible-expand-icon">expand_more</mat-icon>
-  </ng-container>
+  }
 </div>
 
-<div
-  *ngIf="isExpanded"
-  [@expand]
-  class="collapsible-panel ani-expand-collapse"
->
-  <ng-content></ng-content>
-</div>
+@if (isExpanded) {
+  <div
+    [@expand]
+    class="collapsible-panel ani-expand-collapse"
+  >
+    <ng-content></ng-content>
+  </div>
+}

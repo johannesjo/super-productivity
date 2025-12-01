@@ -1,0 +1,193 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  border: 2px dashed var(--c-accent);
+  border-radius: 8px;
+  position: relative;
+  pointer-events: none;
+  z-index: 33;
+  opacity: 0.2;
+  margin-bottom: 6px;
+  display: block;
+  container-type: inline-size;
+
+  color: var(--text-color);
+  background: var(--bg-lightest);
+
+  &:hover:not(.edit-mode) {
+    opacity: 0.6;
+    cursor: pointer;
+  }
+
+  &.edit-mode {
+    pointer-events: auto;
+    opacity: 1;
+    box-shadow: var(--whiteframe-shadow-4dp);
+  }
+
+  .time {
+    cursor: pointer;
+    position: absolute;
+    bottom: 100%;
+    //margin-bottom: -6px;
+    border: 2px dashed var(--c-accent);
+    background: inherit;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+    font-size: 13px;
+    text-align: center;
+    border-top-left-radius: 4px;
+    border-top-right-radius: 4px;
+    border-bottom: 0;
+    padding: 1px 12px;
+    color: inherit;
+    z-index: 1;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+
+    @include mq(xs, max) {
+      font-size: 10px;
+      padding: 0 4px;
+    }
+
+    mat-icon {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+      line-height: 16px;
+      vertical-align: middle;
+
+      @include mq(xs, max) {
+        font-size: 12px;
+        width: 12px;
+        height: 12px;
+        line-height: 12px;
+      }
+    }
+  }
+
+  .task-input-container {
+    position: absolute;
+    inset: 0;
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+
+    @include mq(xs, max) {
+      padding: 4px;
+      gap: 4px;
+    }
+
+    // Remove padding when width is very small (< 150px)
+    @container (max-width: 135px) {
+      padding: 2px;
+      gap: 2px;
+    }
+
+    select-task-minimal {
+      flex: 1;
+      min-height: 0;
+      //flex: 1 0 auto;
+    }
+
+    .task-type-indicator {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 12px;
+      font-weight: 500;
+
+      @include mq(xs, max) {
+        font-size: 9px;
+        padding: 1px 4px;
+      }
+
+      &.create {
+        background-color: rgba(var(--c-accent-rgb), 0.15);
+        color: var(--c-accent);
+      }
+
+      &.select {
+        background-color: rgba(var(--c-primary-rgb), 0.15);
+        color: var(--c-primary);
+      }
+
+      mat-icon {
+        font-size: 12px;
+        width: 12px;
+        height: 12px;
+
+        @include mq(xs, max) {
+          font-size: 10px;
+          width: 10px;
+          height: 10px;
+        }
+      }
+
+      span {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+
+        @include mq(xs, max) {
+          max-width: 80px;
+        }
+      }
+    }
+
+    .mode-hint {
+      font-size: 12px;
+      color: var(--text-tertiary);
+      text-align: center;
+      line-height: 1;
+      opacity: 0.8;
+      margin-top: auto;
+      border-top: 1px dashed var(--extra-border-color);
+
+      @include mq(xs, max) {
+        font-size: 11px;
+      }
+
+      // Hide hint text when width is very small (< 150px)
+      @container (max-width: 135px) {
+        display: none;
+      }
+    }
+  }
+}
+
+.msg {
+  position: absolute;
+  top: 50%;
+  transform: translate(0, -50%);
+  width: 100%;
+  text-align: center;
+  font-weight: bold;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+
+  @include mq(xs, max) {
+    font-size: 12px;
+  }
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+
+    @include mq(xs, max) {
+      font-size: 14px;
+      width: 14px;
+      height: 14px;
+    }
+  }
+}

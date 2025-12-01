@@ -12,73 +12,75 @@
     tabindex="-1"
   ></textarea>
 
-  <div
-    *ngIf="!isShowAsText"
-    [class.isNoCols]="!options.cols?.length"
-    class="wrapper-wrapper"
-  >
-    <button
-      [matMenuTriggerFor]="addColMenu"
-      [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL|translate"
-      class="add-col"
-      color=""
-      mat-mini-fab
-      matTooltipPosition="left"
+  @if (!isShowAsText) {
+    <div
+      [class.isNoCols]="!options.cols?.length"
+      class="wrapper-wrapper"
     >
-      <mat-icon>add</mat-icon>
-    </button>
-    <mat-menu #addColMenu="matMenu">
       <button
-        (click)="addCol(colOpt.id)"
-        *ngFor="let colOpt of colOpts; trackBy: trackByIndex"
-        mat-menu-item
+        [matMenuTriggerFor]="addColMenu"
+        [matTooltip]="T.F.WORKLOG.EXPORT.ADD_COL | translate"
+        class="add-col"
+        color=""
+        mat-mini-fab
+        matTooltipPosition="left"
       >
-        {{colOpt.title|translate}}
+        <mat-icon>add</mat-icon>
       </button>
-    </mat-menu>
-
-    <div class="table-wrapper material-table _no-elevation">
-      <table>
-        <tr class="control-row">
-          <td *ngFor="let col of options.cols;let i = index; trackBy: trackByIndex">
-            <mat-select
-              (selectionChange)="onOptionsChange()"
-              [(ngModel)]="options.cols[i]"
-              [matTooltip]="T.F.WORKLOG.EXPORT.EDIT_COL|translate"
-              matTooltipPosition="above"
-            >
-              <mat-option><em>remove</em></mat-option>
-              <mat-option
-                *ngFor="let colOpt of colOpts"
-                [value]="colOpt.id"
-              >
-                {{colOpt.title|translate}}
-              </mat-option>
-            </mat-select>
-          </td>
-        </tr>
-        <tr>
-          <th
-            *ngFor="let headlineCol of headlineCols; let i = index; trackBy: trackByIndex"
-            [ngClass]="options.cols[i]"
+      <mat-menu #addColMenu="matMenu">
+        @for (colOpt of colOpts; track $index) {
+          <button
+            (click)="addCol(colOpt.id)"
+            mat-menu-item
           >
-            {{headlineCol}}
-          </th>
-        </tr>
-        <tr *ngFor="let row of formattedRows;">
-          <td
-            *ngFor="let col of row; let i = index;"
-            [innerHTML]="col"
-            [ngClass]="options.cols[i]"
-          ></td>
-        </tr>
-      </table>
+            {{ colOpt.title | translate }}
+          </button>
+        }
+      </mat-menu>
+      <div class="table-wrapper material-table _no-elevation">
+        <table>
+          <tr class="control-row">
+            @for (col of options.cols; track i; let i = $index) {
+              <td>
+                <mat-select
+                  (selectionChange)="onOptionsChange()"
+                  [(ngModel)]="options.cols[i]"
+                  [matTooltip]="T.F.WORKLOG.EXPORT.EDIT_COL | translate"
+                  matTooltipPosition="above"
+                >
+                  <mat-option><em>remove</em></mat-option>
+                  @for (colOpt of colOpts; track colOpt) {
+                    <mat-option [value]="colOpt.id">
+                      {{ colOpt.title | translate }}
+                    </mat-option>
+                  }
+                </mat-select>
+              </td>
+            }
+          </tr>
+          <tr>
+            @for (headlineCol of headlineCols; track i; let i = $index) {
+              <th [ngClass]="options.cols[i]">{{ headlineCol }}</th>
+            }
+          </tr>
+          @for (row of formattedRows; track row) {
+            <tr>
+              @for (col of row; track col; let i = $index) {
+                <td
+                  [innerHTML]="col"
+                  [ngClass]="options.cols[i]"
+                ></td>
+              }
+            </tr>
+          }
+        </table>
+      </div>
     </div>
-  </div>
+  }
 
   <collapsible
     [isInline]="true"
-    [title]="T.F.WORKLOG.EXPORT.OPTIONS|translate"
+    [title]="T.F.WORKLOG.EXPORT.OPTIONS | translate"
     class="options-collapsible"
   >
     <section class="options">
@@ -90,95 +92,90 @@
               [(ngModel)]="isShowAsText"
               name="isShowAsText"
             >
-              {{T.F.WORKLOG.EXPORT.SHOW_AS_TEXT|translate}}
+              {{ T.F.WORKLOG.EXPORT.SHOW_AS_TEXT | translate }}
             </mat-slide-toggle>
           </div>
         </div>
         <div class="col">
-          <mat-form-field
-            *ngIf="(isWorklogExport)"
-            class="md-block"
-          >
-            <label>{{T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY|translate}}</label>
-            <input
-              (change)="onOptionsChange()"
-              [(ngModel)]="options.separateTasksBy"
-              matInput
-              name="separateTasksBy"
-              type="text"
-            />
-          </mat-form-field>
+          @if (isWorklogExport()) {
+            <mat-form-field class="md-block">
+              <label>{{ T.F.WORKLOG.EXPORT.SEPARATE_TASKS_BY | translate }}</label>
+              <input
+                (change)="onOptionsChange()"
+                [(ngModel)]="options.separateTasksBy"
+                matInput
+                name="separateTasksBy"
+                type="text"
+              />
+            </mat-form-field>
+          }
         </div>
         <div class="col">
           <mat-form-field>
-            <label>{{T.F.WORKLOG.EXPORT.ROUND_TIME_WORKED_TO|translate}}</label>
+            <label>{{ T.F.WORKLOG.EXPORT.ROUND_TIME_WORKED_TO | translate }}</label>
             <mat-select
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.roundWorkTimeTo"
             >
               <mat-option
-                ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
+                ><em>{{ T.F.WORKLOG.EXPORT.DONT_ROUND | translate }}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
-                {{roundOption.title|translate}}
-              </mat-option>
+              @for (roundOption of roundTimeOptions; track $index) {
+                <mat-option [value]="roundOption.id">
+                  {{ roundOption.title | translate }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>{{T.F.WORKLOG.EXPORT.ROUND_START_TIME_TO|translate}}</label>
+            <label>{{ T.F.WORKLOG.EXPORT.ROUND_START_TIME_TO | translate }}</label>
             <mat-select
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.roundStartTimeTo"
             >
               <mat-option
-                ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
+                ><em>{{ T.F.WORKLOG.EXPORT.DONT_ROUND | translate }}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
-                {{roundOption.title|translate}}
-              </mat-option>
+              @for (roundOption of roundTimeOptions; track $index) {
+                <mat-option [value]="roundOption.id">
+                  {{ roundOption.title | translate }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>{{T.F.WORKLOG.EXPORT.ROUND_END_TIME_TO|translate}}</label>
+            <label>{{ T.F.WORKLOG.EXPORT.ROUND_END_TIME_TO | translate }}</label>
             <mat-select
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.roundEndTimeTo"
             >
               <mat-option
-                ><em>{{T.F.WORKLOG.EXPORT.DONT_ROUND|translate}}</em></mat-option
+                ><em>{{ T.F.WORKLOG.EXPORT.DONT_ROUND | translate }}</em></mat-option
               >
-              <mat-option
-                *ngFor="let roundOption of roundTimeOptions; trackBy: trackByIndex"
-                [value]="roundOption.id"
-              >
-                {{roundOption.title|translate}}
-              </mat-option>
+              @for (roundOption of roundTimeOptions; track $index) {
+                <mat-option [value]="roundOption.id">
+                  {{ roundOption.title | translate }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
         <div class="col">
           <mat-form-field>
-            <label>{{T.F.WORKLOG.EXPORT.GROUP_BY|translate}}</label>
+            <label>{{ T.F.WORKLOG.EXPORT.GROUP_BY | translate }}</label>
             <mat-select
               (selectionChange)="onOptionsChange()"
               [(ngModel)]="options.groupBy"
             >
-              <mat-option
-                *ngFor="let groupByOption of groupByOptions; trackBy: trackByIndex"
-                [value]="groupByOption.id"
-              >
-                {{groupByOption.title|translate}}
-              </mat-option>
+              @for (groupByOption of groupByOptions; track $index) {
+                <mat-option [value]="groupByOption.id">
+                  {{ groupByOption.title | translate }}
+                </mat-option>
+              }
             </mat-select>
           </mat-form-field>
         </div>
@@ -191,17 +188,18 @@
   align="end"
   mat-dialog-actions
 >
-  <button
-    *ngIf="isShowAsText"
-    color="primary"
-    data-clipboard-action="copy"
-    data-clipboard-target="#task-textarea"
-    id="clipboard-btn"
-    mat-button
-  >
-    <mat-icon>content_paste</mat-icon>
-    {{T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD|translate}}
-  </button>
+  @if (isShowAsText) {
+    <button
+      color="primary"
+      data-clipboard-action="copy"
+      data-clipboard-target="#task-textarea"
+      id="clipboard-btn"
+      mat-button
+    >
+      <mat-icon>content_paste</mat-icon>
+      {{ T.F.WORKLOG.EXPORT.COPY_TO_CLIPBOARD | translate }}
+    </button>
+  }
 
   <a
     [simpleDownloadData]="txt"
@@ -210,16 +208,17 @@
     mat-button
   >
     <mat-icon>file_download</mat-icon>
-    {{T.F.WORKLOG.EXPORT.SAVE_TO_FILE|translate}}
+    {{ T.F.WORKLOG.EXPORT.SAVE_TO_FILE | translate }}
   </a>
 
-  <button
-    (click)="onCloseClick()"
-    *ngIf="isShowClose"
-    color="primary"
-    mat-stroked-button
-    type="button"
-  >
-    {{T.G.CLOSE|translate}}
-  </button>
+  @if (isShowClose()) {
+    <button
+      (click)="onCloseClick()"
+      color="primary"
+      mat-stroked-button
+      type="button"
+    >
+      {{ T.G.CLOSE | translate }}
+    </button>
+  }
 </div>

@@ -1,0 +1,109 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  position: fixed;
+  z-index: var(--z-focus-mode-overlay);
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  -webkit-app-region: no-drag !important;
+  --z-focus-mode-drag-bar: 0;
+  --z-focus-mode-close-btn: 5;
+  --z-focus-mode-overlay-selector: 10;
+  --z-focus-mode-main-selector: 2;
+  --z-focus-mode-duration-slider: 2;
+  --z-focus-mode-simple-counter: 4;
+  --z-focus-mode-drag-over: 31;
+  --z-focus-mode-hide-notes: 2;
+  --z-focus-mode-countdown: 11;
+}
+
+.mac-os-drag-bar {
+  -webkit-app-region: drag;
+  height: 50px;
+  width: 160px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: var(--z-focus-mode-drag-bar);
+  display: none;
+
+  :host-context(.isMac) & {
+    display: block;
+  }
+}
+
+main {
+  flex-grow: 1;
+  display: flex;
+  position: relative;
+  height: 500px;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.scroll-container {
+  overflow: auto;
+  max-height: 100%;
+  width: 100%;
+}
+
+.close-btn {
+  position: absolute;
+  top: var(--s);
+  right: var(--s);
+  width: 56px;
+  height: 56px;
+  z-index: var(--z-focus-mode-close-btn);
+  @include mousePrimaryDevice {
+    transition: opacity var(--transition-leave);
+    //visibility: hidden;
+    opacity: 0;
+  }
+
+  :host:hover & {
+    transition: opacity var(--transition-enter);
+    //visibility: visible;
+    opacity: 1;
+  }
+
+  mat-icon {
+    font-size: 32px !important; //make it bigger, the default being 24px.
+    width: 32px;
+    height: 32px;
+  }
+}
+
+.pomodoro-info-wrapper {
+  text-align: center;
+  max-width: 500px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.pomodoro-info-msg {
+  font-size: 20px;
+  margin-bottom: 16px;
+}
+
+.focus-mode-select-mode {
+  position: absolute;
+  top: var(--s3);
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(100%, 560px);
+  z-index: var(--z-focus-mode-overlay-selector);
+}
+
+focus-mode-task-selection,
+focus-mode-duration-selection {
+  margin-bottom: auto;
+  margin-top: -32px;
+}

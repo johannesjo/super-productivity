@@ -1,0 +1,523 @@
+// CSS Custom Properties (CSS Variables)
+// This file defines all CSS variables used throughout the application
+
+// ===============================
+// CORE DESIGN TOKENS
+// ===============================
+
+:root {
+  // -----------------------------
+  // Spacing System
+  // -----------------------------
+  --s: 8px;
+  --s-quarter: 2px;
+  --s-half: 4px;
+  --s2: 16px; // 2 * 8px
+  --s3: 24px; // 3 * 8px
+  --s4: 32px; // 4 * 8px
+  --s5: 40px; // 5 * 8px
+  --s6: 48px; // 6 * 8px
+  --s7: 56px; // 7 * 8px
+  --s8: 64px; // 8 * 8px
+  --s9: 72px; // 9 * 8px
+
+  // -----------------------------
+  // Layout System
+  // -----------------------------
+  // Breakpoints
+  --layout-xxxs: 398px;
+  --layout-xxs: 440px;
+  --layout-xs: 600px;
+  --layout-sm: 960px;
+  --layout-md: 1280px;
+  --layout-lg: 1920px;
+  --layout-xl: 2000px;
+
+  // Component dimensions
+  --component-max-width: 800px;
+  --side-nav-width-switch-mobile: 500px;
+  --side-nav-width-switch-l: 1500px;
+  --side-nav-width-mobile: calc(100vw - var(--s9));
+  --side-nav-width: 200px;
+  --side-nav-width-l: 400px;
+  --bar-height-large: 56px;
+  --bar-height: 48px;
+  --bar-height-small: 40px;
+  --mat-mini-fab-size: 48px;
+  --mac-title-bar-padding: 20px;
+  --card-border-radius: 4px;
+
+  // Z-index layers
+  --z-focus-mode-overlay: 101;
+  --z-main-header-wrapper: 50;
+  --z-side-nav: 60;
+  --z-banner: 11;
+  --z-main-header: 12;
+  --z-celebrate: 102;
+  --z-backdrop: 222;
+  // NOTE needs to be below the z-index of cdk-overlay which is 1000
+  --z-add-task-bar: 999;
+  --z-search-bar: 999;
+  --z-mobile-bottom-nav: 50;
+  --z-right-panel: 44;
+  --z-right-panel-resize-handle: 65;
+  --z-right-panel-edge-handle: 66;
+  --z-tour: 1001;
+  --z-dragged-nav-item: 1002;
+
+  // ===============================
+  // COLORS - Theme Independent
+  // ===============================
+
+  // -----------------------------
+  // Semantic Colors
+  // -----------------------------
+  --color-success: #4caf50;
+  --color-warning: #ff9800;
+  --color-danger: #f44336;
+  --success-green: #4fa758;
+  --sun-yellow: #fff400;
+
+  // -----------------------------
+  // Dark Theme Elevation Colors
+  // -----------------------------
+  --dark0: rgb(0, 0, 0);
+  --dark0-5: rgb(26, 26, 26);
+  --dark1: rgb(30, 30, 30);
+  --dark2: rgb(34, 34, 34);
+  --dark3: rgb(36, 36, 36);
+  --dark4: rgb(39, 39, 39);
+  --dark4-5: rgb(40, 40, 40);
+  --dark5: rgb(42, 42, 42);
+  --dark6: rgb(44, 44, 44);
+  --dark8: rgb(46, 46, 46);
+  --dark10: rgb(48, 48, 48);
+  --dark12: rgb(51, 51, 51);
+  --dark16: rgb(53, 53, 53);
+  --dark24: rgb(56, 56, 56);
+
+  // -----------------------------
+  // Overlay Colors
+  // -----------------------------
+  --c-dark-10: rgba(0, 0, 0, 0.1);
+  --c-dark-20: rgba(0, 0, 0, 0.2);
+  --c-dark-30: rgba(0, 0, 0, 0.3);
+  --c-dark-40: rgba(0, 0, 0, 0.4);
+  --c-dark-50: rgba(0, 0, 0, 0.5);
+  --c-dark-60: rgba(0, 0, 0, 0.6);
+  --c-dark-80: rgba(0, 0, 0, 0.8);
+  --c-dark-90: rgba(0, 0, 0, 0.9);
+  --c-light-05: rgba(255, 255, 255, 0.05);
+  --c-light-10: rgba(255, 255, 255, 0.1);
+  --c-light-33: rgba(255, 255, 255, 0.33);
+  --c-light-40: rgba(255, 255, 255, 0.4);
+  --c-light-50: rgba(255, 255, 255, 0.5);
+  --c-light-70: rgba(255, 255, 255, 0.7);
+  --c-light-90: rgba(255, 255, 255, 0.9);
+
+  // Legacy palette references
+  --c-primary: var(--palette-primary-500);
+  --c-accent: var(--palette-accent-500);
+  --c-warn: var(--palette-warn-500);
+  --c-contrast: var(--palette-primary-contrast-500);
+
+  // ===============================
+  // ANIMATION & TRANSITIONS
+  // ===============================
+
+  // Timing functions
+  --ani-standard-timing: cubic-bezier(0.4, 0, 0.2, 1);
+  --ani-enter-timing: cubic-bezier(0, 0, 0.2, 1);
+  --ani-leave-timing: cubic-bezier(0.4, 0, 1, 1);
+  --ani-sharp-timing: cubic-bezier(0.4, 0, 0.6, 1);
+  --ease-in-out-quint: cubic-bezier(0.38, 0.04, 0.35, 0.96);
+
+  // Durations
+  --transition-duration-xs: 90ms;
+  --transition-duration-s: 150ms;
+  --transition-duration-m: 225ms;
+  --transition-duration-l: 375ms;
+  --transition-duration-enter: 225ms;
+  --transition-duration-leave: 195ms;
+  --page-transition-duration: 225ms;
+
+  // Transition shorthands
+  --transition-fast: all var(--transition-duration-xs) ease-in-out;
+  --transition-standard: all var(--transition-duration-m) var(--ani-standard-timing);
+  --transition-enter: all var(--transition-duration-m) var(--ani-enter-timing);
+  --transition-leave: all var(--transition-duration-m) var(--ani-leave-timing);
+
+  // ===============================
+  // COMPONENT-SPECIFIC VARIABLES
+  // ===============================
+
+  // -----------------------------
+  // Planner Task Component
+  // -----------------------------
+  --planner-item-height: 42px;
+  --planner-item-ico-size: 20px;
+  --planner-font-size: 14px;
+  --planner-font-size-mobile: 13px;
+  --planner-font-size-smaller: 11px;
+  --planner-font-size-smaller-mobile: 10px;
+
+  // -----------------------------
+  // Task Component
+  // -----------------------------
+  --task-first-line-min-height: 40px;
+  --task-icon-default-opacity: 0.7;
+  --task-inner-padding-top-bottom: 4px;
+  --task-is-done-dim-opacity: 0.3;
+  --task-border-radius: 4px;
+
+  // Task z-indexes
+  --z-drag-handle: 1;
+  --z-task-title: 4;
+  --z-btn: 4;
+  --z-time-wrapper: 4;
+  --z-btn-hover: 5;
+  --z-hover-controls: 6;
+  --z-progress-bar: 7;
+  --z-check-done: 11;
+  --z-first-line-controls-hover: 12;
+  --z-swipe-block: 0;
+  --z-is-selected-host: 20;
+  --z-focus-host: 21;
+  --z-is-current-host: 22;
+  --z-toggle-sub-task-btn: 30;
+  --z-drag-over-msg: 31;
+  --z-task-title-focus: 32;
+  --z-time-btn-svg-wrapper: 5555;
+
+  // -----------------------------
+  // Common Alpha Values
+  // -----------------------------
+  --border-alpha: 0.12;
+  --overlay-alpha: 0.1;
+  --separator-alpha: 0.3;
+  --muted-alpha: 0.6;
+  --intense-alpha: 0.9;
+}
+
+// ===============================
+// THEME-SPECIFIC OVERRIDES
+// ===============================
+
+// -----------------------------
+// Light Theme (Default)
+// -----------------------------
+body {
+  // Background colors
+  --bg: #f8f8f7;
+  --bg-darker: rgb(235, 235, 235);
+  --bg-drag-col: rgb(242, 242, 242);
+  --bg-slightly-lighter: var(--bg);
+  --bg-lighter: #fff;
+  --bg-lightest: #fff;
+  --bg-super-light: #fff;
+  --card-bg: #ffffff;
+  --card-shadow: var(--whiteframe-shadow-2dp);
+
+  // Navigation & Panel backgrounds
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-item-active-bg: rgba(255, 255, 255, 1.25);
+  --sidenav-hover-bg: rgba(205, 205, 205, 0.35);
+  --sidenav-active-text: var(
+    --palette-primary-600
+  ); // Darker for better contrast on light bg
+  --sidenav-text: var(--text-color-less-intense);
+  --sidenav-text-hover: var(--text-color-most-intense);
+  // task numbers and projects/tags expand and hover buttons on right
+  --sidenav-text-secondary: var(--text-color-muted);
+
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.6));
+  --right-panel-bg: transparent;
+  --right-panel-bg-mobile: #fff;
+  --bottom-nav-height: 44px;
+  --bottom-nav-bg: var(--sidenav-bg-mobile);
+  --bottom-panel-bg: #fff;
+  --bottom-panel-handle: rgba(0, 0, 0, 0.4);
+  --bottom-panel-handle-active: rgba(0, 0, 0, 0.6);
+
+  // Text colors
+  --text-color: rgb(44, 44, 44);
+  --text-color-less-intense: rgba(44, 44, 44, 0.9);
+  --text-color-muted: rgba(44, 44, 44, 0.6);
+  --text-color-more-intense: var(--text-color);
+  --text-color-most-intense: rgb(0, 0, 0);
+
+  // Selected task
+  --selected-task-bg-color: #fff;
+
+  // Borders and separators
+  --extra-border-color: #eee;
+  --separator-color: #d0d0d0;
+  --divider-color: rgba(0, 0, 0, 0.12);
+
+  // Backdrop
+  --c-backdrop: var(--c-dark-60);
+
+  // Note colors
+  --standard-note-bg: #ffffff;
+  --standard-note-fg: var(--text-color);
+  --standard-note-bg-hovered: var(--standard-note-bg);
+  --notes-container-bg: inherit;
+
+  // Task colors
+  --task-c-bg: #fff;
+  --task-c-selected-bg: var(--selected-task-bg-color);
+  --sub-task-c-bg: var(--task-c-bg);
+  --sub-task-c-bg-done: var(--task-c-bg);
+  --task-c-bg-done: var(--task-c-bg);
+  --task-c-current-bg: var(--task-c-bg);
+  --task-c-drag-drop-bg: var(--task-c-bg);
+  --sub-task-c-bg-in-selected: var(--task-c-bg);
+
+  // Task shadows
+  --task-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  //--task-shadow: rgba(0, 0, 0, 0.1) 0px 1px 3px 0px, rgba(0, 0, 0, 0.06) 0px 1px 2px 0px;
+
+  --task-shadow-sub-task: none;
+  //--task-shadow-sub-task: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+  --task-current-shadow: var(--whiteframe-shadow-4dp);
+  --task-selected-shadow: var(--whiteframe-shadow-3dp);
+
+  // Task Border
+  //--task-border: 1px solid var(--extra-border-color);
+
+  // Scrollbar colors
+  --scrollbar-thumb: rgba(136, 136, 136, 0.4);
+  --scrollbar-thumb-hover: rgba(85, 85, 85, 0.7);
+  --scrollbar-track: rgba(241, 241, 241, 0);
+
+  // Chip colors
+  --chip-outline-color: rgba(125, 125, 125, 0.4);
+
+  // Progress circle
+  --progress-bg: rgba(127, 127, 127, 0.2);
+
+  // Close button
+  --close-btn-bg: var(--bg-darker);
+  --close-btn-border: var(--divider-color);
+
+  // Banner
+  --banner-bg: var(--card-bg);
+  --banner-shadow: var(--whiteframe-shadow-2dp);
+
+  // Improvement banner
+  --improvement-text: rgba(44, 44, 44, 1);
+  --improvement-border: var(--c-light-33);
+  --improvement-button-text: rgba(44, 44, 44, 1);
+
+  // Select/Options
+  --select-hover-bg: var(--c-dark-10);
+  --options-border-color: var(--c-dark-10);
+
+  // Attachments
+  --attachment-bg: var(--card-bg);
+  --attachment-border: var(--extra-border-color);
+  --attachment-control-bg: var(--c-light-40);
+  --attachment-control-border: var(--c-light-50);
+  --attachment-control-hover-bg: var(--c-light-90);
+
+  // Schedule Events
+  --schedule-event-bg: var(--card-bg);
+  --schedule-event-bg-in-side-panel: var(--schedule-event-bg);
+
+  // Hover controls
+  --hover-controls-border: 1px solid;
+  --hover-controls-border-opacity: 0.5;
+
+  // Task detail item
+  --task-detail-value-color: rgba(
+    var(--palette-foreground-secondary-text),
+    var(--palette-foreground-secondary-text-alpha, 1)
+  );
+  --task-detail-bg: var(--card-bg);
+  --task-detail-bg-hover: #eeeeee;
+  --task-detail-shadow: var(--card-shadow);
+
+  // Grid colors
+  --grid-color: #dadce0;
+
+  // Special colors overrides for light theme
+  --sun-yellow: #ffc107;
+
+  // Transition duration overrides for light theme
+  --transition-duration-s: 180ms;
+  --transition-duration-l: 400ms;
+  --transition-duration--leave: 195ms;
+}
+
+// -----------------------------
+// Dark Theme
+// -----------------------------
+body.isDarkTheme {
+  // Background colors
+  //--bg: var(--dark0);
+  --bg: #131314;
+  --bg-darker: var(--dark0);
+  --bg-slightly-lighter: var(--dark4);
+  --bg-lighter: var(--dark12);
+  --bg-lightest: var(--dark24);
+  --bg-super-light: #616161;
+  --card-bg: var(--dark3);
+
+  // Navigation & Panel backgrounds
+  --sidenav-bg: transparent;
+  --sidenav-bg-mobile: var(--bg);
+  --sidenav-item-active-bg: rgba(255, 255, 255, 0.075);
+  --sidenav-hover-bg: rgba(255, 255, 255, 0.05);
+  --sidenav-active-text: var(--palette-primary-400);
+
+  --overlay-bg: var(--c-backdrop, rgba(0, 0, 0, 0.8));
+  --right-panel-bg: transparent;
+  --right-panel-bg-mobile: var(--bg);
+  --bottom-nav-bg: var(--sidenav-bg-mobile);
+  --bottom-panel-bg: var(--dark1);
+  --bottom-panel-handle: rgba(255, 255, 255, 0.4);
+  --bottom-panel-handle-active: rgba(255, 255, 255, 0.6);
+
+  // Text colors
+  --text-color: rgb(230, 230, 230);
+  --text-color-less-intense: rgba(235, 235, 235, 0.9);
+  --text-color-muted: rgba(235, 235, 235, 0.75);
+  --text-color-more-intense: rgb(245, 245, 245);
+  --text-color-most-intense: rgb(255, 255, 255);
+
+  // Selected task
+  --selected-task-bg-color: var(--dark6);
+
+  // Borders and separators
+  --extra-border-color: rgba(255, 255, 255, 0.12);
+  --separator-color: rgba(255, 255, 255, 0.1);
+  --divider-color: rgba(255, 255, 255, 0.12);
+
+  // Backdrop
+  --c-backdrop: var(--c-dark-60);
+
+  // Note colors
+  --standard-note-bg: var(--dark10);
+  --standard-note-fg: #eeeeee;
+  --standard-note-bg-hovered: var(--dark24);
+  --notes-container-bg: inherit;
+
+  // Task colors
+  //--task-c-bg: #212123ff;
+  --task-c-bg: var(--dark3);
+  --sub-task-c-bg: var(--dark4-5);
+  --sub-task-c-bg-done: var(--dark2);
+  --task-c-bg-done: var(--dark1);
+
+  --task-c-selected-bg: var(--dark6);
+  --task-c-current-bg: var(--dark12);
+  --task-c-drag-drop-bg: var(--dark12);
+  --sub-task-c-bg-in-selected: var(--dark10);
+
+  // Task shadows
+  --task-current-shadow: var(--whiteframe-shadow-4dp);
+  --task-selected-shadow: var(--whiteframe-shadow-4dp);
+  --task-shadow-sub-task: var(--task-shadow);
+
+  // Scrollbar colors
+  --scrollbar-thumb: rgba(150, 150, 150, 0.3);
+  --scrollbar-thumb-hover: rgba(150, 150, 150, 0.7);
+  --scrollbar-track: rgba(34, 34, 34, 0);
+
+  // Grid colors
+  --grid-color: var(--c-light-10);
+
+  // Chip colors
+  --chip-outline-color: rgba(125, 125, 125, 0.4);
+
+  // Close button
+  --close-btn-bg: var(--bg-lightest);
+  --close-btn-border: var(--extra-border-color);
+
+  // Banner
+  --banner-bg: var(--bg-lightest);
+
+  // Improvement banner
+  --improvement-text: var(--text-color-most-intense);
+  --improvement-border: var(--c-light-33);
+  --improvement-button-text: white;
+
+  // Select/Options
+  --select-hover-bg: var(--c-light-10);
+  --options-border-color: var(--c-light-10);
+
+  // Attachments
+  --attachment-bg: var(--bg-lighter);
+  --attachment-border: transparent;
+  --attachment-control-bg: var(--c-dark-40);
+  --attachment-control-border: var(--c-dark-50);
+  --attachment-control-hover-bg: var(--c-dark-90);
+
+  // Schedule Events
+  --schedule-event-bg: var(--card-bg);
+  --schedule-event-bg-in-side-panel: var(--dark12);
+
+  // Hover controls
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
+
+  // Task detail item
+  --task-detail-value-color: rgba(255, 255, 255, 0.7);
+  --task-detail-bg: var(--dark8);
+  --task-detail-bg-hover: var(--dark12);
+
+  // Material Design sidenav backdrop override
+  --mat-sidenav-scrim-color: var(--c-dark-80);
+}
+
+/* stylelint-disable */
+:root {
+  /* stylelint-enable */
+
+  // ===============================
+  // SHADOWS & ELEVATION
+  // ===============================
+
+  --whiteframe-shadow-1dp: var(--md-sys-level1);
+  --whiteframe-shadow-2dp: var(--md-sys-level1-5);
+  --whiteframe-shadow-3dp: var(--md-sys-level2);
+  --whiteframe-shadow-4dp: var(--md-sys-level2);
+  --whiteframe-shadow-6dp: var(--md-sys-level3);
+  --whiteframe-shadow-8dp: var(--md-sys-level3);
+  --whiteframe-shadow-12dp: var(--md-sys-level4);
+  --whiteframe-shadow-24dp: var(--md-sys-level5);
+
+  // material design m3 shadows
+  //--md-sys-level0: none;
+  //--md-sys-level1: 0 1px 4px 0 rgba(0, 0, 0, 0.37);
+  //--md-sys-level1-5: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 4px 8px 0 rgba(0, 0, 0, 0.24);
+  //--md-sys-level2: 0 2px 2px 0 rgba(0, 0, 0, 0.2), 0 6px 10px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level3: 0 11px 7px 0 rgba(0, 0, 0, 0.19), 0 13px 25px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level4: 0 14px 12px 0 rgba(0, 0, 0, 0.17), 0 20px 40px 0 rgba(0, 0, 0, 0.3);
+  //--md-sys-level5: 0 17px 17px 0 rgba(0, 0, 0, 0.15), 0 27px 55px 0 rgba(0, 0, 0, 0.3);
+
+  // apple
+  //--md-sys-level1:   0 1px 2px rgba(0,0,0,0.12);
+  //--md-sys-level1-5: 0 2px 4px rgba(0,0,0,0.12);
+  //--md-sys-level2:   0 4px 8px rgba(0,0,0,0.14);
+  //--md-sys-level3:   0 8px 16px rgba(0,0,0,0.16);
+  //--md-sys-level4:   0 12px 24px rgba(0,0,0,0.18);
+  //--md-sys-level5:   0 20px 40px rgba(0,0,0,0.20);
+
+  /* Ant-like tokens */
+  --md-sys-level1: 0 2px 8px rgba(0, 0, 0, 0.12), 0 1px 3px -2px rgba(0, 0, 0, 0.16);
+  --md-sys-level1-5: 0 3px 10px rgba(0, 0, 0, 0.12), 0 3px 6px -3px rgba(0, 0, 0, 0.16);
+  --md-sys-level2: 0 4px 12px rgba(0, 0, 0, 0.14), 0 6px 16px -4px rgba(0, 0, 0, 0.12);
+  --md-sys-level3: 0 8px 24px rgba(0, 0, 0, 0.14), 0 12px 28px -6px rgba(0, 0, 0, 0.12);
+  --md-sys-level4: 0 12px 32px rgba(0, 0, 0, 0.16), 0 20px 40px -8px rgba(0, 0, 0, 0.12);
+  --md-sys-level5: 0 20px 48px rgba(0, 0, 0, 0.18), 0 32px 64px -10px rgba(0, 0, 0, 0.14);
+
+  /* Fluent-like tokens: soft ambient + directional key */
+  //--md-sys-level1:   0 1px 2px rgba(0,0,0,0.10), 0 2px 1px rgba(0,0,0,0.08);
+  //--md-sys-level1-5: 0 2px 4px rgba(0,0,0,0.10), 0 3px 2px rgba(0,0,0,0.10);
+  //--md-sys-level2:   0 4px 8px rgba(0,0,0,0.12), 0 6px 4px rgba(0,0,0,0.12);
+  //--md-sys-level3:   0 8px 16px rgba(0,0,0,0.14), 0 10px 6px rgba(0,0,0,0.12);
+  //--md-sys-level4:   0 12px 24px rgba(0,0,0,0.16), 0 16px 8px rgba(0,0,0,0.12);
+  //--md-sys-level5:   0 20px 40px rgba(0,0,0,0.18), 0 28px 12px rgba(0,0,0,0.14);
+}

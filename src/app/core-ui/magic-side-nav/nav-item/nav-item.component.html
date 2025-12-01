@@ -1,0 +1,232 @@
+@if (mode() === 'work' && workContext()) {
+  <div
+    class="planner-drag-place-holder-shared"
+    *cdkDragPlaceholder
+  ></div>
+
+  <button
+    #routeBtn
+    [routerLink]="[type() === 'TAG' ? 'tag' : 'project', workContext()!.id, 'tasks']"
+    routerLinkActive="active"
+    class="nav-link"
+    [class.has-tasks]="nrOfOpenTasks() > 0"
+    mat-menu-item
+    (click)="clicked.emit()"
+  >
+    <mat-icon
+      class="nav-icon"
+      [style.color]="workContextIconColor() ?? null"
+      [class.nav-icon-emoji]="isWorkContextEmojiIcon()"
+      [class.drag-handle]="defaultIcon() !== 'today' && defaultIcon() !== 'inbox'"
+      >{{ workContext()!.icon || defaultIcon() }}
+    </mat-icon>
+
+    <span
+      class="nav-label"
+      [class.label-hidden]="!showLabels()"
+      [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+    >
+      {{ workContext()!.title }}
+    </span>
+  </button>
+
+  @if (nrOfOpenTasks() > 0) {
+    <div class="task-count">{{ nrOfOpenTasks() }}</div>
+  }
+
+  <button
+    #settingsBtn
+    class="additional-btn"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
+  <context-menu
+    [contextMenu]="contextMenu"
+    [rightClickTriggerEl]="routeBtn"
+    [leftClickTriggerEl]="settingsBtn"
+  ></context-menu>
+
+  <ng-template #contextMenu>
+    <work-context-menu
+      [contextId]="workContext()!.id"
+      [contextType]="type()!"
+    ></work-context-menu>
+  </ng-template>
+} @else if (mode() === 'folder' && folderId()) {
+  <button
+    #folderBtn
+    class="nav-link"
+    mat-menu-item
+    [attr.aria-expanded]="expanded()"
+    [attr.aria-controls]="ariaControls()"
+    (click)="clicked.emit()"
+  >
+    <mat-icon class="nav-icon expand-icon drag-handle folder-icon">
+      {{ expanded() ? 'folder_open' : 'folder' }}
+    </mat-icon>
+    @if (label()) {
+      <span
+        class="nav-label"
+        [class.label-hidden]="!showLabels()"
+        [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+      >
+        {{ label() }}
+      </span>
+    }
+  </button>
+
+  <button
+    #folderSettingsBtn
+    class="additional-btn"
+    mat-icon-button
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+
+  <context-menu
+    [contextMenu]="folderContextMenu"
+    [rightClickTriggerEl]="folderBtn"
+    [leftClickTriggerEl]="folderSettingsBtn"
+  ></context-menu>
+
+  <ng-template #folderContextMenu>
+    <folder-context-menu
+      [folderId]="folderId()!"
+      [treeKind]="treeKind()"
+    ></folder-context-menu>
+  </ng-template>
+} @else {
+  <!-- Container + presentational row unified here -->
+  @if (container() === 'route') {
+    <a
+      [routerLink]="navRoute()"
+      routerLinkActive="active"
+      mat-menu-item
+      class="nav-link"
+      [class.expanded]="expanded()"
+      [class]="tourClass()"
+      (click)="clicked.emit()"
+    >
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
+          [svgIcon]="svgIcon()"
+        ></mat-icon>
+      } @else if (icon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
+      }
+      @if (label()) {
+        <span
+          class="nav-label"
+          [class.label-hidden]="!showLabels()"
+          [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+        >
+          {{ label() | translate }}
+        </span>
+      }
+    </a>
+  } @else if (container() === 'href') {
+    <a
+      [href]="navHref()"
+      target="_blank"
+      mat-menu-item
+      rel="noopener noreferrer"
+      class="nav-link"
+      [class.expanded]="expanded()"
+      (click)="clicked.emit()"
+    >
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
+          [svgIcon]="svgIcon()"
+        ></mat-icon>
+      } @else if (icon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
+      }
+      @if (label()) {
+        <span
+          class="nav-label"
+          [class.label-hidden]="!showLabels()"
+          [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+        >
+          {{ label() | translate }}
+        </span>
+      }
+    </a>
+  } @else if (container() === 'action' || container() === 'group') {
+    <button
+      class="nav-link"
+      mat-menu-item
+      [class.expanded]="container() === 'group' && expanded()"
+      [attr.aria-expanded]="container() === 'group' ? expanded() : null"
+      [attr.aria-controls]="container() === 'group' ? ariaControls() : null"
+      [matMenuTriggerFor]="menuTriggerFor()"
+      [class]="tourClass()"
+      (click)="clicked.emit()"
+    >
+      @if (customPluginId(); as pluginId) {
+        <plugin-icon
+          class="nav-icon"
+          [pluginId]="pluginId"
+          [fallbackIcon]="icon() || 'extension'"
+        ></plugin-icon>
+      } @else if (svgIcon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && svgIcon() === 'expand_more'"
+          [class.icon--svg]="true"
+          [class.icon--early-on]="svgIcon() === 'early_on'"
+          [svgIcon]="namedSvgIcon()"
+        ></mat-icon>
+      } @else if (icon()) {
+        <mat-icon
+          class="nav-icon"
+          [class.expand-icon]="container() === 'group' && icon() === 'expand_more'"
+        >
+          {{ icon() }}
+        </mat-icon>
+      }
+      @if (label()) {
+        <span
+          class="nav-label"
+          [class.label-hidden]="!showLabels()"
+          [attr.aria-hidden]="!showLabels() ? 'true' : 'false'"
+        >
+          {{ label() | translate }}
+        </span>
+      } @else {
+        <h1>XXX</h1>
+      }
+    </button>
+  }
+}

@@ -1,0 +1,16 @@
+:host {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  margin-top: var(--s5);
+  margin-bottom: var(--s);
+
+  h3 {
+    margin-bottom: var(--s);
+    font-weight: bold;
+  }
+}
+
+td {
+  text-align: left;
+}

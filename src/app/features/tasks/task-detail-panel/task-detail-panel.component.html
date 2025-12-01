@@ -1,0 +1,345 @@
+<div class="wrapper">
+  <header class="task-title-wrapper">
+    <task-title
+      [resetToLastExternalValueTrigger]="task()"
+      (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
+      [value]="task().title || ''"
+      class="task-title"
+    ></task-title>
+    <!--    <button mat-icon-button>-->
+    <!--      <mat-icon>more_vert</mat-icon>-->
+    <!--    </button>-->
+  </header>
+
+  @if (isShowSubTasksPanel()) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (keyPress)="onItemKeyPress($event)"
+      [expanded]="
+        isSubTaskPanelExpandedInitially() &&
+        (task().subTasks?.length || 0) > 0 &&
+        !isDialogMode()
+      "
+      [type]="'panel'"
+    >
+      <ng-container panel-header>
+        <mat-icon class="panel-header-icon">list</mat-icon>
+        <span>{{
+          T.F.TASK.ADDITIONAL_INFO.SUB_TASKS
+            | translate: { nr: task().subTasks?.length || 0 }
+        }}</span>
+      </ng-container>
+      <ng-container panel-content>
+        @if (task().subTasks && task().subTasks.length) {
+          <div class="sub-tasks">
+            @if (task().subTasks?.length) {
+              <task-list
+                [@expand]
+                [isHideAll]="!!task()._hideSubTasksMode"
+                [isHideDone]="task()._hideSubTasksMode === ShowSubTasksMode.HideDone"
+                [listModelId]="task().id || ''"
+                [parentId]="task().id || ''"
+                [tasks]="task().subTasks || []"
+                listId="SUB"
+              ></task-list>
+            }
+          </div>
+        }
+        <div style="text-align: center">
+          <button
+            (click)="addSubTask()"
+            mat-button
+          >
+            <mat-icon>add</mat-icon>
+            <span>{{ T.F.TASK.ADDITIONAL_INFO.ADD_SUB_TASK | translate }}</span>
+          </button>
+        </div>
+      </ng-container>
+    </task-detail-item>
+  }
+  @if (task().parentId) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (editActionTriggered)="
+        taskService.setSelectedIdToParentAndSwitchContextIfNecessary(task())
+      "
+      (keyPress)="onItemKeyPress($event)"
+      [inputIcon]="'arrow_forward'"
+      class="input-item --estimate"
+    >
+      <ng-container input-title>
+        <mat-icon>subdirectory_arrow_right</mat-icon>
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.PARENT | translate }}</span>
+      </ng-container>
+      <ng-container input-value>
+        @if (parentTaskData()?.issueType; as issueType) {
+          <mat-icon [svgIcon]="issueType | issueIcon"></mat-icon>
+        }
+        <span>{{ parentTaskData()?.title }}</span>
+      </ng-container>
+    </task-detail-item>
+  }
+  @if (showTimeEstimate()) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (editActionTriggered)="estimateTime()"
+      (keyPress)="onItemKeyPress($event)"
+      [inputIcon]="'edit'"
+      class="input-item --estimate"
+    >
+      <ng-container input-title>
+        <mat-icon>timer</mat-icon>
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.TIME | translate }}</span>
+      </ng-container>
+      <ng-container input-value>
+        <span class="time-val">
+          <span [innerHTML]="task().timeSpent || 0 | msToString"></span>
+        </span>
+        <span class="separator">/</span>
+        <span
+          [innerHTML]="task().timeEstimate || 0 | msToString"
+          class="time-val"
+        ></span>
+        <ng-container input-additional>
+          <progress-bar [progress]="progress()"></progress-bar>
+        </ng-container>
+      </ng-container>
+    </task-detail-item>
+  }
+  <task-detail-item
+    (collapseParent)="collapseParent()"
+    (editActionTriggered)="scheduleTask()"
+    (keyPress)="onItemKeyPress($event)"
+    [inputIcon]="task().dueWithTime || task().dueDay ? 'edit' : 'add'"
+    class="input-item"
+    [class.color-warn]="isOverdue()"
+  >
+    <ng-container input-title>
+      <mat-icon>{{ showScheduleIcon() }}</mat-icon>
+      <span>{{ scheduleLabelKey() | translate }}</span>
+    </ng-container>
+    <ng-container input-value>
+      @if (task().dueWithTime) {
+        <div
+          class="reminder-value"
+          matTooltipPosition="left"
+        >
+          {{ task().dueWithTime | localeDate: 'short' }}
+        </div>
+      }
+      @if (task().dueDay) {
+        <div class="reminder-value">
+          @if (isPlannedForTodayDay()) {
+            <mat-icon>wb_sunny</mat-icon>
+            {{ T.G.TODAY_TAG_TITLE | translate }}
+          } @else {
+            {{ task().dueDay | localeDate: 'shortDate' }}
+          }
+        </div>
+      }
+    </ng-container>
+  </task-detail-item>
+
+  @if (task().issueId && task().issueType !== ICAL_TYPE) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (keyPress)="onItemKeyPress($event)"
+      [expanded]="isExpandedIssuePanel() && !isDialogMode()"
+      [type]="'panel'"
+    >
+      <ng-container panel-header>
+        <issue-header [task]="task()"></issue-header>
+      </ng-container>
+      <ng-container panel-content>
+        @if (!isIssueDataLoadedForCurrentType()) {
+          <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
+        }
+        @if (issueData() && isIssueDataLoadedForCurrentType()) {
+          <issue-content
+            [@expandFadeInOnly]
+            [issueData]="issueData()"
+            [task]="task()"
+            class="panel-content-wrapper issue-content-wrapper"
+          ></issue-content>
+        }
+      </ng-container>
+    </task-detail-item>
+  }
+
+  <task-detail-item
+    #noteWrapperElRef
+    (collapseParent)="collapseParent()"
+    (editActionTriggered)="panelState.isFocusNotes.set(true)"
+    (keyPress)="onItemKeyPress($event)"
+    [expanded]="isExpandedNotesPanel() && !isDialogMode()"
+    [type]="'panel'"
+  >
+    <ng-container panel-header>
+      @if (isMarkdownChecklist()) {
+        <mat-icon>checklist</mat-icon>
+        Checklist
+        <!-- -->
+      } @else {
+        @if (task().notes) {
+          <mat-icon>chat</mat-icon>
+        }
+        @if (!task().notes) {
+          <mat-icon>chat_bubble_outline</mat-icon>
+        }
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.NOTES | translate }}</span>
+      }
+    </ng-container>
+
+    <ng-container panel-content>
+      <inline-markdown
+        (blur)="panelState.isFocusNotes.set(false)"
+        (blurred)="panelState.isFocusNotes.set(false)"
+        (changed)="changeTaskNotes($event); panelState.isFocusNotes.set(false)"
+        (keyboardUnToggle)="focusItem(noteWrapperElRef)"
+        [isFocus]="panelState.isFocusNotes()"
+        [isShowControls]="true"
+        [isShowChecklistToggle]="true"
+        [isDefaultText]="!task().notes"
+        [model]="task().notes || defaultTaskNotes()"
+      ></inline-markdown>
+    </ng-container>
+  </task-detail-item>
+
+  @if (hasAttachments()) {
+    <task-detail-item
+      #attachmentPanelElRef
+      (collapseParent)="collapseParent()"
+      (keyPress)="onItemKeyPress($event)"
+      [expanded]="panelState.isExpandedAttachmentPanel() && !isDialogMode()"
+      [type]="'panel'"
+    >
+      <ng-container panel-header>
+        <mat-icon>attachment</mat-icon>
+        <span>{{
+          T.F.TASK.ADDITIONAL_INFO.ATTACHMENTS | translate: { nr: totalAttachments() }
+        }}</span>
+      </ng-container>
+      <ng-container panel-content>
+        <div
+          class="panel-content-wrapper attachment-list-panel-content-wrapper"
+          style="padding-bottom: 8px"
+        >
+          @if (task().issueType) {
+            <task-attachment-list
+              [attachments]="issueAttachments()"
+              [isDisableControls]="true"
+              [taskId]="task().id || ''"
+            ></task-attachment-list>
+          }
+          @if (issueAttachments().length && localAttachments().length) {
+            <h3
+              class="mat-h3"
+              style="margin-bottom: 0"
+            >
+              {{ T.F.TASK.ADDITIONAL_INFO.LOCAL_ATTACHMENTS | translate }}
+            </h3>
+          }
+          <task-attachment-list
+            [attachments]="localAttachments()"
+            [taskId]="task().id || ''"
+          ></task-attachment-list>
+          <div style="text-align: center">
+            <button
+              (click)="addAttachment()"
+              mat-button
+            >
+              <mat-icon>add</mat-icon>
+              <span>{{ T.F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT | translate }}</span>
+            </button>
+          </div>
+        </div>
+      </ng-container>
+    </task-detail-item>
+  }
+  @if (!hasAttachments()) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (editActionTriggered)="addAttachment()"
+      (keyPress)="onItemKeyPress($event)"
+      [inputIcon]="'add'"
+      class="input-item"
+    >
+      <ng-container input-title>
+        <mat-icon>attachment</mat-icon>
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.ADD_ATTACHMENT | translate }}</span>
+      </ng-container>
+      <ng-container input-value></ng-container>
+    </task-detail-item>
+  }
+  @if (!task().parentId && !task().issueId) {
+    <task-detail-item
+      (collapseParent)="collapseParent()"
+      (editActionTriggered)="editTaskRepeatCfg()"
+      (keyPress)="onItemKeyPress($event)"
+      [inputIcon]="task().repeatCfgId ? 'edit' : 'add'"
+      class="input-item"
+    >
+      <ng-container input-title>
+        <mat-icon svgIcon="repeat"></mat-icon>
+        <span>{{ T.F.TASK.ADDITIONAL_INFO.REPEAT | translate }}</span>
+      </ng-container>
+      <ng-container input-value>
+        @if (repeatCfgLabel()) {
+          <div
+            class="reminder-value"
+            matTooltipPosition="left"
+          >
+            {{ repeatCfgLabel() }}
+          </div>
+        }
+      </ng-container>
+    </task-detail-item>
+  }
+
+  <task-detail-item
+    #tagEditDetailItemElRef
+    (collapseParent)="collapseParent()"
+    (keyPress)="onItemKeyPress($event)"
+    (editActionTriggered)="tagEditElRef.focusInput()"
+    type="fullSizeInput"
+    class="input-item --estimate"
+  >
+    <ng-container input-title>
+      <mat-icon>style</mat-icon>
+    </ng-container>
+    <ng-container input-value>
+      <tag-edit
+        #tagEditElRef
+        [task]="task()"
+        [tagIds]="task().tagIds || []"
+        (escapePress)="tagEditDetailItemElRef.focusEl()"
+      ></tag-edit>
+    </ng-container>
+  </task-detail-item>
+
+  <div class="date-info">
+    <div
+      class="edit-date-info"
+      [title]="T.G.EDIT | translate"
+      (click)="editCreated()"
+    >
+      Created on {{ task().created | localeDate: 'short' }}
+    </div>
+    @if (task().doneOn) {
+      <div
+        class="edit-date-info"
+        [title]="T.G.EDIT | translate"
+        (click)="editCompleted()"
+      >
+        Completed on {{ task().doneOn | localeDate: 'short' }}
+      </div>
+    }
+  </div>
+</div>
+
+@if (panelState.isDragOver()) {
+  <div class="bgc-accent drag-over-msg">
+    <mat-icon>add</mat-icon>
+    {{ T.F.TASK.CMP.DROP_ATTACHMENT | translate: { title: task().title } }}
+  </div>
+}

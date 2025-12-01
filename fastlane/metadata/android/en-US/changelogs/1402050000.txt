@@ -1,0 +1,12 @@
+
+### Bug Fixes
+
+* consistent issue panel button #4862
+* data repair not working as it should #4459
+* error when using global add task shortcut (fb7f925), closes #4859
+* only show right panel when open – issue for wide viewport (bbd1531), closes #4858 #4868
+* potentially fix idle race condition
+* Tutorial expects menu button even if it doesn't exist #4861
+### Features
+
+* add os module support to plugin node executor

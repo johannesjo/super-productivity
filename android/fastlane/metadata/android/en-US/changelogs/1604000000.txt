@@ -1,0 +1,117 @@
+
+### Bug Fixes
+
+* add back in lost translations
+* add error handling for invalid date strings in dateStrToUtcDate function
+* add migration for localization changes
+* align today filtering across metrics and tests
+* **android:** update OkHttp dependency to 4.12.0 #5579
+* change sorting logic to fix failed tests
+* change tests mock data after renaming
+* correct order of donate route to prevent wildcard interception
+* donation text
+* enhance error handling and message extraction in WebDAV API #5486
+* **errors:** enhance body handling for error messages
+* exclude future tasks from Today view and Planner Today column (d53faf6), closes #5555
+* failed test
+* handle special characters in IPC errors and skip translation
+* improve on utc date fix
+* invalid test
+* isLeaveInToday not properly handling dueDay
+* keybindings not surpressed in dialogs etc (3dce728), closes #5509
+* lint error.
+* **localization:** global refactor
+* make everything work again
+* minimize to tray not restoring #5581
+* optional error
+* **plugin-api:** align simple counter API signatures and enable deleteCounter
+* prevent text resizing on mobile devices
+* refactor tray handling to use shared state for task and countdown visibility
+* remove new sync stuff that accidentally got in branch
+* remove task placement header menu
+* removed hard check on the trello board id format.
+* **schedule:** failing cases
+* send initial app settings to Electron to prevent tray/title races
+* start focus session context menu entry
+* **sync:** prevent data corruption by using robust base64 conversion methods (5227287), closes #2619
+* Tag selected and deselected on every other keystroke (#5452)
+* Tag selected and deselected on every other keystroke (#5452)
+* **taskRepeat:** include taskRepeatCfg in task retrieval for accurate date handling
+* **taskRepeat:** Sync 'Planned At' with Repeat settings on initial task assignment #5517
+* test case for trello
+* **ui:** fix bottom nav overlap on iOS by adding safe-area padding (4fe779e), closes #5563
+* update content security policy to fix dropbox sync with decompression
+* update cross-model migration to version 4.4 and add tests
+* update cross-model migration to version 4.4 and add tests 2
+* update label from 'Scheduler' to 'Schedule'
+* update short syntax tag handling to use string literals for replace/combine mode
+* use explicit date constructor for date string parsing to avoid timezone offset issues
+* use relative import for app.constants in cross-model-4_4
+* **webdav:** enhance URL handling to robustly encode paths and handle spaces in base URLs
+* weird setting show condition
+* **workContext:** update task filtering logic to retain tasks scheduled for tomorrow and future dates
+### Features
+
+* add donate page with routing and content
+* add EXDATE support to calendar event retrieval (7621606), closes #5516
+* add isDonatePageEnabled feature and update migration logic
+* add placeholder text support to daily summary and inline markdown components
+* add translation
+* add unschedule all to today context menu
+* add unschedule all to today context menu for Chinese
+* add unschedule all to today context menu for Chinese
+* add unschedule all to today context menu for Chinese
+* add unschedule all to today context menu for Chinese
+* added indication for boards loading.
+* additional button for loading
+* change window title for dev
+* community plugins first draft
+* delete old localization settings after migration
+* don't install api test plugin
+* don't log credentials
+* enhance donate page with internationalization support
+* **focusMode:** prevent session reset when completing task (0b0c03e), closes #5526
+* handle newer remote revisions during model download (3351e24), closes #5520
+* **i18n:** add export task list string to localization files
+* **i18n:** add translations
+* **i18n:** update translations
+* improve banner text
+* improve on new community plugin stuff
+* improve phrasing
+* include response body in HTTP status check (aedbb65), closes #5508
+* initial instruction on trello integration setup.
+* **ipc:** implement IPC handlers for app control, data, exec, global shortcuts, system, and Jira
+* **ipc:** improve error handling and streamline IPC initialization
+* migrate isEnableUserProfiles to appFeatures and update related translations
+* **plugins:** add deleteCounter method and update related API calls
+* **plugins:** add plugin packaging script and improve build command handling
+* **plugins:** add simple counter API methods for plugins
+* **plugins:** enhance plugin packaging and improve file handling logic
+* **plugins:** improve on infrastructre for bundled plugins
+* **plugins:** update boilerplate
+* polish plugin section
+* polish plugin section 2
+* **reflectionNote:** first draft
+* **reflectionNote:** show last reflection note on startup as banner
+* restore icon schedule header buttons
+* **schedule:** add button and mat-menu to save space
+* **schedule:** improve main-header-buttons
+* select trello board after valid trello configuration.
+* **sorting:** refactor and implements reverse sorting
+* **startup:** refactor startup logic and move initialization to StartupService
+* **tour:** improve
+* **trello_integration:** non-functional stub for
+* **trello:** initial working on trello integration.
+* **trello:** removed validation for boardId
+* **trello:** removed warning from the dialog
+* **trello:** wip - integrate trello with super productivity
+* **ui:** add (non-working) trello provider button to the providers list
+* update guide.
+* Update README to include Trello in integrations
+* update rxjs to 7 step 1
+* update rxjs to 7 step 2
+* **workContext:** only filter future tasks for today list
+### Reverts
+
+* Revert "Merge pull request #5420 from overcuriousity/scheduling" (844cc00), closes #5420
+* Revert "fix(schedule): failing cases"

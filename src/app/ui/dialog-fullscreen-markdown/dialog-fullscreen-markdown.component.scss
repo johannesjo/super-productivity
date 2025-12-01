@@ -1,4 +1,4 @@
-@import '../../../variables';
+@use '../../../styles/_globals.scss' as *;
 
 :host {
   position: fixed;
@@ -14,11 +14,15 @@
   }
 }
 
+:host-context(.isMac.isElectron) {
+  padding-top: var(--mac-title-bar-padding);
+}
+
 .content {
   flex-grow: 1;
   position: relative;
-  @include layerTextAndBgHighest;
-
+  color: var(--text-color-more-intense);
+  background-color: var(--bg-lightest);
   textarea,
   .markdown-preview {
     position: absolute;
@@ -28,7 +32,7 @@
     left: 0;
     height: 100%;
     width: 100%;
-    padding: $s $s * 2;
+    padding: var(--s) var(--s2);
 
     @include scrollY;
   }
@@ -43,7 +47,7 @@
     resize: none;
     min-height: inherit;
     overflow: auto;
-    padding: $s $s * 2;
+    padding: var(--s) var(--s2);
     font-size: 14px;
 
     &:focus {
@@ -62,13 +66,7 @@
       left: 50%;
       border-left: 2px solid;
 
-      @include darkTheme() {
-        border-color: $dark-theme-extra-border-color;
-      }
-
-      @include lightTheme() {
-        border-color: $light-theme-extra-border-color;
-      }
+      border-color: var(--extra-border-color);
     }
   }
 }
@@ -77,11 +75,12 @@
   flex-direction: row;
   display: flex;
   justify-content: flex-end;
-  box-shadow: $whiteframe-shadow-2dp;
-  padding: 0 $s * 2;
+  align-items: center;
+  box-shadow: var(--whiteframe-shadow-2dp);
+  padding: 0 var(--s2);
 
   > button {
-    margin: $s;
+    margin: var(--s);
   }
 }
 

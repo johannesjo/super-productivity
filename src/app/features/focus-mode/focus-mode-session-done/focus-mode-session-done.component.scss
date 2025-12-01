@@ -1,0 +1,42 @@
+:host {
+  text-align: center;
+}
+
+.msg {
+  margin-bottom: var(--s3);
+  padding: var(--s2);
+}
+
+.task-title-label,
+.worked-for-label {
+  font-size: 14px;
+}
+
+.worked-for-value {
+  font-size: 20px;
+  font-weight: bold;
+  margin: auto;
+  margin-top: var(--s2);
+  margin-bottom: var(--s2);
+  //display: inline-block;
+  //border: 3px solid var(--c-primary);
+  //border-radius: 50%;
+  //min-width: 90px;
+  //height: 90px;
+  //line-height: 90px;
+  padding: 0 var(--s);
+}
+
+.task-title {
+  margin-top: var(--s);
+  font-size: 18px;
+}
+
+.btn-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-top: var(--s4);
+  gap: var(--s);
+}

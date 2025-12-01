@@ -1,0 +1,278 @@
+/**
+ * Nord Snow Storm Theme for Super Productivity
+ * Light theme based on Nord Snow Storm color scheme
+ * Clean, minimal, with enhanced accessibility
+ */
+
+/* Remove all shadows for minimal aesthetic */
+* {
+  box-shadow: none !important;
+}
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* Nord Snow Storm theme variables (Light theme) */
+body:not(.isDarkTheme) {
+  /* ===============================
+   * NORD COLOR PALETTE
+   * ===============================*/
+
+  /* Polar Night */
+  --nord0: #2e3440;
+  --nord1: #3b4252;
+  --nord2: #434c5e;
+  --nord3: #4c566a;
+
+  /* Snow Storm */
+  --nord4: #d8dee9;
+  --nord5: #e5e9f0;
+  --nord6: #eceff4;
+
+  /* Frost */
+  --nord7: #8fbcbb;
+  --nord8: #88c0d0;
+  --nord9: #81a1c1;
+  --nord10: #5e81ac;
+
+  /* Aurora */
+  --nord11: #bf616a;
+  --nord12: #d08770;
+  --nord13: #ebcb8b;
+  --nord14: #a3be8c;
+  --nord15: #b48ead;
+
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: var(--nord6);
+  --bg-darker: var(--nord5);
+  --bg-slightly-lighter: #f2f4f8;
+  --bg-lighter: #ffffff;
+  --bg-lightest: #ffffff;
+  --bg-super-light: #ffffff;
+
+  /* Component backgrounds */
+  --card-bg: #ffffff;
+  --sidenav-bg: var(--nord5);
+  --selected-task-bg-color: #f2f4f8;
+  --banner-bg: #f2f4f8;
+
+  /* Task backgrounds with light hierarchy */
+  --task-c-bg: var(--nord5);
+  --task-c-selected-bg: #f2f4f8;
+  --sub-task-c-bg: var(--nord5);
+  --sub-task-c-bg-done: var(--nord6);
+  --task-c-bg-done: var(--nord6);
+  --task-c-current-bg: #dfe4ec;
+  --task-c-drag-drop-bg: #dfe4ec;
+  --sub-task-c-bg-in-selected: #e8ecf3;
+
+  /* Note backgrounds */
+  --standard-note-bg: #ffffff;
+  --standard-note-bg-hovered: var(--nord5);
+
+  /* ===============================
+   * TEXT COLORS - HIGH CONTRAST
+   * ===============================*/
+
+  --text-color: var(--nord1);
+  --text-color-less-intense: rgba(59, 66, 82, 0.87);
+  --text-color-muted: rgba(59, 66, 82, 0.54);
+  --text-color-more-intense: var(--nord0);
+  --text-color-most-intense: var(--nord0);
+
+  /* Note text */
+  --standard-note-fg: var(--nord1);
+
+  /* Task detail */
+  --task-detail-value-color: rgba(59, 66, 82, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: var(--nord4);
+  --separator-color: rgba(216, 222, 233, 0.6);
+  --divider-color: var(--nord4);
+
+  /* Chip borders */
+  --chip-outline-color: rgba(59, 66, 82, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* Dark accent for contrast on light background */
+  --palette-accent-500: var(--nord0);
+  --c-accent: var(--nord10);
+  --palette-accent-100: #9fa5b0;
+  --palette-accent-200: #7f879a;
+  --palette-accent-300: #5f6984;
+  --palette-accent-400: #3f4b6e;
+  --palette-accent-600: #262d3a;
+  --palette-accent-700: #1f2430;
+  --palette-accent-800: #181b26;
+  --palette-accent-900: #11121c;
+
+  /* Alternative Nord blue accent */
+  --nord-blue: var(--nord10);
+
+  /* Secondary colors */
+  --c-success: var(--nord14);
+  --c-warning: var(--nord12);
+  --c-error: var(--nord11);
+  --c-info: var(--nord8);
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - Light styled */
+  --scrollbar-thumb: var(--nord4);
+  --scrollbar-thumb-hover: var(--nord2);
+  --scrollbar-track: var(--nord6);
+
+  /* Close button */
+  --close-btn-bg: var(--nord5);
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(46, 52, 64, 0.08);
+  --options-border-color: rgba(46, 52, 64, 0.15);
+
+  /* Attachments */
+  --attachment-bg: #ffffff;
+  --attachment-border: var(--nord4);
+  --attachment-control-bg: rgba(255, 255, 255, 0.8);
+  --attachment-control-border: var(--nord4);
+  --attachment-control-hover-bg: rgba(255, 255, 255, 0.95);
+
+  /* Grid */
+  --grid-color: rgba(59, 66, 82, 0.08);
+
+  /* Progress */
+  --progress-bg: rgba(59, 66, 82, 0.12);
+
+  /* Improvement banner */
+  --improvement-text: var(--nord0);
+  --improvement-border: rgba(46, 52, 64, 0.3);
+  --improvement-button-text: var(--nord0);
+
+  /* ===============================
+   * SHADOWS - DISABLED
+   * ===============================*/
+
+  --shadow-key-umbra-opacity: 0;
+  --shadow-key-penumbra-opacity: 0;
+  --shadow-ambient-shadow-opacity: 0;
+  --task-current-shadow: none;
+  --task-selected-shadow: none;
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+
+  /* ===============================
+   * BACKDROP
+   * ===============================*/
+
+  --c-backdrop: rgba(0, 0, 0, 0.4);
+}
+
+/* Hide gradient backgrounds */
+body::before,
+body .first-line:hover .hover-controls::before {
+  display: none !important;
+}
+
+/* Apply background and text colors */
+body,
+body:not(.isDarkTheme) {
+  background-color: var(--bg);
+  color: var(--text-color);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Page wrapper */
+body .page-wrapper,
+body:not(.isDarkTheme) .page-wrapper {
+  color: var(--text-color);
+}
+
+/* Links with accent */
+a,
+body a[href],
+body:not(.isDarkTheme) a[href] {
+  color: var(--c-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover,
+body a[href]:hover,
+body:not(.isDarkTheme) a[href]:hover {
+  opacity: 0.7;
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides for light theme */
+body:not(.isDarkTheme) {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--nord0);
+  --mat-fab-small-container-color: var(--c-accent);
+  --mat-sys-primary-container: var(--c-accent);
+}
+
+/* Special Nord light styling */
+.frost-accent {
+  color: var(--nord10);
+}
+.aurora-red {
+  color: var(--nord11);
+}
+.aurora-orange {
+  color: var(--nord12);
+}
+.aurora-yellow {
+  color: var(--nord13);
+}
+.aurora-green {
+  color: var(--nord14);
+}
+.aurora-purple {
+  color: var(--nord15);
+}

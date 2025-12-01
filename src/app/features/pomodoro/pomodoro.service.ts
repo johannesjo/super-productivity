@@ -1,6 +1,6 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
+
 import { combineLatest, interval, merge, Observable, of } from 'rxjs';
-import { GlobalConfigService } from '../config/global-config.service';
 import {
   distinctUntilChanged,
   filter,
@@ -11,8 +11,14 @@ import {
   switchMap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
+
+import { Actions, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
+
+import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { PomodoroConfig, SoundConfig } from '../config/global-config.model';
+import { GlobalConfigService } from '../config/global-config.service';
+import { TaskService } from '../tasks/task.service';
 import {
   finishPomodoroSession,
   pausePomodoro,
@@ -28,8 +34,6 @@ import {
   selectIsManualPause,
   selectIsManualPauseBreak,
 } from './store/pomodoro.reducer';
-import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
-import { Actions, ofType } from '@ngrx/effects';
 
 const TICK_DURATION = 500;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
@@ -39,16 +43,22 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
   providedIn: 'root',
 })
 export class PomodoroService {
+  private _configService = inject(GlobalConfigService);
+  private _store$ = inject<Store<any>>(Store);
+  private _actions$ = inject(Actions);
+  private readonly _taskService = inject(TaskService);
+
   onStop$: Observable<any> = this._actions$.pipe(ofType(stopPomodoro));
 
   cfg$: Observable<PomodoroConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg && cfg.pomodoro),
+    distinctUntilChanged(),
   );
   soundConfig$: Observable<SoundConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg && cfg.sound),
   );
   isEnabled$: Observable<boolean> = this.cfg$.pipe(
-    map((cfg) => cfg && cfg.isEnabled),
+    map((cfg) => cfg && !!cfg.isEnabled),
     shareReplay(1),
   );
 
@@ -108,22 +118,15 @@ export class PomodoroService {
     this.onStop$,
   ).pipe(
     withLatestFrom(this.isLongBreak$, this.isShortBreak$, this.isBreak$, this.cfg$),
-    map(([trigger, isLong, isShort, isBreak, cfg]) => {
-      // cfg = { ...cfg };
-      // // @ts-ignore
-      // cfg.duration = 5000;
-      // // @ts-ignore
-      // cfg.breakDuration = 15000;
-      // // @ts-ignore
-      // cfg.longerBreakDuration = 20000;
+    map(([trigger, isLong, isShort, isBreak, cfg]): number => {
       if (!isBreak) {
-        return cfg.duration || DEFAULT_GLOBAL_CONFIG.pomodoro.duration;
+        return (cfg.duration ?? DEFAULT_GLOBAL_CONFIG.pomodoro.duration) as number;
       } else if (isShort) {
-        return cfg.breakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration;
+        return (cfg.breakDuration ??
+          DEFAULT_GLOBAL_CONFIG.pomodoro.breakDuration) as number;
       } else if (isLong) {
-        return (
-          cfg.longerBreakDuration || DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration
-        );
+        return (cfg.longerBreakDuration ??
+          DEFAULT_GLOBAL_CONFIG.pomodoro.longerBreakDuration) as number;
       } else {
         throw new Error('Pomodoro: nextSession$');
       }
@@ -146,11 +149,7 @@ export class PomodoroService {
     }),
   );
 
-  constructor(
-    private _configService: GlobalConfigService,
-    private _store$: Store<any>,
-    private _actions$: Actions,
-  ) {
+  constructor() {
     // NOTE: idle handling is not required, as unsetting the task auto triggers pause
     this.currentSessionTime$
       .pipe(
@@ -160,8 +159,16 @@ export class PomodoroService {
       .subscribe(([val, cfg, isBreak]) => {
         if (cfg.isManualContinueBreak && !isBreak) {
           this.pauseBreak(true);
+
+          if (cfg.isDisableAutoStartAfterBreak) {
+            this._taskService.pauseCurrent();
+          }
         } else if (cfg.isManualContinue && isBreak) {
           this.pause(true);
+
+          if (cfg.isDisableAutoStartAfterBreak) {
+            this._taskService.pauseCurrent();
+          }
         } else {
           this.finishPomodoroSession();
         }
@@ -170,7 +177,7 @@ export class PomodoroService {
     this.currentSessionTime$
       .pipe(
         withLatestFrom(this.cfg$),
-        filter(([val, cfg]) => cfg.isEnabled && cfg.isPlayTick),
+        filter(([val, cfg]) => !!cfg.isEnabled && !!cfg.isPlayTick),
         map(([val]) => val),
         distinctUntilChanged(),
         filter((v, index) => index % (1000 / TICK_DURATION) === 0),

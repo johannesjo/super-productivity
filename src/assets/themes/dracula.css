@@ -1,0 +1,270 @@
+/**
+ * Dracula Theme for Super Productivity
+ * Dark theme based on the popular Dracula color scheme
+ * Enhanced with smooth transitions and accessibility improvements
+ */
+
+/* Remove all shadows for clean aesthetic */
+* {
+  box-shadow: none !important;
+}
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* Dracula theme variables */
+body.isDarkTheme {
+  /* ===============================
+   * DRACULA COLOR PALETTE
+   * ===============================*/
+
+  --dracula-background: #282a36;
+  --dracula-current-line: #44475a;
+  --dracula-foreground: #f8f8f2;
+  --dracula-comment: #6272a4;
+  --dracula-cyan: #8be9fd;
+  --dracula-green: #50fa7b;
+  --dracula-orange: #ffb86c;
+  --dracula-pink: #ff79c6;
+  --dracula-purple: #bd93f9;
+  --dracula-red: #ff5555;
+  --dracula-yellow: #f1fa8c;
+
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: var(--dracula-background);
+  --bg-darker: #21222c;
+  --bg-slightly-lighter: #2c2e3a;
+  --bg-lighter: #343746;
+  --bg-lightest: #3c3f51;
+  --bg-super-light: var(--dracula-current-line);
+
+  /* Component backgrounds */
+  --card-bg: #2c2e3a;
+  --sidenav-bg: #21222c;
+  --selected-task-bg-color: #343746;
+  --banner-bg: #343746;
+
+  /* Task backgrounds with better hierarchy */
+  --task-c-bg: #2c2e3a;
+  --task-c-selected-bg: #343746;
+  --sub-task-c-bg: #262935;
+  --sub-task-c-bg-done: #21222c;
+  --task-c-bg-done: #21222c;
+  --task-c-current-bg: var(--dracula-current-line);
+  --task-c-drag-drop-bg: var(--dracula-current-line);
+  --sub-task-c-bg-in-selected: #2f3240;
+
+  /* Note backgrounds */
+  --standard-note-bg: #2c2e3a;
+  --standard-note-bg-hovered: #343746;
+
+  /* ===============================
+   * TEXT COLORS
+   * ===============================*/
+
+  --text-color: var(--dracula-foreground);
+  --text-color-less-intense: rgba(248, 248, 242, 0.87);
+  --text-color-muted: var(--dracula-comment);
+  --text-color-more-intense: #ffffff;
+  --text-color-most-intense: #ffffff;
+
+  /* Note text */
+  --standard-note-fg: var(--dracula-foreground);
+
+  /* Task detail */
+  --task-detail-value-color: rgba(248, 248, 242, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: #191a21;
+  --separator-color: rgba(68, 71, 90, 0.4);
+  --divider-color: #21222c;
+
+  /* Chip borders */
+  --chip-outline-color: rgba(248, 248, 242, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* Dracula purple as primary accent */
+  --palette-accent-500: var(--dracula-purple);
+  --c-accent: var(--dracula-purple);
+  --palette-accent-100: #e6d9fc;
+  --palette-accent-200: #d9c7fb;
+  --palette-accent-300: #cdb5fa;
+  --palette-accent-400: #c0a3f9;
+  --palette-accent-600: #a77ff7;
+  --palette-accent-700: #9166f5;
+  --palette-accent-800: #7b4cf3;
+  --palette-accent-900: #6633f1;
+
+  /* Secondary colors for potential use */
+  --c-success: var(--dracula-green);
+  --c-warning: var(--dracula-orange);
+  --c-error: var(--dracula-red);
+  --c-info: var(--dracula-cyan);
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - Dracula styled */
+  --scrollbar-thumb: var(--dracula-current-line);
+  --scrollbar-thumb-hover: #565971;
+  --scrollbar-track: var(--dracula-background);
+
+  /* Close button */
+  --close-btn-bg: #343746;
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(189, 147, 249, 0.12);
+  --options-border-color: rgba(189, 147, 249, 0.2);
+
+  /* Attachments */
+  --attachment-bg: #2c2e3a;
+  --attachment-border: transparent;
+  --attachment-control-bg: rgba(0, 0, 0, 0.3);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.7);
+
+  /* Grid */
+  --grid-color: rgba(248, 248, 242, 0.06);
+
+  /* Progress */
+  --progress-bg: rgba(248, 248, 242, 0.12);
+
+  /* Improvement banner */
+  --improvement-text: #ffffff;
+  --improvement-border: rgba(189, 147, 249, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* ===============================
+   * SHADOWS - DISABLED
+   * ===============================*/
+
+  --shadow-key-umbra-opacity: 0;
+  --shadow-key-penumbra-opacity: 0;
+  --shadow-ambient-shadow-opacity: 0;
+  --task-current-shadow: none;
+  --task-selected-shadow: none;
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: none;
+  --hover-controls-border-opacity: 0;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+}
+
+/* Hide gradient backgrounds */
+body::before,
+body .first-line:hover .hover-controls::before {
+  display: none !important;
+}
+
+/* Apply background and text colors */
+body,
+body.isDarkTheme {
+  background-color: var(--bg);
+  color: var(--text-color);
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Page wrapper */
+body .page-wrapper,
+body.isDarkTheme .page-wrapper {
+  color: var(--text-color);
+}
+
+/* Links with Dracula accent */
+a,
+body a[href],
+body.isDarkTheme a[href] {
+  color: var(--c-accent);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+a:hover,
+body a[href]:hover,
+body.isDarkTheme a[href]:hover {
+  opacity: 0.8;
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides */
+body.isDarkTheme {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--dracula-purple);
+}
+
+/* Code blocks with Dracula syntax highlighting */
+code,
+pre {
+  background-color: var(--dracula-current-line);
+  color: var(--dracula-foreground);
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+/* Special Dracula-themed elements */
+.dracula-comment {
+  color: var(--dracula-comment);
+}
+.dracula-cyan {
+  color: var(--dracula-cyan);
+}
+.dracula-green {
+  color: var(--dracula-green);
+}
+.dracula-orange {
+  color: var(--dracula-orange);
+}
+.dracula-pink {
+  color: var(--dracula-pink);
+}
+.dracula-purple {
+  color: var(--dracula-purple);
+}
+.dracula-red {
+  color: var(--dracula-red);
+}
+.dracula-yellow {
+  color: var(--dracula-yellow);
+}

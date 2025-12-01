@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { CaldavCfg } from './caldav.model';
 // @ts-ignore
 import DavClient, { namespaces as NS } from '@nextcloud/cdav-library';
@@ -8,7 +8,7 @@ import Calendar from 'cdav-library/models/calendar';
 import ICAL from 'ical.js';
 
 import { from, Observable, throwError } from 'rxjs';
-import { CaldavIssue } from './caldav-issue/caldav-issue.model';
+import { CaldavIssue, CaldavIssueStatus } from './caldav-issue.model';
 import { CALDAV_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import { SearchResultItem } from '../../issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -16,19 +16,27 @@ import { T } from '../../../../t.const';
 import { catchError } from 'rxjs/operators';
 import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { throwHandledError } from '../../../../util/throw-handled-error';
+import { IssueLog } from '../../../../core/log';
 
 interface ClientCache {
   client: DavClient;
   calendars: Map<string, Calendar>;
 }
 
+interface CalDavTaskData {
+  data: string;
+  url: string;
+  etag: string;
+  update?: () => Promise<void>;
+}
+
 @Injectable({
   providedIn: 'root',
 })
 export class CaldavClientService {
-  private _clientCache = new Map<string, ClientCache>();
+  private readonly _snackService = inject(SnackService);
 
-  constructor(private readonly _snackService: SnackService) {}
+  private _clientCache = new Map<string, ClientCache>();
 
   private static _isValidSettings(cfg: CaldavCfg): boolean {
     return (
@@ -52,7 +60,10 @@ export class CaldavClientService {
     return url.substring(url.lastIndexOf('/') + 1);
   }
 
-  private static async _getAllTodos(calendar: any, filterOpen: boolean): Promise<any> {
+  private static async _getAllTodos(
+    calendar: Calendar,
+    filterOpen: boolean,
+  ): Promise<CalDavTaskData[]> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -82,7 +93,10 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-  private static async _findTaskByUid(calendar: any, taskUid: string): Promise<any> {
+  private static async _findTaskByUid(
+    calendar: Calendar,
+    taskUid: string,
+  ): Promise<CalDavTaskData[]> {
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -108,30 +122,35 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
-  private static _mapTask(task: any): CaldavIssue {
+  private static _mapTask(task: CalDavTaskData): CaldavIssue {
     const jCal = ICAL.parse(task.data);
     const comp = new ICAL.Component(jCal);
     const todo = comp.getFirstSubcomponent('vtodo');
 
-    let categories: string[] = [];
-    for (const cats of todo.getAllProperties('categories')) {
-      if (cats) {
-        categories = categories.concat(cats.getValues());
-      }
+    if (!todo) {
+      IssueLog.log(task);
+      throw new Error('No todo found for task');
     }
 
-    const completed = todo.getFirstPropertyValue('completed');
+    const categoriesProperty = todo.getAllProperties('categories')[0];
+    const categories: string[] = categoriesProperty?.getValues() || [];
 
     return {
-      id: todo.getFirstPropertyValue('uid'),
-      completed: !!completed,
+      id: todo.getFirstPropertyValue('uid') as string,
+      completed: !!todo.getFirstPropertyValue('completed'),
       item_url: task.url,
-      summary: todo.getFirstPropertyValue('summary') || '',
-      due: todo.getFirstPropertyValue('due') || '',
-      start: todo.getFirstPropertyValue('dtstart') || '',
+      summary: (todo.getFirstPropertyValue('summary') as string) || '',
+      start: (todo.getFirstPropertyValue('dtstart') as ICAL.Time)?.toJSDate().getTime(),
+      due: (todo.getFirstPropertyValue('due') as ICAL.Time)?.toJSDate().getTime(),
+      note: (todo.getFirstPropertyValue('description') as string) || undefined,
+      status: (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined,
+      priority: +(todo.getFirstPropertyValue('priority') as string) || undefined,
+      percent_complete:
+        +(todo.getFirstPropertyValue('percent-complete') as string) || undefined,
+      location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
-      note: todo.getFirstPropertyValue('description') || '',
       etag_hash: this._hashEtag(task.etag),
+      related_to: (todo.getFirstPropertyValue('related-to') as string) || undefined,
     };
   }
 
@@ -142,7 +161,7 @@ export class CaldavClientService {
     if (etag.length === 0) {
       return hash;
     }
-    for (i = 0; i < this.length; i++) {
+    for (i = 0; i < etag.length; i++) {
       chr = etag.charCodeAt(i);
       hash = (hash << 5) - hash + chr; //eslint-disable-line no-bitwise
       // Convert to 32bit integer
@@ -168,7 +187,7 @@ export class CaldavClientService {
 
       await client
         .connect({ enableCalDAV: true })
-        .catch((err: any) => this._handleNetErr(err));
+        .catch((err) => this._handleNetErr(err));
 
       const cache = {
         client,
@@ -180,7 +199,7 @@ export class CaldavClientService {
     }
   }
 
-  async _getCalendar(cfg: CaldavCfg): Promise<any> {
+  async _getCalendar(cfg: CaldavCfg): Promise<Calendar> {
     const clientCache = await this._get_client(cfg);
     const resource = cfg.resourceName as string;
 
@@ -190,7 +209,7 @@ export class CaldavClientService {
 
     const calendars = await clientCache.client.calendarHomes[0]
       .findAllCalendars()
-      .catch((err: any) => this._handleNetErr(err));
+      .catch((err) => this._handleNetErr(err));
 
     const calendar = calendars.find(
       (item: Calendar) =>
@@ -256,17 +275,20 @@ export class CaldavClientService {
     );
   }
 
-  updateCompletedState$(
+  updateState$(
     caldavCfg: CaldavCfg,
     issueId: string,
     completed: boolean,
-  ): Observable<any> {
-    return from(this._updateCompletedState(caldavCfg, issueId, completed)).pipe(
+    summary: string,
+  ): Observable<void> {
+    return from(
+      this._updateTask(caldavCfg, issueId, { completed: completed, summary: summary }),
+    ).pipe(
       catchError((err) => throwError({ [HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err })),
     );
   }
 
-  private _getXhrProvider(cfg: CaldavCfg): any {
+  private _getXhrProvider(cfg: CaldavCfg): () => XMLHttpRequest {
     // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
     function xhrProvider(): XMLHttpRequest {
       const xhr = new XMLHttpRequest();
@@ -292,7 +314,7 @@ export class CaldavClientService {
     return xhrProvider;
   }
 
-  private _handleNetErr(err: any): void {
+  private _handleNetErr(err: unknown): never {
     this._snackService.open({
       type: 'ERROR',
       msg: T.F.ISSUE.S.ERR_NETWORK,
@@ -322,11 +344,11 @@ export class CaldavClientService {
     filterCategory: boolean,
   ): Promise<CaldavIssue[]> {
     const cal = await this._getCalendar(cfg);
-    const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch(
-      (err: any) => this._handleNetErr(err),
+    const tasks = await CaldavClientService._getAllTodos(cal, filterOpen).catch((err) =>
+      this._handleNetErr(err),
     );
     return tasks
-      .map((t: any) => CaldavClientService._mapTask(t))
+      .map((t) => CaldavClientService._mapTask(t))
       .filter(
         (t: CaldavIssue) =>
           !filterCategory || !cfg.categoryFilter || t.labels.includes(cfg.categoryFilter),
@@ -335,7 +357,7 @@ export class CaldavClientService {
 
   private async _getTask(cfg: CaldavCfg, uid: string): Promise<CaldavIssue> {
     const cal = await this._getCalendar(cfg);
-    const task = await CaldavClientService._findTaskByUid(cal, uid).catch((err: any) =>
+    const task = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
       this._handleNetErr(err),
     );
 
@@ -350,11 +372,11 @@ export class CaldavClientService {
     return CaldavClientService._mapTask(task[0]);
   }
 
-  private async _updateCompletedState(
+  private async _updateTask(
     cfg: CaldavCfg,
     uid: string,
-    completed: boolean,
-  ): Promise<any> {
+    updates: { completed: boolean; summary: string },
+  ): Promise<void> {
     const cal = await this._getCalendar(cfg);
 
     if (cal.readOnly) {
@@ -368,7 +390,7 @@ export class CaldavClientService {
       throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
     }
 
-    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err: any) =>
+    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
       this._handleNetErr(err),
     );
 
@@ -388,17 +410,32 @@ export class CaldavClientService {
     const comp = new ICAL.Component(jCal);
     const todo = comp.getFirstSubcomponent('vtodo');
 
-    const oldCompleted = !!todo.getFirstPropertyValue('completed');
-
-    if (completed === oldCompleted) {
+    if (!todo) {
+      IssueLog.err('No todo found for task', task);
       return;
     }
 
     const now = ICAL.Time.now();
-    if (completed) {
-      todo.updatePropertyWithValue('completed', now);
-    } else {
-      todo.removeProperty('completed');
+    let changeObserved = false;
+
+    const oldCompleted = !!todo.getFirstPropertyValue('completed');
+    if (updates.completed !== oldCompleted) {
+      if (updates.completed) {
+        todo.updatePropertyWithValue('completed', now);
+      } else {
+        todo.removeProperty('completed');
+      }
+      changeObserved = true;
+    }
+
+    const oldSummary = todo.getFirstPropertyValue('summary');
+    if (updates.summary !== oldSummary) {
+      todo.updatePropertyWithValue('summary', updates.summary);
+      changeObserved = true;
+    }
+
+    if (!changeObserved) {
+      return;
     }
     todo.updatePropertyWithValue('last-modified', now);
     todo.updatePropertyWithValue('dtstamp', now);
@@ -408,10 +445,12 @@ export class CaldavClientService {
     // As 'sequence' starts at 0 and completing probably counts as a major change, then it should be at least 1 in the end,
     // if no other changes have been written.
     const sequence = todo.getFirstPropertyValue('sequence');
-    const sequenceInt = sequence ? parseInt(sequence) + 1 : 1;
+    const sequenceInt = sequence ? parseInt(sequence as string) + 1 : 1;
     todo.updatePropertyWithValue('sequence', sequenceInt);
 
     task.data = ICAL.stringify(jCal);
-    await task.update().catch((err: any) => this._handleNetErr(err));
+    if (task.update) {
+      await task.update().catch((err) => this._handleNetErr(err));
+    }
   }
 }

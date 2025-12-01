@@ -3,26 +3,37 @@ import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/
 import {
   DominaModeConfig,
   EvaluationConfig,
+  FocusModeConfig,
   GlobalConfigState,
   IdleConfig,
+  LocalizationConfig,
   MiscConfig,
+  PomodoroConfig,
+  ReminderConfig,
+  ScheduleConfig,
+  ShortSyntaxConfig,
   SoundConfig,
   SyncConfig,
   TakeABreakConfig,
-  TimelineConfig,
 } from '../global-config.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../default-global-config.const';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { migrateGlobalConfigState } from '../migrate-global-config.util';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
+import { getHoursFromClockString } from '../../../util/get-hours-from-clock-string';
 
 export const CONFIG_FEATURE_NAME = 'globalConfig';
 export const selectConfigFeatureState =
   createFeatureSelector<GlobalConfigState>(CONFIG_FEATURE_NAME);
+export const selectLocalizationConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): LocalizationConfig => cfg.localization,
+);
 export const selectMiscConfig = createSelector(
   selectConfigFeatureState,
   (cfg): MiscConfig => cfg.misc,
+);
+export const selectShortSyntaxConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): ShortSyntaxConfig => cfg.shortSyntax,
 );
 export const selectSoundConfig = createSelector(
   selectConfigFeatureState,
@@ -46,7 +57,7 @@ export const selectTakeABreakConfig = createSelector(
 );
 export const selectTimelineConfig = createSelector(
   selectConfigFeatureState,
-  (cfg): TimelineConfig => cfg.timeline,
+  (cfg): ScheduleConfig => cfg.schedule,
 );
 
 export const selectIsDominaModeConfig = createSelector(
@@ -54,26 +65,57 @@ export const selectIsDominaModeConfig = createSelector(
   (cfg): DominaModeConfig => cfg.dominaMode,
 );
 
+export const selectFocusModeConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): FocusModeConfig => cfg.focusMode,
+);
+export const selectPomodoroConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): PomodoroConfig => cfg.pomodoro,
+);
+export const selectIsPomodoroEnabled = createSelector(
+  selectConfigFeatureState,
+  (cfg): boolean => !!cfg.pomodoro.isEnabled,
+);
+export const selectReminderConfig = createSelector(
+  selectConfigFeatureState,
+  (cfg): ReminderConfig => cfg.reminder,
+);
+
 export const initialGlobalConfigState: GlobalConfigState = {
   ...DEFAULT_GLOBAL_CONFIG,
-  [MODEL_VERSION_KEY]: MODEL_VERSION.GLOBAL_CONFIG,
 };
 
 export const globalConfigReducer = createReducer<GlobalConfigState>(
   initialGlobalConfigState,
 
   on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.globalConfig
-      ? migrateGlobalConfigState({ ...appDataComplete.globalConfig })
-      : oldState,
+    appDataComplete.globalConfig ? appDataComplete.globalConfig : oldState,
   ),
 
   on(updateGlobalConfigSection, (state, { sectionKey, sectionCfg }) => ({
     ...state,
     [sectionKey]: {
-      // @ts-ignore
       ...state[sectionKey],
       ...sectionCfg,
     },
   })),
+);
+
+export const selectTimelineWorkStartEndHours = createSelector(
+  selectConfigFeatureState,
+  (
+    cfg,
+  ): {
+    workStart: number;
+    workEnd: number;
+  } | null => {
+    if (!cfg.schedule.isWorkStartEndEnabled) {
+      return null;
+    }
+    return {
+      workStart: getHoursFromClockString(cfg.schedule.workStart),
+      workEnd: getHoursFromClockString(cfg.schedule.workEnd),
+    };
+  },
 );

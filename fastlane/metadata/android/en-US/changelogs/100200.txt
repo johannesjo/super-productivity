@@ -1,0 +1,52 @@
+
+### Bug Fixes
+
+* correct notes toggle button color
+* crash when env var WEBDAV_BACKEND is not set
+* error message not showing after unsuccessful import
+* **simpleCounter:** duration
+* **sync:** rev check code #3661 #3660
+* **webDav:** add workaround for MKCOL problem on android
+* **webDav:** base url not working as expected #3617
+* wrong url parsing for marked
+### Features
+
+* allow adding of all RFC3986 uris as attachment type link #2775
+* allow clicking of all RFC3986 uris #2775
+* allow clicking of all RFC3986 uris #2775
+* allow even shorter short syntax for scheduling tasks (e.g. @9 => 9:00)
+* **android:** improve error handling in request interceptor 3657
+* **android:** minimize app instead of close
+* **android:** prepare auto builds
+* changes the separators when the user is typing
+* **electron:** fix weird typing issue
+* hide hidden projects from add task bar mention suggestions
+* hide hidden projects from add task bar mention suggestions
+* hide hidden projects from add task bar mention suggestions
+* improve task component performance (possibly)
+* only show countdown timer when active
+* prevent case when task could be lost to the void
+* remove legacy data warning
+* **repeatedTasks:** autofill start time for scheduled tasks
+* **repeatedTasks:** autofill start time for scheduled tasks
+* **repeatedTasks:** autofill start time for scheduled tasks
+* show android version on settings page
+* show android version on settings page
+* show android version on settings page
+* **simpleCounter:** add outline to countdown button when time is up
+* **simpleCounter:** add translations
+* **simpleCounter:** add translations
+* **simpleCounter:** add translations 2
+* **simpleCounter:** add translations 2
+* **simpleCounter:** improve repeat countdown button for session over
+* **simpleCounter:** improve repeat countdown button for session over
+* **simpleCounter:** make config for new counter type work
+* **simpleCounter:** make config for new counter type work
+* **simpleCounter:** make new simple counter type work
+* **simpleCounter:** make new simple counter type work
+* **simpleCounter:** outline new type
+* **simpleCounter:** outline new type
+* **simpleCounter:** use banner for new type instead of alert
+* **simpleCounter:** use banner for new type instead of alert
+* **sync:** handle special edge case #3651
+* **task:** show list of all tasks when adding unrecorded time #3666

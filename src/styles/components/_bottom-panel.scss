@@ -1,0 +1,64 @@
+// Bottom panel sheet styles
+.bottom-panel-sheet {
+  .mat-bottom-sheet-container {
+    padding: 0;
+    height: 60vh; // Default to 3/5 of viewport height
+    max-height: 98vh;
+    min-height: 20vh;
+    // Fix to bottom of viewport
+    position: fixed !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    width: 100vw !important;
+    // Enable smooth resizing - but disable during custom dragging
+    transition: height 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+    // Allow the sheet to be draggable
+    resize: vertical;
+    overflow: hidden;
+    background: var(--bottom-panel-bg);
+    border-top-right-radius: 20px;
+    border-top-left-radius: 20px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+
+    // Disable transitions during custom drag
+    &.dragging {
+      transition: none;
+      // Prevent any inner animation/transition jank while dragging
+      * {
+        transition: none !important;
+        animation: none !important;
+      }
+    }
+  }
+
+  .bottom-panel-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 20vh;
+  }
+
+  .bottom-panel-content {
+    // Minimal padding for bottom sheet
+    padding: 0 4px;
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+
+    // Ensure components fill the available space
+    > * {
+      height: 100%;
+    }
+  }
+
+  // Improve dragging experience on mobile
+  .bottom-panel-header {
+    // Increase touch target
+    min-height: 36px;
+    // Better visual feedback
+    &:active {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+}

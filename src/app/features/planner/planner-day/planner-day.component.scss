@@ -1,0 +1,185 @@
+@use '../../../../styles/_globals.scss' as *;
+@use '../../tasks/task/task.component.mixins' as *;
+
+:host {
+  display: flex;
+  flex-direction: column;
+  min-width: 260px;
+  width: 260px;
+  // there needs to be enough space for the fab buttons
+
+  padding-bottom: 96px;
+  margin-bottom: 32px;
+
+  @include mq(xs, max) {
+    width: 100%;
+    max-width: 100%;
+    min-width: 100%;
+    padding: 0;
+    margin-bottom: 16px;
+  }
+}
+
+:host header {
+  margin-top: 16px;
+  margin-right: -4px;
+  margin-left: -4px;
+  border-radius: 8px;
+  //position: sticky;
+  //top: -2px;
+  //&.is-stuck {
+  //  background: white;
+  //  box-shadow: var(--whiteframe-shadow-2dp);
+  //  z-index: 10;
+  //}
+}
+
+.day-title {
+  font-size: 22px;
+  text-align: center;
+  font-weight: bold;
+  vertical-align: middle;
+  padding-top: 8px;
+
+  .date {
+    font-size: 12px;
+  }
+}
+
+.day-counts {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  border-radius: 4px;
+  font-size: 18px;
+
+  mat-icon:last-of-type {
+    margin-left: 8px;
+    font-size: 16px;
+  }
+
+  .available-hours {
+    margin-left: 4px;
+    font-size: 14px;
+    opacity: 0.7;
+  }
+}
+
+.progress-container {
+  margin: 0 auto;
+  width: 95%;
+  height: 4px;
+  position: relative;
+  margin-bottom: 8px;
+}
+
+.day-estimate {
+  margin-top: 8px;
+  font-size: 16px;
+  text-align: center;
+}
+
+.section-title {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0 8px;
+}
+
+.normal-tasks,
+.scheduled {
+  margin-top: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.scheduled {
+  flex-grow: 1;
+  /* Additional styles if needed */
+  margin-top: 16px;
+
+  @include mq(xs, max) {
+    &.no-items {
+      display: none;
+    }
+  }
+}
+
+.normal-tasks-items,
+.scheduled-items {
+  min-height: var(--planner-item-height);
+  flex-grow: 1;
+}
+
+.normal-tasks-items > * {
+  margin-bottom: 8px;
+}
+
+.scheduled-item {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+
+  &.Task .time {
+    cursor: pointer;
+    border-radius: 50%;
+    background: var(--task-c-bg);
+  }
+
+  .time {
+    text-align: center;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    margin-right: 4px;
+    flex-grow: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    font-size: var(--planner-font-size-smaller-mobile);
+
+    @include mq(xs) {
+      font-size: var(--planner-font-size-smaller);
+    }
+
+    mat-icon {
+      display: none;
+    }
+
+    &:hover {
+      mat-icon {
+        display: block;
+      }
+
+      span {
+        display: none;
+      }
+    }
+  }
+
+  .time-time {
+    line-height: 1;
+    text-align: center;
+    white-space: wrap;
+    display: inline-flex;
+    max-width: 30px;
+
+    ::ng-deep span {
+      text-align: center;
+      font-size: 9px;
+    }
+  }
+
+  > :nth-child(2) {
+    flex-grow: 1;
+  }
+}
+
+.empty {
+  text-align: center;
+  font-style: italic;
+  line-height: var(--planner-item-height);
+  height: 0;
+}

@@ -1,6 +1,6 @@
-import * as moment from 'moment';
 import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
 import { msToString } from '../../../ui/duration/ms-to-string.pipe';
+import { formatTimeHHmm } from '../../../util/format-time-hhmm';
 import { roundDuration } from '../../../util/round-duration';
 import { roundTime } from '../../../util/round-time';
 import { unique } from '../../../util/unique';
@@ -8,6 +8,7 @@ import { ProjectCopy } from '../../project/project.model';
 import { TagCopy } from '../../tag/tag.model';
 import { WorklogTask } from '../../tasks/task.model';
 import { WorklogExportSettingsCopy, WorklogGrouping } from '../worklog.model';
+import { Log } from '../../../core/log';
 import {
   ItemsByKey,
   RowItem,
@@ -123,7 +124,7 @@ const handleDateGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const skipTask = (task: WorklogTask, groupBy: WorklogGrouping): boolean => {
   return (
-    (groupBy === WorklogGrouping.PARENT && task.parentId !== null) ||
+    (groupBy === WorklogGrouping.PARENT && !!task.parentId) ||
     (groupBy === WorklogGrouping.TASK && task.subTaskIds.length > 0)
   );
 };
@@ -183,11 +184,10 @@ const handleWorklogGroup = (data: WorklogExportData): ItemsByKey<RowItem> => {
  */
 const getTaskFields = (task: WorklogTask, data: WorklogExportData): TaskFields => {
   const titlesWithSub = [task.title];
-  const parentTask =
-    task.parentId !== null
-      ? // NOTE: we use 'ERR' to still throw an error for invalid data
-        (data.tasks.find((t) => t.id === task.parentId) as WorklogTask) || 'ERR'
-      : undefined;
+  const parentTask = task.parentId
+    ? // NOTE: we use 'ERR' to still throw an error for invalid data
+      (data.tasks.find((t) => t.id === task.parentId) as WorklogTask) || 'ERR'
+    : undefined;
 
   const titles = parentTask ? [parentTask.title] : [task.title];
 
@@ -255,7 +255,7 @@ export const formatRows = (
           0,
         );
         const timeSpentPart = row.timeSpent / timeSpentTotal;
-        console.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
+        Log.log(`${row.timeSpent} / ${timeSpentTotal} = ${timeSpentPart}`);
         timeEstimate = timeEstimate * timeSpentPart;
       }
 
@@ -268,19 +268,19 @@ export const formatRows = (
         case 'START':
           const workStart = !row.workStart ? 0 : row.workStart;
           return workStart
-            ? moment(
+            ? formatTimeHHmm(
                 options.roundStartTimeTo
                   ? roundTime(workStart, options.roundStartTimeTo)
                   : workStart,
-              ).format('HH:mm')
+              )
             : EMPTY_VAL;
         case 'END':
           return row.workEnd
-            ? moment(
+            ? formatTimeHHmm(
                 options.roundEndTimeTo && row.workEnd
                   ? roundTime(row.workEnd, options.roundEndTimeTo)
                   : row.workEnd,
-              ).format('HH:mm')
+              )
             : EMPTY_VAL;
         case 'TITLES':
           return row.titles.join(options.separateTasksBy || '<br>');

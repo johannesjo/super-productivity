@@ -1,41 +1,77 @@
 <button
-  [routerLink]="[base,contextId,'quick-history']"
+  [routerLink]="[base, contextId, 'quick-history']"
   mat-menu-item
 >
   <mat-icon>history</mat-icon>
-  <span class="text">{{T.MH.QUICK_HISTORY|translate}}</span>
+  <span class="text">{{ T.MH.QUICK_HISTORY | translate }}</span>
 </button>
 
 <button
-  [routerLink]="[base,contextId,'worklog']"
+  [routerLink]="[base, contextId, 'worklog']"
   mat-menu-item
 >
   <mat-icon>date_range</mat-icon>
-  <span class="text">{{T.MH.WORKLOG|translate}}</span>
+  <span class="text">{{ T.MH.WORKLOG | translate }}</span>
 </button>
 
+@if (isForProject || contextId === TODAY_TAG_ID) {
+  <button
+    [routerLink]="[base, contextId, 'metrics']"
+    mat-menu-item
+  >
+    <mat-icon>donut_large</mat-icon>
+    <span class="text">{{ T.MH.METRICS | translate }}</span>
+  </button>
+}
+
+@if (contextId === TODAY_TAG_ID) {
+  <button
+    (click)="unplanAllTodayTasks()"
+    mat-menu-item
+  >
+    <mat-icon>event_busy</mat-icon>
+    <span class="text">{{ T.MH.UNPLAN_ALL_TASKS | translate }}</span>
+  </button>
+}
+
 <button
-  *ngIf="isForProject || contextId ===TODAY_TAG_ID"
-  [routerLink]="[base,contextId,'metrics']"
+  (click)="shareTasksAsMarkdown()"
   mat-menu-item
 >
-  <mat-icon>donut_large</mat-icon>
-  <span class="text">{{T.MH.METRICS|translate}}</span>
+  <mat-icon>{{ shareSupport === 'none' ? 'content_copy' : 'ios_share' }}</mat-icon>
+  <span class="text">
+    {{
+      (shareSupport === 'none'
+        ? T.MH.COPY_TASK_LIST_MARKDOWN
+        : T.MH.SHARE_TASK_LIST_MARKDOWN
+      ) | translate
+    }}
+  </span>
 </button>
 
 <button
-  [routerLink]="[base,contextId,'settings']"
+  [routerLink]="[base, contextId, 'settings']"
   mat-menu-item
 >
   <mat-icon>settings</mat-icon>
-  <span class="text">{{T.MH.SETTINGS|translate}}</span>
+  <span class="text">{{ T.MH.SETTINGS | translate }}</span>
 </button>
 
-<button
-  (click)="deleteTag()"
-  *ngIf="!isForProject && contextId !== TODAY_TAG_ID"
-  mat-menu-item
->
-  <mat-icon class="color-warn-i">delete_forever</mat-icon>
-  <span class="text">{{T.MH.DELETE_TAG|translate}}</span>
-</button>
+@if (!isForProject && contextId !== TODAY_TAG_ID) {
+  <button
+    (click)="deleteTag()"
+    mat-menu-item
+  >
+    <mat-icon class="color-warn-i">delete_forever</mat-icon>
+    <span class="text">{{ T.MH.DELETE_TAG | translate }}</span>
+  </button>
+}
+@if (isForProject && contextId !== INBOX_PROJECT.id) {
+  <button
+    (click)="deleteProject()"
+    mat-menu-item
+  >
+    <mat-icon class="color-warn-i">delete_forever</mat-icon>
+    <span class="text">{{ T.MH.DELETE_PROJECT | translate }}</span>
+  </button>
+}

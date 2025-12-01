@@ -1,4 +1,6 @@
-@import '../_variables.scss';
+@use 'angular-material-css-vars' as mat-css-vars;
+@use '../_common';
+@use './mixins/media-queries';
 
 html,
 body,
@@ -6,13 +8,23 @@ app-root,
 .app-frame {
   overflow: hidden;
   margin: 0;
+  /* stylelint-disable-next-line no-duplicate-selectors */
   height: 100%;
   height: -webkit-fill-available;
   box-sizing: border-box;
-  //font-family: 'Montserrat', 'Roboto', sans-serif;
-  //font-family: 'Open Sans', sans-serif;
-  //font-family: 'Roboto', sans-serif;
-  font-family: 'Roboto', 'Comic Sans MS';
+  font-optical-sizing: auto;
+  font-family: 'Open Sans', sans-serif;
+}
+
+html {
+  overflow: hidden !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+
+  button,
+  a {
+    -webkit-app-region: no-drag !important;
+  }
 }
 
 body {
@@ -38,56 +50,41 @@ body {
     opacity: 0;
   }
 
-  &.isEnabledBackgroundGradient {
+  &.isLightTheme {
+    color: var(--text-color);
+    background: var(--bg);
+
     &:before {
       display: block;
-    }
-  }
-
-  &.isLightTheme {
-    color: $light-theme-text-color;
-
-    &.isDisableBackgroundGradient {
-      background: $light-theme-bg;
-    }
-
-    &:before {
       opacity: 1;
       filter: saturate(0.8);
-      background: linear-gradient(
-        180deg,
-        $c-primary-50 0,
-        $c-primary-100 85%,
-        $c-primary-200 100%
-      );
+      background: mat-css-vars.mat-css-color(50, 1);
+    }
+    &.isDisableBackgroundTint {
+      background: var(--bg);
+      &:before {
+        display: none;
+        opacity: 0;
+      }
     }
   }
 
   &.isDarkTheme {
-    color: $dark-theme-text-color;
-
-    &.isDisableBackgroundGradient {
-      background: $dark-theme-bg;
-    }
+    color: var(--text-color);
+    background: var(--bg);
 
     &:before {
+      display: block;
       opacity: 1;
-      filter: brightness(0.7) saturate(0.6);
-      background: linear-gradient(
-        180deg,
-        $dark-theme-bg 0,
-        $c-primary-900 20%,
-        $c-primary-800 50%,
-        $c-primary-700 100%
-      );
-      background: linear-gradient(
-        180deg,
-        $dark-theme-bg 0,
-        $c-primary-900 20%,
-        $c-primary-800 100%
-      );
-      //background: linear-gradient(180deg, $c-primary-700 0, $c-primary-800 20%, $c-primary-900 30%, $dark-theme-bg 100%);
-      //background: linear-gradient(180deg, $c-primary-900 0, $c-primary-800 80%, $c-primary-700 90%, $c-primary-600 100%);
+      filter: brightness(0.1);
+      background: mat-css-vars.mat-css-color(900, 1);
+    }
+    &.isDisableBackgroundTint {
+      background: var(--bg);
+      &:before {
+        display: none;
+        opacity: 0;
+      }
     }
   }
 
@@ -100,39 +97,40 @@ body {
 }
 
 .page-wrapper {
-  padding: $s $s $s * 9;
-  @include mq(xs) {
-    padding: $s 2 * $s $s * 9;
+  padding: var(--s) var(--s) calc(var(--s) * 9);
+
+  @include media-queries.mq(xs) {
+    padding: var(--s) var(--s2) calc(var(--s) * 9);
   }
 }
 
 .component-wrapper {
-  max-width: $component-max-width;
+  max-width: var(--component-max-width);
   margin: auto;
 }
 
 .task-list-wrapper {
-  padding: 0 0 $s * 9;
+  padding: 0 var(--s) var(--s7);
   // for a little bit of extra space for 800 width
-  max-width: #{$component-max-width - 40};
+  max-width: calc(var(--component-max-width) - 40px);
   margin: auto;
 
-  @include mq(xxs) {
-    padding: 0 $s * 1 $s * 9;
+  @include media-queries.mq(xxs) {
+    padding: 0 var(--s) var(--s7);
   }
 
-  @include mq(xs) {
-    padding: 0 $s * 1.5 $s * 9;
+  @include media-queries.mq(xs) {
+    padding: 0 calc(var(--s) * 1.5) var(--s7);
   }
 
-  @include mq(sm) {
-    padding: 0 3 * $s $s * 9;
-    max-width: $component-max-width;
+  @include media-queries.mq(sm) {
+    padding: 0 var(--s3) var(--s7);
+    max-width: var(--component-max-width);
   }
 
-  @include mq(lg) {
-    padding: 0 3 * $s $s * 9;
-    max-width: $component-max-width + 100;
+  @include media-queries.mq(lg) {
+    padding: 0 var(--s3) var(--s7);
+    max-width: calc(var(--component-max-width) + 100px);
   }
 
   improvement-banner + & {
@@ -141,13 +139,13 @@ body {
 }
 
 blockquote {
-  border-left: 4px solid rgba(var(--palette-accent-500), 1);
+  border-left: 4px solid rgba(var(--c-accent), 1);
   margin: 20px 0;
   padding: 1px 20px;
 }
 
 a[href] {
-  color: $c-accent;
+  color: var(--c-accent);
 }
 
 *,
@@ -161,4 +159,41 @@ img {
   max-width: 100%;
   height: auto;
   display: block;
+}
+
+// scrollbars
+* {
+  --scrollbar-width: thin;
+  --scrollbar-width-legacy: 4px;
+  --scrollbar-color-thumb: var(--scrollbar-thumb);
+  --scrollbar-color-track: var(--scrollbar-track);
+
+  .isDarkTheme & {
+    --scrollbar-color-thumb: var(--scrollbar-thumb);
+    --scrollbar-color-track: var(--scrollbar-track);
+  }
+
+  /* Modern browsers with `scrollbar-*` support */
+  @supports (scrollbar-width: auto) {
+    & {
+      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+      scrollbar-width: var(--scrollbar-width);
+    }
+  }
+
+  /* Legacy browsers with `::-webkit-scrollbar-*` support */
+  @supports selector(::-webkit-scrollbar) {
+    &::-webkit-scrollbar-thumb {
+      background: var(--scrollbar-color-thumb);
+    }
+
+    &::-webkit-scrollbar-track {
+      background: var(--scrollbar-color-track);
+    }
+
+    &::-webkit-scrollbar {
+      max-width: var(--scrollbar-width-legacy);
+      max-height: var(--scrollbar-width-legacy);
+    }
+  }
 }

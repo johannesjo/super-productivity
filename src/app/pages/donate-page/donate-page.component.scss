@@ -1,0 +1,26 @@
+.page-wrapper {
+  padding: calc(var(--s) * 2);
+  max-width: 600px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.content {
+  margin-top: calc(var(--s) * 4);
+}
+
+p {
+  margin-bottom: calc(var(--s) * 2);
+  font-size: 1.2rem;
+  line-height: 1.6;
+}
+
+//.mat-mdc-raised-button {
+//  margin-top: calc(var(--s) * 2);
+//  padding: var(--s) calc(var(--s) * 3);
+//  font-size: 1.2rem;
+//
+//  mat-icon {
+//    margin-right: var(--s);
+//  }
+//}

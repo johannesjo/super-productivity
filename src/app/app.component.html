@@ -1,104 +1,140 @@
-<ng-container *ngIf="isShowUi$|async">
-  <div
-    *ngIf="(globalThemeService.backgroundImg$|async) as bgImage"
-    [style.background]="'url(' + bgImage + ')'"
-    class="bg-image"
-  ></div>
-
+@if (isShowUi$ | async) {
+  @if (globalThemeService.backgroundImg(); as bgImage) {
+    <div
+      [style.background]="'url(' + bgImage + ')'"
+      class="bg-image"
+    ></div>
+  }
   <!--TODO move inside page container somehow -->
-  <add-task-bar
-    (blurred)="layoutService.hideAddTaskBar()"
-    *ngIf="layoutService.isShowAddTaskBar$|async"
-    [isElevated]="true"
-    class="global"
-  ></add-task-bar>
-  <div
-    *ngIf="(layoutService.isShowAddTaskBar$|async)"
-    @fade
-    class="backdrop"
-  ></div>
-  <search-bar
-    (blurred)="layoutService.hideSearchBar()"
-    *ngIf="layoutService.isShowSearchBar$|async"
-  ></search-bar>
-  <div
-    *ngIf="(layoutService.isShowSearchBar$|async)"
-    @fade
-    class="backdrop"
-  ></div>
-  <mat-sidenav-container [dir]="isRTL ? 'rtl' : 'ltr'">
-    <mat-sidenav
-      (closedStart)="layoutService.hideSideNav()"
-      [mode]="(layoutService.isNavOver$|async) ? 'over' : 'side'"
-      [opened]="(layoutService.isShowSideNav$|async)"
-      position="start"
+  @if (layoutService.isShowAddTaskBar()) {
+    <add-task-bar
+      (closed)="layoutService.hideAddTaskBar()"
+      (done)="layoutService.hideAddTaskBar()"
+      (afterTaskAdd)="onTaskAdded($event)"
+      [isGlobalBarVariant]="true"
+      class="global"
+    ></add-task-bar>
+  }
+  @if (layoutService.isShowAddTaskBar()) {
+    <div
+      (click)="layoutService.hideAddTaskBar()"
+      @fade
+      class="backdrop"
+    ></div>
+  }
+  <!-- -->
+  @if (isShowFocusOverlay()) {
+    <focus-mode-overlay @warp></focus-mode-overlay>
+  } @else {
+    <div
+      class="app-container"
+      [class.has-mobile-bottom-nav]="isShowMobileButtonNav"
+      [dir]="isRTL ? 'rtl' : 'ltr'"
     >
-      <side-nav #sideNavElRef></side-nav>
-      <ng-container *ngIf="workContextService.isActiveWorkContextProject$|async">
-      </ng-container>
-    </mat-sidenav>
-
-    <mat-sidenav-content>
-      <header
-        [class.isNotScrolled]="!(layoutService.isScrolled$|async)"
-        class="header-wrapper"
+      <magic-side-nav
+        #magicSideNav
+        [activeWorkContextId]="getActiveWorkContextId()"
       >
-        <main-header></main-header>
-        <bookmark-bar
-          *ngIf="(workContextService.isActiveWorkContextProject$|async)"
-        ></bookmark-bar>
-        <banner></banner>
-      </header>
+      </magic-side-nav>
 
-      <div
-        #routeWrapper
-        [@warpRoute]="getPage(o)"
-        class="route-wrapper"
-      >
-        <router-outlet #o="outlet"></router-outlet>
+      <main class="main-content">
+        <header
+          [class.isNotScrolled]="!layoutService.isScrolled()"
+          class="header-wrapper"
+        >
+          <main-header></main-header>
+
+          <banner></banner>
+        </header>
+
+        <right-panel>
+          <div
+            #routeWrapper
+            [@warpRoute]="getPage(o)"
+            class="route-wrapper"
+          >
+            <router-outlet #o="outlet"></router-outlet>
+          </div>
+        </right-panel>
+        <global-progress-bar></global-progress-bar>
+      </main>
+
+      <!-- Mobile Bottom Navigation -->
+      @if (isShowMobileButtonNav()) {
+        <mobile-bottom-nav
+          (toggleMobileNavEvent)="magicSideNav.toggleMobileNav()"
+        ></mobile-bottom-nav>
+      }
+    </div>
+  }
+  <!-- -->
+}
+@if (
+  !(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$ | async) ||
+  (imexMetaService.isDataImportInProgress$ | async)
+) {
+  <div class="loading-full-page-wrapper">
+    <global-progress-bar></global-progress-bar>
+    <div class="app-loading">
+      <div class="productivity-tip">
+        <h2 id="heading">{{ productivityTipTitle }}</h2>
+        <p id="text">{{ productivityTipText }}</p>
       </div>
-      <global-progress-bar></global-progress-bar>
-    </mat-sidenav-content>
-  </mat-sidenav-container>
-</ng-container>
-
-<div
-  *ngIf="!(syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$|async) || (imexMetaService.isDataImportInProgress$|async)"
-  class="loading-full-page-wrapper"
->
-  <global-progress-bar></global-progress-bar>
-
-  <div class="app-loading">
-    <div class="productivity-tip">
-      <h2 id="heading">{{productivityTipTitle}}</h2>
-      <p id="text">{{productivityTipText}}</p>
+      <div class="spinner">
+        <div class="double-bounce1"></div>
+        <div class="double-bounce2"></div>
+      </div>
+      <svg
+        class="logo"
+        viewBox="0 0 64 64"
+      >
+        <path
+          d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
+          id="path3395"
+          style="
+            fill: #000000;
+            fill-opacity: 1;
+            fill-rule: evenodd;
+            stroke: none;
+            stroke-width: 1.46761858;
+            stroke-linecap: butt;
+            stroke-linejoin: bevel;
+            stroke-miterlimit: 13.80000019;
+            stroke-dasharray: none;
+            stroke-opacity: 1;
+          "
+        />
+      </svg>
     </div>
-
-    <div class="spinner">
-      <div class="double-bounce1"></div>
-      <div class="double-bounce2"></div>
-    </div>
-
-    <svg
-      class="logo"
-      viewBox="0 0 64 64"
-    >
-      <path
-        d="M 0.65537046,34.582787 32.452267,63.855301 63.791548,0.94356422 30.222644,47.722023 Z"
-        id="path3395"
-        style="
-          fill: #000000;
-          fill-opacity: 1;
-          fill-rule: evenodd;
-          stroke: none;
-          stroke-width: 1.46761858;
-          stroke-linecap: butt;
-          stroke-linejoin: bevel;
-          stroke-miterlimit: 13.80000019;
-          stroke-dasharray: none;
-          stroke-opacity: 1;
-        "
-      />
-    </svg>
   </div>
-</div>
+}
+<!-- -->
+
+@defer {
+  <shepherd></shepherd>
+}
+
+<!-- Background context menu -->
+@if (routeWrapper) {
+  <context-menu
+    [contextMenu]="backgroundContextMenu"
+    [rightClickTriggerEl]="routeWrapper.nativeElement"
+    [allowedSelectors]="
+      '.route-wrapper, .today, .task-list-wrapper, .page-wrapper, .route-wrapper > *, .search-results'
+    "
+  ></context-menu>
+}
+
+<ng-template #backgroundContextMenu>
+  <div style="min-width: 200px; max-width: 300px">
+    <button
+      mat-menu-item
+      (click)="changeBackgroundFromUnsplash()"
+      class="background-menu-item"
+      style="width: 100%; overflow: hidden"
+    >
+      <mat-icon>image</mat-icon>
+      <span>{{ T.APP.CONTEXT_MENU.CHANGE_BACKGROUND | translate }}</span>
+    </button>
+  </div>
+</ng-template>

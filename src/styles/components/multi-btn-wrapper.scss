@@ -1,0 +1,63 @@
+@use '../mixins/_is-touch-device';
+
+.g-multi-btn-wrapper {
+  display: flex;
+  position: relative;
+  align-items: stretch;
+  justify-content: stretch;
+
+  a,
+  button {
+    height: 44px !important;
+    line-height: 44px !important;
+    min-height: 44px !important;
+  }
+
+  button:first-of-type {
+    flex-grow: 1;
+  }
+
+  > button:nth-of-type(n + 2) {
+    //>  button:last-of-type {
+    border-radius: 0;
+    align-self: stretch;
+    display: inline-flex;
+    min-width: 48px;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    align-items: center;
+    justify-content: center;
+
+    .mat-mdc-button-persistent-ripple {
+      border-radius: 0 !important;
+    }
+
+    .mat-mdc-button-touch-target {
+      width: 40px;
+      height: 40px;
+    }
+
+    @include is-touch-device.mousePrimaryDevice(true) {
+      opacity: 0;
+      display: none;
+    }
+  }
+
+  &:focus,
+  &:hover {
+    button:nth-of-type(n + 2) {
+      @include is-touch-device.mousePrimaryDevice(true) {
+        opacity: 0.8;
+        display: inline-flex;
+      }
+    }
+  }
+
+  //button:first-of-type:focus + button {
+  //  @include mousePrimaryDevice(true) {
+  //    opacity: 0.8;
+  //    display: inline-flex;
+  //  }
+  //}
+}

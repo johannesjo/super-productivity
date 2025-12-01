@@ -1,16 +1,17 @@
-import { RootState } from '../root-state';
 import { actionLogger } from '../../util/action-logger';
-import { environment } from '../../../environments/environment';
-import { ActionReducer } from '@ngrx/store/src/models';
+import { ActionReducer, Action } from '@ngrx/store';
+import { Log } from '../../core/log';
 
-export const actionLoggerReducer = (
-  reducer: ActionReducer<any, any>,
-): ActionReducer<any, any> => {
-  return (state: RootState, action: any) => {
-    if (environment.production) {
-      console.log(action.type, (action as any)?.payload || action);
-    }
-    actionLogger(action);
+export const actionLoggerReducer = <S, A extends Action = Action>(
+  reducer: ActionReducer<S, A>,
+): ActionReducer<S, A> => {
+  return (state: S | undefined, action: A) => {
+    // if (environment.production) {
+    Log.verbose(
+      '[a]' + action.type,
+      (action as Action & { payload?: unknown })?.payload || action,
+    );
+    actionLogger(action as unknown as { type: string; [key: string]: unknown });
     return reducer(state, action);
   };
 };

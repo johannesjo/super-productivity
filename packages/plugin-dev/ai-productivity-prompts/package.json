@@ -1,0 +1,28 @@
+{
+  "name": "ai-productivity-prompts-plugin",
+  "version": "1.0.0",
+  "description": "AI Productivity Prompts plugin for Super Productivity",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "dev:watch": "node scripts/watch-and-build.js",
+    "build": "vite build && node scripts/inline-assets.js",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "deploy": "npm run build",
+    "clean": "rm -rf dist node_modules *.zip",
+    "lint": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@solidjs/router": "^0.14.10",
+    "@types/node": "^22.15.33",
+    "solid-js": "^1.9.7",
+    "typescript": "^5.8.3",
+    "vite": "^7.1.12",
+    "vite-plugin-solid": "^2.11.10",
+    "archiver": "^7.0.1"
+  },
+  "dependencies": {
+    "@super-productivity/plugin-api": "file:../../plugin-api"
+  }
+}

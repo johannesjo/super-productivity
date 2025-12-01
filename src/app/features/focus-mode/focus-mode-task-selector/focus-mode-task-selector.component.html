@@ -1,0 +1,27 @@
+<div
+  class="task-selector-backdrop"
+  (click)="close()"
+  @fade
+>
+  <div
+    class="task-selector-overlay"
+    (click)="$event.stopPropagation()"
+    (keydown)="onKeyDown($event)"
+  >
+    <select-task
+      (taskChange)="onTaskChange($event)"
+      [isIncludeDoneTasks]="false"
+      [isLimitToProject]="false"
+      [isShowSuggestionsWithoutSearch]="true"
+    ></select-task>
+
+    <button
+      mat-mini-fab
+      color="primary"
+      (click)="createAndSelectTaskFromInput()"
+      [disabled]="!currentTaskInputText().trim()"
+    >
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

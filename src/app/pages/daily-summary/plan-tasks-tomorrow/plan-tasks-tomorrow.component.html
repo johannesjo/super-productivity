@@ -1,65 +1,46 @@
-<div class="task-list-wrapper">
-  <section class="add-task-bar-wrapper">
-    <div
-      *ngIf="workContextService.estimateRemainingToday$|async as estimateTotal"
-      @expand
-      class="estimate-total"
-    >
-      <div class="label">{{T.PDS.ESTIMATE_TOTAL|translate}}</div>
-      <div class="no-wrap">
-        ~<strong class="time-val">{{estimateTotal|msToString}}</strong>
-        <mat-icon
-          style="margin-left: 2px"
-          svgIcon="estimate_remaining"
-        ></mat-icon>
-      </div>
-    </div>
+@let tomorrow = plannerService.tomorrow$ | async;
+@let leftOverTodayIds = leftOverTodayIds$ | async;
 
-    <add-task-bar [isDisableAutoFocus]="true"></add-task-bar>
+@if (tomorrow) {
+  <div class="task-list-wrapper">
+    <section class="add-task-bar-wrapper">
+      <!--    @if (workContextService.estimateRemainingToday$ | async; as estimateTotal) {-->
+      <!--      <div-->
+      <!--        @expand-->
+      <!--        class="estimate-total"-->
+      <!--      >-->
+      <!--        <div class="label">{{ T.PDS.ESTIMATE_TOTAL | translate }}</div>-->
+      <!--        <div class="no-wrap">-->
+      <!--          ~<strong class="time-val">{{ estimateTotal | msToString }}</strong>-->
+      <!--          <mat-icon-->
+      <!--            style="margin-left: 2px"-->
+      <!--            svgIcon="estimate_remaining"-->
+      <!--          ></mat-icon>-->
+      <!--        </div>-->
+      <!--      </div>-->
+      <!--    }-->
 
-    <!-- NOTE workContextService.isToday should work as we only need the initial value -->
-    <div
-      class="wrap-add-planned"
-      *ngIf="workContextService.isToday && (taskService.allPlannedForTodayNotOnToday$|async) as plannedForToday"
-    >
-      <button
-        *ngIf="plannedForToday?.length"
-        (click)="taskService.movePlannedTasksToToday(plannedForToday)"
-        class="add-scheduled"
-        color=""
-        mat-stroked-button
-        tabindex="1"
-      >
-        <mat-icon>playlist_add</mat-icon>
-        {{T.WW.ADD_SCHEDULED_FOR_TODAY|translate:{nr: plannedForToday.length} }}
-      </button>
+      <add-task-bar
+        [isDisableAutoFocus]="true"
+        [planForDay]="tomorrow.dayDate"
+      ></add-task-bar>
 
-      <ng-container
-        *ngIf="plannedForToday.length === 0 && (taskService.allPlannedForTomorrowNotOnToday$|async) as plannedForTomorrow"
-      >
-        <ng-container
-          *ngIf="(repeatableScheduledForTomorrow$|async) as repeatableScheduledForTomorrow"
+      <!-- NOTE workContextService.isToday should work as we only need the initial value -->
+      <!--    <add-scheduled-today-or-tomorrow-btn></add-scheduled-today-or-tomorrow-btn>-->
+    </section>
+
+    @if (leftOverTodayIds?.length) {
+      <div>
+        <button
+          mat-stroked-button
+          color="primary"
+          (click)="planAllTodayTomorrow()"
         >
-          <button
-            *ngIf="plannedForTomorrow.length || repeatableScheduledForTomorrow.length"
-            (click)="addAllPlannedToDayAndCreateRepeatable(plannedForTomorrow, repeatableScheduledForTomorrow)"
-            class="add-scheduled"
-            color=""
-            mat-stroked-button
-            tabindex="1"
-          >
-            <mat-icon>playlist_add</mat-icon>
-            {{T.WW.ADD_SCHEDULED_FOR_TOMORROW|translate:{ nr: plannedForTomorrow.length +
-            repeatableScheduledForTomorrow.length } }}
-          </button>
-        </ng-container>
-      </ng-container>
-    </div>
-  </section>
-
-  <task-list
-    [tasks]="workContextService.undoneTasks$|async"
-    listId="PARENT"
-    listModelId="UNDONE"
-  ></task-list>
-</div>
+          <mat-icon>wb_sunny</mat-icon>
+          {{ T.PDS.ADD_TASKS_FROM_TODAY | translate }} ({{ leftOverTodayIds?.length }})
+        </button>
+      </div>
+    }
+    <planner-day [day]="tomorrow"></planner-day>
+  </div>
+}

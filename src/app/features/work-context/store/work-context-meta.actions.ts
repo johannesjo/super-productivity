@@ -33,3 +33,23 @@ export const moveTaskDownInTodayList = createAction(
     workContextType: WorkContextType;
   }>(),
 );
+
+export const moveTaskToTopInTodayList = createAction(
+  '[WorkContextMeta] Move Task To Top in Today',
+  props<{
+    taskId: string;
+    workContextId: string;
+    doneTaskIds: string[];
+    workContextType: WorkContextType;
+  }>(),
+);
+
+export const moveTaskToBottomInTodayList = createAction(
+  '[WorkContextMeta] Move Task To Bottom in Today',
+  props<{
+    taskId: string;
+    workContextId: string;
+    doneTaskIds: string[];
+    workContextType: WorkContextType;
+  }>(),
+);

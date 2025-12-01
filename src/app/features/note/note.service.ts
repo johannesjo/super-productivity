@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Note, NoteState } from './note.model';
 import { select, Store } from '@ngrx/store';
@@ -15,26 +15,25 @@ import {
   selectNoteById,
   selectNoteFeatureState,
 } from './store/note.reducer';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { take } from 'rxjs/operators';
 import { createFromDrop } from '../../core/drop-paste-input/drop-paste-input';
 import { isImageUrl, isImageUrlSimple } from '../../util/is-image-url';
 import { DropPasteInput } from '../../core/drop-paste-input/drop-paste.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { isInputElement } from '../../util/dom-element';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NoteService {
+  private _store$ = inject<Store<any>>(Store);
+  private _pfapiService = inject(PfapiService);
+  private _workContextService = inject(WorkContextService);
+
   notes$: Observable<Note[]> = this._store$.pipe(select(selectAllNotes));
   state$: Observable<NoteState> = this._store$.select(selectNoteFeatureState);
-
-  constructor(
-    private _store$: Store<any>,
-    private _persistenceService: PersistenceService,
-    private _workContextService: WorkContextService,
-  ) {}
 
   getByIdOnce$(id: string): Observable<Note> {
     return this._store$.pipe(select(selectNoteById, { id }), take(1));
@@ -113,15 +112,11 @@ export class NoteService {
 
   private async _handleInput(drop: DropPasteInput, ev: Event): Promise<void> {
     // properly not intentional so we leave
-    if (!drop || !drop.path || drop.type === 'FILE') {
-      return;
-    }
+    if (!drop || !drop.path || drop.type === 'FILE') return;
 
-    // don't intervene with text inputs
+    // Skip handling inside input elements
     const target = ev.target as HTMLElement;
-    if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA') {
-      return;
-    }
+    if (isInputElement(target)) return;
 
     const note: Partial<Note> = {
       content: drop.path,

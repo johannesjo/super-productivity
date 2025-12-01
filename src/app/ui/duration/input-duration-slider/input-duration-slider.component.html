@@ -1,11 +1,12 @@
 <div class="circle bg-primary">
   <div class="inner-circle"></div>
   <div class="dots">
-    <div
-      *ngFor="let hour of dots; trackBy: trackByIndex"
-      @dot
-      class="dot bg-100"
-    ></div>
+    @for (hour of dots(); track $index) {
+      <div
+        @dot
+        class="dot bg-100"
+      ></div>
+    }
   </div>
   <div
     #circleEl
@@ -14,16 +15,17 @@
     <div class="handle"></div>
   </div>
   <div class="value-wrapper">
-    <label
-      *ngIf="label"
-      [for]="uid"
-      [innerHtml]="label"
-    ></label>
+    @if (label()) {
+      <label
+        [for]="uid"
+        [innerHtml]="label()"
+      ></label>
+    }
     <input
       (ngModelChange)="onInputChange($event)"
       [id]="uid"
-      [ngModel]="_model"
-      [placeholder]="T.G.CLICK_TO_EDIT|translate"
+      [ngModel]="_model()"
+      [placeholder]="T.G.EXAMPLE_VAL | translate"
       class="value"
       inputDuration="optional"
       spellcheck="false"

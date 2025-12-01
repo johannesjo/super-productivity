@@ -11,13 +11,15 @@ import { initialObstructionState } from '../../features/metric/obstruction/store
 import { AppBaseData } from './sync.model';
 import { initialNoteState } from '../../features/note/store/note.reducer';
 import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
-import { MODEL_VERSION } from '../../core/model-version';
-import { MODEL_VERSION_KEY } from '../../app.constants';
+import { plannerInitialState } from '../../features/planner/store/planner.reducer';
+import { GlobalConfigState } from '../../features/config/global-config.model';
+import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
+import { initialBoardsState } from '../../features/boards/store/boards.reducer';
+import { menuTreeInitialState } from '../../features/menu-tree/store/menu-tree.reducer';
 
 export const SYNC_INITIAL_SYNC_TRIGGER = 'INITIAL_SYNC_TRIGGER';
 export const SYNC_DEFAULT_AUDIT_TIME = 10000;
 
-export const SYNC_ACTIVITY_AFTER_SOMETHING_ELSE_THROTTLE_TIME = 1000 * 60;
 export const SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME = 1000 * 60 * 5;
 
 export const SYNC_BEFORE_CLOSE_ID = 'SYNC_BEFORE_CLOSE_ID';
@@ -25,31 +27,50 @@ export const SYNC_MIN_INTERVAL = 5000;
 
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   project: initialProjectState,
+  menuTree: menuTreeInitialState,
   archivedProjects: {},
   globalConfig: initialGlobalConfigState,
   reminders: [],
+  planner: plannerInitialState,
+  issueProvider: issueProviderInitialState,
+  boards: initialBoardsState,
 
   task: initialTaskState,
   tag: initialTagState,
   simpleCounter: initialSimpleCounterState,
   taskArchive: {
     ...(createEmptyEntity() as TaskArchive),
-    [MODEL_VERSION_KEY]: MODEL_VERSION.TASK_ARCHIVE,
   },
   taskRepeatCfg: initialTaskRepeatCfgState,
   note: initialNoteState,
 
   // metric
   metric: initialMetricState,
+
+  // TODO remove completely
   improvement: initialImprovementState,
+  // TODO remove completely
   obstruction: initialObstructionState,
 };
 
-export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: string[][] = [
-  ['misc', 'isDarkMode'],
-  ['sync', 'localFileSync', 'syncFilePath'],
-  ['sync', 'webDav', 'password'],
-  ['sync', 'dropboxSync', 'accessToken'],
-  // NOTE: googleDriveSync uses localStorage SUP_GOOGLE_SESSION instead
-  // ['sync', 'googleDriveSync', 'authCode'],
+// NOTE: they should never be changed
+export const PREPEND_STR_ENCRYPTION = 'SP_ENC_';
+export const PREPEND_STR_COMPRESSION = 'SP_CPR_';
+
+type GlobalConfigKey = keyof GlobalConfigState;
+type MiscKey = keyof GlobalConfigState['misc'];
+type SyncKey = keyof GlobalConfigState['sync'];
+type LocalFileSyncKey = keyof GlobalConfigState['sync']['localFileSync'];
+type WebDavKey = keyof GlobalConfigState['sync']['webDav'];
+
+type ConfigPath =
+  | [GlobalConfigKey, MiscKey]
+  | [GlobalConfigKey, SyncKey, LocalFileSyncKey | WebDavKey];
+
+export const GLOBAL_CONFIG_LOCAL_ONLY_FIELDS: ConfigPath[] = [
+  // ['misc', 'darkMode'],
+  // ['sync', 'localFileSync'],
+  // ['sync', 'webDav', 'password'],
+  // ['sync', 'localFileSync', 'syncFolderPath'],
+  // ['sync', 'webDav', 'password'],
 ];

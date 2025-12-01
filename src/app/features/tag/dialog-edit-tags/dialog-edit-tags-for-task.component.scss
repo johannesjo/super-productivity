@@ -1,12 +1,17 @@
+@use '../../../../styles/_globals.scss' as *;
+
 :host {
   display: flex;
   flex-direction: column;
   justify-content: stretch;
   align-items: stretch;
   max-width: 600px;
-  width: 70vw;
 
-  :host-context([dir=rtl]) {
+  @include mq(xs) {
+    width: 70vw;
+  }
+
+  :host-context([dir='rtl']) {
     direction: rtl;
   }
 }

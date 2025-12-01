@@ -1,63 +1,80 @@
-import { Injectable } from '@angular/core';
-import { from, Observable, of } from 'rxjs';
-import { filter, shareReplay, switchMap, take } from 'rxjs/operators';
-import { ProjectService } from '../../features/project/project.service';
-import { WorkContextService } from '../../features/work-context/work-context.service';
+import { inject, Injectable } from '@angular/core';
+import { from, Observable } from 'rxjs';
+import { mapTo, take } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
 import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.actions';
-import { PersistenceService } from '../persistence/persistence.service';
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
-import { isValidAppData } from '../../imex/sync/is-valid-app-data.util';
 import { DataRepairService } from '../data-repair/data-repair.service';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { CROSS_MODEL_VERSION } from '../../pfapi/pfapi-config';
+import { DataInitStateService } from './data-init-state.service';
+import { UserProfileService } from '../../features/user-profile/user-profile.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {
-  isAllDataLoadedInitially$: Observable<boolean> = from(this.reInit()).pipe(
-    switchMap(() => this._workContextService.isActiveWorkContextProject$),
-    switchMap((isProject) =>
-      isProject
-        ? // NOTE: this probably won't work some of the time
-          this._projectService.isRelatedDataLoadedForCurrentProject$
-        : of(true),
-    ),
-    filter((isLoaded) => isLoaded),
-    take(1),
-    // only ever load once
-    shareReplay(1),
+  private _pfapiService = inject(PfapiService);
+  private _store$ = inject<Store<any>>(Store);
+  private _dataRepairService = inject(DataRepairService);
+  private _dataInitStateService = inject(DataInitStateService);
+  private _userProfileService = inject(UserProfileService);
+
+  private _isAllDataLoadedInitially$: Observable<boolean> = from(this.reInit()).pipe(
+    mapTo(true),
   );
 
-  constructor(
-    private _persistenceService: PersistenceService,
-    private _projectService: ProjectService,
-    private _workContextService: WorkContextService,
-    private _store$: Store<any>,
-    private _dataRepairService: DataRepairService,
-  ) {
+  constructor() {
     // TODO better construction than this
-    this.isAllDataLoadedInitially$.pipe(take(1)).subscribe(() => {
+    this._isAllDataLoadedInitially$.pipe(take(1)).subscribe((v) => {
       // here because to avoid circular dependencies
       this._store$.dispatch(allDataWasLoaded());
+      this._dataInitStateService._neverUpdateOutsideDataInitService$.next(v);
     });
   }
 
   // NOTE: it's important to remember that this doesn't mean that no changes are occurring any more
   // because the data load is triggered, but not necessarily already reflected inside the store
-  async reInit(isOmitTokens: boolean = false): Promise<void> {
-    const appDataComplete = await this._persistenceService.loadComplete(true);
-    const isValid = isValidAppData(appDataComplete);
-    if (isValid) {
-      this._store$.dispatch(loadAllData({ appDataComplete, isOmitTokens }));
+  async reInit(): Promise<void> {
+    // localStorage check
+    // This check happens before ANY profile initialization code runs
+    const isProfilesEnabled =
+      typeof localStorage !== 'undefined' &&
+      localStorage.getItem('sp_user_profiles_enabled') === 'true';
+
+    if (isProfilesEnabled) {
+      // Only initialize profile system if explicitly enabled
+      await this._userProfileService.initialize();
+    }
+
+    await this._pfapiService.pf.wasDataMigratedInitiallyPromise;
+    const appDataComplete = await this._pfapiService.pf.getAllSyncModelData(true);
+    const validationResult = this._pfapiService.pf.validate(appDataComplete);
+    if (validationResult.success) {
+      this._store$.dispatch(loadAllData({ appDataComplete }));
     } else {
+      // DATA REPAIR CASE
+      // ----------------
       if (this._dataRepairService.isRepairPossibleAndConfirmed(appDataComplete)) {
-        const fixedData = this._dataRepairService.repairData(appDataComplete);
+        const fixedData = this._pfapiService.pf.repairCompleteData(
+          appDataComplete,
+          validationResult.errors,
+        );
         this._store$.dispatch(
           loadAllData({
             appDataComplete: fixedData,
-            isOmitTokens,
           }),
         );
-        await this._persistenceService.importComplete(fixedData);
+        const localCrossModelVersion =
+          (await this._pfapiService.pf.metaModel.load()).crossModelVersion ||
+          CROSS_MODEL_VERSION;
+
+        await this._pfapiService.pf.importAllSycModelData({
+          data: fixedData,
+          crossModelVersion: localCrossModelVersion,
+          // since we already did try
+          isAttemptRepair: false,
+        });
       }
+      // TODO handle start fresh case
     }
   }
 }

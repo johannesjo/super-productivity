@@ -1,29 +1,22 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { SnackService } from '../../../../core/snack/snack.service';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  HttpHeaders,
-  HttpParams,
-  HttpRequest,
-} from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams, HttpRequest } from '@angular/common/http';
 import { GiteaCfg } from './gitea.model';
 import { catchError, filter, map, switchMap } from 'rxjs/operators';
-import { Observable, ObservableInput, throwError } from 'rxjs';
+import { Observable } from 'rxjs';
 import { throwHandledError } from '../../../../util/throw-handled-error';
-import { HANDLED_ERROR_PROP_STR } from '../../../../app.constants';
 import { T } from '../../../../t.const';
-import { ISSUE_PROVIDER_HUMANIZED, GITEA_TYPE } from '../../issue.const';
+import { GITEA_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../issue.const';
 import {
   GiteaIssue,
   GiteaIssueStateOptions,
   GiteaRepositoryReduced,
-} from './gitea-issue/gitea-issue.model';
+} from './gitea-issue.model';
 import {
-  mapGiteaIssueToSearchResult,
-  mapGiteaIssueIdToIssueNumber,
   isIssueFromProject,
-} from './gitea-issue/gitea-issue-map.util';
+  mapGiteaIssueIdToIssueNumber,
+  mapGiteaIssueToSearchResult,
+} from './gitea-issue-map.util';
 import {
   GITEA_API_SUBPATH_REPO,
   GITEA_API_SUBPATH_USER,
@@ -33,12 +26,14 @@ import {
 } from './gitea.const';
 import { SearchResultItem } from '../../issue.model';
 import { GiteaUser } from './gitea-api-responses';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 
 @Injectable({
   providedIn: 'root',
 })
 export class GiteaApiService {
-  constructor(private _snackService: SnackService, private _http: HttpClient) {}
+  private _snackService = inject(SnackService);
+  private _http = inject(HttpClient);
 
   searchIssueForRepo$(searchText: string, cfg: GiteaCfg): Observable<SearchResultItem[]> {
     return this.getCurrentRepositoryFor$(cfg).pipe(
@@ -180,10 +175,12 @@ export class GiteaApiService {
     ];
     const req = new HttpRequest(p.method, p.url, ...allArgs);
     return this._http.request(req).pipe(
-      // TODO remove type: 0 @see https://brianflove.com/2018/09/03/angular-http-client-observe-response/
+      // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
       filter((res) => !(res === Object(res) && res.type === 0)),
       map((res: any) => (res && res.body ? res.body : res)),
-      catchError(this._handleRequestError$.bind(this)),
+      catchError((err) =>
+        handleIssueProviderHttpError$(GITEA_TYPE, this._snackService, err),
+      ),
     );
   }
 
@@ -208,44 +205,6 @@ export class GiteaApiService {
       !!cfg.repoFullname &&
       cfg.repoFullname.length > 0
     );
-  }
-
-  private _handleRequestError$(
-    error: HttpErrorResponse,
-    caught: Observable<unknown>,
-  ): ObservableInput<unknown> {
-    if (error.error instanceof ErrorEvent) {
-      // A client-side or network error occurred. Handle it accordingly.
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.F.ISSUE.S.ERR_NETWORK,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[GITEA_TYPE],
-        },
-      });
-    } else if (error.error && error.error.message) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: ISSUE_PROVIDER_HUMANIZED[GITEA_TYPE] + ': ' + error.error.message,
-      });
-    } else {
-      // The backend returned an unsuccessful response code.
-      this._snackService.open({
-        type: 'ERROR',
-        translateParams: {
-          errorMsg:
-            (error.error && (error.error.name || error.error.statusText)) ||
-            error.toString(),
-          statusCode: error.status,
-        },
-        msg: T.F.OPEN_PROJECT.S.ERR_UNKNOWN,
-      });
-    }
-    if (error && error.message) {
-      return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitea: ' + error.message });
-    }
-
-    return throwError({ [HANDLED_ERROR_PROP_STR]: 'Gitea: Api request failed.' });
   }
 }
 

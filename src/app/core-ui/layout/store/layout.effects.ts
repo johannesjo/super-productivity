@@ -1,10 +1,11 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
-import { hideNotes, toggleShowNotes } from './layout.actions';
-import { filter, mapTo, withLatestFrom } from 'rxjs/operators';
+import { hideNonTaskSidePanelContent } from './layout.actions';
+import { filter, mapTo } from 'rxjs/operators';
 import { setSelectedTask } from '../../../features/tasks/store/task.actions';
+import { TaskDetailTargetPanel } from '../../../features/tasks/task.model';
 import { LayoutService } from '../layout.service';
-import { NavigationEnd, Router } from '@angular/router';
+import { NavigationStart, NavigationEnd, Router } from '@angular/router';
 
 // what should happen
 // task selected => open panel
@@ -16,34 +17,36 @@ import { NavigationEnd, Router } from '@angular/router';
 
 @Injectable()
 export class LayoutEffects {
+  private actions$ = inject(Actions);
+  private layoutService = inject(LayoutService);
+  private router = inject(Router);
+
   hideNotesWhenTaskIsSelected$ = createEffect(() =>
     this.actions$.pipe(
       ofType(setSelectedTask),
-      filter(({ id }) => id !== null),
-      mapTo(hideNotes()),
+      filter(({ id, taskDetailTargetPanel, isSkipToggle }) => {
+        // Do not hide side content when opening modal (DONT_OPEN_PANEL) or when explicitly skipped
+        if (id === null) return false;
+        if (isSkipToggle) return false;
+        return taskDetailTargetPanel !== TaskDetailTargetPanel.DONT_OPEN_PANEL;
+      }),
+      mapTo(hideNonTaskSidePanelContent()),
     ),
   );
 
   hideNotesNavigatingToDailySummary$ = createEffect(() =>
     this.router.events.pipe(
-      filter((event: any) => event instanceof NavigationEnd),
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
       filter((event) => !!event.url.match(/(daily-summary)$/)),
-      mapTo(hideNotes()),
+      mapTo(hideNonTaskSidePanelContent()),
     ),
   );
 
-  hideSelectedTaskWhenNoteShowIsToggled$ = createEffect(() =>
-    this.actions$.pipe(
-      ofType(toggleShowNotes),
-      withLatestFrom(this.layoutService.isShowNotes$),
-      filter(([, isShowNotes]) => isShowNotes),
+  // Deselect task on navigation start - parent task button will re-select after navigation
+  unselectTaskOnNavigation$ = createEffect(() =>
+    this.router.events.pipe(
+      filter((event): event is NavigationStart => event instanceof NavigationStart),
       mapTo(setSelectedTask({ id: null })),
     ),
   );
-
-  constructor(
-    private actions$: Actions,
-    private layoutService: LayoutService,
-    private router: Router,
-  ) {}
 }

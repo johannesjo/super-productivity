@@ -1,3 +1,14 @@
 node_modules
 .git
 .gitignore
+.angular
+dist
+app
+release
+backup
+*.log
+.idea
+.vscode
+coverage
+e2e-results
+tmp

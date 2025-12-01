@@ -1,0 +1,7 @@
+
+### Bug Fixes
+
+* handle web view compatability check in android rather than in index.html
+### Features
+
+* improve webview fallback experience

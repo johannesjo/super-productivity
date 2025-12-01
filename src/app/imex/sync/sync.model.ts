@@ -6,24 +6,25 @@ import { ImprovementState } from '../../features/metric/improvement/improvement.
 import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { TagState } from '../../features/tag/tag.model';
-import { TaskAttachment } from '../../features/tasks/task-attachment/task-attachment.model';
-import { EntityState } from '@ngrx/entity';
 import { SimpleCounterState } from '../../features/simple-counter/simple-counter.model';
 import { ProjectArchive } from '../../features/project/project-archive.model';
-import { SyncProvider } from './sync-provider.model';
+import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { ProjectState } from '../../features/project/project.model';
-import { BookmarkState } from '../../features/bookmark/bookmark.model';
 import { NoteState } from '../../features/note/note.model';
+import { PlannerState } from '../../features/planner/store/planner.reducer';
+import { IssueProviderState } from '../../features/issue/issue.model';
+import { BoardsState } from '../../features/boards/store/boards.reducer';
+import { MenuTreeState } from '../../features/menu-tree/store/menu-tree.model';
 
-/** @deprecated */
-export type TaskAttachmentState = EntityState<TaskAttachment>;
-
-export interface AppBaseData {
+export interface AppBaseWithoutLastSyncModelChange {
   project: ProjectState;
-  archivedProjects: ProjectArchive;
+  menuTree: MenuTreeState;
   globalConfig: GlobalConfigState;
   reminders: Reminder[];
+  planner: PlannerState;
+  boards: BoardsState;
   note: NoteState;
+  issueProvider: IssueProviderState;
 
   // Metric models
   metric: MetricState;
@@ -33,19 +34,41 @@ export interface AppBaseData {
   task: TaskState;
   tag: TagState;
   simpleCounter: SimpleCounterState;
-  taskArchive: TaskArchive;
   taskRepeatCfg: TaskRepeatCfgState;
 }
+
+export interface AppMainFileNoRevsData extends AppBaseWithoutLastSyncModelChange {
+  lastLocalSyncModelChange: number | null;
+}
+
+export interface AppMainFileData extends AppMainFileNoRevsData {
+  archiveRev: string;
+  archiveLastUpdate: number;
+}
+
+export interface AppArchiveFileData {
+  taskArchive: TaskArchive;
+  archivedProjects: ProjectArchive;
+}
+
+export interface AppBaseData
+  extends AppBaseWithoutLastSyncModelChange,
+    AppArchiveFileData {}
 
 export interface LocalSyncMetaForProvider {
   lastSync: number;
   rev: string | null;
+  revTaskArchive: string | null;
+  // currently dropbox only
+  accessToken?: string;
+  refreshToken?: string;
+  _tokenExpiresAt?: number;
 }
 
 export interface LocalSyncMetaModel {
-  [SyncProvider.WebDAV]: LocalSyncMetaForProvider;
-  [SyncProvider.Dropbox]: LocalSyncMetaForProvider;
-  [SyncProvider.LocalFile]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.WebDAV]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.Dropbox]: LocalSyncMetaForProvider;
+  [LegacySyncProvider.LocalFile]: LocalSyncMetaForProvider;
 }
 
 export type AppBaseDataEntityLikeStates =
@@ -55,15 +78,9 @@ export type AppBaseDataEntityLikeStates =
   | TaskArchive
   | SimpleCounterState;
 
-// NOTE: [key:string] always refers to projectId
-export interface AppDataForProjects {
-  bookmark: {
-    [key: string]: BookmarkState;
-  };
-}
-
-export interface AppDataComplete extends AppBaseData, AppDataForProjects {
+export interface AppDataCompleteLegacy extends AppBaseData {
   lastLocalSyncModelChange: number | null;
+  lastArchiveUpdate: number | null;
 }
 
 export type DialogConflictResolutionResult = 'USE_LOCAL' | 'USE_REMOTE' | false;
@@ -72,7 +89,7 @@ export type DialogPermissionResolutionResult = 'DISABLED_SYNC' | 'GRANTED_PERMIS
 
 export type SyncGetRevResult = 'NO_REMOTE_DATA' | 'HANDLED_ERROR' | Error;
 
-export type SyncResult =
+export type SyncResultLegacy =
   | 'SUCCESS'
   | 'NO_UPDATE_REQUIRED'
   | 'USER_ABORT'

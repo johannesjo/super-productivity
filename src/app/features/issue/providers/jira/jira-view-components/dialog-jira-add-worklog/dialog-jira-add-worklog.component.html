@@ -1,5 +1,5 @@
 <form
-  (submit)="submitWorklog()"
+  (submit)="$event.preventDefault(); submitWorklog()"
   class="mat-body"
   name="time-estimate-form"
 >
@@ -8,21 +8,22 @@
       class="dialog-header-icon"
       svgIcon="jira"
     ></mat-icon>
-    <span>{{T.F.JIRA.DIALOG_WORKLOG.TITLE|translate}}</span>
+    <span>{{ T.F.JIRA.DIALOG_WORKLOG.TITLE | translate }}</span>
   </h1>
 
   <mat-dialog-content>
     <p>
-      {{T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR|translate}}
-      <strong>{{issue.key}} {{issue.summary}}</strong>.
+      {{ T.F.JIRA.DIALOG_WORKLOG.SUBMIT_WORKLOG_FOR | translate }}
+      <strong>{{ issue.key }} {{ issue.summary }}</strong
+      >.
     </p>
     <p>
-      {{T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED|translate}}
-      <strong>{{(timeLogged)|msToString}}</strong>
+      {{ T.F.JIRA.DIALOG_WORKLOG.CURRENTLY_LOGGED | translate }}
+      <strong>{{ timeLogged | msToString }}</strong>
     </p>
 
     <div class="form-wrapper">
-      <mat-label>{{T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT|translate}}</mat-label>
+      <mat-label>{{ T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT | translate }}</mat-label>
       <mat-form-field>
         <input
           [(ngModel)]="timeSpent"
@@ -37,7 +38,7 @@
           class="suffix-wrapper"
           matSuffix
           [matMenuTriggerFor]="contextMenu"
-          [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP|translate"
+          [matTooltip]="T.F.JIRA.DIALOG_WORKLOG.TIME_SPENT_TOOLTIP | translate"
         >
           <button
             mat-icon-button
@@ -56,28 +57,32 @@
 
       <mat-menu #contextMenu="matMenu">
         <ng-template matMenuContent>
-          <button
-            *ngFor="let opt of defaultTimeOptions"
-            mat-menu-item
-            type="button"
-            (click)="fill(opt.value)"
-          >
-            {{opt.label|translate}} ({{(getTimeToLogForMode(opt.value)|msToString)}})
-          </button>
+          @for (opt of defaultTimeOptions; track opt) {
+            <button
+              mat-menu-item
+              type="button"
+              (click)="fill(opt.value)"
+            >
+              {{ opt.label | translate }} ({{
+                getTimeToLogForMode(opt.value) | msToString
+              }})
+            </button>
+          }
         </ng-template>
       </mat-menu>
 
-      <mat-checkbox
-        *ngIf="defaultTimeCheckboxContent"
-        [@expandFade]
-        [checked]="defaultTimeCheckboxContent.isChecked"
-        (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
-        style="margin-bottom: 20px"
-        >{{defaultTimeCheckboxContent.label|translate}}
-      </mat-checkbox>
+      @if (defaultTimeCheckboxContent) {
+        <mat-checkbox
+          [@expandFade]
+          [checked]="defaultTimeCheckboxContent.isChecked"
+          (change)="defaultTimeCheckboxContent.isChecked = $event.checked"
+          style="margin-bottom: 20px"
+          >{{ defaultTimeCheckboxContent.label | translate }}
+        </mat-checkbox>
+      }
 
       <mat-form-field>
-        <mat-label>{{T.F.JIRA.DIALOG_WORKLOG.STARTED|translate}}</mat-label>
+        <mat-label>{{ T.F.JIRA.DIALOG_WORKLOG.STARTED | translate }}</mat-label>
         <input
           [(ngModel)]="started"
           matInput
@@ -85,7 +90,7 @@
           required
           type="datetime-local"
         />
-        <mat-error>{{T.F.JIRA.DIALOG_WORKLOG.INVALID_DATE|translate}}</mat-error>
+        <mat-error>{{ T.F.JIRA.DIALOG_WORKLOG.INVALID_DATE | translate }}</mat-error>
       </mat-form-field>
       <mat-form-field>
         <mat-label>Comment</mat-label>
@@ -110,7 +115,7 @@
         mat-button
         type="button"
       >
-        {{T.G.CANCEL|translate}}
+        {{ T.G.CANCEL | translate }}
       </button>
       <button
         class="btn btn-primary submit-button"
@@ -119,7 +124,7 @@
         type="submit"
       >
         <mat-icon>save</mat-icon>
-        {{T.F.JIRA.DIALOG_WORKLOG.SAVE_WORKLOG|translate}}
+        {{ T.F.JIRA.DIALOG_WORKLOG.SAVE_WORKLOG | translate }}
       </button>
     </div>
   </mat-dialog-actions>

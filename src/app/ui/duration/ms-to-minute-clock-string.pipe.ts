@@ -1,30 +1,20 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import * as moment from 'moment';
 
-export const msToMinuteClockString = (value: any): string => {
-  const md = moment.duration(value);
-  let hours = 0;
-  let minutes = 0;
-  if (+md.days() > 0) {
-    hours = md.days() * 24;
-  }
-  if (+md.hours() > 0) {
-    hours += md.hours();
-  }
+export const msToMinuteClockString = (value: number | null | undefined): string => {
+  const totalMs = Number(value) || 0;
+  const totalSeconds = Math.floor(Math.abs(totalMs) / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const seconds = totalSeconds % 60;
 
-  minutes = hours * 60;
-  if (+md.minutes() > 0) {
-    minutes += +md.minutes();
-  }
+  const sign = totalMs < 0 ? '-' : '';
 
-  const parsed = minutes + ':' + ('00' + +md.seconds()).slice(-2);
+  const parsed = sign + totalMinutes + ':' + ('00' + seconds).slice(-2);
 
   return parsed.trim();
 };
 
-@Pipe({
-  name: 'msToMinuteClockString',
-})
+@Pipe({ name: 'msToMinuteClockString' })
 export class MsToMinuteClockStringPipe implements PipeTransform {
-  transform: (value: any, ...args: any[]) => any = msToMinuteClockString;
+  transform: (value: number | null | undefined, ...args: unknown[]) => string =
+    msToMinuteClockString;
 }

@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import {
   concatMap,
@@ -7,7 +7,6 @@ import {
   exhaustMap,
   filter,
   map,
-  mapTo,
   pairwise,
   shareReplay,
   switchMap,
@@ -15,12 +14,10 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { SyncTriggerService } from './sync-trigger.service';
 import {
   SYNC_BEFORE_CLOSE_ID,
   SYNC_INITIAL_SYNC_TRIGGER,
-  SYNC_MIN_INTERVAL,
 } from '../../imex/sync/sync.const';
 import { combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
 import { isOnline$ } from '../../util/is-online';
@@ -30,18 +27,29 @@ import { ExecBeforeCloseService } from '../../core/electron/exec-before-close.se
 import { IS_ELECTRON } from '../../app.constants';
 import { TaskService } from '../../features/tasks/task.service';
 import { SimpleCounterService } from '../../features/simple-counter/simple-counter.service';
-import { SyncProviderService } from './sync-provider.service';
+import { SyncWrapperService } from './sync-wrapper.service';
 import { getSyncErrorStr } from './get-sync-error-str';
 import { InitialPwaUpdateCheckService } from '../../core/initial-pwa-update-check.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { SyncLog } from '../../core/log';
 
 @Injectable()
 export class SyncEffects {
-  syncBeforeQuit$: any = createEffect(
+  private _syncWrapperService = inject(SyncWrapperService);
+  private _syncTriggerService = inject(SyncTriggerService);
+  private _snackService = inject(SnackService);
+  private _taskService = inject(TaskService);
+  private _simpleCounterService = inject(SimpleCounterService);
+  private _dataInitStateService = inject(DataInitStateService);
+  private _execBeforeCloseService = inject(ExecBeforeCloseService);
+  private readonly _initialPwaUpdateCheckService = inject(InitialPwaUpdateCheckService);
+
+  syncBeforeQuit$ = createEffect(
     () =>
       !IS_ELECTRON
         ? EMPTY
-        : this._dataInitService.isAllDataLoadedInitially$.pipe(
-            concatMap(() => this._syncProviderService.isEnabledAndReady$),
+        : this._dataInitStateService.isAllDataLoadedInitially$.pipe(
+            concatMap(() => this._syncWrapperService.isEnabledAndReady$),
             distinctUntilChanged(),
             tap((isEnabled) =>
               isEnabled
@@ -59,13 +67,13 @@ export class SyncEffects {
             // minimally hacky delay to wait for inMemoryDatabase update...
             delay(100),
             switchMap(() =>
-              this._syncProviderService
+              this._syncWrapperService
                 .sync()
                 .then(() => {
                   this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
                 })
                 .catch((e: unknown) => {
-                  console.error(e);
+                  SyncLog.err(e);
                   this._snackService.open({
                     msg: T.F.DROPBOX.S.SYNC_ERROR,
                     type: 'ERROR',
@@ -80,50 +88,40 @@ export class SyncEffects {
   );
   // private _wasJustEnabled$: Observable<boolean> = of(false);
   private _wasJustEnabled$: Observable<boolean> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       // NOTE: it is important that we don't use distinct until changed here
-      switchMap(() => this._syncProviderService.isEnabledAndReady$),
+      switchMap(() => this._syncWrapperService.isEnabledAndReady$),
       pairwise(),
       map(([a, b]) => !a && !!b),
       filter((wasJustEnabled) => wasJustEnabled),
       shareReplay(),
     );
 
-  triggerSync$: any = createEffect(
+  triggerSync$ = createEffect(
     () =>
-      this._dataInitService.isAllDataLoadedInitially$.pipe(
+      this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         switchMap(() =>
           merge(
             // dynamic
             combineLatest([
-              this._syncProviderService.isEnabledAndReady$,
-              this._syncProviderService.syncInterval$,
+              this._syncWrapperService.isEnabledAndReady$,
+              this._syncWrapperService.syncInterval$,
             ]).pipe(
               switchMap(([isEnabledAndReady, syncInterval]) =>
-                isEnabledAndReady
-                  ? this._syncTriggerService.getSyncTrigger$(
-                      syncInterval,
-                      SYNC_MIN_INTERVAL,
-                    )
+                isEnabledAndReady && syncInterval
+                  ? this._syncTriggerService.getSyncTrigger$(syncInterval)
                   : EMPTY,
               ),
             ),
 
             // initial after starting app
             this._initialPwaUpdateCheckService.afterInitialUpdateCheck$.pipe(
-              concatMap(() => this._syncProviderService.isEnabledAndReady$),
+              concatMap(() => this._syncWrapperService.isEnabledAndReady$),
               take(1),
-              withLatestFrom(this._syncProviderService.isEnabled$),
-              switchMap(([isEnabledAndReady, isEnabled]) => {
+              switchMap((isEnabledAndReady) => {
                 if (isEnabledAndReady) {
                   return of(SYNC_INITIAL_SYNC_TRIGGER);
                 } else {
-                  if (isEnabled) {
-                    this._snackService.open({
-                      msg: T.F.SYNC.S.INITIAL_SYNC_ERROR,
-                      type: 'ERROR',
-                    });
-                  }
                   this._syncTriggerService.setInitialSyncDone(true);
                   return EMPTY;
                 }
@@ -131,10 +129,11 @@ export class SyncEffects {
             ),
 
             // initial after enabling it,
-            this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
+            // TODO maybe re-enable
+            // this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
           ),
         ),
-        tap((x) => console.log('sync(effect).....', x)),
+        tap((x) => SyncLog.log('sync(effect).....', x)),
         withLatestFrom(isOnline$),
         // don't run multiple after each other when dialog is open
         exhaustMap(([trigger, isOnline]) => {
@@ -146,7 +145,7 @@ export class SyncEffects {
             // we need to return something
             return of(null);
           }
-          return this._syncProviderService
+          return this._syncWrapperService
             .sync()
             .then(() => {
               if (trigger === SYNC_INITIAL_SYNC_TRIGGER) {
@@ -167,15 +166,4 @@ export class SyncEffects {
       ),
     { dispatch: false },
   );
-
-  constructor(
-    private _syncProviderService: SyncProviderService,
-    private _syncTriggerService: SyncTriggerService,
-    private _snackService: SnackService,
-    private _taskService: TaskService,
-    private _simpleCounterService: SimpleCounterService,
-    private _dataInitService: DataInitService,
-    private _execBeforeCloseService: ExecBeforeCloseService,
-    private readonly _initialPwaUpdateCheckService: InitialPwaUpdateCheckService,
-  ) {}
 }

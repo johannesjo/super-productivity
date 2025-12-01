@@ -2,6 +2,7 @@ import { WorkContextCommon, WorkContextThemeCfg } from './work-context.model';
 import { WorklogExportSettings, WorklogGrouping } from '../worklog/worklog.model';
 import { ConfigFormSection } from '../config/global-config.model';
 import { T } from '../../t.const';
+import { FormlyFieldConfig } from '@ngx-formly/core/lib/models/fieldconfig';
 
 export const WORKLOG_EXPORT_DEFAULTS: WorklogExportSettings = {
   cols: ['DATE', 'START', 'END', 'TIME_CLOCK', 'TITLES_INCLUDING_SUB'],
@@ -18,10 +19,11 @@ export const DEFAULT_TODAY_TAG_COLOR = '#6495ED';
 
 export const WORK_CONTEXT_DEFAULT_THEME: WorkContextThemeCfg = {
   isAutoContrast: true,
-  isDisableBackgroundGradient: false,
+  isDisableBackgroundTint: false,
   primary: DEFAULT_TAG_COLOR,
   huePrimary: '500',
   accent: '#ff4081',
+  // accent: 'rgb(180,14,225)',
   hueAccent: '500',
   warn: '#e11826',
   hueWarn: '500',
@@ -34,10 +36,12 @@ export const WORK_CONTEXT_DEFAULT_COMMON: WorkContextCommon = {
     worklogExportSettings: WORKLOG_EXPORT_DEFAULTS,
   },
   theme: WORK_CONTEXT_DEFAULT_THEME,
-  workStart: {},
-  workEnd: {},
-  breakTime: {},
-  breakNr: {},
+  // breakTime: {},
+  // breakNr: {},
+  taskIds: [],
+  icon: null,
+  id: '',
+  title: '',
 };
 
 export const HUES = [
@@ -61,26 +65,23 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
     items: [
       {
         key: 'primary',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_PRIMARY,
-          type: 'color',
         },
       },
       {
         key: 'accent',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_ACCENT,
-          type: 'color',
         },
       },
       {
         key: 'warn',
-        type: 'input',
+        type: 'color',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_COLOR_WARN,
-          type: 'color',
         },
       },
       {
@@ -130,15 +131,19 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
         },
       },
       {
-        key: 'isDisableBackgroundGradient',
+        key: 'isDisableBackgroundTint',
         type: 'checkbox',
+        expressions: {
+          hide: (fCfg: FormlyFieldConfig) =>
+            fCfg.model.backgroundImageDark || fCfg.model.backgroundImageLight,
+        },
         templateOptions: {
-          label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_GRADIENT,
+          label: T.F.PROJECT.FORM_THEME.L_IS_DISABLE_BACKGROUND_TINT,
         },
       },
       {
         key: 'backgroundImageDark',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_DARK,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',
@@ -146,7 +151,7 @@ export const WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG: ConfigFormSection<WorkContex
       },
       {
         key: 'backgroundImageLight',
-        type: 'input',
+        type: 'image-input',
         templateOptions: {
           label: T.F.PROJECT.FORM_THEME.L_BACKGROUND_IMAGE_LIGHT,
           description: '* https://some/cool.jpg, file:///home/user/bg.png',

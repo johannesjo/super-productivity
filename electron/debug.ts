@@ -1,5 +1,5 @@
 'use strict';
-import { log } from 'electron-log';
+import { log } from 'electron-log/main';
 import { OpenDevToolsOptions, app, BrowserWindow } from 'electron';
 import * as localShortcut from 'electron-localshortcut';
 const isMacOS = process.platform === 'darwin';
@@ -73,7 +73,15 @@ function inspectElements(): void {
 //   }
 // };
 
-export const initDebug = (opts: any, isAddReload: boolean): void => {
+export const initDebug = (
+  opts: {
+    enabled?: boolean | null;
+    showDevTools?: boolean;
+    devToolsMode?: 'bottom' | 'left' | 'right' | 'undocked' | 'detach' | 'previous';
+    mode?: string;
+  },
+  isAddReload: boolean,
+): void => {
   opts = Object.assign(
     {
       enabled: null,
@@ -88,11 +96,21 @@ export const initDebug = (opts: any, isAddReload: boolean): void => {
     return;
   }
 
-  if (opts.devToolsMode !== 'previous') {
-    devToolsOptions.mode = opts.devToolsMode;
+  if (opts.devToolsMode !== 'previous' && opts.devToolsMode) {
+    devToolsOptions.mode = opts.devToolsMode as
+      | 'bottom'
+      | 'left'
+      | 'right'
+      | 'undocked'
+      | 'detach';
   }
 
   app.on('browser-window-created', (event, win) => {
+    // Skip dev tools for overlay window
+    if (win.title === 'Super Productivity Overlay') {
+      return;
+    }
+
     if (opts.showDevTools) {
       win.webContents.once('devtools-opened', () => {
         // Workaround for https://github.com/electron/electron/issues/13095

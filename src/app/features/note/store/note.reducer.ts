@@ -17,15 +17,12 @@ import {
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { devError } from '../../../util/dev-error';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { MODEL_VERSION_KEY } from '../../../app.constants';
-import { MODEL_VERSION } from '../../../core/model-version';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 export const adapter: EntityAdapter<Note> = createEntityAdapter<Note>();
 
 export const initialNoteState: NoteState = adapter.getInitialState({
-  ids: [],
   todayOrder: [],
-  [MODEL_VERSION_KEY]: MODEL_VERSION.NOTE,
 });
 
 export const { selectIds, selectEntities, selectAll, selectTotal } =
@@ -71,11 +68,19 @@ const _reducer = createReducer<NoteState>(
     appDataComplete.note ? appDataComplete.note : state,
   ),
 
+  on(TaskSharedActions.deleteProject, (state, { project }) => {
+    return adapter.removeMany(project.noteIds, {
+      ...state,
+      todayOrder: state.todayOrder.filter((idI) => !project.noteIds.includes(idI)),
+    });
+  }),
+
   on(updateNoteOrder, (state, { ids, activeContextType }) =>
     activeContextType !== WorkContextType.PROJECT
       ? {
           ...state,
-          noteIds: ids,
+          todayOrder: ids,
+          // ids: unique([...ids, ...state.ids]),
         }
       : state,
   ),

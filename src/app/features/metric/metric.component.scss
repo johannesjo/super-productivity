@@ -1,11 +1,12 @@
-@import '../../../variables';
+@use '../../../styles/_globals.scss' as *;
 
 :host {
   text-align: center;
 }
 
 h3 {
-  margin-top: $s*3;
+  margin-top: var(--s4);
+  margin-bottom: var(--s);
 }
 
 .basic-stats {
@@ -13,6 +14,18 @@ h3 {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+}
+
+.metrics-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  position: relative;
+
+  h1 {
+    margin: 0;
+  }
 }
 
 table {
@@ -27,9 +40,6 @@ table {
   }
 }
 
-.chart-wrapper {
-}
-
 .pie-charts {
   @include mq(sm) {
     display: flex;
@@ -41,9 +51,9 @@ table {
 }
 
 section {
-  margin-bottom: 2*$s;
+  margin-bottom: var(--s2);
 }
 
 .metric-metrics {
-  margin-top: $s*6;
+  margin-top: var(--s6);
 }

@@ -1,0 +1,37 @@
+{
+  "name": "boilerplate-solid-js",
+  "version": "1.0.0",
+  "description": "Solid.js Boilerplate Plugin for Super Productivity",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "typecheck": "tsc --noEmit",
+    "package": "node scripts/build-plugin.js",
+    "deploy": "npm run build"
+  },
+  "devDependencies": {
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/testing-library": "^0.8.10",
+    "@super-productivity/plugin-api": "file:../../plugin-api",
+    "@super-productivity/vite-plugin": "file:../../vite-plugin",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "archiver": "^7.0.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-solid": "^0.14.5",
+    "jsdom": "^27.2.0",
+    "prettier": "^3.6.2",
+    "solid-js": "^1.9.10",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
+    "vite-plugin-solid": "^2.11.10",
+    "vitest": "^4.0.14"
+  }
+}

@@ -1,0 +1,189 @@
+
+### Bug Fixes
+
+* add auto-fix for simpleCounter null value issue (#4593)
+* add missing translation
+* adding task from issue provider with no default project leading to modelvalidaiton error
+* autofix for global config to always use default if possible
+* autofix for global config to always use default if possible 2
+* autofix to default config if wrong value
+* build
+* cannot read properties of undefined #4493
+* canvas confetti error
+* change ISSUE_REFRESH_MAP to use issueProviderId as key
+* cleaning value and ctrl+v not working on windows #4520
+* correct GitLab issue URL format (eb627c0), closes gitlab.com/user/repo/issues/user/repo#4
+* default project setting not working anymore #4442
+* don't update lamport timestamp for sync
+* double undo reducer
+* **duration:** improve duration input handling and validation logic #4564
+* **duration:** improve duration input handling and validation logic #4564
+* **e2e:** update selectors for task list tests
+* error "Project INBOX not found" #4432
+* Error Invalid param given to UpdateProjectOrder when inbox project is hidden #4416
+* error when entering invalid value #4452
+* error with new task creation when there is no default estimate #4423
+* extract numeric issue ID from malformed GitLab issue IDs (584cf40), closes project/repo#4 project/repo#123 #123 gitlab.com/project/-/issues/project/repo#4
+* handle edge cases in sync status determination
+* **i18n:** avoid error "Parameter 'key' required" #4133
+* **i18n:** avoid error "Parameter 'key' required" 2 #4133
+* improve sync state check #4426
+* improve type safety in test-utils.ts
+* improve validation error messages and add tests
+* initial sync cfg dialog not shown
+* **issue:** resolve Angular control flow template syntax error
+* **issue:** resolve NG0600 error - writing to signals in computed context
+* lint
+* missing directive
+* monkey patch mat-context menu to fix mat menu issue of triggering directly the element under the finger in submenus
+* parameterized selectors for task due date selectors
+* preserve default sync folder path when no overriding (3561d6e), closes /github.com/johannesjo/super-productivity/issues/4545#issuecomment-2974843258
+* prevent model validation error
+* re-enable reload
+* remove 'any' type from mapSubTasksToTasks function and fix test selectors
+* remove 'any' type from task-shared-scheduling meta-reducer
+* remove alert
+* remove failing deletion
+* remove most 'any' types from add-tasks-for-tomorrow.service.spec.ts
+* restore and fix remaining e2e tests in task-list-basic directory
+* restore missing logic in shared reducers
+* restore task reordering logic for removeTasksFromTodayTag
+* start nginx via its built-in entrypoint script (afc6264), closes /github.com/johannesjo/super-productivity/issues/4545#issuecomment-2974843258
+* **sync:** data not being properly persisted during sync
+* **sync:** ensure database unlock is called in finally block to prevent deadlocks
+* **sync:** make android error handling more robust
+* **sync:** make dropbox sync work again as it should
+* **sync:** prevent multiple sync config dialogs on android
+* **task:** add null checks for tasks and subTasks in selectors and utility functions
+* **task:** drag and drop
+* **task:** fix short syntax tag updates when editing tasks
+* **task:** handle tasks with undefined subTasks in delete and restore operations
+* **task:** re-add missing task update
+* **task:** re-add missing task update for handleConvertToMainTask
+* **task:** syntax error
+* **undo-task-delete:** enhance tag handling for deleted tasks
+* **undo-task-delete:** simplify condition for project task checks
+* update all references from issueLink$ to issueLink Promise method
+* update all references from searchIssues$ to searchIssues Promise method
+* update task selector tests to work with parameterized selectors
+* **webdav:** also fix downloads of non meta models
+* weird observable condition
+### Code Refactoring
+
+* convert getById$ to return Promise instead of Observable
+* convert issueLink$ to return Promise instead of Observable
+* convert pollTimer$ to simple pollInterval number
+* convert searchIssues$ to return Promise instead of Observable
+* convert testConnection$ to return Promise instead of Observable
+* **task:** consolidate TaskSharedActions logic to task-shared.reducer and replace TaskActionTypes with string literals
+* **task:** migrate addTask, deleteTask, and deleteTasks to TaskSharedActions
+* **task:** remove updateTask action in favor of TaskSharedActions.updateTask
+* **task:** remove updateTaskTags action in favor of updateTask
+### Features
+
+* add 'isTrayShowCurrentCountdown' setting and corresponding translations
+* add 'isTrayShowCurrentCountdown' setting and corresponding translations
+* add defensive coding fix for #4370
+* Add due date for gitlab sync
+* add prettier stuff
+* also log validation errors for validation error
+* change color for filter stuff
+* **date:** utilize Angular's DatePipe for consistent date formatting in shortDate2 and shortPlannedAt pipes  #4549
+* **e2e:** add comprehensive e2e test scenarios
+* **errorHandler:** add conditional rendering for additional error logs
+* **error:** improve autofix
+* **i18n:** add missing translation for domina mode #4133
+* **i18n:** remove unused translations
+* **i18n:** remove unused translations
+* implement Lamport timestamps for reliable sync
+* **input:** enhance duration input handling for zero values and race conditions
+* **input:** enhance duration input handling for zero values and race conditions
+* integrate 'isTrayShowCurrentCountdown' setting into tray message logic
+* **issue:** fix styling and functionality issues
+* **issue:** further improve
+* **issue:** further simplify and make some conditions work as they should
+* **issue:** implement GitHub-style collapsible comments for all providers
+* **issue:** improve component
+* **issue:** merge issue stuff into single component
+* **issue:** more adjustments
+* **issue:** more adjustments
+* **issue:** restore OpenProject upload attachments feature
+* **issue:** simplify
+* **jira:** add workaround
+* merge issue header stuff into single component
+* move setting down
+* move setting down
+* remove ngzone
+* **saf-droid:** outline
+* **search:** improve and cleanup
+* **search:** move search to sidebar
+* **sync:** add base directory for android
+* **sync:** implement database locking during sync to prevent race conditions
+* **sync:** improve conflict handling
+* **sync:** improve decrypt error dialog
+* **sync:** make android folder selection work again #4390
+* **sync:** make file sync base more robust
+* **sync:** make local file sync work as it should
+* **sync:** minor adjustments
+* **sync:** remove Is-None-Match check for downloads for now
+* **sync:** simplify cfg #4390
+* **sync:** use idb instead of capacitor preferences for saving config stuff #4390
+* **tags:** add functionality to remove non-existent tags from tasks in repair script #4567
+* **task:** implement tag conflict resolution for parent and sub-tasks
+* **task:** optimize task scheduling logic to prevent unnecessary state updates
+* **validation:** enhance ModelValidationError to include validation results and additional logging
+* webdav sync default settings in env variables of container
+* **webdav:** add dev error
+* **webdav:** add unit tests for Webdav class and API interactions
+* **webdav:** disable CapacitorHttp for unsupported methods and use original fetch function
+* **webdav:** enhance error handling and support for creating parent directories during uploads
+* **webdav:** fifth draft of standard compliant webdav
+* **webdav:** first draft of standard compliant webdav
+* **webdav:** fourth draft of standard compliant webdav
+* **webdav:** implement CapacitorHttp support for non-standard methods on Android WebView
+* **webdav:** implement HEAD request for Android to improve file metadata retrieval
+* **webdav:** improve folder creation and error handling for Nextcloud
+* **webdav:** make download work again
+* **webdav:** make it work for yandex
+* **webdav:** make it work for yandex
+* **webdav:** make upload work again
+* **webdav:** make webdav work again
+* **webdav:** refine CapacitorHttp usage and improve error handling for file metadata retrieval
+* **webdav:** remove redundant parent directory check and clarify directory creation logic
+* **webdav:** second draft of standard compliant webdav
+* **webdav:** third draft of standard compliant webdav
+* **webdav:** tmp remove dev error
+### BREAKING CHANGES
+
+* **task:** TaskActionTypes enum removed. All actions now use string literals directly.
+* **task:** addTask, deleteTask, and deleteTasks actions removed from task.actions. Use TaskSharedActions versions instead.
+* **task:** updateTask action has been removed from task.actions. Use TaskSharedActions.updateTask instead.
+* **task:** updateTaskTags action has been removed. Use TaskSharedActions.updateTask with tagIds in the changes object instead.
+* pollTimer$ property replaced with pollInterval number
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+* searchIssues$ method renamed to searchIssues and returns Promise
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+* getById$ method has Promise equivalent getById
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+* issueLink$ method renamed to issueLink and returns Promise
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+* testConnection$ method renamed to testConnection and returns Promise
+
+🤖 Generated with Claude Code
+
+Co-Authored-By: Claude <noreply@anthropic.com>
+
+
+

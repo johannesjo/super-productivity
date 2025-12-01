@@ -1,0 +1,31 @@
+
+### Bug Fixes
+
+* add defensive programming fix for (9b30d56), closes #4698
+* Adding @date incorrectly adds task to today when @date is listed last #4644
+* avoid mutation
+* date pipe error with indonesian (42dc082), closes #4670
+* error alert background for dark theme
+* only filter out later today tasks for today list
+* **plugin:** plugin.js initialization not working as it should
+* **plugin:** remove plugin from list when deleted
+* **plugins:** fix plugin upload issues with UI reactivity and uploaded:// protocol
+* **plugin:** uploaded plugins not working
+* **plugin:** warning
+* remove line breaks on paste in task title (#4669)
+* repeatable tasks not getting re-created #4687
+* side panel content show behavior
+* task detail panel not opening for tasks planned for later (64cba1f), closes #4664
+
+
+### Features
+
+* add log and update message
+* add possibility to cancel tutorial
+* improve reliably for repeatable tasks
+* improve reliably for repeatable tasks 2
+* improve repeat task handling
+* **sync:** improve sync conflict dialog
+### Reverts
+
+* Revert "test: disable due tests for now"

@@ -1,0 +1,642 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0"
+    />
+    <title>sync.md Configuration</title>
+    <style>
+      /* Reset and base styles */
+      :root {
+        --bg-primary: #fff;
+        --bg-secondary: #f5f5f5;
+        --bg-tertiary: #e0e0e0;
+        --text-primary: #333;
+        --text-secondary: #666;
+        --text-muted: #999;
+        --border-color: #ddd;
+        --border-color-focus: #2196f3;
+        --accent-primary: #2196f3;
+        --accent-primary-hover: #1976d2;
+        --success-bg: #e8f5e9;
+        --success-text: #2e7d32;
+        --success-border: #c8e6c9;
+        --error-bg: #ffebee;
+        --error-text: #c62828;
+        --error-border: #ffcdd2;
+        --info-bg: #e3f2fd;
+        --info-text: #1565c0;
+        --info-border: #bbdefb;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg-primary: #2a2a2a;
+          --bg-secondary: #333;
+          --bg-tertiary: #444;
+          --text-primary: #e0e0e0;
+          --text-secondary: #ccc;
+          --text-muted: #aaa;
+          --border-color: #444;
+          --border-color-focus: #4a9eff;
+          --accent-primary: #1976d2;
+          --accent-primary-hover: #1565c0;
+          --success-bg: #1b3a1b;
+          --success-text: #81c784;
+          --success-border: #2e5f2e;
+          --error-bg: #4a1414;
+          --error-text: #ef5350;
+          --error-border: #6f2020;
+          --info-bg: #1e3a5f;
+          --info-text: #64b5f6;
+          --info-border: #2962a0;
+        }
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: 'Open Sans', 'Helvetica Neue', Arial, sans-serif;
+        font-size: 14px;
+        line-height: 1.5;
+        color: var(--text-primary);
+        background: transparent;
+        padding: 20px;
+      }
+
+      /* Container */
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+      }
+
+      /* Header */
+      h1 {
+        font-size: 24px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      .subtitle {
+        color: var(--text-secondary);
+        margin-bottom: 24px;
+      }
+
+      /* Form elements */
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        font-weight: 500;
+        margin-bottom: 6px;
+        color: var(--text-secondary);
+      }
+
+      input[type='text'],
+      select {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 14px;
+        background: var(--bg-primary);
+        color: var(--text-primary);
+        transition: border-color 0.2s;
+      }
+
+      input[type='text']:focus,
+      select:focus {
+        outline: none;
+        border-color: var(--border-color-focus);
+        background: var(--bg-secondary);
+      }
+
+      .help-text {
+        font-size: 12px;
+        color: var(--text-muted);
+        margin-top: 4px;
+      }
+
+      /* Buttons */
+      .button-group {
+        display: flex;
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .warning {
+        border: 1px solid var(--accent-primary);
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-weight: bold;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        transition: all 0.2s;
+      }
+
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .btn-primary {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: white;
+      }
+
+      .btn-primary:hover:not(:disabled) {
+        background: var(--accent-primary-hover);
+        border-color: var(--accent-primary-hover);
+      }
+
+      .btn-secondary:hover:not(:disabled) {
+        background: var(--bg-tertiary);
+        border-color: var(--border-color);
+      }
+
+      /* Status messages */
+      .status {
+        padding: 12px 16px;
+        border-radius: 6px;
+        margin-top: 20px;
+        display: none;
+      }
+
+      .status.show {
+        display: block;
+      }
+
+      .status.info {
+        background: var(--info-bg);
+        color: var(--info-text);
+        border: 1px solid var(--info-border);
+      }
+
+      .status.success {
+        background: var(--success-bg);
+        color: var(--success-text);
+        border: 1px solid var(--success-border);
+      }
+
+      .status.error {
+        background: var(--error-bg);
+        color: var(--error-text);
+        border: 1px solid var(--error-border);
+      }
+
+      /* Loading spinner */
+      .spinner {
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        border: 2px solid var(--border-color);
+        border-top: 2px solid var(--border-color-focus);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 8px;
+        vertical-align: middle;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* File path test button */
+      .file-path-wrapper {
+        position: relative;
+      }
+
+      .test-file-btn {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        padding: 6px 12px;
+        font-size: 12px;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: 4px;
+        cursor: pointer;
+        color: var(--text-primary);
+      }
+
+      .test-file-btn:hover {
+        background: var(--bg-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>sync.md</h1>
+      <p class="subtitle">Sync tasks between Super Productivity and Markdown files</p>
+
+      <form id="configForm">
+        <div class="form-group">
+          <label for="filePath">Markdown File Path</label>
+          <div class="file-path-wrapper">
+            <input
+              type="text"
+              id="filePath"
+              placeholder="/path/to/your/tasks.md"
+              style="padding-right: 70px"
+            />
+            <button
+              type="button"
+              class="test-file-btn"
+              onclick="testFilePath()"
+            >
+              Test
+            </button>
+          </div>
+          <div class="help-text">Full path to the markdown file to sync with</div>
+        </div>
+
+        <div class="form-group">
+          <label for="projectId">Project</label>
+          <select id="projectId">
+            <option value="">Loading projects...</option>
+          </select>
+          <div class="help-text">Select the project to sync tasks with</div>
+        </div>
+
+        <div class="warning">
+          Please be warned that task data of this project might be involuntary changed or
+          deleted!
+        </div>
+
+        <div class="button-group">
+          <button
+            type="submit"
+            class="btn-primary"
+            id="saveBtn"
+          >
+            Save & Sync
+          </button>
+        </div>
+      </form>
+
+      <div
+        id="status"
+        class="status"
+      ></div>
+    </div>
+
+    <script>
+      // State
+      let config = null;
+      let projects = [];
+
+      // Message handling
+      async function sendMessage(message) {
+        return new Promise((resolve, reject) => {
+          const messageId = Date.now().toString();
+          const timeout = setTimeout(() => {
+            window.removeEventListener('message', handler);
+            reject(new Error('Message timeout'));
+          }, 10000);
+
+          const handler = (event) => {
+            if (
+              event.data?.messageId === messageId ||
+              (event.data?.type === 'PLUGIN_MESSAGE_RESPONSE' &&
+                event.data?.messageId === messageId)
+            ) {
+              clearTimeout(timeout);
+              window.removeEventListener('message', handler);
+              resolve(event.data.response || event.data);
+            }
+          };
+
+          window.addEventListener('message', handler);
+
+          window.parent.postMessage(
+            {
+              type: 'PLUGIN_MESSAGE',
+              message,
+              messageId,
+            },
+            '*',
+          );
+        });
+      }
+
+      // UI functions
+      function showStatus(message, type = 'info') {
+        const status = document.getElementById('status');
+        status.textContent = message;
+        status.className = `status ${type} show`;
+
+        if (type !== 'error') {
+          setTimeout(() => {
+            status.classList.remove('show');
+          }, 5000);
+        }
+      }
+
+      async function loadProjects() {
+        try {
+          // Try to get projects directly from PluginAPI if available
+          if (window.PluginAPI?.getAllProjects) {
+            console.log('Loading projects directly from PluginAPI');
+            projects = await window.PluginAPI.getAllProjects();
+          } else {
+            // TODO remove fallback
+            console.log('Loading projects via message');
+            const response = await sendMessage({ type: 'getProjects' });
+            if (response?.success && response.projects) {
+              projects = response.projects;
+            } else {
+              throw new Error('Failed to get projects from background');
+            }
+          }
+
+          const select = document.getElementById('projectId');
+          select.innerHTML = '<option value="">Select a project...</option>';
+
+          if (projects && projects.length > 0) {
+            projects.forEach((project) => {
+              const option = document.createElement('option');
+              option.value = project.id;
+              option.textContent = project.title;
+              select.appendChild(option);
+            });
+          } else {
+            select.innerHTML = '<option value="">No projects found</option>';
+          }
+        } catch (error) {
+          console.error('Failed to load projects:', error);
+          showStatus('Failed to load projects', 'error');
+
+          // Retry after a delay
+          setTimeout(() => {
+            console.log('Retrying to load projects...');
+            loadProjects();
+          }, 2000);
+        }
+      }
+
+      async function loadConfig() {
+        try {
+          // Request config from background
+          const response = await sendMessage({ type: 'getConfig' });
+          if (response?.success && response.config) {
+            config = response.config;
+            document.getElementById('filePath').value = config.filePath || '';
+            document.getElementById('projectId').value = config.projectId || '';
+          }
+        } catch (error) {
+          console.error('Failed to load config:', error);
+        }
+      }
+
+      async function testFilePath() {
+        const filePath = document.getElementById('filePath').value;
+        if (!filePath) {
+          showStatus('Please enter a file path', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode first
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'File operations are only available in the desktop version of Super Productivity',
+            'error',
+          );
+          return;
+        }
+
+        try {
+          const result = await window.PluginAPI.executeNodeScript({
+            script: `
+              const fs = require('fs');
+              const path = require('path');
+
+              try {
+                const absolutePath = path.resolve(args[0]);
+                if (!fs.existsSync(absolutePath)) {
+                  return { success: false, error: 'File not found' };
+                }
+
+                const stats = fs.statSync(absolutePath);
+                if (!stats.isFile()) {
+                  return { success: false, error: 'Path is not a file' };
+                }
+
+                const content = fs.readFileSync(absolutePath, 'utf8');
+                const lines = content.split('\\n');
+                const taskCount = lines.filter(line => /^\\s*- \\[[ x]\\]/.test(line)).length;
+
+                return {
+                  success: true,
+                  info: {
+                    size: stats.size,
+                    modified: stats.mtime,
+                    taskCount: taskCount
+                  }
+                };
+              } catch (error) {
+                return { success: false, error: error.message };
+              }
+            `,
+            args: [filePath],
+            timeout: 5000,
+          });
+
+          if (result.success && result.result?.success) {
+            const info = result.result.info;
+            showStatus(`File is valid! Found ${info.taskCount} tasks`, 'success');
+          } else {
+            showStatus(result.result?.error || 'Failed to access file', 'error');
+          }
+        } catch (error) {
+          showStatus('Failed to test file: ' + error.message, 'error');
+        }
+      }
+
+      // Form submission
+      document.getElementById('configForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        const filePath = document.getElementById('filePath').value;
+        const projectId = document.getElementById('projectId').value;
+        const syncDirection = 'bidirectional';
+
+        if (!filePath || !projectId) {
+          showStatus('Please fill in all required fields', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'sync.md plugin requires the desktop version of Super Productivity',
+            'error',
+          );
+          return;
+        }
+
+        const newConfig = {
+          filePath,
+          projectId,
+          syncDirection,
+          enabled: true,
+        };
+
+        try {
+          // Disable save button during operation
+          const saveBtn = document.getElementById('saveBtn');
+          saveBtn.disabled = true;
+          saveBtn.innerHTML = 'Saving<span class="spinner"></span>';
+
+          // Update config in background (which will store it locally)
+          const saveResponse = await sendMessage({
+            type: 'saveConfig',
+            config: newConfig,
+          });
+
+          console.log('Save response received:', saveResponse);
+
+          // Check if we have a result field (message response wrapper)
+          const actualResponse = saveResponse?.result || saveResponse;
+
+          if (!actualResponse?.success) {
+            throw new Error(actualResponse?.error || 'Failed to save config');
+          }
+
+          config = newConfig;
+
+          // Trigger sync immediately after saving
+          saveBtn.innerHTML = 'Syncing<span class="spinner"></span>';
+          showStatus('Configuration saved - sync started...', 'info');
+
+          try {
+            const syncResponse = await sendMessage({ type: 'syncNow' });
+            // Don't show error here - the sync is async and will complete later
+            // The SYNC_COMPLETED or SYNC_ERROR events will handle the final status
+            if (!syncResponse?.success && syncResponse?.error) {
+              // Only show error if there's an actual error message (not just missing success)
+              showStatus('Sync error: ' + syncResponse.error, 'error');
+            }
+          } catch (error) {
+            showStatus('Failed to trigger sync: ' + error.message, 'error');
+          }
+
+          // Re-enable button
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & Sync';
+        } catch (error) {
+          console.error('Failed to save config:', error);
+          showStatus('Failed to save configuration', 'error');
+          // Re-enable button on error
+          const saveBtn = document.getElementById('saveBtn');
+          saveBtn.disabled = false;
+          saveBtn.textContent = 'Save & Sync';
+        }
+      });
+
+      // Listen for sync events from background
+      window.addEventListener('message', (event) => {
+        console.log('UI received message:', event.data);
+
+        if (event.data?.type === 'SYNC_COMPLETED') {
+          console.log('Sync completed event received');
+
+          // Show success with sync result details
+          if (event.data.result) {
+            const result = event.data.result;
+            let message = 'Sync completed successfully';
+            if (
+              result.tasksAdded > 0 ||
+              result.tasksUpdated > 0 ||
+              result.tasksDeleted > 0
+            ) {
+              message += ` - ${result.tasksAdded} added, ${result.tasksUpdated} updated, ${result.tasksDeleted} deleted`;
+            } else {
+              message += ' - no changes';
+            }
+            showStatus(message, 'success');
+          } else {
+            showStatus('Sync completed successfully', 'success');
+          }
+
+          // Re-enable save button if it was disabled
+          const saveBtn = document.getElementById('saveBtn');
+          if (saveBtn && saveBtn.disabled) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save & Sync';
+          }
+        } else if (event.data?.type === 'SYNC_ERROR') {
+          console.log('Sync error event received:', event.data.error);
+          showStatus('Sync error: ' + event.data.error, 'error');
+
+          // Re-enable save button on error
+          const saveBtn = document.getElementById('saveBtn');
+          if (saveBtn && saveBtn.disabled) {
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save & Sync';
+          }
+        }
+      });
+
+      // Wait for PluginAPI to be available
+      async function waitForPluginAPI(maxAttempts = 20) {
+        for (let i = 0; i < maxAttempts; i++) {
+          if (window.PluginAPI) {
+            console.log(`PluginAPI available after ${i} attempts`);
+            return true;
+          }
+          await new Promise((resolve) => setTimeout(resolve, 100));
+        }
+        console.error('PluginAPI not available after', maxAttempts, 'attempts');
+        return false;
+      }
+
+      // Initialize
+      window.addEventListener('load', async () => {
+        // Wait for PluginAPI
+        const apiAvailable = await waitForPluginAPI();
+        if (!apiAvailable) {
+          showStatus('Plugin API not available. Please reload the page.', 'error');
+          return;
+        }
+
+        // Check if we're in desktop mode
+        if (!window.PluginAPI?.executeNodeScript) {
+          showStatus(
+            'sync.md plugin requires the desktop version of Super Productivity. File sync features are not available in the web version.',
+            'error',
+          );
+          document.getElementById('configForm').style.opacity = '0.5';
+          document.getElementById('configForm').style.pointerEvents = 'none';
+          return;
+        }
+
+        await loadProjects();
+        await loadConfig();
+      });
+    </script>
+  </body>
+</html>

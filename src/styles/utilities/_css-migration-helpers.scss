@@ -1,0 +1,88 @@
+// CSS Migration Helper Functions
+// ===============================
+// These utilities help migrate from Sass variables to CSS custom properties
+
+// Convert Sass arithmetic to CSS calc()
+// Usage: @include calc-multiply(margin-top, --s, 2);
+@mixin calc-multiply($property, $var, $multiplier) {
+  #{$property}: calc(var(#{$var}) * #{$multiplier});
+}
+
+// Convert negative Sass values to CSS calc()
+// Usage: @include calc-negative(margin-left, --s);
+@mixin calc-negative($property, $var) {
+  #{$property}: calc(-1 * var(#{$var}));
+}
+
+// Convert division to CSS calc()
+// Usage: @include calc-divide(width, --container-width, 2);
+@mixin calc-divide($property, $var, $divisor) {
+  #{$property}: calc(var(#{$var}) / #{$divisor});
+}
+
+// Complex calc with multiple operations
+// Usage: @include calc-complex(padding, "--s * 2 + var(--border-width)");
+@mixin calc-complex($property, $expression) {
+  #{$property}: calc(#{$expression});
+}
+
+// Helper to create CSS variable with fallback
+// Usage: @include css-var(color, --text-color, var(--text-color-most-intense));
+@mixin css-var($property, $var, $fallback: null) {
+  @if $fallback {
+    #{$property}: var(#{$var}, #{$fallback});
+  } @else {
+    #{$property}: var(#{$var});
+  }
+}
+
+// Helper to define CSS variables with light/dark theme support
+// Usage: @include theme-var(--my-color, var(--text-color-most-intense), var(--card-bg));
+@mixin theme-var($var-name, $light-value, $dark-value) {
+  body {
+    #{$var-name}: #{$light-value};
+  }
+
+  body.isDarkTheme {
+    #{$var-name}: #{$dark-value};
+  }
+}
+
+// Helper to convert RGBA with opacity to CSS variables
+// Usage: @include rgba-var(border-color, --text-color-rgb, 0.5);
+@mixin rgba-var($property, $rgb-var, $opacity) {
+  #{$property}: rgba(var(#{$rgb-var}), #{$opacity});
+}
+
+// Batch conversion helper for common patterns
+// Usage: @include convert-spacing(margin, 2, 4, 1, 3);
+@mixin convert-spacing($property, $top: null, $right: null, $bottom: null, $left: null) {
+  $values: ();
+
+  @if $top {
+    $values: append($values, if($top == 0, 0, calc(var(--s) * #{$top})));
+  }
+  @if $right {
+    $values: append($values, if($right == 0, 0, calc(var(--s) * #{$right})));
+  }
+  @if $bottom {
+    $values: append($values, if($bottom == 0, 0, calc(var(--s) * #{$bottom})));
+  }
+  @if $left {
+    $values: append($values, if($left == 0, 0, calc(var(--s) * #{$left})));
+  }
+
+  #{$property}: $values;
+}
+
+// Debug helper to identify Sass variables in use
+// Usage: @include debug-sass-var($my-sass-var, "my-sass-var");
+@mixin debug-sass-var($var, $var-name) {
+  @debug 'Sass variable #{$var-name} = #{$var} - Consider converting to CSS variable';
+}
+
+// Migration checklist helper
+// Outputs a comment with migration status
+@mixin migration-status($component-name, $status: 'pending') {
+  /* CSS Variable Migration Status for #{$component-name}: #{$status} */
+}

@@ -4,6 +4,7 @@ import { mapArchiveToWorklog } from './map-archive-to-worklog';
 import { Dictionary, EntityState } from '@ngrx/entity';
 import { Worklog } from '../worklog.model';
 
+/* eslint-disable @typescript-eslint/naming-convention */
 const START_END_ALL = {
   workStart: {
     '1200-05-05': 10713600000,
@@ -26,6 +27,7 @@ describe('mapArchiveToWorklog', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'A',
         id: 'A',
         timeSpent: 13332,
@@ -36,7 +38,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13332);
@@ -62,6 +64,7 @@ describe('mapArchiveToWorklog', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'A',
         id: 'A',
         subTaskIds: ['SUB_B', 'SUB_C'],
@@ -73,6 +76,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'A',
@@ -82,6 +86,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_C',
         id: 'SUB_C',
         parentId: 'A',
@@ -91,7 +96,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13332);
@@ -119,6 +124,7 @@ describe('mapArchiveToWorklog', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT1',
         id: 'PT1',
         subTaskIds: ['SUB_A', 'SUB_B'],
@@ -129,6 +135,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'MT1',
         id: 'MT1',
         subTaskIds: [],
@@ -139,6 +146,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_A',
         id: 'SUB_A',
         parentId: 'PT1',
@@ -149,6 +157,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'PT1',
@@ -159,7 +168,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(13333);
@@ -177,6 +186,7 @@ describe('mapArchiveToWorklog', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT1',
         id: 'PT1',
         subTaskIds: ['SUB_A', 'SUB_B', 'SUB_C'],
@@ -191,6 +201,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_A',
         id: 'SUB_A',
         parentId: 'PT1',
@@ -205,6 +216,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'PT1',
@@ -218,6 +230,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_C',
         id: 'SUB_C',
         parentId: 'PT1',
@@ -232,7 +245,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(21366);
@@ -261,6 +274,7 @@ describe('mapArchiveToWorklog', () => {
     const ts = fakeTaskStateFromArray([
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'PT1',
         id: 'PT1',
         subTaskIds: ['SUB_A', 'SUB_B', 'SUB_C'],
@@ -275,6 +289,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_A',
         id: 'SUB_A',
         parentId: 'PT1',
@@ -290,6 +305,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_B',
         id: 'SUB_B',
         parentId: 'PT1',
@@ -303,6 +319,7 @@ describe('mapArchiveToWorklog', () => {
       },
       {
         ...DEFAULT_TASK,
+        projectId: 'P1',
         title: 'SUB_C',
         id: 'SUB_C',
         parentId: 'PT1',
@@ -318,7 +335,7 @@ describe('mapArchiveToWorklog', () => {
       },
     ]);
 
-    const r = mapArchiveToWorklog(ts, [], START_END_ALL);
+    const r = mapArchiveToWorklog(ts, [], START_END_ALL, 1, 'en-US');
     const w: Worklog = r.worklog;
 
     expect(r.totalTimeSpent).toBe(21366);

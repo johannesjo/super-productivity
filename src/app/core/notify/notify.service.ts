@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { NotifyModel } from './notify.model';
 import { environment } from '../../../environments/environment';
 import { IS_ELECTRON } from '../../app.constants';
@@ -6,16 +6,16 @@ import { IS_MOBILE } from '../../util/is-mobile';
 import { TranslateService } from '@ngx-translate/core';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { androidInterface } from '../../features/android/android-interface';
+import { Log } from '../log';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { generateNotificationId } from '../../features/android/android-notification-id.util';
 
 @Injectable({
   providedIn: 'root',
 })
 export class NotifyService {
-  constructor(
-    private _translateService: TranslateService,
-    private _uiHelperService: UiHelperService,
-  ) {}
+  private _translateService = inject(TranslateService);
+  private _uiHelperService = inject(UiHelperService);
 
   async notifyDesktop(options: NotifyModel): Promise<Notification | undefined> {
     if (!IS_MOBILE) {
@@ -44,7 +44,6 @@ export class NotifyService {
       if (per === 'granted') {
         await svcReg.showNotification(title, {
           icon: 'assets/icons/icon-128x128.png',
-          vibrate: [100, 50, 100],
           silent: false,
           data: {
             dateOfArrival: Date.now(),
@@ -55,15 +54,55 @@ export class NotifyService {
         });
       }
     } else if (IS_ANDROID_WEB_VIEW) {
-      androidInterface.showNotification(title || 'NO_TITLE', body);
+      try {
+        // Check permissions
+        const checkResult = await LocalNotifications.checkPermissions();
+        let displayPermissionGranted = checkResult.display === 'granted';
+
+        // Request permissions if not granted
+        if (!displayPermissionGranted) {
+          const requestResult = await LocalNotifications.requestPermissions();
+          displayPermissionGranted = requestResult.display === 'granted';
+          if (!displayPermissionGranted) {
+            Log.warn('NotifyService: Notification permission not granted');
+            return;
+          }
+        }
+
+        // Generate a deterministic notification ID from title and body
+        // Use a prefix to distinguish plugin notifications from reminders
+        const notificationKey = `plugin-notification:${title}:${body}`;
+        const notificationId = generateNotificationId(notificationKey);
+
+        // Schedule an immediate notification
+        await LocalNotifications.schedule({
+          notifications: [
+            {
+              id: notificationId,
+              title,
+              body,
+              schedule: {
+                at: new Date(Date.now() + 1000), // Show after 1 second
+                allowWhileIdle: true,
+              },
+            },
+          ],
+        });
+
+        Log.log('NotifyService: Android notification scheduled successfully', {
+          id: notificationId,
+          title,
+        });
+      } catch (error) {
+        Log.err('NotifyService: Failed to show Android notification', error);
+      }
     } else if (this._isBasicNotificationSupport()) {
       const permission = await Notification.requestPermission();
       // not supported for basic notifications so we delete them
-      delete options.actions;
+      // delete options.actions;
       if (permission === 'granted') {
         const instance = new Notification(title, {
           icon: 'assets/icons/icon-128x128.png',
-          vibrate: [100, 50, 100],
           silent: false,
           data: {
             dateOfArrival: Date.now(),
@@ -84,7 +123,7 @@ export class NotifyService {
         return instance;
       }
     }
-    console.warn('No notifications supported');
+    Log.err('No notifications supported');
     return undefined;
   }
 

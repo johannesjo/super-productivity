@@ -1,20 +1,24 @@
-table {
-  @include mq(xs) {
-    th,
-    td {
-      padding: 0 $s;
-    }
+@use '../mixins/_media-queries';
 
+table {
+  th,
+  td {
+    // overwrite material stuff for inline input
+    overflow-x: visible !important;
+    overflow-y: visible !important;
+  }
+
+  @include media-queries.mq(xs) {
     th,
     td {
+      padding: 0 var(--s);
+
       &:first-child {
-        padding-left: 0;
+        //padding-left: 0;
       }
-    }
-    th,
-    td {
+
       &:last-child {
-        padding-right: 0;
+        //padding-right: 0;
       }
     }
   }
@@ -22,14 +26,15 @@ table {
 
 .table-wrapper {
   overflow: auto;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 }
 
-$this-table-min-height: $s * 2;
-$this-table-shadow: $whiteframe-shadow-1dp;
+$this-table-min-height: var(--s2);
+$this-table-shadow: var(--whiteframe-shadow-1dp);
+
 div.material-table {
   box-shadow: $this-table-shadow;
-  border-radius: $card-border-radius;
+  border-radius: var(--card-border-radius);
 
   table {
     width: 100%;
@@ -42,7 +47,7 @@ div.material-table {
   box-shadow: $this-table-shadow;
   font-size: 13px;
   white-space: nowrap;
-  background-color: #fff;
+  background-color: var(--card-bg);
 
   &,
   * {
@@ -61,9 +66,9 @@ div.material-table {
   }
 
   .isDarkTheme & {
-    background: $dark-theme-card-bg;
+    background: var(--card-bg);
     // NOTE: because we're on a lighter background
-    color: $dark-theme-text-color;
+    color: var(--text-color);
   }
 
   .isDarkTheme &._no-elevation {
@@ -72,37 +77,7 @@ div.material-table {
 
   tr {
     min-height: $this-table-min-height;
-  }
 
-  th,
-  td {
-    vertical-align: middle;
-    min-height: $this-table-min-height;
-    position: relative;
-    border-top: 1px solid;
-    border-bottom: 1px solid;
-    padding: $s $s * 2.25;
-    box-sizing: border-box;
-    text-align: left;
-
-    .isLightTheme & {
-      border-color: $light-theme-extra-border-color;
-    }
-
-    .isDarkTheme & {
-      border-color: $dark-theme-extra-border-color;
-    }
-
-    &:first-of-type {
-      padding-left: $s * 3;
-    }
-
-    &:last-of-type {
-      padding-right: $s * 3;
-    }
-  }
-
-  tr {
     &:first-of-type {
       th,
       td {
@@ -115,6 +90,34 @@ div.material-table {
       td {
         border-bottom-width: 0;
       }
+    }
+  }
+
+  th,
+  td {
+    vertical-align: middle;
+    min-height: $this-table-min-height;
+    position: relative;
+    border-top: 1px solid;
+    border-bottom: 1px solid;
+    padding: var(--s) calc(var(--s) * 2.25);
+    box-sizing: border-box;
+    text-align: left;
+
+    .isLightTheme & {
+      border-color: var(--extra-border-color);
+    }
+
+    .isDarkTheme & {
+      border-color: var(--extra-border-color);
+    }
+
+    &:first-of-type {
+      padding-left: var(--s3);
+    }
+
+    &:last-of-type {
+      padding-right: var(--s3);
     }
   }
 }

@@ -1,0 +1,37 @@
+<h1 mat-dialog-title>{{ T.FILE_IMEX.IMPORT_FROM_URL_DIALOG_TITLE | translate }}</h1>
+<mat-dialog-content>
+  <p>{{ T.FILE_IMEX.IMPORT_FROM_URL_DIALOG_DESCRIPTION | translate }}</p>
+  <mat-form-field class="full-width">
+    <mat-label>{{ T.FILE_IMEX.URL_PLACEHOLDER | translate }}</mat-label>
+    <input
+      matInput
+      [(ngModel)]="url"
+      name="urlInput"
+      type="url"
+      placeholder="{{ T.FILE_IMEX.URL_PLACEHOLDER | translate }}"
+      required
+      #urlCtrl="ngModel"
+    />
+    @if (urlCtrl.invalid && (urlCtrl.dirty || urlCtrl.touched)) {
+      <mat-error>
+        {{ T.FILE_IMEX.S_ERR_INVALID_URL | translate }}
+      </mat-error>
+    }
+  </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    (click)="cancel()"
+  >
+    {{ T.G.CANCEL | translate }}
+  </button>
+  <button
+    mat-raised-button
+    color="primary"
+    (click)="submit()"
+    [disabled]="!url || url.trim() === '' || urlCtrl.invalid"
+  >
+    {{ T.G.SUBMIT | translate }}
+  </button>
+</mat-dialog-actions>

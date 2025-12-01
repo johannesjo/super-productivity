@@ -9,14 +9,12 @@ export type OpenProjectTransitionOption =
 
 export interface OpenProjectTransitionConfig {
   // NOTE: keys mirror IssueLocalState type
-  OPEN: OpenProjectTransitionOption;
+  // todo remove this with a proper migration since currently not used
+  OPEN?: OpenProjectTransitionOption;
   IN_PROGRESS: OpenProjectTransitionOption;
   DONE: OpenProjectTransitionOption;
 }
 export interface OpenProjectCfg extends BaseIssueProviderCfg {
-  isSearchIssuesFromOpenProject: boolean;
-  isAutoAddToBacklog: boolean;
-  isAutoPoll: boolean;
   isShowTimeTrackingDialog: boolean;
   isShowTimeTrackingDialogForEachSubTask: boolean;
   timeTrackingDialogDefaultTime: JiraWorklogExportDefaultTime;
@@ -29,5 +27,8 @@ export interface OpenProjectCfg extends BaseIssueProviderCfg {
   isSetProgressOnTaskDone: boolean;
   progressOnDone: number;
   transitionConfig: OpenProjectTransitionConfig;
-  availableTransitions: OpenProjectOriginalStatus[];
+  availableTransitions:
+    | OpenProjectOriginalStatus[]
+    | { id: string; name: string; [key: string]: unknown }[];
+  metadata: { string: any } | undefined;
 }

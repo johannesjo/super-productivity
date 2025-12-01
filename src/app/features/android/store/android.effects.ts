@@ -1,138 +1,185 @@
-import { Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
-import {
-  addTimeSpent,
-  setCurrentTask,
-  unsetCurrentTask,
-  updateTask,
-} from '../../tasks/store/task.actions';
-import { select, Store } from '@ngrx/store';
-import {
-  distinctUntilChanged,
-  filter,
-  map,
-  skip,
-  tap,
-  withLatestFrom,
-} from 'rxjs/operators';
-import { selectCurrentTask } from '../../tasks/store/task.selectors';
-import { GlobalConfigService } from '../../config/global-config.service';
-import { androidInterface } from '../android-interface';
-import { SyncProviderService } from '../../../imex/sync/sync-provider.service';
-import { TranslateService } from '@ngx-translate/core';
-import { T } from '../../../t.const';
-import { msToClockString } from '../../../ui/duration/ms-to-clock-string.pipe';
-import { TaskCopy } from '../../tasks/task.model';
-import { showAddTaskBar } from '../../../core-ui/layout/store/layout.actions';
+import { inject, Injectable } from '@angular/core';
+import { Actions, createEffect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
+import { switchMap, tap } from 'rxjs/operators';
+import { timer } from 'rxjs';
+import { ReminderService } from '../../reminder/reminder.service';
+import { LocalNotifications } from '@capacitor/local-notifications';
+import { SnackService } from '../../../core/snack/snack.service';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
+import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
+import { DroidLog } from '../../../core/log';
+import { generateNotificationId } from '../android-notification-id.util';
 
 // TODO send message to electron when current task changes here
 
+const DELAY_PERMISSIONS = 2000;
+const DELAY_SCHEDULE = 5000;
+
 @Injectable()
 export class AndroidEffects {
-  taskChangeNotification$: any = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(setCurrentTask, unsetCurrentTask, addTimeSpent),
-        withLatestFrom(
-          this._store$.pipe(select(selectCurrentTask)),
-          this._globalConfigService.cfg$,
-          this._syncProviderService.isSyncing$,
+  private _actions$ = inject(Actions);
+  private _store$ = inject<Store<any>>(Store);
+  private _reminderService = inject(ReminderService);
+  private _snackService = inject(SnackService);
+  // Single-shot guard so we don’t spam the user with duplicate warnings.
+  private _hasShownNotificationWarning = false;
+  private _hasCheckedExactAlarm = false;
+
+  askPermissionsIfNotGiven$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        timer(DELAY_PERMISSIONS).pipe(
+          tap(async (v) => {
+            try {
+              const checkResult = await LocalNotifications.checkPermissions();
+              DroidLog.log('AndroidEffects: initial permission check', checkResult);
+              const displayPermissionGranted = checkResult.display === 'granted';
+              if (displayPermissionGranted) {
+                await this._ensureExactAlarmAccess();
+                return;
+              }
+              // Surface a gentle warning early, but defer the actual permission prompt until we truly need it.
+              this._notifyPermissionIssue();
+            } catch (error) {
+              DroidLog.err(error);
+              this._notifyPermissionIssue(error?.toString());
+            }
+          }),
         ),
-        tap(([action, current, cfg, isSyncing]) => {
-          if (isSyncing) {
-            return;
-          }
+      {
+        dispatch: false,
+      },
+    );
 
-          const isPomodoro = cfg.pomodoro.isEnabled;
-          if (current) {
-            const progress: number =
-              Math.round(
-                current &&
-                  current.timeEstimate &&
-                  (current.timeSpent / current.timeEstimate) * 100,
-              ) || 333;
-            androidInterface.updatePermanentNotification?.(
-              current.title,
-              msToClockString(current.timeSpent, true),
-              isPomodoro ? -1 : progress,
-            );
-          } else {
-            this._setDefaultNotification();
-          }
-        }),
-      ),
-    { dispatch: false },
-  );
-
-  syncNotification$ = createEffect(
-    () =>
-      this._syncProviderService.isSyncing$.pipe(
-        // skip first to avoid default message
-        skip(1),
-        distinctUntilChanged(),
-        tap((isSync) =>
-          isSync
-            ? androidInterface.updatePermanentNotification?.(
-                this._translateService.instant(
-                  T.ANDROID.PERMANENT_NOTIFICATION_MSGS.SYNCING,
-                ),
-                '',
-                999,
-              )
-            : this._setDefaultNotification(),
+  scheduleNotifications$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        timer(DELAY_SCHEDULE).pipe(
+          switchMap(() => this._reminderService.reminders$),
+          tap(async (reminders) => {
+            try {
+              if (!reminders || reminders.length === 0) {
+                // Nothing to schedule yet, so avoid triggering the runtime permission dialog prematurely.
+                return;
+              }
+              DroidLog.log('AndroidEffects: scheduling reminders', {
+                reminderCount: reminders.length,
+              });
+              const checkResult = await LocalNotifications.checkPermissions();
+              DroidLog.log('AndroidEffects: pre-schedule permission check', checkResult);
+              let displayPermissionGranted = checkResult.display === 'granted';
+              if (!displayPermissionGranted) {
+                // Reminder scheduling only works after the runtime permission is accepted.
+                const requestResult = await LocalNotifications.requestPermissions();
+                DroidLog.log({ requestResult });
+                displayPermissionGranted = requestResult.display === 'granted';
+                if (!displayPermissionGranted) {
+                  this._notifyPermissionIssue();
+                  return;
+                }
+              }
+              await this._ensureExactAlarmAccess();
+              const pendingNotifications = await LocalNotifications.getPending();
+              DroidLog.log({ pendingNotifications });
+              if (pendingNotifications.notifications.length > 0) {
+                await LocalNotifications.cancel({
+                  notifications: pendingNotifications.notifications.map((n) => ({
+                    id: n.id,
+                  })),
+                });
+              }
+              // Re-schedule the full set so the native alarm manager is always in sync.
+              await LocalNotifications.schedule({
+                notifications: reminders.map((reminder) => {
+                  // Use deterministic ID based on reminder's relatedId to prevent duplicate notifications
+                  const id = generateNotificationId(reminder.relatedId);
+                  const now = Date.now();
+                  const scheduleAt =
+                    reminder.remindAt <= now ? now + 1000 : reminder.remindAt; // push overdue reminders into the immediate future
+                  const mapped: LocalNotificationSchema = {
+                    id,
+                    title: reminder.title,
+                    body: '',
+                    extra: {
+                      reminder,
+                    },
+                    schedule: {
+                      // eslint-disable-next-line no-mixed-operators
+                      at: new Date(scheduleAt),
+                      allowWhileIdle: true,
+                      repeats: false,
+                      every: undefined,
+                    },
+                  };
+                  return mapped;
+                }),
+              });
+              DroidLog.log('AndroidEffects: scheduled local notifications', {
+                reminderCount: reminders.length,
+              });
+            } catch (error) {
+              DroidLog.err(error);
+              this._notifyPermissionIssue(error?.toString());
+            }
+          }),
         ),
-      ),
-    { dispatch: false },
-  );
+      {
+        dispatch: false,
+      },
+    );
 
-  markTaskAsDone$ = createEffect(() =>
-    androidInterface.onMarkCurrentTaskAsDone$.pipe(
-      withLatestFrom(this._store$.select(selectCurrentTask)),
-      filter(([, currentTask]) => !!currentTask),
-      map(([, currentTask]) =>
-        updateTask({
-          task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
-        }),
-      ),
-    ),
-  );
+  // markTaskAsDone$ = createEffect(() =>
+  //   androidInterface.onMarkCurrentTaskAsDone$.pipe(
+  //     withLatestFrom(this._store$.select(selectCurrentTask)),
+  //     filter(([, currentTask]) => !!currentTask),
+  //     map(([, currentTask]) =>
+  //       updateTask({
+  //         task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
+  //       }),
+  //     ),
+  //   ),
+  // );
+  //
+  // pauseTracking$ = createEffect(() =>
+  //   androidInterface.onPauseCurrentTask$.pipe(
+  //     withLatestFrom(this._store$.select(selectCurrentTask)),
+  //     filter(([, currentTask]) => !!currentTask),
+  //     map(([, currentTask]) => setCurrentTask({ id: null })),
+  //   ),
+  // );
+  // showAddTaskBar$ = createEffect(() =>
+  //   androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
+  // );
 
-  pauseTracking$ = createEffect(() =>
-    androidInterface.onPauseCurrentTask$.pipe(
-      withLatestFrom(this._store$.select(selectCurrentTask)),
-      filter(([, currentTask]) => !!currentTask),
-      map(([, currentTask]) => setCurrentTask({ id: null })),
-    ),
-  );
-
-  showAddTaskBar$ = createEffect(() =>
-    androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
-  );
-
-  constructor(
-    private _actions$: Actions,
-    private _store$: Store<any>,
-    private _globalConfigService: GlobalConfigService,
-    private _syncProviderService: SyncProviderService,
-    private _translateService: TranslateService,
-  ) {
-    // wait for initial translation
-    setTimeout(() => {
-      androidInterface.updatePermanentNotification?.(
-        '',
-        this._translateService.instant(T.ANDROID.PERMANENT_NOTIFICATION_MSGS.INITIAL),
-        -1,
-      );
-    }, 4000);
+  private async _ensureExactAlarmAccess(): Promise<void> {
+    try {
+      if (this._hasCheckedExactAlarm) {
+        return;
+      }
+      // Android 12+ gates exact alarms behind a separate toggle; surface the settings screen if needed.
+      const exactAlarmStatus = await LocalNotifications.checkExactNotificationSetting();
+      if (exactAlarmStatus?.exact_alarm !== 'granted') {
+        DroidLog.log(await LocalNotifications.changeExactNotificationSetting());
+      } else {
+        this._hasCheckedExactAlarm = true;
+      }
+    } catch (error) {
+      DroidLog.warn(error);
+    }
   }
 
-  private _setDefaultNotification(): void {
-    androidInterface.updatePermanentNotification?.(
-      '',
-      this._translateService.instant(
-        T.ANDROID.PERMANENT_NOTIFICATION_MSGS.NO_ACTIVE_TASKS,
-      ),
-      -1,
-    );
+  private _notifyPermissionIssue(message?: string): void {
+    if (this._hasShownNotificationWarning) {
+      return;
+    }
+    this._hasShownNotificationWarning = true;
+    // Fallback snackbar so the user gets feedback even when the native APIs throw.
+    this._snackService.open({
+      type: 'ERROR',
+      msg: message || 'Notifications not supported',
+    });
   }
 }

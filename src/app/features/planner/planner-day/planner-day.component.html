@@ -1,0 +1,139 @@
+<header>
+  <div class="day-title">
+    @if (day.isToday) {
+      <mat-icon inline="true">wb_sunny</mat-icon>
+    }
+    {{ day.dayDate | localeDate: 'EEE' }}
+    <span class="date">{{ day.dayDate | shortDate2 }}</span>
+  </div>
+  <!--<div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>-->
+
+  <div class="day-counts">
+    <span>{{ day.timeEstimate | roundDuration | msToString }}</span>
+    @if (day.availableHours !== undefined) {
+      <span class="available-hours"
+        >/ {{ day.availableHours | roundDuration | msToString }}</span
+      >
+    }
+
+    @if (day.itemsTotal > 5) {
+      <mat-icon inline="true">task_alt</mat-icon>
+      <span>{{ day.itemsTotal }}</span>
+    }
+  </div>
+
+  @if (day.progressPercentage !== undefined) {
+    <div class="progress-container">
+      <progress-bar
+        [progress]="day.progressPercentage"
+        [cssClass]="getProgressBarClass(day.progressPercentage)"
+      ></progress-bar>
+    </div>
+  }
+</header>
+
+<div class="normal-tasks">
+  <div
+    class="normal-tasks-items"
+    cdkDropList
+    [cdkDropListData]="day.dayDate"
+    (cdkDropListDropped)="drop('TODO', day.tasks, $event)"
+  >
+    @for (task of day.tasks; track task.id) {
+      <planner-task
+        cdkDrag
+        [cdkDragData]="task"
+        [task]="task"
+        [day]="day.dayDate"
+      ></planner-task>
+    }
+
+    <!-- -->
+    @for (
+      repeatProjection of day.noStartTimeRepeatProjections;
+      track repeatProjection.id
+    ) {
+      <planner-repeat-projection
+        [repeatCfg]="repeatProjection.repeatCfg"
+        [dayDate]="day.dayDate"
+      ></planner-repeat-projection>
+    }
+
+    <!-- -->
+    @if (day.tasks.length === 0 && day.noStartTimeRepeatProjections.length === 0) {
+      <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>
+    }
+  </div>
+
+  <add-task-inline [planForDay]="day.dayDate"></add-task-inline>
+</div>
+
+<div
+  class="scheduled"
+  [class.no-items]="day.scheduledIItems.length === 0"
+>
+  <div class="section-title">
+    <mat-icon>alarm</mat-icon>
+  </div>
+
+  <div
+    class="scheduled-items"
+    cdkDropList
+    cdkDropListSortingDisabled
+    [cdkDropListData]="day.dayDate"
+    (cdkDropListDropped)="drop('SCHEDULED', day.scheduledIItems, $event)"
+  >
+    @for (scheduledItem of day.scheduledIItems; track scheduledItem.id) {
+      <div
+        class="scheduled-item"
+        [ngClass]="scheduledItem.type"
+      >
+        @if (scheduledItem.type === SCHEDULE_ITEM_TYPE.Task) {
+          <div
+            class="time"
+            (click)="editTaskReminderOrReScheduleIfPossible(scheduledItem.task)"
+          >
+            <span
+              class="time-time"
+              [innerHTML]="scheduledItem.start | roundDuration | shortTimeHtml"
+            ></span>
+            <mat-icon>alarm</mat-icon>
+          </div>
+        } @else {
+          <div
+            class="time time-time"
+            [innerHTML]="scheduledItem.start | roundDuration | shortTimeHtml"
+          ></div>
+        }
+
+        <!-- -->
+        @switch (scheduledItem.type) {
+          @case (SCHEDULE_ITEM_TYPE.Task) {
+            <planner-task
+              cdkDrag
+              [task]="scheduledItem.task"
+              [day]="day.dayDate"
+              [cdkDragData]="scheduledItem.task"
+            ></planner-task>
+          }
+          @case (SCHEDULE_ITEM_TYPE.CalEvent) {
+            <planner-calendar-event
+              [calendarEvent]="scheduledItem.calendarEvent"
+            ></planner-calendar-event>
+          }
+          @case (SCHEDULE_ITEM_TYPE.RepeatProjection) {
+            <planner-repeat-projection
+              [repeatCfg]="scheduledItem.repeatCfg"
+              [dayDate]="day.dayDate"
+            ></planner-repeat-projection>
+          }
+        }
+      </div>
+    }
+
+    <!-- -->
+    @if (day.scheduledIItems.length === 0) {
+      <div class="empty">{{ T.F.PLANNER.PLAN_VIEW.NO_SCHEDULED_ITEMS | translate }}</div>
+    }
+  </div>
+</div>

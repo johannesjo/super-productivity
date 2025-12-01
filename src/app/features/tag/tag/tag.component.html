@@ -1,6 +1,23 @@
-<mat-icon
-  [style.background]="color"
-  class="tag-ico"
-  >{{tag?.icon}}</mat-icon
->
-<span class="tag-title">{{tag?.title}}</span>
+@if (tag().icon) {
+  @if (isEmojiIcon()) {
+    <span
+      [style.color]="color()"
+      class="tag-ico tag-ico-emoji"
+      >{{ tag().icon }}
+    </span>
+  } @else {
+    <mat-icon
+      [style.color]="color()"
+      class="tag-ico"
+      >{{ tag().icon }}
+    </mat-icon>
+  }
+} @else {
+  <div
+    class="circle"
+    [style.background]="color()"
+  ></div>
+}
+@if (!isHideTitle()) {
+  <span class="tag-title">{{ tag().title }}</span>
+}

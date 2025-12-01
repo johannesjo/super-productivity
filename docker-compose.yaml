@@ -1,0 +1,29 @@
+services:
+  # Super Productivity app
+  app:
+    image: johannesjo/super-productivity:latest
+    ports:
+      - '8080:80'
+    environment:
+      # Pre-configured defaults for easier setup
+      WEBDAV_BASE_URL: ${WEBDAV_BASE_URL:-http://localhost:2345/}
+      WEBDAV_USERNAME: ${WEBDAV_USERNAME:-admin}
+      WEBDAV_SYNC_FOLDER_PATH: ${WEBDAV_SYNC_FOLDER_PATH:-/}
+      SYNC_INTERVAL: ${SYNC_INTERVAL:-15}
+      IS_COMPRESSION_ENABLED: ${IS_COMPRESSION_ENABLED:-true}
+      IS_ENCRYPTION_ENABLED: ${IS_ENCRYPTION_ENABLED:-false}
+
+  # WebDAV sync server
+  webdav:
+    image: hacdias/webdav:latest
+    ports:
+      - '2345:2345'
+    volumes:
+      - ./webdav.yaml:/config.yml:ro
+      - ${WEBDAV_DATA_DIR:-./data}:/data
+    healthcheck:
+      test: ['CMD', 'wget', '--quiet', '--tries=1', '--spider', 'http://localhost:2345/']
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 10s

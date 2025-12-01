@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TaskService } from '../tasks/task.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { EMPTY, from, merge, Observable, of, Subject, timer } from 'rxjs';
@@ -24,16 +24,13 @@ import { BannerService } from '../../core/banner/banner.service';
 import { BannerId } from '../../core/banner/banner.model';
 import { GlobalConfigState, TakeABreakConfig } from '../config/global-config.model';
 import { T } from '../../t.const';
-import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { NotifyService } from '../../core/notify/notify.service';
-import { ElectronService } from '../../core/electron/electron.service';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import { Tick } from '../../core/global-tracking-interval/tick.model';
-import { ipcRenderer } from 'electron';
 import { PomodoroService } from '../pomodoro/pomodoro.service';
 import { Actions, ofType } from '@ngrx/effects';
-import { triggerResetBreakTimer } from '../idle/store/idle.actions';
+import { idleDialogResult, triggerResetBreakTimer } from '../idle/store/idle.actions';
 import { playSound } from '../../util/play-sound';
 
 const BREAK_TRIGGER_DURATION = 10 * 60 * 1000;
@@ -55,6 +52,20 @@ const BANNER_ID: BannerId = BannerId.TakeABreak;
   providedIn: 'root',
 })
 export class TakeABreakService {
+  private _taskService = inject(TaskService);
+  private _timeTrackingService = inject(GlobalTrackingIntervalService);
+  private _idleService = inject(IdleService);
+  private _actions$ = inject(Actions);
+  private _configService = inject(GlobalConfigService);
+  private _workContextService = inject(WorkContextService);
+  private _notifyService = inject(NotifyService);
+  private _pomodoroService = inject(PomodoroService);
+  private _bannerService = inject(BannerService);
+  private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
+  private _uiHelperService = inject(UiHelperService);
+
+  otherNoBreakTIme$ = new Subject<number>();
+
   private _timeWithNoCurrentTask$: Observable<number> =
     this._taskService.currentTaskId$.pipe(
       switchMap((currentId) => {
@@ -67,8 +78,8 @@ export class TakeABreakService {
 
   private _isIdleResetEnabled$: Observable<boolean> = this._configService.idle$.pipe(
     switchMap((idleCfg) => {
-      const isConfigured =
-        idleCfg.isEnableIdleTimeTracking && idleCfg.isUnTrackedIdleResetsBreakTimer;
+      const isConfigured = idleCfg.isEnableIdleTimeTracking;
+      // return [true];
       if (IS_ELECTRON) {
         return [isConfigured];
       } else if (isConfigured) {
@@ -84,8 +95,33 @@ export class TakeABreakService {
     filter((timeWithNoTask) => timeWithNoTask > BREAK_TRIGGER_DURATION),
   );
 
-  private _tick$: Observable<number> = this._timeTrackingService.tick$.pipe(
-    map((tick) => tick.duration),
+  private _tick$: Observable<number> = merge(
+    this._timeTrackingService.tick$.pipe(
+      map((tick) => tick.duration),
+      filter(() => !!this._taskService.currentTaskId()),
+    ),
+    this._actions$.pipe(ofType(idleDialogResult)).pipe(
+      switchMap(({ trackItems, idleTime, isResetBreakTimer }) => {
+        if (trackItems.find((t) => t.type === 'BREAK')) {
+          return of(0);
+        }
+        if ((trackItems.length === 0 || trackItems.length === 1) && !isResetBreakTimer) {
+          return EMPTY;
+        }
+        return of(
+          trackItems.reduce(
+            (acc, t) =>
+              t.type === 'BREAK'
+                ? // every break resets the timer to zero
+                  0
+                : // for type TASK we add the time
+                  acc + (typeof t.time === 'number' ? t.time : 0),
+            0,
+          ),
+        );
+      }),
+    ),
+    this.otherNoBreakTIme$,
   );
 
   private _triggerSnooze$: Subject<number> = new Subject();
@@ -193,20 +229,7 @@ export class TakeABreakService {
     [number, GlobalConfigState, boolean, boolean]
   > = this._triggerBanner$.pipe(throttleTime(DESKTOP_NOTIFICATION_THROTTLE));
 
-  constructor(
-    private _taskService: TaskService,
-    private _timeTrackingService: GlobalTrackingIntervalService,
-    private _idleService: IdleService,
-    private _actions$: Actions,
-    private _configService: GlobalConfigService,
-    private _workContextService: WorkContextService,
-    private _electronService: ElectronService,
-    private _notifyService: NotifyService,
-    private _pomodoroService: PomodoroService,
-    private _bannerService: BannerService,
-    private _chromeExtensionInterfaceService: ChromeExtensionInterfaceService,
-    private _uiHelperService: UiHelperService,
-  ) {
+  constructor() {
     this._triggerReset$
       .pipe(
         withLatestFrom(this._configService.takeABreak$),
@@ -220,7 +243,7 @@ export class TakeABreakService {
 
     if (IS_ELECTRON) {
       this._triggerLockScreenThrottledAndDelayed$.subscribe(() => {
-        (this._electronService.ipcRenderer as typeof ipcRenderer).send(IPC.LOCK_SCREEN);
+        window.ea.lockScreen();
       });
 
       this._triggerFullscreenBlockerThrottledAndDelayed$
@@ -229,13 +252,10 @@ export class TakeABreakService {
         )
         .subscribe(([, takeABreakCfg, timeWorkingWithoutABreak]) => {
           const msg = this._createMessage(timeWorkingWithoutABreak, takeABreakCfg);
-          (this._electronService.ipcRenderer as typeof ipcRenderer).send(
-            IPC.FULL_SCREEN_BLOCKER,
-            {
-              msg,
-              takeABreakCfg,
-            },
-          );
+          window.ea.showFullScreenBlocker({
+            msg,
+            takeABreakCfg,
+          });
         });
     }
 
@@ -243,7 +263,10 @@ export class TakeABreakService {
       const msg = this._createMessage(timeWithoutBreak, cfg.takeABreak);
       this._notifyService.notifyDesktop({
         tag: 'TAKE_A_BREAK',
-        renotify: true,
+        // Todo: check if applicable
+        ...({
+          renotify: true,
+        } as any),
         title: T.GCF.TAKE_A_BREAK.NOTIFICATION_TITLE,
         body: msg,
       });
@@ -294,7 +317,7 @@ export class TakeABreakService {
           cfg.takeABreak.motivationalImgs.length
             ? cfg.takeABreak.motivationalImgs[
                 Math.floor(Math.random() * cfg.takeABreak.motivationalImgs.length)
-              ]
+              ] || undefined
             : undefined,
       });
     });

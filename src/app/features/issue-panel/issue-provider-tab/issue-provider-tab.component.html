@@ -1,0 +1,135 @@
+<!--- create 10 random list items -->
+<header>
+  <button
+    mat-icon-button
+    style="margin-right: 8px; opacity: 0.5"
+    (click)="openSettings()"
+  >
+    <mat-icon>settings</mat-icon>
+  </button>
+  <div class="title">{{ issueProviderTooltip() }}</div>
+  @let defaultP = defaultProject();
+  @if (defaultP) {
+    <mat-icon class="arrow">arrow_forward</mat-icon>
+    <div class="default-project">{{ defaultP.title }}</div>
+  }
+</header>
+@let ip = issueProvider();
+<!---->
+
+@if (ip.isEnabled) {
+  <!---->
+  @if (ip.issueProviderKey === 'JIRA' && IS_WEB_EXTENSION_REQUIRED_FOR_JIRA) {
+    <div [ngClass]="HelperClasses.isHideForAdvancedFeatures">
+      <p [innerHTML]="T.G.EXTENSION_INFO | translate"></p>
+    </div>
+  }
+  <!---->
+  @if (ip.issueProviderKey === 'ICAL') {
+    <issue-panel-calendar-agenda [issueProvider]="ip"></issue-panel-calendar-agenda>
+  } @else {
+    <form
+      class="example-form"
+      style="width: 100%; margin: 8px 0 16px"
+    >
+      <mat-form-field
+        style="width: 100%; margin: 0"
+        appearance="outline"
+      >
+        <!--      <mat-icon matPrefix>filter_alt</mat-icon>-->
+        <!--      <mat-label>Filter</mat-label>-->
+        <mat-label>Search</mat-label>
+        <mat-icon
+          matPrefix
+          style="opacity: 0.5"
+          >search</mat-icon
+        >
+        <input
+          #searchTextEl
+          [ngModel]="searchText()"
+          (ngModelChange)="searchText.set($event)"
+          autocomplete="off"
+          matInput
+          name="search"
+          placeholder="Search"
+        />
+
+        @if (isPinned()) {
+          <mat-icon
+            class="keep-ico"
+            matSuffix
+            svgIcon="keep_filled"
+            style="cursor: pointer"
+            (click)="unPinSearch()"
+            [matTooltip]="'Clear pinned search query'"
+          ></mat-icon>
+        } @else if (
+          ip?.pinnedSearch?.length || searchText()?.length >= SEARCH_MIN_LENGTH
+        ) {
+          <mat-icon
+            class="keep-ico"
+            matSuffix
+            svgIcon="keep"
+            style="cursor: pointer"
+            (click)="pinSearch()"
+            [matTooltip]="'Remember search query'"
+          ></mat-icon>
+        }
+        <!-- -->
+        @if (searchText().length === 0 && issueProviderHelpLink()) {
+          <mat-hint
+            ><a
+              [href]="issueProviderHelpLink()"
+              target="_blank"
+              >{{ ISSUE_PROVIDER_HUMANIZED[ip.issueProviderKey] }} search syntax</a
+            ></mat-hint
+          >
+        }
+        <!--    @if (searchText()?.length > 0) {-->
+        <!--    <mat-icon-->
+        <!--      style="cursor: pointer"-->
+        <!--      matSuffix-->
+        <!--      (click)="searchText.set('')"-->
+        <!--      >close</mat-icon-->
+        <!--    >-->
+        <!--    }-->
+      </mat-form-field>
+    </form>
+  }
+  <!---->
+  @if (isLoading()) {
+    <div class="spinner">
+      <mat-spinner diameter="50"></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <error-card
+      [errorTxt]="error()"
+      [actionAdvice]="'Check your config!'"
+    ></error-card>
+  } @else if (!issueItems()?.length && searchText()?.length > 0) {
+    <div class="empty">No items found (already added are not shown)</div>
+  } @else {
+    <div
+      class="item-list"
+      [@standardList]="issueItems()?.length"
+    >
+      <!--  (cdkDropListDropped)="drop($event)"-->
+
+      @for (item of issueItems(); track item.issueData.id) {
+        <!--    <div style="display: flex; align-items: center">-->
+        <!--      <button-->
+        <!--        mat-icon-button-->
+        <!--        color=""-->
+        <!--      >-->
+        <!--        <mat-icon>add</mat-icon>-->
+        <!--      </button>-->
+        <issue-preview-item
+          [issueProviderId]="ip.id"
+          [itemData]="item"
+          (addIssue)="addIssue($event)"
+        ></issue-preview-item>
+        <!--    </div>-->
+      }
+    </div>
+  }
+}

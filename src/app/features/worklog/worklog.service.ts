@@ -1,4 +1,4 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Worklog,
   WorklogDay,
@@ -7,7 +7,6 @@ import {
   WorklogYearsWithWeeks,
 } from './worklog.model';
 import { dedupeByKey } from '../../util/de-dupe-by-key';
-import { PersistenceService } from '../../core/persistence/persistence.service';
 import { BehaviorSubject, from, merge, Observable } from 'rxjs';
 import {
   concatMap,
@@ -27,20 +26,34 @@ import { TaskService } from '../tasks/task.service';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { getCompleteStateForWorkContext } from './util/get-complete-state-for-work-context.util';
 import { NavigationEnd, Router } from '@angular/router';
-import { DataInitService } from '../../core/data-init/data-init.service';
 import { WorklogTask } from '../tasks/task.model';
 import { mapArchiveToWorklogWeeks } from './util/map-archive-to-worklog-weeks';
-import * as moment from 'moment';
 import { DateAdapter } from '@angular/material/core';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
+import { TaskArchiveService } from '../time-tracking/task-archive.service';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
+  private readonly _pfapiService = inject(PfapiService);
+  private readonly _workContextService = inject(WorkContextService);
+  private readonly _dataInitStateService = inject(DataInitStateService);
+  private readonly _taskService = inject(TaskService);
+  private readonly _timeTrackingService = inject(TimeTrackingService);
+  private readonly _router = inject(Router);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
+  private _dateAdapter = inject(DateAdapter);
+  private _taskArchiveService = inject(TaskArchiveService);
+
   // treated as private but needs to be assigned first
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
     true,
   );
   _archiveUpdateTrigger$: Observable<any> =
-    this._dataInitService.isAllDataLoadedInitially$.pipe(
+    this._dataInitStateService.isAllDataLoadedInitially$.pipe(
       concatMap(() =>
         merge(
           // this._workContextService.activeWorkContextOnceOnContextChange$,
@@ -151,15 +164,6 @@ export class WorklogService {
     }),
   );
 
-  constructor(
-    private readonly _persistenceService: PersistenceService,
-    private readonly _workContextService: WorkContextService,
-    private readonly _dataInitService: DataInitService,
-    private readonly _taskService: TaskService,
-    private readonly _router: Router,
-    private _dateAdapter: DateAdapter<unknown>,
-  ) {}
-
   refreshWorklog(): void {
     this.archiveUpdateManualTrigger$.next(true);
   }
@@ -173,15 +177,19 @@ export class WorklogService {
   ): Observable<WorklogTask[]> {
     const isProjectIdProvided: boolean = !!projectId || projectId === null;
 
+    // Convert date range to date strings for timezone-safe comparison
+    const rangeStartStr = getDbDateStr(rangeStart);
+    const rangeEndStr = getDbDateStr(rangeEnd);
+
     return this.worklogTasks$.pipe(
       map((tasks) => {
         tasks = tasks.filter((task: WorklogTask) => {
-          // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-          const taskDate = moment(task.dateStr).toDate();
+          // Use date string comparison instead of Date object comparison
+          // to avoid timezone issues
           return (
             (!isProjectIdProvided || task.projectId === projectId) &&
-            taskDate >= rangeStart &&
-            taskDate <= rangeEnd
+            task.dateStr >= rangeStartStr &&
+            task.dateStr <= rangeEndStr
           );
         });
 
@@ -189,10 +197,9 @@ export class WorklogService {
           tasks = tasks.map((task): WorklogTask => {
             const timeSpentOnDay: any = {};
             Object.keys(task.timeSpentOnDay).forEach((dateStr) => {
-              // NOTE: we need to use moment here as otherwise the dates might be off for other time zones
-              const date = moment(dateStr).toDate();
-
-              if (date >= rangeStart && date <= rangeEnd) {
+              // Use date string comparison instead of Date object comparison
+              // to avoid timezone issues
+              if (dateStr >= rangeStartStr && dateStr <= rangeEndStr) {
                 timeSpentOnDay[dateStr] = task.timeSpentOnDay[dateStr];
               }
             });
@@ -212,31 +219,26 @@ export class WorklogService {
   private async _loadWorklogForWorkContext(
     workContext: WorkContext,
   ): Promise<{ worklog: Worklog; totalTimeSpent: number }> {
-    const archive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+    const archive = (await this._taskArchiveService.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();
 
     // console.time('calcTime');
-    const { completeStateForWorkContext, unarchivedIds } = getCompleteStateForWorkContext(
-      workContext,
-      taskState,
-      archive,
-    );
+    const { completeStateForWorkContext, nonArchiveTaskIds } =
+      getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
-    const startEnd = {
-      workStart: workContext.workStart,
-      workEnd: workContext.workEnd,
-    };
+    const workStartEndForWorkContext =
+      await this._timeTrackingService.getLegacyWorkStartEndForWorkContext(workContext);
 
     if (completeStateForWorkContext) {
       const { worklog, totalTimeSpent } = mapArchiveToWorklog(
         completeStateForWorkContext,
-        unarchivedIds,
-        startEnd,
+        nonArchiveTaskIds,
+        workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._dateTimeFormatService.currentLocale,
       );
       return {
         worklog,
@@ -252,31 +254,26 @@ export class WorklogService {
   private async _loadQuickHistoryForWorkContext(
     workContext: WorkContext,
   ): Promise<WorklogYearsWithWeeks | null> {
-    const archive =
-      (await this._persistenceService.taskArchive.loadState()) || createEmptyEntity();
+    const archive = (await this._taskArchiveService.load()) || createEmptyEntity();
     const taskState =
       (await this._taskService.taskFeatureState$.pipe(first()).toPromise()) ||
       createEmptyEntity();
 
     // console.time('calcTime');
-    const { completeStateForWorkContext, unarchivedIds } = getCompleteStateForWorkContext(
-      workContext,
-      taskState,
-      archive,
-    );
+    const { completeStateForWorkContext, nonArchiveTaskIds } =
+      getCompleteStateForWorkContext(workContext, taskState, archive);
     // console.timeEnd('calcTime');
 
-    const startEnd = {
-      workStart: workContext.workStart,
-      workEnd: workContext.workEnd,
-    };
+    const workStartEndForWorkContext =
+      await this._timeTrackingService.getLegacyWorkStartEndForWorkContext(workContext);
 
     if (completeStateForWorkContext) {
       return mapArchiveToWorklogWeeks(
         completeStateForWorkContext,
-        unarchivedIds,
-        startEnd,
+        nonArchiveTaskIds,
+        workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
+        this._dateTimeFormatService.currentLocale,
       );
     }
     return null;

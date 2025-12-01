@@ -1,0 +1,220 @@
+@use '../../../../../styles/_globals.scss' as *;
+@use '../../shared-tag-project-styles';
+
+.clear-btn {
+  opacity: 0.5;
+  border-radius: 4px !important;
+  margin-left: -8px;
+  min-width: 32px;
+  padding: 0;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  flex-shrink: 0;
+
+  @include mq(xs) {
+    margin-left: -8px;
+  }
+
+  mat-icon {
+    margin: 0;
+  }
+
+  &:hover {
+    opacity: 1;
+  }
+}
+
+.project-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.menu-icon-emoji {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+  text-align: center;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+.action-bar {
+  position: relative;
+  padding-top: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  border-top: 1px dashed var(--extra-border-color);
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  @include mq(xs) {
+    gap: 2px;
+  }
+
+  .action-btn {
+    cursor: pointer;
+    opacity: 0.4;
+    display: flex !important;
+    align-items: center;
+    overflow: hidden;
+    font-size: 13px;
+    min-width: 70px !important;
+    flex-shrink: 0;
+    // prevent dark theme being lighter than background
+    background: transparent !important;
+
+    //outline: 1px solid red;
+    //::ng-deep .mdc-button__label {
+    //  outline: 1px solid greenyellow;
+    //}
+    //::ng-deep span {
+    //  outline: 1px solid orchid;
+    //}
+    //::ng-deep mat-icon {
+    //  outline: 1px solid #007bff;
+    //}
+    //::ng-deep > mat-icon {
+    //  outline: 1px solid orange;
+    //}
+
+    ::ng-deep > mat-icon.hide {
+      width: 0;
+      overflow: hidden;
+    }
+
+    // Override mat-button padding to be more compact
+    &.mat-mdc-button {
+      padding: 0 8px;
+
+      .mat-mdc-button-touch-target {
+        display: none; // Remove touch target that can affect layout
+      }
+    }
+
+    @include mq(xs, max) {
+      font-size: 12px;
+    }
+
+    // Material button label wrapper
+    .mdc-button__label {
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      min-width: 0;
+    }
+
+    // Apply ellipsis to the text inside the button
+
+    ::ng-deep > span,
+    > span,
+    .mdc-button__label > span {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0; // Allow span to shrink
+      display: inline-block; // Needed for ellipsis to work
+      max-width: 100%; // Ensure it doesn't exceed parent
+    }
+
+    mat-icon {
+      flex-shrink: 0; // Prevent icon from shrinking
+      margin-right: 4px;
+    }
+
+    &.has-value {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Project button is always active since we always have a project selected
+    &.project-btn {
+      background-color: var(--bg-lightest);
+      opacity: 1;
+    }
+
+    // Highlight when menu is open
+    &.menu-open {
+      background-color: rgba(0, 0, 0, 0.05);
+      opacity: 1;
+
+      @include darkTheme() {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+
+      mat-icon {
+        color: inherit;
+      }
+    }
+
+    .new-tags-indicator {
+      font-size: 0.8em;
+      font-weight: normal;
+      opacity: 0.8;
+      margin-left: 4px;
+    }
+
+    .tags-display {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      overflow: hidden;
+      position: relative;
+      min-height: 20px; // Ensure consistent baseline height
+      line-height: 1; // Normalize line height
+
+      // When nested in span, use inline-flex
+      &:only-child {
+        display: inline-flex;
+        vertical-align: middle;
+      }
+
+      .tag-item {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-shrink: 0;
+        min-width: 0;
+
+        &.new-tag {
+          .tag-title {
+            font-style: italic;
+            opacity: 0.8;
+          }
+
+          mat-icon {
+            color: var(--color-accent);
+          }
+        }
+
+        mat-icon {
+          font-size: 16px;
+          width: 16px;
+          height: 16px;
+          line-height: 16px;
+        }
+
+        .tag-title {
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          min-width: 0;
+          font-size: 0.9em;
+        }
+
+        // Last visible tag gets truncated with ellipsis if needed
+        &:last-child .tag-title {
+          text-overflow: ellipsis;
+        }
+      }
+    }
+  }
+}

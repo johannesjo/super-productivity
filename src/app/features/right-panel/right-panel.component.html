@@ -1,26 +1,40 @@
-<better-drawer-container
-  (wasClosed)="close()"
-  [isOpen]="isOpen$|async"
-  [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
-  [sideWidth]="40"
->
-  <ng-container better-drawer-content>
-    <ng-content></ng-content>
-  </ng-container>
-
-  <ng-container better-drawer-side>
+<div class="content">
+  <ng-content></ng-content>
+</div>
+@if (isOpen()) {
+  <div
+    swipeGesture
+    (swiperight)="IS_TOUCH_PRIMARY && close()"
+    [style]="sideStyle()"
+    class="side"
+    @slideRightPanel
+  >
     <div class="right-panel">
-      <notes
-        *ngIf="!(selectedTaskWithDelayForNone$|async) "
-        [@slideInFromRight]
-      ></notes>
-      <task-additional-info
-        [isOver]="isAlwaysOver || (layoutService.isRightPanelOver$|async)"
-        [@taskAdditionalInfoTaskChange]=" selectedTaskWithDelayForNone?.id"
-        [@.disabled]="isDisableTaskPanelAni"
-        *ngIf="selectedTaskWithDelayForNone$|async as selectedTaskWithDelayForNone"
-        [task]="selectedTaskWithDelayForNone"
-      ></task-additional-info>
+      <!-- Resize Handle -->
+      <div
+        class="resize-handle"
+        (pointerdown)="onResizePointerDown($event)"
+        [attr.aria-label]="'Resize right panel'"
+        role="separator"
+      ></div>
+      <button
+        class="edge-close-handle tour-edge-close-handle"
+        role="button"
+        tabindex="0"
+        [attr.aria-label]="'Close right panel or drag to resize'"
+        (pointerdown)="onCloseButtonPointerDown($event)"
+        (pointerup)="onCloseButtonPointerUp($event)"
+        (keydown.enter)="close()"
+      >
+        <mat-icon>chevron_right</mat-icon>
+      </button>
+
+      <div
+        class="side-inner"
+        [style.min-width.px]="panelWidth()"
+      >
+        <right-panel-content></right-panel-content>
+      </div>
     </div>
-  </ng-container>
-</better-drawer-container>
+  </div>
+}

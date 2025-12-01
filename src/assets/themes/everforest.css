@@ -1,0 +1,601 @@
+/**
+ * Everforest Theme for Super Productivity
+ * Dark and Light themes inspired by the Everforest color scheme
+ * Based on the sainnhe/everforest vim theme
+ */
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 150ms ease-in-out;
+  --transition-normal: 250ms ease-in-out;
+}
+
+/* ===============================
+ * EVERFOREST LIGHT MODE
+ * ===============================*/
+body:not(.isDarkTheme) {
+  /* ===============================
+   * EVERFOREST LIGHT COLOR PALETTE
+   * ===============================*/
+
+  /* Background colors - Light */
+  --everforest-bg-dim: #f2efdf;
+  --everforest-bg0: #fdf6e3;
+  --everforest-bg1: #f4f0d9;
+  --everforest-bg2: #efebd4;
+  --everforest-bg3: #e6e2cc;
+  --everforest-bg4: #e0dcc7;
+  --everforest-bg5: #bdc3af;
+
+  /* Foreground colors - Light */
+  --everforest-fg: #5c6a72;
+  --everforest-fg-dim: #708089;
+  --everforest-grey0: #a6b0a0;
+  --everforest-grey1: #939f91;
+  --everforest-grey2: #829181;
+
+  /* Main accent colors - Light (more vibrant for light mode) */
+  --everforest-red: #f85552;
+  --everforest-orange: #f57d26;
+  --everforest-yellow: #dfa000;
+  --everforest-green: #8da101;
+  --everforest-aqua: #35a77c;
+  --everforest-blue: #3a94c5;
+  --everforest-purple: #df69ba;
+
+  /* Additional colors - Light */
+  --everforest-bg-green: #dce5c2;
+  --everforest-bg-red: #fbe3da;
+  --everforest-bg-blue: #e0e9f0;
+  --everforest-bg-yellow: #f4e6d0;
+
+  /* ===============================
+   * BACKGROUND COLORS - LIGHT
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: var(--everforest-bg0);
+  --bg-darker: var(--everforest-bg1);
+  --bg-slightly-lighter: var(--everforest-bg-dim);
+  --bg-lighter: var(--everforest-bg-dim);
+  --bg-lightest: var(--everforest-bg-dim);
+  --bg-super-light: var(--everforest-bg5);
+
+  /* Component backgrounds */
+  --card-bg: #fffbf0;
+  --sidenav-bg: var(--everforest-bg1);
+  --selected-task-bg-color: var(--everforest-bg2);
+  --banner-bg: var(--everforest-bg2);
+
+  /* Task backgrounds - warmer yellowish tones */
+  --task-c-bg: #fffdf5;
+  --task-c-selected-bg: #f8f4e6;
+  --sub-task-c-bg: #fffdf5;
+  --sub-task-c-bg-done: rgba(141, 161, 1, 0.08);
+  --task-c-bg-done: rgba(141, 161, 1, 0.08);
+  --task-c-current-bg: #f5f0dd;
+  --task-c-drag-drop-bg: var(--everforest-bg3);
+  --sub-task-c-bg-in-selected: #faf6e8;
+
+  /* Note backgrounds */
+  --standard-note-bg: #fffbf0;
+  --standard-note-bg-hovered: var(--everforest-bg2);
+
+  /* Planner specific */
+  --planner-task-bg: #fffdf5;
+  --planner-days-bg: var(--everforest-bg1);
+
+  /* ===============================
+   * TEXT COLORS - LIGHT
+   * ===============================*/
+
+  --text-color: var(--everforest-fg);
+  --text-color-less-intense: rgba(92, 106, 114, 0.87);
+  --text-color-muted: var(--everforest-grey1);
+  --text-color-more-intense: #3c474d;
+  --text-color-most-intense: #2b3339;
+
+  /* Note text */
+  --standard-note-fg: var(--everforest-fg);
+
+  /* Task detail */
+  --task-detail-value-color: rgba(92, 106, 114, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS - LIGHT
+   * ===============================*/
+
+  --extra-border-color: var(--everforest-bg3);
+  --separator-color: rgba(189, 195, 175, 0.6);
+  --divider-color: var(--everforest-bg3);
+
+  /* Chip borders */
+  --chip-outline-color: rgba(92, 106, 114, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS - LIGHT
+   * ===============================*/
+
+  /* Primary accent - Everforest green */
+  --palette-accent-500: var(--everforest-green);
+  --c-accent: var(--everforest-green);
+  --palette-accent-100: #e8edc0;
+  --palette-accent-200: #d9e3a6;
+  --palette-accent-300: #cad98c;
+  --palette-accent-400: #bbcf72;
+  --palette-accent-600: #7d9001;
+  --palette-accent-700: #6d7f01;
+  --palette-accent-800: #5d6e01;
+  --palette-accent-900: #4d5d01;
+
+  /* Secondary colors */
+  --c-success: var(--everforest-green);
+  --c-warning: var(--everforest-yellow);
+  --c-error: var(--everforest-red);
+  --c-info: var(--everforest-blue);
+
+  /* Alternative accents */
+  --everforest-accent-aqua: var(--everforest-aqua);
+  --everforest-accent-purple: var(--everforest-purple);
+
+  /* ===============================
+   * UI ELEMENTS - LIGHT
+   * ===============================*/
+
+  /* Scrollbar - Light */
+  --scrollbar-thumb: var(--everforest-bg5);
+  --scrollbar-thumb-hover: var(--everforest-green);
+  --scrollbar-track: var(--everforest-bg1);
+
+  /* Close button */
+  --close-btn-bg: var(--everforest-bg3);
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(141, 161, 1, 0.12);
+  --options-border-color: rgba(141, 161, 1, 0.2);
+
+  /* Attachments */
+  --attachment-bg: var(--everforest-bg1);
+  --attachment-border: var(--everforest-bg3);
+  --attachment-control-bg: rgba(255, 255, 255, 0.8);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(255, 255, 255, 0.95);
+
+  /* Grid */
+  --grid-color: rgba(92, 106, 114, 0.08);
+
+  /* Progress */
+  --progress-bg: rgba(92, 106, 114, 0.15);
+
+  /* Improvement banner */
+  --improvement-text: var(--everforest-fg);
+  --improvement-border: rgba(141, 161, 1, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* Special backgrounds */
+  --color-background-color-options: var(--everforest-bg2);
+  --color-background-text-field: var(--everforest-bg1);
+  --color-background-dark: var(--everforest-bg3);
+  --color-background-notes: var(--everforest-bg1);
+  --color-background-inline-markdown: var(--everforest-bg2);
+  --color-background-button-shadow: var(--everforest-green);
+
+  /* ===============================
+   * SHADOWS - LIGHT (softer)
+   * ===============================*/
+
+  --shadow-key-umbra-opacity: 0.08;
+  --shadow-key-penumbra-opacity: 0.05;
+  --shadow-ambient-shadow-opacity: 0.03;
+
+  /* Task shadows */
+  --task-current-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+  --task-selected-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+
+  /* ===============================
+   * HOVER CONTROLS - LIGHT
+   * ===============================*/
+
+  --hover-controls-border: 1px solid rgba(141, 161, 1, 0.3);
+  --hover-controls-border-opacity: 0.3;
+
+  /* ===============================
+   * INTERACTION STATES - LIGHT
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+
+  /* ===============================
+   * CODE & MARKDOWN - LIGHT
+   * ===============================*/
+
+  --code-bg: var(--everforest-bg2);
+  --code-fg: var(--everforest-orange);
+  --inline-code-bg: var(--everforest-bg2);
+  --inline-code-fg: var(--everforest-orange);
+}
+
+/* ===============================
+ * EVERFOREST DARK MODE
+ * ===============================*/
+body.isDarkTheme {
+  /* ===============================
+   * EVERFOREST COLOR PALETTE
+   * ===============================*/
+
+  /* Background colors */
+  --everforest-bg-dim: #1e2326;
+  --everforest-bg0: #272e33;
+  --everforest-bg1: #2e383c;
+  --everforest-bg2: #374145;
+  --everforest-bg3: #414b50;
+  --everforest-bg4: #495156;
+  --everforest-bg5: #4f5b58;
+
+  /* Foreground colors */
+  --everforest-fg: #d3c6aa;
+  --everforest-fg-dim: #a7a085;
+  --everforest-grey0: #7a8478;
+  --everforest-grey1: #859289;
+  --everforest-grey2: #9da9a0;
+
+  /* Main accent colors */
+  --everforest-red: #e67e80;
+  --everforest-orange: #e69875;
+  --everforest-yellow: #dbbc7f;
+  --everforest-green: #a7c080;
+  --everforest-aqua: #83c092;
+  --everforest-blue: #7fbbb3;
+  --everforest-purple: #d699b6;
+
+  /* Additional colors */
+  --everforest-bg-green: #404d44;
+  --everforest-bg-red: #514045;
+  --everforest-bg-blue: #415058;
+  --everforest-bg-yellow: #4d4c43;
+
+  /* ===============================
+   * BACKGROUND COLORS
+   * ===============================*/
+
+  /* Main backgrounds */
+  --bg: var(--everforest-bg0);
+  --bg-darker: var(--everforest-bg-dim);
+  --bg-slightly-lighter: var(--everforest-bg1);
+  --bg-lighter: var(--everforest-bg2);
+  --bg-lightest: var(--everforest-bg3);
+  --bg-super-light: var(--everforest-bg5);
+
+  /* Component backgrounds */
+  --card-bg: var(--everforest-bg1);
+  --sidenav-bg: var(--everforest-bg-dim);
+  --selected-task-bg-color: var(--everforest-bg2);
+  --banner-bg: var(--everforest-bg2);
+
+  /* Task backgrounds with better hierarchy */
+  --task-c-bg: var(--everforest-bg1);
+  --task-c-selected-bg: var(--everforest-bg2);
+  --sub-task-c-bg: var(--everforest-bg1);
+  --sub-task-c-bg-done: rgba(167, 192, 128, 0.08);
+  --task-c-bg-done: rgba(167, 192, 128, 0.08);
+  --task-c-current-bg: var(--everforest-bg3);
+  --task-c-drag-drop-bg: var(--everforest-bg3);
+  --sub-task-c-bg-in-selected: var(--everforest-bg2);
+
+  /* Note backgrounds */
+  --standard-note-bg: var(--everforest-bg1);
+  --standard-note-bg-hovered: var(--everforest-bg2);
+
+  /* Planner specific */
+  --planner-task-bg: var(--everforest-bg-dim);
+  --planner-days-bg: var(--everforest-bg-dim);
+
+  /* ===============================
+   * TEXT COLORS
+   * ===============================*/
+
+  --text-color: var(--everforest-fg);
+  --text-color-less-intense: rgba(211, 198, 170, 0.87);
+  --text-color-muted: var(--everforest-grey1);
+  --text-color-more-intense: var(--everforest-fg);
+  --text-color-most-intense: #ffffff;
+
+  /* Note text */
+  --standard-note-fg: var(--everforest-fg);
+
+  /* Task detail */
+  --task-detail-value-color: rgba(211, 198, 170, 0.7);
+
+  /* ===============================
+   * BORDERS & SEPARATORS
+   * ===============================*/
+
+  --extra-border-color: var(--everforest-bg-dim);
+  --separator-color: rgba(78, 90, 88, 0.6);
+  --divider-color: var(--everforest-bg-dim);
+
+  /* Chip borders */
+  --chip-outline-color: rgba(211, 198, 170, 0.23);
+
+  /* ===============================
+   * ACCENT & THEME COLORS
+   * ===============================*/
+
+  /* Primary accent - Everforest green */
+  --palette-accent-500: var(--everforest-green);
+  --c-accent: var(--everforest-green);
+  --palette-accent-100: #d4dfcc;
+  --palette-accent-200: #c2d4b3;
+  --palette-accent-300: #b0c99a;
+  --palette-accent-400: #9ebe81;
+  --palette-accent-600: #8ba66f;
+  --palette-accent-700: #7a9162;
+  --palette-accent-800: #697c55;
+  --palette-accent-900: #586748;
+
+  /* Secondary colors */
+  --c-success: var(--everforest-green);
+  --c-warning: var(--everforest-yellow);
+  --c-error: var(--everforest-red);
+  --c-info: var(--everforest-blue);
+
+  /* Alternative accents */
+  --everforest-accent-aqua: var(--everforest-aqua);
+  --everforest-accent-purple: var(--everforest-purple);
+
+  /* ===============================
+   * UI ELEMENTS
+   * ===============================*/
+
+  /* Scrollbar - Everforest styled */
+  --scrollbar-thumb: var(--everforest-bg3);
+  --scrollbar-thumb-hover: var(--everforest-green);
+  --scrollbar-track: var(--everforest-bg0);
+
+  /* Close button */
+  --close-btn-bg: var(--everforest-bg3);
+  --close-btn-border: transparent;
+
+  /* Select/Options */
+  --select-hover-bg: rgba(167, 192, 128, 0.12);
+  --options-border-color: rgba(167, 192, 128, 0.2);
+
+  /* Attachments */
+  --attachment-bg: var(--everforest-bg1);
+  --attachment-border: transparent;
+  --attachment-control-bg: rgba(0, 0, 0, 0.3);
+  --attachment-control-border: transparent;
+  --attachment-control-hover-bg: rgba(0, 0, 0, 0.7);
+
+  /* Grid */
+  --grid-color: rgba(211, 198, 170, 0.08);
+
+  /* Progress */
+  --progress-bg: rgba(211, 198, 170, 0.15);
+
+  /* Improvement banner */
+  --improvement-text: var(--everforest-fg);
+  --improvement-border: rgba(167, 192, 128, 0.3);
+  --improvement-button-text: #ffffff;
+
+  /* Special backgrounds */
+  --color-background-color-options: var(--everforest-bg2);
+  --color-background-text-field: rgba(211, 198, 170, 0.1);
+  --color-background-dark: var(--everforest-bg-dim);
+  --color-background-notes: var(--everforest-bg1);
+  --color-background-inline-markdown: var(--everforest-bg2);
+  --color-background-button-shadow: var(--everforest-green);
+
+  /* ===============================
+   * SHADOWS - SUBTLE & NATURAL
+   * ===============================*/
+
+  /* Subtle shadows for Everforest theme */
+  --shadow-key-umbra-opacity: 0.12;
+  --shadow-key-penumbra-opacity: 0.08;
+  --shadow-ambient-shadow-opacity: 0.06;
+
+  /* Task shadows */
+  --task-current-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  --task-selected-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+
+  /* ===============================
+   * HOVER CONTROLS
+   * ===============================*/
+
+  --hover-controls-border: 1px solid rgba(167, 192, 128, 0.3);
+  --hover-controls-border-opacity: 0.3;
+
+  /* ===============================
+   * INTERACTION STATES
+   * ===============================*/
+
+  --hover-bg-opacity: 0.04;
+  --focus-bg-opacity: 0.08;
+  --pressed-bg-opacity: 0.12;
+  --disabled-opacity: 0.38;
+
+  /* ===============================
+   * CODE & MARKDOWN
+   * ===============================*/
+
+  --code-bg: var(--everforest-bg2);
+  --code-fg: var(--everforest-orange);
+  --inline-code-bg: var(--everforest-bg2);
+  --inline-code-fg: var(--everforest-orange);
+}
+
+/* Apply background and text colors */
+body {
+  background-color: var(--bg);
+  color: var(--text-color) !important;
+  transition:
+    background-color var(--transition-normal),
+    color var(--transition-normal);
+}
+
+/* Page wrapper */
+body .page-wrapper {
+  color: var(--text-color) !important;
+}
+
+/* Links with Everforest accent - different for light/dark */
+body:not(.isDarkTheme) a,
+body:not(.isDarkTheme) a[href] {
+  color: var(--everforest-aqua);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+body:not(.isDarkTheme) a:hover,
+body:not(.isDarkTheme) a[href]:hover {
+  opacity: 0.9;
+  color: var(--everforest-blue);
+}
+
+body.isDarkTheme a,
+body.isDarkTheme a[href] {
+  color: var(--everforest-aqua);
+  text-decoration: none;
+  transition: opacity var(--transition-fast);
+}
+
+body.isDarkTheme a:hover,
+body.isDarkTheme a[href]:hover {
+  opacity: 0.8;
+  color: var(--everforest-blue);
+}
+
+/* Smooth hover states */
+.task-c:hover,
+.sub-task-c:hover {
+  background-color: var(--task-c-selected-bg);
+  transition: background-color var(--transition-fast);
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  outline: 2px solid var(--c-accent);
+  outline-offset: 2px;
+}
+
+/* Material overrides for Everforest theme - Light mode */
+body:not(.isDarkTheme) {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--everforest-green);
+}
+
+/* Material overrides for Everforest theme - Dark mode */
+body.isDarkTheme {
+  --mat-theme-surface: var(--card-bg);
+  --mat-theme-on-surface: var(--text-color);
+  --mat-theme-background: var(--bg);
+  --mat-theme-primary: var(--everforest-green);
+}
+
+/* Special Everforest styling classes */
+.everforest-red {
+  color: var(--everforest-red);
+}
+.everforest-orange {
+  color: var(--everforest-orange);
+}
+.everforest-yellow {
+  color: var(--everforest-yellow);
+}
+.everforest-green {
+  color: var(--everforest-green);
+}
+.everforest-aqua {
+  color: var(--everforest-aqua);
+}
+.everforest-blue {
+  color: var(--everforest-blue);
+}
+.everforest-purple {
+  color: var(--everforest-purple);
+}
+
+/* Code blocks and inline code */
+code,
+pre {
+  background-color: var(--code-bg) !important;
+  color: var(--code-fg) !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+}
+
+pre {
+  padding: 8px 12px;
+}
+
+/* Completed tasks - subtle green tint */
+.task-c.isDone,
+.sub-task-c.isDone {
+  background-color: var(--task-c-bg-done);
+  opacity: 0.85;
+}
+
+/* Active/current task highlight */
+.task-c.isCurrent {
+  background-color: var(--task-c-current-bg);
+  border-left: 3px solid var(--everforest-green);
+}
+
+/* Input fields */
+input,
+textarea,
+select {
+  background-color: var(--color-background-text-field);
+  border-color: var(--everforest-bg3);
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  border-color: var(--everforest-green);
+  outline: none;
+}
+
+/* Success/warning/error states with Everforest colors */
+.success {
+  color: var(--everforest-green);
+}
+
+.warning {
+  color: var(--everforest-yellow);
+}
+
+.error,
+.danger {
+  color: var(--everforest-red);
+}
+
+/* Info text */
+.info {
+  color: var(--everforest-blue);
+}
+
+/* Selected text */
+::selection {
+  background-color: rgba(167, 192, 128, 0.3);
+  color: var(--text-color-most-intense);
+}
+
+/* Progress bars */
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-active-indicator-color: var(--everforest-green);
+  --mdc-linear-progress-track-color: var(--everforest-bg3);
+}
+
+/* Snackbar */
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--everforest-bg3);
+  --mdc-snackbar-supporting-text-color: var(--everforest-fg);
+}

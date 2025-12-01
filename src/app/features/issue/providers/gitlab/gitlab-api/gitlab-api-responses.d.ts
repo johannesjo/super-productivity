@@ -25,7 +25,9 @@ export type GitlabOriginalUser = Readonly<{
 }>;
 
 export type GitlabOriginalIssue = Readonly<{
+  // unique identifier used in GitLab db and is only usable for admins in many cases
   id: number;
+  // unique only on a project level
   iid: number;
   project_id: number;
   title: string;

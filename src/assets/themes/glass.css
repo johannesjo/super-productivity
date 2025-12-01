@@ -1,0 +1,131 @@
+/**
+ * Glass Theme for Super Productivity
+ * Minimal glassmorphism design with frosted glass effects
+ */
+
+/* Remove shadows for clean glass aesthetic */
+* {
+  box-shadow: none !important;
+  font-family: /*"Sawasdee",*/
+    'Ubuntu Sans',
+    Ubuntu,
+    -apple-system,
+    BlinkMacSystemFont,
+    'Helvetica Neue',
+    'Noto Sans',
+    sans-serif;
+}
+
+/* Smooth transitions */
+:root {
+  --transition-fast: 200ms ease-in-out;
+  --transition-normal: 300ms ease-in-out;
+}
+
+/* Glass theme variables */
+body,
+body.isDarkTheme {
+  /* Background colors - much darker glass */
+  /*--bg: rgba(8, 8, 15, 0.99);*/
+  /*--bg-darker: rgba(5, 5, 12, 1);*/
+  /*--bg-slightly-lighter: rgba(15, 15, 22, 0.98);*/
+  /*--bg-lighter: rgba(22, 22, 30, 0.95);*/
+  /*--bg-lightest: rgba(30, 30, 38, 0.9);*/
+  /*--bg-super-light: rgba(38, 38, 46, 0.85);*/
+
+  /*!* Glass component backgrounds - darker *!*/
+  --card-bg: rgba(255, 255, 255, 0.05);
+  --sidenav-bg: rgba(255, 255, 255, 0.02);
+  --selected-task-bg-color: rgba(255, 255, 255, 0.08);
+  --banner-bg: rgba(255, 255, 255, 0.06);
+
+  /*!* Glass task backgrounds - darker *!*/
+  --task-c-bg: rgba(255, 255, 255, 0.05);
+  --task-detail-bg: rgba(255, 255, 255, 0.05);
+  --task-c-selected-bg: rgba(255, 255, 255, 0.08);
+  --sub-task-c-bg: rgba(255, 255, 255, 0.02);
+  --sub-task-c-bg-done: rgba(255, 255, 255, 0.01);
+  --task-c-bg-done: rgba(255, 255, 255, 0.02);
+  --task-c-current-bg: rgba(74, 158, 255, 0.1);
+  --task-c-drag-drop-bg: rgba(108, 124, 230, 0.1);
+  --sub-task-c-bg-in-selected: rgba(255, 255, 255, 0.05);
+
+  /*!* Glass note backgrounds - darker *!*/
+  --standard-note-bg: rgba(255, 255, 255, 0.05);
+  --standard-note-bg-hovered: rgba(255, 255, 255, 0.08);
+
+  /*!* Text colors *!*/
+  /*--text-color: rgba(255, 255, 255, 0.95);*/
+  /*--text-color-less-intense: rgba(255, 255, 255, 0.8);*/
+  /*--text-color-muted: rgba(255, 255, 255, 0.6);*/
+  /*--text-color-more-intense: rgba(255, 255, 255, 1);*/
+  /*--text-color-most-intense: rgba(255, 255, 255, 1);*/
+  /*--standard-note-fg: rgba(255, 255, 255, 0.9);*/
+  /*--task-detail-value-color: rgba(255, 255, 255, 0.7);*/
+
+  /*!* Borders & separators *!*/
+  --extra-border-color: rgba(255, 255, 255, 0.1);
+  --separator-color: rgba(255, 255, 255, 0.15);
+  --divider-color: rgba(255, 255, 255, 0.08);
+  --chip-outline-color: rgba(255, 255, 255, 0.2);
+
+  /*!* Accent & theme colors *!*/
+  /*--palette-accent-500: var(--glass-accent);*/
+  /*--c-accent: var(--glass-accent);*/
+  /*--c-success: var(--glass-success);*/
+  /*--c-warning: var(--glass-warning);*/
+  /*--c-error: var(--glass-error);*/
+  /*--c-info: var(--glass-primary);*/
+
+  /*!* UI elements *!*/
+  /*--close-btn-bg: rgba(255, 255, 255, 0.1);*/
+  /*--close-btn-border: rgba(255, 255, 255, 0.2);*/
+
+  /*--select-hover-bg: rgba(108, 124, 230, 0.15);*/
+  /*--options-border-color: rgba(255, 255, 255, 0.2);*/
+
+  /*--attachment-bg: rgba(255, 255, 255, 0.08);*/
+  /*--grid-color: rgba(255, 255, 255, 0.05);*/
+  /*--progress-bg: rgba(255, 255, 255, 0.1);*/
+
+  /*!* Shadows - disabled *!*/
+  /*--shadow-key-umbra-opacity: 0;*/
+  /*--shadow-key-penumbra-opacity: 0;*/
+  /*--shadow-ambient-shadow-opacity: 0;*/
+  /*--task-current-shadow: none;*/
+  /*--task-selected-shadow: none;*/
+
+  /*!* Hover controls *!*/
+  /*--hover-controls-border: rgba(108, 124, 230, 0.3);*/
+  /*--hover-controls-border-opacity: 0.3;*/
+
+  /*!* Interaction states *!*/
+  /*--hover-bg-opacity: 0.06;*/
+  /*--focus-bg-opacity: 0.1;*/
+  /*--pressed-bg-opacity: 0.15;*/
+  /*--disabled-opacity: 0.4;*/
+
+  --right-panel-bg: transparent;
+}
+
+schedule header,
+schedule-event.ScheduledRepeatProjection {
+  background: rgba(255, 255, 255, 0.1) !important;
+}
+
+schedule-event.ScheduledRepeatProjection,
+.mat-mdc-mini-fab.mat-unthemed {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Glass task styling */
+schedule header,
+schedule-event,
+.mat-mdc-mini-fab,
+better-drawer-container .side,
+note,
+mat-card,
+planner-task,
+task .box {
+  backdrop-filter: blur(64px) !important;
+}

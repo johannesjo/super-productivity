@@ -1,5 +1,4 @@
 import { dirtyDeepCopy } from '../../util/dirtyDeepCopy';
-import { AppDataComplete } from '../sync/sync.model';
 
 let i: number = 0;
 
@@ -14,10 +13,17 @@ const KEY_TO_REPLACE = [
   'host',
   'gitlabBaseUrl',
   'syncFilePath',
+  'syncFolderPath',
   'title',
   'originalImgPath',
   'path',
   'content',
+
+  'repo',
+  'repoFullname',
+  'filterUserName',
+  'caldavUrl',
+  'api_key',
 ];
 
 const maskString = (key: string, val: string, counter: number): string => {
@@ -28,11 +34,13 @@ const maskString = (key: string, val: string, counter: number): string => {
   }
 };
 
-const recurse = (obj: any): void => {
+const recurse = (obj: unknown): void => {
+  if (typeof obj !== 'object' || obj === null) return;
+
   // eslint-disable-next-line guard-for-in
   for (const key in obj) {
     if (Object.prototype.hasOwnProperty.call(obj, key)) {
-      const val = obj[key];
+      const val = (obj as Record<string, unknown>)[key];
       if (Array.isArray(val)) {
         val.forEach((arrVal) => {
           if (typeof arrVal === 'object' && arrVal !== null) {
@@ -42,16 +50,15 @@ const recurse = (obj: any): void => {
       } else if (typeof val === 'object' && val !== null) {
         recurse(val);
       } else if (typeof val === 'string') {
-        obj[key] = maskString(key, val, i);
+        (obj as Record<string, unknown>)[key] = maskString(key, val, i);
       }
     }
     i++;
   }
 };
 
-export const privacyExport = (d: AppDataComplete): string => {
+export const privacyExport = (d: unknown): string => {
   const cpy = dirtyDeepCopy(d);
   recurse(cpy);
-
   return JSON.stringify(cpy);
 };

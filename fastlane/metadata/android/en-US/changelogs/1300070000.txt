@@ -1,0 +1,6 @@
+
+### Bug Fixes
+
+* actual sync provider state in sync button #4374
+* prevent sync provider being set wrong initially
+* sidebar opens when toggling any misc setting on mobile #4379

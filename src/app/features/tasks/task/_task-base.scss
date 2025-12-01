@@ -1,0 +1,245 @@
+@use '../../../../styles/_globals.scss' as *;
+@use 'task.component.mixins' as *;
+
+// TASK BOX STYLES
+// ---------------
+// NOTE: needs to come first to be overwritten by :host.isCurrent
+// NOTE: needs to be very light, because we're on a lighter background for the dark theme
+:host-context(.isDarkTheme) {
+  color: var(--text-color);
+}
+
+:host-context(.isDarkTheme).isSelected,
+:host-context(.isDarkTheme).isCurrent {
+  color: var(--text-color-most-intense);
+}
+
+:host {
+  --task-button-spacer: 1px;
+  --play-icon-size: 22px;
+  --task-icon-size: 40px;
+  --mini-badge-size: var(--s2);
+
+  display: block;
+  position: relative;
+
+  color: var(--text-color);
+
+  &.isSelected {
+    z-index: var(--z-is-selected-host);
+    //position: sticky;
+    //top: 16px;
+  }
+
+  &.isCurrent {
+    z-index: var(--z-is-current-host);
+    position: sticky;
+    top: var(--s);
+  }
+
+  &:focus {
+    z-index: var(--z-focus-host);
+    outline: none;
+  }
+}
+
+.inner-wrapper {
+  position: relative;
+  // NOTE: -1 px because we move the box slightly up
+  padding: calc(var(--task-inner-padding-top-bottom) - 1px) 0
+    var(--task-inner-padding-top-bottom);
+  margin-bottom: 0;
+}
+
+//::ng-deep task .box {
+//  background: red !important;
+//}
+
+.box {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 2px;
+  top: 2px;
+  transition: var(--transition-standard);
+  transition-property: transform, box-shadow;
+  border: var(--task-border, 1px solid transparent);
+  border-radius: var(--task-border-radius);
+  box-shadow: var(--task-shadow);
+
+  background: var(--task-c-bg);
+
+  // NOTE: also applies to child tasks
+  :host-context(.isLightTheme).isSelected.isSelected & {
+    background: var(--task-c-selected-bg);
+  }
+
+  :host-context(.isDarkTheme).isDone & {
+    background: var(--task-c-bg-done);
+  }
+
+  :host-context(.isDarkTheme).isSelected.isSelected & {
+    background: var(--task-c-selected-bg);
+  }
+
+  :host.isSelected.isSelected > .inner-wrapper > & {
+    transition: var(--transition-enter);
+    transition-property: left, right, box-shadow;
+    box-shadow: var(--task-selected-shadow);
+    // because of the shadow, this looks better
+    //bottom: 2px;
+
+    //@include darkTheme {
+    //  box-shadow: var(--whiteframe-shadow-4dp);
+    //}
+
+    @include mq(xs) {
+      transform-origin: left;
+      left: calc(-1 * var(--task-border-radius));
+      border-top-left-radius: var(--task-border-radius);
+      border-bottom-left-radius: var(--task-border-radius);
+    }
+
+    @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected
+        .sub-tasks
+        ::ng-deep
+        .box {
+      background: var(--sub-task-c-bg-in-selected);
+    }
+  }
+
+  :host:focus > .inner-wrapper > & {
+    border-radius: var(--task-border-radius);
+    // we don't want focus borders for touch only devices
+    @include noTouchOnly() {
+      border-color: var(--palette-primary-400);
+      border-width: 1px;
+      border-style: solid !important;
+    }
+  }
+
+  :host:focus.mobile-highlight-searched-item > .inner-wrapper > & {
+    border-color: var(--palette-primary-400);
+    border-width: 1px;
+    border-style: solid !important;
+  }
+
+  :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
+    border-radius: var(--task-border-radius);
+    box-shadow: var(--task-current-shadow);
+    // because of the shadow, this looks better
+    //bottom: 2px;
+
+    @include mq(xs) {
+      //transform: scale($task-current-task-zoom);
+      left: calc(-1 * var(--task-border-radius));
+      right: calc(-1 * var(--task-border-radius));
+    }
+  }
+
+  :host.isSelected.isSelected > .inner-wrapper > &,
+  :host.isSelected.isCurrent.isCurrent.isCurrent.isCurrent & {
+    @include mq(xs) {
+      right: -34px;
+    }
+    @include mq(md) {
+      right: -234px;
+    }
+    @include mq(xl) {
+      right: calc(-1 * var(--task-border-radius));
+    }
+  }
+
+  :host-context(.isLightTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
+    border-color: var(--c-accent) !important;
+    border-width: 1px !important;
+    border-style: dashed;
+  }
+
+  :host-context(.isDarkTheme).isCurrent.isCurrent.isCurrent.isCurrent & {
+    background: var(--task-c-current-bg);
+    box-shadow: var(--task-current-shadow);
+  }
+
+  :host:first-child > .inner-wrapper > & {
+    border-top-left-radius: var(--task-border-radius);
+    border-top-right-radius: var(--task-border-radius);
+  }
+
+  :host:last-child > .inner-wrapper > & {
+    border-bottom-left-radius: var(--task-border-radius);
+    border-bottom-right-radius: var(--task-border-radius);
+  }
+}
+
+.sub-tasks {
+  margin: var(--s) var(--s) var(--s) var(--s3);
+  position: relative;
+
+  @include mq(xs) {
+    //margin: var(--s) var(--s2) var(--s) var(--s3);
+    margin: var(--s) var(--s) var(--s) var(--s5);
+  }
+
+  ::ng-deep .box {
+    box-shadow: var(--task-shadow-sub-task);
+    border-radius: 0;
+    top: -1px;
+    background: var(--sub-task-c-bg);
+
+    @include lightTheme {
+      border-color: var(--extra-border-color);
+      bottom: 0;
+    }
+  }
+}
+
+:host-context(.isDarkTheme) ::ng-deep .isDone.isDone .box {
+  background: var(--sub-task-c-bg-done);
+}
+
+.first-line {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  flex-wrap: nowrap;
+  user-select: none;
+  -webkit-user-select: none; /* Safari */
+  justify-content: space-between;
+  min-height: var(--task-first-line-min-height);
+  touch-action: pan-y;
+
+  @include mq(xs, max) {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  //@include smallMainContainer{
+  //  flex-wrap: wrap;
+  //  justify-content: flex-end;
+  //}
+}
+
+.title-and-left-btns-wrapper {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  flex-grow: 1;
+  flex-shrink: 1;
+  flex-basis: 70%;
+  // we cannot do this since this cuts of the box shadow of the task edit
+  //overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+
+  @include mq(xs, max) {
+    //margin-bottom: 5px;
+    //flex-shrink: 0;
+    flex-basis: 50%;
+  }
+
+  @include isDoneForFirstLine {
+    opacity: var(--task-is-done-dim-opacity);
+  }
+}

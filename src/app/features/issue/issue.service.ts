@@ -1,30 +1,36 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   IssueData,
   IssueDataReduced,
+  IssueProvider,
   IssueProviderKey,
   SearchResultItem,
+  SearchResultItemWithProviderId,
 } from './issue.model';
 import { TaskAttachment } from '../tasks/task-attachment/task-attachment.model';
-import { from, merge, Observable, of, Subject, zip } from 'rxjs';
+import { forkJoin, from, merge, Observable, of, Subject } from 'rxjs';
 import {
   CALDAV_TYPE,
   GITEA_TYPE,
-  REDMINE_TYPE,
   GITHUB_TYPE,
   GITLAB_TYPE,
+  ICAL_TYPE,
   ISSUE_PROVIDER_HUMANIZED,
   ISSUE_PROVIDER_ICON_MAP,
   ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  TRELLO_TYPE,
+  REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
-import { Task } from '../tasks/task.model';
+import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
-import { switchMap } from 'rxjs/operators';
+import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
+import { catchError, map, switchMap } from 'rxjs/operators';
+import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
@@ -33,11 +39,45 @@ import { RedmineCommonInterfacesService } from './providers/redmine/redmine-comm
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
+import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
+import { ICalIssueReduced } from './providers/calendar/calendar.model';
+import { WorkContextType } from '../work-context/work-context.model';
+import { WorkContextService } from '../work-context/work-context.service';
+import { ProjectService } from '../project/project.service';
+import { IssueProviderService } from './issue-provider.service';
+import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { getCalendarEventIdCandidates } from '../calendar-integration/get-calendar-event-id-candidates';
+import { Store } from '@ngrx/store';
+import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
+import { getErrorTxt } from '../../util/get-error-text';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { TODAY_TAG } from '../tag/tag.const';
+import typia from 'typia';
+import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/global-progress-bar.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class IssueService {
+  private _taskService = inject(TaskService);
+  private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
+  private _githubCommonInterfacesService = inject(GithubCommonInterfacesService);
+  private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
+  private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
+  private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
+  private _giteaInterfaceService = inject(GiteaCommonInterfacesService);
+  private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
+  private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
+  private _issueProviderService = inject(IssueProviderService);
+  private _workContextService = inject(WorkContextService);
+  private _snackService = inject(SnackService);
+  private _translateService = inject(TranslateService);
+  private _projectService = inject(ProjectService);
+  private _calendarIntegrationService = inject(CalendarIntegrationService);
+  private _store = inject(Store);
+  private _globalProgressBarService = inject(GlobalProgressBarService);
+
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [GITHUB_TYPE]: this._githubCommonInterfacesService,
@@ -46,91 +86,112 @@ export class IssueService {
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
+    [ICAL_TYPE]: this._calendarCommonInterfaceService,
+
+    // trello
+    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
   };
 
-  // NOTE: in theory we might need to clean this up on project change, but it's unlikely to matter
-  ISSUE_REFRESH_MAP: { [key: string]: { [key: string]: Subject<IssueData> } } = {
-    [GITLAB_TYPE]: {},
-    [GITHUB_TYPE]: {},
-    [REDMINE_TYPE]: {},
-    [JIRA_TYPE]: {},
-    [CALDAV_TYPE]: {},
-    [OPEN_PROJECT_TYPE]: {},
-    [GITEA_TYPE]: {},
-    [REDMINE_TYPE]: {},
-  };
+  ISSUE_REFRESH_MAP: {
+    [issueProviderId: string]: { [issueId: string]: Subject<IssueData> };
+  } = {};
 
-  constructor(
-    private _taskService: TaskService,
-    private _jiraCommonInterfacesService: JiraCommonInterfacesService,
-    private _githubCommonInterfacesService: GithubCommonInterfacesService,
-    private _gitlabCommonInterfacesService: GitlabCommonInterfacesService,
-    private _caldavCommonInterfaceService: CaldavCommonInterfacesService,
-    private _openProjectInterfaceService: OpenProjectCommonInterfacesService,
-    private _giteaInterfaceService: GiteaCommonInterfacesService,
-    private _redmineInterfaceService: RedmineCommonInterfacesService,
-    private _snackService: SnackService,
-    private _translateService: TranslateService,
-  ) {}
+  testConnection(issueProviderCfg: IssueProvider): Promise<boolean> {
+    return this.ISSUE_SERVICE_MAP[issueProviderCfg.issueProviderKey].testConnection(
+      issueProviderCfg,
+    );
+  }
 
+  getById(
+    issueType: IssueProviderKey,
+    id: string | number,
+    issueProviderId: string,
+  ): Promise<IssueData | null> {
+    return this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId);
+  }
+
+  // Keep Observable version for components that need real-time updates via refresh
   getById$(
     issueType: IssueProviderKey,
     id: string | number,
-    projectId: string,
-  ): Observable<IssueData> {
-    // account for issue refreshment
-    if (!this.ISSUE_REFRESH_MAP[issueType][id]) {
-      this.ISSUE_REFRESH_MAP[issueType][id] = new Subject<IssueData>();
+    issueProviderId: string,
+  ): Observable<IssueData | null> {
+    // account for (manual) issue refreshing
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId] = {};
     }
-    return this.ISSUE_SERVICE_MAP[issueType]
-      .getById$(id, projectId)
-      .pipe(
-        switchMap((issue) =>
-          merge<IssueData>(of(issue), this.ISSUE_REFRESH_MAP[issueType][id]),
-        ),
-      );
+    if (!this.ISSUE_REFRESH_MAP[issueProviderId][id]) {
+      this.ISSUE_REFRESH_MAP[issueProviderId][id] = new Subject<IssueData>();
+    }
+    return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
+      switchMap((issue) => merge(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id])),
+    );
   }
 
-  searchIssues$(searchTerm: string, projectId: string): Observable<SearchResultItem[]> {
-    const obs = Object.keys(this.ISSUE_SERVICE_MAP)
-      .map((key) => this.ISSUE_SERVICE_MAP[key])
-      .filter((provider) => typeof provider.searchIssues$ === 'function')
-      .map((provider) => (provider.searchIssues$ as any)(searchTerm, projectId));
-    obs.unshift(from([[]]));
-
-    return zip(...obs, (...allResults: any[]) => [].concat(...allResults)) as Observable<
-      SearchResultItem[]
-    >;
+  searchIssues(
+    searchTerm: string,
+    issueProviderId: string,
+    issueProviderKey: IssueProviderKey,
+    isEmptySearch = false,
+  ): Promise<SearchResultItem[]> {
+    // check if text is more than just special chars
+    if (searchTerm.replace(/[^\p{L}\p{N}]+/gu, '').length === 0 && !isEmptySearch) {
+      return Promise.resolve([]);
+    }
+    return this.ISSUE_SERVICE_MAP[issueProviderKey].searchIssues(
+      searchTerm,
+      issueProviderId,
+    );
   }
 
-  issueLink$(
+  searchAllEnabledIssueProviders$(
+    searchTerm: string,
+  ): Observable<SearchResultItemWithProviderId[]> {
+    return this._store.select(selectEnabledIssueProviders).pipe(
+      switchMap((enabledProviders) => {
+        if (enabledProviders.length === 0) {
+          return of([]);
+        }
+
+        const searchObservables = enabledProviders.map((provider) =>
+          from(
+            this.searchIssues(searchTerm, provider.id, provider.issueProviderKey),
+          ).pipe(
+            map((results) =>
+              results.map((result) => ({
+                ...result,
+                issueProviderId: provider.id,
+              })),
+            ),
+            catchError((err) => {
+              this._snackService.open({
+                svgIco: ISSUE_PROVIDER_ICON_MAP[provider.issueProviderKey],
+                msg: T.F.ISSUE.S.ERR_GENERIC,
+                type: 'ERROR',
+                translateParams: {
+                  issueProviderName: ISSUE_PROVIDER_HUMANIZED[provider.issueProviderKey],
+                  errTxt: getErrorTxt(err),
+                },
+              });
+              throw new Error(err);
+            }),
+          ),
+        );
+        return forkJoin(searchObservables).pipe(map((results) => results.flat()));
+      }),
+    );
+  }
+
+  issueLink(
     issueType: IssueProviderKey,
     issueId: string | number,
-    projectId: string,
-  ): Observable<string> {
-    return this.ISSUE_SERVICE_MAP[issueType].issueLink$(issueId, projectId);
+    issueProviderId: string,
+  ): Promise<string> {
+    return this.ISSUE_SERVICE_MAP[issueType].issueLink(issueId, issueProviderId);
   }
 
-  isBacklogPollEnabledForProjectOnce$(
-    providerKey: IssueProviderKey,
-    projectId: string,
-  ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isBacklogPollingEnabledForProjectOnce$(
-      projectId,
-    );
-  }
-
-  isPollIssueChangesEnabledForProjectOnce$(
-    providerKey: IssueProviderKey,
-    projectId: string,
-  ): Observable<boolean> {
-    return this.ISSUE_SERVICE_MAP[providerKey].isIssueRefreshEnabledForProjectOnce$(
-      projectId,
-    );
-  }
-
-  getPollTimer$(providerKey: IssueProviderKey): Observable<number> {
-    return this.ISSUE_SERVICE_MAP[providerKey].pollTimer$;
+  getPollInterval(providerKey: IssueProviderKey): number {
+    return this.ISSUE_SERVICE_MAP[providerKey].pollInterval;
   }
 
   getMappedAttachments(
@@ -145,7 +206,7 @@ export class IssueService {
 
   async checkAndImportNewIssuesToBacklogForProject(
     providerKey: IssueProviderKey,
-    projectId: string,
+    issueProviderId: string,
   ): Promise<void> {
     if (!this.ISSUE_SERVICE_MAP[providerKey].getNewIssuesToAddToBacklog) {
       return;
@@ -161,11 +222,11 @@ export class IssueService {
     });
 
     const allExistingIssueIds: string[] | number[] =
-      await this._taskService.getAllIssueIdsForProject(projectId, providerKey);
+      await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
 
     const potentialIssuesToAdd = await (
       this.ISSUE_SERVICE_MAP[providerKey] as any
-    ).getNewIssuesToAddToBacklog(projectId, allExistingIssueIds);
+    ).getNewIssuesToAddToBacklog(issueProviderId, allExistingIssueIds);
 
     const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
       (issue: IssueData): boolean =>
@@ -173,13 +234,17 @@ export class IssueService {
     );
 
     issuesToAdd.forEach((issue: IssueDataReduced) => {
-      this.addTaskWithIssue(providerKey, issue, projectId, true);
+      // TODO add correct project id
+      this.addTaskFromIssue({
+        issueDataReduced: issue,
+        issueProviderId,
+        issueProviderKey: providerKey,
+        isAddToBacklog: true,
+      });
     });
 
     if (issuesToAdd.length === 1) {
-      const issueTitle = this.ISSUE_SERVICE_MAP[providerKey].getAddTaskData(
-        issuesToAdd[0],
-      ).title;
+      const issueTitle = this._getAddTaskData(providerKey, issuesToAdd[0]).title;
       this._snackService.open({
         svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
         // ico: 'cloud_download',
@@ -211,9 +276,9 @@ export class IssueService {
     isNotifySuccess: boolean = true,
     isNotifyNoUpdateRequired: boolean = false,
   ): Promise<void> {
-    const { issueId, issueType, projectId } = task;
+    const { issueId, issueType, issueProviderId } = task;
 
-    if (!issueId || !issueType || !projectId) {
+    if (!issueId || !issueType || !issueProviderId) {
       throw new Error('No issue task');
     }
     if (!this.ISSUE_SERVICE_MAP[issueType].getFreshDataForIssueTask) {
@@ -225,8 +290,8 @@ export class IssueService {
     )(task, isNotifySuccess, isNotifyNoUpdateRequired);
 
     if (update) {
-      if (this.ISSUE_REFRESH_MAP[issueType][issueId]) {
-        this.ISSUE_REFRESH_MAP[issueType][issueId].next(update.issue);
+      if (this.ISSUE_REFRESH_MAP[issueProviderId]?.[issueId]) {
+        this.ISSUE_REFRESH_MAP[issueProviderId][issueId].next(update.issue);
       }
       this._taskService.update(task.id, update.taskChanges);
 
@@ -252,10 +317,11 @@ export class IssueService {
     }
   }
 
-  async refreshIssueTasks(tasks: Task[]): Promise<void> {
+  // TODO given we have issueProvider available, we could also just pass that
+  async refreshIssueTasks(tasks: Task[], issueProvider: IssueProvider): Promise<void> {
     // dynamic map that has a list of tasks for every entry where the entry is an issue type
     const tasksIssueIdsByIssueProviderKey: any = {};
-    const tasksWithoutIssueId = [];
+    const tasksWithoutIssueId: Readonly<Task>[] = [];
 
     for (const task of tasks) {
       if (!task.issueId || !task.issueType) {
@@ -270,35 +336,36 @@ export class IssueService {
 
     for (const pKey of Object.keys(tasksIssueIdsByIssueProviderKey)) {
       const providerKey = pKey as IssueProviderKey;
-      console.log(
+      IssueLog.log(
         'POLLING CHANGES FOR ' + providerKey,
         tasksIssueIdsByIssueProviderKey[providerKey],
       );
-      this._snackService.open({
-        svgIco: ISSUE_PROVIDER_ICON_MAP[providerKey],
-        msg: T.F.ISSUE.S.POLLING_CHANGES,
-        isSpinner: true,
-        translateParams: {
-          issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
-          issuesStr: this._translateService.instant(
-            ISSUE_STR_MAP[providerKey].ISSUES_STR,
-          ),
-        },
+      const pollingLabelParams = {
+        issueProviderName: ISSUE_PROVIDER_HUMANIZED[providerKey],
+        issuesStr: this._translateService.instant(ISSUE_STR_MAP[providerKey].ISSUES_STR),
+      };
+
+      this._globalProgressBarService.countUp('POLL', {
+        labelParams: pollingLabelParams,
       });
 
-      const updates: {
+      let updates: {
         task: Task;
         taskChanges: Partial<Task>;
         issue: IssueData;
-      }[] = await // TODO export fn to type instead
-      (this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks as any)(
-        tasksIssueIdsByIssueProviderKey[providerKey],
-      );
+      }[] = [];
+      try {
+        updates = await this.ISSUE_SERVICE_MAP[providerKey].getFreshDataForIssueTasks(
+          tasksIssueIdsByIssueProviderKey[providerKey],
+        );
+      } finally {
+        this._globalProgressBarService.countDown();
+      }
 
       if (updates.length > 0) {
         for (const update of updates) {
-          if (this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string]) {
-            this.ISSUE_REFRESH_MAP[providerKey][update.task.issueId as string].next(
+          if (this.ISSUE_REFRESH_MAP[issueProvider.id]?.[update.task.issueId as string]) {
+            this.ISSUE_REFRESH_MAP[issueProvider.id][update.task.issueId as string].next(
               update.issue,
             );
           }
@@ -338,39 +405,262 @@ export class IssueService {
     }
   }
 
-  async addTaskWithIssue(
-    issueType: IssueProviderKey,
-    issueIdOrData: string | number | IssueDataReduced,
-    projectId: string,
-    isAddToBacklog: boolean = false,
-  ): Promise<string> {
-    if (!this.ISSUE_SERVICE_MAP[issueType].getAddTaskData) {
-      throw new Error('Issue method not available');
+  async addTaskFromIssue({
+    issueDataReduced,
+    issueProviderId,
+    issueProviderKey,
+    additional = {},
+    isAddToBacklog = false,
+    isForceDefaultProject = false,
+  }: {
+    issueDataReduced: IssueDataReduced;
+    issueProviderId: string;
+    issueProviderKey: IssueProviderKey;
+    additional?: Partial<Task>;
+    isAddToBacklog?: boolean;
+    isForceDefaultProject?: boolean;
+  }): Promise<string | undefined> {
+    if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
+      throw new Error('No issueData');
     }
-    const { issueId, issueData } =
-      typeof issueIdOrData === 'number' || typeof issueIdOrData === 'string'
-        ? {
-            issueId: issueIdOrData,
-            issueData: await this.ISSUE_SERVICE_MAP[issueType]
-              .getById$(issueIdOrData, projectId)
-              .toPromise(),
-          }
-        : {
-            issueId: issueIdOrData.id,
-            issueData: issueIdOrData,
-          };
 
-    const { title = null, ...additionalFields } =
-      this.ISSUE_SERVICE_MAP[issueType].getAddTaskData(issueData);
+    const issueIdCandidates = this._getIssueIdCandidates(
+      issueProviderKey,
+      issueDataReduced,
+    );
 
-    return this._taskService.add(title, isAddToBacklog, {
-      issueType,
-      issueId: issueId as string,
+    if (
+      await this._checkAndHandleIssueAlreadyAdded(
+        issueProviderKey,
+        issueProviderId,
+        issueDataReduced.id.toString(),
+        { issueIdCandidates },
+      )
+    ) {
+      return undefined;
+    }
+
+    const {
+      title = null,
+      related_to,
+      ...additionalFromProviderIssueService
+    } = this._getAddTaskData(issueProviderKey, issueDataReduced);
+    IssueLog.log({ title, related_to, additionalFromProviderIssueService });
+
+    const getProjectOrTagId = async (): Promise<Partial<TaskCopy>> => {
+      const defaultProjectId = (
+        await this._issueProviderService
+          .getCfgOnce$(issueProviderId, issueProviderKey)
+          .toPromise()
+      ).defaultProjectId;
+
+      if (typeof this._workContextService.activeWorkContextId !== 'string') {
+        throw new Error('No active work context id');
+      }
+
+      if (
+        this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
+        !isForceDefaultProject
+      ) {
+        return {
+          projectId: defaultProjectId || this._workContextService.activeWorkContextId,
+        };
+      } else {
+        return {
+          tagIds:
+            this._workContextService.activeWorkContextType === WorkContextType.TAG &&
+            this._workContextService.activeWorkContextId !== TODAY_TAG.id
+              ? [this._workContextService.activeWorkContextId]
+              : [],
+          projectId: defaultProjectId || undefined,
+        };
+      }
+    };
+
+    const taskData = {
+      issueType: issueProviderKey,
+      issueProviderId: issueProviderId,
+      issueId: issueDataReduced.id.toString(),
       issueWasUpdated: false,
       issueLastUpdated: Date.now(),
-      ...additionalFields,
-      // this is very important as chances are we are in another context already when adding!
-      projectId,
-    });
+      // Default plan for today unless a precise time is provided by provider
+      dueDay: getDbDateStr(),
+      ...additionalFromProviderIssueService,
+      // NOTE: if we were to add tags, this could be overwritten here
+      ...(await getProjectOrTagId()),
+      ...additional,
+    };
+
+    // If a precise start time is provided by the provider, avoid setting dueDay as well
+    if ((taskData as Partial<TaskCopy>).dueWithTime) {
+      (taskData as Partial<TaskCopy>).dueDay = undefined;
+    }
+
+    let taskId: string | undefined;
+
+    if (related_to) {
+      taskId = await this._tryAddSubTask({
+        title: title as string,
+        taskData,
+        issueParentId: related_to,
+        issueProviderId,
+        issueProviderKey,
+      });
+    }
+
+    // add new task (also fallback when parent id of subtask is not found)
+    if (!taskId) {
+      taskId = taskData.dueWithTime
+        ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
+        : this._taskService.add(title, isAddToBacklog, taskData);
+
+      // TODO more elegant solution for skipped calendar events
+      if (issueProviderKey === ICAL_TYPE) {
+        this._calendarIntegrationService.skipCalendarEvent(
+          issueDataReduced as ICalIssueReduced,
+        );
+      }
+    }
+
+    return taskId;
   }
+
+  private async _tryAddSubTask({
+    title,
+    taskData,
+    issueParentId,
+    issueProviderId,
+    issueProviderKey,
+  }: {
+    title: string;
+    taskData: Partial<Task>;
+    issueParentId: string;
+    issueProviderId: string;
+    issueProviderKey: IssueProviderKey;
+  }): Promise<string | undefined> {
+    const parentTask = await this._taskService.checkForTaskWithIssueEverywhere(
+      issueParentId,
+      issueProviderKey,
+      issueProviderId,
+    );
+
+    if (parentTask) {
+      const subTaskData = { title, ...taskData } as Partial<TaskCopy>;
+      // Ensure invariants for sub-tasks as well
+      if (subTaskData.dueWithTime) {
+        subTaskData.dueDay = undefined;
+      }
+      return this._taskService.addSubTaskTo(parentTask.task.id, subTaskData);
+    }
+
+    return undefined;
+  }
+
+  private async _checkAndHandleIssueAlreadyAdded(
+    issueType: IssueProviderKey,
+    issueProviderId: string,
+    issueId: string,
+    opts?: { issueIdCandidates?: string[] },
+  ): Promise<boolean> {
+    const idsToCheck = Array.from(
+      new Set(
+        opts?.issueIdCandidates && opts.issueIdCandidates.length
+          ? [issueId, ...opts.issueIdCandidates]
+          : [issueId],
+      ),
+    );
+
+    let res: Awaited<
+      ReturnType<typeof this._taskService.checkForTaskWithIssueEverywhere>
+    > | null = null;
+    for (const candidateId of idsToCheck) {
+      res = await this._taskService.checkForTaskWithIssueEverywhere(
+        candidateId,
+        issueType,
+        issueProviderId,
+      );
+      if (res) {
+        break;
+      }
+    }
+
+    if (res?.isFromArchive) {
+      this._taskService.restoreTask(res.task, res.subTasks || []);
+      this._snackService.open({
+        ico: 'info',
+        msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+        translateParams: { title: res.task.title },
+      });
+      return true;
+    } else if (res?.task) {
+      if (
+        res.task.projectId &&
+        res.task.projectId === this._workContextService.activeWorkContextId
+      ) {
+        this._projectService.moveTaskToTodayList(res.task.id, res.task.projectId);
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_BACKLOG,
+          translateParams: { title: res.task.title },
+        });
+        return true;
+      } else {
+        const taskWithTaskSubTasks = await this._taskService
+          .getByIdWithSubTaskData$(res.task.id)
+          .toPromise();
+        this._taskService.moveToCurrentWorkContext(taskWithTaskSubTasks);
+        this._snackService.open({
+          ico: 'arrow_upward',
+          msg: T.F.TASK.S.FOUND_MOVE_FROM_OTHER_LIST,
+          translateParams: {
+            title: res.task.title,
+            contextTitle: res.task.projectId
+              ? (await this._projectService.getByIdOnce$(res.task.projectId).toPromise())
+                  ?.title
+              : 'another tag',
+          },
+        });
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  private _getAddTaskData(
+    issueProviderKey: IssueProviderKey,
+    issueReduced: IssueDataReduced,
+  ): IssueTask {
+    if (!this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData) {
+      throw new Error('Issue method not available');
+    }
+    const r = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueReduced);
+    typia.assert<IssueTask>(r);
+    return r;
+  }
+
+  private _getIssueIdCandidates(
+    issueProviderKey: IssueProviderKey,
+    issueDataReduced: IssueDataReduced,
+  ): string[] | undefined {
+    if (issueProviderKey !== ICAL_TYPE) {
+      return undefined;
+    }
+    return getCalendarEventIdCandidates(issueDataReduced as ICalIssueReduced);
+  }
+
+  // TODO if we need to refresh data on after add, this is how we would do it
+  // try {
+  //   const freshIssueData = await this.ISSUE_SERVICE_MAP[issueProviderKey]
+  //     .getById$(issueDataReduced.issueData.id, issueProvider.id)
+  //     .toPromise();
+  //   // eslint-disable-next-line @typescript-eslint/no-shadow
+  //   const { title = null, ...additionalFields } =
+  //     this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(freshIssueData);
+  //   this._taskService.update(taskId, {});
+  // } catch (e) {
+  //   IssueLog.err(e);
+  //   this._taskService.remove(taskId);
+  //   // TODO show error msg
+  // }
 }

@@ -1,5 +1,3 @@
-@import "../../../../variables";
-
 :host {
   display: block;
 }
@@ -7,36 +5,25 @@
 .summary-table {
   width: 100%;
 
-  @include darkTheme {
-    background: $dark-theme-bg-lighter;
-  }
+  background: var(--card-bg);
 
   tr {
     height: 36px !important;
   }
 
   td {
-    @include lightTheme() {
-      color: $light-theme-text-color-muted;
-    }
-    @include darkTheme {
-      color: $dark-theme-text-color-muted;
-    }
+    text-align: center;
+
+    color: var(--text-color-muted);
 
     inline-input {
-      @include lightTheme() {
-        color: $light-theme-text-color;
-      }
-      @include darkTheme {
-        color: $dark-theme-text-color;
-      }
+      color: var(--text-color);
     }
   }
 
   th {
     text-align: center;
   }
-
 
   th,
   td {
@@ -49,7 +36,7 @@
   }
 
   .cdk-column-timeSpentToday ::ng-deep .inline-input-wrapper {
-    padding: $s;
+    padding: var(--s);
 
     input {
       width: 100px;
@@ -76,7 +63,7 @@
   &:focus,
   &:hover {
     mat-icon {
-      animation: $transition-duration-m success-btn-ani linear;
+      animation: var(--transition-duration-m) success-btn-ani linear;
     }
 
     .check {
@@ -101,7 +88,6 @@
   }
 }
 
-
 .repeat-task-icon {
   vertical-align: middle;
   margin-right: 4px;
@@ -114,6 +100,8 @@
   //border: 1px solid orange;
   text-align: start;
   align-items: center;
+  // prevent overflow for looooong words
+  word-break: break-word;
 
   &.isDone ::ng-deep .value-wrapper {
     text-decoration: line-through;
@@ -123,11 +111,11 @@
     font-style: italic;
   }
 
-
   > span {
     text-decoration: none !important;
+    word-break: break-word;
     display: block;
-    padding-left: $s*1;
+    padding-left: var(--s);
   }
 
   inline-input {
@@ -137,7 +125,7 @@
   }
 
   ::ng-deep .inline-input-wrapper {
-    padding: $s;
+    padding: var(--s);
 
     input {
       width: 100%;

@@ -1,7 +1,4 @@
-import {
-  ConfigFormSection,
-  GenericConfigFormSection,
-} from '../config/global-config.model';
+import { ConfigFormSection } from '../config/global-config.model';
 import { T } from '../../t.const';
 import { Project } from './project.model';
 
@@ -15,6 +12,14 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
       templateOptions: {
         required: true,
         label: T.F.PROJECT.FORM_BASIC.L_TITLE,
+      },
+    },
+    {
+      key: 'icon',
+      type: 'icon',
+      templateOptions: {
+        label: T.F.TAG.FORM_BASIC.L_ICON,
+        description: T.G.ICON_INP_DESCRIPTION,
       },
     },
     {
@@ -34,7 +39,7 @@ export const BASIC_PROJECT_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
   ],
 };
 
-export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection = {
+export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: ConfigFormSection<Project> = {
   // TODO translate
   title: 'Project Settings & Theme',
   key: 'basic',
@@ -51,16 +56,24 @@ export const CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG: GenericConfigFormSection =
       },
     },
     {
-      key: 'theme.primary',
-      type: 'input',
+      key: 'theme.primary' as any,
+      type: 'color',
       templateOptions: {
         label: T.F.PROJECT.FORM_THEME.L_THEME_COLOR,
-        type: 'color',
       },
     },
     {
-      key: 'isBacklogDisabled',
+      key: 'icon',
+      type: 'icon',
+      templateOptions: {
+        label: T.F.TAG.FORM_BASIC.L_ICON,
+        description: T.G.ICON_INP_DESCRIPTION,
+      },
+    },
+    {
+      key: 'isEnableBacklog',
       type: 'checkbox',
+      defaultValue: false,
       templateOptions: {
         label: T.F.PROJECT.FORM_BASIC.L_ENABLE_BACKLOG,
       },

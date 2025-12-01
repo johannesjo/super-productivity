@@ -1,0 +1,28 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  overflow: auto;
+  display: flex;
+  height: 100%;
+}
+
+.days {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  box-sizing: border-box;
+  padding: 24px;
+  padding-top: 0;
+  gap: 16px;
+
+  @include mq(xs) {
+    gap: 24px;
+  }
+
+  @include mq(xs, max) {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    padding: 16px;
+  }
+}

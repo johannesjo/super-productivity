@@ -4,7 +4,7 @@
 module.exports = function (config) {
   // NOTE: necessary to fix some of the unit tests with a timezone in them
   // NOTE2: won't work for wallaby, but that's maybe ok for now
-  process.env.TZ = 'Europe/Berlin';
+  // process.env.TZ = 'Europe/Berlin';
 
   config.set({
     basePath: '',
@@ -12,20 +12,26 @@ module.exports = function (config) {
     plugins: [
       require('karma-jasmine'),
       require('karma-chrome-launcher'),
-      require('karma-jasmine-html-reporter'),
-      require('karma-coverage-istanbul-reporter'),
       require('@angular-devkit/build-angular/plugins/karma'),
+      require('./test-helpers/karma-running-spec-on-disconnect'),
+      require('karma-spec-reporter'),
     ],
     client: {
       clearContext: false, // leave Jasmine Spec Runner output visible in browser
       captureConsole: false,
     },
-    coverageIstanbulReporter: {
-      dir: require('path').join(__dirname, '../coverage'),
-      reports: ['html', 'lcovonly'],
-      fixWebpackSourcePaths: true,
+    reporters: process.env.CI ? ['spec', 'running-spec'] : ['spec', 'running-spec'],
+    specReporter: {
+      maxLogLines: 5, // limit number of lines logged per test
+      suppressSummary: false, // show summary
+      suppressErrorSummary: false, // show error summary
+      suppressFailed: false, // show failed tests
+      suppressPassed: true, // hide passed tests
+      suppressSkipped: true, // hide skipped tests
+      showBrowser: false, // don't show browser name
+      showSpecTiming: false, // don't show spec timing
+      failFast: false, // continue after first failure
     },
-    reporters: ['progress', 'kjhtml'],
     port: 9876,
     colors: true,
     logLevel: config.LOG_INFO,
@@ -52,10 +58,24 @@ module.exports = function (config) {
           // Without a remote debugging port, Google Chrome exits immediately.
           '--remote-debugging-port=9222',
           '--disable-web-security',
+          // Additional performance optimizations
+          '--disable-dev-shm-usage', // Overcome limited resource problems
+          '--disable-software-rasterizer',
+          '--disable-extensions',
+          '--disable-setuid-sandbox',
+          '--disable-logging',
+          '--disable-background-networking',
+          '--disable-sync',
+          '--disable-features=VizDisplayCompositor', // Disable GPU compositor
+          '--enable-features=NetworkService,NetworkServiceInProcess',
         ],
         debug: true,
       },
     },
-    browserNoActivityTimeout: 120000,
+    browserNoActivityTimeout: 6000, // time before killing browser if no signal
+    browserDisconnectTimeout: 2000, // time to wait after disconnection
+    browserDisconnectTolerance: 1, // retry once if disconnect occurs
+    captureTimeout: 10000,
+    reportSlowerThan: 500,
   });
 };
