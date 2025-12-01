@@ -157,9 +157,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
     } else if (isSubtask) {
-      if (!PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        return true;
-      }
+      // Allow subtasks to be moved to any list, promoting them to parent tasks if needed.
+      // The drop handler will take care of the rest.
+      return true;
     } else {
       if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
         return true;
@@ -195,6 +195,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     }
 
     let targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
+    const isDropAtEnd =
+      ev.currentIndex > 0 && ev.currentIndex === targetListData.filteredTasks.length;
+
+    if (!targetTask && isDropAtEnd) {
+      // dropped at the end of the list. Let's use the last item as the target
+      targetTask = targetListData.filteredTasks[ev.currentIndex - 1] as TaskCopy;
+    }
 
     if ('issueData' in draggedTask) {
       return this._addFromIssuePanel(draggedTask, srcListData as string);
@@ -216,6 +223,17 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     // Detect drop zone: top, bottom-left (reorder), or bottom-right (convert to subtask)
     const dropZoneType = this._getDropZoneType(ev);
+
+    console.log('--- DROP DEBUG ---', {
+      draggedTask: task.id,
+      draggedTaskParent: task.parentId,
+      targetTask: targetTask?.id,
+      dropZone: dropZoneType,
+      currentIndex: ev.currentIndex,
+      previousIndex: ev.previousIndex,
+      sourceList: srcListData.listModelId,
+      targetList: targetListData.listModelId,
+    });
 
     console.log('[DROP HANDLER]', {
       dropZoneType,
@@ -283,8 +301,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
             const isDraggingDown =
               currentDraggedIndex !== -1 && currentDraggedIndex < currentTargetIndex;
 
-            if (isDraggingDown) {
-              // When dragging down, place AFTER the target item
+            const isPlaceAfter = isDraggingDown || dropZoneType !== 'top' || isDropAtEnd;
+
+            if (isPlaceAfter) {
+              // When dragging down, or dropping on bottom half, place AFTER the target item
               const filtered = targetListData.filteredTasks.filter(
                 (t) => t.id !== task.id,
               );
@@ -311,6 +331,64 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       task,
       newIds,
     });
+
+    // special handling for promotions
+    const isSrcParentList = PARENT_ALLOWED_LISTS.includes(
+      srcListData.listModelId as string,
+    );
+    const isTargetParentList = PARENT_ALLOWED_LISTS.includes(
+      targetListData.listModelId as string,
+    );
+    if (!isSrcParentList && isTargetParentList) {
+      const oldParentId = srcListData.listModelId as string;
+      const newSubTaskIds = (srcListData as DropModelDataForList).allTasks
+        .filter((t) => t.id !== task.id)
+        .map((t) => t.id);
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: { id: oldParentId, changes: { subTaskIds: newSubTaskIds } },
+        }),
+      );
+    }
+
+    console.log('[PROMOTION CHECK]', {
+      dropZoneType,
+      isBottomLeft: dropZoneType === 'bottom-left',
+      isSubtask: !!task.parentId,
+      isTargetParent: task.parentId && targetTask && targetTask.id === task.parentId,
+      taskId: task.id,
+      parentId: task.parentId,
+      targetTaskId: targetTask?.id,
+    });
+    // handle promotion via gesture
+    if (
+      dropZoneType === 'bottom-left' &&
+      task.parentId &&
+      targetTask.id === task.parentId
+    ) {
+      console.log(
+        '[DROP HANDLER] Promoting subtask to parent task (dropping below parent)',
+        {
+          task,
+          targetTask,
+          parentSubtasks: (targetTask as TaskWithSubTasks).subTaskIds,
+        },
+      );
+      const parentTask = targetTask as TaskWithSubTasks;
+      const newSubTaskIds = parentTask.subTaskIds.filter((id) => id !== task.id);
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: { id: parentTask.id, changes: { subTaskIds: newSubTaskIds } },
+        }),
+      );
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: { id: task.id, changes: { parentId: undefined } },
+        }),
+      );
+      this._store.dispatch(TaskSharedActions.planTasksForToday({ taskIds: [task.id] }));
+      return;
+    }
 
     this.dropListService.blockAniTrigger$.next();
     this._move(
@@ -456,7 +534,27 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       this._store.dispatch(
         moveProjectTaskToBacklogList({ taskId, newOrderedIds, workContextId }),
       );
-    } else {
+    } else if (!isSrcRegularList && isTargetRegularList) {
+      console.log('PROMOTING SUBTASK', { taskId, src, target, newOrderedIds });
+      // sub task to main list
+      this._store.dispatch(
+        TaskSharedActions.updateTask({
+          task: { id: taskId, changes: { parentId: undefined } },
+        }),
+      );
+      const workContextType = this._workContextService
+        .activeWorkContextType as WorkContextType;
+      this._store.dispatch(
+        moveTaskInTodayList({
+          taskId,
+          newOrderedIds,
+          src: src as any,
+          target: target,
+          workContextId,
+          workContextType,
+        }),
+      );
+    } else if (!isSrcRegularList && !isTargetRegularList) {
       // move sub task
       this._store.dispatch(
         moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, newOrderedIds }),
