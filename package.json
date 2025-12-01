@@ -206,7 +206,7 @@
     "detect-it": "^4.0.1",
     "electron": "37.7.0",
     "electron-builder": "^26.0.20",
-    "eslint": "^8.57.1",
+    "eslint": "^9.39.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-jsdoc": "50.6.0",
