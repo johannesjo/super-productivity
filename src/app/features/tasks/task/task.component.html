@@ -326,18 +326,6 @@
           [tasks]="t.subTasks"
           listId="SUB"
         ></task-list>
-        <!-- Drop zone to convert subtasks to independent tasks - drag subtask OUTSIDE -->
-        <div
-          class="drop-zone-convert-to-task"
-          cdkDropList
-          [cdkDropListConnectedTo]="dropListService.dropLists | async"
-          [cdkDropListData]="{ listModelId: 'DROP_CONVERT_TO_TASK', taskId: t.id }"
-          (cdkDropListDropped)="onDropConvertToTask($event)"
-        >
-          <span class="drop-hint">
-            {{ T.F.TASK.CMP.DRAG_TASK_HERE_TO_CONVERT | translate }}
-          </span>
-        </div>
       }
     </div>
   }

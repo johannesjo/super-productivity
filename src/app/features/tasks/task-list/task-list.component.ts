@@ -224,27 +224,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     // Detect drop zone: top, bottom-left (reorder), or bottom-right (convert to subtask)
     const dropZoneType = this._getDropZoneType(ev);
 
-    console.log('--- DROP DEBUG ---', {
-      draggedTask: task.id,
-      draggedTaskParent: task.parentId,
-      targetTask: targetTask?.id,
-      dropZone: dropZoneType,
-      currentIndex: ev.currentIndex,
-      previousIndex: ev.previousIndex,
-      sourceList: srcListData.listModelId,
-      targetList: targetListData.listModelId,
-    });
-
-    console.log('[DROP HANDLER]', {
-      dropZoneType,
-      targetTaskId: targetTask?.id,
-      draggedTaskId: task.id,
-      canDrop: targetTask
-        ? this.canDropOnTask(task, targetTask as TaskWithSubTasks)
-        : false,
-      isAncestor: targetTask ? this._isTaskAncestorOf(task.id, targetTask.id) : false,
-    });
-
     // If drop is bottom-right AND target is valid, convert to subtask
     if (
       dropZoneType === 'bottom-right' &&
@@ -252,40 +231,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       this.canDropOnTask(task, targetTask as TaskWithSubTasks) &&
       !this._isTaskAncestorOf(task.id, targetTask.id)
     ) {
-      console.log('[DROP HANDLER] Converting to subtask');
-      console.log('[NESTING BEFORE]', {
-        parentTask: {
-          id: targetTask.id,
-          subTaskIds: (targetTask as TaskWithSubTasks).subTaskIds || [],
-        },
-        taskToNest: {
-          id: task.id,
-          parentId: task.parentId,
-        },
-      });
       this.dropListService.blockAniTrigger$.next();
       this._taskDragDropService.makeSubtask(task.id, targetTask.id);
       this._taskViewCustomizerService.setSort(DEFAULT_OPTIONS.sort);
 
-      // Log after the action is dispatched
-      setTimeout(() => {
-        const updatedParentTask = this.tasks().find((t) => t.id === targetTask.id);
-        const updatedTask = this.tasks().find((t) => t.id === task.id);
-        console.log('[NESTING AFTER]', {
-          parentTask: {
-            id: updatedParentTask?.id,
-            subTaskIds: (updatedParentTask as TaskWithSubTasks)?.subTaskIds || [],
-          },
-          nestedTask: {
-            id: updatedTask?.id,
-            parentId: updatedTask?.parentId,
-          },
-        });
-      }, 100);
       return;
     }
 
-    console.log('[DROP HANDLER] Proceeding with reorder');
     // Otherwise, proceed with normal reordering (top or bottom-left)
     const newIds =
       targetTask && targetTask.id !== task.id
@@ -293,6 +245,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
             const currentDraggedIndex = targetListData.filteredTasks.findIndex(
               (t) => t.id === task.id,
             );
+
+            if (currentDraggedIndex === -1) {
+              const newTasks = [...targetListData.filteredTasks, task];
+              newTasks.splice(ev.currentIndex, 0, task);
+              return newTasks;
+            }
+
             const currentTargetIndex = targetListData.filteredTasks.findIndex(
               (t) => t.id === targetTask.id,
             );
@@ -351,29 +310,12 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       );
     }
 
-    console.log('[PROMOTION CHECK]', {
-      dropZoneType,
-      isBottomLeft: dropZoneType === 'bottom-left',
-      isSubtask: !!task.parentId,
-      isTargetParent: task.parentId && targetTask && targetTask.id === task.parentId,
-      taskId: task.id,
-      parentId: task.parentId,
-      targetTaskId: targetTask?.id,
-    });
     // handle promotion via gesture
     if (
       dropZoneType === 'bottom-left' &&
       task.parentId &&
       targetTask.id === task.parentId
     ) {
-      console.log(
-        '[DROP HANDLER] Promoting subtask to parent task (dropping below parent)',
-        {
-          task,
-          targetTask,
-          parentSubtasks: (targetTask as TaskWithSubTasks).subTaskIds,
-        },
-      );
       const parentTask = targetTask as TaskWithSubTasks;
       const newSubTaskIds = parentTask.subTaskIds.filter((id) => id !== task.id);
       this._store.dispatch(
@@ -535,7 +477,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
         moveProjectTaskToBacklogList({ taskId, newOrderedIds, workContextId }),
       );
     } else if (!isSrcRegularList && isTargetRegularList) {
-      console.log('PROMOTING SUBTASK', { taskId, src, target, newOrderedIds });
       // sub task to main list
       this._store.dispatch(
         TaskSharedActions.updateTask({
