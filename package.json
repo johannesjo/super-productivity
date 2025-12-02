@@ -142,7 +142,7 @@
     "@angular-eslint/eslint-plugin-template": "^20.5.0",
     "@angular-eslint/schematics": "^20.5.0",
     "@angular-eslint/template-parser": "^20.5.0",
-    "@angular/animations": "^20.3.7",
+    "@angular/animations": "^21.0.2",
     "@angular/cdk": "^20.2.10",
     "@angular/cli": "^20.3.7",
     "@angular/common": "^20.3.7",
