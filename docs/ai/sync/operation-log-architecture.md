@@ -179,7 +179,11 @@ interface EntityConflict {
 
 ---
 
-## 5. Architecture Layers
+## 5. Architecture Layers & PFAPI Integration
+
+### 5.1 Current State (Op Log Branch)
+
+The legacy `SaveToDbEffects` has been **disabled** - NgRx actions no longer write directly to the `'pf'` database. Instead, the Operation Log Effects capture all persistent actions:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -190,29 +194,87 @@ interface EntityConflict {
 ┌─────────────────────────────────────────────────────────────┐
 │                     NgRx Store                              │
 │                  (Single Source of Truth)                   │
-└───────────┬─────────────────────────────────┬───────────────┘
-            │                                 │
-            ▼                                 ▼
-┌───────────────────────────┐   ┌─────────────────────────────┐
-│  Operation Log Effects    │   │  Legacy PFAPI ModelCtrl     │
-│  - Blacklist filter       │   │  - Direct state saves       │
-│  - !isRemote filter       │   │  - Used by legacy code      │
-│  - Write to SUP_OPS       │   │  - Write to 'pf' DB         │
-└───────────┬───────────────┘   └──────────────┬──────────────┘
-            │                                  │
-            ▼                                  ▼
-┌───────────────────────────┐   ┌─────────────────────────────┐
-│  IndexedDB: SUP_OPS       │   │  IndexedDB: pf              │
-│  ├── ops (log entries)    │   │  ├── META_MODEL             │
-│  └── state_cache          │   │  ├── task, project, ...     │
-└───────────┬───────────────┘   └──────────────┬──────────────┘
-            │                                  │
-            ▼                                  ▼
-┌───────────────────────────┐   ┌─────────────────────────────┐
-│  Op Log Sync              │   │  Legacy LWW Sync            │
-│  (Local File, Server)     │   │  (WebDAV, Dropbox)          │
-└───────────────────────────┘   └─────────────────────────────┘
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│              Operation Log Effects                          │
+│  - Filter: skip blacklisted actions                         │
+│  - Filter: skip isRemote actions (prevents re-logging)      │
+│  - Acquire Web Lock                                         │
+│  - Increment vector clock                                   │
+│  - Convert action → Operation                               │
+│  - Append to SUP_OPS IndexedDB                              │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+                      ▼
+┌─────────────────────────────────────────────────────────────┐
+│               IndexedDB: SUP_OPS                            │
+│  ├── ops (operation log entries)                            │
+│  └── state_cache (periodic snapshots)                       │
+└─────────────────────────────────────────────────────────────┘
 ```
+
+### 5.2 PFAPI Integration Points
+
+The Operation Log system integrates with PFAPI at several key points:
+
+| Integration Point                          | How It's Used                             |
+| ------------------------------------------ | ----------------------------------------- |
+| `PfapiService.pf.metaModel.loadClientId()` | Get device ID for vector clocks           |
+| `PfapiService.pf.getAllSyncModelData()`    | Get current state for snapshots/migration |
+| `VectorClock` utilities                    | Shared conflict detection logic           |
+| `SyncProviderServiceInterface`             | Reuse provider abstractions               |
+| `loadAllData` action                       | Hydrate NgRx from snapshot/legacy data    |
+
+### 5.3 The 'pf' Database Role
+
+With Operation Log enabled, the `'pf'` database serves a **different purpose**:
+
+| Scenario                 | 'pf' Database Usage                                                    |
+| ------------------------ | ---------------------------------------------------------------------- |
+| **Startup**              | NOT used - hydration is from SUP_OPS snapshot + tail replay            |
+| **User Actions**         | NOT written - SaveToDbEffects is disabled                              |
+| **Genesis Migration**    | READ ONCE - legacy data copied to SUP_OPS as genesis op                |
+| **Legacy Sync Download** | WRITTEN - WebDAV/Dropbox download updates 'pf' then dispatches to NgRx |
+| **Legacy Sync Upload**   | READ - data read from NgRx store (not 'pf') for upload                 |
+
+### 5.4 Sync Flow (Full Picture)
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                           SyncService.sync()                                 │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+      ┌───────────────────────────┴───────────────────────────┐
+      │                                                       │
+      ▼                                                       ▼
+┌─────────────────────────────┐                 ┌─────────────────────────────┐
+│  Operation Log Sync         │                 │  Legacy PFAPI Sync          │
+│  (for Local File/Server)    │                 │  (for WebDAV/Dropbox)       │
+│                             │                 │                             │
+│  1. Upload pending ops      │                 │  1. Compare vector clocks   │
+│  2. Download remote ops     │                 │  2. Download/upload __meta_ │
+│  3. Per-entity conflict     │                 │  3. Sync changed models     │
+│     detection               │                 │  4. Full state on conflict  │
+│  4. Apply non-conflicting   │                 │                             │
+│  5. Present conflicts       │                 │  Writes to 'pf' database    │
+│                             │                 │  then dispatches to NgRx    │
+│  Writes to SUP_OPS only     │                 │                             │
+└─────────────────────────────┘                 └─────────────────────────────┘
+```
+
+### 5.5 Key Insight: State Consistency
+
+Since `SaveToDbEffects` is disabled, the `'pf'` database may become **stale** relative to NgRx state:
+
+- **NgRx Store**: Always current (source of truth)
+- **SUP_OPS**: Current (operations logged in real-time)
+- **'pf' Database**: May be stale (only updated on legacy sync download or migration)
+
+This is intentional - the `'pf'` database is a **sync buffer** for legacy providers, not a source of truth.
+
+For comprehensive PFAPI architecture details, see [PFAPI Sync and Persistence Architecture](./pfapi-sync-persistence-architecture.md).
 
 ---
 
@@ -270,7 +332,9 @@ src/app/core/persistence/operation-log/
    - Increment vector clock
    - Convert to Operation
    - Append to SUP_OPS IndexedDB
-4. Legacy PFAPI also saves to 'pf' database (parallel)
+
+Note: Legacy SaveToDbEffects is DISABLED on this branch.
+The 'pf' database is NOT updated on user actions.
 ```
 
 ### 7.2 Read Path (Startup)
@@ -436,7 +500,61 @@ useOperationLogSync?: boolean; // Default: false
 
 ---
 
-## 12. Current Implementation Status
+## 12. Architectural Concerns & Mitigations
+
+### 12.1 Stale 'pf' Database Problem
+
+**Issue:** Since `SaveToDbEffects` is disabled, the `'pf'` database becomes stale after user actions. This affects:
+
+1. **Legacy Sync Upload:** When WebDAV/Dropbox sync uploads data, where does it read from?
+
+**Current Behavior:** The PFAPI `ModelCtrl` classes have in-memory caches. When `getAllSyncModelData()` is called, it reads from these caches which are populated by the `loadAllData` action during hydration and any subsequent NgRx state changes.
+
+**Mitigation:** The in-memory caches in `ModelCtrl` should be kept in sync with NgRx state. This happens because:
+
+- On startup: `loadAllData` dispatches to NgRx AND the legacy persistence layer observes this
+- On user action: NgRx state changes, but `ModelCtrl` cache is NOT automatically updated
+
+**⚠️ POTENTIAL BUG:** If a user makes changes and then triggers a WebDAV/Dropbox sync before any other sync/restart, the uploaded data may be stale (from last hydration, not current NgRx state).
+
+**Recommended Fix:** Either:
+
+- A) Re-enable `SaveToDbEffects` to keep 'pf' database in sync (increases write load)
+- B) Have legacy sync read from NgRx store directly instead of `ModelCtrl` cache
+- C) Update `ModelCtrl` cache on NgRx state changes via a new effect
+
+### 12.2 Dual Vector Clock Tracking
+
+**Issue:** Both systems track vector clocks:
+
+- PFAPI: `LocalMeta.vectorClock` in 'pf' database
+- Operation Log: Per-operation `vectorClock` in SUP_OPS
+
+**Current Behavior:** These are currently independent. The operation log maintains its own vector clock progression.
+
+**Recommendation:** For consistency, both should use the same client ID (they do - both call `loadClientId()`) and the PFAPI vector clock should be updated whenever the op log vector clock increments.
+
+### 12.3 Conflict Resolution Paths
+
+**Issue:** Conflicts can arise from two sources:
+
+1. **Op Log Conflicts:** Per-entity conflicts detected during op log sync
+2. **Legacy Conflicts:** Full-state conflicts detected during PFAPI sync (vector clock CONCURRENT)
+
+**Current Behavior:**
+
+- Op log conflicts → `ConflictResolutionService` → per-entity UI
+- Legacy conflicts → PFAPI conflict handling → full state choice
+
+**Recommendation:** When using op log sync, legacy conflicts should be rare (op log handles granular conflicts). But if both sync methods run, conflicting conflict resolutions could occur. Consider:
+
+- Run op log sync FIRST (already the case)
+- If op log sync has no conflicts, legacy sync should also be conflict-free
+- If op log sync detects conflicts, resolve them BEFORE legacy sync runs
+
+---
+
+## 13. Current Implementation Status
 
 ### Complete
 
@@ -464,9 +582,10 @@ useOperationLogSync?: boolean; // Default: false
 
 ---
 
-## 13. References
+## 14. References
 
 - [Execution Plan](./operation-log-execution-plan.md) - Phased implementation details
 - [Full Design Doc](./operation-log-sync.md) - Comprehensive technical specification
 - [Vector Clock Implementation](../../../src/app/pfapi/api/util/vector-clock.ts)
 - [Current Sync Service](../../../src/app/pfapi/api/sync/sync.service.ts)
+- [PFAPI Architecture](./pfapi-sync-persistence-architecture.md) - Legacy persistence system details
