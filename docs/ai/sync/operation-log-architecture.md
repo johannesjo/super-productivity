@@ -82,12 +82,14 @@ The system uses **two separate IndexedDB databases** that coexist:
 
 ### 3.1 Decision Matrix
 
-| Provider            | Remote Sync Strategy     | Local Persistence | Reason                                  |
-| ------------------- | ------------------------ | ----------------- | --------------------------------------- |
-| **WebDAV**          | Legacy LWW (`main.json`) | Both databases    | HTTP overhead makes many files slow     |
-| **Dropbox**         | Legacy LWW (`main.json`) | Both databases    | API rate limits, slow directory listing |
-| **Local File Sync** | Operation Log            | Both databases    | Local disk is fast                      |
-| **Future Server**   | Operation Log            | Both databases    | Server handles ops efficiently          |
+> **⚠️ CORRECTION (December 2, 2025):** All current providers (WebDAV, Dropbox, LocalFileSync) use the **same legacy LWW approach**. They all sync to a single `main.json` file. Operation log sync is reserved for future server-based providers only.
+
+| Provider            | Remote Sync Strategy     | Local Persistence | Reason                                   |
+| ------------------- | ------------------------ | ----------------- | ---------------------------------------- |
+| **WebDAV**          | Legacy LWW (`main.json`) | Both databases    | HTTP overhead makes many files slow      |
+| **Dropbox**         | Legacy LWW (`main.json`) | Both databases    | API rate limits, slow directory listing  |
+| **Local File Sync** | Legacy LWW (`main.json`) | Both databases    | Single file sync, same approach as above |
+| **Future Server**   | Operation Log (planned)  | Both databases    | Server would handle ops efficiently      |
 
 ### 3.2 Sync Flow by Provider
 
@@ -106,7 +108,21 @@ Sync Triggered
               └─→ Full state replacement on conflict
 ```
 
-**Local File Sync / Future Server (Operation Log):**
+**Local File Sync:**
+
+> **Note:** LocalFileSync uses the same legacy LWW flow as WebDAV/Dropbox. It will remain on legacy sync.
+
+```
+Sync Triggered
+    │
+    └─→ SyncService.sync()
+         │
+         ├─→ Skip operation log sync (not supported)
+         │
+         └─→ Legacy MetaSyncService (single main.json file)
+```
+
+**Future Server (Operation Log - PLANNED):**
 
 ```
 Sync Triggered
@@ -124,27 +140,41 @@ Sync Triggered
 
 ### 3.3 Implementation
 
+> **⚠️ CRITICAL BUG (December 2, 2025):** The code below shows the **intended** implementation. The **actual** code in `sync.service.ts:102-110` runs op-log sync for ALL providers without any gating check. This must be fixed.
+
 ```typescript
-// In sync.service.ts
+// INTENDED (sync.service.ts) - NOT YET IMPLEMENTED
 async sync(): Promise<void> {
   const provider = this._currentSyncProvider$.value;
 
   // Operation log sync only for supported providers
+  // ⚠️ BUG: This check does NOT exist in actual code!
   if (this.supportsOpLogSync(provider)) {
     await this._operationLogSyncService.uploadPendingOps(provider);
     await this._operationLogSyncService.downloadRemoteOps(provider);
   }
 
   // Legacy LWW sync
-  // - For WebDAV/Dropbox: This is the primary sync
-  // - For others: This provides backup
+  // - For ALL current providers (WebDAV/Dropbox/LocalFileSync): This is the only sync
   await this.legacySync();
 }
 
 private supportsOpLogSync(provider: SyncProvider | null): boolean {
   if (!provider) return false;
-  // WebDAV and Dropbox use legacy only
-  return provider.id !== 'WebDAV' && provider.id !== 'Dropbox';
+  // ALL current providers use legacy LWW sync
+  // WebDAV, Dropbox, LocalFileSync: all sync to a single main.json file
+  // Op-log sync is reserved for future server-based providers only
+  return false;
+}
+```
+
+**ACTUAL CODE (sync.service.ts:102-110) - BROKEN:**
+
+```typescript
+// This runs for ALL providers including WebDAV/Dropbox!
+if (currentSyncProvider) {
+  await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+  await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
 }
 ```
 
@@ -523,39 +553,74 @@ useOperationLogSync?: boolean; // Default: false
 
 ## 12. Architectural Concerns & Mitigations
 
-### 12.1 Stale 'pf' Database Problem
+### 12.1 🔴 CRITICAL: Legacy Sync Uploads Stale Data
 
-**Issue:** Since `SaveToDbEffects` is disabled, the `'pf'` database becomes stale after user actions. This affects:
+**Issue:** Since `SaveToDbEffects` is disabled (entire class body commented out), the `'pf'` database becomes stale after user actions. **ALL legacy sync providers (WebDAV, Dropbox, LocalFileSync) are affected.**
 
-1. **Legacy Sync Upload:** When WebDAV/Dropbox sync uploads data, where does it read from?
+**Impact Chain:**
 
-**Current Behavior:** The PFAPI `ModelCtrl` classes have in-memory caches. When `getAllSyncModelData()` is called, it reads from these caches which are populated by the `loadAllData` action during hydration and any subsequent NgRx state changes.
+1. User makes changes → NgRx updated, SUP_OPS written
+2. `'pf'` database NOT updated (SaveToDbEffects disabled)
+3. User triggers sync (any provider)
+4. `uploadAll()` → `getAllSyncModelData()` → reads stale `ModelCtrl._inMemoryData` or `'pf'` DB
+5. **OLD STATE uploaded to remote**
+6. Other device downloads → gets OLD state
+7. **Recent work LOST**
 
-**Mitigation:** The in-memory caches in `ModelCtrl` should be kept in sync with NgRx state. This happens because:
+**Why `ModelCtrl` caches are stale:**
 
-- On startup: `loadAllData` dispatches to NgRx AND the legacy persistence layer observes this
-- On user action: NgRx state changes, but `ModelCtrl` cache is NOT automatically updated
+- `ModelCtrl.load()` returns `this._inMemoryData || await this._db.load(...)` (line 113-121)
+- `_inMemoryData` is only updated when `save()` is called
+- With `SaveToDbEffects` disabled, `save()` is NEVER called after user actions
+- Caches only update on: hydration, legacy sync download, or migration
 
-**⚠️ POTENTIAL BUG:** If a user makes changes and then triggers a WebDAV/Dropbox sync before any other sync/restart, the uploaded data may be stale (from last hydration, not current NgRx state).
+**🚨 THIS IS NOT THEORETICAL - IT'S HAPPENING NOW** for any user on this branch.
 
-**Recommended Fix:** Either:
+**Required Fix (Choose ONE):**
 
-- A) Re-enable `SaveToDbEffects` to keep 'pf' database in sync (increases write load)
-- B) Have legacy sync read from NgRx store directly instead of `ModelCtrl` cache
-- C) Update `ModelCtrl` cache on NgRx state changes via a new effect
+- **A) Read from NgRx directly:** Modify `getAllSyncModelData()` to use NgRx selectors instead of `ModelCtrl.load()`
+- **B) Flush before upload:** Add an effect that copies NgRx state to `ModelCtrl` caches before legacy sync
+- **C) Re-enable SaveToDbEffects:** Keep `'pf'` database in sync (increases write load but simplest fix)
 
-### 12.2 Dual Vector Clock Tracking
+### 12.2 🔴 CRITICAL: SaveToDbEffects Disabled at Branch Level, Not Feature Flag
 
-**Issue:** Both systems track vector clocks:
+**Issue:** The `SaveToDbEffects` class body is **completely commented out** in `save-to-db.effects.ts`. This is NOT gated by the `useOperationLogSync` feature flag.
+
+**Result when feature flag is OFF:**
+
+- Op log sync disabled ✓
+- But `SaveToDbEffects` STILL disabled ✗
+- User changes go to NgRx only
+- **NO PERSISTENCE AT ALL** for local IndexedDB storage
+
+**This means the branch itself breaks ALL persistence, regardless of feature flag setting.**
+
+**Required Fix:** Gate the `SaveToDbEffects` disable by feature flag:
+
+```typescript
+// If useOperationLogSync is false, SaveToDbEffects should be ENABLED
+// If useOperationLogSync is true, SaveToDbEffects should be DISABLED
+```
+
+### 12.3 Dual Vector Clock Divergence
+
+**Issue:** Two independent vector clocks exist:
 
 - PFAPI: `LocalMeta.vectorClock` in 'pf' database
 - Operation Log: Per-operation `vectorClock` in SUP_OPS
 
-**Current Behavior:** These are currently independent. The operation log maintains its own vector clock progression.
+**They are NEVER synchronized.** The architecture "recommends" alignment but no implementation exists.
 
-**Recommendation:** For consistency, both should use the same client ID (they do - both call `loadClientId()`) and the PFAPI vector clock should be updated whenever the op log vector clock increments.
+**Impact:**
 
-### 12.3 Conflict Resolution Paths
+- Op log advances vector clock on every action
+- PFAPI vector clock only updates on legacy sync
+- Legacy sync may think "no changes" when op log has 1000 pending ops
+- False "in sync" status, missed uploads
+
+**Required Fix:** Add an effect to update PFAPI vector clock whenever op log vector clock increments.
+
+### 12.4 Conflict Resolution Paths
 
 **Issue:** Conflicts can arise from two sources:
 
@@ -573,18 +638,83 @@ useOperationLogSync?: boolean; // Default: false
 - If op log sync has no conflicts, legacy sync should also be conflict-free
 - If op log sync detects conflicts, resolve them BEFORE legacy sync runs
 
+### 12.5 Offline > 7 Days = Undefined Behavior
+
+**Issue:** Compaction deletes ops older than 7 days. A device offline for 8+ days:
+
+1. Requests ops [100...500]
+2. Server only has ops [400...800] (older ones compacted)
+3. **No defined behavior** - client may partially apply, crash, or silently lose data
+
+**Missing:**
+
+- Detection of "ops gap"
+- Signal to force snapshot resync
+- Snapshot merge strategy (current state vs snapshot = which wins?)
+
+**Required Fix:** Define and implement handling for devices that fall off the operation log tail.
+
+### 12.6 No Disaster Recovery Path
+
+**Issue:** If `SUP_OPS` IndexedDB is corrupted/cleared:
+
+- It's the declared "source of truth"
+- `'pf'` database is stale (not written to)
+- Remote has ops but no full state snapshot
+- **No recovery procedure documented or implemented**
+
+**Needed:**
+
+- Integrity checks on startup
+- Recovery from remote ops + manifest
+- Recovery from legacy `'pf'` database as fallback
+- Recovery from remote `main.json` as last resort
+
+### 12.7 Genesis Migration Has No Idempotency
+
+**Issue:** Migration runs "only when SUP_OPS is empty." But:
+
+- What if migration crashes mid-way?
+- What if user downgrades and re-upgrades?
+- What if SUP_OPS has partial ops from failed migration?
+
+**No validation exists** to detect or repair these states.
+
+### 12.8 Vector Clock Pruning: Code vs Docs Mismatch
+
+**Docs say:** "Prune after 30 days"
+**Code does:** `limitVectorClockSize()` prunes when **count > 50**
+
+**Impact:** Team with 55 devices - device #51 gets pruned. When it syncs again, its ops may be misclassified (false conflicts or missed concurrent detection).
+
+### 12.9 Action Blacklist is Maintenance Nightmare
+
+**Issue:** Using a **Blacklist** means any new UI feature that dispatches an action must be manually added to the list.
+
+**Risk:** Developers will forget. The Operation Log will silently fill with thousands of "Toggle Sidebar" or "Focus Input" events.
+
+- **Bloat:** Sync performance degrades
+- **Replay Crashes:** If these UI actions rely on transient DOM states or services not available during background replay/hydration, the app will crash on startup
+
+**Recommendation:** Invert control. Use a **Whitelist** (via a decorator like `@Persistent()`) or a specific `PersistenceService.persist(op)` call. Explicit persistence is safer than implicit persistence.
+
 ---
 
 ## 13. Current Implementation Status
 
-### Production Blockers (Must Fix First)
+### 🚨 CRITICAL PRODUCTION BLOCKERS
 
-These issues **break legacy sync compatibility** or **cause data loss**:
+> **⚠️ DO NOT MERGE TO MASTER** until these are fixed. They affect ALL users, not just op-log users.
 
-| Blocker                 | Issue                                                       | Risk                       | Fix Location          |
-| ----------------------- | ----------------------------------------------------------- | -------------------------- | --------------------- |
-| **Provider Gating**     | Op-log sync runs for ALL providers including WebDAV/Dropbox | HIGH - breaks legacy users | `sync.service.ts:103` |
-| **Compaction Triggers** | Service exists but never invoked - log grows unbounded      | HIGH - disk exhaustion     | New effect needed     |
+| #   | Blocker                                      | Impact                                                  | Location                                        | Severity    |
+| --- | -------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------- | ----------- |
+| 1   | **Legacy sync uploads stale data**           | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | `getAllSyncModelData()` reads stale `ModelCtrl` | 🔴 CRITICAL |
+| 2   | **SaveToDbEffects disabled at branch level** | NO persistence when feature flag is OFF                 | `save-to-db.effects.ts` (entire body commented) | 🔴 CRITICAL |
+| 3   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | `sync.service.ts:102-110`                       | 🔴 CRITICAL |
+| 4   | **Compaction reads stale cache**             | Data loss when compaction runs                          | `operation-log-compaction.service.ts:23`        | 🔴 CRITICAL |
+| 5   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | `operation-applier.service.ts:44`               | 🟠 HIGH     |
+| 6   | **Compaction never triggers**                | Op log grows unbounded                                  | No triggers exist                               | 🟠 HIGH     |
+| 7   | **Replay guard missing**                     | Side effects fire during hydration                      | `replay-guard.service.ts` doesn't exist         | 🟠 HIGH     |
 
 ### Complete ✅
 
