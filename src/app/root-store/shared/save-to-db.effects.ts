@@ -57,6 +57,7 @@ export class SaveToDbEffects {
   // NOTE: These effects are DISABLED when useOperationLogSync is true.
   // When operation log sync is enabled, persistence happens via OperationLogEffects
   // which writes to SUP_OPS IndexedDB instead of the 'pf' database.
+  // Legacy sync reads data on-demand from NgRx store via a delegate.
   // --------------------------------------------------
 
   tag$ = this._createSaveEffect(selectTagFeatureState, 'tag');

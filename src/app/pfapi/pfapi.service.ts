@@ -27,6 +27,7 @@ import {
   distinctUntilChanged,
   filter,
   map,
+  pairwise,
   shareReplay,
   startWith,
 } from 'rxjs/operators';
@@ -34,6 +35,7 @@ import { fromPfapiEvent, pfapiEventAndInitialAfter } from './pfapi-helper';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { PFLog } from '../core/log';
+import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
 
 @Injectable({
   providedIn: 'root',
@@ -44,9 +46,15 @@ export class PfapiService {
   private _globalProgressBarService = inject(GlobalProgressBarService);
   private _imexViewService = inject(ImexViewService);
   private _store = inject(Store);
+  private _storeDelegateService = inject(PfapiStoreDelegateService);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
+
+  // Initialize model controllers reference for delegate service
+  private _initDelegateService = (() => {
+    this._storeDelegateService.setModelCtrls(this.m);
+  })();
 
   // NOTE: subscribing to this to early (e.g. in a constructor), might mess up due to share replay
   public readonly isSyncProviderEnabledAndReady$ = pfapiEventAndInitialAfter(
@@ -132,6 +140,47 @@ export class PfapiService {
         alert('Unable to set sync provider. Please check your settings.');
       }
     });
+
+    // Wire up NgRx store delegate for operation log sync mode
+    // When enabled, legacy sync reads from NgRx store instead of ModelCtrl caches
+    this._commonAndLegacySyncConfig$
+      .pipe(
+        map((cfg) => !!cfg?.useOperationLogSync),
+        startWith(false),
+        distinctUntilChanged(),
+        pairwise(),
+      )
+      .subscribe(async ([wasOpLog, useOpLog]) => {
+        if (useOpLog) {
+          // Enable delegate: legacy sync will read from NgRx store
+          PFLog.normal('PfapiService: Enabling NgRx store delegate for op-log sync');
+          this.pf.setGetAllSyncModelDataFromStoreDelegate(() =>
+            this._storeDelegateService.getAllSyncModelDataFromStore(),
+          );
+        } else {
+          // Disable delegate: legacy sync will read from ModelCtrl caches
+          if (wasOpLog) {
+            // Transitioning from op-log to legacy mode: flush current state to 'pf' database
+            PFLog.normal(
+              'PfapiService: Flushing NgRx state to pf database before disabling op-log',
+            );
+            try {
+              const currentState =
+                await this._storeDelegateService.getAllSyncModelDataFromStore();
+              await this.pf.importAllSycModelData({
+                data: currentState,
+                crossModelVersion: CROSS_MODEL_VERSION,
+                isBackupData: false,
+                isAttemptRepair: false,
+              });
+            } catch (e) {
+              PFLog.err('Failed to flush state to pf database:', e);
+            }
+          }
+          PFLog.normal('PfapiService: Disabling NgRx store delegate');
+          this.pf.setGetAllSyncModelDataFromStoreDelegate(null);
+        }
+      });
   }
 
   async importCompleteBackup(
