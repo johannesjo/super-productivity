@@ -28,6 +28,7 @@ class CapacitorMainActivity : BridgeActivity() {
     private lateinit var javaScriptInterface: JavaScriptInterface
     private var webViewCompatibility: WebViewCompatibilityChecker.Result? = null
     private var webViewBlocked = false
+    private var pendingShareIntent: JSONObject? = null
 
     private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
@@ -123,15 +124,20 @@ class CapacitorMainActivity : BridgeActivity() {
 
         
         // Handle initial intent (cold start)
-        // Delay to ensure WebView is loaded
-        Handler(Looper.getMainLooper()).postDelayed({
-            handleIntent(intent)
-        }, 3000)
+        handleIntent(intent)
     }
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         handleIntent(intent)
+    }
+
+    fun flushPendingShareIntent() {
+        pendingShareIntent?.let {
+            Log.d("SP_SHARE", "Flushing pending share intent: $it")
+            callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", it.toString())
+            pendingShareIntent = null
+        }
     }
 
     private fun handleIntent(intent: Intent) {
@@ -146,11 +152,18 @@ class CapacitorMainActivity : BridgeActivity() {
                 if (sharedText != null) {
                     val json = JSONObject()
                     json.put("title", sharedTitle)
-                    json.put("type", "LINK")
+                    val type = if (sharedText.startsWith("http")) "LINK" else "TEXT"
+                    json.put("type", type)
                     json.put("path", sharedText)
 
-                    Log.d("SP_SHARE", "Calling JS interface with: $json")
-                    callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
+                    if (::javaScriptInterface.isInitialized) {
+                        Log.d("SP_SHARE", "JS initialized, sending directly: $json")
+                        callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
+                        pendingShareIntent = null
+                    } else {
+                        Log.d("SP_SHARE", "JS NOT initialized, queueing: $json")
+                        pendingShareIntent = json
+                    }
                 }
             }
         }

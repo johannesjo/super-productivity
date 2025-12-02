@@ -139,14 +139,18 @@ export class AndroidEffects {
       () =>
         androidInterface.onShareWithAttachment$.pipe(
           tap((shareData) => {
-            const truncatedTitle = shareData.title.substring(0, 100);
+            const truncatedTitle =
+              shareData.title.length > 150
+                ? shareData.title.substring(0, 147) + '...'
+                : shareData.title;
             const taskTitle = `Check: ${truncatedTitle}`;
             const taskId = this._taskService.add(taskTitle);
+            const icon = shareData.type === 'LINK' ? 'link' : 'file_present';
             this._taskAttachmentService.addAttachment(taskId, {
               title: shareData.title,
               type: shareData.type,
               path: shareData.path,
-              icon: 'link',
+              icon,
               id: null,
             });
             this._snackService.open({

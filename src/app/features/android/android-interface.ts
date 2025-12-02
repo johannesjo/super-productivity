@@ -36,6 +36,8 @@ export interface AndroidInterface {
   clearDb(rId: string): void; // @deprecated
   clearDbCallback(rId: string): void;
 
+  triggerGetShareData?(): void;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
@@ -132,4 +134,5 @@ if (IS_ANDROID_WEB_VIEW) {
   };
 
   DroidLog.log('Android Web View interfaces initialized', androidInterface);
+  androidInterface.triggerGetShareData?.();
 }
