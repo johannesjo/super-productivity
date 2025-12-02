@@ -106,6 +106,10 @@ export interface WebDavConfig {
   syncFolderPath?: string | null;
 }
 
+export interface SuperSyncConfig extends WebDavConfig {
+  accessToken?: string | null;
+}
+
 export interface LocalFileSyncConfig {
   // TODO remove and migrate
   syncFilePath?: string | null;
@@ -155,7 +159,7 @@ export type SyncConfig = Readonly<{
   /* NOTE: view model for form only*/
   webDav?: WebDavConfig;
   /* NOTE: view model for form only*/
-  superSync?: WebDavConfig;
+  superSync?: SuperSyncConfig;
   /* NOTE: view model for form only*/
   localFileSync?: LocalFileSyncConfig;
 }>;

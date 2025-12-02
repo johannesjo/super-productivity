@@ -1,136 +1,157 @@
-document.addEventListener('DOMContentLoaded', () => {
-  const tabs = document.querySelectorAll('.tab');
-  const loginForm = document.getElementById('login-form');
-  const registerForm = document.getElementById('register-form');
-  const messageArea = document.getElementById('message-area');
+const API_BASE = '/api';
 
-  // Tab Switching
-  tabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      tabs.forEach((t) => t.classList.remove('active'));
-      tab.classList.add('active');
+// State
+const state = {
+  token: null,
+};
 
-      const target = tab.dataset.tab;
-      if (target === 'login') {
-        loginForm.classList.remove('hidden');
-        registerForm.classList.add('hidden');
-      } else {
-        loginForm.classList.add('hidden');
-        registerForm.classList.remove('hidden');
-      }
-      clearMessage();
-    });
-  });
+// DOM Elements
+const loginForm = document.getElementById('login-form');
+const registerForm = document.getElementById('register-form');
+const authForms = document.getElementById('auth-forms');
+const tokenDisplay = document.getElementById('token-display');
+const tokenArea = document.getElementById('token-area');
+const messageArea = document.getElementById('message-area');
+const copyBtn = document.getElementById('copy-btn');
 
-  // Login Handler
-  document.getElementById('login').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    setLoading(e.target, true);
-    clearMessage();
+// --- Event Listeners ---
 
-    const email = document.getElementById('login-email').value;
-    const password = document.getElementById('login-password').value;
+loginForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
 
-    try {
-      const response = await fetch('/api/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
+  await handleAuth('/login', { email, password });
+});
 
-      const data = await response.json();
+registerForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('register-email').value;
+  const password = document.getElementById('register-password').value;
+  const confirm = document.getElementById('register-confirm').value;
 
-      if (response.ok) {
-        showMessage(
-          'Login successful! You can now use these credentials in Super Productivity.',
-          'success',
-        );
-        // Optional: Store token if needed for future admin features
-        // localStorage.setItem('token', data.token);
-      } else {
-        showMessage(data.error || 'Login failed', 'error');
-      }
-    } catch (err) {
-      showMessage('Network error occurred', 'error');
-    } finally {
-      setLoading(e.target, false);
-    }
-  });
-
-  // Register Handler
-  document.getElementById('register').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    setLoading(e.target, true);
-    clearMessage();
-
-    const email = document.getElementById('register-email').value;
-    const password = document.getElementById('register-password').value;
-    const confirmPassword = document.getElementById('register-confirm-password').value;
-
-    if (password !== confirmPassword) {
-      showMessage('Passwords do not match', 'error');
-      setLoading(e.target, false);
-      return;
-    }
-
-    if (password.length < 6) {
-      showMessage('Password must be at least 6 characters', 'error');
-      setLoading(e.target, false);
-      return;
-    }
-
-    try {
-      const response = await fetch('/api/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        showMessage(
-          'Registration successful! Please check your server logs for the verification link (dev mode) or verify if email configured.',
-          'success',
-        );
-        // Switch to login tab after brief delay
-        setTimeout(() => {
-          tabs[0].click();
-        }, 2000);
-      } else {
-        showMessage(data.error || 'Registration failed', 'error');
-      }
-    } catch (err) {
-      showMessage('Network error occurred', 'error');
-    } finally {
-      setLoading(e.target, false);
-    }
-  });
-
-  function showMessage(text, type) {
-    messageArea.textContent = text;
-    messageArea.className = `message ${type}`;
-    messageArea.classList.remove('hidden');
+  if (password !== confirm) {
+    showMessage('Passwords do not match', 'error');
+    return;
   }
 
-  function clearMessage() {
-    messageArea.classList.add('hidden');
-    messageArea.textContent = '';
-  }
+  // Register first
+  const success = await handleAuth('/register', { email, password }, true);
 
-  function setLoading(form, isLoading) {
-    const btn = form.querySelector('button');
-    const text = btn.querySelector('.btn-text');
-    const loader = btn.querySelector('.loader');
-
-    if (isLoading) {
-      text.classList.add('hidden');
-      loader.classList.remove('hidden');
-      btn.disabled = true;
-    } else {
-      text.classList.remove('hidden');
-      loader.classList.add('hidden');
-      btn.disabled = false;
-    }
+  // Auto login if registration successful
+  if (success) {
+    // Wait a bit for UX
+    setTimeout(async () => {
+      showMessage('Registration successful! Logging in...', 'success');
+      await handleAuth('/login', { email, password });
+    }, 1000);
   }
 });
+
+// --- Functions ---
+
+function switchTab(tab) {
+  // Update buttons
+  document.querySelectorAll('.tab-btn').forEach((btn) => {
+    btn.classList.remove('active');
+    if (btn.innerText.toLowerCase().includes(tab)) {
+      btn.classList.add('active');
+    }
+  });
+
+  // Update forms
+  document.querySelectorAll('.auth-form').forEach((form) => {
+    form.classList.remove('active');
+  });
+  document.getElementById(`${tab}-form`).classList.add('active');
+
+  // Clear messages
+  hideMessage();
+}
+
+async function handleAuth(endpoint, body, isRegister = false) {
+  setLoading(true);
+  hideMessage();
+
+  try {
+    const res = await fetch(`${API_BASE}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Authentication failed');
+    }
+
+    if (isRegister) {
+      // Registration success
+      return true;
+    } else {
+      // Login success -> Show Token
+      showToken(data.token);
+    }
+  } catch (err) {
+    showMessage(err.message, 'error');
+    return false;
+  } finally {
+    setLoading(false);
+  }
+}
+
+function showToken(token) {
+  state.token = token;
+  tokenArea.value = token;
+  authForms.classList.add('hidden');
+  tokenDisplay.classList.remove('hidden');
+  showMessage('Logged in successfully!', 'success');
+}
+
+function logout() {
+  state.token = null;
+  tokenArea.value = '';
+  tokenDisplay.classList.add('hidden');
+  authForms.classList.remove('hidden');
+  hideMessage();
+  document.getElementById('login-password').value = '';
+}
+
+async function copyToken() {
+  if (!state.token) return;
+
+  try {
+    await navigator.clipboard.writeText(state.token);
+    const originalText = copyBtn.innerText;
+    copyBtn.innerText = 'Copied!';
+    copyBtn.classList.add('success');
+
+    setTimeout(() => {
+      copyBtn.innerText = originalText;
+      copyBtn.classList.remove('success');
+    }, 2000);
+  } catch (err) {
+    showMessage('Failed to copy to clipboard', 'error');
+  }
+}
+
+function showMessage(msg, type) {
+  messageArea.innerText = msg;
+  messageArea.className = type === 'error' ? 'msg-error' : 'msg-success';
+  messageArea.classList.remove('hidden');
+}
+
+function hideMessage() {
+  messageArea.classList.add('hidden');
+}
+
+function setLoading(isLoading) {
+  const btns = document.querySelectorAll('button');
+  btns.forEach((btn) => (btn.disabled = isLoading));
+  if (isLoading) {
+    document.body.style.cursor = 'wait';
+  } else {
+    document.body.style.cursor = 'default';
+  }
+}

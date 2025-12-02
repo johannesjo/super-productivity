@@ -50,8 +50,8 @@ export const registerUser = async (
       db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
       throw new Error('Failed to send verification email. Please try again later.');
     }
-  } catch (err: any) {
-    if (err.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+  } catch (err: unknown) {
+    if ((err as { code?: string })?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
       const existingUser = db
         .prepare('SELECT * FROM users WHERE email = ?')
         .get(email) as User | undefined;
@@ -154,7 +154,9 @@ export const loginUser = async (
     | undefined;
 
   // Timing attack mitigation: always perform a comparison
-  // Use a dummy hash so the comparison takes roughly the same time
+  // Even if the user is not found, we hash and compare against a dummy hash.
+  // This ensures the response time is roughly the same for valid and invalid emails,
+  // preventing attackers from enumerating valid email addresses based on timing differences.
   // This is a valid bcrypt hash (12 rounds) of the string "dummy"
   const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
   const hashToCompare = user ? user.password_hash : dummyHash;
@@ -176,9 +178,30 @@ export const loginUser = async (
   return { token, user: { id: user.id, email: user.email } };
 };
 
-export const verifyToken = (token: string): { userId: number; email: string } | null => {
+export const verifyToken = async (
+  token: string,
+): Promise<{ userId: number; email: string } | null> => {
   try {
-    return jwt.verify(token, JWT_SECRET) as { userId: number; email: string };
+    const payload = await new Promise<{ userId: number; email: string }>(
+      (resolve, reject) => {
+        jwt.verify(token, JWT_SECRET, (err, decoded) => {
+          if (err) return reject(err);
+          resolve(decoded as { userId: number; email: string });
+        });
+      },
+    );
+
+    // Verify user exists in DB to prevent foreign key errors if user was deleted
+    // or if the DB was reset but the client has an old token
+    const db = getDb();
+    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(payload.userId);
+
+    if (!user) {
+      Logger.warn(`Token verification failed: User ${payload.userId} not found in DB`);
+      return null;
+    }
+
+    return payload;
   } catch (err) {
     return null;
   }

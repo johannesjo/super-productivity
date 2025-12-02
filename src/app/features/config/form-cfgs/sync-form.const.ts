@@ -164,22 +164,40 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       key: 'superSync',
       fieldGroup: [
         {
-          key: 'userName',
+          key: 'baseUrl',
           type: 'input',
-          className: 'e2e-userName',
+          className: 'e2e-baseUrl',
           templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+            label: 'Server URL',
+            description: 'e.g. https://sync.super-productivity.com',
           },
         },
         {
-          key: 'password',
-          type: 'input',
-          className: 'e2e-password',
+          type: 'btn',
           templateOptions: {
-            type: 'password',
+            text: 'Get Token / Login',
+            btnType: 'primary',
+            centerBtn: true,
+            onClick: (field: any) => {
+              const baseUrl = field.model.baseUrl;
+              if (baseUrl) {
+                window.open(baseUrl, '_blank');
+              } else {
+                alert('Please enter a Server URL first');
+              }
+            },
+          },
+        },
+        {
+          key: 'accessToken',
+          type: 'textarea',
+          className: 'e2e-accessToken',
+          templateOptions: {
             required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+            label: 'Access Token',
+            description: 'Paste the token obtained from the login page here',
+            rows: 3,
           },
         },
       ],
@@ -203,16 +221,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       type: 'collapsible',
       props: { label: T.G.ADVANCED_CFG },
       fieldGroup: [
-        {
-          key: 'superSync.baseUrl',
-          type: 'input',
-          hideExpression: (model) => model.syncProvider !== LegacySyncProvider.SuperSync,
-          className: 'e2e-baseUrl',
-          templateOptions: {
-            required: true,
-            label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
-          },
-        },
         {
           key: 'isCompressionEnabled',
           type: 'checkbox',

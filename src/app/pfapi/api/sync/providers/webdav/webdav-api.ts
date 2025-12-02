@@ -598,6 +598,7 @@ export class WebdavApi {
         etag: etag,
         href: fullPath,
       },
+      path: fullPath,
     };
   }
 }
