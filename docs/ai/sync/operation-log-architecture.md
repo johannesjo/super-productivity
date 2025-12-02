@@ -262,15 +262,15 @@ The Operation Log system integrates with PFAPI at several key points:
 
 ### 5.3 The 'pf' Database Role
 
-In the hybrid model, the `'pf'` database is kept in sync to support legacy providers:
+In the Memory-Only Adapter model, the `'pf'` database usage is minimized:
 
 | Scenario                 | 'pf' Database Usage                                                    |
 | ------------------------ | ---------------------------------------------------------------------- |
 | **Startup**              | NOT used - hydration is from SUP_OPS snapshot + tail replay            |
-| **User Actions**         | **WRITTEN** - SaveToDbEffects writes to 'pf' database                  |
+| **User Actions**         | **MEMORY ONLY** - `SaveToDbEffects` updates cache, **SKIPS DB WRITE**  |
 | **Genesis Migration**    | READ ONCE - legacy data copied to SUP_OPS as genesis op                |
 | **Legacy Sync Download** | WRITTEN - WebDAV/Dropbox download updates 'pf' then dispatches to NgRx |
-| **Legacy Sync Upload**   | READ - data read from 'pf' database or NgRx for upload                 |
+| **Legacy Sync Upload**   | **IGNORED** - Sync reads fresh data from `ModelCtrl` Memory Cache      |
 
 ### 5.4 Sync Flow (Full Picture)
 
@@ -361,8 +361,8 @@ src/app/core/persistence/operation-log/
 1. User action → NgRx dispatch
 2. Reducer updates state (optimistic)
 3. Parallel Persistence:
-   a) OperationLogEffects → Writes to SUP_OPS
-   b) SaveToDbEffects    → Writes to 'pf' database
+   a) OperationLogEffects → Writes to SUP_OPS (Disk)
+   b) SaveToDbEffects    → Updates ModelCtrl Cache (Memory) + META_MODEL (Disk)
 ```
 
 ### 7.2 Read Path (Startup)
@@ -584,19 +584,27 @@ export const limitVectorClockSize = (clock, currentClientId) => {
 
 Instead, the **Operation Log is Always On** for local persistence (`SUP_OPS`), running in parallel with the legacy persistence.
 
-### 11.1 Hybrid Persistence Strategy
+### 11.1 Hybrid Persistence Strategy (Memory-Only Model Adapter)
 
-To ensure seamless switching between legacy providers (WebDAV/Dropbox) and future server providers, both persistence mechanisms operate simultaneously:
+To strictly minimize I/O overhead, we stop writing Model data (Tasks, Projects, etc.) to the legacy `'pf'` IndexedDB entirely. `SUP_OPS` becomes the **sole** persistence layer for model data.
 
-1.  **`OperationLogEffects` (Always Active):** Captures all actions and writes to `SUP_OPS` (Op Log). This is the modern source of truth for conflict detection.
-2.  **`SaveToDbEffects` (Always Active):** Writes full state to the `'pf'` database. This ensures that if the user switches to a legacy provider (WebDAV/Dropbox), the data is ready for legacy sync.
+1.  **`OperationLogEffects` (Primary Persistence):** Writes to `SUP_OPS` (Disk).
+2.  **`SaveToDbEffects` (Memory Adapter):**
+    - Updates `ModelCtrl` **in-memory cache** (`_inMemoryData`). This ensures `SyncService` can read the current state.
+    - Updates `META_MODEL` (Disk). **Crucial:** We still persist revisions and vector clocks to disk so that the legacy sync algorithm knows _when_ to trigger a sync.
+    - **DROPS** the write to the legacy Model tables (`TASK`, `PROJECT`, etc.).
 
-| Mechanism             | Status     | Destination | Purpose                                 |
+| Mechanism             | Status     | Destination | Behavior                                |
 | --------------------- | ---------- | ----------- | --------------------------------------- |
-| `OperationLogEffects` | ✅ ENABLED | `SUP_OPS`   | Source of truth, Op Log Sync, Undo/Redo |
-| `SaveToDbEffects`     | ✅ ENABLED | `'pf'` DB   | Legacy Sync compatibility, Backup       |
+| `OperationLogEffects` | ✅ ENABLED | `SUP_OPS`   | **Full Persistence** (Source of Truth)  |
+| `SaveToDbEffects`     | ✅ ENABLED | Memory Only | **Mirror State** (For Legacy Sync Read) |
+| `MetaModel`           | ✅ ENABLED | `'pf'` DB   | **Metadata Only** (For Sync timestamps) |
 
-This hybrid approach eliminates the risk of stale data when using legacy sync providers.
+**Trade-off:**
+
+- **Performance:** Excellent. Zero redundant I/O for heavy model data.
+- **Downgrade Risk:** The legacy `'pf'` database will become stale/empty. If a user downgrades to an older version of the app (which doesn't read `SUP_OPS`), they will lose access to recent data.
+  - _Mitigation:_ We accept this risk for the performance gain. A manual "Export to Legacy DB" could be added if needed.
 
 ---
 
@@ -604,13 +612,13 @@ This hybrid approach eliminates the risk of stale data when using legacy sync pr
 
 ### 12.1 (Resolved) Legacy Sync Stale Data
 
-**Issue:** Previously, `SaveToDbEffects` was disabled, causing the 'pf' database to become stale.
-**Resolution:** We have adopted a **Hybrid Persistence** strategy where `SaveToDbEffects` is always enabled, ensuring the 'pf' database is always up to date for legacy sync providers.
+**Issue:** Previously, `SaveToDbEffects` was disabled, causing the 'pf' database and memory cache to become stale.
+**Resolution:** With the **Memory-Only Adapter** strategy, `SaveToDbEffects` keeps the `ModelCtrl` in-memory cache perfectly synchronized with NgRx. Legacy sync (WebDAV/Dropbox) reads directly from this fresh memory cache, ensuring accurate uploads without needing disk persistence.
 
 ### 12.2 (Resolved) SaveToDbEffects Configuration
 
 **Issue:** `SaveToDbEffects` was commented out.
-**Resolution:** Re-enabled `SaveToDbEffects` to run in parallel with `OperationLogEffects`.
+**Resolution:** Re-enabled `SaveToDbEffects`. It will be configured to skip disk writes for Models.
 
 ### 12.3 Dual Vector Clock Divergence
 
