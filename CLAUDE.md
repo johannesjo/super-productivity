@@ -2,14 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## General Guidelines
+## Project-Specific Guidelines
 
-1. Prefer functional programming patterns: Use pure functions, immutability, and avoid side effects where possible.
-2. KISS (Keep It Simple, Stupid): Aim for simplicity and clarity in code. Avoid unnecessary complexity and abstractions.
-3. DRY (Don't Repeat Yourself): Reuse code where possible. Create utility functions or services for common logic, but avoid unnecessary abstractions.
-4. Confirm understanding before making changes: If you're unsure about the purpose of a piece of code, ask for clarification rather than making assumptions.
-5. **ALWAYS** use `npm run checkFile <filepath>` on each file you modify to ensure proper formatting and linting. This runs both prettier and lint checks on individual files. Unless you want to lint and format multiple files, then use `npm run prettier` and `npm run lint` instead.
-6. When creating html templates, prefer plain html like `<table>` and `<div>`. Keep CSS styles to a minimum. Keep nesting to a minimum. Keep css classes to a minimum. Use Angular Material components where appropriate, but avoid overusing them.
+1. **ALWAYS** use `npm run checkFile <filepath>` on each `ts` or `scss` file you modify to ensure proper formatting and linting. Unless you want to lint and format multiple files, then use `npm run prettier` and `npm run lint` instead.
+2. When creating HTML templates, prefer plain HTML (`<table>`, `<div>`). Keep CSS, nesting, and classes to a minimum. Use Angular Material components where appropriate but sparingly.
 
 ## Project Overview
 
