@@ -23,14 +23,21 @@ We evaluated both approaches. Per-entity delta sync was attempted but proved com
 
 ### 1.2 Critical Path
 
-**Before ANY further development**, two blockers must be fixed:
+> **⚠️ DO NOT MERGE TO MASTER** until these are fixed. They affect ALL users, not just op-log users.
 
-| Blocker                         | Risk                                         | Effort |
-| ------------------------------- | -------------------------------------------- | ------ |
-| Provider gating not implemented | WebDAV/Dropbox users upload ops/ directories | Small  |
-| Compaction never triggered      | Disk space grows unbounded                   | Medium |
+**Before ANY further development**, these critical blockers must be fixed:
 
-This plan outlines **Phase 0 (blockers)** + **5 phases** to bring the system to production-ready status.
+| #   | Blocker                                      | Impact                                                  | Effort |
+| --- | -------------------------------------------- | ------------------------------------------------------- | ------ |
+| 1   | **Legacy sync uploads stale data**           | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | Medium |
+| 2   | **SaveToDbEffects disabled at branch level** | NO persistence when feature flag is OFF                 | Small  |
+| 3   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | Small  |
+| 4   | **Compaction reads stale cache**             | Data loss when compaction runs                          | Small  |
+| 5   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | Medium |
+
+> **Note:** LocalFileSync uses the same legacy LWW sync approach as WebDAV/Dropbox. All three sync to a single `main.json` file. Op-log sync for LocalFileSync is planned but not yet implemented.
+
+This plan outlines **Phase 0 (critical blockers)** + **5 phases** to bring the system to production-ready status.
 
 ---
 
@@ -266,7 +273,122 @@ await this.opLogStore.saveStateCache({
 
 **Prerequisites:** None - do this before any other work.
 
-#### 0.1 Implement Provider Gating
+> **⚠️ CRITICAL: These blockers affect ALL users on this branch, not just those who enable the op-log feature flag.**
+
+#### 0.1 Fix Legacy Sync Stale Data Problem
+
+**Files to modify:**
+
+- `src/app/pfapi/api/pfapi.ts` (method: `getAllSyncModelData`)
+- OR `src/app/root-store/shared/save-to-db.effects.ts`
+
+**Problem:**
+
+- `SaveToDbEffects` is disabled (entire class body commented out)
+- `getAllSyncModelData()` calls `modelCtrl.load()` for each model
+- `ModelCtrl.load()` returns `this._inMemoryData || await this._db.load(...)`
+- Since saves are disabled, caches are STALE after user actions
+- **ALL sync providers (WebDAV, Dropbox, LocalFileSync) upload OLD state**
+
+**Fix Options (choose ONE):**
+
+**Option A: Read from NgRx directly (RECOMMENDED)**
+
+```typescript
+// pfapi.ts - add method to read from NgRx store
+async getAllSyncModelDataFromStore(): Promise<AllSyncModels<MD>> {
+  // Use selectors to get current NgRx state
+  return await firstValueFrom(this.store.select(selectAllSyncModelData));
+}
+
+// Modify getAllSyncModelData to use this when op-log is enabled
+async getAllSyncModelData(): Promise<AllSyncModels<MD>> {
+  if (this.useOperationLogSync) {
+    return this.getAllSyncModelDataFromStore();
+  }
+  // ... existing logic for legacy
+}
+```
+
+**Option B: Flush NgRx to ModelCtrl before sync**
+
+```typescript
+// Add new effect that runs before sync upload
+flushToModelCtrl$ = createEffect(
+  () =>
+    this.actions$.pipe(
+      ofType(syncStarted),
+      tap(() => {
+        // Copy each NgRx slice to corresponding ModelCtrl cache
+        for (const modelId of Object.keys(this.pfapiService.m)) {
+          const state = this.store.selectSignal(selectModelState(modelId))();
+          this.pfapiService.m[modelId]._inMemoryData = state;
+        }
+      }),
+    ),
+  { dispatch: false },
+);
+```
+
+**Option C: Re-enable SaveToDbEffects**
+
+- Uncomment `save-to-db.effects.ts`
+- Accept increased write load
+- Simplest but highest performance cost
+
+**Acceptance Criteria:**
+
+- [ ] WebDAV sync uploads CURRENT NgRx state, not stale cache
+- [ ] Dropbox sync uploads CURRENT NgRx state
+- [ ] LocalFileSync uploads CURRENT NgRx state
+- [ ] User creates task → syncs → other device sees task
+- [ ] Integration test verifies state consistency
+
+#### 0.2 Gate SaveToDbEffects by Feature Flag
+
+**File to modify:** `src/app/root-store/shared/save-to-db.effects.ts`
+
+**Problem:**
+
+- `SaveToDbEffects` is completely commented out at the BRANCH level
+- Feature flag `useOperationLogSync` is separate
+- When flag is OFF, user has NO persistence at all
+
+**Fix:**
+
+```typescript
+@Injectable()
+export class SaveToDbEffects {
+  private _store = inject(Store<RootState>);
+  private _actions = inject(Actions);
+  private _pfapiService = inject(PfapiService);
+  private _globalConfigService = inject(GlobalConfigService);
+
+  // Only run if operation log sync is DISABLED
+  private isLegacyPersistenceEnabled$ = this._globalConfigService.sync$.pipe(
+    map((sync) => !sync?.useOperationLogSync),
+  );
+
+  tag$ = createEffect(
+    () =>
+      this.isLegacyPersistenceEnabled$.pipe(
+        filter((enabled) => enabled),
+        switchMap(() => this.createSaveEffect(selectTagFeatureState, 'tag')),
+      ),
+    { dispatch: false },
+  );
+  // ... repeat for other effects
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] When `useOperationLogSync: false`, SaveToDbEffects writes to 'pf' database
+- [ ] When `useOperationLogSync: true`, SaveToDbEffects is disabled
+- [ ] User without feature flag has working persistence
+- [ ] Unit test verifies conditional behavior
+
+#### 0.3 Implement Provider Gating
 
 **File to modify:** `src/app/pfapi/api/sync/sync.service.ts`
 
@@ -286,8 +408,10 @@ if (currentSyncProvider) {
 // Add helper method
 private supportsOpLogSync(provider: SyncProvider | null): boolean {
   if (!provider) return false;
-  // WebDAV and Dropbox use legacy LWW only
-  return provider.id !== 'WebDAV' && provider.id !== 'Dropbox';
+  // ALL current providers use legacy LWW sync
+  // WebDAV, Dropbox, LocalFileSync: all sync to a single main.json file
+  // Op-log sync is reserved for future server-based providers only
+  return false;
 }
 
 // Update sync() method
@@ -297,14 +421,16 @@ if (this.supportsOpLogSync(currentSyncProvider)) {
 }
 ```
 
+> **Note:** ALL current providers (WebDAV, Dropbox, LocalFileSync) use legacy LWW sync with a single `main.json` file. Op-log sync is designed for future server-based providers where the server can efficiently handle operation streams. LocalFileSync will remain on legacy sync.
+
 **Acceptance Criteria:**
 
 - [ ] WebDAV sync does NOT call `uploadPendingOps` or `downloadRemoteOps`
 - [ ] Dropbox sync does NOT call op-log methods
-- [ ] Local File Sync DOES call op-log methods
+- [ ] LocalFileSync does NOT call op-log methods (uses legacy sync)
 - [ ] Unit test verifies provider gating
 
-#### 0.2 Implement Compaction Triggers
+#### 0.4 Fix Compaction Snapshot Source
 
 **Files to modify:**
 
@@ -356,6 +482,44 @@ async onBeforeUnload(): Promise<void> {
 - [ ] Old synced ops are deleted (respecting 7-day window)
 - [ ] Unsynced ops are NEVER deleted
 - [ ] Unit test verifies compaction trigger
+
+#### 0.5 Add Dependency Retry Queue (Move from Phase 2)
+
+**Files to modify:**
+
+- `src/app/core/persistence/operation-log/operation-applier.service.ts`
+- `src/app/core/persistence/operation-log/dependency-resolver.service.ts`
+
+**Problem:**
+
+```typescript
+// operation-applier.service.ts:38-44
+if (missingHardDeps.length > 0) {
+  PFLog.warn('... Skipping operation due to missing hard dependencies.', ...);
+  continue;  // <-- SILENTLY DROPS THE OPERATION!
+}
+```
+
+**Impact:** If a subtask op arrives before its parent task op (due to network timing), the subtask is **permanently lost** with only a console warning.
+
+**Fix:**
+
+```typescript
+// Add retry queue instead of continue
+if (missingHardDeps.length > 0) {
+  this.dependencyResolver.queueForRetry(op, missingHardDeps);
+  continue; // Queue it, don't drop it
+}
+```
+
+See Phase 2.1 for full implementation details of the retry queue.
+
+**Acceptance Criteria:**
+
+- [ ] Subtask op with missing parent is QUEUED, not dropped
+- [ ] When parent arrives, subtask is retried and applied
+- [ ] After MAX_RETRIES, op is logged as error (not silently dropped)
+- [ ] Unit test: subtask before parent → both eventually applied
 
 ---
 
@@ -973,6 +1137,20 @@ Add as **Phase 1.4** (after 1.1-1.3) since model changes are inevitable and migr
 
 ## 5. Validation Checklist
 
+### Phase 0 Validation (CRITICAL)
+
+- [ ] **0.1 Stale Data:** User creates task → WebDAV sync → other device downloads → task appears
+- [ ] **0.1 Stale Data:** User creates task → Dropbox sync → other device downloads → task appears
+- [ ] **0.1 Stale Data:** User creates task → LocalFileSync → other device downloads → task appears
+- [ ] **0.2 Feature Flag:** With flag OFF, user data persists to IndexedDB after app restart
+- [ ] **0.2 Feature Flag:** With flag ON, SaveToDbEffects doesn't run
+- [ ] **0.3 Provider Gating:** WebDAV sync does NOT call op-log methods
+- [ ] **0.3 Provider Gating:** Dropbox sync does NOT call op-log methods
+- [ ] **0.3 Provider Gating:** LocalFileSync does NOT call op-log methods (uses legacy)
+- [ ] **0.4 Compaction:** Snapshot contains current NgRx state (verify with debugger)
+- [ ] **0.4 Compaction:** Compaction actually triggers after 500 ops
+- [ ] **0.5 Dependency:** Subtask arriving before parent is queued, not dropped
+
 ### Phase 1 Validation
 
 - [ ] Run `npm test` - all existing tests pass
@@ -1011,15 +1189,38 @@ Add as **Phase 1.4** (after 1.1-1.3) since model changes are inevitable and migr
 
 ## 6. Risk Register
 
+### 🔴 CRITICAL Risks (Data Loss / Branch-Breaking)
+
+| Risk                                           | Likelihood | Impact   | Mitigation                                                            |
+| ---------------------------------------------- | ---------- | -------- | --------------------------------------------------------------------- |
+| **Legacy sync uploads stale data**             | **100%**   | Critical | Phase 0.1 - Read from NgRx store instead of stale ModelCtrl cache     |
+| **SaveToDbEffects disabled for ALL users**     | **100%**   | Critical | Phase 0.2 - Gate disable by feature flag                              |
+| **Op-log sync runs for unsupported providers** | High       | High     | Phase 0.3 - Add provider gating check                                 |
+| **Compaction snapshots stale data**            | High       | Critical | Phase 0.4 - Read from NgRx store                                      |
+| **Dependency ops silently dropped**            | High       | High     | Phase 0.5 - Add retry queue                                           |
+| **SUP_OPS corruption with no recovery path**   | Low        | Critical | Add recovery procedures (from remote, from legacy pf, from main.json) |
+| **Genesis migration crashes mid-way**          | Low        | High     | Add idempotency checks and repair path                                |
+
+### 🟠 HIGH Risks
+
+| Risk                                     | Likelihood | Impact | Mitigation                                    |
+| ---------------------------------------- | ---------- | ------ | --------------------------------------------- |
+| Replay fires side effects                | High       | Medium | Phase 1 replay guard implementation           |
+| Dual vector clocks diverge               | High       | Medium | Sync PFAPI VC when op log advances            |
+| Device offline >7 days falls off op tail | Medium     | High   | Define snapshot merge strategy, gap detection |
+| Action blacklist misses UI actions       | High       | Medium | Comprehensive audit OR switch to whitelist    |
+
+### 🟡 MEDIUM Risks
+
 | Risk                                                  | Likelihood | Impact   | Mitigation                                            |
 | ----------------------------------------------------- | ---------- | -------- | ----------------------------------------------------- |
 | Compaction deletes ops still needed by offline device | Medium     | High     | Longer retention window; snapshot contains full state |
 | Concurrent manifest updates cause data loss           | Low        | High     | Atomic upload; manifest is append-only list           |
-| Replay fires side effects                             | High       | Medium   | Phase 1 replay guard implementation                   |
 | Large op log slows startup                            | Medium     | Medium   | Compaction; snapshot hydration                        |
 | Field-level merge produces invalid state              | Low        | High     | Typia validation after merge; manual override option  |
 | User confusion with conflict UI                       | Medium     | Medium   | Clear UX; auto-merge for simple cases                 |
 | Migration breaks existing data                        | Low        | Critical | Backup before migration; rollback path                |
+| Vector clock pruning drops device (>50 devices)       | Low        | Medium   | Implement time-based pruning (30 days) as documented  |
 
 ---
 
