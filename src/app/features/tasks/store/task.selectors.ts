@@ -48,15 +48,13 @@ export const mapSubTasksToTask = (
   }
   return {
     ...task,
-    subTasks: task.subTaskIds
-      .map((id) => {
-        const subTask = s.entities[id] as Task;
-        if (!subTask) {
-          devError('Task data not found for ' + id);
-        }
-        return subTask;
-      })
-      .filter((subTask): subTask is Task => !!subTask),
+    subTasks: task.subTaskIds.map((id) => {
+      const subTask = s.entities[id] as Task;
+      if (!subTask) {
+        devError('Task data not found for ' + id);
+      }
+      return subTask;
+    }),
   };
 };
 
