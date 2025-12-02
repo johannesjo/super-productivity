@@ -38,8 +38,8 @@ The Operation Log system provides:
 **Key principles:**
 
 - **NgRx Store** = Single runtime source of truth
-- **SUP_OPS (IndexedDB)** = Single persistence source of truth for all model data
-- **PFAPI** = Sync protocol only. **NO LOCAL PERSISTENCE RESPONSIBILITY** for model data (Task, Project, etc.).
+- **SUP_OPS (IndexedDB)** = Single persistence source of truth for model data
+- **PFAPI** = Sync protocol only (no local persistence for model data)
 - **No feature flags** = One implementation that always works
 
 ### 1.2 Key Benefits
@@ -78,35 +78,89 @@ interface StateCache {
 }
 ```
 
-### 2.2 'pf' Database (Legacy - Metadata Only)
+### 2.2 'pf' Database (Metadata Only)
 
-The legacy `pf` database is used ONLY for:
+The legacy `pf` database is used **ONLY** for:
 
 - **META_MODEL** - Vector clocks, revision tracking (needed by sync protocol)
-- **Non-NgRx models** - reminders, archives, plugins (loaded on-demand)
 
-**CRITICAL:** Model data (tasks, projects, tags, etc.) is **NOT** written to `pf` database anymore. `SaveToDbEffects` is completely disabled for these models.
+**ALL sync model data goes through NgRx → SUP_OPS. The `pf` database model tables are NOT used.**
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │                         IndexedDB                                   │
 ├────────────────────────────────┬────────────────────────────────────┤
 │      'pf' database             │      'SUP_OPS' database            │
-│      (Metadata + Archives)     │      (Operation Log)               │
+│      (Metadata ONLY)           │      (Operation Log)               │
 │                                │                                    │
 │  ┌──────────────────────┐      │  ┌──────────────────────┐          │
-│  │ META_MODEL (metadata)│      │  │ ops (event log)      │          │
-│  │ reminders            │      │  │ state_cache (snapshot)│         │
-│  │ archiveYoung         │      │  └──────────────────────┘          │
-│  │ archiveOld           │      │                                    │
-│  │ pluginUserData       │      │                                    │
-│  │ pluginMetadata       │      │                                    │
-│  └──────────────────────┘      │                                    │
-│                                │                                    │
-│  NOT used for:                 │  Used for:                         │
-│  task, project, tag, etc.      │  All model persistence             │
+│  │ META_MODEL (metadata)│◄─────┼──│ ops (event log)      │          │
+│  └──────────────────────┘      │  │ state_cache (snapshot)│         │
+│                                │  └──────────────────────┘          │
+│  NOT used for model data:      │                                    │
+│  - task, project, tag          │  ALL sync models persisted here:   │
+│  - reminders, archives         │  - task, project, tag, note        │
+│  - plugins, etc.               │  - reminders, archives             │
+│                                │  - plugins, config, etc.           │
 └────────────────────────────────┴────────────────────────────────────┘
 ```
+
+### 2.3 Models Requiring NgRx Migration
+
+The following models are part of the sync model but currently NOT in NgRx state. They need to be migrated:
+
+| Model            | Current State             | Migration Required          |
+| ---------------- | ------------------------- | --------------------------- |
+| `reminders`      | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `archiveYoung`   | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `archiveOld`     | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `pluginUserData` | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `pluginMetadata` | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `improvement`    | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+| `obstruction`    | Direct `ModelCtrl.save()` | Add to NgRx, create effects |
+
+**This is a BLOCKER** - All sync models must be migrated to NgRx before the op-log system is complete. No hybrid persistence modes.
+
+**Migration steps:**
+
+1. Create NgRx feature state for each model (reducer, actions, selectors)
+2. Update services to dispatch actions instead of direct `ModelCtrl.save()`
+3. Add selectors to `PfapiStoreDelegateService`
+4. Operation log effects will automatically capture the actions
+5. Genesis migration loads these models from `pf` database into the initial snapshot
+
+**One-time data migration (genesis):**
+
+```typescript
+// In genesis migration - load ALL models from legacy pf database
+async createGenesisSnapshot(): Promise<void> {
+  // Load NgRx models (already in pf)
+  const [task, project, tag, ...] = await Promise.all([
+    this.pfapiService.m.task.load(),
+    this.pfapiService.m.project.load(),
+    // ...
+  ]);
+
+  // Load non-NgRx models (also in pf)
+  const [reminders, archiveYoung, archiveOld, ...] = await Promise.all([
+    this.pfapiService.m.reminders.load(),
+    this.pfapiService.m.archiveYoung.load(),
+    this.pfapiService.m.archiveOld.load(),
+    // ...
+  ]);
+
+  // Create snapshot with ALL models
+  const fullState = { task, project, tag, reminders, archiveYoung, archiveOld, ... };
+  await this.opLogStore.saveStateCache({ state: fullState, ... });
+}
+```
+
+**After migration:**
+
+- ALL sync models persist via NgRx → OperationLogEffects → SUP_OPS
+- `pf` database only holds META_MODEL (sync protocol metadata)
+- `PfapiStoreDelegateService` reads ALL models from NgRx selectors
+- No dual persistence paths
 
 ---
 
@@ -125,12 +179,12 @@ NgRx Dispatch (action)
     └──► OperationLogEffects
               │
               ├──► Convert action to Operation
-              ├──► Increment vector clock
+              ├──► Increment vector clock (per-op)
               ├──► Append to SUP_OPS (disk)
               └──► Broadcast to other tabs
 ```
 
-**SaveToDbEffects is DISABLED** - no writes to `pf` database for model data.
+**Note:** Legacy sync uses **vector clocks** (not timestamps) to detect changes. The vector clock comparison happens when sync compares local vs remote state.
 
 ### 3.2 Read Path (Startup / Hydration)
 
@@ -144,41 +198,42 @@ OperationLogHydratorService
     │         │
     │         └──► If no snapshot: Genesis migration from 'pf' database
     │
-    ├──► Dispatch loadAllData(snapshot) to NgRx
+    ├──► Dispatch loadAllData(snapshot, { isHydration: true }) to NgRx
     │
     └──► Load tail ops (seq > snapshot.lastAppliedOpSeq)
               │
               └──► Replay ops with isRemote=true (prevents re-logging)
 ```
 
-### 3.3 Sync Path (Legacy Providers)
+### 3.3 Sync Upload Path (Legacy Providers)
 
 ```
 Sync Triggered (WebDAV/Dropbox/LocalFile)
     │
     ▼
-SyncService calls PFAPI.getAllSyncModelData()
+SyncService compares local vs remote vector clocks (from META_MODEL)
     │
-    ▼
-PfapiStoreDelegateService.getAllSyncModelDataFromStore()
-    │
-    ├──► Read NgRx state via selectors (task, project, tag, etc.)
-    │
-    └──► Load non-NgRx models from 'pf' database (reminders, archives)
+    └──► If local is ahead (changes exist):
               │
               ▼
-         Return combined data
+         PFAPI.getAllSyncModelData()
               │
               ▼
-         Generate main.json / model files
+         PfapiStoreDelegateService.getAllSyncModelDataFromStore()
               │
-              ▼
-         Upload to provider
+              └──► Read ALL models from NgRx state via selectors
+                        │
+                        ▼
+                   Return combined data
+                        │
+                        ▼
+                   Generate __meta / model files
+                        │
+                        ▼
+                   Upload to provider
 ```
 
-**Key insight:** PFAPI reads directly from NgRx. The `pf` database is completely bypassed for model data read/write. It is NOT used as a cache.
-
-### 3.4 Sync Download Path
+### 3.4 Sync Download Path (Legacy Providers)
 
 ```
 Download from Provider
@@ -187,20 +242,83 @@ Download from Provider
 PFAPI receives main.json
     │
     ▼
-Dispatch loadAllData(remoteData) to NgRx
+Dispatch loadAllData(remoteData, { isRemoteSync: true }) to NgRx
     │
     ▼
-OperationLogEffects sees loadAllData
+OperationLogEffects sees loadAllData with isRemoteSync=true
     │
-    └──► Creates "import" operation in SUP_OPS
-         (or skips if isRemote=true)
+    ├──► Create "SYNC_IMPORT" operation in SUP_OPS  ◄── CRITICAL
+    │         (This persists the remote state)
+    │
+    └──► Force snapshot to state_cache  ◄── SAFETY
+              (Ensures persistence even if app crashes)
 ```
+
+**CRITICAL:** Sync downloads MUST be persisted to SUP_OPS. Either:
+
+1. Create a special `SYNC_IMPORT` operation with full state
+2. OR force an immediate snapshot after applying remote data
+
+Without this, downloaded data exists only in memory and would be lost on crash.
+
+### 3.5 loadAllData Action Variants
+
+The `loadAllData` action needs to distinguish its source:
+
+```typescript
+interface LoadAllDataMeta {
+  isHydration?: boolean; // From SUP_OPS on startup - skip logging
+  isRemoteSync?: boolean; // From sync download - create import op + snapshot
+  isBackupImport?: boolean; // From file import - create import op
+}
+
+// Usage:
+dispatch(loadAllData({ data, meta: { isRemoteSync: true } }));
+```
+
+| Source               | Create Op?          | Force Snapshot? |
+| -------------------- | ------------------- | --------------- |
+| Hydration (startup)  | No                  | No              |
+| Remote sync download | Yes (SYNC_IMPORT)   | Yes             |
+| Backup file import   | Yes (BACKUP_IMPORT) | Yes             |
 
 ---
 
-## 4. Provider-Specific Sync Strategy
+## 4. Vector Clock Synchronization
 
-### 4.1 Decision Matrix
+### 4.1 Two Vector Clock Systems
+
+The system has two vector clock locations:
+
+1. **Per-operation vector clock** - Each op in SUP_OPS has its own vector clock
+2. **META_MODEL vector clock** - Global vector clock used by legacy sync protocol
+
+Legacy sync compares `META_MODEL.vectorClock` (local) vs remote `__meta.vectorClock` to detect changes.
+
+### 4.2 Keeping Vector Clocks in Sync
+
+**Question:** When ops are written to SUP_OPS, do we need to update META_MODEL's vector clock?
+
+**Answer:** The sync protocol compares META_MODEL vector clocks. If we don't update META_MODEL's vector clock when ops are written, legacy sync won't detect local changes.
+
+**Solution:** When `OperationLogEffects` writes an operation, also increment META_MODEL's vector clock:
+
+```typescript
+// After writing op to SUP_OPS:
+await this.metaModel.incrementVectorClock(this.clientId);
+```
+
+This ensures legacy sync can detect that local state has changed.
+
+### 4.3 Note on lastLocalSyncModelChange
+
+The `lastLocalSyncModelChange` field is NOT used for sync decision-making. Sync uses vector clock comparison, not timestamps.
+
+---
+
+## 5. Provider-Specific Sync Strategy
+
+### 5.1 Decision Matrix
 
 | Provider            | Remote Sync Protocol    | Notes                              |
 | ------------------- | ----------------------- | ---------------------------------- |
@@ -209,30 +327,29 @@ OperationLogEffects sees loadAllData
 | **Local File Sync** | Legacy LWW              | Single file sync, reads from NgRx  |
 | **Future Server**   | Operation Log (planned) | Would upload/download ops directly |
 
-### 4.2 Why Legacy Providers Don't Use Op-Log Sync
+### 5.2 Why Legacy Providers Don't Use Op-Log Sync
 
 - **WebDAV**: HTTP overhead makes thousands of small op files slow
 - **Dropbox**: API rate limits, slow directory listing
 - **LocalFile**: Simpler to sync one file than manage op chunks
 
-Op-log sync is reserved for future server-based providers that can efficiently handle operation streams.
+Op-log sync is reserved for future server-based providers.
 
 ---
 
-## 5. Key Services
+## 6. Key Services
 
-### 5.1 File Map
+### 6.1 File Map
 
 ```
 src/app/core/persistence/operation-log/
 ├── operation.types.ts               # Type definitions
 ├── operation-log-store.service.ts   # SUP_OPS IndexedDB persistence
-├── operation-log.effects.ts         # NgRx effect capture
+├── operation-log.effects.ts         # NgRx effect capture + META_MODEL sync
 ├── operation-log-hydrator.service.ts# Startup state restoration
 ├── operation-log-compaction.service.ts # Snapshot + GC
 ├── operation-applier.service.ts     # Apply ops to store
 ├── operation-converter.util.ts      # Op ↔ Action conversion
-├── conflict-resolution.service.ts   # Conflict UI (future)
 ├── dependency-resolver.service.ts   # Entity dependency tracking
 ├── lock.service.ts                  # Cross-tab locking
 └── multi-tab-coordinator.service.ts # BroadcastChannel sync
@@ -242,27 +359,27 @@ src/app/pfapi/
 └── pfapi.service.ts                 # Sync orchestration
 ```
 
-### 5.2 Service Responsibilities
+### 6.2 Service Responsibilities
 
-| Service                         | Responsibility                                |
-| ------------------------------- | --------------------------------------------- |
-| `OperationLogStoreService`      | SUP_OPS IndexedDB CRUD, vector clock tracking |
-| `OperationLogEffects`           | Capture actions, write ops to SUP_OPS         |
-| `OperationLogHydratorService`   | Load snapshot + replay tail on startup        |
-| `OperationLogCompactionService` | Create snapshots, prune old ops               |
-| `PfapiStoreDelegateService`     | Read NgRx state for legacy sync               |
-| `LockService`                   | Web Locks API + fallback for cross-tab safety |
-| `MultiTabCoordinatorService`    | BroadcastChannel for tab coordination         |
+| Service                         | Responsibility                                    |
+| ------------------------------- | ------------------------------------------------- |
+| `OperationLogStoreService`      | SUP_OPS IndexedDB CRUD, vector clock tracking     |
+| `OperationLogEffects`           | Capture actions, write ops, **update META_MODEL** |
+| `OperationLogHydratorService`   | Load snapshot + replay tail on startup            |
+| `OperationLogCompactionService` | Create snapshots, prune old ops                   |
+| `PfapiStoreDelegateService`     | Read NgRx state + non-NgRx models for sync        |
+| `LockService`                   | Web Locks API + fallback for cross-tab safety     |
+| `MultiTabCoordinatorService`    | BroadcastChannel for tab coordination             |
 
 ---
 
-## 6. Operation Structure
+## 7. Operation Structure
 
 ```typescript
 interface Operation {
   id: string; // UUID v7 (time-ordered)
   actionType: string; // NgRx action type
-  opType: OpType; // CRT | UPD | DEL | MOV | BATCH
+  opType: OpType; // CRT | UPD | DEL | MOV | BATCH | SYNC_IMPORT
   entityType: EntityType; // TASK | PROJECT | TAG | NOTE | ...
   entityId?: string; // Affected entity ID
   entityIds?: string[]; // For batch operations
@@ -274,29 +391,30 @@ interface Operation {
   parentOpId?: string; // For conflict chains
 }
 
-type OpType = 'CRT' | 'UPD' | 'DEL' | 'MOV' | 'BATCH';
+type OpType = 'CRT' | 'UPD' | 'DEL' | 'MOV' | 'BATCH' | 'SYNC_IMPORT' | 'BACKUP_IMPORT';
 ```
 
 ---
 
-## 7. Compaction
+## 8. Compaction
 
-### 7.1 Triggers
+### 8.1 Triggers
 
 - Every 500 operations
+- After sync download (safety)
 - On app close (optional)
 
-### 7.2 Process
+### 8.2 Process
 
 ```
 1. Acquire compaction lock
-2. Read current state from NgRx (via selector)
+2. Read current state from NgRx (via PfapiStoreDelegateService)
 3. Save snapshot to SUP_OPS.state_cache
 4. Delete ops WHERE syncedAt IS NOT NULL AND appliedAt < (now - 7 days)
 5. Never delete unsynced ops
 ```
 
-### 7.3 Configuration
+### 8.3 Configuration
 
 | Setting            | Value   | Description                            |
 | ------------------ | ------- | -------------------------------------- |
@@ -305,7 +423,113 @@ type OpType = 'CRT' | 'UPD' | 'DEL' | 'MOV' | 'BATCH';
 
 ---
 
-## 8. Genesis Migration
+## 9. Schema Migrations
+
+### 9.1 The Challenge
+
+With operation log persistence, schema migrations are more complex than with snapshot-only persistence:
+
+1. **Ops are immutable** - We can't modify historical ops to match new schema
+2. **Snapshots must be current** - state_cache needs the latest schema
+3. **Replay must work** - Old ops applied to new reducers must not break
+
+### 9.2 Migration Strategy
+
+**Approach: Migrate at snapshot boundaries**
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    Schema Migration Flow                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  App Update (schema v1 → v2)                                    │
+│       │                                                          │
+│       ▼                                                          │
+│  Load state_cache (v1 snapshot)                                 │
+│       │                                                          │
+│       ▼                                                          │
+│  Run migration: migrateV1ToV2(snapshot)                         │
+│       │                                                          │
+│       ▼                                                          │
+│  Dispatch loadAllData(migratedSnapshot, { isHydration: true })  │
+│       │                                                          │
+│       ▼                                                          │
+│  Force new snapshot (now v2)                                    │
+│       │                                                          │
+│       ▼                                                          │
+│  Delete old ops (they're now baked into v2 snapshot)            │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 9.3 Implementation
+
+```typescript
+// schema-migration.service.ts
+interface SchemaMigration {
+  fromVersion: number;
+  toVersion: number;
+  migrate: (state: AllSyncModels) => AllSyncModels;
+}
+
+const MIGRATIONS: SchemaMigration[] = [
+  {
+    fromVersion: 1,
+    toVersion: 2,
+    migrate: (state) => ({
+      ...state,
+      task: migrateTasksV1ToV2(state.task),
+    }),
+  },
+  // ... future migrations
+];
+
+@Injectable({ providedIn: 'root' })
+export class SchemaMigrationService {
+  async migrateIfNeeded(snapshot: StateCache): Promise<StateCache> {
+    const currentVersion = CURRENT_SCHEMA_VERSION;
+    let { state, schemaVersion } = snapshot;
+
+    while (schemaVersion < currentVersion) {
+      const migration = MIGRATIONS.find((m) => m.fromVersion === schemaVersion);
+      if (!migration) {
+        throw new Error(`No migration path from v${schemaVersion}`);
+      }
+      state = migration.migrate(state);
+      schemaVersion = migration.toVersion;
+    }
+
+    return { ...snapshot, state, schemaVersion };
+  }
+}
+```
+
+### 9.4 Op Schema Versioning
+
+Each operation has a `schemaVersion` field:
+
+```typescript
+interface Operation {
+  // ...
+  schemaVersion: number; // Schema version when op was created
+}
+```
+
+**During replay:**
+
+- Ops with older schema versions are applied via compatibility layer
+- OR skipped if snapshot already contains their effects (post-migration)
+
+### 9.5 Best Practices
+
+1. **Additive changes are safe** - New fields with defaults work without migration
+2. **Destructive changes require migration** - Renaming/removing fields needs explicit handling
+3. **Compact after migration** - New snapshot bakes in migration, old ops can be deleted
+4. **Test migration paths** - Each version pair needs migration test coverage
+
+---
+
+## 10. Genesis Migration
 
 On first startup with operation log (when SUP_OPS is empty):
 
@@ -313,16 +537,74 @@ On first startup with operation log (when SUP_OPS is empty):
 1. Check if SUP_OPS has any ops
 2. If empty:
    a. Load all data from 'pf' database (legacy)
-   b. Create "genesis" operation with full state
+   b. Create "GENESIS" operation with full state
    c. Save snapshot to state_cache
+   d. Mark genesis op as synced (it came from legacy sync)
 3. Future startups hydrate from SUP_OPS
 ```
 
 ---
 
-## 9. Multi-Tab Coordination
+## 10. Disaster Recovery
 
-### 9.1 Write Coordination
+### 10.1 SUP_OPS Corruption
+
+If SUP_OPS IndexedDB is corrupted or cleared:
+
+```
+1. Detect: Hydration fails or returns empty/invalid state
+2. Check: Does 'pf' database have valid data?
+   a. If yes: Re-run genesis migration
+   b. If no: Check remote sync for data
+3. If remote has data: Force sync download
+4. If all else fails: User must restore from backup
+```
+
+### 10.2 Genesis Migration Failure
+
+If genesis migration crashes mid-way:
+
+```
+1. On next startup, SUP_OPS may have partial data
+2. Detect: state_cache missing or ops count < expected
+3. Recovery: Clear SUP_OPS, re-run genesis migration
+```
+
+### 10.3 Recovery Implementation
+
+```typescript
+// In OperationLogHydratorService
+async hydrateStore(): Promise<void> {
+  try {
+    const snapshot = await this.opLogStore.loadStateCache();
+    if (!snapshot || !this.isValidSnapshot(snapshot)) {
+      // Recovery path
+      await this.attemptRecovery();
+      return;
+    }
+    // Normal hydration...
+  } catch (e) {
+    await this.attemptRecovery();
+  }
+}
+
+private async attemptRecovery(): Promise<void> {
+  // 1. Try legacy database
+  const legacyData = await this.pfapi.getAllSyncModelData();
+  if (legacyData && this.hasData(legacyData)) {
+    await this.runGenesisMigration(legacyData);
+    return;
+  }
+  // 2. Try remote sync
+  // 3. Show error to user
+}
+```
+
+---
+
+## 11. Multi-Tab Coordination
+
+### 11.1 Write Coordination
 
 ```typescript
 // Primary: Web Locks API
@@ -332,7 +614,7 @@ await navigator.locks.request('sp_op_log_write', callback);
 await this.acquireFallbackLock(lockName, callback);
 ```
 
-### 9.2 State Broadcast
+### 11.2 State Broadcast
 
 When one tab writes an operation:
 
@@ -342,7 +624,7 @@ When one tab writes an operation:
 
 ---
 
-## 10. Action Filtering
+## 12. Action Filtering
 
 We use a **blacklist** approach - all actions are persisted unless explicitly excluded.
 
@@ -364,7 +646,7 @@ export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
 
 ---
 
-## 11. Current Implementation Status
+## 13. Current Implementation Status
 
 ### Complete ✅
 
@@ -377,13 +659,17 @@ export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
 - Op → Action conversion with isRemote flag
 - `PfapiStoreDelegateService` (reads NgRx for sync)
 
-### In Progress 🚧
+### Needs Implementation 🚧
 
-| Component           | Status                        | Priority |
-| ------------------- | ----------------------------- | -------- |
-| Compaction triggers | Logic exists, never invoked   | HIGH     |
-| Dependency resolver | Extracts deps, no retry queue | HIGH     |
-| Action blacklist    | Only ~10 actions, needs audit | MEDIUM   |
+| Component                 | Issue                             | Priority     |
+| ------------------------- | --------------------------------- | ------------ |
+| META_MODEL sync           | Ops don't update META_MODEL       | **CRITICAL** |
+| Sync download persistence | Downloads not written to SUP_OPS  | **CRITICAL** |
+| Non-NgRx model migration  | reminders, archives bypass op-log | **HIGH**     |
+| Compaction triggers       | Logic exists, never invoked       | HIGH         |
+| Action blacklist          | Only ~10 actions, needs audit     | MEDIUM       |
+| Disaster recovery         | No recovery path implemented      | MEDIUM       |
+| Schema migration service  | No migration infrastructure       | MEDIUM       |
 
 ### Not Started ❌
 
@@ -391,39 +677,37 @@ export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
 | ---------------------- | -------------------------------- | -------- |
 | Future server sync     | Op-log sync for server providers | LOW      |
 | Per-entity conflict UI | Field-level diff display         | LOW      |
-| Schema migrations      | Op/snapshot version migrations   | MEDIUM   |
 
 ---
 
-## 12. Architectural Simplifications Made
+## 14. Architectural Simplifications Made
 
-### 12.1 Removed: Feature Flag
+### 14.1 Removed: Feature Flag
 
-**Old:** `useOperationLogSync` feature flag to toggle between op-log and legacy persistence.
+**Old:** `useOperationLogSync` feature flag to toggle persistence.
 
-**New:** Operation log is always enabled. One implementation, no conditionals.
+**New:** Operation log is always enabled. One implementation.
 
-### 12.2 Removed: Dual Write Path
+### 14.2 Removed: Dual Write Path
 
-**Old:** Both `SaveToDbEffects` (→ pf) and `OperationLogEffects` (→ SUP_OPS) running in parallel.
+**Old:** Both `SaveToDbEffects` and `OperationLogEffects` running in parallel.
 
-**New:** Only `OperationLogEffects` writes to persistence. `SaveToDbEffects` is disabled.
+**New:** Only `OperationLogEffects` writes model data. `SaveToDbEffects` disabled.
 
-### 12.3 Removed: Memory-Only Adapter
+### 14.3 Removed: Memory-Only Adapter
 
 **Old:** `SaveToDbEffects` updating ModelCtrl cache without disk writes.
 
-**New:** PFAPI reads directly from NgRx via `PfapiStoreDelegateService`. No cache to manage.
+**New:** PFAPI reads directly from NgRx. No cache to manage.
 
-### 12.4 Simplified: PFAPI Role
+### 14.4 Simplified: PFAPI Role
 
 **Old:** PFAPI managed local persistence + sync protocol.
 
-**New:** PFAPI manages sync protocol only. Local persistence is handled by operation log. The `pf` database is strictly for metadata (vector clocks) and non-NgRx data (archives).
+**New:** PFAPI manages sync protocol only. Local persistence is SUP_OPS.
 
 ---
 
-## 13. References
+## 15. References
 
 - [Execution Plan](./operation-log-execution-plan.md) - Implementation tasks
-- [Refactoring Plan](./refactoring-plan-oplog-decoupling.md) - Decoupling details
