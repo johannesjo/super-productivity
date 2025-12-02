@@ -1244,8 +1244,8 @@
         "NAME_LABEL": "文件夹名称",
         "NAME_PLACEHOLDER": "输入文件夹名称",
         "NAME_REQUIRED": "文件夹名称是必需的",
-        "NO_PARENT": "无父级（根级别）"
-        "PARENT_LABEL": "父文件夹",
+        "NO_PARENT": "无父级（根级别）",
+        "PARENT_LABEL": "父文件夹"
       },
       "SELECT": {
         "LABEL": "文件夹",
@@ -1874,7 +1874,7 @@
       "TIME_LOCALE_RU_RU": "俄语：24小时制，日.月.年",
       "TIME_LOCALE_ZH_CN": "简体中文：24小时制，年/月/日",
       "TIME_LOCALE_JA_JP": "日语：24小时制，年/月/日",
-      "TIME_LOCALE_KO_KR": "韩语：12小时制（上午/下午），年. 月. 日",
+      "TIME_LOCALE_KO_KR": "韩语：12小时制（上午/下午），年. 月. 日"
     },
     "MISC": {
       "DARK_MODE": "深色模式",
