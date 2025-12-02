@@ -76,6 +76,14 @@
   flex: 1;
   position: relative;
   overflow: hidden;
+
+  &.is-resizing {
+    pointer-events: none;
+
+    iframe {
+      pointer-events: none;
+    }
+  }
 }
 
 .plugin-iframe {

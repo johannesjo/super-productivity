@@ -4,6 +4,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
@@ -36,7 +37,7 @@ import { DateAdapter } from '@angular/material/core';
     '[style.--nr-of-days]': 'daysToShow().length',
   },
 })
-export class ScheduleComponent implements AfterViewInit {
+export class ScheduleComponent {
   taskService = inject(TaskService);
   layoutService = inject(LayoutService);
   scheduleService = inject(ScheduleService);
@@ -151,15 +152,17 @@ export class ScheduleComponent implements AfterViewInit {
         data: { isInfoShownInitially: true },
       });
     }
-  }
 
-  ngAfterViewInit(): void {
-    // Handle fragment scrolling manually as a fallback
-    setTimeout(() => {
-      const element = document.getElementById('work-start');
-      if (element) {
-        element.scrollIntoView({ behavior: 'instant', block: 'start' });
+    effect(() => {
+      if (this.isMonthView() === false) {
+        // scroll to work start whenever view is switched to work-week
+        setTimeout(() => {
+          const element = document.getElementById('work-start');
+          if (element) {
+            element.scrollIntoView({ behavior: 'instant', block: 'start' });
+          }
+        }); // Small delay to ensure DOM is fully rendered
       }
-    }); // Small delay to ensure DOM is fully rendered
+    });
   }
 }

@@ -95,6 +95,7 @@ export class PluginService implements OnDestroy {
       ...(environment.production ? [] : ['assets/bundled-plugins/api-test-plugin']),
       'assets/bundled-plugins/procrastination-buster',
       'assets/bundled-plugins/ai-productivity-prompts',
+      'assets/bundled-plugins/automations',
     ];
 
     // Only load manifests for discovery
@@ -159,6 +160,7 @@ export class PluginService implements OnDestroy {
       'assets/bundled-plugins/sync-md',
       ...(environment.production ? [] : ['assets/bundled-plugins/api-test-plugin']),
       'assets/bundled-plugins/procrastination-buster',
+      'assets/bundled-plugins/automations',
     ];
 
     // KISS: No preloading - just load plugins directly

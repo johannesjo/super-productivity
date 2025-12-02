@@ -38,6 +38,7 @@ export type MiscConfig = Readonly<{
   isShowProductivityTipLonger?: boolean;
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
+  isUseCustomWindowTitleBar?: boolean;
   customTheme?: string;
   defaultStartPage?: number;
   unsplashApiKey?: string | null;

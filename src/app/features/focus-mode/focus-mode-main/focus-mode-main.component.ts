@@ -21,6 +21,7 @@ import {
   adjustRemainingTime,
   completeFocusSession,
   completeTask,
+  focusModeLoaded,
   pauseFocusSession,
   selectFocusTask,
   setFocusModeMode,
@@ -195,6 +196,8 @@ export class FocusModeMainComponent {
   private _dragEnterTarget?: HTMLElement;
 
   constructor() {
+    this._store.dispatch(focusModeLoaded());
+
     // Use effect to reactively update defaultTaskNotes
     effect(() => {
       const misc = this._globalConfigService.misc();
