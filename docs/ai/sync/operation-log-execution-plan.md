@@ -52,7 +52,7 @@ The Operation Log sync system provides per-entity conflict detection with semant
 
 3. **Compaction Risk**: Deleting synced ops older than 7 days is safe, but if a device is offline for >7 days, it may miss ops that were compacted away. The snapshot should contain the full state, but conflict detection loses granularity.
 
-4. **Manifest Consistency**: The manifest file is overwritten atomically (`forceOverwrite: true`), which is correct for eventual consistency but may cause issues if two devices upload simultaneously.
+4. **Provider-Specific Sync**: WebDAV and Dropbox continue using legacy LWW (Last-Writer-Wins) sync with `main.json`. Operation log sync is only enabled for Local File Sync and future server-based providers where file operations are fast. See [Architecture Doc](./operation-log-architecture.md) for details.
 
 ---
 
@@ -241,9 +241,19 @@ if (missingHardDeps.length > 0) {
 
 ### Phase 3: Conflict Resolution UI & Logic
 
-**Objective:** Enable users to make informed conflict resolution decisions with field-level visibility.
+**Objective:** Enable users to make informed conflict resolution decisions with field-level visibility and per-conflict granularity.
 
 **Duration Estimate:** 2 weeks
+
+#### Critical Issues in Current Implementation
+
+1. **Single global resolution applied to all conflicts** (HIGH): `dialog-conflict-resolution.component.ts:34-49` returns one resolution, but `conflict-resolution.service.ts:24-66` applies it to ALL conflicts.
+
+2. **No payload/field visibility** (HIGH): UI shows only op counts and timestamps, not actual data differences.
+
+3. **Missing edge case handling** (MEDIUM): `conflict.localOps[conflict.localOps.length - 1]` throws if arrays are empty.
+
+4. **No feature flag UI** (MEDIUM): `useOperationLogSync` has no settings toggle.
 
 #### 3.1 Enhanced Conflict Data Structure
 
@@ -525,7 +535,7 @@ This ensures:
 - Legacy sync continues working
 - Operation log data preserved but unused
 
-#### 5.4 Monitoring & Alerts
+#### 5.4 Monitoring & Metrics
 
 **Metrics to track:**
 
@@ -694,6 +704,6 @@ The operation log stores the vector clock state _after_ each operation, enabling
 
 ---
 
-## 7. Related Documents
+## 9. Related Documents
 
 - [Architecture Overview](./operation-log-architecture.md) - High-level system design and components
