@@ -1782,7 +1782,7 @@ Our operation log follows CRDT principles from Bartosz Sypytkowski's research:
 
 ## References
 
-- [Operation Log Sync Research](./operation-log-sync-research.md) - Industry best practices
+- [Operation Log Best Practices](./operation-log-sync-best-practices.md) - Industry best practices
 - [Operation Log Architecture](./operation-log-architecture.md) - Full system design
 - [Execution Plan](./operation-log-execution-plan.md) - Implementation tasks
 - [PFAPI Architecture](./pfapi-sync-persistence-architecture.md) - Legacy sync system
