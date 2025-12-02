@@ -1400,7 +1400,7 @@ async deleteStaleDevices(beforeTime: number): Promise<{ changes: number }> {
 
 ## 12. Compression
 
-Large payloads are compressed to reduce bandwidth and storage.
+Large payloads are compressed to reduce bandwidth.
 
 ### Request/Response Compression
 
@@ -1420,41 +1420,6 @@ async function start(): Promise<void> {
 
   // ... rest of setup
 }
-```
-
-### Payload Compression in Service
-
-```typescript
-import * as zlib from 'zlib';
-
-// Compress large operation payloads before storage
-function compressIfNeeded(payload: unknown): { data: Buffer; compressed: boolean } {
-  const json = JSON.stringify(payload);
-
-  if (json.length > COMPRESSION_THRESHOLD) {
-    return {
-      data: zlib.gzipSync(json),
-      compressed: true,
-    };
-  }
-
-  return {
-    data: Buffer.from(json, 'utf-8'),
-    compressed: false,
-  };
-}
-
-// Decompress when reading
-function decompressPayload(data: Buffer, compressed: boolean): unknown {
-  if (compressed) {
-    const decompressed = zlib.gunzipSync(data).toString('utf-8');
-    return JSON.parse(decompressed);
-  }
-  return JSON.parse(data.toString('utf-8'));
-}
-
-// Updated schema to track compression
-// ALTER TABLE operations ADD COLUMN payload_compressed BOOLEAN DEFAULT FALSE;
 ```
 
 ### Snapshot Compression
@@ -1482,12 +1447,6 @@ It keeps the server fast, simple, and agnostic to domain logic. It supports End-
 ## References
 
 - [Server Sync Architecture](./server-sync-architecture.md) - Detailed algorithms and design
-- [Operation Log Sync Research](./operation-log-sync-research.md) - Industry best practices (Replicache, Linear, Figma)
+- [Operation Log Best Practices](./operation-log-sync-best-practices.md) - Industry standards and architectural decisions
 - [Operation Log Architecture](./operation-log-architecture.md) - Client-side system
 - [Execution Plan](./operation-log-execution-plan.md) - Client implementation tasks
-
-### External References
-
-- [Replicache Documentation](https://doc.replicache.dev/)
-- [Linear Sync Engine](https://github.com/wzhudev/reverse-linear-sync-engine)
-- [Figma LiveGraph](https://www.figma.com/blog/livegraph-real-time-data-fetching-at-figma/)

@@ -12,6 +12,7 @@ import { initDb } from './db';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
 import { verifyToken } from './auth';
+import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
 
 export { ServerConfig, loadConfigFromEnv };
 
@@ -210,8 +211,14 @@ export const createServer = (
       // API Routes
       await fastifyServer.register(apiRoutes, { prefix: '/api' });
 
+      // Sync Routes
+      await fastifyServer.register(syncRoutes, { prefix: '/api/sync' });
+
       // Page Routes
       await fastifyServer.register(pageRoutes, { prefix: '/' });
+
+      // Start cleanup jobs
+      startCleanupJobs();
 
       // WebDAV Handler (Catch-all via hook)
       // We use a hook because Fastify's router validates HTTP methods and might not support all WebDAV methods
@@ -295,6 +302,7 @@ export const createServer = (
       }
     },
     stop: async (): Promise<void> => {
+      stopCleanupJobs();
       if (fastifyServer) {
         await fastifyServer.close();
         fastifyServer = undefined;

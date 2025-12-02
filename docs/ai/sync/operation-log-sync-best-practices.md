@@ -75,40 +75,66 @@ Replaying 100,000 operations to build the initial state is slow.
 - **Snapshots:** Periodically (e.g., every 1,000 ops), generating a full state snapshot.
 - **Hybrid Sync:** New devices download the latest Snapshot + any Operations occurring _after_ that snapshot.
 
-## 4. Conflict Resolution Strategies
+## 4. Client-Side Optimization: Coalescing & Batching
 
-### 4.1. Detection
+### 4.1. Write Coalescing (Squashing)
+
+Coalescing is the practice of merging multiple granular updates to the same entity into a single operation _before_ it is synced to the server.
+
+- **When to use:**
+  - **Rapid Text Entry:** If a user types "Hello" (5 ops), squash into 1 op ("Hello") after a debounce period (e.g., 500ms).
+  - **Slider/Drag Adjustments:** If a user drags a progress bar from 0% to 50%, typically only the final value (50%) matters.
+- **Benefits:**
+  - Reduces server storage growth.
+  - Speeds up replay/initial sync for other clients.
+  - Reduces network overhead.
+- **Risks:**
+  - **History Loss:** You lose the detailed audit trail of intermediate keystrokes. (Usually acceptable).
+  - **Conflict Complexity:** If two users edit the same field simultaneously, coalesced ops can make "Character-level" merging (OT/CRDT) harder if you are relying on simple LWW. But for field-level LWW, it is actually helpful.
+
+### 4.2. Logical Batching
+
+A "Batch" operation is a container for multiple distinct actions that should be treated atomically.
+
+- **Use Case:** "Create Task" + "Add Tag" + "Move to Project X".
+- **Implementation:** The client sends a single `BATCH` op containing an array of sub-operations.
+- **Benefit:** Ensures database consistency. If the network fails, the task isn't created without its tag.
+
+## 5. Conflict Resolution Strategies
+
+### 5.1. Detection
 
 - **Server-side:** "I received an update for Entity X based on v1, but I am already at v2."
 - **Client-side:** "I downloaded Op A (ServerSeq 50) which modifies Task 1, but I have a local pending Op B that also modifies Task 1."
 
-### 4.2. Resolution Models
+### 5.2. Resolution Models
 
 1.  **Last-Write-Wins (LWW):** Simple, robust, but data loss is possible. Uses wall-clock timestamps.
 2.  **Three-Way Merge:** If the payload is diff-able (e.g., JSON Patch), try to merge.
 3.  **Manual:** Flag the conflict and ask the user (complex UI).
 4.  **Hybrid:** LWW for simple fields (Title), Merge for collections (Tags), Append for logs (Time tracking).
 
-## 5. Security & Reliability
+## 6. Security & Reliability
 
-### 5.1. Authentication
+### 6.1. Authentication
 
 - **Token-Based:** JWTs are standard.
 - **Scope:** Tokens should restrict access to specific `user_id` partitions.
 
-### 5.2. Encryption
+### 6.2. Encryption
 
 - **Transport:** HTTPS/WSS is mandatory.
 - **At Rest:** If the server is untrusted, clients should encrypt the `payload` field before sending. The server syncs encrypted blobs. (End-to-End Encryption - E2EE).
 
-### 5.3. Rate Limiting
+### 6.3. Rate Limiting
 
 - Essential to prevent a single malfunctioning client from flooding the log.
 
-## 6. Summary Checklist
+## 7. Summary Checklist
 
 - [ ] **Database:** SQLite (Start) / Postgres (Scale).
 - [ ] **ID Generation:** UUID v7 (Time-ordered).
 - [ ] **Protocol:** HTTP (Reliable) + WebSocket (Notify).
+- [ ] **Optimization:** Coalesce rapid local edits; Batch atomic actions.
 - [ ] **Conflict:** Server assigns order; Client reconciles.
 - [ ] **Safety:** Tombstones for deletions, Snapshots for speed.
