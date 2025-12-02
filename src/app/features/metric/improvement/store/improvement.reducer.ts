@@ -1,6 +1,7 @@
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
-import { createFeatureSelector, createReducer, createSelector } from '@ngrx/store';
+import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
 import { Improvement, ImprovementState } from '../improvement.model';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
 // TODO: Remove in future version - kept for backward compatibility only
 // This feature has been removed but reducer is kept for data migration
@@ -15,8 +16,13 @@ export const initialImprovementState: ImprovementState =
     hiddenImprovementBannerItems: [],
   });
 
-// Empty reducer that maintains empty state for backward compatibility
-export const improvementReducer = createReducer(initialImprovementState);
+// Reducer that loads state from appDataComplete for backward compatibility
+export const improvementReducer = createReducer(
+  initialImprovementState,
+  on(loadAllData, (state, { appDataComplete }) =>
+    appDataComplete.improvement?.ids ? appDataComplete.improvement : state,
+  ),
+);
 
 // Stub selectors for backward compatibility
 export const selectImprovementFeatureState = createFeatureSelector<ImprovementState>(

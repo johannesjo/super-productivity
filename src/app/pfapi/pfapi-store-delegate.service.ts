@@ -7,6 +7,8 @@ import { selectBoardsState } from '../features/boards/store/boards.selectors';
 import { selectConfigFeatureState } from '../features/config/store/global-config.reducer';
 import { selectIssueProviderState } from '../features/issue/store/issue-provider.selectors';
 import { selectMenuTreeState } from '../features/menu-tree/store/menu-tree.selectors';
+import { selectImprovementFeatureState } from '../features/metric/improvement/store/improvement.reducer';
+import { selectObstructionFeatureState } from '../features/metric/obstruction/store/obstruction.reducer';
 import { selectMetricFeatureState } from '../features/metric/store/metric.selectors';
 import { selectNoteFeatureState } from '../features/note/store/note.reducer';
 import { selectPlannerState } from '../features/planner/store/planner.selectors';
@@ -28,7 +30,7 @@ import { environment } from '../../environments/environment';
  * allows legacy sync (WebDAV/Dropbox) to read the current state directly from NgRx instead
  * of ModelCtrl caches.
  *
- * For models not in NgRx (reminders, archives, plugins, improvement, obstruction),
+ * For models not in NgRx (reminders, archives, plugins),
  * we load from the 'pf' database on-demand via ModelCtrl.load().
  */
 @Injectable({
@@ -76,6 +78,8 @@ export class PfapiStoreDelegateService {
         this._store.select(selectTaskRepeatCfgFeatureState),
         this._store.select(selectMenuTreeState),
         this._store.select(selectTimeTrackingState),
+        this._store.select(selectImprovementFeatureState),
+        this._store.select(selectObstructionFeatureState),
       ]).pipe(
         first(),
         map(
@@ -93,6 +97,8 @@ export class PfapiStoreDelegateService {
             taskRepeatCfg,
             menuTree,
             timeTracking,
+            improvement,
+            obstruction,
           ]) => ({
             // Clean up task state before sync (same as SaveToDbEffects)
             task: {
@@ -112,6 +118,8 @@ export class PfapiStoreDelegateService {
             taskRepeatCfg,
             menuTree,
             timeTracking,
+            improvement,
+            obstruction,
           }),
         ),
       ),
@@ -119,29 +127,18 @@ export class PfapiStoreDelegateService {
 
     // Load non-NgRx models from 'pf' database on-demand
     // These models are not in NgRx state, so we load them directly from IndexedDB
-    const [
-      reminders,
-      improvement,
-      obstruction,
-      pluginUserData,
-      pluginMetadata,
-      archiveYoung,
-      archiveOld,
-    ] = await Promise.all([
-      this._modelCtrls.reminders.load(),
-      this._modelCtrls.improvement.load(),
-      this._modelCtrls.obstruction.load(),
-      this._modelCtrls.pluginUserData.load(),
-      this._modelCtrls.pluginMetadata.load(),
-      this._modelCtrls.archiveYoung.load(),
-      this._modelCtrls.archiveOld.load(),
-    ]);
+    const [reminders, pluginUserData, pluginMetadata, archiveYoung, archiveOld] =
+      await Promise.all([
+        this._modelCtrls.reminders.load(),
+        this._modelCtrls.pluginUserData.load(),
+        this._modelCtrls.pluginMetadata.load(),
+        this._modelCtrls.archiveYoung.load(),
+        this._modelCtrls.archiveOld.load(),
+      ]);
 
     return {
       ...ngrxData,
       reminders,
-      improvement,
-      obstruction,
       pluginUserData,
       pluginMetadata,
       archiveYoung,
