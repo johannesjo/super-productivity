@@ -1,6 +1,6 @@
 # Operation Log Sync: Architecture
 
-**Status:** Implementation in Progress (~60% complete)
+**Status:** Implementation in Progress (~65% complete)
 **Branch:** `feat/operation-logs`
 **Last Updated:** December 2, 2025
 
@@ -172,6 +172,17 @@ private isLegacySyncProvider(provider: SyncProvider | null): boolean {
 }
 ```
 
+### 3.4 Simplified Local Persistence Strategy
+
+Running two local persistence paths (SUP_OPS + `pf`) in parallel adds significant complexity. A simpler approach:
+
+- **Single local source of truth:** In op-log mode, hydrate only from SUP_OPS (snapshot + tail) and disable `SaveToDbEffects` writes to `pf`.
+- **Legacy projection for sync:** Before a WebDAV/Dropbox/LocalFile sync, materialize the current NgRx state (or SUP_OPS snapshot) into the `pf` shape (`__meta` + model blobs). Use this projection solely for the sync upload/download; do not treat it as a second source of truth afterward.
+- **Legacy ingest:** When legacy sync downloads data, convert it into a genesis op (or batch ops), append to SUP_OPS, then replay into NgRx so remote data still flows through the op-log pipeline.
+- **Simple gating:** `syncMode = 'oplog' | 'legacy'`; op-log sync runs only for providers that support it. Legacy providers touch op-log only via the projection/ingest adapters.
+
+This keeps “save/load locally” unified (op log only) and confines legacy compatibility to thin adapters at the sync boundary.
+
 ## 4. Data Structures
 
 ### 4.1 Operation
@@ -222,12 +233,21 @@ interface EntityConflict {
 
 ## 5. Architecture Layers & PFAPI Integration
 
-### 5.1 Current State (Op Log Branch)
+### 5.1 Current State (Op Log Branch) - B-Lite Implementation
 
-The system now uses **Hybrid Persistence**. Both `SaveToDbEffects` and `OperationLogEffects` are active:
+The system uses **exclusive persistence** based on the `useOperationLogSync` feature flag:
 
-1.  **Operation Log Effects:** Capture actions for `SUP_OPS` (Op Log).
-2.  **SaveToDbEffects:** Capture actions for `'pf'` database (Legacy compatibility).
+**When `useOperationLogSync: true` (Op-Log Mode):**
+
+- `OperationLogEffects` writes all actions to `SUP_OPS` (IndexedDB)
+- `SaveToDbEffects` is **completely disabled** (filtered out)
+- Legacy sync reads from NgRx store via `PfapiStoreDelegateService`
+- The 'pf' database is NOT written to during normal operation
+
+**When `useOperationLogSync: false` (Legacy Mode):**
+
+- `SaveToDbEffects` writes to 'pf' database as usual
+- `OperationLogEffects` still runs (for future migration)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -237,15 +257,26 @@ The system now uses **Hybrid Persistence**. Both `SaveToDbEffects` and `Operatio
                       ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                     NgRx Store                              │
-│                  (Single Source of Truth)                   │
+│                  (Runtime State)                            │
 └─────────────────────┬───────────────────────────────────────┘
                       │
-          ┌───────────┴───────────┐
-          ▼                       ▼
-┌─────────────────────┐ ┌─────────────────────┐
-│ Op Log Effects      │ │ SaveToDbEffects     │
-│ (Writes SUP_OPS)    │ │ (Writes 'pf' DB)    │
-└─────────────────────┘ └─────────────────────┘
+      ┌───────────────┼───────────────┐
+      │               │               │
+      ▼               ▼               ▼
+┌───────────┐  ┌─────────────┐  ┌───────────────────────┐
+│ Op Log    │  │ SaveToDb    │  │ PfapiStoreDelegate    │
+│ Effects   │  │ Effects     │  │ Service               │
+│           │  │             │  │                       │
+│ (Always)  │  │ (Legacy     │  │ (Reads NgRx for       │
+│           │  │  mode only) │  │  legacy sync when     │
+│           │  │             │  │  oplog enabled)       │
+└─────┬─────┘  └──────┬──────┘  └───────────────────────┘
+      │               │
+      ▼               ▼
+┌───────────┐  ┌─────────────┐
+│ SUP_OPS   │  │ 'pf' DB     │
+│ IndexedDB │  │ IndexedDB   │
+└───────────┘  └─────────────┘
 ```
 
 ### 5.2 PFAPI Integration Points
@@ -262,15 +293,16 @@ The Operation Log system integrates with PFAPI at several key points:
 
 ### 5.3 The 'pf' Database Role
 
-In the Memory-Only Adapter model, the `'pf'` database usage is minimized:
+In the B-Lite model, the `'pf'` database usage is minimized when op-log sync is enabled:
 
-| Scenario                 | 'pf' Database Usage                                                    |
-| ------------------------ | ---------------------------------------------------------------------- |
-| **Startup**              | NOT used - hydration is from SUP_OPS snapshot + tail replay            |
-| **User Actions**         | **MEMORY ONLY** - `SaveToDbEffects` updates cache, **SKIPS DB WRITE**  |
-| **Genesis Migration**    | READ ONCE - legacy data copied to SUP_OPS as genesis op                |
-| **Legacy Sync Download** | WRITTEN - WebDAV/Dropbox download updates 'pf' then dispatches to NgRx |
-| **Legacy Sync Upload**   | **IGNORED** - Sync reads fresh data from `ModelCtrl` Memory Cache      |
+| Scenario                 | 'pf' Database Usage                                                            |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| **Startup**              | NOT used - hydration is from SUP_OPS snapshot + tail replay                    |
+| **User Actions**         | **NOT WRITTEN** - `SaveToDbEffects` is completely disabled                     |
+| **Genesis Migration**    | READ ONCE - legacy data copied to SUP_OPS as genesis op                        |
+| **Legacy Sync Download** | WRITTEN - WebDAV/Dropbox download updates 'pf' then dispatches to NgRx         |
+| **Legacy Sync Upload**   | **BYPASSED** - Sync reads fresh data from NgRx via `PfapiStoreDelegateService` |
+| **Disable Op-Log**       | **FLUSHED** - Current NgRx state is written to 'pf' database for legacy mode   |
 
 ### 5.4 Sync Flow (Full Picture)
 
@@ -297,15 +329,27 @@ In the Memory-Only Adapter model, the `'pf'` database usage is minimized:
 └─────────────────────────────┘                 └─────────────────────────────┘
 ```
 
-### 5.5 Key Insight: Dual State Consistency
+### 5.5 Key Insight: B-Lite Delegate Pattern
 
-With both effects enabled, both databases are kept consistent:
+When op-log sync is enabled, the system uses a **delegate pattern** for legacy sync:
 
-- **NgRx Store**: Runtime state.
-- **SUP_OPS**: Op Log source of truth.
-- **'pf' Database**: Legacy mirror (kept current by SaveToDbEffects).
+- **NgRx Store**: Single runtime source of truth
+- **SUP_OPS**: Durable persistence (source of truth on disk)
+- **'pf' Database**: NOT written during normal operation
+- **PfapiStoreDelegateService**: Reads from NgRx store for legacy sync uploads
 
-This ensures that legacy sync (WebDAV/Dropbox) always has access to the latest state in the format it expects.
+**Implementation Details:**
+
+- `PfapiService` sets the delegate via `pf.setGetAllSyncModelDataFromStoreDelegate()`
+- The delegate combines 13 NgRx selectors for models in state
+- Non-NgRx models (reminders, archives, plugins) are loaded from 'pf' database on-demand
+- When disabling op-log mode, current NgRx state is flushed to 'pf' database
+
+**Key Files:**
+
+- `src/app/pfapi/pfapi-store-delegate.service.ts` - Reads all sync data from NgRx
+- `src/app/pfapi/pfapi.service.ts:143-183` - Wires up delegate based on config
+- `src/app/root-store/shared/save-to-db.effects.ts` - Disabled when oplog enabled
 
 For comprehensive PFAPI architecture details, see [PFAPI Sync and Persistence Architecture](./pfapi-sync-persistence-architecture.md).
 
@@ -331,6 +375,13 @@ src/app/core/persistence/operation-log/
 ├── lock.service.ts                  # ✅ Cross-tab locking
 ├── multi-tab-coordinator.service.ts # ✅ BroadcastChannel sync
 └── replay-guard.service.ts          # ❌ DOES NOT EXIST - Must create
+
+src/app/pfapi/
+├── pfapi-store-delegate.service.ts  # ✅ NEW: Reads sync data from NgRx store
+└── pfapi.service.ts                 # ✅ MODIFIED: Wires up delegate for op-log mode
+
+src/app/root-store/shared/
+└── save-to-db.effects.ts            # ✅ MODIFIED: Disabled when op-log enabled
 ```
 
 **Legend:** ✅ Complete | ⚠️ Partial/Broken | ❌ Missing
@@ -350,6 +401,7 @@ src/app/core/persistence/operation-log/
 | `ReplayGuardService`            | Signal to block side effects during hydration      | ❌ Missing            |
 | `LockService`                   | Web Locks API + fallback for cross-tab safety      | ✅                    |
 | `MultiTabCoordinatorService`    | BroadcastChannel for tab coordination              | ✅                    |
+| `PfapiStoreDelegateService`     | Read sync data from NgRx for legacy sync           | ✅ NEW                |
 
 ---
 
@@ -357,12 +409,22 @@ src/app/core/persistence/operation-log/
 
 ### 7.1 Write Path (User Action)
 
+**When `useOperationLogSync: true`:**
+
 ```
 1. User action → NgRx dispatch
 2. Reducer updates state (optimistic)
-3. Parallel Persistence:
-   a) OperationLogEffects → Writes to SUP_OPS (Disk)
-   b) SaveToDbEffects    → Updates ModelCtrl Cache (Memory) + META_MODEL (Disk)
+3. OperationLogEffects → Writes to SUP_OPS (Disk)
+4. SaveToDbEffects is DISABLED (no 'pf' writes)
+```
+
+**When `useOperationLogSync: false`:**
+
+```
+1. User action → NgRx dispatch
+2. Reducer updates state (optimistic)
+3. SaveToDbEffects → Writes to 'pf' database (Disk)
+4. OperationLogEffects → Writes to SUP_OPS (for future migration)
 ```
 
 ### 7.2 Read Path (Startup)
@@ -580,31 +642,35 @@ export const limitVectorClockSize = (clock, currentClientId) => {
 
 ## 11. Feature Flag Strategy
 
-> **Decision:** We do NOT use a global `useOperationLogSync` feature flag.
+> **Decision:** We use `useOperationLogSync` feature flag to control persistence strategy.
 
-Instead, the **Operation Log is Always On** for local persistence (`SUP_OPS`), running in parallel with the legacy persistence.
+### 11.1 B-Lite Persistence Strategy (Delegate Pattern)
 
-### 11.1 Hybrid Persistence Strategy (Memory-Only Model Adapter)
+The B-Lite approach completely disables `SaveToDbEffects` when op-log sync is enabled, using a delegate pattern for legacy sync reads:
 
-To strictly minimize I/O overhead, we stop writing Model data (Tasks, Projects, etc.) to the legacy `'pf'` IndexedDB entirely. `SUP_OPS` becomes the **sole** persistence layer for model data.
+**When `useOperationLogSync: true`:**
 
 1.  **`OperationLogEffects` (Primary Persistence):** Writes to `SUP_OPS` (Disk).
-2.  **`SaveToDbEffects` (Memory Adapter):**
-    - Updates `ModelCtrl` **in-memory cache** (`_inMemoryData`). This ensures `SyncService` can read the current state.
-    - Updates `META_MODEL` (Disk). **Crucial:** We still persist revisions and vector clocks to disk so that the legacy sync algorithm knows _when_ to trigger a sync.
-    - **DROPS** the write to the legacy Model tables (`TASK`, `PROJECT`, etc.).
+2.  **`SaveToDbEffects` (DISABLED):** Completely filtered out - no 'pf' database writes.
+3.  **`PfapiStoreDelegateService`:** Provides fresh data to legacy sync by reading from NgRx store.
 
-| Mechanism             | Status     | Destination | Behavior                                |
-| --------------------- | ---------- | ----------- | --------------------------------------- |
-| `OperationLogEffects` | ✅ ENABLED | `SUP_OPS`   | **Full Persistence** (Source of Truth)  |
-| `SaveToDbEffects`     | ✅ ENABLED | Memory Only | **Mirror State** (For Legacy Sync Read) |
-| `MetaModel`           | ✅ ENABLED | `'pf'` DB   | **Metadata Only** (For Sync timestamps) |
+**When `useOperationLogSync: false`:**
 
-**Trade-off:**
+1.  **`SaveToDbEffects` (Primary Persistence):** Writes to 'pf' database as usual.
+2.  **`OperationLogEffects` (ENABLED):** Still writes to SUP_OPS for future migration.
 
-- **Performance:** Excellent. Zero redundant I/O for heavy model data.
-- **Downgrade Risk:** The legacy `'pf'` database will become stale/empty. If a user downgrades to an older version of the app (which doesn't read `SUP_OPS`), they will lose access to recent data.
-  - _Mitigation:_ We accept this risk for the performance gain. A manual "Export to Legacy DB" could be added if needed.
+| Mechanism                   | Op-Log Mode | Legacy Mode | Behavior                        |
+| --------------------------- | ----------- | ----------- | ------------------------------- |
+| `OperationLogEffects`       | ✅ ENABLED  | ✅ ENABLED  | Writes to SUP_OPS               |
+| `SaveToDbEffects`           | ❌ DISABLED | ✅ ENABLED  | Writes to 'pf' DB               |
+| `PfapiStoreDelegateService` | ✅ ACTIVE   | ❌ INACTIVE | Reads from NgRx for legacy sync |
+
+**Trade-offs:**
+
+- **Performance:** Excellent. Zero redundant I/O when op-log enabled.
+- **Simplicity:** No dual-write complexity or cache synchronization needed.
+- **Downgrade Risk:** The legacy `'pf'` database becomes stale when op-log enabled. If disabling op-log mode, state is flushed to 'pf' database.
+- **Legacy Sync:** WebDAV/Dropbox sync works correctly via delegate pattern.
 
 ---
 
@@ -613,12 +679,22 @@ To strictly minimize I/O overhead, we stop writing Model data (Tasks, Projects, 
 ### 12.1 (Resolved) Legacy Sync Stale Data
 
 **Issue:** Previously, `SaveToDbEffects` was disabled, causing the 'pf' database and memory cache to become stale.
-**Resolution:** With the **Memory-Only Adapter** strategy, `SaveToDbEffects` keeps the `ModelCtrl` in-memory cache perfectly synchronized with NgRx. Legacy sync (WebDAV/Dropbox) reads directly from this fresh memory cache, ensuring accurate uploads without needing disk persistence.
+**Resolution:** With the **B-Lite Delegate Pattern**, `SaveToDbEffects` is completely disabled when op-log is enabled, but legacy sync reads directly from NgRx store via `PfapiStoreDelegateService`. This ensures accurate uploads without needing 'pf' database persistence.
+
+**Implementation:**
+
+- `PfapiService` sets a delegate function via `pf.setGetAllSyncModelDataFromStoreDelegate()`
+- The delegate reads 13 models from NgRx selectors
+- Non-NgRx models (reminders, archives, plugins) are loaded from 'pf' database on-demand
+- When legacy sync needs data, it calls the delegate instead of reading from `ModelCtrl` caches
 
 ### 12.2 (Resolved) SaveToDbEffects Configuration
 
 **Issue:** `SaveToDbEffects` was commented out.
-**Resolution:** Re-enabled `SaveToDbEffects`. It will be configured to skip disk writes for Models.
+**Resolution:** `SaveToDbEffects` is gated by the `useOperationLogSync` feature flag:
+
+- When `useOperationLogSync: true`: Effects are filtered out (disabled)
+- When `useOperationLogSync: false`: Effects run normally (legacy behavior)
 
 ### 12.3 Dual Vector Clock Divergence
 
@@ -724,14 +800,20 @@ To strictly minimize I/O overhead, we stop writing Model data (Tasks, Projects, 
 
 > **⚠️ DO NOT MERGE TO MASTER** until these are fixed. They affect ALL users, not just op-log users.
 
-| #   | Blocker                                    | Impact                                     | Location                                 | Severity    |
-| --- | ------------------------------------------ | ------------------------------------------ | ---------------------------------------- | ----------- |
-| 1   | **Provider gating missing**                | Op-log sync runs for ALL providers         | `sync.service.ts:102-110`                | 🔴 CRITICAL |
-| 2   | **Compaction reads stale cache**           | Data loss when compaction runs             | `operation-log-compaction.service.ts:23` | 🔴 CRITICAL |
-| 3   | **Dependency ops silently dropped**        | Subtasks arriving before parents are LOST  | `operation-applier.service.ts:44`        | 🟠 HIGH     |
-| 4   | **Compaction never triggers**              | Op log grows unbounded                     | No triggers exist                        | 🟠 HIGH     |
-| 5   | **Replay guard missing**                   | Side effects fire during hydration         | `replay-guard.service.ts` doesn't exist  | 🟠 HIGH     |
-| 6   | **Per-entity conflict resolution missing** | All conflicts get single global resolution | `conflict-resolution.service.ts:37`      | 🟠 HIGH     |
+| #     | Blocker                                    | Impact                                     | Location                                 | Severity    |
+| ----- | ------------------------------------------ | ------------------------------------------ | ---------------------------------------- | ----------- |
+| ~~1~~ | ~~**Legacy sync uploads stale data**~~     | ~~ALL sync providers upload OLD state~~    | ~~`pfapi.service.ts`~~                   | ✅ RESOLVED |
+| 2     | **Provider gating missing**                | Op-log sync runs for ALL providers         | `sync.service.ts:102-110`                | 🔴 CRITICAL |
+| 3     | **Compaction reads stale cache**           | Data loss when compaction runs             | `operation-log-compaction.service.ts:23` | 🔴 CRITICAL |
+| 4     | **Dependency ops silently dropped**        | Subtasks arriving before parents are LOST  | `operation-applier.service.ts:44`        | 🟠 HIGH     |
+| 5     | **Compaction never triggers**              | Op log grows unbounded                     | No triggers exist                        | 🟠 HIGH     |
+| 6     | **Replay guard missing**                   | Side effects fire during hydration         | `replay-guard.service.ts` doesn't exist  | 🟠 HIGH     |
+| 7     | **Per-entity conflict resolution missing** | All conflicts get single global resolution | `conflict-resolution.service.ts:37`      | 🟠 HIGH     |
+
+**✅ Resolved in B-Lite Implementation (December 2, 2025):**
+
+- Legacy sync stale data: Implemented `PfapiStoreDelegateService` to read from NgRx store
+- SaveToDbEffects gating: Now filtered by `useOperationLogSync` feature flag
 
 ### Complete ✅
 
@@ -743,6 +825,11 @@ To strictly minimize I/O overhead, we stop writing Model data (Tasks, Projects, 
 - Genesis migration from legacy data
 - Op → Action conversion with isRemote flag
 - Per-entity conflict detection
+- **B-Lite PFAPI Integration** (NEW - December 2, 2025):
+  - `PfapiStoreDelegateService` reads sync data from NgRx store
+  - `SaveToDbEffects` gated by `useOperationLogSync` feature flag
+  - Delegate wiring in `PfapiService` based on config
+  - Backward compatibility: state flush when disabling op-log mode
 
 ### Partial / Broken ⚠️
 
