@@ -45,9 +45,40 @@ This execution plan is organized around the three parts of the [Operation Log Ar
 
 ---
 
+# ⚠️ Implementation Order (CRITICAL)
+
+Tasks have dependencies. **Follow this order exactly:**
+
+```
+Phase 1: Foundation (can be parallelized)
+├── B.1 Update META_MODEL Vector Clock
+├── B.2 Persist Sync Downloads
+├── B.3 Wire Delegate Always-On
+├── A.2 Add Compaction Triggers (⚠️ depends on B.4 for full correctness)
+├── A.3 Audit Action Blacklist
+└── A.5 Add Schema Migration Service
+
+Phase 2: Non-NgRx Migration (BLOCKER for Phase 3)
+└── B.4 Migrate Non-NgRx Models ← Must complete before A.1
+
+Phase 3: Cutover (only after B.4 is complete)
+├── A.1 Disable SaveToDbEffects ← Depends on B.4
+└── A.4 Update Disaster Recovery ← Update recovery paths
+```
+
+**Why B.4 must complete before A.1:**
+
+- If SaveToDbEffects is disabled before non-NgRx models are migrated to NgRx
+- Non-NgRx models (reminders, archives) will have NO persistence path
+- Data loss will occur
+
+---
+
 # Part A Tasks: Local Persistence
 
 ## A.1 Disable SaveToDbEffects
+
+> ⚠️ **DEPENDENCY:** This task can ONLY be done after B.4 (Migrate Non-NgRx Models) is complete!
 
 **Priority:** HIGH | **Effort:** Small
 
@@ -82,6 +113,8 @@ EffectsModule.forRoot([
 ## A.2 Add Compaction Triggers
 
 **Priority:** HIGH | **Effort:** Small
+
+> ⚠️ **WARNING:** Until B.4 (Migrate Non-NgRx Models) is complete, compaction snapshots will include stale data for non-NgRx models (read from `pf` database). This is acceptable during transition - the snapshot is still crash-safe, just potentially out-of-date for those models.
 
 **Problem:** Compaction logic exists but is never invoked. Op log grows unbounded.
 
@@ -172,6 +205,11 @@ async compact(): Promise<void> {
 
 **File:** `src/app/core/persistence/operation-log/operation-log-hydrator.service.ts`
 
+> ⚠️ **NOTE:** Recovery paths change based on transition phase:
+>
+> - **During transition (before A.1):** `pf` database has recent data - can use genesis migration
+> - **After transition (A.1 complete):** `pf` database becomes stale - must use remote sync or backup import
+
 **Implementation:**
 
 ```typescript
@@ -189,22 +227,32 @@ async hydrateStore(): Promise<void> {
 }
 
 private async attemptRecovery(): Promise<void> {
-  // 1. Try legacy pf database
+  // 1. Try legacy pf database (only useful during transition)
   const legacyData = await this.pfapi.getAllSyncModelData();
   if (legacyData && this.hasData(legacyData)) {
+    console.warn('SUP_OPS corrupted - recovering from pf database (may be stale post-transition)');
     await this.runGenesisMigration(legacyData);
     return;
   }
-  // 2. Try remote sync
-  // 3. Show error to user
+
+  // 2. Try remote sync (preferred post-transition)
+  if (this.syncService.isConfigured()) {
+    console.warn('SUP_OPS corrupted - attempting recovery from remote sync');
+    await this.syncService.forceDownload();
+    return;
+  }
+
+  // 3. Show error to user with backup import option
+  this.showRecoveryDialog();
 }
 ```
 
 **Acceptance:**
 
 - [ ] Corrupted SUP_OPS triggers recovery
-- [ ] Recovery attempts genesis migration from pf
-- [ ] User sees clear error if all recovery fails
+- [ ] Recovery attempts genesis migration from pf (with staleness warning)
+- [ ] Recovery attempts remote sync if configured
+- [ ] User sees clear error with backup import option if all recovery fails
 
 ---
 
@@ -313,12 +361,13 @@ export const loadAllData = createAction(
 
 ```typescript
 // operation-log.effects.ts
+// ⚠️ IMPORTANT: Use switchMap, NOT tap(async) - tap doesn't await async callbacks!
 handleLoadAllData$ = createEffect(
   () =>
     this.actions$.pipe(
       ofType(loadAllData),
       filter((action) => action.meta?.isRemoteSync || action.meta?.isBackupImport),
-      tap(async (action) => {
+      switchMap(async (action) => {
         // Create SYNC_IMPORT operation
         const op: Operation = {
           id: uuidv7(),
