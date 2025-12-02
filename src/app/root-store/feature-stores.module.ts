@@ -83,6 +83,26 @@ import { appStateFeature } from './app-state/app-state.reducer';
 import { SaveToDbEffects } from './shared/save-to-db.effects';
 import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
 import { OperationLogEffects } from '../core/persistence/operation-log/operation-log.effects';
+import {
+  PLUGIN_USER_DATA_FEATURE_NAME,
+  pluginUserDataReducer,
+} from '../plugins/store/plugin-user-data.reducer';
+import {
+  PLUGIN_METADATA_FEATURE_NAME,
+  pluginMetadataReducer,
+} from '../plugins/store/plugin-metadata.reducer';
+import {
+  REMINDER_FEATURE_NAME,
+  reminderReducer,
+} from '../features/reminder/store/reminder.reducer';
+import {
+  ARCHIVE_YOUNG_FEATURE_NAME,
+  archiveYoungReducer,
+} from '../features/time-tracking/store/archive-young.reducer';
+import {
+  ARCHIVE_OLD_FEATURE_NAME,
+  archiveOldReducer,
+} from '../features/time-tracking/store/archive-old.reducer';
 
 @NgModule({
   declarations: [],
@@ -151,6 +171,12 @@ import { OperationLogEffects } from '../core/persistence/operation-log/operation
 
     StoreModule.forFeature(plannerFeature),
     EffectsModule.forFeature([PlannerEffects]),
+
+    StoreModule.forFeature(PLUGIN_USER_DATA_FEATURE_NAME, pluginUserDataReducer),
+    StoreModule.forFeature(PLUGIN_METADATA_FEATURE_NAME, pluginMetadataReducer),
+    StoreModule.forFeature(REMINDER_FEATURE_NAME, reminderReducer),
+    StoreModule.forFeature(ARCHIVE_YOUNG_FEATURE_NAME, archiveYoungReducer),
+    StoreModule.forFeature(ARCHIVE_OLD_FEATURE_NAME, archiveOldReducer),
 
     // EFFECTS ONLY
     EffectsModule.forFeature([...(IS_ANDROID_WEB_VIEW ? [AndroidEffects] : [])]),

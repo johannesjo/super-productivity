@@ -10,6 +10,11 @@ import { selectMenuTreeState } from '../features/menu-tree/store/menu-tree.selec
 import { selectImprovementFeatureState } from '../features/metric/improvement/store/improvement.reducer';
 import { selectObstructionFeatureState } from '../features/metric/obstruction/store/obstruction.reducer';
 import { selectMetricFeatureState } from '../features/metric/store/metric.selectors';
+import { selectPluginUserDataFeatureState } from '../plugins/store/plugin-user-data.reducer';
+import { selectPluginMetadataFeatureState } from '../plugins/store/plugin-metadata.reducer';
+import { selectReminderFeatureState } from '../features/reminder/store/reminder.reducer';
+import { selectArchiveYoungFeatureState } from '../features/time-tracking/store/archive-young.reducer';
+import { selectArchiveOldFeatureState } from '../features/time-tracking/store/archive-old.reducer';
 import { selectNoteFeatureState } from '../features/note/store/note.reducer';
 import { selectPlannerState } from '../features/planner/store/planner.selectors';
 import { selectProjectFeatureState } from '../features/project/store/project.selectors';
@@ -19,7 +24,7 @@ import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { selectTaskRepeatCfgFeatureState } from '../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { selectTimeTrackingState } from '../features/time-tracking/store/time-tracking.selectors';
 
-import { AllSyncModels, ModelCfgToModelCtrl } from './api/pfapi.model';
+import { AllSyncModels } from './api/pfapi.model';
 import { PfapiAllModelCfg } from './pfapi-config';
 import { environment } from '../../environments/environment';
 
@@ -30,8 +35,7 @@ import { environment } from '../../environments/environment';
  * allows legacy sync (WebDAV/Dropbox) to read the current state directly from NgRx instead
  * of ModelCtrl caches.
  *
- * For models not in NgRx (reminders, archives, plugins),
- * we load from the 'pf' database on-demand via ModelCtrl.load().
+ * All sync models are now read from NgRx state.
  */
 @Injectable({
   providedIn: 'root',
@@ -39,31 +43,12 @@ import { environment } from '../../environments/environment';
 export class PfapiStoreDelegateService {
   private _store = inject(Store);
 
-  // Reference to model controllers, set by PfapiService during initialization
-  private _modelCtrls: ModelCfgToModelCtrl<PfapiAllModelCfg> | null = null;
-
   /**
-   * Sets the model controllers reference. Called by PfapiService during initialization.
+   * Gets all sync model data from NgRx store.
+   * All models are read from NgRx state (current runtime state).
    */
-  setModelCtrls(modelCtrls: ModelCfgToModelCtrl<PfapiAllModelCfg>): void {
-    this._modelCtrls = modelCtrls;
-  }
-
-  /**
-   * Gets all sync model data from NgRx store combined with non-NgRx models from 'pf' database.
-   *
-   * Models in NgRx are read from the store (current runtime state).
-   * Models NOT in NgRx (reminders, archives, plugins, etc.) are loaded from 'pf' database.
-   */
-  async getAllSyncModelDataFromStore(): Promise<AllSyncModels<PfapiAllModelCfg>> {
-    if (!this._modelCtrls) {
-      throw new Error(
-        'PfapiStoreDelegateService: modelCtrls not set. Call setModelCtrls first.',
-      );
-    }
-
-    // Get all NgRx state in one snapshot
-    const ngrxData = await firstValueFrom(
+  getAllSyncModelDataFromStore(): Promise<AllSyncModels<PfapiAllModelCfg>> {
+    return firstValueFrom(
       combineLatest([
         this._store.select(selectTaskFeatureState),
         this._store.select(selectProjectFeatureState),
@@ -80,6 +65,11 @@ export class PfapiStoreDelegateService {
         this._store.select(selectTimeTrackingState),
         this._store.select(selectImprovementFeatureState),
         this._store.select(selectObstructionFeatureState),
+        this._store.select(selectPluginUserDataFeatureState),
+        this._store.select(selectPluginMetadataFeatureState),
+        this._store.select(selectReminderFeatureState),
+        this._store.select(selectArchiveYoungFeatureState),
+        this._store.select(selectArchiveOldFeatureState),
       ]).pipe(
         first(),
         map(
@@ -99,50 +89,41 @@ export class PfapiStoreDelegateService {
             timeTracking,
             improvement,
             obstruction,
-          ]) => ({
-            // Clean up task state before sync (same as SaveToDbEffects)
-            task: {
-              ...task,
-              selectedTaskId: environment.production ? null : task.selectedTaskId,
-              currentTaskId: null,
-            },
-            project,
-            tag,
-            globalConfig,
-            note,
-            issueProvider,
-            planner,
-            boards,
-            metric,
-            simpleCounter,
-            taskRepeatCfg,
-            menuTree,
-            timeTracking,
-            improvement,
-            obstruction,
-          }),
+            pluginUserData,
+            pluginMetadata,
+            reminders,
+            archiveYoung,
+            archiveOld,
+          ]) =>
+            ({
+              // Clean up task state before sync (same as SaveToDbEffects)
+              task: {
+                ...task,
+                selectedTaskId: environment.production ? null : task.selectedTaskId,
+                currentTaskId: null,
+              },
+              project,
+              tag,
+              globalConfig,
+              note,
+              issueProvider,
+              planner,
+              boards,
+              metric,
+              simpleCounter,
+              taskRepeatCfg,
+              menuTree,
+              timeTracking,
+              improvement,
+              obstruction,
+              pluginUserData,
+              pluginMetadata,
+              reminders,
+              archiveYoung,
+              archiveOld,
+            }) as AllSyncModels<PfapiAllModelCfg>,
         ),
       ),
     );
-
-    // Load non-NgRx models from 'pf' database on-demand
-    // These models are not in NgRx state, so we load them directly from IndexedDB
-    const [reminders, pluginUserData, pluginMetadata, archiveYoung, archiveOld] =
-      await Promise.all([
-        this._modelCtrls.reminders.load(),
-        this._modelCtrls.pluginUserData.load(),
-        this._modelCtrls.pluginMetadata.load(),
-        this._modelCtrls.archiveYoung.load(),
-        this._modelCtrls.archiveOld.load(),
-      ]);
-
-    return {
-      ...ngrxData,
-      reminders,
-      pluginUserData,
-      pluginMetadata,
-      archiveYoung,
-      archiveOld,
-    } as AllSyncModels<PfapiAllModelCfg>;
   }
 }
