@@ -7,13 +7,13 @@
 
 ## 1. Overview
 
-The Operation Log sync system replaces whole-file Last-Writer-Wins (LWW) with per-entity conflict detection and semantic merge capabilities.
+The Operation Log sync system provides per-entity conflict detection and semantic merge capabilities for sync providers that support it, while maintaining compatibility with legacy Last-Writer-Wins (LWW) sync for WebDAV/Dropbox.
 
 ### Core Paradigm
 
 - **NgRx is the Single Source of Truth**
-- **Persistence is a Log of Operations**
-- **Sync is the Exchange of Operations**
+- **Persistence is a Log of Operations** (local)
+- **Sync strategy varies by provider** (remote)
 
 ### Key Benefits
 
@@ -26,9 +26,114 @@ The Operation Log sync system replaces whole-file Last-Writer-Wins (LWW) with pe
 
 ---
 
-## 2. Data Structures
+## 2. Dual Database Architecture
 
-### 2.1 Operation
+The system uses **two separate IndexedDB databases** that coexist:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                         IndexedDB                                   │
+├────────────────────────────────┬────────────────────────────────────┤
+│      'pf' database             │      'SUP_OPS' database            │
+│      (Legacy PFAPI)            │      (Operation Log)               │
+│                                │                                    │
+│  ┌──────────────────────┐      │  ┌──────────────────────┐          │
+│  │ META_MODEL (metadata)│      │  │ ops (event log)      │          │
+│  │ task (full state)    │      │  │ state_cache (snapshot)│         │
+│  │ project (full state) │      │  └──────────────────────┘          │
+│  │ tag (full state)     │      │                                    │
+│  │ ...                  │      │                                    │
+│  └──────────────────────┘      │                                    │
+│                                │                                    │
+│  Used by: Legacy LWW sync      │  Used by: Op log sync              │
+│  (WebDAV, Dropbox)             │  (Local File, Future Server)       │
+└────────────────────────────────┴────────────────────────────────────┘
+```
+
+### Why Two Databases?
+
+- **No key conflicts** - completely separate namespaces
+- **Backward compatible** - legacy sync continues to work unchanged
+- **Provider-specific sync** - each uses the appropriate database
+- **Migration safe** - Genesis op copies legacy state to op log
+
+---
+
+## 3. Provider-Specific Sync Strategy
+
+### 3.1 Decision Matrix
+
+| Provider            | Remote Sync Strategy     | Local Persistence | Reason                                  |
+| ------------------- | ------------------------ | ----------------- | --------------------------------------- |
+| **WebDAV**          | Legacy LWW (`main.json`) | Both databases    | HTTP overhead makes many files slow     |
+| **Dropbox**         | Legacy LWW (`main.json`) | Both databases    | API rate limits, slow directory listing |
+| **Local File Sync** | Operation Log            | Both databases    | Local disk is fast                      |
+| **Future Server**   | Operation Log            | Both databases    | Server handles ops efficiently          |
+
+### 3.2 Sync Flow by Provider
+
+**WebDAV / Dropbox (Legacy LWW):**
+
+```
+Sync Triggered
+    │
+    └─→ SyncService.sync()
+         │
+         ├─→ Skip operation log sync (provider not supported)
+         │
+         └─→ Legacy MetaSyncService
+              ├─→ Compare vector clocks (from 'pf' META_MODEL)
+              ├─→ Upload/download main.json as needed
+              └─→ Full state replacement on conflict
+```
+
+**Local File Sync / Future Server (Operation Log):**
+
+```
+Sync Triggered
+    │
+    └─→ SyncService.sync()
+         │
+         ├─→ OperationLogSyncService
+         │    ├─→ Upload pending ops from SUP_OPS
+         │    ├─→ Download remote ops
+         │    ├─→ Detect per-entity conflicts
+         │    └─→ Apply/resolve conflicts
+         │
+         └─→ Legacy sync (optional backup)
+```
+
+### 3.3 Implementation
+
+```typescript
+// In sync.service.ts
+async sync(): Promise<void> {
+  const provider = this._currentSyncProvider$.value;
+
+  // Operation log sync only for supported providers
+  if (this.supportsOpLogSync(provider)) {
+    await this._operationLogSyncService.uploadPendingOps(provider);
+    await this._operationLogSyncService.downloadRemoteOps(provider);
+  }
+
+  // Legacy LWW sync
+  // - For WebDAV/Dropbox: This is the primary sync
+  // - For others: This provides backup
+  await this.legacySync();
+}
+
+private supportsOpLogSync(provider: SyncProvider | null): boolean {
+  if (!provider) return false;
+  // WebDAV and Dropbox use legacy only
+  return provider.id !== 'WebDAV' && provider.id !== 'Dropbox';
+}
+```
+
+---
+
+## 4. Data Structures
+
+### 4.1 Operation
 
 ```typescript
 interface Operation {
@@ -47,7 +152,7 @@ interface Operation {
 }
 ```
 
-### 2.2 Log Entry (IndexedDB)
+### 4.2 Log Entry (IndexedDB)
 
 ```typescript
 interface OperationLogEntry {
@@ -59,7 +164,7 @@ interface OperationLogEntry {
 }
 ```
 
-### 2.3 Conflict
+### 4.3 Conflict
 
 ```typescript
 interface EntityConflict {
@@ -74,7 +179,7 @@ interface EntityConflict {
 
 ---
 
-## 3. Architecture Layers
+## 5. Architecture Layers
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -85,65 +190,62 @@ interface EntityConflict {
 ┌─────────────────────────────────────────────────────────────┐
 │                     NgRx Store                              │
 │                  (Single Source of Truth)                   │
-└─────────────────────┬───────────────────────────────────────┘
-                      │ Effect (isPersistent)
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Operation Log Effects                          │
-│  - Filter: blacklist + !isRemote                            │
-│  - Convert action → Operation                               │
-│  - Increment vector clock                                   │
-│  - Write to IndexedDB (with Web Lock)                       │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│              IndexedDB: SUP_OPS                             │
-│  ├── ops (operation log entries)                            │
-│  └── state_cache (snapshots for hydration)                  │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│                   Sync Layer                                │
-│  - Upload: pending ops → chunked files → remote             │
-│  - Download: remote files → conflict detection → apply      │
-│  - Manifest: tracks all op files + last snapshot            │
-└─────────────────────────────────────────────────────────────┘
+└───────────┬─────────────────────────────────┬───────────────┘
+            │                                 │
+            ▼                                 ▼
+┌───────────────────────────┐   ┌─────────────────────────────┐
+│  Operation Log Effects    │   │  Legacy PFAPI ModelCtrl     │
+│  - Blacklist filter       │   │  - Direct state saves       │
+│  - !isRemote filter       │   │  - Used by legacy code      │
+│  - Write to SUP_OPS       │   │  - Write to 'pf' DB         │
+└───────────┬───────────────┘   └──────────────┬──────────────┘
+            │                                  │
+            ▼                                  ▼
+┌───────────────────────────┐   ┌─────────────────────────────┐
+│  IndexedDB: SUP_OPS       │   │  IndexedDB: pf              │
+│  ├── ops (log entries)    │   │  ├── META_MODEL             │
+│  └── state_cache          │   │  ├── task, project, ...     │
+└───────────┬───────────────┘   └──────────────┬──────────────┘
+            │                                  │
+            ▼                                  ▼
+┌───────────────────────────┐   ┌─────────────────────────────┐
+│  Op Log Sync              │   │  Legacy LWW Sync            │
+│  (Local File, Server)     │   │  (WebDAV, Dropbox)          │
+└───────────────────────────┘   └─────────────────────────────┘
 ```
 
 ---
 
-## 4. Core Services
+## 6. Core Services
 
-### 4.1 File Map
+### 6.1 File Map
 
 ```
 src/app/core/persistence/operation-log/
 ├── operation.types.ts               # Type definitions
-├── operation-log-store.service.ts   # IndexedDB persistence
+├── operation-log-store.service.ts   # SUP_OPS IndexedDB persistence
 ├── operation-log.effects.ts         # NgRx effect capture
 ├── operation-log-hydrator.service.ts# Startup state restoration
-├── operation-log-sync.service.ts    # Remote sync
+├── operation-log-sync.service.ts    # Remote sync (for supported providers)
 ├── operation-log-compaction.service.ts # Garbage collection
 ├── operation-applier.service.ts     # Apply ops to store
 ├── operation-converter.util.ts      # Op ↔ Action conversion
 ├── conflict-resolution.service.ts   # Conflict UI/logic
 ├── dependency-resolver.service.ts   # Entity dependency handling
-├── action-whitelist.ts              # Persistent action registry (Blacklist)
+├── action-whitelist.ts              # Blacklisted actions (not persisted)
 ├── lock.service.ts                  # Cross-tab locking
 ├── multi-tab-coordinator.service.ts # BroadcastChannel sync
-└── replay-guard.service.ts          # Prevents side effects during replay
+└── replay-guard.service.ts          # [PLANNED] Prevents side effects during replay
 ```
 
-### 4.2 Service Responsibilities
+### 6.2 Service Responsibilities
 
 | Service                         | Responsibility                                     |
 | ------------------------------- | -------------------------------------------------- |
-| `OperationLogStoreService`      | IndexedDB CRUD, vector clock tracking              |
+| `OperationLogStoreService`      | SUP_OPS IndexedDB CRUD, vector clock tracking      |
 | `OperationLogEffects`           | Capture persistent actions, write ops              |
 | `OperationLogHydratorService`   | Load snapshot + replay tail on startup             |
-| `OperationLogSyncService`       | Upload/download ops, detect conflicts              |
+| `OperationLogSyncService`       | Upload/download ops (non-WebDAV/Dropbox only)      |
 | `OperationLogCompactionService` | Create snapshots, prune old ops                    |
 | `OperationApplierService`       | Dispatch ops as actions with dependency resolution |
 | `ConflictResolutionService`     | Present conflicts to user, apply resolutions       |
@@ -154,9 +256,9 @@ src/app/core/persistence/operation-log/
 
 ---
 
-## 5. Key Workflows
+## 7. Key Workflows
 
-### 5.1 Write Path (User Action)
+### 7.1 Write Path (User Action)
 
 ```
 1. User action → NgRx dispatch
@@ -167,44 +269,58 @@ src/app/core/persistence/operation-log/
    - Acquire Web Lock
    - Increment vector clock
    - Convert to Operation
-   - Append to IndexedDB
+   - Append to SUP_OPS IndexedDB
+4. Legacy PFAPI also saves to 'pf' database (parallel)
 ```
 
-### 5.2 Read Path (Startup)
+### 7.2 Read Path (Startup)
 
 ```
-1. Load snapshot from state_cache (if exists)
+1. Load snapshot from SUP_OPS state_cache (if exists)
 2. Hydrate NgRx with snapshot state
 3. Query ops WHERE seq > snapshot.lastAppliedOpSeq
 4. Replay tail ops with isRemote=true (prevents re-logging)
-5. If no snapshot: full replay from op log
+5. If no snapshot: run migration from legacy 'pf' database
 ```
 
-### 5.3 Sync Path
-
-**Upload:**
+### 7.3 Migration (Legacy → Op Log)
 
 ```
-1. Get unsynced ops from IndexedDB
-2. Chunk into files (100 ops/file)
-3. Upload to remote storage
-4. Mark ops as synced
-5. Update remote manifest
+First startup with op log enabled:
+1. Check if SUP_OPS has any ops (lastSeq > 0)
+2. If empty, load all data from 'pf' database
+3. Create Genesis Operation (batch of all legacy state)
+4. Save snapshot to state_cache
+5. Future startups hydrate from SUP_OPS
 ```
 
-**Download:**
+### 7.4 Sync Path (Provider-Dependent)
+
+**For Local File Sync / Future Server:**
 
 ```
-1. Fetch remote manifest
-2. Identify new op files
-3. Download and parse ops
-4. Filter already-applied (by op.id)
-5. Detect conflicts (vector clock comparison)
-6. Apply non-conflicting ops
-7. Present conflicts to user
+Upload:
+1. Get unsynced ops from SUP_OPS
+2. Upload ops to remote
+3. Mark ops as synced
+
+Download:
+1. Download remote ops
+2. Detect conflicts (vector clock comparison)
+3. Apply non-conflicting ops
+4. Present conflicts to user
 ```
 
-### 5.4 Conflict Detection
+**For WebDAV / Dropbox:**
+
+```
+(Uses legacy sync unchanged)
+1. Compare META_MODEL vector clocks
+2. Download/upload main.json as needed
+3. Full state replacement
+```
+
+### 7.5 Conflict Detection
 
 ```typescript
 // Vector clock comparison determines conflict type:
@@ -214,23 +330,23 @@ HAPPENED_AFTER  → Remote is ancestor (stale), skip
 CONCURRENT      → TRUE CONFLICT - needs resolution
 ```
 
-### 5.5 Compaction
+### 7.6 Compaction
 
 ```
 Triggers: Every 500 ops, app close, size > 10MB
 
 1. Acquire compaction lock
 2. Snapshot current NgRx state
-3. Save to state_cache with lastAppliedOpSeq
+3. Save to SUP_OPS state_cache with lastAppliedOpSeq
 4. Delete ops WHERE syncedAt AND appliedAt < (now - 7 days)
 5. Never delete unsynced ops
 ```
 
 ---
 
-## 6. Entity Relationships
+## 8. Entity Relationships
 
-### 6.1 Dependency Graph
+### 8.1 Dependency Graph
 
 ```
 TASK → PROJECT (soft: orphan if missing)
@@ -240,14 +356,14 @@ NOTE → PROJECT (soft: orphan if missing)
 TASK_REPEAT_CFG → PROJECT (soft: orphan if missing)
 ```
 
-### 6.2 Dependency Handling
+### 8.2 Dependency Handling
 
 | Type | Behavior                                                |
 | ---- | ------------------------------------------------------- |
 | Hard | Queue op, retry when dependency arrives (max 5 retries) |
 | Soft | Apply op, skip/null missing reference, log warning      |
 
-### 6.3 Cascade Operations
+### 8.3 Cascade Operations
 
 - **Delete Project** → Orphan tasks to inbox (not cascade delete)
 - **Delete Parent Task** → Cascade delete subtasks
@@ -255,36 +371,9 @@ TASK_REPEAT_CFG → PROJECT (soft: orphan if missing)
 
 ---
 
-## 7. Remote Storage Format
+## 9. Safety Mechanisms
 
-```
-/superproductivity/
-├── main.json              # Legacy full state (backup)
-├── meta.json              # Legacy metadata
-├── ops/
-│   ├── manifest.json      # Index of op files
-│   ├── ops_clientA_*.json # Chunked op files
-│   └── ...
-└── snapshots/
-    └── snapshot_*.json    # Periodic full snapshots
-```
-
-**Manifest:**
-
-```typescript
-interface OperationLogManifest {
-  version: number;
-  operationFiles: string[];
-  lastCompactedSeq?: number;
-  lastCompactedSnapshotFile?: string;
-}
-```
-
----
-
-## 8. Safety Mechanisms
-
-### 8.1 Replay Guard
+### 9.1 Replay Guard
 
 Prevents side effects (notifications, analytics) during hydration/sync:
 
@@ -293,7 +382,7 @@ Prevents side effects (notifications, analytics) during hydration/sync:
 if (this.replayGuard.isReplaying()) return;
 ```
 
-### 8.2 Action Filtering
+### 9.2 Action Filtering
 
 We use a **Blacklist** approach. By default, all actions are persisted unless explicitly excluded. This ensures that new features are persisted by default, but requires care to exclude transient UI state.
 
@@ -306,7 +395,7 @@ BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
 ]);
 ```
 
-### 8.3 Cross-Tab Locking
+### 9.3 Cross-Tab Locking
 
 ```typescript
 // Primary: Web Locks API
@@ -316,51 +405,50 @@ await navigator.locks.request('sp_op_log_write', callback);
 await this.acquireFallbackLock(lockName, callback);
 ```
 
-### 8.4 Vector Clock Pruning
+### 9.4 Vector Clock Pruning
 
 After 30 days, prune device entries from vector clocks (implemented in `limitVectorClockSize`).
 
 ---
 
-## 9. Configuration
+## 10. Configuration
 
 | Setting            | Default | Description                            |
 | ------------------ | ------- | -------------------------------------- |
 | Compaction trigger | 500 ops | Ops before snapshot                    |
 | Retention window   | 7 days  | Keep synced ops for conflict detection |
-| Chunk size         | 100 ops | Ops per remote file                    |
 | Max retries        | 5       | Dependency retry attempts              |
 | Retry delay        | 1000ms  | Between dependency retries             |
 
 ---
 
-## 10. Feature Flag
+## 11. Feature Flag
 
 ```typescript
 // In SyncConfig
 useOperationLogSync?: boolean; // Default: false
 
-// Hybrid mode during rollout:
-// - Operation log sync for incremental changes
-// - Legacy full-file sync as safety net
+// When enabled:
+// - Local File Sync uses operation log
+// - WebDAV/Dropbox continue using legacy LWW
+// - Legacy sync runs as backup for all providers
 ```
 
 ---
 
-## 11. Current Implementation Status
+## 12. Current Implementation Status
 
 ### Complete
 
-- IndexedDB store with ops + state_cache
+- Dual IndexedDB architecture (pf + SUP_OPS)
 - NgRx effect capture with vector clock
-- Manifest-based chunked file sync
-- Per-entity conflict detection
 - Snapshot + tail replay hydration
 - 7-day compaction with snapshot
 - Multi-tab BroadcastChannel coordination
 - Web Locks + localStorage fallback
 - Genesis migration from legacy data
 - Op → Action conversion with isRemote flag
+- Per-entity conflict detection
 
 ### In Progress / Gaps
 
@@ -376,7 +464,7 @@ useOperationLogSync?: boolean; // Default: false
 
 ---
 
-## 12. References
+## 13. References
 
 - [Execution Plan](./operation-log-execution-plan.md) - Phased implementation details
 - [Full Design Doc](./operation-log-sync.md) - Comprehensive technical specification
