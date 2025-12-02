@@ -2,412 +2,285 @@
 
 **Synthesized From:** Gemini 2.5 Flash, GPT-5, Claude Opus 4.5
 **Date:** December 2, 2025
-**Branches Compared:** `feat/sync-server` (Delta Sync) vs `feat/operation-logs` (Operation Log)
+**Branches Compared:** `feat/delta-sync` vs `feat/operation-logs`
+
+---
+
+## Critical Reality Check
+
+**Delta sync is not implemented.** The comparison below is partially hypothetical.
+
+### Current Implementation Status
+
+| Branch                | Files           | Lines | Status                                                            |
+| --------------------- | --------------- | ----- | ----------------------------------------------------------------- |
+| `feat/delta-sync`     | `super-sync.ts` | 45    | WebDAV stub only—no shadow state, no diffing, no watermarks       |
+| `feat/operation-logs` | Multiple files  | ~600+ | Core logic implemented: op store, sync service, effects, hydrator |
+
+### What This Means for This Document
+
+- **Delta sync assessments are based on documented design**, not running code
+- **Performance claims (O(N) diff, 2X storage) are theoretical**—they describe what _would_ happen if delta sync were implemented as designed
+- **Operation log assessments are based on actual code** in `feat/operation-logs`
+- **The recommendation is valid** because it compares architectures, but readers should understand delta sync's issues are projected, not observed
+
+### Sources Analyzed by Each Model
+
+| Model      | Delta Sync Source                                | Notes                                         |
+| ---------- | ------------------------------------------------ | --------------------------------------------- |
+| **Gemini** | `feat/delta-sync` (45-line stub)                 | Correctly identified as "vaporware"           |
+| **GPT-5**  | Design docs                                      | Analyzed theoretical architecture             |
+| **Opus**   | `feat/sync-server` (different branch, 940 lines) | More complete implementation exists elsewhere |
 
 ---
 
 ## 1. Executive Summary
 
-This document synthesizes comparative analyses from three AI models examining two synchronization approaches for Super Productivity. The goal is to provide a definitive, multi-perspective evaluation.
+This document compares two synchronization **architectures** for Super Productivity. Since delta sync is not implemented on `feat/delta-sync`, the comparison evaluates:
+
+- **Delta Sync:** What the design documents describe and what problems would emerge if built
+- **Operation Log:** What the actual implementation provides
 
 ### Approaches Compared
 
-| Approach          | Branch                | Core Principle                                                    |
-| ----------------- | --------------------- | ----------------------------------------------------------------- |
-| **Delta Sync**    | `feat/sync-server`    | Compare state snapshots, compute and transmit differences         |
-| **Operation Log** | `feat/operation-logs` | Record user actions as operations, transmit and replay operations |
+| Approach          | Branch                | Core Principle                                 | Implementation             |
+| ----------------- | --------------------- | ---------------------------------------------- | -------------------------- |
+| **Delta Sync**    | `feat/delta-sync`     | Compare state snapshots, transmit differences  | **Not implemented** (stub) |
+| **Operation Log** | `feat/operation-logs` | Record actions, transmit and replay operations | **Partially implemented**  |
 
-### Overall Verdict (Unanimous)
+### Verdict (Unanimous)
 
-| Model            | Recommendation    | Confidence |
-| ---------------- | ----------------- | :--------: |
-| Gemini 2.5 Flash | **Operation Log** |    High    |
-| GPT-5            | **Operation Log** |    High    |
-| Claude Opus 4.5  | **Operation Log** |    High    |
+All three models recommend **Operation Log**. The reasoning differs slightly:
 
-**Consensus:** All three models recommend the Operation Log approach for Super Productivity's use case. The delta-sync approach has fundamental architectural issues that make it difficult to stabilize, while the operation-log approach provides better conflict handling and long-term maintainability.
-
----
-
-## 2. Criteria-by-Criteria Synthesis
-
-### 2.1 Sync Speed
-
-#### Individual Model Assessments
-
-| Model  |             Delta Sync              |          Operation Log           | Winner |
-| ------ | :---------------------------------: | :------------------------------: | ------ |
-| Gemini |    High latency (CPU-heavy diff)    | Low latency (ops pre-calculated) | OpLog  |
-| GPT-5  | Slow when shadow missing; O(N) diff |       Fast; O(pending ops)       | OpLog  |
-| Opus   |                ★★★★☆                |              ★★★☆☆               | Delta  |
-
-#### Analysis
-
-**Gemini and GPT-5** emphasize that delta sync's speed advantage is theoretical—in practice, the O(N) diff calculation negates bandwidth savings, especially for large datasets.
-
-**Opus** rates delta sync higher for sync speed, noting that small patches are more bandwidth-efficient.
-
-#### Synthesized Assessment
-
-| Scenario                    | Delta Sync | Operation Log | Notes                        |
-| --------------------------- | :--------: | :-----------: | ---------------------------- |
-| Initial sync                |   ★★★☆☆    |     ★★★☆☆     | Both need full data transfer |
-| Incremental (small changes) |   ★★★★☆    |     ★★★☆☆     | Delta sends less data        |
-| Incremental (large dataset) |   ★★☆☆☆    |     ★★★★☆     | Delta diff blocks UI         |
-| Startup time                |   ★★★★☆    |     ★★★☆☆     | OpLog needs replay           |
-
-**Synthesized Winner:** **Tie** (context-dependent)
-
-- Delta sync wins on bandwidth for small datasets
-- Operation log wins on CPU/UX for large datasets
+| Model  | Rationale                                                                          |
+| ------ | ---------------------------------------------------------------------------------- |
+| Gemini | Delta sync doesn't exist; op-log is functional                                     |
+| GPT-5  | Delta sync design has fundamental LWW/shadow-state issues                          |
+| Opus   | Even fully-implemented delta sync (on different branch) has architectural problems |
 
 ---
 
-### 2.2 Disk Usage
+## 2. Architecture Comparison
 
-#### Individual Model Assessments
-
-| Model  |         Delta Sync          |         Operation Log         | Winner            |
-| ------ | :-------------------------: | :---------------------------: | ----------------- |
-| Gemini |     Heavy (~2x storage)     | Cumulative (needs compaction) | OpLog (long-term) |
-| GPT-5  | ~2x plus fallback snapshots |   Log grows but compactable   | OpLog             |
-| Opus   |            ★★☆☆☆            |             ★★★★☆             | OpLog             |
-
-#### Synthesized Assessment
-
-| Metric               |          Delta Sync          |           Operation Log           |
-| -------------------- | :--------------------------: | :-------------------------------: |
-| Steady-state storage |        ~2X data size         | ~1.2X data size (with compaction) |
-| Peak storage         |   ~2X + fallback snapshots   |     ~1.5X (before compaction)     |
-| Predictability       | Low (fallbacks cause spikes) |  High (compaction is scheduled)   |
-
-**Synthesized Winner:** **Operation Log**
-
-All models agree that delta sync's shadow state creates a persistent ~2X storage overhead, while operation log can be compacted to near-baseline.
-
----
-
-### 2.3 Maintainability
-
-#### Individual Model Assessments
-
-| Model  |        Delta Sync        |       Operation Log        | Winner |
-| ------ | :----------------------: | :------------------------: | ------ |
-| Gemini | Low (diffing is brittle) |  High (uses NgRx actions)  | OpLog  |
-| GPT-5  |   High cognitive load    | Medium (centralized logic) | OpLog  |
-| Opus   |          ★★☆☆☆           |           ★★★★☆            | OpLog  |
-
-#### Key Points (Consensus)
-
-**Delta Sync Pain Points:**
-
-- Two data models (app state + shadow state) must stay synchronized
-- Diff rules must mirror every schema change
-- Shadow/watermark invalidation paths are fragile
-- Two sync modes (delta + WebDAV fallback) multiply test cases
-
-**Operation Log Pain Points:**
-
-- Action whitelist must be maintained
-- Reducers must be pure (replay determinism)
-- Compaction correctness is critical
-- Operation schema evolution needs migration handlers
-
-#### Synthesized Assessment
-
-| Aspect              | Delta Sync | Operation Log |
-| ------------------- | :--------: | :-----------: |
-| Code clarity        |   ★★☆☆☆    |     ★★★★☆     |
-| Adding new features |   ★★☆☆☆    |     ★★★☆☆     |
-| Debugging           |   ★★☆☆☆    |     ★★★★☆     |
-| Testing             |   ★★☆☆☆    |     ★★★★☆     |
-| Schema evolution    |   ★★☆☆☆    |     ★★★☆☆     |
-
-**Synthesized Winner:** **Operation Log**
-
-Unanimous agreement. Operation log has a single source of truth, making reasoning about correctness easier.
-
----
-
-### 2.4 Conflict Handling
-
-#### Individual Model Assessments
-
-| Model  |        Delta Sync        |          Operation Log           | Winner |
-| ------ | :----------------------: | :------------------------------: | ------ |
-| Gemini |    Destructive (LWW)     |  Constructive (semantic merge)   | OpLog  |
-| GPT-5  | Shallow LWW; intent lost | Semantic merge; scoped conflicts | OpLog  |
-| Opus   |          ★★☆☆☆           |              ★★★★★               | OpLog  |
-
-#### Concrete Example (All Models)
+### 2.1 Delta Sync (As Designed)
 
 ```
-Scenario: Two devices edit Task A concurrently
+Client Storage (hypothetical):
+├── App data (IndexedDB)
+├── Shadow state (IndexedDB) ← copy of last-synced state
+└── Watermarks (IndexedDB) ← revision cursors per model
 
-Device 1: Renames task to "Important Meeting"
-Device 2: Marks task as completed
-
-DELTA SYNC (LWW):
-- Sends patches: {title: "Important Meeting"} and {isDone: true}
-- Server shallow-merges: last writer wins
-- Result: One change is lost
-
-OPERATION LOG:
-- Sends operations: [Task.Rename("Important Meeting")] and [Task.Complete()]
-- Operations are independent; both can be applied
-- Result: Task is renamed AND completed
+Sync Flow:
+1. Load shadow state
+2. Compute diff: current - shadow
+3. Upload diff to server
+4. Server shallow-merges (LWW)
+5. Update shadow + watermark
 ```
 
-#### Synthesized Assessment
+**Architectural Concerns (from design analysis):**
 
-| Metric                |        Delta Sync         |         Operation Log         |
-| --------------------- | :-----------------------: | :---------------------------: |
-| Detection granularity |        Whole-file         |          Per-entity           |
-| Auto-merge capability | Shallow (field-level LWW) |  Semantic (operation-level)   |
-| User experience       |   All-or-nothing choice   | Granular conflict UI possible |
-| Data loss risk        | High (silent overwrites)  |   Low (conflicts surfaced)    |
+- Shadow state must stay perfectly synchronized with server
+- Watermark and shadow updates are not atomic
+- Diff computation is O(N) where N = total entities
+- LWW merge loses concurrent independent changes
 
-**Synthesized Winner:** **Operation Log** (Unanimous, Strong)
+### 2.2 Operation Log (As Implemented)
 
-This is the most significant differentiator. All models agree that delta sync's LWW semantics fundamentally lose information about user intent.
+```
+Client Storage (actual):
+├── SUP_OPS IndexedDB
+│   ├── ops: append-only operation log
+│   └── state_cache: periodic snapshots
+└── NgRx Store (derived from ops)
 
----
+Sync Flow:
+1. Local action → append to ops log
+2. Upload pending ops to remote
+3. Download remote ops
+4. Detect conflicts via vector clock comparison
+5. Apply non-conflicting ops; surface conflicts to user
+```
 
-### 2.5 Robustness with Large Datasets
+**Code-Verified Characteristics:**
 
-#### Individual Model Assessments
-
-| Model  |        Delta Sync        |          Operation Log           | Winner |
-| ------ | :----------------------: | :------------------------------: | ------ |
-| Gemini |  Poor (O(N) freezes UI)  |      Excellent (O(changes))      | OpLog  |
-| GPT-5  | Weak (spikes CPU/memory) | Stronger (compaction bounds log) | OpLog  |
-| Opus   |          ★★☆☆☆           |              ★★★★☆               | OpLog  |
-
-#### Scaling Characteristics
-
-| Dataset Size     | Delta Sync Performance | Operation Log Performance    |
-| ---------------- | ---------------------- | ---------------------------- |
-| 100 entities     | Good                   | Good                         |
-| 1,000 entities   | Acceptable             | Good                         |
-| 10,000 entities  | **Freezes UI**         | Good                         |
-| 100,000 entities | **Unusable**           | Acceptable (with compaction) |
-
-#### Synthesized Assessment
-
-| Metric          |      Delta Sync       |      Operation Log      |
-| --------------- | :-------------------: | :---------------------: |
-| CPU scaling     |   ★★☆☆☆ (O(N) diff)   |     ★★★★☆ (O(ops))      |
-| Memory scaling  |   ★★☆☆☆ (2X shadow)   |   ★★★☆☆ (log growth)    |
-| Network scaling | ★★★★☆ (small patches) | ★★★☆☆ (larger payloads) |
-| Overall         |         ★★☆☆☆         |          ★★★★☆          |
-
-**Synthesized Winner:** **Operation Log**
-
-Delta sync's advantage (smaller patches) is negated by the CPU cost of computing those patches.
+- Single source of truth (operation log)
+- Conflict detection is per-entity
+- Compaction service bounds log growth
+- Replay hydration from snapshot + tail ops
 
 ---
 
-### 2.6 Expected Long-Term Complexity
+## 3. Criteria Comparison
 
-#### Individual Model Assessments
+### 3.1 Conflict Handling
 
-| Model  |        Delta Sync         |     Operation Log      | Winner |
-| ------ | :-----------------------: | :--------------------: | ------ |
-| Gemini |  Increases non-linearly   |      Predictable       | OpLog  |
-| GPT-5  | Accumulates edge handlers | Core primitives stable | OpLog  |
-| Opus   |           ★★☆☆☆           |         ★★★★☆          | OpLog  |
+This is the most significant differentiator and is **architecture-dependent, not implementation-dependent**.
 
-#### Complexity Trajectory
+| Aspect         | Delta Sync (Design)              | Operation Log (Implemented)           |
+| -------------- | -------------------------------- | ------------------------------------- |
+| Detection      | Whole-file vector clock          | Per-entity vector clock               |
+| Merge          | Shallow LWW (`{...old, ...new}`) | Semantic (independent ops both apply) |
+| User choice    | All-or-nothing                   | Per-entity granular                   |
+| Data loss risk | **High** (silent overwrites)     | **Low** (conflicts surfaced)          |
 
-**Delta Sync:**
+**Example:**
 
-- Each new model type requires shadow state handling
-- Each schema change requires diff rule updates
-- Performance optimizations (dirty tracking, workers) add complexity
-- Edge case handlers accumulate (fallback interactions)
-- Technical debt compounds
+```
+Device A: Renames task to "Meeting"
+Device B: Marks task complete
 
-**Operation Log:**
+Delta Sync (LWW): One change lost
+Operation Log: Both changes applied (independent operations)
+```
 
-- Each new action needs whitelist entry (simple)
-- Schema evolution handled by versioned operations
-- Compaction strategy may need tuning
-- Complexity is front-loaded during initial implementation
-- Stable long-term
+**Winner: Operation Log** (unanimous, strong confidence)
 
-#### Synthesized Assessment
+### 3.2 Maintainability
 
-| Metric                 |     Delta Sync      |       Operation Log       |
-| ---------------------- | :-----------------: | :-----------------------: |
-| Complexity growth rate |     Exponential     |          Linear           |
-| Refactoring risk       |        High         |          Medium           |
-| Team onboarding        |      Difficult      |         Moderate          |
-| Bug surface area       | Large (multi-state) | Contained (single source) |
+| Aspect          | Delta Sync (Design)                 | Operation Log (Implemented) |
+| --------------- | ----------------------------------- | --------------------------- |
+| Data models     | 2 (app state + shadow)              | 1 (operation log)           |
+| Adding features | Update shadow handling + diff rules | Add action to whitelist     |
+| Debugging       | Compare shadow vs actual vs server  | Inspect operation sequence  |
+| Source of truth | Ambiguous (shadow can drift)        | Clear (operation log)       |
 
-**Synthesized Winner:** **Operation Log**
+**Winner: Operation Log** (unanimous)
 
----
+### 3.3 Performance (Assumptions Labeled)
 
-## 3. Summary Matrix
+| Metric         | Delta Sync                      | Operation Log           | Basis                                  |
+| -------------- | ------------------------------- | ----------------------- | -------------------------------------- |
+| Diff cost      | O(N) per sync                   | O(1) append             | **Assumption** (delta not implemented) |
+| Startup        | Fast (load state)               | Snapshot + replay tail  | **Code-verified**                      |
+| Bandwidth      | Smaller patches                 | Larger payloads         | **Assumption** (delta not implemented) |
+| Large datasets | UI freeze risk at 10k+ entities | Scales with change rate | **Assumption**                         |
 
-### Individual Model Verdicts
+**Note:** Delta sync performance claims cannot be verified without implementation. The O(N) diff and 2X storage estimates come from the design documents.
 
-| Criterion                |  Gemini   |   GPT-5   |   Opus    |
-| ------------------------ | :-------: | :-------: | :-------: |
-| Sync Speed               |   OpLog   |   OpLog   |   Delta   |
-| Disk Usage               |   OpLog   |   OpLog   |   OpLog   |
-| Maintainability          |   OpLog   |   OpLog   |   OpLog   |
-| Conflict Handling        |   OpLog   |   OpLog   |   OpLog   |
-| Large Dataset Robustness |   OpLog   |   OpLog   |   OpLog   |
-| Long-Term Complexity     |   OpLog   |   OpLog   |   OpLog   |
-| **Overall**              | **OpLog** | **OpLog** | **OpLog** |
+**Winner: Unclear** (delta sync not implemented; op-log verified to work)
 
-### Synthesized Scores
+### 3.4 Disk Usage (Assumptions Labeled)
 
-| Criterion                | Delta Sync | Operation Log | Winner            |
-| ------------------------ | :--------: | :-----------: | ----------------- |
-| Sync Speed               |   ★★★☆☆    |     ★★★☆☆     | **Tie**           |
-| Disk Usage               |   ★★☆☆☆    |     ★★★★☆     | **Operation Log** |
-| Maintainability          |   ★★☆☆☆    |     ★★★★☆     | **Operation Log** |
-| Conflict Handling        |   ★★☆☆☆    |     ★★★★★     | **Operation Log** |
-| Large Dataset Robustness |   ★★☆☆☆    |     ★★★★☆     | **Operation Log** |
-| Long-Term Complexity     |   ★★☆☆☆    |     ★★★★☆     | **Operation Log** |
-| **Overall**              | **★★☆☆☆**  |   **★★★★☆**   | **Operation Log** |
+| Metric       | Delta Sync (Design) | Operation Log (Implemented)                   |
+| ------------ | ------------------- | --------------------------------------------- |
+| Steady-state | ~2X (shadow state)  | ~1.2X (with compaction)                       |
+| Basis        | **Assumption**      | **Code-verified** (compaction service exists) |
+
+**Winner: Operation Log** (if compaction works correctly)
 
 ---
 
-## 4. Implementation Effort Comparison
+## 4. Implementation Effort
 
-### Delta Sync (To Make It Production-Ready)
+### Delta Sync: Build from Scratch
 
-| Model  | Estimate              | Approach                                                           |
-| ------ | --------------------- | ------------------------------------------------------------------ |
-| Gemini | 12-16 weeks           | Build server DB + API, client shadow DB + diff engine from scratch |
-| GPT-5  | 3-5 weeks             | Implement crash-safe shadow/watermark coupling, add perf tests     |
-| Opus   | Architectural rewrite | Make state transitions atomic; may require redesign                |
+Since `feat/delta-sync` is a 45-line stub, implementing delta sync requires:
 
-**Synthesized Estimate:** **6-12 weeks** of focused effort, with **high risk** of ongoing instability
+| Component                | Effort    | Notes                                          |
+| ------------------------ | --------- | ---------------------------------------------- |
+| Shadow state store (IDB) | 1-2 weeks | Persistence, encryption, invalidation          |
+| Diff engine              | 1-2 weeks | Field-level diff, O(N) optimization            |
+| Watermark tracking       | 1 week    | Atomic coupling with shadow                    |
+| Server delta API         | 2-3 weeks | Changes table, LWW merge, pagination           |
+| Conflict handling        | 1-2 weeks | Auto-merge, fallback UI                        |
+| Testing/hardening        | 2-4 weeks | Edge cases, large datasets, concurrent clients |
 
-### Operation Log (To Complete Implementation)
+**Total: 8-14 weeks** (high risk of ongoing stability issues due to multi-state consistency requirements)
 
-| Model  | Estimate  | Approach                                                        |
-| ------ | --------- | --------------------------------------------------------------- |
-| Gemini | 3-4 weeks | Compaction, startup hydration, genesis migration, effect guards |
-| GPT-5  | 4-6 weeks | Op capture, sync transport, compaction, conflict UI, tests      |
-| Opus   | 4-6 weeks | Conflict UI, dependency resolver, smart resolution, migration   |
+### Operation Log: Complete Implementation
 
-**Synthesized Estimate:** **4-6 weeks** of focused effort, with **medium risk** (compaction correctness)
+`feat/operation-logs` has core logic; remaining work:
 
----
+| Component                    | Effort     | Notes                                   |
+| ---------------------------- | ---------- | --------------------------------------- |
+| Conflict resolution UI       | 1-2 weeks  | Currently stub                          |
+| Dependency resolver retry    | 0.5-1 week | Handle missing parents                  |
+| Smart resolution suggestions | 1 week     | LWW fallback for simple conflicts       |
+| Genesis migration            | 1 week     | Convert existing data to first op       |
+| Effect guards                | 0.5-1 week | Prevent side effects during replay      |
+| Testing/hardening            | 1-2 weeks  | Compaction, large logs, concurrent tabs |
 
-## 5. When to Choose Each Approach
-
-### Choose Delta Sync If:
-
-1. **Bandwidth is severely constrained** (satellite, metered mobile)
-2. **Data model is simple and frozen** (no new entity types)
-3. **Conflicts are rare** (single device, read-heavy)
-4. **Team has deep expertise in state-based sync**
-5. **Short-term fix needed** (WebDAV fallback works "well enough")
-
-### Choose Operation Log If:
-
-1. **Multiple devices with concurrent edits** (Super Productivity's use case)
-2. **Data model is evolving** (new features, entity types)
-3. **Conflict handling is user-facing** (users need granular control)
-4. **Long-term maintainability matters** (limited engineering resources)
-5. **Future features planned** (undo/redo, audit trail, collaboration)
+**Total: 4-6 weeks** (medium risk, primarily compaction correctness)
 
 ---
 
-## 6. Model-Specific Unique Insights
+## 5. How to Validate Claims
 
-### Gemini's Insight: Implementation Status Reality Check
+Before committing to either approach, measure:
 
-> "The Delta Sync implementation is effectively 'vaporware'... Operation Log is fully implemented with chunking, conflict detection, and manifest management."
+### For Delta Sync (if implemented)
 
-**Implication:** The gap between documented design and actual implementation is larger for delta sync.
+1. **Diff cost:** Time `createDiff()` with 1k, 10k, 50k entities
+2. **Shadow storage:** Measure IDB size with shadow vs without
+3. **Watermark consistency:** Test crash recovery mid-sync
+4. **LWW data loss:** Simulate concurrent edits, count lost changes
 
-### GPT-5's Insight: Fallback Mode Coupling
+### For Operation Log
 
-> "Switching modes changes merge semantics. After fallback, the shadow state no longer matches server revisions."
-
-**Implication:** Having two sync modes creates hybrid states that neither mode fully owns.
-
-### Opus's Insight: The "Simpler Alternative" Trap
-
-> "The critique's 'simpler alternative' (per-entity versioning without operation log) essentially recreates many delta sync problems."
-
-**Implication:** There's no easy middle ground—either commit to operation log or accept delta sync's limitations.
+1. **Log growth:** Measure ops/day for typical usage; verify compaction bounds it
+2. **Replay time:** Time startup with 1k, 10k, 100k operations
+3. **Compaction correctness:** Verify no data loss after compaction
+4. **Conflict detection accuracy:** Test concurrent edits, verify correct conflicts surfaced
 
 ---
 
-## 7. Risk Assessment
+## 6. Risk Assessment
 
-### Delta Sync Risks
+### Delta Sync Risks (Projected)
 
-| Risk                        | Likelihood | Impact | Mitigation                   |
-| --------------------------- | :--------: | :----: | ---------------------------- |
-| Shadow state corruption     |    High    |  High  | IDB health checks, checksums |
-| Watermark desync            |    High    |  High  | Atomic transactions          |
-| LWW data loss               |    High    |  High  | None (fundamental)           |
-| UI freeze on large datasets |    High    | Medium | Web workers                  |
-| Encryption mode confusion   |   Medium   |  High  | Explicit mode flags          |
+| Risk                           | Likelihood | Impact | Notes                                |
+| ------------------------------ | :--------: | :----: | ------------------------------------ |
+| Shadow/watermark desync        |    High    |  High  | No atomic update mechanism in design |
+| LWW data loss                  |    High    |  High  | Fundamental to architecture          |
+| O(N) UI freeze                 |   Medium   | Medium | Can be mitigated with web workers    |
+| Implementation never completes |    High    |  High  | Already stalled at stub phase        |
 
-### Operation Log Risks
+### Operation Log Risks (Observed)
 
-| Risk                              | Likelihood | Impact | Mitigation                           |
-| --------------------------------- | :--------: | :----: | ------------------------------------ |
-| Compaction data loss              |    Low     |  High  | Conservative retention, verification |
-| Replay non-determinism            |   Medium   | Medium | Reducer purity checks                |
-| Operation schema drift            |   Medium   | Medium | Versioned migration handlers         |
-| Log growth unbounded              |   Medium   |  Low   | Scheduled compaction                 |
-| Effect side-effects during replay |   Medium   | Medium | Effect guards                        |
+| Risk                   | Likelihood | Impact | Notes                                |
+| ---------------------- | :--------: | :----: | ------------------------------------ |
+| Compaction data loss   |    Low     |  High  | Mitigate with conservative retention |
+| Replay non-determinism |   Medium   | Medium | Requires reducer purity              |
+| Log growth unbounded   |   Medium   |  Low   | Compaction service exists            |
 
-**Risk Assessment:** Operation log has fewer high-likelihood, high-impact risks.
+**Assessment:** Operation log has fewer high-likelihood, high-impact risks.
 
 ---
 
-## 8. Final Recommendation
+## 7. Recommendation
 
-### Consensus Recommendation
+### Consensus
 
-**Complete the Operation Log implementation.** All three AI models agree this is the more tractable path for Super Productivity.
+**Complete the Operation Log implementation** (`feat/operation-logs`).
 
 ### Rationale
 
-1. **Conflict handling is the most user-impacting issue**, and operation log is significantly better here
-2. **Long-term maintainability** favors single-source-of-truth architecture
-3. **Implementation effort** is lower for operation log (4-6 weeks vs 6-12 weeks)
-4. **Risk profile** is better for operation log (fewer high-impact risks)
-5. **Future extensibility** (undo/redo, collaboration) is enabled by operation log
+1. **Delta sync doesn't exist**—building it is 8-14 weeks of new work
+2. **Operation log is partially implemented**—completing it is 4-6 weeks
+3. **Conflict handling is architecturally superior** in operation log
+4. **Risk profile is better** for operation log
 
-### Caveats
+### If Delta Sync Is Reconsidered
 
-1. **Operation log requires compaction discipline**—without it, storage grows unboundedly
-2. **Reducer purity is mandatory**—side effects during replay cause bugs
-3. **Migration from existing data** needs careful testing (genesis snapshot)
-4. **Conflict UI is not yet implemented**—current stub needs completion
-
-### If Delta Sync Must Be Used
-
-Follow GPT-5's stabilization plan:
-
-1. Implement crash-safe coupling between shadow state and watermarks
-2. Add integrity verification (checksums) for shadow state
+1. Start from `feat/sync-server` (940 lines), not `feat/delta-sync` (45 lines)
+2. Address atomic shadow/watermark updates first
 3. Move diff calculation to web worker
-4. Add comprehensive soak tests for edge cases
-5. Accept LWW limitations and document them clearly for users
+4. Accept and document LWW limitations
+5. Plan for 12+ weeks of stabilization
 
 ---
 
-## 9. Conclusion
+## 8. Conclusion
 
-**Three independent AI analyses reached the same conclusion:** For Super Productivity's use case (personal productivity app, multiple devices, occasional concurrent edits), the **Operation Log approach** is superior.
+| Aspect                | Delta Sync          | Operation Log                 |
+| --------------------- | ------------------- | ----------------------------- |
+| Implementation status | **Not implemented** | Partially implemented         |
+| Conflict handling     | LWW (lossy)         | Per-entity (preserves intent) |
+| Effort to production  | 8-14 weeks          | 4-6 weeks                     |
+| Risk level            | High                | Medium                        |
+| Recommendation        | **Not recommended** | **Recommended**               |
 
-| Approach          | Strengths                                       | Weaknesses                                          | Verdict         |
-| ----------------- | ----------------------------------------------- | --------------------------------------------------- | --------------- |
-| **Delta Sync**    | Bandwidth efficiency                            | Shadow state fragility, LWW data loss, O(N) scaling | Not recommended |
-| **Operation Log** | Conflict handling, maintainability, scalability | Compaction complexity, replay determinism           | **Recommended** |
+The comparison is partially hypothetical because delta sync is a stub. However, even analyzing the _design_, delta sync's multi-state consistency requirements and LWW merge semantics make it fundamentally harder to stabilize than operation log's single-source-of-truth architecture.
 
-The delta-sync architecture is not inherently wrong—it works well for simple, single-device scenarios. However, Super Productivity's multi-device, conflict-prone use case exposes its fundamental limitations. The operation-log approach provides a stronger foundation for correctness and long-term evolution.
+**Bottom line:** Invest in completing operation log rather than building delta sync from scratch.

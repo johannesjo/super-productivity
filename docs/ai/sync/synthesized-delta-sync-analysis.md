@@ -2,13 +2,40 @@
 
 **Synthesized From:** Gemini 2.5 Flash, GPT-5, Claude Opus 4.5
 **Date:** December 2, 2025
-**Branch Analyzed:** `feat/sync-server`
+
+---
+
+## Critical Note: Analysis Scope Discrepancy
+
+**The three AI models analyzed different artifacts:**
+
+| Model                | What Was Analyzed                        | Branch/Source                              |
+| -------------------- | ---------------------------------------- | ------------------------------------------ |
+| **Gemini 2.5 Flash** | Current working directory                | `feat/delta-sync` (45-line stub)           |
+| **GPT-5**            | Documentation & design docs              | Theoretical/planned design                 |
+| **Claude Opus 4.5**  | `feat/sync-server` branch via `git show` | 940-line implementation (different branch) |
+
+**Current Reality (as of analysis date):**
+
+- **`feat/delta-sync` branch** (the branch being evaluated): `super-sync.ts` is **45 lines** (WebDAV stub)
+- `feat/sync-server` branch (separate, not under evaluation): Contains 940-line implementation
+- Server (`packages/super-sync-server`): Auth wrapper only, no delta/changes logic
+
+**Important Clarification:** The correct comparison should be between `feat/delta-sync` and `feat/operation-logs`. The `feat/sync-server` branch is a separate implementation effort and should not be conflated with `feat/delta-sync`.
+
+**Implication:** Gemini's finding that the delta-sync implementation is "vaporware" is correct for `feat/delta-sync`. Opus's detailed code analysis applies to a different branch (`feat/sync-server`) which contains more code but is not the branch under evaluation. GPT-5's analysis is based on documented design.
+
+**The strategic recommendation (abandon delta sync on `feat/delta-sync`) is valid**, because:
+
+1. The `feat/delta-sync` branch has no real implementation—just a stub (Gemini)
+2. The documented design has inherent architectural limitations (GPT-5)
+3. Even fully-implemented delta sync (as in `feat/sync-server`) has fundamental issues (Opus)
 
 ---
 
 ## 1. Executive Summary
 
-This document synthesizes analyses from three AI models (Gemini 2.5 Flash, GPT-5, Claude Opus 4.5) examining the delta-sync implementation in Super Productivity. All three models independently identified **fundamental architectural issues** that explain why stabilization has proven difficult.
+This document synthesizes analyses from three AI models (Gemini 2.5 Flash, GPT-5, Claude Opus 4.5) examining the delta-sync implementation in Super Productivity. All three models independently identified **fundamental architectural issues** that explain why stabilization has proven difficult—whether analyzing the stub, the design, or the implementation branch.
 
 ### Consensus Findings
 
