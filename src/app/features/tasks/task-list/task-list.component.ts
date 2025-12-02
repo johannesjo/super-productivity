@@ -76,7 +76,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _scheduleExternalDragService = inject(ScheduleExternalDragService);
   private _taskDragDropService = inject(TaskDragDropService);
   dropListService = inject(DropListService);
-  
+
   private _isShiftPressed = false;
 
   tasks = input<TaskWithSubTasks[]>([]);
@@ -123,7 +123,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
-    
+
     // Listen for Shift key to allow promotion
     window.addEventListener('keydown', this._handleKeyDown);
     window.addEventListener('keyup', this._handleKeyUp);
@@ -132,18 +132,18 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList()!);
     this._scheduleExternalDragService.setActiveTask(null);
-    
+
     // Remove Shift key listeners
     window.removeEventListener('keydown', this._handleKeyDown);
     window.removeEventListener('keyup', this._handleKeyUp);
   }
-  
+
   private _handleKeyDown = (event: KeyboardEvent): void => {
     if (event.key === 'Shift') {
       this._isShiftPressed = true;
     }
   };
-  
+
   private _handleKeyUp = (event: KeyboardEvent): void => {
     if (event.key === 'Shift') {
       this._isShiftPressed = false;
@@ -166,17 +166,17 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const task = drag.data;
     const sourceData = drag.dropContainer?.data;
     const targetData = drop.data;
-    
+
     // Safety check
     if (!sourceData || !targetData) {
       console.warn('[ENTER PREDICATE] Missing data', { sourceData, targetData });
       return false;
     }
-    
+
     const sourceModelId = sourceData.listModelId;
     const targetModelId = targetData.listModelId;
     const isSubtask = !!task.parentId;
-    
+
     console.log('[ENTER PREDICATE DEBUG]', {
       taskId: task.id,
       isSubtask,
@@ -190,7 +190,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
       return false;
     }
-    
+
     // KEY LOGIC: If dragging a subtask FROM its own subtask list
     if (isSubtask && sourceModelId === task.parentId) {
       // If Shift is pressed, allow promotion to parent lists
@@ -198,25 +198,25 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
         console.log('[ENTER PREDICATE DEBUG] Shift pressed - ALLOW PROMOTION');
         return true;
       }
-      
+
       // Otherwise, only allow dropping in same parent (reordering)
       const allowDrop = targetModelId === task.parentId;
-      console.log('[ENTER PREDICATE DEBUG] Subtask from own list - allow only same parent:', allowDrop);
+
       return allowDrop;
     }
-    
+
     // For subtask lists: allow subtasks
     if (this.listId() === 'SUB') {
       console.log('[ENTER PREDICATE DEBUG] SUB list - allow subtasks');
       return isSubtask;
     }
-    
+
     // For parent lists: allow all tasks
     if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
       console.log('[ENTER PREDICATE DEBUG] PARENT list - allow all');
       return true;
     }
-    
+
     return false;
   };
 
@@ -231,13 +231,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     const srcListData = ev.previousContainer.data;
     const targetListData = ev.container.data;
     const draggedTask = ev.item.data;
-    
+
     // Safety check
     if (!srcListData || !targetListData) {
       console.error('[DROP] Missing data', { srcListData, targetListData });
       return;
     }
-    
+
     TaskLog.log({
       ev,
       srcListData,
@@ -424,7 +424,20 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       TaskWithSubTasks | SearchResultItem
     >,
   ): 'top' | 'bottom-left' | 'bottom-right' {
-    const dropElement = event.container.element.nativeElement;
+    const sortedItems = event.container.getSortedItems();
+    const targetDragItem = sortedItems[event.currentIndex];
+
+    if (!targetDragItem) {
+      // Fallback for drops at the end of the list, though less precise
+      const dropElement = event.container.element.nativeElement;
+      const rect = dropElement.getBoundingClientRect();
+      const dropPointY = event.dropPoint.y;
+      const relativeY = dropPointY - rect.top;
+      const topThreshold = rect.height * 0.5;
+      return relativeY < topThreshold ? 'top' : 'bottom-left';
+    }
+
+    const dropElement = targetDragItem.element.nativeElement;
     const rect = dropElement.getBoundingClientRect();
 
     // Use dropPoint which is the actual drop position from CDK
@@ -440,24 +453,14 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     // Threshold: 50% from top is "top", rest is "bottom"
     const topThreshold = elementHeight * 0.5;
+    const rightThreshold = elementWidth * 0.66;
 
     const zone =
       relativeY < topThreshold
         ? 'top'
-        : relativeX < elementWidth * 0.66
+        : relativeX < rightThreshold
           ? 'bottom-left'
           : 'bottom-right';
-
-    console.log('[DROP ZONE DEBUG]', {
-      dropPointX,
-      dropPointY,
-      rect: { top: rect.top, left: rect.left, height: rect.height, width: rect.width },
-      relativeX,
-      relativeY,
-      topThreshold,
-      leftThreshold: elementWidth * 0.5,
-      zone,
-    });
 
     return zone;
   }
