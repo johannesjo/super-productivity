@@ -4,35 +4,46 @@ import { MultiTabCoordinatorService } from './multi-tab-coordinator.service';
 import { Operation } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 
+// Mock BroadcastChannel class that can be used with `new`
+class MockBroadcastChannel {
+  static instance: MockBroadcastChannel | null = null;
+  name: string;
+  onmessage: ((ev: MessageEvent) => void) | null = null;
+  postMessage = jasmine.createSpy('postMessage');
+  close = jasmine.createSpy('close');
+
+  constructor(name: string) {
+    this.name = name;
+    MockBroadcastChannel.instance = this;
+  }
+}
+
 describe('MultiTabCoordinatorService', () => {
   let service: MultiTabCoordinatorService;
   let mockStore: jasmine.SpyObj<Store>;
-  let mockBroadcastChannel: BroadcastChannel;
-
-  // Mock BroadcastChannel since it's not available in test environment sometimes
-  class MockBroadcastChannel {
-    name: string;
-    onmessage: ((this: BroadcastChannel, ev: MessageEvent) => any) | null = null;
-    constructor(name: string) {
-      this.name = name;
-    }
-    postMessage(message: any): void {}
-    close(): void {}
-  }
+  let originalBroadcastChannel: typeof BroadcastChannel;
 
   beforeEach(() => {
     mockStore = jasmine.createSpyObj('Store', ['dispatch']);
 
-    // Spy on window.BroadcastChannel to return our mock
-    spyOn(window as any, 'BroadcastChannel').and.callFake((name: string) => {
-      mockBroadcastChannel = new MockBroadcastChannel(name) as any;
-      return mockBroadcastChannel;
-    });
+    // Reset the static instance
+    MockBroadcastChannel.instance = null;
+
+    // Save original BroadcastChannel
+    originalBroadcastChannel = window.BroadcastChannel;
+
+    // Replace BroadcastChannel with our mock class
+    (window as any).BroadcastChannel = MockBroadcastChannel;
 
     TestBed.configureTestingModule({
       providers: [MultiTabCoordinatorService, { provide: Store, useValue: mockStore }],
     });
     service = TestBed.inject(MultiTabCoordinatorService);
+  });
+
+  afterEach(() => {
+    // Restore original BroadcastChannel
+    window.BroadcastChannel = originalBroadcastChannel;
   });
 
   it('should be created', () => {
@@ -54,10 +65,10 @@ describe('MultiTabCoordinatorService', () => {
       schemaVersion: 1,
     };
 
-    spyOn(mockBroadcastChannel, 'postMessage');
     service.notifyNewOperation(op);
 
-    expect(mockBroadcastChannel.postMessage).toHaveBeenCalledWith({
+    const mockChannel = MockBroadcastChannel.instance!;
+    expect(mockChannel.postMessage).toHaveBeenCalledWith({
       type: 'NEW_OP',
       op,
     });
@@ -83,15 +94,16 @@ describe('MultiTabCoordinatorService', () => {
       data: { type: 'NEW_OP', op },
     });
 
-    if (mockBroadcastChannel.onmessage) {
-      mockBroadcastChannel.onmessage(event);
+    const mockChannel = MockBroadcastChannel.instance!;
+    if (mockChannel.onmessage) {
+      mockChannel.onmessage(event);
     } else {
       fail('onmessage handler not set');
     }
 
     expect(mockStore.dispatch).toHaveBeenCalled();
     const dispatchedAction = mockStore.dispatch.calls.mostRecent()
-      .args[0] as PersistentAction;
+      .args[0] as unknown as PersistentAction;
 
     expect(dispatchedAction.type).toBe('[Test] Remote Action');
     expect(dispatchedAction['title']).toBe('New Title'); // Payload merged

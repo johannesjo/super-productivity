@@ -32,6 +32,7 @@ const PROVIDER_FIELD_DEFAULTS: Record<SyncProviderId, Record<string, string>> = 
     baseUrl: '',
     userName: '',
     password: '',
+    accessToken: '',
     syncFolderPath: '',
     encryptKey: '',
   },

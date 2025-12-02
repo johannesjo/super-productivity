@@ -6,13 +6,7 @@ import { Logger } from './logger';
 // Zod Schemas
 const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
-  password: z
-    .string()
-    .min(12, 'Password must be at least 12 characters long')
-    .regex(/[a-z]/, 'Password must contain at least one lowercase letter')
-    .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
-    .regex(/\d/, 'Password must contain at least one number')
-    .regex(/[\W_]/, 'Password must contain at least one special character'),
+  password: z.string().min(12, 'Password must be at least 12 characters long'),
 });
 
 const LoginSchema = z.object({

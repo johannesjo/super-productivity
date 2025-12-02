@@ -57,6 +57,7 @@ describe('WebdavApi', () => {
         type: 'file',
         etag: 'abc123',
         data: {},
+        path: '/test.txt',
       };
       mockXmlParser.parseMultiplePropsFromXml.and.returnValue([mockFileMeta]);
 
@@ -123,6 +124,7 @@ describe('WebdavApi', () => {
           type: 'file',
           etag: 'def456',
           data: {},
+          path: '/folder/file with spaces.txt',
         },
       ]);
 
@@ -151,6 +153,7 @@ describe('WebdavApi', () => {
         type: 'file',
         etag: 'Wed, 15 Jan 2025 10:00:00 GMT',
         data: {},
+        path: '/test.txt',
       };
       const headSpy = spyOn<any>(api, '_getFileMetaViaHead').and.returnValue(
         Promise.resolve(headMeta),
@@ -269,6 +272,7 @@ describe('WebdavApi', () => {
           data: {
             etag: '"meta-etag-should-not-override"',
           },
+          path: '/test.txt',
         }),
       );
 
@@ -302,6 +306,7 @@ describe('WebdavApi', () => {
           data: {
             etag: '"propfind-etag-456"',
           },
+          path: '/test.txt',
         }),
       );
 
@@ -332,6 +337,7 @@ describe('WebdavApi', () => {
           type: 'file',
           etag: '',
           data: {},
+          path: '/test.txt',
         }),
       );
 
@@ -534,6 +540,7 @@ describe('WebdavApi', () => {
           type: 'file',
           etag: 'Wed, 15 Jan 2025 12:00:00 GMT', // Using lastmod as etag
           data: {},
+          path: '/test.txt',
         }),
       );
 
@@ -624,6 +631,7 @@ describe('WebdavApi', () => {
           data: {
             etag: '"propfind-etag-456"', // Original ETag in data
           },
+          path: '/test.txt',
         }),
       );
 
@@ -782,6 +790,7 @@ describe('WebdavApi', () => {
           etag: '',
           href: 'http://example.com/webdav/test.json',
         },
+        path: 'http://example.com/webdav/test.json',
       });
     });
 
@@ -871,6 +880,7 @@ describe('WebdavApi', () => {
           type: 'file',
           etag: 'Wed, 15 Jan 2025 10:00:00 GMT', // Using lastmod as etag
           data: {},
+          path: '/test.txt',
         },
       ]);
 

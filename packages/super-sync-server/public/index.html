@@ -6,168 +6,165 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0"
     />
-    <title>SuperSync Server</title>
+    <title>SuperSync Server - Connect</title>
     <link
       rel="stylesheet"
       href="style.css"
     />
     <link
-      rel="preconnect"
-      href="https://fonts.googleapis.com"
-    />
-    <link
-      rel="preconnect"
-      href="https://fonts.gstatic.com"
-      crossorigin
-    />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
+      rel="icon"
+      href="favicon.ico"
+      type="image/x-icon"
     />
   </head>
   <body>
-    <div class="background-gradient"></div>
-
     <div class="container">
       <header>
-        <div class="logo">
-          <svg
-            width="32"
-            height="32"
-            viewBox="0 0 24 24"
-            fill="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M12 4L12 20M12 4L8 8M12 4L16 8"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M4 12L20 12M4 12L8 8M4 12L8 16"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
-          <span>SuperSync Server</span>
-        </div>
-        <div class="status-indicator">
-          <span class="dot"></span>
-          <span class="text">Server Online</span>
-        </div>
+        <h1>SuperSync</h1>
+        <p>Connect your productivity</p>
       </header>
 
-      <main>
-        <section class="hero">
-          <h1>Your Data.<br />Synchronized.</h1>
-          <p>Secure, private, and fast synchronization for Super Productivity.</p>
-        </section>
-
-        <section class="auth-card">
+      <main id="app">
+        <!-- Authentication Forms -->
+        <div
+          id="auth-forms"
+          class="card"
+        >
           <div class="tabs">
             <button
-              class="tab active"
-              data-tab="login"
+              class="tab-btn active"
+              onclick="switchTab('login')"
             >
               Login
             </button>
             <button
-              class="tab"
-              data-tab="register"
+              class="tab-btn"
+              onclick="switchTab('register')"
             >
               Register
             </button>
           </div>
 
-          <div
-            class="form-container"
+          <!-- Login Form -->
+          <form
             id="login-form"
+            class="auth-form active"
           >
-            <form id="login">
-              <div class="input-group">
-                <label for="login-email">Email</label>
-                <input
-                  type="email"
-                  id="login-email"
-                  required
-                  placeholder="you@example.com"
-                />
-              </div>
-              <div class="input-group">
-                <label for="login-password">Password</label>
-                <input
-                  type="password"
-                  id="login-password"
-                  required
-                  placeholder="••••••••"
-                />
-              </div>
-              <button
-                type="submit"
-                class="btn-primary"
-              >
-                <span class="btn-text">Log In</span>
-                <div class="loader hidden"></div>
-              </button>
-            </form>
-          </div>
+            <div class="form-group">
+              <label for="login-email">Email</label>
+              <input
+                type="email"
+                id="login-email"
+                required
+                placeholder="name@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="login-password">Password</label>
+              <input
+                type="password"
+                id="login-password"
+                required
+                placeholder="Your password"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn primary"
+            >
+              Log In
+            </button>
+          </form>
 
-          <div
-            class="form-container hidden"
+          <!-- Register Form -->
+          <form
             id="register-form"
+            class="auth-form"
           >
-            <form id="register">
-              <div class="input-group">
-                <label for="register-email">Email</label>
-                <input
-                  type="email"
-                  id="register-email"
-                  required
-                  placeholder="you@example.com"
-                />
-              </div>
-              <div class="input-group">
-                <label for="register-password">Password</label>
-                <input
-                  type="password"
-                  id="register-password"
-                  required
-                  placeholder="••••••••"
-                />
-                <small>Minimum 6 characters</small>
-              </div>
-              <div class="input-group">
-                <label for="register-confirm-password">Confirm Password</label>
-                <input
-                  type="password"
-                  id="register-confirm-password"
-                  required
-                  placeholder="••••••••"
-                />
-              </div>
-              <button
-                type="submit"
-                class="btn-primary"
-              >
-                <span class="btn-text">Create Account</span>
-                <div class="loader hidden"></div>
-              </button>
-            </form>
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input
+                type="email"
+                id="register-email"
+                required
+                placeholder="name@example.com"
+              />
+            </div>
+            <div class="form-group">
+              <label for="register-password">Password</label>
+              <input
+                type="password"
+                id="register-password"
+                required
+                placeholder="Min. 12 characters"
+              />
+              <small>Must be at least 12 characters.</small>
+            </div>
+            <div class="form-group">
+              <label for="register-confirm">Confirm Password</label>
+              <input
+                type="password"
+                id="register-confirm"
+                required
+                placeholder="Repeat password"
+              />
+            </div>
+            <button
+              type="submit"
+              class="btn secondary"
+            >
+              Register
+            </button>
+          </form>
+        </div>
+
+        <!-- Success / Token Display -->
+        <div
+          id="token-display"
+          class="card hidden"
+        >
+          <div class="success-icon">🔐</div>
+          <h2>Connection Successful</h2>
+          <p>Copy this token and paste it into Super Productivity settings.</p>
+
+          <div class="token-box">
+            <textarea
+              id="token-area"
+              readonly
+              onclick="this.select()"
+            ></textarea>
+            <button
+              id="copy-btn"
+              class="btn primary"
+              onclick="copyToken()"
+            >
+              Copy Token
+            </button>
           </div>
 
-          <div
-            id="message-area"
-            class="message hidden"
-          ></div>
-        </section>
+          <div class="warning-box">
+            <p>
+              <strong>Keep this safe!</strong> This token grants access to your sync data.
+            </p>
+          </div>
+
+          <button
+            onclick="logout()"
+            class="btn text-only"
+          >
+            Log Out / Back
+          </button>
+        </div>
+
+        <!-- Status Messages -->
+        <div
+          id="message-area"
+          class="hidden"
+        ></div>
       </main>
 
       <footer>
-        <p>&copy; 2025 Super Productivity. Open Source.</p>
+        <p>Super Productivity Sync Server</p>
       </footer>
     </div>
 

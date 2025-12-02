@@ -217,6 +217,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
         : 'http://localhost:1900',
       userName: null,
       password: null,
+      accessToken: null,
       syncFolderPath: null,
     },
 

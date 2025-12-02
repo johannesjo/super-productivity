@@ -47,19 +47,24 @@ class JWTAuthentication implements webdav.HTTPAuthentication {
     }
 
     const token = authHeader.split(' ')[1];
-    const payload = verifyToken(token);
 
-    if (!payload) {
-      return callback(new Error('Invalid token'));
-    }
+    verifyToken(token)
+      .then((payload) => {
+        if (!payload) {
+          return callback(new Error('Invalid token'));
+        }
 
-    // webdav-server callback signature expects Error but we pass null on success
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    callback(null as any, {
-      uid: payload.userId.toString(),
-      username: payload.email,
-      isAdministrator: false,
-    });
+        // webdav-server callback signature expects Error but we pass null on success
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        callback(null as any, {
+          uid: payload.userId.toString(),
+          username: payload.email,
+          isAdministrator: false,
+        });
+      })
+      .catch((err) => {
+        callback(err instanceof Error ? err : new Error('Token verification failed'));
+      });
   }
 }
 
@@ -210,9 +215,8 @@ export const createServer = (
 
       // WebDAV Handler (Catch-all via hook)
       // We use a hook because Fastify's router validates HTTP methods and might not support all WebDAV methods
-      fastifyServer.addHook('onRequest', (req, reply, done) => {
+      fastifyServer.addHook('onRequest', async (req, reply) => {
         if (req.url.startsWith('/api')) {
-          done();
           return;
         }
 
@@ -224,7 +228,6 @@ export const createServer = (
           urlPath === '/verify-email' ||
           urlPath === '/health'
         ) {
-          done();
           return;
         }
 
@@ -236,7 +239,7 @@ export const createServer = (
         }
 
         const token = authHeader.split(' ')[1];
-        const payload = verifyToken(token);
+        const payload = await verifyToken(token);
 
         if (!payload) {
           reply.status(401).send({ error: 'Invalid token' });
