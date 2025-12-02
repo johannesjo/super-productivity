@@ -51,11 +51,6 @@ export class PfapiService {
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
 
-  // Initialize model controllers reference for delegate service
-  private _initDelegateService = (() => {
-    this._storeDelegateService.setModelCtrls(this.m);
-  })();
-
   // NOTE: subscribing to this to early (e.g. in a constructor), might mess up due to share replay
   public readonly isSyncProviderEnabledAndReady$ = pfapiEventAndInitialAfter(
     this._dataInitStateService.isAllDataLoadedInitially$,
