@@ -137,23 +137,3 @@ export const decrypt = async (data: string, password: string): Promise<string> =
     return await decryptLegacy(data, password);
   }
 };
-
-// TESTING CODE
-// export const testCrypto = async (): Promise<void> => {
-//   const enc = await encrypt('HAHAHHA', '1234');
-//   PFLog.log('enc', enc);
-//   decrypt(enc, '1234')
-//     .then((r) => {
-//       PFLog.log('YEAH', r);
-//     })
-//     .catch((r) => {
-//       PFLog.log('NOOO', r);
-//     });
-//
-//   const decrypted = await decrypt(enc, '1234');
-//   PFLog.log('decrypted', decrypted);
-// };
-//
-// testCrypto();
-//
-// (window as any).decrypt = decrypt;
