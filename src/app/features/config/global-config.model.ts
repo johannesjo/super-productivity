@@ -145,6 +145,11 @@ export type SyncConfig = Readonly<{
   syncProvider: LegacySyncProvider | null;
   syncInterval: number;
 
+  // Operation Log sync feature flag (experimental)
+  // When true: uses event sourcing for persistence (ops written to SUP_OPS)
+  // When false: uses legacy SaveToDbEffects (writes to 'pf' database)
+  useOperationLogSync?: boolean;
+
   /* NOTE: view model for form only*/
   encryptKey?: string | null;
   /* NOTE: view model for form only*/

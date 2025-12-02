@@ -12,12 +12,15 @@ import { selectTagFeatureState } from '../../features/tag/store/tag.reducer';
 import { selectProjectFeatureState } from '../../features/project/store/project.selectors';
 import { selectConfigFeatureState } from '../../features/config/store/global-config.reducer';
 import { take } from 'rxjs/operators';
+import { GlobalConfigService } from '../../features/config/global-config.service';
+import { SyncConfig } from '../../features/config/global-config.model';
 
 describe('SaveToDbEffects', () => {
   let actions$: Subject<Action>;
   let effects: SaveToDbEffects;
   let pfapiServiceMock: any;
   let dataInitStateServiceMock: any;
+  let globalConfigServiceMock: any;
   let store: MockStore<RootState>;
 
   beforeEach(() => {
@@ -41,6 +44,12 @@ describe('SaveToDbEffects', () => {
       isAllDataLoadedInitially$: of(true),
     };
 
+    // Mock the globalConfigService - useOperationLogSync is false (default)
+    // so SaveToDbEffects should run
+    globalConfigServiceMock = {
+      sync$: of({ useOperationLogSync: false } as Partial<SyncConfig>),
+    };
+
     actions$ = new Subject<Action>();
 
     TestBed.configureTestingModule({
@@ -52,6 +61,7 @@ describe('SaveToDbEffects', () => {
         }),
         { provide: PfapiService, useValue: pfapiServiceMock },
         { provide: DataInitStateService, useValue: dataInitStateServiceMock },
+        { provide: GlobalConfigService, useValue: globalConfigServiceMock },
       ],
     });
 

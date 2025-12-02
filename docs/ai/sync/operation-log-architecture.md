@@ -82,14 +82,14 @@ The system uses **two separate IndexedDB databases** that coexist:
 
 ### 3.1 Decision Matrix
 
-> **⚠️ CORRECTION (December 2, 2025):** All current providers (WebDAV, Dropbox, LocalFileSync) use the **same legacy LWW approach**. They all sync to a single `main.json` file. Operation log sync is reserved for future server-based providers only.
+> All current providers (WebDAV, Dropbox, LocalFileSync) use the **same legacy LWW approach**. They all sync to a `__meta` file and WebDAV and Dropbox additionally sync separate per model files for certain files. Operation log sync is reserved for future server-based providers only.
 
-| Provider            | Remote Sync Strategy     | Local Persistence | Reason                                   |
-| ------------------- | ------------------------ | ----------------- | ---------------------------------------- |
-| **WebDAV**          | Legacy LWW (`main.json`) | Both databases    | HTTP overhead makes many files slow      |
-| **Dropbox**         | Legacy LWW (`main.json`) | Both databases    | API rate limits, slow directory listing  |
-| **Local File Sync** | Legacy LWW (`main.json`) | Both databases    | Single file sync, same approach as above |
-| **Future Server**   | Operation Log (planned)  | Both databases    | Server would handle ops efficiently      |
+| Provider            | Remote Sync Strategy    | Local Persistence | Reason                                   |
+| ------------------- | ----------------------- | ----------------- | ---------------------------------------- |
+| **WebDAV**          | Legacy LWW              | Both databases    | HTTP overhead makes many files slow      |
+| **Dropbox**         | Legacy LWW              | Both databases    | API rate limits, slow directory listing  |
+| **Local File Sync** | Legacy LWW              | Both databases    | Single file sync, same approach as above |
+| **Future Server**   | Operation Log (planned) | Both databases    | Server would handle ops efficiently      |
 
 ### 3.2 Sync Flow by Provider
 
@@ -104,7 +104,8 @@ Sync Triggered
          │
          └─→ Legacy MetaSyncService
               ├─→ Compare vector clocks (from 'pf' META_MODEL)
-              ├─→ Upload/download main.json as needed
+              ├─→ Upload/download __meta file as needed
+              ├─→ Upload/download model files as needed
               └─→ Full state replacement on conflict
 ```
 
@@ -119,7 +120,7 @@ Sync Triggered
          │
          ├─→ Skip operation log sync (not supported)
          │
-         └─→ Legacy MetaSyncService (single main.json file)
+         └─→ Legacy MetaSyncService (single __meta file)
 ```
 
 **Future Server (Operation Log - PLANNED):**
@@ -167,18 +168,6 @@ private supportsOpLogSync(provider: SyncProvider | null): boolean {
   return false;
 }
 ```
-
-**ACTUAL CODE (sync.service.ts:102-110) - BROKEN:**
-
-```typescript
-// This runs for ALL providers including WebDAV/Dropbox!
-if (currentSyncProvider) {
-  await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
-  await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
-}
-```
-
----
 
 ## 4. Data Structures
 

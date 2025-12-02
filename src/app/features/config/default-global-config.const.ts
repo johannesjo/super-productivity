@@ -189,6 +189,11 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     syncProvider: null,
     syncInterval: minute,
 
+    // Operation Log sync feature flag - EXPERIMENTAL
+    // Default false: uses legacy SaveToDbEffects (writes to 'pf' database)
+    // When true: uses event sourcing for persistence (ops written to SUP_OPS)
+    useOperationLogSync: false,
+
     webDav: {
       baseUrl: null,
       userName: null,

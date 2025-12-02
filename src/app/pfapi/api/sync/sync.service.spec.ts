@@ -13,6 +13,7 @@ import {
   RevMismatchForModelError,
 } from '../errors/errors';
 import { EncryptAndCompressHandlerService } from './encrypt-and-compress-handler.service';
+import { OperationLogSyncService } from '../../../core/persistence/operation-log/operation-log-sync.service';
 
 interface FakeModel {
   id: string;
@@ -58,6 +59,7 @@ describe('SyncService', () => {
   let mockSyncProvider: any;
   let mockMetaSyncService: jasmine.SpyObj<MetaSyncService>;
   let mockModelSyncService: jasmine.SpyObj<ModelSyncService<any>>;
+  let mockOperationLogSyncService: jasmine.SpyObj<OperationLogSyncService>;
 
   beforeEach(() => {
     // Setup mock model controllers
@@ -80,6 +82,14 @@ describe('SyncService', () => {
     mockMetaSyncService = setupMetaSyncService();
     mockModelSyncService = setupModelSyncService();
 
+    // Setup mock OperationLogSyncService
+    mockOperationLogSyncService = jasmine.createSpyObj('OperationLogSyncService', [
+      'uploadPendingOps',
+      'downloadRemoteOps',
+    ]);
+    mockOperationLogSyncService.uploadPendingOps.and.returnValue(Promise.resolve());
+    mockOperationLogSyncService.downloadRemoteOps.and.returnValue(Promise.resolve());
+
     // Create service with spies for internal services
     service = new SyncService(
       mockModelControllers,
@@ -88,6 +98,7 @@ describe('SyncService', () => {
       mockSyncProvider$,
       mockEncryptAndCompressCfg$,
       mockEncryptAndCompressHandler,
+      mockOperationLogSyncService,
     );
 
     // Replace internal services with mocks
