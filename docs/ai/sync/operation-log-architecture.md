@@ -29,7 +29,7 @@ We evaluated two approaches:
 
 - **NgRx is the runtime state** (in-memory, volatile)
 - **IndexedDB (`SUP_OPS`) is the durable source of truth** (survives restarts)
-- **Persistence is a Log of Operations** (local)
+- **Persistence is Hybrid** (Op Log + Legacy)
 - **Sync strategy varies by provider** (remote)
 
 > **Note:** On startup, NgRx is hydrated FROM IndexedDB. The "source of truth" for persistence is `SUP_OPS`, not NgRx.
@@ -84,12 +84,12 @@ The system uses **two separate IndexedDB databases** that coexist:
 
 > All current providers (WebDAV, Dropbox, LocalFileSync) use the **same legacy LWW approach**. They all sync to a `__meta` file and WebDAV and Dropbox additionally sync separate per model files for certain files. Operation log sync is reserved for future server-based providers only.
 
-| Provider            | Remote Sync Strategy    | Local Persistence | Reason                                   |
-| ------------------- | ----------------------- | ----------------- | ---------------------------------------- |
-| **WebDAV**          | Legacy LWW              | Both databases    | HTTP overhead makes many files slow      |
-| **Dropbox**         | Legacy LWW              | Both databases    | API rate limits, slow directory listing  |
-| **Local File Sync** | Legacy LWW              | Both databases    | Single file sync, same approach as above |
-| **Future Server**   | Operation Log (planned) | Both databases    | Server would handle ops efficiently      |
+| Provider            | Remote Sync Strategy            | Local Persistence | Reason                                    |
+| ------------------- | ------------------------------- | ----------------- | ----------------------------------------- |
+| **WebDAV**          | Legacy LWW (Meta + Model files) | Both (Hybrid)     | HTTP overhead makes many files slow       |
+| **Dropbox**         | Legacy LWW (Meta + Model files) | Both (Hybrid)     | API rate limits, slow directory listing   |
+| **Local File Sync** | Legacy LWW (Single Meta file)   | Both (Hybrid)     | Simple local file access, one file easier |
+| **Future Server**   | Operation Log (planned)         | Both (Hybrid)     | Server would handle ops efficiently       |
 
 ### 3.2 Sync Flow by Provider
 
@@ -141,31 +141,34 @@ Sync Triggered
 
 ### 3.3 Implementation
 
-> **⚠️ CRITICAL BUG (December 2, 2025):** The code below shows the **intended** implementation. The **actual** code in `sync.service.ts:102-110` runs op-log sync for ALL providers without any gating check. This must be fixed.
+> **Hybrid Sync Logic:** The sync service determines which sync method to use based on the provider type.
 
 ```typescript
-// INTENDED (sync.service.ts) - NOT YET IMPLEMENTED
+// INTENDED (sync.service.ts)
 async sync(): Promise<void> {
   const provider = this._currentSyncProvider$.value;
 
-  // Operation log sync only for supported providers
-  // ⚠️ BUG: This check does NOT exist in actual code!
+  // 1. Operation Log Sync (Future Server Providers)
   if (this.supportsOpLogSync(provider)) {
     await this._operationLogSyncService.uploadPendingOps(provider);
     await this._operationLogSyncService.downloadRemoteOps(provider);
   }
 
-  // Legacy LWW sync
-  // - For ALL current providers (WebDAV/Dropbox/LocalFileSync): This is the only sync
-  await this.legacySync();
+  // 2. Legacy LWW Sync (WebDAV, Dropbox, LocalFile)
+  // Maintained for backward compatibility and existing providers
+  if (this.isLegacySyncProvider(provider)) {
+     await this.legacySync();
+  }
 }
 
 private supportsOpLogSync(provider: SyncProvider | null): boolean {
-  if (!provider) return false;
-  // ALL current providers use legacy LWW sync
-  // WebDAV, Dropbox, LocalFileSync: all sync to a single main.json file
-  // Op-log sync is reserved for future server-based providers only
-  return false;
+  // Only future server provider supports Op Log sync remotely
+  return provider === 'SERVER';
+}
+
+private isLegacySyncProvider(provider: SyncProvider | null): boolean {
+   // WebDAV, Dropbox, LocalFile use legacy LWW sync
+   return ['WEBDAV', 'DROPBOX', 'LOCAL_FILE'].includes(provider);
 }
 ```
 
@@ -221,7 +224,10 @@ interface EntityConflict {
 
 ### 5.1 Current State (Op Log Branch)
 
-The legacy `SaveToDbEffects` has been **disabled** - NgRx actions no longer write directly to the `'pf'` database. Instead, the Operation Log Effects capture all persistent actions:
+The system now uses **Hybrid Persistence**. Both `SaveToDbEffects` and `OperationLogEffects` are active:
+
+1.  **Operation Log Effects:** Capture actions for `SUP_OPS` (Op Log).
+2.  **SaveToDbEffects:** Capture actions for `'pf'` database (Legacy compatibility).
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -234,23 +240,12 @@ The legacy `SaveToDbEffects` has been **disabled** - NgRx actions no longer writ
 │                  (Single Source of Truth)                   │
 └─────────────────────┬───────────────────────────────────────┘
                       │
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│              Operation Log Effects                          │
-│  - Filter: skip blacklisted actions                         │
-│  - Filter: skip isRemote actions (prevents re-logging)      │
-│  - Acquire Web Lock                                         │
-│  - Increment vector clock                                   │
-│  - Convert action → Operation                               │
-│  - Append to SUP_OPS IndexedDB                              │
-└─────────────────────┬───────────────────────────────────────┘
-                      │
-                      ▼
-┌─────────────────────────────────────────────────────────────┐
-│               IndexedDB: SUP_OPS                            │
-│  ├── ops (operation log entries)                            │
-│  └── state_cache (periodic snapshots)                       │
-└─────────────────────────────────────────────────────────────┘
+          ┌───────────┴───────────┐
+          ▼                       ▼
+┌─────────────────────┐ ┌─────────────────────┐
+│ Op Log Effects      │ │ SaveToDbEffects     │
+│ (Writes SUP_OPS)    │ │ (Writes 'pf' DB)    │
+└─────────────────────┘ └─────────────────────┘
 ```
 
 ### 5.2 PFAPI Integration Points
@@ -267,15 +262,15 @@ The Operation Log system integrates with PFAPI at several key points:
 
 ### 5.3 The 'pf' Database Role
 
-With Operation Log enabled, the `'pf'` database serves a **different purpose**:
+In the hybrid model, the `'pf'` database is kept in sync to support legacy providers:
 
 | Scenario                 | 'pf' Database Usage                                                    |
 | ------------------------ | ---------------------------------------------------------------------- |
 | **Startup**              | NOT used - hydration is from SUP_OPS snapshot + tail replay            |
-| **User Actions**         | NOT written - SaveToDbEffects is disabled                              |
+| **User Actions**         | **WRITTEN** - SaveToDbEffects writes to 'pf' database                  |
 | **Genesis Migration**    | READ ONCE - legacy data copied to SUP_OPS as genesis op                |
 | **Legacy Sync Download** | WRITTEN - WebDAV/Dropbox download updates 'pf' then dispatches to NgRx |
-| **Legacy Sync Upload**   | READ - data read from NgRx store (not 'pf') for upload                 |
+| **Legacy Sync Upload**   | READ - data read from 'pf' database or NgRx for upload                 |
 
 ### 5.4 Sync Flow (Full Picture)
 
@@ -302,15 +297,15 @@ With Operation Log enabled, the `'pf'` database serves a **different purpose**:
 └─────────────────────────────┘                 └─────────────────────────────┘
 ```
 
-### 5.5 Key Insight: State Consistency
+### 5.5 Key Insight: Dual State Consistency
 
-Since `SaveToDbEffects` is disabled, the `'pf'` database may become **stale** relative to NgRx state:
+With both effects enabled, both databases are kept consistent:
 
-- **NgRx Store**: Always current (source of truth)
-- **SUP_OPS**: Current (operations logged in real-time)
-- **'pf' Database**: May be stale (only updated on legacy sync download or migration)
+- **NgRx Store**: Runtime state.
+- **SUP_OPS**: Op Log source of truth.
+- **'pf' Database**: Legacy mirror (kept current by SaveToDbEffects).
 
-This is intentional - the `'pf'` database is a **sync buffer** for legacy providers, not a source of truth.
+This ensures that legacy sync (WebDAV/Dropbox) always has access to the latest state in the format it expects.
 
 For comprehensive PFAPI architecture details, see [PFAPI Sync and Persistence Architecture](./pfapi-sync-persistence-architecture.md).
 
@@ -365,16 +360,9 @@ src/app/core/persistence/operation-log/
 ```
 1. User action → NgRx dispatch
 2. Reducer updates state (optimistic)
-3. OperationLogEffects:
-   - Check blacklist (skip blacklisted)
-   - Check !isRemote (skip remote ops)
-   - Acquire Web Lock
-   - Increment vector clock
-   - Convert to Operation
-   - Append to SUP_OPS IndexedDB
-
-Note: Legacy SaveToDbEffects is DISABLED on this branch.
-The 'pf' database is NOT updated on user actions.
+3. Parallel Persistence:
+   a) OperationLogEffects → Writes to SUP_OPS
+   b) SaveToDbEffects    → Writes to 'pf' database
 ```
 
 ### 7.2 Read Path (Startup)
@@ -590,89 +578,39 @@ export const limitVectorClockSize = (clock, currentClientId) => {
 
 ---
 
-## 11. Feature Flag
+## 11. Feature Flag Strategy
 
-> **⚠️ NOT IMPLEMENTED:** The `useOperationLogSync` flag does NOT exist in `SyncConfig` or anywhere in the codebase. This section describes the intended design.
+> **Decision:** We do NOT use a global `useOperationLogSync` feature flag.
 
-```typescript
-// INTENDED - NOT YET IN SyncConfig
-useOperationLogSync?: boolean; // Default: false
+Instead, the **Operation Log is Always On** for local persistence (`SUP_OPS`), running in parallel with the legacy persistence.
 
-// When enabled:
-// - Op log captures all persistent actions
-// - SaveToDbEffects is disabled
-// - Future server providers would use op log sync
+### 11.1 Hybrid Persistence Strategy
 
-// When disabled:
-// - SaveToDbEffects writes to 'pf' database (normal legacy behavior)
-// - Op log features are completely disabled
-```
+To ensure seamless switching between legacy providers (WebDAV/Dropbox) and future server providers, both persistence mechanisms operate simultaneously:
 
-### 11.1 Persistence Matrix (MUST BE DEFINED)
+1.  **`OperationLogEffects` (Always Active):** Captures all actions and writes to `SUP_OPS` (Op Log). This is the modern source of truth for conflict detection.
+2.  **`SaveToDbEffects` (Always Active):** Writes full state to the `'pf'` database. This ensures that if the user switches to a legacy provider (WebDAV/Dropbox), the data is ready for legacy sync.
 
-| Feature Flag      | SaveToDbEffects | Op Log Effects | 'pf' DB    | SUP_OPS    | Sync Source |
-| ----------------- | --------------- | -------------- | ---------- | ---------- | ----------- |
-| `false` (default) | ✅ ENABLED      | ❌ DISABLED    | ✅ Current | ❌ Empty   | 'pf' DB     |
-| `true`            | ❌ DISABLED     | ✅ ENABLED     | ⚠️ Stale   | ✅ Current | NgRx Store  |
+| Mechanism             | Status     | Destination | Purpose                                 |
+| --------------------- | ---------- | ----------- | --------------------------------------- |
+| `OperationLogEffects` | ✅ ENABLED | `SUP_OPS`   | Source of truth, Op Log Sync, Undo/Redo |
+| `SaveToDbEffects`     | ✅ ENABLED | `'pf'` DB   | Legacy Sync compatibility, Backup       |
 
-**Current State (BROKEN):** SaveToDbEffects is disabled at BRANCH level regardless of flag, so:
-
-- Flag doesn't exist
-- 'pf' DB is always stale
-- SUP_OPS is written but sync still reads from stale 'pf' DB
+This hybrid approach eliminates the risk of stale data when using legacy sync providers.
 
 ---
 
 ## 12. Architectural Concerns & Mitigations
 
-### 12.1 🔴 CRITICAL: Legacy Sync Uploads Stale Data
+### 12.1 (Resolved) Legacy Sync Stale Data
 
-**Issue:** Since `SaveToDbEffects` is disabled (entire class body commented out), the `'pf'` database becomes stale after user actions. **ALL legacy sync providers (WebDAV, Dropbox, LocalFileSync) are affected.**
+**Issue:** Previously, `SaveToDbEffects` was disabled, causing the 'pf' database to become stale.
+**Resolution:** We have adopted a **Hybrid Persistence** strategy where `SaveToDbEffects` is always enabled, ensuring the 'pf' database is always up to date for legacy sync providers.
 
-**Impact Chain:**
+### 12.2 (Resolved) SaveToDbEffects Configuration
 
-1. User makes changes → NgRx updated, SUP_OPS written
-2. `'pf'` database NOT updated (SaveToDbEffects disabled)
-3. User triggers sync (any provider)
-4. `uploadAll()` → `getAllSyncModelData()` → reads stale `ModelCtrl._inMemoryData` or `'pf'` DB
-5. **OLD STATE uploaded to remote**
-6. Other device downloads → gets OLD state
-7. **Recent work LOST**
-
-**Why `ModelCtrl` caches are stale:**
-
-- `ModelCtrl.load()` returns `this._inMemoryData || await this._db.load(...)` (line 113-121)
-- `_inMemoryData` is only updated when `save()` is called
-- With `SaveToDbEffects` disabled, `save()` is NEVER called after user actions
-- Caches only update on: hydration, legacy sync download, or migration
-
-**🚨 THIS IS NOT THEORETICAL - IT'S HAPPENING NOW** for any user on this branch.
-
-**Required Fix (Choose ONE):**
-
-- **A) Read from NgRx directly:** Modify `getAllSyncModelData()` to use NgRx selectors instead of `ModelCtrl.load()`
-- **B) Flush before upload:** Add an effect that copies NgRx state to `ModelCtrl` caches before legacy sync
-- **C) Re-enable SaveToDbEffects:** Keep `'pf'` database in sync (increases write load but simplest fix)
-
-### 12.2 🔴 CRITICAL: SaveToDbEffects Disabled at Branch Level, Not Feature Flag
-
-**Issue:** The `SaveToDbEffects` class body is **completely commented out** in `save-to-db.effects.ts`. This is NOT gated by the `useOperationLogSync` feature flag.
-
-**Result when feature flag is OFF:**
-
-- Op log sync disabled ✓
-- But `SaveToDbEffects` STILL disabled ✗
-- User changes go to NgRx only
-- **NO PERSISTENCE AT ALL** for local IndexedDB storage
-
-**This means the branch itself breaks ALL persistence, regardless of feature flag setting.**
-
-**Required Fix:** Gate the `SaveToDbEffects` disable by feature flag:
-
-```typescript
-// If useOperationLogSync is false, SaveToDbEffects should be ENABLED
-// If useOperationLogSync is true, SaveToDbEffects should be DISABLED
-```
+**Issue:** `SaveToDbEffects` was commented out.
+**Resolution:** Re-enabled `SaveToDbEffects` to run in parallel with `OperationLogEffects`.
 
 ### 12.3 Dual Vector Clock Divergence
 
@@ -778,17 +716,14 @@ useOperationLogSync?: boolean; // Default: false
 
 > **⚠️ DO NOT MERGE TO MASTER** until these are fixed. They affect ALL users, not just op-log users.
 
-| #   | Blocker                                      | Impact                                                  | Location                                        | Severity    |
-| --- | -------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------- | ----------- |
-| 1   | **Legacy sync uploads stale data**           | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | `getAllSyncModelData()` reads stale `ModelCtrl` | 🔴 CRITICAL |
-| 2   | **SaveToDbEffects disabled at branch level** | NO persistence when feature flag is OFF                 | `save-to-db.effects.ts` (entire body commented) | 🔴 CRITICAL |
-| 3   | **Feature flag doesn't exist**               | Can't control op-log vs legacy behavior                 | `SyncConfig` missing `useOperationLogSync`      | 🔴 CRITICAL |
-| 4   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | `sync.service.ts:102-110`                       | 🔴 CRITICAL |
-| 5   | **Compaction reads stale cache**             | Data loss when compaction runs                          | `operation-log-compaction.service.ts:23`        | 🔴 CRITICAL |
-| 6   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | `operation-applier.service.ts:44`               | 🟠 HIGH     |
-| 7   | **Compaction never triggers**                | Op log grows unbounded                                  | No triggers exist                               | 🟠 HIGH     |
-| 8   | **Replay guard missing**                     | Side effects fire during hydration                      | `replay-guard.service.ts` doesn't exist         | 🟠 HIGH     |
-| 9   | **Per-entity conflict resolution missing**   | All conflicts get single global resolution              | `conflict-resolution.service.ts:37`             | 🟠 HIGH     |
+| #   | Blocker                                    | Impact                                     | Location                                 | Severity    |
+| --- | ------------------------------------------ | ------------------------------------------ | ---------------------------------------- | ----------- |
+| 1   | **Provider gating missing**                | Op-log sync runs for ALL providers         | `sync.service.ts:102-110`                | 🔴 CRITICAL |
+| 2   | **Compaction reads stale cache**           | Data loss when compaction runs             | `operation-log-compaction.service.ts:23` | 🔴 CRITICAL |
+| 3   | **Dependency ops silently dropped**        | Subtasks arriving before parents are LOST  | `operation-applier.service.ts:44`        | 🟠 HIGH     |
+| 4   | **Compaction never triggers**              | Op log grows unbounded                     | No triggers exist                        | 🟠 HIGH     |
+| 5   | **Replay guard missing**                   | Side effects fire during hydration         | `replay-guard.service.ts` doesn't exist  | 🟠 HIGH     |
+| 6   | **Per-entity conflict resolution missing** | All conflicts get single global resolution | `conflict-resolution.service.ts:37`      | 🟠 HIGH     |
 
 ### Complete ✅
 
