@@ -359,7 +359,9 @@ export class SyncWrapperService {
 
     try {
       await Promise.all([
-        this._dataInitService.reInit(),
+        // Use reInitFromRemoteSync() which reads from 'pf' database, persists to SUP_OPS,
+        // and updates NgRx - ensuring synced data is not lost
+        this._dataInitService.reInitFromRemoteSync(),
         this._reminderService.reloadFromDatabase(),
       ]);
       // wait an extra frame to potentially avoid follow up problems

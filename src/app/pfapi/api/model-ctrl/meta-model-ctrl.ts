@@ -294,6 +294,41 @@ export class MetaModelCtrl {
   }
 
   /**
+   * Increments the vector clock to signal a local change has occurred.
+   * This is used by the operation log to ensure PFAPI sync detects local changes.
+   *
+   * @param clientId The client ID to increment the vector clock for
+   * @throws {MetaNotReadyError} When metamodel is not loaded yet
+   */
+  async incrementVectorClockForLocalChange(clientId: string): Promise<void> {
+    const metaModel = this._metaModelInMemory;
+    if (!metaModel) {
+      throw new MetaNotReadyError('vectorClockUpdate', {
+        isLocalOnly: false,
+      } as ModelCfg<never>);
+    }
+
+    const timestamp = Date.now();
+    const currentVectorClock = metaModel.vectorClock || {};
+    let newVectorClock = incrementVectorClock(currentVectorClock, clientId);
+    newVectorClock = limitVectorClockSize(newVectorClock, clientId);
+
+    const updatedMeta: LocalMeta = {
+      ...metaModel,
+      lastUpdate: timestamp,
+      vectorClock: newVectorClock,
+    };
+
+    PFLog.verbose(`${MetaModelCtrl.L}.incrementVectorClockForLocalChange()`, {
+      clientId,
+      oldClock: currentVectorClock,
+      newClock: newVectorClock,
+    });
+
+    await this.save(updatedMeta);
+  }
+
+  /**
    * Gets the metamodel or throws an error if not ready
    */
   private _getMetaModelOrThrow<MT extends ModelBase>(
