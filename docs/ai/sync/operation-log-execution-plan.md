@@ -39,7 +39,7 @@ The Operation Log sync system provides per-entity conflict detection with semant
 | **Conflict Service** | `conflict-resolution.service.ts:51-54`    | TODO: Revert/remove local ops on "remote wins"                        | Potential state inconsistency                                  |
 | **Dependency Retry** | `operation-applier.service.ts:20-21`      | TODO: Queue + retry for missing hard deps                             | Subtasks orphaned if parent arrives later                      |
 | **Smart Resolution** | `operation-log-sync.service.ts:278`       | TODO: `suggestResolution` always returns 'manual'                     | No auto-merge for trivial conflicts                            |
-| **Action Whitelist** | `action-whitelist.ts`                     | Only 9 blacklisted actions                                            | Need explicit whitelist per entity type                        |
+| **Action Blacklist** | `action-whitelist.ts`                     | Only 9 blacklisted actions                                            | UI actions might leak into operation log                       |
 | **Effect Guards**    | `operation-log.effects.ts`                | No replay guard flag                                                  | Side effects (notifications, analytics) may fire during replay |
 | **Error Recovery**   | `operation-log.effects.ts:77-80`          | Commented out rollback                                                | Optimistic updates not recoverable                             |
 | **Testing**          | `*.spec.ts`                               | Only 1 spec file (multi-tab)                                          | No coverage for sync, compaction, hydration                    |
@@ -113,22 +113,24 @@ async hydrateStore(): Promise<void> {
 - [ ] Notification effects don't fire during hydration
 - [ ] Unit test verifies flag state transitions
 
-#### 1.2 Complete Action Whitelist
+#### 1.2 Refine Action Blacklist
 
 **File to modify:** `src/app/core/persistence/operation-log/action-whitelist.ts`
 
 **Implementation:**
 
 - Audit all NgRx actions in `src/app/features/*/store/*.actions.ts`
-- Create explicit whitelist map: `Map<ActionType, EntityType>`
-- Update effect to use whitelist instead of blacklist
+- Identify transient, UI-only, or non-persistent actions that are missing from `BLACKLISTED_ACTION_TYPES`.
+- Add comments or categorization to the blacklist for clarity.
+- **Note:** We use a blacklist approach because most actions should be persisted.
 
-**Deliverable:** Complete mapping of ~50-100 action types to entity types
+**Deliverable:** Comprehensive blacklist of non-persistent actions.
 
 **Acceptance Criteria:**
 
-- [ ] Every persistent action has explicit entity type mapping
-- [ ] Unit test verifies all feature actions are categorized
+- [ ] Audit completed for all feature modules
+- [ ] Confirmed that only persistent state changes are allowed through
+- [ ] Unit test ensures known UI actions are blacklisted
 
 #### 1.3 Error Recovery for Optimistic Updates
 
@@ -634,7 +636,7 @@ PFLog.metric('oplog_sync_complete', {
 
 ```
 src/app/core/persistence/operation-log/
-- action-whitelist.ts              # Action → Entity mapping
+- action-whitelist.ts              # List of excluded actions
 - conflict-resolution.service.ts   # Conflict UI and resolution
 - dependency-resolver.service.ts   # Dep extraction and checking
 - lock.service.ts                  # Cross-tab locking
@@ -689,3 +691,9 @@ enum VectorClockComparison {
 ```
 
 The operation log stores the vector clock state _after_ each operation, enabling precise conflict detection at the entity level.
+
+---
+
+## 7. Related Documents
+
+- [Architecture Overview](./operation-log-architecture.md) - High-level system design and components
