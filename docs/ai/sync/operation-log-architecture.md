@@ -595,15 +595,18 @@ function detectConflict(localOp: Operation, remoteOp: Operation): boolean {
 }
 ```
 
-## C.3 Not Implemented Yet
+## C.3 Detailed Architecture
 
-Server sync is **future work**. Current status:
+Server sync is **future work**. For the complete server sync architecture including:
 
-- [ ] Server API design
-- [ ] Per-op sync tracking
-- [ ] Sync-aware compaction
-- [ ] Conflict resolution UI
-- [ ] Entity-level merge strategies
+- REST API and WebSocket protocol design
+- Conflict detection algorithms (vector clock comparison)
+- Entity-level merge strategies per model type
+- Sync-aware compaction rules
+- Offline handling and recovery
+- Migration path from legacy sync
+
+See: **[Server Sync Architecture](./server-sync-architecture.md)**
 
 ---
 
@@ -667,3 +670,4 @@ src/app/pfapi/
 
 - [Execution Plan](./operation-log-execution-plan.md) - Implementation tasks
 - [PFAPI Architecture](./pfapi-sync-persistence-architecture.md) - Legacy sync system
+- [Server Sync Architecture](./server-sync-architecture.md) - Future server-based sync (Part C)
