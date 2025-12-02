@@ -22,6 +22,7 @@ export type EntityType =
   | 'TASK_REPEAT_CFG'
   | 'ISSUE_PROVIDER'
   | 'MIGRATION'
+  | 'RECOVERY' // For disaster recovery imports
   | 'ALL'; // For full state imports (sync, backup)
 
 export interface Operation {

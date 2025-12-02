@@ -4,13 +4,18 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { convertOpToAction } from './operation-converter.util';
 import { OperationLogMigrationService } from './operation-log-migration.service';
+import {
+  CURRENT_SCHEMA_VERSION,
+  MigratableStateCache,
+  SchemaMigrationService,
+} from './schema-migration.service';
 import { PFLog } from '../../log';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { Operation, OpType } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 
-const CURRENT_SCHEMA_VERSION = 1;
+type StateCache = MigratableStateCache;
 
 /**
  * Handles the hydration (loading) of the application state from the operation log
@@ -24,59 +29,232 @@ export class OperationLogHydratorService {
   private store = inject(Store);
   private opLogStore = inject(OperationLogStoreService);
   private migrationService = inject(OperationLogMigrationService);
+  private schemaMigrationService = inject(SchemaMigrationService);
   private pfapiService = inject(PfapiService);
 
   async hydrateStore(): Promise<void> {
     PFLog.normal('OperationLogHydratorService: Starting hydration...');
-    // 1. Load snapshot
-    let snapshot = await this.opLogStore.loadStateCache();
 
-    if (!snapshot) {
-      PFLog.normal(
-        'OperationLogHydratorService: No snapshot found. Checking for migration...',
-      );
-      // Fresh install or migration - no snapshot exists
-      await this.migrationService.checkAndMigrate();
-      // Try loading again after potential migration
-      snapshot = await this.opLogStore.loadStateCache();
+    try {
+      // 1. Load snapshot
+      let snapshot = await this.opLogStore.loadStateCache();
+
+      if (!snapshot) {
+        PFLog.normal(
+          'OperationLogHydratorService: No snapshot found. Checking for migration...',
+        );
+        // Fresh install or migration - no snapshot exists
+        await this.migrationService.checkAndMigrate();
+        // Try loading again after potential migration
+        snapshot = await this.opLogStore.loadStateCache();
+      }
+
+      // 2. Run schema migration if needed
+      if (snapshot && this.schemaMigrationService.needsMigration(snapshot)) {
+        PFLog.normal('OperationLogHydratorService: Running schema migration...');
+        snapshot = this.schemaMigrationService.migrateIfNeeded(snapshot);
+        // Save migrated snapshot
+        await this.opLogStore.saveStateCache(snapshot);
+        PFLog.normal('OperationLogHydratorService: Schema migration complete.');
+      }
+
+      // 3. Validate snapshot if it exists
+      if (snapshot && !this._isValidSnapshot(snapshot)) {
+        PFLog.warn(
+          'OperationLogHydratorService: Snapshot is invalid/corrupted. Attempting recovery...',
+        );
+        await this._attemptRecovery();
+        return;
+      }
+
+      if (snapshot) {
+        PFLog.normal('OperationLogHydratorService: Snapshot found. Hydrating state...', {
+          lastAppliedOpSeq: snapshot.lastAppliedOpSeq,
+        });
+        // 3. Hydrate NgRx with snapshot
+        // We cast state to any because AllSyncModels type is complex and we trust the cache
+        this.store.dispatch(loadAllData({ appDataComplete: snapshot.state as any }));
+
+        // 4. Replay tail operations
+        const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
+        PFLog.normal(
+          `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
+        );
+
+        for (const entry of tailOps) {
+          const action = convertOpToAction(entry.op);
+          this.store.dispatch(action);
+        }
+        PFLog.normal('OperationLogHydratorService: Hydration complete.');
+      } else {
+        PFLog.warn(
+          'OperationLogHydratorService: No snapshot found. Replaying all operations from start.',
+        );
+        // No snapshot means we might be in a fresh install state or post-migration-check with no legacy data.
+        // We must replay ALL operations from the beginning of the log.
+        const allOps = await this.opLogStore.getOpsAfterSeq(0);
+
+        if (allOps.length === 0) {
+          // Fresh install - no data at all
+          PFLog.normal(
+            'OperationLogHydratorService: Fresh install detected. No data to load.',
+          );
+          return;
+        }
+
+        PFLog.normal(
+          `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
+        );
+
+        for (const entry of allOps) {
+          const action = convertOpToAction(entry.op);
+          this.store.dispatch(action);
+        }
+        PFLog.normal('OperationLogHydratorService: Full replay complete.');
+      }
+    } catch (e) {
+      PFLog.err('OperationLogHydratorService: Error during hydration', e);
+      await this._attemptRecovery();
+    }
+  }
+
+  /**
+   * Validates that a snapshot has the expected structure and data.
+   */
+  private _isValidSnapshot(snapshot: StateCache): boolean {
+    // Check required properties exist
+    if (!snapshot.state || typeof snapshot.lastAppliedOpSeq !== 'number') {
+      return false;
     }
 
-    if (snapshot) {
-      PFLog.normal('OperationLogHydratorService: Snapshot found. Hydrating state...', {
-        lastAppliedOpSeq: snapshot.lastAppliedOpSeq,
-      });
-      // 2. Hydrate NgRx with snapshot
-      // We cast state to any because AllSyncModels type is complex and we trust the cache
-      this.store.dispatch(loadAllData({ appDataComplete: snapshot.state as any }));
+    // Check state is an object with expected structure
+    const state = snapshot.state as Record<string, unknown>;
+    if (typeof state !== 'object' || state === null) {
+      return false;
+    }
 
-      // 3. Replay tail operations
-      const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
-      PFLog.normal(
-        `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
-      );
-
-      for (const entry of tailOps) {
-        const action = convertOpToAction(entry.op);
-        this.store.dispatch(action);
+    // Check for at least some core models (task, project, globalConfig)
+    // These should always exist even if empty
+    const coreModels = ['task', 'project', 'globalConfig'];
+    for (const model of coreModels) {
+      if (!(model in state)) {
+        PFLog.warn(
+          `OperationLogHydratorService: Missing core model in snapshot: ${model}`,
+        );
+        return false;
       }
-      PFLog.normal('OperationLogHydratorService: Hydration complete.');
-    } else {
+    }
+
+    return true;
+  }
+
+  /**
+   * Attempts to recover from a corrupted or missing SUP_OPS database.
+   * Recovery strategy:
+   * 1. Try to load data from legacy 'pf' database (ModelCtrl caches)
+   * 2. If found, run genesis migration with that data
+   * 3. If no legacy data, log error (user will need to sync or restore from backup)
+   */
+  private async _attemptRecovery(): Promise<void> {
+    PFLog.normal('OperationLogHydratorService: Attempting disaster recovery...');
+
+    try {
+      // 1. Try to load from legacy 'pf' database
+      const legacyData = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
+
+      // Check if legacy data has any actual content
+      const hasData = this._hasUsableData(legacyData);
+
+      if (hasData) {
+        PFLog.normal(
+          'OperationLogHydratorService: Found data in legacy database. Recovering...',
+        );
+        await this._recoverFromLegacyData(legacyData);
+        return;
+      }
+
+      // 2. No legacy data found - check if sync provider is available
       PFLog.warn(
-        'OperationLogHydratorService: No snapshot found. Replaying all operations from start.',
-      );
-      // No snapshot means we might be in a fresh install state or post-migration-check with no legacy data.
-      // We must replay ALL operations from the beginning of the log.
-      const allOps = await this.opLogStore.getOpsAfterSeq(0);
-      PFLog.normal(
-        `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
+        'OperationLogHydratorService: No legacy data found. ' +
+          'If you have sync enabled, please trigger a sync to restore your data. ' +
+          'Otherwise, you may need to restore from a backup.',
       );
 
-      for (const entry of allOps) {
-        const action = convertOpToAction(entry.op);
-        this.store.dispatch(action);
-      }
-      PFLog.normal('OperationLogHydratorService: Full replay complete.');
+      // Dispatch empty state so app can at least start
+      // User can then sync or import a backup
+    } catch (e) {
+      PFLog.err('OperationLogHydratorService: Recovery failed', e);
+      // App will start with empty state
+      // User can sync or restore from backup
     }
+  }
+
+  /**
+   * Checks if the data has any usable content (not just empty/default state).
+   */
+  private _hasUsableData(data: Record<string, unknown>): boolean {
+    // Check if there are any tasks (the most important data)
+    const taskState = data['task'] as { ids?: string[] } | undefined;
+    if (taskState?.ids && taskState.ids.length > 0) {
+      return true;
+    }
+
+    // Check if there are any projects beyond the default
+    const projectState = data['project'] as { ids?: string[] } | undefined;
+    if (projectState?.ids && projectState.ids.length > 1) {
+      return true;
+    }
+
+    // Check if there's any configuration that suggests user has used the app
+    const globalConfig = data['globalConfig'] as Record<string, unknown> | undefined;
+    if (globalConfig && Object.keys(globalConfig).length > 0) {
+      // Has some configuration - might be worth recovering
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Recovers from legacy data by creating a new genesis snapshot.
+   */
+  private async _recoverFromLegacyData(
+    legacyData: Record<string, unknown>,
+  ): Promise<void> {
+    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+
+    // Create recovery operation
+    const recoveryOp: Operation = {
+      id: uuidv7(),
+      actionType: '[Recovery] Data Recovery Import',
+      opType: OpType.Batch,
+      entityType: 'RECOVERY',
+      entityId: '*',
+      payload: legacyData,
+      clientId: clientId,
+      vectorClock: { [clientId]: 1 },
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+
+    // Write recovery operation
+    await this.opLogStore.append(recoveryOp);
+
+    // Create state cache
+    const lastSeq = await this.opLogStore.getLastSeq();
+    await this.opLogStore.saveStateCache({
+      state: legacyData,
+      lastAppliedOpSeq: lastSeq,
+      vectorClock: recoveryOp.vectorClock,
+      compactedAt: Date.now(),
+    });
+
+    // Dispatch to NgRx
+    this.store.dispatch(loadAllData({ appDataComplete: legacyData as any }));
+
+    PFLog.normal(
+      'OperationLogHydratorService: Recovery complete. Data restored from legacy database.',
+    );
   }
 
   /**

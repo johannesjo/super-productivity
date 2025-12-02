@@ -21,6 +21,7 @@ interface OpLogDB extends DBSchema {
       lastAppliedOpSeq: number;
       vectorClock: VectorClock;
       compactedAt: number;
+      schemaVersion?: number;
     };
   };
 }
@@ -190,6 +191,7 @@ export class OperationLogStoreService {
     lastAppliedOpSeq: number;
     vectorClock: VectorClock;
     compactedAt: number;
+    schemaVersion?: number;
   }): Promise<void> {
     await this._ensureInit();
     await this.db.put('state_cache', {
@@ -203,6 +205,7 @@ export class OperationLogStoreService {
     lastAppliedOpSeq: number;
     vectorClock: VectorClock;
     compactedAt: number;
+    schemaVersion?: number;
   } | null> {
     await this._ensureInit();
     const cache = await this.db.get('state_cache', 'current');
