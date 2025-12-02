@@ -4,6 +4,7 @@ import {
   Component,
   computed,
   forwardRef,
+  HostBinding,
   inject,
   input,
   OnDestroy,
@@ -16,7 +17,13 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
+import {
+  CdkDrag,
+  CdkDragDrop,
+  CdkDragMove,
+  CdkDragStart,
+  CdkDropList,
+} from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -77,8 +84,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _taskDragDropService = inject(TaskDragDropService);
   dropListService = inject(DropListService);
 
-  private _isShiftPressed = false;
-
   tasks = input<TaskWithSubTasks[]>([]);
   isHideDone = input(false);
   isHideAll = input(false);
@@ -119,36 +124,20 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   readonly dropList = viewChild(CdkDropList);
 
+  @HostBinding('class.isSubTaskList') get isSubTaskListClass(): boolean {
+    return this.isSubTaskList();
+  }
+
   T: typeof T = T;
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
-
-    // Listen for Shift key to allow promotion
-    window.addEventListener('keydown', this._handleKeyDown);
-    window.addEventListener('keyup', this._handleKeyUp);
   }
 
   ngOnDestroy(): void {
     this.dropListService.unregisterDropList(this.dropList()!);
     this._scheduleExternalDragService.setActiveTask(null);
-
-    // Remove Shift key listeners
-    window.removeEventListener('keydown', this._handleKeyDown);
-    window.removeEventListener('keyup', this._handleKeyUp);
   }
-
-  private _handleKeyDown = (event: KeyboardEvent): void => {
-    if (event.key === 'Shift') {
-      this._isShiftPressed = true;
-    }
-  };
-
-  private _handleKeyUp = (event: KeyboardEvent): void => {
-    if (event.key === 'Shift') {
-      this._isShiftPressed = false;
-    }
-  };
 
   trackByFn(i: number, task: Task): string {
     return task.id;
@@ -160,31 +149,46 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   onDragEnded(): void {
     this._scheduleExternalDragService.setActiveTask(null);
+    this.dropListService.setPromotionMode(false);
+  }
+
+  // TODO maybe throttle
+  onDragMoved(event: CdkDragMove<TaskWithSubTasks>, task: TaskWithSubTasks): void {
+    if (task.parentId) {
+      const subLists = this.dropListService.getSubLists();
+      const { x, y } = event.pointerPosition;
+
+      const isOverSubList = subLists.some((list) => {
+        const rect = list.element.nativeElement.getBoundingClientRect();
+        return x >= rect.left && x <= rect.right && y >= rect.top && y <= rect.bottom;
+      });
+
+      if (isOverSubList) {
+        this.dropListService.setPromotionMode(false);
+      } else {
+        this.dropListService.setPromotionMode(true);
+      }
+    }
   }
 
   enterPredicate = (drag: CdkDrag, drop: CdkDropList): boolean => {
+    const isPromotionMode = this.dropListService.isPromotionMode$.getValue();
+    if (isPromotionMode && this.listId() === 'SUB') {
+      return false;
+    }
+
     const task = drag.data;
     const sourceData = drag.dropContainer?.data;
     const targetData = drop.data;
 
     // Safety check
     if (!sourceData || !targetData) {
-      console.warn('[ENTER PREDICATE] Missing data', { sourceData, targetData });
       return false;
     }
 
     const sourceModelId = sourceData.listModelId;
     const targetModelId = targetData.listModelId;
     const isSubtask = !!task.parentId;
-
-    console.log('[ENTER PREDICATE DEBUG]', {
-      taskId: task.id,
-      isSubtask,
-      sourceModelId,
-      targetModelId,
-      listId: this.listId(),
-      isShiftPressed: this._isShiftPressed,
-    });
 
     // Block OVERDUE and LATER_TODAY
     if (targetModelId === 'OVERDUE' || targetModelId === 'LATER_TODAY') {
@@ -194,8 +198,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     // KEY LOGIC: If dragging a subtask FROM its own subtask list
     if (isSubtask && sourceModelId === task.parentId) {
       // If Shift is pressed, allow promotion to parent lists
-      if (this._isShiftPressed && PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-        console.log('[ENTER PREDICATE DEBUG] Shift pressed - ALLOW PROMOTION');
+      if (isPromotionMode && PARENT_ALLOWED_LISTS.includes(targetModelId as string)) {
         return true;
       }
 
@@ -207,13 +210,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     // For subtask lists: allow subtasks
     if (this.listId() === 'SUB') {
-      console.log('[ENTER PREDICATE DEBUG] SUB list - allow subtasks');
       return isSubtask;
     }
 
     // For parent lists: allow all tasks
-    if (PARENT_ALLOWED_LISTS.includes(targetModelId)) {
-      console.log('[ENTER PREDICATE DEBUG] PARENT list - allow all');
+    if (PARENT_ALLOWED_LISTS.includes(targetModelId as string)) {
       return true;
     }
 
@@ -234,7 +235,6 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
     // Safety check
     if (!srcListData || !targetListData) {
-      console.error('[DROP] Missing data', { srcListData, targetListData });
       return;
     }
 
