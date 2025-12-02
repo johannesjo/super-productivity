@@ -490,6 +490,8 @@ TASK_REPEAT_CFG → PROJECT (soft: orphan if missing)
 
 ### 9.1 Replay Guard
 
+> **⚠️ NOT IMPLEMENTED:** The `ReplayGuardService` does not exist. This section describes the intended design.
+
 Prevents side effects (notifications, analytics) during hydration/sync:
 
 ```typescript
@@ -497,18 +499,64 @@ Prevents side effects (notifications, analytics) during hydration/sync:
 if (this.replayGuard.isReplaying()) return;
 ```
 
+**Required Scope:** The replay guard MUST be active during ALL operation replay scenarios:
+
+| Entry Point                  | Location                               | Status         |
+| ---------------------------- | -------------------------------------- | -------------- |
+| Startup hydration            | `operation-log-hydrator.service.ts:22` | ❌ Not guarded |
+| Remote op application        | `operation-log-sync.service.ts:223`    | ❌ Not guarded |
+| Conflict resolution apply    | `conflict-resolution.service.ts:48`    | ❌ Not guarded |
+| Dependency retry application | `dependency-resolver.service.ts`       | ❌ Not guarded |
+| Multi-tab broadcast receive  | `multi-tab-coordinator.service.ts`     | ❌ Not guarded |
+
+**Effects that MUST check the guard:**
+
+- Notification scheduling
+- Analytics tracking
+- External API calls (Jira, GitHub, etc.)
+- Electron tray updates
+- Reminder scheduling
+- Any effect with external side effects
+
 ### 9.2 Action Filtering
+
+> **⚠️ FILE NAMING BUG:** The file `action-whitelist.ts` exports `BLACKLISTED_ACTION_TYPES`. This is confusing and should be renamed to `action-blacklist.ts`.
 
 We use a **Blacklist** approach. By default, all actions are persisted unless explicitly excluded. This ensures that new features are persisted by default, but requires care to exclude transient UI state.
 
 ```typescript
+// File: action-whitelist.ts (should be renamed to action-blacklist.ts)
 // Blacklisted actions are NOT persisted
-BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
+export const BLACKLISTED_ACTION_TYPES: Set<string> = new Set([
   '[App] Set Current Worklog Task',
   '[Layout] Toggle Sidebar',
-  // ...
+  '[Layout] Show AddTaskBar',
+  '[Layout] Hide AddTaskBar',
+  '[Focus Mode] Enter Focus Mode',
+  '[Focus Mode] Exit Focus Mode',
+  '[Task] SetCurrentTask',
+  '[Task] SetSelectedTask',
+  '[Task] UnsetCurrentTask',
+  '[Task] Update Task Ui',
+  '[Task] Toggle Show Sub Tasks',
+  // ... only 11 actions currently blacklisted!
 ]);
 ```
+
+**Risk:** Using a blacklist means any new UI feature that dispatches an action will be persisted unless manually added to the list. Developers will forget, causing:
+
+- Op log bloat with UI state changes
+- Replay crashes if actions depend on transient DOM state
+
+**Recommendation:** Consider switching to a **Whitelist** approach using `PersistentActionMeta.isPersistent` (already exists but underused).
+
+**Actions likely missing from blacklist:**
+
+- All `[Worklog]` UI state actions
+- `[Pomodoro]` transient session state (vs. config)
+- Focus session transient state
+- Selection states across features
+- Any action with `Ui` or `UI` in the name
 
 ### 9.3 Cross-Tab Locking
 
@@ -522,7 +570,23 @@ await this.acquireFallbackLock(lockName, callback);
 
 ### 9.4 Vector Clock Pruning
 
-After 30 days, prune device entries from vector clocks (implemented in `limitVectorClockSize`).
+> **⚠️ DOCS vs CODE MISMATCH:** Documentation says "After 30 days", but actual code uses **count > 50** (no time-based logic).
+
+**Actual Implementation** (`vector-clock.ts:326, 343-379`):
+
+```typescript
+const MAX_VECTOR_CLOCK_SIZE = 50;
+
+export const limitVectorClockSize = (clock, currentClientId) => {
+  if (entries.length <= MAX_VECTOR_CLOCK_SIZE) return clock;
+  // Sorts by value (descending), keeps top 50 most active
+  // NO time-based logic exists!
+};
+```
+
+**Risk:** A team with 55 devices will have device #51 pruned even if it was active yesterday. When that device syncs, its ops may be misclassified as new rather than concurrent, causing false conflicts or duplicate data.
+
+**Required Fix:** Implement time-based pruning (30 days) as documented, with count limit as fallback only.
 
 ---
 
@@ -539,15 +603,34 @@ After 30 days, prune device entries from vector clocks (implemented in `limitVec
 
 ## 11. Feature Flag
 
+> **⚠️ NOT IMPLEMENTED:** The `useOperationLogSync` flag does NOT exist in `SyncConfig` or anywhere in the codebase. This section describes the intended design.
+
 ```typescript
-// In SyncConfig
+// INTENDED - NOT YET IN SyncConfig
 useOperationLogSync?: boolean; // Default: false
 
 // When enabled:
-// - Local File Sync uses operation log
-// - WebDAV/Dropbox continue using legacy LWW
-// - Legacy sync runs as backup for all providers
+// - Op log captures all persistent actions
+// - SaveToDbEffects is disabled
+// - Future server providers would use op log sync
+
+// When disabled:
+// - SaveToDbEffects writes to 'pf' database (normal legacy behavior)
+// - Op log features are completely disabled
 ```
+
+### 11.1 Persistence Matrix (MUST BE DEFINED)
+
+| Feature Flag      | SaveToDbEffects | Op Log Effects | 'pf' DB    | SUP_OPS    | Sync Source |
+| ----------------- | --------------- | -------------- | ---------- | ---------- | ----------- |
+| `false` (default) | ✅ ENABLED      | ❌ DISABLED    | ✅ Current | ❌ Empty   | 'pf' DB     |
+| `true`            | ❌ DISABLED     | ✅ ENABLED     | ⚠️ Stale   | ✅ Current | NgRx Store  |
+
+**Current State (BROKEN):** SaveToDbEffects is disabled at BRANCH level regardless of flag, so:
+
+- Flag doesn't exist
+- 'pf' DB is always stale
+- SUP_OPS is written but sync still reads from stale 'pf' DB
 
 ---
 
@@ -710,11 +793,13 @@ useOperationLogSync?: boolean; // Default: false
 | --- | -------------------------------------------- | ------------------------------------------------------- | ----------------------------------------------- | ----------- |
 | 1   | **Legacy sync uploads stale data**           | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | `getAllSyncModelData()` reads stale `ModelCtrl` | 🔴 CRITICAL |
 | 2   | **SaveToDbEffects disabled at branch level** | NO persistence when feature flag is OFF                 | `save-to-db.effects.ts` (entire body commented) | 🔴 CRITICAL |
-| 3   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | `sync.service.ts:102-110`                       | 🔴 CRITICAL |
-| 4   | **Compaction reads stale cache**             | Data loss when compaction runs                          | `operation-log-compaction.service.ts:23`        | 🔴 CRITICAL |
-| 5   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | `operation-applier.service.ts:44`               | 🟠 HIGH     |
-| 6   | **Compaction never triggers**                | Op log grows unbounded                                  | No triggers exist                               | 🟠 HIGH     |
-| 7   | **Replay guard missing**                     | Side effects fire during hydration                      | `replay-guard.service.ts` doesn't exist         | 🟠 HIGH     |
+| 3   | **Feature flag doesn't exist**               | Can't control op-log vs legacy behavior                 | `SyncConfig` missing `useOperationLogSync`      | 🔴 CRITICAL |
+| 4   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | `sync.service.ts:102-110`                       | 🔴 CRITICAL |
+| 5   | **Compaction reads stale cache**             | Data loss when compaction runs                          | `operation-log-compaction.service.ts:23`        | 🔴 CRITICAL |
+| 6   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | `operation-applier.service.ts:44`               | 🟠 HIGH     |
+| 7   | **Compaction never triggers**                | Op log grows unbounded                                  | No triggers exist                               | 🟠 HIGH     |
+| 8   | **Replay guard missing**                     | Side effects fire during hydration                      | `replay-guard.service.ts` doesn't exist         | 🟠 HIGH     |
+| 9   | **Per-entity conflict resolution missing**   | All conflicts get single global resolution              | `conflict-resolution.service.ts:37`             | 🟠 HIGH     |
 
 ### Complete ✅
 

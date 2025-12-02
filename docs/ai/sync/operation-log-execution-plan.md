@@ -27,15 +27,16 @@ We evaluated both approaches. Per-entity delta sync was attempted but proved com
 
 **Before ANY further development**, these critical blockers must be fixed:
 
-| #   | Blocker                                      | Impact                                                  | Effort |
-| --- | -------------------------------------------- | ------------------------------------------------------- | ------ |
-| 1   | **Legacy sync uploads stale data**           | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | Medium |
-| 2   | **SaveToDbEffects disabled at branch level** | NO persistence when feature flag is OFF                 | Small  |
-| 3   | **Provider gating missing**                  | Op-log sync runs for ALL providers                      | Small  |
-| 4   | **Compaction reads stale cache**             | Data loss when compaction runs                          | Small  |
-| 5   | **Dependency ops silently dropped**          | Subtasks arriving before parents are LOST               | Medium |
+| #   | Blocker                                        | Impact                                                  | Phase | Effort |
+| --- | ---------------------------------------------- | ------------------------------------------------------- | ----- | ------ |
+| 1   | **Legacy sync uploads stale data**             | ALL WebDAV/Dropbox/LocalFileSync users lose recent work | 0.1   | Medium |
+| 2   | **Feature flag `useOperationLogSync` missing** | Can't control op-log vs legacy behavior                 | 0.2   | Small  |
+| 3   | **SaveToDbEffects disabled at branch level**   | NO persistence when feature flag is OFF                 | 0.2.5 | Small  |
+| 4   | **Provider gating missing**                    | Op-log sync runs for ALL providers                      | 0.3   | Small  |
+| 5   | **Compaction reads stale cache**               | Data loss when compaction runs                          | 0.4   | Small  |
+| 6   | **Dependency ops silently dropped**            | Subtasks arriving before parents are LOST               | 0.5   | Medium |
 
-> **Note:** LocalFileSync uses the same legacy LWW sync approach as WebDAV/Dropbox. All three sync to a single `main.json` file. Op-log sync for LocalFileSync is planned but not yet implemented.
+> **Note:** LocalFileSync uses the same legacy LWW sync approach as WebDAV/Dropbox. All three sync to a single `main.json` file. Op-log sync is reserved for future server-based providers only.
 
 This plan outlines **Phase 0 (critical blockers)** + **5 phases** to bring the system to production-ready status.
 
@@ -344,7 +345,42 @@ flushToModelCtrl$ = createEffect(
 - [ ] User creates task → syncs → other device sees task
 - [ ] Integration test verifies state consistency
 
-#### 0.2 Gate SaveToDbEffects by Feature Flag
+#### 0.2 Create Feature Flag `useOperationLogSync`
+
+**Files to modify:**
+
+- `src/app/features/config/global-config.model.ts`
+- `src/app/features/config/default-global-config.const.ts`
+
+**Problem:**
+
+- Feature flag `useOperationLogSync` does NOT exist anywhere in code
+- Documentation references it, but `SyncConfig` doesn't have this property
+- Cannot control op-log vs legacy behavior
+
+**Fix:**
+
+```typescript
+// global-config.model.ts - add to SyncConfig interface
+export interface SyncConfig {
+  // ... existing fields ...
+  useOperationLogSync?: boolean; // Default: false
+}
+
+// default-global-config.const.ts - add default value
+sync: {
+  // ... existing defaults ...
+  useOperationLogSync: false,
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] `SyncConfig` interface has `useOperationLogSync?: boolean`
+- [ ] Default value is `false`
+- [ ] Property can be read via `GlobalConfigService.sync$`
+
+#### 0.2.5 Gate SaveToDbEffects by Feature Flag
 
 **File to modify:** `src/app/root-store/shared/save-to-db.effects.ts`
 
@@ -1142,8 +1178,10 @@ Add as **Phase 1.4** (after 1.1-1.3) since model changes are inevitable and migr
 - [ ] **0.1 Stale Data:** User creates task → WebDAV sync → other device downloads → task appears
 - [ ] **0.1 Stale Data:** User creates task → Dropbox sync → other device downloads → task appears
 - [ ] **0.1 Stale Data:** User creates task → LocalFileSync → other device downloads → task appears
-- [ ] **0.2 Feature Flag:** With flag OFF, user data persists to IndexedDB after app restart
-- [ ] **0.2 Feature Flag:** With flag ON, SaveToDbEffects doesn't run
+- [ ] **0.2 Feature Flag:** `SyncConfig.useOperationLogSync` property exists with default `false`
+- [ ] **0.2 Feature Flag:** Property readable via `GlobalConfigService.sync$`
+- [ ] **0.2.5 SaveToDbEffects:** With flag OFF, user data persists to IndexedDB after app restart
+- [ ] **0.2.5 SaveToDbEffects:** With flag ON, SaveToDbEffects doesn't run
 - [ ] **0.3 Provider Gating:** WebDAV sync does NOT call op-log methods
 - [ ] **0.3 Provider Gating:** Dropbox sync does NOT call op-log methods
 - [ ] **0.3 Provider Gating:** LocalFileSync does NOT call op-log methods (uses legacy)
@@ -1194,7 +1232,8 @@ Add as **Phase 1.4** (after 1.1-1.3) since model changes are inevitable and migr
 | Risk                                           | Likelihood | Impact   | Mitigation                                                            |
 | ---------------------------------------------- | ---------- | -------- | --------------------------------------------------------------------- |
 | **Legacy sync uploads stale data**             | **100%**   | Critical | Phase 0.1 - Read from NgRx store instead of stale ModelCtrl cache     |
-| **SaveToDbEffects disabled for ALL users**     | **100%**   | Critical | Phase 0.2 - Gate disable by feature flag                              |
+| **Feature flag doesn't exist in code**         | **100%**   | Critical | Phase 0.2 - Add `useOperationLogSync` to SyncConfig                   |
+| **SaveToDbEffects disabled for ALL users**     | **100%**   | Critical | Phase 0.2.5 - Gate disable by feature flag                            |
 | **Op-log sync runs for unsupported providers** | High       | High     | Phase 0.3 - Add provider gating check                                 |
 | **Compaction snapshots stale data**            | High       | Critical | Phase 0.4 - Read from NgRx store                                      |
 | **Dependency ops silently dropped**            | High       | High     | Phase 0.5 - Add retry queue                                           |
