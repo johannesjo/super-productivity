@@ -782,7 +782,7 @@ Compressed: <binary compressed data>
       ↓ (if encryption enabled)
 Encrypted: <AES encrypted data>
       ↓
-Prefixed: "pf_" + <base64 encoded data>
+Prefixed: "pf_" + <cross_model_version> + "__" + <base64 encoded data>
 ```
 
 The `pf_` prefix indicates the data has been processed and needs decryption/decompression.
