@@ -124,3 +124,107 @@ export interface FileDownloadResponse extends FileRevResponse {
   /** The file content as a string */
   dataStr: string;
 }
+
+// ===== Operation Sync Types =====
+
+/**
+ * Operation structure for server sync
+ */
+export interface SyncOperation {
+  id: string;
+  clientId: string;
+  actionType: string;
+  opType: string;
+  entityType: string;
+  entityId?: string;
+  payload: unknown;
+  vectorClock: Record<string, number>;
+  timestamp: number;
+  schemaVersion: number;
+}
+
+/**
+ * Server operation with server-assigned sequence
+ */
+export interface ServerSyncOperation {
+  serverSeq: number;
+  op: SyncOperation;
+  receivedAt: number;
+}
+
+/**
+ * Result of uploading a single operation
+ */
+export interface OpUploadResult {
+  opId: string;
+  accepted: boolean;
+  serverSeq?: number;
+  error?: string;
+}
+
+/**
+ * Response from uploading operations
+ */
+export interface OpUploadResponse {
+  results: OpUploadResult[];
+  newOps?: ServerSyncOperation[];
+  latestSeq: number;
+}
+
+/**
+ * Response from downloading operations
+ */
+export interface OpDownloadResponse {
+  ops: ServerSyncOperation[];
+  hasMore: boolean;
+  latestSeq: number;
+}
+
+/**
+ * Extended sync provider interface with operation sync support
+ */
+export interface OperationSyncCapable {
+  /**
+   * Whether this provider supports direct operation sync (vs file-based)
+   */
+  supportsOperationSync: boolean;
+
+  /**
+   * Upload operations to the server
+   * @param ops Operations to upload
+   * @param clientId Client identifier
+   * @param lastKnownServerSeq Last known server sequence (for piggyback download)
+   */
+  uploadOps(
+    ops: SyncOperation[],
+    clientId: string,
+    lastKnownServerSeq?: number,
+  ): Promise<OpUploadResponse>;
+
+  /**
+   * Download operations from the server
+   * @param sinceSeq Download ops with serverSeq > sinceSeq
+   * @param excludeClient Exclude ops from this client
+   * @param limit Maximum number of ops to return
+   */
+  downloadOps(
+    sinceSeq: number,
+    excludeClient?: string,
+    limit?: number,
+  ): Promise<OpDownloadResponse>;
+
+  /**
+   * Get the last known server sequence for this user
+   */
+  getLastServerSeq(): Promise<number>;
+
+  /**
+   * Update the last known server sequence
+   */
+  setLastServerSeq(seq: number): Promise<void>;
+
+  /**
+   * Acknowledge that operations up to lastSeq have been received
+   */
+  acknowledgeOps(clientId: string, lastSeq: number): Promise<void>;
+}
