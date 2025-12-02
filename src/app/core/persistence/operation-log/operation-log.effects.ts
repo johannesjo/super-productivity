@@ -10,8 +10,11 @@ import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { MultiTabCoordinatorService } from './multi-tab-coordinator.service';
+import { OperationLogCompactionService } from './operation-log-compaction.service';
+import { PFLog } from '../../log';
 
 const CURRENT_SCHEMA_VERSION = 1;
+const COMPACTION_THRESHOLD = 500;
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -24,11 +27,13 @@ const CURRENT_SCHEMA_VERSION = 1;
 @Injectable()
 export class OperationLogEffects {
   private clientId?: string;
+  private opsSinceCompaction = 0;
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
   private pfapiService = inject(PfapiService);
   private multiTabCoordinator = inject(MultiTabCoordinatorService);
+  private compactionService = inject(OperationLogCompactionService);
 
   persistOperation$ = createEffect(
     () =>
@@ -70,13 +75,39 @@ export class OperationLogEffects {
           schemaVersion: CURRENT_SCHEMA_VERSION,
         };
 
+        // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);
+
+        // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
+        // This ensures legacy sync (WebDAV/Dropbox) can detect local changes
+        await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
+
+        // 3. Broadcast to other tabs
         this.multiTabCoordinator.notifyNewOperation(op);
       });
+
+      // 4. Check if compaction is needed
+      this.opsSinceCompaction++;
+      if (this.opsSinceCompaction >= COMPACTION_THRESHOLD) {
+        this.opsSinceCompaction = 0;
+        // Trigger compaction asynchronously (don't block write operation)
+        this.triggerCompaction();
+      }
     } catch (e) {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);
       // this.notifyUserAndTriggerRollback(action);
     }
+  }
+
+  /**
+   * Triggers compaction asynchronously without blocking the main operation.
+   * This is called after COMPACTION_THRESHOLD operations have been written.
+   */
+  private triggerCompaction(): void {
+    PFLog.normal('OperationLogEffects: Triggering compaction...');
+    this.compactionService.compact().catch((e) => {
+      PFLog.err('OperationLogEffects: Compaction failed', e);
+    });
   }
 }

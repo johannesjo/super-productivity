@@ -49,4 +49,16 @@ export class DataInitService {
     // Hydrate from Operation Log (which handles migration from legacy if needed)
     await this._operationLogHydratorService.hydrateStore();
   }
+
+  /**
+   * Re-initialize the app after a remote sync download.
+   * This uses hydrateFromRemoteSync() which:
+   * 1. Reads the synced data from 'pf' database
+   * 2. Persists it to SUP_OPS as a SYNC_IMPORT operation
+   * 3. Creates a snapshot for crash safety
+   * 4. Updates NgRx with the synced data
+   */
+  async reInitFromRemoteSync(): Promise<void> {
+    await this._operationLogHydratorService.hydrateFromRemoteSync();
+  }
 }

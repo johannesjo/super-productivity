@@ -323,6 +323,26 @@ export class Pfapi<const MD extends ModelCfgs> {
     return allData as AllSyncModels<MD>;
   }
 
+  /**
+   * Read all sync model data directly from ModelCtrl caches ('pf' database).
+   * This bypasses the NgRx delegate and is used after sync download to get
+   * the newly synced data before it's loaded into NgRx.
+   */
+  async getAllSyncModelDataFromModelCtrls(): Promise<AllSyncModels<MD>> {
+    PFLog.normal(`${this.getAllSyncModelDataFromModelCtrls.name}()`);
+    const modelIds = Object.keys(this.m);
+    const promises = modelIds.map((modelId) => {
+      const modelCtrl = this.m[modelId];
+      return modelCtrl.load();
+    });
+
+    const allDataArr = await Promise.all(promises);
+    return allDataArr.reduce((acc, cur, idx) => {
+      acc[modelIds[idx]] = cur;
+      return acc;
+    }, {}) as AllSyncModels<MD>;
+  }
+
   async loadCompleteBackup(isSkipValidityCheck = false): Promise<CompleteBackup<MD>> {
     const d = await this.getAllSyncModelData(isSkipValidityCheck);
     const meta = await this.metaModel.load();

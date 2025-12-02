@@ -7,6 +7,8 @@ export enum OpType {
   Delete = 'DEL',
   Move = 'MOV', // For list reordering
   Batch = 'BATCH', // For bulk operations (import, mass update)
+  SyncImport = 'SYNC_IMPORT', // Full state import from remote sync
+  BackupImport = 'BACKUP_IMPORT', // Full state import from backup file
 }
 
 export type EntityType =
@@ -19,7 +21,8 @@ export type EntityType =
   | 'WORK_CONTEXT'
   | 'TASK_REPEAT_CFG'
   | 'ISSUE_PROVIDER'
-  | 'MIGRATION';
+  | 'MIGRATION'
+  | 'ALL'; // For full state imports (sync, backup)
 
 export interface Operation {
   // IDENTITY
