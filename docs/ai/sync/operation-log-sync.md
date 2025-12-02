@@ -21,7 +21,7 @@
 
 ### 1.3. Key Benefits Over Current Implementation
 
-The current sync system (see [`sync.service.ts`](../../src/app/pfapi/api/sync/sync.service.ts)) already uses vector clocks for conflict detection at the whole-data level. This proposal extends that to per-operation granularity:
+The current sync system (see [`sync.service.ts`](src/app/pfapi/api/sync/sync.service.ts)) already uses vector clocks for conflict detection at the whole-data level. This proposal extends that to per-operation granularity:
 
 ```
 Current:  [Device A State] vs [Device B State] → Conflict if concurrent
@@ -34,7 +34,7 @@ Proposed: [Op1, Op2, Op3]  vs [Op4, Op5]       → Merge non-conflicting, flag c
 
 ### 2.1. The Vector Clock (Existing)
 
-Already implemented in [`vector-clock.ts`](../../src/app/pfapi/api/util/vector-clock.ts). No changes needed.
+Already implemented in [`vector-clock.ts`](src/app/pfapi/api/util/vector-clock.ts). No changes needed.
 
 ```typescript
 // Map of Client ID -> Counter
@@ -942,12 +942,12 @@ Phase 4: Remove snapshot sync (operation log is primary)
 
 ### 6.2. pfapi Integration Points
 
-| Existing Component                                                       | Integration Approach          |
-| ------------------------------------------------------------------------ | ----------------------------- |
-| [`MetaModelCtrl`](../../src/app/pfapi/api/model-ctrl/meta-model-ctrl.ts) | Add op log sequence to meta   |
-| [`ModelSyncService`](../../src/app/pfapi/api/sync/model-sync.service.ts) | Keep for snapshot backup      |
-| [`SyncService.sync()`](../../src/app/pfapi/api/sync/sync.service.ts:91)  | Add operation exchange phase  |
-| Vector Clock utilities                                                   | Reuse existing implementation |
+| Existing Component                                                      | Integration Approach          |
+| ----------------------------------------------------------------------- | ----------------------------- |
+| [`MetaModelCtrl`](src/app/pfapi/api/model-ctrl/meta-model-ctrl.ts)      | Add op log sequence to meta   |
+| [`ModelSyncService`](src/app/pfapi/api/sync/model-sync.service.ts)      | Keep for snapshot backup      |
+| [`SyncService.sync()`](../../src/app/pfapi/api/sync/sync.service.ts:91) | Add operation exchange phase  |
+| Vector Clock utilities                                                  | Reuse existing implementation |
 
 ### 6.3. Remote Storage Format
 
@@ -1291,5 +1291,5 @@ describe('Operation Log E2E', () => {
 - [CRDT Primer](https://crdt.tech/)
 - [Vector Clocks Explained](https://en.wikipedia.org/wiki/Vector_clock)
 - [Web Locks API](https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API)
-- [Existing Vector Clock Implementation](../../src/app/pfapi/api/util/vector-clock.ts)
-- [Current Sync Service](../../src/app/pfapi/api/sync/sync.service.ts)
+- [Existing Vector Clock Implementation](src/app/pfapi/api/util/vector-clock.ts)
+- [Current Sync Service](src/app/pfapi/api/sync/sync.service.ts)
