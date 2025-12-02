@@ -1,6 +1,6 @@
 # Operation Log Architecture
 
-**Status:** Implementation in Progress (~70% complete)
+**Status:** Part A/B Complete (100%), Part C Not Started
 **Branch:** `feat/operation-logs`
 **Last Updated:** December 2, 2025
 
@@ -621,18 +621,19 @@ See: **[Server Sync Architecture](./server-sync-architecture.md)**
 - Web Locks + localStorage fallback
 - Genesis migration from legacy data
 - `PfapiStoreDelegateService` (reads NgRx for sync)
+- META_MODEL vector clock update (B.1) - ops now update META_MODEL
+- Sync download persistence (B.2) - downloads written to SUP_OPS via `hydrateFromRemoteSync()`
+- Non-NgRx model migration (B.4) - all models (reminders, archives, plugins) now in NgRx
+- Compaction triggers (A.2) - triggered every 500 operations
+- Action blacklist audit (A.3) - expanded to 39 UI-only actions
+- Disaster recovery (A.6) - recovery from legacy 'pf' database on corruption
+- Schema migration service (A.7) - infrastructure for state migrations
 
 ## Needs Implementation 🚧
 
-| Component                      | Part | Issue                             | Priority     |
-| ------------------------------ | ---- | --------------------------------- | ------------ |
-| META_MODEL vector clock update | B    | Ops don't update META_MODEL       | **CRITICAL** |
-| Sync download persistence      | B    | Downloads not written to SUP_OPS  | **CRITICAL** |
-| Non-NgRx model migration       | B    | reminders, archives bypass op-log | **HIGH**     |
-| Compaction triggers            | A    | Logic exists, never invoked       | HIGH         |
-| Action blacklist audit         | A    | Only ~10 actions, needs audit     | MEDIUM       |
-| Disaster recovery              | A    | No recovery path implemented      | MEDIUM       |
-| Schema migration service       | A    | No migration infrastructure       | MEDIUM       |
+| Component                  | Part | Issue | Priority |
+| -------------------------- | ---- | ----- | -------- |
+| (None - Part A/B complete) |      |       |          |
 
 ## Not Started ❌
 
