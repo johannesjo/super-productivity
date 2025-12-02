@@ -1,21 +1,31 @@
 import { SyncProviderId } from '../../../pfapi.const';
 import { WebdavBaseProvider } from '../webdav/webdav-base-provider';
 import { WebdavPrivateCfg } from '../webdav/webdav.model';
+import {
+  OperationSyncCapable,
+  SyncOperation,
+  OpUploadResponse,
+  OpDownloadResponse,
+} from '../../sync-provider.interface';
+import { SyncLog } from '../../../../../core/log';
+
+const LAST_SERVER_SEQ_KEY = 'super_sync_last_server_seq';
 
 /**
  * SuperSync provider - a WebDAV-based sync provider with enhanced capabilities.
  *
- * Current features (Phase 0):
- * - Standard WebDAV synchronization
- *
- * Planned features:
- * - Phase 1: Safe sync operations with transaction support
- * - Phase 2: Incremental updates for faster sync
+ * Features:
+ * - Standard WebDAV synchronization for file-based sync
+ * - Operation-based sync via REST API (OperationSyncCapable)
  *
  * @see docs/sync/SYNC-PLAN.md for full roadmap
  */
-export class SuperSyncProvider extends WebdavBaseProvider<SyncProviderId.SuperSync> {
+export class SuperSyncProvider
+  extends WebdavBaseProvider<SyncProviderId.SuperSync>
+  implements OperationSyncCapable
+{
   readonly id = SyncProviderId.SuperSync;
+  readonly supportsOperationSync = true;
 
   protected override get logLabel(): string {
     return 'SuperSyncProvider';
@@ -40,6 +50,105 @@ export class SuperSyncProvider extends WebdavBaseProvider<SyncProviderId.SuperSy
     return parts.join('/').replace(/\/+/g, '/');
   }
 
-  // Future: Add SuperSync-specific methods here
-  // Example: beginTransaction(), commitTransaction(), etc.
+  // === Operation Sync Implementation ===
+
+  async uploadOps(
+    ops: SyncOperation[],
+    clientId: string,
+    lastKnownServerSeq?: number,
+  ): Promise<OpUploadResponse> {
+    SyncLog.debug(this.logLabel, 'uploadOps', { opsCount: ops.length, clientId });
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<OpUploadResponse>(cfg, '/api/sync/ops', {
+      method: 'POST',
+      body: JSON.stringify({
+        ops,
+        clientId,
+        lastKnownServerSeq,
+      }),
+    });
+
+    return response;
+  }
+
+  async downloadOps(
+    sinceSeq: number,
+    excludeClient?: string,
+    limit?: number,
+  ): Promise<OpDownloadResponse> {
+    SyncLog.debug(this.logLabel, 'downloadOps', { sinceSeq, excludeClient, limit });
+    const cfg = await this._cfgOrError();
+
+    const params = new URLSearchParams({ sinceSeq: String(sinceSeq) });
+    if (excludeClient) {
+      params.set('excludeClient', excludeClient);
+    }
+    if (limit !== undefined) {
+      params.set('limit', String(limit));
+    }
+
+    const response = await this._fetchApi<OpDownloadResponse>(
+      cfg,
+      `/api/sync/ops?${params.toString()}`,
+      { method: 'GET' },
+    );
+
+    return response;
+  }
+
+  async getLastServerSeq(): Promise<number> {
+    const stored = localStorage.getItem(LAST_SERVER_SEQ_KEY);
+    return stored ? parseInt(stored, 10) : 0;
+  }
+
+  async setLastServerSeq(seq: number): Promise<void> {
+    localStorage.setItem(LAST_SERVER_SEQ_KEY, String(seq));
+  }
+
+  async acknowledgeOps(clientId: string, lastSeq: number): Promise<void> {
+    SyncLog.debug(this.logLabel, 'acknowledgeOps', { clientId, lastSeq });
+    const cfg = await this._cfgOrError();
+
+    await this._fetchApi<{ acknowledged: boolean }>(
+      cfg,
+      `/api/sync/devices/${encodeURIComponent(clientId)}/ack`,
+      {
+        method: 'POST',
+        body: JSON.stringify({ lastSeq }),
+      },
+    );
+  }
+
+  // === Helper Methods ===
+
+  private async _fetchApi<T>(
+    cfg: WebdavPrivateCfg,
+    path: string,
+    options: RequestInit,
+  ): Promise<T> {
+    const baseUrl = cfg.baseUrl.replace(/\/$/, '');
+    const url = `${baseUrl}${path}`;
+
+    // Create Basic auth token from username/password
+    const authToken = btoa(`${cfg.userName}:${cfg.password}`);
+
+    const headers = new Headers(options.headers as HeadersInit);
+    headers.set('Content-Type', 'application/json');
+    headers.set('Authorization', `Bearer ${authToken}`);
+
+    const response = await fetch(url, {
+      ...options,
+      headers,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      throw new Error(
+        `SuperSync API error: ${response.status} ${response.statusText} - ${errorText}`,
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
 }

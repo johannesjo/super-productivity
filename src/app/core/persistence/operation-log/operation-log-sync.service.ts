@@ -19,7 +19,11 @@ import { PFLog } from '../../log';
 // import { chunkArray } from '../../../util/chunk-array'; // Removed as not used
 import { chunkArray } from '../../../util/chunk-array';
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
-import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
+import {
+  SyncProviderServiceInterface,
+  OperationSyncCapable,
+  SyncOperation,
+} from '../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
 import { OperationApplierService } from './operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
@@ -27,6 +31,18 @@ import { ConflictResolutionService } from './conflict-resolution.service';
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
 const MANIFEST_VERSION = 1;
+
+/**
+ * Type guard to check if a provider supports operation-based sync
+ */
+const isOperationSyncCapable = (
+  provider: SyncProviderServiceInterface<SyncProviderId>,
+): provider is SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable => {
+  return (
+    'supportsOperationSync' in provider &&
+    (provider as unknown as OperationSyncCapable).supportsOperationSync === true
+  );
+};
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -88,7 +104,112 @@ export class OperationLogSyncService {
       return;
     }
 
-    PFLog.normal('OperationLogSyncService: Uploading pending operations...');
+    // Use operation sync if supported
+    if (isOperationSyncCapable(syncProvider)) {
+      await this._uploadPendingOpsViaApi(syncProvider);
+      return;
+    }
+
+    // Fall back to file-based sync
+    await this._uploadPendingOpsViaFiles(syncProvider);
+  }
+
+  private async _uploadPendingOpsViaApi(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
+  ): Promise<void> {
+    PFLog.normal('OperationLogSyncService: Uploading pending operations via API...');
+    await this.lockService.request('sp_op_log_upload', async () => {
+      const pendingOps = await this.opLogStore.getUnsynced();
+
+      if (pendingOps.length === 0) {
+        PFLog.normal('OperationLogSyncService: No pending operations to upload.');
+        return;
+      }
+
+      // Get the clientId from the first operation
+      const clientId = pendingOps[0].op.clientId;
+      const lastKnownServerSeq = await syncProvider.getLastServerSeq();
+
+      // Convert to SyncOperation format
+      const syncOps: SyncOperation[] = pendingOps.map((entry) => ({
+        id: entry.op.id,
+        clientId: entry.op.clientId,
+        actionType: entry.op.actionType,
+        opType: entry.op.opType,
+        entityType: entry.op.entityType,
+        entityId: entry.op.entityId,
+        payload: entry.op.payload,
+        vectorClock: entry.op.vectorClock,
+        timestamp: entry.op.timestamp,
+        schemaVersion: entry.op.schemaVersion,
+      }));
+
+      // Upload in batches (API supports up to 100 ops per request)
+      const MAX_OPS_PER_REQUEST = 100;
+      const chunks = chunkArray(syncOps, MAX_OPS_PER_REQUEST);
+      const correspondingEntries = chunkArray(pendingOps, MAX_OPS_PER_REQUEST);
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i];
+        const entries = correspondingEntries[i];
+
+        PFLog.normal(
+          `OperationLogSyncService: Uploading batch of ${chunk.length} ops via API`,
+        );
+
+        const response = await syncProvider.uploadOps(
+          chunk,
+          clientId,
+          lastKnownServerSeq,
+        );
+
+        // Mark successfully accepted ops as synced
+        const acceptedSeqs = response.results
+          .filter((r) => r.accepted)
+          .map((r) => {
+            const entry = entries.find((e) => e.op.id === r.opId);
+            return entry?.seq;
+          })
+          .filter((seq): seq is number => seq !== undefined);
+
+        if (acceptedSeqs.length > 0) {
+          await this.opLogStore.markSynced(acceptedSeqs);
+        }
+
+        // Update last known server seq
+        await syncProvider.setLastServerSeq(response.latestSeq);
+
+        // Process any piggybacked new ops from other clients
+        if (response.newOps && response.newOps.length > 0) {
+          PFLog.normal(
+            `OperationLogSyncService: Received ${response.newOps.length} piggybacked ops`,
+          );
+          const piggybackedOps = response.newOps.map((serverOp) =>
+            this._syncOpToOperation(serverOp.op),
+          );
+          await this._processRemoteOps(piggybackedOps, syncProvider);
+        }
+
+        // Log any rejected operations
+        const rejected = response.results.filter((r) => !r.accepted);
+        if (rejected.length > 0) {
+          PFLog.warn(
+            `OperationLogSyncService: ${rejected.length} ops were rejected`,
+            rejected,
+          );
+        }
+      }
+
+      PFLog.normal(
+        `OperationLogSyncService: Successfully uploaded ${pendingOps.length} ops via API.`,
+      );
+    });
+  }
+
+  private async _uploadPendingOpsViaFiles(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    PFLog.normal('OperationLogSyncService: Uploading pending operations via files...');
     await this.lockService.request('sp_op_log_upload', async () => {
       const pendingOps = await this.opLogStore.getUnsynced();
 
@@ -148,7 +269,73 @@ export class OperationLogSyncService {
       return;
     }
 
-    PFLog.normal('OperationLogSyncService: Downloading remote operations...');
+    // Use operation sync if supported
+    if (isOperationSyncCapable(syncProvider)) {
+      await this._downloadRemoteOpsViaApi(syncProvider);
+      return;
+    }
+
+    // Fall back to file-based sync
+    await this._downloadRemoteOpsViaFiles(syncProvider);
+  }
+
+  private async _downloadRemoteOpsViaApi(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
+  ): Promise<void> {
+    PFLog.normal('OperationLogSyncService: Downloading remote operations via API...');
+    await this.lockService.request('sp_op_log_download', async () => {
+      const lastServerSeq = await syncProvider.getLastServerSeq();
+      const appliedOpIds = await this.opLogStore.getAppliedOpIds();
+
+      // Download ops in pages
+      let hasMore = true;
+      let sinceSeq = lastServerSeq;
+      let totalProcessed = 0;
+
+      while (hasMore) {
+        const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
+
+        if (response.ops.length === 0) {
+          break;
+        }
+
+        // Convert SyncOperations to Operations, filtering already applied
+        const newOps = response.ops
+          .filter((serverOp) => !appliedOpIds.has(serverOp.op.id))
+          .map((serverOp) => this._syncOpToOperation(serverOp.op));
+
+        if (newOps.length > 0) {
+          await this._processRemoteOps(newOps, syncProvider);
+          totalProcessed += newOps.length;
+        }
+
+        // Update cursors
+        sinceSeq = response.ops[response.ops.length - 1].serverSeq;
+        hasMore = response.hasMore;
+
+        // Update the last known server seq
+        await syncProvider.setLastServerSeq(response.latestSeq);
+      }
+
+      // Acknowledge that we've processed ops up to the latest seq
+      if (totalProcessed > 0) {
+        const pendingOps = await this.opLogStore.getUnsynced();
+        const clientId = pendingOps[0]?.op.clientId;
+        if (clientId) {
+          await syncProvider.acknowledgeOps(clientId, sinceSeq);
+        }
+      }
+
+      PFLog.normal(
+        `OperationLogSyncService: Downloaded and processed ${totalProcessed} remote operations via API.`,
+      );
+    });
+  }
+
+  private async _downloadRemoteOpsViaFiles(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    PFLog.normal('OperationLogSyncService: Downloading remote operations via files...');
     await this.lockService.request('sp_op_log_download', async () => {
       const remoteManifest = await this._loadRemoteManifest(syncProvider);
       let remoteOpFileNames: string[] = remoteManifest.operationFiles;
@@ -232,9 +419,55 @@ export class OperationLogSyncService {
       }
 
       PFLog.normal(
-        `OperationLogSyncService: Downloaded and processed remote operations.`,
+        `OperationLogSyncService: Downloaded and processed remote operations via files.`,
       );
     });
+  }
+
+  /**
+   * Process remote operations: detect conflicts and apply non-conflicting ones
+   */
+  private async _processRemoteOps(
+    remoteOps: Operation[],
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
+    const { nonConflicting, conflicts } = await this.detectConflicts(
+      remoteOps,
+      appliedFrontierByEntity,
+    );
+
+    // Apply non-conflicting ops
+    if (nonConflicting.length > 0) {
+      await this.operationApplier.applyOperations(nonConflicting);
+    }
+
+    // Handle conflicts
+    if (conflicts.length > 0) {
+      PFLog.warn(
+        `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
+        conflicts,
+      );
+      await this.conflictResolutionService.presentConflicts(conflicts);
+    }
+  }
+
+  /**
+   * Convert SyncOperation to Operation (handles type differences)
+   */
+  private _syncOpToOperation(syncOp: SyncOperation): Operation {
+    return {
+      id: syncOp.id,
+      clientId: syncOp.clientId,
+      actionType: syncOp.actionType,
+      opType: syncOp.opType as Operation['opType'],
+      entityType: syncOp.entityType as Operation['entityType'],
+      entityId: syncOp.entityId,
+      payload: syncOp.payload,
+      vectorClock: syncOp.vectorClock,
+      timestamp: syncOp.timestamp,
+      schemaVersion: syncOp.schemaVersion,
+    };
   }
 
   async detectConflicts(
