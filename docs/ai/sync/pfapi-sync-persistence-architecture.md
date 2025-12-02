@@ -147,6 +147,8 @@ All data is stored in a single IndexedDB database with one object store. Each en
 
 ### IndexedDB Keys
 
+#### System Keys
+
 | Key                   | Content                   | Description                                             |
 | --------------------- | ------------------------- | ------------------------------------------------------- |
 | `__meta_`             | `LocalMeta`               | Sync metadata (vector clock, revMap, timestamps)        |
@@ -155,15 +157,31 @@ All data is stored in a single IndexedDB database with one object store. Each en
 | `__sp_cred_WebDAV`    | `WebdavPrivateCfg`        | WebDAV credentials                                      |
 | `__sp_cred_LocalFile` | `LocalFileSyncPrivateCfg` | Local file sync config                                  |
 | `__TMP_BACKUP`        | `AllSyncModels`           | Temporary backup during imports                         |
-| `task`                | `TaskState`               | Tasks data                                              |
-| `project`             | `ProjectState`            | Projects data                                           |
-| `tag`                 | `TagState`                | Tags data                                               |
-| `globalConfig`        | `GlobalConfigState`       | User settings                                           |
-| `note`                | `NoteState`               | Notes data                                              |
-| `timeTracking`        | `TimeTrackingState`       | Time tracking records                                   |
-| `archiveYoung`        | `ArchiveModel`            | Recent archived tasks                                   |
-| `archiveOld`          | `ArchiveModel`            | Old archived tasks                                      |
-| ...                   | ...                       | (other models)                                          |
+
+#### Model Keys (all defined in `pfapi-config.ts`)
+
+| Key              | Content               | Main File | Description                   |
+| ---------------- | --------------------- | --------- | ----------------------------- |
+| `task`           | `TaskState`           | Yes       | Tasks data (EntityState)      |
+| `timeTracking`   | `TimeTrackingState`   | Yes       | Time tracking records         |
+| `project`        | `ProjectState`        | Yes       | Projects (EntityState)        |
+| `tag`            | `TagState`            | Yes       | Tags (EntityState)            |
+| `simpleCounter`  | `SimpleCounterState`  | Yes       | Simple counters (EntityState) |
+| `note`           | `NoteState`           | Yes       | Notes (EntityState)           |
+| `taskRepeatCfg`  | `TaskRepeatCfgState`  | Yes       | Recurring task configs        |
+| `reminders`      | `Reminder[]`          | Yes       | Reminder array                |
+| `planner`        | `PlannerState`        | Yes       | Planner state                 |
+| `boards`         | `BoardsState`         | Yes       | Kanban boards                 |
+| `menuTree`       | `MenuTreeState`       | No        | Menu structure                |
+| `globalConfig`   | `GlobalConfigState`   | No        | User settings                 |
+| `issueProvider`  | `IssueProviderState`  | No        | Issue tracker configs         |
+| `metric`         | `MetricState`         | No        | Metrics (EntityState)         |
+| `improvement`    | `ImprovementState`    | No        | Improvements (EntityState)    |
+| `obstruction`    | `ObstructionState`    | No        | Obstructions (EntityState)    |
+| `pluginUserData` | `PluginUserDataState` | No        | Plugin user data              |
+| `pluginMetadata` | `PluginMetaDataState` | No        | Plugin metadata               |
+| `archiveYoung`   | `ArchiveModel`        | No        | Recent archived tasks         |
+| `archiveOld`     | `ArchiveModel`        | No        | Old archived tasks            |
 
 ### Local Storage Diagram
 
@@ -206,19 +224,25 @@ if (modelCfg.validate) {
   }
 }
 
-// 2. Metadata is updated (if requested)
-if (isUpdateRevAndLastUpdate) {
-  // Increment vector clock
-  vectorClock = incrementVectorClock(vectorClock, clientId);
-  // Update revMap with timestamp
+// 2. Metadata is updated (if requested via isUpdateRevAndLastUpdate)
+// Always:
+vectorClock = incrementVectorClock(vectorClock, clientId);
+lastUpdate = Date.now();
+
+// Only for NON-main-file models (isMainFileModel: false):
+if (!modelCfg.isMainFileModel) {
   revMap[modelId] = Date.now().toString();
-  // Update lastUpdate timestamp
-  lastUpdate = Date.now();
 }
+// Main file models are tracked via mainModelData in the meta file, not revMap
 
 // 3. Data is saved to IndexedDB
 await db.put('main', data, modelId); // e.g., key='task', value=TaskState
 ```
+
+**Important distinction:**
+
+- **Main file models** (`isMainFileModel: true`): Vector clock is incremented, but `revMap` is NOT updated. These models are embedded in `mainModelData` within the meta file.
+- **Separate model files** (`isMainFileModel: false`): Both vector clock and `revMap` are updated. The `revMap` entry tracks the revision of the individual remote file.
 
 ### 2. Model Control Layer
 
@@ -357,15 +381,30 @@ function getSyncStatusFromMetaFiles(remote: RemoteMeta, local: LocalMeta) {
 }
 ```
 
-The algorithm:
+The algorithm (simplified - actual implementation has more nuances):
 
-1. If local or remote has no data, sync in that direction
-2. If either lacks a vector clock, return `Conflict`
-3. Compare vector clocks:
-   - `EQUAL` -> `InSync`
-   - `LESS_THAN` -> `UpdateLocal`
-   - `GREATER_THAN` -> `UpdateRemote`
-   - `CONCURRENT` -> `Conflict`
+1. **Empty data checks:**
+
+   - If remote has no data (`isRemoteDataEmpty`), return `UpdateRemoteAll`
+   - If local has no data (`isLocalDataEmpty`), return `UpdateLocalAll`
+
+2. **Vector clock validation:**
+
+   - If either local or remote lacks a vector clock, return `Conflict` with reason `NoLastSync`
+   - Both `vectorClock` and `lastSyncedVectorClock` must be present
+
+3. **Change detection using `hasVectorClockChanges`:**
+
+   - Local changes: Compare current `vectorClock` vs `lastSyncedVectorClock`
+   - Remote changes: Compare remote `vectorClock` vs local `lastSyncedVectorClock`
+
+4. **Sync status determination:**
+   - No local changes + no remote changes -> `InSync`
+   - Local changes only -> `UpdateRemote`
+   - Remote changes only -> `UpdateLocal`
+   - Both have changes -> `Conflict` with reason `BothNewerLastSync`
+
+**Note:** The actual implementation also handles edge cases like minimal-update bootstrap scenarios and validates that clocks are properly initialized.
 
 ### 5. Sync Providers
 
@@ -398,9 +437,9 @@ interface SyncProviderServiceInterface<PID extends SyncProviderId> {
 | Provider      | Description                 | Force Upload | Max Concurrent |
 | ------------- | --------------------------- | ------------ | -------------- |
 | **Dropbox**   | OAuth2 PKCE authentication  | Yes          | 4              |
-| **WebDAV**    | Nextcloud, ownCloud, etc.   | No           | varies         |
+| **WebDAV**    | Nextcloud, ownCloud, etc.   | No           | 10             |
 | **LocalFile** | Electron/Android filesystem | No           | 10             |
-| **SuperSync** | Custom sync implementation  | -            | -              |
+| **SuperSync** | WebDAV-based custom sync    | No           | 10             |
 
 ### 6. Data Encryption & Compression
 
@@ -420,14 +459,20 @@ Data format prefix: `pf_` indicates processed data.
 Handles data schema evolution:
 
 - Checks version on app startup
-- Applies cross-model migrations sequentially
-- Supports both forward and backward migrations
+- Applies cross-model migrations sequentially in order
+- **Only supports forward (upgrade) migrations** - throws `CanNotMigrateMajorDownError` if data version is higher than code version (major version mismatch)
 
 ```typescript
 interface CrossModelMigrations {
   [version: number]: (fullData) => transformedData;
 }
 ```
+
+**Migration behavior:**
+
+- If `dataVersion === codeVersion`: No migration needed
+- If `dataVersion < codeVersion`: Run all migrations from `dataVersion` to `codeVersion`
+- If `dataVersion > codeVersion` (major version differs): Throws error - downgrade not supported
 
 Current version: `4.4` (from `pfapi-config.ts`)
 
@@ -746,34 +791,30 @@ The `pf_` prefix indicates the data has been processed and needs decryption/deco
 
 From `pfapi-config.ts`:
 
-### All Models
+| Model            | Main File | Description            |
+| ---------------- | --------- | ---------------------- |
+| `task`           | Yes       | Tasks data             |
+| `timeTracking`   | Yes       | Time tracking records  |
+| `project`        | Yes       | Projects               |
+| `tag`            | Yes       | Tags                   |
+| `simpleCounter`  | Yes       | Simple Counters        |
+| `note`           | Yes       | Notes                  |
+| `taskRepeatCfg`  | Yes       | Recurring task configs |
+| `reminders`      | Yes       | Reminders              |
+| `planner`        | Yes       | Planner data           |
+| `boards`         | Yes       | Kanban boards          |
+| `menuTree`       | No        | Menu structure         |
+| `globalConfig`   | No        | User settings          |
+| `issueProvider`  | No        | Issue tracker configs  |
+| `metric`         | No        | Metrics data           |
+| `improvement`    | No        | Metric improvements    |
+| `obstruction`    | No        | Metric obstructions    |
+| `pluginUserData` | No        | Plugin user data       |
+| `pluginMetadata` | No        | Plugin metadata        |
+| `archiveYoung`   | No        | Recent archive         |
+| `archiveOld`     | No        | Old archive            |
 
-| Model            | Main File | Has Repair | Description                   |
-| ---------------- | --------- | ---------- | ----------------------------- |
-| `task`           | Yes       | Yes        | Tasks data (EntityState)      |
-| `timeTracking`   | Yes       | No         | Time tracking records         |
-| `project`        | Yes       | Yes        | Projects (EntityState)        |
-| `tag`            | Yes       | Yes        | Tags (EntityState)            |
-| `simpleCounter`  | Yes       | Yes        | Simple counters (EntityState) |
-| `note`           | Yes       | Yes        | Notes (EntityState)           |
-| `taskRepeatCfg`  | Yes       | Yes        | Recurring task configs        |
-| `reminders`      | Yes       | No         | Reminder array                |
-| `planner`        | Yes       | No         | Planner state                 |
-| `boards`         | Yes       | No         | Kanban boards                 |
-| `menuTree`       | No        | No         | Menu structure                |
-| `globalConfig`   | No        | No         | User settings                 |
-| `issueProvider`  | No        | Yes        | Issue tracker configs         |
-| `metric`         | No        | Yes        | Metrics (EntityState)         |
-| `improvement`    | No        | Yes        | Improvements (EntityState)    |
-| `obstruction`    | No        | Yes        | Obstructions (EntityState)    |
-| `pluginUserData` | No        | No         | Plugin user data              |
-| `pluginMetadata` | No        | No         | Plugin metadata               |
-| `archiveYoung`   | No        | Yes        | Recent archived tasks         |
-| `archiveOld`     | No        | Yes        | Old archived tasks            |
-
-**Main file models** are embedded in the metadata file for faster sync of frequently-accessed data.
-
-**Repair functions** use `fixEntityStateConsistency` to fix corrupted NgRx EntityState structures.
+**Main file models** are stored in the metadata file itself for faster sync of frequently-accessed data.
 
 ## Error Handling
 
@@ -794,6 +835,7 @@ type PfapiEvents =
   | 'metaModelChange' // Metadata updated
   | 'providerChange' // Provider switched
   | 'providerReady' // Provider authenticated
+  | 'providerPrivateCfgChange' // Provider credentials updated
   | 'onBeforeUpdateLocal'; // About to download changes
 ```
 
@@ -815,4 +857,4 @@ type PfapiEvents =
 
 ## Future Considerations
 
-The system is being extended with **Operation Log Sync** for more granular synchronization at the operation level rather than full model replacement. See `operation-log-architecture.md` for details.
+The system has been extended with **Operation Log Sync** for more granular synchronization at the operation level rather than full model replacement. See `operation-log-architecture.md` for details.
