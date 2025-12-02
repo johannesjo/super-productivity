@@ -48,6 +48,7 @@ import { TaskLog } from '../../../core/log';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 import { DEFAULT_OPTIONS } from '../../task-view-customizer/types';
 import { TaskDragDropService } from '../task-drag-drop.service';
+import { throttle } from '../../../util/decorators';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -152,7 +153,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     this.dropListService.setPromotionMode(false);
   }
 
-  // TODO maybe throttle
+  @throttle(100)
   onDragMoved(event: CdkDragMove<TaskWithSubTasks>, task: TaskWithSubTasks): void {
     if (task.parentId) {
       const subLists = this.dropListService.getSubLists();
