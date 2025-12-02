@@ -570,15 +570,38 @@ useOperationLogSync?: boolean; // Default: false
 
 ### In Progress / Gaps
 
-| Component        | Gap                                        | Priority |
-| ---------------- | ------------------------------------------ | -------- |
-| Replay Guard     | No global flag to block side effects       | HIGH     |
-| Action Blacklist | Refining blacklist (auditing all actions)  | HIGH     |
-| Dependency Retry | Ops with missing deps are dropped          | HIGH     |
-| Conflict UI      | Single global resolution, no field diffs   | HIGH     |
-| Error Recovery   | Optimistic update rollback commented out   | MEDIUM   |
-| Feature Flag UI  | No settings toggle for useOperationLogSync | MEDIUM   |
-| Testing          | Only 1 spec file (multi-tab)               | MEDIUM   |
+| Component          | Gap                                            | Priority |
+| ------------------ | ---------------------------------------------- | -------- |
+| Replay Guard       | No global flag to block side effects           | HIGH     |
+| Action Blacklist   | Refining blacklist (auditing all actions)      | HIGH     |
+| Dependency Retry   | Ops with missing deps are dropped              | HIGH     |
+| Conflict UI        | Single global resolution, no field diffs       | HIGH     |
+| Provider Gating    | Op-log sync runs for ALL providers (incl. LWW) | HIGH     |
+| Compaction Source  | Snapshots stale PFAPI cache, not NgRx state    | HIGH     |
+| Compaction Trigger | Service exists but never invoked               | MEDIUM   |
+| Model Migrations   | No migration path for schema version changes   | HIGH     |
+| Error Recovery     | Optimistic update rollback commented out       | MEDIUM   |
+| Feature Flag UI    | No settings toggle for useOperationLogSync     | MEDIUM   |
+| Testing            | Only 1 spec file (multi-tab)                   | MEDIUM   |
+
+### Code Review Findings (December 2, 2025)
+
+Detailed findings from code review are documented in the [Execution Plan](./operation-log-execution-plan.md#23-detailed-code-review-findings-december-2-2025).
+
+**Summary of HIGH priority gaps:**
+
+1. **`replay-guard.service.ts`** - Does not exist. Hydration dispatches actions without blocking side effects.
+2. **`action-whitelist.ts`** - Only 9 actions blacklisted. Needs comprehensive audit of all NgRx actions.
+3. **`operation-applier.service.ts:38-44`** - Missing deps cause ops to be silently skipped with `continue`.
+4. **`conflict-resolution.service.ts:37`** - Single global resolution applied to ALL conflicts, no per-conflict choice.
+5. **`sync.service.ts:103-105`** - Provider gating NOT implemented. Op-log sync runs for ALL providers including WebDAV/Dropbox (docs say it should be skipped).
+6. **`operation-log-compaction.service.ts:23`** - Snapshots stale PFAPI cache, not NgRx state. With SaveToDbEffects disabled, snapshots may miss recent changes.
+7. **`OperationLogCompactionService`** - Never invoked. No triggers exist despite docs claiming "Every 500 ops, app close, size > 10MB".
+8. **Model Migrations** - No migration path exists. `state_cache` lacks `schemaVersion`. Hydration/sync don't check versions or transform payloads.
+
+**Open Questions:** See [Execution Plan Section 4.4](./operation-log-execution-plan.md#44-open-questions-from-code-review-december-2-2025) for decisions needed.
+
+**Model Migration Strategy:** See [Execution Plan Section 4.5](./operation-log-execution-plan.md#45-model-migration-strategy-december-2-2025) for required components and implementation plan.
 
 ---
 
