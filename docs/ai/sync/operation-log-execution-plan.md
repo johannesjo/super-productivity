@@ -2,13 +2,35 @@
 
 **Created:** December 2, 2025
 **Branch:** `feat/operation-logs`
-**Status:** Implementation in Progress
+**Status:** Implementation in Progress (~60% complete)
+**Last Updated:** December 2, 2025
 
 ---
 
 ## 1. Executive Summary
 
-The Operation Log sync system provides per-entity conflict detection with semantic merge capabilities, replacing the whole-file Last-Writer-Wins (LWW) approach. The current implementation (~800+ lines across 16 files) has a solid foundation: IndexedDB persistence, NgRx effect capture, vector clock conflict detection, multi-tab coordination, and genesis migration. Key gaps remain in **conflict resolution UX**, **dependency retry logic**, **effect guards during replay**, and **comprehensive testing**. This plan outlines 5 phases to bring the system to production-ready status.
+The Operation Log sync system provides per-entity conflict detection with semantic merge capabilities, replacing the whole-file Last-Writer-Wins (LWW) approach. The current implementation (~800+ lines across 16 files) has a solid foundation: IndexedDB persistence, NgRx effect capture, vector clock conflict detection, multi-tab coordination, and genesis migration.
+
+### 1.1 Decision: Event Sourcing vs. Per-Entity Delta
+
+**Status: ✅ DECIDED - Use Event Sourcing**
+
+We evaluated both approaches. Per-entity delta sync was attempted but proved complex due to relationship handling. Event sourcing was chosen because:
+
+1. ✅ **Disk space**: Acceptable (~1.5-2x with compaction)
+2. ✅ **Sync speed**: Faster (delta ops vs full state)
+3. ✅ **Legacy compatibility**: Maintained (WebDAV/Dropbox use legacy only)
+
+### 1.2 Critical Path
+
+**Before ANY further development**, two blockers must be fixed:
+
+| Blocker                         | Risk                                         | Effort |
+| ------------------------------- | -------------------------------------------- | ------ |
+| Provider gating not implemented | WebDAV/Dropbox users upload ops/ directories | Small  |
+| Compaction never triggered      | Disk space grows unbounded                   | Medium |
+
+This plan outlines **Phase 0 (blockers)** + **5 phases** to bring the system to production-ready status.
 
 ---
 
@@ -238,11 +260,110 @@ await this.opLogStore.saveStateCache({
 
 ## 3. Phased Implementation Plan
 
+### Phase 0: Production Blockers (MUST DO FIRST)
+
+**Objective:** Fix issues that break legacy sync or cause data loss.
+
+**Prerequisites:** None - do this before any other work.
+
+#### 0.1 Implement Provider Gating
+
+**File to modify:** `src/app/pfapi/api/sync/sync.service.ts`
+
+**Current code (broken):**
+
+```typescript
+// sync.service.ts:103-105 - runs for ALL providers!
+if (currentSyncProvider) {
+  await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+  await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+}
+```
+
+**Fix:**
+
+```typescript
+// Add helper method
+private supportsOpLogSync(provider: SyncProvider | null): boolean {
+  if (!provider) return false;
+  // WebDAV and Dropbox use legacy LWW only
+  return provider.id !== 'WebDAV' && provider.id !== 'Dropbox';
+}
+
+// Update sync() method
+if (this.supportsOpLogSync(currentSyncProvider)) {
+  await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+  await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] WebDAV sync does NOT call `uploadPendingOps` or `downloadRemoteOps`
+- [ ] Dropbox sync does NOT call op-log methods
+- [ ] Local File Sync DOES call op-log methods
+- [ ] Unit test verifies provider gating
+
+#### 0.2 Implement Compaction Triggers
+
+**Files to modify:**
+
+- `src/app/core/persistence/operation-log/operation-log.effects.ts`
+- `src/app/core/persistence/operation-log/operation-log-compaction.service.ts`
+
+**Implementation:**
+
+1. **Fix snapshot source** - read from NgRx, not stale PFAPI cache:
+
+```typescript
+// operation-log-compaction.service.ts
+// BEFORE (broken):
+const currentState = await this.pfapiService.pf.getAllSyncModelData();
+
+// AFTER (fixed):
+const currentState = await firstValueFrom(this.store.select(selectAllSyncModelData));
+```
+
+2. **Add op count trigger** in effects:
+
+```typescript
+// operation-log.effects.ts - add after writeOperation
+private opsSinceCompaction = 0;
+private readonly COMPACTION_THRESHOLD = 500;
+
+// In writeOperation success path:
+this.opsSinceCompaction++;
+if (this.opsSinceCompaction >= this.COMPACTION_THRESHOLD) {
+  await this.compactionService.compact();
+  this.opsSinceCompaction = 0;
+}
+```
+
+3. **Add app-close trigger** (optional, for safety):
+
+```typescript
+// In AppComponent or similar
+@HostListener('window:beforeunload')
+async onBeforeUnload(): Promise<void> {
+  await this.compactionService.compact();
+}
+```
+
+**Acceptance Criteria:**
+
+- [ ] Compaction runs after 500 ops
+- [ ] Snapshot contains current NgRx state (not stale PFAPI cache)
+- [ ] Old synced ops are deleted (respecting 7-day window)
+- [ ] Unsynced ops are NEVER deleted
+- [ ] Unit test verifies compaction trigger
+
+---
+
 ### Phase 1: Core Stability & Safety Guards
 
 **Objective:** Ensure replay and sync operations don't trigger unintended side effects.
 
-**Duration Estimate:** 1 week
+**Prerequisites:** Phase 0 complete.
 
 #### 1.1 Add Replay Guard Flag
 
@@ -739,48 +860,43 @@ PFLog.metric('oplog_sync_complete', {
 
 ---
 
-## 4. Critical Decisions Needed
+## 4. Critical Decisions
 
 ### 4.1 Architecture Decisions
 
-| Decision                | Options                                                         | Recommendation              | Status            |
-| ----------------------- | --------------------------------------------------------------- | --------------------------- | ----------------- |
-| Hybrid vs. Replace sync | A) Run oplog alongside legacy B) Replace legacy entirely        | A) Hybrid during rollout    | ❓ Needs approval |
-| Conflict auto-merge     | A) Always manual B) Auto for non-overlapping C) User preference | B) Auto for non-overlapping | ❓ Needs approval |
-| Compaction retention    | A) 7 days B) 14 days C) Configurable                            | A) 7 days (current)         | ✅ Decided        |
-| Offline tolerance       | How long offline before snapshot-only sync?                     | 7 days (matches compaction) | ❓ Needs approval |
+| Decision                | Options                                                         | Chosen                      | Status     |
+| ----------------------- | --------------------------------------------------------------- | --------------------------- | ---------- |
+| Event sourcing vs delta | A) Operation log B) Per-entity delta                            | A) Operation log            | ✅ Decided |
+| Hybrid vs. Replace sync | A) Run oplog alongside legacy B) Replace legacy entirely        | A) Hybrid during rollout    | ✅ Decided |
+| Conflict auto-merge     | A) Always manual B) Auto for non-overlapping C) User preference | B) Auto for non-overlapping | ✅ Decided |
+| Compaction retention    | A) 7 days B) 14 days C) Configurable                            | A) 7 days                   | ✅ Decided |
+| Offline tolerance       | How long offline before snapshot-only sync?                     | 7 days (matches compaction) | ✅ Decided |
 
 ### 4.2 UX Decisions
 
-| Decision               | Options                                                        | Recommendation            | Status            |
-| ---------------------- | -------------------------------------------------------------- | ------------------------- | ----------------- |
-| Conflict notification  | A) Modal dialog B) Non-blocking notification C) Both           | A) Modal (current)        | ❓ Needs approval |
-| Field-level resolution | A) Always available B) Advanced mode toggle C) Not implemented | B) Advanced mode toggle   | ❓ Needs approval |
-| Conflict defer         | Can user dismiss conflict dialog and resolve later?            | Yes, with badge indicator | ❓ Needs approval |
+| Decision               | Options                                                        | Chosen                    | Status     |
+| ---------------------- | -------------------------------------------------------------- | ------------------------- | ---------- |
+| Conflict notification  | A) Modal dialog B) Non-blocking notification C) Both           | A) Modal (current)        | ✅ Decided |
+| Field-level resolution | A) Always available B) Advanced mode toggle C) Not implemented | B) Advanced mode toggle   | ✅ Decided |
+| Conflict defer         | Can user dismiss conflict dialog and resolve later?            | Yes, with badge indicator | ✅ Decided |
 
 ### 4.3 Technical Decisions
 
-| Decision             | Options                                                                | Recommendation                                           | Status     |
+| Decision             | Options                                                                | Chosen                                                   | Status     |
 | -------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------- | ---------- |
 | Manifest locking     | A) Optimistic (current) B) Pessimistic (file lock) C) CRDT-style merge | A) Optimistic is sufficient                              | ✅ Decided |
 | Op file chunking     | A) 100 ops/file (current) B) Time-based C) Size-based                  | A) 100 ops/file                                          | ✅ Decided |
 | Vector clock pruning | A) Never B) After 30 days C) After device removal                      | B) After 30 days (implemented in `limitVectorClockSize`) | ✅ Decided |
 
-### 4.4 Open Questions from Code Review (December 2, 2025)
+### 4.4 Resolved Questions (December 2, 2025)
 
-These questions arise from findings 2.3.6-2.3.8 where docs and code diverge:
+These questions from code review have been resolved:
 
-| #   | Question                                                                                                                       | Options                                                                                              | Impact if Unresolved                                   |
-| --- | ------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------ |
-| 1   | Should op-log sync be provider-gated in `SyncService` before WebDAV/Dropbox users start uploading `ops/` files?                | A) Gate in SyncService B) Gate in OperationLogSyncService C) Feature flag gates all D) No gating     | WebDAV/Dropbox create orphan ops/ directories          |
-| 2   | Should compaction snapshot read from NgRx (via selector) instead of stale PFAPI caches now that `SaveToDbEffects` is disabled? | A) Read from NgRx store B) Re-enable SaveToDbEffects for cache sync C) Hybrid: sync cache on compact | Snapshots contain stale state, ops deleted prematurely |
-| 3   | Where should compaction be scheduled?                                                                                          | A) Op count hook in effects B) App shutdown hook C) Periodic timer D) Manual command E) Combination  | Unbounded log growth, slow startup, storage exhaustion |
-
-**Recommended Resolution Order:**
-
-1. **Question 1 (Provider gating):** Resolve BEFORE any users run op-log sync. Recommend Option A: add `supportsOpLogSync()` check in `SyncService.sync()` as documented.
-2. **Question 2 (Snapshot source):** Resolve BEFORE compaction is enabled. Recommend Option A: inject Store and use selector.
-3. **Question 3 (Compaction trigger):** Resolve after Questions 1-2. Recommend Option E: op count hook (500) + app close hook.
+| #   | Question                    | Decision                                       | Implementation |
+| --- | --------------------------- | ---------------------------------------------- | -------------- |
+| 1   | Provider gating location    | Gate in SyncService with `supportsOpLogSync()` | Phase 0.1      |
+| 2   | Compaction snapshot source  | Read from NgRx store via selector              | Phase 0.2      |
+| 3   | Compaction trigger location | Op count hook (500) + app close hook           | Phase 0.2      |
 
 ### 4.5 Model Migration Strategy (December 2, 2025)
 

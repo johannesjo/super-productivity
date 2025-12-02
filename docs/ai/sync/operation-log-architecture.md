@@ -1,7 +1,8 @@
 # Operation Log Sync: Architecture
 
-**Status:** Implementation in Progress
+**Status:** Implementation in Progress (~60% complete)
 **Branch:** `feat/operation-logs`
+**Last Updated:** December 2, 2025
 
 ---
 
@@ -9,19 +10,37 @@
 
 The Operation Log sync system provides per-entity conflict detection and semantic merge capabilities for sync providers that support it, while maintaining compatibility with legacy Last-Writer-Wins (LWW) sync for WebDAV/Dropbox.
 
-### Core Paradigm
+### 1.1 Why Event Sourcing?
 
-- **NgRx is the Single Source of Truth**
+We evaluated two approaches:
+
+| Approach                       | Complexity | Effort     | Result                                                 |
+| ------------------------------ | ---------- | ---------- | ------------------------------------------------------ |
+| Per-entity delta sync          | Medium     | 2-3 weeks  | Attempted - still complex due to relationship handling |
+| Operation log (event sourcing) | High       | 8-10 weeks | **Chosen** - better conflict granularity               |
+
+**Decision Rationale (December 2, 2025):**
+
+1. ✅ **Disk space**: Acceptable with compaction (snapshot + 7 days of ops ≈ 1.5-2x traditional)
+2. ✅ **Sync speed**: Faster (delta ops vs full state transfer)
+3. ✅ **Legacy compatibility**: Maintained (WebDAV/Dropbox use legacy sync only)
+
+### 1.2 Core Paradigm
+
+- **NgRx is the runtime state** (in-memory, volatile)
+- **IndexedDB (`SUP_OPS`) is the durable source of truth** (survives restarts)
 - **Persistence is a Log of Operations** (local)
 - **Sync strategy varies by provider** (remote)
 
-### Key Benefits
+> **Note:** On startup, NgRx is hydrated FROM IndexedDB. The "source of truth" for persistence is `SUP_OPS`, not NgRx.
+
+### 1.3 Key Benefits
 
 | Problem (Current)       | Solution (Operation Log)                    |
 | ----------------------- | ------------------------------------------- |
 | Last-write-wins on file | Per-operation merge with granular conflicts |
 | Full state sync         | Delta operations only                       |
-| Dual source of truth    | NgRx primary, IndexedDB derived             |
+| Dual source of truth    | SUP_OPS primary, NgRx is runtime cache      |
 | Binary conflict choice  | Automatic merge of non-conflicting ops      |
 
 ---
@@ -284,37 +303,39 @@ For comprehensive PFAPI architecture details, see [PFAPI Sync and Persistence Ar
 
 ```
 src/app/core/persistence/operation-log/
-├── operation.types.ts               # Type definitions
-├── operation-log-store.service.ts   # SUP_OPS IndexedDB persistence
-├── operation-log.effects.ts         # NgRx effect capture
-├── operation-log-hydrator.service.ts# Startup state restoration
-├── operation-log-sync.service.ts    # Remote sync (for supported providers)
-├── operation-log-compaction.service.ts # Garbage collection
-├── operation-applier.service.ts     # Apply ops to store
-├── operation-converter.util.ts      # Op ↔ Action conversion
-├── conflict-resolution.service.ts   # Conflict UI/logic
-├── dependency-resolver.service.ts   # Entity dependency handling
-├── action-whitelist.ts              # Blacklisted actions (not persisted)
-├── lock.service.ts                  # Cross-tab locking
-├── multi-tab-coordinator.service.ts # BroadcastChannel sync
-└── replay-guard.service.ts          # [PLANNED] Prevents side effects during replay
+├── operation.types.ts               # ✅ Type definitions
+├── operation-log-store.service.ts   # ✅ SUP_OPS IndexedDB persistence
+├── operation-log.effects.ts         # ✅ NgRx effect capture
+├── operation-log-hydrator.service.ts# ✅ Startup state restoration
+├── operation-log-sync.service.ts    # ⚠️ Remote sync (provider gating NOT implemented)
+├── operation-log-compaction.service.ts # ⚠️ GC exists but NEVER TRIGGERED
+├── operation-applier.service.ts     # ⚠️ Apply ops (missing retry queue)
+├── operation-converter.util.ts      # ✅ Op ↔ Action conversion
+├── conflict-resolution.service.ts   # ⚠️ Single global resolution only
+├── dependency-resolver.service.ts   # ⚠️ Extracts deps, no retry queue
+├── action-whitelist.ts              # ⚠️ Only 9 actions blacklisted
+├── lock.service.ts                  # ✅ Cross-tab locking
+├── multi-tab-coordinator.service.ts # ✅ BroadcastChannel sync
+└── replay-guard.service.ts          # ❌ DOES NOT EXIST - Must create
 ```
+
+**Legend:** ✅ Complete | ⚠️ Partial/Broken | ❌ Missing
 
 ### 6.2 Service Responsibilities
 
-| Service                         | Responsibility                                     |
-| ------------------------------- | -------------------------------------------------- |
-| `OperationLogStoreService`      | SUP_OPS IndexedDB CRUD, vector clock tracking      |
-| `OperationLogEffects`           | Capture persistent actions, write ops              |
-| `OperationLogHydratorService`   | Load snapshot + replay tail on startup             |
-| `OperationLogSyncService`       | Upload/download ops (non-WebDAV/Dropbox only)      |
-| `OperationLogCompactionService` | Create snapshots, prune old ops                    |
-| `OperationApplierService`       | Dispatch ops as actions with dependency resolution |
-| `ConflictResolutionService`     | Present conflicts to user, apply resolutions       |
-| `DependencyResolverService`     | Track entity dependencies, queue missing deps      |
-| `ReplayGuardService`            | Signal to block side effects during hydration      |
-| `LockService`                   | Web Locks API + fallback for cross-tab safety      |
-| `MultiTabCoordinatorService`    | BroadcastChannel for tab coordination              |
+| Service                         | Responsibility                                     | Status                |
+| ------------------------------- | -------------------------------------------------- | --------------------- |
+| `OperationLogStoreService`      | SUP_OPS IndexedDB CRUD, vector clock tracking      | ✅                    |
+| `OperationLogEffects`           | Capture persistent actions, write ops              | ✅                    |
+| `OperationLogHydratorService`   | Load snapshot + replay tail on startup             | ⚠️ No replay guard    |
+| `OperationLogSyncService`       | Upload/download ops (non-WebDAV/Dropbox only)      | ⚠️ No provider gating |
+| `OperationLogCompactionService` | Create snapshots, prune old ops                    | ⚠️ Never invoked      |
+| `OperationApplierService`       | Dispatch ops as actions with dependency resolution | ⚠️ Missing retry      |
+| `ConflictResolutionService`     | Present conflicts to user, apply resolutions       | ⚠️ Single resolution  |
+| `DependencyResolverService`     | Track entity dependencies, queue missing deps      | ⚠️ No queue           |
+| `ReplayGuardService`            | Signal to block side effects during hydration      | ❌ Missing            |
+| `LockService`                   | Web Locks API + fallback for cross-tab safety      | ✅                    |
+| `MultiTabCoordinatorService`    | BroadcastChannel for tab coordination              | ✅                    |
 
 ---
 
@@ -556,33 +577,44 @@ useOperationLogSync?: boolean; // Default: false
 
 ## 13. Current Implementation Status
 
-### Complete
+### Production Blockers (Must Fix First)
+
+These issues **break legacy sync compatibility** or **cause data loss**:
+
+| Blocker                 | Issue                                                       | Risk                       | Fix Location          |
+| ----------------------- | ----------------------------------------------------------- | -------------------------- | --------------------- |
+| **Provider Gating**     | Op-log sync runs for ALL providers including WebDAV/Dropbox | HIGH - breaks legacy users | `sync.service.ts:103` |
+| **Compaction Triggers** | Service exists but never invoked - log grows unbounded      | HIGH - disk exhaustion     | New effect needed     |
+
+### Complete ✅
 
 - Dual IndexedDB architecture (pf + SUP_OPS)
 - NgRx effect capture with vector clock
 - Snapshot + tail replay hydration
-- 7-day compaction with snapshot
 - Multi-tab BroadcastChannel coordination
 - Web Locks + localStorage fallback
 - Genesis migration from legacy data
 - Op → Action conversion with isRemote flag
 - Per-entity conflict detection
 
-### In Progress / Gaps
+### Partial / Broken ⚠️
 
-| Component          | Gap                                            | Priority |
-| ------------------ | ---------------------------------------------- | -------- |
-| Replay Guard       | No global flag to block side effects           | HIGH     |
-| Action Blacklist   | Refining blacklist (auditing all actions)      | HIGH     |
-| Dependency Retry   | Ops with missing deps are dropped              | HIGH     |
-| Conflict UI        | Single global resolution, no field diffs       | HIGH     |
-| Provider Gating    | Op-log sync runs for ALL providers (incl. LWW) | HIGH     |
-| Compaction Source  | Snapshots stale PFAPI cache, not NgRx state    | HIGH     |
-| Compaction Trigger | Service exists but never invoked               | MEDIUM   |
-| Model Migrations   | No migration path for schema version changes   | HIGH     |
-| Error Recovery     | Optimistic update rollback commented out       | MEDIUM   |
-| Feature Flag UI    | No settings toggle for useOperationLogSync     | MEDIUM   |
-| Testing            | Only 1 spec file (multi-tab)                   | MEDIUM   |
+| Component           | What Works    | What's Missing                           | Priority |
+| ------------------- | ------------- | ---------------------------------------- | -------- |
+| Compaction Service  | Logic exists  | Never triggered, reads stale PFAPI cache | HIGH     |
+| Dependency Resolver | Extracts deps | No retry queue - ops silently dropped    | HIGH     |
+| Conflict Resolution | Basic dialog  | Single global resolution, no field diffs | HIGH     |
+| Action Blacklist    | 9 actions     | ~140 actions unaudited                   | MEDIUM   |
+| Error Recovery      | Try/catch     | Rollback commented out                   | MEDIUM   |
+
+### Missing ❌
+
+| Component            | Description                                                 | Priority |
+| -------------------- | ----------------------------------------------------------- | -------- |
+| **Replay Guard**     | Service does not exist - side effects fire during hydration | HIGH     |
+| **Model Migrations** | No schema version in state_cache, no migration logic        | HIGH     |
+| **Feature Flag UI**  | No settings toggle for useOperationLogSync                  | MEDIUM   |
+| **Test Coverage**    | Only 1 spec file (multi-tab)                                | MEDIUM   |
 
 ### Code Review Findings (December 2, 2025)
 
