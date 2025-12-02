@@ -68,6 +68,16 @@ export class Pfapi<const MD extends ModelCfgs> {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _operationLogSyncService = inject(OperationLogSyncService); // Inject the service here
 
+  /**
+   * Delegate function to get all sync model data from an external source (e.g., NgRx store).
+   * When set, this will be used by getAllSyncModelData() instead of reading from ModelCtrl caches.
+   * This is needed when operation log sync is enabled and SaveToDbEffects is disabled,
+   * as ModelCtrl caches become stale in that case.
+   */
+  private _getAllSyncModelDataFromStoreDelegate:
+    | (() => Promise<AllSyncModels<MD>>)
+    | null = null;
+
   constructor(
     modelCfgs: MD,
     public syncProviders: SyncProviderServiceInterface<SyncProviderId>[],
@@ -250,22 +260,48 @@ export class Pfapi<const MD extends ModelCfgs> {
     this._encryptAndCompressCfg$.next(cfg);
   }
 
+  /**
+   * Sets the delegate function to get sync model data from NgRx store.
+   * This should be called by PfapiService when operation log sync is enabled.
+   * @param delegate Function that returns all sync model data from NgRx store
+   */
+  setGetAllSyncModelDataFromStoreDelegate(
+    delegate: (() => Promise<AllSyncModels<MD>>) | null,
+  ): void {
+    PFLog.normal(
+      `${this.setGetAllSyncModelDataFromStoreDelegate.name}()`,
+      delegate ? 'set' : 'cleared',
+    );
+    this._getAllSyncModelDataFromStoreDelegate = delegate;
+  }
+
   private _getAllSyncModelDataRetryCount = 0;
 
   // TODO improve naming with validity check
   async getAllSyncModelData(isSkipValidityCheck = false): Promise<AllSyncModels<MD>> {
     PFLog.normal(`${this.getAllSyncModelData.name}()`);
-    const modelIds = Object.keys(this.m);
-    const promises = modelIds.map((modelId) => {
-      const modelCtrl = this.m[modelId];
-      return modelCtrl.load();
-    });
 
-    const allDataArr = await Promise.all(promises);
-    const allData = allDataArr.reduce((acc, cur, idx) => {
-      acc[modelIds[idx]] = cur;
-      return acc;
-    }, {});
+    let allData: AllSyncModels<MD>;
+
+    // When operation log sync is enabled, use the delegate to read from NgRx store
+    // instead of ModelCtrl caches (which are stale when SaveToDbEffects is disabled)
+    if (this._getAllSyncModelDataFromStoreDelegate) {
+      PFLog.normal(`${this.getAllSyncModelData.name}(): Using NgRx store delegate`);
+      allData = await this._getAllSyncModelDataFromStoreDelegate();
+    } else {
+      // Legacy path: read from ModelCtrl caches (pf database)
+      const modelIds = Object.keys(this.m);
+      const promises = modelIds.map((modelId) => {
+        const modelCtrl = this.m[modelId];
+        return modelCtrl.load();
+      });
+
+      const allDataArr = await Promise.all(promises);
+      allData = allDataArr.reduce((acc, cur, idx) => {
+        acc[modelIds[idx]] = cur;
+        return acc;
+      }, {}) as AllSyncModels<MD>;
+    }
 
     // TODO maybe remove validation check, since we already validate on every import and save
     const validationResultIfNeeded =

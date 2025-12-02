@@ -96,19 +96,16 @@ export class SyncService<const MD extends ModelCfgs> {
         return { status: SyncStatus.NotConfigured };
       }
 
-      // --- NEW: Operation Log Sync Phase ---
-      // This will upload local pending operations and download remote operations,
-      // including conflict detection at the operation level.
+      // --- Operation Log Sync Phase ---
+      // Operation log sync is only for providers that support it.
+      // Currently ALL providers (WebDAV, Dropbox, LocalFileSync) use legacy LWW sync.
+      // Op-log sync is reserved for future server-based providers only.
       const currentSyncProvider = this._currentSyncProvider$.value;
-      if (currentSyncProvider) {
+      if (currentSyncProvider && this._supportsOpLogSync(currentSyncProvider)) {
         await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
         await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
-      } else {
-        PFLog.warn(
-          `${SyncService.L}: No active sync provider found for operation log sync.`,
-        );
       }
-      // --- END NEW ---
+      // --- END Operation Log Sync Phase ---
 
       const localMeta0 = await this._metaModelCtrl.load();
 
@@ -727,6 +724,33 @@ export class SyncService<const MD extends ModelCfgs> {
    */
   private async _isReadyForSync(): Promise<boolean> {
     return this._currentSyncProvider$.getOrError().isReady();
+  }
+
+  /**
+   * Checks if the sync provider supports operation log sync.
+   * Currently ALL providers (WebDAV, Dropbox, LocalFileSync) use legacy LWW sync.
+   * Op-log sync is reserved for future server-based providers only.
+   * @param provider The sync provider to check
+   * @returns boolean indicating if operation log sync is supported
+   */
+  private _supportsOpLogSync(
+    provider: SyncProviderServiceInterface<SyncProviderId>,
+  ): boolean {
+    // ALL current providers use legacy LWW sync with a single main.json file.
+    // Operation log sync requires a provider that can efficiently handle
+    // multiple small files (operation chunks) and is designed for future
+    // server-based providers.
+    //
+    // Provider IDs that do NOT support op-log sync:
+    // - SyncProviderId.Dropbox
+    // - SyncProviderId.WebDAV
+    // - SyncProviderId.LocalFile
+    // - SyncProviderId.SuperSync (until explicitly supported)
+    //
+    // For now, return false for ALL providers.
+    // When a server-based provider is added that supports op-log sync,
+    // add a check here: if (provider.id === SyncProviderId.FutureServer) return true;
+    return false;
   }
 
   /**
