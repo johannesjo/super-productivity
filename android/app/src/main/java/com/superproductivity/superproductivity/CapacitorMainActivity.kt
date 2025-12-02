@@ -29,6 +29,7 @@ class CapacitorMainActivity : BridgeActivity() {
     private var webViewCompatibility: WebViewCompatibilityChecker.Result? = null
     private var webViewBlocked = false
     private var pendingShareIntent: JSONObject? = null
+    private var isFrontendReady = false
 
     private val storageHelper =
         SimpleStorageHelper(this) // for scoped storage permission management on Android 10+
@@ -133,6 +134,7 @@ class CapacitorMainActivity : BridgeActivity() {
     }
 
     fun flushPendingShareIntent() {
+        isFrontendReady = true
         pendingShareIntent?.let {
             Log.d("SP_SHARE", "Flushing pending share intent: $it")
             callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", it.toString())
@@ -152,16 +154,16 @@ class CapacitorMainActivity : BridgeActivity() {
                 if (sharedText != null) {
                     val json = JSONObject()
                     json.put("title", sharedTitle)
-                    val type = if (sharedText.startsWith("http")) "LINK" else "TEXT"
+                    val type = if (sharedText.startsWith("http")) "LINK" else "NOTE"
                     json.put("type", type)
                     json.put("path", sharedText)
 
-                    if (::javaScriptInterface.isInitialized) {
-                        Log.d("SP_SHARE", "JS initialized, sending directly: $json")
+                    if (isFrontendReady) {
+                        Log.d("SP_SHARE", "Frontend ready, sending directly: $json")
                         callJSInterfaceFunctionIfExists("next", "onShareWithAttachment$", json.toString())
                         pendingShareIntent = null
                     } else {
-                        Log.d("SP_SHARE", "JS NOT initialized, queueing: $json")
+                        Log.d("SP_SHARE", "Frontend NOT ready, queueing: $json")
                         pendingShareIntent = json
                     }
                 }
