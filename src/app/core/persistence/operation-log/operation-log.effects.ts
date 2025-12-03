@@ -11,6 +11,8 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 import { MultiTabCoordinatorService } from './multi-tab-coordinator.service';
 import { OperationLogCompactionService } from './operation-log-compaction.service';
 import { PFLog } from '../../log';
+import { SnackService } from '../../snack/snack.service';
+import { T } from '../../../t.const';
 
 const CURRENT_SCHEMA_VERSION = 1;
 const COMPACTION_THRESHOLD = 500;
@@ -33,6 +35,7 @@ export class OperationLogEffects {
   private pfapiService = inject(PfapiService);
   private multiTabCoordinator = inject(MultiTabCoordinatorService);
   private compactionService = inject(OperationLogCompactionService);
+  private snackService = inject(SnackService);
 
   persistOperation$ = createEffect(
     () =>
@@ -94,7 +97,7 @@ export class OperationLogEffects {
     } catch (e) {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);
-      // this.notifyUserAndTriggerRollback(action);
+      this.notifyUserAndTriggerRollback();
     }
   }
 
@@ -106,6 +109,22 @@ export class OperationLogEffects {
     PFLog.normal('OperationLogEffects: Triggering compaction...');
     this.compactionService.compact().catch((e) => {
       PFLog.err('OperationLogEffects: Compaction failed', e);
+    });
+  }
+
+  /**
+   * Notifies the user that persistence failed and offers to reload the app.
+   * This is called when writing to IndexedDB fails, leaving the app state
+   * potentially inconsistent with persisted data.
+   */
+  private notifyUserAndTriggerRollback(): void {
+    this.snackService.open({
+      type: 'ERROR',
+      msg: T.F.SYNC.S.PERSIST_FAILED,
+      actionStr: T.PS.RELOAD,
+      actionFn: (): void => {
+        window.location.reload();
+      },
     });
   }
 }
