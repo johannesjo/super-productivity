@@ -13,6 +13,7 @@ import { OperationLogCompactionService } from './operation-log-compaction.servic
 import { PFLog } from '../../log';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
+import { validateOperationPayload } from './validate-operation-payload';
 
 const CURRENT_SCHEMA_VERSION = 1;
 const COMPACTION_THRESHOLD = 500;
@@ -80,6 +81,30 @@ export class OperationLogEffects {
           timestamp: Date.now(),
           schemaVersion: CURRENT_SCHEMA_VERSION,
         };
+
+        // CHECKPOINT A: Validate payload before persisting
+        const validationResult = validateOperationPayload(op);
+        if (!validationResult.success) {
+          PFLog.err('[OperationLogEffects] Invalid operation payload', {
+            error: validationResult.error,
+            actionType: action.type,
+            opType: op.opType,
+            entityType: op.entityType,
+          });
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.INVALID_OPERATION_PAYLOAD,
+          });
+          return; // Skip persisting invalid operation
+        }
+
+        // Log warnings if any (but still persist)
+        if (validationResult.warnings?.length) {
+          PFLog.warn('[OperationLogEffects] Operation payload warnings', {
+            warnings: validationResult.warnings,
+            actionType: action.type,
+          });
+        }
 
         // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);

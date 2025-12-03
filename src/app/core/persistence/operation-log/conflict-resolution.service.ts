@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EntityConflict } from './operation.types';
 import { OperationApplierService } from './operation-applier.service';
@@ -11,6 +12,11 @@ import {
 import { firstValueFrom } from 'rxjs';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
+import { ValidateStateService } from './validate-state.service';
+import { RepairOperationService } from './repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
+import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
 /**
  * Service to manage conflict resolution, typically presenting a UI to the user.
@@ -21,9 +27,13 @@ import { T } from '../../../t.const';
 })
 export class ConflictResolutionService {
   private dialog = inject(MatDialog);
+  private store = inject(Store);
   private operationApplier = inject(OperationApplierService);
   private opLogStore = inject(OperationLogStoreService);
   private snackService = inject(SnackService);
+  private validateStateService = inject(ValidateStateService);
+  private repairOperationService = inject(RepairOperationService);
+  private storeDelegateService = inject(PfapiStoreDelegateService);
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
@@ -99,6 +109,50 @@ export class ConflictResolutionService {
           );
         }
       }
+
+      // CHECKPOINT D: Validate and repair state after conflict resolution
+      await this._validateAndRepairAfterResolution();
     }
+  }
+
+  /**
+   * Validates the current state after conflict resolution and repairs if necessary.
+   * This is Checkpoint D in the validation architecture.
+   */
+  private async _validateAndRepairAfterResolution(): Promise<void> {
+    PFLog.normal('[ConflictResolutionService] Running post-resolution validation...');
+
+    // Get current state from NgRx
+    const currentState =
+      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
+
+    // Validate and repair if needed
+    const result = this.validateStateService.validateAndRepair(currentState);
+
+    if (!result.wasRepaired) {
+      PFLog.normal('[ConflictResolutionService] State valid after conflict resolution');
+      return;
+    }
+
+    if (!result.repairedState || !result.repairSummary) {
+      PFLog.err(
+        '[ConflictResolutionService] Repair failed after conflict resolution:',
+        result.error,
+      );
+      return;
+    }
+
+    // Create REPAIR operation
+    await this.repairOperationService.createRepairOperation(
+      result.repairedState,
+      result.repairSummary,
+    );
+
+    // Dispatch repaired state to NgRx
+    this.store.dispatch(loadAllData({ appDataComplete: result.repairedState as any }));
+
+    PFLog.log(
+      '[ConflictResolutionService] Created REPAIR operation after conflict resolution',
+    );
   }
 }

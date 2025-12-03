@@ -1,4 +1,5 @@
 import { inject, Injectable } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { LockService } from './lock.service';
 import {
@@ -25,6 +26,11 @@ import {
 import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
 import { OperationApplierService } from './operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
+import { ValidateStateService } from './validate-state.service';
+import { RepairOperationService } from './repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
+import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
+import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
@@ -51,10 +57,14 @@ const isOperationSyncCapable = (
   providedIn: 'root',
 })
 export class OperationLogSyncService {
+  private store = inject(Store);
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private operationApplier = inject(OperationApplierService);
   private conflictResolutionService = inject(ConflictResolutionService);
+  private validateStateService = inject(ValidateStateService);
+  private repairOperationService = inject(RepairOperationService);
+  private storeDelegateService = inject(PfapiStoreDelegateService);
 
   private _getManifestFileName(): string {
     return MANIFEST_FILE_NAME;
@@ -412,7 +422,12 @@ export class OperationLogSyncService {
           `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
           conflicts,
         );
-        await this.conflictResolutionService.presentConflicts(conflicts); // Call conflict resolution UI
+        // Conflict resolution service will validate after resolving
+        await this.conflictResolutionService.presentConflicts(conflicts);
+      } else if (nonConflicting.length > 0) {
+        // CHECKPOINT D: If no conflicts but we applied ops, validate state
+        // (Conflict resolution handles validation when there are conflicts)
+        await this._validateAfterSync();
       }
 
       PFLog.normal(
@@ -484,7 +499,11 @@ export class OperationLogSyncService {
         `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
         conflicts,
       );
+      // Conflict resolution service will validate after resolving
       await this.conflictResolutionService.presentConflicts(conflicts);
+    } else if (nonConflicting.length > 0) {
+      // CHECKPOINT D: If no conflicts but we applied ops, validate state
+      await this._validateAfterSync();
     }
   }
 
@@ -577,5 +596,41 @@ export class OperationLogSyncService {
       }
     }
     return { nonConflicting, conflicts };
+  }
+
+  /**
+   * CHECKPOINT D: Validates state after applying remote operations.
+   * If validation fails, attempts repair and creates a REPAIR operation.
+   */
+  private async _validateAfterSync(): Promise<void> {
+    PFLog.normal('[OperationLogSyncService] Running post-sync validation...');
+
+    // Get current state from NgRx
+    const currentState =
+      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
+
+    // Validate and repair if needed
+    const result = this.validateStateService.validateAndRepair(currentState);
+
+    if (!result.wasRepaired) {
+      PFLog.normal('[OperationLogSyncService] State valid after sync');
+      return;
+    }
+
+    if (!result.repairedState || !result.repairSummary) {
+      PFLog.err('[OperationLogSyncService] Repair failed after sync:', result.error);
+      return;
+    }
+
+    // Create REPAIR operation
+    await this.repairOperationService.createRepairOperation(
+      result.repairedState,
+      result.repairSummary,
+    );
+
+    // Dispatch repaired state to NgRx
+    this.store.dispatch(loadAllData({ appDataComplete: result.repairedState as any }));
+
+    PFLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
   }
 }

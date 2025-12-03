@@ -9,6 +9,7 @@ export enum OpType {
   Batch = 'BATCH', // For bulk operations (import, mass update)
   SyncImport = 'SYNC_IMPORT', // Full state import from remote sync
   BackupImport = 'BACKUP_IMPORT', // Full state import from backup file
+  Repair = 'REPAIR', // Auto-repair operation with full repaired state
 }
 
 export type EntityType =
@@ -82,4 +83,26 @@ export interface OperationLogManifest {
   operationFiles: string[]; // List of all uploaded operation files
   lastCompactedSeq?: number; // The sequence number of the last op included in a full state snapshot
   lastCompactedSnapshotFile?: string; // Reference to the last full state snapshot file
+}
+
+/**
+ * Minimal summary of repairs performed, used in REPAIR operation payload.
+ * Keeps repair log lightweight while providing debugging info.
+ */
+export interface RepairSummary {
+  entityStateFixed: number; // Fixed ids/entities array sync
+  orphanedEntitiesRestored: number; // Tasks restored from archive, orphaned notes fixed
+  invalidReferencesRemoved: number; // Non-existent project/tag IDs removed
+  relationshipsFixed: number; // Project/tag ID consistency, subtask parent relationships
+  structureRepaired: number; // Menu tree, inbox project creation
+  typeErrorsFixed: number; // Typia errors auto-fixed (type coercion)
+}
+
+/**
+ * Payload structure for REPAIR operations.
+ * Contains the fully repaired state and a summary of what was fixed.
+ */
+export interface RepairPayload {
+  appDataComplete: unknown; // AppDataCompleteNew - using unknown to avoid circular deps
+  repairSummary: RepairSummary;
 }
