@@ -20,6 +20,7 @@
     "fastify": "^5.6.2",
     "jsonwebtoken": "^9.0.2",
     "nodemailer": "^7.0.11",
+    "uuidv7": "^1.1.0",
     "zod": "^4.1.13"
   },
   "devDependencies": {
