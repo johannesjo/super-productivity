@@ -4,6 +4,7 @@ import { ConflictReason, SyncProviderId, SyncStatus } from './pfapi.const';
 import { DropboxPrivateCfg } from './sync/providers/dropbox/dropbox';
 import { IValidation } from 'typia';
 import { WebdavPrivateCfg } from './sync/providers/webdav/webdav.model';
+import { SuperSyncPrivateCfg } from './sync/providers/super-sync/super-sync.model';
 
 type JSONPrimitive = string | number | boolean | null;
 type Serializable = JSONPrimitive | SerializableObject | SerializableArray;
@@ -175,6 +176,7 @@ export interface LocalFileSyncPrivateCfg extends SyncProviderPrivateCfgBase {
 export type SyncProviderPrivateCfg =
   | DropboxPrivateCfg
   | WebdavPrivateCfg
+  | SuperSyncPrivateCfg
   | LocalFileSyncPrivateCfg;
 
 export type PrivateCfgByProviderId<T extends SyncProviderId> =
@@ -185,7 +187,7 @@ export type PrivateCfgByProviderId<T extends SyncProviderId> =
       : T extends SyncProviderId.Dropbox
         ? DropboxPrivateCfg
         : T extends SyncProviderId.SuperSync
-          ? WebdavPrivateCfg
+          ? SuperSyncPrivateCfg
           : never;
 
 // Define all possible event names

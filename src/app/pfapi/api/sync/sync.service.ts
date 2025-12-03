@@ -104,6 +104,13 @@ export class SyncService<const MD extends ModelCfgs> {
       if (currentSyncProvider && this._supportsOpLogSync(currentSyncProvider)) {
         await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
         await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+
+        // For operation-only providers (like SuperSync), skip file-based sync
+        // Operation sync handles all data synchronization
+        PFLog.normal(
+          `${SyncService.L}.${this.sync.name}(): Operation sync complete, skipping file-based sync`,
+        );
+        return { status: SyncStatus.InSync };
       }
       // --- END Operation Log Sync Phase ---
 
