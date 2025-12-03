@@ -30,7 +30,6 @@ const MAX_COMPACTION_FAILURES = 3;
 @Injectable()
 export class OperationLogEffects {
   private clientId?: string;
-  private opsSinceCompaction = 0;
   private compactionFailures = 0;
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
@@ -122,11 +121,11 @@ export class OperationLogEffects {
         this.multiTabCoordinator.notifyNewOperation(op);
       });
 
-      // 4. Check if compaction is needed
-      this.opsSinceCompaction++;
-      if (this.opsSinceCompaction >= COMPACTION_THRESHOLD) {
+      // 4. Check if compaction is needed (persistent counter across tabs/restarts)
+      const opsCount = await this.opLogStore.incrementCompactionCounter();
+      if (opsCount >= COMPACTION_THRESHOLD) {
         // Trigger compaction asynchronously (don't block write operation)
-        // Counter is reset inside triggerCompaction() on success
+        // Counter is reset in compaction service on success
         this.triggerCompaction();
       }
     } catch (e) {
@@ -140,14 +139,13 @@ export class OperationLogEffects {
    * Triggers compaction asynchronously without blocking the main operation.
    * This is called after COMPACTION_THRESHOLD operations have been written.
    * Tracks failures and notifies user after MAX_COMPACTION_FAILURES consecutive failures.
+   * Counter is reset by compaction service on success.
    */
   private triggerCompaction(): void {
     PFLog.normal('OperationLogEffects: Triggering compaction...');
     this.compactionService
       .compact()
       .then(() => {
-        // Only reset counter on successful compaction
-        this.opsSinceCompaction = 0;
         this.compactionFailures = 0;
       })
       .catch((e) => {
