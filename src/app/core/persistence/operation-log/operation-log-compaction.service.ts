@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { LockService } from './lock.service';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
+import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
+import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -15,26 +16,29 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 export class OperationLogCompactionService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
-  private pfapiService = inject(PfapiService);
+  private storeDelegate = inject(PfapiStoreDelegateService);
 
   async compact(): Promise<void> {
     await this.lockService.request('sp_op_log_compact', async () => {
-      // 1. Get current state
-      const currentState = await this.pfapiService.pf.getAllSyncModelData();
+      // 1. Get current state from NgRx store (via delegate for consistency)
+      const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
 
       // 2. Get current vector clock (max of all ops)
       const currentVectorClock = await this.opLogStore.getCurrentVectorClock();
 
-      // 3. Write to state cache
+      // 3. Write to state cache with schema version
       const lastSeq = await this.opLogStore.getLastSeq();
       await this.opLogStore.saveStateCache({
         state: currentState,
         lastAppliedOpSeq: lastSeq,
         vectorClock: currentVectorClock,
         compactedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
       });
 
       // 4. Delete old operations (keep recent for conflict resolution window)
+      // Retention: 7 days - keeps enough history for conflict detection
+      // Only delete ops that have been synced to remote
       const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
       const cutoff = Date.now() - retentionWindowMs;
 
