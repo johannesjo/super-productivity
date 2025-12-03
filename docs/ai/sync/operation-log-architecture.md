@@ -369,57 +369,292 @@ private async attemptRecovery(): Promise<void> {
 
 ## A.7 Schema Migrations
 
-### Strategy: Migrate at Snapshot Boundaries
+When Super Productivity's data model changes (new fields, renamed properties, restructured entities), schema migrations ensure existing data remains usable after app updates.
+
+### Core Concepts
+
+| Concept                    | Description                                                                 |
+| -------------------------- | --------------------------------------------------------------------------- |
+| **Schema Version**         | Integer tracking current data model version (stored in ops + snapshots)     |
+| **Migration**              | Function transforming state from version N to N+1                           |
+| **Snapshot Boundary**      | Migrations run when loading snapshots, creating clean versioned checkpoints |
+| **Forward Compatibility**  | Newer apps can read older data (via migrations)                             |
+| **Backward Compatibility** | Older apps receiving newer ops (via graceful degradation)                   |
+
+### Migration Triggers
 
 ```
-App Update (schema v1 → v2)
+┌─────────────────────────────────────────────────────────────────────┐
+│                    App Update Detected                               │
+│                    (schemaVersion mismatch)                          │
+└─────────────────────────────────────────────────────────────────────┘
+                               │
+           ┌───────────────────┼───────────────────┐
+           ▼                   ▼                   ▼
+    Load Snapshot         Replay Ops         Receive Remote Ops
+    (stale version)       (mixed versions)   (newer/older version)
+           │                   │                   │
+           ▼                   ▼                   ▼
+    Run migrations       Apply ops as-is     Migrate if needed
+    on full state        (ops are additive)  (full state imports)
+```
+
+### A.7.1 Snapshot Migration (Local)
+
+When app starts and finds a snapshot with older schema version:
+
+```
+App Startup (schema v1 → v2)
     │
     ▼
 Load state_cache (v1 snapshot)
     │
     ▼
-Run migration: migrateV1ToV2(snapshot)
+Detect version mismatch: snapshot.schemaVersion < CURRENT_SCHEMA_VERSION
     │
     ▼
-Dispatch loadAllData(migratedSnapshot)
+Run migration chain: migrateV1ToV2(snapshot.state)
     │
     ▼
-Force new snapshot (now v2)
+Dispatch loadAllData(migratedState)
     │
     ▼
-Delete old ops (baked into v2 snapshot)
+Force new snapshot with schemaVersion = 2
+    │
+    ▼
+Continue with tail ops (ops after snapshot)
 ```
 
-### Implementation
+### A.7.2 Operation Replay (Mixed Versions)
+
+Operations in the log may have different schema versions. During replay:
 
 ```typescript
+// Operations are "additive" - they describe what changed, not full state
+// Example: { opType: 'UPD', payload: { task: { id: 'x', changes: { title: 'new' } } } }
+
+// Old ops apply to migrated state because:
+// 1. Fields they reference still exist (or are mapped)
+// 2. New fields have defaults filled by migration
+// 3. Renamed fields are handled by migration aliases
+
+async replayOperation(op: Operation, currentState: AppDataComplete): Promise<void> {
+  // Op schema version is informational - ops apply to current state structure
+  // The snapshot was already migrated to current schema
+  await this.operationApplier.applyOperations([op]);
+}
+```
+
+### A.7.3 Remote Sync (Cross-Version Clients)
+
+When clients run different Super Productivity versions, sync must handle version differences:
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                     Remote Sync Scenarios                            │
+└─────────────────────────────────────────────────────────────────────┘
+
+Scenario 1: Newer client receives older ops
+──────────────────────────────────────────
+Client v2 ◄─── ops from v1 client
+    │
+    └── Ops apply normally (additive changes to migrated state)
+        Missing new fields use defaults from migration
+
+Scenario 2: Older client receives newer ops
+──────────────────────────────────────────
+Client v1 ◄─── ops from v2 client
+    │
+    ├── Individual ops: Unknown fields ignored (graceful degradation)
+    │   { task: { id: 'x', changes: { title: 'a', newFieldV2: 'b' } } }
+    │                                            ↑ ignored by v1
+    │
+    └── Full state imports (SYNC_IMPORT): May fail validation
+        → User prompted to update app or resolve manually
+
+Scenario 3: Mixed version sync with conflicts
+──────────────────────────────────────────
+Client v1 conflicts with Client v2
+    │
+    └── Conflict resolution uses entity-level comparison
+        Version-specific fields handled during merge
+```
+
+### A.7.4 Full State Imports (SYNC_IMPORT/BACKUP_IMPORT)
+
+When receiving full state from remote (e.g., SYNC_IMPORT from another client):
+
+```typescript
+async handleFullStateImport(payload: { appDataComplete: AppDataComplete }): Promise<void> {
+  const { appDataComplete } = payload;
+
+  // 1. Detect schema version of incoming state
+  const incomingVersion = detectSchemaVersion(appDataComplete);
+
+  if (incomingVersion < CURRENT_SCHEMA_VERSION) {
+    // 2a. Migrate incoming state up to current version
+    const migratedState = await this.migrateState(appDataComplete, incomingVersion);
+    this.store.dispatch(loadAllData({ appDataComplete: migratedState }));
+  } else if (incomingVersion > CURRENT_SCHEMA_VERSION) {
+    // 2b. Incoming state is from newer app version
+    // Options: warn user, attempt graceful load, or reject
+    PFLog.warn('Received state from newer app version', { incomingVersion });
+    // Attempt load - unknown fields will be stripped by Typia validation
+    this.store.dispatch(loadAllData({ appDataComplete }));
+  } else {
+    // 2c. Same version - direct load
+    this.store.dispatch(loadAllData({ appDataComplete }));
+  }
+
+  // 3. Save migrated snapshot
+  await this.saveStateCache(/* current state with current schema version */);
+}
+```
+
+### A.7.5 Migration Implementation
+
+```typescript
+// schema-migration.service.ts
+
+interface SchemaMigration {
+  fromVersion: number;
+  toVersion: number;
+  description: string;
+  migrate: (state: unknown) => unknown;
+}
+
 const MIGRATIONS: SchemaMigration[] = [
-  // No migrations yet - schema version 1 is initial
-  // Add migrations here as needed:
+  // Example migrations (not yet implemented):
   // {
   //   fromVersion: 1,
   //   toVersion: 2,
-  //   description: 'Add new field to tasks',
+  //   description: 'Add priority field to tasks',
   //   migrate: (state) => ({
   //     ...state,
-  //     task: migrateTasksV1ToV2(state.task),
+  //     task: {
+  //       ...state.task,
+  //       entities: Object.fromEntries(
+  //         Object.entries(state.task.entities).map(([id, task]) => [
+  //           id,
+  //           { ...task, priority: task.priority ?? 'NORMAL' }
+  //         ])
+  //       )
+  //     }
+  //   }),
+  // },
+  // {
+  //   fromVersion: 2,
+  //   toVersion: 3,
+  //   description: 'Rename task.estimate to task.timeEstimate',
+  //   migrate: (state) => ({
+  //     ...state,
+  //     task: {
+  //       ...state.task,
+  //       entities: Object.fromEntries(
+  //         Object.entries(state.task.entities).map(([id, task]) => {
+  //           const { estimate, ...rest } = task;
+  //           return [id, { ...rest, timeEstimate: estimate }];
+  //         })
+  //       )
+  //     }
   //   }),
   // },
 ];
 
 async migrateIfNeeded(snapshot: StateCache): Promise<StateCache> {
   let { state, schemaVersion } = snapshot;
+  schemaVersion = schemaVersion ?? 1; // Default for pre-versioned data
 
   while (schemaVersion < CURRENT_SCHEMA_VERSION) {
     const migration = MIGRATIONS.find(m => m.fromVersion === schemaVersion);
-    if (!migration) throw new Error(`No migration path from v${schemaVersion}`);
+    if (!migration) {
+      throw new Error(`No migration path from schema v${schemaVersion}`);
+    }
+
+    PFLog.log(`[Migration] Running: ${migration.description}`);
     state = migration.migrate(state);
     schemaVersion = migration.toVersion;
   }
 
   return { ...snapshot, state, schemaVersion };
 }
+
+// Helper to detect schema version from state structure
+function detectSchemaVersion(state: unknown): number {
+  // Check for version markers or structural differences
+  // This is a fallback when schemaVersion field is missing
+  if (hasV3Structure(state)) return 3;
+  if (hasV2Structure(state)) return 2;
+  return 1; // Assume v1 for unversioned data
+}
 ```
+
+### A.7.6 Version Handling in Operations
+
+Each operation includes the schema version when it was created:
+
+```typescript
+interface Operation {
+  // ... other fields
+  schemaVersion: number; // Schema version when op was created
+}
+
+// When creating operations:
+const op: Operation = {
+  id: uuidv7(),
+  // ... other fields
+  schemaVersion: CURRENT_SCHEMA_VERSION, // e.g., 1
+};
+```
+
+This enables:
+
+- **Debugging** - Know which app version created an operation
+- **Future migration** - Transform old ops if needed (not currently implemented)
+- **Compatibility checks** - Warn when receiving ops from much newer versions
+
+### A.7.7 Design Principles for Migrations
+
+| Principle                      | Description                                        |
+| ------------------------------ | -------------------------------------------------- |
+| **Additive changes preferred** | Adding new optional fields with defaults is safest |
+| **Avoid breaking renames**     | Use aliases or transformations instead             |
+| **Test migration chains**      | Ensure v1→v2→v3 produces same result as v1→v3      |
+| **Preserve unknown fields**    | Don't strip fields from newer versions             |
+| **Idempotent migrations**      | Running twice should be safe                       |
+
+### A.7.8 Handling Unsupported Versions
+
+```typescript
+// When local version is too old for remote data
+if (remoteSchemaVersion > CURRENT_SCHEMA_VERSION + MAX_VERSION_SKIP) {
+  this.snackService.open({
+    type: 'ERROR',
+    msg: T.F.SYNC.S.VERSION_TOO_OLD,
+    actionStr: T.PS.UPDATE_APP,
+    actionFn: () => window.open(UPDATE_URL, '_blank'),
+  });
+  throw new Error('App version too old for synced data');
+}
+
+// When remote sends data from ancient version
+if (remoteSchemaVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
+  this.snackService.open({
+    type: 'ERROR',
+    msg: T.F.SYNC.S.REMOTE_DATA_TOO_OLD,
+  });
+  // May need manual intervention or force re-sync
+}
+```
+
+### A.7.9 Future Considerations
+
+| Enhancement                  | Description                                   | Priority |
+| ---------------------------- | --------------------------------------------- | -------- |
+| **Operation migration**      | Transform old ops to new schema during replay | Low      |
+| **Conflict-aware migration** | Special handling for version conflicts        | Medium   |
+| **Migration rollback**       | Undo migration if it fails partway            | Low      |
+| **Progressive migration**    | Migrate in background over multiple sessions  | Low      |
 
 ---
 
