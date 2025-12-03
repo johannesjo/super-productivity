@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C Implemented
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025
+**Last Updated:** December 3, 2025 (rollback + rejected ops)
 
 ---
 
@@ -61,6 +61,7 @@ interface OperationLogEntry {
   appliedAt: number; // When applied locally
   source: 'local' | 'remote';
   syncedAt?: number; // For server sync (Part C)
+  rejectedAt?: number; // When rejected during conflict resolution
 }
 
 // state_cache table - periodic snapshots
@@ -692,11 +693,22 @@ async presentConflicts(conflicts: EntityConflict[]): Promise<void> {
     for (const conflict of conflicts) {
       await this.operationApplier.applyOperations(conflict.remoteOps);
     }
+    // Mark local ops as rejected so they won't be re-synced
+    const localOpIds = conflict.localOps.map(op => op.id);
+    await this.opLogStore.markRejected(localOpIds);
   } else {
     // Keep local ops, ignore remote
   }
 }
 ```
+
+### Rejected Operations
+
+When the user chooses "remote" resolution, local conflicting operations are marked with `rejectedAt` timestamp:
+
+- Rejected ops remain in the log for history/debugging
+- `getUnsynced()` excludes rejected ops (won't re-upload)
+- Compaction may eventually delete old rejected ops
 
 ## C.6 Dependency Resolution
 
@@ -739,15 +751,20 @@ interface OperationDependency {
 - Conflict resolution dialog (C.5)
 - Dependency resolution with retry queue (C.6)
 - Persistent action metadata on all model actions
+- **Rollback notification on persistence failure** (shows snackbar with reload action)
+- **Rejected operation tracking** (`rejectedAt` field, excluded from sync)
 
 ## Future Enhancements 🔮
 
-| Component        | Description                                |
-| ---------------- | ------------------------------------------ |
-| Auto-merge       | Automatic merge for non-conflicting fields |
-| Undo/Redo        | Leverage op-log for undo history           |
-| Offline queue UI | Show pending sync operations to user       |
-| Op-log analytics | Debug view of operation history            |
+| Component             | Description                                  | Priority |
+| --------------------- | -------------------------------------------- | -------- |
+| Auto-merge            | Automatic merge for non-conflicting fields   | Low      |
+| Undo/Redo             | Leverage op-log for undo history             | Low      |
+| Offline queue UI      | Show pending sync operations to user         | Low      |
+| Op-log viewer         | Debug panel for viewing operation history    | Medium   |
+| IndexedDB index       | Index on `syncedAt` for faster getUnsynced() | Low      |
+| Persistent compaction | Track ops since compaction across restarts   | Low      |
+| Diff-based storage    | Store diffs for large text fields (notes)    | Defer    |
 
 ---
 
