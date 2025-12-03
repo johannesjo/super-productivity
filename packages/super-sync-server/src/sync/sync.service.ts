@@ -1,7 +1,6 @@
 import Database from 'better-sqlite3';
 import * as zlib from 'zlib';
 import { getDb, DbOperation } from '../db';
-import { Logger } from '../logger';
 import {
   Operation,
   ServerOperation,
@@ -373,7 +372,41 @@ export class SyncService {
             delete state[entityType][entityId];
           }
           break;
+        case 'MOV':
+          // Move operations typically contain reordering info in payload
+          // Apply any payload changes (e.g., updated parent, order)
+          if (entityId && payload) {
+            state[entityType][entityId] = {
+              ...(state[entityType][entityId] as Record<string, unknown>),
+              ...payload,
+            };
+          }
+          break;
+        case 'BATCH':
+          // Batch operations can contain updates to multiple entities
+          // The payload structure depends on the batch type
+          if (payload && typeof payload === 'object') {
+            // If payload has entities keyed by ID, apply them
+            const batchPayload = payload as Record<string, unknown>;
+            if (batchPayload.entities && typeof batchPayload.entities === 'object') {
+              const entities = batchPayload.entities as Record<string, unknown>;
+              for (const [id, entity] of Object.entries(entities)) {
+                state[entityType][id] = {
+                  ...(state[entityType][id] as Record<string, unknown>),
+                  ...(entity as Record<string, unknown>),
+                };
+              }
+            } else if (entityId) {
+              // Single entity batch update
+              state[entityType][entityId] = {
+                ...(state[entityType][entityId] as Record<string, unknown>),
+                ...batchPayload,
+              };
+            }
+          }
+          break;
         case 'SYNC_IMPORT':
+        case 'BACKUP_IMPORT':
           // Full state import - replace everything
           Object.assign(state, payload);
           break;
@@ -452,7 +485,8 @@ export class SyncService {
 
   getOnlineDeviceCount(userId: number): number {
     // Consider devices online if seen in last 5 minutes
-    const threshold = Date.now() - 5 * 60 * 1000;
+    const fiveMinutesMs = 5 * 60 * 1000;
+    const threshold = Date.now() - fiveMinutesMs;
     const row = this.stmts.getOnlineDeviceCount.get(userId, threshold) as
       | { count: number }
       | undefined;
@@ -467,7 +501,9 @@ export class SyncService {
     }
     if (
       !op.opType ||
-      !['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT'].includes(op.opType)
+      !['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT', 'BACKUP_IMPORT'].includes(
+        op.opType,
+      )
     ) {
       return { valid: false, error: 'Invalid opType' };
     }

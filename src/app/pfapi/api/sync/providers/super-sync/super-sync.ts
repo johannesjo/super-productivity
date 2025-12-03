@@ -9,7 +9,7 @@ import {
 } from '../../sync-provider.interface';
 import { SyncLog } from '../../../../../core/log';
 
-const LAST_SERVER_SEQ_KEY = 'super_sync_last_server_seq';
+const LAST_SERVER_SEQ_KEY_PREFIX = 'super_sync_last_server_seq_';
 
 /**
  * SuperSync provider - a WebDAV-based sync provider with enhanced capabilities.
@@ -93,12 +93,29 @@ export class SuperSyncProvider
   }
 
   async getLastServerSeq(): Promise<number> {
-    const stored = localStorage.getItem(LAST_SERVER_SEQ_KEY);
+    const key = await this._getServerSeqKey();
+    const stored = localStorage.getItem(key);
     return stored ? parseInt(stored, 10) : 0;
   }
 
   async setLastServerSeq(seq: number): Promise<void> {
-    localStorage.setItem(LAST_SERVER_SEQ_KEY, String(seq));
+    const key = await this._getServerSeqKey();
+    localStorage.setItem(key, String(seq));
+  }
+
+  /**
+   * Generates a storage key unique to this server URL to avoid conflicts
+   * when switching between different accounts or servers.
+   */
+  private async _getServerSeqKey(): Promise<string> {
+    const cfg = await this.privateCfg.load();
+    // Create a simple hash of the baseUrl to keep the key short but unique
+    const baseUrl = cfg?.baseUrl ?? 'default';
+    const hash = baseUrl
+      .split('')
+      .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
+      .toString(16);
+    return `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
   }
 
   async acknowledgeOps(clientId: string, lastSeq: number): Promise<void> {

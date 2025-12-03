@@ -1,5 +1,12 @@
 // Operation types
-export type OpType = 'CRT' | 'UPD' | 'DEL' | 'MOV' | 'BATCH' | 'SYNC_IMPORT';
+export type OpType =
+  | 'CRT'
+  | 'UPD'
+  | 'DEL'
+  | 'MOV'
+  | 'BATCH'
+  | 'SYNC_IMPORT'
+  | 'BACKUP_IMPORT';
 
 export type VectorClock = Record<string, number>;
 
@@ -10,6 +17,7 @@ export interface Operation {
   opType: OpType;
   entityType: string;
   entityId?: string;
+  entityIds?: string[]; // For batch operations
   payload: unknown;
   vectorClock: VectorClock;
   timestamp: number;

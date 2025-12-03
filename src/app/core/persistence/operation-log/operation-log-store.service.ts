@@ -124,27 +124,24 @@ export class OperationLogStoreService {
 
   async getAppliedOpIds(): Promise<Set<string>> {
     await this._ensureInit();
-    // This might be heavy if log is huge. But log is compacted.
-    const keys = await this.db.getAllKeysFromIndex('ops', 'byId');
-    return new Set(keys as unknown as string[]);
+    // Performance note: This could be slow for large logs, but compaction keeps it bounded.
+    // Index 'byId' contains op.id (string) values, so all keys are strings.
+    // The cast is safe because our index is on string IDs.
+    const opIds = (await this.db.getAllKeysFromIndex(
+      'ops',
+      'byId',
+    )) as unknown as string[];
+    return new Set(opIds);
   }
 
-  async markApplied(id: string): Promise<void> {
-    await this._ensureInit();
-    // Ops are assumed applied when appended locally.
-    // For remote ops, they are appended then applied.
-    // This method in the plan might be for tracking which remote ops are applied if we download them but don't apply immediately?
-    // Or for ensuring we don't re-apply?
-    // In the plan "markApplied assumes the op is already in the log"
-    // But OperationLogEntry has `appliedAt`.
-    // If we append it, we set appliedAt.
-    // So maybe this is redundant or updates the timestamp?
-    // I'll leave it empty or implement if `appliedAt` needs update.
-    // The plan says: "Persist remote op first... then dispatch... then markApplied".
-    // So maybe when persisting remote op we set appliedAt to null/0?
-    // The append method I wrote sets appliedAt to Date.now().
-    // I should probably allow append to take partial entry or update it.
-    // For now, I'll assume append sets it.
+  /**
+   * Marks an operation as applied. Currently a no-op because `append()`
+   * already sets `appliedAt` to the current timestamp. This method exists
+   * for interface completeness and future flexibility.
+   */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async markApplied(_id: string): Promise<void> {
+    // No-op: appliedAt is set by append()
   }
 
   async markSynced(seqs: number[]): Promise<void> {

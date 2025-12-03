@@ -137,6 +137,7 @@ export interface SyncOperation {
   opType: string;
   entityType: string;
   entityId?: string;
+  entityIds?: string[]; // For batch operations
   payload: unknown;
   vectorClock: Record<string, number>;
   timestamp: number;

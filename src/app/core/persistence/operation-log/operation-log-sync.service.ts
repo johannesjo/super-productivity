@@ -14,9 +14,7 @@ import {
   mergeVectorClocks,
   VectorClockComparison,
 } from '../../../pfapi/api/util/vector-clock';
-import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
-// import { chunkArray } from '../../../util/chunk-array'; // Removed as not used
 import { chunkArray } from '../../../util/chunk-array';
 import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
 import {
@@ -55,8 +53,6 @@ const isOperationSyncCapable = (
 export class OperationLogSyncService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private dependencyResolver = inject(DependencyResolverService);
   private operationApplier = inject(OperationApplierService);
   private conflictResolutionService = inject(ConflictResolutionService);
 
@@ -138,6 +134,7 @@ export class OperationLogSyncService {
         opType: entry.op.opType,
         entityType: entry.op.entityType,
         entityId: entry.op.entityId,
+        entityIds: entry.op.entityIds,
         payload: entry.op.payload,
         vectorClock: entry.op.vectorClock,
         timestamp: entry.op.timestamp,
@@ -187,7 +184,7 @@ export class OperationLogSyncService {
           const piggybackedOps = response.newOps.map((serverOp) =>
             this._syncOpToOperation(serverOp.op),
           );
-          await this._processRemoteOps(piggybackedOps, syncProvider);
+          await this._processRemoteOps(piggybackedOps);
         }
 
         // Log any rejected operations
@@ -305,7 +302,7 @@ export class OperationLogSyncService {
           .map((serverOp) => this._syncOpToOperation(serverOp.op));
 
         if (newOps.length > 0) {
-          await this._processRemoteOps(newOps, syncProvider);
+          await this._processRemoteOps(newOps);
           totalProcessed += newOps.length;
         }
 
@@ -427,10 +424,7 @@ export class OperationLogSyncService {
   /**
    * Process remote operations: detect conflicts and apply non-conflicting ones
    */
-  private async _processRemoteOps(
-    remoteOps: Operation[],
-    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<void> {
+  private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
     const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
       remoteOps,
@@ -463,6 +457,7 @@ export class OperationLogSyncService {
       opType: syncOp.opType as Operation['opType'],
       entityType: syncOp.entityType as Operation['entityType'],
       entityId: syncOp.entityId,
+      entityIds: syncOp.entityIds,
       payload: syncOp.payload,
       vectorClock: syncOp.vectorClock,
       timestamp: syncOp.timestamp,

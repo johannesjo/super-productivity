@@ -17,9 +17,10 @@ const OperationSchema = z.object({
   id: z.string().min(1),
   clientId: z.string().min(1),
   actionType: z.string().min(1),
-  opType: z.enum(['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT']),
+  opType: z.enum(['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT', 'BACKUP_IMPORT']),
   entityType: z.string().min(1),
   entityId: z.string().optional(),
+  entityIds: z.array(z.string()).optional(), // For batch operations
   payload: z.unknown(),
   vectorClock: z.record(z.string(), z.number()),
   timestamp: z.number(),
@@ -306,10 +307,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 };
 
 // Simple UUID v7-like ID generator
-function generateOpId(): string {
+const generateOpId = (): string => {
   const timestamp = Date.now().toString(16).padStart(12, '0');
   const random = Array.from({ length: 20 }, () =>
     Math.floor(Math.random() * 16).toString(16),
   ).join('');
   return `${timestamp}${random}`;
-}
+};
