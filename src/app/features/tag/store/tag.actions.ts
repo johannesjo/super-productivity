@@ -56,10 +56,27 @@ export const deleteTags = createAction(
 
 export const updateTagOrder = createAction(
   '[Tag] Update Tag Order',
-  props<{ ids: string[] }>(),
+  (tagProps: { ids: string[] }) => ({
+    ...tagProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TAG',
+      entityIds: tagProps.ids,
+      opType: OpType.Move,
+      isBulk: true,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const updateAdvancedConfigForTag = createAction(
   '[Tag] Update Advanced Config',
-  props<{ tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }>(),
+  (tagProps: { tagId: string; sectionKey: WorkContextAdvancedCfgKey; data: any }) => ({
+    ...tagProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TAG',
+      entityId: tagProps.tagId,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );

@@ -17,8 +17,8 @@ export interface PersistentAction extends Action {
   [key: string]: any; // Payload properties
 }
 
-// Helper type guard
+// Helper type guard - only actions with explicit isPersistent: true are persisted
 export const isPersistentAction = (action: Action): action is PersistentAction => {
   const a = action as PersistentAction;
-  return !!a.meta && a.meta.isPersistent !== false;
+  return !!a.meta && a.meta.isPersistent === true;
 };
