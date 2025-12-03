@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { LockService } from './lock.service';
@@ -66,7 +66,7 @@ export class OperationLogSyncService {
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
-  private pfapiService = inject(PfapiService);
+  private injector = inject(Injector);
 
   private _getManifestFileName(): string {
     return MANIFEST_FILE_NAME;
@@ -625,7 +625,8 @@ export class OperationLogSyncService {
     }
 
     // Create REPAIR operation
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    const pfapiService = this.injector.get(PfapiService);
+    const clientId = await pfapiService.pf.metaModel.loadClientId();
     await this.repairOperationService.createRepairOperation(
       result.repairedState,
       result.repairSummary,
