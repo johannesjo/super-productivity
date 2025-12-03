@@ -70,6 +70,7 @@ export class SyncWrapperService {
   // Track when we're waiting for user input (e.g., conflict dialog)
   // to avoid timeout errors during user decision time
   private _isWaitingForUserInput$ = new BehaviorSubject(false);
+  isWaitingForUserInput$ = this._isWaitingForUserInput$.asObservable();
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
     switchMap((isEnabled) =>
