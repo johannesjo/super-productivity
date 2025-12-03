@@ -1,5 +1,6 @@
 import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
 import { z } from 'zod';
+import { uuidv7 } from 'uuidv7';
 import { authenticate } from '../middleware';
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
@@ -215,7 +216,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Create a SYNC_IMPORT operation
         const op = {
-          id: generateOpId(),
+          id: uuidv7(),
           clientId,
           actionType: 'SYNC_IMPORT',
           opType: 'SYNC_IMPORT' as const,
@@ -304,13 +305,4 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       }
     },
   );
-};
-
-// Simple UUID v7-like ID generator
-const generateOpId = (): string => {
-  const timestamp = Date.now().toString(16).padStart(12, '0');
-  const random = Array.from({ length: 20 }, () =>
-    Math.floor(Math.random() * 16).toString(16),
-  ).join('');
-  return `${timestamp}${random}`;
 };
