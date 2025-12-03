@@ -29,6 +29,7 @@ import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from './validate-state.service';
 import { RepairOperationService } from './repair-operation.service';
 import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../pfapi/pfapi.service';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 
@@ -65,6 +66,7 @@ export class OperationLogSyncService {
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
+  private pfapiService = inject(PfapiService);
 
   private _getManifestFileName(): string {
     return MANIFEST_FILE_NAME;
@@ -623,9 +625,11 @@ export class OperationLogSyncService {
     }
 
     // Create REPAIR operation
+    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
     await this.repairOperationService.createRepairOperation(
       result.repairedState,
       result.repairSummary,
+      clientId,
     );
 
     // Dispatch repaired state to NgRx

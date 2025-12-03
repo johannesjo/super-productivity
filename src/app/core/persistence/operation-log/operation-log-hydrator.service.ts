@@ -511,9 +511,11 @@ export class OperationLogHydratorService {
     // Create REPAIR operation to persist the repaired state
     this._isRepairInProgress = true;
     try {
+      const clientId = await this.pfapiService.pf.metaModel.loadClientId();
       await this.repairOperationService.createRepairOperation(
         result.repairedState,
         result.repairSummary,
+        clientId,
       );
       PFLog.log(`[OperationLogHydratorService] Created REPAIR operation for ${context}`);
     } finally {
