@@ -9,6 +9,18 @@ import { crossModelMigration4_4 } from './cross-model-4_4';
 import { crossModelMigration4_5 } from './cross-model-4_5';
 
 /* eslint-disable @typescript-eslint/naming-convention */
+
+/**
+ * LEGACY MIGRATIONS (Deprecated)
+ *
+ * These migrations are only used for upgrading data from pre-Operation Log versions.
+ * They are executed automatically by PFAPI when loading data from the legacy persistence layer.
+ *
+ * ⚠️ DO NOT ADD NEW MIGRATIONS HERE ⚠️
+ *
+ * For all new schema changes, use the Operation Log's `SchemaMigrationService`
+ * located in `src/app/core/persistence/operation-log/schema-migration.service.ts`.
+ */
 export const CROSS_MODEL_MIGRATIONS: CrossModelMigrations = {
   2: crossModelMigration2,
   3: crossModelMigration3,

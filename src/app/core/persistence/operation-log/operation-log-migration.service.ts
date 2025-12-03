@@ -24,7 +24,9 @@ export class OperationLogMigrationService {
     PFLog.normal('OperationLogMigrationService: Checking for legacy data to migrate...');
 
     // Load all legacy data
-    // We skip validity check here because we want to migrate whatever is there
+    // We skip validity check here because we want to migrate whatever is there.
+    // NOTE: This call automatically runs legacy `CROSS_MODEL_MIGRATIONS` if the data
+    // is from an older version. This ensures we import already-migrated data.
     const legacyState = await this.pfapiService.pf.getAllSyncModelData(true);
 
     // Check if there is any actual data to migrate

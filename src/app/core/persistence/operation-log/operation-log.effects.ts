@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { filter, concatMap } from 'rxjs/operators';
 import { LockService } from './lock.service';
@@ -35,7 +35,7 @@ export class OperationLogEffects {
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
-  private pfapiService = inject(PfapiService);
+  private injector = inject(Injector);
   private multiTabCoordinator = inject(MultiTabCoordinatorService);
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
@@ -51,8 +51,10 @@ export class OperationLogEffects {
   );
 
   private async writeOperation(action: PersistentAction): Promise<void> {
+    const pfapiService = this.injector.get(PfapiService);
+
     if (!this.clientId) {
-      this.clientId = await this.pfapiService.pf.metaModel.loadClientId();
+      this.clientId = await pfapiService.pf.metaModel.loadClientId();
     }
     if (!this.clientId) {
       throw new Error('Failed to load clientId - cannot persist operation');
@@ -112,10 +114,8 @@ export class OperationLogEffects {
         // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
         // This ensures legacy sync (WebDAV/Dropbox) can detect local changes
         // Skip if sync is in progress (database locked) - the op is already safe in SUP_OPS
-        if (!this.pfapiService.pf.isSyncInProgress) {
-          await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(
-            clientId,
-          );
+        if (!pfapiService.pf.isSyncInProgress) {
+          await pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
         }
 
         // 3. Broadcast to other tabs
