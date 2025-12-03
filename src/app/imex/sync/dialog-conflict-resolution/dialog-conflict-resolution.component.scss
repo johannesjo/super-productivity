@@ -3,6 +3,26 @@
   padding: 16px;
   margin-bottom: 16px;
   border-radius: 4px;
+
+  &.resolved {
+    border-color: var(--primary-color, #3f51b5);
+    opacity: 0.8;
+  }
+}
+
+.conflict-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+
+  h3 {
+    margin: 0;
+  }
+
+  .resolved-icon {
+    color: var(--primary-color, #3f51b5);
+  }
 }
 
 .conflict-sides {
@@ -16,4 +36,9 @@
   padding: 8px;
   background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
+
+  &.selected {
+    background: rgba(63, 81, 181, 0.1);
+    border: 1px solid var(--primary-color, #3f51b5);
+  }
 }

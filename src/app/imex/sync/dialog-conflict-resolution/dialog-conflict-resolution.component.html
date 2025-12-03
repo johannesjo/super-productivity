@@ -4,11 +4,22 @@
   <p>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.INTRO' | translate }}</p>
 
   @for (conflict of data.conflicts; track conflict.entityId) {
-    <div class="conflict-item">
-      <h3>{{ conflict.entityType }}: {{ conflict.entityId }}</h3>
+    <div
+      class="conflict-item"
+      [class.resolved]="getResolution(conflict.entityId)"
+    >
+      <div class="conflict-header">
+        <h3>{{ conflict.entityType }}: {{ conflict.entityId }}</h3>
+        @if (getResolution(conflict.entityId)) {
+          <mat-icon class="resolved-icon">check_circle</mat-icon>
+        }
+      </div>
 
       <div class="conflict-sides">
-        <div class="local-side">
+        <div
+          class="local-side"
+          [class.selected]="getResolution(conflict.entityId) === 'local'"
+        >
           <h4>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.LOCAL' | translate }}</h4>
           <p>
             {{ 'F.SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
@@ -25,13 +36,20 @@
           <button
             mat-stroked-button
             type="button"
+            [color]="getResolution(conflict.entityId) === 'local' ? 'primary' : undefined"
             (click)="resolve($index, 'local')"
           >
+            @if (getResolution(conflict.entityId) === 'local') {
+              <mat-icon>check</mat-icon>
+            }
             {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_LOCAL' | translate }}
           </button>
         </div>
 
-        <div class="remote-side">
+        <div
+          class="remote-side"
+          [class.selected]="getResolution(conflict.entityId) === 'remote'"
+        >
           <h4>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.REMOTE' | translate }}</h4>
           <p>
             {{ 'F.SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
@@ -49,8 +67,14 @@
           <button
             mat-stroked-button
             type="button"
+            [color]="
+              getResolution(conflict.entityId) === 'remote' ? 'primary' : undefined
+            "
             (click)="resolve($index, 'remote')"
           >
+            @if (getResolution(conflict.entityId) === 'remote') {
+              <mat-icon>check</mat-icon>
+            }
             {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_REMOTE' | translate }}
           </button>
         </div>
@@ -71,9 +95,16 @@
   </button>
   <button
     mat-button
-    color="primary"
     (click)="resolveAll('remote')"
   >
     {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_ALL_REMOTE' | translate }}
+  </button>
+  <button
+    mat-flat-button
+    color="primary"
+    [disabled]="!allResolved"
+    (click)="submitResolutions()"
+  >
+    {{ 'G.APPLY' | translate }}
   </button>
 </div>
