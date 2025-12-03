@@ -366,7 +366,9 @@ export const selectTaskByIssueId = createSelector(
 export const selectTasksById = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { ids: string[] }): Task[] =>
-    props.ids ? (props.ids.map((id) => state.entities[id]) as Task[]) : [],
+    props.ids
+      ? props.ids.map((id) => state.entities[id]).filter((task): task is Task => !!task)
+      : [],
 );
 
 export const selectTasksWithDueTimeById = createSelector(
