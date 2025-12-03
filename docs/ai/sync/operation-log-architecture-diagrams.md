@@ -306,3 +306,59 @@ graph TD
     classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
     classDef io fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 ```
+
+## 6. Hybrid Manifest Conceptual Map
+
+This mindmap breaks down the core concepts, structure, and decision flows of the Hybrid Manifest architecture, highlighting the "Buffer vs. Overflow" strategy.
+
+```mermaid
+mindmap
+  root((Hybrid Manifest<br/>Architecture))
+    Concept
+      Buffer System
+        Small ops stay in Manifest
+        Reduces file count
+      Overflow System
+        Full buffer dumps to file
+        Keeps manifest light
+    Structure
+      Version Tag
+      Last Snapshot Reference
+        Base state file
+      Embedded Operations
+        The "Hot" Buffer
+        List of recent Op objects
+      Operation Files List
+        The "Cold" History
+        List of filenames
+    Write Path
+      1. Download Manifest
+      2. Check Buffer Size
+        Under Threshold
+          Append to Embedded
+          Upload Manifest
+          **1 Write / 0 New Files**
+        Over Threshold
+          Move Embedded to new File
+          Add File to List
+          Put New Ops in Embedded
+          Upload Manifest
+          **1 Write / 1 New File**
+    Read Path
+      1. Download Manifest
+      2. Load Snapshot
+        If newer than local
+      3. Load External Files
+        Only unseen files
+      4. Apply Embedded Ops
+        Most recent changes
+    Compaction
+      Trigger
+        File count > 50
+        Total ops > 5000
+      Process
+        Generate Snapshot
+        Clear External Files List
+        Clear Embedded Ops
+        Update Manifest
+```
