@@ -35,6 +35,7 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { devError } from '../../../util/dev-error';
 import { TaskLog } from '../../../core/log';
+import { filterLocalAction } from '../../../util/filter-local-action';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -51,6 +52,7 @@ export class ShortSyntaxEffects {
   shortSyntax$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
+      filterLocalAction(),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;

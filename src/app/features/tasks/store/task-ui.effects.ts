@@ -31,6 +31,7 @@ import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
+import { filterLocalAction } from '../../../util/filter-local-action';
 
 @Injectable()
 export class TaskUiEffects {
@@ -49,6 +50,7 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.addTask),
+        filterLocalAction(),
         withLatestFrom(this._workContextService.mainListTaskIds$),
         switchMap(([{ task }, activeContextTaskIds]) => {
           if (task.projectId) {
@@ -94,6 +96,7 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.deleteTask),
+        filterLocalAction(),
         tap(({ task }) => {
           this._snackService.open({
             translateParams: {
@@ -169,6 +172,7 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
+        filterLocalAction(),
         filter(({ task: { changes } }) => !!changes.isDone),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
@@ -184,6 +188,7 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.moveToOtherProject),
+        filterLocalAction(),
         filter(
           ({ targetProjectId }) =>
             targetProjectId !== this._workContextService.activeWorkContextId,

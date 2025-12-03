@@ -21,6 +21,7 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
+import { filterLocalAction } from '../../../util/filter-local-action';
 
 @Injectable()
 export class TaskInternalEffects {
@@ -31,6 +32,7 @@ export class TaskInternalEffects {
   onAllSubTasksDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.updateTask),
+      filterLocalAction(),
       withLatestFrom(
         this._store$.pipe(select(selectMiscConfig)),
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -68,6 +70,7 @@ export class TaskInternalEffects {
   setDefaultEstimateIfNonGiven$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, addSubTask),
+      filterLocalAction(),
       filter(({ task }) => !task.timeEstimate),
       withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
       map(([action, cfg]) => ({
@@ -102,6 +105,7 @@ export class TaskInternalEffects {
         moveProjectTaskToBacklogList.type,
         moveProjectTaskToBacklogListAuto.type,
       ),
+      filterLocalAction(),
       withLatestFrom(
         this._store$.pipe(select(selectConfigFeatureState)),
         this._store$.pipe(select(selectTaskFeatureState)),
