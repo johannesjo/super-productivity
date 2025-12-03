@@ -55,7 +55,7 @@ export class OperationLogEffects {
     const { type, meta, ...payload } = action;
 
     try {
-      await this.lockService.request('sp_op_log_write', async () => {
+      await this.lockService.request('sp_op_log', async () => {
         const currentClock = await this.opLogStore.getCurrentVectorClock();
         const newClock = incrementVectorClock(currentClock, clientId);
 

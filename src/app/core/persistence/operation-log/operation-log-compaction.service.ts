@@ -19,7 +19,7 @@ export class OperationLogCompactionService {
   private storeDelegate = inject(PfapiStoreDelegateService);
 
   async compact(): Promise<void> {
-    await this.lockService.request('sp_op_log_compact', async () => {
+    await this.lockService.request('sp_op_log', async () => {
       // 1. Get current state from NgRx store (via delegate for consistency)
       const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
 
