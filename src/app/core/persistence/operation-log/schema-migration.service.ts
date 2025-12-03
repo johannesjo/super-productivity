@@ -34,6 +34,10 @@ export interface SchemaMigration {
  * Registry of all schema migrations.
  * Add new migrations here when the state structure changes.
  *
+ * NOTE: This is for Operation Log schema migrations (Post-v10 / Post-OpLog).
+ * For legacy migrations (upgrading from older versions of the app), see:
+ * `src/app/pfapi/migrate/cross-model-migrations.ts`
+ *
  * Example migration:
  * ```typescript
  * {
