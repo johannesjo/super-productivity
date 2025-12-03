@@ -407,6 +407,77 @@ export class Pfapi<const MD extends ModelCfgs> {
     }
   }
 
+  /**
+   * Migrates and validates import data without persisting to 'pf' database.
+   * Used for operation-log-based imports where data goes directly to SUP_OPS.
+   */
+  async migrateAndValidateImportData({
+    data,
+    crossModelVersion,
+    isAttemptRepair = false,
+    isSkipLegacyWarnings = false,
+  }: {
+    data: AllSyncModels<MD>;
+    crossModelVersion: number;
+    isAttemptRepair?: boolean;
+    isSkipLegacyWarnings?: boolean;
+  }): Promise<AllSyncModels<MD>> {
+    PFLog.normal(`${this.migrateAndValidateImportData.name}()`);
+
+    // 1. Run migrations
+    const { dataAfter } = await this.migrationService.migrate(crossModelVersion, data);
+    data = dataAfter;
+
+    // 2. Validate
+    if (this.cfg?.validate) {
+      const validationResult = this.cfg.validate(data);
+      if (!validationResult.success) {
+        PFLog.critical(
+          `${this.migrateAndValidateImportData.name}() data not valid`,
+          validationResult,
+        );
+        if (isAttemptRepair && this.cfg.repair) {
+          PFLog.critical(`${this.migrateAndValidateImportData.name}() attempting repair`);
+          data = this.cfg.repair(data, (validationResult as IValidation.IFailure).errors);
+          const r2 = this.cfg.validate(data);
+          if (!r2.success) {
+            throw new DataValidationFailedError(r2);
+          }
+        } else {
+          throw new DataValidationFailedError(validationResult);
+        }
+      }
+    }
+
+    // 3. Filter out legacy model IDs
+    const SKIPPED_MODEL_IDS = ['lastLocalSyncModelChange', 'lastArchiveUpdate'];
+    const filteredData = { ...data } as AllSyncModels<MD>;
+    for (const modelId of Object.keys(filteredData)) {
+      if (SKIPPED_MODEL_IDS.includes(modelId)) {
+        delete (filteredData as Record<string, unknown>)[modelId];
+      } else if (!this.m[modelId] && !isSkipLegacyWarnings) {
+        PFLog.err(
+          'ModelId without Ctrl',
+          modelId,
+          (filteredData as Record<string, unknown>)[modelId],
+        );
+        if (
+          !confirm(
+            `ModelId "${modelId}" was found in data. The model seems to be outdated. Ignore and proceed to import anyway?`,
+          )
+        ) {
+          throw new ModelIdWithoutCtrlError(
+            modelId,
+            (filteredData as Record<string, unknown>)[modelId],
+          );
+        }
+        delete (filteredData as Record<string, unknown>)[modelId];
+      }
+    }
+
+    return filteredData;
+  }
+
   async importAllSycModelData({
     data,
     crossModelVersion,
