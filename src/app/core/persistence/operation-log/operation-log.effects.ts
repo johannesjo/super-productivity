@@ -86,7 +86,12 @@ export class OperationLogEffects {
 
         // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
         // This ensures legacy sync (WebDAV/Dropbox) can detect local changes
-        await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
+        // Skip if sync is in progress (database locked) - the op is already safe in SUP_OPS
+        if (!this.pfapiService.pf.isSyncInProgress) {
+          await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(
+            clientId,
+          );
+        }
 
         // 3. Broadcast to other tabs
         this.multiTabCoordinator.notifyNewOperation(op);

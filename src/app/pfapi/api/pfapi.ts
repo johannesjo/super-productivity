@@ -57,6 +57,10 @@ export class Pfapi<const MD extends ModelCfgs> {
 
   private _isSyncInProgress = false;
 
+  get isSyncInProgress(): boolean {
+    return this._isSyncInProgress;
+  }
+
   public readonly wasDataMigratedInitiallyPromise: Promise<void>;
 
   public readonly tmpBackupService: TmpBackupService<AllSyncModels<MD>>;
