@@ -309,58 +309,205 @@ graph TD
     classDef io fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 ```
 
-## 6. Hybrid Manifest Conceptual Map
+## 6. Hybrid Manifest Conceptual Overview
 
-This mindmap breaks down the core concepts, structure, and decision flows of the Hybrid Manifest architecture, highlighting the "Buffer vs. Overflow" strategy.
+This diagram shows the Hybrid Manifest architecture: how operations flow from "hot" (recent, in manifest) to "cold" (archived files) to "frozen" (snapshot), and the decision logic for each transition.
+
+### 6.1 Data Lifecycle: Hot → Cold → Frozen
 
 ```mermaid
-mindmap
-  root((Hybrid Manifest<br/>Architecture))
-    Concept
-      Buffer System
-        Small ops stay in Manifest
-        Reduces file count
-      Overflow System
-        Full buffer dumps to file
-        Keeps manifest light
-    Structure
-      Version Tag
-      Last Snapshot Reference
-        Base state file
-      Embedded Operations
-        The "Hot" Buffer
-        List of recent Op objects
-      Operation Files List
-        The "Cold" History
-        List of filenames
-    Write Path
-      1. Download Manifest
-      2. Check Buffer Size
-        Under Threshold
-          Append to Embedded
-          Upload Manifest
-          **1 Write / 0 New Files**
-        Over Threshold
-          Move Embedded to new File
-          Add File to List
-          Put New Ops in Embedded
-          Upload Manifest
-          **1 Write / 1 New File**
-    Read Path
-      1. Download Manifest
-      2. Load Snapshot
-        If newer than local
-      3. Load External Files
-        Only unseen files
-      4. Apply Embedded Ops
-        Most recent changes
-    Compaction
-      Trigger
-        File count > 50
-        Total ops > 5000
-      Process
-        Generate Snapshot
-        Clear External Files List
-        Clear Embedded Ops
-        Update Manifest
+graph LR
+    subgraph "HOT: Manifest Buffer"
+        direction TB
+        Buffer["embeddedOperations[]<br/>━━━━━━━━━━━━━━━<br/>• Op 47<br/>• Op 48<br/>• Op 49<br/>━━━━━━━━━━━━━━━<br/>~50 ops max"]
+    end
+
+    subgraph "COLD: Operation Files"
+        direction TB
+        Files["operationFiles[]<br/>━━━━━━━━━━━━━━━<br/>• overflow_001.json<br/>• overflow_002.json<br/>• overflow_003.json<br/>━━━━━━━━━━━━━━━<br/>~50 files max"]
+    end
+
+    subgraph "FROZEN: Snapshot"
+        direction TB
+        Snap["lastSnapshot<br/>━━━━━━━━━━━━━━━<br/>snap_170789.json<br/>━━━━━━━━━━━━━━━<br/>Full app state"]
+    end
+
+    NewOp((New Op)) -->|"Always"| Buffer
+    Buffer -->|"When full<br/>(overflow)"| Files
+    Files -->|"When too many<br/>(compaction)"| Snap
+
+    style Buffer fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style Files fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Snap fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style NewOp fill:#fff,stroke:#333,stroke-width:2px
 ```
+
+### 6.2 Manifest File Structure
+
+```mermaid
+graph TB
+    subgraph Manifest["manifest.json"]
+        direction TB
+
+        V["version: 2"]
+        FC["frontierClock: { A: 5, B: 3 }"]
+
+        subgraph SnapRef["lastSnapshot (optional)"]
+            SF["fileName: 'snap_170789.json'"]
+            SV["vectorClock: { A: 2, B: 1 }"]
+        end
+
+        subgraph EmbeddedOps["embeddedOperations[] — THE BUFFER"]
+            E1["Op { id: 'abc', entityType: 'TASK', ... }"]
+            E2["Op { id: 'def', entityType: 'PROJECT', ... }"]
+            E3["...up to 50 ops"]
+        end
+
+        subgraph OpFiles["operationFiles[] — OVERFLOW REFERENCES"]
+            F1["{ fileName: 'overflow_001.json', opCount: 100 }"]
+            F2["{ fileName: 'overflow_002.json', opCount: 100 }"]
+        end
+    end
+
+    style Manifest fill:#fff,stroke:#333,stroke-width:3px
+    style EmbeddedOps fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style OpFiles fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style SnapRef fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+### 6.3 Write Path: Buffer vs Overflow Decision
+
+```mermaid
+flowchart TD
+    Start([Client has pending ops]) --> Download[Download manifest.json]
+    Download --> CheckRemote{Remote has<br/>new ops?}
+
+    CheckRemote -->|Yes| ApplyFirst[Download & apply<br/>remote ops first]
+    ApplyFirst --> CheckBuffer
+    CheckRemote -->|No| CheckBuffer
+
+    CheckBuffer{Buffer + Pending<br/>< 50 ops?}
+
+    CheckBuffer -->|Yes| FastPath
+    CheckBuffer -->|No| SlowPath
+
+    subgraph FastPath["⚡ FAST PATH (1 request)"]
+        Append[Append pending to<br/>embeddedOperations]
+        Append --> Upload1[Upload manifest.json]
+    end
+
+    subgraph SlowPath["📦 OVERFLOW PATH (2 requests)"]
+        Flush[Upload embeddedOperations<br/>as overflow_XXX.json]
+        Flush --> AddRef[Add file to operationFiles]
+        AddRef --> Clear[Put pending ops in<br/>now-empty buffer]
+        Clear --> Upload2[Upload manifest.json]
+    end
+
+    Upload1 --> CheckSnap
+    Upload2 --> CheckSnap
+
+    CheckSnap{Files > 50 OR<br/>Ops > 5000?}
+    CheckSnap -->|Yes| Compact[Trigger Compaction]
+    CheckSnap -->|No| Done([Done])
+    Compact --> Done
+
+    style FastPath fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style SlowPath fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Start fill:#fff,stroke:#333
+    style Done fill:#fff,stroke:#333
+```
+
+### 6.4 Read Path: Reconstructing State
+
+```mermaid
+flowchart TD
+    Start([Client checks for updates]) --> Download[Download manifest.json]
+
+    Download --> QuickCheck{frontierClock<br/>changed?}
+    QuickCheck -->|No| Done([No changes - done])
+
+    QuickCheck -->|Yes| NeedSnap{Local behind<br/>snapshot?}
+
+    NeedSnap -->|Yes| LoadSnap
+    NeedSnap -->|No| LoadFiles
+
+    subgraph LoadSnap["🧊 Load Snapshot (fresh install / behind)"]
+        DownSnap[Download snapshot file]
+        DownSnap --> ApplySnap[Apply as base state]
+    end
+
+    ApplySnap --> LoadFiles
+
+    subgraph LoadFiles["📁 Load Operation Files"]
+        FilterFiles[Filter to unseen files only]
+        FilterFiles --> DownFiles[Download each file]
+        DownFiles --> CollectOps[Collect all operations]
+    end
+
+    CollectOps --> LoadEmbed
+
+    subgraph LoadEmbed["⚡ Load Embedded Ops"]
+        FilterEmbed[Filter by op.id<br/>skip already-applied]
+        FilterEmbed --> AddOps[Add to collected ops]
+    end
+
+    AddOps --> Apply
+
+    subgraph Apply["✅ Apply All"]
+        Sort[Sort by vectorClock]
+        Sort --> Detect[Detect conflicts]
+        Detect --> ApplyOps[Apply non-conflicting]
+    end
+
+    ApplyOps --> UpdateClock[Update local<br/>lastSyncedClock]
+    UpdateClock --> Done2([Done])
+
+    style LoadSnap fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style LoadFiles fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style LoadEmbed fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style Apply fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+### 6.5 Compaction: Freezing State
+
+```mermaid
+flowchart TD
+    Trigger{{"Trigger Conditions"}}
+    Trigger --> C1["operationFiles > 50"]
+    Trigger --> C2["Total ops > 5000"]
+    Trigger --> C3["7+ days since snapshot"]
+
+    C1 --> Start
+    C2 --> Start
+    C3 --> Start
+
+    Start([Begin Compaction]) --> Sync[Ensure full sync<br/>no pending ops]
+    Sync --> Read[Read current state<br/>from NgRx]
+    Read --> Generate[Generate snapshot file<br/>+ checksum]
+    Generate --> UpSnap[Upload snapshot file]
+
+    UpSnap --> UpdateMan
+
+    subgraph UpdateMan["Update Manifest"]
+        SetSnap[Set lastSnapshot →<br/>new file reference]
+        SetSnap --> ClearFiles[Clear operationFiles]
+        ClearFiles --> ClearBuffer[Clear embeddedOperations]
+        ClearBuffer --> ResetClock[Set frontierClock →<br/>snapshot's clock]
+    end
+
+    UpdateMan --> UpMan[Upload manifest.json]
+    UpMan --> Cleanup[Async: Delete old files<br/>from server]
+    Cleanup --> Done([Done])
+
+    style Trigger fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style UpdateMan fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+### 6.6 Request Count Comparison
+
+| Scenario             | Old (v1)               | Hybrid (v2)                      | Savings |
+| -------------------- | ---------------------- | -------------------------------- | ------- |
+| Small sync (1-5 ops) | 3 requests             | **1 request**                    | 67%     |
+| Buffer overflow      | 3 requests             | **2 requests**                   | 33%     |
+| Fresh install        | N requests (all files) | **2 requests** (snap + manifest) | ~95%    |
+| No changes           | 1 request (manifest)   | **1 request** (manifest)         | Same    |
