@@ -327,23 +327,51 @@ export class SyncService {
     serverSeq: number;
     generatedAt: number;
   } {
-    // Get all operations for this user
-    const allOps = this.stmts.getAllOps.all(userId) as DbOperation[];
     const latestSeq = this.getLatestSeq(userId);
+    let state: Record<string, unknown> = {};
+    let startSeq = 0;
 
-    // Replay operations to build current state
-    const state = this.replayOpsToState(allOps);
+    // Try to get cached snapshot to build upon (Incremental Snapshot)
+    const cached = this.getCachedSnapshot(userId);
+    if (cached) {
+      state = cached.state as Record<string, unknown>;
+      startSeq = cached.serverSeq;
+    }
+
+    // If we are already up to date, return cached
+    if (startSeq >= latestSeq && cached) {
+      return {
+        state: cached.state,
+        serverSeq: cached.serverSeq,
+        generatedAt: Date.now(), // Refresh timestamp
+      };
+    }
+
+    // Get only operations since the last snapshot
+    const newOps = this.stmts.getOpsSince.all(
+      userId,
+      startSeq,
+      // Fetch all remaining ops (limit high enough)
+      1000000,
+    ) as DbOperation[];
+
+    // Replay operations to update state
+    const finalState = this.replayOpsToState(newOps, state);
     const generatedAt = Date.now();
 
-    // Cache for future requests
-    this.cacheSnapshot(userId, state, latestSeq);
+    // Cache the new snapshot
+    this.cacheSnapshot(userId, finalState, latestSeq);
 
-    return { state, serverSeq: latestSeq, generatedAt };
+    return { state: finalState, serverSeq: latestSeq, generatedAt };
   }
 
-  private replayOpsToState(ops: DbOperation[]): Record<string, unknown> {
-    // Initialize empty state
-    const state: Record<string, Record<string, unknown>> = {};
+  private replayOpsToState(
+    ops: DbOperation[],
+    initialState: Record<string, unknown> = {},
+  ): Record<string, unknown> {
+    // Clone initial state to avoid mutation if needed (though we assign to it)
+    // We cast it to our working structure
+    const state = { ...(initialState as Record<string, Record<string, unknown>>) };
 
     // Apply operations in order
     for (const row of ops) {

@@ -41,6 +41,7 @@ export const createServer = (
     start: async (): Promise<string> => {
       fastifyServer = Fastify({
         logger: false, // We use our own logger
+        bodyLimit: 20 * 1024 * 1024, // 20MB - needed for large imports
       });
 
       // Security Headers

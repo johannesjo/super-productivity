@@ -60,15 +60,22 @@ export interface DbTombstone {
 
 let db: Database.Database;
 
-export const initDb = (dataDir: string): void => {
-  const dbPath = path.join(dataDir, 'database.sqlite');
+export const initDb = (dataDir: string, inMemory = false): void => {
+  let dbPath: string;
 
-  // Ensure data directory exists
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
+  if (inMemory) {
+    db = new Database(':memory:');
+    dbPath = ':memory:';
+  } else {
+    dbPath = path.join(dataDir, 'database.sqlite');
+
+    // Ensure data directory exists
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
+    }
+
+    db = new Database(dbPath);
   }
-
-  db = new Database(dbPath);
 
   // Create users table
   db.exec(`

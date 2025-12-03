@@ -7,6 +7,7 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
+    "test": "vitest run",
     "delete-user": "ts-node scripts/delete-user.ts"
   },
   "dependencies": {
@@ -29,8 +30,11 @@
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^18.0.0",
     "@types/nodemailer": "^7.0.4",
+    "@types/supertest": "^6.0.3",
     "nodemon": "^3.1.11",
+    "supertest": "^7.1.4",
     "ts-node": "^10.9.1",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
   }
 }
