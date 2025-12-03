@@ -1,8 +1,8 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, D Functional; Part C Design Only
+**Status:** Parts A, B, D Complete; Part C Design Only
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025 (documentation accuracy review)
+**Last Updated:** December 3, 2025 (A.7.12, A.7.13, A.7.15 implemented)
 
 ---
 
@@ -10,14 +10,14 @@
 
 The Operation Log serves **four distinct purposes**:
 
-| Purpose                    | Description                                   | Status                   |
-| -------------------------- | --------------------------------------------- | ------------------------ |
-| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Functional ⚠️ (see gaps) |
-| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅              |
-| **C. Server Sync**         | Upload/download individual operations         | Design Only 📋           |
-| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅              |
+| Purpose                    | Description                                   | Status         |
+| -------------------------- | --------------------------------------------- | -------------- |
+| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅    |
+| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅    |
+| **C. Server Sync**         | Upload/download individual operations         | Design Only 📋 |
+| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅    |
 
-> **⚠️ Known Gaps**: Migration safety (A.7.12) and tail ops consistency (A.7.13) are documented requirements but NOT yet implemented. These are critical for production use with schema migrations.
+> **✅ Migration Ready**: Migration safety (A.7.12), tail ops consistency (A.7.13), and unified migration interface (A.7.15) are now implemented. The system is ready for schema migrations when `CURRENT_SCHEMA_VERSION > 1`.
 
 This document is structured around these four purposes. Most complexity lives in **Part A** (local persistence). **Part B** is a thin bridge to PFAPI. **Part C** handles operation-based sync with servers. **Part D** integrates validation and automatic repair.
 
@@ -769,7 +769,7 @@ To handle synchronization between clients on different schema versions, the syst
 
 ### A.7.12 Migration Safety
 
-**Status:** Requirement (Not Implemented)
+**Status:** Implemented ✅
 
 Migrations are critical and risky. To prevent data loss if a migration crashes mid-process:
 
@@ -779,7 +779,7 @@ Migrations are critical and risky. To prevent data loss if a migration crashes m
 
 ### A.7.13 Tail Ops Consistency
 
-**Status:** Requirement (Not Implemented)
+**Status:** Implemented ✅
 
 **What are Tail Ops?**
 When the app starts, it loads the most recent snapshot (e.g., from yesterday). It then loads all operations that occurred _after_ that snapshot (the "tail") to reconstruct the exact state at the moment the app was closed.
@@ -813,7 +813,7 @@ The **Tail Ops MUST be migrated** during hydration.
 
 ### A.7.15 Unified State and Operation Migrations
 
-**Status:** Design Ready (Not Implemented)
+**Status:** Implemented ✅
 
 State migrations and operation migrations are closely related—both handle the same underlying data model changes. This section defines how they work together.
 
@@ -1612,17 +1612,17 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 - Persistent action metadata on all model actions
 - Rollback notification on persistence failure (shows snackbar with reload action)
 - Hydration optimizations (skip replay for SyncImport, save snapshot after >10 ops replayed)
+- **Migration safety backup (A.7.12)** - Creates backup before migration, restores on failure
+- **Tail ops migration (A.7.13)** - Migrates operations during hydration before replay
+- **Unified migration interface (A.7.15)** - `SchemaMigration` includes both `migrateState` and optional `migrateOperation`
 
-### Not Implemented ⚠️ (Critical for Schema Migrations)
+### Not Implemented ⚠️
 
-| Item                            | Section | Risk if Missing                                         |
-| ------------------------------- | ------- | ------------------------------------------------------- |
-| **Migration safety backup**     | A.7.12  | Data loss if migration crashes mid-process              |
-| **Tail ops migration**          | A.7.13  | Data corruption when replaying old ops after update     |
-| **Operation-level migration**   | A.7.11  | Conflicts may compare mismatched schemas                |
-| **Unified migration interface** | A.7.15  | Easy to forget op migration when adding state migration |
+| Item                            | Section | Risk if Missing                          |
+| ------------------------------- | ------- | ---------------------------------------- |
+| **Conflict-aware op migration** | A.7.11  | Conflicts may compare mismatched schemas |
 
-> **Note**: These are only critical when `CURRENT_SCHEMA_VERSION > 1`. Currently safe since no migrations exist.
+> **Note**: A.7.11 (conflict-aware migration) is only needed when Part C (Server Sync) is implemented. The local migration system (A.7.12, A.7.13, A.7.15) is complete.
 
 ## Part B: Legacy Sync Bridge
 
