@@ -154,6 +154,8 @@ graph TD
 
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
+> **Note:** Sections 3, 4.1, and 4.2 describe **planned architecture** that is not yet implemented. Currently, only state cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration (`migrateOperation()`) is not implemented—tail ops are replayed directly without per-operation migration.
+
 This diagram visualizes the "Receiver-Side Migration" strategy. The Migration Layer acts as a shield, ensuring that _only_ operations matching the current schema version ever reach the core conflict detection and application logic.
 
 ```mermaid
@@ -282,13 +284,13 @@ graph TD
     subgraph "Hybrid Manifest File (JSON)"
         ManVer[Version: 2]:::file
         SnapRef[Last Snapshot: 'snap_123.json']:::file
-        Buffer[Embedded Ops (Buffer)<br/>[Op1, Op2, ...]]:::buffer
-        ExtFiles[External Files List<br/>['ops_A.json', ...]]:::file
+        Buffer[Embedded Ops Buffer<br/>Op1, Op2, ...]:::buffer
+        ExtFiles[External Files List<br/>ops_A.json, ...]:::file
     end
 
     subgraph "Sync Logic (Upload Path)"
         Start((Start Sync)) --> ReadMan[Download Manifest]
-        ReadMan --> CheckSize{Buffer Full?<br/>(> 50 ops)}
+        ReadMan --> CheckSize{Buffer Full?<br/>more than 50 ops}
 
         CheckSize -- No --> AppendBuffer[Append to<br/>Embedded Ops]:::action
         AppendBuffer --> WriteMan[Upload Manifest]:::io
