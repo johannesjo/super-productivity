@@ -433,6 +433,12 @@ export class OperationLogSyncService {
 
     // Apply non-conflicting ops
     if (nonConflicting.length > 0) {
+      // Store operations in IndexedDB before applying
+      for (const op of nonConflicting) {
+        if (!(await this.opLogStore.hasOp(op.id))) {
+          await this.opLogStore.append(op, 'remote');
+        }
+      }
       await this.operationApplier.applyOperations(nonConflicting);
     }
 
