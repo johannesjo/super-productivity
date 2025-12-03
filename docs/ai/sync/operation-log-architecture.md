@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C Implemented
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025 (rollback + rejected ops)
+**Last Updated:** December 3, 2025 (hydration optimizations, isSyncInProgress check)
 
 ---
 
@@ -68,8 +68,9 @@ interface OperationLogEntry {
 interface StateCache {
   state: AllSyncModels; // Full snapshot
   lastAppliedOpSeq: number;
-  savedAt: number;
-  schemaVersion: number;
+  vectorClock: VectorClock; // Current merged vector clock
+  compactedAt: number; // When this snapshot was created
+  schemaVersion?: number; // Optional for backward compatibility
 }
 ```
 
@@ -190,8 +191,20 @@ OperationLogHydratorService
     │
     └──► Load tail ops (seq > snapshot.lastAppliedOpSeq)
               │
-              └──► Replay ops (prevents re-logging via isRemote flag)
+              ├──► If last op is SyncImport: load directly (skip replay)
+              │
+              ├──► Otherwise: Replay ops (prevents re-logging via isRemote flag)
+              │
+              └──► If replayed >10 ops: Save new snapshot for faster future loads
 ```
+
+### Hydration Optimizations
+
+Two optimizations speed up hydration:
+
+1. **Skip replay for SyncImport**: When the last operation in the log is a `SyncImport` (full state import), the hydrator loads it directly instead of replaying all preceding operations. This significantly speeds up initial load after imports or syncs.
+
+2. **Save snapshot after replay**: After replaying more than 10 tail operations, a new state cache snapshot is saved. This avoids replaying the same operations on subsequent startups.
 
 ### Genesis Migration
 
@@ -206,7 +219,8 @@ async createGenesisSnapshot(): Promise<void> {
   await this.opLogStore.saveStateCache({
     state: allModels,
     lastAppliedOpSeq: 0,
-    savedAt: Date.now(),
+    vectorClock: {},
+    compactedAt: Date.now(),
     schemaVersion: CURRENT_SCHEMA_VERSION
   });
 }
@@ -441,8 +455,11 @@ private async writeOperation(op: Operation): Promise<void> {
   // 1. Write to SUP_OPS (Part A)
   await this.opLogStore.appendOperation(op);
 
-  // 2. Bridge to PFAPI (Part B)
-  await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(this.clientId);
+  // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
+  // Skip if sync is in progress (database locked) - the op is already safe in SUP_OPS
+  if (!this.pfapiService.pf.isSyncInProgress) {
+    await this.pfapiService.pf.metaModel.incrementVectorClockForLocalChange(this.clientId);
+  }
 
   // 3. Broadcast to other tabs (Part A)
   this.multiTabCoordinator.broadcastOperation(op);
@@ -454,6 +471,7 @@ This ensures:
 - PFAPI can detect "there are local changes to sync"
 - Legacy sync providers work unchanged
 - No changes needed to PFAPI sync protocol
+- **No lock errors during sync** - META_MODEL update is skipped when sync is in progress (op is still safely persisted in SUP_OPS)
 
 ## B.3 Sync Download Persistence
 
@@ -525,8 +543,6 @@ export class PfapiStoreDelegateService {
         this._store.select(selectTaskRepeatCfgFeatureState),
         this._store.select(selectMenuTreeState),
         this._store.select(selectTimeTrackingState),
-        this._store.select(selectImprovementFeatureState),
-        this._store.select(selectObstructionFeatureState),
         this._store.select(selectPluginUserDataFeatureState),
         this._store.select(selectPluginMetadataFeatureState),
         this._store.select(selectReminderFeatureState),
@@ -628,6 +644,8 @@ async downloadRemoteOps(syncProvider: OperationSyncCapable): Promise<void> {
 ```
 
 ## C.3 File-Based Sync Fallback
+
+THE ACTUAL SYNC PROTOCOL WORKS NOT LIKE THIS. THIS IS JUST AN IDEA if we later want to connect the two approaches.
 
 For providers without API support (WebDAV/Dropbox), operations are synced via files:
 
@@ -753,6 +771,8 @@ interface OperationDependency {
 - Persistent action metadata on all model actions
 - **Rollback notification on persistence failure** (shows snackbar with reload action)
 - **Rejected operation tracking** (`rejectedAt` field, excluded from sync)
+- **Skip META_MODEL update during sync** (prevents lock errors when user makes changes during sync)
+- **Hydration optimizations** (skip replay for SyncImport, save snapshot after >10 ops replayed)
 
 ## Future Enhancements 🔮
 
@@ -760,11 +780,8 @@ interface OperationDependency {
 | --------------------- | -------------------------------------------- | -------- |
 | Auto-merge            | Automatic merge for non-conflicting fields   | Low      |
 | Undo/Redo             | Leverage op-log for undo history             | Low      |
-| Offline queue UI      | Show pending sync operations to user         | Low      |
-| Op-log viewer         | Debug panel for viewing operation history    | Medium   |
 | IndexedDB index       | Index on `syncedAt` for faster getUnsynced() | Low      |
 | Persistent compaction | Track ops since compaction across restarts   | Low      |
-| Diff-based storage    | Store diffs for large text fields (notes)    | Defer    |
 
 ---
 
