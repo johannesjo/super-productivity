@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -43,9 +49,7 @@ export class DialogConflictResolutionComponent {
   // Track resolution for each conflict by entityId
   resolutions = signal<Map<string, ConflictResolution>>(new Map());
 
-  get allResolved(): boolean {
-    return this.resolutions().size === this.data.conflicts.length;
-  }
+  allResolved = computed(() => this.resolutions().size === this.data.conflicts.length);
 
   getResolution(entityId: string): ConflictResolution | undefined {
     return this.resolutions().get(entityId);

@@ -102,7 +102,7 @@
   <button
     mat-flat-button
     color="primary"
-    [disabled]="!allResolved"
+    [disabled]="!allResolved()"
     (click)="submitResolutions()"
   >
     {{ 'G.APPLY' | translate }}
