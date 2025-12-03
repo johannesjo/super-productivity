@@ -359,6 +359,20 @@ export class Pfapi<const MD extends ModelCfgs> {
     isSkipLegacyWarnings: boolean = false,
     isForceConflict: boolean = false,
   ): Promise<void> {
+    // Validate that backup.data exists
+    if (!backup.data) {
+      PFLog.err(
+        `${this.importCompleteBackup.name}() backup.data is ${backup.data}. ` +
+          `Backup keys: ${Object.keys(backup).join(', ')}. ` +
+          `This might indicate a malformed backup file format.`,
+      );
+      throw new Error(
+        `Invalid backup format: backup.data is ${backup.data}. ` +
+          `Expected a nested 'data' property containing the model data. ` +
+          `Backup has keys: ${Object.keys(backup).join(', ')}`,
+      );
+    }
+
     // First import the data
     await this.importAllSycModelData({
       data: backup.data,
@@ -414,6 +428,18 @@ export class Pfapi<const MD extends ModelCfgs> {
     data = dataAfter;
 
     if (this.cfg?.validate) {
+      // Debug logging for archive validation issues
+      const dataAny = data as any;
+      PFLog.normal(`${this.importAllSycModelData.name}() pre-validation check:`, {
+        hasArchiveYoung: 'archiveYoung' in dataAny,
+        archiveYoungType: typeof dataAny?.archiveYoung,
+        archiveYoungIsNull: dataAny?.archiveYoung === null,
+        hasArchiveOld: 'archiveOld' in dataAny,
+        archiveOldType: typeof dataAny?.archiveOld,
+        archiveOldIsNull: dataAny?.archiveOld === null,
+        dataKeys: Object.keys(dataAny || {}),
+      });
+
       const validationResult = this.cfg.validate(data);
       if (!validationResult.success) {
         PFLog.critical(
