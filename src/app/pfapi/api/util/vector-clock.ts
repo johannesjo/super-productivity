@@ -124,16 +124,16 @@ export const compareVectorClocks = (
 ): VectorClockComparison => {
   // Handle null/undefined cases
   if (isVectorClockEmpty(a) && isVectorClockEmpty(b)) {
-    PFLog.err('BOTH VECTOR CLOCKS EMPTY!!!');
-    return VectorClockComparison.CONCURRENT;
+    // Both empty = equal (both have no history)
+    return VectorClockComparison.EQUAL;
   }
   if (isVectorClockEmpty(a)) {
-    PFLog.err('EMPTY VECTOR CLOCK a !!!');
-    return VectorClockComparison.CONCURRENT;
+    // a is empty, b has history = a happened before b (a < b)
+    return VectorClockComparison.LESS_THAN;
   }
   if (isVectorClockEmpty(b)) {
-    PFLog.err('EMPTY VECTOR CLOCK b !!!');
-    return VectorClockComparison.CONCURRENT;
+    // b is empty, a has history = a happened after b (a > b)
+    return VectorClockComparison.GREATER_THAN;
   }
 
   // Safe type assertion after null checks
