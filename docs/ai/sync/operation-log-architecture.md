@@ -1,22 +1,23 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, C Implemented
+**Status:** Parts A, B, C, D Implemented
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025 (hydration optimizations, isSyncInProgress check)
+**Last Updated:** December 3, 2025 (validation & repair integration)
 
 ---
 
 ## Overview
 
-The Operation Log serves **three distinct purposes**:
+The Operation Log serves **four distinct purposes**:
 
-| Purpose                   | Description                                   | Status      |
-| ------------------------- | --------------------------------------------- | ----------- |
-| **A. Local Persistence**  | Fast writes, crash recovery, event sourcing   | Complete ✅ |
-| **B. Legacy Sync Bridge** | Vector clock updates for PFAPI sync detection | Complete ✅ |
-| **C. Server Sync**        | Upload/download individual operations         | Complete ✅ |
+| Purpose                    | Description                                   | Status      |
+| -------------------------- | --------------------------------------------- | ----------- |
+| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅ |
+| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅ |
+| **C. Server Sync**         | Upload/download individual operations         | Complete ✅ |
+| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅ |
 
-This document is structured around these three purposes. Most complexity lives in **Part A** (local persistence). **Part B** is a thin bridge to PFAPI. **Part C** handles operation-based sync with servers.
+This document is structured around these four purposes. Most complexity lives in **Part A** (local persistence). **Part B** is a thin bridge to PFAPI. **Part C** handles operation-based sync with servers. **Part D** integrates validation and automatic repair.
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
@@ -140,7 +141,15 @@ interface Operation {
   schemaVersion: number; // For migrations
 }
 
-type OpType = 'CRT' | 'UPD' | 'DEL' | 'MOV' | 'BATCH' | 'SYNC_IMPORT' | 'BACKUP_IMPORT';
+type OpType =
+  | 'CRT'
+  | 'UPD'
+  | 'DEL'
+  | 'MOV'
+  | 'BATCH'
+  | 'SYNC_IMPORT'
+  | 'BACKUP_IMPORT'
+  | 'REPAIR';
 ```
 
 ### Persistent Action Pattern
@@ -746,6 +755,191 @@ interface OperationDependency {
 
 ---
 
+# Part D: Data Validation & Repair
+
+The operation log integrates with PFAPI's validation and repair system to prevent data corruption and automatically recover from invalid states.
+
+## D.1 Validation Architecture
+
+Four validation checkpoints ensure data integrity throughout the operation lifecycle:
+
+| Checkpoint | Location                            | When                      | Action on Failure                          |
+| ---------- | ----------------------------------- | ------------------------- | ------------------------------------------ |
+| **A**      | `operation-log.effects.ts`          | Before IndexedDB write    | Reject operation, log error, show snackbar |
+| **B**      | `operation-log-hydrator.service.ts` | After loading snapshot    | Attempt repair, create REPAIR op           |
+| **C**      | `operation-log-hydrator.service.ts` | After replaying tail ops  | Attempt repair, create REPAIR op           |
+| **D**      | `operation-log-sync.service.ts`     | After applying remote ops | Attempt repair, create REPAIR op           |
+
+## D.2 REPAIR Operation Type
+
+When validation fails at checkpoints B, C, or D, the system attempts automatic repair using PFAPI's `dataRepair()` function. If repair succeeds, a REPAIR operation is created:
+
+```typescript
+enum OpType {
+  // ... existing types
+  Repair = 'REPAIR', // Auto-repair operation with full repaired state
+}
+
+interface RepairPayload {
+  appDataComplete: AppDataCompleteNew; // Full repaired state
+  repairSummary: RepairSummary; // What was fixed
+}
+
+interface RepairSummary {
+  entityStateFixed: number; // Fixed ids/entities array sync
+  orphanedEntitiesRestored: number; // Tasks restored from archive
+  invalidReferencesRemoved: number; // Non-existent project/tag IDs removed
+  relationshipsFixed: number; // Project/tag ID consistency
+  structureRepaired: number; // Menu tree, inbox project creation
+  typeErrorsFixed: number; // Typia errors auto-fixed
+}
+```
+
+### REPAIR Operation Behavior
+
+- **During replay**: REPAIR operations load state directly (like SyncImport), skipping prior operations
+- **User notification**: Shows snackbar with count of issues fixed
+- **Audit trail**: REPAIR operations are visible in the operation log for debugging
+
+## D.3 Checkpoint A: Payload Validation
+
+Before writing to IndexedDB, operation payloads are validated in `validate-operation-payload.ts`:
+
+```typescript
+validateOperationPayload(op: Operation): PayloadValidationResult {
+  // 1. Structural validation - payload must be object
+  // 2. OpType-specific validation:
+  //    - CREATE: entity with valid 'id' field required
+  //    - UPDATE: id + changes, or entity with id required
+  //    - DELETE: entityId/entityIds required
+  //    - MOVE: ids array required
+  //    - BATCH: non-empty payload required
+  //    - SYNC_IMPORT/BACKUP_IMPORT: appDataComplete structure required
+  //    - REPAIR: skip (internally generated)
+}
+```
+
+This validation is **intentionally lenient** - it checks structural requirements rather than deep entity validation. Full Typia validation happens at state checkpoints.
+
+## D.4 Checkpoints B & C: Hydration Validation
+
+During hydration, state is validated at two points:
+
+```
+App Startup
+    │
+    ▼
+Load snapshot from state_cache
+    │
+    ├──► CHECKPOINT B: Validate snapshot
+    │         │
+    │         └──► If invalid: repair + create REPAIR op
+    │
+    ▼
+Dispatch loadAllData(snapshot)
+    │
+    ▼
+Replay tail operations
+    │
+    └──► CHECKPOINT C: Validate current state
+              │
+              └──► If invalid: repair + create REPAIR op + dispatch repaired state
+```
+
+### Implementation
+
+```typescript
+// In operation-log-hydrator.service.ts
+private async _validateAndRepairState(state: AppDataCompleteNew): Promise<AppDataCompleteNew> {
+  if (this._isRepairInProgress) return state; // Prevent infinite loops
+
+  const result = this.validateStateService.validateAndRepair(state);
+  if (!result.wasRepaired) return state;
+
+  this._isRepairInProgress = true;
+  try {
+    await this.repairOperationService.createRepairOperation(
+      result.repairedState,
+      result.repairSummary,
+    );
+    return result.repairedState;
+  } finally {
+    this._isRepairInProgress = false;
+  }
+}
+```
+
+## D.5 Checkpoint D: Post-Sync Validation
+
+After applying remote operations, state is validated:
+
+- In `operation-log-sync.service.ts` - after applying non-conflicting ops (when no conflicts)
+- In `conflict-resolution.service.ts` - after resolving all conflicts
+
+This catches:
+
+- State drift from remote operations
+- Corruption introduced during sync
+- Invalid operations from other clients
+
+## D.6 ValidateStateService
+
+Wraps PFAPI's validation and repair functionality:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class ValidateStateService {
+  validateState(state: AppDataCompleteNew): StateValidationResult {
+    // 1. Run Typia schema validation
+    const typiaResult = validateAllData(state);
+
+    // 2. Run cross-model relationship validation
+    const isRelatedValid = isRelatedModelDataValid(state);
+
+    return { isValid, typiaErrors, crossModelError };
+  }
+
+  validateAndRepair(state: AppDataCompleteNew): ValidateAndRepairResult {
+    // 1. Validate
+    // 2. If invalid: run dataRepair()
+    // 3. Re-validate repaired state
+    // 4. Return repaired state + summary
+  }
+}
+```
+
+## D.7 RepairOperationService
+
+Creates REPAIR operations and notifies the user:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class RepairOperationService {
+  async createRepairOperation(
+    repairedState: AppDataCompleteNew,
+    repairSummary: RepairSummary,
+  ): Promise<void> {
+    // 1. Create REPAIR operation with repaired state + summary
+    // 2. Append to operation log
+    // 3. Save state cache snapshot
+    // 4. Show notification to user
+  }
+
+  static createEmptyRepairSummary(): RepairSummary {
+    return {
+      entityStateFixed: 0,
+      orphanedEntitiesRestored: 0,
+      invalidReferencesRemoved: 0,
+      relationshipsFixed: 0,
+      structureRepaired: 0,
+      typeErrorsFixed: 0,
+    };
+  }
+}
+```
+
+---
+
 # Implementation Status
 
 ## Complete ✅
@@ -773,6 +967,13 @@ interface OperationDependency {
 - **Rejected operation tracking** (`rejectedAt` field, excluded from sync)
 - **Skip META_MODEL update during sync** (prevents lock errors when user makes changes during sync)
 - **Hydration optimizations** (skip replay for SyncImport, save snapshot after >10 ops replayed)
+- **Payload validation at write** (Checkpoint A - structural validation before IndexedDB write)
+- **State validation during hydration** (Checkpoints B & C - Typia + cross-model validation)
+- **Post-sync validation** (Checkpoint D - validation after applying remote ops)
+- **REPAIR operation type** (auto-repair with full state + repair summary)
+- **ValidateStateService** (wraps PFAPI validation + repair)
+- **RepairOperationService** (creates REPAIR ops, user notification)
+- **User notification on repair** (snackbar with issue count)
 
 ## Future Enhancements 🔮
 
@@ -803,7 +1004,10 @@ src/app/core/persistence/operation-log/
 ├── multi-tab-coordinator.service.ts      # BroadcastChannel coordination
 ├── schema-migration.service.ts           # State schema migrations
 ├── dependency-resolver.service.ts        # Extract/check operation dependencies
-└── conflict-resolution.service.ts        # Conflict UI presentation
+├── conflict-resolution.service.ts        # Conflict UI presentation
+├── validate-state.service.ts             # Typia + cross-model validation wrapper
+├── validate-operation-payload.ts         # Checkpoint A - payload validation
+└── repair-operation.service.ts           # REPAIR operation creation + notification
 
 src/app/pfapi/
 ├── pfapi-store-delegate.service.ts       # Reads NgRx for sync (Part B)

@@ -12,11 +12,14 @@ import {
 import { PFLog } from '../../log';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
-import { Operation, OpType } from './operation.types';
+import { Operation, OpType, RepairPayload } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
+import { ValidateStateService } from './validate-state.service';
+import { RepairOperationService } from './repair-operation.service';
+import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 
 type StateCache = MigratableStateCache;
 
@@ -36,6 +39,11 @@ export class OperationLogHydratorService {
   private pfapiService = inject(PfapiService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private snackService = inject(SnackService);
+  private validateStateService = inject(ValidateStateService);
+  private repairOperationService = inject(RepairOperationService);
+
+  // Flag to prevent re-validation immediately after repair
+  private _isRepairInProgress = false;
 
   async hydrateStore(): Promise<void> {
     PFLog.normal('OperationLogHydratorService: Starting hydration...');
@@ -76,29 +84,37 @@ export class OperationLogHydratorService {
         PFLog.normal('OperationLogHydratorService: Snapshot found. Hydrating state...', {
           lastAppliedOpSeq: snapshot.lastAppliedOpSeq,
         });
-        // 3. Hydrate NgRx with snapshot
-        // We cast state to any because AllSyncModels type is complex and we trust the cache
-        this.store.dispatch(loadAllData({ appDataComplete: snapshot.state as any }));
+
+        // CHECKPOINT B: Validate and repair snapshot state before dispatching
+        let stateToLoad = snapshot.state as AppDataCompleteNew;
+        if (!this._isRepairInProgress) {
+          const validationResult = await this._validateAndRepairState(
+            stateToLoad,
+            'snapshot',
+          );
+          if (validationResult.wasRepaired && validationResult.repairedState) {
+            stateToLoad = validationResult.repairedState;
+            // Update snapshot with repaired state
+            snapshot = { ...snapshot, state: stateToLoad };
+          }
+        }
+
+        // 3. Hydrate NgRx with (possibly repaired) snapshot
+        this.store.dispatch(loadAllData({ appDataComplete: stateToLoad as any }));
 
         // 4. Replay tail operations
         const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
 
         if (tailOps.length > 0) {
-          // Optimization: If last op is SyncImport, skip replay and load it directly
+          // Optimization: If last op is SyncImport or Repair, skip replay and load directly
           const lastOp = tailOps[tailOps.length - 1].op;
-          if (lastOp.opType === OpType.SyncImport && lastOp.payload) {
+          const appData = this._extractFullStateFromOp(lastOp);
+          if (appData) {
             PFLog.normal(
-              `OperationLogHydratorService: Last of ${tailOps.length} tail ops is SyncImport, loading directly`,
+              `OperationLogHydratorService: Last of ${tailOps.length} tail ops is ${lastOp.opType}, loading directly`,
             );
-            const payload = lastOp.payload as { appDataComplete?: unknown } | unknown;
-            const appData =
-              typeof payload === 'object' &&
-              payload !== null &&
-              'appDataComplete' in payload
-                ? payload.appDataComplete
-                : payload;
             this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
-            // No snapshot save needed - SyncImport already contains full state
+            // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
             PFLog.normal(
@@ -115,6 +131,11 @@ export class OperationLogHydratorService {
                 `OperationLogHydratorService: Saving new snapshot after replaying ${tailOps.length} ops`,
               );
               await this._saveCurrentStateAsSnapshot();
+            }
+
+            // CHECKPOINT C: Validate state after replaying tail operations
+            if (!this._isRepairInProgress) {
+              await this._validateAndRepairCurrentState('tail-replay');
             }
           }
         }
@@ -136,21 +157,15 @@ export class OperationLogHydratorService {
           return;
         }
 
-        // Optimization: If last op is SyncImport, skip replay and load it directly
+        // Optimization: If last op is SyncImport or Repair, skip replay and load directly
         const lastOp = allOps[allOps.length - 1].op;
-        if (lastOp.opType === OpType.SyncImport && lastOp.payload) {
+        const appData = this._extractFullStateFromOp(lastOp);
+        if (appData) {
           PFLog.normal(
-            `OperationLogHydratorService: Last of ${allOps.length} ops is SyncImport, loading directly`,
+            `OperationLogHydratorService: Last of ${allOps.length} ops is ${lastOp.opType}, loading directly`,
           );
-          const payload = lastOp.payload as { appDataComplete?: unknown } | unknown;
-          const appData =
-            typeof payload === 'object' &&
-            payload !== null &&
-            'appDataComplete' in payload
-              ? payload.appDataComplete
-              : payload;
           this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
-          // No snapshot save needed - SyncImport already contains full state
+          // No snapshot save needed - full state ops already contain complete state
         } else {
           PFLog.normal(
             `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
@@ -165,6 +180,11 @@ export class OperationLogHydratorService {
             `OperationLogHydratorService: Saving snapshot after replaying ${allOps.length} ops`,
           );
           await this._saveCurrentStateAsSnapshot();
+
+          // CHECKPOINT C: Validate state after replaying all operations
+          if (!this._isRepairInProgress) {
+            await this._validateAndRepairCurrentState('full-replay');
+          }
         }
 
         PFLog.normal('OperationLogHydratorService: Full replay complete.');
@@ -216,6 +236,47 @@ export class OperationLogHydratorService {
     }
 
     return true;
+  }
+
+  /**
+   * Extracts full application state from operations that contain complete state.
+   * Returns undefined for operations that don't contain full state (normal CRUD ops).
+   *
+   * Operations that contain full state:
+   * - OpType.SyncImport: Full state from remote sync
+   * - OpType.Repair: Full repaired state from auto-repair
+   * - OpType.BackupImport: Full state from backup file restore
+   */
+  private _extractFullStateFromOp(op: Operation): unknown | undefined {
+    if (!op.payload) {
+      return undefined;
+    }
+
+    // Handle full state operations
+    if (
+      op.opType === OpType.SyncImport ||
+      op.opType === OpType.BackupImport ||
+      op.opType === OpType.Repair
+    ) {
+      const payload = op.payload as
+        | { appDataComplete?: unknown }
+        | RepairPayload
+        | unknown;
+
+      // Check if payload has appDataComplete wrapper
+      if (
+        typeof payload === 'object' &&
+        payload !== null &&
+        'appDataComplete' in payload
+      ) {
+        return (payload as { appDataComplete: unknown }).appDataComplete;
+      }
+
+      // Legacy format: payload IS the appDataComplete
+      return payload;
+    }
+
+    return undefined;
   }
 
   /**
@@ -418,6 +479,66 @@ export class OperationLogHydratorService {
     } catch (e) {
       PFLog.err('OperationLogHydratorService: Error during hydrateFromRemoteSync', e);
       throw e;
+    }
+  }
+
+  /**
+   * Validates a state object and repairs it if necessary.
+   * Used for validating snapshot state before dispatching.
+   *
+   * @param state - The state to validate
+   * @param context - Context string for logging (e.g., 'snapshot', 'tail-replay')
+   * @returns Validation result with optional repaired state
+   */
+  private async _validateAndRepairState(
+    state: AppDataCompleteNew,
+    context: string,
+  ): Promise<{ wasRepaired: boolean; repairedState?: AppDataCompleteNew }> {
+    const result = this.validateStateService.validateAndRepair(state);
+
+    if (!result.wasRepaired) {
+      return { wasRepaired: false };
+    }
+
+    if (!result.repairedState || !result.repairSummary) {
+      PFLog.err(
+        `[OperationLogHydratorService] Repair failed for ${context}:`,
+        result.error,
+      );
+      return { wasRepaired: false };
+    }
+
+    // Create REPAIR operation to persist the repaired state
+    this._isRepairInProgress = true;
+    try {
+      await this.repairOperationService.createRepairOperation(
+        result.repairedState,
+        result.repairSummary,
+      );
+      PFLog.log(`[OperationLogHydratorService] Created REPAIR operation for ${context}`);
+    } finally {
+      this._isRepairInProgress = false;
+    }
+
+    return { wasRepaired: true, repairedState: result.repairedState };
+  }
+
+  /**
+   * Validates the current NgRx state and repairs it if necessary.
+   * Used after replaying operations.
+   *
+   * @param context - Context string for logging
+   */
+  private async _validateAndRepairCurrentState(context: string): Promise<void> {
+    // Get current state from NgRx
+    const currentState =
+      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
+
+    const result = await this._validateAndRepairState(currentState, context);
+
+    if (result.wasRepaired && result.repairedState) {
+      // Dispatch the repaired state to NgRx
+      this.store.dispatch(loadAllData({ appDataComplete: result.repairedState as any }));
     }
   }
 }

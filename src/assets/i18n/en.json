@@ -1176,6 +1176,8 @@
         "HYDRATION_FAILED": "Failed to load data. Please reload the app.",
         "COMPACTION_FAILED": "Database cleanup failed. App may slow down.",
         "CONFLICT_RESOLUTION_FAILED": "Sync conflict resolution failed. Please reload.",
+        "DATA_REPAIRED": "Data automatically repaired ({{count}} issues fixed)",
+        "INVALID_OPERATION_PAYLOAD": "Invalid operation payload. Action not saved.",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
       },
