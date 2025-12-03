@@ -14,6 +14,12 @@ import { validateMetaBase } from '../util/validate-meta-base';
 import { SyncProviderId } from '../pfapi.const';
 
 /**
+ * Lock TTL in milliseconds (5 minutes)
+ * Locks older than this are considered stale and ignored
+ */
+const LOCK_TTL_MS = 5 * 60 * 1000;
+
+/**
  * Service responsible for synchronizing metadata between local and remote storage
  */
 export class MetaSyncService {
@@ -63,16 +69,46 @@ export class MetaSyncService {
 
       // Check if file is locked
       if (r.dataStr.startsWith(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX)) {
-        const lockClientId = r.dataStr
+        const lockContent = r.dataStr
           .slice(MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX.length)
           .replace(/\n/g, '');
 
-        // Check if lock is from this client
-        const currentClientId = await this._metaModelCtrl.loadClientId();
-        if (lockClientId === currentClientId) {
-          throw new LockFromLocalClientPresentError();
+        // Parse lock content - format: "clientId:timestamp" or legacy "clientId"
+        const colonIndex = lockContent.lastIndexOf(':');
+        let lockClientId: string;
+        let lockTimestamp: number | null = null;
+
+        if (colonIndex > 0) {
+          // New format with timestamp
+          lockClientId = lockContent.slice(0, colonIndex);
+          lockTimestamp = parseInt(lockContent.slice(colonIndex + 1), 10);
+        } else {
+          // Legacy format without timestamp - treat as potentially stale
+          lockClientId = lockContent;
         }
-        throw new LockPresentError(lockClientId);
+
+        const currentClientId = await this._metaModelCtrl.loadClientId();
+
+        // Check if lock is expired (TTL exceeded or no timestamp = legacy lock)
+        const lockAge = lockTimestamp ? Date.now() - lockTimestamp : Infinity;
+        const isLockExpired = lockAge > LOCK_TTL_MS;
+
+        if (isLockExpired) {
+          PFLog.warn(
+            `${MetaSyncService.L}.${this.download.name}(): Stale lock detected, ignoring`,
+            {
+              lockClientId,
+              lockTimestamp,
+              lockAge,
+              ttl: LOCK_TTL_MS,
+            },
+          );
+          // Continue to regular processing - stale lock will be overwritten on next upload
+        } else if (lockClientId === currentClientId) {
+          throw new LockFromLocalClientPresentError();
+        } else {
+          throw new LockPresentError(lockClientId);
+        }
       }
 
       // Process data
@@ -150,6 +186,7 @@ export class MetaSyncService {
 
   /**
    * Create a lock on the remote metadata file
+   * Lock format: SYNC_IN_PROGRESS__clientId:timestamp
    * @param revToMatch Optional revision that the remote file must match for the lock to succeed
    * @returns Promise resolving to the new revision string
    */
@@ -157,11 +194,15 @@ export class MetaSyncService {
     PFLog.normal(`${MetaSyncService.L}.${this.lock.name}()`, { revToMatch });
     const syncProvider = this._currentSyncProvider$.getOrError();
     const clientId = await this._metaModelCtrl.loadClientId();
+    const timestamp = Date.now();
+
+    // Lock content format: "SYNC_IN_PROGRESS__clientId:timestamp"
+    const lockContent = `${MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX}${clientId}:${timestamp}`;
 
     return (
       await syncProvider.uploadFile(
         MetaModelCtrl.META_MODEL_REMOTE_FILE_NAME,
-        MetaModelCtrl.META_FILE_LOCK_CONTENT_PREFIX + clientId,
+        lockContent,
         revToMatch,
         true,
       )

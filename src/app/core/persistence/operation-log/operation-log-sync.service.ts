@@ -423,6 +423,7 @@ export class OperationLogSyncService {
 
   /**
    * Process remote operations: detect conflicts and apply non-conflicting ones
+   * If applying operations fails, rolls back any stored operations to maintain consistency.
    */
   private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
     const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
@@ -431,15 +432,50 @@ export class OperationLogSyncService {
       appliedFrontierByEntity,
     );
 
-    // Apply non-conflicting ops
+    // Apply non-conflicting ops with rollback on failure
     if (nonConflicting.length > 0) {
-      // Store operations in IndexedDB before applying
-      for (const op of nonConflicting) {
-        if (!(await this.opLogStore.hasOp(op.id))) {
-          await this.opLogStore.append(op, 'remote');
+      // Track ops we've stored for potential rollback
+      const storedOpIds: string[] = [];
+
+      try {
+        // Store operations in IndexedDB before applying
+        for (const op of nonConflicting) {
+          if (!(await this.opLogStore.hasOp(op.id))) {
+            await this.opLogStore.append(op, 'remote');
+            storedOpIds.push(op.id);
+          }
         }
+
+        // Apply all ops - if this fails, we need to clean up stored ops
+        await this.operationApplier.applyOperations(nonConflicting);
+      } catch (e) {
+        // Rollback: remove ops that were stored but not successfully applied
+        if (storedOpIds.length > 0) {
+          PFLog.critical(
+            'OperationLogSyncService: Failed to apply operations, rolling back stored ops',
+            {
+              storedOpIds,
+              error: e,
+            },
+          );
+
+          try {
+            await this.opLogStore.deleteOpsWhere((entry) =>
+              storedOpIds.includes(entry.op.id),
+            );
+            PFLog.normal(
+              `OperationLogSyncService: Rolled back ${storedOpIds.length} stored ops`,
+            );
+          } catch (rollbackError) {
+            PFLog.critical(
+              'OperationLogSyncService: Failed to rollback stored ops - state may be inconsistent',
+              { rollbackError, originalError: e },
+            );
+          }
+        }
+
+        throw e;
       }
-      await this.operationApplier.applyOperations(nonConflicting);
     }
 
     // Handle conflicts
