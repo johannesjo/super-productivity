@@ -9,7 +9,7 @@ import { isDataRepairPossible } from '../../../pfapi/repair/is-data-repair-possi
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { RepairSummary } from './operation.types';
 import { PFLog } from '../../log';
-import { RepairOperationService } from './repair-operation.service';
+import { RepairOperationService } from './repair-operation.service'; // Used for createEmptyRepairSummary()
 
 /**
  * Result of validating application state.

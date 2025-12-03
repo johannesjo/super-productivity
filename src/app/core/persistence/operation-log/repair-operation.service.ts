@@ -1,6 +1,5 @@
 import { Injectable, inject } from '@angular/core';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
 import { Operation, OpType, RepairPayload, RepairSummary } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
@@ -22,7 +21,6 @@ const CURRENT_SCHEMA_VERSION = 1;
 })
 export class RepairOperationService {
   private opLogStore = inject(OperationLogStoreService);
-  private pfapiService = inject(PfapiService);
   private lockService = inject(LockService);
   private snackService = inject(SnackService);
 
@@ -32,15 +30,16 @@ export class RepairOperationService {
    *
    * @param repairedState - The fully repaired application state
    * @param repairSummary - Summary of what was repaired (counts by category)
+   * @param clientId - The client ID for the operation (passed by caller to avoid circular dependency)
    * @returns The sequence number of the created operation
    */
   async createRepairOperation(
     repairedState: unknown,
     repairSummary: RepairSummary,
+    clientId: string,
   ): Promise<number> {
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
     if (!clientId) {
-      throw new Error('Failed to load clientId - cannot create repair operation');
+      throw new Error('clientId is required - cannot create repair operation');
     }
 
     const payload: RepairPayload = {
