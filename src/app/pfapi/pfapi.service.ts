@@ -216,12 +216,14 @@ export class PfapiService {
       ? { [clientId]: 2 } // Fresh vector clock
       : incrementVectorClock(currentClock, clientId);
 
+    const opId = uuidv7();
     const op: Operation = {
-      id: uuidv7(),
+      id: opId,
       actionType: '[SP_ALL] Load(import) all data',
       opType: OpType.SyncImport,
       entityType: 'ALL',
-      payload: importedData,
+      entityId: opId, // Use opId as entityId to ensure uniqueness for conflict resolution
+      payload: { appDataComplete: importedData }, // Wrap to match loadAllData action shape
       clientId,
       vectorClock: newClock,
       timestamp: Date.now(),

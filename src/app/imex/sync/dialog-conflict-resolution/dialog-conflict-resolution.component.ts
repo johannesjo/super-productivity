@@ -22,7 +22,7 @@ import { MatIcon } from '@angular/material/icon';
 export type ConflictResolution = 'local' | 'remote';
 
 export interface ConflictResolutionResult {
-  resolutions: Map<string, ConflictResolution>;
+  resolutions: Map<number, ConflictResolution>; // Keyed by conflict index
   conflicts: EntityConflict[];
 }
 
@@ -46,26 +46,25 @@ export class DialogConflictResolutionComponent {
   private _dialogRef = inject(MatDialogRef<DialogConflictResolutionComponent>);
   data = inject<{ conflicts: EntityConflict[] }>(MAT_DIALOG_DATA);
 
-  // Track resolution for each conflict by entityId
-  resolutions = signal<Map<string, ConflictResolution>>(new Map());
+  // Track resolution for each conflict by index (entityId may not be unique)
+  resolutions = signal<Map<number, ConflictResolution>>(new Map());
 
   allResolved = computed(() => this.resolutions().size === this.data.conflicts.length);
 
-  getResolution(entityId: string): ConflictResolution | undefined {
-    return this.resolutions().get(entityId);
+  getResolution(index: number): ConflictResolution | undefined {
+    return this.resolutions().get(index);
   }
 
   resolve(conflictIndex: number, resolution: ConflictResolution): void {
-    const conflict = this.data.conflicts[conflictIndex];
     const newMap = new Map(this.resolutions());
-    newMap.set(conflict.entityId, resolution);
+    newMap.set(conflictIndex, resolution);
     this.resolutions.set(newMap);
   }
 
   resolveAll(resolution: ConflictResolution): void {
-    const newMap = new Map<string, ConflictResolution>();
-    this.data.conflicts.forEach((conflict) => {
-      newMap.set(conflict.entityId, resolution);
+    const newMap = new Map<number, ConflictResolution>();
+    this.data.conflicts.forEach((_, index) => {
+      newMap.set(index, resolution);
     });
     this.resolutions.set(newMap);
   }

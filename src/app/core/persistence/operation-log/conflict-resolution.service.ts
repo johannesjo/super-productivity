@@ -45,12 +45,13 @@ export class ConflictResolutionService {
         result.resolutions,
       );
 
-      for (const conflict of conflicts) {
-        const resolution = result.resolutions.get(conflict.entityId);
+      for (let i = 0; i < conflicts.length; i++) {
+        const conflict = conflicts[i];
+        const resolution = result.resolutions.get(i); // Use index to match dialog
 
         if (!resolution) {
           PFLog.warn(
-            `ConflictResolutionService: No resolution for ${conflict.entityId}, skipping`,
+            `ConflictResolutionService: No resolution for conflict ${i} (${conflict.entityId}), skipping`,
           );
           continue;
         }
