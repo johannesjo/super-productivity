@@ -8,7 +8,7 @@ import {
 } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { select, Store } from '@ngrx/store';
-import { filter, map, mergeMap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, mergeMap, tap, withLatestFrom } from 'rxjs/operators';
 import { selectTaskFeatureState } from './task.selectors';
 import {
   selectConfigFeatureState,
@@ -21,13 +21,15 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
-import { filterLocalAction } from '../../../util/filter-local-action';
+import { filterLocalAction, filterRemoteAction } from '../../../util/filter-local-action';
+import { ArchiveService } from '../../time-tracking/archive.service';
 
 @Injectable()
 export class TaskInternalEffects {
   private _actions$ = inject(Actions);
   private _store$ = inject(Store);
   private _workContextSession = inject(WorkContextService);
+  private _archiveService = inject(ArchiveService);
 
   onAllSubTasksDone$ = createEffect(() =>
     this._actions$.pipe(
@@ -176,6 +178,23 @@ export class TaskInternalEffects {
         }
       }),
     ),
+  );
+
+  /**
+   * When receiving a remote moveToArchive operation, write the archived tasks
+   * to archiveYoung. This is necessary because SuperSyncProvider only syncs
+   * operations, not model files like archiveYoung/archiveOld.
+   */
+  writeArchivedTasksForRemoteSync$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.moveToArchive),
+        filterRemoteAction(),
+        tap(({ tasks }) => {
+          this._archiveService.writeTasksToArchiveForRemoteSync(tasks);
+        }),
+      ),
+    { dispatch: false },
   );
 
   private _findNextTask(
