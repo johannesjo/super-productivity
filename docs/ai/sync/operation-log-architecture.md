@@ -549,6 +549,45 @@ async handleFullStateImport(payload: { appDataComplete: AppDataComplete }): Prom
 
 ### A.7.5 Migration Implementation
 
+Migrations are defined in `src/app/core/persistence/operation-log/schema-migration.service.ts`.
+
+#### How to Create a New Migration
+
+1.  **Increment Version**: Update `CURRENT_SCHEMA_VERSION` to `N + 1`.
+2.  **Define Migration**: Add a new entry to the `MIGRATIONS` array.
+3.  **Implement Logic**: Write the transformation function `migrate(state)`.
+
+```typescript
+// src/app/core/persistence/operation-log/schema-migration.service.ts
+
+export const CURRENT_SCHEMA_VERSION = 2; // Increment this!
+
+const MIGRATIONS: SchemaMigration[] = [
+  {
+    fromVersion: 1,
+    toVersion: 2,
+    description: 'Add priority field to tasks',
+    migrate: (state: any) => {
+      // Deep clone or careful spread recommended
+      const newState = { ...state };
+
+      // Transform specific model
+      if (newState.task && newState.task.entities) {
+        newState.task.entities = Object.fromEntries(
+          Object.entries(newState.task.entities).map(([id, task]: [string, any]) => [
+            id,
+            { ...task, priority: task.priority ?? 'NORMAL' },
+          ]),
+        );
+      }
+      return newState;
+    },
+  },
+];
+```
+
+#### Service Implementation
+
 ```typescript
 // schema-migration.service.ts
 
@@ -558,44 +597,6 @@ interface SchemaMigration {
   description: string;
   migrate: (state: unknown) => unknown;
 }
-
-const MIGRATIONS: SchemaMigration[] = [
-  // Example migrations (not yet implemented):
-  // {
-  //   fromVersion: 1,
-  //   toVersion: 2,
-  //   description: 'Add priority field to tasks',
-  //   migrate: (state) => ({
-  //     ...state,
-  //     task: {
-  //       ...state.task,
-  //       entities: Object.fromEntries(
-  //         Object.entries(state.task.entities).map(([id, task]) => [
-  //           id,
-  //           { ...task, priority: task.priority ?? 'NORMAL' }
-  //         ])
-  //       )
-  //     }
-  //   }),
-  // },
-  // {
-  //   fromVersion: 2,
-  //   toVersion: 3,
-  //   description: 'Rename task.estimate to task.timeEstimate',
-  //   migrate: (state) => ({
-  //     ...state,
-  //     task: {
-  //       ...state.task,
-  //       entities: Object.fromEntries(
-  //         Object.entries(state.task.entities).map(([id, task]) => {
-  //           const { estimate, ...rest } = task;
-  //           return [id, { ...rest, timeEstimate: estimate }];
-  //         })
-  //       )
-  //     }
-  //   }),
-  // },
-];
 
 async migrateIfNeeded(snapshot: StateCache): Promise<StateCache> {
   let { state, schemaVersion } = snapshot;
