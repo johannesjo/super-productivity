@@ -126,7 +126,7 @@ export class PluginRunner {
       try {
         // Simple function execution with PluginAPI in scope
         const pluginFunction = new Function(
-          'plugin',
+          'PluginAPI',
           `
           'use strict';
           try {
