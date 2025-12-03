@@ -341,6 +341,17 @@ export class OperationLogStoreService {
     }
   }
 
+  /**
+   * Returns the snapshot's vector clock, which serves as a baseline for entities
+   * that haven't been modified since compaction.
+   * Used as a fallback in conflict detection to prevent false conflicts.
+   */
+  async getSnapshotVectorClock(): Promise<VectorClock | undefined> {
+    await this._ensureInit();
+    const snapshot = await this.loadStateCache();
+    return snapshot?.vectorClock;
+  }
+
   async getCurrentVectorClock(): Promise<VectorClock> {
     await this._ensureInit();
     // We need the max vector clock from cache + subsequent ops.

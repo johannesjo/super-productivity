@@ -252,12 +252,16 @@ export class OperationLogSyncService {
           await syncProvider.uploadFile(fullFilePath, JSON.stringify(chunk), null);
           updatedManifestFiles.push(fullFilePath);
           newFilesUploaded++;
+          // Only mark as synced after successful upload
+          await this.opLogStore.markSynced(chunk.map((e) => e.seq));
         } else {
           PFLog.normal(
             `OperationLogSyncService: Skipping upload for existing file ${fullFilePath}`,
           );
+          // File already exists in manifest, so these ops are already synced
+          // Mark them as synced locally to prevent re-upload attempts
+          await this.opLogStore.markSynced(chunk.map((e) => e.seq));
         }
-        await this.opLogStore.markSynced(chunk.map((e) => e.seq)); // Always mark as synced if already present remotely or just uploaded
       }
 
       if (newFilesUploaded > 0) {
@@ -433,7 +437,14 @@ export class OperationLogSyncService {
         appliedFrontierByEntity,
       );
 
-      // Apply non-conflicting ops
+      // Store non-conflicting ops in IndexedDB before applying (ensures durability)
+      for (const op of nonConflicting) {
+        if (!(await this.opLogStore.hasOp(op.id))) {
+          await this.opLogStore.append(op, 'remote');
+        }
+      }
+
+      // Apply non-conflicting ops (now with dependency sorting)
       await this.operationApplier.applyOperations(nonConflicting);
 
       // Handle conflicts
@@ -554,6 +565,10 @@ export class OperationLogSyncService {
     const conflicts: EntityConflict[] = [];
     const nonConflicting: Operation[] = [];
 
+    // Get the snapshot vector clock as a fallback for entities not in the frontier map
+    // This prevents false conflicts for entities that haven't been modified since compaction
+    const snapshotVectorClock = await this.opLogStore.getSnapshotVectorClock();
+
     for (const remoteOp of remoteOps) {
       const entityIdsToCheck =
         remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
@@ -566,8 +581,11 @@ export class OperationLogSyncService {
         const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
 
         // Build the frontier from everything we know locally (applied + pending)
+        // Use snapshot vector clock as fallback if no per-entity frontier exists
+        // This ensures entities modified before compaction aren't treated as having no history
+        const baselineClock = appliedFrontier || snapshotVectorClock || {};
         const allClocks = [
-          ...(appliedFrontier ? [appliedFrontier] : []),
+          baselineClock,
           ...localOpsForEntity.map((op) => op.vectorClock),
         ];
         const localFrontier = allClocks.reduce(
