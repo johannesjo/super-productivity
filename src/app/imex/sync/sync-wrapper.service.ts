@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { catchError, filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
+import { filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -67,15 +67,31 @@ export class SyncWrapperService {
   private _isSyncInProgress$ = new BehaviorSubject(false);
   isSyncInProgress$ = this._isSyncInProgress$.asObservable();
 
+  // Track when we're waiting for user input (e.g., conflict dialog)
+  // to avoid timeout errors during user decision time
+  private _isWaitingForUserInput$ = new BehaviorSubject(false);
+
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
     switchMap((isEnabled) =>
       isEnabled
         ? this._isSyncInProgress$.pipe(
             filter((isInProgress) => !isInProgress),
-            timeout(40000),
-            catchError((error) => {
-              devError('Sync wait timeout exceeded');
-              return of(undefined);
+            timeout({
+              each: 40000,
+              with: () =>
+                // If waiting for user input, don't error - just wait indefinitely
+                this._isWaitingForUserInput$.pipe(
+                  switchMap((isWaiting) => {
+                    if (isWaiting) {
+                      // Continue waiting for sync to complete (no timeout)
+                      return this._isSyncInProgress$.pipe(
+                        filter((isInProgress) => !isInProgress),
+                      );
+                    }
+                    devError('Sync wait timeout exceeded');
+                    return of(undefined);
+                  }),
+                ),
             }),
           )
         : of(undefined),
@@ -144,9 +160,12 @@ export class SyncWrapperService {
             conflictReason: r.conflictData?.reason,
             additional: r.conflictData?.additional,
           });
+
+          this._isWaitingForUserInput$.next(true);
           const res = await this._openConflictDialog$(
             r.conflictData as ConflictData,
           ).toPromise();
+          this._isWaitingForUserInput$.next(false);
 
           if (res === 'USE_LOCAL') {
             SyncLog.log('User chose USE_LOCAL, calling uploadAll(true) with force');

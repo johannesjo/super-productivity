@@ -2288,20 +2288,6 @@
     "SCHEDULED_TASKS_WITH_TIME": "Scheduled Tasks with Start Time",
     "START_TASK": "Start task and remove reminder"
   },
-  "SYNC": {
-    "D_CONFLICT_RESOLUTION": {
-      "INTRO": "",
-      "LAST_OP": "",
-      "LOCAL": "",
-      "OPS_COUNT": "",
-      "REMOTE": "",
-      "TITLE": "",
-      "USE_ALL_LOCAL": "",
-      "USE_ALL_REMOTE": "",
-      "USE_LOCAL": "",
-      "USE_REMOTE": ""
-    }
-  },
   "Share Chart": "",
   "Share Heatmap": "",
   "THEMES": {
