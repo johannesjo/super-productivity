@@ -281,7 +281,23 @@ export class SyncService<const MD extends ModelCfgs> {
         const result = await this._metaFileSyncService.download();
         remoteMeta = result.remoteMeta;
       } catch (e) {
-        PFLog.error('Warning: Cannot fetch remote metadata during force upload', e);
+        // Only proceed without remote metadata if it's a NoRemoteMetaFile error
+        // (meaning this is a fresh sync, no remote data exists)
+        if (e instanceof NoRemoteMetaFile) {
+          PFLog.normal(
+            `${SyncService.L}.${this.uploadAll.name}(): No remote meta file found, proceeding with fresh upload`,
+          );
+        } else {
+          // For other errors, fail fast to prevent vector clock drift
+          PFLog.critical(
+            `${SyncService.L}.${this.uploadAll.name}(): Cannot fetch remote metadata during force upload`,
+            e,
+          );
+          throw new Error(
+            'Force upload failed: unable to fetch remote metadata for vector clock merge. ' +
+              'This could cause data inconsistency. Please check your connection and retry.',
+          );
+        }
       }
 
       // Merge vector clocks if remote metadata was successfully fetched
@@ -295,9 +311,13 @@ export class SyncService<const MD extends ModelCfgs> {
           remote: remoteVector,
           merged: localVector,
         });
-      } else {
-        PFLog.error('Proceeding with force upload without remote vector clock merge');
+      } else if (remoteMeta) {
+        // Remote exists but has no vector clock - legacy data, safe to proceed
+        PFLog.warn(
+          `${SyncService.L}.${this.uploadAll.name}(): Remote metadata has no vector clock (legacy data)`,
+        );
       }
+      // If remoteMeta is null, it's a fresh upload (NoRemoteMetaFile case) - safe to proceed
 
       let newVector = incrementVectorClock(localVector, clientId);
 
