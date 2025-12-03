@@ -98,7 +98,8 @@ export class OperationLogHydratorService {
                 ? payload.appDataComplete
                 : payload;
             this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
-            await this._saveCurrentStateAsSnapshot();
+            // No snapshot save needed - SyncImport already contains full state
+            // Snapshot will be saved after next batch of regular operations
           } else {
             PFLog.normal(
               `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
@@ -149,6 +150,7 @@ export class OperationLogHydratorService {
               ? payload.appDataComplete
               : payload;
           this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
+          // No snapshot save needed - SyncImport already contains full state
         } else {
           PFLog.normal(
             `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
@@ -157,13 +159,13 @@ export class OperationLogHydratorService {
             const action = convertOpToAction(entry.op);
             this.store.dispatch(action);
           }
-        }
 
-        // Save snapshot after replay for faster future loads
-        PFLog.normal(
-          `OperationLogHydratorService: Saving snapshot after processing ${allOps.length} ops`,
-        );
-        await this._saveCurrentStateAsSnapshot();
+          // Save snapshot after replay for faster future loads
+          PFLog.normal(
+            `OperationLogHydratorService: Saving snapshot after replaying ${allOps.length} ops`,
+          );
+          await this._saveCurrentStateAsSnapshot();
+        }
 
         PFLog.normal('OperationLogHydratorService: Full replay complete.');
       }
