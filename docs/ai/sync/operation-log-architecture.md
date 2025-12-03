@@ -701,6 +701,20 @@ if (remoteSchemaVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
 | **Migration rollback**       | Undo migration if it fails partway            | Low      |
 | **Progressive migration**    | Migrate in background over multiple sessions  | Low      |
 
+### A.7.10 Relationship with Legacy PFAPI Migrations (CROSS_MODEL_MIGRATION)
+
+The application contains a legacy migration system (`CROSS_MODEL_MIGRATION` in `src/app/pfapi/migrate/cross-model-migrations.ts`) used by the old persistence layer.
+
+**Do we keep it?**
+Yes, for now. The **Genesis Migration** (A.3) relies on `pfapi` services to load the initial state from the legacy database. This loading process executes `CROSS_MODEL_MIGRATION`s to ensure the legacy data is in a consistent state before it is imported into the Operation Log.
+
+**Should we remove it?**
+No, not yet. It provides the bridge from older versions of the app to the Operation Log version. However:
+
+1.  **No new migrations** should be added to `CROSS_MODEL_MIGRATION`.
+2.  All future schema changes should use the **Schema Migration** system (A.7) described above.
+3.  Once the Operation Log is fully established and legacy data is considered obsolete (e.g., after several major versions), the legacy migration code can be removed.
+
 ---
 
 # Part B: Legacy Sync Bridge
