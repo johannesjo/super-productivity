@@ -100,7 +100,7 @@ export interface SyncConfig {
 
 export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   maxOpsPerUpload: 100,
-  maxPayloadSizeBytes: 1_000_000, // 1MB
+  maxPayloadSizeBytes: 20 * 1024 * 1024, // 20MB - needed for large imports
   downloadLimit: 1000,
   uploadRateLimit: { max: 100, windowMs: 60_000 },
   downloadRateLimit: { max: 200, windowMs: 60_000 },

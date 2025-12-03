@@ -68,7 +68,7 @@ async function cleanupOldOperations(): Promise<void> {
 async function cleanupStaleDevices(): Promise<void> {
   try {
     const syncService = getSyncService();
-    const staleThreshold = Date.now() - 90 * 24 * 60 * 60 * 1000; // 90 days
+    const staleThreshold = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days
 
     const deleted = syncService.deleteStaleDevices(staleThreshold);
     if (deleted > 0) {

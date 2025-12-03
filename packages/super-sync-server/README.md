@@ -1,6 +1,17 @@
 # SuperSync Server
 
-A WebDAV-based sync server for Super Productivity with JWT authentication.
+A custom, high-performance synchronization server for Super Productivity.
+
+> **Note:** This server implements a custom operation-based synchronization protocol (Event Sourcing), **not** WebDAV. It is designed specifically for the Super Productivity client's efficient sync requirements.
+
+## Architecture
+
+The server uses an **Append-Only Log** architecture backed by **SQLite**:
+
+1.  **Operations**: Clients upload atomic operations (Create, Update, Delete, Move).
+2.  **Sequence Numbers**: The server assigns a strictly increasing `server_seq` to each operation.
+3.  **Synchronization**: Clients request "all operations since sequence `X`".
+4.  **Snapshots**: The server can regenerate the full state by replaying operations, optimizing initial syncs.
 
 ## Quick Start
 
@@ -26,7 +37,7 @@ All configuration is done via environment variables. Copy `.env.example` to `.en
 | Variable       | Default  | Description                                         |
 | -------------- | -------- | --------------------------------------------------- |
 | `PORT`         | `1900`   | Server port                                         |
-| `DATA_DIR`     | `./data` | Directory for storing sync data                     |
+| `DATA_DIR`     | `./data` | Directory for storing sync data (SQLite DB)         |
 | `PUBLIC_URL`   | -        | Publicly reachable URL used for email links         |
 | `JWT_SECRET`   | -        | **Required in production.** Secret for signing JWTs |
 | `CORS_ENABLED` | `true`   | Enable CORS for browser clients                     |
@@ -59,17 +70,6 @@ Response:
 }
 ```
 
-#### Verify email
-
-```http
-POST /api/verify-email
-Content-Type: application/json
-
-{
-  "token": "verification-token-from-registration"
-}
-```
-
 #### Login
 
 ```http
@@ -86,28 +86,53 @@ Response:
 
 ```json
 {
-  "token": "jwt-token-for-webdav",
+  "token": "jwt-token",
   "user": { "id": 1, "email": "user@example.com" }
 }
 ```
 
-### WebDAV
+### Synchronization
 
-All WebDAV endpoints require Bearer authentication:
+All sync endpoints require Bearer authentication: `Authorization: Bearer <jwt-token>`
+
+#### 1. Upload Operations
+
+Send new changes to the server.
 
 ```http
-Authorization: Bearer <jwt-token>
+POST /api/sync/ops
 ```
 
-Standard WebDAV methods are supported: `GET`, `PUT`, `DELETE`, `PROPFIND`, `PROPPATCH`, `MKCOL`, `COPY`, `MOVE`, `LOCK`, `UNLOCK`.
+#### 2. Download Operations
+
+Get changes from other devices.
+
+```http
+GET /api/sync/ops?sinceSeq=123
+```
+
+#### 3. Get Snapshot
+
+Get the full current state (optimized).
+
+```http
+GET /api/sync/snapshot
+```
+
+#### 4. Sync Status
+
+Check pending operations and device status.
+
+```http
+GET /api/sync/status
+```
 
 ## Client Configuration
 
-In Super Productivity, configure SuperSync with:
+In Super Productivity, configure the Custom Sync provider with:
 
-- **Base URL**: `http://localhost:1900/`
-- **Auth Token**: JWT token from login response
-- **Sync Folder**: `super-productivity` (or any folder name)
+- **Base URL**: `http://localhost:1900` (or your deployed URL)
+- **Auth Token**: JWT token from login
 
 ## Development
 
@@ -122,7 +147,7 @@ npm run build
 npm start
 ```
 
-## Docker (Coming Soon)
+## Docker
 
 ```bash
 docker run -d \
@@ -135,7 +160,6 @@ docker run -d \
 
 ## Security Notes
 
-- **Set JWT_SECRET** to a secure random value in production
-- **Use HTTPS in production** (via reverse proxy like nginx)
-- **Restrict CORS origins** in production: `CORS_ORIGINS="https://app.super-productivity.com"`
-- Password must be at least 8 characters
+- **Set JWT_SECRET** to a secure random value in production.
+- **Use HTTPS in production** (via reverse proxy like nginx).
+- **Restrict CORS origins** in production.
