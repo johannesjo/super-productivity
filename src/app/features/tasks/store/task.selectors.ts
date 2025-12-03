@@ -383,13 +383,10 @@ export const selectTasksWithDueTimeById = createSelector(
 export const selectTasksWithSubTasksByIds = createSelector(
   selectTaskFeatureState,
   (state: TaskState, props: { ids: string[] }): TaskWithSubTasks[] =>
-    props.ids.map((id: string) => {
-      const task = state.entities[id];
-      if (!task) {
-        devError('Task data not found for ' + id);
-      }
-      return mapSubTasksToTask(task as Task, state) as TaskWithSubTasks;
-    }),
+    props.ids
+      .map((id: string) => state.entities[id])
+      .filter((task): task is Task => !!task)
+      .map((task) => mapSubTasksToTask(task, state) as TaskWithSubTasks),
 );
 
 export const selectTaskByIdWithSubTaskData = createSelector(
