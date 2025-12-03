@@ -1,22 +1,84 @@
 import { createActionGroup, emptyProps, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { IssueProvider } from '../issue.model';
+import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
+import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
 export const IssueProviderActions = createActionGroup({
   source: 'IssueProvider/API',
   events: {
+    // Loading action - no persistence (hydrating state)
     'Load IssueProviders': props<{ issueProviders: IssueProvider[] }>(),
-    'Add IssueProvider': props<{ issueProvider: IssueProvider }>(),
+
+    'Add IssueProvider': (providerProps: { issueProvider: IssueProvider }) => ({
+      ...providerProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityId: providerProps.issueProvider.id,
+        opType: OpType.Create,
+      } as PersistentActionMeta,
+    }),
+
+    // Upsert is typically used for sync/import, so no persistence metadata
     'Upsert IssueProvider': props<{ issueProvider: IssueProvider }>(),
+
+    // Bulk add is typically used for sync/import, so no persistence metadata
     'Add IssueProviders': props<{ issueProviders: IssueProvider[] }>(),
+
+    // Bulk upsert is typically used for sync/import, so no persistence metadata
     'Upsert IssueProviders': props<{ issueProviders: IssueProvider[] }>(),
-    'Update IssueProvider': props<{ issueProvider: Update<IssueProvider> }>(),
+
+    'Update IssueProvider': (providerProps: {
+      issueProvider: Update<IssueProvider>;
+    }) => ({
+      ...providerProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityId: providerProps.issueProvider.id as string,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
+
+    // Bulk update is typically used for sync/import, so no persistence metadata
     'Update IssueProviders': props<{ issueProviders: Update<IssueProvider>[] }>(),
-    'Sort IssueProviders First': props<{ ids: string[] }>(),
-    'Delete IssueProvider': props<{ id: string }>(),
-    'Delete IssueProviders': props<{ ids: string[] }>(),
+
+    'Sort IssueProviders First': (providerProps: { ids: string[] }) => ({
+      ...providerProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityIds: providerProps.ids,
+        opType: OpType.Move,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
+
+    'Delete IssueProvider': (providerProps: { id: string }) => ({
+      ...providerProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityId: providerProps.id,
+        opType: OpType.Delete,
+      } as PersistentActionMeta,
+    }),
+
+    'Delete IssueProviders': (providerProps: { ids: string[] }) => ({
+      ...providerProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityIds: providerProps.ids,
+        opType: OpType.Delete,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
+
+    // Internal cleanup action - no persistence
     'Clear IssueProviders': emptyProps(),
   },
 });

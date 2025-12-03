@@ -21,6 +21,7 @@ export type EntityType =
   | 'WORK_CONTEXT'
   | 'TASK_REPEAT_CFG'
   | 'ISSUE_PROVIDER'
+  | 'PLANNER'
   | 'MIGRATION'
   | 'RECOVERY' // For disaster recovery imports
   | 'ALL'; // For full state imports (sync, backup)

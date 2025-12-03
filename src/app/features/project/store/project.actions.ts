@@ -54,21 +54,33 @@ export const updateProject = createAction(
 
 export const updateProjectAdvancedCfg = createAction(
   '[Project] Update Project Advanced Cfg',
-  props<{
+  (projectProps: {
     projectId: string;
     sectionKey: WorkContextAdvancedCfgKey;
     data: any;
-  }>(),
+  }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: projectProps.projectId,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
-
-// export const deleteProjects = createAction(
-//   '[Project] Delete Projects',
-//   props<{ ids: string[] }>(),
-// );
 
 export const updateProjectOrder = createAction(
   '[Project] Update Project Order',
-  props<{ ids: string[] }>(),
+  (projectProps: { ids: string[] }) => ({
+    ...projectProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityIds: projectProps.ids,
+      opType: OpType.Move,
+      isBulk: true,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const archiveProject = createAction(
@@ -114,56 +126,152 @@ export const toggleHideFromMenu = createAction(
 // -----------------
 export const moveProjectTaskToBacklogListAuto = createAction(
   '[Project] Auto Move Task from regular to backlog',
-  props<{ taskId: string; projectId: string }>(),
+  (taskProps: { taskId: string; projectId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskToRegularListAuto = createAction(
   '[Project] Auto Move Task from backlog to regular',
-  props<{ taskId: string; projectId: string; isMoveToTop: boolean }>(),
+  (taskProps: { taskId: string; projectId: string; isMoveToTop: boolean }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskUpInBacklogList = createAction(
   '[Project] Move Task Up in Backlog',
-  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+  (taskProps: {
+    taskId: string;
+    workContextId: string;
+    doneBacklogTaskIds: string[];
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskDownInBacklogList = createAction(
   '[Project] Move Task Down in Backlog',
-  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+  (taskProps: {
+    taskId: string;
+    workContextId: string;
+    doneBacklogTaskIds: string[];
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskToTopInBacklogList = createAction(
   '[Project] Move Task to Top in Backlog',
-  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+  (taskProps: {
+    taskId: string;
+    workContextId: string;
+    doneBacklogTaskIds: string[];
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskToBottomInBacklogList = createAction(
   '[Project] Move Task to Bottom in Backlog',
-  props<{ taskId: string; workContextId: string; doneBacklogTaskIds: string[] }>(),
+  (taskProps: {
+    taskId: string;
+    workContextId: string;
+    doneBacklogTaskIds: string[];
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskInBacklogList = createAction(
   '[Project] Move Task in Backlog',
-  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
+  (taskProps: { taskId: string; newOrderedIds: string[]; workContextId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskToBacklogList = createAction(
   '[Project] Move Task from regular to backlog',
-  props<{ taskId: string; newOrderedIds: string[]; workContextId: string }>(),
+  (taskProps: { taskId: string; newOrderedIds: string[]; workContextId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveProjectTaskToRegularList = createAction(
   '[Project] Move Task from backlog to regular',
-  props<{
+  (taskProps: {
     taskId: string;
     newOrderedIds: string[];
     workContextId: string;
     src: DropListModelSource;
     target: DropListModelSource;
-  }>(),
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveAllProjectBacklogTasksToRegularList = createAction(
   '[Project] Move all backlog tasks to regular',
-  props<{ projectId: string }>(),
+  (taskProps: { projectId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'PROJECT',
+      entityId: taskProps.projectId,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
