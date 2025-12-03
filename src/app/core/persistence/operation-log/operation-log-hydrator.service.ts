@@ -11,6 +11,7 @@ import {
 } from './schema-migration.service';
 import { PFLog } from '../../log';
 import { PfapiService } from '../../../pfapi/pfapi.service';
+import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
 import { Operation, OpType } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
@@ -33,6 +34,7 @@ export class OperationLogHydratorService {
   private migrationService = inject(OperationLogMigrationService);
   private schemaMigrationService = inject(SchemaMigrationService);
   private pfapiService = inject(PfapiService);
+  private storeDelegateService = inject(PfapiStoreDelegateService);
   private snackService = inject(SnackService);
 
   async hydrateStore(): Promise<void> {
@@ -88,6 +90,15 @@ export class OperationLogHydratorService {
           const action = convertOpToAction(entry.op);
           this.store.dispatch(action);
         }
+
+        // 5. If we replayed many ops, save a new snapshot for faster future loads
+        if (tailOps.length > 10) {
+          PFLog.normal(
+            `OperationLogHydratorService: Saving new snapshot after replaying ${tailOps.length} ops`,
+          );
+          await this._saveCurrentStateAsSnapshot();
+        }
+
         PFLog.normal('OperationLogHydratorService: Hydration complete.');
       } else {
         PFLog.warn(
@@ -113,6 +124,13 @@ export class OperationLogHydratorService {
           const action = convertOpToAction(entry.op);
           this.store.dispatch(action);
         }
+
+        // Save snapshot after full replay for faster future loads
+        PFLog.normal(
+          `OperationLogHydratorService: Saving snapshot after replaying ${allOps.length} ops`,
+        );
+        await this._saveCurrentStateAsSnapshot();
+
         PFLog.normal('OperationLogHydratorService: Full replay complete.');
       }
     } catch (e) {
@@ -271,6 +289,35 @@ export class OperationLogHydratorService {
     PFLog.normal(
       'OperationLogHydratorService: Recovery complete. Data restored from legacy database.',
     );
+  }
+
+  /**
+   * Saves the current NgRx state as a snapshot for faster future loads.
+   * Called after replaying many operations to optimize next startup.
+   */
+  private async _saveCurrentStateAsSnapshot(): Promise<void> {
+    try {
+      // Get current state from NgRx
+      const currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
+
+      // Get current vector clock and last seq
+      const vectorClock = await this.opLogStore.getCurrentVectorClock();
+      const lastSeq = await this.opLogStore.getLastSeq();
+
+      // Save snapshot
+      await this.opLogStore.saveStateCache({
+        state: currentState,
+        lastAppliedOpSeq: lastSeq,
+        vectorClock,
+        compactedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      });
+
+      PFLog.normal('OperationLogHydratorService: Saved new snapshot after replay');
+    } catch (e) {
+      // Don't fail hydration if snapshot save fails
+      PFLog.warn('OperationLogHydratorService: Failed to save snapshot after replay', e);
+    }
   }
 
   /**
