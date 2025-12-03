@@ -44,7 +44,7 @@ export class ConflictResolutionService {
 
     this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
       data: { conflicts },
-      disableClose: true,
+      disableClose: false,
     });
 
     const result: ConflictResolutionResult | undefined = await firstValueFrom(
@@ -69,18 +69,47 @@ export class ConflictResolutionService {
         }
 
         if (resolution === 'remote') {
-          const appliedOpIds: string[] = [];
           try {
-            // Apply remote ops
+            // First, store all remote ops in IndexedDB (ensures durability)
+            const storedOpIds: string[] = [];
             for (const op of conflict.remoteOps) {
               if (!(await this.opLogStore.hasOp(op.id))) {
                 await this.opLogStore.append(op, 'remote');
+                storedOpIds.push(op.id);
               }
-              await this.operationApplier.applyOperations([op]);
-              await this.opLogStore.markApplied(op.id);
-              appliedOpIds.push(op.id);
             }
-            // Mark local ops as rejected so they won't be re-synced
+
+            // Apply all remote ops together - applyOperations now handles dependency sorting
+            await this.operationApplier.applyOperations(conflict.remoteOps);
+
+            // Check if any operations failed permanently
+            const failedCount = this.operationApplier.getFailedCount();
+            if (failedCount > 0) {
+              const failedOps = this.operationApplier.getFailedOperations();
+              PFLog.err(
+                `ConflictResolutionService: ${failedCount} operations failed for ${conflict.entityId}`,
+                failedOps,
+              );
+              // Don't reject local ops if some remote ops failed - state is inconsistent
+              this.snackService.open({
+                type: 'ERROR',
+                msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+                actionStr: T.PS.RELOAD,
+                actionFn: (): void => {
+                  window.location.reload();
+                },
+              });
+              // Clear failed ops for next resolution attempt
+              this.operationApplier.clearFailedOperations();
+              continue; // Skip marking local as rejected for this conflict
+            }
+
+            // Mark applied ops
+            for (const op of conflict.remoteOps) {
+              await this.opLogStore.markApplied(op.id);
+            }
+
+            // Only mark local ops as rejected if ALL remote ops succeeded
             const localOpIds = conflict.localOps.map((op) => op.id);
             await this.opLogStore.markRejected(localOpIds);
             PFLog.normal(
@@ -89,7 +118,7 @@ export class ConflictResolutionService {
           } catch (e) {
             PFLog.err(
               `ConflictResolutionService: Failed during remote resolution for ${conflict.entityId}`,
-              { appliedOpIds, error: e },
+              { error: e },
             );
             this.snackService.open({
               type: 'ERROR',
@@ -99,7 +128,8 @@ export class ConflictResolutionService {
                 window.location.reload();
               },
             });
-            throw e;
+            // Continue to next conflict instead of throwing - allows partial resolution
+            continue;
           }
         } else {
           // Keep local ops.

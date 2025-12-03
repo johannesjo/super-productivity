@@ -87,6 +87,12 @@
 >
   <button
     mat-button
+    (click)="cancel()"
+  >
+    {{ 'G.CANCEL' | translate }}
+  </button>
+  <button
+    mat-button
     (click)="resolveAll('local')"
   >
     {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_ALL_LOCAL' | translate }}

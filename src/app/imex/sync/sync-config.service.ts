@@ -150,7 +150,7 @@ export class SyncConfigService {
     // Split settings into public (global config) and private (credentials/secrets)
     // to maintain security boundaries - credentials never go to global config
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { encryptKey, webDav, localFileSync, ...globalConfig } = newSettings;
+    const { encryptKey, webDav, localFileSync, superSync, ...globalConfig } = newSettings;
     this._globalConfigService.updateSection('sync', globalConfig);
 
     // Provider-specific settings (URLs, credentials) must be stored securely

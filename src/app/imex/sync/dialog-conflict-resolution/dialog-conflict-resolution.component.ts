@@ -75,4 +75,8 @@ export class DialogConflictResolutionComponent {
       conflicts: this.data.conflicts,
     } as ConflictResolutionResult);
   }
+
+  cancel(): void {
+    this._dialogRef.close(undefined);
+  }
 }

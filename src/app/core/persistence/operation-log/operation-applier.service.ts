@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Operation } from './operation.types';
+import { Operation, OpType } from './operation.types';
 import { convertOpToAction } from './operation-converter.util';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
@@ -54,8 +54,11 @@ export class OperationApplierService {
       ops.map((op) => op.id),
     );
 
-    // First, apply the new operations
-    for (const op of ops) {
+    // Sort operations by dependency to ensure parents are created before children
+    const sortedOps = this._sortByDependency(ops);
+
+    // Apply the sorted operations
+    for (const op of sortedOps) {
       await this._tryApplyOperation({ op, retryCount: 0, missingDeps: [] });
     }
 
@@ -174,5 +177,109 @@ export class OperationApplierService {
     for (const pending of toRetry) {
       await this._tryApplyOperation(pending);
     }
+  }
+
+  /**
+   * Sorts operations topologically so that dependencies (parents) are applied
+   * before dependents (children). Uses Kahn's algorithm.
+   *
+   * For operations within the same batch, this ensures that:
+   * - CREATE operations for parent entities come before CREATE operations for children
+   * - Operations are ordered such that any entity referenced by another operation
+   *   is created first (within the batch)
+   *
+   * Note: This only sorts within the batch. Dependencies on entities that already
+   * exist in the store are handled by the retry mechanism.
+   */
+  private _sortByDependency(ops: Operation[]): Operation[] {
+    if (ops.length <= 1) {
+      return ops;
+    }
+
+    // Build a map of entityId -> operation that creates it (within this batch)
+    const creatorMap = new Map<string, Operation>();
+    for (const op of ops) {
+      if (op.opType === OpType.Create && op.entityId) {
+        creatorMap.set(op.entityId, op);
+      }
+    }
+
+    // Build dependency graph: opId -> set of opIds that must come before it
+    const dependencies = new Map<string, Set<string>>();
+    const opById = new Map<string, Operation>();
+
+    for (const op of ops) {
+      opById.set(op.id, op);
+      dependencies.set(op.id, new Set());
+
+      // Extract dependencies for this operation
+      const deps = this.dependencyResolver.extractDependencies(op);
+
+      for (const dep of deps) {
+        // Only consider hard dependencies (mustExist: true)
+        if (!dep.mustExist) continue;
+
+        // Check if this dependency is created by another operation in this batch
+        const creatorOp = creatorMap.get(dep.entityId);
+        if (creatorOp && creatorOp.id !== op.id) {
+          // This operation depends on creatorOp
+          dependencies.get(op.id)!.add(creatorOp.id);
+        }
+      }
+    }
+
+    // Kahn's algorithm for topological sort
+    const inDegree = new Map<string, number>();
+    for (const op of ops) {
+      inDegree.set(op.id, dependencies.get(op.id)!.size);
+    }
+
+    // Queue of operations with no dependencies (in-degree = 0)
+    const queue: Operation[] = [];
+    for (const op of ops) {
+      if (inDegree.get(op.id) === 0) {
+        queue.push(op);
+      }
+    }
+
+    const sorted: Operation[] = [];
+
+    while (queue.length > 0) {
+      const op = queue.shift()!;
+      sorted.push(op);
+
+      // Reduce in-degree of operations that depend on this one
+      for (const [depOpId, depSet] of dependencies) {
+        if (depSet.has(op.id)) {
+          depSet.delete(op.id);
+          const newDegree = inDegree.get(depOpId)! - 1;
+          inDegree.set(depOpId, newDegree);
+          if (newDegree === 0) {
+            queue.push(opById.get(depOpId)!);
+          }
+        }
+      }
+    }
+
+    // If there are cycles (shouldn't happen normally), add remaining ops at the end
+    if (sorted.length < ops.length) {
+      const sortedIds = new Set(sorted.map((o) => o.id));
+      const remaining = ops.filter((o) => !sortedIds.has(o.id));
+      PFLog.warn(
+        'OperationApplierService: Detected cycle in operation dependencies. Adding remaining ops:',
+        remaining.map((o) => o.id),
+      );
+      sorted.push(...remaining);
+    }
+
+    if (sorted.length !== ops.length) {
+      PFLog.err('OperationApplierService: Topological sort lost operations!', {
+        input: ops.length,
+        output: sorted.length,
+      });
+      return ops; // Fallback to original order
+    }
+
+    return sorted;
   }
 }
