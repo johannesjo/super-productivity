@@ -11,6 +11,7 @@ interface OpLogDB extends DBSchema {
     value: OperationLogEntry;
     indexes: {
       byId: string;
+      bySyncedAt: number | undefined;
     };
   };
   state_cache: {
@@ -22,6 +23,7 @@ interface OpLogDB extends DBSchema {
       vectorClock: VectorClock;
       compactedAt: number;
       schemaVersion?: number;
+      compactionCounter?: number; // Tracks ops since last compaction (persistent)
     };
   };
 }
@@ -48,6 +50,7 @@ export class OperationLogStoreService {
           autoIncrement: true,
         });
         opStore.createIndex('byId', 'op.id', { unique: true });
+        opStore.createIndex('bySyncedAt', 'syncedAt');
 
         db.createObjectStore('state_cache', { keyPath: 'id' });
       },
@@ -291,6 +294,54 @@ export class OperationLogStoreService {
         id: 'current',
       });
       await this.db.delete('state_cache', 'backup');
+    }
+  }
+
+  // ============================================================
+  // Persistent Compaction Counter
+  // ============================================================
+
+  /**
+   * Gets the current compaction counter value.
+   * Returns 0 if no counter exists yet.
+   */
+  async getCompactionCounter(): Promise<number> {
+    await this._ensureInit();
+    const cache = await this.db.get('state_cache', 'current');
+    return cache?.compactionCounter ?? 0;
+  }
+
+  /**
+   * Increments the compaction counter and returns the new value.
+   * Used to track operations since last compaction across tabs/restarts.
+   */
+  async incrementCompactionCounter(): Promise<number> {
+    await this._ensureInit();
+    const cache = await this.db.get('state_cache', 'current');
+    if (!cache) {
+      // No state cache yet - counter starts at 1
+      return 1;
+    }
+    const newCount = (cache.compactionCounter ?? 0) + 1;
+    await this.db.put('state_cache', {
+      ...cache,
+      compactionCounter: newCount,
+    });
+    return newCount;
+  }
+
+  /**
+   * Resets the compaction counter to 0.
+   * Called after successful compaction.
+   */
+  async resetCompactionCounter(): Promise<void> {
+    await this._ensureInit();
+    const cache = await this.db.get('state_cache', 'current');
+    if (cache) {
+      await this.db.put('state_cache', {
+        ...cache,
+        compactionCounter: 0,
+      });
     }
   }
 

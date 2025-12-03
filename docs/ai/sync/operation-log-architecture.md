@@ -1562,14 +1562,14 @@ When IndexedDB storage quota is exceeded:
 
 ### Compaction Trigger Coordination
 
-**Status:** Potential Race Condition
+**Status:** Implemented ✅
 
-The 500-ops compaction trigger is checked per-tab:
+The 500-ops compaction trigger uses a persistent counter stored in `state_cache.compactionCounter`:
 
-- **Risk**: Multiple tabs could each count 500 ops and trigger compaction simultaneously
-- **Current mitigation**: Web Locks prevent concurrent compaction execution
-- **Gap**: No shared counter means compaction may trigger more frequently than intended
-- **Proposed solution**: Store `opsSinceCompaction` in IndexedDB, read/increment atomically
+- Counter is shared across tabs via IndexedDB
+- Counter persists across app restarts
+- Counter is reset after successful compaction
+- Web Locks still prevent concurrent compaction execution
 
 ## Data Integrity Edge Cases
 
@@ -1615,6 +1615,8 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 - **Migration safety backup (A.7.12)** - Creates backup before migration, restores on failure
 - **Tail ops migration (A.7.13)** - Migrates operations during hydration before replay
 - **Unified migration interface (A.7.15)** - `SchemaMigration` includes both `migrateState` and optional `migrateOperation`
+- **Persistent compaction counter** - Counter stored in `state_cache`, shared across tabs/restarts
+- **`syncedAt` index** - Index on ops store for faster `getUnsynced()` queries
 
 ### Not Implemented ⚠️
 
@@ -1664,13 +1666,13 @@ The following are **documented designs**, not implemented code:
 
 ## Future Enhancements 🔮
 
-| Component             | Description                                  | Priority |
-| --------------------- | -------------------------------------------- | -------- |
-| Auto-merge            | Automatic merge for non-conflicting fields   | Low      |
-| Undo/Redo             | Leverage op-log for undo history             | Low      |
-| IndexedDB index       | Index on `syncedAt` for faster getUnsynced() | Low      |
-| Persistent compaction | Track ops since compaction across restarts   | Low      |
-| Quota handling        | Graceful degradation on storage exhaustion   | Medium   |
+| Component      | Description                                | Priority |
+| -------------- | ------------------------------------------ | -------- |
+| Auto-merge     | Automatic merge for non-conflicting fields | Low      |
+| Undo/Redo      | Leverage op-log for undo history           | Low      |
+| Quota handling | Graceful degradation on storage exhaustion | Medium   |
+
+> **Recently Completed:** `syncedAt` index (for faster getUnsynced()) and persistent compaction counter (tracks ops across tabs/restarts) are now implemented.
 
 ---
 

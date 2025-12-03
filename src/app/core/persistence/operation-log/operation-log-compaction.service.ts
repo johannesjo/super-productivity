@@ -36,7 +36,10 @@ export class OperationLogCompactionService {
         schemaVersion: CURRENT_SCHEMA_VERSION,
       });
 
-      // 4. Delete old operations (keep recent for conflict resolution window)
+      // 4. Reset compaction counter (persistent across tabs/restarts)
+      await this.opLogStore.resetCompactionCounter();
+
+      // 5. Delete old operations (keep recent for conflict resolution window)
       // Retention: 7 days - keeps enough history for conflict detection
       // Only delete ops that have been synced to remote
       const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
