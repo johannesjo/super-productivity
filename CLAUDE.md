@@ -96,7 +96,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 1. **Type Safety**: The codebase uses strict TypeScript. Always maintain proper typing.
 2. **State Updates**: Never mutate state directly. Use NgRx actions and reducers.
 3. **Testing**: Add tests for new features, especially in services and state management.
-4. **Translations**: UI strings must use the translation service (`T` or `TranslateService`).
+4. **Translations**: UI strings must use the translation service (`T` or `TranslateService`). When adding translation keys, **only edit `en.json`** - never edit other locale files directly.
 5. **Electron Context**: Check `IS_ELECTRON` before using Electron-specific features.
 6. **Privacy**: No analytics or tracking. User data stays local unless explicitly synced.
 

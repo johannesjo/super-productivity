@@ -16,6 +16,7 @@ import { T } from '../../../t.const';
 
 const CURRENT_SCHEMA_VERSION = 1;
 const COMPACTION_THRESHOLD = 500;
+const MAX_COMPACTION_FAILURES = 3;
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -29,6 +30,7 @@ const COMPACTION_THRESHOLD = 500;
 export class OperationLogEffects {
   private clientId?: string;
   private opsSinceCompaction = 0;
+  private compactionFailures = 0;
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
@@ -50,6 +52,9 @@ export class OperationLogEffects {
   private async writeOperation(action: PersistentAction): Promise<void> {
     if (!this.clientId) {
       this.clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    }
+    if (!this.clientId) {
+      throw new Error('Failed to load clientId - cannot persist operation');
     }
     const clientId = this.clientId;
 
@@ -90,8 +95,8 @@ export class OperationLogEffects {
       // 4. Check if compaction is needed
       this.opsSinceCompaction++;
       if (this.opsSinceCompaction >= COMPACTION_THRESHOLD) {
-        this.opsSinceCompaction = 0;
         // Trigger compaction asynchronously (don't block write operation)
+        // Counter is reset inside triggerCompaction() on success
         this.triggerCompaction();
       }
     } catch (e) {
@@ -104,12 +109,27 @@ export class OperationLogEffects {
   /**
    * Triggers compaction asynchronously without blocking the main operation.
    * This is called after COMPACTION_THRESHOLD operations have been written.
+   * Tracks failures and notifies user after MAX_COMPACTION_FAILURES consecutive failures.
    */
   private triggerCompaction(): void {
     PFLog.normal('OperationLogEffects: Triggering compaction...');
-    this.compactionService.compact().catch((e) => {
-      PFLog.err('OperationLogEffects: Compaction failed', e);
-    });
+    this.compactionService
+      .compact()
+      .then(() => {
+        // Only reset counter on successful compaction
+        this.opsSinceCompaction = 0;
+        this.compactionFailures = 0;
+      })
+      .catch((e) => {
+        PFLog.err('OperationLogEffects: Compaction failed', e);
+        this.compactionFailures++;
+        if (this.compactionFailures >= MAX_COMPACTION_FAILURES) {
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.COMPACTION_FAILED,
+          });
+        }
+      });
   }
 
   /**

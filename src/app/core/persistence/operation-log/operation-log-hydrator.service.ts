@@ -14,6 +14,8 @@ import { PfapiService } from '../../../pfapi/pfapi.service';
 import { Operation, OpType } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
+import { SnackService } from '../../snack/snack.service';
+import { T } from '../../../t.const';
 
 type StateCache = MigratableStateCache;
 
@@ -31,6 +33,7 @@ export class OperationLogHydratorService {
   private migrationService = inject(OperationLogMigrationService);
   private schemaMigrationService = inject(SchemaMigrationService);
   private pfapiService = inject(PfapiService);
+  private snackService = inject(SnackService);
 
   async hydrateStore(): Promise<void> {
     PFLog.normal('OperationLogHydratorService: Starting hydration...');
@@ -114,7 +117,20 @@ export class OperationLogHydratorService {
       }
     } catch (e) {
       PFLog.err('OperationLogHydratorService: Error during hydration', e);
-      await this._attemptRecovery();
+      try {
+        await this._attemptRecovery();
+      } catch (recoveryErr) {
+        PFLog.err('OperationLogHydratorService: Recovery also failed', recoveryErr);
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.HYDRATION_FAILED,
+          actionStr: T.PS.RELOAD,
+          actionFn: (): void => {
+            window.location.reload();
+          },
+        });
+        throw recoveryErr;
+      }
     }
   }
 

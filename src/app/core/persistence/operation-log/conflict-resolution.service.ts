@@ -9,6 +9,8 @@ import {
   DialogConflictResolutionComponent,
 } from '../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
 import { firstValueFrom } from 'rxjs';
+import { SnackService } from '../../snack/snack.service';
+import { T } from '../../../t.const';
 
 /**
  * Service to manage conflict resolution, typically presenting a UI to the user.
@@ -21,6 +23,7 @@ export class ConflictResolutionService {
   private dialog = inject(MatDialog);
   private operationApplier = inject(OperationApplierService);
   private opLogStore = inject(OperationLogStoreService);
+  private snackService = inject(SnackService);
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
@@ -53,20 +56,38 @@ export class ConflictResolutionService {
         }
 
         if (resolution === 'remote') {
-          // Apply remote ops
-          for (const op of conflict.remoteOps) {
-            if (!(await this.opLogStore.hasOp(op.id))) {
-              await this.opLogStore.append(op, 'remote');
+          const appliedOpIds: string[] = [];
+          try {
+            // Apply remote ops
+            for (const op of conflict.remoteOps) {
+              if (!(await this.opLogStore.hasOp(op.id))) {
+                await this.opLogStore.append(op, 'remote');
+              }
+              await this.operationApplier.applyOperations([op]);
+              await this.opLogStore.markApplied(op.id);
+              appliedOpIds.push(op.id);
             }
-            await this.operationApplier.applyOperations([op]);
-            await this.opLogStore.markApplied(op.id);
+            // Mark local ops as rejected so they won't be re-synced
+            const localOpIds = conflict.localOps.map((op) => op.id);
+            await this.opLogStore.markRejected(localOpIds);
+            PFLog.normal(
+              `ConflictResolutionService: Applied remote ops for ${conflict.entityId}`,
+            );
+          } catch (e) {
+            PFLog.err(
+              `ConflictResolutionService: Failed during remote resolution for ${conflict.entityId}`,
+              { appliedOpIds, error: e },
+            );
+            this.snackService.open({
+              type: 'ERROR',
+              msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+              actionStr: T.PS.RELOAD,
+              actionFn: (): void => {
+                window.location.reload();
+              },
+            });
+            throw e;
           }
-          // Mark local ops as rejected so they won't be re-synced
-          const localOpIds = conflict.localOps.map((op) => op.id);
-          await this.opLogStore.markRejected(localOpIds);
-          PFLog.normal(
-            `ConflictResolutionService: Applied remote ops for ${conflict.entityId}`,
-          );
         } else {
           // Keep local ops.
           // We assume they are already applied to state.
