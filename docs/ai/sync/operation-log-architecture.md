@@ -811,6 +811,217 @@ The **Tail Ops MUST be migrated** during hydration.
 - **Decision:** The Conflict Resolution UI will simply show the migrated value (3600). We will **not** implement special annotations (e.g., "Values differ due to migration").
 - **KISS Principle:** Users generally recognize their data even if the format shifts slightly. The complexity of tracking "why" a value changed is not worth the implementation cost.
 
+### A.7.15 Unified State and Operation Migrations
+
+**Status:** Design Ready (Not Implemented)
+
+State migrations and operation migrations are closely related—both handle the same underlying data model changes. This section defines how they work together.
+
+#### The Relationship
+
+| Migration Type          | Applies To                    | When Executed               |
+| ----------------------- | ----------------------------- | --------------------------- |
+| **State migration**     | Full snapshot (AllSyncModels) | Hydration, sync import      |
+| **Operation migration** | Individual ops                | Tail ops replay, remote ops |
+
+Both use the same `schemaVersion` field. A single schema change may require one or both migration types.
+
+#### When Is Operation Migration Needed?
+
+| Change Type          | State Migration   | Op Migration                   | Example                     |
+| -------------------- | ----------------- | ------------------------------ | --------------------------- |
+| Add optional field   | ✅ (set default)  | ❌ (old ops just don't set it) | `priority?: string`         |
+| Rename field         | ✅ (copy old→new) | ✅ (transform payload)         | `estimate` → `timeEstimate` |
+| Remove field/feature | ✅ (delete it)    | ✅ (drop ops or strip field)   | Remove `pomodoro`           |
+| Change field type    | ✅ (convert)      | ✅ (convert in payload)        | `"1h"` → `3600`             |
+| Add entity type      | ✅ (initialize)   | ❌ (no old ops exist)          | New `Board` entity          |
+
+**Rule of thumb:** If the change is purely additive (new optional fields with defaults, new entity types), operation migration is usually not needed. If the change modifies or removes existing fields, operation migration is required.
+
+#### Unified Migration Definition
+
+Link state and operation migrations in a single definition:
+
+```typescript
+interface SchemaMigration {
+  fromVersion: number;
+  toVersion: number;
+  description: string;
+
+  // Required: transform full state snapshot
+  migrateState: (state: AllSyncModels) => AllSyncModels;
+
+  // Optional: transform individual operation
+  // Return null to drop the operation entirely (e.g., for removed features)
+  migrateOperation?: (op: Operation) => Operation | null;
+
+  // Explicit declaration forces author to think about operation migration
+  // If true but migrateOperation is undefined, startup validation fails
+  requiresOperationMigration: boolean;
+}
+```
+
+**Benefits:**
+
+1. **Single source of truth** - One place defines all changes for a version bump
+2. **Explicit decision** - `requiresOperationMigration` forces thinking about ops
+3. **Consistent versioning** - No risk of version number mismatch between the two
+4. **Validation** - Startup check catches missing operation migrations
+
+#### Startup Validation
+
+```typescript
+// In schema-migration.service.ts initialization
+for (const migration of MIGRATIONS) {
+  if (migration.requiresOperationMigration && !migration.migrateOperation) {
+    throw new Error(
+      `Migration v${migration.fromVersion}→v${migration.toVersion} declares ` +
+        `requiresOperationMigration=true but migrateOperation is not defined`,
+    );
+  }
+}
+```
+
+#### Execution Order
+
+```
+Hydration Flow:
+  1. Load snapshot from state_cache (schemaVersion = 1)
+  2. Run migrateState(snapshot) → v2 state
+  3. Save migrated snapshot (for faster future loads)
+  4. Load tail ops (may have schemaVersion = 1)
+  5. For each op where op.schemaVersion < CURRENT:
+       migrateOperation(op) → v2 op (or null to drop)
+  6. Apply migrated ops to v2 state
+
+Sync Flow (receiving remote ops):
+  1. Download remote ops (may have mixed schemaVersions)
+  2. For each op where op.schemaVersion < CURRENT:
+       migrateOperation(op) → v2 op
+  3. Run conflict detection on v2 ops
+  4. Apply to v2 state
+```
+
+#### Example: Field Rename Migration
+
+```typescript
+const MIGRATIONS: SchemaMigration[] = [
+  {
+    fromVersion: 1,
+    toVersion: 2,
+    description: 'Rename task.estimate to task.timeEstimate',
+    requiresOperationMigration: true,
+
+    migrateState: (state) => {
+      if (!state.task?.entities) return state;
+
+      const migratedEntities = Object.fromEntries(
+        Object.entries(state.task.entities).map(([id, task]: [string, any]) => [
+          id,
+          {
+            ...task,
+            timeEstimate: task.estimate ?? task.timeEstimate ?? 0,
+            estimate: undefined, // Remove old field
+          },
+        ]),
+      );
+
+      return {
+        ...state,
+        task: { ...state.task, entities: migratedEntities },
+      };
+    },
+
+    migrateOperation: (op) => {
+      // Only transform TASK UPDATE operations
+      if (op.entityType !== 'TASK' || op.opType !== 'UPD') {
+        return op;
+      }
+
+      const changes = (op.payload as any)?.changes;
+      if (!changes || changes.estimate === undefined) {
+        return op; // No estimate field in this op
+      }
+
+      // Transform: estimate → timeEstimate
+      return {
+        ...op,
+        schemaVersion: 2, // Mark as migrated
+        payload: {
+          ...op.payload,
+          changes: {
+            ...changes,
+            timeEstimate: changes.estimate,
+            estimate: undefined,
+          },
+        },
+      };
+    },
+  },
+];
+```
+
+#### Example: Feature Removal Migration
+
+```typescript
+{
+  fromVersion: 2,
+  toVersion: 3,
+  description: 'Remove deprecated pomodoro feature',
+  requiresOperationMigration: true,
+
+  migrateState: (state) => {
+    // Remove pomodoro data from state
+    const { pomodoro, ...rest } = state as any;
+    return rest;
+  },
+
+  migrateOperation: (op) => {
+    // Drop any operations targeting the removed feature
+    if (op.entityType === 'POMODORO') {
+      return null; // Operation is dropped entirely
+    }
+
+    // Strip pomodoro fields from task operations
+    if (op.entityType === 'TASK' && op.opType === 'UPD') {
+      const changes = (op.payload as any)?.changes;
+      if (changes?.pomodoroCount !== undefined) {
+        const { pomodoroCount, ...restChanges } = changes;
+        return {
+          ...op,
+          schemaVersion: 3,
+          payload: { ...op.payload, changes: restChanges },
+        };
+      }
+    }
+
+    return op;
+  },
+}
+```
+
+#### Why Not Auto-Derive Operation Migration?
+
+It might seem possible to derive operation migration from state migration:
+
+```typescript
+// Hypothetical auto-derivation (NOT recommended)
+migrateOperation(op: Operation): Operation {
+  const fakeState = { [op.entityType]: { entities: { temp: op.payload } } };
+  const migrated = migrateState(fakeState);
+  return { ...op, payload: migrated[op.entityType].entities.temp };
+}
+```
+
+**This doesn't work because:**
+
+1. **UPDATE payloads differ from entities** - UPDATE ops have `{ id, changes }`, not full entity
+2. **Partial data** - Ops may only contain the fields being changed
+3. **CREATE vs UPDATE semantics** - State migration sees full entities; ops may be partial
+4. **Null handling** - Dropping ops (return null) can't be auto-derived
+
+**Conclusion:** Explicit `migrateOperation` functions are required for non-additive changes.
+
 ---
 
 # Part B: Legacy Sync Bridge
@@ -1404,11 +1615,12 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ### Not Implemented ⚠️ (Critical for Schema Migrations)
 
-| Item                          | Section | Risk if Missing                                     |
-| ----------------------------- | ------- | --------------------------------------------------- |
-| **Migration safety backup**   | A.7.12  | Data loss if migration crashes mid-process          |
-| **Tail ops migration**        | A.7.13  | Data corruption when replaying old ops after update |
-| **Operation-level migration** | A.7.11  | Conflicts may compare mismatched schemas            |
+| Item                            | Section | Risk if Missing                                         |
+| ------------------------------- | ------- | ------------------------------------------------------- |
+| **Migration safety backup**     | A.7.12  | Data loss if migration crashes mid-process              |
+| **Tail ops migration**          | A.7.13  | Data corruption when replaying old ops after update     |
+| **Operation-level migration**   | A.7.11  | Conflicts may compare mismatched schemas                |
+| **Unified migration interface** | A.7.15  | Easy to forget op migration when adding state migration |
 
 > **Note**: These are only critical when `CURRENT_SCHEMA_VERSION > 1`. Currently safe since no migrations exist.
 
