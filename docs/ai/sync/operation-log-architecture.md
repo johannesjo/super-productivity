@@ -567,11 +567,12 @@ const MIGRATIONS: SchemaMigration[] = [
     fromVersion: 1,
     toVersion: 2,
     description: 'Add priority field to tasks',
-    migrate: (state: any) => {
-      // Deep clone or careful spread recommended
-      const newState = { ...state };
+    migrate: (state: AllSyncModels) => {
+      // 'state' here is the entire app data (AllSyncModels)
+      // Deep clone or careful spread recommended to avoid direct mutation
+      const newState: AllSyncModels = { ...state };
 
-      // Transform specific model
+      // Transform specific model (e.g., task)
       if (newState.task && newState.task.entities) {
         newState.task.entities = Object.fromEntries(
           Object.entries(newState.task.entities).map(([id, task]: [string, any]) => [
@@ -585,6 +586,16 @@ const MIGRATIONS: SchemaMigration[] = [
   },
 ];
 ```
+
+#### Best Practices
+
+1.  **Type Safety**: While `state: any` is used for flexibility, aim for `state: AllSyncModels` or a more specific type if possible, and cast internally as needed.
+2.  **Immutability**: Always return a new state object. Avoid directly mutating the incoming `state` object.
+3.  **Handle missing data**: `state` or its nested properties might be partial or undefined (e.g., in edge cases or if a new model is introduced). Use optional chaining (`?.`) and nullish coalescing (`??`) as appropriate.
+4.  **Preserve unrelated data**: Do not unintentionally drop fields or entire models that your migration is not concerned with.
+5.  **Test your migration**: Write unit tests to verify that your migration correctly transforms data from version N to N+1, especially edge cases.
+
+````
 
 #### Service Implementation
 
@@ -633,7 +644,7 @@ function detectSchemaVersion(state: unknown): number {
 
   return 1; // Default: assume v1 for unversioned/legacy data
 }
-```
+````
 
 ### A.7.6 Version Handling in Operations
 
