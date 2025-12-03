@@ -32,6 +32,8 @@ import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.s
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { SnackService } from '../../snack/snack.service';
+import { T } from '../../../t.const';
 
 const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';
@@ -66,6 +68,7 @@ export class OperationLogSyncService {
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
+  private snackService = inject(SnackService);
   private injector = inject(Injector);
 
   private _getManifestFileName(): string {
@@ -293,6 +296,10 @@ export class OperationLogSyncService {
   ): Promise<void> {
     PFLog.normal('OperationLogSyncService: Downloading remote operations via API...');
     await this.lockService.request('sp_op_log_download', async () => {
+      // Get clientId at start to avoid race conditions with other tabs
+      const pfapiService = this.injector.get(PfapiService);
+      const clientId = await pfapiService.pf.metaModel.loadClientId();
+
       const lastServerSeq = await syncProvider.getLastServerSeq();
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
 
@@ -327,12 +334,8 @@ export class OperationLogSyncService {
       }
 
       // Acknowledge that we've processed ops up to the latest seq
-      if (totalProcessed > 0) {
-        const pendingOps = await this.opLogStore.getUnsynced();
-        const clientId = pendingOps[0]?.op.clientId;
-        if (clientId) {
-          await syncProvider.acknowledgeOps(clientId, sinceSeq);
-        }
+      if (totalProcessed > 0 && clientId) {
+        await syncProvider.acknowledgeOps(clientId, sinceSeq);
       }
 
       PFLog.normal(
@@ -387,6 +390,8 @@ export class OperationLogSyncService {
       const appliedFrontierByEntity = await this.opLogStore.getEntityFrontier();
 
       const allRemoteOps: Operation[] = [];
+      const failedFiles: string[] = [];
+
       for (const fullFilePath of remoteOpFileNames) {
         try {
           const fileContent = await syncProvider.downloadFile(fullFilePath);
@@ -399,8 +404,21 @@ export class OperationLogSyncService {
             `OperationLogSyncService: Failed to download or parse remote op file ${fullFilePath}`,
             e,
           );
-          // Continue with next file
+          failedFiles.push(fullFilePath);
         }
+      }
+
+      // Warn user about failed downloads
+      if (failedFiles.length > 0) {
+        PFLog.warn(
+          `OperationLogSyncService: ${failedFiles.length} remote operation file(s) failed to download`,
+          failedFiles,
+        );
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.INCOMPLETE_OP_SYNC,
+          translateParams: { count: failedFiles.length },
+        });
       }
 
       if (allRemoteOps.length === 0) {

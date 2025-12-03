@@ -46,9 +46,10 @@ describe('Vector Clock', () => {
   });
 
   describe('compareVectorClocks', () => {
-    it('should return CONCURRENT for two empty clocks', () => {
-      expect(compareVectorClocks({}, {})).toBe(VectorClockComparison.CONCURRENT);
-      expect(compareVectorClocks(null, null)).toBe(VectorClockComparison.CONCURRENT);
+    it('should return EQUAL for two empty clocks', () => {
+      // Both empty clocks have no history, so they are equal
+      expect(compareVectorClocks({}, {})).toBe(VectorClockComparison.EQUAL);
+      expect(compareVectorClocks(null, null)).toBe(VectorClockComparison.EQUAL);
     });
 
     it('should return EQUAL for identical clocks', () => {
@@ -84,9 +85,10 @@ describe('Vector Clock', () => {
     });
 
     it('should handle comparison with empty clock', () => {
+      // A clock with history is causally after an empty clock
       const clock1 = { client1: 1 };
-      expect(compareVectorClocks(clock1, {})).toBe(VectorClockComparison.CONCURRENT);
-      expect(compareVectorClocks({}, clock1)).toBe(VectorClockComparison.CONCURRENT);
+      expect(compareVectorClocks(clock1, {})).toBe(VectorClockComparison.GREATER_THAN);
+      expect(compareVectorClocks({}, clock1)).toBe(VectorClockComparison.LESS_THAN);
     });
   });
 

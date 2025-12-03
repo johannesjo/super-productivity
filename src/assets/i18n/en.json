@@ -1168,6 +1168,7 @@
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data. Maybe you enabled encryption and your local password does not match the one used to encrypt the remote data?",
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
+        "INCOMPLETE_OP_SYNC": "Sync incomplete: {{count}} operation file(s) failed to download",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "SUCCESS_DOWNLOAD": "Synced data from remote",
         "SUCCESS_IMPORT": "Data imported",
