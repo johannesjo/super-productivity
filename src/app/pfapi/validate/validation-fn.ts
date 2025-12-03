@@ -16,8 +16,6 @@ import { TaskRepeatCfgState } from '../../features/task-repeat-cfg/task-repeat-c
 import { BoardsState } from '../../features/boards/store/boards.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
 import { MetricState } from '../../features/metric/metric.model';
-import { ImprovementState } from '../../features/metric/improvement/improvement.model';
-import { ObstructionState } from '../../features/metric/obstruction/obstruction.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { ValidationResult } from '../api/pfapi.model';
@@ -50,8 +48,6 @@ const _validatePlanner = createValidate<PlannerState>();
 const _validateBoards = createValidate<BoardsState>();
 const _validateIssueProvider = createValidate<IssueProviderState>();
 const _validateMetric = createValidate<MetricState>();
-const _validateImprovement = createValidate<ImprovementState>();
-const _validateObstruction = createValidate<ObstructionState>();
 const _validateGlobalConfig = createValidate<GlobalConfigState>();
 const _validateTimeTracking = createValidate<TimeTrackingState>();
 const _validatePluginUserData = createValidate<PluginUserDataState>();
@@ -99,10 +95,6 @@ export const appDataValidators: {
   boards: <R>(d: R | BoardsState) => _wrapValidate(_validateBoards(d)),
   issueProvider: (d) => _wrapValidate(_validateIssueProvider(d), d, true),
   metric: <R>(d: R | MetricState) => _wrapValidate(_validateMetric(d), d, true),
-  improvement: <R>(d: R | ImprovementState) =>
-    _wrapValidate(_validateImprovement(d), d, true),
-  obstruction: <R>(d: R | ObstructionState) =>
-    _wrapValidate(_validateObstruction(d), d, true),
   globalConfig: <R>(d: R | GlobalConfigState) => _wrapValidate(_validateGlobalConfig(d)),
   timeTracking: <R>(d: R | TimeTrackingState) => _wrapValidate(_validateTimeTracking(d)),
   pluginUserData: <R>(d: R | PluginUserDataState) =>

@@ -19,14 +19,6 @@ import {
 } from './persistence.model';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import {
-  Improvement,
-  ImprovementState,
-} from '../../features/metric/improvement/improvement.model';
-import {
-  Obstruction,
-  ObstructionState,
-} from '../../features/metric/obstruction/obstruction.model';
-import {
   TaskRepeatCfg,
   TaskRepeatCfgState,
 } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
@@ -91,16 +83,10 @@ export class PersistenceLegacyService {
     ENTITY_MODEL_CFGS.note,
   );
 
-  // METRIC MODELS
   metric: PersistenceBaseEntityModel<MetricState, Metric> = this._cmBaseEntity<
     MetricState,
     Metric
   >(ENTITY_MODEL_CFGS.metric);
-
-  improvement: PersistenceBaseEntityModel<ImprovementState, Improvement> =
-    this._cmBaseEntity<ImprovementState, Improvement>(ENTITY_MODEL_CFGS.improvement);
-  obstruction: PersistenceBaseEntityModel<ObstructionState, Obstruction> =
-    this._cmBaseEntity<ObstructionState, Obstruction>(ENTITY_MODEL_CFGS.obstruction);
 
   // MAIN TASK MODELS
   task: PersistenceBaseEntityModel<TaskState, Task> = this._cmBaseEntity<TaskState, Task>(

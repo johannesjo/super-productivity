@@ -7,8 +7,6 @@ import { selectBoardsState } from '../features/boards/store/boards.selectors';
 import { selectConfigFeatureState } from '../features/config/store/global-config.reducer';
 import { selectIssueProviderState } from '../features/issue/store/issue-provider.selectors';
 import { selectMenuTreeState } from '../features/menu-tree/store/menu-tree.selectors';
-import { selectImprovementFeatureState } from '../features/metric/improvement/store/improvement.reducer';
-import { selectObstructionFeatureState } from '../features/metric/obstruction/store/obstruction.reducer';
 import { selectMetricFeatureState } from '../features/metric/store/metric.selectors';
 import { selectPluginUserDataFeatureState } from '../plugins/store/plugin-user-data.reducer';
 import { selectPluginMetadataFeatureState } from '../plugins/store/plugin-metadata.reducer';
@@ -61,8 +59,6 @@ export class PfapiStoreDelegateService {
         this._store.select(selectTaskRepeatCfgFeatureState),
         this._store.select(selectMenuTreeState),
         this._store.select(selectTimeTrackingState),
-        this._store.select(selectImprovementFeatureState),
-        this._store.select(selectObstructionFeatureState),
         this._store.select(selectPluginUserDataFeatureState),
         this._store.select(selectPluginMetadataFeatureState),
         this._store.select(selectReminderFeatureState),
@@ -85,8 +81,6 @@ export class PfapiStoreDelegateService {
             taskRepeatCfg,
             menuTree,
             timeTracking,
-            improvement,
-            obstruction,
             pluginUserData,
             pluginMetadata,
             reminders,
@@ -112,8 +106,6 @@ export class PfapiStoreDelegateService {
               taskRepeatCfg,
               menuTree,
               timeTracking,
-              improvement,
-              obstruction,
               pluginUserData,
               pluginMetadata,
               reminders,

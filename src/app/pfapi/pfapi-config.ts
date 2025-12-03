@@ -17,8 +17,6 @@ import { BoardsState, initialBoardsState } from '../features/boards/store/boards
 import { NoteState } from '../features/note/note.model';
 import { IssueProviderState } from '../features/issue/issue.model';
 import { MetricState } from '../features/metric/metric.model';
-import { ImprovementState } from '../features/metric/improvement/improvement.model';
-import { ObstructionState } from '../features/metric/obstruction/obstruction.model';
 import { TaskState } from '../features/tasks/task.model';
 import { TagState } from '../features/tag/tag.model';
 import { SimpleCounterState } from '../features/simple-counter/simple-counter.model';
@@ -28,8 +26,6 @@ import { DEFAULT_GLOBAL_CONFIG } from '../features/config/default-global-config.
 import { initialNoteState } from '../features/note/store/note.reducer';
 import { issueProviderInitialState } from '../features/issue/store/issue-provider.reducer';
 import { initialMetricState } from '../features/metric/store/metric.reducer';
-import { initialImprovementState } from '../features/metric/improvement/store/improvement.reducer';
-import { initialObstructionState } from '../features/metric/obstruction/store/obstruction.reducer';
 import { initialTaskState } from '../features/tasks/store/task.reducer';
 import { initialTagState } from '../features/tag/store/tag.reducer';
 import { initialSimpleCounterState } from '../features/simple-counter/store/simple-counter.reducer';
@@ -77,11 +73,7 @@ export type PfapiAllModelCfg = {
   note: ModelCfg<NoteState>;
   issueProvider: ModelCfg<IssueProviderState>;
 
-  // Metric models
   metric: ModelCfg<MetricState>;
-  // TODO: Remove improvement and obstruction in future version after data migration
-  improvement: ModelCfg<ImprovementState>;
-  obstruction: ModelCfg<ObstructionState>;
 
   task: ModelCfg<TaskState>;
   tag: ModelCfg<TagState>;
@@ -189,20 +181,9 @@ export const PFAPI_MODEL_CFGS: PfapiAllModelCfg = {
     repair: fixEntityStateConsistency,
   },
 
-  // Metric models
   metric: {
     defaultData: initialMetricState,
     validate: appDataValidators.metric,
-    repair: fixEntityStateConsistency,
-  },
-  improvement: {
-    defaultData: initialImprovementState,
-    validate: appDataValidators.improvement,
-    repair: fixEntityStateConsistency,
-  },
-  obstruction: {
-    defaultData: initialObstructionState,
-    validate: appDataValidators.obstruction,
     repair: fixEntityStateConsistency,
   },
 

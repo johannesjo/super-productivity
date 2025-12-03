@@ -11,17 +11,6 @@ export interface MetricCopy {
   // string date of day
   id: string;
 
-  // TODO remove
-  obstructions: string[];
-  // TODO remove
-  improvements: string[];
-  // TODO remove
-  improvementsTomorrow: string[];
-  // TODO remove
-  mood?: number | null;
-  // TODO remove
-  productivity?: number | null;
-
   focusSessions?: number[];
 
   // Evaluation fields

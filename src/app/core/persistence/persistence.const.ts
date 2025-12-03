@@ -14,17 +14,6 @@ import { Note, NoteState } from '../../features/note/note.model';
 import { noteReducer } from '../../features/note/store/note.reducer';
 import { Metric, MetricState } from '../../features/metric/metric.model';
 import { metricReducer } from '../../features/metric/store/metric.reducer';
-
-import {
-  Improvement,
-  ImprovementState,
-} from '../../features/metric/improvement/improvement.model';
-import { improvementReducer } from '../../features/metric/improvement/store/improvement.reducer';
-import {
-  Obstruction,
-  ObstructionState,
-} from '../../features/metric/obstruction/obstruction.model';
-import { obstructionReducer } from '../../features/metric/obstruction/store/obstruction.reducer';
 import {
   ArchiveTask,
   Task,
@@ -58,10 +47,7 @@ interface PersistenceEntityModelCfgs {
   simpleCounter: PersistenceEntityModelCfg<SimpleCounterState, SimpleCounter>;
   note: PersistenceEntityModelCfg<NoteState, Note>;
 
-  // METRIC MODELS
   metric: PersistenceEntityModelCfg<MetricState, Metric>;
-  improvement: PersistenceEntityModelCfg<ImprovementState, Improvement>;
-  obstruction: PersistenceEntityModelCfg<ObstructionState, Obstruction>;
 
   // MAIN TASK MODELS
   task: PersistenceEntityModelCfg<TaskState, Task>;
@@ -128,26 +114,10 @@ export const ENTITY_MODEL_CFGS: PersistenceEntityModelCfgs = {
     migrateFn: (v) => v,
   },
 
-  // METRIC MODELS
   metric: {
     appDataKey: 'metric',
     modelVersion: 99,
     reducerFn: metricReducer as any,
-    migrateFn: (v) => v,
-  },
-  // TODO: Remove improvement and obstruction in future version after data migration
-  // These are kept for backward compatibility with existing data
-  improvement: {
-    appDataKey: 'improvement',
-    modelVersion: 99,
-    reducerFn: improvementReducer,
-    migrateFn: (v) => v,
-  },
-
-  obstruction: {
-    appDataKey: 'obstruction',
-    modelVersion: 99,
-    reducerFn: obstructionReducer as any,
     migrateFn: (v) => v,
   },
 
