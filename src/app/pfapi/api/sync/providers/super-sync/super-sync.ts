@@ -1,48 +1,93 @@
 import { SyncProviderId } from '../../../pfapi.const';
-import { WebdavBaseProvider } from '../webdav/webdav-base-provider';
-import { WebdavPrivateCfg } from '../webdav/webdav.model';
 import {
+  SyncProviderServiceInterface,
+  FileRevResponse,
+  FileDownloadResponse,
   OperationSyncCapable,
   SyncOperation,
   OpUploadResponse,
   OpDownloadResponse,
 } from '../../sync-provider.interface';
+import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
+import { SuperSyncPrivateCfg } from './super-sync.model';
+import { MissingCredentialsSPError } from '../../../errors/errors';
 import { SyncLog } from '../../../../../core/log';
 
 const LAST_SERVER_SEQ_KEY_PREFIX = 'super_sync_last_server_seq_';
 
 /**
- * SuperSync provider - a WebDAV-based sync provider with enhanced capabilities.
+ * SuperSync provider - operation-based sync provider.
  *
- * Features:
- * - Standard WebDAV synchronization for file-based sync
- * - Operation-based sync via REST API (OperationSyncCapable)
+ * This provider uses operation-based sync exclusively (no file-based sync).
+ * All data is synchronized through the operations API.
  *
  * @see docs/sync/SYNC-PLAN.md for full roadmap
  */
 export class SuperSyncProvider
-  extends WebdavBaseProvider<SyncProviderId.SuperSync>
-  implements OperationSyncCapable
+  implements SyncProviderServiceInterface<SyncProviderId.SuperSync>, OperationSyncCapable
 {
   readonly id = SyncProviderId.SuperSync;
+  readonly isUploadForcePossible = false;
+  readonly maxConcurrentRequests = 10;
   readonly supportsOperationSync = true;
 
-  protected override get logLabel(): string {
+  public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.SuperSync>;
+
+  constructor(_basePath?: string) {
+    // basePath is ignored - SuperSync uses operation-based sync only
+  }
+
+  private get logLabel(): string {
     return 'SuperSyncProvider';
   }
 
-  override async isReady(): Promise<boolean> {
-    const privateCfg = await this.privateCfg.load();
-    return !!(privateCfg && privateCfg.baseUrl && privateCfg.accessToken);
+  async isReady(): Promise<boolean> {
+    const cfg = await this.privateCfg.load();
+    return !!(cfg && cfg.baseUrl && cfg.accessToken);
   }
 
-  protected override _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
-    const parts: string[] = [];
-    if (this._extraPath) {
-      parts.push(this._extraPath);
-    }
-    parts.push(targetPath);
-    return parts.join('/').replace(/\/+/g, '/');
+  async setPrivateCfg(cfg: SuperSyncPrivateCfg): Promise<void> {
+    await this.privateCfg.setComplete(cfg);
+  }
+
+  // === File Operations (Not supported - use operation sync instead) ===
+
+  async getFileRev(
+    _targetPath: string,
+    _localRev: string | null,
+  ): Promise<FileRevResponse> {
+    throw new Error(
+      'SuperSync uses operation-based sync only. File operations not supported.',
+    );
+  }
+
+  async downloadFile(_targetPath: string): Promise<FileDownloadResponse> {
+    throw new Error(
+      'SuperSync uses operation-based sync only. File operations not supported.',
+    );
+  }
+
+  async uploadFile(
+    _targetPath: string,
+    _dataStr: string,
+    _localRev: string | null,
+    _isForceOverwrite?: boolean,
+  ): Promise<FileRevResponse> {
+    throw new Error(
+      'SuperSync uses operation-based sync only. File operations not supported.',
+    );
+  }
+
+  async removeFile(_targetPath: string): Promise<void> {
+    throw new Error(
+      'SuperSync uses operation-based sync only. File operations not supported.',
+    );
+  }
+
+  async listFiles(_dirPath: string): Promise<string[]> {
+    throw new Error(
+      'SuperSync uses operation-based sync only. File operations not supported.',
+    );
   }
 
   // === Operation Sync Implementation ===
@@ -103,21 +148,6 @@ export class SuperSyncProvider
     localStorage.setItem(key, String(seq));
   }
 
-  /**
-   * Generates a storage key unique to this server URL to avoid conflicts
-   * when switching between different accounts or servers.
-   */
-  private async _getServerSeqKey(): Promise<string> {
-    const cfg = await this.privateCfg.load();
-    // Create a simple hash of the baseUrl to keep the key short but unique
-    const baseUrl = cfg?.baseUrl ?? 'default';
-    const hash = baseUrl
-      .split('')
-      .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
-      .toString(16);
-    return `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
-  }
-
   async acknowledgeOps(clientId: string, lastSeq: number): Promise<void> {
     SyncLog.debug(this.logLabel, 'acknowledgeOps', { clientId, lastSeq });
     const cfg = await this._cfgOrError();
@@ -132,10 +162,32 @@ export class SuperSyncProvider
     );
   }
 
-  // === Helper Methods ===
+  // === Private Helper Methods ===
+
+  private async _cfgOrError(): Promise<SuperSyncPrivateCfg> {
+    const cfg = await this.privateCfg.load();
+    if (!cfg) {
+      throw new MissingCredentialsSPError();
+    }
+    return cfg;
+  }
+
+  /**
+   * Generates a storage key unique to this server URL to avoid conflicts
+   * when switching between different accounts or servers.
+   */
+  private async _getServerSeqKey(): Promise<string> {
+    const cfg = await this.privateCfg.load();
+    const baseUrl = cfg?.baseUrl ?? 'default';
+    const hash = baseUrl
+      .split('')
+      .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
+      .toString(16);
+    return `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
+  }
 
   private async _fetchApi<T>(
-    cfg: WebdavPrivateCfg,
+    cfg: SuperSyncPrivateCfg,
     path: string,
     options: RequestInit,
   ): Promise<T> {
@@ -144,13 +196,7 @@ export class SuperSyncProvider
 
     const headers = new Headers(options.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
-    if (cfg.accessToken) {
-      headers.set('Authorization', `Bearer ${cfg.accessToken}`);
-    } else if (cfg.userName && cfg.password) {
-      // Create Basic auth token from username/password
-      const authToken = btoa(`${cfg.userName}:${cfg.password}`);
-      headers.set('Authorization', `Basic ${authToken}`);
-    }
+    headers.set('Authorization', `Bearer ${cfg.accessToken}`);
 
     const response = await fetch(url, {
       ...options,

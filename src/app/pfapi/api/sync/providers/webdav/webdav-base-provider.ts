@@ -14,11 +14,9 @@ import { SyncLog } from '../../../../../core/log';
 /**
  * Base class for WebDAV-based sync providers.
  * Provides common functionality for uploading, downloading, and managing files via WebDAV.
- * Extend this class to create specialized WebDAV providers (e.g., SuperSync).
  */
-export abstract class WebdavBaseProvider<
-  T extends SyncProviderId.WebDAV | SyncProviderId.SuperSync,
-> implements SyncProviderServiceInterface<T>
+export abstract class WebdavBaseProvider<T extends SyncProviderId.WebDAV>
+  implements SyncProviderServiceInterface<T>
 {
   abstract readonly id: T;
   readonly isUploadForcePossible = false;
