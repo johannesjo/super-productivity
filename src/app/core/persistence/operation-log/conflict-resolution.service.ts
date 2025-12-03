@@ -4,7 +4,10 @@ import { EntityConflict } from './operation.types';
 import { OperationApplierService } from './operation-applier.service';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PFLog } from '../../log';
-import { DialogConflictResolutionComponent } from '../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
+import {
+  ConflictResolutionResult,
+  DialogConflictResolutionComponent,
+} from '../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
 import { firstValueFrom } from 'rxjs';
 
 /**
@@ -29,16 +32,26 @@ export class ConflictResolutionService {
       disableClose: true,
     });
 
-    const result = await firstValueFrom(this._dialogRef.afterClosed());
+    const result: ConflictResolutionResult | undefined = await firstValueFrom(
+      this._dialogRef.afterClosed(),
+    );
 
-    if (result) {
-      // Simplified handling: apply resolution to all conflicts for now
-      // In a real scenario, we would iterate over resolved conflicts
-      const resolution = result.resolution; // 'local' | 'remote'
-
-      PFLog.normal(`ConflictResolutionService: Resolved with ${resolution}`);
+    if (result && result.resolutions) {
+      PFLog.normal(
+        'ConflictResolutionService: Processing resolutions',
+        result.resolutions,
+      );
 
       for (const conflict of conflicts) {
+        const resolution = result.resolutions.get(conflict.entityId);
+
+        if (!resolution) {
+          PFLog.warn(
+            `ConflictResolutionService: No resolution for ${conflict.entityId}, skipping`,
+          );
+          continue;
+        }
+
         if (resolution === 'remote') {
           // Apply remote ops
           for (const op of conflict.remoteOps) {
@@ -51,14 +64,17 @@ export class ConflictResolutionService {
           // Mark local ops as rejected so they won't be re-synced
           const localOpIds = conflict.localOps.map((op) => op.id);
           await this.opLogStore.markRejected(localOpIds);
+          PFLog.normal(
+            `ConflictResolutionService: Applied remote ops for ${conflict.entityId}`,
+          );
         } else {
           // Keep local ops.
           // We assume they are already applied to state.
           // We just need to ensure they are kept in the log for sync later.
-          // But we might need to re-apply them if remote was partially applied?
-          // In this simple model, local ops are already in the log.
           // We essentially "ignore" the remote ops (don't apply them).
-          PFLog.normal('ConflictResolutionService: Keeping local ops, ignoring remote.');
+          PFLog.normal(
+            `ConflictResolutionService: Keeping local ops for ${conflict.entityId}`,
+          );
         }
       }
     }
