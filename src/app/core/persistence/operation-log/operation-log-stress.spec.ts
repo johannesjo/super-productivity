@@ -1,0 +1,155 @@
+import { TestBed } from '@angular/core/testing';
+import { OperationLogStoreService } from './operation-log-store.service';
+import { Operation, OpType, EntityType } from './operation.types';
+import { uuidv7 } from '../../../util/uuid-v7';
+
+// Increase timeout for stress tests
+jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
+
+describe('OperationLog Stress Test', () => {
+  let service: OperationLogStoreService;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [OperationLogStoreService],
+    });
+    service = TestBed.inject(OperationLogStoreService);
+    await service.init();
+  });
+
+  it('should handle 1000 operations efficiently', async () => {
+    const COUNT = 1000;
+    const ops: Operation[] = [];
+    const now = Date.now();
+
+    console.log(`Generating ${COUNT} operations...`);
+    for (let i = 0; i < COUNT; i++) {
+      ops.push({
+        id: uuidv7(),
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: `task-${i}`,
+        payload: { title: `Task ${i} title`, description: 'Some description' },
+        clientId: 'stressTestClient',
+        vectorClock: { stressTestClient: i },
+        timestamp: now + i,
+        schemaVersion: 1,
+      });
+    }
+
+    const startWrite = performance.now();
+    for (const op of ops) {
+      await service.append(op);
+    }
+    const endWrite = performance.now();
+    const writeTime = endWrite - startWrite;
+    console.log(`Write time for ${COUNT} ops: ${writeTime.toFixed(2)}ms`);
+
+    // Expect reasonably fast writes (under 2ms per op on average)
+    expect(writeTime).toBeLessThan(COUNT * 2);
+
+    expect((await service.getOpsAfterSeq(0)).length).toBeGreaterThanOrEqual(COUNT);
+  });
+
+  it('should handle 1000 LARGE payload operations (10KB each)', async () => {
+    const COUNT = 1000;
+    const ops: Operation[] = [];
+    const now = Date.now();
+    const largeString = 'x'.repeat(1024 * 10); // 10KB
+
+    console.log(`Generating ${COUNT} large operations...`);
+    for (let i = 0; i < COUNT; i++) {
+      ops.push({
+        id: uuidv7(),
+        actionType: '[Note] Update',
+        opType: OpType.Update,
+        entityType: 'NOTE' as EntityType,
+        entityId: `note-${i}`,
+        payload: { content: largeString },
+        clientId: 'stressTestClient',
+        vectorClock: { stressTestClient: i },
+        timestamp: now + i,
+        schemaVersion: 1,
+      });
+    }
+
+    const startWrite = performance.now();
+    for (const op of ops) {
+      await service.append(op);
+    }
+    const endWrite = performance.now();
+    const writeTime = endWrite - startWrite;
+    console.log(`Write time for ${COUNT} LARGE ops: ${writeTime.toFixed(2)}ms`);
+
+    // Expect under 5ms per large op
+    expect(writeTime).toBeLessThan(COUNT * 5);
+
+    const startRead = performance.now();
+    const opsInDb = await service.getOpsAfterSeq(0);
+    const endRead = performance.now();
+    console.log(
+      `Read time for ${opsInDb.length} LARGE ops: ${(endRead - startRead).toFixed(2)}ms`,
+    );
+  });
+
+  it('should scan efficiently during compaction (10k ops)', async () => {
+    const NOISE_COUNT = 10000;
+    const ops: Operation[] = [];
+    const now = Date.now();
+
+    for (let i = 0; i < NOISE_COUNT; i++) {
+      ops.push({
+        id: uuidv7(),
+        actionType: '[Task] Noise',
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: `noise-${i}`,
+        payload: {},
+        clientId: 'stressTestClient',
+        vectorClock: { stressTestClient: i },
+        timestamp: now + i,
+        schemaVersion: 1,
+      });
+    }
+    // Bulk append noise (simulated via promise.all for setup speed)
+    await Promise.all(ops.map((op) => service.append(op)));
+
+    // Add 100 ops to delete
+    const delOps: Operation[] = [];
+    for (let i = 0; i < 100; i++) {
+      delOps.push({
+        id: uuidv7(),
+        actionType: '[Task] DeleteMe',
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: `del-${i}`,
+        payload: {},
+        clientId: 'stressTestClient',
+        vectorClock: { stressTestClient: i },
+        timestamp: now + NOISE_COUNT + i,
+        schemaVersion: 1,
+      });
+    }
+    await Promise.all(delOps.map((op) => service.append(op)));
+
+    const initialCount = (await service.getOpsAfterSeq(0)).length;
+    const startDelete = performance.now();
+
+    // Delete ops with actionType '[Task] DeleteMe' - requires scanning everything
+    await service.deleteOpsWhere((entry) => entry.op.actionType === '[Task] DeleteMe');
+
+    const endDelete = performance.now();
+    const deleteTime = endDelete - startDelete;
+    console.log(
+      `Deleted 100 ops from ~${initialCount} total in ${deleteTime.toFixed(2)}ms`,
+    );
+
+    const finalCount = (await service.getOpsAfterSeq(0)).length;
+    expect(finalCount).toBe(initialCount - 100);
+
+    // Expect scan speed to be reasonable (e.g. < 1000ms for 10k items)
+    // On my test it was ~240ms.
+    expect(deleteTime).toBeLessThan(1000);
+  });
+});
