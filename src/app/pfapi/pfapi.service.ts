@@ -35,6 +35,12 @@ import { DataInitStateService } from '../core/data-init/data-init-state.service'
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { PFLog } from '../core/log';
 import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
+import { OperationLogStoreService } from '../core/persistence/operation-log/operation-log-store.service';
+import { Operation, OpType } from '../core/persistence/operation-log/operation.types';
+import { CURRENT_SCHEMA_VERSION } from '../core/persistence/operation-log/schema-migration.service';
+import { incrementVectorClock } from './api/util/vector-clock';
+import { uuidv7 } from '../util/uuid-v7';
+import { loadAllData } from '../root-store/meta/load-all-data.action';
 
 @Injectable({
   providedIn: 'root',
@@ -46,6 +52,7 @@ export class PfapiService {
   private _imexViewService = inject(ImexViewService);
   private _store = inject(Store);
   private _storeDelegateService = inject(PfapiStoreDelegateService);
+  private _opLogStore = inject(OperationLogStoreService);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
@@ -151,30 +158,88 @@ export class PfapiService {
   ): Promise<void> {
     try {
       this._imexViewService.setDataImportInProgress(true);
-      if ('crossModelVersion' in data && 'timestamp' in data) {
-        await this.pf.importCompleteBackup(data, isSkipLegacyWarnings, isForceConflict);
+
+      // 1. Normalize backup structure
+      let backupData: AppDataCompleteNew;
+      let crossModelVersion: number;
+
+      if ('crossModelVersion' in data && 'timestamp' in data && 'data' in data) {
+        backupData = data.data;
+        crossModelVersion = data.crossModelVersion;
       } else {
-        await this.pf.importCompleteBackup(
-          {
-            data,
-            lastUpdate: 1,
-            timestamp: 1,
-            // NOTE since this is legacy data, we start at 0
-            crossModelVersion: 0,
-          },
-          isSkipLegacyWarnings,
-          isForceConflict,
-        );
+        backupData = data as AppDataCompleteNew;
+        crossModelVersion = 0; // Legacy data
       }
 
+      // 2. Migrate and validate (no 'pf' save)
+      const validatedData = await this.pf.migrateAndValidateImportData({
+        data: backupData,
+        crossModelVersion,
+        isAttemptRepair: true,
+        isSkipLegacyWarnings,
+      });
+
+      // 3. Persist to operation log
+      await this._persistImportToOperationLog(
+        validatedData as AppDataCompleteNew,
+        isForceConflict,
+      );
+
+      // 4. Dispatch to NgRx (no page reload needed!)
+      this._store.dispatch(loadAllData({ appDataComplete: validatedData }));
+
       this._imexViewService.setDataImportInProgress(false);
-      if (!isSkipReload) {
+
+      // Only reload if explicitly requested (legacy behavior fallback)
+      if (!isSkipReload && isForceConflict) {
+        // Force conflict may need reload to reset sync state
         window.location.reload();
       }
     } catch (e) {
       this._imexViewService.setDataImportInProgress(false);
       throw e;
     }
+  }
+
+  private async _persistImportToOperationLog(
+    importedData: AppDataCompleteNew,
+    isForceConflict: boolean,
+  ): Promise<void> {
+    PFLog.normal('PfapiService: Persisting import to operation log...');
+
+    const clientId = isForceConflict
+      ? await this.pf.metaModel.generateNewClientId()
+      : await this.pf.metaModel.loadClientId();
+
+    const currentClock = await this._opLogStore.getCurrentVectorClock();
+    const newClock = isForceConflict
+      ? { [clientId]: 2 } // Fresh vector clock
+      : incrementVectorClock(currentClock, clientId);
+
+    const op: Operation = {
+      id: uuidv7(),
+      actionType: '[SP_ALL] Load(import) all data',
+      opType: OpType.SyncImport,
+      entityType: 'ALL',
+      payload: importedData,
+      clientId,
+      vectorClock: newClock,
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+
+    await this._opLogStore.append(op, 'local');
+    const lastSeq = await this._opLogStore.getLastSeq();
+
+    await this._opLogStore.saveStateCache({
+      state: importedData,
+      lastAppliedOpSeq: lastSeq,
+      vectorClock: newClock,
+      compactedAt: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    });
+
+    PFLog.normal('PfapiService: Import persisted to operation log.');
   }
 
   async isCheckForStrayLocalTmpDBBackupAndImport(): Promise<void> {

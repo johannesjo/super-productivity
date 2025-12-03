@@ -180,10 +180,9 @@ export class FileImexComponent implements OnInit {
     }
 
     try {
-      await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
+      // Import first, then navigate (no page reload, state updates inline)
       await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
-      // Optionally, add a success snackbar here if desired
-      // this._snackService.open({ type: 'SUCCESS', msg: 'Data imported successfully!' });
+      await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
     } catch (e) {
       Log.err('Import process failed', e);
       this._snackService.open({
