@@ -60,6 +60,7 @@ export interface OperationLogEntry {
   appliedAt: number; // When this op was applied locally (epoch ms)
   source: 'local' | 'remote'; // Origin of this operation
   syncedAt?: number; // When successfully synced to remote (null if pending)
+  rejectedAt?: number; // When rejected during conflict resolution (epoch ms)
 }
 
 export interface EntityConflict {

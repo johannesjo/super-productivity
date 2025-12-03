@@ -104,7 +104,7 @@ export class OperationLogStoreService {
     await this._ensureInit();
     // Scan all ops and filter. Optimized later if needed.
     const all = await this.db.getAll('ops');
-    return all.filter((e) => !e.syncedAt);
+    return all.filter((e) => !e.syncedAt && !e.rejectedAt);
   }
 
   async getUnsyncedByEntity(): Promise<Map<string, Operation[]>> {
@@ -153,6 +153,23 @@ export class OperationLogStoreService {
       const entry = await store.get(seq);
       if (entry) {
         entry.syncedAt = now;
+        await store.put(entry);
+      }
+    }
+    await tx.done;
+  }
+
+  async markRejected(opIds: string[]): Promise<void> {
+    await this._ensureInit();
+    const tx = this.db.transaction('ops', 'readwrite');
+    const store = tx.objectStore('ops');
+    const index = store.index('byId');
+    const now = Date.now();
+
+    for (const opId of opIds) {
+      const entry = await index.get(opId);
+      if (entry) {
+        entry.rejectedAt = now;
         await store.put(entry);
       }
     }

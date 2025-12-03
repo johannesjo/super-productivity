@@ -48,10 +48,9 @@ export class ConflictResolutionService {
             await this.operationApplier.applyOperations([op]);
             await this.opLogStore.markApplied(op.id);
           }
-          // TODO: Revert/Remove local ops?
-          // Since local ops are pending, they haven't been "applied" in the log sense?
-          // No, they are in the log as "local". We might need to mark them as rejected or similar.
-          // For now, we assume remote application overwrites state.
+          // Mark local ops as rejected so they won't be re-synced
+          const localOpIds = conflict.localOps.map((op) => op.id);
+          await this.opLogStore.markRejected(localOpIds);
         } else {
           // Keep local ops.
           // We assume they are already applied to state.
