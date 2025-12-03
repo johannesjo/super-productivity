@@ -1,7 +1,7 @@
-<h1 mat-dialog-title>{{ 'SYNC.CONFLICT_RESOLUTION.TITLE' | translate }}</h1>
+<h1 mat-dialog-title>{{ 'SYNC.D_CONFLICT_RESOLUTION.TITLE' | translate }}</h1>
 
 <div mat-dialog-content>
-  <p>{{ 'SYNC.CONFLICT_RESOLUTION.INTRO' | translate }}</p>
+  <p>{{ 'SYNC.D_CONFLICT_RESOLUTION.INTRO' | translate }}</p>
 
   @for (conflict of data.conflicts; track conflict.entityId) {
     <div class="conflict-item">
@@ -9,11 +9,14 @@
 
       <div class="conflict-sides">
         <div class="local-side">
-          <h4>{{ 'SYNC.CONFLICT_RESOLUTION.LOCAL' | translate }}</h4>
-          <p>Ops: {{ conflict.localOps.length }}</p>
+          <h4>{{ 'SYNC.D_CONFLICT_RESOLUTION.LOCAL' | translate }}</h4>
+          <p>
+            {{ 'SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
+            {{ conflict.localOps.length }}
+          </p>
           @if (conflict.localOps.length > 0) {
             <p>
-              Last:
+              {{ 'SYNC.D_CONFLICT_RESOLUTION.LAST_OP' | translate }}
               {{
                 conflict.localOps[conflict.localOps.length - 1].timestamp | date: 'short'
               }}
@@ -23,16 +26,19 @@
             mat-stroked-button
             (click)="resolve($index, 'local')"
           >
-            {{ 'SYNC.CONFLICT_RESOLUTION.USE_LOCAL' | translate }}
+            {{ 'SYNC.D_CONFLICT_RESOLUTION.USE_LOCAL' | translate }}
           </button>
         </div>
 
         <div class="remote-side">
-          <h4>{{ 'SYNC.CONFLICT_RESOLUTION.REMOTE' | translate }}</h4>
-          <p>Ops: {{ conflict.remoteOps.length }}</p>
+          <h4>{{ 'SYNC.D_CONFLICT_RESOLUTION.REMOTE' | translate }}</h4>
+          <p>
+            {{ 'SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
+            {{ conflict.remoteOps.length }}
+          </p>
           @if (conflict.remoteOps.length > 0) {
             <p>
-              Last:
+              {{ 'SYNC.D_CONFLICT_RESOLUTION.LAST_OP' | translate }}
               {{
                 conflict.remoteOps[conflict.remoteOps.length - 1].timestamp
                   | date: 'short'
@@ -43,7 +49,7 @@
             mat-stroked-button
             (click)="resolve($index, 'remote')"
           >
-            {{ 'SYNC.CONFLICT_RESOLUTION.USE_REMOTE' | translate }}
+            {{ 'SYNC.D_CONFLICT_RESOLUTION.USE_REMOTE' | translate }}
           </button>
         </div>
       </div>
@@ -59,13 +65,13 @@
     mat-button
     (click)="resolveAll('local')"
   >
-    {{ 'SYNC.CONFLICT_RESOLUTION.USE_ALL_LOCAL' | translate }}
+    {{ 'SYNC.D_CONFLICT_RESOLUTION.USE_ALL_LOCAL' | translate }}
   </button>
   <button
     mat-button
     color="primary"
     (click)="resolveAll('remote')"
   >
-    {{ 'SYNC.CONFLICT_RESOLUTION.USE_ALL_REMOTE' | translate }}
+    {{ 'SYNC.D_CONFLICT_RESOLUTION.USE_ALL_REMOTE' | translate }}
   </button>
 </div>
