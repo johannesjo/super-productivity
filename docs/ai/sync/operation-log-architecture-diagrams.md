@@ -152,80 +152,157 @@ graph TD
     API <--> ServerDB
 ```
 
-## 3. Conflict-Aware Migration Strategy
+## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
-This mindmap outlines the strategy for handling version conflicts during sync by migrating operations before conflict detection.
-
-```mermaid
-mindmap
-  root((Conflict-Aware<br/>Migration))
-    Strategies
-      Operation-Level Migration
-        Transform V1 Op to V2 Op
-        Extend SchemaMigration Interface
-      Inbound Path Receive
-        Intercept Remote Ops
-        Check Op Schema Version
-        Migrate Old Ops
-        Detect Conflicts on Migrated Ops
-      Outbound Path Send
-        Get Unsynced Ops
-        Migrate Pending Ops if Old
-        Ensure Upload matches Current Schema
-      Conflict Resolution
-        Unified Comparison
-        Local Current vs Remote Migrated
-        Prevent False Conflicts
-```
-
-## 4. Hybrid Manifest & Snapshot Architecture (WebDAV / Dropbox Fallback)
-
-This diagram illustrates the efficient "Hybrid Manifest" approach for file-based sync, showing how small operations are buffered in the manifest to reduce request counts, how overflow creates new files, and how snapshotting consolidates history.
+This diagram visualizes the "Receiver-Side Migration" strategy. The Migration Layer acts as a shield, ensuring that _only_ operations matching the current schema version ever reach the core conflict detection and application logic.
 
 ```mermaid
 graph TD
+    %% Nodes
+    subgraph "Sources of Operations (Mixed Versions)"
+        Remote[Remote Client Sync]:::src
+        Disk[Local Disk Tail Ops]:::src
+    end
+
+    subgraph "Migration Layer (The Shield)"
+        Check{"Is Op Old?<br/>(vOp < vCurrent)"}:::logic
+        Migrate["Run migrateOperation()<br/>Pipeline"]:::action
+        CheckDrop{"Result is<br/>Null?"}:::logic
+        Pass["Pass Through"]:::pass
+    end
+
+    subgraph "Core System (Current Version Only)"
+        Conflict["Conflict Detection<br/>(Apples-to-Apples)"]:::core
+        Apply["Apply to State"]:::core
+    end
+
+    %% Flow
+    Remote --> Check
+    Disk --> Check
+
+    Check -- Yes --> Migrate
+    Check -- No --> Pass
+
+    Migrate --> CheckDrop
+    CheckDrop -- Yes --> Drop[("🗑️ Drop Op<br/>(Destructive Change)")]:::drop
+    CheckDrop -- No --> Conflict
+
+    Pass --> Conflict
+    Conflict --> Apply
+
     %% Styles
-    classDef local fill:#fff,stroke:#333,stroke-width:2px,color:black;
-    classDef remote fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
-    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:black;
-    classDef storage fill:#f9f,stroke:#333,stroke-width:2px,color:black;
+    classDef src fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
+    classDef logic fill:#fff,stroke:#333,stroke-width:2px;
+    classDef action fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef pass fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef drop fill:#ffebee,stroke:#c62828,stroke-width:2px,stroke-dasharray: 5 5;
+    classDef core fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+```
 
-    subgraph "Client: Write Path (Hybrid)"
-        StartWrite((Sync Trigger)) --> LoadMan[Download manifest.json]
-        LoadMan --> CheckBuff{Buffer Full?<br/>> 50 Ops}:::decision
+## 4. Migration Scenarios
 
-        %% Path A: Buffer Open
-        CheckBuff -- No --> AppendBuff[Append Ops to<br/>manifest.embeddedOperations]
-        AppendBuff --> WriteMan[Upload manifest.json]:::remote
+### 4.1 Tail Ops Migration (Local Startup Consistency)
 
-        %% Path B: Buffer Full (Overflow)
-        CheckBuff -- Yes --> CreateFile[Flush embeddedOperations<br/>to ops/overflow_TIMESTAMP.json]:::storage
-        CreateFile --> UploadFile[Upload Op File]:::remote
-        UploadFile --> ClearBuff[Clear Buffer &<br/>Add Filename to<br/>manifest.operationFiles]
-        ClearBuff --> AppendBuff
+Ensures that operations occurring after a snapshot ("Tail Ops") are migrated to the current version before being applied to the migrated state.
+
+```mermaid
+sequenceDiagram
+    participant IDB as IndexedDB (SUP_OPS)
+    participant Hydrator as OpLogHydrator
+    participant Migrator as SchemaMigrationService
+    participant Applier as OperationApplier
+    participant Store as NgRx Store
+
+    Note over IDB, Store: App Updated from V1 -> V2
+
+    Hydrator->>IDB: Load Snapshot (Version 1)
+    IDB-->>Hydrator: Returns Snapshot V1
+
+    Hydrator->>Migrator: migrateIfNeeded(Snapshot V1)
+    Migrator-->>Hydrator: Returns Migrated Snapshot (Version 2)
+
+    Hydrator->>Store: Load Initial State (V2)
+
+    Hydrator->>IDB: Load Tail Ops (Version 1)
+    Note right of IDB: Ops created after snapshot<br/>but before update
+    IDB-->>Hydrator: Returns Ops [OpA(v1), OpB(v1)]
+
+    loop For Each Op
+        Hydrator->>Migrator: migrateOperation(Op V1)
+        Migrator-->>Hydrator: Returns Op V2 (or null)
+
+        alt Op was Dropped (null)
+            Hydrator->>Hydrator: Ignore
+        else Op Migrated
+            Hydrator->>Applier: Apply(Op V2)
+            Applier->>Store: Dispatch Action (V2 Payload)
+        end
     end
 
-    subgraph "Client: Read Path"
-        StartRead((Sync Start)) --> DownMan[Download manifest.json]:::remote
-        DownMan --> CheckSnap{Newer<br/>Snapshot?}:::decision
+    Note over Store: State matches V2 Schema<br/>Consistency Preserved
+```
 
-        CheckSnap -- Yes --> DownSnap[Download & Apply<br/>Snapshot File]:::remote
-        CheckSnap -- No --> CheckFiles
+### 4.2 Receiver-Side Sync Migration
 
-        DownSnap --> CheckFiles
-        CheckFiles[Download & Apply<br/>New Op Files]:::remote
-        CheckFiles --> ApplyEmb[Apply<br/>embeddedOperations]
-        ApplyEmb --> Done((Sync Done))
+Demonstrates how a client on V2 handles incoming data from a client still on V1.
+
+```mermaid
+sequenceDiagram
+    participant Remote as Remote Client (V1)
+    participant Server as Sync Server
+    participant Local as Local Client (V2)
+    participant Conflict as Conflict Detector
+
+    Remote->>Server: Upload Operation (Version 1)<br/>{ payload: { oldField: 'X' } }
+    Server-->>Local: Download Operation (Version 1)
+
+    Note over Local: Client V2 receives V1 data
+
+    Local->>Local: Check Op Schema Version (v1 < v2)
+    Local->>Local: Call SchemaMigrationService.migrateOperation()
+
+    Note over Local: Transforms payload:<br/>{ oldField: 'X' } -> { newField: 'X' }
+
+    Local->>Conflict: detectConflicts(Remote Op V2)
+
+    alt Conflict Detected
+        Conflict->>Local: Show Dialog (V2 vs V2 comparison)
+    else No Conflict
+        Local->>Local: Apply Operation (V2)
+    end
+```
+
+## 5. Hybrid Manifest (File-Based Sync)
+
+This diagram illustrates the "Hybrid Manifest" optimization (`hybrid-manifest-architecture.md`) which reduces HTTP request overhead for WebDAV/Dropbox sync by buffering small operations directly inside the manifest file.
+
+```mermaid
+graph TD
+    %% Nodes
+    subgraph "Hybrid Manifest File (JSON)"
+        ManVer[Version: 2]:::file
+        SnapRef[Last Snapshot: 'snap_123.json']:::file
+        Buffer[Embedded Ops (Buffer)<br/>[Op1, Op2, ...]]:::buffer
+        ExtFiles[External Files List<br/>['ops_A.json', ...]]:::file
     end
 
-    subgraph "Client: Snapshotting (Compaction)"
-        Trigger{Trigger?<br/>> 50 Files}:::decision
-        Trigger -- Yes --> GenSnap[Generate Full Snapshot]:::storage
-        GenSnap --> UpSnap[Upload Snapshot File]:::remote
-        UpSnap --> UpManSnap[Update manifest.json:<br/>1. Set lastSnapshot<br/>2. Clear operationFiles]:::remote
-        UpManSnap --> Cleanup[Delete Old Files<br/>(Async)]
+    subgraph "Sync Logic (Upload Path)"
+        Start((Start Sync)) --> ReadMan[Download Manifest]
+        ReadMan --> CheckSize{Buffer Full?<br/>(> 50 ops)}
+
+        CheckSize -- No --> AppendBuffer[Append to<br/>Embedded Ops]:::action
+        AppendBuffer --> WriteMan[Upload Manifest]:::io
+
+        CheckSize -- Yes --> Flush[Flush Buffer]:::action
+        Flush --> CreateFile[Create 'ops_NEW.json'<br/>with old buffer content]:::io
+        CreateFile --> UpdateRef[Add 'ops_NEW.json'<br/>to External Files]:::action
+        UpdateRef --> ClearBuffer[Clear Buffer &<br/>Add Pending Ops]:::action
+        ClearBuffer --> WriteMan
     end
 
-    class LoadMan,WriteMan,CreateFile,UploadFile,DownMan,DownSnap,CheckFiles,UpSnap,UpManSnap remote;
-    class CheckBuff,CheckSnap,Trigger decision;
+    %% Styles
+    classDef file fill:#fff3e0,stroke:#ef6c00,stroke-width:2px;
+    classDef buffer fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px;
+    classDef action fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef io fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 ```

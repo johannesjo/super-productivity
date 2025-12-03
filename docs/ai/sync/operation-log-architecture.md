@@ -753,10 +753,63 @@ To handle synchronization between clients on different schema versions, the syst
 3.  **Outbound Migration (Send Path)**
 
     - **Location:** `OperationLogStore.getUnsynced()`
-    - **Logic:** Ensure all pending operations sent to the server match `CURRENT_SCHEMA_VERSION`. If an op was created before a local migration (e.g., pending from last session), migrate it on-the-fly before upload.
+    - **Strategy:** **Send As-Is (Receiver Migrates)**.
+    - **Logic:** The client sends operations exactly as they are stored in `SUP_OPS`, preserving their original `schemaVersion`. We do _not_ migrate operations before uploading.
+    - **Reasoning:** This follows the "Robustness Principle" (be conservative in what you do, liberal in what you accept). It avoids the performance cost of batch-migrating thousands of pending operations after a long offline period and eliminates the need to rewrite `SUP_OPS`. The receiving client (which knows its own version best) is responsible for upgrading incoming data.
 
-4.  **Conflict Resolution**
-    - The `ConflictResolutionService` will display the _migrated_ remote operation against the current local state, ensuring the user sees a consistent view of the data (e.g., "Time Estimate" on both sides, rather than "Estimate" vs "Time Estimate").
+4.  **Destructive Migrations**
+
+    - **Scenario:** A feature is removed in V2 (e.g., "Pomodoro" settings deleted), but we receive a V1 `UPDATE` op for it.
+    - **Logic:** The `migrateOperation` function can return `null`.
+    - **Handling:** The sync and replay systems must handle `null` by dropping the operation entirely.
+
+5.  **Conflict Resolution**
+    - The `ConflictResolutionService` will display the _migrated_ remote operation against the current local state.
+    - **UI Decision:** We display the migrated values directly without special "migrated" annotations. Ideally, the conflict dialog uses the same formatters/components as the main UI, so the data looks familiar (e.g., "1 hour" instead of "3600").
+
+### A.7.12 Migration Safety
+
+**Status:** Requirement (Not Implemented)
+
+Migrations are critical and risky. To prevent data loss if a migration crashes mid-process:
+
+1.  **Backup Before Migrate:** Before `SchemaMigrationService.migrateIfNeeded()` begins modifying the state, it must create a backup of the current `state_cache`.
+    - Implementation: Copy `SUP_OPS` object store entry to a backup key (e.g., `state_cache_backup`).
+2.  **Rollback on Failure:** If migration throws an error, catch it, restore the backup, and prevent the app from loading potentially corrupted "half-migrated" state. (Likely show a fatal error screen asking user to export backup or contact support).
+
+### A.7.13 Tail Ops Consistency
+
+**Status:** Requirement (Not Implemented)
+
+**What are Tail Ops?**
+When the app starts, it loads the most recent snapshot (e.g., from yesterday). It then loads all operations that occurred _after_ that snapshot (the "tail") to reconstruct the exact state at the moment the app was closed.
+
+**The Consistency Gap**
+
+1.  Snapshot is loaded (Version 1).
+2.  App is updated (Version 2).
+3.  Snapshot is migrated (V1 → V2).
+4.  Tail ops are loaded (Version 1).
+5.  **Problem:** If we apply V1 tail ops to the V2 state, they might write to fields that no longer exist or have changed format.
+
+**Solution**
+The **Tail Ops MUST be migrated** during hydration.
+
+- The `OperationLogHydrator` must pass tail ops through the same `SchemaMigrationService.migrateOperation` pipeline used for sync.
+- This ensures that the `OperationApplier` always receives operations matching the current runtime schema.
+
+### A.7.14 Other Design Decisions
+
+**Operation Envelope vs. Payload**
+
+- **Decision:** `schemaVersion` applies **only to the `payload`** of the operation.
+- **Reasoning:** Changes to the Operation structure itself (the "envelope", e.g., `id`, `vectorClock`, `opType`) are considered "System Level" breaking changes. They cannot be handled by the standard schema migration system. If the envelope changes, we would likely need a "Genesis V2" event or a specialized one-time database upgrade script.
+
+**Conflict UI for Synthetic Conflicts**
+
+- **Scenario:** Migration transforms logic (e.g., "1h" string → 3600 seconds).
+- **Decision:** The Conflict Resolution UI will simply show the migrated value (3600). We will **not** implement special annotations (e.g., "Values differ due to migration").
+- **KISS Principle:** Users generally recognize their data even if the format shifts slightly. The complexity of tracking "why" a value changed is not worth the implementation cost.
 
 ---
 
