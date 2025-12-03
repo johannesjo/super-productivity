@@ -206,6 +206,7 @@ export class ArchiveService {
       },
       {
         isUpdateRevAndLastUpdate: false, // Don't update rev for remote sync
+        isIgnoreDBLock: true, // Called during sync when DB is locked
       },
     );
 
