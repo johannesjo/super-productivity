@@ -4,7 +4,7 @@ import { filter, concatMap } from 'rxjs/operators';
 import { LockService } from './lock.service';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
-import { BLACKLISTED_ACTION_TYPES } from './action-whitelist';
+import { BLACKLISTED_ACTION_TYPES } from './action-blacklist';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { Operation } from './operation.types';
