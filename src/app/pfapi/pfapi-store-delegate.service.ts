@@ -31,11 +31,9 @@ import { environment } from '../../environments/environment';
 /**
  * Service that provides a delegate function to read all sync model data from the NgRx store.
  *
- * When operation log sync is enabled, SaveToDbEffects is completely disabled. This delegate
- * allows legacy sync (WebDAV/Dropbox) to read the current state directly from NgRx instead
- * of ModelCtrl caches.
- *
- * All sync models are now read from NgRx state.
+ * Persistence happens via OperationLogEffects to SUP_OPS IndexedDB, so ModelCtrl caches
+ * are stale. This delegate allows legacy sync (WebDAV/Dropbox) to read the current state
+ * directly from NgRx instead of ModelCtrl caches.
  */
 @Injectable({
   providedIn: 'root',
@@ -96,7 +94,7 @@ export class PfapiStoreDelegateService {
             archiveOld,
           ]) =>
             ({
-              // Clean up task state before sync (same as SaveToDbEffects)
+              // Clean up task state before sync
               task: {
                 ...task,
                 selectedTaskId: environment.production ? null : task.selectedTaskId,

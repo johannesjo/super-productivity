@@ -80,7 +80,6 @@ import { plannerFeature } from '../features/planner/store/planner.reducer';
 import { PlannerEffects } from '../features/planner/store/planner.effects';
 import { AppStateEffects } from './app-state/app-state.effects';
 import { appStateFeature } from './app-state/app-state.reducer';
-import { SaveToDbEffects } from './shared/save-to-db.effects';
 import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
 import { OperationLogEffects } from '../core/persistence/operation-log/operation-log.effects';
 import {
@@ -107,7 +106,6 @@ import {
 @NgModule({
   declarations: [],
   imports: [
-    EffectsModule.forFeature([SaveToDbEffects]),
     EffectsModule.forFeature([OperationLogEffects]),
 
     StoreModule.forFeature(appStateFeature),
