@@ -727,6 +727,37 @@ No, not yet. It provides the bridge from older versions of the app to the Operat
 2.  All future schema changes should use the **Schema Migration** system (A.7) described above.
 3.  Once the Operation Log is fully established and legacy data is considered obsolete (e.g., after several major versions), the legacy migration code can be removed.
 
+### A.7.11 Conflict-Aware Migration Strategy
+
+**Status:** Design Ready (Not Implemented)
+
+To handle synchronization between clients on different schema versions, the system must ensure that operations are comparable ("apples-to-apples") before conflict detection occurs.
+
+#### Strategy
+
+1.  **Operation-Level Migration Pipeline**
+
+    - Extend `SchemaMigration` interface to include `migrateOperation?: (op: Operation) => Operation`.
+    - This allows transforming a V1 `UPDATE` (e.g., `{ changes: { oldField: 'val' } }`) into a V2 `UPDATE` (e.g., `{ changes: { newField: 'val' } }`).
+
+2.  **Inbound Migration (Receive Path)**
+
+    - **Location:** `OperationLogSyncService.processRemoteOps`
+    - **Logic:**
+      1.  Receive `remoteOps`.
+      2.  Check `op.schemaVersion` for each op.
+      3.  If `op.schemaVersion < CURRENT_SCHEMA_VERSION`, run `SchemaMigrationService.migrateOperation(op)`.
+      4.  Pass _migrated_ ops to `detectConflicts()`.
+    - **Benefit:** Conflict detection works on the _current_ schema structure, preventing false negatives (missing a conflict because field names differ) and confusing diffs.
+
+3.  **Outbound Migration (Send Path)**
+
+    - **Location:** `OperationLogStore.getUnsynced()`
+    - **Logic:** Ensure all pending operations sent to the server match `CURRENT_SCHEMA_VERSION`. If an op was created before a local migration (e.g., pending from last session), migrate it on-the-fly before upload.
+
+4.  **Conflict Resolution**
+    - The `ConflictResolutionService` will display the _migrated_ remote operation against the current local state, ensuring the user sees a consistent view of the data (e.g., "Time Estimate" on both sides, rather than "Estimate" vs "Time Estimate").
+
 ---
 
 # Part B: Legacy Sync Bridge
