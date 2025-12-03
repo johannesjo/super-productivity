@@ -483,6 +483,7 @@ export class OperationLogSyncService {
       const entityIdsToCheck =
         remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
       let isConflicting = false;
+      let isStaleOrDuplicate = false;
 
       for (const entityId of entityIdsToCheck) {
         const entityKey = `${remoteOp.entityType}:${entityId}`;
@@ -501,6 +502,24 @@ export class OperationLogSyncService {
 
         const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
+        // Skip stale operations (local already has newer state)
+        if (vcComparison === VectorClockComparison.GREATER_THAN) {
+          PFLog.verbose(
+            `OperationLogSyncService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
+          );
+          isStaleOrDuplicate = true;
+          break;
+        }
+
+        // Skip duplicate operations (already applied)
+        if (vcComparison === VectorClockComparison.EQUAL) {
+          PFLog.verbose(
+            `OperationLogSyncService: Skipping duplicate remote op: ${remoteOp.id}`,
+          );
+          isStaleOrDuplicate = true;
+          break;
+        }
+
         if (vcComparison === VectorClockComparison.CONCURRENT) {
           // True conflict - same entity modified independently
           conflicts.push({
@@ -516,8 +535,8 @@ export class OperationLogSyncService {
         }
       }
 
-      if (!isConflicting) {
-        // One happened before the other - can be auto-resolved
+      if (!isConflicting && !isStaleOrDuplicate) {
+        // Remote is newer (LESS_THAN) - safe to apply
         nonConflicting.push(remoteOp);
       }
     }
