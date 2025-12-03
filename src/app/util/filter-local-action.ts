@@ -30,3 +30,23 @@ interface ActionWithMeta extends Action {
  */
 export const filterLocalAction = <T extends ActionWithMeta>(): OperatorFunction<T, T> =>
   filter((action: T) => !action.meta?.isRemote);
+
+/**
+ * RxJS operator that filters to only remote actions from sync.
+ *
+ * Use this in effects that should only run for remote sync actions,
+ * not for local user actions.
+ *
+ * @example
+ * ```typescript
+ * myEffect$ = createEffect(() =>
+ *   this._actions$.pipe(
+ *     ofType(TaskSharedActions.moveToArchive),
+ *     filterRemoteAction(),
+ *     // ... rest of effect
+ *   )
+ * );
+ * ```
+ */
+export const filterRemoteAction = <T extends ActionWithMeta>(): OperatorFunction<T, T> =>
+  filter((action: T) => !!action.meta?.isRemote);

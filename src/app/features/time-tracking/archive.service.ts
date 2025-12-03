@@ -155,4 +155,62 @@ export class ArchiveService {
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD\n_______________________',
     );
   }
+
+  /**
+   * Writes tasks to archiveYoung for remote sync operations.
+   * This is a simplified version that only adds tasks without triggering
+   * time tracking flush or archiveOld compaction.
+   *
+   * Used when receiving moveToArchive operations from other clients.
+   */
+  async writeTasksToArchiveForRemoteSync(tasks: TaskWithSubTasks[]): Promise<void> {
+    const now = Date.now();
+    const flatTasks = flattenTasks(tasks);
+
+    Log.log('[ArchiveService] writeTasksToArchiveForRemoteSync:', {
+      inputTasksCount: tasks.length,
+      flatTasksCount: flatTasks.length,
+      taskIds: flatTasks.map((t) => t.id),
+    });
+
+    if (!flatTasks.length) {
+      Log.log('[ArchiveService] No tasks to archive for remote sync');
+      return;
+    }
+
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const taskArchiveState = archiveYoung.task || createEmptyEntity();
+
+    const newTaskArchive = taskAdapter.addMany(
+      flatTasks.map(({ subTasks, ...task }) => ({
+        ...task,
+        reminderId: undefined,
+        isDone: true,
+        dueWithTime: undefined,
+        dueDay: undefined,
+        _hideSubTasksMode: undefined,
+        doneOn:
+          task.isDone && task.doneOn
+            ? task.doneOn
+            : task.parentId
+              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
+              : now,
+      })),
+      taskArchiveState,
+    );
+
+    await this._pfapiService.m.archiveYoung.save(
+      {
+        ...archiveYoung,
+        task: newTaskArchive,
+      },
+      {
+        isUpdateRevAndLastUpdate: false, // Don't update rev for remote sync
+      },
+    );
+
+    Log.log('[ArchiveService] Remote sync: saved tasks to archiveYoung:', {
+      archivedTaskCount: Object.keys(newTaskArchive.entities).length,
+    });
+  }
 }
