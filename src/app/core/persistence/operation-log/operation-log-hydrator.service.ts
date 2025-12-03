@@ -82,21 +82,40 @@ export class OperationLogHydratorService {
 
         // 4. Replay tail operations
         const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
-        PFLog.normal(
-          `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
-        );
 
-        for (const entry of tailOps) {
-          const action = convertOpToAction(entry.op);
-          this.store.dispatch(action);
-        }
+        if (tailOps.length > 0) {
+          // Optimization: If last op is SyncImport, skip replay and load it directly
+          const lastOp = tailOps[tailOps.length - 1].op;
+          if (lastOp.opType === OpType.SyncImport && lastOp.payload) {
+            PFLog.normal(
+              `OperationLogHydratorService: Last of ${tailOps.length} tail ops is SyncImport, loading directly`,
+            );
+            const payload = lastOp.payload as { appDataComplete?: unknown } | unknown;
+            const appData =
+              typeof payload === 'object' &&
+              payload !== null &&
+              'appDataComplete' in payload
+                ? payload.appDataComplete
+                : payload;
+            this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
+            await this._saveCurrentStateAsSnapshot();
+          } else {
+            PFLog.normal(
+              `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
+            );
+            for (const entry of tailOps) {
+              const action = convertOpToAction(entry.op);
+              this.store.dispatch(action);
+            }
 
-        // 5. If we replayed many ops, save a new snapshot for faster future loads
-        if (tailOps.length > 10) {
-          PFLog.normal(
-            `OperationLogHydratorService: Saving new snapshot after replaying ${tailOps.length} ops`,
-          );
-          await this._saveCurrentStateAsSnapshot();
+            // 5. If we replayed many ops, save a new snapshot for faster future loads
+            if (tailOps.length > 10) {
+              PFLog.normal(
+                `OperationLogHydratorService: Saving new snapshot after replaying ${tailOps.length} ops`,
+              );
+              await this._saveCurrentStateAsSnapshot();
+            }
+          }
         }
 
         PFLog.normal('OperationLogHydratorService: Hydration complete.');
@@ -116,18 +135,33 @@ export class OperationLogHydratorService {
           return;
         }
 
-        PFLog.normal(
-          `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
-        );
-
-        for (const entry of allOps) {
-          const action = convertOpToAction(entry.op);
-          this.store.dispatch(action);
+        // Optimization: If last op is SyncImport, skip replay and load it directly
+        const lastOp = allOps[allOps.length - 1].op;
+        if (lastOp.opType === OpType.SyncImport && lastOp.payload) {
+          PFLog.normal(
+            `OperationLogHydratorService: Last of ${allOps.length} ops is SyncImport, loading directly`,
+          );
+          const payload = lastOp.payload as { appDataComplete?: unknown } | unknown;
+          const appData =
+            typeof payload === 'object' &&
+            payload !== null &&
+            'appDataComplete' in payload
+              ? payload.appDataComplete
+              : payload;
+          this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
+        } else {
+          PFLog.normal(
+            `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
+          );
+          for (const entry of allOps) {
+            const action = convertOpToAction(entry.op);
+            this.store.dispatch(action);
+          }
         }
 
-        // Save snapshot after full replay for faster future loads
+        // Save snapshot after replay for faster future loads
         PFLog.normal(
-          `OperationLogHydratorService: Saving snapshot after replaying ${allOps.length} ops`,
+          `OperationLogHydratorService: Saving snapshot after processing ${allOps.length} ops`,
         );
         await this._saveCurrentStateAsSnapshot();
 
