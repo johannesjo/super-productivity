@@ -6,8 +6,6 @@ import { createEmptyEntity } from '../../util/create-empty-entity';
 import { TaskArchive } from '../../features/tasks/task.model';
 import { initialTaskRepeatCfgState } from '../../features/task-repeat-cfg/store/task-repeat-cfg.reducer';
 import { initialMetricState } from '../../features/metric/store/metric.reducer';
-import { initialImprovementState } from '../../features/metric/improvement/store/improvement.reducer';
-import { initialObstructionState } from '../../features/metric/obstruction/store/obstruction.reducer';
 import { AppBaseData } from './sync.model';
 import { initialNoteState } from '../../features/note/store/note.reducer';
 import { initialGlobalConfigState } from '../../features/config/store/global-config.reducer';
@@ -44,13 +42,7 @@ export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   taskRepeatCfg: initialTaskRepeatCfgState,
   note: initialNoteState,
 
-  // metric
   metric: initialMetricState,
-
-  // TODO remove completely
-  improvement: initialImprovementState,
-  // TODO remove completely
-  obstruction: initialObstructionState,
 };
 
 // NOTE: they should never be changed

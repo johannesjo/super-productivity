@@ -36,8 +36,6 @@ export const createAppDataCompleteMock = (): AppDataCompleteNew => ({
     todayOrder: [],
   },
   metric: createEmptyEntity(),
-  improvement: createEmptyEntity() as any,
-  obstruction: createEmptyEntity(),
   planner: { days: {}, addPlannedTasksDialogLastShown: undefined },
   issueProvider: createEmptyEntity() as any,
   boards: {

@@ -12,10 +12,6 @@ export const crossModelMigration4: CrossModelMigrateFn = ((
   PFLog.log('____________________Migrate4__________________');
   const copy = fullData;
 
-  if (!Array.isArray(copy.improvement.hiddenImprovementBannerItems)) {
-    copy.improvement.hiddenImprovementBannerItems = [];
-  }
-
   migrateTasks(copy.task);
   migrateTasks(copy.archiveYoung.task);
   migrateTasks(copy.archiveOld.task);
