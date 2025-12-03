@@ -25,13 +25,9 @@ import {
   PluginUserDataState,
 } from '../../plugins/plugin-persistence.model'; // for more speed
 
+// TODO check if we can improve on this
 // for more speed
-// type DataToValidate = Omit<AppDataCompleteNew, 'archiveOld' | 'archiveYoung'>;
-// to test broken validation
-// type DataToValidate = AppDataCompleteNew & {
-//   NOT_THERE: boolean;
-// };
-type DataToValidate = AppDataCompleteNew;
+type DataToValidate = Omit<AppDataCompleteNew, 'archiveOld' | 'archiveYoung'>;
 
 // Create reusable validation functions
 const _validateAllData = createValidate<DataToValidate>();
