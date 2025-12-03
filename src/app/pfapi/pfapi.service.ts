@@ -27,7 +27,6 @@ import {
   distinctUntilChanged,
   filter,
   map,
-  pairwise,
   shareReplay,
   startWith,
 } from 'rxjs/operators';
@@ -136,46 +135,12 @@ export class PfapiService {
       }
     });
 
-    // Wire up NgRx store delegate for operation log sync mode
-    // When enabled, legacy sync reads from NgRx store instead of ModelCtrl caches
-    this._commonAndLegacySyncConfig$
-      .pipe(
-        map((cfg) => !!cfg?.useOperationLogSync),
-        startWith(false),
-        distinctUntilChanged(),
-        pairwise(),
-      )
-      .subscribe(async ([wasOpLog, useOpLog]) => {
-        if (useOpLog) {
-          // Enable delegate: legacy sync will read from NgRx store
-          PFLog.normal('PfapiService: Enabling NgRx store delegate for op-log sync');
-          this.pf.setGetAllSyncModelDataFromStoreDelegate(() =>
-            this._storeDelegateService.getAllSyncModelDataFromStore(),
-          );
-        } else {
-          // Disable delegate: legacy sync will read from ModelCtrl caches
-          if (wasOpLog) {
-            // Transitioning from op-log to legacy mode: flush current state to 'pf' database
-            PFLog.normal(
-              'PfapiService: Flushing NgRx state to pf database before disabling op-log',
-            );
-            try {
-              const currentState =
-                await this._storeDelegateService.getAllSyncModelDataFromStore();
-              await this.pf.importAllSycModelData({
-                data: currentState,
-                crossModelVersion: CROSS_MODEL_VERSION,
-                isBackupData: false,
-                isAttemptRepair: false,
-              });
-            } catch (e) {
-              PFLog.err('Failed to flush state to pf database:', e);
-            }
-          }
-          PFLog.normal('PfapiService: Disabling NgRx store delegate');
-          this.pf.setGetAllSyncModelDataFromStoreDelegate(null);
-        }
-      });
+    // Wire up NgRx store delegate for operation log sync
+    // Legacy sync reads from NgRx store instead of ModelCtrl caches
+    PFLog.normal('PfapiService: Enabling NgRx store delegate for op-log sync');
+    this.pf.setGetAllSyncModelDataFromStoreDelegate(() =>
+      this._storeDelegateService.getAllSyncModelDataFromStore(),
+    );
   }
 
   async importCompleteBackup(

@@ -71,8 +71,8 @@ export class Pfapi<const MD extends ModelCfgs> {
   /**
    * Delegate function to get all sync model data from an external source (e.g., NgRx store).
    * When set, this will be used by getAllSyncModelData() instead of reading from ModelCtrl caches.
-   * This is needed when operation log sync is enabled and SaveToDbEffects is disabled,
-   * as ModelCtrl caches become stale in that case.
+   * This is needed because persistence happens via OperationLogEffects to SUP_OPS,
+   * so ModelCtrl caches are stale and we need to read from NgRx store instead.
    */
   private _getAllSyncModelDataFromStoreDelegate:
     | (() => Promise<AllSyncModels<MD>>)
@@ -283,8 +283,8 @@ export class Pfapi<const MD extends ModelCfgs> {
 
     let allData: AllSyncModels<MD>;
 
-    // When operation log sync is enabled, use the delegate to read from NgRx store
-    // instead of ModelCtrl caches (which are stale when SaveToDbEffects is disabled)
+    // Use the delegate to read from NgRx store instead of ModelCtrl caches
+    // (ModelCtrl caches are stale because persistence happens via OperationLogEffects)
     if (this._getAllSyncModelDataFromStoreDelegate) {
       PFLog.normal(`${this.getAllSyncModelData.name}(): Using NgRx store delegate`);
       allData = await this._getAllSyncModelDataFromStoreDelegate();
