@@ -33,12 +33,7 @@ export class SuperSyncProvider
 
   override async isReady(): Promise<boolean> {
     const privateCfg = await this.privateCfg.load();
-    return !!(
-      privateCfg &&
-      privateCfg.userName &&
-      privateCfg.baseUrl &&
-      privateCfg.password
-    );
+    return !!(privateCfg && privateCfg.baseUrl && privateCfg.accessToken);
   }
 
   protected override _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {
@@ -130,12 +125,15 @@ export class SuperSyncProvider
     const baseUrl = cfg.baseUrl.replace(/\/$/, '');
     const url = `${baseUrl}${path}`;
 
-    // Create Basic auth token from username/password
-    const authToken = btoa(`${cfg.userName}:${cfg.password}`);
-
     const headers = new Headers(options.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
-    headers.set('Authorization', `Bearer ${authToken}`);
+    if (cfg.accessToken) {
+      headers.set('Authorization', `Bearer ${cfg.accessToken}`);
+    } else if (cfg.userName && cfg.password) {
+      // Create Basic auth token from username/password
+      const authToken = btoa(`${cfg.userName}:${cfg.password}`);
+      headers.set('Authorization', `Basic ${authToken}`);
+    }
 
     const response = await fetch(url, {
       ...options,

@@ -398,9 +398,16 @@ export class WebdavApi {
     const cfg = await this._getCfgOrError();
 
     // Build authorization header
-    const auth = btoa(`${cfg.userName}:${cfg.password}`);
+    let authHeaderVal;
+    if (cfg.accessToken) {
+      authHeaderVal = `Bearer ${cfg.accessToken}`;
+    } else {
+      const auth = btoa(`${cfg.userName}:${cfg.password}`);
+      authHeaderVal = `Basic ${auth}`;
+    }
+
     const allHeaders = {
-      [WebDavHttpHeader.AUTHORIZATION]: `Basic ${auth}`,
+      [WebDavHttpHeader.AUTHORIZATION]: authHeaderVal,
       ...headers,
     };
 

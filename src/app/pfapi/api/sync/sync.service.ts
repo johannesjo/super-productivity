@@ -736,21 +736,10 @@ export class SyncService<const MD extends ModelCfgs> {
   private _supportsOpLogSync(
     provider: SyncProviderServiceInterface<SyncProviderId>,
   ): boolean {
-    // ALL current providers use legacy LWW sync with a single main.json file.
-    // Operation log sync requires a provider that can efficiently handle
-    // multiple small files (operation chunks) and is designed for future
-    // server-based providers.
-    //
-    // Provider IDs that do NOT support op-log sync:
-    // - SyncProviderId.Dropbox
-    // - SyncProviderId.WebDAV
-    // - SyncProviderId.LocalFile
-    // - SyncProviderId.SuperSync (until explicitly supported)
-    //
-    // For now, return false for ALL providers.
-    // When a server-based provider is added that supports op-log sync,
-    // add a check here: if (provider.id === SyncProviderId.FutureServer) return true;
-    return false;
+    // Check if provider implements OperationSyncCapable
+    // We cast to unknown first then to OperationSyncCapable to access the property safely
+    const p = provider as unknown as { supportsOperationSync?: boolean };
+    return !!p.supportsOperationSync;
   }
 
   /**
