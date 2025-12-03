@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EntityConflict } from './operation.types';
@@ -35,7 +35,7 @@ export class ConflictResolutionService {
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
-  private pfapiService = inject(PfapiService);
+  private injector = inject(Injector);
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
@@ -145,7 +145,8 @@ export class ConflictResolutionService {
     }
 
     // Create REPAIR operation
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    const pfapiService = this.injector.get(PfapiService);
+    const clientId = await pfapiService.pf.metaModel.loadClientId();
     await this.repairOperationService.createRepairOperation(
       result.repairedState,
       result.repairSummary,
