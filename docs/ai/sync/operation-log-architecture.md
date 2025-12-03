@@ -20,9 +20,9 @@ The Operation Log serves **four distinct purposes**:
 This document is structured around these four purposes. Most complexity lives in **Part A** (local persistence). **Part B** is a thin bridge to PFAPI. **Part C** handles operation-based sync with servers. **Part D** integrates validation and automatic repair.
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                        User Action                                   │
-└────────────────────────────────────────────────────────────────────┘
+┌───────────────────────────────────────────────────────────────────┐
+│                          User Action                              │
+└───────────────────────────────────────────────────────────────────┘
                              ▼
                         NgRx Store
                   (Runtime Source of Truth)
@@ -371,6 +371,18 @@ private async attemptRecovery(): Promise<void> {
 
 When Super Productivity's data model changes (new fields, renamed properties, restructured entities), schema migrations ensure existing data remains usable after app updates.
 
+> **Current Status:** Migration infrastructure is implemented, but no actual migrations exist yet. The `MIGRATIONS` array is empty and `CURRENT_SCHEMA_VERSION = 1`. This section documents the designed behavior for when migrations are needed.
+
+### Configuration
+
+`CURRENT_SCHEMA_VERSION` is defined in `src/app/core/persistence/operation-log/schema-migration.service.ts`:
+
+```typescript
+export const CURRENT_SCHEMA_VERSION = 1;
+export const MIN_SUPPORTED_SCHEMA_VERSION = 1;
+export const MAX_VERSION_SKIP = 5; // Max versions ahead we'll attempt to load
+```
+
 ### Core Concepts
 
 | Concept                    | Description                                                                 |
@@ -445,6 +457,14 @@ async replayOperation(op: Operation, currentState: AppDataComplete): Promise<voi
 }
 ```
 
+> **Limitation:** Operations are NOT migrated during replay. If a migration renames a field (e.g., `estimate` → `timeEstimate`), old operations referencing `estimate` will apply that field to the entity, potentially causing data inconsistency. To avoid this:
+>
+> 1. **Prefer additive migrations** - Add new fields with defaults rather than renaming
+> 2. **Use aliases in reducers** - If renaming is necessary, reducers should accept both old and new field names
+> 3. **Force compaction after migration** - Reduce the window of mixed-version operations
+>
+> Operation-level migration (transforming old ops to new schema during replay) is listed as a future enhancement in A.7.9.
+
 ### A.7.3 Remote Sync (Cross-Version Clients)
 
 When clients run different Super Productivity versions, sync must handle version differences:
@@ -488,26 +508,42 @@ When receiving full state from remote (e.g., SYNC_IMPORT from another client):
 async handleFullStateImport(payload: { appDataComplete: AppDataComplete }): Promise<void> {
   const { appDataComplete } = payload;
 
-  // 1. Detect schema version of incoming state
-  const incomingVersion = detectSchemaVersion(appDataComplete);
+  // 1. Detect schema version of incoming state (from schemaVersion field or structure)
+  const incomingVersion = appDataComplete.schemaVersion ?? detectSchemaVersion(appDataComplete);
 
   if (incomingVersion < CURRENT_SCHEMA_VERSION) {
     // 2a. Migrate incoming state up to current version
     const migratedState = await this.migrateState(appDataComplete, incomingVersion);
     this.store.dispatch(loadAllData({ appDataComplete: migratedState }));
+
+  } else if (incomingVersion > CURRENT_SCHEMA_VERSION + MAX_VERSION_SKIP) {
+    // 2b. Too far ahead - reject and prompt user to update
+    this.snackService.open({
+      type: 'ERROR',
+      msg: T.F.SYNC.S.VERSION_TOO_OLD,
+      actionStr: T.PS.UPDATE_APP,
+      actionFn: () => window.open(UPDATE_URL, '_blank'),
+    });
+    throw new Error(`Schema version ${incomingVersion} requires app update`);
+
   } else if (incomingVersion > CURRENT_SCHEMA_VERSION) {
-    // 2b. Incoming state is from newer app version
-    // Options: warn user, attempt graceful load, or reject
-    PFLog.warn('Received state from newer app version', { incomingVersion });
+    // 2c. Slightly ahead - attempt graceful load with warning
+    PFLog.warn('Received state from newer app version', { incomingVersion, current: CURRENT_SCHEMA_VERSION });
+    this.snackService.open({
+      type: 'WARN',
+      msg: T.F.SYNC.S.NEWER_VERSION_WARNING, // "Data from newer app version - some features may not work"
+    });
     // Attempt load - unknown fields will be stripped by Typia validation
+    // This may cause data loss for fields the older app doesn't understand
     this.store.dispatch(loadAllData({ appDataComplete }));
+
   } else {
-    // 2c. Same version - direct load
+    // 2d. Same version - direct load
     this.store.dispatch(loadAllData({ appDataComplete }));
   }
 
-  // 3. Save migrated snapshot
-  await this.saveStateCache(/* current state with current schema version */);
+  // 3. Save snapshot (always with current schema version)
+  await this.saveStateCache(/* current state with schemaVersion = CURRENT_SCHEMA_VERSION */);
 }
 ```
 
@@ -579,13 +615,22 @@ async migrateIfNeeded(snapshot: StateCache): Promise<StateCache> {
   return { ...snapshot, state, schemaVersion };
 }
 
-// Helper to detect schema version from state structure
+// Helper to detect schema version from state structure (fallback when schemaVersion field is missing)
 function detectSchemaVersion(state: unknown): number {
-  // Check for version markers or structural differences
-  // This is a fallback when schemaVersion field is missing
-  if (hasV3Structure(state)) return 3;
-  if (hasV2Structure(state)) return 2;
-  return 1; // Assume v1 for unversioned data
+  // Primary: Use explicit schemaVersion field if present
+  if (typeof state === 'object' && state !== null && 'schemaVersion' in state) {
+    return (state as { schemaVersion: number }).schemaVersion;
+  }
+
+  // Fallback: Infer from structure (add checks as migrations are implemented)
+  // Example checks (not yet implemented):
+  // - v2 added task.priority field
+  // - v3 renamed task.estimate to task.timeEstimate
+  //
+  // if (hasTaskPriorityField(state)) return 2;
+  // if (hasTimeEstimateField(state)) return 3;
+
+  return 1; // Default: assume v1 for unversioned/legacy data
 }
 ```
 
