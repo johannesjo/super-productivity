@@ -8,12 +8,10 @@ import {
 } from '../../tasks/store/task.selectors';
 import { Task, TaskWithDueTime, TaskWithSubTasks } from '../../tasks/task.model';
 import { devError } from '../../../util/dev-error';
-import {
-  selectProjectById,
-  selectProjectFeatureState,
-} from '../../project/store/project.selectors';
+import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { Log } from '../../../core/log';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
 
@@ -55,7 +53,22 @@ export const selectActiveWorkContext = createSelector(
       };
     }
     if (activeType === WorkContextType.PROJECT) {
-      const project = selectProjectById.projector(projectState, { id: activeId });
+      const project = projectState.entities[activeId];
+      if (!project) {
+        // This should not happen, but if it does, we don't want to crash the app
+        // This might happen during import when the active context is set to a project that is not yet imported
+        Log.err('Project not found: ' + activeId);
+        const tag = tagState.entities[TODAY_TAG.id];
+        if (!tag) {
+          throw new Error('Today tag not found');
+        }
+        return {
+          ...tag,
+          type: WorkContextType.TAG,
+          routerLink: `tag/${tag.id}`,
+          noteIds: todayOrder,
+        };
+      }
       return {
         ...project,
         icon: null,
