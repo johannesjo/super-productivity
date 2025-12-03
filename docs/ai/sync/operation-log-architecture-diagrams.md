@@ -151,3 +151,81 @@ graph TD
 
     API <--> ServerDB
 ```
+
+## 3. Conflict-Aware Migration Strategy
+
+This mindmap outlines the strategy for handling version conflicts during sync by migrating operations before conflict detection.
+
+```mermaid
+mindmap
+  root((Conflict-Aware<br/>Migration))
+    Strategies
+      Operation-Level Migration
+        Transform V1 Op to V2 Op
+        Extend SchemaMigration Interface
+      Inbound Path Receive
+        Intercept Remote Ops
+        Check Op Schema Version
+        Migrate Old Ops
+        Detect Conflicts on Migrated Ops
+      Outbound Path Send
+        Get Unsynced Ops
+        Migrate Pending Ops if Old
+        Ensure Upload matches Current Schema
+      Conflict Resolution
+        Unified Comparison
+        Local Current vs Remote Migrated
+        Prevent False Conflicts
+```
+
+## 4. Hybrid Manifest & Snapshot Architecture (WebDAV / Dropbox Fallback)
+
+This diagram illustrates the efficient "Hybrid Manifest" approach for file-based sync, showing how small operations are buffered in the manifest to reduce request counts, how overflow creates new files, and how snapshotting consolidates history.
+
+```mermaid
+graph TD
+    %% Styles
+    classDef local fill:#fff,stroke:#333,stroke-width:2px,color:black;
+    classDef remote fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
+    classDef decision fill:#fff9c4,stroke:#fbc02d,stroke-width:2px,color:black;
+    classDef storage fill:#f9f,stroke:#333,stroke-width:2px,color:black;
+
+    subgraph "Client: Write Path (Hybrid)"
+        StartWrite((Sync Trigger)) --> LoadMan[Download manifest.json]
+        LoadMan --> CheckBuff{Buffer Full?<br/>> 50 Ops}:::decision
+
+        %% Path A: Buffer Open
+        CheckBuff -- No --> AppendBuff[Append Ops to<br/>manifest.embeddedOperations]
+        AppendBuff --> WriteMan[Upload manifest.json]:::remote
+
+        %% Path B: Buffer Full (Overflow)
+        CheckBuff -- Yes --> CreateFile[Flush embeddedOperations<br/>to ops/overflow_TIMESTAMP.json]:::storage
+        CreateFile --> UploadFile[Upload Op File]:::remote
+        UploadFile --> ClearBuff[Clear Buffer &<br/>Add Filename to<br/>manifest.operationFiles]
+        ClearBuff --> AppendBuff
+    end
+
+    subgraph "Client: Read Path"
+        StartRead((Sync Start)) --> DownMan[Download manifest.json]:::remote
+        DownMan --> CheckSnap{Newer<br/>Snapshot?}:::decision
+
+        CheckSnap -- Yes --> DownSnap[Download & Apply<br/>Snapshot File]:::remote
+        CheckSnap -- No --> CheckFiles
+
+        DownSnap --> CheckFiles
+        CheckFiles[Download & Apply<br/>New Op Files]:::remote
+        CheckFiles --> ApplyEmb[Apply<br/>embeddedOperations]
+        ApplyEmb --> Done((Sync Done))
+    end
+
+    subgraph "Client: Snapshotting (Compaction)"
+        Trigger{Trigger?<br/>> 50 Files}:::decision
+        Trigger -- Yes --> GenSnap[Generate Full Snapshot]:::storage
+        GenSnap --> UpSnap[Upload Snapshot File]:::remote
+        UpSnap --> UpManSnap[Update manifest.json:<br/>1. Set lastSnapshot<br/>2. Clear operationFiles]:::remote
+        UpManSnap --> Cleanup[Delete Old Files<br/>(Async)]
+    end
+
+    class LoadMan,WriteMan,CreateFile,UploadFile,DownMan,DownSnap,CheckFiles,UpSnap,UpManSnap remote;
+    class CheckBuff,CheckSnap,Trigger decision;
+```
