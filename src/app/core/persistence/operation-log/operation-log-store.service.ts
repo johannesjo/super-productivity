@@ -226,6 +226,74 @@ export class OperationLogStoreService {
     return cache || null;
   }
 
+  // ============================================================
+  // Migration Safety Backup (A.7.12)
+  // ============================================================
+
+  /**
+   * Saves a backup of the current state cache before running migrations.
+   * If a migration crashes mid-process, this backup can be restored.
+   */
+  async saveStateCacheBackup(): Promise<void> {
+    await this._ensureInit();
+    const current = await this.db.get('state_cache', 'current');
+    if (current) {
+      await this.db.put('state_cache', {
+        ...current,
+        id: 'backup',
+      });
+    }
+  }
+
+  /**
+   * Loads the backup state cache, if one exists.
+   * Used for crash recovery during migration.
+   */
+  async loadStateCacheBackup(): Promise<{
+    state: unknown;
+    lastAppliedOpSeq: number;
+    vectorClock: VectorClock;
+    compactedAt: number;
+    schemaVersion?: number;
+  } | null> {
+    await this._ensureInit();
+    const backup = await this.db.get('state_cache', 'backup');
+    return backup || null;
+  }
+
+  /**
+   * Clears the backup state cache after successful migration.
+   */
+  async clearStateCacheBackup(): Promise<void> {
+    await this._ensureInit();
+    await this.db.delete('state_cache', 'backup');
+  }
+
+  /**
+   * Checks if a backup exists (indicates interrupted migration).
+   */
+  async hasStateCacheBackup(): Promise<boolean> {
+    await this._ensureInit();
+    const backup = await this.db.get('state_cache', 'backup');
+    return !!backup;
+  }
+
+  /**
+   * Restores the backup as the current state cache.
+   * Used when migration fails and we need to rollback.
+   */
+  async restoreStateCacheFromBackup(): Promise<void> {
+    await this._ensureInit();
+    const backup = await this.db.get('state_cache', 'backup');
+    if (backup) {
+      await this.db.put('state_cache', {
+        ...backup,
+        id: 'current',
+      });
+      await this.db.delete('state_cache', 'backup');
+    }
+  }
+
   async getCurrentVectorClock(): Promise<VectorClock> {
     await this._ensureInit();
     // We need the max vector clock from cache + subsequent ops.

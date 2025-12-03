@@ -49,6 +49,16 @@ export class OperationLogHydratorService {
     PFLog.normal('OperationLogHydratorService: Starting hydration...');
 
     try {
+      // A.7.12: Check for interrupted migration (backup exists)
+      const hasBackup = await this.opLogStore.hasStateCacheBackup();
+      if (hasBackup) {
+        PFLog.warn(
+          'OperationLogHydratorService: Found migration backup - previous migration may have crashed. Restoring...',
+        );
+        await this.opLogStore.restoreStateCacheFromBackup();
+        PFLog.normal('OperationLogHydratorService: Restored from backup.');
+      }
+
       // 1. Load snapshot
       let snapshot = await this.opLogStore.loadStateCache();
 
@@ -62,13 +72,9 @@ export class OperationLogHydratorService {
         snapshot = await this.opLogStore.loadStateCache();
       }
 
-      // 2. Run schema migration if needed
+      // 2. Run schema migration if needed (A.7.12: with backup safety)
       if (snapshot && this.schemaMigrationService.needsMigration(snapshot)) {
-        PFLog.normal('OperationLogHydratorService: Running schema migration...');
-        snapshot = this.schemaMigrationService.migrateIfNeeded(snapshot);
-        // Save migrated snapshot
-        await this.opLogStore.saveStateCache(snapshot);
-        PFLog.normal('OperationLogHydratorService: Schema migration complete.');
+        snapshot = await this._migrateSnapshotWithBackup(snapshot);
       }
 
       // 3. Validate snapshot if it exists
@@ -102,7 +108,7 @@ export class OperationLogHydratorService {
         // 3. Hydrate NgRx with (possibly repaired) snapshot
         this.store.dispatch(loadAllData({ appDataComplete: stateToLoad as any }));
 
-        // 4. Replay tail operations
+        // 4. Replay tail operations (A.7.13: with operation migration)
         const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
 
         if (tailOps.length > 0) {
@@ -117,18 +123,23 @@ export class OperationLogHydratorService {
             // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
+            // A.7.13: Migrate tail operations before replay
+            const opsToReplay = this._migrateTailOps(tailOps.map((e) => e.op));
+
+            const droppedCount = tailOps.length - opsToReplay.length;
             PFLog.normal(
-              `OperationLogHydratorService: Replaying ${tailOps.length} tail operations.`,
+              `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
+                `(${droppedCount} dropped during migration).`,
             );
-            for (const entry of tailOps) {
-              const action = convertOpToAction(entry.op);
+            for (const op of opsToReplay) {
+              const action = convertOpToAction(op);
               this.store.dispatch(action);
             }
 
             // 5. If we replayed many ops, save a new snapshot for faster future loads
-            if (tailOps.length > 10) {
+            if (opsToReplay.length > 10) {
               PFLog.normal(
-                `OperationLogHydratorService: Saving new snapshot after replaying ${tailOps.length} ops`,
+                `OperationLogHydratorService: Saving new snapshot after replaying ${opsToReplay.length} ops`,
               );
               await this._saveCurrentStateAsSnapshot();
             }
@@ -167,17 +178,22 @@ export class OperationLogHydratorService {
           this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
           // No snapshot save needed - full state ops already contain complete state
         } else {
+          // A.7.13: Migrate all operations before replay
+          const opsToReplay = this._migrateTailOps(allOps.map((e) => e.op));
+
+          const droppedCount = allOps.length - opsToReplay.length;
           PFLog.normal(
-            `OperationLogHydratorService: Replaying all ${allOps.length} operations.`,
+            `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
+              `(${droppedCount} dropped during migration).`,
           );
-          for (const entry of allOps) {
-            const action = convertOpToAction(entry.op);
+          for (const op of opsToReplay) {
+            const action = convertOpToAction(op);
             this.store.dispatch(action);
           }
 
           // Save snapshot after replay for faster future loads
           PFLog.normal(
-            `OperationLogHydratorService: Saving snapshot after replaying ${allOps.length} ops`,
+            `OperationLogHydratorService: Saving snapshot after replaying ${opsToReplay.length} ops`,
           );
           await this._saveCurrentStateAsSnapshot();
 
@@ -415,6 +431,95 @@ export class OperationLogHydratorService {
       // Don't fail hydration if snapshot save fails
       PFLog.warn('OperationLogHydratorService: Failed to save snapshot after replay', e);
     }
+  }
+
+  // ============================================================
+  // A.7.12 Migration Safety & A.7.13 Tail Ops Migration
+  // ============================================================
+
+  /**
+   * Migrates a snapshot with backup safety (A.7.12).
+   * Creates a backup before migration and restores it if migration fails.
+   *
+   * @param snapshot - The snapshot to migrate
+   * @returns The migrated snapshot
+   * @throws If migration fails and rollback also fails
+   */
+  private async _migrateSnapshotWithBackup(snapshot: StateCache): Promise<StateCache> {
+    PFLog.normal(
+      'OperationLogHydratorService: Running schema migration with backup safety...',
+    );
+
+    // 1. Create backup before migration
+    await this.opLogStore.saveStateCacheBackup();
+    PFLog.normal('OperationLogHydratorService: Created pre-migration backup.');
+
+    try {
+      // 2. Run migration
+      const migratedSnapshot = this.schemaMigrationService.migrateStateIfNeeded(snapshot);
+
+      // 3. Save migrated snapshot
+      await this.opLogStore.saveStateCache(migratedSnapshot);
+
+      // 4. Clear backup on success
+      await this.opLogStore.clearStateCacheBackup();
+      PFLog.normal(
+        'OperationLogHydratorService: Schema migration complete. Backup cleared.',
+      );
+
+      return migratedSnapshot;
+    } catch (e) {
+      PFLog.err(
+        'OperationLogHydratorService: Schema migration failed. Restoring backup...',
+        e,
+      );
+
+      try {
+        // Restore backup
+        await this.opLogStore.restoreStateCacheFromBackup();
+        PFLog.normal(
+          'OperationLogHydratorService: Backup restored after migration failure.',
+        );
+      } catch (restoreErr) {
+        PFLog.err(
+          'OperationLogHydratorService: CRITICAL - Failed to restore backup after migration failure!',
+          restoreErr,
+        );
+        // Both migration and restore failed - this is a critical error
+        throw new Error(
+          `Schema migration failed and backup restore also failed. ` +
+            `Original error: ${e instanceof Error ? e.message : String(e)}. ` +
+            `Restore error: ${restoreErr instanceof Error ? restoreErr.message : String(restoreErr)}`,
+        );
+      }
+
+      // Re-throw original error after successful restore
+      throw e;
+    }
+  }
+
+  /**
+   * Migrates tail operations to current schema version (A.7.13).
+   * Operations that should be dropped (e.g., for removed features) are filtered out.
+   *
+   * @param ops - The operations to migrate
+   * @returns Array of migrated operations
+   */
+  private _migrateTailOps(ops: Operation[]): Operation[] {
+    // Check if any ops need migration
+    const needsMigration = ops.some((op) =>
+      this.schemaMigrationService.operationNeedsMigration(op),
+    );
+
+    if (!needsMigration) {
+      return ops;
+    }
+
+    PFLog.normal(
+      `OperationLogHydratorService: Migrating ${ops.length} tail ops to current schema version...`,
+    );
+
+    return this.schemaMigrationService.migrateOperations(ops);
   }
 
   /**
