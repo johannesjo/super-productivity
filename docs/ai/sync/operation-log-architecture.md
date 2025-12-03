@@ -1,8 +1,8 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, C, D Implemented
+**Status:** Parts A, B, D Functional; Part C Design Only
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025 (validation & repair integration)
+**Last Updated:** December 3, 2025 (documentation accuracy review)
 
 ---
 
@@ -10,12 +10,14 @@
 
 The Operation Log serves **four distinct purposes**:
 
-| Purpose                    | Description                                   | Status      |
-| -------------------------- | --------------------------------------------- | ----------- |
-| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅ |
-| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅ |
-| **C. Server Sync**         | Upload/download individual operations         | Complete ✅ |
-| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅ |
+| Purpose                    | Description                                   | Status                   |
+| -------------------------- | --------------------------------------------- | ------------------------ |
+| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Functional ⚠️ (see gaps) |
+| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅              |
+| **C. Server Sync**         | Upload/download individual operations         | Design Only 📋           |
+| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅              |
+
+> **⚠️ Known Gaps**: Migration safety (A.7.12) and tail ops consistency (A.7.13) are documented requirements but NOT yet implemented. These are critical for production use with schema migrations.
 
 This document is structured around these four purposes. Most complexity lives in **Part A** (local persistence). **Part B** is a thin bridge to PFAPI. **Part C** handles operation-based sync with servers. **Part D** integrates validation and automatic repair.
 
@@ -595,8 +597,6 @@ const MIGRATIONS: SchemaMigration[] = [
 4.  **Preserve unrelated data**: Do not unintentionally drop fields or entire models that your migration is not concerned with.
 5.  **Test your migration**: Write unit tests to verify that your migration correctly transforms data from version N to N+1, especially edge cases.
 
-````
-
 #### Service Implementation
 
 ```typescript
@@ -644,7 +644,7 @@ function detectSchemaVersion(state: unknown): number {
 
   return 1; // Default: assume v1 for unversioned/legacy data
 }
-````
+```
 
 ### A.7.6 Version Handling in Operations
 
@@ -1111,7 +1111,7 @@ async presentConflicts(conflicts: EntityConflict[]): Promise<void> {
       await this.operationApplier.applyOperations(conflict.remoteOps);
     }
     // Mark local ops as rejected so they won't be re-synced
-    const localOpIds = conflict.localOps.map(op => op.id);
+    const localOpIds = conflicts.flatMap(c => c.localOps.map(op => op.id));
     await this.opLogStore.markRejected(localOpIds);
   } else {
     // Keep local ops, ignore remote
@@ -1330,9 +1330,64 @@ export class RepairOperationService {
 
 ---
 
+# Edge Cases & Missing Considerations
+
+This section documents known edge cases and areas requiring further design or implementation.
+
+## Storage & Resource Limits
+
+### IndexedDB Quota Exhaustion
+
+**Status:** Not Handled
+
+When IndexedDB storage quota is exceeded:
+
+- **Current behavior**: Write fails, error thrown
+- **Desired behavior**: Graceful degradation with user notification
+- **Proposed solution**:
+  1. Catch `QuotaExceededError` in `OperationLogStore`
+  2. Trigger emergency compaction (delete old synced ops regardless of retention window)
+  3. If still failing, show user dialog with options: clear old data, export backup, or sync and clear
+
+### Compaction Trigger Coordination
+
+**Status:** Potential Race Condition
+
+The 500-ops compaction trigger is checked per-tab:
+
+- **Risk**: Multiple tabs could each count 500 ops and trigger compaction simultaneously
+- **Current mitigation**: Web Locks prevent concurrent compaction execution
+- **Gap**: No shared counter means compaction may trigger more frequently than intended
+- **Proposed solution**: Store `opsSinceCompaction` in IndexedDB, read/increment atomically
+
+## Data Integrity Edge Cases
+
+### Genesis Migration with Partial Data
+
+**Status:** Not Fully Defined
+
+What if data exists in both `pf` AND `SUP_OPS` databases?
+
+- **Scenario**: Interrupted migration, partial data in each store
+- **Current behavior**: If `SUP_OPS.state_cache` exists, use it; ignore `pf`
+- **Risk**: May lose newer data that was written to `pf` after partial migration
+- **Proposed solution**: Compare timestamps, merge if necessary, or prompt user
+
+### Compaction During Active Sync
+
+**Status:** Handled via Locks
+
+- Compaction acquires `sp_op_log_compact` lock
+- Sync operations use separate locks
+- **Verified safe**: Compaction only deletes ops with `syncedAt` set, so unsynced ops from active sync are preserved
+
+---
+
 # Implementation Status
 
-## Complete ✅
+## Part A: Local Persistence
+
+### Complete ✅
 
 - SUP_OPS IndexedDB store (ops + state_cache)
 - NgRx effect capture with isPersistent pattern
@@ -1340,30 +1395,60 @@ export class RepairOperationService {
 - Multi-tab BroadcastChannel coordination
 - Web Locks + localStorage fallback
 - Genesis migration from legacy data
+- Compaction with 7-day retention window
+- Disaster recovery from legacy 'pf' database
+- Schema migration service infrastructure (no migrations defined yet)
+- Persistent action metadata on all model actions
+- Rollback notification on persistence failure (shows snackbar with reload action)
+- Hydration optimizations (skip replay for SyncImport, save snapshot after >10 ops replayed)
+
+### Not Implemented ⚠️ (Critical for Schema Migrations)
+
+| Item                          | Section | Risk if Missing                                     |
+| ----------------------------- | ------- | --------------------------------------------------- |
+| **Migration safety backup**   | A.7.12  | Data loss if migration crashes mid-process          |
+| **Tail ops migration**        | A.7.13  | Data corruption when replaying old ops after update |
+| **Operation-level migration** | A.7.11  | Conflicts may compare mismatched schemas            |
+
+> **Note**: These are only critical when `CURRENT_SCHEMA_VERSION > 1`. Currently safe since no migrations exist.
+
+## Part B: Legacy Sync Bridge
+
+### Complete ✅
+
 - `PfapiStoreDelegateService` (reads all NgRx models for sync)
 - META_MODEL vector clock update (B.2)
 - Sync download persistence via `hydrateFromRemoteSync()` (B.3)
 - All models in NgRx (no hybrid persistence)
-- Compaction with 7-day retention window
-- Disaster recovery from legacy 'pf' database
-- Schema migration service infrastructure
-- Server sync upload/download (C.2)
-- File-based sync fallback (C.3)
+- Skip META_MODEL update during sync (prevents lock errors)
+
+## Part C: Server Sync
+
+### Design Only 📋
+
+The following are **documented designs**, not implemented code:
+
+- Operation sync protocol interface (`OperationSyncCapable`)
+- Upload/download flows (C.2)
+- File-based sync fallback (C.3) - explicitly marked as "JUST AN IDEA"
 - Entity-level conflict detection (C.4)
 - Conflict resolution dialog (C.5)
 - Dependency resolution with retry queue (C.6)
-- Persistent action metadata on all model actions
-- **Rollback notification on persistence failure** (shows snackbar with reload action)
-- **Rejected operation tracking** (`rejectedAt` field, excluded from sync)
-- **Skip META_MODEL update during sync** (prevents lock errors when user makes changes during sync)
-- **Hydration optimizations** (skip replay for SyncImport, save snapshot after >10 ops replayed)
-- **Payload validation at write** (Checkpoint A - structural validation before IndexedDB write)
-- **State validation during hydration** (Checkpoints B & C - Typia + cross-model validation)
-- **Post-sync validation** (Checkpoint D - validation after applying remote ops)
-- **REPAIR operation type** (auto-repair with full state + repair summary)
-- **ValidateStateService** (wraps PFAPI validation + repair)
-- **RepairOperationService** (creates REPAIR ops, user notification)
-- **User notification on repair** (snackbar with issue count)
+- Rejected operation tracking (`rejectedAt` field)
+
+> **Clarification**: Part C describes a future server-based sync system. The current app uses Part B (Legacy Sync Bridge) for WebDAV/Dropbox/LocalFile sync.
+
+## Part D: Validation & Repair
+
+### Complete ✅
+
+- Payload validation at write (Checkpoint A - structural validation before IndexedDB write)
+- State validation during hydration (Checkpoints B & C - Typia + cross-model validation)
+- Post-sync validation (Checkpoint D - validation after applying remote ops)
+- REPAIR operation type (auto-repair with full state + repair summary)
+- ValidateStateService (wraps PFAPI validation + repair)
+- RepairOperationService (creates REPAIR ops, user notification)
+- User notification on repair (snackbar with issue count)
 
 ## Future Enhancements 🔮
 
@@ -1373,6 +1458,7 @@ export class RepairOperationService {
 | Undo/Redo             | Leverage op-log for undo history             | Low      |
 | IndexedDB index       | Index on `syncedAt` for faster getUnsynced() | Low      |
 | Persistent compaction | Track ops since compaction across restarts   | Low      |
+| Quota handling        | Graceful degradation on storage exhaustion   | Medium   |
 
 ---
 
