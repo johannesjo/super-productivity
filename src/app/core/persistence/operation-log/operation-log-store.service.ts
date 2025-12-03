@@ -11,7 +11,7 @@ interface OpLogDB extends DBSchema {
     value: OperationLogEntry;
     indexes: {
       byId: string;
-      bySyncedAt: number | undefined;
+      bySyncedAt: number;
     };
   };
   state_cache: {
@@ -41,6 +41,7 @@ interface OpLogDB extends DBSchema {
 })
 export class OperationLogStoreService {
   private _db?: IDBPDatabase<OpLogDB>;
+  private _initPromise?: Promise<void>;
 
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
@@ -71,7 +72,10 @@ export class OperationLogStoreService {
 
   private async _ensureInit(): Promise<void> {
     if (!this._db) {
-      await this.init();
+      if (!this._initPromise) {
+        this._initPromise = this.init();
+      }
+      await this._initPromise;
     }
   }
 
@@ -94,11 +98,6 @@ export class OperationLogStoreService {
   }
 
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
-    await this._ensureInit();
-    return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
-  }
-
-  async getOpsAfterSeqDirect(seq: number): Promise<OperationLogEntry[]> {
     await this._ensureInit();
     return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
   }
@@ -128,13 +127,10 @@ export class OperationLogStoreService {
   async getAppliedOpIds(): Promise<Set<string>> {
     await this._ensureInit();
     // Performance note: This could be slow for large logs, but compaction keeps it bounded.
-    // Index 'byId' contains op.id (string) values, so all keys are strings.
-    // The cast is safe because our index is on string IDs.
-    const opIds = (await this.db.getAllKeysFromIndex(
-      'ops',
-      'byId',
-    )) as unknown as string[];
-    return new Set(opIds);
+    // getAllKeysFromIndex returns PRIMARY keys, not index values.
+    // We need to get all entries and extract op.id.
+    const entries = await this.db.getAll('ops');
+    return new Set(entries.map((e) => e.op.id));
   }
 
   /**
@@ -379,7 +375,7 @@ export class OperationLogStoreService {
 
     // Get ops after snapshot
     const seq = snapshot ? snapshot.lastAppliedOpSeq : 0;
-    const ops = await this.getOpsAfterSeqDirect(seq);
+    const ops = await this.getOpsAfterSeq(seq);
 
     // Merge all op clocks?
     // Actually, we usually just want to know the max for each client.
@@ -393,6 +389,18 @@ export class OperationLogStoreService {
   }
 
   // Frontiers
+  /**
+   * Clears all data from the database. Used for testing purposes only.
+   * @internal
+   */
+  async _clearAllDataForTesting(): Promise<void> {
+    await this._ensureInit();
+    const tx = this.db.transaction(['ops', 'state_cache'], 'readwrite');
+    await tx.objectStore('ops').clear();
+    await tx.objectStore('state_cache').clear();
+    await tx.done;
+  }
+
   async getEntityFrontier(
     entityType?: EntityType,
     entityId?: string,
@@ -439,7 +447,7 @@ export class OperationLogStoreService {
     // Or empty?
     // If we use global VC as baseline for all entities, it's safe (over-estimates causality).
 
-    const ops = await this.getOpsAfterSeqDirect(snapshot?.lastAppliedOpSeq || 0);
+    const ops = await this.getOpsAfterSeq(snapshot?.lastAppliedOpSeq || 0);
     for (const entry of ops) {
       const ids = entry.op.entityIds || (entry.op.entityId ? [entry.op.entityId] : []);
 
