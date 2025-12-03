@@ -1,4 +1,4 @@
-import { createActionGroup, props } from '@ngrx/store';
+import { createActionGroup } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { IssueDataReduced } from '../../features/issue/issue.model';
@@ -34,11 +34,19 @@ export const TaskSharedActions = createActionGroup({
       } as PersistentActionMeta,
     }),
 
-    convertToMainTask: props<{
+    convertToMainTask: (taskProps: {
       task: Task;
       parentTagIds: string[];
       isPlanForToday?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
     deleteTask: (taskProps: { task: TaskWithSubTasks }) => ({
       ...taskProps,
@@ -62,43 +70,84 @@ export const TaskSharedActions = createActionGroup({
     }),
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
-    moveToArchive: props<{
-      tasks: TaskWithSubTasks[];
-    }>(),
+    moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: taskProps.tasks.map((t) => t.id),
+        opType: OpType.Update,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
-    restoreTask: props<{
-      task: Task | TaskWithSubTasks;
-      subTasks: Task[];
-    }>(),
+    restoreTask: (taskProps: { task: Task | TaskWithSubTasks; subTasks: Task[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
     // Task Scheduling
-    scheduleTaskWithTime: props<{
+    scheduleTaskWithTime: (taskProps: {
       task: Task;
       dueWithTime: number;
       remindAt?: number;
       isMoveToBacklog: boolean;
       isSkipAutoRemoveFromToday?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
-    reScheduleTaskWithTime: props<{
+    reScheduleTaskWithTime: (taskProps: {
       task: Task;
       dueWithTime: number;
       remindAt?: number;
       isMoveToBacklog: boolean;
       isSkipAutoRemoveFromToday?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
-    unscheduleTask: props<{
+    unscheduleTask: (taskProps: {
       id: string;
       reminderId?: string;
       isSkipToast?: boolean;
       isLeaveInToday?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
-    dismissReminderOnly: props<{
-      id: string;
-      reminderId: string;
-    }>(),
+    dismissReminderOnly: (taskProps: { id: string; reminderId: string }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
     // Task Updates
     updateTask: (taskProps: { task: Update<Task>; isIgnoreShortSyntax?: boolean }) => ({
@@ -112,43 +161,93 @@ export const TaskSharedActions = createActionGroup({
     }),
 
     // Project Management
-    moveToOtherProject: props<{
+    moveToOtherProject: (taskProps: {
       task: TaskWithSubTasks;
       targetProjectId: string;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: taskProps.task.id,
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
 
-    deleteProject: props<{
-      project: Project;
-      allTaskIds: string[];
-    }>(),
+    deleteProject: (taskProps: { project: Project; allTaskIds: string[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'PROJECT',
+        entityId: taskProps.project.id,
+        opType: OpType.Delete,
+      } as PersistentActionMeta,
+    }),
 
     // Today Tag Management
-    planTasksForToday: props<{
+    planTasksForToday: (taskProps: {
       taskIds: string[];
       parentTaskMap?: { [taskId: string]: string | undefined };
       isShowSnack?: boolean;
       isSkipRemoveReminder?: boolean;
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: taskProps.taskIds,
+        opType: OpType.Update,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
-    removeTasksFromTodayTag: props<{
-      taskIds: string[];
-    }>(),
+    removeTasksFromTodayTag: (taskProps: { taskIds: string[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: taskProps.taskIds,
+        opType: OpType.Update,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
     // Tag Management
-    removeTagsForAllTasks: props<{
-      tagIdsToRemove: string[];
-    }>(),
+    removeTagsForAllTasks: (taskProps: { tagIdsToRemove: string[] }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TAG',
+        entityIds: taskProps.tagIdsToRemove,
+        opType: OpType.Update,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
-    moveTaskInTodayTagList: props<{
-      toTaskId: string;
-      fromTaskId: string;
-    }>(),
+    moveTaskInTodayTagList: (taskProps: { toTaskId: string; fromTaskId: string }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: [taskProps.toTaskId, taskProps.fromTaskId],
+        opType: OpType.Move,
+        isBulk: true,
+      } as PersistentActionMeta,
+    }),
 
     // Batch Operations
-    batchUpdateForProject: props<{
+    batchUpdateForProject: (taskProps: {
       projectId: string;
       operations: BatchOperation[];
       createdTaskIds: { [tempId: string]: string };
-    }>(),
+    }) => ({
+      ...taskProps,
+      meta: {
+        isPersistent: true,
+        entityType: 'PROJECT',
+        entityId: taskProps.projectId,
+        opType: OpType.Batch,
+      } as PersistentActionMeta,
+    }),
   },
 });
