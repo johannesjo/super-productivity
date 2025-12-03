@@ -37,6 +37,7 @@ import { DataInitStateService } from '../../core/data-init/data-init-state.servi
 import { Store } from '@ngrx/store';
 import { selectCurrentTaskId } from '../../features/tasks/store/task.selectors';
 import { SyncLog } from '../../core/log';
+import { SyncWrapperService } from './sync-wrapper.service';
 
 const MAX_WAIT_FOR_INITIAL_SYNC = 25000;
 const USER_INTERACTION_SYNC_CHECK_THROTTLE_TIME = 15 * 60 * 10000;
@@ -51,6 +52,7 @@ export class SyncTriggerService {
   private readonly _idleService = inject(IdleService);
   private readonly _pfapiService = inject(PfapiService);
   private readonly _store = inject(Store);
+  private readonly _syncWrapperService = inject(SyncWrapperService);
 
   private _onUpdateLocalDataTrigger$ = this._pfapiService.onLocalMetaUpdate$;
 
@@ -163,7 +165,16 @@ export class SyncTriggerService {
   // NOTE: can be called multiple times apparently
   afterInitialSyncDoneAndDataLoadedInitially$: Observable<boolean> = merge(
     this._afterInitialSyncDoneAndDataLoadedInitially$,
-    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(mapTo(true)),
+    timer(MAX_WAIT_FOR_INITIAL_SYNC).pipe(
+      // When timeout fires, wait for conflict dialog to close if it's open
+      switchMap(() =>
+        this._syncWrapperService.isWaitingForUserInput$.pipe(
+          filter((isWaiting) => !isWaiting),
+          first(),
+        ),
+      ),
+      mapTo(true),
+    ),
   ).pipe(first(), shareReplay(1));
 
   getSyncTrigger$(syncInterval: number = SYNC_DEFAULT_AUDIT_TIME): Observable<unknown> {
