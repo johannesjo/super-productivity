@@ -124,6 +124,12 @@ export class TaskDueEffects {
               map(([tasksDueToday, todayTaskIds]) => {
                 const missingTaskIds = tasksDueToday
                   .filter((task) => !todayTaskIds.includes(task.id))
+                  // Exclude subtasks whose parent is already in TODAY
+                  // (preventParentAndSubTaskInTodayList$ will remove them anyway,
+                  // causing an infinite add/remove loop and phantom sync changes)
+                  .filter(
+                    (task) => !task.parentId || !todayTaskIds.includes(task.parentId),
+                  )
                   .map((task) => task.id);
 
                 if (!environment.production && missingTaskIds.length > 0) {
