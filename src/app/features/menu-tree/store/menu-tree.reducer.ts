@@ -168,14 +168,23 @@ export const menuTreeReducer = createReducer(
     ...state,
     tagTree: _deleteItemsFromTree(state.tagTree, ids, MenuTreeKind.TAG),
   })),
-  on(TaskSharedActions.addTagToTask, (state, { tag }) => ({
-    ...state,
-    tagTree: [
-      ...state.tagTree,
-      {
-        k: MenuTreeKind.TAG,
-        id: tag.id,
-      },
-    ],
-  })),
+  on(TaskSharedActions.addTagToTask, (state, { tag }) => {
+    // Only add to tree if tag doesn't already exist (handles existing tag assignment)
+    const tagExistsInTree = state.tagTree.some(
+      (node) => node.k === MenuTreeKind.TAG && node.id === tag.id,
+    );
+    if (tagExistsInTree) {
+      return state;
+    }
+    return {
+      ...state,
+      tagTree: [
+        ...state.tagTree,
+        {
+          k: MenuTreeKind.TAG as const,
+          id: tag.id,
+        },
+      ],
+    };
+  }),
 );
