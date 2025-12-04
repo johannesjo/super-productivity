@@ -76,7 +76,7 @@ export class ConflictResolutionService {
 
       if (resolution === 'remote') {
         try {
-          const storedSeqs: number[] = [];
+          const storedOps: Array<{ id: string; seq: number }> = [];
           const appliedOpIds: string[] = [];
           let hadFailure = false;
 
@@ -92,7 +92,7 @@ export class ConflictResolutionService {
             const seq = await this.opLogStore.append(op, 'remote', {
               pendingApply: true,
             });
-            storedSeqs.push(seq);
+            storedOps.push({ id: op.id, seq });
 
             try {
               // Apply single operation
@@ -118,7 +118,10 @@ export class ConflictResolutionService {
           }
 
           // Only mark successfully applied ops (not failed ones)
-          const successSeqs = storedSeqs.slice(0, appliedOpIds.length);
+          const appliedSet = new Set(appliedOpIds);
+          const successSeqs = storedOps
+            .filter((o) => appliedSet.has(o.id))
+            .map((o) => o.seq);
           if (successSeqs.length > 0) {
             await this.opLogStore.markApplied(successSeqs);
           }
@@ -127,6 +130,21 @@ export class ConflictResolutionService {
             PFLog.err(
               `ConflictResolutionService: Partial failure for ${conflict.entityId}. Applied ${appliedOpIds.length}/${conflict.remoteOps.length} ops`,
             );
+
+            // CRITICAL: Mark failed ops as rejected to prevent them from being
+            // incorrectly marked as 'applied' by _recoverPendingRemoteOps() on restart.
+            // Failed ops are those that were stored but not applied.
+            const failedOpIds = storedOps
+              .filter((o) => !appliedSet.has(o.id))
+              .map((o) => o.id);
+
+            if (failedOpIds.length > 0) {
+              PFLog.warn(
+                `ConflictResolutionService: Marking ${failedOpIds.length} failed ops as rejected`,
+              );
+              await this.opLogStore.markRejected(failedOpIds);
+            }
+
             this.snackService.open({
               type: 'ERROR',
               msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,

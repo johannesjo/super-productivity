@@ -182,9 +182,24 @@ export class OperationLogHydratorService {
           PFLog.normal(
             `OperationLogHydratorService: Last of ${allOps.length} ops is ${lastOp.opType}, loading directly`,
           );
-          this.store.dispatch(
-            loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
-          );
+
+          // Validate and repair the full-state data BEFORE loading to NgRx
+          // This prevents corrupted SyncImport/Repair operations from breaking the app
+          if (!this._isRepairInProgress) {
+            const validationResult = await this._validateAndRepairState(
+              appData as AppDataCompleteNew,
+              'full-state-op-load',
+            );
+            const stateToLoad =
+              validationResult.wasRepaired && validationResult.repairedState
+                ? validationResult.repairedState
+                : (appData as AppDataCompleteNew);
+            this.store.dispatch(loadAllData({ appDataComplete: stateToLoad }));
+          } else {
+            this.store.dispatch(
+              loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
+            );
+          }
           // No snapshot save needed - full state ops already contain complete state
         } else {
           // A.7.13: Migrate all operations before replay
