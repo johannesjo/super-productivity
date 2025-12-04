@@ -8,6 +8,37 @@ import {
   SyncConfig,
   DEFAULT_SYNC_CONFIG,
 } from './sync.types';
+import { Logger } from '../logger';
+
+/**
+ * Valid entity types for operations.
+ * Operations with unknown entity types will be rejected.
+ */
+const ALLOWED_ENTITY_TYPES = new Set([
+  'task',
+  'project',
+  'tag',
+  'note',
+  'global_config',
+  'simple_counter',
+  'work_context',
+  'task_repeat_cfg',
+  'issue_provider',
+  'planner',
+  'menu_tree',
+  'metric',
+  'board',
+  'reminder',
+  'migration',
+  'recovery',
+  'all',
+]);
+
+/**
+ * Maximum operations to process during snapshot generation.
+ * Prevents memory exhaustion for users with excessive operation history.
+ */
+const MAX_OPS_FOR_SNAPSHOT = 100000;
 
 interface PreparedStatements {
   insertOp: Database.Statement;
@@ -209,7 +240,13 @@ export class SyncService {
           });
         } catch (err: unknown) {
           // Duplicate ID (already processed) - idempotency
-          if (err instanceof Error && err.message.includes('UNIQUE constraint failed')) {
+          // Use SQLite error code for reliable detection instead of string matching
+          const sqliteError = err as { code?: string };
+          if (
+            sqliteError?.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' ||
+            sqliteError?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
+            sqliteError?.code === 'SQLITE_CONSTRAINT'
+          ) {
             results.push({
               opId: op.id,
               accepted: false,
@@ -347,9 +384,23 @@ export class SyncService {
       };
     }
 
+    // Safety check: prevent memory exhaustion for excessive operation counts
+    const totalOpsToProcess = latestSeq - startSeq;
+    if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
+      Logger.error(
+        `Snapshot generation for user ${userId} requires ${totalOpsToProcess} ops ` +
+          `(max ${MAX_OPS_FOR_SNAPSHOT}). Consider implementing data archival.`,
+      );
+      throw new Error(
+        `Too many operations to process (${totalOpsToProcess}). ` +
+          `Maximum allowed: ${MAX_OPS_FOR_SNAPSHOT}. Contact support for data archival.`,
+      );
+    }
+
     // Process operations in batches to avoid memory issues
     const BATCH_SIZE = 10000;
     let currentSeq = startSeq;
+    let totalProcessed = 0;
 
     while (currentSeq < latestSeq) {
       const batchOps = this.stmts.getOpsSince.all(
@@ -365,6 +416,13 @@ export class SyncService {
 
       // Update currentSeq to the last processed operation
       currentSeq = batchOps[batchOps.length - 1].server_seq;
+      totalProcessed += batchOps.length;
+
+      // Double-check bounds during processing (defensive)
+      if (totalProcessed > MAX_OPS_FOR_SNAPSHOT) {
+        Logger.error(`Snapshot generation exceeded max ops limit during processing`);
+        break;
+      }
     }
 
     const generatedAt = Date.now();
@@ -388,6 +446,13 @@ export class SyncService {
       const opType = row.op_type;
       const entityType = row.entity_type.toLowerCase();
       const entityId = row.entity_id;
+
+      // Skip operations with invalid entity types (defensive)
+      if (!ALLOWED_ENTITY_TYPES.has(entityType)) {
+        Logger.warn(`Skipping operation with invalid entity type: ${entityType}`);
+        continue;
+      }
+
       const payload = JSON.parse(row.payload);
 
       // Initialize entity type if needed
@@ -502,6 +567,32 @@ export class SyncService {
     return result.changes;
   }
 
+  /**
+   * Batch cleanup of old operations for all users in a single query.
+   * Avoids N+1 query pattern by using a subquery to find minimum acked seq per user.
+   * Only deletes operations that are:
+   * 1. Older than cutoffTime
+   * 2. Have been acknowledged by all devices for that user (seq < min acked seq)
+   */
+  deleteOldSyncedOpsForAllUsers(cutoffTime: number): number {
+    // Use a single query with subquery to avoid N+1
+    const stmt = this.db.prepare(`
+      DELETE FROM operations
+      WHERE received_at < ?
+        AND server_seq < (
+          SELECT COALESCE(MIN(last_acked_seq), 0)
+          FROM sync_devices
+          WHERE sync_devices.user_id = operations.user_id
+        )
+        AND EXISTS (
+          SELECT 1 FROM sync_devices
+          WHERE sync_devices.user_id = operations.user_id
+        )
+    `);
+    const result = stmt.run(cutoffTime);
+    return result.changes;
+  }
+
   getMinAckedSeq(userId: number): number | null {
     const row = this.stmts.getMinAckedSeq.get(userId) as
       | { min_seq: number | null }
@@ -537,6 +628,9 @@ export class SyncService {
     if (!op.id || typeof op.id !== 'string') {
       return { valid: false, error: 'Invalid operation ID' };
     }
+    if (op.id.length > 255) {
+      return { valid: false, error: 'Operation ID too long' };
+    }
     if (
       !op.opType ||
       !['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT', 'BACKUP_IMPORT'].includes(
@@ -548,8 +642,24 @@ export class SyncService {
     if (!op.entityType) {
       return { valid: false, error: 'Missing entityType' };
     }
+    // Validate entity type against allowlist
+    if (!ALLOWED_ENTITY_TYPES.has(op.entityType.toLowerCase())) {
+      return { valid: false, error: `Invalid entityType: ${op.entityType}` };
+    }
+    // Validate entityId format/length if present
+    if (op.entityId !== undefined && op.entityId !== null) {
+      if (typeof op.entityId !== 'string' || op.entityId.length > 255) {
+        return { valid: false, error: 'Invalid entityId format or length' };
+      }
+    }
     if (op.payload === undefined) {
       return { valid: false, error: 'Missing payload' };
+    }
+    // Schema version validation
+    if (op.schemaVersion !== undefined) {
+      if (op.schemaVersion < 1 || op.schemaVersion > 100) {
+        return { valid: false, error: `Invalid schema version: ${op.schemaVersion}` };
+      }
     }
 
     // Size limit

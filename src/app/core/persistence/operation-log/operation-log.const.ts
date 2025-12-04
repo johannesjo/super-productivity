@@ -90,3 +90,10 @@ export const LOCK_STORAGE_PROPAGATION_DELAY_MS = 50;
  * Used in localStorage-based two-phase commit lock fallback.
  */
 export const LOCK_FINAL_VERIFICATION_DELAY_MS = 20;
+
+/**
+ * Maximum operations to accumulate in memory during API download.
+ * Prevents out-of-memory errors when syncing with users who have
+ * millions of unsynced operations.
+ */
+export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;

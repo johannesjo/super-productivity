@@ -27,32 +27,16 @@ async function cleanupExpiredTombstones(): Promise<void> {
 }
 
 /**
- * Clean up old operations that have been acknowledged by all devices
+ * Clean up old operations that have been acknowledged by all devices.
+ * Uses a single batch query to avoid N+1 database queries.
  */
 async function cleanupOldOperations(): Promise<void> {
   try {
     const syncService = getSyncService();
     const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.opRetentionMs;
-    const userIds = syncService.getAllUserIds();
 
-    let totalDeleted = 0;
-
-    for (const userId of userIds) {
-      // Find minimum acknowledged sequence across all devices
-      const minAckedSeq = syncService.getMinAckedSeq(userId);
-
-      if (minAckedSeq === null) {
-        // No devices have acknowledged - skip this user
-        continue;
-      }
-
-      // Only delete operations that:
-      // 1. Are older than cutoff time (90 days)
-      // 2. Have been acknowledged by all devices (seq < minAckedSeq)
-      const deleted = syncService.deleteOldSyncedOps(userId, minAckedSeq, cutoffTime);
-
-      totalDeleted += deleted;
-    }
+    // Use batch cleanup to avoid N+1 queries
+    const totalDeleted = syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
     if (totalDeleted > 0) {
       Logger.info(`Old operations cleanup: deleted ${totalDeleted} operations`);

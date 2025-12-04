@@ -19,6 +19,7 @@ import { T } from '../../../../t.const';
 import {
   MAX_DOWNLOAD_RETRIES,
   DOWNLOAD_RETRY_BASE_DELAY_MS,
+  MAX_DOWNLOAD_OPS_IN_MEMORY,
 } from '../operation-log.const';
 
 /**
@@ -102,6 +103,20 @@ export class OperationLogDownloadService {
           .map((serverOp) => syncOpToOperation(serverOp.op));
 
         allNewOps.push(...newOps);
+
+        // Bounds check: prevent memory exhaustion
+        if (allNewOps.length > MAX_DOWNLOAD_OPS_IN_MEMORY) {
+          PFLog.error(
+            `OperationLogDownloadService: Too many operations to download (${allNewOps.length}). ` +
+              `Stopping at ${MAX_DOWNLOAD_OPS_IN_MEMORY} to prevent memory exhaustion.`,
+          );
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.TOO_MANY_OPS_TO_DOWNLOAD,
+          });
+          // Process what we have so far rather than failing completely
+          break;
+        }
 
         // Update cursors
         sinceSeq = response.ops[response.ops.length - 1].serverSeq;
