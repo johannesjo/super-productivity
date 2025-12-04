@@ -171,6 +171,58 @@ export const updateStartDateForRepeatableTask = (
   }
 };
 
+/**
+ * Incrementally updates parent's timeSpentOnDay based on delta from subtask change.
+ * Much faster than full recalculation when only one day changed.
+ */
+const updateParentTimeSpentIncremental = (
+  parentId: string,
+  oldTimeSpentOnDay: TimeSpentOnDay | undefined,
+  newTimeSpentOnDay: TimeSpentOnDay,
+  state: TaskState,
+): TaskState => {
+  const parent = state.entities[parentId];
+  if (!parent) return state;
+
+  // Find what days changed and by how much
+  const allDays = new Set([
+    ...Object.keys(oldTimeSpentOnDay || {}),
+    ...Object.keys(newTimeSpentOnDay),
+  ]);
+
+  let totalDelta = 0;
+  const parentTimeSpentOnDay = { ...parent.timeSpentOnDay };
+
+  for (const day of allDays) {
+    const oldVal = oldTimeSpentOnDay?.[day] || 0;
+    const newVal = newTimeSpentOnDay[day] || 0;
+    const delta = newVal - oldVal;
+
+    if (delta !== 0) {
+      totalDelta += delta;
+      const currentParentVal = parentTimeSpentOnDay[day] || 0;
+      const newParentVal = currentParentVal + delta;
+
+      if (newParentVal > 0) {
+        parentTimeSpentOnDay[day] = newParentVal;
+      } else {
+        delete parentTimeSpentOnDay[day];
+      }
+    }
+  }
+
+  return taskAdapter.updateOne(
+    {
+      id: parentId,
+      changes: {
+        timeSpentOnDay: parentTimeSpentOnDay,
+        timeSpent: parent.timeSpent + totalDelta,
+      },
+    },
+    state,
+  );
+};
+
 export const updateTimeSpentForTask = (
   id: string,
   newTimeSpentOnDay: TimeSpentOnDay,
@@ -181,6 +233,7 @@ export const updateTimeSpentForTask = (
   }
 
   const task = getTaskById(id, state);
+  const oldTimeSpentOnDay = task.timeSpentOnDay;
   const timeSpent = calcTotalTimeSpent(newTimeSpentOnDay);
 
   const stateAfterUpdate = taskAdapter.updateOne(
@@ -194,8 +247,14 @@ export const updateTimeSpentForTask = (
     state,
   );
 
+  // Use incremental update for parent instead of full recalculation
   return task.parentId
-    ? reCalcTimeSpentForParentIfParent(task.parentId, stateAfterUpdate)
+    ? updateParentTimeSpentIncremental(
+        task.parentId,
+        oldTimeSpentOnDay,
+        newTimeSpentOnDay,
+        stateAfterUpdate,
+      )
     : stateAfterUpdate;
 };
 
