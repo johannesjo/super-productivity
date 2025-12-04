@@ -28,13 +28,26 @@ export class OperationLogMigrationService {
     // is from an older version. This ensures we import already-migrated data.
     const legacyState = await this.pfapiService.pf.getAllSyncModelData(true);
 
-    // Check if there is any actual data to migrate
-    const hasData = Object.keys(legacyState).some((key) => {
-      const model = legacyState[key as keyof typeof legacyState];
-      return model && Object.keys(model).length > 0;
+    // Check if there is any actual user data to migrate.
+    // We only check entity models (tasks, projects, tags, etc.) because config models
+    // like globalConfig always return non-empty defaults even on a fresh database.
+    const entityModelsToCheck = [
+      'task',
+      'project',
+      'tag',
+      'note',
+      'taskRepeatCfg',
+      'simpleCounter',
+      'metric',
+    ];
+    const hasUserData = entityModelsToCheck.some((key) => {
+      const model = legacyState[key as keyof typeof legacyState] as
+        | { ids?: string[] }
+        | undefined;
+      return model?.ids && model.ids.length > 0;
     });
 
-    if (!hasData) {
+    if (!hasUserData) {
       PFLog.normal('OperationLogMigrationService: No legacy data found. Starting fresh.');
       return;
     }
