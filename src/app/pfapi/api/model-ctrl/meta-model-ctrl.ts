@@ -329,7 +329,9 @@ export class MetaModelCtrl {
       newClock: newVectorClock,
     });
 
-    await this.save(updatedMeta);
+    // We ignore DB lock here because this might be called during sync (e.g. repair operation)
+    // or by operation log effects which run independently of the main DB lock.
+    await this.save(updatedMeta, true);
   }
 
   /**
@@ -372,7 +374,9 @@ export class MetaModelCtrl {
       mergedClock,
     });
 
-    await this.save(updatedMeta);
+    // We ignore DB lock here because this acts as a system recovery mechanism
+    // and should not be blocked by regular DB locks.
+    await this.save(updatedMeta, true);
   }
 
   /**
