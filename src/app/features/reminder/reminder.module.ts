@@ -13,23 +13,24 @@ import {
   map,
   take,
 } from 'rxjs/operators';
-import { Reminder } from './reminder.model';
 import { UiHelperService } from '../ui-helper/ui-helper.service';
 import { NotifyService } from '../../core/notify/notify.service';
 import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-reminders/dialog-view-task-reminders.component';
 import { throttle } from '../../util/decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { from, merge, of, timer, interval } from 'rxjs';
+import { merge, of, timer, interval } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from 'src/app/t.const';
+import { TaskWithReminderData } from '../tasks/task.model';
+import { Store } from '@ngrx/store';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 @NgModule({
   declarations: [],
   imports: [CommonModule],
 })
-// TODO move to effect
 export class ReminderModule {
   private readonly _reminderService = inject(ReminderService);
   private readonly _matDialog = inject(MatDialog);
@@ -39,27 +40,27 @@ export class ReminderModule {
   private readonly _layoutService = inject(LayoutService);
   private readonly _taskService = inject(TaskService);
   private readonly _syncTriggerService = inject(SyncTriggerService);
+  private readonly _store = inject(Store);
 
   constructor() {
-    from(this._reminderService.init())
+    // Initialize reminder service (runs migration in background)
+    this._reminderService.init();
+
+    this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$
       .pipe(
-        // we do this to wait for syncing and the like
-        concatMap(
-          () => this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$,
-        ),
         first(),
         delay(1000),
         concatMap(() =>
           this._reminderService.onRemindersActive$.pipe(
             // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
             filter(
-              (reminder) =>
+              (reminders) =>
                 this._matDialog.openDialogs.length === 0 &&
-                !!reminder &&
-                reminder.length > 0,
+                !!reminders &&
+                reminders.length > 0,
             ),
             // don't show reminders while add task bar is open
-            switchMap((reminders: Reminder[]) => {
+            switchMap((reminders: TaskWithReminderData[]) => {
               const isShowAddTaskBar = this._layoutService.isShowAddTaskBar();
               return isShowAddTaskBar
                 ? merge([
@@ -77,7 +78,7 @@ export class ReminderModule {
           ),
         ),
       )
-      .subscribe((reminders: Reminder[]) => {
+      .subscribe((reminders: TaskWithReminderData[]) => {
         if (IS_ELECTRON) {
           this._uiHelperService.focusApp();
         }
@@ -85,42 +86,43 @@ export class ReminderModule {
         this._showNotification(reminders);
 
         const oldest = reminders[0];
-        if (oldest.type === 'TASK') {
-          if (this._taskService.currentTaskId() === oldest.relatedId) {
-            this._snackService.open({
-              type: 'CUSTOM',
-              msg: T.F.REMINDER.S_ACTIVE_TASK_DUE,
-              translateParams: {
-                title: oldest.title,
+        const taskId = oldest.id;
+
+        if (this._taskService.currentTaskId() === taskId) {
+          this._snackService.open({
+            type: 'CUSTOM',
+            msg: T.F.REMINDER.S_ACTIVE_TASK_DUE,
+            translateParams: {
+              title: oldest.title,
+            },
+            config: {
+              // show for longer
+              duration: 20000,
+            },
+            ico: 'alarm',
+          });
+          // Dismiss the reminder for the current task
+          this._store.dispatch(
+            TaskSharedActions.dismissReminderOnly({
+              id: taskId,
+            }),
+          );
+        } else {
+          this._matDialog
+            .open(DialogViewTaskRemindersComponent, {
+              autoFocus: false,
+              restoreFocus: true,
+              data: {
+                reminders,
               },
-              config: {
-                // show for longer
-                duration: 20000,
-              },
-              ico: 'alarm',
-            });
-            this._reminderService.removeReminder(oldest.id);
-            this._taskService.update(oldest.relatedId, {
-              reminderId: undefined,
-              dueWithTime: undefined,
-            });
-          } else {
-            this._matDialog
-              .open(DialogViewTaskRemindersComponent, {
-                autoFocus: false,
-                restoreFocus: true,
-                data: {
-                  reminders,
-                },
-              })
-              .afterClosed();
-          }
+            })
+            .afterClosed();
         }
       });
   }
 
   @throttle(60000)
-  private _showNotification(reminders: Reminder[]): void {
+  private _showNotification(reminders: TaskWithReminderData[]): void {
     const isMultiple = reminders.length > 1;
     const title = isMultiple
       ? '"' +

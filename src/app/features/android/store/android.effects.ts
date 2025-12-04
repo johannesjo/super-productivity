@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { switchMap, tap } from 'rxjs/operators';
 import { timer } from 'rxjs';
-import { ReminderService } from '../../reminder/reminder.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
@@ -12,6 +11,8 @@ import { generateNotificationId } from '../android-notification-id.util';
 import { androidInterface } from '../android-interface';
 import { TaskService } from '../../tasks/task.service';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
+import { Store } from '@ngrx/store';
+import { selectAllTasksWithReminder } from '../../tasks/store/task.selectors';
 
 // TODO send message to electron when current task changes here
 
@@ -20,11 +21,11 @@ const DELAY_SCHEDULE = 5000;
 
 @Injectable()
 export class AndroidEffects {
-  private _reminderService = inject(ReminderService);
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
   private _taskAttachmentService = inject(TaskAttachmentService);
-  // Single-shot guard so we don’t spam the user with duplicate warnings.
+  private _store = inject(Store);
+  // Single-shot guard so we don't spam the user with duplicate warnings.
   private _hasShownNotificationWarning = false;
   private _hasCheckedExactAlarm = false;
 
@@ -60,15 +61,15 @@ export class AndroidEffects {
     createEffect(
       () =>
         timer(DELAY_SCHEDULE).pipe(
-          switchMap(() => this._reminderService.reminders$),
-          tap(async (reminders) => {
+          switchMap(() => this._store.select(selectAllTasksWithReminder)),
+          tap(async (tasksWithReminders) => {
             try {
-              if (!reminders || reminders.length === 0) {
+              if (!tasksWithReminders || tasksWithReminders.length === 0) {
                 // Nothing to schedule yet, so avoid triggering the runtime permission dialog prematurely.
                 return;
               }
               DroidLog.log('AndroidEffects: scheduling reminders', {
-                reminderCount: reminders.length,
+                reminderCount: tasksWithReminders.length,
               });
               const checkResult = await LocalNotifications.checkPermissions();
               DroidLog.log('AndroidEffects: pre-schedule permission check', checkResult);
@@ -95,18 +96,18 @@ export class AndroidEffects {
               }
               // Re-schedule the full set so the native alarm manager is always in sync.
               await LocalNotifications.schedule({
-                notifications: reminders.map((reminder) => {
-                  // Use deterministic ID based on reminder's relatedId to prevent duplicate notifications
-                  const id = generateNotificationId(reminder.relatedId);
+                notifications: tasksWithReminders.map((task) => {
+                  // Use deterministic ID based on task id to prevent duplicate notifications
+                  const id = generateNotificationId(task.id);
                   const now = Date.now();
-                  const scheduleAt =
-                    reminder.remindAt <= now ? now + 1000 : reminder.remindAt; // push overdue reminders into the immediate future
+                  const scheduleAt = task.remindAt <= now ? now + 1000 : task.remindAt; // push overdue reminders into the immediate future
                   const mapped: LocalNotificationSchema = {
                     id,
-                    title: reminder.title,
+                    title: task.title,
                     body: '',
                     extra: {
-                      reminder,
+                      taskId: task.id,
+                      remindAt: task.remindAt,
                     },
                     schedule: {
                       // eslint-disable-next-line no-mixed-operators
@@ -120,7 +121,7 @@ export class AndroidEffects {
                 }),
               });
               DroidLog.log('AndroidEffects: scheduled local notifications', {
-                reminderCount: reminders.length,
+                reminderCount: tasksWithReminders.length,
               });
             } catch (error) {
               DroidLog.err(error);
@@ -161,29 +162,6 @@ export class AndroidEffects {
         ),
       { dispatch: false },
     );
-
-  // markTaskAsDone$ = createEffect(() =>
-  //   androidInterface.onMarkCurrentTaskAsDone$.pipe(
-  //     withLatestFrom(this._store$.select(selectCurrentTask)),
-  //     filter(([, currentTask]) => !!currentTask),
-  //     map(([, currentTask]) =>
-  //       updateTask({
-  //         task: { id: (currentTask as TaskCopy).id, changes: { isDone: true } },
-  //       }),
-  //     ),
-  //   ),
-  // );
-  //
-  // pauseTracking$ = createEffect(() =>
-  //   androidInterface.onPauseCurrentTask$.pipe(
-  //     withLatestFrom(this._store$.select(selectCurrentTask)),
-  //     filter(([, currentTask]) => !!currentTask),
-  //     map(([, currentTask]) => setCurrentTask({ id: null })),
-  //   ),
-  // );
-  // showAddTaskBar$ = createEffect(() =>
-  //   androidInterface.onAddNewTask$.pipe(map(() => showAddTaskBar())),
-  // );
 
   private async _ensureExactAlarmAccess(): Promise<void> {
     try {
