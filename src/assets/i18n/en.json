@@ -1178,6 +1178,7 @@
         "PERSIST_FAILED": "Failed to save changes. Please reload the app.",
         "REMOTE_DATA_TOO_OLD": "Remote data is too old to be processed. Please update your remote app.",
         "STORAGE_QUOTA_EXCEEDED": "Storage full. Please free up space or trigger database cleanup.",
+        "STORAGE_RECOVERED_AFTER_COMPACTION": "Storage was running low. Old data cleaned up successfully.",
         "SUCCESS_DOWNLOAD": "Synced data from remote",
         "SUCCESS_IMPORT": "Data imported",
         "SUCCESS_VIA_BUTTON": "Data successfully synced",
