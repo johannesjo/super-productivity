@@ -34,13 +34,40 @@ export const dataRepair = (
   let dataOut: AppDataCompleteNew = { ...data };
   // let dataOut: AppDataComplete = dirtyDeepCopy(data);
 
+  // Ensure archive structures exist
+  if (!dataOut.archiveYoung) {
+    dataOut.archiveYoung = {
+      task: { ids: [], entities: {} },
+      timeTracking: {} as any,
+      lastTimeTrackingFlush: 0,
+    };
+  }
+  if (!dataOut.archiveYoung.task) {
+    dataOut.archiveYoung.task = { ids: [], entities: {} };
+  }
+  if (!dataOut.archiveOld) {
+    dataOut.archiveOld = {
+      task: { ids: [], entities: {} },
+      timeTracking: {} as any,
+      lastTimeTrackingFlush: 0,
+    };
+  }
+  if (!dataOut.archiveOld.task) {
+    dataOut.archiveOld.task = { ids: [], entities: {} };
+  }
+
+  // Initialize reminders if missing
+  if (!dataOut.reminders) {
+    dataOut.reminders = [];
+  }
+
   // move all taskArchive data into young to make things easier for us
   dataOut.archiveYoung = {
     task: {
-      ids: [...dataOut.archiveOld.task?.ids, ...dataOut.archiveYoung.task?.ids],
+      ids: [...dataOut.archiveOld.task.ids, ...dataOut.archiveYoung.task.ids],
       entities: {
-        ...dataOut.archiveOld.task?.entities,
-        ...dataOut.archiveYoung.task?.entities,
+        ...dataOut.archiveOld.task.entities,
+        ...dataOut.archiveYoung.task.entities,
       },
     },
     // NOTE only taskArchive data for now
@@ -112,6 +139,9 @@ const _fixEntityStates = (data: AppDataCompleteNew): AppDataCompleteNew => {
 };
 
 const _removeDuplicatesFromArchive = (data: AppDataCompleteNew): AppDataCompleteNew => {
+  if (!data.task || !data.archiveYoung?.task) {
+    return data;
+  }
   const taskIds = data.task.ids as string[];
   const archiveTaskIds = data.archiveYoung.task.ids as string[];
   const duplicateIds = taskIds.filter((id) => archiveTaskIds.includes(id));
