@@ -131,7 +131,11 @@ export class OperationLogEffects {
     } catch (e) {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);
-      this.notifyUserAndTriggerRollback();
+      if (this.isQuotaExceededError(e)) {
+        this.handleQuotaExceeded();
+      } else {
+        this.notifyUserAndTriggerRollback();
+      }
     }
   }
 
@@ -173,6 +177,40 @@ export class OperationLogEffects {
       actionFn: (): void => {
         window.location.reload();
       },
+    });
+  }
+
+  /**
+   * Checks if an error is a QuotaExceededError from IndexedDB.
+   * This happens when the browser storage quota is exceeded.
+   */
+  private isQuotaExceededError(e: unknown): boolean {
+    if (e instanceof DOMException) {
+      // Standard quota exceeded error names
+      return (
+        e.name === 'QuotaExceededError' ||
+        e.name === 'NS_ERROR_DOM_QUOTA_REACHED' || // Firefox
+        e.code === 22 // Legacy Safari
+      );
+    }
+    return false;
+  }
+
+  /**
+   * Handles storage quota exceeded by triggering emergency compaction
+   * and notifying the user.
+   */
+  private handleQuotaExceeded(): void {
+    PFLog.err(
+      'OperationLogEffects: Storage quota exceeded, triggering emergency compaction',
+    );
+    this.snackService.open({
+      type: 'ERROR',
+      msg: T.F.SYNC.S.STORAGE_QUOTA_EXCEEDED,
+    });
+    // Attempt emergency compaction to free up space
+    this.compactionService.compact().catch((compactErr) => {
+      PFLog.err('OperationLogEffects: Emergency compaction also failed', compactErr);
     });
   }
 }
