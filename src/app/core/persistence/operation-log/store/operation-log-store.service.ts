@@ -365,21 +365,28 @@ export class OperationLogStoreService {
   }
 
   /**
-   * Increments the compaction counter and returns the new value.
+   * Atomically increments the compaction counter and returns the new value.
+   * Uses a transaction to ensure the read-modify-write is atomic across tabs.
    * Used to track operations since last compaction across tabs/restarts.
    */
   async incrementCompactionCounter(): Promise<number> {
     await this._ensureInit();
-    const cache = await this.db.get('state_cache', 'current');
+    const tx = this.db.transaction('state_cache', 'readwrite');
+    const store = tx.objectStore('state_cache');
+    const cache = await store.get('current');
+
     if (!cache) {
       // No state cache yet - counter starts at 1
+      await tx.done;
       return 1;
     }
+
     const newCount = (cache.compactionCounter ?? 0) + 1;
-    await this.db.put('state_cache', {
+    await store.put({
       ...cache,
       compactionCounter: newCount,
     });
+    await tx.done;
     return newCount;
   }
 
