@@ -23,6 +23,11 @@ interface TaskOperationPayload {
   tagIds?: string[];
 }
 
+/** Payload shape for note operations that may have dependencies */
+interface NoteOperationPayload {
+  projectId?: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class DependencyResolverService {
   private store = inject(Store);
@@ -32,9 +37,9 @@ export class DependencyResolverService {
    */
   extractDependencies(op: Operation): OperationDependency[] {
     const deps: OperationDependency[] = [];
-    const payload = op.payload as TaskOperationPayload;
 
     if (op.entityType === 'TASK') {
+      const payload = op.payload as TaskOperationPayload;
       if (payload.projectId) {
         deps.push({
           entityType: 'PROJECT',
@@ -54,7 +59,21 @@ export class DependencyResolverService {
       // Tags are soft dependencies, we usually ignore if missing or handle in reducer
     }
 
-    // Add other entity types as needed
+    if (op.entityType === 'NOTE') {
+      const payload = op.payload as NoteOperationPayload;
+      if (payload.projectId) {
+        deps.push({
+          entityType: 'PROJECT',
+          entityId: payload.projectId,
+          mustExist: false, // Soft dependency (Note can exist without project)
+          relation: 'reference',
+        });
+      }
+    }
+
+    // SIMPLE_COUNTER, METRIC - typically don't have hard dependencies
+    // PROJECT - typically independent unless nested structure is used
+
     return deps;
   }
 
@@ -122,6 +141,7 @@ export class DependencyResolverService {
       case 'PLANNER':
       case 'MENU_TREE':
       case 'BOARD':
+      case 'REMINDER':
       case 'MIGRATION':
       case 'RECOVERY':
       case 'ALL':

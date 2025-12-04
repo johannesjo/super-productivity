@@ -357,11 +357,14 @@ async compact(): Promise<void> {
 
 ### Configuration
 
-| Setting            | Value   | Description               |
-| ------------------ | ------- | ------------------------- |
-| Compaction trigger | 500 ops | Ops before snapshot       |
-| Retention window   | 7 days  | Keep recent synced ops    |
-| Unsynced ops       | ∞       | Never delete unsynced ops |
+| Setting                 | Value   | Description                                 |
+| ----------------------- | ------- | ------------------------------------------- |
+| Compaction trigger      | 500 ops | Ops before snapshot                         |
+| Retention window        | 7 days  | Keep recent synced ops                      |
+| Emergency retention     | 1 day   | Shorter retention for quota exceeded        |
+| Compaction timeout      | 25 sec  | Abort if exceeds (prevents lock expiration) |
+| Max compaction failures | 3       | Failures before user notification           |
+| Unsynced ops            | ∞       | Never delete unsynced ops                   |
 
 ## A.5 Multi-Tab Coordination
 
@@ -1655,25 +1658,38 @@ This section documents known edge cases and areas requiring further design or im
 
 ### IndexedDB Quota Exhaustion
 
-**Status:** ⚠️ Not Handled — Required Before Production
+**Status:** ✅ Implemented (December 2025)
 
-**Risk Level:** HIGH — Unsynced operations are permanently lost with no warning or recovery.
+When IndexedDB storage quota is exceeded, the system handles it gracefully:
 
-When IndexedDB storage quota is exceeded:
+**Implementation** (see `operation-log.effects.ts`):
 
-- **Current behavior**: Write fails, error thrown, **unsynced ops lost**
-- **Desired behavior**: Graceful degradation with user notification
-- **Affected users**: Large workspaces (years of data, many projects, frequent operations without sync)
-- **Proposed solution**:
-  1. Catch `QuotaExceededError` in `OperationLogStore.appendOperation()`
-  2. Trigger emergency compaction (delete old synced ops regardless of retention window)
-  3. If still failing, show user dialog with options:
-     - Export backup immediately
-     - Sync now (to mark ops as synced, enabling deletion)
-     - Clear old synced data manually
-  4. **Never** silently fail—always surface the error to the user
+1. **Error Detection**: Catches `QuotaExceededError` including browser variants:
 
-**Implementation priority:** Must be implemented before shipping to users with large workspaces to prevent silent data loss.
+   - Standard: `DOMException` with name `QuotaExceededError`
+   - Firefox: `NS_ERROR_DOM_QUOTA_REACHED`
+   - Safari (legacy): Error code 22
+
+2. **Emergency Compaction**: Triggers `emergencyCompact()` with shorter retention:
+
+   - Normal retention: 7 days (`COMPACTION_RETENTION_MS`)
+   - Emergency retention: 24 hours (`EMERGENCY_COMPACTION_RETENTION_MS`)
+   - Only deletes ops that have been synced (`syncedAt` set)
+
+3. **Circuit Breaker**: Flag `isHandlingQuotaExceeded` prevents infinite retry loops:
+
+   - If quota exceeded during retry attempt, aborts immediately
+   - Shows error to user instead of looping forever
+
+4. **User Notification**: On permanent failure (after emergency compaction fails):
+   - Shows snackbar with error message
+   - Dispatches rollback action to revert optimistic update
+   - User data in NgRx store remains consistent
+
+**Constants** (`operation-log.const.ts`):
+
+- `EMERGENCY_COMPACTION_RETENTION_MS = 24 * 60 * 60 * 1000` (1 day)
+- `MAX_COMPACTION_FAILURES = 3`
 
 ### Compaction Trigger Coordination
 
@@ -1855,6 +1871,7 @@ To detect silent divergence between clients:
 - **Unified migration interface (A.7.15)** - `SchemaMigration` includes both `migrateState` and optional `migrateOperation`
 - **Persistent compaction counter** - Counter stored in `state_cache`, shared across tabs/restarts
 - **`syncedAt` index** - Index on ops store for faster `getUnsynced()` queries
+- **Quota handling** - Emergency compaction on `QuotaExceededError` with circuit breaker to prevent infinite loops
 
 ### Not Implemented ⚠️
 
@@ -1904,13 +1921,12 @@ To detect silent divergence between clients:
 
 ## Future Enhancements 🔮
 
-| Component      | Description                                | Priority | Notes                                                                                    |
-| -------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------- |
-| Quota handling | Graceful degradation on storage exhaustion | **HIGH** | Required before production—see [IndexedDB Quota Exhaustion](#indexeddb-quota-exhaustion) |
-| Auto-merge     | Automatic merge for non-conflicting fields | Low      |                                                                                          |
-| Undo/Redo      | Leverage op-log for undo history           | Low      |                                                                                          |
+| Component  | Description                                | Priority | Notes |
+| ---------- | ------------------------------------------ | -------- | ----- |
+| Auto-merge | Automatic merge for non-conflicting fields | Low      |       |
+| Undo/Redo  | Leverage op-log for undo history           | Low      |       |
 
-> **Recently Completed:** `syncedAt` index (for faster getUnsynced()) and persistent compaction counter (tracks ops across tabs/restarts) are now implemented.
+> **Recently Completed:** Quota handling with emergency compaction and circuit breaker (December 2025), `syncedAt` index (for faster getUnsynced()), and persistent compaction counter (tracks ops across tabs/restarts).
 
 ---
 
