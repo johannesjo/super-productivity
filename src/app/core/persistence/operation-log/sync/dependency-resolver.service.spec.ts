@@ -1,9 +1,9 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { DependencyResolverService } from './dependency-resolver.service';
-import { Operation, OpType, EntityType } from './operation.types';
-import { selectTaskById } from '../../../features/tasks/store/task.selectors';
-import { selectProjectById } from '../../../features/project/store/project.reducer';
+import { Operation, OpType, EntityType } from '../operation.types';
+import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
+import { selectProjectById } from '../../../../features/project/store/project.reducer';
 
 describe('DependencyResolverService', () => {
   let service: DependencyResolverService;

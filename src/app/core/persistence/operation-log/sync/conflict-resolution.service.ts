@@ -1,23 +1,23 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { EntityConflict } from './operation.types';
-import { OperationApplierService } from './operation-applier.service';
-import { OperationLogStoreService } from './operation-log-store.service';
-import { PFLog } from '../../log';
+import { EntityConflict } from '../operation.types';
+import { OperationApplierService } from '../processing/operation-applier.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import { PFLog } from '../../../log';
 import {
   ConflictResolutionResult,
   DialogConflictResolutionComponent,
 } from '../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
 import { firstValueFrom } from 'rxjs';
-import { SnackService } from '../../snack/snack.service';
-import { T } from '../../../t.const';
-import { ValidateStateService } from './validate-state.service';
-import { RepairOperationService } from './repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
-import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
-import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
+import { ValidateStateService } from '../processing/validate-state.service';
+import { RepairOperationService } from '../processing/repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
 /**
  * Service to manage conflict resolution, typically presenting a UI to the user.

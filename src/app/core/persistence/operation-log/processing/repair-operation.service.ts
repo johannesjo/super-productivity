@@ -1,14 +1,14 @@
 import { Injectable, inject } from '@angular/core';
-import { OperationLogStoreService } from './operation-log-store.service';
-import { Operation, OpType, RepairPayload, RepairSummary } from './operation.types';
-import { uuidv7 } from '../../../util/uuid-v7';
-import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
-import { LockService } from './lock.service';
-import { SnackService } from '../../snack/snack.service';
-import { T } from '../../../t.const';
-import { PFLog } from '../../log';
-import { VectorClockService } from './vector-clock.service';
-import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import { Operation, OpType, RepairPayload, RepairSummary } from '../operation.types';
+import { uuidv7 } from '../../../../util/uuid-v7';
+import { incrementVectorClock } from '../../../../pfapi/api/util/vector-clock';
+import { LockService } from '../sync/lock.service';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
+import { PFLog } from '../../../log';
+import { VectorClockService } from '../sync/vector-clock.service';
+import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 
 /**
  * Service responsible for creating REPAIR operations.

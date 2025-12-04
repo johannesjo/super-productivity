@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { Operation, OperationLogEntry, VectorClock } from './operation.types';
-import { toEntityKey } from './entity-key.util';
+import { Operation, OperationLogEntry, VectorClock } from '../operation.types';
+import { toEntityKey } from '../entity-key.util';
 
 const DB_NAME = 'SUP_OPS';
 const DB_VERSION = 1;

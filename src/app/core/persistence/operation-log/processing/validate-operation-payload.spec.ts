@@ -1,5 +1,5 @@
 import { validateOperationPayload } from './validate-operation-payload';
-import { Operation, OpType, EntityType } from './operation.types';
+import { Operation, OpType, EntityType } from '../operation.types';
 
 describe('validateOperationPayload', () => {
   const createTestOperation = (overrides: Partial<Operation> = {}): Operation => ({

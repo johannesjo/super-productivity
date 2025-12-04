@@ -1,5 +1,5 @@
-import { Operation, EntityType, OpType } from './operation.types';
-import { PFLog } from '../../log';
+import { Operation, EntityType, OpType } from '../operation.types';
+import { PFLog } from '../../../log';
 
 /**
  * Result of validating an operation payload.

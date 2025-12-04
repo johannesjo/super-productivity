@@ -1,8 +1,8 @@
 import { Injectable, inject } from '@angular/core';
-import { Operation, EntityType } from './operation.types';
+import { Operation, EntityType } from '../operation.types';
 import { Store } from '@ngrx/store';
-import { selectTaskById } from '../../../features/tasks/store/task.selectors';
-import { selectProjectById } from '../../../features/project/store/project.reducer';
+import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
+import { selectProjectById } from '../../../../features/project/store/project.reducer';
 import { firstValueFrom } from 'rxjs';
 
 export interface OperationDependency {

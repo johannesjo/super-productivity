@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { OperationLogStoreService } from './operation-log-store.service';
-import { VectorClock, EntityType } from './operation.types';
-import { mergeVectorClocks } from '../../../pfapi/api/util/vector-clock';
-import { toEntityKey } from './entity-key.util';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import { VectorClock, EntityType } from '../operation.types';
+import { mergeVectorClocks } from '../../../../pfapi/api/util/vector-clock';
+import { toEntityKey } from '../entity-key.util';
 
 /**
  * Service for managing vector clocks in the operation log system.

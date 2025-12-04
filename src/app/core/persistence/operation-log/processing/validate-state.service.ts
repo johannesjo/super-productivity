@@ -1,15 +1,15 @@
 import { Injectable } from '@angular/core';
 import { IValidation } from 'typia';
-import { validateAllData } from '../../../pfapi/validate/validation-fn';
+import { validateAllData } from '../../../../pfapi/validate/validation-fn';
 import {
   isRelatedModelDataValid,
   getLastValidityError,
 } from '../../../pfapi/validate/is-related-model-data-valid';
-import { dataRepair } from '../../../pfapi/repair/data-repair';
-import { isDataRepairPossible } from '../../../pfapi/repair/is-data-repair-possible.util';
-import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
-import { RepairSummary } from './operation.types';
-import { PFLog } from '../../log';
+import { dataRepair } from '../../../../pfapi/repair/data-repair';
+import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
+import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
+import { RepairSummary } from '../operation.types';
+import { PFLog } from '../../../log';
 import { RepairOperationService } from './repair-operation.service'; // Used for createEmptyRepairSummary()
 
 /**

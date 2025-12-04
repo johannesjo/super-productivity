@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
-import { OperationLogManifest } from './operation.types';
-import { PFLog } from '../../log';
-import { RemoteFileNotFoundAPIError } from '../../../pfapi/api/errors/errors';
-import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
-import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
+import { OperationLogManifest } from '../operation.types';
+import { PFLog } from '../../../log';
+import { RemoteFileNotFoundAPIError } from '../../../../pfapi/api/errors/errors';
+import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
+import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 
 export const OPS_DIR = 'ops/';
 const MANIFEST_FILE_NAME = OPS_DIR + 'manifest.json';

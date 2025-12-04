@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Operation } from './operation.types';
-import { convertOpToAction } from './operation-converter.util';
+import { Operation } from '../operation.types';
+import { convertOpToAction } from '../operation-converter.util';
 
 /**
  * Coordinates multi-tab synchronization using the BroadcastChannel API.

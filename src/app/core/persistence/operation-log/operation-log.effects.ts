@@ -1,22 +1,22 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
 import { filter, concatMap } from 'rxjs/operators';
-import { LockService } from './lock.service';
-import { OperationLogStoreService } from './operation-log-store.service';
+import { LockService } from './sync/lock.service';
+import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
-import { MultiTabCoordinatorService } from './multi-tab-coordinator.service';
-import { OperationLogCompactionService } from './operation-log-compaction.service';
+import { MultiTabCoordinatorService } from './sync/multi-tab-coordinator.service';
+import { OperationLogCompactionService } from './store/operation-log-compaction.service';
 import { PFLog } from '../../log';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
-import { validateOperationPayload } from './validate-operation-payload';
-import { VectorClockService } from './vector-clock.service';
+import { validateOperationPayload } from './processing/validate-operation-payload';
+import { VectorClockService } from './sync/vector-clock.service';
 import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.const';
-import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
+import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the

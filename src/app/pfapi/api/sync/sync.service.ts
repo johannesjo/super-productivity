@@ -36,7 +36,7 @@ import {
   sanitizeVectorClock,
 } from '../util/vector-clock';
 import { getVectorClock } from '../util/backwards-compat';
-import { OperationLogSyncService } from '../../../core/persistence/operation-log/operation-log-sync.service';
+import { OperationLogSyncService } from '../../../core/persistence/operation-log/sync/operation-log-sync.service';
 
 /**
  * Sync Service for Super Productivity

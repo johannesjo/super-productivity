@@ -6,7 +6,7 @@ import { allDataWasLoaded } from '../../root-store/meta/all-data-was-loaded.acti
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { DataInitStateService } from './data-init-state.service';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
-import { OperationLogHydratorService } from '../persistence/operation-log/operation-log-hydrator.service';
+import { OperationLogHydratorService } from '../persistence/operation-log/store/operation-log-hydrator.service';
 
 @Injectable({ providedIn: 'root' })
 export class DataInitService {

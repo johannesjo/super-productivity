@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { MultiTabCoordinatorService } from './multi-tab-coordinator.service';
-import { Operation } from './operation.types';
-import { PersistentAction } from './persistent-action.interface';
+import { Operation } from '../operation.types';
+import { PersistentAction } from '../persistent-action.interface';
 
 // Mock BroadcastChannel class that can be used with `new`
 class MockBroadcastChannel {
