@@ -31,7 +31,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Create,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     convertToMainTask: (taskProps: {
@@ -45,7 +45,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     deleteTask: (taskProps: { task: TaskWithSubTasks }) => ({
@@ -55,7 +55,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Delete,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     deleteTasks: (taskProps: { taskIds: string[] }) => ({
@@ -66,7 +66,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: taskProps.taskIds,
         opType: OpType.Delete,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
@@ -78,7 +78,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: taskProps.tasks.map((t) => t.id),
         opType: OpType.Update,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     restoreTask: (taskProps: { task: Task | TaskWithSubTasks; subTasks: Task[] }) => ({
@@ -88,7 +88,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Task Scheduling
@@ -105,7 +105,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     reScheduleTaskWithTime: (taskProps: {
@@ -121,7 +121,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     unscheduleTask: (taskProps: {
@@ -136,7 +136,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     dismissReminderOnly: (taskProps: { id: string; reminderId: string }) => ({
@@ -146,7 +146,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Task Updates
@@ -157,7 +157,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id as string,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Project Management
@@ -171,7 +171,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityId: taskProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     deleteProject: (taskProps: { project: Project; allTaskIds: string[] }) => ({
@@ -181,7 +181,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'PROJECT',
         entityId: taskProps.project.id,
         opType: OpType.Delete,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Today Tag Management
@@ -198,7 +198,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: taskProps.taskIds,
         opType: OpType.Update,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     removeTasksFromTodayTag: (taskProps: { taskIds: string[] }) => ({
@@ -209,7 +209,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: taskProps.taskIds,
         opType: OpType.Update,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Tag Management
@@ -220,7 +220,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'TASK',
         entityIds: [props.taskId, props.tagId],
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     removeTagsForAllTasks: (taskProps: { tagIdsToRemove: string[] }) => ({
@@ -231,7 +231,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: taskProps.tagIdsToRemove,
         opType: OpType.Update,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     moveTaskInTodayTagList: (taskProps: { toTaskId: string; fromTaskId: string }) => ({
@@ -242,7 +242,7 @@ export const TaskSharedActions = createActionGroup({
         entityIds: [taskProps.toTaskId, taskProps.fromTaskId],
         opType: OpType.Move,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Batch Operations
@@ -257,7 +257,7 @@ export const TaskSharedActions = createActionGroup({
         entityType: 'PROJECT',
         entityId: taskProps.projectId,
         opType: OpType.Batch,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
   },
 });

@@ -70,7 +70,7 @@ export const moveSubTask = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -83,7 +83,7 @@ export const moveSubTaskUp = createAction(
       entityType: 'TASK',
       entityId: taskProps.id,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -96,7 +96,7 @@ export const moveSubTaskDown = createAction(
       entityType: 'TASK',
       entityId: taskProps.id,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -109,7 +109,7 @@ export const moveSubTaskToTop = createAction(
       entityType: 'TASK',
       entityId: taskProps.id,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -122,7 +122,7 @@ export const moveSubTaskToBottom = createAction(
       entityType: 'TASK',
       entityId: taskProps.id,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -159,7 +159,7 @@ export const addSubTask = createAction(
       entityType: 'TASK',
       entityId: taskProps.task.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -181,7 +181,7 @@ export const roundTimeSpentForDay = createAction(
       entityIds: taskProps.taskIds,
       opType: OpType.Update,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
