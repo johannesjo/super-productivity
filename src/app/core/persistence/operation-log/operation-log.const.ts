@@ -52,3 +52,15 @@ export const EMERGENCY_COMPACTION_RETENTION_MS = 24 * 60 * 60 * 1000;
  * If compaction exceeds this, it aborts to prevent data corruption.
  */
 export const COMPACTION_TIMEOUT_MS = 25000;
+
+/**
+ * Maximum operations in the pending retry queue.
+ * If exceeded, new operations are marked as failed immediately to prevent memory leaks.
+ */
+export const MAX_PENDING_QUEUE_SIZE = 1000;
+
+/**
+ * Maximum permanently failed operations to keep for debugging.
+ * If exceeded, oldest failed operations are dropped to prevent memory leaks.
+ */
+export const MAX_FAILED_OPS_SIZE = 500;
