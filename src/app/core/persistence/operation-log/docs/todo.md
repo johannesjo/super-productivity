@@ -2,8 +2,23 @@
 
 **Status:** Needs evaluation before implementation
 **Created:** December 4, 2025
+**Last Updated:** December 4, 2025
 
 These items were identified in the code audit but require further evaluation and design discussion before implementation.
+
+---
+
+## Recently Completed ✅
+
+### Quota Handling (December 2025)
+
+**Implementation:** `operation-log.effects.ts`
+
+- ✅ Emergency compaction on `QuotaExceededError` with 1-day retention (vs 7-day normal)
+- ✅ Cross-browser error detection (Chrome, Firefox `NS_ERROR_DOM_QUOTA_REACHED`, Safari code 22)
+- ✅ Circuit breaker (`isHandlingQuotaExceeded`) prevents infinite retry loops
+- ✅ User notification via snackbar on permanent failure
+- ✅ Rollback action dispatched to revert optimistic state update
 
 ---
 
@@ -159,10 +174,12 @@ deleteProject: (taskProps: { projectId: string; allTaskIds: string[] })
 
 ## Implementation Order Recommendation
 
-1. **Tombstones** - Foundation for safe deletes, enables undo/restore
-2. **Move operations** - Highest sync conflict risk
-3. **moveToArchive** - Needs design decision on archive sync strategy
-4. **deleteProject** - Simple cleanup, low impact
+1. **Tombstones** - Foundation for safe deletes, enables undo/restore (HIGH priority)
+2. **Move operations** - Highest sync conflict risk (CRITICAL priority)
+3. **moveToArchive** - Needs design decision on archive sync strategy (MEDIUM)
+4. **deleteProject** - Simple cleanup, low impact (LOW)
+
+> **Note:** Quota handling was previously listed as HIGH priority and is now complete. See "Recently Completed" section above.
 
 ---
 
