@@ -25,12 +25,12 @@ export class LockService {
   ): Promise<void> {
     const lockKey = `lock_${lockName}`;
     const lockId = Math.random().toString(36).substring(2);
-    const timeout = 5000; // 5s max lock time for the operation itself
+    // 30s max lock time - operations may take longer during large syncs or compactions
+    const timeout = 30000;
 
-    // Try to acquire
+    // Try to acquire - wait up to 60s for a busy lock to be released
     const start = Date.now();
-    while (Date.now() - start < 10000) {
-      // 10s wait timeout to acquire
+    while (Date.now() - start < 60000) {
       // Check if locked
       const currentLock = localStorage.getItem(lockKey);
       let isExpired = false;
@@ -67,6 +67,6 @@ export class LockService {
       const randomDelay = Math.random() * 100;
       await new Promise((r) => setTimeout(r, 50 + randomDelay));
     }
-    throw new Error(`Could not acquire lock ${lockName} after 10s`);
+    throw new Error(`Could not acquire lock ${lockName} after 60s`);
   }
 }

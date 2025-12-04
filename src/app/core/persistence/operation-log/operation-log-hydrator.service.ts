@@ -51,6 +51,9 @@ export class OperationLogHydratorService {
     PFLog.normal('OperationLogHydratorService: Starting hydration...');
 
     try {
+      // Check for pending remote ops from crashed sync
+      await this._recoverPendingRemoteOps();
+
       // A.7.12: Check for interrupted migration (backup exists)
       const hasBackup = await this.opLogStore.hasStateCacheBackup();
       if (hasBackup) {
@@ -211,6 +214,10 @@ export class OperationLogHydratorService {
 
         PFLog.normal('OperationLogHydratorService: Full replay complete.');
       }
+
+      // Sync PFAPI vector clock with SUP_OPS to ensure consistency
+      // This recovers from any failed PFAPI updates during previous operations
+      await this._syncPfapiVectorClock();
     } catch (e) {
       PFLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
@@ -657,5 +664,55 @@ export class OperationLogHydratorService {
       // Dispatch the repaired state to NgRx
       this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
     }
+  }
+
+  /**
+   * Syncs PFAPI meta model's vector clock with the current SUP_OPS vector clock.
+   * This ensures eventual consistency if a previous PFAPI update failed after
+   * an operation was written to SUP_OPS.
+   */
+  private async _syncPfapiVectorClock(): Promise<void> {
+    try {
+      const currentClock = await this.vectorClockService.getCurrentVectorClock();
+
+      // Only sync if we have operations (not fresh install)
+      if (Object.keys(currentClock).length === 0) {
+        return;
+      }
+
+      // Update PFAPI meta model to match SUP_OPS clock
+      // This uses a direct update rather than increment to set the exact values
+      await this.pfapiService.pf.metaModel.syncVectorClock(currentClock);
+      PFLog.normal('OperationLogHydratorService: Synced PFAPI vector clock with SUP_OPS');
+    } catch (e) {
+      // Non-fatal - PFAPI might not be ready yet or sync might not be enabled
+      PFLog.verbose('OperationLogHydratorService: Could not sync PFAPI vector clock', e);
+    }
+  }
+
+  /**
+   * Recovers from pending remote ops that were stored but not applied (crash recovery).
+   * These ops are in the log and will be replayed during normal hydration, so we just
+   * need to mark them as applied to prevent them appearing as orphaned.
+   */
+  private async _recoverPendingRemoteOps(): Promise<void> {
+    const pendingOps = await this.opLogStore.getPendingRemoteOps();
+
+    if (pendingOps.length === 0) {
+      return;
+    }
+
+    PFLog.warn(
+      `OperationLogHydratorService: Found ${pendingOps.length} pending remote ops from previous crash. ` +
+        `Marking as applied (they will be replayed during hydration).`,
+    );
+
+    // Mark them as applied - they'll be replayed during normal hydration
+    const seqs = pendingOps.map((e) => e.seq);
+    await this.opLogStore.markApplied(seqs);
+
+    PFLog.normal(
+      `OperationLogHydratorService: Recovered ${pendingOps.length} pending remote ops.`,
+    );
   }
 }

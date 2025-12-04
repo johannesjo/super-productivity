@@ -62,6 +62,13 @@ export interface OperationLogEntry {
   source: 'local' | 'remote'; // Origin of this operation
   syncedAt?: number; // When successfully synced to remote (null if pending)
   rejectedAt?: number; // When rejected during conflict resolution (epoch ms)
+  /**
+   * For remote ops only: tracks whether the op was successfully applied to NgRx.
+   * - 'pending': stored but not yet applied (set on initial storage)
+   * - 'applied': successfully dispatched to NgRx store
+   * Used for crash recovery: pending remote ops are retried on startup.
+   */
+  applicationStatus?: 'pending' | 'applied';
 }
 
 export interface EntityConflict {

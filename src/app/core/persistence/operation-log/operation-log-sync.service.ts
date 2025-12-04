@@ -104,49 +104,29 @@ export class OperationLogSyncService {
       appliedFrontierByEntity,
     );
 
-    // Apply non-conflicting ops with rollback on failure
+    // Apply non-conflicting ops with crash-safe tracking
     if (nonConflicting.length > 0) {
-      // Track ops we've stored for potential rollback
-      const storedOpIds: string[] = [];
+      // Track stored seqs for marking as applied after success
+      const storedSeqs: number[] = [];
 
-      try {
-        // Store operations in IndexedDB before applying
-        for (const op of nonConflicting) {
-          if (!(await this.opLogStore.hasOp(op.id))) {
-            await this.opLogStore.append(op, 'remote');
-            storedOpIds.push(op.id);
-          }
+      // Store operations with pending status before applying
+      // If we crash after storing but before applying, these will be retried on startup
+      for (const op of nonConflicting) {
+        if (!(await this.opLogStore.hasOp(op.id))) {
+          const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+          storedSeqs.push(seq);
         }
+      }
 
-        // Apply all ops - if this fails, we need to clean up stored ops
-        await this.operationApplier.applyOperations(nonConflicting);
-      } catch (e) {
-        // Rollback: remove ops that were stored but not successfully applied
-        if (storedOpIds.length > 0) {
-          PFLog.critical(
-            'OperationLogSyncService: Failed to apply operations, rolling back stored ops',
-            {
-              storedOpIds,
-              error: e,
-            },
-          );
+      // Apply all ops to NgRx store
+      await this.operationApplier.applyOperations(nonConflicting);
 
-          try {
-            await this.opLogStore.deleteOpsWhere((entry) =>
-              storedOpIds.includes(entry.op.id),
-            );
-            PFLog.normal(
-              `OperationLogSyncService: Rolled back ${storedOpIds.length} stored ops`,
-            );
-          } catch (rollbackError) {
-            PFLog.critical(
-              'OperationLogSyncService: Failed to rollback stored ops - state may be inconsistent',
-              { rollbackError, originalError: e },
-            );
-          }
-        }
-
-        throw e;
+      // Mark ops as successfully applied (crash recovery will skip these)
+      if (storedSeqs.length > 0) {
+        await this.opLogStore.markApplied(storedSeqs);
+        PFLog.normal(
+          `OperationLogSyncService: Applied and marked ${storedSeqs.length} remote ops`,
+        );
       }
     }
 

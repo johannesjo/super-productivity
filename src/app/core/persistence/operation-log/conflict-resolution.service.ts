@@ -76,17 +76,24 @@ export class ConflictResolutionService {
 
       if (resolution === 'remote') {
         try {
-          // First, store all remote ops in IndexedDB (ensures durability)
-          const storedOpIds: string[] = [];
+          // First, store all remote ops with pending status (ensures durability + crash recovery)
+          const storedSeqs: number[] = [];
           for (const op of conflict.remoteOps) {
             if (!(await this.opLogStore.hasOp(op.id))) {
-              await this.opLogStore.append(op, 'remote');
-              storedOpIds.push(op.id);
+              const seq = await this.opLogStore.append(op, 'remote', {
+                pendingApply: true,
+              });
+              storedSeqs.push(seq);
             }
           }
 
           // Apply all remote ops together - applyOperations now handles dependency sorting
           await this.operationApplier.applyOperations(conflict.remoteOps);
+
+          // Mark ops as successfully applied
+          if (storedSeqs.length > 0) {
+            await this.opLogStore.markApplied(storedSeqs);
+          }
 
           // Check if any operations failed permanently
           const failedCount = this.operationApplier.getFailedCount();
