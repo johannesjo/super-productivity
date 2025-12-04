@@ -27,6 +27,12 @@ import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
 import { toEntityKey } from '../entity-key.util';
+import {
+  MAX_VERSION_SKIP,
+  SchemaMigrationService,
+} from '../store/schema-migration.service';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -53,6 +59,8 @@ export class OperationLogSyncService {
   private downloadService = inject(OperationLogDownloadService);
   private vectorClockService = inject(VectorClockService);
   private injector = inject(Injector);
+  private schemaMigrationService = inject(SchemaMigrationService);
+  private snackService = inject(SnackService);
 
   /**
    * Upload pending local operations to remote storage.
@@ -99,6 +107,55 @@ export class OperationLogSyncService {
    * Internal implementation of remote ops processing.
    */
   private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
+    // 1. Migrate operations to current schema version (Receiver-Side Migration)
+    const currentVersion = this.schemaMigrationService.getCurrentVersion();
+    const migratedOps: Operation[] = [];
+    let updateRequired = false;
+
+    for (const op of remoteOps) {
+      const opVersion = op.schemaVersion ?? 1;
+
+      // Check if remote op is too new (exceeds supported skip)
+      if (opVersion > currentVersion + MAX_VERSION_SKIP) {
+        updateRequired = true;
+        break;
+      }
+
+      try {
+        const migrated = this.schemaMigrationService.migrateOperation(op);
+        if (migrated) {
+          migratedOps.push(migrated);
+        } else {
+          PFLog.verbose(
+            `OperationLogSyncService: Dropped op ${op.id} (migrated to null)`,
+          );
+        }
+      } catch (e) {
+        PFLog.err(`OperationLogSyncService: Migration failed for op ${op.id}`, e);
+        // We skip ops that fail migration, but if they are from a compatible version,
+        // this indicates a bug or data corruption.
+      }
+    }
+
+    if (updateRequired) {
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.VERSION_TOO_OLD,
+        actionStr: T.PS.UPDATE_APP,
+        actionFn: () => window.open('https://super-productivity.com/download', '_blank'),
+      });
+      return;
+    }
+
+    if (migratedOps.length === 0) {
+      if (remoteOps.length > 0) {
+        PFLog.normal(
+          'OperationLogSyncService: All remote ops were dropped during migration.',
+        );
+      }
+      return;
+    }
+
     // Check if this is a fresh client (no local pending operations)
     // In this case, skip conflict detection and accept all remote operations
     const localPendingOps = await this.opLogStore.getUnsynced();
@@ -106,15 +163,15 @@ export class OperationLogSyncService {
     if (localPendingOps.length === 0) {
       PFLog.normal(
         'OperationLogSyncService: Fresh client detected (0 pending ops). Accepting all remote operations.',
-        { remoteOpsCount: remoteOps.length },
+        { remoteOpsCount: migratedOps.length },
       );
-      await this._applyRemoteOpsDirectly(remoteOps);
+      await this._applyRemoteOpsDirectly(migratedOps);
       return;
     }
 
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
-      remoteOps,
+      migratedOps,
       appliedFrontierByEntity,
     );
 

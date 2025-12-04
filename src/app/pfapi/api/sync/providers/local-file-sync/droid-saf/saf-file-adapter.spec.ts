@@ -1,10 +1,15 @@
 import { SafFileAdapter } from './saf-file-adapter';
 import { SafService } from './saf.service';
+import { Log, LogLevel } from '../../../../../../core/log';
 
 describe('SafFileAdapter', () => {
   let adapter: SafFileAdapter;
   let mockGetUri: jasmine.Spy<() => Promise<string | undefined>>;
   const testUri = 'content://test.uri';
+
+  beforeAll(() => {
+    Log.setLevel(LogLevel.DEBUG);
+  });
 
   beforeEach(() => {
     mockGetUri = jasmine.createSpy('getUri').and.returnValue(Promise.resolve(testUri));

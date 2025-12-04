@@ -1623,6 +1623,60 @@ export class RepairOperationService {
 
 ---
 
+# Part E: Smart Archive Handling
+
+The application splits data into "Active State" (in-memory, Redux) and "Archive State" (on-disk, rarely accessed) to maintain performance.
+
+- **ArchiveYoung**: Recently archived tasks and their worklogs (e.g., last 30 days).
+- **ArchiveOld**: Deep storage for historical data (months/years old).
+
+## E.1 The Problem with Syncing Archives
+
+In the legacy system, changing one task in the archive required re-uploading the entire (potentially massive) archive file. This was bandwidth-intensive and slow.
+
+## E.2 New Strategy: Deterministic Local Side Effects
+
+In the Operation Log architecture, **we do NOT sync the archive files directly.** Instead, we sync the **Instructions** that modify the archives. Because the logic is deterministic, all clients end up with identical archive files without ever transferring them.
+
+| Component        | Sync Strategy                 | Mechanism                                                                  |
+| ---------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| **Active State** | **Operation Log**             | Standard sync (Ops applied to Redux)                                       |
+| **ArchiveYoung** | **Deterministic Side Effect** | `moveToArchive` ops trigger local moves from Active → Young on all clients |
+| **ArchiveOld**   | **Deterministic Side Effect** | `flushYoungToOld` ops trigger local flush from Young → Old on all clients  |
+
+### E.3 Workflow: moveToArchive
+
+When a user archives tasks:
+
+1.  **Client A (Origin):**
+    - Generates `moveToArchive` operation.
+    - Locally moves Tasks + Worklogs from Active Store → `ArchiveYoung`.
+2.  **Sync:** Operation travels to Client B.
+3.  **Client B (Remote):**
+    - Receives `moveToArchive` operation.
+    - Executes the **exact same logic**:
+      - Selects the targeted tasks from its _own_ Active Store.
+      - Moves Tasks + Worklogs to its _own_ `ArchiveYoung`.
+      - Removes them from Active Store.
+
+**Result:** Both clients have identical `ArchiveYoung` files, but zero archive data was transferred over the network.
+
+### E.4 Workflow: Flushing (Young → Old)
+
+_Note: This is the planned strategy for future implementation._
+
+When `ArchiveYoung` gets too large:
+
+1.  **Client A** decides it's time to flush.
+2.  Instead of doing it silently, it emits a `flushYoungToOld` operation.
+3.  **All Clients** receive this op and run the standard flush logic:
+    - Move items older than X days from `Young` → `Old`.
+    - Save both files.
+
+This keeps even the deep storage `ArchiveOld` consistent across devices with minimal overhead.
+
+---
+
 # Edge Cases & Missing Considerations
 
 This section documents known edge cases and areas requiring further design or implementation.
