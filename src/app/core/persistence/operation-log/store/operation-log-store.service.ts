@@ -44,6 +44,10 @@ export class OperationLogStoreService {
   private _db?: IDBPDatabase<OpLogDB>;
   private _initPromise?: Promise<void>;
 
+  // Cache for getAppliedOpIds() to avoid full table scans on every download
+  private _appliedOpIdsCache: Set<string> | null = null;
+  private _cacheLastSeq: number = 0;
+
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
       upgrade: (db) => {
@@ -193,11 +197,20 @@ export class OperationLogStoreService {
 
   async getAppliedOpIds(): Promise<Set<string>> {
     await this._ensureInit();
-    // Performance note: This could be slow for large logs, but compaction keeps it bounded.
-    // getAllKeysFromIndex returns PRIMARY keys, not index values.
-    // We need to get all entries and extract op.id.
+
+    const currentLastSeq = await this.getLastSeq();
+
+    // Return cache if valid (no new operations since last cache build)
+    if (this._appliedOpIdsCache && this._cacheLastSeq === currentLastSeq) {
+      return new Set(this._appliedOpIdsCache);
+    }
+
+    // Rebuild cache
     const entries = await this.db.getAll('ops');
-    return new Set(entries.map((e) => e.op.id));
+    this._appliedOpIdsCache = new Set(entries.map((e) => e.op.id));
+    this._cacheLastSeq = currentLastSeq;
+
+    return new Set(this._appliedOpIdsCache);
   }
 
   async markSynced(seqs: number[]): Promise<void> {
