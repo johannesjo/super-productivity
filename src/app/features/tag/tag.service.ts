@@ -86,22 +86,25 @@ export class TagService {
     this._store$.dispatch(upsertTag({ tag }));
   }
 
-  getAddTagActionAndId(tag: Partial<Tag>): { action: Action<any>; id: string } {
-    const id = nanoid();
+  createTagObject(tag: Partial<Tag>): Tag {
+    const id = tag.id || nanoid();
     return {
+      ...DEFAULT_TAG,
       id,
-      action: addTag({
-        tag: {
-          ...DEFAULT_TAG,
-          id,
-          title: tag.title || 'EMPTY',
-          created: Date.now(),
-          icon: null,
-          color: tag.color || null,
-          taskIds: [],
-          ...tag,
-        },
-      }),
+      title: tag.title || 'EMPTY',
+      created: Date.now(),
+      icon: null,
+      color: tag.color || null,
+      taskIds: [],
+      ...tag,
+    };
+  }
+
+  getAddTagActionAndId(tag: Partial<Tag>): { action: Action<any>; id: string } {
+    const newTag = this.createTagObject(tag);
+    return {
+      id: newTag.id,
+      action: addTag({ tag: newTag }),
     };
   }
 }

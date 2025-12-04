@@ -7,6 +7,7 @@ import { Project } from '../../features/project/project.model';
 import { BatchOperation } from '@super-productivity/plugin-api';
 import { PersistentActionMeta } from '../../core/persistence/operation-log/persistent-action.interface';
 import { OpType } from '../../core/persistence/operation-log/operation.types';
+import { Tag } from '../../features/tag/tag.model';
 
 /**
  * Shared actions that affect multiple reducers (tasks, projects, tags)
@@ -213,6 +214,16 @@ export const TaskSharedActions = createActionGroup({
     }),
 
     // Tag Management
+    addTagToTask: (props: { tag: Tag; taskId: string }) => ({
+      ...props,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityIds: [props.taskId, props.tag.id],
+        opType: OpType.Update,
+      } as PersistentActionMeta,
+    }),
+
     removeTagsForAllTasks: (taskProps: { tagIdsToRemove: string[] }) => ({
       ...taskProps,
       meta: {
