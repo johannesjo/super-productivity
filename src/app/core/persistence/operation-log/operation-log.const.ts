@@ -39,3 +39,9 @@ export const LOCK_ACQUIRE_TIMEOUT_MS = 60000;
  * Default: 7 days
  */
 export const COMPACTION_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
+
+/**
+ * Retention window for emergency compaction when storage quota is exceeded.
+ * Uses a shorter window (1 day) to free up more space.
+ */
+export const EMERGENCY_COMPACTION_RETENTION_MS = 24 * 60 * 60 * 1000;

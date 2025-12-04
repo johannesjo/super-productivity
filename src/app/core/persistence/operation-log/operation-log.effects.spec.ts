@@ -64,6 +64,7 @@ describe('OperationLogEffects', () => {
     ]);
     mockCompactionService = jasmine.createSpyObj('OperationLogCompactionService', [
       'compact',
+      'emergencyCompact',
     ]);
     mockMultiTabCoordinator = jasmine.createSpyObj('MultiTabCoordinatorService', [
       'notifyNewOperation',
@@ -83,6 +84,7 @@ describe('OperationLogEffects', () => {
       Promise.resolve({ testClient: 5 }),
     );
     mockCompactionService.compact.and.returnValue(Promise.resolve());
+    mockCompactionService.emergencyCompact.and.returnValue(Promise.resolve(true));
     mockInjector.get.and.returnValue(mockPfapiService);
 
     TestBed.configureTestingModule({
@@ -296,17 +298,27 @@ describe('OperationLogEffects', () => {
       });
     });
 
-    it('should handle quota exceeded error specially', (done) => {
+    it('should handle quota exceeded error with emergency compaction and retry', (done) => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
-      mockOpLogStore.append.and.rejectWith(quotaError);
+      // First call fails with quota error, second call (retry) succeeds
+      let callCount = 0;
+      mockOpLogStore.append.and.callFake(() => {
+        callCount++;
+        if (callCount === 1) {
+          return Promise.reject(quotaError);
+        }
+        return Promise.resolve(1);
+      });
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
 
       effects.persistOperation$.subscribe({
         complete: () => {
-          // Quota exceeded triggers emergency compaction
+          // Quota exceeded triggers emergency compaction and retry
           setTimeout(() => {
-            expect(mockCompactionService.compact).toHaveBeenCalled();
+            expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
+            // Should have tried to append twice (initial + retry after compaction)
+            expect(mockOpLogStore.append).toHaveBeenCalledTimes(2);
             done();
           }, 10);
         },

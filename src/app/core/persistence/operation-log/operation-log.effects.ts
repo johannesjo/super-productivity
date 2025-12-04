@@ -132,7 +132,7 @@ export class OperationLogEffects {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);
       if (this.isQuotaExceededError(e)) {
-        this.handleQuotaExceeded();
+        await this.handleQuotaExceeded(action);
       } else {
         this.notifyUserAndTriggerRollback();
       }
@@ -198,19 +198,39 @@ export class OperationLogEffects {
 
   /**
    * Handles storage quota exceeded by triggering emergency compaction
-   * and notifying the user.
+   * and retrying the failed operation.
    */
-  private handleQuotaExceeded(): void {
+  private async handleQuotaExceeded(action: PersistentAction): Promise<void> {
     PFLog.err(
-      'OperationLogEffects: Storage quota exceeded, triggering emergency compaction',
+      'OperationLogEffects: Storage quota exceeded, attempting emergency compaction',
     );
+
+    const compactionSucceeded = await this.compactionService.emergencyCompact();
+
+    if (compactionSucceeded) {
+      try {
+        // Retry the failed operation after compaction freed space
+        await this.writeOperation(action);
+        this.snackService.open({
+          type: 'SUCCESS',
+          msg: T.F.SYNC.S.STORAGE_RECOVERED_AFTER_COMPACTION,
+        });
+        return;
+      } catch (retryErr) {
+        PFLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
+      }
+    } else {
+      PFLog.err('OperationLogEffects: Emergency compaction failed');
+    }
+
+    // Compaction failed or retry failed - show error with action
     this.snackService.open({
       type: 'ERROR',
       msg: T.F.SYNC.S.STORAGE_QUOTA_EXCEEDED,
-    });
-    // Attempt emergency compaction to free up space
-    this.compactionService.compact().catch((compactErr) => {
-      PFLog.err('OperationLogEffects: Emergency compaction also failed', compactErr);
+      actionStr: T.PS.RELOAD,
+      actionFn: (): void => {
+        window.location.reload();
+      },
     });
   }
 }
