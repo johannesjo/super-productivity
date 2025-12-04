@@ -6,7 +6,8 @@ export type OpType =
   | 'MOV'
   | 'BATCH'
   | 'SYNC_IMPORT'
-  | 'BACKUP_IMPORT';
+  | 'BACKUP_IMPORT'
+  | 'REPAIR';
 
 export type VectorClock = Record<string, number>;
 
