@@ -15,7 +15,7 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { provideMockStore } from '@ngrx/store/testing';
-import { Operation } from '../operation.types';
+import { Operation, OpType } from '../operation.types';
 import { T } from '../../../../t.const';
 
 // Helper to mock OpLogEntry
@@ -207,6 +207,130 @@ describe('OperationLogSyncService', () => {
         [migratedOp],
         jasmine.any(Map),
       );
+    });
+  });
+
+  describe('_suggestResolution', () => {
+    // Access private method for testing
+    const callSuggestResolution = (
+      svc: OperationLogSyncService,
+      localOps: Operation[],
+      remoteOps: Operation[],
+    ): 'local' | 'remote' | 'manual' => {
+      return (svc as any)._suggestResolution(localOps, remoteOps);
+    };
+
+    const createOp = (partial: Partial<Operation>): Operation => ({
+      id: 'op-1',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'entity-1',
+      payload: {},
+      clientId: 'client-1',
+      vectorClock: { client1: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      ...partial,
+    });
+
+    it('should suggest remote when local ops are empty', () => {
+      const remoteOps = [createOp({ id: 'remote-1' })];
+      expect(callSuggestResolution(service, [], remoteOps)).toBe('remote');
+    });
+
+    it('should suggest local when remote ops are empty', () => {
+      const localOps = [createOp({ id: 'local-1' })];
+      expect(callSuggestResolution(service, localOps, [])).toBe('local');
+    });
+
+    it('should suggest newer side when timestamps differ by more than 1 hour', () => {
+      const now = Date.now();
+      const TWO_HOURS_MS = 2 * 60 * 60 * 1000;
+      const twoHoursAgo = now - TWO_HOURS_MS;
+
+      const localOps = [createOp({ id: 'local-1', timestamp: now })];
+      const remoteOps = [createOp({ id: 'remote-1', timestamp: twoHoursAgo })];
+
+      // Local is newer
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
+
+      // Flip: remote is newer
+      const localOpsOld = [createOp({ id: 'local-1', timestamp: twoHoursAgo })];
+      const remoteOpsNew = [createOp({ id: 'remote-1', timestamp: now })];
+      expect(callSuggestResolution(service, localOpsOld, remoteOpsNew)).toBe('remote');
+    });
+
+    it('should prefer update over delete (local delete, remote update)', () => {
+      const now = Date.now();
+      const localOps = [
+        createOp({ id: 'local-1', opType: OpType.Delete, timestamp: now }),
+      ];
+      const remoteOps = [
+        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: now }),
+      ];
+
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('remote');
+    });
+
+    it('should prefer update over delete (remote delete, local update)', () => {
+      const now = Date.now();
+      const localOps = [
+        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
+      ];
+      const remoteOps = [
+        createOp({ id: 'remote-1', opType: OpType.Delete, timestamp: now }),
+      ];
+
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
+    });
+
+    it('should prefer create over update', () => {
+      const now = Date.now();
+      const localOps = [
+        createOp({ id: 'local-1', opType: OpType.Create, timestamp: now }),
+      ];
+      const remoteOps = [
+        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: now }),
+      ];
+
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
+
+      // Flip
+      const localOps2 = [
+        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
+      ];
+      const remoteOps2 = [
+        createOp({ id: 'remote-1', opType: OpType.Create, timestamp: now }),
+      ];
+      expect(callSuggestResolution(service, localOps2, remoteOps2)).toBe('remote');
+    });
+
+    it('should return manual for close timestamps with same op types', () => {
+      const now = Date.now();
+      const FIVE_MINUTES_MS = 5 * 60 * 1000;
+      const fiveMinutesAgo = now - FIVE_MINUTES_MS;
+
+      const localOps = [
+        createOp({ id: 'local-1', opType: OpType.Update, timestamp: now }),
+      ];
+      const remoteOps = [
+        createOp({ id: 'remote-1', opType: OpType.Update, timestamp: fiveMinutesAgo }),
+      ];
+
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
+    });
+
+    it('should return manual when both have delete ops', () => {
+      const now = Date.now();
+      const localOps = [
+        createOp({ id: 'local-1', opType: OpType.Delete, timestamp: now }),
+      ];
+      const remoteOps = [
+        createOp({ id: 'remote-1', opType: OpType.Delete, timestamp: now }),
+      ];
+
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
     });
   });
 });
