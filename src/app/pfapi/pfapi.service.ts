@@ -137,6 +137,8 @@ export class PfapiService {
             isEncrypt: !!cfg.isEncryptionEnabled,
             isCompress: !!cfg.isCompressionEnabled,
           });
+          PFLog.normal('Sync enabled and configured. Triggering initial sync.');
+          await this.pf.sync();
         }
       } catch (e) {
         PFLog.err(e);
