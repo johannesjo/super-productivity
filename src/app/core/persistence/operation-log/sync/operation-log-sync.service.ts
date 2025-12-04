@@ -5,6 +5,7 @@ import {
   ConflictResult,
   EntityConflict,
   Operation,
+  OpType,
   VectorClock,
 } from '../operation.types';
 import {
@@ -289,8 +290,7 @@ export class OperationLogSyncService {
             entityId: entityId, // Conflicting entity ID
             localOps: localOpsForEntity,
             remoteOps: [remoteOp],
-            suggestedResolution: 'manual', // Default to manual for now
-            // TODO: implement suggestResolution
+            suggestedResolution: this._suggestResolution(localOpsForEntity, [remoteOp]),
           });
           isConflicting = true;
           break; // Conflict for this remoteOp, move to next remoteOp
@@ -388,5 +388,46 @@ export class OperationLogSyncService {
     }
 
     await this._validateAfterSync();
+  }
+
+  /**
+   * Suggests a conflict resolution based on heuristics.
+   * Returns 'local' | 'remote' | 'manual' (merge not auto-supported yet)
+   */
+  private _suggestResolution(
+    localOps: Operation[],
+    remoteOps: Operation[],
+  ): 'local' | 'remote' | 'manual' {
+    // Edge case: no ops on one side = clear winner
+    if (localOps.length === 0) return 'remote';
+    if (remoteOps.length === 0) return 'local';
+
+    const latestLocal = Math.max(...localOps.map((op) => op.timestamp));
+    const latestRemote = Math.max(...remoteOps.map((op) => op.timestamp));
+    const timeDiffMs = Math.abs(latestLocal - latestRemote);
+
+    // Heuristic 1: Large time gap (>1 hour) = newer wins
+    // Rationale: User likely made changes in sequence, not concurrently
+    const ONE_HOUR_MS = 60 * 60 * 1000;
+    if (timeDiffMs > ONE_HOUR_MS) {
+      return latestLocal > latestRemote ? 'local' : 'remote';
+    }
+
+    // Heuristic 2: Delete vs Update - prefer Update (preserve data)
+    // Rationale: Users generally prefer not to lose work
+    const hasLocalDelete = localOps.some((op) => op.opType === OpType.Delete);
+    const hasRemoteDelete = remoteOps.some((op) => op.opType === OpType.Delete);
+    if (hasLocalDelete && !hasRemoteDelete) return 'remote';
+    if (hasRemoteDelete && !hasLocalDelete) return 'local';
+
+    // Heuristic 3: Create vs anything else - Create wins
+    // Rationale: If one side created entity, that's more significant
+    const hasLocalCreate = localOps.some((op) => op.opType === OpType.Create);
+    const hasRemoteCreate = remoteOps.some((op) => op.opType === OpType.Create);
+    if (hasLocalCreate && !hasRemoteCreate) return 'local';
+    if (hasRemoteCreate && !hasLocalCreate) return 'remote';
+
+    // Default: manual - let user decide
+    return 'manual';
   }
 }
