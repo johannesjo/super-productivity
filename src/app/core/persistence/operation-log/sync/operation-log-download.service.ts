@@ -16,6 +16,10 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
+import {
+  MAX_DOWNLOAD_RETRIES,
+  DOWNLOAD_RETRY_BASE_DELAY_MS,
+} from '../operation-log.const';
 
 /**
  * Result of a download operation.
@@ -173,14 +177,17 @@ export class OperationLogDownloadService {
 
       for (const fullFilePath of remoteOpFileNames) {
         try {
-          const fileContent = await syncProvider.downloadFile(fullFilePath);
+          const fileContent = await this._downloadFileWithRetry(
+            syncProvider,
+            fullFilePath,
+          );
           const chunk = JSON.parse(fileContent.dataStr) as OperationLogEntry[];
           // Filter already applied ops from this chunk before adding to allNewOps
           const newOpsInChunk = chunk.filter((entry) => !appliedOpIds.has(entry.op.id));
           allNewOps.push(...newOpsInChunk.map((entry) => entry.op));
         } catch (e) {
           PFLog.error(
-            `OperationLogDownloadService: Failed to download or parse remote op file ${fullFilePath}`,
+            `OperationLogDownloadService: Failed to download or parse remote op file ${fullFilePath} after ${MAX_DOWNLOAD_RETRIES} retries`,
             e,
           );
           failedFiles.push(fullFilePath);
@@ -211,5 +218,35 @@ export class OperationLogDownloadService {
       success: failedFileCount === 0,
       failedFileCount,
     };
+  }
+
+  /**
+   * Downloads a file with exponential backoff retry for transient errors.
+   * Retries with delays: 1s, 2s, 4s (base * 2^attempt).
+   */
+  private async _downloadFileWithRetry(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    filePath: string,
+  ): Promise<{ dataStr: string }> {
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt <= MAX_DOWNLOAD_RETRIES; attempt++) {
+      try {
+        return await syncProvider.downloadFile(filePath);
+      } catch (e) {
+        lastError = e;
+
+        if (attempt < MAX_DOWNLOAD_RETRIES) {
+          const delay = DOWNLOAD_RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+          PFLog.warn(
+            `OperationLogDownloadService: Download failed for ${filePath}, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_DOWNLOAD_RETRIES})`,
+            e,
+          );
+          await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+      }
+    }
+
+    throw lastError;
   }
 }

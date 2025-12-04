@@ -239,6 +239,21 @@ export class OperationLogSyncService {
     // This prevents false conflicts for entities that haven't been modified since compaction
     const snapshotVectorClock = await this.vectorClockService.getSnapshotVectorClock();
 
+    // SAFETY CHECK: Detect potential clock corruption
+    // If we have pending local ops (not a fresh client) but no snapshot clock,
+    // this indicates corrupted metadata - treat cautiously to avoid data loss
+    const hasLocalPendingOps = localPendingOpsByEntity.size > 0;
+    const hasNoSnapshotClock =
+      !snapshotVectorClock || Object.keys(snapshotVectorClock).length === 0;
+    const potentialClockCorruption = hasLocalPendingOps && hasNoSnapshotClock;
+
+    if (potentialClockCorruption) {
+      PFLog.warn(
+        'OperationLogSyncService: Potential clock corruption detected - have pending ops but no snapshot clock. Will be conservative in conflict detection.',
+        { pendingEntityCount: localPendingOpsByEntity.size },
+      );
+    }
+
     for (const remoteOp of remoteOps) {
       const entityIdsToCheck =
         remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
@@ -263,7 +278,22 @@ export class OperationLogSyncService {
           {},
         );
 
-        const vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+        let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+
+        // SAFETY: If we detected potential clock corruption and the local frontier
+        // is empty for this entity (would result in LESS_THAN), treat as CONCURRENT
+        // to force conflict resolution instead of silently accepting remote data
+        const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+        if (
+          potentialClockCorruption &&
+          localFrontierIsEmpty &&
+          vcComparison === VectorClockComparison.LESS_THAN
+        ) {
+          PFLog.warn(
+            `OperationLogSyncService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
+          );
+          vcComparison = VectorClockComparison.CONCURRENT;
+        }
 
         // Skip stale operations (local already has newer state)
         if (vcComparison === VectorClockComparison.GREATER_THAN) {

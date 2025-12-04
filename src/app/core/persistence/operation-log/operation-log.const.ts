@@ -64,3 +64,15 @@ export const MAX_PENDING_QUEUE_SIZE = 1000;
  * If exceeded, oldest failed operations are dropped to prevent memory leaks.
  */
 export const MAX_FAILED_OPS_SIZE = 500;
+
+/**
+ * Maximum retry attempts for downloading operation files.
+ * Transient network errors are retried with exponential backoff.
+ */
+export const MAX_DOWNLOAD_RETRIES = 3;
+
+/**
+ * Base delay for download retry exponential backoff (milliseconds).
+ * Delays: 1s, 2s, 4s for retries 1, 2, 3.
+ */
+export const DOWNLOAD_RETRY_BASE_DELAY_MS = 1000;

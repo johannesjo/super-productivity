@@ -3,6 +3,10 @@ import { Operation, EntityType } from '../operation.types';
 import { Store } from '@ngrx/store';
 import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
 import { selectProjectById } from '../../../../features/project/store/project.reducer';
+import { selectTagById } from '../../../../features/tag/store/tag.reducer';
+import { selectNoteById } from '../../../../features/note/store/note.reducer';
+import { selectMetricById } from '../../../../features/metric/store/metric.selectors';
+import { selectSimpleCounterById } from '../../../../features/simple-counter/store/simple-counter.reducer';
 import { firstValueFrom } from 'rxjs';
 
 export interface OperationDependency {
@@ -81,17 +85,49 @@ export class DependencyResolverService {
 
   private async checkEntityExists(type: EntityType, id: string): Promise<boolean> {
     switch (type) {
-      case 'TASK':
+      case 'TASK': {
         const task = await firstValueFrom(this.store.select(selectTaskById, { id }));
         return !!task;
-      case 'PROJECT':
+      }
+      case 'PROJECT': {
         const project = await firstValueFrom(
           this.store.select(selectProjectById, { id }),
         );
         return !!project;
-      // Implement others
+      }
+      case 'TAG': {
+        const tag = await firstValueFrom(this.store.select(selectTagById, { id }));
+        return !!tag;
+      }
+      case 'NOTE': {
+        const note = await firstValueFrom(this.store.select(selectNoteById, { id }));
+        return !!note;
+      }
+      case 'METRIC': {
+        const metric = await firstValueFrom(this.store.select(selectMetricById, { id }));
+        return !!metric;
+      }
+      case 'SIMPLE_COUNTER': {
+        const counter = await firstValueFrom(
+          this.store.select(selectSimpleCounterById, { id }),
+        );
+        return !!counter;
+      }
+      // These entity types don't have individual entity selectors or
+      // don't require dependency checking (singleton/aggregate entities)
+      case 'GLOBAL_CONFIG':
+      case 'WORK_CONTEXT':
+      case 'TASK_REPEAT_CFG':
+      case 'ISSUE_PROVIDER':
+      case 'PLANNER':
+      case 'MENU_TREE':
+      case 'BOARD':
+      case 'MIGRATION':
+      case 'RECOVERY':
+      case 'ALL':
+        return true; // These don't require dependency resolution
       default:
-        return true; // Assume exists if we don't track it yet
+        return true; // Unknown types assumed to exist
     }
   }
 }
