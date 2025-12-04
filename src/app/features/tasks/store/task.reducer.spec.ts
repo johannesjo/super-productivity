@@ -130,4 +130,32 @@ describe('Task Reducer', () => {
       expect(state.ids).toEqual(['task2', 'task4', 'task1', 'task3']);
     });
   });
+
+  describe('TaskSharedActions.addTagToTask', () => {
+    it('should add tagId to task tagIds', () => {
+      const action = TaskSharedActions.addTagToTask({
+        taskId: 'task1',
+        tagId: 'tag1',
+      });
+      const state = taskReducer(stateWithTasks, action);
+
+      expect(state.entities['task1']!.tagIds).toContain('tag1');
+    });
+
+    it('should ensure tagId uniqueness', () => {
+      const stateWithTag = taskReducer(
+        stateWithTasks,
+        TaskSharedActions.addTagToTask({ taskId: 'task1', tagId: 'tag1' }),
+      );
+
+      const action = TaskSharedActions.addTagToTask({
+        taskId: 'task1',
+        tagId: 'tag1',
+      });
+      const state = taskReducer(stateWithTag, action);
+
+      expect(state.entities['task1']!.tagIds.length).toBe(1);
+      expect(state.entities['task1']!.tagIds).toContain('tag1');
+    });
+  });
 });
