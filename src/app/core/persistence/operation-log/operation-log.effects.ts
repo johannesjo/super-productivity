@@ -30,6 +30,8 @@ import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 export class OperationLogEffects {
   private clientId?: string;
   private compactionFailures = 0;
+  /** Circuit breaker: prevents recursive quota exceeded handling */
+  private isHandlingQuotaExceeded = false;
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
@@ -92,9 +94,14 @@ export class OperationLogEffects {
             opType: op.opType,
             entityType: op.entityType,
           });
+          // State may be inconsistent (action dispatched to reducers but not persisted)
           this.snackService.open({
             type: 'ERROR',
             msg: T.F.SYNC.S.INVALID_OPERATION_PAYLOAD,
+            actionStr: T.PS.RELOAD,
+            actionFn: (): void => {
+              window.location.reload();
+            },
           });
           return; // Skip persisting invalid operation
         }
@@ -132,7 +139,15 @@ export class OperationLogEffects {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);
       if (this.isQuotaExceededError(e)) {
-        await this.handleQuotaExceeded(action);
+        // Circuit breaker: prevent recursive quota handling
+        if (this.isHandlingQuotaExceeded) {
+          PFLog.err(
+            'OperationLogEffects: Quota exceeded during retry - aborting to prevent loop',
+          );
+          this.notifyUserAndTriggerRollback();
+        } else {
+          await this.handleQuotaExceeded(action);
+        }
       } else {
         this.notifyUserAndTriggerRollback();
       }
@@ -199,6 +214,7 @@ export class OperationLogEffects {
   /**
    * Handles storage quota exceeded by triggering emergency compaction
    * and retrying the failed operation.
+   * Uses circuit breaker flag to prevent infinite recursion.
    */
   private async handleQuotaExceeded(action: PersistentAction): Promise<void> {
     PFLog.err(
@@ -209,6 +225,8 @@ export class OperationLogEffects {
 
     if (compactionSucceeded) {
       try {
+        // Set circuit breaker before retry to prevent recursive handling
+        this.isHandlingQuotaExceeded = true;
         // Retry the failed operation after compaction freed space
         await this.writeOperation(action);
         this.snackService.open({
@@ -218,6 +236,9 @@ export class OperationLogEffects {
         return;
       } catch (retryErr) {
         PFLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
+      } finally {
+        // Always clear circuit breaker
+        this.isHandlingQuotaExceeded = false;
       }
     } else {
       PFLog.err('OperationLogEffects: Emergency compaction failed');
