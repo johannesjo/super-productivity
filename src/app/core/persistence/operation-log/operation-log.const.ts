@@ -76,3 +76,17 @@ export const MAX_DOWNLOAD_RETRIES = 3;
  * Delays: 1s, 2s, 4s for retries 1, 2, 3.
  */
 export const DOWNLOAD_RETRY_BASE_DELAY_MS = 1000;
+
+/**
+ * Delay after writing pending lock to allow storage events to propagate across tabs.
+ * 50ms is sufficient for most browser storage event propagation.
+ * Used in localStorage-based two-phase commit lock fallback.
+ */
+export const LOCK_STORAGE_PROPAGATION_DELAY_MS = 50;
+
+/**
+ * Final verification delay after upgrading to confirmed lock.
+ * Shorter than propagation delay since we're just confirming our own write.
+ * Used in localStorage-based two-phase commit lock fallback.
+ */
+export const LOCK_FINAL_VERIFICATION_DELAY_MS = 20;

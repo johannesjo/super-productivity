@@ -1,5 +1,10 @@
 import { Injectable } from '@angular/core';
-import { LOCK_ACQUIRE_TIMEOUT_MS, LOCK_TIMEOUT_MS } from '../operation-log.const';
+import {
+  LOCK_ACQUIRE_TIMEOUT_MS,
+  LOCK_FINAL_VERIFICATION_DELAY_MS,
+  LOCK_STORAGE_PROPAGATION_DELAY_MS,
+  LOCK_TIMEOUT_MS,
+} from '../operation-log.const';
 
 /**
  * Provides a cross-tab and cross-process locking mechanism for critical operations.
@@ -58,8 +63,7 @@ export class LockService {
         localStorage.setItem(lockKey, pendingVal);
 
         // Wait for storage events to settle across tabs
-        // 50ms is long enough to handle most cache coherency delays
-        await new Promise((r) => setTimeout(r, 50));
+        await new Promise((r) => setTimeout(r, LOCK_STORAGE_PROPAGATION_DELAY_MS));
 
         // Phase 2: Verify we still own the pending lock
         if (localStorage.getItem(lockKey) === pendingVal) {
@@ -68,7 +72,7 @@ export class LockService {
           localStorage.setItem(lockKey, confirmedVal);
 
           // Final verification after another short delay
-          await new Promise((r) => setTimeout(r, 20));
+          await new Promise((r) => setTimeout(r, LOCK_FINAL_VERIFICATION_DELAY_MS));
           if (localStorage.getItem(lockKey) === confirmedVal) {
             // Successfully acquired lock
             try {

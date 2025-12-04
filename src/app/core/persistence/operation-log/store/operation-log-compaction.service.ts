@@ -27,20 +27,41 @@ export class OperationLogCompactionService {
   private vectorClockService = inject(VectorClockService);
 
   async compact(): Promise<void> {
+    await this._doCompact(COMPACTION_RETENTION_MS, false);
+  }
+
+  /**
+   * Emergency compaction triggered when storage quota is exceeded.
+   * Uses a shorter retention window (1 day instead of 7) to free more space.
+   * Returns true if compaction succeeded, false otherwise.
+   */
+  async emergencyCompact(): Promise<boolean> {
+    try {
+      await this._doCompact(EMERGENCY_COMPACTION_RETENTION_MS, true);
+      return true;
+    } catch (e) {
+      PFLog.err('OperationLogCompactionService: Emergency compaction failed', e);
+      return false;
+    }
+  }
+
+  /**
+   * Core compaction logic shared between regular and emergency compaction.
+   * @param retentionMs - How long to keep synced operations (in ms)
+   * @param isEmergency - Whether this is an emergency compaction (for logging)
+   */
+  private async _doCompact(retentionMs: number, isEmergency: boolean): Promise<void> {
     await this.lockService.request('sp_op_log', async () => {
       const startTime = Date.now();
+      const label = isEmergency ? 'emergency ' : '';
 
       // 1. Get current state from NgRx store (via delegate for consistency)
       const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
-
-      // Check timeout after expensive operation
-      this.checkCompactionTimeout(startTime, 'state snapshot');
+      this.checkCompactionTimeout(startTime, `${label}state snapshot`);
 
       // 2. Get current vector clock (max of all ops)
       const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
-
-      // Check timeout after clock computation
-      this.checkCompactionTimeout(startTime, 'vector clock');
+      this.checkCompactionTimeout(startTime, `${label}vector clock`);
 
       // 3. Get lastSeq IMMEDIATELY before writing cache to minimize race window
       // This ensures new ops written after this point have seq > lastSeq
@@ -62,7 +83,7 @@ export class OperationLogCompactionService {
 
       // 6. Delete old operations (keep recent for conflict resolution window)
       // Only delete ops that have been synced to remote
-      const cutoff = Date.now() - COMPACTION_RETENTION_MS;
+      const cutoff = Date.now() - retentionMs;
 
       await this.opLogStore.deleteOpsWhere(
         (entry) =>
@@ -71,51 +92,6 @@ export class OperationLogCompactionService {
           entry.seq <= lastSeq, // keep tail for conflict frontier
       );
     });
-  }
-
-  /**
-   * Emergency compaction triggered when storage quota is exceeded.
-   * Uses a shorter retention window (1 day instead of 7) to free more space.
-   * Returns true if compaction succeeded, false otherwise.
-   */
-  async emergencyCompact(): Promise<boolean> {
-    try {
-      await this.lockService.request('sp_op_log', async () => {
-        const startTime = Date.now();
-
-        const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
-        this.checkCompactionTimeout(startTime, 'emergency state snapshot');
-
-        const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
-        this.checkCompactionTimeout(startTime, 'emergency vector clock');
-
-        const lastSeq = await this.opLogStore.getLastSeq();
-
-        await this.opLogStore.saveStateCache({
-          state: currentState,
-          lastAppliedOpSeq: lastSeq,
-          vectorClock: currentVectorClock,
-          compactedAt: Date.now(),
-          schemaVersion: CURRENT_SCHEMA_VERSION,
-        });
-
-        await this.opLogStore.resetCompactionCounter();
-
-        // Use shorter retention window for emergency compaction
-        const cutoff = Date.now() - EMERGENCY_COMPACTION_RETENTION_MS;
-
-        await this.opLogStore.deleteOpsWhere(
-          (entry) =>
-            !!entry.syncedAt && // never drop unsynced ops
-            entry.appliedAt < cutoff &&
-            entry.seq <= lastSeq,
-        );
-      });
-      return true;
-    } catch (e) {
-      PFLog.err('OperationLogCompactionService: Emergency compaction failed', e);
-      return false;
-    }
   }
 
   /**
