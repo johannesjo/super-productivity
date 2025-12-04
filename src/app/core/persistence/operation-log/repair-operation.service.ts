@@ -7,6 +7,7 @@ import { LockService } from './lock.service';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { PFLog } from '../../log';
+import { VectorClockService } from './vector-clock.service';
 
 const CURRENT_SCHEMA_VERSION = 1;
 
@@ -23,6 +24,7 @@ export class RepairOperationService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private snackService = inject(SnackService);
+  private vectorClockService = inject(VectorClockService);
 
   /**
    * Creates a REPAIR operation with the repaired state and saves it to the operation log.
@@ -50,7 +52,7 @@ export class RepairOperationService {
     let seq: number = 0;
 
     await this.lockService.request('sp_op_log', async () => {
-      const currentClock = await this.opLogStore.getCurrentVectorClock();
+      const currentClock = await this.vectorClockService.getCurrentVectorClock();
       const newClock = incrementVectorClock(currentClock, clientId);
 
       const op: Operation = {

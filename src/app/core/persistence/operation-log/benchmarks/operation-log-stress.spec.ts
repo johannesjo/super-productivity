@@ -1,12 +1,32 @@
+/**
+ * Operation Log Performance Benchmarks
+ *
+ * These are NOT regular unit tests - they are manual performance benchmarks
+ * for measuring IndexedDB operation throughput.
+ *
+ * To run these benchmarks:
+ * 1. Change `xdescribe` to `describe` below
+ * 2. Run: npm run test:file src/app/core/persistence/operation-log/benchmarks/operation-log-stress.benchmark.ts
+ * 3. Watch the console output for timing information
+ *
+ * Note: Results vary significantly based on:
+ * - Browser/test runner
+ * - System I/O performance
+ * - Concurrent processes
+ *
+ * These tests are excluded from regular test runs to avoid flaky CI failures
+ * due to timing dependencies on system load.
+ */
 import { TestBed } from '@angular/core/testing';
-import { OperationLogStoreService } from './operation-log-store.service';
-import { Operation, OpType, EntityType } from './operation.types';
-import { uuidv7 } from '../../../util/uuid-v7';
+import { OperationLogStoreService } from '../operation-log-store.service';
+import { Operation, OpType, EntityType } from '../operation.types';
+import { uuidv7 } from '../../../../util/uuid-v7';
 
 // Increase timeout for stress tests
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;
 
-describe('OperationLog Stress Test', () => {
+// Change to `describe` to run benchmarks
+xdescribe('OperationLog Performance Benchmarks', () => {
   let service: OperationLogStoreService;
 
   beforeEach(async () => {
@@ -19,9 +39,7 @@ describe('OperationLog Stress Test', () => {
     await service._clearAllDataForTesting();
   });
 
-  // Skip stress tests in regular test runs - they have timing dependencies
-  // and are meant for manual performance benchmarking
-  xit('should handle 1000 operations efficiently', async () => {
+  it('benchmark: 1000 sequential writes', async () => {
     const COUNT = 1000;
     const ops: Operation[] = [];
     const now = Date.now();
@@ -49,14 +67,14 @@ describe('OperationLog Stress Test', () => {
     const endWrite = performance.now();
     const writeTime = endWrite - startWrite;
     console.log(`Write time for ${COUNT} ops: ${writeTime.toFixed(2)}ms`);
+    console.log(`Average per op: ${(writeTime / COUNT).toFixed(2)}ms`);
 
     // Expect reasonably fast writes (under 2ms per op on average)
     expect(writeTime).toBeLessThan(COUNT * 2);
-
     expect((await service.getOpsAfterSeq(0)).length).toBeGreaterThanOrEqual(COUNT);
   });
 
-  xit('should handle 1000 LARGE payload operations (10KB each)', async () => {
+  it('benchmark: 1000 large payload writes (10KB each)', async () => {
     const COUNT = 1000;
     const ops: Operation[] = [];
     const now = Date.now();
@@ -85,6 +103,7 @@ describe('OperationLog Stress Test', () => {
     const endWrite = performance.now();
     const writeTime = endWrite - startWrite;
     console.log(`Write time for ${COUNT} LARGE ops: ${writeTime.toFixed(2)}ms`);
+    console.log(`Average per op: ${(writeTime / COUNT).toFixed(2)}ms`);
 
     // Expect under 5ms per large op
     expect(writeTime).toBeLessThan(COUNT * 5);
@@ -97,11 +116,12 @@ describe('OperationLog Stress Test', () => {
     );
   });
 
-  xit('should scan efficiently during compaction (10k ops)', async () => {
+  it('benchmark: scan and delete 100 ops from 10k total', async () => {
     const NOISE_COUNT = 10000;
     const ops: Operation[] = [];
     const now = Date.now();
 
+    console.log(`Setting up ${NOISE_COUNT} noise operations...`);
     for (let i = 0; i < NOISE_COUNT; i++) {
       ops.push({
         id: uuidv7(),
@@ -138,12 +158,13 @@ describe('OperationLog Stress Test', () => {
     await Promise.all(delOps.map((op) => service.append(op)));
 
     const initialCount = (await service.getOpsAfterSeq(0)).length;
-    const startDelete = performance.now();
+    console.log(`Starting delete from ${initialCount} total ops...`);
 
+    const startDelete = performance.now();
     // Delete ops with actionType '[Task] DeleteMe' - requires scanning everything
     await service.deleteOpsWhere((entry) => entry.op.actionType === '[Task] DeleteMe');
-
     const endDelete = performance.now();
+
     const deleteTime = endDelete - startDelete;
     console.log(
       `Deleted 100 ops from ~${initialCount} total in ${deleteTime.toFixed(2)}ms`,
@@ -153,7 +174,6 @@ describe('OperationLog Stress Test', () => {
     expect(finalCount).toBe(initialCount - 100);
 
     // Expect scan speed to be reasonable (e.g. < 1000ms for 10k items)
-    // On my test it was ~240ms.
     expect(deleteTime).toBeLessThan(1000);
   });
 });

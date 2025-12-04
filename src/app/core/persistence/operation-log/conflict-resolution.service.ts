@@ -104,11 +104,6 @@ export class ConflictResolutionService {
               continue; // Skip marking local as rejected for this conflict
             }
 
-            // Mark applied ops
-            for (const op of conflict.remoteOps) {
-              await this.opLogStore.markApplied(op.id);
-            }
-
             // Only mark local ops as rejected if ALL remote ops succeeded
             const localOpIds = conflict.localOps.map((op) => op.id);
             await this.opLogStore.markRejected(localOpIds);
@@ -184,7 +179,7 @@ export class ConflictResolutionService {
     );
 
     // Dispatch repaired state to NgRx
-    this.store.dispatch(loadAllData({ appDataComplete: result.repairedState as any }));
+    this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
 
     PFLog.log(
       '[ConflictResolutionService] Created REPAIR operation after conflict resolution',

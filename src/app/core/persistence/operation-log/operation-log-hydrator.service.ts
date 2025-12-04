@@ -20,6 +20,7 @@ import { T } from '../../../t.const';
 import { ValidateStateService } from './validate-state.service';
 import { RepairOperationService } from './repair-operation.service';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
+import { VectorClockService } from './vector-clock.service';
 
 type StateCache = MigratableStateCache;
 
@@ -41,6 +42,7 @@ export class OperationLogHydratorService {
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
+  private vectorClockService = inject(VectorClockService);
 
   // Flag to prevent re-validation immediately after repair
   private _isRepairInProgress = false;
@@ -106,7 +108,7 @@ export class OperationLogHydratorService {
         }
 
         // 3. Hydrate NgRx with (possibly repaired) snapshot
-        this.store.dispatch(loadAllData({ appDataComplete: stateToLoad as any }));
+        this.store.dispatch(loadAllData({ appDataComplete: stateToLoad }));
 
         // 4. Replay tail operations (A.7.13: with operation migration)
         const tailOps = await this.opLogStore.getOpsAfterSeq(snapshot.lastAppliedOpSeq);
@@ -119,7 +121,9 @@ export class OperationLogHydratorService {
             PFLog.normal(
               `OperationLogHydratorService: Last of ${tailOps.length} tail ops is ${lastOp.opType}, loading directly`,
             );
-            this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
+            this.store.dispatch(
+              loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
+            );
             // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
@@ -175,7 +179,9 @@ export class OperationLogHydratorService {
           PFLog.normal(
             `OperationLogHydratorService: Last of ${allOps.length} ops is ${lastOp.opType}, loading directly`,
           );
-          this.store.dispatch(loadAllData({ appDataComplete: appData as any }));
+          this.store.dispatch(
+            loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
+          );
           // No snapshot save needed - full state ops already contain complete state
         } else {
           // A.7.13: Migrate all operations before replay
@@ -397,7 +403,9 @@ export class OperationLogHydratorService {
     });
 
     // Dispatch to NgRx
-    this.store.dispatch(loadAllData({ appDataComplete: legacyData as any }));
+    this.store.dispatch(
+      loadAllData({ appDataComplete: legacyData as AppDataCompleteNew }),
+    );
 
     PFLog.normal(
       'OperationLogHydratorService: Recovery complete. Data restored from legacy database.',
@@ -414,7 +422,7 @@ export class OperationLogHydratorService {
       const currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
 
       // Get current vector clock and last seq
-      const vectorClock = await this.opLogStore.getCurrentVectorClock();
+      const vectorClock = await this.vectorClockService.getCurrentVectorClock();
       const lastSeq = await this.opLogStore.getLastSeq();
 
       // Save snapshot
@@ -545,7 +553,7 @@ export class OperationLogHydratorService {
       const clientId = await this.pfapiService.pf.metaModel.loadClientId();
 
       // 3. Create SYNC_IMPORT operation
-      const currentClock = await this.opLogStore.getCurrentVectorClock();
+      const currentClock = await this.vectorClockService.getCurrentVectorClock();
       const newClock = incrementVectorClock(currentClock, clientId);
 
       const op: Operation = {
@@ -577,7 +585,9 @@ export class OperationLogHydratorService {
       PFLog.normal('OperationLogHydratorService: Saved state cache after sync');
 
       // 7. Dispatch loadAllData to update NgRx
-      this.store.dispatch(loadAllData({ appDataComplete: syncedData as any }));
+      this.store.dispatch(
+        loadAllData({ appDataComplete: syncedData as AppDataCompleteNew }),
+      );
       PFLog.normal(
         'OperationLogHydratorService: Dispatched loadAllData with synced data',
       );
@@ -645,7 +655,7 @@ export class OperationLogHydratorService {
 
     if (result.wasRepaired && result.repairedState) {
       // Dispatch the repaired state to NgRx
-      this.store.dispatch(loadAllData({ appDataComplete: result.repairedState as any }));
+      this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
     }
   }
 }
