@@ -1174,6 +1174,7 @@
         "IMPORTING": "Importing data",
         "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
         "INCOMPLETE_OP_SYNC": "Sync incomplete: {{count}} operation file(s) failed to download",
+        "TOO_MANY_OPS_TO_DOWNLOAD": "Too many sync operations to download. Some changes may be missing.",
         "INITIAL_SYNC_ERROR": "Initial Sync failed",
         "INVALID_OPERATION_PAYLOAD": "Invalid operation detected. Changes may not be saved - please reload.",
         "PERSIST_FAILED": "Failed to save changes. State may be inconsistent - please reload.",
@@ -1183,6 +1184,7 @@
         "SUCCESS_DOWNLOAD": "Synced data from remote",
         "SUCCESS_IMPORT": "Data imported",
         "SUCCESS_VIA_BUTTON": "Data successfully synced",
+        "TOO_MANY_OPS_TO_DOWNLOAD": "Too many operations to download. Please contact support or try clearing your sync data.",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!"

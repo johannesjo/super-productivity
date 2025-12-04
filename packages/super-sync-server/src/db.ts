@@ -126,6 +126,7 @@ export const initDb = (dataDir: string, inMemory = false): void => {
     CREATE INDEX IF NOT EXISTS idx_ops_user_entity ON operations(user_id, entity_type, entity_id);
     CREATE INDEX IF NOT EXISTS idx_ops_client ON operations(user_id, client_id);
     CREATE UNIQUE INDEX IF NOT EXISTS idx_ops_user_seq_unique ON operations(user_id, server_seq);
+    CREATE INDEX IF NOT EXISTS idx_ops_received_at ON operations(user_id, received_at);
   `);
 
   // Per-user sequence counter and snapshot cache

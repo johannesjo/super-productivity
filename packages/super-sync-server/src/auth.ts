@@ -5,6 +5,8 @@ import { Logger } from './logger';
 import { randomBytes } from 'crypto';
 import { sendVerificationEmail } from './email';
 
+const MIN_JWT_SECRET_LENGTH = 32;
+
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -14,6 +16,11 @@ const getJwtSecret = (): string => {
     // Use stable secret for development to preserve sessions across restarts
     Logger.warn('JWT_SECRET not set - using development default (NOT FOR PRODUCTION)');
     return 'super-sync-dev-secret-do-not-use-in-production';
+  }
+  if (secret.length < MIN_JWT_SECRET_LENGTH) {
+    throw new Error(
+      `JWT_SECRET must be at least ${MIN_JWT_SECRET_LENGTH} characters for security`,
+    );
   }
   return secret;
 };
