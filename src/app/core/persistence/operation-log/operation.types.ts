@@ -25,6 +25,7 @@ export type EntityType =
   | 'PLANNER'
   | 'MENU_TREE'
   | 'METRIC'
+  | 'BOARD'
   | 'MIGRATION'
   | 'RECOVERY' // For disaster recovery imports
   | 'ALL'; // For full state imports (sync, backup)

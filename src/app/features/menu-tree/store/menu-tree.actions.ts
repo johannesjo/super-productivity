@@ -14,7 +14,7 @@ export const updateProjectTree = createAction(
       entityType: 'MENU_TREE',
       entityId: 'projectTree',
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -27,7 +27,7 @@ export const updateTagTree = createAction(
       entityType: 'MENU_TREE',
       entityId: 'tagTree',
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -40,7 +40,7 @@ export const deleteFolder = createAction(
       entityType: 'MENU_TREE',
       entityId: folderProps.folderId,
       opType: OpType.Delete,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -53,6 +53,6 @@ export const updateFolder = createAction(
       entityType: 'MENU_TREE',
       entityId: folderProps.folderId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

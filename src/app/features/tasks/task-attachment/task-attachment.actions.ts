@@ -14,7 +14,7 @@ export const addTaskAttachment = createAction(
       entityType: 'TASK',
       entityId: attachmentProps.taskId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -27,7 +27,7 @@ export const updateTaskAttachment = createAction(
       entityType: 'TASK',
       entityId: attachmentProps.taskId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -40,6 +40,6 @@ export const deleteTaskAttachment = createAction(
       entityType: 'TASK',
       entityId: attachmentProps.taskId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

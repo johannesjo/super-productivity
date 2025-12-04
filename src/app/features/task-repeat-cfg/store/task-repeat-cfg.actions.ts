@@ -18,7 +18,7 @@ export const addTaskRepeatCfgToTask = createAction(
       entityType: 'TASK_REPEAT_CFG',
       entityId: cfgProps.taskRepeatCfg.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -34,7 +34,7 @@ export const updateTaskRepeatCfg = createAction(
       entityType: 'TASK_REPEAT_CFG',
       entityId: cfgProps.taskRepeatCfg.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -48,7 +48,7 @@ export const updateTaskRepeatCfgs = createAction(
       entityIds: cfgProps.ids,
       opType: OpType.Update,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -67,7 +67,7 @@ export const deleteTaskRepeatCfg = createAction(
       entityType: 'TASK_REPEAT_CFG',
       entityId: cfgProps.id,
       opType: OpType.Delete,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -81,7 +81,7 @@ export const deleteTaskRepeatCfgs = createAction(
       entityIds: cfgProps.ids,
       opType: OpType.Delete,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -94,6 +94,6 @@ export const deleteTaskRepeatCfgInstance = createAction(
       entityType: 'TASK_REPEAT_CFG',
       entityId: cfgProps.repeatCfgId,
       opType: OpType.Update, // Deleting an instance updates the cfg's excluded dates
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

@@ -21,7 +21,7 @@ export const moveTaskInTodayList = createAction(
       entityType: taskProps.workContextType === 'TAG' ? 'TAG' : 'PROJECT',
       entityId: taskProps.workContextId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -39,7 +39,7 @@ export const moveTaskUpInTodayList = createAction(
       entityType: taskProps.workContextType === 'TAG' ? 'TAG' : 'PROJECT',
       entityId: taskProps.workContextId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -57,7 +57,7 @@ export const moveTaskDownInTodayList = createAction(
       entityType: taskProps.workContextType === 'TAG' ? 'TAG' : 'PROJECT',
       entityId: taskProps.workContextId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -75,7 +75,7 @@ export const moveTaskToTopInTodayList = createAction(
       entityType: taskProps.workContextType === 'TAG' ? 'TAG' : 'PROJECT',
       entityId: taskProps.workContextId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -93,6 +93,6 @@ export const moveTaskToBottomInTodayList = createAction(
       entityType: taskProps.workContextType === 'TAG' ? 'TAG' : 'PROJECT',
       entityId: taskProps.workContextId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { initialTimeTrackingState, timeTrackingReducer } from './time-tracking.reducer';
-import { TimeTrackingActions } from './time-tracking.actions';
+import { TimeTrackingActions, updateWorkContextData } from './time-tracking.actions';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { TaskCopy } from '../../tasks/task.model';
@@ -61,7 +61,7 @@ describe('TimeTracking Reducer', () => {
     const ctx = { id: '1', type: 'PROJECT' as WorkContextType };
     const date = '2023-01-01';
     const updates = { s: 10, e: 20 };
-    const action = TimeTrackingActions.updateWorkContextData({ ctx, date, updates });
+    const action = updateWorkContextData({ ctx, date, updates });
     const result = timeTrackingReducer(customInitialState, action);
 
     expect(result.project['1'][date].s).toBe(10);
@@ -78,7 +78,7 @@ describe('TimeTracking Reducer', () => {
     const ctx = { id: '2', type: 'TAG' as WorkContextType };
     const date = '2023-01-02';
     const updates = { s: 30, e: 40 };
-    const action = TimeTrackingActions.updateWorkContextData({ ctx, date, updates });
+    const action = updateWorkContextData({ ctx, date, updates });
     const result = timeTrackingReducer(customInitialState, action);
 
     expect(result.tag['2'][date].s).toBe(30);
