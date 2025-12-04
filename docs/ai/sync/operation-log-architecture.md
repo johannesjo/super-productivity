@@ -6,6 +6,73 @@
 
 ---
 
+## Introduction: The Core Architecture
+
+### The Core Concept: Event Sourcing
+
+The Operation Log fundamentally changes how the app treats data. Instead of treating the database as a "bucket" where we overwrite data (e.g., "The task title is now X"), we treat it as a **timeline of events** (e.g., "At 10:00 AM, User changed task title to X").
+
+- **Source of Truth:** The _Log_ is the truth. The "current state" of the app (what you see on screen) is just a calculation derived by replaying that log from the beginning of time.
+- **Immutability:** Once an operation is written, it is never changed. We only append new operations. If you "delete" a task, we don't remove the row; we append a `DELETE` operation.
+
+### 1. How Data is Saved (The Write Path)
+
+When a user performs an action (like ticking a checkbox):
+
+1.  **Capture:** The system intercepts the Redux action (e.g., `TaskUpdate`).
+2.  **Wrap:** It wraps this action into a standardized `Operation` object. This object includes:
+    - **Payload:** What changed (e.g., `{ isDone: true }`).
+    - **ID & Timestamp:** A unique ID (UUID v7) and the time it happened.
+    - **Vector Clock:** A version counter used to track causality (e.g., "This change happened _after_ version 5").
+3.  **Persist:** This `Operation` is immediately appended to the `SUP_OPS` table in IndexedDB. This is very fast because we're just adding a small JSON object, not rewriting a huge file.
+4.  **Broadcast:** The operation is broadcast to other open tabs so they update instantly.
+
+### 2. How Data is Loaded (The Read Path)
+
+Replaying _every_ operation since the beginning would be too slow. We use **Snapshots** to speed this up:
+
+1.  **Load Snapshot:** On startup, the app loads the most recent "Save Point" (a full copy of the app state saved, say, yesterday).
+2.  **Replay Tail:** The app then queries the Log: "Give me all operations that happened _after_ this snapshot."
+3.  **Fast Forward:** It applies those few "tail" operations to the snapshot. Now the app is fully up to date.
+4.  **Hydration Optimization:** If a sync just happened, we might simply load the new state directly, skipping the replay entirely.
+
+### 3. How Sync Works
+
+The Operation Log enables two types of synchronization:
+
+**A. True "Server Sync" (The Modern Way)**
+This is efficient and precise.
+
+- **Exchange:** Devices swap individual `Operations`, not full files. This saves massive amounts of bandwidth.
+- **Conflict Detection:** Because every operation has a **Vector Clock**, we can mathematically prove if two changes happened concurrently.
+  - _Example:_ Device A sends "Update Title (Version 1 -> 2)". Device B sees it has "Version 1", so it applies the update safely.
+  - _Conflict:_ If Device B _also_ made a change and is at "Version 2", it knows "Wait, we both changed Version 1 at the same time!" -> **Conflict Detected**.
+- **Resolution:** The user is shown a dialog to pick the winner. The loser isn't deleted; it's marked as "Rejected" in the log but kept for history.
+
+**B. "Legacy Sync" (Dropbox, WebDAV, Local File)**
+This is a compatibility bridge.
+
+- The Operation Log itself doesn't sync files. Instead, when it saves an operation, it secretly "ticks" a version number in the legacy database.
+- The legacy sync system (PFAPI) sees this tick, realizes "Local data has changed," and triggers its standard "Upload Everything" process.
+- This ensures the new architecture works seamlessly with your existing sync providers without breaking them.
+
+### 4. Safety & Self-Healing
+
+The system assumes data corruption is inevitable (power loss, bad sync, cosmic rays) and builds defenses against it:
+
+- **Validation Checkpoints:** Data is checked _before_ writing to disk, _after_ loading from disk, and _after_ receiving sync data.
+- **Auto-Repair:** If the state is invalid (e.g., a subtask points to a missing parent), the app doesn't crash. It runs an auto-repair script (e.g., detaches the subtask) and generates a special **`REPAIR` Operation**.
+- **Audit Trail:** This `REPAIR` op is saved to the log. This means you can look back and see exactly _when_ and _why_ the system modified your data automatically.
+
+### 5. Maintenance (Compaction)
+
+If we kept every operation forever, the database would grow huge.
+
+- **Compaction:** Every ~500 operations, the system takes a new Snapshot of the current state.
+- **Cleanup:** It then looks for old operations that are already "baked into" that snapshot and have been successfully synced to the server. It safely deletes them to free up space, keeping the log lean.
+
+---
+
 ## Overview
 
 The Operation Log serves **four distinct purposes**:
