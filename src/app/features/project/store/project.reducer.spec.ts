@@ -354,6 +354,31 @@ describe('projectReducer', () => {
       expect((r.entities as any).P1.backlogTaskIds).toEqual(['B2']);
       expect((r.entities as any).P1.taskIds).toEqual(['B1']);
     });
+
+    it('should append to end when moving to DONE section with null anchor', () => {
+      const s = fakeEntityStateFromArray([
+        {
+          id: 'P1',
+          taskIds: ['T1', 'T2'],
+          backlogTaskIds: ['B1', 'B2'],
+          isEnableBacklog: true,
+        },
+      ] as Partial<Project>[]);
+
+      const r = projectReducer(
+        s as any,
+        moveProjectTaskToRegularList({
+          taskId: 'B1',
+          afterTaskId: null,
+          workContextId: 'P1',
+          src: 'BACKLOG',
+          target: 'DONE',
+        }) as any,
+      );
+      expect((r.entities as any).P1.backlogTaskIds).toEqual(['B2']);
+      // When target is DONE and afterTaskId is null, append to end
+      expect((r.entities as any).P1.taskIds).toEqual(['T1', 'T2', 'B1']);
+    });
   });
 
   describe('moveTaskInTodayList (anchor-based)', () => {
