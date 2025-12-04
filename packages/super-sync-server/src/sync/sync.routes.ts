@@ -18,7 +18,16 @@ const OperationSchema = z.object({
   id: z.string().min(1),
   clientId: z.string().min(1),
   actionType: z.string().min(1),
-  opType: z.enum(['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT', 'BACKUP_IMPORT']),
+  opType: z.enum([
+    'CRT',
+    'UPD',
+    'DEL',
+    'MOV',
+    'BATCH',
+    'SYNC_IMPORT',
+    'BACKUP_IMPORT',
+    'REPAIR',
+  ]),
   entityType: z.string().min(1),
   entityId: z.string().optional(),
   entityIds: z.array(z.string()).optional(), // For batch operations

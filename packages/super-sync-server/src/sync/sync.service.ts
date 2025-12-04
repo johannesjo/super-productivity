@@ -633,9 +633,16 @@ export class SyncService {
     }
     if (
       !op.opType ||
-      !['CRT', 'UPD', 'DEL', 'MOV', 'BATCH', 'SYNC_IMPORT', 'BACKUP_IMPORT'].includes(
-        op.opType,
-      )
+      ![
+        'CRT',
+        'UPD',
+        'DEL',
+        'MOV',
+        'BATCH',
+        'SYNC_IMPORT',
+        'BACKUP_IMPORT',
+        'REPAIR',
+      ].includes(op.opType)
     ) {
       return { valid: false, error: 'Invalid opType' };
     }
