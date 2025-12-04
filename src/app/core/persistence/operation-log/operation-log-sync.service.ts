@@ -262,8 +262,16 @@ export class OperationLogSyncService {
     // Validate and repair if needed
     const result = this.validateStateService.validateAndRepair(currentState);
 
-    if (!result.wasRepaired) {
+    if (result.isValid && !result.wasRepaired) {
       PFLog.normal('[OperationLogSyncService] State valid after sync');
+      return;
+    }
+
+    if (!result.isValid) {
+      PFLog.err(
+        '[OperationLogSyncService] State invalid after sync (repair failed or impossible):',
+        result.error || result.crossModelError,
+      );
       return;
     }
 

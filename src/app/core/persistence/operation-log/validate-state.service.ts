@@ -105,6 +105,7 @@ export interface ValidateAndRepairResult {
   repairedState?: AppDataCompleteNew;
   repairSummary?: RepairSummary;
   error?: string;
+  crossModelError?: string;
 }
 
 /**
@@ -141,10 +142,23 @@ export class ValidateStateService {
     }
 
     // 2. Run cross-model relationship validation
-    const isRelatedValid = isRelatedModelDataValid(state);
+    let isRelatedValid = false;
+    try {
+      isRelatedValid = isRelatedModelDataValid(state);
+    } catch (e) {
+      isRelatedValid = false;
+      PFLog.warn('[ValidateStateService] Cross-model validation threw error', e);
+      // Ensure we capture the error
+      if (!getLastValidityError()) {
+        // If isRelatedModelDataValid threw without setting lastValidityError (unlikely but possible)
+        // we should manually set it or just use the exception message
+        result.crossModelError = e instanceof Error ? e.message : String(e);
+      }
+    }
+
     if (!isRelatedValid) {
       result.isValid = false;
-      result.crossModelError = getLastValidityError();
+      result.crossModelError = result.crossModelError || getLastValidityError();
       PFLog.warn('[ValidateStateService] Cross-model validation failed', {
         error: result.crossModelError,
       });
