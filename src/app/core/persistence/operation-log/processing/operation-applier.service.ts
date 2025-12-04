@@ -100,6 +100,29 @@ export class OperationApplierService {
   }
 
   /**
+   * Clears old failed operations that are beyond useful debugging.
+   * Called periodically (e.g., on app startup or after sync) to prevent memory growth.
+   *
+   * @param maxAgeMs - Maximum age of failed operations to keep (default: 7 days)
+   * @returns Number of operations pruned
+   */
+  pruneOldFailedOperations(maxAgeMs: number = 7 * 24 * 60 * 60 * 1000): number {
+    const cutoff = Date.now() - maxAgeMs;
+    const before = this.permanentlyFailedOps.length;
+
+    this.permanentlyFailedOps = this.permanentlyFailedOps.filter(
+      (pending) => pending.op.timestamp > cutoff,
+    );
+
+    const pruned = before - this.permanentlyFailedOps.length;
+    if (pruned > 0) {
+      PFLog.normal(`OperationApplierService: Pruned ${pruned} old failed operations`);
+    }
+
+    return pruned;
+  }
+
+  /**
    * Attempts to apply a single operation, handling dependency failures.
    */
   private async _tryApplyOperation(pending: PendingOperation): Promise<boolean> {
