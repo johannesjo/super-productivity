@@ -136,7 +136,11 @@ bootstrapApplication(AppComponent, {
       }),
       EffectsModule.forRoot([]),
       !environment.production && !environment.stage
-        ? StoreDevtoolsModule.instrument()
+        ? StoreDevtoolsModule.instrument({
+            maxAge: 15,
+            logOnly: environment.production,
+            actionsBlocklist: ['[TimeTracking] Add time spent'],
+          })
         : [],
       ReactiveFormsModule,
       ServiceWorkerModule.register('ngsw-worker.js', {
