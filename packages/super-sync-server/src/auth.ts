@@ -11,8 +11,9 @@ const getJwtSecret = (): string => {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('JWT_SECRET environment variable is required in production');
     }
-    Logger.warn('JWT_SECRET not set - using random secret for development');
-    return randomBytes(64).toString('hex');
+    // Use stable secret for development to preserve sessions across restarts
+    Logger.warn('JWT_SECRET not set - using development default (NOT FOR PRODUCTION)');
+    return 'super-sync-dev-secret-do-not-use-in-production';
   }
   return secret;
 };

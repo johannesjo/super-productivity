@@ -44,6 +44,8 @@ const UploadSnapshotSchema = z.object({
   state: z.unknown(),
   clientId: z.string().min(1),
   reason: z.enum(['initial', 'recovery', 'migration']),
+  vectorClock: z.record(z.string(), z.number()),
+  schemaVersion: z.number().optional(),
 });
 
 const AckSchema = z.object({
@@ -211,7 +213,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           });
         }
 
-        const { state, clientId, reason } = parseResult.data;
+        const { state, clientId, reason, vectorClock, schemaVersion } = parseResult.data;
         const syncService = getSyncService();
 
         // Create a SYNC_IMPORT operation
@@ -222,9 +224,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           opType: 'SYNC_IMPORT' as const,
           entityType: 'ALL',
           payload: state,
-          vectorClock: {},
+          vectorClock,
           timestamp: Date.now(),
-          schemaVersion: 1,
+          schemaVersion: schemaVersion ?? 1,
         };
 
         const results = syncService.uploadOps(userId, clientId, [op]);

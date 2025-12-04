@@ -347,22 +347,32 @@ export class SyncService {
       };
     }
 
-    // Get only operations since the last snapshot
-    const newOps = this.stmts.getOpsSince.all(
-      userId,
-      startSeq,
-      // Fetch all remaining ops (limit high enough)
-      1000000,
-    ) as DbOperation[];
+    // Process operations in batches to avoid memory issues
+    const BATCH_SIZE = 10000;
+    let currentSeq = startSeq;
 
-    // Replay operations to update state
-    const finalState = this.replayOpsToState(newOps, state);
+    while (currentSeq < latestSeq) {
+      const batchOps = this.stmts.getOpsSince.all(
+        userId,
+        currentSeq,
+        BATCH_SIZE,
+      ) as DbOperation[];
+
+      if (batchOps.length === 0) break;
+
+      // Replay this batch
+      state = this.replayOpsToState(batchOps, state);
+
+      // Update currentSeq to the last processed operation
+      currentSeq = batchOps[batchOps.length - 1].server_seq;
+    }
+
     const generatedAt = Date.now();
 
     // Cache the new snapshot
-    this.cacheSnapshot(userId, finalState, latestSeq);
+    this.cacheSnapshot(userId, state, latestSeq);
 
-    return { state: finalState, serverSeq: latestSeq, generatedAt };
+    return { state, serverSeq: latestSeq, generatedAt };
   }
 
   private replayOpsToState(
