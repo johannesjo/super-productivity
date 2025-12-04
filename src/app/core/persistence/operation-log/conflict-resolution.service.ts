@@ -76,34 +76,57 @@ export class ConflictResolutionService {
 
       if (resolution === 'remote') {
         try {
-          // First, store all remote ops with pending status (ensures durability + crash recovery)
           const storedSeqs: number[] = [];
+          const appliedOpIds: string[] = [];
+          let hadFailure = false;
+
+          // Store and apply operations ONE AT A TIME to avoid partial state corruption
           for (const op of conflict.remoteOps) {
-            if (!(await this.opLogStore.hasOp(op.id))) {
-              const seq = await this.opLogStore.append(op, 'remote', {
-                pendingApply: true,
-              });
-              storedSeqs.push(seq);
+            // Skip duplicates
+            if (await this.opLogStore.hasOp(op.id)) {
+              PFLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
+              continue;
+            }
+
+            // Store with pending status for crash recovery
+            const seq = await this.opLogStore.append(op, 'remote', {
+              pendingApply: true,
+            });
+            storedSeqs.push(seq);
+
+            try {
+              // Apply single operation
+              await this.operationApplier.applyOperations([op]);
+
+              // Check if this operation failed
+              const failedCount = this.operationApplier.getFailedCount();
+              if (failedCount > 0) {
+                PFLog.err(
+                  `ConflictResolutionService: Operation ${op.id} failed to apply`,
+                );
+                this.operationApplier.clearFailedOperations();
+                hadFailure = true;
+                break; // Stop applying more ops
+              }
+
+              appliedOpIds.push(op.id);
+            } catch (e) {
+              PFLog.err(`ConflictResolutionService: Exception applying op ${op.id}`, e);
+              hadFailure = true;
+              break;
             }
           }
 
-          // Apply all remote ops together - applyOperations now handles dependency sorting
-          await this.operationApplier.applyOperations(conflict.remoteOps);
-
-          // Mark ops as successfully applied
-          if (storedSeqs.length > 0) {
-            await this.opLogStore.markApplied(storedSeqs);
+          // Only mark successfully applied ops (not failed ones)
+          const successSeqs = storedSeqs.slice(0, appliedOpIds.length);
+          if (successSeqs.length > 0) {
+            await this.opLogStore.markApplied(successSeqs);
           }
 
-          // Check if any operations failed permanently
-          const failedCount = this.operationApplier.getFailedCount();
-          if (failedCount > 0) {
-            const failedOps = this.operationApplier.getFailedOperations();
+          if (hadFailure) {
             PFLog.err(
-              `ConflictResolutionService: ${failedCount} operations failed for ${conflict.entityId}`,
-              failedOps,
+              `ConflictResolutionService: Partial failure for ${conflict.entityId}. Applied ${appliedOpIds.length}/${conflict.remoteOps.length} ops`,
             );
-            // Don't reject local ops if some remote ops failed - state is inconsistent
             this.snackService.open({
               type: 'ERROR',
               msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
@@ -112,8 +135,6 @@ export class ConflictResolutionService {
                 window.location.reload();
               },
             });
-            // Clear failed ops for next resolution attempt
-            this.operationApplier.clearFailedOperations();
             continue; // Skip marking local as rejected for this conflict
           }
 
@@ -121,7 +142,7 @@ export class ConflictResolutionService {
           const localOpIds = conflict.localOps.map((op) => op.id);
           await this.opLogStore.markRejected(localOpIds);
           PFLog.normal(
-            `ConflictResolutionService: Applied remote ops for ${conflict.entityId}`,
+            `ConflictResolutionService: Applied ${appliedOpIds.length} remote ops for ${conflict.entityId}`,
           );
         } catch (e) {
           PFLog.err(

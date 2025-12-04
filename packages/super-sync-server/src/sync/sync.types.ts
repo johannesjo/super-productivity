@@ -74,6 +74,8 @@ export interface UploadSnapshotRequest {
   state: unknown;
   clientId: string;
   reason: 'initial' | 'recovery' | 'migration';
+  vectorClock: VectorClock;
+  schemaVersion?: number;
 }
 
 // Status types

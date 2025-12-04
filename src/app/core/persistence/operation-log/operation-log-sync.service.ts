@@ -122,6 +122,8 @@ export class OperationLogSyncService {
     if (nonConflicting.length > 0) {
       // Track stored seqs for marking as applied after success
       const storedSeqs: number[] = [];
+      // Track ops that are NOT duplicates (need to be applied)
+      const opsToApply: Operation[] = [];
 
       // Store operations with pending status before applying
       // If we crash after storing but before applying, these will be retried on startup
@@ -129,11 +131,16 @@ export class OperationLogSyncService {
         if (!(await this.opLogStore.hasOp(op.id))) {
           const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
           storedSeqs.push(seq);
+          opsToApply.push(op);
+        } else {
+          PFLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
         }
       }
 
-      // Apply all ops to NgRx store
-      await this.operationApplier.applyOperations(nonConflicting);
+      // Apply only NON-duplicate ops to NgRx store
+      if (opsToApply.length > 0) {
+        await this.operationApplier.applyOperations(opsToApply);
+      }
 
       // Mark ops as successfully applied (crash recovery will skip these)
       if (storedSeqs.length > 0) {
@@ -292,15 +299,21 @@ export class OperationLogSyncService {
     }
 
     const storedSeqs: number[] = [];
+    const opsToApply: Operation[] = [];
 
     for (const op of remoteOps) {
       if (!(await this.opLogStore.hasOp(op.id))) {
         const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
         storedSeqs.push(seq);
+        opsToApply.push(op);
+      } else {
+        PFLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
       }
     }
 
-    await this.operationApplier.applyOperations(remoteOps);
+    if (opsToApply.length > 0) {
+      await this.operationApplier.applyOperations(opsToApply);
+    }
 
     if (storedSeqs.length > 0) {
       await this.opLogStore.markApplied(storedSeqs);
