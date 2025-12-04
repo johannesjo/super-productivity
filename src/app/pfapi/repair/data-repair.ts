@@ -30,9 +30,13 @@ export const dataRepair = (
   }
 
   // console.time('dataRepair');
-  // NOTE copy is important to prevent readonly errors
-  let dataOut: AppDataCompleteNew = { ...data };
-  // let dataOut: AppDataComplete = dirtyDeepCopy(data);
+  // NOTE deep copy is important to prevent readonly errors from frozen NgRx state
+  // We detect if the state is frozen and only deep clone in that case for performance
+  const isFrozen =
+    Object.isFrozen(data) ||
+    (data.task && Object.isFrozen(data.task)) ||
+    (data.project && Object.isFrozen(data.project));
+  let dataOut: AppDataCompleteNew = isFrozen ? structuredClone(data) : { ...data };
 
   // Ensure archive structures exist
   if (!dataOut.archiveYoung) {
@@ -265,7 +269,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
   data: AppDataCompleteNew,
 ): AppDataCompleteNew => {
   const { task, project, tag, archiveYoung } = data;
-  const taskIds: string[] = task.ids;
+  const taskIds: string[] = task.ids as string[];
   const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
   const taskIdsToRestoreFromArchive: string[] = [];
 
@@ -293,8 +297,7 @@ const _removeMissingTasksFromListsOrRestoreFromArchive = (
 
   tag.ids.forEach((tId: string | number) => {
     const tagItem = tag.entities[tId] as TagCopy;
-    const filteredTaskIds = tagItem.taskIds.filter((id) => taskIds.includes(id));
-    tag.entities[tId] = { ...tagItem, taskIds: filteredTaskIds };
+    tagItem.taskIds = tagItem.taskIds.filter((id) => taskIds.includes(id));
   });
 
   taskIdsToRestoreFromArchive.forEach((id) => {
