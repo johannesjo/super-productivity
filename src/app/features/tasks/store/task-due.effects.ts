@@ -18,9 +18,9 @@ import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { environment } from '../../../../environments/environment';
 import { TaskLog } from '../../../core/log';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
+import { environment } from '../../../../environments/environment';
 
 @Injectable()
 export class TaskDueEffects {
@@ -131,6 +131,15 @@ export class TaskDueEffects {
                     (task) => !task.parentId || !todayTaskIds.includes(task.parentId),
                   )
                   .map((task) => task.id);
+
+                // Debug log to investigate repeated operations
+                TaskLog.log('[TaskDueEffects] ensureTasksDueTodayInTodayTag check:', {
+                  tasksDueTodayCount: tasksDueToday.length,
+                  tasksDueTodayIds: tasksDueToday.map((t) => t.id),
+                  todayTaskIdsCount: todayTaskIds.length,
+                  missingTaskIds,
+                  willDispatch: missingTaskIds.length > 0,
+                });
 
                 if (!environment.production && missingTaskIds.length > 0) {
                   TaskLog.err(
