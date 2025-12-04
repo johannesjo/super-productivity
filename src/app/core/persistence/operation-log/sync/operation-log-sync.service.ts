@@ -13,7 +13,7 @@ import {
   mergeVectorClocks,
   VectorClockComparison,
 } from '../../../../pfapi/api/util/vector-clock';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { OperationApplierService } from '../processing/operation-applier.service';
@@ -87,7 +87,7 @@ export class OperationLogSyncService {
     const result = await this.downloadService.downloadRemoteOps(syncProvider);
 
     if (result.newOps.length === 0) {
-      PFLog.normal(
+      OpLog.normal(
         'OperationLogSyncService: No new remote operations to process after download.',
       );
       return;
@@ -127,12 +127,12 @@ export class OperationLogSyncService {
         if (migrated) {
           migratedOps.push(migrated);
         } else {
-          PFLog.verbose(
+          OpLog.verbose(
             `OperationLogSyncService: Dropped op ${op.id} (migrated to null)`,
           );
         }
       } catch (e) {
-        PFLog.err(`OperationLogSyncService: Migration failed for op ${op.id}`, e);
+        OpLog.err(`OperationLogSyncService: Migration failed for op ${op.id}`, e);
         // We skip ops that fail migration, but if they are from a compatible version,
         // this indicates a bug or data corruption.
       }
@@ -150,7 +150,7 @@ export class OperationLogSyncService {
 
     if (migratedOps.length === 0) {
       if (remoteOps.length > 0) {
-        PFLog.normal(
+        OpLog.normal(
           'OperationLogSyncService: All remote ops were dropped during migration.',
         );
       }
@@ -162,7 +162,7 @@ export class OperationLogSyncService {
     const localPendingOps = await this.opLogStore.getUnsynced();
 
     if (localPendingOps.length === 0) {
-      PFLog.normal(
+      OpLog.normal(
         'OperationLogSyncService: Fresh client detected (0 pending ops). Accepting all remote operations.',
         { remoteOpsCount: migratedOps.length },
       );
@@ -191,7 +191,7 @@ export class OperationLogSyncService {
           storedSeqs.push(seq);
           opsToApply.push(op);
         } else {
-          PFLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
+          OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
         }
       }
 
@@ -203,7 +203,7 @@ export class OperationLogSyncService {
       // Mark ops as successfully applied (crash recovery will skip these)
       if (storedSeqs.length > 0) {
         await this.opLogStore.markApplied(storedSeqs);
-        PFLog.normal(
+        OpLog.normal(
           `OperationLogSyncService: Applied and marked ${storedSeqs.length} remote ops`,
         );
       }
@@ -211,7 +211,7 @@ export class OperationLogSyncService {
 
     // Handle conflicts
     if (conflicts.length > 0) {
-      PFLog.warn(
+      OpLog.warn(
         `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
         conflicts,
       );
@@ -248,7 +248,7 @@ export class OperationLogSyncService {
     const potentialClockCorruption = hasLocalPendingOps && hasNoSnapshotClock;
 
     if (potentialClockCorruption) {
-      PFLog.warn(
+      OpLog.warn(
         'OperationLogSyncService: Potential clock corruption detected - have pending ops but no snapshot clock. Will be conservative in conflict detection.',
         { pendingEntityCount: localPendingOpsByEntity.size },
       );
@@ -289,7 +289,7 @@ export class OperationLogSyncService {
           localFrontierIsEmpty &&
           vcComparison === VectorClockComparison.LESS_THAN
         ) {
-          PFLog.warn(
+          OpLog.warn(
             `OperationLogSyncService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
           );
           vcComparison = VectorClockComparison.CONCURRENT;
@@ -297,7 +297,7 @@ export class OperationLogSyncService {
 
         // Skip stale operations (local already has newer state)
         if (vcComparison === VectorClockComparison.GREATER_THAN) {
-          PFLog.verbose(
+          OpLog.verbose(
             `OperationLogSyncService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
           );
           isStaleOrDuplicate = true;
@@ -306,7 +306,7 @@ export class OperationLogSyncService {
 
         // Skip duplicate operations (already applied)
         if (vcComparison === VectorClockComparison.EQUAL) {
-          PFLog.verbose(
+          OpLog.verbose(
             `OperationLogSyncService: Skipping duplicate remote op: ${remoteOp.id}`,
           );
           isStaleOrDuplicate = true;
@@ -340,7 +340,7 @@ export class OperationLogSyncService {
    * If validation fails, attempts repair and creates a REPAIR operation.
    */
   private async _validateAfterSync(): Promise<void> {
-    PFLog.normal('[OperationLogSyncService] Running post-sync validation...');
+    OpLog.normal('[OperationLogSyncService] Running post-sync validation...');
 
     // Get current state from NgRx
     const currentState =
@@ -350,12 +350,12 @@ export class OperationLogSyncService {
     const result = this.validateStateService.validateAndRepair(currentState);
 
     if (result.isValid && !result.wasRepaired) {
-      PFLog.normal('[OperationLogSyncService] State valid after sync');
+      OpLog.normal('[OperationLogSyncService] State valid after sync');
       return;
     }
 
     if (!result.isValid) {
-      PFLog.err(
+      OpLog.err(
         '[OperationLogSyncService] State invalid after sync (repair failed or impossible):',
         result.error || result.crossModelError,
       );
@@ -363,7 +363,7 @@ export class OperationLogSyncService {
     }
 
     if (!result.repairedState || !result.repairSummary) {
-      PFLog.err('[OperationLogSyncService] Repair failed after sync:', result.error);
+      OpLog.err('[OperationLogSyncService] Repair failed after sync:', result.error);
       return;
     }
 
@@ -381,7 +381,7 @@ export class OperationLogSyncService {
       loadAllData({ appDataComplete: result.repairedState as AppDataCompleteNew }),
     );
 
-    PFLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
+    OpLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
   }
 
   /**
@@ -402,7 +402,7 @@ export class OperationLogSyncService {
         storedSeqs.push(seq);
         opsToApply.push(op);
       } else {
-        PFLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
+        OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
       }
     }
 
@@ -412,7 +412,7 @@ export class OperationLogSyncService {
 
     if (storedSeqs.length > 0) {
       await this.opLogStore.markApplied(storedSeqs);
-      PFLog.normal(
+      OpLog.normal(
         `OperationLogSyncService: Fresh client applied ${storedSeqs.length} remote ops`,
       );
     }

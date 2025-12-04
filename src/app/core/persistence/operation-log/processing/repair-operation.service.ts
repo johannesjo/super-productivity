@@ -6,7 +6,7 @@ import { incrementVectorClock } from '../../../../pfapi/api/util/vector-clock';
 import { LockService } from '../sync/lock.service';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 
@@ -79,7 +79,7 @@ export class RepairOperationService {
         schemaVersion: CURRENT_SCHEMA_VERSION,
       });
 
-      PFLog.log('[RepairOperationService] Created REPAIR operation', {
+      OpLog.log('[RepairOperationService] Created REPAIR operation', {
         seq,
         repairSummary,
       });

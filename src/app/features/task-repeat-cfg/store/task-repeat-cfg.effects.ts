@@ -47,7 +47,6 @@ import { TaskReminderOptionId } from '../../tasks/task.model';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
-  private _actions$ = inject(LOCAL_ACTIONS);
   private _localActions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
@@ -55,7 +54,7 @@ export class TaskRepeatCfgEffects {
   private _taskArchiveService = inject(TaskArchiveService);
 
   addRepeatCfgToTaskUpdateTask$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(addTaskRepeatCfgToTask),
       filter(({ startTime, remindAt }) => !!startTime && !!remindAt),
       concatMap(({ taskId, startTime, remindAt, taskRepeatCfg }) =>
@@ -97,7 +96,7 @@ export class TaskRepeatCfgEffects {
   );
 
   removeConfigIdFromTaskStateTasks$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(deleteTaskRepeatCfg),
       concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
       filter((tasks) => tasks && !!tasks.length),
@@ -118,7 +117,7 @@ export class TaskRepeatCfgEffects {
 
   removeConfigIdFromTaskArchiveTasks$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(deleteTaskRepeatCfg),
         tap(({ id }) => {
           this._taskArchiveService.removeRepeatCfgFromArchiveTasks(id);
@@ -129,7 +128,7 @@ export class TaskRepeatCfgEffects {
 
   updateTaskAfterMakingItRepeatable$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(addTaskRepeatCfgToTask),
         switchMap(({ taskRepeatCfg, taskId }) => {
           return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
@@ -176,7 +175,7 @@ export class TaskRepeatCfgEffects {
    */
   autoSyncSubtaskTemplatesFromNewest$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(
           addSubTask,
           moveSubTask,
@@ -270,7 +269,7 @@ export class TaskRepeatCfgEffects {
    * from the newest instance to set initial templates.
    */
   enableAutoUpdateOrInheritSnapshot$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(updateTaskRepeatCfg),
       // only react to enabling inherit subtasks; avoids loops
       // Note: this snapshots current subtasks when inherit is enabled, regardless of auto-update flag
@@ -390,7 +389,7 @@ export class TaskRepeatCfgEffects {
 
   checkToUpdateAllTaskInstances$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(updateTaskRepeatCfg),
         filter(({ isAskToUpdateAllTaskInstances }) => !!isAskToUpdateAllTaskInstances),
         concatMap(({ taskRepeatCfg }) => {

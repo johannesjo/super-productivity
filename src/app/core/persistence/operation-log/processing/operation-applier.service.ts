@@ -3,7 +3,7 @@ import { Store } from '@ngrx/store';
 import { Operation, OpType } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import {
   MAX_DEPENDENCY_RETRY_ATTEMPTS,
   MAX_FAILED_OPS_SIZE,
@@ -51,7 +51,7 @@ export class OperationApplierService {
   private permanentlyFailedOps: PendingOperation[] = [];
 
   async applyOperations(ops: Operation[]): Promise<void> {
-    PFLog.normal(
+    OpLog.normal(
       'OperationApplierService: Applying operations:',
       ops.map((op) => op.id),
     );
@@ -68,7 +68,7 @@ export class OperationApplierService {
     // (new ops might have resolved their dependencies)
     await this._retryPendingOperations();
 
-    PFLog.normal('OperationApplierService: Finished applying operations.');
+    OpLog.normal('OperationApplierService: Finished applying operations.');
   }
 
   /**
@@ -116,7 +116,7 @@ export class OperationApplierService {
 
     const pruned = before - this.permanentlyFailedOps.length;
     if (pruned > 0) {
-      PFLog.normal(`OperationApplierService: Pruned ${pruned} old failed operations`);
+      OpLog.normal(`OperationApplierService: Pruned ${pruned} old failed operations`);
     }
 
     return pruned;
@@ -144,12 +144,12 @@ export class OperationApplierService {
       if (shouldMarkFailed) {
         // Log reason for failure
         if (this.pendingQueue.length >= MAX_PENDING_QUEUE_SIZE) {
-          PFLog.warn(
+          OpLog.warn(
             'OperationApplierService: Pending queue at capacity, marking operation as failed immediately.',
             { opId: op.id, queueSize: this.pendingQueue.length },
           );
         } else {
-          PFLog.err(
+          OpLog.err(
             'OperationApplierService: Operation permanently failed after max retries.',
             {
               opId: op.id,
@@ -162,7 +162,7 @@ export class OperationApplierService {
 
         // Ensure failed ops list doesn't exceed capacity
         if (this.permanentlyFailedOps.length >= MAX_FAILED_OPS_SIZE) {
-          PFLog.warn(
+          OpLog.warn(
             'OperationApplierService: Failed ops queue at capacity, dropping oldest.',
           );
           this.permanentlyFailedOps.shift();
@@ -186,7 +186,7 @@ export class OperationApplierService {
       }
 
       // Queue for retry
-      PFLog.warn(
+      OpLog.warn(
         'OperationApplierService: Queuing operation for retry due to missing dependencies.',
         { opId: op.id, missingDeps: missingDepIds, retryCount: retryCount + 1 },
       );
@@ -201,7 +201,7 @@ export class OperationApplierService {
     // Dependencies satisfied, apply the operation
     const action = convertOpToAction(op);
 
-    PFLog.verbose(
+    OpLog.verbose(
       'OperationApplierService: Dispatching action for operation:',
       op.id,
       action,
@@ -219,7 +219,7 @@ export class OperationApplierService {
       return;
     }
 
-    PFLog.normal(
+    OpLog.normal(
       'OperationApplierService: Retrying pending operations:',
       this.pendingQueue.length,
     );
@@ -320,7 +320,7 @@ export class OperationApplierService {
     if (sorted.length < ops.length) {
       const sortedIds = new Set(sorted.map((o) => o.id));
       const remaining = ops.filter((o) => !sortedIds.has(o.id));
-      PFLog.warn(
+      OpLog.warn(
         'OperationApplierService: Detected cycle in operation dependencies. Adding remaining ops:',
         remaining.map((o) => o.id),
       );
@@ -328,7 +328,7 @@ export class OperationApplierService {
     }
 
     if (sorted.length !== ops.length) {
-      PFLog.err('OperationApplierService: Topological sort lost operations!', {
+      OpLog.err('OperationApplierService: Topological sort lost operations!', {
         input: ops.length,
         output: sorted.length,
       });

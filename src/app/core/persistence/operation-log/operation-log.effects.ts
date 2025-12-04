@@ -11,7 +11,7 @@ import { Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { MultiTabCoordinatorService } from './sync/multi-tab-coordinator.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
-import { PFLog } from '../../log';
+import { OpLog } from '../../log';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './processing/validate-operation-payload';
@@ -92,7 +92,7 @@ export class OperationLogEffects {
         // CHECKPOINT A: Validate payload before persisting
         const validationResult = validateOperationPayload(op);
         if (!validationResult.success) {
-          PFLog.err('[OperationLogEffects] Invalid operation payload', {
+          OpLog.err('[OperationLogEffects] Invalid operation payload', {
             error: validationResult.error,
             actionType: action.type,
             opType: op.opType,
@@ -112,7 +112,7 @@ export class OperationLogEffects {
 
         // Log warnings if any (but still persist)
         if (validationResult.warnings?.length) {
-          PFLog.warn('[OperationLogEffects] Operation payload warnings', {
+          OpLog.warn('[OperationLogEffects] Operation payload warnings', {
             warnings: validationResult.warnings,
             actionType: action.type,
           });
@@ -145,7 +145,7 @@ export class OperationLogEffects {
       if (this.isQuotaExceededError(e)) {
         // Circuit breaker: prevent recursive quota handling
         if (this.isHandlingQuotaExceeded) {
-          PFLog.err(
+          OpLog.err(
             'OperationLogEffects: Quota exceeded during retry - aborting to prevent loop',
           );
           this.notifyUserAndTriggerRollback();
@@ -165,14 +165,14 @@ export class OperationLogEffects {
    * Counter is reset by compaction service on success.
    */
   private triggerCompaction(): void {
-    PFLog.normal('OperationLogEffects: Triggering compaction...');
+    OpLog.normal('OperationLogEffects: Triggering compaction...');
     this.compactionService
       .compact()
       .then(() => {
         this.compactionFailures = 0;
       })
       .catch((e) => {
-        PFLog.err('OperationLogEffects: Compaction failed', e);
+        OpLog.err('OperationLogEffects: Compaction failed', e);
         this.compactionFailures++;
         if (this.compactionFailures >= MAX_COMPACTION_FAILURES) {
           this.snackService.open({
@@ -221,7 +221,7 @@ export class OperationLogEffects {
    * Uses circuit breaker flag to prevent infinite recursion.
    */
   private async handleQuotaExceeded(action: PersistentAction): Promise<void> {
-    PFLog.err(
+    OpLog.err(
       'OperationLogEffects: Storage quota exceeded, attempting emergency compaction',
     );
 
@@ -239,13 +239,13 @@ export class OperationLogEffects {
         });
         return;
       } catch (retryErr) {
-        PFLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
+        OpLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
       } finally {
         // Always clear circuit breaker
         this.isHandlingQuotaExceeded = false;
       }
     } else {
-      PFLog.err('OperationLogEffects: Emergency compaction failed');
+      OpLog.err('OperationLogEffects: Emergency compaction failed');
     }
 
     // Compaction failed or retry failed - show error with action

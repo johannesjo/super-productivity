@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Operation, VectorClock } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 
 /**
  * Current schema version for the operation log state cache.
@@ -166,7 +166,7 @@ export class SchemaMigrationService {
       };
     }
 
-    PFLog.normal(
+    OpLog.normal(
       `SchemaMigrationService: Migrating state from v${currentVersion} to v${CURRENT_SCHEMA_VERSION}`,
     );
 
@@ -184,7 +184,7 @@ export class SchemaMigrationService {
         );
       }
 
-      PFLog.normal(
+      OpLog.normal(
         `SchemaMigrationService: Running state migration v${migration.fromVersion} → v${migration.toVersion}: ${migration.description}`,
       );
 
@@ -192,7 +192,7 @@ export class SchemaMigrationService {
         state = migration.migrateState(state);
         version = migration.toVersion;
       } catch (e) {
-        PFLog.err(
+        OpLog.err(
           `SchemaMigrationService: State migration failed at v${migration.fromVersion} → v${migration.toVersion}`,
           e,
         );
@@ -203,7 +203,7 @@ export class SchemaMigrationService {
       }
     }
 
-    PFLog.normal(`SchemaMigrationService: State migration complete. Now at v${version}`);
+    OpLog.normal(`SchemaMigrationService: State migration complete. Now at v${version}`);
 
     return {
       ...cache,
@@ -254,7 +254,7 @@ export class SchemaMigrationService {
             migratedOp = { ...migratedOp, schemaVersion: migration.toVersion };
           }
         } catch (e) {
-          PFLog.err(
+          OpLog.err(
             `SchemaMigrationService: Operation migration failed at v${migration.fromVersion} → v${migration.toVersion}`,
             e,
           );
@@ -288,7 +288,7 @@ export class SchemaMigrationService {
       if (migratedOp !== null) {
         migrated.push(migratedOp);
       } else {
-        PFLog.normal(
+        OpLog.normal(
           `SchemaMigrationService: Dropped operation ${op.id} (${op.actionType}) during migration`,
         );
       }

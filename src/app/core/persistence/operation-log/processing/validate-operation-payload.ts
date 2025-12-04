@@ -1,5 +1,5 @@
 import { Operation, EntityType, OpType } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 
 /**
  * Result of validating an operation payload.
@@ -81,7 +81,7 @@ const validateCreatePayload = (
   if (!entity) {
     // Warning rather than error - some creates might have different shapes
     warnings.push(`CREATE payload missing expected entity (${entityType})`);
-    PFLog.warn(`[ValidateOperationPayload] ${warnings[0]}`, payload);
+    OpLog.warn(`[ValidateOperationPayload] ${warnings[0]}`, payload);
   } else if (typeof entity === 'object' && entity !== null) {
     // Basic ID check for the entity
     const entityObj = entity as Record<string, unknown>;
@@ -148,7 +148,7 @@ const validateUpdatePayload = (
 
   // Allow through with warning - updates have many shapes
   warnings.push(`UPDATE payload has unusual structure for ${entityType}`);
-  PFLog.warn(`[ValidateOperationPayload] ${warnings[0]}`, payload);
+  OpLog.warn(`[ValidateOperationPayload] ${warnings[0]}`, payload);
 
   return { success: true, warnings };
 };
@@ -186,7 +186,7 @@ const validateDeletePayload = (
   }
 
   // Allow through with warning
-  PFLog.warn(
+  OpLog.warn(
     `[ValidateOperationPayload] DELETE missing entityId/entityIds for ${entityType}`,
     payload,
   );
@@ -215,7 +215,7 @@ const validateMovePayload = (
     return { success: true };
   }
 
-  PFLog.warn('[ValidateOperationPayload] MOVE missing ids array', payload);
+  OpLog.warn('[ValidateOperationPayload] MOVE missing ids array', payload);
   return { success: true, warnings: ['MOVE missing ids array'] };
 };
 
@@ -315,7 +315,7 @@ export const validateOperationPayload = (op: Operation): PayloadValidationResult
       return { success: true };
 
     default:
-      PFLog.warn(
+      OpLog.warn(
         `[ValidateOperationPayload] Unknown opType: ${op.opType}, allowing through`,
       );
       return { success: true };

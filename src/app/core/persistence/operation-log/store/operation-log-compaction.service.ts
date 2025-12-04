@@ -9,7 +9,7 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -40,7 +40,7 @@ export class OperationLogCompactionService {
       await this._doCompact(EMERGENCY_COMPACTION_RETENTION_MS, true);
       return true;
     } catch (e) {
-      PFLog.err('OperationLogCompactionService: Emergency compaction failed', e);
+      OpLog.err('OperationLogCompactionService: Emergency compaction failed', e);
       return false;
     }
   }
