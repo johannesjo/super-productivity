@@ -2,7 +2,7 @@ import { inject, Injectable, Injector } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
 import { Operation, OperationLogEntry } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
@@ -56,7 +56,7 @@ export class OperationLogDownloadService {
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<DownloadResult> {
     if (!syncProvider) {
-      PFLog.warn(
+      OpLog.warn(
         'OperationLogDownloadService: No active sync provider passed for download.',
       );
       return { newOps: [], success: false, failedFileCount: 0 };
@@ -74,7 +74,7 @@ export class OperationLogDownloadService {
   private async _downloadRemoteOpsViaApi(
     syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
   ): Promise<DownloadResult> {
-    PFLog.normal('OperationLogDownloadService: Downloading remote operations via API...');
+    OpLog.normal('OperationLogDownloadService: Downloading remote operations via API...');
 
     const allNewOps: Operation[] = [];
 
@@ -106,7 +106,7 @@ export class OperationLogDownloadService {
 
         // Bounds check: prevent memory exhaustion
         if (allNewOps.length > MAX_DOWNLOAD_OPS_IN_MEMORY) {
-          PFLog.error(
+          OpLog.error(
             `OperationLogDownloadService: Too many operations to download (${allNewOps.length}). ` +
               `Stopping at ${MAX_DOWNLOAD_OPS_IN_MEMORY} to prevent memory exhaustion.`,
           );
@@ -131,7 +131,7 @@ export class OperationLogDownloadService {
         await syncProvider.acknowledgeOps(clientId, sinceSeq);
       }
 
-      PFLog.normal(
+      OpLog.normal(
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via API.`,
       );
     });
@@ -142,7 +142,7 @@ export class OperationLogDownloadService {
   private async _downloadRemoteOpsViaFiles(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<DownloadResult> {
-    PFLog.normal(
+    OpLog.normal(
       'OperationLogDownloadService: Downloading remote operations via files...',
     );
 
@@ -155,7 +155,7 @@ export class OperationLogDownloadService {
 
       // Fallback if manifest is empty or listFiles is supported and more files are found
       if (remoteOpFileNames.length === 0 && syncProvider.listFiles) {
-        PFLog.normal(
+        OpLog.normal(
           'OperationLogDownloadService: Manifest is empty, falling back to listFiles to discover ops.',
         );
         try {
@@ -170,20 +170,20 @@ export class OperationLogDownloadService {
             await this.manifestService.uploadRemoteManifest(syncProvider, remoteManifest);
           }
         } catch (e) {
-          PFLog.error(
+          OpLog.error(
             'OperationLogDownloadService: Failed to list remote operation files during fallback',
             e,
           );
           return;
         }
       } else if (!syncProvider.listFiles) {
-        PFLog.warn(
+        OpLog.warn(
           'OperationLogDownloadService: Provider does not support listFiles. Relying solely on manifest.',
         );
       }
 
       if (remoteOpFileNames.length === 0) {
-        PFLog.normal('OperationLogDownloadService: No remote operation files found.');
+        OpLog.normal('OperationLogDownloadService: No remote operation files found.');
         return;
       }
 
@@ -201,7 +201,7 @@ export class OperationLogDownloadService {
           const newOpsInChunk = chunk.filter((entry) => !appliedOpIds.has(entry.op.id));
           allNewOps.push(...newOpsInChunk.map((entry) => entry.op));
         } catch (e) {
-          PFLog.error(
+          OpLog.error(
             `OperationLogDownloadService: Failed to download or parse remote op file ${fullFilePath} after ${MAX_DOWNLOAD_RETRIES} retries`,
             e,
           );
@@ -212,7 +212,7 @@ export class OperationLogDownloadService {
       // Warn user about failed downloads
       if (failedFiles.length > 0) {
         failedFileCount = failedFiles.length;
-        PFLog.warn(
+        OpLog.warn(
           `OperationLogDownloadService: ${failedFiles.length} remote operation file(s) failed to download`,
           failedFiles,
         );
@@ -223,7 +223,7 @@ export class OperationLogDownloadService {
         });
       }
 
-      PFLog.normal(
+      OpLog.normal(
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via files.`,
       );
     });
@@ -253,7 +253,7 @@ export class OperationLogDownloadService {
 
         if (attempt < MAX_DOWNLOAD_RETRIES) {
           const delay = DOWNLOAD_RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
-          PFLog.warn(
+          OpLog.warn(
             `OperationLogDownloadService: Download failed for ${filePath}, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_DOWNLOAD_RETRIES})`,
             e,
           );

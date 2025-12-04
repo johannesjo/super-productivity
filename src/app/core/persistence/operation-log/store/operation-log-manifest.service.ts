@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { OperationLogManifest } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { RemoteFileNotFoundAPIError } from '../../../../pfapi/api/errors/errors';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
@@ -35,16 +35,16 @@ export class OperationLogManifestService {
     try {
       const fileContent = await syncProvider.downloadFile(this.getManifestFileName());
       const manifest = JSON.parse(fileContent.dataStr) as OperationLogManifest;
-      PFLog.normal('OperationLogManifestService: Loaded remote manifest', manifest);
+      OpLog.normal('OperationLogManifestService: Loaded remote manifest', manifest);
       return manifest;
     } catch (e) {
       if (e instanceof RemoteFileNotFoundAPIError) {
-        PFLog.normal(
+        OpLog.normal(
           'OperationLogManifestService: Remote manifest not found. Creating new.',
         );
         return this.createEmptyManifest();
       }
-      PFLog.error('OperationLogManifestService: Failed to load remote manifest', e);
+      OpLog.error('OperationLogManifestService: Failed to load remote manifest', e);
       throw e;
     }
   }
@@ -53,7 +53,7 @@ export class OperationLogManifestService {
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
     manifest: OperationLogManifest,
   ): Promise<void> {
-    PFLog.normal('OperationLogManifestService: Uploading remote manifest', manifest);
+    OpLog.normal('OperationLogManifestService: Uploading remote manifest', manifest);
     // Note: revToMatch is null, we always overwrite the manifest for simplicity
     await syncProvider.uploadFile(
       this.getManifestFileName(),

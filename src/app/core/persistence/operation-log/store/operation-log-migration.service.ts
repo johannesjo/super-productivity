@@ -3,7 +3,7 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { Operation, OpType } from '../operation.types';
 import { uuidv7 } from '../../../../util/uuid-v7';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { PersistenceLocalService } from '../../persistence-local.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
@@ -20,7 +20,7 @@ export class OperationLogMigrationService {
       return;
     }
 
-    PFLog.normal('OperationLogMigrationService: Checking for legacy data to migrate...');
+    OpLog.normal('OperationLogMigrationService: Checking for legacy data to migrate...');
 
     // Load all legacy data
     // We skip validity check here because we want to migrate whatever is there.
@@ -48,11 +48,11 @@ export class OperationLogMigrationService {
     });
 
     if (!hasUserData) {
-      PFLog.normal('OperationLogMigrationService: No legacy data found. Starting fresh.');
+      OpLog.normal('OperationLogMigrationService: No legacy data found. Starting fresh.');
       return;
     }
 
-    PFLog.normal(
+    OpLog.normal(
       'OperationLogMigrationService: Legacy data found. Creating Genesis Operation.',
     );
 
@@ -83,7 +83,7 @@ export class OperationLogMigrationService {
       compactedAt: Date.now(),
     });
 
-    PFLog.normal(
+    OpLog.normal(
       'OperationLogMigrationService: Migration complete. Genesis Operation created.',
     );
   }

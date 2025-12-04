@@ -4,7 +4,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EntityConflict } from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import {
   ConflictResolutionResult,
   DialogConflictResolutionComponent,
@@ -40,7 +40,7 @@ export class ConflictResolutionService {
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
   async presentConflicts(conflicts: EntityConflict[]): Promise<void> {
-    PFLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
+    OpLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
 
     this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
       data: { conflicts },
@@ -54,21 +54,21 @@ export class ConflictResolutionService {
     // If dialog was cancelled, still validate state since non-conflicting ops
     // may have already been applied before the dialog opened
     if (!result || !result.resolutions) {
-      PFLog.normal(
+      OpLog.normal(
         'ConflictResolutionService: Dialog cancelled, running validation for already-applied ops',
       );
       await this._validateAndRepairAfterResolution();
       return;
     }
 
-    PFLog.normal('ConflictResolutionService: Processing resolutions', result.resolutions);
+    OpLog.normal('ConflictResolutionService: Processing resolutions', result.resolutions);
 
     for (let i = 0; i < conflicts.length; i++) {
       const conflict = conflicts[i];
       const resolution = result.resolutions.get(i); // Use index to match dialog
 
       if (!resolution) {
-        PFLog.warn(
+        OpLog.warn(
           `ConflictResolutionService: No resolution for conflict ${i} (${conflict.entityId}), skipping`,
         );
         continue;
@@ -84,7 +84,7 @@ export class ConflictResolutionService {
           for (const op of conflict.remoteOps) {
             // Skip duplicates
             if (await this.opLogStore.hasOp(op.id)) {
-              PFLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
+              OpLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
               continue;
             }
 
@@ -101,7 +101,7 @@ export class ConflictResolutionService {
               // Check if this operation failed
               const failedCount = this.operationApplier.getFailedCount();
               if (failedCount > 0) {
-                PFLog.err(
+                OpLog.err(
                   `ConflictResolutionService: Operation ${op.id} failed to apply`,
                 );
                 this.operationApplier.clearFailedOperations();
@@ -111,7 +111,7 @@ export class ConflictResolutionService {
 
               appliedOpIds.push(op.id);
             } catch (e) {
-              PFLog.err(`ConflictResolutionService: Exception applying op ${op.id}`, e);
+              OpLog.err(`ConflictResolutionService: Exception applying op ${op.id}`, e);
               hadFailure = true;
               break;
             }
@@ -127,7 +127,7 @@ export class ConflictResolutionService {
           }
 
           if (hadFailure) {
-            PFLog.err(
+            OpLog.err(
               `ConflictResolutionService: Partial failure for ${conflict.entityId}. Applied ${appliedOpIds.length}/${conflict.remoteOps.length} ops`,
             );
 
@@ -139,7 +139,7 @@ export class ConflictResolutionService {
               .map((o) => o.id);
 
             if (failedOpIds.length > 0) {
-              PFLog.warn(
+              OpLog.warn(
                 `ConflictResolutionService: Marking ${failedOpIds.length} failed ops as rejected`,
               );
               await this.opLogStore.markRejected(failedOpIds);
@@ -159,11 +159,11 @@ export class ConflictResolutionService {
           // Only mark local ops as rejected if ALL remote ops succeeded
           const localOpIds = conflict.localOps.map((op) => op.id);
           await this.opLogStore.markRejected(localOpIds);
-          PFLog.normal(
+          OpLog.normal(
             `ConflictResolutionService: Applied ${appliedOpIds.length} remote ops for ${conflict.entityId}`,
           );
         } catch (e) {
-          PFLog.err(
+          OpLog.err(
             `ConflictResolutionService: Failed during remote resolution for ${conflict.entityId}`,
             { error: e },
           );
@@ -183,7 +183,7 @@ export class ConflictResolutionService {
         // We assume they are already applied to state.
         // We just need to ensure they are kept in the log for sync later.
         // We essentially "ignore" the remote ops (don't apply them).
-        PFLog.normal(
+        OpLog.normal(
           `ConflictResolutionService: Keeping local ops for ${conflict.entityId}`,
         );
       }
@@ -198,7 +198,7 @@ export class ConflictResolutionService {
    * This is Checkpoint D in the validation architecture.
    */
   private async _validateAndRepairAfterResolution(): Promise<void> {
-    PFLog.normal('[ConflictResolutionService] Running post-resolution validation...');
+    OpLog.normal('[ConflictResolutionService] Running post-resolution validation...');
 
     // Get current state from NgRx
     const currentState =
@@ -208,12 +208,12 @@ export class ConflictResolutionService {
     const result = this.validateStateService.validateAndRepair(currentState);
 
     if (!result.wasRepaired) {
-      PFLog.normal('[ConflictResolutionService] State valid after conflict resolution');
+      OpLog.normal('[ConflictResolutionService] State valid after conflict resolution');
       return;
     }
 
     if (!result.repairedState || !result.repairSummary) {
-      PFLog.err(
+      OpLog.err(
         '[ConflictResolutionService] Repair failed after conflict resolution:',
         result.error,
       );
@@ -232,7 +232,7 @@ export class ConflictResolutionService {
     // Dispatch repaired state to NgRx
     this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
 
-    PFLog.log(
+    OpLog.log(
       '[ConflictResolutionService] Created REPAIR operation after conflict resolution',
     );
   }

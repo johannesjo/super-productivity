@@ -2,7 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
 import { Operation, OperationLogEntry } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { chunkArray } from '../../../../util/chunk-array';
 import {
   SyncProviderServiceInterface,
@@ -42,7 +42,7 @@ export class OperationLogUploadService {
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<UploadResult> {
     if (!syncProvider) {
-      PFLog.warn('OperationLogUploadService: No active sync provider passed for upload.');
+      OpLog.warn('OperationLogUploadService: No active sync provider passed for upload.');
       return { uploadedCount: 0, piggybackedOps: [] };
     }
 
@@ -58,7 +58,7 @@ export class OperationLogUploadService {
   private async _uploadPendingOpsViaApi(
     syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
   ): Promise<UploadResult> {
-    PFLog.normal('OperationLogUploadService: Uploading pending operations via API...');
+    OpLog.normal('OperationLogUploadService: Uploading pending operations via API...');
 
     const piggybackedOps: Operation[] = [];
     let uploadedCount = 0;
@@ -67,7 +67,7 @@ export class OperationLogUploadService {
       const pendingOps = await this.opLogStore.getUnsynced();
 
       if (pendingOps.length === 0) {
-        PFLog.normal('OperationLogUploadService: No pending operations to upload.');
+        OpLog.normal('OperationLogUploadService: No pending operations to upload.');
         return;
       }
 
@@ -89,7 +89,7 @@ export class OperationLogUploadService {
         const chunk = chunks[i];
         const entries = correspondingEntries[i];
 
-        PFLog.normal(
+        OpLog.normal(
           `OperationLogUploadService: Uploading batch of ${chunk.length} ops via API`,
         );
 
@@ -118,7 +118,7 @@ export class OperationLogUploadService {
 
         // Collect piggybacked new ops from other clients
         if (response.newOps && response.newOps.length > 0) {
-          PFLog.normal(
+          OpLog.normal(
             `OperationLogUploadService: Received ${response.newOps.length} piggybacked ops`,
           );
           const ops = response.newOps.map((serverOp) => syncOpToOperation(serverOp.op));
@@ -128,14 +128,14 @@ export class OperationLogUploadService {
         // Log any rejected operations
         const rejected = response.results.filter((r) => !r.accepted);
         if (rejected.length > 0) {
-          PFLog.warn(
+          OpLog.warn(
             `OperationLogUploadService: ${rejected.length} ops were rejected`,
             rejected,
           );
         }
       }
 
-      PFLog.normal(
+      OpLog.normal(
         `OperationLogUploadService: Successfully uploaded ${uploadedCount} ops via API.`,
       );
     });
@@ -146,7 +146,7 @@ export class OperationLogUploadService {
   private async _uploadPendingOpsViaFiles(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<UploadResult> {
-    PFLog.normal('OperationLogUploadService: Uploading pending operations via files...');
+    OpLog.normal('OperationLogUploadService: Uploading pending operations via files...');
 
     let uploadedCount = 0;
 
@@ -154,7 +154,7 @@ export class OperationLogUploadService {
       const pendingOps = await this.opLogStore.getUnsynced();
 
       if (pendingOps.length === 0) {
-        PFLog.normal('OperationLogUploadService: No pending operations to upload.');
+        OpLog.normal('OperationLogUploadService: No pending operations to upload.');
         return;
       }
 
@@ -173,7 +173,7 @@ export class OperationLogUploadService {
 
         // Only upload if file isn't already in the manifest (simple dedupe for now)
         if (!updatedManifestFiles.includes(fullFilePath)) {
-          PFLog.normal(
+          OpLog.normal(
             `OperationLogUploadService: Uploading ${chunk.length} ops to ${fullFilePath}`,
           );
           // revToMatch is null, as these are new files
@@ -184,7 +184,7 @@ export class OperationLogUploadService {
           await this.opLogStore.markSynced(chunk.map((e) => e.seq));
           uploadedCount += chunk.length;
         } else {
-          PFLog.normal(
+          OpLog.normal(
             `OperationLogUploadService: Skipping upload for existing file ${fullFilePath}`,
           );
           // File already exists in manifest, so these ops are already synced
@@ -200,7 +200,7 @@ export class OperationLogUploadService {
         await this.manifestService.uploadRemoteManifest(syncProvider, remoteManifest);
       }
 
-      PFLog.normal(
+      OpLog.normal(
         `OperationLogUploadService: Successfully uploaded ${newFilesUploaded} new operation files (${uploadedCount} ops).`,
       );
     });

@@ -3,7 +3,7 @@ import { OperationLogMigrationService } from './operation-log-migration.service'
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PersistenceLocalService } from '../../persistence-local.service';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 
 describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
@@ -34,10 +34,9 @@ describe('OperationLogMigrationService', () => {
       'save',
     ]);
 
-    // Spy on PFLog
-    spyOn(PFLog, 'normal');
-    spyOn(PFLog, 'error');
-
+    // Spy on OpLog
+    spyOn(OpLog, 'normal');
+    spyOn(OpLog, 'error');
     TestBed.configureTestingModule({
       providers: [
         OperationLogMigrationService,

@@ -9,7 +9,7 @@ import { dataRepair } from '../../../../pfapi/repair/data-repair';
 import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { RepairSummary } from '../operation.types';
-import { PFLog } from '../../../log';
+import { OpLog } from '../../../log';
 import { RepairOperationService } from './repair-operation.service'; // Used for createEmptyRepairSummary()
 
 /**
@@ -136,7 +136,7 @@ export class ValidateStateService {
     if (!typiaResult.success) {
       result.isValid = false;
       result.typiaErrors = typiaResult.errors || [];
-      PFLog.warn('[ValidateStateService] Typia validation failed', {
+      OpLog.warn('[ValidateStateService] Typia validation failed', {
         errorCount: result.typiaErrors.length,
       });
     }
@@ -147,7 +147,7 @@ export class ValidateStateService {
       isRelatedValid = isRelatedModelDataValid(state);
     } catch (e) {
       isRelatedValid = false;
-      PFLog.warn('[ValidateStateService] Cross-model validation threw error', e);
+      OpLog.warn('[ValidateStateService] Cross-model validation threw error', e);
       // Ensure we capture the error
       if (!getLastValidityError()) {
         // If isRelatedModelDataValid threw without setting lastValidityError (unlikely but possible)
@@ -159,13 +159,13 @@ export class ValidateStateService {
     if (!isRelatedValid) {
       result.isValid = false;
       result.crossModelError = result.crossModelError || getLastValidityError();
-      PFLog.warn('[ValidateStateService] Cross-model validation failed', {
+      OpLog.warn('[ValidateStateService] Cross-model validation failed', {
         error: result.crossModelError,
       });
     }
 
     if (result.isValid) {
-      PFLog.normal('[ValidateStateService] State validation passed');
+      OpLog.normal('[ValidateStateService] State validation passed');
     }
 
     return result;
@@ -187,11 +187,11 @@ export class ValidateStateService {
     }
 
     // State is invalid - attempt repair
-    PFLog.log('[ValidateStateService] State invalid, attempting repair...');
+    OpLog.log('[ValidateStateService] State invalid, attempting repair...');
 
     // Check if repair is possible
     if (!isDataRepairPossible(state)) {
-      PFLog.err('[ValidateStateService] Data repair not possible - state too corrupted');
+      OpLog.err('[ValidateStateService] Data repair not possible - state too corrupted');
       return {
         isValid: false,
         wasRepaired: false,
@@ -214,7 +214,7 @@ export class ValidateStateService {
       // Validate the repaired state to confirm it's now valid
       const revalidationResult = this.validateState(repairedState);
       if (!revalidationResult.isValid) {
-        PFLog.err('[ValidateStateService] State still invalid after repair');
+        OpLog.err('[ValidateStateService] State still invalid after repair');
         return {
           isValid: false,
           wasRepaired: true,
@@ -224,7 +224,7 @@ export class ValidateStateService {
         };
       }
 
-      PFLog.log('[ValidateStateService] State successfully repaired', {
+      OpLog.log('[ValidateStateService] State successfully repaired', {
         repairSummary,
       });
 
@@ -235,7 +235,7 @@ export class ValidateStateService {
         repairSummary,
       };
     } catch (e) {
-      PFLog.err('[ValidateStateService] Error during repair', e);
+      OpLog.err('[ValidateStateService] Error during repair', e);
       return {
         isValid: false,
         wasRepaired: false,

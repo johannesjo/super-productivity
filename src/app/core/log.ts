@@ -357,7 +357,7 @@ export class Log {
 // All context loggers now record to history
 export const SyncLog = Log.withContext('sync');
 export const PFLog = Log.withContext('pf');
-export const OpLog = Log.withContext('op-log');
+export const OpLog = Log.withContext('ol');
 export const PluginLog = Log.withContext('plugin');
 export const IssueLog = Log.withContext('issue');
 export const DroidLog = Log.withContext('droid');
