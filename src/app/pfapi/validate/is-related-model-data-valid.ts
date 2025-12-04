@@ -10,13 +10,36 @@ let lastValidityError: string;
 export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   errorCount = 0;
 
+  if (!d) {
+    _validityError('Data is null or undefined', { d });
+    return false;
+  }
+
+  // Check for required properties before accessing them
+  // We check for the existence of the main models used in validation
+  if (
+    !d.project ||
+    !d.tag ||
+    !d.task ||
+    !d.archiveYoung ||
+    !d.archiveOld ||
+    !d.note ||
+    !d.issueProvider ||
+    !d.reminders
+  ) {
+    _validityError('Missing required model data in AppDataCompleteNew', { d });
+    return false;
+  }
+
   // Extract commonly used collections once
-  const projectIds = new Set<string>(d.project.ids as string[]);
-  const tagIds = new Set<string>(d.tag.ids as string[]);
-  const taskIds = new Set<string>(d.task.ids as string[]);
-  const archiveYoungTaskIds = new Set<string>(d.archiveYoung.task.ids as string[]);
-  const archiveOldTaskIds = new Set<string>(d.archiveOld.task.ids as string[]);
-  const noteIds = new Set<string>(d.note.ids as string[]);
+  const projectIds = new Set<string>((d.project.ids as string[]) || []);
+  const tagIds = new Set<string>((d.tag.ids as string[]) || []);
+  const taskIds = new Set<string>((d.task.ids as string[]) || []);
+  const archiveYoungTaskIds = new Set<string>(
+    (d.archiveYoung.task?.ids as string[]) || [],
+  );
+  const archiveOldTaskIds = new Set<string>((d.archiveOld.task?.ids as string[]) || []);
+  const noteIds = new Set<string>((d.note.ids as string[]) || []);
 
   // Validate projects, tasks and tags relationships
   if (

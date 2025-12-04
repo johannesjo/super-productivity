@@ -2,6 +2,8 @@ import { getDb, initDb } from '../src/db';
 import { loadConfigFromEnv } from '../src/config';
 import { Logger } from '../src/logger';
 import * as readline from 'readline';
+import * as path from 'path';
+import * as fs from 'fs';
 
 const rl = readline.createInterface({
   input: process.stdin,
@@ -15,8 +17,17 @@ const question = (query: string): Promise<string> => {
 };
 
 async function main() {
-  // Load config and init DB
+  // Load config
   const config = loadConfigFromEnv();
+  const dbPath = path.join(config.dataDir, 'database.sqlite');
+
+  if (!fs.existsSync(dbPath)) {
+    console.error(`Database not found at ${dbPath}`);
+    console.error('Please ensure the DATA_DIR environment variable is set correctly.');
+    process.exit(1);
+  }
+
+  // Init DB
   initDb(config.dataDir);
   const db = getDb();
 
