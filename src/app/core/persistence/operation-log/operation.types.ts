@@ -30,45 +30,133 @@ export type EntityType =
   | 'ALL'; // For full state imports (sync, backup)
 
 export interface Operation {
-  // IDENTITY
-  id: string; // UUID v7 (time-ordered, better for sorting)
+  /**
+   * Unique identifier for the operation.
+   * Should be a UUID v7 (time-ordered) to allow for rough chronological sorting
+   * even without vector clocks, which aids in debugging and indexing.
+   */
+  id: string;
 
   // ACTION MAPPING
-  actionType: string; // NgRx Action type (e.g., '[Task] Update')
-  opType: OpType; // High-level operation category
+  /**
+   * The specific NgRx Action type (e.g., '[Task] Update').
+   * Used to replay the operation against the store during application or testing.
+   */
+  actionType: string;
+
+  /**
+   * High-level operation category (Create, Update, Delete, etc.).
+   * Used for broad logic handling like persistence strategies or conflict resolution rules.
+   */
+  opType: OpType;
 
   // SCOPE
-  entityType: EntityType; // 'TASK' | 'PROJECT' | 'TAG' | 'NOTE' | 'GLOBAL_CONFIG' | 'SIMPLE_COUNTER'
-  entityId?: string; // ID of the affected entity (or '*' for global config)
-  entityIds?: string[]; // For batch operations
+  /**
+   * The type of the data model entity being modified (e.g., 'TASK', 'PROJECT').
+   */
+  entityType: EntityType;
+
+  /**
+   * The specific ID of the entity being modified.
+   * Use '*' for singleton entities like global config.
+   */
+  entityId?: string;
+
+  /**
+   * List of entity IDs for batch operations that affect multiple items simultaneously.
+   */
+  entityIds?: string[];
 
   // DATA
-  // Validated by Typia.
-  // For large text fields (Notes), consider storing diffs instead of full content in future iterations.
+  /**
+   * The actual data change associated with the operation.
+   * - For 'CRT', this is the full object.
+   * - For 'UPD', this is a partial object (changeset).
+   * - For 'DEL', this might be empty or a tombstone.
+   * Validated by Typia at runtime.
+   */
   payload: unknown;
 
   // CAUSALITY & ORDERING
-  clientId: string; // Device generating the op (reuse existing from vector-clock)
-  vectorClock: VectorClock; // State of the world AFTER this Op
-  timestamp: number; // Wall clock time (ISO 8601 or epoch ms)
+  /**
+   * The ID of the device/client that generated this operation.
+   * Essential for vector clock management and identifying the source of changes.
+   */
+  clientId: string;
+
+  /**
+   * Represents the causal state of the world AFTER this operation was applied.
+   * Used to detect concurrency: if two ops have unordered vector clocks, they are concurrent.
+   * This is the primary mechanism for ensuring consistency across distributed devices.
+   */
+  vectorClock: VectorClock;
+
+  /**
+   * Wall clock time (epoch ms) from the **originating** device.
+   * - Used as a tie-breaker for concurrent operations (Last-Write-Wins logic).
+   * - NOT used for garbage collection or local maintenance.
+   */
+  timestamp: number;
 
   // META
-  schemaVersion: number; // For future migrations
-  parentOpId?: string; // For conflict resolution chains
+  /**
+   * The schema version of the data at the time of operation creation.
+   * Allows the system to migrate or transform payloads if the data structure changes in the future.
+   */
+  schemaVersion: number;
+
+  /**
+   * The ID of the direct parent operation, if this op is a resolution to a conflict.
+   * Helps in tracing the history of a conflict resolution chain.
+   */
+  parentOpId?: string;
 }
 
 export interface OperationLogEntry {
-  seq: number; // Local, monotonic auto-increment (IndexedDB primary key)
-  op: Operation;
-  appliedAt: number; // When this op was applied locally (epoch ms)
-  source: 'local' | 'remote'; // Origin of this operation
-  syncedAt?: number; // When successfully synced to remote (null if pending)
-  rejectedAt?: number; // When rejected during conflict resolution (epoch ms)
   /**
-   * For remote ops only: tracks whether the op was successfully applied to NgRx.
-   * - 'pending': stored but not yet applied (set on initial storage)
-   * - 'applied': successfully dispatched to NgRx store
-   * Used for crash recovery: pending remote ops are retried on startup.
+   * Local, monotonic auto-increment integer (IndexedDB primary key).
+   * Strictly orders operations as they arrived or were generated on THIS specific device.
+   */
+  seq: number;
+
+  /**
+   * The operation data itself (the synchronized part).
+   */
+  op: Operation;
+
+  /**
+   * Local timestamp (epoch ms) indicating when this operation was written to the LOCAL database.
+   * - **Usage:** Strictly for local maintenance, such as garbage collection (compaction).
+   * - **Compaction:** Old entries are deleted based on `Date.now() - appliedAt > Retention`.
+   * - **Sync:** This value is NOT synchronized and implies nothing about the global order of events.
+   */
+  appliedAt: number;
+
+  /**
+   * Origin of the operation:
+   * - 'local': Generated by this device.
+   * - 'remote': Received from the sync server.
+   */
+  source: 'local' | 'remote';
+
+  /**
+   * Timestamp (epoch ms) when this operation was successfully acknowledged by the remote server.
+   * - Null/Undefined if the operation is still pending upload.
+   * - Used to determine which operations are safe to compact (must be synced first).
+   */
+  syncedAt?: number;
+
+  /**
+   * Timestamp (epoch ms) if the operation was rejected during conflict resolution.
+   * Effectively marks the operation as "dead" but kept for history/debugging.
+   */
+  rejectedAt?: number;
+
+  /**
+   * For remote ops only: tracks whether the op was successfully applied to the local NgRx store.
+   * - 'pending': Stored in DB but not yet dispatched to state (e.g., during initial download).
+   * - 'applied': Successfully dispatched to NgRx.
+   * Used for crash recovery: on startup, any 'pending' remote ops are re-dispatched.
    */
   applicationStatus?: 'pending' | 'applied';
 }
