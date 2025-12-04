@@ -45,3 +45,10 @@ export const COMPACTION_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
  * Uses a shorter window (1 day) to free up more space.
  */
 export const EMERGENCY_COMPACTION_RETENTION_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Maximum time allowed for compaction before aborting.
+ * Should be safely under LOCK_TIMEOUT_MS to prevent lock expiration during compaction.
+ * If compaction exceeds this, it aborts to prevent data corruption.
+ */
+export const COMPACTION_TIMEOUT_MS = 25000;

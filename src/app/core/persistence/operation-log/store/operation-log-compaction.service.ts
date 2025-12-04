@@ -2,12 +2,14 @@ import { inject, Injectable } from '@angular/core';
 import { LockService } from '../sync/lock.service';
 import {
   COMPACTION_RETENTION_MS,
+  COMPACTION_TIMEOUT_MS,
   EMERGENCY_COMPACTION_RETENTION_MS,
 } from '../operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { VectorClockService } from '../sync/vector-clock.service';
+import { PFLog } from '../../../log';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -26,14 +28,25 @@ export class OperationLogCompactionService {
 
   async compact(): Promise<void> {
     await this.lockService.request('sp_op_log', async () => {
+      const startTime = Date.now();
+
       // 1. Get current state from NgRx store (via delegate for consistency)
       const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
+
+      // Check timeout after expensive operation
+      this.checkCompactionTimeout(startTime, 'state snapshot');
 
       // 2. Get current vector clock (max of all ops)
       const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
 
-      // 3. Write to state cache with schema version
+      // Check timeout after clock computation
+      this.checkCompactionTimeout(startTime, 'vector clock');
+
+      // 3. Get lastSeq IMMEDIATELY before writing cache to minimize race window
+      // This ensures new ops written after this point have seq > lastSeq
       const lastSeq = await this.opLogStore.getLastSeq();
+
+      // 4. Write to state cache with schema version
       await this.opLogStore.saveStateCache({
         state: currentState,
         lastAppliedOpSeq: lastSeq,
@@ -42,10 +55,12 @@ export class OperationLogCompactionService {
         schemaVersion: CURRENT_SCHEMA_VERSION,
       });
 
-      // 4. Reset compaction counter (persistent across tabs/restarts)
+      // After snapshot is saved, new operations with seq > lastSeq won't be deleted
+
+      // 5. Reset compaction counter (persistent across tabs/restarts)
       await this.opLogStore.resetCompactionCounter();
 
-      // 5. Delete old operations (keep recent for conflict resolution window)
+      // 6. Delete old operations (keep recent for conflict resolution window)
       // Only delete ops that have been synced to remote
       const cutoff = Date.now() - COMPACTION_RETENTION_MS;
 
@@ -66,8 +81,14 @@ export class OperationLogCompactionService {
   async emergencyCompact(): Promise<boolean> {
     try {
       await this.lockService.request('sp_op_log', async () => {
+        const startTime = Date.now();
+
         const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
+        this.checkCompactionTimeout(startTime, 'emergency state snapshot');
+
         const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
+        this.checkCompactionTimeout(startTime, 'emergency vector clock');
+
         const lastSeq = await this.opLogStore.getLastSeq();
 
         await this.opLogStore.saveStateCache({
@@ -92,7 +113,24 @@ export class OperationLogCompactionService {
       });
       return true;
     } catch (e) {
+      PFLog.err('OperationLogCompactionService: Emergency compaction failed', e);
       return false;
+    }
+  }
+
+  /**
+   * Checks if compaction has exceeded the timeout threshold.
+   * If exceeded, throws an error to abort compaction before the lock expires.
+   * This prevents data corruption from concurrent access.
+   */
+  private checkCompactionTimeout(startTime: number, phase: string): void {
+    const elapsed = Date.now() - startTime;
+    if (elapsed > COMPACTION_TIMEOUT_MS) {
+      throw new Error(
+        `Compaction timeout after ${elapsed}ms during ${phase}. ` +
+          `Aborting to prevent lock expiration. ` +
+          `Consider reducing state size or increasing timeout.`,
+      );
     }
   }
 }
