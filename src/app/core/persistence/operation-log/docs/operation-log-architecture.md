@@ -1,8 +1,8 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, C, D Complete
+**Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 4, 2025 (Part C implemented)
+**Last Updated:** December 4, 2025
 
 ---
 
@@ -77,12 +77,14 @@ If we kept every operation forever, the database would grow huge.
 
 The Operation Log serves **four distinct purposes**:
 
-| Purpose                    | Description                                   | Status      |
-| -------------------------- | --------------------------------------------- | ----------- |
-| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅ |
-| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅ |
-| **C. Server Sync**         | Upload/download individual operations         | Complete ✅ |
-| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅ |
+| Purpose                    | Description                                   | Status                        |
+| -------------------------- | --------------------------------------------- | ----------------------------- |
+| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅                   |
+| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅                   |
+| **C. Server Sync**         | Upload/download individual operations         | Complete ✅ (single-version)¹ |
+| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅                   |
+
+> ¹ **Cross-version sync limitation**: Part C is complete for clients on the same schema version. Cross-version sync (A.7.11) is not yet implemented—see [A.7.11 Conflict-Aware Migration](#a711-conflict-aware-migration-strategy) for guardrails.
 
 > **✅ Migration Ready**: Migration safety (A.7.12), tail ops consistency (A.7.13), and unified migration interface (A.7.15) are now implemented. The system is ready for schema migrations when `CURRENT_SCHEMA_VERSION > 1`.
 
@@ -833,6 +835,28 @@ To handle synchronization between clients on different schema versions, the syst
 5.  **Conflict Resolution**
     - The `ConflictResolutionService` will display the _migrated_ remote operation against the current local state.
     - **UI Decision:** We display the migrated values directly without special "migrated" annotations. Ideally, the conflict dialog uses the same formatters/components as the main UI, so the data looks familiar (e.g., "1 hour" instead of "3600").
+
+#### Interim Guardrails (Until Implementation)
+
+Until A.7.11 is fully implemented, the following guardrails protect against cross-version sync issues:
+
+| Guardrail                    | Description                                                                | Location                                   |
+| ---------------------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
+| **Version check on receive** | Reject operations with `schemaVersion > CURRENT + MAX_VERSION_SKIP`        | `OperationLogSyncService.processRemoteOps` |
+| **Update prompt**            | Show "update app" snackbar when receiving newer-version ops                | `OperationLogSyncService`                  |
+| **Same-version assumption**  | Current `CURRENT_SCHEMA_VERSION = 1` means all clients are on same version | N/A (no migrations yet)                    |
+
+**When A.7.11 becomes critical:**
+
+1. When `CURRENT_SCHEMA_VERSION` is bumped to 2+
+2. When users on different app versions sync together
+3. When migrations modify fields referenced by UPDATE operations
+
+**Recommended pre-release checklist:**
+
+- [ ] Implement A.7.11 before releasing any schema migration that renames/removes fields
+- [ ] For additive-only migrations (new optional fields), A.7.11 is not strictly required
+- [ ] Consider blocking sync upload if `localSchemaVersion < remoteSchemaVersion` to prevent older clients from polluting newer clients with stale-schema operations
 
 ### A.7.12 Migration Safety
 
@@ -1631,16 +1655,25 @@ This section documents known edge cases and areas requiring further design or im
 
 ### IndexedDB Quota Exhaustion
 
-**Status:** Not Handled
+**Status:** ⚠️ Not Handled — Required Before Production
+
+**Risk Level:** HIGH — Unsynced operations are permanently lost with no warning or recovery.
 
 When IndexedDB storage quota is exceeded:
 
-- **Current behavior**: Write fails, error thrown
+- **Current behavior**: Write fails, error thrown, **unsynced ops lost**
 - **Desired behavior**: Graceful degradation with user notification
+- **Affected users**: Large workspaces (years of data, many projects, frequent operations without sync)
 - **Proposed solution**:
-  1. Catch `QuotaExceededError` in `OperationLogStore`
+  1. Catch `QuotaExceededError` in `OperationLogStore.appendOperation()`
   2. Trigger emergency compaction (delete old synced ops regardless of retention window)
-  3. If still failing, show user dialog with options: clear old data, export backup, or sync and clear
+  3. If still failing, show user dialog with options:
+     - Export backup immediately
+     - Sync now (to mark ops as synced, enabling deletion)
+     - Clear old synced data manually
+  4. **Never** silently fail—always surface the error to the user
+
+**Implementation priority:** Must be implemented before shipping to users with large workspaces to prevent silent data loss.
 
 ### Compaction Trigger Coordination
 
@@ -1657,14 +1690,26 @@ The 500-ops compaction trigger uses a persistent counter stored in `state_cache.
 
 ### Genesis Migration with Partial Data
 
-**Status:** Not Fully Defined
+**Status:** ⚠️ Not Fully Defined — Edge Case Risk
+
+**Risk Level:** MEDIUM — Silent data loss possible in crash/interruption scenarios.
 
 What if data exists in both `pf` AND `SUP_OPS` databases?
 
-- **Scenario**: Interrupted migration, partial data in each store
-- **Current behavior**: If `SUP_OPS.state_cache` exists, use it; ignore `pf`
-- **Risk**: May lose newer data that was written to `pf` after partial migration
-- **Proposed solution**: Compare timestamps, merge if necessary, or prompt user
+- **Scenario**: Crash during genesis migration, or app downgrade after migration
+- **Current behavior**: If `SUP_OPS.state_cache` exists, use it; ignore `pf` entirely
+- **Risk**: May lose newer data that was written to `pf` after partial migration completed
+- **Detection gap**: No mechanism to detect if `pf` has newer data than `SUP_OPS`
+
+**Proposed solution:**
+
+1. Store `migrationTimestamp` in both `SUP_OPS.state_cache` and `pf.META_MODEL`
+2. On startup, compare timestamps:
+   - If `pf.lastUpdate > SUP_OPS.migrationTimestamp`: Warn user, offer merge or re-migrate
+   - If equal or `pf` older: Proceed with SUP_OPS (current behavior)
+3. For app downgrades: Show clear error that downgrade may lose data, require explicit confirmation
+
+**Mitigation (current):** Genesis migration is a one-time event. Once SUP_OPS is established, all writes go there. Risk is limited to the migration moment itself.
 
 ### Compaction During Active Sync
 
@@ -1728,58 +1773,62 @@ When `ArchiveYoung` gets too large:
 
 This keeps even the deep storage `ArchiveOld` consistent across devices with minimal overhead.
 
----
+### E.5 Error Handling & Edge Cases
 
-# Edge Cases & Missing Considerations
+The deterministic replay approach requires careful handling of edge cases to prevent archive divergence between clients.
 
-This section documents known edge cases and areas requiring further design or implementation.
+#### Missing Entity on Remote
 
-## Storage & Resource Limits
+**Scenario:** Client B receives `moveToArchive(taskId: 'abc')` but task 'abc' doesn't exist in its Active Store.
 
-### IndexedDB Quota Exhaustion
+**Possible causes:**
 
-**Status:** Not Handled
+- Task was deleted on Client B before sync
+- Task creation op hasn't arrived yet (out-of-order delivery)
+- Task was never synced to Client B
 
-When IndexedDB storage quota is exceeded:
+**Handling strategy:**
 
-- **Current behavior**: Write fails, error thrown
-- **Desired behavior**: Graceful degradation with user notification
-- **Proposed solution**:
-  1. Catch `QuotaExceededError` in `OperationLogStore`
-  2. Trigger emergency compaction (delete old synced ops regardless of retention window)
-  3. If still failing, show user dialog with options: clear old data, export backup, or sync and clear
+| Cause            | Detection                                       | Response                                    |
+| ---------------- | ----------------------------------------------- | ------------------------------------------- |
+| **Deleted**      | Task exists in local archive or deletion log    | No-op (already handled)                     |
+| **Out-of-order** | Task ID not in active, archive, or deletion log | Queue op for retry; apply when task arrives |
+| **Never synced** | After retry timeout (e.g., 5 min)               | Log warning, skip op, accept divergence     |
 
-### Compaction Trigger Coordination
+#### Out-of-Order Operations
 
-**Status:** Implemented ✅
+**Scenario:** `flushYoungToOld` arrives before `moveToArchive` that should have populated Young.
 
-The 500-ops compaction trigger uses a persistent counter stored in `state_cache.compactionCounter`:
+**Handling:**
 
-- Counter is shared across tabs via IndexedDB
-- Counter persists across app restarts
-- Counter is reset after successful compaction
-- Web Locks still prevent concurrent compaction execution
+1. Flush operations should be **idempotent**: flush only items that match criteria (age threshold)
+2. If Young is empty/sparse, flush is a no-op—no error
+3. Later `moveToArchive` ops populate Young normally
+4. Next flush will catch them
 
-## Data Integrity Edge Cases
+#### Idempotency Requirements
 
-### Genesis Migration with Partial Data
+All archive operations MUST be idempotent to handle:
 
-**Status:** Not Fully Defined
+- Duplicate delivery (network retry, tab broadcast + sync)
+- Replay during hydration
+- Re-application after conflict resolution
 
-What if data exists in both `pf` AND `SUP_OPS` databases?
+| Operation            | Idempotency guarantee                                |
+| -------------------- | ---------------------------------------------------- |
+| `moveToArchive`      | Check if task already in archive; skip if present    |
+| `flushYoungToOld`    | Move only items not already in Old; merge if present |
+| `restoreFromArchive` | Check if task already in Active; skip if present     |
 
-- **Scenario**: Interrupted migration, partial data in each store
-- **Current behavior**: If `SUP_OPS.state_cache` exists, use it; ignore `pf`
-- **Risk**: May lose newer data that was written to `pf` after partial migration
-- **Proposed solution**: Compare timestamps, merge if necessary, or prompt user
+#### Divergence Detection (Future)
 
-### Compaction During Active Sync
+To detect silent divergence between clients:
 
-**Status:** Handled via Locks
+1. Compute hash of archive entity IDs periodically
+2. Exchange hashes during sync
+3. If mismatch: trigger full archive reconciliation (download missing, resolve duplicates)
 
-- Compaction acquires `sp_op_log_compact` lock
-- Sync operations use separate locks
-- **Verified safe**: Compaction only deletes ops with `syncedAt` set, so unsynced ops from active sync are preserved
+**Status:** Not implemented. Current assumption is deterministic replay prevents divergence. If divergence is observed in production, implement detection.
 
 ---
 
@@ -1809,11 +1858,11 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ### Not Implemented ⚠️
 
-| Item                            | Section | Risk if Missing                          |
-| ------------------------------- | ------- | ---------------------------------------- |
-| **Conflict-aware op migration** | A.7.11  | Conflicts may compare mismatched schemas |
+| Item                            | Section | Risk if Missing                          | When Critical                                           |
+| ------------------------------- | ------- | ---------------------------------------- | ------------------------------------------------------- |
+| **Conflict-aware op migration** | A.7.11  | Conflicts may compare mismatched schemas | Before any schema migration that renames/removes fields |
 
-> **Note**: A.7.11 (conflict-aware migration) is only needed when Part C (Server Sync) is implemented. The local migration system (A.7.12, A.7.13, A.7.15) is complete.
+> **Note**: A.7.11 is required for cross-version sync. Currently safe because `CURRENT_SCHEMA_VERSION = 1` (all clients on same version). See [A.7.11 Interim Guardrails](#interim-guardrails-until-implementation) for pre-release checklist.
 
 ## Part B: Legacy Sync Bridge
 
@@ -1827,7 +1876,7 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ## Part C: Server Sync
 
-### Complete ✅
+### Complete ✅ (Single-Version)
 
 - Operation sync protocol interface (`OperationSyncCapable`)
 - `OperationLogSyncService` (orchestration, processRemoteOps, detectConflicts)
@@ -1839,7 +1888,7 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 - `OperationApplierService` (retry queue + topological sort)
 - Rejected operation tracking (`rejectedAt` field)
 
-> **Clarification**: Part C describes the server-based sync system. While fully implemented in the core, it is currently utilized by the new sync providers (when configured) alongside the legacy sync bridge.
+> **Cross-version limitation**: Part C is complete for clients on the same schema version. When `CURRENT_SCHEMA_VERSION > 1` and clients run different versions, A.7.11 (conflict-aware op migration) is required to ensure correct conflict detection.
 
 ## Part D: Validation & Repair
 
@@ -1855,11 +1904,11 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ## Future Enhancements 🔮
 
-| Component      | Description                                | Priority |
-| -------------- | ------------------------------------------ | -------- |
-| Auto-merge     | Automatic merge for non-conflicting fields | Low      |
-| Undo/Redo      | Leverage op-log for undo history           | Low      |
-| Quota handling | Graceful degradation on storage exhaustion | Medium   |
+| Component      | Description                                | Priority | Notes                                                                                    |
+| -------------- | ------------------------------------------ | -------- | ---------------------------------------------------------------------------------------- |
+| Quota handling | Graceful degradation on storage exhaustion | **HIGH** | Required before production—see [IndexedDB Quota Exhaustion](#indexeddb-quota-exhaustion) |
+| Auto-merge     | Automatic merge for non-conflicting fields | Low      |                                                                                          |
+| Undo/Redo      | Leverage op-log for undo history           | Low      |                                                                                          |
 
 > **Recently Completed:** `syncedAt` index (for faster getUnsynced()) and persistent compaction counter (tracks ops across tabs/restarts) are now implemented.
 
