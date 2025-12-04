@@ -1676,6 +1676,113 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ---
 
+# Part E: Smart Archive Handling
+
+The application splits data into "Active State" (in-memory, Redux) and "Archive State" (on-disk, rarely accessed) to maintain performance.
+
+- **ArchiveYoung**: Recently archived tasks and their worklogs (e.g., last 30 days).
+- **ArchiveOld**: Deep storage for historical data (months/years old).
+
+## E.1 The Problem with Syncing Archives
+
+In the legacy system, changing one task in the archive required re-uploading the entire (potentially massive) archive file. This was bandwidth-intensive and slow.
+
+## E.2 New Strategy: Deterministic Local Side Effects
+
+In the Operation Log architecture, **we do NOT sync the archive files directly.** Instead, we sync the **Instructions** that modify the archives. Because the logic is deterministic, all clients end up with identical archive files without ever transferring them.
+
+| Component        | Sync Strategy                 | Mechanism                                                                  |
+| ---------------- | ----------------------------- | -------------------------------------------------------------------------- |
+| **Active State** | **Operation Log**             | Standard sync (Ops applied to Redux)                                       |
+| **ArchiveYoung** | **Deterministic Side Effect** | `moveToArchive` ops trigger local moves from Active → Young on all clients |
+| **ArchiveOld**   | **Deterministic Side Effect** | `flushYoungToOld` ops trigger local flush from Young → Old on all clients  |
+
+### E.3 Workflow: moveToArchive
+
+When a user archives tasks:
+
+1.  **Client A (Origin):**
+    - Generates `moveToArchive` operation.
+    - Locally moves Tasks + Worklogs from Active Store → `ArchiveYoung`.
+2.  **Sync:** Operation travels to Client B.
+3.  **Client B (Remote):**
+    - Receives `moveToArchive` operation.
+    - Executes the **exact same logic**:
+      - Selects the targeted tasks from its _own_ Active Store.
+      - Moves Tasks + Worklogs to its _own_ `ArchiveYoung`.
+      - Removes them from Active Store.
+
+**Result:** Both clients have identical `ArchiveYoung` files, but zero archive data was transferred over the network.
+
+### E.4 Workflow: Flushing (Young → Old)
+
+_Note: This is the planned strategy for future implementation._
+
+When `ArchiveYoung` gets too large:
+
+1.  **Client A** decides it's time to flush.
+2.  Instead of doing it silently, it emits a `flushYoungToOld` operation.
+3.  **All Clients** receive this op and run the standard flush logic:
+    - Move items older than X days from `Young` → `Old`.
+    - Save both files.
+
+This keeps even the deep storage `ArchiveOld` consistent across devices with minimal overhead.
+
+---
+
+# Edge Cases & Missing Considerations
+
+This section documents known edge cases and areas requiring further design or implementation.
+
+## Storage & Resource Limits
+
+### IndexedDB Quota Exhaustion
+
+**Status:** Not Handled
+
+When IndexedDB storage quota is exceeded:
+
+- **Current behavior**: Write fails, error thrown
+- **Desired behavior**: Graceful degradation with user notification
+- **Proposed solution**:
+  1. Catch `QuotaExceededError` in `OperationLogStore`
+  2. Trigger emergency compaction (delete old synced ops regardless of retention window)
+  3. If still failing, show user dialog with options: clear old data, export backup, or sync and clear
+
+### Compaction Trigger Coordination
+
+**Status:** Implemented ✅
+
+The 500-ops compaction trigger uses a persistent counter stored in `state_cache.compactionCounter`:
+
+- Counter is shared across tabs via IndexedDB
+- Counter persists across app restarts
+- Counter is reset after successful compaction
+- Web Locks still prevent concurrent compaction execution
+
+## Data Integrity Edge Cases
+
+### Genesis Migration with Partial Data
+
+**Status:** Not Fully Defined
+
+What if data exists in both `pf` AND `SUP_OPS` databases?
+
+- **Scenario**: Interrupted migration, partial data in each store
+- **Current behavior**: If `SUP_OPS.state_cache` exists, use it; ignore `pf`
+- **Risk**: May lose newer data that was written to `pf` after partial migration
+- **Proposed solution**: Compare timestamps, merge if necessary, or prompt user
+
+### Compaction During Active Sync
+
+**Status:** Handled via Locks
+
+- Compaction acquires `sp_op_log_compact` lock
+- Sync operations use separate locks
+- **Verified safe**: Compaction only deletes ops with `syncedAt` set, so unsynced ops from active sync are preserved
+
+---
+
 # Implementation Status
 
 ## Part A: Local Persistence

@@ -256,14 +256,14 @@ sequenceDiagram
 graph TD
     subgraph "Hydration & Migration"
         direction TB
-        Start((App Start)) --> LoadSnap[Load Snapshot<br/>(Version V1)]
-        LoadSnap --> CheckVer{Schema<br/>Version?}
+        Start((App Start)) --> LoadSnap["Load Snapshot<br/>(Version V1)"]
+        LoadSnap --> CheckVer{"Schema<br/>Version?"}
 
         CheckVer -- Match --> LoadState
         CheckVer -- Old --> MigrateSnap["migrateIfNeeded()<br/>Upgrade V1 -> V2"]
-        MigrateSnap --> LoadState[Init NgRx State<br/>(Version V2)]
+        MigrateSnap --> LoadState["Init NgRx State<br/>(Version V2)"]
 
-        LoadState --> LoadTail[Load Tail Ops<br/>(Version V1)]
+        LoadState --> LoadTail["Load Tail Ops<br/>(Version V1)"]
         LoadTail --> Iterate{Next Op?}
 
         Iterate -- No --> Done((Ready))
@@ -330,8 +330,8 @@ graph TD
     end
 
     subgraph "Local Client (Version V2)"
-        Server -->|Download| InOp[Incoming Op<br/>(Version V1)]
-        InOp --> CheckSchema{Schema<br/>Check}
+        Server -->|Download| InOp["Incoming Op<br/>(Version V1)"]
+        InOp --> CheckSchema{"Schema<br/>Check"}
 
         CheckSchema -- "V1 < V2" --> Migrate["migrateOperation()<br/>Upgrade V1 -> V2"]
         CheckSchema -- "V1 == V2" --> Conflict
