@@ -1,6 +1,5 @@
 import { effect, inject, Injectable } from '@angular/core';
 import { PersistenceLocalService } from '../persistence/persistence-local.service';
-import { PersistenceLegacyService } from '../persistence/persistence-legacy.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -16,10 +15,7 @@ import { ChromeExtensionInterfaceService } from '../chrome-extension-interface/c
 import { ProjectService } from '../../features/project/project.service';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { IS_ELECTRON } from '../../app.constants';
-import { SyncStatus } from '../../pfapi/api';
 import { Log } from '../log';
-import { download } from '../../util/download';
-import { AppDataCompleteNew } from '../../pfapi/pfapi-config';
 import { T } from '../../t.const';
 import { DEFAULT_META_MODEL } from '../../pfapi/api/model-ctrl/meta-model-ctrl';
 import { BannerId } from '../banner/banner.model';
@@ -44,10 +40,12 @@ const DEFERRED_INIT_DELAY_MS = 1000;
   providedIn: 'root',
 })
 export class StartupService {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _persistenceLocalService = inject(PersistenceLocalService);
-  private _persistenceLegacyService = inject(PersistenceLegacyService);
   private _pfapiService = inject(PfapiService);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _imexMetaService = inject(ImexViewService);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _translateService = inject(TranslateService);
   private _localBackupService = inject(LocalBackupService);
   private _globalConfigService = inject(GlobalConfigService);
@@ -89,7 +87,7 @@ export class StartupService {
   }
 
   init(): void {
-    this._checkMigrationAndInitBackups();
+    this._initBackups();
     this._requestPersistence();
 
     // deferred init
@@ -148,93 +146,18 @@ export class StartupService {
     }
   }
 
-  private async _checkMigrationAndInitBackups(): Promise<void> {
-    const MIGRATED_VAL = 42;
-    const lastLocalSyncModelChange =
-      await this._persistenceLocalService.loadLastSyncModelChange();
-    // CHECK AND DO MIGRATION
-    // ---------------------
-    if (
-      typeof lastLocalSyncModelChange === 'number' &&
-      lastLocalSyncModelChange > MIGRATED_VAL
-    ) {
-      // disable sync until reload
-      this._pfapiService.pf.sync = () => Promise.resolve({ status: SyncStatus.InSync });
-      this._imexMetaService.setDataImportInProgress(true);
+  private async _initBackups(): Promise<void> {
+    // if everything is normal, check for TMP stray backup
+    await this._pfapiService.isCheckForStrayLocalTmpDBBackupAndImport();
 
-      const legacyData = await this._persistenceLegacyService.loadComplete();
-      Log.log({ legacyData: legacyData });
-
-      alert(this._translateService.instant(T.MIGRATE.DETECTED_LEGACY));
-
-      if (
-        !IS_ANDROID_WEB_VIEW &&
-        confirm(this._translateService.instant(T.MIGRATE.C_DOWNLOAD_BACKUP))
-      ) {
-        try {
-          await download('sp-legacy-backup.json', JSON.stringify(legacyData));
-        } catch (e) {
-          Log.error(e);
-        }
+    // if completely fresh instance check for local backups
+    if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
+      const meta = await this._pfapiService.pf.metaModel.load();
+      if (!meta || meta.lastUpdate === DEFAULT_META_MODEL.lastUpdate) {
+        await this._localBackupService.askForFileStoreBackupIfAvailable();
       }
-      try {
-        await this._pfapiService.importCompleteBackup(
-          legacyData as unknown as AppDataCompleteNew,
-          true,
-          true,
-        );
-        this._imexMetaService.setDataImportInProgress(true);
-        await this._persistenceLocalService.updateLastSyncModelChange(MIGRATED_VAL);
-
-        alert(this._translateService.instant(T.MIGRATE.SUCCESS));
-
-        if (IS_ELECTRON) {
-          window.ea.relaunch();
-          // if relaunch fails we hard close the app
-          window.setTimeout(() => window.ea.exit(1234), 1000);
-        }
-        window.location.reload();
-        // fallback
-        window.setTimeout(
-          () => alert(this._translateService.instant(T.MIGRATE.E_RESTART_FAILED)),
-          2000,
-        );
-      } catch (error) {
-        // prevent any interaction with the app on after failure
-        this._imexMetaService.setDataImportInProgress(true);
-        Log.err(error);
-
-        try {
-          alert(
-            this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
-              '\n\n' +
-              JSON.stringify(
-                (error as { additionalLog?: Array<{ errors: unknown }> })
-                  .additionalLog?.[0]?.errors,
-              ),
-          );
-        } catch (e) {
-          alert(
-            this._translateService.instant(T.MIGRATE.E_MIGRATION_FAILED) +
-              '\n\n' +
-              error?.toString(),
-          );
-        }
-        return;
-      }
-    } else {
-      // if everything is normal, check for TMP stray backup
-      await this._pfapiService.isCheckForStrayLocalTmpDBBackupAndImport();
-
-      // if completely fresh instance check for local backups
-      if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
-        const meta = await this._pfapiService.pf.metaModel.load();
-        if (!meta || meta.lastUpdate === DEFAULT_META_MODEL.lastUpdate) {
-          await this._localBackupService.askForFileStoreBackupIfAvailable();
-        }
-        // trigger backup init after
-        this._localBackupService.init();
-      }
+      // trigger backup init after
+      this._localBackupService.init();
     }
   }
 
