@@ -22,6 +22,7 @@ import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { addTag } from '../store/tag.actions';
 
 @Component({
   selector: 'dialog-edit-tags',
@@ -84,7 +85,10 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
     };
 
     const tag = this._tagService.createTagObject({ title: cleanTitle(title) });
-    this._store.dispatch(TaskSharedActions.addTagToTask({ tag, taskId: this.task.id }));
+    this._store.dispatch(addTag({ tag }));
+    this._store.dispatch(
+      TaskSharedActions.addTagToTask({ tagId: tag.id, taskId: this.task.id }),
+    );
   }
 
   removeTag(id: string): void {

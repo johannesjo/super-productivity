@@ -7,7 +7,7 @@ import {
 } from './menu-tree.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { createMockProject } from '../../../root-store/meta/task-shared-meta-reducers/test-utils';
-import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
+import { addTag, deleteTag, deleteTags } from '../../tag/store/tag.actions';
 import { DEFAULT_TAG } from '../../tag/tag.const';
 import { Tag } from '../../tag/tag.model';
 
@@ -134,7 +134,7 @@ describe('menuTreeReducer', () => {
     expect(result.tagTree.find((node) => node.id === 'tag-keep-root')).toBe(keepRoot);
   });
 
-  describe('addTagToTask', () => {
+  describe('addTag', () => {
     const createMockTag = (id: string): Tag => ({
       ...DEFAULT_TAG,
       id,
@@ -149,10 +149,7 @@ describe('menuTreeReducer', () => {
       };
 
       const newTag = createMockTag('new-tag');
-      const result = menuTreeReducer(
-        state,
-        TaskSharedActions.addTagToTask({ tag: newTag, taskId: 'task-1' }),
-      );
+      const result = menuTreeReducer(state, addTag({ tag: newTag }));
 
       expect(result.tagTree.length).toBe(2);
       expect(result.tagTree[0]).toBe(existingTag);
@@ -167,10 +164,7 @@ describe('menuTreeReducer', () => {
       };
 
       const tag = createMockTag('existing-tag');
-      const result = menuTreeReducer(
-        state,
-        TaskSharedActions.addTagToTask({ tag, taskId: 'task-1' }),
-      );
+      const result = menuTreeReducer(state, addTag({ tag }));
 
       expect(result.tagTree.length).toBe(1);
       expect(result).toBe(state);
@@ -185,10 +179,7 @@ describe('menuTreeReducer', () => {
       };
 
       const tag = createMockTag('nested-tag');
-      const result = menuTreeReducer(
-        state,
-        TaskSharedActions.addTagToTask({ tag, taskId: 'task-1' }),
-      );
+      const result = menuTreeReducer(state, addTag({ tag }));
 
       // Should not add since tag exists in folder
       expect(result.tagTree.length).toBe(1);
@@ -202,10 +193,7 @@ describe('menuTreeReducer', () => {
       };
 
       const newTag = createMockTag('first-tag');
-      const result = menuTreeReducer(
-        state,
-        TaskSharedActions.addTagToTask({ tag: newTag, taskId: 'task-1' }),
-      );
+      const result = menuTreeReducer(state, addTag({ tag: newTag }));
 
       expect(result.tagTree.length).toBe(1);
       expect(result.tagTree[0]).toEqual({ k: MenuTreeKind.TAG, id: 'first-tag' });

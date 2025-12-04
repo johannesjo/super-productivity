@@ -31,7 +31,6 @@ import {
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Log } from '../../../core/log';
-import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -336,13 +335,7 @@ export const tagReducer = createReducer<TagState>(
     );
   }),
 
-  on(TaskSharedActions.addTagToTask, (state: TagState, { tag }) => {
-    // Only add tag if it doesn't already exist (handles existing tag assignment)
-    if (state.entities[tag.id]) {
-      return state;
-    }
-    return tagAdapter.addOne(tag, state);
-  }),
+  // addTagToTask no longer creates tags - use TagActions.addTag first if needed
 
   // TASK STUFF
   // ---------

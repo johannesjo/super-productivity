@@ -8,7 +8,7 @@ import {
   updateFolder,
 } from './menu-tree.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
+import { addTag, deleteTag, deleteTags } from '../../tag/store/tag.actions';
 
 export const menuTreeFeatureKey = 'menuTree';
 
@@ -186,8 +186,8 @@ export const menuTreeReducer = createReducer(
     ...state,
     tagTree: _deleteItemsFromTree(state.tagTree, ids, MenuTreeKind.TAG),
   })),
-  on(TaskSharedActions.addTagToTask, (state, { tag }) => {
-    // Only add to tree if tag doesn't already exist (handles existing tag assignment)
+  on(addTag, (state, { tag }) => {
+    // Only add to tree if tag doesn't already exist
     if (_itemExistsInTree(state.tagTree, tag.id, MenuTreeKind.TAG)) {
       return state;
     }

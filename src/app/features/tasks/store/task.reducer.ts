@@ -515,14 +515,14 @@ export const taskReducer = createReducer<TaskState>(
 
   // TAG STUFF
   // ---------
-  on(TaskSharedActions.addTagToTask, (state, { taskId, tag }) => {
+  on(TaskSharedActions.addTagToTask, (state, { taskId, tagId }) => {
     const task = state.entities[taskId];
     if (!task) return state;
     return taskAdapter.updateOne(
       {
         id: taskId,
         changes: {
-          tagIds: unique([...task.tagIds, tag.id]),
+          tagIds: unique([...task.tagIds, tagId]),
         },
       },
       state,
