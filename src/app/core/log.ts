@@ -299,50 +299,50 @@ export class Log {
         console.log(contextPrefix, ...args);
       },
       err: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.ERROR) {
+        if (this.level >= LogLevel.ERROR) {
           this.recordLog('ERROR', context, args);
           console.error(contextPrefix, ...args);
         }
       },
       log: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.NORMAL) {
+        if (this.level >= LogLevel.NORMAL) {
           this.recordLog('LOG', context, args);
           console.log(contextPrefix, ...args);
         }
       },
       info: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.NORMAL) {
+        if (this.level >= LogLevel.NORMAL) {
           this.recordLog('INFO', context, args);
           console.info(contextPrefix, ...args);
         }
       },
       verbose: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.VERBOSE) {
+        if (this.level >= LogLevel.VERBOSE) {
           this.recordLog('VERBOSE', context, args);
           console.log(contextPrefix, ...args);
         }
       },
       debug: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.DEBUG) {
+        if (this.level >= LogLevel.DEBUG) {
           this.recordLog('DEBUG', context, args);
           console.debug(contextPrefix, ...args);
         }
       },
       // Backwards compatibility aliases
       error: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.ERROR) {
+        if (this.level >= LogLevel.ERROR) {
           this.recordLog('ERROR', context, args);
           console.error(contextPrefix, ...args);
         }
       },
       normal: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.NORMAL) {
+        if (this.level >= LogLevel.NORMAL) {
           this.recordLog('LOG', context, args);
           console.log(contextPrefix, ...args);
         }
       },
       warn: (...args: unknown[]) => {
-        if (LOG_LEVEL >= LogLevel.ERROR) {
+        if (this.level >= LogLevel.ERROR) {
           this.recordLog('WARN', context, args);
           console.warn(contextPrefix, ...args);
         }

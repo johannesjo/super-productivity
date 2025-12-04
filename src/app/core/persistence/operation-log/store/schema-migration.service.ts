@@ -7,6 +7,7 @@ import { PFLog } from '../../../log';
  * Increment this when making breaking changes to the state structure.
  */
 export const CURRENT_SCHEMA_VERSION = 1;
+export const MAX_VERSION_SKIP = 5;
 
 /**
  * Interface for state cache that may need migration.

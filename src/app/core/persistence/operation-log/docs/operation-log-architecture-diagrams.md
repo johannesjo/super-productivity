@@ -207,6 +207,9 @@ graph TD
 
 Ensures that operations occurring after a snapshot ("Tail Ops") are migrated to the current version before being applied to the migrated state.
 
+<details>
+<summary>Sequence Diagram</summary>
+
 ```mermaid
 sequenceDiagram
     participant IDB as IndexedDB (SUP_OPS)
@@ -244,9 +247,50 @@ sequenceDiagram
     Note over Store: State matches V2 Schema<br/>Consistency Preserved
 ```
 
+</details>
+
+<details>
+<summary>Flowchart Diagram</summary>
+
+```mermaid
+graph TD
+    subgraph "Hydration & Migration"
+        direction TB
+        Start((App Start)) --> LoadSnap[Load Snapshot<br/>(Version V1)]
+        LoadSnap --> CheckVer{Schema<br/>Version?}
+
+        CheckVer -- Match --> LoadState
+        CheckVer -- Old --> MigrateSnap["migrateIfNeeded()<br/>Upgrade V1 -> V2"]
+        MigrateSnap --> LoadState[Init NgRx State<br/>(Version V2)]
+
+        LoadState --> LoadTail[Load Tail Ops<br/>(Version V1)]
+        LoadTail --> Iterate{Next Op?}
+
+        Iterate -- No --> Done((Ready))
+        Iterate -- Yes --> MigOp["migrateOperation(Op V1)"]
+
+        MigOp --> NullCheck{Result?}
+        NullCheck -- Null --> Drop[Drop Op]
+        NullCheck -- Valid --> Apply[Apply Op V2]
+
+        Drop --> Iterate
+        Apply --> Iterate
+    end
+
+    classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px;
+    classDef decision fill:#fff,stroke:#333,stroke-width:2px;
+    class LoadSnap,MigrateSnap,LoadState,LoadTail,MigOp,Apply process;
+    class CheckVer,Iterate,NullCheck decision;
+```
+
+</details>
+
 ### 4.2 Receiver-Side Sync Migration
 
 Demonstrates how a client on V2 handles incoming data from a client still on V1.
+
+<details>
+<summary>Sequence Diagram</summary>
 
 ```mermaid
 sequenceDiagram
@@ -273,6 +317,44 @@ sequenceDiagram
         Local->>Local: Apply Operation (V2)
     end
 ```
+
+</details>
+
+<details>
+<summary>Flowchart Diagram</summary>
+
+```mermaid
+graph TD
+    subgraph "Remote"
+        RemoteClient["Remote Client<br/>(Version V1)"] -->|Upload| Server[(Server)]
+    end
+
+    subgraph "Local Client (Version V2)"
+        Server -->|Download| InOp[Incoming Op<br/>(Version V1)]
+        InOp --> CheckSchema{Schema<br/>Check}
+
+        CheckSchema -- "V1 < V2" --> Migrate["migrateOperation()<br/>Upgrade V1 -> V2"]
+        CheckSchema -- "V1 == V2" --> Conflict
+
+        Migrate --> NullCheck{Result?}
+        NullCheck -- Null --> Discard[Discard Op]
+        NullCheck -- Valid --> Conflict
+
+        Conflict{"Conflict<br/>Detection"}
+        Conflict -- "No Conflict" --> Apply[Apply Op V2]
+        Conflict -- "Conflict" --> Resolve[Resolution Dialog]
+    end
+
+    classDef remote fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
+    classDef local fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef decision fill:#fff,stroke:#333,stroke-width:2px;
+
+    class RemoteClient,Server remote;
+    class InOp,Migrate,Apply,Resolve,Discard local;
+    class CheckSchema,NullCheck,Conflict decision;
+```
+
+</details>
 
 ## 5. Hybrid Manifest (File-Based Sync)
 
@@ -502,12 +584,3 @@ flowchart TD
     style Trigger fill:#ffebee,stroke:#c62828,stroke-width:2px
     style UpdateMan fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 ```
-
-### 6.6 Request Count Comparison
-
-| Scenario             | Old (v1)               | Hybrid (v2)                      | Savings |
-| -------------------- | ---------------------- | -------------------------------- | ------- |
-| Small sync (1-5 ops) | 3 requests             | **1 request**                    | 67%     |
-| Buffer overflow      | 3 requests             | **2 requests**                   | 33%     |
-| Fresh install        | N requests (all files) | **2 requests** (snap + manifest) | ~95%    |
-| No changes           | 1 request (manifest)   | **1 request** (manifest)         | Same    |

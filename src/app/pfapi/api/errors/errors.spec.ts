@@ -1,4 +1,5 @@
 import { DataValidationFailedError, HttpNotOkAPIError } from './errors';
+import { Log, LogLevel } from '../../../core/log';
 
 describe('HttpNotOkAPIError', () => {
   it('should successfully strip script tags (fix "kt toast" issue)', () => {
@@ -31,6 +32,10 @@ describe('HttpNotOkAPIError', () => {
 describe('DataValidationFailedError', () => {
   let consoleLogSpy: jasmine.Spy;
   let consoleErrorSpy: jasmine.Spy;
+
+  beforeAll(() => {
+    Log.setLevel(LogLevel.DEBUG);
+  });
 
   beforeEach(() => {
     consoleLogSpy = spyOn(console, 'log');
