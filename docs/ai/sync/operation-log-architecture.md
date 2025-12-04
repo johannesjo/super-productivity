@@ -1,8 +1,8 @@
 # Operation Log Architecture
 
-**Status:** Parts A, B, D Complete; Part C Design Only
+**Status:** Parts A, B, C, D Complete
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 3, 2025 (A.7.12, A.7.13, A.7.15 implemented)
+**Last Updated:** December 4, 2025 (Part C implemented)
 
 ---
 
@@ -10,12 +10,12 @@
 
 The Operation Log serves **four distinct purposes**:
 
-| Purpose                    | Description                                   | Status         |
-| -------------------------- | --------------------------------------------- | -------------- |
-| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅    |
-| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅    |
-| **C. Server Sync**         | Upload/download individual operations         | Design Only 📋 |
-| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅    |
+| Purpose                    | Description                                   | Status      |
+| -------------------------- | --------------------------------------------- | ----------- |
+| **A. Local Persistence**   | Fast writes, crash recovery, event sourcing   | Complete ✅ |
+| **B. Legacy Sync Bridge**  | Vector clock updates for PFAPI sync detection | Complete ✅ |
+| **C. Server Sync**         | Upload/download individual operations         | Complete ✅ |
+| **D. Validation & Repair** | Prevent corruption, auto-repair invalid state | Complete ✅ |
 
 > **✅ Migration Ready**: Migration safety (A.7.12), tail ops consistency (A.7.13), and unified migration interface (A.7.15) are now implemented. The system is ready for schema migrations when `CURRENT_SCHEMA_VERSION > 1`.
 
@@ -1255,9 +1255,7 @@ async downloadRemoteOps(syncProvider: OperationSyncCapable): Promise<void> {
 
 ## C.3 File-Based Sync Fallback
 
-THE ACTUAL SYNC PROTOCOL WORKS NOT LIKE THIS. THIS IS JUST AN IDEA if we later want to connect the two approaches.
-
-For providers without API support (WebDAV/Dropbox), operations are synced via files:
+For providers without API support (WebDAV/Dropbox), operations are synced via files (`OperationLogUploadService` and `OperationLogDownloadService` handle this transparently):
 
 ```
 ops/
@@ -1267,7 +1265,7 @@ ops/
 └── ops_CLIENT2_1701234600000.json
 ```
 
-The manifest tracks which operation files exist. Each file contains a batch of operations.
+The manifest tracks which operation files exist. Each file contains a batch of operations. The system supports both API-based sync and this file-based fallback.
 
 ## C.4 Conflict Detection
 
@@ -1495,9 +1493,26 @@ export class ValidateStateService {
     const typiaResult = validateAllData(state);
 
     // 2. Run cross-model relationship validation
-    const isRelatedValid = isRelatedModelDataValid(state);
+    //    NOTE: isRelatedModelDataValid errors are now caught and treated as validation failures
+    //    rather than crashing, allowing validateAndRepair to trigger dataRepair.
+    let isRelatedValid = true;
+    try {
+      isRelatedValid = isRelatedModelDataValid(state);
+    } catch (e) {
+      PFLog.warn(
+        'isRelatedModelDataValid threw an error, treating as validation failure',
+        e,
+      );
+      isRelatedValid = false;
+    }
 
-    return { isValid, typiaErrors, crossModelError };
+    return {
+      isValid,
+      typiaErrors,
+      crossModelError: !isRelatedValid
+        ? 'isRelatedModelDataValid threw error'
+        : undefined,
+    };
   }
 
   validateAndRepair(state: AppDataCompleteNew): ValidateAndRepairResult {
@@ -1638,19 +1653,19 @@ What if data exists in both `pf` AND `SUP_OPS` databases?
 
 ## Part C: Server Sync
 
-### Design Only 📋
-
-The following are **documented designs**, not implemented code:
+### Complete ✅
 
 - Operation sync protocol interface (`OperationSyncCapable`)
-- Upload/download flows (C.2)
-- File-based sync fallback (C.3) - explicitly marked as "JUST AN IDEA"
-- Entity-level conflict detection (C.4)
-- Conflict resolution dialog (C.5)
-- Dependency resolution with retry queue (C.6)
+- `OperationLogSyncService` (orchestration, processRemoteOps, detectConflicts)
+- `OperationLogUploadService` (API upload + file-based fallback)
+- `OperationLogDownloadService` (API download + file-based fallback)
+- Entity-level conflict detection (vector clock comparisons)
+- `ConflictResolutionService` (UI presentation + apply resolutions)
+- `DependencyResolverService` (extract/check dependencies)
+- `OperationApplierService` (retry queue + topological sort)
 - Rejected operation tracking (`rejectedAt` field)
 
-> **Clarification**: Part C describes a future server-based sync system. The current app uses Part B (Legacy Sync Bridge) for WebDAV/Dropbox/LocalFile sync.
+> **Clarification**: Part C describes the server-based sync system. While fully implemented in the core, it is currently utilized by the new sync providers (when configured) alongside the legacy sync bridge.
 
 ## Part D: Validation & Repair
 
