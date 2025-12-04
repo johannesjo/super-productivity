@@ -16,7 +16,7 @@ export const PlannerActions = createActionGroup({
         entityType: 'PLANNER',
         entityId: plannerProps.day,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Internal cleanup action - no persistence
@@ -41,7 +41,7 @@ export const PlannerActions = createActionGroup({
         entityType: 'PLANNER',
         entityId: plannerProps.task.id,
         opType: OpType.Move,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     'Move In List': (plannerProps: {
@@ -55,7 +55,7 @@ export const PlannerActions = createActionGroup({
         entityType: 'PLANNER',
         entityId: plannerProps.targetDay,
         opType: OpType.Move,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     'Move Before Task': (plannerProps: { fromTask: TaskCopy; toTaskId: string }) => ({
@@ -65,7 +65,7 @@ export const PlannerActions = createActionGroup({
         entityType: 'PLANNER',
         entityId: plannerProps.fromTask.id,
         opType: OpType.Move,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     'Plan Task for Day': (plannerProps: {
@@ -80,7 +80,7 @@ export const PlannerActions = createActionGroup({
         entityType: 'PLANNER',
         entityId: plannerProps.task.id,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // UI state action - no persistence

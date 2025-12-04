@@ -1,4 +1,4 @@
-import { createAction, props } from '@ngrx/store';
+import { createAction } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Tag } from '../tag.model';
 import { WorkContextAdvancedCfgKey } from '../../work-context/work-context.model';
@@ -12,7 +12,7 @@ export const addTag = createAction('[Tag] Add Tag', (tagProps: { tag: Tag }) => 
     entityType: 'TAG',
     entityId: tagProps.tag.id,
     opType: OpType.Create,
-  } as PersistentActionMeta,
+  } satisfies PersistentActionMeta,
 }));
 
 export const updateTag = createAction(
@@ -24,11 +24,9 @@ export const updateTag = createAction(
       entityType: 'TAG',
       entityId: tagProps.tag.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
-
-export const upsertTag = createAction('[Tag] Upsert Tag', props<{ tag: Tag }>());
 
 export const deleteTag = createAction('[Tag] Delete Tag', (tagProps: { id: string }) => ({
   ...tagProps,
@@ -37,7 +35,7 @@ export const deleteTag = createAction('[Tag] Delete Tag', (tagProps: { id: strin
     entityType: 'TAG',
     entityId: tagProps.id,
     opType: OpType.Delete,
-  } as PersistentActionMeta,
+  } satisfies PersistentActionMeta,
 }));
 
 export const deleteTags = createAction(
@@ -50,7 +48,7 @@ export const deleteTags = createAction(
       entityIds: tagProps.ids,
       opType: OpType.Delete,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -64,7 +62,7 @@ export const updateTagOrder = createAction(
       entityIds: tagProps.ids,
       opType: OpType.Move,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -77,6 +75,6 @@ export const updateAdvancedConfigForTag = createAction(
       entityType: 'TAG',
       entityId: tagProps.tagId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

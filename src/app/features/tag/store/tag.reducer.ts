@@ -26,7 +26,6 @@ import {
   updateAdvancedConfigForTag,
   updateTag,
   updateTagOrder,
-  upsertTag,
 } from './tag.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
@@ -297,8 +296,6 @@ export const tagReducer = createReducer<TagState>(
   on(addTag, (state: TagState, { tag }) => tagAdapter.addOne(tag, state)),
 
   on(updateTag, (state: TagState, { tag }) => tagAdapter.updateOne(tag, state)),
-
-  on(upsertTag, (state: TagState, { tag }) => tagAdapter.upsertOne(tag, state)),
 
   on(deleteTag, (state: TagState, { id }) => tagAdapter.removeOne(id, state)),
 

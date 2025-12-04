@@ -1,5 +1,4 @@
 import { IssueProviderKey } from '../issue/issue.model';
-import { Reminder } from '../reminder/reminder.model';
 import { EntityState } from '@ngrx/entity';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 // Import the unified Task type from plugin-api
@@ -97,7 +96,9 @@ export interface TaskCopy
   modified?: number;
   doneOn?: number;
   parentId?: string;
+  /** @deprecated Use remindAt instead. Kept for migration compatibility. */
   reminderId?: string;
+  remindAt?: number;
   repeatCfgId?: string;
   _hideSubTasksMode?: HideSubTasksMode;
 }
@@ -113,13 +114,12 @@ export type ArchiveTask = Readonly<TaskCopy>;
 export type Task = Readonly<TaskCopy>;
 
 export interface TaskWithReminderData extends Task {
-  readonly reminderData: Reminder;
+  readonly reminderData: { remindAt: number };
   readonly parentData?: Task;
 }
 
 export interface TaskWithReminder extends Task {
-  reminderId: string;
-  dueWithTime: number;
+  remindAt: number;
 }
 
 export interface TaskWithDueTime extends Task {
@@ -133,8 +133,7 @@ export interface TaskWithDueDay extends Task {
 export type TaskPlannedWithDayOrTime = TaskWithDueTime | TaskWithDueDay;
 
 export interface TaskWithoutReminder extends Task {
-  reminderId: undefined;
-  due: undefined;
+  remindAt: undefined;
 }
 
 export interface TaskWithPlannedForDayIndication extends TaskWithoutReminder {

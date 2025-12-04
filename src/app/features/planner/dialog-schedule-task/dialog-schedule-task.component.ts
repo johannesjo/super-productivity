@@ -25,7 +25,6 @@ import { PlannerActions } from '../store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { SnackService } from '../../../core/snack/snack.service';
-import { removeReminderFromTask } from '../../tasks/store/task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { truncate } from '../../../util/truncate';
 import { TASK_REMINDER_OPTIONS } from './task-reminder-options.const';
@@ -278,7 +277,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
-          reminderId: this.data.task.reminderId,
         }),
       );
     } else if (this.plannedDayForTask === getDbDateStr()) {
@@ -286,7 +284,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
-          reminderId: this.data.task.reminderId,
           isSkipToast: true,
         }),
       );
@@ -300,7 +297,6 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
-          reminderId: this.data.task.reminderId,
           isSkipToast: true,
         }),
       );
@@ -392,11 +388,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       typeof this.data.task.reminderId === 'string'
     ) {
       this._store.dispatch(
-        removeReminderFromTask({
-          id: this.data.task.id,
-          reminderId: this.data.task.reminderId,
-          isSkipToast: true,
-          isLeaveDueTime: true,
+        TaskSharedActions.updateTask({
+          task: {
+            id: this.data.task.id,
+            changes: {
+              remindAt: undefined,
+            },
+          },
         }),
       );
     }

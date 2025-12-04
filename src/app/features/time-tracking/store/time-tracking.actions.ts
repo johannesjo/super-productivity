@@ -42,6 +42,6 @@ export const syncTimeSpent = createAction(
       entityType: 'TASK',
       entityId: actionProps.taskId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

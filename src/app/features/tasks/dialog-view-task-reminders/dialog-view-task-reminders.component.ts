@@ -13,7 +13,6 @@ import {
   MatDialogRef,
   MatDialogTitle,
 } from '@angular/material/dialog';
-import { Reminder } from '../../reminder/reminder.model';
 import { Task, TaskWithReminderData } from '../task.model';
 import { TaskService } from '../task.service';
 import { BehaviorSubject, combineLatest, Observable, Subscription } from 'rxjs';
@@ -71,23 +70,25 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   private _store = inject(Store);
   private _reminderService = inject(ReminderService);
   data = inject<{
-    reminders: Reminder[];
+    reminders: TaskWithReminderData[];
   }>(MAT_DIALOG_DATA);
 
   T: typeof T = T;
   isDisableControls: boolean = false;
-  reminders$: BehaviorSubject<Reminder[]> = new BehaviorSubject(this.data.reminders);
-  tasks$: Observable<TaskWithReminderData[]> = this.reminders$.pipe(
-    switchMap((reminders) =>
-      this._taskService.getByIdsLive$(reminders.map((r) => r.relatedId)).pipe(
+  taskIds$: BehaviorSubject<string[]> = new BehaviorSubject(
+    this.data.reminders.map((r) => r.id),
+  );
+  tasks$: Observable<TaskWithReminderData[]> = this.taskIds$.pipe(
+    switchMap((taskIds) =>
+      this._taskService.getByIdsLive$(taskIds).pipe(
         first(),
         map((tasks: Task[]) =>
           tasks
-            .filter((task) => !!task)
+            .filter((task) => !!task && typeof task.remindAt === 'number')
             .map(
               (task): TaskWithReminderData => ({
                 ...task,
-                reminderData: reminders.find((r) => r.relatedId === task.id) as Reminder,
+                reminderData: { remindAt: task.remindAt as number },
               }),
             ),
         ),
@@ -114,15 +115,9 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   private _subs: Subscription = new Subscription();
 
   constructor() {
-    // this._matDialogRef.disableClose = true;
-    this._subs.add(
-      this._reminderService.onReloadModel$.subscribe(() => {
-        this._close();
-      }),
-    );
     this._subs.add(
       this._reminderService.onRemindersActive$.subscribe((reminders) => {
-        this.reminders$.next(reminders);
+        this.taskIds$.next(reminders.map((r) => r.id));
       }),
     );
     this._subs.add(
@@ -143,42 +138,41 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         },
       }),
     );
-    if (task.reminderId) {
-      this._removeReminderFromList(task.reminderId as string);
-    }
+    this._removeTaskFromList(task.id);
   }
 
   dismiss(task: TaskWithReminderData): void {
-    // const now = Date.now();
     if (task.projectId || task.parentId || task.tagIds.length > 0) {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: task.id,
-          reminderId: task.reminderId as string,
         }),
       );
-      this._removeReminderFromList(task.reminderId as string);
+      this._removeTaskFromList(task.id);
     }
   }
 
   dismissReminderOnly(task: TaskWithReminderData): void {
-    if (task.reminderId) {
-      this._store.dispatch(
-        TaskSharedActions.dismissReminderOnly({
-          id: task.id,
-          reminderId: task.reminderId as string,
-        }),
-      );
-      this._removeReminderFromList(task.reminderId as string);
-    }
+    this._store.dispatch(
+      TaskSharedActions.dismissReminderOnly({
+        id: task.id,
+      }),
+    );
+    this._removeTaskFromList(task.id);
   }
 
   snooze(task: TaskWithReminderData, snoozeInMinutes: number): void {
-    this._reminderService.updateReminder(task.reminderData.id, {
-      // prettier-ignore
-      remindAt: Date.now() + (snoozeInMinutes * MINUTES_TO_MILLISECONDS),
-    });
-    this._removeReminderFromList(task.reminderId as string);
+    const snoozeMs = snoozeInMinutes * MINUTES_TO_MILLISECONDS;
+    const newRemindAt = Date.now() + snoozeMs;
+    this._store.dispatch(
+      TaskSharedActions.reScheduleTaskWithTime({
+        task,
+        dueWithTime: task.dueWithTime || newRemindAt,
+        remindAt: newRemindAt,
+        isMoveToBacklog: false,
+      }),
+    );
+    this._removeTaskFromList(task.id);
   }
 
   planForTomorrow(task: TaskWithReminderData): void {
@@ -189,7 +183,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         isShowSnack: true,
       }),
     );
-    this._removeReminderFromList(task.reminderId as string);
+    this._removeTaskFromList(task.id);
   }
 
   editReminder(task: TaskWithReminderData, isCloseAfter: boolean = false): void {
@@ -202,7 +196,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         .afterClosed()
         .subscribe((wasEdited) => {
           if (wasEdited) {
-            this._removeReminderFromList(task.reminderId as string);
+            this._removeTaskFromList(task.id);
           }
           if (isCloseAfter) {
             this._close();
@@ -219,13 +213,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   // ------------
   snoozeAll(snoozeInMinutes: number): void {
     this._prepareForBulkAction();
-    this.reminders$.getValue().forEach((reminder) => {
-      this._reminderService.updateReminder(reminder.id, {
-        // prettier-ignore
-        remindAt: Date.now() + (snoozeInMinutes * MINUTES_TO_MILLISECONDS),
-      });
-    });
-    this._finalizeBulkAction();
+    this._subs.add(
+      this.tasks$.pipe(first()).subscribe((tasks) => {
+        tasks.forEach((task) => this.snooze(task, snoozeInMinutes));
+        this._finalizeBulkAction();
+      }),
+    );
   }
 
   rescheduleAllUntilTomorrow(): void {
@@ -251,7 +244,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async addAllToToday(): Promise<void> {
     this._prepareForBulkAction();
-    const selectedTasks = await this._getTasksFromReminderList();
+    const selectedTasks = await this._getTasksFromList();
 
     this._store.dispatch(
       TaskSharedActions.planTasksForToday({
@@ -268,7 +261,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async dismissAll(): Promise<void> {
     this._prepareForBulkAction();
-    const tasks = await this._getTasksFromReminderList();
+    const tasks = await this._getTasksFromList();
     tasks.forEach((task) => {
       if (task.projectId || task.parentId || task.tagIds.length > 0) {
         this.dismiss(task);
@@ -279,7 +272,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async dismissAllRemindersOnly(): Promise<void> {
     this._prepareForBulkAction();
-    const tasks = await this._getTasksFromReminderList();
+    const tasks = await this._getTasksFromList();
     tasks.forEach((task) => {
       this.dismissReminderOnly(task);
     });
@@ -307,9 +300,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   markTaskAsDone(task: TaskWithReminderData): void {
     this._taskService.setDone(task.id);
-    if (task.reminderId) {
-      this._removeReminderFromList(task.reminderId as string);
-    }
+    this._removeTaskFromList(task.id);
   }
 
   async markAllAsDone(): Promise<void> {
@@ -318,7 +309,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
 
   async markAllTasksAsDone(): Promise<void> {
     this._prepareForBulkAction();
-    const tasks = await this._getTasksFromReminderList();
+    const tasks = await this._getTasksFromList();
     tasks.forEach((task) => {
       this._taskService.setDone(task.id);
     });
@@ -332,18 +323,16 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     this._matDialogRef.close();
   }
 
-  private _removeReminderFromList(reminderId: string): void {
-    const newReminders = this.reminders$
-      .getValue()
-      .filter((reminder) => reminder.id !== reminderId);
-    if (newReminders.length <= 0) {
+  private _removeTaskFromList(taskId: string): void {
+    const newTaskIds = this.taskIds$.getValue().filter((id) => id !== taskId);
+    if (newTaskIds.length <= 0) {
       this._close();
     } else {
-      this.reminders$.next(newReminders);
+      this.taskIds$.next(newTaskIds);
     }
   }
 
-  private async _getTasksFromReminderList(): Promise<TaskWithReminderData[]> {
+  private async _getTasksFromList(): Promise<TaskWithReminderData[]> {
     return (await this.tasks$.pipe(first()).toPromise()) as TaskWithReminderData[];
   }
 

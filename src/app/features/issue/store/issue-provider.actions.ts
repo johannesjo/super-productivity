@@ -19,7 +19,7 @@ export const IssueProviderActions = createActionGroup({
         entityType: 'ISSUE_PROVIDER',
         entityId: providerProps.issueProvider.id,
         opType: OpType.Create,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Upsert is typically used for sync/import, so no persistence metadata
@@ -40,7 +40,7 @@ export const IssueProviderActions = createActionGroup({
         entityType: 'ISSUE_PROVIDER',
         entityId: providerProps.issueProvider.id as string,
         opType: OpType.Update,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Bulk update is typically used for sync/import, so no persistence metadata
@@ -54,7 +54,7 @@ export const IssueProviderActions = createActionGroup({
         entityIds: providerProps.ids,
         opType: OpType.Move,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     'Delete IssueProvider': (providerProps: { id: string }) => ({
@@ -64,7 +64,7 @@ export const IssueProviderActions = createActionGroup({
         entityType: 'ISSUE_PROVIDER',
         entityId: providerProps.id,
         opType: OpType.Delete,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     'Delete IssueProviders': (providerProps: { ids: string[] }) => ({
@@ -75,7 +75,7 @@ export const IssueProviderActions = createActionGroup({
         entityIds: providerProps.ids,
         opType: OpType.Delete,
         isBulk: true,
-      } as PersistentActionMeta,
+      } satisfies PersistentActionMeta,
     }),
 
     // Internal cleanup action - no persistence

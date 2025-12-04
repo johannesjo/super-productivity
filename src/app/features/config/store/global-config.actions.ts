@@ -16,6 +16,6 @@ export const updateGlobalConfigSection = createAction(
       entityType: 'GLOBAL_CONFIG',
       entityId: configProps.sectionKey, // Use section key as entity ID
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

@@ -23,14 +23,6 @@ export const setSelectedTask = createAction(
 
 export const unsetCurrentTask = createAction('[Task] UnsetCurrentTask');
 
-export const addReminderIdToTask = createAction(
-  '[Task] Add ReminderId to Task',
-  props<{
-    taskId: string;
-    reminderId: string;
-  }>(),
-);
-
 export const __updateMultipleTaskSimple = createAction(
   '[Task] Update multiple Tasks (simple)',
   props<{
@@ -137,17 +129,6 @@ export const removeTimeSpent = createAction(
       opType: OpType.Update,
     } as PersistentActionMeta,
   }),
-);
-
-export const removeReminderFromTask = createAction(
-  '[Task] Remove Reminder',
-
-  props<{
-    id: string;
-    reminderId: string;
-    isSkipToast?: boolean;
-    isLeaveDueTime?: boolean;
-  }>(),
 );
 
 export const addSubTask = createAction(

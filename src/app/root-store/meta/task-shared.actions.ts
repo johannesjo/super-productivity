@@ -126,7 +126,6 @@ export const TaskSharedActions = createActionGroup({
 
     unscheduleTask: (taskProps: {
       id: string;
-      reminderId?: string;
       isSkipToast?: boolean;
       isLeaveInToday?: boolean;
     }) => ({
@@ -139,7 +138,7 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    dismissReminderOnly: (taskProps: { id: string; reminderId: string }) => ({
+    dismissReminderOnly: (taskProps: { id: string }) => ({
       ...taskProps,
       meta: {
         isPersistent: true,
