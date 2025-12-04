@@ -5,6 +5,7 @@ import {
   TaskState,
   TaskWithDueDay,
   TaskWithDueTime,
+  TaskWithReminder,
   TaskWithSubTasks,
 } from '../task.model';
 import { taskAdapter } from './task.adapter';
@@ -478,6 +479,15 @@ export const selectAllTasksWithDueTimeSorted = createSelector(
     return tasks
       .filter((task) => typeof task.dueWithTime === 'number')
       .sort((a, b) => a.dueWithTime! - b.dueWithTime!) as TaskWithDueTime[];
+  },
+);
+
+export const selectAllTasksWithReminder = createSelector(
+  selectAllTasks,
+  (tasks: Task[]): TaskWithReminder[] => {
+    return tasks.filter(
+      (task) => typeof task.remindAt === 'number' && !task.isDone,
+    ) as TaskWithReminder[];
   },
 );
 

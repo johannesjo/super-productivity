@@ -23,6 +23,6 @@ export const flushYoungToOld = createAction(
       isPersistent: true,
       entityType: 'ALL', // Affects multiple entity types (tasks, timeTracking)
       opType: OpType.Batch, // Bulk operation affecting multiple entities
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

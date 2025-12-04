@@ -402,7 +402,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._store.dispatch(
       TaskSharedActions.unscheduleTask({
         id: this.task.id,
-        reminderId: this.task.reminderId,
       }),
     );
   }
@@ -656,7 +655,6 @@ export class TaskContextMenuInnerComponent implements AfterViewInit {
     this._store.dispatch(
       TaskSharedActions.unscheduleTask({
         id: this.task.id,
-        reminderId: this.task.reminderId,
       }),
     );
   }

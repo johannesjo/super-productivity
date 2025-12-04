@@ -27,6 +27,7 @@ const handleScheduleTaskWithTime = (
   state: RootState,
   task: { id: string },
   dueWithTime: number,
+  remindAt?: number,
 ): RootState => {
   // Check if task already has the same dueWithTime
   const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
@@ -41,6 +42,7 @@ const handleScheduleTaskWithTime = (
   // If task is already correctly scheduled, don't change state
   if (
     currentTask.dueWithTime === dueWithTime &&
+    currentTask.remindAt === remindAt &&
     isScheduledForToday === isCurrentlyInToday
   ) {
     return state;
@@ -55,6 +57,7 @@ const handleScheduleTaskWithTime = (
         changes: {
           dueWithTime,
           dueDay: undefined,
+          remindAt,
         },
       },
       state[TASK_FEATURE_NAME],
@@ -92,6 +95,7 @@ const handleUnScheduleTask = (
         changes: {
           dueDay: isLeaveInToday ? getDbDateStr() : undefined,
           dueWithTime: undefined,
+          remindAt: undefined,
         },
       },
       state[TASK_FEATURE_NAME],
@@ -115,14 +119,14 @@ const handleUnScheduleTask = (
 };
 
 const handleDismissReminderOnly = (state: RootState, taskId: string): RootState => {
-  // Only clear the dueWithTime (reminder time) but keep dueDay and Today tag
+  // Only clear remindAt (the reminder notification) but keep dueWithTime, dueDay, and Today tag
   return {
     ...state,
     [TASK_FEATURE_NAME]: taskAdapter.updateOne(
       {
         id: taskId,
         changes: {
-          dueWithTime: undefined,
+          remindAt: undefined,
         },
       },
       state[TASK_FEATURE_NAME],
@@ -157,7 +161,7 @@ const handlePlanTasksForToday = (
       id: taskId,
       changes: {
         dueDay: today,
-        ...(shouldClearTime ? { dueWithTime: undefined } : {}),
+        ...(shouldClearTime ? { dueWithTime: undefined, remindAt: undefined } : {}),
       },
     };
   });
@@ -243,16 +247,16 @@ const handleMoveTaskInTodayTagList = (
 
 const createActionHandlers = (state: RootState, action: Action): ActionHandlerMap => ({
   [TaskSharedActions.scheduleTaskWithTime.type]: () => {
-    const { task, dueWithTime } = action as ReturnType<
+    const { task, dueWithTime, remindAt } = action as ReturnType<
       typeof TaskSharedActions.scheduleTaskWithTime
     >;
-    return handleScheduleTaskWithTime(state, task, dueWithTime);
+    return handleScheduleTaskWithTime(state, task, dueWithTime, remindAt);
   },
   [TaskSharedActions.reScheduleTaskWithTime.type]: () => {
-    const { task, dueWithTime } = action as ReturnType<
+    const { task, dueWithTime, remindAt } = action as ReturnType<
       typeof TaskSharedActions.reScheduleTaskWithTime
     >;
-    return handleScheduleTaskWithTime(state, task, dueWithTime);
+    return handleScheduleTaskWithTime(state, task, dueWithTime, remindAt);
   },
   [TaskSharedActions.unscheduleTask.type]: () => {
     const { id, isLeaveInToday } = action as ReturnType<

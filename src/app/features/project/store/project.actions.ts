@@ -25,7 +25,7 @@ export const addProject = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.project.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -48,7 +48,7 @@ export const updateProject = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.project.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -65,7 +65,7 @@ export const updateProjectAdvancedCfg = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.projectId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -79,7 +79,7 @@ export const updateProjectOrder = createAction(
       entityIds: projectProps.ids,
       opType: OpType.Move,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -92,7 +92,7 @@ export const archiveProject = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.id,
       opType: OpType.Update, // Archiving is an update
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -105,7 +105,7 @@ export const unarchiveProject = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -118,7 +118,7 @@ export const toggleHideFromMenu = createAction(
       entityType: 'PROJECT',
       entityId: projectProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -133,7 +133,7 @@ export const moveProjectTaskToBacklogListAuto = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -146,7 +146,7 @@ export const moveProjectTaskToRegularListAuto = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -163,7 +163,7 @@ export const moveProjectTaskUpInBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -180,7 +180,7 @@ export const moveProjectTaskDownInBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -197,7 +197,7 @@ export const moveProjectTaskToTopInBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -214,7 +214,7 @@ export const moveProjectTaskToBottomInBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -227,7 +227,7 @@ export const moveProjectTaskInBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -240,7 +240,7 @@ export const moveProjectTaskToBacklogList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -259,7 +259,7 @@ export const moveProjectTaskToRegularList = createAction(
       entityType: 'TASK',
       entityId: taskProps.taskId,
       opType: OpType.Move,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -272,6 +272,6 @@ export const moveAllProjectBacklogTasksToRegularList = createAction(
       entityType: 'PROJECT',
       entityId: taskProps.projectId,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

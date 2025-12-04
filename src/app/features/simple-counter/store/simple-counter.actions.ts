@@ -13,7 +13,7 @@ export const addSimpleCounter = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.simpleCounter.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -26,7 +26,7 @@ export const updateSimpleCounter = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.simpleCounter.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -45,7 +45,7 @@ export const deleteSimpleCounter = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Delete,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -59,7 +59,7 @@ export const deleteSimpleCounters = createAction(
       entityIds: counterProps.ids,
       opType: OpType.Delete,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -78,7 +78,7 @@ export const setSimpleCounterCounterToday = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -91,7 +91,7 @@ export const setSimpleCounterCounterForDate = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -104,7 +104,7 @@ export const increaseSimpleCounterCounterToday = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -117,7 +117,7 @@ export const decreaseSimpleCounterCounterToday = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -130,7 +130,7 @@ export const toggleSimpleCounterCounter = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -148,7 +148,7 @@ export const setSimpleCounterCounterOff = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -161,6 +161,6 @@ export const setSimpleCounterCounterOn = createAction(
       entityType: 'SIMPLE_COUNTER',
       entityId: counterProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

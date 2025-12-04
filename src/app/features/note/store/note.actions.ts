@@ -19,7 +19,7 @@ export const updateNoteOrder = createAction(
       entityIds: noteProps.ids,
       opType: OpType.Move,
       isBulk: true,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -32,7 +32,7 @@ export const addNote = createAction(
       entityType: 'NOTE',
       entityId: noteProps.note.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -45,7 +45,7 @@ export const updateNote = createAction(
       entityType: 'NOTE',
       entityId: noteProps.note.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -58,7 +58,7 @@ export const deleteNote = createAction(
       entityType: 'NOTE',
       entityId: noteProps.id,
       opType: OpType.Delete,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -71,6 +71,6 @@ export const moveNoteToOtherProject = createAction(
       entityType: 'NOTE',
       entityId: noteProps.note.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

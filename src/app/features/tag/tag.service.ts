@@ -12,7 +12,6 @@ import {
   deleteTags,
   updateTag,
   updateTagOrder,
-  upsertTag,
 } from './store/tag.actions';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -80,10 +79,6 @@ export class TagService {
 
   updateTag(id: string, changes: Partial<Tag>): void {
     this._store$.dispatch(updateTag({ tag: { id, changes } }));
-  }
-
-  upsertTag(tag: Tag): void {
-    this._store$.dispatch(upsertTag({ tag }));
   }
 
   createTagObject(tag: Partial<Tag>): Tag {

@@ -650,7 +650,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this._store.dispatch(
       TaskSharedActions.unscheduleTask({
         id: this.task().id,
-        reminderId: this.task().reminderId,
       }),
     );
   }

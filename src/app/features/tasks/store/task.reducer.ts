@@ -1,13 +1,11 @@
 import {
   __updateMultipleTaskSimple,
-  addReminderIdToTask,
   addSubTask,
   moveSubTask,
   moveSubTaskDown,
   moveSubTaskToBottom,
   moveSubTaskToTop,
   moveSubTaskUp,
-  removeReminderFromTask,
   removeTimeSpent,
   roundTimeSpentForDay,
   setCurrentTask,
@@ -645,36 +643,5 @@ export const taskReducer = createReducer<TaskState>(
       // we do this to maintain the order of tasks when they are moved to overdue
       ids: [...taskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
     };
-  }),
-
-  // REMINDER STUFF
-  // --------------
-  on(addReminderIdToTask, (state, { taskId, reminderId }) => {
-    return taskAdapter.updateOne(
-      {
-        id: taskId,
-        changes: {
-          reminderId,
-        },
-      },
-      state,
-    );
-  }),
-
-  on(removeReminderFromTask, (state, { id, isLeaveDueTime }) => {
-    return taskAdapter.updateOne(
-      {
-        id,
-        changes: {
-          reminderId: undefined,
-          ...(isLeaveDueTime
-            ? {}
-            : {
-                dueWithTime: undefined,
-              }),
-        },
-      },
-      state,
-    );
   }),
 );
