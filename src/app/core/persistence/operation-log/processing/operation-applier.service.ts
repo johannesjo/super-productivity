@@ -9,6 +9,8 @@ import {
   MAX_FAILED_OPS_SIZE,
   MAX_PENDING_QUEUE_SIZE,
 } from '../operation-log.const';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
 
 /**
  * Interface for tracking pending operations that failed due to missing dependencies.
@@ -34,6 +36,7 @@ interface PendingOperation {
 export class OperationApplierService {
   private store = inject(Store);
   private dependencyResolver = inject(DependencyResolverService);
+  private snackService = inject(SnackService);
 
   /**
    * Queue of operations that failed due to missing dependencies.
@@ -147,6 +150,15 @@ export class OperationApplierService {
           retryCount,
           missingDeps: missingDepIds,
         });
+
+        // Notify user about failed operation (only once per batch to avoid spam)
+        // Check if this is the first failed op or if we just hit a threshold
+        if (this.permanentlyFailedOps.length === 1) {
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.OPERATION_PERMANENTLY_FAILED,
+          });
+        }
         return false;
       }
 
