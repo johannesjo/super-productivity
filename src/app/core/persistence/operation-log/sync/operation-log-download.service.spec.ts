@@ -51,7 +51,7 @@ describe('OperationLogDownloadService', () => {
     );
     mockOpLogStore.getAppliedOpIds.and.returnValue(Promise.resolve(new Set<string>()));
     mockManifestService.loadRemoteManifest.and.returnValue(
-      Promise.resolve({ operationFiles: [] }),
+      Promise.resolve({ operationFiles: [], version: 1 }),
     );
     mockInjector.get.and.returnValue(mockPfapiService);
 
@@ -118,6 +118,7 @@ describe('OperationLogDownloadService', () => {
             ops: [
               {
                 serverSeq: 1,
+                receivedAt: Date.now(),
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -138,6 +139,7 @@ describe('OperationLogDownloadService', () => {
             ops: [
               {
                 serverSeq: 2,
+                receivedAt: Date.now(),
                 op: {
                   id: 'op-2',
                   clientId: 'c1',
@@ -171,6 +173,7 @@ describe('OperationLogDownloadService', () => {
             ops: [
               {
                 serverSeq: 1,
+                receivedAt: Date.now(),
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -185,6 +188,7 @@ describe('OperationLogDownloadService', () => {
               },
               {
                 serverSeq: 2,
+                receivedAt: Date.now(),
                 op: {
                   id: 'op-2',
                   clientId: 'c1',
@@ -215,6 +219,7 @@ describe('OperationLogDownloadService', () => {
             ops: [
               {
                 serverSeq: 5,
+                receivedAt: Date.now(),
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -259,7 +264,7 @@ describe('OperationLogDownloadService', () => {
 
       it('should use file download for non-API providers', async () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [] }),
+          Promise.resolve({ operationFiles: [], version: 1 }),
         );
 
         await service.downloadRemoteOps(mockFileProvider);
@@ -289,10 +294,10 @@ describe('OperationLogDownloadService', () => {
         };
 
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'] }),
+          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'], version: 1 }),
         );
         mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: JSON.stringify([mockEntry]) }),
+          Promise.resolve({ dataStr: JSON.stringify([mockEntry]), rev: 'test-rev' }),
         );
 
         const result = await service.downloadRemoteOps(mockFileProvider);
@@ -305,12 +310,14 @@ describe('OperationLogDownloadService', () => {
 
       it('should fallback to listFiles when manifest is empty', async () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [] }),
+          Promise.resolve({ operationFiles: [], version: 1 }),
         );
-        mockFileProvider.listFiles.and.returnValue(
+        (mockFileProvider.listFiles as jasmine.Spy).and.returnValue(
           Promise.resolve([`${OPS_DIR}ops_client_123.json`]),
         );
-        mockFileProvider.downloadFile.and.returnValue(Promise.resolve({ dataStr: '[]' }));
+        mockFileProvider.downloadFile.and.returnValue(
+          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
+        );
 
         await service.downloadRemoteOps(mockFileProvider);
 
@@ -319,12 +326,14 @@ describe('OperationLogDownloadService', () => {
 
       it('should update manifest after discovering files via listFiles', async () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [] }),
+          Promise.resolve({ operationFiles: [], version: 1 }),
         );
-        mockFileProvider.listFiles.and.returnValue(
+        (mockFileProvider.listFiles as jasmine.Spy).and.returnValue(
           Promise.resolve([`${OPS_DIR}ops_client_123.json`]),
         );
-        mockFileProvider.downloadFile.and.returnValue(Promise.resolve({ dataStr: '[]' }));
+        mockFileProvider.downloadFile.and.returnValue(
+          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
+        );
 
         await service.downloadRemoteOps(mockFileProvider);
 
@@ -373,10 +382,10 @@ describe('OperationLogDownloadService', () => {
           Promise.resolve(new Set(['op-1'])),
         );
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'] }),
+          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'], version: 1 }),
         );
         mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: JSON.stringify(mockEntries) }),
+          Promise.resolve({ dataStr: JSON.stringify(mockEntries), rev: 'test-rev' }),
         );
 
         const result = await service.downloadRemoteOps(mockFileProvider);
@@ -389,11 +398,12 @@ describe('OperationLogDownloadService', () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
           Promise.resolve({
             operationFiles: ['ops/ops_client_1.json', 'ops/ops_client_2.json'],
+            version: 1,
           }),
         );
         mockFileProvider.downloadFile
           .withArgs('ops/ops_client_1.json')
-          .and.returnValue(Promise.resolve({ dataStr: '[]' }));
+          .and.returnValue(Promise.resolve({ dataStr: '[]', rev: 'test-rev' }));
         mockFileProvider.downloadFile
           .withArgs('ops/ops_client_2.json')
           .and.rejectWith(new Error('Network error'));
@@ -406,7 +416,7 @@ describe('OperationLogDownloadService', () => {
 
       it('should notify user about failed downloads', async () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_fail.json'] }),
+          Promise.resolve({ operationFiles: ['ops/ops_fail.json'], version: 1 }),
         );
         mockFileProvider.downloadFile.and.rejectWith(new Error('Download failed'));
 
@@ -422,9 +432,11 @@ describe('OperationLogDownloadService', () => {
 
       it('should return success true when all files download successfully', async () => {
         mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_1.json'] }),
+          Promise.resolve({ operationFiles: ['ops/ops_client_1.json'], version: 1 }),
         );
-        mockFileProvider.downloadFile.and.returnValue(Promise.resolve({ dataStr: '[]' }));
+        mockFileProvider.downloadFile.and.returnValue(
+          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
+        );
 
         const result = await service.downloadRemoteOps(mockFileProvider);
 

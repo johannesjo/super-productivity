@@ -1,7 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { OperationLogHydratorService } from './operation-log-hydrator.service';
-import { OperationLogStoreService, StateCache } from './operation-log-store.service';
+import { OperationLogStoreService } from './operation-log-store.service';
+import { MigratableStateCache } from './schema-migration.service';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import {
   SchemaMigrationService,
@@ -35,7 +36,9 @@ describe('OperationLogHydratorService', () => {
     globalConfig: {},
   } as any;
 
-  const createMockSnapshot = (overrides: Partial<StateCache> = {}): StateCache => ({
+  const createMockSnapshot = (
+    overrides: Partial<MigratableStateCache> = {},
+  ): MigratableStateCache => ({
     state: mockState,
     lastAppliedOpSeq: 10,
     vectorClock: { clientA: 5 },
@@ -130,7 +133,10 @@ describe('OperationLogHydratorService', () => {
     mockSchemaMigrationService.needsMigration.and.returnValue(false);
     mockSchemaMigrationService.operationNeedsMigration.and.returnValue(false);
     mockSchemaMigrationService.migrateOperations.and.callFake((ops) => ops);
-    mockValidateStateService.validateAndRepair.and.returnValue({ wasRepaired: false });
+    mockValidateStateService.validateAndRepair.and.returnValue({
+      isValid: true,
+      wasRepaired: false,
+    });
     mockStoreDelegateService.getAllSyncModelDataFromStore.and.returnValue(
       Promise.resolve(mockState),
     );
@@ -206,6 +212,7 @@ describe('OperationLogHydratorService', () => {
         const repairedState = { ...mockState, repaired: true };
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
         mockValidateStateService.validateAndRepair.and.returnValue({
+          isValid: false,
           wasRepaired: true,
           repairedState,
           repairSummary: { entityStateFixed: 1 } as any,
@@ -224,6 +231,7 @@ describe('OperationLogHydratorService', () => {
         const repairSummary = { entityStateFixed: 1 } as any;
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
         mockValidateStateService.validateAndRepair.and.returnValue({
+          isValid: false,
           wasRepaired: true,
           repairedState,
           repairSummary,
