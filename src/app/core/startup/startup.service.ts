@@ -86,7 +86,15 @@ export class StartupService {
     }
   }
 
-  init(): void {
+  async init(): Promise<void> {
+    if (!IS_ANDROID_WEB_VIEW && !IS_ELECTRON) {
+      const isSingle = await this._checkIsSingleInstance();
+      if (!isSingle) {
+        this._showMultiInstanceBlocker();
+        return;
+      }
+    }
+
     this._initBackups();
     this._requestPersistence();
 
@@ -141,7 +149,6 @@ export class StartupService {
 
       if (!IS_ANDROID_WEB_VIEW) {
         this._chromeExtensionInterfaceService.init();
-        this._initMultiInstanceWarning();
       }
     }
   }
@@ -161,37 +168,53 @@ export class StartupService {
     }
   }
 
-  private _initMultiInstanceWarning(): void {
+  private async _checkIsSingleInstance(): Promise<boolean> {
     const channel = new BroadcastChannel('superProductivityTab');
-    let isOriginal = true;
+    let isAnotherInstanceActive = false;
 
-    enum Msg {
-      newTabOpened = 'newTabOpened',
-      alreadyOpenElsewhere = 'alreadyOpenElsewhere',
+    // 1. Listen for other instances saying "I'm here!"
+    const checkListener = (msg: MessageEvent): void => {
+      if (msg.data === 'alreadyOpenElsewhere') {
+        isAnotherInstanceActive = true;
+      }
+    };
+    channel.addEventListener('message', checkListener);
+
+    // 2. Ask "Is anyone here?"
+    channel.postMessage('newTabOpened');
+
+    // 3. Wait a bit for a response
+    await new Promise((resolve) => setTimeout(resolve, 150));
+
+    channel.removeEventListener('message', checkListener);
+
+    if (isAnotherInstanceActive) {
+      return false;
     }
 
-    channel.postMessage(Msg.newTabOpened);
-    // note that listener is added after posting the message
-
+    // 4. If we are the only one, start listening for new tabs to warn them
     channel.addEventListener('message', (msg) => {
-      if (msg.data === Msg.newTabOpened && isOriginal) {
-        // message received from 2nd tab
-        // reply to all new tabs that the website is already open
-        channel.postMessage(Msg.alreadyOpenElsewhere);
-      }
-      if (msg.data === Msg.alreadyOpenElsewhere) {
-        isOriginal = false;
-        // message received from original tab
-        // replace this with whatever logic you need
-        // NOTE: translations not ready yet
-        const t =
-          'You are running multiple instances of Super Productivity (possibly over multiple tabs). This is not recommended and might lead to data loss!!';
-        const t2 = 'Please close all other instances, before you continue!';
-        // show in two dialogs to be sure the user didn't miss it
-        alert(t);
-        alert(t2);
+      if (msg.data === 'newTabOpened') {
+        channel.postMessage('alreadyOpenElsewhere');
       }
     });
+
+    return true;
+  }
+
+  private _showMultiInstanceBlocker(): void {
+    const msg =
+      'Super Productivity is already running in another tab. Please close this tab or the other one.';
+    const style =
+      'display: flex; align-items: center; justify-content: center; height: 100vh; text-align: center; font-family: sans-serif; padding: 2rem;';
+    document.body.innerHTML = `
+      <div style="${style}">
+        <div>
+          <h1>App is already open</h1>
+          <p>${msg}</p>
+        </div>
+      </div>
+    `;
   }
 
   private _isTourLikelyToBeShown(): boolean {
