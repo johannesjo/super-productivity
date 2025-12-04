@@ -35,13 +35,13 @@ import { DataInitStateService } from '../core/data-init/data-init-state.service'
 import { GlobalProgressBarService } from '../core-ui/global-progress-bar/global-progress-bar.service';
 import { PFLog } from '../core/log';
 import { PfapiStoreDelegateService } from './pfapi-store-delegate.service';
-import { OperationLogStoreService } from '../core/persistence/operation-log/operation-log-store.service';
+import { OperationLogStoreService } from '../core/persistence/operation-log/store/operation-log-store.service';
 import { Operation, OpType } from '../core/persistence/operation-log/operation.types';
-import { CURRENT_SCHEMA_VERSION } from '../core/persistence/operation-log/schema-migration.service';
+import { CURRENT_SCHEMA_VERSION } from '../core/persistence/operation-log/store/schema-migration.service';
 import { incrementVectorClock } from './api/util/vector-clock';
 import { uuidv7 } from '../util/uuid-v7';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
-import { VectorClockService } from '../core/persistence/operation-log/vector-clock.service';
+import { VectorClockService } from '../core/persistence/operation-log/sync/vector-clock.service';
 
 @Injectable({
   providedIn: 'root',

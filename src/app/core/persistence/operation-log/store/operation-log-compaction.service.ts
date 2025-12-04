@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
-import { LockService } from './lock.service';
-import { COMPACTION_RETENTION_MS } from './operation-log.const';
+import { LockService } from '../sync/lock.service';
+import { COMPACTION_RETENTION_MS } from '../operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
-import { VectorClockService } from './vector-clock.service';
+import { VectorClockService } from '../sync/vector-clock.service';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.

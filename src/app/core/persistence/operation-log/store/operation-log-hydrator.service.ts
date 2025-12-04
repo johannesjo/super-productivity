@@ -1,26 +1,26 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { loadAllData } from '../../../root-store/meta/load-all-data.action';
-import { convertOpToAction } from './operation-converter.util';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { convertOpToAction } from '../operation-converter.util';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import {
   CURRENT_SCHEMA_VERSION,
   MigratableStateCache,
   SchemaMigrationService,
 } from './schema-migration.service';
-import { PFLog } from '../../log';
-import { PfapiService } from '../../../pfapi/pfapi.service';
-import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
-import { Operation, OpType, RepairPayload } from './operation.types';
-import { uuidv7 } from '../../../util/uuid-v7';
-import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
-import { SnackService } from '../../snack/snack.service';
-import { T } from '../../../t.const';
-import { ValidateStateService } from './validate-state.service';
-import { RepairOperationService } from './repair-operation.service';
-import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
-import { VectorClockService } from './vector-clock.service';
+import { PFLog } from '../../../log';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { Operation, OpType, RepairPayload } from '../operation.types';
+import { uuidv7 } from '../../../../util/uuid-v7';
+import { incrementVectorClock } from '../../../../pfapi/api/util/vector-clock';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
+import { ValidateStateService } from '../processing/validate-state.service';
+import { RepairOperationService } from '../processing/repair-operation.service';
+import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
+import { VectorClockService } from '../sync/vector-clock.service';
 
 type StateCache = MigratableStateCache;
 

@@ -1,16 +1,19 @@
 import { inject, Injectable } from '@angular/core';
-import { OperationLogStoreService } from './operation-log-store.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
-import { Operation, OperationLogEntry } from './operation.types';
-import { PFLog } from '../../log';
-import { chunkArray } from '../../../util/chunk-array';
+import { Operation, OperationLogEntry } from '../operation.types';
+import { PFLog } from '../../../log';
+import { chunkArray } from '../../../../util/chunk-array';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
   SyncOperation,
 } from '../../../pfapi/api/sync/sync-provider.interface';
-import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
-import { OperationLogManifestService, OPS_DIR } from './operation-log-manifest.service';
+import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
+import {
+  OperationLogManifestService,
+  OPS_DIR,
+} from '../store/operation-log-manifest.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
 
 /**

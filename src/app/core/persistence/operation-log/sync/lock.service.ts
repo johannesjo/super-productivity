@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { LOCK_ACQUIRE_TIMEOUT_MS, LOCK_TIMEOUT_MS } from './operation-log.const';
+import { LOCK_ACQUIRE_TIMEOUT_MS, LOCK_TIMEOUT_MS } from '../operation-log.const';
 
 /**
  * Provides a cross-tab and cross-process locking mechanism for critical operations.

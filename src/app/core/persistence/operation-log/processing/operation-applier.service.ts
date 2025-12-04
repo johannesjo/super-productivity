@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { Operation, OpType } from './operation.types';
-import { convertOpToAction } from './operation-converter.util';
-import { DependencyResolverService } from './dependency-resolver.service';
-import { PFLog } from '../../log';
-import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from './operation-log.const';
+import { Operation, OpType } from '../operation.types';
+import { convertOpToAction } from '../operation-converter.util';
+import { DependencyResolverService } from '../sync/dependency-resolver.service';
+import { PFLog } from '../../../log';
+import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from '../operation-log.const';
 
 /**
  * Interface for tracking pending operations that failed due to missing dependencies.

@@ -19,8 +19,8 @@
  */
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../operation-log-store.service';
-import { Operation, OpType, EntityType } from '../operation.types';
-import { uuidv7 } from '../../../../util/uuid-v7';
+import { Operation, OpType, EntityType } from '../../operation.types';
+import { uuidv7 } from '../../../../../util/uuid-v7';
 
 // Increase timeout for stress tests
 jasmine.DEFAULT_TIMEOUT_INTERVAL = 60000;

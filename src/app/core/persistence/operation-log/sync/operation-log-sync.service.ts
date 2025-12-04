@@ -1,6 +1,6 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { OperationLogStoreService } from './operation-log-store.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
   ConflictResult,
   EntityConflict,
@@ -12,21 +12,21 @@ import {
   mergeVectorClocks,
   VectorClockComparison,
 } from '../../../pfapi/api/util/vector-clock';
-import { PFLog } from '../../log';
-import { SyncProviderServiceInterface } from '../../../pfapi/api/sync/sync-provider.interface';
-import { SyncProviderId } from '../../../pfapi/api/pfapi.const';
-import { OperationApplierService } from './operation-applier.service';
+import { PFLog } from '../../../log';
+import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
+import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
+import { OperationApplierService } from '../processing/operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
-import { ValidateStateService } from './validate-state.service';
-import { RepairOperationService } from './repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
-import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
-import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { ValidateStateService } from '../processing/validate-state.service';
+import { RepairOperationService } from '../processing/repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
-import { toEntityKey } from './entity-key.util';
+import { toEntityKey } from '../entity-key.util';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.

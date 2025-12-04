@@ -1,10 +1,10 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { PfapiService } from '../../../pfapi/pfapi.service';
-import { Operation, OpType } from './operation.types';
-import { uuidv7 } from '../../../util/uuid-v7';
-import { PFLog } from '../../log';
-import { PersistenceLocalService } from '../persistence-local.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { Operation, OpType } from '../operation.types';
+import { uuidv7 } from '../../../../util/uuid-v7';
+import { PFLog } from '../../../log';
+import { PersistenceLocalService } from '../../persistence-local.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 @Injectable({ providedIn: 'root' })

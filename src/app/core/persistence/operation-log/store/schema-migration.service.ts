@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
-import { Operation, VectorClock } from './operation.types';
-import { PFLog } from '../../log';
+import { Operation, VectorClock } from '../operation.types';
+import { PFLog } from '../../../log';
 
 /**
  * Current schema version for the operation log state cache.

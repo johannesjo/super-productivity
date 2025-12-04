@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from './operation-log-store.service';
-import { VectorClockService } from './vector-clock.service';
-import { Operation, OpType, EntityType, VectorClock } from './operation.types';
-import { uuidv7 } from '../../../util/uuid-v7';
+import { VectorClockService } from '../sync/vector-clock.service';
+import { Operation, OpType, EntityType, VectorClock } from '../operation.types';
+import { uuidv7 } from '../../../../util/uuid-v7';
 
 describe('OperationLogStoreService', () => {
   let service: OperationLogStoreService;

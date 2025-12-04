@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { ValidateStateService } from './validate-state.service';
-import { AppDataCompleteNew, PFAPI_MODEL_CFGS } from '../../../pfapi/pfapi-config';
-import { MenuTreeKind } from '../../../features/menu-tree/store/menu-tree.model';
-import { environment } from '../../../../environments/environment';
+import { AppDataCompleteNew, PFAPI_MODEL_CFGS } from '../../../../pfapi/pfapi-config';
+import { MenuTreeKind } from '../../../../features/menu-tree/store/menu-tree.model';
+import { environment } from '../../../../../environments/environment';
 
 describe('ValidateStateService', () => {
   let service: ValidateStateService;
