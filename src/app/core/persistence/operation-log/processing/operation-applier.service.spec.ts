@@ -7,11 +7,13 @@ import {
 } from '../sync/dependency-resolver.service';
 import { Operation, OpType, EntityType } from '../operation.types';
 import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from '../operation-log.const';
+import { SnackService } from '../../../snack/snack.service';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
   let mockStore: jasmine.SpyObj<Store>;
   let mockDependencyResolver: jasmine.SpyObj<DependencyResolverService>;
+  let mockSnackService: jasmine.SpyObj<SnackService>;
 
   const createMockOperation = (
     id: string,
@@ -38,6 +40,7 @@ describe('OperationApplierService', () => {
       'extractDependencies',
       'checkDependencies',
     ]);
+    mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
 
     // Default: no dependencies
     mockDependencyResolver.extractDependencies.and.returnValue([]);
@@ -50,6 +53,7 @@ describe('OperationApplierService', () => {
         OperationApplierService,
         { provide: Store, useValue: mockStore },
         { provide: DependencyResolverService, useValue: mockDependencyResolver },
+        { provide: SnackService, useValue: mockSnackService },
       ],
     });
 
