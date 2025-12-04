@@ -23,6 +23,8 @@ export type EntityType =
   | 'TASK_REPEAT_CFG'
   | 'ISSUE_PROVIDER'
   | 'PLANNER'
+  | 'MENU_TREE'
+  | 'METRIC'
   | 'MIGRATION'
   | 'RECOVERY' // For disaster recovery imports
   | 'ALL'; // For full state imports (sync, backup)
