@@ -6,12 +6,12 @@ import {
   EntityConflict,
   Operation,
   VectorClock,
-} from './operation.types';
+} from '../operation.types';
 import {
   compareVectorClocks,
   mergeVectorClocks,
   VectorClockComparison,
-} from '../../../pfapi/api/util/vector-clock';
+} from '../../../../pfapi/api/util/vector-clock';
 import { PFLog } from '../../../log';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
