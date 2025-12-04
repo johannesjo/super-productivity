@@ -698,10 +698,11 @@ describe('SyncService', () => {
       await expectAsync(service.sync()).toBeRejected();
     });
 
-    it('should handle errors when sync provider is not set', async () => {
+    it('should return NotConfigured when sync provider is not set', async () => {
       mockSyncProvider$.next(null);
 
-      await expectAsync(service.sync()).toBeRejected();
+      const result = await service.sync();
+      expect(result.status).toBe(SyncStatus.NotConfigured);
     });
 
     it('should handle errors when sync provider is not ready', async () => {
