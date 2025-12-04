@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { LockService } from './lock.service';
+import { COMPACTION_RETENTION_MS } from './operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
@@ -42,10 +43,8 @@ export class OperationLogCompactionService {
       await this.opLogStore.resetCompactionCounter();
 
       // 5. Delete old operations (keep recent for conflict resolution window)
-      // Retention: 7 days - keeps enough history for conflict detection
       // Only delete ops that have been synced to remote
-      const retentionWindowMs = 7 * 24 * 60 * 60 * 1000; // 7 days
-      const cutoff = Date.now() - retentionWindowMs;
+      const cutoff = Date.now() - COMPACTION_RETENTION_MS;
 
       await this.opLogStore.deleteOpsWhere(
         (entry) =>
