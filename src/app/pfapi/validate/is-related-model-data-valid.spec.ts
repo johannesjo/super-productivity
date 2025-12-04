@@ -1,5 +1,4 @@
 import { AppDataCompleteNew } from '../pfapi-config';
-import { isRelatedModelDataValid } from './is-related-model-data-valid';
 import { PFLog } from '../../core/log';
 
 // Mock PFLog to suppress output during test
@@ -10,6 +9,33 @@ PFLog.err = console.error;
 PFLog.critical = console.error;
 
 describe('isRelatedModelDataValid', () => {
+  let isRelatedModelDataValid: any;
+
+  beforeEach(() => {
+    /* eslint-disable @typescript-eslint/no-var-requires */
+    // Reset modules to allow re-importing with mocks
+    // @ts-ignore
+    delete require.cache[require.resolve('../../util/dev-error')];
+    // @ts-ignore
+    delete require.cache[require.resolve('./is-related-model-data-valid')];
+
+    // Mock the devError module
+    // @ts-ignore
+    require('../../util/dev-error');
+    // @ts-ignore
+    require.cache[require.resolve('../../util/dev-error')] = {
+      exports: {
+        devError: jasmine.createSpy('devError'),
+      },
+    };
+
+    // Import the function under test
+    // @ts-ignore
+    isRelatedModelDataValid =
+      require('./is-related-model-data-valid').isRelatedModelDataValid;
+    /* eslint-enable @typescript-eslint/no-var-requires */
+  });
+
   it('should handle null data gracefully', () => {
     // @ts-ignore
     const result = isRelatedModelDataValid(null);
@@ -27,10 +53,7 @@ describe('isRelatedModelDataValid', () => {
       reminders: [],
     };
 
-    try {
-      isRelatedModelDataValid(partialData as AppDataCompleteNew);
-    } catch (e) {
-      expect(e).toBeTruthy(); // We expect it to crash currently
-    }
+    const result = isRelatedModelDataValid(partialData as AppDataCompleteNew);
+    expect(result).toBe(false);
   });
 });
