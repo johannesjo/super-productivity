@@ -10,12 +10,22 @@ import { GlobalConfigService } from '../config/global-config.service';
 import { Store } from '@ngrx/store';
 import { selectAllTasksWithReminder } from '../tasks/store/task.selectors';
 import { TaskWithReminder, TaskWithReminderData } from '../tasks/task.model';
+import { PfapiService } from '../../pfapi/pfapi.service';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 interface WorkerReminder {
   id: string;
   remindAt: number;
   title: string;
   type: 'TASK';
+}
+
+interface LegacyReminder {
+  id: string;
+  remindAt: number;
+  title: string;
+  type: 'NOTE' | 'TASK';
+  relatedId: string;
 }
 
 @Injectable({
@@ -26,6 +36,7 @@ export class ReminderService {
   private readonly _imexMetaService = inject(ImexViewService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _store = inject(Store);
+  private readonly _pfapiService = inject(PfapiService);
 
   private _onRemindersActive$: Subject<TaskWithReminderData[]> = new Subject<
     TaskWithReminderData[]
@@ -55,6 +66,9 @@ export class ReminderService {
     this._w.addEventListener('message', this._onReminderActivated.bind(this));
     this._w.addEventListener('error', this._handleError.bind(this));
 
+    // Migrate legacy reminders to task.remindAt (one-time migration)
+    this._migrateLegacyReminders();
+
     // Subscribe to tasks with reminders and update worker whenever they change
     this._store
       .select(selectAllTasksWithReminder)
@@ -65,6 +79,61 @@ export class ReminderService {
           Log.log('Updated reminders in worker', reminders);
         }
       });
+  }
+
+  private async _migrateLegacyReminders(): Promise<void> {
+    try {
+      const legacyReminders = (await this._pfapiService.pf.m.reminders.load()) as
+        | LegacyReminder[]
+        | null;
+
+      if (!legacyReminders || legacyReminders.length === 0) {
+        Log.log('ReminderService: No legacy reminders to migrate');
+        return;
+      }
+
+      Log.log(
+        `ReminderService: Migrating ${legacyReminders.length} legacy reminders to task.remindAt`,
+      );
+
+      let migratedCount = 0;
+      let skippedNotes = 0;
+
+      for (const reminder of legacyReminders) {
+        if (reminder.type === 'NOTE') {
+          // Note reminders are discontinued
+          skippedNotes++;
+          Log.log(`ReminderService: Skipping NOTE reminder: ${reminder.id}`);
+          continue;
+        }
+
+        if (reminder.type === 'TASK') {
+          // Dispatch action to reschedule with remindAt
+          // This will update the task's remindAt field through the reducer
+          this._store.dispatch(
+            TaskSharedActions.reScheduleTaskWithTime({
+              task: { id: reminder.relatedId, title: reminder.title } as TaskWithReminder,
+              dueWithTime: reminder.remindAt,
+              remindAt: reminder.remindAt,
+              isMoveToBacklog: false,
+            }),
+          );
+          migratedCount++;
+          Log.log(`ReminderService: Migrated reminder for task: ${reminder.relatedId}`);
+        }
+      }
+
+      // Clear legacy reminders after migration
+      await this._pfapiService.pf.m.reminders.save([], {
+        isUpdateRevAndLastUpdate: false,
+      });
+
+      Log.log(
+        `ReminderService: Migration complete - ${migratedCount} migrated, ${skippedNotes} NOTE reminders skipped`,
+      );
+    } catch (err) {
+      Log.err('ReminderService: Failed to migrate legacy reminders', err);
+    }
   }
 
   private _mapTasksToWorkerReminders(tasks: TaskWithReminder[]): WorkerReminder[] {

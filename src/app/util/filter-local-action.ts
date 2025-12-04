@@ -2,16 +2,6 @@ import { filter, OperatorFunction } from 'rxjs';
 import { Action } from '@ngrx/store';
 
 /**
- * Action with optional persistence metadata.
- * Remote actions have meta.isRemote = true.
- */
-interface ActionWithMeta extends Action {
-  meta?: {
-    isRemote?: boolean;
-  };
-}
-
-/**
  * RxJS operator that filters out remote actions from sync.
  *
  * Use this in effects that should only run for local user actions,
@@ -28,8 +18,9 @@ interface ActionWithMeta extends Action {
  * );
  * ```
  */
-export const filterLocalAction = <T extends ActionWithMeta>(): OperatorFunction<T, T> =>
-  filter((action: T) => !action.meta?.isRemote);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const filterLocalAction = <T extends Action>(): OperatorFunction<T, T> =>
+  filter((action: T) => !(action as any).meta?.isRemote);
 
 /**
  * RxJS operator that filters to only remote actions from sync.
@@ -48,5 +39,6 @@ export const filterLocalAction = <T extends ActionWithMeta>(): OperatorFunction<
  * );
  * ```
  */
-export const filterRemoteAction = <T extends ActionWithMeta>(): OperatorFunction<T, T> =>
-  filter((action: T) => !!action.meta?.isRemote);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const filterRemoteAction = <T extends Action>(): OperatorFunction<T, T> =>
+  filter((action: T) => !!(action as any).meta?.isRemote);

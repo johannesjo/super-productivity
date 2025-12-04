@@ -129,17 +129,13 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   async ngAfterViewInit(): Promise<void> {
     // Handle case when task is provided
     if (this.data.task) {
-      if (this.data.task.reminderId) {
-        const reminder = this._reminderService.getById(this.data.task.reminderId);
-        if (reminder && this.data.task.dueWithTime) {
+      if (this.data.task.remindAt) {
+        if (this.data.task.dueWithTime) {
           this.selectedReminderCfgId = millisecondsDiffToRemindOption(
             this.data.task.dueWithTime,
-            reminder.remindAt,
+            this.data.task.remindAt,
           );
-        } else {
-          Log.err('No reminder found for task', this.data.task);
         }
-        // for tasks without anything scheduled
       } else if (!this.data.task.dueWithTime) {
         this.selectedReminderCfgId = this._defaultTaskRemindCfgId();
       } else {

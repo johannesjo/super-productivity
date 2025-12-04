@@ -759,7 +759,6 @@ export class ScheduleWeekDragService {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: task.id,
-          reminderId: task.reminderId,
           isLeaveInToday: true,
         }),
       );
@@ -769,7 +768,6 @@ export class ScheduleWeekDragService {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: task.id,
-          reminderId: task.reminderId,
         }),
       );
     } else {
