@@ -50,7 +50,7 @@ const getArchiveEntityState = (
   const archive = state[archiveType];
   if (!archive || typeof archive !== 'object') return undefined;
 
-  const taskState = (archive as Record<string, unknown>).task;
+  const taskState = (archive as unknown as Record<string, unknown>).task;
   if (
     taskState &&
     typeof taskState === 'object' &&
@@ -80,10 +80,11 @@ const getTaskEntities = (state: AppDataCompleteNew): Record<string, TaskEntity> 
 };
 
 /**
- * Interface for menu tree state.
+ * Interface for menu tree state (matches actual MenuTreeState).
  */
-interface MenuTreeState {
-  items: unknown[];
+interface MenuTreeStateLocal {
+  projectTree?: unknown[];
+  tagTree?: unknown[];
 }
 
 /**
@@ -390,10 +391,15 @@ export class ValidateStateService {
     }
 
     // Check menu tree changes
-    const origMenuTree = original.menuTree as MenuTreeState | undefined;
-    const repairedMenuTree = repaired.menuTree as MenuTreeState | undefined;
-    const origMenuItems = origMenuTree?.items?.length || 0;
-    const repairedMenuItems = repairedMenuTree?.items?.length || 0;
+    const origMenuTree = original.menuTree as unknown as MenuTreeStateLocal | undefined;
+    const repairedMenuTree = repaired.menuTree as unknown as
+      | MenuTreeStateLocal
+      | undefined;
+    const origMenuItems =
+      (origMenuTree?.projectTree?.length || 0) + (origMenuTree?.tagTree?.length || 0);
+    const repairedMenuItems =
+      (repairedMenuTree?.projectTree?.length || 0) +
+      (repairedMenuTree?.tagTree?.length || 0);
     if (origMenuItems !== repairedMenuItems) {
       count++;
     }
