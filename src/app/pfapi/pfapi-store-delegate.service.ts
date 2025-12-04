@@ -21,6 +21,7 @@ import { selectTagFeatureState } from '../features/tag/store/tag.reducer';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { selectTaskRepeatCfgFeatureState } from '../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { selectTimeTrackingState } from '../features/time-tracking/store/time-tracking.selectors';
+import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 
 import { AllSyncModels } from './api/pfapi.model';
 import { PfapiAllModelCfg } from './pfapi-config';
@@ -109,8 +110,16 @@ export class PfapiStoreDelegateService {
               pluginUserData,
               pluginMetadata,
               reminders,
-              archiveYoung,
-              archiveOld,
+              archiveYoung: archiveYoung || {
+                task: { ids: [], entities: {} },
+                timeTracking: { ...initialTimeTrackingState },
+                lastTimeTrackingFlush: 0,
+              },
+              archiveOld: archiveOld || {
+                task: { ids: [], entities: {} },
+                timeTracking: { ...initialTimeTrackingState },
+                lastTimeTrackingFlush: 0,
+              },
             }) as AllSyncModels<PfapiAllModelCfg>,
         ),
       ),
