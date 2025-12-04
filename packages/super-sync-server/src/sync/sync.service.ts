@@ -510,8 +510,17 @@ export class SyncService {
           break;
         case 'SYNC_IMPORT':
         case 'BACKUP_IMPORT':
+        case 'REPAIR':
           // Full state import - replace everything
-          Object.assign(state, payload);
+          // Handle wrapped payloads (REPAIR always has appDataComplete, others might)
+          if (payload && typeof payload === 'object' && 'appDataComplete' in payload) {
+            Object.assign(
+              state,
+              (payload as { appDataComplete: unknown }).appDataComplete,
+            );
+          } else {
+            Object.assign(state, payload);
+          }
           break;
       }
     }
