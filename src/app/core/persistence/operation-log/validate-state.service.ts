@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { IValidation } from 'typia';
 import { validateAllData } from '../../../pfapi/validate/validation-fn';
 import {
   isRelatedModelDataValid,
@@ -10,6 +11,80 @@ import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { RepairSummary } from './operation.types';
 import { PFLog } from '../../log';
 import { RepairOperationService } from './repair-operation.service'; // Used for createEmptyRepairSummary()
+
+/**
+ * Type representing an NgRx entity state slice.
+ */
+interface EntityState<T = unknown> {
+  ids: string[];
+  entities: Record<string, T>;
+}
+
+/**
+ * Helper to safely access entity state with proper typing.
+ */
+const getEntityState = (
+  state: AppDataCompleteNew,
+  model: 'task' | 'project' | 'tag' | 'note' | 'simpleCounter',
+): EntityState | undefined => {
+  const slice = state[model];
+  if (
+    slice &&
+    typeof slice === 'object' &&
+    'ids' in slice &&
+    'entities' in slice &&
+    Array.isArray(slice.ids)
+  ) {
+    return slice as EntityState;
+  }
+  return undefined;
+};
+
+/**
+ * Helper to get archive entity state.
+ */
+const getArchiveEntityState = (
+  state: AppDataCompleteNew,
+  archiveType: 'archiveYoung' | 'archiveOld',
+): EntityState | undefined => {
+  const archive = state[archiveType];
+  if (!archive || typeof archive !== 'object') return undefined;
+
+  const taskState = (archive as Record<string, unknown>).task;
+  if (
+    taskState &&
+    typeof taskState === 'object' &&
+    'ids' in taskState &&
+    Array.isArray((taskState as EntityState).ids)
+  ) {
+    return taskState as EntityState;
+  }
+  return undefined;
+};
+
+/**
+ * Interface for task entity in the state (minimal fields needed for validation).
+ */
+interface TaskEntity {
+  id: string;
+  projectId?: string;
+  tagIds?: string[];
+}
+
+/**
+ * Helper to get tasks from entity state.
+ */
+const getTaskEntities = (state: AppDataCompleteNew): Record<string, TaskEntity> => {
+  const taskState = getEntityState(state, 'task');
+  return (taskState?.entities as Record<string, TaskEntity>) || {};
+};
+
+/**
+ * Interface for menu tree state.
+ */
+interface MenuTreeState {
+  items: unknown[];
+}
 
 /**
  * Result of validating application state.
@@ -111,7 +186,7 @@ export class ValidateStateService {
 
     try {
       // Run repair
-      const typiaErrors = validationResult.typiaErrors as any[];
+      const typiaErrors = validationResult.typiaErrors as IValidation.IError[];
       const repairedState = dataRepair(state, typiaErrors);
 
       // Create repair summary based on validation errors
@@ -203,8 +278,10 @@ export class ValidateStateService {
     const models = ['task', 'project', 'tag', 'note', 'simpleCounter'] as const;
 
     for (const model of models) {
-      const origIds = (original[model] as any)?.ids?.length || 0;
-      const repairedIds = (repaired[model] as any)?.ids?.length || 0;
+      const origState = getEntityState(original, model);
+      const repairedState = getEntityState(repaired, model);
+      const origIds = origState?.ids?.length || 0;
+      const repairedIds = repairedState?.ids?.length || 0;
       if (origIds !== repairedIds) {
         count += Math.abs(origIds - repairedIds);
       }
@@ -223,10 +300,11 @@ export class ValidateStateService {
     let count = 0;
 
     // Check if task-project assignments changed
-    const origTasks = Object.values((original.task as any)?.entities || {});
+    const origTasks = getTaskEntities(original);
+    const repairedTasks = getTaskEntities(repaired);
 
-    for (const origTask of origTasks as any[]) {
-      const repairedTask = (repaired.task as any)?.entities?.[origTask.id];
+    for (const origTask of Object.values(origTasks)) {
+      const repairedTask = repairedTasks[origTask.id];
       if (repairedTask) {
         if (origTask.projectId !== repairedTask.projectId) {
           count++;
@@ -253,12 +331,15 @@ export class ValidateStateService {
     let count = 0;
 
     // Check archive changes
+    const origYoungArchive = getArchiveEntityState(original, 'archiveYoung');
+    const origOldArchive = getArchiveEntityState(original, 'archiveOld');
+    const repairedYoungArchive = getArchiveEntityState(repaired, 'archiveYoung');
+    const repairedOldArchive = getArchiveEntityState(repaired, 'archiveOld');
+
     const origArchiveCount =
-      ((original.archiveYoung?.task as any)?.ids?.length || 0) +
-      ((original.archiveOld?.task as any)?.ids?.length || 0);
+      (origYoungArchive?.ids?.length || 0) + (origOldArchive?.ids?.length || 0);
     const repairedArchiveCount =
-      ((repaired.archiveYoung?.task as any)?.ids?.length || 0) +
-      ((repaired.archiveOld?.task as any)?.ids?.length || 0);
+      (repairedYoungArchive?.ids?.length || 0) + (repairedOldArchive?.ids?.length || 0);
 
     if (origArchiveCount !== repairedArchiveCount) {
       count += Math.abs(origArchiveCount - repairedArchiveCount);
@@ -277,10 +358,11 @@ export class ValidateStateService {
     let count = 0;
 
     // Check for tasks with removed projectIds
-    const origTasks = Object.values((original.task as any)?.entities || {});
+    const origTasks = getTaskEntities(original);
+    const repairedTasks = getTaskEntities(repaired);
 
-    for (const origTask of origTasks as any[]) {
-      const repairedTask = (repaired.task as any)?.entities?.[origTask.id];
+    for (const origTask of Object.values(origTasks)) {
+      const repairedTask = repairedTasks[origTask.id];
       if (!repairedTask && origTask.projectId) {
         count++;
       }
@@ -299,15 +381,19 @@ export class ValidateStateService {
     let count = 0;
 
     // Check if inbox project was created
-    const origProjectCount = (original.project as any)?.ids?.length || 0;
-    const repairedProjectCount = (repaired.project as any)?.ids?.length || 0;
+    const origProjectState = getEntityState(original, 'project');
+    const repairedProjectState = getEntityState(repaired, 'project');
+    const origProjectCount = origProjectState?.ids?.length || 0;
+    const repairedProjectCount = repairedProjectState?.ids?.length || 0;
     if (repairedProjectCount > origProjectCount) {
       count++;
     }
 
     // Check menu tree changes
-    const origMenuItems = (original.menuTree as any)?.items?.length || 0;
-    const repairedMenuItems = (repaired.menuTree as any)?.items?.length || 0;
+    const origMenuTree = original.menuTree as MenuTreeState | undefined;
+    const repairedMenuTree = repaired.menuTree as MenuTreeState | undefined;
+    const origMenuItems = origMenuTree?.items?.length || 0;
+    const repairedMenuItems = repairedMenuTree?.items?.length || 0;
     if (origMenuItems !== repairedMenuItems) {
       count++;
     }

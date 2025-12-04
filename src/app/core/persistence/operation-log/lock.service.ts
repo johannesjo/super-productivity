@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { LOCK_ACQUIRE_TIMEOUT_MS, LOCK_TIMEOUT_MS } from './operation-log.const';
 
 /**
  * Provides a cross-tab and cross-process locking mechanism for critical operations.
@@ -25,12 +26,10 @@ export class LockService {
   ): Promise<void> {
     const lockKey = `lock_${lockName}`;
     const lockId = Math.random().toString(36).substring(2);
-    // 30s max lock time - operations may take longer during large syncs or compactions
-    const timeout = 30000;
 
-    // Try to acquire - wait up to 60s for a busy lock to be released
+    // Try to acquire - wait up to LOCK_ACQUIRE_TIMEOUT_MS for a busy lock to be released
     const start = Date.now();
-    while (Date.now() - start < 60000) {
+    while (Date.now() - start < LOCK_ACQUIRE_TIMEOUT_MS) {
       // Check if locked
       const currentLock = localStorage.getItem(lockKey);
       let isExpired = false;
@@ -38,7 +37,7 @@ export class LockService {
         const parts = currentLock.split(':');
         if (parts.length === 2) {
           const ts = parseInt(parts[1], 10);
-          if (Date.now() - ts > timeout) {
+          if (Date.now() - ts > LOCK_TIMEOUT_MS) {
             isExpired = true;
           }
         }
@@ -67,6 +66,8 @@ export class LockService {
       const randomDelay = Math.random() * 100;
       await new Promise((r) => setTimeout(r, 50 + randomDelay));
     }
-    throw new Error(`Could not acquire lock ${lockName} after 60s`);
+    throw new Error(
+      `Could not acquire lock ${lockName} after ${LOCK_ACQUIRE_TIMEOUT_MS / 1000}s`,
+    );
   }
 }

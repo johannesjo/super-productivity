@@ -4,12 +4,7 @@ import { Operation, OpType } from './operation.types';
 import { convertOpToAction } from './operation-converter.util';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { PFLog } from '../../log';
-
-/**
- * Maximum number of retry attempts for operations with missing dependencies.
- * After this many attempts, the operation is considered permanently failed.
- */
-const MAX_RETRY_ATTEMPTS = 3;
+import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from './operation-log.const';
 
 /**
  * Interface for tracking pending operations that failed due to missing dependencies.
@@ -111,7 +106,7 @@ export class OperationApplierService {
     if (missingHardDeps.length > 0) {
       const missingDepIds = missingHardDeps.map((d) => d.entityId);
 
-      if (retryCount >= MAX_RETRY_ATTEMPTS) {
+      if (retryCount >= MAX_DEPENDENCY_RETRY_ATTEMPTS) {
         // Permanently failed - move to failed list
         PFLog.err(
           'OperationApplierService: Operation permanently failed after max retries.',
