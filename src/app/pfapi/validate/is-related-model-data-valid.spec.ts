@@ -1,17 +1,16 @@
 import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
 
-// Mock PFLog to suppress output during test
-PFLog.log = console.log;
-PFLog.error = console.error;
-PFLog.warn = console.warn;
-PFLog.err = console.error;
-PFLog.critical = console.error;
-
 describe('isRelatedModelDataValid', () => {
   let isRelatedModelDataValid: any;
 
   beforeEach(() => {
+    // Suppress PFLog output during tests by spying on the methods
+    spyOn(PFLog, 'log');
+    spyOn(PFLog, 'error');
+    spyOn(PFLog, 'warn');
+    spyOn(PFLog, 'err');
+    spyOn(PFLog, 'critical');
     /* eslint-disable @typescript-eslint/no-var-requires */
     // Reset modules to allow re-importing with mocks
     // @ts-ignore
