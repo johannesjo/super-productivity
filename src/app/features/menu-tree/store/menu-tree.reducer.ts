@@ -109,6 +109,24 @@ const _deleteItemsFromTree = (
   return itemIds.reduce((acc, id) => _deleteItemFromTree(acc, id, itemKind), tree);
 };
 
+const _itemExistsInTree = (
+  tree: MenuTreeTreeNode[],
+  itemId: string,
+  itemKind: MenuTreeKind.PROJECT | MenuTreeKind.TAG,
+): boolean => {
+  for (const node of tree) {
+    if (node.k === itemKind && node.id === itemId) {
+      return true;
+    }
+    if (node.k === MenuTreeKind.FOLDER) {
+      if (_itemExistsInTree(node.children, itemId, itemKind)) {
+        return true;
+      }
+    }
+  }
+  return false;
+};
+
 export const menuTreeReducer = createReducer(
   menuTreeInitialState,
   on(loadAllData, (_state, { appDataComplete }) => {
@@ -170,10 +188,7 @@ export const menuTreeReducer = createReducer(
   })),
   on(TaskSharedActions.addTagToTask, (state, { tag }) => {
     // Only add to tree if tag doesn't already exist (handles existing tag assignment)
-    const tagExistsInTree = state.tagTree.some(
-      (node) => node.k === MenuTreeKind.TAG && node.id === tag.id,
-    );
-    if (tagExistsInTree) {
+    if (_itemExistsInTree(state.tagTree, tag.id, MenuTreeKind.TAG)) {
       return state;
     }
     return {
