@@ -19,6 +19,7 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
 import { RepairOperationService } from '../processing/repair-operation.service';
+import { OperationApplierService } from '../processing/operation-applier.service';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
 
@@ -43,6 +44,7 @@ export class OperationLogHydratorService {
   private validateStateService = inject(ValidateStateService);
   private repairOperationService = inject(RepairOperationService);
   private vectorClockService = inject(VectorClockService);
+  private operationApplierService = inject(OperationApplierService);
 
   // Flag to prevent re-validation immediately after repair
   private _isRepairInProgress = false;
@@ -233,6 +235,9 @@ export class OperationLogHydratorService {
       // Sync PFAPI vector clock with SUP_OPS to ensure consistency
       // This recovers from any failed PFAPI updates during previous operations
       await this._syncPfapiVectorClock();
+
+      // Prune old failed operations to prevent memory growth
+      this.operationApplierService.pruneOldFailedOperations();
     } catch (e) {
       PFLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
@@ -700,8 +705,23 @@ export class OperationLogHydratorService {
       await this.pfapiService.pf.metaModel.syncVectorClock(currentClock);
       PFLog.normal('OperationLogHydratorService: Synced PFAPI vector clock with SUP_OPS');
     } catch (e) {
-      // Non-fatal - PFAPI might not be ready yet or sync might not be enabled
-      PFLog.verbose('OperationLogHydratorService: Could not sync PFAPI vector clock', e);
+      // Distinguish between expected errors and actual failures
+      const errorMessage = e instanceof Error ? e.message : String(e);
+      const isExpectedError =
+        errorMessage.includes('not initialized') ||
+        errorMessage.includes('sync not enabled') ||
+        errorMessage.includes('not ready');
+
+      if (isExpectedError) {
+        // Non-fatal - PFAPI might not be ready yet or sync might not be enabled
+        PFLog.verbose(
+          'OperationLogHydratorService: Could not sync PFAPI vector clock (expected)',
+          e,
+        );
+      } else {
+        // Unexpected error - log as warning for visibility
+        PFLog.warn('OperationLogHydratorService: Failed to sync PFAPI vector clock', e);
+      }
     }
   }
 
