@@ -32,3 +32,10 @@ export const LOCK_TIMEOUT_MS = 30000;
  * If lock cannot be acquired within this time, an error is thrown.
  */
 export const LOCK_ACQUIRE_TIMEOUT_MS = 60000;
+
+/**
+ * Retention window for synced operations during compaction (milliseconds).
+ * Operations older than this that have been synced will be deleted.
+ * Default: 7 days
+ */
+export const COMPACTION_RETENTION_MS = 7 * 24 * 60 * 60 * 1000;
