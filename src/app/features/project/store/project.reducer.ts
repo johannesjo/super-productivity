@@ -12,10 +12,7 @@ import {
   moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
-import {
-  moveItemInList,
-  moveTaskForWorkContextLikeState,
-} from '../../work-context/store/work-context-meta.helper';
+import { moveItemAfterAnchor } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeftUntil,
   arrayMoveRightUntil,
@@ -107,18 +104,18 @@ export const projectReducer = createReducer<ProjectState>(
 
   on(
     moveTaskInTodayList,
-    (state, { taskId, newOrderedIds, target, workContextType, workContextId }) => {
+    (state, { taskId, afterTaskId, target, workContextType, workContextId }) => {
       if (workContextType !== WORK_CONTEXT_TYPE) {
         return state;
       }
 
       const taskIdsBefore = (state.entities[workContextId] as Project).taskIds;
-      const taskIds = moveTaskForWorkContextLikeState(
-        taskId,
-        newOrderedIds,
-        target,
-        taskIdsBefore,
-      );
+      // When moving to DONE section with null anchor, append to end
+      // Otherwise use standard anchor-based positioning
+      const taskIds =
+        afterTaskId === null && target === 'DONE'
+          ? [...taskIdsBefore.filter((id) => id !== taskId), taskId]
+          : moveItemAfterAnchor(taskId, afterTaskId, taskIdsBefore);
       return projectAdapter.updateOne(
         {
           id: workContextId,
@@ -131,13 +128,13 @@ export const projectReducer = createReducer<ProjectState>(
     },
   ),
 
-  on(moveProjectTaskInBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
-    const taskIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-    const backlogTaskIds = moveTaskForWorkContextLikeState(
+  on(moveProjectTaskInBacklogList, (state, { taskId, afterTaskId, workContextId }) => {
+    const currentBacklogTaskIds = (state.entities[workContextId] as Project)
+      .backlogTaskIds;
+    const backlogTaskIds = moveItemAfterAnchor(
       taskId,
-      newOrderedIds,
-      null,
-      taskIdsBefore,
+      afterTaskId,
+      currentBacklogTaskIds,
     );
     return projectAdapter.updateOne(
       {
@@ -270,7 +267,7 @@ export const projectReducer = createReducer<ProjectState>(
 
   // MOVE TASK ACTIONS
   // -----------------
-  on(moveProjectTaskToBacklogList, (state, { taskId, newOrderedIds, workContextId }) => {
+  on(moveProjectTaskToBacklogList, (state, { taskId, afterTaskId, workContextId }) => {
     const project = state.entities[workContextId] as Project;
     if (!project.isEnableBacklog) {
       Log.err('Project backlog is disabled');
@@ -280,7 +277,7 @@ export const projectReducer = createReducer<ProjectState>(
     const backlogIdsBefore = project.backlogTaskIds;
 
     const filteredToday = todaysTaskIdsBefore.filter(filterOutId(taskId));
-    const backlogTaskIds = moveItemInList(taskId, backlogIdsBefore, newOrderedIds);
+    const backlogTaskIds = moveItemAfterAnchor(taskId, afterTaskId, backlogIdsBefore);
 
     return projectAdapter.updateOne(
       {
@@ -294,12 +291,16 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(moveProjectTaskToRegularList, (state, { taskId, newOrderedIds, workContextId }) => {
+  on(moveProjectTaskToRegularList, (state, { taskId, afterTaskId, workContextId }) => {
     const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
     const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
 
     const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
-    const newTodaysTaskIds = moveItemInList(taskId, todaysTaskIdsBefore, newOrderedIds);
+    const newTodaysTaskIds = moveItemAfterAnchor(
+      taskId,
+      afterTaskId,
+      todaysTaskIdsBefore,
+    );
 
     return projectAdapter.updateOne(
       {

@@ -18,7 +18,7 @@ These items were identified in the code audit but require further evaluation and
 - ✅ Cross-browser error detection (Chrome, Firefox `NS_ERROR_DOM_QUOTA_REACHED`, Safari code 22)
 - ✅ Circuit breaker (`isHandlingQuotaExceeded`) prevents infinite retry loops
 - ✅ User notification via snackbar on permanent failure
-- ✅ Rollback action dispatched to revert optimistic state update
+- ✅ App reload triggered to restore consistent state from persisted data
 
 ---
 
@@ -60,11 +60,39 @@ Without tombstones, concurrent delete + update operations result in non-determin
 
 ### Current State
 
-Actions like `moveProjectTaskInBacklogList` use `newOrderedIds: string[]` which sends the entire reordered list.
+Some drag-drop actions like `moveProjectTaskInBacklogList` use `newOrderedIds: string[]` which sends the entire reordered list.
+
+### Partial Progress ✅
+
+Keyboard/button-triggered moves have already been refactored to use only `taskId`:
+
+- ✅ `moveProjectTaskUpInBacklogList`
+- ✅ `moveProjectTaskDownInBacklogList`
+- ✅ `moveProjectTaskToTopInBacklogList`
+- ✅ `moveProjectTaskToBottomInBacklogList`
+- ✅ `moveProjectTaskToBacklogListAuto`
+- ✅ `moveProjectTaskToRegularListAuto`
+
+**December 2025 Update:** Drag-drop moves refactored to anchor-based positioning:
+
+- ✅ `moveProjectTaskInBacklogList` - Now uses `{ taskId, afterTaskId, workContextId }`
+- ✅ `moveProjectTaskToBacklogList` - Now uses `{ taskId, afterTaskId, workContextId }`
+- ✅ `moveProjectTaskToRegularList` - Now uses `{ taskId, afterTaskId, workContextId, src, target }` (src/target retained for done/undone effects)
+- ✅ `moveTaskInTodayList` - Now uses `{ taskId, afterTaskId, workContextId, workContextType, src, target }` (handles PROJECT and TAG contexts, special handling for DONE section)
+
+Helper functions added in `work-context-meta.helper.ts`:
+
+- `moveItemAfterAnchor(itemId, afterItemId, currentList)` - Anchor-based list reordering
+- `getAnchorFromDragDrop(itemId, newOrderedIds)` - Extracts anchor from drag-drop event
 
 ### Problem
 
-Two concurrent moves of different tasks will conflict completely since both send the full list.
+Two concurrent drag-drop moves of different tasks will conflict completely since both send the full list.
+
+### Remaining Actions (still use full list ordering)
+
+- `updateProjectOrder` - Project list reordering (less frequent operation)
+- `updateTagOrder` - Tag list reordering (less frequent operation)
 
 ### Proposed Solutions
 
@@ -95,14 +123,6 @@ Two concurrent moves of different tasks will conflict completely since both send
 - Most robust but significantly complex
 - Consider libraries like Yjs or Automerge
 
-### Affected Actions
-
-- `moveProjectTaskInBacklogList`
-- `moveProjectTaskToBacklogList`
-- `moveProjectTaskToRegularList`
-- `updateProjectOrder`
-- `updateTagOrder`
-
 ### Questions to Resolve
 
 - Which approach balances complexity vs. robustness?
@@ -113,8 +133,8 @@ Two concurrent moves of different tasks will conflict completely since both send
 
 ## 3. Slim Down `moveToArchive` Payload
 
-**Priority:** MEDIUM
-**Complexity:** MEDIUM
+**Priority:** MEDIUM → DEFERRED
+**Complexity:** HIGH (requires architectural changes)
 
 ### Current State
 
@@ -124,51 +144,51 @@ moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] })
 
 Sends full task objects (5-50 KB per operation).
 
-### Proposed Change
+### Analysis (December 2025)
 
-```typescript
-moveToArchive: (taskProps: { taskIds: string[] })
-```
+After investigation, the full payload is **intentionally required**:
 
-### Considerations
+1. **Remote sync needs full data**: When a client receives `moveToArchive`, it must write the tasks to its local archive storage (archiveYoung). The originating client has already removed tasks from its active state.
 
-- Archive is a special "snapshot" operation
-- Receiver might not have task data if syncing from scratch
-- May need separate "archive data" sync mechanism
-- Evaluate if this is intentional design for data preservation
+2. **Sync timing mismatch**: Operations sync immediately, but archiveYoung syncs daily. If we only sent task IDs, receiving clients couldn't look up the task data.
 
-### Questions to Resolve
+3. **Offline-first design**: A client may receive operations after being offline. The full payload ensures archive data is available even without recent archiveYoung sync.
 
-- Is full payload intentional for offline-first scenarios?
-- How does archive sync work across clients?
-- Should archive operations be treated like `SYNC_IMPORT` (rule 2.1 exception)?
+### Potential Future Optimization
+
+To reduce payload size would require architectural changes:
+
+- Sync archiveYoung before sending moveToArchive operations
+- Or implement "archive data fetch on demand" for receiving clients
+- Or use a reference-based system where archive data is fetched separately
+
+### Decision
+
+Keep current implementation. The full payload is a deliberate design choice for sync reliability. The 5-50 KB per archive operation is acceptable given archive operations are infrequent (typically once per day at end-of-day).
 
 ---
 
-## 4. Slim Down `deleteProject` Payload
+## 4. ~~Slim Down `deleteProject` Payload~~ ✅ COMPLETED
 
-**Priority:** LOW
-**Complexity:** LOW
+**Status:** COMPLETED (December 2025)
 
-### Current State
+### Implementation
+
+Changed from:
 
 ```typescript
 deleteProject: (taskProps: { project: Project; allTaskIds: string[] })
 ```
 
-Full `Project` object (5-20 KB) is persisted but only `project.id` is used.
-
-### Proposed Change
+To:
 
 ```typescript
-deleteProject: (taskProps: { projectId: string; allTaskIds: string[] })
+deleteProject: (taskProps: { projectId: string; noteIds: string[]; allTaskIds: string[] })
 ```
 
-### Notes
-
-- `allTaskIds` is needed for cascading delete (rule 3.5)
-- Easy fix once tombstone system is in place
-- Low priority since functional correctness is maintained
+- Reduced payload from full `Project` object (5-20 KB) to just IDs
+- `noteIds` is required by note.reducer.ts to delete associated notes
+- Updated all reducers, effects, and tests
 
 ---
 
@@ -176,10 +196,10 @@ deleteProject: (taskProps: { projectId: string; allTaskIds: string[] })
 
 1. **Tombstones** - Foundation for safe deletes, enables undo/restore (HIGH priority)
 2. **Move operations** - Highest sync conflict risk (CRITICAL priority)
-3. **moveToArchive** - Needs design decision on archive sync strategy (MEDIUM)
-4. **deleteProject** - Simple cleanup, low impact (LOW)
+3. ~~**moveToArchive**~~ - Deferred: full payload required for sync reliability
+4. ~~**deleteProject**~~ ✅ - Completed December 2025
 
-> **Note:** Quota handling was previously listed as HIGH priority and is now complete. See "Recently Completed" section above.
+> **Note:** Quota handling and deleteProject payload slim-down are complete. moveToArchive was analyzed and deferred - see Item 3 for rationale.
 
 ---
 

@@ -33,16 +33,18 @@ import {
   moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../features/work-context/store/work-context-meta.actions';
+import { LOCAL_ACTIONS } from '../util/local-actions.token';
 
 @Injectable()
 export class PluginHooksEffects {
   private readonly actions$ = inject(Actions);
+  private readonly localActions$ = inject(LOCAL_ACTIONS);
   private readonly store = inject(Store);
   private readonly pluginService = inject(PluginService);
 
   taskComplete$ = createEffect(
     () =>
-      this.actions$.pipe(
+      this.localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((action) => action.task.changes.isDone === true),
         switchMap((action) =>
@@ -81,7 +83,7 @@ export class PluginHooksEffects {
 
   taskUpdate$ = createEffect(
     () =>
-      this.actions$.pipe(
+      this.localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         switchMap((action) =>
           this.store.pipe(

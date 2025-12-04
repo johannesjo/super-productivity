@@ -10,7 +10,7 @@ import {
   moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../../work-context/store/work-context-meta.actions';
-import { moveTaskForWorkContextLikeState } from '../../work-context/store/work-context-meta.helper';
+import { moveItemAfterAnchor } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeftUntil,
   arrayMoveRightUntil,
@@ -189,7 +189,7 @@ export const tagReducer = createReducer<TagState>(
     moveTaskInTodayList,
     (
       state: TagState,
-      { taskId, newOrderedIds, src, target, workContextType, workContextId },
+      { taskId, afterTaskId, target, workContextType, workContextId },
     ) => {
       if (workContextType !== WORK_CONTEXT_TYPE) {
         return state;
@@ -199,12 +199,12 @@ export const tagReducer = createReducer<TagState>(
         throw new Error('No tag');
       }
       const taskIdsBefore = tag.taskIds;
-      const taskIds = moveTaskForWorkContextLikeState(
-        taskId,
-        newOrderedIds,
-        target,
-        taskIdsBefore,
-      );
+      // When moving to DONE section with null anchor, append to end
+      // Otherwise use standard anchor-based positioning
+      const taskIds =
+        afterTaskId === null && target === 'DONE'
+          ? [...taskIdsBefore.filter((id) => id !== taskId), taskId]
+          : moveItemAfterAnchor(taskId, afterTaskId, taskIdsBefore);
       return tagAdapter.updateOne(
         {
           id: workContextId,

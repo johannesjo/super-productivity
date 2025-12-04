@@ -3,7 +3,6 @@ import { Update } from '@ngrx/entity';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 import { IssueDataReduced } from '../../features/issue/issue.model';
 import { WorkContextType } from '../../features/work-context/work-context.model';
-import { Project } from '../../features/project/project.model';
 import { BatchOperation } from '@super-productivity/plugin-api';
 import { PersistentActionMeta } from '../../core/persistence/operation-log/persistent-action.interface';
 import { OpType } from '../../core/persistence/operation-log/operation.types';
@@ -173,12 +172,16 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    deleteProject: (taskProps: { project: Project; allTaskIds: string[] }) => ({
+    deleteProject: (taskProps: {
+      projectId: string;
+      noteIds: string[];
+      allTaskIds: string[];
+    }) => ({
       ...taskProps,
       meta: {
         isPersistent: true,
         entityType: 'PROJECT',
-        entityId: taskProps.project.id,
+        entityId: taskProps.projectId,
         opType: OpType.Delete,
       } satisfies PersistentActionMeta,
     }),

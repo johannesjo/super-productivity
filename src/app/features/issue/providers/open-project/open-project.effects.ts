@@ -22,10 +22,12 @@ import { T } from 'src/app/t.const';
 import { DialogOpenProjectTransitionComponent } from './open-project-view-components/dialog-openproject-transition/dialog-open-project-transition.component';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
+import { LOCAL_ACTIONS } from '../../../../util/local-actions.token';
 
 @Injectable()
 export class OpenProjectEffects {
   private readonly _actions$ = inject(Actions);
+  private readonly _localActions$ = inject(LOCAL_ACTIONS);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _snackService = inject(SnackService);
   private readonly _openProjectApiService = inject(OpenProjectApiService);
@@ -36,10 +38,11 @@ export class OpenProjectEffects {
 
   postTime$: any = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        filter((task) => !!task),
         concatMap((task) =>
           task.parentId
             ? this._taskService
@@ -47,6 +50,7 @@ export class OpenProjectEffects {
                 .pipe(map((parent) => ({ mainTask: parent, subTask: task })))
             : of({ mainTask: task, subTask: undefined }),
         ),
+        filter(({ mainTask }) => !!mainTask),
         concatMap(({ mainTask, subTask }) =>
           mainTask.issueType === OPEN_PROJECT_TYPE &&
           mainTask.issueId &&

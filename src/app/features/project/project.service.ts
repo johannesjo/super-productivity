@@ -202,7 +202,13 @@ export class ProjectService {
       }
     });
     const allTaskIds = [...allParentTaskIds, ...subTaskIdsForProject];
-    this._store$.dispatch(TaskSharedActions.deleteProject({ project, allTaskIds }));
+    this._store$.dispatch(
+      TaskSharedActions.deleteProject({
+        projectId: project.id,
+        noteIds: project.noteIds,
+        allTaskIds,
+      }),
+    );
   }
 
   update(projectId: string, changedFields: Partial<Project>): void {

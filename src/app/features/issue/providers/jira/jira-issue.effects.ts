@@ -34,10 +34,12 @@ import { isJiraEnabled } from './is-jira-enabled.util';
 import { IssueProviderService } from '../../issue-provider.service';
 import { assertTruthy } from '../../../../util/assert-truthy';
 import { devError } from '../../../../util/dev-error';
+import { LOCAL_ACTIONS } from '../../../../util/local-actions.token';
 
 @Injectable()
 export class JiraIssueEffects {
   private readonly _actions$ = inject(Actions);
+  private readonly _localActions$ = inject(LOCAL_ACTIONS);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _snackService = inject(SnackService);
   private readonly _taskService = inject(TaskService);
@@ -50,10 +52,11 @@ export class JiraIssueEffects {
 
   addWorkLog$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),
+        filter((task) => !!task),
         concatMap((task) =>
           task.parentId
             ? this._taskService
@@ -61,6 +64,7 @@ export class JiraIssueEffects {
                 .pipe(map((parent) => ({ mainTask: parent, subTask: task })))
             : of({ mainTask: task, subTask: undefined }),
         ),
+        filter(({ mainTask }) => !!mainTask),
         concatMap(({ mainTask, subTask }) =>
           mainTask.issueType === JIRA_TYPE && mainTask.issueId && mainTask.issueProviderId
             ? this._getCfgOnce$(mainTask.issueProviderId).pipe(

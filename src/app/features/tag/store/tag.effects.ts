@@ -32,10 +32,12 @@ import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class TagEffects {
   private _actions$ = inject(Actions);
+  private _localActions$ = inject(LOCAL_ACTIONS);
   private _store$ = inject<Store<any>>(Store);
   private _snackService = inject(SnackService);
   private _tagService = inject(TagService);
@@ -66,7 +68,7 @@ export class TagEffects {
 
   snackPlanForToday$: any = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.planTasksForToday),
         filter(({ isShowSnack }) => !!isShowSnack),
         tap(async ({ taskIds }) => {
