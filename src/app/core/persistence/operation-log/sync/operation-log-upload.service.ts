@@ -8,7 +8,7 @@ import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
   SyncOperation,
-} from '../../../pfapi/api/sync/sync-provider.interface';
+} from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import {
   OperationLogManifestService,

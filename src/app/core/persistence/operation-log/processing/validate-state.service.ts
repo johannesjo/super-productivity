@@ -4,7 +4,7 @@ import { validateAllData } from '../../../../pfapi/validate/validation-fn';
 import {
   isRelatedModelDataValid,
   getLastValidityError,
-} from '../../../pfapi/validate/is-related-model-data-valid';
+} from '../../../../pfapi/validate/is-related-model-data-valid';
 import { dataRepair } from '../../../../pfapi/repair/data-repair';
 import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';

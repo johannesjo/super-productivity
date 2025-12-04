@@ -8,7 +8,7 @@ import { PFLog } from '../../../log';
 import {
   ConflictResolutionResult,
   DialogConflictResolutionComponent,
-} from '../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
+} from '../../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
 import { firstValueFrom } from 'rxjs';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
