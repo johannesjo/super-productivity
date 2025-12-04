@@ -106,6 +106,8 @@ const ea: ElectronAPI = {
   makeJiraRequest: (args) => _send('JIRA_MAKE_REQUEST_EVENT', args),
   jiraSetupImgHeaders: (args) => _send('JIRA_SETUP_IMG_HEADERS', args),
 
+  makeLinearRequest: (args) => _send('LINEAR_MAKE_REQUEST_EVENT', args),
+
   backupAppData: (appData) => _send('BACKUP', appData),
 
   updateCurrentTask: (
