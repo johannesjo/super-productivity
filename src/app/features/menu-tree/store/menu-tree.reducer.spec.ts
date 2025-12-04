@@ -6,7 +6,6 @@ import {
   MenuTreeTreeNode,
 } from './menu-tree.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { createMockProject } from '../../../root-store/meta/task-shared-meta-reducers/test-utils';
 import { addTag, deleteTag, deleteTags } from '../../tag/store/tag.actions';
 import { DEFAULT_TAG } from '../../tag/tag.const';
 import { Tag } from '../../tag/tag.model';
@@ -45,7 +44,8 @@ describe('menuTreeReducer', () => {
     const result = menuTreeReducer(
       state,
       TaskSharedActions.deleteProject({
-        project: createMockProject({ id: 'project-remove' }),
+        projectId: 'project-remove',
+        noteIds: [],
         allTaskIds: [],
       }),
     );
@@ -68,7 +68,8 @@ describe('menuTreeReducer', () => {
     const result = menuTreeReducer(
       state,
       TaskSharedActions.deleteProject({
-        project: createMockProject({ id: 'project-nested-remove' }),
+        projectId: 'project-nested-remove',
+        noteIds: [],
         allTaskIds: [],
       }),
     );

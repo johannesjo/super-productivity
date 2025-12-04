@@ -22,11 +22,11 @@ export const issueProviderReducer = createReducer(
   on(loadAllData, (oldState, { appDataComplete }) =>
     appDataComplete.issueProvider ? appDataComplete.issueProvider : oldState,
   ),
-  on(TaskSharedActions.deleteProject, (state, { project }) =>
+  on(TaskSharedActions.deleteProject, (state, { projectId }) =>
     adapter.updateMany(
       state.ids
         .map((id) => state.entities[id])
-        .filter((ip) => ip?.defaultProjectId === project.id)
+        .filter((ip) => ip?.defaultProjectId === projectId)
         .map((ip) => ({ id: ip!.id, changes: { defaultProjectId: null } })),
       state,
     ),

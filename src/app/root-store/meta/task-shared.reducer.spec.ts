@@ -1779,8 +1779,10 @@ describe('taskSharedMetaReducer', () => {
         ['task1', 'task2', 'keep-task'],
         ['task1', 'task3', 'keep-task'],
       );
+      const mockProject = createMockProject();
       const action = TaskSharedActions.deleteProject({
-        project: createMockProject(),
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
         allTaskIds: ['task1', 'task2', 'task3'],
       });
 
@@ -1795,8 +1797,10 @@ describe('taskSharedMetaReducer', () => {
     });
 
     it('should handle empty project task lists', () => {
+      const mockProject = createMockProject();
       const action = TaskSharedActions.deleteProject({
-        project: createMockProject(),
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
         allTaskIds: [],
       });
 

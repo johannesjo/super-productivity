@@ -14,10 +14,12 @@ import { Project } from '../project.model';
 import { Observable } from 'rxjs';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class ProjectEffects {
   private _actions$ = inject(Actions);
+  private _localActions$ = inject(LOCAL_ACTIONS);
   private _snackService = inject(SnackService);
   private _taskArchiveService = inject(TaskArchiveService);
   private _globalConfigService = inject(GlobalConfigService);
@@ -25,11 +27,11 @@ export class ProjectEffects {
 
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.deleteProject),
-        tap(async ({ project }) => {
+        tap(async ({ projectId }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
-          const id = project.id as string;
+          const id = projectId;
           this._taskArchiveService.removeAllArchiveTasksForProject(id);
           // Reminders are now stored on tasks (task.remindAt), so they're deleted with the tasks
           this._timeTrackingService.cleanupDataEverywhereForProject(id);
@@ -124,7 +126,7 @@ export class ProjectEffects {
 
   showDeletionSnack: Observable<unknown> = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.deleteProject.type),
         tap(() => {
           this._snackService.open({

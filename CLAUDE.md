@@ -99,6 +99,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 4. **Translations**: UI strings must use the translation service (`T` or `TranslateService`). When adding translation keys, **only edit `en.json`** - never edit other locale files directly.
 5. **Electron Context**: Check `IS_ELECTRON` before using Electron-specific features.
 6. **Privacy**: No analytics or tracking. User data stays local unless explicitly synced.
+7. **Effects & Remote Sync**: For NgRx effects that perform side effects (snackbars, external API calls, plugin hooks), use `inject(LOCAL_ACTIONS)` instead of `inject(Actions)`. This filters out remote sync operations where the side effect already happened on the original client. See `src/app/util/local-actions.token.ts` and the architecture docs at `src/app/core/persistence/operation-log/docs/operation-log-architecture.md` (section A.6).
 
 ## 🚫 Known Anti-Patterns to Avoid
 

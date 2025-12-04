@@ -86,7 +86,7 @@ export const taskReducer = createReducer<TaskState>(
       : state,
   ),
 
-  on(TaskSharedActions.deleteProject, (state, { project, allTaskIds }) => {
+  on(TaskSharedActions.deleteProject, (state, { allTaskIds }) => {
     return taskAdapter.removeMany(allTaskIds, {
       ...state,
       currentTaskId:

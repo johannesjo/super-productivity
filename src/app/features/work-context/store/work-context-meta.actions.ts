@@ -9,7 +9,7 @@ export const moveTaskInTodayList = createAction(
   '[WorkContextMeta] Move Task in Today',
   (taskProps: {
     taskId: string;
-    newOrderedIds: string[];
+    afterTaskId: string | null;
     workContextType: WorkContextType;
     workContextId: string;
     src: DropListModelSource;

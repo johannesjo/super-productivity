@@ -66,6 +66,7 @@ import {
   moveTaskToTopInTodayList,
   moveTaskUpInTodayList,
 } from '../work-context/store/work-context-meta.actions';
+import { getAnchorFromDragDrop } from '../work-context/store/work-context-meta.helper';
 import { Router } from '@angular/router';
 import { unique } from '../../util/unique';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
@@ -452,10 +453,11 @@ export class TaskService {
       // move inside today
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
         moveTaskInTodayList({
           taskId,
-          newOrderedIds,
+          afterTaskId,
           src,
           target,
           workContextId,
@@ -464,15 +466,17 @@ export class TaskService {
       );
     } else if (src === 'BACKLOG' && target === 'BACKLOG') {
       // move inside backlog
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
-        moveProjectTaskInBacklogList({ taskId, newOrderedIds, workContextId }),
+        moveProjectTaskInBacklogList({ taskId, afterTaskId, workContextId }),
       );
     } else if (src === 'BACKLOG' && isTargetTodayList) {
       // move from backlog to today
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
         moveProjectTaskToRegularList({
           taskId,
-          newOrderedIds,
+          afterTaskId,
           src,
           target,
           workContextId,
@@ -480,8 +484,9 @@ export class TaskService {
       );
     } else if (isSrcTodayList && target === 'BACKLOG') {
       // move from today to backlog
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
-        moveProjectTaskToBacklogList({ taskId, newOrderedIds, workContextId }),
+        moveProjectTaskToBacklogList({ taskId, afterTaskId, workContextId }),
       );
     } else {
       // move sub task

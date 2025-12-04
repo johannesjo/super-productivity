@@ -215,7 +215,7 @@ export const moveProjectTaskToBottomInBacklogList = createAction(
 
 export const moveProjectTaskInBacklogList = createAction(
   '[Project] Move Task in Backlog',
-  (taskProps: { taskId: string; newOrderedIds: string[]; workContextId: string }) => ({
+  (taskProps: { taskId: string; afterTaskId: string | null; workContextId: string }) => ({
     ...taskProps,
     meta: {
       isPersistent: true,
@@ -228,7 +228,7 @@ export const moveProjectTaskInBacklogList = createAction(
 
 export const moveProjectTaskToBacklogList = createAction(
   '[Project] Move Task from regular to backlog',
-  (taskProps: { taskId: string; newOrderedIds: string[]; workContextId: string }) => ({
+  (taskProps: { taskId: string; afterTaskId: string | null; workContextId: string }) => ({
     ...taskProps,
     meta: {
       isPersistent: true,
@@ -243,7 +243,7 @@ export const moveProjectTaskToRegularList = createAction(
   '[Project] Move Task from backlog to regular',
   (taskProps: {
     taskId: string;
-    newOrderedIds: string[];
+    afterTaskId: string | null;
     workContextId: string;
     src: DropListModelSource;
     target: DropListModelSource;

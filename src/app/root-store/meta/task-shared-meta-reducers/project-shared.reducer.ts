@@ -80,7 +80,7 @@ const handleMoveToOtherProject = (
 
 const handleDeleteProject = (
   state: RootState,
-  project: { id: string },
+  projectId: string,
   allTaskIds: string[],
 ): RootState => {
   const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
@@ -97,11 +97,11 @@ const handleDeleteProject = (
 
   // Then remove the project entity
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { [project.id]: _, ...remainingEntities } =
+  const { [projectId]: _, ...remainingEntities } =
     stateWithUpdatedTags[PROJECT_FEATURE_NAME].entities;
   const remainingIds = (
     stateWithUpdatedTags[PROJECT_FEATURE_NAME].ids as string[]
-  ).filter((id) => id !== project.id);
+  ).filter((id) => id !== projectId);
 
   return {
     ...stateWithUpdatedTags,
@@ -125,10 +125,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     return handleMoveToOtherProject(state, task, targetProjectId);
   },
   [TaskSharedActions.deleteProject.type]: () => {
-    const { project, allTaskIds } = action as ReturnType<
+    const { projectId, allTaskIds } = action as ReturnType<
       typeof TaskSharedActions.deleteProject
     >;
-    return handleDeleteProject(state, project, allTaskIds);
+    return handleDeleteProject(state, projectId, allTaskIds);
   },
 });
 

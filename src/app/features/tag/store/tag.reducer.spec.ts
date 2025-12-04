@@ -5,6 +5,8 @@ import { TODAY_TAG } from '../tag.const';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { DEFAULT_TASK } from '../../tasks/task.model';
 import * as getDbDateStrUtil from '../../../util/get-db-date-str';
+import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
+import { WorkContextType } from '../../work-context/work-context.model';
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
@@ -188,6 +190,133 @@ describe('TagReducer', () => {
       const taskIds = (result.entities[TODAY_TAG.id] as Tag).taskIds;
       expect(taskIds).toEqual(['task2', 'task1']);
       expect(taskIds.filter((id) => id === 'task1').length).toBe(1);
+    });
+  });
+
+  describe('moveTaskInTodayList (anchor-based)', () => {
+    it('should move task to start of list when afterTaskId is null and target is UNDONE', () => {
+      const initialState = {
+        ...initialTagState,
+        entities: {
+          ...initialTagState.entities,
+          [TODAY_TAG.id]: {
+            ...TODAY_TAG,
+            taskIds: ['A', 'B', 'C'],
+          },
+        },
+      };
+
+      const action = moveTaskInTodayList({
+        taskId: 'C',
+        afterTaskId: null,
+        workContextType: WorkContextType.TAG,
+        workContextId: TODAY_TAG.id,
+        src: 'UNDONE',
+        target: 'UNDONE',
+      });
+
+      const result = tagReducer(initialState, action);
+      expect((result.entities[TODAY_TAG.id] as Tag).taskIds).toEqual(['C', 'A', 'B']);
+    });
+
+    it('should move task after specified anchor', () => {
+      const initialState = {
+        ...initialTagState,
+        entities: {
+          ...initialTagState.entities,
+          [TODAY_TAG.id]: {
+            ...TODAY_TAG,
+            taskIds: ['A', 'B', 'C'],
+          },
+        },
+      };
+
+      const action = moveTaskInTodayList({
+        taskId: 'C',
+        afterTaskId: 'A',
+        workContextType: WorkContextType.TAG,
+        workContextId: TODAY_TAG.id,
+        src: 'UNDONE',
+        target: 'UNDONE',
+      });
+
+      const result = tagReducer(initialState, action);
+      expect((result.entities[TODAY_TAG.id] as Tag).taskIds).toEqual(['A', 'C', 'B']);
+    });
+
+    it('should move task to end of list when anchor is last item', () => {
+      const initialState = {
+        ...initialTagState,
+        entities: {
+          ...initialTagState.entities,
+          [TODAY_TAG.id]: {
+            ...TODAY_TAG,
+            taskIds: ['A', 'B', 'C'],
+          },
+        },
+      };
+
+      const action = moveTaskInTodayList({
+        taskId: 'A',
+        afterTaskId: 'C',
+        workContextType: WorkContextType.TAG,
+        workContextId: TODAY_TAG.id,
+        src: 'UNDONE',
+        target: 'UNDONE',
+      });
+
+      const result = tagReducer(initialState, action);
+      expect((result.entities[TODAY_TAG.id] as Tag).taskIds).toEqual(['B', 'C', 'A']);
+    });
+
+    it('should append task to end when afterTaskId is null and target is DONE', () => {
+      const initialState = {
+        ...initialTagState,
+        entities: {
+          ...initialTagState.entities,
+          [TODAY_TAG.id]: {
+            ...TODAY_TAG,
+            taskIds: ['A', 'B', 'C'],
+          },
+        },
+      };
+
+      const action = moveTaskInTodayList({
+        taskId: 'A',
+        afterTaskId: null,
+        workContextType: WorkContextType.TAG,
+        workContextId: TODAY_TAG.id,
+        src: 'UNDONE',
+        target: 'DONE',
+      });
+
+      const result = tagReducer(initialState, action);
+      expect((result.entities[TODAY_TAG.id] as Tag).taskIds).toEqual(['B', 'C', 'A']);
+    });
+
+    it('should not modify state when workContextType is PROJECT', () => {
+      const initialState = {
+        ...initialTagState,
+        entities: {
+          ...initialTagState.entities,
+          [TODAY_TAG.id]: {
+            ...TODAY_TAG,
+            taskIds: ['A', 'B', 'C'],
+          },
+        },
+      };
+
+      const action = moveTaskInTodayList({
+        taskId: 'C',
+        afterTaskId: null,
+        workContextType: WorkContextType.PROJECT,
+        workContextId: 'some-project',
+        src: 'UNDONE',
+        target: 'UNDONE',
+      });
+
+      const result = tagReducer(initialState, action);
+      expect(result).toBe(initialState);
     });
   });
 });

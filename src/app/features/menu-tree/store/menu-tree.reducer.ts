@@ -174,9 +174,9 @@ export const menuTreeReducer = createReducer(
         ? _updateFolderInTree(state.tagTree, folderId, name)
         : state.tagTree,
   })),
-  on(TaskSharedActions.deleteProject, (state, { project }) => ({
+  on(TaskSharedActions.deleteProject, (state, { projectId }) => ({
     ...state,
-    projectTree: _deleteItemFromTree(state.projectTree, project.id, MenuTreeKind.PROJECT),
+    projectTree: _deleteItemFromTree(state.projectTree, projectId, MenuTreeKind.PROJECT),
   })),
   on(deleteTag, (state, { id }) => ({
     ...state,

@@ -400,7 +400,99 @@ this.broadcastChannel.onmessage = (event) => {
 };
 ```
 
-## A.6 Disaster Recovery
+## A.6 LOCAL_ACTIONS Token for Effects
+
+### The Problem
+
+When operations are synced from remote clients (other tabs or devices), they are dispatched to NgRx with `meta.isRemote: true`. Effects that perform side effects (snacks, work logs, notifications, plugin hooks) should NOT run for these remote operations because:
+
+1. **Duplicate side effects** - The side effect already happened on the original client
+2. **Invalid state access** - The task/entity referenced by the action may not exist yet (out-of-order delivery)
+3. **User confusion** - Showing "Task completed!" snack for something completed on another device hours ago
+
+### The Solution: LOCAL_ACTIONS Injection Token
+
+The `LOCAL_ACTIONS` injection token provides a pre-filtered Actions stream that excludes remote operations:
+
+```typescript
+// src/app/util/local-actions.token.ts
+import { inject, InjectionToken } from '@angular/core';
+import { Actions } from '@ngrx/effects';
+import { Action } from '@ngrx/store';
+import { Observable } from 'rxjs';
+import { filter } from 'rxjs/operators';
+
+export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIONS', {
+  providedIn: 'root',
+  factory: () => {
+    const actions$ = inject(Actions);
+    return actions$.pipe(filter((action: Action) => !(action as any).meta?.isRemote));
+  },
+});
+```
+
+### Usage in Effects
+
+Use `LOCAL_ACTIONS` instead of `Actions` for effects that should NOT run for remote operations:
+
+```typescript
+@Injectable()
+export class MyEffects {
+  private _actions$ = inject(Actions);          // ALL actions (local + remote)
+  private _localActions$ = inject(LOCAL_ACTIONS); // LOCAL actions only
+
+  // ✅ Use LOCAL_ACTIONS for side effects
+  showSnack$ = createEffect(
+    () =>
+      this._localActions$.pipe(
+        ofType(TaskSharedActions.updateTask),
+        filter((action) => action.task.changes.isDone === true),
+        tap(() => this.snackService.open({ msg: 'Task completed!' })),
+      ),
+    { dispatch: false },
+  );
+
+  // ✅ Use regular actions$ for state updates that should apply everywhere
+  moveTaskToList$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(moveTaskInTodayList),
+      // This dispatches another action - should work for all sources
+      map(({ taskId }) => TaskSharedActions.updateTask({ ... })),
+    ),
+  );
+}
+```
+
+### When to Use LOCAL_ACTIONS
+
+| Scenario                          | Use LOCAL_ACTIONS? | Reason                                              |
+| --------------------------------- | ------------------ | --------------------------------------------------- |
+| Show snackbar/toast               | ✅ Yes             | UI notification already happened on original client |
+| Post work log to Jira/OpenProject | ✅ Yes             | External API call already made                      |
+| Play sound                        | ✅ Yes             | Audio feedback is local-only                        |
+| Update Electron taskbar           | ✅ Yes             | Desktop UI is local-only                            |
+| Dispatch plugin hooks             | ✅ Yes             | Plugins already ran on original client              |
+| Update another entity in store    | ❌ No              | State change should apply everywhere                |
+| Navigate/route change             | ✅ Yes             | Navigation is local-only                            |
+| Dispatch cascading actions        | ⚠️ Depends         | If it modifies state: No. If side-effect only: Yes  |
+
+### Effects Using LOCAL_ACTIONS (Reference)
+
+| File                            | Effect                                          | Side Effect Type         |
+| ------------------------------- | ----------------------------------------------- | ------------------------ |
+| `task-reminder.effects.ts`      | `snack$`, `updateTaskReminderSnack$`, etc.      | Snackbar                 |
+| `task-repeat-cfg.effects.ts`    | `updateStartDateOnComplete$`                    | State + side effect      |
+| `jira-issue.effects.ts`         | `addWorkLog$`                                   | External API             |
+| `open-project.effects.ts`       | `postTime$`                                     | External API             |
+| `project.effects.ts`            | `deleteProjectRelatedData`, `showDeletionSnack` | External cleanup + snack |
+| `tag.effects.ts`                | `snackPlanForToday$`                            | Snackbar                 |
+| `task-electron.effects.ts`      | `clearTaskBarOnTaskDone$`                       | Electron UI              |
+| `plugin-hooks.effects.ts`       | `taskComplete$`, `taskUpdate$`                  | Plugin hooks             |
+| `task-related-model.effects.ts` | `autoAddTodayTagOnMarkAsDone`                   | Cascading action         |
+
+---
+
+## A.7 Disaster Recovery
 
 ### SUP_OPS Corruption
 

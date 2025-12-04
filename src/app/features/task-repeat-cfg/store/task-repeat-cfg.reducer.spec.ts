@@ -11,7 +11,6 @@ import {
   TaskRepeatCfgState,
 } from '../task-repeat-cfg.model';
 import { AppDataCompleteLegacy } from '../../../imex/sync/sync.model';
-import { Project } from '../../project/project.model';
 
 const createTaskRepeatCfg = (
   id: string,
@@ -90,7 +89,8 @@ describe('TaskRepeatCfgReducer', () => {
       const existingState = createStateWithCfgs(cfgs);
 
       const action = TaskSharedActions.deleteProject({
-        project: { id: projectId } as Project,
+        projectId,
+        noteIds: [],
         allTaskIds: [],
       });
       const result = taskRepeatCfgReducer(existingState, action);
@@ -108,7 +108,8 @@ describe('TaskRepeatCfgReducer', () => {
       const existingState = createStateWithCfgs([cfg]);
 
       const action = TaskSharedActions.deleteProject({
-        project: { id: 'deleted-project' } as Project,
+        projectId: 'deleted-project',
+        noteIds: [],
         allTaskIds: [],
       });
       const result = taskRepeatCfgReducer(existingState, action);
@@ -121,7 +122,8 @@ describe('TaskRepeatCfgReducer', () => {
       const existingState = createStateWithCfgs([cfg]);
 
       const action = TaskSharedActions.deleteProject({
-        project: { id: 'empty-project' } as Project,
+        projectId: 'empty-project',
+        noteIds: [],
         allTaskIds: [],
       });
       const result = taskRepeatCfgReducer(existingState, action);

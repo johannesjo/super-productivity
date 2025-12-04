@@ -12,10 +12,12 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Store } from '@ngrx/store';
 import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class TaskRelatedModelEffects {
   private _actions$ = inject(Actions);
+  private _localActions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
@@ -59,11 +61,11 @@ export class TaskRelatedModelEffects {
 
   autoAddTodayTagOnMarkAsDone = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((a) => a.task.changes.isDone === true),
         switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
-        filter((task: Task) => !task.parentId),
+        filter((task: Task) => !!task && !task.parentId),
         map((task) =>
           TaskSharedActions.planTasksForToday({
             taskIds: [task.id],

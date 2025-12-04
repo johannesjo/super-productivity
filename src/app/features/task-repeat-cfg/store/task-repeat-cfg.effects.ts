@@ -44,11 +44,13 @@ import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creat
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { devError } from '../../../util/dev-error';
 import { TaskReminderOptionId } from '../../tasks/task.model';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
   private _actions$ = inject(Actions);
+  private _localActions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _matDialog = inject(MatDialog);
@@ -372,7 +374,7 @@ export class TaskRepeatCfgEffects {
 
   // Update startDate when a task with repeatOnComplete is marked as done
   updateStartDateOnComplete$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(TaskSharedActions.updateTask),
       filter((a) => a.task.changes.isDone === true),
       switchMap(({ task }) =>
@@ -380,7 +382,7 @@ export class TaskRepeatCfgEffects {
           .getByIdOnce$(task.id as string)
           .pipe(map((fullTask) => fullTask)),
       ),
-      filter((task) => !!task.repeatCfgId),
+      filter((task) => !!task?.repeatCfgId),
       switchMap((task) =>
         this._taskRepeatCfgService.getTaskRepeatCfgById$(task.repeatCfgId as string).pipe(
           take(1),

@@ -21,12 +21,14 @@ import { IPC } from '../../../../../electron/shared-with-frontend/ipc-events.con
 import { ipcAddTaskFromAppUri$ } from '../../../core/ipc-events';
 import { TaskService } from '../task.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 // TODO send message to electron when current task changes here
 
 @Injectable()
 export class TaskElectronEffects {
   private _actions$ = inject(Actions);
+  private _localActions$ = inject(LOCAL_ACTIONS);
   private _store$ = inject<Store<any>>(Store);
   private _configService = inject(GlobalConfigService);
   private _focusModeService = inject(FocusModeService);
@@ -113,7 +115,7 @@ export class TaskElectronEffects {
 
   clearTaskBarOnTaskDone$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         tap(({ task }) => {
           if (task.changes.isDone) {

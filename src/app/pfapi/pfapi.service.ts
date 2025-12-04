@@ -141,8 +141,10 @@ export class PfapiService {
           await this.pf.sync();
         }
       } catch (e) {
-        PFLog.err(e);
-        alert('Unable to set sync provider. Please check your settings.');
+        PFLog.err('Failed to set sync provider or sync:', e);
+        const errorMsg =
+          e instanceof Error ? e.message : 'Unknown error - check console for details';
+        alert(`Unable to set sync provider: ${errorMsg}`);
       }
     });
 
