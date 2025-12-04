@@ -336,9 +336,13 @@ export const tagReducer = createReducer<TagState>(
     );
   }),
 
-  on(TaskSharedActions.addTagToTask, (state: TagState, { tag }) =>
-    tagAdapter.addOne(tag, state),
-  ),
+  on(TaskSharedActions.addTagToTask, (state: TagState, { tag }) => {
+    // Only add tag if it doesn't already exist (handles existing tag assignment)
+    if (state.entities[tag.id]) {
+      return state;
+    }
+    return tagAdapter.addOne(tag, state);
+  }),
 
   // TASK STUFF
   // ---------
