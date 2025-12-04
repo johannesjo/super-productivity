@@ -2,6 +2,8 @@ import { createAction, props } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { Task, TaskDetailTargetPanel } from '../task.model';
 import { RoundTimeOption } from '../../project/project.model';
+import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
+import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
 export const setCurrentTask = createAction(
   '[Task] SetCurrentTask',
@@ -56,41 +58,85 @@ export const undoDeleteTask = createAction('[Task] Undo Delete Task');
 
 export const moveSubTask = createAction(
   '[Task] Move sub task',
-  props<{
+  (taskProps: {
     taskId: string;
     srcTaskId: string;
     targetTaskId: string;
     newOrderedIds: string[];
-  }>(),
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.taskId,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveSubTaskUp = createAction(
   '[Task] Move up',
-
-  props<{ id: string; parentId: string }>(),
+  (taskProps: { id: string; parentId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.id,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveSubTaskDown = createAction(
   '[Task] Move down',
-  props<{ id: string; parentId: string }>(),
+  (taskProps: { id: string; parentId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.id,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveSubTaskToTop = createAction(
   '[Task] Move to top',
-
-  props<{ id: string; parentId: string }>(),
+  (taskProps: { id: string; parentId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.id,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const moveSubTaskToBottom = createAction(
   '[Task] Move to bottom',
-
-  props<{ id: string; parentId: string }>(),
+  (taskProps: { id: string; parentId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.id,
+      opType: OpType.Move,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const removeTimeSpent = createAction(
   '[Task] Remove time spent',
-
-  props<{ id: string; date: string; duration: number }>(),
+  (taskProps: { id: string; date: string; duration: number }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.id,
+      opType: OpType.Update,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const removeReminderFromTask = createAction(
@@ -106,22 +152,37 @@ export const removeReminderFromTask = createAction(
 
 export const addSubTask = createAction(
   '[Task] Add SubTask',
-
-  props<{ task: Task; parentId: string }>(),
+  (taskProps: { task: Task; parentId: string }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityId: taskProps.task.id,
+      opType: OpType.Create,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const toggleStart = createAction('[Task] Toggle start');
 
 export const roundTimeSpentForDay = createAction(
   '[Task] RoundTimeSpentForDay',
-
-  props<{
+  (taskProps: {
     day: string;
     taskIds: string[];
     roundTo: RoundTimeOption;
     isRoundUp: boolean;
     projectId?: string | null;
-  }>(),
+  }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityIds: taskProps.taskIds,
+      opType: OpType.Update,
+      isBulk: true,
+    } as PersistentActionMeta,
+  }),
 );
 
 export const addNewTagsFromShortSyntax = createAction(
