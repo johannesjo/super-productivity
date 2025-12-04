@@ -1,6 +1,6 @@
 import { nanoid } from 'nanoid';
 import typia from 'typia';
-import { first, map, take, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, first, map, take, withLatestFrom } from 'rxjs/operators';
 import { computed, effect, inject, Injectable, untracked } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Observable } from 'rxjs';
@@ -82,7 +82,10 @@ import {
 import { Update } from '@ngrx/entity';
 import { RootState } from '../../root-store/root-state';
 import { DateService } from '../../core/date/date.service';
-import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
+import {
+  TimeTrackingActions,
+  syncTimeSpent,
+} from '../time-tracking/store/time-tracking.actions';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -181,6 +184,11 @@ export class TaskService {
   private _lastFocusedTaskEl: HTMLElement | null = null;
   private _allTasks$: Observable<Task[]> = this._store.pipe(select(selectAllTasks));
 
+  // Batch sync for time tracking: accumulates duration per task, syncs every 5 minutes
+  private static readonly SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
+  private _unsyncedDuration: Map<string, { duration: number; date: string }> = new Map();
+  private _lastSyncTime = Date.now();
+
   constructor() {
     document.addEventListener(
       'focus',
@@ -196,22 +204,68 @@ export class TaskService {
       true,
     );
 
-    // time tracking
+    // time tracking with batch sync
     this._timeTrackingService.tick$
       .pipe(
         withLatestFrom(this.currentTask$, this._imexMetaService.isDataImportInProgress$),
       )
       .subscribe(([tick, currentTask, isImportInProgress]) => {
         if (currentTask && !isImportInProgress) {
+          // Update local state immediately (existing behavior)
           this.addTimeSpent(currentTask, tick.duration, tick.date);
+
+          // Accumulate for batch sync
+          this._accumulateTimeSpent(currentTask.id, tick.duration, tick.date);
+
+          // Check if it's time to sync (every 5 minutes)
+          if (Date.now() - this._lastSyncTime >= TaskService.SYNC_INTERVAL_MS) {
+            this._flushAccumulatedTimeSpent();
+          }
         }
       });
+
+    // Flush accumulated time when task stops (currentTaskId becomes null or changes)
+    this.currentTaskId$.pipe(distinctUntilChanged()).subscribe((newTaskId) => {
+      // When task changes or stops, flush any accumulated time
+      this._flushAccumulatedTimeSpent();
+    });
 
     effect(() => {
       if (!this.isTimeTrackingEnabled() && untracked(this.currentTaskId) != null) {
         this.toggleStartTask();
       }
     });
+  }
+
+  /**
+   * Accumulates time spent for batch sync to other clients.
+   */
+  private _accumulateTimeSpent(taskId: string, duration: number, date: string): void {
+    const existing = this._unsyncedDuration.get(taskId);
+    if (existing && existing.date === date) {
+      existing.duration += duration;
+    } else {
+      // If date changed, flush the old accumulated time first
+      if (existing) {
+        this._store.dispatch(
+          syncTimeSpent({ taskId, date: existing.date, duration: existing.duration }),
+        );
+      }
+      this._unsyncedDuration.set(taskId, { duration, date });
+    }
+  }
+
+  /**
+   * Dispatches syncTimeSpent for all accumulated time and resets accumulators.
+   */
+  private _flushAccumulatedTimeSpent(): void {
+    this._unsyncedDuration.forEach(({ duration, date }, taskId) => {
+      if (duration > 0) {
+        this._store.dispatch(syncTimeSpent({ taskId, date, duration }));
+      }
+    });
+    this._unsyncedDuration.clear();
+    this._lastSyncTime = Date.now();
   }
 
   getAllParentWithoutTag$(tagId: string): Observable<Task[]> {

@@ -4,12 +4,10 @@ import { flattenTasks } from '../tasks/store/task.selectors';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { taskAdapter } from '../tasks/store/task.adapter';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import {
-  sortTimeTrackingAndTasksFromArchiveYoungToOld,
-  sortTimeTrackingDataToArchiveYoung,
-} from './sort-data-to-flush';
+import { sortTimeTrackingDataToArchiveYoung } from './sort-data-to-flush';
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
+import { flushYoungToOld } from './store/archive.actions';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
 
@@ -116,6 +114,7 @@ export class ArchiveService {
     );
 
     // ------------------------------------------------
+    // Check if it's time to flush archiveYoung to archiveOld
     const archiveOld = await this._pfapiService.m.archiveOld.load();
     const isFlushArchiveOld =
       now - archiveOld.lastTimeTrackingFlush > ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD;
@@ -124,42 +123,17 @@ export class ArchiveService {
       return;
     }
 
-    // ------------------------------------------------
-    // Result B:
-    // Also sort timeTracking and task data from archiveYoung to archiveOld
-    const newSorted2 = sortTimeTrackingAndTasksFromArchiveYoungToOld({
-      archiveYoung: newArchiveYoung,
-      archiveOld,
-      threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
-      now,
-    });
-    await this._pfapiService.m.archiveYoung.save(
-      {
-        ...newSorted2.archiveYoung,
-        lastTimeTrackingFlush: now,
-      },
-      {
-        isUpdateRevAndLastUpdate: true,
-      },
-    );
-    await this._pfapiService.m.archiveOld.save(
-      {
-        ...newSorted2.archiveOld,
-        lastTimeTrackingFlush: now,
-      },
-      {
-        isUpdateRevAndLastUpdate: true,
-      },
-    );
-    Log.log(
-      '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD\n_______________________',
-    );
+    // Dispatch the flush action - this will be persisted and synced to other clients
+    // The actual flush operation is handled by ArchiveEffects.flushYoungToOld$
+    // This ensures other clients receive the operation and replay the same flush,
+    // maintaining deterministic archive state without syncing large archiveOld files.
+    this._store.dispatch(flushYoungToOld({ timestamp: now }));
   }
 
   /**
    * Writes tasks to archiveYoung for remote sync operations.
-   * This is a simplified version that only adds tasks without triggering
-   * time tracking flush or archiveOld compaction.
+   * Also moves historical time tracking data to archiveYoung to keep
+   * the client's archive consistent with the originating client.
    *
    * Used when receiving moveToArchive operations from other clients.
    */
@@ -199,9 +173,18 @@ export class ArchiveService {
       taskArchiveState,
     );
 
+    // Also move historical time tracking data to archiveYoung
+    // This ensures the remote client's archive matches the originating client
+    const timeTracking = await this._pfapiService.m.timeTracking.load();
+    const sorted = sortTimeTrackingDataToArchiveYoung({
+      timeTracking,
+      archiveYoung,
+      todayStr: getDbDateStr(now),
+    });
+
     await this._pfapiService.m.archiveYoung.save(
       {
-        ...archiveYoung,
+        ...sorted.archiveYoung,
         task: newTaskArchive,
       },
       {
@@ -210,8 +193,18 @@ export class ArchiveService {
       },
     );
 
-    Log.log('[ArchiveService] Remote sync: saved tasks to archiveYoung:', {
-      archivedTaskCount: Object.keys(newTaskArchive.entities).length,
-    });
+    // Update active time tracking state (remove historical data that was moved to archive)
+    this._store.dispatch(
+      TimeTrackingActions.updateWholeState({
+        newState: sorted.timeTracking,
+      }),
+    );
+
+    Log.log(
+      '[ArchiveService] Remote sync: saved tasks and time tracking to archiveYoung:',
+      {
+        archivedTaskCount: Object.keys(newTaskArchive.entities).length,
+      },
+    );
   }
 }
