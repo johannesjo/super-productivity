@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { setCurrentTask } from '../../../tasks/store/task.actions';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { concatMap, filter, map, take, tap, withLatestFrom } from 'rxjs/operators';
@@ -26,8 +26,7 @@ import { LOCAL_ACTIONS } from '../../../../util/local-actions.token';
 
 @Injectable()
 export class OpenProjectEffects {
-  private readonly _actions$ = inject(Actions);
-  private readonly _localActions$ = inject(LOCAL_ACTIONS);
+  private readonly _actions$ = inject(LOCAL_ACTIONS);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _snackService = inject(SnackService);
   private readonly _openProjectApiService = inject(OpenProjectApiService);
@@ -38,7 +37,7 @@ export class OpenProjectEffects {
 
   postTime$: any = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),

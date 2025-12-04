@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { ALL_ACTIONS } from '../../../util/local-actions.token';
 import { tap } from 'rxjs/operators';
 import { flushYoungToOld } from './archive.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
@@ -9,7 +10,9 @@ import { Log } from '../../../core/log';
 
 @Injectable()
 export class ArchiveEffects {
-  private _actions$ = inject(Actions);
+  // Uses ALL_ACTIONS because this effect must run for both local and remote dispatches
+  // to ensure deterministic archive state across all clients
+  private _actions$ = inject(ALL_ACTIONS);
   private _pfapiService = inject(PfapiService);
 
   /**

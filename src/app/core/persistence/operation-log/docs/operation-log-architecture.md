@@ -425,7 +425,7 @@ import { filter } from 'rxjs/operators';
 export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIONS', {
   providedIn: 'root',
   factory: () => {
-    const actions$ = inject(Actions);
+    const actions$ = inject(LOCAL_ACTIONS);
     return actions$.pipe(filter((action: Action) => !(action as any).meta?.isRemote));
   },
 });
@@ -438,7 +438,7 @@ Use `LOCAL_ACTIONS` instead of `Actions` for effects that should NOT run for rem
 ```typescript
 @Injectable()
 export class MyEffects {
-  private _actions$ = inject(Actions);          // ALL actions (local + remote)
+  private _actions$ = inject(LOCAL_ACTIONS);          // ALL actions (local + remote)
   private _localActions$ = inject(LOCAL_ACTIONS); // LOCAL actions only
 
   // ✅ Use LOCAL_ACTIONS for side effects
@@ -2017,8 +2017,14 @@ To detect silent divergence between clients:
 | ---------- | ------------------------------------------ | -------- | ----- |
 | Auto-merge | Automatic merge for non-conflicting fields | Low      |       |
 | Undo/Redo  | Leverage op-log for undo history           | Low      |       |
+| Tombstones | Soft delete with retention window          | High     |       |
 
-> **Recently Completed:** Quota handling with emergency compaction and circuit breaker (December 2025), `syncedAt` index (for faster getUnsynced()), and persistent compaction counter (tracks ops across tabs/restarts).
+> **Recently Completed (December 2025):**
+>
+> - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement. See `work-context-meta.helper.ts` for helper functions.
+> - **Quota handling**: Emergency compaction and circuit breaker on `QuotaExceededError`
+> - **`syncedAt` index**: Faster `getUnsynced()` queries
+> - **Persistent compaction counter**: Tracks ops across tabs/restarts
 
 ---
 
@@ -2040,6 +2046,8 @@ src/app/core/persistence/operation-log/
 │   └── schema-migration.service.ts           # State schema migrations
 ├── sync/
 │   ├── operation-log-sync.service.ts         # Upload/download operations (Part C)
+│   ├── operation-log-download.service.ts     # Download operations
+│   ├── operation-log-upload.service.ts       # Upload operations
 │   ├── lock.service.ts                       # Cross-tab locking (Web Locks + fallback)
 │   ├── multi-tab-coordinator.service.ts      # BroadcastChannel coordination
 │   ├── dependency-resolver.service.ts        # Extract/check operation dependencies
@@ -2049,6 +2057,10 @@ src/app/core/persistence/operation-log/
     ├── validate-state.service.ts             # Typia + cross-model validation wrapper
     ├── validate-operation-payload.ts         # Checkpoint A - payload validation
     └── repair-operation.service.ts           # REPAIR operation creation + notification
+
+src/app/features/work-context/store/
+├── work-context-meta.actions.ts          # Move actions (moveTaskInTodayList, etc.)
+└── work-context-meta.helper.ts           # Anchor-based positioning helpers
 
 src/app/pfapi/
 ├── pfapi-store-delegate.service.ts       # Reads NgRx for sync (Part B)

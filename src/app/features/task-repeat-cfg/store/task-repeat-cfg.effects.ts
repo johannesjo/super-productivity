@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import {
   concatMap,
   filter,
@@ -49,7 +50,7 @@ import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _localActions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _taskRepeatCfgService = inject(TaskRepeatCfgService);

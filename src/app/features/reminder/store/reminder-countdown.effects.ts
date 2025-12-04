@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect } from '@ngrx/effects';
+import { createEffect } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import {
   selectAllTasksWithReminder,
   selectCurrentTaskId,
@@ -34,7 +35,7 @@ const COUNTDOWN_MAGIC_GAP = 500;
 
 @Injectable()
 export class ReminderCountdownEffects {
-  private actions$ = inject(Actions);
+  private actions$ = inject(LOCAL_ACTIONS);
   private _datePipe = inject(LocaleDatePipe);
   private _store = inject(Store);
   private _bannerService = inject(BannerService);

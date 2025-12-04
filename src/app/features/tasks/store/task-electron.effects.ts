@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { setCurrentTask, unsetCurrentTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import { filter, startWith, take, tap, withLatestFrom } from 'rxjs/operators';
@@ -27,8 +27,7 @@ import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class TaskElectronEffects {
-  private _actions$ = inject(Actions);
-  private _localActions$ = inject(LOCAL_ACTIONS);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _store$ = inject<Store<any>>(Store);
   private _configService = inject(GlobalConfigService);
   private _focusModeService = inject(FocusModeService);
@@ -115,7 +114,7 @@ export class TaskElectronEffects {
 
   clearTaskBarOnTaskDone$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         tap(({ task }) => {
           if (task.changes.isDone) {

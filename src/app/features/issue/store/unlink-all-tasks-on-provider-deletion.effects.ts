@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { TaskService } from '../../tasks/task.service';
 import { TaskCopy } from '../../tasks/task.model';
 import { IssueProviderActions } from './issue-provider.actions';
@@ -13,7 +14,7 @@ import { IssueLog } from '../../../core/log';
 
 @Injectable()
 export class UnlinkAllTasksOnProviderDeletionEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
   private _taskArchiveService = inject(TaskArchiveService);

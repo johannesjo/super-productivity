@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Store } from '@ngrx/store';
 import { EMPTY, of } from 'rxjs';
 import {
@@ -35,7 +36,7 @@ const SESSION_DONE_SOUND = 'positive.ogg';
 
 @Injectable()
 export class FocusModeEffects {
-  private actions$ = inject(Actions);
+  private actions$ = inject(LOCAL_ACTIONS);
   private store = inject(Store);
   private strategyFactory = inject(FocusModeStrategyFactory);
   private globalConfigService = inject(GlobalConfigService);

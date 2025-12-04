@@ -4,7 +4,8 @@ import { EMPTY, Observable } from 'rxjs';
 import { map, mergeMap, switchMap, tap } from 'rxjs/operators';
 import { DateService } from 'src/app/core/date/date.service';
 
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { select, Store } from '@ngrx/store';
 import { TranslateService } from '@ngx-translate/core';
 
@@ -26,7 +27,7 @@ import { selectSimpleCounterById } from './simple-counter.reducer';
 
 @Injectable()
 export class SimpleCounterEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _store$ = inject<Store<any>>(Store);
   private _timeTrackingService = inject(GlobalTrackingIntervalService);
   private _dateService = inject(DateService);

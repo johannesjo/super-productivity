@@ -7,9 +7,10 @@ import { DEFAULT_SNACK_CFG } from './snack.const';
 import { SnackCustomComponent } from './snack-custom/snack-custom.component';
 import { TranslateService } from '@ngx-translate/core';
 import { MatSnackBar, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
-import { Actions, ofType } from '@ngrx/effects';
+import { ofType } from '@ngrx/effects';
 import { setActiveWorkContext } from '../../features/work-context/store/work-context.actions';
 import { debounce } from '../../util/decorators';
+import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 
 @Injectable({
   providedIn: 'root',
@@ -17,7 +18,7 @@ import { debounce } from '../../util/decorators';
 export class SnackService {
   private _store$ = inject(Store);
   private _translateService = inject(TranslateService);
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _matSnackBar = inject(MatSnackBar);
 
   private _ref?: MatSnackBarRef<SnackCustomComponent | SimpleSnackBar>;

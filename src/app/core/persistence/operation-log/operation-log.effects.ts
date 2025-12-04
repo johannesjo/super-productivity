@@ -1,5 +1,6 @@
 import { inject, Injectable, Injector } from '@angular/core';
-import { Actions, createEffect } from '@ngrx/effects';
+import { createEffect } from '@ngrx/effects';
+import { ALL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, mergeMap } from 'rxjs/operators';
 import { LockService } from './sync/lock.service';
 import { OperationLogStoreService } from './store/operation-log-store.service';
@@ -32,7 +33,8 @@ export class OperationLogEffects {
   private compactionFailures = 0;
   /** Circuit breaker: prevents recursive quota exceeded handling */
   private isHandlingQuotaExceeded = false;
-  private actions$ = inject(Actions);
+  // Uses ALL_ACTIONS because this effect captures all persistent actions and handles isRemote filtering internally
+  private actions$ = inject(ALL_ACTIONS);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
   private vectorClockService = inject(VectorClockService);

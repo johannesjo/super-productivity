@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
@@ -16,8 +16,7 @@ import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class TaskRelatedModelEffects {
-  private _actions$ = inject(Actions);
-  private _localActions$ = inject(LOCAL_ACTIONS);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
@@ -61,7 +60,7 @@ export class TaskRelatedModelEffects {
 
   autoAddTodayTagOnMarkAsDone = createEffect(() =>
     this.ifAutoAddTodayEnabled$(
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((a) => a.task.changes.isDone === true),
         switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),

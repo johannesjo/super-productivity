@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, map, tap, withLatestFrom, startWith } from 'rxjs/operators';
 import { setSelectedTask } from '../../tasks/store/task.actions';
 import { TaskService } from '../../tasks/task.service';
@@ -14,7 +15,7 @@ import { WorkContextService } from '../work-context.service';
 
 @Injectable()
 export class WorkContextEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _bannerService = inject(BannerService);
   private _router = inject(Router);
