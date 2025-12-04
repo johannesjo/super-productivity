@@ -25,10 +25,16 @@ export const unsetCurrentTask = createAction('[Task] UnsetCurrentTask');
 
 export const __updateMultipleTaskSimple = createAction(
   '[Task] Update multiple Tasks (simple)',
-  props<{
-    taskUpdates: Update<Task>[];
-    isIgnoreShortSyntax?: boolean;
-  }>(),
+  (taskProps: { taskUpdates: Update<Task>[]; isIgnoreShortSyntax?: boolean }) => ({
+    ...taskProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TASK',
+      entityIds: taskProps.taskUpdates.map((u) => u.id as string),
+      opType: OpType.Update,
+      isBulk: true,
+    } satisfies PersistentActionMeta,
+  }),
 );
 
 export const updateTaskUi = createAction(

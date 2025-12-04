@@ -26,7 +26,6 @@ import {
   unarchiveProject,
   updateProject,
   updateProjectOrder,
-  upsertProject,
 } from './store/project.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { DEFAULT_PROJECT } from './project.const';
@@ -187,17 +186,6 @@ export class ProjectService {
       }),
     );
     return id;
-  }
-
-  upsert(project: Partial<Project>): void {
-    this._store$.dispatch(
-      upsertProject({
-        project: {
-          ...project,
-          id: project.id || nanoid(),
-        } as Project,
-      }),
-    );
   }
 
   async remove(project: Project): Promise<void> {
