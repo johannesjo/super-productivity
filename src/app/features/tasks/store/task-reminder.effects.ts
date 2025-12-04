@@ -41,7 +41,7 @@ export class TaskReminderEffects {
   );
 
   autoMoveToBacklog$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(TaskSharedActions.scheduleTaskWithTime),
       filter(({ isMoveToBacklog }) => isMoveToBacklog),
       map(({ task }) => {
@@ -58,7 +58,7 @@ export class TaskReminderEffects {
 
   updateTaskReminderSnack$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.reScheduleTaskWithTime),
         filter(({ remindAt }) => typeof remindAt === 'number'),
         tap(({ task }) =>
@@ -76,7 +76,7 @@ export class TaskReminderEffects {
   );
 
   autoMoveToBacklogOnReschedule$ = createEffect(() =>
-    this._actions$.pipe(
+    this._localActions$.pipe(
       ofType(TaskSharedActions.reScheduleTaskWithTime),
       filter(({ isMoveToBacklog }) => isMoveToBacklog),
       mergeMap(({ task, isMoveToBacklog }) => {
@@ -95,7 +95,7 @@ export class TaskReminderEffects {
 
   unscheduleDoneTask$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => !!task.changes.isDone),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
@@ -114,7 +114,7 @@ export class TaskReminderEffects {
 
   unscheduleSnack$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.unscheduleTask),
         filter(({ isSkipToast }) => !isSkipToast),
         tap(() => {
@@ -130,7 +130,7 @@ export class TaskReminderEffects {
 
   dismissReminderSnack$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._localActions$.pipe(
         ofType(TaskSharedActions.dismissReminderOnly),
         tap(() => {
           this._snackService.open({
