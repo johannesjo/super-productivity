@@ -76,6 +76,7 @@ import { ReminderCountdownEffects } from '../features/reminder/store/reminder-co
 import { SyncEffects } from '../imex/sync/sync.effects';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
+import { ArchiveEffects } from '../features/time-tracking/store/archive.effects';
 import { plannerFeature } from '../features/planner/store/planner.reducer';
 import { PlannerEffects } from '../features/planner/store/planner.effects';
 import { AppStateEffects } from './app-state/app-state.effects';
@@ -166,6 +167,7 @@ import {
     StoreModule.forFeature(boardsFeature),
 
     StoreModule.forFeature(timeTrackingFeature),
+    EffectsModule.forFeature([ArchiveEffects]),
 
     StoreModule.forFeature(plannerFeature),
     EffectsModule.forFeature([PlannerEffects]),

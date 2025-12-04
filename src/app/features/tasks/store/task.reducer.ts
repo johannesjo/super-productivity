@@ -48,7 +48,10 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { createReducer, on } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import {
+  TimeTrackingActions,
+  syncTimeSpent,
+} from '../../time-tracking/store/time-tracking.actions';
 import { TaskLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
 
@@ -102,6 +105,34 @@ export const taskReducer = createReducer<TaskState>(
       {
         ...task.timeSpentOnDay,
         [date]: currentTimeSpentForTickDay + duration,
+      },
+      state,
+    );
+  }),
+
+  // Sync time spent from remote clients
+  // Local: no-op (state already updated by addTimeSpent ticks)
+  // Remote: apply the batched duration
+  on(syncTimeSpent, (state, action) => {
+    // Only apply for remote actions - local state is already up-to-date
+    if (!action.meta.isRemote) {
+      return state;
+    }
+
+    const { taskId, date, duration } = action;
+    const task = state.entities[taskId];
+    if (!task) {
+      TaskLog.warn(`[syncTimeSpent] Task ${taskId} not found, skipping`);
+      return state;
+    }
+
+    const currentTimeSpentForDay =
+      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+    return updateTimeSpentForTask(
+      taskId,
+      {
+        ...task.timeSpentOnDay,
+        [date]: currentTimeSpentForDay + duration,
       },
       state,
     );
