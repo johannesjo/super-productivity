@@ -3,6 +3,7 @@ import { LockService } from './lock.service';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiStoreDelegateService } from '../../../pfapi/pfapi-store-delegate.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
+import { VectorClockService } from './vector-clock.service';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -17,6 +18,7 @@ export class OperationLogCompactionService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private storeDelegate = inject(PfapiStoreDelegateService);
+  private vectorClockService = inject(VectorClockService);
 
   async compact(): Promise<void> {
     await this.lockService.request('sp_op_log', async () => {
@@ -24,7 +26,7 @@ export class OperationLogCompactionService {
       const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
 
       // 2. Get current vector clock (max of all ops)
-      const currentVectorClock = await this.opLogStore.getCurrentVectorClock();
+      const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
 
       // 3. Write to state cache with schema version
       const lastSeq = await this.opLogStore.getLastSeq();

@@ -14,6 +14,7 @@ import { PFLog } from '../../log';
 import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './validate-operation-payload';
+import { VectorClockService } from './vector-clock.service';
 
 const CURRENT_SCHEMA_VERSION = 1;
 const COMPACTION_THRESHOLD = 500;
@@ -34,6 +35,7 @@ export class OperationLogEffects {
   private actions$ = inject(Actions);
   private lockService = inject(LockService);
   private opLogStore = inject(OperationLogStoreService);
+  private vectorClockService = inject(VectorClockService);
   private injector = inject(Injector);
   private multiTabCoordinator = inject(MultiTabCoordinatorService);
   private compactionService = inject(OperationLogCompactionService);
@@ -66,7 +68,7 @@ export class OperationLogEffects {
 
     try {
       await this.lockService.request('sp_op_log', async () => {
-        const currentClock = await this.opLogStore.getCurrentVectorClock();
+        const currentClock = await this.vectorClockService.getCurrentVectorClock();
         const newClock = incrementVectorClock(currentClock, clientId);
 
         const op: Operation = {

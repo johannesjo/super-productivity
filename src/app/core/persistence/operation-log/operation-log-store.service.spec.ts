@@ -1,10 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from './operation-log-store.service';
+import { VectorClockService } from './vector-clock.service';
 import { Operation, OpType, EntityType, VectorClock } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 
 describe('OperationLogStoreService', () => {
   let service: OperationLogStoreService;
+  let vectorClockService: VectorClockService;
 
   // Helper to create test operations
   const createTestOperation = (overrides: Partial<Operation> = {}): Operation => ({
@@ -23,9 +25,10 @@ describe('OperationLogStoreService', () => {
 
   beforeEach(async () => {
     TestBed.configureTestingModule({
-      providers: [OperationLogStoreService],
+      providers: [OperationLogStoreService, VectorClockService],
     });
     service = TestBed.inject(OperationLogStoreService);
+    vectorClockService = TestBed.inject(VectorClockService);
     await service.init();
     // Clear all data from previous tests to ensure test isolation
     await service._clearAllDataForTesting();
@@ -399,9 +402,9 @@ describe('OperationLogStoreService', () => {
     });
   });
 
-  describe('getCurrentVectorClock', () => {
+  describe('VectorClockService.getCurrentVectorClock', () => {
     it('should return empty clock when no data exists', async () => {
-      const clock = await service.getCurrentVectorClock();
+      const clock = await vectorClockService.getCurrentVectorClock();
       expect(clock).toEqual({});
     });
 
@@ -427,15 +430,15 @@ describe('OperationLogStoreService', () => {
       await service.append(op1);
       await service.append(op2);
 
-      const clock = await service.getCurrentVectorClock();
+      const clock = await vectorClockService.getCurrentVectorClock();
       expect(clock.clientA).toBe(6);
       expect(clock.clientB).toBe(4);
     });
   });
 
-  describe('getEntityFrontier', () => {
+  describe('VectorClockService.getEntityFrontier', () => {
     it('should return empty map when no ops exist', async () => {
-      const frontier = await service.getEntityFrontier();
+      const frontier = await vectorClockService.getEntityFrontier();
       expect(frontier.size).toBe(0);
     });
 
@@ -460,7 +463,7 @@ describe('OperationLogStoreService', () => {
       await service.append(op2);
       await service.append(op3);
 
-      const frontier = await service.getEntityFrontier();
+      const frontier = await vectorClockService.getEntityFrontier();
       expect(frontier.get('TASK:task1')).toEqual({ clientA: 2 }); // Latest for task1
       expect(frontier.get('PROJECT:proj1')).toEqual({ clientA: 3 });
     });
@@ -480,7 +483,9 @@ describe('OperationLogStoreService', () => {
       await service.append(op1);
       await service.append(op2);
 
-      const taskFrontier = await service.getEntityFrontier('TASK' as EntityType);
+      const taskFrontier = await vectorClockService.getEntityFrontier(
+        'TASK' as EntityType,
+      );
       expect(taskFrontier.size).toBe(1);
       expect(taskFrontier.has('TASK:task1')).toBe(true);
       expect(taskFrontier.has('PROJECT:proj1')).toBe(false);

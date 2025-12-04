@@ -12,6 +12,13 @@ export interface OperationDependency {
   relation: 'parent' | 'reference';
 }
 
+/** Payload shape for task operations that may have dependencies */
+interface TaskOperationPayload {
+  projectId?: string;
+  parentId?: string;
+  tagIds?: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DependencyResolverService {
   private store = inject(Store);
@@ -21,7 +28,7 @@ export class DependencyResolverService {
    */
   extractDependencies(op: Operation): OperationDependency[] {
     const deps: OperationDependency[] = [];
-    const payload = op.payload as any;
+    const payload = op.payload as TaskOperationPayload;
 
     if (op.entityType === 'TASK') {
       if (payload.projectId) {

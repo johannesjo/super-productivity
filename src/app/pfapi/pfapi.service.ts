@@ -41,6 +41,7 @@ import { CURRENT_SCHEMA_VERSION } from '../core/persistence/operation-log/schema
 import { incrementVectorClock } from './api/util/vector-clock';
 import { uuidv7 } from '../util/uuid-v7';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
+import { VectorClockService } from '../core/persistence/operation-log/vector-clock.service';
 
 @Injectable({
   providedIn: 'root',
@@ -53,6 +54,7 @@ export class PfapiService {
   private _store = inject(Store);
   private _storeDelegateService = inject(PfapiStoreDelegateService);
   private _opLogStore = inject(OperationLogStoreService);
+  private _vectorClockService = inject(VectorClockService);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
@@ -211,7 +213,7 @@ export class PfapiService {
       ? await this.pf.metaModel.generateNewClientId()
       : await this.pf.metaModel.loadClientId();
 
-    const currentClock = await this._opLogStore.getCurrentVectorClock();
+    const currentClock = await this._vectorClockService.getCurrentVectorClock();
     const newClock = isForceConflict
       ? { [clientId]: 2 } // Fresh vector clock
       : incrementVectorClock(currentClock, clientId);
