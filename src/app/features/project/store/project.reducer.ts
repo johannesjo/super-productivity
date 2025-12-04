@@ -291,28 +291,32 @@ export const projectReducer = createReducer<ProjectState>(
     );
   }),
 
-  on(moveProjectTaskToRegularList, (state, { taskId, afterTaskId, workContextId }) => {
-    const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
-    const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
+  on(
+    moveProjectTaskToRegularList,
+    (state, { taskId, afterTaskId, target, workContextId }) => {
+      const backlogIdsBefore = (state.entities[workContextId] as Project).backlogTaskIds;
+      const todaysTaskIdsBefore = (state.entities[workContextId] as Project).taskIds;
 
-    const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
-    const newTodaysTaskIds = moveItemAfterAnchor(
-      taskId,
-      afterTaskId,
-      todaysTaskIdsBefore,
-    );
+      const filteredBacklog = backlogIdsBefore.filter(filterOutId(taskId));
+      // When moving to DONE section with null anchor, append to end
+      // Otherwise use standard anchor-based positioning
+      const newTodaysTaskIds =
+        afterTaskId === null && target === 'DONE'
+          ? [...todaysTaskIdsBefore, taskId]
+          : moveItemAfterAnchor(taskId, afterTaskId, todaysTaskIdsBefore);
 
-    return projectAdapter.updateOne(
-      {
-        id: workContextId,
-        changes: {
-          taskIds: newTodaysTaskIds,
-          backlogTaskIds: filteredBacklog,
+      return projectAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            taskIds: newTodaysTaskIds,
+            backlogTaskIds: filteredBacklog,
+          },
         },
-      },
-      state,
-    );
-  }),
+        state,
+      );
+    },
+  ),
 
   on(
     moveTaskUpInTodayList,
