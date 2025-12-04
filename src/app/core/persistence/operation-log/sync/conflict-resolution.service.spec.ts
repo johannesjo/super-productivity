@@ -192,9 +192,12 @@ describe('ConflictResolutionService', () => {
       expect(mockOpLogStore.append).toHaveBeenCalled();
       expect(mockOperationApplier.applyOperations).toHaveBeenCalled();
 
-      // Should NOT mark as applied or reject local ops on failure
+      // Should NOT mark as applied on failure
       expect(mockOpLogStore.markApplied).not.toHaveBeenCalled();
-      expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+
+      // SHOULD mark failed REMOTE ops as rejected (to prevent crash recovery issues)
+      // but NOT local ops - local ops should remain in the log
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
 
       expect(mockSnackService.open).toHaveBeenCalled();
       expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();

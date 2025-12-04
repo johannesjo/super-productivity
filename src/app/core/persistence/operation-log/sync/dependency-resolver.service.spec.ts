@@ -157,8 +157,10 @@ describe('DependencyResolverService', () => {
     it('should assume unknown entity types exist', async () => {
       const deps = [
         {
-          entityType: 'TAG' as EntityType,
-          entityId: 'tag1',
+          // Use an unknown entity type that's not in the switch case
+          // to test the default case which returns true
+          entityType: 'UNKNOWN_FUTURE_TYPE' as EntityType,
+          entityId: 'some-id',
           mustExist: false,
           relation: 'reference' as const,
         },
