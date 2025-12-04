@@ -26,6 +26,7 @@ import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
+import { toEntityKey } from './entity-key.util';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -167,7 +168,7 @@ export class OperationLogSyncService {
       let isStaleOrDuplicate = false;
 
       for (const entityId of entityIdsToCheck) {
-        const entityKey = `${remoteOp.entityType}:${entityId}`;
+        const entityKey = toEntityKey(remoteOp.entityType, entityId);
         const localOpsForEntity = localPendingOpsByEntity.get(entityKey) || [];
         const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
 

@@ -15,10 +15,8 @@ import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './validate-operation-payload';
 import { VectorClockService } from './vector-clock.service';
-
-const CURRENT_SCHEMA_VERSION = 1;
-const COMPACTION_THRESHOLD = 500;
-const MAX_COMPACTION_FAILURES = 3;
+import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.const';
+import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the

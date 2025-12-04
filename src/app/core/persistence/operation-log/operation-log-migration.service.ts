@@ -5,8 +5,7 @@ import { Operation, OpType } from './operation.types';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { PFLog } from '../../log';
 import { PersistenceLocalService } from '../persistence-local.service';
-
-const CURRENT_SCHEMA_VERSION = 1;
+import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 @Injectable({ providedIn: 'root' })
 export class OperationLogMigrationService {

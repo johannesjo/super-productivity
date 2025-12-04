@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
 import { Operation, OperationLogEntry, VectorClock } from './operation.types';
+import { toEntityKey } from './entity-key.util';
 
 const DB_NAME = 'SUP_OPS';
 const DB_VERSION = 1;
@@ -151,7 +152,7 @@ export class OperationLogStoreService {
     for (const entry of unsynced) {
       const ids = entry.op.entityIds || (entry.op.entityId ? [entry.op.entityId] : []);
       for (const id of ids) {
-        const key = `${entry.op.entityType}:${id}`;
+        const key = toEntityKey(entry.op.entityType, id);
         if (!map.has(key)) map.set(key, []);
         map.get(key)!.push(entry.op);
       }

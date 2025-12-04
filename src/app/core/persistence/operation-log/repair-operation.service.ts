@@ -8,8 +8,7 @@ import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { PFLog } from '../../log';
 import { VectorClockService } from './vector-clock.service';
-
-const CURRENT_SCHEMA_VERSION = 1;
+import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 /**
  * Service responsible for creating REPAIR operations.

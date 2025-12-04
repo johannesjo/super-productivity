@@ -1,0 +1,34 @@
+/**
+ * Configuration constants for the Operation Log system.
+ * Centralizes all tunable parameters for easier maintenance and documentation.
+ */
+
+/**
+ * Number of operations before triggering automatic compaction.
+ * Compaction reduces storage size by snapshotting state and removing old operations.
+ */
+export const COMPACTION_THRESHOLD = 500;
+
+/**
+ * Maximum consecutive compaction failures before notifying the user.
+ * After this many failures, a warning is shown to prompt user action.
+ */
+export const MAX_COMPACTION_FAILURES = 3;
+
+/**
+ * Maximum retry attempts for operations with missing dependencies.
+ * After this many retries, the operation is marked as permanently failed.
+ */
+export const MAX_DEPENDENCY_RETRY_ATTEMPTS = 3;
+
+/**
+ * Lock timeout for fallback localStorage-based locking (milliseconds).
+ * Used when Web Locks API is not available.
+ */
+export const LOCK_TIMEOUT_MS = 30000;
+
+/**
+ * Maximum wait time to acquire a lock (milliseconds).
+ * If lock cannot be acquired within this time, an error is thrown.
+ */
+export const LOCK_ACQUIRE_TIMEOUT_MS = 60000;
