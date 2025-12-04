@@ -99,6 +99,37 @@ export class OperationLogStoreService {
     return this.db.add('ops', entry as OperationLogEntry);
   }
 
+  async appendBatch(
+    ops: Operation[],
+    source: 'local' | 'remote' = 'local',
+    options?: { pendingApply?: boolean },
+  ): Promise<number[]> {
+    await this._ensureInit();
+    const tx = this.db.transaction('ops', 'readwrite');
+    const store = tx.objectStore('ops');
+    const seqs: number[] = [];
+
+    for (const op of ops) {
+      const entry: Omit<OperationLogEntry, 'seq'> = {
+        op,
+        appliedAt: Date.now(),
+        source,
+        syncedAt: source === 'remote' ? Date.now() : undefined,
+        applicationStatus:
+          source === 'remote'
+            ? options?.pendingApply
+              ? 'pending'
+              : 'applied'
+            : undefined,
+      };
+      const seq = await store.add(entry as OperationLogEntry);
+      seqs.push(seq as number);
+    }
+
+    await tx.done;
+    return seqs;
+  }
+
   /**
    * Marks operations as successfully applied.
    * Called after remote operations have been dispatched to NgRx.
