@@ -750,7 +750,8 @@ export class SyncService<const MD extends ModelCfgs> {
    * @returns Promise resolving to boolean indicating readiness
    */
   private async _isReadyForSync(): Promise<boolean> {
-    return this._currentSyncProvider$.getOrError().isReady();
+    const currentSyncProvider = this._currentSyncProvider$.value;
+    return currentSyncProvider ? currentSyncProvider.isReady() : Promise.resolve(false);
   }
 
   /**
