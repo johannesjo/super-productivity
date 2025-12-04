@@ -1174,6 +1174,7 @@
         "SUCCESS_IMPORT": "Data imported",
         "SUCCESS_VIA_BUTTON": "Data successfully synced",
         "PERSIST_FAILED": "Failed to save changes. Please reload the app.",
+        "STORAGE_QUOTA_EXCEEDED": "Storage full. Please free up space or trigger database cleanup.",
         "HYDRATION_FAILED": "Failed to load data. Please reload the app.",
         "COMPACTION_FAILED": "Database cleanup failed. App may slow down.",
         "CONFLICT_RESOLUTION_FAILED": "Sync conflict resolution failed. Please reload.",
