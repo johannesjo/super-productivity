@@ -99,6 +99,19 @@ export class OperationLogSyncService {
    * Internal implementation of remote ops processing.
    */
   private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
+    // Check if this is a fresh client (no local pending operations)
+    // In this case, skip conflict detection and accept all remote operations
+    const localPendingOps = await this.opLogStore.getUnsynced();
+
+    if (localPendingOps.length === 0) {
+      PFLog.normal(
+        'OperationLogSyncService: Fresh client detected (0 pending ops). Accepting all remote operations.',
+        { remoteOpsCount: remoteOps.length },
+      );
+      await this._applyRemoteOpsDirectly(remoteOps);
+      return;
+    }
+
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
       remoteOps,
@@ -267,5 +280,35 @@ export class OperationLogSyncService {
     );
 
     PFLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
+  }
+
+  /**
+   * Apply remote operations directly without conflict detection.
+   * Used for fresh clients with no local pending operations.
+   */
+  private async _applyRemoteOpsDirectly(remoteOps: Operation[]): Promise<void> {
+    if (remoteOps.length === 0) {
+      return;
+    }
+
+    const storedSeqs: number[] = [];
+
+    for (const op of remoteOps) {
+      if (!(await this.opLogStore.hasOp(op.id))) {
+        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+        storedSeqs.push(seq);
+      }
+    }
+
+    await this.operationApplier.applyOperations(remoteOps);
+
+    if (storedSeqs.length > 0) {
+      await this.opLogStore.markApplied(storedSeqs);
+      PFLog.normal(
+        `OperationLogSyncService: Fresh client applied ${storedSeqs.length} remote ops`,
+      );
+    }
+
+    await this._validateAfterSync();
   }
 }
