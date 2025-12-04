@@ -121,15 +121,15 @@ export class OperationLogEffects {
 
         // 3. Broadcast to other tabs
         this.multiTabCoordinator.notifyNewOperation(op);
-      });
 
-      // 4. Check if compaction is needed (persistent counter across tabs/restarts)
-      const opsCount = await this.opLogStore.incrementCompactionCounter();
-      if (opsCount >= COMPACTION_THRESHOLD) {
-        // Trigger compaction asynchronously (don't block write operation)
-        // Counter is reset in compaction service on success
-        this.triggerCompaction();
-      }
+        // 4. Check if compaction is needed (inside lock to prevent race between tabs)
+        const opsCount = await this.opLogStore.incrementCompactionCounter();
+        if (opsCount >= COMPACTION_THRESHOLD) {
+          // Trigger compaction asynchronously (don't block write operation)
+          // Counter is reset in compaction service on success
+          this.triggerCompaction();
+        }
+      });
     } catch (e) {
       // 4.1.1 Error Handling for Optimistic Updates
       console.error('Failed to persist operation', e);

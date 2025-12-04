@@ -11,7 +11,11 @@ import {
 import { validateLocalMeta } from '../util/validate-local-meta';
 import { PFEventEmitter } from '../util/events';
 import { devError } from '../../../util/dev-error';
-import { incrementVectorClock, limitVectorClockSize } from '../util/vector-clock';
+import {
+  incrementVectorClock,
+  limitVectorClockSize,
+  mergeVectorClocks,
+} from '../util/vector-clock';
 
 export const DEFAULT_META_MODEL: LocalMeta = {
   crossModelVersion: 1,
@@ -323,6 +327,49 @@ export class MetaModelCtrl {
       clientId,
       oldClock: currentVectorClock,
       newClock: newVectorClock,
+    });
+
+    await this.save(updatedMeta);
+  }
+
+  /**
+   * Syncs the meta model's vector clock to match the provided clock.
+   * Used during hydration to recover from failed vector clock updates.
+   * Only updates if the provided clock has higher values.
+   *
+   * @param targetClock The vector clock to sync to
+   */
+  async syncVectorClock(targetClock: Record<string, number>): Promise<void> {
+    const metaModel = this._metaModelInMemory;
+    if (!metaModel) {
+      throw new MetaNotReadyError('syncVectorClock', {
+        isLocalOnly: false,
+      } as ModelCfg<never>);
+    }
+
+    const currentClock = metaModel.vectorClock || {};
+    // Merge clocks, taking max for each client
+    const mergedClock = mergeVectorClocks(currentClock, targetClock);
+
+    // Only update if there are differences
+    const isDifferent = Object.keys(mergedClock).some(
+      (key) => mergedClock[key] !== currentClock[key],
+    );
+
+    if (!isDifferent) {
+      return;
+    }
+
+    const updatedMeta: LocalMeta = {
+      ...metaModel,
+      vectorClock: mergedClock,
+      lastUpdate: Date.now(),
+    };
+
+    PFLog.verbose(`${MetaModelCtrl.L}.syncVectorClock()`, {
+      oldClock: currentClock,
+      targetClock,
+      mergedClock,
     });
 
     await this.save(updatedMeta);

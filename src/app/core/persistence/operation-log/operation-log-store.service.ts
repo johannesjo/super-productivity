@@ -79,16 +79,51 @@ export class OperationLogStoreService {
     }
   }
 
-  async append(op: Operation, source: 'local' | 'remote' = 'local'): Promise<void> {
+  async append(
+    op: Operation,
+    source: 'local' | 'remote' = 'local',
+    options?: { pendingApply?: boolean },
+  ): Promise<number> {
     await this._ensureInit();
     const entry: Omit<OperationLogEntry, 'seq'> = {
       op,
       appliedAt: Date.now(),
       source,
       syncedAt: source === 'remote' ? Date.now() : undefined,
+      // For remote ops, track application status for crash recovery
+      applicationStatus:
+        source === 'remote' ? (options?.pendingApply ? 'pending' : 'applied') : undefined,
     };
-    // seq is auto-incremented
-    await this.db.add('ops', entry as OperationLogEntry);
+    // seq is auto-incremented, returned for later reference
+    return this.db.add('ops', entry as OperationLogEntry);
+  }
+
+  /**
+   * Marks operations as successfully applied.
+   * Called after remote operations have been dispatched to NgRx.
+   */
+  async markApplied(seqs: number[]): Promise<void> {
+    await this._ensureInit();
+    const tx = this.db.transaction('ops', 'readwrite');
+    const store = tx.objectStore('ops');
+    for (const seq of seqs) {
+      const entry = await store.get(seq);
+      if (entry && entry.applicationStatus === 'pending') {
+        entry.applicationStatus = 'applied';
+        await store.put(entry);
+      }
+    }
+    await tx.done;
+  }
+
+  /**
+   * Gets remote operations that are pending application (for crash recovery).
+   * These are ops that were stored but the app crashed before marking them applied.
+   */
+  async getPendingRemoteOps(): Promise<OperationLogEntry[]> {
+    await this._ensureInit();
+    const all = await this.db.getAll('ops');
+    return all.filter((e) => e.source === 'remote' && e.applicationStatus === 'pending');
   }
 
   async hasOp(id: string): Promise<boolean> {
