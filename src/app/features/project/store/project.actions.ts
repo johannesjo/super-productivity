@@ -29,11 +29,6 @@ export const addProject = createAction(
   }),
 );
 
-export const upsertProject = createAction(
-  '[Project] Upsert Project',
-  props<{ project: Project }>(),
-);
-
 export const addProjects = createAction(
   '[Project] Add Projects',
   props<{ projects: Project[] }>(),

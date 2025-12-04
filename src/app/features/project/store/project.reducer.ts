@@ -46,7 +46,6 @@ import {
   updateProject,
   updateProjectAdvancedCfg,
   updateProjectOrder,
-  upsertProject,
 } from './project.actions';
 import {
   addNote,
@@ -154,7 +153,6 @@ export const projectReducer = createReducer<ProjectState>(
   // Project Actions
   // ------------
   on(addProject, (state, { project }) => projectAdapter.addOne(project, state)),
-  on(upsertProject, (state, { project }) => projectAdapter.upsertOne(project, state)),
   on(addProjects, (state, { projects }) => projectAdapter.addMany(projects, state)),
 
   on(updateProject, (state, { project }) => projectAdapter.updateOne(project, state)),
