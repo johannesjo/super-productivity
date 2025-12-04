@@ -6,14 +6,27 @@ import { Task } from '../../tasks/task.model';
 import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
 import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
+// Standalone persistent action for updating work context data
+export const updateWorkContextData = createAction(
+  '[TimeTracking] Update Work Context Data',
+  (actionProps: {
+    ctx: { id: string; type: WorkContextType };
+    date: string;
+    updates: Partial<TTWorkContextData>;
+  }) => ({
+    ...actionProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'WORK_CONTEXT',
+      entityId: actionProps.ctx.id,
+      opType: OpType.Update,
+    } satisfies PersistentActionMeta,
+  }),
+);
+
 export const TimeTrackingActions = createActionGroup({
   source: 'TimeTracking',
   events: {
-    'Update Work Context Data': props<{
-      ctx: { id: string; type: WorkContextType };
-      date: string;
-      updates: Partial<TTWorkContextData>;
-    }>(),
     'Add time spent': props<{
       task: Task;
       date: string;

@@ -1,6 +1,5 @@
 import { PersistenceBaseModelCfg, PersistenceEntityModelCfg } from './persistence.model';
 import { GlobalConfigState } from '../../features/config/global-config.model';
-import { Reminder } from '../../features/reminder/reminder.model';
 import { Project, ProjectState } from '../../features/project/project.model';
 import { projectReducer } from '../../features/project/store/project.reducer';
 import { Tag, TagState } from '../../features/tag/tag.model';
@@ -35,7 +34,6 @@ import { BoardsState } from '../../features/boards/store/boards.reducer';
 interface PersistenceBaseModelCfgs {
   // [key: string]: PersistenceBaseModelCfg<any>;
   globalConfig: PersistenceBaseModelCfg<GlobalConfigState>;
-  reminders: PersistenceBaseModelCfg<Reminder[]>;
   planner: PersistenceBaseModelCfg<PlannerState>;
   boards: PersistenceBaseModelCfg<BoardsState>;
 }
@@ -61,12 +59,6 @@ export const BASE_MODEL_CFGS: PersistenceBaseModelCfgs = {
     // TODO remove this everywhere
     modelVersion: 99,
     migrateFn: (v) => v,
-  },
-  reminders: {
-    appDataKey: 'reminders',
-    modelVersion: 99,
-    // no migrations needed yet
-    migrateFn: (s: Reminder[]) => s,
   },
   planner: {
     appDataKey: 'planner',

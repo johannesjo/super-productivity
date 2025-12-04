@@ -21,7 +21,7 @@ export const addMetric = createAction(
       entityType: 'METRIC',
       entityId: metricProps.metric.id,
       opType: OpType.Create,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -34,7 +34,7 @@ export const updateMetric = createAction(
       entityType: 'METRIC',
       entityId: metricProps.metric.id as string,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -47,7 +47,7 @@ export const upsertMetric = createAction(
       entityType: 'METRIC',
       entityId: metricProps.metric.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -60,7 +60,7 @@ export const deleteMetric = createAction(
       entityType: 'METRIC',
       entityId: metricProps.id,
       opType: OpType.Delete,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
@@ -73,6 +73,6 @@ export const logFocusSession = createAction(
       entityType: 'METRIC',
       entityId: metricProps.day,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );

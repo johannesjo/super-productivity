@@ -1,4 +1,4 @@
-import { TimeTrackingActions } from './time-tracking.actions';
+import { TimeTrackingActions, updateWorkContextData } from './time-tracking.actions';
 import { createFeature, createReducer, on } from '@ngrx/store';
 import { TimeTrackingState } from '../time-tracking.model';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
@@ -64,7 +64,7 @@ export const timeTrackingReducer = createReducer(
     };
   }),
 
-  on(TimeTrackingActions.updateWorkContextData, (state, { ctx, date, updates }) => {
+  on(updateWorkContextData, (state, { ctx, date, updates }) => {
     const prop = ctx.type === 'TAG' ? 'tag' : 'project';
 
     return {

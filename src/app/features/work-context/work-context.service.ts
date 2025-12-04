@@ -61,7 +61,7 @@ import { distinctUntilChangedObject } from '../../util/distinct-until-changed-ob
 import { DateService } from 'src/app/core/date/date.service';
 import { getTimeSpentForDay } from './get-time-spent-for-day.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
-import { TimeTrackingActions } from '../time-tracking/store/time-tracking.actions';
+import { updateWorkContextData } from '../time-tracking/store/time-tracking.actions';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { INBOX_PROJECT } from '../project/project.const';
 import { selectProjectById } from '../project/store/project.selectors';
@@ -586,7 +586,7 @@ export class WorkContextService {
       throw new Error('Invalid active work context');
     }
     this._store$.dispatch(
-      TimeTrackingActions.updateWorkContextData({
+      updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
         updates: { s: newVal },
@@ -599,7 +599,7 @@ export class WorkContextService {
       throw new Error('Invalid active work context');
     }
     this._store$.dispatch(
-      TimeTrackingActions.updateWorkContextData({
+      updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
         updates: { e: newVal },
@@ -618,7 +618,7 @@ export class WorkContextService {
     const currentBreakNr = (await this.getBreakNr$().pipe(first()).toPromise()) || 0;
 
     this._store$.dispatch(
-      TimeTrackingActions.updateWorkContextData({
+      updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
         updates: { b: currentBreakNr + 1, bt: currentBreakTime + valToAdd },
@@ -635,7 +635,7 @@ export class WorkContextService {
     }
 
     this._store$.dispatch(
-      TimeTrackingActions.updateWorkContextData({
+      updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
         updates: { b: nrBreaks },
@@ -652,7 +652,7 @@ export class WorkContextService {
     }
 
     this._store$.dispatch(
-      TimeTrackingActions.updateWorkContextData({
+      updateWorkContextData({
         ctx: { id: this.activeWorkContextId, type: this.activeWorkContextType },
         date,
         updates: { bt: breakTime },

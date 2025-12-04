@@ -1,3 +1,4 @@
+import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
 import {
   __updateMultipleTaskSimple,
   addSubTask,
@@ -113,7 +114,7 @@ export const taskReducer = createReducer<TaskState>(
   // Remote: apply the batched duration
   on(syncTimeSpent, (state, action) => {
     // Only apply for remote actions - local state is already up-to-date
-    if (!action.meta.isRemote) {
+    if (!(action.meta as PersistentActionMeta).isRemote) {
       return state;
     }
 
