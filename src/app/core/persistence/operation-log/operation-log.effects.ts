@@ -1,6 +1,6 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Actions, createEffect } from '@ngrx/effects';
-import { filter, concatMap } from 'rxjs/operators';
+import { filter, mergeMap } from 'rxjs/operators';
 import { LockService } from './sync/lock.service';
 import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
@@ -46,7 +46,9 @@ export class OperationLogEffects {
       this.actions$.pipe(
         filter((action) => isPersistentAction(action)),
         filter((action) => !(action as PersistentAction).meta.isRemote),
-        concatMap((action) => this.writeOperation(action as PersistentAction)),
+        // Use mergeMap with concurrency limit for parallel writes
+        // Lock service handles ordering; this prevents action queue backup
+        mergeMap((action) => this.writeOperation(action as PersistentAction), 4),
       ),
     { dispatch: false },
   );

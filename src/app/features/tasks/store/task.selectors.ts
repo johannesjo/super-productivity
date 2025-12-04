@@ -22,23 +22,28 @@ import { selectTodayStr } from '../../../root-store/app-state/app-state.selector
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 
 const mapSubTasksToTasks = (tasksIN: Task[]): TaskWithSubTasks[] => {
-  return tasksIN
-    .filter((task) => !task.parentId)
-    .map((task) => {
-      if (task.subTaskIds && task.subTaskIds.length > 0) {
-        return {
-          ...task,
-          subTasks: task.subTaskIds
-            .map((subTaskId: string) => tasksIN.find((taskIN) => taskIN.id === subTaskId))
-            .filter((t): t is Task => t !== undefined),
-        };
-      } else {
-        return {
-          ...task,
-          subTasks: [],
-        };
+  // Create a Map for O(1) lookups instead of O(n) find() calls
+  const taskMap = new Map<string, Task>();
+  for (const task of tasksIN) {
+    taskMap.set(task.id, task);
+  }
+
+  const result: TaskWithSubTasks[] = [];
+  for (const task of tasksIN) {
+    if (task.parentId) continue;
+
+    if (task.subTaskIds && task.subTaskIds.length > 0) {
+      const subTasks: Task[] = [];
+      for (const subTaskId of task.subTaskIds) {
+        const subTask = taskMap.get(subTaskId);
+        if (subTask) subTasks.push(subTask);
       }
-    });
+      result.push({ ...task, subTasks });
+    } else {
+      result.push({ ...task, subTasks: [] });
+    }
+  }
+  return result;
 };
 export const mapSubTasksToTask = (
   task: Task | null,
@@ -153,7 +158,8 @@ export const selectOverdueTasksOnToday = createSelector(
   selectOverdueTasks,
   selectTodayTagTaskIds,
   (overdue, todayTaskIds): Task[] => {
-    return overdue.filter((t) => todayTaskIds.includes(t.id));
+    const todaySet = new Set(todayTaskIds);
+    return overdue.filter((t) => todaySet.has(t.id));
   },
 );
 
@@ -162,16 +168,16 @@ export const selectOverdueTasksWithSubTasks = createSelector(
   selectTaskFeatureState,
   selectTagFeatureState,
   (overdueTasks, taskState, tagState): TaskWithSubTasks[] => {
-    const overdueIds = overdueTasks.map((task) => task.id);
+    const overdueIdSet = new Set(overdueTasks.map((task) => task.id));
     const todayTag = tagState.entities[TODAY_TAG.id]!;
+    const todayTaskIdSet = new Set(todayTag.taskIds);
     return overdueTasks
       .filter(
         (task) =>
           (!task.parentId ||
-            (!overdueIds.includes(task.parentId) &&
-              !todayTag.taskIds.includes(task.parentId))) &&
+            (!overdueIdSet.has(task.parentId) && !todayTaskIdSet.has(task.parentId))) &&
           !task.isDone &&
-          !todayTag.taskIds.includes(task.id),
+          !todayTaskIdSet.has(task.id),
       )
       .map((task) => {
         return mapSubTasksToTask(task as Task, taskState) as TaskWithSubTasks;
@@ -205,6 +211,7 @@ export const selectAllTasksDueAndOverdue = createSelector(
   selectTagFeatureState,
   selectTodayStr,
   (s, tagState, todayStr): Task[] => {
+    const todayTaskIdSet = new Set(tagState.entities[TODAY_TAG.id]?.taskIds);
     return s.ids
       .map((id) => s.entities[id] as Task)
       .filter(
@@ -214,7 +221,7 @@ export const selectAllTasksDueAndOverdue = createSelector(
           // which is lexicographically sortable. This avoids timezone conversion issues that occur
           // when creating Date objects from date strings.
           task.dueDay <= todayStr &&
-          !tagState.entities[TODAY_TAG.id]?.taskIds.includes(task.id),
+          !todayTaskIdSet.has(task.id),
       );
   },
 );
@@ -266,46 +273,64 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
     }
 
     const now = Date.now();
-    const todayStart = new Date();
-    todayStart.setHours(0, 0, 0, 0);
     const todayEnd = new Date();
     todayEnd.setHours(23, 59, 59, 999);
+    const todayEndTime = todayEnd.getTime();
 
-    const allTasks = taskState.ids.map((id) => taskState.entities[id] as Task);
+    // Convert to Set for O(1) lookups
+    const todayTaskIdSet = new Set(todayTaskIds);
 
     // Filter tasks that are:
     // 1. In TODAY tag
     // 2. Have dueWithTime set
     // 3. dueWithTime is later than current time but still today
     // 4. Not done
-    const laterTodayTasksAll = allTasks.filter(
-      (task) =>
-        todayTaskIds.includes(task.id) &&
+    const laterTodayTasksAll: Task[] = [];
+    for (const id of taskState.ids) {
+      const task = taskState.entities[id] as Task;
+      if (
+        todayTaskIdSet.has(task.id) &&
         task.dueWithTime &&
         task.dueWithTime >= now &&
-        task.dueWithTime <= todayEnd.getTime() &&
-        !task.isDone,
-    );
+        task.dueWithTime <= todayEndTime &&
+        !task.isDone
+      ) {
+        laterTodayTasksAll.push(task);
+      }
+    }
 
     // Separate parent tasks and subtasks
-    const parentTasks = laterTodayTasksAll.filter((task) => !task.parentId);
-    const scheduledSubtasks = laterTodayTasksAll.filter((task) => task.parentId);
+    const parentTasks: Task[] = [];
+    const scheduledSubtasks: Task[] = [];
+    for (const task of laterTodayTasksAll) {
+      if (task.parentId) {
+        scheduledSubtasks.push(task);
+      } else {
+        parentTasks.push(task);
+      }
+    }
 
-    // Create a set of parent IDs that have scheduled subtasks
+    // Create sets for O(1) lookups
     const parentIdsWithScheduledSubtasks = new Set(
       scheduledSubtasks.map((subtask) => subtask.parentId),
     );
+    const parentTaskIdSet = new Set(parentTasks.map((t) => t.id));
 
     // Include parent tasks that either:
     // 1. Are scheduled themselves, OR
     // 2. Have scheduled subtasks
-    const parentsToInclude = allTasks.filter(
-      (task) =>
-        todayTaskIds.includes(task.id) &&
+    const parentsToInclude: Task[] = [];
+    for (const id of taskState.ids) {
+      const task = taskState.entities[id] as Task;
+      if (
+        todayTaskIdSet.has(task.id) &&
         !task.isDone &&
         !task.parentId &&
-        (parentTasks.includes(task) || parentIdsWithScheduledSubtasks.has(task.id)),
-    );
+        (parentTaskIdSet.has(task.id) || parentIdsWithScheduledSubtasks.has(task.id))
+      ) {
+        parentsToInclude.push(task);
+      }
+    }
 
     // Get IDs of parents that will be included
     const parentIdsInLaterToday = new Set(parentsToInclude.map((task) => task.id));

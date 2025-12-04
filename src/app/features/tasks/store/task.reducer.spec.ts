@@ -4,6 +4,7 @@ import { initialTaskState, taskReducer } from './task.reducer';
 import * as fromActions from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { INBOX_PROJECT } from '../../project/project.const';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 
 describe('Task Reducer', () => {
   const createTask = (id: string, partial: Partial<Task> = {}): Task => ({
@@ -156,6 +157,118 @@ describe('Task Reducer', () => {
 
       expect(state.entities['task1']!.tagIds.length).toBe(1);
       expect(state.entities['task1']!.tagIds).toContain('tag1');
+    });
+  });
+
+  describe('Incremental parent time update optimization', () => {
+    const createTaskWithTime = (
+      id: string,
+      timeSpentOnDay: { [key: string]: number },
+      parentId?: string,
+    ): Task =>
+      createTask(id, {
+        timeSpentOnDay,
+        timeSpent: Object.values(timeSpentOnDay).reduce((a, b) => a + b, 0),
+        parentId,
+      });
+
+    it('should incrementally update parent timeSpentOnDay when subtask time is added', () => {
+      const parentTask = createTaskWithTime('parent', {
+        '2024-01-01': 3600,
+        '2024-01-02': 1800,
+      });
+      const subtask1 = createTaskWithTime(
+        'sub1',
+        { '2024-01-01': 1800, '2024-01-02': 900 },
+        'parent',
+      );
+      const subtask2 = createTaskWithTime(
+        'sub2',
+        { '2024-01-01': 1800, '2024-01-02': 900 },
+        'parent',
+      );
+
+      const stateWithParent: TaskState = {
+        ...initialTaskState,
+        ids: ['parent', 'sub1', 'sub2'],
+        entities: {
+          parent: { ...parentTask, subTaskIds: ['sub1', 'sub2'] },
+          sub1: subtask1,
+          sub2: subtask2,
+        },
+      };
+
+      // Add 600ms to subtask1 on 2024-01-01
+      const action = TimeTrackingActions.addTimeSpent({
+        task: subtask1,
+        date: '2024-01-01',
+        duration: 600,
+        isFromTrackingReminder: false,
+      });
+      const state = taskReducer(stateWithParent, action);
+
+      // Parent should have incremental update: 3600 + 600 = 4200 for 01-01
+      expect(state.entities['parent']!.timeSpentOnDay['2024-01-01']).toBe(4200);
+      expect(state.entities['parent']!.timeSpentOnDay['2024-01-02']).toBe(1800);
+      expect(state.entities['parent']!.timeSpent).toBe(6000); // 4200 + 1800
+    });
+
+    it('should handle adding time to a new day', () => {
+      const parentTask = createTaskWithTime('parent', { '2024-01-01': 3600 });
+      const subtask = createTaskWithTime('sub', { '2024-01-01': 3600 }, 'parent');
+
+      const stateWithParent: TaskState = {
+        ...initialTaskState,
+        ids: ['parent', 'sub'],
+        entities: {
+          parent: { ...parentTask, subTaskIds: ['sub'] },
+          sub: subtask,
+        },
+      };
+
+      // Add time to a new day (2024-01-02)
+      const action = TimeTrackingActions.addTimeSpent({
+        task: subtask,
+        date: '2024-01-02',
+        duration: 1800,
+        isFromTrackingReminder: false,
+      });
+      const state = taskReducer(stateWithParent, action);
+
+      expect(state.entities['parent']!.timeSpentOnDay['2024-01-01']).toBe(3600);
+      expect(state.entities['parent']!.timeSpentOnDay['2024-01-02']).toBe(1800);
+      expect(state.entities['parent']!.timeSpent).toBe(5400);
+    });
+
+    it('should correctly update subtask and parent timeSpent totals', () => {
+      const parentTask = createTaskWithTime('parent', { '2024-01-01': 1000 });
+      const subtask = createTaskWithTime('sub', { '2024-01-01': 1000 }, 'parent');
+
+      const stateWithParent: TaskState = {
+        ...initialTaskState,
+        ids: ['parent', 'sub'],
+        entities: {
+          parent: { ...parentTask, subTaskIds: ['sub'] },
+          sub: subtask,
+        },
+      };
+
+      // Add more time
+      const action = TimeTrackingActions.addTimeSpent({
+        task: subtask,
+        date: '2024-01-01',
+        duration: 500,
+        isFromTrackingReminder: false,
+      });
+      const state = taskReducer(stateWithParent, action);
+
+      // Subtask should have updated timeSpent
+      expect(state.entities['sub']!.timeSpentOnDay['2024-01-01']).toBe(1500);
+      expect(state.entities['sub']!.timeSpent).toBe(1500);
+
+      // Parent should have incremental update
+      expect(state.entities['parent']!.timeSpentOnDay['2024-01-01']).toBe(1500);
+      expect(state.entities['parent']!.timeSpent).toBe(1500);
     });
   });
 });
