@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../../util/local-actions.token';
 import { Observable } from 'rxjs';
 import { filter, tap, withLatestFrom } from 'rxjs/operators';
 import { SyncConfig } from '../../../../features/config/global-config.model';
@@ -10,7 +11,7 @@ import { DropboxPrivateCfg, SyncProviderId } from '../../../../pfapi/api';
 
 @Injectable()
 export class DropboxEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _pfapiService = inject(PfapiService);
 
   askToDeleteTokensOnDisable$: Observable<unknown> = createEffect(

@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Action } from '@ngrx/store';
 import { addNewTagsFromShortSyntax } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -35,11 +36,10 @@ import { WorkContextService } from '../../work-context/work-context.service';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { devError } from '../../../util/dev-error';
 import { TaskLog } from '../../../core/log';
-import { filterLocalAction } from '../../../util/filter-local-action';
 
 @Injectable()
 export class ShortSyntaxEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _taskService = inject(TaskService);
   private _tagService = inject(TagService);
   private _projectService = inject(ProjectService);
@@ -52,7 +52,6 @@ export class ShortSyntaxEffects {
   shortSyntax$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
-      filterLocalAction(),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;

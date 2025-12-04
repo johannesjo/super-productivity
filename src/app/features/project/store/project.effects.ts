@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, map, tap } from 'rxjs/operators';
 import {
   addProject,
@@ -14,12 +15,10 @@ import { Project } from '../project.model';
 import { Observable } from 'rxjs';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
-import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class ProjectEffects {
-  private _actions$ = inject(Actions);
-  private _localActions$ = inject(LOCAL_ACTIONS);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _snackService = inject(SnackService);
   private _taskArchiveService = inject(TaskArchiveService);
   private _globalConfigService = inject(GlobalConfigService);
@@ -27,7 +26,7 @@ export class ProjectEffects {
 
   deleteProjectRelatedData: Observable<unknown> = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.deleteProject),
         tap(async ({ projectId }) => {
           // NOTE: we also do stuff on a reducer level (probably better to handle on this level @TODO refactor)
@@ -126,7 +125,7 @@ export class ProjectEffects {
 
   showDeletionSnack: Observable<unknown> = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.deleteProject.type),
         tap(() => {
           this._snackService.open({

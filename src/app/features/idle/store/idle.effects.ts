@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
@@ -58,7 +59,7 @@ const IDLE_POLL_INTERVAL = 1000;
 
 @Injectable()
 export class IdleEffects {
-  private actions$ = inject(Actions);
+  private actions$ = inject(LOCAL_ACTIONS);
   private _chromeExtensionInterfaceService = inject(ChromeExtensionInterfaceService);
   private _workContextService = inject(WorkContextService);
   private _taskService = inject(TaskService);

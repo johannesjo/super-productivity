@@ -5,21 +5,24 @@ import { Observable } from 'rxjs';
 import { filter } from 'rxjs/operators';
 
 /**
- * Injection token for Actions stream filtered to local user actions only.
+ * DEFAULT: Injection token for Actions stream filtered to local user actions only.
  *
- * Use this in effects that should NOT run for remote sync operations.
- * Remote sync operations (with meta.isRemote: true) have already executed
- * their side effects on the original client - running them again would
- * cause duplicates (snacks, work logs, notifications, etc.).
+ * This should be used by ALL effects as the standard replacement for `inject(LOCAL_ACTIONS)`.
+ *
+ * Why? When actions come from remote sync or hydration:
+ * - Reducers should run (to update state) ✓
+ * - Effects should NOT run because:
+ *   1. UI side effects (snacks, sounds) already happened on original client
+ *   2. Cascading actions are already in the operation log as separate entries
  *
  * @example
  * ```typescript
  * @Injectable()
  * export class MyEffects {
- *   private _localActions$ = inject(LOCAL_ACTIONS);
+ *   private _actions$ = inject(LOCAL_ACTIONS); // Use this as default
  *
  *   myEffect$ = createEffect(() =>
- *     this._localActions$.pipe(
+ *     this._actions$.pipe(
  *       ofType(SomeAction),
  *       // This effect only runs for local user actions
  *     )
@@ -33,4 +36,18 @@ export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIO
     const actions$ = inject(Actions);
     return actions$.pipe(filter((action: Action) => !(action as any).meta?.isRemote));
   },
+});
+
+/**
+ * SPECIAL CASE: Unfiltered Actions stream including remote sync operations.
+ *
+ * Only use this for effects that MUST react to remote operations:
+ * - operation-log.effects.ts: Captures and persists all actions (handles isRemote internally)
+ * - archive.effects.ts: Deterministic archive handling across devices
+ *
+ * For all other effects, use LOCAL_ACTIONS instead.
+ */
+export const ALL_ACTIONS = new InjectionToken<Observable<Action>>('ALL_ACTIONS', {
+  providedIn: 'root',
+  factory: () => inject(Actions),
 });

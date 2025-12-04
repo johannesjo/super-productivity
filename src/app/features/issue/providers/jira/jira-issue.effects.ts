@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import {
   concatMap,
@@ -38,8 +38,7 @@ import { LOCAL_ACTIONS } from '../../../../util/local-actions.token';
 
 @Injectable()
 export class JiraIssueEffects {
-  private readonly _actions$ = inject(Actions);
-  private readonly _localActions$ = inject(LOCAL_ACTIONS);
+  private readonly _actions$ = inject(LOCAL_ACTIONS);
   private readonly _store$ = inject<Store<any>>(Store);
   private readonly _snackService = inject(SnackService);
   private readonly _taskService = inject(TaskService);
@@ -52,7 +51,7 @@ export class JiraIssueEffects {
 
   addWorkLog$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id.toString())),

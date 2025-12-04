@@ -12,7 +12,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { Actions, ofType } from '@ngrx/effects';
+import { ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
@@ -34,6 +34,7 @@ import {
   selectIsManualPause,
   selectIsManualPauseBreak,
 } from './store/pomodoro.reducer';
+import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 
 const TICK_DURATION = 500;
 const DEFAULT_SOUND = 'assets/snd/positive.ogg';
@@ -45,7 +46,7 @@ const DEFAULT_TICK_SOUND = 'assets/snd/tick.mp3';
 export class PomodoroService {
   private _configService = inject(GlobalConfigService);
   private _store$ = inject<Store<any>>(Store);
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private readonly _taskService = inject(TaskService);
 
   onStop$: Observable<any> = this._actions$.pipe(ofType(stopPomodoro));

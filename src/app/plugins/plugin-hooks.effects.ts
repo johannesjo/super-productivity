@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { select, Store } from '@ngrx/store';
 import { filter, map, switchMap, take, tap, withLatestFrom } from 'rxjs/operators';
 import { EMPTY } from 'rxjs';
@@ -37,14 +37,13 @@ import { LOCAL_ACTIONS } from '../util/local-actions.token';
 
 @Injectable()
 export class PluginHooksEffects {
-  private readonly actions$ = inject(Actions);
-  private readonly localActions$ = inject(LOCAL_ACTIONS);
+  private readonly actions$ = inject(LOCAL_ACTIONS);
   private readonly store = inject(Store);
   private readonly pluginService = inject(PluginService);
 
   taskComplete$ = createEffect(
     () =>
-      this.localActions$.pipe(
+      this.actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((action) => action.task.changes.isDone === true),
         switchMap((action) =>
@@ -83,7 +82,7 @@ export class PluginHooksEffects {
 
   taskUpdate$ = createEffect(
     () =>
-      this.localActions$.pipe(
+      this.actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         switchMap((action) =>
           this.store.pipe(

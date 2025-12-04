@@ -1,5 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { ALL_ACTIONS, LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import {
   addSubTask,
   setCurrentTask,
@@ -21,12 +22,13 @@ import {
   moveProjectTaskToBacklogList,
   moveProjectTaskToBacklogListAuto,
 } from '../../project/store/project.actions';
-import { filterLocalAction, filterRemoteAction } from '../../../util/filter-local-action';
+import { filterRemoteAction } from '../../../util/filter-local-action';
 import { ArchiveService } from '../../time-tracking/archive.service';
 
 @Injectable()
 export class TaskInternalEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
+  private _allActions$ = inject(ALL_ACTIONS); // For writeArchivedTasksForRemoteSync$ which needs remote actions
   private _store$ = inject(Store);
   private _workContextSession = inject(WorkContextService);
   private _archiveService = inject(ArchiveService);
@@ -34,7 +36,6 @@ export class TaskInternalEffects {
   onAllSubTasksDone$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.updateTask),
-      filterLocalAction(),
       withLatestFrom(
         this._store$.pipe(select(selectMiscConfig)),
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -72,7 +73,6 @@ export class TaskInternalEffects {
   setDefaultEstimateIfNonGiven$ = createEffect(() =>
     this._actions$.pipe(
       ofType(TaskSharedActions.addTask, addSubTask),
-      filterLocalAction(),
       filter(({ task }) => !task.timeEstimate),
       withLatestFrom(this._store$.pipe(select(selectConfigFeatureState))),
       map(([action, cfg]) => ({
@@ -107,7 +107,6 @@ export class TaskInternalEffects {
         moveProjectTaskToBacklogList.type,
         moveProjectTaskToBacklogListAuto.type,
       ),
-      filterLocalAction(),
       withLatestFrom(
         this._store$.pipe(select(selectConfigFeatureState)),
         this._store$.pipe(select(selectTaskFeatureState)),
@@ -187,7 +186,7 @@ export class TaskInternalEffects {
    */
   writeArchivedTasksForRemoteSync$ = createEffect(
     () =>
-      this._actions$.pipe(
+      this._allActions$.pipe(
         ofType(TaskSharedActions.moveToArchive),
         filterRemoteAction(),
         tap(({ tasks }) => {

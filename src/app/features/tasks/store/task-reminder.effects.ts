@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
 import { truncate } from '../../../util/truncate';
@@ -10,11 +11,9 @@ import { TaskService } from '../task.service';
 import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { Store } from '@ngrx/store';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
-import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
 export class TaskReminderEffects {
-  private _actions$ = inject(Actions);
   private _localActions$ = inject(LOCAL_ACTIONS);
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
@@ -42,7 +41,7 @@ export class TaskReminderEffects {
   );
 
   autoMoveToBacklog$ = createEffect(() =>
-    this._localActions$.pipe(
+    this._actions$.pipe(
       ofType(TaskSharedActions.scheduleTaskWithTime),
       filter(({ isMoveToBacklog }) => isMoveToBacklog),
       map(({ task }) => {
@@ -59,7 +58,7 @@ export class TaskReminderEffects {
 
   updateTaskReminderSnack$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.reScheduleTaskWithTime),
         filter(({ remindAt }) => typeof remindAt === 'number'),
         tap(({ task }) =>
@@ -77,7 +76,7 @@ export class TaskReminderEffects {
   );
 
   autoMoveToBacklogOnReschedule$ = createEffect(() =>
-    this._localActions$.pipe(
+    this._actions$.pipe(
       ofType(TaskSharedActions.reScheduleTaskWithTime),
       filter(({ isMoveToBacklog }) => isMoveToBacklog),
       mergeMap(({ task, isMoveToBacklog }) => {
@@ -96,7 +95,7 @@ export class TaskReminderEffects {
 
   unscheduleDoneTask$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => !!task.changes.isDone),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
@@ -115,7 +114,7 @@ export class TaskReminderEffects {
 
   unscheduleSnack$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.unscheduleTask),
         filter(({ isSkipToast }) => !isSkipToast),
         tap(() => {
@@ -131,7 +130,7 @@ export class TaskReminderEffects {
 
   dismissReminderSnack$ = createEffect(
     () =>
-      this._localActions$.pipe(
+      this._actions$.pipe(
         ofType(TaskSharedActions.dismissReminderOnly),
         tap(() => {
           this._snackService.open({

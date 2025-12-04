@@ -36,7 +36,7 @@ import {
   selectAllTasksWithSubTasks,
   selectTasksWithSubTasksByIds,
 } from '../tasks/store/task.selectors';
-import { Actions, ofType } from '@ngrx/effects';
+import { ofType } from '@ngrx/effects';
 import { WorklogExportSettings } from '../worklog/worklog.model';
 import { updateProjectAdvancedCfg } from '../project/store/project.actions';
 import { updateAdvancedConfigForTag } from '../tag/store/tag.actions';
@@ -67,13 +67,14 @@ import { INBOX_PROJECT } from '../project/project.const';
 import { selectProjectById } from '../project/store/project.selectors';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
+import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 
 @Injectable({
   providedIn: 'root',
 })
 export class WorkContextService {
   private _store$ = inject<Store<WorkContextState>>(Store);
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _tagService = inject(TagService);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _dateService = inject(DateService);

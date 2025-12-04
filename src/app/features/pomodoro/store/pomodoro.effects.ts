@@ -12,7 +12,8 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Action, select, Store } from '@ngrx/store';
 
 import { IS_ELECTRON } from '../../../app.constants';
@@ -41,7 +42,7 @@ import {
 @Injectable()
 export class PomodoroEffects {
   private _pomodoroService = inject(PomodoroService);
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _notifyService = inject(NotifyService);
   private _matDialog = inject(MatDialog);
   private _snackService = inject(SnackService);
