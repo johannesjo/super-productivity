@@ -168,4 +168,14 @@ export const menuTreeReducer = createReducer(
     ...state,
     tagTree: _deleteItemsFromTree(state.tagTree, ids, MenuTreeKind.TAG),
   })),
+  on(TaskSharedActions.addTagToTask, (state, { tag }) => ({
+    ...state,
+    tagTree: [
+      ...state.tagTree,
+      {
+        k: MenuTreeKind.TAG,
+        id: tag.id,
+      },
+    ],
+  })),
 );

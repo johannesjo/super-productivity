@@ -20,6 +20,8 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { AsyncPipe } from '@angular/common';
 import { TranslatePipe } from '@ngx-translate/core';
+import { Store } from '@ngrx/store';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 @Component({
   selector: 'dialog-edit-tags',
@@ -40,6 +42,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 export class DialogEditTagsForTaskComponent implements OnDestroy {
   private _taskService = inject(TaskService);
   private _tagService = inject(TagService);
+  private _store = inject(Store);
   private _matDialogRef =
     inject<MatDialogRef<DialogEditTagsForTaskComponent>>(MatDialogRef);
   data = inject<DialogEditTagsForTaskPayload>(MAT_DIALOG_DATA);
@@ -80,8 +83,8 @@ export class DialogEditTagsForTaskComponent implements OnDestroy {
       return t.replace('#', '');
     };
 
-    const id = this._tagService.addTag({ title: cleanTitle(title) });
-    this._updateTags(unique([...this.tagIds, id]));
+    const tag = this._tagService.createTagObject({ title: cleanTitle(title) });
+    this._store.dispatch(TaskSharedActions.addTagToTask({ tag, taskId: this.task.id }));
   }
 
   removeTag(id: string): void {

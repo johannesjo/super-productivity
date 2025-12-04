@@ -1,4 +1,4 @@
-import { convertOpToAction } from './operation-converter.util';
+import { convertOpToAction, ACTION_TYPE_ALIASES } from './operation-converter.util';
 import { Operation, OpType } from './operation.types';
 
 describe('operation-converter utility', () => {
@@ -243,6 +243,34 @@ describe('operation-converter utility', () => {
         const action = convertOpToAction(op);
 
         expect(action.meta.entityType).toBe(entityType);
+      }
+    });
+
+    it('should use current action type when no alias exists', () => {
+      const op = createMockOperation({ actionType: '[Task] Some Action' });
+      const action = convertOpToAction(op);
+
+      expect(action.type).toBe('[Task] Some Action');
+    });
+
+    it('should resolve aliased action types to current names', () => {
+      // Temporarily add an alias for testing
+      const originalAliases = { ...ACTION_TYPE_ALIASES };
+      (ACTION_TYPE_ALIASES as Record<string, string>)['[Old] Legacy Action'] =
+        '[New] Current Action';
+
+      try {
+        const op = createMockOperation({ actionType: '[Old] Legacy Action' });
+        const action = convertOpToAction(op);
+
+        expect(action.type).toBe('[New] Current Action');
+      } finally {
+        // Restore original aliases
+        Object.keys(ACTION_TYPE_ALIASES).forEach((key) => {
+          if (!(key in originalAliases)) {
+            delete (ACTION_TYPE_ALIASES as Record<string, string>)[key];
+          }
+        });
       }
     });
   });

@@ -513,6 +513,22 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
+  // TAG STUFF
+  // ---------
+  on(TaskSharedActions.addTagToTask, (state, { taskId, tag }) => {
+    const task = state.entities[taskId];
+    if (!task) return state;
+    return taskAdapter.updateOne(
+      {
+        id: taskId,
+        changes: {
+          tagIds: unique([...task.tagIds, tag.id]),
+        },
+      },
+      state,
+    );
+  }),
+
   // TASK ARCHIVE STUFF
   // ------------------
   on(TaskSharedActions.moveToArchive, (state, { tasks }) => {

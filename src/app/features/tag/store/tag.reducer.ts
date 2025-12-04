@@ -31,6 +31,7 @@ import {
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Log } from '../../../core/log';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 
 export const TAG_FEATURE_NAME = 'tag';
 const WORK_CONTEXT_TYPE: WorkContextType = WorkContextType.TAG;
@@ -334,6 +335,10 @@ export const tagReducer = createReducer<TagState>(
       state,
     );
   }),
+
+  on(TaskSharedActions.addTagToTask, (state: TagState, { tag }) =>
+    tagAdapter.addOne(tag, state),
+  ),
 
   // TASK STUFF
   // ---------
