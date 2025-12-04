@@ -4,7 +4,11 @@ import { Operation, OpType } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { PFLog } from '../../../log';
-import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from '../operation-log.const';
+import {
+  MAX_DEPENDENCY_RETRY_ATTEMPTS,
+  MAX_FAILED_OPS_SIZE,
+  MAX_PENDING_QUEUE_SIZE,
+} from '../operation-log.const';
 
 /**
  * Interface for tracking pending operations that failed due to missing dependencies.
@@ -106,17 +110,38 @@ export class OperationApplierService {
     if (missingHardDeps.length > 0) {
       const missingDepIds = missingHardDeps.map((d) => d.entityId);
 
-      if (retryCount >= MAX_DEPENDENCY_RETRY_ATTEMPTS) {
-        // Permanently failed - move to failed list
-        PFLog.err(
-          'OperationApplierService: Operation permanently failed after max retries.',
-          {
-            opId: op.id,
-            actionType: op.actionType,
-            missingDeps: missingDepIds,
-            retryCount,
-          },
-        );
+      // Check if we should mark as failed (max retries or queue at capacity)
+      const shouldMarkFailed =
+        retryCount >= MAX_DEPENDENCY_RETRY_ATTEMPTS ||
+        this.pendingQueue.length >= MAX_PENDING_QUEUE_SIZE;
+
+      if (shouldMarkFailed) {
+        // Log reason for failure
+        if (this.pendingQueue.length >= MAX_PENDING_QUEUE_SIZE) {
+          PFLog.warn(
+            'OperationApplierService: Pending queue at capacity, marking operation as failed immediately.',
+            { opId: op.id, queueSize: this.pendingQueue.length },
+          );
+        } else {
+          PFLog.err(
+            'OperationApplierService: Operation permanently failed after max retries.',
+            {
+              opId: op.id,
+              actionType: op.actionType,
+              missingDeps: missingDepIds,
+              retryCount,
+            },
+          );
+        }
+
+        // Ensure failed ops list doesn't exceed capacity
+        if (this.permanentlyFailedOps.length >= MAX_FAILED_OPS_SIZE) {
+          PFLog.warn(
+            'OperationApplierService: Failed ops queue at capacity, dropping oldest.',
+          );
+          this.permanentlyFailedOps.shift();
+        }
+
         this.permanentlyFailedOps.push({
           op,
           retryCount,
