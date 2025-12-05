@@ -12,6 +12,7 @@ import {
   SyncStatusResponse,
   DEFAULT_SYNC_CONFIG,
   OP_TYPES,
+  SYNC_ERROR_CODES,
 } from './sync.types';
 
 // Zod Schemas
@@ -115,8 +116,17 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Rate limit check
         if (syncService.isRateLimited(userId)) {
-          Logger.warn(`[user:${userId}] Rate limited`);
-          return reply.status(429).send({ error: 'Rate limited' });
+          Logger.audit({
+            event: 'RATE_LIMITED',
+            userId,
+            clientId,
+            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
+            opsCount: ops.length,
+          });
+          return reply.status(429).send({
+            error: 'Rate limited',
+            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
+          });
         }
 
         // Process operations - cast to Operation[] since Zod validates the structure

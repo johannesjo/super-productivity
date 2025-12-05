@@ -344,10 +344,16 @@ export class SyncService {
           // Validate operation
           const validation = this.validateOp(op);
           if (!validation.valid) {
-            Logger.warn(`[user:${userId}] Op validation failed: ${validation.error}`, {
+            Logger.audit({
+              event: 'OP_REJECTED',
+              userId,
+              clientId,
               opId: op.id,
-              opType: op.opType,
               entityType: op.entityType,
+              entityId: op.entityId,
+              errorCode: validation.errorCode,
+              reason: validation.error,
+              opType: op.opType,
             });
             results.push({
               opId: op.id,
@@ -362,19 +368,25 @@ export class SyncService {
           const conflict = this.detectConflict(userId, op);
           if (conflict.hasConflict) {
             const isConcurrent = conflict.reason?.includes('Concurrent');
-            Logger.warn(`[user:${userId}] Conflict detected: ${conflict.reason}`, {
+            const errorCode = isConcurrent
+              ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
+              : SYNC_ERROR_CODES.CONFLICT_STALE;
+            Logger.audit({
+              event: 'OP_REJECTED',
+              userId,
+              clientId,
               opId: op.id,
-              opType: op.opType,
               entityType: op.entityType,
               entityId: op.entityId,
+              errorCode,
+              reason: conflict.reason,
+              opType: op.opType,
             });
             results.push({
               opId: op.id,
               accepted: false,
               error: conflict.reason,
-              errorCode: isConcurrent
-                ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
-                : SYNC_ERROR_CODES.CONFLICT_STALE,
+              errorCode,
             });
             continue;
           }
@@ -419,6 +431,17 @@ export class SyncService {
             sqliteError?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
             sqliteError?.code === 'SQLITE_CONSTRAINT'
           ) {
+            Logger.audit({
+              event: 'OP_REJECTED',
+              userId,
+              clientId,
+              opId: op.id,
+              entityType: op.entityType,
+              entityId: op.entityId,
+              errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+              reason: 'Duplicate operation ID',
+              opType: op.opType,
+            });
             results.push({
               opId: op.id,
               accepted: false,
