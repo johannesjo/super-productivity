@@ -159,3 +159,87 @@ export const createMinimalTagPayload = (
   title: `Tag ${id}`,
   ...overrides,
 });
+
+/**
+ * Factory for creating note operations.
+ */
+export const createNoteOperation = (
+  client: TestClient,
+  noteId: string,
+  opType: OpType,
+  payload: Record<string, unknown>,
+): Operation => {
+  const actionTypeMap: Record<OpType, string> = {
+    [OpType.Create]: '[Note] Add Note',
+    [OpType.Update]: '[Note] Update Note',
+    [OpType.Delete]: '[Note] Delete Note',
+    [OpType.Move]: '[Note] Move',
+    [OpType.Batch]: '[Note] Batch Update',
+    [OpType.SyncImport]: '[Note] Sync Import',
+    [OpType.BackupImport]: '[Note] Backup Import',
+    [OpType.Repair]: '[Note] Repair',
+  };
+
+  return client.createOperation({
+    actionType: actionTypeMap[opType] || '[Note] Update Note',
+    opType,
+    entityType: 'NOTE',
+    entityId: noteId,
+    payload,
+  });
+};
+
+/**
+ * Factory for creating global config operations (singleton entity).
+ */
+export const createGlobalConfigOperation = (
+  client: TestClient,
+  opType: OpType,
+  payload: Record<string, unknown>,
+): Operation => {
+  const actionTypeMap: Record<OpType, string> = {
+    [OpType.Create]: '[Global Config] Update Global Config Section',
+    [OpType.Update]: '[Global Config] Update Global Config Section',
+    [OpType.Delete]: '[Global Config] Update Global Config Section',
+    [OpType.Move]: '[Global Config] Update Global Config Section',
+    [OpType.Batch]: '[Global Config] Update Global Config Section',
+    [OpType.SyncImport]: '[Global Config] Sync Import',
+    [OpType.BackupImport]: '[Global Config] Backup Import',
+    [OpType.Repair]: '[Global Config] Repair',
+  };
+
+  return client.createOperation({
+    actionType: actionTypeMap[opType] || '[Global Config] Update Global Config Section',
+    opType,
+    entityType: 'GLOBAL_CONFIG',
+    entityId: '*', // Singleton uses '*' as entity ID
+    payload,
+  });
+};
+
+/**
+ * Creates a minimal note payload for testing.
+ */
+export const createMinimalNotePayload = (
+  id: string,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> => ({
+  id,
+  content: `Note ${id} content`,
+  created: Date.now(),
+  ...overrides,
+});
+
+/**
+ * Creates a minimal global config payload section for testing.
+ */
+export const createMinimalGlobalConfigPayload = (
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> => ({
+  sectionKey: 'misc',
+  sectionValue: {
+    isDarkMode: false,
+    isConfirmBeforeExit: true,
+  },
+  ...overrides,
+});
