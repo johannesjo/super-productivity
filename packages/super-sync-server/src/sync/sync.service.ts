@@ -72,6 +72,7 @@ interface PreparedStatements {
   getOnlineDeviceCount: Database.Statement;
   getLatestOpForEntity: Database.Statement;
   getMinServerSeq: Database.Statement;
+  getDevice: Database.Statement;
 }
 
 /**
@@ -246,6 +247,11 @@ export class SyncService {
       // Get minimum server_seq for a user (for gap detection)
       getMinServerSeq: this.db.prepare(`
         SELECT MIN(server_seq) as min_seq FROM operations WHERE user_id = ?
+      `),
+
+      // Get device by user and client ID (for ownership validation)
+      getDevice: this.db.prepare(`
+        SELECT 1 FROM sync_devices WHERE user_id = ? AND client_id = ?
       `),
     };
   }
@@ -964,6 +970,15 @@ export class SyncService {
     return result.changes;
   }
 
+  /**
+   * Check if a device belongs to a user.
+   * Used to validate device ownership before accepting ACKs.
+   */
+  isDeviceOwner(userId: number, clientId: string): boolean {
+    const row = this.stmts.getDevice.get(userId, clientId);
+    return !!row;
+  }
+
   getAllUserIds(): number[] {
     const rows = this.stmts.getAllUserIds.all() as { user_id: number }[];
     return rows.map((r) => r.user_id);
@@ -1070,6 +1085,16 @@ export class SyncService {
     // Replace with sanitized clock (removes invalid entries)
     op.vectorClock = clockValidation.clock;
 
+    // Check payload complexity BEFORE JSON.stringify to prevent DoS
+    // Deep nesting can cause exponential CPU usage during serialization
+    if (!this.validatePayloadComplexity(op.payload)) {
+      return {
+        valid: false,
+        error: 'Payload too complex (max depth 20, max keys 10000)',
+        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
+      };
+    }
+
     // Size limit
     const payloadSize = JSON.stringify(op.payload).length;
     if (payloadSize > this.config.maxPayloadSizeBytes) {
@@ -1108,6 +1133,57 @@ export class SyncService {
     }
 
     return { valid: true };
+  }
+
+  /**
+   * Validate payload complexity to prevent DoS attacks via deeply nested objects.
+   * Checks maximum nesting depth and total number of keys.
+   *
+   * @param payload - The payload to validate
+   * @param maxDepth - Maximum allowed nesting depth (default 20)
+   * @param maxKeys - Maximum total keys across all levels (default 10000)
+   * @returns true if payload is within limits, false otherwise
+   */
+  private validatePayloadComplexity(
+    payload: unknown,
+    maxDepth: number = 20,
+    maxKeys: number = 10000,
+  ): boolean {
+    let totalKeys = 0;
+
+    const checkDepth = (obj: unknown, depth: number): boolean => {
+      // Exceeded max depth
+      if (depth > maxDepth) {
+        return false;
+      }
+
+      // Primitives are fine
+      if (obj === null || typeof obj !== 'object') {
+        return true;
+      }
+
+      // Check arrays
+      if (Array.isArray(obj)) {
+        totalKeys += obj.length;
+        if (totalKeys > maxKeys) {
+          return false;
+        }
+        return obj.every((item) => checkDepth(item, depth + 1));
+      }
+
+      // Check objects
+      const keys = Object.keys(obj);
+      totalKeys += keys.length;
+      if (totalKeys > maxKeys) {
+        return false;
+      }
+
+      return keys.every((key) =>
+        checkDepth((obj as Record<string, unknown>)[key], depth + 1),
+      );
+    };
+
+    return checkDepth(payload, 0);
   }
 }
 

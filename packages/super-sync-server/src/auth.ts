@@ -224,39 +224,70 @@ export const loginUser = async (
     ).run(user.id);
   }
 
-  const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: JWT_EXPIRY,
-  });
+  // Include token_version in JWT for revocation support
+  const tokenVersion = user.token_version ?? 0;
+  const token = jwt.sign(
+    { userId: user.id, email: user.email, tokenVersion },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRY },
+  );
 
   Logger.info(`User logged in (ID: ${user.id})`);
 
   return { token, user: { id: user.id, email: user.email } };
 };
 
+/**
+ * Revoke all existing tokens for a user by incrementing their token version.
+ * Call this when the user changes their password or explicitly logs out all devices.
+ */
+export const revokeAllTokens = (userId: number): void => {
+  const db = getDb();
+  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
+    userId,
+  );
+  Logger.info(`All tokens revoked for user ${userId}`);
+};
+
 export const verifyToken = async (
   token: string,
 ): Promise<{ userId: number; email: string } | null> => {
   try {
-    const payload = await new Promise<{ userId: number; email: string }>(
-      (resolve, reject) => {
-        jwt.verify(token, JWT_SECRET, (err, decoded) => {
-          if (err) return reject(err);
-          resolve(decoded as { userId: number; email: string });
-        });
-      },
-    );
+    const payload = await new Promise<{
+      userId: number;
+      email: string;
+      tokenVersion?: number;
+    }>((resolve, reject) => {
+      jwt.verify(token, JWT_SECRET, (err, decoded) => {
+        if (err) return reject(err);
+        resolve(decoded as { userId: number; email: string; tokenVersion?: number });
+      });
+    });
 
-    // Verify user exists in DB to prevent foreign key errors if user was deleted
-    // or if the DB was reset but the client has an old token
+    // Verify user exists and token version matches
     const db = getDb();
-    const user = db.prepare('SELECT id FROM users WHERE id = ?').get(payload.userId);
+    const user = db
+      .prepare('SELECT id, token_version FROM users WHERE id = ?')
+      .get(payload.userId) as { id: number; token_version: number } | undefined;
 
     if (!user) {
       Logger.warn(`Token verification failed: User ${payload.userId} not found in DB`);
       return null;
     }
 
-    return payload;
+    // Check token version - if it doesn't match, the token has been revoked
+    // (e.g., user changed password). Tokens without version are treated as version 0.
+    const tokenVersion = payload.tokenVersion ?? 0;
+    const currentVersion = user.token_version ?? 0;
+    if (tokenVersion !== currentVersion) {
+      Logger.warn(
+        `Token verification failed: Token version mismatch for user ${payload.userId} ` +
+          `(token: ${tokenVersion}, current: ${currentVersion})`,
+      );
+      return null;
+    }
+
+    return { userId: payload.userId, email: payload.email };
   } catch (err) {
     return null;
   }

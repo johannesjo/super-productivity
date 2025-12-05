@@ -421,6 +421,17 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const { lastSeq } = parseResult.data;
         const syncService = getSyncService();
 
+        // Validate device ownership before accepting ACK
+        if (!syncService.isDeviceOwner(userId, clientId)) {
+          Logger.audit({
+            event: 'DEVICE_OWNERSHIP_VIOLATION',
+            userId,
+            clientId,
+            reason: 'Attempted to ACK for unowned device',
+          });
+          return reply.status(403).send({ error: 'Device not found or access denied' });
+        }
+
         Logger.debug(
           `[user:${userId}] Ack: client ${clientId.slice(0, 8)}... acked seq ${lastSeq}`,
         );
