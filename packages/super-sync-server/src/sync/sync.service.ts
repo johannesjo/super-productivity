@@ -76,6 +76,12 @@ interface PreparedStatements {
 }
 
 /**
+ * Maximum entries in caches to prevent unbounded memory growth.
+ * With ~200 bytes per entry, 10000 entries = ~2MB max memory per cache.
+ */
+const MAX_CACHE_SIZE = 10000;
+
+/**
  * Tracks recently processed request IDs for deduplication.
  * Key format: "userId:requestId"
  */
@@ -839,6 +845,14 @@ export class SyncService {
     const limit = this.config.uploadRateLimit;
 
     if (!counter || now > counter.resetAt) {
+      // Enforce cache size limit (FIFO eviction) before adding
+      if (this.rateLimitCounters.size >= MAX_CACHE_SIZE) {
+        const firstKey = this.rateLimitCounters.keys().next().value;
+        if (firstKey !== undefined) {
+          this.rateLimitCounters.delete(firstKey);
+        }
+      }
+
       this.rateLimitCounters.set(userId, {
         count: 1,
         resetAt: now + limit.windowMs,
@@ -900,9 +914,19 @@ export class SyncService {
 
   /**
    * Store results for a processed request ID.
+   * Enforces cache size limit by removing oldest entries when full.
    */
   cacheRequestResults(userId: number, requestId: string, results: UploadResult[]): void {
     const key = `${userId}:${requestId}`;
+
+    // Enforce cache size limit (FIFO eviction)
+    if (this.requestDeduplicationCache.size >= MAX_CACHE_SIZE) {
+      const firstKey = this.requestDeduplicationCache.keys().next().value;
+      if (firstKey) {
+        this.requestDeduplicationCache.delete(firstKey);
+      }
+    }
+
     this.requestDeduplicationCache.set(key, {
       processedAt: Date.now(),
       results,

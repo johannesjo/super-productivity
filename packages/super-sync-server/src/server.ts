@@ -7,7 +7,7 @@ import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import { loadConfigFromEnv, ServerConfig } from './config';
 import { Logger } from './logger';
-import { initDb } from './db';
+import { initDb, getDb } from './db';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
 import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
@@ -83,9 +83,21 @@ export const createServer = (
         prefix: '/',
       });
 
-      // Health Check
-      fastifyServer.get('/health', async () => {
-        return { status: 'ok' };
+      // Health Check - verifies database connectivity
+      fastifyServer.get('/health', async (_, reply) => {
+        try {
+          const db = getDb();
+          // Simple query to verify DB is responsive
+          db.prepare('SELECT 1').get();
+          return { status: 'ok', db: 'connected' };
+        } catch (err) {
+          Logger.error('Health check failed: DB not responsive', err);
+          return reply.status(503).send({
+            status: 'error',
+            db: 'disconnected',
+            message: 'Database not responsive',
+          });
+        }
       });
 
       // API Routes
