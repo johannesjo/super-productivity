@@ -1,6 +1,7 @@
 # Operation Log: Architecture Diagrams
 
 **Last Updated:** December 5, 2025
+**Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
 
@@ -87,10 +88,17 @@ This diagram details the flow for syncing individual operations with a server (`
 
 **Implementation Status:** Complete (single-schema-version). Key services:
 
-- `OperationLogSyncService` - Orchestration
-- `OperationLogUploadService` / `OperationLogDownloadService` - Data transfer
-- `ConflictResolutionService` - User resolution UI
-- `VectorClockService` - Conflict detection
+- `OperationLogSyncService` - Orchestration, fresh client safety checks
+- `OperationLogUploadService` / `OperationLogDownloadService` - Data transfer (API + file-based fallback)
+- `ConflictResolutionService` - User resolution UI, batch apply
+- `VectorClockService` - Conflict detection, frontier tracking
+- `DependencyResolverService` - Hard/soft dependency extraction
+
+**Recent Additions (December 2025):**
+
+- Server-side security: audit logging, error codes, deduplication, validation
+- Gap detection in download operations
+- Transaction isolation for downloads
 
 ```mermaid
 graph TD

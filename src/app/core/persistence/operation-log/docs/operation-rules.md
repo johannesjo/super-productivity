@@ -113,13 +113,18 @@ This document establishes the core rules and principles for designing the Operat
 
 ### 3.5 Deletion & Tombstones
 
-- **Rule:** Deletions must use **tombstones** rather than immediate removal.
-- **Purpose:** Tombstones ensure that:
-  - Concurrent updates to deleted entities are properly rejected.
-  - Sync peers learn about deletions even if they have pending updates.
-  - Undo/restore functionality remains possible within a retention window.
-- **Retention:** Tombstones should be retained for at least the compaction retention window (e.g., 30 days) before permanent removal.
-- **Cascading:** Deleting a parent entity should tombstone all dependent children in the same operation batch.
+> **Status (December 2025):** Tombstones are **DEFERRED**. After comprehensive evaluation, the current event-sourced architecture provides sufficient safeguards without explicit tombstones. See `todo.md` Item 1 for the full evaluation.
+
+- **Current Implementation:** Deletions use **DELETE operations** in the event log (immutable events, not destructive).
+- **Alternative Safeguards in Place:**
+  - Vector clocks detect concurrent delete+update conflicts; user resolution UI is presented.
+  - Tag sanitization filters non-existent taskIds at reducer level.
+  - Subtask cascading deletes include all child tasks.
+  - Auto-repair removes orphaned references and creates REPAIR operations.
+- **When to Revisit:**
+  - If undo/restore functionality is needed.
+  - If audit compliance requires explicit "entity deleted at time X" records.
+  - If cross-version sync (A.7.11) reveals edge cases not handled by current safeguards.
 
 ### 3.6 Operation Batching
 
