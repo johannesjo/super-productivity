@@ -1187,6 +1187,7 @@
         "TOO_MANY_OPS_TO_DOWNLOAD": "Too many operations to download. Please contact support or try clearing your sync data.",
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
+        "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!"
       },
       "SAFETY_BACKUP": {

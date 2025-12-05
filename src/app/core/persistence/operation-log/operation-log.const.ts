@@ -105,3 +105,24 @@ export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;
  * After this many retries across restarts, the operation is marked as rejected.
  */
 export const MAX_CONFLICT_RETRY_ATTEMPTS = 5;
+
+/**
+ * Maximum age of remote operation files to keep during remote cleanup (milliseconds).
+ * Files older than this will be deleted to prevent unbounded remote storage growth.
+ * Should be >= COMPACTION_RETENTION_MS to ensure no data loss during sync gaps.
+ * Default: 14 days (double local retention for safety margin)
+ */
+export const REMOTE_COMPACTION_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
+
+/**
+ * Maximum number of remote operation files to keep regardless of age.
+ * Prevents deletion of recent files even if there are many.
+ * Provides safety margin for high-frequency usage scenarios.
+ */
+export const MAX_REMOTE_FILES_TO_KEEP = 100;
+
+/**
+ * Maximum number of operations to be rejected before showing user warning.
+ * Once this threshold is reached, user is notified about permanently failed ops.
+ */
+export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;

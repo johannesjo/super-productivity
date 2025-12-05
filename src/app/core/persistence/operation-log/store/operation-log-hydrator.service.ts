@@ -127,9 +127,24 @@ export class OperationLogHydratorService {
             OpLog.normal(
               `OperationLogHydratorService: Last of ${tailOps.length} tail ops is ${lastOp.opType}, loading directly`,
             );
-            this.store.dispatch(
-              loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
-            );
+
+            // Validate and repair the full-state data BEFORE loading to NgRx
+            // This prevents corrupted SyncImport/Repair operations from breaking the app
+            if (!this._repairMutex) {
+              const validationResult = await this._validateAndRepairState(
+                appData as AppDataCompleteNew,
+                'tail-full-state-op-load',
+              );
+              const tailStateToLoad =
+                validationResult.wasRepaired && validationResult.repairedState
+                  ? validationResult.repairedState
+                  : (appData as AppDataCompleteNew);
+              this.store.dispatch(loadAllData({ appDataComplete: tailStateToLoad }));
+            } else {
+              this.store.dispatch(
+                loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
+              );
+            }
             // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
