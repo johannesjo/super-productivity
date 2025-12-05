@@ -11,6 +11,7 @@ import {
   ONLINE_DEVICE_THRESHOLD_MS,
   validatePayload,
   compareVectorClocks,
+  sanitizeVectorClock,
   VectorClock,
 } from './sync.types';
 import { Logger } from '../logger';
@@ -812,6 +813,14 @@ export class SyncService {
         return { valid: false, error: `Invalid schema version: ${op.schemaVersion}` };
       }
     }
+
+    // Validate and sanitize vector clock
+    const clockValidation = sanitizeVectorClock(op.vectorClock);
+    if (!clockValidation.valid) {
+      return { valid: false, error: clockValidation.error };
+    }
+    // Replace with sanitized clock (removes invalid entries)
+    op.vectorClock = clockValidation.clock;
 
     // Size limit
     const payloadSize = JSON.stringify(op.payload).length;
