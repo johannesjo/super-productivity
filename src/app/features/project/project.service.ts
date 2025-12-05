@@ -273,18 +273,14 @@ export class ProjectService {
         .filter((t): t is Task => !!t);
 
       // copy and remove meta fields we don't want to pass as "additional"
-      const rest = { ...(p as unknown as Task) } as any;
-      delete rest.id;
-      delete rest.parentId;
-      delete rest.subTaskIds;
-      delete rest.projectId;
-      delete rest.created;
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
+      const { id, parentId, subTaskIds, projectId, created, ...taskDataToCopy } = p;
 
       const isBacklog = template.backlogTaskIds.includes((p as any).id);
 
       const newParentTask = this._taskService.createNewTaskWithDefaults({
         title: p.title,
-        additional: rest as Partial<Task>,
+        additional: taskDataToCopy,
         workContextType: WorkContextType.PROJECT,
         workContextId: newProjectId,
       });
@@ -303,16 +299,12 @@ export class ProjectService {
       // create subtasks
       if (subTasks && subTasks.length > 0) {
         for (const st of subTasks) {
-          const restSt = { ...(st as unknown as Task) } as any;
-          delete restSt.id;
-          delete restSt.parentId;
-          delete restSt.subTaskIds;
-          delete restSt.projectId;
-          delete restSt.created;
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
+          const { id: id_st, parentId: parentIdst, subTaskIds: subTaskIdsst, projectId: projectIdst, created: createdst , ...subTaskDataToCopy} = st;
 
           const newSub = this._taskService.createNewTaskWithDefaults({
             title: st.title,
-            additional: restSt as Partial<Task>,
+            additional: subTaskDataToCopy,
             workContextType: WorkContextType.PROJECT,
             workContextId: newProjectId,
           });
