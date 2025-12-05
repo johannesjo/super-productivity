@@ -14,6 +14,39 @@ export type OpType = (typeof OP_TYPES)[number];
 
 export type VectorClock = Record<string, number>;
 
+/**
+ * Compare two vector clocks.
+ * Returns:
+ * - 'LESS_THAN': a happened before b
+ * - 'GREATER_THAN': b happened before a
+ * - 'EQUAL': clocks are identical
+ * - 'CONCURRENT': neither happened before the other (conflict!)
+ */
+export type VectorClockComparison = 'LESS_THAN' | 'GREATER_THAN' | 'EQUAL' | 'CONCURRENT';
+
+export const compareVectorClocks = (
+  a: VectorClock,
+  b: VectorClock,
+): VectorClockComparison => {
+  const allKeys = new Set([...Object.keys(a), ...Object.keys(b)]);
+
+  let aGreater = false;
+  let bGreater = false;
+
+  for (const key of allKeys) {
+    const aVal = a[key] ?? 0;
+    const bVal = b[key] ?? 0;
+
+    if (aVal > bVal) aGreater = true;
+    if (bVal > aVal) bGreater = true;
+  }
+
+  if (aGreater && bGreater) return 'CONCURRENT';
+  if (aGreater) return 'GREATER_THAN';
+  if (bGreater) return 'LESS_THAN';
+  return 'EQUAL';
+};
+
 export interface Operation {
   id: string;
   clientId: string;
