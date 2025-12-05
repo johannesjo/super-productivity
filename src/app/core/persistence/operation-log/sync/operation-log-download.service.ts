@@ -6,6 +6,7 @@ import { OpLog } from '../../../log';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
+  SyncOperation,
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import {
@@ -21,6 +22,9 @@ import {
   DOWNLOAD_RETRY_BASE_DELAY_MS,
   MAX_DOWNLOAD_OPS_IN_MEMORY,
 } from '../operation-log.const';
+import { OperationEncryptionService } from './operation-encryption.service';
+import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
+import { DecryptError } from '../../../../pfapi/api/errors/errors';
 
 /**
  * Result of a download operation.
@@ -51,6 +55,7 @@ export class OperationLogDownloadService {
   private manifestService = inject(OperationLogManifestService);
   private snackService = inject(SnackService);
   private injector = inject(Injector);
+  private encryptionService = inject(OperationEncryptionService);
 
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -78,6 +83,11 @@ export class OperationLogDownloadService {
 
     const allNewOps: Operation[] = [];
 
+    // Get encryption key upfront
+    const privateCfg =
+      (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
+    const encryptKey = privateCfg?.encryptKey;
+
     await this.lockService.request('sp_op_log_download', async () => {
       // Get clientId at start to avoid race conditions with other tabs
       const pfapiService = this.injector.get(PfapiService);
@@ -100,11 +110,46 @@ export class OperationLogDownloadService {
 
         receivedAnyOps = true;
 
-        // Convert SyncOperations to Operations, filtering already applied
-        const newOps = response.ops
+        // Filter already applied ops
+        let syncOps: SyncOperation[] = response.ops
           .filter((serverOp) => !appliedOpIds.has(serverOp.op.id))
-          .map((serverOp) => syncOpToOperation(serverOp.op));
+          .map((serverOp) => serverOp.op);
 
+        // Decrypt encrypted operations if we have an encryption key
+        const hasEncryptedOps = syncOps.some((op) => op.isPayloadEncrypted);
+        if (hasEncryptedOps) {
+          if (!encryptKey) {
+            // No encryption key available - fail with a helpful message
+            OpLog.error(
+              'OperationLogDownloadService: Received encrypted operations but no encryption key is configured.',
+            );
+            this.snackService.open({
+              type: 'ERROR',
+              msg: T.F.SYNC.S.ENCRYPTION_PASSWORD_REQUIRED,
+            });
+            return;
+          }
+
+          try {
+            syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
+          } catch (e) {
+            if (e instanceof DecryptError) {
+              OpLog.error(
+                'OperationLogDownloadService: Failed to decrypt operations. Wrong encryption password?',
+                e,
+              );
+              this.snackService.open({
+                type: 'ERROR',
+                msg: T.F.SYNC.S.DECRYPTION_FAILED,
+              });
+              return;
+            }
+            throw e;
+          }
+        }
+
+        // Convert to Operation format
+        const newOps = syncOps.map((op) => syncOpToOperation(op));
         allNewOps.push(...newOps);
 
         // Bounds check: prevent memory exhaustion

@@ -1,0 +1,65 @@
+import { Injectable } from '@angular/core';
+import { encrypt, decrypt } from '../../../../pfapi/api/encryption/encryption';
+import { SyncOperation } from '../../../../pfapi/api/sync/sync-provider.interface';
+
+/**
+ * Handles E2E encryption/decryption of operation payloads for SuperSync.
+ * Uses AES-256-GCM with Argon2id key derivation (same as legacy sync providers).
+ */
+@Injectable({
+  providedIn: 'root',
+})
+export class OperationEncryptionService {
+  /**
+   * Encrypts the payload of a SyncOperation.
+   * Returns a new operation with encrypted payload and isPayloadEncrypted=true.
+   */
+  async encryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOperation> {
+    const payloadStr = JSON.stringify(op.payload);
+    const encryptedPayload = await encrypt(payloadStr, encryptKey);
+    return {
+      ...op,
+      payload: encryptedPayload,
+      isPayloadEncrypted: true,
+    };
+  }
+
+  /**
+   * Decrypts the payload of a SyncOperation.
+   * Returns a new operation with decrypted payload.
+   * Throws DecryptError if decryption fails.
+   * Non-encrypted operations pass through unchanged.
+   */
+  async decryptOperation(op: SyncOperation, encryptKey: string): Promise<SyncOperation> {
+    if (!op.isPayloadEncrypted) {
+      return op;
+    }
+    const decryptedStr = await decrypt(op.payload as string, encryptKey);
+    return {
+      ...op,
+      payload: JSON.parse(decryptedStr),
+      isPayloadEncrypted: false,
+    };
+  }
+
+  /**
+   * Batch encrypt operations for upload.
+   */
+  async encryptOperations(
+    ops: SyncOperation[],
+    encryptKey: string,
+  ): Promise<SyncOperation[]> {
+    return Promise.all(ops.map((op) => this.encryptOperation(op, encryptKey)));
+  }
+
+  /**
+   * Batch decrypt operations after download.
+   * Non-encrypted ops pass through unchanged.
+   */
+  async decryptOperations(
+    ops: SyncOperation[],
+    encryptKey: string,
+  ): Promise<SyncOperation[]> {
+    return Promise.all(ops.map((op) => this.decryptOperation(op, encryptKey)));
+  }
+}
