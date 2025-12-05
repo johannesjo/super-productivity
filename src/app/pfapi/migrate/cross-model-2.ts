@@ -2,8 +2,6 @@ import { AppDataCompleteLegacy } from '../../imex/sync/sync.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { CrossModelMigrateFn, ImpossibleError } from '../api';
 import { TTWorkContextSessionMap } from '../../features/time-tracking/time-tracking.model';
-import { ProjectCopy } from '../../features/project/project.model';
-import { TagCopy } from '../../features/tag/tag.model';
 import {
   HideSubTasksMode,
   TaskArchive,
@@ -18,6 +16,14 @@ import {
 } from '../../features/boards/store/boards.reducer';
 import { DEFAULT_BOARD_CFG, DEFAULT_PANEL_CFG } from '../../features/boards/boards.const';
 import { PFLog } from '../../core/log';
+
+// Legacy types for migration - these fields were removed from the current models
+interface LegacyWorkContextTimeTracking {
+  workStart?: Record<string, number>;
+  workEnd?: Record<string, number>;
+  breakNr?: Record<string, number>;
+  breakTime?: Record<string, number>;
+}
 
 export const crossModelMigration2: CrossModelMigrateFn = ((
   fullData: AppDataCompleteLegacy,
@@ -43,7 +49,10 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
   const projectTimeTracking: TTWorkContextSessionMap = Object.keys(
     copy.project.entities,
   ).reduce((acc, projectId) => {
-    const project = copy.project.entities[projectId] as ProjectCopy;
+    // Cast to legacy type to access old fields that have been removed from current model
+    const project = copy.project.entities[
+      projectId
+    ] as unknown as LegacyWorkContextTimeTracking;
     acc[projectId] = {};
 
     Object.keys(project.workStart || {}).forEach((date) => {
@@ -71,14 +80,14 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
       };
     });
 
-    // @ts-ignore
-    delete copy.project.entities[projectId]!.workStart!;
-    // @ts-ignore
-    delete copy.project.entities[projectId]!.workEnd!;
-    // @ts-ignore
-    delete copy.project.entities[projectId]!.breakTime!;
-    // @ts-ignore
-    delete copy.project.entities[projectId]!.breakNr!;
+    // Delete legacy fields from the entity
+    const entityAsLegacy = copy.project.entities[
+      projectId
+    ] as unknown as LegacyWorkContextTimeTracking;
+    delete entityAsLegacy.workStart;
+    delete entityAsLegacy.workEnd;
+    delete entityAsLegacy.breakTime;
+    delete entityAsLegacy.breakNr;
 
     return acc;
   }, {} as TTWorkContextSessionMap);
@@ -86,7 +95,8 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
   // Migrate tag time tracking data
   const tagTimeTracking: TTWorkContextSessionMap = Object.keys(copy.tag.entities).reduce(
     (acc, tagId) => {
-      const tag = copy.tag.entities[tagId] as TagCopy;
+      // Cast to legacy type to access old fields that have been removed from current model
+      const tag = copy.tag.entities[tagId] as unknown as LegacyWorkContextTimeTracking;
       acc[tagId] = {};
 
       Object.keys(tag.workStart || {}).forEach((date) => {
@@ -114,14 +124,14 @@ export const crossModelMigration2: CrossModelMigrateFn = ((
         };
       });
 
-      // @ts-ignore
-      delete copy.tag.entities[tagId]!.workStart!;
-      // @ts-ignore
-      delete copy.tag.entities[tagId]!.workEnd!;
-      // @ts-ignore
-      delete copy.tag.entities[tagId]!.breakTime!;
-      // @ts-ignore
-      delete copy.tag.entities[tagId]!.breakNr!;
+      // Delete legacy fields from the entity
+      const entityAsLegacy = copy.tag.entities[
+        tagId
+      ] as unknown as LegacyWorkContextTimeTracking;
+      delete entityAsLegacy.workStart;
+      delete entityAsLegacy.workEnd;
+      delete entityAsLegacy.breakTime;
+      delete entityAsLegacy.breakNr;
 
       return acc;
     },

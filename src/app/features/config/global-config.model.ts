@@ -95,7 +95,6 @@ export type PomodoroConfig = Readonly<{
   isManualContinueBreak?: boolean;
   isPlaySound?: boolean;
   isPlaySoundAfterBreak?: boolean;
-  // isGoToWorkView?: boolean;
   isPlayTick?: boolean;
 
   // due to formly not being reliable here we need to be more lenient

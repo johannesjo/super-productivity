@@ -117,8 +117,6 @@ export class ProjectService {
         return breakNr;
       }),
     );
-
-    // return this._store$.pipe(select(selectProjectBreakNrForProject, { id: projectId }));
   }
 
   getBreakTimeForProject$(projectId: string): Observable<BreakTime> {
