@@ -86,10 +86,50 @@ describe('DependencyResolverService', () => {
       expect(deps.find((d) => d.entityId === 'parentTask1')).toBeTruthy();
     });
 
-    it('should return empty array for non-TASK entities', () => {
+    it('should return empty array for non-TASK entities without dependencies', () => {
       const op = createTestOperation({
         entityType: 'PROJECT' as EntityType,
         payload: { someField: 'value' },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps).toEqual([]);
+    });
+
+    it('should extract taskIds from TAG operations as soft dependencies', () => {
+      const op = createTestOperation({
+        entityType: 'TAG' as EntityType,
+        entityId: 'tag1',
+        payload: { taskIds: ['task1', 'task2', 'task3'] },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps.length).toBe(3);
+      expect(deps).toEqual([
+        {
+          entityType: 'TASK',
+          entityId: 'task1',
+          mustExist: false,
+          relation: 'reference',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'task2',
+          mustExist: false,
+          relation: 'reference',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'task3',
+          mustExist: false,
+          relation: 'reference',
+        },
+      ]);
+    });
+
+    it('should return empty array for TAG operations without taskIds', () => {
+      const op = createTestOperation({
+        entityType: 'TAG' as EntityType,
+        entityId: 'tag1',
+        payload: { title: 'My Tag', color: 'blue' },
       });
       const deps = service.extractDependencies(op);
       expect(deps).toEqual([]);
