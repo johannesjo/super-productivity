@@ -243,7 +243,7 @@ describe('ReminderService', () => {
       expect(mockWorker.postMessage).toHaveBeenCalledTimes(initialCalls + 2);
     });
 
-    it('should not update worker when only title changes', () => {
+    it('should update worker when title changes', () => {
       service.init();
       const initialCalls = mockWorker.postMessage.calls.count();
 
@@ -258,7 +258,7 @@ describe('ReminderService', () => {
       tasksWithReminderSubject.next(tasks1);
       expect(mockWorker.postMessage).toHaveBeenCalledTimes(initialCalls + 1);
 
-      // Title changed but id and remindAt are the same
+      // Title changed - worker should be updated so notification shows correct title
       const tasks2: TaskWithReminder[] = [
         {
           id: 'task1',
@@ -268,8 +268,10 @@ describe('ReminderService', () => {
         } as TaskWithReminder,
       ];
       tasksWithReminderSubject.next(tasks2);
-      // Should still be same count because distinctUntilChanged only checks id and remindAt
-      expect(mockWorker.postMessage).toHaveBeenCalledTimes(initialCalls + 1);
+      expect(mockWorker.postMessage).toHaveBeenCalledTimes(initialCalls + 2);
+      expect(mockWorker.postMessage).toHaveBeenCalledWith([
+        { id: 'task1', remindAt: 1000, title: 'Updated Title', type: 'TASK' },
+      ]);
     });
   });
 

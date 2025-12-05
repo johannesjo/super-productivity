@@ -77,7 +77,10 @@ export class ReminderService {
         distinctUntilChanged((prev, curr) => {
           if (prev.length !== curr.length) return false;
           return prev.every(
-            (r, i) => r.id === curr[i].id && r.remindAt === curr[i].remindAt,
+            (r, i) =>
+              r.id === curr[i].id &&
+              r.remindAt === curr[i].remindAt &&
+              r.title === curr[i].title,
           );
         }),
       )
