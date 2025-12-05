@@ -704,6 +704,82 @@ describe('taskSharedCrudMetaReducer', () => {
         testState,
       );
     });
+
+    it('should remove subtasks from tags when parent is deleted (sync scenario)', () => {
+      // Scenario: Parent task deleted, subtask is in Today tag but not in action payload
+      const testState = createStateWithExistingTasks(
+        ['task1', 'subtask1', 'other-task'],
+        [],
+        ['task1', 'other-task'],
+        ['subtask1', 'today-task'], // Subtask in Today, not in tag1
+      );
+
+      // Setup parent-child relationship
+      const task1 = testState[TASK_FEATURE_NAME].entities.task1 as Task;
+      const subtask1 = testState[TASK_FEATURE_NAME].entities.subtask1 as Task;
+      testState[TASK_FEATURE_NAME].entities.task1 = {
+        ...task1,
+        subTaskIds: ['subtask1'],
+      };
+      testState[TASK_FEATURE_NAME].entities.subtask1 = {
+        ...subtask1,
+        parentId: 'task1',
+        tagIds: [], // Subtask doesn't have tagIds in payload
+      };
+
+      const action = TaskSharedActions.deleteTasks({
+        taskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      // Subtask should be removed from TODAY tag even though not in payload
+      expectStateUpdate(
+        expectTagUpdates({
+          tag1: { taskIds: ['other-task'] },
+          TODAY: { taskIds: ['today-task'] },
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should remove subtasks from multiple tags when parent is deleted', () => {
+      // Scenario: Subtask is in both tag1 and TODAY, parent deleted
+      const testState = createStateWithExistingTasks(
+        ['task1', 'subtask1', 'other-task'],
+        [],
+        ['task1', 'subtask1', 'other-task'], // Subtask in tag1
+        ['subtask1', 'today-task'], // Subtask also in TODAY
+      );
+
+      const task1 = testState[TASK_FEATURE_NAME].entities.task1 as Task;
+      const subtask1 = testState[TASK_FEATURE_NAME].entities.subtask1 as Task;
+      testState[TASK_FEATURE_NAME].entities.task1 = {
+        ...task1,
+        subTaskIds: ['subtask1'],
+      };
+      testState[TASK_FEATURE_NAME].entities.subtask1 = {
+        ...subtask1,
+        parentId: 'task1',
+      };
+
+      const action = TaskSharedActions.deleteTasks({
+        taskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+      // Subtask should be removed from both tags
+      expectStateUpdate(
+        expectTagUpdates({
+          tag1: { taskIds: ['other-task'] },
+          TODAY: { taskIds: ['today-task'] },
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
   });
 
   describe('updateTask action', () => {
