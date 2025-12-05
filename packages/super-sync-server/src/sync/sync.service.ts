@@ -349,130 +349,158 @@ export class SyncService {
     // Ensure user has sync state row
     this.stmts.initUserSeq.run(userId);
 
-    // Process in transaction for atomicity
+    // Use immediate mode to acquire write lock upfront (prevents deadlocks)
+    // Process each operation individually within the transaction
     const tx = this.db.transaction(() => {
       for (const op of ops) {
-        try {
-          // Validate operation
-          const validation = this.validateOp(op);
-          if (!validation.valid) {
-            Logger.audit({
-              event: 'OP_REJECTED',
-              userId,
-              clientId,
-              opId: op.id,
-              entityType: op.entityType,
-              entityId: op.entityId,
-              errorCode: validation.errorCode,
-              reason: validation.error,
-              opType: op.opType,
-            });
-            results.push({
-              opId: op.id,
-              accepted: false,
-              error: validation.error,
-              errorCode: validation.errorCode,
-            });
-            continue;
-          }
-
-          // Check for conflicts with existing operations
-          const conflict = this.detectConflict(userId, op);
-          if (conflict.hasConflict) {
-            const isConcurrent = conflict.reason?.includes('Concurrent');
-            const errorCode = isConcurrent
-              ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
-              : SYNC_ERROR_CODES.CONFLICT_STALE;
-            Logger.audit({
-              event: 'OP_REJECTED',
-              userId,
-              clientId,
-              opId: op.id,
-              entityType: op.entityType,
-              entityId: op.entityId,
-              errorCode,
-              reason: conflict.reason,
-              opType: op.opType,
-            });
-            results.push({
-              opId: op.id,
-              accepted: false,
-              error: conflict.reason,
-              errorCode,
-            });
-            continue;
-          }
-
-          // Get next sequence number
-          const row = this.stmts.getNextSeq.get(userId) as { last_seq: number };
-          const serverSeq = row.last_seq;
-
-          // Insert operation
-          this.stmts.insertOp.run(
-            op.id,
-            userId,
-            clientId,
-            serverSeq,
-            op.actionType,
-            op.opType,
-            op.entityType,
-            op.entityId ?? null,
-            JSON.stringify(op.payload),
-            JSON.stringify(op.vectorClock),
-            op.schemaVersion,
-            op.timestamp,
-            now,
-          );
-
-          // Create tombstone for delete operations
-          if (op.opType === 'DEL' && op.entityId) {
-            this.createTombstoneSync(userId, op.entityType, op.entityId, op.id);
-          }
-
-          results.push({
-            opId: op.id,
-            accepted: true,
-            serverSeq,
-          });
-        } catch (err: unknown) {
-          // Duplicate ID (already processed) - idempotency
-          // Use SQLite error code for reliable detection instead of string matching
-          const sqliteError = err as { code?: string };
-          if (
-            sqliteError?.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' ||
-            sqliteError?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
-            sqliteError?.code === 'SQLITE_CONSTRAINT'
-          ) {
-            Logger.audit({
-              event: 'OP_REJECTED',
-              userId,
-              clientId,
-              opId: op.id,
-              entityType: op.entityType,
-              entityId: op.entityId,
-              errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-              reason: 'Duplicate operation ID',
-              opType: op.opType,
-            });
-            results.push({
-              opId: op.id,
-              accepted: false,
-              error: 'Duplicate operation ID',
-              errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
-            });
-          } else {
-            throw err;
-          }
-        }
+        const result = this.processOperation(userId, clientId, op, now);
+        results.push(result);
       }
 
       // Update device last seen
       this.stmts.updateDevice.run(clientId, userId, now, now);
     });
 
-    tx();
+    try {
+      tx.immediate();
+    } catch (err) {
+      // Transaction failed - all operations were rolled back
+      // Return error results for all operations that appeared successful
+      Logger.error(`Transaction failed for user ${userId}: ${(err as Error).message}`);
+
+      // Mark all "successful" results as failed due to transaction rollback
+      return ops.map((op) => ({
+        opId: op.id,
+        accepted: false,
+        error: 'Transaction rolled back due to internal error',
+        errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
+      }));
+    }
 
     return results;
+  }
+
+  /**
+   * Process a single operation within a transaction.
+   * Handles validation, conflict detection, and persistence.
+   * Never throws - returns error result instead.
+   */
+  private processOperation(
+    userId: number,
+    clientId: string,
+    op: Operation,
+    now: number,
+  ): UploadResult {
+    try {
+      // Validate operation
+      const validation = this.validateOp(op);
+      if (!validation.valid) {
+        Logger.audit({
+          event: 'OP_REJECTED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          entityId: op.entityId,
+          errorCode: validation.errorCode,
+          reason: validation.error,
+          opType: op.opType,
+        });
+        return {
+          opId: op.id,
+          accepted: false,
+          error: validation.error,
+          errorCode: validation.errorCode,
+        };
+      }
+
+      // Check for conflicts with existing operations
+      const conflict = this.detectConflict(userId, op);
+      if (conflict.hasConflict) {
+        const isConcurrent = conflict.reason?.includes('Concurrent');
+        const errorCode = isConcurrent
+          ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
+          : SYNC_ERROR_CODES.CONFLICT_STALE;
+        Logger.audit({
+          event: 'OP_REJECTED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          entityId: op.entityId,
+          errorCode,
+          reason: conflict.reason,
+          opType: op.opType,
+        });
+        return {
+          opId: op.id,
+          accepted: false,
+          error: conflict.reason,
+          errorCode,
+        };
+      }
+
+      // Get next sequence number
+      const row = this.stmts.getNextSeq.get(userId) as { last_seq: number };
+      const serverSeq = row.last_seq;
+
+      // Insert operation
+      this.stmts.insertOp.run(
+        op.id,
+        userId,
+        clientId,
+        serverSeq,
+        op.actionType,
+        op.opType,
+        op.entityType,
+        op.entityId ?? null,
+        JSON.stringify(op.payload),
+        JSON.stringify(op.vectorClock),
+        op.schemaVersion,
+        op.timestamp,
+        now,
+      );
+
+      // Create tombstone for delete operations
+      if (op.opType === 'DEL' && op.entityId) {
+        this.createTombstoneSync(userId, op.entityType, op.entityId, op.id);
+      }
+
+      return {
+        opId: op.id,
+        accepted: true,
+        serverSeq,
+      };
+    } catch (err: unknown) {
+      // Duplicate ID (already processed) - idempotency
+      // Use SQLite error code for reliable detection instead of string matching
+      const sqliteError = err as { code?: string };
+      if (
+        sqliteError?.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' ||
+        sqliteError?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
+        sqliteError?.code === 'SQLITE_CONSTRAINT'
+      ) {
+        Logger.audit({
+          event: 'OP_REJECTED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          entityId: op.entityId,
+          errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+          reason: 'Duplicate operation ID',
+          opType: op.opType,
+        });
+        return {
+          opId: op.id,
+          accepted: false,
+          error: 'Duplicate operation ID',
+          errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
+        };
+      }
+      // Re-throw unexpected errors to trigger transaction rollback
+      throw err;
+    }
   }
 
   private createTombstoneSync(
