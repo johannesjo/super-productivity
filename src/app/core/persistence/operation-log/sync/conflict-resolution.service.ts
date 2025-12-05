@@ -95,8 +95,7 @@ export class ConflictResolutionService {
       if (resolution === 'remote') {
         try {
           const storedOps: Array<{ id: string; seq: number }> = [];
-          const appliedOpIds: string[] = [];
-          let hadFailure = false;
+          const opsToApply: Operation[] = [];
 
           // Step 1: Persist ALL operations first to ensure safety
           // This ensures that even if we crash or fail during application,
@@ -113,79 +112,66 @@ export class ConflictResolutionService {
               pendingApply: true,
             });
             storedOps.push({ id: op.id, seq });
+            opsToApply.push(op);
           }
 
-          // Step 2: Apply operations sequentially
-          for (const { id } of storedOps) {
-            const op = conflict.remoteOps.find((o) => o.id === id);
-            if (!op) continue;
-
+          // Step 2: Apply ALL operations at once so the applier can sort by dependencies
+          // This is critical - applying one at a time bypasses dependency resolution
+          if (opsToApply.length > 0) {
             try {
-              // Apply single operation
-              await this.operationApplier.applyOperations([op]);
+              await this.operationApplier.applyOperations(opsToApply);
 
-              // Check if this operation failed
+              // Check if any operations failed
               const failedCount = this.operationApplier.getFailedCount();
               if (failedCount > 0) {
                 OpLog.err(
-                  `ConflictResolutionService: Operation ${op.id} failed to apply`,
+                  `ConflictResolutionService: ${failedCount} operations failed to apply for ${conflict.entityId}`,
                 );
                 this.operationApplier.clearFailedOperations();
-                hadFailure = true;
-                break; // Stop applying more ops
+
+                // Mark all stored ops as failed for retry
+                const allOpIds = storedOps.map((o) => o.id);
+                await this.opLogStore.markFailed(allOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
+
+                this.snackService.open({
+                  type: 'ERROR',
+                  msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+                  actionStr: T.PS.RELOAD,
+                  actionFn: (): void => {
+                    window.location.reload();
+                  },
+                });
+                continue; // Skip marking local as rejected for this conflict
               }
 
-              appliedOpIds.push(op.id);
+              // All ops succeeded - mark as applied
+              const successSeqs = storedOps.map((o) => o.seq);
+              await this.opLogStore.markApplied(successSeqs);
             } catch (e) {
-              OpLog.err(`ConflictResolutionService: Exception applying op ${op.id}`, e);
-              hadFailure = true;
-              break;
-            }
-          }
-
-          // Only mark successfully applied ops (not failed ones)
-          const appliedSet = new Set(appliedOpIds);
-          const successSeqs = storedOps
-            .filter((o) => appliedSet.has(o.id))
-            .map((o) => o.seq);
-          if (successSeqs.length > 0) {
-            await this.opLogStore.markApplied(successSeqs);
-          }
-
-          if (hadFailure) {
-            OpLog.err(
-              `ConflictResolutionService: Partial failure for ${conflict.entityId}. Applied ${appliedOpIds.length}/${conflict.remoteOps.length} ops`,
-            );
-
-            // Mark failed ops as 'failed' so they can be retried on next startup.
-            // After MAX_CONFLICT_RETRY_ATTEMPTS, markFailed will mark them as rejected.
-            const failedOpIds = storedOps
-              .filter((o) => !appliedSet.has(o.id))
-              .map((o) => o.id);
-
-            if (failedOpIds.length > 0) {
-              OpLog.warn(
-                `ConflictResolutionService: Marking ${failedOpIds.length} failed ops for retry`,
+              OpLog.err(
+                `ConflictResolutionService: Exception applying ops for ${conflict.entityId}`,
+                e,
               );
-              await this.opLogStore.markFailed(failedOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
-            }
+              const allOpIds = storedOps.map((o) => o.id);
+              await this.opLogStore.markFailed(allOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
 
-            this.snackService.open({
-              type: 'ERROR',
-              msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
-              actionStr: T.PS.RELOAD,
-              actionFn: (): void => {
-                window.location.reload();
-              },
-            });
-            continue; // Skip marking local as rejected for this conflict
+              this.snackService.open({
+                type: 'ERROR',
+                msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+                actionStr: T.PS.RELOAD,
+                actionFn: (): void => {
+                  window.location.reload();
+                },
+              });
+              continue;
+            }
           }
 
-          // Only mark local ops as rejected if ALL remote ops succeeded
+          // Mark local ops as rejected since we chose remote
           const localOpIds = conflict.localOps.map((op) => op.id);
           await this.opLogStore.markRejected(localOpIds);
           OpLog.normal(
-            `ConflictResolutionService: Applied ${appliedOpIds.length} remote ops for ${conflict.entityId}`,
+            `ConflictResolutionService: Applied ${opsToApply.length} remote ops for ${conflict.entityId}`,
           );
         } catch (e) {
           OpLog.err(
@@ -204,12 +190,17 @@ export class ConflictResolutionService {
           continue;
         }
       } else {
-        // Keep local ops.
-        // We assume they are already applied to state.
-        // We just need to ensure they are kept in the log for sync later.
-        // We essentially "ignore" the remote ops (don't apply them).
+        // Keep local ops - store remote ops as rejected so they won't be sent again
+        // This creates a record of the conflict resolution decision
+        for (const op of conflict.remoteOps) {
+          if (!(await this.opLogStore.hasOp(op.id))) {
+            await this.opLogStore.append(op, 'remote');
+          }
+        }
+        const remoteOpIds = conflict.remoteOps.map((op) => op.id);
+        await this.opLogStore.markRejected(remoteOpIds);
         OpLog.normal(
-          `ConflictResolutionService: Keeping local ops for ${conflict.entityId}`,
+          `ConflictResolutionService: Keeping local ops for ${conflict.entityId}, marked ${remoteOpIds.length} remote ops as rejected`,
         );
       }
     }

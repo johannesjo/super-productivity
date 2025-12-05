@@ -30,7 +30,6 @@ describe('TaskArchiveService', () => {
     notes: '',
     projectId: '',
     parentId: undefined,
-    reminderId: undefined,
     created: Date.now(),
     repeatCfgId: undefined,
     _hideSubTasksMode: 2,
