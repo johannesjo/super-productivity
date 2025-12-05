@@ -3,7 +3,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { Observable, Subject } from 'rxjs';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { T } from '../../t.const';
-import { filter, map, skipUntil } from 'rxjs/operators';
+import { distinctUntilChanged, filter, map, skipUntil } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { Log } from '../../core/log';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -69,10 +69,18 @@ export class ReminderService {
     // Migrate legacy reminders to task.remindAt (one-time migration)
     this._migrateLegacyReminders();
 
-    // Subscribe to tasks with reminders and update worker whenever they change
+    // Subscribe to tasks with reminders and update worker only when reminders actually change
     this._store
       .select(selectAllTasksWithReminder)
-      .pipe(map((tasks) => this._mapTasksToWorkerReminders(tasks)))
+      .pipe(
+        map((tasks) => this._mapTasksToWorkerReminders(tasks)),
+        distinctUntilChanged((prev, curr) => {
+          if (prev.length !== curr.length) return false;
+          return prev.every(
+            (r, i) => r.id === curr[i].id && r.remindAt === curr[i].remindAt,
+          );
+        }),
+      )
       .subscribe((reminders) => {
         this._updateRemindersInWorker(reminders);
         if (!environment.production) {
