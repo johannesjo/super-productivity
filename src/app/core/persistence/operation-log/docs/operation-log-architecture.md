@@ -213,14 +213,35 @@ interface Operation {
 }
 
 type OpType =
-  | 'CRT'
-  | 'UPD'
-  | 'DEL'
-  | 'MOV'
-  | 'BATCH'
-  | 'SYNC_IMPORT'
-  | 'BACKUP_IMPORT'
-  | 'REPAIR';
+  | 'CRT' // Create
+  | 'UPD' // Update
+  | 'DEL' // Delete
+  | 'MOV' // Move (list reordering)
+  | 'BATCH' // Bulk operations (import, mass update)
+  | 'SYNC_IMPORT' // Full state import from remote sync
+  | 'BACKUP_IMPORT' // Full state import from backup file
+  | 'REPAIR'; // Auto-repair operation with full repaired state
+
+type EntityType =
+  | 'TASK'
+  | 'PROJECT'
+  | 'TAG'
+  | 'NOTE'
+  | 'GLOBAL_CONFIG'
+  | 'SIMPLE_COUNTER'
+  | 'WORK_CONTEXT'
+  | 'TASK_REPEAT_CFG'
+  | 'ISSUE_PROVIDER'
+  | 'PLANNER'
+  | 'MENU_TREE'
+  | 'METRIC'
+  | 'BOARD'
+  | 'REMINDER'
+  | 'PLUGIN_USER_DATA'
+  | 'PLUGIN_METADATA'
+  | 'MIGRATION'
+  | 'RECOVERY'
+  | 'ALL';
 ```
 
 ### Persistent Action Pattern
@@ -357,21 +378,26 @@ async compact(): Promise<void> {
 
 ### Configuration
 
-| Setting                         | Value   | Description                                 |
-| ------------------------------- | ------- | ------------------------------------------- |
-| Compaction trigger              | 500 ops | Ops before snapshot                         |
-| Retention window                | 7 days  | Keep recent synced ops                      |
-| Emergency retention             | 1 day   | Shorter retention for quota exceeded        |
-| Compaction timeout              | 25 sec  | Abort if exceeds (prevents lock expiration) |
-| Max compaction failures         | 3       | Failures before user notification           |
-| Unsynced ops                    | ∞       | Never delete unsynced ops                   |
-| Max pending queue size          | 10,000  | Dependency retry queue limit                |
-| Max failed ops size             | 2,000   | Permanently failed ops history limit        |
-| Max download ops in memory      | 50,000  | Bounds memory during API download           |
-| Remote file retention           | 14 days | Server-side operation file retention        |
-| Max remote files to keep        | 100     | Minimum recent files on server              |
-| Max conflict retry attempts     | 5       | Retries before rejecting failed ops         |
-| Max rejected ops before warning | 10      | Threshold for user notification             |
+| Setting                         | Value   | Description                                    |
+| ------------------------------- | ------- | ---------------------------------------------- |
+| Compaction trigger              | 500 ops | Ops before snapshot                            |
+| Retention window                | 7 days  | Keep recent synced ops                         |
+| Emergency retention             | 1 day   | Shorter retention for quota exceeded           |
+| Compaction timeout              | 25 sec  | Abort if exceeds (prevents lock expiration)    |
+| Max compaction failures         | 3       | Failures before user notification              |
+| Unsynced ops                    | ∞       | Never delete unsynced ops                      |
+| Max pending queue size          | 10,000  | Dependency retry queue limit                   |
+| Max failed ops size             | 2,000   | Permanently failed ops history limit           |
+| Max download ops in memory      | 50,000  | Bounds memory during API download              |
+| Remote file retention           | 14 days | Server-side operation file retention           |
+| Max remote files to keep        | 100     | Minimum recent files on server                 |
+| Max conflict retry attempts     | 5       | Retries before rejecting failed ops            |
+| Max rejected ops before warning | 10      | Threshold for user notification                |
+| Max dependency retry attempts   | 3       | Retries for ops with missing dependencies      |
+| Lock timeout                    | 30 sec  | localStorage fallback lock timeout             |
+| Lock acquire timeout            | 60 sec  | Max wait to acquire a lock                     |
+| Max download retries            | 3       | Retry attempts for failed file downloads       |
+| Max ops for snapshot (server)   | 100,000 | Server-side memory protection for snapshot gen |
 
 ## A.5 Multi-Tab Coordination
 
@@ -496,6 +522,8 @@ export class MyEffects {
 | `task-electron.effects.ts`      | `clearTaskBarOnTaskDone$`                       | Electron UI              |
 | `plugin-hooks.effects.ts`       | `taskComplete$`, `taskUpdate$`                  | Plugin hooks             |
 | `task-related-model.effects.ts` | `autoAddTodayTagOnMarkAsDone`                   | Cascading action         |
+| `short-syntax.effects.ts`       | `createTask$`, parsing effects                  | State + side effect      |
+| `task-due.effects.ts`           | `setTaskDue$`                                   | State update             |
 
 ---
 
@@ -2008,6 +2036,20 @@ To detect silent divergence between clients:
 - Bounded memory during download (`MAX_DOWNLOAD_OPS_IN_MEMORY = 50,000`)
 - Integration test suite (`sync-scenarios.integration.spec.ts`)
 - E2E test infrastructure (`supersync.spec.ts` with Playwright)
+- **Server-side security hardening** (December 2025):
+  - Structured audit logging for security events
+  - Structured error codes (`SYNC_ERROR_CODES`) for upload results
+  - Gap detection in download operations
+  - Request ID deduplication for idempotent uploads
+  - Transaction isolation for download operations
+  - Entity type allowlist to prevent injection
+  - Input validation for operation ID, entity ID, and schema version
+  - Server-side conflict detection
+  - Vector clock sanitization
+  - Rate limiting and size validation for plugin data
+  - JWT secret minimum length validation (32 chars)
+  - Batch cleanup queries (replaced N+1 pattern)
+  - Database index on `(user_id, received_at)` for cleanup queries
 
 > **Cross-version limitation**: Part C is complete for clients on the same schema version. When `CURRENT_SCHEMA_VERSION > 1` and clients run different versions, A.7.11 (conflict-aware op migration) is required to ensure correct conflict detection.
 
@@ -2035,12 +2077,16 @@ To detect silent divergence between clients:
 > **Recently Completed (December 2025):**
 >
 > - **Server Sync (SuperSync)**: Full upload/download infrastructure with conflict detection, user resolution UI, and integration tests
+> - **Server Security Hardening**: Audit logging, structured error codes, request deduplication, transaction isolation, input validation, rate limiting
 > - **Tag sanitization**: Remove subtask IDs from tags when parent deleted, filter non-existent taskIds on sync
-> - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement
+> - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement (including subtask moves)
 > - **Quota handling**: Emergency compaction and circuit breaker on `QuotaExceededError`
 > - **`syncedAt` index**: Faster `getUnsynced()` queries
 > - **Persistent compaction counter**: Tracks ops across tabs/restarts
 > - **Failed operations cleanup**: Bounded tracking with `MAX_FAILED_OPS_SIZE = 2,000`
+> - **Plugin data sync**: Operation logging for plugin user data and metadata
+> - **Gap detection**: Download operations detect and report sequence gaps
+> - **Server-side conflict detection**: Prevents concurrent modifications on server
 
 ---
 

@@ -24,6 +24,32 @@ These items were identified in the code audit but require further evaluation and
 - ✅ Integration tests: `sync-scenarios.integration.spec.ts` (protocol-level)
 - ✅ E2E test infrastructure: `supersync.spec.ts` (Playwright)
 
+### Server Security & Reliability (December 2025)
+
+**Implementation:** Comprehensive security hardening and reliability improvements
+
+- ✅ Structured audit logging for security events
+- ✅ Structured error codes for upload results (`SYNC_ERROR_CODES`)
+- ✅ Gap detection in download operations
+- ✅ Request ID deduplication for idempotent uploads
+- ✅ Transaction isolation for download operations
+- ✅ Entity type allowlist to prevent injection
+- ✅ Input validation for operation ID, entity ID, and schema version
+- ✅ Server-side conflict detection
+- ✅ Vector clock sanitization
+- ✅ Rate limiting and size validation for plugin data
+- ✅ JWT secret minimum length validation (32 chars)
+- ✅ Batch cleanup queries (replaced N+1 pattern)
+- ✅ Database index on `(user_id, received_at)` for cleanup queries
+- ✅ `MAX_OPS_FOR_SNAPSHOT = 100k` to prevent memory exhaustion
+
+### Subtask Move Operations (December 2025)
+
+**Implementation:** `task.service.ts`, `task.reducer.ts`
+
+- ✅ `moveSubTask` migrated to anchor-based positioning (`afterTaskId`)
+- ✅ Consistent with parent task move operations
+
 ### Tag Sanitization on Task Delete (December 2025)
 
 **Implementation:** `tag-shared.reducer.ts`
@@ -154,7 +180,6 @@ All task drag-drop move operations now use anchor-based positioning (`afterTaskI
 
 - `updateProjectOrder` - Project list reordering (rarely used)
 - `updateTagOrder` - Tag list reordering (rarely used)
-- `moveSubTask` - Subtask reordering within parent (different use case)
 
 ---
 
@@ -234,18 +259,21 @@ deleteProject: (taskProps: { projectId: string; noteIds: string[]; allTaskIds: s
 
 ## Current System Status
 
-| Component              | Status             | Notes                                                         |
-| ---------------------- | ------------------ | ------------------------------------------------------------- |
-| **Local Persistence**  | ✅ Complete        | Event sourcing, crash recovery, fast hydration                |
-| **Legacy Sync Bridge** | ✅ Complete        | PFAPI integration, vector clock updates                       |
-| **Server Sync (API)**  | ✅ Complete        | Single-schema-version, upload/download working                |
-| **Conflict Detection** | ✅ Complete        | Vector clock-based, user resolution UI                        |
-| **Validation**         | ✅ Complete        | Typia + cross-model, 4 checkpoints                            |
-| **Auto-Repair**        | ✅ Complete        | 6 fix categories, creates REPAIR operations                   |
-| **Compaction**         | ✅ Complete        | Snapshot-based, retention windows, emergency mode             |
-| **Delete Handling**    | ✅ Complete        | Tag sanitization, cascading deletes, conflict heuristics      |
-| **Cross-Schema Sync**  | ⚠️ Not Implemented | A.7.11 required before CURRENT_SCHEMA_VERSION > 1             |
-| **Tombstone System**   | ⏸️ Deferred        | Not currently needed; revisit for undo/restore or audit needs |
+| Component              | Status             | Notes                                                                |
+| ---------------------- | ------------------ | -------------------------------------------------------------------- |
+| **Local Persistence**  | ✅ Complete        | Event sourcing, crash recovery, fast hydration                       |
+| **Legacy Sync Bridge** | ✅ Complete        | PFAPI integration, vector clock updates                              |
+| **Server Sync (API)**  | ✅ Complete        | Single-schema-version, upload/download working                       |
+| **Conflict Detection** | ✅ Complete        | Vector clock-based, user resolution UI                               |
+| **Validation**         | ✅ Complete        | Typia + cross-model, 4 checkpoints                                   |
+| **Auto-Repair**        | ✅ Complete        | 6 fix categories, creates REPAIR operations                          |
+| **Compaction**         | ✅ Complete        | Snapshot-based, retention windows, emergency mode                    |
+| **Delete Handling**    | ✅ Complete        | Tag sanitization, cascading deletes, conflict heuristics             |
+| **Server Security**    | ✅ Complete        | Audit logging, error codes, deduplication, validation, rate limiting |
+| **Cross-Schema Sync**  | ⚠️ Not Implemented | A.7.11 required before CURRENT_SCHEMA_VERSION > 1                    |
+| **Tombstone System**   | ⏸️ Deferred        | Not currently needed; revisit for undo/restore or audit needs        |
+| **Plugin Data Sync**   | ✅ Complete        | Operation logging for plugin user data and metadata                  |
+| **Move Operations**    | ✅ Complete        | Anchor-based positioning for tasks and subtasks                      |
 
 ---
 
