@@ -177,6 +177,8 @@ export class DependencyResolverService {
       case 'MENU_TREE':
       case 'BOARD':
       case 'REMINDER':
+      case 'PLUGIN_USER_DATA':
+      case 'PLUGIN_METADATA':
       case 'MIGRATION':
       case 'RECOVERY':
       case 'ALL':

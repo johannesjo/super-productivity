@@ -27,6 +27,8 @@ export type EntityType =
   | 'METRIC'
   | 'BOARD'
   | 'REMINDER'
+  | 'PLUGIN_USER_DATA'
+  | 'PLUGIN_METADATA'
   | 'MIGRATION'
   | 'RECOVERY' // For disaster recovery imports
   | 'ALL'; // For full state imports (sync, backup)

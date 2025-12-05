@@ -25,6 +25,8 @@ const getEntityKeyFromType = (entityType: EntityType): string | null => {
     TASK_REPEAT_CFG: 'taskRepeatCfg',
     ISSUE_PROVIDER: 'issueProvider',
     PLANNER: 'planner',
+    PLUGIN_USER_DATA: 'pluginUserData',
+    PLUGIN_METADATA: 'pluginMetadata',
   };
   return mapping[entityType] || null;
 };

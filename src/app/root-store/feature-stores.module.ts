@@ -91,6 +91,7 @@ import {
   PLUGIN_METADATA_FEATURE_NAME,
   pluginMetadataReducer,
 } from '../plugins/store/plugin-metadata.reducer';
+import { PluginEffects } from '../plugins/store/plugin.effects';
 import {
   REMINDER_FEATURE_NAME,
   reminderReducer,
@@ -174,6 +175,7 @@ import {
 
     StoreModule.forFeature(PLUGIN_USER_DATA_FEATURE_NAME, pluginUserDataReducer),
     StoreModule.forFeature(PLUGIN_METADATA_FEATURE_NAME, pluginMetadataReducer),
+    EffectsModule.forFeature([PluginEffects]),
     StoreModule.forFeature(REMINDER_FEATURE_NAME, reminderReducer),
     StoreModule.forFeature(ARCHIVE_YOUNG_FEATURE_NAME, archiveYoungReducer),
     StoreModule.forFeature(ARCHIVE_OLD_FEATURE_NAME, archiveOldReducer),
