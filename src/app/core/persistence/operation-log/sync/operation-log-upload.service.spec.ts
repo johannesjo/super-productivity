@@ -82,7 +82,7 @@ describe('OperationLogUploadService', () => {
     it('should return empty result when no sync provider', async () => {
       const result = await service.uploadPendingOps(null as any);
 
-      expect(result).toEqual({ uploadedCount: 0, piggybackedOps: [] });
+      expect(result).toEqual({ uploadedCount: 0, rejectedCount: 0, piggybackedOps: [] });
     });
 
     describe('API-based sync', () => {
@@ -140,7 +140,11 @@ describe('OperationLogUploadService', () => {
 
         const result = await service.uploadPendingOps(mockApiProvider);
 
-        expect(result).toEqual({ uploadedCount: 0, piggybackedOps: [] });
+        expect(result).toEqual({
+          uploadedCount: 0,
+          rejectedCount: 0,
+          piggybackedOps: [],
+        });
       });
 
       it('should upload pending operations', async () => {
@@ -285,7 +289,11 @@ describe('OperationLogUploadService', () => {
 
         const result = await service.uploadPendingOps(mockFileProvider);
 
-        expect(result).toEqual({ uploadedCount: 0, piggybackedOps: [] });
+        expect(result).toEqual({
+          uploadedCount: 0,
+          rejectedCount: 0,
+          piggybackedOps: [],
+        });
       });
 
       it('should upload pending operations as file', async () => {

@@ -100,7 +100,6 @@ describe('workContext selectors', () => {
         subTaskIds: [],
         tagIds: [TODAY_TAG.id],
         dueWithTime: 1234,
-        reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
 
       const result = selectStartableTasksForActiveContext.projector([M1, M2]);
@@ -108,7 +107,6 @@ describe('workContext selectors', () => {
         {
           id: 'M2',
           dueWithTime: 1234,
-          reminderId: 'asd',
           subTaskIds: [],
           tagIds: ['TODAY'],
         },
