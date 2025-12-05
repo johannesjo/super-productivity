@@ -867,6 +867,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "TITLE": "¿Duplicar Proyecto?",
+        "MSG": "Este proyecto es bastante grande y podría tardar un tiempo en duplicarse. ¿Quieres continuar?",
+        "OK": "Duplicar de todos modos",
+        "CANCEL": "Cancelar"
+      },
       "D_CREATE": {
         "CREATE": "Crear Proyecto",
         "EDIT": "Editar Proyecto",
@@ -1774,6 +1780,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
+    "DUPLICATE_PROJECT_ERROR": "No se pudo duplicar el proyecto",
+    "DUPLICATE_PROJECT_SUCCESS": "Proyecto duplicado",
     "ERR_COMPRESSION": "Error de la interfaz de compresión",
     "FILE_DOWNLOADED": "{{fileName}} descargado",
     "FILE_DOWNLOADED_BTN": "Abrir carpeta",
@@ -1781,6 +1789,9 @@
     "PERSISTENCE_ERROR": "Error al solicitar la persistencia de datos: {{err}}",
     "RUNNING_X": "Ejecutando \"{{str}}\".",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} presionado, pero el atajo de abrir marcadores solo está disponible cuando se está en contexto de proyecto."
+  },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copia)"
   },
   "GPB": {
     "ASSETS": "Cargando activos...",
@@ -1799,6 +1810,7 @@
     "CREATE_PROJECT": "Crear Proyecto",
     "CREATE_TAG": "Crear Etiqueta",
     "DELETE_TAG": "Eliminar Etiqueta",
+    "DUPLICATE_PROJECT": "Duplicar",
     "GO_TO_TASK_LIST": "Ir a lista de tareas",
     "MANAGE_PROJECTS": "Gestionar Proyectos",
     "METRICS": "Métricas",
