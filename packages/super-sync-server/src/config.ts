@@ -36,15 +36,11 @@ export interface ServerConfig {
 }
 
 /**
- * Default CORS origins for security.
- * Includes localhost (any port) for development and the official sync server.
- * Can be overridden via CORS_ORIGINS environment variable.
+ * Default CORS origins for production security.
+ * Only allows the official Super Productivity app.
+ * Use CORS_ORIGINS env var to add development origins (e.g., localhost).
  */
-const DEFAULT_CORS_ORIGINS: CorsOrigin[] = [
-  /^https?:\/\/localhost(:\d+)?$/,
-  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
-  'https://sync.super-productivity.com',
-];
+const DEFAULT_CORS_ORIGINS: CorsOrigin[] = ['https://app.super-productivity.com'];
 
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
