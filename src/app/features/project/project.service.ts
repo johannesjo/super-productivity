@@ -284,7 +284,7 @@ export class ProjectService {
     for (const p of tasks) {
       const subTasks = p.subTaskIds
         .map((id) => taskState.entities[id])
-        .filter((t): t is Task => !!t);
+        .filter((t): t is Task => t !== undefined && t !== null);
 
       // copy and remove meta fields we don't want to pass as "additional"
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
