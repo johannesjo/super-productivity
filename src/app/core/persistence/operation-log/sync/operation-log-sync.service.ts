@@ -265,64 +265,75 @@ export class OperationLogSyncService {
       appliedFrontierByEntity,
     );
 
-    // Apply non-conflicting ops with crash-safe tracking
+    // IMPORTANT: Handle conflicts BEFORE applying any operations.
+    // If we apply non-conflicting ops first, they may reference entities that are
+    // part of conflicts, causing "Task not found" errors before the user can resolve.
+    if (conflicts.length > 0) {
+      OpLog.warn(
+        `OperationLogSyncService: Detected ${conflicts.length} conflicts. Showing dialog before applying any ops.`,
+        conflicts,
+      );
+      // Pass non-conflicting ops to conflict resolution so they can be applied
+      // together with resolved conflicts after user makes their choice
+      await this.conflictResolutionService.presentConflicts(conflicts, nonConflicting);
+      return;
+    }
+
+    // No conflicts - safe to apply non-conflicting ops directly
     if (nonConflicting.length > 0) {
-      // Track stored seqs for marking as applied after success
-      const storedSeqs: number[] = [];
-      // Track ops that are NOT duplicates (need to be applied)
-      const opsToApply: Operation[] = [];
-      // Track op IDs for error handling
-      const storedOpIds: string[] = [];
+      await this._applyNonConflictingOps(nonConflicting);
+      // CHECKPOINT D: Validate state after applying ops
+      await this._validateAfterSync();
+    }
+  }
 
-      // Store operations with pending status before applying
-      // If we crash after storing but before applying, these will be retried on startup
-      for (const op of nonConflicting) {
-        if (!(await this.opLogStore.hasOp(op.id))) {
-          const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
-          storedSeqs.push(seq);
-          storedOpIds.push(op.id);
-          opsToApply.push(op);
-        } else {
-          OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
-        }
-      }
+  /**
+   * Apply non-conflicting operations with crash-safe tracking.
+   * Stores ops as pending, applies them, then marks as applied.
+   */
+  private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
+    // Track stored seqs for marking as applied after success
+    const storedSeqs: number[] = [];
+    // Track ops that are NOT duplicates (need to be applied)
+    const opsToApply: Operation[] = [];
+    // Track op IDs for error handling
+    const storedOpIds: string[] = [];
 
-      // Apply only NON-duplicate ops to NgRx store
-      if (opsToApply.length > 0) {
-        try {
-          await this.operationApplier.applyOperations(opsToApply);
-        } catch (e) {
-          // If application fails catastrophically, mark ops as failed to prevent
-          // them from being uploaded in a potentially inconsistent state
-          OpLog.err(
-            `OperationLogSyncService: Failed to apply ${opsToApply.length} ops. Marking as failed.`,
-            e,
-          );
-          await this.opLogStore.markFailed(storedOpIds);
-          throw e;
-        }
-      }
-
-      // Mark ops as successfully applied (crash recovery will skip these)
-      if (storedSeqs.length > 0) {
-        await this.opLogStore.markApplied(storedSeqs);
-        OpLog.normal(
-          `OperationLogSyncService: Applied and marked ${storedSeqs.length} remote ops`,
-        );
+    // Store operations with pending status before applying
+    // If we crash after storing but before applying, these will be retried on startup
+    for (const op of ops) {
+      if (!(await this.opLogStore.hasOp(op.id))) {
+        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+        storedSeqs.push(seq);
+        storedOpIds.push(op.id);
+        opsToApply.push(op);
+      } else {
+        OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
       }
     }
 
-    // Handle conflicts
-    if (conflicts.length > 0) {
-      OpLog.warn(
-        `OperationLogSyncService: Detected ${conflicts.length} conflicts.`,
-        conflicts,
+    // Apply only NON-duplicate ops to NgRx store
+    if (opsToApply.length > 0) {
+      try {
+        await this.operationApplier.applyOperations(opsToApply);
+      } catch (e) {
+        // If application fails catastrophically, mark ops as failed to prevent
+        // them from being uploaded in a potentially inconsistent state
+        OpLog.err(
+          `OperationLogSyncService: Failed to apply ${opsToApply.length} ops. Marking as failed.`,
+          e,
+        );
+        await this.opLogStore.markFailed(storedOpIds);
+        throw e;
+      }
+    }
+
+    // Mark ops as successfully applied (crash recovery will skip these)
+    if (storedSeqs.length > 0) {
+      await this.opLogStore.markApplied(storedSeqs);
+      OpLog.normal(
+        `OperationLogSyncService: Applied and marked ${storedSeqs.length} remote ops`,
       );
-      // Conflict resolution service will validate after resolving
-      await this.conflictResolutionService.presentConflicts(conflicts);
-    } else if (nonConflicting.length > 0) {
-      // CHECKPOINT D: If no conflicts but we applied ops, validate state
-      await this._validateAfterSync();
     }
   }
 

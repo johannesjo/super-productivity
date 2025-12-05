@@ -1,7 +1,7 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { EntityConflict } from '../operation.types';
+import { EntityConflict, Operation } from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { OpLog } from '../../../log';
@@ -40,7 +40,16 @@ export class ConflictResolutionService {
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
-  async presentConflicts(conflicts: EntityConflict[]): Promise<void> {
+  /**
+   * Present conflicts to the user for resolution.
+   * @param conflicts - The detected conflicts to resolve
+   * @param nonConflictingOps - Non-conflicting ops to apply AFTER conflicts are resolved
+   *   These are passed separately to ensure all ops are applied together after user decision.
+   */
+  async presentConflicts(
+    conflicts: EntityConflict[],
+    nonConflictingOps: Operation[] = [],
+  ): Promise<void> {
     OpLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
 
     this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
@@ -52,14 +61,22 @@ export class ConflictResolutionService {
       this._dialogRef.afterClosed(),
     );
 
-    // If dialog was cancelled, still validate state since non-conflicting ops
-    // may have already been applied before the dialog opened
+    // If dialog was cancelled, don't apply any operations
+    // The user chose not to sync - state should remain as-is
     if (!result || !result.resolutions) {
       OpLog.normal(
-        'ConflictResolutionService: Dialog cancelled, running validation for already-applied ops',
+        'ConflictResolutionService: Dialog cancelled, no operations will be applied',
       );
-      await this._validateAndRepairAfterResolution();
       return;
+    }
+
+    // Apply non-conflicting ops FIRST before resolving conflicts
+    // These are safe to apply and may include dependencies needed by conflict ops
+    if (nonConflictingOps.length > 0) {
+      OpLog.normal(
+        `ConflictResolutionService: Applying ${nonConflictingOps.length} non-conflicting ops before conflict resolution`,
+      );
+      await this._applyNonConflictingOps(nonConflictingOps);
     }
 
     OpLog.normal('ConflictResolutionService: Processing resolutions', result.resolutions);
@@ -199,6 +216,50 @@ export class ConflictResolutionService {
 
     // CHECKPOINT D: Validate and repair state after conflict resolution
     await this._validateAndRepairAfterResolution();
+  }
+
+  /**
+   * Apply non-conflicting operations with crash-safe tracking.
+   * These are operations that don't conflict with local state and are safe to apply.
+   */
+  private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
+    const storedSeqs: number[] = [];
+    const opsToApply: Operation[] = [];
+    const storedOpIds: string[] = [];
+
+    // Store operations with pending status before applying
+    for (const op of ops) {
+      if (!(await this.opLogStore.hasOp(op.id))) {
+        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+        storedSeqs.push(seq);
+        storedOpIds.push(op.id);
+        opsToApply.push(op);
+      } else {
+        OpLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
+      }
+    }
+
+    // Apply operations to NgRx store
+    if (opsToApply.length > 0) {
+      try {
+        await this.operationApplier.applyOperations(opsToApply);
+      } catch (e) {
+        OpLog.err(
+          `ConflictResolutionService: Failed to apply ${opsToApply.length} non-conflicting ops`,
+          e,
+        );
+        await this.opLogStore.markFailed(storedOpIds);
+        throw e;
+      }
+    }
+
+    // Mark ops as successfully applied
+    if (storedSeqs.length > 0) {
+      await this.opLogStore.markApplied(storedSeqs);
+      OpLog.normal(
+        `ConflictResolutionService: Applied and marked ${storedSeqs.length} non-conflicting ops`,
+      );
+    }
   }
 
   /**
