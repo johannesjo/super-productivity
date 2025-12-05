@@ -98,7 +98,7 @@ export const dataRepair = (
   dataOut = _fixInconsistentTagId(dataOut);
   dataOut = _setTaskProjectIdAccordingToParent(dataOut);
   dataOut = _removeDuplicatesFromArchive(dataOut);
-  dataOut = _removeMissingReminderIds(dataOut);
+  dataOut = _clearLegacyReminderIds(dataOut);
   dataOut = _fixTaskRepeatMissingWeekday(dataOut);
   dataOut = _createInboxProjectIfNecessary(dataOut);
   dataOut = _fixOrphanedNotes(dataOut);
@@ -166,15 +166,16 @@ const _removeDuplicatesFromArchive = (data: AppDataCompleteNew): AppDataComplete
   return data;
 };
 
-const _removeMissingReminderIds = (data: AppDataCompleteNew): AppDataCompleteNew => {
+// Clear any legacy reminderId values - reminders now use remindAt directly on tasks
+const _clearLegacyReminderIds = (data: AppDataCompleteNew): AppDataCompleteNew => {
   data.task.ids.forEach((id: string) => {
-    const t: Task = data.task.entities[id] as Task;
-    if (t.reminderId && !data.reminders.find((r) => r.id === t.reminderId)) {
-      data.task.entities[id] = {
-        ...t,
-        reminderId: undefined,
-        dueWithTime: undefined,
+    const t = data.task.entities[id] as Task & { reminderId?: string };
+    if (t.reminderId) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { reminderId, ...taskWithoutReminderId } = t as TaskCopy & {
+        reminderId?: string;
       };
+      data.task.entities[id] = taskWithoutReminderId;
     }
   });
   return data;

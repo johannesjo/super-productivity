@@ -520,7 +520,7 @@ export class TaskRepeatCfgEffects {
         completeCfg.startTime as string,
         new Date(),
       );
-      if (task.reminderId) {
+      if (task.remindAt) {
         this._taskService.reScheduleTask({
           task,
           due: dateTime,

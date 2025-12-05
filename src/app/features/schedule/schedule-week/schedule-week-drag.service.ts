@@ -622,7 +622,7 @@ export class ScheduleWeekDragService {
 
   private _scheduleTask(task: TaskCopy, scheduleTime: number): void {
     const hasExistingSchedule = !!task?.dueWithTime;
-    const hasReminder = !!task?.reminderId;
+    const hasReminder = !!task?.remindAt;
     const defaultReminderOption = this._getDefaultReminderOption();
     // Smart reminder logic: if task is brand new to scheduling, add a reminder based on user's default setting.
     // If it already has a reminder, update it. Otherwise, leave reminders unchanged.

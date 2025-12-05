@@ -364,26 +364,9 @@ const validateIssueProviders = (
   return true;
 };
 
-const validateReminders = (d: AppDataCompleteNew): boolean => {
-  if (environment.production) {
-    // NOTE don't check for production, is it is not a big problem
-    return true;
-  }
-
-  // Convert reminders to a Set for faster lookup
-  const reminderIds = new Set(d.reminders.map((r) => r.id));
-
-  for (const tid of d.task.ids) {
-    const task = d.task.entities[tid];
-    if (task && task.reminderId && !reminderIds.has(task.reminderId)) {
-      _validityError(`Missing reminder ${task.reminderId} from task not existing`, {
-        task,
-        d,
-      });
-      return false;
-    }
-  }
-
+// NOTE: reminderId is deprecated - reminders now use remindAt directly on tasks
+// This validation is kept as a no-op for backward compatibility
+const validateReminders = (_d: AppDataCompleteNew): boolean => {
   return true;
 };
 
