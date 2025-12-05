@@ -21,6 +21,7 @@ interface TaskOperationPayload {
   projectId?: string;
   parentId?: string;
   tagIds?: string[];
+  subTaskIds?: string[];
 }
 
 /** Payload shape for note operations that may have dependencies */
@@ -55,6 +56,18 @@ export class DependencyResolverService {
           mustExist: true, // Hard dependency (Subtask needs parent)
           relation: 'parent',
         });
+      }
+      // SubTaskIds are soft dependencies - parent task references children
+      // We want subtasks to be created before parent updates that reference them
+      if (payload.subTaskIds?.length) {
+        for (const subTaskId of payload.subTaskIds) {
+          deps.push({
+            entityType: 'TASK',
+            entityId: subTaskId,
+            mustExist: false, // Soft dependency (prefer subtask exists, but don't block)
+            relation: 'reference',
+          });
+        }
       }
       // Tags are soft dependencies, we usually ignore if missing or handle in reducer
     }
