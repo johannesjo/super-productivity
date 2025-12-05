@@ -60,7 +60,16 @@ export const registerUser = async (
     const emailSent = await sendVerificationEmail(email, verificationToken);
     if (!emailSent) {
       // Clean up the newly created account to prevent unusable, un-verifiable entries
-      db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
+      try {
+        db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
+        Logger.info(`Cleaned up failed registration (ID: ${info.lastInsertRowid})`);
+      } catch (cleanupErr) {
+        // Log but don't mask the original email failure
+        Logger.error(
+          `Failed to clean up user ${info.lastInsertRowid} after email failure:`,
+          cleanupErr,
+        );
+      }
       throw new Error('Failed to send verification email. Please try again later.');
     }
   } catch (err: unknown) {
@@ -105,13 +114,24 @@ export const registerUser = async (
 
         const emailSent = await sendVerificationEmail(email, newToken);
         if (!emailSent) {
-          db.prepare(
-            `
+          try {
+            db.prepare(
+              `
               UPDATE users
               SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = ?
               WHERE id = ?
             `,
-          ).run(previousToken, previousExpiresAt, previousResendCount, existingUser.id);
+            ).run(previousToken, previousExpiresAt, previousResendCount, existingUser.id);
+            Logger.info(
+              `Rolled back token update for user ${existingUser.id} after email failure`,
+            );
+          } catch (rollbackErr) {
+            // Log but don't mask the original email failure
+            Logger.error(
+              `Failed to rollback token update for user ${existingUser.id}:`,
+              rollbackErr,
+            );
+          }
 
           throw new Error('Failed to send verification email. Please try again later.');
         }
