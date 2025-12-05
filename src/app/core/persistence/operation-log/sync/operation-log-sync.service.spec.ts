@@ -14,6 +14,7 @@ import { RepairOperationService } from '../processing/repair-operation.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
+import { DependencyResolverService } from './dependency-resolver.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Operation, OpType } from '../operation.types';
 import { T } from '../../../../t.const';
@@ -35,6 +36,7 @@ describe('OperationLogSyncService', () => {
   let operationApplierServiceSpy: jasmine.SpyObj<OperationApplierService>;
   let conflictResolutionServiceSpy: jasmine.SpyObj<ConflictResolutionService>;
   let validateStateServiceSpy: jasmine.SpyObj<ValidateStateService>;
+  let dependencyResolverSpy: jasmine.SpyObj<DependencyResolverService>;
 
   beforeEach(() => {
     schemaMigrationServiceSpy = jasmine.createSpyObj('SchemaMigrationService', [
@@ -61,6 +63,9 @@ describe('OperationLogSyncService', () => {
     ]);
     validateStateServiceSpy = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepair',
+    ]);
+    dependencyResolverSpy = jasmine.createSpyObj('DependencyResolverService', [
+      'extractDependencies',
     ]);
 
     TestBed.configureTestingModule({
@@ -98,6 +103,7 @@ describe('OperationLogSyncService', () => {
             'downloadRemoteOps',
           ]),
         },
+        { provide: DependencyResolverService, useValue: dependencyResolverSpy },
       ],
     });
 
@@ -110,6 +116,8 @@ describe('OperationLogSyncService', () => {
       isValid: true,
       wasRepaired: false,
     } as any);
+    // Default dependency extraction: return empty array (no dependencies)
+    dependencyResolverSpy.extractDependencies.and.returnValue([]);
   });
 
   it('should be created', () => {
@@ -124,6 +132,9 @@ describe('OperationLogSyncService', () => {
       ];
       // Assume fresh client to keep test simple
       opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
 
@@ -151,6 +162,9 @@ describe('OperationLogSyncService', () => {
 
       // Assume fresh client
       opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
 

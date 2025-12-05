@@ -111,7 +111,7 @@ describe('ConflictResolutionService', () => {
       },
     ];
 
-    it('should validate state if dialog is cancelled', async () => {
+    it('should not apply ops if dialog is cancelled', async () => {
       const mockDialogRef = {
         afterClosed: () => of(undefined),
       } as MatDialogRef<DialogConflictResolutionComponent>;
@@ -120,11 +120,12 @@ describe('ConflictResolutionService', () => {
       await service.presentConflicts(conflicts);
 
       expect(mockDialog.open).toHaveBeenCalled();
-      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+      // When cancelled, no operations should be applied or validated
       expect(mockOpLogStore.append).not.toHaveBeenCalled();
+      expect(mockValidateStateService.validateAndRepair).not.toHaveBeenCalled();
     });
 
-    it('should handle "local" resolution (keep local ops)', async () => {
+    it('should handle "local" resolution (keep local ops, reject remote)', async () => {
       const mockDialogRef = {
         afterClosed: () =>
           of({
@@ -133,11 +134,17 @@ describe('ConflictResolutionService', () => {
           }),
       } as MatDialogRef<DialogConflictResolutionComponent>;
       mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
 
       await service.presentConflicts(conflicts);
 
-      expect(mockOpLogStore.append).not.toHaveBeenCalled();
-      expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+      // Remote ops should be stored and marked rejected when keeping local
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        conflicts[0].remoteOps[0],
+        'remote',
+      );
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
       expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
     });
 
@@ -205,10 +212,17 @@ describe('ConflictResolutionService', () => {
     });
 
     it('should repair state if validation finds issues', async () => {
+      // Must provide a resolution (not cancel) for validation to run
       const mockDialogRef = {
-        afterClosed: () => of(undefined),
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'local']]),
+            conflicts,
+          }),
       } as MatDialogRef<DialogConflictResolutionComponent>;
       mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
 
       // Simulate repair needed
       mockValidateStateService.validateAndRepair.and.returnValue({
