@@ -338,13 +338,14 @@ const handleDeleteTask = (
   }
 
   // Update tags - collect all affected tags and tasks to remove
-  // Only include tags that actually exist in the state to prevent errors
+  // Include TODAY_TAG.id explicitly since it's not stored in task.tagIds by design
   const potentialTagIds = [
-    TODAY_TAG.id, // always check today list
+    TODAY_TAG.id,
     ...task.tagIds,
     ...(task.subTasks || []).flatMap((st) => st.tagIds || []),
   ];
 
+  // Only include tags that actually exist in the state to prevent errors
   const affectedTagIds = unique(
     potentialTagIds.filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]),
   );
@@ -386,17 +387,18 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
   };
 
   // Only update tags that actually contain at least one of the tasks being deleted
+  // Use allIds (includes subtasks) to ensure subtask IDs are also removed from tags
   const affectedTags = (state[TAG_FEATURE_NAME].ids as string[]).filter((tagId) => {
     const tag = state[TAG_FEATURE_NAME].entities[tagId];
     if (!tag) return false;
-    return taskIds.some((taskId) => tag.taskIds.includes(taskId));
+    return allIds.some((taskId) => tag.taskIds.includes(taskId));
   });
 
   const tagUpdates = affectedTags.map(
     (tagId): Update<Tag> => ({
       id: tagId,
       changes: {
-        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, taskIds),
+        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, allIds),
       },
     }),
   );
