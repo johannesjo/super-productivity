@@ -430,21 +430,32 @@ export class SyncService {
 
   // === Download Operations ===
 
+  /**
+   * Get operations since a sequence number.
+   * This is wrapped in a transaction to ensure snapshot isolation.
+   * Without transaction isolation, the latestSeq could be incremented
+   * between reading ops and returning the response, causing clients to miss operations.
+   */
   getOpsSince(
     userId: number,
     sinceSeq: number,
     excludeClient?: string,
     limit: number = 500,
   ): ServerOperation[] {
-    const stmt = excludeClient
-      ? this.stmts.getOpsSinceExcludeClient
-      : this.stmts.getOpsSince;
+    // Use transaction for snapshot isolation
+    const tx = this.db.transaction(() => {
+      const stmt = excludeClient
+        ? this.stmts.getOpsSinceExcludeClient
+        : this.stmts.getOpsSince;
 
-    const args = excludeClient
-      ? [userId, sinceSeq, excludeClient, limit]
-      : [userId, sinceSeq, limit];
+      const args = excludeClient
+        ? [userId, sinceSeq, excludeClient, limit]
+        : [userId, sinceSeq, limit];
 
-    const rows = stmt.all(...args) as DbOperation[];
+      return stmt.all(...args) as DbOperation[];
+    });
+
+    const rows = tx();
 
     return rows.map((row) => ({
       serverSeq: row.server_seq,
@@ -462,6 +473,55 @@ export class SyncService {
       },
       receivedAt: row.received_at,
     }));
+  }
+
+  /**
+   * Get operations and latest sequence atomically.
+   * Uses transaction to ensure the latestSeq matches the returned operations.
+   */
+  getOpsSinceWithSeq(
+    userId: number,
+    sinceSeq: number,
+    excludeClient?: string,
+    limit: number = 500,
+  ): { ops: ServerOperation[]; latestSeq: number } {
+    const tx = this.db.transaction(() => {
+      const stmt = excludeClient
+        ? this.stmts.getOpsSinceExcludeClient
+        : this.stmts.getOpsSince;
+
+      const args = excludeClient
+        ? [userId, sinceSeq, excludeClient, limit]
+        : [userId, sinceSeq, limit];
+
+      const rows = stmt.all(...args) as DbOperation[];
+      const seqRow = this.stmts.getLatestSeq.get(userId) as
+        | { last_seq: number }
+        | undefined;
+
+      return { rows, latestSeq: seqRow?.last_seq ?? 0 };
+    });
+
+    const { rows, latestSeq } = tx();
+
+    const ops = rows.map((row) => ({
+      serverSeq: row.server_seq,
+      op: {
+        id: row.id,
+        clientId: row.client_id,
+        actionType: row.action_type,
+        opType: row.op_type as Operation['opType'],
+        entityType: row.entity_type,
+        entityId: row.entity_id ?? undefined,
+        payload: JSON.parse(row.payload),
+        vectorClock: JSON.parse(row.vector_clock),
+        schemaVersion: row.schema_version,
+        timestamp: row.client_timestamp,
+      },
+      receivedAt: row.received_at,
+    }));
+
+    return { ops, latestSeq };
   }
 
   getLatestSeq(userId: number): number {

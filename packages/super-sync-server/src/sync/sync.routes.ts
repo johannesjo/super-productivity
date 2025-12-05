@@ -122,21 +122,33 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           );
         }
 
-        // Optionally include new ops from other clients
+        // Optionally include new ops from other clients (with atomic latestSeq read)
         let newOps: import('./sync.types').ServerOperation[] | undefined;
+        let latestSeq: number;
+
         if (lastKnownServerSeq !== undefined) {
-          newOps = syncService.getOpsSince(userId, lastKnownServerSeq, clientId, 100);
+          // Use atomic read to get ops and latestSeq together
+          const opsResult = syncService.getOpsSinceWithSeq(
+            userId,
+            lastKnownServerSeq,
+            clientId,
+            100,
+          );
+          newOps = opsResult.ops;
+          latestSeq = opsResult.latestSeq;
           if (newOps.length > 0) {
             Logger.info(
               `[user:${userId}] Piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})`,
             );
           }
+        } else {
+          latestSeq = syncService.getLatestSeq(userId);
         }
 
         const response: UploadOpsResponse = {
           results,
           newOps: newOps && newOps.length > 0 ? newOps : undefined,
-          latestSeq: syncService.getLatestSeq(userId),
+          latestSeq,
         };
 
         return reply.send(response);
@@ -190,7 +202,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         );
 
         const maxLimit = Math.min(limit, 1000);
-        const ops = syncService.getOpsSince(
+
+        // Use atomic read to get ops and latestSeq in one transaction
+        // This prevents race conditions where new ops arrive between the two reads
+        const { ops, latestSeq } = syncService.getOpsSinceWithSeq(
           userId,
           sinceSeq,
           excludeClient,
@@ -200,7 +215,6 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const hasMore = ops.length > maxLimit;
         if (hasMore) ops.pop();
 
-        const latestSeq = syncService.getLatestSeq(userId);
         Logger.info(
           `[user:${userId}] Download: ${ops.length} ops (sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore})`,
         );
