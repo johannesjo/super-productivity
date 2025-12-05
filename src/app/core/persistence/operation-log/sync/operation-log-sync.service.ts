@@ -34,6 +34,7 @@ import {
 } from '../store/schema-migration.service';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
+import { DependencyResolverService } from './dependency-resolver.service';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -62,6 +63,7 @@ export class OperationLogSyncService {
   private injector = inject(Injector);
   private schemaMigrationService = inject(SchemaMigrationService);
   private snackService = inject(SnackService);
+  private dependencyResolver = inject(DependencyResolverService);
 
   /**
    * Upload pending local operations to remote storage.
@@ -111,6 +113,7 @@ export class OperationLogSyncService {
     // 1. Migrate operations to current schema version (Receiver-Side Migration)
     const currentVersion = this.schemaMigrationService.getCurrentVersion();
     const migratedOps: Operation[] = [];
+    const droppedEntityIds = new Set<string>();
     let updateRequired = false;
 
     for (const op of remoteOps) {
@@ -127,6 +130,13 @@ export class OperationLogSyncService {
         if (migrated) {
           migratedOps.push(migrated);
         } else {
+          // Track dropped entity IDs for dependency warning
+          if (op.entityId) {
+            droppedEntityIds.add(op.entityId);
+          }
+          if (op.entityIds) {
+            op.entityIds.forEach((id) => droppedEntityIds.add(id));
+          }
           OpLog.verbose(
             `OperationLogSyncService: Dropped op ${op.id} (migrated to null)`,
           );
@@ -146,6 +156,11 @@ export class OperationLogSyncService {
         actionFn: () => window.open('https://super-productivity.com/download', '_blank'),
       });
       return;
+    }
+
+    // Warn if any migrated ops depend on dropped entities
+    if (droppedEntityIds.size > 0) {
+      this._warnAboutDroppedDependencies(migratedOps, droppedEntityIds);
     }
 
     if (migratedOps.length === 0) {
@@ -459,5 +474,36 @@ export class OperationLogSyncService {
 
     // Default: manual - let user decide
     return 'manual';
+  }
+
+  /**
+   * Warns if any operations have dependencies on entities that were dropped during migration.
+   * This helps identify potential issues where subsequent ops may fail due to missing dependencies.
+   */
+  private _warnAboutDroppedDependencies(
+    ops: Operation[],
+    droppedEntityIds: Set<string>,
+  ): void {
+    const affectedOps: Array<{ opId: string; droppedDependency: string }> = [];
+
+    for (const op of ops) {
+      const deps = this.dependencyResolver.extractDependencies(op);
+      for (const dep of deps) {
+        if (droppedEntityIds.has(dep.entityId)) {
+          affectedOps.push({
+            opId: op.id,
+            droppedDependency: `${dep.entityType}:${dep.entityId}`,
+          });
+        }
+      }
+    }
+
+    if (affectedOps.length > 0) {
+      OpLog.warn(
+        `OperationLogSyncService: ${affectedOps.length} ops depend on ${droppedEntityIds.size} dropped entities. ` +
+          `These ops may fail to apply due to missing dependencies.`,
+        { affectedOps: affectedOps.slice(0, 10) }, // Log first 10 for debugging
+      );
+    }
   }
 }

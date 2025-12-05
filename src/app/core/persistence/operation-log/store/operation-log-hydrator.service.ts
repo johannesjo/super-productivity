@@ -22,6 +22,7 @@ import { RepairOperationService } from '../processing/repair-operation.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
+import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 
 type StateCache = MigratableStateCache;
 
@@ -238,6 +239,10 @@ export class OperationLogHydratorService {
 
       // Prune old failed operations to prevent memory growth
       this.operationApplierService.pruneOldFailedOperations();
+
+      // Retry any failed remote ops from previous conflict resolution attempts
+      // Now that state is fully hydrated, dependencies might be resolved
+      await this.retryFailedRemoteOps();
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
@@ -766,5 +771,64 @@ export class OperationLogHydratorService {
     OpLog.normal(
       `OperationLogHydratorService: Recovered ${pendingOps.length} pending remote ops.`,
     );
+  }
+
+  /**
+   * Retries failed remote operations from previous conflict resolution attempts.
+   * Called after hydration to give failed ops another chance to apply now that
+   * more state might be available (e.g., dependencies resolved by sync).
+   *
+   * Failed ops are ops that previously failed during conflict resolution
+   * but may succeed now that more state has been loaded.
+   */
+  async retryFailedRemoteOps(): Promise<void> {
+    const failedOps = await this.opLogStore.getFailedRemoteOps();
+
+    if (failedOps.length === 0) {
+      return;
+    }
+
+    OpLog.normal(
+      `OperationLogHydratorService: Retrying ${failedOps.length} previously failed remote ops...`,
+    );
+
+    const appliedOpIds: string[] = [];
+    const stillFailedOpIds: string[] = [];
+
+    for (const entry of failedOps) {
+      try {
+        await this.operationApplierService.applyOperations([entry.op]);
+
+        const failedCount = this.operationApplierService.getFailedCount();
+        if (failedCount > 0) {
+          this.operationApplierService.clearFailedOperations();
+          stillFailedOpIds.push(entry.op.id);
+        } else {
+          appliedOpIds.push(entry.op.id);
+        }
+      } catch (e) {
+        OpLog.warn(`OperationLogHydratorService: Failed to retry op ${entry.op.id}`, e);
+        stillFailedOpIds.push(entry.op.id);
+      }
+    }
+
+    // Mark successfully applied ops
+    if (appliedOpIds.length > 0) {
+      const appliedSeqs = failedOps
+        .filter((e) => appliedOpIds.includes(e.op.id))
+        .map((e) => e.seq);
+      await this.opLogStore.markApplied(appliedSeqs);
+      OpLog.normal(
+        `OperationLogHydratorService: Successfully retried ${appliedOpIds.length} failed ops`,
+      );
+    }
+
+    // Update retry count for still-failed ops (may reject them if max retries reached)
+    if (stillFailedOpIds.length > 0) {
+      await this.opLogStore.markFailed(stillFailedOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
+      OpLog.warn(
+        `OperationLogHydratorService: ${stillFailedOpIds.length} ops still failing after retry`,
+      );
+    }
   }
 }

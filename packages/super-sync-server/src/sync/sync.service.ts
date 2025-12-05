@@ -7,31 +7,35 @@ import {
   UploadResult,
   SyncConfig,
   DEFAULT_SYNC_CONFIG,
+  OP_TYPES,
+  ONLINE_DEVICE_THRESHOLD_MS,
+  validatePayload,
 } from './sync.types';
 import { Logger } from '../logger';
 
 /**
  * Valid entity types for operations.
+ * Must match the EntityType union in the client's operation.types.ts.
  * Operations with unknown entity types will be rejected.
  */
 const ALLOWED_ENTITY_TYPES = new Set([
-  'task',
-  'project',
-  'tag',
-  'note',
-  'global_config',
-  'simple_counter',
-  'work_context',
-  'task_repeat_cfg',
-  'issue_provider',
-  'planner',
-  'menu_tree',
-  'metric',
-  'board',
-  'reminder',
-  'migration',
-  'recovery',
-  'all',
+  'TASK',
+  'PROJECT',
+  'TAG',
+  'NOTE',
+  'GLOBAL_CONFIG',
+  'SIMPLE_COUNTER',
+  'WORK_CONTEXT',
+  'TASK_REPEAT_CFG',
+  'ISSUE_PROVIDER',
+  'PLANNER',
+  'MENU_TREE',
+  'METRIC',
+  'BOARD',
+  'REMINDER',
+  'MIGRATION',
+  'RECOVERY',
+  'ALL',
 ]);
 
 /**
@@ -56,6 +60,7 @@ interface PreparedStatements {
   getTombstone: Database.Statement;
   deleteExpiredTombstones: Database.Statement;
   deleteOldSyncedOps: Database.Statement;
+  deleteOldSyncedOpsForAllUsers: Database.Statement;
   getMinAckedSeq: Database.Statement;
   deleteStaleDevices: Database.Statement;
   getAllUserIds: Database.Statement;
@@ -164,6 +169,31 @@ export class SyncService {
         WHERE user_id = ? AND server_seq < ? AND received_at < ?
       `),
 
+      deleteOldSyncedOpsForAllUsers: this.db.prepare(`
+        DELETE FROM operations
+        WHERE received_at < ?
+          AND (
+            -- Case 1: User has devices - only delete if acked by all
+            (
+              EXISTS (
+                SELECT 1 FROM sync_devices
+                WHERE sync_devices.user_id = operations.user_id
+              )
+              AND server_seq < (
+                SELECT COALESCE(MIN(last_acked_seq), 0)
+                FROM sync_devices
+                WHERE sync_devices.user_id = operations.user_id
+              )
+            )
+            OR
+            -- Case 2: User has no devices - safe to delete old ops
+            NOT EXISTS (
+              SELECT 1 FROM sync_devices
+              WHERE sync_devices.user_id = operations.user_id
+            )
+          )
+      `),
+
       getMinAckedSeq: this.db.prepare(`
         SELECT MIN(last_acked_seq) as min_seq FROM sync_devices WHERE user_id = ?
       `),
@@ -211,7 +241,7 @@ export class SyncService {
           const row = this.stmts.getNextSeq.get(userId) as { last_seq: number };
           const serverSeq = row.last_seq;
 
-          // Insert operation (normalize entityType to lowercase for consistency)
+          // Insert operation
           this.stmts.insertOp.run(
             op.id,
             userId,
@@ -219,7 +249,7 @@ export class SyncService {
             serverSeq,
             op.actionType,
             op.opType,
-            op.entityType.toLowerCase(),
+            op.entityType,
             op.entityId ?? null,
             JSON.stringify(op.payload),
             JSON.stringify(op.vectorClock),
@@ -230,12 +260,7 @@ export class SyncService {
 
           // Create tombstone for delete operations
           if (op.opType === 'DEL' && op.entityId) {
-            this.createTombstoneSync(
-              userId,
-              op.entityType.toLowerCase(),
-              op.entityId,
-              op.id,
-            );
+            this.createTombstoneSync(userId, op.entityType, op.entityId, op.id);
           }
 
           results.push({
@@ -449,7 +474,7 @@ export class SyncService {
     // Apply operations in order
     for (const row of ops) {
       const opType = row.op_type;
-      const entityType = row.entity_type.toLowerCase();
+      const entityType = row.entity_type;
       const entityId = row.entity_id;
 
       // Skip operations with invalid entity types (defensive)
@@ -602,26 +627,12 @@ export class SyncService {
   /**
    * Batch cleanup of old operations for all users in a single query.
    * Avoids N+1 query pattern by using a subquery to find minimum acked seq per user.
-   * Only deletes operations that are:
-   * 1. Older than cutoffTime
-   * 2. Have been acknowledged by all devices for that user (seq < min acked seq)
+   * Deletes operations that are:
+   * 1. Older than cutoffTime AND have been acknowledged by all devices (seq < min acked seq)
+   * 2. OR older than cutoffTime for users with no active devices (orphaned ops)
    */
   deleteOldSyncedOpsForAllUsers(cutoffTime: number): number {
-    // Use a single query with subquery to avoid N+1
-    const stmt = this.db.prepare(`
-      DELETE FROM operations
-      WHERE received_at < ?
-        AND server_seq < (
-          SELECT COALESCE(MIN(last_acked_seq), 0)
-          FROM sync_devices
-          WHERE sync_devices.user_id = operations.user_id
-        )
-        AND EXISTS (
-          SELECT 1 FROM sync_devices
-          WHERE sync_devices.user_id = operations.user_id
-        )
-    `);
-    const result = stmt.run(cutoffTime);
+    const result = this.stmts.deleteOldSyncedOpsForAllUsers.run(cutoffTime);
     return result.changes;
   }
 
@@ -645,9 +656,7 @@ export class SyncService {
   // === Status ===
 
   getOnlineDeviceCount(userId: number): number {
-    // Consider devices online if seen in last 5 minutes
-    const fiveMinutesMs = 5 * 60 * 1000;
-    const threshold = Date.now() - fiveMinutesMs;
+    const threshold = Date.now() - ONLINE_DEVICE_THRESHOLD_MS;
     const row = this.stmts.getOnlineDeviceCount.get(userId, threshold) as
       | { count: number }
       | undefined;
@@ -663,26 +672,14 @@ export class SyncService {
     if (op.id.length > 255) {
       return { valid: false, error: 'Operation ID too long' };
     }
-    if (
-      !op.opType ||
-      ![
-        'CRT',
-        'UPD',
-        'DEL',
-        'MOV',
-        'BATCH',
-        'SYNC_IMPORT',
-        'BACKUP_IMPORT',
-        'REPAIR',
-      ].includes(op.opType)
-    ) {
+    if (!op.opType || !OP_TYPES.includes(op.opType)) {
       return { valid: false, error: 'Invalid opType' };
     }
     if (!op.entityType) {
       return { valid: false, error: 'Missing entityType' };
     }
-    // Validate entity type against allowlist
-    if (!ALLOWED_ENTITY_TYPES.has(op.entityType.toLowerCase())) {
+    // Validate entity type against allowlist (case-sensitive, must match client EntityType)
+    if (!ALLOWED_ENTITY_TYPES.has(op.entityType)) {
       return { valid: false, error: `Invalid entityType: ${op.entityType}` };
     }
     // Validate entityId format/length if present
@@ -690,6 +687,10 @@ export class SyncService {
       if (typeof op.entityId !== 'string' || op.entityId.length > 255) {
         return { valid: false, error: 'Invalid entityId format or length' };
       }
+    }
+    // DEL operations require entityId - a delete without a target is meaningless
+    if (op.opType === 'DEL' && !op.entityId) {
+      return { valid: false, error: 'DEL operation requires entityId' };
     }
     if (op.payload === undefined) {
       return { valid: false, error: 'Missing payload' };
@@ -705,6 +706,12 @@ export class SyncService {
     const payloadSize = JSON.stringify(op.payload).length;
     if (payloadSize > this.config.maxPayloadSizeBytes) {
       return { valid: false, error: 'Payload too large' };
+    }
+
+    // Validate payload structure based on operation type
+    const payloadValidation = validatePayload(op.opType, op.payload);
+    if (!payloadValidation.valid) {
+      return { valid: false, error: payloadValidation.error };
     }
 
     // Timestamp validation (based on HLC best practices)

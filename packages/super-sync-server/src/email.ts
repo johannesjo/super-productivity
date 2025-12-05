@@ -56,7 +56,7 @@ export const sendVerificationEmail = async (
       from,
       to,
       subject: 'Verify your SuperSync account',
-      text: `Please verify your account by clicking the following link: ${verificationLink}\n\nToken: ${token}`,
+      text: `Please verify your account by clicking the following link: ${verificationLink}\n\nIf clicking the link doesn't work, copy and paste it into your browser.`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Welcome to SuperSync!</h2>
@@ -71,7 +71,6 @@ export const sendVerificationEmail = async (
             If the button doesn't work, copy and paste this link into your browser:
           </p>
           <p style="font-size: 12px; color: #666;">${verificationLink}</p>
-          <p style="font-size: 12px; color: #666;">Token: ${token}</p>
         </div>
       `,
     });

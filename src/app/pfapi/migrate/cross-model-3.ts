@@ -15,6 +15,9 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-conf
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 import { PFLog } from '../../core/log';
 
+// Legacy task type with reminderId field (removed in current model)
+type LegacyTaskCopy = TaskCopy & { reminderId?: string };
+
 const LEGACY_INBOX_PROJECT_ID = 'INBOX' as const;
 
 export const crossModelMigration3: CrossModelMigrateFn = ((
@@ -205,7 +208,8 @@ const migrateTasks = <T extends EntityState<TaskCopy>>(
       task.issueAttachmentNr = task.issueAttachmentNr || undefined;
       task.issueTimeTracked = task.issueTimeTracked || undefined;
       task.issuePoints = task.issuePoints || undefined;
-      task.reminderId = task.reminderId || undefined;
+      (task as LegacyTaskCopy).reminderId =
+        (task as LegacyTaskCopy).reminderId || undefined;
       task.parentId = task.parentId || undefined;
       task.doneOn = task.doneOn || undefined;
       task.timeEstimate = task.timeEstimate || 0;

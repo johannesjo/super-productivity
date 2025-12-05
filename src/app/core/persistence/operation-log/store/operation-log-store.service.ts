@@ -245,6 +245,49 @@ export class OperationLogStoreService {
     await tx.done;
   }
 
+  /**
+   * Marks operations as failed (can be retried later).
+   * Increments the retry count for each operation.
+   * If maxRetries is provided and reached, marks as rejected instead.
+   */
+  async markFailed(opIds: string[], maxRetries?: number): Promise<void> {
+    await this._ensureInit();
+    const tx = this.db.transaction('ops', 'readwrite');
+    const store = tx.objectStore('ops');
+    const index = store.index('byId');
+    const now = Date.now();
+
+    for (const opId of opIds) {
+      const entry = await index.get(opId);
+      if (entry) {
+        const newRetryCount = (entry.retryCount ?? 0) + 1;
+
+        // If max retries reached, mark as rejected permanently
+        if (maxRetries !== undefined && newRetryCount >= maxRetries) {
+          entry.rejectedAt = now;
+          entry.applicationStatus = undefined;
+        } else {
+          entry.applicationStatus = 'failed';
+          entry.retryCount = newRetryCount;
+        }
+        await store.put(entry);
+      }
+    }
+    await tx.done;
+  }
+
+  /**
+   * Gets remote operations that failed and can be retried.
+   * These are ops that were attempted but failed (e.g., missing dependency).
+   */
+  async getFailedRemoteOps(): Promise<OperationLogEntry[]> {
+    await this._ensureInit();
+    const all = await this.db.getAll('ops');
+    return all.filter(
+      (e) => e.source === 'remote' && e.applicationStatus === 'failed' && !e.rejectedAt,
+    );
+  }
+
   async deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void> {
     await this._ensureInit();
     // This requires iterating and deleting.

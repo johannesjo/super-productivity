@@ -51,6 +51,7 @@ describe('ConflictResolutionService', () => {
       'append',
       'markApplied',
       'markRejected',
+      'markFailed',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
@@ -195,9 +196,9 @@ describe('ConflictResolutionService', () => {
       // Should NOT mark as applied on failure
       expect(mockOpLogStore.markApplied).not.toHaveBeenCalled();
 
-      // SHOULD mark failed REMOTE ops as rejected (to prevent crash recovery issues)
-      // but NOT local ops - local ops should remain in the log
-      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
+      // SHOULD mark failed REMOTE ops as failed for retry (not rejected)
+      // They can be retried on next startup, and rejected after MAX_CONFLICT_RETRY_ATTEMPTS
+      expect(mockOpLogStore.markFailed).toHaveBeenCalledWith(['remote-1'], 5);
 
       expect(mockSnackService.open).toHaveBeenCalled();
       expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();

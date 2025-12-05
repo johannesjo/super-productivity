@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyReply } from 'fastify';
 import { z } from 'zod';
 import { uuidv7 } from 'uuidv7';
-import { authenticate } from '../middleware';
+import { authenticate, AuthenticatedFastifyRequest } from '../middleware';
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
 import {
@@ -11,6 +11,7 @@ import {
   SnapshotResponse,
   SyncStatusResponse,
   DEFAULT_SYNC_CONFIG,
+  OP_TYPES,
 } from './sync.types';
 
 // Zod Schemas
@@ -18,16 +19,7 @@ const OperationSchema = z.object({
   id: z.string().min(1),
   clientId: z.string().min(1),
   actionType: z.string().min(1),
-  opType: z.enum([
-    'CRT',
-    'UPD',
-    'DEL',
-    'MOV',
-    'BATCH',
-    'SYNC_IMPORT',
-    'BACKUP_IMPORT',
-    'REPAIR',
-  ]),
+  opType: z.enum(OP_TYPES),
   entityType: z.string().min(1),
   entityId: z.string().optional(),
   entityIds: z.array(z.string()).optional(), // For batch operations
@@ -80,9 +72,12 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         },
       },
     },
-    async (req: FastifyRequest<{ Body: UploadOpsRequest }>, reply: FastifyReply) => {
+    async (
+      req: AuthenticatedFastifyRequest<{ Body: UploadOpsRequest }>,
+      reply: FastifyReply,
+    ) => {
       try {
-        const userId = req.user!.userId;
+        const userId = req.user.userId;
 
         // Validate request body
         const parseResult = UploadOpsSchema.safeParse(req.body);
@@ -141,9 +136,14 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         },
       },
     },
-    async (req, reply) => {
+    async (
+      req: AuthenticatedFastifyRequest<{
+        Querystring: { sinceSeq: string; limit?: string; excludeClient?: string };
+      }>,
+      reply: FastifyReply,
+    ) => {
       try {
-        const userId = req.user!.userId;
+        const userId = req.user.userId;
 
         // Validate query params
         const parseResult = DownloadOpsQuerySchema.safeParse(req.query);
@@ -183,35 +183,43 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   // GET /api/sync/snapshot - Get full state snapshot
-  fastify.get('/snapshot', async (req, reply) => {
-    try {
-      const userId = req.user!.userId;
-      const syncService = getSyncService();
+  fastify.get(
+    '/snapshot',
+    async (req: AuthenticatedFastifyRequest, reply: FastifyReply) => {
+      try {
+        const userId = req.user.userId;
+        const syncService = getSyncService();
 
-      // Check if we have a cached snapshot
-      const cached = syncService.getCachedSnapshot(userId);
-      if (
-        cached &&
-        Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
-      ) {
-        return reply.send(cached as SnapshotResponse);
+        // Check if we have a cached snapshot
+        const cached = syncService.getCachedSnapshot(userId);
+        if (
+          cached &&
+          Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
+        ) {
+          return reply.send(cached as SnapshotResponse);
+        }
+
+        // Generate fresh snapshot by replaying ops
+        const snapshot = syncService.generateSnapshot(userId);
+        return reply.send(snapshot as SnapshotResponse);
+      } catch (err) {
+        Logger.error(`Get snapshot error: ${errorMessage(err)}`);
+        return reply.status(500).send({ error: 'Internal server error' });
       }
-
-      // Generate fresh snapshot by replaying ops
-      const snapshot = syncService.generateSnapshot(userId);
-      return reply.send(snapshot as SnapshotResponse);
-    } catch (err) {
-      Logger.error(`Get snapshot error: ${errorMessage(err)}`);
-      return reply.status(500).send({ error: 'Internal server error' });
-    }
-  });
+    },
+  );
 
   // POST /api/sync/snapshot - Upload full state
   fastify.post<{ Body: { state: unknown; clientId: string; reason: string } }>(
     '/snapshot',
-    async (req, reply) => {
+    async (
+      req: AuthenticatedFastifyRequest<{
+        Body: { state: unknown; clientId: string; reason: string };
+      }>,
+      reply: FastifyReply,
+    ) => {
       try {
-        const userId = req.user!.userId;
+        const userId = req.user.userId;
 
         // Validate request body
         const parseResult = UploadSnapshotSchema.safeParse(req.body);
@@ -231,7 +239,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           clientId,
           actionType: 'SYNC_IMPORT',
           opType: 'SYNC_IMPORT' as const,
-          entityType: 'all',
+          entityType: 'ALL',
           payload: state,
           vectorClock,
           timestamp: Date.now(),
@@ -261,38 +269,47 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   // GET /api/sync/status - Get sync status
-  fastify.get('/status', async (req, reply) => {
-    try {
-      const userId = req.user!.userId;
-      const syncService = getSyncService();
+  fastify.get(
+    '/status',
+    async (req: AuthenticatedFastifyRequest, reply: FastifyReply) => {
+      try {
+        const userId = req.user.userId;
+        const syncService = getSyncService();
 
-      const latestSeq = syncService.getLatestSeq(userId);
-      const minAckedSeq = syncService.getMinAckedSeq(userId);
-      const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
+        const latestSeq = syncService.getLatestSeq(userId);
+        const minAckedSeq = syncService.getMinAckedSeq(userId);
+        const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
 
-      const cached = syncService.getCachedSnapshot(userId);
-      const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
+        const cached = syncService.getCachedSnapshot(userId);
+        const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
-      const response: SyncStatusResponse = {
-        latestSeq,
-        devicesOnline: syncService.getOnlineDeviceCount(userId),
-        pendingOps,
-        snapshotAge,
-      };
+        const response: SyncStatusResponse = {
+          latestSeq,
+          devicesOnline: syncService.getOnlineDeviceCount(userId),
+          pendingOps,
+          snapshotAge,
+        };
 
-      return reply.send(response);
-    } catch (err) {
-      Logger.error(`Get status error: ${errorMessage(err)}`);
-      return reply.status(500).send({ error: 'Internal server error' });
-    }
-  });
+        return reply.send(response);
+      } catch (err) {
+        Logger.error(`Get status error: ${errorMessage(err)}`);
+        return reply.status(500).send({ error: 'Internal server error' });
+      }
+    },
+  );
 
   // POST /api/sync/devices/:clientId/ack - Acknowledge received sequences
   fastify.post<{ Params: { clientId: string }; Body: { lastSeq: number } }>(
     '/devices/:clientId/ack',
-    async (req, reply) => {
+    async (
+      req: AuthenticatedFastifyRequest<{
+        Params: { clientId: string };
+        Body: { lastSeq: number };
+      }>,
+      reply: FastifyReply,
+    ) => {
       try {
-        const userId = req.user!.userId;
+        const userId = req.user.userId;
         const { clientId } = req.params;
 
         // Validate body
