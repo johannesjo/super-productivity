@@ -2025,11 +2025,12 @@ To detect silent divergence between clients:
 
 ## Future Enhancements 🔮
 
-| Component  | Description                                | Priority | Notes |
-| ---------- | ------------------------------------------ | -------- | ----- |
-| Auto-merge | Automatic merge for non-conflicting fields | Low      |       |
-| Undo/Redo  | Leverage op-log for undo history           | Low      |       |
-| Tombstones | Soft delete with retention window          | High     |       |
+| Component  | Description                                | Priority | Notes                                                                          |
+| ---------- | ------------------------------------------ | -------- | ------------------------------------------------------------------------------ |
+| Auto-merge | Automatic merge for non-conflicting fields | Low      |                                                                                |
+| Undo/Redo  | Leverage op-log for undo history           | Low      |                                                                                |
+| Tombstones | Soft delete with retention window          | Medium   | Deferred Dec 2025 - current safeguards sufficient (see todo.md for evaluation) |
+| A.7.11     | Conflict-aware operation migration         | High     | Required before `CURRENT_SCHEMA_VERSION > 1` for cross-version sync            |
 
 > **Recently Completed (December 2025):**
 >
