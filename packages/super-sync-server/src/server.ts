@@ -11,6 +11,7 @@ import { initDb } from './db';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
 import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
+import { testRoutes } from './test-routes';
 
 export { ServerConfig, loadConfigFromEnv };
 
@@ -92,6 +93,12 @@ export const createServer = (
 
       // Sync Routes (operation-based sync)
       await fastifyServer.register(syncRoutes, { prefix: '/api/sync' });
+
+      // Test Routes (only in test mode)
+      if (fullConfig.testMode?.enabled) {
+        await fastifyServer.register(testRoutes, { prefix: '/api/test' });
+        Logger.warn('TEST MODE ENABLED - Test routes available at /api/test/*');
+      }
 
       // Page Routes
       await fastifyServer.register(pageRoutes, { prefix: '/' });
