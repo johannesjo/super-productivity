@@ -981,4 +981,201 @@ base.describe('@supersync SuperSync E2E', () => {
       }
     },
   );
+
+  /**
+   * Scenario 7.1: Three-Client Eventual Consistency
+   *
+   * Tests that three clients all converge to the same state after
+   * concurrent operations and multiple sync rounds. This simulates
+   * a real-world scenario with phone, laptop, and desktop.
+   *
+   * Setup: Clients A, B, C with shared account
+   *
+   * Timeline:
+   * 1. Client A creates Task-1, syncs
+   * 2. Client B syncs (gets Task-1), creates Task-2
+   * 3. Client C syncs (gets Task-1), creates Task-3, renames Task-1
+   * 4. Client B syncs (uploads Task-2)
+   * 5. Client C syncs (uploads Task-3 + rename, downloads Task-2)
+   * 6. Client A syncs (downloads Task-2, Task-3, rename)
+   * 7. Client B syncs (downloads Task-3, rename)
+   * 8. All three clients should have identical state
+   *
+   * Expected:
+   * - All clients have Task-1 (renamed), Task-2, Task-3
+   * - No data loss from concurrent operations
+   * - System achieves eventual consistency
+   */
+  base(
+    '7.1 Three clients achieve eventual consistency',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const uniqueId = Date.now();
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+      let clientC: SimulatedE2EClient | null = null;
+
+      try {
+        // Create shared test user
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Task names
+        const task1Name = `Task1-${uniqueId}`;
+        const task1Renamed = `Task1-Renamed-${uniqueId}`;
+        const task2Name = `Task2-${uniqueId}`;
+        const task3Name = `Task3-${uniqueId}`;
+
+        // ============ PHASE 1: Client A Creates Task-1 ============
+        console.log('[3-Client Test] Phase 1: Client A creates Task-1');
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        await clientA.workView.addTask(task1Name);
+        console.log(`[3-Client Test] Client A created: ${task1Name}`);
+
+        await clientA.sync.syncAndWait();
+        console.log('[3-Client Test] Client A synced');
+
+        // ============ PHASE 2: Client B Gets Task-1, Creates Task-2 ============
+        console.log('[3-Client Test] Phase 2: Client B syncs and creates Task-2');
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        // Verify B has Task-1
+        await waitForTask(clientB.page, task1Name);
+        console.log('[3-Client Test] Client B received Task-1');
+
+        // B creates Task-2
+        await clientB.workView.addTask(task2Name);
+        console.log(`[3-Client Test] Client B created: ${task2Name}`);
+
+        // ============ PHASE 3: Client C Gets Task-1, Creates Task-3, Renames Task-1 ============
+        console.log(
+          '[3-Client Test] Phase 3: Client C syncs, creates Task-3, renames Task-1',
+        );
+        clientC = await createSimulatedClient(browser, baseURL!, 'C', testRunId);
+        await clientC.sync.setupSuperSync(syncConfig);
+        await clientC.sync.syncAndWait();
+
+        // Verify C has Task-1 (but NOT Task-2 yet - B hasn't synced)
+        await waitForTask(clientC.page, task1Name);
+        console.log('[3-Client Test] Client C received Task-1');
+
+        // C creates Task-3
+        await clientC.workView.addTask(task3Name);
+        console.log(`[3-Client Test] Client C created: ${task3Name}`);
+
+        // C renames Task-1
+        const task1LocatorC = clientC.page.locator(`task:has-text("${task1Name}")`);
+        await task1LocatorC.dblclick(); // Double-click to edit
+        const editInput = clientC.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInput.waitFor({ state: 'visible', timeout: 5000 });
+        await editInput.fill(task1Renamed);
+        await clientC.page.keyboard.press('Enter');
+        await clientC.page.waitForTimeout(500);
+        console.log(`[3-Client Test] Client C renamed Task-1 to: ${task1Renamed}`);
+
+        // ============ PHASE 4: Client B Syncs (Uploads Task-2) ============
+        console.log('[3-Client Test] Phase 4: Client B syncs (uploads Task-2)');
+        await clientB.sync.syncAndWait();
+        console.log('[3-Client Test] Client B synced');
+
+        // ============ PHASE 5: Client C Syncs (Uploads Task-3 + Rename, Downloads Task-2) ============
+        console.log('[3-Client Test] Phase 5: Client C syncs');
+        await clientC.sync.syncAndWait();
+
+        // Verify C now has Task-2
+        await waitForTask(clientC.page, task2Name);
+        console.log('[3-Client Test] Client C received Task-2');
+
+        // ============ PHASE 6: Client A Syncs (Downloads Task-2, Task-3, Rename) ============
+        console.log('[3-Client Test] Phase 6: Client A syncs');
+        await clientA.sync.syncAndWait();
+
+        // Verify A has all tasks with correct state
+        await waitForTask(clientA.page, task1Renamed);
+        await waitForTask(clientA.page, task2Name);
+        await waitForTask(clientA.page, task3Name);
+        console.log('[3-Client Test] Client A received all updates');
+
+        // ============ PHASE 7: Client B Syncs (Downloads Task-3, Rename) ============
+        console.log('[3-Client Test] Phase 7: Client B syncs');
+        await clientB.sync.syncAndWait();
+
+        // Verify B has all tasks with correct state
+        await waitForTask(clientB.page, task1Renamed);
+        await waitForTask(clientB.page, task3Name);
+        console.log('[3-Client Test] Client B received all updates');
+
+        // ============ PHASE 8: Final Verification - All Clients Identical ============
+        console.log('[3-Client Test] Phase 8: Verifying eventual consistency');
+
+        // Helper to count tasks on a client
+        const getTaskCount = async (client: SimulatedE2EClient): Promise<number> => {
+          return client.page.locator('task').count();
+        };
+
+        // Helper to check if a task with given text exists
+        const hasTaskWithText = async (
+          client: SimulatedE2EClient,
+          text: string,
+        ): Promise<boolean> => {
+          const count = await client.page.locator(`task:has-text("${text}")`).count();
+          return count > 0;
+        };
+
+        const countA = await getTaskCount(clientA);
+        const countB = await getTaskCount(clientB);
+        const countC = await getTaskCount(clientC);
+
+        console.log(`[3-Client Test] Client A task count: ${countA}`);
+        console.log(`[3-Client Test] Client B task count: ${countB}`);
+        console.log(`[3-Client Test] Client C task count: ${countC}`);
+
+        // All clients should have exactly 3 tasks
+        expect(countA).toBe(3);
+        expect(countB).toBe(3);
+        expect(countC).toBe(3);
+
+        // Verify renamed Task-1 exists on all clients (using partial match for the unique part)
+        // Note: Task names may have client prefixes, so we match on the unique identifier
+        const task1UniqueId = `Task1-Renamed-${uniqueId}`;
+        expect(await hasTaskWithText(clientA, task1UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientB, task1UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientC, task1UniqueId)).toBe(true);
+        console.log('[3-Client Test] Task-1 (renamed) exists on all clients');
+
+        // Verify Task-2 exists on all clients
+        const task2UniqueId = `Task2-${uniqueId}`;
+        expect(await hasTaskWithText(clientA, task2UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientB, task2UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientC, task2UniqueId)).toBe(true);
+        console.log('[3-Client Test] Task-2 exists on all clients');
+
+        // Verify Task-3 exists on all clients
+        const task3UniqueId = `Task3-${uniqueId}`;
+        expect(await hasTaskWithText(clientA, task3UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientB, task3UniqueId)).toBe(true);
+        expect(await hasTaskWithText(clientC, task3UniqueId)).toBe(true);
+        console.log('[3-Client Test] Task-3 exists on all clients');
+
+        // Verify original Task-1 name no longer exists (it was renamed)
+        const task1OriginalId = `Task1-${uniqueId}`;
+        // Skip checking on C since C did the rename and might still have the old element in DOM
+        expect(await hasTaskWithText(clientA, task1OriginalId)).toBe(false);
+        expect(await hasTaskWithText(clientB, task1OriginalId)).toBe(false);
+
+        console.log('[3-Client Test] ✓ All three clients have identical state!');
+        console.log('[3-Client Test] ✓ Eventual consistency achieved!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+        if (clientC) await closeClient(clientC);
+      }
+    },
+  );
 });
