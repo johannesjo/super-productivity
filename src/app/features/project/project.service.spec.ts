@@ -150,6 +150,11 @@ describe('ProjectService', () => {
     store.overrideSelector(selectNoteFeatureState, initialNoteState);
   });
 
+  afterEach(() => {
+    // Reset selector mocks to prevent interference with other test files
+    store.resetSelectors();
+  });
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
