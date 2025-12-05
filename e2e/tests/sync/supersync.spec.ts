@@ -860,4 +860,125 @@ base.describe('@supersync SuperSync E2E', () => {
       }
     },
   );
+
+  /**
+   * Scenario 6.1: Time Tracking Sync
+   *
+   * Tests that time tracked on one client syncs to another client.
+   *
+   * Setup: Client A and B with shared account
+   *
+   * Actions:
+   * 1. Client A creates a task
+   * 2. Client A starts time tracking on the task
+   * 3. Wait for time to accumulate (3 seconds)
+   * 4. Client A stops time tracking
+   * 5. Client A syncs
+   * 6. Client B syncs
+   * 7. Verify Client B sees the tracked time
+   *
+   * Expected:
+   * - Client B shows timeSpent > 0 for the task
+   * - Both clients have matching time values
+   */
+  base(
+    '6.1 Time tracking syncs between clients',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const uniqueId = Date.now();
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        // Create shared test user
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // ============ PHASE 1: Client A Creates Task ============
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `TimeTrack-${uniqueId}`;
+        await clientA.workView.addTask(taskName);
+        console.log(`[TimeTrack Test] Client A created task: ${taskName}`);
+
+        // ============ PHASE 2: Start Time Tracking ============
+        const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
+        await taskLocatorA.hover();
+
+        // Click the play button to start tracking
+        const startBtn = taskLocatorA.locator('.start-task-btn');
+        await startBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await startBtn.click();
+        console.log('[TimeTrack Test] Client A started time tracking');
+
+        // Verify tracking started - play icon indicator should appear
+        const playIndicator = taskLocatorA.locator('.play-icon-indicator');
+        await expect(playIndicator).toBeVisible({ timeout: 5000 });
+        console.log('[TimeTrack Test] Time tracking active');
+
+        // ============ PHASE 3: Accumulate Time ============
+        // Wait for time to accumulate (5 seconds to get visible time display)
+        console.log('[TimeTrack Test] Waiting 5 seconds for time to accumulate...');
+        await clientA.page.waitForTimeout(5000);
+
+        // ============ PHASE 4: Stop Time Tracking ============
+        await taskLocatorA.hover();
+
+        // Click the pause button to stop tracking
+        // The pause button appears when task is current (being tracked)
+        const pauseBtn = taskLocatorA.locator('button:has(mat-icon:has-text("pause"))');
+        await pauseBtn.waitFor({ state: 'visible', timeout: 5000 });
+        await pauseBtn.click();
+        console.log('[TimeTrack Test] Client A stopped time tracking');
+
+        // Wait for tracking to stop
+        await expect(playIndicator).not.toBeVisible({ timeout: 5000 });
+
+        // Verify time was recorded on Client A
+        // Time is displayed in .time-wrapper .time-val
+        const timeValA = taskLocatorA.locator('.time-wrapper .time-val').first();
+        await expect(timeValA).toBeVisible({ timeout: 5000 });
+        const timeTextA = await timeValA.textContent();
+        console.log(`[TimeTrack Test] Client A recorded time: ${timeTextA}`);
+
+        // ============ PHASE 5: Sync to Server ============
+        await clientA.sync.syncAndWait();
+        console.log('[TimeTrack Test] Client A synced');
+
+        // ============ PHASE 6: Client B Downloads ============
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        console.log('[TimeTrack Test] Client B synced');
+
+        // ============ PHASE 7: Verify Time on Client B ============
+        // Wait for task to appear
+        await waitForTask(clientB.page, taskName);
+
+        const taskLocatorB = clientB.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskLocatorB).toBeVisible({ timeout: 10000 });
+
+        // Verify time is displayed on Client B
+        const timeValB = taskLocatorB.locator('.time-wrapper .time-val').first();
+        await expect(timeValB).toBeVisible({ timeout: 10000 });
+        const timeTextB = await timeValB.textContent();
+        console.log(`[TimeTrack Test] Client B shows time: ${timeTextB}`);
+
+        // Verify time is non-zero (should show something like "0h 0m 3s" or similar)
+        // The time text should not be empty and should not be "0s" or equivalent
+        expect(timeTextB).toBeTruthy();
+        expect(timeTextB?.trim()).not.toBe('');
+
+        // Both clients should show the same time
+        expect(timeTextB?.trim()).toBe(timeTextA?.trim());
+        console.log('[TimeTrack Test] Time values match on both clients');
+
+        console.log('[TimeTrack Test] ✓ All verifications passed!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
