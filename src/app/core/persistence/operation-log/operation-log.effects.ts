@@ -16,7 +16,11 @@ import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './processing/validate-operation-payload';
 import { VectorClockService } from './sync/vector-clock.service';
-import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.const';
+import {
+  COMPACTION_THRESHOLD,
+  LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES,
+  MAX_COMPACTION_FAILURES,
+} from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 
 /**
@@ -117,6 +121,9 @@ export class OperationLogEffects {
             actionType: action.type,
           });
         }
+
+        // Monitor payload size for performance analysis
+        this.monitorPayloadSize(op);
 
         // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);
@@ -257,5 +264,29 @@ export class OperationLogEffects {
         window.location.reload();
       },
     });
+  }
+
+  /**
+   * Monitors operation payload size and logs warnings for large payloads.
+   * This helps identify inefficient data patterns that could impact sync performance.
+   */
+  private monitorPayloadSize(op: Operation): void {
+    try {
+      const payloadJson = JSON.stringify(op.payload);
+      const payloadSizeBytes = new Blob([payloadJson]).size;
+
+      if (payloadSizeBytes > LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES) {
+        OpLog.warn('[OperationLogEffects] Large operation payload detected', {
+          actionType: op.actionType,
+          entityType: op.entityType,
+          opType: op.opType,
+          payloadSizeKB: Math.round(payloadSizeBytes / 1024),
+          entityId: op.entityId,
+          entityIdsCount: op.entityIds?.length,
+        });
+      }
+    } catch {
+      // Silently ignore serialization errors - validation already passed
+    }
   }
 }
