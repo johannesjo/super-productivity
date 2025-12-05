@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Actions, createEffect, ofType } from '@ngrx/effects';
+import { createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
 import { tap, withLatestFrom } from 'rxjs/operators';
 import { PfapiService } from '../../pfapi/pfapi.service';
@@ -11,10 +11,11 @@ import {
 } from './plugin.actions';
 import { selectPluginUserDataFeatureState } from './plugin-user-data.reducer';
 import { selectPluginMetadataFeatureState } from './plugin-metadata.reducer';
+import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 
 @Injectable()
 export class PluginEffects {
-  private _actions$ = inject(Actions);
+  private _actions$ = inject(LOCAL_ACTIONS);
   private _store = inject(Store);
   private _pfapiService = inject(PfapiService);
 
