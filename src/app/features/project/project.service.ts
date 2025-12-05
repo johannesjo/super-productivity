@@ -13,9 +13,8 @@ import {
   WorkContextType,
 } from '../work-context/work-context.model';
 import { TaskService } from '../tasks/task.service';
-import { selectAllTasksWithSubTasks } from '../tasks/store/task.selectors';
 import { addSubTask } from '../tasks/store/task.actions';
-import { Task } from '../tasks/task.model';
+import { Task, TaskState } from '../tasks/task.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import {
   addProject,
@@ -261,13 +260,28 @@ export class ProjectService {
     });
 
     const taskState = await firstValueFrom(this._store$.select(selectTaskFeatureState));
-    const parentTaskIds = [...template.taskIds, ...template.backlogTaskIds];
-    const parentTasks = parentTaskIds
+
+    const parentTasks = template.taskIds
       .map((id) => taskState.entities[id])
       .filter((t): t is Task => !!t);
+    this._duplicateTasksToProject(parentTasks, newProjectId, false, taskState);
 
+    const backlogTasks = template.backlogTaskIds
+      .map((id) => taskState.entities[id])
+      .filter((t): t is Task => !!t);
+    this._duplicateTasksToProject(backlogTasks, newProjectId, true, taskState);
+
+    return newProjectId;
+  }
+
+  private _duplicateTasksToProject(
+    tasks: Task[],
+    newProjectId: string,
+    isBacklog: boolean,
+    taskState: TaskState,
+  ): void {
     // For each parent task create a copy in the new project and then copy its subtasks
-    for (const p of parentTasks) {
+    for (const p of tasks) {
       const subTasks = p.subTaskIds
         .map((id) => taskState.entities[id])
         .filter((t): t is Task => !!t);
@@ -275,8 +289,6 @@ export class ProjectService {
       // copy and remove meta fields we don't want to pass as "additional"
       // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
       const { id, parentId, subTaskIds, projectId, created, ...taskDataToCopy } = p;
-
-      const isBacklog = template.backlogTaskIds.includes((p as any).id);
 
       const newParentTask = this._taskService.createNewTaskWithDefaults({
         title: p.title,
@@ -313,7 +325,5 @@ export class ProjectService {
         }
       }
     }
-
-    return newProjectId;
   }
 }
