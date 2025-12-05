@@ -865,6 +865,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "TITLE": "Duplicate Project?",
+        "MSG": "This project is quite large and might take a while to duplicate. Do you want to proceed?",
+        "OK": "Duplicate Anyway",
+        "CANCEL": "Cancel"
+      },
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",

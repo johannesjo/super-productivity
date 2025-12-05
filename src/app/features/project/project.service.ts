@@ -12,6 +12,7 @@ import {
   BreakTimeCopy,
   WorkContextType,
 } from '../work-context/work-context.model';
+import { MatDialog } from '@angular/material/dialog';
 import { TaskService } from '../tasks/task.service';
 import { addSubTask } from '../tasks/store/task.actions';
 import { Task, TaskState } from '../tasks/task.model';
@@ -43,6 +44,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { sortByTitle } from '../../util/sort-by-title';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 @Injectable({
   providedIn: 'root',
@@ -54,6 +56,7 @@ export class ProjectService {
   private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _taskService = inject(TaskService);
   private readonly _translate = inject(TranslateService);
+  private readonly _matDialog = inject(MatDialog);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
   list = toSignal(this.list$, { initialValue: [] });
@@ -250,6 +253,45 @@ export class ProjectService {
       throw new Error('Template project not found');
     }
 
+    const taskState = await firstValueFrom(this._store$.select(selectTaskFeatureState));
+    const parentTasks = template.taskIds
+      .map((id) => taskState.entities[id])
+      .filter((t): t is Task => !!t);
+    const backlogTasks = template.backlogTaskIds
+      .map((id) => taskState.entities[id])
+      .filter((t): t is Task => !!t);
+
+    let totalTaskCount = parentTasks.length + backlogTasks.length;
+    parentTasks.forEach((p) => (totalTaskCount += p.subTaskIds.length));
+    backlogTasks.forEach((p) => (totalTaskCount += p.subTaskIds.length));
+
+    if (totalTaskCount > 50) {
+      const isConfirmed = await firstValueFrom(
+        this._matDialog
+          .open(DialogConfirmComponent, {
+            restoreFocus: true,
+            data: {
+              title: this._translate.instant(
+                T.F.PROJECT.D_CONFIRM_DUPLICATE_BIG_PROJECT.TITLE,
+              ),
+              message: this._translate.instant(
+                T.F.PROJECT.D_CONFIRM_DUPLICATE_BIG_PROJECT.MSG,
+                {
+                  taskCount: totalTaskCount,
+                },
+              ),
+              okTxt: T.F.PROJECT.D_CONFIRM_DUPLICATE_BIG_PROJECT.OK,
+              cancelTxt: T.F.PROJECT.D_CONFIRM_DUPLICATE_BIG_PROJECT.CANCEL,
+            },
+          })
+          .afterClosed(),
+      );
+
+      if (!isConfirmed) {
+        return Promise.reject('User cancelled duplication of large project');
+      }
+    }
+
     // Create new project with copied basic cfg but empty task lists (tasks are duplicated separately)
     const newProjectId = this.add({
       ...template,
@@ -259,16 +301,8 @@ export class ProjectService {
       noteIds: [],
     });
 
-    const taskState = await firstValueFrom(this._store$.select(selectTaskFeatureState));
-
-    const parentTasks = template.taskIds
-      .map((id) => taskState.entities[id])
-      .filter((t): t is Task => !!t);
     this._duplicateTasksToProject(parentTasks, newProjectId, false, taskState);
 
-    const backlogTasks = template.backlogTaskIds
-      .map((id) => taskState.entities[id])
-      .filter((t): t is Task => !!t);
     this._duplicateTasksToProject(backlogTasks, newProjectId, true, taskState);
 
     return newProjectId;
