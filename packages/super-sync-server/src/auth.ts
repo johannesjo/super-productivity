@@ -11,6 +11,10 @@ const BCRYPT_ROUNDS = 12;
 const JWT_EXPIRY = '7d';
 const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
+// Account lockout constants
+const MAX_FAILED_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -50,7 +54,7 @@ export const registerUser = async (
       )
       .run(email, passwordHash, verificationToken, expiresAt);
 
-    Logger.info(`User registered: ${email} (ID: ${info.lastInsertRowid})`);
+    Logger.info(`User registered (ID: ${info.lastInsertRowid})`);
 
     // Send verification email asynchronously
     const emailSent = await sendVerificationEmail(email, verificationToken);
@@ -66,11 +70,13 @@ export const registerUser = async (
         .get(email) as User | undefined;
 
       if (!existingUser) {
-        Logger.warn(`Unique constraint hit but user not found for email: ${email}`);
+        Logger.warn('Unique constraint hit but user not found');
       } else if (existingUser.is_verified === 1) {
-        Logger.info(`Registration attempt for verified email: ${email}`);
+        Logger.info(
+          `Registration attempt for already verified account (ID: ${existingUser.id})`,
+        );
       } else if (existingUser.verification_resend_count >= 1) {
-        Logger.info(`Verification resend already sent for email: ${email}`);
+        Logger.info(`Verification resend already sent (ID: ${existingUser.id})`);
       } else {
         const tokenStillValid =
           !!existingUser.verification_token &&
@@ -110,7 +116,7 @@ export const registerUser = async (
           throw new Error('Failed to send verification email. Please try again later.');
         }
 
-        Logger.info(`Resent verification email for: ${email}`);
+        Logger.info(`Resent verification email (ID: ${existingUser.id})`);
       }
     } else {
       throw err;
@@ -148,7 +154,7 @@ export const verifyEmail = (token: string): boolean => {
     `,
   ).run(user.id);
 
-  Logger.info(`User verified: ${user.email}`);
+  Logger.info(`User verified (ID: ${user.id})`);
   return true;
 };
 
@@ -162,6 +168,17 @@ export const loginUser = async (
     | User
     | undefined;
 
+  // Check if account is locked (do this after fetching user but before password check)
+  if (user && user.locked_until && user.locked_until > Date.now()) {
+    const remainingMinutes = Math.ceil((user.locked_until - Date.now()) / 60000);
+    Logger.warn(
+      `Login attempt for locked account (ID: ${user.id}), ${remainingMinutes}min remaining`,
+    );
+    throw new Error(
+      'Account temporarily locked due to too many failed login attempts. Please try again later.',
+    );
+  }
+
   // Timing attack mitigation: always perform a comparison
   // Even if the user is not found, we hash and compare against a dummy hash.
   // This ensures the response time is roughly the same for valid and invalid emails,
@@ -173,6 +190,26 @@ export const loginUser = async (
   const isMatch = await bcrypt.compare(password, hashToCompare);
 
   if (!user || !isMatch) {
+    // Increment failed attempts if user exists
+    if (user) {
+      const newFailedAttempts = (user.failed_login_attempts || 0) + 1;
+      const shouldLock = newFailedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
+      const lockedUntil = shouldLock ? Date.now() + LOCKOUT_DURATION_MS : null;
+
+      db.prepare(
+        'UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
+      ).run(newFailedAttempts, lockedUntil, user.id);
+
+      if (shouldLock) {
+        Logger.warn(
+          `Account locked after ${newFailedAttempts} failed attempts (ID: ${user.id})`,
+        );
+      } else {
+        Logger.debug(
+          `Failed login attempt ${newFailedAttempts}/${MAX_FAILED_LOGIN_ATTEMPTS} (ID: ${user.id})`,
+        );
+      }
+    }
     throw new Error('Invalid credentials');
   }
 
@@ -180,11 +217,18 @@ export const loginUser = async (
     throw new Error('Email not verified');
   }
 
+  // Reset failed attempts on successful login
+  if (user.failed_login_attempts > 0 || user.locked_until) {
+    db.prepare(
+      'UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
+    ).run(user.id);
+  }
+
   const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
     expiresIn: JWT_EXPIRY,
   });
 
-  Logger.info(`User logged in: ${user.email} (ID: ${user.id})`);
+  Logger.info(`User logged in (ID: ${user.id})`);
 
   return { token, user: { id: user.id, email: user.email } };
 };
