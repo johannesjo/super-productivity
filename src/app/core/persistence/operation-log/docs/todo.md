@@ -1,10 +1,24 @@
-# Operation Log: Items Needing Evaluation
+## Recently Identified Issues 🧐
 
-**Status:** Needs evaluation before implementation
-**Created:** December 4, 2025
-**Last Updated:** December 5, 2025
+### Evaluate Immediate Sync Trigger Discrepancy (December 2025)
 
-These items were identified in the code audit but require further evaluation and design discussion before implementation.
+**Priority:** HIGH
+**Complexity:** MEDIUM
+**Status:** Needs evaluation
+
+**Finding:** There is a discrepancy between the stated memory regarding the implementation of an "immediate sync trigger after first configuration" and the current code.
+
+- **Memory states:** The feature was implemented by adding `this.pf.sync()` to `PfapiService._commonAndLegacySyncConfig$` subscription.
+- **Current Code (`src/app/pfapi/pfapi.service.ts`):** This call is explicitly commented out with a note: `// NOTE: Don't trigger sync here - SyncEffects.triggerSync$ handles initial sync`.
+- **Further Investigation (`src/app/imex/sync/sync.effects.ts`):** The `SyncEffects.triggerSync$` also has a relevant section (`this._wasJustEnabled$`) for triggering sync after enabling that is commented out.
+
+**Impact:** The intended "immediate sync" after enabling synchronization might not be functioning as expected. Sync might only occur after an app reload/restart.
+
+**Action:**
+
+1.  Confirm if "immediate sync after enabling" is a desired feature.
+2.  If yes, evaluate the existing `SyncEffects.triggerSync$` logic and determine the correct mechanism to enable this without causing duplicate sync calls or race conditions.
+3.  Consider whether the `pf.sync()` call in `PfapiService` should be re-enabled, or if `SyncEffects` should be modified to handle the "was just enabled" state.
 
 ---
 
