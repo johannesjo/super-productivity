@@ -1,20 +1,27 @@
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
-import { DEFAULT_SYNC_CONFIG } from './sync.types';
+import {
+  DEFAULT_SYNC_CONFIG,
+  STALE_DEVICE_THRESHOLD_MS,
+  MS_PER_HOUR,
+  MS_PER_DAY,
+} from './sync.types';
 
 // Cleanup intervals
-const TOMBSTONE_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // Daily
-const OLD_OPS_CLEANUP_INTERVAL = 24 * 60 * 60 * 1000; // Daily
-const STALE_DEVICES_CLEANUP_INTERVAL = 60 * 60 * 1000; // Hourly
+const TOMBSTONE_CLEANUP_INTERVAL = MS_PER_DAY; // Daily
+const OLD_OPS_CLEANUP_INTERVAL = MS_PER_DAY; // Daily
+const STALE_DEVICES_CLEANUP_INTERVAL = MS_PER_HOUR; // Hourly
+const RATE_LIMIT_CLEANUP_INTERVAL = MS_PER_HOUR; // Hourly
 
 let tombstoneCleanupTimer: NodeJS.Timeout | null = null;
 let oldOpsCleanupTimer: NodeJS.Timeout | null = null;
 let staleDevicesCleanupTimer: NodeJS.Timeout | null = null;
+let rateLimitCleanupTimer: NodeJS.Timeout | null = null;
 
 /**
  * Clean up expired tombstones
  */
-async function cleanupExpiredTombstones(): Promise<void> {
+function cleanupExpiredTombstones(): void {
   try {
     const syncService = getSyncService();
     const deleted = syncService.deleteExpiredTombstones();
@@ -30,7 +37,7 @@ async function cleanupExpiredTombstones(): Promise<void> {
  * Clean up old operations that have been acknowledged by all devices.
  * Uses a single batch query to avoid N+1 database queries.
  */
-async function cleanupOldOperations(): Promise<void> {
+function cleanupOldOperations(): void {
   try {
     const syncService = getSyncService();
     const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.opRetentionMs;
@@ -47,12 +54,12 @@ async function cleanupOldOperations(): Promise<void> {
 }
 
 /**
- * Clean up stale devices (not seen in 90 days)
+ * Clean up stale devices (not seen in 30 days)
  */
-async function cleanupStaleDevices(): Promise<void> {
+function cleanupStaleDevices(): void {
   try {
     const syncService = getSyncService();
-    const staleThreshold = Date.now() - 30 * 24 * 60 * 60 * 1000; // 30 days
+    const staleThreshold = Date.now() - STALE_DEVICE_THRESHOLD_MS;
 
     const deleted = syncService.deleteStaleDevices(staleThreshold);
     if (deleted > 0) {
@@ -60,6 +67,21 @@ async function cleanupStaleDevices(): Promise<void> {
     }
   } catch (error) {
     Logger.error(`Stale device cleanup failed: ${error}`);
+  }
+}
+
+/**
+ * Clean up expired rate limit counters to prevent memory leaks
+ */
+function cleanupRateLimitCounters(): void {
+  try {
+    const syncService = getSyncService();
+    const cleaned = syncService.cleanupExpiredRateLimitCounters();
+    if (cleaned > 0) {
+      Logger.info(`Rate limit cleanup: removed ${cleaned} expired counters`);
+    }
+  } catch (error) {
+    Logger.error(`Rate limit cleanup failed: ${error}`);
   }
 }
 
@@ -74,6 +96,7 @@ export function startCleanupJobs(): void {
     cleanupExpiredTombstones();
     cleanupOldOperations();
     cleanupStaleDevices();
+    cleanupRateLimitCounters();
   }, 10_000);
 
   // Schedule recurring jobs
@@ -87,6 +110,11 @@ export function startCleanupJobs(): void {
   staleDevicesCleanupTimer = setInterval(
     cleanupStaleDevices,
     STALE_DEVICES_CLEANUP_INTERVAL,
+  );
+
+  rateLimitCleanupTimer = setInterval(
+    cleanupRateLimitCounters,
+    RATE_LIMIT_CLEANUP_INTERVAL,
   );
 
   Logger.info('Cleanup jobs scheduled');
@@ -107,6 +135,10 @@ export function stopCleanupJobs(): void {
   if (staleDevicesCleanupTimer) {
     clearInterval(staleDevicesCleanupTimer);
     staleDevicesCleanupTimer = null;
+  }
+  if (rateLimitCleanupTimer) {
+    clearInterval(rateLimitCleanupTimer);
+    rateLimitCleanupTimer = null;
   }
   Logger.info('Cleanup jobs stopped');
 }

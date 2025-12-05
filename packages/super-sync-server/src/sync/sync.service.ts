@@ -211,7 +211,7 @@ export class SyncService {
           const row = this.stmts.getNextSeq.get(userId) as { last_seq: number };
           const serverSeq = row.last_seq;
 
-          // Insert operation
+          // Insert operation (normalize entityType to lowercase for consistency)
           this.stmts.insertOp.run(
             op.id,
             userId,
@@ -219,7 +219,7 @@ export class SyncService {
             serverSeq,
             op.actionType,
             op.opType,
-            op.entityType,
+            op.entityType.toLowerCase(),
             op.entityId ?? null,
             JSON.stringify(op.payload),
             JSON.stringify(op.vectorClock),
@@ -230,7 +230,12 @@ export class SyncService {
 
           // Create tombstone for delete operations
           if (op.opType === 'DEL' && op.entityId) {
-            this.createTombstoneSync(userId, op.entityType, op.entityId, op.id);
+            this.createTombstoneSync(
+              userId,
+              op.entityType.toLowerCase(),
+              op.entityId,
+              op.id,
+            );
           }
 
           results.push({
@@ -555,6 +560,24 @@ export class SyncService {
 
     counter.count++;
     return false;
+  }
+
+  /**
+   * Clean up expired rate limit counters to prevent memory leaks.
+   * Should be called periodically (e.g., hourly).
+   */
+  cleanupExpiredRateLimitCounters(): number {
+    const now = Date.now();
+    let cleaned = 0;
+
+    for (const [userId, counter] of this.rateLimitCounters) {
+      if (now > counter.resetAt) {
+        this.rateLimitCounters.delete(userId);
+        cleaned++;
+      }
+    }
+
+    return cleaned;
   }
 
   // === Tombstone Management ===
