@@ -231,7 +231,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           clientId,
           actionType: 'SYNC_IMPORT',
           opType: 'SYNC_IMPORT' as const,
-          entityType: 'ALL',
+          entityType: 'all',
           payload: state,
           vectorClock,
           timestamp: Date.now(),

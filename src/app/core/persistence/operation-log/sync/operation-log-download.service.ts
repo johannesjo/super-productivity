@@ -89,6 +89,7 @@ export class OperationLogDownloadService {
       // Download ops in pages
       let hasMore = true;
       let sinceSeq = lastServerSeq;
+      let receivedAnyOps = false;
 
       while (hasMore) {
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
@@ -96,6 +97,8 @@ export class OperationLogDownloadService {
         if (response.ops.length === 0) {
           break;
         }
+
+        receivedAnyOps = true;
 
         // Convert SyncOperations to Operations, filtering already applied
         const newOps = response.ops
@@ -127,7 +130,8 @@ export class OperationLogDownloadService {
       }
 
       // Acknowledge that we've processed ops up to the latest seq
-      if (allNewOps.length > 0 && clientId) {
+      // Do this even if all ops were already applied (to update server-side cursor)
+      if (receivedAnyOps && clientId) {
         await syncProvider.acknowledgeOps(clientId, sinceSeq);
       }
 

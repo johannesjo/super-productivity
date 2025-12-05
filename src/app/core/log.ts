@@ -16,8 +16,8 @@ interface LogEntry {
   args: unknown[];
 }
 
-// Map old numeric levels to new enum for backwards compatibility
-const LOG_LEVEL = environment.production ? LogLevel.DEBUG : LogLevel.DEBUG;
+// Production uses ERROR level to reduce noise, development uses DEBUG for full visibility
+const LOG_LEVEL = environment.production ? LogLevel.ERROR : LogLevel.DEBUG;
 
 const MAX_DATA_LENGTH = 400;
 

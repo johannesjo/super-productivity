@@ -46,8 +46,8 @@ export class OperationLogHydratorService {
   private vectorClockService = inject(VectorClockService);
   private operationApplierService = inject(OperationApplierService);
 
-  // Flag to prevent re-validation immediately after repair
-  private _isRepairInProgress = false;
+  // Mutex to prevent concurrent repair operations and re-validation during repair
+  private _repairMutex: Promise<void> | null = null;
 
   async hydrateStore(): Promise<void> {
     OpLog.normal('OperationLogHydratorService: Starting hydration...');
@@ -100,7 +100,7 @@ export class OperationLogHydratorService {
 
         // CHECKPOINT B: Validate and repair snapshot state before dispatching
         let stateToLoad = snapshot.state as AppDataCompleteNew;
-        if (!this._isRepairInProgress) {
+        if (!this._repairMutex) {
           const validationResult = await this._validateAndRepairState(
             stateToLoad,
             'snapshot',
@@ -154,7 +154,7 @@ export class OperationLogHydratorService {
             }
 
             // CHECKPOINT C: Validate state after replaying tail operations
-            if (!this._isRepairInProgress) {
+            if (!this._repairMutex) {
               await this._validateAndRepairCurrentState('tail-replay');
             }
           }
@@ -187,7 +187,7 @@ export class OperationLogHydratorService {
 
           // Validate and repair the full-state data BEFORE loading to NgRx
           // This prevents corrupted SyncImport/Repair operations from breaking the app
-          if (!this._isRepairInProgress) {
+          if (!this._repairMutex) {
             const validationResult = await this._validateAndRepairState(
               appData as AppDataCompleteNew,
               'full-state-op-load',
@@ -224,7 +224,7 @@ export class OperationLogHydratorService {
           await this._saveCurrentStateAsSnapshot();
 
           // CHECKPOINT C: Validate state after replaying all operations
-          if (!this._isRepairInProgress) {
+          if (!this._repairMutex) {
             await this._validateAndRepairCurrentState('full-replay');
           }
         }
@@ -434,6 +434,10 @@ export class OperationLogHydratorService {
       loadAllData({ appDataComplete: legacyData as AppDataCompleteNew }),
     );
 
+    // Sync PFAPI vector clock to match the recovery operation
+    // This ensures that the meta model knows about the new clock state
+    await this.pfapiService.pf.metaModel.syncVectorClock(recoveryOp.vectorClock);
+
     OpLog.normal(
       'OperationLogHydratorService: Recovery complete. Data restored from legacy database.',
     );
@@ -627,6 +631,7 @@ export class OperationLogHydratorService {
   /**
    * Validates a state object and repairs it if necessary.
    * Used for validating snapshot state before dispatching.
+   * Uses a mutex to prevent concurrent repair operations.
    *
    * @param state - The state to validate
    * @param context - Context string for logging (e.g., 'snapshot', 'tail-replay')
@@ -636,6 +641,11 @@ export class OperationLogHydratorService {
     state: AppDataCompleteNew,
     context: string,
   ): Promise<{ wasRepaired: boolean; repairedState?: AppDataCompleteNew }> {
+    // Wait for any ongoing repair to complete before validating
+    if (this._repairMutex) {
+      await this._repairMutex;
+    }
+
     const result = this.validateStateService.validateAndRepair(state);
 
     if (!result.wasRepaired) {
@@ -651,18 +661,25 @@ export class OperationLogHydratorService {
     }
 
     // Create REPAIR operation to persist the repaired state
-    this._isRepairInProgress = true;
-    try {
-      const clientId = await this.pfapiService.pf.metaModel.loadClientId();
-      await this.repairOperationService.createRepairOperation(
-        result.repairedState,
-        result.repairSummary,
-        clientId,
-      );
-      OpLog.log(`[OperationLogHydratorService] Created REPAIR operation for ${context}`);
-    } finally {
-      this._isRepairInProgress = false;
-    }
+    // Use mutex to prevent concurrent repairs
+    const repairPromise = (async () => {
+      try {
+        const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+        await this.repairOperationService.createRepairOperation(
+          result.repairedState!,
+          result.repairSummary!,
+          clientId,
+        );
+        OpLog.log(
+          `[OperationLogHydratorService] Created REPAIR operation for ${context}`,
+        );
+      } finally {
+        this._repairMutex = null;
+      }
+    })();
+
+    this._repairMutex = repairPromise;
+    await repairPromise;
 
     return { wasRepaired: true, repairedState: result.repairedState };
   }
