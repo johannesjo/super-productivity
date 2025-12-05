@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
+import { provideMockActions } from '@ngrx/effects/testing';
 import { TranslateService } from '@ngx-translate/core';
 import { PfapiService } from './pfapi.service';
 import { DataInitStateService } from '../core/data-init/data-init-state.service';
@@ -10,10 +11,11 @@ import { OperationLogStoreService } from '../core/persistence/operation-log/stor
 import { VectorClockService } from '../core/persistence/operation-log/sync/vector-clock.service';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew, CROSS_MODEL_VERSION } from './pfapi-config';
-import { of } from 'rxjs';
-import { CompleteBackup } from './api';
+import { of, Observable } from 'rxjs';
+import { CompleteBackup, Pfapi } from './api';
 import { Task, TaskState } from '../features/tasks/task.model';
 import { ArchiveModel } from '../features/time-tracking/time-tracking.model';
+import { Action } from '@ngrx/store';
 
 describe('PfapiService', () => {
   let service: PfapiService;
@@ -21,6 +23,7 @@ describe('PfapiService', () => {
   let imexViewServiceMock: jasmine.SpyObj<ImexViewService>;
   let opLogStoreMock: jasmine.SpyObj<OperationLogStoreService>;
   let vectorClockServiceMock: jasmine.SpyObj<VectorClockService>;
+  let actions$: Observable<Action>;
 
   // Track ModelCtrl.save calls
   let modelCtrlSaveCalls: Map<string, unknown[]>;
@@ -103,23 +106,28 @@ describe('PfapiService', () => {
       project: { ids: [], entities: {} },
       tag: { ids: [], entities: {} },
       globalConfig: {} as never,
-      note: { ids: [], entities: {} },
+      note: { ids: [], entities: {}, todayOrder: [] },
       issueProvider: { ids: [], entities: {} },
       planner: { days: {}, addPlannedTasksDialogLastShown: undefined },
-      boards: { ids: [], entities: {} },
+      boards: { boardCfgs: [] },
       metric: { ids: [], entities: {}, obstructionIds: [], improvementIds: [] },
       simpleCounter: { ids: [], entities: {} },
       taskRepeatCfg: { ids: [], entities: {} },
       menuTree: { projectTree: [], tagTree: [] },
       timeTracking: { project: {}, tag: {} },
-      pluginUserData: {},
-      pluginMetadata: {},
+      pluginUserData: [],
+      pluginMetadata: [],
       reminders: [],
     } as AppDataCompleteNew;
   };
 
   beforeEach(() => {
+    // Reset the singleton flag to allow new instances in tests
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Pfapi as any)._wasInstanceCreated = false;
+
     modelCtrlSaveCalls = new Map();
+    actions$ = of();
 
     storeMock = jasmine.createSpyObj('Store', ['dispatch', 'select']);
     storeMock.select.and.returnValue(of({}));
@@ -165,6 +173,7 @@ describe('PfapiService', () => {
     TestBed.configureTestingModule({
       providers: [
         PfapiService,
+        provideMockActions(() => actions$),
         { provide: Store, useValue: storeMock },
         { provide: ImexViewService, useValue: imexViewServiceMock },
         { provide: OperationLogStoreService, useValue: opLogStoreMock },
