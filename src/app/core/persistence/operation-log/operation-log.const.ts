@@ -126,3 +126,11 @@ export const MAX_REMOTE_FILES_TO_KEEP = 100;
  * Once this threshold is reached, user is notified about permanently failed ops.
  */
 export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
+
+/**
+ * Threshold in bytes for logging a warning about large operation payloads.
+ * Operations exceeding this size may indicate inefficient data patterns
+ * and could impact sync performance and storage usage.
+ * Default: 10KB
+ */
+export const LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES = 10 * 1024;
