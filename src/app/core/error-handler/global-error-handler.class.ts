@@ -22,6 +22,12 @@ export class GlobalErrorHandler implements ErrorHandler {
   // TODO Cleanup this mess
   async handleError(err: unknown): Promise<void> {
     const errStr = typeof err === 'string' ? err : String(err);
+    // Suppress known error NG03402 which often happens when exiting the app while an animation is running
+    if (errStr.includes('NG03402')) {
+      Log.warn('Suppressing NG03402 error:', err);
+      return;
+    }
+
     // eslint-disable-next-line
     let simpleStack = '';
     if (

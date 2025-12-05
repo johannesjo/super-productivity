@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "16.4.3",
+  "version": "16.5.0",
   "description": "ToDo list and Time Tracking",
   "keywords": [
     "ToDo",
@@ -205,8 +205,8 @@
     "core-js": "^3.39.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "37.7.0",
-    "electron-builder": "^26.0.20",
+    "electron": "39.2.5",
+    "electron-builder": "^26.3.3",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",

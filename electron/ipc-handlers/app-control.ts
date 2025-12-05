@@ -21,7 +21,7 @@ export const initAppControlIpc = (): void => {
   ipcMain.on(IPC.OPEN_DEV_TOOLS, () => getWin().webContents.openDevTools());
   ipcMain.on(IPC.RELOAD_MAIN_WIN, () => getWin().reload());
 
-  ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, async (ev, cfg: GlobalConfigState) => {
+  const updateSettings = async (ev: any, cfg: GlobalConfigState): Promise<void> => {
     setIsMinimizeToTray(cfg.misc.isMinimizeToTray);
     setIsTrayShowCurrentTask(cfg.misc.isTrayShowCurrentTask);
     setIsTrayShowCurrentCountdown(cfg.misc.isTrayShowCurrentCountdown);
@@ -32,7 +32,10 @@ export const initAppControlIpc = (): void => {
         cfg.misc.isUseCustomWindowTitleBar,
       );
     }
-  });
+  };
+
+  ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, updateSettings);
+  ipcMain.on(IPC.UPDATE_SETTINGS, updateSettings);
 
   ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
     const mainWin = getWin();

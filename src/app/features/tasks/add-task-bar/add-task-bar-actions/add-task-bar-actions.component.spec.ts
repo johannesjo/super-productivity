@@ -65,7 +65,9 @@ describe('AddTaskBarActionsComponent', () => {
       localization: () => ({ timeLocale: locale }),
     });
   };
-  const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-']);
+  const mockDateTimeFormatService = jasmine.createSpyObj('DateTimeFormatService', ['-'], {
+    currentLocale: 'en-US',
+  });
 
   beforeEach(async () => {
     // Create proper signal mocks
@@ -329,7 +331,12 @@ describe('AddTaskBarActionsComponent', () => {
           TranslateModule.forRoot(),
         ],
         providers: [
-          { provide: DateTimeFormatService, useValue: mockDateTimeFormatService },
+          {
+            provide: DateTimeFormatService,
+            useValue: jasmine.createSpyObj('DateTimeFormatService', ['-'], {
+              currentLocale: 'de-de',
+            }),
+          },
           {
             provide: GlobalConfigService,
             useValue: mockConfigService(DateTimeLocales.de_de),

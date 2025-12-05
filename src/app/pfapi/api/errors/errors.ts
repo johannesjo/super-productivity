@@ -142,8 +142,13 @@ export class HttpNotOkAPIError extends AdditionalLogErrorBase {
       // Not JSON, continue
     }
 
+    // Strip script and style tags with their content
+    const cleanBody = body
+      .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, '')
+      .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, '');
+
     // Strip HTML tags for plain text
-    const withoutTags = body
+    const withoutTags = cleanBody
       .replace(/<[^>]+>/g, ' ')
       .replace(/\s+/g, ' ')
       .trim();

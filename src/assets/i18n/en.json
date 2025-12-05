@@ -865,6 +865,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "TITLE": "Duplicate Project?",
+        "MSG": "This project is quite large and might take a while to duplicate. Do you want to proceed?",
+        "OK": "Duplicate Anyway",
+        "CANCEL": "Cancel"
+      },
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
@@ -1931,7 +1937,8 @@
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
       "DEFAULT_TASK_REMIND_OPTION": "Default remind option selected when creating tasks",
       "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
-      "TITLE": "Reminders"
+      "TITLE": "Reminders",
+      "DISABLE_REMINDERS": "Disable all reminders"
     },
     "SCHEDULE": {
       "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
@@ -2038,6 +2045,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "DUPLICATE_PROJECT_ERROR": "The project could not be duplicated",
+    "DUPLICATE_PROJECT_SUCCESS": "Project duplicated successfully",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -2052,6 +2061,9 @@
     "SHARE_UNAVAILABLE_FALLBACK": "Copied to clipboard.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today"
+  },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copy)"
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -2072,6 +2084,7 @@
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "CREATE_PROJECT": "Create Project",
+    "DUPLICATE_PROJECT": "Duplicate",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",

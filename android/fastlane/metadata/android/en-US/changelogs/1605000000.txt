@@ -1,0 +1,60 @@
+
+### Bug Fixes
+
+* **android:** address cold start share race condition and type mismatch
+* attempt to fix question mark issue (5b7b428), closes #5619
+* **e2e:** ensure api-test-plugin is always loaded for tests
+* **e2e:** include missing assets for api-test-plugin build
+* **electron:** minimize to tray not working immediately after enabling (e19d3fb), closes #5622
+* **errorHandler:** suppress NG03402 error on app exit (c2ba004), closes #5644
+* **focusMode:** ensure custom pomodoro settings are applied on initialization (b070233), closes #5611
+* hover behavior for current task title box
+* **idle:** idle time dialog switches between two different timers (e8daec6), closes #5652
+* inline scheduling of Overdue tasks results in abnormal behavior (794a13a), closes #5656
+* motivational Images break settings persistence (a704738), closes #5655
+* **plugin:** panel resizing not working over plugin iframe page
+* **project:** improve duplicate project feature
+* same icon
+* test failure on systems with non-English locale (48ce0e3), closes #5647
+* **ui:** show plugin icon in collapsed sidenav by unhiding menu item text wrapper
+### Features
+
+* add constants and translations
+* **android:** implement sharing functionality with attachment support
+* **android:** improve sharing robustness and UX
+* **automationPlugin:** add ActionDialog and ConditionDialog components for rule management
+* **automationPlugin:** add delete functionality for automation rules
+* **automationPlugin:** add first draft
+* **automationPlugin:** add import and export functionality for automation rules
+* **automationPlugin:** add new actions for snack, dialog, and webhook
+* **automationPlugin:** add Pico CSS for styling and update plugin paths
+* **automationPlugin:** add project and tag fetching to enhance rule editing experience
+* **automationPlugin:** add rule validation and improve task creation handling
+* **automationPlugin:** add time based triggers
+* **automationPlugin:** add warning box for plugin usage and clear default rules
+* **automationPlugin:** enhance error handling and improve rate limiting for automation rules
+* **automationPlugin:** enhance theme handling and task event logging for improved integration and debugging
+* **automationPlugin:** enhance UI components with grid layout and improved styling
+* **automationPlugin:** implement automation rule management and action execution
+* **automationPlugin:** implement rate limiting and dialog prompts for high-frequency rule execution
+* **automationPlugin:** implement rule management features including save, delete, and toggle status
+* **automationPlugin:** implement rule validation logic and integrate it into the import process
+* **automationPlugin:** improve
+* **automationPlugin:** improve button styles and add copyTo option for plugin output
+* **automationPlugin:** improve error handling for corrupted and invalid automation rules
+* **automationPlugin:** integrate DataCache for improved project and tag retrieval
+* **automationPlugin:** streamline condition section layout in RuleEditor
+* **automationPlugin:** update background color to transparent and simplify button class
+* **automationPlugin:** update icon handling to use namedSvgIcon for improved clarity
+* **automationPlugin:** update meta
+* **automationPlugin:** update placeholders in ActionDialog and ConditionDialog for better user guidance
+* **automationPlugin:** update rule retrieval methods to support async operations
+* **automationPlugin:** validate webhook URLs and sanitize event data before sending
+* **customWindowTitleBar:** add sexy custom window title bar <3
+* duplicate project option
+* duplicate project translations
+* **encryption:** migrate to argon2id
+* **webdav:** improve error extraction from HTML responses (79ac57b), closes #5508
+
+
+
