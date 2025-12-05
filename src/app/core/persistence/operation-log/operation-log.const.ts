@@ -134,3 +134,11 @@ export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
  * Default: 10KB
  */
 export const LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES = 10 * 1024;
+
+/**
+ * Maximum number of operations in a single batchUpdateForProject call.
+ * Large batch operations are automatically chunked into smaller batches
+ * to prevent oversized operation payloads.
+ * Default: 50 operations per batch
+ */
+export const MAX_BATCH_OPERATIONS_SIZE = 50;

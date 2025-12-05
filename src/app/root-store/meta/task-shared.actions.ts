@@ -69,14 +69,15 @@ export const TaskSharedActions = createActionGroup({
     }),
 
     // TODO rename to `moveTaskToArchive__` to indicate it should not be called directly
-    // Note: Only pass taskIds to reduce operation payload size.
-    // Reducers look up full TaskWithSubTasks from state using these IDs.
-    moveToArchive: (taskProps: { taskIds: string[] }) => ({
+    // Note: Full task payload is required for sync reliability.
+    // Remote clients need task data to write to their local archive.
+    // See docs/archive-operation-redesign.md for detailed analysis.
+    moveToArchive: (taskProps: { tasks: TaskWithSubTasks[] }) => ({
       ...taskProps,
       meta: {
         isPersistent: true,
         entityType: 'TASK',
-        entityIds: taskProps.taskIds,
+        entityIds: taskProps.tasks.map((t) => t.id),
         opType: OpType.Update,
         isBulk: true,
       } satisfies PersistentActionMeta,
