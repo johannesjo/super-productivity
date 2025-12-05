@@ -57,11 +57,11 @@ export const createServer = (
       });
 
       // CORS Configuration
+      // Supports both string origins and RegExp patterns
       if (fullConfig.cors.enabled) {
+        const hasWildcard = fullConfig.cors.allowedOrigins?.some((o) => o === '*');
         await fastifyServer.register(cors, {
-          origin: fullConfig.cors.allowedOrigins?.includes('*')
-            ? true
-            : fullConfig.cors.allowedOrigins,
+          origin: hasWildcard ? true : fullConfig.cors.allowedOrigins,
           methods: ['GET', 'HEAD', 'PUT', 'POST', 'DELETE', 'OPTIONS'],
           allowedHeaders: [
             'Authorization',

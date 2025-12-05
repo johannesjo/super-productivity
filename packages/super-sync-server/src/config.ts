@@ -1,4 +1,8 @@
 import * as path from 'path';
+import { Logger } from './logger';
+
+/** CORS origin can be a string or RegExp for pattern matching (e.g., localhost with any port) */
+export type CorsOrigin = string | RegExp;
 
 export interface ServerConfig {
   port: number;
@@ -10,7 +14,7 @@ export interface ServerConfig {
   publicUrl: string;
   cors: {
     enabled: boolean;
-    allowedOrigins?: string[];
+    allowedOrigins?: CorsOrigin[];
   };
   smtp?: {
     host: string;
@@ -31,13 +35,24 @@ export interface ServerConfig {
   };
 }
 
+/**
+ * Default CORS origins for security.
+ * Includes localhost (any port) for development and the official sync server.
+ * Can be overridden via CORS_ORIGINS environment variable.
+ */
+const DEFAULT_CORS_ORIGINS: CorsOrigin[] = [
+  /^https?:\/\/localhost(:\d+)?$/,
+  /^https?:\/\/127\.0\.0\.1(:\d+)?$/,
+  'https://sync.super-productivity.com',
+];
+
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
   dataDir: './data',
   publicUrl: 'http://localhost:1900',
   cors: {
     enabled: true,
-    allowedOrigins: ['*'],
+    allowedOrigins: DEFAULT_CORS_ORIGINS,
   },
 };
 
@@ -95,11 +110,20 @@ export const loadConfigFromEnv = (
   }
 
   // CORS configuration
+  // CORS_ORIGINS overrides defaults (comma-separated list of origins)
+  // Use CORS_ORIGINS=* for wildcard (NOT recommended for production)
   if (process.env.CORS_ENABLED !== undefined) {
     config.cors.enabled = process.env.CORS_ENABLED === 'true';
   }
   if (process.env.CORS_ORIGINS) {
-    config.cors.allowedOrigins = process.env.CORS_ORIGINS.split(',').map((o) => o.trim());
+    const origins = process.env.CORS_ORIGINS.split(',').map((o) => o.trim());
+    // Warn if wildcard is used
+    if (origins.includes('*')) {
+      Logger.warn(
+        'CORS_ORIGINS contains wildcard (*). This is insecure and not recommended for production.',
+      );
+    }
+    config.cors.allowedOrigins = origins;
     // If origins are provided, implicitly enable CORS if not explicitly disabled
     if (process.env.CORS_ENABLED === undefined) {
       config.cors.enabled = true;
@@ -123,10 +147,20 @@ export const loadConfigFromEnv = (
   }
 
   // Test mode configuration
+  // Requires both TEST_MODE=true AND TEST_MODE_CONFIRM=yes-i-understand-the-risks
+  // This double-check prevents accidental test mode enablement
   if (process.env.TEST_MODE === 'true') {
     if (process.env.NODE_ENV === 'production') {
       throw new Error('TEST_MODE cannot be enabled in production');
     }
+    if (process.env.TEST_MODE_CONFIRM !== 'yes-i-understand-the-risks') {
+      throw new Error(
+        'TEST_MODE requires TEST_MODE_CONFIRM=yes-i-understand-the-risks to prevent accidental enablement',
+      );
+    }
+    Logger.warn(
+      '⚠️  TEST_MODE is enabled - test routes are exposed. DO NOT use in production!',
+    );
     config.testMode = {
       enabled: true,
       autoVerifyUsers: true,

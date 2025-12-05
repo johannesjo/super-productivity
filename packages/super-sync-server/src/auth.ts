@@ -14,12 +14,10 @@ const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('JWT_SECRET environment variable is required in production');
-    }
-    // Use stable secret for development to preserve sessions across restarts
-    Logger.warn('JWT_SECRET not set - using development default (NOT FOR PRODUCTION)');
-    return 'super-sync-dev-secret-do-not-use-in-production';
+    throw new Error(
+      'JWT_SECRET environment variable is required. ' +
+        `Generate one with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`,
+    );
   }
   if (secret.length < MIN_JWT_SECRET_LENGTH) {
     throw new Error(

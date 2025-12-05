@@ -14,7 +14,11 @@ const BCRYPT_ROUNDS = 12;
 const JWT_EXPIRY = '7d';
 
 const getJwtSecret = (): string => {
-  return process.env.JWT_SECRET || 'super-sync-dev-secret-do-not-use-in-production';
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required');
+  }
+  return secret;
 };
 
 interface CreateUserBody {
