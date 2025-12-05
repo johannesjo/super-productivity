@@ -477,4 +477,216 @@ base.describe('@supersync SuperSync E2E', () => {
       }
     },
   );
+
+  /**
+   * Scenario 4.1: Complex Chain of Actions
+   *
+   * This test simulates a realistic workflow where two clients
+   * perform various actions in sequence, syncing between each step.
+   *
+   * Chain of operations:
+   * 1. Client A: Create task "Project X"
+   * 2. Sync A → Server → Sync B
+   * 3. Client B: Rename task to "Project X - Planning"
+   * 4. Client B: Add subtask "Research"
+   * 5. Sync B → Server → Sync A
+   * 6. Client A: Mark "Research" as done
+   * 7. Client A: Add subtask "Implementation"
+   * 8. Sync A → Server → Sync B
+   * 9. Client B: Add subtask "Testing"
+   * 10. Client B: Mark parent "Project X - Planning" as done
+   * 11. Sync B → Server → Sync A
+   * 12. Verify final state matches on both clients
+   *
+   * Expected: Both clients have identical final state with:
+   * - Parent task "Project X - Planning" (done)
+   *   - "Research" (done)
+   *   - "Implementation" (not done)
+   *   - "Testing" (not done)
+   */
+  base(
+    '4.1 Complex chain of actions syncs correctly',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const uniqueId = Date.now();
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // ============ PHASE 1: Initial Setup ============
+        // Set up both clients
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // ============ PHASE 2: Client A Creates Initial Task ============
+        const initialTaskName = `ProjectX-${uniqueId}`;
+        await clientA.workView.addTask(initialTaskName);
+        console.log(`[Chain Test] Client A created task: ${initialTaskName}`);
+
+        // Sync: A → Server
+        await clientA.sync.syncAndWait();
+
+        // Sync: Server → B
+        await clientB.sync.syncAndWait();
+
+        // Verify B has the task
+        await waitForTask(clientB.page, initialTaskName);
+        console.log('[Chain Test] Client B received initial task');
+
+        // ============ PHASE 3: Client B Renames and Adds Subtask ============
+        const renamedTaskName = `ProjectX-Planning-${uniqueId}`;
+        const taskLocatorB = clientB.page.locator(`task:has-text("${initialTaskName}")`);
+
+        // Rename the task (click title, edit, blur)
+        await taskLocatorB.locator('task-title').click();
+        await clientB.page.waitForSelector('task textarea', { state: 'visible' });
+        await clientB.page.locator('task textarea').fill(renamedTaskName);
+        await clientB.page.keyboard.press('Tab');
+        await clientB.page.waitForTimeout(300);
+        console.log(`[Chain Test] Client B renamed task to: ${renamedTaskName}`);
+
+        // Add first subtask "Research"
+        const subtask1Name = `Research-${uniqueId}`;
+        const renamedTaskLocatorB = clientB.page.locator(
+          `task:has-text("${renamedTaskName}")`,
+        );
+        await clientB.workView.addSubTask(renamedTaskLocatorB, subtask1Name);
+        console.log(`[Chain Test] Client B added subtask: ${subtask1Name}`);
+
+        // Sync: B → Server
+        await clientB.sync.syncAndWait();
+
+        // Sync: Server → A
+        await clientA.sync.syncAndWait();
+
+        // Verify A has the renamed task and subtask
+        await waitForTask(clientA.page, renamedTaskName);
+        const parentTaskA = clientA.page.locator(`task:has-text("${renamedTaskName}")`);
+        const expandBtnA = parentTaskA.locator('.expand-btn');
+        if (await expandBtnA.isVisible()) {
+          await expandBtnA.click();
+        }
+        await waitForTask(clientA.page, subtask1Name);
+        console.log('[Chain Test] Client A received rename and subtask');
+
+        // ============ PHASE 4: Client A Marks Subtask Done and Adds Another ============
+        // Mark Research subtask as done
+        const subtask1LocatorA = clientA.page.locator(
+          `task.hasNoSubTasks:has-text("${subtask1Name}")`,
+        );
+        await subtask1LocatorA.hover();
+        await subtask1LocatorA.locator('.task-done-btn').click();
+        console.log(`[Chain Test] Client A marked ${subtask1Name} as done`);
+
+        // Add second subtask "Implementation"
+        const subtask2Name = `Implementation-${uniqueId}`;
+        await clientA.workView.addSubTask(parentTaskA, subtask2Name);
+        console.log(`[Chain Test] Client A added subtask: ${subtask2Name}`);
+
+        // Sync: A → Server
+        await clientA.sync.syncAndWait();
+
+        // Sync: Server → B
+        await clientB.sync.syncAndWait();
+
+        // Verify B has the updates
+        const expandBtnB = renamedTaskLocatorB.locator('.expand-btn');
+        if (await expandBtnB.isVisible()) {
+          await expandBtnB.click();
+        }
+        await waitForTask(clientB.page, subtask2Name);
+        console.log('[Chain Test] Client B received done status and new subtask');
+
+        // ============ PHASE 5: Client B Adds Subtask and Marks It Done ============
+        // Add third subtask "Testing"
+        const subtask3Name = `Testing-${uniqueId}`;
+        await clientB.workView.addSubTask(renamedTaskLocatorB, subtask3Name);
+        console.log(`[Chain Test] Client B added subtask: ${subtask3Name}`);
+
+        // Mark the Testing subtask as done (not the parent - parent tasks with subtasks
+        // don't show done button in hover controls)
+        const subtask3LocatorB = clientB.page.locator(
+          `task.hasNoSubTasks:has-text("${subtask3Name}")`,
+        );
+        await subtask3LocatorB.hover();
+        await subtask3LocatorB.locator('.task-done-btn').click();
+        console.log(`[Chain Test] Client B marked ${subtask3Name} as done`);
+
+        // Sync: B → Server
+        await clientB.sync.syncAndWait();
+
+        // Sync: Server → A
+        await clientA.sync.syncAndWait();
+
+        // ============ PHASE 6: Final Verification ============
+        console.log('[Chain Test] Verifying final state...');
+
+        // Both clients should have the parent task (not done - only subtasks were marked done)
+        const finalParentA = clientA.page.locator(
+          `task:not(.hasNoSubTasks):has-text("${renamedTaskName}")`,
+        );
+        const finalParentB = clientB.page.locator(
+          `task:not(.hasNoSubTasks):has-text("${renamedTaskName}")`,
+        );
+        await expect(finalParentA).toBeVisible({ timeout: 10000 });
+        await expect(finalParentB).toBeVisible({ timeout: 10000 });
+
+        // Expand parents to see subtasks
+        const finalExpandA = finalParentA.locator('.expand-btn');
+        if (await finalExpandA.isVisible()) {
+          await finalExpandA.click();
+        }
+        const finalExpandB = finalParentB.locator('.expand-btn');
+        if (await finalExpandB.isVisible()) {
+          await finalExpandB.click();
+        }
+
+        // Verify all three subtasks exist on both clients
+        // Research (done - marked by Client A in Phase 4)
+        await expect(
+          clientA.page.locator(`task.hasNoSubTasks.isDone:has-text("${subtask1Name}")`),
+        ).toBeVisible({ timeout: 5000 });
+        await expect(
+          clientB.page.locator(`task.hasNoSubTasks.isDone:has-text("${subtask1Name}")`),
+        ).toBeVisible({ timeout: 5000 });
+
+        // Implementation (not done)
+        await expect(
+          clientA.page.locator(
+            `task.hasNoSubTasks:not(.isDone):has-text("${subtask2Name}")`,
+          ),
+        ).toBeVisible({ timeout: 5000 });
+        await expect(
+          clientB.page.locator(
+            `task.hasNoSubTasks:not(.isDone):has-text("${subtask2Name}")`,
+          ),
+        ).toBeVisible({ timeout: 5000 });
+
+        // Testing (done - marked by Client B in Phase 5)
+        await expect(
+          clientA.page.locator(`task.hasNoSubTasks.isDone:has-text("${subtask3Name}")`),
+        ).toBeVisible({ timeout: 5000 });
+        await expect(
+          clientB.page.locator(`task.hasNoSubTasks.isDone:has-text("${subtask3Name}")`),
+        ).toBeVisible({ timeout: 5000 });
+
+        // Count total tasks should match
+        const totalTasksA = await clientA.page.locator('task').count();
+        const totalTasksB = await clientB.page.locator('task').count();
+        expect(totalTasksA).toBe(totalTasksB);
+        expect(totalTasksA).toBe(4); // 1 parent + 3 subtasks
+
+        console.log('[Chain Test] ✓ All verifications passed!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
