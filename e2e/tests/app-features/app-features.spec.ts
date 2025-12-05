@@ -39,7 +39,10 @@ test.describe('App Features', () => {
       const featureElement = feature.locator(page);
 
       // elements on settings page
-      const appFeaturesSection = page.locator('collapsible', { hasText: 'App Features' });
+      // Use .first() because there may be multiple "App Features" sections (global and project-specific)
+      const appFeaturesSection = page
+        .locator('collapsible', { hasText: 'App Features' })
+        .first();
       const featureSwitch = page.getByRole('switch', {
         name: feature.label,
         exact: true,
