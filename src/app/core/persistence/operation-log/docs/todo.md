@@ -54,34 +54,55 @@ These items were identified in the code audit but require further evaluation and
 
 ---
 
-## 1. Implement Tombstone System (Rule 3.5)
+## 1. Tombstone System (Rule 3.5) - DEFERRED
 
-**Priority:** HIGH
+**Priority:** MEDIUM (was HIGH)
 **Complexity:** HIGH
+**Status:** Evaluated December 2025 - Not currently required
 
-### Current State
+### Evaluation Summary
 
-- Deletions are immediate hard removals via `adapter.removeOne()`
-- No `isDeleted`, `deletedAt` fields exist on models
-- No retention window for recovery
+After comprehensive analysis, tombstones are **not currently needed**. The existing system provides sufficient safeguards:
 
-### Required Changes
+1. **Event-sourced deletes:** Delete operations are immutable events in the log, not destructive
+2. **Conflict detection works:** Vector clocks detect concurrent delete+update; user resolution UI presented
+3. **Tag sanitization (Dec 2025):** Recently added fixes filter non-existent task IDs at reducer level
+4. **Auto-repair handles orphans:** Invalid states are detected and repaired with REPAIR operations
+5. **Archive data preserved:** `moveToArchive` is an UPDATE op, not DELETE - historical data kept
 
-- Add tombstone fields to Task, Project, Tag models
+### Current Safeguards Against Delete Conflicts
+
+| Mechanism        | Location                                | What It Does                                    |
+| ---------------- | --------------------------------------- | ----------------------------------------------- |
+| Vector clocks    | `conflict-resolution.service.ts`        | Detects concurrent ops, presents to user        |
+| Delete heuristic | `operation-log-sync.service.ts:524-540` | Delete vs Update → prefers preserving data      |
+| Tag sanitization | `tag-shared.reducer.ts`                 | Filters non-existent taskIds (9a6bc139a)        |
+| Subtask cascade  | `task-shared-crud.reducer.ts`           | Includes subtasks in delete cleanup (bf3a386cf) |
+| Auto-repair      | `validate-state.service.ts`             | Removes orphaned references, creates REPAIR op  |
+
+### Why Not Implement Now
+
+- No critical data loss scenarios identified in integration tests
+- Recent tag sanitization fixes prove system can self-heal
+- Cross-version sync (A.7.11) is the real blocker - tombstones don't solve that
+- Schema changes for tombstone fields would affect all entity models
+
+### When to Revisit
+
+- **Cross-version sync needed:** When `CURRENT_SCHEMA_VERSION > 1` and clients may run different app versions
+- **Undo/restore feature requested:** Tombstones enable recovery of deleted entities
+- **Audit compliance required:** If explicit "entity deleted at time X" records needed
+- **Performance issues:** If delete ops cause sync bottleneck on high-churn datasets
+
+### Original Proposed Changes (For Future Reference)
+
+If tombstones become necessary:
+
+- Add `isDeleted`, `deletedAt` fields to Task, Project, Tag models
 - Update delete reducers to mark as deleted instead of removing
-- Add compaction service to clean old tombstones after retention window
+- Add compaction service to clean old tombstones after retention window (suggested 30 days)
 - Update selectors to filter out tombstoned entities
 - Add recovery/undo functions
-
-### Sync Impact
-
-Without tombstones, concurrent delete + update operations result in non-deterministic state depending on replay order.
-
-### Questions to Resolve
-
-- What should the retention window be? (Rule suggests 30 days)
-- How should UI handle tombstoned entities?
-- Should archived tasks also use tombstones?
 
 ---
 
@@ -200,29 +221,31 @@ deleteProject: (taskProps: { projectId: string; noteIds: string[]; allTaskIds: s
 
 ## Implementation Order Recommendation
 
-1. **Tombstones** - Foundation for safe deletes, enables undo/restore (HIGH priority)
+1. ~~**Tombstones**~~ - DEFERRED: current safeguards sufficient (see Item 1 evaluation above)
 2. ~~**Move operations**~~ ✅ - Completed December 2025 (anchor-based positioning)
 3. ~~**moveToArchive**~~ - Deferred: full payload required for sync reliability
 4. ~~**deleteProject**~~ ✅ - Completed December 2025
 5. ~~**Server Sync**~~ ✅ - Completed December 2025 (single-version sync)
+6. **Cross-Schema Sync (A.7.11)** - HIGH priority when `CURRENT_SCHEMA_VERSION > 1`
 
-> **Note:** Server sync (SuperSync), quota handling, deleteProject payload slim-down, and anchor-based move operations are all complete. moveToArchive was analyzed and deferred - see Item 3 for rationale. The only remaining CRITICAL item is the Tombstone system.
+> **Note:** All major sync infrastructure is complete. The remaining HIGH priority item is A.7.11 (conflict-aware operation migration) which becomes critical when schema migrations are needed. Tombstones were evaluated and deferred - the event-sourced architecture plus recent tag sanitization fixes provide sufficient delete conflict handling.
 
 ---
 
 ## Current System Status
 
-| Component              | Status             | Notes                                             |
-| ---------------------- | ------------------ | ------------------------------------------------- |
-| **Local Persistence**  | ✅ Complete        | Event sourcing, crash recovery, fast hydration    |
-| **Legacy Sync Bridge** | ✅ Complete        | PFAPI integration, vector clock updates           |
-| **Server Sync (API)**  | ✅ Complete        | Single-schema-version, upload/download working    |
-| **Conflict Detection** | ✅ Complete        | Vector clock-based, user resolution UI            |
-| **Validation**         | ✅ Complete        | Typia + cross-model, 4 checkpoints                |
-| **Auto-Repair**        | ✅ Complete        | 6 fix categories, creates REPAIR operations       |
-| **Compaction**         | ✅ Complete        | Snapshot-based, retention windows, emergency mode |
-| **Cross-Schema Sync**  | ⚠️ Not Implemented | A.7.11 requires operation-level migration         |
-| **Tombstone System**   | ❌ Not Implemented | For delete safety + undo/restore                  |
+| Component              | Status             | Notes                                                         |
+| ---------------------- | ------------------ | ------------------------------------------------------------- |
+| **Local Persistence**  | ✅ Complete        | Event sourcing, crash recovery, fast hydration                |
+| **Legacy Sync Bridge** | ✅ Complete        | PFAPI integration, vector clock updates                       |
+| **Server Sync (API)**  | ✅ Complete        | Single-schema-version, upload/download working                |
+| **Conflict Detection** | ✅ Complete        | Vector clock-based, user resolution UI                        |
+| **Validation**         | ✅ Complete        | Typia + cross-model, 4 checkpoints                            |
+| **Auto-Repair**        | ✅ Complete        | 6 fix categories, creates REPAIR operations                   |
+| **Compaction**         | ✅ Complete        | Snapshot-based, retention windows, emergency mode             |
+| **Delete Handling**    | ✅ Complete        | Tag sanitization, cascading deletes, conflict heuristics      |
+| **Cross-Schema Sync**  | ⚠️ Not Implemented | A.7.11 required before CURRENT_SCHEMA_VERSION > 1             |
+| **Tombstone System**   | ⏸️ Deferred        | Not currently needed; revisit for undo/restore or audit needs |
 
 ---
 
