@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 4, 2025
+**Last Updated:** December 5, 2025
 
 ---
 
@@ -357,14 +357,21 @@ async compact(): Promise<void> {
 
 ### Configuration
 
-| Setting                 | Value   | Description                                 |
-| ----------------------- | ------- | ------------------------------------------- |
-| Compaction trigger      | 500 ops | Ops before snapshot                         |
-| Retention window        | 7 days  | Keep recent synced ops                      |
-| Emergency retention     | 1 day   | Shorter retention for quota exceeded        |
-| Compaction timeout      | 25 sec  | Abort if exceeds (prevents lock expiration) |
-| Max compaction failures | 3       | Failures before user notification           |
-| Unsynced ops            | ∞       | Never delete unsynced ops                   |
+| Setting                         | Value   | Description                                 |
+| ------------------------------- | ------- | ------------------------------------------- |
+| Compaction trigger              | 500 ops | Ops before snapshot                         |
+| Retention window                | 7 days  | Keep recent synced ops                      |
+| Emergency retention             | 1 day   | Shorter retention for quota exceeded        |
+| Compaction timeout              | 25 sec  | Abort if exceeds (prevents lock expiration) |
+| Max compaction failures         | 3       | Failures before user notification           |
+| Unsynced ops                    | ∞       | Never delete unsynced ops                   |
+| Max pending queue size          | 10,000  | Dependency retry queue limit                |
+| Max failed ops size             | 2,000   | Permanently failed ops history limit        |
+| Max download ops in memory      | 50,000  | Bounds memory during API download           |
+| Remote file retention           | 14 days | Server-side operation file retention        |
+| Max remote files to keep        | 100     | Minimum recent files on server              |
+| Max conflict retry attempts     | 5       | Retries before rejecting failed ops         |
+| Max rejected ops before warning | 10      | Threshold for user notification             |
 
 ## A.5 Multi-Tab Coordination
 
@@ -1989,13 +1996,18 @@ To detect silent divergence between clients:
 
 - Operation sync protocol interface (`OperationSyncCapable`)
 - `OperationLogSyncService` (orchestration, processRemoteOps, detectConflicts)
-- `OperationLogUploadService` (API upload + file-based fallback)
-- `OperationLogDownloadService` (API download + file-based fallback)
+- `OperationLogUploadService` (API upload + file-based fallback, batching)
+- `OperationLogDownloadService` (API download + file-based fallback, pagination)
 - Entity-level conflict detection (vector clock comparisons)
-- `ConflictResolutionService` (UI presentation + apply resolutions)
-- `DependencyResolverService` (extract/check dependencies)
-- `OperationApplierService` (retry queue + topological sort)
-- Rejected operation tracking (`rejectedAt` field)
+- `ConflictResolutionService` (UI presentation + batch apply resolutions)
+- `VectorClockService` (global/entity frontier tracking, compaction recovery)
+- `DependencyResolverService` (extract/check hard/soft dependencies)
+- `OperationApplierService` (retry queue + topological sort + failed ops cleanup)
+- Rejected operation tracking (`rejectedAt` field + user notification)
+- Fresh client safety checks (prevents empty clients from overwriting server)
+- Bounded memory during download (`MAX_DOWNLOAD_OPS_IN_MEMORY = 50,000`)
+- Integration test suite (`sync-scenarios.integration.spec.ts`)
+- E2E test infrastructure (`supersync.spec.ts` with Playwright)
 
 > **Cross-version limitation**: Part C is complete for clients on the same schema version. When `CURRENT_SCHEMA_VERSION > 1` and clients run different versions, A.7.11 (conflict-aware op migration) is required to ensure correct conflict detection.
 
@@ -2021,10 +2033,13 @@ To detect silent divergence between clients:
 
 > **Recently Completed (December 2025):**
 >
-> - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement. See `work-context-meta.helper.ts` for helper functions.
+> - **Server Sync (SuperSync)**: Full upload/download infrastructure with conflict detection, user resolution UI, and integration tests
+> - **Tag sanitization**: Remove subtask IDs from tags when parent deleted, filter non-existent taskIds on sync
+> - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement
 > - **Quota handling**: Emergency compaction and circuit breaker on `QuotaExceededError`
 > - **`syncedAt` index**: Faster `getUnsynced()` queries
 > - **Persistent compaction counter**: Tracks ops across tabs/restarts
+> - **Failed operations cleanup**: Bounded tracking with `MAX_FAILED_OPS_SIZE = 2,000`
 
 ---
 
@@ -2033,30 +2048,44 @@ To detect silent divergence between clients:
 ```
 src/app/core/persistence/operation-log/
 ├── operation.types.ts                    # Type definitions (Operation, OpType, EntityType)
-├── operation-log.const.ts                # Constants
+├── operation-log.const.ts                # Constants (thresholds, timeouts, limits)
 ├── operation-log.effects.ts              # Action capture + META_MODEL bridge
 ├── operation-converter.util.ts           # Op ↔ Action conversion
 ├── persistent-action.interface.ts        # PersistentAction type + isPersistentAction guard
 ├── entity-key.util.ts                    # Entity key generation utilities
 ├── store/
 │   ├── operation-log-store.service.ts        # SUP_OPS IndexedDB wrapper
-│   ├── operation-log-hydrator.service.ts     # Startup hydration
-│   ├── operation-log-compaction.service.ts   # Snapshot + cleanup
+│   ├── operation-log-hydrator.service.ts     # Startup hydration + crash recovery
+│   ├── operation-log-compaction.service.ts   # Snapshot + cleanup + emergency mode
+│   ├── operation-log-manifest.service.ts     # File-based sync manifest management
 │   ├── operation-log-migration.service.ts    # Genesis migration from legacy
 │   └── schema-migration.service.ts           # State schema migrations
 ├── sync/
-│   ├── operation-log-sync.service.ts         # Upload/download operations (Part C)
-│   ├── operation-log-download.service.ts     # Download operations
-│   ├── operation-log-upload.service.ts       # Upload operations
+│   ├── operation-log-sync.service.ts         # Orchestration (Part C)
+│   ├── operation-log-download.service.ts     # Download ops (API + file fallback)
+│   ├── operation-log-upload.service.ts       # Upload ops (API + file fallback)
+│   ├── vector-clock.service.ts               # Global/entity frontier tracking
 │   ├── lock.service.ts                       # Cross-tab locking (Web Locks + fallback)
 │   ├── multi-tab-coordinator.service.ts      # BroadcastChannel coordination
-│   ├── dependency-resolver.service.ts        # Extract/check operation dependencies
-│   └── conflict-resolution.service.ts        # Conflict UI presentation
-└── processing/
-    ├── operation-applier.service.ts          # Apply ops to store with dependency handling
-    ├── validate-state.service.ts             # Typia + cross-model validation wrapper
-    ├── validate-operation-payload.ts         # Checkpoint A - payload validation
-    └── repair-operation.service.ts           # REPAIR operation creation + notification
+│   ├── dependency-resolver.service.ts        # Extract/check dependencies
+│   ├── conflict-resolution.service.ts        # Conflict UI presentation
+│   └── operation-sync.util.ts                # Sync helper utilities
+├── processing/
+│   ├── operation-applier.service.ts          # Apply ops with dependency handling
+│   ├── validate-state.service.ts             # Typia + cross-model validation
+│   ├── validate-operation-payload.ts         # Checkpoint A - payload validation
+│   └── repair-operation.service.ts           # REPAIR operation creation
+├── integration/                              # Integration test suite
+│   ├── sync-scenarios.integration.spec.ts    # Protocol-level sync tests
+│   ├── multi-client-sync.integration.spec.ts # Multi-client scenarios
+│   ├── state-consistency.integration.spec.ts # State validation tests
+│   └── helpers/                              # Test utilities
+│       ├── mock-sync-server.helper.ts        # Server mock for tests
+│       ├── simulated-client.helper.ts        # Client simulation
+│       ├── test-client.helper.ts             # Test client utilities
+│       └── operation-factory.helper.ts       # Test operation builders
+└── benchmarks/
+    └── operation-log-stress.spec.ts          # Performance stress tests
 
 src/app/features/work-context/store/
 ├── work-context-meta.actions.ts          # Move actions (moveTaskInTodayList, etc.)
@@ -2065,6 +2094,11 @@ src/app/features/work-context/store/
 src/app/pfapi/
 ├── pfapi-store-delegate.service.ts       # Reads NgRx for sync (Part B)
 └── pfapi.service.ts                      # Sync orchestration
+
+e2e/
+├── tests/sync/supersync.spec.ts          # E2E SuperSync tests (Playwright)
+├── pages/supersync.page.ts               # Page object for sync tests
+└── utils/supersync-helpers.ts            # E2E test utilities
 ```
 
 ---

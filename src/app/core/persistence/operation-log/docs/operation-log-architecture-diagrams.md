@@ -1,8 +1,16 @@
 # Operation Log: Architecture Diagrams
 
-## 1. Operation Log Architecture (Local Persistence & Legacy Bridge)
+**Last Updated:** December 5, 2025
+
+These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
+
+---
+
+## 1. Operation Log Architecture (Local Persistence & Legacy Bridge) ✅ IMPLEMENTED
 
 This diagram illustrates how user actions flow through the system, how they are persisted to IndexedDB (`SUP_OPS`), how the system hydrates on startup, and how it bridges to the legacy PFAPI system.
+
+**Implementation Status:** Complete. See Part A and Part B in [operation-log-architecture.md](./operation-log-architecture.md).
 
 ```mermaid
 graph TD
@@ -73,9 +81,16 @@ graph TD
     class LegacyMeta,LegacySync,noteLegacy legacy;
 ```
 
-## 2. Operation Log Sync Architecture (Server Sync)
+## 2. Operation Log Sync Architecture (Server Sync) ✅ IMPLEMENTED
 
 This diagram details the flow for syncing individual operations with a server (`Part C`), including conflict detection, resolution strategies, and the validation loop (`Part D`).
+
+**Implementation Status:** Complete (single-schema-version). Key services:
+
+- `OperationLogSyncService` - Orchestration
+- `OperationLogUploadService` / `OperationLogDownloadService` - Data transfer
+- `ConflictResolutionService` - User resolution UI
+- `VectorClockService` - Conflict detection
 
 ```mermaid
 graph TD
@@ -154,7 +169,7 @@ graph TD
 
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
-> **Note:** Sections 3, 4.1, and 4.2 describe **planned architecture** that is not yet implemented. Currently, only state cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration (`migrateOperation()`) is not implemented—tail ops are replayed directly without per-operation migration.
+> **Note:** Sections 3, 4.1, and 4.2 describe the **cross-version migration strategy** (A.7.11) which is designed but not yet implemented. Currently `CURRENT_SCHEMA_VERSION = 1`, so all clients are on the same version. State cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration will be needed when schema versions diverge between clients.
 
 This diagram visualizes the "Receiver-Side Migration" strategy. The Migration Layer acts as a shield, ensuring that _only_ operations matching the current schema version ever reach the core conflict detection and application logic.
 
@@ -356,9 +371,11 @@ graph TD
 
 </details>
 
-## 5. Hybrid Manifest (File-Based Sync)
+## 5. Hybrid Manifest (File-Based Sync) ✅ IMPLEMENTED
 
 This diagram illustrates the "Hybrid Manifest" optimization (`hybrid-manifest-architecture.md`) which reduces HTTP request overhead for WebDAV/Dropbox sync by buffering small operations directly inside the manifest file.
+
+**Implementation Status:** Complete. Managed by `OperationLogManifestService` with remote cleanup after 14 days.
 
 ```mermaid
 graph TD
@@ -391,9 +408,11 @@ graph TD
     classDef io fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px;
 ```
 
-## 6. Hybrid Manifest Conceptual Overview
+## 6. Hybrid Manifest Conceptual Overview ✅ IMPLEMENTED
 
 This diagram shows the Hybrid Manifest architecture: how operations flow from "hot" (recent, in manifest) to "cold" (archived files) to "frozen" (snapshot), and the decision logic for each transition.
+
+**Implementation Status:** Complete. Used by `OperationLogUploadService` and `OperationLogDownloadService` for file-based sync providers (WebDAV, Dropbox).
 
 ### 6.1 Data Lifecycle: Hot → Cold → Frozen
 
