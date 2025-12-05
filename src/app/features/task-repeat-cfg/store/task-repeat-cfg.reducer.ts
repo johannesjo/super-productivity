@@ -55,6 +55,9 @@ export const taskRepeatCfgReducer = createReducer<TaskRepeatCfgState>(
     //   // this._taskRepeatCfgService.updateTaskRepeatCfgs(cfgsToUpdate, { projectId: null });
     // }
   }),
+  on(TaskSharedActions.deleteTaskRepeatCfg, (state, { taskRepeatCfgId }) =>
+    adapter.removeOne(taskRepeatCfgId, state),
+  ),
 
   // INTERNAL
   on(addTaskRepeatCfgToTask, (state, { taskRepeatCfg }) =>

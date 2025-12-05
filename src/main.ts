@@ -39,10 +39,12 @@ import { StoreModule } from '@ngrx/store';
 import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delete.meta-reducer';
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
 import {
+  issueProviderSharedMetaReducer,
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
   tagSharedMetaReducer,
   taskBatchUpdateMetaReducer,
+  taskRepeatCfgSharedMetaReducer,
   taskSharedCrudMetaReducer,
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
@@ -112,6 +114,8 @@ bootstrapApplication(AppComponent, {
           taskSharedSchedulingMetaReducer,
           projectSharedMetaReducer,
           tagSharedMetaReducer,
+          issueProviderSharedMetaReducer,
+          taskRepeatCfgSharedMetaReducer,
           plannerSharedMetaReducer,
           actionLoggerReducer,
         ],
