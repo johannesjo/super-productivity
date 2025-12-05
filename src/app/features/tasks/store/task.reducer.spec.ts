@@ -92,6 +92,392 @@ describe('Task Reducer', () => {
     });
   });
 
+  describe('moveSubTask (anchor-based)', () => {
+    const createStateWithSubtasks = (): TaskState => ({
+      ...initialTaskState,
+      ids: ['parent1', 'parent2', 'sub1', 'sub2', 'sub3', 'sub4'],
+      entities: {
+        parent1: createTask('parent1', { subTaskIds: ['sub1', 'sub2', 'sub3'] }),
+        parent2: createTask('parent2', { subTaskIds: ['sub4'] }),
+        sub1: createTask('sub1', { parentId: 'parent1' }),
+        sub2: createTask('sub2', { parentId: 'parent1' }),
+        sub3: createTask('sub3', { parentId: 'parent1' }),
+        sub4: createTask('sub4', { parentId: 'parent2' }),
+      },
+    });
+
+    describe('reordering within same parent', () => {
+      it('should move subtask to start when afterTaskId is null', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub3',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent1',
+          afterTaskId: null,
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub3', 'sub1', 'sub2']);
+      });
+
+      it('should move subtask after specified anchor', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub3',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent1',
+          afterTaskId: 'sub1',
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub1', 'sub3', 'sub2']);
+      });
+
+      it('should move subtask to end when anchor is last item', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent1',
+          afterTaskId: 'sub3',
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub2', 'sub3', 'sub1']);
+      });
+
+      it('should handle moving item that is already at target position', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub2',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent1',
+          afterTaskId: 'sub1',
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub1', 'sub2', 'sub3']);
+      });
+    });
+
+    describe('moving between parents', () => {
+      it('should move subtask to different parent at start', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent2',
+          afterTaskId: null,
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub2', 'sub3']);
+        expect(result.entities['parent2']!.subTaskIds).toEqual(['sub1', 'sub4']);
+        expect(result.entities['sub1']!.parentId).toBe('parent2');
+      });
+
+      it('should move subtask to different parent after anchor', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent2',
+          afterTaskId: 'sub4',
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub2', 'sub3']);
+        expect(result.entities['parent2']!.subTaskIds).toEqual(['sub4', 'sub1']);
+        expect(result.entities['sub1']!.parentId).toBe('parent2');
+      });
+
+      it('should update projectId when moving to parent with different project', () => {
+        const state: TaskState = {
+          ...initialTaskState,
+          ids: ['parent1', 'parent2', 'sub1'],
+          entities: {
+            parent1: createTask('parent1', {
+              subTaskIds: ['sub1'],
+              projectId: 'project1',
+            }),
+            parent2: createTask('parent2', { subTaskIds: [], projectId: 'project2' }),
+            sub1: createTask('sub1', { parentId: 'parent1', projectId: 'project1' }),
+          },
+        };
+
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent2',
+          afterTaskId: null,
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['sub1']!.projectId).toBe('project2');
+      });
+    });
+
+    describe('edge cases', () => {
+      it('should handle anchor not found by appending to end', () => {
+        const state = createStateWithSubtasks();
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent1',
+          afterTaskId: 'non-existent',
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual(['sub2', 'sub3', 'sub1']);
+      });
+
+      it('should handle moving to empty parent', () => {
+        const state: TaskState = {
+          ...initialTaskState,
+          ids: ['parent1', 'parent2', 'sub1'],
+          entities: {
+            parent1: createTask('parent1', { subTaskIds: ['sub1'] }),
+            parent2: createTask('parent2', { subTaskIds: [] }),
+            sub1: createTask('sub1', { parentId: 'parent1' }),
+          },
+        };
+
+        const action = fromActions.moveSubTask({
+          taskId: 'sub1',
+          srcTaskId: 'parent1',
+          targetTaskId: 'parent2',
+          afterTaskId: null,
+        });
+
+        const result = taskReducer(state, action);
+        expect(result.entities['parent1']!.subTaskIds).toEqual([]);
+        expect(result.entities['parent2']!.subTaskIds).toEqual(['sub1']);
+      });
+    });
+  });
+
+  describe('moveSubTaskUp', () => {
+    it('should move subtask up one position', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskUp({
+          id: 'subTask2',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask2', 'subTask1']);
+    });
+
+    it('should not change order when subtask is already at top', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskUp({
+          id: 'subTask1',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask1', 'subTask2']);
+    });
+
+    it('should return unchanged state when parent not found', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskUp({
+          id: 'subTask1',
+          parentId: 'non-existent',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+
+    it('should return unchanged state when subtask not in parent', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskUp({
+          id: 'subTask1',
+          parentId: 'task2',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+  });
+
+  describe('moveSubTaskDown', () => {
+    it('should move subtask down one position', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskDown({
+          id: 'subTask1',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask2', 'subTask1']);
+    });
+
+    it('should not change order when subtask is already at bottom', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskDown({
+          id: 'subTask2',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask1', 'subTask2']);
+    });
+
+    it('should return unchanged state when parent not found', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskDown({
+          id: 'subTask1',
+          parentId: 'non-existent',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+
+    it('should return unchanged state when subtask not in parent', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskDown({
+          id: 'subTask1',
+          parentId: 'task2',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+  });
+
+  describe('moveSubTaskToTop', () => {
+    it('should move subtask to top of list', () => {
+      const stateWithThreeSubtasks: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'sub1', 'sub2', 'sub3'],
+        entities: {
+          task1: createTask('task1', { subTaskIds: ['sub1', 'sub2', 'sub3'] }),
+          sub1: createTask('sub1', { parentId: 'task1' }),
+          sub2: createTask('sub2', { parentId: 'task1' }),
+          sub3: createTask('sub3', { parentId: 'task1' }),
+        },
+      };
+
+      const state = taskReducer(
+        stateWithThreeSubtasks,
+        fromActions.moveSubTaskToTop({
+          id: 'sub3',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['sub3', 'sub1', 'sub2']);
+    });
+
+    it('should not change order when subtask is already at top', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToTop({
+          id: 'subTask1',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask1', 'subTask2']);
+    });
+
+    it('should return unchanged state when parent not found', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToTop({
+          id: 'subTask1',
+          parentId: 'non-existent',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+
+    it('should return unchanged state when subtask not in parent', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToTop({
+          id: 'subTask1',
+          parentId: 'task2',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+  });
+
+  describe('moveSubTaskToBottom', () => {
+    it('should move subtask to bottom of list', () => {
+      const stateWithThreeSubtasks: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'sub1', 'sub2', 'sub3'],
+        entities: {
+          task1: createTask('task1', { subTaskIds: ['sub1', 'sub2', 'sub3'] }),
+          sub1: createTask('sub1', { parentId: 'task1' }),
+          sub2: createTask('sub2', { parentId: 'task1' }),
+          sub3: createTask('sub3', { parentId: 'task1' }),
+        },
+      };
+
+      const state = taskReducer(
+        stateWithThreeSubtasks,
+        fromActions.moveSubTaskToBottom({
+          id: 'sub1',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['sub2', 'sub3', 'sub1']);
+    });
+
+    it('should not change order when subtask is already at bottom', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToBottom({
+          id: 'subTask2',
+          parentId: 'task1',
+        }),
+      );
+
+      expect(state.entities['task1']!.subTaskIds).toEqual(['subTask1', 'subTask2']);
+    });
+
+    it('should return unchanged state when parent not found', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToBottom({
+          id: 'subTask1',
+          parentId: 'non-existent',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+
+    it('should return unchanged state when subtask not in parent', () => {
+      const state = taskReducer(
+        stateWithTasks,
+        fromActions.moveSubTaskToBottom({
+          id: 'subTask1',
+          parentId: 'task2',
+        }),
+      );
+
+      expect(state).toBe(stateWithTasks);
+    });
+  });
+
   describe('Current task operations', () => {
     it('should set current task', () => {
       const action = fromActions.setCurrentTask({ id: 'task2' });

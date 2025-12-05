@@ -27,7 +27,7 @@ import {
   updateTimeSpentForTask,
 } from './task.reducer.util';
 import { taskAdapter } from './task.adapter';
-import { moveItemInList } from '../../work-context/store/work-context-meta.helper';
+import { moveItemAfterAnchor } from '../../work-context/store/work-context-meta.helper';
 import {
   arrayMoveLeft,
   arrayMoveRight,
@@ -255,7 +255,7 @@ export const taskReducer = createReducer<TaskState>(
     );
   }),
 
-  on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, newOrderedIds }) => {
+  on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, afterTaskId }) => {
     let newState = state;
     const oldPar = getTaskById(srcTaskId, state);
     const newPar = getTaskById(targetTaskId, state);
@@ -272,12 +272,13 @@ export const taskReducer = createReducer<TaskState>(
     );
     newState = reCalcTimesForParentIfParent(oldPar.id, newState);
 
-    // for new parent add and move
+    // for new parent add using anchor-based positioning
+    const newParSubTaskIds = (newState.entities[newPar.id] as Task).subTaskIds;
     newState = taskAdapter.updateOne(
       {
         id: newPar.id,
         changes: {
-          subTaskIds: unique(moveItemInList(taskId, newPar.subTaskIds, newOrderedIds)),
+          subTaskIds: moveItemAfterAnchor(taskId, afterTaskId, newParSubTaskIds),
         },
       },
       newState,
