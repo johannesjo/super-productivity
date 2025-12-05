@@ -24,6 +24,15 @@ export class ArchiveEffects {
    * 1. Loads archiveYoung and archiveOld
    * 2. Moves old tasks and time tracking data from Young to Old
    * 3. Saves both archives
+   *
+   * NOTE on isIgnoreDBLock: When using Operation Log sync, this effect can be triggered
+   * during sync processing (via OperationApplierService dispatching remote ops). The PFAPI
+   * sync wrapper (pfapi.ts:_wrapSyncAction) locks the database to prevent external writes
+   * during sync. However, this effect IS part of sync processing - it's applying a remote
+   * `flushYoungToOld` operation to maintain deterministic archive state across clients.
+   * Therefore, we must use isIgnoreDBLock:true to allow these writes to proceed.
+   * Without this flag, the meta model update (triggered by isUpdateRevAndLastUpdate:true)
+   * would be blocked, causing "Attempting to write DB for __meta_ while locked" errors.
    */
   flushYoungToOld$ = createEffect(
     () =>
@@ -49,6 +58,8 @@ export class ArchiveEffects {
             },
             {
               isUpdateRevAndLastUpdate: true,
+              // Required during OpLog sync - see JSDoc above for explanation
+              isIgnoreDBLock: true,
             },
           );
 
@@ -59,6 +70,8 @@ export class ArchiveEffects {
             },
             {
               isUpdateRevAndLastUpdate: true,
+              // Required during OpLog sync - see JSDoc above for explanation
+              isIgnoreDBLock: true,
             },
           );
 
