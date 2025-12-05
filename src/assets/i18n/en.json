@@ -1100,6 +1100,11 @@
         "P2": "Or you can also change your password, which will overwrite all remote data.",
         "PASSWORD": "Password"
       },
+      "D_FRESH_CLIENT_CONFIRM": {
+        "MESSAGE": "This appears to be a fresh installation. Remote data with {{count}} changes was found. Do you want to download and apply this data?",
+        "OK": "Download Remote Data",
+        "TITLE": "Initial Sync"
+      },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Close App",
         "BTN_DOWNLOAD_BACKUP": "Download Local Backup",
@@ -1188,7 +1193,8 @@
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
-        "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!"
+        "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
+        "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied."
       },
       "SAFETY_BACKUP": {
         "BACKUP_NOT_FOUND": "Backup with ID {{backupId}} not found",
