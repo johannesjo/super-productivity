@@ -172,19 +172,10 @@ export class OperationLogSyncService {
       return;
     }
 
-    // Check if this is a fresh client (no local pending operations)
-    // In this case, skip conflict detection and accept all remote operations
-    const localPendingOps = await this.opLogStore.getUnsynced();
-
-    if (localPendingOps.length === 0) {
-      OpLog.normal(
-        'OperationLogSyncService: Fresh client detected (0 pending ops). Accepting all remote operations.',
-        { remoteOpsCount: migratedOps.length },
-      );
-      await this._applyRemoteOpsDirectly(migratedOps);
-      return;
-    }
-
+    // Always run conflict detection, even with 0 pending ops.
+    // A client with 0 pending ops is NOT necessarily a "fresh" client - it may have
+    // already-synced ops that remote ops could conflict with. The entity frontier
+    // tracks applied ops regardless of sync status.
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
       migratedOps,
@@ -397,42 +388,6 @@ export class OperationLogSyncService {
     );
 
     OpLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
-  }
-
-  /**
-   * Apply remote operations directly without conflict detection.
-   * Used for fresh clients with no local pending operations.
-   */
-  private async _applyRemoteOpsDirectly(remoteOps: Operation[]): Promise<void> {
-    if (remoteOps.length === 0) {
-      return;
-    }
-
-    const storedSeqs: number[] = [];
-    const opsToApply: Operation[] = [];
-
-    for (const op of remoteOps) {
-      if (!(await this.opLogStore.hasOp(op.id))) {
-        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
-        storedSeqs.push(seq);
-        opsToApply.push(op);
-      } else {
-        OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
-      }
-    }
-
-    if (opsToApply.length > 0) {
-      await this.operationApplier.applyOperations(opsToApply);
-    }
-
-    if (storedSeqs.length > 0) {
-      await this.opLogStore.markApplied(storedSeqs);
-      OpLog.normal(
-        `OperationLogSyncService: Fresh client applied ${storedSeqs.length} remote ops`,
-      );
-    }
-
-    await this._validateAfterSync();
   }
 
   /**

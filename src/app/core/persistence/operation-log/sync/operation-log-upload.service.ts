@@ -15,6 +15,9 @@ import {
   OPS_DIR,
 } from '../store/operation-log-manifest.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
+import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 
 /**
  * Result of an upload operation. May contain piggybacked operations
@@ -23,6 +26,7 @@ import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util
 export interface UploadResult {
   uploadedCount: number;
   piggybackedOps: Operation[];
+  rejectedCount: number;
 }
 
 /**
@@ -37,13 +41,14 @@ export class OperationLogUploadService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private manifestService = inject(OperationLogManifestService);
+  private snackService = inject(SnackService);
 
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<UploadResult> {
     if (!syncProvider) {
       OpLog.warn('OperationLogUploadService: No active sync provider passed for upload.');
-      return { uploadedCount: 0, piggybackedOps: [] };
+      return { uploadedCount: 0, piggybackedOps: [], rejectedCount: 0 };
     }
 
     // Use operation sync if supported
@@ -62,6 +67,7 @@ export class OperationLogUploadService {
 
     const piggybackedOps: Operation[] = [];
     let uploadedCount = 0;
+    let rejectedCount = 0;
 
     await this.lockService.request('sp_op_log_upload', async () => {
       const pendingOps = await this.opLogStore.getUnsynced();
@@ -125,22 +131,37 @@ export class OperationLogUploadService {
           piggybackedOps.push(...ops);
         }
 
-        // Log any rejected operations
+        // Handle rejected operations - mark them as permanently rejected
+        // This prevents infinite retry loops for invalid operations
         const rejected = response.results.filter((r) => !r.accepted);
         if (rejected.length > 0) {
+          const rejectedOpIds = rejected.map((r) => r.opId);
+          await this.opLogStore.markRejected(rejectedOpIds);
+          rejectedCount += rejected.length;
+
           OpLog.warn(
-            `OperationLogUploadService: ${rejected.length} ops were rejected`,
-            rejected,
+            `OperationLogUploadService: ${rejected.length} ops were permanently rejected`,
+            rejected.map((r) => ({ opId: r.opId, error: r.error })),
           );
         }
       }
 
       OpLog.normal(
-        `OperationLogUploadService: Successfully uploaded ${uploadedCount} ops via API.`,
+        `OperationLogUploadService: Uploaded ${uploadedCount} ops via API` +
+          (rejectedCount > 0 ? `, ${rejectedCount} rejected` : '.'),
       );
     });
 
-    return { uploadedCount, piggybackedOps };
+    // Notify user if significant number of ops were rejected
+    if (rejectedCount >= MAX_REJECTED_OPS_BEFORE_WARNING) {
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.UPLOAD_OPS_REJECTED,
+        translateParams: { count: rejectedCount },
+      });
+    }
+
+    return { uploadedCount, piggybackedOps, rejectedCount };
   }
 
   private async _uploadPendingOpsViaFiles(
@@ -198,6 +219,12 @@ export class OperationLogUploadService {
         updatedManifestFiles.sort();
         remoteManifest.operationFiles = updatedManifestFiles;
         await this.manifestService.uploadRemoteManifest(syncProvider, remoteManifest);
+
+        // Periodically clean up old remote files to prevent unbounded storage growth
+        // Run cleanup after every 10 new file uploads to balance overhead vs storage
+        if (newFilesUploaded >= 10 || updatedManifestFiles.length > 50) {
+          await this.manifestService.cleanupRemoteFiles(syncProvider);
+        }
       }
 
       OpLog.normal(
@@ -205,8 +232,22 @@ export class OperationLogUploadService {
       );
     });
 
-    // File-based sync doesn't support piggybacking
-    return { uploadedCount, piggybackedOps: [] };
+    // File-based sync doesn't support piggybacking or per-op rejection
+    return { uploadedCount, piggybackedOps: [], rejectedCount: 0 };
+  }
+
+  /**
+   * Triggers remote cleanup of old operation files for file-based sync.
+   * Can be called manually or scheduled periodically.
+   */
+  async cleanupRemoteFiles(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<number> {
+    if (isOperationSyncCapable(syncProvider)) {
+      // API-based sync handles cleanup on server side
+      return 0;
+    }
+    return this.manifestService.cleanupRemoteFiles(syncProvider);
   }
 
   private _entryToSyncOp(entry: OperationLogEntry): SyncOperation {
