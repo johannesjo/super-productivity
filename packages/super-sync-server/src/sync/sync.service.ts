@@ -229,6 +229,11 @@ export class SyncService {
           // Validate operation
           const validation = this.validateOp(op);
           if (!validation.valid) {
+            Logger.warn(`[user:${userId}] Op validation failed: ${validation.error}`, {
+              opId: op.id,
+              opType: op.opType,
+              entityType: op.entityType,
+            });
             results.push({
               opId: op.id,
               accepted: false,
