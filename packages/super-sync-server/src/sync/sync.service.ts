@@ -13,6 +13,8 @@ import {
   compareVectorClocks,
   sanitizeVectorClock,
   VectorClock,
+  SYNC_ERROR_CODES,
+  SyncErrorCode,
 } from './sync.types';
 import { Logger } from '../logger';
 
@@ -351,6 +353,7 @@ export class SyncService {
               opId: op.id,
               accepted: false,
               error: validation.error,
+              errorCode: validation.errorCode,
             });
             continue;
           }
@@ -358,6 +361,7 @@ export class SyncService {
           // Check for conflicts with existing operations
           const conflict = this.detectConflict(userId, op);
           if (conflict.hasConflict) {
+            const isConcurrent = conflict.reason?.includes('Concurrent');
             Logger.warn(`[user:${userId}] Conflict detected: ${conflict.reason}`, {
               opId: op.id,
               opType: op.opType,
@@ -368,6 +372,9 @@ export class SyncService {
               opId: op.id,
               accepted: false,
               error: conflict.reason,
+              errorCode: isConcurrent
+                ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
+                : SYNC_ERROR_CODES.CONFLICT_STALE,
             });
             continue;
           }
@@ -416,6 +423,7 @@ export class SyncService {
               opId: op.id,
               accepted: false,
               error: 'Duplicate operation ID',
+              errorCode: SYNC_ERROR_CODES.DUPLICATE_OPERATION,
             });
           } else {
             throw err;
@@ -950,47 +958,91 @@ export class SyncService {
 
   // === Validation ===
 
-  private validateOp(op: Operation): { valid: boolean; error?: string } {
+  private validateOp(op: Operation): {
+    valid: boolean;
+    error?: string;
+    errorCode?: SyncErrorCode;
+  } {
     if (!op.id || typeof op.id !== 'string') {
-      return { valid: false, error: 'Invalid operation ID' };
+      return {
+        valid: false,
+        error: 'Invalid operation ID',
+        errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
+      };
     }
     if (op.id.length > 255) {
-      return { valid: false, error: 'Operation ID too long' };
+      return {
+        valid: false,
+        error: 'Operation ID too long',
+        errorCode: SYNC_ERROR_CODES.INVALID_OP_ID,
+      };
     }
     if (!op.opType || !OP_TYPES.includes(op.opType)) {
-      return { valid: false, error: 'Invalid opType' };
+      return {
+        valid: false,
+        error: 'Invalid opType',
+        errorCode: SYNC_ERROR_CODES.INVALID_OP_TYPE,
+      };
     }
     if (!op.entityType) {
-      return { valid: false, error: 'Missing entityType' };
+      return {
+        valid: false,
+        error: 'Missing entityType',
+        errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
+      };
     }
     // Validate entity type against allowlist (case-sensitive, must match client EntityType)
     if (!ALLOWED_ENTITY_TYPES.has(op.entityType)) {
-      return { valid: false, error: `Invalid entityType: ${op.entityType}` };
+      return {
+        valid: false,
+        error: `Invalid entityType: ${op.entityType}`,
+        errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
+      };
     }
     // Validate entityId format/length if present
     if (op.entityId !== undefined && op.entityId !== null) {
       if (typeof op.entityId !== 'string' || op.entityId.length > 255) {
-        return { valid: false, error: 'Invalid entityId format or length' };
+        return {
+          valid: false,
+          error: 'Invalid entityId format or length',
+          errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_ID,
+        };
       }
     }
     // DEL operations require entityId - a delete without a target is meaningless
     if (op.opType === 'DEL' && !op.entityId) {
-      return { valid: false, error: 'DEL operation requires entityId' };
+      return {
+        valid: false,
+        error: 'DEL operation requires entityId',
+        errorCode: SYNC_ERROR_CODES.MISSING_ENTITY_ID,
+      };
     }
     if (op.payload === undefined) {
-      return { valid: false, error: 'Missing payload' };
+      return {
+        valid: false,
+        error: 'Missing payload',
+        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
+      };
     }
     // Schema version validation
     if (op.schemaVersion !== undefined) {
       if (op.schemaVersion < 1 || op.schemaVersion > 100) {
-        return { valid: false, error: `Invalid schema version: ${op.schemaVersion}` };
+        return {
+          valid: false,
+          error: `Invalid schema version: ${op.schemaVersion}`,
+          errorCode: SYNC_ERROR_CODES.INVALID_SCHEMA_VERSION,
+        };
       }
     }
 
     // Validate and sanitize vector clock
     const clockValidation = sanitizeVectorClock(op.vectorClock);
     if (!clockValidation.valid) {
-      return { valid: false, error: clockValidation.error };
+      return {
+        valid: false,
+        error: clockValidation.error,
+        errorCode: SYNC_ERROR_CODES.INVALID_VECTOR_CLOCK,
+      };
     }
     // Replace with sanitized clock (removes invalid entries)
     op.vectorClock = clockValidation.clock;
@@ -998,22 +1050,38 @@ export class SyncService {
     // Size limit
     const payloadSize = JSON.stringify(op.payload).length;
     if (payloadSize > this.config.maxPayloadSizeBytes) {
-      return { valid: false, error: 'Payload too large' };
+      return {
+        valid: false,
+        error: 'Payload too large',
+        errorCode: SYNC_ERROR_CODES.PAYLOAD_TOO_LARGE,
+      };
     }
 
     // Validate payload structure based on operation type
     const payloadValidation = validatePayload(op.opType, op.payload);
     if (!payloadValidation.valid) {
-      return { valid: false, error: payloadValidation.error };
+      return {
+        valid: false,
+        error: payloadValidation.error,
+        errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
+      };
     }
 
     // Timestamp validation (based on HLC best practices)
     const now = Date.now();
     if (op.timestamp > now + this.config.maxClockDriftMs) {
-      return { valid: false, error: 'Timestamp too far in future' };
+      return {
+        valid: false,
+        error: 'Timestamp too far in future',
+        errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
+      };
     }
     if (op.timestamp < now - this.config.maxOpAgeMs) {
-      return { valid: false, error: 'Operation too old' };
+      return {
+        valid: false,
+        error: 'Operation too old',
+        errorCode: SYNC_ERROR_CODES.INVALID_TIMESTAMP,
+      };
     }
 
     return { valid: true };
