@@ -260,23 +260,23 @@ export class ProjectService {
       noteIds: [],
     });
 
-    // Fetch all tasks with subtask data and filter by project
-    const allTasks = await firstValueFrom(
-      this._store$.select(selectAllTasksWithSubTasks),
-    );
-
-    const parentTasks = (allTasks || []).filter(
-      (t) => t.projectId === templateProjectId && !t.parentId,
-    );
+    const taskState = await firstValueFrom(this._store$.select(selectTaskFeatureState));
+    const parentTaskIds = [...template.taskIds, ...template.backlogTaskIds];
+    const parentTasks = parentTaskIds
+      .map((id) => taskState.entities[id])
+      .filter((t): t is Task => !!t);
 
     // For each parent task create a copy in the new project and then copy its subtasks
     for (const p of parentTasks) {
+      const subTasks = p.subTaskIds
+        .map((id) => taskState.entities[id])
+        .filter((t): t is Task => !!t);
+
       // copy and remove meta fields we don't want to pass as "additional"
       const rest = { ...(p as unknown as Task) } as any;
       delete rest.id;
       delete rest.parentId;
       delete rest.subTaskIds;
-      delete rest.subTasks;
       delete rest.projectId;
       delete rest.created;
 
@@ -301,13 +301,12 @@ export class ProjectService {
       );
 
       // create subtasks
-      if (p.subTasks && p.subTasks.length > 0) {
-        for (const st of p.subTasks) {
+      if (subTasks && subTasks.length > 0) {
+        for (const st of subTasks) {
           const restSt = { ...(st as unknown as Task) } as any;
           delete restSt.id;
           delete restSt.parentId;
           delete restSt.subTaskIds;
-          delete restSt.subTasks;
           delete restSt.projectId;
           delete restSt.created;
 
