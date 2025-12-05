@@ -1082,7 +1082,8 @@
         "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remote"
       },
       "D_CONFLICT_RESOLUTION": {
-        "INTRO": "Your local and remote data have conflicting changes. Please choose which version to keep for each item.",
+        "ENTITY": "Entity",
+        "INTRO": "Your local and remote data have conflicting changes. Click to choose which version to keep for each item.",
         "LAST_OP": "Last:",
         "LOCAL": "Local",
         "OPS_COUNT": "Operations:",

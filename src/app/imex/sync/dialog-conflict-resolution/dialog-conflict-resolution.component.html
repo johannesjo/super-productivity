@@ -1,84 +1,80 @@
 <h1 mat-dialog-title>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.TITLE' | translate }}</h1>
 
 <div mat-dialog-content>
-  <p>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.INTRO' | translate }}</p>
+  <p class="intro">{{ 'F.SYNC.D_CONFLICT_RESOLUTION.INTRO' | translate }}</p>
 
-  @for (conflict of data.conflicts; track $index) {
-    <div
-      class="conflict-item"
-      [class.resolved]="getResolution($index)"
-    >
-      <div class="conflict-header">
-        <h3>{{ conflict.entityType }}: {{ conflict.entityId || 'ALL' }}</h3>
-        @if (getResolution($index)) {
-          <mat-icon class="resolved-icon">check_circle</mat-icon>
-        }
-      </div>
-
-      <div class="conflict-sides">
-        <div
-          class="local-side"
-          [class.selected]="getResolution($index) === 'local'"
-        >
-          <h4>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.LOCAL' | translate }}</h4>
-          <p>
-            {{ 'F.SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
-            {{ conflict.localOps.length }}
-          </p>
-          @if (conflict.localOps.length > 0) {
-            <p>
-              {{ 'F.SYNC.D_CONFLICT_RESOLUTION.LAST_OP' | translate }}
-              {{
-                conflict.localOps[conflict.localOps.length - 1].timestamp | date: 'short'
-              }}
-            </p>
-          }
-          <button
-            mat-stroked-button
-            type="button"
-            [color]="getResolution($index) === 'local' ? 'primary' : undefined"
+  <table class="conflict-table">
+    <thead>
+      <tr>
+        <th class="entity-col">
+          {{ 'F.SYNC.D_CONFLICT_RESOLUTION.ENTITY' | translate }}
+        </th>
+        <th class="side-col">{{ 'F.SYNC.D_CONFLICT_RESOLUTION.LOCAL' | translate }}</th>
+        <th class="side-col">{{ 'F.SYNC.D_CONFLICT_RESOLUTION.REMOTE' | translate }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (conflict of data.conflicts; track $index) {
+        <tr [class.resolved]="getResolution($index)">
+          <td class="entity-col">
+            <div class="entity-info">
+              <span class="entity-type">{{ conflict.entityType }}</span>
+              <span class="entity-id">{{ getEntityLabel(conflict) }}</span>
+              @if (getResolution($index)) {
+                <mat-icon class="resolved-icon">check_circle</mat-icon>
+              }
+            </div>
+          </td>
+          <td
+            class="side-col"
+            [class.selected]="getResolution($index) === 'local'"
             (click)="resolve($index, 'local')"
           >
-            @if (getResolution($index) === 'local') {
-              <mat-icon>check</mat-icon>
-            }
-            {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_LOCAL' | translate }}
-          </button>
-        </div>
-
-        <div
-          class="remote-side"
-          [class.selected]="getResolution($index) === 'remote'"
-        >
-          <h4>{{ 'F.SYNC.D_CONFLICT_RESOLUTION.REMOTE' | translate }}</h4>
-          <p>
-            {{ 'F.SYNC.D_CONFLICT_RESOLUTION.OPS_COUNT' | translate }}
-            {{ conflict.remoteOps.length }}
-          </p>
-          @if (conflict.remoteOps.length > 0) {
-            <p>
-              {{ 'F.SYNC.D_CONFLICT_RESOLUTION.LAST_OP' | translate }}
-              {{
-                conflict.remoteOps[conflict.remoteOps.length - 1].timestamp
-                  | date: 'short'
-              }}
-            </p>
-          }
-          <button
-            mat-stroked-button
-            type="button"
-            [color]="getResolution($index) === 'remote' ? 'primary' : undefined"
+            <div class="side-content">
+              <div class="ops-summary">
+                <span class="ops-count">{{ conflict.localOps.length }} ops</span>
+                <span class="ops-types">{{ getOpTypesSummary(conflict.localOps) }}</span>
+              </div>
+              @if (conflict.localOps.length > 0) {
+                <div class="last-op">
+                  <span class="timestamp">{{
+                    conflict.localOps[conflict.localOps.length - 1].timestamp
+                      | date: 'short'
+                  }}</span>
+                  <span class="action-type">{{
+                    getActionLabel(conflict.localOps[conflict.localOps.length - 1])
+                  }}</span>
+                </div>
+              }
+            </div>
+          </td>
+          <td
+            class="side-col"
+            [class.selected]="getResolution($index) === 'remote'"
             (click)="resolve($index, 'remote')"
           >
-            @if (getResolution($index) === 'remote') {
-              <mat-icon>check</mat-icon>
-            }
-            {{ 'F.SYNC.D_CONFLICT_RESOLUTION.USE_REMOTE' | translate }}
-          </button>
-        </div>
-      </div>
-    </div>
-  }
+            <div class="side-content">
+              <div class="ops-summary">
+                <span class="ops-count">{{ conflict.remoteOps.length }} ops</span>
+                <span class="ops-types">{{ getOpTypesSummary(conflict.remoteOps) }}</span>
+              </div>
+              @if (conflict.remoteOps.length > 0) {
+                <div class="last-op">
+                  <span class="timestamp">{{
+                    conflict.remoteOps[conflict.remoteOps.length - 1].timestamp
+                      | date: 'short'
+                  }}</span>
+                  <span class="action-type">{{
+                    getActionLabel(conflict.remoteOps[conflict.remoteOps.length - 1])
+                  }}</span>
+                </div>
+              }
+            </div>
+          </td>
+        </tr>
+      }
+    </tbody>
+  </table>
 </div>
 
 <div
