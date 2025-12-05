@@ -2,7 +2,7 @@ import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { TASK_FEATURE_NAME } from './task.reducer';
 import {
   Task,
-  TaskState as ITaskState,
+  TaskState,
   TaskWithDueDay,
   TaskWithDueTime,
   TaskWithSubTasks,
@@ -19,8 +19,6 @@ import {
 } from '../../tag/store/tag.reducer';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-
-export type TaskState = ITaskState;
 
 const mapSubTasksToTasks = (tasksIN: Task[]): TaskWithSubTasks[] => {
   return tasksIN

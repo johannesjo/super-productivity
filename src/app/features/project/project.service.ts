@@ -331,8 +331,18 @@ export class ProjectService {
         .filter((t): t is Task => t !== undefined && t !== null);
 
       // copy and remove meta fields we don't want to pass as "additional"
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
-      const { id, parentId, subTaskIds, projectId, created, ...taskDataToCopy } = p;
+      /* eslint-disable @typescript-eslint/no-unused-vars */
+      const {
+        id,
+        parentId,
+        subTaskIds,
+        projectId,
+        created,
+        timeSpent,
+        timeSpentOnDay,
+        ...taskDataToCopy
+      } = p;
+      /* eslint-enable @typescript-eslint/no-unused-vars */
 
       const newParentTask = this._taskService.createNewTaskWithDefaults({
         title: p.title,
@@ -355,8 +365,18 @@ export class ProjectService {
       // create subtasks
       if (subTasks && subTasks.length > 0) {
         for (const st of subTasks) {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars, prettier/prettier
-          const { id: id_st, parentId: parentIdst, subTaskIds: subTaskIdsst, projectId: projectIdst, created: createdst , ...subTaskDataToCopy} = st;
+          /* eslint-disable @typescript-eslint/no-unused-vars */
+          const {
+            id: _id,
+            parentId: _parentId,
+            subTaskIds: _subTaskIds,
+            projectId: _projectId,
+            created: _created,
+            timeSpent: _timeSpent,
+            timeSpentOnDay: _timeSpentOnDay,
+            ...subTaskDataToCopy
+          } = st;
+          /* eslint-enable @typescript-eslint/no-unused-vars */
 
           const newSub = this._taskService.createNewTaskWithDefaults({
             title: st.title,
