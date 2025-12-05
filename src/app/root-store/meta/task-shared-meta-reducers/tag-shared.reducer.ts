@@ -7,7 +7,6 @@ import {
   taskAdapter,
 } from '../../../features/tasks/store/task.reducer';
 import { Task } from '../../../features/tasks/task.model';
-import { Tag } from '../../../features/tag/tag.model';
 import { ActionHandlerMap } from './task-shared-helpers';
 import { updateTag } from '../../../features/tag/store/tag.actions';
 import { OpLog } from '../../../core/log';
@@ -17,57 +16,41 @@ import { OpLog } from '../../../core/log';
 // =============================================================================
 
 /**
- * Sanitizes a Tag update action by filtering out non-existent task IDs from taskIds.
- * This prevents sync issues where a Tag update operation arrives before the corresponding
- * task has been created on this client.
+ * Logs a warning if a Tag update contains taskIds that don't exist in the store.
+ * This is informational only - we no longer filter out these IDs because:
+ * 1. The DependencyResolverService now ensures proper ordering (tasks before tag updates)
+ * 2. The UI gracefully handles references to non-existent tasks
+ * 3. Filtering would cause data loss if ordering still failed for any reason
  *
  * @param state - Current root state
- * @param action - The updateTag action to sanitize
- * @returns The sanitized action (or original if no sanitization needed)
+ * @param action - The updateTag action to check
  */
-const sanitizeUpdateTagAction = (
+const warnOnMissingTaskIds = (
   state: RootState,
   action: ReturnType<typeof updateTag>,
-): ReturnType<typeof updateTag> => {
+): void => {
   const changes = action.tag.changes;
 
-  // Only sanitize if taskIds are being updated
+  // Only check if taskIds are being updated
   if (!changes || !('taskIds' in changes) || !Array.isArray(changes.taskIds)) {
-    return action;
+    return;
   }
 
   const taskState = state[TASK_FEATURE_NAME];
   const existingTaskIds = new Set(taskState.ids as string[]);
 
-  // Filter to only include tasks that exist in the current state
-  const sanitizedTaskIds = changes.taskIds.filter((taskId) =>
-    existingTaskIds.has(taskId),
-  );
+  const missingTaskIds = changes.taskIds.filter((taskId) => !existingTaskIds.has(taskId));
 
-  // If nothing was filtered out, return the original action
-  if (sanitizedTaskIds.length === changes.taskIds.length) {
-    return action;
+  if (missingTaskIds.length > 0) {
+    OpLog.warn(
+      'tagSharedMetaReducer: Tag update references non-existent taskIds (allowing anyway)',
+      {
+        tagId: action.tag.id,
+        missingTaskIds,
+        totalTaskIds: changes.taskIds.length,
+      },
+    );
   }
-
-  const removedTaskIds = changes.taskIds.filter((taskId) => !existingTaskIds.has(taskId));
-  OpLog.warn('tagSharedMetaReducer: Filtered out non-existent taskIds from Tag update', {
-    tagId: action.tag.id,
-    removedTaskIds,
-    originalCount: changes.taskIds.length,
-    sanitizedCount: sanitizedTaskIds.length,
-  });
-
-  // Create a new action with sanitized taskIds
-  return {
-    ...action,
-    tag: {
-      ...action.tag,
-      changes: {
-        ...changes,
-        taskIds: sanitizedTaskIds,
-      } as Partial<Tag>,
-    },
-  };
 };
 
 // =============================================================================
@@ -120,19 +103,15 @@ export const tagSharedMetaReducer: MetaReducer = (
 
     const rootState = state as RootState;
 
-    // Transform updateTag action to sanitize taskIds before processing
-    let transformedAction = action;
+    // Log warning if updateTag references non-existent tasks (informational only)
     if (action.type === updateTag.type) {
-      transformedAction = sanitizeUpdateTagAction(
-        rootState,
-        action as ReturnType<typeof updateTag>,
-      );
+      warnOnMissingTaskIds(rootState, action as ReturnType<typeof updateTag>);
     }
 
-    const actionHandlers = createActionHandlers(rootState, transformedAction);
-    const handler = actionHandlers[transformedAction.type];
+    const actionHandlers = createActionHandlers(rootState, action);
+    const handler = actionHandlers[action.type];
     const updatedState = handler ? handler(rootState) : rootState;
 
-    return reducer(updatedState, transformedAction);
+    return reducer(updatedState, action);
   };
 };

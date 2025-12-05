@@ -298,8 +298,13 @@ describe('tagSharedMetaReducer', () => {
     });
   });
 
-  describe('updateTag action sanitization', () => {
-    it('should filter out non-existent taskIds from Tag update', () => {
+  describe('updateTag action handling', () => {
+    // Note: The reducer no longer filters taskIds - it just logs a warning.
+    // This is intentional: DependencyResolverService ensures proper ordering,
+    // and the UI handles missing task references gracefully.
+    // Filtering was causing data loss during sync when tasks arrived after tags.
+
+    it('should pass through updateTag with non-existent taskIds unchanged', () => {
       const testState = createStateWithExistingTasks(
         ['existing-task-1', 'existing-task-2'],
         [],
@@ -315,7 +320,7 @@ describe('tagSharedMetaReducer', () => {
       });
       (testState[TAG_FEATURE_NAME].ids as string[]).push(TODAY_TAG.id);
 
-      // Try to update Tag with taskIds that don't exist
+      // Update Tag with taskIds that include non-existent ones
       const action = updateTag({
         tag: {
           id: TODAY_TAG.id,
@@ -327,16 +332,17 @@ describe('tagSharedMetaReducer', () => {
 
       metaReducer(testState, action);
 
-      // The action passed to the reducer should have sanitized taskIds
+      // The action should be passed through unchanged (no filtering)
       expect(mockReducer).toHaveBeenCalled();
       const passedAction = mockReducer.calls.mostRecent().args[1];
       expect(passedAction.tag.changes.taskIds).toEqual([
         'existing-task-1',
+        'non-existent-task',
         'existing-task-2',
       ]);
     });
 
-    it('should not modify action when all taskIds exist', () => {
+    it('should pass through updateTag when all taskIds exist', () => {
       const testState = createStateWithExistingTasks(
         ['task-1', 'task-2', 'task-3'],
         [],
@@ -393,7 +399,7 @@ describe('tagSharedMetaReducer', () => {
       expect(passedAction.tag.changes.taskIds).toBeUndefined();
     });
 
-    it('should filter all taskIds when none exist', () => {
+    it('should pass through updateTag with all non-existent taskIds unchanged', () => {
       const testState = createBaseState();
 
       testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({
@@ -414,11 +420,16 @@ describe('tagSharedMetaReducer', () => {
 
       metaReducer(testState, action);
 
+      // Action should be passed through unchanged
       const passedAction = mockReducer.calls.mostRecent().args[1];
-      expect(passedAction.tag.changes.taskIds).toEqual([]);
+      expect(passedAction.tag.changes.taskIds).toEqual([
+        'non-existent-1',
+        'non-existent-2',
+        'non-existent-3',
+      ]);
     });
 
-    it('should preserve other changes while sanitizing taskIds', () => {
+    it('should preserve all changes when passing through action', () => {
       const testState = createStateWithExistingTasks(['existing-task'], [], [], []);
 
       testState[TAG_FEATURE_NAME].entities['my-tag'] = createMockTag({
@@ -445,10 +456,14 @@ describe('tagSharedMetaReducer', () => {
       const passedAction = mockReducer.calls.mostRecent().args[1];
       expect(passedAction.tag.changes.title).toBe('New Title');
       expect(passedAction.tag.changes.color).toBe('#ff0000');
-      expect(passedAction.tag.changes.taskIds).toEqual(['existing-task']);
+      // All taskIds are preserved (no filtering)
+      expect(passedAction.tag.changes.taskIds).toEqual([
+        'existing-task',
+        'non-existent-task',
+      ]);
     });
 
-    it('should preserve meta property on sanitized action', () => {
+    it('should preserve meta property on action', () => {
       const testState = createStateWithExistingTasks(['existing-task'], [], [], []);
 
       testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({

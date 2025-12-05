@@ -29,6 +29,11 @@ interface NoteOperationPayload {
   projectId?: string;
 }
 
+/** Payload shape for tag operations that may have dependencies */
+interface TagOperationPayload {
+  taskIds?: string[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class DependencyResolverService {
   private store = inject(Store);
@@ -81,6 +86,23 @@ export class DependencyResolverService {
           mustExist: false, // Soft dependency (Note can exist without project)
           relation: 'reference',
         });
+      }
+    }
+
+    if (op.entityType === 'TAG') {
+      const payload = op.payload as TagOperationPayload;
+      // Tag -> Task is a soft dependency. We want tasks to be created before
+      // tag updates that reference them, to avoid the tag-shared.reducer
+      // filtering out "non-existent" taskIds during sync.
+      if (payload.taskIds?.length) {
+        for (const taskId of payload.taskIds) {
+          deps.push({
+            entityType: 'TASK',
+            entityId: taskId,
+            mustExist: false, // Soft dependency (prefer task exists, but don't block)
+            relation: 'reference',
+          });
+        }
       }
     }
 
