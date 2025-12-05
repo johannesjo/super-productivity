@@ -267,8 +267,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       return;
     }
 
-    // TODO simplify
-    if (this.data.task.reminderId) {
+    if (this.data.task.remindAt) {
       this._store.dispatch(
         TaskSharedActions.unscheduleTask({
           id: this.data.task.id,
@@ -380,7 +379,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     if (
       this.data.task &&
       this.selectedReminderCfgId === TaskReminderOptionId.DoNotRemind &&
-      typeof this.data.task.reminderId === 'string'
+      this.data.task.remindAt !== undefined
     ) {
       this._store.dispatch(
         TaskSharedActions.updateTask({

@@ -55,8 +55,6 @@ export const crossModelMigration4_6: CrossModelMigrateFn = ((
         copy.task.entities[reminder.relatedId] = {
           ...task,
           remindAt: reminder.remindAt,
-          // Clear the old reminderId
-          reminderId: undefined,
         };
         migratedCount++;
         PFLog.log(`Migrated reminder for task: ${reminder.relatedId}`);

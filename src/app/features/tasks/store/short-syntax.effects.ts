@@ -148,7 +148,7 @@ export class ShortSyntaxEffects {
             isIgnoreShortSyntax: true,
           }),
         );
-        if (taskChanges.dueWithTime && !taskChanges.reminderId) {
+        if (taskChanges.dueWithTime && !taskChanges.remindAt) {
           const { dueWithTime } = taskChanges;
           if (taskChanges.hasPlannedTime === false) {
             const plannedDay = new Date(dueWithTime);

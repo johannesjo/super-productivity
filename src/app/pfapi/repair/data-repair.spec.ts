@@ -1696,7 +1696,7 @@ describe('dataRepair()', () => {
     });
   });
 
-  it('should remove missing reminders from tasks', () => {
+  it('should clear legacy reminderId from tasks', () => {
     const taskState = {
       ...mock.task,
       ...fakeEntityStateFromArray<Task>([
@@ -1704,44 +1704,33 @@ describe('dataRepair()', () => {
           ...DEFAULT_TASK,
           id: 'TEST',
           title: 'TEST',
-          reminderId: 'R1',
           dueWithTime: 12321,
         },
         {
           ...DEFAULT_TASK,
           id: 'TEST2',
           title: 'TEST2',
-          reminderId: 'R2_MISSING',
           dueWithTime: 12321,
         },
       ]),
     } as any;
 
-    expect(
-      dataRepair({
-        ...mock,
-        task: taskState,
-        reminders: [{ id: 'R1' }],
-      } as any),
-    ).toEqual({
+    // Add legacy reminderId fields to simulate old data
+    (taskState.entities.TEST as any).reminderId = 'R1';
+    (taskState.entities.TEST2 as any).reminderId = 'R2_LEGACY';
+
+    const result = dataRepair({
       ...mock,
-      reminders: [{ id: 'R1' } as any],
-      task: {
-        ...taskState,
-        entities: {
-          TEST: {
-            ...taskState.entities.TEST,
-            reminderId: 'R1',
-            dueWithTime: 12321,
-          },
-          TEST2: {
-            ...taskState.entities.TEST2,
-            reminderId: undefined,
-            dueWithTime: undefined,
-          },
-        },
-      },
-    });
+      task: taskState,
+      reminders: [],
+    } as any);
+
+    // Both tasks should have reminderId cleared (field removed)
+    expect((result.task.entities.TEST as any).reminderId).toBeUndefined();
+    expect((result.task.entities.TEST2 as any).reminderId).toBeUndefined();
+    // dueWithTime should be preserved
+    expect(result.task.entities.TEST!.dueWithTime).toBe(12321);
+    expect(result.task.entities.TEST2!.dueWithTime).toBe(12321);
   });
   it('should add defaults to taskRepeatCfgs', () => {
     const taskRepeatCfg = {

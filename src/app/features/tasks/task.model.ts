@@ -96,8 +96,6 @@ export interface TaskCopy
   modified?: number;
   doneOn?: number;
   parentId?: string;
-  /** @deprecated Use remindAt instead. Kept for migration compatibility. */
-  reminderId?: string;
   remindAt?: number;
   repeatCfgId?: string;
   _hideSubTasksMode?: HideSubTasksMode;
