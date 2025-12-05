@@ -490,8 +490,9 @@ export class TaskService {
       );
     } else {
       // move sub task
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
-        moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, newOrderedIds }),
+        moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, afterTaskId }),
       );
     }
   }

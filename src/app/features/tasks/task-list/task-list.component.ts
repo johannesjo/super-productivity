@@ -351,8 +351,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       );
     } else {
       // move sub task
+      const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       this._store.dispatch(
-        moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, newOrderedIds }),
+        moveSubTask({ taskId, srcTaskId: src, targetTaskId: target, afterTaskId }),
       );
     }
   }

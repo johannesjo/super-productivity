@@ -60,7 +60,7 @@ export const moveSubTask = createAction(
     taskId: string;
     srcTaskId: string;
     targetTaskId: string;
-    newOrderedIds: string[];
+    afterTaskId: string | null;
   }) => ({
     ...taskProps,
     meta: {
