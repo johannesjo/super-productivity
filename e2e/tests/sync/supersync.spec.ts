@@ -31,12 +31,21 @@ const generateTestRunId = (workerIndex: number): string => {
 };
 
 base.describe('@supersync SuperSync E2E', () => {
-  // Skip all tests if server is not running
-  base.beforeAll(async () => {
-    const healthy = await isServerHealthy();
-    if (!healthy) {
-      base.skip();
+  // Check server health once and cache the result
+  let serverHealthy: boolean | null = null;
+
+  base.beforeEach(async ({}, testInfo) => {
+    // Only check server health once per worker
+    if (serverHealthy === null) {
+      serverHealthy = await isServerHealthy();
+      if (!serverHealthy) {
+        console.warn(
+          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+        );
+      }
     }
+    // Skip the test if server is not healthy
+    testInfo.skip(!serverHealthy, 'SuperSync server not running');
   });
 
   /**
@@ -210,9 +219,10 @@ base.describe('@supersync SuperSync E2E', () => {
         // Verify Client B has the task
         await waitForTask(clientB.page, taskName);
 
-        // Client A marks task as done
+        // Client A marks task as done (hover to reveal done button)
         const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorA.locator('.mat-mdc-checkbox').click();
+        await taskLocatorA.hover();
+        await taskLocatorA.locator('.task-done-btn').click();
 
         // Client A syncs the update
         await clientA.sync.syncAndWait();
@@ -220,13 +230,12 @@ base.describe('@supersync SuperSync E2E', () => {
         // Client B syncs to receive the update
         await clientB.sync.syncAndWait();
 
-        // Verify both show task as done
-        const checkboxA = taskLocatorA.locator('.mat-mdc-checkbox');
-        const taskLocatorB = clientB.page.locator(`task:has-text("${taskName}")`);
-        const checkboxB = taskLocatorB.locator('.mat-mdc-checkbox');
-
-        await expect(checkboxA).toBeChecked();
-        await expect(checkboxB).toBeChecked();
+        // Verify both show task as done (task with .isDone class exists)
+        // Use .isDone selector to avoid matching animating/duplicated elements
+        const doneTaskA = clientA.page.locator(`task.isDone:has-text("${taskName}")`);
+        const doneTaskB = clientB.page.locator(`task.isDone:has-text("${taskName}")`);
+        await expect(doneTaskA).toBeVisible({ timeout: 10000 });
+        await expect(doneTaskB).toBeVisible({ timeout: 10000 });
       } finally {
         if (clientA) await closeClient(clientA);
         if (clientB) await closeClient(clientB);
@@ -272,19 +281,20 @@ base.describe('@supersync SuperSync E2E', () => {
         // Verify Client B has the task
         await waitForTask(clientB.page, taskName);
 
-        // Client A deletes the task
+        // Client A deletes the task using keyboard shortcut (Backspace)
         const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorA.hover();
-        const deleteBtn = taskLocatorA.locator('button[aria-label="Delete task"]');
-        await deleteBtn.click();
+        await taskLocatorA.click(); // Focus the task
+        await clientA.page.keyboard.press('Backspace');
 
         // Confirm deletion if dialog appears
         const confirmBtn = clientA.page.locator(
           'mat-dialog-actions button:has-text("Delete")',
         );
-        if (await confirmBtn.isVisible({ timeout: 1000 }).catch(() => false)) {
+        if (await confirmBtn.isVisible({ timeout: 2000 }).catch(() => false)) {
           await confirmBtn.click();
         }
+        // Wait for task to be removed
+        await clientA.page.waitForTimeout(500);
 
         // Client A syncs the deletion
         await clientA.sync.syncAndWait();
@@ -350,12 +360,15 @@ base.describe('@supersync SuperSync E2E', () => {
         await waitForTask(clientB.page, taskName);
 
         // Client A marks done (creates local op)
+        // Hover to reveal controls, then click done button
         const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorA.locator('.mat-mdc-checkbox').click();
+        await taskLocatorA.hover();
+        await taskLocatorA.locator('.task-done-btn').click();
 
         // Client B marks done too (concurrent edit)
         const taskLocatorB = clientB.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorB.locator('.mat-mdc-checkbox').click();
+        await taskLocatorB.hover();
+        await taskLocatorB.locator('.task-done-btn').click();
 
         // Client A syncs first
         await clientA.sync.syncAndWait();
@@ -422,7 +435,8 @@ base.describe('@supersync SuperSync E2E', () => {
         await waitForTask(clientB.page, parentTaskName);
 
         // Client B creates a subtask under the parent
-        const subtaskName = `Subtask-${testRunId}`;
+        // Use a name that won't match the parent (no testRunId overlap)
+        const subtaskName = `ChildOfParent-${Date.now()}`;
         const parentTaskB = clientB.page.locator(`task:has-text("${parentTaskName}")`);
         await clientB.workView.addSubTask(parentTaskB, subtaskName);
 
@@ -450,11 +464,12 @@ base.describe('@supersync SuperSync E2E', () => {
         await waitForTask(clientB.page, subtaskName);
 
         // Verify subtask exists on both
+        // Use .hasNoSubTasks to target only the subtask, not its parent (which also "has text" of nested subtask)
         await expect(
-          clientA.page.locator(`task:has-text("${subtaskName}")`),
+          clientA.page.locator(`task.hasNoSubTasks:has-text("${subtaskName}")`),
         ).toBeVisible();
         await expect(
-          clientB.page.locator(`task:has-text("${subtaskName}")`),
+          clientB.page.locator(`task.hasNoSubTasks:has-text("${subtaskName}")`),
         ).toBeVisible();
       } finally {
         if (clientA) await closeClient(clientA);
