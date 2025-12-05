@@ -12,6 +12,8 @@ import {
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { OpType, OperationLogEntry } from '../operation.types';
+import { SnackService } from '../../../snack/snack.service';
+import { provideMockStore } from '@ngrx/store/testing';
 
 describe('OperationLogUploadService', () => {
   let service: OperationLogUploadService;
@@ -46,6 +48,7 @@ describe('OperationLogUploadService', () => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'getUnsynced',
       'markSynced',
+      'markRejected',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
     mockManifestService = jasmine.createSpyObj('OperationLogManifestService', [
@@ -69,9 +72,14 @@ describe('OperationLogUploadService', () => {
     TestBed.configureTestingModule({
       providers: [
         OperationLogUploadService,
+        provideMockStore(),
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: LockService, useValue: mockLockService },
         { provide: OperationLogManifestService, useValue: mockManifestService },
+        {
+          provide: SnackService,
+          useValue: jasmine.createSpyObj('SnackService', ['open']),
+        },
       ],
     });
 
