@@ -18,6 +18,8 @@ import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
+import { OperationEncryptionService } from './operation-encryption.service';
+import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
 
 /**
  * Result of an upload operation. May contain piggybacked operations
@@ -42,6 +44,7 @@ export class OperationLogUploadService {
   private lockService = inject(LockService);
   private manifestService = inject(OperationLogManifestService);
   private snackService = inject(SnackService);
+  private encryptionService = inject(OperationEncryptionService);
 
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -81,10 +84,23 @@ export class OperationLogUploadService {
       const clientId = pendingOps[0].op.clientId;
       const lastKnownServerSeq = await syncProvider.getLastServerSeq();
 
+      // Check if E2E encryption is enabled
+      const privateCfg =
+        (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
+      const isEncryptionEnabled =
+        privateCfg?.isEncryptionEnabled && !!privateCfg?.encryptKey;
+      const encryptKey = privateCfg?.encryptKey;
+
       // Convert to SyncOperation format
-      const syncOps: SyncOperation[] = pendingOps.map((entry) =>
+      let syncOps: SyncOperation[] = pendingOps.map((entry) =>
         this._entryToSyncOp(entry),
       );
+
+      // Encrypt payloads if E2E encryption is enabled
+      if (isEncryptionEnabled && encryptKey) {
+        OpLog.normal('OperationLogUploadService: Encrypting operation payloads...');
+        syncOps = await this.encryptionService.encryptOperations(syncOps, encryptKey);
+      }
 
       // Upload in batches (API supports up to 100 ops per request)
       const MAX_OPS_PER_REQUEST = 100;
@@ -127,7 +143,17 @@ export class OperationLogUploadService {
           OpLog.normal(
             `OperationLogUploadService: Received ${response.newOps.length} piggybacked ops`,
           );
-          const ops = response.newOps.map((serverOp) => syncOpToOperation(serverOp.op));
+          let piggybackSyncOps = response.newOps.map((serverOp) => serverOp.op);
+
+          // Decrypt piggybacked ops if we have an encryption key
+          if (encryptKey) {
+            piggybackSyncOps = await this.encryptionService.decryptOperations(
+              piggybackSyncOps,
+              encryptKey,
+            );
+          }
+
+          const ops = piggybackSyncOps.map((op) => syncOpToOperation(op));
           piggybackedOps.push(...ops);
         }
 

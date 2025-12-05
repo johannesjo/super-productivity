@@ -9,4 +9,7 @@ export interface SuperSyncPrivateCfg extends SyncProviderPrivateCfgBase {
   refreshToken?: string;
   /** Token expiration timestamp (Unix ms) */
   expiresAt?: number;
+  /** Whether E2E encryption is enabled for operation payloads */
+  isEncryptionEnabled?: boolean;
+  // Note: encryptKey is inherited from SyncProviderPrivateCfgBase
 }

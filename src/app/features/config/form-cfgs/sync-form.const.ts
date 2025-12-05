@@ -200,6 +200,33 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             rows: 3,
           },
         },
+        // E2E Encryption for SuperSync
+        {
+          key: 'isEncryptionEnabled',
+          type: 'checkbox',
+          templateOptions: {
+            label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_E2E_ENCRYPTION,
+          },
+        },
+        {
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          type: 'tpl',
+          className: 'tpl warn-text',
+          templateOptions: {
+            tag: 'div',
+            text: T.F.SYNC.FORM.SUPER_SYNC.ENCRYPTION_WARNING,
+          },
+        },
+        {
+          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          key: 'encryptKey',
+          type: 'input',
+          templateOptions: {
+            required: true,
+            type: 'password',
+            label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
+          },
+        },
       ],
     },
 

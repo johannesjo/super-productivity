@@ -142,6 +142,8 @@ export interface SyncOperation {
   vectorClock: Record<string, number>;
   timestamp: number;
   schemaVersion: number;
+  /** True if payload is an encrypted string (E2E encryption enabled) */
+  isPayloadEncrypted?: boolean;
 }
 
 /**
