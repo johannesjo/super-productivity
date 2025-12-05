@@ -13,6 +13,7 @@ export interface User {
   verification_resend_count: number; // number of times verification mail was resent
   failed_login_attempts: number; // count of consecutive failed logins
   locked_until: number | null; // Unix timestamp when lockout expires
+  token_version: number; // Incremented on password change to invalidate old tokens
   created_at: string;
 }
 
@@ -203,6 +204,13 @@ export const initDb = (dataDir: string, inMemory = false): void => {
     Logger.info('Migrating database: adding account lockout columns');
     db.exec('ALTER TABLE users ADD COLUMN failed_login_attempts INTEGER DEFAULT 0');
     db.exec('ALTER TABLE users ADD COLUMN locked_until INTEGER');
+  }
+
+  // Migration: Add token versioning for token revocation
+  const hasTokenVersion = columns.some((col) => col.name === 'token_version');
+  if (!hasTokenVersion) {
+    Logger.info('Migrating database: adding token_version column');
+    db.exec('ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 0');
   }
 
   Logger.info(`Database initialized at ${dbPath}`);
