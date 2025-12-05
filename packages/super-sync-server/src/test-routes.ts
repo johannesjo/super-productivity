@@ -58,28 +58,34 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
           .get(email) as { id: number; email: string } | undefined;
 
         let userId: number;
+        let tokenVersion: number;
 
         if (existingUser) {
-          // User exists, just return a token for them
+          // User exists, get their current token version
+          const user = db
+            .prepare('SELECT token_version FROM users WHERE id = ?')
+            .get(existingUser.id) as { token_version: number } | undefined;
           userId = existingUser.id;
+          tokenVersion = user?.token_version ?? 0;
           Logger.info(`[TEST] Returning existing user: ${email} (ID: ${userId})`);
         } else {
           // Create user with is_verified=1 (skip email verification)
           const info = db
             .prepare(
               `
-              INSERT INTO users (email, password_hash, is_verified, verification_token, verification_token_expires_at)
-              VALUES (?, ?, 1, NULL, NULL)
+              INSERT INTO users (email, password_hash, is_verified, verification_token, verification_token_expires_at, token_version)
+              VALUES (?, ?, 1, NULL, NULL, 0)
             `,
             )
             .run(email, passwordHash);
 
           userId = info.lastInsertRowid as number;
+          tokenVersion = 0;
           Logger.info(`[TEST] Created test user: ${email} (ID: ${userId})`);
         }
 
-        // Generate JWT token
-        const token = jwt.sign({ userId, email }, getJwtSecret(), {
+        // Generate JWT token (include tokenVersion for consistency with auth.ts)
+        const token = jwt.sign({ userId, email, tokenVersion }, getJwtSecret(), {
           expiresIn: JWT_EXPIRY,
         });
 
