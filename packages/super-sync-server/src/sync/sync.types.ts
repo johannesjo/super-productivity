@@ -100,8 +100,11 @@ export interface PayloadValidationResult {
  * Validates operation payload structure based on operation type.
  * This is a server-side security check to ensure payloads have the expected structure.
  *
+ * Note: The entity ID is stored in operation.entityId, NOT in the payload.
+ * Payloads contain the entity data, e.g., { task: { id: '...', title: '...' } }
+ *
  * Rules:
- * - CRT: Must be an object with an 'id' field (string)
+ * - CRT: Must be a non-null object (contains the entity being created)
  * - UPD: Must be an object (partial update)
  * - DEL: Can be empty object, null, or object with deletion metadata
  * - MOV: Must be an object (contains move/reorder data)
@@ -134,16 +137,6 @@ export const validatePayload = (
   }
 
   const payloadObj = payload as Record<string, unknown>;
-
-  // CRT requires an 'id' field
-  if (opType === 'CRT') {
-    if (!('id' in payloadObj) || typeof payloadObj.id !== 'string') {
-      return { valid: false, error: 'CRT payload must contain a string id field' };
-    }
-    if (payloadObj.id.length === 0 || payloadObj.id.length > 255) {
-      return { valid: false, error: 'CRT payload id must be 1-255 characters' };
-    }
-  }
 
   // BATCH with 'entities' must have entities as an object
   if (opType === 'BATCH' && 'entities' in payloadObj) {
