@@ -20,6 +20,15 @@ export interface ServerConfig {
     pass?: string;
     from: string;
   };
+  /**
+   * Test mode configuration. When enabled, provides endpoints for E2E testing.
+   * NEVER enable in production!
+   */
+  testMode?: {
+    enabled: boolean;
+    /** Automatically verify users on registration (skip email verification) */
+    autoVerifyUsers: boolean;
+  };
 }
 
 const DEFAULT_CONFIG: ServerConfig = {
@@ -110,6 +119,17 @@ export const loadConfigFromEnv = (
       user: process.env.SMTP_USER,
       pass: process.env.SMTP_PASS,
       from: process.env.SMTP_FROM || '"SuperSync" <noreply@example.com>',
+    };
+  }
+
+  // Test mode configuration
+  if (process.env.TEST_MODE === 'true') {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('TEST_MODE cannot be enabled in production');
+    }
+    config.testMode = {
+      enabled: true,
+      autoVerifyUsers: true,
     };
   }
 
