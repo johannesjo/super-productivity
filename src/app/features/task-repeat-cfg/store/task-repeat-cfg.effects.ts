@@ -12,11 +12,7 @@ import {
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
-import {
-  addTaskRepeatCfgToTask,
-  deleteTaskRepeatCfg,
-  updateTaskRepeatCfg,
-} from './task-repeat-cfg.actions';
+import { addTaskRepeatCfgToTask, updateTaskRepeatCfg } from './task-repeat-cfg.actions';
 import { Task, TaskCopy } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
@@ -114,32 +110,16 @@ export class TaskRepeatCfgEffects {
     ),
   );
 
-  removeConfigIdFromTaskStateTasks$ = createEffect(() =>
-    this._localActions$.pipe(
-      ofType(deleteTaskRepeatCfg),
-      concatMap(({ id }) => this._taskService.getTasksByRepeatCfgId$(id).pipe(take(1))),
-      filter((tasks) => tasks && !!tasks.length),
-      mergeMap((tasks: Task[]) =>
-        tasks.map((task) =>
-          TaskSharedActions.updateTask({
-            task: {
-              id: task.id,
-              changes: {
-                repeatCfgId: undefined,
-              },
-            },
-          }),
-        ),
-      ),
-    ),
-  );
-
+  /**
+   * Unlink archive tasks when a task repeat config is deleted.
+   * Regular tasks are handled by the meta-reducer for atomic sync.
+   */
   removeConfigIdFromTaskArchiveTasks$ = createEffect(
     () =>
       this._localActions$.pipe(
-        ofType(deleteTaskRepeatCfg),
-        tap(({ id }) => {
-          this._taskArchiveService.removeRepeatCfgFromArchiveTasks(id);
+        ofType(TaskSharedActions.deleteTaskRepeatCfg),
+        tap(({ taskRepeatCfgId }) => {
+          this._taskArchiveService.removeRepeatCfgFromArchiveTasks(taskRepeatCfgId);
         }),
       ),
     { dispatch: false },

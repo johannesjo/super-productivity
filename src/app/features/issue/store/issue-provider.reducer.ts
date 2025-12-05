@@ -31,6 +31,9 @@ export const issueProviderReducer = createReducer(
       state,
     ),
   ),
+  on(TaskSharedActions.deleteIssueProvider, (state, { issueProviderId }) =>
+    adapter.removeOne(issueProviderId, state),
+  ),
   // -----------
 
   on(IssueProviderActions.addIssueProvider, (state, action) =>

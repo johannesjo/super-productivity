@@ -654,17 +654,25 @@ export class PluginBridgeService implements OnDestroy {
 
   /**
    * Internal method to persist plugin data
+   * Includes size and rate limit validation
    */
   private async _persistDataSynced(pluginId: string, dataStr: string): Promise<void> {
     typia.assert<string>(dataStr);
 
     try {
-      await this._pluginUserPersistenceService.persistPluginUserData(pluginId, dataStr);
+      this._pluginUserPersistenceService.persistPluginUserData(pluginId, dataStr);
       console.log('PluginBridge: Plugin data persisted successfully', {
         pluginId,
+        dataSize: new Blob([dataStr]).size,
       });
     } catch (error) {
+      // Log the specific error (rate limit or size exceeded)
       PluginLog.err('PluginBridge: Failed to persist plugin data:', error);
+
+      // Rethrow with the original error message for better debugging
+      if (error instanceof Error) {
+        throw error;
+      }
       throw new Error(this._translateService.instant(T.PLUGINS.UNABLE_TO_PERSIST_DATA));
     }
   }

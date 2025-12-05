@@ -261,5 +261,33 @@ export const TaskSharedActions = createActionGroup({
         opType: OpType.Batch,
       } satisfies PersistentActionMeta,
     }),
+
+    // Issue Provider Management
+    deleteIssueProvider: (props: {
+      issueProviderId: string;
+      taskIdsToUnlink: string[];
+    }) => ({
+      ...props,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityId: props.issueProviderId,
+        opType: OpType.Delete,
+      } satisfies PersistentActionMeta,
+    }),
+
+    // Task Repeat Config Management
+    deleteTaskRepeatCfg: (props: {
+      taskRepeatCfgId: string;
+      taskIdsToUnlink: string[];
+    }) => ({
+      ...props,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK_REPEAT_CFG',
+        entityId: props.taskRepeatCfgId,
+        opType: OpType.Delete,
+      } satisfies PersistentActionMeta,
+    }),
   },
 });

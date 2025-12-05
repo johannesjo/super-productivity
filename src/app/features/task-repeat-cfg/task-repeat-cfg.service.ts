@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import {
   addTaskRepeatCfgToTask,
-  deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
@@ -20,6 +19,7 @@ import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.c
 import { MatDialog } from '@angular/material/dialog';
 import { T } from '../../t.const';
 import { first, take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { Task } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
@@ -93,8 +93,17 @@ export class TaskRepeatCfgService {
     );
   }
 
-  deleteTaskRepeatCfg(id: string): void {
-    this._store$.dispatch(deleteTaskRepeatCfg({ id }));
+  async deleteTaskRepeatCfg(id: string): Promise<void> {
+    // Gather task IDs to unlink - this ensures atomic sync
+    const tasks = await firstValueFrom(this._taskService.getTasksByRepeatCfgId$(id));
+    const taskIdsToUnlink = tasks.map((task) => task.id);
+
+    this._store$.dispatch(
+      TaskSharedActions.deleteTaskRepeatCfg({
+        taskRepeatCfgId: id,
+        taskIdsToUnlink,
+      }),
+    );
   }
 
   deleteTaskRepeatCfgsNoTaskCleanup(ids: string[]): void {
@@ -149,9 +158,9 @@ export class TaskRepeatCfgService {
         },
       })
       .afterClosed()
-      .subscribe((isConfirm: boolean) => {
+      .subscribe(async (isConfirm: boolean) => {
         if (isConfirm) {
-          this.deleteTaskRepeatCfg(id);
+          await this.deleteTaskRepeatCfg(id);
         }
       });
   }
