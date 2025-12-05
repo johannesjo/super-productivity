@@ -44,6 +44,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { sortByTitle } from '../../util/sort-by-title';
+import { Note } from '../note/note.model';
+import { selectNoteFeatureState } from '../note/store/note.reducer';
+import { addNote } from '../note/store/note.actions';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 @Injectable({
@@ -301,6 +304,13 @@ export class ProjectService {
       noteIds: [],
     });
 
+    const noteState = await firstValueFrom(this._store$.select(selectNoteFeatureState));
+    const notesToCopy = template.noteIds
+      .map((noteId) => noteState.entities[noteId])
+      .filter((note): note is Note => !!note);
+    const newNoteIds = this._duplicateNotesToProject(notesToCopy, newProjectId);
+    this.update(newProjectId, { noteIds: newNoteIds });
+
     this._duplicateTasksToProject(parentTasks, newProjectId, false, taskState);
 
     this._duplicateTasksToProject(backlogTasks, newProjectId, true, taskState);
@@ -359,5 +369,26 @@ export class ProjectService {
         }
       }
     }
+  }
+
+  private _duplicateNotesToProject(notes: Note[], newProjectId: string): string[] {
+    const newNoteIds: string[] = [];
+    for (const note of notes) {
+      const newNoteId = nanoid();
+      newNoteIds.push(newNoteId);
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { id, projectId, isPinnedToToday, created, modified, ...noteToCopy } = note;
+
+      const newNote: Note = {
+        ...noteToCopy,
+        id: newNoteId,
+        projectId: newProjectId,
+        isPinnedToToday: false,
+        created: Date.now(),
+        modified: Date.now(),
+      };
+      this._store$.dispatch(addNote({ note: newNote, isPreventFocus: true }));
+    }
+    return newNoteIds;
   }
 }
