@@ -127,7 +127,7 @@ export class PfapiService {
       }
     });
 
-    this._commonAndLegacySyncConfig$.subscribe(async (cfg) => {
+    this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       try {
         this.pf.setActiveSyncProvider(
           cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
@@ -137,11 +137,11 @@ export class PfapiService {
             isEncrypt: !!cfg.isEncryptionEnabled,
             isCompress: !!cfg.isCompressionEnabled,
           });
-          PFLog.normal('Sync enabled and configured. Triggering initial sync.');
-          await this.pf.sync();
+          // NOTE: Don't trigger sync here - SyncEffects.triggerSync$ handles initial sync
+          // to avoid "Sync already in progress" errors from duplicate sync calls
         }
       } catch (e) {
-        PFLog.err('Failed to set sync provider or sync:', e);
+        PFLog.err('Failed to set sync provider:', e);
         const errorMsg =
           e instanceof Error ? e.message : 'Unknown error - check console for details';
         alert(`Unable to set sync provider: ${errorMsg}`);
