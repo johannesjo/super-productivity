@@ -2,13 +2,35 @@
 
 **Status:** Needs evaluation before implementation
 **Created:** December 4, 2025
-**Last Updated:** December 4, 2025
+**Last Updated:** December 5, 2025
 
 These items were identified in the code audit but require further evaluation and design discussion before implementation.
 
 ---
 
 ## Recently Completed ✅
+
+### Server Sync (SuperSync) Complete (December 2025)
+
+**Implementation:** Full sync infrastructure now operational
+
+- ✅ `OperationLogSyncService` orchestration with fresh client safety checks
+- ✅ `OperationLogUploadService` with API-based sync + file-based fallback
+- ✅ `OperationLogDownloadService` with pagination and bounded memory (50k ops max)
+- ✅ `ConflictResolutionService` with user dialog and batch application
+- ✅ `VectorClockService` for global/entity frontier tracking
+- ✅ `DependencyResolverService` for hard/soft dependency extraction
+- ✅ Rejected operations tracking and user notification
+- ✅ Integration tests: `sync-scenarios.integration.spec.ts` (protocol-level)
+- ✅ E2E test infrastructure: `supersync.spec.ts` (Playwright)
+
+### Tag Sanitization on Task Delete (December 2025)
+
+**Implementation:** `tag-shared.reducer.ts`
+
+- ✅ Remove subtask IDs from tags when parent task is deleted
+- ✅ Sanitize Tag updates to filter non-existent taskIds
+- ✅ Prevents referential integrity errors during sync
 
 ### Anchor-Based Move Operations (December 2025)
 
@@ -182,8 +204,25 @@ deleteProject: (taskProps: { projectId: string; noteIds: string[]; allTaskIds: s
 2. ~~**Move operations**~~ ✅ - Completed December 2025 (anchor-based positioning)
 3. ~~**moveToArchive**~~ - Deferred: full payload required for sync reliability
 4. ~~**deleteProject**~~ ✅ - Completed December 2025
+5. ~~**Server Sync**~~ ✅ - Completed December 2025 (single-version sync)
 
-> **Note:** Quota handling, deleteProject payload slim-down, and anchor-based move operations are complete. moveToArchive was analyzed and deferred - see Item 3 for rationale. The only remaining CRITICAL item is the Tombstone system.
+> **Note:** Server sync (SuperSync), quota handling, deleteProject payload slim-down, and anchor-based move operations are all complete. moveToArchive was analyzed and deferred - see Item 3 for rationale. The only remaining CRITICAL item is the Tombstone system.
+
+---
+
+## Current System Status
+
+| Component              | Status             | Notes                                             |
+| ---------------------- | ------------------ | ------------------------------------------------- |
+| **Local Persistence**  | ✅ Complete        | Event sourcing, crash recovery, fast hydration    |
+| **Legacy Sync Bridge** | ✅ Complete        | PFAPI integration, vector clock updates           |
+| **Server Sync (API)**  | ✅ Complete        | Single-schema-version, upload/download working    |
+| **Conflict Detection** | ✅ Complete        | Vector clock-based, user resolution UI            |
+| **Validation**         | ✅ Complete        | Typia + cross-model, 4 checkpoints                |
+| **Auto-Repair**        | ✅ Complete        | 6 fix categories, creates REPAIR operations       |
+| **Compaction**         | ✅ Complete        | Snapshot-based, retention windows, emergency mode |
+| **Cross-Schema Sync**  | ⚠️ Not Implemented | A.7.11 requires operation-level migration         |
+| **Tombstone System**   | ❌ Not Implemented | For delete safety + undo/restore                  |
 
 ---
 
@@ -191,3 +230,4 @@ deleteProject: (taskProps: { projectId: string; noteIds: string[]; allTaskIds: s
 
 - [operation-rules.md](./operation-rules.md) - Design rules reference
 - [code-audit.md](./code-audit.md) - Full audit findings
+- [operation-log-architecture.md](./operation-log-architecture.md) - Full system design
