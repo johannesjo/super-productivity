@@ -9,7 +9,6 @@ import { Task, TaskArchive, TaskCopy, TaskState } from '../../features/tasks/tas
 import { unique } from '../../util/unique';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { TaskRepeatCfgCopy } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
-import { ALL_ENTITY_MODEL_KEYS } from '../../core/persistence/persistence.const';
 import { IssueProvider } from '../../features/issue/issue.model';
 import { AppDataCompleteNew } from '../pfapi-config';
 import { INBOX_PROJECT } from '../../features/project/project.const';
@@ -18,8 +17,20 @@ import { IValidation } from 'typia';
 import { PFLog } from '../../core/log';
 import { repairMenuTree } from './repair-menu-tree';
 
-// TODO improve later
-const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = ALL_ENTITY_MODEL_KEYS;
+/**
+ * Entity state keys that have ids/entities structure.
+ * Used for fixing entity state consistency during repair.
+ */
+const ENTITY_STATE_KEYS: (keyof AppDataCompleteLegacy)[] = [
+  'project',
+  'issueProvider',
+  'tag',
+  'simpleCounter',
+  'note',
+  'metric',
+  'task',
+  'taskRepeatCfg',
+];
 
 export const dataRepair = (
   data: AppDataCompleteNew,
