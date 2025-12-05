@@ -348,4 +348,192 @@ describe('OperationApplierService', () => {
       expect(service.getFailedCount()).toBe(0);
     });
   });
+
+  describe('pruneOldFailedOperations', () => {
+    it('should remove operations older than maxAgeMs', async () => {
+      const oldOp = createMockOperation('old-op', 'TASK', OpType.Create, {
+        parentId: 'missing',
+      });
+      // Override timestamp to be old (8 days ago)
+      const eightDaysMs = 8 * 24 * 60 * 60 * 1000;
+      (oldOp as any).timestamp = Date.now() - eightDaysMs;
+
+      const recentOp = createMockOperation('recent-op', 'TASK', OpType.Create, {
+        parentId: 'missing',
+      });
+
+      const parentDep: OperationDependency = {
+        entityType: 'TASK',
+        entityId: 'missing',
+        mustExist: true,
+        relation: 'parent',
+      };
+
+      mockDependencyResolver.extractDependencies.and.returnValue([parentDep]);
+      mockDependencyResolver.checkDependencies.and.returnValue(
+        Promise.resolve({ missing: [parentDep] }),
+      );
+
+      // Create two failed operations
+      await service.applyOperations([oldOp]);
+      for (let i = 0; i < MAX_DEPENDENCY_RETRY_ATTEMPTS; i++) {
+        await service.applyOperations([]);
+      }
+
+      await service.applyOperations([recentOp]);
+      for (let i = 0; i < MAX_DEPENDENCY_RETRY_ATTEMPTS; i++) {
+        await service.applyOperations([]);
+      }
+
+      expect(service.getFailedCount()).toBe(2);
+
+      // Prune with 7-day default
+      const pruned = service.pruneOldFailedOperations();
+
+      expect(pruned).toBe(1);
+      expect(service.getFailedCount()).toBe(1);
+      expect(service.getFailedOperations()[0].op.id).toBe('recent-op');
+    });
+
+    it('should return 0 when no operations are old enough to prune', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Create, {
+        parentId: 'missing',
+      });
+
+      const parentDep: OperationDependency = {
+        entityType: 'TASK',
+        entityId: 'missing',
+        mustExist: true,
+        relation: 'parent',
+      };
+
+      mockDependencyResolver.extractDependencies.and.returnValue([parentDep]);
+      mockDependencyResolver.checkDependencies.and.returnValue(
+        Promise.resolve({ missing: [parentDep] }),
+      );
+
+      // Create a failed operation
+      await service.applyOperations([op]);
+      for (let i = 0; i < MAX_DEPENDENCY_RETRY_ATTEMPTS; i++) {
+        await service.applyOperations([]);
+      }
+
+      const pruned = service.pruneOldFailedOperations();
+
+      expect(pruned).toBe(0);
+      expect(service.getFailedCount()).toBe(1);
+    });
+  });
+
+  describe('snack notification', () => {
+    it('should show error snack on first failed operation', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Create, {
+        parentId: 'missing',
+      });
+
+      const parentDep: OperationDependency = {
+        entityType: 'TASK',
+        entityId: 'missing',
+        mustExist: true,
+        relation: 'parent',
+      };
+
+      mockDependencyResolver.extractDependencies.and.returnValue([parentDep]);
+      mockDependencyResolver.checkDependencies.and.returnValue(
+        Promise.resolve({ missing: [parentDep] }),
+      );
+
+      // Exhaust retries to create a failed operation
+      await service.applyOperations([op]);
+      for (let i = 0; i < MAX_DEPENDENCY_RETRY_ATTEMPTS; i++) {
+        await service.applyOperations([]);
+      }
+
+      expect(mockSnackService.open).toHaveBeenCalledTimes(1);
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+        }),
+      );
+    });
+  });
+
+  describe('dependency sorting edge cases', () => {
+    it('should handle soft dependencies for tie-breaking', async () => {
+      // Two CREATE ops: one has soft dependency on the other
+      const projectOp = createMockOperation(
+        'project-op',
+        'PROJECT',
+        OpType.Create,
+        { title: 'Project' },
+        'project-1',
+      );
+      const taskOp = createMockOperation(
+        'task-op',
+        'TASK',
+        OpType.Create,
+        { projectId: 'project-1' },
+        'task-1',
+      );
+
+      // Soft dependency: task has soft reference to project
+      const softDep: OperationDependency = {
+        entityType: 'PROJECT',
+        entityId: 'project-1',
+        mustExist: false, // Soft dependency
+        relation: 'reference',
+      };
+
+      mockDependencyResolver.extractDependencies.and.callFake((op: Operation) => {
+        if (op.id === 'task-op') {
+          return [softDep];
+        }
+        return [];
+      });
+
+      // Apply in reverse order (task first)
+      await service.applyOperations([taskOp, projectOp]);
+
+      // Both should be dispatched
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
+
+      // Project should be dispatched before task (soft dependency tie-breaking)
+      const calls = mockStore.dispatch.calls.all();
+      expect((calls[0].args[0] as any).meta.entityId).toBe('project-1');
+      expect((calls[1].args[0] as any).meta.entityId).toBe('task-1');
+    });
+
+    it('should handle operations with same timestamp using CREATE preference', async () => {
+      const timestamp = Date.now();
+
+      const updateOp = createMockOperation(
+        'update-op',
+        'TASK',
+        OpType.Update,
+        { title: 'Updated' },
+        'task-1',
+      );
+      (updateOp as any).timestamp = timestamp;
+
+      const createOp = createMockOperation(
+        'create-op',
+        'TASK',
+        OpType.Create,
+        { title: 'Created' },
+        'task-2',
+      );
+      (createOp as any).timestamp = timestamp;
+
+      // No dependencies
+      mockDependencyResolver.extractDependencies.and.returnValue([]);
+
+      // Apply update first
+      await service.applyOperations([updateOp, createOp]);
+
+      // CREATE should be dispatched first due to sorting preference
+      const calls = mockStore.dispatch.calls.all();
+      expect((calls[0].args[0] as any).meta.entityId).toBe('task-2'); // CREATE
+      expect((calls[1].args[0] as any).meta.entityId).toBe('task-1'); // UPDATE
+    });
+  });
 });
