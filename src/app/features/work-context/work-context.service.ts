@@ -528,8 +528,8 @@ export class WorkContextService {
     return this._store$.pipe(select(selectAllTasks)).pipe(
       map((tasks) =>
         getTimeSpentForDay(
-          // avoid double counting parent and sub tasks
-          tasks.filter((task) => !task.parentId),
+          // Guard against undefined tasks during sync, avoid double counting parent/sub tasks
+          tasks.filter((task) => task && !task.parentId),
           day,
         ),
       ),

@@ -1,5 +1,7 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
+import { MatDialog } from '@angular/material/dialog';
+import { firstValueFrom } from 'rxjs';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
   ConflictResult,
@@ -35,6 +37,7 @@ import {
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { DependencyResolverService } from './dependency-resolver.service';
+import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -64,14 +67,46 @@ export class OperationLogSyncService {
   private schemaMigrationService = inject(SchemaMigrationService);
   private snackService = inject(SnackService);
   private dependencyResolver = inject(DependencyResolverService);
+  private dialog = inject(MatDialog);
+
+  /**
+   * Checks if this client is "wholly fresh" - meaning it has never synced before
+   * and has no local operation history. A fresh client accepting remote data
+   * should require user confirmation to prevent accidental data loss.
+   *
+   * @returns true if this is a fresh client with no history
+   */
+  async isWhollyFreshClient(): Promise<boolean> {
+    const snapshot = await this.opLogStore.loadStateCache();
+    const lastSeq = await this.opLogStore.getLastSeq();
+
+    // Fresh client: no snapshot AND no operations in the log
+    return !snapshot && lastSeq === 0;
+  }
 
   /**
    * Upload pending local operations to remote storage.
    * Any piggybacked operations received during upload are automatically processed.
+   *
+   * SAFETY: A wholly fresh client (no snapshot, no operations) should NOT upload.
+   * Fresh clients must first download and apply remote data before they can contribute.
+   * This prevents scenarios where a fresh/empty client overwrites existing remote data.
    */
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<void> {
+    // SAFETY: Block upload from wholly fresh clients
+    // A fresh client has nothing meaningful to upload and uploading could overwrite
+    // valid remote data with empty/default state.
+    const isFresh = await this.isWhollyFreshClient();
+    if (isFresh) {
+      OpLog.warn(
+        'OperationLogSyncService: Upload blocked - this is a fresh client with no history. ' +
+          'Download remote data first before uploading.',
+      );
+      return;
+    }
+
     const result = await this.uploadService.uploadPendingOps(syncProvider);
 
     // Process any piggybacked ops from the upload response
@@ -82,6 +117,8 @@ export class OperationLogSyncService {
 
   /**
    * Download and process remote operations from storage.
+   * For fresh clients (no local history), shows a confirmation dialog before accepting remote data
+   * to prevent accidental data overwrites.
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -95,7 +132,53 @@ export class OperationLogSyncService {
       return;
     }
 
+    // SAFETY: Fresh client confirmation
+    // If this is a wholly fresh client (no local data) receiving remote data for the first time,
+    // show a confirmation dialog to prevent accidental data loss scenarios where a fresh client
+    // could overwrite existing remote data.
+    const isFreshClient = await this.isWhollyFreshClient();
+    if (isFreshClient && result.newOps.length > 0) {
+      OpLog.warn(
+        `OperationLogSyncService: Fresh client detected. Requesting confirmation before accepting ${result.newOps.length} remote ops.`,
+      );
+
+      const confirmed = await this._showFreshClientSyncConfirmation(result.newOps.length);
+      if (!confirmed) {
+        OpLog.normal(
+          'OperationLogSyncService: User cancelled fresh client sync. Remote data not applied.',
+        );
+        this.snackService.open({
+          msg: T.F.SYNC.S.FRESH_CLIENT_SYNC_CANCELLED,
+        });
+        return;
+      }
+
+      OpLog.normal(
+        'OperationLogSyncService: User confirmed fresh client sync. Proceeding with remote data.',
+      );
+    }
+
     await this._processRemoteOps(result.newOps);
+  }
+
+  /**
+   * Shows a confirmation dialog for fresh client sync.
+   * Asks user to confirm before accepting remote data on a fresh install.
+   */
+  private async _showFreshClientSyncConfirmation(opCount: number): Promise<boolean> {
+    const dialogRef = this.dialog.open(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        title: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE,
+        message: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE,
+        translateParams: { count: opCount },
+        okTxt: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.OK,
+        cancelTxt: T.G.CANCEL,
+      },
+    });
+
+    const result = await firstValueFrom(dialogRef.afterClosed());
+    return result === true;
   }
 
   /**
@@ -188,6 +271,8 @@ export class OperationLogSyncService {
       const storedSeqs: number[] = [];
       // Track ops that are NOT duplicates (need to be applied)
       const opsToApply: Operation[] = [];
+      // Track op IDs for error handling
+      const storedOpIds: string[] = [];
 
       // Store operations with pending status before applying
       // If we crash after storing but before applying, these will be retried on startup
@@ -195,6 +280,7 @@ export class OperationLogSyncService {
         if (!(await this.opLogStore.hasOp(op.id))) {
           const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
           storedSeqs.push(seq);
+          storedOpIds.push(op.id);
           opsToApply.push(op);
         } else {
           OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
@@ -203,7 +289,18 @@ export class OperationLogSyncService {
 
       // Apply only NON-duplicate ops to NgRx store
       if (opsToApply.length > 0) {
-        await this.operationApplier.applyOperations(opsToApply);
+        try {
+          await this.operationApplier.applyOperations(opsToApply);
+        } catch (e) {
+          // If application fails catastrophically, mark ops as failed to prevent
+          // them from being uploaded in a potentially inconsistent state
+          OpLog.err(
+            `OperationLogSyncService: Failed to apply ${opsToApply.length} ops. Marking as failed.`,
+            e,
+          );
+          await this.opLogStore.markFailed(storedOpIds);
+          throw e;
+        }
       }
 
       // Mark ops as successfully applied (crash recovery will skip these)
