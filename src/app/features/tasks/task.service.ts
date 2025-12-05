@@ -834,7 +834,10 @@ export class TaskService {
     if (parentTasks.length) {
       TaskLog.log('[TaskService] Dispatching moveToArchive action for parent tasks');
       // Only move parent tasks to archive, never subtasks
-      this._store.dispatch(TaskSharedActions.moveToArchive({ tasks: parentTasks }));
+      // Note: Pass only taskIds to reduce operation payload size
+      this._store.dispatch(
+        TaskSharedActions.moveToArchive({ taskIds: parentTasks.map((t) => t.id) }),
+      );
       // Only archive parent tasks to prevent orphaned subtasks
       TaskLog.log('[TaskService] Calling archive service to persist tasks');
       await this._archiveService.moveTasksToArchiveAndFlushArchiveIfDue(parentTasks);

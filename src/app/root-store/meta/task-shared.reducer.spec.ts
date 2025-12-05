@@ -780,17 +780,9 @@ describe('taskSharedMetaReducer', () => {
   });
 
   describe('moveToArchive action', () => {
-    const createArchiveAction = (tasks: Partial<TaskWithSubTasks>[] = []) =>
-      TaskSharedActions.moveToArchive({
-        tasks: tasks.map(
-          (t) =>
-            ({
-              ...createMockTask(),
-              subTasks: [],
-              ...t,
-            }) as TaskWithSubTasks,
-        ),
-      });
+    // Helper to create archive action with taskIds
+    const createArchiveAction = (taskIds: string[]) =>
+      TaskSharedActions.moveToArchive({ taskIds });
 
     it('should remove tasks from project taskIds and backlogTaskIds', () => {
       const testState = createStateWithExistingTasks(
@@ -799,14 +791,25 @@ describe('taskSharedMetaReducer', () => {
         ['task1', 'subtask1', 'keep-task'],
         ['task1', 'subtask1', 'today-task'],
       );
-      const action = createArchiveAction([
-        {
-          id: 'task1',
-          subTaskIds: ['subtask1'],
-          subTasks: [{ id: 'subtask1', tagIds: ['tag1'] } as Task],
-        },
-        { id: 'task2', projectId: 'project1' },
-      ]);
+      // Ensure task entities exist in state with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        subTaskIds: ['subtask1'],
+      });
+      testState[TASK_FEATURE_NAME].entities.subtask1 = createMockTask({
+        id: 'subtask1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        parentId: 'task1',
+      });
+      testState[TASK_FEATURE_NAME].entities.task2 = createMockTask({
+        id: 'task2',
+        projectId: 'project1',
+        tagIds: [],
+      });
+      const action = createArchiveAction(['task1', 'task2']);
 
       expectStateUpdate(
         {
@@ -824,7 +827,7 @@ describe('taskSharedMetaReducer', () => {
       );
     });
 
-    it('should handle empty tasks array', () => {
+    it('should handle empty taskIds array', () => {
       const action = createArchiveAction([]);
 
       expectStateUpdate(
@@ -850,6 +853,26 @@ describe('taskSharedMetaReducer', () => {
         ['parent-task', 'subtask1', 'keep-task'],
       );
 
+      // Add task entities with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+        id: 'parent-task',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        subTaskIds: ['subtask1', 'subtask2'],
+      });
+      testState[TASK_FEATURE_NAME].entities.subtask1 = createMockTask({
+        id: 'subtask1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        parentId: 'parent-task',
+      });
+      testState[TASK_FEATURE_NAME].entities.subtask2 = createMockTask({
+        id: 'subtask2',
+        projectId: 'project1',
+        tagIds: ['tag1', 'tag2'],
+        parentId: 'parent-task',
+      });
+
       // Add another tag
       testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
         id: 'tag2',
@@ -861,27 +884,7 @@ describe('taskSharedMetaReducer', () => {
         'tag2',
       ];
 
-      const action = createArchiveAction([
-        {
-          id: 'parent-task',
-          tagIds: ['tag1'],
-          subTaskIds: ['subtask1', 'subtask2'],
-          subTasks: [
-            {
-              ...DEFAULT_TASK,
-              id: 'subtask1',
-              projectId: 'test-project',
-              tagIds: ['tag1'],
-            },
-            {
-              ...DEFAULT_TASK,
-              id: 'subtask2',
-              projectId: 'test-project',
-              tagIds: ['tag1', 'tag2'],
-            },
-          ],
-        },
-      ]);
+      const action = createArchiveAction(['parent-task']);
 
       expectStateUpdate(
         {
@@ -919,13 +922,7 @@ describe('taskSharedMetaReducer', () => {
         tagIds: ['tag1'],
       });
 
-      const action = createArchiveAction([
-        {
-          id: 'task1',
-          projectId: undefined,
-          tagIds: ['tag1'],
-        },
-      ]);
+      const action = createArchiveAction(['task1']);
 
       expectStateUpdate(
         {
@@ -947,25 +944,19 @@ describe('taskSharedMetaReducer', () => {
         ['project-task', 'orphan-task'],
       );
 
-      // Create orphan task without projectId
+      // Create task entities with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities['project-task'] = createMockTask({
+        id: 'project-task',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+      });
       testState[TASK_FEATURE_NAME].entities['orphan-task'] = createMockTask({
         id: 'orphan-task',
         projectId: undefined,
         tagIds: ['tag1'],
       });
 
-      const action = createArchiveAction([
-        {
-          id: 'project-task',
-          projectId: 'project1',
-          tagIds: ['tag1'],
-        },
-        {
-          id: 'orphan-task',
-          projectId: undefined,
-          tagIds: ['tag1'],
-        },
-      ]);
+      const action = createArchiveAction(['project-task', 'orphan-task']);
 
       expectStateUpdate(
         {
@@ -990,12 +981,14 @@ describe('taskSharedMetaReducer', () => {
         [], // No tasks in TODAY
       );
 
-      const action = createArchiveAction([
-        {
-          id: 'task1',
-          tagIds: ['tag1'],
-        },
-      ]);
+      // Create task entity with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+      });
+
+      const action = createArchiveAction(['task1']);
 
       expectStateUpdate(
         {
@@ -1028,25 +1021,19 @@ describe('taskSharedMetaReducer', () => {
         'project2',
       ];
 
-      // Update task2 to be in project2
+      // Create task entities with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+      });
       testState[TASK_FEATURE_NAME].entities.task2 = createMockTask({
         id: 'task2',
         projectId: 'project2',
         tagIds: ['tag1'],
       });
 
-      const action = createArchiveAction([
-        {
-          id: 'task1',
-          projectId: 'project1',
-          tagIds: ['tag1'],
-        },
-        {
-          id: 'task2',
-          projectId: 'project2',
-          tagIds: ['tag1'],
-        },
-      ]);
+      const action = createArchiveAction(['task1', 'task2']);
 
       expectStateUpdate(
         {
@@ -1073,18 +1060,33 @@ describe('taskSharedMetaReducer', () => {
         [],
       );
 
-      const action = createArchiveAction([
-        {
-          id: 'parent',
-          tagIds: ['tag1'],
-          subTaskIds: ['sub1', 'sub2', 'sub3'],
-          subTasks: [
-            { ...DEFAULT_TASK, id: 'sub1', projectId: 'test-project', tagIds: ['tag1'] },
-            { ...DEFAULT_TASK, id: 'sub2', projectId: 'test-project', tagIds: ['tag1'] },
-            { ...DEFAULT_TASK, id: 'sub3', projectId: 'test-project', tagIds: ['tag1'] },
-          ],
-        },
-      ]);
+      // Create task entities with proper data for lookup
+      testState[TASK_FEATURE_NAME].entities.parent = createMockTask({
+        id: 'parent',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        subTaskIds: ['sub1', 'sub2', 'sub3'],
+      });
+      testState[TASK_FEATURE_NAME].entities.sub1 = createMockTask({
+        id: 'sub1',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        parentId: 'parent',
+      });
+      testState[TASK_FEATURE_NAME].entities.sub2 = createMockTask({
+        id: 'sub2',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        parentId: 'parent',
+      });
+      testState[TASK_FEATURE_NAME].entities.sub3 = createMockTask({
+        id: 'sub3',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        parentId: 'parent',
+      });
+
+      const action = createArchiveAction(['parent']);
 
       expectStateUpdate(
         {
