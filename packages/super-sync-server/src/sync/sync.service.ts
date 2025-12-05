@@ -69,6 +69,7 @@ interface PreparedStatements {
   getAllUserIds: Database.Statement;
   getOnlineDeviceCount: Database.Statement;
   getLatestOpForEntity: Database.Statement;
+  getMinServerSeq: Database.Statement;
 }
 
 /**
@@ -238,6 +239,11 @@ export class SyncService {
         WHERE user_id = ? AND entity_type = ? AND entity_id = ?
         ORDER BY server_seq DESC
         LIMIT 1
+      `),
+
+      // Get minimum server_seq for a user (for gap detection)
+      getMinServerSeq: this.db.prepare(`
+        SELECT MIN(server_seq) as min_seq FROM operations WHERE user_id = ?
       `),
     };
   }
@@ -493,15 +499,20 @@ export class SyncService {
   }
 
   /**
-   * Get operations and latest sequence atomically.
+   * Get operations and latest sequence atomically with gap detection.
    * Uses transaction to ensure the latestSeq matches the returned operations.
+   *
+   * Gap detection rules:
+   * 1. If sinceSeq > 0 and the first returned op's seq != sinceSeq + 1, there's a gap
+   * 2. If sinceSeq is older than our oldest retained operation, there's a gap
+   * 3. If sinceSeq > latestSeq, the client is ahead (should not happen, but handle gracefully)
    */
   getOpsSinceWithSeq(
     userId: number,
     sinceSeq: number,
     excludeClient?: string,
     limit: number = 500,
-  ): { ops: ServerOperation[]; latestSeq: number } {
+  ): { ops: ServerOperation[]; latestSeq: number; gapDetected: boolean } {
     const tx = this.db.transaction(() => {
       const stmt = excludeClient
         ? this.stmts.getOpsSinceExcludeClient
@@ -515,11 +526,41 @@ export class SyncService {
       const seqRow = this.stmts.getLatestSeq.get(userId) as
         | { last_seq: number }
         | undefined;
+      const minSeqRow = this.stmts.getMinServerSeq.get(userId) as
+        | { min_seq: number | null }
+        | undefined;
 
-      return { rows, latestSeq: seqRow?.last_seq ?? 0 };
+      return {
+        rows,
+        latestSeq: seqRow?.last_seq ?? 0,
+        minSeq: minSeqRow?.min_seq ?? null,
+      };
     });
 
-    const { rows, latestSeq } = tx();
+    const { rows, latestSeq, minSeq } = tx();
+
+    // Gap detection logic
+    let gapDetected = false;
+
+    if (sinceSeq > 0 && latestSeq > 0) {
+      // If we requested ops since a sequence, but the minimum retained op is higher,
+      // operations have been purged and there's a gap
+      if (minSeq !== null && sinceSeq < minSeq - 1) {
+        gapDetected = true;
+        Logger.warn(
+          `[user:${userId}] Gap detected: sinceSeq=${sinceSeq} but minSeq=${minSeq}`,
+        );
+      }
+
+      // If we got ops but the first one doesn't immediately follow sinceSeq,
+      // there's a gap (unless we're excluding a client and they created the gap)
+      if (!excludeClient && rows.length > 0 && rows[0].server_seq > sinceSeq + 1) {
+        gapDetected = true;
+        Logger.warn(
+          `[user:${userId}] Gap detected: expected seq ${sinceSeq + 1} but got ${rows[0].server_seq}`,
+        );
+      }
+    }
 
     const ops = rows.map((row) => ({
       serverSeq: row.server_seq,
@@ -538,7 +579,7 @@ export class SyncService {
       receivedAt: row.received_at,
     }));
 
-    return { ops, latestSeq };
+    return { ops, latestSeq, gapDetected };
   }
 
   getLatestSeq(userId: number): number {
