@@ -12,11 +12,13 @@ const TOMBSTONE_CLEANUP_INTERVAL = MS_PER_DAY; // Daily
 const OLD_OPS_CLEANUP_INTERVAL = MS_PER_DAY; // Daily
 const STALE_DEVICES_CLEANUP_INTERVAL = MS_PER_HOUR; // Hourly
 const RATE_LIMIT_CLEANUP_INTERVAL = MS_PER_HOUR; // Hourly
+const REQUEST_DEDUP_CLEANUP_INTERVAL = MS_PER_HOUR; // Hourly
 
 let tombstoneCleanupTimer: NodeJS.Timeout | null = null;
 let oldOpsCleanupTimer: NodeJS.Timeout | null = null;
 let staleDevicesCleanupTimer: NodeJS.Timeout | null = null;
 let rateLimitCleanupTimer: NodeJS.Timeout | null = null;
+let requestDedupCleanupTimer: NodeJS.Timeout | null = null;
 
 /**
  * Clean up expired tombstones
@@ -86,6 +88,21 @@ function cleanupRateLimitCounters(): void {
 }
 
 /**
+ * Clean up expired request deduplication entries to prevent memory leaks
+ */
+function cleanupRequestDedupEntries(): void {
+  try {
+    const syncService = getSyncService();
+    const cleaned = syncService.cleanupExpiredRequestDedupEntries();
+    if (cleaned > 0) {
+      Logger.info(`Request dedup cleanup: removed ${cleaned} expired entries`);
+    }
+  } catch (error) {
+    Logger.error(`Request dedup cleanup failed: ${error}`);
+  }
+}
+
+/**
  * Start all cleanup jobs
  */
 export function startCleanupJobs(): void {
@@ -97,6 +114,7 @@ export function startCleanupJobs(): void {
     cleanupOldOperations();
     cleanupStaleDevices();
     cleanupRateLimitCounters();
+    cleanupRequestDedupEntries();
   }, 10_000);
 
   // Schedule recurring jobs
@@ -115,6 +133,11 @@ export function startCleanupJobs(): void {
   rateLimitCleanupTimer = setInterval(
     cleanupRateLimitCounters,
     RATE_LIMIT_CLEANUP_INTERVAL,
+  );
+
+  requestDedupCleanupTimer = setInterval(
+    cleanupRequestDedupEntries,
+    REQUEST_DEDUP_CLEANUP_INTERVAL,
   );
 
   Logger.info('Cleanup jobs scheduled');
@@ -139,6 +162,10 @@ export function stopCleanupJobs(): void {
   if (rateLimitCleanupTimer) {
     clearInterval(rateLimitCleanupTimer);
     rateLimitCleanupTimer = null;
+  }
+  if (requestDedupCleanupTimer) {
+    clearInterval(requestDedupCleanupTimer);
+    requestDedupCleanupTimer = null;
   }
   Logger.info('Cleanup jobs stopped');
 }

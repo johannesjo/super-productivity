@@ -71,11 +71,28 @@ interface PreparedStatements {
   getLatestOpForEntity: Database.Statement;
 }
 
+/**
+ * Tracks recently processed request IDs for deduplication.
+ * Key format: "userId:requestId"
+ */
+interface RequestDeduplicationEntry {
+  processedAt: number;
+  results: UploadResult[];
+}
+
 export class SyncService {
   private db: Database.Database;
   private stmts!: PreparedStatements;
   private config: SyncConfig;
   private rateLimitCounters: Map<number, { count: number; resetAt: number }> = new Map();
+
+  /**
+   * Cache of recently processed request IDs for deduplication.
+   * Prevents duplicate processing when clients retry failed uploads.
+   * Entries expire after 5 minutes.
+   */
+  private requestDeduplicationCache: Map<string, RequestDeduplicationEntry> = new Map();
+  private readonly REQUEST_DEDUP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.db = getDb();
@@ -770,6 +787,61 @@ export class SyncService {
     for (const [userId, counter] of this.rateLimitCounters) {
       if (now > counter.resetAt) {
         this.rateLimitCounters.delete(userId);
+        cleaned++;
+      }
+    }
+
+    return cleaned;
+  }
+
+  // === Request Deduplication ===
+
+  /**
+   * Check if a request has already been processed.
+   * Returns the cached results if found, or null if new request.
+   */
+  checkRequestDeduplication(userId: number, requestId: string): UploadResult[] | null {
+    const key = `${userId}:${requestId}`;
+    const entry = this.requestDeduplicationCache.get(key);
+
+    if (!entry) {
+      return null;
+    }
+
+    // Check if entry has expired
+    if (Date.now() - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
+      this.requestDeduplicationCache.delete(key);
+      return null;
+    }
+
+    Logger.debug(
+      `[user:${userId}] Request ${requestId} already processed, returning cached results`,
+    );
+    return entry.results;
+  }
+
+  /**
+   * Store results for a processed request ID.
+   */
+  cacheRequestResults(userId: number, requestId: string, results: UploadResult[]): void {
+    const key = `${userId}:${requestId}`;
+    this.requestDeduplicationCache.set(key, {
+      processedAt: Date.now(),
+      results,
+    });
+  }
+
+  /**
+   * Clean up expired request deduplication entries.
+   * Should be called periodically (same schedule as rate limit cleanup).
+   */
+  cleanupExpiredRequestDedupEntries(): number {
+    const now = Date.now();
+    let cleaned = 0;
+
+    for (const [key, entry] of this.requestDeduplicationCache) {
+      if (now - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
+        this.requestDeduplicationCache.delete(key);
         cleaned++;
       }
     }
