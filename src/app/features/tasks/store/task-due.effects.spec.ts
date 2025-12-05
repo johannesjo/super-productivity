@@ -49,8 +49,8 @@ xdescribe('TaskDueEffects', () => {
     title: `Task ${id}`,
     projectId: 'project-1',
     created: Date.now(),
-    dueDay,
     ...partial,
+    dueDay, // Must come after partial to ensure dueDay is always set
   });
 
   beforeEach(() => {

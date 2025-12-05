@@ -89,6 +89,12 @@ describe('OperationLogDownloadService', () => {
           'acknowledgeOps',
         ]);
         (mockApiProvider as any).supportsOperationSync = true;
+        // Add privateCfg mock for E2E encryption support
+        (mockApiProvider as any).privateCfg = {
+          load: jasmine
+            .createSpy('privateCfg.load')
+            .and.returnValue(Promise.resolve(null)),
+        };
 
         mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
         mockApiProvider.downloadOps.and.returnValue(
