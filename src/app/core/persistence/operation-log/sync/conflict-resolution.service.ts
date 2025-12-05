@@ -18,6 +18,7 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 
 /**
  * Service to manage conflict resolution, typically presenting a UI to the user.
@@ -80,7 +81,9 @@ export class ConflictResolutionService {
           const appliedOpIds: string[] = [];
           let hadFailure = false;
 
-          // Store and apply operations ONE AT A TIME to avoid partial state corruption
+          // Step 1: Persist ALL operations first to ensure safety
+          // This ensures that even if we crash or fail during application,
+          // we have a record of all operations in the sequence
           for (const op of conflict.remoteOps) {
             // Skip duplicates
             if (await this.opLogStore.hasOp(op.id)) {
@@ -93,6 +96,12 @@ export class ConflictResolutionService {
               pendingApply: true,
             });
             storedOps.push({ id: op.id, seq });
+          }
+
+          // Step 2: Apply operations sequentially
+          for (const { id } of storedOps) {
+            const op = conflict.remoteOps.find((o) => o.id === id);
+            if (!op) continue;
 
             try {
               // Apply single operation
@@ -131,18 +140,17 @@ export class ConflictResolutionService {
               `ConflictResolutionService: Partial failure for ${conflict.entityId}. Applied ${appliedOpIds.length}/${conflict.remoteOps.length} ops`,
             );
 
-            // CRITICAL: Mark failed ops as rejected to prevent them from being
-            // incorrectly marked as 'applied' by _recoverPendingRemoteOps() on restart.
-            // Failed ops are those that were stored but not applied.
+            // Mark failed ops as 'failed' so they can be retried on next startup.
+            // After MAX_CONFLICT_RETRY_ATTEMPTS, markFailed will mark them as rejected.
             const failedOpIds = storedOps
               .filter((o) => !appliedSet.has(o.id))
               .map((o) => o.id);
 
             if (failedOpIds.length > 0) {
               OpLog.warn(
-                `ConflictResolutionService: Marking ${failedOpIds.length} failed ops as rejected`,
+                `ConflictResolutionService: Marking ${failedOpIds.length} failed ops for retry`,
               );
-              await this.opLogStore.markRejected(failedOpIds);
+              await this.opLogStore.markFailed(failedOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
             }
 
             this.snackService.open({

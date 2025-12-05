@@ -655,8 +655,8 @@ describe('Multi-User Isolation', () => {
       string,
       Record<string, { title: string }>
     >;
-    expect(user1State.task['user1-task']).toBeDefined();
-    expect(user1State.task['user2-task']).toBeUndefined();
+    expect(user1State.TASK['user1-task']).toBeDefined();
+    expect(user1State.TASK['user2-task']).toBeUndefined();
 
     // Get user 2's snapshot
     const user2Snapshot = await app.inject({
@@ -669,8 +669,8 @@ describe('Multi-User Isolation', () => {
       string,
       Record<string, { title: string }>
     >;
-    expect(user2State.task['user2-task']).toBeDefined();
-    expect(user2State.task['user1-task']).toBeUndefined();
+    expect(user2State.TASK['user2-task']).toBeDefined();
+    expect(user2State.TASK['user1-task']).toBeUndefined();
   });
 
   it('should isolate sync status between users', async () => {

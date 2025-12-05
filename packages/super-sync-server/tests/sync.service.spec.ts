@@ -449,10 +449,10 @@ describe('SyncService', () => {
         string,
         Record<string, { title: string; done: boolean }>
       >;
-      expect(state.task).toBeDefined();
-      expect(state.task.t1).toBeDefined();
-      expect(state.task.t1.title).toBe('Task 1');
-      expect(state.task.t1.done).toBe(true);
+      expect(state.TASK).toBeDefined();
+      expect(state.TASK.t1).toBeDefined();
+      expect(state.TASK.t1.title).toBe('Task 1');
+      expect(state.TASK.t1.done).toBe(true);
     });
 
     it('should use incremental snapshots', () => {
@@ -477,7 +477,7 @@ describe('SyncService', () => {
       const snap1 = service.generateSnapshot(userId);
       expect(snap1.serverSeq).toBe(1);
       expect(
-        (snap1.state as Record<string, Record<string, { text: string }>>).note.n1.text,
+        (snap1.state as Record<string, Record<string, { text: string }>>).NOTE.n1.text,
       ).toBe('Note 1');
 
       // Step 2: Add more operations
@@ -501,8 +501,8 @@ describe('SyncService', () => {
 
       expect(snap2.serverSeq).toBe(2);
       const state = snap2.state as Record<string, Record<string, { text: string }>>;
-      expect(state.note.n1.text).toBe('Note 1'); // Preserved
-      expect(state.note.n2.text).toBe('Note 2'); // Added
+      expect(state.NOTE.n1.text).toBe('Note 1'); // Preserved
+      expect(state.NOTE.n2.text).toBe('Note 2'); // Added
     });
 
     it('should handle deletions in snapshots', () => {
@@ -543,7 +543,7 @@ describe('SyncService', () => {
       const snap = service.generateSnapshot(userId);
       const state = snap.state as Record<string, Record<string, unknown>>;
 
-      expect(state.tag.tg1).toBeUndefined();
+      expect(state.TAG.tg1).toBeUndefined();
     });
 
     it('should handle MOV operations', () => {
@@ -582,7 +582,7 @@ describe('SyncService', () => {
       const snap = service.generateSnapshot(userId);
       const state = snap.state as Record<string, Record<string, { parentId: string }>>;
 
-      expect(state.task.t1.parentId).toBe('p1');
+      expect(state.TASK.t1.parentId).toBe('p1');
     });
 
     it('should handle BATCH operations with entities payload', () => {
@@ -612,8 +612,8 @@ describe('SyncService', () => {
         Record<string, { title: string; done: boolean }>
       >;
 
-      expect(state.task.t1.title).toBe('Task 1');
-      expect(state.task.t2.done).toBe(true);
+      expect(state.TASK.t1.title).toBe('Task 1');
+      expect(state.TASK.t2.done).toBe(true);
     });
 
     it('should return cached snapshot if up to date', () => {

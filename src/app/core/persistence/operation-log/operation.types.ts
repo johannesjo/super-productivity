@@ -158,9 +158,16 @@ export interface OperationLogEntry {
    * For remote ops only: tracks whether the op was successfully applied to the local NgRx store.
    * - 'pending': Stored in DB but not yet dispatched to state (e.g., during initial download).
    * - 'applied': Successfully dispatched to NgRx.
-   * Used for crash recovery: on startup, any 'pending' remote ops are re-dispatched.
+   * - 'failed': Attempted to apply but failed (e.g., missing dependency). Will be retried on startup.
+   * Used for crash recovery: on startup, any 'pending' or 'failed' remote ops are re-dispatched.
    */
-  applicationStatus?: 'pending' | 'applied';
+  applicationStatus?: 'pending' | 'applied' | 'failed';
+
+  /**
+   * For 'failed' ops: number of retry attempts.
+   * After MAX_CONFLICT_RETRY_ATTEMPTS, the op is marked as rejected.
+   */
+  retryCount?: number;
 }
 
 export interface EntityConflict {

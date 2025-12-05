@@ -1,14 +1,29 @@
 import { FastifyRequest, FastifyReply } from 'fastify';
 import { verifyToken } from './auth';
 
-// Extend FastifyRequest to include user
+// User payload type
+export interface AuthUser {
+  userId: number;
+  email: string;
+}
+
+// Extend FastifyRequest to include optional user (before auth)
 declare module 'fastify' {
   interface FastifyRequest {
-    user?: { userId: number; email: string };
+    user?: AuthUser;
   }
 }
 
-export const authenticate = async (req: FastifyRequest, reply: FastifyReply) => {
+// Type for requests after authentication middleware has run
+// Use this in route handlers that require auth
+export interface AuthenticatedFastifyRequest<T = unknown> extends FastifyRequest<T> {
+  user: AuthUser;
+}
+
+export const authenticate = async (
+  req: FastifyRequest,
+  reply: FastifyReply,
+): Promise<FastifyReply | void> => {
   const authHeader = req.headers.authorization;
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
     return reply.code(401).send({ error: 'Missing or invalid Authorization header' });

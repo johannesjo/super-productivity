@@ -5,7 +5,11 @@ import { Logger } from './logger';
 import { randomBytes } from 'crypto';
 import { sendVerificationEmail } from './email';
 
+// Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
+const BCRYPT_ROUNDS = 12;
+const JWT_EXPIRY = '7d';
+const VERIFICATION_TOKEN_EXPIRY_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 const getJwtSecret = (): string => {
   const secret = process.env.JWT_SECRET;
@@ -34,10 +38,9 @@ export const registerUser = async (
   // Password strength validation is handled by Zod in api.ts
 
   const db = getDb();
-  const passwordHash = await bcrypt.hash(password, 12);
+  const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const verificationToken = randomBytes(32).toString('hex');
-  const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
-  const expiresAt = Date.now() + TWENTY_FOUR_HOURS_MS;
+  const expiresAt = Date.now() + VERIFICATION_TOKEN_EXPIRY_MS;
 
   try {
     const info = db
@@ -82,7 +85,7 @@ export const registerUser = async (
             : randomBytes(32).toString('hex');
         const newExpiresAt = tokenStillValid
           ? existingUser.verification_token_expires_at
-          : Date.now() + TWENTY_FOUR_HOURS_MS;
+          : Date.now() + VERIFICATION_TOKEN_EXPIRY_MS;
 
         const previousToken = existingUser.verification_token;
         const previousExpiresAt = existingUser.verification_token_expires_at;
@@ -180,7 +183,7 @@ export const loginUser = async (
   }
 
   const token = jwt.sign({ userId: user.id, email: user.email }, JWT_SECRET, {
-    expiresIn: '7d',
+    expiresIn: JWT_EXPIRY,
   });
 
   return { token, user: { id: user.id, email: user.email } };

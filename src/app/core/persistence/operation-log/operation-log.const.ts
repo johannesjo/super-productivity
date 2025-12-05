@@ -56,14 +56,16 @@ export const COMPACTION_TIMEOUT_MS = 25000;
 /**
  * Maximum operations in the pending retry queue.
  * If exceeded, new operations are marked as failed immediately to prevent memory leaks.
+ * Set to 10000 to handle large initial imports with complex dependency chains.
  */
-export const MAX_PENDING_QUEUE_SIZE = 1000;
+export const MAX_PENDING_QUEUE_SIZE = 10000;
 
 /**
  * Maximum permanently failed operations to keep for debugging.
  * If exceeded, oldest failed operations are dropped to prevent memory leaks.
+ * Set to 2000 to provide adequate debugging history for complex sync scenarios.
  */
-export const MAX_FAILED_OPS_SIZE = 500;
+export const MAX_FAILED_OPS_SIZE = 2000;
 
 /**
  * Maximum retry attempts for downloading operation files.
@@ -97,3 +99,9 @@ export const LOCK_FINAL_VERIFICATION_DELAY_MS = 20;
  * millions of unsynced operations.
  */
 export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;
+
+/**
+ * Maximum retry attempts for operations that fail during conflict resolution.
+ * After this many retries across restarts, the operation is marked as rejected.
+ */
+export const MAX_CONFLICT_RETRY_ATTEMPTS = 5;

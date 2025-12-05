@@ -236,12 +236,14 @@ export class OperationApplierService {
 
   /**
    * Sorts operations topologically so that dependencies (parents) are applied
-   * before dependents (children). Uses Kahn's algorithm.
+   * before dependents (children). Uses Kahn's algorithm with soft dependency tie-breaking.
    *
    * For operations within the same batch, this ensures that:
    * - CREATE operations for parent entities come before CREATE operations for children
    * - Operations are ordered such that any entity referenced by another operation
    *   is created first (within the batch)
+   * - Soft dependencies (mustExist: false) are used as secondary sort preference to
+   *   minimize temporary broken references
    *
    * Note: This only sorts within the batch. Dependencies on entities that already
    * exist in the store are handled by the retry mechanism.
@@ -259,26 +261,33 @@ export class OperationApplierService {
       }
     }
 
-    // Build dependency graph: opId -> set of opIds that must come before it
-    const dependencies = new Map<string, Set<string>>();
+    // Build dependency graph: opId -> set of opIds that must come before it (hard deps)
+    // Also track soft dependencies for tie-breaking
+    const hardDependencies = new Map<string, Set<string>>();
+    const softDependsOn = new Map<string, Set<string>>(); // ops that soft-depend on this op
     const opById = new Map<string, Operation>();
 
     for (const op of ops) {
       opById.set(op.id, op);
-      dependencies.set(op.id, new Set());
+      hardDependencies.set(op.id, new Set());
 
       // Extract dependencies for this operation
       const deps = this.dependencyResolver.extractDependencies(op);
 
       for (const dep of deps) {
-        // Only consider hard dependencies (mustExist: true)
-        if (!dep.mustExist) continue;
-
         // Check if this dependency is created by another operation in this batch
         const creatorOp = creatorMap.get(dep.entityId);
         if (creatorOp && creatorOp.id !== op.id) {
-          // This operation depends on creatorOp
-          dependencies.get(op.id)!.add(creatorOp.id);
+          if (dep.mustExist) {
+            // Hard dependency - must be satisfied before this op
+            hardDependencies.get(op.id)!.add(creatorOp.id);
+          } else {
+            // Soft dependency - use for tie-breaking (creatorOp should come first)
+            if (!softDependsOn.has(creatorOp.id)) {
+              softDependsOn.set(creatorOp.id, new Set());
+            }
+            softDependsOn.get(creatorOp.id)!.add(op.id);
+          }
         }
       }
     }
@@ -286,10 +295,10 @@ export class OperationApplierService {
     // Kahn's algorithm for topological sort
     const inDegree = new Map<string, number>();
     for (const op of ops) {
-      inDegree.set(op.id, dependencies.get(op.id)!.size);
+      inDegree.set(op.id, hardDependencies.get(op.id)!.size);
     }
 
-    // Queue of operations with no dependencies (in-degree = 0)
+    // Queue of operations with no hard dependencies (in-degree = 0)
     const queue: Operation[] = [];
     for (const op of ops) {
       if (inDegree.get(op.id) === 0) {
@@ -300,11 +309,34 @@ export class OperationApplierService {
     const sorted: Operation[] = [];
 
     while (queue.length > 0) {
+      // Sort queue to prioritize:
+      // 1. CREATE ops first (they create entities others may reference)
+      // 2. Ops that have soft dependents (other ops soft-depend on them)
+      // 3. Earlier timestamp as final tie-breaker
+      queue.sort((a, b) => {
+        // CREATE ops first
+        const aIsCreate = a.opType === OpType.Create ? 1 : 0;
+        const bIsCreate = b.opType === OpType.Create ? 1 : 0;
+        if (aIsCreate !== bIsCreate) {
+          return bIsCreate - aIsCreate; // Higher (CREATE) first
+        }
+
+        // Ops with more soft dependents first (they unblock more ops)
+        const aSoftDeps = softDependsOn.get(a.id)?.size ?? 0;
+        const bSoftDeps = softDependsOn.get(b.id)?.size ?? 0;
+        if (aSoftDeps !== bSoftDeps) {
+          return bSoftDeps - aSoftDeps; // More soft dependents first
+        }
+
+        // Earlier timestamp first
+        return a.timestamp - b.timestamp;
+      });
+
       const op = queue.shift()!;
       sorted.push(op);
 
       // Reduce in-degree of operations that depend on this one
-      for (const [depOpId, depSet] of dependencies) {
+      for (const [depOpId, depSet] of hardDependencies) {
         if (depSet.has(op.id)) {
           depSet.delete(op.id);
           const newDegree = inDegree.get(depOpId)! - 1;
