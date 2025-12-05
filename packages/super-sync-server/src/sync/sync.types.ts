@@ -24,6 +24,53 @@ export type VectorClock = Record<string, number>;
  */
 export type VectorClockComparison = 'LESS_THAN' | 'GREATER_THAN' | 'EQUAL' | 'CONCURRENT';
 
+/**
+ * Validates and sanitizes a vector clock.
+ * Returns a sanitized clock with validated entries, or an error.
+ *
+ * Validation rules:
+ * - Maximum 100 entries (prevents DoS via huge clocks)
+ * - Keys must be non-empty strings, max 255 characters
+ * - Values must be non-negative integers, max 10 million
+ * - Invalid entries are removed (not rejected)
+ */
+export const sanitizeVectorClock = (
+  clock: unknown,
+): { valid: true; clock: VectorClock } | { valid: false; error: string } => {
+  if (typeof clock !== 'object' || clock === null || Array.isArray(clock)) {
+    return { valid: false, error: 'Vector clock must be an object' };
+  }
+
+  const entries = Object.entries(clock as Record<string, unknown>);
+
+  if (entries.length > 100) {
+    return { valid: false, error: 'Vector clock has too many entries (max 100)' };
+  }
+
+  const sanitized: VectorClock = {};
+
+  for (const [key, value] of entries) {
+    // Validate key
+    if (typeof key !== 'string' || key.length === 0 || key.length > 255) {
+      continue; // Skip invalid keys
+    }
+
+    // Validate value
+    if (
+      typeof value !== 'number' ||
+      !Number.isInteger(value) ||
+      value < 0 ||
+      value > 10000000
+    ) {
+      continue; // Skip invalid values
+    }
+
+    sanitized[key] = value;
+  }
+
+  return { valid: true, clock: sanitized };
+};
+
 export const compareVectorClocks = (
   a: VectorClock,
   b: VectorClock,
