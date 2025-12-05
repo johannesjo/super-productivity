@@ -689,4 +689,175 @@ base.describe('@supersync SuperSync E2E', () => {
       }
     },
   );
+
+  /**
+   * Scenario 5.1: Task Archiving and Worklog Sync
+   *
+   * Tests that archived tasks appear in worklog on both clients after sync.
+   *
+   * Setup: Client A and B with shared account
+   *
+   * Actions:
+   * 1. Client A creates tasks and marks them done
+   * 2. Client A syncs
+   * 3. Client B syncs (receives tasks)
+   * 4. Client B archives tasks via "Finish Day"
+   * 5. Client B syncs (uploads archive operation)
+   * 6. Client A syncs (receives archive)
+   * 7. Both clients verify tasks appear in worklog
+   *
+   * Expected:
+   * - Both clients show archived tasks in worklog
+   * - Task titles visible in worklog entries
+   */
+  base(
+    '5.1 Archived tasks appear in worklog on both clients',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const uniqueId = Date.now();
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        // Create shared test user
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // ============ PHASE 1: Client A Creates and Completes Tasks ============
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        // Create two tasks
+        const task1Name = `Archive-Task1-${uniqueId}`;
+        const task2Name = `Archive-Task2-${uniqueId}`;
+
+        await clientA.workView.addTask(task1Name);
+        console.log(`[Archive Test] Client A created task: ${task1Name}`);
+
+        await clientA.workView.addTask(task2Name);
+        console.log(`[Archive Test] Client A created task: ${task2Name}`);
+
+        // Mark both tasks as done
+        const task1Locator = clientA.page.locator(`task:has-text("${task1Name}")`);
+        await task1Locator.hover();
+        await task1Locator.locator('.task-done-btn').click();
+        console.log(`[Archive Test] Client A marked ${task1Name} as done`);
+
+        const task2Locator = clientA.page.locator(`task:has-text("${task2Name}")`);
+        await task2Locator.hover();
+        await task2Locator.locator('.task-done-btn').click();
+        console.log(`[Archive Test] Client A marked ${task2Name} as done`);
+
+        // ============ PHASE 2: Sync Tasks to Server ============
+        await clientA.sync.syncAndWait();
+        console.log('[Archive Test] Client A synced tasks');
+
+        // ============ PHASE 3: Client B Downloads Tasks ============
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        console.log('[Archive Test] Client B synced (downloaded tasks)');
+
+        // Verify Client B has the tasks
+        await waitForTask(clientB.page, task1Name);
+        await waitForTask(clientB.page, task2Name);
+        console.log('[Archive Test] Client B received both tasks');
+
+        // ============ PHASE 4: Client B Archives Tasks via Finish Day ============
+        // Click "Finish Day" button to go to daily summary
+        const finishDayBtn = clientB.page.locator('.e2e-finish-day');
+        await finishDayBtn.waitFor({ state: 'visible', timeout: 10000 });
+        await finishDayBtn.click();
+        console.log('[Archive Test] Client B clicked Finish Day');
+
+        // Wait for daily summary page
+        await clientB.page.waitForURL(/daily-summary/, { timeout: 10000 });
+        await clientB.page.waitForLoadState('networkidle');
+        console.log('[Archive Test] Client B on daily summary page');
+
+        // Click the "Save and go home" button to archive tasks
+        const saveAndGoHomeBtn = clientB.page.locator(
+          'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
+        );
+        await saveAndGoHomeBtn.waitFor({ state: 'visible', timeout: 10000 });
+        await saveAndGoHomeBtn.click();
+        console.log('[Archive Test] Client B clicked Save and go home (archiving)');
+
+        // Wait for navigation back to work view
+        await clientB.page.waitForURL(/tag\/TODAY/, { timeout: 10000 });
+        await clientB.page.waitForLoadState('networkidle');
+        console.log('[Archive Test] Client B back on work view after archiving');
+
+        // ============ PHASE 5: Sync Archive Operation ============
+        await clientB.sync.syncAndWait();
+        console.log('[Archive Test] Client B synced (uploaded archive)');
+
+        // Client A syncs to receive archive
+        await clientA.sync.syncAndWait();
+        console.log('[Archive Test] Client A synced (downloaded archive)');
+
+        // ============ PHASE 6: Verify Worklog on Both Clients ============
+        // Navigate Client A to worklog
+        await clientA.page.goto('/#/tag/TODAY/worklog');
+        await clientA.page.waitForLoadState('networkidle');
+        await clientA.page.waitForSelector('worklog', { timeout: 10000 });
+        console.log('[Archive Test] Client A navigated to worklog');
+
+        // Navigate Client B to worklog
+        await clientB.page.goto('/#/tag/TODAY/worklog');
+        await clientB.page.waitForLoadState('networkidle');
+        await clientB.page.waitForSelector('worklog', { timeout: 10000 });
+        console.log('[Archive Test] Client B navigated to worklog');
+
+        // Expand the current day's worklog to see tasks
+        // Click on the week row to expand it
+        const expandWorklogA = async (): Promise<void> => {
+          const weekRow = clientA.page.locator('.week-row').first();
+          if (await weekRow.isVisible()) {
+            await weekRow.click();
+            await clientA.page.waitForTimeout(500);
+          }
+        };
+
+        const expandWorklogB = async (): Promise<void> => {
+          const weekRow = clientB.page.locator('.week-row').first();
+          if (await weekRow.isVisible()) {
+            await weekRow.click();
+            await clientB.page.waitForTimeout(500);
+          }
+        };
+
+        await expandWorklogA();
+        await expandWorklogB();
+
+        // Verify tasks appear in worklog on both clients
+        // Tasks are shown in .task-title within the worklog table
+        const task1InWorklogA = clientA.page.locator(
+          `.task-summary-table .task-title:has-text("${task1Name}")`,
+        );
+        const task2InWorklogA = clientA.page.locator(
+          `.task-summary-table .task-title:has-text("${task2Name}")`,
+        );
+        const task1InWorklogB = clientB.page.locator(
+          `.task-summary-table .task-title:has-text("${task1Name}")`,
+        );
+        const task2InWorklogB = clientB.page.locator(
+          `.task-summary-table .task-title:has-text("${task2Name}")`,
+        );
+
+        await expect(task1InWorklogA).toBeVisible({ timeout: 10000 });
+        await expect(task2InWorklogA).toBeVisible({ timeout: 10000 });
+        console.log('[Archive Test] Client A worklog has both tasks');
+
+        await expect(task1InWorklogB).toBeVisible({ timeout: 10000 });
+        await expect(task2InWorklogB).toBeVisible({ timeout: 10000 });
+        console.log('[Archive Test] Client B worklog has both tasks');
+
+        console.log('[Archive Test] ✓ All verifications passed!');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
