@@ -195,4 +195,8 @@ If payload size becomes a real problem (not theoretical), revisit Option D (oper
 3. Performance testing with 20K+ tasks
 4. PFAPI compatibility during transition
 
+**Alternative Optimization:**
+
+5. **Payload Compression**: Since task data (text/JSON) compresses extremely well (often >90%), we could compress the `_tasks` payload within the `moveToArchive` operation (e.g., using LZ-string or GZIP) before sending. This would solve the size concern without requiring the architectural overhaul of Option D.
+
 Until then, current approach is the right balance.
