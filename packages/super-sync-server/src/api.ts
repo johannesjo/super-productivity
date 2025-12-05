@@ -22,9 +22,24 @@ type RegisterBody = z.infer<typeof RegisterSchema>;
 type LoginBody = z.infer<typeof LoginSchema>;
 type VerifyEmailBody = z.infer<typeof VerifyEmailSchema>;
 
-// Error response helper
-const errorMessage = (err: unknown): string =>
-  err instanceof Error ? err.message : 'Unknown error';
+// Known safe error messages that can be shown to clients
+const SAFE_ERROR_MESSAGES = new Set([
+  'Invalid credentials',
+  'Email not verified',
+  'Invalid verification token',
+  'Verification token has expired',
+  'Registration successful. Please check your email to verify your account.',
+  'Failed to send verification email. Please try again later.',
+  'Account temporarily locked due to too many failed login attempts. Please try again later.',
+]);
+
+// Returns a safe error message for clients (hides internal details)
+const getSafeErrorMessage = (err: unknown, fallback: string): string => {
+  if (err instanceof Error && SAFE_ERROR_MESSAGES.has(err.message)) {
+    return err.message;
+  }
+  return fallback;
+};
 
 export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
   // Stricter rate limiting for registration (5 attempts per 15 minutes)
@@ -53,10 +68,11 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const result = await registerUser(email, password);
         return reply.status(201).send(result);
       } catch (err) {
-        Logger.error(`Registration error: ${errorMessage(err)}`);
-        // Generic error message to avoid leaking implementation details (e.g. specific DB errors)
-        // unless it's a known business logic error (which we might want to refine later)
-        return reply.status(400).send({ error: errorMessage(err) });
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Registration error: ${errMsg}`);
+        return reply.status(400).send({
+          error: getSafeErrorMessage(err, 'Registration failed. Please try again.'),
+        });
       }
     },
   );
@@ -86,8 +102,11 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         verifyEmail(token);
         return reply.send({ message: 'Email verified successfully' });
       } catch (err) {
-        Logger.error(`Verification error: ${errorMessage(err)}`);
-        return reply.status(400).send({ error: errorMessage(err) });
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Verification error: ${errMsg}`);
+        return reply.status(400).send({
+          error: getSafeErrorMessage(err, 'Verification failed. Please try again.'),
+        });
       }
     },
   );
@@ -118,8 +137,11 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         return reply.send(result);
       } catch (err) {
-        Logger.error(`Login error: ${errorMessage(err)}`);
-        return reply.status(401).send({ error: errorMessage(err) });
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Login error: ${errMsg}`);
+        return reply.status(401).send({
+          error: getSafeErrorMessage(err, 'Authentication failed'),
+        });
       }
     },
   );
