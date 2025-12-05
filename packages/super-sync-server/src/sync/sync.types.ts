@@ -119,6 +119,7 @@ export interface UploadOpsRequest {
   ops: Operation[];
   clientId: string;
   lastKnownServerSeq?: number;
+  requestId?: string; // For request deduplication on retries
 }
 
 export interface UploadResult {

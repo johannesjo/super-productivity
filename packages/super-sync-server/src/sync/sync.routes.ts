@@ -33,6 +33,7 @@ const UploadOpsSchema = z.object({
   ops: z.array(OperationSchema).min(1).max(DEFAULT_SYNC_CONFIG.maxOpsPerUpload),
   clientId: z.string().min(1),
   lastKnownServerSeq: z.number().optional(),
+  requestId: z.string().min(1).max(64).optional(), // For request deduplication
 });
 
 const DownloadOpsQuerySchema = z.object({
@@ -89,12 +90,28 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           });
         }
 
-        const { ops, clientId, lastKnownServerSeq } = parseResult.data;
+        const { ops, clientId, lastKnownServerSeq, requestId } = parseResult.data;
         const syncService = getSyncService();
 
         Logger.info(
           `[user:${userId}] Upload: ${ops.length} ops from client ${clientId.slice(0, 8)}...`,
         );
+
+        // Check for duplicate request (client retry)
+        if (requestId) {
+          const cachedResults = syncService.checkRequestDeduplication(userId, requestId);
+          if (cachedResults) {
+            Logger.info(
+              `[user:${userId}] Returning cached results for request ${requestId}`,
+            );
+            const latestSeq = syncService.getLatestSeq(userId);
+            return reply.send({
+              results: cachedResults,
+              latestSeq,
+              deduplicated: true,
+            } as UploadOpsResponse & { deduplicated: boolean });
+          }
+        }
 
         // Rate limit check
         if (syncService.isRateLimited(userId)) {
@@ -108,6 +125,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           clientId,
           ops as unknown as import('./sync.types').Operation[],
         );
+
+        // Cache results for deduplication if requestId was provided
+        if (requestId) {
+          syncService.cacheRequestResults(userId, requestId, results);
+        }
 
         const accepted = results.filter((r) => r.accepted).length;
         const rejected = results.filter((r) => !r.accepted).length;
