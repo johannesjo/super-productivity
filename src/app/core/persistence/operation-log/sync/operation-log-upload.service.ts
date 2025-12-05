@@ -145,8 +145,9 @@ export class OperationLogUploadService {
           );
           let piggybackSyncOps = response.newOps.map((serverOp) => serverOp.op);
 
-          // Decrypt piggybacked ops if we have an encryption key
-          if (encryptKey) {
+          // Decrypt piggybacked ops if any are encrypted and we have a key
+          const hasEncryptedOps = piggybackSyncOps.some((op) => op.isPayloadEncrypted);
+          if (hasEncryptedOps && encryptKey) {
             piggybackSyncOps = await this.encryptionService.decryptOperations(
               piggybackSyncOps,
               encryptKey,

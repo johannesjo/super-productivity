@@ -82,6 +82,7 @@ export class OperationLogDownloadService {
     OpLog.normal('OperationLogDownloadService: Downloading remote operations via API...');
 
     const allNewOps: Operation[] = [];
+    let downloadFailed = false;
 
     // Get encryption key upfront
     const privateCfg =
@@ -127,6 +128,7 @@ export class OperationLogDownloadService {
               type: 'ERROR',
               msg: T.F.SYNC.S.ENCRYPTION_PASSWORD_REQUIRED,
             });
+            downloadFailed = true;
             return;
           }
 
@@ -142,6 +144,7 @@ export class OperationLogDownloadService {
                 type: 'ERROR',
                 msg: T.F.SYNC.S.DECRYPTION_FAILED,
               });
+              downloadFailed = true;
               return;
             }
             throw e;
@@ -184,6 +187,10 @@ export class OperationLogDownloadService {
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via API.`,
       );
     });
+
+    if (downloadFailed) {
+      return { newOps: [], success: false, failedFileCount: 0 };
+    }
 
     return { newOps: allNewOps, success: true, failedFileCount: 0 };
   }

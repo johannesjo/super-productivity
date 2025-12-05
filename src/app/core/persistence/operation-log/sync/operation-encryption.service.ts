@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { encrypt, decrypt } from '../../../../pfapi/api/encryption/encryption';
 import { SyncOperation } from '../../../../pfapi/api/sync/sync-provider.interface';
+import { DecryptError } from '../../../../pfapi/api/errors/errors';
 
 /**
  * Handles E2E encryption/decryption of operation payloads for SuperSync.
@@ -34,12 +35,19 @@ export class OperationEncryptionService {
     if (!op.isPayloadEncrypted) {
       return op;
     }
-    const decryptedStr = await decrypt(op.payload as string, encryptKey);
-    return {
-      ...op,
-      payload: JSON.parse(decryptedStr),
-      isPayloadEncrypted: false,
-    };
+    if (typeof op.payload !== 'string') {
+      throw new DecryptError('Encrypted payload must be a string');
+    }
+    try {
+      const decryptedStr = await decrypt(op.payload, encryptKey);
+      return {
+        ...op,
+        payload: JSON.parse(decryptedStr),
+        isPayloadEncrypted: false,
+      };
+    } catch (e) {
+      throw new DecryptError('Failed to decrypt operation payload', e);
+    }
   }
 
   /**
