@@ -19,6 +19,13 @@ export class SuperSyncPage extends BasePage {
   readonly syncSpinner: Locator;
   readonly syncCheckIcon: Locator;
   readonly syncErrorIcon: Locator;
+  /** Fresh client confirmation dialog - appears when a new client first syncs */
+  readonly freshClientDialog: Locator;
+  readonly freshClientConfirmBtn: Locator;
+  /** Conflict resolution dialog - appears when local and remote have conflicting changes */
+  readonly conflictDialog: Locator;
+  readonly conflictUseRemoteBtn: Locator;
+  readonly conflictApplyBtn: Locator;
 
   constructor(page: Page) {
     super(page);
@@ -29,7 +36,19 @@ export class SuperSyncPage extends BasePage {
     this.saveBtn = page.locator('mat-dialog-actions button[mat-stroked-button]');
     this.syncSpinner = page.locator('.sync-btn mat-icon.spin');
     this.syncCheckIcon = page.locator('.sync-btn mat-icon.sync-state-ico');
-    this.syncErrorIcon = page.locator('.sync-btn mat-icon.error');
+    // Error state shows sync_problem icon (no special class, just the icon name)
+    this.syncErrorIcon = page.locator('.sync-btn mat-icon:has-text("sync_problem")');
+    // Fresh client confirmation dialog elements
+    this.freshClientDialog = page.locator('dialog-confirm');
+    this.freshClientConfirmBtn = page.locator('dialog-confirm button[mat-flat-button]');
+    // Conflict resolution dialog elements
+    this.conflictDialog = page.locator('dialog-conflict-resolution');
+    this.conflictUseRemoteBtn = page.locator(
+      'dialog-conflict-resolution button:has-text("Use All Remote")',
+    );
+    this.conflictApplyBtn = page.locator(
+      'dialog-conflict-resolution button:has-text("G.APPLY")',
+    );
   }
 
   /**
@@ -70,10 +89,71 @@ export class SuperSyncPage extends BasePage {
 
   /**
    * Wait for sync to complete (spinner gone, check icon visible).
+   * Automatically handles sync dialogs:
+   * - Fresh client confirmation dialog
+   * - Conflict resolution dialog (uses remote by default)
    */
   async waitForSyncComplete(timeout = 30000): Promise<void> {
-    await this.syncSpinner.waitFor({ state: 'hidden', timeout });
-    await this.syncCheckIcon.waitFor({ state: 'visible', timeout: 5000 });
+    const startTime = Date.now();
+
+    // Poll for completion while handling dialogs
+    while (Date.now() - startTime < timeout) {
+      // Check if fresh client confirmation dialog appeared
+      if (await this.freshClientDialog.isVisible()) {
+        console.log('[SuperSyncPage] Fresh client dialog detected, confirming...');
+        await this.freshClientConfirmBtn.click();
+        await this.page.waitForTimeout(500);
+        continue;
+      }
+
+      // Check if conflict resolution dialog appeared
+      if (await this.conflictDialog.isVisible()) {
+        console.log('[SuperSyncPage] Conflict dialog detected, using remote...');
+        await this.conflictUseRemoteBtn.click();
+        // Wait for selection to be applied
+        await this.page.waitForTimeout(300);
+        // Click G.APPLY to confirm the resolution
+        if (await this.conflictApplyBtn.isEnabled()) {
+          console.log('[SuperSyncPage] Clicking G.APPLY to apply resolution...');
+          await this.conflictApplyBtn.click();
+        }
+        // Wait for dialog to close and sync to continue
+        await this.page.waitForTimeout(1000);
+        continue;
+      }
+
+      // Check if sync is complete
+      const isSpinning = await this.syncSpinner.isVisible();
+      if (!isSpinning) {
+        // Check for error state first
+        const hasError = await this.syncErrorIcon.isVisible();
+        if (hasError) {
+          // Check for error snackbar
+          const errorSnackbar = this.page.locator(
+            'simple-snack-bar, .mat-mdc-snack-bar-container',
+          );
+          const snackbarText = await errorSnackbar
+            .textContent()
+            .catch(() => 'Unknown error');
+          throw new Error(`Sync failed: ${snackbarText?.trim() || 'Server error'}`);
+        }
+
+        // Sync finished successfully - verify with check icon
+        const checkVisible = await this.syncCheckIcon.isVisible();
+        if (checkVisible) {
+          return;
+        }
+
+        // Neither error nor success - wait a bit more
+        await this.page.waitForTimeout(500);
+        continue;
+      }
+
+      // Wait before checking again
+      await this.page.waitForTimeout(200);
+    }
+
+    throw new Error(`Sync did not complete within ${timeout}ms`);
   }
 
   /**
