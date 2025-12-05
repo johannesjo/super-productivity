@@ -110,15 +110,24 @@ export class SuperSyncPage extends BasePage {
       if (await this.conflictDialog.isVisible()) {
         console.log('[SuperSyncPage] Conflict dialog detected, using remote...');
         await this.conflictUseRemoteBtn.click();
-        // Wait for selection to be applied
-        await this.page.waitForTimeout(300);
-        // Click G.APPLY to confirm the resolution
-        if (await this.conflictApplyBtn.isEnabled()) {
-          console.log('[SuperSyncPage] Clicking G.APPLY to apply resolution...');
-          await this.conflictApplyBtn.click();
+        // Wait for selection to be applied and G.APPLY to be enabled
+        await this.page.waitForTimeout(500);
+
+        // Wait for G.APPLY button to be enabled (with retry)
+        for (let i = 0; i < 10; i++) {
+          if (await this.conflictApplyBtn.isEnabled()) {
+            console.log('[SuperSyncPage] Clicking G.APPLY to apply resolution...');
+            await this.conflictApplyBtn.click();
+            break;
+          }
+          await this.page.waitForTimeout(200);
         }
-        // Wait for dialog to close and sync to continue
-        await this.page.waitForTimeout(1000);
+
+        // Wait for dialog to close
+        await this.conflictDialog
+          .waitFor({ state: 'hidden', timeout: 5000 })
+          .catch(() => {});
+        await this.page.waitForTimeout(500);
         continue;
       }
 
@@ -165,9 +174,12 @@ export class SuperSyncPage extends BasePage {
 
   /**
    * Perform a full sync and wait for completion.
+   * Includes a settling delay to let UI update after sync.
    */
   async syncAndWait(): Promise<void> {
     await this.triggerSync();
     await this.waitForSyncComplete();
+    // Allow UI to settle after sync - reduces flakiness
+    await this.page.waitForTimeout(300);
   }
 }
