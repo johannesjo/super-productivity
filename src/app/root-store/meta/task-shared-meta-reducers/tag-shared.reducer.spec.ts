@@ -12,6 +12,8 @@ import {
   createStateWithExistingTasks,
   expectStateUpdate,
 } from './test-utils';
+import { updateTag } from '../../../features/tag/store/tag.actions';
+import { TODAY_TAG } from '../../../features/tag/tag.const';
 
 describe('tagSharedMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -293,6 +295,185 @@ describe('tagSharedMetaReducer', () => {
       metaReducer(baseState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(baseState, action);
+    });
+  });
+
+  describe('updateTag action sanitization', () => {
+    it('should filter out non-existent taskIds from Tag update', () => {
+      const testState = createStateWithExistingTasks(
+        ['existing-task-1', 'existing-task-2'],
+        [],
+        [],
+        [],
+      );
+
+      // Add Today tag to state
+      testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({
+        id: TODAY_TAG.id,
+        title: 'Today',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push(TODAY_TAG.id);
+
+      // Try to update Tag with taskIds that don't exist
+      const action = updateTag({
+        tag: {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: ['existing-task-1', 'non-existent-task', 'existing-task-2'],
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      // The action passed to the reducer should have sanitized taskIds
+      expect(mockReducer).toHaveBeenCalled();
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.tag.changes.taskIds).toEqual([
+        'existing-task-1',
+        'existing-task-2',
+      ]);
+    });
+
+    it('should not modify action when all taskIds exist', () => {
+      const testState = createStateWithExistingTasks(
+        ['task-1', 'task-2', 'task-3'],
+        [],
+        [],
+        [],
+      );
+
+      testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({
+        id: TODAY_TAG.id,
+        title: 'Today',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push(TODAY_TAG.id);
+
+      const action = updateTag({
+        tag: {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: ['task-1', 'task-2', 'task-3'],
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.tag.changes.taskIds).toEqual(['task-1', 'task-2', 'task-3']);
+    });
+
+    it('should pass through updateTag when no taskIds in changes', () => {
+      const testState = createBaseState();
+
+      testState[TAG_FEATURE_NAME].entities['tag-1'] = createMockTag({
+        id: 'tag-1',
+        title: 'My Tag',
+        taskIds: ['task-1'],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push('tag-1');
+
+      // Update tag without taskIds
+      const action = updateTag({
+        tag: {
+          id: 'tag-1',
+          changes: {
+            title: 'Updated Title',
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.tag.changes.title).toBe('Updated Title');
+      expect(passedAction.tag.changes.taskIds).toBeUndefined();
+    });
+
+    it('should filter all taskIds when none exist', () => {
+      const testState = createBaseState();
+
+      testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({
+        id: TODAY_TAG.id,
+        title: 'Today',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push(TODAY_TAG.id);
+
+      const action = updateTag({
+        tag: {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: ['non-existent-1', 'non-existent-2', 'non-existent-3'],
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.tag.changes.taskIds).toEqual([]);
+    });
+
+    it('should preserve other changes while sanitizing taskIds', () => {
+      const testState = createStateWithExistingTasks(['existing-task'], [], [], []);
+
+      testState[TAG_FEATURE_NAME].entities['my-tag'] = createMockTag({
+        id: 'my-tag',
+        title: 'Old Title',
+        taskIds: [],
+        color: '#000000',
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push('my-tag');
+
+      const action = updateTag({
+        tag: {
+          id: 'my-tag',
+          changes: {
+            title: 'New Title',
+            color: '#ff0000',
+            taskIds: ['existing-task', 'non-existent-task'],
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.tag.changes.title).toBe('New Title');
+      expect(passedAction.tag.changes.color).toBe('#ff0000');
+      expect(passedAction.tag.changes.taskIds).toEqual(['existing-task']);
+    });
+
+    it('should preserve meta property on sanitized action', () => {
+      const testState = createStateWithExistingTasks(['existing-task'], [], [], []);
+
+      testState[TAG_FEATURE_NAME].entities[TODAY_TAG.id] = createMockTag({
+        id: TODAY_TAG.id,
+        title: 'Today',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push(TODAY_TAG.id);
+
+      const action = updateTag({
+        tag: {
+          id: TODAY_TAG.id,
+          changes: {
+            taskIds: ['existing-task', 'non-existent-task'],
+          },
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const passedAction = mockReducer.calls.mostRecent().args[1];
+      expect(passedAction.meta).toBeDefined();
+      expect(passedAction.meta.isPersistent).toBe(true);
+      expect(passedAction.meta.entityType).toBe('TAG');
+      expect(passedAction.meta.entityId).toBe(TODAY_TAG.id);
     });
   });
 });
