@@ -10,6 +10,8 @@ import {
   OP_TYPES,
   ONLINE_DEVICE_THRESHOLD_MS,
   validatePayload,
+  compareVectorClocks,
+  VectorClock,
 } from './sync.types';
 import { Logger } from '../logger';
 
@@ -65,6 +67,7 @@ interface PreparedStatements {
   deleteStaleDevices: Database.Statement;
   getAllUserIds: Database.Statement;
   getOnlineDeviceCount: Database.Statement;
+  getLatestOpForEntity: Database.Statement;
 }
 
 export class SyncService {
@@ -210,7 +213,93 @@ export class SyncService {
         SELECT COUNT(*) as count FROM sync_devices
         WHERE user_id = ? AND last_seen_at > ?
       `),
+
+      // Get the most recent operation for a specific entity (for conflict detection)
+      getLatestOpForEntity: this.db.prepare(`
+        SELECT * FROM operations
+        WHERE user_id = ? AND entity_type = ? AND entity_id = ?
+        ORDER BY server_seq DESC
+        LIMIT 1
+      `),
     };
+  }
+
+  // === Conflict Detection ===
+
+  /**
+   * Check if an incoming operation conflicts with existing operations.
+   * Returns conflict info if a concurrent modification is detected.
+   *
+   * Conflict detection rules:
+   * - Only entity-specific ops (with entityId) can conflict
+   * - SYNC_IMPORT, BACKUP_IMPORT, REPAIR bypass conflict detection (full state operations)
+   * - UPD/DEL/MOV on an entity with a concurrent vector clock is a conflict
+   */
+  private detectConflict(
+    userId: number,
+    op: Operation,
+  ): { hasConflict: boolean; reason?: string; existingClock?: VectorClock } {
+    // Skip conflict detection for full-state operations
+    if (
+      op.opType === 'SYNC_IMPORT' ||
+      op.opType === 'BACKUP_IMPORT' ||
+      op.opType === 'REPAIR'
+    ) {
+      return { hasConflict: false };
+    }
+
+    // Skip if no entityId (can't have entity-level conflicts)
+    if (!op.entityId) {
+      return { hasConflict: false };
+    }
+
+    // Get the latest operation for this entity
+    const existingOp = this.stmts.getLatestOpForEntity.get(
+      userId,
+      op.entityType,
+      op.entityId,
+    ) as DbOperation | undefined;
+
+    // No existing operation = no conflict
+    if (!existingOp) {
+      return { hasConflict: false };
+    }
+
+    // Parse the existing operation's vector clock
+    const existingClock = JSON.parse(existingOp.vector_clock) as VectorClock;
+
+    // Compare vector clocks
+    const comparison = compareVectorClocks(op.vectorClock, existingClock);
+
+    // If the incoming op's clock is GREATER_THAN existing, it's a valid successor
+    if (comparison === 'GREATER_THAN') {
+      return { hasConflict: false };
+    }
+
+    // If clocks are EQUAL, this might be a retry of the same operation - check if from same client
+    if (comparison === 'EQUAL' && op.clientId === existingOp.client_id) {
+      return { hasConflict: false };
+    }
+
+    // CONCURRENT or LESS_THAN means conflict
+    if (comparison === 'CONCURRENT') {
+      return {
+        hasConflict: true,
+        reason: `Concurrent modification detected for ${op.entityType}:${op.entityId}`,
+        existingClock,
+      };
+    }
+
+    // LESS_THAN means the incoming op is older than what we have
+    if (comparison === 'LESS_THAN') {
+      return {
+        hasConflict: true,
+        reason: `Stale operation: server has newer version of ${op.entityType}:${op.entityId}`,
+        existingClock,
+      };
+    }
+
+    return { hasConflict: false };
   }
 
   // === Upload Operations ===
@@ -238,6 +327,23 @@ export class SyncService {
               opId: op.id,
               accepted: false,
               error: validation.error,
+            });
+            continue;
+          }
+
+          // Check for conflicts with existing operations
+          const conflict = this.detectConflict(userId, op);
+          if (conflict.hasConflict) {
+            Logger.warn(`[user:${userId}] Conflict detected: ${conflict.reason}`, {
+              opId: op.id,
+              opType: op.opType,
+              entityType: op.entityType,
+              entityId: op.entityId,
+            });
+            results.push({
+              opId: op.id,
+              accepted: false,
+              error: conflict.reason,
             });
             continue;
           }
