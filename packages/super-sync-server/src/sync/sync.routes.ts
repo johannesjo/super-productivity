@@ -1,7 +1,7 @@
-import { FastifyInstance, FastifyReply } from 'fastify';
+import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { uuidv7 } from 'uuidv7';
-import { authenticate, AuthenticatedFastifyRequest } from '../middleware';
+import { authenticate, getAuthUser } from '../middleware';
 import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
 import {
@@ -72,12 +72,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         },
       },
     },
-    async (
-      req: AuthenticatedFastifyRequest<{ Body: UploadOpsRequest }>,
-      reply: FastifyReply,
-    ) => {
+    async (req: FastifyRequest<{ Body: UploadOpsRequest }>, reply: FastifyReply) => {
       try {
-        const userId = req.user.userId;
+        const userId = getAuthUser(req).userId;
 
         // Validate request body
         const parseResult = UploadOpsSchema.safeParse(req.body);
@@ -137,13 +134,13 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       },
     },
     async (
-      req: AuthenticatedFastifyRequest<{
+      req: FastifyRequest<{
         Querystring: { sinceSeq: string; limit?: string; excludeClient?: string };
       }>,
       reply: FastifyReply,
     ) => {
       try {
-        const userId = req.user.userId;
+        const userId = getAuthUser(req).userId;
 
         // Validate query params
         const parseResult = DownloadOpsQuerySchema.safeParse(req.query);
@@ -183,43 +180,40 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   // GET /api/sync/snapshot - Get full state snapshot
-  fastify.get(
-    '/snapshot',
-    async (req: AuthenticatedFastifyRequest, reply: FastifyReply) => {
-      try {
-        const userId = req.user.userId;
-        const syncService = getSyncService();
+  fastify.get('/snapshot', async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const userId = getAuthUser(req).userId;
+      const syncService = getSyncService();
 
-        // Check if we have a cached snapshot
-        const cached = syncService.getCachedSnapshot(userId);
-        if (
-          cached &&
-          Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
-        ) {
-          return reply.send(cached as SnapshotResponse);
-        }
-
-        // Generate fresh snapshot by replaying ops
-        const snapshot = syncService.generateSnapshot(userId);
-        return reply.send(snapshot as SnapshotResponse);
-      } catch (err) {
-        Logger.error(`Get snapshot error: ${errorMessage(err)}`);
-        return reply.status(500).send({ error: 'Internal server error' });
+      // Check if we have a cached snapshot
+      const cached = syncService.getCachedSnapshot(userId);
+      if (
+        cached &&
+        Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
+      ) {
+        return reply.send(cached as SnapshotResponse);
       }
-    },
-  );
+
+      // Generate fresh snapshot by replaying ops
+      const snapshot = syncService.generateSnapshot(userId);
+      return reply.send(snapshot as SnapshotResponse);
+    } catch (err) {
+      Logger.error(`Get snapshot error: ${errorMessage(err)}`);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
 
   // POST /api/sync/snapshot - Upload full state
   fastify.post<{ Body: { state: unknown; clientId: string; reason: string } }>(
     '/snapshot',
     async (
-      req: AuthenticatedFastifyRequest<{
+      req: FastifyRequest<{
         Body: { state: unknown; clientId: string; reason: string };
       }>,
       reply: FastifyReply,
     ) => {
       try {
-        const userId = req.user.userId;
+        const userId = getAuthUser(req).userId;
 
         // Validate request body
         const parseResult = UploadSnapshotSchema.safeParse(req.body);
@@ -269,47 +263,44 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   );
 
   // GET /api/sync/status - Get sync status
-  fastify.get(
-    '/status',
-    async (req: AuthenticatedFastifyRequest, reply: FastifyReply) => {
-      try {
-        const userId = req.user.userId;
-        const syncService = getSyncService();
+  fastify.get('/status', async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const userId = getAuthUser(req).userId;
+      const syncService = getSyncService();
 
-        const latestSeq = syncService.getLatestSeq(userId);
-        const minAckedSeq = syncService.getMinAckedSeq(userId);
-        const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
+      const latestSeq = syncService.getLatestSeq(userId);
+      const minAckedSeq = syncService.getMinAckedSeq(userId);
+      const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
 
-        const cached = syncService.getCachedSnapshot(userId);
-        const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
+      const cached = syncService.getCachedSnapshot(userId);
+      const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
-        const response: SyncStatusResponse = {
-          latestSeq,
-          devicesOnline: syncService.getOnlineDeviceCount(userId),
-          pendingOps,
-          snapshotAge,
-        };
+      const response: SyncStatusResponse = {
+        latestSeq,
+        devicesOnline: syncService.getOnlineDeviceCount(userId),
+        pendingOps,
+        snapshotAge,
+      };
 
-        return reply.send(response);
-      } catch (err) {
-        Logger.error(`Get status error: ${errorMessage(err)}`);
-        return reply.status(500).send({ error: 'Internal server error' });
-      }
-    },
-  );
+      return reply.send(response);
+    } catch (err) {
+      Logger.error(`Get status error: ${errorMessage(err)}`);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
 
   // POST /api/sync/devices/:clientId/ack - Acknowledge received sequences
   fastify.post<{ Params: { clientId: string }; Body: { lastSeq: number } }>(
     '/devices/:clientId/ack',
     async (
-      req: AuthenticatedFastifyRequest<{
+      req: FastifyRequest<{
         Params: { clientId: string };
         Body: { lastSeq: number };
       }>,
       reply: FastifyReply,
     ) => {
       try {
-        const userId = req.user.userId;
+        const userId = getAuthUser(req).userId;
         const { clientId } = req.params;
 
         // Validate body

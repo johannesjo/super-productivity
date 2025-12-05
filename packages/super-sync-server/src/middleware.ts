@@ -14,11 +14,17 @@ declare module 'fastify' {
   }
 }
 
-// Type for requests after authentication middleware has run
-// Use this in route handlers that require auth
-export interface AuthenticatedFastifyRequest<T = unknown> extends FastifyRequest<T> {
-  user: AuthUser;
-}
+/**
+ * Helper to get authenticated user from request.
+ * Use this in route handlers protected by the authenticate preHandler hook.
+ * Throws if user is not set (should never happen after authenticate hook).
+ */
+export const getAuthUser = (req: FastifyRequest): AuthUser => {
+  if (!req.user) {
+    throw new Error('User not authenticated - missing auth middleware?');
+  }
+  return req.user;
+};
 
 export const authenticate = async (
   req: FastifyRequest,
