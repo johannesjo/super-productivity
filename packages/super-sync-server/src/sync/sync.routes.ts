@@ -15,15 +15,25 @@ import {
   SYNC_ERROR_CODES,
 } from './sync.types';
 
+// Validation constants
+const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
+const MAX_CLIENT_ID_LENGTH = 255;
+
 // Zod Schemas
+const ClientIdSchema = z
+  .string()
+  .min(1)
+  .max(MAX_CLIENT_ID_LENGTH)
+  .regex(CLIENT_ID_REGEX, 'clientId must be alphanumeric with underscores/hyphens only');
+
 const OperationSchema = z.object({
-  id: z.string().min(1),
-  clientId: z.string().min(1),
-  actionType: z.string().min(1),
+  id: z.string().min(1).max(255),
+  clientId: ClientIdSchema,
+  actionType: z.string().min(1).max(255),
   opType: z.enum(OP_TYPES),
-  entityType: z.string().min(1),
-  entityId: z.string().optional(),
-  entityIds: z.array(z.string()).optional(), // For batch operations
+  entityType: z.string().min(1).max(255),
+  entityId: z.string().max(255).optional(),
+  entityIds: z.array(z.string().max(255)).optional(), // For batch operations
   payload: z.unknown(),
   vectorClock: z.record(z.string(), z.number()),
   timestamp: z.number(),
@@ -32,7 +42,7 @@ const OperationSchema = z.object({
 
 const UploadOpsSchema = z.object({
   ops: z.array(OperationSchema).min(1).max(DEFAULT_SYNC_CONFIG.maxOpsPerUpload),
-  clientId: z.string().min(1),
+  clientId: ClientIdSchema,
   lastKnownServerSeq: z.number().optional(),
   requestId: z.string().min(1).max(64).optional(), // For request deduplication
 });
@@ -40,12 +50,12 @@ const UploadOpsSchema = z.object({
 const DownloadOpsQuerySchema = z.object({
   sinceSeq: z.coerce.number().int().min(0),
   limit: z.coerce.number().int().min(1).max(1000).optional(),
-  excludeClient: z.string().optional(),
+  excludeClient: ClientIdSchema.optional(),
 });
 
 const UploadSnapshotSchema = z.object({
   state: z.unknown(),
-  clientId: z.string().min(1),
+  clientId: ClientIdSchema,
   reason: z.enum(['initial', 'recovery', 'migration']),
   vectorClock: z.record(z.string(), z.number()),
   schemaVersion: z.number().optional(),
@@ -98,6 +108,22 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           `[user:${userId}] Upload: ${ops.length} ops from client ${clientId.slice(0, 8)}...`,
         );
 
+        // Rate limit check BEFORE deduplication to prevent bypass
+        // (attacker could retry with same requestId to skip rate limiting)
+        if (syncService.isRateLimited(userId)) {
+          Logger.audit({
+            event: 'RATE_LIMITED',
+            userId,
+            clientId,
+            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
+            opsCount: ops.length,
+          });
+          return reply.status(429).send({
+            error: 'Rate limited',
+            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
+          });
+        }
+
         // Check for duplicate request (client retry)
         if (requestId) {
           const cachedResults = syncService.checkRequestDeduplication(userId, requestId);
@@ -112,21 +138,6 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
               deduplicated: true,
             } as UploadOpsResponse & { deduplicated: boolean });
           }
-        }
-
-        // Rate limit check
-        if (syncService.isRateLimited(userId)) {
-          Logger.audit({
-            event: 'RATE_LIMITED',
-            userId,
-            clientId,
-            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
-            opsCount: ops.length,
-          });
-          return reply.status(429).send({
-            error: 'Rate limited',
-            errorCode: SYNC_ERROR_CODES.RATE_LIMITED,
-          });
         }
 
         // Process operations - cast to Operation[] since Zod validates the structure
@@ -254,7 +265,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
 
         Logger.info(
-          `[user:${userId}] Download: ${ops.length} ops (sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore}, gapDetected=${gapDetected})`,
+          `[user:${userId}] Download: ${ops.length} ops ` +
+            `(sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore}, gap=${gapDetected})`,
         );
 
         const response: DownloadOpsResponse = {

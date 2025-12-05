@@ -49,6 +49,12 @@ const ALLOWED_ENTITY_TYPES = new Set([
  */
 const MAX_OPS_FOR_SNAPSHOT = 100000;
 
+/**
+ * Maximum compressed snapshot size in bytes (50MB).
+ * Prevents storage exhaustion from excessively large snapshots.
+ */
+const MAX_SNAPSHOT_SIZE_BYTES = 50 * 1024 * 1024;
+
 interface PreparedStatements {
   insertOp: Database.Statement;
   getNextSeq: Database.Statement;
@@ -686,6 +692,15 @@ export class SyncService {
     const now = Date.now();
     // Compress snapshot to reduce storage
     const compressed = zlib.gzipSync(JSON.stringify(state));
+
+    // Enforce size limit to prevent storage exhaustion
+    if (compressed.length > MAX_SNAPSHOT_SIZE_BYTES) {
+      Logger.error(
+        `[user:${userId}] Snapshot too large: ${compressed.length} bytes ` +
+          `(max ${MAX_SNAPSHOT_SIZE_BYTES}). Skipping cache.`,
+      );
+      return;
+    }
 
     this.stmts.cacheSnapshot.run(compressed, serverSeq, now, userId);
   }
