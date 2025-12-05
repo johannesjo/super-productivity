@@ -1,3 +1,32 @@
+// Structured error codes for client handling
+export const SYNC_ERROR_CODES = {
+  // Validation errors (400)
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  INVALID_OP_ID: 'INVALID_OP_ID',
+  INVALID_OP_TYPE: 'INVALID_OP_TYPE',
+  INVALID_ENTITY_TYPE: 'INVALID_ENTITY_TYPE',
+  INVALID_ENTITY_ID: 'INVALID_ENTITY_ID',
+  INVALID_PAYLOAD: 'INVALID_PAYLOAD',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+  INVALID_VECTOR_CLOCK: 'INVALID_VECTOR_CLOCK',
+  INVALID_TIMESTAMP: 'INVALID_TIMESTAMP',
+  MISSING_ENTITY_ID: 'MISSING_ENTITY_ID',
+  INVALID_SCHEMA_VERSION: 'INVALID_SCHEMA_VERSION',
+
+  // Conflict errors (409)
+  CONFLICT_CONCURRENT: 'CONFLICT_CONCURRENT',
+  CONFLICT_STALE: 'CONFLICT_STALE',
+  DUPLICATE_OPERATION: 'DUPLICATE_OPERATION',
+
+  // Rate limiting (429)
+  RATE_LIMITED: 'RATE_LIMITED',
+
+  // Server errors (500)
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+export type SyncErrorCode = (typeof SYNC_ERROR_CODES)[keyof typeof SYNC_ERROR_CODES];
+
 // Operation types - single source of truth
 export const OP_TYPES = [
   'CRT',
@@ -127,6 +156,7 @@ export interface UploadResult {
   accepted: boolean;
   serverSeq?: number;
   error?: string;
+  errorCode?: SyncErrorCode;
 }
 
 export interface UploadOpsResponse {
