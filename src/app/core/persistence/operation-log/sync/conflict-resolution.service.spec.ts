@@ -237,5 +237,57 @@ describe('ConflictResolutionService', () => {
       expect(mockRepairOperationService.createRepairOperation).toHaveBeenCalled();
       expect(mockStore.dispatch).toHaveBeenCalled();
     });
+
+    it('should apply non-conflicting ops together with resolved conflict ops in single batch', async () => {
+      // Scenario: Task create (non-conflicting) depends on Project create (resolved from conflict)
+      // Both should be applied together so dependency sorting works
+      const projectConflict: EntityConflict[] = [
+        {
+          entityType: 'PROJECT',
+          entityId: 'proj-1',
+          localOps: [createMockOp('local-proj-1', 'local')],
+          remoteOps: [
+            {
+              ...createMockOp('remote-proj-1', 'remote'),
+              entityType: 'PROJECT',
+              entityId: 'proj-1',
+              opType: OpType.Create,
+            },
+          ],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      const taskOp: Operation = {
+        ...createMockOp('remote-task-1', 'remote'),
+        entityType: 'TASK',
+        entityId: 'task-1',
+        opType: OpType.Create,
+        payload: { projectId: 'proj-1' }, // Depends on the project in conflict
+      };
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'remote']]), // User chooses remote (create project)
+            conflicts: projectConflict,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(projectConflict, [taskOp]);
+
+      // Both the conflict op (project create) and non-conflicting op (task create)
+      // should be applied in a single call so dependency sorting works
+      expect(mockOperationApplier.applyOperations).toHaveBeenCalledTimes(1);
+      const appliedOps = mockOperationApplier.applyOperations.calls.mostRecent()
+        .args[0] as Operation[];
+      expect(appliedOps.length).toBe(2);
+      expect(appliedOps.map((o) => o.id).sort()).toEqual(
+        ['remote-proj-1', 'remote-task-1'].sort(),
+      );
+    });
   });
 });
