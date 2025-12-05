@@ -29,7 +29,21 @@ import {
 // ACTION HANDLERS
 // =============================================================================
 
-const handleMoveToArchive = (state: RootState, tasks: TaskWithSubTasks[]): RootState => {
+const handleMoveToArchive = (state: RootState, taskIds: string[]): RootState => {
+  // Look up tasks from state - they must exist since we're archiving them
+  const taskState = state[TASK_FEATURE_NAME];
+  const tasks: TaskWithSubTasks[] = taskIds
+    .map((id) => {
+      const task = taskState.entities[id];
+      if (!task) return null;
+      // Build TaskWithSubTasks by looking up subtasks
+      const subTasks = (task.subTaskIds || [])
+        .map((subId) => taskState.entities[subId])
+        .filter((st): st is Task => !!st);
+      return { ...task, subTasks } as TaskWithSubTasks;
+    })
+    .filter((t): t is TaskWithSubTasks => !!t);
+
   const taskIdsToArchive = tasks.flatMap((t) => [t.id, ...t.subTasks.map((st) => st.id)]);
 
   // Update projects
@@ -150,8 +164,8 @@ const handleRestoreTask = (
 
 const createActionHandlers = (state: RootState, action: Action): ActionHandlerMap => ({
   [TaskSharedActions.moveToArchive.type]: () => {
-    const { tasks } = action as ReturnType<typeof TaskSharedActions.moveToArchive>;
-    return handleMoveToArchive(state, tasks);
+    const { taskIds } = action as ReturnType<typeof TaskSharedActions.moveToArchive>;
+    return handleMoveToArchive(state, taskIds);
   },
   [TaskSharedActions.restoreTask.type]: () => {
     const { task, subTasks } = action as ReturnType<typeof TaskSharedActions.restoreTask>;
