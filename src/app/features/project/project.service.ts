@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
 import { Project } from './project.model';
 import { select, Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
@@ -246,7 +246,7 @@ export class ProjectService {
       throw new Error('No template project id given');
     }
 
-    const template = await this.getByIdOnce$(templateProjectId).pipe(take(1)).toPromise();
+    const template = await firstValueFrom(this.getByIdOnce$(templateProjectId));
     if (!template) {
       throw new Error('Template project not found');
     }
@@ -261,10 +261,9 @@ export class ProjectService {
     });
 
     // Fetch all tasks with subtask data and filter by project
-    const allTasks = await this._store$
-      .select(selectAllTasksWithSubTasks)
-      .pipe(take(1))
-      .toPromise();
+    const allTasks = await firstValueFrom(
+      this._store$.select(selectAllTasksWithSubTasks),
+    );
 
     const parentTasks = (allTasks || []).filter(
       (t) => t.projectId === templateProjectId && !t.parentId,
