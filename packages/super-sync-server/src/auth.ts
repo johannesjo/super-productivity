@@ -186,6 +186,8 @@ export const loginUser = async (
     expiresIn: JWT_EXPIRY,
   });
 
+  Logger.info(`User logged in: ${user.email} (ID: ${user.id})`);
+
   return { token, user: { id: user.id, email: user.email } };
 };
 

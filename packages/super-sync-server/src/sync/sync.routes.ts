@@ -79,6 +79,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         // Validate request body
         const parseResult = UploadOpsSchema.safeParse(req.body);
         if (!parseResult.success) {
+          Logger.warn(
+            `[user:${userId}] Upload validation failed`,
+            parseResult.error.issues,
+          );
           return reply.status(400).send({
             error: 'Validation failed',
             details: parseResult.error.issues,
@@ -88,8 +92,13 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const { ops, clientId, lastKnownServerSeq } = parseResult.data;
         const syncService = getSyncService();
 
+        Logger.info(
+          `[user:${userId}] Upload: ${ops.length} ops from client ${clientId.slice(0, 8)}...`,
+        );
+
         // Rate limit check
         if (syncService.isRateLimited(userId)) {
+          Logger.warn(`[user:${userId}] Rate limited`);
           return reply.status(429).send({ error: 'Rate limited' });
         }
 
@@ -100,10 +109,28 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           ops as unknown as import('./sync.types').Operation[],
         );
 
+        const accepted = results.filter((r) => r.accepted).length;
+        const rejected = results.filter((r) => !r.accepted).length;
+        Logger.info(
+          `[user:${userId}] Upload result: ${accepted} accepted, ${rejected} rejected`,
+        );
+
+        if (rejected > 0) {
+          Logger.debug(
+            `[user:${userId}] Rejected ops:`,
+            results.filter((r) => !r.accepted),
+          );
+        }
+
         // Optionally include new ops from other clients
         let newOps: import('./sync.types').ServerOperation[] | undefined;
         if (lastKnownServerSeq !== undefined) {
           newOps = syncService.getOpsSince(userId, lastKnownServerSeq, clientId, 100);
+          if (newOps.length > 0) {
+            Logger.info(
+              `[user:${userId}] Piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})`,
+            );
+          }
         }
 
         const response: UploadOpsResponse = {
@@ -145,6 +172,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         // Validate query params
         const parseResult = DownloadOpsQuerySchema.safeParse(req.query);
         if (!parseResult.success) {
+          Logger.warn(
+            `[user:${userId}] Download validation failed`,
+            parseResult.error.issues,
+          );
           return reply.status(400).send({
             error: 'Validation failed',
             details: parseResult.error.issues,
@@ -153,6 +184,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         const { sinceSeq, limit = 500, excludeClient } = parseResult.data;
         const syncService = getSyncService();
+
+        Logger.debug(
+          `[user:${userId}] Download request: sinceSeq=${sinceSeq}, limit=${limit}`,
+        );
 
         const maxLimit = Math.min(limit, 1000);
         const ops = syncService.getOpsSince(
@@ -165,10 +200,15 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const hasMore = ops.length > maxLimit;
         if (hasMore) ops.pop();
 
+        const latestSeq = syncService.getLatestSeq(userId);
+        Logger.info(
+          `[user:${userId}] Download: ${ops.length} ops (sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore})`,
+        );
+
         const response: DownloadOpsResponse = {
           ops,
           hasMore,
-          latestSeq: syncService.getLatestSeq(userId),
+          latestSeq,
         };
 
         return reply.send(response);
@@ -185,17 +225,24 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const userId = getAuthUser(req).userId;
       const syncService = getSyncService();
 
+      Logger.info(`[user:${userId}] Snapshot requested`);
+
       // Check if we have a cached snapshot
       const cached = syncService.getCachedSnapshot(userId);
       if (
         cached &&
         Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
       ) {
+        Logger.info(
+          `[user:${userId}] Returning cached snapshot (seq=${cached.serverSeq}, age=${Math.round((Date.now() - cached.generatedAt) / 1000)}s)`,
+        );
         return reply.send(cached as SnapshotResponse);
       }
 
       // Generate fresh snapshot by replaying ops
+      Logger.info(`[user:${userId}] Generating fresh snapshot...`);
       const snapshot = syncService.generateSnapshot(userId);
+      Logger.info(`[user:${userId}] Snapshot generated (seq=${snapshot.serverSeq})`);
       return reply.send(snapshot as SnapshotResponse);
     } catch (err) {
       Logger.error(`Get snapshot error: ${errorMessage(err)}`);
@@ -271,13 +318,18 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const latestSeq = syncService.getLatestSeq(userId);
       const minAckedSeq = syncService.getMinAckedSeq(userId);
       const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
+      const devicesOnline = syncService.getOnlineDeviceCount(userId);
 
       const cached = syncService.getCachedSnapshot(userId);
       const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
+      Logger.debug(
+        `[user:${userId}] Status: seq=${latestSeq}, devices=${devicesOnline}, pending=${pendingOps}`,
+      );
+
       const response: SyncStatusResponse = {
         latestSeq,
-        devicesOnline: syncService.getOnlineDeviceCount(userId),
+        devicesOnline,
         pendingOps,
         snapshotAge,
       };
@@ -306,6 +358,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         // Validate body
         const parseResult = AckSchema.safeParse(req.body);
         if (!parseResult.success) {
+          Logger.warn(`[user:${userId}] Ack validation failed`, parseResult.error.issues);
           return reply.status(400).send({
             error: 'Validation failed',
             details: parseResult.error.issues,
@@ -315,6 +368,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const { lastSeq } = parseResult.data;
         const syncService = getSyncService();
 
+        Logger.debug(
+          `[user:${userId}] Ack: client ${clientId.slice(0, 8)}... acked seq ${lastSeq}`,
+        );
         syncService.updateDeviceAck(userId, clientId, lastSeq);
 
         return reply.send({ acknowledged: true });
