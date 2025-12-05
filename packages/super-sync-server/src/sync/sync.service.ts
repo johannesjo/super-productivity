@@ -695,73 +695,79 @@ export class SyncService {
     serverSeq: number;
     generatedAt: number;
   } {
-    const latestSeq = this.getLatestSeq(userId);
-    let state: Record<string, unknown> = {};
-    let startSeq = 0;
+    // Wrap in transaction for snapshot isolation - prevents race conditions
+    // where new ops arrive between reading latestSeq and processing ops
+    const tx = this.db.transaction(() => {
+      const latestSeq = this.getLatestSeq(userId);
+      let state: Record<string, unknown> = {};
+      let startSeq = 0;
 
-    // Try to get cached snapshot to build upon (Incremental Snapshot)
-    const cached = this.getCachedSnapshot(userId);
-    if (cached) {
-      state = cached.state as Record<string, unknown>;
-      startSeq = cached.serverSeq;
-    }
-
-    // If we are already up to date, return cached
-    if (startSeq >= latestSeq && cached) {
-      return {
-        state: cached.state,
-        serverSeq: cached.serverSeq,
-        generatedAt: Date.now(), // Refresh timestamp
-      };
-    }
-
-    // Safety check: prevent memory exhaustion for excessive operation counts
-    const totalOpsToProcess = latestSeq - startSeq;
-    if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
-      Logger.error(
-        `Snapshot generation for user ${userId} requires ${totalOpsToProcess} ops ` +
-          `(max ${MAX_OPS_FOR_SNAPSHOT}). Consider implementing data archival.`,
-      );
-      throw new Error(
-        `Too many operations to process (${totalOpsToProcess}). ` +
-          `Maximum allowed: ${MAX_OPS_FOR_SNAPSHOT}. Contact support for data archival.`,
-      );
-    }
-
-    // Process operations in batches to avoid memory issues
-    const BATCH_SIZE = 10000;
-    let currentSeq = startSeq;
-    let totalProcessed = 0;
-
-    while (currentSeq < latestSeq) {
-      const batchOps = this.stmts.getOpsSince.all(
-        userId,
-        currentSeq,
-        BATCH_SIZE,
-      ) as DbOperation[];
-
-      if (batchOps.length === 0) break;
-
-      // Replay this batch
-      state = this.replayOpsToState(batchOps, state);
-
-      // Update currentSeq to the last processed operation
-      currentSeq = batchOps[batchOps.length - 1].server_seq;
-      totalProcessed += batchOps.length;
-
-      // Double-check bounds during processing (defensive)
-      if (totalProcessed > MAX_OPS_FOR_SNAPSHOT) {
-        Logger.error(`Snapshot generation exceeded max ops limit during processing`);
-        break;
+      // Try to get cached snapshot to build upon (Incremental Snapshot)
+      const cached = this.getCachedSnapshot(userId);
+      if (cached) {
+        state = cached.state as Record<string, unknown>;
+        startSeq = cached.serverSeq;
       }
-    }
 
-    const generatedAt = Date.now();
+      // If we are already up to date, return cached
+      if (startSeq >= latestSeq && cached) {
+        return {
+          state: cached.state,
+          serverSeq: cached.serverSeq,
+          generatedAt: Date.now(), // Refresh timestamp
+        };
+      }
 
-    // Cache the new snapshot
-    this.cacheSnapshot(userId, state, latestSeq);
+      // Safety check: prevent memory exhaustion for excessive operation counts
+      const totalOpsToProcess = latestSeq - startSeq;
+      if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
+        Logger.error(
+          `Snapshot generation for user ${userId} requires ${totalOpsToProcess} ops ` +
+            `(max ${MAX_OPS_FOR_SNAPSHOT}). Consider implementing data archival.`,
+        );
+        throw new Error(
+          `Too many operations to process (${totalOpsToProcess}). ` +
+            `Maximum allowed: ${MAX_OPS_FOR_SNAPSHOT}. Contact support for data archival.`,
+        );
+      }
 
-    return { state, serverSeq: latestSeq, generatedAt };
+      // Process operations in batches to avoid memory issues
+      const BATCH_SIZE = 10000;
+      let currentSeq = startSeq;
+      let totalProcessed = 0;
+
+      while (currentSeq < latestSeq) {
+        const batchOps = this.stmts.getOpsSince.all(
+          userId,
+          currentSeq,
+          BATCH_SIZE,
+        ) as DbOperation[];
+
+        if (batchOps.length === 0) break;
+
+        // Replay this batch
+        state = this.replayOpsToState(batchOps, state);
+
+        // Update currentSeq to the last processed operation
+        currentSeq = batchOps[batchOps.length - 1].server_seq;
+        totalProcessed += batchOps.length;
+
+        // Double-check bounds during processing (defensive)
+        if (totalProcessed > MAX_OPS_FOR_SNAPSHOT) {
+          Logger.error(`Snapshot generation exceeded max ops limit during processing`);
+          break;
+        }
+      }
+
+      const generatedAt = Date.now();
+
+      // Cache the new snapshot
+      this.cacheSnapshot(userId, state, latestSeq);
+
+      return { state, serverSeq: latestSeq, generatedAt };
+    });
+
+    return tx();
   }
 
   private replayOpsToState(
