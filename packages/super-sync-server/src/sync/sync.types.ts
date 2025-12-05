@@ -146,6 +146,13 @@ export interface DownloadOpsResponse {
   ops: ServerOperation[];
   hasMore: boolean;
   latestSeq: number;
+  /**
+   * Set to true if operations were deleted and the client should re-sync
+   * from a snapshot. This happens when:
+   * - The requested sinceSeq is older than retained operations
+   * - There's a gap in sequence numbers (operations were purged)
+   */
+  gapDetected?: boolean;
 }
 
 // Snapshot types
