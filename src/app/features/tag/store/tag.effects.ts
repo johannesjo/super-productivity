@@ -114,29 +114,52 @@ export class TagEffects {
             this._timeTrackingService.cleanupDataEverywhereForTag(id);
           });
 
-          // remove from task repeat
+          // remove from task repeat - using bulk operations to reduce operation count
           const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$
             .pipe(take(1))
             .toPromise();
+
+          // Collect configs that need to be deleted (orphaned) vs updated
+          const cfgIdsToDelete: string[] = [];
+          const cfgIdsToUpdate: string[] = [];
+
           taskRepeatCfgs.forEach((taskRepeatCfg) => {
             if (taskRepeatCfg.tagIds.some((r) => tagIdsToRemove.indexOf(r) >= 0)) {
-              const tagIds = taskRepeatCfg.tagIds.filter(
+              const remainingTagIds = taskRepeatCfg.tagIds.filter(
                 (tagId) => !tagIdsToRemove.includes(tagId),
               );
-              if (tagIds.length === 0 && !taskRepeatCfg.projectId) {
-                this._taskRepeatCfgService.deleteTaskRepeatCfg(
-                  taskRepeatCfg.id as string,
-                );
+              if (remainingTagIds.length === 0 && !taskRepeatCfg.projectId) {
+                // Config becomes orphaned (no tags and no project) - delete it
+                cfgIdsToDelete.push(taskRepeatCfg.id as string);
               } else {
-                this._taskRepeatCfgService.updateTaskRepeatCfg(
-                  taskRepeatCfg.id as string,
-                  {
-                    tagIds,
-                  },
-                );
+                // Config still has tags or a project - update to remove deleted tags
+                cfgIdsToUpdate.push(taskRepeatCfg.id as string);
               }
             }
           });
+
+          // Use bulk delete for orphaned configs (no task cleanup needed since
+          // tasks are already cleaned up via removeTagsForAllTask above)
+          if (cfgIdsToDelete.length > 0) {
+            this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgIdsToDelete);
+          }
+
+          // Update remaining configs to remove the deleted tags
+          // Note: Each config may have different remaining tagIds, so we need
+          // individual updates. Bulk update would require the same changes for all.
+          if (cfgIdsToUpdate.length > 0) {
+            cfgIdsToUpdate.forEach((cfgId) => {
+              const cfg = taskRepeatCfgs.find((c) => c.id === cfgId);
+              if (cfg) {
+                const remainingTagIds = cfg.tagIds.filter(
+                  (tagId) => !tagIdsToRemove.includes(tagId),
+                );
+                this._taskRepeatCfgService.updateTaskRepeatCfg(cfgId, {
+                  tagIds: remainingTagIds,
+                });
+              }
+            });
+          }
         }),
       ),
     { dispatch: false },
