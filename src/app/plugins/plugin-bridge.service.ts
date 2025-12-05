@@ -51,6 +51,7 @@ import { Log, PluginLog } from '../core/log';
 import { TaskCopy } from '../features/tasks/task.model';
 import { ProjectCopy } from '../features/project/project.model';
 import { TagCopy } from '../features/tag/tag.model';
+import { MAX_BATCH_OPERATIONS_SIZE } from '../core/persistence/operation-log/operation-log.const';
 
 // New imports for simple counters
 import { selectAllSimpleCounters } from '../features/simple-counter/store/simple-counter.reducer';
@@ -621,12 +622,13 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Batch update tasks for a project
    * Only generate IDs here - let the reducer handle all validation
+   * Large batches are automatically chunked to prevent oversized operation payloads
    */
   async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
     typia.assert<BatchUpdateRequest>(request);
 
-    // Generate IDs for all create operations
-    // We need to do this here so we can return them to the plugin immediately
+    // Generate IDs for all create operations upfront
+    // We need consistent IDs across all chunks
     const createdTaskIds: { [tempId: string]: string } = {};
     request.operations.forEach((op) => {
       if (op.type === 'create') {
@@ -635,14 +637,27 @@ export class PluginBridgeService implements OnDestroy {
       }
     });
 
-    // Dispatch the batch update action - let the reducer handle all validation
-    this._store.dispatch(
-      TaskSharedActions.batchUpdateForProject({
-        projectId: request.projectId,
-        operations: request.operations,
-        createdTaskIds,
-      }),
-    );
+    // Chunk large operations to prevent oversized payloads
+    const chunks = this._chunkOperations(request.operations);
+
+    if (chunks.length > 1) {
+      PluginLog.log('PluginBridge: Chunking large batch operation', {
+        totalOperations: request.operations.length,
+        chunks: chunks.length,
+        chunkSize: MAX_BATCH_OPERATIONS_SIZE,
+      });
+    }
+
+    // Dispatch each chunk as a separate action
+    chunks.forEach((chunk) => {
+      this._store.dispatch(
+        TaskSharedActions.batchUpdateForProject({
+          projectId: request.projectId,
+          operations: chunk,
+          createdTaskIds, // Same IDs mapping for all chunks
+        }),
+      );
+    });
 
     // Return the generated IDs immediately
     // The reducer will validate everything including project existence
@@ -650,6 +665,21 @@ export class PluginBridgeService implements OnDestroy {
       success: true,
       createdTaskIds,
     };
+  }
+
+  /**
+   * Chunks operations array into smaller batches to prevent oversized payloads
+   */
+  private _chunkOperations<T>(operations: T[]): T[][] {
+    if (operations.length <= MAX_BATCH_OPERATIONS_SIZE) {
+      return [operations];
+    }
+
+    const chunks: T[][] = [];
+    for (let i = 0; i < operations.length; i += MAX_BATCH_OPERATIONS_SIZE) {
+      chunks.push(operations.slice(i, i + MAX_BATCH_OPERATIONS_SIZE));
+    }
+    return chunks;
   }
 
   /**
