@@ -259,8 +259,14 @@ const migrateTaskDictionary = (taskDict: Dictionary<TaskCopy>): void => {
       }
     }
 
-    // Remove null and undefined values from task.timeSpentOnDay
-    if (task.timeSpentOnDay) {
+    // Initialize timeSpentOnDay if missing (required field)
+    if (!task.timeSpentOnDay) {
+      taskDict[taskId] = {
+        ...taskDict[taskId],
+        timeSpentOnDay: {},
+      };
+    } else {
+      // Remove null and undefined values from task.timeSpentOnDay
       const cleanTimeSpent: TimeSpentOnDayCopy = {};
       let hasInvalidValues = false;
 

@@ -194,6 +194,10 @@ export class PfapiService {
       // 4. Dispatch to NgRx (no page reload needed!)
       this._store.dispatch(loadAllData({ appDataComplete: validatedData }));
 
+      // 5. Update ModelCtrl caches so services reading from pf.m.*.load() get fresh data
+      // This is needed because TaskArchiveService and others read from ModelCtrl, not NgRx
+      await this._updateModelCtrlCaches(validatedData as AppDataCompleteNew);
+
       this._imexViewService.setDataImportInProgress(false);
 
       // Only reload if explicitly requested (legacy behavior fallback)
@@ -248,6 +252,32 @@ export class PfapiService {
     });
 
     PFLog.normal('PfapiService: Import persisted to operation log.');
+  }
+
+  /**
+   * Updates ModelCtrl in-memory caches with imported data.
+   * This ensures services that read from pf.m.*.load() (like TaskArchiveService)
+   * get the fresh imported data instead of stale cached data.
+   */
+  private async _updateModelCtrlCaches(data: AppDataCompleteNew): Promise<void> {
+    PFLog.normal('PfapiService: Updating ModelCtrl caches...');
+
+    const modelIds = Object.keys(data);
+    const promises = modelIds.map((modelId) => {
+      const modelCtrl = this.pf.m[modelId as keyof typeof this.pf.m];
+      const modelData = (data as Record<string, unknown>)[modelId];
+      if (modelCtrl && modelData !== undefined) {
+        // Save updates both in-memory cache and 'pf' database
+        return modelCtrl.save(modelData as never, {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        });
+      }
+      return Promise.resolve();
+    });
+
+    await Promise.all(promises);
+    PFLog.normal('PfapiService: ModelCtrl caches updated.');
   }
 
   async isCheckForStrayLocalTmpDBBackupAndImport(): Promise<void> {
