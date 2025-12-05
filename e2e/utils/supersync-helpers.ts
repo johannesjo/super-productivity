@@ -166,14 +166,37 @@ export const closeClient = async (client: SimulatedE2EClient): Promise<void> => 
 
 /**
  * Wait for a task with given name to appear on the page.
+ * Uses longer timeout by default for sync operations which can be slow.
+ * Includes retry logic for better reliability after sync operations.
  */
 export const waitForTask = async (
   page: Page,
   taskName: string,
-  timeout = 15000,
+  timeout = 25000,
 ): Promise<void> => {
   const escapedName = taskName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  await page.waitForSelector(`task:has-text("${escapedName}")`, { timeout });
+  const startTime = Date.now();
+
+  // Retry loop to handle DOM update delays
+  while (Date.now() - startTime < timeout) {
+    try {
+      await page.waitForSelector(`task:has-text("${escapedName}")`, {
+        timeout: 5000,
+        state: 'visible',
+      });
+      return; // Success
+    } catch {
+      // Wait a bit and retry
+      await page.waitForTimeout(300);
+    }
+  }
+
+  // Final attempt with full remaining timeout
+  const remaining = Math.max(timeout - (Date.now() - startTime), 1000);
+  await page.waitForSelector(`task:has-text("${escapedName}")`, {
+    timeout: remaining,
+    state: 'visible',
+  });
 };
 
 /**

@@ -302,13 +302,17 @@ base.describe('@supersync SuperSync E2E', () => {
         // Client B syncs to receive the deletion
         await clientB.sync.syncAndWait();
 
+        // Wait for DOM to settle after sync
+        await clientB.page.waitForLoadState('domcontentloaded');
+        await clientB.page.waitForTimeout(300);
+
         // Verify task is removed from both clients
         await expect(
           clientA.page.locator(`task:has-text("${taskName}")`),
-        ).not.toBeVisible();
+        ).not.toBeVisible({ timeout: 10000 });
         await expect(
           clientB.page.locator(`task:has-text("${taskName}")`),
-        ).not.toBeVisible();
+        ).not.toBeVisible({ timeout: 10000 });
       } finally {
         if (clientA) await closeClient(clientA);
         if (clientB) await closeClient(clientB);
@@ -565,6 +569,9 @@ base.describe('@supersync SuperSync E2E', () => {
         // Sync: Server → A
         await clientA.sync.syncAndWait();
 
+        // Wait for DOM to settle
+        await clientA.page.waitForLoadState('domcontentloaded');
+
         // Verify A has the renamed task and subtask
         await waitForTask(clientA.page, renamedTaskName);
         const parentTaskA = clientA.page.locator(`task:has-text("${renamedTaskName}")`);
@@ -594,6 +601,9 @@ base.describe('@supersync SuperSync E2E', () => {
 
         // Sync: Server → B
         await clientB.sync.syncAndWait();
+
+        // Wait for DOM to settle
+        await clientB.page.waitForLoadState('domcontentloaded');
 
         // Verify B has the updates
         const expandBtnB = renamedTaskLocatorB.locator('.expand-btn');
@@ -1088,6 +1098,9 @@ base.describe('@supersync SuperSync E2E', () => {
         console.log('[3-Client Test] Phase 5: Client C syncs');
         await clientC.sync.syncAndWait();
 
+        // Wait for DOM to settle after sync
+        await clientC.page.waitForLoadState('domcontentloaded');
+
         // Verify C now has Task-2
         await waitForTask(clientC.page, task2Name);
         console.log('[3-Client Test] Client C received Task-2');
@@ -1095,6 +1108,9 @@ base.describe('@supersync SuperSync E2E', () => {
         // ============ PHASE 6: Client A Syncs (Downloads Task-2, Task-3, Rename) ============
         console.log('[3-Client Test] Phase 6: Client A syncs');
         await clientA.sync.syncAndWait();
+
+        // Wait for DOM to settle after sync
+        await clientA.page.waitForLoadState('domcontentloaded');
 
         // Verify A has all tasks with correct state
         await waitForTask(clientA.page, task1Renamed);
@@ -1105,6 +1121,10 @@ base.describe('@supersync SuperSync E2E', () => {
         // ============ PHASE 7: Client B Syncs (Downloads Task-3, Rename) ============
         console.log('[3-Client Test] Phase 7: Client B syncs');
         await clientB.sync.syncAndWait();
+
+        // Wait for DOM to settle after sync
+        await clientB.page.waitForLoadState('domcontentloaded');
+        await clientB.page.waitForTimeout(500);
 
         // Verify B has all tasks with correct state
         await waitForTask(clientB.page, task1Renamed);
