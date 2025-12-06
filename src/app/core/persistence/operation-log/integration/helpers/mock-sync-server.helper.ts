@@ -15,7 +15,6 @@ import {
 export class MockSyncServer {
   private ops: ServerSyncOperation[] = [];
   private nextSeq = 1;
-  private clientAcks: Map<string, number> = new Map();
 
   /**
    * Upload operations to the mock server.
@@ -104,25 +103,6 @@ export class MockSyncServer {
   }
 
   /**
-   * Acknowledge that a client has received ops up to a sequence.
-   */
-  acknowledgeOps(clientId: string, lastSeq: number): void {
-    const currentAck = this.clientAcks.get(clientId) ?? 0;
-    if (lastSeq > currentAck) {
-      this.clientAcks.set(clientId, lastSeq);
-    }
-  }
-
-  /**
-   * Get the minimum acknowledged sequence across all clients.
-   * (Useful for cleanup logic)
-   */
-  getMinAckedSeq(): number | null {
-    if (this.clientAcks.size === 0) return null;
-    return Math.min(...this.clientAcks.values());
-  }
-
-  /**
    * Get all stored operations (for assertions).
    */
   getAllOps(): ServerSyncOperation[] {
@@ -144,6 +124,15 @@ export class MockSyncServer {
   clear(): void {
     this.ops = [];
     this.nextSeq = 1;
-    this.clientAcks.clear();
+  }
+
+  /**
+   * Get minimum acknowledged sequence (stub for tests).
+   * In real implementation this would track per-client ack positions.
+   */
+  getMinAckedSeq(): number {
+    // For testing purposes, return the latest seq
+    // A real implementation would track per-client ack positions
+    return this.getLatestSeq();
   }
 }

@@ -355,6 +355,84 @@ describe('OperationLogSyncService', () => {
       expect(result.nonConflicting.length).toBe(2);
       expect(result.conflicts.length).toBe(0);
     });
+
+    it('should NOT conflict when snapshot clock has entries but entity has no local state', async () => {
+      // Scenario: Client B has a snapshot with {clientA: 10, clientB: 5}
+      // Client A sends a delete op for a task that B never modified
+      // The delete op has vectorClock {clientA: 11}
+      // This should NOT be a conflict - B has no local state for this entity
+
+      // No pending local ops for any entity
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot has entries for multiple clients (from previous syncs)
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 10, clientB: 5 }),
+      );
+
+      // No per-entity frontier (entity wasn't modified after snapshot)
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+
+      // Remote delete from Client A - its vectorClock only has clientA's counter
+      const remoteOps: Operation[] = [
+        createOp({
+          id: 'remote-delete-op',
+          entityType: 'TASK',
+          entityId: 'task-xyz',
+          opType: OpType.Delete,
+          clientId: 'clientA',
+          vectorClock: { clientA: 11 }, // Only knows about clientA
+        }),
+      ];
+
+      const result = await service.detectConflicts(remoteOps, new Map());
+
+      // Should NOT be a conflict - entity has no local state
+      expect(result.conflicts.length).toBe(0);
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('remote-delete-op');
+    });
+
+    it('should NOT conflict when entity has frontier but no pending ops', async () => {
+      // Scenario: Entity was modified after snapshot but those ops are already synced
+      // A new remote op arrives - should NOT conflict since no pending local ops
+      // Key insight: conflicts require PENDING local changes, not just historical ones
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 5 }),
+      );
+
+      // Entity HAS a frontier (was modified after snapshot, but already synced)
+      const entityFrontier = new Map<string, any>();
+      entityFrontier.set('TASK:task-1', { clientA: 8, clientB: 3 });
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(
+        Promise.resolve(entityFrontier),
+      );
+
+      // Remote op - even with "concurrent" looking vector clock, no conflict
+      // because local has no PENDING changes
+      const remoteOps: Operation[] = [
+        createOp({
+          id: 'remote-update-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          opType: OpType.Update,
+          vectorClock: { clientA: 9 },
+        }),
+      ];
+
+      // Pass the entity frontier to detectConflicts
+      const result = await service.detectConflicts(remoteOps, entityFrontier);
+
+      // No pending local ops = no conflict possible
+      // The remote op should be applied directly
+      expect(result.conflicts.length).toBe(0);
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('remote-update-op');
+    });
   });
 
   describe('_suggestResolution', () => {

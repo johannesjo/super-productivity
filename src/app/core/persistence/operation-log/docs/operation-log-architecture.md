@@ -1460,7 +1460,6 @@ interface OperationSyncCapable {
     clientId?: string,
     limit?: number,
   ): Promise<DownloadResponse>;
-  acknowledgeOps(clientId: string, upToSeq: number): Promise<void>;
   getLastServerSeq(): Promise<number>;
   setLastServerSeq(seq: number): Promise<void>;
 }
@@ -1597,7 +1596,9 @@ The manifest tracks which operation files exist. Each file contains a batch of o
 
 ## C.4 Conflict Detection
 
-Conflicts are detected using vector clocks at the entity level:
+Conflicts are detected using vector clocks at the entity level. **Importantly, a conflict can only
+occur when there are pending (unsynced) local operations for an entity.** If local has no pending
+changes for an entity, any remote operation is safe to apply - there's nothing local to conflict with.
 
 ```typescript
 async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
@@ -1606,9 +1607,20 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
 
   for (const remoteOp of remoteOps) {
     const entityKey = `${remoteOp.entityType}:${remoteOp.entityId}`;
+    const localPendingOps = localPendingByEntity.get(entityKey) || [];
+
+    // FAST PATH: No pending local ops = no conflict possible
+    // Conflicts require concurrent modifications. If local hasn't modified
+    // this entity since last sync, any remote op can be applied safely.
+    if (localPendingOps.length === 0) {
+      nonConflicting.push(remoteOp);
+      continue;
+    }
+
+    // Build local frontier from applied + pending ops
     const localFrontier = mergeClocks(
       appliedFrontierByEntity.get(entityKey),
-      ...localPendingByEntity.get(entityKey)?.map(op => op.vectorClock) || []
+      ...localPendingOps.map(op => op.vectorClock)
     );
 
     const comparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
@@ -1616,7 +1628,7 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
       conflicts.push({
         entityType: remoteOp.entityType,
         entityId: remoteOp.entityId,
-        localOps: localPendingByEntity.get(entityKey) || [],
+        localOps: localPendingOps,
         remoteOps: [remoteOp],
         suggestedResolution: 'manual'
       });
@@ -1628,6 +1640,18 @@ async detectConflicts(remoteOps: Operation[]): Promise<ConflictResult> {
   return { nonConflicting, conflicts };
 }
 ```
+
+### Why Pending Ops Matter for Conflict Detection
+
+The key insight is that **conflicts are about uncommitted changes**, not historical state:
+
+- **Applied/synced ops**: Already reconciled between clients. Their vector clocks contributed to the
+  global sync state, but they don't represent "in-flight" changes that could be lost.
+- **Pending ops**: Not yet synced. These represent changes that could conflict with incoming remote ops.
+
+If Client A sends a delete operation for a task, and Client B has no pending ops for that task,
+Client B should simply apply the delete - there's no local work to lose. The snapshot/frontier
+vector clocks track _history_, not _intent_.
 
 ## C.5 Conflict Resolution
 

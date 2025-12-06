@@ -366,6 +366,14 @@ export class OperationLogSyncService {
         const localOpsForEntity = localPendingOpsByEntity.get(entityKey) || [];
         const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
 
+        // FAST PATH: If no local PENDING ops for this entity, no conflict possible.
+        // Conflicts require concurrent modifications - if local hasn't modified this entity
+        // since last sync (no pending ops), any remote op can be applied safely.
+        // The appliedFrontier and snapshot clock track APPLIED history, not pending changes.
+        if (localOpsForEntity.length === 0) {
+          continue; // No conflict possible - check next entityId
+        }
+
         // Build the frontier from everything we know locally (applied + pending)
         // Use snapshot vector clock as fallback if no per-entity frontier exists
         // This ensures entities modified before compaction aren't treated as having no history
