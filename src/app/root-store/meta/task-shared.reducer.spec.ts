@@ -880,6 +880,21 @@ describe('taskSharedMetaReducer', () => {
         'tag2',
       ];
 
+      // Update task entities to match expected state (handleMoveToArchive reads from state)
+      testState[TASK_FEATURE_NAME].entities['parent-task'] = {
+        ...testState[TASK_FEATURE_NAME].entities['parent-task'],
+        subTaskIds: ['subtask1', 'subtask2'],
+      } as Task;
+      testState[TASK_FEATURE_NAME].entities.subtask2 = {
+        ...testState[TASK_FEATURE_NAME].entities.subtask2,
+        tagIds: ['tag1', 'tag2'],
+        parentId: 'parent-task',
+      } as Task;
+      testState[TASK_FEATURE_NAME].entities.subtask1 = {
+        ...testState[TASK_FEATURE_NAME].entities.subtask1,
+        parentId: 'parent-task',
+      } as Task;
+
       const subtask1 = createMockTask({
         id: 'subtask1',
         projectId: 'project1',
@@ -1039,6 +1054,13 @@ describe('taskSharedMetaReducer', () => {
         ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
         'project2',
       ];
+
+      // Update task2 entity to have correct projectId (createStateWithExistingTasks
+      // only sets projectId for tasks in project1's taskIds/backlogTaskIds)
+      testState[TASK_FEATURE_NAME].entities.task2 = {
+        ...testState[TASK_FEATURE_NAME].entities.task2,
+        projectId: 'project2',
+      } as Task;
 
       const tasksToArchive: TaskWithSubTasks[] = [
         createTaskWithSubTasks({
