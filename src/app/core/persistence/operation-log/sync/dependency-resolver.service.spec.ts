@@ -2,8 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { Operation, OpType, EntityType } from '../operation.types';
-import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
-import { selectProjectById } from '../../../../features/project/store/project.reducer';
+import { selectTaskEntities } from '../../../../features/tasks/store/task.selectors';
+import { selectProjectFeatureState } from '../../../../features/project/store/project.reducer';
 
 describe('DependencyResolverService', () => {
   let service: DependencyResolverService;
@@ -125,6 +125,39 @@ describe('DependencyResolverService', () => {
       ]);
     });
 
+    it('should extract taskIds from nested TAG update operations (updateTag action)', () => {
+      // updateTag action has structure: { tag: { id, changes: { taskIds } } }
+      const op = createTestOperation({
+        entityType: 'TAG' as EntityType,
+        entityId: 'today-tag',
+        opType: OpType.Update,
+        payload: {
+          tag: {
+            id: 'today-tag',
+            changes: {
+              taskIds: ['task1', 'task2'],
+            },
+          },
+        },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps.length).toBe(2);
+      expect(deps).toEqual([
+        {
+          entityType: 'TASK',
+          entityId: 'task1',
+          mustExist: false,
+          relation: 'reference',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'task2',
+          mustExist: false,
+          relation: 'reference',
+        },
+      ]);
+    });
+
     it('should return empty array for TAG operations without taskIds', () => {
       const op = createTestOperation({
         entityType: 'TAG' as EntityType,
@@ -188,8 +221,14 @@ describe('DependencyResolverService', () => {
 
   describe('checkDependencies', () => {
     it('should return empty missing array when all dependencies exist', async () => {
-      store.overrideSelector(selectTaskById, { id: 'parentTask1' } as any);
-      store.overrideSelector(selectProjectById, { id: 'proj1' } as any);
+      // Mock entity dictionaries with the entities that should exist
+      store.overrideSelector(selectTaskEntities, {
+        parentTask1: { id: 'parentTask1' },
+      } as any);
+      store.overrideSelector(selectProjectFeatureState, {
+        ids: ['proj1'],
+        entities: { proj1: { id: 'proj1' } },
+      } as any);
 
       const deps = [
         {
@@ -211,7 +250,8 @@ describe('DependencyResolverService', () => {
     });
 
     it('should return missing task dependency', async () => {
-      store.overrideSelector(selectTaskById, null as any);
+      // Mock empty task entities dictionary
+      store.overrideSelector(selectTaskEntities, {} as any);
 
       const deps = [
         {
@@ -228,7 +268,11 @@ describe('DependencyResolverService', () => {
     });
 
     it('should return missing project dependency', async () => {
-      store.overrideSelector(selectProjectById, null as any);
+      // Mock empty project state
+      store.overrideSelector(selectProjectFeatureState, {
+        ids: [],
+        entities: {},
+      } as any);
 
       const deps = [
         {

@@ -1,13 +1,52 @@
 import { Injectable, inject } from '@angular/core';
 import { Operation, EntityType } from '../operation.types';
 import { Store } from '@ngrx/store';
-import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
-import { selectProjectById } from '../../../../features/project/store/project.reducer';
-import { selectTagById } from '../../../../features/tag/store/tag.reducer';
-import { selectNoteById } from '../../../../features/note/store/note.reducer';
-import { selectMetricById } from '../../../../features/metric/store/metric.selectors';
-import { selectSimpleCounterById } from '../../../../features/simple-counter/store/simple-counter.reducer';
+import { selectTaskEntities } from '../../../../features/tasks/store/task.selectors';
+import {
+  selectProjectFeatureState,
+  selectEntities as selectProjectEntitiesFromAdapter,
+} from '../../../../features/project/store/project.reducer';
+import {
+  selectTagFeatureState,
+  selectEntities as selectTagEntitiesFromAdapter,
+} from '../../../../features/tag/store/tag.reducer';
+import {
+  selectNoteFeatureState,
+  selectEntities as selectNoteEntitiesFromAdapter,
+} from '../../../../features/note/store/note.reducer';
+import {
+  selectMetricFeatureState,
+  selectEntities as selectMetricEntitiesFromAdapter,
+} from '../../../../features/metric/store/metric.selectors';
+import {
+  selectSimpleCounterFeatureState,
+  selectEntities as selectSimpleCounterEntitiesFromAdapter,
+} from '../../../../features/simple-counter/store/simple-counter.reducer';
 import { firstValueFrom } from 'rxjs';
+import { createSelector } from '@ngrx/store';
+import { Dictionary } from '@ngrx/entity';
+
+// Create entity dictionary selectors for bulk lookups
+const selectProjectEntities = createSelector(
+  selectProjectFeatureState,
+  selectProjectEntitiesFromAdapter,
+);
+const selectTagEntities = createSelector(
+  selectTagFeatureState,
+  selectTagEntitiesFromAdapter,
+);
+const selectNoteEntities = createSelector(
+  selectNoteFeatureState,
+  selectNoteEntitiesFromAdapter,
+);
+const selectMetricEntities = createSelector(
+  selectMetricFeatureState,
+  selectMetricEntitiesFromAdapter,
+);
+const selectSimpleCounterEntities = createSelector(
+  selectSimpleCounterFeatureState,
+  selectSimpleCounterEntitiesFromAdapter,
+);
 
 export interface OperationDependency {
   entityType: EntityType;
@@ -32,6 +71,13 @@ interface NoteOperationPayload {
 /** Payload shape for tag operations that may have dependencies */
 interface TagOperationPayload {
   taskIds?: string[];
+  // For updateTag action, taskIds are nested in tag.changes
+  tag?: {
+    id?: string;
+    changes?: {
+      taskIds?: string[];
+    };
+  };
 }
 
 @Injectable({ providedIn: 'root' })
@@ -94,8 +140,13 @@ export class DependencyResolverService {
       // Tag -> Task is a soft dependency. We want tasks to be created before
       // tag updates that reference them, to avoid the tag-shared.reducer
       // filtering out "non-existent" taskIds during sync.
-      if (payload.taskIds?.length) {
-        for (const taskId of payload.taskIds) {
+      // Also ensures DELETE operations for tasks wait until after this tag update.
+
+      // Handle both direct taskIds (addTag) and nested taskIds (updateTag)
+      const taskIds = payload.taskIds || payload.tag?.changes?.taskIds;
+
+      if (taskIds?.length) {
+        for (const taskId of taskIds) {
           deps.push({
             entityType: 'TASK',
             entityId: taskId,
@@ -114,61 +165,113 @@ export class DependencyResolverService {
 
   /**
    * Checks if dependencies are met in the current store state.
+   * Uses bulk entity lookups to avoid N+1 selector subscriptions.
    */
   async checkDependencies(deps: OperationDependency[]): Promise<{
     missing: OperationDependency[];
   }> {
-    const missing: OperationDependency[] = [];
+    if (deps.length === 0) {
+      return { missing: [] };
+    }
 
-    // We need access to the state. We can use selectors.
-    // Note: selectors might be async.
-    // For synchronous checking against a snapshot, we might need a different approach or
-    // assume we can access state synchronously if we are inside an effect/reducer context.
-    // But here we are likely in a service (Hydrator or Sync).
-    // `firstValueFrom(store.select(...))` is the way.
-
+    // Group dependencies by entity type
+    const depsByType = new Map<EntityType, OperationDependency[]>();
     for (const dep of deps) {
-      const exists = await this.checkEntityExists(dep.entityType, dep.entityId);
-      if (!exists) {
-        missing.push(dep);
+      const list = depsByType.get(dep.entityType) || [];
+      list.push(dep);
+      depsByType.set(dep.entityType, list);
+    }
+
+    // Fetch entity dictionaries only for types we need (single selector call per type)
+    const entityDicts = await this.getEntityDictionaries(depsByType);
+
+    // Check all dependencies against the fetched dictionaries
+    const missing: OperationDependency[] = [];
+    for (const dep of deps) {
+      const dict = entityDicts.get(dep.entityType);
+      // If we have a dictionary for this type, check it; otherwise use the fallback logic
+      if (dict !== undefined) {
+        if (!dict[dep.entityId]) {
+          missing.push(dep);
+        }
+      } else {
+        // For entity types without dictionary selectors (singleton/aggregate types),
+        // they're assumed to exist
+        const exists = this.checkSingletonEntityExists(dep.entityType);
+        if (!exists) {
+          missing.push(dep);
+        }
       }
     }
 
     return { missing };
   }
 
-  private async checkEntityExists(type: EntityType, id: string): Promise<boolean> {
+  /**
+   * Fetches entity dictionaries for the requested entity types.
+   * Only makes one selector call per entity type, regardless of how many entities are checked.
+   */
+  private async getEntityDictionaries(
+    depsByType: Map<EntityType, OperationDependency[]>,
+  ): Promise<Map<EntityType, Dictionary<unknown> | undefined>> {
+    const result = new Map<EntityType, Dictionary<unknown> | undefined>();
+
+    // Fetch all needed dictionaries in parallel
+    const promises: Promise<void>[] = [];
+
+    if (depsByType.has('TASK')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectTaskEntities)).then((dict) => {
+          result.set('TASK', dict);
+        }),
+      );
+    }
+    if (depsByType.has('PROJECT')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectProjectEntities)).then((dict) => {
+          result.set('PROJECT', dict);
+        }),
+      );
+    }
+    if (depsByType.has('TAG')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectTagEntities)).then((dict) => {
+          result.set('TAG', dict);
+        }),
+      );
+    }
+    if (depsByType.has('NOTE')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectNoteEntities)).then((dict) => {
+          result.set('NOTE', dict);
+        }),
+      );
+    }
+    if (depsByType.has('METRIC')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectMetricEntities)).then((dict) => {
+          result.set('METRIC', dict);
+        }),
+      );
+    }
+    if (depsByType.has('SIMPLE_COUNTER')) {
+      promises.push(
+        firstValueFrom(this.store.select(selectSimpleCounterEntities)).then((dict) => {
+          result.set('SIMPLE_COUNTER', dict);
+        }),
+      );
+    }
+
+    await Promise.all(promises);
+    return result;
+  }
+
+  /**
+   * For singleton/aggregate entity types that don't have per-entity lookups.
+   * These are assumed to always exist.
+   */
+  private checkSingletonEntityExists(type: EntityType): boolean {
     switch (type) {
-      case 'TASK': {
-        const task = await firstValueFrom(this.store.select(selectTaskById, { id }));
-        return !!task;
-      }
-      case 'PROJECT': {
-        const project = await firstValueFrom(
-          this.store.select(selectProjectById, { id }),
-        );
-        return !!project;
-      }
-      case 'TAG': {
-        const tag = await firstValueFrom(this.store.select(selectTagById, { id }));
-        return !!tag;
-      }
-      case 'NOTE': {
-        const note = await firstValueFrom(this.store.select(selectNoteById, { id }));
-        return !!note;
-      }
-      case 'METRIC': {
-        const metric = await firstValueFrom(this.store.select(selectMetricById, { id }));
-        return !!metric;
-      }
-      case 'SIMPLE_COUNTER': {
-        const counter = await firstValueFrom(
-          this.store.select(selectSimpleCounterById, { id }),
-        );
-        return !!counter;
-      }
-      // These entity types don't have individual entity selectors or
-      // don't require dependency checking (singleton/aggregate entities)
       case 'GLOBAL_CONFIG':
       case 'WORK_CONTEXT':
       case 'TASK_REPEAT_CFG':
