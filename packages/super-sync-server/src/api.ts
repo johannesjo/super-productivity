@@ -1,6 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
-import { registerUser, loginUser, verifyEmail } from './auth';
+import { registerUser, loginUser, verifyEmail, replaceToken } from './auth';
+import { authenticate, getAuthUser } from './middleware';
 import { Logger } from './logger';
 
 // Zod Schemas
@@ -141,6 +142,34 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         Logger.error(`Login error: ${errMsg}`);
         return reply.status(401).send({
           error: getSafeErrorMessage(err, 'Authentication failed'),
+        });
+      }
+    },
+  );
+
+  // Replace JWT token (requires authentication)
+  // Use this when a token was accidentally shared or compromised
+  fastify.post(
+    '/replace-token',
+    {
+      preHandler: authenticate,
+      config: {
+        rateLimit: {
+          max: 5,
+          timeWindow: '15 minutes',
+        },
+      },
+    },
+    async (req, reply) => {
+      try {
+        const user = getAuthUser(req);
+        const result = replaceToken(user.userId, user.email);
+        return reply.send(result);
+      } catch (err) {
+        const errMsg = err instanceof Error ? err.message : 'Unknown error';
+        Logger.error(`Token replacement error: ${errMsg}`);
+        return reply.status(500).send({
+          error: 'Failed to replace token. Please try again.',
         });
       }
     },
