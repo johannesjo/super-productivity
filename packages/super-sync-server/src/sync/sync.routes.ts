@@ -65,10 +65,6 @@ const UploadSnapshotSchema = z.object({
   schemaVersion: z.number().optional(),
 });
 
-const AckSchema = z.object({
-  lastSeq: z.number().int().min(0),
-});
-
 // Error helper
 const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
@@ -435,21 +431,17 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const syncService = getSyncService();
 
       const latestSeq = syncService.getLatestSeq(userId);
-      const minAckedSeq = syncService.getMinAckedSeq(userId);
-      const pendingOps = minAckedSeq !== null ? latestSeq - minAckedSeq : 0;
       const devicesOnline = syncService.getOnlineDeviceCount(userId);
 
       const cached = syncService.getCachedSnapshot(userId);
       const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
-      Logger.debug(
-        `[user:${userId}] Status: seq=${latestSeq}, devices=${devicesOnline}, pending=${pendingOps}`,
-      );
+      Logger.debug(`[user:${userId}] Status: seq=${latestSeq}, devices=${devicesOnline}`);
 
       const response: SyncStatusResponse = {
         latestSeq,
         devicesOnline,
-        pendingOps,
+        pendingOps: 0, // Deprecated: ACK-based tracking removed
         snapshotAge,
       };
 
@@ -459,55 +451,4 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       return reply.status(500).send({ error: 'Internal server error' });
     }
   });
-
-  // POST /api/sync/devices/:clientId/ack - Acknowledge received sequences
-  fastify.post<{ Params: { clientId: string }; Body: { lastSeq: number } }>(
-    '/devices/:clientId/ack',
-    async (
-      req: FastifyRequest<{
-        Params: { clientId: string };
-        Body: { lastSeq: number };
-      }>,
-      reply: FastifyReply,
-    ) => {
-      try {
-        const userId = getAuthUser(req).userId;
-        const { clientId } = req.params;
-
-        // Validate body
-        const parseResult = AckSchema.safeParse(req.body);
-        if (!parseResult.success) {
-          Logger.warn(`[user:${userId}] Ack validation failed`, parseResult.error.issues);
-          return reply.status(400).send({
-            error: 'Validation failed',
-            details: parseResult.error.issues,
-          });
-        }
-
-        const { lastSeq } = parseResult.data;
-        const syncService = getSyncService();
-
-        // Validate device ownership before accepting ACK
-        if (!syncService.isDeviceOwner(userId, clientId)) {
-          Logger.audit({
-            event: 'DEVICE_OWNERSHIP_VIOLATION',
-            userId,
-            clientId,
-            reason: 'Attempted to ACK for unowned device',
-          });
-          return reply.status(403).send({ error: 'Device not found or access denied' });
-        }
-
-        Logger.debug(
-          `[user:${userId}] Ack: client ${clientId.slice(0, 8)}... acked seq ${lastSeq}`,
-        );
-        syncService.updateDeviceAck(userId, clientId, lastSeq);
-
-        return reply.send({ acknowledged: true });
-      } catch (err) {
-        Logger.error(`Ack error: ${errorMessage(err)}`);
-        return reply.status(500).send({ error: 'Internal server error' });
-      }
-    },
-  );
 };

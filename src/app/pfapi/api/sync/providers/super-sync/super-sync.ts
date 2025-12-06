@@ -150,20 +150,6 @@ export class SuperSyncProvider
     localStorage.setItem(key, String(seq));
   }
 
-  async acknowledgeOps(clientId: string, lastSeq: number): Promise<void> {
-    SyncLog.debug(this.logLabel, 'acknowledgeOps', { clientId, lastSeq });
-    const cfg = await this._cfgOrError();
-
-    await this._fetchApi<{ acknowledged: boolean }>(
-      cfg,
-      `/api/sync/devices/${encodeURIComponent(clientId)}/ack`,
-      {
-        method: 'POST',
-        body: JSON.stringify({ lastSeq }),
-      },
-    );
-  }
-
   async uploadSnapshot(
     state: unknown,
     clientId: string,

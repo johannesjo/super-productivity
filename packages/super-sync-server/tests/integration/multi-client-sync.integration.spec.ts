@@ -177,19 +177,6 @@ class SimulatedClient {
     return body;
   }
 
-  /** Acknowledges operations up to given seq */
-  async ack(seq?: number): Promise<void> {
-    const ackSeq = seq ?? this.lastKnownSeq;
-    const response = await this.app.inject({
-      method: 'POST',
-      url: `/api/sync/devices/${this.clientId}/ack`,
-      headers: { authorization: `Bearer ${this.authToken}` },
-      payload: { lastSeq: ackSeq },
-    });
-
-    expect(response.statusCode).toBe(200);
-  }
-
   /** Applies remote operations to local state */
   private applyRemoteOps(ops: ServerOperation[]): void {
     for (const serverOp of ops) {
@@ -780,65 +767,6 @@ describe('Multi-Client Sync Integration', () => {
     });
   });
 
-  describe('Device Acknowledgment', () => {
-    it('should track device ack correctly', async () => {
-      const clientA = new SimulatedClient(app, userId);
-      const clientB = new SimulatedClient(app, userId);
-
-      // Both clients upload
-      clientA.createOp('CRT', 'TASK', 'task-a', { title: 'A' });
-      await clientA.upload();
-
-      clientB.createOp('CRT', 'TASK', 'task-b', { title: 'B' });
-      await clientB.upload();
-
-      // Both sync and ack
-      await clientA.download();
-      await clientA.ack();
-
-      await clientB.download();
-      await clientB.ack();
-
-      // Verify min acked seq
-      const service = getSyncService();
-      const minAcked = service.getMinAckedSeq(userId);
-      expect(minAcked).toBe(2);
-    });
-
-    it('should report correct pending ops based on ack state', async () => {
-      const clientA = new SimulatedClient(app, userId);
-      const clientB = new SimulatedClient(app, userId);
-
-      // Upload 3 ops from Client A
-      clientA.createOp('CRT', 'TASK', 'task-1', { title: '1' });
-      clientA.createOp('CRT', 'TASK', 'task-2', { title: '2' });
-      clientA.createOp('CRT', 'TASK', 'task-3', { title: '3' });
-      await clientA.upload();
-
-      // Client B must upload something to be registered in sync_devices
-      // (Note: device ack only works for devices that have uploaded at least once)
-      clientB.createOp('CRT', 'TASK', 'task-b', { title: 'B' });
-      await clientB.upload();
-
-      // Client A acks all (seq 4 now since B uploaded)
-      await clientA.ack(4);
-
-      // Client B only acks up to seq 1
-      await clientB.ack(1);
-
-      // Check status
-      const response = await app.inject({
-        method: 'GET',
-        url: '/api/sync/status',
-        headers: { authorization: `Bearer ${clientA.authToken}` },
-      });
-
-      const status = response.json();
-      expect(status.latestSeq).toBe(4);
-      expect(status.pendingOps).toBe(3); // 4 - 1 = 3 pending (minAcked=1)
-    });
-  });
-
   describe('Concurrent Uploads', () => {
     it('should handle simultaneous uploads from multiple clients', async () => {
       const clients = Array.from({ length: 5 }, () => new SimulatedClient(app, userId));
@@ -1062,7 +990,8 @@ describe('Diagnostic: Sync Flow Verification', () => {
   });
 
   /**
-   * Diagnostic test to verify what happens with entity conflicts
+   * Diagnostic test to verify server-side conflict detection.
+   * Server now detects concurrent edits via vector clock comparison.
    */
   it('DIAGNOSTIC: Concurrent edit detection', async () => {
     console.log('\n=== Concurrent Edit Scenario ===\n');
@@ -1083,7 +1012,10 @@ describe('Diagnostic: Sync Flow Verification', () => {
     console.log('  Client B seq:', clientB.currentSeq);
 
     // Both edit the SAME task (this creates concurrent edits)
-    // IMPORTANT: They're now at seq=1, so they'll see each other's edits when they sync
+    // After B downloads A's CRT op, B's VC becomes {client-a: 1}
+    // When A edits: A's VC becomes {client-a: 2}
+    // When B edits: B's VC becomes {client-a: 1, client-b: 1}
+    // These are CONCURRENT (neither > the other)
     console.log('\nBoth clients editing same task concurrently...');
     clientA.createOp('UPD', 'TASK', 'shared-task', { title: 'Edited by A' });
     clientB.createOp('UPD', 'TASK', 'shared-task', { title: 'Edited by B' });
@@ -1091,49 +1023,31 @@ describe('Diagnostic: Sync Flow Verification', () => {
     console.log('  Client A VC after edit:', clientA.currentVectorClock);
     console.log('  Client B VC after edit:', clientB.currentVectorClock);
 
-    // Both upload - Client A uploads first (seq=2), then B (seq=3)
-    // The upload will piggyback new ops if available
+    // Both upload - Client A uploads first, then B
     const resultA = await clientA.upload();
     const resultB = await clientB.upload();
 
     console.log('\nUpload results:');
-    console.log('  Client A serverSeq:', resultA.results[0].serverSeq);
-    console.log('  Client B serverSeq:', resultB.results[0].serverSeq);
-    console.log('  Client A latestSeq after upload:', resultA.latestSeq);
-    console.log('  Client B latestSeq after upload:', resultB.latestSeq);
-    console.log('  Client A piggybacked:', resultA.newOps?.length ?? 0);
-    console.log('  Client B piggybacked:', resultB.newOps?.length ?? 0);
+    console.log('  Client A accepted:', resultA.results[0].accepted);
+    console.log('  Client B accepted:', resultB.results[0].accepted);
+    console.log('  Client B error:', resultB.results[0].error);
 
-    // After uploads:
-    // - Client A uploaded at seq=2, but its lastKnownSeq was 1, so latestSeq becomes 2
-    // - Client B uploaded at seq=3, but its lastKnownSeq was 1, so it should get A's op (seq=2) piggybacked
-    // Both clients should see each other's updates via piggybacking
-
-    // Server should have accepted both - conflict detection is client-side
+    // Client A's edit is accepted (first to upload wins)
     expect(resultA.results[0].accepted).toBe(true);
-    expect(resultB.results[0].accepted).toBe(true);
 
-    // Client B should have received A's op via piggybacking (since B's lastKnownSeq was 1)
+    // Client B's edit is REJECTED as concurrent conflict
+    // Server detects: B's VC {client-a:1, client-b:1} vs server's latest for entity {client-a:2}
+    // B has client-a:1 < 2, so not GREATER_THAN → rejected as CONCURRENT
+    expect(resultB.results[0].accepted).toBe(false);
+    expect(resultB.results[0].errorCode).toBe('CONFLICT_CONCURRENT');
+
+    // Client B gets A's op piggybacked so it can resolve the conflict
     expect(resultB.newOps).toHaveLength(1);
     expect(resultB.newOps![0].op.payload).toEqual({ title: 'Edited by A' });
 
-    // Client A needs to download B's op since it wasn't piggybacked (A uploaded before B)
-    // But A's lastKnownSeq is now 2, and B's op is at seq=3, so A should get it
-    const downloadA = await clientA.downloadAll();
-
-    console.log('\nAfter sync:');
-    console.log('  Client A downloaded:', downloadA.length, 'ops');
-    console.log('  Client A VC:', clientA.currentVectorClock);
-    console.log('  Client B VC:', clientB.currentVectorClock);
-
-    // Client A should download Client B's update (seq=3)
-    expect(downloadA).toHaveLength(1);
-    expect(downloadA[0].op.payload).toEqual({ title: 'Edited by B' });
-
     console.log('\n=== Concurrent Edit Scenario Complete ===');
-    console.log(
-      'NOTE: Conflict detection/resolution happens CLIENT-SIDE based on vector clocks',
-    );
+    console.log('NOTE: Server detects conflicts via vector clock comparison.');
+    console.log('Client must resolve and retry with merged vector clock.');
     console.log('\n');
   });
 });

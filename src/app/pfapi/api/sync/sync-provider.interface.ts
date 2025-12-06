@@ -227,11 +227,6 @@ export interface OperationSyncCapable {
   setLastServerSeq(seq: number): Promise<void>;
 
   /**
-   * Acknowledge that operations up to lastSeq have been received
-   */
-  acknowledgeOps(clientId: string, lastSeq: number): Promise<void>;
-
-  /**
    * Upload a full state snapshot (for backup imports, repairs, initial sync)
    * This is more efficient than sending large payloads through the ops endpoint.
    * @param state The complete application state

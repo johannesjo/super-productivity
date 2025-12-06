@@ -125,14 +125,4 @@ export class MockSyncServer {
     this.ops = [];
     this.nextSeq = 1;
   }
-
-  /**
-   * Get minimum acknowledged sequence (stub for tests).
-   * In real implementation this would track per-client ack positions.
-   */
-  getMinAckedSeq(): number {
-    // For testing purposes, return the latest seq
-    // A real implementation would track per-client ack positions
-    return this.getLatestSeq();
-  }
 }

@@ -395,54 +395,6 @@ describe('SuperSyncProvider', () => {
     });
   });
 
-  describe('acknowledgeOps', () => {
-    it('should send acknowledgment to server', async () => {
-      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
-
-      fetchSpy.and.returnValue(
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ acknowledged: true }),
-        } as Response),
-      );
-
-      await provider.acknowledgeOps('client-1', 10);
-
-      expect(fetchSpy).toHaveBeenCalledTimes(1);
-
-      const [url, options] = fetchSpy.calls.mostRecent().args;
-      expect(url).toBe('https://sync.example.com/api/sync/devices/client-1/ack');
-      expect(options.method).toBe('POST');
-
-      const body = JSON.parse(options.body);
-      expect(body.lastSeq).toBe(10);
-    });
-
-    it('should encode client ID in URL', async () => {
-      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
-
-      fetchSpy.and.returnValue(
-        Promise.resolve({
-          ok: true,
-          json: () => Promise.resolve({ acknowledged: true }),
-        } as Response),
-      );
-
-      await provider.acknowledgeOps('client/with/slashes', 10);
-
-      const url = fetchSpy.calls.mostRecent().args[0];
-      expect(url).toContain('client%2Fwith%2Fslashes');
-    });
-
-    it('should throw MissingCredentialsSPError when config is missing', async () => {
-      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(null));
-
-      await expectAsync(provider.acknowledgeOps('client-1', 10)).toBeRejectedWith(
-        jasmine.any(MissingCredentialsSPError),
-      );
-    });
-  });
-
   describe('error handling', () => {
     it('should include error text in API error message', async () => {
       mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
