@@ -129,7 +129,10 @@ export class SyncEffects {
             ),
 
             // initial after enabling it
-            this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_AFTER_ENABLE')),
+            this._wasJustEnabled$.pipe(
+              take(1),
+              map(() => 'SYNC_AFTER_ENABLE'),
+            ),
           ),
         ),
         tap((x) => SyncLog.log('sync(effect).....', x)),
