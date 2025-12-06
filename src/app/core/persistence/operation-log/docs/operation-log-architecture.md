@@ -1515,7 +1515,73 @@ async downloadRemoteOps(syncProvider: OperationSyncCapable): Promise<void> {
 }
 ```
 
-## C.3 File-Based Sync Fallback
+## C.3 Full-State Operations via Snapshot Endpoint
+
+Operations that contain the full application state (`SyncImport`, `BackupImport`, `Repair`) can be very large (10-30MB+). Instead of sending these through the regular `/api/sync/ops` endpoint, they are uploaded via the dedicated `/api/sync/snapshot` endpoint which is optimized for large payloads.
+
+### Operation Routing
+
+```
+Upload Flow
+    │
+    ├──► Filter: Is opType in { SYNC_IMPORT, BACKUP_IMPORT, REPAIR }?
+    │         │
+    │         ├──► YES: Upload via /api/sync/snapshot
+    │         │         • Uses uploadSnapshot() method
+    │         │         • Maps opType to reason: initial, recovery, migration
+    │         │         • Supports E2E encryption
+    │         │
+    │         └──► NO: Upload via /api/sync/ops (normal batched upload)
+```
+
+### Implementation
+
+```typescript
+// Full-state op types routed to snapshot endpoint
+const FULL_STATE_OP_TYPES = new Set([
+  OpType.SyncImport,
+  OpType.BackupImport,
+  OpType.Repair,
+]);
+
+// In OperationLogUploadService._uploadPendingOpsViaApi():
+const fullStateOps = pendingOps.filter((entry) =>
+  FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
+);
+const regularOps = pendingOps.filter(
+  (entry) => !FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
+);
+
+// Upload full-state ops via snapshot endpoint
+for (const entry of fullStateOps) {
+  await syncProvider.uploadSnapshot(
+    entry.op.payload, // Full app state
+    entry.op.clientId,
+    mapOpTypeToReason(entry.op.opType), // 'initial' | 'recovery' | 'migration'
+    entry.op.vectorClock,
+    entry.op.schemaVersion,
+  );
+}
+
+// Upload regular ops in batches via ops endpoint
+// ... (existing batch upload logic)
+```
+
+### OpType to Reason Mapping
+
+| OpType          | Snapshot Reason | Use Case                         |
+| --------------- | --------------- | -------------------------------- |
+| `SYNC_IMPORT`   | `initial`       | First sync or full state refresh |
+| `BACKUP_IMPORT` | `recovery`      | Restoring from backup file       |
+| `REPAIR`        | `recovery`      | Auto-repair with corrected state |
+
+### Benefits
+
+1. **Reduced body limit issues** - Snapshot endpoint has 30MB limit, separate from regular ops
+2. **Semantic clarity** - Full state uploads use appropriate endpoint
+3. **Server-side optimization** - Server can cache snapshots for faster client bootstrap
+
+## C.4 File-Based Sync Fallback
 
 For providers without API support (WebDAV/Dropbox), operations are synced via files (`OperationLogUploadService` and `OperationLogDownloadService` handle this transparently):
 

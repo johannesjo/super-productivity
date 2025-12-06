@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 5, 2025
+**Last Updated:** December 6, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -99,6 +99,7 @@ This diagram details the flow for syncing individual operations with a server (`
 - Server-side security: audit logging, error codes, deduplication, validation
 - Gap detection in download operations
 - Transaction isolation for downloads
+- Full-state operations (BackupImport, Repair, SyncImport) routed via snapshot endpoint
 
 ```mermaid
 graph TD
@@ -164,9 +165,13 @@ graph TD
         PendingOps -->|Filter| FilterRejected{Is<br/>Rejected?}
 
         FilterRejected -- Yes --> Skip[Skip Upload]
-        FilterRejected -- No --> UploadBatch[Batch for Upload]
+        FilterRejected -- No --> ClassifyOp{Op Type?}
 
-        UploadBatch -->|3. Upload| API
+        ClassifyOp -- "BackupImport<br/>Repair<br/>SyncImport" --> SnapshotUpload[Upload via<br/>/api/sync/snapshot]
+        ClassifyOp -- "Other" --> UploadBatch[Batch for Upload]
+
+        SnapshotUpload -->|3a. Upload State| API
+        UploadBatch -->|3b. Upload| API
         API -->|Ack| ServerAck[Server Acknowledgement]
         ServerAck -->|Update| MarkSynced[Mark Ops Synced]
         MarkSynced --> OpLog
@@ -174,6 +179,82 @@ graph TD
 
     API <--> ServerDB
 ```
+
+## 2b. Full-State Operations via Snapshot Endpoint ✅ IMPLEMENTED
+
+Full-state operations (BackupImport, Repair, SyncImport) contain the entire application state and can exceed the regular `/api/sync/ops` body size limit (~30MB). These operations are routed through the `/api/sync/snapshot` endpoint instead.
+
+**Implementation Status:** Complete. See `OperationLogUploadService._uploadFullStateOpAsSnapshot()`.
+
+```mermaid
+flowchart TB
+    subgraph "Upload Decision Flow"
+        GetUnsynced[Get Unsynced Operations<br/>from IndexedDB]
+        Classify{Classify by OpType}
+
+        GetUnsynced --> Classify
+
+        subgraph FullStateOps["Full-State Operations"]
+            SyncImport[OpType.SyncImport]
+            BackupImport[OpType.BackupImport]
+            Repair[OpType.Repair]
+        end
+
+        subgraph RegularOps["Regular Operations"]
+            CRT[OpType.CRT]
+            UPD[OpType.UPD]
+            DEL[OpType.DEL]
+            MOV[OpType.MOV]
+            BATCH[OpType.BATCH]
+        end
+
+        Classify --> FullStateOps
+        Classify --> RegularOps
+
+        FullStateOps --> SnapshotPath
+        RegularOps --> OpsPath
+
+        subgraph SnapshotPath["Snapshot Endpoint Path"]
+            MapReason["Map OpType to reason:<br/>SyncImport → 'initial'<br/>BackupImport → 'recovery'<br/>Repair → 'recovery'"]
+            Encrypt1{E2E Encryption<br/>Enabled?}
+            EncryptPayload[Encrypt state payload]
+            UploadSnapshot["POST /api/sync/snapshot<br/>{state, clientId, reason,<br/>vectorClock, schemaVersion}"]
+        end
+
+        subgraph OpsPath["Ops Endpoint Path"]
+            Encrypt2{E2E Encryption<br/>Enabled?}
+            EncryptOps[Encrypt operation payloads]
+            Batch[Batch up to 100 ops]
+            UploadOps["POST /api/sync/ops<br/>{ops[], clientId, lastKnownSeq}"]
+        end
+
+        MapReason --> Encrypt1
+        Encrypt1 -- Yes --> EncryptPayload
+        Encrypt1 -- No --> UploadSnapshot
+        EncryptPayload --> UploadSnapshot
+
+        Encrypt2 -- Yes --> EncryptOps
+        Encrypt2 -- No --> Batch
+        EncryptOps --> Batch
+        Batch --> UploadOps
+    end
+
+    UploadSnapshot --> MarkSynced[Mark Operation as Synced]
+    UploadOps --> MarkSynced
+
+    style FullStateOps fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style RegularOps fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+    style SnapshotPath fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style OpsPath fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**Why This Matters:**
+
+1. **Body Size Limits**: Regular `/api/sync/ops` has a ~30MB limit which backup imports can exceed
+2. **Efficiency**: Snapshot endpoint is designed for large payloads and stores state directly
+3. **Server-Side Handling**: Server creates a synthetic operation record for audit purposes
+
+---
 
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
