@@ -73,21 +73,6 @@ export const startApp = (): void => {
   // https://github.com/electron/electron/issues/46538#issuecomment-2808806722
   app.commandLine.appendSwitch('gtk-version', '3');
 
-  // Force X11 on Linux by default (Electron 38+ defaults to Wayland via --ozone-platform=auto)
-  // Wayland has known issues:
-  // - Idle detection fallbacks are unreliable (#1443)
-  // - Global shortcuts require manual system configuration (GlobalShortcutsPortal)
-  // Users can override with --ozone-platform=wayland if desired
-  if (process.platform === 'linux') {
-    const forceWayland = process.argv.some(
-      (arg) =>
-        arg.includes('--ozone-platform=wayland') || arg.includes('--force-wayland'),
-    );
-    if (!forceWayland) {
-      app.commandLine.appendSwitch('ozone-platform', 'x11');
-    }
-  }
-
   // NOTE: needs to be executed before everything else
   process.argv.forEach((val) => {
     if (val && val.includes('--disable-tray')) {
