@@ -2,7 +2,10 @@ import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
 import { Update } from '@ngrx/entity';
 import { RootState } from '../../root-state';
 import { TaskSharedActions } from '../task-shared.actions';
-import { PROJECT_FEATURE_NAME } from '../../../features/project/store/project.reducer';
+import {
+  PROJECT_FEATURE_NAME,
+  projectAdapter,
+} from '../../../features/project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
 import {
   TASK_FEATURE_NAME,
@@ -367,10 +370,17 @@ const handleDeleteTask = (
 const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
   let updatedState = state;
 
-  // Get all task IDs including subtasks
+  // Get all task IDs including subtasks, and collect project associations
+  const projectIdsSet = new Set<string>();
   const allIds = taskIds.reduce((acc: string[], id: string) => {
     const task = state[TASK_FEATURE_NAME].entities[id] as Task;
-    return task ? [...acc, id, ...task.subTaskIds] : [...acc, id];
+    if (task) {
+      if (task.projectId) {
+        projectIdsSet.add(task.projectId);
+      }
+      return [...acc, id, ...task.subTaskIds];
+    }
+    return [...acc, id];
   }, []);
 
   // Remove tasks from task state
@@ -385,6 +395,33 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
           : newTaskState.currentTaskId,
     },
   };
+
+  // Clean up projects - remove task IDs from all affected projects
+  const projectIds = Array.from(projectIdsSet);
+  if (projectIds.length > 0) {
+    const projectUpdates = projectIds
+      .filter((pid) => !!state[PROJECT_FEATURE_NAME].entities[pid])
+      .map((pid) => {
+        const project = getProject(state, pid);
+        return {
+          id: pid,
+          changes: {
+            taskIds: removeTasksFromList(project.taskIds, allIds),
+            backlogTaskIds: removeTasksFromList(project.backlogTaskIds, allIds),
+          },
+        };
+      });
+
+    if (projectUpdates.length > 0) {
+      updatedState = {
+        ...updatedState,
+        [PROJECT_FEATURE_NAME]: projectAdapter.updateMany(
+          projectUpdates,
+          updatedState[PROJECT_FEATURE_NAME],
+        ),
+      };
+    }
+  }
 
   // Only update tags that actually contain at least one of the tasks being deleted
   // Use allIds (includes subtasks) to ensure subtask IDs are also removed from tags
