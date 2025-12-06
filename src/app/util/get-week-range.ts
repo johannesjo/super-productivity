@@ -14,28 +14,34 @@ export interface WeekRange {
  * @returns An object containing the start and end dates of the week.
  */
 export const getWeekRange = (relativeDate: Date, firstDayOfWeek: number): WeekRange => {
-  const date = new Date(relativeDate); // Create a copy of the input date
-  const dayOfWeek = date.getDay(); // Get the current day of the week (0-6)
+  // Get timezone offset in minutes
+  const timezoneOffsetInMinutes = relativeDate.getTimezoneOffset();
+  const timezoneOffsetInMilliseconds = timezoneOffsetInMinutes * 60000; // Convert to milliseconds
 
-  const startOfWeek = new Date(date); // Initialize starting date of the week
-  const endOfWeek = new Date(date); // Initialize ending date of the week
+  // Adjust the date by the timezone offset
+  const adjustedDate = new Date(relativeDate.getTime() + timezoneOffsetInMilliseconds);
+
+  // Get the day of the week from the adjusted date
+  const dayOfWeek = adjustedDate.getDay();
 
   // Calculate the shift to determine the start of the week
   const shift =
-    dayOfWeek < firstDayOfWeek
-      ? dayOfWeek + 7 - firstDayOfWeek // If current day is before the start day
-      : dayOfWeek - firstDayOfWeek; // If current day is on or after the start day
+    dayOfWeek >= firstDayOfWeek
+      ? dayOfWeek - firstDayOfWeek
+      : 7 - (firstDayOfWeek - dayOfWeek);
 
-  // Adjust the startOfWeek to the calculated date and set to midnight
-  startOfWeek.setDate(date.getDate() - shift);
-  startOfWeek.setHours(0, 0, 0, 0);
+  // Set the start of the week
+  const startOfWeek = new Date(adjustedDate);
+  startOfWeek.setDate(adjustedDate.getDate() - shift);
+  startOfWeek.setHours(0, 0, 0, 0); // Set time to the start of the day
 
-  // Adjust the endOfWeek to 6 days after the startOfWeek and set to end of the day
+  // Set the end of the week (6 days later)
+  const endOfWeek = new Date(startOfWeek);
   endOfWeek.setDate(startOfWeek.getDate() + 6);
-  endOfWeek.setHours(23, 59, 59, 999);
+  endOfWeek.setHours(23, 59, 59, 999); // Set time to the end of the day
 
   return {
-    start: startOfWeek, // Return start date of the week
-    end: endOfWeek, // Return end date of the week
+    start: startOfWeek,
+    end: endOfWeek,
   };
 };
