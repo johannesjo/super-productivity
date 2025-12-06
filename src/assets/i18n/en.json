@@ -1145,6 +1145,13 @@
           "L_SYNC_FOLDER_PATH": "Sync folder path"
         },
         "SUPER_SYNC": {
+          "INFO_TEXT": "SuperSync keeps your tasks synchronized across all your devices in real-time. Your data is stored securely on the sync server.",
+          "L_SERVER_URL": "Server URL",
+          "SERVER_URL_DESCRIPTION": "Leave as-is for the official server, or enter a custom server URL",
+          "LOGIN_INSTRUCTIONS": "Click the button below to open the server login page. After logging in, copy your access token and paste it here.",
+          "BTN_GET_TOKEN": "Open Server & Get Token",
+          "L_ACCESS_TOKEN": "Access Token",
+          "ACCESS_TOKEN_DESCRIPTION": "Paste the token you copied from the server login page",
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
           "ENCRYPTION_WARNING": "WARNING: If you forget your encryption password, your data cannot be recovered. This password is separate from your login password. You must use the same password on all devices."
         },

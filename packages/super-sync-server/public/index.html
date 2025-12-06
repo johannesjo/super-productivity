@@ -125,7 +125,10 @@
         >
           <div class="success-icon">🔐</div>
           <h2>Connection Successful</h2>
-          <p>Copy this token and paste it into Super Productivity settings.</p>
+          <p>
+            <strong>Next step:</strong> Copy this token and paste it in Super
+            Productivity's sync settings.
+          </p>
 
           <div class="token-box">
             <textarea
@@ -142,6 +145,18 @@
             </button>
           </div>
 
+          <details class="instructions">
+            <summary>How to use this token</summary>
+            <ol>
+              <li>Open Super Productivity</li>
+              <li>Go to Settings (gear icon)</li>
+              <li>Click "Setup Sync" or go to the Sync section</li>
+              <li>Select "SuperSync" as your sync provider</li>
+              <li>Paste the token in the "Access Token" field</li>
+              <li>Click "Save & Enable"</li>
+            </ol>
+          </details>
+
           <div class="warning-box">
             <p>
               <strong>Keep this safe!</strong> This token grants access to your sync data.
@@ -152,7 +167,7 @@
             <button
               id="refresh-btn"
               onclick="refreshToken()"
-              class="btn secondary"
+              class="btn text-only"
             >
               Refresh Token
             </button>
@@ -160,7 +175,7 @@
               onclick="logout()"
               class="btn text-only"
             >
-              Log Out / Back
+              Log Out
             </button>
           </div>
         </div>
