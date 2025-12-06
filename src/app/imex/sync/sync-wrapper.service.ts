@@ -67,6 +67,10 @@ export class SyncWrapperService {
   private _isSyncInProgress$ = new BehaviorSubject(false);
   isSyncInProgress$ = this._isSyncInProgress$.asObservable();
 
+  isSyncInProgressSync(): boolean {
+    return this._isSyncInProgress$.getValue();
+  }
+
   // Track when we're waiting for user input (e.g., conflict dialog)
   // to avoid timeout errors during user decision time
   private _isWaitingForUserInput$ = new BehaviorSubject(false);

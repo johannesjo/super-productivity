@@ -141,7 +141,10 @@ export class StartupService {
         if (!gCfg) {
           throw new Error();
         }
-        if (gCfg.misc.isConfirmBeforeExit) {
+        if (
+          gCfg.misc.isConfirmBeforeExit ||
+          this._syncWrapperService.isSyncInProgressSync()
+        ) {
           e.preventDefault();
           e.returnValue = '';
         }
