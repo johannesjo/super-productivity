@@ -582,6 +582,72 @@ describe('OperationApplierService', () => {
       expect((calls[1].args[0] as any).meta.entityId).toBe('task-1'); // Task DELETE
     });
 
+    it('should apply DELETE after Tag UPDATE with nested taskIds (updateTag action)', async () => {
+      // This tests the real-world scenario: updateTag action has nested structure
+      // payload: { tag: { id, changes: { taskIds: [...] } } }
+      const tagUpdateOp = createMockOperation(
+        'tag-update-op',
+        'TAG',
+        OpType.Update,
+        {
+          tag: {
+            id: 'TODAY',
+            changes: {
+              taskIds: ['task-1', 'task-2', 'task-3'],
+            },
+          },
+        },
+        'TODAY',
+      );
+
+      const taskDeleteOp = createMockOperation(
+        'task-delete-op',
+        'TASK',
+        OpType.Delete,
+        { id: 'task-1' },
+        'task-1',
+      );
+
+      // Simulate real dependency extraction from nested structure
+      mockDependencyResolver.extractDependencies.and.callFake((op: Operation) => {
+        if (op.id === 'tag-update-op') {
+          // Real extractor would find taskIds in tag.changes.taskIds
+          return [
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'task-1',
+              mustExist: false,
+              relation: 'reference' as const,
+            },
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'task-2',
+              mustExist: false,
+              relation: 'reference' as const,
+            },
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'task-3',
+              mustExist: false,
+              relation: 'reference' as const,
+            },
+          ];
+        }
+        return [];
+      });
+
+      // Apply DELETE first - should be reordered to come after Tag UPDATE
+      await service.applyOperations([taskDeleteOp, tagUpdateOp]);
+
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
+
+      const calls = mockStore.dispatch.calls.all();
+      // Tag UPDATE with nested taskIds should come first
+      expect((calls[0].args[0] as any).meta.entityId).toBe('TODAY');
+      // DELETE should come last
+      expect((calls[1].args[0] as any).meta.entityId).toBe('task-1');
+    });
+
     it('should apply multiple operations before DELETE when all reference the entity', async () => {
       // Scenario: Multiple operations reference task-1 before it's deleted
       const tagUpdate1 = createMockOperation(
