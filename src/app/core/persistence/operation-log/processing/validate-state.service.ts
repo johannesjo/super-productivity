@@ -365,6 +365,8 @@ export class ValidateStateService {
 
   /**
    * Counts invalid reference removals.
+   * Checks for tasks where projectId or tagIds were cleaned up (set to null/undefined
+   * or removed from array) because the referenced entity no longer exists.
    */
   private _countInvalidReferenceRemovals(
     original: AppDataCompleteNew,
@@ -372,14 +374,22 @@ export class ValidateStateService {
   ): number {
     let count = 0;
 
-    // Check for tasks with removed projectIds
     const origTasks = getTaskEntities(original);
     const repairedTasks = getTaskEntities(repaired);
 
     for (const origTask of Object.values(origTasks)) {
       const repairedTask = repairedTasks[origTask.id];
-      if (!repairedTask && origTask.projectId) {
-        count++;
+      if (repairedTask) {
+        // Check if projectId was removed (invalid reference cleaned)
+        if (origTask.projectId && !repairedTask.projectId) {
+          count++;
+        }
+        // Check if tagIds were reduced (invalid references cleaned)
+        const origTagCount = origTask.tagIds?.length || 0;
+        const repairedTagCount = repairedTask.tagIds?.length || 0;
+        if (origTagCount > repairedTagCount) {
+          count += origTagCount - repairedTagCount;
+        }
       }
     }
 
