@@ -718,6 +718,176 @@ describe('Multi-User Isolation', () => {
   });
 });
 
+describe('Gzip Compressed Snapshot Upload', () => {
+  let app: FastifyInstance;
+  const userId = 1;
+  const clientId = 'test-device-1';
+  let authToken: string;
+
+  beforeEach(async () => {
+    initDb('./data', true);
+    const db = getDb();
+
+    db.prepare(
+      `INSERT INTO users (id, email, password_hash, is_verified, created_at)
+       VALUES (?, 'test@test.com', 'hash', 1, ?)`,
+    ).run(userId, Date.now());
+
+    initSyncService();
+    authToken = createToken(userId, 'test@test.com');
+
+    app = Fastify();
+    await app.register(syncRoutes, { prefix: '/api/sync' });
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('should accept gzip-compressed snapshot upload', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    const payload = {
+      state: { task: { t1: { title: 'Compressed Task' } } },
+      clientId,
+      reason: 'initial',
+      vectorClock: { [clientId]: 1 },
+      schemaVersion: 1,
+    };
+
+    const jsonPayload = JSON.stringify(payload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload, 'utf-8'));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: compressedPayload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.accepted).toBe(true);
+    expect(body.serverSeq).toBeDefined();
+  });
+
+  it('should still accept uncompressed snapshot upload', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+      },
+      payload: {
+        state: { task: { t1: { title: 'Uncompressed Task' } } },
+        clientId,
+        reason: 'recovery',
+        vectorClock: { [clientId]: 1 },
+      },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.accepted).toBe(true);
+  });
+
+  it('should return 400 for invalid gzip data', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: Buffer.from('not valid gzip data'),
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toContain('decompress');
+  });
+
+  it('should handle large compressed payloads', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    // Create a large payload (simulate backup import)
+    const tasks: Record<string, { title: string; description: string }> = {};
+    for (let i = 0; i < 1000; i++) {
+      tasks[`task-${i}`] = {
+        title: `Task ${i}`,
+        description: 'A'.repeat(1000), // 1KB per task
+      };
+    }
+
+    const payload = {
+      state: { task: tasks },
+      clientId,
+      reason: 'recovery',
+      vectorClock: { [clientId]: 1 },
+      schemaVersion: 1,
+    };
+
+    const jsonPayload = JSON.stringify(payload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload, 'utf-8'));
+
+    // Compression should significantly reduce size
+    expect(compressedPayload.length).toBeLessThan(jsonPayload.length * 0.5);
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: compressedPayload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.accepted).toBe(true);
+  });
+
+  it('should validate payload after decompression', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    // Invalid payload (missing required fields)
+    const payload = {
+      state: { task: {} },
+      // missing clientId, reason, vectorClock
+    };
+
+    const jsonPayload = JSON.stringify(payload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload, 'utf-8'));
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: compressedPayload,
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toBe('Validation failed');
+  });
+});
+
 describe('Concurrent Operations', () => {
   let app: FastifyInstance;
   const userId = 1;
