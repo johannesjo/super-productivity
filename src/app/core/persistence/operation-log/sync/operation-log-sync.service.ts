@@ -352,21 +352,8 @@ export class OperationLogSyncService {
     // Get the snapshot vector clock as a fallback for entities not in the frontier map
     // This prevents false conflicts for entities that haven't been modified since compaction
     const snapshotVectorClock = await this.vectorClockService.getSnapshotVectorClock();
-
-    // SAFETY CHECK: Detect potential clock corruption
-    // If we have pending local ops (not a fresh client) but no snapshot clock,
-    // this indicates corrupted metadata - treat cautiously to avoid data loss
-    const hasLocalPendingOps = localPendingOpsByEntity.size > 0;
     const hasNoSnapshotClock =
       !snapshotVectorClock || Object.keys(snapshotVectorClock).length === 0;
-    const potentialClockCorruption = hasLocalPendingOps && hasNoSnapshotClock;
-
-    if (potentialClockCorruption) {
-      OpLog.warn(
-        'OperationLogSyncService: Potential clock corruption detected - have pending ops but no snapshot clock. Will be conservative in conflict detection.',
-        { pendingEntityCount: localPendingOpsByEntity.size },
-      );
-    }
 
     for (const remoteOp of remoteOps) {
       const entityIdsToCheck =
@@ -392,15 +379,21 @@ export class OperationLogSyncService {
           {},
         );
 
+        const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
         let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
-        // SAFETY: If we detected potential clock corruption and the local frontier
-        // is empty for this entity (would result in LESS_THAN), treat as CONCURRENT
-        // to force conflict resolution instead of silently accepting remote data
-        const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+        // SAFETY: Per-entity clock corruption check.
+        // If THIS entity has pending local ops but an empty frontier (no snapshot clock),
+        // this indicates corrupted metadata for this specific entity.
+        // Convert LESS_THAN to CONCURRENT to force conflict resolution.
+        // NOTE: We check per-entity, not globally, to avoid false conflicts when
+        // a fresh client has unrelated pending ops (e.g., GLOBAL_CONFIG) but no
+        // local ops for the entity being checked (e.g., TASK).
+        const entityHasPendingOps = localOpsForEntity.length > 0;
+        const potentialEntityCorruption =
+          entityHasPendingOps && hasNoSnapshotClock && localFrontierIsEmpty;
         if (
-          potentialClockCorruption &&
-          localFrontierIsEmpty &&
+          potentialEntityCorruption &&
           vcComparison === VectorClockComparison.LESS_THAN
         ) {
           OpLog.warn(

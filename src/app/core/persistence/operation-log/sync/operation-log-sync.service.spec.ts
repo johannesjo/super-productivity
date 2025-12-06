@@ -224,6 +224,139 @@ describe('OperationLogSyncService', () => {
     });
   });
 
+  describe('detectConflicts - fresh client scenarios', () => {
+    const createOp = (partial: Partial<Operation>): Operation => ({
+      id: 'op-1',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'entity-1',
+      payload: {},
+      clientId: 'client-1',
+      vectorClock: { client1: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      ...partial,
+    });
+
+    it('should NOT flag remote TASK ops as conflicts when fresh client has only GLOBAL_CONFIG pending ops', async () => {
+      // Scenario: Fresh client configured sync (creating GLOBAL_CONFIG op) but hasn't synced yet
+      // Remote TASK ops should NOT be conflicts - they should be applied directly
+
+      // Setup: GLOBAL_CONFIG has a pending local op, but TASK:task-1 has none
+      const pendingByEntity = new Map<string, Operation[]>();
+      pendingByEntity.set('GLOBAL_CONFIG:sync', [
+        createOp({
+          id: 'local-config-op',
+          entityType: 'GLOBAL_CONFIG',
+          entityId: 'sync',
+          opType: OpType.Update,
+          vectorClock: { localClient: 1 },
+        }),
+      ]);
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(pendingByEntity));
+
+      // No snapshot (fresh client)
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve(undefined),
+      );
+
+      // No entity frontier for TASK (it's a fresh client)
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+
+      // Remote TASK operation from another client
+      const remoteTaskOps: Operation[] = [
+        createOp({
+          id: 'remote-task-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          opType: OpType.Create,
+          vectorClock: { otherClient: 1 },
+        }),
+      ];
+
+      const result = await service.detectConflicts(remoteTaskOps, new Map());
+
+      // TASK op should be non-conflicting (not a conflict!)
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('remote-task-op');
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should flag as conflict when entity has pending local ops but empty frontier (potential corruption)', async () => {
+      // Scenario: An entity has pending local ops but no frontier entry and no snapshot
+      // This indicates potential clock corruption - should be flagged as conflict
+
+      const pendingByEntity = new Map<string, Operation[]>();
+      pendingByEntity.set('TASK:task-1', [
+        createOp({
+          id: 'local-task-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          opType: OpType.Update,
+          vectorClock: { localClient: 1 },
+        }),
+      ]);
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(pendingByEntity));
+
+      // No snapshot (potential corruption scenario)
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve(undefined),
+      );
+
+      // No entity frontier (the pending ops vector clock should have been tracked)
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+
+      // Remote op for the SAME entity
+      const remoteOps: Operation[] = [
+        createOp({
+          id: 'remote-task-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          opType: OpType.Update,
+          vectorClock: { otherClient: 1 },
+        }),
+      ];
+
+      const result = await service.detectConflicts(remoteOps, new Map());
+
+      // Should be flagged as conflict due to per-entity corruption check
+      expect(result.conflicts.length).toBe(1);
+      expect(result.conflicts[0].entityId).toBe('task-1');
+      expect(result.nonConflicting.length).toBe(0);
+    });
+
+    it('should apply remote ops without conflict for truly fresh client (no pending ops at all)', async () => {
+      // Scenario: Completely fresh client with no local ops whatsoever
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve(undefined),
+      );
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+
+      const remoteOps: Operation[] = [
+        createOp({
+          id: 'remote-op-1',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          vectorClock: { otherClient: 1 },
+        }),
+        createOp({
+          id: 'remote-op-2',
+          entityType: 'PROJECT',
+          entityId: 'project-1',
+          vectorClock: { otherClient: 2 },
+        }),
+      ];
+
+      const result = await service.detectConflicts(remoteOps, new Map());
+
+      // All ops should be non-conflicting
+      expect(result.nonConflicting.length).toBe(2);
+      expect(result.conflicts.length).toBe(0);
+    });
+  });
+
   describe('_suggestResolution', () => {
     // Access private method for testing
     const callSuggestResolution = (

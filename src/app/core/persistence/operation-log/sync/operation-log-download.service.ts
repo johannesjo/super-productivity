@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
 import { Operation, OperationLogEntry } from '../operation.types';
@@ -13,7 +13,6 @@ import {
   OperationLogManifestService,
   OPS_DIR,
 } from '../store/operation-log-manifest.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
@@ -54,7 +53,6 @@ export class OperationLogDownloadService {
   private lockService = inject(LockService);
   private manifestService = inject(OperationLogManifestService);
   private snackService = inject(SnackService);
-  private injector = inject(Injector);
   private encryptionService = inject(OperationEncryptionService);
 
   async downloadRemoteOps(
@@ -90,17 +88,12 @@ export class OperationLogDownloadService {
     const encryptKey = privateCfg?.encryptKey;
 
     await this.lockService.request('sp_op_log_download', async () => {
-      // Get clientId at start to avoid race conditions with other tabs
-      const pfapiService = this.injector.get(PfapiService);
-      const clientId = await pfapiService.pf.metaModel.loadClientId();
-
       const lastServerSeq = await syncProvider.getLastServerSeq();
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
 
       // Download ops in pages
       let hasMore = true;
       let sinceSeq = lastServerSeq;
-      let receivedAnyOps = false;
 
       while (hasMore) {
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
@@ -108,8 +101,6 @@ export class OperationLogDownloadService {
         if (response.ops.length === 0) {
           break;
         }
-
-        receivedAnyOps = true;
 
         // Filter already applied ops
         let syncOps: SyncOperation[] = response.ops
@@ -177,11 +168,11 @@ export class OperationLogDownloadService {
         await syncProvider.setLastServerSeq(response.latestSeq);
       }
 
-      // Acknowledge that we've processed ops up to the latest seq
-      // Do this even if all ops were already applied (to update server-side cursor)
-      if (receivedAnyOps && clientId) {
-        await syncProvider.acknowledgeOps(clientId, sinceSeq);
-      }
+      // NOTE: We don't call acknowledgeOps here anymore.
+      // ACK was used for server-side garbage collection, but the server already
+      // cleans up stale devices after 30 days (STALE_DEVICE_THRESHOLD_MS).
+      // Removing ACK simplifies the flow and avoids issues with fresh clients
+      // (device not registered until first upload would cause 403 errors).
 
       OpLog.normal(
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via API.`,

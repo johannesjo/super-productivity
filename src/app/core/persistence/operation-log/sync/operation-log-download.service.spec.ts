@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { Injector } from '@angular/core';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
@@ -21,15 +20,6 @@ describe('OperationLogDownloadService', () => {
   let mockLockService: jasmine.SpyObj<LockService>;
   let mockManifestService: jasmine.SpyObj<OperationLogManifestService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
-  let mockInjector: jasmine.SpyObj<Injector>;
-
-  const mockPfapiService = {
-    pf: {
-      metaModel: {
-        loadClientId: jasmine.createSpy().and.returnValue(Promise.resolve('test-client')),
-      },
-    },
-  };
 
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
@@ -41,7 +31,6 @@ describe('OperationLogDownloadService', () => {
       'uploadRemoteManifest',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
-    mockInjector = jasmine.createSpyObj('Injector', ['get']);
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -53,7 +42,6 @@ describe('OperationLogDownloadService', () => {
     mockManifestService.loadRemoteManifest.and.returnValue(
       Promise.resolve({ operationFiles: [], version: 1 }),
     );
-    mockInjector.get.and.returnValue(mockPfapiService);
 
     TestBed.configureTestingModule({
       providers: [
@@ -62,7 +50,6 @@ describe('OperationLogDownloadService', () => {
         { provide: LockService, useValue: mockLockService },
         { provide: OperationLogManifestService, useValue: mockManifestService },
         { provide: SnackService, useValue: mockSnackService },
-        { provide: Injector, useValue: mockInjector },
       ],
     });
 
@@ -219,7 +206,7 @@ describe('OperationLogDownloadService', () => {
         expect(result.newOps[0].id).toBe('op-2');
       });
 
-      it('should acknowledge ops after successful download', async () => {
+      it('should not call acknowledgeOps (removed to simplify fresh client flow)', async () => {
         mockApiProvider.downloadOps.and.returnValue(
           Promise.resolve({
             ops: [
@@ -246,7 +233,8 @@ describe('OperationLogDownloadService', () => {
 
         await service.downloadRemoteOps(mockApiProvider);
 
-        expect(mockApiProvider.acknowledgeOps).toHaveBeenCalledWith('test-client', 5);
+        // ACK was removed - server uses stale device cleanup instead (30 days)
+        expect(mockApiProvider.acknowledgeOps).not.toHaveBeenCalled();
       });
 
       it('should return success true for API sync', async () => {
