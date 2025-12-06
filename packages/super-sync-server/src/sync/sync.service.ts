@@ -17,6 +17,14 @@ import {
   SyncErrorCode,
 } from './sync.types';
 import { Logger } from '../logger';
+import {
+  CURRENT_SCHEMA_VERSION,
+  migrateState,
+  migrateOperation,
+  stateNeedsMigration,
+  validateMigrationRegistry,
+  type OperationLike,
+} from '@sp/shared-schema';
 
 /**
  * Valid entity types for operations.
@@ -164,13 +172,13 @@ export class SyncService {
       `),
 
       getCachedSnapshot: this.db.prepare(`
-        SELECT snapshot_data, last_snapshot_seq, snapshot_at
+        SELECT snapshot_data, last_snapshot_seq, snapshot_at, snapshot_schema_version
         FROM user_sync_state WHERE user_id = ?
       `),
 
       cacheSnapshot: this.db.prepare(`
         UPDATE user_sync_state
-        SET snapshot_data = ?, last_snapshot_seq = ?, snapshot_at = ?
+        SET snapshot_data = ?, last_snapshot_seq = ?, snapshot_at = ?, snapshot_schema_version = ?
         WHERE user_id = ?
       `),
 
@@ -668,12 +676,18 @@ export class SyncService {
 
   getCachedSnapshot(
     userId: number,
-  ): { state: unknown; serverSeq: number; generatedAt: number } | null {
+  ): {
+    state: unknown;
+    serverSeq: number;
+    generatedAt: number;
+    schemaVersion: number;
+  } | null {
     const row = this.stmts.getCachedSnapshot.get(userId) as
       | {
           snapshot_data: Buffer | null;
           last_snapshot_seq: number | null;
           snapshot_at: number | null;
+          snapshot_schema_version: number | null;
         }
       | undefined;
 
@@ -685,6 +699,7 @@ export class SyncService {
       state: JSON.parse(decompressed),
       serverSeq: row.last_snapshot_seq ?? 0,
       generatedAt: row.snapshot_at ?? 0,
+      schemaVersion: row.snapshot_schema_version ?? 1,
     };
   }
 
@@ -702,13 +717,21 @@ export class SyncService {
       return;
     }
 
-    this.stmts.cacheSnapshot.run(compressed, serverSeq, now, userId);
+    // Store with current schema version
+    this.stmts.cacheSnapshot.run(
+      compressed,
+      serverSeq,
+      now,
+      CURRENT_SCHEMA_VERSION,
+      userId,
+    );
   }
 
   generateSnapshot(userId: number): {
     state: unknown;
     serverSeq: number;
     generatedAt: number;
+    schemaVersion: number;
   } {
     // Wrap in transaction for snapshot isolation - prevents race conditions
     // where new ops arrive between reading latestSeq and processing ops
@@ -716,21 +739,48 @@ export class SyncService {
       const latestSeq = this.getLatestSeq(userId);
       let state: Record<string, unknown> = {};
       let startSeq = 0;
+      let snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
 
       // Try to get cached snapshot to build upon (Incremental Snapshot)
       const cached = this.getCachedSnapshot(userId);
       if (cached) {
         state = cached.state as Record<string, unknown>;
         startSeq = cached.serverSeq;
+        snapshotSchemaVersion = cached.schemaVersion;
       }
 
-      // If we are already up to date, return cached
-      if (startSeq >= latestSeq && cached) {
+      // If we are already up to date AND at current schema version, return cached
+      if (
+        startSeq >= latestSeq &&
+        cached &&
+        snapshotSchemaVersion === CURRENT_SCHEMA_VERSION
+      ) {
         return {
           state: cached.state,
           serverSeq: cached.serverSeq,
           generatedAt: Date.now(), // Refresh timestamp
+          schemaVersion: CURRENT_SCHEMA_VERSION,
         };
+      }
+
+      // Migrate snapshot if it's from an older schema version
+      if (stateNeedsMigration(snapshotSchemaVersion, CURRENT_SCHEMA_VERSION)) {
+        Logger.info(
+          `[user:${userId}] Migrating snapshot from v${snapshotSchemaVersion} to v${CURRENT_SCHEMA_VERSION}`,
+        );
+        const migrationResult = migrateState(
+          state,
+          snapshotSchemaVersion,
+          CURRENT_SCHEMA_VERSION,
+        );
+        if (!migrationResult.success) {
+          Logger.error(
+            `[user:${userId}] Snapshot migration failed: ${migrationResult.error}`,
+          );
+          throw new Error(`Snapshot migration failed: ${migrationResult.error}`);
+        }
+        state = migrationResult.data as Record<string, unknown>;
+        snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
       }
 
       // Safety check: prevent memory exhaustion for excessive operation counts
@@ -760,7 +810,7 @@ export class SyncService {
 
         if (batchOps.length === 0) break;
 
-        // Replay this batch
+        // Replay this batch (operations are migrated during replay)
         state = this.replayOpsToState(batchOps, state);
 
         // Update currentSeq to the last processed operation
@@ -779,7 +829,12 @@ export class SyncService {
       // Cache the new snapshot
       this.cacheSnapshot(userId, state, latestSeq);
 
-      return { state, serverSeq: latestSeq, generatedAt };
+      return {
+        state,
+        serverSeq: latestSeq,
+        generatedAt,
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      };
     });
 
     return tx();
@@ -795,17 +850,50 @@ export class SyncService {
 
     // Apply operations in order
     for (const row of ops) {
-      const opType = row.op_type;
-      const entityType = row.entity_type;
-      const entityId = row.entity_id;
+      let opType = row.op_type;
+      let entityType = row.entity_type;
+      let entityId = row.entity_id;
+      let payload = JSON.parse(row.payload);
+
+      // Migrate operation if it's from an older schema version
+      const opSchemaVersion = row.schema_version ?? 1;
+      if (opSchemaVersion < CURRENT_SCHEMA_VERSION) {
+        const opLike: OperationLike = {
+          id: row.id,
+          opType,
+          entityType,
+          entityId: entityId ?? undefined,
+          payload,
+          schemaVersion: opSchemaVersion,
+        };
+
+        const migrationResult = migrateOperation(opLike, CURRENT_SCHEMA_VERSION);
+        if (!migrationResult.success) {
+          Logger.warn(
+            `Operation migration failed for ${row.id}: ${migrationResult.error}. Skipping.`,
+          );
+          continue;
+        }
+
+        const migratedOp = migrationResult.data;
+        if (migratedOp === null || migratedOp === undefined) {
+          // Operation was dropped during migration (e.g., removed feature)
+          Logger.info(`Operation ${row.id} dropped during migration (feature removed)`);
+          continue;
+        }
+
+        // Use migrated values
+        opType = migratedOp.opType;
+        entityType = migratedOp.entityType;
+        entityId = migratedOp.entityId ?? null;
+        payload = migratedOp.payload;
+      }
 
       // Skip operations with invalid entity types (defensive)
       if (!ALLOWED_ENTITY_TYPES.has(entityType)) {
         Logger.warn(`Skipping operation with invalid entity type: ${entityType}`);
         continue;
       }
-
-      const payload = JSON.parse(row.payload);
 
       // Initialize entity type if needed
       if (!state[entityType]) {
