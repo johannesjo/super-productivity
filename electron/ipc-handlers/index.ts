@@ -3,4 +3,5 @@ export { initAppDataIpc } from './app-data';
 export { initExecIpc } from './exec';
 export { initGlobalShortcutsIpc } from './global-shortcuts';
 export { initJiraIpc } from './jira';
+export { initLinearIpc } from './linear';
 export { initSystemIpc } from './system';

@@ -6,6 +6,7 @@ import {
   initExecIpc,
   initGlobalShortcutsIpc,
   initJiraIpc,
+  initLinearIpc,
   initSystemIpc,
 } from './ipc-handlers';
 
@@ -22,6 +23,7 @@ export const initIpcInterfaces = (): void => {
   initAppControlIpc();
   initSystemIpc();
   initJiraIpc();
+  initLinearIpc();
   initGlobalShortcutsIpc();
   initExecIpc();
 };

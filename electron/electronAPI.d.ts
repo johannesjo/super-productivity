@@ -134,6 +134,12 @@ export interface ElectronAPI {
 
   jiraSetupImgHeaders(args: { jiraCfg: JiraCfg }): void;
 
+  makeLinearRequest(args: {
+    requestId: string;
+    url: string;
+    requestInit: RequestInit;
+  }): void;
+
   backupAppData(appData: AppDataCompleteLegacy | AppDataCompleteNew): void;
 
   updateCurrentTask(

@@ -22,6 +22,7 @@ import {
   OPEN_PROJECT_TYPE,
   TRELLO_TYPE,
   REDMINE_TYPE,
+  LINEAR_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
@@ -36,6 +37,7 @@ import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
 import { GiteaCommonInterfacesService } from './providers/gitea/gitea-common-interfaces.service';
 import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
+import { LinearCommonInterfacesService } from './providers/linear/linear-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -68,6 +70,7 @@ export class IssueService {
   private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
   private _giteaInterfaceService = inject(GiteaCommonInterfacesService);
   private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
+  private _linearCommonInterfaceService = inject(LinearCommonInterfacesService);
   private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
   private _issueProviderService = inject(IssueProviderService);
   private _workContextService = inject(WorkContextService);
@@ -87,6 +90,7 @@ export class IssueService {
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
+    [LINEAR_TYPE]: this._linearCommonInterfaceService,
 
     // trello
     [TRELLO_TYPE]: this._trelloCommonInterfacesService,
