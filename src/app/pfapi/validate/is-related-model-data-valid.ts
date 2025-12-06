@@ -168,23 +168,57 @@ const validateTasksToProjectsAndTags = (
     }
   }
 
-  // Similar validation for archive tasks
-  for (const tid of d.archiveYoung.task.ids) {
-    const task = d.archiveYoung.task.entities[tid];
-    if (!task) continue;
+  // Similar validation for archiveYoung tasks
+  if (d.archiveYoung.task?.ids) {
+    for (const tid of d.archiveYoung.task.ids) {
+      const task = d.archiveYoung.task.entities[tid];
+      if (!task) continue;
 
-    if (task.projectId && !projectIds.has(task.projectId)) {
-      _validityError(`projectId ${task.projectId} from archive task not existing`, {
-        task,
-        d,
-      });
-      return false;
-    }
-
-    for (const tagId of task.tagIds) {
-      if (!tagIds.has(tagId)) {
-        _validityError(`tagId "${tagId}" from task archive not existing`, { task, d });
+      if (task.projectId && !projectIds.has(task.projectId)) {
+        _validityError(
+          `projectId ${task.projectId} from archiveYoung task not existing`,
+          {
+            task,
+            d,
+          },
+        );
         return false;
+      }
+
+      for (const tagId of task.tagIds) {
+        if (!tagIds.has(tagId)) {
+          _validityError(`tagId "${tagId}" from archiveYoung task not existing`, {
+            task,
+            d,
+          });
+          return false;
+        }
+      }
+    }
+  }
+
+  // Validation for archiveOld tasks (same checks as archiveYoung)
+  if (d.archiveOld.task?.ids) {
+    for (const tid of d.archiveOld.task.ids) {
+      const task = d.archiveOld.task.entities[tid];
+      if (!task) continue;
+
+      if (task.projectId && !projectIds.has(task.projectId)) {
+        _validityError(`projectId ${task.projectId} from archiveOld task not existing`, {
+          task,
+          d,
+        });
+        return false;
+      }
+
+      for (const tagId of task.tagIds) {
+        if (!tagIds.has(tagId)) {
+          _validityError(`tagId "${tagId}" from archiveOld task not existing`, {
+            task,
+            d,
+          });
+          return false;
+        }
       }
     }
   }
@@ -282,63 +316,70 @@ const validateSubTasks = (
   }
 
   // Same for archiveYoung tasks
-  for (const tid of archiveYoungTaskIds) {
-    const task = d.archiveYoung.task.entities[tid];
-    if (!task) continue;
+  if (d.archiveYoung.task?.entities) {
+    for (const tid of archiveYoungTaskIds) {
+      const task = d.archiveYoung.task.entities[tid];
+      if (!task) continue;
 
-    if (task.parentId && !d.archiveYoung.task.entities[task.parentId]) {
-      // Check if parent exists in archiveOld before considering it a lonely subtask
-      if (!d.archiveOld.task.entities[task.parentId]) {
-        _validityError(`Inconsistent Task State: Lonely Sub Task in Archive ${task.id}`, {
-          task,
-          d,
-        });
-        return false;
-      }
-    }
-
-    for (const subId of task.subTaskIds) {
-      if (!d.archiveYoung.task.entities[subId]) {
-        // Check if subtask exists in archiveOld before considering it missing
-        if (!d.archiveOld.task.entities[subId]) {
+      if (task.parentId && !d.archiveYoung.task.entities[task.parentId]) {
+        // Check if parent exists in archiveOld before considering it a lonely subtask
+        if (!d.archiveOld.task?.entities?.[task.parentId]) {
           _validityError(
-            `Inconsistent Task State: Missing sub task data in archive ${subId}`,
-            { task, d },
+            `Inconsistent Task State: Lonely Sub Task in Archive ${task.id}`,
+            {
+              task,
+              d,
+            },
           );
           return false;
+        }
+      }
+
+      for (const subId of task.subTaskIds) {
+        if (!d.archiveYoung.task.entities[subId]) {
+          // Check if subtask exists in archiveOld before considering it missing
+          if (!d.archiveOld.task?.entities?.[subId]) {
+            _validityError(
+              `Inconsistent Task State: Missing sub task data in archive ${subId}`,
+              { task, d },
+            );
+            return false;
+          }
         }
       }
     }
   }
 
   // Validate archiveOld tasks
-  for (const tid of archiveOldTaskIds) {
-    const task = d.archiveOld.task.entities[tid];
-    if (!task) continue;
+  if (d.archiveOld.task?.entities) {
+    for (const tid of archiveOldTaskIds) {
+      const task = d.archiveOld.task.entities[tid];
+      if (!task) continue;
 
-    if (task.parentId && !d.archiveOld.task.entities[task.parentId]) {
-      // Check if parent exists in archiveYoung before considering it a lonely subtask
-      if (!d.archiveYoung.task.entities[task.parentId]) {
-        _validityError(
-          `Inconsistent Task State: Lonely Sub Task in Old Archive ${task.id}`,
-          {
-            task,
-            d,
-          },
-        );
-        return false;
-      }
-    }
-
-    for (const subId of task.subTaskIds) {
-      if (!d.archiveOld.task.entities[subId]) {
-        // Check if subtask exists in archiveYoung before considering it missing
-        if (!d.archiveYoung.task.entities[subId]) {
+      if (task.parentId && !d.archiveOld.task.entities[task.parentId]) {
+        // Check if parent exists in archiveYoung before considering it a lonely subtask
+        if (!d.archiveYoung.task?.entities?.[task.parentId]) {
           _validityError(
-            `Inconsistent Task State: Missing sub task data in old archive ${subId}`,
-            { task, d },
+            `Inconsistent Task State: Lonely Sub Task in Old Archive ${task.id}`,
+            {
+              task,
+              d,
+            },
           );
           return false;
+        }
+      }
+
+      for (const subId of task.subTaskIds) {
+        if (!d.archiveOld.task.entities[subId]) {
+          // Check if subtask exists in archiveYoung before considering it missing
+          if (!d.archiveYoung.task?.entities?.[subId]) {
+            _validityError(
+              `Inconsistent Task State: Missing sub task data in old archive ${subId}`,
+              { task, d },
+            );
+            return false;
+          }
         }
       }
     }
