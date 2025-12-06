@@ -711,7 +711,7 @@ describe('SyncService', () => {
   });
 
   describe('cleanup', () => {
-    it('should delete old synced operations', () => {
+    it('should delete old operations (time-based)', () => {
       const service = getSyncService();
       const db = getDb();
 
@@ -734,18 +734,76 @@ describe('SyncService', () => {
       }
 
       // Manually set old received_at to simulate old operations
-      // The query uses server_seq < beforeSeq, so seq 1 and 2 will be deleted when beforeSeq=3
       db.prepare('UPDATE operations SET received_at = ? WHERE server_seq <= 2').run(
         Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago
       );
 
-      // beforeSeq=3 means delete ops with server_seq < 3 (i.e., seq 1 and 2)
-      const deleted = service.deleteOldSyncedOps(userId, 3, Date.now());
+      // Time-based cleanup: delete ops received before cutoff
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
+      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
       expect(deleted).toBe(2);
 
       const remaining = service.getOpsSince(userId, 0);
       expect(remaining).toHaveLength(3);
+    });
+
+    it('should delete old operations from all users', () => {
+      const service = getSyncService();
+      const db = getDb();
+
+      // Create second user for this test
+      const user2Id = 2;
+      db.prepare(
+        `INSERT INTO users (id, email, password_hash, is_verified, created_at)
+         VALUES (?, 'test2@test.com', 'hash', 1, ?)`,
+      ).run(user2Id, Date.now());
+
+      // Upload ops for user 1
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: {},
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Upload ops for user 2
+      service.uploadOps(user2Id, 'client-2', [
+        {
+          id: uuidv7(),
+          clientId: 'client-2',
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't2',
+          payload: {},
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Make all ops old
+      db.prepare('UPDATE operations SET received_at = ?').run(
+        Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago
+      );
+
+      // Delete ops older than 50 days
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(deleted).toBe(2); // Both users' ops deleted
+
+      expect(service.getOpsSince(userId, 0)).toHaveLength(0);
+      expect(service.getOpsSince(user2Id, 0)).toHaveLength(0);
     });
 
     it('should delete stale devices', () => {
@@ -768,15 +826,70 @@ describe('SyncService', () => {
         },
       ]);
 
-      // Make device stale
+      // Make device stale (100 days ago)
       db.prepare('UPDATE sync_devices SET last_seen_at = ? WHERE client_id = ?').run(
-        Date.now() - 100 * 24 * 60 * 60 * 1000, // 100 days ago
+        Date.now() - 100 * 24 * 60 * 60 * 1000,
         clientId,
       );
 
-      const deleted = service.deleteStaleDevices(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      // Delete devices not seen in 50 days
+      const deleted = service.deleteStaleDevices(Date.now() - 50 * 24 * 60 * 60 * 1000);
 
       expect(deleted).toBe(1);
+    });
+
+    it('should not delete recent operations', () => {
+      const service = getSyncService();
+
+      // Upload recent operations
+      for (let i = 1; i <= 3; i++) {
+        service.uploadOps(userId, clientId, [
+          {
+            id: uuidv7(),
+            clientId,
+            actionType: 'ADD',
+            opType: 'CRT',
+            entityType: 'TASK',
+            entityId: `t${i}`,
+            payload: {},
+            vectorClock: {},
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ]);
+      }
+
+      // Try to delete with 50-day cutoff - should delete nothing since ops are fresh
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(deleted).toBe(0);
+      expect(service.getOpsSince(userId, 0)).toHaveLength(3);
+    });
+
+    it('should not delete recent devices', () => {
+      const service = getSyncService();
+
+      // Create device by uploading (device will have current timestamp)
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: {},
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Try to delete with 50-day cutoff - should delete nothing since device is fresh
+      const deleted = service.deleteStaleDevices(Date.now() - 50 * 24 * 60 * 60 * 1000);
+
+      expect(deleted).toBe(0);
     });
   });
 

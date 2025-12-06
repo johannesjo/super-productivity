@@ -63,6 +63,7 @@ describe('OperationLogSyncService', () => {
     ]);
     validateStateServiceSpy = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepair',
+      'validateAndRepairCurrentState',
     ]);
     dependencyResolverSpy = jasmine.createSpyObj('DependencyResolverService', [
       'extractDependencies',
@@ -116,6 +117,7 @@ describe('OperationLogSyncService', () => {
       isValid: true,
       wasRepaired: false,
     } as any);
+    validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
     // Default dependency extraction: return empty array (no dependencies)
     dependencyResolverSpy.extractDependencies.and.returnValue([]);
   });

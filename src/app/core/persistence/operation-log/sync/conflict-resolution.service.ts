@@ -1,5 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
-import { Store } from '@ngrx/store';
+import { inject, Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { EntityConflict, Operation } from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
@@ -13,11 +12,6 @@ import { firstValueFrom } from 'rxjs';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { RepairOperationService } from '../processing/repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
-import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 
 /**
@@ -29,14 +23,10 @@ import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 })
 export class ConflictResolutionService {
   private dialog = inject(MatDialog);
-  private store = inject(Store);
   private operationApplier = inject(OperationApplierService);
   private opLogStore = inject(OperationLogStoreService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
-  private repairOperationService = inject(RepairOperationService);
-  private storeDelegateService = inject(PfapiStoreDelegateService);
-  private injector = inject(Injector);
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
@@ -200,42 +190,6 @@ export class ConflictResolutionService {
    * This is Checkpoint D in the validation architecture.
    */
   private async _validateAndRepairAfterResolution(): Promise<void> {
-    OpLog.normal('[ConflictResolutionService] Running post-resolution validation...');
-
-    // Get current state from NgRx
-    const currentState =
-      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
-
-    // Validate and repair if needed
-    const result = this.validateStateService.validateAndRepair(currentState);
-
-    if (!result.wasRepaired) {
-      OpLog.normal('[ConflictResolutionService] State valid after conflict resolution');
-      return;
-    }
-
-    if (!result.repairedState || !result.repairSummary) {
-      OpLog.err(
-        '[ConflictResolutionService] Repair failed after conflict resolution:',
-        result.error,
-      );
-      return;
-    }
-
-    // Create REPAIR operation
-    const pfapiService = this.injector.get(PfapiService);
-    const clientId = await pfapiService.pf.metaModel.loadClientId();
-    await this.repairOperationService.createRepairOperation(
-      result.repairedState,
-      result.repairSummary,
-      clientId,
-    );
-
-    // Dispatch repaired state to NgRx
-    this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
-
-    OpLog.log(
-      '[ConflictResolutionService] Created REPAIR operation after conflict resolution',
-    );
+    await this.validateStateService.validateAndRepairCurrentState('conflict-resolution');
   }
 }

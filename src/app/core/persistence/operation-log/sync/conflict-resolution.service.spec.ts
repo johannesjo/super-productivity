@@ -1,14 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { Store } from '@ngrx/store';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { SnackService } from '../../../snack/snack.service';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { RepairOperationService } from '../processing/repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { of } from 'rxjs';
 import { EntityConflict, OpType, Operation } from '../operation.types';
 import { DialogConflictResolutionComponent } from '../../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
@@ -16,14 +12,10 @@ import { DialogConflictResolutionComponent } from '../../../../imex/sync/dialog-
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
   let mockDialog: jasmine.SpyObj<MatDialog>;
-  let mockStore: jasmine.SpyObj<Store>;
   let mockOperationApplier: jasmine.SpyObj<OperationApplierService>;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockValidateStateService: jasmine.SpyObj<ValidateStateService>;
-  let mockRepairOperationService: jasmine.SpyObj<RepairOperationService>;
-  let mockStoreDelegateService: jasmine.SpyObj<PfapiStoreDelegateService>;
-  let mockPfapiService: any;
 
   const createMockOp = (id: string, clientId: string): Operation => ({
     id,
@@ -40,7 +32,6 @@ describe('ConflictResolutionService', () => {
 
   beforeEach(() => {
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
-    mockStore = jasmine.createSpyObj('Store', ['dispatch']);
     mockOperationApplier = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
       'getFailedCount',
@@ -55,45 +46,24 @@ describe('ConflictResolutionService', () => {
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
-      'validateAndRepair',
+      'validateAndRepairCurrentState',
     ]);
-    mockRepairOperationService = jasmine.createSpyObj('RepairOperationService', [
-      'createRepairOperation',
-    ]);
-    mockStoreDelegateService = jasmine.createSpyObj('PfapiStoreDelegateService', [
-      'getAllSyncModelDataFromStore',
-    ]);
-    mockPfapiService = {
-      pf: {
-        metaModel: {
-          loadClientId: jasmine.createSpy('loadClientId').and.resolveTo('client-1'),
-        },
-      },
-    };
 
     TestBed.configureTestingModule({
       providers: [
         ConflictResolutionService,
         { provide: MatDialog, useValue: mockDialog },
-        { provide: Store, useValue: mockStore },
         { provide: OperationApplierService, useValue: mockOperationApplier },
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: SnackService, useValue: mockSnackService },
         { provide: ValidateStateService, useValue: mockValidateStateService },
-        { provide: RepairOperationService, useValue: mockRepairOperationService },
-        { provide: PfapiStoreDelegateService, useValue: mockStoreDelegateService },
-        { provide: PfapiService, useValue: mockPfapiService },
       ],
     });
     service = TestBed.inject(ConflictResolutionService);
 
     // Default mock behaviors
     mockOperationApplier.getFailedCount.and.returnValue(0);
-    mockValidateStateService.validateAndRepair.and.returnValue({
-      isValid: true,
-      wasRepaired: false,
-    });
-    mockStoreDelegateService.getAllSyncModelDataFromStore.and.resolveTo({} as any);
+    mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
   });
 
   it('should be created', () => {
@@ -122,7 +92,9 @@ describe('ConflictResolutionService', () => {
       expect(mockDialog.open).toHaveBeenCalled();
       // When cancelled, no operations should be applied or validated
       expect(mockOpLogStore.append).not.toHaveBeenCalled();
-      expect(mockValidateStateService.validateAndRepair).not.toHaveBeenCalled();
+      expect(
+        mockValidateStateService.validateAndRepairCurrentState,
+      ).not.toHaveBeenCalled();
     });
 
     it('should handle "local" resolution (keep local ops, reject remote)', async () => {
@@ -145,7 +117,7 @@ describe('ConflictResolutionService', () => {
         'remote',
       );
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
-      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
     });
 
     it('should handle "remote" resolution (apply remote ops, reject local)', async () => {
@@ -176,7 +148,7 @@ describe('ConflictResolutionService', () => {
       // Verify local op rejection
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
 
-      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
     });
 
     it('should handle partial failures during remote resolution', async () => {
@@ -208,10 +180,10 @@ describe('ConflictResolutionService', () => {
       expect(mockOpLogStore.markFailed).toHaveBeenCalledWith(['remote-1'], 5);
 
       expect(mockSnackService.open).toHaveBeenCalled();
-      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
     });
 
-    it('should repair state if validation finds issues', async () => {
+    it('should call validateAndRepairCurrentState after resolution', async () => {
       // Must provide a resolution (not cancel) for validation to run
       const mockDialogRef = {
         afterClosed: () =>
@@ -224,18 +196,12 @@ describe('ConflictResolutionService', () => {
       mockOpLogStore.hasOp.and.resolveTo(false);
       mockOpLogStore.append.and.resolveTo(100);
 
-      // Simulate repair needed
-      mockValidateStateService.validateAndRepair.and.returnValue({
-        isValid: false,
-        wasRepaired: true,
-        repairedState: { task: { ids: [] } } as any,
-        repairSummary: { entityStateFixed: 1 } as any,
-      });
-
       await service.presentConflicts(conflicts);
 
-      expect(mockRepairOperationService.createRepairOperation).toHaveBeenCalled();
-      expect(mockStore.dispatch).toHaveBeenCalled();
+      // The new method handles validation and repair internally
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalledWith(
+        'conflict-resolution',
+      );
     });
 
     it('should apply non-conflicting ops together with resolved conflict ops in single batch', async () => {

@@ -475,8 +475,8 @@ flowchart TB
 
     subgraph Cleanup["Cleanup Tasks"]
         StaleDevices[Remove stale devices<br/>not seen in 50 days]
-        OldOps[Delete old operations<br/>older than 50 days]
-        ExpiredTombstones[Delete expired tombstones<br/>older than 30 days]
+        OldOps[Delete old operations<br/>older than 90 days]
+        ExpiredTombstones[Delete expired tombstones<br/>older than 90 days]
     end
 
     Hourly --> StaleDevices

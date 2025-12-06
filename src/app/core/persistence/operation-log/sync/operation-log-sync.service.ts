@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -21,11 +21,6 @@ import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { RepairOperationService } from '../processing/repair-operation.service';
-import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
-import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
@@ -58,12 +53,9 @@ export class OperationLogSyncService {
   private operationApplier = inject(OperationApplierService);
   private conflictResolutionService = inject(ConflictResolutionService);
   private validateStateService = inject(ValidateStateService);
-  private repairOperationService = inject(RepairOperationService);
-  private storeDelegateService = inject(PfapiStoreDelegateService);
   private uploadService = inject(OperationLogUploadService);
   private downloadService = inject(OperationLogDownloadService);
   private vectorClockService = inject(VectorClockService);
-  private injector = inject(Injector);
   private schemaMigrationService = inject(SchemaMigrationService);
   private snackService = inject(SnackService);
   private dependencyResolver = inject(DependencyResolverService);
@@ -455,48 +447,7 @@ export class OperationLogSyncService {
    * If validation fails, attempts repair and creates a REPAIR operation.
    */
   private async _validateAfterSync(): Promise<void> {
-    OpLog.normal('[OperationLogSyncService] Running post-sync validation...');
-
-    // Get current state from NgRx
-    const currentState =
-      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
-
-    // Validate and repair if needed
-    const result = this.validateStateService.validateAndRepair(currentState);
-
-    if (result.isValid && !result.wasRepaired) {
-      OpLog.normal('[OperationLogSyncService] State valid after sync');
-      return;
-    }
-
-    if (!result.isValid) {
-      OpLog.err(
-        '[OperationLogSyncService] State invalid after sync (repair failed or impossible):',
-        result.error || result.crossModelError,
-      );
-      return;
-    }
-
-    if (!result.repairedState || !result.repairSummary) {
-      OpLog.err('[OperationLogSyncService] Repair failed after sync:', result.error);
-      return;
-    }
-
-    // Create REPAIR operation
-    const pfapiService = this.injector.get(PfapiService);
-    const clientId = await pfapiService.pf.metaModel.loadClientId();
-    await this.repairOperationService.createRepairOperation(
-      result.repairedState,
-      result.repairSummary,
-      clientId,
-    );
-
-    // Dispatch repaired state to NgRx
-    this.store.dispatch(
-      loadAllData({ appDataComplete: result.repairedState as AppDataCompleteNew }),
-    );
-
-    OpLog.log('[OperationLogSyncService] Created REPAIR operation after sync');
+    await this.validateStateService.validateAndRepairCurrentState('sync');
   }
 
   /**

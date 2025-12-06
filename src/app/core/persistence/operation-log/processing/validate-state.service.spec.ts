@@ -1,11 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { provideMockStore } from '@ngrx/store/testing';
 import { ValidateStateService } from './validate-state.service';
+import { RepairOperationService } from './repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { AppDataCompleteNew, PFAPI_MODEL_CFGS } from '../../../../pfapi/pfapi-config';
 import { MenuTreeKind } from '../../../../features/menu-tree/store/menu-tree.model';
 import { environment } from '../../../../../environments/environment';
 
 describe('ValidateStateService', () => {
   let service: ValidateStateService;
+  let mockRepairService: jasmine.SpyObj<RepairOperationService>;
+  let mockStoreDelegateService: jasmine.SpyObj<PfapiStoreDelegateService>;
 
   const createEmptyState = (): AppDataCompleteNew => {
     const state: any = {};
@@ -16,7 +21,20 @@ describe('ValidateStateService', () => {
   };
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    mockRepairService = jasmine.createSpyObj('RepairOperationService', [
+      'createRepairOperation',
+    ]);
+    mockStoreDelegateService = jasmine.createSpyObj('PfapiStoreDelegateService', [
+      'getAllSyncModelDataFromStore',
+    ]);
+
+    TestBed.configureTestingModule({
+      providers: [
+        provideMockStore(),
+        { provide: RepairOperationService, useValue: mockRepairService },
+        { provide: PfapiStoreDelegateService, useValue: mockStoreDelegateService },
+      ],
+    });
     service = TestBed.inject(ValidateStateService);
   });
 
