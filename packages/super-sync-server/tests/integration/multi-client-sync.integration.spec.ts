@@ -1137,3 +1137,165 @@ describe('Diagnostic: Sync Flow Verification', () => {
     console.log('\n');
   });
 });
+
+describe('Gzip Compressed Snapshot Integration', () => {
+  let app: FastifyInstance;
+  const userId = 1;
+
+  beforeEach(async () => {
+    initDb('./data', true);
+    const db = getDb();
+    db.prepare(
+      `INSERT INTO users (id, email, password_hash, is_verified, created_at)
+       VALUES (?, 'test@test.com', 'hash', 1, ?)`,
+    ).run(userId, Date.now());
+    initSyncService();
+    app = Fastify();
+    await app.register(syncRoutes, { prefix: '/api/sync' });
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  /**
+   * Integration test: Verify that gzip-compressed snapshot uploads work
+   * through the complete route handler and sync service.
+   */
+  it('should accept gzip-compressed snapshot and sync to other clients', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    const clientA = new SimulatedClient(app, userId, 'desktop');
+    const clientB = new SimulatedClient(app, userId, 'mobile');
+
+    // Create a large payload (simulates backup import)
+    const largeState = {
+      tasks: Array.from({ length: 100 }, (_, i) => ({
+        id: `task-${i}`,
+        title: `Task number ${i} with some longer description text`,
+        done: i % 3 === 0,
+        projectId: 'proj-1',
+      })),
+      projects: [{ id: 'proj-1', title: 'Main Project', taskIds: [] }],
+      tags: [{ id: 'tag-1', name: 'Important' }],
+    };
+
+    const snapshotPayload = {
+      state: largeState,
+      clientId: clientA.clientId,
+      reason: 'recovery',
+      vectorClock: { [clientA.clientId]: 1 },
+      schemaVersion: 1,
+    };
+
+    const jsonPayload = JSON.stringify(snapshotPayload);
+    const compressedPayload = await gzipAsync(Buffer.from(jsonPayload));
+
+    console.log(
+      `Payload size: ${jsonPayload.length} bytes -> ${compressedPayload.length} bytes (${((compressedPayload.length / jsonPayload.length) * 100).toFixed(1)}%)`,
+    );
+
+    // Upload compressed snapshot
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${clientA.authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: compressedPayload,
+    });
+
+    expect(response.statusCode).toBe(200);
+    const result = response.json();
+    expect(result.accepted).toBe(true);
+    expect(result.serverSeq).toBeDefined();
+
+    console.log(`Snapshot accepted at serverSeq: ${result.serverSeq}`);
+
+    // Client B should be able to download the snapshot
+    const snapshotResponse = await app.inject({
+      method: 'GET',
+      url: '/api/sync/snapshot',
+      headers: { authorization: `Bearer ${clientB.authToken}` },
+    });
+
+    expect(snapshotResponse.statusCode).toBe(200);
+    const snapshot = snapshotResponse.json();
+
+    // Verify the state was correctly stored and retrieved
+    expect(snapshot.state).toBeDefined();
+    expect(snapshot.serverSeq).toBe(result.serverSeq);
+
+    console.log('Client B successfully retrieved snapshot from server');
+  });
+
+  /**
+   * Verify that an uncompressed snapshot still works (backwards compatibility).
+   */
+  it('should accept uncompressed snapshot alongside compressed ones', async () => {
+    const zlib = await import('zlib');
+    const { promisify } = await import('util');
+    const gzipAsync = promisify(zlib.gzip);
+
+    const clientA = new SimulatedClient(app, userId, 'client-a');
+    const clientB = new SimulatedClient(app, userId, 'client-b');
+
+    // Client A uploads compressed
+    const payloadA = {
+      state: { tasks: [{ id: 'task-a', title: 'From A' }] },
+      clientId: clientA.clientId,
+      reason: 'initial',
+      vectorClock: { [clientA.clientId]: 1 },
+      schemaVersion: 1,
+    };
+    const compressedA = await gzipAsync(Buffer.from(JSON.stringify(payloadA)));
+
+    const responseA = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${clientA.authToken}`,
+        'content-type': 'application/json',
+        'content-encoding': 'gzip',
+      },
+      payload: compressedA,
+    });
+
+    expect(responseA.statusCode).toBe(200);
+    expect(responseA.json().accepted).toBe(true);
+
+    // Client B uploads uncompressed (no Content-Encoding header)
+    const payloadB = {
+      state: { tasks: [{ id: 'task-b', title: 'From B' }] },
+      clientId: clientB.clientId,
+      reason: 'initial',
+      vectorClock: { [clientB.clientId]: 1 },
+      schemaVersion: 1,
+    };
+
+    const responseB = await app.inject({
+      method: 'POST',
+      url: '/api/sync/snapshot',
+      headers: {
+        authorization: `Bearer ${clientB.authToken}`,
+        'content-type': 'application/json',
+      },
+      payload: payloadB,
+    });
+
+    expect(responseB.statusCode).toBe(200);
+    expect(responseB.json().accepted).toBe(true);
+
+    // Both should be at sequential server sequences
+    const seqA = responseA.json().serverSeq;
+    const seqB = responseB.json().serverSeq;
+    expect(seqB).toBe(seqA + 1);
+
+    console.log(`Mixed compression: A (gzip) at seq ${seqA}, B (plain) at seq ${seqB}`);
+  });
+});
