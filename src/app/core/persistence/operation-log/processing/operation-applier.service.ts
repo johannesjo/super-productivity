@@ -242,6 +242,8 @@ export class OperationApplierService {
    * - CREATE operations for parent entities come before CREATE operations for children
    * - Operations are ordered such that any entity referenced by another operation
    *   is created first (within the batch)
+   * - DELETE operations come AFTER any operations that reference the deleted entity
+   *   (to allow tag/project updates to remove references before the entity is deleted)
    * - Soft dependencies (mustExist: false) are used as secondary sort preference to
    *   minimize temporary broken references
    *
@@ -255,10 +257,27 @@ export class OperationApplierService {
 
     // Build a map of entityId -> operation that creates it (within this batch)
     const creatorMap = new Map<string, Operation>();
+    // Build a map of entityId -> operation that deletes it (within this batch)
+    const deleterMap = new Map<string, Operation>();
     for (const op of ops) {
       if (op.opType === OpType.Create && op.entityId) {
         creatorMap.set(op.entityId, op);
       }
+      if (op.opType === OpType.Delete && op.entityId) {
+        deleterMap.set(op.entityId, op);
+      }
+    }
+
+    // Log DELETE operations for debugging
+    if (deleterMap.size > 0) {
+      OpLog.verbose(
+        'OperationApplierService: Batch contains DELETE operations:',
+        Array.from(deleterMap.entries()).map(([entityId, op]) => ({
+          entityId,
+          opId: op.id,
+          actionType: op.actionType,
+        })),
+      );
     }
 
     // Build dependency graph: opId -> set of opIds that must come before it (hard deps)
@@ -266,6 +285,14 @@ export class OperationApplierService {
     const hardDependencies = new Map<string, Set<string>>();
     const softDependsOn = new Map<string, Set<string>>(); // ops that soft-depend on this op
     const opById = new Map<string, Operation>();
+    // Track delete-before relationships for debugging
+    const deleteWaitsFor: Array<{
+      deleteOpId: string;
+      deleteEntityId: string;
+      waitsForOpId: string;
+      waitsForActionType: string;
+      referencedEntityId: string;
+    }> = [];
 
     for (const op of ops) {
       opById.set(op.id, op);
@@ -289,7 +316,31 @@ export class OperationApplierService {
             softDependsOn.get(creatorOp.id)!.add(op.id);
           }
         }
+
+        // IMPORTANT: If this operation references an entity that will be deleted,
+        // the DELETE must come AFTER this operation. This ensures tag/project updates
+        // that still reference a task can be applied before the task is deleted.
+        const deleterOp = deleterMap.get(dep.entityId);
+        if (deleterOp && deleterOp.id !== op.id) {
+          // The delete operation depends on this operation completing first
+          hardDependencies.get(deleterOp.id)!.add(op.id);
+          deleteWaitsFor.push({
+            deleteOpId: deleterOp.id,
+            deleteEntityId: dep.entityId,
+            waitsForOpId: op.id,
+            waitsForActionType: op.actionType,
+            referencedEntityId: dep.entityId,
+          });
+        }
       }
+    }
+
+    // Log delete ordering constraints
+    if (deleteWaitsFor.length > 0) {
+      OpLog.verbose(
+        'OperationApplierService: DELETE ordering constraints:',
+        deleteWaitsFor,
+      );
     }
 
     // Kahn's algorithm for topological sort
@@ -365,6 +416,31 @@ export class OperationApplierService {
         output: sorted.length,
       });
       return ops; // Fallback to original order
+    }
+
+    // Log if ordering changed, especially for DELETE operations
+    if (deleterMap.size > 0) {
+      const inputOrder = ops.map((o) => ({
+        id: o.id.slice(-8),
+        type: o.opType,
+        action: o.actionType,
+        entityId: o.entityId?.slice(-8),
+      }));
+      const outputOrder = sorted.map((o) => ({
+        id: o.id.slice(-8),
+        type: o.opType,
+        action: o.actionType,
+        entityId: o.entityId?.slice(-8),
+      }));
+
+      // Check if any reordering happened
+      const orderChanged = ops.some((op, i) => op.id !== sorted[i].id);
+      if (orderChanged) {
+        OpLog.log('OperationApplierService: Reordered operations for DELETE safety:', {
+          inputOrder,
+          outputOrder,
+        });
+      }
     }
 
     return sorted;
