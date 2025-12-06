@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { IValidation } from 'typia';
 import { validateAllData } from '../../../../pfapi/validate/validation-fn';
 import {
@@ -10,7 +11,10 @@ import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-po
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { RepairSummary } from '../operation.types';
 import { OpLog } from '../../../log';
-import { RepairOperationService } from './repair-operation.service'; // Used for createEmptyRepairSummary()
+import { RepairOperationService } from './repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
 /**
  * Type representing an NgRx entity state slice.
@@ -121,6 +125,64 @@ export interface ValidateAndRepairResult {
   providedIn: 'root',
 })
 export class ValidateStateService {
+  private store = inject(Store);
+  private storeDelegateService = inject(PfapiStoreDelegateService);
+  private repairOperationService = inject(RepairOperationService);
+  private injector = inject(Injector);
+
+  /**
+   * Validates current state from NgRx store, repairs if needed, creates a REPAIR operation,
+   * and dispatches the repaired state. This is the full Checkpoint D flow.
+   *
+   * @param context - Logging context (e.g., 'sync', 'conflict-resolution')
+   * @returns true if state is valid (or was successfully repaired), false otherwise
+   */
+  async validateAndRepairCurrentState(context: string): Promise<boolean> {
+    OpLog.normal(
+      `[ValidateStateService:${context}] Running post-operation validation...`,
+    );
+
+    const currentState =
+      (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
+
+    const result = this.validateAndRepair(currentState);
+
+    if (result.isValid && !result.wasRepaired) {
+      OpLog.normal(`[ValidateStateService:${context}] State valid`);
+      return true;
+    }
+
+    if (!result.isValid) {
+      OpLog.err(
+        `[ValidateStateService:${context}] State invalid (repair failed or impossible):`,
+        result.error || result.crossModelError,
+      );
+      return false;
+    }
+
+    if (!result.repairedState || !result.repairSummary) {
+      OpLog.err(`[ValidateStateService:${context}] Repair failed:`, result.error);
+      return false;
+    }
+
+    // Create REPAIR operation
+    const pfapiService = this.injector.get(PfapiService);
+    const clientId = await pfapiService.pf.metaModel.loadClientId();
+    await this.repairOperationService.createRepairOperation(
+      result.repairedState,
+      result.repairSummary,
+      clientId,
+    );
+
+    // Dispatch repaired state to NgRx
+    this.store.dispatch(
+      loadAllData({ appDataComplete: result.repairedState as AppDataCompleteNew }),
+    );
+
+    OpLog.log(`[ValidateStateService:${context}] Created REPAIR operation`);
+    return true;
+  }
+
   /**
    * Validates application state using both Typia schema validation
    * and cross-model relationship validation.
