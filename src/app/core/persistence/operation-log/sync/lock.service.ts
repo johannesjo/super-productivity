@@ -49,9 +49,14 @@ export class LockService {
         const parts = currentLock.split(':');
         if (parts.length >= 2) {
           const ts = parseInt(parts[parts.length - 1], 10);
-          if (Date.now() - ts > LOCK_TIMEOUT_MS) {
-            canAcquire = true; // Lock expired
+          // Handle NaN: if timestamp is invalid, consider lock expired
+          // This prevents stuck locks from corrupted storage values
+          if (isNaN(ts) || Date.now() - ts > LOCK_TIMEOUT_MS) {
+            canAcquire = true; // Lock expired or invalid
           }
+        } else {
+          // Invalid lock format - treat as expired
+          canAcquire = true;
         }
       } else {
         canAcquire = true; // No lock
