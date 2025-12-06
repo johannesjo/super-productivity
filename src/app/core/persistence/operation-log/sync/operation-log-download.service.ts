@@ -170,7 +170,7 @@ export class OperationLogDownloadService {
 
       // NOTE: We don't call acknowledgeOps here anymore.
       // ACK was used for server-side garbage collection, but the server already
-      // cleans up stale devices after 30 days (STALE_DEVICE_THRESHOLD_MS).
+      // cleans up stale devices after 50 days (STALE_DEVICE_THRESHOLD_MS).
       // Removing ACK simplifies the flow and avoids issues with fresh clients
       // (device not registered until first upload would cause 403 errors).
 

@@ -291,7 +291,7 @@ export const MS_PER_DAY = 24 * MS_PER_HOUR;
 
 // Device thresholds
 export const ONLINE_DEVICE_THRESHOLD_MS = 5 * MS_PER_MINUTE; // 5 minutes
-export const STALE_DEVICE_THRESHOLD_MS = 30 * MS_PER_DAY; // 30 days
+export const STALE_DEVICE_THRESHOLD_MS = 50 * MS_PER_DAY; // 50 days
 
 export const DEFAULT_SYNC_CONFIG: SyncConfig = {
   maxOpsPerUpload: 100,
