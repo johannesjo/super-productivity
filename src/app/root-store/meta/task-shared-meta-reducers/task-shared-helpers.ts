@@ -44,11 +44,50 @@ export const updateTags = (state: RootState, updates: Update<Tag>[]): RootState 
 // ENTITY GETTERS
 // =============================================================================
 
-export const getTag = (state: RootState, tagId: string): Tag =>
-  state[TAG_FEATURE_NAME].entities[tagId] as Tag;
+/**
+ * Gets a tag entity from state. Throws if tag doesn't exist.
+ * Callers should check existence before calling if tag may not exist.
+ */
+export const getTag = (state: RootState, tagId: string): Tag => {
+  const tag = state[TAG_FEATURE_NAME].entities[tagId];
+  if (!tag) {
+    throw new Error(
+      `Tag ${tagId} not found in state. This may indicate an out-of-order remote operation.`,
+    );
+  }
+  return tag as Tag;
+};
 
-export const getProject = (state: RootState, projectId: string): Project =>
-  state[PROJECT_FEATURE_NAME].entities[projectId] as Project;
+/**
+ * Gets a tag entity from state, or undefined if it doesn't exist.
+ * Use this when the tag may not exist (e.g., during remote sync).
+ */
+export const getTagOrUndefined = (state: RootState, tagId: string): Tag | undefined =>
+  state[TAG_FEATURE_NAME].entities[tagId] as Tag | undefined;
+
+/**
+ * Gets a project entity from state. Throws if project doesn't exist.
+ * Callers should check existence before calling if project may not exist.
+ */
+export const getProject = (state: RootState, projectId: string): Project => {
+  const project = state[PROJECT_FEATURE_NAME].entities[projectId];
+  if (!project) {
+    throw new Error(
+      `Project ${projectId} not found in state. This may indicate an out-of-order remote operation.`,
+    );
+  }
+  return project as Project;
+};
+
+/**
+ * Gets a project entity from state, or undefined if it doesn't exist.
+ * Use this when the project may not exist (e.g., during remote sync).
+ */
+export const getProjectOrUndefined = (
+  state: RootState,
+  projectId: string,
+): Project | undefined =>
+  state[PROJECT_FEATURE_NAME].entities[projectId] as Project | undefined;
 
 // =============================================================================
 // LIST MANIPULATION HELPERS
