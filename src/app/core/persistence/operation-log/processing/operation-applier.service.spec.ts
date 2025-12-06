@@ -535,5 +535,154 @@ describe('OperationApplierService', () => {
       expect((calls[0].args[0] as any).meta.entityId).toBe('task-2'); // CREATE
       expect((calls[1].args[0] as any).meta.entityId).toBe('task-1'); // UPDATE
     });
+
+    it('should apply DELETE after operations that reference the deleted entity', async () => {
+      // Scenario: Tag UPDATE references task-1, and there's a DELETE for task-1
+      // The DELETE should come after the Tag UPDATE
+      const tagUpdateOp = createMockOperation(
+        'tag-update-op',
+        'TAG',
+        OpType.Update,
+        { taskIds: ['task-1', 'task-2'] },
+        'today-tag',
+      );
+
+      const taskDeleteOp = createMockOperation(
+        'task-delete-op',
+        'TASK',
+        OpType.Delete,
+        { id: 'task-1' },
+        'task-1',
+      );
+
+      // Tag update has soft dependency on task-1
+      const taskDep: OperationDependency = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        mustExist: false,
+        relation: 'reference',
+      };
+
+      mockDependencyResolver.extractDependencies.and.callFake((op: Operation) => {
+        if (op.id === 'tag-update-op') {
+          return [taskDep];
+        }
+        return [];
+      });
+
+      // Apply DELETE first in input order - should be reordered
+      await service.applyOperations([taskDeleteOp, tagUpdateOp]);
+
+      // Both should be dispatched
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
+
+      // Tag UPDATE should be dispatched BEFORE task DELETE
+      const calls = mockStore.dispatch.calls.all();
+      expect((calls[0].args[0] as any).meta.entityId).toBe('today-tag'); // Tag UPDATE
+      expect((calls[1].args[0] as any).meta.entityId).toBe('task-1'); // Task DELETE
+    });
+
+    it('should apply multiple operations before DELETE when all reference the entity', async () => {
+      // Scenario: Multiple operations reference task-1 before it's deleted
+      const tagUpdate1 = createMockOperation(
+        'tag-update-1',
+        'TAG',
+        OpType.Update,
+        { taskIds: ['task-1'] },
+        'tag-1',
+      );
+
+      const tagUpdate2 = createMockOperation(
+        'tag-update-2',
+        'TAG',
+        OpType.Update,
+        { taskIds: ['task-1', 'task-2'] },
+        'tag-2',
+      );
+
+      const taskDeleteOp = createMockOperation(
+        'task-delete-op',
+        'TASK',
+        OpType.Delete,
+        { id: 'task-1' },
+        'task-1',
+      );
+
+      mockDependencyResolver.extractDependencies.and.callFake((op: Operation) => {
+        if (op.id === 'tag-update-1' || op.id === 'tag-update-2') {
+          return [
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'task-1',
+              mustExist: false,
+              relation: 'reference' as const,
+            },
+          ];
+        }
+        return [];
+      });
+
+      // Apply DELETE first
+      await service.applyOperations([taskDeleteOp, tagUpdate1, tagUpdate2]);
+
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+
+      // DELETE should be last
+      const calls = mockStore.dispatch.calls.all();
+      expect((calls[2].args[0] as any).meta.entityId).toBe('task-1'); // DELETE is last
+    });
+
+    it('should handle CREATE-UPDATE-DELETE chain correctly', async () => {
+      // Full lifecycle: Task CREATE, Tag UPDATE (adding task), Task DELETE
+      const taskCreate = createMockOperation(
+        'task-create',
+        'TASK',
+        OpType.Create,
+        { title: 'New Task' },
+        'task-1',
+      );
+
+      const tagUpdate = createMockOperation(
+        'tag-update',
+        'TAG',
+        OpType.Update,
+        { taskIds: ['task-1'] },
+        'today-tag',
+      );
+
+      const taskDelete = createMockOperation(
+        'task-delete',
+        'TASK',
+        OpType.Delete,
+        { id: 'task-1' },
+        'task-1',
+      );
+
+      mockDependencyResolver.extractDependencies.and.callFake((op: Operation) => {
+        if (op.id === 'tag-update') {
+          return [
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'task-1',
+              mustExist: false,
+              relation: 'reference' as const,
+            },
+          ];
+        }
+        return [];
+      });
+
+      // Apply in mixed order
+      await service.applyOperations([taskDelete, tagUpdate, taskCreate]);
+
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+
+      // Order should be: CREATE, UPDATE, DELETE
+      const calls = mockStore.dispatch.calls.all();
+      // CREATE comes first (CREATE ops are prioritized)
+      expect((calls[0].args[0] as any).meta.opType).toBe(OpType.Create);
+      // DELETE comes last (waits for tag update that references it)
+      expect((calls[2].args[0] as any).meta.opType).toBe(OpType.Delete);
+    });
   });
 });
