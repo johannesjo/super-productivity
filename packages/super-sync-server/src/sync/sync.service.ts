@@ -76,7 +76,6 @@ interface PreparedStatements {
   insertTombstone: Database.Statement;
   getTombstone: Database.Statement;
   deleteExpiredTombstones: Database.Statement;
-  deleteOldSyncedOps: Database.Statement;
   deleteOldSyncedOpsForAllUsers: Database.Statement;
   deleteStaleDevices: Database.Statement;
   getAllUserIds: Database.Statement;
@@ -200,13 +199,8 @@ export class SyncService {
         DELETE FROM tombstones WHERE expires_at < ?
       `),
 
-      deleteOldSyncedOps: this.db.prepare(`
-        DELETE FROM operations
-        WHERE user_id = ? AND server_seq < ? AND received_at < ?
-      `),
-
-      // Time-based cleanup: delete operations older than threshold (50 days)
-      // Simpler than ACK-based cleanup - relies on stale device cleanup to free ops
+      // Time-based cleanup: delete operations older than threshold (90 days).
+      // Simpler than ACK-based cleanup - just delete old ops regardless of device status.
       deleteOldSyncedOpsForAllUsers: this.db.prepare(`
         DELETE FROM operations WHERE received_at < ?
       `),
@@ -1062,14 +1056,9 @@ export class SyncService {
     return result.changes;
   }
 
-  deleteOldSyncedOps(userId: number, beforeSeq: number, beforeTime: number): number {
-    const result = this.stmts.deleteOldSyncedOps.run(userId, beforeSeq, beforeTime);
-    return result.changes;
-  }
-
   /**
    * Deletes all operations older than cutoffTime (time-based cleanup).
-   * Simple approach: old ops are cleaned up after 50 days regardless of device status.
+   * Simple approach: old ops are cleaned up after 90 days regardless of device status.
    */
   deleteOldSyncedOpsForAllUsers(cutoffTime: number): number {
     const result = this.stmts.deleteOldSyncedOpsForAllUsers.run(cutoffTime);
@@ -1083,7 +1072,6 @@ export class SyncService {
 
   /**
    * Check if a device belongs to a user.
-   * Used to validate device ownership before accepting ACKs.
    */
   isDeviceOwner(userId: number, clientId: string): boolean {
     const row = this.stmts.getDevice.get(userId, clientId);

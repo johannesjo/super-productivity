@@ -9,7 +9,6 @@ import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
 import { Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
-import { MultiTabCoordinatorService } from './sync/multi-tab-coordinator.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
 import { OpLog } from '../../log';
 import { SnackService } from '../../snack/snack.service';
@@ -43,7 +42,6 @@ export class OperationLogEffects {
   private opLogStore = inject(OperationLogStoreService);
   private vectorClockService = inject(VectorClockService);
   private injector = inject(Injector);
-  private multiTabCoordinator = inject(MultiTabCoordinatorService);
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
 
@@ -135,10 +133,7 @@ export class OperationLogEffects {
           await pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
         }
 
-        // 3. Broadcast to other tabs
-        this.multiTabCoordinator.notifyNewOperation(op);
-
-        // 4. Check if compaction is needed (inside lock to prevent race between tabs)
+        // 3. Check if compaction is needed (inside lock to prevent race between tabs)
         const opsCount = await this.opLogStore.incrementCompactionCounter();
         if (opsCount >= COMPACTION_THRESHOLD) {
           // Trigger compaction asynchronously (don't block write operation)

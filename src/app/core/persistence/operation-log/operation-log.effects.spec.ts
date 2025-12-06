@@ -7,7 +7,6 @@ import { OperationLogStoreService } from './store/operation-log-store.service';
 import { LockService } from './sync/lock.service';
 import { VectorClockService } from './sync/vector-clock.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
-import { MultiTabCoordinatorService } from './sync/multi-tab-coordinator.service';
 import { SnackService } from '../../snack/snack.service';
 import { Injector } from '@angular/core';
 import { OpType } from './operation.types';
@@ -21,7 +20,6 @@ describe('OperationLogEffects', () => {
   let mockLockService: jasmine.SpyObj<LockService>;
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
   let mockCompactionService: jasmine.SpyObj<OperationLogCompactionService>;
-  let mockMultiTabCoordinator: jasmine.SpyObj<MultiTabCoordinatorService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockInjector: jasmine.SpyObj<Injector>;
 
@@ -66,9 +64,6 @@ describe('OperationLogEffects', () => {
       'compact',
       'emergencyCompact',
     ]);
-    mockMultiTabCoordinator = jasmine.createSpyObj('MultiTabCoordinatorService', [
-      'notifyNewOperation',
-    ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockInjector = jasmine.createSpyObj('Injector', ['get']);
 
@@ -95,7 +90,6 @@ describe('OperationLogEffects', () => {
         { provide: LockService, useValue: mockLockService },
         { provide: VectorClockService, useValue: mockVectorClockService },
         { provide: OperationLogCompactionService, useValue: mockCompactionService },
-        { provide: MultiTabCoordinatorService, useValue: mockMultiTabCoordinator },
         { provide: SnackService, useValue: mockSnackService },
         { provide: Injector, useValue: mockInjector },
       ],
@@ -173,22 +167,6 @@ describe('OperationLogEffects', () => {
           const appendCall = mockOpLogStore.append.calls.mostRecent();
           const operation = appendCall.args[0];
           expect(operation.vectorClock['testClient']).toBe(6); // Incremented from 5
-          done();
-        },
-      });
-    });
-
-    it('should broadcast operation to other tabs', (done) => {
-      const action = createPersistentAction('[Task] Update Task');
-      actions$ = of(action);
-
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          expect(mockMultiTabCoordinator.notifyNewOperation).toHaveBeenCalledWith(
-            jasmine.objectContaining({
-              actionType: '[Task] Update Task',
-            }),
-          );
           done();
         },
       });
