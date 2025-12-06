@@ -142,3 +142,11 @@ export const LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES = 10 * 1024;
  * Default: 50 operations per batch
  */
 export const MAX_BATCH_OPERATIONS_SIZE = 50;
+
+/**
+ * Maximum age for pending operations before they expire and are rejected (milliseconds).
+ * If an operation has been pending for longer than this (e.g., due to data corruption
+ * or repeated crashes), it's marked as rejected instead of being replayed.
+ * Default: 24 hours - enough time for legitimate recovery scenarios
+ */
+export const PENDING_OPERATION_EXPIRY_MS = 24 * 60 * 60 * 1000;

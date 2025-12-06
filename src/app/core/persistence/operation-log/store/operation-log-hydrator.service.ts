@@ -22,7 +22,10 @@ import { RepairOperationService } from '../processing/repair-operation.service';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
+import {
+  MAX_CONFLICT_RETRY_ATTEMPTS,
+  PENDING_OPERATION_EXPIRY_MS,
+} from '../operation-log.const';
 
 type StateCache = MigratableStateCache;
 
@@ -766,6 +769,10 @@ export class OperationLogHydratorService {
    * Recovers from pending remote ops that were stored but not applied (crash recovery).
    * These ops are in the log and will be replayed during normal hydration, so we just
    * need to mark them as applied to prevent them appearing as orphaned.
+   *
+   * Operations pending for longer than PENDING_OPERATION_EXPIRY_MS are considered
+   * stale (likely due to data corruption or repeated failures) and are rejected
+   * instead of replayed.
    */
   private async _recoverPendingRemoteOps(): Promise<void> {
     const pendingOps = await this.opLogStore.getPendingRemoteOps();
@@ -774,17 +781,38 @@ export class OperationLogHydratorService {
       return;
     }
 
-    OpLog.warn(
-      `OperationLogHydratorService: Found ${pendingOps.length} pending remote ops from previous crash. ` +
-        `Marking as applied (they will be replayed during hydration).`,
+    const now = Date.now();
+    const validOps = pendingOps.filter(
+      (e) => now - e.appliedAt < PENDING_OPERATION_EXPIRY_MS,
+    );
+    const expiredOps = pendingOps.filter(
+      (e) => now - e.appliedAt >= PENDING_OPERATION_EXPIRY_MS,
     );
 
-    // Mark them as applied - they'll be replayed during normal hydration
-    const seqs = pendingOps.map((e) => e.seq);
-    await this.opLogStore.markApplied(seqs);
+    // Reject expired ops - they've been pending too long
+    if (expiredOps.length > 0) {
+      const expiredIds = expiredOps.map((e) => e.op.id);
+      await this.opLogStore.markRejected(expiredIds);
+      OpLog.warn(
+        `OperationLogHydratorService: Rejected ${expiredOps.length} expired pending remote ops ` +
+          `(pending > ${PENDING_OPERATION_EXPIRY_MS / (60 * 60 * 1000)}h). ` +
+          `Oldest was ${Math.round((now - Math.min(...expiredOps.map((e) => e.appliedAt))) / (60 * 60 * 1000))}h old.`,
+      );
+    }
+
+    // Mark valid ops as applied - they'll be replayed during normal hydration
+    if (validOps.length > 0) {
+      const seqs = validOps.map((e) => e.seq);
+      await this.opLogStore.markApplied(seqs);
+      OpLog.warn(
+        `OperationLogHydratorService: Found ${validOps.length} pending remote ops from previous crash. ` +
+          `Marking as applied (they will be replayed during hydration).`,
+      );
+    }
 
     OpLog.normal(
-      `OperationLogHydratorService: Recovered ${pendingOps.length} pending remote ops.`,
+      `OperationLogHydratorService: Recovered ${validOps.length} pending remote ops, ` +
+        `rejected ${expiredOps.length} expired ops.`,
     );
   }
 
