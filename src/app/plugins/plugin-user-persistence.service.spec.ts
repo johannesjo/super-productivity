@@ -1,4 +1,4 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed } from '@angular/core/testing';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
 import {
@@ -55,25 +55,32 @@ describe('PluginUserPersistenceService', () => {
       expect(dispatchSpy).not.toHaveBeenCalled();
     });
 
-    it('should throw error when called too frequently (rate limiting)', fakeAsync(() => {
-      const pluginId = 'test-plugin';
-      const data = 'test data';
+    it('should throw error when called too frequently (rate limiting)', () => {
+      const baseTime = Date.now();
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(baseTime));
+      try {
+        const pluginId = 'test-plugin';
+        const data = 'test data';
 
-      // First call should succeed
-      service.persistPluginUserData(pluginId, data);
-      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        // First call should succeed
+        service.persistPluginUserData(pluginId, data);
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
 
-      // Immediate second call should fail
-      expect(() => service.persistPluginUserData(pluginId, data)).toThrowError(
-        /Plugin data persist rate limited/,
-      );
-      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        // Immediate second call should fail
+        expect(() => service.persistPluginUserData(pluginId, data)).toThrowError(
+          /Plugin data persist rate limited/,
+        );
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
 
-      // After waiting MIN_PLUGIN_PERSIST_INTERVAL_MS, should succeed again
-      tick(MIN_PLUGIN_PERSIST_INTERVAL_MS);
-      service.persistPluginUserData(pluginId, data);
-      expect(dispatchSpy).toHaveBeenCalledTimes(2);
-    }));
+        // After waiting MIN_PLUGIN_PERSIST_INTERVAL_MS, should succeed again
+        jasmine.clock().tick(MIN_PLUGIN_PERSIST_INTERVAL_MS);
+        service.persistPluginUserData(pluginId, data);
+        expect(dispatchSpy).toHaveBeenCalledTimes(2);
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
 
     it('should allow different plugins to persist data without rate limiting each other', () => {
       const plugin1 = 'plugin-1';

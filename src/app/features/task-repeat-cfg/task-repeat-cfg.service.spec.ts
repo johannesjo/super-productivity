@@ -6,7 +6,6 @@ import { TaskService } from '../tasks/task.service';
 import { WorkContextService } from '../work-context/work-context.service';
 import {
   addTaskRepeatCfgToTask,
-  deleteTaskRepeatCfg,
   deleteTaskRepeatCfgs,
   updateTaskRepeatCfg,
   updateTaskRepeatCfgs,
@@ -69,6 +68,7 @@ describe('TaskRepeatCfgService', () => {
     const taskServiceSpy = jasmine.createSpyObj('TaskService', [
       'createNewTaskWithDefaults',
       'getTasksWithSubTasksByRepeatCfgId$',
+      'getTasksByRepeatCfgId$',
     ]);
     const workContextServiceSpy = jasmine.createSpyObj('WorkContextService', [], {
       activeWorkContextType: WorkContextType.PROJECT,
@@ -183,15 +183,17 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('deleteTaskRepeatCfg', () => {
-    it('should dispatch deleteTaskRepeatCfg action', () => {
+    it('should dispatch deleteTaskRepeatCfg action', async () => {
       const id = 'cfg-123';
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([mockTask]));
 
-      service.deleteTaskRepeatCfg(id);
+      await service.deleteTaskRepeatCfg(id);
 
       expect(dispatchSpy).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          type: deleteTaskRepeatCfg.type,
-          id,
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: id,
+          taskIdsToUnlink: [mockTask.id],
         }),
       );
     });
@@ -275,9 +277,10 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('deleteTaskRepeatCfgWithDialog', () => {
-    it('should open dialog and delete on confirm', () => {
+    it('should open dialog and delete on confirm', async () => {
       const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(true) });
       matDialog.open.and.returnValue(dialogRefSpy);
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([]));
 
       service.deleteTaskRepeatCfgWithDialog('cfg-123');
 
@@ -289,21 +292,29 @@ describe('TaskRepeatCfgService', () => {
         }),
       });
 
+      // Wait for the async delete operation to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(dispatchSpy).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          type: deleteTaskRepeatCfg.type,
-          id: 'cfg-123',
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: 'cfg-123',
+          taskIdsToUnlink: [],
         }),
       );
     });
 
-    it('should not delete when dialog is cancelled', () => {
+    it('should not delete when dialog is cancelled', async () => {
       const dialogRefSpy = jasmine.createSpyObj({ afterClosed: of(false) });
       matDialog.open.and.returnValue(dialogRefSpy);
 
       service.deleteTaskRepeatCfgWithDialog('cfg-123');
 
       expect(matDialog.open).toHaveBeenCalled();
+
+      // Wait for the async operation to complete
+      await new Promise((resolve) => setTimeout(resolve, 0));
+
       expect(dispatchSpy).not.toHaveBeenCalled();
     });
   });
