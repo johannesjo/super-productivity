@@ -210,6 +210,18 @@ small {
   font-size: 0.9rem;
 }
 
+/* Action Buttons */
+.action-buttons {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.btn.success {
+  background-color: var(--success);
+}
+
 /* Messages */
 #message-area {
   padding: 1rem;

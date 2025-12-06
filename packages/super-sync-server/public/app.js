@@ -136,6 +136,49 @@ async function copyToken() {
   }
 }
 
+async function refreshToken() {
+  if (!state.token) return;
+
+  const refreshBtn = document.getElementById('refresh-btn');
+  setLoading(true);
+  hideMessage();
+
+  try {
+    const res = await fetch(`${API_BASE}/replace-token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${state.token}`,
+      },
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'Failed to refresh token');
+    }
+
+    // Update with new token
+    state.token = data.token;
+    tokenArea.value = data.token;
+
+    // Visual feedback
+    const originalText = refreshBtn.innerText;
+    refreshBtn.innerText = 'Refreshed!';
+    refreshBtn.classList.add('success');
+    showMessage('Token refreshed! Old token is now invalid.', 'success');
+
+    setTimeout(() => {
+      refreshBtn.innerText = originalText;
+      refreshBtn.classList.remove('success');
+    }, 2000);
+  } catch (err) {
+    showMessage(err.message, 'error');
+  } finally {
+    setLoading(false);
+  }
+}
+
 function showMessage(msg, type) {
   messageArea.innerText = msg;
   messageArea.className = type === 'error' ? 'msg-error' : 'msg-success';
