@@ -40,7 +40,7 @@ flowchart TB
 flowchart TB
     subgraph Routes["API Routes"]
         AuthR["/api/register<br/>/api/login<br/>/api/verify-email"]
-        SyncR["/api/sync/ops<br/>/api/sync/snapshot<br/>/api/sync/status<br/>/api/sync/devices/:id/ack"]
+        SyncR["/api/sync/ops<br/>/api/sync/snapshot<br/>/api/sync/status"]
         Health["/health"]
     end
 
@@ -129,7 +129,6 @@ erDiagram
         text device_name
         text user_agent
         int last_seen_at
-        int last_acked_seq
         int created_at
     }
 
@@ -285,7 +284,6 @@ flowchart TB
         OpsEndpoint["/api/sync/ops<br/>POST: Upload ops<br/>GET: Download ops"]
         SnapshotEndpoint["/api/sync/snapshot<br/>POST: Upload full state<br/>GET: Download full state"]
         StatusEndpoint["/api/sync/status<br/>GET: Sync status info"]
-        AckEndpoint["/api/sync/devices/:id/ack<br/>POST: Acknowledge received seq"]
     end
 
     subgraph Tables["Database Tables"]
@@ -300,7 +298,6 @@ flowchart TB
     SnapshotEndpoint --> OpsTable
     StatusEndpoint --> StateTable
     StatusEndpoint --> DevicesTable
-    AckEndpoint --> DevicesTable
 ```
 
 ## 1.9 Upload Operations - POST /api/sync/ops
@@ -462,30 +459,12 @@ sequenceDiagram
     Server->>DB: Get sync_devices for user
     Server->>DB: Get min server_seq in operations
 
-    Server-->>Client: {<br/>  latestSeq,<br/>  minRetainedSeq,<br/>  devices: [{clientId, deviceName, lastSeenAt, lastAckedSeq}]<br/>}
+    Server-->>Client: {<br/>  latestSeq,<br/>  minRetainedSeq,<br/>  devices: [{clientId, deviceName, lastSeenAt}]<br/>}
 
     Note over Client,Server: Used by client to check:<br/>- Current server seq<br/>- If local sinceSeq is still valid<br/>- Other connected devices
 ```
 
-## 1.13 Acknowledge Sequence - POST /api/sync/devices/:id/ack
-
-```mermaid
-sequenceDiagram
-    participant Client
-    participant Server
-    participant DB as SQLite
-
-    Client->>Server: POST /api/sync/devices/:clientId/ack<br/>{lastAckedSeq}
-
-    Server->>Server: Verify clientId matches JWT
-    Server->>DB: UPDATE sync_devices<br/>SET last_acked_seq = :lastAckedSeq,<br/>last_seen_at = NOW()<br/>WHERE client_id = :clientId
-
-    Server-->>Client: {success: true}
-
-    Note over Client,Server: Server uses lastAckedSeq to:<br/>- Track which ops each device has<br/>- Determine safe-to-delete ops<br/>- Detect stale devices
-```
-
-## 1.14 Server Cleanup Process
+## 1.13 Server Cleanup Process
 
 ```mermaid
 flowchart TB
@@ -495,22 +474,14 @@ flowchart TB
     end
 
     subgraph Cleanup["Cleanup Tasks"]
-        StaleDevices[Remove stale devices<br/>not seen in 30 days]
-        OldOps[Delete old operations<br/>acked by all devices<br/>older than retention]
+        StaleDevices[Remove stale devices<br/>not seen in 50 days]
+        OldOps[Delete old operations<br/>older than 50 days]
         ExpiredTombstones[Delete expired tombstones<br/>older than 30 days]
-    end
-
-    subgraph Safety["Safety Checks"]
-        MinRetained[Keep min ops for gap detection]
-        ActiveDevices[Check all active device acks]
     end
 
     Hourly --> StaleDevices
     Daily --> OldOps
     Daily --> ExpiredTombstones
-
-    OldOps --> MinRetained
-    OldOps --> ActiveDevices
 ```
 
 ---
@@ -869,7 +840,7 @@ sequenceDiagram
         end
     end
 
-    OpLog->>Server: POST /api/sync/devices/:clientId/ack<br/>{lastAckedSeq}
+    OpLog->>IDB: Update lastServerSeq
 ```
 
 ## 3.3 Full Sync Cycle
@@ -897,12 +868,12 @@ flowchart TB
         CheckGap{Gap?}
         GetSnapshot[GET /api/sync/snapshot]
         ApplyRemote[Apply remote ops]
-        AckSeq[ACK received seq]
+        UpdateSeq[Update lastServerSeq]
     end
 
     subgraph Maintenance["Maintenance"]
         Compact[Compaction<br/>every 500 ops]
-        Cleanup[Server cleanup<br/>daily/hourly]
+        Cleanup[Server cleanup<br/>time-based: 50 days]
     end
 
     UserEdit --> CreateOp
@@ -920,9 +891,9 @@ flowchart TB
     CheckGap -->|Yes| GetSnapshot
     CheckGap -->|No| ApplyRemote
     GetSnapshot --> ApplyRemote
-    ApplyRemote --> AckSeq
+    ApplyRemote --> UpdateSeq
 
-    AckSeq --> Compact
+    UpdateSeq --> Compact
     Compact --> Cleanup
 ```
 

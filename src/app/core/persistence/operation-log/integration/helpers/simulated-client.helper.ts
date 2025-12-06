@@ -135,9 +135,6 @@ export class SimulatedClient {
     // Update last known seq
     this.lastKnownServerSeq = response.latestSeq;
 
-    // Acknowledge receipt
-    server.acknowledgeOps(this.clientId, this.lastKnownServerSeq);
-
     return { downloaded: response.ops.length };
   }
 

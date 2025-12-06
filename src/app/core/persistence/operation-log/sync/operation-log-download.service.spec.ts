@@ -73,7 +73,6 @@ describe('OperationLogDownloadService', () => {
           'getLastServerSeq',
           'downloadOps',
           'setLastServerSeq',
-          'acknowledgeOps',
         ]);
         (mockApiProvider as any).supportsOperationSync = true;
         // Add privateCfg mock for E2E encryption support
@@ -204,37 +203,6 @@ describe('OperationLogDownloadService', () => {
 
         expect(result.newOps.length).toBe(1);
         expect(result.newOps[0].id).toBe('op-2');
-      });
-
-      it('should not call acknowledgeOps (removed to simplify fresh client flow)', async () => {
-        mockApiProvider.downloadOps.and.returnValue(
-          Promise.resolve({
-            ops: [
-              {
-                serverSeq: 5,
-                receivedAt: Date.now(),
-                op: {
-                  id: 'op-1',
-                  clientId: 'c1',
-                  actionType: '[Task] Add',
-                  opType: OpType.Create,
-                  entityType: 'TASK',
-                  payload: {},
-                  vectorClock: {},
-                  timestamp: Date.now(),
-                  schemaVersion: 1,
-                },
-              },
-            ],
-            hasMore: false,
-            latestSeq: 5,
-          }),
-        );
-
-        await service.downloadRemoteOps(mockApiProvider);
-
-        // ACK was removed - server uses stale device cleanup instead (30 days)
-        expect(mockApiProvider.acknowledgeOps).not.toHaveBeenCalled();
       });
 
       it('should return success true for API sync', async () => {

@@ -73,13 +73,11 @@ interface PreparedStatements {
   getCachedSnapshot: Database.Statement;
   cacheSnapshot: Database.Statement;
   getAllOps: Database.Statement;
-  updateDeviceAck: Database.Statement;
   insertTombstone: Database.Statement;
   getTombstone: Database.Statement;
   deleteExpiredTombstones: Database.Statement;
   deleteOldSyncedOps: Database.Statement;
   deleteOldSyncedOpsForAllUsers: Database.Statement;
-  getMinAckedSeq: Database.Statement;
   deleteStaleDevices: Database.Statement;
   getAllUserIds: Database.Statement;
   getOnlineDeviceCount: Database.Statement;
@@ -187,12 +185,6 @@ export class SyncService {
         ORDER BY server_seq ASC
       `),
 
-      updateDeviceAck: this.db.prepare(`
-        UPDATE sync_devices
-        SET last_acked_seq = ?, last_seen_at = ?
-        WHERE user_id = ? AND client_id = ?
-      `),
-
       insertTombstone: this.db.prepare(`
         INSERT OR REPLACE INTO tombstones
         (user_id, entity_type, entity_id, deleted_at, deleted_by_op_id, expires_at)
@@ -213,33 +205,10 @@ export class SyncService {
         WHERE user_id = ? AND server_seq < ? AND received_at < ?
       `),
 
+      // Time-based cleanup: delete operations older than threshold (50 days)
+      // Simpler than ACK-based cleanup - relies on stale device cleanup to free ops
       deleteOldSyncedOpsForAllUsers: this.db.prepare(`
-        DELETE FROM operations
-        WHERE received_at < ?
-          AND (
-            -- Case 1: User has devices - only delete if acked by all
-            (
-              EXISTS (
-                SELECT 1 FROM sync_devices
-                WHERE sync_devices.user_id = operations.user_id
-              )
-              AND server_seq < (
-                SELECT COALESCE(MIN(last_acked_seq), 0)
-                FROM sync_devices
-                WHERE sync_devices.user_id = operations.user_id
-              )
-            )
-            OR
-            -- Case 2: User has no devices - safe to delete old ops
-            NOT EXISTS (
-              SELECT 1 FROM sync_devices
-              WHERE sync_devices.user_id = operations.user_id
-            )
-          )
-      `),
-
-      getMinAckedSeq: this.db.prepare(`
-        SELECT MIN(last_acked_seq) as min_seq FROM sync_devices WHERE user_id = ?
+        DELETE FROM operations WHERE received_at < ?
       `),
 
       deleteStaleDevices: this.db.prepare(`
@@ -965,12 +934,6 @@ export class SyncService {
     return state;
   }
 
-  // === Device Acknowledgment ===
-
-  updateDeviceAck(userId: number, clientId: string, lastAckedSeq: number): void {
-    this.stmts.updateDeviceAck.run(lastAckedSeq, Date.now(), userId, clientId);
-  }
-
   // === Rate Limiting ===
 
   isRateLimited(userId: number): boolean {
@@ -1105,22 +1068,12 @@ export class SyncService {
   }
 
   /**
-   * Batch cleanup of old operations for all users in a single query.
-   * Avoids N+1 query pattern by using a subquery to find minimum acked seq per user.
-   * Deletes operations that are:
-   * 1. Older than cutoffTime AND have been acknowledged by all devices (seq < min acked seq)
-   * 2. OR older than cutoffTime for users with no active devices (orphaned ops)
+   * Deletes all operations older than cutoffTime (time-based cleanup).
+   * Simple approach: old ops are cleaned up after 50 days regardless of device status.
    */
   deleteOldSyncedOpsForAllUsers(cutoffTime: number): number {
     const result = this.stmts.deleteOldSyncedOpsForAllUsers.run(cutoffTime);
     return result.changes;
-  }
-
-  getMinAckedSeq(userId: number): number | null {
-    const row = this.stmts.getMinAckedSeq.get(userId) as
-      | { min_seq: number | null }
-      | undefined;
-    return row?.min_seq ?? null;
   }
 
   deleteStaleDevices(beforeTime: number): number {

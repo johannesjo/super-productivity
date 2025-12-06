@@ -857,41 +857,9 @@ describe('Sync Scenarios Integration', () => {
       expect(server.getAllOps().length).toBe(1);
     });
 
-    /**
-     * Scenario 8.3: Client acknowledgment tracking
-     *
-     * Server tracks what each client has acknowledged
-     */
-    it('8.3 Server tracks client acknowledgments', async () => {
-      const clientA = new SimulatedClient('client-a-test', storeService);
-      const clientB = new SimulatedClient('client-b-test', storeService);
-
-      // A creates ops
-      await clientA.createLocalOp('TASK', 'task1', OpType.Create, '[Task] Add Task', {
-        title: 'Task 1',
-      });
-      await clientA.sync(server);
-
-      // B syncs and acknowledges
-      await clientB.sync(server);
-
-      // Only B has acknowledged (A uploaded but didn't explicitly ack)
-      // In the SimulatedClient, downloadFromServer calls acknowledgeOps
-      const minAck = server.getMinAckedSeq();
-      expect(minAck).toBe(1);
-
-      // A creates more ops
-      await clientA.createLocalOp('TASK', 'task2', OpType.Create, '[Task] Add Task', {
-        title: 'Task 2',
-      });
-      await clientA.sync(server);
-
-      // B syncs again
-      await clientB.sync(server);
-
-      // Min ack should now be 2 (B's last ack)
-      expect(server.getMinAckedSeq()).toBe(2);
-    });
+    // NOTE: Scenario 8.3 (Client acknowledgment tracking) was removed.
+    // ACK mechanism has been replaced with time-based cleanup (50 days).
+    // See sync-server-architecture-diagrams.md for details.
 
     /**
      * Scenario 8.4: lastKnownServerSeq persistence simulation
