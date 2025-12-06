@@ -283,7 +283,7 @@ flowchart LR
 flowchart TB
     subgraph Endpoints["Sync API Endpoints"]
         OpsEndpoint["/api/sync/ops<br/>POST: Upload ops<br/>GET: Download ops"]
-        SnapshotEndpoint["/api/sync/snapshot<br/>GET: Full state snapshot"]
+        SnapshotEndpoint["/api/sync/snapshot<br/>POST: Upload full state<br/>GET: Download full state"]
         StatusEndpoint["/api/sync/status<br/>GET: Sync status info"]
         AckEndpoint["/api/sync/devices/:id/ack<br/>POST: Acknowledge received seq"]
     end
@@ -396,6 +396,56 @@ sequenceDiagram
     end
 
     Note over Client,Server: Client uses snapshot when<br/>gapDetected=true from download<br/>or on first sync
+```
+
+## 1.11b Upload Snapshot - POST /api/sync/snapshot
+
+Full-state operations (BackupImport, Repair, SyncImport) are uploaded via the snapshot endpoint instead of /api/sync/ops. This avoids body size limits for large payloads (~20-30MB) that contain the entire application state.
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant Server
+    participant DB as SQLite
+
+    Client->>Server: POST /api/sync/snapshot<br/>{state, clientId, reason, vectorClock, schemaVersion}
+
+    Note over Server: reason: 'initial' | 'recovery' | 'migration'
+
+    Server->>Server: Validate request body
+    Server->>Server: Compress state with gzip
+
+    Server->>DB: BEGIN TRANSACTION
+    Server->>DB: UPDATE user_sync_state<br/>SET snapshot_data, snapshot_at
+    Server->>DB: Get next server_seq
+    Server->>DB: INSERT synthetic operation<br/>opType: SNAPSHOT_{reason}
+    Server->>DB: Update user last_seq
+    Server->>DB: COMMIT
+
+    Server-->>Client: {accepted: true, serverSeq}
+
+    Note over Client,Server: Client marks the original<br/>BackupImport/Repair/SyncImport<br/>operation as synced
+```
+
+**Client-Side Routing (OperationLogUploadService):**
+
+```mermaid
+flowchart TB
+    subgraph Upload["Upload Pending Operations"]
+        GetPending[Get unsynced ops from IndexedDB]
+        Classify{Classify by OpType}
+
+        GetPending --> Classify
+
+        Classify -->|SyncImport<br/>BackupImport<br/>Repair| FullState[Full-State Operations]
+        Classify -->|CRT, UPD, DEL<br/>MOV, BATCH| Regular[Regular Operations]
+
+        FullState --> SnapshotEndpoint[POST /api/sync/snapshot<br/>Upload entire state payload]
+        Regular --> OpsEndpoint[POST /api/sync/ops<br/>Batch up to 100 ops]
+    end
+
+    style FullState fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Regular fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
 ```
 
 ## 1.12 Get Status - GET /api/sync/status
