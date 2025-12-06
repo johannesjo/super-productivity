@@ -139,6 +139,15 @@ async function copyToken() {
 async function refreshToken() {
   if (!state.token) return;
 
+  // Show confirmation dialog
+  const confirmed = confirm(
+    'Are you sure you want to refresh your token?\n\n' +
+      'This will invalidate your current token. You will need to update ' +
+      'the token in Super Productivity and any other devices using this account.',
+  );
+
+  if (!confirmed) return;
+
   const refreshBtn = document.getElementById('refresh-btn');
   setLoading(true);
   hideMessage();

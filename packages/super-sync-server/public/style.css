@@ -201,6 +201,31 @@ small {
   color: var(--text);
 }
 
+/* Instructions */
+.instructions {
+  text-align: left;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background-color: var(--bg);
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.instructions summary {
+  cursor: pointer;
+  font-weight: 500;
+  color: var(--primary);
+}
+
+.instructions ol {
+  margin: 0.75rem 0 0 1.25rem;
+  color: var(--text-light);
+}
+
+.instructions li {
+  margin-bottom: 0.25rem;
+}
+
 .warning-box {
   background-color: #fff3cd;
   border: 1px solid #ffeeba;

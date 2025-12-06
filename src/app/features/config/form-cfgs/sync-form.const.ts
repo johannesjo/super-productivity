@@ -164,19 +164,34 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       key: 'superSync',
       fieldGroup: [
         {
+          type: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.SUPER_SYNC.INFO_TEXT,
+          },
+        },
+        {
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
           templateOptions: {
             required: true,
-            label: 'Server URL',
-            description: 'e.g. https://sync.super-productivity.com',
+            label: T.F.SYNC.FORM.SUPER_SYNC.L_SERVER_URL,
+            description: T.F.SYNC.FORM.SUPER_SYNC.SERVER_URL_DESCRIPTION,
+          },
+        },
+        {
+          type: 'tpl',
+          className: 'tpl',
+          templateOptions: {
+            tag: 'p',
+            text: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
           },
         },
         {
           type: 'btn',
           templateOptions: {
-            text: 'Get Token / Login',
+            text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
             btnType: 'primary',
             centerBtn: true,
             onClick: (field: any) => {
@@ -195,8 +210,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           className: 'e2e-accessToken',
           templateOptions: {
             required: true,
-            label: 'Access Token',
-            description: 'Paste the token obtained from the login page here',
+            label: T.F.SYNC.FORM.SUPER_SYNC.L_ACCESS_TOKEN,
+            description: T.F.SYNC.FORM.SUPER_SYNC.ACCESS_TOKEN_DESCRIPTION,
             rows: 3,
           },
         },
