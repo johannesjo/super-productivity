@@ -1,3 +1,10 @@
+## [16.5.1](https://github.com/johannesjo/super-productivity/compare/v16.5.0...v16.5.1) (2025-12-06)
+
+### Bug Fixes
+
+- broken translation files ([e1c9a8a](https://github.com/johannesjo/super-productivity/commit/e1c9a8a1a9de9c1836a836f8e241e57564b8b426))
+- **electron:** remove forced X11 mode on Linux ([152939a](https://github.com/johannesjo/super-productivity/commit/152939a8668d98fee62b9c4db7a196f32a5438b2)), closes [#5663](https://github.com/johannesjo/super-productivity/issues/5663)
+
 # [16.5.0](https://github.com/johannesjo/super-productivity/compare/v16.4.3...v16.5.0) (2025-12-05)
 
 ### Bug Fixes
