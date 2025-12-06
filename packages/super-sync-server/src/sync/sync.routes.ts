@@ -1,5 +1,7 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
+import * as zlib from 'zlib';
+import { promisify } from 'util';
 import { uuidv7 } from 'uuidv7';
 import { authenticate, getAuthUser } from '../middleware';
 import { getSyncService } from './sync.service';
@@ -14,6 +16,8 @@ import {
   OP_TYPES,
   SYNC_ERROR_CODES,
 } from './sync.types';
+
+const gunzipAsync = promisify(zlib.gunzip);
 
 // Validation constants
 const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
@@ -70,6 +74,28 @@ const errorMessage = (err: unknown): string =>
   err instanceof Error ? err.message : 'Unknown error';
 
 export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
+  // Add content type parser for gzip-encoded JSON
+  // This allows clients to send compressed request bodies with Content-Encoding: gzip
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'buffer' },
+    (req, body: Buffer, done) => {
+      const contentEncoding = req.headers['content-encoding'];
+      if (contentEncoding === 'gzip') {
+        // Return raw buffer for gzip - will be decompressed in route handler
+        done(null, body);
+      } else {
+        // Parse JSON normally for uncompressed requests
+        try {
+          const json = JSON.parse(body.toString('utf-8'));
+          done(null, json);
+        } catch (err) {
+          done(err as Error, undefined);
+        }
+      }
+    },
+  );
+
   // All sync routes require authentication
   fastify.addHook('preHandler', authenticate);
 
@@ -316,19 +342,47 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
   });
 
   // POST /api/sync/snapshot - Upload full state
-  fastify.post<{ Body: { state: unknown; clientId: string; reason: string } }>(
+  // Supports gzip-compressed request bodies via Content-Encoding: gzip header
+  fastify.post<{ Body: unknown }>(
     '/snapshot',
-    async (
-      req: FastifyRequest<{
-        Body: { state: unknown; clientId: string; reason: string };
-      }>,
-      reply: FastifyReply,
-    ) => {
+    {
+      bodyLimit: 30 * 1024 * 1024, // 30MB - needed for backup/repair imports
+    },
+    async (req: FastifyRequest<{ Body: unknown }>, reply: FastifyReply) => {
       try {
         const userId = getAuthUser(req).userId;
 
+        // Handle gzip-compressed request body
+        let body: unknown = req.body;
+        const contentEncoding = req.headers['content-encoding'];
+
+        if (contentEncoding === 'gzip') {
+          // Body comes as Buffer when compressed
+          const rawBody = req.body as Buffer;
+          if (!Buffer.isBuffer(rawBody)) {
+            return reply.status(400).send({
+              error: 'Expected compressed body with Content-Encoding: gzip',
+            });
+          }
+
+          try {
+            const decompressed = await gunzipAsync(rawBody);
+            body = JSON.parse(decompressed.toString('utf-8'));
+            Logger.debug(
+              `[user:${userId}] Snapshot decompressed: ${rawBody.length} -> ${decompressed.length} bytes`,
+            );
+          } catch (decompressErr) {
+            Logger.warn(
+              `[user:${userId}] Failed to decompress snapshot: ${errorMessage(decompressErr)}`,
+            );
+            return reply.status(400).send({
+              error: 'Failed to decompress gzip body',
+            });
+          }
+        }
+
         // Validate request body
-        const parseResult = UploadSnapshotSchema.safeParse(req.body);
+        const parseResult = UploadSnapshotSchema.safeParse(body);
         if (!parseResult.success) {
           return reply.status(400).send({
             error: 'Validation failed',
