@@ -148,12 +148,21 @@
             </p>
           </div>
 
-          <button
-            onclick="logout()"
-            class="btn text-only"
-          >
-            Log Out / Back
-          </button>
+          <div class="action-buttons">
+            <button
+              id="refresh-btn"
+              onclick="refreshToken()"
+              class="btn secondary"
+            >
+              Refresh Token
+            </button>
+            <button
+              onclick="logout()"
+              class="btn text-only"
+            >
+              Log Out / Back
+            </button>
+          </div>
         </div>
 
         <!-- Status Messages -->
