@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 5, 2025
+**Last Updated:** December 6, 2025
 
 ---
 
@@ -2128,6 +2128,13 @@ To detect silent divergence between clients:
 > - **Plugin data sync**: Operation logging for plugin user data and metadata
 > - **Gap detection**: Download operations detect and report sequence gaps
 > - **Server-side conflict detection**: Prevents concurrent modifications on server
+> - **Compaction race safety**: Safety check to abort deletion if new ops written during snapshot
+> - **Entity validation in meta-reducers**: Improved getTag/getProject helpers with validation and safe variants
+> - **Project cleanup in deleteTasks**: handleDeleteTasks now cleans up project taskIds/backlogTaskIds
+> - **Archive validation**: archiveOld tasks now validated for project/tag references, null-safety added
+> - **Lock service robustness**: Handle NaN timestamps and invalid lock formats in fallback lock
+> - **Array payload rejection**: Explicit check to reject arrays (which bypass `typeof === 'object'`)
+> - **Pending operation expiry**: Operations pending >24h are rejected instead of replayed (PENDING_OPERATION_EXPIRY_MS)
 
 ---
 
