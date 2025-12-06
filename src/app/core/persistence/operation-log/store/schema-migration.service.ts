@@ -1,13 +1,25 @@
 import { Injectable } from '@angular/core';
 import { Operation, VectorClock } from '../operation.types';
 import { OpLog } from '../../../log';
+import {
+  CURRENT_SCHEMA_VERSION as SHARED_CURRENT_SCHEMA_VERSION,
+  MAX_VERSION_SKIP as SHARED_MAX_VERSION_SKIP,
+  MIGRATIONS,
+  migrateState,
+  migrateOperation as sharedMigrateOperation,
+  stateNeedsMigration,
+  operationNeedsMigration as sharedOperationNeedsMigration,
+  validateMigrationRegistry,
+  type SchemaMigration,
+  type OperationLike,
+} from '@sp/shared-schema';
 
-/**
- * Current schema version for the operation log state cache.
- * Increment this when making breaking changes to the state structure.
- */
-export const CURRENT_SCHEMA_VERSION = 1;
-export const MAX_VERSION_SKIP = 5;
+// Re-export shared constants for backwards compatibility
+export const CURRENT_SCHEMA_VERSION = SHARED_CURRENT_SCHEMA_VERSION;
+export const MAX_VERSION_SKIP = SHARED_MAX_VERSION_SKIP;
+
+// Re-export types
+export type { SchemaMigration };
 
 /**
  * Interface for state cache that may need migration.
@@ -21,92 +33,11 @@ export interface MigratableStateCache {
 }
 
 /**
- * Interface for schema migrations (A.7.15 Unified State and Operation Migrations).
- * Each migration transforms state from one version to the next, and optionally
- * transforms individual operations for tail ops replay and conflict detection.
- *
- * @see docs/ai/sync/operation-log-architecture.md A.7.15
- */
-export interface SchemaMigration {
-  fromVersion: number;
-  toVersion: number;
-  description: string;
-
-  /** Required: transform full state snapshot */
-  migrateState: (state: unknown) => unknown;
-
-  /**
-   * Optional: transform individual operation.
-   * Return null to drop the operation entirely (e.g., for removed features).
-   * Only needed for non-additive changes (renames, removals, type changes).
-   */
-  migrateOperation?: (op: Operation) => Operation | null;
-
-  /**
-   * Explicit declaration forces author to think about operation migration.
-   * If true but migrateOperation is undefined, startup validation fails.
-   */
-  requiresOperationMigration: boolean;
-}
-
-/**
- * Registry of all schema migrations.
- * Add new migrations here when the state structure changes.
- *
- * NOTE: This is for Operation Log schema migrations (Post-v10 / Post-OpLog).
- * For legacy migrations (upgrading from older versions of the app), see:
- * `src/app/pfapi/migrate/cross-model-migrations.ts`
- *
- * Example migration (additive change - no operation migration needed):
- * ```typescript
- * {
- *   fromVersion: 1,
- *   toVersion: 2,
- *   description: 'Add priority field to tasks',
- *   requiresOperationMigration: false,
- *   migrateState: (state) => {
- *     const s = state as any;
- *     if (!s.task?.entities) return state;
- *     const entities = Object.fromEntries(
- *       Object.entries(s.task.entities).map(([id, task]: [string, any]) => [
- *         id,
- *         { ...task, priority: task.priority ?? 'NORMAL' },
- *       ])
- *     );
- *     return { ...s, task: { ...s.task, entities } };
- *   },
- * },
- * ```
- *
- * Example migration (field rename - operation migration required):
- * ```typescript
- * {
- *   fromVersion: 2,
- *   toVersion: 3,
- *   description: 'Rename task.estimate to task.timeEstimate',
- *   requiresOperationMigration: true,
- *   migrateState: (state) => { ... },
- *   migrateOperation: (op) => {
- *     if (op.entityType !== 'TASK' || op.opType !== 'UPD') return op;
- *     const changes = (op.payload as any)?.changes;
- *     if (!changes?.estimate) return op;
- *     return {
- *       ...op,
- *       schemaVersion: 3,
- *       payload: { ...op.payload, changes: { ...changes, timeEstimate: changes.estimate, estimate: undefined } },
- *     };
- *   },
- * },
- * ```
- */
-const MIGRATIONS: SchemaMigration[] = [
-  // No migrations yet - schema version 1 is the initial version
-  // Add migrations here as needed
-];
-
-/**
  * Service responsible for migrating state cache snapshots and operations
  * between schema versions.
+ *
+ * This is an Angular wrapper around the shared schema migration functions
+ * from @sp/shared-schema package.
  *
  * When the application's state structure changes (e.g., new fields, renamed properties),
  * migrations ensure old snapshots and operations can be upgraded to work with new code.
@@ -139,14 +70,11 @@ export class SchemaMigrationService {
    * have a migrateOperation function defined.
    */
   private _validateMigrationRegistry(): void {
-    for (const migration of MIGRATIONS) {
-      if (migration.requiresOperationMigration && !migration.migrateOperation) {
-        throw new Error(
-          `SchemaMigrationService: Migration v${migration.fromVersion}→v${migration.toVersion} ` +
-            `declares requiresOperationMigration=true but migrateOperation is not defined. ` +
-            `Either implement migrateOperation or set requiresOperationMigration=false.`,
-        );
-      }
+    const errors = validateMigrationRegistry();
+    if (errors.length > 0) {
+      throw new Error(
+        `SchemaMigrationService: Invalid migration registry:\n${errors.join('\n')}`,
+      );
     }
   }
 
@@ -170,44 +98,19 @@ export class SchemaMigrationService {
       `SchemaMigrationService: Migrating state from v${currentVersion} to v${CURRENT_SCHEMA_VERSION}`,
     );
 
-    let { state } = cache;
-    let version = currentVersion;
+    const result = migrateState(cache.state, currentVersion, CURRENT_SCHEMA_VERSION);
 
-    // Run migrations sequentially
-    while (version < CURRENT_SCHEMA_VERSION) {
-      const migration = MIGRATIONS.find((m) => m.fromVersion === version);
-
-      if (!migration) {
-        throw new Error(
-          `SchemaMigrationService: No migration path from version ${version}. ` +
-            `Current version is ${CURRENT_SCHEMA_VERSION}.`,
-        );
-      }
-
-      OpLog.normal(
-        `SchemaMigrationService: Running state migration v${migration.fromVersion} → v${migration.toVersion}: ${migration.description}`,
-      );
-
-      try {
-        state = migration.migrateState(state);
-        version = migration.toVersion;
-      } catch (e) {
-        OpLog.err(
-          `SchemaMigrationService: State migration failed at v${migration.fromVersion} → v${migration.toVersion}`,
-          e,
-        );
-        throw new Error(
-          `Schema state migration failed: ${migration.description}. ` +
-            `Error: ${e instanceof Error ? e.message : String(e)}`,
-        );
-      }
+    if (!result.success) {
+      throw new Error(`SchemaMigrationService: ${result.error}`);
     }
 
-    OpLog.normal(`SchemaMigrationService: State migration complete. Now at v${version}`);
+    OpLog.normal(
+      `SchemaMigrationService: State migration complete. Now at v${CURRENT_SCHEMA_VERSION}`,
+    );
 
     return {
       ...cache,
-      state,
+      state: result.data,
       schemaVersion: CURRENT_SCHEMA_VERSION,
     };
   }
@@ -233,45 +136,36 @@ export class SchemaMigrationService {
       return op;
     }
 
-    let migratedOp: Operation | null = { ...op };
-    let version = opVersion;
+    // Convert to OperationLike for the shared function
+    const opLike: OperationLike = {
+      id: op.id,
+      opType: op.opType,
+      entityType: op.entityType,
+      entityId: op.entityId,
+      entityIds: op.entityIds,
+      payload: op.payload,
+      schemaVersion: opVersion,
+    };
 
-    while (version < CURRENT_SCHEMA_VERSION && migratedOp !== null) {
-      const migration = MIGRATIONS.find((m) => m.fromVersion === version);
+    const result = sharedMigrateOperation(opLike, CURRENT_SCHEMA_VERSION);
 
-      if (!migration) {
-        throw new Error(
-          `SchemaMigrationService: No migration path from version ${version}. ` +
-            `Current version is ${CURRENT_SCHEMA_VERSION}.`,
-        );
-      }
-
-      if (migration.migrateOperation) {
-        try {
-          migratedOp = migration.migrateOperation(migratedOp);
-          if (migratedOp !== null) {
-            // Update schema version on the operation
-            migratedOp = { ...migratedOp, schemaVersion: migration.toVersion };
-          }
-        } catch (e) {
-          OpLog.err(
-            `SchemaMigrationService: Operation migration failed at v${migration.fromVersion} → v${migration.toVersion}`,
-            e,
-          );
-          throw new Error(
-            `Schema operation migration failed: ${migration.description}. ` +
-              `Error: ${e instanceof Error ? e.message : String(e)}`,
-          );
-        }
-      } else {
-        // No operation migration defined - just update version
-        migratedOp = { ...migratedOp, schemaVersion: migration.toVersion };
-      }
-
-      version = migration.toVersion;
+    if (!result.success) {
+      throw new Error(`SchemaMigrationService: ${result.error}`);
     }
 
-    return migratedOp;
+    if (result.data === null || result.data === undefined) {
+      return null;
+    }
+
+    // Merge migrated fields back into the original operation
+    return {
+      ...op,
+      opType: result.data.opType as Operation['opType'],
+      entityType: result.data.entityType as Operation['entityType'],
+      entityId: result.data.entityId,
+      payload: result.data.payload,
+      schemaVersion: result.data.schemaVersion,
+    };
   }
 
   /**
@@ -301,16 +195,23 @@ export class SchemaMigrationService {
    * Returns true if the cache needs migration.
    */
   needsMigration(cache: MigratableStateCache): boolean {
-    const currentVersion = cache.schemaVersion ?? 1;
-    return currentVersion < CURRENT_SCHEMA_VERSION;
+    return stateNeedsMigration(cache.schemaVersion, CURRENT_SCHEMA_VERSION);
   }
 
   /**
    * Returns true if the operation needs migration.
    */
   operationNeedsMigration(op: Operation): boolean {
-    const opVersion = op.schemaVersion ?? 1;
-    return opVersion < CURRENT_SCHEMA_VERSION;
+    return sharedOperationNeedsMigration(
+      {
+        id: op.id,
+        opType: op.opType,
+        entityType: op.entityType,
+        payload: op.payload,
+        schemaVersion: op.schemaVersion ?? 1,
+      },
+      CURRENT_SCHEMA_VERSION,
+    );
   }
 
   /**

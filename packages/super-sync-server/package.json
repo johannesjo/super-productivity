@@ -12,6 +12,7 @@
     "clear-data": "ts-node scripts/clear-data.ts"
   },
   "dependencies": {
+    "@sp/shared-schema": "*",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",

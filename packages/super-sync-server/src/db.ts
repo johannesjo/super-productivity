@@ -40,6 +40,7 @@ export interface DbUserSyncState {
   last_snapshot_seq: number | null;
   snapshot_data: Buffer | null;
   snapshot_at: number | null;
+  snapshot_schema_version: number | null;
 }
 
 export interface DbSyncDevice {
@@ -211,6 +212,18 @@ export const initDb = (dataDir: string, inMemory = false): void => {
   if (!hasTokenVersion) {
     Logger.info('Migrating database: adding token_version column');
     db.exec('ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 0');
+  }
+
+  // Migration: Add schema version tracking for snapshots
+  const syncStateColumns = db.pragma('table_info(user_sync_state)') as { name: string }[];
+  const hasSnapshotSchemaVersion = syncStateColumns.some(
+    (col) => col.name === 'snapshot_schema_version',
+  );
+  if (!hasSnapshotSchemaVersion) {
+    Logger.info('Migrating database: adding snapshot_schema_version column');
+    db.exec(
+      'ALTER TABLE user_sync_state ADD COLUMN snapshot_schema_version INTEGER DEFAULT 1',
+    );
   }
 
   Logger.info(`Database initialized at ${dbPath}`);

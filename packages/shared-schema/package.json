@@ -1,0 +1,16 @@
+{
+  "name": "@sp/shared-schema",
+  "version": "1.0.0",
+  "description": "Shared schema versioning and migrations for Super Productivity sync",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0",
+    "vitest": "^3.2.4"
+  }
+}
