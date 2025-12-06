@@ -513,4 +513,194 @@ describe('SuperSyncProvider', () => {
       );
     });
   });
+
+  describe('uploadSnapshot', () => {
+    it('should upload snapshot with gzip compression', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const mockResponse = {
+        accepted: true,
+        serverSeq: 5,
+      };
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve(mockResponse),
+        } as Response),
+      );
+
+      const state = { tasks: [{ id: 'task-1', title: 'Test' }] };
+      const vectorClock: Record<string, number> = {};
+      vectorClock['client-1'] = 3;
+      const result = await provider.uploadSnapshot(
+        state,
+        'client-1',
+        'recovery',
+        vectorClock,
+        1,
+      );
+
+      expect(result).toEqual(mockResponse);
+      expect(fetchSpy).toHaveBeenCalledTimes(1);
+
+      const [url, options] = fetchSpy.calls.mostRecent().args;
+      expect(url).toBe('https://sync.example.com/api/sync/snapshot');
+      expect(options.method).toBe('POST');
+      expect(options.headers.get('Authorization')).toBe('Bearer test-access-token');
+      expect(options.headers.get('Content-Type')).toBe('application/json');
+      expect(options.headers.get('Content-Encoding')).toBe('gzip');
+    });
+
+    it('should send gzip-compressed body', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ accepted: true }),
+        } as Response),
+      );
+
+      await provider.uploadSnapshot({ data: 'test' }, 'client-1', 'initial', {}, 1);
+
+      const body = fetchSpy.calls.mostRecent().args[1].body;
+      expect(body).toBeInstanceOf(Uint8Array);
+      // Verify gzip magic number
+      expect(body[0]).toBe(0x1f);
+      expect(body[1]).toBe(0x8b);
+    });
+
+    it('should include all required fields in payload', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      let capturedBody: Uint8Array | null = null;
+      fetchSpy.and.callFake(async (_url: string, options: RequestInit) => {
+        capturedBody = options.body as Uint8Array;
+        return {
+          ok: true,
+          json: () => Promise.resolve({ accepted: true }),
+        } as Response;
+      });
+
+      const state = { tasks: [] };
+      const vectorClock: Record<string, number> = {};
+      vectorClock['client-1'] = 5;
+      await provider.uploadSnapshot(state, 'client-1', 'migration', vectorClock, 2);
+
+      // Decompress and verify payload
+      expect(capturedBody).not.toBeNull();
+      const stream = new DecompressionStream('gzip');
+      const writer = stream.writable.getWriter();
+      writer.write(capturedBody!);
+      writer.close();
+      const decompressed = await new Response(stream.readable).arrayBuffer();
+      const payload = JSON.parse(new TextDecoder().decode(decompressed));
+
+      expect(payload.state).toEqual(state);
+      expect(payload.clientId).toBe('client-1');
+      expect(payload.reason).toBe('migration');
+      expect(payload.vectorClock).toEqual(vectorClock);
+      expect(payload.schemaVersion).toBe(2);
+    });
+
+    it('should throw MissingCredentialsSPError when config is missing', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(null));
+
+      await expectAsync(
+        provider.uploadSnapshot({}, 'client-1', 'recovery', {}, 1),
+      ).toBeRejectedWith(jasmine.any(MissingCredentialsSPError));
+    });
+
+    it('should throw error on API failure', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: false,
+          status: 413,
+          statusText: 'Payload Too Large',
+          text: () => Promise.resolve('Body too large'),
+        } as Response),
+      );
+
+      await expectAsync(
+        provider.uploadSnapshot(
+          { largeData: 'x'.repeat(1000) },
+          'client-1',
+          'recovery',
+          {},
+          1,
+        ),
+      ).toBeRejectedWithError(/SuperSync API error: 413/);
+    });
+
+    it('should handle different snapshot reasons', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      const reasons: Array<'initial' | 'recovery' | 'migration'> = [
+        'initial',
+        'recovery',
+        'migration',
+      ];
+
+      for (const reason of reasons) {
+        fetchSpy.and.returnValue(
+          Promise.resolve({
+            ok: true,
+            json: () => Promise.resolve({ accepted: true }),
+          } as Response),
+        );
+
+        await provider.uploadSnapshot({}, 'client-1', reason, {}, 1);
+
+        // Verify the reason was included in the compressed payload
+        const body = fetchSpy.calls.mostRecent().args[1].body as Uint8Array;
+        const stream = new DecompressionStream('gzip');
+        const writer = stream.writable.getWriter();
+        writer.write(body);
+        writer.close();
+        const decompressed = await new Response(stream.readable).arrayBuffer();
+        const payload = JSON.parse(new TextDecoder().decode(decompressed));
+
+        expect(payload.reason).toBe(reason);
+      }
+    });
+
+    it('should compress large payloads effectively', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+
+      let capturedBody: Uint8Array | null = null;
+      fetchSpy.and.callFake(async (_url: string, options: RequestInit) => {
+        capturedBody = options.body as Uint8Array;
+        return {
+          ok: true,
+          json: () => Promise.resolve({ accepted: true }),
+        } as Response;
+      });
+
+      // Create a large repetitive payload (compresses well)
+      const largeState = {
+        tasks: Array.from({ length: 100 }, (_, i) => ({
+          id: `task-${i}`,
+          title: `Task number ${i} with description`,
+          done: false,
+        })),
+      };
+
+      await provider.uploadSnapshot(largeState, 'client-1', 'recovery', {}, 1);
+
+      const originalSize = JSON.stringify({
+        state: largeState,
+        clientId: 'client-1',
+        reason: 'recovery',
+        vectorClock: {},
+        schemaVersion: 1,
+      }).length;
+
+      expect(capturedBody).not.toBeNull();
+      // Compressed should be significantly smaller
+      expect(capturedBody!.length).toBeLessThan(originalSize * 0.5);
+    });
+  });
 });
