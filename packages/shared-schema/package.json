@@ -1,6 +1,7 @@
 {
   "name": "@sp/shared-schema",
   "version": "1.0.0",
+  "type": "module",
   "description": "Shared schema versioning and migrations for Super Productivity sync",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

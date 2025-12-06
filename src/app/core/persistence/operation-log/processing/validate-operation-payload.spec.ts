@@ -43,6 +43,15 @@ describe('validateOperationPayload', () => {
       expect(result.success).toBe(false);
       expect(result.error).toContain('object');
     });
+
+    it('should reject array payload', () => {
+      const op = createTestOperation({
+        payload: [{ id: 'task1' }, { id: 'task2' }] as unknown as Record<string, unknown>,
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('array');
+    });
   });
 
   describe('CREATE operation', () => {

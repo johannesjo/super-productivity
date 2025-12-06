@@ -22,7 +22,6 @@ import {
   migrateState,
   migrateOperation,
   stateNeedsMigration,
-  validateMigrationRegistry,
   type OperationLike,
 } from '@sp/shared-schema';
 
@@ -674,9 +673,7 @@ export class SyncService {
 
   // === Snapshot Management ===
 
-  getCachedSnapshot(
-    userId: number,
-  ): {
+  getCachedSnapshot(userId: number): {
     state: unknown;
     serverSeq: number;
     generatedAt: number;

@@ -4,11 +4,19 @@ import { AppDataCompleteNew } from '../pfapi-config';
 import { PFLog } from '../../core/log';
 import { MenuTreeKind } from '../../features/menu-tree/store/menu-tree.model';
 
+// WARNING: Module-level mutable state. This is not ideal because:
+// 1. Can cause test pollution if tests don't properly isolate
+// 2. State persists between validation calls
+// The errorCount is reset at the start of each call, but lastValidityError persists.
+// Consumers should call getLastValidityError() immediately after isRelatedModelDataValid()
+// to get the error from the current validation run.
+// TODO: Refactor to return a ValidationResult object { isValid: boolean, errors: string[] }
 let errorCount = 0;
-let lastValidityError: string;
+let lastValidityError: string | undefined;
 
 export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   errorCount = 0;
+  lastValidityError = undefined; // Reset at start of each validation
 
   if (!d) {
     _validityError('Data is null or undefined', { d });

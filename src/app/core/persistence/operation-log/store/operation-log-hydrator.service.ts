@@ -696,6 +696,12 @@ export class OperationLogHydratorService {
         OpLog.log(
           `[OperationLogHydratorService] Created REPAIR operation for ${context}`,
         );
+      } catch (e) {
+        OpLog.err(
+          `[OperationLogHydratorService] Failed to create REPAIR operation for ${context}:`,
+          e,
+        );
+        throw e;
       } finally {
         this._repairMutex = null;
       }

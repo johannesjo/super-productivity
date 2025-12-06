@@ -1,4 +1,4 @@
-import type { SchemaMigration } from '../migration.types';
+import type { SchemaMigration } from '../migration.types.js';
 
 /**
  * Registry of all schema migrations.

@@ -1,6 +1,13 @@
-import { MIGRATIONS } from './migrations';
-import { CURRENT_SCHEMA_VERSION, MIN_SUPPORTED_SCHEMA_VERSION } from './schema-version';
-import type { MigrationResult, OperationLike, SchemaMigration } from './migration.types';
+import { MIGRATIONS } from './migrations/index.js';
+import {
+  CURRENT_SCHEMA_VERSION,
+  MIN_SUPPORTED_SCHEMA_VERSION,
+} from './schema-version.js';
+import type {
+  MigrationResult,
+  OperationLike,
+  SchemaMigration,
+} from './migration.types.js';
 
 /**
  * Find a migration that transforms from the given version.
@@ -149,6 +156,9 @@ export function migrateOperation(
         // No operation migration defined - just update version
         currentOp = { ...currentOp, schemaVersion: migration.toVersion };
       }
+      // Track version even if operation was dropped (null)
+      // This ensures migratedToVersion reflects where we actually stopped
+      version = migration.toVersion;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : String(err);
       return {
@@ -158,15 +168,13 @@ export function migrateOperation(
         migratedToVersion: version,
       };
     }
-
-    version = migration.toVersion;
   }
 
   return {
     success: true,
     data: currentOp,
     migratedFromVersion: sourceVersion,
-    migratedToVersion: currentOp ? version : sourceVersion,
+    migratedToVersion: version,
   };
 }
 
