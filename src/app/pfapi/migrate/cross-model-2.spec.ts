@@ -53,6 +53,7 @@ describe('crossModelMigration2()', () => {
             ARCHIE_TASK_ID: {
               created: 0,
               timeEstimate: 0,
+              timeSpentOnDay: {},
             },
           },
         },
@@ -149,7 +150,9 @@ describe('crossModelMigration2()', () => {
       archiveYoung: {
         task: {
           ids: ['ARCHIE_TASK_ID'],
-          entities: { ARCHIE_TASK_ID: { created: 0, timeEstimate: 0 } },
+          entities: {
+            ARCHIE_TASK_ID: { created: 0, timeEstimate: 0, timeSpentOnDay: {} },
+          },
         },
         timeTracking: {
           project: {},
