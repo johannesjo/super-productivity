@@ -1387,6 +1387,47 @@ export class PfapiStoreDelegateService {
 
 All sync models are now in NgRx - no hybrid persistence.
 
+## B.5 Archive Data (Direct PFAPI Pattern)
+
+Archive data (`archiveYoung`, `archiveOld`) bypasses the NgRx store and operation log entirely.
+This is intentional for performance and to bound operation log size.
+
+### Why Archives Bypass Operation Log
+
+1. **Size**: Archived tasks can grow to tens of thousands of entries over years
+2. **Frequency**: Archive updates are rare (only when archiving tasks or flushing old data)
+3. **Sync needs**: Archives still need to sync via PFAPI, but don't need operation-level granularity
+
+### Data Flow for Archive Operations
+
+```
+Archive Operation (e.g., archiving a completed task)
+    │
+    ├──► 1. Update archive directly via ModelCtrl.save()
+    │         └──► isUpdateRevAndLastUpdate: true
+    │                   └──► Increments META_MODEL.vectorClock
+    │                   └──► PFAPI sync detects change
+    │
+    └──► 2. (No operation log entry - by design)
+```
+
+### Services Using Direct PFAPI Pattern
+
+| Service               | Purpose                    | Why Direct PFAPI    |
+| --------------------- | -------------------------- | ------------------- |
+| `TaskArchiveService`  | CRUD for archived tasks    | Size, low frequency |
+| `ArchiveService`      | Archive/unarchive tasks    | Size, low frequency |
+| `TimeTrackingService` | Flush time data to archive | Size, low frequency |
+| `PluginEffects`       | Plugin metadata/data       | Isolated feature    |
+
+### Key Rule
+
+When modifying archive or plugin data directly via PFAPI:
+
+- **Always use `{ isUpdateRevAndLastUpdate: true }`**
+- This ensures PFAPI sync detects the change
+- Without it, changes won't sync to other devices
+
 ---
 
 # Part C: Server Sync
