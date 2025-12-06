@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
-import { Operation, OperationLogEntry } from '../operation.types';
+import { Operation, OperationLogEntry, OpType } from '../operation.types';
 import { OpLog } from '../../../log';
 import { chunkArray } from '../../../../util/chunk-array';
 import {
@@ -20,6 +20,16 @@ import { T } from '../../../../t.const';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
+
+/**
+ * Operation types that contain full application state and should use
+ * the snapshot endpoint instead of the regular ops endpoint.
+ */
+const FULL_STATE_OP_TYPES = new Set([
+  OpType.SyncImport,
+  OpType.BackupImport,
+  OpType.Repair,
+]);
 
 /**
  * Result of an upload operation. May contain piggybacked operations
@@ -91,8 +101,44 @@ export class OperationLogUploadService {
         privateCfg?.isEncryptionEnabled && !!privateCfg?.encryptKey;
       const encryptKey = privateCfg?.encryptKey;
 
+      // Separate full-state operations (backup imports, repairs) from regular ops
+      // Full-state ops are uploaded via snapshot endpoint for better efficiency
+      const fullStateOps = pendingOps.filter((entry) =>
+        FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
+      );
+      const regularOps = pendingOps.filter(
+        (entry) => !FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
+      );
+
+      // Upload full-state operations via snapshot endpoint
+      for (const entry of fullStateOps) {
+        const result = await this._uploadFullStateOpAsSnapshot(
+          syncProvider,
+          entry,
+          encryptKey,
+        );
+        if (result.accepted) {
+          await this.opLogStore.markSynced([entry.seq]);
+          uploadedCount++;
+          if (result.serverSeq !== undefined) {
+            await syncProvider.setLastServerSeq(result.serverSeq);
+          }
+        } else {
+          await this.opLogStore.markRejected([entry.op.id]);
+          rejectedCount++;
+          OpLog.warn(
+            `OperationLogUploadService: Full-state op ${entry.op.id} rejected: ${result.error}`,
+          );
+        }
+      }
+
+      // Skip regular ops processing if none exist
+      if (regularOps.length === 0) {
+        return;
+      }
+
       // Convert to SyncOperation format
-      let syncOps: SyncOperation[] = pendingOps.map((entry) =>
+      let syncOps: SyncOperation[] = regularOps.map((entry) =>
         this._entryToSyncOp(entry),
       );
 
@@ -105,7 +151,7 @@ export class OperationLogUploadService {
       // Upload in batches (API supports up to 100 ops per request)
       const MAX_OPS_PER_REQUEST = 100;
       const chunks = chunkArray(syncOps, MAX_OPS_PER_REQUEST);
-      const correspondingEntries = chunkArray(pendingOps, MAX_OPS_PER_REQUEST);
+      const correspondingEntries = chunkArray(regularOps, MAX_OPS_PER_REQUEST);
 
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
@@ -291,5 +337,64 @@ export class OperationLogUploadService {
       timestamp: entry.op.timestamp,
       schemaVersion: entry.op.schemaVersion,
     };
+  }
+
+  /**
+   * Uploads a full-state operation (backup import, repair, sync import) via
+   * the snapshot endpoint instead of the ops endpoint. This is more efficient
+   * for large payloads as the snapshot endpoint is designed for full state uploads.
+   */
+  private async _uploadFullStateOpAsSnapshot(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
+    entry: OperationLogEntry,
+    encryptKey: string | undefined,
+  ): Promise<{ accepted: boolean; serverSeq?: number; error?: string }> {
+    const op = entry.op;
+    OpLog.normal(
+      `OperationLogUploadService: Uploading ${op.opType} operation via snapshot endpoint`,
+    );
+
+    // The payload for full-state ops IS the complete state
+    let state = op.payload;
+
+    // If encryption is enabled, encrypt the state
+    if (encryptKey) {
+      OpLog.normal('OperationLogUploadService: Encrypting snapshot payload...');
+      state = await this.encryptionService.encryptPayload(state, encryptKey);
+    }
+
+    // Map operation type to snapshot reason
+    const reason = this._opTypeToSnapshotReason(op.opType as OpType);
+
+    try {
+      const response = await syncProvider.uploadSnapshot(
+        state,
+        op.clientId,
+        reason,
+        op.vectorClock,
+        op.schemaVersion,
+      );
+      return response;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Unknown error';
+      OpLog.error(`OperationLogUploadService: Snapshot upload failed: ${message}`);
+      return { accepted: false, error: message };
+    }
+  }
+
+  /**
+   * Maps an OpType to the snapshot reason expected by the server.
+   */
+  private _opTypeToSnapshotReason(opType: OpType): 'initial' | 'recovery' | 'migration' {
+    switch (opType) {
+      case OpType.SyncImport:
+        return 'initial';
+      case OpType.BackupImport:
+        return 'recovery';
+      case OpType.Repair:
+        return 'recovery';
+      default:
+        return 'recovery';
+    }
   }
 }
