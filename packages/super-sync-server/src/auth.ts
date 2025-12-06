@@ -280,21 +280,25 @@ export const replaceToken = (
 ): { token: string; user: { id: number; email: string } } => {
   const db = getDb();
 
-  // Increment token version to invalidate all existing tokens
-  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
-    userId,
-  );
+  // Use transaction to ensure atomicity of version increment and read
+  const newTokenVersion = db.transaction(() => {
+    // Increment token version to invalidate all existing tokens
+    db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
+      userId,
+    );
 
-  // Get the new token version
-  const user = db.prepare('SELECT token_version FROM users WHERE id = ?').get(userId) as
-    | { token_version: number }
-    | undefined;
+    // Get the new token version
+    const user = db
+      .prepare('SELECT token_version FROM users WHERE id = ?')
+      .get(userId) as { token_version: number } | undefined;
 
-  if (!user) {
-    throw new Error('User not found');
-  }
+    if (!user) {
+      throw new Error('User not found');
+    }
 
-  const newTokenVersion = user.token_version;
+    return user.token_version;
+  })();
+
   const token = jwt.sign({ userId, email, tokenVersion: newTokenVersion }, JWT_SECRET, {
     expiresIn: JWT_EXPIRY,
   });

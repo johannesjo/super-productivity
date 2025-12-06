@@ -119,5 +119,44 @@ describe('LockService', () => {
       });
       expect(executed).toBe(true);
     });
+
+    it('should handle corrupted lock format with no timestamp', async () => {
+      // Simulate corrupted lock entry without proper format
+      const lockKey = 'lock_corrupted_no_ts';
+      localStorage.setItem(lockKey, 'invalid_format_no_colon');
+
+      // Service should treat invalid format as expired and acquire the lock
+      let executed = false;
+      await service.request('corrupted_no_ts', async () => {
+        executed = true;
+      });
+      expect(executed).toBe(true);
+    });
+
+    it('should handle corrupted lock format with NaN timestamp', async () => {
+      // Simulate corrupted lock entry with non-numeric timestamp
+      const lockKey = 'lock_corrupted_nan';
+      localStorage.setItem(lockKey, 'some_id:not_a_number');
+
+      // Service should treat NaN timestamp as expired and acquire the lock
+      let executed = false;
+      await service.request('corrupted_nan', async () => {
+        executed = true;
+      });
+      expect(executed).toBe(true);
+    });
+
+    it('should handle empty string lock value', async () => {
+      // Simulate empty string in localStorage
+      const lockKey = 'lock_empty';
+      localStorage.setItem(lockKey, '');
+
+      // Service should be able to acquire the lock
+      let executed = false;
+      await service.request('empty', async () => {
+        executed = true;
+      });
+      expect(executed).toBe(true);
+    });
   });
 });

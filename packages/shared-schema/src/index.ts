@@ -3,7 +3,7 @@ export {
   CURRENT_SCHEMA_VERSION,
   MIN_SUPPORTED_SCHEMA_VERSION,
   MAX_VERSION_SKIP,
-} from './schema-version';
+} from './schema-version.js';
 
 // Types
 export type {
@@ -11,7 +11,7 @@ export type {
   SchemaMigration,
   MigrationResult,
   MigratableStateCache,
-} from './migration.types';
+} from './migration.types.js';
 
 // Migration functions
 export {
@@ -22,7 +22,7 @@ export {
   operationNeedsMigration,
   validateMigrationRegistry,
   getCurrentSchemaVersion,
-} from './migrate';
+} from './migrate.js';
 
 // Migration registry (for inspection/debugging)
-export { MIGRATIONS } from './migrations';
+export { MIGRATIONS } from './migrations/index.js';
