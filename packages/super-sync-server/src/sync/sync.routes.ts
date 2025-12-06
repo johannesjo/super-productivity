@@ -22,6 +22,7 @@ const gunzipAsync = promisify(zlib.gunzip);
 // Validation constants
 const CLIENT_ID_REGEX = /^[a-zA-Z0-9_-]+$/;
 const MAX_CLIENT_ID_LENGTH = 255;
+const MAX_DECOMPRESSED_SIZE = 100 * 1024 * 1024; // 100MB - prevents zip bombs
 
 // Zod Schemas
 const ClientIdSchema = z
@@ -363,6 +364,14 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
           try {
             const decompressed = await gunzipAsync(rawBody);
+            if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
+              Logger.warn(
+                `[user:${userId}] Decompressed snapshot too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
+              );
+              return reply.status(413).send({
+                error: 'Decompressed payload too large',
+              });
+            }
             body = JSON.parse(decompressed.toString('utf-8'));
             Logger.debug(
               `[user:${userId}] Snapshot decompressed: ${rawBody.length} -> ${decompressed.length} bytes`,
