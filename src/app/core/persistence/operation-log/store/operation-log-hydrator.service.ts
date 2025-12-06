@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
-import { convertOpToAction } from '../operation-converter.util';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import {
   CURRENT_SCHEMA_VERSION,
@@ -159,10 +158,10 @@ export class OperationLogHydratorService {
               `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
                 `(${droppedCount} dropped during migration).`,
             );
-            for (const op of opsToReplay) {
-              const action = convertOpToAction(op);
-              this.store.dispatch(action);
-            }
+            // Use OperationApplierService to handle dependency resolution during replay.
+            // This ensures operations referencing deleted entities are handled gracefully
+            // rather than throwing errors (e.g., adding subtask to deleted parent).
+            await this.operationApplierService.applyOperations(opsToReplay);
 
             // 5. If we replayed many ops, save a new snapshot for faster future loads
             if (opsToReplay.length > 10) {
@@ -231,10 +230,10 @@ export class OperationLogHydratorService {
             `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
               `(${droppedCount} dropped during migration).`,
           );
-          for (const op of opsToReplay) {
-            const action = convertOpToAction(op);
-            this.store.dispatch(action);
-          }
+          // Use OperationApplierService to handle dependency resolution during replay.
+          // This ensures operations referencing deleted entities are handled gracefully
+          // rather than throwing errors (e.g., adding subtask to deleted parent).
+          await this.operationApplierService.applyOperations(opsToReplay);
 
           // Save snapshot after replay for faster future loads
           OpLog.normal(
