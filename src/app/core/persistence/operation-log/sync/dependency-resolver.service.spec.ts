@@ -134,6 +134,56 @@ describe('DependencyResolverService', () => {
       const deps = service.extractDependencies(op);
       expect(deps).toEqual([]);
     });
+
+    it('should extract projectId from NOTE operations as soft dependency', () => {
+      const op = createTestOperation({
+        entityType: 'NOTE' as EntityType,
+        entityId: 'note1',
+        payload: { projectId: 'proj1', content: 'My note' },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps.length).toBe(1);
+      expect(deps[0]).toEqual({
+        entityType: 'PROJECT',
+        entityId: 'proj1',
+        mustExist: false,
+        relation: 'reference',
+      });
+    });
+
+    it('should return empty array for NOTE operations without projectId', () => {
+      const op = createTestOperation({
+        entityType: 'NOTE' as EntityType,
+        entityId: 'note1',
+        payload: { content: 'Note without project' },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps).toEqual([]);
+    });
+
+    it('should extract subTaskIds from TASK operations as soft dependencies', () => {
+      const op = createTestOperation({
+        entityType: 'TASK' as EntityType,
+        entityId: 'parentTask',
+        payload: { subTaskIds: ['sub1', 'sub2'] },
+      });
+      const deps = service.extractDependencies(op);
+      expect(deps.length).toBe(2);
+      expect(deps).toEqual([
+        {
+          entityType: 'TASK',
+          entityId: 'sub1',
+          mustExist: false,
+          relation: 'reference',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'sub2',
+          mustExist: false,
+          relation: 'reference',
+        },
+      ]);
+    });
   });
 
   describe('checkDependencies', () => {
