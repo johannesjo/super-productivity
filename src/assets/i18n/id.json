@@ -1569,7 +1569,7 @@
         "GROUP_SCHEDULED_DATE": "Tanggal Terjadwal",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reset Semua",
-        "SCHEDULED_DEFAULT": "Tanggal Apa Saja",
+        "SCHEDULED_NULL": "Tidak ditentukan",
         "SCHEDULED_NEXT_MONTH": "Bulan Depan",
         "SCHEDULED_NEXT_WEEK": "Minggu Depan",
         "SCHEDULED_THIS_MONTH": "Bulan ini",
@@ -1587,7 +1587,7 @@
         "TIME_2HOUR": "> 2 Jam",
         "TIME_10MIN": "> 10 Menit",
         "TIME_30MIN": "> 30 Menit",
-        "TIME_DEFAULT": "Durasi Apa Saja",
+        "TIME_NULL": "Tidak ditentukan",
         "TIME_SPENT": "Waktu yang dihabiskan",
         "TITLE": "Sesuaikan Tampilan Tugas"
       }

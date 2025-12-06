@@ -1310,7 +1310,7 @@
         "GROUP_SCHEDULED_DATE": "Запланована дата",
         "GROUP_TAG": "Тег",
         "RESET_ALL": "Скинути все",
-        "SCHEDULED_DEFAULT": "Будь-яка дата",
+        "SCHEDULED_NULL": "Не вказано",
         "SCHEDULED_NEXT_MONTH": "Наступний місяць",
         "SCHEDULED_NEXT_WEEK": "Наступного тижня",
         "SCHEDULED_THIS_MONTH": "Цього місяця",
@@ -1326,7 +1326,7 @@
         "TIME_2HOUR": "> 2 години",
         "TIME_10MIN": "> 10 хвилин",
         "TIME_30MIN": "> 30 хвилин",
-        "TIME_DEFAULT": "Будь-яка тривалість",
+        "TIME_NULL": "Не вказано",
         "TIME_SPENT": "Витрачений час",
         "TITLE": "Налаштування перегляду завдань"
       }

@@ -16,6 +16,7 @@ import { TagService } from '../tag/tag.service';
 import {
   DEFAULT_OPTIONS,
   FILTER_OPTION_TYPE,
+  FILTER_SCHEDULE,
   FilterOption,
   GROUP_OPTION_TYPE,
   GroupOption,
@@ -23,6 +24,8 @@ import {
   SORT_ORDER,
   SortOption,
 } from './types';
+import { DateAdapter } from '@angular/material/core';
+import { DEFAULT_FIRST_DAY_OF_WEEK } from 'src/app/core/locale.constants';
 
 describe('TaskViewCustomizerService', () => {
   let service: TaskViewCustomizerService;
@@ -118,10 +121,14 @@ describe('TaskViewCustomizerService', () => {
     };
     projectUpdateSpy = jasmine.createSpy('update');
     tagUpdateSpy = jasmine.createSpy('updateTag');
+    const dateAdapter = jasmine.createSpyObj<DateAdapter<Date>>('DateAdapter', [], {
+      getFirstDayOfWeek: () => DEFAULT_FIRST_DAY_OF_WEEK,
+    });
 
     TestBed.configureTestingModule({
       providers: [
         TaskViewCustomizerService,
+        { provide: DateAdapter, useValue: dateAdapter },
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: ProjectService, useValue: { update: projectUpdateSpy } },
         { provide: TagService, useValue: { updateTag: tagUpdateSpy } },
@@ -173,10 +180,37 @@ describe('TaskViewCustomizerService', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.scheduledDate,
-      'tomorrow',
+      FILTER_SCHEDULE.tomorrow,
     );
     expect(filtered.length).toBe(1);
     expect(filtered[0].id).toBe('Alpha(Tag A)');
+  });
+
+  it('should filter by empty schedule date', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.scheduledDate,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(0);
+  });
+
+  it('should filter by empty timeSpent', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.timeSpent,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(1);
+  });
+
+  it('should filter by empty estimatedTime', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.estimatedTime,
+      FILTER_SCHEDULE.NULL,
+    );
+    expect(filtered.length).toBe(1);
   });
 
   it('should sort by name', () => {
