@@ -291,6 +291,11 @@ export const validateOperationPayload = (op: Operation): PayloadValidationResult
     return { success: false, error: 'Payload must be an object' };
   }
 
+  // Arrays bypass typeof === 'object' check, but payloads should be plain objects
+  if (Array.isArray(op.payload)) {
+    return { success: false, error: 'Payload must be a plain object, not an array' };
+  }
+
   // 2. Validate based on operation type
   switch (op.opType) {
     case OpType.Create:
