@@ -403,5 +403,233 @@ describe('OperationLogUploadService', () => {
         expect(mockFileProvider.uploadFile).toHaveBeenCalledTimes(2);
       });
     });
+
+    describe('full-state operation routing', () => {
+      let mockApiProvider: jasmine.SpyObj<
+        SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable
+      >;
+
+      const createFullStateEntry = (
+        seq: number,
+        id: string,
+        clientId: string,
+        opType: OpType,
+      ): OperationLogEntry => ({
+        seq,
+        op: {
+          id,
+          clientId,
+          actionType: '[Sync] Import',
+          opType,
+          entityType: 'ALL',
+          entityId: undefined,
+          payload: { tasks: [], projects: [] },
+          vectorClock: { [clientId]: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        appliedAt: Date.now(),
+        source: 'local',
+      });
+
+      beforeEach(() => {
+        mockApiProvider = jasmine.createSpyObj('ApiSyncProvider', [
+          'getLastServerSeq',
+          'uploadOps',
+          'setLastServerSeq',
+          'uploadSnapshot',
+        ]);
+        (mockApiProvider as any).supportsOperationSync = true;
+        (mockApiProvider as any).privateCfg = {
+          load: jasmine
+            .createSpy('privateCfg.load')
+            .and.returnValue(Promise.resolve(null)),
+        };
+
+        mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({ results: [], latestSeq: 0, newOps: [] }),
+        );
+        mockApiProvider.setLastServerSeq.and.returnValue(Promise.resolve());
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({ accepted: true, serverSeq: 1 }),
+        );
+      });
+
+      it('should route SyncImport operations through snapshot endpoint', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.SyncImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalled();
+        expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+      });
+
+      it('should route BackupImport operations through snapshot endpoint', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalled();
+        expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+      });
+
+      it('should route Repair operations through snapshot endpoint', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.Repair);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalled();
+        expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+      });
+
+      it('should use correct reason for SyncImport (initial)', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.SyncImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalledWith(
+          jasmine.anything(),
+          'client-1',
+          'initial',
+          jasmine.anything(),
+          jasmine.anything(),
+        );
+      });
+
+      it('should use correct reason for BackupImport (recovery)', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalledWith(
+          jasmine.anything(),
+          'client-1',
+          'recovery',
+          jasmine.anything(),
+          jasmine.anything(),
+        );
+      });
+
+      it('should use correct reason for Repair (recovery)', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.Repair);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalledWith(
+          jasmine.anything(),
+          'client-1',
+          'recovery',
+          jasmine.anything(),
+          jasmine.anything(),
+        );
+      });
+
+      it('should mark full-state ops as synced after successful upload', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+      });
+
+      it('should mark full-state ops as rejected when snapshot fails', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({ accepted: false, error: 'Server error' }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1']);
+        expect(result.rejectedCount).toBe(1);
+      });
+
+      it('should handle mixed full-state and regular operations', async () => {
+        const fullStateEntry = createFullStateEntry(
+          1,
+          'op-1',
+          'client-1',
+          OpType.BackupImport,
+        );
+        const regularEntry = createMockEntry(2, 'op-2', 'client-1');
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([fullStateEntry, regularEntry]),
+        );
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [{ opId: 'op-2', accepted: true }],
+            latestSeq: 2,
+            newOps: [],
+          }),
+        );
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        // Both endpoints should be called
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalled();
+        expect(mockApiProvider.uploadOps).toHaveBeenCalled();
+
+        // Regular op should be sent via uploadOps, not uploadSnapshot
+        const uploadOpsCall = mockApiProvider.uploadOps.calls.mostRecent();
+        const opsArg = uploadOpsCall.args[0];
+        expect(opsArg.length).toBe(1);
+        expect(opsArg[0].id).toBe('op-2');
+      });
+
+      it('should update server seq after snapshot upload', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.SyncImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({ accepted: true, serverSeq: 42 }),
+        );
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(42);
+      });
+
+      it('should pass vectorClock and schemaVersion to snapshot upload', async () => {
+        const vectorClock: Record<string, number> = {};
+        vectorClock['client-1'] = 5;
+        vectorClock['client-2'] = 3;
+        const entry: OperationLogEntry = {
+          seq: 1,
+          op: {
+            id: 'op-1',
+            clientId: 'client-1',
+            actionType: '[Sync] Import',
+            opType: OpType.BackupImport,
+            entityType: 'ALL',
+            entityId: undefined,
+            payload: { data: 'state' },
+            vectorClock,
+            timestamp: Date.now(),
+            schemaVersion: 42,
+          },
+          appliedAt: Date.now(),
+          source: 'local',
+        };
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockApiProvider.uploadSnapshot).toHaveBeenCalledWith(
+          { data: 'state' },
+          'client-1',
+          'recovery',
+          vectorClock,
+          42,
+        );
+      });
+    });
   });
 });
