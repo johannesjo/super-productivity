@@ -150,10 +150,13 @@ export class TaskViewCustomizerService {
         );
 
         return tasks.filter((task) => {
-          const due = task.dueDay || task.dueWithTime;
-          if (!due) return false;
+          const dueStr = task.dueDay
+            ? task.dueDay
+            : task.dueWithTime
+              ? getDbDateStr(task.dueWithTime)
+              : null;
 
-          const dueStr = getDbDateStr(new Date(due));
+          if (!dueStr) return false;
 
           switch (value) {
             case FILTER_SCHEDULE.today:
