@@ -119,6 +119,22 @@ export class ConflictResolutionService {
       allOpsToApply.push(op);
     }
 
+    // Step 2.5: Mark rejected operations BEFORE applying
+    // This ensures crash-safety: if we crash after applying but before marking,
+    // the rejected ops won't be re-uploaded on restart
+    if (localOpsToReject.length > 0) {
+      await this.opLogStore.markRejected(localOpsToReject);
+      OpLog.normal(
+        `ConflictResolutionService: Marked ${localOpsToReject.length} local ops as rejected`,
+      );
+    }
+    if (remoteOpsToReject.length > 0) {
+      await this.opLogStore.markRejected(remoteOpsToReject);
+      OpLog.normal(
+        `ConflictResolutionService: Marked ${remoteOpsToReject.length} remote ops as rejected`,
+      );
+    }
+
     // Step 3: Apply ALL operations in a single batch for proper dependency sorting
     // This ensures that dependencies between conflict ops and non-conflicting ops are resolved
     if (allOpsToApply.length > 0) {
@@ -165,20 +181,6 @@ export class ConflictResolutionService {
           },
         });
       }
-    }
-
-    // Step 4: Mark rejected operations
-    if (localOpsToReject.length > 0) {
-      await this.opLogStore.markRejected(localOpsToReject);
-      OpLog.normal(
-        `ConflictResolutionService: Marked ${localOpsToReject.length} local ops as rejected`,
-      );
-    }
-    if (remoteOpsToReject.length > 0) {
-      await this.opLogStore.markRejected(remoteOpsToReject);
-      OpLog.normal(
-        `ConflictResolutionService: Marked ${remoteOpsToReject.length} remote ops as rejected`,
-      );
     }
 
     // CHECKPOINT D: Validate and repair state after conflict resolution

@@ -128,9 +128,8 @@ export class SyncEffects {
               }),
             ),
 
-            // initial after enabling it,
-            // TODO maybe re-enable
-            // this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_DBX_AFTER_ENABLE')),
+            // initial after enabling it
+            this._wasJustEnabled$.pipe(take(1), mapTo('SYNC_AFTER_ENABLE')),
           ),
         ),
         tap((x) => SyncLog.log('sync(effect).....', x)),

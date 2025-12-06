@@ -375,19 +375,18 @@ export class OperationLogHydratorService {
         return;
       }
 
-      // 2. No legacy data found - check if sync provider is available
+      // 2. No legacy data found
+      // App will start with NgRx initial state (empty).
+      // User can sync or import a backup to restore their data.
       OpLog.warn(
         'OperationLogHydratorService: No legacy data found. ' +
           'If you have sync enabled, please trigger a sync to restore your data. ' +
           'Otherwise, you may need to restore from a backup.',
       );
-
-      // Dispatch empty state so app can at least start
-      // User can then sync or import a backup
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Recovery failed', e);
-      // App will start with empty state
-      // User can sync or restore from backup
+      // App will start with NgRx initial state (empty).
+      // User can sync or restore from backup.
     }
   }
 
