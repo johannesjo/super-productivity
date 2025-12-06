@@ -7,11 +7,13 @@ import {
   SyncOperation,
   OpUploadResponse,
   OpDownloadResponse,
+  SnapshotUploadResponse,
 } from '../../sync-provider.interface';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SuperSyncPrivateCfg } from './super-sync.model';
 import { MissingCredentialsSPError } from '../../../errors/errors';
 import { SyncLog } from '../../../../../core/log';
+import { compressWithGzip } from '../../../compression/compression-handler';
 
 const LAST_SERVER_SEQ_KEY_PREFIX = 'super_sync_last_server_seq_';
 
@@ -162,6 +164,41 @@ export class SuperSyncProvider
     );
   }
 
+  async uploadSnapshot(
+    state: unknown,
+    clientId: string,
+    reason: 'initial' | 'recovery' | 'migration',
+    vectorClock: Record<string, number>,
+    schemaVersion: number,
+  ): Promise<SnapshotUploadResponse> {
+    SyncLog.debug(this.logLabel, 'uploadSnapshot', { clientId, reason, schemaVersion });
+    const cfg = await this._cfgOrError();
+
+    // Compress the payload to reduce upload size
+    const jsonPayload = JSON.stringify({
+      state,
+      clientId,
+      reason,
+      vectorClock,
+      schemaVersion,
+    });
+
+    const compressedPayload = await compressWithGzip(jsonPayload);
+    SyncLog.debug(this.logLabel, 'uploadSnapshot compressed', {
+      originalSize: jsonPayload.length,
+      compressedSize: compressedPayload.length,
+      ratio: ((compressedPayload.length / jsonPayload.length) * 100).toFixed(1) + '%',
+    });
+
+    const response = await this._fetchApiCompressed<SnapshotUploadResponse>(
+      cfg,
+      '/api/sync/snapshot',
+      compressedPayload,
+    );
+
+    return response;
+  }
+
   // === Private Helper Methods ===
 
   private async _cfgOrError(): Promise<SuperSyncPrivateCfg> {
@@ -201,6 +238,39 @@ export class SuperSyncProvider
     const response = await fetch(url, {
       ...options,
       headers,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text().catch(() => 'Unknown error');
+      throw new Error(
+        `SuperSync API error: ${response.status} ${response.statusText} - ${errorText}`,
+      );
+    }
+
+    return response.json() as Promise<T>;
+  }
+
+  /**
+   * Sends a gzip-compressed request body.
+   * Used for large payloads like snapshot uploads.
+   */
+  private async _fetchApiCompressed<T>(
+    cfg: SuperSyncPrivateCfg,
+    path: string,
+    compressedBody: Uint8Array,
+  ): Promise<T> {
+    const baseUrl = cfg.baseUrl.replace(/\/$/, '');
+    const url = `${baseUrl}${path}`;
+
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    headers.set('Content-Encoding', 'gzip');
+    headers.set('Authorization', `Bearer ${cfg.accessToken}`);
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers,
+      body: compressedBody,
     });
 
     if (!response.ok) {

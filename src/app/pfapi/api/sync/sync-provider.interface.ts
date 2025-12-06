@@ -230,4 +230,30 @@ export interface OperationSyncCapable {
    * Acknowledge that operations up to lastSeq have been received
    */
   acknowledgeOps(clientId: string, lastSeq: number): Promise<void>;
+
+  /**
+   * Upload a full state snapshot (for backup imports, repairs, initial sync)
+   * This is more efficient than sending large payloads through the ops endpoint.
+   * @param state The complete application state
+   * @param clientId Client identifier
+   * @param reason Why the snapshot is being uploaded
+   * @param vectorClock Current vector clock state
+   * @param schemaVersion Schema version of the state
+   */
+  uploadSnapshot(
+    state: unknown,
+    clientId: string,
+    reason: 'initial' | 'recovery' | 'migration',
+    vectorClock: Record<string, number>,
+    schemaVersion: number,
+  ): Promise<SnapshotUploadResponse>;
+}
+
+/**
+ * Response from uploading a snapshot
+ */
+export interface SnapshotUploadResponse {
+  accepted: boolean;
+  serverSeq?: number;
+  error?: string;
 }

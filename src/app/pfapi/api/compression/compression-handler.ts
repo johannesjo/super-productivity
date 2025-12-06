@@ -1,6 +1,29 @@
 import { CompressError, DecompressError } from '../errors/errors';
 import { PFLog } from '../../../core/log';
 
+/**
+ * Compresses a string using gzip and returns the raw bytes.
+ * Use this for binary transmission (e.g., HTTP with Content-Encoding: gzip).
+ */
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+export async function compressWithGzip(input: string): Promise<Uint8Array> {
+  try {
+    const stream = new CompressionStream('gzip');
+    const writer = stream.writable.getWriter();
+    writer.write(new TextEncoder().encode(input));
+    writer.close();
+    const compressed = await new Response(stream.readable).arrayBuffer();
+    return new Uint8Array(compressed);
+  } catch (error) {
+    PFLog.err(error);
+    throw new CompressError(error);
+  }
+}
+
+/**
+ * Compresses a string using gzip and returns base64-encoded result.
+ * Use this for JSON payloads where binary data needs string encoding.
+ */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export async function compressWithGzipToString(input: string): Promise<string> {
   try {

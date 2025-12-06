@@ -70,4 +70,29 @@ export class OperationEncryptionService {
   ): Promise<SyncOperation[]> {
     return Promise.all(ops.map((op) => this.decryptOperation(op, encryptKey)));
   }
+
+  /**
+   * Encrypts an arbitrary payload (for snapshot uploads).
+   * Returns the encrypted string.
+   */
+  async encryptPayload(payload: unknown, encryptKey: string): Promise<string> {
+    const payloadStr = JSON.stringify(payload);
+    return encrypt(payloadStr, encryptKey);
+  }
+
+  /**
+   * Decrypts an encrypted payload string.
+   * Returns the parsed payload object.
+   */
+  async decryptPayload<T = unknown>(
+    encryptedPayload: string,
+    encryptKey: string,
+  ): Promise<T> {
+    try {
+      const decryptedStr = await decrypt(encryptedPayload, encryptKey);
+      return JSON.parse(decryptedStr) as T;
+    } catch (e) {
+      throw new DecryptError('Failed to decrypt payload', e);
+    }
+  }
 }
