@@ -269,6 +269,41 @@ export const revokeAllTokens = (userId: number): void => {
   Logger.info(`All tokens revoked for user ${userId}`);
 };
 
+/**
+ * Replace the current JWT with a new one.
+ * This invalidates all existing tokens (including the current one) and returns a fresh token.
+ * Use this when a token was accidentally shared or compromised.
+ */
+export const replaceToken = (
+  userId: number,
+  email: string,
+): { token: string; user: { id: number; email: string } } => {
+  const db = getDb();
+
+  // Increment token version to invalidate all existing tokens
+  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
+    userId,
+  );
+
+  // Get the new token version
+  const user = db.prepare('SELECT token_version FROM users WHERE id = ?').get(userId) as
+    | { token_version: number }
+    | undefined;
+
+  if (!user) {
+    throw new Error('User not found');
+  }
+
+  const newTokenVersion = user.token_version;
+  const token = jwt.sign({ userId, email, tokenVersion: newTokenVersion }, JWT_SECRET, {
+    expiresIn: JWT_EXPIRY,
+  });
+
+  Logger.info(`Token replaced for user ${userId} (new version: ${newTokenVersion})`);
+
+  return { token, user: { id: userId, email } };
+};
+
 export const verifyToken = async (
   token: string,
 ): Promise<{ userId: number; email: string } | null> => {
