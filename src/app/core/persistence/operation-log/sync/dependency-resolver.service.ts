@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Operation, EntityType } from '../operation.types';
+import { Operation, EntityType, isMultiEntityPayload } from '../operation.types';
 import { Store } from '@ngrx/store';
 import { selectTaskEntities } from '../../../../features/tasks/store/task.selectors';
 import {
@@ -85,13 +85,27 @@ export class DependencyResolverService {
   private store = inject(Store);
 
   /**
+   * Extracts the action payload from an operation.
+   * Handles both multi-entity (new format) and legacy payloads.
+   */
+  private extractActionPayload(op: Operation): unknown {
+    if (isMultiEntityPayload(op.payload)) {
+      return op.payload.actionPayload;
+    }
+    return op.payload;
+  }
+
+  /**
    * Identifies dependencies for a given operation.
    */
   extractDependencies(op: Operation): OperationDependency[] {
     const deps: OperationDependency[] = [];
 
+    // Extract actionPayload for both multi-entity and legacy payloads
+    const actionPayload = this.extractActionPayload(op);
+
     if (op.entityType === 'TASK') {
-      const payload = op.payload as TaskOperationPayload;
+      const payload = actionPayload as TaskOperationPayload;
       if (payload.projectId) {
         deps.push({
           entityType: 'PROJECT',
@@ -124,11 +138,11 @@ export class DependencyResolverService {
     }
 
     if (op.entityType === 'NOTE') {
-      const payload = op.payload as NoteOperationPayload;
-      if (payload.projectId) {
+      const notePayload = actionPayload as NoteOperationPayload;
+      if (notePayload.projectId) {
         deps.push({
           entityType: 'PROJECT',
-          entityId: payload.projectId,
+          entityId: notePayload.projectId,
           mustExist: false, // Soft dependency (Note can exist without project)
           relation: 'reference',
         });
@@ -136,14 +150,14 @@ export class DependencyResolverService {
     }
 
     if (op.entityType === 'TAG') {
-      const payload = op.payload as TagOperationPayload;
+      const tagPayload = actionPayload as TagOperationPayload;
       // Tag -> Task is a soft dependency. We want tasks to be created before
       // tag updates that reference them, to avoid the tag-shared.reducer
       // filtering out "non-existent" taskIds during sync.
       // Also ensures DELETE operations for tasks wait until after this tag update.
 
       // Handle both direct taskIds (addTag) and nested taskIds (updateTag)
-      const taskIds = payload.taskIds || payload.tag?.changes?.taskIds;
+      const taskIds = tagPayload.taskIds || tagPayload.tag?.changes?.taskIds;
 
       if (taskIds?.length) {
         for (const taskId of taskIds) {

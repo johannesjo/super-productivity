@@ -1,5 +1,6 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
+import { Store } from '@ngrx/store';
 import { ALL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, mergeMap } from 'rxjs/operators';
 import { LockService } from './sync/lock.service';
@@ -7,7 +8,7 @@ import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
-import { Operation } from './operation.types';
+import { MultiEntityPayload, Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
 import { OpLog } from '../../log';
@@ -21,6 +22,10 @@ import {
   MAX_COMPACTION_FAILURES,
 } from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
+import { StateChangeCaptureService } from './processing/state-change-capture.service';
+import { RootState } from '../../../root-store/root-state';
+import { firstValueFrom } from 'rxjs';
+import { OpType } from './operation.types';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -44,6 +49,8 @@ export class OperationLogEffects {
   private injector = inject(Injector);
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
+  private stateChangeCaptureService = inject(StateChangeCaptureService);
+  private store = inject(Store);
 
   persistOperation$ = createEffect(
     () =>
@@ -70,7 +77,25 @@ export class OperationLogEffects {
 
     // Extract payload (everything except type and meta)
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { type, meta, ...payload } = action;
+    const { type, meta, ...actionPayload } = action;
+
+    // Get the after-state and compute entity changes from state diff
+    const afterState = await firstValueFrom(
+      this.store.select((state: RootState) => state),
+    );
+    const entityChanges = this.stateChangeCaptureService.computeEntityChanges(
+      action,
+      afterState,
+    );
+
+    // Create multi-entity payload with action payload and computed changes
+    const multiEntityPayload: MultiEntityPayload = {
+      actionPayload: actionPayload as Record<string, unknown>,
+      entityChanges,
+    };
+
+    // Determine primary opType: if any entity was created/deleted, use that; otherwise Update
+    const derivedOpType = this.deriveOpType(entityChanges, action.meta.opType);
 
     try {
       await this.lockService.request('sp_op_log', async () => {
@@ -80,11 +105,11 @@ export class OperationLogEffects {
         const op: Operation = {
           id: uuidv7(),
           actionType: action.type,
-          opType: action.meta.opType,
+          opType: derivedOpType,
           entityType: action.meta.entityType,
           entityId: action.meta.entityId,
-          entityIds: action.meta.entityIds,
-          payload: payload,
+          entityIds: this.collectAllEntityIds(entityChanges, action.meta.entityIds),
+          payload: multiEntityPayload,
           clientId: clientId,
           vectorClock: newClock,
           timestamp: Date.now(),
@@ -283,5 +308,51 @@ export class OperationLogEffects {
     } catch {
       // Silently ignore serialization errors - validation already passed
     }
+  }
+
+  /**
+   * Derives the primary opType from entity changes.
+   * Priority: Delete > Create > Update (most significant change wins).
+   * Falls back to action meta opType if no entity changes.
+   */
+  private deriveOpType(
+    entityChanges: import('./operation.types').EntityChange[],
+    fallbackOpType: OpType,
+  ): OpType {
+    if (entityChanges.length === 0) {
+      return fallbackOpType;
+    }
+
+    // Check for deletes first (most significant)
+    if (entityChanges.some((c) => c.opType === OpType.Delete)) {
+      return OpType.Delete;
+    }
+
+    // Then creates
+    if (entityChanges.some((c) => c.opType === OpType.Create)) {
+      return OpType.Create;
+    }
+
+    // Default to update
+    return OpType.Update;
+  }
+
+  /**
+   * Collects all unique entity IDs from entity changes plus any existing entityIds.
+   * This ensures the operation tracks all affected entities for conflict detection.
+   */
+  private collectAllEntityIds(
+    entityChanges: import('./operation.types').EntityChange[],
+    existingEntityIds?: string[],
+  ): string[] | undefined {
+    const ids = new Set<string>(existingEntityIds || []);
+
+    for (const change of entityChanges) {
+      if (change.entityId && change.entityId !== '*') {
+        ids.add(change.entityId);
+      }
+    }
+
+    return ids.size > 0 ? Array.from(ids) : undefined;
   }
 }

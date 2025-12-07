@@ -350,4 +350,212 @@ describe('validateOperationPayload', () => {
       expect(result.success).toBe(true);
     });
   });
+
+  describe('multi-entity payload validation', () => {
+    it('should validate valid MultiEntityPayload', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-1',
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: { title: 'Updated' } } },
+          entityChanges: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              opType: OpType.Update,
+              changes: { title: 'Updated' },
+            },
+            {
+              entityType: 'TAG',
+              entityId: 'tag-1',
+              opType: OpType.Update,
+              changes: { taskIds: ['task-1', 'task-2'] },
+            },
+          ],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate MultiEntityPayload with empty entityChanges', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-1',
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: { title: 'Test' } } },
+          entityChanges: [],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings).toContain('MultiEntityPayload.entityChanges is empty');
+    });
+
+    it('should reject MultiEntityPayload with null actionPayload', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-1',
+        payload: {
+          actionPayload: null,
+          entityChanges: [],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('actionPayload must be a non-null object');
+    });
+
+    it('should reject entityChange with missing entityType', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: {} } },
+          entityChanges: [{ entityId: 'task-1', opType: OpType.Update, changes: {} }],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('missing or invalid entityType');
+    });
+
+    it('should reject entityChange with missing entityId', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: {} } },
+          entityChanges: [{ entityType: 'TASK', opType: OpType.Update, changes: {} }],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('missing or invalid entityId');
+    });
+
+    it('should reject entityChange with missing opType', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: {} } },
+          entityChanges: [{ entityType: 'TASK', entityId: 'task-1', changes: {} }],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('missing or invalid opType');
+    });
+
+    it('should validate CREATE entityChange with valid entity data', () => {
+      const op = createTestOperation({
+        opType: OpType.Create,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-new',
+        payload: {
+          actionPayload: { task: { id: 'task-new', title: 'New Task' } },
+          entityChanges: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-new',
+              opType: OpType.Create,
+              changes: { id: 'task-new', title: 'New Task' },
+            },
+            {
+              entityType: 'PROJECT',
+              entityId: 'project-1',
+              opType: OpType.Update,
+              changes: { taskIds: ['task-new'] },
+            },
+          ],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject CREATE entityChange with null changes', () => {
+      const op = createTestOperation({
+        opType: OpType.Create,
+        entityType: 'TASK' as EntityType,
+        payload: {
+          actionPayload: { task: { id: 'task-1' } },
+          entityChanges: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              opType: OpType.Create,
+              changes: null,
+            },
+          ],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(false);
+      expect(result.error).toContain('CREATE requires changes to be an object');
+    });
+
+    it('should validate DELETE entityChange with minimal tombstone', () => {
+      const op = createTestOperation({
+        opType: OpType.Delete,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-to-delete',
+        payload: {
+          actionPayload: { task: { id: 'task-to-delete' } },
+          entityChanges: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-to-delete',
+              opType: OpType.Delete,
+              changes: { id: 'task-to-delete' },
+            },
+            {
+              entityType: 'TAG',
+              entityId: 'tag-1',
+              opType: OpType.Update,
+              changes: { taskIds: [] },
+            },
+          ],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+    });
+
+    it('should validate singleton entityChange with * as entityId', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'GLOBAL_CONFIG' as EntityType,
+        entityId: '*',
+        payload: {
+          actionPayload: { sectionKey: 'misc', sectionConfig: { isDarkMode: true } },
+          entityChanges: [
+            {
+              entityType: 'GLOBAL_CONFIG',
+              entityId: '*',
+              opType: OpType.Update,
+              changes: { misc: { isDarkMode: true } },
+            },
+          ],
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+    });
+
+    it('should still validate legacy payload format (backward compatibility)', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-1',
+        payload: { task: { id: 'task-1', changes: { title: 'Legacy Format' } } },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+    });
+  });
 });

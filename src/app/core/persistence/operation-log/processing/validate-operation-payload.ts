@@ -1,4 +1,10 @@
-import { Operation, EntityType, OpType } from '../operation.types';
+import {
+  Operation,
+  EntityType,
+  OpType,
+  isMultiEntityPayload,
+  EntityChange,
+} from '../operation.types';
 import { OpLog } from '../../../log';
 
 /**
@@ -269,6 +275,137 @@ const validateFullStatePayload = (payload: unknown): PayloadValidationResult => 
 };
 
 /**
+ * Validates entity changes in a multi-entity payload.
+ */
+const validateEntityChanges = (
+  entityChanges: EntityChange[],
+): PayloadValidationResult => {
+  const warnings: string[] = [];
+
+  for (let i = 0; i < entityChanges.length; i++) {
+    const change = entityChanges[i];
+
+    // Validate entity type
+    if (!change.entityType || typeof change.entityType !== 'string') {
+      return {
+        success: false,
+        error: `EntityChange[${i}] missing or invalid entityType`,
+      };
+    }
+
+    // Validate entity ID (allow '*' for singletons)
+    if (!change.entityId || typeof change.entityId !== 'string') {
+      return {
+        success: false,
+        error: `EntityChange[${i}] missing or invalid entityId`,
+      };
+    }
+
+    // Validate op type
+    if (!change.opType || typeof change.opType !== 'string') {
+      return {
+        success: false,
+        error: `EntityChange[${i}] missing or invalid opType`,
+      };
+    }
+
+    // Validate changes based on opType
+    if (change.opType === OpType.Create) {
+      if (
+        !change.changes ||
+        typeof change.changes !== 'object' ||
+        change.changes === null
+      ) {
+        return {
+          success: false,
+          error: `EntityChange[${i}] CREATE requires changes to be an object with entity data`,
+        };
+      }
+      // Create should have an id in changes
+      const changesObj = change.changes as Record<string, unknown>;
+      if (!changesObj.id && change.entityId !== '*') {
+        warnings.push(`EntityChange[${i}] CREATE changes missing 'id' field`);
+      }
+    } else if (change.opType === OpType.Delete) {
+      // Delete should have minimal changes (tombstone)
+      // Allow null/undefined or object
+      if (change.changes !== null && change.changes !== undefined) {
+        if (typeof change.changes !== 'object') {
+          return {
+            success: false,
+            error: `EntityChange[${i}] DELETE changes must be null or object`,
+          };
+        }
+      }
+    }
+    // Update changes can be partial objects, no strict validation needed
+  }
+
+  return { success: true, warnings: warnings.length > 0 ? warnings : undefined };
+};
+
+/**
+ * Validates a multi-entity payload structure.
+ */
+const validateMultiEntityPayloadStructure = (
+  payload: unknown,
+): PayloadValidationResult => {
+  if (!isMultiEntityPayload(payload)) {
+    // Not a multi-entity payload, this is fine (legacy format)
+    return { success: true };
+  }
+
+  const warnings: string[] = [];
+
+  // Validate actionPayload
+  if (
+    !payload.actionPayload ||
+    typeof payload.actionPayload !== 'object' ||
+    payload.actionPayload === null
+  ) {
+    return {
+      success: false,
+      error: 'MultiEntityPayload.actionPayload must be a non-null object',
+    };
+  }
+
+  // Validate entityChanges array
+  if (!Array.isArray(payload.entityChanges)) {
+    return {
+      success: false,
+      error: 'MultiEntityPayload.entityChanges must be an array',
+    };
+  }
+
+  // Empty entityChanges is allowed (action may not have caused state changes)
+  if (payload.entityChanges.length === 0) {
+    warnings.push('MultiEntityPayload.entityChanges is empty');
+  } else {
+    // Validate each entity change
+    const changesResult = validateEntityChanges(payload.entityChanges);
+    if (!changesResult.success) {
+      return changesResult;
+    }
+    if (changesResult.warnings) {
+      warnings.push(...changesResult.warnings);
+    }
+  }
+
+  return { success: true, warnings: warnings.length > 0 ? warnings : undefined };
+};
+
+/**
+ * Extracts the action payload from an operation payload.
+ * Handles both multi-entity (new format) and legacy payloads.
+ */
+const extractActionPayloadForValidation = (payload: unknown): Record<string, unknown> => {
+  if (isMultiEntityPayload(payload)) {
+    return payload.actionPayload;
+  }
+  return payload as Record<string, unknown>;
+};
+
+/**
  * Validates an operation payload before persisting to IndexedDB.
  *
  * This is Checkpoint A in the validation architecture.
@@ -276,12 +413,15 @@ const validateFullStatePayload = (payload: unknown): PayloadValidationResult => 
  * - For DELETE operations: validates IDs are present
  * - For SYNC_IMPORT/BACKUP_IMPORT: validates appDataComplete structure exists
  * - For REPAIR: skips validation (internally generated)
+ * - For MultiEntityPayload: validates actionPayload and entityChanges structure
  *
  * NOTE: This validation is intentionally lenient to start.
  * It checks structural requirements rather than deep entity validation.
  * Full Typia validation happens at state checkpoints (B, C, D).
  */
 export const validateOperationPayload = (op: Operation): PayloadValidationResult => {
+  const allWarnings: string[] = [];
+
   // 1. Basic structural validation
   if (op.payload === null || op.payload === undefined) {
     return { success: false, error: 'Payload cannot be null or undefined' };
@@ -296,35 +436,75 @@ export const validateOperationPayload = (op: Operation): PayloadValidationResult
     return { success: false, error: 'Payload must be a plain object, not an array' };
   }
 
-  // 2. Validate based on operation type
+  // 2. Validate multi-entity payload structure if present
+  const multiEntityResult = validateMultiEntityPayloadStructure(op.payload);
+  if (!multiEntityResult.success) {
+    return multiEntityResult;
+  }
+  if (multiEntityResult.warnings) {
+    allWarnings.push(...multiEntityResult.warnings);
+  }
+
+  // 3. Extract actionPayload for type-specific validation
+  // For multi-entity payloads, we validate the actionPayload
+  // For legacy payloads, we validate the payload directly
+  const actionPayload = extractActionPayloadForValidation(op.payload);
+
+  // 4. Validate based on operation type
+  let result: PayloadValidationResult;
   switch (op.opType) {
     case OpType.Create:
-      return validateCreatePayload(op.entityType, op.payload);
+      result = validateCreatePayload(op.entityType, actionPayload);
+      break;
 
     case OpType.Update:
-      return validateUpdatePayload(op.entityType, op.payload);
+      result = validateUpdatePayload(op.entityType, actionPayload);
+      break;
 
     case OpType.Delete:
-      return validateDeletePayload(op.entityType, op.payload, op.entityId, op.entityIds);
+      result = validateDeletePayload(
+        op.entityType,
+        actionPayload,
+        op.entityId,
+        op.entityIds,
+      );
+      break;
 
     case OpType.Move:
-      return validateMovePayload(op.payload, op.entityIds);
+      result = validateMovePayload(actionPayload, op.entityIds);
+      break;
 
     case OpType.Batch:
-      return validateBatchPayload(op.payload);
+      result = validateBatchPayload(actionPayload);
+      break;
 
     case OpType.SyncImport:
     case OpType.BackupImport:
-      return validateFullStatePayload(op.payload);
+      result = validateFullStatePayload(actionPayload);
+      break;
 
     case OpType.Repair:
       // Repair operations are internally generated - skip validation
-      return { success: true };
+      result = { success: true };
+      break;
 
     default:
       OpLog.warn(
         `[ValidateOperationPayload] Unknown opType: ${op.opType}, allowing through`,
       );
-      return { success: true };
+      result = { success: true };
   }
+
+  // Merge warnings
+  if (!result.success) {
+    return result;
+  }
+  if (result.warnings) {
+    allWarnings.push(...result.warnings);
+  }
+
+  return {
+    success: true,
+    warnings: allWarnings.length > 0 ? allWarnings : undefined,
+  };
 };

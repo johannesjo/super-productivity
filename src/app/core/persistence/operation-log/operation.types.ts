@@ -214,3 +214,86 @@ export interface RepairPayload {
   appDataComplete: unknown; // AppDataCompleteNew - using unknown to avoid circular deps
   repairSummary: RepairSummary;
 }
+
+// =============================================================================
+// LEGACY TYPES (deprecated - will be removed with SideEffectExtractorService)
+// =============================================================================
+
+/**
+ * @deprecated Use EntityChange instead. Will be removed in Phase 5.
+ */
+export interface SideEffectUpdate {
+  entityType: EntityType;
+  entityId: string;
+  changes: unknown;
+}
+
+/**
+ * @deprecated Use MultiEntityPayload instead. Will be removed in Phase 5.
+ */
+export interface CompositePayload {
+  mainData: Record<string, unknown>;
+  sideEffects: SideEffectUpdate[];
+}
+
+// =============================================================================
+// MULTI-ENTITY OPERATIONS
+// =============================================================================
+
+/**
+ * Represents a single entity change within a multi-entity operation.
+ * Captures the exact changes made to one entity as part of an atomic operation.
+ */
+export interface EntityChange {
+  /**
+   * The type of entity being changed.
+   */
+  entityType: EntityType;
+
+  /**
+   * The ID of the entity being changed.
+   */
+  entityId: string;
+
+  /**
+   * The type of change (Create, Update, Delete).
+   */
+  opType: OpType;
+
+  /**
+   * The actual changes:
+   * - For Create: Full entity object
+   * - For Update: Partial object with only changed fields
+   * - For Delete: Minimal tombstone { id: string }
+   */
+  changes: unknown;
+}
+
+/**
+ * Payload wrapper for multi-entity operations.
+ * Contains the original action payload plus all entity changes computed from state diff.
+ */
+export interface MultiEntityPayload {
+  /**
+   * The original action payload (for replaying the action on remote clients).
+   */
+  actionPayload: Record<string, unknown>;
+
+  /**
+   * All entity changes that resulted from this action.
+   * Computed by diffing state before and after the action.
+   */
+  entityChanges: EntityChange[];
+}
+
+/**
+ * Type guard to check if a payload is a multi-entity payload.
+ */
+export const isMultiEntityPayload = (payload: unknown): payload is MultiEntityPayload => {
+  return (
+    typeof payload === 'object' &&
+    payload !== null &&
+    'entityChanges' in payload &&
+    Array.isArray((payload as MultiEntityPayload).entityChanges)
+  );
+};

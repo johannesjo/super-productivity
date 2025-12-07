@@ -273,5 +273,92 @@ describe('operation-converter utility', () => {
         });
       }
     });
+
+    describe('multi-entity payload handling', () => {
+      it('should extract actionPayload from MultiEntityPayload', () => {
+        const op = createMockOperation({
+          payload: {
+            actionPayload: { taskId: 'task-1', title: 'Test Task' },
+            entityChanges: [
+              {
+                entityType: 'TASK',
+                entityId: 'task-1',
+                opType: OpType.Update,
+                changes: { title: 'Test Task' },
+              },
+              {
+                entityType: 'TAG',
+                entityId: 'tag-1',
+                opType: OpType.Update,
+                changes: { taskIds: ['task-1'] },
+              },
+            ],
+          },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).taskId).toBe('task-1');
+        expect((action as any).title).toBe('Test Task');
+        // entityChanges should NOT be spread into the action
+        expect((action as any).entityChanges).toBeUndefined();
+      });
+
+      it('should handle MultiEntityPayload with empty entityChanges', () => {
+        const op = createMockOperation({
+          payload: {
+            actionPayload: { id: 'task-1' },
+            entityChanges: [],
+          },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).id).toBe('task-1');
+      });
+
+      it('should fall back to legacy payload format when not MultiEntityPayload', () => {
+        const op = createMockOperation({
+          payload: { directProperty: 'value', nested: { prop: 123 } },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).directProperty).toBe('value');
+        expect((action as any).nested.prop).toBe(123);
+      });
+
+      it('should handle complex MultiEntityPayload with nested actionPayload', () => {
+        const op = createMockOperation({
+          payload: {
+            actionPayload: {
+              task: { id: 't1', title: 'Parent', subTaskIds: ['st1'] },
+              subTasks: [{ id: 'st1', title: 'Child' }],
+            },
+            entityChanges: [
+              {
+                entityType: 'TASK',
+                entityId: 't1',
+                opType: OpType.Create,
+                changes: { id: 't1' },
+              },
+              {
+                entityType: 'TASK',
+                entityId: 'st1',
+                opType: OpType.Create,
+                changes: { id: 'st1' },
+              },
+              {
+                entityType: 'PROJECT',
+                entityId: 'p1',
+                opType: OpType.Update,
+                changes: { taskIds: ['t1'] },
+              },
+            ],
+          },
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).task.id).toBe('t1');
+        expect((action as any).subTasks[0].id).toBe('st1');
+      });
+    });
   });
 });

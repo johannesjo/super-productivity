@@ -2,13 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { concatMap, filter, map, mergeMap, tap } from 'rxjs/operators';
+import { concatMap, filter, tap } from 'rxjs/operators';
 import { truncate } from '../../../util/truncate';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
-import { EMPTY } from 'rxjs';
 import { TaskService } from '../task.service';
-import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { Store } from '@ngrx/store';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 
@@ -40,21 +38,10 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  autoMoveToBacklog$ = createEffect(() =>
-    this._localActions$.pipe(
-      ofType(TaskSharedActions.scheduleTaskWithTime),
-      filter(({ isMoveToBacklog }) => isMoveToBacklog),
-      map(({ task }) => {
-        if (!task.projectId) {
-          throw new Error('Move to backlog not possible for non project tasks');
-        }
-        return moveProjectTaskToBacklogListAuto({
-          taskId: task.id,
-          projectId: task.projectId,
-        });
-      }),
-    ),
-  );
+  // NOTE: autoMoveToBacklog is now handled atomically in the meta-reducer
+  // (task-shared-scheduling.reducer.ts) to ensure atomic consistency.
+  // The isMoveToBacklog flag in scheduleTaskWithTime action is processed
+  // directly in handleScheduleTaskWithTime().
 
   updateTaskReminderSnack$ = createEffect(
     () =>
@@ -75,23 +62,10 @@ export class TaskReminderEffects {
     { dispatch: false },
   );
 
-  autoMoveToBacklogOnReschedule$ = createEffect(() =>
-    this._localActions$.pipe(
-      ofType(TaskSharedActions.reScheduleTaskWithTime),
-      filter(({ isMoveToBacklog }) => isMoveToBacklog),
-      mergeMap(({ task, isMoveToBacklog }) => {
-        if (!task.projectId) {
-          return EMPTY;
-        }
-        return [
-          moveProjectTaskToBacklogListAuto({
-            taskId: task.id,
-            projectId: task.projectId,
-          }),
-        ];
-      }),
-    ),
-  );
+  // NOTE: autoMoveToBacklogOnReschedule is now handled atomically in the meta-reducer
+  // (task-shared-scheduling.reducer.ts) to ensure atomic consistency.
+  // The isMoveToBacklog flag in reScheduleTaskWithTime action is processed
+  // directly in handleScheduleTaskWithTime().
 
   unscheduleDoneTask$ = createEffect(
     () =>

@@ -16,8 +16,11 @@ import {
   ActionHandlerMap,
   getTag,
   removeTasksFromList,
+  updateProject,
+  getProjectOrUndefined,
   updateTags,
 } from './task-shared-helpers';
+import { filterOutId } from '../../../util/filter-out-id';
 
 // =============================================================================
 // ACTION HANDLERS
@@ -25,9 +28,10 @@ import {
 
 const handleScheduleTaskWithTime = (
   state: RootState,
-  task: { id: string },
+  task: { id: string; projectId?: string | null },
   dueWithTime: number,
   remindAt?: number,
+  isMoveToBacklog?: boolean,
 ): RootState => {
   // Check if task already has the same dueWithTime
   const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
@@ -39,17 +43,18 @@ const handleScheduleTaskWithTime = (
   const isScheduledForToday = isToday(dueWithTime);
   const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
-  // If task is already correctly scheduled, don't change state
+  // If task is already correctly scheduled, don't change state (unless backlog move requested)
   if (
     currentTask.dueWithTime === dueWithTime &&
     currentTask.remindAt === remindAt &&
-    isScheduledForToday === isCurrentlyInToday
+    isScheduledForToday === isCurrentlyInToday &&
+    !isMoveToBacklog
   ) {
     return state;
   }
 
   // First, update the task entity with the scheduling data
-  const updatedState = {
+  let updatedState: RootState = {
     ...state,
     [TASK_FEATURE_NAME]: taskAdapter.updateOne(
       {
@@ -63,6 +68,23 @@ const handleScheduleTaskWithTime = (
       state[TASK_FEATURE_NAME],
     ),
   };
+
+  // Handle backlog move atomically if requested
+  if (isMoveToBacklog && currentTask.projectId) {
+    const project = getProjectOrUndefined(updatedState, currentTask.projectId);
+    if (project && project.isEnableBacklog) {
+      const todaysTaskIdsBefore = project.taskIds;
+      const backlogIdsBefore = project.backlogTaskIds;
+
+      // Only move if not already in backlog
+      if (!backlogIdsBefore.includes(task.id)) {
+        updatedState = updateProject(updatedState, currentTask.projectId, {
+          taskIds: todaysTaskIdsBefore.filter(filterOutId(task.id)),
+          backlogTaskIds: [task.id, ...backlogIdsBefore],
+        });
+      }
+    }
+  }
 
   // No tag change needed
   if (isScheduledForToday === isCurrentlyInToday) {
@@ -247,16 +269,28 @@ const handleMoveTaskInTodayTagList = (
 
 const createActionHandlers = (state: RootState, action: Action): ActionHandlerMap => ({
   [TaskSharedActions.scheduleTaskWithTime.type]: () => {
-    const { task, dueWithTime, remindAt } = action as ReturnType<
+    const { task, dueWithTime, remindAt, isMoveToBacklog } = action as ReturnType<
       typeof TaskSharedActions.scheduleTaskWithTime
     >;
-    return handleScheduleTaskWithTime(state, task, dueWithTime, remindAt);
+    return handleScheduleTaskWithTime(
+      state,
+      task,
+      dueWithTime,
+      remindAt,
+      isMoveToBacklog,
+    );
   },
   [TaskSharedActions.reScheduleTaskWithTime.type]: () => {
-    const { task, dueWithTime, remindAt } = action as ReturnType<
+    const { task, dueWithTime, remindAt, isMoveToBacklog } = action as ReturnType<
       typeof TaskSharedActions.reScheduleTaskWithTime
     >;
-    return handleScheduleTaskWithTime(state, task, dueWithTime, remindAt);
+    return handleScheduleTaskWithTime(
+      state,
+      task,
+      dueWithTime,
+      remindAt,
+      isMoveToBacklog,
+    );
   },
   [TaskSharedActions.unscheduleTask.type]: () => {
     const { id, isLeaveInToday } = action as ReturnType<

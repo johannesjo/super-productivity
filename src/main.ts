@@ -1,4 +1,5 @@
 import {
+  APP_INITIALIZER,
   enableProdMode,
   ErrorHandler,
   importProvidersFrom,
@@ -42,6 +43,8 @@ import {
   issueProviderSharedMetaReducer,
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
+  setStateChangeCaptureService,
+  stateCaptureMetaReducer,
   tagSharedMetaReducer,
   taskBatchUpdateMetaReducer,
   taskRepeatCfgSharedMetaReducer,
@@ -49,6 +52,7 @@ import {
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
+import { StateChangeCaptureService } from './app/core/persistence/operation-log/processing/state-change-capture.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -118,6 +122,8 @@ bootstrapApplication(AppComponent, {
           taskRepeatCfgSharedMetaReducer,
           plannerSharedMetaReducer,
           actionLoggerReducer,
+          // IMPORTANT: stateCaptureMetaReducer must be LAST to capture state right before feature reducers
+          stateCaptureMetaReducer,
         ],
         ...(environment.production
           ? {
@@ -188,6 +194,18 @@ bootstrapApplication(AppComponent, {
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
     provideZonelessChangeDetection(),
+    // Initialize StateChangeCaptureService for multi-entity operation capture
+    // This must run before any persistent actions are dispatched
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (service: StateChangeCaptureService) => {
+        return () => {
+          setStateChangeCaptureService(service);
+        };
+      },
+      deps: [StateChangeCaptureService],
+      multi: true,
+    },
   ],
 }).then(() => {
   // Initialize touch fix for Material menus

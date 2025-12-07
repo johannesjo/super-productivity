@@ -8,7 +8,11 @@ import {
 } from '../../../features/tasks/store/task.reducer';
 import { Task } from '../../../features/tasks/task.model';
 import { ActionHandlerMap } from './task-shared-helpers';
-import { updateTag } from '../../../features/tag/store/tag.actions';
+import {
+  deleteTag,
+  deleteTags,
+  updateTag,
+} from '../../../features/tag/store/tag.actions';
 import { OpLog } from '../../../core/log';
 
 // =============================================================================
@@ -92,6 +96,17 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
       typeof TaskSharedActions.removeTagsForAllTasks
     >;
     return handleRemoveTagsForAllTasks(state, tagIdsToRemove);
+  },
+  // Handle deleteTag atomically - remove tag references from tasks BEFORE the tag entity is deleted
+  // This ensures atomic consistency: tasks won't have references to non-existent tags
+  [deleteTag.type]: () => {
+    const { id } = action as ReturnType<typeof deleteTag>;
+    return handleRemoveTagsForAllTasks(state, [id]);
+  },
+  // Handle deleteTags atomically - remove tag references from tasks BEFORE tag entities are deleted
+  [deleteTags.type]: () => {
+    const { ids } = action as ReturnType<typeof deleteTags>;
+    return handleRemoveTagsForAllTasks(state, ids);
   },
 });
 

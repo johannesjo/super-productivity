@@ -7,7 +7,6 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { TaskService } from '../task.service';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.actions';
 import { DEFAULT_TASK, Task } from '../task.model';
 import { TestScheduler } from 'rxjs/testing';
 import { T } from '../../../t.const';
@@ -140,64 +139,8 @@ describe('TaskReminderEffects', () => {
     });
   });
 
-  describe('autoMoveToBacklog$', () => {
-    it('should dispatch moveProjectTaskToBacklogListAuto when isMoveToBacklog is true', () => {
-      testScheduler.run(({ hot, expectObservable }) => {
-        const action = TaskSharedActions.scheduleTaskWithTime({
-          task: mockTask,
-          dueWithTime: Date.now() + 86400000,
-          remindAt: Date.now() + 86400000,
-          isMoveToBacklog: true,
-        });
-
-        actions$ = hot('-a', { a: action });
-
-        const expectedAction = moveProjectTaskToBacklogListAuto({
-          taskId: 'task-1',
-          projectId: 'project-1',
-        });
-
-        expectObservable(effects.autoMoveToBacklog$).toBe('-a', { a: expectedAction });
-      });
-    });
-
-    it('should not emit when isMoveToBacklog is false', () => {
-      testScheduler.run(({ hot, expectObservable }) => {
-        const action = TaskSharedActions.scheduleTaskWithTime({
-          task: mockTask,
-          dueWithTime: Date.now() + 86400000,
-          remindAt: Date.now() + 86400000,
-          isMoveToBacklog: false,
-        });
-
-        actions$ = hot('-a', { a: action });
-
-        expectObservable(effects.autoMoveToBacklog$).toBe('--');
-      });
-    });
-
-    it('should throw error for task without projectId', () => {
-      // Testing runtime behavior when projectId is empty string
-      const taskWithoutProject = {
-        ...mockTask,
-        projectId: '',
-      } as Task;
-      const action = TaskSharedActions.scheduleTaskWithTime({
-        task: taskWithoutProject,
-        dueWithTime: Date.now() + 86400000,
-        remindAt: Date.now() + 86400000,
-        isMoveToBacklog: true,
-      });
-
-      actions$ = of(action);
-
-      effects.autoMoveToBacklog$.subscribe({
-        error: (err) => {
-          expect(err.message).toContain('Move to backlog not possible');
-        },
-      });
-    });
-  });
+  // Note: autoMoveToBacklog$ effect was removed - functionality moved to task-shared-scheduling.reducer
+  // The isMoveToBacklog flag is now handled atomically in the reducer for atomic consistency
 
   describe('updateTaskReminderSnack$', () => {
     it('should show snack when task reminder is updated', () => {
@@ -239,64 +182,8 @@ describe('TaskReminderEffects', () => {
     });
   });
 
-  describe('autoMoveToBacklogOnReschedule$', () => {
-    it('should dispatch moveProjectTaskToBacklogListAuto when rescheduling with isMoveToBacklog', () => {
-      testScheduler.run(({ hot, expectObservable }) => {
-        const action = TaskSharedActions.reScheduleTaskWithTime({
-          task: mockTask,
-          dueWithTime: Date.now() + 86400000,
-          remindAt: Date.now() + 86000000,
-          isMoveToBacklog: true,
-        });
-
-        actions$ = hot('-a', { a: action });
-
-        const expectedAction = moveProjectTaskToBacklogListAuto({
-          taskId: 'task-1',
-          projectId: 'project-1',
-        });
-
-        expectObservable(effects.autoMoveToBacklogOnReschedule$).toBe('-a', {
-          a: expectedAction,
-        });
-      });
-    });
-
-    it('should not emit when isMoveToBacklog is false', () => {
-      testScheduler.run(({ hot, expectObservable }) => {
-        const action = TaskSharedActions.reScheduleTaskWithTime({
-          task: mockTask,
-          dueWithTime: Date.now() + 86400000,
-          remindAt: Date.now() + 86000000,
-          isMoveToBacklog: false,
-        });
-
-        actions$ = hot('-a', { a: action });
-
-        expectObservable(effects.autoMoveToBacklogOnReschedule$).toBe('--');
-      });
-    });
-
-    it('should return EMPTY for task without projectId', () => {
-      testScheduler.run(({ hot, expectObservable }) => {
-        // Testing runtime behavior when projectId is empty string
-        const taskWithoutProject = {
-          ...mockTask,
-          projectId: '',
-        } as Task;
-        const action = TaskSharedActions.reScheduleTaskWithTime({
-          task: taskWithoutProject,
-          dueWithTime: Date.now() + 86400000,
-          remindAt: Date.now() + 86000000,
-          isMoveToBacklog: true,
-        });
-
-        actions$ = hot('-a', { a: action });
-
-        expectObservable(effects.autoMoveToBacklogOnReschedule$).toBe('--');
-      });
-    });
-  });
+  // Note: autoMoveToBacklogOnReschedule$ effect was removed - functionality moved to task-shared-scheduling.reducer
+  // The isMoveToBacklog flag is now handled atomically in the reducer for atomic consistency
 
   describe('unscheduleDoneTask$', () => {
     it('should dispatch unscheduleTask when completing task with reminder', () => {

@@ -95,9 +95,13 @@ export class TagEffects {
         ofType(deleteTag, deleteTags),
         map((a: any) => (a.ids ? a.ids : [a.id])),
         tap(async (tagIdsToRemove: string[]) => {
-          // remove from all tasks
-          this._taskService.removeTagsForAllTask(tagIdsToRemove);
-          // remove from archive
+          // NOTE: Removing tags from active tasks is now handled atomically in the meta-reducer
+          // (tag-shared.reducer.ts). This ensures atomic consistency - tasks won't have references
+          // to non-existent tags during the deletion process.
+          // We only need to handle async cleanup operations here (archive, time tracking, repeat configs).
+
+          // TODO this all needs to be handled in reducers
+          // remove from archive (async operation - not part of NgRx state)
           await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
 
           const isOrphanedParentTask = (t: Task): boolean =>
