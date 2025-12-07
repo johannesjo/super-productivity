@@ -609,5 +609,60 @@ describe('OperationLogHydratorService', () => {
         loadAllData({ appDataComplete: syncedData as any }),
       );
     });
+
+    it('should validate and repair synced data before dispatching', async () => {
+      const syncedData = { task: { entities: {}, ids: [] } };
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedData));
+
+      await service.hydrateFromRemoteSync();
+
+      expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+    });
+
+    it('should dispatch repaired data if validation repairs it', async () => {
+      const syncedData = { task: { entities: {}, ids: [] } } as any;
+      const repairedData = { task: { entities: {}, ids: [] }, repaired: true } as any;
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedData));
+      mockValidateStateService.validateAndRepair.and.returnValue({
+        isValid: false,
+        wasRepaired: true,
+        repairedState: repairedData,
+        repairSummary: { entityStateFixed: 1 } as any,
+      });
+
+      await service.hydrateFromRemoteSync();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        loadAllData({ appDataComplete: repairedData }),
+      );
+    });
+
+    it('should save repaired state to cache if validation repairs it', async () => {
+      const syncedData = { task: { entities: {}, ids: [] } } as any;
+      const repairedData = { task: { entities: {}, ids: [] }, repaired: true } as any;
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedData));
+      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
+      mockValidateStateService.validateAndRepair.and.returnValue({
+        isValid: false,
+        wasRepaired: true,
+        repairedState: repairedData,
+        repairSummary: { entityStateFixed: 1 } as any,
+      });
+
+      await service.hydrateFromRemoteSync();
+
+      expect(mockOpLogStore.saveStateCache).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          state: repairedData,
+          lastAppliedOpSeq: 50,
+        }),
+      );
+    });
   });
 });
