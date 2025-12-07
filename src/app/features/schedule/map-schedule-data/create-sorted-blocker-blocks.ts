@@ -239,6 +239,11 @@ const createBlockerBlocksForCalendarEvents = (
   const blockedBlocks: BlockedBlock[] = [];
   icalEventMap.forEach((icalMapEntry) => {
     icalMapEntry.items.forEach((calEv) => {
+      // Skip all-day events - they don't block time slots
+      if (calEv.isAllDay) {
+        return;
+      }
+
       const start = calEv.start;
       const end = calEv.start + calEv.duration;
 

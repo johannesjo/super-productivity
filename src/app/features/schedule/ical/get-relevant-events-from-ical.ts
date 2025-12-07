@@ -25,6 +25,19 @@ const safeGetDateTimestamp = (vevent: any, propertyName: string): number | null 
 };
 
 /**
+ * Checks if the event's DTSTART is a DATE value (all-day event) vs DATE-TIME.
+ * In ical.js, ICAL.Time has an `isDate` property that is true for VALUE=DATE.
+ */
+const isAllDayEvent = (vevent: any): boolean => {
+  try {
+    const dtstart = vevent.getFirstPropertyValue('dtstart');
+    return dtstart?.isDate === true;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Exception event data for RECURRENCE-ID handling
  */
 interface ExceptionEvent {
@@ -231,6 +244,7 @@ const getForRecurring = (
     const recur = vevent.getFirstPropertyValue('rrule');
 
     const iter = recur.iterator(start);
+    const isAllDay = isAllDayEvent(vevent);
 
     // Build set of exception timestamps for fast lookup
     const exceptionTimestamps = new Set(exceptions.map((ex) => ex.recurrenceId));
@@ -256,6 +270,7 @@ const getForRecurring = (
           id: baseId + '_' + next,
           calProviderId,
           description: description || undefined,
+          ...(isAllDay && { isAllDay }),
         });
       } else if (nextTimestamp > endTimeStamp) {
         break;
@@ -318,6 +333,7 @@ const convertVEventToCalendarIntegrationEvent = (
   // detailed comment in #1814:
   // https://github.com/johannesjo/super-productivity/issues/1814#issuecomment-1008132824
   const duration = calculateEventDuration(vevent, start);
+  const isAllDay = isAllDayEvent(vevent);
 
   return {
     id: options?.overrideId || vevent.getFirstPropertyValue('uid'),
@@ -327,6 +343,7 @@ const convertVEventToCalendarIntegrationEvent = (
     duration,
     calProviderId,
     legacyIds: options?.legacyIds,
+    ...(isAllDay && { isAllDay }),
   };
 };
 

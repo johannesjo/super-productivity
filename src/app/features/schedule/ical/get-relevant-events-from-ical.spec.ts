@@ -286,7 +286,7 @@ END:VCALENDAR`;
   });
 
   describe('edge cases', () => {
-    it('should handle all-day events', () => {
+    it('should handle all-day events and set isAllDay flag', () => {
       const icalData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -307,6 +307,31 @@ END:VCALENDAR`;
 
       expect(events.length).toBe(1);
       expect(events[0].title).toBe('All Day Event');
+      expect(events[0].isAllDay).toBe(true);
+    });
+
+    it('should NOT set isAllDay flag for timed events', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:timed-event
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+SUMMARY:Timed Event
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      expect(events.length).toBe(1);
+      expect(events[0].title).toBe('Timed Event');
+      expect(events[0].isAllDay).toBeUndefined();
     });
 
     it('should handle recurring event with UNTIL', () => {
@@ -336,7 +361,7 @@ END:VCALENDAR`;
       });
     });
 
-    it('should handle recurring all-day event without end time', () => {
+    it('should handle recurring all-day event without end time and set isAllDay flag', () => {
       const icalData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -359,6 +384,7 @@ END:VCALENDAR`;
       events.forEach((event) => {
         expect(event.title).toBe('Recurring All Day No End');
         expect(event.duration).toBe(0); // No duration specified
+        expect(event.isAllDay).toBe(true);
       });
     });
 
