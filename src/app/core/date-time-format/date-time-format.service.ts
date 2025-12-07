@@ -65,9 +65,9 @@ export class DateTimeFormatService {
     effect(() => {
       const cfgValue = this._globalConfigService.localization()?.firstDayOfWeek;
 
-      // If not been setted or been reseted - use default
+      // If not set or reset - use Monday as default (ISO 8601 standard)
       if (!cfgValue) {
-        this._dateAdapter.getFirstDayOfWeek = () => this.initialFirstDayOfWeek;
+        this._dateAdapter.getFirstDayOfWeek = () => DEFAULT_FIRST_DAY_OF_WEEK;
         return;
       }
 
