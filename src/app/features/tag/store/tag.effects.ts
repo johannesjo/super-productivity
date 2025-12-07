@@ -16,14 +16,11 @@ import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { deleteTag, deleteTags, updateTag } from './tag.actions';
 import { TagService } from '../tag.service';
-import { TaskService } from '../../tasks/task.service';
 import { EMPTY, Observable, of } from 'rxjs';
-import { Task } from '../../tasks/task.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag.const';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
@@ -41,8 +38,6 @@ export class TagEffects {
   private _snackService = inject(SnackService);
   private _tagService = inject(TagService);
   private _workContextService = inject(WorkContextService);
-  private _taskService = inject(TaskService);
-  private _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private _router = inject(Router);
   private _taskArchiveService = inject(TaskArchiveService);
   private _timeTrackingService = inject(TimeTrackingService);
@@ -89,80 +84,33 @@ export class TagEffects {
     { dispatch: false },
   );
 
+  /**
+   * Handles async cleanup when tags are deleted.
+   *
+   * NOTE: Most tag deletion cleanup is now handled atomically in the meta-reducer
+   * (tag-shared.reducer.ts), including:
+   * - Removing tag references from tasks
+   * - Deleting orphaned tasks (no project, no tags, no parent)
+   * - Cleaning up task repeat configs
+   * - Cleaning up current time tracking state
+   *
+   * This effect only handles async operations that can't be in a reducer:
+   * - Archive cleanup (IndexedDB, not NgRx state)
+   * - Archive time tracking cleanup (IndexedDB, not NgRx state)
+   */
   deleteTagRelatedData: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
         ofType(deleteTag, deleteTags),
         map((a: any) => (a.ids ? a.ids : [a.id])),
         tap(async (tagIdsToRemove: string[]) => {
-          // NOTE: Removing tags from active tasks is now handled atomically in the meta-reducer
-          // (tag-shared.reducer.ts). This ensures atomic consistency - tasks won't have references
-          // to non-existent tags during the deletion process.
-          // We only need to handle async cleanup operations here (archive, time tracking, repeat configs).
-
-          // TODO this all needs to be handled in reducers
-          // remove from archive (async operation - not part of NgRx state)
+          // Remove tags from archived tasks (async - IndexedDB, not NgRx state)
           await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
 
-          const isOrphanedParentTask = (t: Task): boolean =>
-            !t.projectId && !t.tagIds.length && !t.parentId;
-
-          // remove orphaned
-          const tasks = await this._taskService.allTasks$.pipe(first()).toPromise();
-          const taskIdsToRemove: string[] = tasks
-            .filter(isOrphanedParentTask)
-            .map((t) => t.id);
-          this._taskService.removeMultipleTasks(taskIdsToRemove);
-
-          tagIdsToRemove.forEach((id) => {
-            this._timeTrackingService.cleanupDataEverywhereForTag(id);
-          });
-
-          // remove from task repeat - using bulk operations to reduce operation count
-          const taskRepeatCfgs = await this._taskRepeatCfgService.taskRepeatCfgs$
-            .pipe(take(1))
-            .toPromise();
-
-          // Collect configs that need to be deleted (orphaned) vs updated
-          const cfgIdsToDelete: string[] = [];
-          const cfgIdsToUpdate: string[] = [];
-
-          taskRepeatCfgs.forEach((taskRepeatCfg) => {
-            if (taskRepeatCfg.tagIds.some((r) => tagIdsToRemove.indexOf(r) >= 0)) {
-              const remainingTagIds = taskRepeatCfg.tagIds.filter(
-                (tagId) => !tagIdsToRemove.includes(tagId),
-              );
-              if (remainingTagIds.length === 0 && !taskRepeatCfg.projectId) {
-                // Config becomes orphaned (no tags and no project) - delete it
-                cfgIdsToDelete.push(taskRepeatCfg.id as string);
-              } else {
-                // Config still has tags or a project - update to remove deleted tags
-                cfgIdsToUpdate.push(taskRepeatCfg.id as string);
-              }
-            }
-          });
-
-          // Use bulk delete for orphaned configs (no task cleanup needed since
-          // tasks are already cleaned up via removeTagsForAllTask above)
-          if (cfgIdsToDelete.length > 0) {
-            this._taskRepeatCfgService.deleteTaskRepeatCfgsNoTaskCleanup(cfgIdsToDelete);
-          }
-
-          // Update remaining configs to remove the deleted tags
-          // Note: Each config may have different remaining tagIds, so we need
-          // individual updates. Bulk update would require the same changes for all.
-          if (cfgIdsToUpdate.length > 0) {
-            cfgIdsToUpdate.forEach((cfgId) => {
-              const cfg = taskRepeatCfgs.find((c) => c.id === cfgId);
-              if (cfg) {
-                const remainingTagIds = cfg.tagIds.filter(
-                  (tagId) => !tagIdsToRemove.includes(tagId),
-                );
-                this._taskRepeatCfgService.updateTaskRepeatCfg(cfgId, {
-                  tagIds: remainingTagIds,
-                });
-              }
-            });
+          // Clean up time tracking data in archives (async - IndexedDB)
+          // Note: Current time tracking state is handled in the meta-reducer
+          for (const tagId of tagIdsToRemove) {
+            await this._timeTrackingService.cleanupArchiveDataForTag(tagId);
           }
         }),
       ),

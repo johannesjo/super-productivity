@@ -104,6 +104,10 @@ export class TimeTrackingService {
     }
   }
 
+  /**
+   * @deprecated Use cleanupArchiveDataForTag instead.
+   * Current state cleanup is now handled atomically in tag-shared.reducer.ts.
+   */
   async cleanupDataEverywhereForTag(tagId: string): Promise<void> {
     const current = await this.current$.pipe(first()).toPromise();
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
@@ -121,6 +125,31 @@ export class TimeTrackingService {
         }),
       );
     }
+
+    if (tagId in archiveYoung.timeTracking.tag) {
+      delete archiveYoung.timeTracking.tag[tagId];
+      await this._pfapiService.m.archiveYoung.save(archiveYoung, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveYoungUpdateTrigger$.next(undefined);
+    }
+
+    if (tagId in archiveOld.timeTracking.tag) {
+      delete archiveOld.timeTracking.tag[tagId];
+      await this._pfapiService.m.archiveOld.save(archiveOld, {
+        isUpdateRevAndLastUpdate: true,
+      });
+      this._archiveOldUpdateTrigger$.next(undefined);
+    }
+  }
+
+  /**
+   * Cleans up time tracking data for a deleted tag from archives only.
+   * Current state cleanup is handled atomically in tag-shared.reducer.ts.
+   */
+  async cleanupArchiveDataForTag(tagId: string): Promise<void> {
+    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveOld = await this._pfapiService.m.archiveOld.load();
 
     if (tagId in archiveYoung.timeTracking.tag) {
       delete archiveYoung.timeTracking.tag[tagId];
