@@ -100,6 +100,7 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 5. **Electron Context**: Check `IS_ELECTRON` before using Electron-specific features.
 6. **Privacy**: No analytics or tracking. User data stays local unless explicitly synced.
 7. **Effects & Remote Sync**: For NgRx effects that perform side effects (snackbars, external API calls, plugin hooks), use `inject(LOCAL_ACTIONS)` instead of `inject(Actions)`. This filters out remote sync operations where the side effect already happened on the original client. See `src/app/util/local-actions.token.ts` and the architecture docs at `src/app/core/persistence/operation-log/docs/operation-log-architecture.md` (section A.6).
+8. **Atomic Multi-Entity Changes**: When one action affects multiple entities (e.g., deleting a tag removes it from tasks), use **meta-reducers** instead of effects to ensure all changes happen in a single reducer pass. This creates one operation in the sync log, preventing partial sync and state inconsistency. See `src/app/root-store/meta/task-shared-meta-reducers/` and Part F in the architecture docs.
 
 ## 🚫 Known Anti-Patterns to Avoid
 
