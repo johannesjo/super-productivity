@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 6, 2025
+**Last Updated:** December 7, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -258,7 +258,7 @@ flowchart TB
 
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
-> **Note:** Sections 3, 4.1, and 4.2 describe the **cross-version migration strategy** (A.7.11) which is designed but not yet implemented. Currently `CURRENT_SCHEMA_VERSION = 1`, so all clients are on the same version. State cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration will be needed when schema versions diverge between clients.
+> **Note:** Sections 3, 4.1, and 4.2 describe the **cross-version migration strategy** (A.7.8) which is designed but not yet implemented. Currently `CURRENT_SCHEMA_VERSION = 1`, so all clients are on the same version. State cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration will be needed when schema versions diverge between clients.
 
 This diagram visualizes the "Receiver-Side Migration" strategy. The Migration Layer acts as a shield, ensuring that _only_ operations matching the current schema version ever reach the core conflict detection and application logic.
 
@@ -691,4 +691,83 @@ flowchart TD
 
     style Trigger fill:#ffebee,stroke:#c62828,stroke-width:2px
     style UpdateMan fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+---
+
+## 7. Atomic State Consistency (Meta-Reducer Pattern) ✅ IMPLEMENTED
+
+This diagram illustrates how meta-reducers ensure atomic state changes across multiple entities, preventing inconsistency during sync. See Part F in [operation-log-architecture.md](./operation-log-architecture.md).
+
+**Implementation Status:** Complete. Key files:
+- `tag-shared.reducer.ts` - Tag deletion with task/repeat-cfg/time-tracking cleanup
+- `state-capture.meta-reducer.ts` - Before-state capture for multi-entity operations
+- `state-change-capture.service.ts` - Computes entity changes from state diff
+
+### 7.1 Meta-Reducer Flow for Multi-Entity Operations
+
+```mermaid
+flowchart TD
+    subgraph UserAction["User Action (e.g., Delete Tag)"]
+        Action[deleteTag action]
+    end
+
+    subgraph MetaReducers["Meta-Reducer Chain (Atomic)"]
+        Capture["stateCaptureMetaReducer<br/>━━━━━━━━━━━━━━━<br/>Captures before-state"]
+        TagMeta["tagSharedMetaReducer<br/>━━━━━━━━━━━━━━━<br/>• Remove tag from tasks<br/>• Delete orphaned tasks<br/>• Clean TaskRepeatCfgs<br/>• Clean TimeTracking"]
+        OtherMeta["Other meta-reducers<br/>━━━━━━━━━━━━━━━<br/>Pass through"]
+    end
+
+    subgraph FeatureReducers["Feature Reducers"]
+        TagReducer["tag.reducer<br/>━━━━━━━━━━━━━━━<br/>Delete tag entity"]
+    end
+
+    subgraph Effects["Effects Layer"]
+        OpEffect["OperationLogEffects<br/>━━━━━━━━━━━━━━━<br/>• Compute state diff<br/>• Create single Operation<br/>• with entityChanges[]"]
+    end
+
+    subgraph Result["Single Atomic Operation"]
+        Op["Operation {<br/>  opType: 'DEL',<br/>  entityType: 'TAG',<br/>  entityChanges: [<br/>    {TAG, delete},<br/>    {TASK, update}x3,<br/>    {TASK_REPEAT_CFG, delete}<br/>  ]<br/>}"]
+    end
+
+    Action --> Capture
+    Capture --> TagMeta
+    TagMeta --> OtherMeta
+    OtherMeta --> FeatureReducers
+    FeatureReducers --> OpEffect
+    OpEffect --> Result
+
+    style UserAction fill:#fff,stroke:#333,stroke-width:2px
+    style MetaReducers fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style FeatureReducers fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Effects fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Result fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px
+```
+
+### 7.2 Why Meta-Reducers vs Effects
+
+```mermaid
+flowchart LR
+    subgraph Problem["❌ Effects Pattern (Non-Atomic)"]
+        direction TB
+        A1[deleteTag action] --> E1[tag.reducer]
+        E1 --> A2[effect: removeTagFromTasks]
+        A2 --> E2[task.reducer]
+        E2 --> A3[effect: cleanTaskRepeatCfgs]
+        A3 --> E3[taskRepeatCfg.reducer]
+
+        Note1["Each action = separate operation<br/>Sync may deliver partially<br/>→ Inconsistent state"]
+    end
+
+    subgraph Solution["✅ Meta-Reducer Pattern (Atomic)"]
+        direction TB
+        B1[deleteTag action] --> M1[tagSharedMetaReducer]
+        M1 --> M2["All changes in one pass:<br/>• tasks updated<br/>• repeatCfgs cleaned<br/>• tag deleted"]
+        M2 --> R1[Single reduced state]
+
+        Note2["One action = one operation<br/>All changes sync together<br/>→ Consistent state"]
+    end
+
+    style Problem fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Solution fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
