@@ -5,6 +5,7 @@ import {
   Injectable,
   runInInjectionContext,
   signal,
+  untracked,
 } from '@angular/core';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { BodyClass, IS_ELECTRON } from '../../app.constants';
@@ -231,6 +232,19 @@ export class GlobalThemeService {
       this._setColorTheme(theme),
     );
     this._isDarkThemeObs$.subscribe((isDarkTheme) => this._setDarkTheme(isDarkTheme));
+
+    // Update Electron title bar overlay when dark mode changes
+    if (IS_ELECTRON && !IS_MAC) {
+      effect(() => {
+        const isDark = this.isDarkTheme();
+        // Use untracked to prevent reading misc from creating a dependency
+        const misc = untracked(() => this._globalConfigService.misc());
+        // Only update if custom window title bar is enabled
+        if (misc?.isUseCustomWindowTitleBar !== false) {
+          window.ea.updateTitleBarDarkMode(isDark);
+        }
+      });
+    }
   }
 
   private _initHandlersForInitialBodyClasses(): void {

@@ -99,6 +99,8 @@ const ea: ElectronAPI = {
   sendAppSettingsToElectron: (globalCfg) =>
     _send('TRANSFER_SETTINGS_TO_ELECTRON', globalCfg),
   sendSettingsUpdate: (globalCfg) => _send('UPDATE_SETTINGS', globalCfg),
+  updateTitleBarDarkMode: (isDarkMode: boolean) =>
+    _send('UPDATE_TITLE_BAR_DARK_MODE', isDarkMode),
   registerGlobalShortcuts: (keyboardCfg) =>
     _send('REGISTER_GLOBAL_SHORTCUTS', keyboardCfg),
   showFullScreenBlocker: (args) => _send('FULL_SCREEN_BLOCKER', args),
