@@ -15,6 +15,7 @@ import { ProjectService } from '../project/project.service';
 import { TagService } from '../tag/tag.service';
 import {
   DEFAULT_OPTIONS,
+  FILTER_COMMON,
   FILTER_OPTION_TYPE,
   FILTER_SCHEDULE,
   FilterOption,
@@ -166,6 +167,15 @@ describe('TaskViewCustomizerService', () => {
     expect(filtered.length).toBe(4);
   });
 
+  it('should filter by empty tag', () => {
+    const filtered = service['applyFilter'](
+      mockTasks,
+      FILTER_OPTION_TYPE.tag,
+      FILTER_COMMON.NOT_SPECIFIED,
+    );
+    expect(filtered.length).toBe(1);
+  });
+
   it('should filter by project name', () => {
     const filtered = service['applyFilter'](
       mockTasks,
@@ -190,7 +200,7 @@ describe('TaskViewCustomizerService', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.scheduledDate,
-      FILTER_SCHEDULE.NULL,
+      FILTER_COMMON.NOT_SPECIFIED,
     );
     expect(filtered.length).toBe(0);
   });
@@ -199,7 +209,7 @@ describe('TaskViewCustomizerService', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.timeSpent,
-      FILTER_SCHEDULE.NULL,
+      FILTER_COMMON.NOT_SPECIFIED,
     );
     expect(filtered.length).toBe(1);
   });
@@ -208,7 +218,7 @@ describe('TaskViewCustomizerService', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.estimatedTime,
-      FILTER_SCHEDULE.NULL,
+      FILTER_COMMON.NOT_SPECIFIED,
     );
     expect(filtered.length).toBe(1);
   });

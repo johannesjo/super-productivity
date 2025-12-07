@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "Planlagt dato",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Tilbakestill alt",
-        "SCHEDULED_NULL": "Ikke spesifisert",
         "SCHEDULED_NEXT_MONTH": "Neste måned",
         "SCHEDULED_NEXT_WEEK": "Neste uke",
         "SCHEDULED_THIS_MONTH": "Denne måneden",
@@ -1587,7 +1586,7 @@
         "TIME_2HOUR": "> 2 timer",
         "TIME_10MIN": "> 10 minutter",
         "TIME_30MIN": "> 30 minutter",
-        "TIME_NULL": "Ikke spesifisert",
+        "FILTER_NOT_SPECIFIED": "Ikke spesifisert",
         "TIME_SPENT": "Brukt tid",
         "TITLE": "Tilpass oppgavevisning"
       }

@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "Data Agendada",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Redefinir Tudo",
-        "SCHEDULED_NULL": "Não especificado",
         "SCHEDULED_NEXT_MONTH": "Próximo mês",
         "SCHEDULED_NEXT_WEEK": "Próxima Semana",
         "SCHEDULED_THIS_MONTH": "Este mês",
@@ -1586,7 +1585,7 @@
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
         "TIME_30MIN": "> 30 Minutos",
-        "TIME_NULL": "Não especificado",
+        "FILTER_NOT_SPECIFIED": "Não especificado",
         "TIME_SPENT": "Tempo gasto",
         "TITLE": "Personalizar Visualização da Tarefa"
       }

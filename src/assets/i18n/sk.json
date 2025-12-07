@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "Naplánovaný dátum",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Resetovať všetko",
-        "SCHEDULED_NULL": "Nešpecifikované",
         "SCHEDULED_NEXT_MONTH": "Ďalší mesiac",
         "SCHEDULED_NEXT_WEEK": "Ďalší týždeň",
         "SCHEDULED_THIS_MONTH": "Tento mesiac",
@@ -1587,7 +1586,7 @@
         "TIME_2HOUR": "> 2 hodiny",
         "TIME_10MIN": "> 10 minút",
         "TIME_30MIN": "> 30 minút",
-        "TIME_NULL": "Nešpecifikované",
+        "FILTER_NOT_SPECIFIED": "Nešpecifikované",
         "TIME_SPENT": "Strávený čas",
         "TITLE": "Prispôsobiť zobrazenie úloh"
       }

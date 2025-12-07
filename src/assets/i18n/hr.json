@@ -1310,7 +1310,6 @@
         "GROUP_SCHEDULED_DATE": "Dat pwograme",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reyaji tout",
-        "SCHEDULED_NULL": "Nije navedeno",
         "SCHEDULED_NEXT_MONTH": "Mwa pwochen",
         "SCHEDULED_NEXT_WEEK": "Semenn pwochenn",
         "SCHEDULED_THIS_MONTH": "Mwa sa a",
@@ -1326,7 +1325,7 @@
         "TIME_2HOUR": "> 2 èdtan",
         "TIME_10MIN": "> 10 minit",
         "TIME_30MIN": "> 30 minit",
-        "TIME_NULL": "Nije navedeno",
+        "FILTER_NOT_SPECIFIED": "Nije navedeno",
         "TIME_SPENT": "Tan pase",
         "TITLE": "Customize Travay View"
       }

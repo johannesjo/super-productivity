@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "تاریخ برنامه ریزی شده",
         "GROUP_TAG": "برچسب",
         "RESET_ALL": "همه را بازنشانی کنید",
-        "SCHEDULED_NULL": "مشخص نشده",
         "SCHEDULED_NEXT_MONTH": "ماه آینده",
         "SCHEDULED_NEXT_WEEK": "هفته ی بعد",
         "SCHEDULED_THIS_MONTH": "این ماه",
@@ -1587,7 +1586,7 @@
         "TIME_2HOUR": "> 2 ساعت",
         "TIME_10MIN": "> 10 دقیقه",
         "TIME_30MIN": "> 30 دقیقه",
-        "TIME_NULL": "مشخص نشده",
+        "FILTER_NOT_SPECIFIED": "مشخص نشده",
         "TIME_SPENT": "زمان صرف شده",
         "TITLE": "سفارشی کردن Task View"
       }

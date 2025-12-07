@@ -1331,7 +1331,6 @@
         "GROUP_SCHEDULED_DATE": "예정일",
         "GROUP_TAG": "태그",
         "RESET_ALL": "모두 재설정",
-        "SCHEDULED_NULL": "지정되지 않음",
         "SCHEDULED_NEXT_MONTH": "다음 달",
         "SCHEDULED_NEXT_WEEK": "다음 주",
         "SCHEDULED_THIS_MONTH": "이달",
@@ -1347,7 +1346,7 @@
         "TIME_2HOUR": "> 2 시간",
         "TIME_10MIN": "> 10분",
         "TIME_30MIN": "> 30분",
-        "TIME_NULL": "지정되지 않음",
+        "FILTER_NOT_SPECIFIED": "지정되지 않음",
         "TIME_SPENT": "소요 시간",
         "TITLE": "작업 보기 사용자 지정"
       }

@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "Запланированная дата",
         "GROUP_TAG": "Тег",
         "RESET_ALL": "Сбросить все",
-        "SCHEDULED_NULL": "Не указано",
         "SCHEDULED_NEXT_MONTH": "Следующий месяц",
         "SCHEDULED_NEXT_WEEK": "Следующая неделя",
         "SCHEDULED_THIS_MONTH": "Этот месяц",
@@ -1587,7 +1586,7 @@
         "TIME_2HOUR": "> 2 часа",
         "TIME_10MIN": "> 10 минут",
         "TIME_30MIN": "> 30 минут",
-        "TIME_NULL": "Не указано",
+        "FILTER_NOT_SPECIFIED": "Не указано",
         "TIME_SPENT": "Потраченное время",
         "TITLE": "Настроить вид задач"
       }

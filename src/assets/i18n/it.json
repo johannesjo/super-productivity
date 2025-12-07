@@ -1440,7 +1440,6 @@
         "GROUP_SCHEDULED_DATE": "Data programmata",
         "GROUP_TAG": "Etichetta",
         "RESET_ALL": "Reimposta tutto",
-        "SCHEDULED_NULL": "Non specificato",
         "SCHEDULED_NEXT_MONTH": "Prossimo mese",
         "SCHEDULED_NEXT_WEEK": "Prossima settimana",
         "SCHEDULED_THIS_MONTH": "Questo mese",
@@ -1456,7 +1455,7 @@
         "TIME_2HOUR": "> 2 ore",
         "TIME_10MIN": "> 10 minuti",
         "TIME_30MIN": "> 30 minuti",
-        "TIME_NULL": "Non specificato",
+        "FILTER_NOT_SPECIFIED": "Non specificato",
         "TIME_SPENT": "Tempo impiegato",
         "TITLE": "Personalizza vista attività"
       }

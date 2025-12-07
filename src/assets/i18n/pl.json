@@ -1425,7 +1425,6 @@
         "GROUP_SCHEDULED_DATE": "Data zaplanowana",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Zresetuj wszystko",
-        "SCHEDULED_NULL": "Nie określono",
         "SCHEDULED_NEXT_MONTH": "Następny miesiąc",
         "SCHEDULED_NEXT_WEEK": "Następny tydzień",
         "SCHEDULED_THIS_MONTH": "Ten miesiąc",
@@ -1441,7 +1440,7 @@
         "TIME_2HOUR": "> 2 godziny",
         "TIME_10MIN": "> 10 minut",
         "TIME_30MIN": "> 30 minut",
-        "TIME_NULL": "Nie określono",
+        "FILTER_NOT_SPECIFIED": "Nie określono",
         "TIME_SPENT": "Czas spędzony",
         "TITLE": "Dostosuj widok zadań"
       }

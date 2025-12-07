@@ -25,7 +25,7 @@ import {
   FILTER_OPTION_TYPE,
   FILTER_SCHEDULE,
   SORT_ORDER,
-  FILTER_TIME,
+  FILTER_COMMON,
 } from './types';
 import { DateAdapter } from '@angular/material/core';
 
@@ -118,13 +118,17 @@ export class TaskViewCustomizerService {
 
   private applyFilter(
     tasks: TaskWithSubTasks[],
-    type: FILTER_OPTION_TYPE | null,
+    type: FILTER_OPTION_TYPE | FILTER_COMMON | null,
     value: string,
   ): TaskWithSubTasks[] {
     if (!type || !value) return tasks;
 
     switch (type) {
       case FILTER_OPTION_TYPE.tag:
+        if (value === FILTER_COMMON.NOT_SPECIFIED) {
+          return tasks.filter((t) => !t.tagIds.length);
+        }
+
         const tag = this._allTags.find((t) =>
           t.title.toLowerCase().includes(value.toLowerCase().trim()),
         );
@@ -137,7 +141,7 @@ export class TaskViewCustomizerService {
         if (!project) return [];
         return tasks.filter((task) => task.projectId === project.id);
       case FILTER_OPTION_TYPE.scheduledDate:
-        if (value === FILTER_SCHEDULE.NULL) {
+        if (value === FILTER_COMMON.NOT_SPECIFIED) {
           return tasks.filter((task) => !task.dueDay && !task.dueWithTime);
         }
 
@@ -205,13 +209,13 @@ export class TaskViewCustomizerService {
           }
         });
       case FILTER_OPTION_TYPE.estimatedTime:
-        if (value === FILTER_TIME.NULL) {
+        if (value === FILTER_COMMON.NOT_SPECIFIED) {
           return tasks.filter((task) => task.timeEstimate === 0);
         }
 
         return tasks.filter((task) => task.timeEstimate >= +value);
       case FILTER_OPTION_TYPE.timeSpent:
-        if (value === FILTER_TIME.NULL) {
+        if (value === FILTER_COMMON.NOT_SPECIFIED) {
           return tasks.filter((task) => task.timeSpent === 0);
         }
 
