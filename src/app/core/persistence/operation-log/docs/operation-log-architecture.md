@@ -508,22 +508,6 @@ export class MyEffects {
 | Navigate/route change             | ✅ Yes             | Navigation is local-only                            |
 | Dispatch cascading actions        | ⚠️ Depends         | If it modifies state: No. If side-effect only: Yes  |
 
-### Effects Using LOCAL_ACTIONS (Reference)
-
-| File                            | Effect                                          | Side Effect Type         |
-| ------------------------------- | ----------------------------------------------- | ------------------------ |
-| `task-reminder.effects.ts`      | `snack$`, `updateTaskReminderSnack$`, etc.      | Snackbar                 |
-| `task-repeat-cfg.effects.ts`    | `updateStartDateOnComplete$`                    | State + side effect      |
-| `jira-issue.effects.ts`         | `addWorkLog$`                                   | External API             |
-| `open-project.effects.ts`       | `postTime$`                                     | External API             |
-| `project.effects.ts`            | `deleteProjectRelatedData`, `showDeletionSnack` | External cleanup + snack |
-| `tag.effects.ts`                | `snackPlanForToday$`                            | Snackbar                 |
-| `task-electron.effects.ts`      | `clearTaskBarOnTaskDone$`                       | Electron UI              |
-| `plugin-hooks.effects.ts`       | `taskComplete$`, `taskUpdate$`                  | Plugin hooks             |
-| `task-related-model.effects.ts` | `autoAddTodayTagOnMarkAsDone`                   | Cascading action         |
-| `short-syntax.effects.ts`       | `createTask$`, parsing effects                  | State + side effect      |
-| `task-due.effects.ts`           | `setTaskDue$`                                   | State update             |
-
 ---
 
 ## A.7 Disaster Recovery
@@ -751,165 +735,33 @@ async handleFullStateImport(payload: { appDataComplete: AppDataComplete }): Prom
 
 Migrations are defined in `src/app/core/persistence/operation-log/schema-migration.service.ts`.
 
-#### How to Create a New Migration
+**How to Create a New Migration:**
 
-1.  **Increment Version**: Update `CURRENT_SCHEMA_VERSION` to `N + 1`.
-2.  **Define Migration**: Add a new entry to the `MIGRATIONS` array.
-3.  **Implement Logic**: Write the transformation function `migrate(state)`.
-
-```typescript
-// src/app/core/persistence/operation-log/schema-migration.service.ts
-
-export const CURRENT_SCHEMA_VERSION = 2; // Increment this!
-
-const MIGRATIONS: SchemaMigration[] = [
-  {
-    fromVersion: 1,
-    toVersion: 2,
-    description: 'Add priority field to tasks',
-    migrate: (state: AllSyncModels) => {
-      // 'state' here is the entire app data (AllSyncModels)
-      // Deep clone or careful spread recommended to avoid direct mutation
-      const newState: AllSyncModels = { ...state };
-
-      // Transform specific model (e.g., task)
-      if (newState.task && newState.task.entities) {
-        newState.task.entities = Object.fromEntries(
-          Object.entries(newState.task.entities).map(([id, task]: [string, any]) => [
-            id,
-            { ...task, priority: task.priority ?? 'NORMAL' },
-          ]),
-        );
-      }
-      return newState;
-    },
-  },
-];
-```
-
-#### Best Practices
-
-1.  **Type Safety**: While `state: any` is used for flexibility, aim for `state: AllSyncModels` or a more specific type if possible, and cast internally as needed.
-2.  **Immutability**: Always return a new state object. Avoid directly mutating the incoming `state` object.
-3.  **Handle missing data**: `state` or its nested properties might be partial or undefined (e.g., in edge cases or if a new model is introduced). Use optional chaining (`?.`) and nullish coalescing (`??`) as appropriate.
-4.  **Preserve unrelated data**: Do not unintentionally drop fields or entire models that your migration is not concerned with.
-5.  **Test your migration**: Write unit tests to verify that your migration correctly transforms data from version N to N+1, especially edge cases.
-
-#### Service Implementation
+1. Increment `CURRENT_SCHEMA_VERSION`
+2. Add entry to `MIGRATIONS` array with `fromVersion`, `toVersion`, `description`, `migrate()`
+3. Test migration chain (v1→v2→v3 should equal v1→v3)
 
 ```typescript
-// schema-migration.service.ts
-
 interface SchemaMigration {
   fromVersion: number;
   toVersion: number;
   description: string;
   migrate: (state: unknown) => unknown;
-}
-
-async migrateIfNeeded(snapshot: StateCache): Promise<StateCache> {
-  let { state, schemaVersion } = snapshot;
-  schemaVersion = schemaVersion ?? 1; // Default for pre-versioned data
-
-  while (schemaVersion < CURRENT_SCHEMA_VERSION) {
-    const migration = MIGRATIONS.find(m => m.fromVersion === schemaVersion);
-    if (!migration) {
-      throw new Error(`No migration path from schema v${schemaVersion}`);
-    }
-
-    PFLog.log(`[Migration] Running: ${migration.description}`);
-    state = migration.migrate(state);
-    schemaVersion = migration.toVersion;
-  }
-
-  return { ...snapshot, state, schemaVersion };
-}
-
-// Helper to detect schema version from state structure (fallback when schemaVersion field is missing)
-function detectSchemaVersion(state: unknown): number {
-  // Primary: Use explicit schemaVersion field if present
-  if (typeof state === 'object' && state !== null && 'schemaVersion' in state) {
-    return (state as { schemaVersion: number }).schemaVersion;
-  }
-
-  // Fallback: Infer from structure (add checks as migrations are implemented)
-  // Example checks (not yet implemented):
-  // - v2 added task.priority field
-  // - v3 renamed task.estimate to task.timeEstimate
-  //
-  // if (hasTaskPriorityField(state)) return 2;
-  // if (hasTimeEstimateField(state)) return 3;
-
-  return 1; // Default: assume v1 for unversioned/legacy data
+  migrateOperation?: (op: Operation) => Operation | null; // For field renames/removals
+  requiresOperationMigration: boolean;
 }
 ```
 
-### A.7.6 Version Handling in Operations
-
-Each operation includes the schema version when it was created:
-
-```typescript
-interface Operation {
-  // ... other fields
-  schemaVersion: number; // Schema version when op was created
-}
-
-// When creating operations:
-const op: Operation = {
-  id: uuidv7(),
-  // ... other fields
-  schemaVersion: CURRENT_SCHEMA_VERSION, // e.g., 1
-};
-```
-
-This enables:
-
-- **Debugging** - Know which app version created an operation
-- **Future migration** - Transform old ops if needed (not currently implemented)
-- **Compatibility checks** - Warn when receiving ops from much newer versions
-
-### A.7.7 Design Principles for Migrations
+**Design Principles:**
 
 | Principle                      | Description                                        |
 | ------------------------------ | -------------------------------------------------- |
 | **Additive changes preferred** | Adding new optional fields with defaults is safest |
 | **Avoid breaking renames**     | Use aliases or transformations instead             |
-| **Test migration chains**      | Ensure v1→v2→v3 produces same result as v1→v3      |
 | **Preserve unknown fields**    | Don't strip fields from newer versions             |
 | **Idempotent migrations**      | Running twice should be safe                       |
 
-### A.7.8 Handling Unsupported Versions
-
-```typescript
-// When local version is too old for remote data
-if (remoteSchemaVersion > CURRENT_SCHEMA_VERSION + MAX_VERSION_SKIP) {
-  this.snackService.open({
-    type: 'ERROR',
-    msg: T.F.SYNC.S.VERSION_TOO_OLD,
-    actionStr: T.PS.UPDATE_APP,
-    actionFn: () => window.open(UPDATE_URL, '_blank'),
-  });
-  throw new Error('App version too old for synced data');
-}
-
-// When remote sends data from ancient version
-if (remoteSchemaVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
-  this.snackService.open({
-    type: 'ERROR',
-    msg: T.F.SYNC.S.REMOTE_DATA_TOO_OLD,
-  });
-  // May need manual intervention or force re-sync
-}
-```
-
-### A.7.9 Future Considerations
-
-| Enhancement                  | Description                                   | Priority |
-| ---------------------------- | --------------------------------------------- | -------- |
-| **Operation migration**      | Transform old ops to new schema during replay | Low      |
-| **Conflict-aware migration** | Special handling for version conflicts        | Medium   |
-| **Migration rollback**       | Undo migration if it fails partway            | Low      |
-| **Progressive migration**    | Migrate in background over multiple sessions  | Low      |
+**Version Mismatch Handling:** Remote data too new → prompt user to update app. Remote data too old → show error, may need manual intervention.
 
 ### A.7.10 Relationship with Legacy PFAPI Migrations (CROSS_MODEL_MIGRATION)
 
@@ -925,128 +777,15 @@ No, not yet. It provides the bridge from older versions of the app to the Operat
 2.  All future schema changes should use the **Schema Migration** system (A.7) described above.
 3.  Once the Operation Log is fully established and legacy data is considered obsolete (e.g., after several major versions), the legacy migration code can be removed.
 
-### A.7.11 Conflict-Aware Migration Strategy
+### A.7.6 Implemented Safety Features
 
-**Status:** Design Ready (Not Implemented)
+**Migration Safety (A.7.12)** ✅ - Backup created before migration; rollback on failure.
 
-To handle synchronization between clients on different schema versions, the system must ensure that operations are comparable ("apples-to-apples") before conflict detection occurs.
+**Tail Ops Consistency (A.7.13)** ✅ - Tail ops are migrated during hydration to match current schema.
 
-#### Strategy
+**Unified Migrations (A.7.15)** ✅ - State and operation migrations linked in single `SchemaMigration` definition.
 
-1.  **Operation-Level Migration Pipeline**
-
-    - Extend `SchemaMigration` interface to include `migrateOperation?: (op: Operation) => Operation`.
-    - This allows transforming a V1 `UPDATE` (e.g., `{ changes: { oldField: 'val' } }`) into a V2 `UPDATE` (e.g., `{ changes: { newField: 'val' } }`).
-
-2.  **Inbound Migration (Receive Path)**
-
-    - **Location:** `OperationLogSyncService.processRemoteOps`
-    - **Logic:**
-      1.  Receive `remoteOps`.
-      2.  Check `op.schemaVersion` for each op.
-      3.  If `op.schemaVersion < CURRENT_SCHEMA_VERSION`, run `SchemaMigrationService.migrateOperation(op)`.
-      4.  Pass _migrated_ ops to `detectConflicts()`.
-    - **Benefit:** Conflict detection works on the _current_ schema structure, preventing false negatives (missing a conflict because field names differ) and confusing diffs.
-
-3.  **Outbound Migration (Send Path)**
-
-    - **Location:** `OperationLogStore.getUnsynced()`
-    - **Strategy:** **Send As-Is (Receiver Migrates)**.
-    - **Logic:** The client sends operations exactly as they are stored in `SUP_OPS`, preserving their original `schemaVersion`. We do _not_ migrate operations before uploading.
-    - **Reasoning:** This follows the "Robustness Principle" (be conservative in what you do, liberal in what you accept). It avoids the performance cost of batch-migrating thousands of pending operations after a long offline period and eliminates the need to rewrite `SUP_OPS`. The receiving client (which knows its own version best) is responsible for upgrading incoming data.
-
-4.  **Destructive Migrations**
-
-    - **Scenario:** A feature is removed in V2 (e.g., "Pomodoro" settings deleted), but we receive a V1 `UPDATE` op for it.
-    - **Logic:** The `migrateOperation` function can return `null`.
-    - **Handling:** The sync and replay systems must handle `null` by dropping the operation entirely.
-
-5.  **Conflict Resolution**
-    - The `ConflictResolutionService` will display the _migrated_ remote operation against the current local state.
-    - **UI Decision:** We display the migrated values directly without special "migrated" annotations. Ideally, the conflict dialog uses the same formatters/components as the main UI, so the data looks familiar (e.g., "1 hour" instead of "3600").
-
-#### Interim Guardrails (Until Implementation)
-
-Until A.7.11 is fully implemented, the following guardrails protect against cross-version sync issues:
-
-| Guardrail                    | Description                                                                | Location                                   |
-| ---------------------------- | -------------------------------------------------------------------------- | ------------------------------------------ |
-| **Version check on receive** | Reject operations with `schemaVersion > CURRENT + MAX_VERSION_SKIP`        | `OperationLogSyncService.processRemoteOps` |
-| **Update prompt**            | Show "update app" snackbar when receiving newer-version ops                | `OperationLogSyncService`                  |
-| **Same-version assumption**  | Current `CURRENT_SCHEMA_VERSION = 1` means all clients are on same version | N/A (no migrations yet)                    |
-
-**When A.7.11 becomes critical:**
-
-1. When `CURRENT_SCHEMA_VERSION` is bumped to 2+
-2. When users on different app versions sync together
-3. When migrations modify fields referenced by UPDATE operations
-
-**Recommended pre-release checklist:**
-
-- [ ] Implement A.7.11 before releasing any schema migration that renames/removes fields
-- [ ] For additive-only migrations (new optional fields), A.7.11 is not strictly required
-- [ ] Consider blocking sync upload if `localSchemaVersion < remoteSchemaVersion` to prevent older clients from polluting newer clients with stale-schema operations
-
-### A.7.12 Migration Safety
-
-**Status:** Implemented ✅
-
-Migrations are critical and risky. To prevent data loss if a migration crashes mid-process:
-
-1.  **Backup Before Migrate:** Before `SchemaMigrationService.migrateIfNeeded()` begins modifying the state, it must create a backup of the current `state_cache`.
-    - Implementation: Copy `SUP_OPS` object store entry to a backup key (e.g., `state_cache_backup`).
-2.  **Rollback on Failure:** If migration throws an error, catch it, restore the backup, and prevent the app from loading potentially corrupted "half-migrated" state. (Likely show a fatal error screen asking user to export backup or contact support).
-
-### A.7.13 Tail Ops Consistency
-
-**Status:** Implemented ✅
-
-**What are Tail Ops?**
-When the app starts, it loads the most recent snapshot (e.g., from yesterday). It then loads all operations that occurred _after_ that snapshot (the "tail") to reconstruct the exact state at the moment the app was closed.
-
-**The Consistency Gap**
-
-1.  Snapshot is loaded (Version 1).
-2.  App is updated (Version 2).
-3.  Snapshot is migrated (V1 → V2).
-4.  Tail ops are loaded (Version 1).
-5.  **Problem:** If we apply V1 tail ops to the V2 state, they might write to fields that no longer exist or have changed format.
-
-**Solution**
-The **Tail Ops MUST be migrated** during hydration.
-
-- The `OperationLogHydrator` must pass tail ops through the same `SchemaMigrationService.migrateOperation` pipeline used for sync.
-- This ensures that the `OperationApplier` always receives operations matching the current runtime schema.
-
-### A.7.14 Other Design Decisions
-
-**Operation Envelope vs. Payload**
-
-- **Decision:** `schemaVersion` applies **only to the `payload`** of the operation.
-- **Reasoning:** Changes to the Operation structure itself (the "envelope", e.g., `id`, `vectorClock`, `opType`) are considered "System Level" breaking changes. They cannot be handled by the standard schema migration system. If the envelope changes, we would likely need a "Genesis V2" event or a specialized one-time database upgrade script.
-
-**Conflict UI for Synthetic Conflicts**
-
-- **Scenario:** Migration transforms logic (e.g., "1h" string → 3600 seconds).
-- **Decision:** The Conflict Resolution UI will simply show the migrated value (3600). We will **not** implement special annotations (e.g., "Values differ due to migration").
-- **KISS Principle:** Users generally recognize their data even if the format shifts slightly. The complexity of tracking "why" a value changed is not worth the implementation cost.
-
-### A.7.15 Unified State and Operation Migrations
-
-**Status:** Implemented ✅
-
-State migrations and operation migrations are closely related—both handle the same underlying data model changes. This section defines how they work together.
-
-#### The Relationship
-
-| Migration Type          | Applies To                    | When Executed               |
-| ----------------------- | ----------------------------- | --------------------------- |
-| **State migration**     | Full snapshot (AllSyncModels) | Hydration, sync import      |
-| **Operation migration** | Individual ops                | Tail ops replay, remote ops |
-
-Both use the same `schemaVersion` field. A single schema change may require one or both migration types.
-
-#### When Is Operation Migration Needed?
+### A.7.7 When Is Operation Migration Needed?
 
 | Change Type          | State Migration   | Op Migration                   | Example                     |
 | -------------------- | ----------------- | ------------------------------ | --------------------------- |
@@ -1056,191 +795,20 @@ Both use the same `schemaVersion` field. A single schema change may require one 
 | Change field type    | ✅ (convert)      | ✅ (convert in payload)        | `"1h"` → `3600`             |
 | Add entity type      | ✅ (initialize)   | ❌ (no old ops exist)          | New `Board` entity          |
 
-**Rule of thumb:** If the change is purely additive (new optional fields with defaults, new entity types), operation migration is usually not needed. If the change modifies or removes existing fields, operation migration is required.
+**Rule of thumb:** Additive changes (new optional fields, new entities) don't need operation migration. Field renames/removals require it.
 
-#### Unified Migration Definition
+### A.7.8 Cross-Version Sync (Not Yet Implemented)
 
-Link state and operation migrations in a single definition:
+**Status:** Design ready, not implemented. Safe while `CURRENT_SCHEMA_VERSION = 1`.
 
-```typescript
-interface SchemaMigration {
-  fromVersion: number;
-  toVersion: number;
-  description: string;
+**Strategy:** Receiver migrates incoming ops before conflict detection. Sender uploads ops as-is.
 
-  // Required: transform full state snapshot
-  migrateState: (state: AllSyncModels) => AllSyncModels;
+**Interim guardrails:**
 
-  // Optional: transform individual operation
-  // Return null to drop the operation entirely (e.g., for removed features)
-  migrateOperation?: (op: Operation) => Operation | null;
+- Reject ops with `schemaVersion > CURRENT + MAX_VERSION_SKIP`
+- Prompt user to update app when receiving newer-version ops
 
-  // Explicit declaration forces author to think about operation migration
-  // If true but migrateOperation is undefined, startup validation fails
-  requiresOperationMigration: boolean;
-}
-```
-
-**Benefits:**
-
-1. **Single source of truth** - One place defines all changes for a version bump
-2. **Explicit decision** - `requiresOperationMigration` forces thinking about ops
-3. **Consistent versioning** - No risk of version number mismatch between the two
-4. **Validation** - Startup check catches missing operation migrations
-
-#### Startup Validation
-
-```typescript
-// In schema-migration.service.ts initialization
-for (const migration of MIGRATIONS) {
-  if (migration.requiresOperationMigration && !migration.migrateOperation) {
-    throw new Error(
-      `Migration v${migration.fromVersion}→v${migration.toVersion} declares ` +
-        `requiresOperationMigration=true but migrateOperation is not defined`,
-    );
-  }
-}
-```
-
-#### Execution Order
-
-```
-Hydration Flow:
-  1. Load snapshot from state_cache (schemaVersion = 1)
-  2. Run migrateState(snapshot) → v2 state
-  3. Save migrated snapshot (for faster future loads)
-  4. Load tail ops (may have schemaVersion = 1)
-  5. For each op where op.schemaVersion < CURRENT:
-       migrateOperation(op) → v2 op (or null to drop)
-  6. Apply migrated ops to v2 state
-
-Sync Flow (receiving remote ops):
-  1. Download remote ops (may have mixed schemaVersions)
-  2. For each op where op.schemaVersion < CURRENT:
-       migrateOperation(op) → v2 op
-  3. Run conflict detection on v2 ops
-  4. Apply to v2 state
-```
-
-#### Example: Field Rename Migration
-
-```typescript
-const MIGRATIONS: SchemaMigration[] = [
-  {
-    fromVersion: 1,
-    toVersion: 2,
-    description: 'Rename task.estimate to task.timeEstimate',
-    requiresOperationMigration: true,
-
-    migrateState: (state) => {
-      if (!state.task?.entities) return state;
-
-      const migratedEntities = Object.fromEntries(
-        Object.entries(state.task.entities).map(([id, task]: [string, any]) => [
-          id,
-          {
-            ...task,
-            timeEstimate: task.estimate ?? task.timeEstimate ?? 0,
-            estimate: undefined, // Remove old field
-          },
-        ]),
-      );
-
-      return {
-        ...state,
-        task: { ...state.task, entities: migratedEntities },
-      };
-    },
-
-    migrateOperation: (op) => {
-      // Only transform TASK UPDATE operations
-      if (op.entityType !== 'TASK' || op.opType !== 'UPD') {
-        return op;
-      }
-
-      const changes = (op.payload as any)?.changes;
-      if (!changes || changes.estimate === undefined) {
-        return op; // No estimate field in this op
-      }
-
-      // Transform: estimate → timeEstimate
-      return {
-        ...op,
-        schemaVersion: 2, // Mark as migrated
-        payload: {
-          ...op.payload,
-          changes: {
-            ...changes,
-            timeEstimate: changes.estimate,
-            estimate: undefined,
-          },
-        },
-      };
-    },
-  },
-];
-```
-
-#### Example: Feature Removal Migration
-
-```typescript
-{
-  fromVersion: 2,
-  toVersion: 3,
-  description: 'Remove deprecated pomodoro feature',
-  requiresOperationMigration: true,
-
-  migrateState: (state) => {
-    // Remove pomodoro data from state
-    const { pomodoro, ...rest } = state as any;
-    return rest;
-  },
-
-  migrateOperation: (op) => {
-    // Drop any operations targeting the removed feature
-    if (op.entityType === 'POMODORO') {
-      return null; // Operation is dropped entirely
-    }
-
-    // Strip pomodoro fields from task operations
-    if (op.entityType === 'TASK' && op.opType === 'UPD') {
-      const changes = (op.payload as any)?.changes;
-      if (changes?.pomodoroCount !== undefined) {
-        const { pomodoroCount, ...restChanges } = changes;
-        return {
-          ...op,
-          schemaVersion: 3,
-          payload: { ...op.payload, changes: restChanges },
-        };
-      }
-    }
-
-    return op;
-  },
-}
-```
-
-#### Why Not Auto-Derive Operation Migration?
-
-It might seem possible to derive operation migration from state migration:
-
-```typescript
-// Hypothetical auto-derivation (NOT recommended)
-migrateOperation(op: Operation): Operation {
-  const fakeState = { [op.entityType]: { entities: { temp: op.payload } } };
-  const migrated = migrateState(fakeState);
-  return { ...op, payload: migrated[op.entityType].entities.temp };
-}
-```
-
-**This doesn't work because:**
-
-1. **UPDATE payloads differ from entities** - UPDATE ops have `{ id, changes }`, not full entity
-2. **Partial data** - Ops may only contain the fields being changed
-3. **CREATE vs UPDATE semantics** - State migration sees full entities; ops may be partial
-4. **Null handling** - Dropping ops (return null) can't be auto-derived
-
-**Conclusion:** Explicit `migrateOperation` functions are required for non-additive changes.
+**Required before:** Any schema migration that renames/removes fields.
 
 ---
 
@@ -2034,74 +1602,19 @@ When a user archives tasks:
 
 ### E.4 Workflow: Flushing (Young → Old)
 
-_Note: This is the planned strategy for future implementation._
+_Planned for future implementation._ When `ArchiveYoung` grows too large, client emits `flushYoungToOld` operation. All clients execute the same flush logic (move items older than X days), keeping `ArchiveOld` consistent.
 
-When `ArchiveYoung` gets too large:
+### E.5 Idempotency Requirements
 
-1.  **Client A** decides it's time to flush.
-2.  Instead of doing it silently, it emits a `flushYoungToOld` operation.
-3.  **All Clients** receive this op and run the standard flush logic:
-    - Move items older than X days from `Young` → `Old`.
-    - Save both files.
+All archive operations MUST be idempotent:
 
-This keeps even the deep storage `ArchiveOld` consistent across devices with minimal overhead.
+| Operation            | Guarantee                          |
+| -------------------- | ---------------------------------- |
+| `moveToArchive`      | Skip if task already in archive    |
+| `flushYoungToOld`    | Move only items not already in Old |
+| `restoreFromArchive` | Skip if task already in Active     |
 
-### E.5 Error Handling & Edge Cases
-
-The deterministic replay approach requires careful handling of edge cases to prevent archive divergence between clients.
-
-#### Missing Entity on Remote
-
-**Scenario:** Client B receives `moveToArchive(taskId: 'abc')` but task 'abc' doesn't exist in its Active Store.
-
-**Possible causes:**
-
-- Task was deleted on Client B before sync
-- Task creation op hasn't arrived yet (out-of-order delivery)
-- Task was never synced to Client B
-
-**Handling strategy:**
-
-| Cause            | Detection                                       | Response                                    |
-| ---------------- | ----------------------------------------------- | ------------------------------------------- |
-| **Deleted**      | Task exists in local archive or deletion log    | No-op (already handled)                     |
-| **Out-of-order** | Task ID not in active, archive, or deletion log | Queue op for retry; apply when task arrives |
-| **Never synced** | After retry timeout (e.g., 5 min)               | Log warning, skip op, accept divergence     |
-
-#### Out-of-Order Operations
-
-**Scenario:** `flushYoungToOld` arrives before `moveToArchive` that should have populated Young.
-
-**Handling:**
-
-1. Flush operations should be **idempotent**: flush only items that match criteria (age threshold)
-2. If Young is empty/sparse, flush is a no-op—no error
-3. Later `moveToArchive` ops populate Young normally
-4. Next flush will catch them
-
-#### Idempotency Requirements
-
-All archive operations MUST be idempotent to handle:
-
-- Duplicate delivery (network retry, tab broadcast + sync)
-- Replay during hydration
-- Re-application after conflict resolution
-
-| Operation            | Idempotency guarantee                                |
-| -------------------- | ---------------------------------------------------- |
-| `moveToArchive`      | Check if task already in archive; skip if present    |
-| `flushYoungToOld`    | Move only items not already in Old; merge if present |
-| `restoreFromArchive` | Check if task already in Active; skip if present     |
-
-#### Divergence Detection (Future)
-
-To detect silent divergence between clients:
-
-1. Compute hash of archive entity IDs periodically
-2. Exchange hashes during sync
-3. If mismatch: trigger full archive reconciliation (download missing, resolve duplicates)
-
-**Status:** Not implemented. Current assumption is deterministic replay prevents divergence. If divergence is observed in production, implement detection.
+**Edge cases:** Missing entities (deleted/out-of-order) → queue for retry or skip. Out-of-order flush → idempotent no-op if Young is empty.
 
 ---
 
