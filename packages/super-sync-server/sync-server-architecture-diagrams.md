@@ -754,6 +754,41 @@ flowchart TB
     style StateEffect fill:#B0E0E6
 ```
 
+## 2.8 Meta-Reducers for Atomic State Changes
+
+When a single user action affects multiple entities (e.g., deleting a tag updates tasks, task repeat configs, and time tracking), all changes must be captured in a single operation to ensure consistency during sync.
+
+```mermaid
+flowchart TB
+    subgraph Problem["❌ Effects Pattern (Non-Atomic)"]
+        direction TB
+        P1[deleteTag action] --> P2[tag.reducer]
+        P2 --> P3[effect: removeTagFromTasks]
+        P3 --> P4[task.reducer]
+        P4 --> P5[effect: cleanTaskRepeatCfgs]
+        Note1["Each step = separate operation<br/>Partial sync → inconsistent state"]
+    end
+
+    subgraph Solution["✅ Meta-Reducer Pattern (Atomic)"]
+        direction TB
+        S1[deleteTag action] --> S2[tagSharedMetaReducer]
+        S2 --> S3["All changes atomically:<br/>• tasks.tagIds updated<br/>• orphaned tasks deleted<br/>• TaskRepeatCfgs cleaned<br/>• TimeTracking cleaned"]
+        S3 --> S4[Single Operation<br/>with entityChanges array]
+        Note2["One action = one operation<br/>All-or-nothing sync"]
+    end
+
+    style Problem fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Solution fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**Key Meta-Reducers:**
+- `tagSharedMetaReducer` - Tag deletion with full cleanup
+- `projectSharedMetaReducer` - Project deletion cleanup
+- `taskSharedCrudMetaReducer` - Task CRUD with tag/project updates
+- `stateCaptureMetaReducer` - Captures before/after state for diff
+
+See Part F in [operation-log-architecture.md](../../src/app/core/persistence/operation-log/docs/operation-log-architecture.md) for details.
+
 ---
 
 # Part 3: Client-Server Interaction
