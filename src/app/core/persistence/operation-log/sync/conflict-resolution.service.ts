@@ -13,6 +13,7 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
 import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
+import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 /**
  * Service to manage conflict resolution, typically presenting a UI to the user.
@@ -27,6 +28,7 @@ export class ConflictResolutionService {
   private opLogStore = inject(OperationLogStoreService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
+  private userInputWaitState = inject(UserInputWaitStateService);
 
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
@@ -44,14 +46,20 @@ export class ConflictResolutionService {
   ): Promise<void> {
     OpLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
 
-    this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
-      data: { conflicts },
-      disableClose: false,
-    });
+    // Signal that we're waiting for user input to prevent sync timeout
+    const stopWaiting = this.userInputWaitState.startWaiting('oplog-conflict');
+    let result: ConflictResolutionResult | undefined;
 
-    const result: ConflictResolutionResult | undefined = await firstValueFrom(
-      this._dialogRef.afterClosed(),
-    );
+    try {
+      this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
+        data: { conflicts },
+        disableClose: false,
+      });
+
+      result = await firstValueFrom(this._dialogRef.afterClosed());
+    } finally {
+      stopWaiting();
+    }
 
     // If dialog was cancelled, don't apply any operations
     // The user chose not to sync - state should remain as-is

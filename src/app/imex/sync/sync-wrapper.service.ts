@@ -35,6 +35,7 @@ import { DialogIncoherentTimestampsErrorComponent } from './dialog-incoherent-ti
 import { SyncLog } from '../../core/log';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { devError } from '../../util/dev-error';
+import { UserInputWaitStateService } from './user-input-wait-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -47,6 +48,7 @@ export class SyncWrapperService {
   private _matDialog = inject(MatDialog);
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
+  private _userInputWaitState = inject(UserInputWaitStateService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -71,10 +73,8 @@ export class SyncWrapperService {
     return this._isSyncInProgress$.getValue();
   }
 
-  // Track when we're waiting for user input (e.g., conflict dialog)
-  // to avoid timeout errors during user decision time
-  private _isWaitingForUserInput$ = new BehaviorSubject(false);
-  isWaitingForUserInput$ = this._isWaitingForUserInput$.asObservable();
+  // Expose shared user input wait state for other services (e.g., SyncTriggerService)
+  isWaitingForUserInput$ = this._userInputWaitState.isWaitingForUserInput$;
 
   afterCurrentSyncDoneOrSyncDisabled$: Observable<unknown> = this.isEnabledAndReady$.pipe(
     switchMap((isEnabled) =>
@@ -85,7 +85,7 @@ export class SyncWrapperService {
               each: 40000,
               with: () =>
                 // If waiting for user input, don't error - just wait indefinitely
-                this._isWaitingForUserInput$.pipe(
+                this._userInputWaitState.isWaitingForUserInput$.pipe(
                   switchMap((isWaiting) => {
                     if (isWaiting) {
                       // Continue waiting for sync to complete (no timeout)
@@ -149,7 +149,7 @@ export class SyncWrapperService {
         case SyncStatus.IncompleteRemoteData:
           return r.status;
 
-        case SyncStatus.Conflict:
+        case SyncStatus.Conflict: {
           SyncLog.log('Sync conflict detected:', {
             remote: r.conflictData?.remote.lastUpdate,
             local: r.conflictData?.local.lastUpdate,
@@ -166,11 +166,16 @@ export class SyncWrapperService {
             additional: r.conflictData?.additional,
           });
 
-          this._isWaitingForUserInput$.next(true);
-          const res = await this._openConflictDialog$(
-            r.conflictData as ConflictData,
-          ).toPromise();
-          this._isWaitingForUserInput$.next(false);
+          // Signal that we're waiting for user input to prevent sync timeout
+          const stopWaiting = this._userInputWaitState.startWaiting('legacy-conflict');
+          let res: DialogConflictResolutionResult | undefined;
+          try {
+            res = await this._openConflictDialog$(
+              r.conflictData as ConflictData,
+            ).toPromise();
+          } finally {
+            stopWaiting();
+          }
 
           if (res === 'USE_LOCAL') {
             SyncLog.log('User chose USE_LOCAL, calling uploadAll(true) with force');
@@ -185,6 +190,7 @@ export class SyncWrapperService {
           SyncLog.log({ res });
 
           return r.status;
+        }
       }
     } catch (error) {
       SyncLog.err(error);

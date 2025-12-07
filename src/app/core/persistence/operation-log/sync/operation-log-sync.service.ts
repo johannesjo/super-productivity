@@ -33,6 +33,7 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 /**
  * Manages the synchronization of the Operation Log with remote storage.
@@ -60,6 +61,7 @@ export class OperationLogSyncService {
   private snackService = inject(SnackService);
   private dependencyResolver = inject(DependencyResolverService);
   private dialog = inject(MatDialog);
+  private userInputWaitState = inject(UserInputWaitStateService);
 
   /**
    * Checks if this client is "wholly fresh" - meaning it has never synced before
@@ -158,19 +160,25 @@ export class OperationLogSyncService {
    * Asks user to confirm before accepting remote data on a fresh install.
    */
   private async _showFreshClientSyncConfirmation(opCount: number): Promise<boolean> {
-    const dialogRef = this.dialog.open(DialogConfirmComponent, {
-      restoreFocus: true,
-      data: {
-        title: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE,
-        message: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE,
-        translateParams: { count: opCount },
-        okTxt: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.OK,
-        cancelTxt: T.G.CANCEL,
-      },
-    });
+    // Signal that we're waiting for user input to prevent sync timeout
+    const stopWaiting = this.userInputWaitState.startWaiting('fresh-client-confirm');
+    try {
+      const dialogRef = this.dialog.open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          title: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE,
+          message: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE,
+          translateParams: { count: opCount },
+          okTxt: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.OK,
+          cancelTxt: T.G.CANCEL,
+        },
+      });
 
-    const result = await firstValueFrom(dialogRef.afterClosed());
-    return result === true;
+      const result = await firstValueFrom(dialogRef.afterClosed());
+      return result === true;
+    } finally {
+      stopWaiting();
+    }
   }
 
   /**
