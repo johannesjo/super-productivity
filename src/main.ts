@@ -44,6 +44,7 @@ import {
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
   setStateChangeCaptureService,
+  shortSyntaxSharedMetaReducer,
   stateCaptureMetaReducer,
   tagSharedMetaReducer,
   taskBatchUpdateMetaReducer,
@@ -121,6 +122,7 @@ bootstrapApplication(AppComponent, {
           issueProviderSharedMetaReducer,
           taskRepeatCfgSharedMetaReducer,
           plannerSharedMetaReducer,
+          shortSyntaxSharedMetaReducer,
           actionLoggerReducer,
           // IMPORTANT: stateCaptureMetaReducer must be LAST to capture state right before feature reducers
           stateCaptureMetaReducer,

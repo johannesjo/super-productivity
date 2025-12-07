@@ -2425,14 +2425,20 @@ describe('taskSharedMetaReducer', () => {
       );
     });
 
-    it('should not change state when task is already in Today and planned for today', () => {
+    it('should reorder task in Today tag when already in Today and planned for today', () => {
       const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
-      const task = createMockTask({ id: 'task1' });
+      // Set task1.tagIds to already include TODAY for board-style consistency test
+      (testState as any).tasks.entities['task1'].tagIds = ['TODAY'];
+      const task = createMockTask({ id: 'task1', tagIds: ['TODAY'] });
       const action = createPlanTaskForDayAction(task, todayStr, false);
 
-      metaReducer(testState, action);
-      expect(mockReducer).toHaveBeenCalledWith(testState, action);
+      // Task gets reordered to end of TODAY tag (isAddToTop=false)
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task', 'task1'] }),
+        action,
+        testState,
+      );
     });
 
     it('should not change state when task is not in Today and not planned for today', () => {

@@ -48,6 +48,7 @@ const ACTION_AFFECTED_ENTITIES: Record<string, EntityType[]> = {
   // ==========================================================================
   // TASK SHARED ACTIONS (cross-entity operations)
   // ==========================================================================
+  '[Task Shared] Apply Short Syntax': ['TASK', 'TAG', 'PROJECT', 'PLANNER'],
   '[TaskShared] Add Task': ['TASK', 'TAG', 'PROJECT'],
   '[TaskShared] Update Task': ['TASK', 'TAG'],
   '[TaskShared] Delete Task': ['TASK', 'TAG', 'PROJECT', 'TASK_REPEAT_CFG'],

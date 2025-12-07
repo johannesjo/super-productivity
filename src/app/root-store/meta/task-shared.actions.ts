@@ -292,5 +292,28 @@ export const TaskSharedActions = createActionGroup({
         opType: OpType.Delete,
       } satisfies PersistentActionMeta,
     }),
+
+    // Short Syntax - Atomic compound action
+    // Combines task updates, project moves, and scheduling into one atomic operation
+    applyShortSyntax: (props: {
+      task: Task;
+      taskChanges: Partial<Task>;
+      targetProjectId?: string;
+      schedulingInfo?: {
+        day?: string;
+        isAddToTop?: boolean;
+        dueWithTime?: number;
+        remindAt?: number | null;
+        isMoveToBacklog?: boolean;
+      };
+    }) => ({
+      ...props,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: props.task.id,
+        opType: OpType.Update,
+      } satisfies PersistentActionMeta,
+    }),
   },
 });
