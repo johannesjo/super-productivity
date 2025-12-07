@@ -458,7 +458,7 @@ import { filter } from 'rxjs/operators';
 export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIONS', {
   providedIn: 'root',
   factory: () => {
-    const actions$ = inject(LOCAL_ACTIONS);
+    const actions$ = inject(Actions);
     return actions$.pipe(filter((action: Action) => !(action as any).meta?.isRemote));
   },
 });
@@ -471,8 +471,7 @@ Use `LOCAL_ACTIONS` instead of `Actions` for effects that should NOT run for rem
 ```typescript
 @Injectable()
 export class MyEffects {
-  private _actions$ = inject(LOCAL_ACTIONS);          // ALL actions (local + remote)
-  private _localActions$ = inject(LOCAL_ACTIONS); // LOCAL actions only
+  private _actions$ = inject(LOCAL_ACTIONS); // LOCAL actions only (excludes isRemote)
 
   // ✅ Use LOCAL_ACTIONS for side effects
   showSnack$ = createEffect(
@@ -2106,6 +2105,148 @@ To detect silent divergence between clients:
 
 ---
 
+# Part F: Atomic State Consistency
+
+This section documents the architectural principles ensuring that related model changes happen atomically, preventing state inconsistency during sync.
+
+## F.1 The Problem: Effects Create Non-Atomic Changes
+
+When a user deletes a tag, multiple entities must be updated:
+
+- The tag is deleted
+- Tasks referencing the tag have their `tagIds` updated
+- TaskRepeatCfgs referencing the tag are updated or deleted
+- TimeTracking data for the tag is cleaned up
+
+If these changes happen in separate NgRx effects:
+
+1. Each effect dispatches a separate action
+2. Each action becomes a separate operation in the log
+3. During sync, operations may arrive out of order or partially
+4. **Result**: Temporary or permanent state inconsistency
+
+## F.2 The Solution: Meta-Reducers for Atomic Changes
+
+**Principle**: All related entity changes from a single user action should happen in a single reducer pass.
+
+Meta-reducers intercept actions before they reach feature reducers and can modify the entire store state atomically:
+
+```typescript
+// tag-shared.reducer.ts - handles deleteTag atomically
+[deleteTag.type]: () => {
+  // 1. Remove tag references from tasks
+  // 2. Delete orphaned tasks (no project, no tags, no parent)
+  // 3. Clean up task repeat configs
+  // 4. Clean up time tracking state
+  return updatedState; // All changes in one pass
+},
+```
+
+### Meta-Reducers in Use
+
+| Meta-Reducer                      | Purpose                                                  |
+| --------------------------------- | -------------------------------------------------------- |
+| `tagSharedMetaReducer`            | Tag deletion cleanup (tasks, repeat cfgs, time tracking) |
+| `projectSharedMetaReducer`        | Project deletion cleanup                                 |
+| `taskSharedCrudMetaReducer`       | Task CRUD with tag/project updates                       |
+| `taskSharedLifecycleMetaReducer`  | Task lifecycle (archive, restore)                        |
+| `taskSharedSchedulingMetaReducer` | Task scheduling with Today tag updates                   |
+| `plannerSharedMetaReducer`        | Planner day management                                   |
+| `taskRepeatCfgSharedMetaReducer`  | Repeat config deletion with task cleanup                 |
+| `issueProviderSharedMetaReducer`  | Issue provider updates                                   |
+| `stateCaptureMetaReducer`         | Captures before/after state for multi-entity ops         |
+
+## F.3 Multi-Entity Operation Capture
+
+The `StateChangeCaptureService` and `stateCaptureMetaReducer` work together to capture all entity changes from a single action:
+
+1. **Before action**: Meta-reducer captures relevant state slices
+2. **After action**: Effect computes diff to find all changed entities
+3. **Result**: Single operation with `entityChanges[]` array
+
+This eliminates the need for manual side-effect extraction and ensures the operation log accurately reflects what changed.
+
+```
+User Action (e.g., Delete Tag)
+    │
+    ▼
+stateCaptureMetaReducer
+    ├──► Capture before-state for affected entity types
+    │
+    ▼
+tagSharedMetaReducer (+ other meta-reducers)
+    ├──► Atomically update all related entities
+    │
+    ▼
+Feature Reducers
+    │
+    ▼
+OperationLogEffects
+    ├──► Compute entity changes by diffing before/after state
+    └──► Create single Operation with entityChanges[]
+```
+
+## F.4 When to Use Meta-Reducers vs Effects
+
+| Scenario                           | Use Meta-Reducer | Use Effect |
+| ---------------------------------- | ---------------- | ---------- |
+| Updating related entities in store | ✅               | ❌         |
+| Deleting entity with cleanup       | ✅               | ❌         |
+| UI notifications (snackbar, sound) | ❌               | ✅         |
+| External API calls                 | ❌               | ✅         |
+| Archive operations (async I/O)     | ❌               | ✅         |
+| Navigation/routing                 | ❌               | ✅         |
+
+**Rule of thumb**: If it modifies NgRx state, use a meta-reducer. If it's a side effect (I/O, UI, external), use an effect with `LOCAL_ACTIONS`.
+
+## F.5 Board-Style Hybrid Pattern
+
+For references between entities (e.g., `tag.taskIds`), we use a "board-style" pattern where:
+
+- **Source of truth**: The child entity's reference (e.g., `task.tagIds`)
+- **Derived list**: The parent entity's list (e.g., `tag.taskIds`) is for ordering only
+
+Selectors recompute membership from the source of truth, providing self-healing:
+
+```typescript
+// work-context.selectors.ts
+export const computeOrderedTaskIdsForTag = (
+  tag: Tag,
+  allTasks: Dictionary<Task>,
+): string[] => {
+  // Use tag.taskIds for order, but filter by actual task.tagIds membership
+  const validFromTagList = tag.taskIds.filter((id) => {
+    const task = allTasks[id];
+    return task && !task.parentId && task.tagIds.includes(tag.id);
+  });
+
+  // Add any tasks that reference this tag but aren't in the list
+  const missingTasks = Object.values(allTasks).filter(
+    (task) =>
+      task &&
+      !task.parentId &&
+      task.tagIds.includes(tag.id) &&
+      !tag.taskIds.includes(task.id),
+  );
+
+  return [...validFromTagList, ...missingTasks.map((t) => t.id)];
+};
+```
+
+This ensures stale references are filtered and missing references are auto-added.
+
+## F.6 Guidelines for New Features
+
+When adding new entities or relationships:
+
+1. **Identify related entities** that must change together
+2. **Create or extend a meta-reducer** to handle atomic updates
+3. **Add action to `ACTION_AFFECTED_ENTITIES`** in `state-change-capture.service.ts`
+4. **Use `LOCAL_ACTIONS`** in effects for side effects only
+5. **Consider board-style pattern** for parent-child list references
+
+---
+
 # Implementation Status
 
 ## Part A: Local Persistence
@@ -2259,7 +2400,9 @@ src/app/core/persistence/operation-log/
 │   ├── operation-applier.service.ts          # Apply ops with dependency handling
 │   ├── validate-state.service.ts             # Typia + cross-model validation
 │   ├── validate-operation-payload.ts         # Checkpoint A - payload validation
-│   └── repair-operation.service.ts           # REPAIR operation creation
+│   ├── repair-operation.service.ts           # REPAIR operation creation
+│   ├── state-capture.meta-reducer.ts         # Meta-reducer for before-state capture (Part F)
+│   └── state-change-capture.service.ts       # Computes entity changes from state diff (Part F)
 ├── integration/                              # Integration test suite
 │   ├── sync-scenarios.integration.spec.ts    # Protocol-level sync tests
 │   ├── multi-client-sync.integration.spec.ts # Multi-client scenarios
@@ -2290,6 +2433,6 @@ e2e/
 
 # References
 
-- [Execution Plan](./operation-log-execution-plan.md) - Implementation tasks
 - [PFAPI Architecture](./pfapi-sync-persistence-architecture.md) - Legacy sync system
-- [Server Sync Architecture](./server-sync-architecture.md) - Server-based sync details
+- [Multi-Entity Operations Plan](./multi-entity-operations-plan.md) - Multi-entity operation design
+- [Operation Rules](./operation-rules.md) - Payload and validation rules
