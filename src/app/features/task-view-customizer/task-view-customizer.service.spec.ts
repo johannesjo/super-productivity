@@ -162,12 +162,12 @@ describe('TaskViewCustomizerService', () => {
     expect(filtered.length).toBe(0);
   });
 
-  it('should not filter when filtering with an empty tag', () => {
+  it('should not filter when filtering with an empty tag input', () => {
     const filtered = service['applyFilter'](mockTasks, FILTER_OPTION_TYPE.tag, '');
     expect(filtered.length).toBe(4);
   });
 
-  it('should filter by empty tag', () => {
+  it('should filter by NOT_SPECIFIED tag (no tags)', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.tag,
@@ -196,7 +196,7 @@ describe('TaskViewCustomizerService', () => {
     expect(filtered[0].id).toBe('Alpha(Tag A)');
   });
 
-  it('should filter by empty schedule date', () => {
+  it('should filter by NOT_SPECIFIED schedule date (no schedule date)', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.scheduledDate,
@@ -205,7 +205,7 @@ describe('TaskViewCustomizerService', () => {
     expect(filtered.length).toBe(0);
   });
 
-  it('should filter by empty timeSpent', () => {
+  it('should filter by NOT_SPECIFIED timeSpent (no timeSpent)', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.timeSpent,
@@ -214,7 +214,7 @@ describe('TaskViewCustomizerService', () => {
     expect(filtered.length).toBe(1);
   });
 
-  it('should filter by empty estimatedTime', () => {
+  it('should filter by NOT_SPECIFIED estimatedTime (no estimatedTime)', () => {
     const filtered = service['applyFilter'](
       mockTasks,
       FILTER_OPTION_TYPE.estimatedTime,
