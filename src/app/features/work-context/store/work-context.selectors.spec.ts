@@ -185,4 +185,179 @@ describe('workContext selectors', () => {
       } as any);
     });
   });
+
+  describe('selectTodayTaskIds (board-style pattern)', () => {
+    it('should return empty array when TODAY tag has no tasks', () => {
+      const tagState = fakeEntityStateFromArray([TODAY_TAG]);
+      const taskState = fakeEntityStateFromArray([]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual([]);
+    });
+
+    it('should return tasks in stored order when all tasks have TODAY tag', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithTasks = {
+        ...TODAY_TAG,
+        taskIds: ['task1', 'task2'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithTasks]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1', 'task2']);
+    });
+
+    it('should filter out stale taskIds (tasks that no longer have TODAY tag)', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [], // Removed from TODAY tag
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithStaleIds = {
+        ...TODAY_TAG,
+        taskIds: ['task1', 'task2'], // task2 is stale
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithStaleIds]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1']);
+    });
+
+    it('should auto-add tasks with TODAY tag but not in stored order', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagMissingTask2 = {
+        ...TODAY_TAG,
+        taskIds: ['task1'], // task2 missing from order
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagMissingTask2]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['task1', 'task2']);
+    });
+
+    it('should exclude subtasks', () => {
+      const parentTask = {
+        id: 'parent',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: ['subtask1'],
+      } as Partial<TaskCopy> as TaskCopy;
+      const subtask = {
+        id: 'subtask1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        parentId: 'parent',
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithTasks = {
+        ...TODAY_TAG,
+        taskIds: ['parent', 'subtask1'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithTasks]);
+      const taskState = fakeEntityStateFromArray([parentTask, subtask]) as any;
+
+      const result = selectTodayTaskIds.projector(tagState, taskState);
+      expect(result).toEqual(['parent']); // subtask excluded
+    });
+  });
+
+  describe('selectUndoneTodayTaskIds', () => {
+    it('should filter out done tasks', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: false,
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: true,
+      } as Partial<TaskCopy> as TaskCopy;
+      const task3 = {
+        id: 'task3',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: false,
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const taskState = fakeEntityStateFromArray([task1, task2, task3]) as any;
+
+      // selectUndoneTodayTaskIds takes todayTaskIds and taskState
+      const result = selectUndoneTodayTaskIds.projector(
+        ['task1', 'task2', 'task3'],
+        taskState,
+      );
+      expect(result).toEqual(['task1', 'task3']);
+    });
+
+    it('should return empty array when all tasks are done', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: true,
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: true,
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectUndoneTodayTaskIds.projector(['task1', 'task2'], taskState);
+      expect(result).toEqual([]);
+    });
+
+    it('should handle tasks that do not exist in taskState', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+        isDone: false,
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const taskState = fakeEntityStateFromArray([task1]) as any;
+
+      // task2 doesn't exist in taskState (may have been deleted)
+      const result = selectUndoneTodayTaskIds.projector(['task1', 'task2'], taskState);
+      // task2 is filtered out because taskState.entities[task2]?.isDone is undefined (falsy but not false)
+      expect(result).toEqual(['task1']);
+    });
+  });
 });
