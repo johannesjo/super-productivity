@@ -400,10 +400,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const syncService = getSyncService();
 
         // Create a SYNC_IMPORT operation
+        // Use the correct NgRx action type so the operation can be replayed on other clients
         const op = {
           id: uuidv7(),
           clientId,
-          actionType: 'SYNC_IMPORT',
+          actionType: '[SP_ALL] Load(import) all data',
           opType: 'SYNC_IMPORT' as const,
           entityType: 'ALL',
           payload: state,

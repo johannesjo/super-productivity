@@ -631,5 +631,173 @@ describe('OperationLogUploadService', () => {
         );
       });
     });
+
+    describe('error handling and recovery', () => {
+      let mockApiProvider: jasmine.SpyObj<
+        SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable
+      >;
+
+      beforeEach(() => {
+        mockApiProvider = jasmine.createSpyObj('ApiSyncProvider', [
+          'getLastServerSeq',
+          'uploadOps',
+          'setLastServerSeq',
+        ]);
+        (mockApiProvider as any).supportsOperationSync = true;
+        (mockApiProvider as any).privateCfg = {
+          load: jasmine
+            .createSpy('privateCfg.load')
+            .and.returnValue(Promise.resolve(null)),
+        };
+
+        mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+        mockApiProvider.setLastServerSeq.and.returnValue(Promise.resolve());
+      });
+
+      it('should handle network failure during upload gracefully', async () => {
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+        );
+        mockApiProvider.uploadOps.and.rejectWith(new Error('Network error'));
+
+        await expectAsync(
+          service.uploadPendingOps(mockApiProvider),
+        ).toBeRejectedWithError('Network error');
+
+        // Operations should NOT be marked as synced
+        expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+      });
+
+      it('should not mark ops synced if setLastServerSeq fails', async () => {
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+        );
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [{ opId: 'op-1', accepted: true }],
+            latestSeq: 10,
+            newOps: [],
+          }),
+        );
+        mockApiProvider.setLastServerSeq.and.rejectWith(new Error('Storage failed'));
+
+        await expectAsync(
+          service.uploadPendingOps(mockApiProvider),
+        ).toBeRejectedWithError('Storage failed');
+      });
+
+      it('should handle partial batch failure correctly', async () => {
+        // First batch succeeds, second batch fails
+        const pendingOps = Array.from({ length: 150 }, (_, i) =>
+          createMockEntry(i + 1, `op-${i}`, 'client-1'),
+        );
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
+
+        let callCount = 0;
+        mockApiProvider.uploadOps.and.callFake(async (ops) => {
+          callCount++;
+          if (callCount === 1) {
+            // First batch succeeds
+            return {
+              results: ops.map((op) => ({ opId: op.id, accepted: true })),
+              latestSeq: 100,
+              newOps: [],
+            };
+          }
+          // Second batch fails
+          throw new Error('Server overloaded');
+        });
+
+        await expectAsync(
+          service.uploadPendingOps(mockApiProvider),
+        ).toBeRejectedWithError('Server overloaded');
+
+        // First batch should have been marked synced
+        expect(mockOpLogStore.markSynced).toHaveBeenCalled();
+      });
+
+      it('should handle mixed accept/reject responses', async () => {
+        const pendingOps = [
+          createMockEntry(1, 'op-1', 'client-1'),
+          createMockEntry(2, 'op-2', 'client-1'),
+          createMockEntry(3, 'op-3', 'client-1'),
+        ];
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [
+              { opId: 'op-1', accepted: true },
+              { opId: 'op-2', accepted: false, reason: 'DUPLICATE' },
+              { opId: 'op-3', accepted: true },
+            ],
+            latestSeq: 10,
+            newOps: [],
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        // 2 accepted, 1 rejected
+        expect(result.uploadedCount).toBe(2);
+        expect(result.rejectedCount).toBe(1);
+        // Only accepted ops should be marked synced
+        expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1, 3]);
+      });
+
+      it('should handle server returning no results for some ops', async () => {
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([
+            createMockEntry(1, 'op-1', 'client-1'),
+            createMockEntry(2, 'op-2', 'client-1'),
+          ]),
+        );
+        // Server only returns result for first op
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [{ opId: 'op-1', accepted: true }],
+            latestSeq: 10,
+            newOps: [],
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        // Only op-1 should be marked synced
+        expect(result.uploadedCount).toBe(1);
+        expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+      });
+
+      it('should handle empty response from server', async () => {
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+        );
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [],
+            latestSeq: 10,
+            newOps: [],
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        // Nothing accepted
+        expect(result.uploadedCount).toBe(0);
+        expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+      });
+
+      it('should handle lock acquisition failure', async () => {
+        mockLockService.request.and.rejectWith(new Error('Lock timeout'));
+        mockOpLogStore.getUnsynced.and.returnValue(
+          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+        );
+
+        await expectAsync(
+          service.uploadPendingOps(mockApiProvider),
+        ).toBeRejectedWithError('Lock timeout');
+
+        expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+      });
+    });
   });
 });

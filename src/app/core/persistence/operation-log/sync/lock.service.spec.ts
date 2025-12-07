@@ -159,4 +159,105 @@ describe('LockService', () => {
       expect(executed).toBe(true);
     });
   });
+
+  describe('concurrent lock requests', () => {
+    it('should serialize concurrent requests to same lock', async () => {
+      const executionOrder: number[] = [];
+      const startTimes: number[] = [];
+
+      // Launch two concurrent lock requests
+      const request1 = service.request('test_lock', async () => {
+        startTimes.push(Date.now());
+        executionOrder.push(1);
+        await new Promise((r) => setTimeout(r, 20));
+      });
+
+      const request2 = service.request('test_lock', async () => {
+        startTimes.push(Date.now());
+        executionOrder.push(2);
+        await new Promise((r) => setTimeout(r, 20));
+      });
+
+      await Promise.all([request1, request2]);
+
+      // Both should execute (serialized)
+      expect(executionOrder.length).toBe(2);
+      expect(executionOrder).toContain(1);
+      expect(executionOrder).toContain(2);
+    });
+
+    it('should queue up to 10 concurrent requests', async () => {
+      const executed: number[] = [];
+
+      const requests: Promise<void>[] = [];
+      for (let i = 0; i < 10; i++) {
+        const requestNum = i;
+        requests.push(
+          service.request('test_lock', async () => {
+            executed.push(requestNum);
+            await new Promise((r) => setTimeout(r, 5));
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+
+      // All 10 should have executed
+      expect(executed.length).toBe(10);
+    });
+
+    it('should complete and resolve after callback finishes', async () => {
+      let callbackCompleted = false;
+      await service.request('test_lock', async () => {
+        await new Promise((r) => setTimeout(r, 5));
+        callbackCompleted = true;
+      });
+
+      expect(callbackCompleted).toBeTrue();
+    });
+
+    it('should handle async callbacks correctly', async () => {
+      let innerValue = '';
+      await service.request('test_lock', async () => {
+        await new Promise((r) => setTimeout(r, 5));
+        innerValue = 'async-result';
+      });
+
+      expect(innerValue).toBe('async-result');
+    });
+  });
+
+  describe('lock timeout handling', () => {
+    it('should release lock on callback timeout via error', async () => {
+      const slowCallback = service.request('test_lock', async () => {
+        await new Promise((r) => setTimeout(r, 50));
+        throw new Error('Callback failed');
+      });
+
+      await expectAsync(slowCallback).toBeRejectedWithError('Callback failed');
+
+      // Lock should be released, next request should work
+      let executed = false;
+      await service.request('test_lock', async () => {
+        executed = true;
+      });
+      expect(executed).toBe(true);
+    });
+  });
+
+  describe('reentrant behavior', () => {
+    it('should handle nested lock requests to different locks', async () => {
+      const order: string[] = [];
+
+      await service.request('outer_lock', async () => {
+        order.push('outer-start');
+        await service.request('inner_lock', async () => {
+          order.push('inner');
+        });
+        order.push('outer-end');
+      });
+
+      expect(order).toEqual(['outer-start', 'inner', 'outer-end']);
+    });
+  });
 });

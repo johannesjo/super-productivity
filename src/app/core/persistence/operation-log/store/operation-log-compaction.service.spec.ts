@@ -8,6 +8,8 @@ import { COMPACTION_RETENTION_MS } from '../operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { OperationLogEntry } from '../operation.types';
 
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
 describe('OperationLogCompactionService', () => {
   let service: OperationLogCompactionService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
@@ -294,6 +296,125 @@ describe('OperationLogCompactionService', () => {
       expect(callOrder.indexOf('saveStateCache')).toBeLessThan(lockEndIndex);
       expect(callOrder.indexOf('deleteOpsWhere')).toBeGreaterThan(lockStartIndex);
       expect(callOrder.indexOf('deleteOpsWhere')).toBeLessThan(lockEndIndex);
+    });
+
+    it('should propagate errors from saveStateCache', async () => {
+      mockOpLogStore.saveStateCache.and.rejectWith(new Error('IndexedDB write failed'));
+
+      await expectAsync(service.compact()).toBeRejectedWithError(
+        'IndexedDB write failed',
+      );
+    });
+
+    it('should propagate errors from vector clock service', async () => {
+      mockVectorClockService.getCurrentVectorClock.and.rejectWith(
+        new Error('Clock read failed'),
+      );
+
+      await expectAsync(service.compact()).toBeRejectedWithError('Clock read failed');
+    });
+
+    it('should propagate errors from state delegate', async () => {
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.rejectWith(
+        new Error('State read failed'),
+      );
+
+      await expectAsync(service.compact()).toBeRejectedWithError('State read failed');
+    });
+  });
+
+  describe('emergencyCompact', () => {
+    it('should return true on successful compaction', async () => {
+      const result = await service.emergencyCompact();
+      expect(result).toBeTrue();
+    });
+
+    it('should return false when compaction fails', async () => {
+      mockOpLogStore.saveStateCache.and.rejectWith(new Error('Storage full'));
+
+      const result = await service.emergencyCompact();
+
+      expect(result).toBeFalse();
+    });
+
+    it('should use shorter retention window than regular compaction', async () => {
+      let capturedFilter: ((entry: OperationLogEntry) => boolean) | undefined;
+      mockOpLogStore.deleteOpsWhere.and.callFake(async (filterFn) => {
+        capturedFilter = filterFn;
+      });
+
+      await service.emergencyCompact();
+
+      // Create an entry that's 2 days old (would be kept by regular compaction,
+      // but deleted by emergency compaction which uses 1-day retention)
+      const twoDaysMs = 2 * MS_PER_DAY;
+      const twoDaysAgo = Date.now() - twoDaysMs;
+      const entry: OperationLogEntry = {
+        seq: 50,
+        op: {} as any,
+        appliedAt: twoDaysAgo,
+        source: 'remote',
+        syncedAt: twoDaysAgo,
+      };
+
+      expect(capturedFilter!(entry)).toBeTrue();
+    });
+
+    it('should still protect unsynced operations during emergency compaction', async () => {
+      let capturedFilter: ((entry: OperationLogEntry) => boolean) | undefined;
+      mockOpLogStore.deleteOpsWhere.and.callFake(async (filterFn) => {
+        capturedFilter = filterFn;
+      });
+
+      await service.emergencyCompact();
+
+      const tenDaysMs = 10 * MS_PER_DAY;
+      const oldUnsyncedEntry: OperationLogEntry = {
+        seq: 50,
+        op: {} as any,
+        appliedAt: Date.now() - tenDaysMs, // 10 days old
+        source: 'local',
+        syncedAt: undefined, // Not synced!
+      };
+
+      expect(capturedFilter!(oldUnsyncedEntry)).toBeFalse();
+    });
+
+    it('should acquire lock during emergency compaction', async () => {
+      await service.emergencyCompact();
+
+      expect(mockLockService.request).toHaveBeenCalledWith(
+        'sp_op_log',
+        jasmine.any(Function),
+      );
+    });
+
+    it('should return false when lock acquisition fails', async () => {
+      mockLockService.request.and.rejectWith(new Error('Lock timeout'));
+
+      const result = await service.emergencyCompact();
+
+      expect(result).toBeFalse();
+    });
+
+    it('should catch and log errors without throwing', async () => {
+      mockOpLogStore.getLastSeq.and.rejectWith(new Error('Database corrupted'));
+
+      // Should not throw, just return false
+      const result = await service.emergencyCompact();
+
+      expect(result).toBeFalse();
+    });
+
+    it('should complete all phases during emergency compaction', async () => {
+      await service.emergencyCompact();
+
+      expect(mockStoreDelegate.getAllSyncModelDataFromStore).toHaveBeenCalled();
+      expect(mockVectorClockService.getCurrentVectorClock).toHaveBeenCalled();
+      expect(mockOpLogStore.getLastSeq).toHaveBeenCalled();
+      expect(mockOpLogStore.saveStateCache).toHaveBeenCalled();
+      expect(mockOpLogStore.resetCompactionCounter).toHaveBeenCalled();
+      expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
     });
   });
 });

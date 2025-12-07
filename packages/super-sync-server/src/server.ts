@@ -66,6 +66,7 @@ export const createServer = (
           allowedHeaders: [
             'Authorization',
             'Content-Type',
+            'Content-Encoding',
             'X-Expected-Rev',
             'X-Force-Overwrite',
             'X-Requested-With',

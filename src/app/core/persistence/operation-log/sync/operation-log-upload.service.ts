@@ -124,11 +124,21 @@ export class OperationLogUploadService {
             await syncProvider.setLastServerSeq(result.serverSeq);
           }
         } else {
-          await this.opLogStore.markRejected([entry.op.id]);
-          rejectedCount++;
-          OpLog.warn(
-            `OperationLogUploadService: Full-state op ${entry.op.id} rejected: ${result.error}`,
-          );
+          // Only permanently reject if the server explicitly rejected the operation
+          // (e.g., validation error, conflict). Network errors should be retried.
+          const isNetworkError = this._isNetworkError(result.error);
+          if (isNetworkError) {
+            OpLog.warn(
+              `OperationLogUploadService: Full-state op ${entry.op.id} failed due to network error, will retry: ${result.error}`,
+            );
+            // Don't mark as rejected - leave as unsynced for retry
+          } else {
+            await this.opLogStore.markRejected([entry.op.id]);
+            rejectedCount++;
+            OpLog.warn(
+              `OperationLogUploadService: Full-state op ${entry.op.id} rejected: ${result.error}`,
+            );
+          }
         }
       }
 
@@ -396,5 +406,26 @@ export class OperationLogUploadService {
       default:
         return 'recovery';
     }
+  }
+
+  /**
+   * Determines if an error message indicates a network/transient error
+   * that should be retried, vs a permanent server rejection.
+   */
+  private _isNetworkError(error: string | undefined): boolean {
+    if (!error) return false;
+    const networkErrorPatterns = [
+      'failed to fetch',
+      'network',
+      'timeout',
+      'econnrefused',
+      'enotfound',
+      'cors',
+      'net::',
+      'offline',
+      'aborted',
+    ];
+    const lowerError = error.toLowerCase();
+    return networkErrorPatterns.some((pattern) => lowerError.includes(pattern));
   }
 }

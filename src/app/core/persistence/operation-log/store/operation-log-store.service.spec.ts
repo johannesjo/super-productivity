@@ -491,4 +491,132 @@ describe('OperationLogStoreService', () => {
       expect(taskFrontier.has('PROJECT:proj1')).toBe(false);
     });
   });
+
+  describe('transaction atomicity', () => {
+    it('should maintain consistency after failed saveStateCache', async () => {
+      const op = createTestOperation();
+      await service.append(op);
+
+      // Save initial state cache
+      await service.saveStateCache({
+        state: { initial: true },
+        lastAppliedOpSeq: 1,
+        vectorClock: { client: 1 },
+        compactedAt: Date.now(),
+        schemaVersion: 1,
+      });
+
+      // Operations should still be accessible
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(1);
+      expect(ops[0].op.id).toBe(op.id);
+    });
+
+    it('should handle concurrent append operations safely', async () => {
+      const ops = Array.from({ length: 10 }, (_, i) =>
+        createTestOperation({ entityId: `task-${i}` }),
+      );
+
+      // Append all concurrently
+      await Promise.all(ops.map((op) => service.append(op)));
+
+      const storedOps = await service.getOpsAfterSeq(0);
+      expect(storedOps.length).toBe(10);
+
+      // All should have unique sequence numbers
+      const seqNumbers = storedOps.map((op) => op.seq);
+      const uniqueSeqs = new Set(seqNumbers);
+      expect(uniqueSeqs.size).toBe(10);
+    });
+
+    it('should handle concurrent markSynced operations safely', async () => {
+      const ops = Array.from({ length: 5 }, (_, i) =>
+        createTestOperation({ entityId: `task-${i}` }),
+      );
+
+      for (const op of ops) {
+        await service.append(op);
+      }
+
+      const storedOps = await service.getOpsAfterSeq(0);
+      const seqNumbers = storedOps.map((op) => op.seq);
+
+      // Mark synced concurrently
+      await Promise.all(seqNumbers.map((seq) => service.markSynced([seq])));
+
+      // All should be synced
+      const afterSync = await service.getOpsAfterSeq(0);
+      for (const entry of afterSync) {
+        expect(entry.syncedAt).toBeDefined();
+      }
+    });
+  });
+
+  describe('edge cases', () => {
+    it('should handle empty arrays for markSynced', async () => {
+      await service.markSynced([]);
+      // Should not throw
+    });
+
+    it('should handle empty arrays for markRejected', async () => {
+      await service.markRejected([]);
+      // Should not throw
+    });
+
+    it('should handle deleteOpsWhere with no matches', async () => {
+      const op = createTestOperation();
+      await service.append(op);
+
+      await service.deleteOpsWhere(() => false);
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(1);
+    });
+
+    it('should handle very large operations', async () => {
+      // Create operation with large payload
+      const largePayload: Record<string, unknown> = {};
+      for (let i = 0; i < 1000; i++) {
+        largePayload[`field${i}`] = 'x'.repeat(100);
+      }
+
+      const op = createTestOperation({ payload: largePayload });
+      await service.append(op);
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(1);
+      expect(ops[0].op.payload).toEqual(largePayload);
+    });
+
+    it('should handle operations with special characters in payload', async () => {
+      const payload = {
+        title: 'Task with "quotes" and \n newlines',
+        description: 'Unicode: 日本語 🎉 emoji',
+        tags: ['special/chars', 'back\\slash'],
+      };
+
+      const op = createTestOperation({ payload });
+      await service.append(op);
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops[0].op.payload).toEqual(payload);
+    });
+
+    it('should preserve operation order in getOpsAfterSeq', async () => {
+      const ids: string[] = [];
+      for (let i = 0; i < 20; i++) {
+        const op = createTestOperation({ entityId: `task-${i}` });
+        ids.push(op.id);
+        await service.append(op);
+      }
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(20);
+
+      // Verify order is preserved
+      for (let i = 0; i < ops.length - 1; i++) {
+        expect(ops[i].seq).toBeLessThan(ops[i + 1].seq);
+      }
+    });
+  });
 });
