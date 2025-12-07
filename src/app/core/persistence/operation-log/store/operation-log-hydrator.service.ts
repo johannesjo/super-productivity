@@ -627,19 +627,33 @@ export class OperationLogHydratorService {
       // 5. Get the sequence number of the operation we just wrote
       const lastSeq = await this.opLogStore.getLastSeq();
 
-      // 6. Save new state cache (snapshot) for crash safety
+      // 6. Validate and repair synced data before dispatching
+      // This fixes stale task references (e.g., tags/projects referencing deleted tasks)
+      let dataToLoad = syncedData as AppDataCompleteNew;
+      if (!this._repairMutex) {
+        const validationResult = await this._validateAndRepairState(
+          dataToLoad,
+          'remote-sync',
+        );
+        if (validationResult.wasRepaired && validationResult.repairedState) {
+          dataToLoad = validationResult.repairedState;
+          OpLog.normal(
+            'OperationLogHydratorService: Repaired synced data before loading',
+          );
+        }
+      }
+
+      // 7. Save new state cache (snapshot) for crash safety
       await this.opLogStore.saveStateCache({
-        state: syncedData,
+        state: dataToLoad,
         lastAppliedOpSeq: lastSeq,
         vectorClock: newClock,
         compactedAt: Date.now(),
       });
       OpLog.normal('OperationLogHydratorService: Saved state cache after sync');
 
-      // 7. Dispatch loadAllData to update NgRx
-      this.store.dispatch(
-        loadAllData({ appDataComplete: syncedData as AppDataCompleteNew }),
-      );
+      // 8. Dispatch loadAllData to update NgRx
+      this.store.dispatch(loadAllData({ appDataComplete: dataToLoad }));
       OpLog.normal(
         'OperationLogHydratorService: Dispatched loadAllData with synced data',
       );
