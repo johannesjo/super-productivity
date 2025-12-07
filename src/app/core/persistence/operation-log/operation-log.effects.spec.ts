@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { Observable, of } from 'rxjs';
 import { OperationLogEffects } from './operation-log.effects';
 import { OperationLogStoreService } from './store/operation-log-store.service';
@@ -22,6 +22,7 @@ describe('OperationLogEffects', () => {
   let mockCompactionService: jasmine.SpyObj<OperationLogCompactionService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockInjector: jasmine.SpyObj<Injector>;
+  let mockStore: jasmine.SpyObj<Store>;
 
   const mockPfapiService = {
     pf: {
@@ -66,6 +67,7 @@ describe('OperationLogEffects', () => {
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockInjector = jasmine.createSpyObj('Injector', ['get']);
+    mockStore = jasmine.createSpyObj('Store', ['dispatch', 'select']);
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -81,6 +83,7 @@ describe('OperationLogEffects', () => {
     mockCompactionService.compact.and.returnValue(Promise.resolve());
     mockCompactionService.emergencyCompact.and.returnValue(Promise.resolve(true));
     mockInjector.get.and.returnValue(mockPfapiService);
+    mockStore.select.and.returnValue(of({})); // Return empty state observable
 
     TestBed.configureTestingModule({
       providers: [
@@ -92,6 +95,7 @@ describe('OperationLogEffects', () => {
         { provide: OperationLogCompactionService, useValue: mockCompactionService },
         { provide: SnackService, useValue: mockSnackService },
         { provide: Injector, useValue: mockInjector },
+        { provide: Store, useValue: mockStore },
       ],
     });
 
@@ -250,9 +254,10 @@ describe('OperationLogEffects', () => {
         complete: () => {
           const appendCall = mockOpLogStore.append.calls.mostRecent();
           const operation = appendCall.args[0];
+          // Payload now uses MultiEntityPayload structure with actionPayload and entityChanges
           expect(operation.payload).toEqual({
-            title: 'Updated Title',
-            done: true,
+            actionPayload: { title: 'Updated Title', done: true },
+            entityChanges: jasmine.any(Array),
           });
           done();
         },

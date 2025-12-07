@@ -167,10 +167,12 @@ describe('Task Reducer - transferTask action', () => {
     const result = reducerWithMetaReducers(rootState, action) as RootState;
     const taskState = result[TASK_FEATURE_NAME];
 
+    // Board-style pattern: task.tagIds is updated to include TODAY when transferring to today
     expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: today,
       dueWithTime: undefined,
+      tagIds: [TODAY_TAG.id],
     });
   });
 

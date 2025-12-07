@@ -11,6 +11,7 @@ import {
   createStateWithExistingTasks,
   expectStateUpdate,
   expectTagUpdate,
+  expectTaskUpdate,
 } from './test-utils';
 
 describe('plannerSharedMetaReducer', () => {
@@ -185,11 +186,19 @@ describe('plannerSharedMetaReducer', () => {
     it('should not change state when task is already in Today and planned for today', () => {
       const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks([], [], [], ['task1', 'other-task']);
-      const task = createMockTask({ id: 'task1' });
+      // Also set task.tagIds to include TODAY
+      (testState as any).tasks.entities['task1'].tagIds = ['TODAY'];
+      const task = createMockTask({ id: 'task1', tagIds: ['TODAY'] });
       const action = createPlanTaskForDayAction(task, todayStr, false);
 
       metaReducer(testState, action);
-      expect(mockReducer).toHaveBeenCalledWith(testState, action);
+      // Should still be called but with state that has task reordered to end
+      expectStateUpdate(
+        expectTagUpdate('TODAY', { taskIds: ['other-task', 'task1'] }),
+        action,
+        mockReducer,
+        testState,
+      );
     });
 
     it('should not change state when task is not in Today and not planned for today', () => {
@@ -199,6 +208,69 @@ describe('plannerSharedMetaReducer', () => {
 
       metaReducer(testState, action);
       expect(mockReducer).toHaveBeenCalledWith(testState, action);
+    });
+
+    // Board-style pattern tests: verify task.tagIds is updated along with tag.taskIds
+    describe('board-style pattern: task.tagIds updates', () => {
+      it('should add TODAY to task.tagIds when planning for today', () => {
+        const todayStr = getDbDateStr();
+        const testState = createStateWithExistingTasks([], [], [], []);
+        // Add a task without TODAY in tagIds
+        (testState as any).tasks.ids = ['task1'];
+        (testState as any).tasks.entities['task1'] = createMockTask({
+          id: 'task1',
+          tagIds: ['other-tag'],
+        });
+
+        const task = createMockTask({ id: 'task1', tagIds: ['other-tag'] });
+        const action = createPlanTaskForDayAction(task, todayStr, false);
+
+        metaReducer(testState, action);
+        expectStateUpdate(
+          expectTaskUpdate('task1', { tagIds: ['other-tag', 'TODAY'] }),
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+
+      it('should remove TODAY from task.tagIds when planning for different day', () => {
+        const testState = createStateWithExistingTasks([], [], [], ['task1']);
+        // Set task.tagIds to include TODAY
+        (testState as any).tasks.entities['task1'].tagIds = ['other-tag', 'TODAY'];
+
+        const task = createMockTask({ id: 'task1', tagIds: ['other-tag', 'TODAY'] });
+        const action = createPlanTaskForDayAction(task, 'tomorrow', false);
+
+        metaReducer(testState, action);
+        expectStateUpdate(
+          expectTaskUpdate('task1', { tagIds: ['other-tag'] }),
+          action,
+          mockReducer,
+          testState,
+        );
+      });
+
+      it('should not duplicate TODAY in task.tagIds if already present', () => {
+        const todayStr = getDbDateStr();
+        const testState = createStateWithExistingTasks([], [], [], []);
+        // Add a task with TODAY already in tagIds
+        (testState as any).tasks.ids = ['task1'];
+        (testState as any).tasks.entities['task1'] = createMockTask({
+          id: 'task1',
+          tagIds: ['TODAY'],
+        });
+
+        const task = createMockTask({ id: 'task1', tagIds: ['TODAY'] });
+        const action = createPlanTaskForDayAction(task, todayStr, false);
+
+        const result = metaReducer(testState, action);
+        // Task should still have only one TODAY
+        expect(
+          result.tasks.entities['task1'].tagIds.filter((id: string) => id === 'TODAY')
+            .length,
+        ).toBe(1);
+      });
     });
   });
 

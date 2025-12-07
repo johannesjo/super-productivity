@@ -117,10 +117,15 @@ const handleAddTask = (
 ): RootState => {
   let updatedState = state;
 
+  // Determine if task should be added to Today tag
+  const shouldAddToToday = task.dueDay === getDbDateStr();
+
   // Add task to task state
+  // Note: TODAY_TAG should NOT be in task.tagIds - it's a virtual tag stored in tag.taskIds only
   const newTask: Task = {
     ...DEFAULT_TASK,
     ...task,
+    tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id), // Ensure TODAY_TAG is not in tagIds
     timeSpent: calcTotalTimeSpent(task.timeSpentOnDay || {}),
     projectId: task.projectId || '',
   };
@@ -144,12 +149,11 @@ const handleAddTask = (
     });
   }
 
-  // Update tags - only update tags that exist
-  const shouldAddToToday = task.dueDay === getDbDateStr();
-
+  // Update tags - only update regular tags that exist (not TODAY_TAG which is virtual)
+  // If shouldAddToToday, also add to TODAY_TAG's taskIds
   const tagIdsToUpdate = [
-    ...task.tagIds,
-    ...(shouldAddToToday ? [TODAY_TAG.id] : []),
+    ...newTask.tagIds, // Regular tags from task.tagIds
+    ...(shouldAddToToday ? [TODAY_TAG.id] : []), // Add TODAY_TAG if task is for today
   ].filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]);
 
   // First, handle conflicts for all tags

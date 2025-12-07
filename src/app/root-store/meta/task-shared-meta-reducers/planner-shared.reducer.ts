@@ -85,7 +85,9 @@ const handleTransferTask = (
   const todayTag = getTag(state, TODAY_TAG.id);
 
   if (prevDay === today && newDay !== today) {
-    return updateTags(state, [
+    // Moving away from today - remove from tag.taskIds
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
+    state = updateTags(state, [
       {
         id: TODAY_TAG.id,
         changes: {
@@ -93,16 +95,20 @@ const handleTransferTask = (
         },
       },
     ]);
+
+    return state;
   }
 
   if (prevDay !== today && newDay === today) {
+    // Moving to today - add to tag.taskIds
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
     const taskIds = [...todayTag.taskIds];
     const targetIndexToUse = targetTaskId
       ? todayTag.taskIds.findIndex((id) => id === targetTaskId)
       : targetIndex;
     taskIds.splice(targetIndexToUse, 0, task.id);
 
-    return updateTags(state, [
+    state = updateTags(state, [
       {
         id: TODAY_TAG.id,
         changes: {
@@ -110,6 +116,8 @@ const handleTransferTask = (
         },
       },
     ]);
+
+    return state;
   }
 
   return state;
@@ -124,30 +132,39 @@ const handlePlanTaskForDay = (
   const todayStr = getDbDateStr();
   const todayTag = getTag(state, TODAY_TAG.id);
 
-  if (day === todayStr && !todayTag.taskIds.includes(task.id)) {
-    const newTaskIds = unique(
+  if (day === todayStr) {
+    // Adding to today - update tag.taskIds only
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
+    const newTagTaskIds = unique(
       isAddToTop
-        ? [task.id, ...todayTag.taskIds]
+        ? [task.id, ...todayTag.taskIds.filter((tid) => tid !== task.id)]
         : [...todayTag.taskIds.filter((tid) => tid !== task.id), task.id],
     );
-    return updateTags(state, [
+
+    state = updateTags(state, [
       {
         id: todayTag.id,
         changes: {
-          taskIds: newTaskIds,
+          taskIds: newTagTaskIds,
         },
       },
     ]);
-  } else if (day !== todayStr && todayTag.taskIds.includes(task.id)) {
-    const newTaskIds = todayTag.taskIds.filter((id) => id !== task.id);
-    return updateTags(state, [
+
+    return state;
+  } else if (todayTag.taskIds.includes(task.id)) {
+    // Moving away from today - remove from tag.taskIds only
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
+    const newTagTaskIds = todayTag.taskIds.filter((id) => id !== task.id);
+    state = updateTags(state, [
       {
         id: todayTag.id,
         changes: {
-          taskIds: newTaskIds,
+          taskIds: newTagTaskIds,
         },
       },
     ]);
+
+    return state;
   }
 
   return state;
@@ -161,11 +178,13 @@ const handleMoveBeforeTask = (
   const todayTag = getTag(state, TODAY_TAG.id);
 
   if (todayTag.taskIds.includes(toTaskId)) {
+    // Moving to today (target is in today list)
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
     const taskIds = todayTag.taskIds.filter((id) => id !== fromTask.id);
     const targetIndex = taskIds.indexOf(toTaskId);
     taskIds.splice(targetIndex, 0, fromTask.id);
 
-    return updateTags(state, [
+    state = updateTags(state, [
       {
         id: todayTag.id,
         changes: {
@@ -173,8 +192,12 @@ const handleMoveBeforeTask = (
         },
       },
     ]);
+
+    return state;
   } else if (todayTag.taskIds.includes(fromTask.id)) {
-    return updateTags(state, [
+    // Moving away from today
+    // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
+    state = updateTags(state, [
       {
         id: todayTag.id,
         changes: {
@@ -182,6 +205,8 @@ const handleMoveBeforeTask = (
         },
       },
     ]);
+
+    return state;
   }
 
   return state;

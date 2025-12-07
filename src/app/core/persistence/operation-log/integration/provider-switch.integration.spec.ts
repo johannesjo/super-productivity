@@ -395,9 +395,6 @@ describe('Provider Switch Integration', () => {
       const client = new SimulatedClient('client-a', storeService);
       const serverA = new MockSyncServer();
 
-      // Get baseline seq before test
-      const baselineSeq = await storeService.getLastSeq();
-
       // Create operations
       await client.createLocalOp(
         'TASK',
@@ -415,9 +412,14 @@ describe('Provider Switch Integration', () => {
       );
       await client.sync(serverA);
 
-      // Get current last seq
-      const lastSeqBefore = await storeService.getLastSeq();
-      expect(lastSeqBefore).toBe(baselineSeq + 2);
+      // Get ops and use first op's seq as baseline
+      // (IndexedDB auto-increment continues across tests even after clearing)
+      const opsBeforeSwitch = await storeService.getOpsAfterSeq(0);
+      expect(opsBeforeSwitch.length).toBe(2);
+      const baselineSeq = opsBeforeSwitch[0].seq;
+
+      // Second operation should be baseline + 1
+      expect(opsBeforeSwitch[1].seq - baselineSeq).toBe(1);
 
       // === SWITCH PROVIDER ===
       // (No new server needed - we're verifying sequence numbers persist locally)
@@ -431,14 +433,13 @@ describe('Provider Switch Integration', () => {
         createMinimalTaskPayload('task-3'),
       );
 
-      // Sequence should continue from where it left off
-      const lastSeqAfter = await storeService.getLastSeq();
-      expect(lastSeqAfter).toBe(baselineSeq + 3);
-
       // Verify the new operation has the incremented seq
-      const allOps = await storeService.getOpsAfterSeq(baselineSeq);
+      const allOps = await storeService.getOpsAfterSeq(0);
+      expect(allOps.length).toBe(3);
       const task3Op = allOps.find((e) => e.op.entityId === 'task-3');
-      expect(task3Op!.seq).toBe(baselineSeq + 3);
+      expect(task3Op).toBeDefined();
+      // Third op should be baseline + 2
+      expect(task3Op!.seq - baselineSeq).toBe(2);
     });
   });
 });

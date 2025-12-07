@@ -218,6 +218,7 @@ const handleScheduleWithTime = (
   const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
   if (isScheduledForToday !== isCurrentlyInToday) {
+    // Update TODAY_TAG.taskIds only (TODAY_TAG should NOT be in task.tagIds)
     const newTaskIds = isScheduledForToday
       ? unique([task.id, ...todayTag.taskIds])
       : todayTag.taskIds.filter((id) => id !== task.id);
@@ -228,14 +229,6 @@ const handleScheduleWithTime = (
         changes: { taskIds: newTaskIds },
       },
     ]);
-
-    // Update task.tagIds for board-style consistency
-    const currentTagIds = currentTask.tagIds || [];
-    if (isScheduledForToday && !currentTagIds.includes(TODAY_TAG.id)) {
-      additionalChanges.tagIds = [...currentTagIds, TODAY_TAG.id];
-    } else if (!isScheduledForToday && currentTagIds.includes(TODAY_TAG.id)) {
-      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
-    }
   }
 
   return { state: updatedState, additionalChanges };
@@ -252,7 +245,6 @@ const handlePlanForDay = (
   isAddToTop: boolean | undefined,
 ): SchedulingResult => {
   let updatedState = state;
-  const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
   const todayStr = getDbDateStr();
   const isForToday = day === todayStr;
 
@@ -263,11 +255,11 @@ const handlePlanForDay = (
   };
 
   const todayTag = getTag(updatedState, TODAY_TAG.id);
-  const isCurrentlyInToday =
-    todayTag.taskIds.includes(task.id) || currentTask.tagIds?.includes(TODAY_TAG.id);
+  // Note: TODAY_TAG should NOT be in task.tagIds - check tag.taskIds only
+  const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
 
   if (isForToday) {
-    // Adding to today
+    // Adding to today - update tag.taskIds only
     const newTagTaskIds = unique(
       isAddToTop
         ? [task.id, ...todayTag.taskIds.filter((tid) => tid !== task.id)]
@@ -281,28 +273,16 @@ const handlePlanForDay = (
       },
     ]);
 
-    // Update task.tagIds for board-style consistency
-    const currentTagIds = currentTask.tagIds || [];
-    if (!currentTagIds.includes(TODAY_TAG.id)) {
-      additionalChanges.tagIds = [...currentTagIds, TODAY_TAG.id];
-    }
-
     // Remove from planner days if present
     updatedState = removeFromPlannerDays(updatedState, task.id);
   } else if (isCurrentlyInToday) {
-    // Moving away from today
+    // Moving away from today - update tag.taskIds only
     updatedState = updateTags(updatedState, [
       {
         id: TODAY_TAG.id,
         changes: { taskIds: todayTag.taskIds.filter((id) => id !== task.id) },
       },
     ]);
-
-    // Update task.tagIds for board-style consistency
-    const currentTagIds = currentTask.tagIds || [];
-    if (currentTagIds.includes(TODAY_TAG.id)) {
-      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
-    }
 
     // Add to planner for the target day
     updatedState = addToPlannerDay(updatedState, task.id, day);
