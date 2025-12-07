@@ -34,6 +34,29 @@ describe('GlobalConfigReducer', () => {
       expect(result.misc.isDisableAnimations).toBe(true);
     });
 
+    it('should use syncProvider from snapshot when oldState has null (initial load)', () => {
+      // This simulates app startup: oldState is initialGlobalConfigState with null syncProvider
+      const oldState = initialGlobalConfigState; // syncProvider is null
+
+      const snapshotConfig: GlobalConfigState = {
+        ...initialGlobalConfigState,
+        sync: {
+          ...initialGlobalConfigState.sync,
+          syncProvider: LegacySyncProvider.SuperSync, // Snapshot has user's provider
+        },
+      };
+
+      const result = globalConfigReducer(
+        oldState,
+        loadAllData({
+          appDataComplete: { globalConfig: snapshotConfig } as AppDataCompleteNew,
+        }),
+      );
+
+      // Should use snapshot's syncProvider since oldState has null
+      expect(result.sync.syncProvider).toBe(LegacySyncProvider.SuperSync);
+    });
+
     it('should preserve syncProvider from oldState when loading synced data', () => {
       const oldState: GlobalConfigState = {
         ...initialGlobalConfigState,

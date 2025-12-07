@@ -89,14 +89,19 @@ export const globalConfigReducer = createReducer<GlobalConfigState>(
     if (!appDataComplete.globalConfig) {
       return oldState;
     }
-    // Preserve current syncProvider when loading synced data.
-    // The sync provider is a local-only setting that should not be overwritten
-    // by remote data (which typically has syncProvider: null).
+    // Preserve current syncProvider ONLY if it's already set (non-null).
+    // On initial load from snapshot, oldState has null (from initialGlobalConfigState),
+    // so we use the snapshot's syncProvider.
+    // On subsequent remote syncs, oldState has the actual provider, so we preserve it
+    // (remote data typically has syncProvider: null since it's a local-only setting).
+    const syncProvider =
+      oldState.sync.syncProvider ?? appDataComplete.globalConfig.sync.syncProvider;
+
     return {
       ...appDataComplete.globalConfig,
       sync: {
         ...appDataComplete.globalConfig.sync,
-        syncProvider: oldState.sync.syncProvider,
+        syncProvider,
       },
     };
   }),
