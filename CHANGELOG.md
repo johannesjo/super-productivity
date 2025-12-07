@@ -1,3 +1,9 @@
+## [16.5.4](https://github.com/johannesjo/super-productivity/compare/v16.5.3...v16.5.4) (2025-12-07)
+
+### Bug Fixes
+
+- **electron:** sync title bar button colors with app theme ([eefbc71](https://github.com/johannesjo/super-productivity/commit/eefbc7135a8142eecf25094ea2ae24d6d5dcf2ed)), closes [#5676](https://github.com/johannesjo/super-productivity/issues/5676)
+
 ## [16.5.3](https://github.com/johannesjo/super-productivity/compare/v16.5.2...v16.5.3) (2025-12-06)
 
 ## [16.5.2](https://github.com/johannesjo/super-productivity/compare/v16.5.1...v16.5.2) (2025-12-06)
