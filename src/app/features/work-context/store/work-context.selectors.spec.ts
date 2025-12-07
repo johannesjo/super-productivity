@@ -20,6 +20,7 @@ describe('workContext selectors', () => {
         // } as Partial<WorkContextCopy> as WorkContextCopy,
         fakeEntityStateFromArray([]),
         fakeEntityStateFromArray([TODAY_TAG]),
+        fakeEntityStateFromArray([]) as any, // taskState - no tasks
         [],
       );
       expect(result).toEqual(
@@ -50,6 +51,44 @@ describe('workContext selectors', () => {
           // workStart: {},
         }),
       );
+    });
+
+    it('should use board-style pattern for tags (task.tagIds as source of truth)', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [TODAY_TAG.id],
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const taskNotInTag = {
+        id: 'task3',
+        tagIds: [], // Does NOT have TODAY tag
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      // Tag has stale taskIds including task3 which doesn't have the tag
+      const todayTagWithStaleIds = {
+        ...TODAY_TAG,
+        taskIds: ['task3', 'task1'], // task3 is stale, task2 is missing
+      };
+
+      const result = selectActiveWorkContext.projector(
+        {
+          activeId: TODAY_TAG.id,
+          activeType: WorkContextType.TAG,
+        } as any,
+        fakeEntityStateFromArray([]),
+        fakeEntityStateFromArray([todayTagWithStaleIds]),
+        fakeEntityStateFromArray([task1, task2, taskNotInTag]) as any,
+        [],
+      );
+
+      // Should filter out task3 (stale) and auto-add task2 (missing from order)
+      expect(result.taskIds).toEqual(['task1', 'task2']);
     });
   });
   describe('selectTrackableTasksForActiveContext', () => {

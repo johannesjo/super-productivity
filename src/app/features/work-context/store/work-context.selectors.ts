@@ -1,6 +1,10 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store';
 import { WorkContext, WorkContextState, WorkContextType } from '../work-context.model';
-import { selectTagById, selectTagFeatureState } from '../../tag/store/tag.reducer';
+import {
+  computeOrderedTaskIdsForTag,
+  selectTagById,
+  selectTagFeatureState,
+} from '../../tag/store/tag.reducer';
 import {
   mapSubTasksToTask,
   selectTaskEntities,
@@ -41,12 +45,27 @@ export const selectActiveWorkContext = createSelector(
   selectActiveContextTypeAndId,
   selectProjectFeatureState,
   selectTagFeatureState,
+  selectTaskFeatureState,
   selectNoteTodayOrder,
-  ({ activeId, activeType }, projectState, tagState, todayOrder): WorkContext => {
+  (
+    { activeId, activeType },
+    projectState,
+    tagState,
+    taskState,
+    todayOrder,
+  ): WorkContext => {
     if (activeType === WorkContextType.TAG) {
       const tag = selectTagById.projector(tagState, { id: activeId });
+      // Use board-style pattern: task.tagIds is source of truth for membership,
+      // tag.taskIds is only for ordering. This provides atomic consistency and self-healing.
+      const orderedTaskIds = computeOrderedTaskIdsForTag(
+        activeId,
+        tag,
+        taskState.entities,
+      );
       return {
         ...tag,
+        taskIds: orderedTaskIds,
         type: WorkContextType.TAG,
         routerLink: `tag/${tag.id}`,
         noteIds: todayOrder,
@@ -62,8 +81,15 @@ export const selectActiveWorkContext = createSelector(
         if (!tag) {
           throw new Error('Today tag not found');
         }
+        // Fallback to TODAY tag with board-style pattern
+        const orderedTaskIds = computeOrderedTaskIdsForTag(
+          TODAY_TAG.id,
+          tag,
+          taskState.entities,
+        );
         return {
           ...tag,
+          taskIds: orderedTaskIds,
           type: WorkContextType.TAG,
           routerLink: `tag/${tag.id}`,
           noteIds: todayOrder,
@@ -185,18 +211,20 @@ export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
 
 export const selectTodayTaskIds = createSelector(
   selectTagFeatureState,
-  (tagState): string[] => {
-    return tagState.entities[TODAY_TAG.id]?.taskIds || [];
+  selectTaskFeatureState,
+  (tagState, taskState): string[] => {
+    // Use board-style pattern: task.tagIds is source of truth for membership
+    const todayTag = tagState.entities[TODAY_TAG.id];
+    return computeOrderedTaskIdsForTag(TODAY_TAG.id, todayTag, taskState.entities);
   },
 );
 
 export const selectUndoneTodayTaskIds = createSelector(
-  selectTagFeatureState,
+  selectTodayTaskIds,
   selectTaskFeatureState,
-  (tagState, taskState): string[] => {
-    return (tagState.entities[TODAY_TAG.id]?.taskIds || []).filter(
-      (taskId) => taskState.entities[taskId]?.isDone === false,
-    );
+  (todayTaskIds, taskState): string[] => {
+    // selectTodayTaskIds already uses board-style pattern
+    return todayTaskIds.filter((taskId) => taskState.entities[taskId]?.isDone === false);
   },
 );
 

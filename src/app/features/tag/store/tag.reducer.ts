@@ -53,6 +53,75 @@ export const selectTodayTagTaskIds = createSelector(
   },
 );
 
+/**
+ * Helper function to compute ordered task IDs for a tag using board-style hybrid pattern.
+ *
+ * This pattern makes `task.tagIds` the single source of truth for tag membership,
+ * while `tag.taskIds` is used only for ordering. This provides:
+ *
+ * 1. **Atomic consistency**: Membership determined by task.tagIds (single source of truth)
+ * 2. **Order preservation**: User-specified order from tag.taskIds
+ * 3. **Self-healing**:
+ *    - Stale taskIds in tag.taskIds → gracefully filtered out
+ *    - Tasks with tagId not in tag.taskIds → auto-added at end
+ *
+ * @param tagId - The ID of the tag to get tasks for
+ * @param tag - The tag entity (or undefined if not found)
+ * @param taskEntities - Map of task entities
+ * @returns Ordered array of task IDs
+ */
+export const computeOrderedTaskIdsForTag = (
+  tagId: string,
+  tag: Tag | undefined,
+  taskEntities: Record<
+    string,
+    { id: string; tagIds: string[]; parentId?: string | null } | undefined
+  >,
+): string[] => {
+  if (!tag) {
+    return [];
+  }
+
+  const storedOrder = tag.taskIds;
+
+  // Find all tasks that have this tag in their tagIds (membership source of truth)
+  // Only include main tasks (not subtasks) since tag lists show parent tasks
+  const tasksWithTag: string[] = [];
+  for (const taskId of Object.keys(taskEntities)) {
+    const task = taskEntities[taskId];
+    if (task && !task.parentId && task.tagIds?.includes(tagId)) {
+      tasksWithTag.push(taskId);
+    }
+  }
+
+  if (tasksWithTag.length === 0) {
+    return [];
+  }
+
+  // Order tasks according to stored order, with unordered tasks appended at end
+  const orderedTasks: (string | undefined)[] = [];
+  const unorderedTasks: string[] = [];
+  const tasksWithTagSet = new Set(tasksWithTag);
+
+  for (const taskId of tasksWithTag) {
+    const orderIndex = storedOrder.indexOf(taskId);
+    if (orderIndex > -1) {
+      orderedTasks[orderIndex] = taskId;
+    } else {
+      // Task has tagId but not in stored order - auto-add at end
+      unorderedTasks.push(taskId);
+    }
+  }
+
+  // Filter out undefined slots (stale IDs in stored order) and append unordered
+  return [
+    ...orderedTasks.filter(
+      (id): id is string => id !== undefined && tasksWithTagSet.has(id),
+    ),
+    ...unorderedTasks,
+  ];
+};
+
 export const selectTagById = createSelector(
   selectTagFeatureState,
   (state: TagState, props: { id: string }): Tag => {
