@@ -43,6 +43,7 @@ const OperationSchema = z.object({
   vectorClock: z.record(z.string(), z.number()),
   timestamp: z.number(),
   schemaVersion: z.number(),
+  parentOpId: z.string().max(255).optional(), // For conflict resolution chain tracking
 });
 
 const UploadOpsSchema = z.object({

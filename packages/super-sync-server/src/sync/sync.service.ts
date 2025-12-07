@@ -48,6 +48,8 @@ const ALLOWED_ENTITY_TYPES = new Set([
   'MIGRATION',
   'RECOVERY',
   'ALL',
+  'PLUGIN_USER_DATA',
+  'PLUGIN_METADATA',
 ]);
 
 /**
@@ -126,8 +128,8 @@ export class SyncService {
         INSERT INTO operations (
           id, user_id, client_id, server_seq, action_type, op_type,
           entity_type, entity_id, payload, vector_clock, schema_version,
-          client_timestamp, received_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          client_timestamp, received_at, parent_op_id
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `),
 
       getNextSeq: this.db.prepare(`
@@ -435,6 +437,7 @@ export class SyncService {
         op.schemaVersion,
         op.timestamp,
         now,
+        op.parentOpId ?? null,
       );
 
       // Create tombstone for delete operations
@@ -540,6 +543,7 @@ export class SyncService {
         vectorClock: JSON.parse(row.vector_clock),
         schemaVersion: row.schema_version,
         timestamp: row.client_timestamp,
+        parentOpId: row.parent_op_id ?? undefined,
       },
       receivedAt: row.received_at,
     }));
@@ -622,6 +626,7 @@ export class SyncService {
         vectorClock: JSON.parse(row.vector_clock),
         schemaVersion: row.schema_version,
         timestamp: row.client_timestamp,
+        parentOpId: row.parent_op_id ?? undefined,
       },
       receivedAt: row.received_at,
     }));

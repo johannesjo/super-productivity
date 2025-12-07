@@ -731,6 +731,80 @@ describe('Multi-Client Sync Integration', () => {
       // Should still only have 1 applied op total
       expect(clientB.appliedOperations).toHaveLength(1);
     });
+
+    it('should handle partial batch upload recovery (simulated network failure)', async () => {
+      // Scenario: Client uploads 5 ops, server accepts first 3, connection dies.
+      // Client retries with all 5 ops. Server should reject first 3 as duplicates,
+      // accept remaining 2.
+
+      const client = new SimulatedClient(app, userId);
+
+      // Create 5 operations manually (not using client.createOp to avoid auto-queuing)
+      const baseVectorClock: Record<string, number> = {};
+      const ops: Operation[] = [];
+      for (let i = 1; i <= 5; i++) {
+        baseVectorClock[client.clientId] = i;
+        ops.push({
+          id: uuidv7(),
+          clientId: client.clientId,
+          actionType: 'TEST_ACTION',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: `task-${i}`,
+          payload: { title: `Task ${i}` },
+          vectorClock: { ...baseVectorClock },
+          timestamp: Date.now() + i,
+          schemaVersion: 1,
+        });
+      }
+
+      // Simulate: First 3 ops reach server (response never reaches client)
+      const firstThreeOps = ops.slice(0, 3);
+      const firstResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${client.authToken}` },
+        payload: { ops: firstThreeOps, clientId: client.clientId },
+      });
+      expect(firstResponse.statusCode).toBe(200);
+      const firstBody = firstResponse.json() as UploadOpsResponse;
+      expect(firstBody.results.filter((r) => r.accepted)).toHaveLength(3);
+
+      // Client retries with ALL 5 ops (doesn't know first 3 succeeded)
+      const retryResponse = await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${client.authToken}` },
+        payload: { ops: ops, clientId: client.clientId },
+      });
+
+      expect(retryResponse.statusCode).toBe(200);
+      const retryBody = retryResponse.json() as UploadOpsResponse;
+
+      // First 3 should be rejected as duplicates
+      expect(retryBody.results[0].accepted).toBe(false);
+      expect(retryBody.results[0].error?.toLowerCase()).toContain('duplicate');
+      expect(retryBody.results[1].accepted).toBe(false);
+      expect(retryBody.results[2].accepted).toBe(false);
+
+      // Last 2 should be accepted
+      expect(retryBody.results[3].accepted).toBe(true);
+      expect(retryBody.results[4].accepted).toBe(true);
+
+      // Verify all 5 ops are now on server (no duplicates, correct order)
+      const downloadResponse = await app.inject({
+        method: 'GET',
+        url: '/api/sync/ops?sinceSeq=0',
+        headers: { authorization: `Bearer ${client.authToken}` },
+      });
+      expect(downloadResponse.statusCode).toBe(200);
+      const downloadBody = downloadResponse.json() as DownloadOpsResponse;
+      expect(downloadBody.ops).toHaveLength(5);
+
+      // Verify ops are in correct sequence order
+      const entityIds = downloadBody.ops.map((o) => o.op.entityId);
+      expect(entityIds).toEqual(['task-1', 'task-2', 'task-3', 'task-4', 'task-5']);
+    });
   });
 
   describe('Multi-User Isolation', () => {

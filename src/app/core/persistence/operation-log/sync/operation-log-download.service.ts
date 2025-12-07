@@ -157,6 +157,7 @@ export class OperationLogDownloadService {
             msg: T.F.SYNC.S.TOO_MANY_OPS_TO_DOWNLOAD,
           });
           // Process what we have so far rather than failing completely
+          downloadFailed = true;
           break;
         }
 

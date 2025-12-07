@@ -77,10 +77,12 @@ export const sanitizeVectorClock = (
   }
 
   const sanitized: VectorClock = {};
+  let strippedCount = 0;
 
   for (const [key, value] of entries) {
     // Validate key
     if (typeof key !== 'string' || key.length === 0 || key.length > 255) {
+      strippedCount++;
       continue; // Skip invalid keys
     }
 
@@ -91,10 +93,17 @@ export const sanitizeVectorClock = (
       value < 0 ||
       value > 10000000
     ) {
+      strippedCount++;
       continue; // Skip invalid values
     }
 
     sanitized[key] = value;
+  }
+
+  if (strippedCount > 0) {
+    console.warn(
+      `sanitizeVectorClock: Stripped ${strippedCount} invalid entries from vector clock`,
+    );
   }
 
   return { valid: true, clock: sanitized };
@@ -135,6 +144,7 @@ export interface Operation {
   vectorClock: VectorClock;
   timestamp: number;
   schemaVersion: number;
+  parentOpId?: string; // For conflict resolution chain tracking
 }
 
 export interface ServerOperation {

@@ -32,6 +32,7 @@ export interface DbOperation {
   schema_version: number;
   client_timestamp: number;
   received_at: number;
+  parent_op_id: string | null; // For conflict resolution chain tracking
 }
 
 export interface DbUserSyncState {
@@ -224,6 +225,14 @@ export const initDb = (dataDir: string, inMemory = false): void => {
     db.exec(
       'ALTER TABLE user_sync_state ADD COLUMN snapshot_schema_version INTEGER DEFAULT 1',
     );
+  }
+
+  // Migration: Add parent_op_id column for conflict resolution chain tracking
+  const opsColumns = db.pragma('table_info(operations)') as { name: string }[];
+  const hasParentOpId = opsColumns.some((col) => col.name === 'parent_op_id');
+  if (!hasParentOpId) {
+    Logger.info('Migrating database: adding parent_op_id column to operations');
+    db.exec('ALTER TABLE operations ADD COLUMN parent_op_id TEXT');
   }
 
   Logger.info(`Database initialized at ${dbPath}`);
