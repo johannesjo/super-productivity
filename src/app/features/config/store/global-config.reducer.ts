@@ -85,9 +85,21 @@ export const initialGlobalConfigState: GlobalConfigState = {
 export const globalConfigReducer = createReducer<GlobalConfigState>(
   initialGlobalConfigState,
 
-  on(loadAllData, (oldState, { appDataComplete }) =>
-    appDataComplete.globalConfig ? appDataComplete.globalConfig : oldState,
-  ),
+  on(loadAllData, (oldState, { appDataComplete }) => {
+    if (!appDataComplete.globalConfig) {
+      return oldState;
+    }
+    // Preserve current syncProvider when loading synced data.
+    // The sync provider is a local-only setting that should not be overwritten
+    // by remote data (which typically has syncProvider: null).
+    return {
+      ...appDataComplete.globalConfig,
+      sync: {
+        ...appDataComplete.globalConfig.sync,
+        syncProvider: oldState.sync.syncProvider,
+      },
+    };
+  }),
 
   on(updateGlobalConfigSection, (state, { sectionKey, sectionCfg }) => ({
     ...state,
