@@ -1,0 +1,410 @@
+{
+  "timestamp": 1733000000000,
+  "lastUpdate": 1733000000000,
+  "crossModelVersion": 4.5,
+  "data": {
+    "project": {
+      "ids": ["test-project-1"],
+      "entities": {
+        "test-project-1": {
+          "id": "test-project-1",
+          "title": "E2E Test Project",
+          "taskIds": ["active-task-1", "active-task-2"],
+          "backlogTaskIds": [],
+          "noteIds": [],
+          "isEnableBacklog": false,
+          "isArchived": false,
+          "isHiddenFromMenu": false,
+          "icon": "folder",
+          "theme": {
+            "primary": "#29b6f6",
+            "accent": "#ff4081",
+            "warn": "#e91e63",
+            "huePrimary": "500",
+            "hueAccent": "500",
+            "hueWarn": "500",
+            "backgroundImageDark": null,
+            "backgroundImageLight": null,
+            "isAutoContrast": true,
+            "isDisableBackgroundGradient": false,
+            "isDisableBackgroundTint": false
+          },
+          "workStart": {},
+          "workEnd": {},
+          "breakNr": {},
+          "breakTime": {}
+        }
+      }
+    },
+    "menuTree": {
+      "tagTree": [],
+      "projectTree": [
+        {
+          "id": "test-project-1",
+          "children": []
+        }
+      ]
+    },
+    "globalConfig": {
+      "misc": {
+        "isConfirmBeforeExit": false,
+        "isNotifyWhenTimeEstimateExceeded": false,
+        "isAutMarkParentAsDone": true,
+        "isAutoStartNextTask": true,
+        "isTurnOffMarkdown": false,
+        "isAutoAddWorkedOnToToday": true,
+        "isDisableInitialDialog": true,
+        "defaultProjectId": null,
+        "firstDayOfWeek": 1,
+        "startOfNextDay": 0,
+        "daysToShowForPastDates": 14,
+        "taskNotesTpl": null,
+        "isEnableAdvanced": false
+      },
+      "evaluation": {},
+      "idle": {
+        "isEnableIdleTimeTracking": false,
+        "isUnTrackedIdleResetsBreakTimer": false,
+        "minIdleTime": 60000,
+        "isOnlyOpenIdleWhenCurrentTask": false
+      },
+      "takeABreak": {
+        "isTakeABreakEnabled": false,
+        "takeABreakMinWorkingTime": 60,
+        "takeABreakSnoozeTime": 15,
+        "takeABreakMessage": null,
+        "motivationalImgs": []
+      },
+      "pomodoro": {
+        "isEnabled": false,
+        "duration": 1500000,
+        "breakDuration": 300000,
+        "longerBreakDuration": 900000,
+        "cyclesBeforeLongerBreak": 4,
+        "isStopTrackingOnBreak": true,
+        "isStopTrackingOnLongBreak": true,
+        "isManualContinue": false,
+        "isPlaySound": true,
+        "isPlaySoundAfterBreak": false,
+        "isEnabled2": false
+      },
+      "keyboard": {
+        "globalShowHide": null,
+        "globalToggleTaskStart": null,
+        "globalAddNote": null,
+        "globalAddTask": null,
+        "addNewTask": "a",
+        "addNewNote": "n",
+        "openProjectNotes": "N",
+        "toggleSideNav": null,
+        "showHelp": "?",
+        "showSearchBar": "f",
+        "toggleBookmarks": "B",
+        "goToWorkView": "w",
+        "goToFocusMode": null,
+        "goToTimeline": null,
+        "goToDailyAgenda": null,
+        "goToSettings": null,
+        "goToScheduledView": null,
+        "zoomIn": "+",
+        "zoomOut": "-",
+        "zoomDefault": "*",
+        "taskEditTitle": "Enter",
+        "taskToggleAdditionalInfoOpen": "i",
+        "taskOpenEstimationDialog": "e",
+        "taskSchedule": "s",
+        "taskToggleDone": "d",
+        "taskAddSubTask": "A",
+        "taskDelete": "Backspace",
+        "taskMoveToProject": "m",
+        "taskOpenContextMenu": "c",
+        "selectPreviousTask": "k",
+        "selectNextTask": "j",
+        "moveTaskUp": "ArrowUp",
+        "moveTaskDown": "ArrowDown",
+        "moveTaskToTop": "Shift+ArrowUp",
+        "moveTaskToBottom": "Shift+ArrowDown",
+        "moveToBacklog": "b",
+        "moveToTodaysTasks": "t",
+        "expandSubTasks": "ArrowRight",
+        "collapseSubTasks": "ArrowLeft",
+        "togglePlay": "p"
+      },
+      "localBackup": {
+        "isEnabled": false
+      },
+      "lang": {
+        "lng": null
+      },
+      "sync": {
+        "isEnabled": false,
+        "syncProvider": null,
+        "isCompressionEnabled": true,
+        "syncInterval": 0,
+        "isEncryptionEnabled": false,
+        "encryptionPassword": null
+      },
+      "timeline": {
+        "isWorkStartEndEnabled": false,
+        "workStart": "9:00",
+        "workEnd": "17:00"
+      },
+      "reminder": {},
+      "focus": {
+        "startSound": null,
+        "breakSound": null
+      },
+      "sound": {
+        "volume": 70,
+        "isPlayDoneSound": true,
+        "doneSound": "done2.mp3",
+        "isPlayTickSound": false,
+        "tickSound": null
+      },
+      "tracking": {
+        "trackingInterval": 1000,
+        "trackingReminderMinTime": 60000,
+        "isTrackingReminderEnabled": false
+      },
+      "quickNotes": {},
+      "dominaMode": {}
+    },
+    "task": {
+      "ids": ["active-task-1", "active-task-2", "active-task-subtask-1"],
+      "entities": {
+        "active-task-1": {
+          "id": "active-task-1",
+          "projectId": "test-project-1",
+          "title": "E2E Import Test - Active Task With Subtask",
+          "subTaskIds": ["active-task-subtask-1"],
+          "timeSpentOnDay": {},
+          "timeSpent": 0,
+          "timeEstimate": 3600000,
+          "isDone": false,
+          "doneOn": null,
+          "notes": "",
+          "tagIds": ["TODAY"],
+          "parentId": null,
+          "remindAt": null,
+          "created": 1733000000000,
+          "repeatCfgId": null,
+          "plannedAt": null,
+          "dueDate": null,
+          "attachments": [],
+          "_hideSubTasksMode": null
+        },
+        "active-task-subtask-1": {
+          "id": "active-task-subtask-1",
+          "projectId": "test-project-1",
+          "title": "E2E Import Test - Subtask of Active Task",
+          "subTaskIds": [],
+          "timeSpentOnDay": {},
+          "timeSpent": 0,
+          "timeEstimate": 1800000,
+          "isDone": false,
+          "doneOn": null,
+          "notes": "",
+          "tagIds": [],
+          "parentId": "active-task-1",
+          "remindAt": null,
+          "created": 1733000000001,
+          "repeatCfgId": null,
+          "plannedAt": null,
+          "dueDate": null,
+          "attachments": []
+        },
+        "active-task-2": {
+          "id": "active-task-2",
+          "projectId": "test-project-1",
+          "title": "E2E Import Test - Simple Active Task",
+          "subTaskIds": [],
+          "timeSpentOnDay": { "2024-12-01": 1800000 },
+          "timeSpent": 1800000,
+          "timeEstimate": 3600000,
+          "isDone": false,
+          "doneOn": null,
+          "notes": "This task has some tracked time",
+          "tagIds": ["TODAY"],
+          "parentId": null,
+          "remindAt": null,
+          "created": 1733000000002,
+          "repeatCfgId": null,
+          "plannedAt": null,
+          "dueDate": null,
+          "attachments": []
+        }
+      },
+      "currentTaskId": null,
+      "selectedTaskId": null,
+      "taskDetailTargetPanel": null,
+      "lastCurrentTaskId": null,
+      "isDataLoaded": true
+    },
+    "tag": {
+      "ids": ["TODAY"],
+      "entities": {
+        "TODAY": {
+          "id": "TODAY",
+          "title": "Today",
+          "taskIds": ["active-task-1", "active-task-2"],
+          "icon": "wb_sunny",
+          "color": null,
+          "created": 1733000000000,
+          "theme": {
+            "primary": "#ffa726",
+            "accent": "#ff4081",
+            "warn": "#e91e63",
+            "huePrimary": "400",
+            "hueAccent": "500",
+            "hueWarn": "500",
+            "isAutoContrast": true,
+            "isDisableBackgroundGradient": false,
+            "isDisableBackgroundTint": true,
+            "backgroundImageDark": "",
+            "backgroundImageLight": null
+          },
+          "workStart": {},
+          "workEnd": {},
+          "breakNr": {},
+          "breakTime": {}
+        }
+      }
+    },
+    "simpleCounter": {
+      "ids": [],
+      "entities": {}
+    },
+    "taskRepeatCfg": {
+      "ids": [],
+      "entities": {}
+    },
+    "reminders": [],
+    "note": {
+      "ids": [],
+      "entities": {},
+      "todayOrder": []
+    },
+    "metric": {
+      "ids": [],
+      "entities": {}
+    },
+    "planner": {
+      "days": {},
+      "addPlannedTasksDialogLastShown": null
+    },
+    "issueProvider": {
+      "ids": [],
+      "entities": {}
+    },
+    "boards": {
+      "boardCfgs": []
+    },
+    "timeTracking": {
+      "project": {
+        "test-project-1": {
+          "2024-12-01": 1800000
+        }
+      },
+      "tag": {
+        "TODAY": {
+          "2024-12-01": 1800000
+        }
+      }
+    },
+    "archiveYoung": {
+      "task": {
+        "ids": ["archived-task-1", "archived-task-2"],
+        "entities": {
+          "archived-task-1": {
+            "id": "archived-task-1",
+            "projectId": "test-project-1",
+            "title": "E2E Import Test - Archived Task Young",
+            "subTaskIds": [],
+            "timeSpentOnDay": { "2024-11-30": 3600000 },
+            "timeSpent": 3600000,
+            "timeEstimate": 3600000,
+            "isDone": true,
+            "doneOn": 1732999000000,
+            "notes": "This task was completed and archived",
+            "tagIds": [],
+            "parentId": null,
+            "remindAt": null,
+            "created": 1732900000000,
+            "repeatCfgId": null,
+            "plannedAt": null,
+            "dueDate": null,
+            "attachments": []
+          },
+          "archived-task-2": {
+            "id": "archived-task-2",
+            "projectId": "test-project-1",
+            "title": "E2E Import Test - Another Archived Task Young",
+            "subTaskIds": [],
+            "timeSpentOnDay": { "2024-11-29": 7200000 },
+            "timeSpent": 7200000,
+            "timeEstimate": 7200000,
+            "isDone": true,
+            "doneOn": 1732998000000,
+            "notes": "",
+            "tagIds": [],
+            "parentId": null,
+            "remindAt": null,
+            "created": 1732800000000,
+            "repeatCfgId": null,
+            "plannedAt": null,
+            "dueDate": null,
+            "attachments": []
+          }
+        }
+      },
+      "timeTracking": {
+        "project": {
+          "test-project-1": {
+            "2024-11-30": 3600000,
+            "2024-11-29": 7200000
+          }
+        },
+        "tag": {}
+      },
+      "lastTimeTrackingFlush": 1732999000000
+    },
+    "archiveOld": {
+      "task": {
+        "ids": ["old-archived-task-1"],
+        "entities": {
+          "old-archived-task-1": {
+            "id": "old-archived-task-1",
+            "projectId": "test-project-1",
+            "title": "E2E Import Test - Old Archived Task",
+            "subTaskIds": [],
+            "timeSpentOnDay": { "2024-10-15": 5400000 },
+            "timeSpent": 5400000,
+            "timeEstimate": 7200000,
+            "isDone": true,
+            "doneOn": 1729000000000,
+            "notes": "This is an old archived task",
+            "tagIds": [],
+            "parentId": null,
+            "remindAt": null,
+            "created": 1728900000000,
+            "repeatCfgId": null,
+            "plannedAt": null,
+            "dueDate": null,
+            "attachments": []
+          }
+        }
+      },
+      "timeTracking": {
+        "project": {
+          "test-project-1": {
+            "2024-10-15": 5400000
+          }
+        },
+        "tag": {}
+      },
+      "lastTimeTrackingFlush": 1729000000000
+    },
+    "pluginMetadata": [],
+    "pluginUserData": []
+  }
+}
