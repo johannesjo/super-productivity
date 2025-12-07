@@ -298,6 +298,115 @@ describe('SyncService', () => {
       expect(results[0].accepted).toBe(false);
       expect(results[0].error).toBe('Payload too large');
     });
+
+    it('should reject complex payloads for regular operations', () => {
+      const service = getSyncService();
+
+      // Create a deeply nested object that exceeds complexity limits
+      const createDeeplyNested = (depth: number): Record<string, unknown> => {
+        if (depth === 0) return { value: 'leaf' };
+        return { nested: createDeeplyNested(depth - 1) };
+      };
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'UPDATE_TASK',
+        opType: 'UPD',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: createDeeplyNested(25), // Exceeds max depth of 20
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(false);
+      expect(results[0].error).toBe('Payload too complex (max depth 20, max keys 10000)');
+    });
+
+    it('should accept complex payloads for SYNC_IMPORT operations', () => {
+      const service = getSyncService();
+
+      // Create a deeply nested object that would fail complexity check for regular ops
+      const createDeeplyNested = (depth: number): Record<string, unknown> => {
+        if (depth === 0) return { value: 'leaf' };
+        return { nested: createDeeplyNested(depth - 1) };
+      };
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: 'SYNC_IMPORT',
+        entityType: 'ALL',
+        payload: createDeeplyNested(25), // Exceeds max depth of 20 but allowed for SYNC_IMPORT
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(true);
+      expect(results[0].serverSeq).toBeDefined();
+    });
+
+    it('should accept complex payloads for BACKUP_IMPORT operations', () => {
+      const service = getSyncService();
+
+      // Create an object with many keys that would fail complexity check
+      const manyKeys: Record<string, string> = {};
+      for (let i = 0; i < 15000; i++) {
+        manyKeys[`key${i}`] = `value${i}`;
+      }
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: 'BACKUP_IMPORT',
+        entityType: 'ALL',
+        payload: manyKeys, // Exceeds max keys of 10000 but allowed for BACKUP_IMPORT
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(true);
+      expect(results[0].serverSeq).toBeDefined();
+    });
+
+    it('should accept complex payloads for REPAIR operations', () => {
+      const service = getSyncService();
+
+      // Create a deeply nested object
+      const createDeeplyNested = (depth: number): Record<string, unknown> => {
+        if (depth === 0) return { value: 'leaf' };
+        return { nested: createDeeplyNested(depth - 1) };
+      };
+
+      const op: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: 'REPAIR',
+        entityType: 'ALL',
+        payload: createDeeplyNested(25), // Exceeds max depth of 20 but allowed for REPAIR
+        vectorClock: {},
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = service.uploadOps(userId, clientId, [op]);
+
+      expect(results[0].accepted).toBe(true);
+      expect(results[0].serverSeq).toBeDefined();
+    });
   });
 
   describe('getOpsSince', () => {

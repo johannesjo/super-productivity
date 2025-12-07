@@ -1191,7 +1191,13 @@ export class SyncService {
 
     // Check payload complexity BEFORE JSON.stringify to prevent DoS
     // Deep nesting can cause exponential CPU usage during serialization
-    if (!this.validatePayloadComplexity(op.payload)) {
+    // Skip for full-state operations (SYNC_IMPORT, BACKUP_IMPORT, REPAIR) which contain
+    // the entire application state and are already size-limited via bodyLimit
+    const isFullStateOp =
+      op.opType === 'SYNC_IMPORT' ||
+      op.opType === 'BACKUP_IMPORT' ||
+      op.opType === 'REPAIR';
+    if (!isFullStateOp && !this.validatePayloadComplexity(op.payload)) {
       return {
         valid: false,
         error: 'Payload too complex (max depth 20, max keys 10000)',
