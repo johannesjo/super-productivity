@@ -581,6 +581,275 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('appendBatch', () => {
+    it('should append multiple operations in a single transaction', async () => {
+      const ops = [
+        createTestOperation({ entityId: 'task1' }),
+        createTestOperation({ entityId: 'task2' }),
+        createTestOperation({ entityId: 'task3' }),
+      ];
+
+      const seqs = await service.appendBatch(ops);
+
+      expect(seqs.length).toBe(3);
+      const storedOps = await service.getOpsAfterSeq(0);
+      expect(storedOps.length).toBe(3);
+    });
+
+    it('should return sequential sequence numbers', async () => {
+      const ops = [
+        createTestOperation({ entityId: 'task1' }),
+        createTestOperation({ entityId: 'task2' }),
+      ];
+
+      const seqs = await service.appendBatch(ops);
+
+      expect(seqs[1]).toBe(seqs[0] + 1);
+    });
+
+    it('should set source and syncedAt for remote batch', async () => {
+      const ops = [
+        createTestOperation({ entityId: 'task1' }),
+        createTestOperation({ entityId: 'task2' }),
+      ];
+
+      await service.appendBatch(ops, 'remote');
+
+      const storedOps = await service.getOpsAfterSeq(0);
+      expect(storedOps[0].source).toBe('remote');
+      expect(storedOps[0].syncedAt).toBeDefined();
+      expect(storedOps[1].source).toBe('remote');
+      expect(storedOps[1].syncedAt).toBeDefined();
+    });
+
+    it('should set applicationStatus to pending when pendingApply is true', async () => {
+      const ops = [createTestOperation({ entityId: 'task1' })];
+
+      await service.appendBatch(ops, 'remote', { pendingApply: true });
+
+      const storedOps = await service.getOpsAfterSeq(0);
+      expect(storedOps[0].applicationStatus).toBe('pending');
+    });
+
+    it('should handle empty array', async () => {
+      const seqs = await service.appendBatch([]);
+
+      expect(seqs).toEqual([]);
+    });
+  });
+
+  describe('getOpById', () => {
+    it('should return operation entry by ID', async () => {
+      const op = createTestOperation();
+      await service.append(op);
+
+      const entry = await service.getOpById(op.id);
+
+      expect(entry).toBeDefined();
+      expect(entry!.op.id).toBe(op.id);
+    });
+
+    it('should return undefined for non-existent ID', async () => {
+      const entry = await service.getOpById('non-existent-id');
+
+      expect(entry).toBeUndefined();
+    });
+  });
+
+  describe('markApplied', () => {
+    it('should update applicationStatus from pending to applied', async () => {
+      const op = createTestOperation();
+      const seq = await service.append(op, 'remote', { pendingApply: true });
+
+      const before = await service.getOpsAfterSeq(0);
+      expect(before[0].applicationStatus).toBe('pending');
+
+      await service.markApplied([seq]);
+
+      const after = await service.getOpsAfterSeq(0);
+      expect(after[0].applicationStatus).toBe('applied');
+    });
+
+    it('should not change status if not pending', async () => {
+      const op = createTestOperation();
+      const seq = await service.append(op, 'remote'); // Not pending
+
+      await service.markApplied([seq]);
+
+      const after = await service.getOpsAfterSeq(0);
+      expect(after[0].applicationStatus).toBe('applied'); // Was already applied
+    });
+
+    it('should handle empty array', async () => {
+      await service.markApplied([]);
+      // Should not throw
+    });
+  });
+
+  describe('getPendingRemoteOps', () => {
+    it('should return only pending remote operations', async () => {
+      const localOp = createTestOperation({ entityId: 'local' });
+      const remoteApplied = createTestOperation({ entityId: 'applied' });
+      const remotePending = createTestOperation({ entityId: 'pending' });
+
+      await service.append(localOp, 'local');
+      await service.append(remoteApplied, 'remote'); // applied by default
+      await service.append(remotePending, 'remote', { pendingApply: true });
+
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(1);
+      expect(pending[0].op.entityId).toBe('pending');
+    });
+
+    it('should return empty array when no pending ops', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'remote');
+
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(0);
+    });
+  });
+
+  describe('markFailed', () => {
+    it('should increment retry count', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'remote', { pendingApply: true });
+
+      await service.markFailed([op.id]);
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops[0].retryCount).toBe(1);
+      expect(ops[0].applicationStatus).toBe('failed');
+    });
+
+    it('should increment retry count on subsequent failures', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'remote', { pendingApply: true });
+
+      await service.markFailed([op.id]);
+      await service.markFailed([op.id]);
+      await service.markFailed([op.id]);
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops[0].retryCount).toBe(3);
+    });
+
+    it('should mark as rejected when max retries reached', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'remote', { pendingApply: true });
+
+      await service.markFailed([op.id], 3); // maxRetries = 3
+      await service.markFailed([op.id], 3);
+      await service.markFailed([op.id], 3); // 3rd failure = rejected
+
+      const ops = await service.getOpsAfterSeq(0);
+      expect(ops[0].rejectedAt).toBeDefined();
+      expect(ops[0].applicationStatus).toBeUndefined();
+    });
+
+    it('should handle empty array', async () => {
+      await service.markFailed([]);
+      // Should not throw
+    });
+  });
+
+  describe('getFailedRemoteOps', () => {
+    it('should return only failed remote operations', async () => {
+      const pending = createTestOperation({ entityId: 'pending' });
+      const failed = createTestOperation({ entityId: 'failed' });
+      const rejected = createTestOperation({ entityId: 'rejected' });
+
+      await service.append(pending, 'remote', { pendingApply: true });
+      await service.append(failed, 'remote', { pendingApply: true });
+      await service.append(rejected, 'remote', { pendingApply: true });
+
+      await service.markFailed([failed.id]);
+      await service.markRejected([rejected.id]);
+
+      const failedOps = await service.getFailedRemoteOps();
+
+      expect(failedOps.length).toBe(1);
+      expect(failedOps[0].op.entityId).toBe('failed');
+    });
+
+    it('should return empty array when no failed ops', async () => {
+      const op = createTestOperation();
+      await service.append(op, 'remote');
+
+      const failed = await service.getFailedRemoteOps();
+
+      expect(failed.length).toBe(0);
+    });
+  });
+
+  describe('crash recovery scenarios', () => {
+    it('should allow recovering pending ops after simulated crash', async () => {
+      // Simulate: ops stored as pending but never marked applied (crash before dispatch)
+      const op1 = createTestOperation({ entityId: 'task1' });
+      const op2 = createTestOperation({ entityId: 'task2' });
+
+      await service.appendBatch([op1, op2], 'remote', { pendingApply: true });
+
+      // Simulating "restart" - get pending ops for recovery
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(2);
+      expect(pending.map((p) => p.op.entityId).sort()).toEqual(['task1', 'task2']);
+    });
+
+    it('should track partial application progress', async () => {
+      const ops = [
+        createTestOperation({ entityId: 'task1' }),
+        createTestOperation({ entityId: 'task2' }),
+        createTestOperation({ entityId: 'task3' }),
+      ];
+
+      const seqs = await service.appendBatch(ops, 'remote', { pendingApply: true });
+
+      // Simulate: first op applied, then crash
+      await service.markApplied([seqs[0]]);
+
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(2);
+      expect(pending.map((p) => p.op.entityId).sort()).toEqual(['task2', 'task3']);
+    });
+  });
+
+  describe('appliedOpIds cache', () => {
+    it('should return cached result when no new ops added', async () => {
+      const op = createTestOperation();
+      await service.append(op);
+
+      // First call builds cache
+      const ids1 = await service.getAppliedOpIds();
+      // Second call should use cache
+      const ids2 = await service.getAppliedOpIds();
+
+      expect(ids1.size).toBe(1);
+      expect(ids2.size).toBe(1);
+      expect(ids1.has(op.id)).toBe(true);
+    });
+
+    it('should invalidate cache when new ops added', async () => {
+      const op1 = createTestOperation({ entityId: 'task1' });
+      await service.append(op1);
+
+      const ids1 = await service.getAppliedOpIds();
+      expect(ids1.size).toBe(1);
+
+      // Add new op
+      const op2 = createTestOperation({ entityId: 'task2' });
+      await service.append(op2);
+
+      const ids2 = await service.getAppliedOpIds();
+      expect(ids2.size).toBe(2);
+      expect(ids2.has(op2.id)).toBe(true);
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle empty arrays for markSynced', async () => {
       await service.markSynced([]);
