@@ -168,6 +168,15 @@ export class OperationLogStoreService {
     return !!entry;
   }
 
+  /**
+   * Gets an operation entry by its ID.
+   * Returns undefined if the operation doesn't exist.
+   */
+  async getOpById(id: string): Promise<OperationLogEntry | undefined> {
+    await this._ensureInit();
+    return this.db.getFromIndex('ops', 'byId', id);
+  }
+
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
     await this._ensureInit();
     return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));

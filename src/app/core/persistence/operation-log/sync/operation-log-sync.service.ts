@@ -82,6 +82,14 @@ export class OperationLogSyncService {
    * Upload pending local operations to remote storage.
    * Any piggybacked operations received during upload are automatically processed.
    *
+   * IMPORTANT: The order of operations is critical:
+   * 1. Upload ops → server may reject some with CONFLICT_CONCURRENT
+   * 2. Process piggybacked ops FIRST → triggers conflict detection with local pending ops
+   * 3. THEN mark server-rejected ops as rejected (if not already resolved via conflict dialog)
+   *
+   * This order ensures users see conflict dialogs when the server rejects their changes,
+   * rather than having their local changes silently discarded.
+   *
    * SAFETY: A wholly fresh client (no snapshot, no operations) should NOT upload.
    * Fresh clients must first download and apply remote data before they can contribute.
    * This prevents scenarios where a fresh/empty client overwrites existing remote data.
@@ -103,9 +111,70 @@ export class OperationLogSyncService {
 
     const result = await this.uploadService.uploadPendingOps(syncProvider);
 
-    // Process any piggybacked ops from the upload response
+    // STEP 1: Process piggybacked ops FIRST
+    // This is critical: piggybacked ops may contain the "winning" remote versions
+    // that caused our local ops to be rejected. By processing them first while our
+    // local ops are still in the pending list, conflict detection will work properly
+    // and the user will see a conflict dialog to choose which version to keep.
     if (result.piggybackedOps.length > 0) {
       await this._processRemoteOps(result.piggybackedOps);
+    }
+
+    // STEP 2: Now handle server-rejected operations
+    // At this point, conflicts have been detected and presented to the user.
+    // We mark remaining rejected ops (those not already resolved via conflict dialog)
+    // as rejected so they won't be re-uploaded.
+    await this._handleRejectedOps(result.rejectedOps);
+  }
+
+  /**
+   * Handles operations that were rejected by the server.
+   *
+   * This is called AFTER processing piggybacked ops to ensure that:
+   * 1. Conflicts are detected properly (local ops still in pending list)
+   * 2. User has had a chance to resolve conflicts via the dialog
+   * 3. Only ops that weren't resolved via conflict dialog get marked rejected
+   *
+   * @param rejectedOps - Operations rejected by the server with error messages
+   */
+  private async _handleRejectedOps(
+    rejectedOps: Array<{ opId: string; error?: string }>,
+  ): Promise<void> {
+    if (rejectedOps.length === 0) {
+      return;
+    }
+
+    // Check which rejected ops are still pending (not yet handled by conflict resolution)
+    const stillPendingRejected: string[] = [];
+    for (const rejected of rejectedOps) {
+      const entry = await this.opLogStore.getOpById(rejected.opId);
+      // Only mark as rejected if:
+      // - Op still exists (wasn't somehow removed)
+      // - Op is not yet synced (if synced, it was accepted after all)
+      // - Op is not already rejected (conflict resolution may have already handled it)
+      if (entry && !entry.syncedAt && !entry.rejectedAt) {
+        stillPendingRejected.push(rejected.opId);
+        OpLog.normal(
+          `OperationLogSyncService: Marking op ${rejected.opId} as rejected (not resolved via conflict): ${rejected.error || 'unknown error'}`,
+        );
+      }
+    }
+
+    if (stillPendingRejected.length > 0) {
+      await this.opLogStore.markRejected(stillPendingRejected);
+      OpLog.normal(
+        `OperationLogSyncService: Marked ${stillPendingRejected.length} server-rejected ops as rejected`,
+      );
+
+      // Notify user if significant number of ops were rejected without conflict resolution
+      const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
+      if (stillPendingRejected.length >= MAX_REJECTED_OPS_BEFORE_WARNING) {
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.UPLOAD_OPS_REJECTED,
+          translateParams: { count: stillPendingRejected.length },
+        });
+      }
     }
   }
 

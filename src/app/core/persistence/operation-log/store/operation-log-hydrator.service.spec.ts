@@ -727,5 +727,72 @@ describe('OperationLogHydratorService', () => {
         }),
       );
     });
+
+    it('should strip syncProvider from remote sync data to preserve local setting', async () => {
+      // Simulate remote data with a syncProvider that should NOT overwrite local
+      const syncedDataWithProvider = {
+        task: { entities: {}, ids: [] },
+        project: { entities: {}, ids: [] },
+        globalConfig: {
+          sync: {
+            syncProvider: 'Dropbox', // Remote has Dropbox
+            isEnabled: true,
+          },
+          misc: { someOtherSetting: true },
+        },
+      } as any;
+
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedDataWithProvider));
+      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(100));
+
+      await service.hydrateFromRemoteSync();
+
+      // Verify the dispatched data has syncProvider nulled out
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        loadAllData({
+          appDataComplete: jasmine.objectContaining({
+            globalConfig: jasmine.objectContaining({
+              sync: jasmine.objectContaining({
+                syncProvider: null, // Should be null, not 'Dropbox'
+                isEnabled: true, // Other sync settings preserved
+              }),
+            }),
+          }),
+        }),
+      );
+
+      // Verify the state cache also has syncProvider nulled out
+      expect(mockOpLogStore.saveStateCache).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          state: jasmine.objectContaining({
+            globalConfig: jasmine.objectContaining({
+              sync: jasmine.objectContaining({
+                syncProvider: null,
+              }),
+            }),
+          }),
+        }),
+      );
+    });
+
+    it('should handle remote sync data without globalConfig', async () => {
+      const syncedDataWithoutConfig = {
+        task: { entities: {}, ids: [] },
+        project: { entities: {}, ids: [] },
+      } as any;
+
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedDataWithoutConfig));
+
+      await service.hydrateFromRemoteSync();
+
+      // Should not throw and should dispatch the data as-is
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        loadAllData({ appDataComplete: syncedDataWithoutConfig }),
+      );
+    });
   });
 });

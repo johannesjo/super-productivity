@@ -602,7 +602,9 @@ export class OperationLogHydratorService {
 
     try {
       // 1. Read synced data directly from 'pf' database (bypassing NgRx delegate)
-      const syncedData = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
+      const syncedData = this._stripLocalOnlySettings(
+        await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls(),
+      );
       OpLog.normal('OperationLogHydratorService: Loaded synced data from pf database');
 
       // 2. Get client ID for vector clock
@@ -895,5 +897,42 @@ export class OperationLogHydratorService {
         `OperationLogHydratorService: ${stillFailedOpIds.length} ops still failing after retry`,
       );
     }
+  }
+
+  /**
+   * Strips local-only settings from synced data to prevent them from being
+   * overwritten by remote data. These settings should remain local to each client.
+   *
+   * Currently strips:
+   * - globalConfig.sync.syncProvider: Each client chooses its own sync provider
+   */
+  private _stripLocalOnlySettings(data: unknown): unknown {
+    if (!data || typeof data !== 'object') {
+      return data;
+    }
+
+    const typedData = data as Record<string, unknown>;
+    if (!typedData['globalConfig']) {
+      return data;
+    }
+
+    const globalConfig = typedData['globalConfig'] as Record<string, unknown>;
+    if (!globalConfig['sync']) {
+      return data;
+    }
+
+    const sync = globalConfig['sync'] as Record<string, unknown>;
+
+    // Return data with syncProvider nulled out
+    return {
+      ...typedData,
+      globalConfig: {
+        ...globalConfig,
+        sync: {
+          ...sync,
+          syncProvider: null, // Local-only setting, don't overwrite from remote
+        },
+      },
+    };
   }
 }

@@ -15,9 +15,6 @@ import {
   OPS_DIR,
 } from '../store/operation-log-manifest.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
-import { SnackService } from '../../../snack/snack.service';
-import { T } from '../../../../t.const';
-import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
 
@@ -35,10 +32,16 @@ const FULL_STATE_OP_TYPES = new Set([
  * Result of an upload operation. May contain piggybacked operations
  * from other clients when using API-based sync.
  */
+export interface RejectedOpInfo {
+  opId: string;
+  error?: string;
+}
+
 export interface UploadResult {
   uploadedCount: number;
   piggybackedOps: Operation[];
   rejectedCount: number;
+  rejectedOps: RejectedOpInfo[];
 }
 
 /**
@@ -53,7 +56,6 @@ export class OperationLogUploadService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private manifestService = inject(OperationLogManifestService);
-  private snackService = inject(SnackService);
   private encryptionService = inject(OperationEncryptionService);
 
   async uploadPendingOps(
@@ -61,7 +63,7 @@ export class OperationLogUploadService {
   ): Promise<UploadResult> {
     if (!syncProvider) {
       OpLog.warn('OperationLogUploadService: No active sync provider passed for upload.');
-      return { uploadedCount: 0, piggybackedOps: [], rejectedCount: 0 };
+      return { uploadedCount: 0, piggybackedOps: [], rejectedCount: 0, rejectedOps: [] };
     }
 
     // Use operation sync if supported
@@ -79,6 +81,7 @@ export class OperationLogUploadService {
     OpLog.normal('OperationLogUploadService: Uploading pending operations via API...');
 
     const piggybackedOps: Operation[] = [];
+    const rejectedOps: RejectedOpInfo[] = [];
     let uploadedCount = 0;
     let rejectedCount = 0;
 
@@ -134,6 +137,7 @@ export class OperationLogUploadService {
             // Don't mark as rejected - leave as unsynced for retry
           } else {
             await this.opLogStore.markRejected([entry.op.id]);
+            rejectedOps.push({ opId: entry.op.id, error: result.error });
             rejectedCount++;
             OpLog.warn(
               `OperationLogUploadService: Full-state op ${entry.op.id} rejected: ${result.error}`,
@@ -214,16 +218,19 @@ export class OperationLogUploadService {
           piggybackedOps.push(...ops);
         }
 
-        // Handle rejected operations - mark them as permanently rejected
-        // This prevents infinite retry loops for invalid operations
+        // Collect rejected operations - DO NOT mark as rejected here!
+        // The sync service must process piggybacked ops FIRST to allow proper conflict detection.
+        // If we mark rejected before processing piggybacked ops, the local ops won't be in the
+        // pending list, conflict detection won't find them, and user's changes are silently lost.
         const rejected = response.results.filter((r) => !r.accepted);
         if (rejected.length > 0) {
-          const rejectedOpIds = rejected.map((r) => r.opId);
-          await this.opLogStore.markRejected(rejectedOpIds);
+          for (const r of rejected) {
+            rejectedOps.push({ opId: r.opId, error: r.error });
+          }
           rejectedCount += rejected.length;
 
           OpLog.warn(
-            `OperationLogUploadService: ${rejected.length} ops were permanently rejected`,
+            `OperationLogUploadService: ${rejected.length} ops were rejected by server (will be handled after piggybacked ops)`,
             rejected.map((r) => ({ opId: r.opId, error: r.error })),
           );
         }
@@ -235,16 +242,10 @@ export class OperationLogUploadService {
       );
     });
 
-    // Notify user if significant number of ops were rejected
-    if (rejectedCount >= MAX_REJECTED_OPS_BEFORE_WARNING) {
-      this.snackService.open({
-        type: 'ERROR',
-        msg: T.F.SYNC.S.UPLOAD_OPS_REJECTED,
-        translateParams: { count: rejectedCount },
-      });
-    }
+    // Note: We no longer show the rejection warning here since rejections
+    // may be resolved via conflict dialog. The sync service handles this.
 
-    return { uploadedCount, piggybackedOps, rejectedCount };
+    return { uploadedCount, piggybackedOps, rejectedCount, rejectedOps };
   }
 
   private async _uploadPendingOpsViaFiles(
@@ -316,7 +317,7 @@ export class OperationLogUploadService {
     });
 
     // File-based sync doesn't support piggybacking or per-op rejection
-    return { uploadedCount, piggybackedOps: [], rejectedCount: 0 };
+    return { uploadedCount, piggybackedOps: [], rejectedCount: 0, rejectedOps: [] };
   }
 
   /**

@@ -90,7 +90,12 @@ describe('OperationLogUploadService', () => {
     it('should return empty result when no sync provider', async () => {
       const result = await service.uploadPendingOps(null as any);
 
-      expect(result).toEqual({ uploadedCount: 0, rejectedCount: 0, piggybackedOps: [] });
+      expect(result).toEqual({
+        uploadedCount: 0,
+        rejectedCount: 0,
+        piggybackedOps: [],
+        rejectedOps: [],
+      });
     });
 
     describe('API-based sync', () => {
@@ -158,6 +163,7 @@ describe('OperationLogUploadService', () => {
           uploadedCount: 0,
           rejectedCount: 0,
           piggybackedOps: [],
+          rejectedOps: [],
         });
       });
 
@@ -201,7 +207,7 @@ describe('OperationLogUploadService', () => {
         expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(42);
       });
 
-      it('should handle rejected operations', async () => {
+      it('should return rejected operations info (not mark them rejected)', async () => {
         const pendingOps = [
           createMockEntry(1, 'op-1', 'client-1'),
           createMockEntry(2, 'op-2', 'client-1'),
@@ -211,7 +217,7 @@ describe('OperationLogUploadService', () => {
           Promise.resolve({
             results: [
               { opId: 'op-1', accepted: true },
-              { opId: 'op-2', accepted: false, reason: 'duplicate' },
+              { opId: 'op-2', accepted: false, error: 'duplicate' },
             ],
             latestSeq: 10,
             newOps: [],
@@ -221,7 +227,13 @@ describe('OperationLogUploadService', () => {
         const result = await service.uploadPendingOps(mockApiProvider);
 
         expect(result.uploadedCount).toBe(1);
+        expect(result.rejectedCount).toBe(1);
+        expect(result.rejectedOps.length).toBe(1);
+        expect(result.rejectedOps[0].opId).toBe('op-2');
+        expect(result.rejectedOps[0].error).toBe('duplicate');
         expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+        // Should NOT mark rejected - that's the sync service's responsibility
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });
 
       it('should return piggybacked operations', async () => {
@@ -307,6 +319,7 @@ describe('OperationLogUploadService', () => {
           uploadedCount: 0,
           rejectedCount: 0,
           piggybackedOps: [],
+          rejectedOps: [],
         });
       });
 
@@ -727,7 +740,7 @@ describe('OperationLogUploadService', () => {
           Promise.resolve({
             results: [
               { opId: 'op-1', accepted: true },
-              { opId: 'op-2', accepted: false, reason: 'DUPLICATE' },
+              { opId: 'op-2', accepted: false, error: 'DUPLICATE' },
               { opId: 'op-3', accepted: true },
             ],
             latestSeq: 10,
@@ -740,8 +753,12 @@ describe('OperationLogUploadService', () => {
         // 2 accepted, 1 rejected
         expect(result.uploadedCount).toBe(2);
         expect(result.rejectedCount).toBe(1);
+        expect(result.rejectedOps.length).toBe(1);
+        expect(result.rejectedOps[0].opId).toBe('op-2');
         // Only accepted ops should be marked synced
         expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1, 3]);
+        // Rejected ops NOT marked here - sync service handles it
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
       });
 
       it('should handle server returning no results for some ops', async () => {
