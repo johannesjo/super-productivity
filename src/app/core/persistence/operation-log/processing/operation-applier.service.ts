@@ -11,6 +11,7 @@ import {
 } from '../operation-log.const';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
+import { ArchiveOperationHandler } from './archive-operation-handler.service';
 
 /**
  * Interface for tracking pending operations that failed due to missing dependencies.
@@ -37,6 +38,7 @@ export class OperationApplierService {
   private store = inject(Store);
   private dependencyResolver = inject(DependencyResolverService);
   private snackService = inject(SnackService);
+  private archiveOperationHandler = inject(ArchiveOperationHandler);
 
   /**
    * Queue of operations that failed due to missing dependencies.
@@ -207,6 +209,11 @@ export class OperationApplierService {
       action,
     );
     this.store.dispatch(action);
+
+    // Handle archive-specific side effects for remote operations
+    // This is called AFTER dispatch because the NgRx state must be updated first
+    await this.archiveOperationHandler.handleRemoteOperation(action);
+
     return true;
   }
 

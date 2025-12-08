@@ -700,6 +700,7 @@ flowchart TD
 This diagram illustrates how meta-reducers ensure atomic state changes across multiple entities, preventing inconsistency during sync. See Part F in [operation-log-architecture.md](./operation-log-architecture.md).
 
 **Implementation Status:** Complete. Key files:
+
 - `tag-shared.reducer.ts` - Tag deletion with task/repeat-cfg/time-tracking cleanup
 - `state-capture.meta-reducer.ts` - Before-state capture for multi-entity operations
 - `state-change-capture.service.ts` - Computes entity changes from state diff
@@ -771,3 +772,108 @@ flowchart LR
     style Problem fill:#ffebee,stroke:#c62828,stroke-width:2px
     style Solution fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
+
+---
+
+## 8. Archive Operations & Side Effects ✅ IMPLEMENTED
+
+This section documents how archive-related side effects are handled, establishing the general rule that **effects should never run for remote operations**.
+
+### 8.1 The General Rule: Effects Only for Local Actions
+
+```mermaid
+flowchart TD
+    subgraph Rule["🔒 GENERAL RULE"]
+        R1["All NgRx effects MUST use LOCAL_ACTIONS"]
+        R2["Effects should NEVER run for remote operations"]
+        R3["Side effects for remote ops are handled<br/>explicitly by OperationApplierService"]
+    end
+
+    subgraph Why["Why This Matters"]
+        W1["• Prevents duplicate side effects"]
+        W2["• Makes sync behavior predictable"]
+        W3["• Side effects happen exactly once<br/>(on originating client)"]
+        W4["• Receiving clients only update state"]
+    end
+
+    Rule --> Why
+
+    style Rule fill:#e8f5e9,stroke:#2e7d32,stroke-width:3px
+    style Why fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+### 8.2 Archive Operations Flow
+
+Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. This requires special handling:
+
+- **Local operations**: Effects handle side effects (using LOCAL_ACTIONS)
+- **Remote operations**: ArchiveOperationHandler handles side effects (called by OperationApplierService)
+
+```mermaid
+flowchart TD
+    subgraph LocalOp["LOCAL Operation (User Action)"]
+        L1[User archives tasks] --> L2[ArchiveService writes<br/>to IndexedDB]
+        L2 --> L3[Dispatch moveToArchive]
+        L3 --> L4[Meta-reducers update state]
+        L4 --> L5[Effects run via LOCAL_ACTIONS]
+        L5 --> L6[OperationLogEffects<br/>creates operation]
+    end
+
+    subgraph RemoteOp["REMOTE Operation (Sync)"]
+        R1[Download operation] --> R2[OperationApplierService<br/>dispatches action]
+        R2 --> R3[Meta-reducers update state]
+        R3 --> R4[ArchiveOperationHandler<br/>handles side effects]
+        R4 --> R5[Write/delete archive<br/>in IndexedDB]
+
+        NoEffect["❌ Effects DON'T run<br/>(action has meta.isRemote=true)"]
+    end
+
+    L6 -.->|"Sync"| R1
+
+    style LocalOp fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style RemoteOp fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style NoEffect fill:#ffebee,stroke:#c62828,stroke-width:2px
+```
+
+### 8.3 ArchiveOperationHandler Integration
+
+```mermaid
+flowchart TD
+    subgraph OperationApplierService["OperationApplierService"]
+        OA1[Receive operation] --> OA2[Check dependencies]
+        OA2 --> OA3[convertOpToAction]
+        OA3 --> OA4["store.dispatch(action)<br/>with meta.isRemote=true"]
+        OA4 --> OA5["archiveOperationHandler<br/>.handleRemoteOperation(action)"]
+    end
+
+    subgraph Handler["ArchiveOperationHandler"]
+        H1{Action Type?}
+        H1 -->|moveToArchive| H2[Write tasks to<br/>archiveYoung]
+        H1 -->|restoreTask| H3[Delete task from<br/>archive]
+        H1 -->|flushYoungToOld| H4[Move old tasks<br/>Young → Old]
+        H1 -->|other| H5[No-op]
+    end
+
+    OA5 --> H1
+
+    style OperationApplierService fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style Handler fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+```
+
+### 8.4 Archive Operations Summary
+
+| Operation         | Local Handling                              | Remote Handling                               |
+| ----------------- | ------------------------------------------- | --------------------------------------------- |
+| `moveToArchive`   | ArchiveService writes BEFORE dispatch       | ArchiveOperationHandler writes AFTER dispatch |
+| `restoreTask`     | Effect removes from archive (LOCAL_ACTIONS) | ArchiveOperationHandler removes from archive  |
+| `flushYoungToOld` | Effect executes flush (LOCAL_ACTIONS)       | ArchiveOperationHandler executes flush        |
+
+### 8.5 Key Files
+
+| File                                              | Purpose                                            |
+| ------------------------------------------------- | -------------------------------------------------- |
+| `processing/archive-operation-handler.service.ts` | Handles archive side effects for remote operations |
+| `processing/operation-applier.service.ts`         | Calls ArchiveOperationHandler after dispatching    |
+| `features/time-tracking/store/archive.effects.ts` | Effects for LOCAL archive operations only          |
+| `features/time-tracking/archive.service.ts`       | Local archive write logic (moveToArchive)          |
+| `features/time-tracking/task-archive.service.ts`  | Archive CRUD operations                            |
