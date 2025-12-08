@@ -63,9 +63,9 @@ describe('OperationCaptureService', () => {
           OpType.Create,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].entityType).toBe('TASK');
         expect(changes[0].entityId).toBe('task-1');
@@ -87,9 +87,9 @@ describe('OperationCaptureService', () => {
           OpType.Create,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(2);
         expect(changes.map((c) => c.entityId).sort()).toEqual(['task-1', 'task-2']);
         expect(changes.every((c) => c.opType === OpType.Create)).toBe(true);
@@ -112,9 +112,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].opType).toBe(OpType.Update);
         expect(changes[0].changes).toEqual({ title: 'Updated Title' });
@@ -135,9 +135,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].changes).toEqual({ title: 'Updated', projectId: 'proj-2' });
       });
@@ -154,9 +154,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, state, state);
+        service.computeAndEnqueue(action, state, state);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(0);
       });
 
@@ -175,9 +175,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].changes).toEqual({ tagIds: ['tag-1', 'tag-2'] });
       });
@@ -197,9 +197,9 @@ describe('OperationCaptureService', () => {
           OpType.Delete,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].entityType).toBe('TASK');
         expect(changes[0].entityId).toBe('task-1');
@@ -224,9 +224,9 @@ describe('OperationCaptureService', () => {
           OpType.Delete,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         const deletedIds = changes
           .filter((c) => c.opType === OpType.Delete)
           .map((c) => c.entityId);
@@ -265,9 +265,9 @@ describe('OperationCaptureService', () => {
           OpType.Delete,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(2);
 
         const taskChange = changes.find((c) => c.entityType === 'TASK');
@@ -311,9 +311,9 @@ describe('OperationCaptureService', () => {
           OpType.Delete,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(2);
 
         const tagChange = changes.find((c) => c.entityType === 'TAG');
@@ -342,9 +342,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].entityType).toBe('GLOBAL_CONFIG');
         expect(changes[0].entityId).toBe('*');
@@ -391,9 +391,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].entityType).toBe('TASK');
       });
@@ -428,9 +428,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(2);
         expect(changes.map((c) => c.entityType).sort()).toEqual(['TAG', 'TASK']);
       });
@@ -458,9 +458,9 @@ describe('OperationCaptureService', () => {
           OpType.Update,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(0);
       });
 
@@ -478,9 +478,9 @@ describe('OperationCaptureService', () => {
           OpType.Create,
         );
 
-        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+        service.computeAndEnqueue(action, beforeState, afterState);
 
-        const changes = service.dequeue('capture-1');
+        const changes = service.dequeue();
         expect(changes.length).toBe(1);
         expect(changes[0].entityType).toBe('TASK');
       });
@@ -488,27 +488,46 @@ describe('OperationCaptureService', () => {
   });
 
   describe('dequeue', () => {
-    it('should return entity changes for valid captureId', () => {
-      const beforeState = createTaskState({}) as unknown as RootState;
-      const afterState = createTaskState({
-        'task-1': { id: 'task-1', title: 'Task' },
+    it('should return entity changes in FIFO order', () => {
+      const state1 = createTaskState({}) as unknown as RootState;
+      const state2 = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task 1' },
+      }) as unknown as RootState;
+      const state3 = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task 1' },
+        'task-2': { id: 'task-2', title: 'Task 2' },
       }) as unknown as RootState;
 
-      const action = createPersistentAction(
+      const action1 = createPersistentAction(
         '[TaskShared] Add Task',
         'TASK',
         'task-1',
         OpType.Create,
       );
+      const action2 = createPersistentAction(
+        '[TaskShared] Add Task',
+        'TASK',
+        'task-2',
+        OpType.Create,
+      );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      // Enqueue two operations
+      service.computeAndEnqueue(action1, state1, state2);
+      service.computeAndEnqueue(action2, state2, state3);
 
-      const changes = service.dequeue('capture-1');
-      expect(changes.length).toBe(1);
+      // First dequeue should return first operation's changes
+      const firstChanges = service.dequeue();
+      expect(firstChanges.length).toBe(1);
+      expect(firstChanges[0].entityId).toBe('task-1');
+
+      // Second dequeue should return second operation's changes
+      const secondChanges = service.dequeue();
+      expect(secondChanges.length).toBe(1);
+      expect(secondChanges[0].entityId).toBe('task-2');
     });
 
-    it('should return empty array for unknown captureId', () => {
-      const changes = service.dequeue('unknown-capture-id');
+    it('should return empty array when queue is empty', () => {
+      const changes = service.dequeue();
       expect(changes).toEqual([]);
     });
 
@@ -525,14 +544,14 @@ describe('OperationCaptureService', () => {
         OpType.Create,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
-      expect(service.has('capture-1')).toBe(true);
+      service.computeAndEnqueue(action, beforeState, afterState);
+      expect(service.getQueueSize()).toBe(1);
 
-      service.dequeue('capture-1');
-      expect(service.has('capture-1')).toBe(false);
+      service.dequeue();
+      expect(service.getQueueSize()).toBe(0);
     });
 
-    it('should return empty array on second dequeue for same captureId', () => {
+    it('should return empty array on subsequent dequeue when queue is empty', () => {
       const beforeState = createTaskState({}) as unknown as RootState;
       const afterState = createTaskState({
         'task-1': { id: 'task-1', title: 'Task' },
@@ -545,12 +564,12 @@ describe('OperationCaptureService', () => {
         OpType.Create,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const firstDequeue = service.dequeue('capture-1');
+      const firstDequeue = service.dequeue();
       expect(firstDequeue.length).toBe(1);
 
-      const secondDequeue = service.dequeue('capture-1');
+      const secondDequeue = service.dequeue();
       expect(secondDequeue).toEqual([]);
     });
   });
@@ -567,30 +586,14 @@ describe('OperationCaptureService', () => {
         OpType.Create,
       );
 
-      service.computeAndEnqueue('capture-1', action, state, state);
+      service.computeAndEnqueue(action, state, state);
       expect(service.getQueueSize()).toBe(1);
 
-      service.computeAndEnqueue('capture-2', action, state, state);
+      service.computeAndEnqueue(action, state, state);
       expect(service.getQueueSize()).toBe(2);
 
-      service.dequeue('capture-1');
+      service.dequeue();
       expect(service.getQueueSize()).toBe(1);
-    });
-
-    it('should correctly check if captureId exists', () => {
-      expect(service.has('capture-1')).toBe(false);
-
-      const state = createTaskState({}) as unknown as RootState;
-      const action = createPersistentAction(
-        '[TaskShared] Add Task',
-        'TASK',
-        'task-1',
-        OpType.Create,
-      );
-
-      service.computeAndEnqueue('capture-1', action, state, state);
-      expect(service.has('capture-1')).toBe(true);
-      expect(service.has('capture-2')).toBe(false);
     });
 
     it('should clear all queued operations', () => {
@@ -602,39 +605,12 @@ describe('OperationCaptureService', () => {
         OpType.Create,
       );
 
-      service.computeAndEnqueue('capture-1', action, state, state);
-      service.computeAndEnqueue('capture-2', action, state, state);
+      service.computeAndEnqueue(action, state, state);
+      service.computeAndEnqueue(action, state, state);
       expect(service.getQueueSize()).toBe(2);
 
       service.clear();
       expect(service.getQueueSize()).toBe(0);
-      expect(service.has('capture-1')).toBe(false);
-      expect(service.has('capture-2')).toBe(false);
-    });
-  });
-
-  describe('stale entry cleanup', () => {
-    it('should clean up stale entries on new computeAndEnqueue', async () => {
-      const state = createTaskState({}) as unknown as RootState;
-      const action = createPersistentAction(
-        '[TaskShared] Add Task',
-        'TASK',
-        'task-1',
-        OpType.Create,
-      );
-
-      service.computeAndEnqueue('stale-capture', action, state, state);
-      expect(service.has('stale-capture')).toBe(true);
-
-      // Access private property to simulate time passing
-      // In a real scenario, we'd wait 5+ seconds, but that's too slow for tests
-      // Instead, we verify the cleanup logic exists by checking the queue isn't cleaned
-      // when entries are fresh
-      service.computeAndEnqueue('fresh-capture', action, state, state);
-
-      // Both should still exist (neither is stale yet)
-      expect(service.has('stale-capture')).toBe(true);
-      expect(service.has('fresh-capture')).toBe(true);
     });
   });
 
@@ -648,9 +624,9 @@ describe('OperationCaptureService', () => {
         OpType.Create,
       );
 
-      service.computeAndEnqueue('capture-1', action, emptyState, emptyState);
+      service.computeAndEnqueue(action, emptyState, emptyState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes).toEqual([]);
     });
 
@@ -668,9 +644,9 @@ describe('OperationCaptureService', () => {
       );
 
       // Should not throw
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       // Can't detect creation because before state is undefined
       expect(changes.length).toBe(0);
     });
@@ -703,9 +679,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(1);
       expect(changes[0].changes).toEqual({
         misc: { nested: { deep: { value: 'changed' } } },
@@ -731,9 +707,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(1);
       expect(changes[0].changes).toEqual({ projectId: null });
     });
@@ -760,9 +736,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(1);
       expect(changes[0].changes).toEqual({ projectId: 'proj-1' });
     });
@@ -789,9 +765,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(1);
       expect(changes[0].changes).toEqual({ projectId: undefined });
     });
@@ -810,9 +786,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, state, state);
+      service.computeAndEnqueue(action, state, state);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(0);
     });
 
@@ -833,9 +809,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(0);
     });
 
@@ -855,9 +831,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(1);
       expect(changes[0].changes).toEqual({ tagIds: ['c', 'b', 'a'] });
     });
@@ -878,9 +854,9 @@ describe('OperationCaptureService', () => {
         OpType.Update,
       );
 
-      service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+      service.computeAndEnqueue(action, beforeState, afterState);
 
-      const changes = service.dequeue('capture-1');
+      const changes = service.dequeue();
       expect(changes.length).toBe(0);
     });
   });

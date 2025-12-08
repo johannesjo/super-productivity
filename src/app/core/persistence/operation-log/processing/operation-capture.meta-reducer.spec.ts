@@ -50,7 +50,6 @@ describe('operationCaptureMetaReducer', () => {
     mockCaptureService = jasmine.createSpyObj('OperationCaptureService', [
       'computeAndEnqueue',
       'dequeue',
-      'has',
       'getQueueSize',
       'clear',
     ]);
@@ -102,49 +101,12 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(mockState, action);
 
-      // Should call computeAndEnqueue with captureId, action, beforeState, afterState
+      // Should call computeAndEnqueue with action, beforeState, afterState
       expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalledWith(
-        jasmine.any(String), // captureId
         action,
         mockState,
         mockModifiedState,
       );
-    });
-
-    it('should generate consistent captureId for same action', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction();
-
-      wrappedReducer(mockState, action);
-
-      const firstCallArgs = mockCaptureService.computeAndEnqueue.calls.first().args;
-      mockCaptureService.computeAndEnqueue.calls.reset();
-
-      wrappedReducer(mockState, action);
-
-      const secondCallArgs = mockCaptureService.computeAndEnqueue.calls.first().args;
-
-      // Same action should produce same captureId
-      expect(firstCallArgs[0]).toBe(secondCallArgs[0]);
-    });
-
-    it('should generate different captureId for different actions', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action1 = createMockAction({
-        meta: { ...createMockAction().meta, entityId: 'task-1' },
-      });
-      const action2 = createMockAction({
-        meta: { ...createMockAction().meta, entityId: 'task-2' },
-      });
-
-      wrappedReducer(mockState, action1);
-      const captureId1 = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-      mockCaptureService.computeAndEnqueue.calls.reset();
-
-      wrappedReducer(mockState, action2);
-      const captureId2 = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-
-      expect(captureId1).not.toBe(captureId2);
     });
 
     it('should NOT process remote actions', () => {
@@ -209,7 +171,7 @@ describe('operationCaptureMetaReducer', () => {
       let capturedAfterState: unknown = null;
 
       mockCaptureService.computeAndEnqueue.and.callFake(
-        (_captureId, _action, beforeState, afterState) => {
+        (_action, beforeState, afterState) => {
           capturedBeforeState = beforeState;
           capturedAfterState = afterState;
         },
@@ -260,64 +222,6 @@ describe('operationCaptureMetaReducer', () => {
         wrappedReducer(mockState, action);
         expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalled();
       });
-    });
-  });
-
-  describe('captureId generation', () => {
-    it('should include action type in captureId', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction({ type: '[Custom] Custom Action' });
-
-      wrappedReducer(mockState, action);
-
-      const captureId = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-      expect(captureId).toContain('[Custom] Custom Action');
-    });
-
-    it('should include entityId in captureId', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction({
-        meta: { ...createMockAction().meta, entityId: 'unique-entity-123' },
-      });
-
-      wrappedReducer(mockState, action);
-
-      const captureId = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-      expect(captureId).toContain('unique-entity-123');
-    });
-
-    it('should handle batch actions with entityIds array', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction({
-        meta: {
-          isPersistent: true,
-          entityType: 'TASK' as EntityType,
-          entityIds: ['task-1', 'task-2', 'task-3'],
-          opType: OpType.Update,
-          isBulk: true,
-        },
-      });
-
-      wrappedReducer(mockState, action);
-
-      const captureId = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-      expect(captureId).toContain('task-1,task-2,task-3');
-    });
-
-    it('should handle actions without entityId or entityIds', () => {
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      const action = createMockAction({
-        meta: {
-          isPersistent: true,
-          entityType: 'GLOBAL_CONFIG' as EntityType,
-          opType: OpType.Update,
-        },
-      });
-
-      wrappedReducer(mockState, action);
-
-      const captureId = mockCaptureService.computeAndEnqueue.calls.first().args[0];
-      expect(captureId).toContain('no-id');
     });
   });
 });

@@ -1,7 +1,7 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { ALL_ACTIONS } from '../../../util/local-actions.token';
-import { filter, mergeMap } from 'rxjs/operators';
+import { concatMap, filter } from 'rxjs/operators';
 import { LockService } from './sync/lock.service';
 import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
@@ -23,7 +23,6 @@ import {
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { OpType } from './operation.types';
-import { generateCaptureId } from './processing/operation-capture.util';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -54,9 +53,8 @@ export class OperationLogEffects {
       this.actions$.pipe(
         filter((action) => isPersistentAction(action)),
         filter((action) => !(action as PersistentAction).meta.isRemote),
-        // Use mergeMap with concurrency limit for parallel writes
-        // Lock service handles ordering; this prevents action queue backup
-        mergeMap((action) => this.writeOperation(action as PersistentAction), 4),
+        // Use concatMap for sequential processing to maintain FIFO queue order
+        concatMap((action) => this.writeOperation(action as PersistentAction)),
       ),
     { dispatch: false },
   );
@@ -76,11 +74,8 @@ export class OperationLogEffects {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, meta, ...actionPayload } = action;
 
-    // Generate captureId to retrieve pre-computed entity changes from queue
-    const captureId = generateCaptureId(action);
-
-    // Get pre-computed entity changes from the queue (synchronous capture from meta-reducer)
-    const entityChanges = this.operationCaptureService.dequeue(captureId);
+    // Get pre-computed entity changes from the FIFO queue (synchronous capture from meta-reducer)
+    const entityChanges = this.operationCaptureService.dequeue();
 
     // Create multi-entity payload with action payload and computed changes
     const multiEntityPayload: MultiEntityPayload = {

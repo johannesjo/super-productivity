@@ -20,7 +20,32 @@ import { devError } from '../../../../util/dev-error';
  * - Filters actions using isArchiveAffectingAction() helper
  * - Delegates all archive logic to ArchiveOperationHandler.handleOperation()
  *
- * ## Why This Architecture
+ * ## Why LOCAL_ACTIONS (Not Actions)
+ *
+ * Archive operations need different handling for local vs remote actions:
+ *
+ * - LOCAL actions: This effect calls ArchiveOperationHandler.handleOperation()
+ * - REMOTE actions: OperationApplierService calls ArchiveOperationHandler.handleOperation() directly
+ *
+ * If we used `Actions` (all actions), remote operations would be processed TWICE:
+ * 1. Explicitly by OperationApplierService (correct)
+ * 2. By this effect (duplicate!)
+ *
+ * Using LOCAL_ACTIONS ensures exactly one code path handles each archive operation.
+ *
+ * ## Operation Flow
+ *
+ * ```
+ * LOCAL OPERATIONS:
+ * User action -> Reducers -> This effect -> ArchiveOperationHandler.handleOperation()
+ *
+ * REMOTE OPERATIONS:
+ * OperationApplierService -> dispatch() -> Reducers
+ *                         \-> ArchiveOperationHandler.handleOperation() (explicit call)
+ *                             (this effect is skipped via LOCAL_ACTIONS filter)
+ * ```
+ *
+ * ## Historical Context
  *
  * Previously, archive operations were scattered across multiple effect files:
  * - archive.effects.ts - flushYoungToOld, restoreTask
@@ -30,20 +55,11 @@ import { devError } from '../../../../util/dev-error';
  * - unlink-all-tasks-on-provider-deletion.effects.ts - deleteIssueProvider cleanup
  *
  * This unified effect consolidates all archive handling to eliminate duplicate code
- * between local effects and remote operation handling (OperationApplierService).
- *
- * ## Operation Flow
- *
- * LOCAL OPERATIONS:
- * Action dispatched -> Reducers -> This effect -> ArchiveOperationHandler.handleOperation()
- *
- * REMOTE OPERATIONS:
- * OperationApplierService -> dispatch() -> Reducers -> ArchiveOperationHandler.handleOperation()
- *                                                              ^
- *                                                   (explicit call, bypasses this effect)
+ * between local effects and remote operation handling.
  *
  * @see ArchiveOperationHandler for list of supported archive-affecting actions
  * @see isArchiveAffectingAction for the action filtering logic
+ * @see OperationApplierService for how remote operations call the handler directly
  */
 @Injectable()
 export class ArchiveOperationHandlerEffects {

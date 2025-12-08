@@ -3,7 +3,6 @@ import { RootState } from '../../../../root-store/root-state';
 import { isPersistentAction, PersistentAction } from '../persistent-action.interface';
 import { OperationCaptureService } from './operation-capture.service';
 import { OpLog } from '../../../log';
-import { generateCaptureId } from './operation-capture.util';
 
 /**
  * Reference to the consolidated service needed by the meta-reducer.
@@ -65,18 +64,15 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
     ) {
       try {
         const persistentAction = action as PersistentAction;
-        const captureId = generateCaptureId(persistentAction);
 
         // Compute entity changes and queue in one step
         operationCaptureService.computeAndEnqueue(
-          captureId,
           persistentAction,
           beforeState as unknown as RootState,
           afterState as unknown as RootState,
         );
 
         OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
-          captureId,
           actionType: persistentAction.type,
         });
       } catch (e) {

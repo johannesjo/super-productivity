@@ -38,118 +38,78 @@ const ENTITY_TYPE_TO_FEATURE: Partial<Record<EntityType, string>> = {
 };
 
 /**
- * Queued entity changes waiting to be consumed by the effect.
- */
-interface QueuedOperation {
-  entityChanges: EntityChange[];
-  queuedAt: number;
-}
-
-/**
- * Unified service for capturing state changes and queuing them for persistence.
- *
- * This service consolidates the functionality of the previous StateChangeCaptureService
- * and OperationQueueService into a single service.
+ * Captures state changes and queues them for persistence using a simple FIFO queue.
  *
  * Flow:
  * 1. Meta-reducer calls `computeAndEnqueue()` with before/after states
- * 2. Service computes entity changes by diffing states and queues them
- * 3. Effect calls `dequeue()` to retrieve pre-computed changes for persistence
+ * 2. Service computes entity changes by diffing states and pushes to queue
+ * 3. Effect calls `dequeue()` to retrieve changes for persistence (FIFO order)
  *
- * This eliminates intermediate storage and simplifies the data flow.
+ * The FIFO queue works because:
+ * - NgRx reducers process actions sequentially
+ * - Effect uses concatMap for sequential processing
+ * - Order is preserved between enqueue and dequeue
  */
 @Injectable({
   providedIn: 'root',
 })
 export class OperationCaptureService {
   /**
-   * Queue of pending operations keyed by captureId.
+   * FIFO queue of pending entity changes.
    */
-  private queue = new Map<string, QueuedOperation>();
-
-  /**
-   * Maximum age of queued operations before cleanup (10 seconds).
-   * Handles cases where an action is captured but effect never runs.
-   */
-  private readonly MAX_QUEUE_AGE_MS = 10000;
+  private queue: EntityChange[][] = [];
 
   /**
    * Computes entity changes from before/after states and enqueues them.
    * Called synchronously by the operation-capture meta-reducer.
-   *
-   * @param captureId Unique identifier for this action's capture
-   * @param action The persistent action that was processed
-   * @param beforeState The root state before the action
-   * @param afterState The root state after the action
    */
   computeAndEnqueue(
-    captureId: string,
     action: PersistentAction,
     beforeState: RootState,
     afterState: RootState,
   ): void {
-    // Clean up stale entries first
-    this._cleanupStale();
-
     const entityChanges = this._computeEntityChanges(action, beforeState, afterState);
-
-    this.queue.set(captureId, {
-      entityChanges,
-      queuedAt: Date.now(),
-    });
+    this.queue.push(entityChanges);
 
     OpLog.verbose('OperationCaptureService: Computed and enqueued operation', {
-      captureId,
       actionType: action.type,
       changeCount: entityChanges.length,
+      queueSize: this.queue.length,
     });
   }
 
   /**
-   * Dequeues entity changes for a given captureId.
-   * Called by the effect to retrieve pre-computed changes.
-   *
-   * @param captureId Unique identifier for this action's capture
-   * @returns Entity changes array, or empty array if not found
+   * Dequeues the next batch of entity changes (FIFO).
+   * Called by the effect to retrieve pre-computed changes for persistence.
    */
-  dequeue(captureId: string): EntityChange[] {
-    const queued = this.queue.get(captureId);
+  dequeue(): EntityChange[] {
+    const entityChanges = this.queue.shift();
 
-    if (!queued) {
-      OpLog.warn('OperationCaptureService: No queued operation found', { captureId });
+    if (entityChanges === undefined) {
+      OpLog.warn('OperationCaptureService: No queued operation found');
       return [];
     }
 
-    // Remove from queue
-    this.queue.delete(captureId);
-
     OpLog.verbose('OperationCaptureService: Dequeued operation', {
-      captureId,
-      changeCount: queued.entityChanges.length,
+      changeCount: entityChanges.length,
+      queueSize: this.queue.length,
     });
 
-    return queued.entityChanges;
-  }
-
-  /**
-   * Checks if an operation is queued (for testing/debugging).
-   */
-  has(captureId: string): boolean {
-    return this.queue.has(captureId);
+    return entityChanges;
   }
 
   /**
    * Gets the current queue size (for monitoring).
    */
   getQueueSize(): number {
-    return this.queue.size;
+    return this.queue.length;
   }
 
   /**
    * Clears all queued operations (for testing).
    */
   clear(): void {
-    this.queue.clear();
+    this.queue = [];
   }
 
   /**
@@ -351,37 +311,5 @@ export class OperationCaptureService {
     }
 
     return false;
-  }
-
-  /**
-   * Removes stale entries that were never consumed.
-   *
-   * This is a safety mechanism for the two-phase capture flow:
-   * 1. Meta-reducer calls computeAndEnqueue() → stores changes in queue
-   * 2. Effect calls dequeue() → retrieves and removes changes
-   *
-   * If step 2 never runs (e.g., effect throws before dequeue, or action
-   * filtered out), entries would leak. This cleanup prevents unbounded
-   * memory growth by removing entries older than MAX_QUEUE_AGE_MS.
-   */
-  private _cleanupStale(): void {
-    const now = Date.now();
-    const staleIds: string[] = [];
-
-    for (const [captureId, queued] of this.queue) {
-      if (now - queued.queuedAt > this.MAX_QUEUE_AGE_MS) {
-        staleIds.push(captureId);
-      }
-    }
-
-    if (staleIds.length > 0) {
-      OpLog.warn('OperationCaptureService: Cleaning up stale queued operations', {
-        count: staleIds.length,
-        ids: staleIds,
-      });
-      for (const id of staleIds) {
-        this.queue.delete(id);
-      }
-    }
   }
 }

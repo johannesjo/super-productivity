@@ -12,7 +12,6 @@ import { Tag } from '../../../../features/tag/tag.model';
 import { DEFAULT_TAG } from '../../../../features/tag/tag.const';
 import { Project } from '../../../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../../../features/project/project.const';
-import { generateCaptureId } from '../processing/operation-capture.util';
 
 /**
  * Multi-Entity Atomicity Tests
@@ -37,9 +36,8 @@ describe('Multi-Entity Atomicity Integration', () => {
     beforeState: RootState,
     afterState: RootState,
   ): EntityChange[] => {
-    const captureId = generateCaptureId(action);
-    service.computeAndEnqueue(captureId, action, beforeState, afterState);
-    return service.dequeue(captureId);
+    service.computeAndEnqueue(action, beforeState, afterState);
+    return service.dequeue();
   };
 
   const createMockTask = (overrides: Partial<Task> = {}): Task => ({
