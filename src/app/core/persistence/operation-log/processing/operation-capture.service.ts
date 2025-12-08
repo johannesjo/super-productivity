@@ -38,162 +38,6 @@ const ENTITY_TYPE_TO_FEATURE: Partial<Record<EntityType, string>> = {
 };
 
 /**
- * Maps action types to the entity types they can potentially affect.
- * This limits which features we diff, improving performance.
- *
- * Note: Action type keys intentionally use NgRx action type format.
- */
-/* eslint-disable @typescript-eslint/naming-convention */
-const ACTION_AFFECTED_ENTITIES: Record<string, EntityType[]> = {
-  // ==========================================================================
-  // TASK SHARED ACTIONS (cross-entity operations)
-  // ==========================================================================
-  '[Task Shared] Apply Short Syntax': ['TASK', 'TAG', 'PROJECT', 'PLANNER'],
-  '[TaskShared] Add Task': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Update Task': ['TASK', 'TAG'],
-  '[TaskShared] Delete Task': ['TASK', 'TAG', 'PROJECT', 'TASK_REPEAT_CFG'],
-  '[TaskShared] Delete Tasks': ['TASK', 'TAG', 'PROJECT', 'TASK_REPEAT_CFG'],
-  '[TaskShared] Schedule Task with Time': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Re-Schedule Task with Time': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Unschedule Task': ['TASK', 'TAG'],
-  '[TaskShared] Dismiss Reminder Only': ['TASK'],
-  '[TaskShared] Plan Tasks for Today': ['TASK', 'TAG'],
-  '[TaskShared] Remove Tasks from Today Tag': ['TASK', 'TAG'],
-  '[TaskShared] Move to Archive': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Restore Task': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Move to Other Project': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Convert to Main Task': ['TASK', 'TAG', 'PROJECT'],
-  '[TaskShared] Delete Project': ['PROJECT', 'TASK', 'TAG', 'TASK_REPEAT_CFG', 'NOTE'],
-  '[TaskShared] Delete Task Repeat Cfg': ['TASK_REPEAT_CFG', 'TASK'],
-
-  // ==========================================================================
-  // TAG ACTIONS
-  // ==========================================================================
-  '[Tag] Add Tag': ['TAG'],
-  '[Tag] Update Tag': ['TAG'],
-  '[Tag] Delete Tag': ['TAG', 'TASK', 'TASK_REPEAT_CFG'],
-  '[Tag] Delete Tags': ['TAG', 'TASK', 'TASK_REPEAT_CFG'],
-
-  // ==========================================================================
-  // PROJECT ACTIONS
-  // ==========================================================================
-  '[Project] Add Project': ['PROJECT'],
-  '[Project] Update Project': ['PROJECT'],
-  '[Project] Upsert Project': ['PROJECT'],
-  '[Project] Update Project Order': ['PROJECT'],
-  '[Project] Delete Project': ['PROJECT', 'TASK', 'TAG', 'TASK_REPEAT_CFG', 'NOTE'],
-  '[Project] Archive Project': ['PROJECT'],
-  '[Project] Unarchive Project': ['PROJECT'],
-  '[Project] Add Task To Backlog First': ['PROJECT', 'TASK'],
-  '[Project] Move Task To Backlog First': ['PROJECT', 'TASK'],
-  '[Project] Move Task To Today First': ['PROJECT', 'TASK'],
-  '[Project] Move Task To Today Last': ['PROJECT', 'TASK'],
-  '[Project] Move Task In Backlog List': ['PROJECT'],
-  '[Project] Move Task In Today List': ['PROJECT'],
-  '[Project] Move Task To Backlog List': ['PROJECT', 'TASK'],
-  '[Project] Move Task To Today List': ['PROJECT', 'TASK'],
-  '[Project] Move All Backlog To Today': ['PROJECT'],
-  '[Project] Move Tasks From Today To Backlog': ['PROJECT'],
-  '[Project] Move All Today To Backlog': ['PROJECT'],
-
-  // ==========================================================================
-  // NOTE ACTIONS
-  // ==========================================================================
-  '[Note] Add Note': ['NOTE', 'PROJECT'],
-  '[Note] Update Note': ['NOTE'],
-  '[Note] Delete Note': ['NOTE', 'PROJECT'],
-
-  // ==========================================================================
-  // SIMPLE COUNTER ACTIONS
-  // ==========================================================================
-  '[SimpleCounter] Add Simple Counter': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Update Simple Counter': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Delete Simple Counter': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Delete Simple Counters': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Set Counter Today': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Set Counter For Date': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Increase Counter Today': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Decrease Counter Today': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Toggle Counter Stopwatch': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Turn Off Counter Stopwatch': ['SIMPLE_COUNTER'],
-  '[SimpleCounter] Turn On Counter Stopwatch': ['SIMPLE_COUNTER'],
-
-  // ==========================================================================
-  // TASK REPEAT CFG ACTIONS
-  // ==========================================================================
-  '[TaskRepeatCfg] Add Task Repeat Cfg To Task': ['TASK_REPEAT_CFG', 'TASK'],
-  '[TaskRepeatCfg] Update Task Repeat Cfg': ['TASK_REPEAT_CFG'],
-  '[TaskRepeatCfg] Update Task Repeat Cfgs': ['TASK_REPEAT_CFG'],
-  '[TaskRepeatCfg] Upsert Task Repeat Cfg': ['TASK_REPEAT_CFG'],
-  '[TaskRepeatCfg] Delete Task Repeat Cfg': ['TASK_REPEAT_CFG'],
-  '[TaskRepeatCfg] Delete Task Repeat Cfgs': ['TASK_REPEAT_CFG'],
-  '[TaskRepeatCfg] Delete Instance': ['TASK_REPEAT_CFG'],
-
-  // ==========================================================================
-  // METRIC ACTIONS
-  // ==========================================================================
-  '[Metric] Add Metric': ['METRIC'],
-  '[Metric] Update Metric': ['METRIC'],
-  '[Metric] Upsert Metric': ['METRIC'],
-  '[Metric] Delete Metric': ['METRIC'],
-
-  // ==========================================================================
-  // GLOBAL CONFIG ACTIONS
-  // ==========================================================================
-  '[GlobalConfig] Update Global Config Section': ['GLOBAL_CONFIG'],
-
-  // ==========================================================================
-  // PLANNER ACTIONS
-  // ==========================================================================
-  '[Planner] Plan Task for Day': ['TASK', 'TAG', 'PLANNER'],
-  '[Planner] Transfer Task': ['TASK', 'TAG', 'PLANNER'],
-  '[Planner] Move Before Task in Day': ['PLANNER'],
-  '[Planner] Move Task to End of Day': ['PLANNER'],
-  '[Planner] Clean up Old Planned Days And Undefined Tasks': ['PLANNER'],
-
-  // ==========================================================================
-  // BOARD ACTIONS
-  // ==========================================================================
-  '[Boards] Add Board': ['BOARD'],
-  '[Boards] Update Board': ['BOARD'],
-  '[Boards] Delete Board': ['BOARD'],
-  '[Boards] Move Panel in Board': ['BOARD'],
-  '[Boards] Move Task in Board Panel': ['BOARD'],
-  '[Boards] Move Task To Board Panel': ['BOARD'],
-
-  // ==========================================================================
-  // MENU TREE ACTIONS
-  // ==========================================================================
-  '[MenuTree] Add Item': ['MENU_TREE'],
-  '[MenuTree] Update Item': ['MENU_TREE'],
-  '[MenuTree] Delete Item': ['MENU_TREE'],
-  '[MenuTree] Move Item': ['MENU_TREE'],
-
-  // ==========================================================================
-  // ISSUE PROVIDER ACTIONS
-  // ==========================================================================
-  '[IssueProvider] Add Issue Provider': ['ISSUE_PROVIDER'],
-  '[IssueProvider] Update Issue Provider': ['ISSUE_PROVIDER'],
-  '[IssueProvider] Delete Issue Provider': ['ISSUE_PROVIDER'],
-
-  // ==========================================================================
-  // WORK CONTEXT META ACTIONS
-  // ==========================================================================
-  '[WorkContextMeta] Move Task in Today': ['TAG', 'PROJECT'],
-  '[WorkContextMeta] Move Task Up in Today': ['TAG', 'PROJECT'],
-  '[WorkContextMeta] Move Task Down in Today': ['TAG', 'PROJECT'],
-  '[WorkContextMeta] Move Task To Top in Today': ['TAG', 'PROJECT'],
-  '[WorkContextMeta] Move Task To Bottom in Today': ['TAG', 'PROJECT'],
-};
-/* eslint-enable @typescript-eslint/naming-convention */
-
-/**
- * Default entity types to check if action type is not in the mapping.
- * Uses the action's primary entityType as a hint if available.
- */
-const DEFAULT_AFFECTED_ENTITIES: EntityType[] = ['TASK', 'TAG', 'PROJECT'];
-
-/**
  * Queued entity changes waiting to be consumed by the effect.
  */
 interface QueuedOperation {
@@ -310,6 +154,8 @@ export class OperationCaptureService {
 
   /**
    * Computes entity changes by diffing before and after states.
+   * Uses reference equality to detect which feature states actually changed,
+   * then only diffs those features.
    */
   private _computeEntityChanges(
     action: PersistentAction,
@@ -317,31 +163,33 @@ export class OperationCaptureService {
     afterState: RootState,
   ): EntityChange[] {
     const changes: EntityChange[] = [];
-    const affectedTypes = this._getAffectedEntityTypes(action);
 
-    for (const entityType of affectedTypes) {
-      const featureName = ENTITY_TYPE_TO_FEATURE[entityType];
-      if (!featureName) continue;
+    // Check all mapped entity types, but only diff those that actually changed
+    for (const [entityType, featureName] of Object.entries(ENTITY_TYPE_TO_FEATURE)) {
+      const beforeFeature = beforeState[featureName as keyof RootState];
+      const afterFeature = afterState[featureName as keyof RootState];
 
-      const beforeFeature = beforeState[featureName as keyof RootState] as any;
-      const afterFeature = afterState[featureName as keyof RootState] as any;
-
+      // Skip if feature state reference is identical (no change)
+      if (beforeFeature === afterFeature) continue;
       if (!beforeFeature || !afterFeature) continue;
 
       // Handle entity adapter states (with entities object)
-      if (beforeFeature.entities && afterFeature.entities) {
+      if (
+        (beforeFeature as any).entities !== undefined &&
+        (afterFeature as any).entities !== undefined
+      ) {
         const entityChanges = this._diffEntityState(
-          entityType,
-          beforeFeature.entities,
-          afterFeature.entities,
+          entityType as EntityType,
+          (beforeFeature as any).entities,
+          (afterFeature as any).entities,
         );
         changes.push(...entityChanges);
       } else {
         // Handle singleton states (like globalConfig)
         const singletonChange = this._diffSingletonState(
-          entityType,
-          beforeFeature,
-          afterFeature,
+          entityType as EntityType,
+          beforeFeature as Record<string, unknown>,
+          afterFeature as Record<string, unknown>,
         );
         if (singletonChange) {
           changes.push(singletonChange);
@@ -360,33 +208,6 @@ export class OperationCaptureService {
     });
 
     return changes;
-  }
-
-  /**
-   * Gets the entity types that could be affected by an action.
-   */
-  private _getAffectedEntityTypes(action: PersistentAction): EntityType[] {
-    const mapped = ACTION_AFFECTED_ENTITIES[action.type];
-    if (mapped) {
-      return mapped;
-    }
-
-    // If action type not mapped, use the primary entity type + defaults
-    const primaryType = action.meta.entityType;
-    if (primaryType && primaryType !== 'ALL') {
-      // Include the primary type plus common related types
-      const types = new Set<EntityType>([primaryType]);
-
-      // Task-related actions often affect tags and projects
-      if (primaryType === 'TASK') {
-        types.add('TAG');
-        types.add('PROJECT');
-      }
-
-      return Array.from(types);
-    }
-
-    return DEFAULT_AFFECTED_ENTITIES;
   }
 
   /**
