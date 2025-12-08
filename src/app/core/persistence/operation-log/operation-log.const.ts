@@ -16,12 +16,6 @@ export const COMPACTION_THRESHOLD = 500;
 export const MAX_COMPACTION_FAILURES = 3;
 
 /**
- * Maximum retry attempts for operations with missing dependencies.
- * After this many retries, the operation is marked as permanently failed.
- */
-export const MAX_DEPENDENCY_RETRY_ATTEMPTS = 3;
-
-/**
  * Lock timeout for fallback localStorage-based locking (milliseconds).
  * Used when Web Locks API is not available.
  */
@@ -52,20 +46,6 @@ export const EMERGENCY_COMPACTION_RETENTION_MS = 24 * 60 * 60 * 1000;
  * If compaction exceeds this, it aborts to prevent data corruption.
  */
 export const COMPACTION_TIMEOUT_MS = 25000;
-
-/**
- * Maximum operations in the pending retry queue.
- * If exceeded, new operations are marked as failed immediately to prevent memory leaks.
- * Set to 10000 to handle large initial imports with complex dependency chains.
- */
-export const MAX_PENDING_QUEUE_SIZE = 10000;
-
-/**
- * Maximum permanently failed operations to keep for debugging.
- * If exceeded, oldest failed operations are dropped to prevent memory leaks.
- * Set to 2000 to provide adequate debugging history for complex sync scenarios.
- */
-export const MAX_FAILED_OPS_SIZE = 2000;
 
 /**
  * Maximum retry attempts for downloading operation files.

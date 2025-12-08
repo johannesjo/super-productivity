@@ -152,31 +152,14 @@ export class ConflictResolutionService {
       try {
         await this.operationApplier.applyOperations(allOpsToApply);
 
-        const failedCount = this.operationApplier.getFailedCount();
-        if (failedCount > 0) {
-          OpLog.err(
-            `ConflictResolutionService: ${failedCount} operations failed to apply`,
-          );
-          this.operationApplier.clearFailedOperations();
-          const allOpIds = allStoredOps.map((o) => o.id);
-          await this.opLogStore.markFailed(allOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
-          this.snackService.open({
-            type: 'ERROR',
-            msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
-            actionStr: T.PS.RELOAD,
-            actionFn: (): void => {
-              window.location.reload();
-            },
-          });
-        } else {
-          // All ops succeeded - mark as applied
-          const successSeqs = allStoredOps.map((o) => o.seq);
-          await this.opLogStore.markApplied(successSeqs);
-          OpLog.normal(
-            `ConflictResolutionService: Successfully applied ${allOpsToApply.length} ops`,
-          );
-        }
+        // If we get here without throwing, all ops succeeded - mark as applied
+        const successSeqs = allStoredOps.map((o) => o.seq);
+        await this.opLogStore.markApplied(successSeqs);
+        OpLog.normal(
+          `ConflictResolutionService: Successfully applied ${allOpsToApply.length} ops`,
+        );
       } catch (e) {
+        // SyncStateCorruptedError or any other error means ops failed to apply
         OpLog.err('ConflictResolutionService: Exception applying ops', e);
         const allOpIds = allStoredOps.map((o) => o.id);
         await this.opLogStore.markFailed(allOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);

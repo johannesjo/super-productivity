@@ -386,14 +386,11 @@ async compact(): Promise<void> {
 | Compaction timeout              | 25 sec  | Abort if exceeds (prevents lock expiration)    |
 | Max compaction failures         | 3       | Failures before user notification              |
 | Unsynced ops                    | ∞       | Never delete unsynced ops                      |
-| Max pending queue size          | 10,000  | Dependency retry queue limit                   |
-| Max failed ops size             | 2,000   | Permanently failed ops history limit           |
 | Max download ops in memory      | 50,000  | Bounds memory during API download              |
 | Remote file retention           | 14 days | Server-side operation file retention           |
 | Max remote files to keep        | 100     | Minimum recent files on server                 |
 | Max conflict retry attempts     | 5       | Retries before rejecting failed ops            |
 | Max rejected ops before warning | 10      | Threshold for user notification                |
-| Max dependency retry attempts   | 3       | Retries for ops with missing dependencies      |
 | Lock timeout                    | 30 sec  | localStorage fallback lock timeout             |
 | Lock acquire timeout            | 60 sec  | Max wait to acquire a lock                     |
 | Max download retries            | 3       | Retry attempts for failed file downloads       |
@@ -1815,7 +1812,7 @@ When adding new entities or relationships:
 - `ConflictResolutionService` (UI presentation + batch apply resolutions)
 - `VectorClockService` (global/entity frontier tracking, compaction recovery)
 - `DependencyResolverService` (extract/check hard/soft dependencies)
-- `OperationApplierService` (retry queue + topological sort + failed ops cleanup)
+- `OperationApplierService` (fail-fast on missing deps → throws `SyncStateCorruptedError`)
 - Rejected operation tracking (`rejectedAt` field + user notification)
 - Fresh client safety checks (prevents empty clients from overwriting server)
 - Bounded memory during download (`MAX_DOWNLOAD_OPS_IN_MEMORY = 50,000`)
@@ -1868,7 +1865,7 @@ When adding new entities or relationships:
 > - **Quota handling**: Emergency compaction and circuit breaker on `QuotaExceededError`
 > - **`syncedAt` index**: Faster `getUnsynced()` queries
 > - **Persistent compaction counter**: Tracks ops across tabs/restarts
-> - **Failed operations cleanup**: Bounded tracking with `MAX_FAILED_OPS_SIZE = 2,000`
+> - **Fail-fast dependency handling**: `OperationApplierService` throws `SyncStateCorruptedError` on missing hard deps (no retry queues)
 > - **Plugin data sync**: Operation logging for plugin user data and metadata
 > - **Gap detection**: Download operations detect and report sequence gaps
 > - **Server-side conflict detection**: Prevents concurrent modifications on server

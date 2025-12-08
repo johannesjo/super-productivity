@@ -258,9 +258,6 @@ export class OperationLogHydratorService {
       // This recovers from any failed PFAPI updates during previous operations
       await this._syncPfapiVectorClock();
 
-      // Prune old failed operations to prevent memory growth
-      this.operationApplierService.pruneOldFailedOperations();
-
       // Retry any failed remote ops from previous conflict resolution attempts
       // Now that state is fully hydrated, dependencies might be resolved
       await this.retryFailedRemoteOps();
@@ -865,15 +862,10 @@ export class OperationLogHydratorService {
     for (const entry of failedOps) {
       try {
         await this.operationApplierService.applyOperations([entry.op]);
-
-        const failedCount = this.operationApplierService.getFailedCount();
-        if (failedCount > 0) {
-          this.operationApplierService.clearFailedOperations();
-          stillFailedOpIds.push(entry.op.id);
-        } else {
-          appliedOpIds.push(entry.op.id);
-        }
+        // If we get here without throwing, the operation succeeded
+        appliedOpIds.push(entry.op.id);
       } catch (e) {
+        // SyncStateCorruptedError or any other error means the op still can't be applied
         OpLog.warn(`OperationLogHydratorService: Failed to retry op ${entry.op.id}`, e);
         stillFailedOpIds.push(entry.op.id);
       }

@@ -34,8 +34,6 @@ describe('ConflictResolutionService', () => {
     mockDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockOperationApplier = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
-      'getFailedCount',
-      'clearFailedOperations',
     ]);
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'hasOp',
@@ -62,7 +60,7 @@ describe('ConflictResolutionService', () => {
     service = TestBed.inject(ConflictResolutionService);
 
     // Default mock behaviors
-    mockOperationApplier.getFailedCount.and.returnValue(0);
+    mockOperationApplier.applyOperations.and.resolveTo();
     mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
   });
 
@@ -163,9 +161,10 @@ describe('ConflictResolutionService', () => {
       mockOpLogStore.hasOp.and.resolveTo(false);
       mockOpLogStore.append.and.resolveTo(100);
 
-      // Simulate application failure
-      mockOperationApplier.applyOperations.and.returnValue(Promise.resolve());
-      mockOperationApplier.getFailedCount.and.returnValue(1);
+      // Simulate application failure by throwing an error
+      mockOperationApplier.applyOperations.and.rejectWith(
+        new Error('Simulated dependency failure'),
+      );
 
       await service.presentConflicts(conflicts);
 
