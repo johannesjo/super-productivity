@@ -860,4 +860,142 @@ describe('OperationCaptureService', () => {
       expect(changes.length).toBe(0);
     });
   });
+
+  describe('TIME_TRACKING action-payload capture', () => {
+    it('should capture syncTimeTracking action from payload (not state diff)', () => {
+      const action: PersistentAction = {
+        type: '[TimeTracking] Sync sessions',
+        contextType: 'TAG',
+        contextId: 'tag-123',
+        date: '2024-01-15',
+        data: { s: 1000, e: 2000, b: 1, bt: 100 },
+        meta: {
+          isPersistent: true,
+          entityType: 'TIME_TRACKING',
+          entityId: 'TAG:tag-123:2024-01-15',
+          opType: OpType.Update,
+        },
+      };
+
+      // Empty states - we don't need them because TIME_TRACKING uses action payload
+      const emptyState = {} as unknown as RootState;
+
+      service.computeAndEnqueue(action, emptyState, emptyState);
+
+      const changes = service.dequeue();
+      expect(changes.length).toBe(1);
+      expect(changes[0].entityType).toBe('TIME_TRACKING');
+      expect(changes[0].entityId).toBe('TAG:tag-123:2024-01-15');
+      expect(changes[0].opType).toBe(OpType.Update);
+      expect(changes[0].changes).toEqual({
+        contextType: 'TAG',
+        contextId: 'tag-123',
+        date: '2024-01-15',
+        data: { s: 1000, e: 2000, b: 1, bt: 100 },
+      });
+    });
+
+    it('should capture syncTimeTracking for PROJECT context', () => {
+      const action: PersistentAction = {
+        type: '[TimeTracking] Sync sessions',
+        contextType: 'PROJECT',
+        contextId: 'proj-456',
+        date: '2024-02-20',
+        data: { s: 5000, e: 6000 },
+        meta: {
+          isPersistent: true,
+          entityType: 'TIME_TRACKING',
+          entityId: 'PROJECT:proj-456:2024-02-20',
+          opType: OpType.Update,
+        },
+      };
+
+      const emptyState = {} as unknown as RootState;
+
+      service.computeAndEnqueue(action, emptyState, emptyState);
+
+      const changes = service.dequeue();
+      expect(changes.length).toBe(1);
+      expect(changes[0].entityId).toBe('PROJECT:proj-456:2024-02-20');
+      expect(changes[0].changes).toEqual({
+        contextType: 'PROJECT',
+        contextId: 'proj-456',
+        date: '2024-02-20',
+        data: { s: 5000, e: 6000 },
+      });
+    });
+
+    it('should capture updateWorkContextData action from payload', () => {
+      const action: PersistentAction = {
+        type: '[TimeTracking] Update Work Context Data',
+        ctx: { id: 'tag-789', type: 'TAG' },
+        date: '2024-03-10',
+        updates: { s: 7000, e: 8000 },
+        meta: {
+          isPersistent: true,
+          entityType: 'TIME_TRACKING',
+          entityId: 'TAG:tag-789:2024-03-10',
+          opType: OpType.Update,
+        },
+      };
+
+      const emptyState = {} as unknown as RootState;
+
+      service.computeAndEnqueue(action, emptyState, emptyState);
+
+      const changes = service.dequeue();
+      expect(changes.length).toBe(1);
+      expect(changes[0].entityType).toBe('TIME_TRACKING');
+      expect(changes[0].entityId).toBe('TAG:tag-789:2024-03-10');
+      expect(changes[0].changes).toEqual({
+        ctx: { id: 'tag-789', type: 'TAG' },
+        date: '2024-03-10',
+        updates: { s: 7000, e: 8000 },
+      });
+    });
+
+    it('should NOT diff state for TIME_TRACKING actions (ignores state changes)', () => {
+      // Even with state changes, TIME_TRACKING should use action payload only
+      const TIME_TRACKING_FEATURE = 'timeTracking';
+      const beforeState = {
+        [TIME_TRACKING_FEATURE]: {
+          tag: { 'tag-1': { '2024-01-01': { s: 100, e: 200 } } },
+          project: {},
+        },
+      } as unknown as RootState;
+
+      const afterState = {
+        [TIME_TRACKING_FEATURE]: {
+          tag: { 'tag-1': { '2024-01-01': { s: 999, e: 9999 } } },
+          project: {},
+        },
+      } as unknown as RootState;
+
+      const action: PersistentAction = {
+        type: '[TimeTracking] Sync sessions',
+        contextType: 'TAG',
+        contextId: 'tag-1',
+        date: '2024-01-01',
+        data: { s: 1000, e: 2000 },
+        meta: {
+          isPersistent: true,
+          entityType: 'TIME_TRACKING',
+          entityId: 'TAG:tag-1:2024-01-01',
+          opType: OpType.Update,
+        },
+      };
+
+      service.computeAndEnqueue(action, beforeState, afterState);
+
+      const changes = service.dequeue();
+      // Should have exactly 1 change from action payload, NOT from state diff
+      expect(changes.length).toBe(1);
+      expect(changes[0].changes).toEqual({
+        contextType: 'TAG',
+        contextId: 'tag-1',
+        date: '2024-01-01',
+        data: { s: 1000, e: 2000 }, // From action payload, not state diff
+      });
+    });
+  });
 });

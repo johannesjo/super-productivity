@@ -29,7 +29,6 @@ import { TimeTrackingState } from '../../../features/time-tracking/time-tracking
  */
 interface ExtendedState extends RootState {
   [TASK_REPEAT_CFG_FEATURE_NAME]?: TaskRepeatCfgState;
-  [TIME_TRACKING_FEATURE_KEY]?: TimeTrackingState;
 }
 
 // =============================================================================

@@ -8,6 +8,8 @@ import {
   TASK_FEATURE_NAME,
   taskAdapter,
 } from '../../../features/tasks/store/task.reducer';
+import { TIME_TRACKING_FEATURE_KEY } from '../../../features/time-tracking/store/time-tracking.reducer';
+import { TimeTrackingState } from '../../../features/time-tracking/time-tracking.model';
 import { Tag } from '../../../features/tag/tag.model';
 import { Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { unique } from '../../../util/unique';
@@ -78,6 +80,25 @@ const handleMoveToOtherProject = (
   return updatedState;
 };
 
+/**
+ * Removes deleted project from TIME_TRACKING state.
+ * Only handles current state - archive cleanup must stay in effect (async).
+ */
+const cleanupTimeTrackingForProject = (
+  timeTrackingState: TimeTrackingState | undefined,
+  projectId: string,
+): TimeTrackingState | undefined => {
+  if (!timeTrackingState) return timeTrackingState;
+  if (!(projectId in timeTrackingState.project)) return timeTrackingState;
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { [projectId]: _, ...remainingProjects } = timeTrackingState.project;
+  return {
+    ...timeTrackingState,
+    project: remainingProjects,
+  };
+};
+
 const handleDeleteProject = (
   state: RootState,
   projectId: string,
@@ -95,6 +116,12 @@ const handleDeleteProject = (
   // First update tags
   const stateWithUpdatedTags = updateTags(state, tagUpdates);
 
+  // Cleanup TIME_TRACKING for deleted project
+  const updatedTimeTracking = cleanupTimeTrackingForProject(
+    stateWithUpdatedTags[TIME_TRACKING_FEATURE_KEY],
+    projectId,
+  );
+
   // Then remove the project entity
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { [projectId]: _, ...remainingEntities } =
@@ -105,6 +132,9 @@ const handleDeleteProject = (
 
   return {
     ...stateWithUpdatedTags,
+    ...(updatedTimeTracking && {
+      [TIME_TRACKING_FEATURE_KEY]: updatedTimeTracking,
+    }),
     [PROJECT_FEATURE_NAME]: {
       ...stateWithUpdatedTags[PROJECT_FEATURE_NAME],
       ids: remainingIds,

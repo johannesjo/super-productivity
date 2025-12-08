@@ -20,6 +20,7 @@ export type EntityType =
   | 'GLOBAL_CONFIG'
   | 'SIMPLE_COUNTER'
   | 'WORK_CONTEXT'
+  | 'TIME_TRACKING'
   | 'TASK_REPEAT_CFG'
   | 'ISSUE_PROVIDER'
   | 'PLANNER'

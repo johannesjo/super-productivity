@@ -6,7 +6,7 @@ import { Task } from '../../tasks/task.model';
 import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
 import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
-// Standalone persistent action for updating work context data
+// Standalone persistent action for updating work context data (manual worklog edits)
 export const updateWorkContextData = createAction(
   '[TimeTracking] Update Work Context Data',
   (actionProps: {
@@ -17,8 +17,32 @@ export const updateWorkContextData = createAction(
     ...actionProps,
     meta: {
       isPersistent: true,
-      entityType: 'WORK_CONTEXT',
-      entityId: actionProps.ctx.id,
+      entityType: 'TIME_TRACKING',
+      entityId: `${actionProps.ctx.type}:${actionProps.ctx.id}:${actionProps.date}`,
+      opType: OpType.Update,
+    } satisfies PersistentActionMeta,
+  }),
+);
+
+/**
+ * Persistent action for syncing TIME_TRACKING session data to other clients.
+ * Dispatched periodically (every 5 minutes) alongside syncTimeSpent.
+ *
+ * Uses action-payload capture (not state diffing) for efficient granular sync.
+ */
+export const syncTimeTracking = createAction(
+  '[TimeTracking] Sync sessions',
+  (actionProps: {
+    contextType: 'TAG' | 'PROJECT';
+    contextId: string;
+    date: string;
+    data: TTWorkContextData;
+  }) => ({
+    ...actionProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'TIME_TRACKING',
+      entityId: `${actionProps.contextType}:${actionProps.contextId}:${actionProps.date}`,
       opType: OpType.Update,
     } satisfies PersistentActionMeta,
   }),

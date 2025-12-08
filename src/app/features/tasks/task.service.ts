@@ -86,7 +86,9 @@ import { DateService } from '../../core/date/date.service';
 import {
   TimeTrackingActions,
   syncTimeSpent,
+  syncTimeTracking,
 } from '../time-tracking/store/time-tracking.actions';
+import { selectTimeTrackingState } from '../time-tracking/store/time-tracking.selectors';
 import { ArchiveService } from '../time-tracking/archive.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -189,6 +191,10 @@ export class TaskService {
   // Batch sync for time tracking: accumulates duration per task, syncs every 5 minutes
   private static readonly SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
   private _unsyncedDuration: Map<string, { duration: number; date: string }> = new Map();
+  private _unsyncedContexts: Map<
+    string,
+    { contextType: 'TAG' | 'PROJECT'; contextId: string; date: string }
+  > = new Map();
   private _lastSyncTime = Date.now();
 
   constructor() {
@@ -218,6 +224,9 @@ export class TaskService {
 
           // Accumulate for batch sync
           this._accumulateTimeSpent(currentTask.id, tick.duration, tick.date);
+
+          // Track contexts for TIME_TRACKING sync
+          this._trackContextsForSync(currentTask, tick.date);
 
           // Check if it's time to sync (every 5 minutes)
           if (Date.now() - this._lastSyncTime >= TaskService.SYNC_INTERVAL_MS) {
@@ -258,15 +267,60 @@ export class TaskService {
   }
 
   /**
+   * Tracks contexts (tags and project) that need TIME_TRACKING sync.
+   */
+  private _trackContextsForSync(task: Task, date: string): void {
+    // Track project context
+    if (task.projectId) {
+      const key = `PROJECT:${task.projectId}:${date}`;
+      this._unsyncedContexts.set(key, {
+        contextType: 'PROJECT',
+        contextId: task.projectId,
+        date,
+      });
+    }
+
+    // Track tag contexts (including TODAY_TAG)
+    for (const tagId of [TODAY_TAG.id, ...task.tagIds]) {
+      const key = `TAG:${tagId}:${date}`;
+      this._unsyncedContexts.set(key, {
+        contextType: 'TAG',
+        contextId: tagId,
+        date,
+      });
+    }
+  }
+
+  /**
    * Dispatches syncTimeSpent for all accumulated time and resets accumulators.
    */
   private _flushAccumulatedTimeSpent(): void {
+    // Sync task.timeSpent totals
     this._unsyncedDuration.forEach(({ duration, date }, taskId) => {
       if (duration > 0) {
         this._store.dispatch(syncTimeSpent({ taskId, date, duration }));
       }
     });
     this._unsyncedDuration.clear();
+
+    // Sync TIME_TRACKING session data (start/end times)
+    if (this._unsyncedContexts.size > 0) {
+      this._store
+        .pipe(select(selectTimeTrackingState), take(1))
+        .subscribe((timeTrackingState) => {
+          this._unsyncedContexts.forEach(({ contextType, contextId, date }) => {
+            const prop = contextType === 'TAG' ? 'tag' : 'project';
+            const data = timeTrackingState?.[prop]?.[contextId]?.[date];
+            if (data) {
+              this._store.dispatch(
+                syncTimeTracking({ contextType, contextId, date, data }),
+              );
+            }
+          });
+          this._unsyncedContexts.clear();
+        });
+    }
+
     this._lastSyncTime = Date.now();
   }
 

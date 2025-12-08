@@ -33,8 +33,8 @@ const ENTITY_TYPE_TO_FEATURE: Partial<Record<EntityType, string>> = {
   TASK_REPEAT_CFG: TASK_REPEAT_CFG_FEATURE_NAME,
   METRIC: METRIC_FEATURE_NAME,
   WORK_CONTEXT: WORK_CONTEXT_FEATURE_NAME,
-  // Note: TIME_TRACKING uses a different state shape (tag-keyed, not entity adapter)
-  // and is handled specially in tag-shared.reducer.ts for tag deletion cleanup
+  // Note: TIME_TRACKING uses action-payload capture (see _captureTimeTrackingFromAction)
+  // instead of state diffing for efficiency with its nested structure
 };
 
 /**
@@ -116,12 +116,20 @@ export class OperationCaptureService {
    * Computes entity changes by diffing before and after states.
    * Uses reference equality to detect which feature states actually changed,
    * then only diffs those features.
+   *
+   * TIME_TRACKING uses action-payload capture instead of state diffing for efficiency.
    */
   private _computeEntityChanges(
     action: PersistentAction,
     beforeState: RootState,
     afterState: RootState,
   ): EntityChange[] {
+    // TIME_TRACKING: Use action payload directly (granular, efficient)
+    // This avoids syncing the entire nested state on every update
+    if (action.meta.entityType === 'TIME_TRACKING') {
+      return this._captureTimeTrackingFromAction(action);
+    }
+
     const changes: EntityChange[] = [];
 
     // Check all mapped entity types, but only diff those that actually changed
@@ -245,6 +253,59 @@ export class OperationCaptureService {
       };
     }
     return null;
+  }
+
+  /**
+   * Captures TIME_TRACKING changes from action payload (not state diff).
+   * This is more efficient than state diffing for the nested TIME_TRACKING structure.
+   *
+   * Supports both syncTimeTracking and updateWorkContextData actions.
+   */
+  private _captureTimeTrackingFromAction(action: PersistentAction): EntityChange[] {
+    // syncTimeTracking action: { contextType, contextId, date, data }
+    if (
+      'contextType' in action &&
+      'contextId' in action &&
+      'date' in action &&
+      'data' in action
+    ) {
+      const { contextType, contextId, date, data } = action as unknown as {
+        contextType: 'TAG' | 'PROJECT';
+        contextId: string;
+        date: string;
+        data: unknown;
+      };
+      return [
+        {
+          entityType: 'TIME_TRACKING',
+          entityId: `${contextType}:${contextId}:${date}`,
+          opType: OpType.Update,
+          changes: { contextType, contextId, date, data },
+        },
+      ];
+    }
+
+    // updateWorkContextData action: { ctx: { id, type }, date, updates }
+    if ('ctx' in action && 'date' in action && 'updates' in action) {
+      const { ctx, date, updates } = action as unknown as {
+        ctx: { id: string; type: string };
+        date: string;
+        updates: unknown;
+      };
+      return [
+        {
+          entityType: 'TIME_TRACKING',
+          entityId: `${ctx.type}:${ctx.id}:${date}`,
+          opType: OpType.Update,
+          changes: { ctx, date, updates },
+        },
+      ];
+    }
+
+    OpLog.warn('OperationCaptureService: Unknown TIME_TRACKING action format', {
+      actionType: action.type,
+    });
+    return [];
   }
 
   /**

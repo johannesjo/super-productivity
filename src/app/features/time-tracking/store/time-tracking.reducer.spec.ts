@@ -1,6 +1,10 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 import { initialTimeTrackingState, timeTrackingReducer } from './time-tracking.reducer';
-import { TimeTrackingActions, updateWorkContextData } from './time-tracking.actions';
+import {
+  TimeTrackingActions,
+  updateWorkContextData,
+  syncTimeTracking,
+} from './time-tracking.actions';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew } from '../../../pfapi/pfapi-config';
 import { TaskCopy } from '../../tasks/task.model';
@@ -83,5 +87,81 @@ describe('TimeTracking Reducer', () => {
 
     expect(result.tag['2'][date].s).toBe(30);
     expect(result.tag['2'][date].e).toBe(40);
+  });
+
+  describe('syncTimeTracking', () => {
+    it('should sync time tracking data for a PROJECT context', () => {
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'proj-1',
+        date: '2024-01-15',
+        data: { s: 1000, e: 2000, b: 1, bt: 100 },
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      expect(result.project['proj-1']['2024-01-15']).toEqual({
+        s: 1000,
+        e: 2000,
+        b: 1,
+        bt: 100,
+      });
+    });
+
+    it('should sync time tracking data for a TAG context', () => {
+      const action = syncTimeTracking({
+        contextType: 'TAG',
+        contextId: 'tag-1',
+        date: '2024-01-15',
+        data: { s: 3000, e: 4000 },
+      });
+      const result = timeTrackingReducer(initialTimeTrackingState, action);
+
+      expect(result.tag['tag-1']['2024-01-15']).toEqual({ s: 3000, e: 4000 });
+    });
+
+    it('should replace existing data when syncing', () => {
+      const customInitialState = {
+        ...initialTimeTrackingState,
+        tag: { 'tag-1': { '2024-01-15': { s: 100, e: 200 } } },
+      };
+
+      const action = syncTimeTracking({
+        contextType: 'TAG',
+        contextId: 'tag-1',
+        date: '2024-01-15',
+        data: { s: 5000, e: 6000, b: 2, bt: 300 },
+      });
+      const result = timeTrackingReducer(customInitialState, action);
+
+      expect(result.tag['tag-1']['2024-01-15']).toEqual({
+        s: 5000,
+        e: 6000,
+        b: 2,
+        bt: 300,
+      });
+    });
+
+    it('should preserve other dates when syncing', () => {
+      const customInitialState = {
+        ...initialTimeTrackingState,
+        project: {
+          'proj-1': {
+            '2024-01-14': { s: 100, e: 200 },
+            '2024-01-15': { s: 300, e: 400 },
+          },
+        },
+      };
+
+      const action = syncTimeTracking({
+        contextType: 'PROJECT',
+        contextId: 'proj-1',
+        date: '2024-01-15',
+        data: { s: 9000, e: 10000 },
+      });
+      const result = timeTrackingReducer(customInitialState, action);
+
+      expect(result.project['proj-1']['2024-01-14']).toEqual({ s: 100, e: 200 });
+      expect(result.project['proj-1']['2024-01-15']).toEqual({ s: 9000, e: 10000 });
+    });
   });
 });
