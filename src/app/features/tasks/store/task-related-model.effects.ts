@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { filter, map, switchMap, tap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -9,7 +9,6 @@ import { TaskService } from '../task.service';
 import { EMPTY, Observable } from 'rxjs';
 import { moveProjectTaskToRegularList } from '../../project/store/project.actions';
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
-import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Store } from '@ngrx/store';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
@@ -20,19 +19,9 @@ export class TaskRelatedModelEffects {
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
-  private _taskArchiveService = inject(TaskArchiveService);
 
   // EFFECTS ===> EXTERNAL
   // ---------------------
-
-  restoreTask$ = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(TaskSharedActions.restoreTask),
-        tap(({ task }) => this._removeFromArchive(task)),
-      ),
-    { dispatch: false },
-  );
 
   ifAutoAddTodayEnabled$ = <T>(obs: Observable<T>): Observable<T> =>
     this._globalConfigService.misc$.pipe(
@@ -128,9 +117,4 @@ export class TaskRelatedModelEffects {
   //     }),
   //   ),
   // );
-
-  private async _removeFromArchive(task: Task): Promise<unknown> {
-    const taskIds = [task.id, ...task.subTaskIds];
-    return this._taskArchiveService.deleteTasks(taskIds);
-  }
 }

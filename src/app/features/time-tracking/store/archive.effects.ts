@@ -5,15 +5,36 @@ import { tap } from 'rxjs/operators';
 import { flushYoungToOld } from './archive.actions';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { sortTimeTrackingAndTasksFromArchiveYoungToOld } from '../sort-data-to-flush';
-import { ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../archive.service';
+import { ArchiveService, ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../archive.service';
 import { Log } from '../../../core/log';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { filterRemoteAction } from '../../../util/filter-local-action';
+import { TaskArchiveService } from '../task-archive.service';
+import { Task } from '../../tasks/task.model';
 
+/**
+ * Centralized effects for all archive-related side effects.
+ *
+ * IMPORTANT: All effects in this file use ALL_ACTIONS (not LOCAL_ACTIONS) because
+ * archive operations must run for BOTH local and remote dispatches to maintain
+ * deterministic archive state across all clients.
+ *
+ * Archive data is stored in IndexedDB (via PFAPI), not NgRx. When operations like
+ * moveToArchive or restoreTask are synced, the receiving client must also update
+ * their local archive storage.
+ *
+ * Effects in this file:
+ * - flushYoungToOld$: Moves old tasks from archiveYoung to archiveOld
+ * - writeArchivedTasksForRemoteSync$: Writes tasks to archive when receiving moveToArchive
+ * - removeFromArchiveForRestoreTask$: Removes tasks from archive when restoring
+ */
 @Injectable()
 export class ArchiveEffects {
-  // Uses ALL_ACTIONS because this effect must run for both local and remote dispatches
-  // to ensure deterministic archive state across all clients
+  // ALL effects in this file use ALL_ACTIONS to run for both local and remote dispatches
   private _actions$ = inject(ALL_ACTIONS);
   private _pfapiService = inject(PfapiService);
+  private _archiveService = inject(ArchiveService);
+  private _taskArchiveService = inject(TaskArchiveService);
 
   /**
    * Handles the flushYoungToOld action by executing the actual flush operation.
@@ -82,4 +103,51 @@ export class ArchiveEffects {
       ),
     { dispatch: false },
   );
+
+  /**
+   * When receiving a REMOTE moveToArchive operation, write the archived tasks
+   * to archiveYoung. This is necessary because the operation log only syncs
+   * operations, not model files like archiveYoung/archiveOld.
+   *
+   * For LOCAL moveToArchive operations, the ArchiveService handles the write
+   * before dispatching the action. This effect only handles the remote case.
+   *
+   * Uses filterRemoteAction() to only process remote operations.
+   */
+  writeArchivedTasksForRemoteSync$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.moveToArchive),
+        filterRemoteAction(),
+        tap(({ tasks }) => {
+          this._archiveService.writeTasksToArchiveForRemoteSync(tasks);
+        }),
+      ),
+    { dispatch: false },
+  );
+
+  /**
+   * When a task is restored from archive (local or remote), remove it from
+   * archive storage. Uses ALL_ACTIONS because remote clients also need to
+   * remove the task from their local archive to maintain consistency.
+   *
+   * Without this, a task restored on one client would remain in the archive
+   * on other clients, causing the task to exist in both places.
+   *
+   * NOTE: Uses isIgnoreDBLock:true for remote operations because PFAPI locks
+   * the database during sync processing, but this effect IS part of sync.
+   */
+  removeFromArchiveForRestoreTask$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(TaskSharedActions.restoreTask),
+        tap(({ task, meta }) => this._removeFromArchive(task, (meta as any)?.isRemote)),
+      ),
+    { dispatch: false },
+  );
+
+  private async _removeFromArchive(task: Task, isRemote?: boolean): Promise<void> {
+    const taskIds = [task.id, ...task.subTaskIds];
+    await this._taskArchiveService.deleteTasks(taskIds, { isIgnoreDBLock: isRemote });
+  }
 }

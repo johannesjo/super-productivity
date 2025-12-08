@@ -81,7 +81,10 @@ export class TaskArchiveService {
     throw new Error('Archive task not found by id');
   }
 
-  async deleteTasks(taskIdsToDelete: string[]): Promise<void> {
+  async deleteTasks(
+    taskIdsToDelete: string[],
+    options?: { isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const archiveYoung = await this._pfapiService.m.archiveYoung.load();
     const toDeleteInArchiveYoung = taskIdsToDelete.filter(
       (id) => !!archiveYoung.task.entities[id],
@@ -97,7 +100,10 @@ export class TaskArchiveService {
           ...archiveYoung,
           task: newTaskState,
         },
-        { isUpdateRevAndLastUpdate: true },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: options?.isIgnoreDBLock,
+        },
       );
     }
 
@@ -115,7 +121,10 @@ export class TaskArchiveService {
           ...archiveOld,
           task: newTaskStateArchiveOld,
         },
-        { isUpdateRevAndLastUpdate: true },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: options?.isIgnoreDBLock,
+        },
       );
     }
   }
