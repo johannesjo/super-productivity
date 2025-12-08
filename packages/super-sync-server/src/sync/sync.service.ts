@@ -593,6 +593,22 @@ export class SyncService {
     // Gap detection logic
     let gapDetected = false;
 
+    // Case 1: Client has history but server is empty (server was reset)
+    if (sinceSeq > 0 && latestSeq === 0) {
+      gapDetected = true;
+      Logger.warn(
+        `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
+      );
+    }
+
+    // Case 2: Client is ahead of server (shouldn't happen normally, indicates server reset)
+    if (sinceSeq > latestSeq && latestSeq > 0) {
+      gapDetected = true;
+      Logger.warn(
+        `[user:${userId}] Gap detected: client ahead sinceSeq=${sinceSeq} > latestSeq=${latestSeq}`,
+      );
+    }
+
     if (sinceSeq > 0 && latestSeq > 0) {
       // If we requested ops since a sequence, but the minimum retained op is higher,
       // operations have been purged and there's a gap
@@ -1200,7 +1216,7 @@ export class SyncService {
     if (!isFullStateOp && !this.validatePayloadComplexity(op.payload)) {
       return {
         valid: false,
-        error: 'Payload too complex (max depth 20, max keys 10000)',
+        error: 'Payload too complex (max depth 20, max keys 20000)',
         errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
       };
     }
@@ -1251,13 +1267,13 @@ export class SyncService {
    *
    * @param payload - The payload to validate
    * @param maxDepth - Maximum allowed nesting depth (default 20)
-   * @param maxKeys - Maximum total keys across all levels (default 10000)
+   * @param maxKeys - Maximum total keys across all levels (default 20000)
    * @returns true if payload is within limits, false otherwise
    */
   private validatePayloadComplexity(
     payload: unknown,
     maxDepth: number = 20,
-    maxKeys: number = 10000,
+    maxKeys: number = 20000,
   ): boolean {
     let totalKeys = 0;
 

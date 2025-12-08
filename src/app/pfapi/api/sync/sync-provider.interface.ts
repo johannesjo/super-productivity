@@ -181,6 +181,16 @@ export interface OpDownloadResponse {
   ops: ServerSyncOperation[];
   hasMore: boolean;
   latestSeq: number;
+  /**
+   * Whether a gap was detected in the operation sequence.
+   * This can happen when:
+   * - The server was reset and client has stale lastServerSeq
+   * - Operations were purged from the server
+   * - Client is ahead of server (shouldn't happen normally)
+   *
+   * When true, the client should reset lastServerSeq to 0 and re-download.
+   */
+  gapDetected?: boolean;
 }
 
 /**

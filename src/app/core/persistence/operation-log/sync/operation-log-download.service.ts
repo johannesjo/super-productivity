@@ -94,11 +94,30 @@ export class OperationLogDownloadService {
       // Download ops in pages
       let hasMore = true;
       let sinceSeq = lastServerSeq;
+      let hasResetForGap = false;
 
       while (hasMore) {
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
 
+        // Handle gap detection: server was reset or client has stale lastServerSeq
+        if (response.gapDetected && !hasResetForGap) {
+          OpLog.warn(
+            `OperationLogDownloadService: Gap detected (sinceSeq=${sinceSeq}, latestSeq=${response.latestSeq}). ` +
+              `Resetting lastServerSeq to 0 and re-downloading.`,
+          );
+          // Reset and re-download from the beginning
+          sinceSeq = 0;
+          hasResetForGap = true;
+          allNewOps.length = 0; // Clear any ops we may have accumulated
+          await syncProvider.setLastServerSeq(0);
+          continue;
+        }
+
         if (response.ops.length === 0) {
+          // Update latestSeq even when no ops returned (to stay in sync with server)
+          if (response.latestSeq > 0) {
+            await syncProvider.setLastServerSeq(response.latestSeq);
+          }
           break;
         }
 

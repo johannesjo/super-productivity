@@ -181,15 +181,15 @@ describe('Gap Detection', () => {
       expect(result.latestSeq).toBe(0);
     });
 
-    it('should handle client ahead of server', () => {
+    it('should detect gap when client is ahead of server (server reset scenario)', () => {
       const service = getSyncService();
 
       // Upload one op
       service.uploadOps(userId, clientA, [createOp(clientA, 'task-1')]);
 
-      // Client claims to be at seq 100 (impossible)
+      // Client claims to be at seq 100 (impossible - indicates server was reset)
       const result = service.getOpsSinceWithSeq(userId, 100);
-      expect(result.gapDetected).toBe(false); // No gap because no ops after seq 100
+      expect(result.gapDetected).toBe(true); // Gap detected: client ahead of server
       expect(result.ops.length).toBe(0);
       expect(result.latestSeq).toBe(1);
     });

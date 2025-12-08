@@ -324,7 +324,7 @@ describe('SyncService', () => {
       const results = service.uploadOps(userId, clientId, [op]);
 
       expect(results[0].accepted).toBe(false);
-      expect(results[0].error).toBe('Payload too complex (max depth 20, max keys 10000)');
+      expect(results[0].error).toBe('Payload too complex (max depth 20, max keys 20000)');
     });
 
     it('should accept complex payloads for SYNC_IMPORT operations', () => {
@@ -359,7 +359,7 @@ describe('SyncService', () => {
 
       // Create an object with many keys that would fail complexity check
       const manyKeys: Record<string, string> = {};
-      for (let i = 0; i < 15000; i++) {
+      for (let i = 0; i < 25000; i++) {
         manyKeys[`key${i}`] = `value${i}`;
       }
 
@@ -369,7 +369,7 @@ describe('SyncService', () => {
         actionType: '[SP_ALL] Load(import) all data',
         opType: 'BACKUP_IMPORT',
         entityType: 'ALL',
-        payload: manyKeys, // Exceeds max keys of 10000 but allowed for BACKUP_IMPORT
+        payload: manyKeys, // Exceeds max keys of 20000 but allowed for BACKUP_IMPORT
         vectorClock: {},
         timestamp: Date.now(),
         schemaVersion: 1,

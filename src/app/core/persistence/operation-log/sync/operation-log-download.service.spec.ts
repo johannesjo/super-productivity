@@ -211,6 +211,164 @@ describe('OperationLogDownloadService', () => {
         expect(result.success).toBeTrue();
         expect(result.failedFileCount).toBe(0);
       });
+
+      describe('gap detection handling', () => {
+        it('should reset lastServerSeq to 0 when gap is detected', async () => {
+          // First call returns gap detected (client has stale sinceSeq)
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(100));
+          mockApiProvider.downloadOps.and.returnValues(
+            // First response: gap detected, no ops
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 3,
+              gapDetected: true,
+            }),
+            // Second response after reset: ops from beginning
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: {},
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 3,
+              gapDetected: false,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          // Should have reset to 0 and re-downloaded
+          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(0);
+          expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
+          expect(result.newOps.length).toBe(1);
+        });
+
+        it('should only reset once per download session to prevent infinite loops', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(100));
+          // Both responses report gap - should only reset once
+          mockApiProvider.downloadOps.and.returnValues(
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 0,
+              gapDetected: true,
+            }),
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 0,
+              gapDetected: true, // Still reports gap after reset
+            }),
+          );
+
+          await service.downloadRemoteOps(mockApiProvider);
+
+          // Should have called setLastServerSeq(0) only once
+          expect(
+            mockApiProvider.setLastServerSeq.calls
+              .allArgs()
+              .filter((args) => args[0] === 0).length,
+          ).toBe(1);
+          // Should have exited after second download (no infinite loop)
+          expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
+        });
+
+        it('should clear accumulated ops when gap is detected mid-download', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+          mockApiProvider.downloadOps.and.returnValues(
+            // First page: some ops
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-stale',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: {},
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: true,
+              latestSeq: 10,
+              gapDetected: false,
+            }),
+            // Second page: gap detected (shouldn't happen normally but test the logic)
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 5,
+              gapDetected: true,
+            }),
+            // After reset: fresh ops
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-fresh',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: {},
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 5,
+              gapDetected: false,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          // Should only contain the fresh op, not the stale one
+          expect(result.newOps.length).toBe(1);
+          expect(result.newOps[0].id).toBe('op-fresh');
+        });
+
+        it('should update lastServerSeq even when no ops are returned', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 5, // Server has ops but none new for us
+              gapDetected: false,
+            }),
+          );
+
+          await service.downloadRemoteOps(mockApiProvider);
+
+          // Should update lastServerSeq to stay in sync
+          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(5);
+        });
+      });
     });
 
     describe('file-based sync', () => {
