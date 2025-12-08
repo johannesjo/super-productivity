@@ -1,17 +1,21 @@
 import { Injectable, inject } from '@angular/core';
 import { Observable, of } from 'rxjs';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
+import { TaskAttachment } from 'src/app/features/tasks/task-attachment/task-attachment.model';
+import { getTimestamp } from '../../../../util/get-timestamp';
+import { truncate } from '../../../../util/truncate';
 import { Task } from '../../../tasks/task.model';
+import { IssueProviderService } from '../../issue-provider.service';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { SearchResultItem } from '../../issue.model';
 import { LinearApiService } from './linear-api.service';
-import { LinearCfg } from './linear.model';
+import {
+  isLinearIssueDone,
+  mapLinearAttachmentToTaskAttachment,
+} from './linear-issue-map.util';
 import { LinearIssue, LinearIssueReduced } from './linear-issue.model';
 import { LINEAR_POLL_INTERVAL } from './linear.const';
-import { IssueProviderService } from '../../issue-provider.service';
-import { getTimestamp } from '../../../../util/get-timestamp';
-import { truncate } from '../../../../util/truncate';
-import { isLinearIssueDone } from './linear-issue-map.util';
+import { LinearCfg } from './linear.model';
 
 @Injectable({
   providedIn: 'root',
@@ -129,6 +133,10 @@ export class LinearCommonInterfacesService implements IssueServiceInterface {
     }
 
     return null;
+  }
+
+  getMappedAttachments(issue: LinearIssue): TaskAttachment[] {
+    return (issue.attachments || []).map(mapLinearAttachmentToTaskAttachment);
   }
 
   async getFreshDataForIssueTasks(tasks: Task[]): Promise<

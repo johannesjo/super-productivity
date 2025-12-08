@@ -45,6 +45,12 @@ export const LINEAR_ISSUE_CONTENT_CONFIG: IssueContentConfig<LinearIssue> = {
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: LinearIssue) => !!issue.description,
     },
+    {
+      label: T.F.ISSUE.ISSUE_CONTENT.ATTACHMENTS,
+      value: 'attachments',
+      type: IssueFieldType.LINK,
+      isVisible: (issue: LinearIssue) => Boolean(issue.attachments?.length),
+    },
   ],
   comments: {
     field: 'comments',

@@ -1,17 +1,13 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of, throwError } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { HttpClient, HttpHeaders, HttpRequest } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { catchError, filter, map } from 'rxjs/operators';
 import { LinearCfg } from './linear.model';
-import { LinearIssue, LinearIssueReduced } from './linear-issue.model';
+import { LinearAttachment, LinearIssue, LinearIssueReduced } from './linear-issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
-import { IPC } from '../../../../../../electron/shared-with-frontend/ipc-events.const';
-import { HANDLED_ERROR_PROP_STR, IS_ELECTRON } from '../../../../app.constants';
-import { IpcRendererEvent } from 'electron';
-import { getErrorTxt } from '../../../../util/get-error-text';
+import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
+import { LINEAR_TYPE } from '../../issue.const';
 import { IssueLog } from '../../../../core/log';
-import { nanoid } from 'nanoid';
-import { from } from 'rxjs';
-import { concatMap, take } from 'rxjs/operators';
 
 const LINEAR_API_URL = 'https://api.linear.app/graphql';
 
@@ -20,22 +16,7 @@ const LINEAR_API_URL = 'https://api.linear.app/graphql';
 })
 export class LinearApiService {
   private _snackService = inject(SnackService);
-
-  private _requestsLog: { [key: string]: LinearRequestLogItem } = {};
-  private _isInterfacesReadyIfNeeded$: Observable<boolean> = IS_ELECTRON
-    ? of(true)
-    : throwError(() => ({
-        [HANDLED_ERROR_PROP_STR]: 'Linear: Only available in Electron environment',
-      }));
-
-  constructor() {
-    // set up callback listener for electron
-    if (IS_ELECTRON) {
-      window.ea.on(IPC.LINEAR_CB_EVENT, (ev: IpcRendererEvent, res: any) => {
-        this._handleResponse(res);
-      });
-    }
-  }
+  private _http = inject(HttpClient);
 
   getById$(issueId: string, cfg: LinearCfg): Observable<LinearIssue> {
     const query = `
@@ -92,20 +73,26 @@ export class LinearApiService {
               }
             }
           }
+          attachments {
+            nodes {
+              id
+              sourceType
+              title
+              url
+            }
+          }
         }
       }
     `;
 
     return this._sendRequest$({
-      linearReqCfg: {
-        query: this._normalizeQuery(query),
-        variables: { id: issueId },
-        transform: (res: any) => {
-          if (res?.data?.issue) {
-            return this._mapLinearIssueToIssue(res.data.issue);
-          }
-          throw new Error('No issue data returned');
-        },
+      query: this._normalizeQuery(query),
+      variables: { id: issueId },
+      transform: (res: any) => {
+        if (res?.data?.issue) {
+          return this._mapLinearIssueToIssue(res.data.issue);
+        }
+        throw new Error('No issue data returned');
       },
       cfg,
     });
@@ -123,7 +110,7 @@ export class LinearApiService {
     opts?: { teamId?: string; projectId?: string },
   ): Observable<LinearIssueReduced[]> {
     const query = `
-      query SearchIssues($first: Int!, $team: IssueTeamFilter, $project: IssueProjectFilter) {
+      query SearchIssues($first: Int!, $team: TeamFilter, $project: NullableProjectFilter) {
         viewer {
           assignedIssues(
             first: $first,
@@ -151,29 +138,31 @@ export class LinearApiService {
       }
     `;
 
-    // Build filter objects for variables, or set to null if not provided
+    // Build filter objects for variables, only include if provided
     const variables: any = { first: 50 };
-    variables.team = opts?.teamId ? { id: { eq: opts.teamId } } : null;
-    variables.project = opts?.projectId ? { id: { eq: opts.projectId } } : null;
+    if (opts?.teamId) {
+      variables.team = { id: { eq: opts.teamId } };
+    }
+    if (opts?.projectId) {
+      variables.project = { id: { eq: opts.projectId } };
+    }
 
     return this._sendRequest$({
-      linearReqCfg: {
-        query: this._normalizeQuery(query),
-        variables,
-        transform: (res: any) => {
-          let issues = res?.data?.viewer?.assignedIssues?.nodes || [];
+      query: this._normalizeQuery(query),
+      variables,
+      transform: (res: any) => {
+        let issues = res?.data?.viewer?.assignedIssues?.nodes || [];
 
-          if (searchTerm.trim()) {
-            const lowerSearchTerm = searchTerm.toLowerCase();
-            issues = issues.filter(
-              (issue: any) =>
-                issue.title.toLowerCase().includes(lowerSearchTerm) ||
-                issue.identifier.toLowerCase().includes(lowerSearchTerm),
-            );
-          }
+        if (searchTerm.trim()) {
+          const lowerSearchTerm = searchTerm.toLowerCase();
+          issues = issues.filter(
+            (issue: any) =>
+              issue.title.toLowerCase().includes(lowerSearchTerm) ||
+              issue.identifier.toLowerCase().includes(lowerSearchTerm),
+          );
+        }
 
-          return issues.map((issue: any) => this._mapLinearIssueToIssueReduced(issue));
-        },
+        return issues.map((issue: any) => this._mapLinearIssueToIssueReduced(issue));
       },
       cfg,
     });
@@ -190,119 +179,70 @@ export class LinearApiService {
     `;
 
     return this._sendRequest$({
-      linearReqCfg: {
-        query: this._normalizeQuery(query),
-        variables: {},
-        transform: () => true,
-      },
+      query: this._normalizeQuery(query),
+      variables: {},
+      transform: () => true,
       cfg,
     }).pipe(
       catchError((error) => {
         IssueLog.err('LINEAR_CONNECTION_TEST', error);
-        return throwError(() => error);
+        throw error;
       }),
     );
   }
 
   private _sendRequest$({
-    linearReqCfg,
+    query,
+    variables,
+    transform,
     cfg,
   }: {
-    linearReqCfg: LinearRequestCfg;
+    query: string;
+    variables: Record<string, any>;
+    transform?: (response: any) => any;
     cfg: LinearCfg;
   }): Observable<any> {
-    return this._isInterfacesReadyIfNeeded$.pipe(
-      take(1),
-      concatMap(() => {
-        const requestId = `linear__graphql__${nanoid()}`;
-
-        const headers = {
-          // eslint-disable-next-line @typescript-eslint/naming-convention
-          'Content-Type': 'application/json',
-          Authorization: cfg.apiKey,
-        };
-
-        const requestInit = {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            query: linearReqCfg.query,
-            variables: linearReqCfg.variables,
-          }),
-        };
-
-        return this._sendRequestToExecutor$(
-          requestId,
-          LINEAR_API_URL,
-          requestInit,
-          linearReqCfg.transform,
-        );
-      }),
-    );
-  }
-
-  private _sendRequestToExecutor$(
-    requestId: string,
-    url: string,
-    requestInit: any,
-    transform: any,
-  ): Observable<any> {
-    let promiseResolve;
-    let promiseReject;
-    const promise = new Promise((resolve, reject) => {
-      promiseResolve = resolve;
-      promiseReject = reject;
+    const headers = new HttpHeaders({
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      'Content-Type': 'application/json',
+      Authorization: cfg.apiKey || '',
     });
 
-    this._requestsLog[requestId] = {
-      promiseResolve,
-      promiseReject,
-      requestId,
-      requestInit,
-      transform,
+    const body = {
+      query,
+      variables,
     };
 
-    const requestToSend = { requestId, requestInit, url };
+    const allArgs = [
+      body,
+      {
+        headers,
+        reportProgress: false,
+        observe: 'response',
+      },
+    ];
 
-    if (IS_ELECTRON) {
-      window.ea.makeLinearRequest(requestToSend);
-    } else {
-      return throwError(
-        () => new Error('Linear: Only available in Electron environment'),
-      );
-    }
+    const req = new HttpRequest('POST' as any, LINEAR_API_URL, ...(allArgs as any));
 
-    return from(promise).pipe(
-      catchError((err) => {
-        IssueLog.log('LINEAR_REQUEST_ERROR', err);
-        const errTxt = `Linear: ${getErrorTxt(err)}`;
-        this._snackService.open({ type: 'ERROR', msg: errTxt });
-        return throwError(() => ({ [HANDLED_ERROR_PROP_STR]: errTxt }));
+    return this._http.request(req).pipe(
+      // Filter out HttpEventType.Sent (type: 0) events to only process actual responses
+      filter((res: any) => !(res === Object(res) && res.type === 0)),
+      map((res: any) => (res && res.body ? res.body : res)),
+      map((res: any) => {
+        // Check for GraphQL errors in response
+        if (res?.errors?.length) {
+          IssueLog.err('LINEAR_GRAPHQL_ERROR', res.errors);
+          throw new Error(res.errors[0].message || 'GraphQL error');
+        }
+        return res;
       }),
+      map((res: any) => {
+        return transform ? transform(res) : res;
+      }),
+      catchError((err) =>
+        handleIssueProviderHttpError$(LINEAR_TYPE, this._snackService, err),
+      ),
     );
-  }
-
-  private _handleResponse(res: { response?: any; error?: any; requestId: string }): void {
-    const { requestId, response, error } = res;
-    const requestLog = this._requestsLog[requestId];
-
-    if (!requestLog) {
-      IssueLog.warn('LINEAR_RESPONSE_UNKNOWN_REQUEST', requestId);
-      return;
-    }
-
-    delete this._requestsLog[requestId];
-
-    if (error) {
-      requestLog.promiseReject(error);
-    } else {
-      try {
-        const result = requestLog.transform ? requestLog.transform(response) : response;
-        requestLog.promiseResolve(result);
-      } catch (err) {
-        requestLog.promiseReject(err);
-      }
-    }
   }
 
   private _normalizeQuery(query: string): string {
@@ -368,26 +308,15 @@ export class LinearApiService {
         id: comment.id,
         body: comment.body,
         createdAt: comment.createdAt,
-        user: {
-          id: comment.user.id,
-          name: comment.user.name,
-          avatarUrl: comment.user.avatarUrl,
-        },
+        user: comment.user
+          ? {
+              id: comment.user.id,
+              name: comment.user.name,
+              avatarUrl: comment.user.avatarUrl,
+            }
+          : undefined,
       })),
+      attachments: (issue.attachments?.nodes || []) as LinearAttachment[],
     };
   }
-}
-
-interface LinearRequestCfg {
-  query: string;
-  variables: Record<string, any>;
-  transform?: (response: any) => any;
-}
-
-interface LinearRequestLogItem {
-  promiseResolve: (value: any) => void;
-  promiseReject: (reason?: any) => void;
-  requestId: string;
-  requestInit: any;
-  transform?: (response: any) => any;
 }

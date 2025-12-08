@@ -40,6 +40,7 @@ export type LinearIssue = LinearIssueReduced &
       color: string;
     }>;
     comments: LinearComment[];
+    attachments: LinearAttachment[];
   }>;
 
 export type LinearComment = Readonly<{
@@ -51,4 +52,11 @@ export type LinearComment = Readonly<{
     name: string;
     avatarUrl?: string;
   };
+}>;
+
+export type LinearAttachment = Readonly<{
+  id: string;
+  sourceType: string;
+  title: string;
+  url: string;
 }>;
