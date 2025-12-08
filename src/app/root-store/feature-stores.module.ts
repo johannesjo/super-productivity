@@ -21,7 +21,6 @@ import { IdleEffects } from '../features/idle/store/idle.effects';
 import { issueProvidersFeature } from '../features/issue/store/issue-provider.reducer';
 import { PollToBacklogEffects } from '../features/issue/store/poll-to-backlog.effects';
 import { PollIssueUpdatesEffects } from '../features/issue/store/poll-issue-updates.effects';
-import { UnlinkAllTasksOnProviderDeletionEffects } from '../features/issue/store/unlink-all-tasks-on-provider-deletion.effects';
 import {
   METRIC_FEATURE_NAME,
   metricReducer,
@@ -76,7 +75,7 @@ import { ReminderCountdownEffects } from '../features/reminder/store/reminder-co
 import { SyncEffects } from '../imex/sync/sync.effects';
 import { boardsFeature } from '../features/boards/store/boards.reducer';
 import { timeTrackingFeature } from '../features/time-tracking/store/time-tracking.reducer';
-import { ArchiveEffects } from '../features/time-tracking/store/archive.effects';
+import { ArchiveOperationHandlerEffects } from '../core/persistence/operation-log/processing/archive-operation-handler.effects';
 import { plannerFeature } from '../features/planner/store/planner.reducer';
 import { PlannerEffects } from '../features/planner/store/planner.effects';
 import { AppStateEffects } from './app-state/app-state.effects';
@@ -126,11 +125,7 @@ import {
     EffectsModule.forFeature([IdleEffects]),
 
     StoreModule.forFeature(issueProvidersFeature),
-    EffectsModule.forFeature([
-      PollToBacklogEffects,
-      PollIssueUpdatesEffects,
-      UnlinkAllTasksOnProviderDeletionEffects,
-    ]),
+    EffectsModule.forFeature([PollToBacklogEffects, PollIssueUpdatesEffects]),
 
     StoreModule.forFeature(METRIC_FEATURE_NAME, metricReducer),
 
@@ -168,7 +163,7 @@ import {
     StoreModule.forFeature(boardsFeature),
 
     StoreModule.forFeature(timeTrackingFeature),
-    EffectsModule.forFeature([ArchiveEffects]),
+    EffectsModule.forFeature([ArchiveOperationHandlerEffects]),
 
     StoreModule.forFeature(plannerFeature),
     EffectsModule.forFeature([PlannerEffects]),

@@ -1,4 +1,5 @@
 import { inject, Injectable, Injector } from '@angular/core';
+import { Action } from '@ngrx/store';
 import { PersistentAction } from '../persistent-action.interface';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
@@ -14,21 +15,49 @@ import { TimeTrackingService } from '../../../../features/time-tracking/time-tra
 import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
 
 /**
- * Handles archive-specific side effects for REMOTE operations.
+ * Action types that affect archive storage and require special handling.
+ */
+const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
+  TaskSharedActions.moveToArchive.type,
+  TaskSharedActions.restoreTask.type,
+  flushYoungToOld.type,
+  TaskSharedActions.deleteProject.type,
+  deleteTag.type,
+  deleteTags.type,
+  TaskSharedActions.deleteTaskRepeatCfg.type,
+  TaskSharedActions.deleteIssueProvider.type,
+  IssueProviderActions.deleteIssueProviders.type,
+];
+
+/**
+ * Helper function to check if an action affects archive storage.
+ * Used by ArchiveOperationHandlerEffects to filter actions.
+ */
+export const isArchiveAffectingAction = (action: Action): action is PersistentAction => {
+  return ARCHIVE_AFFECTING_ACTION_TYPES.includes(action.type);
+};
+
+/**
+ * Centralized handler for all archive-specific side effects.
  *
- * This service is called by OperationApplierService AFTER dispatching remote operations.
- * It ensures that archive storage (IndexedDB) is updated to match the NgRx state changes.
+ * This is the SINGLE SOURCE OF TRUTH for archive storage operations. All code paths
+ * that need to update archive storage (IndexedDB) should go through this handler.
  *
- * ## Why This Exists
+ * ## Entry Points
  *
- * Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. When remote operations
- * are applied, we need to update the archive storage to maintain consistency. This cannot
- * be done in effects because:
+ * 1. **Local operations**: Called by ArchiveOperationHandlerEffects after action dispatch
+ * 2. **Remote operations**: Called by OperationApplierService after applying remote operations
  *
- * 1. Effects should only run for LOCAL_ACTIONS (local user actions)
- * 2. Running effects for remote operations would cause side effects to happen twice
- *    (once on original client, once on receiving client)
- * 3. The OperationApplierService has full control over when side effects happen
+ * ## Why This Architecture
+ *
+ * Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. Previously,
+ * archive operations were duplicated across multiple effect files. This handler
+ * consolidates all archive logic to:
+ *
+ * 1. Eliminate duplicate code between local effects and remote operation handling
+ * 2. Make it easy to add new archive-affecting operations (update one switch statement)
+ * 3. Ensure consistent behavior between local and remote operations
+ * 4. Provide a clear audit point for all archive writes
  *
  * ## Operations Handled
  *
@@ -42,9 +71,9 @@ import { IssueProviderActions } from '../../../../features/issue/store/issue-pro
  *
  * ## Important Notes
  *
- * - Uses `isIgnoreDBLock: true` because this runs during sync processing when PFAPI
- *   has the database locked
+ * - For remote operations, uses `isIgnoreDBLock: true` because sync processing has the DB locked
  * - All operations are idempotent - safe to run multiple times
+ * - Use `isArchiveAffectingAction()` helper to check if an action needs archive handling
  */
 @Injectable({
   providedIn: 'root',
@@ -61,12 +90,16 @@ export class ArchiveOperationHandler {
   private _getTimeTrackingService = lazyInject(this._injector, TimeTrackingService);
 
   /**
-   * Process a remote operation and handle any archive-related side effects.
+   * Process an action and handle any archive-related side effects.
    *
-   * @param action The action that was dispatched (already has meta.isRemote = true)
+   * This method handles both local and remote operations. For remote operations
+   * (action.meta.isRemote === true), it uses isIgnoreDBLock: true because sync
+   * processing has the database locked.
+   *
+   * @param action The action that was dispatched
    * @returns Promise that resolves when archive operations are complete
    */
-  async handleRemoteOperation(action: PersistentAction): Promise<void> {
+  async handleOperation(action: PersistentAction): Promise<void> {
     switch (action.type) {
       case TaskSharedActions.moveToArchive.type:
         await this._handleMoveToArchive(action);
@@ -105,32 +138,41 @@ export class ArchiveOperationHandler {
 
   /**
    * Writes archived tasks to archiveYoung storage.
-   * Called when receiving a remote moveToArchive operation.
+   * REMOTE ONLY: For local operations, archive is written BEFORE action dispatch
+   * by ArchiveService.moveToArchive(), so we skip here to avoid double-writes.
    */
   private async _handleMoveToArchive(action: PersistentAction): Promise<void> {
+    if (!action.meta.isRemote) {
+      return; // Local: already written by ArchiveService before dispatch
+    }
     const tasks = (action as ReturnType<typeof TaskSharedActions.moveToArchive>).tasks;
     await this._getArchiveService().writeTasksToArchiveForRemoteSync(tasks);
   }
 
   /**
    * Removes a restored task from archive storage.
-   * Called when receiving a remote restoreTask operation.
+   * Called for both local and remote restoreTask operations.
    */
   private async _handleRestoreTask(action: PersistentAction): Promise<void> {
     const task = (action as ReturnType<typeof TaskSharedActions.restoreTask>).task;
     const taskIds = [task.id, ...task.subTaskIds];
-    await this._getTaskArchiveService().deleteTasks(taskIds, { isIgnoreDBLock: true });
+    const isRemote = !!action.meta?.isRemote;
+    await this._getTaskArchiveService().deleteTasks(
+      taskIds,
+      isRemote ? { isIgnoreDBLock: true } : {},
+    );
   }
 
   /**
    * Executes the flush from archiveYoung to archiveOld.
-   * Called when receiving a remote flushYoungToOld operation.
+   * Called for both local and remote flushYoungToOld operations.
    *
    * This operation is deterministic - given the same timestamp and archive state,
    * it will produce the same result on all clients.
    */
   private async _handleFlushYoungToOld(action: PersistentAction): Promise<void> {
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
+    const isRemote = !!action.meta?.isRemote;
     const pfapi = this._getPfapiService();
 
     const archiveYoung = await pfapi.m.archiveYoung.load();
@@ -150,7 +192,7 @@ export class ArchiveOperationHandler {
       },
       {
         isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: true,
+        isIgnoreDBLock: isRemote ? true : undefined,
       },
     );
 
@@ -161,12 +203,12 @@ export class ArchiveOperationHandler {
       },
       {
         isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: true,
+        isIgnoreDBLock: isRemote ? true : undefined,
       },
     );
 
     Log.log(
-      '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',
+      `______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via ${isRemote ? 'remote' : 'local'} op handler)\n_______________________`,
     );
   }
 

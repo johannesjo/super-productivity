@@ -110,20 +110,9 @@ export class TaskRepeatCfgEffects {
     ),
   );
 
-  /**
-   * Unlink archive tasks when a task repeat config is deleted.
-   * Regular tasks are handled by the meta-reducer for atomic sync.
-   */
-  removeConfigIdFromTaskArchiveTasks$ = createEffect(
-    () =>
-      this._localActions$.pipe(
-        ofType(TaskSharedActions.deleteTaskRepeatCfg),
-        tap(({ taskRepeatCfgId }) => {
-          this._taskArchiveService.removeRepeatCfgFromArchiveTasks(taskRepeatCfgId);
-        }),
-      ),
-    { dispatch: false },
-  );
+  // NOTE: Archive cleanup for deleteTaskRepeatCfg is now handled by
+  // ArchiveOperationHandler._handleDeleteTaskRepeatCfg, which is the single
+  // source of truth for archive operations.
 
   updateTaskAfterMakingItRepeatable$ = createEffect(
     () =>

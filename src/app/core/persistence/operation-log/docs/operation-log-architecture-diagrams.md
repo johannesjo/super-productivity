@@ -839,11 +839,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph OperationApplierService["OperationApplierService"]
-        OA1[Receive operation] --> OA2[Check dependencies]
-        OA2 --> OA3[convertOpToAction]
+    subgraph OperationApplierService["OperationApplierService (Fail-Fast)"]
+        OA1[Receive operation] --> OA2{Check hard<br/>dependencies}
+        OA2 -->|Missing| OA_ERR["throw SyncStateCorruptedError<br/>(triggers full re-sync)"]
+        OA2 -->|OK| OA3[convertOpToAction]
         OA3 --> OA4["store.dispatch(action)<br/>with meta.isRemote=true"]
-        OA4 --> OA5["archiveOperationHandler<br/>.handleRemoteOperation(action)"]
+        OA4 --> OA5["archiveOperationHandler<br/>.handleOperation(action)"]
     end
 
     subgraph Handler["ArchiveOperationHandler"]
@@ -851,13 +852,18 @@ flowchart TD
         H1 -->|moveToArchive| H2[Write tasks to<br/>archiveYoung]
         H1 -->|restoreTask| H3[Delete task from<br/>archive]
         H1 -->|flushYoungToOld| H4[Move old tasks<br/>Young → Old]
-        H1 -->|other| H5[No-op]
+        H1 -->|deleteProject| H5[Remove tasks<br/>for project]
+        H1 -->|deleteTag| H6[Remove tag<br/>from tasks]
+        H1 -->|deleteTaskRepeatCfg| H7[Remove repeatCfgId<br/>from tasks]
+        H1 -->|deleteIssueProvider| H8[Unlink issue data<br/>from tasks]
+        H1 -->|other| H9[No-op]
     end
 
     OA5 --> H1
 
     style OperationApplierService fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     style Handler fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style OA_ERR fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 ```
 
 ### 8.4 Archive Operations Summary

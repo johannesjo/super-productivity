@@ -2,7 +2,6 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import {
-  concatMap,
   distinctUntilChanged,
   filter,
   first,
@@ -22,8 +21,6 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { Router } from '@angular/router';
 import { TODAY_TAG } from '../tag.const';
-import { TaskArchiveService } from '../../time-tracking/task-archive.service';
-import { TimeTrackingService } from '../../time-tracking/time-tracking.service';
 import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TranslateService } from '@ngx-translate/core';
@@ -31,7 +28,6 @@ import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
-import { devError } from '../../../util/dev-error';
 
 @Injectable()
 export class TagEffects {
@@ -41,8 +37,6 @@ export class TagEffects {
   private _tagService = inject(TagService);
   private _workContextService = inject(WorkContextService);
   private _router = inject(Router);
-  private _taskArchiveService = inject(TaskArchiveService);
-  private _timeTrackingService = inject(TimeTrackingService);
   private _translateService = inject(TranslateService);
   private _plannerService = inject(PlannerService);
 
@@ -87,48 +81,14 @@ export class TagEffects {
   );
 
   /**
-   * Handles async cleanup when tags are deleted.
+   * Redirects to Today tag if the current tag is deleted.
    *
-   * NOTE: Most tag deletion cleanup is now handled atomically in the meta-reducer
-   * (tag-shared.reducer.ts), including:
-   * - Removing tag references from tasks
-   * - Deleting orphaned tasks (no project, no tags, no parent)
-   * - Cleaning up task repeat configs
-   * - Cleaning up current time tracking state
+   * NOTE: Archive cleanup (removing tags from archived tasks, cleaning up time tracking)
+   * is now handled by ArchiveOperationHandler, which is the single source of truth for
+   * archive operations.
    *
-   * This effect only handles async operations that can't be in a reducer:
-   * - Archive cleanup (IndexedDB, not NgRx state)
-   * - Archive time tracking cleanup (IndexedDB, not NgRx state)
+   * @see ArchiveOperationHandler._handleDeleteTags
    */
-  deleteTagRelatedData: Observable<unknown> = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(deleteTag, deleteTags),
-        map((a: any) => (a.ids ? a.ids : [a.id])),
-        concatMap(async (tagIdsToRemove: string[]) => {
-          try {
-            // Remove tags from archived tasks (async - IndexedDB, not NgRx state)
-            await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
-
-            // Clean up time tracking data in archives (async - IndexedDB)
-            // Note: Current time tracking state is handled in the meta-reducer
-            for (const tagId of tagIdsToRemove) {
-              await this._timeTrackingService.cleanupArchiveDataForTag(tagId);
-            }
-          } catch (e) {
-            // Archive cleanup is non-critical - log and notify but don't break
-            devError('[TagEffects] Failed to clean up tag archive data');
-            this._snackService.open({
-              type: 'ERROR',
-              msg: T.F.TAG.S.ARCHIVE_CLEANUP_FAILED,
-            });
-          }
-          return tagIdsToRemove;
-        }),
-      ),
-    { dispatch: false },
-  );
-
   redirectIfCurrentTagIsDeleted: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(

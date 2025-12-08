@@ -109,7 +109,7 @@ describe('ArchiveOperationHandler', () => {
     service = TestBed.inject(ArchiveOperationHandler);
   });
 
-  describe('handleRemoteOperation', () => {
+  describe('handleOperation', () => {
     describe('moveToArchive action', () => {
       it('should write tasks to archive for remote sync', async () => {
         const tasks = [
@@ -124,7 +124,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockArchiveService.writeTasksToArchiveForRemoteSync).toHaveBeenCalledWith(
           tasks,
@@ -143,7 +143,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockArchiveService.writeTasksToArchiveForRemoteSync).toHaveBeenCalledWith(
           [],
@@ -159,7 +159,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
       });
@@ -178,7 +178,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledWith(
           ['task-1', 'subtask-1', 'subtask-2'],
@@ -196,7 +196,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledWith(['task-1'], {
           isIgnoreDBLock: true,
@@ -213,7 +213,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -236,7 +236,7 @@ describe('ArchiveOperationHandler', () => {
         // The action should be recognized and try to load archive
         // (may fail due to sorting, but we verify it attempted to process)
         try {
-          await service.handleRemoteOperation(action);
+          await service.handleOperation(action);
         } catch {
           // Expected - sort function returns undefined in tests
         }
@@ -257,7 +257,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockTaskArchiveService.removeAllArchiveTasksForProject,
@@ -276,7 +276,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -293,7 +293,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
           'tag-1',
@@ -310,7 +310,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
           'tag-1',
@@ -336,7 +336,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -357,7 +357,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
@@ -372,7 +372,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -394,7 +394,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
@@ -409,7 +409,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -433,7 +433,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
@@ -456,7 +456,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -479,7 +479,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as PersistentAction;
 
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
@@ -504,7 +504,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeResolved();
+        await expectAsync(service.handleOperation(action)).toBeResolved();
       });
     });
 
@@ -517,8 +517,8 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
+        await service.handleOperation(action);
 
         expect(mockArchiveService.writeTasksToArchiveForRemoteSync).toHaveBeenCalledTimes(
           2,
@@ -534,8 +534,8 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await service.handleRemoteOperation(action);
-        await service.handleRemoteOperation(action);
+        await service.handleOperation(action);
+        await service.handleOperation(action);
 
         expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledTimes(2);
       });
@@ -555,7 +555,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from deleteTasks', async () => {
@@ -570,7 +570,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from archive load in flushYoungToOld', async () => {
@@ -586,7 +586,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWithError(
+        await expectAsync(service.handleOperation(action)).toBeRejectedWithError(
           'Load failed',
         );
       });
@@ -605,7 +605,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from removeTagsFromAllTasks', async () => {
@@ -620,7 +620,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from removeRepeatCfgFromArchiveTasks', async () => {
@@ -636,7 +636,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from unlinkIssueProviderFromArchiveTasks for single provider', async () => {
@@ -652,7 +652,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
 
       it('should propagate errors from unlinkIssueProviderFromArchiveTasks for multiple providers', async () => {
@@ -667,7 +667,7 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+        await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
       });
     });
   });
