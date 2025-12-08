@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 7, 2025
+**Last Updated:** December 8, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -804,31 +804,34 @@ flowchart TD
 
 ### 8.2 Archive Operations Flow
 
-Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. This requires special handling:
+Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. This requires special handling through a **unified** `ArchiveOperationHandler`:
 
-- **Local operations**: Effects handle side effects (using LOCAL_ACTIONS)
-- **Remote operations**: ArchiveOperationHandler handles side effects (called by OperationApplierService)
+- **Local operations**: `ArchiveOperationHandlerEffects` routes through `ArchiveOperationHandler` (using LOCAL_ACTIONS)
+- **Remote operations**: `OperationApplierService` calls `ArchiveOperationHandler` directly after dispatch
+
+Both paths use the same handler to ensure consistent behavior.
 
 ```mermaid
 flowchart TD
     subgraph LocalOp["LOCAL Operation (User Action)"]
-        L1[User archives tasks] --> L2[ArchiveService writes<br/>to IndexedDB]
+        L1[User archives tasks] --> L2[ArchiveService writes<br/>to IndexedDB<br/>BEFORE dispatch]
         L2 --> L3[Dispatch moveToArchive]
         L3 --> L4[Meta-reducers update state]
-        L4 --> L5[Effects run via LOCAL_ACTIONS]
-        L5 --> L6[OperationLogEffects<br/>creates operation]
+        L4 --> L5[ArchiveOperationHandlerEffects<br/>via LOCAL_ACTIONS]
+        L5 --> L6[ArchiveOperationHandler<br/>.handleOperation]
+        L4 --> L7[OperationLogEffects<br/>creates operation]
     end
 
     subgraph RemoteOp["REMOTE Operation (Sync)"]
         R1[Download operation] --> R2[OperationApplierService<br/>dispatches action]
         R2 --> R3[Meta-reducers update state]
-        R3 --> R4[ArchiveOperationHandler<br/>handles side effects]
+        R3 --> R4[ArchiveOperationHandler<br/>.handleOperation]
         R4 --> R5[Write/delete archive<br/>in IndexedDB]
 
-        NoEffect["❌ Effects DON'T run<br/>(action has meta.isRemote=true)"]
+        NoEffect["❌ Regular effects DON'T run<br/>(action has meta.isRemote=true)"]
     end
 
-    L6 -.->|"Sync"| R1
+    L7 -.->|"Sync"| R1
 
     style LocalOp fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style RemoteOp fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
@@ -836,6 +839,8 @@ flowchart TD
 ```
 
 ### 8.3 ArchiveOperationHandler Integration
+
+The `OperationApplierService` uses a **fail-fast** approach: if hard dependencies are missing, it throws `SyncStateCorruptedError` rather than attempting complex retry logic. This triggers a full re-sync, which is safer than partial recovery.
 
 ```mermaid
 flowchart TD
@@ -849,13 +854,14 @@ flowchart TD
 
     subgraph Handler["ArchiveOperationHandler"]
         H1{Action Type?}
-        H1 -->|moveToArchive| H2[Write tasks to<br/>archiveYoung]
+        H1 -->|moveToArchive| H2[Write tasks to<br/>archiveYoung<br/>REMOTE ONLY]
         H1 -->|restoreTask| H3[Delete task from<br/>archive]
         H1 -->|flushYoungToOld| H4[Move old tasks<br/>Young → Old]
-        H1 -->|deleteProject| H5[Remove tasks<br/>for project]
-        H1 -->|deleteTag| H6[Remove tag<br/>from tasks]
+        H1 -->|deleteProject| H5[Remove tasks<br/>for project +<br/>cleanup time tracking]
+        H1 -->|deleteTag/deleteTags| H6[Remove tag<br/>from tasks +<br/>cleanup time tracking]
         H1 -->|deleteTaskRepeatCfg| H7[Remove repeatCfgId<br/>from tasks]
         H1 -->|deleteIssueProvider| H8[Unlink issue data<br/>from tasks]
+        H1 -->|deleteIssueProviders| H8b[Unlink multiple<br/>issue providers]
         H1 -->|other| H9[No-op]
     end
 
@@ -866,20 +872,28 @@ flowchart TD
     style OA_ERR fill:#ffcdd2,stroke:#c62828,stroke-width:2px
 ```
 
+**Why Fail-Fast?**
+
+The server guarantees operations arrive in sequence order, and delete operations are atomic via meta-reducers. If dependencies are missing, something is fundamentally wrong with sync state. A full re-sync is safer than attempting partial recovery with potential inconsistencies.
+
 ### 8.4 Archive Operations Summary
 
-| Operation         | Local Handling                              | Remote Handling                               |
-| ----------------- | ------------------------------------------- | --------------------------------------------- |
-| `moveToArchive`   | ArchiveService writes BEFORE dispatch       | ArchiveOperationHandler writes AFTER dispatch |
-| `restoreTask`     | Effect removes from archive (LOCAL_ACTIONS) | ArchiveOperationHandler removes from archive  |
-| `flushYoungToOld` | Effect executes flush (LOCAL_ACTIONS)       | ArchiveOperationHandler executes flush        |
+| Operation              | Local Handling                                                         | Remote Handling                                              |
+| ---------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `moveToArchive`        | ArchiveService writes BEFORE dispatch; handler skips (no double-write) | ArchiveOperationHandler writes AFTER dispatch                |
+| `restoreTask`          | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler removes from archive                 |
+| `flushYoungToOld`      | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler executes flush                       |
+| `deleteProject`        | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler removes tasks + cleans time tracking |
+| `deleteTag/deleteTags` | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler removes tags + cleans time tracking  |
+| `deleteTaskRepeatCfg`  | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler removes repeatCfgId from tasks       |
+| `deleteIssueProvider`  | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler unlinks issue data                   |
 
 ### 8.5 Key Files
 
-| File                                              | Purpose                                            |
-| ------------------------------------------------- | -------------------------------------------------- |
-| `processing/archive-operation-handler.service.ts` | Handles archive side effects for remote operations |
-| `processing/operation-applier.service.ts`         | Calls ArchiveOperationHandler after dispatching    |
-| `features/time-tracking/store/archive.effects.ts` | Effects for LOCAL archive operations only          |
-| `features/time-tracking/archive.service.ts`       | Local archive write logic (moveToArchive)          |
-| `features/time-tracking/task-archive.service.ts`  | Archive CRUD operations                            |
+| File                                              | Purpose                                                             |
+| ------------------------------------------------- | ------------------------------------------------------------------- |
+| `processing/archive-operation-handler.service.ts` | **Unified** handler for all archive side effects (local AND remote) |
+| `processing/archive-operation-handler.effects.ts` | Routes local actions to ArchiveOperationHandler via LOCAL_ACTIONS   |
+| `processing/operation-applier.service.ts`         | Calls ArchiveOperationHandler after dispatching remote operations   |
+| `features/time-tracking/archive.service.ts`       | Local archive write logic (moveToArchive writes BEFORE dispatch)    |
+| `features/time-tracking/task-archive.service.ts`  | Archive CRUD operations                                             |

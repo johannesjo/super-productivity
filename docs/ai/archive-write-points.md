@@ -1,10 +1,12 @@
 # Archive Write Points Documentation
 
+**Last Updated:** December 8, 2025
+
 This document tracks all locations where archive storage (IndexedDB) is written to, ensuring archive integrity and preventing unexpected writes.
 
 ## Single Source of Truth: ArchiveOperationHandler
 
-All archive write operations MUST go through `ArchiveOperationHandler`. This handler is the centralized point for all archive storage operations.
+All archive write operations MUST go through `ArchiveOperationHandler`. This handler is the **unified, centralized** point for all archive storage operations, used by both local and remote operations.
 
 ### File Location
 
@@ -12,8 +14,16 @@ All archive write operations MUST go through `ArchiveOperationHandler`. This han
 
 ### Entry Points
 
-1. **Local Operations**: `ArchiveOperationHandlerEffects` → `ArchiveOperationHandler.handleOperation()`
+Both local and remote operations flow through the same handler:
+
+1. **Local Operations**: `ArchiveOperationHandlerEffects` (using `LOCAL_ACTIONS`) → `ArchiveOperationHandler.handleOperation()`
 2. **Remote Operations**: `OperationApplierService` → `ArchiveOperationHandler.handleOperation()`
+
+This unified architecture ensures:
+
+- Identical behavior for local and remote operations
+- Single place to add new archive-affecting operations
+- Eliminates duplicate code between local effects and remote handling
 
 ## Archive-Affecting Actions
 

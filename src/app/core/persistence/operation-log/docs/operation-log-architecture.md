@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 6, 2025
+**Last Updated:** December 8, 2025
 
 ---
 
@@ -1664,24 +1664,27 @@ Meta-reducers intercept actions before they reach feature reducers and can modif
 | `plannerSharedMetaReducer`        | Planner day management                                   |
 | `taskRepeatCfgSharedMetaReducer`  | Repeat config deletion with task cleanup                 |
 | `issueProviderSharedMetaReducer`  | Issue provider updates                                   |
-| `stateCaptureMetaReducer`         | Captures before/after state for multi-entity ops         |
+| `operationCaptureMetaReducer`     | Captures before/after state, enqueues entity changes     |
 
 ## F.3 Multi-Entity Operation Capture
 
-The `StateChangeCaptureService` and `stateCaptureMetaReducer` work together to capture all entity changes from a single action:
+The `OperationCaptureService` and `operation-capture.meta-reducer` work together using a **simple FIFO queue** to capture all entity changes from a single action:
 
-1. **Before action**: Meta-reducer captures relevant state slices
-2. **After action**: Effect computes diff to find all changed entities
-3. **Result**: Single operation with `entityChanges[]` array
+1. **Before action**: Meta-reducer captures before-state
+2. **After action**: Meta-reducer calls `OperationCaptureService.computeAndEnqueue()` with before/after states
+3. **Effect processes**: Effect calls `OperationCaptureService.dequeue()` to get pre-computed changes
+4. **Result**: Single operation with `entityChanges[]` array
 
-This eliminates the need for manual side-effect extraction and ensures the operation log accurately reflects what changed.
+The FIFO queue works because NgRx reducers process actions sequentially, and effects use `concatMap` for sequential processing. Order is preserved between enqueue and dequeue.
+
+**Optimization**: The service uses reference equality to detect which feature states actually changed, only diffing features where `beforeFeature !== afterFeature`.
 
 ```
 User Action (e.g., Delete Tag)
     │
     ▼
-stateCaptureMetaReducer
-    ├──► Capture before-state for affected entity types
+operation-capture.meta-reducer
+    ├──► Capture before-state
     │
     ▼
 tagSharedMetaReducer (+ other meta-reducers)
@@ -1691,8 +1694,14 @@ tagSharedMetaReducer (+ other meta-reducers)
 Feature Reducers
     │
     ▼
+operation-capture.meta-reducer
+    ├──► Call OperationCaptureService.computeAndEnqueue(action, before, after)
+    │         └──► Computes entity changes by diffing before/after state
+    │         └──► Pushes to FIFO queue
+    │
+    ▼
 OperationLogEffects
-    ├──► Compute entity changes by diffing before/after state
+    ├──► Call OperationCaptureService.dequeue() to get pre-computed changes
     └──► Create single Operation with entityChanges[]
 ```
 
@@ -1860,12 +1869,14 @@ When adding new entities or relationships:
 >
 > - **Server Sync (SuperSync)**: Full upload/download infrastructure with conflict detection, user resolution UI, and integration tests
 > - **Server Security Hardening**: Audit logging, structured error codes, request deduplication, transaction isolation, input validation, rate limiting
+> - **Unified Archive Handling**: `ArchiveOperationHandler` is now the single source of truth for all archive operations, used by both local effects and remote operation application
+> - **Simplified OperationCaptureService**: Refactored to FIFO queue with reference equality optimization for detecting changed feature states
+> - **Simplified OperationApplierService**: Refactored to fail-fast approach - throws `SyncStateCorruptedError` on missing hard deps (no retry queues)
 > - **Tag sanitization**: Remove subtask IDs from tags when parent deleted, filter non-existent taskIds on sync
 > - **Anchor-based move operations**: All task drag-drop moves now use `afterTaskId` instead of full list replacement (including subtask moves)
 > - **Quota handling**: Emergency compaction and circuit breaker on `QuotaExceededError`
 > - **`syncedAt` index**: Faster `getUnsynced()` queries
 > - **Persistent compaction counter**: Tracks ops across tabs/restarts
-> - **Fail-fast dependency handling**: `OperationApplierService` throws `SyncStateCorruptedError` on missing hard deps (no retry queues)
 > - **Plugin data sync**: Operation logging for plugin user data and metadata
 > - **Gap detection**: Download operations detect and report sequence gaps
 > - **Server-side conflict detection**: Prevents concurrent modifications on server
@@ -1907,12 +1918,14 @@ src/app/core/persistence/operation-log/
 │   ├── conflict-resolution.service.ts        # Conflict UI presentation
 │   └── operation-sync.util.ts                # Sync helper utilities
 ├── processing/
-│   ├── operation-applier.service.ts          # Apply ops with dependency handling
+│   ├── operation-applier.service.ts          # Apply ops with fail-fast dependency handling
+│   ├── operation-capture.service.ts          # FIFO queue for capturing entity changes
+│   ├── operation-capture.meta-reducer.ts     # Meta-reducer for before/after state capture
+│   ├── archive-operation-handler.service.ts  # Unified handler for archive side effects
+│   ├── archive-operation-handler.effects.ts  # Routes local actions to ArchiveOperationHandler
 │   ├── validate-state.service.ts             # Typia + cross-model validation
 │   ├── validate-operation-payload.ts         # Checkpoint A - payload validation
-│   ├── repair-operation.service.ts           # REPAIR operation creation
-│   ├── state-capture.meta-reducer.ts         # Meta-reducer for before-state capture (Part F)
-│   └── state-change-capture.service.ts       # Computes entity changes from state diff (Part F)
+│   └── repair-operation.service.ts           # REPAIR operation creation
 ├── integration/                              # Integration test suite
 │   ├── sync-scenarios.integration.spec.ts    # Protocol-level sync tests
 │   ├── multi-client-sync.integration.spec.ts # Multi-client scenarios
