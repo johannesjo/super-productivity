@@ -4,6 +4,7 @@
 <button
   mat-flat-button
   (click)="onClick()"
+  [matTooltip]="to.tooltip ? (to.tooltip | translate) : ''"
 >
   {{ (to.text | translate) || 'Click Me' }}
 </button>

@@ -164,13 +164,6 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       key: 'superSync',
       fieldGroup: [
         {
-          type: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: T.F.SYNC.FORM.SUPER_SYNC.INFO_TEXT,
-          },
-        },
-        {
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
@@ -181,17 +174,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          type: 'tpl',
-          className: 'tpl',
-          templateOptions: {
-            tag: 'p',
-            text: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
-          },
-        },
-        {
           type: 'btn',
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
+            tooltip: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
             btnType: 'primary',
             centerBtn: true,
             onClick: (field: any) => {
