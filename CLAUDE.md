@@ -110,3 +110,4 @@ The app uses NgRx (Redux pattern) for state management. Key state slices:
 - Adding side effects in constructors
 - Re-declaring styles that exist in Angular Material theme
 - Using deprecated Angular APIs (e.g., `NgModules` when not needed)
+- **Using `inject(Actions)` or `ALL_ACTIONS` in effects** - Effects should NEVER run for remote operations. Side effects happen exactly once on the originating client. Always use `inject(LOCAL_ACTIONS)` instead.
