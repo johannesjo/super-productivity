@@ -2,17 +2,19 @@ import { TestBed } from '@angular/core/testing';
 import { RepairOperationService } from './repair-operation.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from '../sync/lock.service';
-import { SnackService } from '../../../snack/snack.service';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { RepairSummary, OpType } from '../operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
+import { TranslateService } from '@ngx-translate/core';
 
 describe('RepairOperationService', () => {
   let service: RepairOperationService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockLockService: jasmine.SpyObj<LockService>;
-  let mockSnackService: jasmine.SpyObj<SnackService>;
+  let mockTranslateService: jasmine.SpyObj<TranslateService>;
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
+  let alertSpy: jasmine.Spy;
+  let confirmSpy: jasmine.Spy;
 
   const mockRepairedState = {
     task: { entities: {}, ids: [] },
@@ -38,7 +40,7 @@ describe('RepairOperationService', () => {
       'saveStateCache',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
-    mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
+    mockTranslateService = jasmine.createSpyObj('TranslateService', ['instant']);
     mockVectorClockService = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
     ]);
@@ -55,13 +57,32 @@ describe('RepairOperationService', () => {
     mockVectorClockService.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ clientA: 5 }),
     );
+    mockTranslateService.instant.and.callFake((key: string) => key);
+
+    // Spy on global alert (handle if already spied)
+    if (!jasmine.isSpy(window.alert)) {
+      alertSpy = spyOn(window, 'alert');
+    } else {
+      alertSpy = window.alert as jasmine.Spy;
+      alertSpy.calls.reset();
+    }
+
+    // Spy on global confirm to prevent devError from throwing
+    // (devError calls confirm() and throws if user confirms)
+    if (!jasmine.isSpy(window.confirm)) {
+      confirmSpy = spyOn(window, 'confirm').and.returnValue(false);
+    } else {
+      confirmSpy = window.confirm as jasmine.Spy;
+      confirmSpy.calls.reset();
+      confirmSpy.and.returnValue(false);
+    }
 
     TestBed.configureTestingModule({
       providers: [
         RepairOperationService,
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: LockService, useValue: mockLockService },
-        { provide: SnackService, useValue: mockSnackService },
+        { provide: TranslateService, useValue: mockTranslateService },
         { provide: VectorClockService, useValue: mockVectorClockService },
       ],
     });
@@ -174,12 +195,8 @@ describe('RepairOperationService', () => {
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      expect(mockSnackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          type: 'SUCCESS',
-          translateParams: { count: '5' },
-        }),
-      );
+      expect(mockTranslateService.instant).toHaveBeenCalled();
+      expect(alertSpy).toHaveBeenCalled();
     });
 
     it('should not notify user when no fixes were made', async () => {
@@ -187,7 +204,7 @@ describe('RepairOperationService', () => {
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      expect(mockSnackService.open).not.toHaveBeenCalled();
+      expect(alertSpy).not.toHaveBeenCalled();
     });
 
     it('should generate unique operation ID', async () => {
@@ -247,11 +264,12 @@ describe('RepairOperationService', () => {
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      expect(mockSnackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          translateParams: { count: '21' }, // 1+2+3+4+5+6 = 21
-        }),
+      // Total fixes = 1+2+3+4+5+6 = 21
+      expect(mockTranslateService.instant).toHaveBeenCalledWith(
+        jasmine.any(String),
+        jasmine.objectContaining({ count: '21' }),
       );
+      expect(alertSpy).toHaveBeenCalled();
     });
   });
 });
