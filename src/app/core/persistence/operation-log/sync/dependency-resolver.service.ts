@@ -23,30 +23,29 @@ import {
   selectEntities as selectSimpleCounterEntitiesFromAdapter,
 } from '../../../../features/simple-counter/store/simple-counter.reducer';
 import { firstValueFrom } from 'rxjs';
-import { createSelector } from '@ngrx/store';
+import { createSelector, MemoizedSelector } from '@ngrx/store';
 import { Dictionary } from '@ngrx/entity';
 
-// Create entity dictionary selectors for bulk lookups
-const selectProjectEntities = createSelector(
-  selectProjectFeatureState,
-  selectProjectEntitiesFromAdapter,
-);
-const selectTagEntities = createSelector(
-  selectTagFeatureState,
-  selectTagEntitiesFromAdapter,
-);
-const selectNoteEntities = createSelector(
-  selectNoteFeatureState,
-  selectNoteEntitiesFromAdapter,
-);
-const selectMetricEntities = createSelector(
-  selectMetricFeatureState,
-  selectMetricEntitiesFromAdapter,
-);
-const selectSimpleCounterEntities = createSelector(
-  selectSimpleCounterFeatureState,
-  selectSimpleCounterEntitiesFromAdapter,
-);
+/**
+ * Registry of entity dictionary selectors for bulk lookups.
+ * To add a new entity type, simply add its selector here.
+ * Entity types not in this registry are assumed to be singleton/aggregate types
+ * that always exist (e.g., GLOBAL_CONFIG, PLANNER).
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyDictionarySelector = MemoizedSelector<object, Dictionary<any>>;
+
+const ENTITY_SELECTORS: Partial<Record<EntityType, AnyDictionarySelector>> = {
+  TASK: selectTaskEntities,
+  PROJECT: createSelector(selectProjectFeatureState, selectProjectEntitiesFromAdapter),
+  TAG: createSelector(selectTagFeatureState, selectTagEntitiesFromAdapter),
+  NOTE: createSelector(selectNoteFeatureState, selectNoteEntitiesFromAdapter),
+  METRIC: createSelector(selectMetricFeatureState, selectMetricEntitiesFromAdapter),
+  SIMPLE_COUNTER: createSelector(
+    selectSimpleCounterFeatureState,
+    selectSimpleCounterEntitiesFromAdapter,
+  ),
+};
 
 export interface OperationDependency {
   entityType: EntityType;
@@ -203,18 +202,10 @@ export class DependencyResolverService {
     const missing: OperationDependency[] = [];
     for (const dep of deps) {
       const dict = entityDicts.get(dep.entityType);
-      // If we have a dictionary for this type, check it; otherwise use the fallback logic
-      if (dict !== undefined) {
-        if (!dict[dep.entityId]) {
-          missing.push(dep);
-        }
-      } else {
-        // For entity types without dictionary selectors (singleton/aggregate types),
-        // they're assumed to exist
-        const exists = this.checkSingletonEntityExists(dep.entityType);
-        if (!exists) {
-          missing.push(dep);
-        }
+      // If we have a dictionary for this type, check it.
+      // Entity types without selectors (singleton/aggregate) are assumed to exist.
+      if (dict !== undefined && !dict[dep.entityId]) {
+        missing.push(dep);
       }
     }
 
@@ -229,79 +220,21 @@ export class DependencyResolverService {
     depsByType: Map<EntityType, OperationDependency[]>,
   ): Promise<Map<EntityType, Dictionary<unknown> | undefined>> {
     const result = new Map<EntityType, Dictionary<unknown> | undefined>();
-
-    // Fetch all needed dictionaries in parallel
     const promises: Promise<void>[] = [];
 
-    if (depsByType.has('TASK')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectTaskEntities)).then((dict) => {
-          result.set('TASK', dict);
-        }),
-      );
-    }
-    if (depsByType.has('PROJECT')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectProjectEntities)).then((dict) => {
-          result.set('PROJECT', dict);
-        }),
-      );
-    }
-    if (depsByType.has('TAG')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectTagEntities)).then((dict) => {
-          result.set('TAG', dict);
-        }),
-      );
-    }
-    if (depsByType.has('NOTE')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectNoteEntities)).then((dict) => {
-          result.set('NOTE', dict);
-        }),
-      );
-    }
-    if (depsByType.has('METRIC')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectMetricEntities)).then((dict) => {
-          result.set('METRIC', dict);
-        }),
-      );
-    }
-    if (depsByType.has('SIMPLE_COUNTER')) {
-      promises.push(
-        firstValueFrom(this.store.select(selectSimpleCounterEntities)).then((dict) => {
-          result.set('SIMPLE_COUNTER', dict);
-        }),
-      );
+    for (const entityType of depsByType.keys()) {
+      const selector = ENTITY_SELECTORS[entityType];
+      if (selector) {
+        promises.push(
+          firstValueFrom(this.store.select(selector)).then((dict) => {
+            result.set(entityType, dict);
+          }),
+        );
+      }
+      // Entity types not in ENTITY_SELECTORS are singleton/aggregate - assumed to exist
     }
 
     await Promise.all(promises);
     return result;
-  }
-
-  /**
-   * For singleton/aggregate entity types that don't have per-entity lookups.
-   * These are assumed to always exist.
-   */
-  private checkSingletonEntityExists(type: EntityType): boolean {
-    switch (type) {
-      case 'GLOBAL_CONFIG':
-      case 'WORK_CONTEXT':
-      case 'TASK_REPEAT_CFG':
-      case 'ISSUE_PROVIDER':
-      case 'PLANNER':
-      case 'MENU_TREE':
-      case 'BOARD':
-      case 'REMINDER':
-      case 'PLUGIN_USER_DATA':
-      case 'PLUGIN_METADATA':
-      case 'MIGRATION':
-      case 'RECOVERY':
-      case 'ALL':
-        return true; // These don't require dependency resolution
-      default:
-        return true; // Unknown types assumed to exist
-    }
   }
 }

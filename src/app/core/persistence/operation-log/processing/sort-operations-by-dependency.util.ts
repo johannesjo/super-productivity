@@ -1,3 +1,9 @@
+/**
+ * @fileoverview Topological sort for operation dependencies
+ * @status DORMANT - Not used in production (last reviewed: 2025-12)
+ *
+ * Kept for potential future use. See sortOperationsByDependency JSDoc for details.
+ */
 import { Operation, OpType } from '../operation.types';
 import { OperationDependency } from '../sync/dependency-resolver.service';
 import { OpLog } from '../../../log';
