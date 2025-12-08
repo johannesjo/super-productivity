@@ -17,8 +17,31 @@ import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 /**
- * Service to manage conflict resolution, typically presenting a UI to the user.
- * It takes detected conflicts, presents them, and applies the chosen resolutions.
+ * Handles sync conflicts when the same entity has been modified both locally and remotely.
+ *
+ * ## Overview
+ * When syncing detects that both local and remote clients modified the same entity,
+ * this service presents a dialog letting the user choose which version to keep.
+ * It then applies the chosen resolution while maintaining data consistency.
+ *
+ * ## Resolution Flow
+ * 1. Present conflict dialog to user (one choice per conflicting entity)
+ * 2. User chooses "local" or "remote" for each conflict (or cancels)
+ * 3. If cancelled: nothing happens, state remains as-is
+ * 4. If resolved:
+ *    - Remote wins: Apply remote ops, reject local ops AND any stale pending ops
+ *    - Local wins: Store remote ops as rejected, local ops will upload on next sync
+ * 5. Apply all chosen ops in a single batch (for dependency sorting)
+ * 6. Validate and repair state (Checkpoint D)
+ *
+ * ## Safety Features
+ * - **Timeout prevention**: Signals user input wait state to prevent sync timeout
+ * - **Duplicate detection**: Skips ops already in the store
+ * - **Crash safety**: Marks ops as rejected BEFORE applying
+ * - **Stale op rejection**: When remote wins, rejects ALL pending ops for affected entities
+ *   (prevents uploading ops with outdated vector clocks)
+ * - **Batch application**: All ops applied together for correct dependency sorting
+ * - **Post-resolution validation**: Runs state validation and repair after resolution
  */
 @Injectable({
   providedIn: 'root',
@@ -31,15 +54,35 @@ export class ConflictResolutionService {
   private validateStateService = inject(ValidateStateService);
   private userInputWaitState = inject(UserInputWaitStateService);
 
+  /** Reference to the open conflict dialog, if any */
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
 
   /**
-   * Present conflicts to the user for resolution.
-   * @param conflicts - The detected conflicts to resolve
-   * @param nonConflictingOps - Non-conflicting ops to apply together with resolved conflict ops.
-   *   These are merged with chosen remote ops and applied in a single batch so that
-   *   dependency sorting works correctly (e.g., a non-conflicting Task create that
-   *   depends on a Project from a resolved conflict).
+   * Present conflicts to the user and apply their chosen resolutions.
+   *
+   * Opens a dialog where the user can choose "local" or "remote" for each conflict.
+   * After the user makes their choices (or cancels), this method:
+   * 1. Stores and applies chosen remote operations
+   * 2. Rejects the losing side's operations (and any stale pending ops)
+   * 3. Validates state after resolution
+   *
+   * @param conflicts - Entity conflicts where both local and remote modified the same entity.
+   *   Each conflict contains the local ops, remote ops, and entity info.
+   * @param nonConflictingOps - Remote ops that don't conflict but arrived in the same sync.
+   *   These are batched with conflict resolutions so dependency sorting works correctly
+   *   (e.g., a non-conflicting Task create that depends on a Project from a resolved conflict).
+   *
+   * @returns Resolves when resolution is complete (or immediately if user cancels)
+   *
+   * @example
+   * ```ts
+   * // During sync, conflicts were detected
+   * const conflicts = detectConflicts(localOps, remoteOps);
+   * const nonConflicting = remoteOps.filter(op => !isConflicting(op));
+   *
+   * // Present to user and apply their choices
+   * await conflictResolutionService.presentConflicts(conflicts, nonConflicting);
+   * ```
    */
   async presentConflicts(
     conflicts: EntityConflict[],
@@ -79,7 +122,11 @@ export class ConflictResolutionService {
     const localOpsToReject: string[] = [];
     const remoteOpsToReject: string[] = [];
 
-    // Step 1: Process conflicts and collect operations based on user choices
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1: Process each conflict based on user's choice
+    // - Remote wins: queue remote ops for application, mark local ops for rejection
+    // - Local wins: store remote ops as rejected (local ops stay pending for upload)
+    // ─────────────────────────────────────────────────────────────────────────
     for (let i = 0; i < conflicts.length; i++) {
       const conflict = conflicts[i];
       const resolution = result.resolutions.get(i);
@@ -117,8 +164,12 @@ export class ConflictResolutionService {
       }
     }
 
-    // Step 1.5: Reject ALL pending ops for entities where remote won
-    // This prevents stale ops (with outdated vector clocks) from being uploaded
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1.5: Reject ALL pending ops for entities where remote won
+    // Why: When remote wins, the local state is replaced. Any pending ops for that
+    // entity were created against the old local state and have outdated vector clocks.
+    // Uploading them would cause conflicts on other clients or corrupt data.
+    // ─────────────────────────────────────────────────────────────────────────
     if (localOpsToReject.length > 0) {
       const affectedEntityKeys = new Set<string>();
       for (let i = 0; i < conflicts.length; i++) {
@@ -149,7 +200,11 @@ export class ConflictResolutionService {
       }
     }
 
-    // Step 2: Add non-conflicting ops to the batch
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2: Add non-conflicting remote ops to the batch
+    // These are remote ops that don't conflict but need to be applied together
+    // with conflict resolutions for correct dependency sorting.
+    // ─────────────────────────────────────────────────────────────────────────
     for (const op of nonConflictingOps) {
       if (await this.opLogStore.hasOp(op.id)) {
         OpLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
@@ -160,9 +215,11 @@ export class ConflictResolutionService {
       allOpsToApply.push(op);
     }
 
-    // Step 2.5: Mark rejected operations BEFORE applying
-    // This ensures crash-safety: if we crash after applying but before marking,
-    // the rejected ops won't be re-uploaded on restart
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2.5: Mark rejected operations BEFORE applying (crash safety)
+    // Why do this before applying? If we crash after applying but before marking,
+    // rejected ops won't be re-uploaded on restart. Order matters for consistency.
+    // ─────────────────────────────────────────────────────────────────────────
     if (localOpsToReject.length > 0) {
       await this.opLogStore.markRejected(localOpsToReject);
       OpLog.normal(
@@ -176,8 +233,13 @@ export class ConflictResolutionService {
       );
     }
 
-    // Step 3: Apply ALL operations in a single batch for proper dependency sorting
-    // This ensures that dependencies between conflict ops and non-conflicting ops are resolved
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 3: Apply ALL operations in a single batch
+    // Why batch? Dependency sorting only works within a single applyOperations() call.
+    // Example: A Task create depends on its Project existing. If the Project came from
+    // a conflict resolution and the Task from non-conflicting ops, batching ensures
+    // the Project is created first.
+    // ─────────────────────────────────────────────────────────────────────────
     if (allOpsToApply.length > 0) {
       OpLog.normal(
         `ConflictResolutionService: Applying ${allOpsToApply.length} ops in single batch`,
@@ -207,13 +269,23 @@ export class ConflictResolutionService {
       }
     }
 
-    // CHECKPOINT D: Validate and repair state after conflict resolution
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 4 (CHECKPOINT D): Validate and repair state after conflict resolution
+    // Conflict resolution can leave orphaned references or inconsistent state.
+    // This checkpoint catches and repairs any issues before normal operation resumes.
+    // ─────────────────────────────────────────────────────────────────────────
     await this._validateAndRepairAfterResolution();
   }
 
   /**
    * Validates the current state after conflict resolution and repairs if necessary.
-   * This is Checkpoint D in the validation architecture.
+   *
+   * This is **Checkpoint D** in the validation architecture. It catches issues like:
+   * - Tasks referencing deleted projects/tags
+   * - Orphaned sub-tasks after parent deletion
+   * - Inconsistent taskIds arrays in projects/tags
+   *
+   * @see ValidateStateService for the full validation and repair logic
    */
   private async _validateAndRepairAfterResolution(): Promise<void> {
     await this.validateStateService.validateAndRepairCurrentState('conflict-resolution');
