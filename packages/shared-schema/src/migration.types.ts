@@ -1,10 +1,23 @@
 /**
  * Minimal operation interface for migrations.
- * Uses only primitives - no framework dependencies.
+ *
+ * This is a simplified version of the full `Operation` type from the main app.
+ * We use primitives (strings) instead of enums/union types because:
+ *
+ * 1. **Package isolation**: This package is shared between the client app and
+ *    super-sync-server. Importing from `src/app/` would create circular deps.
+ *
+ * 2. **Portability**: Migrations must be pure functions that run anywhere
+ *    (server, tests, workers) without Angular or app-specific dependencies.
+ *
+ * 3. **Stability**: Using strings instead of enums means migrations won't
+ *    break if OpType or EntityType values change in the main app.
  */
 export interface OperationLike {
   id: string;
+  /** High-level operation category (e.g., 'CRT', 'UPD', 'DEL') */
   opType: string;
+  /** Entity type being modified (e.g., 'TASK', 'PROJECT', 'TAG') */
   entityType: string;
   entityId?: string;
   entityIds?: string[];
