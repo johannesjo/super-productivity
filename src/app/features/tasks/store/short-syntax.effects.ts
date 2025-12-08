@@ -102,12 +102,15 @@ export class ShortSyntaxEffects {
         ),
       ),
       mergeMap(([{ task, originalAction }, tags, projects, defaultProjectId]) => {
+        const isReplaceTagIds = originalAction.type === TaskSharedActions.updateTask.type;
         const r = shortSyntax(
           task,
           this._globalConfigService?.cfg()?.shortSyntax ||
             DEFAULT_GLOBAL_CONFIG.shortSyntax,
           tags,
           projects,
+          undefined,
+          isReplaceTagIds ? 'replace' : 'combine',
         );
         if (environment.production) {
           TaskLog.log('shortSyntax', r);

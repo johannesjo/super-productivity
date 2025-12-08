@@ -2,6 +2,7 @@ import { createAction, props } from '@ngrx/store';
 import { FocusModeMode } from '../focus-mode.model';
 
 // Core actions
+export const focusModeLoaded = createAction('[FocusMode] Loaded');
 export const tick = createAction('[FocusMode] Timer Tick');
 
 // Primary actions (using Focus prefix for consistency)

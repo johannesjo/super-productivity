@@ -50,10 +50,12 @@ export class AddTaskBarParserService {
     // Get current tags from state to preserve pre-selected tags
     const currentState = this._stateService.state();
     const parseResult = shortSyntax(
-      { title: text, tagIds: currentState.tagIds },
+      { title: text, tagIds: currentState.tagIdsFromTxt },
       config,
       allTags,
       allProjects,
+      undefined,
+      'replace',
     );
 
     // Create current parse result data structure
@@ -68,7 +70,7 @@ export class AddTaskBarParserService {
         projectId: this._stateService.isAutoDetected()
           ? defaultProject?.id || null
           : null,
-        tagIds: currentState.tagIds, // Preserve pre-selected tags
+        tagIds: currentState.tagIdsFromTxt, // Preserve pre-selected tags
         newTagTitles: [],
         timeSpentOnDay: null,
         timeEstimate: null,
@@ -78,8 +80,8 @@ export class AddTaskBarParserService {
       };
     } else {
       // Extract parsed values
-      const tagIds = parseResult.taskChanges.tagIds || [];
-      const newTagTitles = parseResult.newTagTitles || [];
+      const tagIds = parseResult.taskChanges.tagIds || currentState.tagIdsFromTxt;
+      const newTagTitles = parseResult.newTagTitles || currentState.newTagTitles;
 
       let dueDate: string | null = null;
       let dueTime: string | null = null;
@@ -142,7 +144,7 @@ export class AddTaskBarParserService {
       !this._previousParseResult ||
       !this._arraysEqual(this._previousParseResult.tagIds, currentResult.tagIds)
     ) {
-      this._stateService.updateTagIds(currentResult.tagIds);
+      this._stateService.updateTagIdsFromTxt(currentResult.tagIds);
     }
 
     if (

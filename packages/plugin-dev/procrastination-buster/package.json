@@ -5,8 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:watch": "node scripts/watch-and-build.js",
-    "build": "vite build && node scripts/inline-assets.js",
+    "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
     "deploy": "npm run build",
@@ -18,9 +17,10 @@
     "@types/node": "^22.15.33",
     "solid-js": "^1.9.7",
     "typescript": "^5.8.3",
-    "vite": "^7.1.12",
+    "vite": "^7.2.0",
     "vite-plugin-solid": "^2.11.10",
-    "archiver": "^7.0.1"
+    "archiver": "^7.0.1",
+    "@super-productivity/vite-plugin": "file:../../vite-plugin"
   },
   "dependencies": {
     "@super-productivity/plugin-api": "file:../../plugin-api"

@@ -11,7 +11,9 @@ import {
   createStateWithExistingTasks,
   expectStateUpdate,
   expectTagUpdate,
+  expectTaskUpdate,
 } from './test-utils';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 describe('taskSharedSchedulingMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -99,6 +101,27 @@ describe('taskSharedSchedulingMetaReducer', () => {
 
       metaReducer(baseState, action);
       expect(mockReducer).toHaveBeenCalledWith(baseState, action);
+    });
+
+    it('should set dueDay when leaving task in Today list', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        dueWithTime: Date.now(),
+        dueDay: undefined,
+      });
+      const action = TaskSharedActions.unscheduleTask({
+        id: 'task1',
+        isLeaveInToday: true,
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        expectTaskUpdate('task1', { dueDay: getDbDateStr(), dueWithTime: undefined }),
+        action,
+        mockReducer,
+        testState,
+      );
     });
   });
 

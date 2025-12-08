@@ -327,6 +327,67 @@ describe('shortSyntax', () => {
       const isDateSetCorrectly = checkSameDay(parsedDate, nextFriday);
       expect(isDateSetCorrectly).toBeTrue();
     });
+
+    it('should properly remove date syntax when there is a space after @', () => {
+      const t = {
+        ...TASK,
+        title: 'Test @ tomorrow 19:00',
+      };
+      // set a fixed date to avoid test flakiness
+      const now = new Date('2025-12-05T10:00:00');
+      const r = shortSyntax(t, CONFIG, undefined, undefined, now);
+
+      expect(r?.taskChanges.title).toBe('Test');
+      expect(r?.taskChanges.dueDay).toBeNull();
+    });
+
+    it('should properly remove date syntax when there is a space after @ for simple number', () => {
+      const t = {
+        ...TASK,
+        title: 'Test @ 4',
+      };
+      const r = shortSyntax(t, CONFIG);
+      expect(r?.taskChanges.title).toBe('Test');
+      expect(r?.taskChanges.dueDay).toBeNull();
+    });
+
+    it('should properly remove date syntax with date format like 12/20/25', () => {
+      const t = {
+        ...TASK,
+        title: 'Test @ 12/20/25 19:00',
+      };
+      const now = new Date('2025-12-05T10:00:00');
+      const r = shortSyntax(t, CONFIG, undefined, undefined, now);
+
+      expect(r?.taskChanges.title).toBe('Test');
+      expect(r?.taskChanges.dueDay).toBeNull();
+      expect(r?.taskChanges.dueWithTime).toBeDefined();
+      // Verify it's scheduled for the future (Dec 20, 2025 at 19:00)
+      const scheduledDate = new Date(r?.taskChanges.dueWithTime as number);
+      expect(scheduledDate.getMonth()).toBe(11); // December (0-indexed)
+      expect(scheduledDate.getDate()).toBe(20);
+      expect(scheduledDate.getHours()).toBe(19);
+    });
+
+    it('should schedule overdue task to future when using inline @ syntax', () => {
+      const t = {
+        ...TASK,
+        title: 'Overdue task @tomorrow 14:00',
+        dueDay: '2025-12-01', // Simulating an overdue task
+      };
+      const now = new Date('2025-12-05T10:00:00');
+      const r = shortSyntax(t, CONFIG, undefined, undefined, now);
+
+      expect(r?.taskChanges.title).toBe('Overdue task');
+      expect(r?.taskChanges.dueDay).toBeNull(); // Should clear the old dueDay
+      expect(r?.taskChanges.dueWithTime).toBeDefined();
+      // Verify it's scheduled for tomorrow (Dec 6, 2025 at 14:00)
+      const scheduledDate = new Date(r?.taskChanges.dueWithTime as number);
+      expect(scheduledDate.getFullYear()).toBe(2025);
+      expect(scheduledDate.getMonth()).toBe(11); // December
+      expect(scheduledDate.getDate()).toBe(6); // Tomorrow
+      expect(scheduledDate.getHours()).toBe(14);
+    });
   });
 
   describe('tags', () => {
@@ -346,6 +407,16 @@ describe('shortSyntax', () => {
         title: '#134 Fun title',
       };
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
+    it('should not parse numeric tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#123 Task description',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
 
       expect(r).toEqual(undefined);
     });
@@ -376,6 +447,42 @@ describe('shortSyntax', () => {
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
 
       expect(r).toEqual(undefined);
+    });
+
+    it('should add tag when it is the first word in the title', () => {
+      const t = {
+        ...TASK,
+        title: '#blu Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id'],
+        },
+      });
+    });
+
+    it('should add multiple tags even if the first tag is at the beginning', () => {
+      const t = {
+        ...TASK,
+        title: '#blu #hihi Fun title',
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS);
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'hihi_id'],
+        },
+      });
     });
 
     it('should work with tags', () => {
@@ -488,6 +595,36 @@ describe('shortSyntax', () => {
         ...TASK,
         title: 'Fun title #blu #idontexist',
         tagIds: [],
+      };
+      const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
+
+      expect(r).toEqual(undefined);
+    });
+
+    it('should remove tags not existing on title', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
+      };
+      const r = shortSyntax(t, CONFIG, ALL_TAGS, undefined, undefined, 'replace');
+
+      expect(r).toEqual({
+        newTagTitles: [],
+        remindAt: null,
+        projectId: undefined,
+        taskChanges: {
+          title: 'Fun title',
+          tagIds: ['blu_id', 'bla_id'],
+        },
+      });
+    });
+
+    it('should not remove tags not existing on title when disabled', () => {
+      const t = {
+        ...TASK,
+        title: 'Fun title #blu #bla',
+        tagIds: ['blu_id', 'bla_id', 'hihi_id'],
       };
       const r = shortSyntax(t, { ...CONFIG, isEnableTag: false }, ALL_TAGS);
 

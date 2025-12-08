@@ -18,10 +18,14 @@ import { T } from 'src/app/t.const';
 import { ICalIssueReduced } from '../../issue/providers/calendar/calendar.model';
 import { getErrorTxt } from 'src/app/util/get-error-text';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { ShortTimePipe } from '../../../ui/pipes/short-time.pipe';
 import { standardListAnimation } from '../../../ui/animations/standard-list.ani';
 import { Log } from '../../../core/log';
+import { loadFromRealLs, saveToRealLs } from '../../../core/persistence/local-storage';
+import { LS } from '../../../core/persistence/storage-keys.const';
+import { MatIcon } from '@angular/material/icon';
+import { TranslatePipe } from '@ngx-translate/core';
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
@@ -29,8 +33,10 @@ import { Log } from '../../../core/log';
     ErrorCardComponent,
     IssuePreviewItemComponent,
     MatProgressSpinner,
-    DatePipe,
+    LocaleDatePipe,
     ShortTimePipe,
+    MatIcon,
+    TranslatePipe,
   ],
   templateUrl: './issue-panel-calendar-agenda.component.html',
   styleUrl: './issue-panel-calendar-agenda.component.scss',
@@ -46,6 +52,7 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
   issueProvider = input.required<IssueProvider>();
   error = signal<string | undefined>(undefined);
   isLoading = signal(false);
+  isShowingCachedData = signal(false);
 
   readonly dropList = viewChild(CdkDropList);
 
@@ -116,13 +123,24 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
       )
       .then((items: SearchResultItem[]) => {
         this.isLoading.set(false);
-        this._setAgendaItems(items as SearchResultItem<'ICAL'>[]);
+        this.isShowingCachedData.set(false);
+        const icalItems = items as SearchResultItem<'ICAL'>[];
+        this._setAgendaItems(icalItems);
+        // Cache successful results
+        this._saveToCache(this.issueProvider().id, icalItems);
       })
       .catch((e) => {
         this.isLoading.set(false);
-        this._setAgendaItems([]);
         Log.err(e);
         this.error.set(getErrorTxt(e));
+        // Fall back to cached data when fetch fails (offline mode)
+        const cachedItems = this._getFromCache(this.issueProvider().id);
+        if (cachedItems) {
+          this.isShowingCachedData.set(true);
+          this._setAgendaItems(cachedItems);
+        } else {
+          this._setAgendaItems([]);
+        }
       });
   }
 
@@ -151,5 +169,38 @@ export class IssuePanelCalendarAgendaComponent implements OnInit {
     });
 
     this.agendaItems.set(agenda.sort((a, b) => (a.dayStr > b.dayStr ? 1 : -1)));
+  }
+
+  private _getCacheKey(providerId: string): string {
+    return `calendar_agenda:${providerId}`;
+  }
+
+  private _getFromCache(providerId: string): SearchResultItem<'ICAL'>[] | null {
+    try {
+      const cache = loadFromRealLs(LS.ISSUE_SEARCH_CACHE);
+      if (!cache || typeof cache !== 'object') {
+        return null;
+      }
+      const key = this._getCacheKey(providerId);
+      const cachedItems = (cache as { [key: string]: unknown })[key];
+      return Array.isArray(cachedItems)
+        ? (cachedItems as SearchResultItem<'ICAL'>[])
+        : null;
+    } catch (e) {
+      Log.warn('Failed to load calendar agenda cache', e);
+      return null;
+    }
+  }
+
+  private _saveToCache(providerId: string, items: SearchResultItem<'ICAL'>[]): void {
+    try {
+      const cache: { [key: string]: unknown } =
+        (loadFromRealLs(LS.ISSUE_SEARCH_CACHE) as { [key: string]: unknown }) || {};
+      const key = this._getCacheKey(providerId);
+      cache[key] = items;
+      saveToRealLs(LS.ISSUE_SEARCH_CACHE, cache);
+    } catch (e) {
+      Log.warn('Failed to save calendar agenda cache', e);
+    }
   }
 }

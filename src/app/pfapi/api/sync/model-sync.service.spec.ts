@@ -198,6 +198,25 @@ describe('ModelSyncService', () => {
         RevMismatchForModelError,
       );
     });
+
+    it('should allow download when remote revision is newer than expected', async () => {
+      const expectedRev = '2025-01-01T12:00:00.000Z';
+      // Remote file is NEWER than what we expected
+      const remoteRev = '2025-01-01T13:00:00.000Z';
+
+      mockSyncProvider.downloadFile.and.returnValue(
+        Promise.resolve({
+          rev: remoteRev,
+          dataStr: JSON.stringify({ data: 'remote-model-data' }),
+        }),
+      );
+
+      const result = await service.download('singleModel', expectedRev);
+      expect(result.rev).toBe(remoteRev);
+      expect(result.data).toEqual({
+        data: 'remote-model-data',
+      });
+    });
   });
 
   describe('updateLocalUpdated', () => {

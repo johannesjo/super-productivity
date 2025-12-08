@@ -1,9 +1,8 @@
 import { App, ipcMain, Menu, nativeTheme, Tray } from 'electron';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { getSettings } from './get-settings';
-import { getWin } from './main-window';
-import { GlobalConfigState } from '../src/app/features/config/global-config.model';
+import { getIsTrayShowCurrentTask, getIsTrayShowCurrentCountdown } from './shared-state';
 import { TaskCopy } from '../src/app/features/tasks/task.model';
+import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { release } from 'os';
 import {
   initOverlayIndicator,
@@ -112,40 +111,37 @@ function initListeners(): void {
         currentFocusSessionTime || 0,
       );
 
-      const mainWin = getWin();
-      getSettings(mainWin, (settings: GlobalConfigState) => {
-        const isTrayShowCurrentTask = settings.misc.isTrayShowCurrentTask;
-        const isTrayShowCurrentCountdown = settings.misc.isTrayShowCurrentCountdown;
+      const isTrayShowCurrentTask = getIsTrayShowCurrentTask();
+      const isTrayShowCurrentCountdown = getIsTrayShowCurrentCountdown();
 
-        const msg =
-          isTrayShowCurrentTask && currentTask
-            ? createIndicatorMessage(
-                currentTask,
-                isPomodoroEnabled,
-                currentPomodoroSessionTime,
-                isTrayShowCurrentCountdown,
-              )
-            : '';
+      const msg =
+        isTrayShowCurrentTask && currentTask
+          ? createIndicatorMessage(
+              currentTask,
+              isPomodoroEnabled,
+              currentPomodoroSessionTime,
+              isTrayShowCurrentCountdown,
+            )
+          : '';
 
-        if (tray) {
-          // tray handling
-          if (currentTask && currentTask.title) {
-            tray.setTitle(msg);
-            if (!IS_MAC) {
-              // NOTE apparently this has no effect for gnome
-              tray.setToolTip(msg);
-            }
-          } else {
-            tray.setTitle('');
-            if (!IS_MAC) {
-              // NOTE apparently this has no effect for gnome
-              tray.setToolTip(msg);
-            }
-            const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
-            setTrayIcon(tray, DIR + `stopped${suf}`);
+      if (tray) {
+        // tray handling
+        if (currentTask && currentTask.title) {
+          tray.setTitle(msg);
+          if (!IS_MAC) {
+            // NOTE apparently this has no effect for gnome
+            tray.setToolTip(msg);
           }
+        } else {
+          tray.setTitle('');
+          if (!IS_MAC) {
+            // NOTE apparently this has no effect for gnome
+            tray.setToolTip(msg);
+          }
+          const suf = shouldUseDarkColors ? '-d.png' : '-l.png';
+          setTrayIcon(tray, DIR + `stopped${suf}`);
         }
-      });
+      }
     },
   );
 

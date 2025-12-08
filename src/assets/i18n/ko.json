@@ -575,6 +575,9 @@
         "PRODUCTIVITY": "얼마나 효율적으로 일 했습니까?",
         "PRODUCTIVITY_HINT": "1 : 시작조차하지 마라 - 10 : 매우 효율적이다."
       },
+      "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "더하다"
+      },
       "S": {
         "SAVE_METRIC": "측정 항목이 성공적으로 저장되었습니다."
       }
@@ -810,6 +813,11 @@
         "UPDATED": "프로젝트 설정 업데이트"
       }
     },
+    "PROJECT_FOLDER": {
+      "SELECT": {
+        "LABEL": "폴더"
+      }
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "현재 연도에 대한 데이터가 없습니다.",
       "PAGE_TITLE": "빠른 기록",
@@ -862,12 +870,14 @@
       },
       "END": "작업 종료",
       "LUNCH_BREAK": "점심 휴식",
+      "MONTH": "달",
       "NO_TASKS": "현재 작업이 없습니다. 상단 표시 줄의 + 버튼을 통해 몇 가지 작업을 추가하세요.",
       "NOW": "지금",
       "PLAN_END_DAY": "하루 일과 종료 시 계획",
       "PLAN_START_DAY": "하루 시작 시 계획 세우기",
       "START": "작업 시작",
-      "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측"
+      "TASK_PROJECTION_INFO": "예약된 반복 작업의 미래 예측",
+      "WEEK": "주"
     },
     "SEARCH_BAR": {
       "INFO": "보관된 작업을 검색하려면 목록 아이콘을 클릭하십시오.",
@@ -937,6 +947,7 @@
         "LAST_SYNC": "마지막 동기화 :",
         "LOCAL": "로컬",
         "LOCAL_REMOTE": "로컬-> 원격",
+        "NEVER": "결코",
         "REMOTE": "원격",
         "TEXT": "<p>Dropbox에서 업데이트. 로컬 및 원격 데이터가 모두 수정 된 것 같습니다.</p>",
         "TIMESTAMP": "타임 스탬프",
@@ -1023,6 +1034,9 @@
         "SUCCESS_VIA_BUTTON": "데이터가 성공적으로 동기화되었습니다.",
         "UNKNOWN_ERROR": "동기화하는 동안 알 수없는 오류가 발생했습니다. 콘솔을 확인하십시오.",
         "UPLOAD_ERROR": "알 수없는 업로드 오류 (설정이 맞습니까?) : {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BTN_DELETE": "삭제하다"
       }
     },
     "TAG": {
@@ -1051,6 +1065,11 @@
         "ADD_NEW_TAG": "새 태그 추가"
       }
     },
+    "TAG_FOLDER": {
+      "SELECT": {
+        "LABEL": "폴더"
+      }
+    },
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "기존 작업 \"{{taskTitle}}\"추가",
@@ -1062,8 +1081,10 @@
         "CREATE_TASK": "새 할 일 만들기",
         "EXAMPLE": "예 : \"일부 작업 제목 + projectName #some-tag #some-other-tag 10m / 3h\"",
         "START": "시작하려면 한 번 더 입력하십시오.",
+        "TODAY": "오늘",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "백로그/오늘의 목록에 작업 추가 토글하기'",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "목록 상단 및 하단에 작업 추가 토글"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "목록 상단 및 하단에 작업 추가 토글",
+        "TOMORROW": "내일"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "첨부 파일 추가",
@@ -1604,6 +1625,8 @@
       "ZH_TW": "中文(繁體)"
     },
     "MISC": {
+      "DARK_MODE": "다크 모드",
+      "DARK_MODE_DARK": "어둠",
       "DEFAULT_PROJECT": "지정되지 않은 경우 작업에 사용할 기본 프로젝트",
       "FIRST_DAY_OF_WEEK": "주의 첫 요일",
       "HELP": "<p><strong>데스크톱 알림이 표시되지 않습니까?</strong> 창의 경우 시스템 > 알림 및 작업을 확인하고 필요한 알림이 활성화되었는지 확인할 수 있습니다.</p>",
@@ -1613,6 +1636,9 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "하루를 먼저 끝내지 않고 앱을 종료하기 전에 확인",
       "IS_DARK_MODE": "다크 모드",
       "IS_DISABLE_ANIMATIONS": "모든 애니메이션 비활성화",
+      "IS_DISABLE_CELEBRATION": "일일 요약에서 축하 비활성화",
+      "USER_PROFILES": "사용자 프로필 활성화 (베타)",
+      "USER_PROFILES_HINT": "각각 별도의 설정, 작업 및 동기화 구성을 가진 다른 사용자 프로필을 생성하고 전환할 수 있습니다. 활성화되면 프로필 관리 버튼이 오른쪽 상단에 나타납니다. 참고: 이 기능을 비활성화하면 UI가 숨겨지지만 프로필 데이터는 유지됩니다 (베타 기능, 보증 없음. 백업이 있는지 확인하십시오).",
       "IS_HIDE_NAV": "기본 헤더가 올라갈 때까지 탐색을 숨 깁니다 (데스크톱 만 해당).",
       "IS_MINIMIZE_TO_TRAY": "트레이로 최소화 (데스크탑만 해당)",
       "IS_SHOW_TIP_LONGER": "앱 시작 시 생산성 팁 표시좀 더 오래",
@@ -1654,7 +1680,9 @@
       "L_WORK_END": "근무일 종료",
       "L_WORK_START": "근무일 시작",
       "LUNCH_BREAK_START_END_DESCRIPTION": "예: 13:00",
+      "MONTH": "달",
       "TITLE": "타임 라인",
+      "WEEK": "주",
       "WORK_START_END_DESCRIPTION": "예 : 17:00"
     },
     "SHORT_SYNTAX": {
@@ -1809,14 +1837,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "오늘부터 할 일 추가",
-    "BACK": "잠깐 내가 뭔가를 잊었 어!",
     "BREAK_LABEL": "휴식 (nr / 시간)",
     "CELEBRATE": "축하해 <i>기념일을 가져 가세요!</i>",
     "CLEAR_ALL_CONTINUE": "모두 완료하고 계속하기",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "아니요, 작업을 취소하십시오.",
-      "MSG": "당신은 일을 끝냈습니다. 집에 갈 시간!",
-      "OK": "네 네! 일시 휴업!"
+      "CANCEL": "아니요, 작업만 지우세요",
+      "MSG": "애플리케이션을 종료하시겠습니까?",
+      "OK": "종료"
     },
     "ESTIMATE_TOTAL": "총 견적:",
     "EVALUATE_DAY": "평가",
@@ -1833,7 +1860,7 @@
     "ROUND_UP_5M": "모든 작업을 5 분으로 올림",
     "ROUND_UP_15M": "모든 작업을 15 분으로 올림",
     "ROUND_UP_30M": "모든 작업을 30 분으로 올림",
-    "SAVE_AND_GO_HOME": "저장하고 집에 가라.",
+    "SAVE_AND_GO_HOME": "오늘 하루를 마무리하기",
     "SAVE_AND_GO_HOME_TOOLTIP": "완료된 모든 작업을 아카이브(작업 로그)로 옮기고 선택적으로 모든 데이터를 동기화하고 앱을 닫습니다.",
     "START_END": "시작 - 끝",
     "SUMMARY_FOR": " {{dayStr}}의 일일 요약",
@@ -1842,6 +1869,13 @@
     "TIME_SPENT_ESTIMATE_TITLE": "소요 시간 : 오늘 보낸 총 시간. 아카이브 된 태스크는 포함되지 않습니다. - 예상 시간 : 오늘 작업 한 작업에 대한 예상 시간에서 다른 날에 이미 소비 한 시간을 뺀 시간입니다.",
     "TIME_SPENT_TODAY_BY_TAG": "태그별로 오늘 보낸 시간",
     "WEEK": "주"
+  },
+  "PLUGINS": {
+    "CANCEL": "취소",
+    "CONFIGURE": "구성",
+    "ERROR": "오류",
+    "OK": "그래",
+    "REMOVE": "제거하다"
   },
   "PM": {
     "TITLE": "프로젝트 측정 항목"
@@ -1858,6 +1892,7 @@
     "TOGGLE_DARK_MODE": "어두운 모드 전환"
   },
   "SCHEDULE": {
+    "NEXT": "다음",
     "NO_REPEATABLE_TASKS": "현재 반복 작업이 없습니다. 작업 사이드 패널에서 '작업 반복'을 선택해 작업을 예약할 수 있습니다. 작업을 열려면 작업 위에 마우스를 올려놓으면 나타나는 가장 오른쪽 아이콘을 클릭하거나 모바일에서는 작업을 탭하세요.",
     "NO_SCHEDULED": "현재 예약 된 작업이 없습니다. 작업 컨텍스트 메뉴에서 \"작업 예약\"을 선택하여 작업을 예약 할 수 있습니다. 그것을 열려면 작업 오른쪽의 작은 점 3 개를 클릭하십시오.",
     "NO_SCHEDULED_TITLE": "하루 동안 예약된 작업",
@@ -1883,6 +1918,24 @@
     "SELECT_THEME": "주제 선택",
     "teal": "물오리",
     "yellow": "노랑"
+  },
+  "USER_PROFILES": {
+    "ACTIVE": "활성",
+    "CANCEL": "취소",
+    "CLOSE": "닫기",
+    "CREATE": "만들기",
+    "CREATE_NEW_PROFILE": "새 프로필 만들기",
+    "CREATED": "생성됨:",
+    "DELETE_PROFILE": "프로필 삭제",
+    "DIALOG_TITLE": "사용자 프로필 관리",
+    "EXISTING_PROFILES": "기존 프로필",
+    "EXPORT_PROFILE": "프로필 내보내기",
+    "MANAGE_PROFILES": "프로필 관리...",
+    "OPEN_PROFILES_FOLDER": "프로필 폴더 열기",
+    "PROFILE_NAME": "프로필 이름",
+    "PROFILE_NAME_PLACEHOLDER": "예: 직장, 개인",
+    "RENAME": "이름 변경",
+    "SAVE": "저장"
   },
   "V": {
     "E_1TO10": "1에서 10 사이의 값을 입력하십시오.",

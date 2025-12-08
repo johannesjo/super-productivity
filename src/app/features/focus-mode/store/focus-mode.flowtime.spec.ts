@@ -415,7 +415,7 @@ describe('FocusMode Flowtime behavior', () => {
 
       TestBed.configureTestingModule({
         providers: [
-          provideMockStore({}),
+          provideMockStore({ initialState: { focusMode: initialState } }),
           provideMockActions(() => actions$),
           FocusModeEffects,
           { provide: BannerService, useValue: { open: () => {}, dismiss: () => {} } },
@@ -466,6 +466,9 @@ describe('FocusMode Flowtime behavior', () => {
     it('should emit setFocusSessionDuration when switching to Pomodoro while idle', (done) => {
       const expectedDuration = 42_000;
 
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
+      store.refreshState();
+
       getStrategySpy.and.callFake((mode: FocusModeMode) => ({
         initialSessionDuration:
           mode === FocusModeMode.Pomodoro ? expectedDuration : 12_000,
@@ -485,6 +488,9 @@ describe('FocusMode Flowtime behavior', () => {
     });
 
     it('should emit setFocusSessionDuration when switching to Countdown while idle', (done) => {
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
+      store.refreshState();
+
       effects.syncDurationWithMode$.pipe(take(1)).subscribe((action) => {
         expect(action).toEqual(
           actions.setFocusSessionDuration({ focusSessionDuration: 12_000 }),
@@ -503,6 +509,7 @@ describe('FocusMode Flowtime behavior', () => {
         elapsed: 1_000,
         startedAt: Date.now(),
       } as any);
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
       store.refreshState();
 
       const sub = effects.syncDurationWithMode$.subscribe({

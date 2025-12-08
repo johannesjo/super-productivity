@@ -101,12 +101,13 @@ export const TAKE_A_BREAK_FORM_CFG: ConfigFormSection<TakeABreakConfig> = {
       type: 'repeat',
       templateOptions: {
         addText: T.GCF.TAKE_A_BREAK.ADD_NEW_IMG,
-        required: true,
         defaultValue: '',
-        minLength: 3,
       },
       fieldArray: {
         type: 'input',
+        templateOptions: {
+          minLength: 3,
+        },
       },
     },
   ],

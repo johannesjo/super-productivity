@@ -1,4 +1,32 @@
-import { DataValidationFailedError } from './errors';
+import { DataValidationFailedError, HttpNotOkAPIError } from './errors';
+
+describe('HttpNotOkAPIError', () => {
+  it('should successfully strip script tags (fix "kt toast" issue)', () => {
+    const response = new Response(null, {
+      status: 500,
+      statusText: 'Internal Server Error',
+    });
+    // Simulating a body where "kt toast" is inside a script tag
+    const body = `
+      <html>
+        <head>
+          <script>
+            var kt = { toast: { show: function() {} } };
+            kt.toast.show('Some ignored message');
+          </script>
+        </head>
+        <body>
+          <h1>Actual Error</h1>
+        </body>
+      </html>
+    `;
+
+    const error = new HttpNotOkAPIError(response, body);
+    // The content inside <script> should now be removed
+    expect(error.message).not.toContain('kt');
+    expect(error.message).toContain('Actual Error');
+  });
+});
 
 describe('DataValidationFailedError', () => {
   let consoleLogSpy: jasmine.Spy;

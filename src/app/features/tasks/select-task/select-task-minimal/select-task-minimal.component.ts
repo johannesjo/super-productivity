@@ -1,4 +1,5 @@
 import {
+  AfterViewInit,
   ChangeDetectionStrategy,
   Component,
   ElementRef,
@@ -9,7 +10,6 @@ import {
   OnInit,
   output,
   viewChild,
-  effect,
 } from '@angular/core';
 import {
   ControlValueAccessor,
@@ -58,7 +58,7 @@ import {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SelectTaskMinimalComponent
-  implements OnInit, OnDestroy, ControlValueAccessor
+  implements OnInit, AfterViewInit, OnDestroy, ControlValueAccessor
 {
   private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
@@ -85,22 +85,9 @@ export class SelectTaskMinimalComponent
 
   readonly inputElement = viewChild<ElementRef>('input');
   readonly autocomplete = viewChild<MatAutocomplete>('auto');
+  readonly autocompleteTrigger = viewChild(MatAutocompleteTrigger);
 
-  constructor() {
-    // Set up autocomplete event listeners when autocomplete becomes available
-    effect(() => {
-      const autocomplete = this.autocomplete();
-      if (autocomplete) {
-        autocomplete.opened.pipe(takeUntil(this._destroy$)).subscribe(() => {
-          this.autocompleteOpened.emit();
-        });
-
-        autocomplete.closed.pipe(takeUntil(this._destroy$)).subscribe(() => {
-          this.autocompleteClosed.emit();
-        });
-      }
-    });
-  }
+  private _isAutocompleteOpen = false;
 
   ngOnInit(): void {
     // Use the same task selection logic as the original SelectTaskComponent
@@ -143,6 +130,23 @@ export class SelectTaskMinimalComponent
           this._onChange(value);
         }
       });
+  }
+
+  ngAfterViewInit(): void {
+    const autocomplete = this.autocomplete();
+    if (!autocomplete) {
+      return;
+    }
+
+    autocomplete.opened.pipe(takeUntil(this._destroy$)).subscribe(() => {
+      this._isAutocompleteOpen = true;
+      this.autocompleteOpened.emit();
+    });
+
+    autocomplete.closed.pipe(takeUntil(this._destroy$)).subscribe(() => {
+      this._isAutocompleteOpen = false;
+      this.autocompleteClosed.emit();
+    });
   }
 
   ngOnDestroy(): void {
@@ -197,6 +201,19 @@ export class SelectTaskMinimalComponent
   }
 
   onKeyDown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' && this._isAutocompleteOpen) {
+      event.preventDefault();
+      const trigger = this.autocompleteTrigger();
+      const activeOption = trigger?.activeOption;
+
+      if (activeOption) {
+        this.taskSelectCtrl.setValue(activeOption.value);
+        trigger?.closePanel();
+      }
+
+      return;
+    }
+
     this.keyPressed.emit(event);
   }
 

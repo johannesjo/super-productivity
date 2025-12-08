@@ -1,0 +1,21 @@
+
+### Bug Fixes
+
+* add task bar search mode not adding to the correct day from planner
+* day change not always detected #5464
+* ensure unique subTaskIds when merging task data
+* focus mode flow time counter
+* **focusMode:** flowtime timer stopping at 25 (d15e6d1), closes #5117
+* **focusMode:** skip preparation screen not working (7817a10), closes #5497
+* inconsistent state on dragging tasks onto project #5489
+* mac mas build
+* **mobile-nav:** check history.state for null before access the key
+* type error #5472
+* type error on race condition (3d4b7fe), closes #5491
+* unable to set due date of new task in add task bar #5495
+* **worklog:** revise comparators for key-value pipe (#5465)
+### Features
+
+* **focusMode:** add dialog to edit focus sessions
+* **focusMode:** show auto-complete suggestions right away (877cf29), closes #5498
+* **simpleCounter:** allow to edit settings directly from context dialog

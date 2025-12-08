@@ -5,7 +5,6 @@ import {
   DestroyRef,
   inject,
   input,
-  LOCALE_ID,
   output,
   signal,
   viewChild,
@@ -17,7 +16,7 @@ import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { first } from 'rxjs/operators';
 import { ProjectService } from '../../../project/project.service';
 import { TagService } from '../../../tag/tag.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogScheduleTaskComponent } from '../../../planner/dialog-schedule-task/dialog-schedule-task.component';
 import { AddTaskBarStateService } from '../add-task-bar-state.service';
 import { AddTaskBarParserService } from '../add-task-bar-parser.service';
@@ -30,6 +29,7 @@ import { dateStrToUtcDate } from '../../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isSingleEmoji } from '../../../../util/extract-first-emoji';
 import { DEFAULT_PROJECT_ICON } from '../../../project/project.const';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 @Component({
   selector: 'add-task-bar-actions',
@@ -53,7 +53,7 @@ export class AddTaskBarActionsComponent {
   private _tagService = inject(TagService);
   private _matDialog = inject(MatDialog);
   private _parserService = inject(AddTaskBarParserService);
-  private _locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _translateService = inject(TranslateService);
   stateService = inject(AddTaskBarStateService);
 
@@ -66,6 +66,7 @@ export class AddTaskBarActionsComponent {
   // Outputs
   estimateChanged = output<string>();
   refocus = output<void>();
+  scheduleDialogOpenChange = output<boolean>();
 
   // Menu state
   isProjectMenuOpen = signal<boolean>(false);
@@ -84,7 +85,13 @@ export class AddTaskBarActionsComponent {
   );
   allTags = this._tagService.tagsNoMyDayAndNoListSorted;
   selectedTags = computed(() =>
-    this.allTags().filter((t) => this.state().tagIds.includes(t.id)),
+    this.allTags().filter(
+      (t) =>
+        this.state().tagIds.includes(t.id) || this.state().tagIdsFromTxt.includes(t.id),
+    ),
+  );
+  hasTagsSelected = computed(
+    () => this.state().tagIds.length > 0 || this.state().tagIdsFromTxt.length > 0,
   );
 
   // Constants
@@ -109,7 +116,7 @@ export class AddTaskBarActionsComponent {
     if (!state.time && this.isSameDate(date, tomorrow)) {
       return state.time || this._translateService.instant(T.F.TASK.ADD_TASK_BAR.TOMORROW);
     }
-    const dateStr = date.toLocaleDateString(this._locale, {
+    const dateStr = date.toLocaleDateString(this._dateTimeFormatService.currentLocale, {
       month: 'short',
       day: 'numeric',
     });
@@ -136,13 +143,20 @@ export class AddTaskBarActionsComponent {
 
   openScheduleDialog(): void {
     const state = this.state();
-    const dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
-      data: {
-        targetDay: state.date || undefined,
-        targetTime: state.time || undefined,
-        isSelectDueOnly: true,
-      },
-    });
+    this.scheduleDialogOpenChange.emit(true);
+    let dialogRef!: MatDialogRef<DialogScheduleTaskComponent>;
+    try {
+      dialogRef = this._matDialog.open(DialogScheduleTaskComponent, {
+        data: {
+          targetDay: state.date || undefined,
+          targetTime: state.time || undefined,
+          isSelectDueOnly: true,
+        },
+      });
+    } catch (err) {
+      this.scheduleDialogOpenChange.emit(false);
+      throw err;
+    }
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result && typeof result === 'object' && result.date) {
@@ -151,6 +165,11 @@ export class AddTaskBarActionsComponent {
         this.stateService.updateRemindOption(result.remindOption);
       }
       this.refocus.emit();
+      window.setTimeout(() => {
+        if (!this._destroyRef.destroyed) {
+          this.scheduleDialogOpenChange.emit(false);
+        }
+      });
     });
   }
 

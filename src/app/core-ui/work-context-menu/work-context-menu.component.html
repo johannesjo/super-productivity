@@ -24,6 +24,16 @@
   </button>
 }
 
+@if (contextId === TODAY_TAG_ID) {
+  <button
+    (click)="unplanAllTodayTasks()"
+    mat-menu-item
+  >
+    <mat-icon>event_busy</mat-icon>
+    <span class="text">{{ T.MH.UNPLAN_ALL_TASKS | translate }}</span>
+  </button>
+}
+
 <button
   (click)="shareTasksAsMarkdown()"
   mat-menu-item
@@ -57,6 +67,13 @@
   </button>
 }
 @if (isForProject && contextId !== INBOX_PROJECT.id) {
+  <button
+    (click)="duplicateProject()"
+    mat-menu-item
+  >
+    <mat-icon>file_copy</mat-icon>
+    <span class="text">{{ T.MH.DUPLICATE_PROJECT | translate }}</span>
+  </button>
   <button
     (click)="deleteProject()"
     mat-menu-item

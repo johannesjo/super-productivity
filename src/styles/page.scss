@@ -13,11 +13,13 @@ app-root,
   height: -webkit-fill-available;
   box-sizing: border-box;
   font-optical-sizing: auto;
-  font-family: 'Open Sans', sans-serif;
+  font-family: var(--font-primary-stack);
 }
 
 html {
   overflow: hidden !important;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 
   button,
   a {
@@ -91,6 +93,10 @@ body {
     .cdk-overlay-container {
       display: none !important;
     }
+  }
+
+  &.isObsidianStyleHeader.isElectron {
+    border: 1px solid var(--divider-color);
   }
 }
 

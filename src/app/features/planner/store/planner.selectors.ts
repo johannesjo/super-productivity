@@ -10,6 +10,7 @@ import {
   ScheduleItemTask,
   ScheduleItemType,
 } from '../planner.model';
+import { ScheduleFromCalendarEvent } from '../../schedule/schedule.model';
 import { TaskCopy, TaskWithDueDay, TaskWithDueTime } from '../../tasks/task.model';
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
@@ -158,13 +159,15 @@ const getPlannerDay = (
       : plannerState.days[dayDate] || [];
   const normalTasks = tIds
     .map((id) => taskState.entities[id] as TaskCopy)
-    .filter((t) => !!t);
+    .filter((t) => !!t)
+    // Filter out tasks with dueDay in future if it is Today's column
+    .filter((t) => !isTodayI || !t.dueDay || t.dueDay <= todayStr);
 
   const { repeatProjectionsForDay, noStartTimeRepeatProjections } =
     getAllRepeatableTasksForDay(taskRepeatCfgs, currentDayTimestamp);
 
   const scheduledTaskItems = getScheduledTaskItems(allPlannedTasks, currentDayDate);
-  const icalEventsForDay = getIcalEventsForDay(icalEvents, currentDayDate);
+  const { timedEvents, allDayEvents } = getIcalEventsForDay(icalEvents, currentDayDate);
 
   const timeEstimate = getAllTimeSpent(
     normalTasks,
@@ -190,14 +193,16 @@ const getPlannerDay = (
       normalTasks.length +
       noStartTimeRepeatProjections.length +
       repeatProjectionsForDay.length +
-      scheduledTaskItems.length,
+      scheduledTaskItems.length +
+      allDayEvents.length,
     scheduledIItems: [
       ...repeatProjectionsForDay,
-      ...icalEventsForDay,
+      ...timedEvents,
       ...scheduledTaskItems,
     ].sort((a, b) => a.start - b.start),
     tasks: normalTasks,
     noStartTimeRepeatProjections,
+    allDayEvents,
     timeEstimate,
     availableHours,
     progressPercentage,
@@ -280,27 +285,40 @@ const getScheduledTaskItems = (
       };
     });
 
+interface IcalEventsForDayResult {
+  timedEvents: ScheduleItemEvent[];
+  allDayEvents: ScheduleFromCalendarEvent[];
+}
+
 const getIcalEventsForDay = (
   icalEvents: ScheduleCalendarMapEntry[],
   currentDayDate: Date,
-): ScheduleItemEvent[] => {
-  const icalEventsForDay: ScheduleItemEvent[] = [];
+): IcalEventsForDayResult => {
+  const timedEvents: ScheduleItemEvent[] = [];
+  const allDayEvents: ScheduleFromCalendarEvent[] = [];
+
   icalEvents.forEach((icalMapEntry) => {
     icalMapEntry.items.forEach((calEv) => {
       const start = calEv.start;
       if (isSameDay(start, currentDayDate)) {
-        const end = calEv.start + calEv.duration;
-        icalEventsForDay.push({
-          id: calEv.id,
-          type: ScheduleItemType.CalEvent,
-          start,
-          end,
-          calendarEvent: {
-            ...calEv,
-          },
-        });
+        if (calEv.isAllDay) {
+          // All-day events go to a separate list with full event data
+          allDayEvents.push({ ...calEv });
+        } else {
+          // Timed events go to scheduled items
+          const end = calEv.start + calEv.duration;
+          timedEvents.push({
+            id: calEv.id,
+            type: ScheduleItemType.CalEvent,
+            start,
+            end,
+            calendarEvent: {
+              ...calEv,
+            },
+          });
+        }
       }
     });
   });
-  return icalEventsForDay;
+  return { timedEvents, allDayEvents };
 };

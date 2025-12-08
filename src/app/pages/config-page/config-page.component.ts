@@ -45,6 +45,9 @@ import { Log } from '../../core/log';
 import { downloadLogs } from '../../util/download';
 import { SnackService } from '../../core/snack/snack.service';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
+import { UserProfileService } from '../../features/user-profile/user-profile.service';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogDisableProfilesConfirmationComponent } from '../../features/user-profile/dialog-disable-profiles-confirmation/dialog-disable-profiles-confirmation.component';
 
 @Component({
   selector: 'config-page',
@@ -69,6 +72,8 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _pluginBridgeService = inject(PluginBridgeService);
   private readonly _snackService = inject(SnackService);
+  private readonly _userProfileService = inject(UserProfileService);
+  private readonly _matDialog = inject(MatDialog);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -217,18 +222,61 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     this._subs.unsubscribe();
   }
 
-  saveGlobalCfg($event: {
+  async saveGlobalCfg($event: {
     sectionKey: GlobalConfigSectionKey | ProjectCfgFormKey;
     config: any;
-  }): void {
+  }): Promise<void> {
     const config = $event.config;
     const sectionKey = $event.sectionKey as GlobalConfigSectionKey;
 
     if (!sectionKey || !config) {
       throw new Error('Not enough data');
-    } else {
-      this.configService.updateSection(sectionKey, config);
     }
+
+    // Check if user is trying to disable user profiles when multiple profiles exist
+    if (
+      sectionKey === 'appFeatures' &&
+      config.isEnableUserProfiles === false &&
+      this._userProfileService.hasMultipleProfiles()
+    ) {
+      const appFeatures = this.globalCfg?.appFeatures;
+      // Only show dialog if we're actually changing from true to false
+      if (appFeatures?.isEnableUserProfiles === true) {
+        const confirmed = await this._showDisableProfilesDialog();
+        if (!confirmed) {
+          // User cancelled, don't save the change
+          return;
+        }
+      }
+    }
+
+    this.configService.updateSection(sectionKey, config);
+  }
+
+  private async _showDisableProfilesDialog(): Promise<boolean> {
+    const activeProfile = this._userProfileService.activeProfile();
+    const allProfiles = this._userProfileService.profiles();
+    const otherProfiles = allProfiles.filter((p) => p.id !== activeProfile?.id);
+
+    if (!activeProfile) {
+      return true; // No active profile, allow disable
+    }
+
+    const dialogRef = this._matDialog.open(DialogDisableProfilesConfirmationComponent, {
+      data: {
+        activeProfile,
+        otherProfiles,
+      },
+      width: '600px',
+      maxWidth: '90vw',
+      disableClose: true,
+    });
+
+    return new Promise((resolve) => {
+      dialogRef.afterClosed().subscribe((result) => {
+        resolve(!!result);
+      });
+    });
   }
 
   getGlobalCfgSection(

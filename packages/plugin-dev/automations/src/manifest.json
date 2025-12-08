@@ -1,0 +1,20 @@
+{
+  "id": "automations",
+  "name": "Automations (experimental)",
+  "version": "1.0.0",
+  "manifestVersion": 1,
+  "minSupVersion": "16.0.0",
+  "description": "Simple rule-based automation for Super Productivity",
+  "author": "Super Productivity",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "permissions": [],
+  "hooks": ["taskComplete", "taskUpdate", "anyTaskUpdate"],
+  "iFrame": true,
+  "sidePanel": false,
+  "isSkipMenuEntry": false,
+  "icon": "icon.svg"
+}

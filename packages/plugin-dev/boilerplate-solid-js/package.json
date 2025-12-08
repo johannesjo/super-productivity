@@ -1,28 +1,37 @@
 {
-  "name": "sp-plugin-boilerplate-solid",
+  "name": "boilerplate-solid-js",
   "version": "1.0.0",
-  "description": "A boilerplate Super Productivity plugin using Solid.js and TypeScript",
+  "description": "Solid.js Boilerplate Plugin for Super Productivity",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:watch": "node scripts/watch-and-build.js",
     "build": "vite build",
     "preview": "vite preview",
+    "test": "vitest",
+    "lint": "eslint .",
+    "format": "prettier --write .",
     "typecheck": "tsc --noEmit",
-    "package": "npm run build && node scripts/build-plugin.js",
-    "deploy": "npm run build && node scripts/inline-assets.js && node scripts/build-plugin.js",
-    "clean": "rm -rf dist node_modules *.zip",
-    "lint": "tsc --noEmit"
+    "package": "node scripts/build-plugin.js",
+    "deploy": "npm run build"
   },
   "devDependencies": {
-    "@types/node": "^22.15.33",
-    "solid-js": "^1.9.7",
-    "typescript": "^5.8.3",
-    "vite": "^7.1.12",
+    "@solidjs/router": "^0.15.4",
+    "@solidjs/testing-library": "^0.8.10",
+    "@super-productivity/plugin-api": "file:../../plugin-api",
+    "@super-productivity/vite-plugin": "file:../../vite-plugin",
+    "@typescript-eslint/eslint-plugin": "^8.48.0",
+    "@typescript-eslint/parser": "^8.48.0",
+    "archiver": "^7.0.1",
+    "eslint": "^9.39.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-solid": "^0.14.5",
+    "jsdom": "^27.2.0",
+    "prettier": "^3.6.2",
+    "solid-js": "^1.9.10",
+    "typescript": "^5.9.3",
+    "vite": "^7.2.4",
     "vite-plugin-solid": "^2.11.10",
-    "archiver": "^7.0.1"
-  },
-  "dependencies": {
-    "@super-productivity/plugin-api": "file:../plugin-api"
+    "vitest": "^4.0.14"
   }
 }

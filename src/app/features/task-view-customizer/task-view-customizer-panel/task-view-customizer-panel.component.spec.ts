@@ -5,6 +5,7 @@ import { RootState } from 'src/app/root-store/root-state';
 import { provideMockStore } from '@ngrx/store/testing';
 import { CONFIG_FEATURE_NAME } from '../../config/store/global-config.reducer';
 import { TaskViewCustomizerService } from '../task-view-customizer.service';
+import { DEFAULT_OPTIONS } from '../types';
 
 describe('TaskViewCustomizerPanelComponent', () => {
   let component: TaskViewCustomizerPanelComponent;
@@ -16,9 +17,9 @@ describe('TaskViewCustomizerPanelComponent', () => {
     setFilterType: jasmine.createSpy('setFilterType'),
     setFilterInput: jasmine.createSpy('setFilterInput'),
     resetAll: jasmine.createSpy('resetAll'),
-    selectedSort: () => 'default',
-    selectedGroup: () => 'default',
-    selectedFilter: () => 'default',
+    selectedSort: () => DEFAULT_OPTIONS.sort,
+    selectedGroup: () => DEFAULT_OPTIONS.group,
+    selectedFilter: () => DEFAULT_OPTIONS.filter,
     filterInputValue: () => '',
   };
 

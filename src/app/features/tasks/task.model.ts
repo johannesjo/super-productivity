@@ -88,8 +88,8 @@ export interface TaskCopy
   timeSpentOnDay: TimeSpentOnDay;
 
   // Additional app-specific fields
-  dueWithTime?: number;
-  dueDay?: string;
+  dueWithTime?: number | null;
+  dueDay?: string | null;
   hasPlannedTime?: boolean;
   attachments: TaskAttachment[];
 

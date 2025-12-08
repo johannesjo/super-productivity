@@ -1,4 +1,4 @@
-import { inject, Injectable, LOCALE_ID } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import {
   Worklog,
   WorklogDay,
@@ -34,6 +34,7 @@ import { DataInitStateService } from '../../core/data-init/data-init-state.servi
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 import { TaskArchiveService } from '../time-tracking/task-archive.service';
 import { getDbDateStr } from '../../util/get-db-date-str';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 @Injectable({ providedIn: 'root' })
 export class WorklogService {
@@ -43,9 +44,9 @@ export class WorklogService {
   private readonly _taskService = inject(TaskService);
   private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _router = inject(Router);
-  private _dateAdapter = inject<DateAdapter<unknown>>(DateAdapter);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
+  private _dateAdapter = inject(DateAdapter);
   private _taskArchiveService = inject(TaskArchiveService);
-  private _locale = inject(LOCALE_ID);
 
   // treated as private but needs to be assigned first
   archiveUpdateManualTrigger$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(
@@ -237,7 +238,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
-        this._locale,
+        this._dateTimeFormatService.currentLocale,
       );
       return {
         worklog,
@@ -272,7 +273,7 @@ export class WorklogService {
         nonArchiveTaskIds,
         workStartEndForWorkContext,
         this._dateAdapter.getFirstDayOfWeek(),
-        this._locale,
+        this._dateTimeFormatService.currentLocale,
       );
     }
     return null;

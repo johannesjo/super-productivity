@@ -90,7 +90,7 @@ const handleUnScheduleTask = (
       {
         id: taskId,
         changes: {
-          dueDay: undefined,
+          dueDay: isLeaveInToday ? getDbDateStr() : undefined,
           dueWithTime: undefined,
         },
       },

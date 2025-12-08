@@ -392,7 +392,8 @@
         "isShowTipLonger": false,
         "taskNotesTpl": "**How can I best achieve it now?**\n\n**What do I want?**\n\n**Why do I want it?**\n",
         "isOverlayIndicatorEnabled": false,
-        "customTheme": "default"
+        "customTheme": "default",
+        "defaultStartPage": 0
       },
       "shortSyntax": {
         "isEnableProject": true,

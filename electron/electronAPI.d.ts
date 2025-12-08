@@ -120,6 +120,8 @@ export interface ElectronAPI {
 
   sendSettingsUpdate(globalCfg: GlobalConfigState): void;
 
+  updateTitleBarDarkMode(isDarkMode: boolean): void;
+
   registerGlobalShortcuts(keyboardConfig: KeyboardConfig): void;
 
   showFullScreenBlocker(args: { msg?: string; takeABreakCfg: TakeABreakConfig }): void;

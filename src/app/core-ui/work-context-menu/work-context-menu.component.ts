@@ -24,6 +24,9 @@ import { INBOX_PROJECT } from '../../features/project/project.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { WorkContextMarkdownService } from '../../features/work-context/work-context-markdown.service';
 import { ShareService, ShareSupport } from '../../core/share/share.service';
+import { Store } from '@ngrx/store';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
+import { TaskWithSubTasks } from '../../features/tasks/task.model';
 
 @Component({
   selector: 'work-context-menu',
@@ -43,6 +46,7 @@ export class WorkContextMenuComponent implements OnInit {
   private _markdownService = inject(WorkContextMarkdownService);
   private _shareService = inject(ShareService);
   private _cd = inject(ChangeDetectorRef);
+  private _store = inject(Store);
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -113,6 +117,19 @@ export class WorkContextMenuComponent implements OnInit {
     }
   }
 
+  async duplicateProject(): Promise<void> {
+    try {
+      await this._projectService.duplicateProject(this.contextId);
+      this._snackService.open(T.GLOBAL_SNACK.DUPLICATE_PROJECT_SUCCESS);
+    } catch (err) {
+      this._snackService.open({
+        msg: T.GLOBAL_SNACK.DUPLICATE_PROJECT_ERROR,
+        type: 'ERROR',
+      });
+      console.error(err);
+    }
+  }
+
   protected readonly INBOX_PROJECT = INBOX_PROJECT;
 
   async shareTasksAsMarkdown(): Promise<void> {
@@ -163,6 +180,48 @@ export class WorkContextMenuComponent implements OnInit {
       type: 'ERROR',
     });
     this._setShareSupport('none');
+  }
+
+  async unplanAllTodayTasks(): Promise<void> {
+    if (this.contextId !== this.TODAY_TAG_ID) {
+      return;
+    }
+
+    const todayTasks = ((await this._workContextService.mainListTasks$
+      .pipe(first())
+      .toPromise()) || []) as TaskWithSubTasks[];
+    const undoneTasks = todayTasks.filter((task) => !task.isDone);
+
+    if (!undoneTasks.length) {
+      this._snackService.open(T.GLOBAL_SNACK.NO_TASKS_TO_UNPLAN);
+      return;
+    }
+
+    const scheduledTasks = undoneTasks.filter(
+      (task) => !!task.dueDay || !!task.dueWithTime,
+    );
+
+    scheduledTasks.forEach((task) => {
+      this._store.dispatch(
+        TaskSharedActions.unscheduleTask({
+          id: task.id,
+          reminderId: task.reminderId,
+          isSkipToast: true,
+        }),
+      );
+    });
+
+    const remainingIds = undoneTasks
+      .filter((task) => !task.dueDay && !task.dueWithTime)
+      .map((task) => task.id);
+
+    if (remainingIds.length) {
+      this._store.dispatch(
+        TaskSharedActions.removeTasksFromTodayTag({ taskIds: remainingIds }),
+      );
+    }
+
+    this._snackService.open(T.GLOBAL_SNACK.UNPLANNED_TODAY_TASKS);
   }
 
   private _setShareSupport(support: ShareSupport): void {

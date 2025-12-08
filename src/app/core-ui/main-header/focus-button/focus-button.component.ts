@@ -14,6 +14,10 @@ import { KeyboardConfig } from '../../../features/config/keyboard-config.model';
 import { DateService } from '../../../core/date/date.service';
 import { FocusModeMode } from '../../../features/focus-mode/focus-mode.model';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogFocusSessionEditComponent } from '../../../features/metric/dialog-focus-session-edit/dialog-focus-session-edit.component';
+import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
+import { first } from 'rxjs/operators';
 
 @Component({
   selector: 'focus-button',
@@ -27,6 +31,7 @@ import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-ci
     MsToMinuteClockStringPipe,
     TranslatePipe,
     ProgressCircleComponent,
+    LongPressDirective,
   ],
 })
 export class FocusButtonComponent {
@@ -34,6 +39,7 @@ export class FocusButtonComponent {
   private readonly _metricService = inject(MetricService);
   private readonly _configService = inject(GlobalConfigService);
   private readonly _dateService = inject(DateService);
+  private readonly _matDialog = inject(MatDialog);
   readonly focusModeService = inject(FocusModeService);
 
   T: typeof T = T;
@@ -94,5 +100,21 @@ export class FocusButtonComponent {
 
   enableFocusMode(): void {
     this._store.dispatch(showFocusOverlay());
+  }
+
+  openFocusSessionDialog(): void {
+    const dayStr = this._dateService.todayStr();
+    this._metricService
+      .getMetricForDay$(dayStr)
+      .pipe(first())
+      .subscribe((metric) => {
+        this._matDialog.open(DialogFocusSessionEditComponent, {
+          restoreFocus: true,
+          data: {
+            day: dayStr,
+            focusSessions: metric.focusSessions ?? [],
+          },
+        });
+      });
   }
 }

@@ -111,8 +111,24 @@ export class ModelSyncService<MD extends ModelCfgs> {
             (legacyRev && this._isSameRev(legacyRev, expectedRev))
           )
         ) {
-          PFLog.normal('Rev mismatch', rev, expectedRev, legacyRev);
-          throw new RevMismatchForModelError(modelId, { rev, expectedRev, legacyRev });
+          const isNewer =
+            rev &&
+            expectedRev &&
+            new Date(rev).getTime() > new Date(expectedRev).getTime();
+          if (isNewer) {
+            // This can happen if the meta file was not updated correctly, e.g. due to an interrupted sync
+            // or if the remote file was updated by another client and the meta file is lagging behind.
+            // In this case we assume that the remote file is the source of truth and we should download it.
+            PFLog.warn(
+              `Rev mismatch: Remote rev is newer than expected. Proceeding with download.`,
+              rev,
+              expectedRev,
+              legacyRev,
+            );
+          } else {
+            PFLog.normal('Rev mismatch', rev, expectedRev, legacyRev);
+            throw new RevMismatchForModelError(modelId, { rev, expectedRev, legacyRev });
+          }
         }
       }
       const data = await this._encryptAndCompressHandler.decompressAndDecryptData<

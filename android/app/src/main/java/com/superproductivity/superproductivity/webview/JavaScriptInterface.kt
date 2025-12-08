@@ -61,6 +61,16 @@ class JavaScriptInterface(
         callJavaScriptFunction(FN_PREFIX + "clearDbCallback('" + requestId + "')")
     }
 
+    @Suppress("unused")
+    @JavascriptInterface
+    fun triggerGetShareData() {
+        if (activity is com.superproductivity.superproductivity.CapacitorMainActivity) {
+            activity.runOnUiThread {
+                activity.flushPendingShareIntent()
+            }
+        }
+    }
+
 
     fun callJavaScriptFunction(script: String) {
         webView.post { webView.evaluateJavascript(script) { } }

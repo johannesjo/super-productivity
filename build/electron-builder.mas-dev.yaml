@@ -5,14 +5,14 @@ files:
   - electron/**/*
   - '!electron/**/*.ts'
   - '!electron/**/*.js.map'
-  - dist/**/*
+  - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
   # Exclude Nx binaries - they're build tools, not runtime dependencies
   - '!**/@nx/nx-darwin-*/**'
   - '!**/@nx/nx-linux-*/**'
   - '!**/@nx/nx-win32-*/**'
 directories:
-  output: './app-builds'
+  output: './.tmp/app-builds'
 
 mac:
   appId: com.super-productivity.app

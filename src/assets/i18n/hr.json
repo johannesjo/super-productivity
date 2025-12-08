@@ -1613,6 +1613,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potvrdi prije zatvaranja programa bez prethodnog završavanja dana",
       "IS_DARK_MODE": "Tamni modus",
       "IS_DISABLE_ANIMATIONS": "Deaktiviraj sve animacije",
+      "IS_DISABLE_CELEBRATION": "Onemogući proslavu u dnevnom sažetku",
       "IS_HIDE_NAV": "Sakrij navigaciju sve dok ne prijeđeš mišem preko naslova (samo za desktop računala)",
       "IS_MINIMIZE_TO_TRAY": "Sklopi u programsku traku (samo za desktop računala)",
       "IS_SHOW_TIP_LONGER": "Montre konsèy pwodiktivite sou app kòmanse yon ti tan ankò",
@@ -1809,14 +1810,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Ajoute travay ki soti nan jodi a",
-    "BACK": "Čekaj, nešto sam zaboravio/la!",
     "BREAK_LABEL": "Pauze (broj / vrijeme)",
     "CELEBRATE": "Odvoji trenutak za <i>slavlje!</i>",
     "CLEAR_ALL_CONTINUE": "Izbriši sve obavljene i nastavi",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Ne, izbriši samo zadatke",
-      "MSG": "Tvoj posao je gotov. Idi doma!",
-      "OK": "Konačno! Isključi računalo!"
+      "CANCEL": "Ne, samo očisti zadatke",
+      "MSG": "Izaći iz aplikacije?",
+      "OK": "Izađi"
     },
     "ESTIMATE_TOTAL": "Ukupna procjena:",
     "EVALUATE_DAY": "Evalye",
@@ -1833,7 +1833,7 @@
     "ROUND_UP_5M": "Zaokruži sve zadatke na 5 minuta",
     "ROUND_UP_15M": "Zaokruži sve zadatke na 15 minuta",
     "ROUND_UP_30M": "Zaokruži sve zadatke na 30 minuta",
-    "SAVE_AND_GO_HOME": "Spremi i idi doma",
+    "SAVE_AND_GO_HOME": "Završi dan",
     "SAVE_AND_GO_HOME_TOOLTIP": "Premjesti sve obavljene zadatke u arhivu (neobavljeni zadaci) te opcionalno sinkroniziraj sve podatake i zatvori program.",
     "START_END": "Početak – Kraj",
     "SUMMARY_FOR": "Dnevni sažetak za {{dayStr}}",
@@ -1883,6 +1883,24 @@
     "SELECT_THEME": "Odaberi temu",
     "teal": "plavozelena",
     "yellow": "žuta"
+  },
+  "USER_PROFILES": {
+    "ACTIVE": "Aktivan",
+    "CANCEL": "Odustani",
+    "CLOSE": "Zatvori",
+    "CREATE": "Kreiraj",
+    "CREATE_NEW_PROFILE": "Kreiraj novi profil",
+    "CREATED": "Kreirano:",
+    "DELETE_PROFILE": "Obriši profil",
+    "DIALOG_TITLE": "Upravljaj korisničkim profilima",
+    "EXISTING_PROFILES": "Postojeći profili",
+    "EXPORT_PROFILE": "Izvezi profil",
+    "MANAGE_PROFILES": "Upravljaj profilima...",
+    "OPEN_PROFILES_FOLDER": "Otvori mapu profila",
+    "PROFILE_NAME": "Ime profila",
+    "PROFILE_NAME_PLACEHOLDER": "npr. Posao, Osobno",
+    "RENAME": "Preimenuj",
+    "SAVE": "Spremi"
   },
   "V": {
     "E_1TO10": "Upiši vrijednost između 1 i 10",

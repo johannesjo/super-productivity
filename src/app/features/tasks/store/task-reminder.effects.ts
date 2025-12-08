@@ -13,7 +13,7 @@ import { moveProjectTaskToBacklogListAuto } from '../../project/store/project.ac
 import { flattenTasks } from './task.selectors';
 import { Store } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { DatePipe } from '@angular/common';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -22,7 +22,7 @@ export class TaskReminderEffects {
   private _snackService = inject(SnackService);
   private _taskService = inject(TaskService);
   private _store = inject(Store);
-  private _datePipe = inject(DatePipe);
+  private _datePipe = inject(LocaleDatePipe);
 
   snack$ = createEffect(
     () =>

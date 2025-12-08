@@ -35,6 +35,13 @@
   </button>
   <button
     mat-raised-button
+    (click)="openSetupDialog('TRELLO')"
+  >
+    <mat-icon svgIcon="trello"></mat-icon>
+    <span>Trello</span>
+  </button>
+  <button
+    mat-raised-button
     (click)="openSetupDialog('GITHUB')"
   >
     <mat-icon svgIcon="github"></mat-icon>

@@ -21,6 +21,14 @@
 
 :host-context(.isMac.isElectron) {
   padding-top: calc(var(--mac-title-bar-padding) - 8px);
+}
+
+:host-context(.isObsidianStyleHeader.isElectron) {
+  padding-right: var(--window-controls-width); // Space for window controls
+}
+
+:host-context(.isMac.isElectron),
+:host-context(.isObsidianStyleHeader.isElectron) {
   -webkit-app-region: drag;
   cursor: grab;
 
@@ -33,6 +41,7 @@
   }
 
   .current-work-context-title,
+  ::ng-deep .current-task-title,
   button,
   a,
   ::ng-deep button,
@@ -381,7 +390,7 @@ button.isActive2 {
 
 :host:hover ::ng-deep {
   .current-task-title {
-    display: none;
+    opacity: 0;
   }
 }
 

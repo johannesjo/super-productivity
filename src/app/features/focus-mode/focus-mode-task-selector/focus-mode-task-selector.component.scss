@@ -1,0 +1,41 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  display: block;
+}
+
+.task-selector-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  backdrop-filter: blur(2px);
+}
+
+.task-selector-overlay {
+  background: var(--c-bg-raised);
+  border-radius: 8px;
+  box-shadow: var(--whiteframe-shadow-8dp);
+  padding: var(--s2);
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: var(--s2);
+
+  @media (max-width: 499px) {
+    width: 95%;
+    max-width: none;
+  }
+
+  select-task {
+    width: 100%;
+  }
+}

@@ -83,22 +83,6 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
-      key: 'firstDayOfWeek',
-      type: 'select',
-      templateOptions: {
-        label: T.GCF.MISC.FIRST_DAY_OF_WEEK,
-        options: [
-          { label: T.F.TASK_REPEAT.F.SUNDAY, value: 0 },
-          { label: T.F.TASK_REPEAT.F.MONDAY, value: 1 },
-          { label: T.F.TASK_REPEAT.F.TUESDAY, value: 2 },
-          { label: T.F.TASK_REPEAT.F.WEDNESDAY, value: 3 },
-          { label: T.F.TASK_REPEAT.F.THURSDAY, value: 4 },
-          { label: T.F.TASK_REPEAT.F.FRIDAY, value: 5 },
-          { label: T.F.TASK_REPEAT.F.SATURDAY, value: 6 },
-        ],
-      },
-    },
-    {
       key: 'startOfNextDay',
       type: 'input',
       defaultValue: 0,
@@ -127,6 +111,13 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       },
     },
     {
+      key: 'isDisableCelebration',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.MISC.IS_DISABLE_CELEBRATION,
+      },
+    },
+    {
       key: 'isShowProductivityTipLonger',
       type: 'checkbox',
       templateOptions: {
@@ -146,8 +137,19 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
       templateOptions: {
         label: T.GCF.MISC.IS_OVERLAY_INDICATOR_ENABLED,
       },
-      hideExpression: (model: any) => !model?.isTrayShowCurrentTask,
     },
+    ...((IS_ELECTRON
+      ? [
+          {
+            key: 'isUseCustomWindowTitleBar',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.GCF.MISC.IS_USE_CUSTOM_WINDOW_TITLE_BAR,
+              description: T.GCF.MISC.IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT,
+            },
+          },
+        ]
+      : []) as LimitedFormlyFieldConfig<MiscConfig>[]),
     {
       key: 'customTheme',
       type: 'select',
@@ -157,6 +159,18 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
           label: theme.name,
           value: theme.id,
         })),
+      },
+    },
+    {
+      key: 'defaultStartPage',
+      type: 'select',
+      defaultValue: 0,
+      templateOptions: {
+        label: T.GCF.MISC.DEFAULT_START_PAGE,
+        options: [
+          { label: T.G.TODAY_TAG_TITLE, value: 0 },
+          { label: T.G.INBOX_PROJECT_TITLE, value: 1 },
+        ],
       },
     },
   ],

@@ -151,11 +151,15 @@ export const createErrorAlert = (
   if (userData) {
     const btnExport = document.createElement('BUTTON');
     btnExport.innerText = 'Export data';
-    btnExport.addEventListener('click', () => {
-      download(
-        'super-productivity-crash-user-data-export.json',
-        JSON.stringify(userData),
-      );
+    btnExport.addEventListener('click', async () => {
+      try {
+        await download(
+          'super-productivity-crash-user-data-export.json',
+          JSON.stringify(userData),
+        );
+      } catch (e) {
+        Log.error(e);
+      }
     });
     innerWrapper.append(btnExport);
 
@@ -163,19 +167,29 @@ export const createErrorAlert = (
     btnPrivacyExport.innerText = 'PE';
     btnPrivacyExport.title =
       'Export anonymized data (to send to contact@super-productivity.com for debugging)';
-    btnPrivacyExport.addEventListener('click', () => {
+    btnPrivacyExport.addEventListener('click', async () => {
       // Type assertion needed for privacy export function
-      download(
-        'ANONYMIZED-super-productivity-crash-user-data-export.json',
-        privacyExport(userData as Parameters<typeof privacyExport>[0]),
-      );
+      try {
+        await download(
+          'ANONYMIZED-super-productivity-crash-user-data-export.json',
+          privacyExport(userData as Parameters<typeof privacyExport>[0]),
+        );
+      } catch (e) {
+        Log.error(e);
+      }
     });
     innerWrapper.append(btnPrivacyExport);
   }
 
   const btnLogs = document.createElement('BUTTON');
   btnLogs.innerText = 'Logs';
-  btnLogs.addEventListener('click', () => downloadLogs());
+  btnLogs.addEventListener('click', async () => {
+    try {
+      await downloadLogs();
+    } catch (e) {
+      Log.error(e);
+    }
+  });
   innerWrapper.append(btnLogs);
 
   const tagReport = document.createElement('A');

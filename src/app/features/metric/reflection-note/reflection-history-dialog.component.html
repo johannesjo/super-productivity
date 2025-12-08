@@ -1,0 +1,36 @@
+<h2 mat-dialog-title>
+  {{ T.F.METRIC.REFLECTION.HISTORY_TITLE | translate }}
+</h2>
+
+<mat-dialog-content>
+  @if (!data.entries.length) {
+    <p class="history-empty">
+      {{ T.F.METRIC.REFLECTION.HISTORY_EMPTY | translate }}
+    </p>
+  } @else {
+    <div class="history-list">
+      @for (entry of data.entries; track entry.created) {
+        <article class="history-entry">
+          <header>
+            <span class="history-entry__date">
+              {{ entry.created | date: 'fullDate' }}
+            </span>
+            <span class="history-entry__day">{{ entry.day }}</span>
+          </header>
+          <p class="history-entry__text">
+            {{ entry.text }}
+          </p>
+        </article>
+      }
+    </div>
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    mat-dialog-close
+  >
+    {{ T.G.CLOSE | translate }}
+  </button>
+</mat-dialog-actions>

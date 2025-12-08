@@ -54,17 +54,35 @@ export class WebdavApi {
           return meta;
         }
       }
-
-      // If PROPFIND fails or returns no data, try HEAD request as fallback
-      if (useGetFallback) {
-        return await this._getFileMetaViaHead(fullPath);
-      }
-
-      throw new RemoteFileNotFoundAPIError(path);
     } catch (e) {
+      // If PROPFIND fails and fallback is enabled, try HEAD
+      if (useGetFallback) {
+        PFLog.verbose(
+          `${WebdavApi.L}.getFileMeta() PROPFIND failed, trying HEAD fallback`,
+          e,
+        );
+        try {
+          return await this._getFileMetaViaHead(fullPath);
+        } catch (headErr) {
+          PFLog.warn(
+            `${WebdavApi.L}.getFileMeta() HEAD fallback failed for ${path}`,
+            headErr,
+          );
+          // If HEAD also fails, throw the original error (or maybe the HEAD error?)
+          // Usually the original PROPFIND error is more informative about connectivity
+        }
+      }
       PFLog.error(`${WebdavApi.L}.getFileMeta() error`, { path, error: e });
       throw e;
     }
+
+    // If we get here, PROPFIND worked but returned no data (or not MULTI_STATUS)
+    // Try HEAD request as fallback if enabled
+    if (useGetFallback) {
+      return await this._getFileMetaViaHead(fullPath);
+    }
+
+    throw new RemoteFileNotFoundAPIError(path);
   }
 
   async download({ path }: { path: string }): Promise<{
@@ -95,29 +113,32 @@ export class WebdavApi {
         response.headers['last-modified'] || response.headers['Last-Modified'];
 
       // Get ETag for legacy compatibility
-      let etag = response.headers['etag'] || response.headers['ETag'];
-      let legacyRev = etag ? this._cleanRev(etag) : undefined;
+      const etagHeader = response.headers['etag'] || response.headers['ETag'];
+      let legacyRev = etagHeader ? this._cleanRev(etagHeader) : undefined;
 
       let rev = lastModified || '';
+      const isLastModifiedMissing = !lastModified;
+      const isLegacyRevMissing = !legacyRev;
 
-      // Fallback: If Last-Modified and ETag are both missing, use PROPFIND to retrive them as it is defined by webDAV protocol
-      // Some servers (like OpenList/Alist) may not return these headers on GET
-      if (!lastModified && !etag) {
+      // Fallback: Some servers may omit Last-Modified on GET, so request metadata separately
+      if (isLastModifiedMissing) {
         PFLog.verbose(
-          `${WebdavApi.L}.download() missing Last-Modified/ETag, trying PROPFIND fallback for ${path}`,
+          `${WebdavApi.L}.download() missing Last-Modified header, trying metadata fallback for ${path}`,
         );
         try {
-          const meta = await this.getFileMeta(path, null, false);
+          const meta = await this.getFileMeta(path, null, true);
           if (!lastModified && meta.lastmod) {
             lastModified = meta.lastmod;
             rev = lastModified;
           }
-          if (!etag && meta.etag) {
-            etag = meta.etag;
-            legacyRev = this._cleanRev(etag);
+          if (isLegacyRevMissing) {
+            const metaEtag = meta.data?.etag;
+            if (metaEtag) {
+              legacyRev = this._cleanRev(metaEtag);
+            }
           }
         } catch (e) {
-          PFLog.warn(`${WebdavApi.L}.download() PROPFIND fallback failed for ${path}`, e);
+          PFLog.warn(`${WebdavApi.L}.download() metadata fallback failed for ${path}`, e);
         }
       }
 
@@ -403,14 +424,62 @@ export class WebdavApi {
       );
     }
 
-    // Ensure baseUrl doesn't end with / and path starts with /
-    const cleanBase = baseUrl.replace(/\/$/, '');
-    const cleanPath = path.startsWith('/') ? path : `/${path}`;
+    try {
+      // We need to robustly handle various combinations of encoded/unencoded baseUrls and paths,
+      // especially for providers like Mailbox.org that include spaces in the user's path.
+      // We also want to avoid double-encoding if the path is already encoded.
+      // See: https://github.com/johannesjo/super-productivity/issues/5508
+      let url: URL;
+      try {
+        url = new URL(baseUrl);
+      } catch (e) {
+        // Try to fix the base URL if it failed (likely due to spaces)
+        // We manually replace spaces to avoid messing up existing encoded characters (like %2F)
+        // which can happen with decodeURI/encodeURI roundtrips.
+        const fixedBase = baseUrl.replace(/ /g, '%20');
+        url = new URL(fixedBase);
+      }
 
-    // Additional validation: ensure the path doesn't try to escape the base path
-    const normalizedPath = cleanPath.replace(/\/+/g, '/'); // Replace multiple slashes with single slash
+      // Remove trailing slash from base
+      const base = url.pathname === '/' ? '' : url.pathname.replace(/\/$/, '');
+      // Remove leading slash from path
+      const append = path.startsWith('/') ? path.substring(1) : path;
 
-    return `${cleanBase}${normalizedPath}`;
+      // Assigning to pathname handles encoding of unencoded characters (spaces)
+      // while preserving already encoded sequences.
+      url.pathname = `${base}/${append}`;
+      return url.href;
+    } catch (e) {
+      // Fallback for invalid Base URL (e.g. no protocol)
+      // Encode path/base segments while avoiding double-encoding
+      const cleanBase = baseUrl.replace(/\/$/, '');
+      const cleanPath = path.startsWith('/') ? path : `/${path}`;
+
+      const encodeSegment = (segment: string): string => {
+        if (!segment) {
+          return segment;
+        }
+        try {
+          return encodeURIComponent(decodeURIComponent(segment));
+        } catch {
+          return encodeURIComponent(segment);
+        }
+      };
+
+      // Separate protocol to avoid collapsing the double slashes
+      const protocolMatch = cleanBase.match(/^([a-zA-Z][a-zA-Z0-9+.-]*:\/\/)(.*)$/);
+      const protocol = protocolMatch ? protocolMatch[1] : '';
+      const baseWithoutProtocol = protocolMatch ? protocolMatch[2] : cleanBase;
+
+      const normalizedBase = baseWithoutProtocol
+        .split('/')
+        .filter((s, idx, arr) => !(idx === arr.length - 1 && s === ''))
+        .map(encodeSegment)
+        .join('/');
+      const normalizedPath = cleanPath.split('/').map(encodeSegment).join('/');
+
+      return `${protocol}${normalizedBase}${normalizedPath}`;
+    }
   }
 
   private _cleanRev(rev: string): string {
@@ -456,6 +525,8 @@ export class WebdavApi {
       );
     }
 
+    const etag = headers['etag'] || headers['ETag'] || '';
+
     return {
       filename,
       basename: filename,
@@ -463,7 +534,15 @@ export class WebdavApi {
       size,
       type: contentType || 'application/octet-stream',
       etag: lastModified, // Use lastmod as etag for consistency
-      data: {},
+      data: {
+        /* eslint-disable @typescript-eslint/naming-convention */
+        'content-type': contentType,
+        'content-length': contentLength,
+        'last-modified': lastModified,
+        /* eslint-enable @typescript-eslint/naming-convention */
+        etag: etag,
+        href: fullPath,
+      },
     };
   }
 }

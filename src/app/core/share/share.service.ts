@@ -205,7 +205,7 @@ export class ShareService {
   async tryNativeShare(payload: SharePayload): Promise<ShareResult> {
     const normalized = ShareTextUtil.ensureShareText(payload);
 
-    const capacitorShare = await SharePlatformUtil.getCapacitorSharePlugin();
+    const capacitorShare = SharePlatformUtil.getCapacitorSharePlugin();
     if (capacitorShare) {
       try {
         await capacitorShare.share({
@@ -229,28 +229,6 @@ export class ShareService {
           };
         }
         console.warn('Capacitor share failed:', error);
-      }
-    }
-
-    if (IS_ANDROID_WEB_VIEW) {
-      try {
-        const win = window as any;
-        if (win.Capacitor?.Plugins?.Share) {
-          await win.Capacitor.Plugins.Share.share({
-            title: normalized.title,
-            text: normalized.text,
-            url: normalized.url,
-            dialogTitle: 'Share via',
-          });
-          this._snackService.open('Shared successfully!');
-          return {
-            success: true,
-            usedNative: true,
-            target: 'native',
-          };
-        }
-      } catch (error) {
-        console.warn('Capacitor share via window failed:', error);
       }
     }
 
@@ -483,7 +461,7 @@ export class ShareService {
     filename: string,
     title: string,
   ): Promise<ShareResult> {
-    const sharePlugin = await SharePlatformUtil.getCapacitorSharePlugin();
+    const sharePlugin = SharePlatformUtil.getCapacitorSharePlugin();
     if (!sharePlugin) {
       return {
         success: false,

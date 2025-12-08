@@ -4,18 +4,18 @@ import {
   computed,
   inject,
   input,
-  LOCALE_ID,
 } from '@angular/core';
 import { ScheduleEvent } from '../schedule.model';
 import { ScheduleEventComponent } from '../schedule-event/schedule-event.component';
-import { DatePipe, formatDate } from '@angular/common';
+import { formatDate } from '@angular/common';
 import { T } from '../../../t.const';
 import { ScheduleService } from '../schedule.service';
-import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
+import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
+import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 
 @Component({
   selector: 'schedule-month',
-  imports: [ScheduleEventComponent, DatePipe, LocaleDatePipe],
+  imports: [ScheduleEventComponent, LocaleDatePipe, LocaleDatePipe],
   templateUrl: './schedule-month.component.html',
   styleUrl: './schedule-month.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -23,7 +23,7 @@ import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 })
 export class ScheduleMonthComponent {
   private _scheduleService = inject(ScheduleService);
-  private _locale = inject(LOCALE_ID);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   readonly events = input<ScheduleEvent[] | null>([]);
   readonly daysToShow = input<string[]>([]);
@@ -44,7 +44,7 @@ export class ScheduleMonthComponent {
       const date = new Date(sundayDate);
       date.setDate(sundayDate.getDate() + dayIndex);
       // 'EEE' format gives abbreviated day name (e.g., 'Mon', 'Tue')
-      headers.push(formatDate(date, 'EEE', this._locale));
+      headers.push(formatDate(date, 'EEE', this._dateTimeFormatService.currentLocale));
     }
 
     return headers;

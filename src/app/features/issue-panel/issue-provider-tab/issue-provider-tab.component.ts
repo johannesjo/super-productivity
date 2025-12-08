@@ -43,10 +43,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { ErrorCardComponent } from '../../../ui/error-card/error-card.component';
 import { selectProjectById } from '../../project/store/project.selectors';
-import {
-  HelperClasses,
-  IS_WEB_EXTENSION_REQUIRED_FOR_JIRA,
-} from '../../../app.constants';
+import { HelperClasses, IS_WEB_BROWSER } from '../../../app.constants';
 import { IssueProviderActions } from '../../issue/store/issue-provider.actions';
 import { IS_MOUSE_PRIMARY } from '../../../util/is-mouse-primary';
 import { getIssueProviderHelpLink } from '../../issue/mapping-helper/get-issue-provider-help-link';
@@ -90,8 +87,7 @@ export class IssueProviderTabComponent implements OnDestroy, AfterViewInit {
   readonly T: typeof T = T;
   readonly SEARCH_MIN_LENGTH = 1;
   readonly ISSUE_PROVIDER_HUMANIZED = ISSUE_PROVIDER_HUMANIZED;
-  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA =
-    IS_WEB_EXTENSION_REQUIRED_FOR_JIRA;
+  protected readonly IS_WEB_EXTENSION_REQUIRED_FOR_JIRA = IS_WEB_BROWSER;
 
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);

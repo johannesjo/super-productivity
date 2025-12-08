@@ -28,6 +28,7 @@
     <button
       mat-button
       class="action-btn"
+      data-test="add-task-bar-due-btn"
       (click)="openScheduleDialog()"
       [class.has-value]="state().date"
     >
@@ -39,6 +40,7 @@
       <button
         mat-button
         class="clear-btn"
+        data-test="add-task-bar-clear-due-btn"
         (click)="clearDateWithSyntax(); $event.stopPropagation()"
         [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_CLEAR_DATE | translate"
         matTooltipPosition="above"
@@ -53,20 +55,19 @@
       #tagsMenuTrigger
       mat-button
       class="action-btn"
-      [class.tags-mode]="state().tagIds.length > 0 || state().newTagTitles.length > 0"
+      [class.tags-mode]="hasTagsSelected() || state().newTagTitles.length > 0"
       [matMenuTriggerFor]="tagsMenu"
-      [class.has-value]="state().tagIds.length > 0 || hasNewTags()"
+      [class.has-value]="hasTagsSelected() || hasNewTags()"
       [class.has-new-tags]="hasNewTags()"
       [class.menu-open]="isTagsMenuOpen()"
       (click)="onTagsMenuClick()"
     >
       <!-- NOTE: we do it this way, since mat-button puts it inside the label otherwise leading to vertical alignment issues -->
-      <mat-icon
-        [class.hide]="state().tagIds.length > 0 || state().newTagTitles.length > 0"
+      <mat-icon [class.hide]="hasTagsSelected() || state().newTagTitles.length > 0"
         >label</mat-icon
       >
 
-      @if (state().tagIds.length === 0 && state().newTagTitles.length === 0) {
+      @if (!hasTagsSelected() && state().newTagTitles.length === 0) {
         <ng-container>
           <span>{{ T.F.TASK.ADD_TASK_BAR.TAGS_BUTTON | translate }}</span>
         </ng-container>
@@ -90,7 +91,7 @@
       }
     </button>
 
-    @if (state().tagIds.length > 0 || hasNewTags()) {
+    @if (hasTagsSelected() || hasNewTags()) {
       <button
         mat-button
         class="clear-btn"

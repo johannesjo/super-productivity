@@ -17,12 +17,20 @@
       "MSG": "Super ProductivityをPWAとしてインストールしますか？"
     },
     "B_OFFLINE": "インターネットに接続していません。課題プロバイダーデータの同期と要求は機能しません。",
+    "CONTEXT_MENU": {
+      "CHANGE_BACKGROUND": "変更の背景"
+    },
     "UPDATE_MAIN_MODEL": "Super Productivityが大幅に更新されました！データのいくつかの移行が必要です。これにより、データが古いバージョンのアプリと互換性がなくなることに注意してください。",
     "UPDATE_MAIN_MODEL_NO_UPDATE": "モデルの更新が選択されていません。モデルのアップグレードを実行しない場合は、前のバージョンにダウングレードする必要があることに注意してください。",
     "UPDATE_WEB_APP": "新しいバージョンがあります。新しいバージョンをロードしますか？"
   },
   "BL": {
     "NO_TASKS": "現在、バックログにタスクはありません"
+  },
+  "BN": {
+    "SHOW_ISSUE_PANEL": "ショー・イシュー・パネル",
+    "SHOW_NOTES": "ショープロジェクトノート",
+    "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "フィルター/グループ/ソートパネルの表示"
   },
   "CONFIRM": {
     "AUTO_FIX": "データが破損しているようです。自動修復を試しますか？その結果、データが部分的に失われる可能性があります。",
@@ -37,6 +45,13 @@
     "PLACEHOLDER": "日付を選択してください",
     "PRESS_ENTER_AGAIN": "保存するにはもう一度Enterキーを押してください",
     "TOMORROW": "明日"
+  },
+  "DIALOG_UNSPLASH_PICKER": {
+    "BY": "によって",
+    "NO_RESULTS": "画像は見つかりませんでした。別の検索ワードを試してみてください。",
+    "SEARCH_LABEL": "検索画像",
+    "SEARCH_PLACEHOLDER": "例えば、自然、山、抽象",
+    "TITLE": "Unsplashから背景画像を選択してください"
   },
   "F": {
     "ATTACHMENT": {
@@ -142,10 +157,15 @@
       "BANNER": {
         "ADD_AS_TASK": "タスクとして追加",
         "FOCUS_TASK": "フォーカスタスク",
+        "SHOW_TASK": "ショータスク",
         "TXT": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!",
         "TXT_MULTIPLE": "<strong>{{title}}</strong>は<strong>{{start}}</strong>から始まります!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)",
         "TXT_PAST": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!",
         "TXT_PAST_MULTIPLE": "<strong>{{title}}</strong>が<strong>{{start}}</strong>に開始されました!<br> (および{{nrOfOtherBanners}} 件の他のイベントが予定されています)"
+      },
+      "EVENT_STRINGS": {
+        "EVENT_STR": "出来事",
+        "EVENTS_STR": "イベント"
       },
       "S": {
         "CAL_PROVIDER_ERROR": "カレンダー プロバイダー エラー: {{errTxt}}"
@@ -190,36 +210,66 @@
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "1分足し",
       "B": {
+        "BREAK_RUNNING": "休憩が始まる",
+        "POMODORO_BREAK_RUNNING": "ブレイク #{{cycleNr}} が走っている",
+        "POMODORO_SESSION_RUNNING": "ポモドーロセッション#{{cycleNr}} が開催中です",
         "SESSION_RUNNING": "フォーカスセッションが進行中です",
         "TO_FOCUS_OVERLAY": "フォーカスオーバーレイ"
       },
       "BACK_TO_PLANNING": "計画に戻る",
+      "BREAK_RELAX_MSG": "少しリラックスしてください",
+      "CLICK_TO_EDIT_DURATION": "編集時間をクリックしてください",
+      "COMPLETE_FOCUS_SESSION": "完全なフォーカスセッション",
+      "COMPLETE_SESSION": "セッション完了",
       "CONGRATS": "セッションの完了おめでとうございます!",
       "CONTINUE_FOCUS_SESSION": "フォーカスセッションを続ける",
+      "CONTINUE_SESSION": "セッション続行",
+      "CONTINUE_TO_NEXT_SESSION": "次のセッションへ続きます",
       "COUNTDOWN": "カウントダウン",
+      "COUNTDOWN_HINT": "時計がゼロになるまで集中しろ",
+      "CURRENT_SESSION_TIME_TOOLTIP": "現在の会期時間",
       "FINISH_TASK_AND_SELECT_NEXT": "タスクを終了して次を選択",
       "FLOWTIME": "フロータイム",
+      "FLOWTIME_HINT": "厳密なタイマーなしの柔軟なペース配分",
+      "FOCUS_TIME_TOOLTIP": "フォーカスタイム",
       "FOR_TASK": "タスク用",
       "GET_READY": "集中セッションの準備をしましょう!",
       "GO_TO_PROCRASTINATION": "先延ばしにするときは助けを求める",
       "GOGOGO": "行け、行け、行け！",
+      "LONG_BREAK": "ロング・ブレイク",
+      "LONG_BREAK_TITLE": "ロングブレイク - サイクル {{cycle}}",
       "NEXT": "次",
       "ON": "オン",
       "OPEN_ISSUE_IN_BROWSER": "ブラウザで問題を開く",
+      "PAUSE_SESSION": "一時停止セッション",
+      "PAUSE_TRACKING": "一時停止トラッキング",
+      "PAUSE_TRACKING_FOR_CURRENT_TASK": "現在のタスクの一時停止トラッキング",
+      "POMODORO": "ポモドーロ",
       "POMODORO_BACK": "バック",
       "POMODORO_DISABLE": "ポモドーロを無効にする",
+      "POMODORO_HINT": "計画的な休憩を伴う構造化されたスプリント",
       "POMODORO_INFO": "ポモドーロ タイマーが有効になっている場合、フォーカス セッションを併用することはできません。",
+      "POMODORO_SESSION_COMPLETED": "ポモドーロセッション終了!",
       "PREP_GET_MENTALLY_READY": "集中して生産的になるために精神的に準備する",
       "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
       "PREP_STRETCH": "軽いストレッチをする",
+      "REMOVE_TIME_MINUTE": "1分の短縮",
+      "RESUME_SESSION": "再開セッション",
       "SELECT_ANOTHER_TASK": "別のタスクを選択",
+      "SELECT_MODE": "フォーカスモードを選びましょう",
       "SELECT_TASK": "集中するタスクを選択",
+      "SELECT_TASK_TO_FOCUS": "タスクを集中させる",
       "SESSION_COMPLETED": "フォーカスセッションが完了しました!",
       "SET_FOCUS_SESSION_DURATION": "フォーカスセッションの継続時間を設定する",
+      "SHORT_BREAK": "ショートブレイク",
+      "SHORT_BREAK_TITLE": "ショートブレイク - サイクル {{cycle}}",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "タスクのメモと添付ファイルを表示/非表示",
+      "SKIP_BREAK": "スキップブレイク",
       "START_FOCUS_SESSION": "フォーカスセッションを開始",
       "START_NEXT_FOCUS_SESSION": "次のフォーカスセッションを開始",
+      "SWITCH_TASK": "スイッチタスク",
       "WORKED_FOR": "あなたが働いていたのは"
     },
     "GITEA": {
@@ -398,6 +448,11 @@
         "POLLING_CHANGES": "{{issueProviderName}}： {{issuesStr}}のポーリングの変更"
       }
     },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "キャッシュされたカレンダー結果を表示します。データが古くなっているかもしれません。"
+      }
+    },
     "JIRA": {
       "BANNER": {
         "BLOCK_ACCESS_MSG": "Jira：APIからの締め出しを防ぐために、アクセスはSuper Productivityによってブロックされています。あなたはおそらくあなたのJira設定をチェックするべきです！",
@@ -541,6 +596,7 @@
         "CHECK": "やったよ！"
       },
       "CMP": {
+        "ACTIVITY_HEATMAP": "アクティビティ・ヒートマップ",
         "AVG_BREAKS_PER_DAY": "一日あたりの平均休憩回数",
         "AVG_TASKS_PER_DAY_WORKED": "一日あたりの平均タスク数",
         "AVG_TIME_SPENT_ON_BREAKS": "平均休憩時間",
@@ -548,24 +604,37 @@
         "AVG_TIME_SPENT_PER_TASK": "タスクあたりの平均消費時間",
         "COUNTING_SUBTASKS": "（サブタスク数）",
         "DAYS_WORKED": "稼動日数",
+        "FOCUS_SESSION_TRENDS": "フォーカスセッションの時間経過",
         "GLOBAL_METRICS": "グローバルメトリクス",
         "MOOD_PRODUCTIVITY_OVER_TIME": "時間とともに気分と生産性",
         "NO_ADDITIONAL_DATA_YET": "追加データはまだ収集されていません。そのためには、日次要約の「評価」パネルのフォームを使用してください。",
+        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "生産性と持続可能性の長期的変化",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "時間の経過とともにカウンターをクリックします",
         "SIMPLE_COUNTERS": "シンプルなカウンター",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "時間の経過とともにストップウォッチカウンター",
         "TASKS_DONE_CREATED": "タスク（完了/作成済み）",
         "TIME_ESTIMATED": "推定時間",
+        "TIME_FRAME_1_MONTH": "1ヶ月",
+        "TIME_FRAME_2_WEEKS": "2週間",
+        "TIME_FRAME_LABEL": "期限",
+        "TIME_FRAME_MAX": "マックス",
         "TIME_SPENT": "使った時間"
       },
       "EVAL_FORM": {
         "ADD_NOTE_FOR_TOMORROW": "明日のメモを追加",
+        "DAILY_STATE": "デイリー・ステート",
+        "DAILY_STATE_TOOLTIP": "両方のスコアに基づくクアドラントシステム(≥50が高い)は、ディープフロー(高/高)、オーバードライブ(高/低)、リカバリー(低/高)、ドリフト(低/低)",
         "DISABLE_REPEAT_EVERY_DAY": "毎日繰り返しを無効にする",
         "ENABLE_REPEAT_EVERY_DAY": "毎日繰り返す",
+        "ENERGY_LEVEL": "元気はどう?",
+        "ENERGY_LEVEL_HINT": "😫 疲れ切っている – 😐 うん – 😊 いいね",
+        "FOCUS_WORK_TIME": "集中した作業時間",
         "HELP_H1": "なぜ私は気にする必要がありますか？",
         "HELP_LINK_TXT": "評価指標セクションに移動します",
         "HELP_P1": "ちょっとした自己評価の時間です！ここでのあなたの答えは保存されており、メトリックのセクションであなたがどのように働いているかに関する少しの統計をあなたに提供します。さらに明日のための提案は翌日あなたのタスクリストの上に現れるでしょう。",
         "HELP_P2": "これは、正確な測定基準を計算することや、自分の仕事について感じていることを改善することよりも、機械のように効率的になることを減らすことを意図しています。それはあなたを助ける要因を見つけることであるだけでなく、あなたの毎日の日常生活の中で痛みのポイントを評価するのに役立ちます。ほんの少し体系的であることはうまくいけばこれらをよりよく把握し、あなたができることを改善するのに役立ちます。",
+        "IMPACT_OF_WORK": "今日、ご自身の仕事の影響をどのように評価していますか?",
+        "IMPACT_OF_WORK_HINT": "1:意味のある進展なし – 4:重大な影響",
         "IMPROVEMENTS": "生産性が向上した理由は何ですか？",
         "IMPROVEMENTS_TOMORROW": "明日を改善するために何ができるでしょうか。",
         "MOOD": "気分はどうですか？",
@@ -573,7 +642,53 @@
         "NOTES": "明日のメモ",
         "OBSTRUCTIONS": "あなたの生産性を妨げたものは何ですか？",
         "PRODUCTIVITY": "どのくらい効率的でしたか？",
-        "PRODUCTIVITY_HINT": "1：まだ始まっていない -  10：非常に効率的"
+        "PRODUCTIVITY_HINT": "1：まだ始まっていない -  10：非常に効率的",
+        "PRODUCTIVITY_SCORE": "生産性スコア",
+        "PRODUCTIVITY_SCORE_TOOLTIP": "65%のインパクト(1-4スケール)• 30%の4時間目標への集中 • 5%の総作業(10時間までに上限)",
+        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7日間の生産性内訳",
+        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7日間の持続可能性の内訳",
+        "STATE_DEEP_FLOW_HEADLINE": "ディープフロー:優れた集中力と持続可能なペース。",
+        "STATE_DEEP_FLOW_HINT": "あなたはちょうど良いタイミングにいます。この組み合わせが可能になった理由を振り返ってください。",
+        "STATE_DRIFT_HEADLINE": "ドリフト:集中力が低くエネルギーも低い。",
+        "STATE_DRIFT_HINT": "大丈夫です。気を散らしていたことを振り返り、優しく調整してください。リセットは学ぶ機会です。",
+        "STATE_IMPACT_MISMATCH_HEADLINE": "低インパクト:集中力は十分ですが、見返りは少ないです。",
+        "STATE_IMPACT_MISMATCH_HINT": "しっかりとした集中力を注いでいたのに、今度はより影響力のある仕事に向けて違いを感じてください。",
+        "STATE_OVERDRIVE_HEADLINE": "オーバードライブ:生産的だが代償が伴う。",
+        "STATE_OVERDRIVE_HINT": "たくさんのことをやり遂げました。燃え尽き症候群が忍び寄る前に、必ずリフレッシュしてください。",
+        "STATE_RECOVERY_HEADLINE": "回復:休息と充電。",
+        "STATE_RECOVERY_HINT": "心に回復のためのスペースを与えているのです。明日にはまたもっと深く潜るエネルギーが湧くでしょう。",
+        "STATE_STEADY_HEADLINE": "安定したリズム:一貫して持続可能な進歩。",
+        "STATE_STEADY_HINT": "いいバランスだね。勢いを保ちながら無理をせず、このペースをうまくいかせるものを育て続けてください。",
+        "SUSTAINABILITY_SCORE": "持続可能性スコア",
+        "SUSTAINABILITY_SCORE_TOOLTIP": "45%のエネルギーレベル • 40%の合理的な労働時間(10時間で0) • 15% 集中力のバランス(4時間で最適)",
+        "TOTAL_WORK_TIME": "現在の総作業時間"
+      },
+      "FOCUS_SESSION_DIALOG": {
+        "ADD_BTN": "足す",
+        "ADD_SESSION": "セッションの追加",
+        "CHART_LABEL": "フォーカス・タイム(分)",
+        "NEW_SESSION_DURATION": "期間",
+        "NO_SESSIONS": "この日はフォーカスセッションはありません",
+        "SESSIONS_LIST": "セッション",
+        "TITLE": "フォーカスセッション",
+        "TOTAL_SESSIONS": "総セッション数",
+        "TOTAL_TIME": "総時間"
+      },
+      "REFLECTION": {
+        "HISTORY_BTN": "過去の回顧を見る",
+        "HISTORY_EMPTY": "まだリフレクションは保存されていません。今日のメモをキャプチャして連勝をスタートしましょう。",
+        "HISTORY_TITLE": "リフレクションの歴史",
+        "PLACEHOLDER_1": "今日うまくいったことは何でしたか?明日は何を変えるべきでしょうか?",
+        "PLACEHOLDER_2": "明日のために少し改善する?",
+        "PLACEHOLDER_3": "どこで焦点が崩れ、どうやって守るのか?",
+        "PLACEHOLDER_4": "どの作業があなたにエネルギーを与えましたか?どちらが排水したの?",
+        "PLACEHOLDER_5": "もう一度繰り返したいことがあります。変えることが一つある。",
+        "REMIND_LABEL": "明日、これを思い出させてください",
+        "REMINDER_CREATED": "明日の振り返りのリマインダーが予定されています",
+        "REMINDER_ERROR": "リマインダーのスケジュールができませんでした",
+        "REMINDER_NEEDS_TEXT": "リマインダーを求める前に、振り返りを書いてください",
+        "REMINDER_TASK_TITLE": "振り返りのノート",
+        "TITLE": "省察のメモ"
       },
       "S": {
         "SAVE_METRIC": "メトリックを保存しました"
@@ -810,6 +925,25 @@
         "UPDATED": "更新されたプロジェクト設定"
       }
     },
+    "PROJECT_FOLDER": {
+      "CONFIRM_DELETE": "「{{title}}」フォルダを削除したいのですか?このフォルダ内のすべてのプロジェクトはルートレベルに移動します。",
+      "DIALOG": {
+        "CREATE_TITLE": "フォルダ作成",
+        "EDIT_TITLE": "編集フォルダ",
+        "NAME_LABEL": "フォルダ名",
+        "NAME_PLACEHOLDER": "フォルダ名を入力してください",
+        "NAME_REQUIRED": "フォルダ名は必須です",
+        "NO_PARENT": "親がいない(ルートレベル)",
+        "PARENT_LABEL": "親フォルダ"
+      },
+      "SELECT": {
+        "LABEL": "フォルダ",
+        "NO_PARENT": "フォルダなし(ルートレベル)",
+        "PLACEHOLDER": "フォルダ選択"
+      },
+      "TOOLTIP_CREATE": "プロジェクトフォルダを作成する",
+      "TOOLTIP_VISIBILITY": "表示/隠しプロジェクト"
+    },
     "QUICK_HISTORY": {
       "NO_DATA": "今年度のデータはありません",
       "PAGE_TITLE": "クイックヒストリー",
@@ -844,6 +978,10 @@
         "ERR_UNKNOWN": "Redmine：不明なエラー {{statusCode}} {{errorMsg}}."
       }
     },
+    "REFLECTION_NOTE": {
+      "ACTION_DISMISS": "解任する",
+      "MSG": "振り返り:({{date}}): {{content}}"
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "隠す",
@@ -861,13 +999,17 @@
         "TITLE": "タイムライン"
       },
       "END": "作業終了",
+      "INSERT_BEFORE": "以前は",
       "LUNCH_BREAK": "昼休憩",
+      "MONTH": "月",
       "NO_TASKS": "現在、タスクはありません。トップバーの+ボタンからいくつかのタスクを追加してください。",
       "NOW": "今",
       "PLAN_END_DAY": "一日の終わりに計画を立てる",
       "PLAN_START_DAY": "一日の始まりに計画を立てる",
+      "SHIFT_KEY_INFO": "Shiftキーを押し続けると日の計画モードを切り替えます",
       "START": "作業開始",
-      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測"
+      "TASK_PROJECTION_INFO": "スケジュールされた反復可能なタスクの将来の予測",
+      "WEEK": "週"
     },
     "SEARCH_BAR": {
       "INFO": "リストアイコンをクリックして、アーカイブされたタスクを検索します",
@@ -916,6 +1058,7 @@
         "POSSIBLE_LEGACY_DATA": "Super Productivity は同期を改善し、1 つのファイルではなく 2 つの別々のファイルを使用するようになりました。Super Productivity のすべてのインスタンスを更新し、データが最も新しいアプリインスタンスから最初にデータを同期することをお勧めします。ローカルデバイスのデータである場合は、この警告を無視して、次のダイアログを確認してアップロードしてください。",
         "REMOTE_MODEL_VERSION_NEWER": "リモートモデルのバージョンは、ローカルのものよりも新しいです。ローカルアプリを最新バージョンに更新してください。"
       },
+      "BTN_SYNC_NOW": "今すぐ同期",
       "C": {
         "EMPTY_SYNC": "空のデータオブジェクトを同期しようとしています。これは（ほぼ）未使用のアプリの最初の同期ですか？",
         "FORCE_UPLOAD": "とにかくローカルデータをアップロードしますか？",
@@ -932,17 +1075,34 @@
         "TITLE": "ログイン： {{provider}}"
       },
       "D_CONFLICT": {
+        "ADDITIONAL_INFO": "追加情報",
+        "CHANGES": "変遷",
+        "CHANGES_SINCE_LAST_SYNC": "前回の同期以降の変更点",
+        "COMPARISON_RESULT": "比較結果",
+        "DATE": "日付",
         "LAMPORT_CLOCK": "改定",
         "LAST_CHANGE": "最終変更：",
         "LAST_SYNC": "最終同期：",
+        "LAST_SYNCED": "最後の同期",
+        "LAST_WRITE": "最後の書き",
         "LOCAL": "ローカル",
         "LOCAL_REMOTE": "ローカル→リモート",
+        "NEVER": "一度もない",
+        "OVERWRITE_WARNING": "警告: {{targetName}} データには約 {{targetChanges}} の変更があり、 {{sourceName}} データには {{sourceChanges}} の変更のみが含まれています。 {{targetName}} データを {{sourceName}} バージョンで上書きしたいのは本当にですか?この行動は取り消せない。",
         "REMOTE": "リモート",
+        "RESULT": "結果",
         "TEXT": "<p>リモートから更新します。ローカルデータとリモートデータの両方が変更されているようです。</p>",
+        "TIME": "時間",
         "TIMESTAMP": "タイムスタンプ",
         "TITLE": "同期：矛盾するデータ",
         "USE_LOCAL": "ローカルを使用",
-        "USE_REMOTE": "リモートを使用"
+        "USE_REMOTE": "リモートを使用",
+        "VECTOR_CLOCK": "ベクトルクロック",
+        "VECTOR_CLOCK_HEADING": "ベクトルクロック",
+        "VECTOR_COMPARISON_CONCURRENT": "同時(真の対立)",
+        "VECTOR_COMPARISON_EQUAL": "等しい",
+        "VECTOR_COMPARISON_LOCAL_GREATER": "ローカル>リモート",
+        "VECTOR_COMPARISON_LOCAL_LESS": "ローカル<リモート"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "リモートの変更と上書き",
@@ -999,6 +1159,7 @@
         "TITLE": "同期",
         "WEB_DAV": {
           "CORS_INFO": "<strong>実験的!!</strong> これを機能させるには、NextcloudインスタンスのCORSを無効にするか制限する必要があります。これは、セキュリティに悪影響を与える可能性があります。詳細については、 <a href='https://github.com/nextcloud/server/issues/3131'>このスレッド</a> を参照してください。自己責任！",
+          "INFO": "残念ながらWebDAVの実装は大きく異なります。Super ProductivityはNextcloudとうまく連携していることで知られていますが、 <strong>あなたのプロバイダー</strong>ではうまくいかないかもしれません。",
           "L_BASE_URL": "ベースURL",
           "L_PASSWORD": "パスワード",
           "L_SYNC_FOLDER_PATH": "同期フォルダパス",
@@ -1010,6 +1171,7 @@
         "ALREADY_IN_SYNC_NO_LOCAL_CHANGES": "ローカルの変更なし - すでに同期している",
         "BTN_CONFIGURE": "構成",
         "BTN_FORCE_OVERWRITE": "強制上書き",
+        "ERROR_CORS": "WebDAV同期エラー:ネットワークリクエストが失敗しました。\n\nこれはCORSの問題かもしれません。以下を必ず確認してください:\n・WebDAVサーバーはクロスオリジンリクエストを許可しています\n• サーバーURLが正確かつアクセス可能です\n・インターネット接続が正常に動作しています",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "リモート・データは現在書き込まれています",
         "ERROR_FALLBACK_TO_BACKUP": "データのインポート中に問題が発生しました。ローカルバックアップにフォールバックします。",
         "ERROR_INVALID_DATA": "同期中にエラーが発生しました。無効なデータ",
@@ -1023,6 +1185,40 @@
         "SUCCESS_VIA_BUTTON": "データが正常に同期されました",
         "UNKNOWN_ERROR": "同期中に不明なエラーが発生しました。コンソールを確認してください。",
         "UPLOAD_ERROR": "不明なアップロードエラー（設定は正しいですか？）： {{err}}"
+      },
+      "SAFETY_BACKUP": {
+        "BACKUP_NOT_FOUND": "ID付きのバックアップ {{backupId}} 見つかりません",
+        "BTN_CLEAR_ALL": "すべてクリア",
+        "BTN_CREATE_MANUAL": "手動バックアップの作成",
+        "BTN_DELETE": "削除",
+        "BTN_REFRESH": "リフレッシュ",
+        "BTN_RESTORE": "戻す",
+        "CLEAR_FAILED": "バックアップのクリアに失敗しました",
+        "CLEARED_SUCCESS": "すべてのバックアップは正常にクリアされました",
+        "CREATE_FAILED": "バックアップ作成に失敗しました",
+        "CREATED_SUCCESS": "手動バックアップの作成が成功しました",
+        "DELETE_FAILED": "バックアップの削除に失敗しました",
+        "DELETED_SUCCESS": "バックアップが正常に削除されました",
+        "DESCRIPTION": "同期作業中にリモートからデータをダウンロードする前に自動バックアップが作成されます。バックアップは4つのスマートスロットに整理されています:最新2スロット、今日の1つ、そして前日の最初のスロット1つです。",
+        "INVALID_ID_ERROR": "無効なバックアップIDが生成されました",
+        "LAST_CHANGE_PREFIX": "最後の変更点:",
+        "LOADING": "積載。。。",
+        "NO_BACKUPS": "安全バックアップはまだ利用できません。バックアップは同期操作の前に自動的に作成されます。",
+        "REASON_BEFORE_UPDATE": "同期前の自動バックアップ",
+        "REASON_MANUAL": "手動バックアップ",
+        "RESTORE_CONFIRM_MSG": "本当に {{timestamp}}からのバックアップを復元したいですか?\n\nこれで現在のすべてのデータが完全に置き換えられます!\n\n理由: {{reason}}\n「OK」をクリックして進行し、キャンセルで中止してください。",
+        "RESTORE_CONFIRM_TITLE": "バックアップの復元",
+        "RESTORE_FAILED": "バックアップの復元に失敗しました: {{error}}",
+        "RESTORED_SUCCESS": "バックアップが正常に復元されました",
+        "SLOT_BEFORE_TODAY": "今日の前の最初のバックアップ",
+        "SLOT_RECENT": "最近のバックアップ",
+        "SLOT_TODAY": "本日の最初のバックアップ",
+        "TITLE": "同期安全バックアップ",
+        "TOOLTIP_CLEAR_ALL": "すべての安全バックアップを削除してください",
+        "TOOLTIP_CREATE_MANUAL": "すべてのデータの手動バックアップを作成します",
+        "TOOLTIP_DELETE": "このバックアップを削除してください",
+        "TOOLTIP_REFRESH": "バックアップリストを更新してください",
+        "TOOLTIP_RESTORE": "このバックアップを復元してください(現在のすべてのデータを置き換えます)"
       }
     },
     "TAG": {
@@ -1051,6 +1247,24 @@
         "ADD_NEW_TAG": "新しいタグを追加"
       }
     },
+    "TAG_FOLDER": {
+      "CONFIRM_DELETE": "「{{title}}」フォルダを削除したいのですか?このフォルダ内のすべてのタグはルートレベルに移動します。",
+      "DIALOG": {
+        "CREATE_TITLE": "フォルダ作成",
+        "EDIT_TITLE": "編集フォルダ",
+        "NAME_LABEL": "フォルダ名",
+        "NAME_PLACEHOLDER": "フォルダ名を入力してください",
+        "NAME_REQUIRED": "フォルダ名は必須です",
+        "NO_PARENT": "親がいない(ルートレベル)",
+        "PARENT_LABEL": "親フォルダ"
+      },
+      "SELECT": {
+        "LABEL": "フォルダ",
+        "NO_PARENT": "フォルダなし(ルートレベル)",
+        "PLACEHOLDER": "フォルダ選択"
+      },
+      "TOOLTIP_CREATE": "タグフォルダを作成する"
+    },
     "TASK": {
       "ADD_TASK_BAR": {
         "ADD_EXISTING_TASK": "既存のタスク「{{taskTitle}}」を追加",
@@ -1059,11 +1273,32 @@
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "リストの一番下にタスクを追加",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "バックログの先頭にタスクを追加",
         "ADD_TASK_TO_TOP_OF_TODAY": "リストの一番上にタスクを追加",
+        "CREATE_NEW_TAGS": "新しいタグを作成する",
         "CREATE_TASK": "新しいタスクを作成する",
+        "DUE_BUTTON": "正当",
+        "ESTIMATE_BUTTON": "見積もる",
         "EXAMPLE": "例：「Some task title + projectName #some-tag #some-other-tag 10m / 3h」",
+        "NO_DATE": "日付なし",
+        "NO_TIME": "時間がありません",
+        "PLACEHOLDER_CREATE": "タスクタイトル #tag@16:00",
+        "PLACEHOLDER_SEARCH": "既存のタスクや課題を追加してみましょう...",
+        "SEARCH_INFO_TEXT": "アーカイブや他のプロジェクトから課題やタスクを検索して追加できます",
         "START": "もう一度Enterキーを押して開始します",
+        "TAGS_BUTTON": "タグ",
+        "TODAY": "今日",
         "TOGGLE_ADD_TO_BACKLOG_TODAY": "タスクのバックログへの追加／今日のリストへの追加を切り替える",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "タスクをリストの一番上と一番下に追加するトグル"
+        "TOGGLE_ADD_TOP_OR_BOTTOM": "タスクをリストの一番上と一番下に追加するトグル",
+        "TOMORROW": "明日",
+        "TOOLTIP_ADD_TASK": "タスクを追加",
+        "TOOLTIP_ADD_TO_BACKLOG": "バックログに追加",
+        "TOOLTIP_ADD_TO_BOTTOM": "下部に追加(Ctrl+1)",
+        "TOOLTIP_ADD_TO_TODAY": "今日に追加",
+        "TOOLTIP_ADD_TO_TOP": "トップに追加(Ctrl+1)",
+        "TOOLTIP_CLEAR_DATE": "クリアデート",
+        "TOOLTIP_CLEAR_ESTIMATE": "明確な推定値",
+        "TOOLTIP_CLEAR_TAGS": "タグはクリア",
+        "TOOLTIP_DISABLE_SEARCH": "イシュー検索を無効にする(Ctrl+2)",
+        "TOOLTIP_ENABLE_SEARCH": "問題検索を有効にする(Ctrl+2)"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "添付ファイルを追加する",
@@ -1093,6 +1328,7 @@
         "DELETE": "タスクを削除",
         "DELETE_REPEAT_INSTANCE": "繰り返されるタスクインスタンスの削除",
         "DROP_ATTACHMENT": "ここにドロップして\"{{title}}\"に添付",
+        "DUPLICATE": "デュプリケート",
         "EDIT_SCHEDULED": "リマインダーを編集",
         "EDIT_TAGS": "タグを編集",
         "EDIT_TASK_TITLE": "編集タイトル",
@@ -1133,6 +1369,8 @@
         "ADD_TO_TODAY": "今日に追加",
         "COMPLETE": "完了する",
         "COMPLETE_ALL": "すべて完了する",
+        "DISMISS_ALL_REMINDERS_KEEP_TODAY": "すべてのリマインダーを無効にする(今日はそのままにしておきましょう)",
+        "DISMISS_REMINDER_KEEP_TODAY": "解散リマインダー(今日も忘れておけ)",
         "DONE": "完了",
         "DUE_TASK": "期限付きタスク",
         "DUE_TASKS": "期限付きタスク",
@@ -1167,6 +1405,11 @@
         "SCHEDULE": "スケジュール",
         "UNSCHEDULE": "予定外"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "日付",
+        "TIME": "時間",
+        "TITLE": "日時を選択してください"
+      },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "消費時間を他の日に追加",
         "DELETE_FOR": "その日のエントリを削除",
@@ -1194,6 +1437,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "既存のタスク <strong>{{title}}</strong> を今日のタスクリストに移動しました",
         "FOUND_MOVE_FROM_OTHER_LIST": "タスク <strong>{{title}}</strong> を <strong>{{contextTitle}}</strong> から現在のリストに追加しました",
         "FOUND_RESTORE_FROM_ARCHIVE": "アーカイブからの発行に関連する復元されたタスク <strong>{{title}}</strong> ",
+        "GO_TO_TASK": "タスクに取りかかってください",
         "LAST_TAG_DELETION_WARNING": "非プロジェクトタスクの最後のタグを削除しようとしています。これは許可されていません！",
         "MOVED_TO_ARCHIVE": "アーカイブに {{nr}} タスクを移動",
         "MOVED_TO_PROJECT": "タスク「{{taskTitle}}」をプロジェクト「{{projectTitle}}」に移動",
@@ -1248,6 +1492,10 @@
         "MSG": "この反復可能なタスクには {{tasksNr}} 個のインスタンスが作成されています。すべてのインスタンスを新しいデフォルトで更新しますか、それとも将来のタスクだけを更新しますか？",
         "OK": "すべてのインスタンスを更新する"
       },
+      "D_DELETE_INSTANCE": {
+        "MSG": " {{date}}の繰り返しタスクインスタンスを削除しますか?これにより、タスクがこの日だけ作成されるのを防ぎます。",
+        "OK": "インスタンスを削除"
+      },
       "D_EDIT": {
         "ADD": "繰り返しタスク設定の追加",
         "ADVANCED_CFG": "高度な設定",
@@ -1264,7 +1512,11 @@
         "C_WEEK": "週間",
         "C_YEAR": "年",
         "DEFAULT_ESTIMATE": "デフォルトの見積もり",
+        "DISABLE_AUTO_UPDATE_SUBTASKS": "自動更新サブタスクを無効にする",
+        "DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION": "最新のインスタンスが変更された際に継承されたサブタスクを自動で更新しないでください",
         "FRIDAY": "金曜日",
+        "INHERIT_SUBTASKS": "サブタスクの継承",
+        "INHERIT_SUBTASKS_DESCRIPTION": "有効化されると、最新のタスクインスタンスのサブタスクが繰り返しタスクで再作成されます",
         "IS_ADD_TO_BOTTOM": "タスクをリストの一番下に移動",
         "MONDAY": "月曜日",
         "NOTES": "デフォルト・ノート",
@@ -1279,9 +1531,16 @@
         "QUICK_SETTING": "リピート設定",
         "REMIND_AT": "で思い出させる",
         "REMIND_AT_PLACEHOLDER": "いつ思い出させるかを選択します",
+        "REMOVE_FOR_DATE": " {{date}}のために削除してください",
+        "REMOVE_INSTANCE": "今日削除してください",
         "REPEAT_CYCLE": "サイクルを繰り返す",
         "REPEAT_EVERY": "毎回繰り返す",
+        "REPEAT_FROM_COMPLETION_DATE": "終わったら繰り返します",
+        "REPEAT_FROM_COMPLETION_DATE_DESCRIPTION": "次のタスクは開始日ではなく、完了日から作成されます。(例:「7日ごと」=完了後7日)",
         "SATURDAY": "土曜日",
+        "SCHEDULE_TYPE_FIXED": "固定スケジュール(例:毎月月曜日、毎月1日)",
+        "SCHEDULE_TYPE_FLEXIBLE": "修了後(例:修了後7日)",
+        "SCHEDULE_TYPE_LABEL": "スケジュールの種類",
         "START_DATE": "開始日",
         "START_TIME": "開始予定時刻",
         "START_TIME_DESCRIPTION": "例えば。 15:00。終日のタスクは空白のままにします",
@@ -1321,7 +1580,9 @@
         "SORT_CREATION_DATE": "作成日",
         "SORT_DEFAULT": "デフォルト",
         "SORT_NAME": "名前",
+        "SORT_PERMANENT": "ソート(恒久的)",
         "SORT_SCHEDULED_DATE": "開催予定日",
+        "SORT_TEMPORARY": "ソート(一時的)",
         "TIME_1HOUR": "> 1時間",
         "TIME_2HOUR": "> 2時間",
         "TIME_10MIN": "> 10分間",
@@ -1338,7 +1599,8 @@
       },
       "B_TTR": {
         "ADD_TO_TASK": "タスクに追加",
-        "MSG": "タイムトラッキングしていない時間が{{time}}あります"
+        "MSG": "タイムトラッキングしていない時間が{{time}}あります",
+        "MSG_WITHOUT_TIME": "時間の記録をしていない"
       },
       "D_IDLE": {
         "ADD_ENTRY": "トラッキングのエントリーを追加",
@@ -1354,7 +1616,9 @@
         "SKIP": "スキップ",
         "SPLIT_TIME": "時間を複数のタスクと休憩に分ける",
         "TASK": "タスク",
-        "TRACK_TO": "以下に追加する："
+        "TRACK_TO": "以下に追加する：",
+        "WARN_SIMPLE_COUNTER": "時間は作動したシンプルなカウンターボタンにカウントされます。",
+        "WARN_SIMPLE_COUNTER_BREAK": "時間は作動したシンプルなカウンターボタンでカウントされます。"
       },
       "D_TRACKING_REMINDER": {
         "CREATE_AND_TRACK": "<em>作成</em>して追加",
@@ -1417,6 +1681,7 @@
       },
       "WEEK": {
         "EXPORT": "週データのエクスポート",
+        "FOCUS_SUMMARY": "フォーカスセッション(nr / 時間)",
         "NO_DATA": "今週はまだタスクがありません。",
         "TITLE": "タイトル"
       }
@@ -1450,10 +1715,12 @@
     "ADVANCED_CFG": "詳細設定",
     "CANCEL": "キャンセル",
     "CLOSE": "閉じる",
+    "COMPLETE": "完成",
     "CONFIRM": "確認する",
     "DELETE": "削除",
     "DISMISS": "やめる",
     "DO_IT": "やれ！",
+    "DONT_SHOW_AGAIN": "もう二度と現れないで",
     "DURATION_DESCRIPTION": "例：\"5h 23m \"で5時間23分",
     "EDIT": "編集",
     "ENABLED": "有効",
@@ -1524,6 +1791,7 @@
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "新しいメモを追加",
+      "ADD_NEW_PROJECT": "新しいプロジェクトを追加",
       "ADD_NEW_TASK": "新しいタスクを追加する",
       "APP_WIDE_SHORTCUTS": "グローバルショートカット（アプリケーション全体）",
       "COLLAPSE_SUB_TASKS": "サブタスクを折りたたむ",
@@ -1546,6 +1814,7 @@
       "MOVE_TO_BACKLOG": "タスクをタスクバックログに移動",
       "MOVE_TO_REGULARS_TASKS": "今日のタスクリストにタスクを移動する",
       "OPEN_PROJECT_NOTES": "プロジェクトノートの表示/非表示",
+      "PLUGIN_SHORTCUTS": "プラグインショートカット",
       "SAVE_NOTE": "メモを保存",
       "SELECT_NEXT_TASK": "次のタスクを選択",
       "SELECT_PREVIOUS_TASK": "前のタスクを選択",
@@ -1597,6 +1866,21 @@
       "PT": "ポルトガル語",
       "RU": "ロシア語",
       "SK": "スロバキア語",
+      "TIME_LOCALE": "時間フォーマットのロケージ",
+      "TIME_LOCALE_AUTO": "システムデフォルト",
+      "TIME_LOCALE_DE_DE": "ドイツ語 - 24時間営業",
+      "TIME_LOCALE_DESCRIPTION": "時間のフォーマットのために場所を選びましょう。場所によって異なる規則(12時間と24時間のフォーマット)が使われています。",
+      "TIME_LOCALE_EN_GB": "英語(イギリス) - 24時間放送",
+      "TIME_LOCALE_EN_US": "英語(米国) - 午前12時間/午後",
+      "TIME_LOCALE_ES_ES": "スペイン語 - 24時間営業",
+      "TIME_LOCALE_FR_FR": "フランス語 - 24時間営業",
+      "TIME_LOCALE_IT_IT": "イタリア語 - 24時間営業",
+      "TIME_LOCALE_JA_JP": "日本語 - 24時間営業",
+      "TIME_LOCALE_KO_KR": "韓国語 - 午前12時間・午後放送",
+      "TIME_LOCALE_PT_BR": "ポルトガル語(ブラジル) - 24時間営業",
+      "TIME_LOCALE_RU_RU": "ロシア語 - 24時間営業",
+      "TIME_LOCALE_TR_TR": "トルコ - 24時間営業",
+      "TIME_LOCALE_ZH_CN": "中国語(簡体字) - 24時間対応",
       "TITLE": "言語",
       "TR": "トルコ語",
       "UK": "Українська",
@@ -1604,6 +1888,11 @@
       "ZH_TW": "中文(繁體)"
     },
     "MISC": {
+      "DARK_MODE": "ダークモード",
+      "DARK_MODE_ARIA_LABEL": "ダークモード選択",
+      "DARK_MODE_DARK": "暗い",
+      "DARK_MODE_LIGHT": "光",
+      "DARK_MODE_SYSTEM": "制",
       "DEFAULT_PROJECT": "何も指定されていない場合にタスクに使用するデフォルトのプロジェクト",
       "FIRST_DAY_OF_WEEK": "週の最初の日",
       "HELP": "<p><strong>デスクトップ通知が表示されませんか？</strong> Windowsの場合は、[システム]> [通知とアクション]を確認し、必要な通知が有効になっているかどうかを確認します。</p>",
@@ -1613,8 +1902,12 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "最初に1日を終えずにアプリを終了する前に確認してください",
       "IS_DARK_MODE": "ダークモード",
       "IS_DISABLE_ANIMATIONS": "すべてのアニメーションを無効にする",
+      "IS_DISABLE_CELEBRATION": "日次サマリーの祝賀を無効にする",
+      "USER_PROFILES": "ユーザープロファイルを有効にする（ベータ版）",
+      "USER_PROFILES_HINT": "異なる設定、タスク、同期設定を持つ複数のユーザープロファイルを作成して切り替えることができます。有効にすると、プロファイル管理ボタンが右上隅に表示されます。注意：この機能を無効にするとUIは非表示になりますが、プロファイルデータは保持されます（ベータ機能、保証なし。必ずバックアップを取ってください）。",
       "IS_HIDE_NAV": "メインヘッダーが表示されるまでナビゲーションを非表示にする（デスクトップのみ）",
       "IS_MINIMIZE_TO_TRAY": "トレイに最小化（デスクトップのみ）",
+      "IS_OVERLAY_INDICATOR_ENABLED": "オーバーレイインジケーターウィンドウを有効にする(デスクトップLinux/gnome)",
       "IS_SHOW_TIP_LONGER": "アプリの起動時に生産性のヒントを少し長く表示する",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "トレイ/ステータスメニューに現在のカウントダウンを表示する(デスクトップMacのみ)",
       "IS_TRAY_SHOW_CURRENT_TASK": "トレイ/ステータスメニューに現在のタスクを表示する（デスクトップのみ）",
@@ -1623,6 +1916,9 @@
       "START_OF_NEXT_DAY": "翌日の開始時間",
       "START_OF_NEXT_DAY_HINT": "いつ（時間単位）から翌日が始まったかをカウントする。デフォルトは0時で、0となる。",
       "TASK_NOTES_TPL": "タスク記述テンプレート",
+      "THEME": "テーマ",
+      "THEME_EXPERIMENTAL": "テーマ(実験的)",
+      "THEME_SELECT_LABEL": "セレクト・テーマ",
       "TITLE": "その他の設定"
     },
     "POMODORO": {
@@ -1630,6 +1926,7 @@
       "CYCLES_BEFORE_LONGER_BREAK": "長い休憩までの作業セッションの回数",
       "DURATION": "作業セッションの時間",
       "HELP": "<p>ポモドーロタイマーは各作業セッションの時間、短い休憩時間、長い休憩までの作業セッションの回数、長い休憩時間など複数の項目で設定できます。</p> <p>ポモドーロが中断している間に気を散らすものを表示するかどうかも設定できます。</p> <p>「ポモドーロ休憩時間追跡の一時停止」を設定すると、作業時間がタスクに費やされたときに休憩時間も追跡されます。 </p> <p>「アクティブなタスクがないときにポモドーロセッションを一時停止」を有効にすると、タスクを一時停止したときにポモドーロセッションも一時停止します。</p>",
+      "IS_DISABLE_AUTO_START_AFTER_BREAK": "休憩後にセッションの自動開始を無効にしてください",
       "IS_ENABLED": "ポモドーロタイマーを有効にする",
       "IS_MANUAL_CONTINUE": "次のポモドーロセッションを手動で開始する",
       "IS_MANUAL_CONTINUE_BREAK": "次の休憩の開始を手動で確認",
@@ -1642,6 +1939,7 @@
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "リマインダーの前にバナーXを表示",
+      "DEFAULT_TASK_REMIND_OPTION": "タスク作成時にデフォルトリマインドオプションを選択してください",
       "IS_COUNTDOWN_BANNER_ENABLED": "リマインダーの期限前にカウントダウンバナーを表示する",
       "TITLE": "注意事項"
     },
@@ -1654,7 +1952,9 @@
       "L_WORK_END": "就業日の終わり",
       "L_WORK_START": "就業日開始",
       "LUNCH_BREAK_START_END_DESCRIPTION": "例 13:00",
+      "MONTH": "月",
       "TITLE": "タイムライン",
+      "WEEK": "週",
       "WORK_START_END_DESCRIPTION": "例えば17:00"
     },
     "SHORT_SYNTAX": {
@@ -1736,10 +2036,16 @@
     "FILE_DOWNLOADED": "{{fileName}} ダウンロード",
     "FILE_DOWNLOADED_BTN": "開いたフォルダ",
     "NAVIGATE_TO_TASK_ERR": "タスクに集中できませんでした。削除しましたか？",
+    "NO_TASKS_TO_COPY": "コピーするタスクがありません",
+    "NO_TASKS_TO_UNPLAN": "計画を外すタスクもありません",
     "PERSISTENCE_DISALLOWED": "データは永続的に保持されません。これはデータの損失につながる可能性があることに注意してください!!",
     "PERSISTENCE_ERROR": "データの永続化をリクエストする際のエラー： {{err}}",
     "RUNNING_X": "\"{{str}}\"を実行しています。",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。"
+    "SHARE_FAILED": "共有は失敗しました。手動でコピーしてください。",
+    "SHARE_FAILED_FALLBACK": "共有は失敗しました。代わりにクリップボードにコピーしました。",
+    "SHARE_UNAVAILABLE_FALLBACK": "クリップボードにコピーしました。",
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} が押されましたが、ブックマークを開くショートカットはプロジェクトコンテキストでのみ使用できます。",
+    "UNPLANNED_TODAY_TASKS": "今日からの予定外の全てのタスク"
   },
   "GPB": {
     "ASSETS": "アセットを読み込んでいます...",
@@ -1758,6 +2064,7 @@
     "ADD_NEW_TASK": "新しいタスクを追加する",
     "ALL_PLANNED_LIST": "リピート／予定",
     "BOARDS": "ポート",
+    "COPY_TASK_LIST_MARKDOWN": "クリップボードにコピー",
     "CREATE_PROJECT": "プロジェクトを作成",
     "CREATE_TAG": "タグを作成",
     "DELETE_PROJECT": "プロジェクトの削除",
@@ -1789,7 +2096,9 @@
     "SCHEDULE": "スケジュール",
     "SEARCH": "捜索",
     "SETTINGS": "設定",
+    "SHARE_TASK_LIST_MARKDOWN": "タスクリストを共有する",
     "SHOW_SEARCH_BAR": "検索バーを表示する",
+    "SIDE_PANEL_MENU": "サイドパネルメニュー",
     "TAGS": "タグ",
     "TASK_LIST": "タスクリスト",
     "TASKS": "タスク",
@@ -1798,6 +2107,7 @@
     "TOGGLE_SHOW_NOTES": "プロジェクトノートの表示/非表示",
     "TOGGLE_TRACK_TIME": "追跡時間の開始/停止",
     "TRIGGER_SYNC": "手動で同期をトリガーする",
+    "UNPLAN_ALL_TASKS": "すべてのタスクを計画解除",
     "WORKLOG": "作業記録"
   },
   "MIGRATE": {
@@ -1809,18 +2119,22 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "今日のタスクを追加",
-    "BACK": "待って！何か忘れてる！",
+    "ARCHIVED_TASKS": {
+      "PLURAL": "{{count}} 親タスクはアーカイブされています",
+      "SINGULAR": "親タスク{{count}} 完了しました。"
+    },
     "BREAK_LABEL": "休憩（回数/時間）",
     "CELEBRATE": " <i>お祝いしましょう！</i>",
     "CLEAR_ALL_CONTINUE": "完了したすべてをクリアして続行",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "いいえ、タスクをクリアするだけです",
-      "MSG": "あなたの仕事は終わりました。家に帰る時間！",
-      "OK": "アイアイ！シャットダウンします！"
+      "CANCEL": "いいえ、タスクをクリアするだけ",
+      "MSG": "アプリケーションを終了しますか？",
+      "OK": "終了"
     },
     "ESTIMATE_TOTAL": "合計見積もり：",
     "EVALUATE_DAY": "評価",
     "EXPORT_TASK_LIST": "タスクリストのエクスポート",
+    "FOCUS_SUMMARY": "フォーカス(nr / 時間)",
     "NO_TASKS": "この日は何もしていません",
     "PLAN_TOMORROW": "プラン",
     "REVIEW_TASKS": "レビュー",
@@ -1833,7 +2147,7 @@
     "ROUND_UP_5M": "すべてのタスクを5分に切り上げ",
     "ROUND_UP_15M": "すべてのタスクを15分に切り上げ",
     "ROUND_UP_30M": "すべてのタスクを30分に切り上げ",
-    "SAVE_AND_GO_HOME": "保存して家に帰る",
+    "SAVE_AND_GO_HOME": "一日を終える",
     "SAVE_AND_GO_HOME_TOOLTIP": "完了したすべてのタスクをアーカイブ（ワークログ）に移動し、オプションですべてのデータを同期してアプリを終了します。",
     "START_END": "開始 - 終了",
     "SUMMARY_FOR": " {{dayStr}}の日別サマリー",
@@ -1842,6 +2156,98 @@
     "TIME_SPENT_ESTIMATE_TITLE": "消費時間：今日消費した合計時間。アーカイブされたタスクは含まれていません。 - 推定時間：今日作業したタスクの見積もり時間から、他の日にすでに消費した時間を差し引いたもの。",
     "TIME_SPENT_TODAY_BY_TAG": "タグ別今日使った時間",
     "WEEK": "週間"
+  },
+  "PLUGINS": {
+    "ACTION_TYPE_NOT_ALLOWED": "アクションタイプ「{{type}}」は許可されていません",
+    "ALREADY_INITIALIZED": "プラグインはすでに初期化されています",
+    "CANCEL": "キャンセル",
+    "CAPABILITIES": {
+      "ACCESS_FILES": "システム上のファイルへのアクセスと改変",
+      "RUN_COMMANDS": "システムコマンドの実行",
+      "USE_NODE_APIS": "Node.js APIやモジュールを活用しましょう"
+    },
+    "CHOOSE_PLUGIN_FILE": "プラグインファイルを選択する",
+    "CLEAR_PLUGIN_CACHE": "プラグインキャッシュをクリアする",
+    "CODE_TOO_LARGE": "プラグインコードが大きすぎる(最大 {{maxSize}}MB)",
+    "CONFIGURATION": "構成",
+    "CONFIGURE": "構成",
+    "CONFIRM_REMOVE": "プラグイン「{{name}}」を削除したいのですか?",
+    "DISABLED": "無効",
+    "ELECTRON_API_NOT_AVAILABLE": "Electron APIは利用できません",
+    "ENABLED": "有効",
+    "ERROR": "エラー",
+    "ERROR_LOADING_PLUGIN": "エラーロードプラグイン",
+    "EXPERIMENTAL_WARNING": "プラグインシステムは実験段階にあり、極めて慎重に使用する必要があります。",
+    "EXPERIMENTAL_WARNING_TITLE": "実験機能 - セキュリティ警告",
+    "FAILED_TO_CLEAR_CACHE": "プラグインキャッシュのクリアに失敗しました",
+    "FAILED_TO_EXECUTE_SCRIPT": "脚本Node.js実行に失敗",
+    "FAILED_TO_EXTRACT_ZIP": "プラグインのZIPファイルの解凍に失敗しました",
+    "FAILED_TO_INSTALL": "プラグインのインストールに失敗しました",
+    "FAILED_TO_LOAD": "プラグインの読み込みに失敗しました",
+    "FAILED_TO_LOAD_CONFIG": "プラグイン設定の読み込みに失敗しました",
+    "FAILED_TO_REMOVE": "プラグインの削除に失敗しました",
+    "FAILED_TO_SAVE_CONFIG": "プラグイン設定の保存に失敗しました",
+    "FILE_TOO_LARGE": "ファイルが大きすぎます({{fileSize}}MB)。最大サイズは {{maxSize}}MBです",
+    "GO_BACK": "戻ってください",
+    "GRANT_PERMISSION": "許可を付与する",
+    "HOOKS": "フック",
+    "ID": "身分証明書：",
+    "INDEX_HTML_NOT_LOADED": "プラグインindex.html読み込まれていません",
+    "INSTALL_PLUGIN": "プラグインのインストール",
+    "INSTALL_WARNING": "プラグインをインストールする前に、ソースを信頼し、求められる権限を理解していることを確認してください。",
+    "INSTALLING": "装着。。。",
+    "LOADING_INTERFACE": "プラグインインターフェースを読み込み中...",
+    "LOADING_PLUGIN": "積載。。。",
+    "MANIFEST_NOT_FOUND": "プラグインマニフェスト(manifest.json)がZIPファイルに見つからない",
+    "MANIFEST_TOO_LARGE": "プラグインマニフェストが大きすぎる(最大 {{maxSize}}KB)",
+    "MENU_ENTRY_ICON_STRING": "メニューエントリーアイコンは文字列でなければなりません",
+    "MENU_ENTRY_LABEL_REQUIRED": "メニューのエントリーラベルが必要です",
+    "MENU_ENTRY_ONCLICK_REQUIRED": "クリックハンドラーのメニュー入力が必要です",
+    "MIN_VERSION": "最小バージョン:",
+    "NO_ADDITIONAL_INFO": "追加情報はありません",
+    "NO_CONTENT_PROVIDED": "コンテンツは提供されていません",
+    "NO_PLUGIN_CONTEXT_ACTION": "プラグインはアクションを実行する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_HEADER_BUTTON": "プラグインはヘッダーボタンを追加する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_LOADING": "プラグインにはデータ読み込みのためのコンテキストがありません",
+    "NO_PLUGIN_CONTEXT_MENU_ENTRY": "プラグインはメニューエントリを追加する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_NODE": "プラグインはNode.jsコードを実行する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_PERSISTENCE": "プラグインはデータを永続化する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_SHORTCUT": "プラグインはショートカットを登録する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_SIDE_PANEL": "プラグインはサイドパネルボタンを追加する権限を持っていません",
+    "NO_PLUGIN_CONTEXT_SYNC": "プラグインは同期を使う権限を持っていません",
+    "NO_PLUGIN_ID_PROVIDED_FOR_HTML": "HTMLコンテンツ用のプラグインIDは提供されていません",
+    "NO_PLUGIN_MANIFEST_NODE": "プラグインマニフェストにはNode.jsモジュールが含まれていません",
+    "NODE_EXECUTION_REQUIRED": "このプラグインはデスクトップアプリでのみ利用可能なNode.js実行が必要です。",
+    "NODE_ONLY_DESKTOP": "Node.js実行はデスクトップアプリでのみ利用可能です",
+    "OK": "わかりました",
+    "PARENT_TASK_DOES_NOT_EXIST": "親タスクは存在しません",
+    "PARENT_TASK_NOT_FOUND": "親タスクは文脈に見つからない '{{contextId}}'",
+    "PERMISSIONS": "権限",
+    "PLEASE_SELECT_ZIP_FILE": "ZIPファイルを選択してください",
+    "PLUGIN_DIALOG_TITLE": "プラグインメッセージ",
+    "PLUGIN_DOES_NOT_SUPPORT_IFRAME": "このプラグインはiframeインターフェースをサポートしていません",
+    "PLUGIN_ID_NOT_PROVIDED": "プラグインIDは提供されていません",
+    "PLUGIN_JS_NOT_FOUND": "プラグインJavaScriptファイル(plugin.js)がZIPファイルに見つからない",
+    "PLUGIN_NOT_FOUND": "プラグインが見つかりません",
+    "PLUGIN_SYSTEM_FAILED_INIT": "プラグインシステムの初期化に失敗しました",
+    "PROJECT_DOES_NOT_EXIST": "プロジェクトは存在しません",
+    "PROJECT_NOT_FOUND": "プロジェクト「{{contextId}}」見つかりません",
+    "RECOMMENDATION": "信頼できるソースからプラグインのみをインストールし、可能であればコードを確認してください。新しいプラグインをインストールする前に必ずデータのバックアップを取ってください。",
+    "REMEMBER_CHOICE": "このプラグインに私が選んだ理由を覚えていますか",
+    "REMOVE": "取り去る",
+    "RISK_DATA_ACCESS": "プラグインはあなたのすべてのタスク、プロジェクト、個人データを読み取り、修正し、削除することができます",
+    "RISK_MALICIOUS_CODE": "悪意のあるプラグインは機密情報を盗んだり、データを破損させたりする可能性があります",
+    "RISK_PERFORMANCE": "不十分なプラグインはパフォーマンスの問題やクラッシュを引き起こすことがあります",
+    "RISK_SYSTEM_ACCESS": "Node.js権限を持つデスクトッププラグインはシステムコマンドを実行できます",
+    "SECURITY_WARNING": "プラグインはあなたのデータやシステムにかなりアクセスできます。信頼できないプラグインのインストールは深刻なセキュリティリスクをもたらします:",
+    "SIDE_PANEL_LABEL_REQUIRED": "サイドパネルのボタンラベルが必要です",
+    "SIDE_PANEL_ONCLICK_REQUIRED": "クリックハンドラーのサイドパネルボタンが必要です",
+    "SYSTEM_ACCESS_REQUEST_DESC": "このプラグインは、あなたのシステム上でNode.jsコードを実行するための許可を要求しています。これにより、以下が可能になります:",
+    "SYSTEM_ACCESS_REQUEST_TITLE": "システムアクセスリクエスト",
+    "TAGS_DO_NOT_EXIST": "1つ以上のタグは存在しません",
+    "TASK_NOT_FOUND": "IDが「{{taskId}}」のタスクが見つかりません",
+    "TASKS_NOT_IN_PROJECT": "プロジェクト『{{contextId}}』には1つ以上のタスクが含まれていません。",
+    "TASKS_NOT_SUBTASKS": "1つ以上のタスクは「{{contextId}}」のサブタスクではありません"
   },
   "PM": {
     "TITLE": "プロジェクトメトリクス"
@@ -1858,6 +2264,7 @@
     "TOGGLE_DARK_MODE": "ダークモードの切り替え"
   },
   "SCHEDULE": {
+    "NEXT": "次に",
     "NO_REPEATABLE_TASKS": "現在、繰り返しタスクはありません。タスクのサイドパネルで \"リピートタスク \"を選択すると、タスクをスケジュールすることができます。タスクをクリックすると表示される一番右のアイコンをクリックしてください。",
     "NO_SCHEDULED": "現在スケジュールされているタスクはありません。タスクのコンテキストメニューで[タスクのスケジュール]を選択してタスクをスケジュールできます。開くには、タスクの右側にある3つの小さな点をクリックします。",
     "NO_SCHEDULED_TITLE": "その日の予定タスク",
@@ -1883,6 +2290,24 @@
     "SELECT_THEME": "テーマを選択",
     "teal": "ティール",
     "yellow": "黄"
+  },
+  "USER_PROFILES": {
+    "ACTIVE": "アクティブ",
+    "CANCEL": "キャンセル",
+    "CLOSE": "閉じる",
+    "CREATE": "作成",
+    "CREATE_NEW_PROFILE": "新しいプロファイルを作成",
+    "CREATED": "作成日:",
+    "DELETE_PROFILE": "プロファイルを削除",
+    "DIALOG_TITLE": "ユーザープロファイルを管理",
+    "EXISTING_PROFILES": "既存のプロファイル",
+    "EXPORT_PROFILE": "プロファイルをエクスポート",
+    "MANAGE_PROFILES": "プロファイルを管理...",
+    "OPEN_PROFILES_FOLDER": "プロファイルフォルダを開く",
+    "PROFILE_NAME": "プロファイル名",
+    "PROFILE_NAME_PLACEHOLDER": "例：仕事、個人",
+    "RENAME": "名前を変更",
+    "SAVE": "保存"
   },
   "V": {
     "E_1TO10": "1から10までの値を入力してください",

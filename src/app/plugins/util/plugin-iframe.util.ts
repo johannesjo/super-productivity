@@ -333,6 +333,14 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           // Action dispatch
           dispatchAction: (action) => callApi('dispatchAction', [action]),
 
+          // Simple counters
+          setCounter: (id, value) => callApi('setCounter', [id, value]),
+          getCounter: (id) => callApi('getCounter', [id]),
+          incrementCounter: (id, incrementBy) => callApi('incrementCounter', [id, incrementBy]),
+          decrementCounter: (id, decrementBy) => callApi('decrementCounter', [id, decrementBy]),
+          deleteCounter: (id) => callApi('deleteCounter', [id]),
+          getAllCounters: () => callApi('getAllCounters'),
+
           // Message handling
           onMessage: (handler) => {
             // Store the handler and set up message listener

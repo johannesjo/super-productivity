@@ -2,10 +2,12 @@ import windowStateKeeper from 'electron-window-state';
 import {
   App,
   BrowserWindow,
+  BrowserWindowConstructorOptions,
   ipcMain,
   Menu,
   MenuItem,
   MenuItemConstructorOptions,
+  nativeTheme,
   shell,
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -13,17 +15,17 @@ import * as path from 'path';
 import { join, normalize } from 'path';
 import { format } from 'url';
 import { IPC } from './shared-with-frontend/ipc-events.const';
-import { getSettings } from './get-settings';
 import { readFileSync, stat } from 'fs';
 import { error, log } from 'electron-log/main';
-import { GlobalConfigState } from '../src/app/features/config/global-config.model';
 import { IS_MAC } from './common.const';
 import {
   destroyOverlayWindow,
   hideOverlayWindow,
   showOverlayWindow,
 } from './overlay-indicator/overlay-indicator';
-import { getIsQuiting, setIsQuiting } from './shared-state';
+import { getIsMinimizeToTray, getIsQuiting, setIsQuiting } from './shared-state';
+import { loadSimpleStoreAll } from './simple-store';
+import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 
 let mainWin: BrowserWindow;
 
@@ -46,7 +48,7 @@ export const getIsAppReady = (): boolean => {
   return mainWinModule.isAppReady;
 };
 
-export const createWindow = ({
+export const createWindow = async ({
   IS_DEV,
   ICONS_FOLDER,
   quitApp,
@@ -58,7 +60,7 @@ export const createWindow = ({
   quitApp: () => void;
   app: App;
   customUrl?: string;
-}): BrowserWindow => {
+}): Promise<BrowserWindow> => {
   // make sure the main window isn't already created
   if (mainWin) {
     errorHandlerWithFrontendInform('Main window already exists');
@@ -75,6 +77,26 @@ export const createWindow = ({
     defaultHeight: 800,
   });
 
+  const simpleStore = await loadSimpleStoreAll();
+  const persistedIsUseCustomWindowTitleBar =
+    simpleStore[SimpleStoreKey.IS_USE_CUSTOM_WINDOW_TITLE_BAR];
+  const legacyIsUseObsidianStyleHeader =
+    simpleStore[SimpleStoreKey.LEGACY_IS_USE_OBSIDIAN_STYLE_HEADER];
+  const isUseCustomWindowTitleBar =
+    persistedIsUseCustomWindowTitleBar ?? legacyIsUseObsidianStyleHeader ?? true;
+  const titleBarStyle: BrowserWindowConstructorOptions['titleBarStyle'] =
+    isUseCustomWindowTitleBar || IS_MAC ? 'hidden' : 'default';
+  // Determine initial symbol color based on system theme preference
+  const initialSymbolColor = nativeTheme.shouldUseDarkColors ? '#fff' : '#000';
+  const titleBarOverlay: BrowserWindowConstructorOptions['titleBarOverlay'] =
+    isUseCustomWindowTitleBar && !IS_MAC
+      ? {
+          color: '#00000000',
+          symbolColor: initialSymbolColor,
+          height: 44,
+        }
+      : undefined;
+
   mainWin = new BrowserWindow({
     x: mainWindowState.x,
     y: mainWindowState.y,
@@ -82,7 +104,9 @@ export const createWindow = ({
     height: mainWindowState.height,
     minHeight: 240,
     minWidth: 300,
-    titleBarStyle: IS_MAC ? 'hidden' : 'default',
+    title: IS_DEV ? 'Super Productivity D' : 'Super Productivity',
+    titleBarStyle,
+    titleBarOverlay,
     show: false,
     webPreferences: {
       scrollBounce: true,
@@ -100,7 +124,7 @@ export const createWindow = ({
     },
     icon: ICONS_FOLDER + '/icon_256x256.png',
     // Wayland compatibility: disable transparent/frameless features that can cause issues
-    // transparent: false,
+    transparent: false,
     // frame: true,
   });
 
@@ -155,6 +179,11 @@ export const createWindow = ({
         });
 
   mainWin.loadURL(url).then(() => {
+    // Set window title for dev mode
+    if (IS_DEV) {
+      mainWin.setTitle('Super Productivity D');
+    }
+
     // load custom stylesheet if any
     const CSS_FILE_PATH = app.getPath('userData') + '/styles.css';
     stat(app.getPath('userData') + '/styles.css', (err) => {
@@ -194,6 +223,23 @@ export const createWindow = ({
   ipcMain.on(IPC.APP_READY, () => {
     mainWinModule.isAppReady = true;
   });
+
+  // Listen for theme changes to update title bar overlay symbol color
+  if (isUseCustomWindowTitleBar && !IS_MAC) {
+    ipcMain.on(IPC.UPDATE_TITLE_BAR_DARK_MODE, (ev, isDarkMode: boolean) => {
+      try {
+        const symbolColor = isDarkMode ? '#fff' : '#000';
+        mainWin.setTitleBarOverlay({
+          color: '#00000000',
+          symbolColor,
+          height: 44,
+        });
+      } catch (e) {
+        // setTitleBarOverlay may not be available on all platforms
+        log('Failed to update title bar overlay:', e);
+      }
+    });
+  }
 
   return mainWin;
 };
@@ -319,20 +365,18 @@ const appCloseHandler = (app: App): void => {
     log('close, isQuiting:', getIsQuiting());
     if (!getIsQuiting()) {
       event.preventDefault();
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg && appCfg.misc.isMinimizeToTray && !getIsQuiting()) {
-          mainWin.hide();
-          showOverlayWindow();
-          return;
-        }
+      if (getIsMinimizeToTray()) {
+        mainWin.hide();
+        showOverlayWindow();
+        return;
+      }
 
-        if (ids.length > 0) {
-          log('Actions to wait for ', ids);
-          mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
-        } else {
-          _quitApp();
-        }
-      });
+      if (ids.length > 0) {
+        log('Actions to wait for ', ids);
+        mainWin.webContents.send(IPC.NOTIFY_ON_CLOSE, ids);
+      } else {
+        _quitApp();
+      }
     }
   });
 
@@ -358,19 +402,17 @@ const appMinimizeHandler = (app: App): void => {
     // TODO find reason for the typing error
     // @ts-ignore
     mainWin.on('minimize', (event: Event) => {
-      getSettings(mainWin, (appCfg: GlobalConfigState) => {
-        if (appCfg.misc.isMinimizeToTray) {
-          event.preventDefault();
-          mainWin.hide();
-          showOverlayWindow();
-        } else {
-          // For regular minimize (not to tray), also show overlay
-          showOverlayWindow();
-          if (IS_MAC) {
-            app.dock?.show();
-          }
+      if (getIsMinimizeToTray()) {
+        event.preventDefault();
+        mainWin.hide();
+        showOverlayWindow();
+      } else {
+        // For regular minimize (not to tray), also show overlay
+        showOverlayWindow();
+        if (IS_MAC) {
+          app.dock?.show();
         }
-      });
+      }
     });
   }
 };

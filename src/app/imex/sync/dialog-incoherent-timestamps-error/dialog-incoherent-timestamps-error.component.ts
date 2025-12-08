@@ -15,6 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton } from '@angular/material/button';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { T } from '../../../t.const';
+import { Log } from '../../../core/log';
 
 export interface DialogIncompleteSyncData {
   modelId: string;
@@ -51,7 +52,11 @@ export class DialogIncoherentTimestampsErrorComponent {
 
   async downloadBackup(): Promise<void> {
     const data = await this._pfapiService.pf.loadCompleteBackup();
-    download('super-productivity-backup.json', JSON.stringify(data));
+    try {
+      await download('super-productivity-backup.json', JSON.stringify(data));
+    } catch (e) {
+      Log.error(e);
+    }
     // download('super-productivity-backup.json', privacyExport(data));
   }
 

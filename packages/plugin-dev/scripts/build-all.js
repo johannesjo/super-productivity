@@ -67,7 +67,13 @@ const plugins = [
       if (!fs.existsSync(targetDir)) {
         fs.mkdirSync(targetDir, { recursive: true });
       }
-      const files = ['manifest.json', 'plugin.js', 'index.html'];
+      const files = [
+        'manifest.json',
+        'plugin.js',
+        'index.html',
+        'config-schema.json',
+        'icon.svg',
+      ];
       for (const file of files) {
         const src = path.join(pluginPath, file);
         const dest = path.join(targetDir, file);

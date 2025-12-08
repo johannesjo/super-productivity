@@ -139,7 +139,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   countUpAndNextRepeatCountdownSession(): void {
     this._bannerService.dismiss(BannerId.SimpleCounterCountdownComplete);
     this.toggleCounter();
-    this._resetCountdown$.next();
+    this._resetCountdown$.next(undefined);
     this.isTimeUp.set(false);
   }
 

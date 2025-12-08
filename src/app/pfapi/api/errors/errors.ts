@@ -66,10 +66,95 @@ export class UploadRevToMatchMismatchAPIError extends AdditionalLogErrorBase {
 export class HttpNotOkAPIError extends AdditionalLogErrorBase {
   override name = ' HttpNotOkAPIError';
   response: Response;
+  body?: string;
 
-  constructor(response: Response) {
-    super(response);
+  constructor(response: Response, body?: string) {
+    super(response, body);
     this.response = response;
+    this.body = body;
+    const statusText = response.statusText || 'Unknown Status';
+
+    // Parse body to extract meaningful error information
+    let errorDetail = '';
+    if (body) {
+      const safeBody =
+        typeof body === 'string'
+          ? body
+          : body !== undefined
+            ? (() => {
+                try {
+                  return JSON.stringify(body);
+                } catch (e) {
+                  return String(body);
+                }
+              })()
+            : '';
+
+      // Try to extract meaningful error from XML/HTML responses
+      errorDetail = this._extractErrorFromBody(safeBody);
+    }
+
+    const bodyText = errorDetail ? ` - ${errorDetail}` : '';
+    this.message = `HTTP ${response.status} ${statusText}${bodyText}`;
+  }
+
+  private _extractErrorFromBody(body: string): string {
+    if (!body) return '';
+
+    // Limit body length for error messages
+    const maxBodyLength = 300;
+
+    // Try to extract error from Nextcloud/WebDAV XML responses
+    // Look for <s:message> or <d:error> tags
+    const nextcloudMessageMatch = body.match(/<s:message[^>]*>(.*?)<\/s:message>/i);
+    if (nextcloudMessageMatch && nextcloudMessageMatch[1]) {
+      return nextcloudMessageMatch[1].trim().substring(0, maxBodyLength);
+    }
+
+    const webdavErrorMatch = body.match(/<d:error[^>]*>(.*?)<\/d:error>/i);
+    if (webdavErrorMatch && webdavErrorMatch[1]) {
+      return webdavErrorMatch[1].trim().substring(0, maxBodyLength);
+    }
+
+    // Look for HTML title tags (often contain error descriptions)
+    const titleMatch = body.match(/<title[^>]*>(.*?)<\/title>/i);
+    if (titleMatch && titleMatch[1]) {
+      const title = titleMatch[1].trim();
+      // Avoid generic titles
+      if (title && !title.match(/^(error|404|403|500)$/i)) {
+        return title.substring(0, maxBodyLength);
+      }
+    }
+
+    // Try to extract JSON error
+    try {
+      const jsonMatch = body.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        const parsed = JSON.parse(jsonMatch[0]);
+        if (parsed.error) {
+          return String(parsed.error).substring(0, maxBodyLength);
+        }
+        if (parsed.message) {
+          return String(parsed.message).substring(0, maxBodyLength);
+        }
+      }
+    } catch (e) {
+      // Not JSON, continue
+    }
+
+    // Strip script and style tags with their content
+    const cleanBody = body
+      .replace(/<script\b[^>]*>([\s\S]*?)<\/script>/gim, '')
+      .replace(/<style\b[^>]*>([\s\S]*?)<\/style>/gim, '');
+
+    // Strip HTML tags for plain text
+    const withoutTags = cleanBody
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    // Return the first meaningful chunk of text
+    return withoutTags.substring(0, maxBodyLength);
   }
 }
 

@@ -1,0 +1,125 @@
+name: Test macOS DMG Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-verify-dmg:
+    runs-on: macos-latest
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Reconfigure git to use HTTP authentication
+        run: |
+          git config --global url."https://github.com/".insteadOf ssh://git@github.com/
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 20
+
+      - name: Get npm cache directory
+        id: npm-cache-dir
+        run: echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: npm-cache
+        with:
+          path: ${{ steps.npm-cache-dir.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+
+      - name: Install native helpers
+        run: npm install @nx/nx-darwin-arm64 dmg-license
+
+      - name: Install npm packages
+        run: npm i
+
+      - name: Decode provisioning profile
+        shell: bash
+        env:
+          PROVISION_PROFILE: ${{ secrets.dl_provision_profile }}
+        run: |
+          if [ -z "$PROVISION_PROFILE" ]; then
+            echo "dl_provision_profile secret is missing"
+            exit 1
+          fi
+          echo "$PROVISION_PROFILE" | base64 --decode > embedded.provisionprofile
+
+      - name: Configure macOS signing keychain
+        env:
+          MAC_CERTS: ${{ secrets.mac_certs }}
+          MAC_CERTS_PASSWORD: ${{ secrets.mac_certs_password }}
+        run: |
+          set -euo pipefail
+          CERT_PATH="$RUNNER_TEMP/mac-certs.p12"
+          echo "$MAC_CERTS" | base64 --decode > "$CERT_PATH"
+
+          KEYCHAIN_PATH="$HOME/Library/Keychains/build.keychain-db"
+          security create-keychain -p "" build.keychain
+          security set-keychain-settings -lut 21600 build.keychain
+          security unlock-keychain -p "" build.keychain
+          security import "$CERT_PATH" -k build.keychain -P "$MAC_CERTS_PASSWORD" -T /usr/bin/codesign -T /usr/bin/security
+          security list-keychains -s build.keychain login.keychain
+          security default-keychain -s build.keychain
+          security set-key-partition-list -S apple-tool:,apple: -k "" build.keychain
+
+          {
+            echo "CSC_KEYCHAIN=$KEYCHAIN_PATH"
+            echo "CSC_LINK=file://$CERT_PATH"
+            echo "CSC_KEY_PASSWORD=$MAC_CERTS_PASSWORD"
+          } >> "$GITHUB_ENV"
+
+      - name: Prepare for app notarization
+        run: |
+          mkdir -p ~/private_keys/
+          echo '${{ secrets.mac_api_key }}' > ~/private_keys/AuthKey_${{ secrets.mac_api_key_id }}.p8
+
+      - name: Generate environment & build sources
+        run: |
+          npm run env
+          npm run build
+
+      - name: Build Developer ID DMG
+        env:
+          API_KEY_ID: ${{ secrets.mac_api_key_id }}
+          API_KEY_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+        run: npx electron-builder --mac --publish=never
+
+      - name: Verify DMG signature
+        run: |
+          set -euo pipefail
+          DMG_PATH=$(ls .tmp/app-builds/superProductivity-*.dmg | head -n 1)
+          if [ -z "$DMG_PATH" ]; then
+            echo "No DMG artefact found"
+            exit 1
+          fi
+
+          MOUNT_POINT="/Volumes/SuperProductivityTest"
+          hdiutil attach "$DMG_PATH" -mountpoint "$MOUNT_POINT" -nobrowse
+          trap 'hdiutil detach "$MOUNT_POINT" || true' EXIT
+
+          APP_PATH="$MOUNT_POINT/Super Productivity.app"
+          /usr/bin/codesign --verify --deep --strict --verbose=4 "$APP_PATH"
+          spctl --assess --verbose "$APP_PATH"
+          AUTHORITY_OUTPUT=$(/usr/bin/codesign -dv "$APP_PATH" 2>&1 | grep Authority || true)
+          if [ -n "$AUTHORITY_OUTPUT" ]; then
+            echo "$AUTHORITY_OUTPUT"
+          else
+            echo "No Authority lines found in codesign -dv output"
+          fi
+
+      - name: Upload DMG artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: mac-dmg-build
+          path: .tmp/app-builds/*.dmg
+          if-no-files-found: error

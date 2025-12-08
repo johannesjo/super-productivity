@@ -21,6 +21,7 @@ describe('isRelatedModelDataValid', () => {
     confirmSpy = window.confirm as jasmine.Spy;
     alertSpy.calls.reset();
     confirmSpy.calls.reset();
+    confirmSpy.and.returnValue(true);
   });
 
   afterEach(() => {

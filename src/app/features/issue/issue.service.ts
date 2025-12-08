@@ -20,6 +20,7 @@ import {
   ISSUE_STR_MAP,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
+  TRELLO_TYPE,
   REDMINE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
@@ -27,6 +28,7 @@ import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
 import { GithubCommonInterfacesService } from './providers/github/github-common-interfaces.service';
+import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
@@ -38,11 +40,13 @@ import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
+import { ICalIssueReduced } from './providers/calendar/calendar.model';
 import { WorkContextType } from '../work-context/work-context.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { IssueProviderService } from './issue-provider.service';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
+import { getCalendarEventIdCandidates } from '../calendar-integration/get-calendar-event-id-candidates';
 import { Store } from '@ngrx/store';
 import { selectEnabledIssueProviders } from './store/issue-provider.selectors';
 import { getErrorTxt } from '../../util/get-error-text';
@@ -57,6 +61,7 @@ import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/glob
 export class IssueService {
   private _taskService = inject(TaskService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
+  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
   private _githubCommonInterfacesService = inject(GithubCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
@@ -82,6 +87,9 @@ export class IssueService {
     [GITEA_TYPE]: this._giteaInterfaceService,
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
+
+    // trello
+    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
   };
 
   ISSUE_REFRESH_MAP: {
@@ -116,9 +124,7 @@ export class IssueService {
       this.ISSUE_REFRESH_MAP[issueProviderId][id] = new Subject<IssueData>();
     }
     return from(this.ISSUE_SERVICE_MAP[issueType].getById(id, issueProviderId)).pipe(
-      switchMap((issue) =>
-        merge<IssueData | null>(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id]),
-      ),
+      switchMap((issue) => merge(of(issue), this.ISSUE_REFRESH_MAP[issueProviderId][id])),
     );
   }
 
@@ -418,11 +424,17 @@ export class IssueService {
       throw new Error('No issueData');
     }
 
+    const issueIdCandidates = this._getIssueIdCandidates(
+      issueProviderKey,
+      issueDataReduced,
+    );
+
     if (
       await this._checkAndHandleIssueAlreadyAdded(
         issueProviderKey,
         issueProviderId,
         issueDataReduced.id.toString(),
+        { issueIdCandidates },
       )
     ) {
       return undefined;
@@ -505,7 +517,7 @@ export class IssueService {
       // TODO more elegant solution for skipped calendar events
       if (issueProviderKey === ICAL_TYPE) {
         this._calendarIntegrationService.skipCalendarEvent(
-          issueDataReduced.id.toString(),
+          issueDataReduced as ICalIssueReduced,
         );
       }
     }
@@ -548,12 +560,30 @@ export class IssueService {
     issueType: IssueProviderKey,
     issueProviderId: string,
     issueId: string,
+    opts?: { issueIdCandidates?: string[] },
   ): Promise<boolean> {
-    const res = await this._taskService.checkForTaskWithIssueEverywhere(
-      issueId,
-      issueType,
-      issueProviderId,
+    const idsToCheck = Array.from(
+      new Set(
+        opts?.issueIdCandidates && opts.issueIdCandidates.length
+          ? [issueId, ...opts.issueIdCandidates]
+          : [issueId],
+      ),
     );
+
+    let res: Awaited<
+      ReturnType<typeof this._taskService.checkForTaskWithIssueEverywhere>
+    > | null = null;
+    for (const candidateId of idsToCheck) {
+      res = await this._taskService.checkForTaskWithIssueEverywhere(
+        candidateId,
+        issueType,
+        issueProviderId,
+      );
+      if (res) {
+        break;
+      }
+    }
+
     if (res?.isFromArchive) {
       this._taskService.restoreTask(res.task, res.subTasks || []);
       this._snackService.open({
@@ -607,6 +637,16 @@ export class IssueService {
     const r = this.ISSUE_SERVICE_MAP[issueProviderKey].getAddTaskData(issueReduced);
     typia.assert<IssueTask>(r);
     return r;
+  }
+
+  private _getIssueIdCandidates(
+    issueProviderKey: IssueProviderKey,
+    issueDataReduced: IssueDataReduced,
+  ): string[] | undefined {
+    if (issueProviderKey !== ICAL_TYPE) {
+      return undefined;
+    }
+    return getCalendarEventIdCandidates(issueDataReduced as ICalIssueReduced);
   }
 
   // TODO if we need to refresh data on after add, this is how we would do it

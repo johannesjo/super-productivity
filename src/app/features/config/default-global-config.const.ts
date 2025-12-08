@@ -8,9 +8,23 @@ const defaultVoice = getDefaultVoice();
 
 export const DEFAULT_DAY_START = '9:00';
 export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
-  lang: {
-    lng: null,
-    timeLocale: undefined,
+  appFeatures: {
+    isTimeTrackingEnabled: true,
+    isFocusModeEnabled: true,
+    isSchedulerEnabled: true,
+    isPlannerEnabled: true,
+    isBoardsEnabled: true,
+    isScheduleDayPanelEnabled: true,
+    isIssuesPanelEnabled: true,
+    isProjectNotesEnabled: true,
+    isSyncIconEnabled: true,
+    isDonatePageEnabled: true,
+    isEnableUserProfiles: false,
+  },
+  localization: {
+    lng: undefined,
+    dateTimeLocale: undefined,
+    firstDayOfWeek: undefined,
   },
   misc: {
     isConfirmBeforeExit: false,
@@ -22,9 +36,9 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isTrayShowCurrentTask: true,
     isTrayShowCurrentCountdown: true,
     defaultProjectId: null,
-    firstDayOfWeek: 1,
     startOfNextDay: 0,
     isDisableAnimations: false,
+    isDisableCelebration: false,
     isShowProductivityTipLonger: false,
     taskNotesTpl: `**How can I best achieve it now?**
 
@@ -34,6 +48,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
 `,
     isOverlayIndicatorEnabled: false,
     customTheme: 'default',
+    defaultStartPage: 0,
   },
   shortSyntax: {
     isEnableProject: true,

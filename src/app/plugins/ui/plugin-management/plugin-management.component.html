@@ -1,4 +1,4 @@
-<mat-card class="warning-card">
+<mat-card class="info-card">
   <mat-card-header>
     <mat-card-title
       >⚠️️️{{ 'PLUGINS.EXPERIMENTAL_WARNING_TITLE' | translate }}️️ ⚠️️️
@@ -6,9 +6,6 @@
   </mat-card-header>
   <mat-card-content>
     <div class="warning-content">
-      <p>
-        <strong>{{ 'PLUGINS.EXPERIMENTAL_WARNING' | translate }}</strong>
-      </p>
       <p>{{ 'PLUGINS.SECURITY_WARNING' | translate }}</p>
       <ul>
         <li>{{ 'PLUGINS.RISK_DATA_ACCESS' | translate }}</li>
@@ -156,29 +153,32 @@
         }
       </table>
 
-      @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
-        <div>
-          <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
-          <div>
-            <mat-chip-set>
-              @for (hook of plugin.manifest.hooks; track hook) {
-                <mat-chip>{{ hook }}</mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        </div>
-      }
-      @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
-        <div>
-          <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
-          <div>
-            <mat-chip-set>
-              @for (permission of plugin.manifest.permissions; track permission) {
-                <mat-chip>{{ permission }}</mat-chip>
-              }
-            </mat-chip-set>
-          </div>
-        </div>
+      @if (
+        (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) ||
+        (plugin.manifest.permissions && plugin.manifest.permissions.length > 0)
+      ) {
+        <collapsible [title]="getPermissionsHooksTitle(plugin)">
+          @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+            <div class="plugin-info-section">
+              <div class="label">{{ 'PLUGINS.PERMISSIONS' | translate }}:</div>
+              <mat-chip-set>
+                @for (permission of plugin.manifest.permissions; track permission) {
+                  <mat-chip>{{ permission }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+          @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
+            <div class="plugin-info-section">
+              <div class="label">{{ 'PLUGINS.HOOKS' | translate }}:</div>
+              <mat-chip-set>
+                @for (hook of plugin.manifest.hooks; track hook) {
+                  <mat-chip>{{ hook }}</mat-chip>
+                }
+              </mat-chip-set>
+            </div>
+          }
+        </collapsible>
       }
     </mat-card-content>
 
@@ -197,5 +197,51 @@
     }
   </mat-card>
 }
+
+<mat-card class="community-plugins-card">
+  <mat-card-header>
+    <mat-card-title>Community Plugins</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div
+      class="warning-content"
+      style="margin-bottom: 16px; color: var(--warn)"
+    >
+      <p>
+        <strong>⚠️ WARNING:</strong> These plugins are developed by the community and are
+        <strong>NOT</strong> reviewed or guaranteed by the Super Productivity team.
+        Install and use them at your own risk. They might contain malicious code or break
+        your application.
+      </p>
+    </div>
+
+    <div class="community-plugins-list">
+      @for (plugin of communityPlugins(); track plugin.name) {
+        <div class="community-plugin-item">
+          <h3 class="plugin-name">
+            <a
+              [href]="plugin.url"
+              target="_blank"
+              >{{ plugin.name }}</a
+            >
+          </h3>
+          <p class="plugin-desc">{{ plugin.shortDescription }}</p>
+        </div>
+      }
+    </div>
+
+    <div style="margin-top: 16px; text-align: center">
+      <a
+        href="https://github.com/johannesjo/super-productivity/blob/master/src/assets/community-plugins.json"
+        target="_blank"
+        mat-button
+        color="primary"
+      >
+        <mat-icon>add</mat-icon>
+        Get your plugin to show up here
+      </a>
+    </div>
+  </mat-card-content>
+</mat-card>
 
 <div class="bottom-bar"></div>

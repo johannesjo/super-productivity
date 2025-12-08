@@ -16,7 +16,7 @@ import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
 import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
+import { CdkDrag, CdkDragDrop, CdkDragStart, CdkDropList } from '@angular/cdk/drag-drop';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import {
@@ -39,6 +39,7 @@ import { AsyncPipe } from '@angular/common';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
 import { TaskLog } from '../../../core/log';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
+import { DEFAULT_OPTIONS } from '../../task-view-customizer/types';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -129,8 +130,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
     return task.id;
   }
 
-  onDragStarted(task: TaskWithSubTasks): void {
-    this._scheduleExternalDragService.setActiveTask(task);
+  onDragStarted(task: TaskWithSubTasks, event: CdkDragStart): void {
+    this._scheduleExternalDragService.setActiveTask(task, event.source._dragRef);
   }
 
   onDragEnded(): void {
@@ -179,6 +180,11 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       listModelId: this.listModelId(),
       filteredTasks: this.filteredTasks(),
     });
+
+    if (this._scheduleExternalDragService.isCancelNextDrop()) {
+      this._scheduleExternalDragService.setCancelNextDrop(false);
+      return;
+    }
 
     const targetTask = targetListData.filteredTasks[ev.currentIndex] as TaskCopy;
 
@@ -246,7 +252,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       newIds.map((p) => p.id),
     );
 
-    this._taskViewCustomizerService.setSort('default');
+    this._taskViewCustomizerService.setSort(DEFAULT_OPTIONS.sort);
   }
 
   async _addFromIssuePanel(

@@ -410,6 +410,50 @@ describe('TaskRepeatCfgService', () => {
       expect(actions).toEqual([]);
     });
 
+    it('should skip creation if computed target date already has an instance', async () => {
+      const targetDayDate = new Date(2020, 0, 4).getTime();
+      const targetDate = new Date(2020, 0, 3);
+      const cfgNeedingCatchUp: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: formatIsoDate(new Date(2020, 0, 1)),
+        lastTaskCreationDay: formatIsoDate(new Date(2019, 11, 30)),
+        repeatEvery: 2,
+      };
+      const existingTask: TaskWithSubTasks = {
+        ...mockTaskWithSubTasks,
+        created: targetDate.getTime(),
+        dueDay: formatIsoDate(targetDate),
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([existingTask]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgNeedingCatchUp,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should respect deleted instances based on computed target date', async () => {
+      const targetDayDate = new Date(2020, 0, 4).getTime();
+      const deletedDate = formatIsoDate(new Date(2020, 0, 3));
+      const cfgWithDeleted: TaskRepeatCfg = {
+        ...mockTaskRepeatCfg,
+        startDate: formatIsoDate(new Date(2020, 0, 1)),
+        lastTaskCreationDay: formatIsoDate(new Date(2019, 11, 30)),
+        repeatEvery: 2,
+        deletedInstanceDates: [deletedDate],
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        cfgWithDeleted,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
     it('should include schedule action if startTime and remindAt are set', async () => {
       const cfgWithSchedule = {
         ...mockTaskRepeatCfg,

@@ -149,7 +149,7 @@ export const startApp = (): void => {
 
   // APP EVENT LISTENERS
   // -------------------
-  appIN.on('ready', createMainWin);
+  appIN.on('ready', () => createMainWin());
   appIN.on('ready', () => initBackupAdapter());
   appIN.on('ready', () => initLocalFileSyncAdapter());
   appIN.on('ready', () => initFullScreenBlocker(IS_DEV));
@@ -353,8 +353,8 @@ export const startApp = (): void => {
   }
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-  function createMainWin(): void {
-    mainWin = createWindow({
+  async function createMainWin(): Promise<void> {
+    mainWin = await createWindow({
       app,
       IS_DEV,
       ICONS_FOLDER,

@@ -1793,6 +1793,7 @@
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Uygulamadan çıkmadan önce günü bitirmeden çıkış yaptığınızı onaylayın",
       "IS_DARK_MODE": "Karanlık mod",
       "IS_DISABLE_ANIMATIONS": "Tüm animasyonları devre dışı bırak",
+      "IS_DISABLE_CELEBRATION": "Günlük özet kutlamasını devre dışı bırak",
       "IS_HIDE_NAV": "Ana başlık yönlendirilene kadar gezinmeyi gizle (yalnızca masaüstü)",
       "IS_MINIMIZE_TO_TRAY": "Tepsiye küçült (yalnızca masaüstü)",
       "IS_SHOW_TIP_LONGER": "Uygulamada üretkenlik ipucunu biraz daha uzun süre başlatın",
@@ -1800,6 +1801,8 @@
       "IS_TRAY_SHOW_CURRENT_TASK": "Mevcut görevi tepsi / Durum menüsünde göster (yalnızca masaüstü)",
       "IS_OVERLAY_INDICATOR_ENABLED": "Panel gösterge penceresini etkinleştir (masaüstü linux/gnome)",
       "IS_TURN_OFF_MARKDOWN": "Notlar için etiketleme ayrıştırmayı kapatın",
+      "USER_PROFILES": "Kullanıcı profillerini etkinleştir (Beta)",
+      "USER_PROFILES_HINT": "Her biri ayrı ayarlar, görevler ve senkronizasyon yapılandırmalarına sahip farklı kullanıcı profilleri oluşturmanıza ve aralarında geçiş yapmanıza olanak tanır. Etkinleştirildiğinde profil yönetimi düğmesi sağ üst köşede görünecektir. Not: Bu özelliği devre dışı bırakmak kullanıcı arayüzünü gizler ancak profil verilerinizi korur (Beta özelliği, garanti yok. Yedeğiniz olduğundan emin olun).",
       "START_OF_NEXT_DAY": "Ertesi günün başlama saati",
       "START_OF_NEXT_DAY_HINT": "Ertesi günün başladığı saati saymak istediğiniz andan itibaren (saat cinsinden). Varsayılan gece yarısıdır, yani 0'dır.",
       "TASK_NOTES_TPL": "Görev açıklama şablonu",
@@ -2001,14 +2004,13 @@
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Bugünden itibaren görev ekleme",
-    "BACK": "Bekle bir şey unuttum!",
     "BREAK_LABEL": "Molalar (saat / saat)",
     "CELEBRATE": "<i>Kutlamak</i> için bir dakikanızı ayırın!",
     "CLEAR_ALL_CONTINUE": "Hepsini temizle ve devam et",
     "D_CONFIRM_APP_CLOSE": {
-      "CANCEL": "Hayır, sadece görevleri temizleyin",
-      "MSG": "Görevlerin bitti. Eve gitme zamanı!",
-      "OK": "Hay hay! Kapat!"
+      "CANCEL": "Hayır, sadece görevleri temizle",
+      "MSG": "Uygulamadan çıkılsın mı?",
+      "OK": "Çık"
     },
     "ESTIMATE_TOTAL": "Toplam tahmin:",
     "EVALUATE_DAY": "Değerlendir",
@@ -2025,7 +2027,7 @@
     "ROUND_UP_5M": "Tüm görevleri 5 dakikaya tamamlayın",
     "ROUND_UP_15M": "Tüm görevleri 15 dakikaya tamamlayın",
     "ROUND_UP_30M": "Tüm görevleri 30 dakikaya tamamlayın",
-    "SAVE_AND_GO_HOME": "Kaydet ve eve git",
+    "SAVE_AND_GO_HOME": "Günü bitir",
     "SAVE_AND_GO_HOME_TOOLTIP": "Yapılan tüm görevleri arşive (iş günlüğü) taşıyın ve isteğe bağlı olarak tüm verileri senkronize edip uygulamayı kapatın.",
     "START_END": "Başlangıç - Bitiş",
     "SUMMARY_FOR": " {{dayStr}} Günlük Özeti",
@@ -2191,6 +2193,24 @@
     "E_MIN_LENGTH": "En az {{val}} karakter uzunluğunda olmalı",
     "E_PATTERN": "Geçersiz Giriş",
     "E_REQUIRED": "Bu alan gereklidir"
+  },
+  "USER_PROFILES": {
+    "DIALOG_TITLE": "Kullanıcı profillerini yönet",
+    "CREATE_NEW_PROFILE": "Yeni profil oluştur",
+    "PROFILE_NAME": "Profil adı",
+    "PROFILE_NAME_PLACEHOLDER": "örn. İş, Kişisel",
+    "CREATE": "Oluştur",
+    "EXISTING_PROFILES": "Mevcut profiller",
+    "ACTIVE": "Aktif",
+    "CREATED": "Oluşturuldu:",
+    "SAVE": "Kaydet",
+    "CANCEL": "İptal",
+    "RENAME": "Yeniden adlandır",
+    "EXPORT_PROFILE": "Profili dışa aktar",
+    "DELETE_PROFILE": "Profili sil",
+    "OPEN_PROFILES_FOLDER": "Profiller klasörünü aç",
+    "CLOSE": "Kapat",
+    "MANAGE_PROFILES": "Profilleri yönet..."
   },
   "WW": {
     "ADD_MORE": "Daha ekle",

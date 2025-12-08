@@ -45,6 +45,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
   readonly isShowControls = input<boolean>(false);
   readonly isShowChecklistToggle = input<boolean>(false);
   readonly isDefaultText = input<boolean>(false);
+  readonly placeholderTxt = input<string | undefined>(undefined);
 
   readonly changed = output<string>();
   readonly focused = output<Event>();

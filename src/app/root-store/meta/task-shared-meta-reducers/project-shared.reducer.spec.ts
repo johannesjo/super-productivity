@@ -84,6 +84,36 @@ describe('projectSharedMetaReducer', () => {
       );
     });
 
+    it('should remove task from actual source project even if payload is stale', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []);
+
+      testState[PROJECT_FEATURE_NAME].entities.project2 = createMockProject({
+        id: 'project2',
+        title: 'Target Project',
+      });
+      (testState[PROJECT_FEATURE_NAME].ids as string[]) = [
+        ...(testState[PROJECT_FEATURE_NAME].ids as string[]),
+        'project2',
+      ];
+
+      const stalePayload: TaskWithSubTasks = {
+        ...createMockTask({ id: 'task1', projectId: 'project2' }),
+        subTasks: [],
+        subTaskIds: [],
+      };
+
+      const action = createMoveToOtherProjectAction(stalePayload, 'project2');
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      expect(updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds).toEqual([]);
+      expect(updatedState[PROJECT_FEATURE_NAME].entities.project2.taskIds).toEqual([
+        'task1',
+      ]);
+      expect(updatedState[TASK_FEATURE_NAME].entities.task1.projectId).toBe('project2');
+    });
+
     it('should move task with subtasks to another project', () => {
       const testState = createStateWithExistingTasks(
         ['task1', 'subtask1', 'subtask2'],

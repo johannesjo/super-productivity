@@ -1,21 +1,38 @@
-//  since new Date("2021-01-01") will produce yesterday's date in timezones with negative timezone offset,
-// we need to convert date string to UTC date.
-// example use case:
-/*
-getDateTimeFromClockString(
-      workStartEndCfg.startTime,
-      dateStrToUtcDate(dayDate),
-)
+// Normalize a date (or ISO datetime) string to a local start-of-day Date
+// to avoid offset drift (e.g., DST differences between UTC and local midnight).
+import { devError } from './dev-error';
 
-^ this would produce wrong day if the timezone offset is negative, if we were not using dateStrToUtcDate
- */
 export const dateStrToUtcDate = (dateStr: string): Date => {
   if (!dateStr) {
     return new Date();
   }
-  // const [year, month, day] = dateStr.split('-').map(Number);
-  // return new Date(Date.UTC(year, month - 1, day));
-  const localDate = new Date(dateStr);
-  // eslint-disable-next-line no-mixed-operators
-  return new Date(localDate.getTime() + localDate.getTimezoneOffset() * 60000);
+
+  const match = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(dateStr);
+  if (!match) {
+    devError(`dateStrToUtcDate: invalid date string: ${dateStr}`);
+    return new Date('Invalid Date');
+  }
+
+  const [, yearStr, monthStr, dayStr] = match;
+  const year = +yearStr;
+  const month = +monthStr;
+  const day = +dayStr;
+
+  if (isNaN(year) || isNaN(month) || isNaN(day)) {
+    devError(`dateStrToUtcDate2: invalid date string: ${dateStr}`);
+    return new Date('Invalid Date');
+  }
+
+  const date = new Date(year, month - 1, day);
+
+  if (
+    date.getFullYear() !== year ||
+    date.getMonth() !== month - 1 ||
+    date.getDate() !== day
+  ) {
+    devError(`dateStrToUtcDate3: invalid date string: ${dateStr}`);
+    return new Date('Invalid Date');
+  }
+
+  return date;
 };

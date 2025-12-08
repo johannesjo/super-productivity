@@ -3,7 +3,7 @@
     @if (day.isToday) {
       <mat-icon inline="true">wb_sunny</mat-icon>
     }
-    {{ day.dayDate | date: 'EEE' }}
+    {{ day.dayDate | localeDate: 'EEE' }}
     <span class="date">{{ day.dayDate | shortDate2 }}</span>
   </div>
   <!--<div class="day-estimate">{{ day.timeEstimate |roundDuration|msToString }}</div>-->
@@ -59,8 +59,20 @@
       ></planner-repeat-projection>
     }
 
+    <!-- All-day calendar events -->
+    @for (allDayEvent of day.allDayEvents; track allDayEvent.id) {
+      <planner-calendar-event
+        class="all-day-event"
+        [calendarEvent]="allDayEvent"
+      ></planner-calendar-event>
+    }
+
     <!-- -->
-    @if (day.tasks.length === 0 && day.noStartTimeRepeatProjections.length === 0) {
+    @if (
+      day.tasks.length === 0 &&
+      day.noStartTimeRepeatProjections.length === 0 &&
+      day.allDayEvents.length === 0
+    ) {
       <div class="empty">{{ T.F.PLANNER.NO_TASKS | translate }}</div>
     }
   </div>

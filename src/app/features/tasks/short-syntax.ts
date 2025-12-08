@@ -16,6 +16,7 @@ type TagChanges = {
 type DueChanges = {
   title?: string;
   dueWithTime?: number;
+  dueDay?: string | null;
 };
 
 const CH_TSP = '/';
@@ -92,6 +93,7 @@ export const shortSyntax = (
   allTags?: Tag[],
   allProjects?: Project[],
   now = new Date(),
+  mode: 'combine' | 'replace' = 'combine',
 ):
   | {
       taskChanges: Partial<Task>;
@@ -137,6 +139,7 @@ export const shortSyntax = (
     changesForTag = parseTagChanges(
       { ...task, title: taskChanges.title || task.title },
       allTags,
+      mode,
     );
     taskChanges = {
       ...taskChanges,
@@ -238,7 +241,11 @@ const parseProjectChanges = (
   return {};
 };
 
-const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges => {
+const parseTagChanges = (
+  task: Partial<TaskCopy>,
+  allTags?: Tag[],
+  mode: 'combine' | 'replace' = 'combine',
+): TagChanges => {
   const taskChanges: Partial<TaskCopy> = {};
 
   const newTagTitlesToCreate: string[] = [];
@@ -259,34 +266,55 @@ const parseTagChanges = (task: Partial<TaskCopy>, allTags?: Tag[]): TagChanges =
             return false;
           }
 
+          const trimmedTitle = initialTitle.trim();
+          const tagStartIndex = trimmedTitle.lastIndexOf(`${CH_TAG}${newTagTitle}`);
+          const isNumericOnly = /^[0-9]+$/.test(newTagTitle);
+
           return (
             newTagTitle.length >= 1 &&
-            // NOTE: we check this to not trigger for "#123 blasfs dfasdf"
-            initialTitle.trim().lastIndexOf(newTagTitle) > 4
+            tagStartIndex !== -1 &&
+            // NOTE: only block tags at the beginning if they are numeric (e.g. "#123 task")
+            (!isNumericOnly || tagStartIndex > 0)
           );
         });
 
-      const tagIdsToAdd: string[] = [];
+      const matchingTagIds: string[] = [];
       regexTagTitlesTrimmedAndFiltered.forEach((newTagTitle) => {
         const existingTag = allTags.find(
           (tag) => newTagTitle.toLowerCase() === tag.title.toLowerCase(),
         );
         if (existingTag) {
-          if (!task.tagIds?.includes(existingTag.id)) {
-            tagIdsToAdd.push(existingTag.id);
-          }
+          matchingTagIds.push(existingTag.id);
         } else {
           newTagTitlesToCreate.push(newTagTitle);
         }
       });
 
-      if (tagIdsToAdd.length) {
-        taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
+      if (mode === 'replace') {
+        // Check if arrays arent the same
+        if (
+          !(
+            task.tagIds.length === matchingTagIds.length &&
+            task.tagIds.every((val, i) => val === matchingTagIds[i])
+          )
+        ) {
+          taskChanges.tagIds = matchingTagIds;
+        }
+      } else {
+        const tagIdsToAdd: string[] = [];
+        matchingTagIds.forEach((id) => {
+          if (!task.tagIds?.includes(id)) {
+            tagIdsToAdd.push(id);
+          }
+        });
+        if (tagIdsToAdd.length) {
+          taskChanges.tagIds = [...(task.tagIds as string[]), ...tagIdsToAdd];
+        }
       }
 
       if (
         newTagTitlesToCreate.length ||
-        tagIdsToAdd.length ||
+        taskChanges.tagIds?.length ||
         regexTagTitlesTrimmedAndFiltered.length
       ) {
         taskChanges.title = initialTitle;
@@ -334,17 +362,16 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
       if (!start.isCertain('hour')) {
         hasPlannedTime = false;
       }
-      let inputDate = parsedDateResult.text;
-      // Hacky way to strip short syntax for time estimate that was
-      // accidentally included in the date parser
-      // For example: the task is "Task @14/4 90m" and we don't want "90m"
-      if (inputDate.match(/ [0-9]{1,}m/g)) {
-        inputDate += 'm';
-      }
+
+      const matchText = parsedDateResult.text;
+      const matchIndex = parsedDateResult.index;
+      const textToReplace = rr[0].substring(0, matchIndex + matchText.length);
+
       return {
         dueWithTime: due,
+        dueDay: null,
         // Strip out the short syntax for scheduled date and given date
-        title: task.title.replace(`@${inputDate}`, ''),
+        title: task.title.replace(textToReplace, '').trim(),
         ...(hasPlannedTime ? {} : { hasPlannedTime: false }),
       };
     }
@@ -368,9 +395,14 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
           due.setDate(due.getDate() + 1);
         }
 
+        const matchIndex = simpleMatch.index as number;
+        const matchText = simpleMatch[0];
+        const textToReplace = rr[0].substring(0, matchIndex + matchText.length);
+
         return {
           dueWithTime: due.getTime(),
-          title: task.title.replace(`@${nr}`, ''),
+          dueDay: null,
+          title: task.title.replace(textToReplace, '').trim(),
         };
       }
     }

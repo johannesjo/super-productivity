@@ -86,6 +86,36 @@ describe('dateStrToUtcDate', () => {
     });
   });
 
+  describe('ISO datetime inputs', () => {
+    const isoTestCases = [
+      '2024-01-15T00:00:00Z',
+      '2024-06-21T23:30:00-11:00',
+      '2024-03-10T07:30:00Z', // US DST start day
+      '2024-12-21T12:00:00+05:30',
+      '2024-1-5T12:00:00Z', // single-digit month/day
+    ];
+
+    isoTestCases.forEach((dateStr) => {
+      it(`should parse ISO datetime string ${dateStr} and keep calendar day`, () => {
+        const result = dateStrToUtcDate(dateStr);
+        const [year, month, day] = dateStr.split('T')[0].split('-').map(Number);
+
+        expect(result.getFullYear()).toBe(year);
+        expect(result.getMonth()).toBe(month - 1);
+        expect(result.getDate()).toBe(day);
+        expect(result.getHours()).toBe(0);
+        expect(result.getMinutes()).toBe(0);
+        expect(result.getSeconds()).toBe(0);
+        expect(result.getMilliseconds()).toBe(0);
+      });
+    });
+
+    it('should return Invalid Date for malformed ISO string', () => {
+      (window.confirm as jasmine.Spy).and.returnValue(false);
+      expect(dateStrToUtcDate('2024/01/15T00:00:00Z').toString()).toBe('Invalid Date');
+    });
+  });
+
   describe('edge cases', () => {
     it('should handle month boundaries correctly', () => {
       const testCases = [
@@ -111,6 +141,7 @@ describe('dateStrToUtcDate', () => {
     });
 
     it('should return Invalid Date for invalid inputs', () => {
+      (window.confirm as jasmine.Spy).and.returnValue(false);
       expect(dateStrToUtcDate('invalid-date').toString()).toBe('Invalid Date');
       expect(dateStrToUtcDate('2024-13-01').toString()).toBe('Invalid Date'); // Invalid month
       expect(dateStrToUtcDate('2024-01-32').toString()).toBe('Invalid Date'); // Invalid day

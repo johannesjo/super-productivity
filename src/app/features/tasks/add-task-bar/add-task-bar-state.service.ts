@@ -71,6 +71,10 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({ ...state, tagIds }));
   }
 
+  updateTagIdsFromTxt(tagIdsFromTxt: string[]): void {
+    this._taskInputState.update((state) => ({ ...state, tagIdsFromTxt }));
+  }
+
   updateNewTagTitles(newTagTitles: string[]): void {
     this._taskInputState.update((state) => ({ ...state, newTagTitles }));
   }
@@ -84,7 +88,12 @@ export class AddTaskBarStateService {
   }
 
   clearTags(cleanedInputTxt?: string): void {
-    this._taskInputState.update((state) => ({ ...state, tagIds: [], newTagTitles: [] }));
+    this._taskInputState.update((state) => ({
+      ...state,
+      tagIds: [],
+      tagIdsFromTxt: [],
+      newTagTitles: [],
+    }));
     if (cleanedInputTxt !== undefined) {
       this.inputTxt.set(cleanedInputTxt);
     }
@@ -109,6 +118,7 @@ export class AddTaskBarStateService {
     this._taskInputState.update((state) => ({
       ...state,
       tagIds: [],
+      tagIdsFromTxt: [],
       newTagTitles: [],
       cleanText: null,
     }));

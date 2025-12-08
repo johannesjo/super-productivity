@@ -272,7 +272,6 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
         margin-right: calc(-1 * var(--s) * 2);
         top: 50%;
         transform: translateY(-50%);
-        pointer-events: none;
         transition: var(--transition-standard);
         display: flex;
         background: var(--bg-lighter);
