@@ -175,6 +175,15 @@ const ACTION_AFFECTED_ENTITIES: Record<string, EntityType[]> = {
   '[IssueProvider] Add Issue Provider': ['ISSUE_PROVIDER'],
   '[IssueProvider] Update Issue Provider': ['ISSUE_PROVIDER'],
   '[IssueProvider] Delete Issue Provider': ['ISSUE_PROVIDER'],
+
+  // ==========================================================================
+  // WORK CONTEXT META ACTIONS
+  // ==========================================================================
+  '[WorkContextMeta] Move Task in Today': ['TAG', 'PROJECT'],
+  '[WorkContextMeta] Move Task Up in Today': ['TAG', 'PROJECT'],
+  '[WorkContextMeta] Move Task Down in Today': ['TAG', 'PROJECT'],
+  '[WorkContextMeta] Move Task To Top in Today': ['TAG', 'PROJECT'],
+  '[WorkContextMeta] Move Task To Bottom in Today': ['TAG', 'PROJECT'],
 };
 /* eslint-enable @typescript-eslint/naming-convention */
 

@@ -359,5 +359,57 @@ describe('StateChangeCaptureService', () => {
       // Should still capture - falls back to default types
       expect(service.hasPendingCapture(action)).toBe(true);
     });
+
+    it('should capture TAG entity changes for WorkContextMeta move actions', () => {
+      const action = createMockAction({
+        type: '[WorkContextMeta] Move Task in Today',
+        meta: {
+          isPersistent: true,
+          entityType: 'TAG' as EntityType,
+          entityId: 'TODAY',
+          opType: OpType.Move,
+        },
+        taskId: 'task-1',
+        afterTaskId: 'task-2',
+        workContextType: 'TAG',
+        workContextId: 'TODAY',
+      });
+
+      const beforeState = createMockState({
+        [TAG_FEATURE_NAME]: {
+          ids: ['TODAY'],
+          entities: {
+            TODAY: {
+              id: 'TODAY',
+              title: 'Today',
+              taskIds: ['task-1', 'task-2', 'task-3'],
+            },
+          },
+        },
+      } as any);
+
+      const afterState = createMockState({
+        [TAG_FEATURE_NAME]: {
+          ids: ['TODAY'],
+          entities: {
+            TODAY: {
+              id: 'TODAY',
+              title: 'Today',
+              taskIds: ['task-2', 'task-1', 'task-3'],
+            },
+          },
+        },
+      } as any);
+
+      service.captureBeforeState(action, beforeState);
+      const changes = service.computeEntityChanges(action, afterState);
+
+      const tagChange = changes.find(
+        (c) => c.entityType === 'TAG' && c.entityId === 'TODAY',
+      );
+      expect(tagChange).toBeDefined();
+      expect(tagChange!.opType).toBe(OpType.Update);
+      expect((tagChange!.changes as any).taskIds).toEqual(['task-2', 'task-1', 'task-3']);
+    });
   });
 });
