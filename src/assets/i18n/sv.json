@@ -983,7 +983,7 @@
     "REFLECTION_NOTE": {
       "MSG": "Reflektionsanteckning: ({{date}}): {{content}}",
       "ACTION_DISMISS": "Avvisa"
-	},
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Dölj",
@@ -1774,7 +1774,7 @@
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Lägg till ny anteckning",
-      "ADD_NEW_TASK": "Lägg till ny uppgift"
+      "ADD_NEW_TASK": "Lägg till ny uppgift",
       "ADD_NEW_PROJECT": "Lägg till nytt projekt",
       "APP_WIDE_SHORTCUTS": "Globala genvägar (gäller hela programmet)",
       "COLLAPSE_SUB_TASKS": "Dölj underuppgifter",
@@ -1906,7 +1906,7 @@
       "BREAK_DURATION": "Varaktighet för korta raster",
       "CYCLES_BEFORE_LONGER_BREAK": "Börja längre paus efter X arbetspass",
       "DURATION": "Arbetstidens längd",
-      "HELP": "<p>Pomodoro-timern kan konfigureras via ett par inställningar. Varje arbetspassets längd, längden på normala pauser, antalet arbetspass som ska genomföras innan en längre paus påbörjas och längden på denna längre paus. </p> <p>Du kan också ställa in om du vill visa dina distraktioner under dina pomodoro-pauser. </p> <p>Om du ställer in "Pausa tidsspårning under pomodoro-paus" kommer även dina pauser att spåras som arbetstid som lagts på en uppgift. </p> <p>Om du aktiverar "Pausa pomodoro-session när ingen aktiv uppgift finns" kommer även pomodoro-sessionen att pausas när du pausar en uppgift.",
+      "HELP": "<p>Pomodoro-timern kan konfigureras via ett par inställningar. Varje arbetspassets längd, längden på normala pauser, antalet arbetspass som ska genomföras innan en längre paus påbörjas och längden på denna längre paus. </p> <p>Du kan också ställa in om du vill visa dina distraktioner under dina pomodoro-pauser. </p> <p>Om du ställer in \"Pausa tidsspårning under pomodoro-paus\" kommer även dina pauser att spåras som arbetstid som lagts på en uppgift. </p> <p>Om du aktiverar \"Pausa pomodoro-session när ingen aktiv uppgift finns\" kommer även pomodoro-sessionen att pausas när du pausar en uppgift.</p>",
       "IS_ENABLED": "Aktivera pomodoro-timer",
       "IS_MANUAL_CONTINUE": "Bekräfta manuellt att nästa pomodoro-session ska startas",
       "IS_MANUAL_CONTINUE_BREAK": "Bekräfta manuellt att nästa paus ska börja",

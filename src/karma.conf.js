@@ -72,10 +72,10 @@ module.exports = function (config) {
         debug: true,
       },
     },
-    browserNoActivityTimeout: 6000, // time before killing browser if no signal
-    browserDisconnectTimeout: 2000, // time to wait after disconnection
-    browserDisconnectTolerance: 1, // retry once if disconnect occurs
-    captureTimeout: 10000,
+    browserNoActivityTimeout: 30000, // time before killing browser if no signal (30s for CI stability)
+    browserDisconnectTimeout: 5000, // time to wait after disconnection
+    browserDisconnectTolerance: 2, // retry twice if disconnect occurs
+    captureTimeout: 60000, // time to wait for browser to capture (60s for slower CI)
     reportSlowerThan: 500,
   });
 };

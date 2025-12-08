@@ -922,6 +922,66 @@ describe('createBlockerBlocks()', () => {
   });
 
   describe('icalEventMap', () => {
+    it('should exclude all-day events from blocker blocks', () => {
+      const icalEventMap: ScheduleCalendarMapEntry[] = [
+        {
+          items: [
+            {
+              id: 'AllDayEvent',
+              calProviderId: 'PR',
+              start: getDateTimeFromClockString('00:00', 24 * 60 * 60 * 1000),
+              title: 'All Day Event',
+              duration: 0,
+              isAllDay: true,
+            },
+            {
+              id: 'TimedEvent',
+              calProviderId: 'PR',
+              start: getDateTimeFromClockString('14:00', 24 * 60 * 60 * 1000),
+              title: 'Timed Event',
+              duration: hours(1),
+            },
+          ],
+        },
+      ];
+      const r = createSortedBlockerBlocks([], [], icalEventMap, undefined, undefined, 0);
+
+      // Only the timed event should create a blocker block
+      expect(r.length).toEqual(1);
+      expect(r[0].entries.length).toEqual(1);
+      expect(r[0].entries[0].type).toEqual(BlockedBlockType.CalendarEvent);
+      expect((r[0].entries[0].data as any).title).toEqual('Timed Event');
+    });
+
+    it('should exclude all-day events even when mixed with timed events from same provider', () => {
+      const icalEventMap: ScheduleCalendarMapEntry[] = [
+        {
+          items: [
+            {
+              id: 'AllDay1',
+              calProviderId: 'PR',
+              start: getDateTimeFromClockString('00:00', 0),
+              title: 'All Day 1',
+              duration: 24 * 60 * 60 * 1000, // 24 hours
+              isAllDay: true,
+            },
+            {
+              id: 'AllDay2',
+              calProviderId: 'PR',
+              start: getDateTimeFromClockString('00:00', 24 * 60 * 60 * 1000),
+              title: 'All Day 2',
+              duration: 0,
+              isAllDay: true,
+            },
+          ],
+        },
+      ];
+      const r = createSortedBlockerBlocks([], [], icalEventMap, undefined, undefined, 0);
+
+      // No blocker blocks should be created for all-day events
+      expect(r.length).toEqual(0);
+    });
+
     it('should work for calendar events', () => {
       if (maybeSkipTimezoneDependent('should work for calendar events')) {
         pending('Skipping timezone-dependent test');

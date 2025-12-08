@@ -7,6 +7,7 @@ import {
   Menu,
   MenuItem,
   MenuItemConstructorOptions,
+  nativeTheme,
   shell,
 } from 'electron';
 import { errorHandlerWithFrontendInform } from './error-handler-with-frontend-inform';
@@ -85,11 +86,13 @@ export const createWindow = async ({
     persistedIsUseCustomWindowTitleBar ?? legacyIsUseObsidianStyleHeader ?? true;
   const titleBarStyle: BrowserWindowConstructorOptions['titleBarStyle'] =
     isUseCustomWindowTitleBar || IS_MAC ? 'hidden' : 'default';
+  // Determine initial symbol color based on system theme preference
+  const initialSymbolColor = nativeTheme.shouldUseDarkColors ? '#fff' : '#000';
   const titleBarOverlay: BrowserWindowConstructorOptions['titleBarOverlay'] =
     isUseCustomWindowTitleBar && !IS_MAC
       ? {
           color: '#00000000',
-          symbolColor: '#fff',
+          symbolColor: initialSymbolColor,
           height: 44,
         }
       : undefined;
@@ -220,6 +223,23 @@ export const createWindow = async ({
   ipcMain.on(IPC.APP_READY, () => {
     mainWinModule.isAppReady = true;
   });
+
+  // Listen for theme changes to update title bar overlay symbol color
+  if (isUseCustomWindowTitleBar && !IS_MAC) {
+    ipcMain.on(IPC.UPDATE_TITLE_BAR_DARK_MODE, (ev, isDarkMode: boolean) => {
+      try {
+        const symbolColor = isDarkMode ? '#fff' : '#000';
+        mainWin.setTitleBarOverlay({
+          color: '#00000000',
+          symbolColor,
+          height: 44,
+        });
+      } catch (e) {
+        // setTitleBarOverlay may not be available on all platforms
+        log('Failed to update title bar overlay:', e);
+      }
+    });
+  }
 
   return mainWin;
 };

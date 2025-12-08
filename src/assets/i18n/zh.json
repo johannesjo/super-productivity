@@ -865,6 +865,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "TITLE": "克隆项目？",
+        "MSG": "这个项目相当大，可能需要一段时间才能完成克隆。您确定要继续吗？",
+        "OK": "仍然克隆",
+        "CANCEL": "取消"
+      },
       "D_CREATE": {
         "CREATE": "创建项目",
         "EDIT": "编辑项目",
@@ -1244,8 +1250,8 @@
         "NAME_LABEL": "文件夹名称",
         "NAME_PLACEHOLDER": "输入文件夹名称",
         "NAME_REQUIRED": "文件夹名称是必需的",
-        "NO_PARENT": "无父级（根级别）"
-        "PARENT_LABEL": "父文件夹",
+        "NO_PARENT": "无父级（根级别）",
+        "PARENT_LABEL": "父文件夹"
       },
       "SELECT": {
         "LABEL": "文件夹",
@@ -1874,7 +1880,7 @@
       "TIME_LOCALE_RU_RU": "俄语：24小时制，日.月.年",
       "TIME_LOCALE_ZH_CN": "简体中文：24小时制，年/月/日",
       "TIME_LOCALE_JA_JP": "日语：24小时制，年/月/日",
-      "TIME_LOCALE_KO_KR": "韩语：12小时制（上午/下午），年. 月. 日",
+      "TIME_LOCALE_KO_KR": "韩语：12小时制（上午/下午），年. 月. 日"
     },
     "MISC": {
       "DARK_MODE": "深色模式",
@@ -1883,6 +1889,7 @@
       "DARK_MODE_LIGHT": "浅色",
       "DARK_MODE_SYSTEM": "系统",
       "DEFAULT_PROJECT": "用于任务（如果未指定）的默认项目",
+      "DEFAULT_START_PAGE": "默认首页",
       "FIRST_DAY_OF_WEEK": "一周的第一天",
       "HELP": "<p><strong>没有看到桌面通知？</strong> 对于 Windows，您可能需要检查系统 > 通知和操作，并检查是否已启用所需的通知。</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "自动将今天标签添加到已处理的任务",
@@ -1892,22 +1899,23 @@
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_DISABLE_CELEBRATION": "在每日摘要中禁用庆祝",
-      "USER_PROFILES": "启用用户配置文件（测试版）",
-      "USER_PROFILES_HINT": "允许您创建并切换不同的用户配置文件，每个配置文件拥有独立的设置、任务和同步配置。启用后，配置文件管理按钮将出现在右上角。注意：关闭此功能会隐藏界面，但您的配置文件数据将被保留（测试版功能，无法保证稳定性，请务必提前备份）。",
+      
       "IS_HIDE_NAV": "隐藏导航栏，直到鼠标悬停在标题栏上（仅限桌面端）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
+      "IS_OVERLAY_INDICATOR_ENABLED": "启用覆盖指示器窗口（桌面 Linux/Gnome）",
       "IS_SHOW_TIP_LONGER": "在应用启动时显示生产力提示更长一点",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "在托盘/状态菜单中显示当前倒计时（仅限桌面 Mac）",
       "IS_TRAY_SHOW_CURRENT_TASK": "在托盘/状态菜单中显示当前任务（仅限桌面 Mac/Windows）",
-      "IS_OVERLAY_INDICATOR_ENABLED": "启用覆盖指示器窗口（桌面 Linux/Gnome）",
       "IS_TURN_OFF_MARKDOWN": "关闭任务描述的 Markdown 解析",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Use custom title bar (Windows/Linux only)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Requires restart to take effect",
       "START_OF_NEXT_DAY": "下一天的开始时间",
       "START_OF_NEXT_DAY_HINT": "从何时（小时）开始计算下一天已经开始。默认是午夜，即 0。",
       "TASK_NOTES_TPL": "任务描述模板",
-      "TITLE": "其他设置",
       "THEME": "主题",
       "THEME_EXPERIMENTAL": "主题（实验性）",
-      "THEME_SELECT_LABEL": "选择主题"
+      "THEME_SELECT_LABEL": "选择主题",
+      "TITLE": "更多设置"
     },
     "POMODORO": {
       "BREAK_DURATION": "短休息持续时间",
@@ -1929,7 +1937,8 @@
       "COUNTDOWN_DURATION": "在实际提醒前 X 显示横幅",
       "IS_COUNTDOWN_BANNER_ENABLED": "提醒到期前显示倒计时横幅",
       "DEFAULT_TASK_REMIND_OPTION": "创建任务时默认选中的提醒方式",
-      "TITLE": "提醒"
+      "TITLE": "提醒",
+      "DISABLE_REMINDERS": "禁用所有提醒"
     },
     "SCHEDULE": {
       "HELP": "计划功能应为您快速概览计划任务如何随时间展开。您可以在左侧菜单 <a href='#/schedule'>'计划'</a> 下找到它。",
@@ -2036,6 +2045,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "已复制到剪贴板",
+    "DUPLICATE_PROJECT_ERROR": "该项目无法克隆",
+    "DUPLICATE_PROJECT_SUCCESS": "项目克隆成功",
     "NO_TASKS_TO_COPY": "没有要复制的任务",
     "SHARE_UNAVAILABLE_FALLBACK": "已复制到剪贴板。",
     "SHARE_FAILED_FALLBACK": "共享失败。改为复制到剪贴板。",
@@ -2050,6 +2061,9 @@
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "按下了 {{keyCombo}}，但在项目上下文中才可使用打开书签快捷键。",
     "UNPLANNED_TODAY_TASKS": "取消今日所有的任务",
     "NO_TASKS_TO_UNPLAN": "没有任务需要取消"
+  },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copy)"
   },
   "GPB": {
     "ASSETS": "正在加载资源...",
@@ -2070,6 +2084,7 @@
     "BOARDS": "看板",
     "COPY_TASK_LIST_MARKDOWN": "复制到剪贴板",
     "CREATE_PROJECT": "创建项目",
+    "DUPLICATE_PROJECT": "克隆",
     "CREATE_TAG": "创建标签",
     "DELETE_PROJECT": "删除项目",
     "DELETE_TAG": "删除标签",
