@@ -245,7 +245,12 @@ const handleMoveBeforeTask = (
     // Note: TODAY_TAG is a virtual tag and should NOT be in task.tagIds
     const taskIds = todayTag.taskIds.filter((id) => id !== fromTask.id);
     const targetIndex = taskIds.indexOf(toTaskId);
-    taskIds.splice(targetIndex, 0, fromTask.id);
+    if (targetIndex === -1) {
+      // Edge case: toTaskId was filtered out (e.g., moving task before itself)
+      taskIds.push(fromTask.id);
+    } else {
+      taskIds.splice(targetIndex, 0, fromTask.id);
+    }
 
     state = updateTags(state, [
       {

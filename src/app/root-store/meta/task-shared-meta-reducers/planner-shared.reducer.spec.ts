@@ -341,6 +341,30 @@ describe('plannerSharedMetaReducer', () => {
       metaReducer(testState, action);
       expect(mockReducer).toHaveBeenCalledWith(testState, action);
     });
+
+    it('should handle moving task before itself (edge case where fromTask.id === toTaskId)', () => {
+      // This tests the bounds check fix: when fromTask.id === toTaskId,
+      // filtering removes toTaskId from the list, causing indexOf to return -1
+      const testState = createStateWithExistingTasks(
+        [],
+        [],
+        [],
+        ['first-task', 'same-task', 'last-task'],
+      );
+      const fromTask = createMockTask({ id: 'same-task' });
+      const action = createMoveBeforeTaskAction(fromTask, 'same-task');
+
+      metaReducer(testState, action);
+      // Task should be appended to end as fallback when target is not found
+      expectStateUpdate(
+        expectTagUpdate('TODAY', {
+          taskIds: ['first-task', 'last-task', 'same-task'],
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
   });
 
   describe('other actions', () => {
