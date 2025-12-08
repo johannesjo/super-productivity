@@ -34,10 +34,6 @@ import { DROPBOX_APP_KEY } from '../imex/sync/dropbox/dropbox.const';
 import { Webdav } from './api/sync/providers/webdav/webdav';
 import { SuperSyncProvider } from './api/sync/providers/super-sync/super-sync';
 import { isDataRepairPossible } from './repair/is-data-repair-possible.util';
-import {
-  getLastValidityError,
-  isRelatedModelDataValid,
-} from './validate/is-related-model-data-valid';
 import { dataRepair } from './repair/data-repair';
 import { LocalFileSyncElectron } from './api/sync/providers/local-file-sync/local-file-sync-electron';
 import { IS_ELECTRON } from '../app.constants';
@@ -50,7 +46,7 @@ import {
 } from '../features/time-tracking/time-tracking.model';
 import { initialTimeTrackingState } from '../features/time-tracking/store/time-tracking.reducer';
 import { CROSS_MODEL_MIGRATIONS } from './migrate/cross-model-migrations';
-import { appDataValidators, validateAllData } from './validate/validation-fn';
+import { appDataValidators, validateFull } from './validate/validation-fn';
 import { fixEntityStateConsistency } from '../util/check-fix-entity-state-consistency';
 import { IValidation } from 'typia';
 import { PFLog } from '../core/log';
@@ -234,31 +230,33 @@ export const PFAPI_SYNC_PROVIDERS = [
 export const PFAPI_CFG: PfapiBaseCfg<PfapiAllModelCfg> = {
   crossModelVersion: CROSS_MODEL_VERSION,
   validate: (data) => {
-    // console.time('validateAllData');
-    const r = validateAllData(data);
+    const result = validateFull(data);
 
-    if (!environment.production && !r.success) {
-      PFLog.log(r);
-      alert('VALIDATION ERROR ');
+    if (!environment.production && !result.isValid) {
+      PFLog.log(result);
+      alert('VALIDATION ERROR');
     }
 
-    // console.time('relatedDataValidation');
-    if (r.success && !isRelatedModelDataValid(data)) {
+    if (result.isValid) {
+      return result.typiaResult;
+    }
+
+    // Cross-model error - wrap in typia format
+    if (result.crossModelError) {
       return {
         success: false,
         data,
         errors: [
           {
-            expected: getLastValidityError() || 'Valid Cross Model Relations',
+            expected: result.crossModelError,
             path: '.',
             value: data,
           },
         ],
       };
     }
-    // console.timeEnd('relatedDataValidation');
-    // console.timeEnd('validateAllData');
-    return r;
+
+    return result.typiaResult;
   },
   onDbError: (err) => {
     PFLog.err(err);

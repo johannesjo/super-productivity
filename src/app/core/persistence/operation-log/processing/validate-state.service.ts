@@ -1,11 +1,7 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { IValidation } from 'typia';
-import { validateAllData } from '../../../../pfapi/validate/validation-fn';
-import {
-  isRelatedModelDataValid,
-  getLastValidityError,
-} from '../../../../pfapi/validate/is-related-model-data-valid';
+import { validateFull } from '../../../../pfapi/validate/validation-fn';
 import { dataRepair } from '../../../../pfapi/repair/data-repair';
 import { isDataRepairPossible } from '../../../../pfapi/repair/is-data-repair-possible.util';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
@@ -185,49 +181,36 @@ export class ValidateStateService {
 
   /**
    * Validates application state using both Typia schema validation
-   * and cross-model relationship validation.
+   * and cross-model relationship validation via the shared validateFull() function.
    */
   validateState(state: AppDataCompleteNew): StateValidationResult {
+    const fullResult = validateFull(state);
+
+    if (fullResult.isValid) {
+      OpLog.normal('[ValidateStateService] State validation passed');
+      return {
+        isValid: true,
+        typiaErrors: [],
+      };
+    }
+
     const result: StateValidationResult = {
-      isValid: true,
+      isValid: false,
       typiaErrors: [],
     };
 
-    // 1. Run Typia schema validation
-    const typiaResult = validateAllData(state);
-    if (!typiaResult.success) {
-      result.isValid = false;
-      result.typiaErrors = (typiaResult as IValidation.IFailure).errors || [];
+    if (!fullResult.typiaResult.success) {
+      result.typiaErrors = (fullResult.typiaResult as IValidation.IFailure).errors || [];
       OpLog.warn('[ValidateStateService] Typia validation failed', {
         errorCount: result.typiaErrors.length,
       });
     }
 
-    // 2. Run cross-model relationship validation
-    let isRelatedValid = false;
-    try {
-      isRelatedValid = isRelatedModelDataValid(state);
-    } catch (e) {
-      isRelatedValid = false;
-      OpLog.warn('[ValidateStateService] Cross-model validation threw error', e);
-      // Ensure we capture the error
-      if (!getLastValidityError()) {
-        // If isRelatedModelDataValid threw without setting lastValidityError (unlikely but possible)
-        // we should manually set it or just use the exception message
-        result.crossModelError = e instanceof Error ? e.message : String(e);
-      }
-    }
-
-    if (!isRelatedValid) {
-      result.isValid = false;
-      result.crossModelError = result.crossModelError || getLastValidityError();
+    if (fullResult.crossModelError) {
+      result.crossModelError = fullResult.crossModelError;
       OpLog.warn('[ValidateStateService] Cross-model validation failed', {
         error: result.crossModelError,
       });
-    }
-
-    if (result.isValid) {
-      OpLog.normal('[ValidateStateService] State validation passed');
     }
 
     return result;

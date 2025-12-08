@@ -1,5 +1,9 @@
 import { isEntityStateConsistent } from '../../util/check-fix-entity-state-consistency';
 import {
+  getLastValidityError,
+  isRelatedModelDataValid,
+} from './is-related-model-data-valid';
+import {
   ArchiveModel,
   TimeTrackingState,
 } from '../../features/time-tracking/time-tracking.model';
@@ -138,4 +142,53 @@ const _wrapValidate = <R>(
   }
 
   return result;
+};
+
+/**
+ * Result of full validation (Typia schema + cross-model relationships).
+ */
+export interface FullValidationResult {
+  isValid: boolean;
+  typiaResult: ValidationResult<AppDataCompleteNew>;
+  crossModelError?: string;
+}
+
+/**
+ * Performs complete validation: Typia schema validation followed by cross-model
+ * relationship validation. This is the single source of truth for full data validation.
+ *
+ * Used by both PFAPI_CFG.validate and ValidateStateService.
+ */
+export const validateFull = (data: AppDataCompleteNew): FullValidationResult => {
+  const typiaResult = validateAllData(data);
+
+  if (!typiaResult.success) {
+    return {
+      isValid: false,
+      typiaResult,
+    };
+  }
+
+  // isRelatedModelDataValid can throw errors in dev mode via devError
+  let isRelatedValid = false;
+  let crossModelError: string | undefined;
+  try {
+    isRelatedValid = isRelatedModelDataValid(data);
+  } catch (e) {
+    isRelatedValid = false;
+    crossModelError = e instanceof Error ? e.message : String(e);
+  }
+
+  if (!isRelatedValid) {
+    return {
+      isValid: false,
+      typiaResult,
+      crossModelError: crossModelError || getLastValidityError(),
+    };
+  }
+
+  return {
+    isValid: true,
+    typiaResult,
+  };
 };
