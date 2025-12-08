@@ -151,14 +151,15 @@ The `take(1)` operator ensures the observable completes after receiving one valu
 
 ## High Priority Issues
 
-### 1. Snapshot Saved Before Validation
+### 1. ~~Snapshot Saved Before Validation~~ - FIXED
 
 **File:** `src/app/core/persistence/operation-log/store/operation-log-hydrator.service.ts`
-**Lines:** 167-176
+**Lines:** 166-179
+**Status:** Fixed on 2025-12-08
 
-Snapshot saved at line 171, validation runs at line 176. If validation finds corruption and repairs, the snapshot is stale.
+**Original Issue:** Snapshot was saved before validation ran. If validation found corruption and repaired it, the snapshot was stale.
 
-**Fix:** Move validation (Checkpoint C) BEFORE saving snapshot.
+**Fix Applied:** Moved validation (CHECKPOINT C) BEFORE saving snapshot in both tail replay and full replay code paths. Snapshot now contains validated/repaired state.
 
 ---
 
@@ -377,12 +378,12 @@ Checks `!task.projectId` but doesn't verify project still exists (could be delet
 
 ### Phase 2: High Priority (Current)
 
-| #   | Issue                          | File                                      |
-| --- | ------------------------------ | ----------------------------------------- |
-| 1   | Snapshot timing                | operation-log-hydrator.service.ts:167-176 |
-| 2   | Subtask orphan detection       | tag-shared.reducer.ts                     |
-| 3   | Race conditions                | task-due.effects.ts:40-65                 |
-| 4   | Error handling standardization | Multiple effects                          |
+| #   | Issue                          | Status                    |
+| --- | ------------------------------ | ------------------------- |
+| 1   | Snapshot timing                | **FIXED** (2025-12-08)    |
+| 2   | Subtask orphan detection       | tag-shared.reducer.ts     |
+| 3   | Race conditions                | task-due.effects.ts:40-65 |
+| 4   | Error handling standardization | Multiple effects          |
 
 ### Phase 3: Add Tests
 

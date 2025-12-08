@@ -304,6 +304,38 @@ describe('OperationLogHydratorService', () => {
 
         expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
       });
+
+      it('should validate state BEFORE saving snapshot (regression test)', async () => {
+        // This tests the fix for the bug where snapshot was saved before validation.
+        // If validation repairs the state, saving snapshot first would persist corrupted state.
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        const tailOps = Array.from({ length: 15 }, (_, i) =>
+          createMockEntry(6 + i, createMockOperation(`op-${6 + i}`)),
+        );
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
+        mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(20));
+
+        // Track order of operations
+        const callOrder: string[] = [];
+        mockValidateStateService.validateAndRepair.and.callFake(() => {
+          callOrder.push('validate');
+          return { isValid: true, wasRepaired: false };
+        });
+        mockOpLogStore.saveStateCache.and.callFake(() => {
+          callOrder.push('saveSnapshot');
+          return Promise.resolve();
+        });
+
+        await service.hydrateStore();
+
+        // Validate should be called before saveStateCache
+        const validateIndex = callOrder.indexOf('validate');
+        const saveIndex = callOrder.indexOf('saveSnapshot');
+        expect(validateIndex).toBeGreaterThanOrEqual(0);
+        expect(saveIndex).toBeGreaterThanOrEqual(0);
+        expect(validateIndex).toBeLessThan(saveIndex);
+      });
     });
 
     describe('full state operations optimization', () => {
@@ -546,6 +578,37 @@ describe('OperationLogHydratorService', () => {
         await service.hydrateStore();
 
         expect(mockOpLogStore.saveStateCache).toHaveBeenCalled();
+      });
+
+      it('should validate state BEFORE saving snapshot in full replay (regression test)', async () => {
+        // Similar to tail replay test - validation must happen before snapshot save
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
+        const allOps = [
+          createMockEntry(1, createMockOperation('op-1')),
+          createMockEntry(2, createMockOperation('op-2')),
+        ];
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(allOps));
+        mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(2));
+
+        // Track order of operations
+        const callOrder: string[] = [];
+        mockValidateStateService.validateAndRepair.and.callFake(() => {
+          callOrder.push('validate');
+          return { isValid: true, wasRepaired: false };
+        });
+        mockOpLogStore.saveStateCache.and.callFake(() => {
+          callOrder.push('saveSnapshot');
+          return Promise.resolve();
+        });
+
+        await service.hydrateStore();
+
+        // Validate should be called before saveStateCache
+        const validateIndex = callOrder.indexOf('validate');
+        const saveIndex = callOrder.indexOf('saveSnapshot');
+        expect(validateIndex).toBeGreaterThanOrEqual(0);
+        expect(saveIndex).toBeGreaterThanOrEqual(0);
+        expect(validateIndex).toBeLessThan(saveIndex);
       });
     });
   });

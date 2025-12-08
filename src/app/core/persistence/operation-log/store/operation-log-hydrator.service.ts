@@ -163,17 +163,19 @@ export class OperationLogHydratorService {
             // rather than throwing errors (e.g., adding subtask to deleted parent).
             await this.operationApplierService.applyOperations(opsToReplay);
 
+            // CHECKPOINT C: Validate state after replaying tail operations
+            // Must validate BEFORE saving snapshot to avoid persisting corrupted state
+            if (!this._repairMutex) {
+              await this._validateAndRepairCurrentState('tail-replay');
+            }
+
             // 5. If we replayed many ops, save a new snapshot for faster future loads
+            // Snapshot is saved AFTER validation to ensure we persist valid/repaired state
             if (opsToReplay.length > 10) {
               OpLog.normal(
                 `OperationLogHydratorService: Saving new snapshot after replaying ${opsToReplay.length} ops`,
               );
               await this._saveCurrentStateAsSnapshot();
-            }
-
-            // CHECKPOINT C: Validate state after replaying tail operations
-            if (!this._repairMutex) {
-              await this._validateAndRepairCurrentState('tail-replay');
             }
           }
         }
@@ -235,16 +237,18 @@ export class OperationLogHydratorService {
           // rather than throwing errors (e.g., adding subtask to deleted parent).
           await this.operationApplierService.applyOperations(opsToReplay);
 
+          // CHECKPOINT C: Validate state after replaying all operations
+          // Must validate BEFORE saving snapshot to avoid persisting corrupted state
+          if (!this._repairMutex) {
+            await this._validateAndRepairCurrentState('full-replay');
+          }
+
           // Save snapshot after replay for faster future loads
+          // Snapshot is saved AFTER validation to ensure we persist valid/repaired state
           OpLog.normal(
             `OperationLogHydratorService: Saving snapshot after replaying ${opsToReplay.length} ops`,
           );
           await this._saveCurrentStateAsSnapshot();
-
-          // CHECKPOINT C: Validate state after replaying all operations
-          if (!this._repairMutex) {
-            await this._validateAndRepairCurrentState('full-replay');
-          }
         }
 
         OpLog.normal('OperationLogHydratorService: Full replay complete.');

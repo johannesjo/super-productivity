@@ -96,13 +96,14 @@ if (!cache) {
 
 When tags deleted, orphan detection only runs on parent tasks. Subtasks of surviving parents that lose all tags become orphaned but aren't cleaned up.
 
-### 3. Snapshot Saved Before Validation
+### 3. ~~Snapshot Saved Before Validation~~ - FIXED
 
-**File:** `src/app/core/persistence/operation-log/store/operation-log-hydrator.service.ts:167-176`
+**File:** `src/app/core/persistence/operation-log/store/operation-log-hydrator.service.ts:166-179`
+**Status:** Fixed on 2025-12-08
 
-Snapshot saved at line 171, validation runs at line 176. If validation finds corruption and repairs, the snapshot is now stale/wrong.
+**Original Issue:** Snapshot was saved before validation ran. If validation found corruption, the snapshot was stale.
 
-**Fix:** Move validation (Checkpoint C) BEFORE saving snapshot.
+**Fix Applied:** Moved validation (CHECKPOINT C) BEFORE saving snapshot in both tail replay and full replay code paths.
 
 ### 4. No Error Handling in applyShortSyntax Sub-Functions
 
