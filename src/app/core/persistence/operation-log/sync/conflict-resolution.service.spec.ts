@@ -41,6 +41,7 @@ describe('ConflictResolutionService', () => {
       'markApplied',
       'markRejected',
       'markFailed',
+      'getUnsyncedByEntity',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
@@ -62,6 +63,7 @@ describe('ConflictResolutionService', () => {
     // Default mock behaviors
     mockOperationApplier.applyOperations.and.resolveTo();
     mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
+    mockOpLogStore.getUnsyncedByEntity.and.resolveTo(new Map());
   });
 
   it('should be created', () => {
@@ -147,6 +149,148 @@ describe('ConflictResolutionService', () => {
       expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
 
       expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
+
+    it('should reject all pending ops for affected entities when remote wins', async () => {
+      // Scenario: TASK:task-1 has 3 pending ops, only first is in conflict
+      const siblingOps = [
+        createMockOp('sibling-1', 'local'),
+        createMockOp('sibling-2', 'local'),
+      ];
+
+      const conflictsWithSiblings: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createMockOp('local-1', 'local')],
+          remoteOps: [createMockOp('remote-1', 'remote')],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'remote']]),
+            conflicts: conflictsWithSiblings,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      // Mock getUnsyncedByEntity to return sibling ops for TASK:task-1
+      const unsyncedByEntity = new Map([['TASK:task-1', siblingOps]]);
+      mockOpLogStore.getUnsyncedByEntity.and.resolveTo(unsyncedByEntity);
+
+      await service.presentConflicts(conflictsWithSiblings);
+
+      // Should reject direct conflict op AND sibling ops
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(
+        jasmine.arrayContaining(['local-1', 'sibling-1', 'sibling-2']),
+      );
+    });
+
+    it('should NOT reject sibling pending ops when local wins', async () => {
+      // Scenario: User chooses local - sibling ops should remain pending
+      const siblingOps = [
+        createMockOp('sibling-1', 'local'),
+        createMockOp('sibling-2', 'local'),
+      ];
+
+      const conflictsWithSiblings: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createMockOp('local-1', 'local')],
+          remoteOps: [createMockOp('remote-1', 'remote')],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'local']]), // User chooses LOCAL
+            conflicts: conflictsWithSiblings,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      // Mock getUnsyncedByEntity - should NOT be called when local wins
+      const unsyncedByEntity = new Map([['TASK:task-1', siblingOps]]);
+      mockOpLogStore.getUnsyncedByEntity.and.resolveTo(unsyncedByEntity);
+
+      await service.presentConflicts(conflictsWithSiblings);
+
+      // Should only reject the remote op, NOT sibling local ops
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['remote-1']);
+      // getUnsyncedByEntity should not be called when no local ops are rejected
+      expect(mockOpLogStore.getUnsyncedByEntity).not.toHaveBeenCalled();
+    });
+
+    it('should only reject sibling ops for entities where remote won in mixed resolutions', async () => {
+      // Scenario: Two conflicts - one resolved as remote, one as local
+      // Sibling ops should only be rejected for the entity where remote won
+      const task1SiblingOps = [createMockOp('task1-sibling', 'local')];
+      const task2SiblingOps = [
+        { ...createMockOp('task2-sibling', 'local'), entityId: 'task-2' },
+      ];
+
+      const mixedConflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createMockOp('local-1', 'local')],
+          remoteOps: [createMockOp('remote-1', 'remote')],
+          suggestedResolution: 'manual',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'task-2',
+          localOps: [{ ...createMockOp('local-2', 'local'), entityId: 'task-2' }],
+          remoteOps: [{ ...createMockOp('remote-2', 'remote'), entityId: 'task-2' }],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([
+              [0, 'remote'], // task-1: remote wins
+              [1, 'local'], // task-2: local wins
+            ]),
+            conflicts: mixedConflicts,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      // Mock getUnsyncedByEntity with sibling ops for both entities
+      const unsyncedByEntity = new Map([
+        ['TASK:task-1', task1SiblingOps],
+        ['TASK:task-2', task2SiblingOps],
+      ]);
+      mockOpLogStore.getUnsyncedByEntity.and.resolveTo(unsyncedByEntity);
+
+      await service.presentConflicts(mixedConflicts);
+
+      // Should reject:
+      // - local-1 (direct conflict, remote won)
+      // - task1-sibling (sibling of entity where remote won)
+      // - remote-2 (direct conflict, local won)
+      // Should NOT reject task2-sibling (local won for task-2)
+      const rejectedCalls = mockOpLogStore.markRejected.calls.allArgs();
+      const allRejectedIds = rejectedCalls.flat().flat();
+
+      expect(allRejectedIds).toContain('local-1');
+      expect(allRejectedIds).toContain('task1-sibling');
+      expect(allRejectedIds).toContain('remote-2');
+      expect(allRejectedIds).not.toContain('task2-sibling');
     });
 
     it('should handle partial failures during remote resolution', async () => {

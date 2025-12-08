@@ -4,6 +4,7 @@ import { EntityConflict, Operation } from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { OpLog } from '../../../log';
+import { toEntityKey } from '../entity-key.util';
 import {
   ConflictResolutionResult,
   DialogConflictResolutionComponent,
@@ -113,6 +114,38 @@ export class ConflictResolutionService {
         OpLog.normal(
           `ConflictResolutionService: Keeping local ops for ${conflict.entityId}`,
         );
+      }
+    }
+
+    // Step 1.5: Reject ALL pending ops for entities where remote won
+    // This prevents stale ops (with outdated vector clocks) from being uploaded
+    if (localOpsToReject.length > 0) {
+      const affectedEntityKeys = new Set<string>();
+      for (let i = 0; i < conflicts.length; i++) {
+        const conflict = conflicts[i];
+        const resolution = result.resolutions.get(i);
+        if (resolution === 'remote') {
+          for (const op of conflict.remoteOps) {
+            const ids = op.entityIds || (op.entityId ? [op.entityId] : []);
+            for (const id of ids) {
+              affectedEntityKeys.add(toEntityKey(op.entityType, id));
+            }
+          }
+        }
+      }
+
+      // Get all pending ops and reject those targeting affected entities
+      const pendingByEntity = await this.opLogStore.getUnsyncedByEntity();
+      for (const entityKey of affectedEntityKeys) {
+        const pendingOps = pendingByEntity.get(entityKey) || [];
+        for (const op of pendingOps) {
+          if (!localOpsToReject.includes(op.id)) {
+            localOpsToReject.push(op.id);
+            OpLog.normal(
+              `ConflictResolutionService: Also rejecting stale op ${op.id} for entity ${entityKey}`,
+            );
+          }
+        }
       }
     }
 
