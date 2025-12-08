@@ -163,14 +163,20 @@ The `take(1)` operator ensures the observable completes after receiving one valu
 
 ---
 
-### 2. Missing Subtask Cascade in Tag Deletion
+### 2. ~~Missing Subtask Cascade in Tag Deletion~~ - FALSE POSITIVE
 
 **File:** `src/app/root-store/meta/task-shared-meta-reducers/tag-shared.reducer.ts`
 **Lines:** 85-116
+**Status:** Re-evaluated on 2025-12-08 - NOT A BUG
 
-Orphan detection only runs on parent tasks. Subtasks of surviving parents that lose all tags become orphaned but aren't cleaned up.
+**Original Claim:** Subtasks of surviving parents that lose all tags become orphaned but aren't cleaned up.
 
-**Fix:** After removing tags from tasks, also check subtasks of surviving parents.
+**Why It's Not a Bug:** A subtask with a surviving parent is NOT orphaned - it's still accessible through its parent in the UI. The current logic is correct:
+
+- A task is orphaned only if it has no tags, no project, AND no parent
+- Subtasks always have a `parentId`, so they're never directly orphaned
+- If a parent becomes orphaned, its subtasks ARE correctly deleted via `removeOrphanedTasks()`
+- If a parent survives, its subtasks remain accessible through the parent
 
 ---
 
@@ -378,12 +384,12 @@ Checks `!task.projectId` but doesn't verify project still exists (could be delet
 
 ### Phase 2: High Priority (Current)
 
-| #   | Issue                          | Status                    |
-| --- | ------------------------------ | ------------------------- |
-| 1   | Snapshot timing                | **FIXED** (2025-12-08)    |
-| 2   | Subtask orphan detection       | tag-shared.reducer.ts     |
-| 3   | Race conditions                | task-due.effects.ts:40-65 |
-| 4   | Error handling standardization | Multiple effects          |
+| #   | Issue                          | Status                      |
+| --- | ------------------------------ | --------------------------- |
+| 1   | Snapshot timing                | **FIXED** (2025-12-08)      |
+| 2   | Subtask orphan detection       | FALSE POSITIVE (2025-12-08) |
+| 3   | Race conditions                | task-due.effects.ts:40-65   |
+| 4   | Error handling standardization | Multiple effects            |
 
 ### Phase 3: Add Tests
 

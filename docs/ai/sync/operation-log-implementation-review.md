@@ -90,11 +90,17 @@ if (!cache) {
 
 ## High Priority Issues
 
-### 2. Missing Subtask Cascade in Tag Deletion
+### 2. ~~Missing Subtask Cascade in Tag Deletion~~ - FALSE POSITIVE
 
 **File:** `src/app/root-store/meta/task-shared-meta-reducers/tag-shared.reducer.ts:85-116`
+**Status:** Re-evaluated on 2025-12-08 - NOT A BUG
 
-When tags deleted, orphan detection only runs on parent tasks. Subtasks of surviving parents that lose all tags become orphaned but aren't cleaned up.
+**Original Claim:** Subtasks of surviving parents that lose all tags become orphaned.
+
+**Why It's Not a Bug:** A subtask with a surviving parent is still accessible through the parent. The current logic correctly:
+
+- Only marks tasks as orphaned if they have no tags, no project, AND no parent
+- Deletes subtasks when their parent is orphaned
 
 ### 3. ~~Snapshot Saved Before Validation~~ - FIXED
 
