@@ -8,12 +8,15 @@ import { Task, TaskWithSubTasks } from '../../../../features/tasks/task.model';
 import { ArchiveModel } from '../../../../features/time-tracking/time-tracking.model';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
+import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
+import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
 
 describe('ArchiveOperationHandler', () => {
   let service: ArchiveOperationHandler;
   let mockArchiveService: jasmine.SpyObj<ArchiveService>;
   let mockTaskArchiveService: jasmine.SpyObj<TaskArchiveService>;
   let mockPfapiService: jasmine.SpyObj<PfapiService>;
+  let mockTimeTrackingService: jasmine.SpyObj<TimeTrackingService>;
 
   const createMockTaskWithSubTasks = (
     id: string,
@@ -43,7 +46,16 @@ describe('ArchiveOperationHandler', () => {
     mockArchiveService = jasmine.createSpyObj('ArchiveService', [
       'writeTasksToArchiveForRemoteSync',
     ]);
-    mockTaskArchiveService = jasmine.createSpyObj('TaskArchiveService', ['deleteTasks']);
+    mockTaskArchiveService = jasmine.createSpyObj('TaskArchiveService', [
+      'deleteTasks',
+      'removeAllArchiveTasksForProject',
+      'removeTagsFromAllTasks',
+      'removeRepeatCfgFromArchiveTasks',
+    ]);
+    mockTimeTrackingService = jasmine.createSpyObj('TimeTrackingService', [
+      'cleanupDataEverywhereForProject',
+      'cleanupArchiveDataForTag',
+    ]);
     mockPfapiService = jasmine.createSpyObj('PfapiService', [], {
       m: {
         archiveYoung: {
@@ -66,6 +78,17 @@ describe('ArchiveOperationHandler', () => {
       Promise.resolve(),
     );
     mockTaskArchiveService.deleteTasks.and.returnValue(Promise.resolve());
+    mockTaskArchiveService.removeAllArchiveTasksForProject.and.returnValue(
+      Promise.resolve(),
+    );
+    mockTaskArchiveService.removeTagsFromAllTasks.and.returnValue(Promise.resolve());
+    mockTaskArchiveService.removeRepeatCfgFromArchiveTasks.and.returnValue(
+      Promise.resolve(),
+    );
+    mockTimeTrackingService.cleanupDataEverywhereForProject.and.returnValue(
+      Promise.resolve(),
+    );
+    mockTimeTrackingService.cleanupArchiveDataForTag.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -73,6 +96,7 @@ describe('ArchiveOperationHandler', () => {
         { provide: ArchiveService, useValue: mockArchiveService },
         { provide: TaskArchiveService, useValue: mockTaskArchiveService },
         { provide: PfapiService, useValue: mockPfapiService },
+        { provide: TimeTrackingService, useValue: mockTimeTrackingService },
       ],
     });
 
@@ -218,6 +242,144 @@ describe('ArchiveOperationHandler', () => {
       });
     });
 
+    describe('deleteProject action', () => {
+      it('should remove all archive tasks for the deleted project', async () => {
+        const action = {
+          type: TaskSharedActions.deleteProject.type,
+          projectId: 'project-1',
+          noteIds: [],
+          allTaskIds: ['task-1', 'task-2'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).toHaveBeenCalledWith('project-1');
+        expect(
+          mockTimeTrackingService.cleanupDataEverywhereForProject,
+        ).toHaveBeenCalledWith('project-1');
+      });
+
+      it('should not call other handlers for deleteProject', async () => {
+        const action = {
+          type: TaskSharedActions.deleteProject.type,
+          projectId: 'project-1',
+          noteIds: [],
+          allTaskIds: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deleteTag action', () => {
+      it('should remove tag from all archive tasks for single tag deletion', async () => {
+        const action = {
+          type: deleteTag.type,
+          id: 'tag-1',
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
+          'tag-1',
+        ]);
+        expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
+          'tag-1',
+        );
+      });
+
+      it('should remove multiple tags for deleteTags action', async () => {
+        const action = {
+          type: deleteTags.type,
+          ids: ['tag-1', 'tag-2', 'tag-3'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).toHaveBeenCalledWith([
+          'tag-1',
+          'tag-2',
+          'tag-3',
+        ]);
+        expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledTimes(3);
+        expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
+          'tag-1',
+        );
+        expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
+          'tag-2',
+        );
+        expect(mockTimeTrackingService.cleanupArchiveDataForTag).toHaveBeenCalledWith(
+          'tag-3',
+        );
+      });
+
+      it('should not call other handlers for deleteTag', async () => {
+        const action = {
+          type: deleteTag.type,
+          id: 'tag-1',
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deleteTaskRepeatCfg action', () => {
+      it('should remove repeatCfgId from all archive tasks', async () => {
+        const action = {
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: 'repeat-cfg-1',
+          taskIdsToUnlink: ['task-1', 'task-2'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).toHaveBeenCalledWith('repeat-cfg-1');
+      });
+
+      it('should not call other handlers for deleteTaskRepeatCfg', async () => {
+        const action = {
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: 'repeat-cfg-1',
+          taskIdsToUnlink: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
+      });
+    });
+
     describe('unhandled actions', () => {
       it('should do nothing for unhandled action types', async () => {
         const action = {
@@ -231,6 +393,13 @@ describe('ArchiveOperationHandler', () => {
           mockArchiveService.writeTasksToArchiveForRemoteSync,
         ).not.toHaveBeenCalled();
         expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).not.toHaveBeenCalled();
         expect(mockPfapiService.m.archiveYoung.load).not.toHaveBeenCalled();
       });
 
@@ -325,6 +494,54 @@ describe('ArchiveOperationHandler', () => {
         await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWithError(
           'Load failed',
         );
+      });
+
+      it('should propagate errors from removeAllArchiveTasksForProject', async () => {
+        const error = new Error('Remove project tasks failed');
+        mockTaskArchiveService.removeAllArchiveTasksForProject.and.returnValue(
+          Promise.reject(error),
+        );
+
+        const action = {
+          type: TaskSharedActions.deleteProject.type,
+          projectId: 'project-1',
+          noteIds: [],
+          allTaskIds: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+      });
+
+      it('should propagate errors from removeTagsFromAllTasks', async () => {
+        const error = new Error('Remove tags failed');
+        mockTaskArchiveService.removeTagsFromAllTasks.and.returnValue(
+          Promise.reject(error),
+        );
+
+        const action = {
+          type: deleteTag.type,
+          id: 'tag-1',
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+      });
+
+      it('should propagate errors from removeRepeatCfgFromArchiveTasks', async () => {
+        const error = new Error('Remove repeat cfg failed');
+        mockTaskArchiveService.removeRepeatCfgFromArchiveTasks.and.returnValue(
+          Promise.reject(error),
+        );
+
+        const action = {
+          type: TaskSharedActions.deleteTaskRepeatCfg.type,
+          taskRepeatCfgId: 'repeat-cfg-1',
+          taskIdsToUnlink: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
       });
     });
   });

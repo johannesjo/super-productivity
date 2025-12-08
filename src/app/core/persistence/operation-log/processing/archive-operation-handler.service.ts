@@ -9,6 +9,8 @@ import { sortTimeTrackingAndTasksFromArchiveYoungToOld } from '../../../../featu
 import { ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../../../../features/time-tracking/archive.service';
 import { Log } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
+import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
+import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
 
 /**
  * Handles archive-specific side effects for REMOTE operations.
@@ -32,6 +34,9 @@ import { lazyInject } from '../../../../util/lazy-inject';
  * - **moveToArchive**: Writes archived tasks to archiveYoung storage
  * - **restoreTask**: Removes task from archive storage
  * - **flushYoungToOld**: Moves old tasks from archiveYoung to archiveOld
+ * - **deleteProject**: Removes all tasks for the deleted project from archive
+ * - **deleteTag/deleteTags**: Removes tag references from archive tasks, deletes orphaned tasks
+ * - **deleteTaskRepeatCfg**: Removes repeatCfgId from archive tasks
  *
  * ## Important Notes
  *
@@ -51,6 +56,7 @@ export class ArchiveOperationHandler {
   private _getArchiveService = lazyInject(this._injector, ArchiveService);
   private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);
   private _getPfapiService = lazyInject(this._injector, PfapiService);
+  private _getTimeTrackingService = lazyInject(this._injector, TimeTrackingService);
 
   /**
    * Process a remote operation and handle any archive-related side effects.
@@ -70,6 +76,19 @@ export class ArchiveOperationHandler {
 
       case flushYoungToOld.type:
         await this._handleFlushYoungToOld(action);
+        break;
+
+      case TaskSharedActions.deleteProject.type:
+        await this._handleDeleteProject(action);
+        break;
+
+      case deleteTag.type:
+      case deleteTags.type:
+        await this._handleDeleteTags(action);
+        break;
+
+      case TaskSharedActions.deleteTaskRepeatCfg.type:
+        await this._handleDeleteTaskRepeatCfg(action);
         break;
     }
   }
@@ -139,5 +158,44 @@ export class ArchiveOperationHandler {
     Log.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',
     );
+  }
+
+  /**
+   * Removes all archived tasks for a deleted project.
+   * Called when receiving a remote deleteProject operation.
+   */
+  private async _handleDeleteProject(action: PersistentAction): Promise<void> {
+    const projectId = (action as ReturnType<typeof TaskSharedActions.deleteProject>)
+      .projectId;
+    await this._getTaskArchiveService().removeAllArchiveTasksForProject(projectId);
+    await this._getTimeTrackingService().cleanupDataEverywhereForProject(projectId);
+  }
+
+  /**
+   * Removes tag references from archived tasks and deletes orphaned tasks.
+   * Called when receiving a remote deleteTag or deleteTags operation.
+   */
+  private async _handleDeleteTags(action: PersistentAction): Promise<void> {
+    const tagIdsToRemove =
+      action.type === deleteTags.type
+        ? (action as ReturnType<typeof deleteTags>).ids
+        : [(action as ReturnType<typeof deleteTag>).id];
+
+    await this._getTaskArchiveService().removeTagsFromAllTasks(tagIdsToRemove);
+
+    for (const tagId of tagIdsToRemove) {
+      await this._getTimeTrackingService().cleanupArchiveDataForTag(tagId);
+    }
+  }
+
+  /**
+   * Removes repeatCfgId from archived tasks.
+   * Called when receiving a remote deleteTaskRepeatCfg operation.
+   */
+  private async _handleDeleteTaskRepeatCfg(action: PersistentAction): Promise<void> {
+    const repeatCfgId = (
+      action as ReturnType<typeof TaskSharedActions.deleteTaskRepeatCfg>
+    ).taskRepeatCfgId;
+    await this._getTaskArchiveService().removeRepeatCfgFromArchiveTasks(repeatCfgId);
   }
 }
