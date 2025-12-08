@@ -279,6 +279,17 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
+    deleteIssueProviders: (props: { ids: string[]; taskIdsToUnlink: string[] }) => ({
+      ...props,
+      meta: {
+        isPersistent: true,
+        entityType: 'ISSUE_PROVIDER',
+        entityIds: props.ids,
+        opType: OpType.Delete,
+        isBulk: true,
+      } satisfies PersistentActionMeta,
+    }),
+
     // Task Repeat Config Management
     deleteTaskRepeatCfg: (props: {
       taskRepeatCfgId: string;

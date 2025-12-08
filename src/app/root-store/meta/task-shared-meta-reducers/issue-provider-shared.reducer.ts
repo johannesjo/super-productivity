@@ -63,6 +63,12 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     >;
     return handleDeleteIssueProvider(state, taskIdsToUnlink);
   },
+  [TaskSharedActions.deleteIssueProviders.type]: () => {
+    const { taskIdsToUnlink } = action as ReturnType<
+      typeof TaskSharedActions.deleteIssueProviders
+    >;
+    return handleDeleteIssueProvider(state, taskIdsToUnlink);
+  },
 });
 
 export const issueProviderSharedMetaReducer: MetaReducer = (

@@ -12,7 +12,6 @@ import { Log } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
-import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
 
 /**
  * Action types that affect archive storage and require special handling.
@@ -26,7 +25,7 @@ const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   deleteTags.type,
   TaskSharedActions.deleteTaskRepeatCfg.type,
   TaskSharedActions.deleteIssueProvider.type,
-  IssueProviderActions.deleteIssueProviders.type,
+  TaskSharedActions.deleteIssueProviders.type,
 ];
 
 /**
@@ -130,7 +129,7 @@ export class ArchiveOperationHandler {
         await this._handleDeleteIssueProvider(action);
         break;
 
-      case IssueProviderActions.deleteIssueProviders.type:
+      case TaskSharedActions.deleteIssueProviders.type:
         await this._handleDeleteIssueProviders(action);
         break;
     }
@@ -269,8 +268,7 @@ export class ArchiveOperationHandler {
    * Called when receiving a remote deleteIssueProviders operation.
    */
   private async _handleDeleteIssueProviders(action: PersistentAction): Promise<void> {
-    const ids = (action as ReturnType<typeof IssueProviderActions.deleteIssueProviders>)
-      .ids;
+    const ids = (action as ReturnType<typeof TaskSharedActions.deleteIssueProviders>).ids;
     for (const issueProviderId of ids) {
       await this._getTaskArchiveService().unlinkIssueProviderFromArchiveTasks(
         issueProviderId,

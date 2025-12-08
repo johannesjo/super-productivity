@@ -13,7 +13,6 @@ import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actio
 import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
-import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
 
 describe('isArchiveAffectingAction', () => {
   it('should return true for moveToArchive action', () => {
@@ -57,7 +56,7 @@ describe('isArchiveAffectingAction', () => {
   });
 
   it('should return true for deleteIssueProviders action', () => {
-    const action = { type: IssueProviderActions.deleteIssueProviders.type };
+    const action = { type: TaskSharedActions.deleteIssueProviders.type };
     expect(isArchiveAffectingAction(action)).toBe(true);
   });
 
@@ -493,7 +492,7 @@ describe('ArchiveOperationHandler', () => {
     describe('deleteIssueProviders action', () => {
       it('should unlink multiple issue providers from all archive tasks', async () => {
         const action = {
-          type: IssueProviderActions.deleteIssueProviders.type,
+          type: TaskSharedActions.deleteIssueProviders.type,
           ids: ['provider-1', 'provider-2', 'provider-3'],
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
@@ -516,7 +515,7 @@ describe('ArchiveOperationHandler', () => {
 
       it('should not call other handlers for deleteIssueProviders', async () => {
         const action = {
-          type: IssueProviderActions.deleteIssueProviders.type,
+          type: TaskSharedActions.deleteIssueProviders.type,
           ids: ['provider-1'],
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
@@ -727,7 +726,7 @@ describe('ArchiveOperationHandler', () => {
         );
 
         const action = {
-          type: IssueProviderActions.deleteIssueProviders.type,
+          type: TaskSharedActions.deleteIssueProviders.type,
           ids: ['provider-1', 'provider-2'],
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;

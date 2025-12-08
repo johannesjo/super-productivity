@@ -57,27 +57,6 @@ export const IssueProviderActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
-    'Delete IssueProvider': (providerProps: { id: string }) => ({
-      ...providerProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'ISSUE_PROVIDER',
-        entityId: providerProps.id,
-        opType: OpType.Delete,
-      } satisfies PersistentActionMeta,
-    }),
-
-    'Delete IssueProviders': (providerProps: { ids: string[] }) => ({
-      ...providerProps,
-      meta: {
-        isPersistent: true,
-        entityType: 'ISSUE_PROVIDER',
-        entityIds: providerProps.ids,
-        opType: OpType.Delete,
-        isBulk: true,
-      } satisfies PersistentActionMeta,
-    }),
-
     // Internal cleanup action - no persistence
     'Clear IssueProviders': emptyProps(),
   },

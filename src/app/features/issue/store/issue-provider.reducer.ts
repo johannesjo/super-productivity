@@ -34,6 +34,9 @@ export const issueProviderReducer = createReducer(
   on(TaskSharedActions.deleteIssueProvider, (state, { issueProviderId }) =>
     adapter.removeOne(issueProviderId, state),
   ),
+  on(TaskSharedActions.deleteIssueProviders, (state, { ids }) =>
+    adapter.removeMany(ids, state),
+  ),
   // -----------
 
   on(IssueProviderActions.addIssueProvider, (state, action) =>
@@ -53,12 +56,6 @@ export const issueProviderReducer = createReducer(
   ),
   on(IssueProviderActions.updateIssueProviders, (state, action) =>
     adapter.updateMany(action.issueProviders, state),
-  ),
-  on(IssueProviderActions.deleteIssueProvider, (state, action) =>
-    adapter.removeOne(action.id, state),
-  ),
-  on(IssueProviderActions.deleteIssueProviders, (state, action) =>
-    adapter.removeMany(action.ids, state),
   ),
   on(IssueProviderActions.loadIssueProviders, (state, action) =>
     adapter.setAll(action.issueProviders, state),
