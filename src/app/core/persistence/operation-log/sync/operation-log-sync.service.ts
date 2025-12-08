@@ -255,13 +255,37 @@ export class OperationLogSyncService {
       return;
     }
 
-    // Always run conflict detection, even with 0 pending ops.
+    // 2. Filter out operations invalidated by SYNC_IMPORT
+    // When a SYNC_IMPORT is received, operations from OTHER clients that were created
+    // BEFORE the import (but synced AFTER it) reference a state that no longer exists.
+    const { validOps, invalidatedOps } =
+      this._filterOpsInvalidatedBySyncImport(migratedOps);
+
+    if (invalidatedOps.length > 0) {
+      OpLog.warn(
+        `OperationLogSyncService: Discarded ${invalidatedOps.length} ops invalidated by SYNC_IMPORT. ` +
+          `These ops were created before the import and reference the old state.`,
+        {
+          discardedOpIds: invalidatedOps.map((op) => op.id),
+          discardedActionTypes: invalidatedOps.map((op) => op.actionType),
+        },
+      );
+    }
+
+    if (validOps.length === 0) {
+      OpLog.normal(
+        'OperationLogSyncService: No valid ops to process after SYNC_IMPORT filtering.',
+      );
+      return;
+    }
+
+    // 3. Run conflict detection on valid ops
     // A client with 0 pending ops is NOT necessarily a "fresh" client - it may have
     // already-synced ops that remote ops could conflict with. The entity frontier
     // tracks applied ops regardless of sync status.
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
-      migratedOps,
+      validOps,
       appliedFrontierByEntity,
     );
 
@@ -528,5 +552,81 @@ export class OperationLogSyncService {
         { affectedOps: affectedOps.slice(0, 10) }, // Log first 10 for debugging
       );
     }
+  }
+
+  /**
+   * Filters out operations that were invalidated by a SYNC_IMPORT operation.
+   *
+   * Problem: When Client A creates operations, then Client B does a SYNC_IMPORT, then
+   * Client A syncs its operations:
+   * - Client A's ops have a higher serverSeq than the SYNC_IMPORT
+   * - But they reference entities that were wiped by the SYNC_IMPORT
+   * - Applying them causes "Task not found" and state inconsistencies
+   *
+   * Solution: Discard operations from OTHER clients that were created BEFORE the
+   * SYNC_IMPORT (by UUIDv7 timestamp comparison). UUIDv7 is time-ordered, so
+   * lexicographic comparison gives chronological ordering.
+   *
+   * Also handles BACKUP_IMPORT similarly since it also replaces the entire state.
+   *
+   * @param ops - Operations to filter (already migrated)
+   * @returns Object with validOps and invalidatedOps arrays
+   */
+  _filterOpsInvalidatedBySyncImport(ops: Operation[]): {
+    validOps: Operation[];
+    invalidatedOps: Operation[];
+  } {
+    // Find full state import operations (SYNC_IMPORT or BACKUP_IMPORT)
+    const fullStateImports = ops.filter(
+      (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
+    );
+
+    // No imports = no filtering needed
+    if (fullStateImports.length === 0) {
+      return { validOps: ops, invalidatedOps: [] };
+    }
+
+    // Find the latest import by UUIDv7 (lexicographic = chronological for UUIDv7)
+    // If there are multiple imports, we care about the latest one since it defines
+    // the current state that subsequent ops should reference.
+    const latestImport = fullStateImports.reduce((latest, op) =>
+      op.id > latest.id ? op : latest,
+    );
+
+    OpLog.normal(
+      `OperationLogSyncService: Processing SYNC_IMPORT from client ${latestImport.clientId} (op: ${latestImport.id})`,
+    );
+
+    const validOps: Operation[] = [];
+    const invalidatedOps: Operation[] = [];
+
+    for (const op of ops) {
+      // Full state import operations themselves are always valid
+      if (op.opType === OpType.SyncImport || op.opType === OpType.BackupImport) {
+        validOps.push(op);
+        continue;
+      }
+
+      // Operations from the SAME client as the import are valid
+      // They were created with knowledge of the import state
+      if (op.clientId === latestImport.clientId) {
+        validOps.push(op);
+        continue;
+      }
+
+      // Operations created AFTER the import are valid (by UUIDv7 comparison)
+      // UUIDv7 is time-ordered: first 48 bits = millisecond timestamp
+      // Lexicographic comparison works for chronological ordering
+      if (op.id > latestImport.id) {
+        validOps.push(op);
+        continue;
+      }
+
+      // Operations created BEFORE the import from OTHER clients are invalidated
+      // They reference the pre-import state which no longer exists
+      invalidatedOps.push(op);
+    }
+
+    return { validOps, invalidatedOps };
   }
 }

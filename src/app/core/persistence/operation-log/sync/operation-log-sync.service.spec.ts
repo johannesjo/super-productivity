@@ -560,4 +560,289 @@ describe('OperationLogSyncService', () => {
       expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
     });
   });
+
+  describe('_filterOpsInvalidatedBySyncImport', () => {
+    // Helper to create operations with UUIDv7-style IDs (lexicographically sortable by time)
+    const createOp = (partial: Partial<Operation>): Operation => ({
+      id: '019afd68-0000-7000-0000-000000000000', // Default UUIDv7 format
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'entity-1',
+      payload: {},
+      clientId: 'client-A',
+      vectorClock: { clientA: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      ...partial,
+    });
+
+    it('should return all ops as valid when no SYNC_IMPORT is present', () => {
+      const ops: Operation[] = [
+        createOp({ id: '019afd68-0001-7000-0000-000000000000', opType: OpType.Update }),
+        createOp({ id: '019afd68-0002-7000-0000-000000000000', opType: OpType.Create }),
+        createOp({ id: '019afd68-0003-7000-0000-000000000000', opType: OpType.Delete }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      expect(result.validOps.length).toBe(3);
+      expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    it('should keep SYNC_IMPORT operation itself as valid', () => {
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-B',
+      });
+
+      const result = service._filterOpsInvalidatedBySyncImport([syncImportOp]);
+
+      expect(result.validOps.length).toBe(1);
+      expect(result.validOps[0].opType).toBe(OpType.SyncImport);
+      expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    it('should filter out ops from OTHER clients created BEFORE SYNC_IMPORT', () => {
+      // Scenario: Client B does SYNC_IMPORT, Client A had ops created before it
+      const ops: Operation[] = [
+        // Client A's op created BEFORE the import (lower UUIDv7)
+        createOp({
+          id: '019afd68-0001-7000-0000-000000000000', // Earlier timestamp
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-1',
+        }),
+        // Client B's SYNC_IMPORT
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000', // Later timestamp
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // SYNC_IMPORT is valid, Client A's earlier op is invalidated
+      expect(result.validOps.length).toBe(1);
+      expect(result.validOps[0].opType).toBe(OpType.SyncImport);
+      expect(result.invalidatedOps.length).toBe(1);
+      expect(result.invalidatedOps[0].clientId).toBe('client-A');
+    });
+
+    it('should preserve ops from the SAME client as SYNC_IMPORT', () => {
+      // Scenario: Client B does SYNC_IMPORT, then creates more ops
+      const ops: Operation[] = [
+        // Client B's ops created BEFORE the import are still valid (same client)
+        createOp({
+          id: '019afd68-0001-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-B',
+          entityId: 'task-1',
+        }),
+        // Client B's SYNC_IMPORT
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+        // Client B's ops after the import
+        createOp({
+          id: '019afd68-0100-7000-0000-000000000000',
+          opType: OpType.Create,
+          clientId: 'client-B',
+          entityId: 'task-2',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // All ops from client-B should be valid
+      expect(result.validOps.length).toBe(3);
+      expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by UUIDv7)', () => {
+      // Scenario: Client B does SYNC_IMPORT, then Client A creates new ops AFTER
+      const ops: Operation[] = [
+        // Client B's SYNC_IMPORT
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+        // Client A's op created AFTER the import (higher UUIDv7)
+        createOp({
+          id: '019afd68-0100-7000-0000-000000000000', // Later timestamp
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-1',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // Both should be valid - Client A's op came after the import
+      expect(result.validOps.length).toBe(2);
+      expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    it('should handle BACKUP_IMPORT the same way as SYNC_IMPORT', () => {
+      const ops: Operation[] = [
+        // Client A's op created BEFORE the backup import
+        createOp({
+          id: '019afd68-0001-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-1',
+        }),
+        // Client B's BACKUP_IMPORT
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.BackupImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      expect(result.validOps.length).toBe(1);
+      expect(result.validOps[0].opType).toBe(OpType.BackupImport);
+      expect(result.invalidatedOps.length).toBe(1);
+      expect(result.invalidatedOps[0].clientId).toBe('client-A');
+    });
+
+    it('should use the LATEST import when multiple imports exist', () => {
+      // Scenario: Multiple imports in the batch - use the latest one
+      const ops: Operation[] = [
+        // Client A's early op
+        createOp({
+          id: '019afd68-0001-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-1',
+        }),
+        // First SYNC_IMPORT from Client B
+        createOp({
+          id: '019afd68-0010-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+        // Client A's op between the two imports
+        createOp({
+          id: '019afd68-0020-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-2',
+        }),
+        // Second SYNC_IMPORT from Client C (latest)
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-C',
+          entityType: 'ALL',
+        }),
+        // Client A's op after the latest import
+        createOp({
+          id: '019afd68-0100-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'task-3',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // Valid: both SYNC_IMPORTs, Client A's op after latest import
+      // Invalid: Client A's two ops before the latest import
+      expect(result.validOps.length).toBe(3);
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0010-7000-0000-000000000000',
+      ); // First import
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0050-7000-0000-000000000000',
+      ); // Second import
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0100-7000-0000-000000000000',
+      ); // After latest import
+      expect(result.invalidatedOps.length).toBe(2);
+    });
+
+    it('should handle mixed scenario with multiple clients and imports', () => {
+      // Complex scenario: A creates ops, B imports, A syncs stale ops, C creates ops
+      const ops: Operation[] = [
+        // Client A's stale ops (created BEFORE B's import)
+        createOp({
+          id: '019afd60-0001-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'tag-today',
+          actionType: '[Tag] Update',
+        }),
+        createOp({
+          id: '019afd60-0002-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: 'client-A',
+          entityId: 'tag-today',
+          actionType: '[Tag] Update',
+        }),
+        // Client B's SYNC_IMPORT (genesis import)
+        createOp({
+          id: '019afd68-0000-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+          actionType: '[OpLog] SyncImport',
+        }),
+        // Client C's ops (created AFTER B's import)
+        createOp({
+          id: '019afd70-0001-7000-0000-000000000000',
+          opType: OpType.Create,
+          clientId: 'client-C',
+          entityId: 'new-task',
+          actionType: '[Task] Create',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // Valid: B's import, C's new op
+      // Invalid: A's two stale ops
+      expect(result.validOps.length).toBe(2);
+      expect(result.invalidatedOps.length).toBe(2);
+      expect(result.invalidatedOps.every((op) => op.clientId === 'client-A')).toBe(true);
+    });
+
+    it('should correctly compare UUIDv7 IDs lexicographically', () => {
+      // Test that UUIDv7 lexicographic comparison works for chronological ordering
+      // Earlier timestamp = lower hex = comes first lexicographically
+      const ops: Operation[] = [
+        // These IDs simulate time progression in UUIDv7 format
+        createOp({
+          id: '019afd6d-0001-7000-0000-000000000000', // t1: earliest
+          opType: OpType.Update,
+          clientId: 'client-A',
+        }),
+        createOp({
+          id: '019afd68-0000-7000-0000-000000000000', // t0: SYNC_IMPORT (note: this is EARLIER!)
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // Client A's op (019afd6d) > SYNC_IMPORT (019afd68), so it's AFTER the import
+      // Therefore it should be VALID
+      expect(result.validOps.length).toBe(2);
+      expect(result.invalidatedOps.length).toBe(0);
+    });
+  });
 });
