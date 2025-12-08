@@ -35,15 +35,15 @@ export class ImportPage extends BasePage {
    * Navigate to the import/export settings page.
    */
   async navigateToImportPage(): Promise<void> {
-    await this.page.goto('/#/settings/sync');
+    await this.page.goto('/#/config');
     await this.page.waitForLoadState('networkidle');
-    // Scroll down to find the file-imex component
-    await this.page.evaluate(() => {
-      const fileImex = document.querySelector('file-imex');
-      if (fileImex) {
-        fileImex.scrollIntoView({ behavior: 'instant', block: 'center' });
-      }
-    });
+    // Wait for page content to fully render
+    await this.page.waitForTimeout(1000);
+
+    // Use Playwright's scrollIntoViewIfNeeded on the button itself
+    // This is more reliable than manual scrolling
+    await this.importFromFileBtn.scrollIntoViewIfNeeded();
+
     await this.importFromFileBtn.waitFor({ state: 'visible', timeout: 10000 });
   }
 

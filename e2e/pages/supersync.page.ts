@@ -79,7 +79,8 @@ export class SuperSyncPage extends BasePage {
    * Trigger a sync operation by clicking the sync button.
    */
   async triggerSync(): Promise<void> {
-    await this.syncBtn.click();
+    // Use force:true to bypass any tooltip overlays that might be in the way
+    await this.syncBtn.click({ force: true });
     // Wait for sync to start or complete immediately
     await Promise.race([
       this.syncSpinner.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {}),
