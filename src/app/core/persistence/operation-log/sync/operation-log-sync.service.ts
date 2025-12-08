@@ -279,6 +279,23 @@ export class OperationLogSyncService {
       return;
     }
 
+    // Check if we have a full-state operation (SYNC_IMPORT or BACKUP_IMPORT)
+    // These replace the entire state, so conflict detection doesn't apply
+    const hasFullStateOp = validOps.some(
+      (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
+    );
+
+    if (hasFullStateOp) {
+      // Full-state operations replace everything - skip conflict detection
+      // and apply all ops directly. The full-state op will overwrite local state.
+      OpLog.normal(
+        'OperationLogSyncService: Full-state operation detected, skipping conflict detection.',
+      );
+      await this._applyNonConflictingOps(validOps);
+      await this._validateAfterSync();
+      return;
+    }
+
     // 3. Run conflict detection on valid ops
     // A client with 0 pending ops is NOT necessarily a "fresh" client - it may have
     // already-synced ops that remote ops could conflict with. The entity frontier

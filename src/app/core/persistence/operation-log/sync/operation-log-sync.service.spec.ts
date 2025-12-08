@@ -845,4 +845,181 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps.length).toBe(0);
     });
   });
+
+  describe('full-state operation handling', () => {
+    // Helper to create operations
+    const createFullStateOp = (partial: Partial<Operation>): Operation => ({
+      id: '019afd68-0000-7000-0000-000000000000',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'entity-1',
+      payload: {},
+      clientId: 'client-A',
+      vectorClock: { clientA: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      ...partial,
+    });
+
+    it('should skip conflict detection when SYNC_IMPORT is in remote ops', async () => {
+      // This is tested implicitly - when SYNC_IMPORT is present, ops are applied directly
+      // without going through conflict detection. We verify by ensuring no conflicts
+      // are presented when SYNC_IMPORT is in the batch.
+
+      const syncImportOp = createFullStateOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-B',
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      // Set up mocks
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      // Process remote ops with SYNC_IMPORT
+      // Note: _processRemoteOps is private but we can still call it in tests
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Should have applied ops directly without showing conflict dialog
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+    });
+
+    it('should skip conflict detection when BACKUP_IMPORT is in remote ops', async () => {
+      const backupImportOp = createFullStateOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.BackupImport,
+        clientId: 'client-B',
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([backupImportOp]);
+
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+    });
+
+    it('should skip conflict detection even when local pending ops exist for SYNC_IMPORT', async () => {
+      // Critical scenario: Local client has pending ops that would normally conflict
+      // but SYNC_IMPORT should bypass conflict detection entirely
+      const syncImportOp = createFullStateOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-B',
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      // Set up local pending ops that would normally trigger conflict
+      const localPendingOp = createFullStateOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Update,
+        clientId: 'local-client',
+        entityType: 'TASK',
+        entityId: 'task-1',
+        vectorClock: { localClient: 1 },
+      });
+
+      const pendingByEntity = new Map<string, Operation[]>();
+      pendingByEntity.set('TASK:task-1', [localPendingOp]);
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(pendingByEntity));
+
+      // Set up entity frontier that would cause CONCURRENT comparison (conflict)
+      const entityFrontier = new Map<string, any>();
+      entityFrontier.set('TASK:task-1', { localClient: 1 });
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(
+        Promise.resolve(entityFrontier),
+      );
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ localClient: 1 }),
+      );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      // Spy on detectConflicts to verify it's NOT called
+      spyOn(service, 'detectConflicts').and.callThrough();
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // detectConflicts should NOT be called at all for full-state ops
+      expect(service.detectConflicts).not.toHaveBeenCalled();
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+    });
+
+    it('should apply SYNC_IMPORT along with subsequent ops from same client', async () => {
+      // Scenario: SYNC_IMPORT followed by regular ops from same client
+      const syncImportOp = createFullStateOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-B',
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      const followUpOp = createFullStateOp({
+        id: '019afd68-0100-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: 'client-B',
+        entityType: 'TASK',
+        entityId: 'new-task',
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([syncImportOp, followUpOp]);
+
+      // Both ops should be applied
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledWith([
+        syncImportOp,
+        followUpOp,
+      ]);
+      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+    });
+
+    it('should still run conflict detection for regular ops without full-state op', async () => {
+      // Verify that normal ops still go through conflict detection
+      const regularOp = createFullStateOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.Update,
+        clientId: 'client-B',
+        entityType: 'TASK',
+        entityId: 'task-1',
+      });
+
+      // No local pending ops = no conflicts
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      spyOn(service, 'detectConflicts').and.callThrough();
+
+      await (service as any)._processRemoteOps([regularOp]);
+
+      // detectConflicts SHOULD be called for regular ops
+      expect(service.detectConflicts).toHaveBeenCalled();
+    });
+  });
 });
