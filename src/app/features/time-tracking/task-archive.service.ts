@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Action } from '@ngrx/store';
 import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
@@ -41,12 +41,22 @@ type TaskArchiveAction =
   providedIn: 'root',
 })
 export class TaskArchiveService {
-  private _pfapiService = inject(PfapiService);
+  // Use lazy injection to break circular dependency:
+  // PfapiService -> Pfapi -> OperationLogSyncService -> OperationApplierService
+  // -> ArchiveOperationHandler -> TaskArchiveService -> PfapiService
+  private _injector = inject(Injector);
+  private _pfapiService?: PfapiService;
+  private get pfapiService(): PfapiService {
+    if (!this._pfapiService) {
+      this._pfapiService = this._injector.get(PfapiService);
+    }
+    return this._pfapiService;
+  }
 
   constructor() {}
 
   async loadYoung(): Promise<TaskArchive> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     return {
       ids: archiveYoung.task.ids,
       entities: archiveYoung.task.entities,
@@ -56,8 +66,8 @@ export class TaskArchiveService {
   async load(): Promise<TaskArchive> {
     // NOTE: these are already saved in memory to speed up things
     const [archiveYoung, archiveOld] = await Promise.all([
-      this._pfapiService.m.archiveYoung.load(),
-      this._pfapiService.m.archiveOld.load(),
+      this.pfapiService.m.archiveYoung.load(),
+      this.pfapiService.m.archiveOld.load(),
     ]);
 
     return {
@@ -70,11 +80,11 @@ export class TaskArchiveService {
   }
 
   async getById(id: string): Promise<Task> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
       return archiveYoung.task.entities[id];
     }
-    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const archiveOld = await this.pfapiService.m.archiveOld.load();
     if (archiveOld.task.entities[id]) {
       return archiveOld.task.entities[id];
     }
@@ -85,7 +95,7 @@ export class TaskArchiveService {
     taskIdsToDelete: string[],
     options?: { isIgnoreDBLock?: boolean },
   ): Promise<void> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const toDeleteInArchiveYoung = taskIdsToDelete.filter(
       (id) => !!archiveYoung.task.entities[id],
     );
@@ -95,7 +105,7 @@ export class TaskArchiveService {
         archiveYoung,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveYoung }),
       );
-      await this._pfapiService.m.archiveYoung.save(
+      await this.pfapiService.m.archiveYoung.save(
         {
           ...archiveYoung,
           task: newTaskState,
@@ -108,7 +118,7 @@ export class TaskArchiveService {
     }
 
     if (toDeleteInArchiveYoung.length < taskIdsToDelete.length) {
-      const archiveOld = await this._pfapiService.m.archiveOld.load();
+      const archiveOld = await this.pfapiService.m.archiveOld.load();
       const toDeleteInArchiveOld = taskIdsToDelete.filter(
         (id) => !!archiveOld.task.entities[id],
       );
@@ -116,7 +126,7 @@ export class TaskArchiveService {
         archiveOld,
         TaskSharedActions.deleteTasks({ taskIds: toDeleteInArchiveOld }),
       );
-      await this._pfapiService.m.archiveOld.save(
+      await this.pfapiService.m.archiveOld.save(
         {
           ...archiveOld,
           task: newTaskStateArchiveOld,
@@ -130,7 +140,7 @@ export class TaskArchiveService {
   }
 
   async updateTask(id: string, changedFields: Partial<Task>): Promise<void> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
       Log.x(changedFields, id);
 
@@ -140,7 +150,7 @@ export class TaskArchiveService {
         TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
       );
     }
-    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const archiveOld = await this.pfapiService.m.archiveOld.load();
     if (archiveOld.task.entities[id]) {
       return await this._execAction(
         'archiveOld',
@@ -153,7 +163,7 @@ export class TaskArchiveService {
 
   async updateTasks(updates: Update<Task>[]): Promise<void> {
     const allUpdates = updates.map((upd) => TaskSharedActions.updateTask({ task: upd }));
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const updatesYoung = allUpdates.filter(
       (upd) => !!archiveYoung.task.entities[upd.task.id],
     );
@@ -164,7 +174,7 @@ export class TaskArchiveService {
         currentArchiveYoung = { ...currentArchiveYoung, task: newTaskState };
       }
       const newTaskStateArchiveYoung = currentArchiveYoung.task;
-      await this._pfapiService.m.archiveYoung.save(
+      await this.pfapiService.m.archiveYoung.save(
         {
           ...archiveYoung,
           task: newTaskStateArchiveYoung,
@@ -174,7 +184,7 @@ export class TaskArchiveService {
     }
 
     if (updatesYoung.length < updates.length) {
-      const archiveOld = await this._pfapiService.m.archiveOld.load();
+      const archiveOld = await this.pfapiService.m.archiveOld.load();
       const updatesOld = allUpdates.filter(
         (upd) => !!archiveOld.task.entities[upd.task.id],
       );
@@ -184,7 +194,7 @@ export class TaskArchiveService {
         currentArchiveOld = { ...currentArchiveOld, task: newTaskState };
       }
       const newTaskStateArchiveOld = currentArchiveOld.task;
-      await this._pfapiService.m.archiveOld.save(
+      await this.pfapiService.m.archiveOld.save(
         {
           ...archiveOld,
           task: newTaskStateArchiveOld,
@@ -270,7 +280,7 @@ export class TaskArchiveService {
     isRoundUp: boolean;
     projectId?: string | null;
   }): Promise<void> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskIdsInArchiveYoung = taskIds.filter(
       (id) => !!archiveYoung.task.entities[id],
     );
@@ -285,7 +295,7 @@ export class TaskArchiveService {
           projectId,
         }),
       );
-      await this._pfapiService.m.archiveYoung.save(
+      await this.pfapiService.m.archiveYoung.save(
         {
           ...archiveYoung,
           task: newTaskState,
@@ -294,7 +304,7 @@ export class TaskArchiveService {
       );
     }
     if (taskIdsInArchiveYoung.length < taskIds.length) {
-      const archiveOld = await this._pfapiService.m.archiveOld.load();
+      const archiveOld = await this.pfapiService.m.archiveOld.load();
       const taskIdsInArchiveOld = taskIds.filter((id) => !!archiveOld.task.entities[id]);
       if (taskIdsInArchiveOld.length > 0) {
         const newTaskStateArchiveOld = this._reduceForArchive(
@@ -307,7 +317,7 @@ export class TaskArchiveService {
             projectId,
           }),
         );
-        await this._pfapiService.m.archiveOld.save(
+        await this.pfapiService.m.archiveOld.save(
           {
             ...archiveOld,
             task: newTaskStateArchiveOld,
@@ -330,7 +340,7 @@ export class TaskArchiveService {
   ): Promise<void> {
     const newTaskState = this._reduceForArchive(archiveBefore, action);
     Log.x(newTaskState);
-    await this._pfapiService.m[target].save(
+    await this.pfapiService.m[target].save(
       {
         ...archiveBefore,
         task: newTaskState,
@@ -343,20 +353,20 @@ export class TaskArchiveService {
     action: TaskArchiveAction,
     isUpdateRevAndLastUpdate = true,
   ): Promise<void> {
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const newTaskState = this._reduceForArchive(archiveYoung, action);
 
-    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const archiveOld = await this.pfapiService.m.archiveOld.load();
     const newTaskStateArchiveOld = this._reduceForArchive(archiveOld, action);
 
-    await this._pfapiService.m.archiveYoung.save(
+    await this.pfapiService.m.archiveYoung.save(
       {
         ...archiveYoung,
         task: newTaskState,
       },
       { isUpdateRevAndLastUpdate },
     );
-    await this._pfapiService.m.archiveOld.save(
+    await this.pfapiService.m.archiveOld.save(
       {
         ...archiveOld,
         task: newTaskStateArchiveOld,
@@ -397,8 +407,8 @@ export class TaskArchiveService {
   //   mapper: (id: string, archive: ArchiveModel) => T,
   // ): Promise<{ young: T[]; old: T[] }> {
   //   const [archiveYoung, archiveOld] = await Promise.all([
-  //     this._pfapiService.m.archive.load(),
-  //     this._pfapiService.m.archiveOld.load(),
+  //     this.pfapiService.m.archive.load(),
+  //     this.pfapiService.m.archiveOld.load(),
   //   ]);
   //
   //   const young: T[] = [];

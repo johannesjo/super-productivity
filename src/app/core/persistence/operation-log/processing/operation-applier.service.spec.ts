@@ -8,12 +8,14 @@ import {
 import { Operation, OpType, EntityType } from '../operation.types';
 import { MAX_DEPENDENCY_RETRY_ATTEMPTS } from '../operation-log.const';
 import { SnackService } from '../../../snack/snack.service';
+import { ArchiveOperationHandler } from './archive-operation-handler.service';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
   let mockStore: jasmine.SpyObj<Store>;
   let mockDependencyResolver: jasmine.SpyObj<DependencyResolverService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
+  let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
 
   const createMockOperation = (
     id: string,
@@ -41,12 +43,16 @@ describe('OperationApplierService', () => {
       'checkDependencies',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
+    mockArchiveOperationHandler = jasmine.createSpyObj('ArchiveOperationHandler', [
+      'handleRemoteOperation',
+    ]);
 
     // Default: no dependencies
     mockDependencyResolver.extractDependencies.and.returnValue([]);
     mockDependencyResolver.checkDependencies.and.returnValue(
       Promise.resolve({ missing: [] }),
     );
+    mockArchiveOperationHandler.handleRemoteOperation.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -54,6 +60,7 @@ describe('OperationApplierService', () => {
         { provide: Store, useValue: mockStore },
         { provide: DependencyResolverService, useValue: mockDependencyResolver },
         { provide: SnackService, useValue: mockSnackService },
+        { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
       ],
     });
 

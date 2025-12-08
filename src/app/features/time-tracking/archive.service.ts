@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { TaskWithSubTasks } from '../tasks/task.model';
 import { flattenTasks } from '../tasks/store/task.selectors';
 import { createEmptyEntity } from '../../util/create-empty-entity';
@@ -42,7 +42,17 @@ export const ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD = 1000 * 60 * 60 * 24 * 21;
   providedIn: 'root',
 })
 export class ArchiveService {
-  private readonly _pfapiService = inject(PfapiService);
+  // Use lazy injection to break circular dependency:
+  // PfapiService -> Pfapi -> OperationLogSyncService -> OperationApplierService
+  // -> ArchiveOperationHandler -> ArchiveService -> PfapiService
+  private readonly _injector = inject(Injector);
+  private _pfapiService?: PfapiService;
+  private get pfapiService(): PfapiService {
+    if (!this._pfapiService) {
+      this._pfapiService = this._injector.get(PfapiService);
+    }
+    return this._pfapiService;
+  }
   private readonly _store = inject(Store);
 
   // NOTE: we choose this method as trigger to check for flushing to archive, since
@@ -62,7 +72,7 @@ export class ArchiveService {
       return;
     }
 
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const newTaskArchive = taskAdapter.addMany(
@@ -89,7 +99,7 @@ export class ArchiveService {
     // Move timeTracking data to archiveYoung
     const newSorted1 = sortTimeTrackingDataToArchiveYoung({
       // TODO think if it is better to get this from store as it is fresher potentially
-      timeTracking: await this._pfapiService.m.timeTracking.load(),
+      timeTracking: await this.pfapiService.m.timeTracking.load(),
       archiveYoung,
       todayStr: getDbDateStr(now),
     });
@@ -98,7 +108,7 @@ export class ArchiveService {
       task: newTaskArchive,
       lastFlush: now,
     };
-    await this._pfapiService.m.archiveYoung.save(newArchiveYoung, {
+    await this.pfapiService.m.archiveYoung.save(newArchiveYoung, {
       isUpdateRevAndLastUpdate: true,
     });
 
@@ -115,7 +125,7 @@ export class ArchiveService {
 
     // ------------------------------------------------
     // Check if it's time to flush archiveYoung to archiveOld
-    const archiveOld = await this._pfapiService.m.archiveOld.load();
+    const archiveOld = await this.pfapiService.m.archiveOld.load();
     const isFlushArchiveOld =
       now - archiveOld.lastTimeTrackingFlush > ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD;
 
@@ -152,7 +162,7 @@ export class ArchiveService {
       return;
     }
 
-    const archiveYoung = await this._pfapiService.m.archiveYoung.load();
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const newTaskArchive = taskAdapter.addMany(
@@ -175,14 +185,14 @@ export class ArchiveService {
 
     // Also move historical time tracking data to archiveYoung
     // This ensures the remote client's archive matches the originating client
-    const timeTracking = await this._pfapiService.m.timeTracking.load();
+    const timeTracking = await this.pfapiService.m.timeTracking.load();
     const sorted = sortTimeTrackingDataToArchiveYoung({
       timeTracking,
       archiveYoung,
       todayStr: getDbDateStr(now),
     });
 
-    await this._pfapiService.m.archiveYoung.save(
+    await this.pfapiService.m.archiveYoung.save(
       {
         ...sorted.archiveYoung,
         task: newTaskArchive,
