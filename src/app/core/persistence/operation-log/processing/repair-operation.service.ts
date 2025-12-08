@@ -4,11 +4,12 @@ import { Operation, OpType, RepairPayload, RepairSummary } from '../operation.ty
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../../pfapi/api/util/vector-clock';
 import { LockService } from '../sync/lock.service';
-import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { OpLog } from '../../../log';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
+import { devError } from '../../../../util/dev-error';
+import { TranslateService } from '@ngx-translate/core';
 
 /**
  * Service responsible for creating REPAIR operations.
@@ -22,7 +23,7 @@ import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 export class RepairOperationService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
-  private snackService = inject(SnackService);
+  private translateService = inject(TranslateService);
   private vectorClockService = inject(VectorClockService);
 
   /**
@@ -92,16 +93,21 @@ export class RepairOperationService {
   }
 
   /**
-   * Shows a snackbar notification to the user about the repair.
+   * Shows a blocking alert and logs devError when repair happens.
+   * Uses native alert() to prevent reload until user acknowledges.
+   * This should ideally never happen - repair is a safety net for corruption.
    */
   private _notifyUser(summary: RepairSummary): void {
     const totalFixes = this._getTotalFixes(summary);
     if (totalFixes > 0) {
-      this.snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.SYNC.S.DATA_REPAIRED,
-        translateParams: { count: totalFixes.toString() },
+      const errorMsg = `Data repair executed: ${totalFixes} issues fixed. Summary: ${JSON.stringify(summary)}`;
+      devError(errorMsg);
+
+      const title = this.translateService.instant(T.F.SYNC.D_DATA_REPAIRED.TITLE);
+      const msg = this.translateService.instant(T.F.SYNC.D_DATA_REPAIRED.MSG, {
+        count: totalFixes.toString(),
       });
+      alert(`${title}\n\n${msg}`);
     }
   }
 

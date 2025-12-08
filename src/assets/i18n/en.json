@@ -1210,6 +1210,10 @@
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
         "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied."
       },
+      "D_DATA_REPAIRED": {
+        "TITLE": "Data Repair Executed",
+        "MSG": "Your data required automatic repair ({{count}} issues fixed). This should not normally happen. If this occurs repeatedly, please report it."
+      },
       "SAFETY_BACKUP": {
         "BACKUP_NOT_FOUND": "Backup with ID {{backupId}} not found",
         "BTN_CLEAR_ALL": "Clear All",
