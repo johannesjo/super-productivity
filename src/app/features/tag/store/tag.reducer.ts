@@ -59,6 +59,15 @@ export const selectAllTagsWithoutMyDay = createSelector(
   (tags: Tag[]): Tag[] => tags.filter((tag) => tag.id !== TODAY_TAG.id),
 );
 
+/**
+ * @deprecated Use `selectTodayTaskIds` from work-context.selectors.ts instead.
+ *
+ * This selector returns raw stored taskIds which may be stale or incomplete.
+ * `selectTodayTaskIds` computes membership from task.dueDay (virtual tag pattern)
+ * and is self-healing.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ */
 export const selectTodayTagTaskIds = createSelector(
   selectTagFeatureState,
   (state: TagState): string[] => {

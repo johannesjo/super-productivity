@@ -161,6 +161,8 @@ export const selectUndoneOverdue = createSelector(
   },
 );
 
+// Note: Uses selectTodayTagTaskIds due to circular dependency with work-context.selectors.ts
+// This selector may include stale tasks - for accurate membership use selectTodayTaskIds
 export const selectOverdueTasksOnToday = createSelector(
   selectOverdueTasks,
   selectTodayTagTaskIds,
@@ -271,6 +273,8 @@ export const selectAllTasksWithSubTasks = createSelector(
   mapSubTasksToTasks,
 );
 
+// Note: Uses selectTodayTagTaskIds due to circular dependency with work-context.selectors.ts
+// This selector may include stale tasks - for accurate membership use selectTodayTaskIds
 export const selectLaterTodayTasksWithSubTasks = createSelector(
   selectTaskFeatureState,
   selectTodayTagTaskIds,

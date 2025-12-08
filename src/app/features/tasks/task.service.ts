@@ -55,7 +55,7 @@ import {
   selectTasksByTag,
   selectTaskWithSubTasksByRepeatConfigId,
 } from './store/task.selectors';
-import { selectTodayTagTaskIds } from '../tag/store/tag.reducer';
+import { selectTodayTaskIds } from '../work-context/store/work-context.selectors';
 import { RoundTimeOption } from '../project/project.model';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -139,7 +139,8 @@ export class TaskService {
   );
 
   // Shared signal to avoid creating 200+ subscriptions in task components
-  todayList = toSignal(this._store.pipe(select(selectTodayTagTaskIds)), {
+  // Uses selectTodayTaskIds which computes membership from task.dueDay (virtual tag pattern)
+  todayList = toSignal(this._store.pipe(select(selectTodayTaskIds)), {
     initialValue: [] as string[],
   });
 

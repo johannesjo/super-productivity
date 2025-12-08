@@ -34,7 +34,7 @@ import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 
 const MINUTES_TO_MILLISECONDS = 1000 * 60;
 
@@ -97,7 +97,7 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   );
   isSingleOnToday$: Observable<boolean> = combineLatest([
     this.tasks$,
-    this._store.select(selectTodayTagTaskIds),
+    this._store.select(selectTodayTaskIds),
   ]).pipe(
     map(
       ([tasks, todayTaskIds]) =>

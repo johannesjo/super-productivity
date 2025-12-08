@@ -11,7 +11,7 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { selectTodayTagTaskIds } from './tag.reducer';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { deleteTag, deleteTags, updateTag } from './tag.actions';
@@ -168,41 +168,42 @@ export class TagEffects {
     { dispatch: false },
   );
 
+  // Uses selectTodayTaskIds which already computes membership from task.dueDay (virtual tag pattern)
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
-    this._store$.select(selectTodayTagTaskIds).pipe(
+    this._store$.select(selectTodayTaskIds).pipe(
       filter((v) => v.length > 0),
       distinctUntilChanged(fastArrayCompare),
       // NOTE: wait a bit for potential effects to be executed
-      switchMap((todayTagTaskIds) =>
+      switchMap((todayTaskIds) =>
         this._store$.select(selectAllTasksDueToday).pipe(
           first(),
-          map((allTasksDueToday) => ({ allTasksDueToday, todayTagTaskIds })),
+          map((allTasksDueToday) => ({ allTasksDueToday, todayTaskIds })),
         ),
       ),
-      switchMap(({ allTasksDueToday, todayTagTaskIds }) => {
+      switchMap(({ allTasksDueToday, todayTaskIds }) => {
         const tasksWithParentInListIds = allTasksDueToday
-          .filter((t) => t.parentId && todayTagTaskIds.includes(t.parentId))
+          .filter((t) => t.parentId && todayTaskIds.includes(t.parentId))
           .map((t) => t.id);
 
         const dueNotInListIds = allTasksDueToday
-          .filter((t) => !todayTagTaskIds.includes(t.id))
+          .filter((t) => !todayTaskIds.includes(t.id))
           .map((t) => t.id);
 
-        const newTaskIds = [...todayTagTaskIds, ...dueNotInListIds].filter(
+        const newTaskIds = [...todayTaskIds, ...dueNotInListIds].filter(
           (id) => !tasksWithParentInListIds.includes(id),
         );
 
         // Only dispatch if the taskIds actually change
         const isChanged =
-          newTaskIds.length !== todayTagTaskIds.length ||
-          newTaskIds.some((id, i) => id !== todayTagTaskIds[i]);
+          newTaskIds.length !== todayTaskIds.length ||
+          newTaskIds.some((id, i) => id !== todayTaskIds[i]);
 
         if (isChanged && (tasksWithParentInListIds.length || dueNotInListIds.length)) {
           Log.log('Preventing parent and subtask in today list', {
             isChanged,
             tasksWithParentInListIds,
             dueNotInListIds,
-            todayTagTaskIds,
+            todayTaskIds,
             newTaskIds,
           });
 

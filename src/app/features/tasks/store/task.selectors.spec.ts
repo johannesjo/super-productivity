@@ -33,9 +33,12 @@ describe('Task Selectors', () => {
       created: Date.now(),
       isDone: true,
       subTaskIds: [],
-      tagIds: [TODAY_TAG.id],
+      // Note: TODAY_TAG should NOT be in tagIds (virtual tag pattern)
+      // Task is on today list via TODAY_TAG.taskIds for ordering
+      tagIds: [],
       projectId: 'project2',
       timeSpentOnDay: { [today]: 3600 },
+      dueDay: today, // Virtual tag: membership determined by dueDay
       timeEstimate: 0,
       timeSpent: 0,
       attachments: [],
@@ -290,8 +293,11 @@ describe('Task Selectors', () => {
       const result = fromSelectors.selectTasksDueForDay.projector(allTasks, {
         day: today,
       });
-      expect(result.length).toBe(1);
-      expect(result[0].id).toBe('task3');
+      // Both task2 and task3 have dueDay: today
+      expect(result.length).toBe(2);
+      expect(result.map((r) => r.id)).toEqual(
+        jasmine.arrayContaining(['task2', 'task3']),
+      );
     });
 
     it('should select tasks due and overdue for day', () => {
@@ -299,7 +305,10 @@ describe('Task Selectors', () => {
       const result = fromSelectors.selectTasksDueAndOverdueForDay.projector(allTasks, {
         day: today,
       });
-      expect(result.map((r) => r.id)).toEqual(['task3', 'task6']); // task3 (today), task6 (yesterday)
+      // task2 (today), task3 (today), task6 (yesterday - overdue)
+      expect(result.map((r) => r.id)).toEqual(
+        jasmine.arrayContaining(['task2', 'task3', 'task6']),
+      );
     });
 
     it('should select tasks with due time for range', () => {
@@ -379,7 +388,8 @@ describe('Task Selectors', () => {
       const result = fromSelectors.selectMainTasksWithoutTag(mockState, {
         tagId: TODAY_TAG.id,
       });
-      expect(result.length).toBe(7); // All main tasks except task2
+      // Virtual tag pattern: TODAY_TAG not in task.tagIds, so all 8 main tasks are returned
+      expect(result.length).toBe(8);
     });
 
     it('should select all calendar task event IDs', () => {
@@ -425,17 +435,19 @@ describe('Task Selectors', () => {
   // Performance-optimized selectors (Set-based lookups)
   describe('Set-based lookup optimizations', () => {
     it('selectOverdueTasksOnToday should correctly filter with Set lookup', () => {
-      // Create state with overdue task that IS on today
+      // Create state with overdue task that IS on today list
+      // Note: Task is overdue (dueDay = yesterday) but displayed on today via TODAY_TAG.taskIds
+      // TODAY_TAG should NOT be in tagIds (virtual tag pattern)
       const overdueOnTodayTask: Task = {
         id: 'overdueOnToday',
         title: 'Overdue on Today',
         created: Date.now(),
         isDone: false,
         subTaskIds: [],
-        tagIds: [TODAY_TAG.id],
+        tagIds: [], // Virtual tag: TODAY should not be in tagIds
         projectId: 'project1',
         timeSpentOnDay: {},
-        dueDay: yesterday,
+        dueDay: yesterday, // Overdue because dueDay is in the past
         timeEstimate: 0,
         timeSpent: 0,
         attachments: [],
@@ -472,7 +484,7 @@ describe('Task Selectors', () => {
     it('selectAllTasksDueAndOverdue should use Set for today tag filtering', () => {
       const result = fromSelectors.selectAllTasksDueAndOverdue(mockState);
       // Should include task3 (due today) and task6 (overdue yesterday)
-      // task2 is excluded because it's in the TODAY tag
+      // task2 is excluded because it's in TODAY_TAG.taskIds (ordering list) AND isDone=true
       expect(result.map((t) => t.id)).toEqual(
         jasmine.arrayContaining(['task3', 'task6']),
       );

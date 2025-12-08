@@ -17,7 +17,7 @@ import { calculateTimeFromYPosition } from '../schedule-utils';
 import { IS_TOUCH_PRIMARY } from '../../../util/is-mouse-primary';
 import type { DragPreviewContext } from './schedule-week-drag.types';
 import type { ScheduleEvent } from '../schedule.model';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { first } from 'rxjs/operators';
 
 interface PointerPosition {
@@ -772,10 +772,10 @@ export class ScheduleWeekDragService {
       );
     } else {
       this._store
-        .select(selectTodayTagTaskIds)
+        .select(selectTodayTaskIds)
         .pipe(first())
-        .subscribe((todayTagTaskIds) => {
-          if (todayTagTaskIds.includes(task.id)) {
+        .subscribe((todayTaskIds) => {
+          if (todayTaskIds.includes(task.id)) {
             this._store.dispatch(
               TaskSharedActions.removeTasksFromTodayTag({
                 taskIds: [task.id],

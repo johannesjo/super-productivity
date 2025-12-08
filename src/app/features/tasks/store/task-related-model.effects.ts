@@ -11,7 +11,7 @@ import { moveProjectTaskToRegularList } from '../../project/store/project.action
 import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
 import { TaskArchiveService } from '../../time-tracking/task-archive.service';
 import { Store } from '@ngrx/store';
-import { selectTodayTagTaskIds } from '../../tag/store/tag.reducer';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 
 @Injectable()
@@ -43,7 +43,7 @@ export class TaskRelatedModelEffects {
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
-        withLatestFrom(this._store.select(selectTodayTagTaskIds)),
+        withLatestFrom(this._store.select(selectTodayTaskIds)),
         filter(
           ([{ task }, todayTaskIds]) =>
             !todayTaskIds.includes(task.id) &&

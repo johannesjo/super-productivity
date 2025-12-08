@@ -433,7 +433,15 @@ export class OperationLogStoreService {
 
     if (!cache) {
       // No state cache yet - create one with counter starting at 1
-      await store.put({ id: 'current', compactionCounter: 1 });
+      // Provide default values for required schema fields
+      await store.put({
+        id: 'current',
+        state: null,
+        lastAppliedOpSeq: 0,
+        vectorClock: {},
+        compactedAt: 0,
+        compactionCounter: 1,
+      });
       await tx.done;
       return 1;
     }
