@@ -144,41 +144,125 @@ describe('operation-converter utility', () => {
       expect(action.meta.opType).toBe(OpType.Batch);
     });
 
-    it('should handle SyncImport operation', () => {
-      const op = createMockOperation({
-        opType: OpType.SyncImport,
-        entityType: 'ALL',
-        actionType: '[Sync] Import State',
-        payload: { fullState: {} },
+    describe('full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair)', () => {
+      it('should wrap SYNC_IMPORT payload in appDataComplete when not already wrapped', () => {
+        const fullState = {
+          task: { ids: ['t1'], entities: { t1: { id: 't1', title: 'Task' } } },
+          project: { ids: ['p1'], entities: { p1: { id: 'p1', title: 'Project' } } },
+          tag: { ids: ['tag1'], entities: { tag1: { id: 'tag1', name: 'Tag' } } },
+        };
+        const op = createMockOperation({
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          actionType: '[SP_ALL] Load(import) all data',
+          payload: fullState, // NOT wrapped in appDataComplete
+        });
+        const action = convertOpToAction(op);
+
+        // Should be wrapped in appDataComplete
+        expect((action as any).appDataComplete).toBeDefined();
+        expect((action as any).appDataComplete.task).toEqual(fullState.task);
+        expect((action as any).appDataComplete.project).toEqual(fullState.project);
+        expect((action as any).appDataComplete.tag).toEqual(fullState.tag);
+
+        // Should NOT spread the raw properties at top level
+        expect((action as any).task).toBeUndefined();
+        expect((action as any).project).toBeUndefined();
+        expect((action as any).tag).toBeUndefined();
       });
-      const action = convertOpToAction(op);
 
-      expect(action.meta.opType).toBe(OpType.SyncImport);
-      expect(action.meta.entityType).toBe('ALL');
-    });
+      it('should preserve appDataComplete wrapper for SYNC_IMPORT if already present', () => {
+        const fullState = {
+          task: { ids: ['t1'], entities: {} },
+        };
+        const op = createMockOperation({
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          actionType: '[SP_ALL] Load(import) all data',
+          payload: { appDataComplete: fullState }, // Already wrapped
+        });
+        const action = convertOpToAction(op);
 
-    it('should handle BackupImport operation', () => {
-      const op = createMockOperation({
-        opType: OpType.BackupImport,
-        entityType: 'ALL',
-        actionType: '[Backup] Restore',
-        payload: { backupData: {} },
+        expect((action as any).appDataComplete).toEqual(fullState);
+        // Should NOT double-wrap
+        expect((action as any).appDataComplete.appDataComplete).toBeUndefined();
       });
-      const action = convertOpToAction(op);
 
-      expect(action.meta.opType).toBe(OpType.BackupImport);
-    });
+      it('should wrap BACKUP_IMPORT payload in appDataComplete when not already wrapped', () => {
+        const fullState = {
+          task: { ids: [], entities: {} },
+          globalConfig: { someConfig: true },
+        };
+        const op = createMockOperation({
+          opType: OpType.BackupImport,
+          entityType: 'ALL',
+          actionType: '[SP_ALL] Load(import) backup file',
+          payload: fullState,
+        });
+        const action = convertOpToAction(op);
 
-    it('should handle Repair operation', () => {
-      const op = createMockOperation({
-        opType: OpType.Repair,
-        entityType: 'ALL',
-        actionType: '[Repair] Apply Repair',
-        payload: { appDataComplete: {}, repairSummary: {} },
+        expect((action as any).appDataComplete).toEqual(fullState);
+        expect((action as any).task).toBeUndefined();
       });
-      const action = convertOpToAction(op);
 
-      expect(action.meta.opType).toBe(OpType.Repair);
+      it('should wrap Repair payload in appDataComplete when not already wrapped', () => {
+        const fullState = {
+          task: { ids: ['t1'], entities: { t1: { id: 't1' } } },
+        };
+        const op = createMockOperation({
+          opType: OpType.Repair,
+          entityType: 'ALL',
+          actionType: '[Repair] Apply Repair',
+          payload: fullState,
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).appDataComplete).toEqual(fullState);
+      });
+
+      it('should preserve meta properties for full-state operations', () => {
+        const op = createMockOperation({
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          actionType: '[SP_ALL] Load(import) all data',
+          payload: { task: {} },
+        });
+        const action = convertOpToAction(op);
+
+        expect(action.meta.opType).toBe(OpType.SyncImport);
+        expect(action.meta.entityType).toBe('ALL');
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.isRemote).toBe(true);
+      });
+
+      it('should handle SYNC_IMPORT with complex nested state', () => {
+        const fullState = {
+          task: {
+            ids: ['t1', 't2'],
+            entities: {
+              t1: { id: 't1', title: 'Task 1', projectId: 'p1', tagIds: ['tag1'] },
+              t2: { id: 't2', title: 'Task 2', parentId: 't1' },
+            },
+          },
+          project: {
+            ids: ['p1'],
+            entities: { p1: { id: 'p1', title: 'Project', taskIds: ['t1', 't2'] } },
+          },
+        };
+        const op = createMockOperation({
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          actionType: '[SP_ALL] Load(import) all data',
+          payload: fullState,
+        });
+        const action = convertOpToAction(op);
+
+        expect((action as any).appDataComplete.task.entities.t1.projectId).toBe('p1');
+        expect((action as any).appDataComplete.project.entities.p1.taskIds).toEqual([
+          't1',
+          't2',
+        ]);
+      });
     });
 
     it('should handle empty payload', () => {

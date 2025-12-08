@@ -1,4 +1,4 @@
-import { isMultiEntityPayload, Operation } from './operation.types';
+import { isMultiEntityPayload, Operation, OpType } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 
 /**
@@ -16,6 +16,16 @@ export const ACTION_TYPE_ALIASES: Record<string, string> = {
 };
 
 /**
+ * OpTypes that contain full application state in their payload.
+ * These need special handling during action conversion.
+ */
+const FULL_STATE_OP_TYPES = new Set([
+  OpType.SyncImport,
+  OpType.BackupImport,
+  OpType.Repair,
+]);
+
+/**
  * Extracts the action payload from an operation.
  * Handles both multi-entity payloads (new format) and legacy payloads.
  */
@@ -29,19 +39,45 @@ const extractActionPayload = (payload: unknown): Record<string, unknown> => {
 };
 
 /**
+ * Extracts the action payload for full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair).
+ * These operations contain the complete application state and need to be wrapped in
+ * `appDataComplete` to match what the loadAllData action expects.
+ *
+ * Handles both:
+ * - New format: payload is { appDataComplete: {...} }
+ * - Legacy format: payload IS the appDataComplete directly
+ */
+const extractFullStatePayload = (payload: unknown): Record<string, unknown> => {
+  // Check if payload already has appDataComplete wrapper
+  if (typeof payload === 'object' && payload !== null && 'appDataComplete' in payload) {
+    // Already wrapped - return as-is
+    return payload as Record<string, unknown>;
+  }
+  // Legacy format: payload is the appDataComplete directly, wrap it
+  return { appDataComplete: payload };
+};
+
+/**
  * Converts an Operation from the operation log back into a PersistentAction.
  * Used during sync replay and recovery to re-dispatch operations.
  *
  * For multi-entity operations, this extracts the actionPayload and uses that
  * to reconstruct the original action. The meta-reducers will then apply all
  * the entity changes atomically.
+ *
+ * For full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair), this wraps
+ * the payload in `appDataComplete` to match the loadAllData action format.
  */
 export const convertOpToAction = (op: Operation): PersistentAction => {
   // Resolve any aliased action types to their current names
   const actionType = ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType;
 
-  // Extract the action payload (handles both multi-entity and legacy formats)
-  const actionPayload = extractActionPayload(op.payload);
+  // Handle full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair) specially
+  // These need their payload wrapped in appDataComplete for the loadAllData action
+  const isFullStateOp = FULL_STATE_OP_TYPES.has(op.opType as OpType);
+  const actionPayload = isFullStateOp
+    ? extractFullStatePayload(op.payload)
+    : extractActionPayload(op.payload);
 
   return {
     type: actionType,
