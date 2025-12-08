@@ -180,18 +180,41 @@ The `take(1)` operator ensures the observable completes after receiving one valu
 
 ---
 
-### 3. Race Conditions in TaskDueEffects
+### ~~3. Race Conditions in TaskDueEffects~~ - FALSE POSITIVE
 
 **File:** `src/app/features/tasks/store/task-due.effects.ts`
-**Lines:** 40-65
+**Status:** Re-evaluated on 2025-12-08 - NOT A BUG
 
-Issues:
+**Original Claims:**
 
 - Double sync wait (before AND after debounce)
-- Multiple effects (`addTasksForTomorrow$`, `removeOverdueFormToday$`) compete on same signals
+- Multiple effects compete on same signals
 - Potential infinite loop if action triggers date change
 
-**Fix:** Consolidate sync waits, ensure effects don't trigger each other.
+**Why It's Not a Bug:**
+
+1. **Double sync wait is intentional:** The pattern `wait → debounce → wait again` ensures:
+
+   - First wait: sync is done when date changes
+   - Debounce: wait for stability
+   - Second wait: confirm sync is still done (in case new sync started during debounce)
+
+2. **Effects are complementary, not competing:**
+
+   - `createRepeatableTasksAndAddDueToday$` (1000ms debounce, adds due tasks)
+   - `removeOverdueFormToday$` (1000ms debounce, removes overdue)
+   - `ensureTasksDueTodayInTodayTag$` (2000ms debounce, defensive check)
+   - Different purposes, staggered timing is intentional
+
+3. **Infinite loop explicitly handled** (lines 128-132):
+   ```typescript
+   // Exclude subtasks whose parent is already in TODAY
+   // (preventParentAndSubTaskInTodayList$ will remove them anyway,
+   // causing an infinite add/remove loop and phantom sync changes)
+   .filter((task) => !task.parentId || !todayTaskIds.includes(task.parentId))
+   ```
+
+**Note:** Test coverage exists (`task-due.effects.spec.ts`) but is disabled (`xdescribe`) due to Dropbox SDK mocking issues. Tests should be re-enabled when SDK mocking is fixed.
 
 ---
 
@@ -388,7 +411,7 @@ Checks `!task.projectId` but doesn't verify project still exists (could be delet
 | --- | ------------------------------ | --------------------------- |
 | 1   | Snapshot timing                | **FIXED** (2025-12-08)      |
 | 2   | Subtask orphan detection       | FALSE POSITIVE (2025-12-08) |
-| 3   | Race conditions                | task-due.effects.ts:40-65   |
+| 3   | Race conditions                | FALSE POSITIVE (2025-12-08) |
 | 4   | Error handling standardization | Multiple effects            |
 
 ### Phase 3: Add Tests
@@ -397,9 +420,10 @@ Checks `!task.projectId` but doesn't verify project still exists (could be delet
 | --- | -------------------------------------------- | -------- |
 | 1   | Re-enable app-state.effects.spec.ts          | Critical |
 | 2   | sync.effects.spec.ts (new)                   | Critical |
-| 3   | issue-provider-shared.reducer.spec.ts (new)  | High     |
-| 4   | task-repeat-cfg-shared.reducer.spec.ts (new) | High     |
-| 5   | layout.effects.spec.ts (new)                 | High     |
+| 3   | Re-enable task-due.effects.spec.ts (fix SDK) | High     |
+| 4   | issue-provider-shared.reducer.spec.ts (new)  | High     |
+| 5   | task-repeat-cfg-shared.reducer.spec.ts (new) | High     |
+| 6   | layout.effects.spec.ts (new)                 | High     |
 
 ### Phase 4: Medium Priority
 
