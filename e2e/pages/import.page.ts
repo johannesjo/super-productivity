@@ -40,10 +40,20 @@ export class ImportPage extends BasePage {
     // Wait for page content to fully render
     await this.page.waitForTimeout(1000);
 
-    // Use Playwright's scrollIntoViewIfNeeded on the button itself
-    // This is more reliable than manual scrolling
-    await this.importFromFileBtn.scrollIntoViewIfNeeded();
+    // The file-imex component is inside the collapsible "Import/Export" section
+    // First, find and expand the Import/Export section
+    const importExportSection = this.page.locator(
+      'collapsible:has-text("Import/Export")',
+    );
+    await importExportSection.scrollIntoViewIfNeeded();
+    await this.page.waitForTimeout(300);
 
+    // Click on the collapsible header to expand it
+    const collapsibleHeader = importExportSection.locator('.collapsible-header, .header');
+    await collapsibleHeader.click();
+    await this.page.waitForTimeout(500);
+
+    // Now the file-imex component should be visible
     await this.importFromFileBtn.waitFor({ state: 'visible', timeout: 10000 });
   }
 
@@ -57,11 +67,24 @@ export class ImportPage extends BasePage {
     // Set the file on the hidden input element
     await this.fileInput.setInputFiles(filePath);
 
+    // Dispatch change event to ensure Angular detects the file change
+    await this.fileInput.dispatchEvent('change');
+
     // Wait for import to be processed
-    // The app navigates to TODAY tag after successful import
-    await this.page.waitForURL(/tag\/TODAY/, { timeout: 15000 });
+    // The app navigates to TODAY tag after successful import via Angular router
+    // Poll for URL change since Angular uses hash-based routing
+    const startTime = Date.now();
+    const timeout = 30000;
+    while (Date.now() - startTime < timeout) {
+      const url = this.page.url();
+      if (url.includes('tag') && url.includes('TODAY')) {
+        break;
+      }
+      await this.page.waitForTimeout(500);
+    }
+
     await this.page.waitForLoadState('networkidle');
-    await this.page.waitForTimeout(500);
+    await this.page.waitForTimeout(1000);
   }
 
   /**

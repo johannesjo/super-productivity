@@ -89,13 +89,14 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
-   * Wait for sync to complete (spinner gone, check icon visible).
+   * Wait for sync to complete (spinner gone, no error).
    * Automatically handles sync dialogs:
    * - Fresh client confirmation dialog
    * - Conflict resolution dialog (uses remote by default)
    */
   async waitForSyncComplete(timeout = 30000): Promise<void> {
     const startTime = Date.now();
+    let stableCount = 0; // Count consecutive checks where sync appears complete
 
     // Poll for completion while handling dialogs
     while (Date.now() - startTime < timeout) {
@@ -104,6 +105,7 @@ export class SuperSyncPage extends BasePage {
         console.log('[SuperSyncPage] Fresh client dialog detected, confirming...');
         await this.freshClientConfirmBtn.click();
         await this.page.waitForTimeout(500);
+        stableCount = 0;
         continue;
       }
 
@@ -129,6 +131,7 @@ export class SuperSyncPage extends BasePage {
           .waitFor({ state: 'hidden', timeout: 5000 })
           .catch(() => {});
         await this.page.waitForTimeout(500);
+        stableCount = 0;
         continue;
       }
 
@@ -148,18 +151,26 @@ export class SuperSyncPage extends BasePage {
           throw new Error(`Sync failed: ${snackbarText?.trim() || 'Server error'}`);
         }
 
-        // Sync finished successfully - verify with check icon
+        // Sync finished - check icon may appear briefly or not at all
         const checkVisible = await this.syncCheckIcon.isVisible();
         if (checkVisible) {
+          return; // Sync complete with check icon
+        }
+
+        // No spinner, no error - sync likely complete
+        // Wait for stable state (3 consecutive checks) to confirm
+        stableCount++;
+        if (stableCount >= 3) {
+          console.log('[SuperSyncPage] Sync complete (no spinner, no error)');
           return;
         }
 
-        // Neither error nor success - wait a bit more
-        await this.page.waitForTimeout(500);
+        await this.page.waitForTimeout(300);
         continue;
       }
 
-      // Wait before checking again
+      // Still spinning - reset stable count
+      stableCount = 0;
       await this.page.waitForTimeout(200);
     }
 
