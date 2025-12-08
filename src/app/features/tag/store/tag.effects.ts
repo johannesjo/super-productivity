@@ -28,6 +28,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
+import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
 
 @Injectable()
 export class TagEffects {
@@ -39,6 +40,7 @@ export class TagEffects {
   private _router = inject(Router);
   private _translateService = inject(TranslateService);
   private _plannerService = inject(PlannerService);
+  private _hydrationState = inject(HydrationStateService);
 
   snackUpdateBaseSettings$: any = createEffect(
     () =>
@@ -141,9 +143,13 @@ export class TagEffects {
   );
 
   // Uses selectTodayTaskIds which already computes membership from task.dueDay (virtual tag pattern)
+  // Note: This is a selector-based effect, so we must check hydration state manually
+  // (LOCAL_ACTIONS filtering only works for action-based effects)
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
     this._store$.select(selectTodayTaskIds).pipe(
       filter((v) => v.length > 0),
+      // Skip during hydration/remote op application to prevent capturing duplicate ops
+      filter(() => !this._hydrationState.isApplyingRemoteOps()),
       distinctUntilChanged(fastArrayCompare),
       // NOTE: wait a bit for potential effects to be executed
       switchMap((todayTaskIds) =>

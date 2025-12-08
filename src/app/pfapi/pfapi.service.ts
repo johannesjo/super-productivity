@@ -129,9 +129,37 @@ export class PfapiService {
 
     this._commonAndLegacySyncConfig$.subscribe((cfg) => {
       try {
-        this.pf.setActiveSyncProvider(
-          cfg.isEnabled ? (cfg.syncProvider as unknown as SyncProviderId) : null,
-        );
+        const newProviderId = cfg.isEnabled
+          ? (cfg.syncProvider as unknown as SyncProviderId)
+          : null;
+        const currentProvider = this.pf.getActiveSyncProvider();
+
+        // Debug logging for hot reload investigation
+        PFLog.warn('[HotReloadDebug] syncConfig subscription fired:', {
+          isEnabled: cfg.isEnabled,
+          newSyncProvider: newProviderId,
+          currentActiveProvider: currentProvider?.id || null,
+        });
+
+        // Guard against hot reload race condition:
+        // Don't clear provider if we had a valid one and the new config has sync disabled
+        // This protects against temporary state resets during HMR
+        if (currentProvider && !newProviderId) {
+          PFLog.warn(
+            '[HotReloadDebug] Ignoring attempt to clear sync provider - likely hot reload race condition',
+          );
+          return;
+        }
+
+        // Log provider changes for debugging
+        if (currentProvider && newProviderId && currentProvider.id !== newProviderId) {
+          PFLog.warn('[HotReloadDebug] Provider change detected:', {
+            from: currentProvider.id,
+            to: newProviderId,
+          });
+        }
+
+        this.pf.setActiveSyncProvider(newProviderId);
         if (cfg.isEnabled) {
           this.pf.setEncryptAndCompressCfg({
             isEncrypt: !!cfg.isEncryptionEnabled,

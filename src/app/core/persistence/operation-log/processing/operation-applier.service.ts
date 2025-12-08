@@ -6,6 +6,7 @@ import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { OpLog } from '../../../log';
 import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
+import { HydrationStateService } from './hydration-state.service';
 
 /**
  * Service responsible for applying operations to the local NgRx store.
@@ -38,6 +39,7 @@ export class OperationApplierService {
   private store = inject(Store);
   private dependencyResolver = inject(DependencyResolverService);
   private archiveOperationHandler = inject(ArchiveOperationHandler);
+  private hydrationState = inject(HydrationStateService);
 
   /**
    * Apply operations to the NgRx store.
@@ -56,8 +58,14 @@ export class OperationApplierService {
       ops.map((op) => op.id),
     );
 
-    for (const op of ops) {
-      await this._applyOperation(op);
+    // Mark that we're applying remote operations to suppress selector-based effects
+    this.hydrationState.startApplyingRemoteOps();
+    try {
+      for (const op of ops) {
+        await this._applyOperation(op);
+      }
+    } finally {
+      this.hydrationState.endApplyingRemoteOps();
     }
 
     OpLog.normal('OperationApplierService: Finished applying operations.');
