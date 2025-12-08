@@ -91,6 +91,22 @@ describe('LinearApiService', () => {
               },
             ],
           },
+          attachments: {
+            nodes: [
+              {
+                id: 'attachment-1',
+                sourceType: 'github',
+                title: 'GitHub Pull Request',
+                url: 'https://github.com/example/pr/123',
+              },
+              {
+                id: 'attachment-2',
+                sourceType: 'slack',
+                title: 'Slack Discussion',
+                url: 'https://slack.com/archives/C123456/p1234567890',
+              },
+            ],
+          },
         },
       },
     };
@@ -99,6 +115,10 @@ describe('LinearApiService', () => {
       expect(issue.identifier).toBe('LIN-1');
       expect(issue.title).toBe('Test Issue');
       expect(issue.comments.length).toBe(1);
+      expect(issue.attachments).toBeDefined();
+      expect(issue.attachments.length).toBe(2);
+      expect(issue.attachments[0].sourceType).toBe('github');
+      expect(issue.attachments[1].sourceType).toBe('slack');
       done();
     });
 
