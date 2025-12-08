@@ -36,14 +36,67 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 /**
- * Manages the synchronization of the Operation Log with remote storage.
- * This service orchestrates uploading local pending operations, downloading remote operations,
- * and detecting conflicts between local and remote changes based on vector clocks.
+ * Orchestrates synchronization of the Operation Log with remote storage.
  *
- * Delegates to specialized services:
- * - OperationLogUploadService: Handles uploading pending operations
- * - OperationLogDownloadService: Handles downloading remote operations
- * - OperationLogManifestService: Handles manifest file operations
+ * ## Overview
+ * This service is the main coordinator for syncing operations between clients.
+ * It handles uploading local changes, downloading remote changes, detecting conflicts,
+ * and ensuring data consistency across all clients.
+ *
+ * ## Sync Flow
+ * ```
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │                           UPLOAD FLOW                                   │
+ * ├─────────────────────────────────────────────────────────────────────────┤
+ * │  1. Check if fresh client (block upload if no history)                 │
+ * │  2. Upload pending ops via OperationLogUploadService                   │
+ * │  3. Process piggybacked ops FIRST (triggers conflict detection)        │
+ * │  4. Mark server-rejected ops as rejected                               │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │                          DOWNLOAD FLOW                                  │
+ * ├─────────────────────────────────────────────────────────────────────────┤
+ * │  1. Download remote ops via OperationLogDownloadService                │
+ * │  2. Fresh client? → Show confirmation dialog                           │
+ * │  3. Process remote ops (_processRemoteOps)                             │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────┐
+ * │                     PROCESS REMOTE OPS FLOW                             │
+ * ├─────────────────────────────────────────────────────────────────────────┤
+ * │  1. Schema migration (receiver-side)                                   │
+ * │  2. Filter ops invalidated by SYNC_IMPORT                              │
+ * │  3. Full-state op? → Skip conflict detection, apply directly           │
+ * │  4. Conflict detection via vector clocks                               │
+ * │  5. Conflicts? → Present dialog, piggyback non-conflicting ops         │
+ * │  6. No conflicts? → Apply ops directly                                 │
+ * │  7. Validate state (Checkpoint D)                                      │
+ * └─────────────────────────────────────────────────────────────────────────┘
+ * ```
+ *
+ * ## Key Concepts
+ *
+ * ### Piggybacked Operations
+ * When uploading, the server may return ops from other clients in the same response.
+ * These are processed BEFORE marking rejected ops so conflict detection works properly.
+ *
+ * ### Non-Conflicting Ops Piggybacking
+ * When conflicts are detected, non-conflicting ops are passed to ConflictResolutionService
+ * to be applied together with resolved conflicts. This ensures dependency sorting works
+ * (e.g., Task depends on Project from a resolved conflict).
+ *
+ * ### Fresh Client Safety
+ * A client with no history must download before uploading to prevent overwriting
+ * valid remote data with empty state. Fresh clients also see a confirmation dialog.
+ *
+ * ## Delegated Services
+ * - **OperationLogUploadService**: Handles server communication for uploads
+ * - **OperationLogDownloadService**: Handles server communication for downloads
+ * - **ConflictResolutionService**: Presents conflicts to user and applies resolutions
+ * - **VectorClockService**: Manages vector clock state and entity frontiers
+ * - **OperationApplierService**: Applies operations to NgRx store
+ * - **ValidateStateService**: Validates and repairs state after sync (Checkpoint D)
  */
 @Injectable({
   providedIn: 'root',
@@ -258,11 +311,31 @@ export class OperationLogSyncService {
     return this._processRemoteOps(remoteOps);
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // REMOTE OPS PROCESSING (Core Pipeline)
+  // ═══════════════════════════════════════════════════════════════════════════
+
   /**
-   * Internal implementation of remote ops processing.
+   * Core pipeline for processing remote operations.
+   *
+   * ## Processing Steps
+   * 1. **Schema Migration** - Migrate ops to current schema version
+   * 2. **SYNC_IMPORT Filtering** - Discard ops invalidated by full-state imports
+   * 3. **Full-State Check** - Skip conflict detection for SYNC_IMPORT/BACKUP_IMPORT
+   * 4. **Conflict Detection** - Compare vector clocks with local pending ops
+   * 5. **Resolution/Application**:
+   *    - If conflicts: Present dialog, piggyback non-conflicting ops
+   *    - If no conflicts: Apply ops directly
+   * 6. **Validation** - Checkpoint D: validate and repair state
+   *
+   * @param remoteOps - Operations received from remote storage
    */
   private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
-    // 1. Migrate operations to current schema version (Receiver-Side Migration)
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1: Schema Migration (Receiver-Side)
+    // Migrate ops from older schema versions to current version.
+    // Ops too new (beyond MAX_VERSION_SKIP) trigger an update prompt.
+    // ─────────────────────────────────────────────────────────────────────────
     const currentVersion = this.schemaMigrationService.getCurrentVersion();
     const migratedOps: Operation[] = [];
     const droppedEntityIds = new Set<string>();
@@ -324,9 +397,11 @@ export class OperationLogSyncService {
       return;
     }
 
-    // 2. Filter out operations invalidated by SYNC_IMPORT
-    // When a SYNC_IMPORT is received, operations from OTHER clients that were created
-    // BEFORE the import (but synced AFTER it) reference a state that no longer exists.
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2: Filter ops invalidated by SYNC_IMPORT
+    // When a full-state import happens, ops from OTHER clients created BEFORE the
+    // import reference entities that were wiped. These must be discarded.
+    // ─────────────────────────────────────────────────────────────────────────
     const { validOps, invalidatedOps } =
       this._filterOpsInvalidatedBySyncImport(migratedOps);
 
@@ -348,15 +423,15 @@ export class OperationLogSyncService {
       return;
     }
 
-    // Check if we have a full-state operation (SYNC_IMPORT or BACKUP_IMPORT)
-    // These replace the entire state, so conflict detection doesn't apply
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 3: Check for full-state operations (SYNC_IMPORT / BACKUP_IMPORT)
+    // These replace the entire state, so conflict detection doesn't apply.
+    // ─────────────────────────────────────────────────────────────────────────
     const hasFullStateOp = validOps.some(
       (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
     );
 
     if (hasFullStateOp) {
-      // Full-state operations replace everything - skip conflict detection
-      // and apply all ops directly. The full-state op will overwrite local state.
       OpLog.normal(
         'OperationLogSyncService: Full-state operation detected, skipping conflict detection.',
       );
@@ -365,41 +440,56 @@ export class OperationLogSyncService {
       return;
     }
 
-    // 3. Run conflict detection on valid ops
-    // A client with 0 pending ops is NOT necessarily a "fresh" client - it may have
-    // already-synced ops that remote ops could conflict with. The entity frontier
-    // tracks applied ops regardless of sync status.
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 4: Conflict Detection
+    // Compare remote ops against local pending ops using vector clocks.
+    // NOTE: A client with 0 pending ops can still have an entity frontier from
+    // already-synced ops. The frontier tracks ALL applied ops, not just pending.
+    // ─────────────────────────────────────────────────────────────────────────
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
       validOps,
       appliedFrontierByEntity,
     );
 
-    // IMPORTANT: Handle conflicts BEFORE applying any operations.
-    // If we apply non-conflicting ops first, they may reference entities that are
-    // part of conflicts, causing "Task not found" errors before the user can resolve.
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 5: Handle Results - Apply or Present Conflicts
+    // IMPORTANT: If conflicts exist, we must NOT apply non-conflicting ops first.
+    // They may depend on entities in the conflict (e.g., Task depends on Project).
+    // Instead, piggyback them to ConflictResolutionService for batched application.
+    // ─────────────────────────────────────────────────────────────────────────
     if (conflicts.length > 0) {
       OpLog.warn(
         `OperationLogSyncService: Detected ${conflicts.length} conflicts. Showing dialog before applying any ops.`,
         conflicts,
       );
-      // Pass non-conflicting ops to conflict resolution so they can be applied
-      // together with resolved conflicts after user makes their choice
+      // Piggyback non-conflicting ops so they're applied with resolved conflicts
       await this.conflictResolutionService.presentConflicts(conflicts, nonConflicting);
       return;
     }
 
-    // No conflicts - safe to apply non-conflicting ops directly
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 6: No Conflicts - Apply directly and validate
+    // ─────────────────────────────────────────────────────────────────────────
     if (nonConflicting.length > 0) {
       await this._applyNonConflictingOps(nonConflicting);
-      // CHECKPOINT D: Validate state after applying ops
       await this._validateAfterSync();
     }
   }
 
   /**
-   * Apply non-conflicting operations with crash-safe tracking.
-   * Stores ops as pending, applies them, then marks as applied.
+   * Applies non-conflicting operations with crash-safe tracking.
+   *
+   * ## Crash Safety Protocol
+   * 1. Store ops with `pendingApply: true` flag
+   * 2. Apply ops to NgRx store
+   * 3. Mark ops as applied (removes pendingApply flag)
+   *
+   * If crash occurs between steps 1-2, ops will be retried on startup.
+   * If crash occurs between steps 2-3, ops may be re-applied (idempotent).
+   *
+   * @param ops - Non-conflicting operations to apply
+   * @throws Re-throws if application fails (ops marked as failed first)
    */
   private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
     // Track stored seqs for marking as applied after success
@@ -447,9 +537,32 @@ export class OperationLogSyncService {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONFLICT DETECTION
+  // ═══════════════════════════════════════════════════════════════════════════
+
   /**
-   * Detect conflicts between remote operations and local state.
-   * Uses vector clocks for causality tracking and per-entity frontiers for conflict detection.
+   * Detects conflicts between remote operations and local pending operations.
+   *
+   * ## How It Works
+   * For each remote op, we compare its vector clock against the local "frontier"
+   * (merged clock of all applied + pending ops for that entity).
+   *
+   * ## Vector Clock Comparison Results
+   * | Result       | Meaning                        | Action                    |
+   * |--------------|--------------------------------|---------------------------|
+   * | LESS_THAN    | Remote is newer                | Apply (non-conflicting)   |
+   * | GREATER_THAN | Local is newer (remote stale)  | Skip remote op            |
+   * | EQUAL        | Same op (duplicate)            | Skip remote op            |
+   * | CONCURRENT   | True conflict                  | Add to conflicts list     |
+   *
+   * ## Fast Path Optimization
+   * If an entity has no local PENDING ops, there's no conflict possible.
+   * Conflicts require concurrent modifications from both sides.
+   *
+   * @param remoteOps - Remote operations to check for conflicts
+   * @param appliedFrontierByEntity - Per-entity vector clocks of applied ops
+   * @returns Object with `nonConflicting` ops to apply and `conflicts` to resolve
    */
   async detectConflicts(
     remoteOps: Operation[],
@@ -568,9 +681,20 @@ export class OperationLogSyncService {
     await this.validateStateService.validateAndRepairCurrentState('sync');
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // CONFLICT RESOLUTION HEURISTICS
+  // ═══════════════════════════════════════════════════════════════════════════
+
   /**
    * Suggests a conflict resolution based on heuristics.
-   * Returns 'local' | 'remote' | 'manual' (merge not auto-supported yet)
+   *
+   * ## Heuristics (in priority order)
+   * 1. **Large time gap (>1 hour)**: Newer wins - user likely made sequential changes
+   * 2. **Delete vs Update**: Update wins - preserve data over deletion
+   * 3. **Create vs other**: Create wins - entity creation is more significant
+   * 4. **Default**: Manual - let user decide
+   *
+   * @returns 'local' | 'remote' | 'manual' suggestion for the conflict dialog
    */
   private _suggestResolution(
     localOps: Operation[],
@@ -640,23 +764,37 @@ export class OperationLogSyncService {
     }
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // SYNC_IMPORT FILTERING
+  // ═══════════════════════════════════════════════════════════════════════════
+
   /**
-   * Filters out operations that were invalidated by a SYNC_IMPORT operation.
+   * Filters out operations invalidated by a SYNC_IMPORT or BACKUP_IMPORT.
    *
-   * Problem: When Client A creates operations, then Client B does a SYNC_IMPORT, then
-   * Client A syncs its operations:
-   * - Client A's ops have a higher serverSeq than the SYNC_IMPORT
-   * - But they reference entities that were wiped by the SYNC_IMPORT
-   * - Applying them causes "Task not found" and state inconsistencies
+   * ## The Problem
+   * ```
+   * Timeline:
+   *   Client A creates ops → Client B does SYNC_IMPORT → Client A syncs
    *
-   * Solution: Discard operations from OTHER clients that were created BEFORE the
-   * SYNC_IMPORT (by UUIDv7 timestamp comparison). UUIDv7 is time-ordered, so
-   * lexicographic comparison gives chronological ordering.
+   * Result:
+   *   - Client A's ops have higher serverSeq than SYNC_IMPORT
+   *   - But they reference entities that were WIPED by the import
+   *   - Applying them causes "Task not found" errors
+   * ```
    *
-   * Also handles BACKUP_IMPORT similarly since it also replaces the entire state.
+   * ## The Solution
+   * Discard ops from OTHER clients created BEFORE the import (by UUIDv7 comparison).
+   * UUIDv7 is time-ordered, so lexicographic comparison gives chronological ordering.
+   *
+   * ## Which ops are kept?
+   * | Op Source              | Op Created          | Result      |
+   * |------------------------|---------------------|-------------|
+   * | Same client as import  | Any time            | ✅ Valid    |
+   * | Other client           | AFTER import        | ✅ Valid    |
+   * | Other client           | BEFORE import       | ❌ Invalid  |
    *
    * @param ops - Operations to filter (already migrated)
-   * @returns Object with validOps and invalidatedOps arrays
+   * @returns Object with `validOps` and `invalidatedOps` arrays
    */
   _filterOpsInvalidatedBySyncImport(ops: Operation[]): {
     validOps: Operation[];
