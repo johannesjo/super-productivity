@@ -133,7 +133,7 @@ export const removeTimeSpent = createAction(
       entityType: 'TASK',
       entityId: taskProps.id,
       opType: OpType.Update,
-    } as PersistentActionMeta,
+    } satisfies PersistentActionMeta,
   }),
 );
 
