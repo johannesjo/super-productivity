@@ -166,7 +166,9 @@ export const plannerReducer = createReducer(
       ...state,
       days: {
         ...daysCopy,
-        // Only add to planner days if NOT today (today is managed by today tag)
+        // Today's ordering is managed by TODAY_TAG.taskIds, not planner.days.
+        // This dual-system design keeps move operations (drag/drop, Ctrl+↑/↓)
+        // uniform for all tags. See: docs/ai/today-tag-architecture.md
         ...(isPlannedForToday
           ? {}
           : {

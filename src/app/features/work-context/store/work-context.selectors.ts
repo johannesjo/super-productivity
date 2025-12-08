@@ -16,8 +16,63 @@ import { selectProjectFeatureState } from '../../project/store/project.selectors
 import { selectNoteTodayOrder } from '../../note/store/note.reducer';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Log } from '../../../core/log';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { Tag } from '../../tag/tag.model';
 
 export const WORK_CONTEXT_FEATURE_NAME = 'workContext';
+
+/**
+ * Computes ordered task IDs for TODAY_TAG using dueDay for membership.
+ *
+ * TODAY_TAG is a "virtual tag" - membership is determined by task.dueDay === today,
+ * NOT by task.tagIds. TODAY_TAG.taskIds only stores the ordering.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ */
+const computeOrderedTaskIdsForToday = (
+  todayTag: Tag | undefined,
+  taskEntities: Record<
+    string,
+    { id: string; dueDay?: string | null; parentId?: string | null } | undefined
+  >,
+): string[] => {
+  const todayStr = getDbDateStr();
+  const storedOrder = todayTag?.taskIds || [];
+
+  // Find all tasks where dueDay === today (membership source of truth)
+  const tasksForToday: string[] = [];
+  for (const taskId of Object.keys(taskEntities)) {
+    const task = taskEntities[taskId];
+    if (task && !task.parentId && task.dueDay === todayStr) {
+      tasksForToday.push(taskId);
+    }
+  }
+
+  if (tasksForToday.length === 0) {
+    return [];
+  }
+
+  // Order tasks according to TODAY_TAG.taskIds, with unordered tasks appended
+  const tasksForTodaySet = new Set(tasksForToday);
+  const orderedTasks: (string | undefined)[] = [];
+  const unorderedTasks: string[] = [];
+
+  for (const taskId of tasksForToday) {
+    const orderIndex = storedOrder.indexOf(taskId);
+    if (orderIndex > -1) {
+      orderedTasks[orderIndex] = taskId;
+    } else {
+      unorderedTasks.push(taskId);
+    }
+  }
+
+  return [
+    ...orderedTasks.filter(
+      (id): id is string => id !== undefined && tasksForTodaySet.has(id),
+    ),
+    ...unorderedTasks,
+  ];
+};
 
 export const selectContextFeatureState = createFeatureSelector<WorkContextState>(
   WORK_CONTEXT_FEATURE_NAME,
@@ -56,13 +111,14 @@ export const selectActiveWorkContext = createSelector(
   ): WorkContext => {
     if (activeType === WorkContextType.TAG) {
       const tag = selectTagById.projector(tagState, { id: activeId });
-      // Use board-style pattern: task.tagIds is source of truth for membership,
-      // tag.taskIds is only for ordering. This provides atomic consistency and self-healing.
-      const orderedTaskIds = computeOrderedTaskIdsForTag(
-        activeId,
-        tag,
-        taskState.entities,
-      );
+
+      // TODAY_TAG uses dueDay for membership (virtual tag pattern)
+      // Regular tags use task.tagIds for membership (board-style pattern)
+      const orderedTaskIds =
+        activeId === TODAY_TAG.id
+          ? computeOrderedTaskIdsForToday(tag, taskState.entities)
+          : computeOrderedTaskIdsForTag(activeId, tag, taskState.entities);
+
       return {
         ...tag,
         taskIds: orderedTaskIds,
@@ -81,12 +137,8 @@ export const selectActiveWorkContext = createSelector(
         if (!tag) {
           throw new Error('Today tag not found');
         }
-        // Fallback to TODAY tag with board-style pattern
-        const orderedTaskIds = computeOrderedTaskIdsForTag(
-          TODAY_TAG.id,
-          tag,
-          taskState.entities,
-        );
+        // Fallback to TODAY tag - use dueDay for membership (virtual tag pattern)
+        const orderedTaskIds = computeOrderedTaskIdsForToday(tag, taskState.entities);
         return {
           ...tag,
           taskIds: orderedTaskIds,
@@ -209,13 +261,21 @@ export const selectDoneBacklogTaskIdsForActiveContext = createSelector(
   },
 );
 
+/**
+ * Selects ordered task IDs for the TODAY work context.
+ *
+ * TODAY_TAG is a "virtual tag" - membership is determined by task.dueDay,
+ * NOT by task.tagIds (TODAY_TAG should NEVER be in task.tagIds).
+ * TODAY_TAG.taskIds only stores the ordering.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ */
 export const selectTodayTaskIds = createSelector(
   selectTagFeatureState,
   selectTaskFeatureState,
   (tagState, taskState): string[] => {
-    // Use board-style pattern: task.tagIds is source of truth for membership
     const todayTag = tagState.entities[TODAY_TAG.id];
-    return computeOrderedTaskIdsForTag(TODAY_TAG.id, todayTag, taskState.entities);
+    return computeOrderedTaskIdsForToday(todayTag, taskState.entities);
   },
 );
 

@@ -172,11 +172,18 @@ describe('shortSyntaxSharedMetaReducer', () => {
         mockReducer,
         stateWithTask,
       );
+      // Virtual tag pattern: TODAY should NOT be in task.tagIds
+      // Membership is determined by task.dueDay, not tagIds
       expectStateUpdate(
-        expectTaskUpdate('task1', { dueDay: todayStr, tagIds: ['TODAY'] }),
+        expectTaskUpdate('task1', { dueDay: todayStr }),
         action,
         mockReducer,
         stateWithTask,
+      );
+      // Verify TODAY is NOT in tagIds
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      expect(calledState[TASK_FEATURE_NAME].entities.task1!.tagIds).not.toContain(
+        'TODAY',
       );
     });
 
@@ -391,13 +398,17 @@ describe('shortSyntaxSharedMetaReducer', () => {
       const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
 
       // Verify all changes happened atomically
+      // Virtual tag pattern: TODAY should NOT be in task.tagIds
       expect(calledState[TASK_FEATURE_NAME].entities.task1).toEqual(
         jasmine.objectContaining({
           title: 'Updated Title',
           projectId: 'project2',
           dueDay: todayStr,
-          tagIds: ['TODAY'],
         }),
+      );
+      // Verify TODAY is NOT in tagIds (virtual tag pattern)
+      expect(calledState[TASK_FEATURE_NAME].entities.task1!.tagIds).not.toContain(
+        'TODAY',
       );
       expect(calledState[PROJECT_FEATURE_NAME].entities.project1!.taskIds).toEqual([]);
       expect(calledState[PROJECT_FEATURE_NAME].entities.project2!.taskIds).toEqual([
@@ -441,13 +452,18 @@ describe('shortSyntaxSharedMetaReducer', () => {
 
       expect(updatedTask.title).toBe('New Title');
       expect(updatedTask.timeEstimate).toBe(7200000);
-      // Note: tagIds will be overwritten by scheduling logic to include TODAY
-      expect(updatedTask.tagIds).toContain('TODAY');
+      // Virtual tag pattern: TODAY should NOT be in task.tagIds
+      // tagIds from taskChanges are preserved, but TODAY is never added
+      expect(updatedTask.tagIds).not.toContain('TODAY');
+      expect(updatedTask.tagIds).toEqual(['tag1', 'tag2']);
     });
   });
 
-  describe('applyShortSyntax action - board-style consistency', () => {
-    it('should update both tag.taskIds and task.tagIds when adding to today', () => {
+  // Virtual tag pattern: TODAY_TAG membership is determined by task.dueDay,
+  // NOT by task.tagIds. TODAY_TAG.taskIds only stores ordering.
+  // See: docs/ai/today-tag-architecture.md
+  describe('applyShortSyntax action - virtual tag pattern consistency', () => {
+    it('should update tag.taskIds for ordering but NOT task.tagIds when adding to today', () => {
       const todayStr = getDbDateStr();
       const testState = createStateWithExistingTasks(['task1'], [], [], []);
 
@@ -476,14 +492,17 @@ describe('shortSyntaxSharedMetaReducer', () => {
 
       const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
 
-      // Both sides should be updated
-      expect(calledState[TASK_FEATURE_NAME].entities.task1!.tagIds).toContain('TODAY');
+      // Virtual tag pattern: TODAY_TAG.taskIds is updated for ordering,
+      // but task.tagIds should NOT contain TODAY
+      expect(calledState[TASK_FEATURE_NAME].entities.task1!.tagIds).not.toContain(
+        'TODAY',
+      );
       expect((calledState as any).tag.entities.TODAY.taskIds as string[]).toContain(
         'task1',
       );
     });
 
-    it('should update both tag.taskIds and task.tagIds when removing from today', () => {
+    it('should clean up legacy TODAY in task.tagIds when removing from today', () => {
       const futureDay = '2099-12-31';
       const testState = createStateWithExistingTasks(['task1'], [], [], ['task1']);
 

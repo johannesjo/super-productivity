@@ -1,3 +1,16 @@
+/**
+ * Tag Reducer
+ *
+ * IMPORTANT: TODAY_TAG is a "Virtual Tag"
+ * -----------------------------------------
+ * TODAY_TAG (ID: 'TODAY') is handled specially:
+ * - Should NEVER be in task.tagIds - membership is determined by task.dueDay
+ * - TODAY_TAG.taskIds only stores ordering for the today list
+ * - Move handlers below work uniformly for ALL tags including TODAY
+ *
+ * This pattern keeps move operations (drag/drop, Ctrl+↑/↓) simple.
+ * See: docs/ai/today-tag-architecture.md
+ */
 import { createEntityAdapter, EntityAdapter } from '@ngrx/entity';
 import { Tag, TagState } from '../tag.model';
 import { createFeatureSelector, createReducer, createSelector, on } from '@ngrx/store';
@@ -254,6 +267,10 @@ export const tagReducer = createReducer<TagState>(
 
   // REGULAR ACTIONS
   // --------------------
+  // Move handlers work uniformly for ALL tags, including TODAY_TAG.
+  // This is why we keep TODAY_TAG.taskIds separate from planner.days -
+  // it allows drag/drop and keyboard shortcuts (Ctrl+↑/↓) to use the same
+  // code path for today as for any other tag. See: docs/ai/today-tag-architecture.md
   on(
     moveTaskInTodayList,
     (

@@ -210,9 +210,11 @@ describe('plannerSharedMetaReducer', () => {
       expect(mockReducer).toHaveBeenCalledWith(testState, action);
     });
 
-    // Board-style pattern tests: verify task.tagIds is updated along with tag.taskIds
-    describe('board-style pattern: task.tagIds updates', () => {
-      it('should add TODAY to task.tagIds when planning for today', () => {
+    // Virtual tag pattern tests: TODAY_TAG membership is determined by task.dueDay,
+    // NOT by task.tagIds. TODAY_TAG should NEVER be in task.tagIds.
+    // See: docs/ai/today-tag-architecture.md
+    describe('virtual tag pattern: task.tagIds cleanup (TODAY should NEVER be in tagIds)', () => {
+      it('should NOT add TODAY to task.tagIds when planning for today (virtual tag pattern)', () => {
         const todayStr = getDbDateStr();
         const testState = createStateWithExistingTasks([], [], [], []);
         // Add a task without TODAY in tagIds
@@ -225,18 +227,15 @@ describe('plannerSharedMetaReducer', () => {
         const task = createMockTask({ id: 'task1', tagIds: ['other-tag'] });
         const action = createPlanTaskForDayAction(task, todayStr, false);
 
-        metaReducer(testState, action);
-        expectStateUpdate(
-          expectTaskUpdate('task1', { tagIds: ['other-tag', 'TODAY'] }),
-          action,
-          mockReducer,
-          testState,
-        );
+        const result = metaReducer(testState, action);
+        // Task.tagIds should NOT contain TODAY (virtual tag pattern)
+        expect(result.tasks.entities['task1'].tagIds).not.toContain('TODAY');
+        expect(result.tasks.entities['task1'].tagIds).toEqual(['other-tag']);
       });
 
-      it('should remove TODAY from task.tagIds when planning for different day', () => {
+      it('should remove TODAY from task.tagIds when present (cleanup legacy data)', () => {
         const testState = createStateWithExistingTasks([], [], [], ['task1']);
-        // Set task.tagIds to include TODAY
+        // Set task.tagIds to include TODAY (legacy data that needs cleanup)
         (testState as any).tasks.entities['task1'].tagIds = ['other-tag', 'TODAY'];
 
         const task = createMockTask({ id: 'task1', tagIds: ['other-tag', 'TODAY'] });
@@ -251,10 +250,10 @@ describe('plannerSharedMetaReducer', () => {
         );
       });
 
-      it('should not duplicate TODAY in task.tagIds if already present', () => {
+      it('should clean up TODAY from task.tagIds if present (legacy data cleanup)', () => {
         const todayStr = getDbDateStr();
         const testState = createStateWithExistingTasks([], [], [], []);
-        // Add a task with TODAY already in tagIds
+        // Add a task with TODAY in tagIds (legacy data that needs cleanup)
         (testState as any).tasks.ids = ['task1'];
         (testState as any).tasks.entities['task1'] = createMockTask({
           id: 'task1',
@@ -265,11 +264,8 @@ describe('plannerSharedMetaReducer', () => {
         const action = createPlanTaskForDayAction(task, todayStr, false);
 
         const result = metaReducer(testState, action);
-        // Task should still have only one TODAY
-        expect(
-          result.tasks.entities['task1'].tagIds.filter((id: string) => id === 'TODAY')
-            .length,
-        ).toBe(1);
+        // TODAY should be removed from tagIds (virtual tag pattern)
+        expect(result.tasks.entities['task1'].tagIds).not.toContain('TODAY');
       });
     });
   });

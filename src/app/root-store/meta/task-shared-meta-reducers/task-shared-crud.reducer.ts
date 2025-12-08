@@ -121,11 +121,15 @@ const handleAddTask = (
   const shouldAddToToday = task.dueDay === getDbDateStr();
 
   // Add task to task state
-  // Note: TODAY_TAG should NOT be in task.tagIds - it's a virtual tag stored in tag.taskIds only
+  // IMPORTANT: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
+  // Membership is determined by task.dueDay, TODAY_TAG.taskIds only stores ordering
+  // See: docs/ai/today-tag-architecture.md
+  const taskTagIds = task.tagIds.filter((id) => id !== TODAY_TAG.id);
+
   const newTask: Task = {
     ...DEFAULT_TASK,
     ...task,
-    tagIds: task.tagIds.filter((id) => id !== TODAY_TAG.id), // Ensure TODAY_TAG is not in tagIds
+    tagIds: taskTagIds,
     timeSpent: calcTotalTimeSpent(task.timeSpentOnDay || {}),
     projectId: task.projectId || '',
   };

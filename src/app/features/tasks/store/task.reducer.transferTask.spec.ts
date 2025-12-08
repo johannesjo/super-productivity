@@ -167,13 +167,15 @@ describe('Task Reducer - transferTask action', () => {
     const result = reducerWithMetaReducers(rootState, action) as RootState;
     const taskState = result[TASK_FEATURE_NAME];
 
-    // Board-style pattern: task.tagIds is updated to include TODAY when transferring to today
+    // Virtual tag pattern: TODAY_TAG should NOT be in task.tagIds
+    // Membership is determined by task.dueDay, not tagIds
     expect(taskState.entities.task1).toEqual({
       ...task,
       dueDay: today,
       dueWithTime: undefined,
-      tagIds: [TODAY_TAG.id],
+      // tagIds should NOT contain TODAY (virtual tag pattern)
     });
+    expect(taskState.entities.task1!.tagIds).not.toContain(TODAY_TAG.id);
   });
 
   it('should not affect other tasks when transferring', () => {

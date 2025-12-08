@@ -275,21 +275,23 @@ export class WorkContextService {
     shareReplay(1),
   );
 
+  // Filter project tasks to show only those scheduled for today
+  // TODAY_TAG is a virtual tag - membership is determined by task.dueDay, not task.tagIds
+  // See: docs/ai/today-tag-architecture.md
   mainListTasksInProject$: Observable<TaskWithSubTasks[]> = this.mainListTasks$.pipe(
-    map((tasks) =>
-      tasks
+    map((tasks) => {
+      const todayStr = getDbDateStr();
+      return tasks
         .filter(
           (task) =>
-            task.tagIds.includes(TODAY_TAG.id) ||
-            task.subTasks.some((subTask) => subTask.tagIds.includes(TODAY_TAG.id)),
+            task.dueDay === todayStr ||
+            task.subTasks.some((subTask) => subTask.dueDay === todayStr),
         )
         .map((task) => ({
           ...task,
-          subTasks: task.subTasks.filter((subTask) =>
-            subTask.tagIds.includes(TODAY_TAG.id),
-          ),
-        })),
-    ),
+          subTasks: task.subTasks.filter((subTask) => subTask.dueDay === todayStr),
+        }));
+    }),
   );
 
   doneTaskIds$: Observable<string[]> = this._store$.select(

@@ -247,6 +247,7 @@ const handlePlanForDay = (
   let updatedState = state;
   const todayStr = getDbDateStr();
   const isForToday = day === todayStr;
+  const currentTask = state[TASK_FEATURE_NAME].entities[task.id] as Task;
 
   // Collect additional task changes
   const additionalChanges: MutableTaskChanges = {
@@ -255,11 +256,14 @@ const handlePlanForDay = (
   };
 
   const todayTag = getTag(updatedState, TODAY_TAG.id);
-  // Note: TODAY_TAG should NOT be in task.tagIds - check tag.taskIds only
   const isCurrentlyInToday = todayTag.taskIds.includes(task.id);
+  const currentTagIds = currentTask?.tagIds || [];
+  const hasTaskTodayTag = currentTagIds.includes(TODAY_TAG.id);
 
   if (isForToday) {
-    // Adding to today - update tag.taskIds only
+    // Adding to today - update TODAY_TAG.taskIds for ordering
+    // IMPORTANT: TODAY_TAG should NEVER be in task.tagIds (virtual tag pattern)
+    // Membership is determined by task.dueDay. See: docs/ai/today-tag-architecture.md
     const newTagTaskIds = unique(
       isAddToTop
         ? [task.id, ...todayTag.taskIds.filter((tid) => tid !== task.id)]
@@ -273,21 +277,31 @@ const handlePlanForDay = (
       },
     ]);
 
+    // Ensure TODAY_TAG is NOT in task.tagIds (cleanup if present from legacy data)
+    if (hasTaskTodayTag) {
+      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
+    }
+
     // Remove from planner days if present
     updatedState = removeFromPlannerDays(updatedState, task.id);
-  } else if (isCurrentlyInToday) {
-    // Moving away from today - update tag.taskIds only
-    updatedState = updateTags(updatedState, [
-      {
-        id: TODAY_TAG.id,
-        changes: { taskIds: todayTag.taskIds.filter((id) => id !== task.id) },
-      },
-    ]);
+  } else {
+    // Moving away from today or scheduling for future
+    if (isCurrentlyInToday) {
+      // Remove from TODAY_TAG.taskIds
+      updatedState = updateTags(updatedState, [
+        {
+          id: TODAY_TAG.id,
+          changes: { taskIds: todayTag.taskIds.filter((id) => id !== task.id) },
+        },
+      ]);
+    }
+
+    // Ensure TODAY_TAG is NOT in task.tagIds (cleanup if present from legacy data)
+    if (hasTaskTodayTag) {
+      additionalChanges.tagIds = currentTagIds.filter((id) => id !== TODAY_TAG.id);
+    }
 
     // Add to planner for the target day
-    updatedState = addToPlannerDay(updatedState, task.id, day);
-  } else {
-    // Not in today, add to planner for target day
     updatedState = addToPlannerDay(updatedState, task.id, day);
   }
 

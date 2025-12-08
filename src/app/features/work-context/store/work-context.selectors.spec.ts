@@ -10,8 +10,19 @@ import {
 } from './work-context.selectors';
 import { WorkContext, WorkContextType } from '../work-context.model';
 import { TaskCopy } from '../../tasks/task.model';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
+/**
+ * Tests for work-context selectors.
+ *
+ * IMPORTANT: TODAY_TAG is a "virtual tag" - membership is determined by task.dueDay,
+ * NOT by task.tagIds. TODAY_TAG.taskIds only stores ordering.
+ * See: docs/ai/today-tag-architecture.md
+ */
 describe('workContext selectors', () => {
+  // Get today's date string for tests
+  const todayStr = getDbDateStr();
+
   describe('selectActiveWorkContext', () => {
     it('should select today tag', () => {
       const result = selectActiveWorkContext.projector(
@@ -55,27 +66,31 @@ describe('workContext selectors', () => {
       );
     });
 
-    it('should use board-style pattern for tags (task.tagIds as source of truth)', () => {
+    it('should use dueDay for TODAY_TAG membership (virtual tag pattern)', () => {
+      // TODAY_TAG uses dueDay for membership, not tagIds
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [], // TODAY_TAG should NOT be in tagIds
+        dueDay: todayStr, // This determines TODAY membership
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [], // TODAY_TAG should NOT be in tagIds
+        dueDay: todayStr, // This determines TODAY membership
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
-      const taskNotInTag = {
+      const taskNotForToday = {
         id: 'task3',
-        tagIds: [], // Does NOT have TODAY tag
+        tagIds: [],
+        dueDay: '2000-01-01', // Not today
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
 
-      // Tag has stale taskIds including task3 which doesn't have the tag
+      // Tag has stale taskIds including task3 which doesn't have dueDay === today
       const todayTagWithStaleIds = {
         ...TODAY_TAG,
-        taskIds: ['task3', 'task1'], // task3 is stale, task2 is missing
+        taskIds: ['task3', 'task1'], // task3 is stale (wrong dueDay), task2 is missing
       };
 
       const result = selectActiveWorkContext.projector(
@@ -85,7 +100,7 @@ describe('workContext selectors', () => {
         } as any,
         fakeEntityStateFromArray([]),
         fakeEntityStateFromArray([todayTagWithStaleIds]),
-        fakeEntityStateFromArray([task1, task2, taskNotInTag]) as any,
+        fakeEntityStateFromArray([task1, task2, taskNotForToday]) as any,
         [],
       );
 
@@ -97,13 +112,15 @@ describe('workContext selectors', () => {
     it('should select tasks for project', () => {
       const M1 = {
         id: 'M1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const M2 = {
         id: 'M2',
         subTaskIds: [],
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         dueWithTime: 1234,
         reminderId: 'asd',
       } as Partial<TaskCopy> as TaskCopy;
@@ -116,13 +133,14 @@ describe('workContext selectors', () => {
         fakeEntityStateFromArray([M2, M1]).entities,
       );
       expect(result).toEqual([
-        { id: 'M1', subTaskIds: [], tagIds: ['TODAY'] },
+        { id: 'M1', subTaskIds: [], tagIds: [], dueDay: todayStr },
         {
           id: 'M2',
           dueWithTime: 1234,
           reminderId: 'asd',
           subTaskIds: [],
-          tagIds: ['TODAY'],
+          tagIds: [],
+          dueDay: todayStr,
         },
       ] as any[]);
     });
@@ -132,14 +150,16 @@ describe('workContext selectors', () => {
     it('should select tasks for project', () => {
       const M1 = {
         id: 'M1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: true,
       } as Partial<TaskCopy> as TaskCopy;
       const M2 = {
         id: 'M2',
         subTaskIds: [],
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         dueWithTime: 1234,
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -149,7 +169,8 @@ describe('workContext selectors', () => {
           id: 'M2',
           dueWithTime: 1234,
           subTaskIds: [],
-          tagIds: ['TODAY'],
+          tagIds: [],
+          dueDay: todayStr,
         },
       ] as Partial<TaskCopy>[] as TaskCopy[]);
     });
@@ -188,8 +209,8 @@ describe('workContext selectors', () => {
     });
   });
 
-  describe('selectTodayTaskIds (board-style pattern)', () => {
-    it('should return empty array when TODAY tag has no tasks', () => {
+  describe('selectTodayTaskIds (virtual tag pattern - uses dueDay)', () => {
+    it('should return empty array when no tasks have dueDay === today', () => {
       const tagState = fakeEntityStateFromArray([TODAY_TAG]);
       const taskState = fakeEntityStateFromArray([]) as any;
 
@@ -197,15 +218,18 @@ describe('workContext selectors', () => {
       expect(result).toEqual([]);
     });
 
-    it('should return tasks in stored order when all tasks have TODAY tag', () => {
+    it('should return tasks in stored order when all tasks have dueDay === today', () => {
+      // TODAY_TAG membership is determined by dueDay, not tagIds
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [], // TODAY_TAG should NOT be in tagIds
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [], // TODAY_TAG should NOT be in tagIds
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -221,15 +245,17 @@ describe('workContext selectors', () => {
       expect(result).toEqual(['task1', 'task2']);
     });
 
-    it('should filter out stale taskIds (tasks that no longer have TODAY tag)', () => {
+    it('should filter out stale taskIds (tasks that no longer have dueDay === today)', () => {
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [], // Removed from TODAY tag
+        tagIds: [],
+        dueDay: '2000-01-01', // No longer today
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -245,15 +271,17 @@ describe('workContext selectors', () => {
       expect(result).toEqual(['task1']);
     });
 
-    it('should auto-add tasks with TODAY tag but not in stored order', () => {
+    it('should auto-add tasks with dueDay === today but not in stored order', () => {
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
 
@@ -272,12 +300,14 @@ describe('workContext selectors', () => {
     it('should exclude subtasks', () => {
       const parentTask = {
         id: 'parent',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: ['subtask1'],
       } as Partial<TaskCopy> as TaskCopy;
       const subtask = {
         id: 'subtask1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         parentId: 'parent',
       } as Partial<TaskCopy> as TaskCopy;
@@ -299,19 +329,22 @@ describe('workContext selectors', () => {
     it('should filter out done tasks', () => {
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: false,
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: true,
       } as Partial<TaskCopy> as TaskCopy;
       const task3 = {
         id: 'task3',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: false,
       } as Partial<TaskCopy> as TaskCopy;
@@ -329,13 +362,15 @@ describe('workContext selectors', () => {
     it('should return empty array when all tasks are done', () => {
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: true,
       } as Partial<TaskCopy> as TaskCopy;
       const task2 = {
         id: 'task2',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: true,
       } as Partial<TaskCopy> as TaskCopy;
@@ -349,7 +384,8 @@ describe('workContext selectors', () => {
     it('should handle tasks that do not exist in taskState', () => {
       const task1 = {
         id: 'task1',
-        tagIds: [TODAY_TAG.id],
+        tagIds: [],
+        dueDay: todayStr,
         subTaskIds: [],
         isDone: false,
       } as Partial<TaskCopy> as TaskCopy;

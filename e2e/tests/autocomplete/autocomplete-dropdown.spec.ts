@@ -9,7 +9,8 @@ test.describe('Autocomplete Dropdown', () => {
     await workViewPage.waitForTaskList();
 
     // Add task with tag syntax, skipClose=true to keep input open
-    await workViewPage.addTask('some task <3 #basicTag', true);
+    // Use sd:today to set dueDay so task appears in TODAY view
+    await workViewPage.addTask('some task <3 #basicTag sd:today', true);
 
     // Small delay to let the tag creation dialog appear
     await page.waitForTimeout(500);
