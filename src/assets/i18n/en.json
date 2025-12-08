@@ -1265,6 +1265,7 @@
         "TITLE": "Basic Settings"
       },
       "S": {
+        "ARCHIVE_CLEANUP_FAILED": "Failed to clean up archived data for deleted tag",
         "UPDATED": "Tag Settings were updated"
       },
       "TTL": {

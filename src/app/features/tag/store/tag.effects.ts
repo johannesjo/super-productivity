@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import {
+  concatMap,
   distinctUntilChanged,
   filter,
   first,
@@ -30,6 +31,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
+import { devError } from '../../../util/dev-error';
 
 @Injectable()
 export class TagEffects {
@@ -103,15 +105,25 @@ export class TagEffects {
       this._actions$.pipe(
         ofType(deleteTag, deleteTags),
         map((a: any) => (a.ids ? a.ids : [a.id])),
-        tap(async (tagIdsToRemove: string[]) => {
-          // Remove tags from archived tasks (async - IndexedDB, not NgRx state)
-          await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
+        concatMap(async (tagIdsToRemove: string[]) => {
+          try {
+            // Remove tags from archived tasks (async - IndexedDB, not NgRx state)
+            await this._taskArchiveService.removeTagsFromAllTasks(tagIdsToRemove);
 
-          // Clean up time tracking data in archives (async - IndexedDB)
-          // Note: Current time tracking state is handled in the meta-reducer
-          for (const tagId of tagIdsToRemove) {
-            await this._timeTrackingService.cleanupArchiveDataForTag(tagId);
+            // Clean up time tracking data in archives (async - IndexedDB)
+            // Note: Current time tracking state is handled in the meta-reducer
+            for (const tagId of tagIdsToRemove) {
+              await this._timeTrackingService.cleanupArchiveDataForTag(tagId);
+            }
+          } catch (e) {
+            // Archive cleanup is non-critical - log and notify but don't break
+            devError('[TagEffects] Failed to clean up tag archive data');
+            this._snackService.open({
+              type: 'ERROR',
+              msg: T.F.TAG.S.ARCHIVE_CLEANUP_FAILED,
+            });
           }
+          return tagIdsToRemove;
         }),
       ),
     { dispatch: false },
