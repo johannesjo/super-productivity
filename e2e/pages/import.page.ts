@@ -68,7 +68,20 @@ export class ImportPage extends BasePage {
     await this.fileInput.setInputFiles(filePath);
 
     // Dispatch change event to ensure Angular detects the file change
-    await this.fileInput.dispatchEvent('change');
+    // Use evaluate to dispatch directly as the input might be hidden/detached from view
+    try {
+      await this.fileInput.evaluate(
+        (node) => {
+          node.dispatchEvent(new Event('change', { bubbles: true }));
+        },
+        { timeout: 2000 },
+      );
+    } catch (e) {
+      console.log(
+        'Dispatch event failed (maybe import already started/element removed):',
+        (e as Error).message,
+      );
+    }
 
     // Wait for import to be processed
     // The app navigates to TODAY tag after successful import via Angular router

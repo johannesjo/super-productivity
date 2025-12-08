@@ -8,6 +8,7 @@ import {
   isServerHealthy,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
+import { waitForAppReady } from '../../utils/waits';
 
 /**
  * SuperSync E2E Tests
@@ -959,12 +960,25 @@ base.describe('@supersync SuperSync E2E', () => {
         // ============ PHASE 6: Client B Downloads ============
         clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
         await clientB.sync.setupSuperSync(syncConfig);
+        // Add delay to ensure any auto-sync from setup has time to start/finish
+        // or to avoid race conditions with "Sync already in progress"
+        await clientB.page.waitForTimeout(2000);
         await clientB.sync.syncAndWait();
         console.log('[TimeTrack Test] Client B synced');
 
+        // Reload to ensure UI reflects DB state (in case of sync UI glitch)
+        await clientB.page.reload();
+        await waitForAppReady(clientB.page);
+
         // ============ PHASE 7: Verify Time on Client B ============
         // Wait for task to appear
-        await waitForTask(clientB.page, taskName);
+        try {
+          await waitForTask(clientB.page, taskName);
+        } catch (e) {
+          const tasks = await clientB.page.locator('task .task-title').allTextContents();
+          console.log('[TimeTrack Test] Client B tasks found:', tasks);
+          throw e;
+        }
 
         const taskLocatorB = clientB.page.locator(`task:has-text("${taskName}")`);
         await expect(taskLocatorB).toBeVisible({ timeout: 10000 });

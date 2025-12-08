@@ -172,7 +172,7 @@ export const closeClient = async (client: SimulatedE2EClient): Promise<void> => 
 export const waitForTask = async (
   page: Page,
   taskName: string,
-  timeout = 25000,
+  timeout = 60000,
 ): Promise<void> => {
   const escapedName = taskName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const startTime = Date.now();

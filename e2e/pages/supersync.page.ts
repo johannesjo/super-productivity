@@ -73,18 +73,47 @@ export class SuperSyncPage extends BasePage {
 
     // Save
     await this.saveBtn.click();
+
+    // Check if sync starts automatically (it should if enabled)
+    try {
+      await this.syncSpinner.waitFor({ state: 'visible', timeout: 5000 });
+      console.log(
+        '[SuperSyncPage] Initial sync started automatically, waiting for completion...',
+      );
+      await this.waitForSyncComplete();
+    } catch (e) {
+      // No auto-sync, that's fine
+    }
   }
 
   /**
    * Trigger a sync operation by clicking the sync button.
    */
   async triggerSync(): Promise<void> {
+    // Wait a bit to ensure any previous internal state is cleared
+    await this.page.waitForTimeout(1000);
+
+    // Check if sync is already running to avoid "Sync already in progress" errors
+    // If it is, wait for it to finish so we can trigger a fresh sync that includes our latest changes
+    if (await this.syncSpinner.isVisible()) {
+      console.log(
+        '[SuperSyncPage] Sync already in progress, waiting for it to finish...',
+      );
+      await this.syncSpinner.waitFor({ state: 'hidden', timeout: 30000 }).catch(() => {
+        console.log(
+          '[SuperSyncPage] Warning: Timed out waiting for previous sync to finish',
+        );
+      });
+      // Add a small buffer after spinner disappears
+      await this.page.waitForTimeout(500);
+    }
+
     // Use force:true to bypass any tooltip overlays that might be in the way
     await this.syncBtn.click({ force: true });
     // Wait for sync to start or complete immediately
     await Promise.race([
-      this.syncSpinner.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {}),
-      this.syncCheckIcon.waitFor({ state: 'visible', timeout: 2000 }).catch(() => {}),
+      this.syncSpinner.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
+      this.syncCheckIcon.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {}),
     ]);
   }
 
@@ -117,8 +146,19 @@ export class SuperSyncPage extends BasePage {
         await this.page.waitForTimeout(500);
 
         // Wait for G.APPLY button to be enabled (with retry)
-        for (let i = 0; i < 10; i++) {
-          if (await this.conflictApplyBtn.isEnabled()) {
+        // Increase retries to allow for processing time (50 * 200ms = 10s)
+        for (let i = 0; i < 50; i++) {
+          // If dialog closed unexpectedly, break loop
+          if (!(await this.conflictDialog.isVisible())) {
+            break;
+          }
+
+          // Check if enabled with short timeout to avoid long waits if element missing
+          const isEnabled = await this.conflictApplyBtn
+            .isEnabled({ timeout: 1000 })
+            .catch(() => false);
+
+          if (isEnabled) {
             console.log('[SuperSyncPage] Clicking G.APPLY to apply resolution...');
             await this.conflictApplyBtn.click();
             break;

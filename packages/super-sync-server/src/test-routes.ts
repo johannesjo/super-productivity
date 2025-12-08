@@ -67,7 +67,15 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
             .get(existingUser.id) as { token_version: number } | undefined;
           userId = existingUser.id;
           tokenVersion = user?.token_version ?? 0;
-          Logger.info(`[TEST] Returning existing user: ${email} (ID: ${userId})`);
+          Logger.info(
+            `[TEST] Returning existing user: ${email} (ID: ${userId}) - Clearing old data`,
+          );
+
+          // Clear old data for this user to ensure clean state
+          db.prepare('DELETE FROM operations WHERE user_id = ?').run(userId);
+          db.prepare('DELETE FROM sync_devices WHERE user_id = ?').run(userId);
+          db.prepare('DELETE FROM user_sync_state WHERE user_id = ?').run(userId);
+          db.prepare('DELETE FROM tombstones WHERE user_id = ?').run(userId);
         } else {
           // Create user with is_verified=1 (skip email verification)
           const info = db

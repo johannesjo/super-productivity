@@ -25,17 +25,28 @@
         "startOfNextDay": 0,
         "daysToShowForPastDates": 14,
         "isMinimizeToTray": false,
-        "isEnableAdvanced": false
+        "isEnableAdvanced": false,
+        "isTrayShowCurrentTask": true,
+        "taskNotesTpl": "",
+        "isDisableAnimations": false
       },
       "appFeatures": {
         "isTimeTrackingEnabled": true,
         "isFocusModeEnabled": true,
         "isSchedulerEnabled": true,
         "isPlannerEnabled": true,
-        "isBoardsEnabled": true
+        "isBoardsEnabled": true,
+        "isScheduleDayPanelEnabled": true,
+        "isIssuesPanelEnabled": true,
+        "isProjectNotesEnabled": true,
+        "isSyncIconEnabled": true,
+        "isDonatePageEnabled": true,
+        "isEnableUserProfiles": false
       },
       "localization": {},
-      "evaluation": {},
+      "evaluation": {
+        "isHideEvaluationSheet": false
+      },
       "idle": {
         "isEnableIdleTimeTracking": false,
         "isUnTrackedIdleResetsBreakTimer": false,
@@ -46,7 +57,12 @@
         "isTakeABreakEnabled": false,
         "takeABreakMinWorkingTime": 60,
         "takeABreakSnoozeTime": 15,
-        "motivationalImgs": []
+        "motivationalImgs": [],
+        "isLockScreen": false,
+        "isTimedFullScreenBlocker": false,
+        "timedFullScreenBlockerDuration": 8000,
+        "isFocusWindow": false,
+        "takeABreakMessage": "Take a break!"
       },
       "pomodoro": {
         "isEnabled": false,
@@ -70,29 +86,60 @@
         "isEnabled": false,
         "isCompressionEnabled": true,
         "syncInterval": 0,
-        "isEncryptionEnabled": false
+        "isEncryptionEnabled": false,
+        "syncProvider": null
       },
       "timeline": {
         "isWorkStartEndEnabled": false,
         "workStart": "9:00",
         "workEnd": "17:00"
       },
-      "reminder": {},
-      "focus": {},
+      "reminder": {
+        "isCountdownBannerEnabled": true,
+        "countdownDuration": 600000
+      },
+      "focusMode": {
+        "isAlwaysUseFocusMode": false,
+        "isSkipPreparation": false
+      },
       "sound": {
         "volume": 70,
         "isPlayDoneSound": true,
         "doneSound": "done2.mp3",
-        "isPlayTickSound": false
+        "isPlayTickSound": false,
+        "isIncreaseDoneSoundPitch": true,
+        "breakReminderSound": null
       },
-      "tracking": {
+      "timeTracking": {
         "trackingInterval": 1000,
-        "trackingReminderMinTime": 60000,
-        "isTrackingReminderEnabled": false
+        "defaultEstimate": 0,
+        "defaultEstimateSubTasks": 0,
+        "isNotifyWhenTimeEstimateExceeded": true,
+        "isAutoStartNextTask": false,
+        "isTrackingReminderEnabled": false,
+        "isTrackingReminderShowOnMobile": false,
+        "trackingReminderMinTime": 300000
       },
       "quickNotes": {},
-      "dominaMode": {},
-      "shortSyntax": {}
+      "dominaMode": {
+        "isEnabled": false,
+        "text": "Your current task is: ${currentTaskTitle}",
+        "interval": 300000,
+        "volume": 75
+      },
+      "shortSyntax": {
+        "isEnableProject": true,
+        "isEnableDue": true,
+        "isEnableTag": true
+      },
+      "schedule": {
+        "isWorkStartEndEnabled": true,
+        "workStart": "9:00",
+        "workEnd": "17:00",
+        "isLunchBreakEnabled": false,
+        "lunchBreakStart": "13:00",
+        "lunchBreakEnd": "14:00"
+      }
     },
     "task": {
       "ids": ["active-task-1", "active-task-2", "active-task-subtask-1"],
@@ -109,7 +156,8 @@
           "tagIds": [],
           "created": 1733000000000,
           "attachments": [],
-          "dueDay": "2024-12-01"
+          "dueDay": "2024-12-01",
+          "projectId": "INBOX_PROJECT"
         },
         "active-task-subtask-1": {
           "id": "active-task-subtask-1",
@@ -123,7 +171,8 @@
           "tagIds": [],
           "parentId": "active-task-1",
           "created": 1733000000001,
-          "attachments": []
+          "attachments": [],
+          "projectId": "INBOX_PROJECT"
         },
         "active-task-2": {
           "id": "active-task-2",
@@ -137,9 +186,14 @@
           "tagIds": [],
           "created": 1733000000002,
           "attachments": [],
-          "dueDay": "2024-12-01"
+          "dueDay": "2024-12-01",
+          "projectId": "INBOX_PROJECT"
         }
-      }
+      },
+      "currentTaskId": null,
+      "selectedTaskId": null,
+      "lastCurrentTaskId": null,
+      "isDataLoaded": false
     },
     "tag": {
       "ids": ["TODAY"],
@@ -159,7 +213,17 @@
           "workStart": {},
           "workEnd": {},
           "breakNr": {},
-          "breakTime": {}
+          "breakTime": {},
+          "advancedCfg": {
+            "worklogExportSettings": {
+              "cols": ["DATE", "START", "END", "TIME_CLOCK", "TITLES_INCLUDING_SUB"],
+              "roundWorkTimeTo": null,
+              "roundStartTimeTo": null,
+              "roundEndTimeTo": null,
+              "groupBy": "DATE",
+              "separateTasksBy": ""
+            }
+          }
         }
       }
     },

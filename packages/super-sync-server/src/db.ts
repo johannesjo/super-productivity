@@ -80,6 +80,7 @@ export const initDb = (dataDir: string, inMemory = false): void => {
     }
 
     db = new Database(dbPath);
+    db.pragma('journal_mode = WAL');
   }
 
   // Create users table
