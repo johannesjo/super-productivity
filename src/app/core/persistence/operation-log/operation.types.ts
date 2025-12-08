@@ -216,27 +216,6 @@ export interface RepairPayload {
 }
 
 // =============================================================================
-// LEGACY TYPES (deprecated - will be removed with SideEffectExtractorService)
-// =============================================================================
-
-/**
- * @deprecated Use EntityChange instead. Will be removed in Phase 5.
- */
-export interface SideEffectUpdate {
-  entityType: EntityType;
-  entityId: string;
-  changes: unknown;
-}
-
-/**
- * @deprecated Use MultiEntityPayload instead. Will be removed in Phase 5.
- */
-export interface CompositePayload {
-  mainData: Record<string, unknown>;
-  sideEffects: SideEffectUpdate[];
-}
-
-// =============================================================================
 // MULTI-ENTITY OPERATIONS
 // =============================================================================
 

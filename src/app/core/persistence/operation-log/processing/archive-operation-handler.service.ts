@@ -8,6 +8,7 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { sortTimeTrackingAndTasksFromArchiveYoungToOld } from '../../../../features/time-tracking/sort-data-to-flush';
 import { ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../../../../features/time-tracking/archive.service';
 import { Log } from '../../../log';
+import { lazyInject } from '../../../../util/lazy-inject';
 
 /**
  * Handles archive-specific side effects for REMOTE operations.
@@ -47,30 +48,9 @@ export class ArchiveOperationHandler {
   // -> ArchiveOperationHandler -> ArchiveService/TaskArchiveService -> PfapiService
   // DataInitService also injects PfapiService directly, causing the cycle.
   private _injector = inject(Injector);
-
-  private _archiveService?: ArchiveService;
-  private get archiveService(): ArchiveService {
-    if (!this._archiveService) {
-      this._archiveService = this._injector.get(ArchiveService);
-    }
-    return this._archiveService;
-  }
-
-  private _taskArchiveService?: TaskArchiveService;
-  private get taskArchiveService(): TaskArchiveService {
-    if (!this._taskArchiveService) {
-      this._taskArchiveService = this._injector.get(TaskArchiveService);
-    }
-    return this._taskArchiveService;
-  }
-
-  private _pfapiService?: PfapiService;
-  private get pfapiService(): PfapiService {
-    if (!this._pfapiService) {
-      this._pfapiService = this._injector.get(PfapiService);
-    }
-    return this._pfapiService;
-  }
+  private _getArchiveService = lazyInject(this._injector, ArchiveService);
+  private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);
+  private _getPfapiService = lazyInject(this._injector, PfapiService);
 
   /**
    * Process a remote operation and handle any archive-related side effects.
@@ -100,7 +80,7 @@ export class ArchiveOperationHandler {
    */
   private async _handleMoveToArchive(action: PersistentAction): Promise<void> {
     const tasks = (action as ReturnType<typeof TaskSharedActions.moveToArchive>).tasks;
-    await this.archiveService.writeTasksToArchiveForRemoteSync(tasks);
+    await this._getArchiveService().writeTasksToArchiveForRemoteSync(tasks);
   }
 
   /**
@@ -110,7 +90,7 @@ export class ArchiveOperationHandler {
   private async _handleRestoreTask(action: PersistentAction): Promise<void> {
     const task = (action as ReturnType<typeof TaskSharedActions.restoreTask>).task;
     const taskIds = [task.id, ...task.subTaskIds];
-    await this.taskArchiveService.deleteTasks(taskIds, { isIgnoreDBLock: true });
+    await this._getTaskArchiveService().deleteTasks(taskIds, { isIgnoreDBLock: true });
   }
 
   /**
@@ -122,9 +102,10 @@ export class ArchiveOperationHandler {
    */
   private async _handleFlushYoungToOld(action: PersistentAction): Promise<void> {
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
+    const pfapi = this._getPfapiService();
 
-    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
-    const archiveOld = await this.pfapiService.m.archiveOld.load();
+    const archiveYoung = await pfapi.m.archiveYoung.load();
+    const archiveOld = await pfapi.m.archiveOld.load();
 
     const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
       archiveYoung,
@@ -133,7 +114,7 @@ export class ArchiveOperationHandler {
       now: timestamp,
     });
 
-    await this.pfapiService.m.archiveYoung.save(
+    await pfapi.m.archiveYoung.save(
       {
         ...newSorted.archiveYoung,
         lastTimeTrackingFlush: timestamp,
@@ -144,7 +125,7 @@ export class ArchiveOperationHandler {
       },
     );
 
-    await this.pfapiService.m.archiveOld.save(
+    await pfapi.m.archiveOld.save(
       {
         ...newSorted.archiveOld,
         lastTimeTrackingFlush: timestamp,

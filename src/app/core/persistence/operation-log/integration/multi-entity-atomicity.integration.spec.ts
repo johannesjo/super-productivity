@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/naming-convention, no-mixed-operators */
-import { StateChangeCaptureService } from '../processing/state-change-capture.service';
+import { OperationCaptureService } from '../processing/operation-capture.service';
 import { PersistentAction, PersistentActionMeta } from '../persistent-action.interface';
-import { EntityType, OpType } from '../operation.types';
+import { EntityType, OpType, EntityChange } from '../operation.types';
 import { RootState } from '../../../../root-store/root-state';
 import { TASK_FEATURE_NAME } from '../../../../features/tasks/store/task.reducer';
 import { TAG_FEATURE_NAME } from '../../../../features/tag/store/tag.reducer';
@@ -12,6 +12,7 @@ import { Tag } from '../../../../features/tag/tag.model';
 import { DEFAULT_TAG } from '../../../../features/tag/tag.const';
 import { Project } from '../../../../features/project/project.model';
 import { DEFAULT_PROJECT } from '../../../../features/project/project.const';
+import { generateCaptureId } from '../processing/operation-capture.util';
 
 /**
  * Multi-Entity Atomicity Tests
@@ -25,7 +26,21 @@ import { DEFAULT_PROJECT } from '../../../../features/project/project.const';
  * 3. transferTask - today tag updates + planner updates + task dueDay update
  */
 describe('Multi-Entity Atomicity Integration', () => {
-  let service: StateChangeCaptureService;
+  let service: OperationCaptureService;
+
+  /**
+   * Helper to compute entity changes using the service.
+   * Wraps computeAndEnqueue + dequeue for testing.
+   */
+  const computeChanges = (
+    action: PersistentAction,
+    beforeState: RootState,
+    afterState: RootState,
+  ): EntityChange[] => {
+    const captureId = generateCaptureId(action);
+    service.computeAndEnqueue(captureId, action, beforeState, afterState);
+    return service.dequeue(captureId);
+  };
 
   const createMockTask = (overrides: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
@@ -135,7 +150,7 @@ describe('Multi-Entity Atomicity Integration', () => {
   });
 
   beforeEach(() => {
-    service = new StateChangeCaptureService();
+    service = new OperationCaptureService();
   });
 
   describe('applyShortSyntax multi-entity atomicity', () => {
@@ -189,8 +204,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createApplyShortSyntaxAction('task-1');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, afterState);
+      const changes = computeChanges(action, beforeState, afterState);
 
       // Verify changes captured across all entity types
       const taskChange = changes.find(
@@ -248,8 +262,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createApplyShortSyntaxAction('task-1');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, afterState);
+      const changes = computeChanges(action, beforeState, afterState);
 
       // Should only have task change, no tag/project changes
       expect(changes.length).toBe(1);
@@ -295,8 +308,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createDeleteTaskAction('task-2');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, afterState);
+      const changes = computeChanges(action, beforeState, afterState);
 
       // Should have task deletion + tag update + project update
       const taskDeletion = changes.find(
@@ -371,8 +383,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createTransferTaskAction('task-1');
-      service.captureBeforeState(action, stateWithPlanner);
-      const changes = service.computeEntityChanges(action, afterState);
+      const changes = computeChanges(action, stateWithPlanner, afterState);
 
       // Should have task update + tag update + planner update
       const taskUpdate = changes.find(
@@ -463,8 +474,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createTransferTaskAction('task-1');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, afterState);
+      const changes = computeChanges(action, beforeState, afterState);
 
       // Should have task update + tag update + planner update
       const taskUpdate = changes.find(
@@ -507,8 +517,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createApplyShortSyntaxAction('task-1');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, inconsistentAfterState);
+      const changes = computeChanges(action, beforeState, inconsistentAfterState);
 
       // Should capture the tag change but NOT a corresponding task change
       const tagChange = changes.find(
@@ -553,8 +562,7 @@ describe('Multi-Entity Atomicity Integration', () => {
       } as RootState;
 
       const action = createApplyShortSyntaxAction('task-1');
-      service.captureBeforeState(action, beforeState);
-      const changes = service.computeEntityChanges(action, consistentAfterState);
+      const changes = computeChanges(action, beforeState, consistentAfterState);
 
       // Both sides should be captured
       const tagChange = changes.find(

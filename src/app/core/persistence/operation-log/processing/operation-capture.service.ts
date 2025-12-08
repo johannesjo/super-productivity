@@ -193,124 +193,144 @@ const ACTION_AFFECTED_ENTITIES: Record<string, EntityType[]> = {
  */
 const DEFAULT_AFFECTED_ENTITIES: EntityType[] = ['TASK', 'TAG', 'PROJECT'];
 
-interface PendingCapture {
-  action: PersistentAction;
-  beforeState: Partial<RootState>;
-  capturedAt: number;
+/**
+ * Queued entity changes waiting to be consumed by the effect.
+ */
+interface QueuedOperation {
+  entityChanges: EntityChange[];
+  queuedAt: number;
 }
 
 /**
- * Service that captures state changes for multi-entity operations.
+ * Unified service for capturing state changes and queuing them for persistence.
+ *
+ * This service consolidates the functionality of the previous StateChangeCaptureService
+ * and OperationQueueService into a single service.
  *
  * Flow:
- * 1. Meta-reducer calls `captureBeforeState()` before passing action to reducers
- * 2. After reducers run, effect calls `computeEntityChanges()` with after-state
- * 3. Service computes diff and returns EntityChange[]
+ * 1. Meta-reducer calls `computeAndEnqueue()` with before/after states
+ * 2. Service computes entity changes by diffing states and queues them
+ * 3. Effect calls `dequeue()` to retrieve pre-computed changes for persistence
  *
- * This eliminates the need for SideEffectExtractorService by capturing actual
- * state changes rather than trying to predict them from action payloads.
+ * This eliminates intermediate storage and simplifies the data flow.
  */
 @Injectable({
   providedIn: 'root',
 })
-export class StateChangeCaptureService {
+export class OperationCaptureService {
   /**
-   * Pending captures keyed by a unique identifier for each action.
-   * Uses WeakMap-like cleanup to prevent memory leaks.
+   * Queue of pending operations keyed by captureId.
    */
-  private pendingCaptures = new Map<string, PendingCapture>();
+  private queue = new Map<string, QueuedOperation>();
 
   /**
-   * Maximum age of pending captures before they're considered stale (5 seconds).
-   * This handles cases where an action is captured but never consumed.
+   * Maximum age of queued operations before cleanup (5 seconds).
+   * Handles cases where an action is captured but effect never runs.
    */
-  private readonly MAX_CAPTURE_AGE_MS = 5000;
+  private readonly MAX_QUEUE_AGE_MS = 5000;
 
   /**
-   * Captures relevant state slices before an action is processed by reducers.
-   * Called by the state-capture meta-reducer.
+   * Computes entity changes from before/after states and enqueues them.
+   * Called synchronously by the operation-capture meta-reducer.
    *
-   * @param action The persistent action about to be processed
-   * @param state The current root state (before action)
+   * @param captureId Unique identifier for this action's capture
+   * @param action The persistent action that was processed
+   * @param beforeState The root state before the action
+   * @param afterState The root state after the action
    */
-  captureBeforeState(action: PersistentAction, state: RootState): void {
-    const captureId = this.generateCaptureId(action);
+  computeAndEnqueue(
+    captureId: string,
+    action: PersistentAction,
+    beforeState: RootState,
+    afterState: RootState,
+  ): void {
+    // Clean up stale entries first
+    this._cleanupStale();
 
-    // Clean up any stale captures
-    this.cleanupStaleCaptures();
+    const entityChanges = this._computeEntityChanges(action, beforeState, afterState);
 
-    // Only capture the relevant state slices for this action type
-    const affectedTypes = this.getAffectedEntityTypes(action);
-    const beforeState: Partial<RootState> = {};
-
-    for (const entityType of affectedTypes) {
-      const featureName = ENTITY_TYPE_TO_FEATURE[entityType];
-      if (featureName && state[featureName as keyof RootState]) {
-        // Deep clone the entities to capture the before state
-        const featureState = state[featureName as keyof RootState] as any;
-        if (featureState?.entities) {
-          beforeState[featureName as keyof RootState] = {
-            ...featureState,
-            entities: { ...featureState.entities },
-          } as any;
-        } else {
-          // For non-entity states (like globalConfig), clone the whole thing
-          beforeState[featureName as keyof RootState] = { ...featureState };
-        }
-      }
-    }
-
-    this.pendingCaptures.set(captureId, {
-      action,
-      beforeState,
-      capturedAt: Date.now(),
+    this.queue.set(captureId, {
+      entityChanges,
+      queuedAt: Date.now(),
     });
 
-    OpLog.verbose('StateChangeCaptureService: Captured before-state', {
+    OpLog.verbose('OperationCaptureService: Computed and enqueued operation', {
       captureId,
       actionType: action.type,
-      affectedTypes,
+      changeCount: entityChanges.length,
     });
   }
 
   /**
-   * Computes entity changes by diffing before and after states.
-   * Called by the effect after reducers have processed the action.
+   * Dequeues entity changes for a given captureId.
+   * Called by the effect to retrieve pre-computed changes.
    *
-   * @param action The persistent action that was processed
-   * @param afterState The root state after the action was processed
-   * @returns Array of entity changes, empty if no capture found or no changes
+   * @param captureId Unique identifier for this action's capture
+   * @returns Entity changes array, or empty array if not found
    */
-  computeEntityChanges(action: PersistentAction, afterState: RootState): EntityChange[] {
-    const captureId = this.generateCaptureId(action);
-    const capture = this.pendingCaptures.get(captureId);
+  dequeue(captureId: string): EntityChange[] {
+    const queued = this.queue.get(captureId);
 
-    if (!capture) {
-      OpLog.warn('StateChangeCaptureService: No capture found for action', {
-        actionType: action.type,
-        captureId,
-      });
+    if (!queued) {
+      OpLog.warn('OperationCaptureService: No queued operation found', { captureId });
       return [];
     }
 
-    // Remove the capture
-    this.pendingCaptures.delete(captureId);
+    // Remove from queue
+    this.queue.delete(captureId);
 
+    OpLog.verbose('OperationCaptureService: Dequeued operation', {
+      captureId,
+      changeCount: queued.entityChanges.length,
+    });
+
+    return queued.entityChanges;
+  }
+
+  /**
+   * Checks if an operation is queued (for testing/debugging).
+   */
+  has(captureId: string): boolean {
+    return this.queue.has(captureId);
+  }
+
+  /**
+   * Gets the current queue size (for monitoring).
+   */
+  getQueueSize(): number {
+    return this.queue.size;
+  }
+
+  /**
+   * Clears all queued operations (for testing).
+   */
+  clear(): void {
+    this.queue.clear();
+  }
+
+  /**
+   * Computes entity changes by diffing before and after states.
+   */
+  private _computeEntityChanges(
+    action: PersistentAction,
+    beforeState: RootState,
+    afterState: RootState,
+  ): EntityChange[] {
     const changes: EntityChange[] = [];
-    const affectedTypes = this.getAffectedEntityTypes(action);
+    const affectedTypes = this._getAffectedEntityTypes(action);
 
     for (const entityType of affectedTypes) {
       const featureName = ENTITY_TYPE_TO_FEATURE[entityType];
       if (!featureName) continue;
 
-      const beforeFeature = capture.beforeState[featureName as keyof RootState] as any;
+      const beforeFeature = beforeState[featureName as keyof RootState] as any;
       const afterFeature = afterState[featureName as keyof RootState] as any;
 
       if (!beforeFeature || !afterFeature) continue;
 
       // Handle entity adapter states (with entities object)
       if (beforeFeature.entities && afterFeature.entities) {
-        const entityChanges = this.diffEntityState(
+        const entityChanges = this._diffEntityState(
           entityType,
           beforeFeature.entities,
           afterFeature.entities,
@@ -318,7 +338,7 @@ export class StateChangeCaptureService {
         changes.push(...entityChanges);
       } else {
         // Handle singleton states (like globalConfig)
-        const singletonChange = this.diffSingletonState(
+        const singletonChange = this._diffSingletonState(
           entityType,
           beforeFeature,
           afterFeature,
@@ -329,7 +349,7 @@ export class StateChangeCaptureService {
       }
     }
 
-    OpLog.verbose('StateChangeCaptureService: Computed entity changes', {
+    OpLog.verbose('OperationCaptureService: Computed entity changes', {
       actionType: action.type,
       changeCount: changes.length,
       changes: changes.map((c) => ({
@@ -343,48 +363,9 @@ export class StateChangeCaptureService {
   }
 
   /**
-   * Checks if an action has a pending capture (for testing/debugging).
-   */
-  hasPendingCapture(action: PersistentAction): boolean {
-    return this.pendingCaptures.has(this.generateCaptureId(action));
-  }
-
-  /**
-   * Gets the count of pending captures (for monitoring).
-   */
-  getPendingCaptureCount(): number {
-    return this.pendingCaptures.size;
-  }
-
-  /**
-   * Generates a unique ID for an action to correlate before/after captures.
-   * Uses action type + primary entity info + timestamp for uniqueness.
-   */
-  private generateCaptureId(action: PersistentAction): string {
-    // Use entity ID if available, otherwise use a combination of properties
-    const entityKey = action.meta.entityId || action.meta.entityIds?.join(',') || 'no-id';
-    // Include a hash of the action to handle same entity multiple times
-    const actionHash = this.simpleHash(JSON.stringify(action));
-    return `${action.type}:${entityKey}:${actionHash}`;
-  }
-
-  /**
-   * Simple hash function for generating unique IDs.
-   */
-  private simpleHash(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
-    }
-    return Math.abs(hash).toString(36);
-  }
-
-  /**
    * Gets the entity types that could be affected by an action.
    */
-  private getAffectedEntityTypes(action: PersistentAction): EntityType[] {
+  private _getAffectedEntityTypes(action: PersistentAction): EntityType[] {
     const mapped = ACTION_AFFECTED_ENTITIES[action.type];
     if (mapped) {
       return mapped;
@@ -411,7 +392,7 @@ export class StateChangeCaptureService {
   /**
    * Diffs two entity adapter states and returns entity changes.
    */
-  private diffEntityState(
+  private _diffEntityState(
     entityType: EntityType,
     beforeEntities: Record<string, unknown>,
     afterEntities: Record<string, unknown>,
@@ -447,7 +428,7 @@ export class StateChangeCaptureService {
     // Find updated entities (in both, but changed)
     for (const id of afterIds) {
       if (beforeIds.has(id)) {
-        const diff = this.computeObjectDiff(
+        const diff = this._computeObjectDiff(
           beforeEntities[id] as Record<string, unknown>,
           afterEntities[id] as Record<string, unknown>,
         );
@@ -468,12 +449,12 @@ export class StateChangeCaptureService {
   /**
    * Diffs two singleton states (non-entity-adapter states).
    */
-  private diffSingletonState(
+  private _diffSingletonState(
     entityType: EntityType,
     beforeState: Record<string, unknown>,
     afterState: Record<string, unknown>,
   ): EntityChange | null {
-    const diff = this.computeObjectDiff(beforeState, afterState);
+    const diff = this._computeObjectDiff(beforeState, afterState);
     if (diff && Object.keys(diff).length > 0) {
       return {
         entityType,
@@ -489,7 +470,7 @@ export class StateChangeCaptureService {
    * Computes a shallow diff between two objects, returning only changed fields.
    * Returns null if objects are identical.
    */
-  private computeObjectDiff(
+  private _computeObjectDiff(
     before: Record<string, unknown>,
     after: Record<string, unknown>,
   ): Record<string, unknown> | null {
@@ -501,7 +482,7 @@ export class StateChangeCaptureService {
       const beforeVal = before[key];
       const afterVal = after[key];
 
-      if (!this.isEqual(beforeVal, afterVal)) {
+      if (!this._isEqual(beforeVal, afterVal)) {
         diff[key] = afterVal;
         hasChanges = true;
       }
@@ -521,7 +502,7 @@ export class StateChangeCaptureService {
   /**
    * Deep equality check for values.
    */
-  private isEqual(a: unknown, b: unknown): boolean {
+  private _isEqual(a: unknown, b: unknown): boolean {
     if (a === b) return true;
     if (a === null || b === null) return a === b;
     if (typeof a !== typeof b) return false;
@@ -529,7 +510,7 @@ export class StateChangeCaptureService {
     if (Array.isArray(a) && Array.isArray(b)) {
       if (a.length !== b.length) return false;
       for (let i = 0; i < a.length; i++) {
-        if (!this.isEqual(a[i], b[i])) return false;
+        if (!this._isEqual(a[i], b[i])) return false;
       }
       return true;
     }
@@ -543,7 +524,7 @@ export class StateChangeCaptureService {
       if (aKeys.length !== bKeys.length) return false;
 
       for (const key of aKeys) {
-        if (!this.isEqual(aObj[key], bObj[key])) return false;
+        if (!this._isEqual(aObj[key], bObj[key])) return false;
       }
       return true;
     }
@@ -552,25 +533,26 @@ export class StateChangeCaptureService {
   }
 
   /**
-   * Removes stale captures that were never consumed.
+   * Removes stale entries that were never consumed.
+   * This handles edge cases where an action is captured but the effect never runs.
    */
-  private cleanupStaleCaptures(): void {
+  private _cleanupStale(): void {
     const now = Date.now();
     const staleIds: string[] = [];
 
-    for (const [id, capture] of this.pendingCaptures) {
-      if (now - capture.capturedAt > this.MAX_CAPTURE_AGE_MS) {
-        staleIds.push(id);
+    for (const [captureId, queued] of this.queue) {
+      if (now - queued.queuedAt > this.MAX_QUEUE_AGE_MS) {
+        staleIds.push(captureId);
       }
     }
 
     if (staleIds.length > 0) {
-      OpLog.warn('StateChangeCaptureService: Cleaning up stale captures', {
+      OpLog.warn('OperationCaptureService: Cleaning up stale queued operations', {
         count: staleIds.length,
         ids: staleIds,
       });
       for (const id of staleIds) {
-        this.pendingCaptures.delete(id);
+        this.queue.delete(id);
       }
     }
   }

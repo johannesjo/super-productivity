@@ -44,7 +44,7 @@ import {
   operationCaptureMetaReducer,
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
-  setOperationCaptureServices,
+  setOperationCaptureService,
   shortSyntaxSharedMetaReducer,
   tagSharedMetaReducer,
   taskBatchUpdateMetaReducer,
@@ -53,8 +53,7 @@ import {
   taskSharedLifecycleMetaReducer,
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
-import { StateChangeCaptureService } from './app/core/persistence/operation-log/processing/state-change-capture.service';
-import { OperationQueueService } from './app/core/persistence/operation-log/processing/operation-queue.service';
+import { OperationCaptureService } from './app/core/persistence/operation-log/processing/operation-capture.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -197,19 +196,16 @@ bootstrapApplication(AppComponent, {
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
     provideZonelessChangeDetection(),
-    // Initialize operation capture services for synchronous state change capture
+    // Initialize operation capture service for synchronous state change capture
     // This must run before any persistent actions are dispatched
     {
       provide: APP_INITIALIZER,
-      useFactory: (
-        queueService: OperationQueueService,
-        captureService: StateChangeCaptureService,
-      ) => {
+      useFactory: (captureService: OperationCaptureService) => {
         return () => {
-          setOperationCaptureServices(queueService, captureService);
+          setOperationCaptureService(captureService);
         };
       },
-      deps: [OperationQueueService, StateChangeCaptureService],
+      deps: [OperationCaptureService],
       multi: true,
     },
   ],

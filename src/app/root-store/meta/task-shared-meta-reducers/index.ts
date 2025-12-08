@@ -9,10 +9,6 @@ export { issueProviderSharedMetaReducer } from './issue-provider-shared.reducer'
 export { taskRepeatCfgSharedMetaReducer } from './task-repeat-cfg-shared.reducer';
 export { shortSyntaxSharedMetaReducer } from './short-syntax-shared.reducer';
 export {
-  stateCaptureMetaReducer,
-  setStateChangeCaptureService,
-} from '../../../core/persistence/operation-log/processing/state-capture.meta-reducer';
-export {
   operationCaptureMetaReducer,
-  setOperationCaptureServices,
+  setOperationCaptureService,
 } from '../../../core/persistence/operation-log/processing/operation-capture.meta-reducer';

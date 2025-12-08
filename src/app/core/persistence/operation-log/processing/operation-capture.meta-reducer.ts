@@ -1,60 +1,32 @@
 import { Action, ActionReducer } from '@ngrx/store';
 import { RootState } from '../../../../root-store/root-state';
 import { isPersistentAction, PersistentAction } from '../persistent-action.interface';
-import { OperationQueueService } from './operation-queue.service';
-import { StateChangeCaptureService } from './state-change-capture.service';
+import { OperationCaptureService } from './operation-capture.service';
 import { OpLog } from '../../../log';
+import { generateCaptureId } from './operation-capture.util';
 
 /**
- * Reference to services needed by the meta-reducer.
- * Set during app initialization via `setOperationCaptureServices()`.
+ * Reference to the consolidated service needed by the meta-reducer.
+ * Set during app initialization via `setOperationCaptureService()`.
  *
  * We use this pattern because meta-reducers are pure functions and cannot
  * use Angular's dependency injection directly.
  */
-let operationQueueService: OperationQueueService | null = null;
-let stateChangeCaptureService: StateChangeCaptureService | null = null;
+let operationCaptureService: OperationCaptureService | null = null;
 
 /**
- * Sets the service instances for the meta-reducer.
+ * Sets the service instance for the meta-reducer.
  * Must be called during app initialization before any persistent actions are dispatched.
  */
-export const setOperationCaptureServices = (
-  queueService: OperationQueueService,
-  captureService: StateChangeCaptureService,
-): void => {
-  operationQueueService = queueService;
-  stateChangeCaptureService = captureService;
+export const setOperationCaptureService = (service: OperationCaptureService): void => {
+  operationCaptureService = service;
 };
 
 /**
- * Gets the current OperationQueueService instance.
+ * Gets the current OperationCaptureService instance.
  */
-export const getOperationQueueService = (): OperationQueueService | null => {
-  return operationQueueService;
-};
-
-/**
- * Generates a unique capture ID for correlating meta-reducer and effect.
- * Uses action type + entity info + simple hash for uniqueness.
- */
-const generateCaptureId = (action: PersistentAction): string => {
-  const entityKey = action.meta.entityId || action.meta.entityIds?.join(',') || 'no-id';
-  const actionHash = simpleHash(JSON.stringify(action));
-  return `${action.type}:${entityKey}:${actionHash}`;
-};
-
-/**
- * Simple hash function for generating unique IDs.
- */
-const simpleHash = (str: string): string => {
-  let hash = 0;
-  for (let i = 0; i < str.length; i++) {
-    const char = str.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash; // Convert to 32-bit integer
-  }
-  return Math.abs(hash).toString(36);
+export const getOperationCaptureService = (): OperationCaptureService | null => {
+  return operationCaptureService;
 };
 
 /**
@@ -67,8 +39,7 @@ const simpleHash = (str: string): string => {
  * Flow:
  * 1. Capture before-state (current state)
  * 2. Call inner reducer to get after-state
- * 3. Compute entity changes from diff
- * 4. Queue changes for effect to persist
+ * 3. Compute entity changes from diff and queue for effect
  *
  * The effect simply dequeues the pre-computed changes - no async state reads!
  *
@@ -88,8 +59,7 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
     // Only process persistent, non-remote actions
     if (
       beforeState &&
-      operationQueueService &&
-      stateChangeCaptureService &&
+      operationCaptureService &&
       isPersistentAction(action) &&
       !(action as PersistentAction).meta.isRemote
     ) {
@@ -97,26 +67,17 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
         const persistentAction = action as PersistentAction;
         const captureId = generateCaptureId(persistentAction);
 
-        // Compute entity changes synchronously using the existing diff logic
-        // Note: We pass beforeState to captureBeforeState, then immediately compute
-        // This is a transitional approach - eventually we can derive directly from action
-        stateChangeCaptureService.captureBeforeState(
+        // Compute entity changes and queue in one step
+        operationCaptureService.computeAndEnqueue(
+          captureId,
           persistentAction,
           beforeState as unknown as RootState,
-        );
-
-        const entityChanges = stateChangeCaptureService.computeEntityChanges(
-          persistentAction,
           afterState as unknown as RootState,
         );
-
-        // Queue the pre-computed changes for the effect
-        operationQueueService.enqueue(captureId, entityChanges);
 
         OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
           captureId,
           actionType: persistentAction.type,
-          changeCount: entityChanges.length,
         });
       } catch (e) {
         OpLog.err('operationCaptureMetaReducer: Failed to capture operation', e);

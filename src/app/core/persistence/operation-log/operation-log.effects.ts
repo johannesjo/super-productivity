@@ -1,6 +1,5 @@
-import { inject, Injectable, Injector, isDevMode } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
-import { Store } from '@ngrx/store';
 import { ALL_ACTIONS } from '../../../util/local-actions.token';
 import { filter, mergeMap } from 'rxjs/operators';
 import { LockService } from './sync/lock.service';
@@ -8,7 +7,7 @@ import { OperationLogStoreService } from './store/operation-log-store.service';
 import { isPersistentAction, PersistentAction } from './persistent-action.interface';
 import { uuidv7 } from '../../../util/uuid-v7';
 import { incrementVectorClock } from '../../../pfapi/api/util/vector-clock';
-import { EntityChange, MultiEntityPayload, Operation } from './operation.types';
+import { MultiEntityPayload, Operation } from './operation.types';
 import { PfapiService } from '../../../pfapi/pfapi.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
 import { OpLog } from '../../log';
@@ -22,11 +21,9 @@ import {
   MAX_COMPACTION_FAILURES,
 } from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
-import { StateChangeCaptureService } from './processing/state-change-capture.service';
-import { OperationQueueService } from './processing/operation-queue.service';
-import { RootState } from '../../../root-store/root-state';
-import { firstValueFrom } from 'rxjs';
+import { OperationCaptureService } from './processing/operation-capture.service';
 import { OpType } from './operation.types';
+import { generateCaptureId } from './processing/operation-capture.util';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -50,9 +47,7 @@ export class OperationLogEffects {
   private injector = inject(Injector);
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
-  private stateChangeCaptureService = inject(StateChangeCaptureService);
-  private operationQueueService = inject(OperationQueueService);
-  private store = inject(Store);
+  private operationCaptureService = inject(OperationCaptureService);
 
   persistOperation$ = createEffect(
     () =>
@@ -82,15 +77,10 @@ export class OperationLogEffects {
     const { type, meta, ...actionPayload } = action;
 
     // Generate captureId to retrieve pre-computed entity changes from queue
-    const captureId = this.generateCaptureId(action);
+    const captureId = generateCaptureId(action);
 
-    // Get pre-computed entity changes from the queue (NEW: synchronous capture)
-    const entityChanges = this.operationQueueService.dequeue(captureId);
-
-    // DEV MODE: Validate against old async path for parallel validation
-    if (isDevMode()) {
-      this.validateEntityChanges(action, entityChanges);
-    }
+    // Get pre-computed entity changes from the queue (synchronous capture from meta-reducer)
+    const entityChanges = this.operationCaptureService.dequeue(captureId);
 
     // Create multi-entity payload with action payload and computed changes
     const multiEntityPayload: MultiEntityPayload = {
@@ -358,56 +348,5 @@ export class OperationLogEffects {
     }
 
     return ids.size > 0 ? Array.from(ids) : undefined;
-  }
-
-  /**
-   * Generates a unique capture ID for correlating meta-reducer and effect.
-   * Uses same logic as operation-capture.meta-reducer.ts.
-   */
-  private generateCaptureId(action: PersistentAction): string {
-    const entityKey = action.meta.entityId || action.meta.entityIds?.join(',') || 'no-id';
-    const actionHash = this.simpleHash(JSON.stringify(action));
-    return `${action.type}:${entityKey}:${actionHash}`;
-  }
-
-  /**
-   * Simple hash function for generating unique IDs.
-   */
-  private simpleHash(str: string): string {
-    let hash = 0;
-    for (let i = 0; i < str.length; i++) {
-      const char = str.charCodeAt(i);
-      hash = (hash << 5) - hash + char;
-      hash = hash & hash;
-    }
-    return Math.abs(hash).toString(36);
-  }
-
-  /**
-   * DEV MODE: Validates entity changes from the queue against the old async path.
-   * This helps catch any discrepancies during the migration period.
-   */
-  private async validateEntityChanges(
-    action: PersistentAction,
-    queuedChanges: EntityChange[],
-  ): Promise<void> {
-    try {
-      // Get after-state using the old async path
-      const afterState = await firstValueFrom(
-        this.store.select((state: RootState) => state),
-      );
-
-      // The old path would compute changes here, but since the meta-reducer
-      // already consumed the capture, we can't re-compute. Instead, we just
-      // log that validation ran and trust the queue for now.
-      // TODO: Implement full comparison once we have action-derived operations
-      OpLog.verbose('[OperationLogEffects] DEV: Validated entity changes from queue', {
-        actionType: action.type,
-        queuedChangeCount: queuedChanges.length,
-        hasAfterState: !!afterState,
-      });
-    } catch (e) {
-      OpLog.warn('[OperationLogEffects] DEV: Validation failed', e);
-    }
   }
 }
