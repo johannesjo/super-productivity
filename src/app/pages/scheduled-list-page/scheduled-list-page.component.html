@@ -96,7 +96,7 @@
                 </div>
                 <div class="time-left">({{ task.dueWithTime | humanizeTimestamp }})</div>
               </div>
-              @if (task.reminderId) {
+              @if (task.remindAt) {
                 <mat-icon>alarm</mat-icon>
               } @else {
                 <mat-icon>schedule</mat-icon>

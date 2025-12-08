@@ -197,7 +197,7 @@ export class ValidateStateService {
     const typiaResult = validateAllData(state);
     if (!typiaResult.success) {
       result.isValid = false;
-      result.typiaErrors = typiaResult.errors || [];
+      result.typiaErrors = (typiaResult as IValidation.IFailure).errors || [];
       OpLog.warn('[ValidateStateService] Typia validation failed', {
         errorCount: result.typiaErrors.length,
       });

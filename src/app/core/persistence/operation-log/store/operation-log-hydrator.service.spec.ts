@@ -759,7 +759,7 @@ describe('OperationLogHydratorService', () => {
                 isEnabled: true, // Other sync settings preserved
               }),
             }),
-          }),
+          }) as any,
         }),
       );
 
