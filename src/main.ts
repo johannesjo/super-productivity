@@ -41,11 +41,11 @@ import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delet
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
 import {
   issueProviderSharedMetaReducer,
+  operationCaptureMetaReducer,
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
-  setStateChangeCaptureService,
+  setOperationCaptureServices,
   shortSyntaxSharedMetaReducer,
-  stateCaptureMetaReducer,
   tagSharedMetaReducer,
   taskBatchUpdateMetaReducer,
   taskRepeatCfgSharedMetaReducer,
@@ -54,6 +54,7 @@ import {
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
 import { StateChangeCaptureService } from './app/core/persistence/operation-log/processing/state-change-capture.service';
+import { OperationQueueService } from './app/core/persistence/operation-log/processing/operation-queue.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -124,8 +125,8 @@ bootstrapApplication(AppComponent, {
           plannerSharedMetaReducer,
           shortSyntaxSharedMetaReducer,
           actionLoggerReducer,
-          // IMPORTANT: stateCaptureMetaReducer must be LAST to capture state right before feature reducers
-          stateCaptureMetaReducer,
+          // IMPORTANT: operationCaptureMetaReducer must be LAST to capture both before and after state synchronously
+          operationCaptureMetaReducer,
         ],
         ...(environment.production
           ? {
@@ -196,16 +197,19 @@ bootstrapApplication(AppComponent, {
     provideRouter(APP_ROUTES, withHashLocation(), withPreloading(PreloadAllModules)),
     PLUGIN_INITIALIZER_PROVIDER,
     provideZonelessChangeDetection(),
-    // Initialize StateChangeCaptureService for multi-entity operation capture
+    // Initialize operation capture services for synchronous state change capture
     // This must run before any persistent actions are dispatched
     {
       provide: APP_INITIALIZER,
-      useFactory: (service: StateChangeCaptureService) => {
+      useFactory: (
+        queueService: OperationQueueService,
+        captureService: StateChangeCaptureService,
+      ) => {
         return () => {
-          setStateChangeCaptureService(service);
+          setOperationCaptureServices(queueService, captureService);
         };
       },
-      deps: [StateChangeCaptureService],
+      deps: [OperationQueueService, StateChangeCaptureService],
       multi: true,
     },
   ],

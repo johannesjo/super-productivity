@@ -12,3 +12,7 @@ export {
   stateCaptureMetaReducer,
   setStateChangeCaptureService,
 } from '../../../core/persistence/operation-log/processing/state-capture.meta-reducer';
+export {
+  operationCaptureMetaReducer,
+  setOperationCaptureServices,
+} from '../../../core/persistence/operation-log/processing/operation-capture.meta-reducer';
