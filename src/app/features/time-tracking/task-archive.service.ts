@@ -267,6 +267,31 @@ export class TaskArchiveService {
     }
   }
 
+  async unlinkIssueProviderFromArchiveTasks(issueProviderId: string): Promise<void> {
+    const taskArchive = await this.load();
+
+    const tasksWithIssueProvider = (taskArchive.ids as string[])
+      .map((id) => taskArchive.entities[id] as Task)
+      .filter((task) => task.issueProviderId === issueProviderId);
+
+    if (tasksWithIssueProvider.length > 0) {
+      const updates: Update<Task>[] = tasksWithIssueProvider.map((t) => ({
+        id: t.id,
+        changes: {
+          issueId: undefined,
+          issueProviderId: undefined,
+          issueType: undefined,
+          issueWasUpdated: undefined,
+          issueLastUpdated: undefined,
+          issueAttachmentNr: undefined,
+          issueTimeTracked: undefined,
+          issuePoints: undefined,
+        },
+      }));
+      await this.updateTasks(updates);
+    }
+  }
+
   async roundTimeSpent({
     day,
     taskIds,

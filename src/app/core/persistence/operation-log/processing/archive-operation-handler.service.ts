@@ -11,6 +11,7 @@ import { Log } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
+import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
 
 /**
  * Handles archive-specific side effects for REMOTE operations.
@@ -37,6 +38,7 @@ import { TimeTrackingService } from '../../../../features/time-tracking/time-tra
  * - **deleteProject**: Removes all tasks for the deleted project from archive
  * - **deleteTag/deleteTags**: Removes tag references from archive tasks, deletes orphaned tasks
  * - **deleteTaskRepeatCfg**: Removes repeatCfgId from archive tasks
+ * - **deleteIssueProvider/deleteIssueProviders**: Unlinks issue data from archive tasks
  *
  * ## Important Notes
  *
@@ -89,6 +91,14 @@ export class ArchiveOperationHandler {
 
       case TaskSharedActions.deleteTaskRepeatCfg.type:
         await this._handleDeleteTaskRepeatCfg(action);
+        break;
+
+      case TaskSharedActions.deleteIssueProvider.type:
+        await this._handleDeleteIssueProvider(action);
+        break;
+
+      case IssueProviderActions.deleteIssueProviders.type:
+        await this._handleDeleteIssueProviders(action);
         break;
     }
   }
@@ -197,5 +207,32 @@ export class ArchiveOperationHandler {
       action as ReturnType<typeof TaskSharedActions.deleteTaskRepeatCfg>
     ).taskRepeatCfgId;
     await this._getTaskArchiveService().removeRepeatCfgFromArchiveTasks(repeatCfgId);
+  }
+
+  /**
+   * Unlinks issue data from archived tasks for a deleted issue provider.
+   * Called when receiving a remote deleteIssueProvider operation.
+   */
+  private async _handleDeleteIssueProvider(action: PersistentAction): Promise<void> {
+    const issueProviderId = (
+      action as ReturnType<typeof TaskSharedActions.deleteIssueProvider>
+    ).issueProviderId;
+    await this._getTaskArchiveService().unlinkIssueProviderFromArchiveTasks(
+      issueProviderId,
+    );
+  }
+
+  /**
+   * Unlinks issue data from archived tasks for multiple deleted issue providers.
+   * Called when receiving a remote deleteIssueProviders operation.
+   */
+  private async _handleDeleteIssueProviders(action: PersistentAction): Promise<void> {
+    const ids = (action as ReturnType<typeof IssueProviderActions.deleteIssueProviders>)
+      .ids;
+    for (const issueProviderId of ids) {
+      await this._getTaskArchiveService().unlinkIssueProviderFromArchiveTasks(
+        issueProviderId,
+      );
+    }
   }
 }

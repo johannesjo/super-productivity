@@ -10,6 +10,7 @@ import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actio
 import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
+import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
 
 describe('ArchiveOperationHandler', () => {
   let service: ArchiveOperationHandler;
@@ -51,6 +52,7 @@ describe('ArchiveOperationHandler', () => {
       'removeAllArchiveTasksForProject',
       'removeTagsFromAllTasks',
       'removeRepeatCfgFromArchiveTasks',
+      'unlinkIssueProviderFromArchiveTasks',
     ]);
     mockTimeTrackingService = jasmine.createSpyObj('TimeTrackingService', [
       'cleanupDataEverywhereForProject',
@@ -83,6 +85,9 @@ describe('ArchiveOperationHandler', () => {
     );
     mockTaskArchiveService.removeTagsFromAllTasks.and.returnValue(Promise.resolve());
     mockTaskArchiveService.removeRepeatCfgFromArchiveTasks.and.returnValue(
+      Promise.resolve(),
+    );
+    mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks.and.returnValue(
       Promise.resolve(),
     );
     mockTimeTrackingService.cleanupDataEverywhereForProject.and.returnValue(
@@ -380,6 +385,93 @@ describe('ArchiveOperationHandler', () => {
       });
     });
 
+    describe('deleteIssueProvider action', () => {
+      it('should unlink issue provider from all archive tasks', async () => {
+        const action = {
+          type: TaskSharedActions.deleteIssueProvider.type,
+          issueProviderId: 'provider-1',
+          taskIdsToUnlink: ['task-1', 'task-2'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-1');
+      });
+
+      it('should not call other handlers for deleteIssueProvider', async () => {
+        const action = {
+          type: TaskSharedActions.deleteIssueProvider.type,
+          issueProviderId: 'provider-1',
+          taskIdsToUnlink: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('deleteIssueProviders action', () => {
+      it('should unlink multiple issue providers from all archive tasks', async () => {
+        const action = {
+          type: IssueProviderActions.deleteIssueProviders.type,
+          ids: ['provider-1', 'provider-2', 'provider-3'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledTimes(3);
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-1');
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-2');
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
+        ).toHaveBeenCalledWith('provider-3');
+      });
+
+      it('should not call other handlers for deleteIssueProviders', async () => {
+        const action = {
+          type: IssueProviderActions.deleteIssueProviders.type,
+          ids: ['provider-1'],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleRemoteOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
     describe('unhandled actions', () => {
       it('should do nothing for unhandled action types', async () => {
         const action = {
@@ -399,6 +491,9 @@ describe('ArchiveOperationHandler', () => {
         expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
         expect(
           mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks,
         ).not.toHaveBeenCalled();
         expect(mockPfapiService.m.archiveYoung.load).not.toHaveBeenCalled();
       });
@@ -538,6 +633,37 @@ describe('ArchiveOperationHandler', () => {
           type: TaskSharedActions.deleteTaskRepeatCfg.type,
           taskRepeatCfgId: 'repeat-cfg-1',
           taskIdsToUnlink: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+      });
+
+      it('should propagate errors from unlinkIssueProviderFromArchiveTasks for single provider', async () => {
+        const error = new Error('Unlink issue provider failed');
+        mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks.and.returnValue(
+          Promise.reject(error),
+        );
+
+        const action = {
+          type: TaskSharedActions.deleteIssueProvider.type,
+          issueProviderId: 'provider-1',
+          taskIdsToUnlink: [],
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await expectAsync(service.handleRemoteOperation(action)).toBeRejectedWith(error);
+      });
+
+      it('should propagate errors from unlinkIssueProviderFromArchiveTasks for multiple providers', async () => {
+        const error = new Error('Unlink issue providers failed');
+        mockTaskArchiveService.unlinkIssueProviderFromArchiveTasks.and.returnValue(
+          Promise.reject(error),
+        );
+
+        const action = {
+          type: IssueProviderActions.deleteIssueProviders.type,
+          ids: ['provider-1', 'provider-2'],
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
