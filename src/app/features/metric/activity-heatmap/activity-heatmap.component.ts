@@ -16,7 +16,9 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { Task } from '../../tasks/task.model';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconButton } from '@angular/material/button';
+import { MatSelectModule } from '@angular/material/select';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -40,7 +42,14 @@ interface WeekData {
   templateUrl: './activity-heatmap.component.html',
   styleUrls: ['./activity-heatmap.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, MatIconButton, MatTooltip, MatIcon],
+  imports: [
+    TranslatePipe,
+    MatFormFieldModule,
+    MatIconButton,
+    MatSelectModule,
+    MatTooltip,
+    MatIcon,
+  ],
 })
 export class ActivityHeatmapComponent {
   private readonly _worklogService = inject(WorklogService);
@@ -49,7 +58,7 @@ export class ActivityHeatmapComponent {
   private readonly _taskArchiveService = inject(TaskArchiveService);
   private readonly _snackService = inject(SnackService);
   private readonly _shareService = inject(ShareService);
-  private selectedPeriod: 'last365' | 'currentYear' = 'last365'; // Defaul to the last 365 days
+  private selectedPeriod: 'last365' | 'currentYear' = 'currentYear'; // Defaul to current year
   private readonly _periodChange$ = new Subject<void>();
   private readonly _dateAdapter = inject(DateAdapter);
 
