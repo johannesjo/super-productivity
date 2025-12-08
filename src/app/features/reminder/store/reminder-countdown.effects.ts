@@ -14,6 +14,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs/operators';
+import { skipDuringSync } from '../../../util/skip-during-sync.operator';
 import { BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
@@ -48,6 +49,7 @@ export class ReminderCountdownEffects {
     () =>
       this._dataInitStateService.isAllDataLoadedInitially$.pipe(
         concatMap(() => this._store.select(selectReminderConfig)),
+        skipDuringSync(),
         switchMap((reminderCfg) =>
           reminderCfg.isCountdownBannerEnabled
             ? combineLatest([

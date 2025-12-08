@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
+import { skipDuringSync } from '../../../util/skip-during-sync.operator';
 import { ChromeExtensionInterfaceService } from '../../../core/chrome-extension-interface/chrome-extension-interface.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskService } from '../../tasks/task.service';
@@ -106,6 +107,7 @@ export class IdleEffects {
   // while the dialog is open, preventing the flickering between two different values.
   triggerIdleWhenEnabled$ = createEffect(() =>
     this._store.select(selectIdleConfig).pipe(
+      skipDuringSync(),
       switchMap(
         ({
           isEnableIdleTimeTracking,
@@ -143,6 +145,7 @@ export class IdleEffects {
 
   handleIdleInit$ = createEffect(() =>
     this._store.select(selectIsIdle).pipe(
+      skipDuringSync(),
       distinctUntilChanged(),
       switchMap((isIdle) => iif(() => isIdle, of(isIdle), EMPTY)),
       withLatestFrom(

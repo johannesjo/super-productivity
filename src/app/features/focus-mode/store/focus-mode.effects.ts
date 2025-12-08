@@ -3,6 +3,7 @@ import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Store } from '@ngrx/store';
 import { EMPTY, of } from 'rxjs';
+import { skipDuringSync } from '../../../util/skip-during-sync.operator';
 import {
   distinctUntilChanged,
   filter,
@@ -48,6 +49,7 @@ export class FocusModeEffects {
   // Auto-show overlay when task is selected (if always use focus mode is enabled)
   autoShowOverlay$ = createEffect(() =>
     this.store.select(selectFocusModeConfig).pipe(
+      skipDuringSync(),
       switchMap((cfg) =>
         cfg?.isAlwaysUseFocusMode
           ? this.taskService.currentTaskId$.pipe(
@@ -63,6 +65,7 @@ export class FocusModeEffects {
   // Detect when work session timer completes and dispatch completeFocusSession
   detectSessionCompletion$ = createEffect(() =>
     this.store.select(selectors.selectTimer).pipe(
+      skipDuringSync(),
       withLatestFrom(this.store.select(selectors.selectMode)),
       filter(
         ([timer, mode]) =>
@@ -85,6 +88,7 @@ export class FocusModeEffects {
   detectBreakTimeUp$ = createEffect(
     () =>
       this.store.select(selectors.selectTimer).pipe(
+        skipDuringSync(),
         filter(
           (timer) =>
             timer.purpose === 'break' &&
@@ -291,6 +295,7 @@ export class FocusModeEffects {
     createEffect(
       () =>
         this.store.select(selectors.selectProgress).pipe(
+          skipDuringSync(),
           withLatestFrom(this.store.select(selectors.selectIsRunning)),
           tap(([progress, isRunning]) => {
             window.ea.setProgressBar({
@@ -327,6 +332,7 @@ export class FocusModeEffects {
         this.store.select(selectors.selectIsOverlayShown),
         this.store.select(selectors.selectTimer),
       ]).pipe(
+        skipDuringSync(),
         map(
           (
             values,
