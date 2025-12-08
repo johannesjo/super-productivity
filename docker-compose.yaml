@@ -1,4 +1,37 @@
 services:
+  # SuperSync server for E2E testing
+  # Start with: docker compose up -d supersync
+  # Required for @supersync e2e tests
+  supersync:
+    build:
+      context: .
+      dockerfile: packages/super-sync-server/Dockerfile.test
+    ports:
+      - '1900:1900'
+    environment:
+      - PORT=1900
+      - TEST_MODE=true
+      - TEST_MODE_CONFIRM=yes-i-understand-the-risks
+      - JWT_SECRET=e2e-test-secret-minimum-32-chars-long-for-security
+      - CORS_ORIGINS=*
+      - DATA_DIR=/data
+    tmpfs:
+      - /data # In-memory SQLite for test isolation
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'wget',
+          '--quiet',
+          '--tries=1',
+          '--spider',
+          'http://localhost:1900/health',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
   # Super Productivity app
   app:
     image: johannesjo/super-productivity:latest
