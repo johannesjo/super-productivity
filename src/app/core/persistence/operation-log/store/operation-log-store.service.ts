@@ -432,7 +432,8 @@ export class OperationLogStoreService {
     const cache = await store.get('current');
 
     if (!cache) {
-      // No state cache yet - counter starts at 1
+      // No state cache yet - create one with counter starting at 1
+      await store.put({ id: 'current', compactionCounter: 1 });
       await tx.done;
       return 1;
     }
