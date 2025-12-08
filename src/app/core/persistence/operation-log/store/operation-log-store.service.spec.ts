@@ -385,6 +385,35 @@ describe('OperationLogStoreService', () => {
       expect(count3).toBe(2);
     });
 
+    it('should persist counter when no state cache exists (regression test)', async () => {
+      // This tests the fix for the bug where incrementCompactionCounter()
+      // returned 1 without persisting when no cache existed.
+      // Without the fix, each call would return 1 (counter never progressed).
+
+      // No state cache exists yet - verify counter starts at 0
+      expect(await service.getCompactionCounter()).toBe(0);
+
+      // First increment should return 1 AND persist it
+      const count1 = await service.incrementCompactionCounter();
+      expect(count1).toBe(1);
+
+      // Verify it was actually persisted
+      const persistedCount1 = await service.getCompactionCounter();
+      expect(persistedCount1).toBe(1);
+
+      // Second increment should return 2 (not 1 again!)
+      const count2 = await service.incrementCompactionCounter();
+      expect(count2).toBe(2);
+
+      // Verify it was persisted
+      const persistedCount2 = await service.getCompactionCounter();
+      expect(persistedCount2).toBe(2);
+
+      // Third increment to be sure
+      const count3 = await service.incrementCompactionCounter();
+      expect(count3).toBe(3);
+    });
+
     it('should reset counter', async () => {
       await service.saveStateCache({
         state: {},
