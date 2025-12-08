@@ -353,37 +353,35 @@ describe('OperationCaptureService', () => {
       });
     });
 
-    describe('action type mapping', () => {
-      it('should only diff affected entity types for known actions', () => {
-        // This action should only affect TASK and TAG, not PROJECT
+    describe('reference equality optimization', () => {
+      it('should skip diffing feature states with identical references', () => {
+        // Create shared references for unchanged features
+        const sharedTagFeature = {
+          ids: ['tag-1'],
+          entities: { 'tag-1': { id: 'tag-1', name: 'Tag', taskIds: [] } },
+        };
+        const sharedProjectFeature = {
+          ids: ['proj-1'],
+          entities: { 'proj-1': { id: 'proj-1', title: 'Project', taskIds: [] } },
+        };
+
         const beforeState = {
           [TASKS_FEATURE]: {
             ids: ['task-1'],
             entities: { 'task-1': { id: 'task-1', title: 'Task' } },
           },
-          [TAG_FEATURE]: {
-            ids: ['tag-1'],
-            entities: { 'tag-1': { id: 'tag-1', name: 'Tag', taskIds: [] } },
-          },
-          [PROJECTS_FEATURE]: {
-            ids: ['proj-1'],
-            entities: { 'proj-1': { id: 'proj-1', title: 'Project', taskIds: [] } },
-          },
+          [TAG_FEATURE]: sharedTagFeature,
+          [PROJECTS_FEATURE]: sharedProjectFeature,
         } as unknown as RootState;
 
+        // After state shares references for unchanged features (NgRx immutability)
         const afterState = {
           [TASKS_FEATURE]: {
             ids: ['task-1'],
             entities: { 'task-1': { id: 'task-1', title: 'Updated Task' } },
           },
-          [TAG_FEATURE]: {
-            ids: ['tag-1'],
-            entities: { 'tag-1': { id: 'tag-1', name: 'Tag', taskIds: [] } },
-          },
-          [PROJECTS_FEATURE]: {
-            ids: ['proj-1'],
-            entities: { 'proj-1': { id: 'proj-1', title: 'Project', taskIds: [] } },
-          },
+          [TAG_FEATURE]: sharedTagFeature, // Same reference - will be skipped
+          [PROJECTS_FEATURE]: sharedProjectFeature, // Same reference - will be skipped
         } as unknown as RootState;
 
         const action = createPersistentAction(
@@ -400,14 +398,81 @@ describe('OperationCaptureService', () => {
         expect(changes[0].entityType).toBe('TASK');
       });
 
-      it('should use default entity types for unknown actions', () => {
+      it('should detect changes across all entity types when references differ', () => {
+        const beforeState = {
+          [TASKS_FEATURE]: {
+            ids: ['task-1'],
+            entities: { 'task-1': { id: 'task-1', title: 'Task' } },
+          },
+          [TAG_FEATURE]: {
+            ids: ['tag-1'],
+            entities: { 'tag-1': { id: 'tag-1', name: 'Tag', taskIds: [] } },
+          },
+        } as unknown as RootState;
+
+        const afterState = {
+          [TASKS_FEATURE]: {
+            ids: ['task-1'],
+            entities: { 'task-1': { id: 'task-1', title: 'Updated Task' } },
+          },
+          [TAG_FEATURE]: {
+            ids: ['tag-1'],
+            entities: { 'tag-1': { id: 'tag-1', name: 'Updated Tag', taskIds: [] } },
+          },
+        } as unknown as RootState;
+
+        const action = createPersistentAction(
+          '[TaskShared] Update Task',
+          'TASK',
+          'task-1',
+          OpType.Update,
+        );
+
+        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+
+        const changes = service.dequeue('capture-1');
+        expect(changes.length).toBe(2);
+        expect(changes.map((c) => c.entityType).sort()).toEqual(['TAG', 'TASK']);
+      });
+
+      it('should not report changes for different references with identical content', () => {
+        // Different object references but same content - no actual changes
+        const beforeState = {
+          [TASKS_FEATURE]: {
+            ids: ['task-1'],
+            entities: { 'task-1': { id: 'task-1', title: 'Task' } },
+          },
+        } as unknown as RootState;
+
+        const afterState = {
+          [TASKS_FEATURE]: {
+            ids: ['task-1'],
+            entities: { 'task-1': { id: 'task-1', title: 'Task' } }, // Same content, different ref
+          },
+        } as unknown as RootState;
+
+        const action = createPersistentAction(
+          '[TaskShared] Update Task',
+          'TASK',
+          'task-1',
+          OpType.Update,
+        );
+
+        service.computeAndEnqueue('capture-1', action, beforeState, afterState);
+
+        const changes = service.dequeue('capture-1');
+        expect(changes.length).toBe(0);
+      });
+
+      it('should work with any action type (no action mapping required)', () => {
         const beforeState = createTaskState({}) as unknown as RootState;
         const afterState = createTaskState({
           'task-1': { id: 'task-1', title: 'Task' },
         }) as unknown as RootState;
 
+        // Completely unknown action type - still works via reference equality
         const action = createPersistentAction(
-          '[CustomFeature] Unknown Action',
+          '[CompletelyUnknown] Some Action',
           'TASK',
           'task-1',
           OpType.Create,
@@ -417,6 +482,7 @@ describe('OperationCaptureService', () => {
 
         const changes = service.dequeue('capture-1');
         expect(changes.length).toBe(1);
+        expect(changes[0].entityType).toBe('TASK');
       });
     });
   });
