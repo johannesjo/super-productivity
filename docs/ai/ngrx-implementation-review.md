@@ -220,30 +220,28 @@ The `take(1)` operator ensures the observable completes after receiving one valu
 
 ### 4. Inconsistent Error Handling Across Effects
 
-| File                       | Has Error Handling    |
-| -------------------------- | --------------------- |
-| `short-syntax.effects.ts`  | Yes (`catchError()`)  |
-| `task-electron.effects.ts` | No                    |
-| `idle.effects.ts`          | No                    |
-| `tag.effects.ts`           | No (async operations) |
+| File                       | Has Error Handling                 |
+| -------------------------- | ---------------------------------- |
+| `short-syntax.effects.ts`  | Yes (`catchError()`)               |
+| `task-electron.effects.ts` | No                                 |
+| `idle.effects.ts`          | No                                 |
+| `tag.effects.ts`           | **FIXED** (2025-12-08) - try/catch |
 
-**Fix:** Standardize error handling pattern across all effects. Use `catchError()` with appropriate fallbacks.
+**Status:** High-priority case (tag.effects.ts async IndexedDB) fixed on 2025-12-08.
 
 ---
 
 ## Medium Priority Issues
 
-### 5. Missing Bounds Checking
+### ~~5. Missing Bounds Checking~~ - FIXED
 
 **File:** `src/app/root-store/meta/task-shared-meta-reducers/planner-shared.reducer.ts`
 **Line:** 247
+**Status:** **FIXED** on 2025-12-08
 
-```typescript
-const targetIndex = taskIds.indexOf(toTaskId);
-taskIds.splice(targetIndex, 0, fromTask.id); // What if indexOf returns -1?
-```
+Added bounds check for `targetIndex === -1` case. When target task is filtered out (e.g., moving task before itself), task is now appended to end as fallback instead of being inserted at wrong position.
 
-If `toTaskId` not found, `targetIndex = -1`, and `splice(-1, 0, id)` inserts at wrong position.
+Regression test added in `planner-shared.reducer.spec.ts`.
 
 ---
 
@@ -427,10 +425,10 @@ Checks `!task.projectId` but doesn't verify project still exists (could be delet
 
 ### Phase 4: Medium Priority
 
-- Bounds checking in planner-shared.reducer.ts
+- ~~Bounds checking in planner-shared.reducer.ts~~ **FIXED** (2025-12-08)
 - Extract duplicated TODAY_TAG logic
 - Fix getTag() error handling pattern
-- Add async error handling in tag.effects.ts
+- ~~Add async error handling in tag.effects.ts~~ **FIXED** (2025-12-08)
 
 ---
 
