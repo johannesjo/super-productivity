@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { ArchiveOperationHandler } from './archive-operation-handler.service';
+import {
+  ArchiveOperationHandler,
+  isArchiveAffectingAction,
+} from './archive-operation-handler.service';
 import { PersistentAction } from '../persistent-action.interface';
 import { ArchiveService } from '../../../../features/time-tracking/archive.service';
 import { TaskArchiveService } from '../../../../features/time-tracking/task-archive.service';
@@ -11,6 +14,68 @@ import { flushYoungToOld } from '../../../../features/time-tracking/store/archiv
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
 import { IssueProviderActions } from '../../../../features/issue/store/issue-provider.actions';
+
+describe('isArchiveAffectingAction', () => {
+  it('should return true for moveToArchive action', () => {
+    const action = { type: TaskSharedActions.moveToArchive.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for restoreTask action', () => {
+    const action = { type: TaskSharedActions.restoreTask.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for flushYoungToOld action', () => {
+    const action = { type: flushYoungToOld.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteProject action', () => {
+    const action = { type: TaskSharedActions.deleteProject.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteTag action', () => {
+    const action = { type: deleteTag.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteTags action', () => {
+    const action = { type: deleteTags.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteTaskRepeatCfg action', () => {
+    const action = { type: TaskSharedActions.deleteTaskRepeatCfg.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteIssueProvider action', () => {
+    const action = { type: TaskSharedActions.deleteIssueProvider.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for deleteIssueProviders action', () => {
+    const action = { type: IssueProviderActions.deleteIssueProviders.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return false for non-archive-affecting actions', () => {
+    const action = { type: '[Task] Update Task' };
+    expect(isArchiveAffectingAction(action)).toBe(false);
+  });
+
+  it('should return false for addTask action', () => {
+    const action = { type: TaskSharedActions.addTask.type };
+    expect(isArchiveAffectingAction(action)).toBe(false);
+  });
+
+  it('should return false for updateTask action', () => {
+    const action = { type: TaskSharedActions.updateTask.type };
+    expect(isArchiveAffectingAction(action)).toBe(false);
+  });
+});
 
 describe('ArchiveOperationHandler', () => {
   let service: ArchiveOperationHandler;
@@ -668,6 +733,141 @@ describe('ArchiveOperationHandler', () => {
         } as unknown as PersistentAction;
 
         await expectAsync(service.handleOperation(action)).toBeRejectedWith(error);
+      });
+    });
+
+    describe('local vs remote operation handling', () => {
+      describe('moveToArchive', () => {
+        it('should skip archive write for local operations (archive written before dispatch)', async () => {
+          const tasks = [createMockTaskWithSubTasks('task-1')];
+          const action = {
+            type: TaskSharedActions.moveToArchive.type,
+            tasks,
+            meta: { isPersistent: true, isRemote: false },
+          } as unknown as PersistentAction;
+
+          await service.handleOperation(action);
+
+          // For local operations, archive is written BEFORE dispatch by ArchiveService
+          // So the handler should NOT write again
+          expect(
+            mockArchiveService.writeTasksToArchiveForRemoteSync,
+          ).not.toHaveBeenCalled();
+        });
+
+        it('should skip archive write when isRemote is undefined (treated as local)', async () => {
+          const tasks = [createMockTaskWithSubTasks('task-1')];
+          const action = {
+            type: TaskSharedActions.moveToArchive.type,
+            tasks,
+            meta: { isPersistent: true },
+          } as unknown as PersistentAction;
+
+          await service.handleOperation(action);
+
+          expect(
+            mockArchiveService.writeTasksToArchiveForRemoteSync,
+          ).not.toHaveBeenCalled();
+        });
+
+        it('should write to archive for remote operations', async () => {
+          const tasks = [createMockTaskWithSubTasks('task-1')];
+          const action = {
+            type: TaskSharedActions.moveToArchive.type,
+            tasks,
+            meta: { isPersistent: true, isRemote: true },
+          } as unknown as PersistentAction;
+
+          await service.handleOperation(action);
+
+          expect(
+            mockArchiveService.writeTasksToArchiveForRemoteSync,
+          ).toHaveBeenCalledWith(tasks);
+        });
+      });
+
+      describe('restoreTask', () => {
+        it('should NOT pass isIgnoreDBLock for local operations', async () => {
+          const task = createMockTask('task-1', []);
+          const action = {
+            type: TaskSharedActions.restoreTask.type,
+            task,
+            subTasks: [],
+            meta: { isPersistent: true, isRemote: false },
+          } as unknown as PersistentAction;
+
+          await service.handleOperation(action);
+
+          // For local operations, DB is not locked, so no isIgnoreDBLock needed
+          expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledWith(['task-1'], {});
+        });
+
+        it('should pass isIgnoreDBLock: true for remote operations', async () => {
+          const task = createMockTask('task-1', []);
+          const action = {
+            type: TaskSharedActions.restoreTask.type,
+            task,
+            subTasks: [],
+            meta: { isPersistent: true, isRemote: true },
+          } as unknown as PersistentAction;
+
+          await service.handleOperation(action);
+
+          // For remote operations, DB is locked during sync, so isIgnoreDBLock needed
+          expect(mockTaskArchiveService.deleteTasks).toHaveBeenCalledWith(['task-1'], {
+            isIgnoreDBLock: true,
+          });
+        });
+      });
+
+      describe('flushYoungToOld', () => {
+        it('should NOT pass isIgnoreDBLock for local operations', async () => {
+          const timestamp = Date.now();
+          const action = {
+            type: flushYoungToOld.type,
+            timestamp,
+            meta: { isPersistent: true, isRemote: false },
+          } as unknown as PersistentAction;
+
+          try {
+            await service.handleOperation(action);
+          } catch {
+            // Expected - sort function returns undefined in tests
+          }
+
+          // Verify save was called without isIgnoreDBLock: true
+          const saveCall = (
+            mockPfapiService.m.archiveYoung.save as jasmine.Spy
+          ).calls.mostRecent();
+          if (saveCall) {
+            const options = saveCall.args[1];
+            expect(options.isIgnoreDBLock).toBeUndefined();
+          }
+        });
+
+        it('should pass isIgnoreDBLock: true for remote operations', async () => {
+          const timestamp = Date.now();
+          const action = {
+            type: flushYoungToOld.type,
+            timestamp,
+            meta: { isPersistent: true, isRemote: true },
+          } as unknown as PersistentAction;
+
+          try {
+            await service.handleOperation(action);
+          } catch {
+            // Expected - sort function returns undefined in tests
+          }
+
+          // Verify save was called with isIgnoreDBLock: true
+          const saveCall = (
+            mockPfapiService.m.archiveYoung.save as jasmine.Spy
+          ).calls.mostRecent();
+          if (saveCall) {
+            const options = saveCall.args[1];
+            expect(options.isIgnoreDBLock).toBe(true);
+          }
+        });
       });
     });
   });
