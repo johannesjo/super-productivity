@@ -68,10 +68,10 @@ export class OperationCaptureService {
   private queue = new Map<string, QueuedOperation>();
 
   /**
-   * Maximum age of queued operations before cleanup (5 seconds).
+   * Maximum age of queued operations before cleanup (10 seconds).
    * Handles cases where an action is captured but effect never runs.
    */
-  private readonly MAX_QUEUE_AGE_MS = 5000;
+  private readonly MAX_QUEUE_AGE_MS = 10000;
 
   /**
    * Computes entity changes from before/after states and enqueues them.
@@ -355,7 +355,14 @@ export class OperationCaptureService {
 
   /**
    * Removes stale entries that were never consumed.
-   * This handles edge cases where an action is captured but the effect never runs.
+   *
+   * This is a safety mechanism for the two-phase capture flow:
+   * 1. Meta-reducer calls computeAndEnqueue() → stores changes in queue
+   * 2. Effect calls dequeue() → retrieves and removes changes
+   *
+   * If step 2 never runs (e.g., effect throws before dequeue, or action
+   * filtered out), entries would leak. This cleanup prevents unbounded
+   * memory growth by removing entries older than MAX_QUEUE_AGE_MS.
    */
   private _cleanupStale(): void {
     const now = Date.now();
