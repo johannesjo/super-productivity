@@ -166,6 +166,16 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
+          type: 'tpl',
+          className: 'tpl warn-text',
+          templateOptions: {
+            tag: 'div',
+            text: T.F.SYNC.FORM.SUPER_SYNC.COST_WARNING,
+          },
+        },
+        {
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
