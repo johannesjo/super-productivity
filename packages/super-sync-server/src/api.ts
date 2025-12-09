@@ -9,7 +9,7 @@ const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(12, 'Password must be at least 12 characters long'),
   termsAccepted: z
-    .boolean({ required_error: 'You must accept the Terms of Service' })
+    .boolean()
     .refine((val) => val === true, {
       message: 'You must accept the Terms of Service',
     }),
