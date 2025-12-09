@@ -435,6 +435,137 @@ describe('OperationLogSyncService', () => {
       expect(result.nonConflicting.length).toBe(1);
       expect(result.nonConflicting[0].id).toBe('remote-update-op');
     });
+
+    // =========================================================================
+    // Regression tests: Stale/duplicate detection with no pending ops
+    // =========================================================================
+    // These tests verify that stale/duplicate remote ops are correctly skipped
+    // even when the local client has no pending ops for that entity.
+    // The applied frontier must be checked to detect stale/duplicate ops.
+
+    it('should skip STALE remote op when local has newer applied state but no pending ops', async () => {
+      // Scenario: Local applied ops up to {clientA: 10}, no pending ops.
+      // Remote sends an OLD op with {clientA: 5}.
+      // This is STALE - local already has newer state. Should be SKIPPED.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock shows we've applied up to clientA: 10
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 10 }),
+      );
+
+      // Entity frontier also shows clientA: 10
+      const entityFrontier = new Map<string, any>();
+      entityFrontier.set('TASK:task-1', { clientA: 10 });
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(
+        Promise.resolve(entityFrontier),
+      );
+
+      // Remote op is OLD (clientA: 5 < local's clientA: 10)
+      const staleRemoteOp: Operation = {
+        id: 'stale-remote-op',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Old title' },
+        clientId: 'clientA',
+        vectorClock: { clientA: 5 }, // STALE: local has clientA: 10
+        timestamp: Date.now() - 10000,
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([staleRemoteOp], entityFrontier);
+
+      // Stale ops should be skipped (neither nonConflicting nor conflicting)
+      expect(result.nonConflicting.length).toBe(0);
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should skip DUPLICATE remote op when local already applied it but has no pending ops', async () => {
+      // Scenario: Local applied op with {clientA: 5}, no pending ops.
+      // Remote sends the SAME op with {clientA: 5}.
+      // This is a DUPLICATE - should be SKIPPED.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock shows we've applied up to clientA: 5
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 5 }),
+      );
+
+      // Entity frontier shows the exact same clock
+      const entityFrontier = new Map<string, any>();
+      entityFrontier.set('TASK:task-1', { clientA: 5 });
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(
+        Promise.resolve(entityFrontier),
+      );
+
+      // Remote op has EQUAL clock - it's a duplicate
+      const duplicateRemoteOp: Operation = {
+        id: 'duplicate-remote-op',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Same title' },
+        clientId: 'clientA',
+        vectorClock: { clientA: 5 }, // EQUAL to local - duplicate
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([duplicateRemoteOp], entityFrontier);
+
+      // Duplicate ops should be skipped (neither nonConflicting nor conflicting)
+      expect(result.nonConflicting.length).toBe(0);
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should still apply NEWER remote op when local has no pending ops (the valid fast-path case)', async () => {
+      // Scenario: Local applied ops up to {clientA: 5}, no pending ops.
+      // Remote sends a NEWER op with {clientA: 6}.
+      // This is valid - should be applied.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock shows we've applied up to clientA: 5
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 5 }),
+      );
+
+      // Entity frontier shows clientA: 5
+      const entityFrontier = new Map<string, any>();
+      entityFrontier.set('TASK:task-1', { clientA: 5 });
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(
+        Promise.resolve(entityFrontier),
+      );
+
+      // Remote op is NEWER (clientA: 6 > local's clientA: 5)
+      const newerRemoteOp: Operation = {
+        id: 'newer-remote-op',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'New title' },
+        clientId: 'clientA',
+        vectorClock: { clientA: 6 }, // NEWER than local
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([newerRemoteOp], entityFrontier);
+
+      // This is the correct behavior that should continue to work
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('newer-remote-op');
+      expect(result.conflicts.length).toBe(0);
+    });
   });
 
   describe('_suggestResolution', () => {

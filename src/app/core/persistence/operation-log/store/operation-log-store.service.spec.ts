@@ -429,6 +429,44 @@ describe('OperationLogStoreService', () => {
       const count = await service.getCompactionCounter();
       expect(count).toBe(0);
     });
+
+    // =========================================================================
+    // Regression test: incrementCompactionCounter counter-only cache handling
+    // =========================================================================
+    // When incrementCompactionCounter creates a cache entry just to track the
+    // counter, loadStateCache should return null since there's no valid snapshot.
+    // This prevents unnecessary recovery paths on startup.
+
+    it('should not expose invalid snapshot when incrementCompactionCounter creates counter-only cache', async () => {
+      // No state cache exists yet
+      const beforeCache = await service.loadStateCache();
+      expect(beforeCache).toBeNull();
+
+      // Increment the compaction counter (simulating operation writes before first compaction)
+      await service.incrementCompactionCounter();
+
+      // Now check what loadStateCache returns
+      const afterCache = await service.loadStateCache();
+
+      // loadStateCache should return null since the cache has state: null
+      // (counter-only entry, not a real snapshot)
+      expect(afterCache).toBeNull();
+    });
+
+    it('should still track compaction counter even when loadStateCache returns null', async () => {
+      // Increment counter without a real snapshot existing
+      await service.incrementCompactionCounter();
+      await service.incrementCompactionCounter();
+      await service.incrementCompactionCounter();
+
+      // loadStateCache returns null (no valid snapshot)
+      const cache = await service.loadStateCache();
+      expect(cache).toBeNull();
+
+      // But the counter should still be tracked correctly
+      const counter = await service.getCompactionCounter();
+      expect(counter).toBe(3);
+    });
   });
 
   describe('VectorClockService.getCurrentVectorClock', () => {
@@ -683,6 +721,56 @@ describe('OperationLogStoreService', () => {
     it('should handle empty array', async () => {
       await service.markApplied([]);
       // Should not throw
+    });
+
+    // =========================================================================
+    // Regression test: markApplied should handle both 'pending' and 'failed' status
+    // =========================================================================
+    // When retryFailedRemoteOps() successfully applies a failed op, it calls
+    // markApplied() to clear it. markApplied() must handle both 'pending' and
+    // 'failed' status transitions to 'applied'.
+
+    it('should update applicationStatus from failed to applied', async () => {
+      // Create an op and mark it as pending
+      const op = createTestOperation();
+      const seq = await service.append(op, 'remote', { pendingApply: true });
+
+      // Mark it as failed (simulating a failed application attempt)
+      await service.markFailed([op.id]);
+
+      // Verify it's now in 'failed' status
+      const afterFail = await service.getOpsAfterSeq(0);
+      expect(afterFail[0].applicationStatus).toBe('failed');
+
+      // Now try to mark it as applied (simulating a successful retry)
+      await service.markApplied([seq]);
+
+      // The status should transition from 'failed' to 'applied'
+      const afterMarkApplied = await service.getOpsAfterSeq(0);
+      expect(afterMarkApplied[0].applicationStatus).toBe('applied');
+    });
+
+    it('should remove failed ops from getFailedRemoteOps after markApplied is called', async () => {
+      // Create an op and mark it as pending
+      const op = createTestOperation();
+      await service.append(op, 'remote', { pendingApply: true });
+
+      // Mark it as failed
+      await service.markFailed([op.id]);
+
+      // Verify it appears in failed ops
+      const failedBefore = await service.getFailedRemoteOps();
+      expect(failedBefore.length).toBe(1);
+
+      // Get the seq from failed ops
+      const seq = failedBefore[0].seq;
+
+      // Call markApplied (simulating successful retry)
+      await service.markApplied([seq]);
+
+      // The op should no longer appear in failed ops
+      const failedAfter = await service.getFailedRemoteOps();
+      expect(failedAfter.length).toBe(0);
     });
   });
 

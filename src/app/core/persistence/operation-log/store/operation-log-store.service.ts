@@ -137,6 +137,7 @@ export class OperationLogStoreService {
   /**
    * Marks operations as successfully applied.
    * Called after remote operations have been dispatched to NgRx.
+   * Also handles transitioning 'failed' ops to 'applied' when retrying succeeds.
    */
   async markApplied(seqs: number[]): Promise<void> {
     await this._ensureInit();
@@ -144,7 +145,12 @@ export class OperationLogStoreService {
     const store = tx.objectStore('ops');
     for (const seq of seqs) {
       const entry = await store.get(seq);
-      if (entry && entry.applicationStatus === 'pending') {
+      // Allow transitioning from 'pending' or 'failed' to 'applied'
+      // 'failed' ops can be retried and need to be cleared when successful
+      if (
+        entry &&
+        (entry.applicationStatus === 'pending' || entry.applicationStatus === 'failed')
+      ) {
         entry.applicationStatus = 'applied';
         await store.put(entry);
       }
@@ -344,7 +350,13 @@ export class OperationLogStoreService {
   } | null> {
     await this._ensureInit();
     const cache = await this.db.get('state_cache', 'current');
-    return cache || null;
+    // Return null if cache doesn't exist or if state is null/undefined.
+    // incrementCompactionCounter() may create a cache entry with state: null
+    // just to track the counter - this shouldn't be treated as a valid snapshot.
+    if (!cache || cache.state === null || cache.state === undefined) {
+      return null;
+    }
+    return cache;
   }
 
   // ============================================================

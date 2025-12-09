@@ -589,14 +589,6 @@ export class OperationLogSyncService {
         const localOpsForEntity = localPendingOpsByEntity.get(entityKey) || [];
         const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
 
-        // FAST PATH: If no local PENDING ops for this entity, no conflict possible.
-        // Conflicts require concurrent modifications - if local hasn't modified this entity
-        // since last sync (no pending ops), any remote op can be applied safely.
-        // The appliedFrontier and snapshot clock track APPLIED history, not pending changes.
-        if (localOpsForEntity.length === 0) {
-          continue; // No conflict possible - check next entityId
-        }
-
         // Build the frontier from everything we know locally (applied + pending)
         // Use snapshot vector clock as fallback if no per-entity frontier exists
         // This ensures entities modified before compaction aren't treated as having no history
@@ -611,6 +603,13 @@ export class OperationLogSyncService {
         );
 
         const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+
+        // FAST PATH: If no local PENDING ops AND no applied frontier for this entity,
+        // there's no local state to compare against - the remote op is newer by default.
+        if (localOpsForEntity.length === 0 && localFrontierIsEmpty) {
+          continue; // No local state - remote is newer, check next entityId
+        }
+
         let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
 
         // SAFETY: Per-entity clock corruption check.
@@ -649,6 +648,12 @@ export class OperationLogSyncService {
           );
           isStaleOrDuplicate = true;
           break;
+        }
+
+        // If no pending local ops, there's no conflict - just check stale/duplicate above.
+        // The remote op is newer (LESS_THAN) and safe to apply.
+        if (localOpsForEntity.length === 0) {
+          continue; // No pending ops = no conflict possible
         }
 
         if (vcComparison === VectorClockComparison.CONCURRENT) {

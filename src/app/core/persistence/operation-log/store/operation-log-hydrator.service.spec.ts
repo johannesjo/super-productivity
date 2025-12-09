@@ -14,6 +14,7 @@ import { SnackService } from '../../../snack/snack.service';
 import { ValidateStateService } from '../processing/validate-state.service';
 import { RepairOperationService } from '../processing/repair-operation.service';
 import { VectorClockService } from '../sync/vector-clock.service';
+import { OperationApplierService } from '../processing/operation-applier.service';
 import { Operation, OperationLogEntry, OpType } from '../operation.types';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
@@ -29,6 +30,7 @@ describe('OperationLogHydratorService', () => {
   let mockValidateStateService: jasmine.SpyObj<ValidateStateService>;
   let mockRepairOperationService: jasmine.SpyObj<RepairOperationService>;
   let mockVectorClockService: jasmine.SpyObj<VectorClockService>;
+  let mockOperationApplierService: jasmine.SpyObj<OperationApplierService>;
 
   const mockState = {
     task: { entities: {}, ids: [] },
@@ -86,6 +88,8 @@ describe('OperationLogHydratorService', () => {
       'append',
       'getPendingRemoteOps',
       'markApplied',
+      'getFailedRemoteOps',
+      'markFailed',
     ]);
     mockMigrationService = jasmine.createSpyObj('OperationLogMigrationService', [
       'checkAndMigrate',
@@ -122,6 +126,9 @@ describe('OperationLogHydratorService', () => {
     mockVectorClockService = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
     ]);
+    mockOperationApplierService = jasmine.createSpyObj('OperationApplierService', [
+      'applyOperations',
+    ]);
 
     // Default mock implementations
     mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
@@ -133,6 +140,10 @@ describe('OperationLogHydratorService', () => {
     mockOpLogStore.clearStateCacheBackup.and.returnValue(Promise.resolve());
     mockOpLogStore.saveStateCache.and.returnValue(Promise.resolve());
     mockOpLogStore.getPendingRemoteOps.and.returnValue(Promise.resolve([]));
+    mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([]));
+    mockOpLogStore.markApplied.and.returnValue(Promise.resolve());
+    mockOpLogStore.markFailed.and.returnValue(Promise.resolve());
+    mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
     mockMigrationService.checkAndMigrate.and.returnValue(Promise.resolve());
     mockSchemaMigrationService.needsMigration.and.returnValue(false);
     mockSchemaMigrationService.operationNeedsMigration.and.returnValue(false);
@@ -161,6 +172,7 @@ describe('OperationLogHydratorService', () => {
         { provide: ValidateStateService, useValue: mockValidateStateService },
         { provide: RepairOperationService, useValue: mockRepairOperationService },
         { provide: VectorClockService, useValue: mockVectorClockService },
+        { provide: OperationApplierService, useValue: mockOperationApplierService },
       ],
     });
 
@@ -792,6 +804,87 @@ describe('OperationLogHydratorService', () => {
       // Should not throw and should dispatch the data as-is
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         loadAllData({ appDataComplete: syncedDataWithoutConfig }),
+      );
+    });
+  });
+
+  // ===========================================================================
+  // retryFailedRemoteOps: Retry failed remote operations
+  // ===========================================================================
+  // These tests verify the retry mechanism for failed remote operations.
+  describe('retryFailedRemoteOps', () => {
+    it('should call markApplied for successfully retried failed ops', async () => {
+      const failedOp = createMockOperation('failed-op-1');
+      const failedEntry: OperationLogEntry = {
+        seq: 42,
+        op: failedOp,
+        appliedAt: Date.now(),
+        source: 'remote',
+        applicationStatus: 'failed',
+        retryCount: 1,
+      };
+
+      mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
+      mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
+
+      await service.retryFailedRemoteOps();
+
+      // Verify markApplied was called with the sequence number
+      expect(mockOpLogStore.markApplied).toHaveBeenCalledWith([42]);
+    });
+
+    it('should clear failed status after successful retry (markApplied handles failed status)', async () => {
+      // Verify that markApplied is called with the correct sequence number
+      // after a successful retry. The actual status transition is tested
+      // in operation-log-store.service.spec.ts.
+
+      const failedOp = createMockOperation('failed-op-1');
+      const failedEntry: OperationLogEntry = {
+        seq: 42,
+        op: failedOp,
+        appliedAt: Date.now(),
+        source: 'remote',
+        applicationStatus: 'failed',
+        retryCount: 1,
+      };
+
+      let markAppliedCalledWithSeqs: number[] = [];
+      mockOpLogStore.markApplied.and.callFake((seqs: number[]) => {
+        markAppliedCalledWithSeqs = seqs;
+        return Promise.resolve();
+      });
+
+      mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
+      mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
+
+      await service.retryFailedRemoteOps();
+
+      // markApplied should be called with the failed op's sequence number
+      expect(markAppliedCalledWithSeqs).toEqual([42]);
+    });
+
+    it('should call markFailed for ops that still fail after retry', async () => {
+      const failedOp = createMockOperation('still-failing-op');
+      const failedEntry: OperationLogEntry = {
+        seq: 99,
+        op: failedOp,
+        appliedAt: Date.now(),
+        source: 'remote',
+        applicationStatus: 'failed',
+        retryCount: 1,
+      };
+
+      mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
+      mockOperationApplierService.applyOperations.and.rejectWith(
+        new Error('Still failing'),
+      );
+
+      await service.retryFailedRemoteOps();
+
+      // markFailed should be called with the op ID
+      expect(mockOpLogStore.markFailed).toHaveBeenCalledWith(
+        ['still-failing-op'],
+        jasmine.any(Number),
       );
     });
   });
