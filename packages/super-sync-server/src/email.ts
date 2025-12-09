@@ -23,6 +23,10 @@ const getTransporter = async (): Promise<nodemailer.Transporter> => {
     });
     Logger.info(`SMTP configured: ${config.smtp.host}:${config.smtp.port}`);
   } else {
+    if (process.env.NODE_ENV === 'production') {
+      throw new Error('SMTP configuration is required in production environments');
+    }
+
     // Fallback to Ethereal for development if no SMTP config
     Logger.warn('No SMTP configuration found. Using Ethereal Email for testing.');
     const testAccount = await nodemailer.createTestAccount();
@@ -56,7 +60,9 @@ export const sendVerificationEmail = async (
       from,
       to,
       subject: 'Verify your SuperSync account',
-      text: `Please verify your account by clicking the following link: ${verificationLink}\n\nIf clicking the link doesn't work, copy and paste it into your browser.`,
+      text:
+        `Please verify your account by clicking the following link: ${verificationLink}\n\n` +
+        `If clicking the link doesn't work, copy and paste it into your browser.`,
       html: `
         <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
           <h2>Welcome to SuperSync!</h2>

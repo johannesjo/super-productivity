@@ -64,6 +64,12 @@ const MAX_OPS_FOR_SNAPSHOT = 100000;
  */
 const MAX_SNAPSHOT_SIZE_BYTES = 50 * 1024 * 1024;
 
+/**
+ * Maximum decompressed snapshot size in bytes (100MB).
+ * Prevents zip bombs from exhausting memory when reading cached snapshots.
+ */
+const MAX_SNAPSHOT_DECOMPRESSED_BYTES = 100 * 1024 * 1024;
+
 interface PreparedStatements {
   insertOp: Database.Statement;
   getNextSeq: Database.Statement;
@@ -674,14 +680,25 @@ export class SyncService {
 
     if (!row?.snapshot_data) return null;
 
-    // Decompress snapshot
-    const decompressed = zlib.gunzipSync(row.snapshot_data).toString('utf-8');
-    return {
-      state: JSON.parse(decompressed),
-      serverSeq: row.last_snapshot_seq ?? 0,
-      generatedAt: row.snapshot_at ?? 0,
-      schemaVersion: row.snapshot_schema_version ?? 1,
-    };
+    try {
+      // Decompress snapshot with an upper bound to prevent zip bombs
+      const decompressed = zlib
+        .gunzipSync(row.snapshot_data, {
+          maxOutputLength: MAX_SNAPSHOT_DECOMPRESSED_BYTES,
+        })
+        .toString('utf-8');
+      return {
+        state: JSON.parse(decompressed),
+        serverSeq: row.last_snapshot_seq ?? 0,
+        generatedAt: row.snapshot_at ?? 0,
+        schemaVersion: row.snapshot_schema_version ?? 1,
+      };
+    } catch (err) {
+      Logger.error(
+        `[user:${userId}] Failed to decompress cached snapshot: ${(err as Error).message}`,
+      );
+      return null;
+    }
   }
 
   cacheSnapshot(userId: number, state: unknown, serverSeq: number): void {

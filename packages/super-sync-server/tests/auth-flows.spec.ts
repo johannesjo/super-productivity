@@ -57,11 +57,12 @@ describe('Authentication Flows', () => {
 
     it('should reject login when account is locked', async () => {
       const db = getDb();
+      const fifteenMinutesMs = 15 * 60 * 1000;
       // Lock the account manually
       db.prepare(
         'UPDATE users SET locked_until = ?, failed_login_attempts = 5 WHERE email = ?',
       ).run(
-        Date.now() + 15 * 60 * 1000, // 15 minutes from now
+        Date.now() + fifteenMinutesMs, // 15 minutes from now
         email,
       );
 
@@ -193,10 +194,11 @@ describe('Authentication Flows', () => {
       await registerUser('expired@test.com', 'SecurePass123!');
 
       const db = getDb();
+      const oneHourMs = 60 * 60 * 1000;
       // Set token to expired (1 hour ago)
       db.prepare(
         'UPDATE users SET verification_token_expires_at = ? WHERE email = ?',
-      ).run(Date.now() - 60 * 60 * 1000, 'expired@test.com');
+      ).run(Date.now() - oneHourMs, 'expired@test.com');
 
       const user = db
         .prepare('SELECT * FROM users WHERE email = ?')
@@ -249,9 +251,6 @@ describe('Authentication Flows', () => {
       await registerUser('stuck@test.com', 'SecurePass123!');
 
       const db = getDb();
-      const user = db
-        .prepare('SELECT * FROM users WHERE email = ?')
-        .get('stuck@test.com') as User;
 
       const expiredToken = 'expired-token';
       // Simulate prior resend and expiry

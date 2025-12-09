@@ -1,8 +1,9 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { initDb, getDb } from '../src/db';
 import { initSyncService, getSyncService } from '../src/sync/sync.service';
 import { Operation, MS_PER_DAY } from '../src/sync/sync.types';
 import { uuidv7 } from 'uuidv7';
+import * as zlib from 'zlib';
 
 describe('Sync Operations', () => {
   const userId = 1;
@@ -141,7 +142,7 @@ describe('Sync Operations', () => {
       const service = getSyncService();
 
       service.uploadOps(userId, clientId, [createOp('task-1', 'CRT')]);
-      const snapshot1 = service.generateSnapshot(userId);
+      service.generateSnapshot(userId);
 
       // Add new operation
       service.uploadOps(userId, clientId, [createOp('task-2', 'CRT')]);
@@ -191,6 +192,22 @@ describe('Sync Operations', () => {
       // This should work without error
       const snapshot = service.generateSnapshot(userId);
       expect(snapshot).toBeDefined();
+    });
+
+    it('should discard cached snapshot if decompression exceeds limit', () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [createOp('task-1', 'CRT')]);
+      service.generateSnapshot(userId);
+
+      const gunzipSpy = vi.spyOn(zlib, 'gunzipSync').mockImplementation(() => {
+        throw new RangeError('maxOutputLength exceeded');
+      });
+
+      const cached = service.getCachedSnapshot(userId);
+      expect(cached).toBeNull();
+
+      gunzipSpy.mockRestore();
     });
   });
 
@@ -307,16 +324,19 @@ describe('Sync Operations', () => {
       const db = getDb();
 
       // Create a tombstone manually with expired time
+      const hundredDaysMs = MS_PER_DAY * 100;
+      const oneDayMs = MS_PER_DAY;
       db.prepare(
         `INSERT INTO tombstones (user_id, entity_type, entity_id, deleted_at, deleted_by_op_id, expires_at)
          VALUES (?, 'TASK', 'old-task', ?, 'op-123', ?)`,
-      ).run(userId, Date.now() - MS_PER_DAY * 100, Date.now() - MS_PER_DAY); // Expired yesterday
+      ).run(userId, Date.now() - hundredDaysMs, Date.now() - oneDayMs); // Expired yesterday
 
       // Also create a non-expired tombstone
+      const ninetyDaysMs = MS_PER_DAY * 90;
       db.prepare(
         `INSERT INTO tombstones (user_id, entity_type, entity_id, deleted_at, deleted_by_op_id, expires_at)
          VALUES (?, 'TASK', 'new-task', ?, 'op-456', ?)`,
-      ).run(userId, Date.now(), Date.now() + MS_PER_DAY * 90); // Expires in 90 days
+      ).run(userId, Date.now(), Date.now() + ninetyDaysMs); // Expires in 90 days
 
       // Cleanup should delete the expired one
       const deleted = service.deleteExpiredTombstones();
@@ -340,13 +360,15 @@ describe('Sync Operations', () => {
       ]);
 
       // Manually set one operation to be "old" (received 100 days ago)
+      const hundredDaysMs = MS_PER_DAY * 100;
       db.prepare('UPDATE operations SET received_at = ? WHERE server_seq = ?').run(
-        Date.now() - MS_PER_DAY * 100,
+        Date.now() - hundredDaysMs,
         1,
       );
 
       // Delete operations older than 90 days
-      const cutoff = Date.now() - MS_PER_DAY * 90;
+      const ninetyDaysMs = MS_PER_DAY * 90;
+      const cutoff = Date.now() - ninetyDaysMs;
       const deleted = service.deleteOldSyncedOpsForAllUsers(cutoff);
 
       expect(deleted).toBe(1);
@@ -365,13 +387,15 @@ describe('Sync Operations', () => {
       service.uploadOps(userId, clientId, [createOp('task-1', 'CRT')]);
 
       // Manually set device to stale (not seen in 60 days)
+      const sixtyDaysMs = MS_PER_DAY * 60;
       db.prepare('UPDATE sync_devices SET last_seen_at = ? WHERE client_id = ?').run(
-        Date.now() - MS_PER_DAY * 60,
+        Date.now() - sixtyDaysMs,
         clientId,
       );
 
       // Delete devices not seen in 50 days
-      const cutoff = Date.now() - MS_PER_DAY * 50;
+      const fiftyDaysMs = MS_PER_DAY * 50;
+      const cutoff = Date.now() - fiftyDaysMs;
       const deleted = service.deleteStaleDevices(cutoff);
 
       expect(deleted).toBe(1);
@@ -384,7 +408,8 @@ describe('Sync Operations', () => {
       service.uploadOps(userId, clientId, [createOp('task-1', 'CRT')]);
 
       // Try to delete devices not seen in 50 days
-      const cutoff = Date.now() - MS_PER_DAY * 50;
+      const fiftyDaysMs = MS_PER_DAY * 50;
+      const cutoff = Date.now() - fiftyDaysMs;
       const deleted = service.deleteStaleDevices(cutoff);
 
       // Should not delete anything (device was just seen)
@@ -437,6 +462,26 @@ describe('Sync Operations', () => {
       const cleaned = service.cleanupExpiredRequestDedupEntries();
       // Fresh entries shouldn't be expired
       expect(cleaned).toBe(0);
+    });
+  });
+
+  describe('Database Constraints', () => {
+    it('should cascade delete operations when user is removed', () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [
+        createOp('task-1', 'CRT'),
+        createOp('task-2', 'CRT'),
+      ]);
+
+      const db = getDb();
+      db.prepare('DELETE FROM users WHERE id = ?').run(userId);
+
+      const remaining = db
+        .prepare('SELECT COUNT(*) as count FROM operations WHERE user_id = ?')
+        .get(userId) as { count: number };
+
+      expect(remaining.count).toBe(0);
     });
   });
 
