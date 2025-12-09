@@ -57,12 +57,39 @@ export class SuperSyncPage extends BasePage {
   async setupSuperSync(config: SuperSyncConfig): Promise<void> {
     await this.syncBtn.click();
     await this.providerSelect.waitFor({ state: 'visible' });
-    await this.providerSelect.click();
 
-    // Select SuperSync option
+    // Retry loop for opening the dropdown
+    let dropdownOpen = false;
     const superSyncOption = this.page
       .locator('mat-option')
       .filter({ hasText: 'SuperSync' });
+
+    for (let i = 0; i < 3; i++) {
+      try {
+        await this.providerSelect.click();
+        // Wait briefly for animation
+        await this.page.waitForTimeout(500);
+
+        if (await superSyncOption.isVisible()) {
+          dropdownOpen = true;
+          break;
+        } else {
+          console.log(`[SuperSyncPage] Dropdown not open attempt ${i + 1}, retrying...`);
+          // If not visible, maybe we need to click again or close/open
+          // Click body to close if it was partially open/confused
+          await this.page.locator('body').click({ force: true });
+          await this.page.waitForTimeout(200);
+        }
+      } catch (e) {
+        console.log(`[SuperSyncPage] Error opening dropdown attempt ${i + 1}: ${e}`);
+      }
+    }
+
+    if (!dropdownOpen) {
+      // Last ditch effort - try one more simple click
+      await this.providerSelect.click();
+    }
+
     await superSyncOption.waitFor({ state: 'visible' });
     await superSyncOption.click();
 
