@@ -127,6 +127,7 @@ export class SuperSyncPage extends BasePage {
       if (config.password) {
         await this.encryptionPasswordInput.waitFor({ state: 'visible' });
         await this.encryptionPasswordInput.fill(config.password);
+        await this.encryptionPasswordInput.blur();
       }
     } else {
       // Ensure it is unchecked if config says disabled

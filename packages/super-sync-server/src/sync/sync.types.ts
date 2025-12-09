@@ -256,7 +256,19 @@ export const validatePayload = (
     if (typeof payload === 'object' && !Array.isArray(payload)) {
       return { valid: true };
     }
-    return { valid: false, error: 'DEL payload must be null or an object' };
+    // Encrypted DEL payload might be a string
+    if (typeof payload === 'string') {
+      return { valid: true };
+    }
+    return {
+      valid: false,
+      error: 'DEL payload must be null, an object, or an encrypted string',
+    };
+  }
+
+  // Encrypted payloads are strings - allow them
+  if (typeof payload === 'string') {
+    return { valid: true };
   }
 
   // All other operations require an object payload
