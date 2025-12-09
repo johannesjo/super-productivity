@@ -2,7 +2,7 @@ import { inject, InjectionToken } from '@angular/core';
 import { Actions } from '@ngrx/effects';
 import { Action } from '@ngrx/store';
 import { Observable } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, share } from 'rxjs/operators';
 
 /**
  * DEFAULT: Injection token for Actions stream filtered to local user actions only.
@@ -34,7 +34,10 @@ export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIO
   providedIn: 'root',
   factory: () => {
     const actions$ = inject(Actions);
-    return actions$.pipe(filter((action: Action) => !(action as any).meta?.isRemote));
+    return actions$.pipe(
+      filter((action: Action) => !(action as any).meta?.isRemote),
+      share(),
+    );
   },
 });
 
