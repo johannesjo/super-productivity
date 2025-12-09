@@ -1,0 +1,221 @@
+import { TestBed } from '@angular/core/testing';
+import { OperationLogSyncService } from '../sync/operation-log-sync.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import {
+  SchemaMigrationService,
+  MAX_VERSION_SKIP,
+} from '../store/schema-migration.service';
+import { SnackService } from '../../../snack/snack.service';
+import { VectorClockService } from '../sync/vector-clock.service';
+import { OperationApplierService } from '../processing/operation-applier.service';
+import { ConflictResolutionService } from '../sync/conflict-resolution.service';
+import { ValidateStateService } from '../processing/validate-state.service';
+import { RepairOperationService } from '../processing/repair-operation.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { OperationLogUploadService } from '../sync/operation-log-upload.service';
+import { OperationLogDownloadService } from '../sync/operation-log-download.service';
+import { DependencyResolverService } from '../sync/dependency-resolver.service';
+import { provideMockStore } from '@ngrx/store/testing';
+import { Operation, OpType } from '../operation.types';
+import { T } from '../../../../t.const';
+import { MatDialog } from '@angular/material/dialog';
+import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
+import { resetTestUuidCounter } from './helpers/test-client.helper';
+
+/**
+ * Integration tests for Schema Migration Handling in Sync.
+ *
+ * Verifies that OperationLogSyncService correctly integrates with
+ * SchemaMigrationService to handle version mismatches during sync.
+ */
+describe('Migration Handling Integration', () => {
+  let service: OperationLogSyncService;
+  let snackServiceSpy: jasmine.SpyObj<SnackService>;
+  let opLogStore: OperationLogStoreService;
+  let operationApplierSpy: jasmine.SpyObj<OperationApplierService>;
+
+  beforeEach(async () => {
+    snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+    operationApplierSpy = jasmine.createSpyObj('OperationApplierService', [
+      'applyOperations',
+    ]);
+
+    TestBed.configureTestingModule({
+      providers: [
+        OperationLogSyncService,
+        OperationLogStoreService,
+        VectorClockService,
+        SchemaMigrationService, // Use REAL service
+        DependencyResolverService, // Use REAL service
+        provideMockStore(),
+        { provide: SnackService, useValue: snackServiceSpy },
+        { provide: OperationApplierService, useValue: operationApplierSpy },
+        {
+          provide: ConflictResolutionService,
+          useValue: jasmine.createSpyObj('ConflictResolutionService', [
+            'presentConflicts',
+          ]),
+        },
+        {
+          provide: ValidateStateService,
+          useValue: jasmine.createSpyObj('ValidateStateService', [
+            'validateAndRepairCurrentState',
+          ]),
+        },
+        {
+          provide: RepairOperationService,
+          useValue: jasmine.createSpyObj('RepairOperationService', [
+            'createRepairOperation',
+          ]),
+        },
+        {
+          provide: PfapiStoreDelegateService,
+          useValue: jasmine.createSpyObj('PfapiStoreDelegateService', [
+            'getAllSyncModelDataFromStore',
+          ]),
+        },
+        {
+          provide: OperationLogUploadService,
+          useValue: jasmine.createSpyObj('OperationLogUploadService', [
+            'uploadPendingOps',
+          ]),
+        },
+        {
+          provide: OperationLogDownloadService,
+          useValue: jasmine.createSpyObj('OperationLogDownloadService', [
+            'downloadRemoteOps',
+          ]),
+        },
+        {
+          provide: MatDialog,
+          useValue: jasmine.createSpyObj('MatDialog', ['open']),
+        },
+        {
+          provide: UserInputWaitStateService,
+          useValue: jasmine.createSpyObj('UserInputWaitStateService', ['startWaiting']),
+        },
+      ],
+    });
+
+    service = TestBed.inject(OperationLogSyncService);
+    opLogStore = TestBed.inject(OperationLogStoreService);
+
+    await opLogStore.init();
+    await opLogStore._clearAllDataForTesting();
+    resetTestUuidCounter();
+  });
+
+  describe('Incoming Remote Operations', () => {
+    const createOp = (version: number): Operation => ({
+      id: `op-v${version}`,
+      clientId: 'remoteClientId',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'task-1',
+      payload: {},
+      vectorClock: { remoteClientId: 1 },
+      timestamp: Date.now(),
+      schemaVersion: version,
+    });
+
+    it('should accept operation with current schema version', async () => {
+      const currentVersion = 1; // Assuming CURRENT_SCHEMA_VERSION is 1
+      const op = createOp(currentVersion);
+
+      await service.processRemoteOps([op]);
+
+      // Should be applied (no error snackbar)
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      expect(operationApplierSpy.applyOperations).toHaveBeenCalledWith([
+        jasmine.objectContaining({ id: op.id }),
+      ]);
+    });
+
+    it('should accept operation with compatible future version (within skip limit)', async () => {
+      // Logic: if opVersion <= current + MAX_VERSION_SKIP, it's accepted
+      // MAX_VERSION_SKIP is 3. So version 4 should be accepted if current is 1.
+      const compatibleVersion = 1 + MAX_VERSION_SKIP;
+      const op = createOp(compatibleVersion);
+
+      await service.processRemoteOps([op]);
+
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      expect(operationApplierSpy.applyOperations).toHaveBeenCalled();
+    });
+
+    it('should reject operation with incompatible future version', async () => {
+      // Logic: if opVersion > current + MAX_VERSION_SKIP, update required
+      const incompatibleVersion = 1 + MAX_VERSION_SKIP + 1;
+      const op = createOp(incompatibleVersion);
+
+      await service.processRemoteOps([op]);
+
+      // Should trigger error snackbar
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
+        }),
+      );
+
+      // Should NOT apply operation
+      expect(operationApplierSpy.applyOperations).not.toHaveBeenCalled();
+    });
+
+    it('should handle operations missing schemaVersion (default to 1)', async () => {
+      const op = createOp(1);
+      delete (op as any).schemaVersion; // Simulate legacy op
+
+      await service.processRemoteOps([op]);
+
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      expect(operationApplierSpy.applyOperations).toHaveBeenCalledWith([
+        jasmine.objectContaining({ id: op.id }),
+      ]);
+    });
+  });
+
+  describe('Application Failures', () => {
+    const createOp = (id: string): Operation => ({
+      id,
+      clientId: 'remoteClientId',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'task-1',
+      payload: {},
+      vectorClock: { remoteClientId: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+    });
+
+    it('should mark operations as failed if application throws error', async () => {
+      const op = createOp('op-fail');
+
+      // Make applier throw error
+      operationApplierSpy.applyOperations.and.rejectWith(
+        new Error('Simulated Apply Error'),
+      );
+
+      // Spy on store to verify markFailed is called
+      spyOn(opLogStore, 'markFailed').and.callThrough();
+
+      try {
+        await service.processRemoteOps([op]);
+        fail('Should have thrown error');
+      } catch (e) {
+        expect((e as Error).message).toBe('Simulated Apply Error');
+      }
+
+      // Verify markFailed was called
+      expect(opLogStore.markFailed).toHaveBeenCalledWith(['op-fail']);
+
+      // Verify op status in store
+      const ops = await opLogStore.getOpsAfterSeq(0);
+      const storedOp = ops.find((e) => e.op.id === 'op-fail');
+      expect(storedOp).toBeDefined();
+      expect(storedOp!.applicationStatus).toBe('failed');
+    });
+  });
+});

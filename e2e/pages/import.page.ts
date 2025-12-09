@@ -70,17 +70,24 @@ export class ImportPage extends BasePage {
     // Dispatch change event to ensure Angular detects the file change
     // Use evaluate to dispatch directly as the input might be hidden/detached from view
     try {
-      await this.fileInput.evaluate(
-        (node) => {
+      // Check if element is still attached before dispatching event
+      // If setInputFiles triggered the import immediately, the element might be gone
+      // We use elementHandle with a short timeout to avoid waiting 15s if it's gone
+      const handle = await this.fileInput.elementHandle({ timeout: 1000 });
+      if (handle) {
+        await handle.evaluate((node) => {
           node.dispatchEvent(new Event('change', { bubbles: true }));
-        },
-        { timeout: 2000 },
-      );
+        });
+      }
     } catch (e) {
-      console.log(
-        'Dispatch event failed (maybe import already started/element removed):',
-        (e as Error).message,
-      );
+      // Ignore timeout errors as they indicate the element was removed (import started)
+      const msg = (e as Error).message;
+      if (!msg.includes('Timeout')) {
+        console.log(
+          'Dispatch event failed (maybe import already started/element removed):',
+          msg,
+        );
+      }
     }
 
     // Wait for import to be processed

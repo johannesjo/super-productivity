@@ -93,7 +93,9 @@ export class SimulatedClient {
     const response = server.uploadOps(syncOps, this.clientId, this.lastKnownServerSeq);
 
     // Mark accepted ops as synced
-    const acceptedOpIds = response.results.filter((r) => r.accepted).map((r) => r.opId);
+    const acceptedOpIds = response.results
+      .filter((r) => r.accepted || r.error?.includes('Duplicate'))
+      .map((r) => r.opId);
 
     const seqsToMark = unsynced
       .filter((entry) => acceptedOpIds.includes(entry.op.id))
@@ -128,12 +130,15 @@ export class SimulatedClient {
       500,
     );
 
+    // Update last known seq based on received ops to ensure pagination works
     if (response.ops.length > 0) {
-      await this._applyRemoteOps(response.ops);
+      this.lastKnownServerSeq = Math.max(
+        this.lastKnownServerSeq,
+        response.ops[response.ops.length - 1].serverSeq,
+      );
+    } else {
+      this.lastKnownServerSeq = response.latestSeq;
     }
-
-    // Update last known seq
-    this.lastKnownServerSeq = response.latestSeq;
 
     return { downloaded: response.ops.length };
   }

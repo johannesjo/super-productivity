@@ -393,15 +393,29 @@ export class ProjectPage extends BasePage {
     await expect(this.workCtxTitle).toContainText(projectName);
   }
 
-  async addNote(noteContent: string): Promise<void> {
+  async addNote(noteContent: string, projectId?: string): Promise<void> {
+    // Ensure we are on the correct project route if an id is provided
+    if (projectId && !this.page.url().includes(projectId)) {
+      await this.page.goto(`/#/project/${projectId}`);
+      await this.page.waitForLoadState('networkidle');
+    }
+
     // Wait for the app to be ready
     const routerWrapper = this.page.locator('.route-wrapper');
     await routerWrapper.waitFor({ state: 'visible', timeout: 6000 }); // Reduced from 10s to 6s
 
     // Wait for the page to be fully loaded
     await this.page.waitForLoadState('networkidle');
-    // Wait for project view to be ready
-    await this.page.locator('.page-project').waitFor({ state: 'visible' });
+    // Wait for project view to be present (not necessarily visible immediately)
+    const workView = this.page.locator('work-view');
+    await workView.waitFor({ state: 'attached', timeout: 15000 });
+    const isWorkViewVisible = await workView
+      .isVisible({ timeout: 5000 })
+      .catch(() => false);
+    if (!isWorkViewVisible) {
+      // Allow a brief moment for the view to finish rendering
+      await this.page.waitForTimeout(500);
+    }
     await this.page.waitForTimeout(100);
 
     // First ensure notes section is visible by clicking toggle if needed
