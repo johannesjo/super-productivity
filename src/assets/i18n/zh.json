@@ -1899,7 +1899,7 @@
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_DISABLE_CELEBRATION": "在每日摘要中禁用庆祝",
-      
+
       "IS_HIDE_NAV": "隐藏导航栏，直到鼠标悬停在标题栏上（仅限桌面端）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_OVERLAY_INDICATOR_ENABLED": "启用覆盖指示器窗口（桌面 Linux/Gnome）",
@@ -1914,7 +1914,7 @@
       "TASK_NOTES_TPL": "任务描述模板",
       "THEME": "主题",
       "THEME_EXPERIMENTAL": "主题（实验性）",
-      "THEME_SELECT_LABEL": "选择主题"
+      "THEME_SELECT_LABEL": "选择主题",
       "TITLE": "更多设置"
     },
     "POMODORO": {
