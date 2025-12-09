@@ -181,7 +181,9 @@ export class SyncConfigService {
       ...PROVIDER_FIELD_DEFAULTS[providerId],
       ...oldConfig,
       ...(privateConfigProviderSpecific as Record<string, unknown>),
-      encryptKey: settings.encryptKey || '',
+      // Use provider specific key if available, otherwise fallback to root key
+      encryptKey:
+        (privateConfigProviderSpecific as any)?.encryptKey || settings.encryptKey || '',
     };
 
     await this._pfapiService.pf.setPrivateCfgForSyncProvider(

@@ -205,6 +205,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           key: 'isEncryptionEnabled',
           type: 'checkbox',
+          className: 'e2e-isEncryptionEnabled',
           templateOptions: {
             label: T.F.SYNC.FORM.SUPER_SYNC.L_ENABLE_E2E_ENCRYPTION,
           },
@@ -222,6 +223,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (model: any) => !model.isEncryptionEnabled,
           key: 'encryptKey',
           type: 'input',
+          className: 'e2e-encryptKey',
           templateOptions: {
             required: true,
             type: 'password',

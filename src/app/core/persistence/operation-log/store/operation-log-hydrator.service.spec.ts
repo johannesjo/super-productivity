@@ -275,8 +275,12 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        // First dispatch is snapshot, then 2 tail ops
-        expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+        // First dispatch is snapshot
+        expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+        // Then tail ops are replayed via applier service
+        expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
+          tailOps.map((e) => e.op),
+        );
       });
 
       it('should request ops after snapshot sequence', async () => {
@@ -574,8 +578,12 @@ describe('OperationLogHydratorService', () => {
 
         await service.hydrateStore();
 
-        // 3 operations replayed
-        expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+        // No snapshot dispatch
+        expect(mockStore.dispatch).not.toHaveBeenCalled();
+        // Replay all ops via applier service
+        expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
+          allOps.map((e) => e.op),
+        );
       });
 
       it('should save snapshot after full replay', async () => {

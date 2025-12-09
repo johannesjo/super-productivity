@@ -1,9 +1,11 @@
-import { type Page, type Locator } from '@playwright/test';
+import { type Page, type Locator, expect } from '@playwright/test';
 import { BasePage } from './base.page';
 
 export interface SuperSyncConfig {
   baseUrl: string;
   accessToken: string;
+  isEncryptionEnabled?: boolean;
+  password?: string;
 }
 
 /**
@@ -15,6 +17,8 @@ export class SuperSyncPage extends BasePage {
   readonly providerSelect: Locator;
   readonly baseUrlInput: Locator;
   readonly accessTokenInput: Locator;
+  readonly encryptionCheckbox: Locator;
+  readonly encryptionPasswordInput: Locator;
   readonly saveBtn: Locator;
   readonly syncSpinner: Locator;
   readonly syncCheckIcon: Locator;
@@ -33,6 +37,10 @@ export class SuperSyncPage extends BasePage {
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
     this.accessTokenInput = page.locator('.e2e-accessToken textarea');
+    this.encryptionCheckbox = page.locator(
+      '.e2e-isEncryptionEnabled input[type="checkbox"]',
+    );
+    this.encryptionPasswordInput = page.locator('.e2e-encryptKey input[type="password"]');
     this.saveBtn = page.locator('mat-dialog-actions button[mat-stroked-button]');
     this.syncSpinner = page.locator('.sync-btn mat-icon.spin');
     this.syncCheckIcon = page.locator('.sync-btn mat-icon.sync-state-ico');
@@ -93,10 +101,43 @@ export class SuperSyncPage extends BasePage {
     await superSyncOption.waitFor({ state: 'visible' });
     await superSyncOption.click();
 
+    // Wait for the dropdown overlay to close
+    await this.page.locator('.mat-mdc-select-panel').waitFor({ state: 'detached' });
+
     // Fill configuration
     await this.baseUrlInput.waitFor({ state: 'visible' });
     await this.baseUrlInput.fill(config.baseUrl);
     await this.accessTokenInput.fill(config.accessToken);
+
+    // Handle Encryption
+    if (config.isEncryptionEnabled) {
+      // Check if already checked (mat-checkbox structure)
+      // We check the native input checked state
+      const isChecked = await this.encryptionCheckbox.isChecked();
+      if (!isChecked) {
+        // Click the custom checkbox touch target, force true to bypass internal input interception
+        await this.page
+          .locator('.e2e-isEncryptionEnabled .mat-mdc-checkbox-touch-target')
+          .click({ force: true });
+
+        // Verify it got checked
+        await expect(this.encryptionCheckbox).toBeChecked({ timeout: 2000 });
+      }
+
+      if (config.password) {
+        await this.encryptionPasswordInput.waitFor({ state: 'visible' });
+        await this.encryptionPasswordInput.fill(config.password);
+      }
+    } else {
+      // Ensure it is unchecked if config says disabled
+      const isChecked = await this.encryptionCheckbox.isChecked();
+      if (isChecked) {
+        await this.page
+          .locator('.e2e-isEncryptionEnabled .mat-mdc-checkbox-touch-target')
+          .click({ force: true });
+        await expect(this.encryptionCheckbox).not.toBeChecked({ timeout: 2000 });
+      }
+    }
 
     // Save
     await this.saveBtn.click();
