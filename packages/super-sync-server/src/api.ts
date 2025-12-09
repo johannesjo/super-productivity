@@ -8,6 +8,11 @@ import { Logger } from './logger';
 const RegisterSchema = z.object({
   email: z.string().email('Invalid email format'),
   password: z.string().min(12, 'Password must be at least 12 characters long'),
+  termsAccepted: z
+    .boolean({ required_error: 'You must accept the Terms of Service' })
+    .refine((val) => val === true, {
+      message: 'You must accept the Terms of Service',
+    }),
 });
 
 const LoginSchema = z.object({
@@ -66,7 +71,7 @@ export const apiRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
         const { email, password } = parseResult.data;
 
-        const result = await registerUser(email, password);
+        const result = await registerUser(email, password, Date.now());
         return reply.status(201).send(result);
       } catch (err) {
         const errMsg = err instanceof Error ? err.message : 'Unknown error';

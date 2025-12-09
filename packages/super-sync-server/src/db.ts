@@ -14,6 +14,7 @@ export interface User {
   failed_login_attempts: number; // count of consecutive failed logins
   locked_until: number | null; // Unix timestamp when lockout expires
   token_version: number; // Incremented on password change to invalidate old tokens
+  terms_accepted_at: number | null; // Unix timestamp when terms were accepted
   created_at: string;
 }
 
@@ -83,6 +84,9 @@ export const initDb = (dataDir: string, inMemory = false): void => {
     db.pragma('journal_mode = WAL');
   }
 
+  // Enforce foreign key constraints to guarantee cascading deletes
+  db.pragma('foreign_keys = ON');
+
   // Create users table
   db.exec(`
     CREATE TABLE IF NOT EXISTS users (
@@ -93,6 +97,10 @@ export const initDb = (dataDir: string, inMemory = false): void => {
       verification_token TEXT,
       verification_token_expires_at INTEGER,
       verification_resend_count INTEGER DEFAULT 0,
+      failed_login_attempts INTEGER DEFAULT 0,
+      locked_until INTEGER,
+      token_version INTEGER DEFAULT 0,
+      terms_accepted_at INTEGER,
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     )
   `);
@@ -214,6 +222,13 @@ export const initDb = (dataDir: string, inMemory = false): void => {
   if (!hasTokenVersion) {
     Logger.info('Migrating database: adding token_version column');
     db.exec('ALTER TABLE users ADD COLUMN token_version INTEGER DEFAULT 0');
+  }
+
+  // Migration: Add terms_accepted_at column
+  const hasTermsAcceptedAt = columns.some((col) => col.name === 'terms_accepted_at');
+  if (!hasTermsAcceptedAt) {
+    Logger.info('Migrating database: adding terms_accepted_at column');
+    db.exec('ALTER TABLE users ADD COLUMN terms_accepted_at INTEGER');
   }
 
   // Migration: Add schema version tracking for snapshots

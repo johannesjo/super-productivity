@@ -36,6 +36,7 @@ const JWT_SECRET = getJwtSecret();
 export const registerUser = async (
   email: string,
   password: string,
+  termsAcceptedAt?: number,
 ): Promise<{ message: string }> => {
   // Password strength validation is handled by Zod in api.ts
 
@@ -43,16 +44,17 @@ export const registerUser = async (
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const verificationToken = randomBytes(32).toString('hex');
   const expiresAt = Date.now() + VERIFICATION_TOKEN_EXPIRY_MS;
+  const acceptedAt = termsAcceptedAt || Date.now();
 
   try {
     const info = db
       .prepare(
         `
-      INSERT INTO users (email, password_hash, verification_token, verification_token_expires_at)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO users (email, password_hash, verification_token, verification_token_expires_at, terms_accepted_at)
+      VALUES (?, ?, ?, ?, ?)
     `,
       )
-      .run(email, passwordHash, verificationToken, expiresAt);
+      .run(email, passwordHash, verificationToken, expiresAt, acceptedAt);
 
     Logger.info(`User registered (ID: ${info.lastInsertRowid})`);
 
@@ -84,8 +86,6 @@ export const registerUser = async (
         Logger.info(
           `Registration attempt for already verified account (ID: ${existingUser.id})`,
         );
-      } else if (existingUser.verification_resend_count >= 1) {
-        Logger.info(`Verification resend already sent (ID: ${existingUser.id})`);
       } else {
         const tokenStillValid =
           !!existingUser.verification_token &&
@@ -136,7 +136,11 @@ export const registerUser = async (
           throw new Error('Failed to send verification email. Please try again later.');
         }
 
-        Logger.info(`Resent verification email (ID: ${existingUser.id})`);
+        Logger.info(
+          `Resent verification email (ID: ${existingUser.id}, count: ${
+            previousResendCount + 1
+          })`,
+        );
       }
     } else {
       throw err;

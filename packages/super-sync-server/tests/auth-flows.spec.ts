@@ -8,6 +8,7 @@ import {
   revokeAllTokens,
   replaceToken,
 } from '../src/auth';
+import { sendVerificationEmail } from '../src/email';
 import * as bcrypt from 'bcryptjs';
 
 // Mock email sending to prevent actual emails during tests
@@ -147,6 +148,19 @@ describe('Authentication Flows', () => {
       expect(user.verification_token).toBeDefined();
       expect(user.verification_token!.length).toBe(64); // 32 bytes hex
       expect(user.verification_token_expires_at).toBeDefined();
+      expect(user.terms_accepted_at).toBeDefined();
+    });
+
+    it('should store custom terms acceptance time', async () => {
+      const customTime = 1600000000000;
+      await registerUser('terms@test.com', 'SecurePass123!', customTime);
+
+      const db = getDb();
+      const user = db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .get('terms@test.com') as User;
+
+      expect(user.terms_accepted_at).toBe(customTime);
     });
 
     it('should verify user with valid token', async () => {
@@ -229,6 +243,36 @@ describe('Authentication Flows', () => {
       await expect(loginUser('unverified@test.com', 'SecurePass123!')).rejects.toThrow(
         'Email not verified',
       );
+    });
+
+    it('should resend verification token even after previous resend when token expired', async () => {
+      await registerUser('stuck@test.com', 'SecurePass123!');
+
+      const db = getDb();
+      const user = db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .get('stuck@test.com') as User;
+
+      const expiredToken = 'expired-token';
+      // Simulate prior resend and expiry
+      db.prepare(
+        `
+          UPDATE users
+          SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = 1
+          WHERE email = ?
+        `,
+      ).run(expiredToken, Date.now() - 1000, 'stuck@test.com');
+
+      await registerUser('stuck@test.com', 'AnotherPass123!');
+
+      const updatedUser = db
+        .prepare('SELECT * FROM users WHERE email = ?')
+        .get('stuck@test.com') as User;
+
+      expect(updatedUser.verification_resend_count).toBe(2);
+      expect(updatedUser.verification_token).not.toBe(expiredToken);
+      expect(updatedUser.verification_token_expires_at).toBeGreaterThan(Date.now());
+      expect(vi.mocked(sendVerificationEmail)).toHaveBeenCalledTimes(2);
     });
   });
 

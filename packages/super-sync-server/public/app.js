@@ -29,14 +29,24 @@ registerForm.addEventListener('submit', async (e) => {
   const email = document.getElementById('register-email').value;
   const password = document.getElementById('register-password').value;
   const confirm = document.getElementById('register-confirm').value;
+  const termsAccepted = document.getElementById('register-terms').checked;
 
   if (password !== confirm) {
     showMessage('Passwords do not match', 'error');
     return;
   }
 
+  if (!termsAccepted) {
+    showMessage('You must accept the Terms of Service', 'error');
+    return;
+  }
+
   // Register first
-  const success = await handleAuth('/register', { email, password }, true);
+  const success = await handleAuth(
+    '/register',
+    { email, password, termsAccepted },
+    true,
+  );
 
   // Auto login if registration successful
   if (success) {
