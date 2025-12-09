@@ -130,3 +130,26 @@ export const MAX_BATCH_OPERATIONS_SIZE = 50;
  * Default: 24 hours - enough time for legitimate recovery scenarios
  */
 export const PENDING_OPERATION_EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Threshold for warning about clock drift between client and server (milliseconds).
+ * If the client's clock differs from the server by more than this amount,
+ * a warning is shown to the user as clock drift can affect conflict resolution.
+ * Default: 5 minutes
+ */
+export const CLOCK_DRIFT_THRESHOLD_MS = 5 * 60 * 1000;
+
+/**
+ * Threshold for logging slow compaction operations (milliseconds).
+ * Compaction metrics are only logged when duration exceeds this threshold
+ * to avoid flooding logs during normal operation.
+ * Default: 3 seconds
+ */
+export const SLOW_COMPACTION_THRESHOLD_MS = 3000;
+
+/**
+ * Threshold for warning about large state size during compaction (megabytes).
+ * Large states may cause compaction to be slow or timeout.
+ * Default: 20MB
+ */
+export const STATE_SIZE_WARNING_THRESHOLD_MB = 20;

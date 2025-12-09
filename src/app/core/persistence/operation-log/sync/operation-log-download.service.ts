@@ -20,6 +20,7 @@ import {
   MAX_DOWNLOAD_RETRIES,
   DOWNLOAD_RETRY_BASE_DELAY_MS,
   MAX_DOWNLOAD_OPS_IN_MEMORY,
+  CLOCK_DRIFT_THRESHOLD_MS,
 } from '../operation-log.const';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
@@ -54,6 +55,9 @@ export class OperationLogDownloadService {
   private manifestService = inject(OperationLogManifestService);
   private snackService = inject(SnackService);
   private encryptionService = inject(OperationEncryptionService);
+
+  /** Track if we've already warned about clock drift this session */
+  private hasWarnedClockDrift = false;
 
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -120,6 +124,9 @@ export class OperationLogDownloadService {
           }
           break;
         }
+
+        // Check for clock drift using server's receivedAt timestamp
+        this._checkClockDrift(response.ops[0].receivedAt);
 
         // Filter already applied ops
         let syncOps: SyncOperation[] = response.ops
@@ -330,5 +337,31 @@ export class OperationLogDownloadService {
     }
 
     throw lastError;
+  }
+
+  /**
+   * Checks for significant clock drift between client and server.
+   * Warns user once per session if drift exceeds threshold.
+   */
+  private _checkClockDrift(serverTimestamp: number): void {
+    if (this.hasWarnedClockDrift) {
+      return;
+    }
+
+    const drift = Date.now() - serverTimestamp;
+    const driftMinutes = Math.abs(drift) / 60000;
+
+    if (driftMinutes > CLOCK_DRIFT_THRESHOLD_MS / 60000) {
+      this.hasWarnedClockDrift = true;
+      OpLog.warn('OperationLogDownloadService: Clock drift detected', {
+        driftMinutes: driftMinutes.toFixed(1),
+        direction: drift > 0 ? 'client ahead' : 'client behind',
+      });
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.CLOCK_DRIFT_WARNING,
+        translateParams: { minutes: Math.round(driftMinutes) },
+      });
+    }
   }
 }
