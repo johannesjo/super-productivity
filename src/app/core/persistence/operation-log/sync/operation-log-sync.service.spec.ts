@@ -54,6 +54,7 @@ describe('OperationLogSyncService', () => {
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getEntityFrontier',
       'getSnapshotVectorClock',
+      'getSnapshotEntityKeys',
     ]);
     operationApplierServiceSpy = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
@@ -564,6 +565,195 @@ describe('OperationLogSyncService', () => {
       // This is the correct behavior that should continue to work
       expect(result.nonConflicting.length).toBe(1);
       expect(result.nonConflicting[0].id).toBe('newer-remote-op');
+      expect(result.conflicts.length).toBe(0);
+    });
+  });
+
+  // =========================================================================
+  // New entity after compaction tests (snapshotEntityKeys fix)
+  // =========================================================================
+  // These tests verify the fix for the bug where remote operations for entities
+  // created AFTER compaction were incorrectly dropped as "stale" because the
+  // snapshot clock had high counters from unrelated work.
+
+  describe('new entity after compaction (snapshotEntityKeys)', () => {
+    it('should accept remote op for entity NOT in snapshotEntityKeys (new entity)', async () => {
+      // Scenario: After compaction, snapshot has high clock from unrelated entities.
+      // A remote op arrives for a brand new entity (not in snapshotEntityKeys).
+      // It should be accepted, NOT rejected as stale.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock has high counters from unrelated work
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 100, clientB: 10 }),
+      );
+
+      // Entity was NOT in snapshot (new entity created after compaction)
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set(['TASK:old-task-1', 'TASK:old-task-2'])),
+      );
+
+      // No applied frontier for this new entity
+      const entityFrontier = new Map<string, any>();
+
+      // Remote creates brand new entity with a clock that would be "stale"
+      // if compared against snapshot clock (clientB: 6 < snapshot's clientB: 10)
+      const remoteOp: Operation = {
+        id: 'create-new-task',
+        actionType: '[Task] Add Task',
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: 'new-task-from-clientB', // NOT in snapshotEntityKeys
+        payload: { title: 'New task' },
+        clientId: 'clientB',
+        vectorClock: { clientB: 6 }, // Lower than snapshot's clientB: 10
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([remoteOp], entityFrontier);
+
+      // Should be accepted as non-conflicting, NOT dropped as stale
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('create-new-task');
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should still reject stale op for entity IN snapshotEntityKeys (existing entity)', async () => {
+      // Scenario: Entity existed at snapshot time. Remote sends stale op.
+      // Should use snapshot clock as baseline and correctly reject as stale.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock: clientA was at 10 for this entity
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 10 }),
+      );
+
+      // Entity WAS in snapshot
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set(['TASK:existing-task'])),
+      );
+
+      // No applied frontier (entity not modified since compaction)
+      const entityFrontier = new Map<string, any>();
+
+      // Remote sends STALE op (clientA: 5 < snapshot's clientA: 10)
+      const staleRemoteOp: Operation = {
+        id: 'stale-update',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'existing-task', // IS in snapshotEntityKeys
+        payload: { title: 'Old title' },
+        clientId: 'clientA',
+        vectorClock: { clientA: 5 }, // Older than snapshot
+        timestamp: Date.now() - 10000,
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([staleRemoteOp], entityFrontier);
+
+      // Should be skipped as stale (existing behavior preserved)
+      expect(result.nonConflicting.length).toBe(0);
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should use snapshot clock as fallback when snapshotEntityKeys is undefined (backward compatibility)', async () => {
+      // Scenario: Old snapshot format without snapshotEntityKeys.
+      // Should maintain existing behavior: treat all entities as existing.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      // Snapshot clock has high counters
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 100 }),
+      );
+
+      // No snapshotEntityKeys (old format)
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(undefined),
+      );
+
+      const entityFrontier = new Map<string, any>();
+
+      // Remote op with clock that would be stale against snapshot
+      const remoteOp: Operation = {
+        id: 'some-op',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'some-task',
+        payload: { title: 'Title' },
+        clientId: 'clientA',
+        vectorClock: { clientA: 50 }, // Lower than snapshot's 100
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([remoteOp], entityFrontier);
+
+      // Should be rejected as stale (backward compatible behavior)
+      expect(result.nonConflicting.length).toBe(0);
+      expect(result.conflicts.length).toBe(0);
+    });
+
+    it('should handle mixed scenario: some entities in snapshot, some new', async () => {
+      // Scenario: Two remote ops - one for existing entity, one for new entity.
+      // Only the stale op for existing entity should be rejected.
+
+      // No pending local ops
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 50, clientB: 20 }),
+      );
+
+      // Only old-task existed at snapshot time
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set(['TASK:old-task'])),
+      );
+
+      const entityFrontier = new Map<string, any>();
+
+      // Stale op for existing entity
+      const staleOp: Operation = {
+        id: 'stale-op',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'old-task', // IN snapshotEntityKeys
+        payload: {},
+        clientId: 'clientA',
+        vectorClock: { clientA: 10 }, // Stale: 10 < 50
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // Valid op for new entity
+      const validOp: Operation = {
+        id: 'valid-op',
+        actionType: '[Task] Add Task',
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: 'new-task', // NOT in snapshotEntityKeys
+        payload: {},
+        clientId: 'clientB',
+        vectorClock: { clientB: 15 }, // Would be stale if compared to snapshot (15 < 20)
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const result = await service.detectConflicts([staleOp, validOp], entityFrontier);
+
+      // staleOp should be rejected (for existing entity)
+      // validOp should be accepted (for new entity)
+      expect(result.nonConflicting.length).toBe(1);
+      expect(result.nonConflicting[0].id).toBe('valid-op');
       expect(result.conflicts.length).toBe(0);
     });
   });

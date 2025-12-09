@@ -578,6 +578,10 @@ export class OperationLogSyncService {
     const hasNoSnapshotClock =
       !snapshotVectorClock || Object.keys(snapshotVectorClock).length === 0;
 
+    // Get snapshot entity keys to distinguish entities that existed at compaction time
+    // vs new entities created later. This is critical for correct fallback behavior.
+    const snapshotEntityKeys = await this.vectorClockService.getSnapshotEntityKeys();
+
     for (const remoteOp of remoteOps) {
       const entityIdsToCheck =
         remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
@@ -590,9 +594,17 @@ export class OperationLogSyncService {
         const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
 
         // Build the frontier from everything we know locally (applied + pending)
-        // Use snapshot vector clock as fallback if no per-entity frontier exists
-        // This ensures entities modified before compaction aren't treated as having no history
-        const baselineClock = appliedFrontier || snapshotVectorClock || {};
+        // CRITICAL FIX: Only use snapshot clock for entities that existed at snapshot time.
+        // For new entities (not in snapshotEntityKeys), use empty clock as baseline.
+        // This prevents incorrectly rejecting remote ops for new entities as "stale"
+        // when the snapshot clock has high counters from unrelated work.
+        //
+        // Backward compatibility: if snapshotEntityKeys is undefined (old snapshot format),
+        // treat all entities as existing (use snapshot clock) to maintain existing behavior.
+        const entityExistedAtSnapshot =
+          snapshotEntityKeys === undefined || snapshotEntityKeys.has(entityKey);
+        const fallbackClock = entityExistedAtSnapshot ? snapshotVectorClock : {};
+        const baselineClock = appliedFrontier || fallbackClock || {};
         const allClocks = [
           baselineClock,
           ...localOpsForEntity.map((op) => op.vectorClock),

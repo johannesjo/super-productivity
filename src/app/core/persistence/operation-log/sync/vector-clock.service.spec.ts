@@ -181,6 +181,93 @@ describe('VectorClockService', () => {
     });
   });
 
+  describe('getSnapshotEntityKeys', () => {
+    it('should return undefined when no snapshot exists', async () => {
+      mockStoreService.loadStateCache.and.returnValue(Promise.resolve(null));
+
+      const entityKeys = await service.getSnapshotEntityKeys();
+
+      expect(entityKeys).toBeUndefined();
+    });
+
+    it('should return undefined when snapshot has no snapshotEntityKeys (old format)', async () => {
+      // Old snapshot format without snapshotEntityKeys
+      mockStoreService.loadStateCache.and.returnValue(
+        Promise.resolve({
+          vectorClock: { clientA: 10 },
+          lastAppliedOpSeq: 100,
+          state: {},
+          compactedAt: Date.now(),
+          // No snapshotEntityKeys field
+        }),
+      );
+
+      const entityKeys = await service.getSnapshotEntityKeys();
+
+      expect(entityKeys).toBeUndefined();
+    });
+
+    it('should return Set of entity keys when snapshot has snapshotEntityKeys', async () => {
+      const snapshotEntityKeys = ['TASK:task-1', 'TASK:task-2', 'PROJECT:proj-1'];
+      mockStoreService.loadStateCache.and.returnValue(
+        Promise.resolve({
+          vectorClock: { clientA: 10 },
+          lastAppliedOpSeq: 100,
+          state: {},
+          compactedAt: Date.now(),
+          snapshotEntityKeys,
+        }),
+      );
+
+      const entityKeys = await service.getSnapshotEntityKeys();
+
+      expect(entityKeys).toBeDefined();
+      expect(entityKeys instanceof Set).toBeTrue();
+      expect(entityKeys!.size).toBe(3);
+      expect(entityKeys!.has('TASK:task-1')).toBeTrue();
+      expect(entityKeys!.has('TASK:task-2')).toBeTrue();
+      expect(entityKeys!.has('PROJECT:proj-1')).toBeTrue();
+    });
+
+    it('should return empty Set when snapshotEntityKeys is empty array', async () => {
+      mockStoreService.loadStateCache.and.returnValue(
+        Promise.resolve({
+          vectorClock: { clientA: 10 },
+          lastAppliedOpSeq: 100,
+          state: {},
+          compactedAt: Date.now(),
+          snapshotEntityKeys: [],
+        }),
+      );
+
+      const entityKeys = await service.getSnapshotEntityKeys();
+
+      expect(entityKeys).toBeDefined();
+      expect(entityKeys!.size).toBe(0);
+    });
+
+    it('should allow efficient lookup of entity existence', async () => {
+      const snapshotEntityKeys = ['TASK:task-1', 'TAG:tag-1', 'PROJECT:proj-1'];
+      mockStoreService.loadStateCache.and.returnValue(
+        Promise.resolve({
+          vectorClock: { clientA: 10 },
+          lastAppliedOpSeq: 100,
+          state: {},
+          compactedAt: Date.now(),
+          snapshotEntityKeys,
+        }),
+      );
+
+      const entityKeys = await service.getSnapshotEntityKeys();
+
+      // Entity that existed at snapshot time
+      expect(entityKeys!.has('TASK:task-1')).toBeTrue();
+
+      // Entity that did NOT exist at snapshot time (new entity)
+      expect(entityKeys!.has('TASK:new-task')).toBeFalse();
+    });
+  });
+
   describe('getEntityFrontier', () => {
     it('should return empty map when no operations', async () => {
       mockStoreService.loadStateCache.and.returnValue(Promise.resolve(null));

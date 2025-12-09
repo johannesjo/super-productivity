@@ -85,6 +85,28 @@ export class VectorClockService {
   }
 
   /**
+   * Gets the set of entity keys that existed at snapshot (compaction) time.
+   *
+   * This is critical for conflict detection: when a remote operation arrives
+   * for an entity, we need to know whether that entity existed at snapshot time:
+   * - If YES: use the snapshot vector clock as the baseline for comparison
+   * - If NO: use an empty clock (the entity is new, so any remote op is valid)
+   *
+   * Without this distinction, new entities created on other clients after
+   * compaction could be incorrectly rejected as "stale" because the snapshot
+   * clock contains high counters from unrelated work.
+   *
+   * @returns Set of entity keys, or undefined if snapshot doesn't have this data
+   */
+  async getSnapshotEntityKeys(): Promise<Set<string> | undefined> {
+    const snapshot = await this.opLogStore.loadStateCache();
+    if (!snapshot?.snapshotEntityKeys) {
+      return undefined;
+    }
+    return new Set(snapshot.snapshotEntityKeys);
+  }
+
+  /**
    * Gets the entity frontier - a map of entity keys to their latest vector clocks.
    *
    * The frontier tracks the most recent operation for each entity, enabling

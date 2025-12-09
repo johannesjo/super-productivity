@@ -500,4 +500,172 @@ describe('OperationLogCompactionService', () => {
       expect(mockOpLogStore.deleteOpsWhere).toHaveBeenCalled();
     });
   });
+
+  // =========================================================================
+  // Snapshot entity keys extraction tests
+  // =========================================================================
+  // These tests verify that compaction extracts and stores entity keys from
+  // the state snapshot. This is critical for conflict detection to distinguish
+  // between entities that existed at compaction time vs new entities.
+
+  describe('snapshotEntityKeys extraction', () => {
+    it('should include snapshotEntityKeys in saved state cache', async () => {
+      const stateWithEntities = {
+        task: { ids: ['task-1', 'task-2'], entities: {} },
+        project: { ids: ['proj-1'], entities: {} },
+        tag: { ids: [], entities: {} },
+        note: { ids: ['note-1'], entities: {} },
+        globalConfig: { someConfig: true },
+        planner: { days: [] },
+        reminders: [{ id: 'reminder-1' }],
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithEntities),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toBeDefined();
+      expect(Array.isArray(savedCache.snapshotEntityKeys)).toBeTrue();
+    });
+
+    it('should extract TASK entity keys from state', async () => {
+      const stateWithTasks = {
+        task: { ids: ['task-1', 'task-2', 'task-3'], entities: {} },
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithTasks),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toContain('TASK:task-1');
+      expect(savedCache.snapshotEntityKeys).toContain('TASK:task-2');
+      expect(savedCache.snapshotEntityKeys).toContain('TASK:task-3');
+    });
+
+    it('should extract PROJECT entity keys from state', async () => {
+      const stateWithProjects = {
+        project: { ids: ['proj-a', 'proj-b'], entities: {} },
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithProjects),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toContain('PROJECT:proj-a');
+      expect(savedCache.snapshotEntityKeys).toContain('PROJECT:proj-b');
+    });
+
+    it('should extract TAG entity keys from state', async () => {
+      const stateWithTags = {
+        tag: { ids: ['tag-1'], entities: {} },
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithTags),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toContain('TAG:tag-1');
+    });
+
+    it('should extract REMINDER entity keys from reminders array', async () => {
+      const stateWithReminders = {
+        reminders: [{ id: 'rem-1' }, { id: 'rem-2' }],
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithReminders),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toContain('REMINDER:rem-1');
+      expect(savedCache.snapshotEntityKeys).toContain('REMINDER:rem-2');
+    });
+
+    it('should extract singleton entity keys (GLOBAL_CONFIG, PLANNER, etc)', async () => {
+      const stateWithSingletons = {
+        globalConfig: { someConfig: true },
+        planner: { days: [] },
+        menuTree: { items: [] },
+        timeTracking: { entries: {} },
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithSingletons),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toContain('GLOBAL_CONFIG:GLOBAL_CONFIG');
+      expect(savedCache.snapshotEntityKeys).toContain('PLANNER:PLANNER');
+      expect(savedCache.snapshotEntityKeys).toContain('MENU_TREE:MENU_TREE');
+      expect(savedCache.snapshotEntityKeys).toContain('TIME_TRACKING:TIME_TRACKING');
+    });
+
+    it('should extract archived task entity keys', async () => {
+      const stateWithArchive = {
+        archiveYoung: { task: { ids: ['archived-task-1'], entities: {} } },
+        archiveOld: { task: { ids: ['old-archived-task'], entities: {} } },
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithArchive),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      // Archived tasks should be tracked as TASK entities
+      expect(savedCache.snapshotEntityKeys).toContain('TASK:archived-task-1');
+      expect(savedCache.snapshotEntityKeys).toContain('TASK:old-archived-task');
+    });
+
+    it('should handle empty state gracefully', async () => {
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({} as any),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      expect(savedCache.snapshotEntityKeys).toBeDefined();
+      expect(savedCache.snapshotEntityKeys!.length).toBe(0);
+    });
+
+    it('should handle state with empty ids arrays', async () => {
+      const stateWithEmptyIds = {
+        task: { ids: [], entities: {} },
+        project: { ids: [], entities: {} },
+        reminders: [],
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithEmptyIds),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      // Should have no entity keys (but should not throw)
+      expect(savedCache.snapshotEntityKeys).toBeDefined();
+      const taskKeys = savedCache.snapshotEntityKeys!.filter((k: string) =>
+        k.startsWith('TASK:'),
+      );
+      expect(taskKeys.length).toBe(0);
+    });
+  });
 });

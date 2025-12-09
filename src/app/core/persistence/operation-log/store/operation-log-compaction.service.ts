@@ -12,6 +12,8 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { VectorClockService } from '../sync/vector-clock.service';
 import { OpLog } from '../../../log';
+import { PfapiAllModelCfg } from '../../../../pfapi/pfapi-config';
+import { AllSyncModels } from '../../../../pfapi/api/pfapi.model';
 
 /**
  * Manages the compaction (garbage collection) of the operation log.
@@ -80,21 +82,27 @@ export class OperationLogCompactionService {
       // This ensures new ops written after this point have seq > lastSeq
       const lastSeq = await this.opLogStore.getLastSeq();
 
-      // 4. Write to state cache with schema version
+      // 4. Extract entity keys for conflict detection after compaction
+      // This allows us to distinguish between entities that existed at snapshot time
+      // vs new entities created later - critical for correct vector clock comparison
+      const snapshotEntityKeys = this._extractEntityKeysFromState(currentState);
+
+      // 5. Write to state cache with schema version and entity keys
       await this.opLogStore.saveStateCache({
         state: currentState,
         lastAppliedOpSeq: lastSeq,
         vectorClock: currentVectorClock,
         compactedAt: Date.now(),
         schemaVersion: CURRENT_SCHEMA_VERSION,
+        snapshotEntityKeys,
       });
 
       // After snapshot is saved, new operations with seq > lastSeq won't be deleted
 
-      // 5. Reset compaction counter (persistent across tabs/restarts)
+      // 6. Reset compaction counter (persistent across tabs/restarts)
       await this.opLogStore.resetCompactionCounter();
 
-      // 6. Delete old operations (keep recent for conflict resolution window)
+      // 7. Delete old operations (keep recent for conflict resolution window)
       // Only delete ops that have been synced to remote
       const cutoff = Date.now() - retentionMs;
 
@@ -131,5 +139,87 @@ export class OperationLogCompactionService {
           `Consider reducing state size or increasing timeout.`,
       );
     }
+  }
+
+  /**
+   * Extracts all entity keys from the state snapshot.
+   * Used for conflict detection to distinguish between entities that existed
+   * at snapshot time vs new entities created later on other clients.
+   *
+   * Format: "ENTITY_TYPE:entityId" (e.g., "TASK:abc123", "PROJECT:xyz789")
+   */
+  private _extractEntityKeysFromState(state: AllSyncModels<PfapiAllModelCfg>): string[] {
+    const keys: string[] = [];
+
+    // Entity adapter states (have ids array)
+    const entityStates: Array<{
+      key: string;
+      state: { ids?: (string | number)[] } | undefined;
+    }> = [
+      { key: 'TASK', state: state.task },
+      { key: 'PROJECT', state: state.project },
+      { key: 'TAG', state: state.tag },
+      { key: 'NOTE', state: state.note },
+      { key: 'ISSUE_PROVIDER', state: state.issueProvider },
+      { key: 'SIMPLE_COUNTER', state: state.simpleCounter },
+      { key: 'TASK_REPEAT_CFG', state: state.taskRepeatCfg },
+      { key: 'METRIC', state: state.metric },
+    ];
+
+    for (const { key, state: entityState } of entityStates) {
+      if (entityState?.ids) {
+        for (const id of entityState.ids) {
+          keys.push(`${key}:${id}`);
+        }
+      }
+    }
+
+    // Reminders are an array, not an entity adapter state
+    if (Array.isArray(state.reminders)) {
+      for (const reminder of state.reminders) {
+        if (reminder?.id) {
+          keys.push(`REMINDER:${reminder.id}`);
+        }
+      }
+    }
+
+    // Boards have a different structure: { boardCfgs: BoardCfg[] }
+    if (state.boards?.boardCfgs && Array.isArray(state.boards.boardCfgs)) {
+      for (const board of state.boards.boardCfgs) {
+        if (board?.id) {
+          keys.push(`BOARD:${board.id}`);
+        }
+      }
+    }
+
+    // Singleton states (single entity with fixed ID)
+    // These always exist and are identified by their type
+    if (state.globalConfig) {
+      keys.push('GLOBAL_CONFIG:GLOBAL_CONFIG');
+    }
+    if (state.planner) {
+      keys.push('PLANNER:PLANNER');
+    }
+    if (state.menuTree) {
+      keys.push('MENU_TREE:MENU_TREE');
+    }
+    if (state.timeTracking) {
+      keys.push('TIME_TRACKING:TIME_TRACKING');
+    }
+
+    // Archive entities (nested task states)
+    // These share the TASK entity type since archived tasks are still tasks
+    if (state.archiveYoung?.task?.ids) {
+      for (const id of state.archiveYoung.task.ids) {
+        keys.push(`TASK:${id}`);
+      }
+    }
+    if (state.archiveOld?.task?.ids) {
+      for (const id of state.archiveOld.task.ids) {
+        keys.push(`TASK:${id}`);
+      }
+    }
+
+    return keys;
   }
 }

@@ -25,6 +25,7 @@ interface OpLogDB extends DBSchema {
       compactedAt: number;
       schemaVersion?: number;
       compactionCounter?: number; // Tracks ops since last compaction (persistent)
+      snapshotEntityKeys?: string[]; // Entity keys that existed at compaction time
     };
   };
 }
@@ -333,6 +334,7 @@ export class OperationLogStoreService {
     vectorClock: VectorClock;
     compactedAt: number;
     schemaVersion?: number;
+    snapshotEntityKeys?: string[];
   }): Promise<void> {
     await this._ensureInit();
     await this.db.put('state_cache', {
@@ -347,6 +349,7 @@ export class OperationLogStoreService {
     vectorClock: VectorClock;
     compactedAt: number;
     schemaVersion?: number;
+    snapshotEntityKeys?: string[];
   } | null> {
     await this._ensureInit();
     const cache = await this.db.get('state_cache', 'current');
@@ -388,6 +391,7 @@ export class OperationLogStoreService {
     vectorClock: VectorClock;
     compactedAt: number;
     schemaVersion?: number;
+    snapshotEntityKeys?: string[];
   } | null> {
     await this._ensureInit();
     const backup = await this.db.get('state_cache', 'backup');
