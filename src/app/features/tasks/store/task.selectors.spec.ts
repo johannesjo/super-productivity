@@ -283,6 +283,173 @@ describe('Task Selectors', () => {
       const result = fromSelectors.selectAllTasksDueAndOverdue(mockState);
       expect(result.length).toBe(2); // task3 (due today) and task6 (overdue)
     });
+
+    it('should select undone overdue tasks', () => {
+      const result = fromSelectors.selectUndoneOverdue(mockState);
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('task6');
+    });
+
+    it('selectOverdueTasksWithSubTasks should include overdue tasks regardless of TODAY_TAG.taskIds', () => {
+      // This tests the virtual TODAY_TAG architecture:
+      // Overdue tasks (dueDay < today) should ALWAYS be shown, even if their ID
+      // is in TODAY_TAG.taskIds (which may contain stale data)
+      const stateWithOverdueInTodayTag = {
+        ...mockState,
+        [TAG_FEATURE_NAME]: {
+          ids: [TODAY_TAG.id],
+          entities: {
+            [TODAY_TAG.id]: {
+              id: TODAY_TAG.id,
+              title: 'Today',
+              // task6 is overdue but its ID is in TODAY_TAG.taskIds (stale data)
+              taskIds: ['task2', 'task6'],
+              isHiddenFromMenu: false,
+            },
+          },
+        },
+      };
+
+      const result = fromSelectors.selectOverdueTasksWithSubTasks(
+        stateWithOverdueInTodayTag,
+      );
+      // task6 should still be shown as overdue
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('task6');
+    });
+
+    it('selectOverdueTasksWithSubTasks should exclude done tasks', () => {
+      const doneOverdueTask: Task = {
+        id: 'doneOverdue',
+        title: 'Done Overdue',
+        created: Date.now(),
+        isDone: true, // Done
+        subTaskIds: [],
+        tagIds: [],
+        projectId: 'project1',
+        timeSpentOnDay: {},
+        dueDay: yesterday, // Overdue
+        timeEstimate: 0,
+        timeSpent: 0,
+        attachments: [],
+      };
+
+      const stateWithDoneOverdue = {
+        ...mockState,
+        [TASK_FEATURE_NAME]: {
+          ...mockTaskState,
+          ids: [...mockTaskState.ids, 'doneOverdue'],
+          entities: {
+            ...mockTaskState.entities,
+            doneOverdue: doneOverdueTask,
+          },
+        },
+      };
+
+      const result = fromSelectors.selectOverdueTasksWithSubTasks(stateWithDoneOverdue);
+      // Only task6 (undone overdue) should be shown
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe('task6');
+    });
+
+    it('selectOverdueTasksWithSubTasks should not show subtasks if parent is also overdue', () => {
+      const overdueParent: Task = {
+        id: 'overdueParent',
+        title: 'Overdue Parent',
+        created: Date.now(),
+        isDone: false,
+        subTaskIds: ['overdueSubtask'],
+        tagIds: [],
+        projectId: 'project1',
+        timeSpentOnDay: {},
+        dueDay: yesterday,
+        timeEstimate: 0,
+        timeSpent: 0,
+        attachments: [],
+      };
+
+      const overdueSubtask: Task = {
+        id: 'overdueSubtask',
+        title: 'Overdue Subtask',
+        created: Date.now(),
+        isDone: false,
+        subTaskIds: [],
+        tagIds: [],
+        projectId: 'project1',
+        parentId: 'overdueParent',
+        timeSpentOnDay: {},
+        dueDay: yesterday,
+        timeEstimate: 0,
+        timeSpent: 0,
+        attachments: [],
+      };
+
+      const stateWithOverdueHierarchy = {
+        ...mockState,
+        [TASK_FEATURE_NAME]: {
+          ...mockTaskState,
+          ids: [...mockTaskState.ids, 'overdueParent', 'overdueSubtask'],
+          entities: {
+            ...mockTaskState.entities,
+            overdueParent,
+            overdueSubtask,
+          },
+        },
+      };
+
+      const result = fromSelectors.selectOverdueTasksWithSubTasks(
+        stateWithOverdueHierarchy,
+      );
+      // Should show task6 and overdueParent (with subtask mapped), but NOT overdueSubtask as top-level
+      const ids = result.map((t) => t.id);
+      expect(ids).toContain('task6');
+      expect(ids).toContain('overdueParent');
+      expect(ids).not.toContain('overdueSubtask');
+      // overdueParent should have its subtask mapped
+      const parent = result.find((t) => t.id === 'overdueParent');
+      expect(parent?.subTasks.length).toBe(1);
+      expect(parent?.subTasks[0].id).toBe('overdueSubtask');
+    });
+
+    it('selectOverdueTasksWithSubTasks should sort by due date chronologically', () => {
+      const twoDaysMs = 2 * 86400000;
+      const twoDaysAgo = getDbDateStr(new Date(Date.now() - twoDaysMs));
+
+      const olderOverdue: Task = {
+        id: 'olderOverdue',
+        title: 'Older Overdue',
+        created: Date.now(),
+        isDone: false,
+        subTaskIds: [],
+        tagIds: [],
+        projectId: 'project1',
+        timeSpentOnDay: {},
+        dueDay: twoDaysAgo, // Older than task6 (yesterday)
+        timeEstimate: 0,
+        timeSpent: 0,
+        attachments: [],
+      };
+
+      const stateWithMultipleOverdue = {
+        ...mockState,
+        [TASK_FEATURE_NAME]: {
+          ...mockTaskState,
+          ids: [...mockTaskState.ids, 'olderOverdue'],
+          entities: {
+            ...mockTaskState.entities,
+            olderOverdue,
+          },
+        },
+      };
+
+      const result = fromSelectors.selectOverdueTasksWithSubTasks(
+        stateWithMultipleOverdue,
+      );
+      expect(result.length).toBe(2);
+      // Older overdue should come first (chronological order)
+      expect(result[0].id).toBe('olderOverdue');
+      expect(result[1].id).toBe('task6');
+    });
   });
 
   // Due date and time selectors

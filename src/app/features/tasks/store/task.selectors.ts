@@ -172,21 +172,19 @@ export const selectOverdueTasksOnToday = createSelector(
   },
 );
 
+// Note: With the virtual TODAY_TAG architecture, overdue tasks (dueDay < today)
+// can never be on today's list (dueDay === today), so we don't filter by TODAY_TAG.taskIds.
+// We only filter out subtasks whose parent is also overdue (to avoid duplicates).
 export const selectOverdueTasksWithSubTasks = createSelector(
   selectOverdueTasks,
   selectTaskFeatureState,
-  selectTagFeatureState,
-  (overdueTasks, taskState, tagState): TaskWithSubTasks[] => {
+  (overdueTasks, taskState): TaskWithSubTasks[] => {
     const overdueIdSet = new Set(overdueTasks.map((task) => task.id));
-    const todayTag = tagState.entities[TODAY_TAG.id]!;
-    const todayTaskIdSet = new Set(todayTag.taskIds);
     return overdueTasks
       .filter(
         (task) =>
-          (!task.parentId ||
-            (!overdueIdSet.has(task.parentId) && !todayTaskIdSet.has(task.parentId))) &&
-          !task.isDone &&
-          !todayTaskIdSet.has(task.id),
+          // Only show top-level tasks, or subtasks whose parent is not overdue
+          (!task.parentId || !overdueIdSet.has(task.parentId)) && !task.isDone,
       )
       .map((task) => {
         return mapSubTasksToTask(task as Task, taskState) as TaskWithSubTasks;
