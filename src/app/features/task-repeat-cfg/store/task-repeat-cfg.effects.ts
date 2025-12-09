@@ -25,6 +25,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isToday } from '../../../util/is-today.util';
@@ -63,9 +64,12 @@ export class TaskRepeatCfgEffects {
               devError(`Task with id ${taskId} not found`);
               return null; // Return null instead of EMPTY
             }
+            // Use dateStrToUtcDate for date strings to avoid UTC parsing issues (fixes #5515)
+            // new Date(dateString) parses as UTC midnight which can shift the local date
             const targetDayTimestamp =
-              (taskRepeatCfg.startDate && new Date(taskRepeatCfg.startDate).getTime()) ||
-              (task.dueDay && new Date(task.dueDay).getTime()) ||
+              (taskRepeatCfg.startDate &&
+                dateStrToUtcDate(taskRepeatCfg.startDate).getTime()) ||
+              (task.dueDay && dateStrToUtcDate(task.dueDay).getTime()) ||
               task.dueWithTime ||
               Date.now();
             const dateTime = getDateTimeFromClockString(

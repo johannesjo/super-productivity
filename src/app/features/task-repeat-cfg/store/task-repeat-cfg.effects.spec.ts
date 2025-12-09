@@ -18,6 +18,7 @@ import { DEFAULT_TASK_REPEAT_CFG, TaskRepeatCfgCopy } from '../task-repeat-cfg.m
 import { addSubTask } from '../../tasks/store/task.actions';
 import { TestScheduler } from 'rxjs/testing';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
@@ -538,9 +539,10 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         taskService.getByIdOnce$.and.returnValue(of(taskWithDifferentDue));
 
+        // Use dateStrToUtcDate to match the fix in the effects file (issue #5515)
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
-          new Date(startDateStr).getTime(),
+          dateStrToUtcDate(startDateStr).getTime(),
         );
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
@@ -580,13 +582,64 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
 
+        // Use dateStrToUtcDate to match the fix in the effects file (issue #5515)
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
-          new Date(dueDayStr).getTime(),
+          dateStrToUtcDate(dueDayStr).getTime(),
         );
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
           task: taskWithDueDay,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should use dateStrToUtcDate to avoid UTC parsing issues (issue #5515)', () => {
+      // This test verifies that date string parsing uses local midnight, not UTC midnight
+      // In far-west timezones (e.g., Hawaii UTC-10), new Date('2025-01-15') would give
+      // Jan 14th local date, but dateStrToUtcDate correctly gives Jan 15th local date
+      testScheduler.run(({ hot, expectObservable }) => {
+        const dateStr = '2025-01-15';
+        const startTimeStr = '14:45'; // 2:45 PM - user's reported time
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: { ...mockRepeatCfg, startDate: dateStr },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+
+        // Verify dateStrToUtcDate gives correct local date
+        const localDate = dateStrToUtcDate(dateStr);
+        expect(localDate.getDate()).toBe(15);
+        expect(localDate.getMonth()).toBe(0); // January
+        expect(localDate.getFullYear()).toBe(2025);
+
+        // The scheduled time should be 14:45 on Jan 15th local time
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          localDate.getTime(),
+        );
+        const scheduledDate = new Date(expectedDateTime);
+        expect(scheduledDate.getHours()).toBe(14);
+        expect(scheduledDate.getMinutes()).toBe(45);
+        expect(scheduledDate.getDate()).toBe(15);
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: mockTask,
           dueWithTime: expectedDateTime,
           remindAt: remindOptionToMilliseconds(
             expectedDateTime,
