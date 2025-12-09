@@ -1,3 +1,21 @@
+## [16.5.5](https://github.com/johannesjo/super-productivity/compare/v16.5.4...v16.5.5) (2025-12-09)
+
+### Bug Fixes
+
+- **docs:** remove broken CalDAV documentation link ([#5577](https://github.com/johannesjo/super-productivity/issues/5577)) ([2fa6754](https://github.com/johannesjo/super-productivity/commit/2fa675496381b76b689fa280ec0507586e241b46))
+- **locale:** default first day of week to Monday (ISO 8601) ([e825894](https://github.com/johannesjo/super-productivity/commit/e8258940cbbfffd78f774e0143a34bd00186dd61))
+- **mobile:** start page setting not applied on Android ([#5689](https://github.com/johannesjo/super-productivity/issues/5689)) ([99a158b](https://github.com/johannesjo/super-productivity/commit/99a158bacb5d26ad634076de080d3623c47c4c8f))
+- **repeat:** preserve startDate when changing quick settings (fixes [#5594](https://github.com/johannesjo/super-productivity/issues/5594)) ([eef71b9](https://github.com/johannesjo/super-productivity/commit/eef71b94117323897452f1ab3bfef850dab2bdcb))
+- **schedule:** respect default reminder setting when drag-scheduling tasks (fixes [#5599](https://github.com/johannesjo/super-productivity/issues/5599)) ([58245c4](https://github.com/johannesjo/super-productivity/commit/58245c42b04de92822a77cadb0bbb87fa78028c6))
+- **test:** add proper waits to app-features E2E test to prevent flakiness ([e3d93de](https://github.com/johannesjo/super-productivity/commit/e3d93de7fc4e11c6e5388cbed056b8a54f605aa5))
+- **test:** mock Date.now() in scheduling tests to avoid midnight failures (fixes [#5609](https://github.com/johannesjo/super-productivity/issues/5609)) ([10d857d](https://github.com/johannesjo/super-productivity/commit/10d857db1d04be1b993b8b8055512d0b46200cd0))
+- **timezone:** correct dueWithTime handling to prevent timezone corruption (fixes [#5515](https://github.com/johannesjo/super-productivity/issues/5515)) ([a9c1e41](https://github.com/johannesjo/super-productivity/commit/a9c1e411ebaa88bca5904ec6e9b5c05e7e8d63c6))
+- translation file ([534095b](https://github.com/johannesjo/super-productivity/commit/534095b5dce9d78d446575dd31881af907b3094a))
+
+### Features
+
+- **calendar:** improve handling of all-day events from iCal ([26723bf](https://github.com/johannesjo/super-productivity/commit/26723bfa6d6e8db4d59592267c6c1b0694d71a35)), closes [#5675](https://github.com/johannesjo/super-productivity/issues/5675)
+
 ## [16.5.4](https://github.com/johannesjo/super-productivity/compare/v16.5.3...v16.5.4) (2025-12-07)
 
 ### Bug Fixes
