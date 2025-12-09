@@ -52,6 +52,7 @@ export class DialogSyncInitialCfgComponent {
     encryptKey: '',
     localFileSync: {},
     webDav: {},
+    superSync: {},
   };
 
   private _matDialogRef =

@@ -141,7 +141,6 @@ export class SyncConfigService {
   }
 
   async updateSettingsFromForm(newSettings: SyncConfig, isForce = false): Promise<void> {
-    console.log('DEBUG: updateSettingsFromForm', JSON.stringify(newSettings, null, 2));
     // Formly can trigger multiple updates for a single user action, causing sync conflicts
     // and unnecessary API calls. This check prevents duplicate saves.
     const isEqual = JSON.stringify(this._lastSettings) === JSON.stringify(newSettings);
@@ -163,8 +162,17 @@ export class SyncConfigService {
 
     // For SuperSync, propagate provider-specific encryption setting to global config
     // This ensures pfapi.service.ts sees isEncryptionEnabled=true when SuperSync encryption is enabled
-    if (providerId === SyncProviderId.SuperSync && superSync?.isEncryptionEnabled) {
-      globalConfig.isEncryptionEnabled = true;
+    // Note: We need to check the SAVED private config because Formly doesn't include hidden fields
+    if (providerId === SyncProviderId.SuperSync) {
+      const activeProvider = await this._pfapiService.pf.getSyncProviderById(providerId);
+      const savedPrivateCfg = activeProvider
+        ? await activeProvider.privateCfg.load()
+        : null;
+      const isEncryptionEnabled =
+        superSync?.isEncryptionEnabled ?? savedPrivateCfg?.isEncryptionEnabled ?? false;
+      if (isEncryptionEnabled) {
+        globalConfig.isEncryptionEnabled = true;
+      }
     }
 
     this._globalConfigService.updateSection('sync', globalConfig);

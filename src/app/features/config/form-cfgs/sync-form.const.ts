@@ -158,12 +158,14 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     },
 
     // SuperSync provider form fields
+    // NOTE: We use hideExpression on individual fields instead of the fieldGroup
+    // because Formly doesn't include values from hidden fieldGroups in the model output
     {
-      hideExpression: (m, v, field) =>
-        field?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
       key: 'superSync',
       fieldGroup: [
         {
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
@@ -174,6 +176,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           type: 'btn',
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
@@ -191,6 +195,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           key: 'accessToken',
           type: 'textarea',
           className: 'e2e-accessToken',
@@ -203,6 +209,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         },
         // E2E Encryption for SuperSync
         {
+          hideExpression: (m, v, field) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
           key: 'isEncryptionEnabled',
           type: 'checkbox',
           className: 'e2e-isEncryptionEnabled',
@@ -211,7 +219,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          hideExpression: (model: any, v: any, field: any) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync ||
+            !model.isEncryptionEnabled,
           type: 'tpl',
           className: 'tpl warn-text',
           templateOptions: {
@@ -220,7 +230,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          hideExpression: (model: any, v: any, field: any) =>
+            field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync ||
+            !model.isEncryptionEnabled,
           key: 'encryptKey',
           type: 'input',
           className: 'e2e-encryptKey',
