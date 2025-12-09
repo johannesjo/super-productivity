@@ -108,6 +108,10 @@ export interface WebDavConfig {
 
 export interface SuperSyncConfig extends WebDavConfig {
   accessToken?: string | null;
+  /** Whether E2E encryption is enabled (SuperSync-specific setting) */
+  isEncryptionEnabled?: boolean;
+  /** Encryption password (SuperSync-specific, stored in private config) */
+  encryptKey?: string | null;
 }
 
 export interface LocalFileSyncConfig {

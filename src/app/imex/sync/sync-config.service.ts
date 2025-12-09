@@ -20,7 +20,10 @@ const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
 
 // Ensures all required fields have empty string defaults to prevent undefined/null errors
 // when providers expect string values (e.g., WebDAV API calls fail with undefined URLs)
-const PROVIDER_FIELD_DEFAULTS: Record<SyncProviderId, Record<string, string>> = {
+const PROVIDER_FIELD_DEFAULTS: Record<
+  SyncProviderId,
+  Record<string, string | boolean>
+> = {
   [SyncProviderId.WebDAV]: {
     baseUrl: '',
     userName: '',
@@ -35,6 +38,7 @@ const PROVIDER_FIELD_DEFAULTS: Record<SyncProviderId, Record<string, string>> = 
     accessToken: '',
     syncFolderPath: '',
     encryptKey: '',
+    isEncryptionEnabled: false,
   },
   [SyncProviderId.LocalFile]: {
     syncFolderPath: '',
@@ -137,6 +141,7 @@ export class SyncConfigService {
   }
 
   async updateSettingsFromForm(newSettings: SyncConfig, isForce = false): Promise<void> {
+    console.log('DEBUG: updateSettingsFromForm', JSON.stringify(newSettings, null, 2));
     // Formly can trigger multiple updates for a single user action, causing sync conflicts
     // and unnecessary API calls. This check prevents duplicate saves.
     const isEqual = JSON.stringify(this._lastSettings) === JSON.stringify(newSettings);
@@ -154,6 +159,12 @@ export class SyncConfigService {
     // Provider-specific settings (URLs, credentials) must be stored securely
     if (providerId) {
       await this._updatePrivateConfig(providerId, newSettings);
+    }
+
+    // For SuperSync, propagate provider-specific encryption setting to global config
+    // This ensures pfapi.service.ts sees isEncryptionEnabled=true when SuperSync encryption is enabled
+    if (providerId === SyncProviderId.SuperSync && superSync?.isEncryptionEnabled) {
+      globalConfig.isEncryptionEnabled = true;
     }
 
     this._globalConfigService.updateSection('sync', globalConfig);
