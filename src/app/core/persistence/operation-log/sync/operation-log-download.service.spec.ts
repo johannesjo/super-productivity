@@ -13,6 +13,9 @@ import {
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { OpType, OperationLogEntry } from '../operation.types';
+import { CLOCK_DRIFT_THRESHOLD_MS } from '../operation-log.const';
+import { T } from '../../../../t.const';
+import { OpLog } from '../../../log';
 
 describe('OperationLogDownloadService', () => {
   let service: OperationLogDownloadService;
@@ -31,6 +34,9 @@ describe('OperationLogDownloadService', () => {
       'uploadRemoteManifest',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
+
+    // Mock OpLog
+    spyOn(OpLog, 'warn');
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -92,6 +98,122 @@ describe('OperationLogDownloadService', () => {
         await service.downloadRemoteOps(mockApiProvider);
 
         expect(mockApiProvider.downloadOps).toHaveBeenCalled();
+      });
+
+      it('should detect and warn about clock drift', async () => {
+        const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
+        const serverTime = Date.now() - driftMs;
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: serverTime,
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: Date.now(),
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+          }),
+        );
+
+        await service.downloadRemoteOps(mockApiProvider);
+
+        expect(OpLog.warn).toHaveBeenCalledWith(
+          'OperationLogDownloadService: Clock drift detected',
+          jasmine.objectContaining({
+            driftMinutes: jasmine.any(String),
+            direction: 'client ahead',
+          }),
+        );
+        expect(mockSnackService.open).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.CLOCK_DRIFT_WARNING,
+          }),
+        );
+      });
+
+      it('should not warn about clock drift if within threshold', async () => {
+        const smallDriftMs = CLOCK_DRIFT_THRESHOLD_MS - 60000; // Threshold - 1 min
+        const serverTime = Date.now() - smallDriftMs;
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: serverTime,
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: Date.now(),
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+          }),
+        );
+
+        await service.downloadRemoteOps(mockApiProvider);
+
+        expect(OpLog.warn).not.toHaveBeenCalled();
+        expect(mockSnackService.open).not.toHaveBeenCalled();
+      });
+
+      it('should only warn about clock drift once per session', async () => {
+        const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
+        const serverTime = Date.now() - driftMs;
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: serverTime,
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: Date.now(),
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+          }),
+        );
+
+        // First call - should warn
+        await service.downloadRemoteOps(mockApiProvider);
+        expect(OpLog.warn).toHaveBeenCalledTimes(1);
+
+        // Second call - should NOT warn again
+        await service.downloadRemoteOps(mockApiProvider);
+        expect(OpLog.warn).toHaveBeenCalledTimes(1);
       });
 
       it('should acquire lock before downloading', async () => {

@@ -4,9 +4,14 @@ import { OperationLogStoreService } from './operation-log-store.service';
 import { LockService } from '../sync/lock.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { COMPACTION_RETENTION_MS } from '../operation-log.const';
+import {
+  COMPACTION_RETENTION_MS,
+  SLOW_COMPACTION_THRESHOLD_MS,
+  STATE_SIZE_WARNING_THRESHOLD_MB,
+} from '../operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { OperationLogEntry } from '../operation.types';
+import { OpLog } from '../../../log';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -39,6 +44,10 @@ describe('OperationLogCompactionService', () => {
     mockVectorClockService = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
     ]);
+
+    // Mock OpLog methods
+    spyOn(OpLog, 'warn');
+    spyOn(OpLog, 'normal');
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -84,6 +93,69 @@ describe('OperationLogCompactionService', () => {
       await service.compact();
 
       expect(mockStoreDelegate.getAllSyncModelDataFromStore).toHaveBeenCalled();
+    });
+
+    it('should warn if state size exceeds threshold', async () => {
+      // Create a large state (threshold in MB, plus extra bytes)
+      const thresholdBytes = STATE_SIZE_WARNING_THRESHOLD_MB * 1024 * 1024;
+      const largeState = {
+        data: 'x'.repeat(thresholdBytes + 100),
+      };
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(largeState as any),
+      );
+
+      await service.compact();
+
+      expect(OpLog.warn).toHaveBeenCalledWith(
+        'OperationLogCompactionService: Large state for compaction',
+        jasmine.objectContaining({
+          stateSizeMB: jasmine.any(String),
+        }),
+      );
+    });
+
+    it('should not warn if state size is within threshold', async () => {
+      // Create a small state
+      const smallState = { data: 'x' };
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(smallState as any),
+      );
+
+      await service.compact();
+
+      expect(OpLog.warn).not.toHaveBeenCalled();
+    });
+
+    it(
+      'should log metrics if compaction is slow',
+      async () => {
+        // Mock one of the async operations to take longer than threshold
+        mockOpLogStore.saveStateCache.and.callFake(async () => {
+          await new Promise((resolve) =>
+            setTimeout(resolve, SLOW_COMPACTION_THRESHOLD_MS + 100),
+          );
+        });
+
+        await service.compact();
+
+        expect(OpLog.normal).toHaveBeenCalledWith(
+          'OperationLogCompactionService: Compaction completed',
+          jasmine.objectContaining({
+            durationMs: jasmine.any(Number),
+            isEmergency: false,
+          }),
+        );
+        const args = (OpLog.normal as jasmine.Spy).calls.mostRecent().args;
+        expect(args[1].durationMs).toBeGreaterThan(SLOW_COMPACTION_THRESHOLD_MS);
+      },
+      SLOW_COMPACTION_THRESHOLD_MS + 2000,
+    );
+
+    it('should not log metrics if compaction is fast', async () => {
+      await service.compact();
+
+      expect(OpLog.normal).not.toHaveBeenCalled();
     });
 
     it('should get current vector clock', async () => {
@@ -327,6 +399,17 @@ describe('OperationLogCompactionService', () => {
     it('should return true on successful compaction', async () => {
       const result = await service.emergencyCompact();
       expect(result).toBeTrue();
+    });
+
+    it('should log metrics (including isEmergency: true) for emergency compaction', async () => {
+      await service.emergencyCompact();
+
+      expect(OpLog.normal).toHaveBeenCalledWith(
+        'OperationLogCompactionService: Compaction completed',
+        jasmine.objectContaining({
+          isEmergency: true,
+        }),
+      );
     });
 
     it('should return false when compaction fails', async () => {
