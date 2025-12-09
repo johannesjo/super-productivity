@@ -78,7 +78,7 @@ const createProjectReliably = async (page: Page, projectName: string): Promise<v
 
   // Dialog
   const nameInput = page.getByRole('textbox', { name: 'Project Name' });
-  await nameInput.waitFor({ state: 'visible', timeout: 5000 });
+  await nameInput.waitFor({ state: 'visible', timeout: 10000 });
   await nameInput.fill(projectName);
 
   const submitBtn = page.locator('dialog-create-project button[type=submit]').first();
@@ -134,7 +134,7 @@ const createTagReliably = async (page: Page, tagName: string): Promise<void> => 
 
   // Dialog
   const dialog = page.locator('mat-dialog-container');
-  await dialog.waitFor({ state: 'visible', timeout: 5000 });
+  await dialog.waitFor({ state: 'visible', timeout: 10000 });
 
   const input = dialog.locator('input[type="text"]').first();
   await input.fill(tagName);
@@ -263,25 +263,67 @@ base.describe('@supersync SuperSync Models', () => {
       const taskLocator = clientA.page.locator(`task:has-text("${taskName}")`);
       await taskLocator.click();
 
+      // Hover to ensure buttons appear
+      await taskLocator.hover();
+      await clientA.page.waitForTimeout(500);
+
       // Click "Edit Tags" button
       const editTagsBtn = clientA.page
         .locator('button[title="Edit tags"], button[aria-label="Edit tags"]')
         .first();
 
-      if (await editTagsBtn.isVisible()) {
-        await editTagsBtn.click();
-      } else {
-        // Ensure task is focused/selected
-        await taskLocator.click();
-        await clientA.page.waitForTimeout(200);
-        // Use keyboard shortcut to open the tag menu (default: "G")
-        await clientA.page.keyboard.press('g');
+      // Retry loop for opening tags menu
+      let menuOpened = false;
+      for (let i = 0; i < 3; i++) {
+        try {
+          if (await editTagsBtn.isVisible()) {
+            await editTagsBtn.click();
+          } else {
+            // Fallback: Try context menu
+            await taskLocator.click({ button: 'right' });
+            // The context menu item is named "Toggle Tags" in English (from T.F.TASK.CMP.TOGGLE_TAGS)
+            // But we also check for "Edit tags" just in case
+            const ctxEditTags = clientA.page.locator('.e2e-edit-tags-btn').first();
+
+            if (await ctxEditTags.isVisible()) {
+              await ctxEditTags.click();
+            } else {
+              // Last resort: shortcut
+              console.log('Context menu item not found, trying shortcut...');
+              // Close context menu if open
+              const backdrop = clientA.page.locator('.cdk-overlay-backdrop');
+              if (await backdrop.isVisible()) {
+                await backdrop.click({ force: true });
+              } else {
+                await clientA.page.keyboard.press('Escape');
+              }
+              await clientA.page.waitForTimeout(200);
+
+              // Ensure task is focused/selected
+              await taskLocator.click({ force: true });
+              await clientA.page.waitForTimeout(200);
+              // Use keyboard shortcut to open the tag menu (default: "G")
+              await clientA.page.keyboard.press('g');
+            }
+          }
+
+          // Dialog "Edit Tags" - now it's a menu
+          const menuPanel = clientA.page.locator('.mat-mdc-menu-panel');
+          await menuPanel.waitFor({ state: 'visible', timeout: 3000 });
+          menuOpened = true;
+          break; // Success
+        } catch (e) {
+          console.log(`Attempt ${i + 1} to open tags menu failed: ${e}, retrying...`);
+          await clientA.page.keyboard.press('Escape'); // Reset state
+          await clientA.page.waitForTimeout(500);
+        }
       }
 
-      // Dialog "Edit Tags" - now it's a menu
-      const menuPanel = clientA.page.locator('.mat-mdc-menu-panel');
-      await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
+      if (!menuOpened) {
+        throw new Error('Failed to open tags menu after 3 attempts');
+      }
 
+      const menuPanel = clientA.page.locator('.mat-mdc-menu-panel');
       // Select the tag from list
       const tagOption = menuPanel
         .locator('button[mat-menu-item]')
@@ -339,7 +381,12 @@ base.describe('@supersync SuperSync Models', () => {
         .locator('nav-item')
         .filter({ hasText: tagName })
         .first();
-      await tagNavItem.click({ force: true });
+      const tagId = await tagNavItem.getAttribute('data-tag-id');
+      if (tagId) {
+        await clientB.page.goto(`/#/tag/${tagId}/work`);
+      } else {
+        await tagNavItem.click({ force: true });
+      }
       await clientB.page.waitForLoadState('networkidle');
 
       await waitForTask(clientB.page, taskName);

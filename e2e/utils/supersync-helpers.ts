@@ -126,6 +126,7 @@ export const createSimulatedClient = async (
     storageState: undefined, // Clean slate - no shared state
     userAgent: `PLAYWRIGHT SYNC-CLIENT-${clientName}`,
     baseURL,
+    viewport: { width: 1920, height: 1080 },
   });
 
   const page = await context.newPage();
