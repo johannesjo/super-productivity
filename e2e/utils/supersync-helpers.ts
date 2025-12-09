@@ -139,6 +139,8 @@ export const createSimulatedClient = async (
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
       console.error(`[Client ${clientName}] Console error:`, msg.text());
+    } else if (process.env.E2E_VERBOSE) {
+      console.log(`[Client ${clientName}] Console ${msg.type()}:`, msg.text());
     }
   });
 

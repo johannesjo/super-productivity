@@ -43,6 +43,8 @@ export const test = base.extend<TestFixtures>({
       page.on('console', (msg) => {
         if (msg.type() === 'error') {
           console.error('Console error:', msg.text());
+        } else if (process.env.E2E_VERBOSE) {
+          console.log(`Console ${msg.type()}:`, msg.text());
         }
       });
 
