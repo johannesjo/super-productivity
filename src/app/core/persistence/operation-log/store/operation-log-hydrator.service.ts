@@ -52,6 +52,9 @@ export class OperationLogHydratorService {
   // Mutex to prevent concurrent repair operations and re-validation during repair
   private _repairMutex: Promise<void> | null = null;
 
+  // Track if schema migration ran during this hydration (requires validation)
+  private _migrationRanDuringHydration = false;
+
   async hydrateStore(): Promise<void> {
     OpLog.normal('OperationLogHydratorService: Starting hydration...');
 
@@ -85,6 +88,7 @@ export class OperationLogHydratorService {
       // 2. Run schema migration if needed (A.7.12: with backup safety)
       if (snapshot && this.schemaMigrationService.needsMigration(snapshot)) {
         snapshot = await this._migrateSnapshotWithBackup(snapshot);
+        this._migrationRanDuringHydration = true;
       }
 
       // 3. Validate snapshot if it exists
@@ -101,9 +105,22 @@ export class OperationLogHydratorService {
           lastAppliedOpSeq: snapshot.lastAppliedOpSeq,
         });
 
-        // CHECKPOINT B: Validate and repair snapshot state before dispatching
+        // CHECKPOINT B: Schema-version trust optimization
+        // Skip synchronous validation if schema version matches current - the snapshot
+        // was validated before being saved in the previous session. Only validate
+        // synchronously if a migration ran (schema changed).
+        // A deferred background validation runs after hydration to catch any corruption.
         let stateToLoad = snapshot.state as AppDataCompleteNew;
-        if (!this._repairMutex) {
+        const snapshotSchemaVersion = (snapshot as { schemaVersion?: number })
+          .schemaVersion;
+        const needsSyncValidation =
+          this._migrationRanDuringHydration ||
+          snapshotSchemaVersion !== CURRENT_SCHEMA_VERSION;
+
+        if (needsSyncValidation && !this._repairMutex) {
+          OpLog.normal(
+            'OperationLogHydratorService: Running synchronous validation (migration ran or schema mismatch)',
+          );
           const validationResult = await this._validateAndRepairState(
             stateToLoad,
             'snapshot',
@@ -113,6 +130,10 @@ export class OperationLogHydratorService {
             // Update snapshot with repaired state
             snapshot = { ...snapshot, state: stateToLoad };
           }
+        } else {
+          OpLog.normal(
+            'OperationLogHydratorService: Trusting snapshot (schema version matches, no migration)',
+          );
         }
 
         // 3. Hydrate NgRx with (possibly repaired) snapshot
@@ -261,6 +282,10 @@ export class OperationLogHydratorService {
       // Retry any failed remote ops from previous conflict resolution attempts
       // Now that state is fully hydrated, dependencies might be resolved
       await this.retryFailedRemoteOps();
+
+      // Schedule deferred background validation to catch any corruption
+      // that wasn't detected during synchronous validation (schema trust optimization)
+      this._scheduleDeferredValidation();
     } catch (e) {
       OpLog.err('OperationLogHydratorService: Error during hydration', e);
       try {
@@ -926,5 +951,82 @@ export class OperationLogHydratorService {
         },
       },
     };
+  }
+
+  /**
+   * Schedules a deferred background validation to run after hydration completes.
+   * This catches any corruption that wasn't detected during synchronous validation
+   * (when we trusted the snapshot due to schema version match).
+   *
+   * If corruption is found, we attempt auto-repair and show a warning to the user.
+   * This runs 5 seconds after hydration to avoid blocking startup.
+   */
+  private _scheduleDeferredValidation(): void {
+    const DEFERRED_VALIDATION_DELAY_MS = 5000;
+
+    setTimeout(async () => {
+      try {
+        OpLog.normal(
+          'OperationLogHydratorService: Running deferred background validation...',
+        );
+
+        const currentState =
+          (await this.storeDelegateService.getAllSyncModelDataFromStore()) as AppDataCompleteNew;
+
+        const result = this.validateStateService.validateAndRepair(currentState);
+
+        if (result.isValid && !result.wasRepaired) {
+          OpLog.normal(
+            'OperationLogHydratorService: Deferred validation passed - no issues found',
+          );
+          return;
+        }
+
+        if (result.wasRepaired && result.repairedState && result.repairSummary) {
+          OpLog.warn(
+            'OperationLogHydratorService: Deferred validation found and repaired issues',
+            result.repairSummary,
+          );
+
+          // Create REPAIR operation to persist the fix
+          const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+          await this.repairOperationService.createRepairOperation(
+            result.repairedState,
+            result.repairSummary,
+            clientId,
+          );
+
+          // Dispatch repaired state to NgRx
+          this.store.dispatch(loadAllData({ appDataComplete: result.repairedState }));
+
+          // Warn user about the issue
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
+            actionStr: T.PS.RELOAD,
+            actionFn: (): void => {
+              window.location.reload();
+            },
+          });
+        } else if (!result.isValid) {
+          // Repair failed or wasn't possible
+          OpLog.err(
+            'OperationLogHydratorService: Deferred validation found issues but repair failed',
+            result.error,
+          );
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.INTEGRITY_CHECK_FAILED,
+            actionStr: T.PS.RELOAD,
+            actionFn: (): void => {
+              window.location.reload();
+            },
+          });
+        }
+      } catch (e) {
+        // Don't crash the app if deferred validation fails
+        OpLog.err('OperationLogHydratorService: Deferred validation error', e);
+      }
+    }, DEFERRED_VALIDATION_DELAY_MS);
   }
 }

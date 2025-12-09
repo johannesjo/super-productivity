@@ -212,8 +212,20 @@ describe('OperationLogHydratorService', () => {
         );
       });
 
-      it('should validate snapshot state before dispatching', async () => {
-        const snapshot = createMockSnapshot();
+      it('should skip synchronous validation when schema version matches (trust optimization)', async () => {
+        // With schema-version trust, we skip sync validation when versions match
+        const snapshot = createMockSnapshot({ schemaVersion: CURRENT_SCHEMA_VERSION });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+
+        await service.hydrateStore();
+
+        // Should NOT call validateAndRepair synchronously (trusted snapshot)
+        expect(mockValidateStateService.validateAndRepair).not.toHaveBeenCalled();
+      });
+
+      it('should validate snapshot state when schema version is missing', async () => {
+        // When schema version is missing/undefined, we must validate
+        const snapshot = createMockSnapshot({ schemaVersion: undefined });
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
 
         await service.hydrateStore();
@@ -223,8 +235,27 @@ describe('OperationLogHydratorService', () => {
         );
       });
 
+      it('should validate snapshot state when schema version mismatches', async () => {
+        // When schema version differs from current, we must validate
+        const snapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION - 1,
+        });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        // Mark that migration ran
+        mockSchemaMigrationService.needsMigration.and.returnValue(true);
+        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue({
+          ...snapshot,
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        });
+
+        await service.hydrateStore();
+
+        expect(mockValidateStateService.validateAndRepair).toHaveBeenCalled();
+      });
+
       it('should dispatch repaired state if validation repairs it', async () => {
-        const snapshot = createMockSnapshot();
+        // Use mismatched schema version to trigger validation
+        const snapshot = createMockSnapshot({ schemaVersion: undefined });
         const repairedState = { ...mockState, repaired: true };
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
         mockValidateStateService.validateAndRepair.and.returnValue({
@@ -242,7 +273,8 @@ describe('OperationLogHydratorService', () => {
       });
 
       it('should create repair operation when state is repaired', async () => {
-        const snapshot = createMockSnapshot();
+        // Use mismatched schema version to trigger validation
+        const snapshot = createMockSnapshot({ schemaVersion: undefined });
         const repairedState = { ...mockState, repaired: true };
         const repairSummary = { entityStateFixed: 1 } as any;
         mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));

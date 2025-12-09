@@ -8,7 +8,6 @@ import {
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
-  MatDialogClose,
   MatDialogContent,
   MatDialogRef,
   MatDialogTitle,
@@ -40,7 +39,6 @@ export interface ConflictResolutionResult {
     MatDialogContent,
     MatDialogActions,
     MatButton,
-    MatDialogClose,
     TranslateModule,
     DatePipe,
     MatIcon,
