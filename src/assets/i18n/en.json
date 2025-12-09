@@ -1740,6 +1740,7 @@
   "G": {
     "ADD": "Add",
     "ADVANCED_CFG": "Advanced Config",
+    "APPLY": "Apply",
     "CANCEL": "Cancel",
     "CLOSE": "Close",
     "COMPLETE": "Complete",

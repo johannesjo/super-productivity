@@ -47,7 +47,7 @@ export class SuperSyncPage extends BasePage {
       'dialog-conflict-resolution button:has-text("Use All Remote")',
     );
     this.conflictApplyBtn = page.locator(
-      'dialog-conflict-resolution button:has-text("G.APPLY")',
+      'dialog-conflict-resolution button:has-text("Apply")',
     );
   }
 
@@ -142,10 +142,10 @@ export class SuperSyncPage extends BasePage {
       if (await this.conflictDialog.isVisible()) {
         console.log('[SuperSyncPage] Conflict dialog detected, using remote...');
         await this.conflictUseRemoteBtn.click();
-        // Wait for selection to be applied and G.APPLY to be enabled
+        // Wait for selection to be applied and Apply to be enabled
         await this.page.waitForTimeout(500);
 
-        // Wait for G.APPLY button to be enabled (with retry)
+        // Wait for Apply button to be enabled (with retry)
         // Increase retries to allow for processing time (50 * 200ms = 10s)
         for (let i = 0; i < 50; i++) {
           // If dialog closed unexpectedly, break loop
@@ -159,7 +159,7 @@ export class SuperSyncPage extends BasePage {
             .catch(() => false);
 
           if (isEnabled) {
-            console.log('[SuperSyncPage] Clicking G.APPLY to apply resolution...');
+            console.log('[SuperSyncPage] Clicking Apply to apply resolution...');
             await this.conflictApplyBtn.click();
             break;
           }
