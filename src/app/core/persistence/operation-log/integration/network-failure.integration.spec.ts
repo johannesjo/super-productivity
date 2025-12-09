@@ -19,15 +19,15 @@ class FailingMockSyncServer extends MockSyncServer {
   private failAfterUploadCount = -1;
   private failNextDownload = false;
 
-  setFailNextUpload(fail: boolean) {
+  setFailNextUpload(fail: boolean): void {
     this.failNextUpload = fail;
   }
 
-  setFailAfterUploadCount(count: number) {
+  setFailAfterUploadCount(count: number): void {
     this.failAfterUploadCount = count;
   }
 
-  setFailNextDownload(fail: boolean) {
+  setFailNextDownload(fail: boolean): void {
     this.failNextDownload = fail;
   }
 

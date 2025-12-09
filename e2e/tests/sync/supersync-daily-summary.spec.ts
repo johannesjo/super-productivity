@@ -4,7 +4,6 @@ import {
   getSuperSyncConfig,
   createSimulatedClient,
   closeClient,
-  waitForTask,
   isServerHealthy,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
