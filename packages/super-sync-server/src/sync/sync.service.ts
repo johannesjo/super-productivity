@@ -212,6 +212,8 @@ export class SyncService {
           // Update device last seen
           await tx.syncDevice.upsert({
             where: {
+              // Prisma composite key naming uses underscores; allow it here
+              // eslint-disable-next-line @typescript-eslint/naming-convention
               userId_clientId: {
                 userId,
                 clientId,
@@ -391,6 +393,8 @@ export class SyncService {
 
     await tx.tombstone.upsert({
       where: {
+        // Prisma composite key naming uses underscores; allow it here
+        // eslint-disable-next-line @typescript-eslint/naming-convention
         userId_entityType_entityId: {
           userId,
           entityType,
@@ -942,12 +946,38 @@ export class SyncService {
   }
 
   async deleteOldSyncedOpsForAllUsers(cutoffTime: number): Promise<number> {
-    const result = await prisma.operation.deleteMany({
+    const states = await prisma.userSyncState.findMany({
       where: {
-        receivedAt: { lt: BigInt(cutoffTime) },
+        lastSnapshotSeq: { not: null },
+        snapshotAt: { not: null },
+      },
+      select: {
+        userId: true,
+        lastSnapshotSeq: true,
+        snapshotAt: true,
       },
     });
-    return result.count;
+
+    let totalDeleted = 0;
+
+    for (const state of states) {
+      const snapshotAt = Number(state.snapshotAt);
+      const lastSnapshotSeq = state.lastSnapshotSeq ?? 0;
+
+      // Only prune ops that are both older than the retention window and covered by a snapshot
+      if (snapshotAt >= cutoffTime && lastSnapshotSeq > 0) {
+        const result = await prisma.operation.deleteMany({
+          where: {
+            userId: state.userId,
+            serverSeq: { lte: lastSnapshotSeq },
+            receivedAt: { lt: BigInt(cutoffTime) },
+          },
+        });
+        totalDeleted += result.count;
+      }
+    }
+
+    return totalDeleted;
   }
 
   async deleteStaleDevices(beforeTime: number): Promise<number> {

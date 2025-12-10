@@ -112,8 +112,44 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       try {
         const userId = getAuthUser(req).userId;
 
+        // Support gzip-encoded uploads to save bandwidth
+        let body: unknown = req.body;
+        const contentEncoding = req.headers['content-encoding'];
+
+        if (contentEncoding === 'gzip') {
+          const rawBody = req.body as Buffer;
+          if (!Buffer.isBuffer(rawBody)) {
+            return reply.status(400).send({
+              error: 'Expected compressed body with Content-Encoding: gzip',
+            });
+          }
+
+          try {
+            const decompressed = await gunzipAsync(rawBody);
+            if (decompressed.length > MAX_DECOMPRESSED_SIZE) {
+              Logger.warn(
+                `[user:${userId}] Decompressed upload too large: ${decompressed.length} bytes (max ${MAX_DECOMPRESSED_SIZE})`,
+              );
+              return reply.status(413).send({
+                error: 'Decompressed payload too large',
+              });
+            }
+            body = JSON.parse(decompressed.toString('utf-8'));
+            Logger.debug(
+              `[user:${userId}] Ops upload decompressed: ${rawBody.length} -> ${decompressed.length} bytes`,
+            );
+          } catch (decompressErr) {
+            Logger.warn(
+              `[user:${userId}] Failed to decompress ops upload: ${errorMessage(decompressErr)}`,
+            );
+            return reply.status(400).send({
+              error: 'Failed to decompress gzip body',
+            });
+          }
+        }
+
         // Validate request body
-        const parseResult = UploadOpsSchema.safeParse(req.body);
+        const parseResult = UploadOpsSchema.safeParse(body);
         if (!parseResult.success) {
           Logger.warn(
             `[user:${userId}] Upload validation failed`,
