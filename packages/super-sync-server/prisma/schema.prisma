@@ -1,0 +1,103 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                         Int       @id @default(autoincrement())
+  email                      String    @unique
+  passwordHash               String    @map("password_hash")
+  isVerified                 Int       @default(0) @map("is_verified") // 0 or 1
+  verificationToken          String?   @map("verification_token")
+  verificationTokenExpiresAt BigInt?   @map("verification_token_expires_at")
+  verificationResendCount    Int       @default(0) @map("verification_resend_count")
+  failedLoginAttempts        Int       @default(0) @map("failed_login_attempts")
+  lockedUntil                BigInt?   @map("locked_until")
+  tokenVersion               Int       @default(0) @map("token_version")
+  termsAcceptedAt            BigInt?   @map("terms_accepted_at")
+  createdAt                  DateTime  @default(now()) @map("created_at")
+  
+  operations                 Operation[]
+  syncState                  UserSyncState?
+  devices                    SyncDevice[]
+  tombstones                 Tombstone[]
+
+  @@index([verificationToken])
+  @@map("users")
+}
+
+model Operation {
+  id             String  @id
+  userId         Int     @map("user_id")
+  clientId       String  @map("client_id")
+  serverSeq      Int     @map("server_seq")
+  actionType     String  @map("action_type")
+  opType         String  @map("op_type")
+  entityType     String  @map("entity_type")
+  entityId       String? @map("entity_id")
+  payload        Json
+  vectorClock    Json    @map("vector_clock")
+  schemaVersion  Int     @map("schema_version")
+  clientTimestamp BigInt  @map("client_timestamp")
+  receivedAt     BigInt  @map("received_at")
+  parentOpId     String? @map("parent_op_id")
+
+  user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, serverSeq])
+  @@index([userId, serverSeq])
+  @@index([userId, entityType, entityId])
+  @@index([userId, clientId])
+  @@index([userId, receivedAt])
+  @@map("operations")
+}
+
+model UserSyncState {
+  userId                Int     @id @map("user_id")
+  lastSeq               Int     @default(0) @map("last_seq")
+  lastSnapshotSeq       Int?    @map("last_snapshot_seq")
+  snapshotData          Bytes?  @map("snapshot_data")
+  snapshotAt            BigInt? @map("snapshot_at")
+  snapshotSchemaVersion Int?    @default(1) @map("snapshot_schema_version")
+
+  user                  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_sync_state")
+}
+
+model SyncDevice {
+  clientId     String  @map("client_id")
+  userId       Int     @map("user_id")
+  deviceName   String? @map("device_name")
+  userAgent    String? @map("user_agent")
+  lastSeenAt   BigInt  @map("last_seen_at")
+  lastAckedSeq Int     @default(0) @map("last_acked_seq")
+  createdAt    BigInt  @map("created_at")
+
+  user         User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, clientId])
+  @@map("sync_devices")
+}
+
+model Tombstone {
+  userId        Int    @map("user_id")
+  entityType    String @map("entity_type")
+  entityId      String @map("entity_id")
+  deletedAt     BigInt @map("deleted_at")
+  deletedByOpId String @map("deleted_by_op_id")
+  expiresAt     BigInt @map("expires_at")
+
+  user          User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, entityType, entityId])
+  @@index([expiresAt])
+  @@map("tombstones")
+}
