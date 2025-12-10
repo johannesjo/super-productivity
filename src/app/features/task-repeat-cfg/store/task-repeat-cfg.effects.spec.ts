@@ -1128,16 +1128,18 @@ describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
         shouldMatchToday: true,
       },
       {
-        name: 'WEEKLY on Friday - pattern does not match today, should fallback',
+        // Friday is 2 days ahead, getNewestPossibleDueDate returns last Friday (Jan 10)
+        name: 'WEEKLY on Friday - returns last Friday (Jan 10)',
         weekday: 'friday',
-        expectedDateStr: null, // Will fallback to task.dueDay
-        shouldMatchToday: false,
+        expectedDateStr: '2025-01-10', // Last Friday before Jan 15
+        shouldMatchToday: true, // Uses calculated date, not fallback
       },
       {
-        name: 'WEEKLY on Monday - pattern does not match today, should fallback',
+        // Monday is 2 days behind, getNewestPossibleDueDate returns last Monday (Jan 13)
+        name: 'WEEKLY on Monday - returns last Monday (Jan 13)',
         weekday: 'monday',
-        expectedDateStr: null,
-        shouldMatchToday: false,
+        expectedDateStr: '2025-01-13', // Last Monday before Jan 15
+        shouldMatchToday: true, // Uses calculated date, not fallback
       },
     ];
 
@@ -1249,11 +1251,13 @@ describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
       });
     });
 
-    it('should fallback when MONTHLY day does not match today', () => {
-      // Today is Jan 15, but repeat is for the 20th
+    it('should return last month occurrence when MONTHLY day has not occurred yet this month', () => {
+      // Today is Jan 15, repeat is for the 20th
+      // getNewestPossibleDueDate returns Dec 20 (last occurrence of the 20th)
       testScheduler.run(({ hot, expectObservable }) => {
         const startTimeStr = '09:00';
-        const fallbackDueDay = '2025-01-20';
+        // Dec 20, 2024 is the most recent 20th before Jan 15, 2025
+        const expectedDateStr = '2024-12-20';
 
         const repeatCfg: TaskRepeatCfgCopy = {
           ...baseRepeatCfg,
@@ -1271,22 +1275,16 @@ describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
 
         actions$ = hot('-a', { a: action });
 
-        const taskWithFallback: Task = {
-          ...baseTask,
-          dueDay: fallbackDueDay,
-        };
+        taskService.getByIdOnce$.and.returnValue(of(baseTask));
 
-        taskService.getByIdOnce$.and.returnValue(of(taskWithFallback));
-
-        // getNewestPossibleDueDate will return null (20th hasn't happened yet in Jan)
-        // So should fall back to task.dueDay
+        // getNewestPossibleDueDate returns Dec 20, 2024 (the last valid occurrence)
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
-          dateStrToUtcDate(fallbackDueDay).getTime(),
+          dateStrToUtcDate(expectedDateStr).getTime(),
         );
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
-          task: taskWithFallback,
+          task: baseTask,
           dueWithTime: expectedDateTime,
           remindAt: remindOptionToMilliseconds(
             expectedDateTime,
