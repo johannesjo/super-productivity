@@ -758,5 +758,42 @@ describe('OperationLogCompactionService', () => {
         );
       }
     });
+
+    it('should correctly extract keys when state contains only a subset of models (incomplete data)', async () => {
+      // Create state with only Task, Tag, and PluginUserData populated
+      const partialState = {
+        task: { ids: ['t1'], entities: { t1: {} } },
+        tag: { ids: ['tag1'], entities: { tag1: {} } },
+        pluginUserData: [{ id: 'pud1', data: 'xyz' }],
+        // explicit undefined/missing for others
+        project: undefined,
+        note: { ids: [], entities: {} }, // empty but defined
+      } as any;
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(partialState),
+      );
+
+      await service.compact();
+
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      const extractedKeys = new Set(savedCache.snapshotEntityKeys);
+
+      // Should contain
+      expect(extractedKeys.has('TASK:t1')).toBeTrue();
+      expect(extractedKeys.has('TAG:tag1')).toBeTrue();
+      expect(extractedKeys.has('PLUGIN_USER_DATA:pud1')).toBeTrue();
+
+      // Should NOT contain
+      const projectKeys = Array.from(extractedKeys).filter((k: string) =>
+        k.startsWith('PROJECT:'),
+      );
+      expect(projectKeys.length).toBe(0);
+
+      const noteKeys = Array.from(extractedKeys).filter((k: string) =>
+        k.startsWith('NOTE:'),
+      );
+      expect(noteKeys.length).toBe(0);
+    });
   });
 });
