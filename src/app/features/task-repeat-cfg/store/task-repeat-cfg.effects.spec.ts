@@ -1040,3 +1040,412 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
     });
   });
 });
+
+/**
+ * Deterministic tests using jasmine.clock() to mock specific dates.
+ * These tests ensure reliable, reproducible results regardless of when they run.
+ */
+describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
+  let actions$: Observable<Action>;
+  let effects: TaskRepeatCfgEffects;
+  let taskService: jasmine.SpyObj<TaskService>;
+  let testScheduler: TestScheduler;
+
+  // Fixed reference date: Wednesday, January 15, 2025
+  const FIXED_WEDNESDAY = new Date(2025, 0, 15, 12, 0, 0);
+
+  const baseTask: Task = {
+    ...DEFAULT_TASK,
+    id: 'test-task-id',
+    title: 'Test Task',
+    projectId: 'test-project',
+    repeatCfgId: 'repeat-cfg-id',
+    subTaskIds: [],
+    created: FIXED_WEDNESDAY.getTime(),
+  };
+
+  const baseRepeatCfg: TaskRepeatCfgCopy = {
+    ...DEFAULT_TASK_REPEAT_CFG,
+    id: 'repeat-cfg-id',
+    title: 'Test Repeat',
+    lastTaskCreationDay: '1970-01-01', // No previous creation
+    shouldInheritSubtasks: false,
+    disableAutoUpdateSubtasks: false,
+    subTaskTemplates: [],
+  };
+
+  beforeEach(() => {
+    // Install jasmine clock BEFORE TestBed setup
+    jasmine.clock().install();
+    jasmine.clock().mockDate(FIXED_WEDNESDAY);
+
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', [
+      'getByIdWithSubTaskData$',
+      'getByIdOnce$',
+      'getTasksByRepeatCfgId$',
+      'getByIdsLive$',
+      'getArchiveTasksForRepeatCfgId',
+    ]);
+
+    const taskRepeatCfgServiceSpy = jasmine.createSpyObj('TaskRepeatCfgService', [
+      'updateTaskRepeatCfg',
+      'getTaskRepeatCfgById$',
+    ]);
+
+    const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    const taskArchiveServiceSpy = jasmine.createSpyObj('TaskArchiveService', ['load']);
+
+    TestBed.configureTestingModule({
+      providers: [
+        TaskRepeatCfgEffects,
+        provideMockActions(() => actions$),
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: TaskRepeatCfgService, useValue: taskRepeatCfgServiceSpy },
+        { provide: MatDialog, useValue: matDialogSpy },
+        { provide: TaskArchiveService, useValue: taskArchiveServiceSpy },
+      ],
+    });
+
+    effects = TestBed.inject(TaskRepeatCfgEffects);
+    taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+
+    testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
+  });
+
+  afterEach(() => {
+    jasmine.clock().uninstall();
+  });
+
+  describe('Scenario: Wednesday creating task for different weekdays', () => {
+    // Today is Wednesday (Jan 15, 2025)
+    const scenarios = [
+      {
+        name: 'WEEKLY on Wednesday (today) - should schedule for today',
+        weekday: 'wednesday',
+        expectedDateStr: '2025-01-15',
+        shouldMatchToday: true,
+      },
+      {
+        name: 'WEEKLY on Friday - pattern does not match today, should fallback',
+        weekday: 'friday',
+        expectedDateStr: null, // Will fallback to task.dueDay
+        shouldMatchToday: false,
+      },
+      {
+        name: 'WEEKLY on Monday - pattern does not match today, should fallback',
+        weekday: 'monday',
+        expectedDateStr: null,
+        shouldMatchToday: false,
+      },
+    ];
+
+    scenarios.forEach(({ name, weekday, expectedDateStr, shouldMatchToday }) => {
+      it(name, () => {
+        testScheduler.run(({ hot, expectObservable }) => {
+          const startTimeStr = '10:00';
+          const fallbackDueDay = '2025-01-20'; // Fallback date
+
+          const repeatCfg: TaskRepeatCfgCopy = {
+            ...baseRepeatCfg,
+            startDate: '2025-01-15', // Today (Wednesday)
+            repeatCycle: 'WEEKLY',
+            repeatEvery: 1,
+            monday: weekday === 'monday',
+            tuesday: weekday === 'tuesday',
+            wednesday: weekday === 'wednesday',
+            thursday: weekday === 'thursday',
+            friday: weekday === 'friday',
+            saturday: weekday === 'saturday',
+            sunday: weekday === 'sunday',
+          };
+
+          const action = addTaskRepeatCfgToTask({
+            taskRepeatCfg: repeatCfg,
+            taskId: 'test-task-id',
+            startTime: startTimeStr,
+            remindAt: TaskReminderOptionId.AtStart,
+          });
+
+          actions$ = hot('-a', { a: action });
+
+          const taskWithFallback: Task = {
+            ...baseTask,
+            dueDay: fallbackDueDay,
+          };
+
+          taskService.getByIdOnce$.and.returnValue(of(taskWithFallback));
+
+          // Calculate expected date
+          const targetDateStr = shouldMatchToday ? expectedDateStr : fallbackDueDay;
+          const expectedDateTime = getDateTimeFromClockString(
+            startTimeStr,
+            dateStrToUtcDate(targetDateStr!).getTime(),
+          );
+
+          const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+            task: taskWithFallback,
+            dueWithTime: expectedDateTime,
+            remindAt: remindOptionToMilliseconds(
+              expectedDateTime,
+              TaskReminderOptionId.AtStart,
+            ),
+            isMoveToBacklog: false,
+            isSkipAutoRemoveFromToday: true,
+          });
+
+          expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+            a: expectedAction,
+          });
+        });
+      });
+    });
+  });
+
+  describe('Scenario: Monthly repeat patterns', () => {
+    it('should schedule for today when MONTHLY and today matches the day of month', () => {
+      // Today is Jan 15, startDate is also the 15th
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '09:00';
+
+        const repeatCfg: TaskRepeatCfgCopy = {
+          ...baseRepeatCfg,
+          startDate: '2024-12-15', // Previous month, same day
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+        };
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: repeatCfg,
+          taskId: 'test-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(baseTask));
+
+        // Should calculate Jan 15, 2025 as the target date
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate('2025-01-15').getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: baseTask,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback when MONTHLY day does not match today', () => {
+      // Today is Jan 15, but repeat is for the 20th
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '09:00';
+        const fallbackDueDay = '2025-01-20';
+
+        const repeatCfg: TaskRepeatCfgCopy = {
+          ...baseRepeatCfg,
+          startDate: '2024-12-20', // 20th of month
+          repeatCycle: 'MONTHLY',
+          repeatEvery: 1,
+        };
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: repeatCfg,
+          taskId: 'test-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithFallback: Task = {
+          ...baseTask,
+          dueDay: fallbackDueDay,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithFallback));
+
+        // getNewestPossibleDueDate will return null (20th hasn't happened yet in Jan)
+        // So should fall back to task.dueDay
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(fallbackDueDay).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithFallback,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+  });
+
+  describe('Scenario: Daily patterns', () => {
+    it('should always schedule for today with DAILY pattern', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '08:00';
+
+        const repeatCfg: TaskRepeatCfgCopy = {
+          ...baseRepeatCfg,
+          startDate: '2025-01-01', // Started earlier this month
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+        };
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: repeatCfg,
+          taskId: 'test-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(baseTask));
+
+        // DAILY always matches today
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate('2025-01-15').getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: baseTask,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should handle DAILY with repeatEvery > 1', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '08:00';
+
+        // Start date Jan 13, repeatEvery 2 means: Jan 13, 15, 17...
+        // Today is Jan 15, which is a valid day
+        const repeatCfg: TaskRepeatCfgCopy = {
+          ...baseRepeatCfg,
+          startDate: '2025-01-13',
+          repeatCycle: 'DAILY',
+          repeatEvery: 2,
+        };
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: repeatCfg,
+          taskId: 'test-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(baseTask));
+
+        // Jan 15 is 2 days from Jan 13, so it matches the pattern
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate('2025-01-15').getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: baseTask,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+  });
+
+  describe('Scenario: Edge cases and error handling', () => {
+    it('should handle future startDate gracefully (fallback to task.dueDay)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '10:00';
+        const fallbackDueDay = '2025-01-15';
+
+        // startDate is in the future
+        const repeatCfg: TaskRepeatCfgCopy = {
+          ...baseRepeatCfg,
+          startDate: '2025-02-01', // Future date
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+        };
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: repeatCfg,
+          taskId: 'test-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithFallback: Task = {
+          ...baseTask,
+          dueDay: fallbackDueDay,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithFallback));
+
+        // Future startDate means getNewestPossibleDueDate returns null
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(fallbackDueDay).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithFallback,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+  });
+});
