@@ -117,7 +117,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const contentEncoding = req.headers['content-encoding'];
 
         if (contentEncoding === 'gzip') {
-          const rawBody = req.body as Buffer;
+          const rawBody = req.body as unknown as Buffer;
           if (!Buffer.isBuffer(rawBody)) {
             return reply.status(400).send({
               error: 'Expected compressed body with Content-Encoding: gzip',

@@ -3,3 +3,4 @@ dist
 data
 ./.env
 .env
+prisma/
