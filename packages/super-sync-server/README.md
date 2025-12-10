@@ -6,7 +6,7 @@ A custom, high-performance synchronization server for Super Productivity.
 
 ## Architecture
 
-The server uses an **Append-Only Log** architecture backed by **SQLite**:
+The server uses an **Append-Only Log** architecture backed by **PostgreSQL** (via Prisma):
 
 1.  **Operations**: Clients upload atomic operations (Create, Update, Delete, Move).
 2.  **Sequence Numbers**: The server assigns a strictly increasing `server_seq` to each operation.
@@ -15,12 +15,36 @@ The server uses an **Append-Only Log** architecture backed by **SQLite**:
 
 ## Quick Start
 
+### Docker (Recommended)
+
+The easiest way to run the server is using the provided Docker Compose configuration.
+
+```bash
+# 1. Copy environment example
+cp .env.example .env
+
+# 2. Configure .env (Set JWT_SECRET, DOMAIN, POSTGRES_PASSWORD)
+nano .env
+
+# 3. Start the stack (Server + Postgres + Caddy)
+docker-compose up -d
+```
+
+### Manual Setup (Development)
+
 ```bash
 # Install dependencies
 npm install
 
-# Set JWT secret (required in production)
-export JWT_SECRET="your-secure-random-secret"
+# Generate Prisma Client
+npx prisma generate
+
+# Set up .env
+cp .env.example .env
+# Edit .env to point to your PostgreSQL instance (DATABASE_URL)
+
+# Push schema to DB
+npx prisma db push
 
 # Start the server
 npm run dev
@@ -32,17 +56,16 @@ npm start
 
 ## Configuration
 
-All configuration is done via environment variables. Copy `.env.example` to `.env` and customize:
+All configuration is done via environment variables.
 
-| Variable       | Default  | Description                                         |
-| -------------- | -------- | --------------------------------------------------- |
-| `PORT`         | `1900`   | Server port                                         |
-| `DATA_DIR`     | `./data` | Directory for storing sync data (SQLite DB)         |
-| `PUBLIC_URL`   | -        | Publicly reachable URL used for email links         |
-| `JWT_SECRET`   | -        | **Required in production.** Secret for signing JWTs |
-| `CORS_ENABLED` | `true`   | Enable CORS for browser clients                     |
-| `CORS_ORIGINS` | `*`      | Allowed origins (comma-separated)                   |
-| `NODE_ENV`     | -        | Set to `production` for production mode             |
+| Variable       | Default                              | Description                                                                    |
+| :------------- | :----------------------------------- | :----------------------------------------------------------------------------- |
+| `PORT`         | `1900`                               | Server port                                                                    |
+| `DATABASE_URL` | -                                    | PostgreSQL connection string (e.g. `postgresql://user:pass@localhost:5432/db`) |
+| `JWT_SECRET`   | -                                    | **Required.** Secret for signing JWTs (min 32 chars)                           |
+| `PUBLIC_URL`   | -                                    | Public URL used for email links (e.g. `https://sync.example.com`)              |
+| `CORS_ORIGINS` | `https://app.super-productivity.com` | Allowed CORS origins                                                           |
+| `SMTP_HOST`    | -                                    | SMTP Server for emails                                                         |
 
 ## API Endpoints
 
@@ -131,35 +154,28 @@ GET /api/sync/status
 
 In Super Productivity, configure the Custom Sync provider with:
 
-- **Base URL**: `http://localhost:1900` (or your deployed URL)
+- **Base URL**: `https://sync.your-domain.com` (or your deployed URL)
 - **Auth Token**: JWT token from login
 
-## Development
+## Maintenance
+
+### Scripts
+
+The server includes scripts for administrative tasks. These use the configured database.
 
 ```bash
-# Run in development mode with hot reload
-npm run dev
+# Delete a user account
+npm run delete-user -- user@example.com
 
-# Build TypeScript
-npm run build
+# Clear sync data (preserves account)
+npm run clear-data -- user@example.com
 
-# Run production build
-npm start
-```
-
-## Docker
-
-```bash
-docker run -d \
-  -p 1900:1900 \
-  -e JWT_SECRET="your-secure-secret" \
-  -e NODE_ENV="production" \
-  -v ./data:/app/data \
-  super-productivity/sync-server
+# Clear ALL sync data (dangerous)
+npm run clear-data -- --all
 ```
 
 ## Security Notes
 
 - **Set JWT_SECRET** to a secure random value in production.
-- **Use HTTPS in production** (via reverse proxy like nginx).
+- **Use HTTPS in production**. The Docker setup includes Caddy to handle this automatically.
 - **Restrict CORS origins** in production.

@@ -1,8 +1,9 @@
-import { getDb, initDb } from '../src/db';
+import { prisma, disconnectDb } from '../src/db';
 import { loadConfigFromEnv } from '../src/config';
 import * as readline from 'readline';
 import * as path from 'path';
 import * as fs from 'fs';
+import { Logger } from '../src/logger';
 
 /**
  * Recursively delete a directory and all its contents.
@@ -28,19 +29,8 @@ const question = (query: string): Promise<string> => {
 };
 
 async function main() {
-  // Load config
+  // Load config for dataDir
   const config = loadConfigFromEnv();
-  const dbPath = path.join(config.dataDir, 'database.sqlite');
-
-  if (!fs.existsSync(dbPath)) {
-    console.error(`Database not found at ${dbPath}`);
-    console.error('Please ensure the DATA_DIR environment variable is set correctly.');
-    process.exit(1);
-  }
-
-  // Init DB
-  initDb(config.dataDir);
-  const db = getDb();
 
   const target = process.argv[2];
 
@@ -62,35 +52,41 @@ async function main() {
 
     console.log('Clearing all sync data...');
 
-    // Clear database tables
-    const tables = ['operations', 'user_sync_state', 'sync_devices', 'tombstones'];
-
-    db.transaction(() => {
-      for (const table of tables) {
-        const res = db.prepare(`DELETE FROM ${table}`).run();
-        console.log(`Deleted ${res.changes} rows from ${table}`);
-      }
-    })();
+    try {
+      // Clear database tables
+      await prisma.$transaction([
+        prisma.operation.deleteMany(),
+        prisma.userSyncState.deleteMany(),
+        prisma.syncDevice.deleteMany(),
+        prisma.tombstone.deleteMany(),
+      ]);
+      Logger.info(
+        'Deleted all rows from sync tables (operations, sync_state, devices, tombstones)',
+      );
+    } catch (err) {
+      Logger.error('Failed to clear database tables:', err);
+      process.exit(1);
+    }
 
     // Clear file-based storage directories
-    // These directories contain data from file-based sync (WebDAV, etc.)
     const fileBasedDirs = [
       path.join(config.dataDir, 'storage'),
       path.join(config.dataDir, 'super-productivity'),
     ];
 
     // Also check for any user-named directories at the root of dataDir
-    // (e.g., data/DEV, data/username, etc.) that aren't the database or known system dirs
-    const systemFiles = ['database.sqlite', 'storage', 'super-productivity'];
     try {
-      const entries = fs.readdirSync(config.dataDir, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory() && !systemFiles.includes(entry.name)) {
-          fileBasedDirs.push(path.join(config.dataDir, entry.name));
+      if (fs.existsSync(config.dataDir)) {
+        const systemFiles = ['database.sqlite', 'storage', 'super-productivity'];
+        const entries = fs.readdirSync(config.dataDir, { withFileTypes: true });
+        for (const entry of entries) {
+          if (entry.isDirectory() && !systemFiles.includes(entry.name)) {
+            fileBasedDirs.push(path.join(config.dataDir, entry.name));
+          }
         }
       }
-    } catch {
-      // Ignore read errors
+    } catch (err) {
+      Logger.warn('Failed to scan data directory for cleanup:', err);
     }
 
     for (const dir of fileBasedDirs) {
@@ -102,9 +98,9 @@ async function main() {
     console.log('Done.');
   } else {
     // Target is an email
-    const user = db.prepare('SELECT id FROM users WHERE email = ?').get(target) as
-      | { id: number }
-      | undefined;
+    const user = await prisma.user.findUnique({
+      where: { email: target },
+    });
 
     if (!user) {
       console.error(`User not found: ${target}`);
@@ -121,23 +117,26 @@ async function main() {
 
     console.log(`Clearing sync data for user ${target} (ID: ${user.id})...`);
 
-    // Clear database tables
-    const tables = ['operations', 'user_sync_state', 'sync_devices', 'tombstones'];
-
-    db.transaction(() => {
-      for (const table of tables) {
-        const res = db.prepare(`DELETE FROM ${table} WHERE user_id = ?`).run(user.id);
-        console.log(`Deleted ${res.changes} rows from ${table}`);
-      }
-    })();
+    try {
+      // Clear database tables for this user
+      await prisma.$transaction([
+        prisma.operation.deleteMany({ where: { userId: user.id } }),
+        prisma.userSyncState.deleteMany({ where: { userId: user.id } }),
+        prisma.syncDevice.deleteMany({ where: { userId: user.id } }),
+        prisma.tombstone.deleteMany({ where: { userId: user.id } }),
+      ]);
+      Logger.info(`Deleted sync data for user ${user.id}`);
+    } catch (err) {
+      Logger.error('Failed to clear user data:', err);
+      process.exit(1);
+    }
 
     // Clear file-based storage for this user
-    // File-based storage may use email as directory name or user ID
-    const emailLocalPart = target.split('@')[0]; // e.g., "DEV" from "DEV@example.com"
+    const emailLocalPart = target.split('@')[0];
     const userFileDirs = [
       path.join(config.dataDir, 'storage', `user-${user.id}`),
-      path.join(config.dataDir, target), // email as directory name
-      path.join(config.dataDir, emailLocalPart), // email local part as directory name
+      path.join(config.dataDir, target),
+      path.join(config.dataDir, emailLocalPart),
       path.join(config.dataDir, 'super-productivity', target),
       path.join(config.dataDir, 'super-productivity', emailLocalPart),
     ];
@@ -151,6 +150,7 @@ async function main() {
     console.log('Done.');
   }
 
+  await disconnectDb();
   process.exit(0);
 }
 
