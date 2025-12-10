@@ -67,10 +67,18 @@ export class TaskRepeatCfgEffects {
             }
             // Calculate the correct target day based on the repeat pattern (fixes #5594)
             // instead of using startDate which always defaults to today
-            const calculatedTargetDate = getNewestPossibleDueDate(
-              taskRepeatCfg as TaskRepeatCfg,
-              new Date(),
-            );
+            let calculatedTargetDate: Date | null = null;
+            try {
+              // getNewestPossibleDueDate throws if startDate is undefined or repeatEvery is invalid
+              if (taskRepeatCfg.startDate) {
+                calculatedTargetDate = getNewestPossibleDueDate(
+                  taskRepeatCfg as TaskRepeatCfg,
+                  new Date(),
+                );
+              }
+            } catch (e) {
+              // Fall back to existing logic if calculation fails
+            }
 
             // Use calculated date if available, otherwise fall back to existing logic
             const targetDayTimestamp = calculatedTargetDate

@@ -624,25 +624,19 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       });
     });
 
-    it('should fallback to task.dueDay if repeat pattern returns null', () => {
+    it('should fallback to task.dueDay when startDate is undefined (issue #5594)', () => {
       testScheduler.run(({ hot, expectObservable }) => {
         const dueDayStr = '2025-02-01';
         const startTimeStr = '10:00';
 
-        // Create a repeat config that cannot calculate a date (no weekdays selected for weekly)
+        // Create a repeat config without startDate - should gracefully fallback
         const action = addTaskRepeatCfgToTask({
           taskRepeatCfg: {
             ...mockRepeatCfg,
             startDate: undefined,
             repeatCycle: 'WEEKLY',
             repeatEvery: 1,
-            monday: false,
-            tuesday: false,
-            wednesday: false,
-            thursday: false,
-            friday: false,
-            saturday: false,
-            sunday: false,
+            monday: true,
           },
           taskId: 'parent-task-id',
           startTime: startTimeStr,
@@ -658,7 +652,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
 
-        // Fallback to task.dueDay when getNewestPossibleDueDate returns null
+        // When startDate is undefined, skip getNewestPossibleDueDate and use task.dueDay
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
           dateStrToUtcDate(dueDayStr).getTime(),
@@ -666,6 +660,146 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
           task: taskWithDueDay,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback to task.dueWithTime when startDate is undefined and no dueDay', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const dueWithTime = new Date(2025, 1, 15, 14, 30).getTime(); // Feb 15, 2025 14:30
+        const startTimeStr = '10:00';
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: undefined,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithDueWithTime: Task = {
+          ...mockTask,
+          dueDay: undefined,
+          dueWithTime,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithDueWithTime));
+
+        // Fallback to task.dueWithTime when no startDate and no dueDay
+        const expectedDateTime = getDateTimeFromClockString(startTimeStr, dueWithTime);
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithDueWithTime,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback to Date.now() when no dates available', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const startTimeStr = '10:00';
+        const now = Date.now();
+
+        // Mock Date.now for predictable results
+        spyOn(Date, 'now').and.returnValue(now);
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: undefined,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithNoDates: Task = {
+          ...mockTask,
+          dueDay: undefined,
+          dueWithTime: undefined,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithNoDates));
+
+        const expectedDateTime = getDateTimeFromClockString(startTimeStr, now);
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithNoDates,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should handle MONTHLY repeat pattern correctly (issue #5594)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const startTimeStr = '10:00';
+
+        // Set startDate to today so MONTHLY pattern matches today
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'MONTHLY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+
+        // For MONTHLY on the same day of month as startDate, should return today
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(todayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: mockTask,
           dueWithTime: expectedDateTime,
           remindAt: remindOptionToMilliseconds(
             expectedDateTime,
