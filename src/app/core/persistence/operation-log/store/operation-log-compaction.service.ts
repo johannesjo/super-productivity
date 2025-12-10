@@ -183,6 +183,24 @@ export class OperationLogCompactionService {
       }
     }
 
+    // Plugin User Data (Array)
+    if (Array.isArray(state.pluginUserData)) {
+      for (const item of state.pluginUserData) {
+        if (item?.id) {
+          keys.push(`PLUGIN_USER_DATA:${item.id}`);
+        }
+      }
+    }
+
+    // Plugin Metadata (Array)
+    if (Array.isArray(state.pluginMetadata)) {
+      for (const item of state.pluginMetadata) {
+        if (item?.id) {
+          keys.push(`PLUGIN_METADATA:${item.id}`);
+        }
+      }
+    }
+
     // Boards have a different structure: { boardCfgs: BoardCfg[] }
     if (state.boards?.boardCfgs && Array.isArray(state.boards.boardCfgs)) {
       for (const board of state.boards.boardCfgs) {

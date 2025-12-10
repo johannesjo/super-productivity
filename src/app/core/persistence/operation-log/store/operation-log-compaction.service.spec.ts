@@ -12,6 +12,7 @@ import {
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { OperationLogEntry } from '../operation.types';
 import { OpLog } from '../../../log';
+import { PFAPI_MODEL_CFGS } from '../../../../pfapi/pfapi-config';
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -666,6 +667,96 @@ describe('OperationLogCompactionService', () => {
         k.startsWith('TASK:'),
       );
       expect(taskKeys.length).toBe(0);
+    });
+
+    it('should extract entity keys for ALL models defined in PFAPI_MODEL_CFGS', async () => {
+      // 1. Create a complete mock state with one item for every model type
+      const completeState: any = {};
+
+      // Helper to generate mock data for each model type
+      Object.keys(PFAPI_MODEL_CFGS).forEach((modelKey) => {
+        const key = modelKey as keyof typeof PFAPI_MODEL_CFGS;
+
+        if (key === 'reminders') {
+          completeState[key] = [{ id: 'reminder-1' }];
+        } else if (key === 'boards') {
+          completeState[key] = { boardCfgs: [{ id: 'board-1' }] };
+        } else if (key === 'archiveYoung' || key === 'archiveOld') {
+          completeState[key] = { task: { ids: [`${key}-task-1`], entities: {} } };
+        } else if (
+          key === 'globalConfig' ||
+          key === 'planner' ||
+          key === 'menuTree' ||
+          key === 'timeTracking'
+        ) {
+          completeState[key] = { someData: true }; // Singleton existence check
+        } else if (key === 'pluginUserData') {
+          completeState[key] = [{ id: 'plugin-user-1' }];
+        } else if (key === 'pluginMetadata') {
+          completeState[key] = [{ id: 'plugin-meta-1' }];
+        } else {
+          // Standard entity adapter models (task, project, etc.)
+          completeState[key] = { ids: [`${key}-1`], entities: {} };
+        }
+      });
+
+      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(completeState),
+      );
+
+      // 2. Run compaction
+      await service.compact();
+
+      // 3. Verify that we got at least one key for every model type
+      const savedCache = mockOpLogStore.saveStateCache.calls.mostRecent().args[0];
+      const extractedKeys = new Set(savedCache.snapshotEntityKeys);
+
+      // Define expected entity types for each model key
+      const modelToEntityType: Record<string, string> = {
+        task: 'TASK',
+        project: 'PROJECT',
+        tag: 'TAG',
+        note: 'NOTE',
+        issueProvider: 'ISSUE_PROVIDER',
+        simpleCounter: 'SIMPLE_COUNTER',
+        taskRepeatCfg: 'TASK_REPEAT_CFG',
+        metric: 'METRIC',
+        reminders: 'REMINDER',
+        boards: 'BOARD',
+        globalConfig: 'GLOBAL_CONFIG',
+        planner: 'PLANNER',
+        menuTree: 'MENU_TREE',
+        timeTracking: 'TIME_TRACKING',
+        archiveYoung: 'TASK', // Archives map to TASK
+        archiveOld: 'TASK', // Archives map to TASK
+        pluginUserData: 'PLUGIN_USER_DATA',
+        pluginMetadata: 'PLUGIN_METADATA',
+      };
+
+      const missingModels: string[] = [];
+
+      Object.keys(PFAPI_MODEL_CFGS).forEach((modelKey) => {
+        const expectedPrefix = modelToEntityType[modelKey];
+        if (!expectedPrefix) {
+          fail(
+            `Test setup error: No expected EntityType defined for model '${modelKey}'`,
+          );
+        }
+
+        const hasKey = Array.from(extractedKeys).some((k) =>
+          k.startsWith(expectedPrefix + ':'),
+        );
+        if (!hasKey) {
+          missingModels.push(modelKey);
+        }
+      });
+
+      if (missingModels.length > 0) {
+        fail(
+          `snapshotEntityKeys extraction is missing support for models: ${missingModels.join(', ')}. \n` +
+            `Update _extractEntityKeysFromState in OperationLogCompactionService to handle these models.`,
+        );
+      }
     });
   });
 });
