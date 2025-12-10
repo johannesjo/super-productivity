@@ -518,35 +518,33 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
   });
 
   describe('addRepeatCfgToTaskUpdateTask$', () => {
-    it('should schedule task using taskRepeatCfg.startDate if present', () => {
+    it('should schedule task for today when DAILY repeat pattern matches (issue #5594)', () => {
       testScheduler.run(({ hot, expectObservable }) => {
-        const startDateStr = '2025-01-01';
+        const todayStr = getDbDateStr();
         const startTimeStr = '10:00';
         const action = addTaskRepeatCfgToTask({
-          taskRepeatCfg: { ...mockRepeatCfg, startDate: startDateStr },
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
           taskId: 'parent-task-id',
           startTime: startTimeStr,
           remindAt: TaskReminderOptionId.AtStart,
         });
 
         actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
 
-        // Task has a DIFFERENT due day to ensure we don't accidentally match
-        const taskWithDifferentDue: Task = {
-          ...mockTask,
-          dueDay: '2024-12-31',
-        };
-
-        taskService.getByIdOnce$.and.returnValue(of(taskWithDifferentDue));
-
-        // Use dateStrToUtcDate to match the fix in the effects file (issue #5515)
+        // For DAILY repeat, getNewestPossibleDueDate returns today
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
-          dateStrToUtcDate(startDateStr).getTime(),
+          dateStrToUtcDate(todayStr).getTime(),
         );
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
-          task: taskWithDifferentDue,
+          task: mockTask,
           dueWithTime: expectedDateTime,
           remindAt: remindOptionToMilliseconds(
             expectedDateTime,
@@ -562,12 +560,90 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       });
     });
 
-    it('should fallback to task.dueDay if taskRepeatCfg.startDate is missing', () => {
+    it('should schedule task for correct weekday when WEEKLY pattern is used (issue #5594)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const today = new Date();
+        const todayDayOfWeek = today.getDay(); // 0 = Sunday, 1 = Monday, etc.
+        const startTimeStr = '10:00';
+
+        // Create a repeat config that repeats on today's weekday
+        const weekdayKeys = [
+          'sunday',
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+        ] as const;
+        const todayWeekdayKey = weekdayKeys[todayDayOfWeek];
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'WEEKLY',
+            repeatEvery: 1,
+            monday: todayWeekdayKey === 'monday',
+            tuesday: todayWeekdayKey === 'tuesday',
+            wednesday: todayWeekdayKey === 'wednesday',
+            thursday: todayWeekdayKey === 'thursday',
+            friday: todayWeekdayKey === 'friday',
+            saturday: todayWeekdayKey === 'saturday',
+            sunday: todayWeekdayKey === 'sunday',
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+
+        // For WEEKLY repeat on today's weekday, should return today
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(todayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: mockTask,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback to task.dueDay if repeat pattern returns null', () => {
       testScheduler.run(({ hot, expectObservable }) => {
         const dueDayStr = '2025-02-01';
         const startTimeStr = '10:00';
+
+        // Create a repeat config that cannot calculate a date (no weekdays selected for weekly)
         const action = addTaskRepeatCfgToTask({
-          taskRepeatCfg: { ...mockRepeatCfg, startDate: undefined },
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: undefined,
+            repeatCycle: 'WEEKLY',
+            repeatEvery: 1,
+            monday: false,
+            tuesday: false,
+            wednesday: false,
+            thursday: false,
+            friday: false,
+            saturday: false,
+            sunday: false,
+          },
           taskId: 'parent-task-id',
           startTime: startTimeStr,
           remindAt: TaskReminderOptionId.AtStart,
@@ -582,7 +658,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
 
-        // Use dateStrToUtcDate to match the fix in the effects file (issue #5515)
+        // Fallback to task.dueDay when getNewestPossibleDueDate returns null
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
           dateStrToUtcDate(dueDayStr).getTime(),
@@ -610,10 +686,15 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       // In far-west timezones (e.g., Hawaii UTC-10), new Date('2025-01-15') would give
       // Jan 14th local date, but dateStrToUtcDate correctly gives Jan 15th local date
       testScheduler.run(({ hot, expectObservable }) => {
-        const dateStr = '2025-01-15';
+        const dateStr = getDbDateStr(); // Use today for predictable results
         const startTimeStr = '14:45'; // 2:45 PM - user's reported time
         const action = addTaskRepeatCfgToTask({
-          taskRepeatCfg: { ...mockRepeatCfg, startDate: dateStr },
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: dateStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
           taskId: 'parent-task-id',
           startTime: startTimeStr,
           remindAt: TaskReminderOptionId.AtStart,
@@ -624,11 +705,12 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         // Verify dateStrToUtcDate gives correct local date
         const localDate = dateStrToUtcDate(dateStr);
-        expect(localDate.getDate()).toBe(15);
-        expect(localDate.getMonth()).toBe(0); // January
-        expect(localDate.getFullYear()).toBe(2025);
+        const today = new Date();
+        expect(localDate.getDate()).toBe(today.getDate());
+        expect(localDate.getMonth()).toBe(today.getMonth());
+        expect(localDate.getFullYear()).toBe(today.getFullYear());
 
-        // The scheduled time should be 14:45 on Jan 15th local time
+        // The scheduled time should be 14:45 on today local time
         const expectedDateTime = getDateTimeFromClockString(
           startTimeStr,
           localDate.getTime(),
@@ -636,7 +718,6 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         const scheduledDate = new Date(expectedDateTime);
         expect(scheduledDate.getHours()).toBe(14);
         expect(scheduledDate.getMinutes()).toBe(45);
-        expect(scheduledDate.getDate()).toBe(15);
 
         const expectedAction = TaskSharedActions.scheduleTaskWithTime({
           task: mockTask,
