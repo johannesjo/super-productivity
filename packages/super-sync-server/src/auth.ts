@@ -1,9 +1,10 @@
-import { getDb, User } from './db';
+import { prisma, User } from './db';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
 import { Logger } from './logger';
 import { randomBytes } from 'crypto';
 import { sendVerificationEmail } from './email';
+import { Prisma } from '@prisma/client';
 
 // Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
@@ -40,88 +41,95 @@ export const registerUser = async (
 ): Promise<{ message: string }> => {
   // Password strength validation is handled by Zod in api.ts
 
-  const db = getDb();
   const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
   const verificationToken = randomBytes(32).toString('hex');
-  const expiresAt = Date.now() + VERIFICATION_TOKEN_EXPIRY_MS;
-  const acceptedAt = termsAcceptedAt || Date.now();
+  const expiresAt = BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
+  const acceptedAt = termsAcceptedAt ? BigInt(termsAcceptedAt) : BigInt(Date.now());
 
   try {
-    const info = db
-      .prepare(
-        `
-      INSERT INTO users (email, password_hash, verification_token, verification_token_expires_at, terms_accepted_at)
-      VALUES (?, ?, ?, ?, ?)
-    `,
-      )
-      .run(email, passwordHash, verificationToken, expiresAt, acceptedAt);
+    const user = await prisma.user.create({
+      data: {
+        email,
+        passwordHash,
+        verificationToken,
+        verificationTokenExpiresAt: expiresAt,
+        termsAcceptedAt: acceptedAt,
+      },
+    });
 
-    Logger.info(`User registered (ID: ${info.lastInsertRowid})`);
+    Logger.info(`User registered (ID: ${user.id})`);
 
     // Send verification email asynchronously
     const emailSent = await sendVerificationEmail(email, verificationToken);
     if (!emailSent) {
       // Clean up the newly created account to prevent unusable, un-verifiable entries
       try {
-        db.prepare('DELETE FROM users WHERE id = ?').run(info.lastInsertRowid);
-        Logger.info(`Cleaned up failed registration (ID: ${info.lastInsertRowid})`);
+        await prisma.user.delete({ where: { id: user.id } });
+        Logger.info(`Cleaned up failed registration (ID: ${user.id})`);
       } catch (cleanupErr) {
         // Log but don't mask the original email failure
         Logger.error(
-          `Failed to clean up user ${info.lastInsertRowid} after email failure:`,
+          `Failed to clean up user ${user.id} after email failure:`,
           cleanupErr,
         );
       }
       throw new Error('Failed to send verification email. Please try again later.');
     }
   } catch (err: unknown) {
-    if ((err as { code?: string })?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
-      const existingUser = db
-        .prepare('SELECT * FROM users WHERE email = ?')
-        .get(email) as User | undefined;
+    if (
+      err instanceof Prisma.PrismaClientKnownRequestError &&
+      err.code === 'P2002' // Unique constraint violation (email)
+    ) {
+      const existingUser = await prisma.user.findUnique({
+        where: { email },
+      });
 
       if (!existingUser) {
         Logger.warn('Unique constraint hit but user not found');
-      } else if (existingUser.is_verified === 1) {
+      } else if (existingUser.isVerified === 1) {
         Logger.info(
           `Registration attempt for already verified account (ID: ${existingUser.id})`,
         );
       } else {
+        const now = BigInt(Date.now());
         const tokenStillValid =
-          !!existingUser.verification_token &&
-          !!existingUser.verification_token_expires_at &&
-          existingUser.verification_token_expires_at > Date.now();
+          !!existingUser.verificationToken &&
+          !!existingUser.verificationTokenExpiresAt &&
+          existingUser.verificationTokenExpiresAt > now;
 
         const newToken =
-          tokenStillValid && existingUser.verification_token
-            ? existingUser.verification_token
+          tokenStillValid && existingUser.verificationToken
+            ? existingUser.verificationToken
             : randomBytes(32).toString('hex');
-        const newExpiresAt = tokenStillValid
-          ? existingUser.verification_token_expires_at
-          : Date.now() + VERIFICATION_TOKEN_EXPIRY_MS;
+        const newExpiresAt =
+          tokenStillValid && existingUser.verificationTokenExpiresAt
+            ? existingUser.verificationTokenExpiresAt
+            : BigInt(Date.now() + VERIFICATION_TOKEN_EXPIRY_MS);
 
-        const previousToken = existingUser.verification_token;
-        const previousExpiresAt = existingUser.verification_token_expires_at;
-        const previousResendCount = existingUser.verification_resend_count;
+        const previousToken = existingUser.verificationToken;
+        const previousExpiresAt = existingUser.verificationTokenExpiresAt;
+        const previousResendCount = existingUser.verificationResendCount;
 
-        db.prepare(
-          `
-            UPDATE users
-            SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = verification_resend_count + 1
-            WHERE id = ?
-          `,
-        ).run(newToken, newExpiresAt, existingUser.id);
+        await prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            verificationToken: newToken,
+            verificationTokenExpiresAt: newExpiresAt,
+            verificationResendCount: { increment: 1 },
+          },
+        });
 
         const emailSent = await sendVerificationEmail(email, newToken);
         if (!emailSent) {
           try {
-            db.prepare(
-              `
-              UPDATE users
-              SET verification_token = ?, verification_token_expires_at = ?, verification_resend_count = ?
-              WHERE id = ?
-            `,
-            ).run(previousToken, previousExpiresAt, previousResendCount, existingUser.id);
+            await prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                verificationToken: previousToken,
+                verificationTokenExpiresAt: previousExpiresAt,
+                verificationResendCount: previousResendCount,
+              },
+            });
             Logger.info(
               `Rolled back token update for user ${existingUser.id} after email failure`,
             );
@@ -152,31 +160,31 @@ export const registerUser = async (
   };
 };
 
-export const verifyEmail = (token: string): boolean => {
-  const db = getDb();
-
-  const user = db
-    .prepare('SELECT * FROM users WHERE verification_token = ?')
-    .get(token) as User | undefined;
+export const verifyEmail = async (token: string): Promise<boolean> => {
+  const user = await prisma.user.findFirst({
+    where: { verificationToken: token },
+  });
 
   if (!user) {
     throw new Error('Invalid verification token');
   }
 
   if (
-    user.verification_token_expires_at &&
-    user.verification_token_expires_at < Date.now()
+    user.verificationTokenExpiresAt &&
+    user.verificationTokenExpiresAt < BigInt(Date.now())
   ) {
     throw new Error('Verification token has expired');
   }
 
-  db.prepare(
-    `
-      UPDATE users
-      SET is_verified = 1, verification_token = NULL, verification_token_expires_at = NULL, verification_resend_count = 0
-      WHERE id = ?
-    `,
-  ).run(user.id);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: {
+      isVerified: 1,
+      verificationToken: null,
+      verificationTokenExpiresAt: null,
+      verificationResendCount: 0,
+    },
+  });
 
   Logger.info(`User verified (ID: ${user.id})`);
   return true;
@@ -186,15 +194,15 @@ export const loginUser = async (
   email: string,
   password: string,
 ): Promise<{ token: string; user: { id: number; email: string } }> => {
-  const db = getDb();
-
-  const user = db.prepare('SELECT * FROM users WHERE email = ?').get(email) as
-    | User
-    | undefined;
+  const user = await prisma.user.findUnique({
+    where: { email },
+  });
 
   // Check if account is locked (do this after fetching user but before password check)
-  if (user && user.locked_until && user.locked_until > Date.now()) {
-    const remainingMinutes = Math.ceil((user.locked_until - Date.now()) / 60000);
+  if (user && user.lockedUntil && user.lockedUntil > BigInt(Date.now())) {
+    const remainingMinutes = Math.ceil(
+      Number(user.lockedUntil - BigInt(Date.now())) / 60000,
+    );
     Logger.warn(
       `Login attempt for locked account (ID: ${user.id}), ${remainingMinutes}min remaining`,
     );
@@ -205,24 +213,25 @@ export const loginUser = async (
 
   // Timing attack mitigation: always perform a comparison
   // Even if the user is not found, we hash and compare against a dummy hash.
-  // This ensures the response time is roughly the same for valid and invalid emails,
-  // preventing attackers from enumerating valid email addresses based on timing differences.
-  // This is a valid bcrypt hash (12 rounds) of the string "dummy"
   const dummyHash = '$2a$12$R9h/cIPz0gi.URNNX3kh2OPST9/PgBkqquzi.Ss7KIUgO2t0jWMUW';
-  const hashToCompare = user ? user.password_hash : dummyHash;
+  const hashToCompare = user ? user.passwordHash : dummyHash;
 
   const isMatch = await bcrypt.compare(password, hashToCompare);
 
   if (!user || !isMatch) {
     // Increment failed attempts if user exists
     if (user) {
-      const newFailedAttempts = (user.failed_login_attempts || 0) + 1;
+      const newFailedAttempts = (user.failedLoginAttempts || 0) + 1;
       const shouldLock = newFailedAttempts >= MAX_FAILED_LOGIN_ATTEMPTS;
-      const lockedUntil = shouldLock ? Date.now() + LOCKOUT_DURATION_MS : null;
+      const lockedUntil = shouldLock ? BigInt(Date.now() + LOCKOUT_DURATION_MS) : null;
 
-      db.prepare(
-        'UPDATE users SET failed_login_attempts = ?, locked_until = ? WHERE id = ?',
-      ).run(newFailedAttempts, lockedUntil, user.id);
+      await prisma.user.update({
+        where: { id: user.id },
+        data: {
+          failedLoginAttempts: newFailedAttempts,
+          lockedUntil,
+        },
+      });
 
       if (shouldLock) {
         Logger.warn(
@@ -237,19 +246,23 @@ export const loginUser = async (
     throw new Error('Invalid credentials');
   }
 
-  if (user.is_verified === 0) {
+  if (user.isVerified === 0) {
     throw new Error('Email not verified');
   }
 
   // Reset failed attempts on successful login
-  if (user.failed_login_attempts > 0 || user.locked_until) {
-    db.prepare(
-      'UPDATE users SET failed_login_attempts = 0, locked_until = NULL WHERE id = ?',
-    ).run(user.id);
+  if (user.failedLoginAttempts > 0 || user.lockedUntil) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+      },
+    });
   }
 
   // Include token_version in JWT for revocation support
-  const tokenVersion = user.token_version ?? 0;
+  const tokenVersion = user.tokenVersion ?? 0;
   const token = jwt.sign(
     { userId: user.id, email: user.email, tokenVersion },
     JWT_SECRET,
@@ -265,43 +278,32 @@ export const loginUser = async (
  * Revoke all existing tokens for a user by incrementing their token version.
  * Call this when the user changes their password or explicitly logs out all devices.
  */
-export const revokeAllTokens = (userId: number): void => {
-  const db = getDb();
-  db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
-    userId,
-  );
+export const revokeAllTokens = async (userId: number): Promise<void> => {
+  await prisma.user.update({
+    where: { id: userId },
+    data: { tokenVersion: { increment: 1 } },
+  });
   Logger.info(`All tokens revoked for user ${userId}`);
 };
 
 /**
  * Replace the current JWT with a new one.
  * This invalidates all existing tokens (including the current one) and returns a fresh token.
- * Use this when a token was accidentally shared or compromised.
  */
-export const replaceToken = (
+export const replaceToken = async (
   userId: number,
   email: string,
-): { token: string; user: { id: number; email: string } } => {
-  const db = getDb();
-
+): Promise<{ token: string; user: { id: number; email: string } }> => {
   // Use transaction to ensure atomicity of version increment and read
-  const newTokenVersion = db.transaction(() => {
+  const newTokenVersion = await prisma.$transaction(async (tx) => {
     // Increment token version to invalidate all existing tokens
-    db.prepare('UPDATE users SET token_version = token_version + 1 WHERE id = ?').run(
-      userId,
-    );
-
-    // Get the new token version
-    const user = db
-      .prepare('SELECT token_version FROM users WHERE id = ?')
-      .get(userId) as { token_version: number } | undefined;
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    return user.token_version;
-  })();
+    const user = await tx.user.update({
+      where: { id: userId },
+      data: { tokenVersion: { increment: 1 } },
+      select: { tokenVersion: true },
+    });
+    return user.tokenVersion;
+  });
 
   const token = jwt.sign({ userId, email, tokenVersion: newTokenVersion }, JWT_SECRET, {
     expiresIn: JWT_EXPIRY,
@@ -328,10 +330,10 @@ export const verifyToken = async (
     });
 
     // Verify user exists and token version matches
-    const db = getDb();
-    const user = db
-      .prepare('SELECT id, token_version FROM users WHERE id = ?')
-      .get(payload.userId) as { id: number; token_version: number } | undefined;
+    const user = await prisma.user.findUnique({
+      where: { id: payload.userId },
+      select: { id: true, tokenVersion: true },
+    });
 
     if (!user) {
       Logger.warn(`Token verification failed: User ${payload.userId} not found in DB`);
@@ -341,7 +343,7 @@ export const verifyToken = async (
     // Check token version - if it doesn't match, the token has been revoked
     // (e.g., user changed password). Tokens without version are treated as version 0.
     const tokenVersion = payload.tokenVersion ?? 0;
-    const currentVersion = user.token_version ?? 0;
+    const currentVersion = user.tokenVersion ?? 0;
     if (tokenVersion !== currentVersion) {
       Logger.warn(
         `Token verification failed: Token version mismatch for user ${payload.userId} ` +

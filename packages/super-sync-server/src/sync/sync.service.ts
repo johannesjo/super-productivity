@@ -1,6 +1,5 @@
-import Database from 'better-sqlite3';
 import * as zlib from 'zlib';
-import { getDb, DbOperation } from '../db';
+import { prisma, Operation as PrismaOperation } from '../db';
 import {
   Operation,
   ServerOperation,
@@ -24,6 +23,7 @@ import {
   stateNeedsMigration,
   type OperationLike,
 } from '@sp/shared-schema';
+import { Prisma } from '@prisma/client';
 
 /**
  * Valid entity types for operations.
@@ -70,29 +70,6 @@ const MAX_SNAPSHOT_SIZE_BYTES = 50 * 1024 * 1024;
  */
 const MAX_SNAPSHOT_DECOMPRESSED_BYTES = 100 * 1024 * 1024;
 
-interface PreparedStatements {
-  insertOp: Database.Statement;
-  getNextSeq: Database.Statement;
-  initUserSeq: Database.Statement;
-  getOpsSince: Database.Statement;
-  getOpsSinceExcludeClient: Database.Statement;
-  updateDevice: Database.Statement;
-  getLatestSeq: Database.Statement;
-  getCachedSnapshot: Database.Statement;
-  cacheSnapshot: Database.Statement;
-  getAllOps: Database.Statement;
-  insertTombstone: Database.Statement;
-  getTombstone: Database.Statement;
-  deleteExpiredTombstones: Database.Statement;
-  deleteOldSyncedOpsForAllUsers: Database.Statement;
-  deleteStaleDevices: Database.Statement;
-  getAllUserIds: Database.Statement;
-  getOnlineDeviceCount: Database.Statement;
-  getLatestOpForEntity: Database.Statement;
-  getMinServerSeq: Database.Statement;
-  getDevice: Database.Statement;
-}
-
 /**
  * Maximum entries in caches to prevent unbounded memory growth.
  * With ~200 bytes per entry, 10000 entries = ~2MB max memory per cache.
@@ -109,8 +86,6 @@ interface RequestDeduplicationEntry {
 }
 
 export class SyncService {
-  private db: Database.Database;
-  private stmts!: PreparedStatements;
   private config: SyncConfig;
   private rateLimitCounters: Map<number, { count: number; resetAt: number }> = new Map();
 
@@ -123,127 +98,7 @@ export class SyncService {
   private readonly REQUEST_DEDUP_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
   constructor(config: Partial<SyncConfig> = {}) {
-    this.db = getDb();
     this.config = { ...DEFAULT_SYNC_CONFIG, ...config };
-    this.prepareStatements();
-  }
-
-  private prepareStatements(): void {
-    this.stmts = {
-      insertOp: this.db.prepare(`
-        INSERT INTO operations (
-          id, user_id, client_id, server_seq, action_type, op_type,
-          entity_type, entity_id, payload, vector_clock, schema_version,
-          client_timestamp, received_at, parent_op_id
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `),
-
-      getNextSeq: this.db.prepare(`
-        UPDATE user_sync_state
-        SET last_seq = last_seq + 1
-        WHERE user_id = ?
-        RETURNING last_seq
-      `),
-
-      initUserSeq: this.db.prepare(`
-        INSERT OR IGNORE INTO user_sync_state (user_id, last_seq)
-        VALUES (?, 0)
-      `),
-
-      getOpsSince: this.db.prepare(`
-        SELECT * FROM operations
-        WHERE user_id = ? AND server_seq > ?
-        ORDER BY server_seq ASC
-        LIMIT ?
-      `),
-
-      getOpsSinceExcludeClient: this.db.prepare(`
-        SELECT * FROM operations
-        WHERE user_id = ? AND server_seq > ? AND client_id != ?
-        ORDER BY server_seq ASC
-        LIMIT ?
-      `),
-
-      updateDevice: this.db.prepare(`
-        INSERT INTO sync_devices (client_id, user_id, last_seen_at, last_acked_seq, created_at)
-        VALUES (?, ?, ?, 0, ?)
-        ON CONFLICT(user_id, client_id) DO UPDATE SET
-          last_seen_at = excluded.last_seen_at
-      `),
-
-      getLatestSeq: this.db.prepare(`
-        SELECT last_seq FROM user_sync_state WHERE user_id = ?
-      `),
-
-      getCachedSnapshot: this.db.prepare(`
-        SELECT snapshot_data, last_snapshot_seq, snapshot_at, snapshot_schema_version
-        FROM user_sync_state WHERE user_id = ?
-      `),
-
-      cacheSnapshot: this.db.prepare(`
-        UPDATE user_sync_state
-        SET snapshot_data = ?, last_snapshot_seq = ?, snapshot_at = ?, snapshot_schema_version = ?
-        WHERE user_id = ?
-      `),
-
-      getAllOps: this.db.prepare(`
-        SELECT * FROM operations
-        WHERE user_id = ?
-        ORDER BY server_seq ASC
-      `),
-
-      insertTombstone: this.db.prepare(`
-        INSERT OR REPLACE INTO tombstones
-        (user_id, entity_type, entity_id, deleted_at, deleted_by_op_id, expires_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `),
-
-      getTombstone: this.db.prepare(`
-        SELECT * FROM tombstones
-        WHERE user_id = ? AND entity_type = ? AND entity_id = ?
-      `),
-
-      deleteExpiredTombstones: this.db.prepare(`
-        DELETE FROM tombstones WHERE expires_at < ?
-      `),
-
-      // Time-based cleanup: delete operations older than threshold (90 days).
-      // Simpler than ACK-based cleanup - just delete old ops regardless of device status.
-      deleteOldSyncedOpsForAllUsers: this.db.prepare(`
-        DELETE FROM operations WHERE received_at < ?
-      `),
-
-      deleteStaleDevices: this.db.prepare(`
-        DELETE FROM sync_devices WHERE last_seen_at < ?
-      `),
-
-      getAllUserIds: this.db.prepare(`
-        SELECT DISTINCT user_id FROM user_sync_state
-      `),
-
-      getOnlineDeviceCount: this.db.prepare(`
-        SELECT COUNT(*) as count FROM sync_devices
-        WHERE user_id = ? AND last_seen_at > ?
-      `),
-
-      // Get the most recent operation for a specific entity (for conflict detection)
-      getLatestOpForEntity: this.db.prepare(`
-        SELECT * FROM operations
-        WHERE user_id = ? AND entity_type = ? AND entity_id = ?
-        ORDER BY server_seq DESC
-        LIMIT 1
-      `),
-
-      // Get minimum server_seq for a user (for gap detection)
-      getMinServerSeq: this.db.prepare(`
-        SELECT MIN(server_seq) as min_seq FROM operations WHERE user_id = ?
-      `),
-
-      // Get device by user and client ID (for ownership validation)
-      getDevice: this.db.prepare(`
-        SELECT 1 FROM sync_devices WHERE user_id = ? AND client_id = ?
-      `),
-    };
   }
 
   // === Conflict Detection ===
@@ -251,16 +106,12 @@ export class SyncService {
   /**
    * Check if an incoming operation conflicts with existing operations.
    * Returns conflict info if a concurrent modification is detected.
-   *
-   * Conflict detection rules:
-   * - Only entity-specific ops (with entityId) can conflict
-   * - SYNC_IMPORT, BACKUP_IMPORT, REPAIR bypass conflict detection (full state operations)
-   * - UPD/DEL/MOV on an entity with a concurrent vector clock is a conflict
    */
-  private detectConflict(
+  private async detectConflict(
     userId: number,
     op: Operation,
-  ): { hasConflict: boolean; reason?: string; existingClock?: VectorClock } {
+    tx: Prisma.TransactionClient,
+  ): Promise<{ hasConflict: boolean; reason?: string; existingClock?: VectorClock }> {
     // Skip conflict detection for full-state operations
     if (
       op.opType === 'SYNC_IMPORT' ||
@@ -276,19 +127,24 @@ export class SyncService {
     }
 
     // Get the latest operation for this entity
-    const existingOp = this.stmts.getLatestOpForEntity.get(
-      userId,
-      op.entityType,
-      op.entityId,
-    ) as DbOperation | undefined;
+    const existingOp = await tx.operation.findFirst({
+      where: {
+        userId,
+        entityType: op.entityType,
+        entityId: op.entityId,
+      },
+      orderBy: {
+        serverSeq: 'desc',
+      },
+    });
 
     // No existing operation = no conflict
     if (!existingOp) {
       return { hasConflict: false };
     }
 
-    // Parse the existing operation's vector clock
-    const existingClock = JSON.parse(existingOp.vector_clock) as VectorClock;
+    // Parse the existing operation's vector clock (Prisma returns Json, cast to VectorClock)
+    const existingClock = existingOp.vectorClock as unknown as VectorClock;
 
     // Compare vector clocks
     const comparison = compareVectorClocks(op.vectorClock, existingClock);
@@ -299,7 +155,7 @@ export class SyncService {
     }
 
     // If clocks are EQUAL, this might be a retry of the same operation - check if from same client
-    if (comparison === 'EQUAL' && op.clientId === existingOp.client_id) {
+    if (comparison === 'EQUAL' && op.clientId === existingOp.clientId) {
       return { hasConflict: false };
     }
 
@@ -326,30 +182,63 @@ export class SyncService {
 
   // === Upload Operations ===
 
-  uploadOps(userId: number, clientId: string, ops: Operation[]): UploadResult[] {
+  async uploadOps(
+    userId: number,
+    clientId: string,
+    ops: Operation[],
+  ): Promise<UploadResult[]> {
     const results: UploadResult[] = [];
     const now = Date.now();
 
-    // Ensure user has sync state row
-    this.stmts.initUserSeq.run(userId);
-
-    // Use immediate mode to acquire write lock upfront (prevents deadlocks)
-    // Process each operation individually within the transaction
-    const tx = this.db.transaction(() => {
-      for (const op of ops) {
-        const result = this.processOperation(userId, clientId, op, now);
-        results.push(result);
-      }
-
-      // Update device last seen
-      this.stmts.updateDevice.run(clientId, userId, now, now);
-    });
-
     try {
-      tx.immediate();
+      // Use transaction to acquire write lock and ensure atomicity
+      await prisma.$transaction(
+        async (tx) => {
+          // Ensure user has sync state row (init if needed)
+          // We assume user exists in `users` table because of foreign key,
+          // but if `uploadOps` is called, authentication should have verified user existence.
+          // However, `user_sync_state` might not exist yet.
+          await tx.userSyncState.upsert({
+            where: { userId },
+            create: { userId, lastSeq: 0 },
+            update: {}, // No-op update to ensure it exists
+          });
+
+          for (const op of ops) {
+            const result = await this.processOperation(userId, clientId, op, now, tx);
+            results.push(result);
+          }
+
+          // Update device last seen
+          await tx.syncDevice.upsert({
+            where: {
+              userId_clientId: {
+                userId,
+                clientId,
+              },
+            },
+            create: {
+              userId,
+              clientId,
+              lastSeenAt: BigInt(now),
+              createdAt: BigInt(now),
+              lastAckedSeq: 0,
+            },
+            update: {
+              lastSeenAt: BigInt(now),
+            },
+          });
+        },
+        {
+          // Serializable might be too strict/slow for Postgres, 'RepeatableRead' is often enough,
+          // but for strict sequence consistency, we want to avoid gaps/races.
+          // Default isolation level in Prisma is usually adequate (ReadCommitted).
+          // However, to strictly serialize `getNextSeq` (last_seq increment), we rely on row locking of `user_sync_state`.
+          // `tx.userSyncState.update` locks the row.
+        },
+      );
     } catch (err) {
       // Transaction failed - all operations were rolled back
-      // Return error results for all operations that appeared successful
       Logger.error(`Transaction failed for user ${userId}: ${(err as Error).message}`);
 
       // Mark all "successful" results as failed due to transaction rollback
@@ -367,14 +256,14 @@ export class SyncService {
   /**
    * Process a single operation within a transaction.
    * Handles validation, conflict detection, and persistence.
-   * Never throws - returns error result instead.
    */
-  private processOperation(
+  private async processOperation(
     userId: number,
     clientId: string,
     op: Operation,
     now: number,
-  ): UploadResult {
+    tx: Prisma.TransactionClient,
+  ): Promise<UploadResult> {
     try {
       // Validate operation
       const validation = this.validateOp(op);
@@ -399,7 +288,7 @@ export class SyncService {
       }
 
       // Check for conflicts with existing operations
-      const conflict = this.detectConflict(userId, op);
+      const conflict = await this.detectConflict(userId, op, tx);
       if (conflict.hasConflict) {
         const isConcurrent = conflict.reason?.includes('Concurrent');
         const errorCode = isConcurrent
@@ -425,30 +314,35 @@ export class SyncService {
       }
 
       // Get next sequence number
-      const row = this.stmts.getNextSeq.get(userId) as { last_seq: number };
-      const serverSeq = row.last_seq;
+      const updatedState = await tx.userSyncState.update({
+        where: { userId },
+        data: { lastSeq: { increment: 1 } },
+      });
+      const serverSeq = updatedState.lastSeq;
 
       // Insert operation
-      this.stmts.insertOp.run(
-        op.id,
-        userId,
-        clientId,
-        serverSeq,
-        op.actionType,
-        op.opType,
-        op.entityType,
-        op.entityId ?? null,
-        JSON.stringify(op.payload),
-        JSON.stringify(op.vectorClock),
-        op.schemaVersion,
-        op.timestamp,
-        now,
-        op.parentOpId ?? null,
-      );
+      await tx.operation.create({
+        data: {
+          id: op.id,
+          userId,
+          clientId,
+          serverSeq,
+          actionType: op.actionType,
+          opType: op.opType,
+          entityType: op.entityType,
+          entityId: op.entityId ?? null,
+          payload: op.payload as Prisma.InputJsonValue,
+          vectorClock: op.vectorClock as Prisma.InputJsonValue,
+          schemaVersion: op.schemaVersion,
+          clientTimestamp: BigInt(op.timestamp),
+          receivedAt: BigInt(now),
+          parentOpId: op.parentOpId ?? null,
+        },
+      });
 
       // Create tombstone for delete operations
       if (op.opType === 'DEL' && op.entityId) {
-        this.createTombstoneSync(userId, op.entityType, op.entityId, op.id);
+        await this.createTombstoneSync(userId, op.entityType, op.entityId, op.id, tx);
       }
 
       return {
@@ -458,12 +352,9 @@ export class SyncService {
       };
     } catch (err: unknown) {
       // Duplicate ID (already processed) - idempotency
-      // Use SQLite error code for reliable detection instead of string matching
-      const sqliteError = err as { code?: string };
       if (
-        sqliteError?.code === 'SQLITE_CONSTRAINT_PRIMARYKEY' ||
-        sqliteError?.code === 'SQLITE_CONSTRAINT_UNIQUE' ||
-        sqliteError?.code === 'SQLITE_CONSTRAINT'
+        err instanceof Prisma.PrismaClientKnownRequestError &&
+        err.code === 'P2002' // Unique constraint violation
       ) {
         Logger.audit({
           event: 'OP_REJECTED',
@@ -488,210 +379,214 @@ export class SyncService {
     }
   }
 
-  private createTombstoneSync(
+  private async createTombstoneSync(
     userId: number,
     entityType: string,
     entityId: string,
     deletedByOpId: string,
-  ): void {
+    tx: Prisma.TransactionClient,
+  ): Promise<void> {
     const now = Date.now();
     const expiresAt = now + this.config.tombstoneRetentionMs;
 
-    this.stmts.insertTombstone.run(
-      userId,
-      entityType,
-      entityId,
-      now,
-      deletedByOpId,
-      expiresAt,
-    );
+    await tx.tombstone.upsert({
+      where: {
+        userId_entityType_entityId: {
+          userId,
+          entityType,
+          entityId,
+        },
+      },
+      create: {
+        userId,
+        entityType,
+        entityId,
+        deletedAt: BigInt(now),
+        deletedByOpId,
+        expiresAt: BigInt(expiresAt),
+      },
+      update: {
+        deletedAt: BigInt(now),
+        deletedByOpId,
+        expiresAt: BigInt(expiresAt),
+      },
+    });
   }
 
   // === Download Operations ===
 
-  /**
-   * Get operations since a sequence number.
-   * This is wrapped in a transaction to ensure snapshot isolation.
-   * Without transaction isolation, the latestSeq could be incremented
-   * between reading ops and returning the response, causing clients to miss operations.
-   */
-  getOpsSince(
+  async getOpsSince(
     userId: number,
     sinceSeq: number,
     excludeClient?: string,
     limit: number = 500,
-  ): ServerOperation[] {
-    // Use transaction for snapshot isolation
-    const tx = this.db.transaction(() => {
-      const stmt = excludeClient
-        ? this.stmts.getOpsSinceExcludeClient
-        : this.stmts.getOpsSince;
-
-      const args = excludeClient
-        ? [userId, sinceSeq, excludeClient, limit]
-        : [userId, sinceSeq, limit];
-
-      return stmt.all(...args) as DbOperation[];
+  ): Promise<ServerOperation[]> {
+    const ops = await prisma.operation.findMany({
+      where: {
+        userId,
+        serverSeq: { gt: sinceSeq },
+        ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
+      },
+      orderBy: {
+        serverSeq: 'asc',
+      },
+      take: limit,
     });
 
-    const rows = tx();
-
-    return rows.map((row) => ({
-      serverSeq: row.server_seq,
+    return ops.map((row) => ({
+      serverSeq: row.serverSeq,
       op: {
         id: row.id,
-        clientId: row.client_id,
-        actionType: row.action_type,
-        opType: row.op_type as Operation['opType'],
-        entityType: row.entity_type,
-        entityId: row.entity_id ?? undefined,
-        payload: JSON.parse(row.payload),
-        vectorClock: JSON.parse(row.vector_clock),
-        schemaVersion: row.schema_version,
-        timestamp: row.client_timestamp,
-        parentOpId: row.parent_op_id ?? undefined,
+        clientId: row.clientId,
+        actionType: row.actionType,
+        opType: row.opType as Operation['opType'],
+        entityType: row.entityType,
+        entityId: row.entityId ?? undefined,
+        payload: row.payload,
+        vectorClock: row.vectorClock as unknown as VectorClock,
+        schemaVersion: row.schemaVersion,
+        timestamp: Number(row.clientTimestamp),
+        parentOpId: row.parentOpId ?? undefined,
       },
-      receivedAt: row.received_at,
+      receivedAt: Number(row.receivedAt),
     }));
   }
 
   /**
    * Get operations and latest sequence atomically with gap detection.
-   * Uses transaction to ensure the latestSeq matches the returned operations.
-   *
-   * Gap detection rules:
-   * 1. If sinceSeq > 0 and the first returned op's seq != sinceSeq + 1, there's a gap
-   * 2. If sinceSeq is older than our oldest retained operation, there's a gap
-   * 3. If sinceSeq > latestSeq, the client is ahead (should not happen, but handle gracefully)
    */
-  getOpsSinceWithSeq(
+  async getOpsSinceWithSeq(
     userId: number,
     sinceSeq: number,
     excludeClient?: string,
     limit: number = 500,
-  ): { ops: ServerOperation[]; latestSeq: number; gapDetected: boolean } {
-    const tx = this.db.transaction(() => {
-      const stmt = excludeClient
-        ? this.stmts.getOpsSinceExcludeClient
-        : this.stmts.getOpsSince;
+  ): Promise<{ ops: ServerOperation[]; latestSeq: number; gapDetected: boolean }> {
+    return prisma.$transaction(async (tx) => {
+      const ops = await tx.operation.findMany({
+        where: {
+          userId,
+          serverSeq: { gt: sinceSeq },
+          ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
+        },
+        orderBy: {
+          serverSeq: 'asc',
+        },
+        take: limit,
+      });
 
-      const args = excludeClient
-        ? [userId, sinceSeq, excludeClient, limit]
-        : [userId, sinceSeq, limit];
+      const seqRow = await tx.userSyncState.findUnique({
+        where: { userId },
+        select: { lastSeq: true },
+      });
 
-      const rows = stmt.all(...args) as DbOperation[];
-      const seqRow = this.stmts.getLatestSeq.get(userId) as
-        | { last_seq: number }
-        | undefined;
-      const minSeqRow = this.stmts.getMinServerSeq.get(userId) as
-        | { min_seq: number | null }
-        | undefined;
+      // Get min sequence efficiently
+      const minSeqAgg = await tx.operation.aggregate({
+        where: { userId },
+        _min: { serverSeq: true },
+      });
 
-      return {
-        rows,
-        latestSeq: seqRow?.last_seq ?? 0,
-        minSeq: minSeqRow?.min_seq ?? null,
-      };
+      const latestSeq = seqRow?.lastSeq ?? 0;
+      const minSeq = minSeqAgg._min.serverSeq ?? null;
+
+      // Gap detection logic
+      let gapDetected = false;
+
+      // Case 1: Client has history but server is empty
+      if (sinceSeq > 0 && latestSeq === 0) {
+        gapDetected = true;
+        Logger.warn(
+          `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
+        );
+      }
+
+      // Case 2: Client is ahead of server
+      if (sinceSeq > latestSeq && latestSeq > 0) {
+        gapDetected = true;
+        Logger.warn(
+          `[user:${userId}] Gap detected: client ahead sinceSeq=${sinceSeq} > latestSeq=${latestSeq}`,
+        );
+      }
+
+      if (sinceSeq > 0 && latestSeq > 0) {
+        // Case 3: Requested seq is purged
+        if (minSeq !== null && sinceSeq < minSeq - 1) {
+          gapDetected = true;
+          Logger.warn(
+            `[user:${userId}] Gap detected: sinceSeq=${sinceSeq} but minSeq=${minSeq}`,
+          );
+        }
+
+        // Case 4: Gap in returned operations
+        if (!excludeClient && ops.length > 0 && ops[0].serverSeq > sinceSeq + 1) {
+          gapDetected = true;
+          Logger.warn(
+            `[user:${userId}] Gap detected: expected seq ${sinceSeq + 1} but got ${ops[0].serverSeq}`,
+          );
+        }
+      }
+
+      const mappedOps = ops.map((row) => ({
+        serverSeq: row.serverSeq,
+        op: {
+          id: row.id,
+          clientId: row.clientId,
+          actionType: row.actionType,
+          opType: row.opType as Operation['opType'],
+          entityType: row.entityType,
+          entityId: row.entityId ?? undefined,
+          payload: row.payload,
+          vectorClock: row.vectorClock as unknown as VectorClock,
+          schemaVersion: row.schemaVersion,
+          timestamp: Number(row.clientTimestamp),
+          parentOpId: row.parentOpId ?? undefined,
+        },
+        receivedAt: Number(row.receivedAt),
+      }));
+
+      return { ops: mappedOps, latestSeq, gapDetected };
     });
-
-    const { rows, latestSeq, minSeq } = tx();
-
-    // Gap detection logic
-    let gapDetected = false;
-
-    // Case 1: Client has history but server is empty (server was reset)
-    if (sinceSeq > 0 && latestSeq === 0) {
-      gapDetected = true;
-      Logger.warn(
-        `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
-      );
-    }
-
-    // Case 2: Client is ahead of server (shouldn't happen normally, indicates server reset)
-    if (sinceSeq > latestSeq && latestSeq > 0) {
-      gapDetected = true;
-      Logger.warn(
-        `[user:${userId}] Gap detected: client ahead sinceSeq=${sinceSeq} > latestSeq=${latestSeq}`,
-      );
-    }
-
-    if (sinceSeq > 0 && latestSeq > 0) {
-      // If we requested ops since a sequence, but the minimum retained op is higher,
-      // operations have been purged and there's a gap
-      if (minSeq !== null && sinceSeq < minSeq - 1) {
-        gapDetected = true;
-        Logger.warn(
-          `[user:${userId}] Gap detected: sinceSeq=${sinceSeq} but minSeq=${minSeq}`,
-        );
-      }
-
-      // If we got ops but the first one doesn't immediately follow sinceSeq,
-      // there's a gap (unless we're excluding a client and they created the gap)
-      if (!excludeClient && rows.length > 0 && rows[0].server_seq > sinceSeq + 1) {
-        gapDetected = true;
-        Logger.warn(
-          `[user:${userId}] Gap detected: expected seq ${sinceSeq + 1} but got ${rows[0].server_seq}`,
-        );
-      }
-    }
-
-    const ops = rows.map((row) => ({
-      serverSeq: row.server_seq,
-      op: {
-        id: row.id,
-        clientId: row.client_id,
-        actionType: row.action_type,
-        opType: row.op_type as Operation['opType'],
-        entityType: row.entity_type,
-        entityId: row.entity_id ?? undefined,
-        payload: JSON.parse(row.payload),
-        vectorClock: JSON.parse(row.vector_clock),
-        schemaVersion: row.schema_version,
-        timestamp: row.client_timestamp,
-        parentOpId: row.parent_op_id ?? undefined,
-      },
-      receivedAt: row.received_at,
-    }));
-
-    return { ops, latestSeq, gapDetected };
   }
 
-  getLatestSeq(userId: number): number {
-    const row = this.stmts.getLatestSeq.get(userId) as { last_seq: number } | undefined;
-    return row?.last_seq ?? 0;
+  async getLatestSeq(userId: number): Promise<number> {
+    const row = await prisma.userSyncState.findUnique({
+      where: { userId },
+      select: { lastSeq: true },
+    });
+    return row?.lastSeq ?? 0;
   }
 
   // === Snapshot Management ===
 
-  getCachedSnapshot(userId: number): {
+  async getCachedSnapshot(userId: number): Promise<{
     state: unknown;
     serverSeq: number;
     generatedAt: number;
     schemaVersion: number;
-  } | null {
-    const row = this.stmts.getCachedSnapshot.get(userId) as
-      | {
-          snapshot_data: Buffer | null;
-          last_snapshot_seq: number | null;
-          snapshot_at: number | null;
-          snapshot_schema_version: number | null;
-        }
-      | undefined;
+  } | null> {
+    const row = await prisma.userSyncState.findUnique({
+      where: { userId },
+      select: {
+        snapshotData: true,
+        lastSnapshotSeq: true,
+        snapshotAt: true,
+        snapshotSchemaVersion: true,
+      },
+    });
 
-    if (!row?.snapshot_data) return null;
+    if (!row?.snapshotData) return null;
 
     try {
-      // Decompress snapshot with an upper bound to prevent zip bombs
+      // Decompress snapshot
       const decompressed = zlib
-        .gunzipSync(row.snapshot_data, {
+        .gunzipSync(row.snapshotData, {
           maxOutputLength: MAX_SNAPSHOT_DECOMPRESSED_BYTES,
         })
         .toString('utf-8');
       return {
         state: JSON.parse(decompressed),
-        serverSeq: row.last_snapshot_seq ?? 0,
-        generatedAt: row.snapshot_at ?? 0,
-        schemaVersion: row.snapshot_schema_version ?? 1,
+        serverSeq: row.lastSnapshotSeq ?? 0,
+        generatedAt: Number(row.snapshotAt) ?? 0,
+        schemaVersion: row.snapshotSchemaVersion ?? 1,
       };
     } catch (err) {
       Logger.error(
@@ -701,12 +596,11 @@ export class SyncService {
     }
   }
 
-  cacheSnapshot(userId: number, state: unknown, serverSeq: number): void {
+  async cacheSnapshot(userId: number, state: unknown, serverSeq: number): Promise<void> {
     const now = Date.now();
-    // Compress snapshot to reduce storage
+    // Compress snapshot
     const compressed = zlib.gzipSync(JSON.stringify(state));
 
-    // Enforce size limit to prevent storage exhaustion
     if (compressed.length > MAX_SNAPSHOT_SIZE_BYTES) {
       Logger.error(
         `[user:${userId}] Snapshot too large: ${compressed.length} bytes ` +
@@ -715,146 +609,173 @@ export class SyncService {
       return;
     }
 
-    // Store with current schema version
-    this.stmts.cacheSnapshot.run(
-      compressed,
-      serverSeq,
-      now,
-      CURRENT_SCHEMA_VERSION,
-      userId,
-    );
+    await prisma.userSyncState.update({
+      where: { userId },
+      data: {
+        snapshotData: compressed,
+        lastSnapshotSeq: serverSeq,
+        snapshotAt: BigInt(now),
+        snapshotSchemaVersion: CURRENT_SCHEMA_VERSION,
+      },
+    });
   }
 
-  generateSnapshot(userId: number): {
+  async generateSnapshot(userId: number): Promise<{
     state: unknown;
     serverSeq: number;
     generatedAt: number;
     schemaVersion: number;
-  } {
-    // Wrap in transaction for snapshot isolation - prevents race conditions
-    // where new ops arrive between reading latestSeq and processing ops
-    const tx = this.db.transaction(() => {
-      const latestSeq = this.getLatestSeq(userId);
-      let state: Record<string, unknown> = {};
-      let startSeq = 0;
-      let snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
+  }> {
+    // Transaction for consistent view
+    return prisma.$transaction(
+      async (tx) => {
+        // Get latest seq in this transaction
+        const seqRow = await tx.userSyncState.findUnique({
+          where: { userId },
+          select: { lastSeq: true },
+        });
+        const latestSeq = seqRow?.lastSeq ?? 0;
 
-      // Try to get cached snapshot to build upon (Incremental Snapshot)
-      const cached = this.getCachedSnapshot(userId);
-      if (cached) {
-        state = cached.state as Record<string, unknown>;
-        startSeq = cached.serverSeq;
-        snapshotSchemaVersion = cached.schemaVersion;
-      }
+        let state: Record<string, unknown> = {};
+        let startSeq = 0;
+        let snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
 
-      // If we are already up to date AND at current schema version, return cached
-      if (
-        startSeq >= latestSeq &&
-        cached &&
-        snapshotSchemaVersion === CURRENT_SCHEMA_VERSION
-      ) {
+        // Try to get cached snapshot (need to fetch it inside tx for consistency?
+        // Actually, we can fetch it. If it's old, we just replay more ops.)
+        // Re-implementing getCachedSnapshot logic inside tx
+        const cachedRow = await tx.userSyncState.findUnique({
+          where: { userId },
+          select: {
+            snapshotData: true,
+            lastSnapshotSeq: true,
+            snapshotAt: true,
+            snapshotSchemaVersion: true,
+          },
+        });
+
+        if (cachedRow?.snapshotData) {
+          try {
+            const decompressed = zlib
+              .gunzipSync(cachedRow.snapshotData, {
+                maxOutputLength: MAX_SNAPSHOT_DECOMPRESSED_BYTES,
+              })
+              .toString('utf-8');
+            state = JSON.parse(decompressed) as Record<string, unknown>;
+            startSeq = cachedRow.lastSnapshotSeq ?? 0;
+            snapshotSchemaVersion = cachedRow.snapshotSchemaVersion ?? 1;
+          } catch (err) {
+            // Ignore corrupted cache
+          }
+        }
+
+        if (
+          startSeq >= latestSeq &&
+          cachedRow?.snapshotData &&
+          snapshotSchemaVersion === CURRENT_SCHEMA_VERSION
+        ) {
+          return {
+            state,
+            serverSeq: startSeq,
+            generatedAt: Date.now(),
+            schemaVersion: CURRENT_SCHEMA_VERSION,
+          };
+        }
+
+        // Migrate snapshot if needed
+        if (stateNeedsMigration(snapshotSchemaVersion, CURRENT_SCHEMA_VERSION)) {
+          Logger.info(
+            `[user:${userId}] Migrating snapshot from v${snapshotSchemaVersion} to v${CURRENT_SCHEMA_VERSION}`,
+          );
+          const migrationResult = migrateState(
+            state,
+            snapshotSchemaVersion,
+            CURRENT_SCHEMA_VERSION,
+          );
+          if (!migrationResult.success) {
+            throw new Error(`Snapshot migration failed: ${migrationResult.error}`);
+          }
+          state = migrationResult.data as Record<string, unknown>;
+          snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
+        }
+
+        const totalOpsToProcess = latestSeq - startSeq;
+        if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
+          throw new Error(
+            `Too many operations to process (${totalOpsToProcess}). ` +
+              `Max: ${MAX_OPS_FOR_SNAPSHOT}.`,
+          );
+        }
+
+        const BATCH_SIZE = 10000;
+        let currentSeq = startSeq;
+        let totalProcessed = 0;
+
+        while (currentSeq < latestSeq) {
+          const batchOps = await tx.operation.findMany({
+            where: {
+              userId,
+              serverSeq: { gt: currentSeq },
+            },
+            orderBy: { serverSeq: 'asc' },
+            take: BATCH_SIZE,
+          });
+
+          if (batchOps.length === 0) break;
+
+          // Replay ops
+          state = this.replayOpsToState(batchOps, state);
+
+          currentSeq = batchOps[batchOps.length - 1].serverSeq;
+          totalProcessed += batchOps.length;
+
+          if (totalProcessed > MAX_OPS_FOR_SNAPSHOT) break;
+        }
+
+        const generatedAt = Date.now();
+
+        // Update cache (we can do this async/outside, but doing it inside ensures it matches the returned state)
+        // However, we are in a read-only-ish flow, but we can write to cache.
+        // We'll call the update directly on tx.
+        // Re-implementing cacheSnapshot logic for tx
+        const compressed = zlib.gzipSync(JSON.stringify(state));
+        if (compressed.length <= MAX_SNAPSHOT_SIZE_BYTES) {
+          await tx.userSyncState.update({
+            where: { userId },
+            data: {
+              snapshotData: compressed,
+              lastSnapshotSeq: latestSeq,
+              snapshotAt: BigInt(generatedAt),
+              snapshotSchemaVersion: CURRENT_SCHEMA_VERSION,
+            },
+          });
+        }
+
         return {
-          state: cached.state,
-          serverSeq: cached.serverSeq,
-          generatedAt: Date.now(), // Refresh timestamp
+          state,
+          serverSeq: latestSeq,
+          generatedAt,
           schemaVersion: CURRENT_SCHEMA_VERSION,
         };
-      }
-
-      // Migrate snapshot if it's from an older schema version
-      if (stateNeedsMigration(snapshotSchemaVersion, CURRENT_SCHEMA_VERSION)) {
-        Logger.info(
-          `[user:${userId}] Migrating snapshot from v${snapshotSchemaVersion} to v${CURRENT_SCHEMA_VERSION}`,
-        );
-        const migrationResult = migrateState(
-          state,
-          snapshotSchemaVersion,
-          CURRENT_SCHEMA_VERSION,
-        );
-        if (!migrationResult.success) {
-          Logger.error(
-            `[user:${userId}] Snapshot migration failed: ${migrationResult.error}`,
-          );
-          throw new Error(`Snapshot migration failed: ${migrationResult.error}`);
-        }
-        state = migrationResult.data as Record<string, unknown>;
-        snapshotSchemaVersion = CURRENT_SCHEMA_VERSION;
-      }
-
-      // Safety check: prevent memory exhaustion for excessive operation counts
-      const totalOpsToProcess = latestSeq - startSeq;
-      if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
-        Logger.error(
-          `Snapshot generation for user ${userId} requires ${totalOpsToProcess} ops ` +
-            `(max ${MAX_OPS_FOR_SNAPSHOT}). Consider implementing data archival.`,
-        );
-        throw new Error(
-          `Too many operations to process (${totalOpsToProcess}). ` +
-            `Maximum allowed: ${MAX_OPS_FOR_SNAPSHOT}. Contact support for data archival.`,
-        );
-      }
-
-      // Process operations in batches to avoid memory issues
-      const BATCH_SIZE = 10000;
-      let currentSeq = startSeq;
-      let totalProcessed = 0;
-
-      while (currentSeq < latestSeq) {
-        const batchOps = this.stmts.getOpsSince.all(
-          userId,
-          currentSeq,
-          BATCH_SIZE,
-        ) as DbOperation[];
-
-        if (batchOps.length === 0) break;
-
-        // Replay this batch (operations are migrated during replay)
-        state = this.replayOpsToState(batchOps, state);
-
-        // Update currentSeq to the last processed operation
-        currentSeq = batchOps[batchOps.length - 1].server_seq;
-        totalProcessed += batchOps.length;
-
-        // Double-check bounds during processing (defensive)
-        if (totalProcessed > MAX_OPS_FOR_SNAPSHOT) {
-          Logger.error(`Snapshot generation exceeded max ops limit during processing`);
-          break;
-        }
-      }
-
-      const generatedAt = Date.now();
-
-      // Cache the new snapshot
-      this.cacheSnapshot(userId, state, latestSeq);
-
-      return {
-        state,
-        serverSeq: latestSeq,
-        generatedAt,
-        schemaVersion: CURRENT_SCHEMA_VERSION,
-      };
-    });
-
-    return tx();
+      },
+      {
+        timeout: 60000, // Snapshots can take time
+      },
+    );
   }
 
   private replayOpsToState(
-    ops: DbOperation[],
+    ops: PrismaOperation[],
     initialState: Record<string, unknown> = {},
   ): Record<string, unknown> {
-    // Clone initial state to avoid mutation if needed (though we assign to it)
-    // We cast it to our working structure
     const state = { ...(initialState as Record<string, Record<string, unknown>>) };
 
-    // Apply operations in order
     for (const row of ops) {
-      let opType = row.op_type;
-      let entityType = row.entity_type;
-      let entityId = row.entity_id;
-      let payload = JSON.parse(row.payload);
+      let opType = row.opType as Operation['opType'];
+      let entityType = row.entityType;
+      let entityId = row.entityId;
+      let payload = row.payload;
 
-      // Migrate operation if it's from an older schema version
-      const opSchemaVersion = row.schema_version ?? 1;
+      const opSchemaVersion = row.schemaVersion ?? 1;
       if (opSchemaVersion < CURRENT_SCHEMA_VERSION) {
         const opLike: OperationLike = {
           id: row.id,
@@ -867,33 +788,19 @@ export class SyncService {
 
         const migrationResult = migrateOperation(opLike, CURRENT_SCHEMA_VERSION);
         if (!migrationResult.success) {
-          Logger.warn(
-            `Operation migration failed for ${row.id}: ${migrationResult.error}. Skipping.`,
-          );
           continue;
         }
-
         const migratedOp = migrationResult.data;
-        if (migratedOp === null || migratedOp === undefined) {
-          // Operation was dropped during migration (e.g., removed feature)
-          Logger.info(`Operation ${row.id} dropped during migration (feature removed)`);
-          continue;
-        }
+        if (!migratedOp) continue;
 
-        // Use migrated values
-        opType = migratedOp.opType;
+        opType = migratedOp.opType as Operation['opType'];
         entityType = migratedOp.entityType;
         entityId = migratedOp.entityId ?? null;
-        payload = migratedOp.payload;
+        payload = migratedOp.payload as any;
       }
 
-      // Skip operations with invalid entity types (defensive)
-      if (!ALLOWED_ENTITY_TYPES.has(entityType)) {
-        Logger.warn(`Skipping operation with invalid entity type: ${entityType}`);
-        continue;
-      }
+      if (!ALLOWED_ENTITY_TYPES.has(entityType)) continue;
 
-      // Initialize entity type if needed
       if (!state[entityType]) {
         state[entityType] = {};
       }
@@ -904,7 +811,7 @@ export class SyncService {
           if (entityId) {
             state[entityType][entityId] = {
               ...(state[entityType][entityId] as Record<string, unknown>),
-              ...payload,
+              ...(payload as Record<string, unknown>),
             };
           }
           break;
@@ -914,20 +821,15 @@ export class SyncService {
           }
           break;
         case 'MOV':
-          // Move operations typically contain reordering info in payload
-          // Apply any payload changes (e.g., updated parent, order)
           if (entityId && payload) {
             state[entityType][entityId] = {
               ...(state[entityType][entityId] as Record<string, unknown>),
-              ...payload,
+              ...(payload as Record<string, unknown>),
             };
           }
           break;
         case 'BATCH':
-          // Batch operations can contain updates to multiple entities
-          // The payload structure depends on the batch type
           if (payload && typeof payload === 'object') {
-            // If payload has entities keyed by ID, apply them
             const batchPayload = payload as Record<string, unknown>;
             if (batchPayload.entities && typeof batchPayload.entities === 'object') {
               const entities = batchPayload.entities as Record<string, unknown>;
@@ -938,7 +840,6 @@ export class SyncService {
                 };
               }
             } else if (entityId) {
-              // Single entity batch update
               state[entityType][entityId] = {
                 ...(state[entityType][entityId] as Record<string, unknown>),
                 ...batchPayload,
@@ -949,8 +850,6 @@ export class SyncService {
         case 'SYNC_IMPORT':
         case 'BACKUP_IMPORT':
         case 'REPAIR':
-          // Full state import - replace everything
-          // Handle wrapped payloads (REPAIR always has appDataComplete, others might)
           if (payload && typeof payload === 'object' && 'appDataComplete' in payload) {
             Object.assign(
               state,
@@ -962,11 +861,11 @@ export class SyncService {
           break;
       }
     }
-
     return state;
   }
 
-  // === Rate Limiting ===
+  // === Rate Limiting & Deduplication ===
+  // (Logic remains largely same, just memory structures)
 
   isRateLimited(userId: number): boolean {
     const now = Date.now();
@@ -974,161 +873,116 @@ export class SyncService {
     const limit = this.config.uploadRateLimit;
 
     if (!counter || now > counter.resetAt) {
-      // Enforce cache size limit (FIFO eviction) before adding
       if (this.rateLimitCounters.size >= MAX_CACHE_SIZE) {
         const firstKey = this.rateLimitCounters.keys().next().value;
-        if (firstKey !== undefined) {
-          this.rateLimitCounters.delete(firstKey);
-        }
+        if (firstKey !== undefined) this.rateLimitCounters.delete(firstKey);
       }
-
-      this.rateLimitCounters.set(userId, {
-        count: 1,
-        resetAt: now + limit.windowMs,
-      });
+      this.rateLimitCounters.set(userId, { count: 1, resetAt: now + limit.windowMs });
       return false;
     }
 
-    if (counter.count >= limit.max) {
-      return true;
-    }
-
+    if (counter.count >= limit.max) return true;
     counter.count++;
     return false;
   }
 
-  /**
-   * Clean up expired rate limit counters to prevent memory leaks.
-   * Should be called periodically (e.g., hourly).
-   */
   cleanupExpiredRateLimitCounters(): number {
     const now = Date.now();
     let cleaned = 0;
-
     for (const [userId, counter] of this.rateLimitCounters) {
       if (now > counter.resetAt) {
         this.rateLimitCounters.delete(userId);
         cleaned++;
       }
     }
-
     return cleaned;
   }
 
-  // === Request Deduplication ===
-
-  /**
-   * Check if a request has already been processed.
-   * Returns the cached results if found, or null if new request.
-   */
   checkRequestDeduplication(userId: number, requestId: string): UploadResult[] | null {
     const key = `${userId}:${requestId}`;
     const entry = this.requestDeduplicationCache.get(key);
-
-    if (!entry) {
-      return null;
-    }
-
-    // Check if entry has expired
+    if (!entry) return null;
     if (Date.now() - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
       this.requestDeduplicationCache.delete(key);
       return null;
     }
-
-    Logger.debug(
-      `[user:${userId}] Request ${requestId} already processed, returning cached results`,
-    );
     return entry.results;
   }
 
-  /**
-   * Store results for a processed request ID.
-   * Enforces cache size limit by removing oldest entries when full.
-   */
   cacheRequestResults(userId: number, requestId: string, results: UploadResult[]): void {
     const key = `${userId}:${requestId}`;
-
-    // Enforce cache size limit (FIFO eviction)
     if (this.requestDeduplicationCache.size >= MAX_CACHE_SIZE) {
       const firstKey = this.requestDeduplicationCache.keys().next().value;
-      if (firstKey) {
-        this.requestDeduplicationCache.delete(firstKey);
-      }
+      if (firstKey) this.requestDeduplicationCache.delete(firstKey);
     }
-
-    this.requestDeduplicationCache.set(key, {
-      processedAt: Date.now(),
-      results,
-    });
+    this.requestDeduplicationCache.set(key, { processedAt: Date.now(), results });
   }
 
-  /**
-   * Clean up expired request deduplication entries.
-   * Should be called periodically (same schedule as rate limit cleanup).
-   */
   cleanupExpiredRequestDedupEntries(): number {
     const now = Date.now();
     let cleaned = 0;
-
     for (const [key, entry] of this.requestDeduplicationCache) {
       if (now - entry.processedAt > this.REQUEST_DEDUP_TTL_MS) {
         this.requestDeduplicationCache.delete(key);
         cleaned++;
       }
     }
-
     return cleaned;
-  }
-
-  // === Tombstone Management ===
-
-  isTombstoned(userId: number, entityType: string, entityId: string): boolean {
-    const row = this.stmts.getTombstone.get(userId, entityType, entityId);
-    return !!row;
   }
 
   // === Cleanup ===
 
-  deleteExpiredTombstones(): number {
-    const result = this.stmts.deleteExpiredTombstones.run(Date.now());
-    return result.changes;
+  async deleteExpiredTombstones(): Promise<number> {
+    const result = await prisma.tombstone.deleteMany({
+      where: {
+        expiresAt: { lt: BigInt(Date.now()) },
+      },
+    });
+    return result.count;
   }
 
-  /**
-   * Deletes all operations older than cutoffTime (time-based cleanup).
-   * Simple approach: old ops are cleaned up after 90 days regardless of device status.
-   */
-  deleteOldSyncedOpsForAllUsers(cutoffTime: number): number {
-    const result = this.stmts.deleteOldSyncedOpsForAllUsers.run(cutoffTime);
-    return result.changes;
+  async deleteOldSyncedOpsForAllUsers(cutoffTime: number): Promise<number> {
+    const result = await prisma.operation.deleteMany({
+      where: {
+        receivedAt: { lt: BigInt(cutoffTime) },
+      },
+    });
+    return result.count;
   }
 
-  deleteStaleDevices(beforeTime: number): number {
-    const result = this.stmts.deleteStaleDevices.run(beforeTime);
-    return result.changes;
+  async deleteStaleDevices(beforeTime: number): Promise<number> {
+    const result = await prisma.syncDevice.deleteMany({
+      where: {
+        lastSeenAt: { lt: BigInt(beforeTime) },
+      },
+    });
+    return result.count;
   }
 
-  /**
-   * Check if a device belongs to a user.
-   */
-  isDeviceOwner(userId: number, clientId: string): boolean {
-    const row = this.stmts.getDevice.get(userId, clientId);
-    return !!row;
+  async isDeviceOwner(userId: number, clientId: string): Promise<boolean> {
+    const count = await prisma.syncDevice.count({
+      where: { userId, clientId },
+    });
+    return count > 0;
   }
 
-  getAllUserIds(): number[] {
-    const rows = this.stmts.getAllUserIds.all() as { user_id: number }[];
-    return rows.map((r) => r.user_id);
+  async getAllUserIds(): Promise<number[]> {
+    const users = await prisma.userSyncState.findMany({
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+    return users.map((u) => u.userId);
   }
 
-  // === Status ===
-
-  getOnlineDeviceCount(userId: number): number {
+  async getOnlineDeviceCount(userId: number): Promise<number> {
     const threshold = Date.now() - ONLINE_DEVICE_THRESHOLD_MS;
-    const row = this.stmts.getOnlineDeviceCount.get(userId, threshold) as
-      | { count: number }
-      | undefined;
-    return row?.count ?? 0;
+    const count = await prisma.syncDevice.count({
+      where: {
+        userId,
+        lastSeenAt: { gt: BigInt(threshold) },
+      },
+    });
+    return count;
   }
 
   // === Validation ===
@@ -1166,7 +1020,6 @@ export class SyncService {
         errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
       };
     }
-    // Validate entity type against allowlist (case-sensitive, must match client EntityType)
     if (!ALLOWED_ENTITY_TYPES.has(op.entityType)) {
       return {
         valid: false,
@@ -1174,7 +1027,6 @@ export class SyncService {
         errorCode: SYNC_ERROR_CODES.INVALID_ENTITY_TYPE,
       };
     }
-    // Validate entityId format/length if present
     if (op.entityId !== undefined && op.entityId !== null) {
       if (typeof op.entityId !== 'string' || op.entityId.length > 255) {
         return {
@@ -1184,7 +1036,6 @@ export class SyncService {
         };
       }
     }
-    // DEL operations require entityId - a delete without a target is meaningless
     if (op.opType === 'DEL' && !op.entityId) {
       return {
         valid: false,
@@ -1199,7 +1050,6 @@ export class SyncService {
         errorCode: SYNC_ERROR_CODES.INVALID_PAYLOAD,
       };
     }
-    // Schema version validation
     if (op.schemaVersion !== undefined) {
       if (op.schemaVersion < 1 || op.schemaVersion > 100) {
         return {
@@ -1210,7 +1060,6 @@ export class SyncService {
       }
     }
 
-    // Validate and sanitize vector clock
     const clockValidation = sanitizeVectorClock(op.vectorClock);
     if (!clockValidation.valid) {
       return {
@@ -1219,13 +1068,8 @@ export class SyncService {
         errorCode: SYNC_ERROR_CODES.INVALID_VECTOR_CLOCK,
       };
     }
-    // Replace with sanitized clock (removes invalid entries)
     op.vectorClock = clockValidation.clock;
 
-    // Check payload complexity BEFORE JSON.stringify to prevent DoS
-    // Deep nesting can cause exponential CPU usage during serialization
-    // Skip for full-state operations (SYNC_IMPORT, BACKUP_IMPORT, REPAIR) which contain
-    // the entire application state and are already size-limited via bodyLimit
     const isFullStateOp =
       op.opType === 'SYNC_IMPORT' ||
       op.opType === 'BACKUP_IMPORT' ||
@@ -1238,7 +1082,6 @@ export class SyncService {
       };
     }
 
-    // Size limit
     const payloadSize = JSON.stringify(op.payload).length;
     if (payloadSize > this.config.maxPayloadSizeBytes) {
       return {
@@ -1248,7 +1091,6 @@ export class SyncService {
       };
     }
 
-    // Validate payload structure based on operation type
     const payloadValidation = validatePayload(op.opType, op.payload);
     if (!payloadValidation.valid) {
       return {
@@ -1258,7 +1100,6 @@ export class SyncService {
       };
     }
 
-    // Timestamp validation (based on HLC best practices)
     const now = Date.now();
     if (op.timestamp > now + this.config.maxClockDriftMs) {
       return {
@@ -1278,15 +1119,6 @@ export class SyncService {
     return { valid: true };
   }
 
-  /**
-   * Validate payload complexity to prevent DoS attacks via deeply nested objects.
-   * Checks maximum nesting depth and total number of keys.
-   *
-   * @param payload - The payload to validate
-   * @param maxDepth - Maximum allowed nesting depth (default 20)
-   * @param maxKeys - Maximum total keys across all levels (default 20000)
-   * @returns true if payload is within limits, false otherwise
-   */
   private validatePayloadComplexity(
     payload: unknown,
     maxDepth: number = 20,
@@ -1295,31 +1127,18 @@ export class SyncService {
     let totalKeys = 0;
 
     const checkDepth = (obj: unknown, depth: number): boolean => {
-      // Exceeded max depth
-      if (depth > maxDepth) {
-        return false;
-      }
+      if (depth > maxDepth) return false;
+      if (obj === null || typeof obj !== 'object') return true;
 
-      // Primitives are fine
-      if (obj === null || typeof obj !== 'object') {
-        return true;
-      }
-
-      // Check arrays
       if (Array.isArray(obj)) {
         totalKeys += obj.length;
-        if (totalKeys > maxKeys) {
-          return false;
-        }
+        if (totalKeys > maxKeys) return false;
         return obj.every((item) => checkDepth(item, depth + 1));
       }
 
-      // Check objects
       const keys = Object.keys(obj);
       totalKeys += keys.length;
-      if (totalKeys > maxKeys) {
-        return false;
-      }
+      if (totalKeys > maxKeys) return false;
 
       return keys.every((key) =>
         checkDepth((obj as Record<string, unknown>)[key], depth + 1),

@@ -12,13 +12,13 @@
     "clear-data": "ts-node scripts/clear-data.ts"
   },
   "dependencies": {
-    "@sp/shared-schema": "*",
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
     "@fastify/static": "^8.3.0",
+    "@prisma/client": "5.22.0",
+    "@sp/shared-schema": "*",
     "bcryptjs": "^3.0.3",
-    "better-sqlite3": "^12.4.6",
     "dotenv": "^17.2.3",
     "fastify": "^5.6.2",
     "jsonwebtoken": "^9.0.2",
@@ -34,6 +34,7 @@
     "@types/nodemailer": "^7.0.4",
     "@types/supertest": "^6.0.3",
     "nodemon": "^3.1.11",
+    "prisma": "5.22.0",
     "supertest": "^7.1.4",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.0",

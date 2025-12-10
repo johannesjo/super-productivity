@@ -7,7 +7,7 @@ import fastifyStatic from '@fastify/static';
 import * as path from 'path';
 import { loadConfigFromEnv, ServerConfig } from './config';
 import { Logger } from './logger';
-import { initDb, getDb } from './db';
+import { prisma, disconnectDb } from './db';
 import { apiRoutes } from './api';
 import { pageRoutes } from './pages';
 import { syncRoutes, startCleanupJobs, stopCleanupJobs } from './sync';
@@ -23,9 +23,6 @@ export const createServer = (
   stop: () => Promise<void>;
 } => {
   const fullConfig = loadConfigFromEnv(config);
-
-  // Initialize Database
-  initDb(fullConfig.dataDir);
 
   // Ensure data directory exists
   if (!fs.existsSync(fullConfig.dataDir)) {
@@ -87,9 +84,8 @@ export const createServer = (
       // Health Check - verifies database connectivity
       fastifyServer.get('/health', async (_, reply) => {
         try {
-          const db = getDb();
           // Simple query to verify DB is responsive
-          db.prepare('SELECT 1').get();
+          await prisma.$queryRaw`SELECT 1`;
           return { status: 'ok', db: 'connected' };
         } catch (err) {
           Logger.error('Health check failed: DB not responsive', err);
@@ -137,6 +133,7 @@ export const createServer = (
         await fastifyServer.close();
         fastifyServer = undefined;
       }
+      await disconnectDb();
     },
   };
 };

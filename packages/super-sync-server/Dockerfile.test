@@ -9,9 +9,6 @@
 
 FROM node:22-alpine
 
-# Install build dependencies for native modules (better-sqlite3)
-RUN apk add --no-cache python3 make g++
-
 WORKDIR /app
 
 # Copy package files for workspace setup
@@ -21,9 +18,6 @@ COPY packages/super-sync-server/package.json ./packages/super-sync-server/
 
 # Install dependencies (ignore scripts to skip husky/prepare from root)
 RUN npm ci --workspace=packages/shared-schema --workspace=packages/super-sync-server --ignore-scripts
-
-# Rebuild better-sqlite3 native module for this platform
-RUN cd /app/packages/super-sync-server && npm rebuild better-sqlite3
 
 # Copy source files
 COPY packages/shared-schema/ ./packages/shared-schema/
@@ -35,6 +29,8 @@ RUN npm run build
 
 # Build super-sync-server
 WORKDIR /app/packages/super-sync-server
+# Generate Prisma Client
+RUN npx prisma generate
 # Clean dist folder to remove any stale files that might conflict
 RUN rm -rf dist && npm run build
 
@@ -50,4 +46,5 @@ ENV TEST_MODE_CONFIRM=yes-i-understand-the-risks
 ENV CORS_ORIGINS=*
 ENV JWT_SECRET=e2e-test-secret-minimum-32-chars-long-for-security
 
-CMD ["node", "dist/index.js"]
+# Push schema to DB and start server
+CMD sh -c "npx prisma db push && node dist/index.js"

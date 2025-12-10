@@ -10,7 +10,7 @@ import {
 interface CleanupJob {
   name: string;
   interval: number;
-  run: () => number;
+  run: () => Promise<number> | number;
 }
 
 const CLEANUP_JOBS: CleanupJob[] = [
@@ -49,9 +49,9 @@ const CLEANUP_JOBS: CleanupJob[] = [
 
 const timers: Map<string, NodeJS.Timeout> = new Map();
 
-const runJob = (job: CleanupJob): void => {
+const runJob = async (job: CleanupJob): Promise<void> => {
   try {
-    const deleted = job.run();
+    const deleted = await job.run();
     if (deleted > 0) {
       Logger.info(`Cleanup [${job.name}]: removed ${deleted} entries`);
     }
@@ -66,7 +66,7 @@ export const startCleanupJobs = (): void => {
   // Run initial cleanup after a short delay
   setTimeout(() => {
     for (const job of CLEANUP_JOBS) {
-      runJob(job);
+      void runJob(job);
     }
   }, 10_000);
 
@@ -74,7 +74,9 @@ export const startCleanupJobs = (): void => {
   for (const job of CLEANUP_JOBS) {
     timers.set(
       job.name,
-      setInterval(() => runJob(job), job.interval),
+      setInterval(() => {
+        void runJob(job);
+      }, job.interval),
     );
   }
 

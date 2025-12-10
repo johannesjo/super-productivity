@@ -7,7 +7,7 @@
 import { FastifyInstance } from 'fastify';
 import * as bcrypt from 'bcryptjs';
 import * as jwt from 'jsonwebtoken';
-import { getDb } from './db';
+import { prisma } from './db';
 import { Logger } from './logger';
 
 const BCRYPT_ROUNDS = 12;
@@ -48,46 +48,45 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
     async (request, reply) => {
       const { email, password } = request.body;
 
-      const db = getDb();
       const passwordHash = await bcrypt.hash(password, BCRYPT_ROUNDS);
 
       try {
         // Check if user already exists
-        const existingUser = db
-          .prepare('SELECT id, email FROM users WHERE email = ?')
-          .get(email) as { id: number; email: string } | undefined;
+        const existingUser = await prisma.user.findUnique({
+          where: { email },
+        });
 
         let userId: number;
         let tokenVersion: number;
 
         if (existingUser) {
-          // User exists, get their current token version
-          const user = db
-            .prepare('SELECT token_version FROM users WHERE id = ?')
-            .get(existingUser.id) as { token_version: number } | undefined;
           userId = existingUser.id;
-          tokenVersion = user?.token_version ?? 0;
+          tokenVersion = existingUser.tokenVersion ?? 0;
           Logger.info(
             `[TEST] Returning existing user: ${email} (ID: ${userId}) - Clearing old data`,
           );
 
           // Clear old data for this user to ensure clean state
-          db.prepare('DELETE FROM operations WHERE user_id = ?').run(userId);
-          db.prepare('DELETE FROM sync_devices WHERE user_id = ?').run(userId);
-          db.prepare('DELETE FROM user_sync_state WHERE user_id = ?').run(userId);
-          db.prepare('DELETE FROM tombstones WHERE user_id = ?').run(userId);
+          await prisma.$transaction([
+            prisma.operation.deleteMany({ where: { userId } }),
+            prisma.syncDevice.deleteMany({ where: { userId } }),
+            prisma.userSyncState.deleteMany({ where: { userId } }),
+            prisma.tombstone.deleteMany({ where: { userId } }),
+          ]);
         } else {
-          // Create user with is_verified=1 (skip email verification)
-          const info = db
-            .prepare(
-              `
-              INSERT INTO users (email, password_hash, is_verified, verification_token, verification_token_expires_at, token_version)
-              VALUES (?, ?, 1, NULL, NULL, 0)
-            `,
-            )
-            .run(email, passwordHash);
+          // Create user with isVerified=1 (skip email verification)
+          const user = await prisma.user.create({
+            data: {
+              email,
+              passwordHash,
+              isVerified: 1,
+              verificationToken: null,
+              verificationTokenExpiresAt: null,
+              tokenVersion: 0,
+            },
+          });
 
-          userId = info.lastInsertRowid as number;
+          userId = user.id;
           tokenVersion = 0;
           Logger.info(`[TEST] Created test user: ${email} (ID: ${userId})`);
         }
@@ -117,15 +116,15 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
    * Wipes users, operations, sync state, and devices.
    */
   fastify.post('/cleanup', async (_request, reply) => {
-    const db = getDb();
-
     try {
-      // Delete in correct order due to foreign key constraints
-      db.exec('DELETE FROM operations');
-      db.exec('DELETE FROM sync_devices');
-      db.exec('DELETE FROM user_sync_state');
-      db.exec('DELETE FROM tombstones');
-      db.exec('DELETE FROM users');
+      // Delete in correct order due to foreign key constraints (cascades usually handle it, but explicit is safer)
+      await prisma.$transaction([
+        prisma.operation.deleteMany(),
+        prisma.syncDevice.deleteMany(),
+        prisma.userSyncState.deleteMany(),
+        prisma.tombstone.deleteMany(),
+        prisma.user.deleteMany(),
+      ]);
 
       Logger.info('[TEST] All test data cleaned up');
 

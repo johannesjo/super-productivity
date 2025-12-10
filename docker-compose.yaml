@@ -1,4 +1,22 @@
 services:
+  # PostgreSQL database for SuperSync
+  db:
+    image: postgres:15-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: supersync
+      POSTGRES_PASSWORD: superpassword
+      POSTGRES_DB: supersync_db
+    ports:
+      - '5432:5432'
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U supersync']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   # SuperSync server for E2E testing
   # Start with: docker compose up -d supersync
   # Required for @supersync e2e tests
@@ -8,6 +26,9 @@ services:
       dockerfile: packages/super-sync-server/Dockerfile.test
     ports:
       - '1900:1900'
+    depends_on:
+      db:
+        condition: service_healthy
     environment:
       - PORT=1900
       - TEST_MODE=true
@@ -15,8 +36,8 @@ services:
       - JWT_SECRET=e2e-test-secret-minimum-32-chars-long-for-security
       - CORS_ORIGINS=*
       - DATA_DIR=/data
-    tmpfs:
-      - /data # In-memory SQLite for test isolation
+      # Prisma connection string
+      - DATABASE_URL=postgresql://supersync:superpassword@db:5432/supersync_db
     healthcheck:
       test:
         [

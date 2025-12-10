@@ -155,7 +155,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             Logger.info(
               `[user:${userId}] Returning cached results for request ${requestId}`,
             );
-            const latestSeq = syncService.getLatestSeq(userId);
+            const latestSeq = await syncService.getLatestSeq(userId);
             return reply.send({
               results: cachedResults,
               latestSeq,
@@ -165,7 +165,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         }
 
         // Process operations - cast to Operation[] since Zod validates the structure
-        const results = syncService.uploadOps(
+        const results = await syncService.uploadOps(
           userId,
           clientId,
           ops as unknown as import('./sync.types').Operation[],
@@ -195,7 +195,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         if (lastKnownServerSeq !== undefined) {
           // Use atomic read to get ops and latestSeq together
-          const opsResult = syncService.getOpsSinceWithSeq(
+          const opsResult = await syncService.getOpsSinceWithSeq(
             userId,
             lastKnownServerSeq,
             clientId,
@@ -209,7 +209,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             );
           }
         } else {
-          latestSeq = syncService.getLatestSeq(userId);
+          latestSeq = await syncService.getLatestSeq(userId);
         }
 
         const response: UploadOpsResponse = {
@@ -272,7 +272,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Use atomic read to get ops and latestSeq in one transaction
         // This prevents race conditions where new ops arrive between the two reads
-        const { ops, latestSeq, gapDetected } = syncService.getOpsSinceWithSeq(
+        const { ops, latestSeq, gapDetected } = await syncService.getOpsSinceWithSeq(
           userId,
           sinceSeq,
           excludeClient,
@@ -317,7 +317,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       Logger.info(`[user:${userId}] Snapshot requested`);
 
       // Check if we have a cached snapshot
-      const cached = syncService.getCachedSnapshot(userId);
+      const cached = await syncService.getCachedSnapshot(userId);
       if (
         cached &&
         Date.now() - cached.generatedAt < DEFAULT_SYNC_CONFIG.snapshotCacheTtlMs
@@ -330,7 +330,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
       // Generate fresh snapshot by replaying ops
       Logger.info(`[user:${userId}] Generating fresh snapshot...`);
-      const snapshot = syncService.generateSnapshot(userId);
+      const snapshot = await syncService.generateSnapshot(userId);
       Logger.info(`[user:${userId}] Snapshot generated (seq=${snapshot.serverSeq})`);
       return reply.send(snapshot as SnapshotResponse);
     } catch (err) {
@@ -413,12 +413,12 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           schemaVersion: schemaVersion ?? 1,
         };
 
-        const results = syncService.uploadOps(userId, clientId, [op]);
+        const results = await syncService.uploadOps(userId, clientId, [op]);
         const result = results[0];
 
         if (result.accepted && result.serverSeq !== undefined) {
           // Cache the snapshot
-          syncService.cacheSnapshot(userId, state, result.serverSeq);
+          await syncService.cacheSnapshot(userId, state, result.serverSeq);
         }
 
         Logger.info(`Snapshot uploaded for user ${userId}, reason: ${reason}`);
@@ -441,10 +441,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const userId = getAuthUser(req).userId;
       const syncService = getSyncService();
 
-      const latestSeq = syncService.getLatestSeq(userId);
-      const devicesOnline = syncService.getOnlineDeviceCount(userId);
+      const latestSeq = await syncService.getLatestSeq(userId);
+      const devicesOnline = await syncService.getOnlineDeviceCount(userId);
 
-      const cached = syncService.getCachedSnapshot(userId);
+      const cached = await syncService.getCachedSnapshot(userId);
       const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
       Logger.debug(`[user:${userId}] Status: seq=${latestSeq}, devices=${devicesOnline}`);
