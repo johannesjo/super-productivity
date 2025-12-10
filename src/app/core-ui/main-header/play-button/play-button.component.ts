@@ -290,8 +290,8 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
           padding-right: 0;
         }
 
-        :host:hover & {
-          opacity: 0;
+        ::ng-deep .action-nav:hover & {
+          visibility: hidden;
         }
       }
     `,
