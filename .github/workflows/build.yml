@@ -56,8 +56,20 @@ jobs:
       - name: Test Unit
         run: npm run test
 
+      - name: Start WebDAV Server
+        run: |
+          docker compose up -d webdav
+
+          # Wait for WebDAV server to be ready
+          chmod +x ./scripts/wait-for-webdav.sh
+          ./scripts/wait-for-webdav.sh
+
       - name: Test E2E
         run: npm run e2e
+
+      - name: Print WebDAV logs on failure
+        if: ${{ failure() }}
+        run: docker compose logs webdav
 
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}

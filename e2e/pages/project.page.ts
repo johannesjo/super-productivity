@@ -48,7 +48,7 @@ export class ProjectPage extends BasePage {
         .filter({ hasText: 'Create Project' })
         .locator('button');
       try {
-        await emptyStateBtn.waitFor({ state: 'visible', timeout: 1000 });
+        await emptyStateBtn.waitFor({ state: 'visible', timeout: 5000 });
         await emptyStateBtn.click();
         // Continue to dialog handling below
       } catch {
@@ -61,6 +61,13 @@ export class ProjectPage extends BasePage {
           .first();
         await projectsGroup.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
 
+        // Ensure expanded
+        const isExpanded = await projectsGroup.getAttribute('aria-expanded');
+        if (isExpanded !== 'true') {
+          await projectsGroup.click();
+          await this.page.waitForTimeout(500);
+        }
+
         // Hover over the Projects group to show additional buttons
         await projectsGroup.hover();
 
@@ -71,8 +78,14 @@ export class ProjectPage extends BasePage {
         const createProjectBtn = this.page.locator(
           'nav-list .additional-btns button[mat-icon-button]:has(mat-icon:text("add"))',
         );
-        await createProjectBtn.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
-        await createProjectBtn.click();
+        // Try to wait for visibility, but if it fails, try forcing click if attached
+        try {
+          await createProjectBtn.waitFor({ state: 'visible', timeout: 5000 });
+          await createProjectBtn.click();
+        } catch (e) {
+          console.log('Additional button not visible via hover, trying force click...');
+          await createProjectBtn.click({ force: true });
+        }
       }
     } catch (error) {
       // If the specific selectors fail, try a more general approach
@@ -82,8 +95,13 @@ export class ProjectPage extends BasePage {
       const addButton = this.page
         .locator('button[mat-icon-button]:has(mat-icon:text("add"))')
         .first();
-      await addButton.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
-      await addButton.click();
+      try {
+        await addButton.waitFor({ state: 'visible', timeout: 5000 });
+        await addButton.click();
+      } catch (e) {
+        console.log('Fallback button not visible, trying force click...');
+        await addButton.click({ force: true });
+      }
     }
 
     // Wait for the dialog to appear

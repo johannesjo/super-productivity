@@ -3,6 +3,7 @@ import { SyncPage } from '../../pages/sync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
 import { waitForAppReady } from '../../utils/waits';
 import { type Browser, type Page } from '@playwright/test';
+import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Full Flow', () => {
   // Use a unique folder for each test run to avoid collisions
@@ -14,6 +15,14 @@ test.describe('WebDAV Sync Full Flow', () => {
     password: 'admin',
     syncFolderPath: `/${SYNC_FOLDER_NAME}`,
   };
+
+  test.beforeAll(async () => {
+    const isUp = await isWebDavServerUp(WEBDAV_CONFIG.baseUrl);
+    if (!isUp) {
+      console.warn('WebDAV server not reachable. Skipping WebDAV tests.');
+      test.skip(true, 'WebDAV server not reachable');
+    }
+  });
 
   const setupClient = async (
     browser: Browser,

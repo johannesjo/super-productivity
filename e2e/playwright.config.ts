@@ -133,7 +133,7 @@ export default defineConfig({
     reuseExistingServer: !process.env.CI, // Don't reuse in CI to ensure clean state
     // unfortunately for CI we need to wait long for this to go up :(
     timeout: 3 * 60 * 1000, // Allow up to 3 minutes for slower CI starts
-    stdout: 'pipe', // Always show output for debugging
+    stdout: 'ignore', // Reduce log noise
     stderr: 'pipe',
   },
 

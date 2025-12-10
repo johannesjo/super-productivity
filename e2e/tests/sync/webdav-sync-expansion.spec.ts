@@ -4,8 +4,23 @@ import { WorkViewPage } from '../../pages/work-view.page';
 import { ProjectPage } from '../../pages/project.page';
 import { waitForAppReady } from '../../utils/waits';
 import { type Browser, type Page } from '@playwright/test';
+import { isWebDavServerUp } from '../../utils/check-webdav';
 
 test.describe('WebDAV Sync Expansion', () => {
+  const WEBDAV_CONFIG_TEMPLATE = {
+    baseUrl: 'http://127.0.0.1:2345/',
+    username: 'admin',
+    password: 'admin',
+  };
+
+  test.beforeAll(async () => {
+    const isUp = await isWebDavServerUp(WEBDAV_CONFIG_TEMPLATE.baseUrl);
+    if (!isUp) {
+      console.warn('WebDAV server not reachable. Skipping WebDAV tests.');
+      test.skip(true, 'WebDAV server not reachable');
+    }
+  });
+
   const createSyncFolder = async (request: any, folderName: string): Promise<void> => {
     const mkcolUrl = `${WEBDAV_CONFIG_TEMPLATE.baseUrl}${folderName}`;
     console.log(`Creating WebDAV folder: ${mkcolUrl}`);
@@ -24,12 +39,6 @@ test.describe('WebDAV Sync Expansion', () => {
     } catch (e) {
       console.warn('Error creating WebDAV folder:', e);
     }
-  };
-
-  const WEBDAV_CONFIG_TEMPLATE = {
-    baseUrl: 'http://127.0.0.1:2345/',
-    username: 'admin',
-    password: 'admin',
   };
 
   const dismissTour = async (page: Page): Promise<void> => {
