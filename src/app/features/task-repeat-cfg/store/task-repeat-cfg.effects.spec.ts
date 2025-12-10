@@ -815,6 +815,175 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       });
     });
 
+    it('should fallback to task.dueDay when WEEKLY pattern does not match today (issue #5594)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const dueDayStr = '2025-03-15';
+        const startTimeStr = '10:00';
+        const today = new Date();
+        const todayDayOfWeek = today.getDay();
+
+        // Create a repeat config for a day that is NOT today
+        // Find a weekday that is NOT today
+        const notTodayDayOfWeek = (todayDayOfWeek + 3) % 7; // 3 days from today
+        const weekdayKeys = [
+          'sunday',
+          'monday',
+          'tuesday',
+          'wednesday',
+          'thursday',
+          'friday',
+          'saturday',
+        ] as const;
+        const notTodayWeekdayKey = weekdayKeys[notTodayDayOfWeek];
+
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'WEEKLY',
+            repeatEvery: 1,
+            monday: notTodayWeekdayKey === 'monday',
+            tuesday: notTodayWeekdayKey === 'tuesday',
+            wednesday: notTodayWeekdayKey === 'wednesday',
+            thursday: notTodayWeekdayKey === 'thursday',
+            friday: notTodayWeekdayKey === 'friday',
+            saturday: notTodayWeekdayKey === 'saturday',
+            sunday: notTodayWeekdayKey === 'sunday',
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithDueDay: Task = {
+          ...mockTask,
+          dueDay: dueDayStr,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
+
+        // When WEEKLY pattern doesn't match today, getNewestPossibleDueDate returns null
+        // So we should fall back to task.dueDay
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(dueDayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithDueDay,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should fallback gracefully when repeatEvery is invalid (issue #5594)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const dueDayStr = '2025-03-15';
+        const startTimeStr = '10:00';
+
+        // Create a repeat config with invalid repeatEvery (0)
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 0, // Invalid!
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        const taskWithDueDay: Task = {
+          ...mockTask,
+          dueDay: dueDayStr,
+        };
+
+        taskService.getByIdOnce$.and.returnValue(of(taskWithDueDay));
+
+        // Should catch the error from getNewestPossibleDueDate and fall back
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(dueDayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: taskWithDueDay,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
+    it('should handle YEARLY repeat pattern correctly (issue #5594)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const startTimeStr = '10:00';
+
+        // Set startDate to today so YEARLY pattern matches today
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'YEARLY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+
+        // For YEARLY on the same day/month as startDate, should return today
+        const expectedDateTime = getDateTimeFromClockString(
+          startTimeStr,
+          dateStrToUtcDate(todayStr).getTime(),
+        );
+
+        const expectedAction = TaskSharedActions.scheduleTaskWithTime({
+          task: mockTask,
+          dueWithTime: expectedDateTime,
+          remindAt: remindOptionToMilliseconds(
+            expectedDateTime,
+            TaskReminderOptionId.AtStart,
+          ),
+          isMoveToBacklog: false,
+          isSkipAutoRemoveFromToday: true,
+        });
+
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('-a', {
+          a: expectedAction,
+        });
+      });
+    });
+
     it('should use dateStrToUtcDate to avoid UTC parsing issues (issue #5515)', () => {
       // This test verifies that date string parsing uses local midnight, not UTC midnight
       // In far-west timezones (e.g., Hawaii UTC-10), new Date('2025-01-15') would give
