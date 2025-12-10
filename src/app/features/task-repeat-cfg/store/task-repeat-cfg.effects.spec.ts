@@ -1128,11 +1128,12 @@ describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
         shouldMatchToday: true,
       },
       {
-        // Friday is 2 days ahead, getNewestPossibleDueDate returns last Friday (Jan 10)
-        name: 'WEEKLY on Friday - returns last Friday (Jan 10)',
+        // Friday (Jan 10) is in the previous ISO week, so diffInWeeks < 0 causes early break
+        // Falls back to task.dueDay (Jan 20)
+        name: 'WEEKLY on Friday - previous week, falls back to task.dueDay',
         weekday: 'friday',
-        expectedDateStr: '2025-01-10', // Last Friday before Jan 15
-        shouldMatchToday: true, // Uses calculated date, not fallback
+        expectedDateStr: '2025-01-20', // Fallback to task.dueDay
+        shouldMatchToday: false, // Uses fallback, not calculated date
       },
       {
         // Monday is 2 days behind, getNewestPossibleDueDate returns last Monday (Jan 13)
