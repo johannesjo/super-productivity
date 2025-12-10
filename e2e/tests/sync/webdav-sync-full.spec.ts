@@ -9,7 +9,7 @@ test.describe('WebDAV Sync Full Flow', () => {
   const SYNC_FOLDER_NAME = `e2e-test-${Date.now()}`;
 
   const WEBDAV_CONFIG = {
-    baseUrl: 'http://localhost:2345/',
+    baseUrl: 'http://127.0.0.1:2345/',
     username: 'admin',
     password: 'admin',
     syncFolderPath: `/${SYNC_FOLDER_NAME}`,

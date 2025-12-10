@@ -26,7 +26,7 @@ test.describe('WebDAV Sync Advanced Features', () => {
   };
 
   const WEBDAV_CONFIG_TEMPLATE = {
-    baseUrl: 'http://localhost:2345/',
+    baseUrl: 'http://127.0.0.1:2345/',
     username: 'admin',
     password: 'admin',
   };

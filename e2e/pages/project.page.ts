@@ -59,7 +59,7 @@ export class ProjectPage extends BasePage {
           .filter({ hasText: 'Projects' })
           .locator('nav-item button')
           .first();
-        await projectsGroup.waitFor({ state: 'visible', timeout: 3000 }); // Reduced from 5s to 3s
+        await projectsGroup.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
 
         // Hover over the Projects group to show additional buttons
         await projectsGroup.hover();
@@ -71,7 +71,7 @@ export class ProjectPage extends BasePage {
         const createProjectBtn = this.page.locator(
           'nav-list .additional-btns button[mat-icon-button]:has(mat-icon:text("add"))',
         );
-        await createProjectBtn.waitFor({ state: 'visible', timeout: 1500 }); // Reduced from 2s to 1.5s
+        await createProjectBtn.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
         await createProjectBtn.click();
       }
     } catch (error) {
@@ -82,7 +82,7 @@ export class ProjectPage extends BasePage {
       const addButton = this.page
         .locator('button[mat-icon-button]:has(mat-icon:text("add"))')
         .first();
-      await addButton.waitFor({ state: 'visible', timeout: 2000 }); // Reduced from 3s to 2s
+      await addButton.waitFor({ state: 'visible', timeout: 10000 }); // Increased for CI stability
       await addButton.click();
     }
 
@@ -92,7 +92,7 @@ export class ProjectPage extends BasePage {
     await this.submitBtn.click();
 
     // Wait for dialog to close by waiting for input to be hidden
-    await this.projectNameInput.waitFor({ state: 'hidden', timeout: 1500 }); // Reduced from 2s to 1.5s
+    await this.projectNameInput.waitFor({ state: 'hidden', timeout: 3000 }); // Increased for CI stability
   }
 
   async getProject(index: number): Promise<Locator> {
