@@ -207,27 +207,27 @@ If action has no `meta` field, it passes (undefined !== true). Remote operations
 
 ### Critical Missing Tests
 
-| Gap                        | Scenario                       | Impact           | Status                                               |
-| -------------------------- | ------------------------------ | ---------------- | ---------------------------------------------------- |
-| **Race conditions**        | Concurrent append + compaction | Data loss        | Open                                                 |
-| **Error recovery**         | Quota exceeded mid-write       | State corruption | ✅ Tested (8 tests in operation-log.effects.spec.ts) |
-| **Multi-tab coordination** | Tab A append + Tab B compact   | Lock deadlock    | Open                                                 |
+| Gap                        | Scenario                       | Impact           | Status                                                          |
+| -------------------------- | ------------------------------ | ---------------- | --------------------------------------------------------------- |
+| ~~**Race conditions**~~    | Concurrent append + compaction | Data loss        | ✅ Tested (compaction.service.spec.ts - 6 race condition tests) |
+| **Error recovery**         | Quota exceeded mid-write       | State corruption | ✅ Tested (8 tests in operation-log.effects.spec.ts)            |
+| **Multi-tab coordination** | Tab A append + Tab B compact   | Lock deadlock    | Covered by lock service tests                                   |
 
 ### Missing Scenarios
 
-1. **Concurrent operations:** No test for append during compaction
+1. ~~**Concurrent operations:** No test for append during compaction~~ → ✅ Added race condition tests
 2. ~~**Quota exceeded:** Emergency compaction path never tested~~ → ✅ Extensively tested (8 test cases)
-3. **Schema migration:** Version mismatch during hydration
+3. ~~**Schema migration:** Version mismatch during hydration~~ → ✅ Added 6 version mismatch tests (hydrator.service.spec.ts)
 4. ~~**3-way conflicts:** Only 2-way conflict resolution tested~~ → ✅ Added E2E test (supersync-edge-cases.spec.ts)
 5. ~~**Conflict on deleted entity:** Update for entity local deleted~~ → ✅ Added E2E test (supersync-edge-cases.spec.ts)
 6. ~~**Very large conflict sets:** 100+ ops on same entity~~ → ✅ Added unit tests (conflict-resolution.service.spec.ts)
-7. **Download retry:** Network failure mid-pagination (2 tests skipped with `pending()`)
+7. ~~**Download retry:** Network failure mid-pagination (2 tests skipped with `pending()`)~~ → ✅ Fixed (4 retry tests now passing)
 
 ### Test Infrastructure Issues
 
 - ~~`sync-scenarios.integration.spec.ts:18-32`: All SimulatedClients share same IndexedDB (not true isolation)~~ → ✅ Documented as intentional design choice with clear explanation of logical isolation strategy (see `simulated-client.helper.ts`)
-- `operation-log-download.service.spec.ts:360-373`: 2 tests marked `pending()` due to timeout
-- Benchmark tests disabled (`xdescribe`)
+- ~~`operation-log-download.service.spec.ts:360-373`: 2 tests marked `pending()` due to timeout~~ → ✅ Fixed with proper retry testing (30s timeouts)
+- Benchmark tests disabled (`xdescribe`) - intentional, for manual performance testing only
 
 ---
 
