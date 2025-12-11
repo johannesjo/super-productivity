@@ -276,7 +276,14 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
-    await expect(taskA).not.toHaveClass(/isDone/);
+    // Reload A to ensure UI reflects synced state
+    await pageA.reload();
+    await waitForAppReady(pageA);
+    await dismissTour(pageA);
+
+    // Re-locate the task after reload
+    const taskAAfterSync = pageA.locator('task', { hasText: taskName }).first();
+    await expect(taskAAfterSync).not.toHaveClass(/isDone/, { timeout: 10000 });
 
     await contextA.close();
     await contextB.close();

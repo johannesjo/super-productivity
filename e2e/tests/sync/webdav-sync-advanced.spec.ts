@@ -246,8 +246,12 @@ test.describe('WebDAV Sync Advanced Features', () => {
 
     // Verify Attachment on B
     const taskB = pageB.locator('task', { hasText: taskName }).first();
-    await taskB.click();
-    await taskB.locator('.show-additional-info-btn').click({ force: true });
+    await expect(taskB).toBeVisible();
+
+    // Click the attachment button to open the side panel with attachments expanded
+    const attachmentBtnB = taskB.locator('.attachment-btn');
+    await expect(attachmentBtnB).toBeVisible();
+    await attachmentBtnB.click({ force: true });
 
     await expect(pageB.locator('.attachment-link')).toContainText('Google');
 
