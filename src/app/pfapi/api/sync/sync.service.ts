@@ -103,7 +103,17 @@ export class SyncService<const MD extends ModelCfgs> {
       const currentSyncProvider = this._currentSyncProvider$.value;
       if (currentSyncProvider && this._supportsOpLogSync(currentSyncProvider)) {
         await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
-        await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+        const downloadResult =
+          await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
+
+        // If server migration was detected, a SYNC_IMPORT was created and needs to be uploaded
+        // immediately to seed the new server with the client's full state
+        if (downloadResult.serverMigrationHandled) {
+          PFLog.normal(
+            `${SyncService.L}.${this.sync.name}(): Server migration detected, uploading full state snapshot`,
+          );
+          await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+        }
 
         // For operation-only providers (like SuperSync), skip file-based sync
         // Operation sync handles all data synchronization

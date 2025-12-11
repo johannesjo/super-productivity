@@ -88,7 +88,9 @@ describe('SyncService', () => {
       'downloadRemoteOps',
     ]);
     mockOperationLogSyncService.uploadPendingOps.and.returnValue(Promise.resolve());
-    mockOperationLogSyncService.downloadRemoteOps.and.returnValue(Promise.resolve());
+    mockOperationLogSyncService.downloadRemoteOps.and.returnValue(
+      Promise.resolve({ serverMigrationHandled: false }),
+    );
 
     // Create service with spies for internal services
     service = new SyncService(

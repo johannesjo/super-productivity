@@ -19,6 +19,7 @@ import {
 import { OpLog } from '../../../log';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
+import { isOperationSyncCapable } from './operation-sync.util';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from '../processing/validate-state.service';
@@ -158,6 +159,10 @@ export class OperationLogSyncService {
    * SAFETY: A wholly fresh client (no snapshot, no operations) should NOT upload.
    * Fresh clients must first download and apply remote data before they can contribute.
    * This prevents scenarios where a fresh/empty client overwrites existing remote data.
+   *
+   * SERVER MIGRATION: When a client with history connects to an empty server for the
+   * first time (server migration scenario), we create a SYNC_IMPORT with full state
+   * before uploading regular ops. This ensures all data is transferred to the new server.
    */
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -173,6 +178,11 @@ export class OperationLogSyncService {
       );
       return;
     }
+
+    // SERVER MIGRATION CHECK: If this client has history but appears to be connecting
+    // to a new/empty server, create a SYNC_IMPORT with full state first.
+    // This handles the scenario where user changes sync server credentials.
+    await this._checkAndHandleServerMigration(syncProvider);
 
     const result = await this.uploadService.uploadPendingOps(syncProvider);
 
@@ -250,26 +260,27 @@ export class OperationLogSyncService {
    *
    * When server migration is detected (gap on empty server), triggers a full state upload
    * to ensure all local data is transferred to the new server.
+   *
+   * @returns Result indicating whether server migration was handled (requires follow-up upload)
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<void> {
+  ): Promise<{ serverMigrationHandled: boolean }> {
     const result = await this.downloadService.downloadRemoteOps(syncProvider);
 
     // Server migration detected: gap on empty server
     // Create a SYNC_IMPORT operation with full local state to seed the new server
     if (result.needsFullStateUpload) {
       await this._handleServerMigration();
-      // Return early - the SYNC_IMPORT will be uploaded on next uploadPendingOps call
-      // We don't process any ops since the server is empty
-      return;
+      // Return with flag indicating migration was handled - caller should upload the SYNC_IMPORT
+      return { serverMigrationHandled: true };
     }
 
     if (result.newOps.length === 0) {
       OpLog.normal(
         'OperationLogSyncService: No new remote operations to process after download.',
       );
-      return;
+      return { serverMigrationHandled: false };
     }
 
     // SAFETY: Fresh client confirmation
@@ -290,7 +301,7 @@ export class OperationLogSyncService {
         this.snackService.open({
           msg: T.F.SYNC.S.FRESH_CLIENT_SYNC_CANCELLED,
         });
-        return;
+        return { serverMigrationHandled: false };
       }
 
       OpLog.normal(
@@ -299,6 +310,7 @@ export class OperationLogSyncService {
     }
 
     await this._processRemoteOps(result.newOps);
+    return { serverMigrationHandled: false };
   }
 
   /**
@@ -325,6 +337,48 @@ export class OperationLogSyncService {
     } finally {
       stopWaiting();
     }
+  }
+
+  /**
+   * Check if we're connecting to a new/empty server and need to upload full state.
+   *
+   * This handles the server migration scenario:
+   * - Client has history (not fresh)
+   * - lastServerSeq is 0 for this server (first time connecting)
+   * - Server is empty (latestSeq = 0)
+   *
+   * When detected, creates a SYNC_IMPORT with full state before regular ops are uploaded.
+   */
+  private async _checkAndHandleServerMigration(
+    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+  ): Promise<void> {
+    // Only check for operation-sync capable providers
+    if (!isOperationSyncCapable(syncProvider)) {
+      return;
+    }
+
+    // Check if lastServerSeq is 0 (first time connecting to this server)
+    const lastServerSeq = await syncProvider.getLastServerSeq();
+    if (lastServerSeq !== 0) {
+      // We've synced with this server before, no migration needed
+      return;
+    }
+
+    // Check if server is empty by doing a minimal download request
+    const response = await syncProvider.downloadOps(0, undefined, 1);
+    if (response.latestSeq !== 0) {
+      // Server has data, this is not a migration scenario
+      // (might be joining an existing sync group)
+      return;
+    }
+
+    // Server is empty AND we have history (not fresh) AND lastServerSeq is 0
+    // This is a server migration - create SYNC_IMPORT with full state
+    OpLog.warn(
+      'OperationLogSyncService: Server migration detected during upload check. ' +
+        'Empty server detected, creating full state SYNC_IMPORT.',
+    );
+    await this._handleServerMigration();
   }
 
   /**
@@ -387,7 +441,7 @@ export class OperationLogSyncService {
 
     OpLog.normal(
       'OperationLogSyncService: Created SYNC_IMPORT operation for server migration. ' +
-        'Will be uploaded on next sync.',
+        'Will be uploaded immediately via follow-up upload.',
     );
   }
 

@@ -61,9 +61,12 @@ export class SuperSyncPage extends BasePage {
 
   /**
    * Configure SuperSync with server URL and access token.
+   * Uses right-click to open settings dialog (works even when sync is already configured).
    */
   async setupSuperSync(config: SuperSyncConfig): Promise<void> {
-    await this.syncBtn.click();
+    // Use right-click to always open sync settings dialog
+    // (left-click triggers sync if already configured)
+    await this.syncBtn.click({ button: 'right' });
     await this.providerSelect.waitFor({ state: 'visible' });
 
     // Retry loop for opening the dropdown
