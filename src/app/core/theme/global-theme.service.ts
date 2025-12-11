@@ -161,6 +161,7 @@ export class GlobalThemeService {
       ['repeat', 'assets/icons/repeat.svg'],
       ['gitea', 'assets/icons/gitea.svg'],
       ['redmine', 'assets/icons/redmine.svg'],
+      ['linear', 'assets/icons/linear.svg'],
       // trello icon
       ['trello', 'assets/icons/trello.svg'],
       ['calendar', 'assets/icons/calendar.svg'],
