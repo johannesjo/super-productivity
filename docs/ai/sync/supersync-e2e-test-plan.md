@@ -1,10 +1,41 @@
 # SuperSync E2E Test Plan
 
-## Status: PLANNED (Not Yet Implemented)
+## Status: ✅ IMPLEMENTED
 
-This plan describes full end-to-end tests for operation-log sync between two browser clients using the real super-sync-server. These tests complement the existing Karma-based integration tests by testing the complete sync flow including network, authentication, and UI.
+**Last Updated:** December 11, 2025
 
-**Prerequisite:** Basic sync functionality should be working before implementing these tests.
+This document describes the full end-to-end tests for operation-log sync between multiple browser clients using the real super-sync-server. These tests complement the existing Karma-based integration tests by testing the complete sync flow including network, authentication, and UI.
+
+### Implementation Status
+
+| Component                  | Status                        |
+| -------------------------- | ----------------------------- |
+| Test mode server endpoints | ✅ Implemented                |
+| Docker Compose setup       | ✅ Implemented                |
+| SuperSyncPage page object  | ✅ Implemented                |
+| Helper utilities           | ✅ Implemented                |
+| Basic sync tests           | ✅ Implemented                |
+| Conflict resolution tests  | ✅ Implemented                |
+| Edge case tests            | ✅ Implemented (Dec 11, 2025) |
+
+### Test Files
+
+| File                                          | Description                                                    |
+| --------------------------------------------- | -------------------------------------------------------------- |
+| `e2e/tests/sync/supersync.spec.ts`            | Core sync scenarios (create, bidirectional, basic conflict)    |
+| `e2e/tests/sync/supersync-advanced.spec.ts`   | Advanced scenarios (delete conflicts, time tracking)           |
+| `e2e/tests/sync/supersync-edge-cases.spec.ts` | Edge cases (3-way conflicts, delete vs update, offline bursts) |
+| `e2e/tests/sync/supersync-models.spec.ts`     | Model-specific sync (projects, tags)                           |
+
+### Running Tests
+
+```bash
+# Start server and run all supersync tests
+npm run e2e:supersync
+
+# Run specific test file
+npm run e2e:playwright:file e2e/tests/sync/supersync-edge-cases.spec.ts
+```
 
 ---
 
