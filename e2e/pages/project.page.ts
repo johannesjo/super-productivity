@@ -24,7 +24,10 @@ export class ProjectPage extends BasePage {
     this.projectNameInput = page.getByRole('textbox', { name: 'Project Name' });
     this.submitBtn = page.locator('dialog-create-project button[type=submit]:enabled');
     this.workCtxMenu = page.locator('work-context-menu');
-    this.workCtxTitle = page.locator('.page-title');
+    // Use more specific selector to avoid matching titles in other areas
+    this.workCtxTitle = page
+      .locator('main .page-title, .route-wrapper .page-title')
+      .first();
     this.projectSettingsBtn = this.workCtxMenu
       .locator('button[aria-label="Project Settings"]')
       .or(this.workCtxMenu.locator('button').nth(3));
@@ -159,36 +162,53 @@ export class ProjectPage extends BasePage {
         .catch(() => {});
     }
 
-    // Locate the project button within the Projects tree
+    // Locate the project nav-link button within the Projects tree
+    // Important: use .nav-link to avoid clicking the additional-btn (context menu trigger)
     let projectBtn = projectsTree
-      .locator('.nav-children .nav-child-item nav-item button')
+      .locator('.nav-children .nav-child-item nav-item button.nav-link')
       .filter({ hasText: fullProjectName })
       .first();
 
     // Fallback: search within the Projects tree more broadly
     if (!(await projectBtn.isVisible().catch(() => false))) {
       projectBtn = projectsTree
-        .locator('button')
+        .locator('button.nav-link')
         .filter({ hasText: fullProjectName })
         .first();
     }
 
-    // Last resort: Global search in side nav
+    // Last resort: Global search in side nav (still use .nav-link)
     if (!(await projectBtn.isVisible().catch(() => false))) {
       projectBtn = this.page
-        .locator('magic-side-nav button')
+        .locator('magic-side-nav button.nav-link')
         .filter({ hasText: fullProjectName })
         .first();
     }
 
     await projectBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await projectBtn.click();
 
-    // Wait for navigation to complete
+    // Click with retry - sometimes the first click doesn't navigate
+    for (let attempt = 0; attempt < 3; attempt++) {
+      await projectBtn.click();
+
+      // Wait for navigation to complete - wait for URL to change to project route
+      const navigated = await this.page
+        .waitForURL(/\/#\/project\//, { timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+
+      if (navigated) break;
+
+      // If navigation didn't happen, wait a bit and retry
+      if (attempt < 2) {
+        await this.page.waitForTimeout(500);
+      }
+    }
+
     await this.page.waitForLoadState('networkidle');
 
-    // Verify we're in the project
-    await expect(this.workCtxTitle).toContainText(fullProjectName);
+    // Wait for the page title to update - this may take a moment after navigation
+    await expect(this.workCtxTitle).toContainText(fullProjectName, { timeout: 15000 });
   }
 
   async navigateToProject(projectLocator: Locator): Promise<void> {

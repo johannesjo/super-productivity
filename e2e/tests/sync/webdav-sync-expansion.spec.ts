@@ -121,6 +121,9 @@ test.describe('WebDAV Sync Expansion', () => {
     const projectName = 'Synced Project';
     await projectPageA.createProject(projectName);
 
+    // Navigate to the newly created project (createProject doesn't auto-navigate)
+    await projectPageA.navigateToProjectByName(projectName);
+
     // Add task to new project on A
     await workViewPageA.addTask('Task in Project A');
 
@@ -145,9 +148,21 @@ test.describe('WebDAV Sync Expansion', () => {
     await waitForAppReady(pageB);
     await dismissTour(pageB);
 
-    // Verify Project on B
-    // Wait for state persistence after reload
-    await waitForStatePersistence(pageB);
+    // Wait for the synced project to appear in the sidebar
+    // First ensure Projects group is expanded
+    const projectsTree = pageB.locator('nav-list-tree').filter({ hasText: 'Projects' });
+    const projectsGroupBtn = projectsTree
+      .locator('.g-multi-btn-wrapper nav-item button')
+      .first();
+    await projectsGroupBtn.waitFor({ state: 'visible', timeout: 5000 });
+    const isExpanded = await projectsGroupBtn.getAttribute('aria-expanded');
+    if (isExpanded !== 'true') {
+      await projectsGroupBtn.click();
+    }
+
+    // Now wait for the project to appear
+    const projectBtn = projectsTree.locator('button').filter({ hasText: projectName });
+    await projectBtn.waitFor({ state: 'visible', timeout: 15000 });
 
     await projectPageB.navigateToProjectByName(projectName);
 
