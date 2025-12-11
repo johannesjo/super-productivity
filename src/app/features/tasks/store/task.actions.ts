@@ -52,7 +52,13 @@ export const toggleTaskHideSubTasks = createAction(
   props<{ taskId: string; isShowLess: boolean; isEndless: boolean }>(),
 );
 
-export const undoDeleteTask = createAction('[Task] Undo Delete Task');
+export const undoDeleteTask = createAction('[Task] Undo Delete Task', () => ({
+  meta: {
+    isPersistent: true,
+    entityType: 'TASK',
+    opType: OpType.Update,
+  } satisfies PersistentActionMeta,
+}));
 
 export const moveSubTask = createAction(
   '[Task] Move sub task',

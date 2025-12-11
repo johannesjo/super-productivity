@@ -179,6 +179,30 @@ describe('Sync Operations', () => {
       expect(snapshot.state).toHaveProperty('TASK');
       expect(snapshot.state).toHaveProperty('PROJECT');
     });
+
+    it('should accept time tracking operations', async () => {
+      const service = getSyncService();
+
+      const timeTrackingOp: Operation = {
+        id: uuidv7(),
+        clientId,
+        actionType: 'ADD_TIME',
+        opType: 'UPD',
+        entityType: 'TIME_TRACKING',
+        entityId: 'tt-1',
+        payload: { timeSpent: 120000, taskId: 'task-1' },
+        vectorClock: { [clientId]: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const results = await service.uploadOps(userId, clientId, [timeTrackingOp]);
+
+      expect(results[0]).toMatchObject({
+        opId: timeTrackingOp.id,
+        accepted: true,
+      });
+    });
   });
 
   describe('Snapshot Size Limits', () => {

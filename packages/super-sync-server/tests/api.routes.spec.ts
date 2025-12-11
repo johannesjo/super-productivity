@@ -152,3 +152,84 @@ describe('API Routes - Replace Token', () => {
     expect(response.json().error).toBe('Invalid token');
   });
 });
+
+describe('API Routes - Verify Email', () => {
+  let app: FastifyInstance;
+  const email = 'verify@test.com';
+  const verificationToken = 'token-123';
+
+  beforeEach(async () => {
+    initDb('./data', true);
+    const db = getDb();
+    const expiresInMs = 60 * 60 * 1000;
+
+    db.prepare(
+      `INSERT INTO users (id, email, password_hash, is_verified, verification_token, verification_token_expires_at, created_at)
+       VALUES (1, ?, 'hash', 0, ?, ?, ?)`,
+    ).run(email, verificationToken, Date.now() + expiresInMs, Date.now());
+
+    app = Fastify();
+    await app.register(apiRoutes, { prefix: '/api' });
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  it('should verify email with valid token', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/verify-email',
+      payload: { token: verificationToken },
+    });
+
+    expect(response.statusCode).toBe(200);
+    const body = response.json();
+    expect(body.message).toBe('Email verified successfully');
+
+    const db = getDb();
+    const user = db
+      .prepare(
+        'SELECT is_verified, verification_token, verification_token_expires_at FROM users WHERE email = ?',
+      )
+      .get(email) as { is_verified: number; verification_token: string | null };
+
+    expect(user.is_verified).toBe(1);
+    expect(user.verification_token).toBeNull();
+  });
+
+  it('should return 400 for invalid token and keep user unverified', async () => {
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/verify-email',
+      payload: { token: 'invalid-token' },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toBe('Invalid verification token');
+
+    const db = getDb();
+    const user = db
+      .prepare('SELECT is_verified FROM users WHERE email = ?')
+      .get(email) as { is_verified: number };
+    expect(user.is_verified).toBe(0);
+  });
+
+  it('should return 400 for expired token', async () => {
+    const db = getDb();
+    db.prepare('UPDATE users SET verification_token_expires_at = ? WHERE email = ?').run(
+      Date.now() - 1000,
+      email,
+    );
+
+    const response = await app.inject({
+      method: 'POST',
+      url: '/api/verify-email',
+      payload: { token: verificationToken },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toBe('Verification token has expired');
+  });
+});

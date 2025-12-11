@@ -307,6 +307,38 @@ describe('undoTaskDeleteMetaReducer', () => {
       );
     });
 
+    it('should update modified timestamp on restore', () => {
+      const oldTimestamp = Date.now() - 10000;
+      const task = createMockTaskWithSubTasks({ modified: oldTimestamp });
+      const deleteAction = TaskSharedActions.deleteTask({ task });
+      const stateAfterDelete = {
+        ...baseState,
+        [TASK_FEATURE_NAME]: {
+          ...baseState[TASK_FEATURE_NAME],
+          entities: {},
+          ids: [],
+        },
+      };
+
+      // First delete the task
+      metaReducer(baseState, deleteAction);
+      mockReducer.calls.reset();
+
+      // Then restore it
+      const undoAction = undoDeleteTask();
+      // Use fake timer or just check if it's recent
+      const beforeRestore = Date.now();
+      metaReducer(stateAfterDelete, undoAction);
+      const afterRestore = Date.now();
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const restoredTask = updatedState[TASK_FEATURE_NAME].entities.task1;
+
+      expect(restoredTask.modified).toBeGreaterThanOrEqual(beforeRestore);
+      expect(restoredTask.modified).toBeLessThanOrEqual(afterRestore);
+      expect(restoredTask.modified).not.toEqual(oldTimestamp);
+    });
+
     it('should restore task to tag arrays', () => {
       const task = createMockTaskWithSubTasks();
       const deleteAction = TaskSharedActions.deleteTask({ task });
