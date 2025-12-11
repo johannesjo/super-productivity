@@ -251,6 +251,8 @@ test.describe('WebDAV Sync Expansion', () => {
     await doneBtnB.click();
     await expect(taskB).not.toHaveClass(/isDone/);
 
+    await pageB.waitForTimeout(1000);
+
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 

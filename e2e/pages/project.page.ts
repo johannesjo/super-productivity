@@ -55,7 +55,7 @@ export class ProjectPage extends BasePage {
         // Not in empty state, continue with normal flow
         // Find the Projects group item and wait for it to be visible
         const projectsGroup = this.page
-          .locator('nav-list')
+          .locator('nav-list-tree')
           .filter({ hasText: 'Projects' })
           .locator('nav-item button')
           .first();
@@ -122,6 +122,65 @@ export class ProjectPage extends BasePage {
     return projectMenuItems.nth(index - 1);
   }
 
+  async navigateToProjectByName(projectName: string): Promise<void> {
+    const fullProjectName = this.testPrefix
+      ? `${this.testPrefix}-${projectName}`
+      : projectName;
+
+    // Wait for the nav to be fully loaded
+    await this.sidenav.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Find the Projects group button
+    const projectsGroup = this.page
+      .locator('nav-list-tree')
+      .filter({ hasText: 'Projects' })
+      .locator('nav-item button')
+      .first();
+
+    // Ensure Projects group is expanded with retry logic
+    if (await projectsGroup.isVisible().catch(() => false)) {
+      for (let i = 0; i < 3; i++) {
+        const isExpanded = await projectsGroup.getAttribute('aria-expanded');
+        if (isExpanded === 'true') break;
+
+        await projectsGroup.click();
+        await this.page.waitForTimeout(1000);
+      }
+    }
+
+    // Locate the project button with multiple approaches
+    // Approach 1: Structured hierarchy
+    let projectBtn = this.page
+      .locator('.nav-children .nav-child-item nav-item button')
+      .filter({ hasText: fullProjectName })
+      .first();
+
+    // Approach 2: Flat search in side nav
+    if (!(await projectBtn.isVisible().catch(() => false))) {
+      projectBtn = this.page
+        .locator('magic-side-nav button')
+        .filter({ hasText: fullProjectName })
+        .first();
+    }
+
+    // Approach 3: Global search (last resort)
+    if (!(await projectBtn.isVisible().catch(() => false))) {
+      projectBtn = this.page
+        .locator('button')
+        .filter({ hasText: fullProjectName })
+        .first();
+    }
+
+    await projectBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await projectBtn.click();
+
+    // Wait for navigation to complete
+    await this.page.waitForLoadState('networkidle');
+
+    // Verify we're in the project
+    await expect(this.workCtxTitle).toContainText(fullProjectName);
+  }
+
   async navigateToProject(projectLocator: Locator): Promise<void> {
     const projectBtn = projectLocator.locator('button').first();
     await projectBtn.waitFor({ state: 'visible' });
@@ -172,7 +231,7 @@ export class ProjectPage extends BasePage {
       .filter({ hasText: 'Create Project' })
       .locator('button');
     const projectsGroupBtn = this.page
-      .locator('nav-list')
+      .locator('nav-list-tree')
       .filter({ hasText: 'Projects' })
       .locator('nav-item button')
       .first();
@@ -204,7 +263,7 @@ export class ProjectPage extends BasePage {
 
     // Find the Projects group button (should exist since we have a project)
     const projectsGroupAfterCreation = this.page
-      .locator('nav-list')
+      .locator('nav-list-tree')
       .filter({ hasText: 'Projects' })
       .locator('nav-item button')
       .first();

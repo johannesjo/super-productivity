@@ -186,6 +186,8 @@ test.describe('WebDAV Sync Full Flow', () => {
     // Wait for deletion
     await expect(pageA.locator('task')).toHaveCount(1); // Should be 1 left
 
+    await pageA.waitForTimeout(1000);
+
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
