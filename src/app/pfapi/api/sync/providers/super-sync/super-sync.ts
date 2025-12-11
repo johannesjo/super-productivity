@@ -202,7 +202,12 @@ export class SuperSyncProvider
   private async _getServerSeqKey(): Promise<string> {
     const cfg = await this.privateCfg.load();
     const baseUrl = cfg?.baseUrl ?? 'default';
-    const hash = baseUrl
+    // Include accessToken in the hash so different users on the same server
+    // get separate lastServerSeq tracking. This ensures server migration detection
+    // works correctly when switching between accounts on the same server.
+    const accessToken = cfg?.accessToken ?? '';
+    const identifier = `${baseUrl}|${accessToken}`;
+    const hash = identifier
       .split('')
       .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
       .toString(16);

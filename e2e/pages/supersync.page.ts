@@ -48,7 +48,9 @@ export class SuperSyncPage extends BasePage {
     this.syncErrorIcon = page.locator('.sync-btn mat-icon:has-text("sync_problem")');
     // Fresh client confirmation dialog elements
     this.freshClientDialog = page.locator('dialog-confirm');
-    this.freshClientConfirmBtn = page.locator('dialog-confirm button[mat-flat-button]');
+    this.freshClientConfirmBtn = page.locator(
+      'dialog-confirm button[mat-stroked-button]',
+    );
     // Conflict resolution dialog elements
     this.conflictDialog = page.locator('dialog-conflict-resolution');
     this.conflictUseRemoteBtn = page.locator(

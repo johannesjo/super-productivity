@@ -51,6 +51,7 @@ describe('OperationLogSyncService', () => {
       'append',
       'markApplied',
       'getUnsyncedByEntity',
+      'getOpsAfterSeq',
     ]);
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getEntityFrontier',
@@ -134,6 +135,8 @@ describe('OperationLogSyncService', () => {
     validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
     // Default dependency extraction: return empty array (no dependencies)
     dependencyResolverSpy.extractDependencies.and.returnValue([]);
+    // Default: no local ops to replay after SYNC_IMPORT
+    opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
   });
 
   it('should be created', () => {
@@ -1355,6 +1358,257 @@ describe('OperationLogSyncService', () => {
 
       // detectConflicts SHOULD be called for regular ops
       expect(service.detectConflicts).toHaveBeenCalled();
+    });
+  });
+
+  describe('_replayLocalSyncedOpsAfterImport (late joiner scenario)', () => {
+    // Helper to create operations
+    const createOp = (partial: Partial<Operation>): Operation => ({
+      id: '019afd68-0000-7000-0000-000000000000',
+      actionType: '[Test] Action',
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'entity-1',
+      payload: {},
+      clientId: 'client-A',
+      vectorClock: { clientA: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+      ...partial,
+    });
+
+    // Helper to create op log entries
+    const createEntry = (
+      op: Operation,
+      options: { syncedAt?: number; source?: 'local' | 'remote' } = {},
+    ): any => ({
+      seq: 1,
+      op,
+      appliedAt: Date.now(),
+      source: options.source ?? 'local',
+      syncedAt: options.syncedAt,
+    });
+
+    it('should replay local synced ops after SYNC_IMPORT is applied', async () => {
+      // Scenario: "Late joiner" - Client B has local synced ops that need to be
+      // replayed after receiving SYNC_IMPORT from Client A
+
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A', // From another client
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      // Local synced ops created by THIS client
+      const localSyncedOp1 = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-B1',
+        actionType: '[Task] Add Task',
+      });
+      const localSyncedOp2 = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-B2',
+        actionType: '[Task] Add Task',
+      });
+
+      // Mock getOpsAfterSeq to return local synced entries
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(localSyncedOp1, { syncedAt: Date.now() - 1000 }),
+            createEntry(localSyncedOp2, { syncedAt: Date.now() - 500 }),
+          ]),
+        );
+
+      // Set up other mocks
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      // Process the SYNC_IMPORT
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Verify that applyOperations was called twice:
+      // 1. First call: Apply the SYNC_IMPORT
+      // 2. Second call: Replay local synced ops
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+      // Second call should have the local synced ops
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(2);
+      expect(secondCallArgs[0].map((op: Operation) => op.id)).toContain(
+        '019afd68-0001-7000-0000-000000000000',
+      );
+      expect(secondCallArgs[0].map((op: Operation) => op.id)).toContain(
+        '019afd68-0002-7000-0000-000000000000',
+      );
+    });
+
+    it('should NOT replay ops from other clients', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Op from THIS client (should be replayed)
+      const localOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        clientId: testClientId,
+      });
+
+      // Op from OTHER client (should NOT be replayed)
+      const otherClientOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        clientId: 'other-client',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(localOp, { syncedAt: Date.now() }),
+            createEntry(otherClientOp, { syncedAt: Date.now() }),
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should only have local client's op
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].clientId).toBe(testClientId);
+    });
+
+    it('should NOT replay unsynced ops (pending upload)', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Synced op (should be replayed)
+      const syncedOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        clientId: testClientId,
+      });
+
+      // Unsynced op (should NOT be replayed - will be uploaded later)
+      const unsyncedOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        clientId: testClientId,
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(syncedOp, { syncedAt: Date.now() }),
+            createEntry(unsyncedOp, { syncedAt: undefined }), // Not synced
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should only have the synced op
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].id).toBe('019afd68-0001-7000-0000-000000000000');
+    });
+
+    it('should NOT replay SYNC_IMPORT or BACKUP_IMPORT ops', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Regular op (should be replayed)
+      const regularOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+      });
+
+      // Old SYNC_IMPORT from this client (should NOT be replayed)
+      const oldImportOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: testClientId,
+        entityType: 'ALL',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(regularOp, { syncedAt: Date.now() }),
+            createEntry(oldImportOp, { syncedAt: Date.now() }),
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should only have the regular op, not the old import
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].opType).toBe(OpType.Create);
+    });
+
+    it('should not call applyOperations for replay if no local synced ops exist', async () => {
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // No local ops at all
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(Promise.resolve([]));
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // applyOperations should only be called once (for the SYNC_IMPORT itself)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
     });
   });
 });

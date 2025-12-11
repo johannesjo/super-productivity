@@ -454,6 +454,36 @@ describe('SuperSyncProvider', () => {
       expect(capturedKeys[0]).not.toBe(capturedKeys[1]);
     });
 
+    it('should generate different keys for different access tokens on same server', async () => {
+      const capturedKeys: string[] = [];
+      localStorageSpy.getItem.and.callFake((key: string) => {
+        capturedKeys.push(key);
+        return null;
+      });
+
+      // First user
+      mockPrivateCfgStore.load.and.returnValue(
+        Promise.resolve({
+          ...testConfig,
+          baseUrl: 'https://server.com',
+          accessToken: 'token-user-1',
+        }),
+      );
+      await provider.getLastServerSeq();
+
+      // Second user (same server, different token)
+      mockPrivateCfgStore.load.and.returnValue(
+        Promise.resolve({
+          ...testConfig,
+          baseUrl: 'https://server.com',
+          accessToken: 'token-user-2',
+        }),
+      );
+      await provider.getLastServerSeq();
+
+      expect(capturedKeys[0]).not.toBe(capturedKeys[1]);
+    });
+
     it('should use default key when config is missing', async () => {
       mockPrivateCfgStore.load.and.returnValue(Promise.resolve(null));
       localStorageSpy.getItem.and.returnValue(null);

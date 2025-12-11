@@ -472,6 +472,76 @@ export class OperationLogSyncService {
   }
 
   /**
+   * Re-applies local synced operations after a SYNC_IMPORT is applied.
+   *
+   * This handles the "late joiner" scenario where:
+   * 1. Client B creates local tasks (B1, B2, B3)
+   * 2. Client B uploads them to server (server accepts)
+   * 3. Client B receives piggybacked SYNC_IMPORT from Client A
+   * 4. SYNC_IMPORT replaces entire state (B's tasks disappear!)
+   * 5. This method re-applies B's synced ops to restore them
+   *
+   * The key insight: piggybacked ops exclude the client's own ops,
+   * so the SYNC_IMPORT doesn't include Client B's changes.
+   * But those ops ARE on the server and SHOULD be in the final state.
+   *
+   * @param appliedOps - The ops that were just applied (includes the SYNC_IMPORT)
+   */
+  private async _replayLocalSyncedOpsAfterImport(appliedOps: Operation[]): Promise<void> {
+    // Get the SYNC_IMPORT's vector clock - we need to replay ops that happened AFTER it
+    const syncImportOp = appliedOps.find(
+      (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
+    );
+    if (!syncImportOp) {
+      return; // Shouldn't happen, but be safe
+    }
+
+    // Get the current client ID
+    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    if (!clientId) {
+      return;
+    }
+
+    // Get all local ops that:
+    // 1. Were created by THIS client (so they're not in the piggybacked ops)
+    // 2. Are already synced (accepted by server)
+    // 3. Have a vector clock that is NOT dominated by the SYNC_IMPORT's clock
+    //    (meaning they were created after/concurrently with the SYNC_IMPORT)
+    const allEntries = await this.opLogStore.getOpsAfterSeq(0);
+    const localSyncedOps = allEntries
+      .filter((entry) => {
+        // Must be created by this client
+        if (entry.op.clientId !== clientId) return false;
+        // Must be synced (accepted by server)
+        if (!entry.syncedAt) return false;
+        // Must NOT be a full-state op itself
+        if (
+          entry.op.opType === OpType.SyncImport ||
+          entry.op.opType === OpType.BackupImport
+        ) {
+          return false;
+        }
+        return true;
+      })
+      .map((entry) => entry.op);
+
+    if (localSyncedOps.length === 0) {
+      OpLog.normal(
+        'OperationLogSyncService: No local synced ops to replay after SYNC_IMPORT.',
+      );
+      return;
+    }
+
+    OpLog.normal(
+      `OperationLogSyncService: Replaying ${localSyncedOps.length} local synced ops after SYNC_IMPORT.`,
+    );
+
+    // Re-apply these ops to restore the local changes on top of the SYNC_IMPORT state
+    // Use applyOperations which handles action dispatching
+    await this.operationApplier.applyOperations(localSyncedOps);
+  }
+
+  /**
    * Process remote operations: detect conflicts and apply non-conflicting ones.
    * If applying operations fails, rolls back any stored operations to maintain consistency.
    */
@@ -604,6 +674,16 @@ export class OperationLogSyncService {
         'OperationLogSyncService: Full-state operation detected, skipping conflict detection.',
       );
       await this._applyNonConflictingOps(validOps);
+
+      // IMPORTANT: After applying a SYNC_IMPORT, re-apply any local ops that were
+      // already synced to the server. This handles the "late joiner" scenario where:
+      // 1. Client B creates local tasks (B1, B2, B3)
+      // 2. Client B uploads them (server accepts)
+      // 3. Client B receives piggybacked SYNC_IMPORT from Client A
+      // 4. SYNC_IMPORT replaces state (B's tasks lost!)
+      // 5. We need to re-apply B's synced ops to restore them
+      await this._replayLocalSyncedOpsAfterImport(validOps);
+
       await this._validateAfterSync();
       return;
     }
