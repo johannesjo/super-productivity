@@ -1,23 +1,25 @@
-FROM node:22-alpine AS builder
+# Simple production Dockerfile for super-sync-server (single stage)
+
+FROM node:22-alpine
 
 WORKDIR /app
 
-# Install required system dependencies for Prisma
-RUN apk add --no-cache openssl libc6-compat
+# System deps for Prisma & healthcheck
+RUN apk add --no-cache openssl libc6-compat wget
 
-# Copy package files for whole workspace
+# Copy workspace package files
 COPY package.json package-lock.json ./
 COPY packages/shared-schema/package.json ./packages/shared-schema/
 COPY packages/super-sync-server/package.json ./packages/super-sync-server/
 
-# Install ALL dependencies for the monorepo, like you do locally
+# Install ALL deps for the monorepo (like locally)
 RUN npm ci --ignore-scripts
 
 # Copy source files
 COPY packages/shared-schema/ ./packages/shared-schema/
 COPY packages/super-sync-server/ ./packages/super-sync-server/
 
-# Build shared-schema first (it's a dependency)
+# Build shared-schema first
 WORKDIR /app/packages/shared-schema
 RUN npm run build
 
@@ -25,37 +27,14 @@ RUN npm run build
 WORKDIR /app/packages/super-sync-server
 RUN npx prisma generate
 RUN rm -rf dist && npm run build
-
-# Copy public files to dist
 RUN cp -r public dist/
 
-FROM node:22-alpine AS production
-
-WORKDIR /app
-
-# Install runtime dependencies only
-RUN apk add --no-cache openssl libc6-compat
-
-# Create non-root user for security
+# Create non-root user and data dir
+WORKDIR /app/packages/super-sync-server
 RUN addgroup -g 1001 -S nodejs && \
-    adduser -S supersync -u 1001 -G nodejs
+    adduser -S supersync -u 1001 -G nodejs && \
+    mkdir -p /app/data && chown -R supersync:nodejs /app/data
 
-# Copy built artifacts from builder
-COPY --from=builder /app/packages/super-sync-server/dist ./dist
-COPY --from=builder /app/packages/super-sync-server/package.json ./
-COPY --from=builder /app/packages/super-sync-server/prisma ./prisma
-
-# Copy shared-schema (required dependency)
-COPY --from=builder /app/packages/shared-schema/dist /app/node_modules/@sp/shared-schema/dist
-COPY --from=builder /app/packages/shared-schema/package.json /app/node_modules/@sp/shared-schema/
-
-# IMPORTANT: copy the root node_modules from the builder
-COPY --from=builder /app/node_modules ./node_modules
-
-# Create data directory
-RUN mkdir -p /app/data && chown -R supersync:nodejs /app/data
-
-# Switch to non-root user
 USER supersync
 
 EXPOSE 1900
