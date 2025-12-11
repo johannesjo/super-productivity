@@ -9,7 +9,8 @@
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "test": "vitest run",
     "delete-user": "ts-node scripts/delete-user.ts",
-    "clear-data": "ts-node scripts/clear-data.ts"
+    "clear-data": "ts-node scripts/clear-data.ts",
+    "monitor": "ts-node scripts/monitor.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
