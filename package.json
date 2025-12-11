@@ -256,7 +256,8 @@
   "overrides": {
     "ngx-markdown": {
       "marked": "12.0.2"
-    }
+    },
+    "@conventional-changelog/git-client": "^2.5.1"
   },
   "optionalDependencies": {
     "@lmdb/lmdb-darwin-x64": "^3.2.0",
