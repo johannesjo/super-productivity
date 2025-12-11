@@ -32,32 +32,26 @@ RUN cp -r public dist/
 # ---- Runtime stage ----
 FROM node:22-alpine AS production
 
+# System deps for Prisma & healthcheck + create user BEFORE copying files
+RUN apk add --no-cache openssl libc6-compat wget && \
+    addgroup -g 1001 -S nodejs && \
+    adduser -S supersync -u 1001 -G nodejs && \
+    mkdir -p /app/data && chown supersync:nodejs /app /app/data
+
 WORKDIR /app
 
-# System deps for Prisma & healthcheck
-RUN apk add --no-cache openssl libc6-compat wget
-
 # Copy built artifacts from builder
-COPY --from=builder /repo/packages/super-sync-server/dist ./dist
-COPY --from=builder /repo/packages/super-sync-server/prisma ./prisma
-COPY --from=builder /repo/packages/super-sync-server/package.json ./package.json
+COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/dist ./dist
+COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/prisma ./prisma
+COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/package.json ./package.json
+COPY --from=builder --chown=supersync:nodejs /repo/packages/shared-schema/sp-shared-schema-*.tgz ./shared-schema.tgz
 
-# Copy shared-schema tarball
-COPY --from=builder /repo/packages/shared-schema/sp-shared-schema-*.tgz ./shared-schema.tgz
-
-# 1. Install local dependency from tarball
-RUN npm install ./shared-schema.tgz --ignore-scripts
-
-# 2. Install remaining production dependencies (including fastify)
-RUN npm install --ignore-scripts --omit=dev
-
-# 3. Generate Prisma client for production (install CLI temporarily)
-RUN npm install prisma@5.22.0 && npx prisma generate && npm remove prisma
-
-# Non-root user + Data directory
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S supersync -u 1001 -G nodejs && \
-    mkdir -p /app/data && chown -R supersync:nodejs /app
+# Install dependencies and generate Prisma client in single layer
+RUN npm install ./shared-schema.tgz --ignore-scripts && \
+    npm install --ignore-scripts --omit=dev && \
+    npx prisma@5.22.0 generate && \
+    rm -f shared-schema.tgz && \
+    npm cache clean --force
 
 USER supersync
 
