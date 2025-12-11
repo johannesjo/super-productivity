@@ -13,8 +13,29 @@ import { TestClient } from './test-client.helper';
  * Wraps TestClient (for vector clocks) and OperationLogStoreService (for persistence)
  * to provide a complete client simulation for integration tests.
  *
- * Note: All SimulatedClient instances share the same IndexedDB database in tests.
- * To simulate true isolation, use markSynced/source tracking to distinguish clients.
+ * ## Test Isolation Strategy
+ *
+ * All SimulatedClient instances share the same IndexedDB database ('SUP_OPS').
+ * This is intentional - it simplifies test setup and avoids complex database management.
+ *
+ * **Logical isolation is achieved through:**
+ * - **clientId filtering**: Each client only sees its own operations via `getUnsyncedOps()`
+ * - **source tracking**: Operations are marked 'local' or 'remote' to distinguish origin
+ * - **markSynced**: Tracks which operations have been uploaded to avoid re-upload
+ * - **MockSyncServer**: Provides true isolation at the "server" level - each test creates
+ *   a fresh MockSyncServer instance that acts as the coordination point
+ *
+ * **What this tests:**
+ * - The sync protocol logic (upload/download/conflict detection)
+ * - Vector clock progression and merging
+ * - Operation ordering and dependency handling
+ *
+ * **What this does NOT test:**
+ * - True multi-process/multi-tab IndexedDB isolation (use E2E tests for this)
+ * - Browser storage quota handling per-client
+ *
+ * For true client isolation (separate databases), use the E2E tests in `e2e/tests/sync/`
+ * which create separate browser contexts with isolated IndexedDB instances.
  */
 export class SimulatedClient {
   readonly clientId: string;

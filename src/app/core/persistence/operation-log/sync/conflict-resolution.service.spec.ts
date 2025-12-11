@@ -398,5 +398,141 @@ describe('ConflictResolutionService', () => {
         ['remote-proj-1', 'remote-task-1'].sort(),
       );
     });
+
+    it('should handle large conflict set (100+ operations on same entity)', async () => {
+      // Scenario: Stress test with many concurrent operations on the same task
+      // This tests that the conflict resolution system can handle large batches
+      const numLocalOps = 50;
+      const numRemoteOps = 50;
+
+      const localOps: Operation[] = [];
+      const remoteOps: Operation[] = [];
+
+      // Create many local operations
+      for (let i = 0; i < numLocalOps; i++) {
+        localOps.push({
+          ...createMockOp(`local-${i}`, 'local'),
+          entityId: 'task-stress',
+          timestamp: Date.now() + i,
+          vectorClock: { local: i + 1 },
+        });
+      }
+
+      // Create many remote operations
+      for (let i = 0; i < numRemoteOps; i++) {
+        remoteOps.push({
+          ...createMockOp(`remote-${i}`, 'remote'),
+          entityId: 'task-stress',
+          timestamp: Date.now() + i,
+          vectorClock: { remote: i + 1 },
+        });
+      }
+
+      const largeConflict: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-stress',
+          localOps,
+          remoteOps,
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'remote']]), // User chooses remote
+            conflicts: largeConflict,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      const startTime = Date.now();
+      await service.presentConflicts(largeConflict);
+      const duration = Date.now() - startTime;
+
+      // Verify all remote ops were stored
+      expect(mockOpLogStore.append).toHaveBeenCalledTimes(numRemoteOps);
+
+      // Verify all remote ops were applied
+      expect(mockOperationApplier.applyOperations).toHaveBeenCalledTimes(1);
+      const appliedOps = mockOperationApplier.applyOperations.calls.mostRecent()
+        .args[0] as Operation[];
+      expect(appliedOps.length).toBe(numRemoteOps);
+
+      // Verify all local ops were rejected
+      const rejectedCalls = mockOpLogStore.markRejected.calls.allArgs();
+      const allRejectedIds = rejectedCalls.flat().flat();
+      expect(allRejectedIds.length).toBeGreaterThanOrEqual(numLocalOps);
+      for (let i = 0; i < numLocalOps; i++) {
+        expect(allRejectedIds).toContain(`local-${i}`);
+      }
+
+      // Performance check: should complete in reasonable time (<5 seconds)
+      expect(duration).toBeLessThan(5000);
+
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
+
+    it('should handle multiple entities with many conflicts each', async () => {
+      // Scenario: 10 entities, each with 10 conflicting operations
+      const numEntities = 10;
+      const opsPerEntity = 10;
+      const multiEntityConflicts: EntityConflict[] = [];
+
+      for (let e = 0; e < numEntities; e++) {
+        const localOps: Operation[] = [];
+        const remoteOps: Operation[] = [];
+
+        for (let i = 0; i < opsPerEntity; i++) {
+          localOps.push({
+            ...createMockOp(`local-${e}-${i}`, 'local'),
+            entityId: `task-${e}`,
+          });
+          remoteOps.push({
+            ...createMockOp(`remote-${e}-${i}`, 'remote'),
+            entityId: `task-${e}`,
+          });
+        }
+
+        multiEntityConflicts.push({
+          entityType: 'TASK',
+          entityId: `task-${e}`,
+          localOps,
+          remoteOps,
+          suggestedResolution: 'manual',
+        });
+      }
+
+      // Alternate resolutions: even entities use remote, odd use local
+      const resolutions = new Map<number, 'local' | 'remote'>();
+      for (let i = 0; i < numEntities; i++) {
+        resolutions.set(i, i % 2 === 0 ? 'remote' : 'local');
+      }
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions,
+            conflicts: multiEntityConflicts,
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(multiEntityConflicts);
+
+      // Verify operations were processed
+      expect(mockDialog.open).toHaveBeenCalledTimes(1);
+
+      // Remote-winning entities (0, 2, 4, 6, 8) = 5 entities * 10 ops = 50 remote ops applied
+      // Local-winning entities (1, 3, 5, 7, 9) = 5 entities * 10 ops = 50 remote ops rejected
+      expect(mockOperationApplier.applyOperations).toHaveBeenCalled();
+
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
   });
 });
