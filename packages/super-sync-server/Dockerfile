@@ -54,7 +54,7 @@ RUN npm install --ignore-scripts --omit=dev
 # Non-root user + Data directory
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S supersync -u 1001 -G nodejs && \
-    mkdir -p /app/data && chown -R supersync:nodejs /app/data
+    mkdir -p /app/data && chown -R supersync:nodejs /app
 
 USER supersync
 
