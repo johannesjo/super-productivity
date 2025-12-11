@@ -19,7 +19,7 @@ services:
     build:
       context: ../..
       dockerfile: packages/super-sync-server/Dockerfile
-    image: supersync:v2
+    image: supersync:v3
     container_name: supersync-server
     restart: always
     environment:
