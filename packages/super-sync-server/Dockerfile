@@ -27,7 +27,6 @@ RUN npm pack
 WORKDIR /repo/packages/super-sync-server
 RUN npx prisma generate
 RUN rm -rf dist && npm run build
-RUN cp -r public dist/
 
 # ---- Runtime stage ----
 FROM node:22-alpine AS production
@@ -42,6 +41,7 @@ WORKDIR /app
 
 # Copy built artifacts from builder
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/dist ./dist
+COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/public ./public
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/prisma ./prisma
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/package.json ./package.json
 COPY --from=builder --chown=supersync:nodejs /repo/packages/shared-schema/sp-shared-schema-*.tgz ./shared-schema.tgz
