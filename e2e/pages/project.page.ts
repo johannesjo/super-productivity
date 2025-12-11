@@ -68,15 +68,20 @@ export class ProjectPage extends BasePage {
           await this.page.waitForTimeout(500);
         }
 
+        // Get the Projects nav-list-tree container to scope the button search
+        const projectsTree = this.page
+          .locator('nav-list-tree')
+          .filter({ hasText: 'Projects' });
+
         // Hover over the Projects group to show additional buttons
         await projectsGroup.hover();
 
         // Wait a bit for the hover effect to take place
         await this.page.waitForTimeout(500);
 
-        // Look for the create project button (add icon) in additional buttons
-        const createProjectBtn = this.page.locator(
-          'nav-list .additional-btns button[mat-icon-button]:has(mat-icon:text("add"))',
+        // Look for the create project button (add icon) within the Projects tree only
+        const createProjectBtn = projectsTree.locator(
+          '.additional-btns button[mat-icon-button]:has(mat-icon:text("add"))',
         );
         // Try to wait for visibility, but if it fails, try forcing click if attached
         try {
@@ -130,43 +135,48 @@ export class ProjectPage extends BasePage {
     // Wait for the nav to be fully loaded
     await this.sidenav.waitFor({ state: 'visible', timeout: 5000 });
 
-    // Find the Projects group button
-    const projectsGroup = this.page
+    // Get the Projects nav-list-tree container
+    const projectsTree = this.page
       .locator('nav-list-tree')
-      .filter({ hasText: 'Projects' })
-      .locator('nav-item button')
+      .filter({ hasText: 'Projects' });
+
+    // Find the Projects group button (the header with expand/collapse)
+    const projectsGroup = projectsTree
+      .locator('.g-multi-btn-wrapper nav-item button')
       .first();
 
     // Ensure Projects group is expanded with retry logic
-    if (await projectsGroup.isVisible().catch(() => false)) {
-      for (let i = 0; i < 3; i++) {
-        const isExpanded = await projectsGroup.getAttribute('aria-expanded');
-        if (isExpanded === 'true') break;
+    await projectsGroup.waitFor({ state: 'visible', timeout: 5000 });
+    for (let i = 0; i < 3; i++) {
+      const isExpanded = await projectsGroup.getAttribute('aria-expanded');
+      if (isExpanded === 'true') break;
 
-        await projectsGroup.click();
-        await this.page.waitForTimeout(1000);
-      }
+      await projectsGroup.click();
+      // Wait for expansion animation to complete - scoped to Projects tree
+      await projectsTree
+        .locator('.nav-children')
+        .waitFor({ state: 'visible', timeout: 3000 })
+        .catch(() => {});
     }
 
-    // Locate the project button with multiple approaches
-    // Approach 1: Structured hierarchy
-    let projectBtn = this.page
+    // Locate the project button within the Projects tree
+    let projectBtn = projectsTree
       .locator('.nav-children .nav-child-item nav-item button')
       .filter({ hasText: fullProjectName })
       .first();
 
-    // Approach 2: Flat search in side nav
+    // Fallback: search within the Projects tree more broadly
     if (!(await projectBtn.isVisible().catch(() => false))) {
-      projectBtn = this.page
-        .locator('magic-side-nav button')
+      projectBtn = projectsTree
+        .locator('button')
         .filter({ hasText: fullProjectName })
         .first();
     }
 
-    // Approach 3: Global search (last resort)
+    // Last resort: Global search in side nav
     if (!(await projectBtn.isVisible().catch(() => false))) {
       projectBtn = this.page
-        .locator('button')
+        .locator('magic-side-nav button')
         .filter({ hasText: fullProjectName })
         .first();
     }

@@ -50,7 +50,7 @@ test.describe('Project', () => {
       .filter({ hasText: 'Create Project' })
       .locator('button');
     const projectsGroupBtn = page
-      .locator('nav-list')
+      .locator('nav-list-tree')
       .filter({ hasText: 'Projects' })
       .locator('nav-item button')
       .first();

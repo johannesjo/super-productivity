@@ -2,7 +2,7 @@ import { test, expect } from '../../fixtures/test.fixture';
 import { SyncPage } from '../../pages/sync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
 import { ProjectPage } from '../../pages/project.page';
-import { waitForAppReady } from '../../utils/waits';
+import { waitForAppReady, waitForStatePersistence } from '../../utils/waits';
 import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
@@ -146,8 +146,8 @@ test.describe('WebDAV Sync Expansion', () => {
     await dismissTour(pageB);
 
     // Verify Project on B
-    // Wait for project navigation
-    await pageB.waitForTimeout(2000);
+    // Wait for state persistence after reload
+    await waitForStatePersistence(pageB);
 
     await projectPageB.navigateToProjectByName(projectName);
 
@@ -225,8 +225,8 @@ test.describe('WebDAV Sync Expansion', () => {
     });
 
     // Mark done on A
-    await pageA.waitForTimeout(1000);
     const taskA = pageA.locator('task', { hasText: taskName }).first();
+    await taskA.waitFor({ state: 'visible' });
     await taskA.hover();
     const doneBtnA = taskA.locator('.task-done-btn');
     await doneBtnA.click({ force: true });
@@ -251,7 +251,8 @@ test.describe('WebDAV Sync Expansion', () => {
     await doneBtnB.click();
     await expect(taskB).not.toHaveClass(/isDone/);
 
-    await pageB.waitForTimeout(1000);
+    // Wait for state persistence before syncing
+    await waitForStatePersistence(pageB);
 
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);

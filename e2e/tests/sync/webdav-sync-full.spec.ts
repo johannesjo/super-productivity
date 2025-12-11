@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test.fixture';
 import { SyncPage } from '../../pages/sync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
-import { waitForAppReady } from '../../utils/waits';
+import { waitForAppReady, waitForStatePersistence } from '../../utils/waits';
 import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
@@ -186,7 +186,8 @@ test.describe('WebDAV Sync Full Flow', () => {
     // Wait for deletion
     await expect(pageA.locator('task')).toHaveCount(1); // Should be 1 left
 
-    await pageA.waitForTimeout(1000);
+    // Wait for state persistence before syncing
+    await waitForStatePersistence(pageA);
 
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
@@ -214,8 +215,8 @@ test.describe('WebDAV Sync Full Flow', () => {
     await titleA.locator('input, textarea').fill('Conflict Task A');
     await pageA.keyboard.press('Enter');
 
-    // Wait a bit to ensure timestamps differ
-    await pageA.waitForTimeout(2000);
+    // Wait for state persistence and ensure timestamps differ between edits
+    await waitForStatePersistence(pageA);
 
     // Edit on B: "Conflict Task B"
     const taskB = pageB.locator('task', { hasText: 'Conflict Task' }).first();
