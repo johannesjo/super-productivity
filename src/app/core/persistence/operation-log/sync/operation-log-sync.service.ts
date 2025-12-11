@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -39,6 +39,7 @@ import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { uuidv7 } from '../../../../util/uuid-v7';
+import { lazyInject } from '../../../../util/lazy-inject';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -120,8 +121,12 @@ export class OperationLogSyncService {
   private dependencyResolver = inject(DependencyResolverService);
   private dialog = inject(MatDialog);
   private userInputWaitState = inject(UserInputWaitStateService);
-  private pfapiService = inject(PfapiService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
+
+  // Lazy injection to break circular dependency:
+  // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
+  private _injector = inject(Injector);
+  private _getPfapiService = lazyInject(this._injector, PfapiService);
 
   /**
    * Checks if this client is "wholly fresh" - meaning it has never synced before
@@ -350,7 +355,7 @@ export class OperationLogSyncService {
     }
 
     // Get client ID and vector clock
-    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
     if (!clientId) {
       OpLog.err(
         'OperationLogSyncService: Cannot create SYNC_IMPORT - no client ID available.',
