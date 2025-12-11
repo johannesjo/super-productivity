@@ -882,7 +882,7 @@ describe('OperationLogSyncService', () => {
       expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
     });
 
-    it('should return manual when both have delete ops', () => {
+    it('should auto-resolve when both have delete ops (outcome is identical)', () => {
       const now = Date.now();
       const localOps = [
         createOp({ id: 'local-1', opType: OpType.Delete, timestamp: now }),
@@ -891,7 +891,8 @@ describe('OperationLogSyncService', () => {
         createOp({ id: 'remote-1', opType: OpType.Delete, timestamp: now }),
       ];
 
-      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('manual');
+      // Both want to delete - auto-resolve to local (could be either, outcome is same)
+      expect(callSuggestResolution(service, localOps, remoteOps)).toBe('local');
     });
   });
 

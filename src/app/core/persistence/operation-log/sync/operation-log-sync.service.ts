@@ -846,10 +846,16 @@ export class OperationLogSyncService {
       return latestLocal > latestRemote ? 'local' : 'remote';
     }
 
-    // Heuristic 2: Delete vs Update - prefer Update (preserve data)
-    // Rationale: Users generally prefer not to lose work
+    // Heuristic 2: Delete conflicts
     const hasLocalDelete = localOps.some((op) => op.opType === OpType.Delete);
     const hasRemoteDelete = remoteOps.some((op) => op.opType === OpType.Delete);
+
+    // Heuristic 2a: Both delete - auto-resolve (outcome is identical either way)
+    // Rationale: Both clients want the entity deleted, no conflict to resolve
+    if (hasLocalDelete && hasRemoteDelete) return 'local';
+
+    // Heuristic 2b: Delete vs Update - prefer Update (preserve data)
+    // Rationale: Users generally prefer not to lose work
     if (hasLocalDelete && !hasRemoteDelete) return 'remote';
     if (hasRemoteDelete && !hasLocalDelete) return 'local';
 
