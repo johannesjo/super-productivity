@@ -503,6 +503,151 @@ describe('OperationLogHydratorService', () => {
 
         expect(mockSchemaMigrationService.migrateOperations).toHaveBeenCalled();
       });
+
+      // Additional version mismatch tests
+
+      it('should handle snapshot with version newer than current (future version)', async () => {
+        // This scenario can happen if a user downgrades the app
+        const futureSnapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION + 5, // Future version
+        });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(futureSnapshot));
+        // Future version doesn't need migration (migration is only for older versions)
+        mockSchemaMigrationService.needsMigration.and.returnValue(false);
+
+        // Should not throw, just load the data
+        await service.hydrateStore();
+
+        expect(mockStore.dispatch).toHaveBeenCalledWith(
+          loadAllData({ appDataComplete: mockState }),
+        );
+      });
+
+      it('should migrate snapshot and operations together when both need migration', async () => {
+        // Both snapshot and tail operations have old schema version
+        const oldSnapshot = createMockSnapshot({
+          schemaVersion: 0,
+          lastAppliedOpSeq: 5,
+        });
+        const migratedSnapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+          lastAppliedOpSeq: 5,
+        });
+
+        const tailOps = [
+          createMockEntry(
+            6,
+            createMockOperation('op-6', OpType.Update, { schemaVersion: 0 }),
+          ),
+          createMockEntry(
+            7,
+            createMockOperation('op-7', OpType.Update, { schemaVersion: 0 }),
+          ),
+        ];
+
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(oldSnapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
+        mockSchemaMigrationService.needsMigration.and.returnValue(true);
+        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+        mockSchemaMigrationService.operationNeedsMigration.and.returnValue(true);
+
+        const migratedOps = tailOps.map((e) => ({
+          ...e.op,
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        }));
+        mockSchemaMigrationService.migrateOperations.and.returnValue(migratedOps);
+
+        await service.hydrateStore();
+
+        // Both snapshot and operations should be migrated
+        expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalled();
+        expect(mockSchemaMigrationService.migrateOperations).toHaveBeenCalled();
+        // Operations should be applied via applier service
+        expect(mockOperationApplierService.applyOperations).toHaveBeenCalled();
+      });
+
+      it('should handle mixed schema versions in tail operations', async () => {
+        // Some tail ops are old version, some are current
+        const snapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+          lastAppliedOpSeq: 5,
+        });
+
+        const tailOps = [
+          createMockEntry(
+            6,
+            createMockOperation('op-6', OpType.Update, { schemaVersion: 0 }), // Old
+          ),
+          createMockEntry(
+            7,
+            createMockOperation('op-7', OpType.Update, {
+              schemaVersion: CURRENT_SCHEMA_VERSION,
+            }), // Current
+          ),
+          createMockEntry(
+            8,
+            createMockOperation('op-8', OpType.Update, { schemaVersion: 0 }), // Old
+          ),
+        ];
+
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
+        mockSchemaMigrationService.needsMigration.and.returnValue(false);
+        // At least one operation needs migration
+        mockSchemaMigrationService.operationNeedsMigration.and.callFake(
+          (op: Operation) => op.schemaVersion === 0,
+        );
+
+        await service.hydrateStore();
+
+        // migrateOperations should be called since some ops need migration
+        expect(mockSchemaMigrationService.migrateOperations).toHaveBeenCalled();
+      });
+
+      it('should not migrate operations if none need migration', async () => {
+        const snapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+          lastAppliedOpSeq: 5,
+        });
+
+        const tailOps = [
+          createMockEntry(
+            6,
+            createMockOperation('op-6', OpType.Update, {
+              schemaVersion: CURRENT_SCHEMA_VERSION,
+            }),
+          ),
+        ];
+
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
+        mockSchemaMigrationService.needsMigration.and.returnValue(false);
+        mockSchemaMigrationService.operationNeedsMigration.and.returnValue(false);
+
+        await service.hydrateStore();
+
+        // migrateOperations should NOT be called
+        expect(mockSchemaMigrationService.migrateOperations).not.toHaveBeenCalled();
+      });
+
+      it('should handle undefined schemaVersion in snapshot (legacy data)', async () => {
+        // Legacy data from before schema versioning was introduced
+        const legacySnapshot = createMockSnapshot({ schemaVersion: undefined });
+        const migratedSnapshot = createMockSnapshot({
+          schemaVersion: CURRENT_SCHEMA_VERSION,
+        });
+
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(legacySnapshot));
+        mockSchemaMigrationService.needsMigration.and.returnValue(true);
+        mockSchemaMigrationService.migrateStateIfNeeded.and.returnValue(migratedSnapshot);
+
+        await service.hydrateStore();
+
+        // Should call migration for legacy (undefined version) snapshot
+        expect(mockSchemaMigrationService.migrateStateIfNeeded).toHaveBeenCalledWith(
+          legacySnapshot,
+        );
+      });
     });
 
     describe('backup recovery', () => {

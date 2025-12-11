@@ -796,4 +796,206 @@ describe('OperationLogCompactionService', () => {
       expect(noteKeys.length).toBe(0);
     });
   });
+
+  // =========================================================================
+  // Race condition tests
+  // =========================================================================
+  // These tests verify behavior when concurrent operations occur during compaction.
+  // The compaction service uses locks to prevent data corruption, and these tests
+  // verify that the locking mechanism works correctly.
+
+  describe('race conditions', () => {
+    it('should request lock for every compact call', async () => {
+      // This test verifies that every compact() call requests the lock.
+      // The actual serialization happens in the LockService (tested separately in lock.service.spec.ts).
+      const lockRequests: string[] = [];
+
+      mockLockService.request.and.callFake(
+        async (_name: string, fn: () => Promise<void>) => {
+          lockRequests.push('lock-requested');
+          await fn();
+        },
+      );
+
+      // Call compact 3 times sequentially
+      await service.compact();
+      await service.compact();
+      await service.compact();
+
+      // Lock should have been requested 3 times
+      expect(lockRequests.length).toBe(3);
+    });
+
+    it('should always request lock with correct name', async () => {
+      await service.compact();
+
+      expect(mockLockService.request).toHaveBeenCalledWith(
+        'sp_op_log',
+        jasmine.any(Function),
+      );
+    });
+
+    it('should use lastSeq captured before deleteOpsWhere to protect new ops', async () => {
+      // Simulate a new operation being written after getLastSeq but before deleteOpsWhere
+      let capturedLastSeq: number | undefined;
+      let deleteFilterFn: ((entry: OperationLogEntry) => boolean) | undefined;
+
+      mockOpLogStore.getLastSeq.and.callFake(async () => {
+        capturedLastSeq = 100;
+        return 100;
+      });
+
+      mockOpLogStore.deleteOpsWhere.and.callFake(async (filterFn) => {
+        deleteFilterFn = filterFn;
+      });
+
+      await service.compact();
+
+      // Verify lastSeq was captured
+      expect(capturedLastSeq).toBe(100);
+
+      // Simulate a new operation written after getLastSeq (seq 101)
+      const newOpAfterSnapshot: OperationLogEntry = {
+        seq: 101, // Written after getLastSeq returned 100
+        op: {} as any,
+        appliedAt: Date.now() - COMPACTION_RETENTION_MS - 1000, // Old enough to delete
+        source: 'local',
+        syncedAt: Date.now() - COMPACTION_RETENTION_MS - 500, // Synced
+      };
+
+      // The filter should NOT delete this op because seq > lastSeq
+      expect(deleteFilterFn!(newOpAfterSnapshot)).toBeFalse();
+
+      // But an op with seq <= lastSeq and old enough should be deleted
+      const oldOpBeforeSnapshot: OperationLogEntry = {
+        seq: 99,
+        op: {} as any,
+        appliedAt: Date.now() - COMPACTION_RETENTION_MS - 1000,
+        source: 'remote',
+        syncedAt: Date.now() - COMPACTION_RETENTION_MS - 500,
+      };
+      expect(deleteFilterFn!(oldOpBeforeSnapshot)).toBeTrue();
+    });
+
+    it('should handle concurrent compact and emergencyCompact calls', async () => {
+      const callOrder: string[] = [];
+
+      mockLockService.request.and.callFake(
+        async (_name: string, fn: () => Promise<void>) => {
+          callOrder.push('lock-start');
+          await fn();
+          callOrder.push('lock-end');
+        },
+      );
+
+      // Launch both regular and emergency compaction concurrently
+      const [regularResult, emergencyResult] = await Promise.all([
+        service.compact().then(() => 'regular-done'),
+        service
+          .emergencyCompact()
+          .then((success) => (success ? 'emergency-done' : 'emergency-failed')),
+      ]);
+
+      // Both should complete
+      expect(regularResult).toBe('regular-done');
+      expect(emergencyResult).toBe('emergency-done');
+
+      // Lock should have been acquired twice (serialized)
+      expect(callOrder.filter((c) => c === 'lock-start').length).toBe(2);
+    });
+
+    it('should not delete operations that arrive during compaction', async () => {
+      // This test verifies the TOCTOU protection:
+      // 1. getLastSeq() returns 100
+      // 2. New op with seq 101 arrives (simulated)
+      // 3. deleteOpsWhere should NOT delete seq 101
+
+      const operationsInStore: OperationLogEntry[] = [
+        {
+          seq: 99,
+          op: { id: 'op-99' } as any,
+          appliedAt: Date.now() - COMPACTION_RETENTION_MS - 2000,
+          source: 'remote',
+          syncedAt: Date.now() - COMPACTION_RETENTION_MS - 1000,
+        },
+        {
+          seq: 100,
+          op: { id: 'op-100' } as any,
+          appliedAt: Date.now() - COMPACTION_RETENTION_MS - 1000,
+          source: 'remote',
+          syncedAt: Date.now() - COMPACTION_RETENTION_MS - 500,
+        },
+        // This op "arrives" during compaction (seq > lastSeq when getLastSeq was called)
+        {
+          seq: 101,
+          op: { id: 'op-101' } as any,
+          appliedAt: Date.now() - COMPACTION_RETENTION_MS - 500,
+          source: 'local',
+          syncedAt: Date.now() - COMPACTION_RETENTION_MS - 100,
+        },
+      ];
+
+      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(100));
+
+      const deletedSeqs: number[] = [];
+      mockOpLogStore.deleteOpsWhere.and.callFake(async (filterFn) => {
+        for (const entry of operationsInStore) {
+          if (filterFn(entry)) {
+            deletedSeqs.push(entry.seq);
+          }
+        }
+      });
+
+      await service.compact();
+
+      // seq 99 and 100 should be eligible for deletion (old, synced, seq <= lastSeq)
+      expect(deletedSeqs).toContain(99);
+      expect(deletedSeqs).toContain(100);
+
+      // seq 101 should NOT be deleted (seq > lastSeq at time of check)
+      expect(deletedSeqs).not.toContain(101);
+    });
+
+    it('should complete all steps atomically within the lock', async () => {
+      // Verify that if saveStateCache fails, subsequent steps don't run
+      const callOrder: string[] = [];
+
+      mockLockService.request.and.callFake(
+        async (_name: string, fn: () => Promise<void>) => {
+          callOrder.push('lock-acquired');
+          try {
+            await fn();
+          } finally {
+            callOrder.push('lock-released');
+          }
+        },
+      );
+
+      mockOpLogStore.saveStateCache.and.callFake(async () => {
+        callOrder.push('saveStateCache');
+        throw new Error('Simulated failure');
+      });
+
+      mockOpLogStore.resetCompactionCounter.and.callFake(async () => {
+        callOrder.push('resetCompactionCounter');
+      });
+
+      mockOpLogStore.deleteOpsWhere.and.callFake(async () => {
+        callOrder.push('deleteOpsWhere');
+      });
+
+      await expectAsync(service.compact()).toBeRejectedWithError('Simulated failure');
+
+      // Lock should have been acquired and released
+      expect(callOrder).toContain('lock-acquired');
+      expect(callOrder).toContain('lock-released');
+
+      // saveStateCache was called
+      expect(callOrder).toContain('saveStateCache');
+
+      // But subsequent steps should NOT have been called
+      expect(callOrder).not.toContain('resetCompactionCounter');
+      expect(callOrder).not.toContain('deleteOpsWhere');
+    });
+  });
 });

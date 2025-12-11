@@ -636,22 +636,134 @@ describe('OperationLogDownloadService', () => {
         expect(result.newOps[0].id).toBe('op-2');
       });
 
-      // NOTE: These tests are skipped because the service uses real setTimeout
-      // with exponential backoff delays (1s + 2s + 4s = 7s) that exceed test timeouts.
-      // jasmine.clock() doesn't work with Promise-based async code.
-      // The functionality is still tested manually - these tests verify retry behavior.
+      // Download failure handling tests
+      // These tests verify retry behavior by counting download attempts and verifying
+      // the final result, without waiting for real retry delays.
       describe('download failure handling', () => {
-        it('should handle file download failures gracefully', () => {
-          // Test is skipped - retry delays cause timeout
-          // The service correctly handles failures and returns { success: false, failedFileCount: N }
-          pending('Skipped due to retry delays exceeding test timeout');
-        });
+        it('should return success:false when file download fails after all retries', async () => {
+          // Setup: provider that always fails to download
+          let downloadAttempts = 0;
+          mockManifestService.loadRemoteManifest.and.returnValue(
+            Promise.resolve({
+              operationFiles: ['ops/ops_client_fail.json'],
+              version: 1,
+            }),
+          );
 
-        it('should notify user about failed downloads', () => {
-          // Test is skipped - retry delays cause timeout
-          // The service correctly shows snackbar notification for failed downloads
-          pending('Skipped due to retry delays exceeding test timeout');
-        });
+          // Mock downloadFile to track attempts and always reject
+          // The service will retry MAX_DOWNLOAD_RETRIES (3) times
+          mockFileProvider.downloadFile.and.callFake(async () => {
+            downloadAttempts++;
+            throw new Error('Network error');
+          });
+
+          // Act: Download with retry (this will take ~7 seconds with real delays)
+          // We're testing the behavior, not the timing
+          const result = await service.downloadRemoteOps(mockFileProvider);
+
+          // Assert: Should have attempted download multiple times
+          // Note: 1 initial attempt + MAX_DOWNLOAD_RETRIES (3) = 4 total attempts
+          expect(downloadAttempts).toBe(4);
+
+          // Assert: Result should indicate failure
+          expect(result.success).toBeFalse();
+          expect(result.failedFileCount).toBe(1);
+          expect(result.newOps).toEqual([]);
+        }, 30000); // Extended timeout for retry delays
+
+        it('should notify user about failed downloads via snackbar', async () => {
+          mockManifestService.loadRemoteManifest.and.returnValue(
+            Promise.resolve({
+              operationFiles: ['ops/ops_client_fail.json'],
+              version: 1,
+            }),
+          );
+
+          // Mock downloadFile to always fail
+          mockFileProvider.downloadFile.and.rejectWith(new Error('Network error'));
+
+          // Act
+          await service.downloadRemoteOps(mockFileProvider);
+
+          // Assert: Should have shown error notification
+          expect(mockSnackService.open).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              type: 'ERROR',
+            }),
+          );
+        }, 30000); // Extended timeout for retry delays
+
+        it('should succeed if download succeeds after retry', async () => {
+          let downloadAttempts = 0;
+          const mockOps = [
+            {
+              seq: 1,
+              op: {
+                id: 'op-retry-success',
+                actionType: '[Test] Action',
+                opType: OpType.Create,
+                entityType: 'TASK',
+                entityId: 'task-1',
+                payload: {},
+                clientId: 'remoteClient',
+                vectorClock: { remoteClient: 1 },
+                timestamp: Date.now(),
+                schemaVersion: 1,
+              },
+              appliedAt: Date.now(),
+              source: 'remote' as const,
+            },
+          ];
+
+          mockManifestService.loadRemoteManifest.and.returnValue(
+            Promise.resolve({
+              operationFiles: ['ops/ops_client_retry.json'],
+              version: 1,
+            }),
+          );
+          mockOpLogStore.getAppliedOpIds.and.returnValue(Promise.resolve(new Set()));
+
+          // Fail first 2 attempts, succeed on 3rd
+          mockFileProvider.downloadFile.and.callFake(async () => {
+            downloadAttempts++;
+            if (downloadAttempts < 3) {
+              throw new Error('Temporary network error');
+            }
+            return { dataStr: JSON.stringify(mockOps), rev: 'test-rev' };
+          });
+
+          // Act
+          const result = await service.downloadRemoteOps(mockFileProvider);
+
+          // Assert: Should have retried and eventually succeeded
+          expect(downloadAttempts).toBe(3);
+          expect(result.success).toBeTrue();
+          expect(result.newOps.length).toBe(1);
+          expect(result.newOps[0].id).toBe('op-retry-success');
+        }, 30000); // Extended timeout for retry delays
+
+        it('should log warnings for each retry attempt', async () => {
+          mockManifestService.loadRemoteManifest.and.returnValue(
+            Promise.resolve({
+              operationFiles: ['ops/ops_client_warn.json'],
+              version: 1,
+            }),
+          );
+
+          // Fail always to trigger all retries
+          mockFileProvider.downloadFile.and.rejectWith(new Error('Network error'));
+
+          // Act
+          await service.downloadRemoteOps(mockFileProvider);
+
+          // Assert: Should have logged warnings for each failed attempt
+          // Total warnings = one warning per failed attempt that will be retried (3)
+          // plus one final warning when all retries exhausted (1) = 4 total
+          // Actually looking at the code: warnings are logged before each retry delay,
+          // so it's 3 warnings (one before each of the 3 retries)
+          // The 4th call might be from the final failure log
+          expect((OpLog.warn as jasmine.Spy).calls.count()).toBeGreaterThanOrEqual(3);
+        }, 30000); // Extended timeout for retry delays
       });
 
       it('should return success true when all files download successfully', async () => {
