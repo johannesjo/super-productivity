@@ -91,6 +91,7 @@ export interface TaskCopy
   dueDay?: string | null;
   hasPlannedTime?: boolean;
   attachments: TaskAttachment[];
+  reminderId?: string | null;
 
   // Ensure type compatibility for internal fields
   modified?: number;
