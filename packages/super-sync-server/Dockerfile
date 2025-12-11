@@ -51,6 +51,9 @@ RUN npm install ./shared-schema.tgz --ignore-scripts
 # 2. Install remaining production dependencies (including fastify)
 RUN npm install --ignore-scripts --omit=dev
 
+# Copy generated Prisma client from builder (missing in fresh install)
+COPY --from=builder /repo/packages/super-sync-server/node_modules/.prisma ./node_modules/.prisma
+
 # Non-root user + Data directory
 RUN addgroup -g 1001 -S nodejs && \
     adduser -S supersync -u 1001 -G nodejs && \
