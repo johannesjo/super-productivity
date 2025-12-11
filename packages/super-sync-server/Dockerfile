@@ -51,7 +51,7 @@ RUN addgroup -g 1001 -S nodejs && \
 
 # Copy built artifacts from builder
 COPY --from=builder /app/packages/super-sync-server/dist ./dist
-COPY --from=builder /app/packages/super-sync-server/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/packages/super-sync-server/package.json ./
 COPY --from=builder /app/packages/super-sync-server/prisma ./prisma
 
