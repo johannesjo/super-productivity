@@ -11,6 +11,7 @@ import { ConflictResolutionService } from '../sync/conflict-resolution.service';
 import { ValidateStateService } from '../processing/validate-state.service';
 import { RepairOperationService } from '../processing/repair-operation.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
@@ -207,6 +208,18 @@ describe('Service Logic Integration', () => {
           useValue: jasmine.createSpyObj('PfapiStoreDelegateService', [
             'getAllSyncModelDataFromStore',
           ]),
+        },
+        {
+          provide: PfapiService,
+          useValue: {
+            pf: {
+              metaModel: {
+                loadClientId: jasmine
+                  .createSpy('loadClientId')
+                  .and.returnValue(Promise.resolve('test-client-id')),
+              },
+            },
+          },
         },
         {
           provide: SnackService,

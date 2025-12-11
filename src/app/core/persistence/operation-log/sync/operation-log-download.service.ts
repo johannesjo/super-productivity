@@ -36,6 +36,12 @@ export interface DownloadResult {
   success: boolean;
   /** Number of files that failed to download (file-based sync only) */
   failedFileCount: number;
+  /**
+   * True when gap detected on empty server - indicates server migration scenario.
+   * When true, the client should upload a full state snapshot before regular ops
+   * to ensure all data is transferred to the new server.
+   */
+  needsFullStateUpload?: boolean;
 }
 
 /**
@@ -85,6 +91,8 @@ export class OperationLogDownloadService {
 
     const allNewOps: Operation[] = [];
     let downloadFailed = false;
+    let needsFullStateUpload = false;
+    let finalLatestSeq = 0;
 
     // Get encryption key upfront
     const privateCfg =
@@ -102,6 +110,7 @@ export class OperationLogDownloadService {
 
       while (hasMore) {
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
+        finalLatestSeq = response.latestSeq;
 
         // Handle gap detection: server was reset or client has stale lastServerSeq
         if (response.gapDetected && !hasResetForGap) {
@@ -201,6 +210,18 @@ export class OperationLogDownloadService {
       // Removing ACK simplifies the flow and avoids issues with fresh clients
       // (device not registered until first upload would cause 403 errors).
 
+      // Server migration detection:
+      // If we detected a gap AND the server is empty (no ops to download),
+      // this indicates a server migration scenario. The client should upload
+      // a full state snapshot to seed the new server with its data.
+      if (hasResetForGap && allNewOps.length === 0 && finalLatestSeq === 0) {
+        needsFullStateUpload = true;
+        OpLog.warn(
+          'OperationLogDownloadService: Server migration detected - gap on empty server. ' +
+            'Full state upload will be required.',
+        );
+      }
+
       OpLog.normal(
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via API.`,
       );
@@ -210,7 +231,7 @@ export class OperationLogDownloadService {
       return { newOps: [], success: false, failedFileCount: 0 };
     }
 
-    return { newOps: allNewOps, success: true, failedFileCount: 0 };
+    return { newOps: allNewOps, success: true, failedFileCount: 0, needsFullStateUpload };
   }
 
   private async _downloadRemoteOpsViaFiles(

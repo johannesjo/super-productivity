@@ -12,6 +12,7 @@ import { ConflictResolutionService } from '../sync/conflict-resolution.service';
 import { ValidateStateService } from '../processing/validate-state.service';
 import { RepairOperationService } from '../processing/repair-operation.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { OperationLogUploadService } from '../sync/operation-log-upload.service';
 import { OperationLogDownloadService } from '../sync/operation-log-download.service';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
@@ -73,6 +74,18 @@ describe('Migration Handling Integration', () => {
           useValue: jasmine.createSpyObj('PfapiStoreDelegateService', [
             'getAllSyncModelDataFromStore',
           ]),
+        },
+        {
+          provide: PfapiService,
+          useValue: {
+            pf: {
+              metaModel: {
+                loadClientId: jasmine
+                  .createSpy('loadClientId')
+                  .and.returnValue(Promise.resolve('test-client-id')),
+              },
+            },
+          },
         },
         {
           provide: OperationLogUploadService,

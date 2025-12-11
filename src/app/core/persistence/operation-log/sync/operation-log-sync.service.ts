@@ -12,6 +12,7 @@ import {
 } from '../operation.types';
 import {
   compareVectorClocks,
+  incrementVectorClock,
   mergeVectorClocks,
   VectorClockComparison,
 } from '../../../../pfapi/api/util/vector-clock';
@@ -26,6 +27,7 @@ import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
 import { toEntityKey } from '../entity-key.util';
 import {
+  CURRENT_SCHEMA_VERSION,
   MAX_VERSION_SKIP,
   SchemaMigrationService,
 } from '../store/schema-migration.service';
@@ -34,6 +36,9 @@ import { T } from '../../../../t.const';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { uuidv7 } from '../../../../util/uuid-v7';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -115,6 +120,8 @@ export class OperationLogSyncService {
   private dependencyResolver = inject(DependencyResolverService);
   private dialog = inject(MatDialog);
   private userInputWaitState = inject(UserInputWaitStateService);
+  private pfapiService = inject(PfapiService);
+  private storeDelegateService = inject(PfapiStoreDelegateService);
 
   /**
    * Checks if this client is "wholly fresh" - meaning it has never synced before
@@ -235,11 +242,23 @@ export class OperationLogSyncService {
    * Download and process remote operations from storage.
    * For fresh clients (no local history), shows a confirmation dialog before accepting remote data
    * to prevent accidental data overwrites.
+   *
+   * When server migration is detected (gap on empty server), triggers a full state upload
+   * to ensure all local data is transferred to the new server.
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<void> {
     const result = await this.downloadService.downloadRemoteOps(syncProvider);
+
+    // Server migration detected: gap on empty server
+    // Create a SYNC_IMPORT operation with full local state to seed the new server
+    if (result.needsFullStateUpload) {
+      await this._handleServerMigration();
+      // Return early - the SYNC_IMPORT will be uploaded on next uploadPendingOps call
+      // We don't process any ops since the server is empty
+      return;
+    }
 
     if (result.newOps.length === 0) {
       OpLog.normal(
@@ -301,6 +320,96 @@ export class OperationLogSyncService {
     } finally {
       stopWaiting();
     }
+  }
+
+  /**
+   * Handles server migration scenario by creating a SYNC_IMPORT operation
+   * with the full current state.
+   *
+   * This is called when:
+   * 1. Client has existing data (lastServerSeq > 0 from old server)
+   * 2. Server returns gapDetected: true (client seq ahead of server)
+   * 3. Server is empty (no ops to download)
+   *
+   * This indicates the client has connected to a new/reset server.
+   * Without uploading full state, incremental ops would reference
+   * entities that don't exist on the new server.
+   */
+  private async _handleServerMigration(): Promise<void> {
+    OpLog.warn(
+      'OperationLogSyncService: Server migration detected. Creating full state SYNC_IMPORT.',
+    );
+
+    // Get current full state from NgRx store
+    const currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
+
+    // Skip if local state is effectively empty
+    if (this._isEmptyState(currentState)) {
+      OpLog.warn('OperationLogSyncService: Skipping SYNC_IMPORT - local state is empty.');
+      return;
+    }
+
+    // Get client ID and vector clock
+    const clientId = await this.pfapiService.pf.metaModel.loadClientId();
+    if (!clientId) {
+      OpLog.err(
+        'OperationLogSyncService: Cannot create SYNC_IMPORT - no client ID available.',
+      );
+      return;
+    }
+
+    const currentClock = await this.vectorClockService.getCurrentVectorClock();
+    const newClock = incrementVectorClock(currentClock, clientId);
+
+    // Create SYNC_IMPORT operation with full state
+    // NOTE: Use raw state directly (not wrapped in appDataComplete).
+    // The snapshot endpoint expects raw state, and the hydrator handles
+    // both formats on extraction.
+    const op: Operation = {
+      id: uuidv7(),
+      actionType: '[SP_ALL] Load(import) all data',
+      opType: OpType.SyncImport,
+      entityType: 'ALL',
+      payload: currentState,
+      clientId,
+      vectorClock: newClock,
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+
+    // Append to operation log - will be uploaded via snapshot endpoint
+    await this.opLogStore.append(op, 'local');
+
+    OpLog.normal(
+      'OperationLogSyncService: Created SYNC_IMPORT operation for server migration. ' +
+        'Will be uploaded on next sync.',
+    );
+  }
+
+  /**
+   * Checks if the state is effectively empty (no meaningful data to sync).
+   * An empty state has no tasks, projects, or tags.
+   */
+  private _isEmptyState(state: unknown): boolean {
+    if (!state || typeof state !== 'object') {
+      return true;
+    }
+
+    const s = state as Record<string, unknown>;
+
+    // Check for meaningful data in key entity collections
+    const taskState = s['task'] as { ids?: unknown[] } | undefined;
+    const projectState = s['project'] as { ids?: unknown[] } | undefined;
+    const tagState = s['tag'] as { ids?: unknown[] } | undefined;
+
+    const hasNoTasks = !taskState?.ids || taskState.ids.length === 0;
+    const hasNoProjects = !projectState?.ids || projectState.ids.length === 0;
+    const hasNoTags = !tagState?.ids || tagState.ids.length === 0;
+
+    // Consider empty if there are no tasks, projects, or user-defined tags
+    // Note: There may be default tags like TODAY_TAG, but if there are no
+    // user tasks/projects, we consider it empty
+    return hasNoTasks && hasNoProjects && hasNoTags;
   }
 
   /**

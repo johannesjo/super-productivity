@@ -17,6 +17,13 @@ export class MockSyncServer {
   private nextSeq = 1;
 
   /**
+   * If true, the next downloadOps call will return gapDetected: true.
+   * Used to simulate server migration scenarios where a client connects
+   * to a new/reset server with stale lastServerSeq.
+   */
+  private forceGapDetected = false;
+
+  /**
    * Upload operations to the mock server.
    * Mimics the behavior of the real sync server.
    */
@@ -72,6 +79,7 @@ export class MockSyncServer {
 
   /**
    * Download operations from the mock server.
+   * Implements gap detection logic matching the real server.
    */
   downloadOps(
     sinceSeq: number,
@@ -86,11 +94,31 @@ export class MockSyncServer {
 
     const hasMore = filtered.length > limit;
     const ops = filtered.slice(0, limit);
+    const latestSeq = this.getLatestSeq();
+
+    // Gap detection logic (matching real server behavior)
+    let gapDetected = false;
+
+    // Check if forced (for testing server migration)
+    if (this.forceGapDetected) {
+      gapDetected = true;
+      this.forceGapDetected = false; // Reset after use
+    } else {
+      // Case 1: Client has history but server is empty
+      if (sinceSeq > 0 && latestSeq === 0) {
+        gapDetected = true;
+      }
+      // Case 2: Client is ahead of server
+      if (sinceSeq > latestSeq && latestSeq > 0) {
+        gapDetected = true;
+      }
+    }
 
     return {
       ops,
       hasMore,
-      latestSeq: this.getLatestSeq(),
+      latestSeq,
+      gapDetected,
     };
   }
 
@@ -124,5 +152,28 @@ export class MockSyncServer {
   clear(): void {
     this.ops = [];
     this.nextSeq = 1;
+    this.forceGapDetected = false;
+  }
+
+  /**
+   * Simulate a server migration/reset by:
+   * 1. Clearing all operations
+   * 2. Setting forceGapDetected so the next download will trigger gap detection
+   *
+   * This mimics what happens when a client connects to a new/empty server
+   * with a stale lastServerSeq from the old server.
+   */
+  simulateServerReset(): void {
+    this.ops = [];
+    this.nextSeq = 1;
+    this.forceGapDetected = true;
+  }
+
+  /**
+   * Force the next downloadOps call to return gapDetected: true.
+   * Useful for testing gap handling without actually clearing data.
+   */
+  setForceGapDetected(value: boolean): void {
+    this.forceGapDetected = value;
   }
 }
