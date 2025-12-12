@@ -233,6 +233,9 @@ export class SyncService {
           });
         },
         {
+          // Large operations like SYNC_IMPORT/BACKUP_IMPORT can have payloads up to 20MB.
+          // Default Prisma timeout (5s) is too short for these. Use 60s to match generateSnapshot.
+          timeout: 60000,
           // Serializable might be too strict/slow for Postgres, 'RepeatableRead' is often enough,
           // but for strict sequence consistency, we want to avoid gaps/races.
           // Default isolation level in Prisma is usually adequate (ReadCommitted).
@@ -242,13 +245,21 @@ export class SyncService {
       );
     } catch (err) {
       // Transaction failed - all operations were rolled back
-      Logger.error(`Transaction failed for user ${userId}: ${(err as Error).message}`);
+      const errorMessage = (err as Error).message || 'Unknown error';
+      Logger.error(`Transaction failed for user ${userId}: ${errorMessage}`);
+
+      // Check if this is a timeout error (common for large payloads)
+      const isTimeout =
+        errorMessage.toLowerCase().includes('timeout') || errorMessage.includes('P2028'); // Prisma transaction timeout error code
 
       // Mark all "successful" results as failed due to transaction rollback
+      // Include enough detail for client to determine if retry is appropriate
       return ops.map((op) => ({
         opId: op.id,
         accepted: false,
-        error: 'Transaction rolled back due to internal error',
+        error: isTimeout
+          ? 'Transaction timeout - server busy, please retry'
+          : `Transaction rolled back: ${errorMessage}`,
         errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
       }));
     }

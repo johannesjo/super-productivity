@@ -553,17 +553,92 @@ describe('OperationLogUploadService', () => {
         expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
       });
 
-      it('should mark full-state ops as rejected when snapshot fails', async () => {
+      it('should mark full-state ops as rejected when snapshot fails with permanent error', async () => {
         const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
         mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
         mockApiProvider.uploadSnapshot.and.returnValue(
-          Promise.resolve({ accepted: false, error: 'Server error' }),
+          Promise.resolve({ accepted: false, error: 'Invalid payload structure' }),
         );
 
         const result = await service.uploadPendingOps(mockApiProvider);
 
         expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['op-1']);
         expect(result.rejectedCount).toBe(1);
+      });
+
+      it('should NOT mark full-state ops as rejected when snapshot fails with transient error (transaction rolled back)', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({
+            accepted: false,
+            error: 'Transaction rolled back due to internal error',
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        // Should NOT be marked as rejected - transient errors should be retried
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(result.rejectedCount).toBe(0);
+      });
+
+      it('should NOT mark full-state ops as rejected when snapshot fails with timeout error', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({
+            accepted: false,
+            error: 'Transaction timeout - server busy, please retry',
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(result.rejectedCount).toBe(0);
+      });
+
+      it('should NOT mark full-state ops as rejected when snapshot fails with network error', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({ accepted: false, error: 'Failed to fetch' }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(result.rejectedCount).toBe(0);
+      });
+
+      it('should NOT mark full-state ops as rejected when snapshot fails with 500 error', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({
+            accepted: false,
+            error: 'SuperSync API error: 500 Internal Server Error',
+          }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(result.rejectedCount).toBe(0);
+      });
+
+      it('should NOT mark full-state ops as rejected when snapshot fails with 503 error', async () => {
+        const entry = createFullStateEntry(1, 'op-1', 'client-1', OpType.BackupImport);
+        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([entry]));
+        mockApiProvider.uploadSnapshot.and.returnValue(
+          Promise.resolve({ accepted: false, error: '503 Service Unavailable' }),
+        );
+
+        const result = await service.uploadPendingOps(mockApiProvider);
+
+        expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+        expect(result.rejectedCount).toBe(0);
       });
 
       it('should handle mixed full-state and regular operations', async () => {

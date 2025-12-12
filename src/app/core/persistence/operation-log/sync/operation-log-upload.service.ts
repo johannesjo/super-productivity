@@ -455,12 +455,20 @@ export class OperationLogUploadService {
   }
 
   /**
-   * Determines if an error message indicates a network/transient error
+   * Determines if an error message indicates a transient error
    * that should be retried, vs a permanent server rejection.
+   *
+   * Transient errors include:
+   * - Network errors (failed to fetch, timeout, etc.)
+   * - Server internal errors (transaction timeout, server busy)
+   *
+   * Permanent rejections are typically validation errors (invalid payload,
+   * duplicate operation, conflict, etc.) that won't succeed on retry.
    */
   private _isNetworkError(error: string | undefined): boolean {
     if (!error) return false;
-    const networkErrorPatterns = [
+    const transientErrorPatterns = [
+      // Network errors
       'failed to fetch',
       'network',
       'timeout',
@@ -470,8 +478,17 @@ export class OperationLogUploadService {
       'net::',
       'offline',
       'aborted',
+      // Server transient errors
+      'server busy',
+      'please retry',
+      'transaction rolled back',
+      'internal server error',
+      '500',
+      '502',
+      '503',
+      '504',
     ];
     const lowerError = error.toLowerCase();
-    return networkErrorPatterns.some((pattern) => lowerError.includes(pattern));
+    return transientErrorPatterns.some((pattern) => lowerError.includes(pattern));
   }
 }
