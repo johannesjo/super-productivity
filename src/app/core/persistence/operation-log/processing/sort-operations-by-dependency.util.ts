@@ -1,8 +1,6 @@
 /**
  * @fileoverview Topological sort for operation dependencies
- * @status DORMANT - Not used in production (last reviewed: 2025-12)
- *
- * Kept for potential future use. See sortOperationsByDependency JSDoc for details.
+ * @status ACTIVE - Used in operation-log-sync.service.ts for replay ordering
  */
 import { Operation, OpType } from '../operation.types';
 import { OperationDependency } from '../sync/dependency-resolver.service';
@@ -29,23 +27,6 @@ export type DependencyExtractor = (op: Operation) => OperationDependency[];
  *
  * Note: This only sorts within the batch. Dependencies on entities that already
  * exist in the store are handled by the retry mechanism.
- *
- * ---
- * CURRENTLY UNUSED: This utility is not currently used in production.
- *
- * Rationale for disabling:
- * 1. The sync server guarantees operations arrive in sequence order
- * 2. Delete operations are atomic via meta-reducers (they remove references
- *    from tags/projects in the same reducer pass, so no separate cleanup
- *    operations exist in the batch)
- *
- * When to re-enable:
- * - If operations start arriving out of order (e.g., parallel sync sources)
- * - If delete operations become non-atomic (separate cleanup operations)
- * - If any bugs appear related to operation ordering during sync
- *
- * See: operation-applier.service.ts for the original usage location
- * ---
  *
  * @param ops - Array of operations to sort
  * @param extractDependencies - Function to extract dependencies from an operation

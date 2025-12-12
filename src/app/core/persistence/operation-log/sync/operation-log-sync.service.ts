@@ -35,6 +35,7 @@ import {
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { DependencyResolverService } from './dependency-resolver.service';
+import { sortOperationsByDependency } from '../processing/sort-operations-by-dependency.util';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
@@ -536,9 +537,15 @@ export class OperationLogSyncService {
       `OperationLogSyncService: Replaying ${localSyncedOps.length} local synced ops after SYNC_IMPORT.`,
     );
 
+    // Sort operations by dependencies to ensure parents are created before children
+    // and DELETE ops come after ops that reference the deleted entity
+    const sortedOps = sortOperationsByDependency(localSyncedOps, (op) =>
+      this.dependencyResolver.extractDependencies(op),
+    );
+
     // Re-apply these ops to restore the local changes on top of the SYNC_IMPORT state
     // Use applyOperations which handles action dispatching
-    await this.operationApplier.applyOperations(localSyncedOps);
+    await this.operationApplier.applyOperations(sortedOps);
   }
 
   /**

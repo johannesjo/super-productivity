@@ -1634,5 +1634,294 @@ describe('OperationLogSyncService', () => {
       // applyOperations should only be called once (for the SYNC_IMPORT itself)
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
     });
+
+    it('should sort operations by dependencies before replay (CREATE before dependent)', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Tag update that references a task (should come AFTER task create)
+      const tagUpdateOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TAG',
+        entityId: 'tag-1',
+        actionType: '[Tag] Update',
+      });
+
+      // Task create (should come FIRST since tag depends on it)
+      const taskCreateOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000', // Later ID
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(tagUpdateOp, { syncedAt: Date.now() - 1000 }),
+            createEntry(taskCreateOp, { syncedAt: Date.now() - 500 }),
+          ]),
+        );
+
+      // Mock dependency extraction: tag update depends on task-1
+      dependencyResolverSpy.extractDependencies.and.callFake((op: Operation) => {
+        if (op.entityType === 'TAG' && op.entityId === 'tag-1') {
+          return [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              mustExist: true,
+              relation: 'reference',
+            },
+          ];
+        }
+        return [];
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should have sorted ops: task create BEFORE tag update
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(2);
+      // Task create should be first (it's depended upon)
+      expect(secondCallArgs[0][0].entityType).toBe('TASK');
+      expect(secondCallArgs[0][0].opType).toBe(OpType.Create);
+      // Tag update should be second (it depends on the task)
+      expect(secondCallArgs[0][1].entityType).toBe('TAG');
+      expect(secondCallArgs[0][1].opType).toBe(OpType.Update);
+    });
+
+    it('should sort DELETE operations after operations that reference the deleted entity', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Task delete (should come LAST after tag update removes reference)
+      const taskDeleteOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID
+        opType: OpType.Delete,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        actionType: '[Task] Delete Task',
+      });
+
+      // Tag update that removes task-1 from tagIds (should come FIRST)
+      const tagUpdateOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000', // Later ID
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TAG',
+        entityId: 'tag-1',
+        actionType: '[Tag] Update',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(taskDeleteOp, { syncedAt: Date.now() - 1000 }),
+            createEntry(tagUpdateOp, { syncedAt: Date.now() - 500 }),
+          ]),
+        );
+
+      // Mock dependency extraction: tag update references task-1
+      dependencyResolverSpy.extractDependencies.and.callFake((op: Operation) => {
+        if (op.entityType === 'TAG' && op.entityId === 'tag-1') {
+          return [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              mustExist: false,
+              relation: 'reference',
+            },
+          ];
+        }
+        return [];
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should have sorted ops: tag update BEFORE task delete
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(2);
+      // Tag update should be first (it references the task to be deleted)
+      expect(secondCallArgs[0][0].entityType).toBe('TAG');
+      expect(secondCallArgs[0][0].opType).toBe(OpType.Update);
+      // Task delete should be last (after references are removed)
+      expect(secondCallArgs[0][1].entityType).toBe('TASK');
+      expect(secondCallArgs[0][1].opType).toBe(OpType.Delete);
+    });
+
+    it('should call extractDependencies for each operation during sorting', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      const op1 = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-1',
+      });
+      const op2 = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TAG',
+        entityId: 'tag-1',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(op1, { syncedAt: Date.now() }),
+            createEntry(op2, { syncedAt: Date.now() }),
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // extractDependencies should be called for each operation being sorted
+      expect(dependencyResolverSpy.extractDependencies).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: op1.id }),
+      );
+      expect(dependencyResolverSpy.extractDependencies).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: op2.id }),
+      );
+    });
+
+    it('should handle complex dependency chains correctly', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Project create (should be first - no dependencies)
+      const projectCreateOp = createOp({
+        id: '019afd68-0003-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'PROJECT',
+        entityId: 'project-1',
+        actionType: '[Project] Add',
+      });
+
+      // Task create that depends on project (should be second)
+      const taskCreateOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID but should come after project
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        actionType: '[Task] Add Task',
+      });
+
+      // Sub-task create that depends on task (should be third)
+      const subTaskCreateOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'subtask-1',
+        actionType: '[Task] Add Sub Task',
+      });
+
+      // Return ops in wrong order (subtask, task, project)
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(subTaskCreateOp, { syncedAt: Date.now() - 300 }),
+            createEntry(taskCreateOp, { syncedAt: Date.now() - 200 }),
+            createEntry(projectCreateOp, { syncedAt: Date.now() - 100 }),
+          ]),
+        );
+
+      // Mock dependency chain: subtask depends on task, task depends on project
+      dependencyResolverSpy.extractDependencies.and.callFake((op: Operation) => {
+        if (op.entityId === 'subtask-1') {
+          return [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              mustExist: true,
+              relation: 'parent',
+            },
+          ];
+        }
+        if (op.entityId === 'task-1') {
+          return [
+            {
+              entityType: 'PROJECT',
+              entityId: 'project-1',
+              mustExist: true,
+              relation: 'parent',
+            },
+          ];
+        }
+        return [];
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should have sorted ops: project -> task -> subtask
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(3);
+      expect(secondCallArgs[0][0].entityId).toBe('project-1');
+      expect(secondCallArgs[0][1].entityId).toBe('task-1');
+      expect(secondCallArgs[0][2].entityId).toBe('subtask-1');
+    });
   });
 });
