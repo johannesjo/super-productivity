@@ -1516,7 +1516,6 @@
         "GROUP_SCHEDULED_DATE": "Geplantes Datum",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Alle zurücksetzen",
-        "SCHEDULED_DEFAULT": "Jedes Datum",
         "SCHEDULED_NEXT_MONTH": "Nächsten Monat",
         "SCHEDULED_NEXT_WEEK": "Nächste Woche",
         "SCHEDULED_THIS_MONTH": "Diesen Monat",
@@ -1533,7 +1532,7 @@
         "TIME_2HOUR": "> 2 Stunden",
         "TIME_10MIN": "> 10 Minuten",
         "TIME_30MIN": "> 30 Minuten",
-        "TIME_DEFAULT": "Jede Dauer",
+        "FILTER_NOT_SPECIFIED": "Nicht angegeben",
         "TIME_SPENT": "Aufgewendete Zeit",
         "TITLE": "Aufgabenansicht anpassen"
       }

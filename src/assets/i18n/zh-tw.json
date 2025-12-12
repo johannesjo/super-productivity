@@ -1477,7 +1477,6 @@
         "GROUP_SCHEDULED_DATE": "Scheduled Date",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reset All",
-        "SCHEDULED_DEFAULT": "Any Date",
         "SCHEDULED_NEXT_MONTH": "Next Month",
         "SCHEDULED_NEXT_WEEK": "Next Week",
         "SCHEDULED_THIS_MONTH": "This Month",
@@ -1493,7 +1492,7 @@
         "TIME_2HOUR": "> 2 Hours",
         "TIME_10MIN": "> 10 Minutes",
         "TIME_30MIN": "> 30 Minutes",
-        "TIME_DEFAULT": "Any Duration",
+        "FILTER_NOT_SPECIFIED": "未指定",
         "TIME_SPENT": "Time Spent",
         "TITLE": "Customize Task View"
       }

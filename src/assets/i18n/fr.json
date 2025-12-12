@@ -1569,7 +1569,6 @@
         "GROUP_SCHEDULED_DATE": "Date prévue",
         "GROUP_TAG": "Étiquette",
         "RESET_ALL": "Réinitialiser tout",
-        "SCHEDULED_DEFAULT": "Toute date",
         "SCHEDULED_NEXT_MONTH": "Mois prochain",
         "SCHEDULED_NEXT_WEEK": "Semaine prochaine",
         "SCHEDULED_THIS_MONTH": "Ce mois-ci",
@@ -1587,7 +1586,7 @@
         "TIME_2HOUR": "> 2 Heures",
         "TIME_10MIN": "> 10 Minutes",
         "TIME_30MIN": "> 30 Minutes",
-        "TIME_DEFAULT": "Toute durée",
+        "FILTER_NOT_SPECIFIED": "Toute date",
         "TIME_SPENT": "Temps passé",
         "TITLE": "Personnaliser la vue des tâches"
       }

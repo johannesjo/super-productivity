@@ -1471,7 +1471,6 @@
         "GROUP_SCHEDULED_DATE": "Planlanan Tarih",
         "GROUP_TAG": "Etiket",
         "RESET_ALL": "Tümünü Sıfırla",
-        "SCHEDULED_DEFAULT": "Herhangi Bir Tarih",
         "SCHEDULED_NEXT_MONTH": "Gelecek ay",
         "SCHEDULED_NEXT_WEEK": "Gelecek hafta",
         "SCHEDULED_THIS_MONTH": "Bu ay",
@@ -1487,7 +1486,7 @@
         "TIME_2HOUR": "> 2 Saat",
         "TIME_10MIN": "> 10 Dakika",
         "TIME_30MIN": "> 30 Dakika",
-        "TIME_DEFAULT": "Herhangi Bir Süre",
+        "FILTER_NOT_SPECIFIED": "Belirtilmemiş",
         "TIME_SPENT": "Geçen Zaman",
         "TITLE": "Görev Görünümünü Özelleştir"
       }

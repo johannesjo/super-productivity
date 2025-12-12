@@ -1502,7 +1502,6 @@
         "GROUP_SCHEDULED_DATE": "Geplande datum",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reset alles",
-        "SCHEDULED_DEFAULT": "Elke datum",
         "SCHEDULED_NEXT_MONTH": "Volgende maand",
         "SCHEDULED_NEXT_WEEK": "Volgende week",
         "SCHEDULED_THIS_MONTH": "Deze maand",
@@ -1518,7 +1517,7 @@
         "TIME_2HOUR": "> 2 Uren",
         "TIME_10MIN": "> 10 Minuten",
         "TIME_30MIN": "> 30 Minuten",
-        "TIME_DEFAULT": "Elke duur",
+        "FILTER_NOT_SPECIFIED": "Niet gespecificeerd",
         "TIME_SPENT": "Tijd besteed",
         "TITLE": "Taakweergave Aanpassen"
       }

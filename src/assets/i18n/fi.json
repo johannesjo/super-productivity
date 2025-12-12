@@ -1485,7 +1485,6 @@
         "GROUP_SCHEDULED_DATE": "Aikataulutettu päivämäärä",
         "GROUP_TAG": "Tunniste",
         "RESET_ALL": "Nollaa kaikki",
-        "SCHEDULED_DEFAULT": "Mikä tahansa päivämäärä",
         "SCHEDULED_NEXT_MONTH": "Ensi kuukausi",
         "SCHEDULED_NEXT_WEEK": "Ensi viikko",
         "SCHEDULED_THIS_MONTH": "Tämä kuukausi",
@@ -1501,7 +1500,7 @@
         "TIME_2HOUR": "> 2 Tuntia",
         "TIME_10MIN": "> 10 Minuuttia",
         "TIME_30MIN": "> 30 Minuuttia",
-        "TIME_DEFAULT": "Mikä tahansa kesto",
+        "FILTER_NOT_SPECIFIED": "Non spécifié",
         "TIME_SPENT": "Käytetty aika",
         "TITLE": "Mukauta tehtävänäkymää"
       }

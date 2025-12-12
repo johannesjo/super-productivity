@@ -1564,7 +1564,6 @@
         "GROUP_SCHEDULED_DATE": "计划日期",
         "GROUP_TAG": "标签",
         "RESET_ALL": "重置全部",
-        "SCHEDULED_DEFAULT": "任意日期",
         "SCHEDULED_NEXT_MONTH": "下个月",
         "SCHEDULED_NEXT_WEEK": "下周",
         "SCHEDULED_THIS_MONTH": "本月",
@@ -1581,7 +1580,7 @@
         "TIME_2HOUR": "> 2 小时",
         "TIME_10MIN": "> 10 分钟",
         "TIME_30MIN": "> 30 分钟",
-        "TIME_DEFAULT": "任意持续时间",
+        "FILTER_NOT_SPECIFIED": "未指定",
         "TIME_SPENT": "花费时间",
         "TITLE": "自定义任务视图"
       }
