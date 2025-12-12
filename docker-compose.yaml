@@ -87,4 +87,5 @@ services:
       start_period: 10s
 
 volumes:
+  db_data:
   webdav_data:
