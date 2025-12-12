@@ -137,6 +137,10 @@ describe('OperationLogSyncService', () => {
     dependencyResolverSpy.extractDependencies.and.returnValue([]);
     // Default: no local ops to replay after SYNC_IMPORT
     opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
+    // Default: successful operation application
+    operationApplierServiceSpy.applyOperations.and.returnValue(
+      Promise.resolve({ appliedOps: [] }),
+    );
   });
 
   it('should be created', () => {
@@ -1217,7 +1221,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       // Process remote ops with SYNC_IMPORT
       // Note: _processRemoteOps is private but we can still call it in tests
@@ -1240,7 +1246,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([backupImportOp]);
 
@@ -1286,7 +1294,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       // Spy on detectConflicts to verify it's NOT called
       spyOn(service, 'detectConflicts').and.callThrough();
@@ -1320,7 +1330,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([syncImportOp, followUpOp]);
 
@@ -1350,7 +1362,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       spyOn(service, 'detectConflicts').and.callThrough();
 
@@ -1434,7 +1448,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       // Process the SYNC_IMPORT
       await (service as any)._processRemoteOps([syncImportOp]);
@@ -1488,7 +1504,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
@@ -1531,7 +1549,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
@@ -1577,7 +1597,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
@@ -1603,7 +1625,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
-      operationApplierServiceSpy.applyOperations.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await (service as any)._processRemoteOps([syncImportOp]);
 

@@ -5,9 +5,13 @@ import { OperationApplierService } from '../processing/operation-applier.service
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { SnackService } from '../../../snack/snack.service';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { of } from 'rxjs';
+import { of, Subject } from 'rxjs';
 import { EntityConflict, OpType, Operation } from '../operation.types';
-import { DialogConflictResolutionComponent } from '../../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
+import {
+  ConflictResolutionResult,
+  DialogConflictResolutionComponent,
+} from '../../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
+import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -16,6 +20,7 @@ describe('ConflictResolutionService', () => {
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockValidateStateService: jasmine.SpyObj<ValidateStateService>;
+  let mockUserInputWaitState: jasmine.SpyObj<UserInputWaitStateService>;
 
   const createMockOp = (id: string, clientId: string): Operation => ({
     id,
@@ -47,6 +52,11 @@ describe('ConflictResolutionService', () => {
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepairCurrentState',
     ]);
+    mockUserInputWaitState = jasmine.createSpyObj('UserInputWaitStateService', [
+      'startWaiting',
+    ]);
+    // startWaiting returns a stop function
+    mockUserInputWaitState.startWaiting.and.returnValue(() => {});
 
     TestBed.configureTestingModule({
       providers: [
@@ -56,12 +66,13 @@ describe('ConflictResolutionService', () => {
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: SnackService, useValue: mockSnackService },
         { provide: ValidateStateService, useValue: mockValidateStateService },
+        { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
       ],
     });
     service = TestBed.inject(ConflictResolutionService);
 
     // Default mock behaviors
-    mockOperationApplier.applyOperations.and.resolveTo();
+    mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
     mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
     mockOpLogStore.getUnsyncedByEntity.and.resolveTo(new Map());
   });
@@ -131,6 +142,10 @@ describe('ConflictResolutionService', () => {
       mockDialog.open.and.returnValue(mockDialogRef);
       mockOpLogStore.hasOp.and.resolveTo(false);
       mockOpLogStore.append.and.resolveTo(100);
+      // Need to return the applied ops so markApplied can be called with correct seqs
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: conflicts[0].remoteOps,
+      });
 
       await service.presentConflicts(conflicts);
 
@@ -305,10 +320,14 @@ describe('ConflictResolutionService', () => {
       mockOpLogStore.hasOp.and.resolveTo(false);
       mockOpLogStore.append.and.resolveTo(100);
 
-      // Simulate application failure by throwing an error
-      mockOperationApplier.applyOperations.and.rejectWith(
-        new Error('Simulated dependency failure'),
-      );
+      // Simulate application failure by returning result with failedOp
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: [],
+        failedOp: {
+          op: conflicts[0].remoteOps[0],
+          error: new Error('Simulated dependency failure'),
+        },
+      });
 
       await service.presentConflicts(conflicts);
 
@@ -533,6 +552,132 @@ describe('ConflictResolutionService', () => {
       expect(mockOperationApplier.applyOperations).toHaveBeenCalled();
 
       expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
+  });
+
+  describe('dialog timeout', () => {
+    /**
+     * Tests for the conflict dialog timeout feature.
+     * The dialog auto-cancels after CONFLICT_DIALOG_TIMEOUT_MS to prevent
+     * sync from being blocked indefinitely if user walks away.
+     */
+
+    // Use constant to avoid linter complaints about mixed operators
+    const FIVE_MINUTES_MS = 5 * 60 * 1000;
+
+    // Sample conflicts for timeout tests
+    const localOps = [createMockOp('local-1', 'client-1')];
+    const remoteOps = [createMockOp('remote-1', 'client-2')];
+    const conflicts: EntityConflict[] = [
+      {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps,
+        remoteOps,
+        suggestedResolution: 'manual',
+      },
+    ];
+
+    beforeEach(() => {
+      jasmine.clock().install();
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    it('should auto-cancel dialog after timeout', async () => {
+      // Use Subject to control when the dialog closes
+      const afterClosed$ = new Subject<ConflictResolutionResult | undefined>();
+
+      const mockDialogRef = {
+        afterClosed: () => afterClosed$.asObservable(),
+        close: jasmine.createSpy('close').and.callFake(() => {
+          // Simulate dialog close by emitting undefined
+          afterClosed$.next(undefined);
+          afterClosed$.complete();
+        }),
+      } as unknown as MatDialogRef<DialogConflictResolutionComponent>;
+
+      mockDialog.open.and.returnValue(mockDialogRef);
+
+      // Start the presentConflicts call
+      const presentPromise = service.presentConflicts(conflicts);
+
+      // Advance time past the timeout
+      jasmine.clock().tick(FIVE_MINUTES_MS + 100);
+
+      // Wait for the method to complete
+      await presentPromise;
+
+      // Verify dialog was closed
+      expect(mockDialogRef.close).toHaveBeenCalledWith(undefined);
+
+      // Verify snack was shown
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: jasmine.any(String),
+      });
+
+      // Verify no operations were applied (cancelled)
+      expect(mockOpLogStore.append).not.toHaveBeenCalled();
+      expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
+    });
+
+    it('should clear timeout when dialog closes normally', async () => {
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'local']]),
+            conflicts,
+          }),
+        close: jasmine.createSpy('close'),
+      } as unknown as MatDialogRef<DialogConflictResolutionComponent>;
+
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(conflicts);
+
+      // Advance time past the timeout (after dialog already closed)
+      jasmine.clock().tick(FIVE_MINUTES_MS + 100);
+
+      // Dialog.close should NOT have been called by the timeout (only if it was called at all)
+      // The key test is that no extra snack warning was shown
+      // Actually we check that snack was NOT called with ERROR type for timeout
+      expect(mockSnackService.open).not.toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: jasmine.stringMatching(/timeout/i),
+      });
+    });
+
+    it('should not apply any operations when dialog times out', async () => {
+      // Use Subject to control when the dialog closes
+      const afterClosed$ = new Subject<ConflictResolutionResult | undefined>();
+
+      const mockDialogRef = {
+        afterClosed: () => afterClosed$.asObservable(),
+        close: jasmine.createSpy('close').and.callFake(() => {
+          afterClosed$.next(undefined);
+          afterClosed$.complete();
+        }),
+      } as unknown as MatDialogRef<DialogConflictResolutionComponent>;
+
+      mockDialog.open.and.returnValue(mockDialogRef);
+
+      const presentPromise = service.presentConflicts(conflicts);
+
+      // Advance time past timeout
+      jasmine.clock().tick(FIVE_MINUTES_MS + 100);
+
+      await presentPromise;
+
+      // No operations should be stored or applied
+      expect(mockOpLogStore.append).not.toHaveBeenCalled();
+      expect(mockOpLogStore.markApplied).not.toHaveBeenCalled();
+      expect(mockOpLogStore.markRejected).not.toHaveBeenCalled();
+      expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
     });
   });
 });

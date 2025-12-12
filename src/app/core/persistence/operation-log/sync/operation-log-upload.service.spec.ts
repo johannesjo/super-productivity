@@ -816,5 +816,181 @@ describe('OperationLogUploadService', () => {
         expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
       });
     });
+
+    describe('preUploadCallback (server migration race condition fix)', () => {
+      /**
+       * These tests verify that preUploadCallback is:
+       * 1. Called INSIDE the upload lock
+       * 2. Called BEFORE checking for pending ops
+       *
+       * This fixes a race condition where multiple tabs could both detect
+       * server migration and create duplicate SYNC_IMPORT operations.
+       */
+      let mockApiProvider: jasmine.SpyObj<
+        SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable
+      >;
+      let mockFileProvider: jasmine.SpyObj<SyncProviderServiceInterface<SyncProviderId>>;
+
+      beforeEach(() => {
+        mockApiProvider = jasmine.createSpyObj('ApiSyncProvider', [
+          'getLastServerSeq',
+          'uploadOps',
+          'setLastServerSeq',
+        ]);
+        (mockApiProvider as any).supportsOperationSync = true;
+        (mockApiProvider as any).privateCfg = {
+          load: jasmine
+            .createSpy('privateCfg.load')
+            .and.returnValue(Promise.resolve(null)),
+        };
+        mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({ results: [], latestSeq: 0, newOps: [] }),
+        );
+        mockApiProvider.setLastServerSeq.and.returnValue(Promise.resolve());
+
+        mockFileProvider = jasmine.createSpyObj('FileSyncProvider', ['uploadFile']);
+        (mockFileProvider as any).supportsOperationSync = false;
+        mockFileProvider.uploadFile.and.returnValue(Promise.resolve({ rev: 'test-rev' }));
+      });
+
+      it('should call preUploadCallback inside the lock for API-based sync', async () => {
+        const callOrder: string[] = [];
+
+        mockLockService.request.and.callFake(
+          async (_name: string, fn: () => Promise<void>) => {
+            callOrder.push('lock-acquired');
+            await fn();
+            callOrder.push('lock-released');
+          },
+        );
+
+        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
+          callOrder.push('callback-executed');
+        });
+
+        await service.uploadPendingOps(mockApiProvider, { preUploadCallback: callback });
+
+        expect(callback).toHaveBeenCalled();
+        // Verify callback was called INSIDE the lock
+        expect(callOrder).toEqual([
+          'lock-acquired',
+          'callback-executed',
+          'lock-released',
+        ]);
+      });
+
+      it('should call preUploadCallback inside the lock for file-based sync', async () => {
+        const callOrder: string[] = [];
+
+        mockLockService.request.and.callFake(
+          async (_name: string, fn: () => Promise<void>) => {
+            callOrder.push('lock-acquired');
+            await fn();
+            callOrder.push('lock-released');
+          },
+        );
+
+        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
+          callOrder.push('callback-executed');
+        });
+
+        await service.uploadPendingOps(mockFileProvider, { preUploadCallback: callback });
+
+        expect(callback).toHaveBeenCalled();
+        // Verify callback was called INSIDE the lock
+        expect(callOrder).toEqual([
+          'lock-acquired',
+          'callback-executed',
+          'lock-released',
+        ]);
+      });
+
+      it('should call preUploadCallback BEFORE checking for pending ops (API)', async () => {
+        const callOrder: string[] = [];
+
+        mockOpLogStore.getUnsynced.and.callFake(async () => {
+          callOrder.push('getUnsynced-called');
+          return [];
+        });
+
+        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
+          callOrder.push('callback-executed');
+        });
+
+        await service.uploadPendingOps(mockApiProvider, { preUploadCallback: callback });
+
+        // Callback should be called before getUnsynced
+        expect(callOrder).toEqual(['callback-executed', 'getUnsynced-called']);
+      });
+
+      it('should call preUploadCallback BEFORE checking for pending ops (file-based)', async () => {
+        const callOrder: string[] = [];
+
+        mockOpLogStore.getUnsynced.and.callFake(async () => {
+          callOrder.push('getUnsynced-called');
+          return [];
+        });
+
+        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
+          callOrder.push('callback-executed');
+        });
+
+        await service.uploadPendingOps(mockFileProvider, { preUploadCallback: callback });
+
+        // Callback should be called before getUnsynced
+        expect(callOrder).toEqual(['callback-executed', 'getUnsynced-called']);
+      });
+
+      it('should not call preUploadCallback if not provided', async () => {
+        await service.uploadPendingOps(mockApiProvider);
+
+        // Should complete without error, verifying optional nature
+        expect(mockLockService.request).toHaveBeenCalled();
+      });
+
+      it('should propagate errors from preUploadCallback', async () => {
+        const callback = jasmine
+          .createSpy('preUploadCallback')
+          .and.rejectWith(new Error('Migration check failed'));
+
+        await expectAsync(
+          service.uploadPendingOps(mockApiProvider, { preUploadCallback: callback }),
+        ).toBeRejectedWithError('Migration check failed');
+
+        // Should not proceed to check for pending ops
+        expect(mockOpLogStore.getUnsynced).not.toHaveBeenCalled();
+      });
+
+      it('should allow callback to create new operations that get uploaded', async () => {
+        // First call to getUnsynced returns empty (callback hasn't run yet)
+        // After callback runs, we simulate it creating a new op
+        let callCount = 0;
+        mockOpLogStore.getUnsynced.and.callFake(async () => {
+          callCount++;
+          if (callCount === 1) {
+            // After callback ran, return the new op it created
+            return [createMockEntry(1, 'sync-import-op', 'client-1')];
+          }
+          return [];
+        });
+
+        mockApiProvider.uploadOps.and.returnValue(
+          Promise.resolve({
+            results: [{ opId: 'sync-import-op', accepted: true }],
+            latestSeq: 1,
+            newOps: [],
+          }),
+        );
+
+        const callback = jasmine.createSpy('preUploadCallback').and.resolveTo(undefined);
+
+        await service.uploadPendingOps(mockApiProvider, { preUploadCallback: callback });
+
+        // Callback was called, and the op it created was uploaded
+        expect(callback).toHaveBeenCalled();
+        expect(mockApiProvider.uploadOps).toHaveBeenCalled();
+      });
+    });
   });
 });

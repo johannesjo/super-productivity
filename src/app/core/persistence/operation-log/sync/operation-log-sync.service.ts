@@ -179,12 +179,12 @@ export class OperationLogSyncService {
       return;
     }
 
-    // SERVER MIGRATION CHECK: If this client has history but appears to be connecting
-    // to a new/empty server, create a SYNC_IMPORT with full state first.
-    // This handles the scenario where user changes sync server credentials.
-    await this._checkAndHandleServerMigration(syncProvider);
-
-    const result = await this.uploadService.uploadPendingOps(syncProvider);
+    // SERVER MIGRATION CHECK: Passed as callback to execute INSIDE the upload lock.
+    // This prevents race conditions where multiple tabs could both detect migration
+    // and create duplicate SYNC_IMPORT operations.
+    const result = await this.uploadService.uploadPendingOps(syncProvider, {
+      preUploadCallback: () => this._checkAndHandleServerMigration(syncProvider),
+    });
 
     // STEP 1: Process piggybacked ops FIRST
     // This is critical: piggybacked ops may contain the "winning" remote versions
@@ -740,20 +740,17 @@ export class OperationLogSyncService {
    * @throws Re-throws if application fails (ops marked as failed first)
    */
   private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
-    // Track stored seqs for marking as applied after success
-    const storedSeqs: number[] = [];
+    // Map op ID to seq for marking partial success
+    const opIdToSeq = new Map<string, number>();
     // Track ops that are NOT duplicates (need to be applied)
     const opsToApply: Operation[] = [];
-    // Track op IDs for error handling
-    const storedOpIds: string[] = [];
 
     // Store operations with pending status before applying
     // If we crash after storing but before applying, these will be retried on startup
     for (const op of ops) {
       if (!(await this.opLogStore.hasOp(op.id))) {
         const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
-        storedSeqs.push(seq);
-        storedOpIds.push(op.id);
+        opIdToSeq.set(op.id, seq);
         opsToApply.push(op);
       } else {
         OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
@@ -762,26 +759,39 @@ export class OperationLogSyncService {
 
     // Apply only NON-duplicate ops to NgRx store
     if (opsToApply.length > 0) {
-      try {
-        await this.operationApplier.applyOperations(opsToApply);
-      } catch (e) {
-        // If application fails catastrophically, mark ops as failed to prevent
-        // them from being uploaded in a potentially inconsistent state
-        OpLog.err(
-          `OperationLogSyncService: Failed to apply ${opsToApply.length} ops. Marking as failed.`,
-          e,
-        );
-        await this.opLogStore.markFailed(storedOpIds);
-        throw e;
-      }
-    }
+      const result = await this.operationApplier.applyOperations(opsToApply);
 
-    // Mark ops as successfully applied (crash recovery will skip these)
-    if (storedSeqs.length > 0) {
-      await this.opLogStore.markApplied(storedSeqs);
-      OpLog.normal(
-        `OperationLogSyncService: Applied and marked ${storedSeqs.length} remote ops`,
-      );
+      // Mark successfully applied ops
+      const appliedSeqs = result.appliedOps
+        .map((op) => opIdToSeq.get(op.id))
+        .filter((seq): seq is number => seq !== undefined);
+
+      if (appliedSeqs.length > 0) {
+        await this.opLogStore.markApplied(appliedSeqs);
+        OpLog.normal(
+          `OperationLogSyncService: Applied and marked ${appliedSeqs.length} remote ops`,
+        );
+      }
+
+      // Handle partial failure
+      if (result.failedOp) {
+        // Find all ops that weren't applied (failed op + remaining ops)
+        const failedOpIndex = opsToApply.findIndex(
+          (op) => op.id === result.failedOp!.op.id,
+        );
+        const failedOps = opsToApply.slice(failedOpIndex);
+        const failedOpIds = failedOps.map((op) => op.id);
+
+        OpLog.err(
+          `OperationLogSyncService: ${result.appliedOps.length} ops applied before failure. ` +
+            `Marking ${failedOpIds.length} ops as failed.`,
+          result.failedOp.error,
+        );
+        await this.opLogStore.markFailed(failedOpIds);
+
+        // Re-throw if it's a SyncStateCorruptedError, otherwise wrap it
+        throw result.failedOp.error;
+      }
     }
   }
 

@@ -9,6 +9,29 @@ import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
 
 /**
+ * Result of applying operations to the NgRx store.
+ *
+ * This allows callers to handle partial success scenarios where some operations
+ * were applied before an error occurred.
+ */
+export interface ApplyOperationsResult {
+  /**
+   * Operations that were successfully applied to the NgRx store.
+   * These ops have already been dispatched and should be marked as applied.
+   */
+  appliedOps: Operation[];
+
+  /**
+   * If an error occurred, this contains the failed operation and the error.
+   * Operations after this one in the batch were NOT applied.
+   */
+  failedOp?: {
+    op: Operation;
+    error: Error;
+  };
+}
+
+/**
  * Service responsible for applying operations to the local NgRx store.
  *
  * ## Design Philosophy: Fail Fast, Re-sync Clean
@@ -43,14 +66,17 @@ export class OperationApplierService {
 
   /**
    * Apply operations to the NgRx store.
-   * Operations are applied in order. If any operation has missing hard dependencies,
-   * a SyncStateCorruptedError is thrown immediately.
+   * Operations are applied in order. If any operation fails, the result includes
+   * information about which operations succeeded and which failed.
    *
-   * @throws SyncStateCorruptedError if any operation has missing hard dependencies
+   * @returns Result containing applied operations and optionally the failed operation.
+   *          Callers should:
+   *          - Mark `appliedOps` as applied (they've been dispatched to NgRx)
+   *          - Mark the failed op and any remaining ops as failed
    */
-  async applyOperations(ops: Operation[]): Promise<void> {
+  async applyOperations(ops: Operation[]): Promise<ApplyOperationsResult> {
     if (ops.length === 0) {
-      return;
+      return { appliedOps: [] };
     }
 
     OpLog.normal(
@@ -58,17 +84,39 @@ export class OperationApplierService {
       ops.map((op) => op.id),
     );
 
+    const appliedOps: Operation[] = [];
+
     // Mark that we're applying remote operations to suppress selector-based effects
     this.hydrationState.startApplyingRemoteOps();
     try {
       for (const op of ops) {
-        await this._applyOperation(op);
+        try {
+          await this._applyOperation(op);
+          appliedOps.push(op);
+        } catch (e) {
+          // Log the error
+          OpLog.err(
+            `OperationApplierService: Failed to apply operation ${op.id}. ` +
+              `${appliedOps.length} ops were applied before this failure.`,
+            e,
+          );
+
+          // Return partial success result with the failed op
+          return {
+            appliedOps,
+            failedOp: {
+              op,
+              error: e instanceof Error ? e : new Error(String(e)),
+            },
+          };
+        }
       }
     } finally {
       this.hydrationState.endApplyingRemoteOps();
     }
 
     OpLog.normal('OperationApplierService: Finished applying operations.');
+    return { appliedOps };
   }
 
   /**

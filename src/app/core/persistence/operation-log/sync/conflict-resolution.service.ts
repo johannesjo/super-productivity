@@ -13,7 +13,10 @@ import { firstValueFrom } from 'rxjs';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { MAX_CONFLICT_RETRY_ATTEMPTS } from '../operation-log.const';
+import {
+  MAX_CONFLICT_RETRY_ATTEMPTS,
+  CONFLICT_DIALOG_TIMEOUT_MS,
+} from '../operation-log.const';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 
 /**
@@ -93,6 +96,7 @@ export class ConflictResolutionService {
     // Signal that we're waiting for user input to prevent sync timeout
     const stopWaiting = this.userInputWaitState.startWaiting('oplog-conflict');
     let result: ConflictResolutionResult | undefined;
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
 
     try {
       this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
@@ -100,8 +104,28 @@ export class ConflictResolutionService {
         disableClose: false,
       });
 
+      // Set up timeout to auto-cancel the dialog
+      // This prevents sync from being blocked indefinitely if user walks away
+      timeoutId = setTimeout(() => {
+        if (this._dialogRef) {
+          OpLog.warn(
+            'ConflictResolutionService: Dialog timeout - auto-cancelling after ' +
+              `${CONFLICT_DIALOG_TIMEOUT_MS / 1000}s`,
+          );
+          this._dialogRef.close(undefined);
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.CONFLICT_DIALOG_TIMEOUT,
+          });
+        }
+      }, CONFLICT_DIALOG_TIMEOUT_MS);
+
       result = await firstValueFrom(this._dialogRef.afterClosed());
     } finally {
+      // Clear timeout on normal close
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       stopWaiting();
     }
 
@@ -244,20 +268,40 @@ export class ConflictResolutionService {
       OpLog.normal(
         `ConflictResolutionService: Applying ${allOpsToApply.length} ops in single batch`,
       );
-      try {
-        await this.operationApplier.applyOperations(allOpsToApply);
 
-        // If we get here without throwing, all ops succeeded - mark as applied
-        const successSeqs = allStoredOps.map((o) => o.seq);
-        await this.opLogStore.markApplied(successSeqs);
+      // Map op ID to seq for marking partial success
+      const opIdToSeq = new Map(allStoredOps.map((o) => [o.id, o.seq]));
+
+      const applyResult = await this.operationApplier.applyOperations(allOpsToApply);
+
+      // Mark successfully applied ops
+      const appliedSeqs = applyResult.appliedOps
+        .map((op) => opIdToSeq.get(op.id))
+        .filter((seq): seq is number => seq !== undefined);
+
+      if (appliedSeqs.length > 0) {
+        await this.opLogStore.markApplied(appliedSeqs);
         OpLog.normal(
-          `ConflictResolutionService: Successfully applied ${allOpsToApply.length} ops`,
+          `ConflictResolutionService: Successfully applied ${appliedSeqs.length} ops`,
         );
-      } catch (e) {
-        // SyncStateCorruptedError or any other error means ops failed to apply
-        OpLog.err('ConflictResolutionService: Exception applying ops', e);
-        const allOpIds = allStoredOps.map((o) => o.id);
-        await this.opLogStore.markFailed(allOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
+      }
+
+      // Handle partial failure
+      if (applyResult.failedOp) {
+        // Find all ops that weren't applied (failed op + remaining ops)
+        const failedOpIndex = allOpsToApply.findIndex(
+          (op) => op.id === applyResult.failedOp!.op.id,
+        );
+        const failedOps = allOpsToApply.slice(failedOpIndex);
+        const failedOpIds = failedOps.map((op) => op.id);
+
+        OpLog.err(
+          `ConflictResolutionService: ${applyResult.appliedOps.length} ops applied before failure. ` +
+            `Marking ${failedOpIds.length} ops as failed.`,
+          applyResult.failedOp.error,
+        );
+        await this.opLogStore.markFailed(failedOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
+
         this.snackService.open({
           type: 'ERROR',
           msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,

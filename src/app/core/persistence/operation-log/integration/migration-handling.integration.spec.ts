@@ -40,6 +40,9 @@ describe('Migration Handling Integration', () => {
     operationApplierSpy = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
     ]);
+    operationApplierSpy.applyOperations.and.returnValue(
+      Promise.resolve({ appliedOps: [] }),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -203,13 +206,17 @@ describe('Migration Handling Integration', () => {
       schemaVersion: 1,
     });
 
-    it('should mark operations as failed if application throws error', async () => {
+    it('should mark operations as failed if application returns failure result', async () => {
       const op = createOp('op-fail');
 
-      // Make applier throw error
-      operationApplierSpy.applyOperations.and.rejectWith(
-        new Error('Simulated Apply Error'),
-      );
+      // Make applier return failure result (new behavior with partial success support)
+      operationApplierSpy.applyOperations.and.resolveTo({
+        appliedOps: [],
+        failedOp: {
+          op,
+          error: new Error('Simulated Apply Error'),
+        },
+      });
 
       // Spy on store to verify markFailed is called
       spyOn(opLogStore, 'markFailed').and.callThrough();

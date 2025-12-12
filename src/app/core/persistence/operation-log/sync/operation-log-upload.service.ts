@@ -45,6 +45,17 @@ export interface UploadResult {
 }
 
 /**
+ * Options for uploadPendingOps.
+ */
+export interface UploadOptions {
+  /**
+   * Optional callback executed INSIDE the upload lock, BEFORE checking for pending ops.
+   * Use this for operations that must be atomic with the upload, such as server migration checks.
+   */
+  preUploadCallback?: () => Promise<void>;
+}
+
+/**
  * Handles uploading local pending operations to remote storage.
  * Supports both API-based sync (for real-time providers) and
  * file-based sync (for WebDAV/file storage providers).
@@ -60,6 +71,7 @@ export class OperationLogUploadService {
 
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     if (!syncProvider) {
       OpLog.warn('OperationLogUploadService: No active sync provider passed for upload.');
@@ -68,15 +80,16 @@ export class OperationLogUploadService {
 
     // Use operation sync if supported
     if (isOperationSyncCapable(syncProvider)) {
-      return this._uploadPendingOpsViaApi(syncProvider);
+      return this._uploadPendingOpsViaApi(syncProvider, options);
     }
 
     // Fall back to file-based sync
-    return this._uploadPendingOpsViaFiles(syncProvider);
+    return this._uploadPendingOpsViaFiles(syncProvider, options);
   }
 
   private async _uploadPendingOpsViaApi(
     syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     OpLog.normal('OperationLogUploadService: Uploading pending operations via API...');
 
@@ -86,6 +99,12 @@ export class OperationLogUploadService {
     let rejectedCount = 0;
 
     await this.lockService.request('sp_op_log_upload', async () => {
+      // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
+      // This ensures operations like server migration checks are atomic with the upload.
+      if (options?.preUploadCallback) {
+        await options.preUploadCallback();
+      }
+
       const pendingOps = await this.opLogStore.getUnsynced();
 
       if (pendingOps.length === 0) {
@@ -250,12 +269,18 @@ export class OperationLogUploadService {
 
   private async _uploadPendingOpsViaFiles(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    options?: UploadOptions,
   ): Promise<UploadResult> {
     OpLog.normal('OperationLogUploadService: Uploading pending operations via files...');
 
     let uploadedCount = 0;
 
     await this.lockService.request('sp_op_log_upload', async () => {
+      // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
+      if (options?.preUploadCallback) {
+        await options.preUploadCallback();
+      }
+
       const pendingOps = await this.opLogStore.getUnsynced();
 
       if (pendingOps.length === 0) {

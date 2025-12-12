@@ -182,7 +182,11 @@ export class OperationLogHydratorService {
             // Use OperationApplierService to handle dependency resolution during replay.
             // This ensures operations referencing deleted entities are handled gracefully
             // rather than throwing errors (e.g., adding subtask to deleted parent).
-            await this.operationApplierService.applyOperations(opsToReplay);
+            const tailReplayResult =
+              await this.operationApplierService.applyOperations(opsToReplay);
+            if (tailReplayResult.failedOp) {
+              throw tailReplayResult.failedOp.error;
+            }
 
             // CHECKPOINT C: Validate state after replaying tail operations
             // Must validate BEFORE saving snapshot to avoid persisting corrupted state
@@ -256,7 +260,11 @@ export class OperationLogHydratorService {
           // Use OperationApplierService to handle dependency resolution during replay.
           // This ensures operations referencing deleted entities are handled gracefully
           // rather than throwing errors (e.g., adding subtask to deleted parent).
-          await this.operationApplierService.applyOperations(opsToReplay);
+          const fullReplayResult =
+            await this.operationApplierService.applyOperations(opsToReplay);
+          if (fullReplayResult.failedOp) {
+            throw fullReplayResult.failedOp.error;
+          }
 
           // CHECKPOINT C: Validate state after replaying all operations
           // Must validate BEFORE saving snapshot to avoid persisting corrupted state
@@ -885,14 +893,17 @@ export class OperationLogHydratorService {
     const stillFailedOpIds: string[] = [];
 
     for (const entry of failedOps) {
-      try {
-        await this.operationApplierService.applyOperations([entry.op]);
-        // If we get here without throwing, the operation succeeded
-        appliedOpIds.push(entry.op.id);
-      } catch (e) {
+      const result = await this.operationApplierService.applyOperations([entry.op]);
+      if (result.failedOp) {
         // SyncStateCorruptedError or any other error means the op still can't be applied
-        OpLog.warn(`OperationLogHydratorService: Failed to retry op ${entry.op.id}`, e);
+        OpLog.warn(
+          `OperationLogHydratorService: Failed to retry op ${entry.op.id}`,
+          result.failedOp.error,
+        );
         stillFailedOpIds.push(entry.op.id);
+      } else {
+        // Operation succeeded
+        appliedOpIds.push(entry.op.id);
       }
     }
 

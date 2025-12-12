@@ -153,3 +153,11 @@ export const SLOW_COMPACTION_THRESHOLD_MS = 3000;
  * Default: 20MB
  */
 export const STATE_SIZE_WARNING_THRESHOLD_MB = 20;
+
+/**
+ * Timeout for the conflict resolution dialog (milliseconds).
+ * If user doesn't respond within this time, the dialog auto-cancels
+ * to prevent sync from being blocked indefinitely.
+ * Default: 5 minutes
+ */
+export const CONFLICT_DIALOG_TIMEOUT_MS = 5 * 60 * 1000;

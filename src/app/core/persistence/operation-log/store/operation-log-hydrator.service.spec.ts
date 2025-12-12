@@ -143,7 +143,9 @@ describe('OperationLogHydratorService', () => {
     mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([]));
     mockOpLogStore.markApplied.and.returnValue(Promise.resolve());
     mockOpLogStore.markFailed.and.returnValue(Promise.resolve());
-    mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
+    mockOperationApplierService.applyOperations.and.returnValue(
+      Promise.resolve({ appliedOps: [] }),
+    );
     mockMigrationService.checkAndMigrate.and.returnValue(Promise.resolve());
     mockSchemaMigrationService.needsMigration.and.returnValue(false);
     mockSchemaMigrationService.operationNeedsMigration.and.returnValue(false);
@@ -1010,7 +1012,9 @@ describe('OperationLogHydratorService', () => {
       };
 
       mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
-      mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
+      mockOperationApplierService.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await service.retryFailedRemoteOps();
 
@@ -1040,7 +1044,9 @@ describe('OperationLogHydratorService', () => {
       });
 
       mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
-      mockOperationApplierService.applyOperations.and.returnValue(Promise.resolve());
+      mockOperationApplierService.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
 
       await service.retryFailedRemoteOps();
 
@@ -1060,8 +1066,14 @@ describe('OperationLogHydratorService', () => {
       };
 
       mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([failedEntry]));
-      mockOperationApplierService.applyOperations.and.rejectWith(
-        new Error('Still failing'),
+      mockOperationApplierService.applyOperations.and.returnValue(
+        Promise.resolve({
+          appliedOps: [],
+          failedOp: {
+            op: failedOp,
+            error: new Error('Still failing'),
+          },
+        }),
       );
 
       await service.retryFailedRemoteOps();
