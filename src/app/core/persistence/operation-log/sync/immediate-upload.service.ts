@@ -18,8 +18,17 @@ const IMMEDIATE_UPLOAD_DEBOUNCE_MS = 100;
  *
  * - 100ms debounce to batch rapid operations
  * - Silent failure (normal sync will pick up pending ops)
- * - Shows checkmark on success without spinning the sync button
  * - Handles piggybacked operations from server responses
+ *
+ * ## Checkmark (IN_SYNC) behavior
+ *
+ * The sync checkmark is ONLY shown when the server confirms there are no pending
+ * remote operations (i.e., piggybackedOps is empty). This ensures the checkmark
+ * accurately represents "fully in sync" state:
+ *
+ * - Upload succeeds + no piggybacked ops → Show checkmark (confirmed in sync)
+ * - Upload succeeds + piggybacked ops exist → Process them, but NO checkmark
+ *   (there may be more remote ops; let normal sync confirm full sync)
  *
  * Guards:
  * - Only uploads when online
@@ -126,13 +135,21 @@ export class ImmediateUploadService implements OnDestroy {
           `ImmediateUploadService: Processing ${result.piggybackedOps.length} piggybacked ops`,
         );
         await this._syncService.processRemoteOps(result.piggybackedOps);
+        // Don't show checkmark when piggybacked ops exist - there may be more
+        // remote ops pending. Let normal sync cycle confirm full sync state.
+        OpLog.verbose(
+          `ImmediateUploadService: Uploaded ${result.uploadedCount} ops, ` +
+            `processed ${result.piggybackedOps.length} piggybacked (checkmark deferred)`,
+        );
+        return;
       }
 
-      // Show checkmark (without spinning) on success
-      if (result.uploadedCount > 0 || result.piggybackedOps.length > 0) {
+      // Show checkmark ONLY when server confirms no pending remote ops
+      // (empty piggybackedOps means we're confirmed in sync)
+      if (result.uploadedCount > 0) {
         this._pfapiService.pf.ev.emit('syncStatusChange', 'IN_SYNC');
         OpLog.verbose(
-          `ImmediateUploadService: Uploaded ${result.uploadedCount} ops immediately`,
+          `ImmediateUploadService: Uploaded ${result.uploadedCount} ops, confirmed in sync`,
         );
       }
     } catch (e) {
