@@ -9,6 +9,7 @@ import { VectorClockService } from './sync/vector-clock.service';
 import { OperationLogCompactionService } from './store/operation-log-compaction.service';
 import { SnackService } from '../../snack/snack.service';
 import { Injector } from '@angular/core';
+import { ImmediateUploadService } from './sync/immediate-upload.service';
 import { OpType } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 import { COMPACTION_THRESHOLD } from './operation-log.const';
@@ -23,6 +24,7 @@ describe('OperationLogEffects', () => {
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockInjector: jasmine.SpyObj<Injector>;
   let mockStore: jasmine.SpyObj<Store>;
+  let mockImmediateUploadService: jasmine.SpyObj<ImmediateUploadService>;
 
   const mockPfapiService = {
     pf: {
@@ -68,6 +70,9 @@ describe('OperationLogEffects', () => {
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockInjector = jasmine.createSpyObj('Injector', ['get']);
     mockStore = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    mockImmediateUploadService = jasmine.createSpyObj('ImmediateUploadService', [
+      'trigger',
+    ]);
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -96,6 +101,7 @@ describe('OperationLogEffects', () => {
         { provide: SnackService, useValue: mockSnackService },
         { provide: Injector, useValue: mockInjector },
         { provide: Store, useValue: mockStore },
+        { provide: ImmediateUploadService, useValue: mockImmediateUploadService },
       ],
     });
 

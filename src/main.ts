@@ -54,6 +54,7 @@ import {
   taskSharedSchedulingMetaReducer,
 } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/core/persistence/operation-log/processing/operation-capture.service';
+import { ImmediateUploadService } from './app/core/persistence/operation-log/sync/immediate-upload.service';
 import { EffectsModule } from '@ngrx/effects';
 import { StoreDevtoolsModule } from '@ngrx/store-devtools';
 import { ReactiveFormsModule } from '@angular/forms';
@@ -206,6 +207,17 @@ bootstrapApplication(AppComponent, {
         };
       },
       deps: [OperationCaptureService],
+      multi: true,
+    },
+    // Initialize immediate upload service for real-time sync to SuperSync
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (immediateUploadService: ImmediateUploadService) => {
+        return () => {
+          immediateUploadService.initialize();
+        };
+      },
+      deps: [ImmediateUploadService],
       multi: true,
     },
   ],

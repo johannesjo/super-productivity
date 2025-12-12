@@ -23,6 +23,7 @@ import {
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { OpType } from './operation.types';
+import { ImmediateUploadService } from './sync/immediate-upload.service';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -47,6 +48,7 @@ export class OperationLogEffects {
   private compactionService = inject(OperationLogCompactionService);
   private snackService = inject(SnackService);
   private operationCaptureService = inject(OperationCaptureService);
+  private immediateUploadService = inject(ImmediateUploadService);
 
   persistOperation$ = createEffect(
     () =>
@@ -139,6 +141,9 @@ export class OperationLogEffects {
 
         // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);
+
+        // 1b. Trigger immediate upload to SuperSync (async, non-blocking)
+        this.immediateUploadService.trigger();
 
         // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
         // This ensures legacy sync (WebDAV/Dropbox) can detect local changes
