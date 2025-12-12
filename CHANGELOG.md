@@ -1,3 +1,23 @@
+# [16.6.0](https://github.com/johannesjo/super-productivity/compare/v16.5.5...v16.6.0) (2025-12-12)
+
+### Bug Fixes
+
+- change filtering by tag/project logic to handle empty inputs ([aa99dba](https://github.com/johannesjo/super-productivity/commit/aa99dbaa9e380c4a71fab65ddecaa823ccb61c21))
+- **e2e:** WebDAV sync tests connection and timeout issues ([19643e7](https://github.com/johannesjo/super-productivity/commit/19643e781c0b5f059e8d37abe49d8ecd3dcb083c))
+- **electron:** improve window controls overlay for Windows/Linux ([#5713](https://github.com/johannesjo/super-productivity/issues/5713)) ([a3d65e0](https://github.com/johannesjo/super-productivity/commit/a3d65e021c115dfce4c2363ee61d9e10239f3227))
+- **i18n-sv:** fix json structure ([a615b39](https://github.com/johannesjo/super-productivity/commit/a615b391c39de86146ffa755856256ab5c349602))
+- **i18n:** incorrect json structure ([d410e1f](https://github.com/johannesjo/super-productivity/commit/d410e1f24ec648ed09afa83255be4cf90bde141b))
+- **repeat:** add error handling for undefined startDate and more tests (fixes [#5594](https://github.com/johannesjo/super-productivity/issues/5594)) ([e1742c5](https://github.com/johannesjo/super-productivity/commit/e1742c5a78f483beea1e5b0330dd6ff443118994))
+- **repeat:** calculate correct target day based on repeat pattern when adding repeat config (fixes [#5594](https://github.com/johannesjo/super-productivity/issues/5594)) ([2dc5ec8](https://github.com/johannesjo/super-productivity/commit/2dc5ec8523ebd363254eac272d4daabfbc794ba2))
+- **repeat:** correct test expectations for getNewestPossibleDueDate behavior ([d2a35a6](https://github.com/johannesjo/super-productivity/commit/d2a35a6e7b2b9f449c944ac78ae3b2298b7d3acc))
+- **repeat:** correct WEEKLY Friday test to expect fallback due to ISO week boundary ([a0cc8bd](https://github.com/johannesjo/super-productivity/commit/a0cc8bd41bb1e672448c6b026d83dd544cd369e7))
+
+### Features
+
+- add linear support ([88c4a8b](https://github.com/johannesjo/super-productivity/commit/88c4a8b17005edba67da3bbfa1b5be70c8deba75))
+- **filtering:** allow filtering by empty time ([2a2324b](https://github.com/johannesjo/super-productivity/commit/2a2324b3ce205b1d989b81bb6d0eef03b60f4a0c))
+- use HttpClient for requests ([b23b29a](https://github.com/johannesjo/super-productivity/commit/b23b29a179500773736bd2cb40773ee0a588d137))
+
 ## [16.5.5](https://github.com/johannesjo/super-productivity/compare/v16.5.4...v16.5.5) (2025-12-09)
 
 ### Bug Fixes
