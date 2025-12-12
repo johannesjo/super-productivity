@@ -79,11 +79,17 @@ export const sortOperationsByDependency = (
     referencedEntityId: string;
   }> = [];
 
+  // First pass: Initialize hardDependencies and opById for ALL operations
+  // This must happen before extracting dependencies, because when we find
+  // a dependency on an entity being deleted, we need to access the deleter's
+  // entry in hardDependencies even if it comes later in the array.
   for (const op of ops) {
     opById.set(op.id, op);
     hardDependencies.set(op.id, new Set());
+  }
 
-    // Extract dependencies for this operation
+  // Second pass: Extract dependencies and build the graph
+  for (const op of ops) {
     const deps = extractDependencies(op);
 
     for (const dep of deps) {
