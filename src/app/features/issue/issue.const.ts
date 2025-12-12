@@ -37,6 +37,10 @@ import {
   DEFAULT_LINEAR_CFG,
   LINEAR_CONFIG_FORM_SECTION,
 } from './providers/linear/linear.const';
+import {
+  DEFAULT_CLICKUP_CFG,
+  CLICKUP_CONFIG_FORM_SECTION,
+} from './providers/clickup/clickup.const';
 
 export const DELAY_BEFORE_ISSUE_POLLING = 8000;
 
@@ -50,6 +54,7 @@ export const REDMINE_TYPE: IssueProviderKey = 'REDMINE';
 export const ICAL_TYPE: IssueProviderKey = 'ICAL';
 export const TRELLO_TYPE: IssueProviderKey = 'TRELLO';
 export const LINEAR_TYPE: IssueProviderKey = 'LINEAR';
+export const CLICKUP_TYPE: IssueProviderKey = 'CLICKUP';
 
 export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   GITLAB_TYPE,
@@ -62,6 +67,7 @@ export const ISSUE_PROVIDER_TYPES: IssueProviderKey[] = [
   TRELLO_TYPE,
   REDMINE_TYPE,
   LINEAR_TYPE,
+  CLICKUP_TYPE,
 ] as const;
 
 export const ISSUE_PROVIDER_ICON_MAP = {
@@ -75,6 +81,7 @@ export const ISSUE_PROVIDER_ICON_MAP = {
   [TRELLO_TYPE]: 'trello',
   [REDMINE_TYPE]: 'redmine',
   [LINEAR_TYPE]: 'linear',
+  [CLICKUP_TYPE]: 'clickup',
 } as const;
 
 export const ISSUE_PROVIDER_HUMANIZED = {
@@ -88,6 +95,7 @@ export const ISSUE_PROVIDER_HUMANIZED = {
   [TRELLO_TYPE]: 'Trello',
   [REDMINE_TYPE]: 'Redmine',
   [LINEAR_TYPE]: 'Linear',
+  [CLICKUP_TYPE]: 'ClickUp',
 } as const;
 
 export const DEFAULT_ISSUE_PROVIDER_CFGS = {
@@ -101,6 +109,7 @@ export const DEFAULT_ISSUE_PROVIDER_CFGS = {
   [TRELLO_TYPE]: DEFAULT_TRELLO_CFG,
   [REDMINE_TYPE]: DEFAULT_REDMINE_CFG,
   [LINEAR_TYPE]: DEFAULT_LINEAR_CFG,
+  [CLICKUP_TYPE]: DEFAULT_CLICKUP_CFG,
 } as const;
 
 export const ISSUE_PROVIDER_FORM_CFGS_MAP = {
@@ -114,6 +123,7 @@ export const ISSUE_PROVIDER_FORM_CFGS_MAP = {
   [TRELLO_TYPE]: TRELLO_CONFIG_FORM_SECTION,
   [REDMINE_TYPE]: REDMINE_CONFIG_FORM_SECTION,
   [LINEAR_TYPE]: LINEAR_CONFIG_FORM_SECTION,
+  [CLICKUP_TYPE]: CLICKUP_CONFIG_FORM_SECTION,
 } as const;
 
 const DEFAULT_ISSUE_STRS: { ISSUE_STR: string; ISSUES_STR: string } = {
@@ -139,6 +149,7 @@ export const ISSUE_STR_MAP: { [key: string]: { ISSUE_STR: string; ISSUES_STR: st
     [TRELLO_TYPE]: DEFAULT_ISSUE_STRS,
     [REDMINE_TYPE]: DEFAULT_ISSUE_STRS,
     [LINEAR_TYPE]: DEFAULT_ISSUE_STRS,
+    [CLICKUP_TYPE]: DEFAULT_ISSUE_STRS,
   } as const;
 
 export const ISSUE_PROVIDER_DEFAULT_COMMON_CFG: Omit<

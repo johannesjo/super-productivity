@@ -19,6 +19,8 @@ import { TrelloCfg } from './providers/trello/trello.model';
 import { TrelloIssue, TrelloIssueReduced } from './providers/trello/trello-issue.model';
 import { LinearCfg } from './providers/linear/linear.model';
 import { LinearIssue, LinearIssueReduced } from './providers/linear/linear-issue.model';
+import { ClickUpCfg } from './providers/clickup/clickup.model';
+import { ClickUpTask, ClickUpTaskReduced } from './providers/clickup/clickup-issue.model';
 import { EntityState } from '@ngrx/entity';
 import {
   CalendarProviderCfg,
@@ -41,7 +43,8 @@ export type IssueProviderKey =
   | 'GITEA'
   | 'TRELLO'
   | 'REDMINE'
-  | 'LINEAR';
+  | 'LINEAR'
+  | 'CLICKUP';
 
 export type IssueIntegrationCfg =
   | JiraCfg
@@ -53,7 +56,8 @@ export type IssueIntegrationCfg =
   | GiteaCfg
   | TrelloCfg
   | RedmineCfg
-  | LinearCfg;
+  | LinearCfg
+  | ClickUpCfg;
 
 export enum IssueLocalState {
   OPEN = 'OPEN',
@@ -73,6 +77,7 @@ export interface IssueIntegrationCfgs {
   GITEA?: GiteaCfg;
   REDMINE?: RedmineCfg;
   LINEAR?: LinearCfg;
+  CLICKUP?: ClickUpCfg;
 }
 
 export type IssueData =
@@ -85,7 +90,8 @@ export type IssueData =
   | GiteaIssue
   | RedmineIssue
   | TrelloIssue
-  | LinearIssue;
+  | LinearIssue
+  | ClickUpTask;
 
 export type IssueDataReduced =
   | GithubIssueReduced
@@ -97,7 +103,8 @@ export type IssueDataReduced =
   | GiteaIssue
   | RedmineIssue
   | TrelloIssueReduced
-  | LinearIssueReduced;
+  | LinearIssueReduced
+  | ClickUpTaskReduced;
 
 export type IssueDataReducedMap = {
   [K in IssueProviderKey]: K extends 'JIRA'
@@ -120,7 +127,9 @@ export type IssueDataReducedMap = {
                     ? RedmineIssue
                     : K extends 'LINEAR'
                       ? LinearIssueReduced
-                      : never;
+                      : K extends 'CLICKUP'
+                        ? ClickUpTaskReduced
+                        : never;
 };
 
 // TODO: add issue model to the IssueDataReducedMap
@@ -201,6 +210,10 @@ export interface IssueProviderLinear extends IssueProviderBase, LinearCfg {
   issueProviderKey: 'LINEAR';
 }
 
+export interface IssueProviderClickUp extends IssueProviderBase, ClickUpCfg {
+  issueProviderKey: 'CLICKUP';
+}
+
 export type IssueProvider =
   | IssueProviderJira
   | IssueProviderGithub
@@ -211,7 +224,8 @@ export type IssueProvider =
   | IssueProviderGitea
   | IssueProviderRedmine
   | IssueProviderTrello
-  | IssueProviderLinear;
+  | IssueProviderLinear
+  | IssueProviderClickUp;
 
 export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
   ? IssueProviderJira
@@ -233,4 +247,6 @@ export type IssueProviderTypeMap<T extends IssueProviderKey> = T extends 'JIRA'
                   ? IssueProviderTrello
                   : T extends 'LINEAR'
                     ? IssueProviderLinear
-                    : never;
+                    : T extends 'CLICKUP'
+                      ? IssueProviderClickUp
+                      : never;
