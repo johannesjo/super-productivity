@@ -10,7 +10,6 @@ import {
   decompressGzipFromString,
 } from '../compression/compression-handler';
 import { EncryptAndCompressCfg } from '../pfapi.model';
-import { environment } from '../../../../environments/environment';
 
 export class EncryptAndCompressHandlerService {
   private static readonly L = 'EncryptAndCompressHandlerService';
@@ -77,7 +76,6 @@ export class EncryptAndCompressHandlerService {
     }
     if (isEncrypt) {
       if (!encryptKey) {
-        PFLog.log(environment.production ? typeof encryptKey : encryptKey);
         throw new Error('No encryption password provided');
       }
 
@@ -108,7 +106,6 @@ export class EncryptAndCompressHandlerService {
     if (isEncrypted) {
       if (!encryptKey) {
         throw new DecryptNoPasswordError({
-          encryptKey,
           dataStr,
           isCompressed,
           isEncrypted,

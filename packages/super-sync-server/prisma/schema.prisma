@@ -34,20 +34,21 @@ model User {
 }
 
 model Operation {
-  id             String  @id
-  userId         Int     @map("user_id")
-  clientId       String  @map("client_id")
-  serverSeq      Int     @map("server_seq")
-  actionType     String  @map("action_type")
-  opType         String  @map("op_type")
-  entityType     String  @map("entity_type")
-  entityId       String? @map("entity_id")
-  payload        Json
-  vectorClock    Json    @map("vector_clock")
-  schemaVersion  Int     @map("schema_version")
-  clientTimestamp BigInt  @map("client_timestamp")
-  receivedAt     BigInt  @map("received_at")
-  parentOpId     String? @map("parent_op_id")
+  id                 String  @id
+  userId             Int     @map("user_id")
+  clientId           String  @map("client_id")
+  serverSeq          Int     @map("server_seq")
+  actionType         String  @map("action_type")
+  opType             String  @map("op_type")
+  entityType         String  @map("entity_type")
+  entityId           String? @map("entity_id")
+  payload            Json
+  vectorClock        Json    @map("vector_clock")
+  schemaVersion      Int     @map("schema_version")
+  clientTimestamp    BigInt  @map("client_timestamp")
+  receivedAt         BigInt  @map("received_at")
+  parentOpId         String? @map("parent_op_id")
+  isPayloadEncrypted Boolean @default(false) @map("is_payload_encrypted")
 
   user           User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 

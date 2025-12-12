@@ -40,9 +40,10 @@ export class OperationEncryptionService {
     }
     try {
       const decryptedStr = await decrypt(op.payload, encryptKey);
+      const parsedPayload = JSON.parse(decryptedStr);
       return {
         ...op,
-        payload: JSON.parse(decryptedStr),
+        payload: parsedPayload,
         isPayloadEncrypted: false,
       };
     } catch (e) {

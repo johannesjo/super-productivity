@@ -30,11 +30,26 @@ const FULL_STATE_OP_TYPES = new Set([
  * Handles both multi-entity payloads (new format) and legacy payloads.
  */
 const extractActionPayload = (payload: unknown): Record<string, unknown> => {
+  // Debug logging for encryption issues
+  console.log(
+    '[DEBUG extractActionPayload] payload type:',
+    typeof payload,
+    'isMultiEntity:',
+    isMultiEntityPayload(payload),
+  );
   if (isMultiEntityPayload(payload)) {
+    console.log(
+      '[DEBUG extractActionPayload] actionPayload:',
+      JSON.stringify(payload.actionPayload)?.substring(0, 500),
+    );
     // Multi-entity payload: extract the original action payload
     return payload.actionPayload;
   }
   // Legacy format: payload is directly the action payload
+  console.log(
+    '[DEBUG extractActionPayload] legacy payload:',
+    JSON.stringify(payload)?.substring(0, 500),
+  );
   return payload as Record<string, unknown>;
 };
 

@@ -132,8 +132,7 @@ export const decrypt = async (data: string, password: string): Promise<string> =
   try {
     return await decryptArgon(data, password);
   } catch (e) {
-    // fallback to legacy decryption
-    console.log('Legacy decryption fallback due to error:', e);
+    // Fallback to legacy decryption (pre-Argon2 format)
     return await decryptLegacy(data, password);
   }
 };

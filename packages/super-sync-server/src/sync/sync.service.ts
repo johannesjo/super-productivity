@@ -323,7 +323,6 @@ export class SyncService {
       });
       const serverSeq = updatedState.lastSeq;
 
-      // Insert operation
       await tx.operation.create({
         data: {
           id: op.id,
@@ -340,6 +339,7 @@ export class SyncService {
           clientTimestamp: BigInt(op.timestamp),
           receivedAt: BigInt(now),
           parentOpId: op.parentOpId ?? null,
+          isPayloadEncrypted: op.isPayloadEncrypted ?? false,
         },
       });
 
@@ -452,6 +452,7 @@ export class SyncService {
         schemaVersion: row.schemaVersion,
         timestamp: Number(row.clientTimestamp),
         parentOpId: row.parentOpId ?? undefined,
+        isPayloadEncrypted: row.isPayloadEncrypted,
       },
       receivedAt: Number(row.receivedAt),
     }));
@@ -544,6 +545,7 @@ export class SyncService {
           schemaVersion: row.schemaVersion,
           timestamp: Number(row.clientTimestamp),
           parentOpId: row.parentOpId ?? undefined,
+          isPayloadEncrypted: row.isPayloadEncrypted,
         },
         receivedAt: Number(row.receivedAt),
       }));

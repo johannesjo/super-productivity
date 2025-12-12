@@ -280,7 +280,10 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             label: T.F.SYNC.FORM.L_ENABLE_COMPRESSION,
           },
         },
+        // Hide for SuperSync since it has dedicated E2E encryption fields above
         {
+          hideExpression: (m: any, v: any, field: any) =>
+            field?.parent?.parent?.model.syncProvider === LegacySyncProvider.SuperSync,
           key: 'isEncryptionEnabled',
           type: 'checkbox',
           templateOptions: {
@@ -288,7 +291,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          hideExpression: (m: any, v: any, field: any) =>
+            field?.parent?.parent?.model.syncProvider === LegacySyncProvider.SuperSync ||
+            !m.isEncryptionEnabled,
           type: 'tpl',
           className: `tpl`,
           templateOptions: {
@@ -297,7 +302,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           },
         },
         {
-          hideExpression: (model: any) => !model.isEncryptionEnabled,
+          hideExpression: (m: any, v: any, field: any) =>
+            field?.parent?.parent?.model.syncProvider === LegacySyncProvider.SuperSync ||
+            !m.isEncryptionEnabled,
           key: 'encryptKey',
           type: 'input',
           templateOptions: {

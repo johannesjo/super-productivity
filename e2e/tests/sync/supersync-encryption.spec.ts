@@ -60,7 +60,7 @@ base.describe('@supersync SuperSync Encryption', () => {
     testInfo.skip(!serverHealthy, 'SuperSync server not running');
   });
 
-  base.skip(
+  base(
     'Encrypted data syncs correctly with valid password',
     async ({ browser, baseURL }, testInfo) => {
       const testRunId = generateTestRunId(testInfo.workerIndex);
@@ -107,7 +107,7 @@ base.describe('@supersync SuperSync Encryption', () => {
     },
   );
 
-  base.skip(
+  base(
     'Encrypted data fails to sync with wrong password',
     async ({ browser, baseURL }, testInfo) => {
       const testRunId = generateTestRunId(testInfo.workerIndex);

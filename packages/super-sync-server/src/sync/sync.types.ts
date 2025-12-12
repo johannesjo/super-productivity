@@ -145,6 +145,7 @@ export interface Operation {
   timestamp: number;
   schemaVersion: number;
   parentOpId?: string; // For conflict resolution chain tracking
+  isPayloadEncrypted?: boolean; // True if payload is E2E encrypted
 }
 
 export interface ServerOperation {
