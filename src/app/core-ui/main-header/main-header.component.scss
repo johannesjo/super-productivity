@@ -24,7 +24,11 @@
 }
 
 :host-context(.isObsidianStyleHeader.isElectron) {
-  padding-right: var(--window-controls-width); // Space for window controls
+  // Dynamic window controls width using Window Controls Overlay CSS env vars
+  // env(titlebar-area-width) = available width (viewport - controls)
+  // So: controls width = 100vw - titlebar-area-width
+  // Fallback calc ensures 140px when env vars unavailable
+  padding-right: calc(100vw - env(titlebar-area-width, calc(100vw - 140px)));
 }
 
 :host-context(.isMac.isElectron),

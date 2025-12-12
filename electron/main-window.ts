@@ -29,6 +29,16 @@ import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 
 let mainWin: BrowserWindow;
 
+/**
+ * Returns theme-aware background color for titlebar overlay.
+ * Semi-transparent to ensure window controls are always visible.
+ */
+const getTitleBarColor = (isDark: boolean): string => {
+  // Dark: matches --bg (#131314) with 95% opacity
+  // Light: matches --bg (#f8f8f7) with 95% opacity
+  return isDark ? 'rgba(19, 19, 20, 0.95)' : 'rgba(248, 248, 247, 0.95)';
+};
+
 const mainWinModule: {
   win?: BrowserWindow;
   isAppReady: boolean;
@@ -91,7 +101,7 @@ export const createWindow = async ({
   const titleBarOverlay: BrowserWindowConstructorOptions['titleBarOverlay'] =
     isUseCustomWindowTitleBar && !IS_MAC
       ? {
-          color: '#00000000',
+          color: getTitleBarColor(nativeTheme.shouldUseDarkColors),
           symbolColor: initialSymbolColor,
           height: 44,
         }
@@ -224,13 +234,13 @@ export const createWindow = async ({
     mainWinModule.isAppReady = true;
   });
 
-  // Listen for theme changes to update title bar overlay symbol color
+  // Listen for theme changes to update title bar overlay color and symbol
   if (isUseCustomWindowTitleBar && !IS_MAC) {
     ipcMain.on(IPC.UPDATE_TITLE_BAR_DARK_MODE, (ev, isDarkMode: boolean) => {
       try {
         const symbolColor = isDarkMode ? '#fff' : '#000';
         mainWin.setTitleBarOverlay({
-          color: '#00000000',
+          color: getTitleBarColor(isDarkMode),
           symbolColor,
           height: 44,
         });
