@@ -46,8 +46,15 @@ export interface DownloadResult {
 
 /**
  * Handles downloading remote operations from storage.
- * Supports both API-based sync (for real-time providers) and
- * file-based sync (for WebDAV/file storage providers).
+ *
+ * CURRENT ARCHITECTURE (as of Dec 2025):
+ * - Only SuperSync uses operation log sync (it implements OperationSyncCapable)
+ * - SuperSync uses API-based sync via `_downloadRemoteOpsViaApi()`
+ * - Legacy providers (WebDAV, Dropbox, LocalFile) do NOT use operation log sync at all
+ *   They use pfapi's model-level LWW sync instead (see sync.service.ts:104)
+ *
+ * The file-based sync method `_downloadRemoteOpsViaFiles()` exists for future extensibility
+ * but is currently NEVER CALLED. If it's ever enabled, decryption support must be added.
  *
  * This service only handles downloading and filtering - conflict detection
  * and application are handled by OperationLogSyncService.
