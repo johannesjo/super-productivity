@@ -460,17 +460,20 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         await clientA.workView.addTask(task3);
 
         // 4. Mark Task 1 Done
-        const taskLocator1 = clientA.page.locator(
-          `task:not(.ng-animating):has-text("${task1}")`,
-        );
+        // Use .first() to avoid strict mode violations during animations
+        const taskLocator1 = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${task1}")`)
+          .first();
         await taskLocator1.hover();
         await taskLocator1.locator('.task-done-btn').click();
         await expect(taskLocator1).toHaveClass(/isDone/);
+        // Wait for done animation to complete
+        await clientA.page.waitForTimeout(300);
 
         // 5. Delete Task 2
-        const taskLocator2 = clientA.page.locator(
-          `task:not(.ng-animating):has-text("${task2}")`,
-        );
+        const taskLocator2 = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${task2}")`)
+          .first();
         await taskLocator2.click({ button: 'right' });
         await clientA.page
           .locator('.mat-mdc-menu-item')
@@ -490,23 +493,27 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         await clientB.sync.syncAndWait();
 
         // 8. Verify B state
+        // Wait for sync animations to settle
+        await clientB.page.waitForTimeout(500);
+
         // Task 1: Visible and Done
-        const taskLocatorB1 = clientB.page.locator(
-          `task:not(.ng-animating):has-text("${task1}")`,
-        );
+        // Use .first() to avoid strict mode violations if task appears in multiple locations during render
+        const taskLocatorB1 = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${task1}")`)
+          .first();
         await expect(taskLocatorB1).toBeVisible();
         await expect(taskLocatorB1).toHaveClass(/isDone/);
 
-        // Task 2: Not Visible
+        // Task 2: Not Visible (was deleted)
         const taskLocatorB2 = clientB.page.locator(
           `task:not(.ng-animating):has-text("${task2}")`,
         );
         await expect(taskLocatorB2).not.toBeVisible();
 
         // Task 3: Visible and Open
-        const taskLocatorB3 = clientB.page.locator(
-          `task:not(.ng-animating):has-text("${task3}")`,
-        );
+        const taskLocatorB3 = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${task3}")`)
+          .first();
         await expect(taskLocatorB3).toBeVisible();
         await expect(taskLocatorB3).not.toHaveClass(/isDone/);
 
