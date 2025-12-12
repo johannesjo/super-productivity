@@ -42,6 +42,7 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
+import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -243,7 +244,6 @@ export class OperationLogSyncService {
       );
 
       // Notify user if significant number of ops were rejected without conflict resolution
-      const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
       if (stillPendingRejected.length >= MAX_REJECTED_OPS_BEFORE_WARNING) {
         this.snackService.open({
           type: 'ERROR',
@@ -508,6 +508,7 @@ export class OperationLogSyncService {
     // 2. Are already synced (accepted by server)
     // 3. Have a vector clock that is NOT dominated by the SYNC_IMPORT's clock
     //    (meaning they were created after/concurrently with the SYNC_IMPORT)
+    const syncImportClock = syncImportOp.vectorClock;
     const allEntries = await this.opLogStore.getOpsAfterSeq(0);
     const localSyncedOps = allEntries
       .filter((entry) => {
@@ -520,6 +521,18 @@ export class OperationLogSyncService {
           entry.op.opType === OpType.SyncImport ||
           entry.op.opType === OpType.BackupImport
         ) {
+          return false;
+        }
+        // Must NOT be dominated by the SYNC_IMPORT's vector clock.
+        // If the op's clock is LESS_THAN the SYNC_IMPORT's clock, it means
+        // the op happened BEFORE the SYNC_IMPORT was created, so it's already
+        // included in the SYNC_IMPORT's state and should NOT be replayed.
+        // Only replay ops that are GREATER_THAN, EQUAL, or CONCURRENT.
+        const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
+        if (comparison === VectorClockComparison.LESS_THAN) {
+          OpLog.verbose(
+            `OperationLogSyncService: Skipping op ${entry.op.id} - dominated by SYNC_IMPORT clock`,
+          );
           return false;
         }
         return true;

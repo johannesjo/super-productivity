@@ -1923,5 +1923,279 @@ describe('OperationLogSyncService', () => {
       expect(secondCallArgs[0][1].entityId).toBe('task-1');
       expect(secondCallArgs[0][2].entityId).toBe('subtask-1');
     });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Vector Clock Dominance Tests
+    // These tests verify that only ops NOT dominated by the SYNC_IMPORT's
+    // vector clock are replayed. An op is "dominated" if its clock is
+    // strictly LESS_THAN the SYNC_IMPORT's clock (happened before).
+    // ─────────────────────────────────────────────────────────────────────────
+
+    it('should NOT replay ops with vector clock dominated by SYNC_IMPORT (LESS_THAN)', async () => {
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with a vector clock indicating it knows about clientA:5 and testClient:3
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        vectorClock: { clientA: 5, [testClientId]: 3 },
+      });
+
+      // Op created BEFORE the SYNC_IMPORT (vectorClock is LESS_THAN) - should NOT be replayed
+      const preImportOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-old',
+        vectorClock: { [testClientId]: 2 }, // 2 < 3, so dominated
+        actionType: '[Task] Add Task',
+      });
+
+      // Op created AFTER the SYNC_IMPORT (vectorClock is GREATER_THAN) - should be replayed
+      const postImportOp = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-new',
+        vectorClock: { [testClientId]: 4 }, // 4 > 3, so not dominated
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(preImportOp, { syncedAt: Date.now() - 1000 }),
+            createEntry(postImportOp, { syncedAt: Date.now() - 500 }),
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call (replay) should only have the post-import op
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-new');
+    });
+
+    it('should replay ops with vector clock CONCURRENT with SYNC_IMPORT', async () => {
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with vector clock
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        vectorClock: { clientA: 5, clientB: 3 },
+      });
+
+      // Op with CONCURRENT vector clock (has testClient:4 which SYNC_IMPORT doesn't know)
+      // SYNC_IMPORT has {A:5, B:3}, op has {testClient:4}
+      // Neither dominates the other = CONCURRENT
+      const concurrentOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-concurrent',
+        vectorClock: { [testClientId]: 4 },
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(concurrentOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call should have the concurrent op (CONCURRENT is NOT dominated)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-concurrent');
+    });
+
+    it('should replay ops with vector clock GREATER_THAN SYNC_IMPORT', async () => {
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with vector clock
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        vectorClock: { clientA: 5, [testClientId]: 3 },
+      });
+
+      // Op with GREATER_THAN vector clock (testClient:10 > 3)
+      const greaterOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-greater',
+        vectorClock: { clientA: 5, [testClientId]: 10 },
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(greaterOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call should have the greater op
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-greater');
+    });
+
+    it('should NOT replay ops with vector clock EQUAL to SYNC_IMPORT (edge case)', async () => {
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with vector clock
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        vectorClock: { clientA: 5, [testClientId]: 3 },
+      });
+
+      // Op with EQUAL vector clock - this is an edge case where the op's state
+      // is already captured in the SYNC_IMPORT, so it should be replayed to be safe
+      // (EQUAL means same causal history, op is valid)
+      const equalOp = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-equal',
+        vectorClock: { clientA: 5, [testClientId]: 3 },
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(equalOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call should have the equal op (EQUAL is NOT LESS_THAN)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-equal');
+    });
+
+    it('should filter dominated ops correctly in mixed scenario', async () => {
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with vector clock
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        vectorClock: { clientA: 10, [testClientId]: 5 },
+      });
+
+      // Mix of ops with different vector clock relationships
+      const dominatedOp1 = createOp({
+        id: '019afd68-0001-7000-0000-000000000000',
+        clientId: testClientId,
+        entityId: 'task-dominated-1',
+        vectorClock: { [testClientId]: 1 }, // LESS_THAN - dominated
+      });
+      const dominatedOp2 = createOp({
+        id: '019afd68-0002-7000-0000-000000000000',
+        clientId: testClientId,
+        entityId: 'task-dominated-2',
+        vectorClock: { clientA: 5, [testClientId]: 3 }, // LESS_THAN - dominated
+      });
+      const notDominatedOp1 = createOp({
+        id: '019afd68-0003-7000-0000-000000000000',
+        clientId: testClientId,
+        entityId: 'task-not-dominated-1',
+        vectorClock: { [testClientId]: 6 }, // GREATER_THAN - not dominated
+      });
+      const notDominatedOp2 = createOp({
+        id: '019afd68-0004-7000-0000-000000000000',
+        clientId: testClientId,
+        entityId: 'task-not-dominated-2',
+        vectorClock: { clientA: 10, [testClientId]: 5, clientC: 1 }, // CONCURRENT - not dominated
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(dominatedOp1, { syncedAt: Date.now() - 400 }),
+            createEntry(dominatedOp2, { syncedAt: Date.now() - 300 }),
+            createEntry(notDominatedOp1, { syncedAt: Date.now() - 200 }),
+            createEntry(notDominatedOp2, { syncedAt: Date.now() - 100 }),
+          ]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Second call should have only the non-dominated ops
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(2);
+      const replayedIds = secondCallArgs[0].map((op: Operation) => op.entityId);
+      expect(replayedIds).toContain('task-not-dominated-1');
+      expect(replayedIds).toContain('task-not-dominated-2');
+      expect(replayedIds).not.toContain('task-dominated-1');
+      expect(replayedIds).not.toContain('task-dominated-2');
+    });
   });
 });
