@@ -13,7 +13,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { addTaskRepeatCfgToTask, updateTaskRepeatCfg } from './task-repeat-cfg.actions';
-import { Task, TaskCopy } from '../../tasks/task.model';
+import { Task, TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
@@ -40,8 +40,6 @@ import { EMPTY, forkJoin, from, Observable, of as rxOf } from 'rxjs';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { devError } from '../../../util/dev-error';
-import { TaskReminderOptionId } from '../../tasks/task.model';
-import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 
 @Injectable()
