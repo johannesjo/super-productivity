@@ -1225,6 +1225,96 @@ describe('dataRepair()', () => {
     });
   });
 
+  it('should clear non-existent repeatCfgId from tasks', () => {
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: INBOX_PROJECT.id,
+          repeatCfgId: 'NON_EXISTENT_REPEAT_CFG',
+        },
+        {
+          ...DEFAULT_TASK,
+          id: 't2',
+          projectId: INBOX_PROJECT.id,
+          repeatCfgId: undefined,
+        },
+      ]),
+    } as any;
+
+    const result = dataRepair({
+      ...mock,
+      task: taskState,
+    } as any);
+
+    // repeatCfgId should be cleared from t1 since it doesn't exist
+    expect(result.task.entities.t1!.repeatCfgId).toBeUndefined();
+    // t2 should remain unchanged
+    expect(result.task.entities.t2!.repeatCfgId).toBeUndefined();
+  });
+
+  it('should clear non-existent repeatCfgId from archived tasks', () => {
+    const archiveYoungState = {
+      task: {
+        ...fakeEntityStateFromArray<Task>([
+          {
+            ...DEFAULT_TASK,
+            id: 'archived-t1',
+            projectId: INBOX_PROJECT.id,
+            repeatCfgId: 'NON_EXISTENT_REPEAT_CFG',
+          },
+        ]),
+      },
+      timeTracking: {},
+      lastTimeTrackingFlush: 0,
+    };
+
+    const result = dataRepair({
+      ...mock,
+      archiveYoung: archiveYoungState,
+    } as any);
+
+    // repeatCfgId should be cleared from archived task
+    expect(result.archiveYoung.task.entities['archived-t1']!.repeatCfgId).toBeUndefined();
+  });
+
+  it('should preserve valid repeatCfgId on tasks', () => {
+    const taskRepeatCfgState = {
+      ...mock.taskRepeatCfg,
+      ...fakeEntityStateFromArray<TaskRepeatCfg>([
+        {
+          ...DEFAULT_TASK_REPEAT_CFG,
+          id: 'VALID_REPEAT_CFG',
+          title: 'Valid Repeat',
+          projectId: INBOX_PROJECT.id,
+        },
+      ]),
+    } as any;
+
+    const taskState = {
+      ...mock.task,
+      ...fakeEntityStateFromArray<Task>([
+        {
+          ...DEFAULT_TASK,
+          id: 't1',
+          projectId: INBOX_PROJECT.id,
+          repeatCfgId: 'VALID_REPEAT_CFG',
+        },
+      ]),
+    } as any;
+
+    const result = dataRepair({
+      ...mock,
+      task: taskState,
+      taskRepeatCfg: taskRepeatCfgState,
+    } as any);
+
+    // repeatCfgId should be preserved since it exists
+    expect(result.task.entities.t1!.repeatCfgId).toBe('VALID_REPEAT_CFG');
+  });
+
   it('should remove from project list if task has wrong project id', () => {
     const project = {
       ...mock.project,

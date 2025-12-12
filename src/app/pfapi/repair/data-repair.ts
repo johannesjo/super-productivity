@@ -99,6 +99,7 @@ export const dataRepair = (
   dataOut = _removeMissingTasksFromListsOrRestoreFromArchive(dataOut);
   dataOut = _removeNonExistentProjectIdsFromIssueProviders(dataOut);
   dataOut = _removeNonExistentProjectIdsFromTaskRepeatCfg(dataOut);
+  dataOut = _removeNonExistentRepeatCfgIdsFromTasks(dataOut);
   dataOut = _addOrphanedTasksToProjectLists(dataOut);
   dataOut = _moveArchivedSubTasksToUnarchivedParents(dataOut);
   dataOut = _moveUnArchivedSubTasksToArchivedParents(dataOut);
@@ -594,6 +595,44 @@ const _removeNonExistentProjectIdsFromTaskRepeatCfg = (
       }
     }
   });
+  return data;
+};
+
+const _removeNonExistentRepeatCfgIdsFromTasks = (
+  data: AppDataCompleteNew,
+): AppDataCompleteNew => {
+  const { task, taskRepeatCfg, archiveYoung } = data;
+  const repeatCfgIds: string[] = taskRepeatCfg.ids as string[];
+  const taskIds: string[] = task.ids;
+  const taskArchiveIds: string[] = archiveYoung.task.ids as string[];
+  let removedCount = 0;
+
+  // Fix tasks in main task state
+  taskIds.forEach((id) => {
+    const t = task.entities[id] as TaskCopy;
+    if (t.repeatCfgId && !repeatCfgIds.includes(t.repeatCfgId)) {
+      PFLog.log(`Clearing non-existent repeatCfgId from task ${t.id}: ${t.repeatCfgId}`);
+      t.repeatCfgId = undefined;
+      removedCount++;
+    }
+  });
+
+  // Fix tasks in archive
+  taskArchiveIds.forEach((id) => {
+    const t = archiveYoung.task.entities[id] as TaskCopy;
+    if (t.repeatCfgId && !repeatCfgIds.includes(t.repeatCfgId)) {
+      PFLog.log(
+        `Clearing non-existent repeatCfgId from archive task ${t.id}: ${t.repeatCfgId}`,
+      );
+      t.repeatCfgId = undefined;
+      removedCount++;
+    }
+  });
+
+  if (removedCount > 0) {
+    PFLog.log(`Total non-existent repeatCfgIds cleared from tasks: ${removedCount}`);
+  }
+
   return data;
 };
 
