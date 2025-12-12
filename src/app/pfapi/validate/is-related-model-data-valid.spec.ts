@@ -55,4 +55,75 @@ describe('isRelatedModelDataValid', () => {
     const result = isRelatedModelDataValid(partialData as AppDataCompleteNew);
     expect(result).toBe(false);
   });
+
+  it('should fail validation when task has non-existent repeatCfgId', () => {
+    const dataWithOrphanedRepeatCfgId: any = {
+      project: {
+        ids: ['p1'],
+        entities: {
+          p1: { id: 'p1', taskIds: ['t1'], backlogTaskIds: [], noteIds: [] },
+        },
+      },
+      tag: { ids: [], entities: {} },
+      task: {
+        ids: ['t1'],
+        entities: {
+          t1: {
+            id: 't1',
+            projectId: 'p1',
+            tagIds: [],
+            subTaskIds: [],
+            repeatCfgId: 'NON_EXISTENT_CFG',
+          },
+        },
+      },
+      taskRepeatCfg: { ids: [], entities: {} },
+      archiveYoung: { task: { ids: [], entities: {} } },
+      archiveOld: { task: { ids: [], entities: {} } },
+      note: { ids: [], entities: {}, todayOrder: [] },
+      issueProvider: { ids: [], entities: {} },
+      reminders: [],
+      menuTree: { projectTree: [], tagTree: [] },
+    };
+
+    const result = isRelatedModelDataValid(dataWithOrphanedRepeatCfgId);
+    expect(result).toBe(false);
+  });
+
+  it('should pass validation when task has valid repeatCfgId', () => {
+    const dataWithValidRepeatCfgId: any = {
+      project: {
+        ids: ['p1'],
+        entities: {
+          p1: { id: 'p1', taskIds: ['t1'], backlogTaskIds: [], noteIds: [] },
+        },
+      },
+      tag: { ids: [], entities: {} },
+      task: {
+        ids: ['t1'],
+        entities: {
+          t1: {
+            id: 't1',
+            projectId: 'p1',
+            tagIds: [],
+            subTaskIds: [],
+            repeatCfgId: 'validRepeatCfg',
+          },
+        },
+      },
+      taskRepeatCfg: {
+        ids: ['validRepeatCfg'],
+        entities: { validRepeatCfg: { id: 'validRepeatCfg' } },
+      },
+      archiveYoung: { task: { ids: [], entities: {} } },
+      archiveOld: { task: { ids: [], entities: {} } },
+      note: { ids: [], entities: {}, todayOrder: [] },
+      issueProvider: { ids: [], entities: {} },
+      reminders: [],
+      menuTree: { projectTree: [], tagTree: [] },
+    };
+
+    const result = isRelatedModelDataValid(dataWithValidRepeatCfgId);
+    expect(result).toBe(true);
+  });
 });

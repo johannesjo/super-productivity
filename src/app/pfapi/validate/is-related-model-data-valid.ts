@@ -43,6 +43,7 @@ export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
   const projectIds = new Set<string>((d.project.ids as string[]) || []);
   const tagIds = new Set<string>((d.tag.ids as string[]) || []);
   const taskIds = new Set<string>((d.task.ids as string[]) || []);
+  const taskRepeatCfgIds = new Set<string>((d.taskRepeatCfg?.ids as string[]) || []);
   const archiveYoungTaskIds = new Set<string>(
     (d.archiveYoung.task?.ids as string[]) || [],
   );
@@ -51,7 +52,14 @@ export const isRelatedModelDataValid = (d: AppDataCompleteNew): boolean => {
 
   // Validate projects, tasks and tags relationships
   if (
-    !validateTasksToProjectsAndTags(d, projectIds, tagIds, taskIds, archiveYoungTaskIds)
+    !validateTasksToProjectsAndTags(
+      d,
+      projectIds,
+      tagIds,
+      taskIds,
+      taskRepeatCfgIds,
+      archiveYoungTaskIds,
+    )
   ) {
     return false;
   }
@@ -112,6 +120,7 @@ const validateTasksToProjectsAndTags = (
   projectIds: Set<string>,
   tagIds: Set<string>,
   taskIds: Set<string>,
+  taskRepeatCfgIds: Set<string>,
   archiveYoungTaskIds: Set<string>,
 ): boolean => {
   // Track project-task relationships and ids for consistency validation
@@ -169,6 +178,15 @@ const validateTasksToProjectsAndTags = (
       }
     }
 
+    // Check repeatCfgId reference
+    if (task.repeatCfgId && !taskRepeatCfgIds.has(task.repeatCfgId)) {
+      _validityError(`repeatCfgId "${task.repeatCfgId}" from task not existing`, {
+        task,
+        d,
+      });
+      return false;
+    }
+
     // Check if task has project or tag
     if (!task.parentId && !task.projectId && task.tagIds.length === 0) {
       _validityError(`Task without project or tag`, { task, d });
@@ -202,6 +220,15 @@ const validateTasksToProjectsAndTags = (
           return false;
         }
       }
+
+      // Check repeatCfgId reference
+      if (task.repeatCfgId && !taskRepeatCfgIds.has(task.repeatCfgId)) {
+        _validityError(
+          `repeatCfgId "${task.repeatCfgId}" from archiveYoung task not existing`,
+          { task, d },
+        );
+        return false;
+      }
     }
   }
 
@@ -227,6 +254,15 @@ const validateTasksToProjectsAndTags = (
           });
           return false;
         }
+      }
+
+      // Check repeatCfgId reference
+      if (task.repeatCfgId && !taskRepeatCfgIds.has(task.repeatCfgId)) {
+        _validityError(
+          `repeatCfgId "${task.repeatCfgId}" from archiveOld task not existing`,
+          { task, d },
+        );
+        return false;
       }
     }
   }
