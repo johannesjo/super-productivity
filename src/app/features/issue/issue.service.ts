@@ -23,6 +23,7 @@ import {
   TRELLO_TYPE,
   REDMINE_TYPE,
   LINEAR_TYPE,
+  CLICKUP_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
@@ -38,6 +39,7 @@ import { OpenProjectCommonInterfacesService } from './providers/open-project/ope
 import { GiteaCommonInterfacesService } from './providers/gitea/gitea-common-interfaces.service';
 import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
 import { LinearCommonInterfacesService } from './providers/linear/linear-common-interfaces.service';
+import { ClickUpCommonInterfacesService } from './providers/clickup/clickup-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -71,6 +73,7 @@ export class IssueService {
   private _giteaInterfaceService = inject(GiteaCommonInterfacesService);
   private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
   private _linearCommonInterfaceService = inject(LinearCommonInterfacesService);
+  private _clickUpCommonInterfaceService = inject(ClickUpCommonInterfacesService);
   private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
   private _issueProviderService = inject(IssueProviderService);
   private _workContextService = inject(WorkContextService);
@@ -91,6 +94,7 @@ export class IssueService {
     [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
     [LINEAR_TYPE]: this._linearCommonInterfaceService,
+    [CLICKUP_TYPE]: this._clickUpCommonInterfaceService,
 
     // trello
     [TRELLO_TYPE]: this._trelloCommonInterfacesService,
@@ -524,9 +528,65 @@ export class IssueService {
           issueDataReduced as ICalIssueReduced,
         );
       }
+
+      // Handle ClickUp subtasks
+      if (issueProviderKey === CLICKUP_TYPE && taskId) {
+        await this._addClickUpSubTasks(
+          issueDataReduced,
+          taskId,
+          issueProviderId,
+          issueProviderKey,
+        );
+      }
     }
 
     return taskId;
+  }
+
+  private async _addClickUpSubTasks(
+    issueDataReduced: IssueDataReduced,
+    parentTaskId: string,
+    issueProviderId: string,
+    issueProviderKey: IssueProviderKey,
+  ): Promise<void> {
+    try {
+      // Fetch full task data to get subtasks
+      const fullIssue = await this.getById(
+        issueProviderKey,
+        issueDataReduced.id,
+        issueProviderId,
+      );
+
+      if (!fullIssue || !(fullIssue as any).subtasks) {
+        return;
+      }
+
+      const subtasks = (fullIssue as any).subtasks || [];
+
+      // Filter out completed subtasks - only add incomplete ones
+      const incompleteSubtasks = subtasks.filter(
+        (subtask: any) => subtask.status?.type !== 'closed',
+      );
+
+      // Add each incomplete subtask
+      for (const subtask of incompleteSubtasks) {
+        const subTaskData = this._getAddTaskData(issueProviderKey, subtask);
+        const { title: subTaskTitle, ...subTaskAdditional } = subTaskData;
+
+        await this._taskService.addSubTaskTo(parentTaskId, {
+          title: subTaskTitle,
+          issueType: issueProviderKey,
+          issueProviderId: issueProviderId,
+          issueId: subtask.id.toString(),
+          issueWasUpdated: false,
+          issueLastUpdated: Date.now(),
+          ...subTaskAdditional,
+        });
+      }
+    } catch (error) {
+      IssueLog.warn('Failed to add ClickUp subtasks:', error);
+      // Don't throw - parent task was already created successfully
+    }
   }
 
   private async _tryAddSubTask({
