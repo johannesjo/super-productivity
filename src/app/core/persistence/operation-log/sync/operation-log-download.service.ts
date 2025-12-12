@@ -234,6 +234,19 @@ export class OperationLogDownloadService {
     return { newOps: allNewOps, success: true, failedFileCount: 0, needsFullStateUpload };
   }
 
+  /**
+   * CURRENTLY UNUSED - This method exists for future extensibility but is never called.
+   *
+   * Why: Operation log sync only runs for providers where `_supportsOpLogSync()` returns true
+   * (see sync.service.ts:104). Currently only SuperSync supports this, and SuperSync uses
+   * API-based sync (`_downloadRemoteOpsViaApi`), not file-based sync.
+   *
+   * Legacy providers (WebDAV, Dropbox, LocalFile) skip operation log sync entirely and use
+   * pfapi's model-level LWW sync instead.
+   *
+   * NOTE: This method does NOT decrypt operation payloads. If file-based operation log sync
+   * is ever enabled for a provider, decryption support must be added here.
+   */
   private async _downloadRemoteOpsViaFiles(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<DownloadResult> {
