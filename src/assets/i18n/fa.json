@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "ردیابی توقف",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "ردیابی توقف برای وظیفه فعلی",
       "POMODORO": "پومودورو",
-      "POMODORO_BACK": "بازگشت",
-      "POMODORO_DISABLE": "غیرفعال کردن پومودورو",
       "POMODORO_HINT": "اسپرینت های ساختارمند با استراحت های برنامه ریزی شده",
-      "POMODORO_INFO": "با فعال بودن تایمر pomodoro نمی توان از جلسات فوکوس استفاده کرد.",
       "POMODORO_SESSION_COMPLETED": "جلسه پومودورو به پایان رسید!",
       "PREP_GET_MENTALLY_READY": "از نظر ذهنی آماده باشید تا متمرکز و سازنده باشید",
       "PREP_SIT_UPRIGHT": "صاف بنشینید (یا بایستید).",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "کشو وظیفه"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "بازگشت به کار!",
-      "BREAK_IS_DONE": "استراحت شما انجام شد!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "پومودورو: زمان استراحت {{nr}}است!",
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "NO_TASKS": "قبل از شروع تایمر Pomodoro باید کارها را اضافه کنید.",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "S": {
-        "RESET": "بازنشانی به اولین جلسه پومودورو",
-        "SESSION_SKIP": "به پایان جلسه پومودورو بروید",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "SKIP_BREAK": "ردشدن از استراحت",
-      "START_BREAK": "شروع به استراحت کنید"
+      "BREAK_IS_DONE": "استراحت شما انجام شد!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "بازگشت به کار!",
@@ -1924,17 +1905,7 @@
       "BREAK_DURATION": "Duration of short breaks",
       "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
       "DURATION": "طول نشست‌های کاری",
-      "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "غیرفعال کردن شروع خودکار جلسه بعد از وقفه",
-      "IS_ENABLED": "Enable pomodoro timer",
-      "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
-      "IS_MANUAL_CONTINUE_BREAK": "شروع استراحت بعدی را به صورت دستی تأیید کنید",
-      "IS_PLAY_SOUND": "Play sound when session is done",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
-      "IS_PLAY_TICK": "Play tick sound every second",
-      "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
-      "LONGER_BREAK_DURATION": "Duration of longer breaks",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Duration of longer breaks"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "بنر X را قبل از یادآوری واقعی نشان دهید",

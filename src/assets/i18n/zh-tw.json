@@ -232,9 +232,6 @@
       "OPEN_ISSUE_IN_BROWSER": "Open issue in Browser",
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Structured sprints with planned breaks",
-      "POMODORO_BACK": "Back",
-      "POMODORO_DISABLE": "Disable Pomodoro",
-      "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
       "PREP_GET_MENTALLY_READY": "Get mentally ready to be focused and productive",
       "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
       "PREP_STRETCH": "Do some mild stretching",
@@ -736,23 +733,7 @@
       "TASK_DRAWER": "Task Drawer"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "繼續加油！",
-      "BREAK_IS_DONE": "休息已完成！",
-      "ENJOY_YOURSELF": "放鬆一會再繼續吧！",
-      "FINISH_SESSION_X": "您已成功完成會話 {{nr}}！",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Time for break {{nr}}!",
-        "BREAK_X_START": "番茄鐘：休息 {{nr}} 開始了！",
-        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
-        "SESSION_X_START": "番茄鐘：會話 {{nr}} 開始了！"
-      },
-      "S": {
-        "RESET": "Reset to first Pomodoro Session",
-        "SESSION_SKIP": "Skip to end of current Pomodoro Session",
-        "SESSION_X_START": "番茄鐘：會話 {{nr}} 開始了！"
-      },
-      "SKIP_BREAK": "跳過休息",
-      "START_BREAK": "Start break"
+      "BREAK_IS_DONE": "休息已完成！"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",

@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Tracking pauzeren",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Tracking pauzeren voor huidige taak",
       "POMODORO": "Pomodoro ",
-      "POMODORO_BACK": "Terug",
-      "POMODORO_DISABLE": "Pomodoro uitschakelen",
       "POMODORO_HINT": "Gestructureerde sprints met geplande pauzes",
-      "POMODORO_INFO": "Focus sessies kunnen niet tegelijk gebruikt worden met pomodoro timer ingeschakeld.",
       "POMODORO_SESSION_COMPLETED": "Pomodoro-sessie voltooid!",
       "PREP_GET_MENTALLY_READY": "Bereid je mentaal voor om gefocust en productief te zijn",
       "PREP_SIT_UPRIGHT": "Zit (of sta) rechtop",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "Taak lade"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Terug aan het werk!",
-      "BREAK_IS_DONE": "Je pauze is voorbij!",
-      "ENJOY_YOURSELF": "Geniet ervan, breng jezelf in beweging, kom terug in:",
-      "FINISH_SESSION_X": "Sessie <strong>{{nr}}</strong>is succesvol afgerond!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Tijd voor pauze {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Break {{nr}} is begonnen!",
-        "NO_TASKS": "Je moet taken toevoegen voordat de Pomodoro-timer kan starten.",
-        "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
-      },
-      "S": {
-        "RESET": "Terugzetten naar eerste Pomodoro-sessie",
-        "SESSION_SKIP": "Naar het einde van de huidige Pomodoro-sessie gaan",
-        "SESSION_X_START": "Pomodoro: Sessie {{nr}} is begonnen!"
-      },
-      "SKIP_BREAK": "Pauze overslaan",
-      "START_BREAK": "Start pauze"
+      "BREAK_IS_DONE": "Je pauze is voorbij!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Terug aan het werk!",
@@ -1829,16 +1810,7 @@
       "BREAK_DURATION": "Duur van korte pauzes",
       "CYCLES_BEFORE_LONGER_BREAK": "Start een langere pauze na X werksessies",
       "DURATION": "Duur van werksessies",
-      "HELP": "<p>De pomodoro-timer kan via een aantal instellingen worden geconfigureerd. De duur van elke werksessie, de duur van normale pauzes, het aantal werksessies dat moet worden uitgevoerd voordat een langere pauze wordt gestart en de duur van deze langere pauze.</p> <p>Je kunt ook instellen of je je afleiding wilt weergeven tijdens je pomodoro-pauzes.</p> <p>Als u \"Pauzetijd bijhouden bij pomodoro-pauze\" instelt, worden ook uw pauzes bijgehouden als werktijd besteed aan een taak.</p> <p>Als u \"Pomodoro-sessie pauzeren wanneer er geen actieve taak is\" inschakelt, wordt de pomodoro-sessie ook onderbroken wanneer u een taak pauzeert.</p>",
-      "IS_ENABLED": "Schakel pomodoro-timer in",
-      "IS_MANUAL_CONTINUE": "Bevestig handmatig het starten van de volgende pomodoro-sessie",
-      "IS_MANUAL_CONTINUE_BREAK": "Handmatig bevestigen dat de volgende pauze begint",
-      "IS_PLAY_SOUND": "Geluid afspelen wanneer de sessie is afgelopen",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Geluid afspelen als de pauze voorbij is",
-      "IS_PLAY_TICK": "Speel elke seconde een tikgeluid",
-      "IS_STOP_TRACKING_ON_BREAK": "Stop tijdregistratie voor taak bij pauze",
-      "LONGER_BREAK_DURATION": "Duur van langere pauzes",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Duur van langere pauzes"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Toon banner X vóór de eigenlijke herinnering",

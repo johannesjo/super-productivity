@@ -168,13 +168,11 @@
     },
     "DOMINA_MODE": {
       "FORM": {
-        "HELP": "Repite la frase configurada cada X cuando se rastrea el tiempo en una tarea.",
-        "L_INTERVAL": "Intervalo para repetir frase",
+        "HELP": "Repite la frase configurada cada X cuando se rastrea tiempo en una tarea.",
+        "L_INTERVAL": "Intervalo para repetir la frase",
         "L_TEXT": "Texto",
-        "L_TEXT_DESCRIPTION": "Por ejemplo: \"¡Trabaja en ${currentTaskTitle}!\"",
-        "L_VOICE": "Seleccionar una voz",
-        "L_VOICE_DESCRIPTION": "Elegir una voz",
-        "TITLE": "Modo Domina"
+        "L_TEXT_DESCRIPTION": "P. ej.: \"¡Trabaja en ${currentTaskTitle}!\"",
+        "TITLE": "Modo Dómina"
       }
     },
     "DROPBOX": {
@@ -194,72 +192,65 @@
     },
     "GITEA": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Gitea para el Proyecto"
+        "TITLE": "Configurar Gitea para el proyecto"
       },
       "FORM": {
-        "FILTER_USER": "Nombre de usuario (p. ej., para filtrar cambios hechos por ti mismo)",
-        "IS_AUTO_IMPORT_ISSUES": "Añadir automáticamente incidencias no resueltas de Gitea al backlog",
-        "IS_AUTO_POLL": "Sondear automáticamente las incidencias git importadas en busca de cambios",
-        "IS_SEARCH_ISSUES_FROM_GITEA": "Mostrar incidencias de git como sugerencias al añadir nuevas tareas",
-        "HOST": "Host (p. ej.: https://try.gitea.io)",
-        "TOKEN": "Token de Acceso",
-        "TOKEN_DESCRIPTION": "Necesario para el acceso a repositorios privados",
-        "REPO_FULL_NAME": "Nombre de usuario u Organización/proyecto",
-        "REPO_FULL_NAME_DESCRIPTION": "Se puede encontrar como parte de la url, al ver el proyecto en el Navegador.",
-        "SCOPE": "Ámbito",
-        "SCOPE_ALL": "Todo",
+        "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar cambios realizados por ti mismo)",
+        "HOST": "Host (por ejemplo: https://try.gitea.io)",
+        "REPO_FULL_NAME": "Nombre de usuario o nombre de la organización/proyecto",
+        "REPO_FULL_NAME_DESCRIPTION": "Puede encontrarse como parte de la url, al visualizar el proyecto en el Navegador.",
+        "SCOPE": "Alcance",
+        "SCOPE_ALL": "Todos",
         "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí"
+        "SCOPE_CREATED": "Creado por mí",
+        "TOKEN": "Token de acceso"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Aquí puedes configurar SuperProductivity para listar incidencias abiertas de Gitea para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se listarán como sugerencias y proporcionarán un enlace a la incidencia así como más información sobre ella.</p> <p>Además puedes añadir e importar automáticamente todas las incidencias abiertas.</p><p>Para superar los límites de uso y para acceder puedes proporcionar un token de acceso.",
+        "HELP": "<p>Aquí puede configurar SuperProductivity para listar las incidencias de Gitea abiertas para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se listarán como sugerencias y proporcionarán un enlace a la incidencia así como más información sobre ella.</p> <p>Además, puede añadir e importar automáticamente todas las incidencias abiertas.</p><p>Para superar los límites de uso y acceder puede proporcionar un token de acceso.",
         "TITLE": "Gitea"
       },
       "ISSUE_CONTENT": {
-        "ASSIGNEE": "Asignado",
-        "AT": "a las",
+        "ASSIGNEE": "Responsable",
+        "AT": "EN",
         "DESCRIPTION": "Descripción",
         "LABELS": "Etiquetas",
-        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas",
-        "PROJECT": "Proyecto",
+        "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
+        "PROJECT": "Poyecto",
         "STATUS": "Estado",
         "SUMMARY": "Resumen",
         "WRITE_A_COMMENT": "Escribir un comentario"
       },
       "S": {
-        "ERR_UNKNOWN": "Gitea: Error desconocido {{statusCode}} {{errorMsg}}. ¿Se ha excedido el límite de tasa de la API?"
+        "ERR_UNKNOWN": "Gitea: Error desconocido {statusCode} {errorMsg}. ¿Límite de tasa de la API excedido?"
       }
     },
     "REDMINE": {
       "DIALOG_INITIAL": {
-        "TITLE": "Configurar Redmine para el Proyecto"
+        "TITLE": "Configurar Redmine para el proyecto"
       },
       "FORM": {
-        "PROJECT_ID": "Identificador del Proyecto",
-        "PROJECT_ID_DESCRIPTION": "Se puede encontrar como parte de la url, al ver el proyecto en el Navegador.",
-        "HOST": "Host (p. ej.: https://redmine.org)",
-        "API_KEY": "Clave de acceso API",
-        "SCOPE": "Ámbito",
+        "API_KEY": "Clave de acceso a la API",
+        "HOST": "Host (por ejemplo: https://redmine.org)",
+        "PROJECT_ID": "Identificador del proyecto",
+        "PROJECT_ID_DESCRIPTION": "Se puede encontrar como parte de la URL al ver el proyecto en el navegador.",
+        "SCOPE": "Alcance",
         "SCOPE_ALL": "Todo",
         "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí",
-        "IS_AUTO_POLL": "Sondear automáticamente las incidencias importadas de redmine en busca de cambios",
-        "IS_SEARCH_ISSUES_FROM_REDMINE": "Mostrar incidencias de redmine como sugerencias al añadir nuevas tareas",
-        "IS_AUTO_IMPORT_ISSUES": "Añadir automáticamente incidencias abiertas de redmine"
+        "SCOPE_CREATED": "Creado por mí"
       },
       "FORM_SECTION": {
-        "TITLE": "Redmine",
-        "HELP": "<p>Aquí puedes configurar SuperProductivity para listar incidencias abiertas de Redmine (ya sea su versión online o una instancia autoalojada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se listarán como sugerencias y proporcionarán un enlace a la incidencia así como más información sobre ella.</p><p>Además puedes importar automáticamente todas las incidencias abiertas.</p>"
+        "HELP": "<p>Aquí puedes configurar SuperProductivity para listar los problemas abiertos de Redmine (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se mostrarán como sugerencias y proporcionarán un enlace al problema así como más información sobre el mismo.</p><p>Además, puedes importar automáticamente todos los problemas abiertos.</p>",
+        "TITLE": "Redmine"
       },
       "ISSUE_CONTENT": {
         "AUTHOR": "Autor",
-        "STATUS": "Estado",
-        "PRIORITY": "Prioridad",
         "DESCRIPTION": "Descripción",
-        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas"
+        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas",
+        "PRIORITY": "Prioridad",
+        "STATUS": "Estado"
       },
       "S": {
-        "ERR_UNKNOWN": "Redmine: Error desconocido {{statusCode}} {{errorMsg}}."
+        "ERR_UNKNOWN": "Redmine: Error desconocido {statusCode} {errorMsg}."
       }
     },
     "FOCUS_MODE": {
@@ -300,10 +291,7 @@
       "PAUSE_TRACKING": "Pausar seguimiento",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pausar seguimiento de la tarea actual",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Volver",
-      "POMODORO_DISABLE": "Desactivar Pomodoro",
       "POMODORO_HINT": "Sprints estructurados con descansos planificados",
-      "POMODORO_INFO": "Las sesiones de enfoque no se pueden usar junto con el temporizador Pomodoro activado",
       "POMODORO_SESSION_COMPLETED": "¡Sesión Pomodoro completada!",
       "PREP_GET_MENTALLY_READY": "Prepárate mentalmente para estar enfocado y ser productivo",
       "PREP_SIT_UPRIGHT": "\"Sé (o mantente) erguido\"",
@@ -324,40 +312,6 @@
       "START_NEXT_FOCUS_SESSION": "Iniciar la siguiente sesión de enfoque",
       "SWITCH_TASK": "Cambiar tarea",
       "WORKED_FOR": "Trabajaste durante"
-    },
-    "GITEA": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Configurar Gitea para el proyecto"
-      },
-      "FORM": {
-        "FILTER_USER": "Nombre de usuario (por ejemplo, para filtrar cambios realizados por ti mismo)",
-        "HOST": "Host (por ejemplo: https://try.gitea.io)",
-        "REPO_FULL_NAME": "Nombre de usuario o nombre de la organización/proyecto",
-        "REPO_FULL_NAME_DESCRIPTION": "Puede encontrarse como parte de la url, al visualizar el proyecto en el Navegador.",
-        "SCOPE": "Alcance",
-        "SCOPE_ALL": "Todos",
-        "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí",
-        "TOKEN": "Token de acceso"
-      },
-      "FORM_SECTION": {
-        "HELP": "<p>Aquí puede configurar SuperProductivity para listar las incidencias de Gitea abiertas para un repositorio específico en el panel de creación de tareas en la vista de planificación diaria. Se listarán como sugerencias y proporcionarán un enlace a la incidencia así como más información sobre ella.</p> <p>Además, puede añadir e importar automáticamente todas las incidencias abiertas.</p><p>Para superar los límites de uso y acceder puede proporcionar un token de acceso.",
-        "TITLE": "Gitea"
-      },
-      "ISSUE_CONTENT": {
-        "ASSIGNEE": "Responsable",
-        "AT": "EN",
-        "DESCRIPTION": "Descripción",
-        "LABELS": "Etiquetas",
-        "MARK_AS_CHECKED": "Marcar actualizaciones como verificadas",
-        "PROJECT": "Poyecto",
-        "STATUS": "Estado",
-        "SUMMARY": "Resumen",
-        "WRITE_A_COMMENT": "Escribir un comentario"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Gitea: Error desconocido {statusCode} {errorMsg}. ¿Límite de tasa de la API excedido?"
-      }
     },
     "GITHUB": {
       "DIALOG_INITIAL": {
@@ -441,15 +395,6 @@
       },
       "S": {
         "ERR_UNKNOWN": "GitLab: Error desconocido {{statusCode}} {{errorMsg}}"
-      }
-    },
-    "DOMINA_MODE": {
-      "FORM": {
-        "HELP": "Repite la frase configurada cada X cuando se rastrea tiempo en una tarea.",
-        "L_INTERVAL": "Intervalo para repetir la frase",
-        "L_TEXT": "Texto",
-        "L_TEXT_DESCRIPTION": "P. ej.: \"¡Trabaja en ${currentTaskTitle}!\"",
-        "TITLE": "Modo Dómina"
       }
     },
     "ISSUE": {
@@ -554,9 +499,8 @@
         "ALLOW_SELF_SIGNED": "Permitir certificado autofirmado",
         "HOST": "Host (p. ej.: http://mi-host.es:1234)",
         "PASSWORD": "Token / Contraseña",
-        "USE_PAT": "Usar token de acceso personal en lugar de contraseña (LEGACY)",
-        "USER_NAME": "Email / Nombre de usuario",
         "USE_PAT": "Usar Token de Acceso Personal en lugar de contraseña",
+        "USER_NAME": "Email / Nombre de usuario",
         "WONKY_COOKIE_MODE": "Autenticación de respaldo mediante Cookies (modo inestable, solo aplicación de escritorio)"
       },
       "FORM_SECTION": {
@@ -723,15 +667,6 @@
         "TITLE": "OpenProject: Enviar Registro de Trabajo"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Elige estado para asignar",
-        "CURRENT_ASSIGNEE": "Asignado Actual:",
-        "CURRENT_STATUS": "Estado Actual:",
-        "PERCENTAGE_DONE": "Progreso:",
-        "TASK_NAME": "Nombre de la tarea:",
-        "TITLE": "OpenProject: Actualizar Estado",
-        "UPDATE_STATUS": "Actualizar Estado"
-      },
-      "DIALOG_TRANSITION": {
         "CHOOSE_STATUS": "Seleccione el estado que desea asignar",
         "CURRENT_ASSIGNEE": "Cesionario actual:",
         "CURRENT_STATUS": "Estado actual:",
@@ -751,12 +686,11 @@
         "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Mostrar diálogo de seguimiento de tiempo cuando se completen subtareas",
         "PROJECT_ID": "ID del Proyecto",
         "PROJECT_ID_DESCRIPTION": "Se puede encontrar como parte de la url, al ver el proyecto en el Navegador.",
-        "TOKEN": "Token de Acceso",
+        "TOKEN": "Token de acceso",
         "SCOPE": "Ámbito",
         "SCOPE_ALL": "Todo",
         "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí",
-        "TOKEN": "Token de acceso"
+        "SCOPE_CREATED": "Creado por mí"
       },
       "FORM_SECTION": {
         "HELP": "<p>Aquí puedes configurar SuperProductivity para listar paquetes de trabajo abiertos de OpenProject. Ten en cuenta que para que esto funcione en el navegador probablemente necesitas configurar CORS para tu servidor OpenProject, para permitir el acceso desde app.super-productivity.com</p>",
@@ -804,23 +738,7 @@
       "TASK_DRAWER": "Cajón de tareas"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "¡De vuelta al trabajo!",
-      "BREAK_IS_DONE": "¡Tu descanso ha terminado!",
-      "ENJOY_YOURSELF": "Disfruta, muévete un poco, vuelve en:",
-      "FINISH_SESSION_X": "¡Terminaste exitosamente la sesión <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_X_START": "Pomodoro: ¡Descanso {{nr}} iniciado!",
-        "BREAK_TIME": "Pomodoro: ¡Hora del descanso {{nr}}!",
-        "NO_TASKS": "Necesitas añadir tareas antes de que el temporizador Pomodoro pueda comenzar.",
-        "SESSION_X_START": "Pomodoro: ¡Sesión {{nr}} iniciada!"
-      },
-      "S": {
-        "SESSION_X_START": "Pomodoro: ¡Sesión {{nr}} iniciada!",
-        "SESSION_SKIP": "Saltar al final de la Sesión Pomodoro actual",
-        "RESET": "Reiniciar a la primera Sesión Pomodoro"
-      },
-      "SKIP_BREAK": "Saltar descanso",
-      "START_BREAK": "Iniciar descanso"
+      "BREAK_IS_DONE": "¡Tu descanso ha terminado!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "¡De vuelta al trabajo!",
@@ -935,35 +853,6 @@
       "PAGE_TITLE": "Historial Rápido",
       "WEEK_TITLE": "Semana {{nr}} ({{timeSpent}})"
     },
-    "REDMINE": {
-      "DIALOG_INITIAL": {
-        "TITLE": "Configurar Redmine para el proyecto"
-      },
-      "FORM": {
-        "API_KEY": "Clave de acceso a la API",
-        "HOST": "Host (por ejemplo: https://redmine.org)",
-        "PROJECT_ID": "Identificador del proyecto",
-        "PROJECT_ID_DESCRIPTION": "Se puede encontrar como parte de la URL al ver el proyecto en el navegador.",
-        "SCOPE": "Alcance",
-        "SCOPE_ALL": "Todo",
-        "SCOPE_ASSIGNED": "Asignado a mí",
-        "SCOPE_CREATED": "Creado por mí"
-      },
-      "FORM_SECTION": {
-        "HELP": "<p>Aquí puedes configurar SuperProductivity para listar los problemas abiertos de Redmine (ya sea la versión en línea o una instancia autohospedada) para un proyecto específico en el panel de creación de tareas en la vista de planificación diaria. Se mostrarán como sugerencias y proporcionarán un enlace al problema así como más información sobre el mismo.</p><p>Además, puedes importar automáticamente todos los problemas abiertos.</p>",
-        "TITLE": "Redmine"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Autor",
-        "DESCRIPTION": "Descripción",
-        "MARK_AS_CHECKED": "Marcar actualizaciones como revisadas",
-        "PRIORITY": "Prioridad",
-        "STATUS": "Estado"
-      },
-      "S": {
-        "ERR_UNKNOWN": "Redmine: Error desconocido {statusCode} {errorMsg}."
-      }
-    },
     "REFLECTION_NOTE": {
       "ACTION_DISMISS": "Descartar"
     },
@@ -1056,8 +945,8 @@
       "D_PERMISSION": {
         "DISABLE_SYNC": "Deshabilitar sincronización",
         "PERM_FILE": "Dar permiso",
-        "TEXT": "<p>Tu permiso de archivo para sincronización local ha sido revocado.</p>",
-        "TITLE": "Sincronización: Permiso de archivo local denegado"
+        "TEXT": "<p>Su permiso de archivo para sincronización local ha sido revocado.</p>",
+        "TITLE": "Sincronización: permiso de archivo local denegado"
       },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Cambiar y sobrescribir remoto",
@@ -1086,12 +975,6 @@
       "D_INITIAL_CFG": {
         "SAVE_AND_ENABLE": "Guardar y Habilitar Sincronización",
         "TITLE": "Configurar Sincronización"
-      },
-      "D_PERMISSION": {
-        "DISABLE_SYNC": "Deshabilitar sincronización",
-        "PERM_FILE": "Dar permiso",
-        "TEXT": "<p>Su permiso de archivo para sincronización local ha sido revocado.</p>",
-        "TITLE": "Sincronización: permiso de archivo local denegado"
       },
       "FORM": {
         "DROPBOX": {
@@ -1157,21 +1040,15 @@
     },
     "TASK": {
       "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Agregar tarea existente \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Agregar problema n. °{{issueNr}} de {{issueType}}",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Agregar tarea al final de la lista de trabajos pendientes",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Agregar tarea al final de la lista",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Agregar tarea a la parte superior de la lista de trabajos pendientes",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Agregar tarea al principio de la lista",
+        "ADD_EXISTING_TASK": "Añadir tarea existente \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Añadir incidencia #{{issueNr}} de {{issueType}}",
+        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Añadir tarea al final del backlog",
+        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Añadir tarea al final de la lista",
+        "ADD_TASK_TO_TOP_OF_BACKLOG": "Añadir tarea al principio del backlog",
+        "ADD_TASK_TO_TOP_OF_TODAY": "Añadir tarea al principio de la lista",
         "CREATE_TASK": "Crear nueva tarea",
-        "DUE_BUTTON": "Debido",
-        "EXAMPLE": "Ejemplo: \"Título de tarea + nombre de proyecto #una etiqueta #otra etiqueta 10m/3h\"",
-        "START": "Presiona entrar una vez más para comenzar",
-        "TAGS_BUTTON": "Etiquetas",
-        "TODAY": "Hoy",
-        "TOGGLE_ADD_TO_BACKLOG_TODAY": "Alternar la adición de tareas a la lista de tareas pendientes / lista de hoy\".",
-        "TOGGLE_ADD_TOP_OR_BOTTOM": "Alternar la adición de tareas a la parte superior e inferior de la lista",
-        "TOMORROW": "Mañana"
+        "EXAMPLE": "Ejemplo: \"Título de tarea @vie 4pm +nombreProyecto #alguna etiqueta #otra etiqueta 10m/3h\"",
+        "START": "Presiona enter una vez más para comenzar"
       },
       "ADDITIONAL_INFO": {
         "ADD_ATTACHMENT": "Añadir adjunto",
@@ -1186,17 +1063,6 @@
         "SCHEDULE_TASK": "Programar Tarea",
         "SUB_TASKS": "Subtareas ({{nr}})",
         "TIME": "Tiempo"
-      },
-      "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Añadir tarea existente \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Añadir incidencia #{{issueNr}} de {{issueType}}",
-        "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Añadir tarea al final del backlog",
-        "ADD_TASK_TO_BOTTOM_OF_TODAY": "Añadir tarea al final de la lista",
-        "ADD_TASK_TO_TOP_OF_BACKLOG": "Añadir tarea al principio del backlog",
-        "ADD_TASK_TO_TOP_OF_TODAY": "Añadir tarea al principio de la lista",
-        "CREATE_TASK": "Crear nueva tarea",
-        "EXAMPLE": "Ejemplo: \"Título de tarea @vie 4pm +nombreProyecto #alguna etiqueta #otra etiqueta 10m/3h\"",
-        "START": "Presiona enter una vez más para comenzar"
       },
       "B": {
         "ADD_HALF_HOUR": "Añadir 1/2 hora",
@@ -1337,17 +1203,12 @@
         "OK": "Eliminar completamente"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
-        "MSG": "Hay {{tasksNr}} instancias creadas para esta tarea repetible. ¿Quieres actualizarlas todas con los nuevos valores predeterminados o solo las tareas futuras?",
-        "CANCEL": "Solo tareas futuras",
+        "CANCEL": "Solo futuras tareas",
+        "MSG": "Hay {{tasksNr}} instancias creadas para esta tarea repetible. ¿Desea actualizarlas todas con los nuevos valores predeterminados o sólo las tareas futuras?",
         "OK": "Actualizar todas las instancias"
       },
       "D_CONFIRM_MOVE_TO_PROJECT": {
         "MSG": "Hay {{tasksNr}} instancias creadas para esta tarea repetible. ¿Quieres moverlas todas al proyecto \"{{projectName}}\"?",
-        "OK": "Actualizar todas las instancias"
-      },
-      "D_CONFIRM_UPDATE_INSTANCES": {
-        "CANCEL": "Solo futuras tareas",
-        "MSG": "Hay {{tasksNr}} instancias creadas para esta tarea repetible. ¿Desea actualizarlas todas con los nuevos valores predeterminados o sólo las tareas futuras?",
         "OK": "Actualizar todas las instancias"
       },
       "D_EDIT": {
@@ -1527,9 +1388,8 @@
     "CONFIRM": "Confirmar",
     "DELETE": "Borrar",
     "DISMISS": "Descartar",
-    "DURATION_DESCRIPTION": "p. ej. \"5h 23m\" lo que resulta en 5 horas y 23 minutos",
-    "DO_IT": "¡Hazlo!",
     "DURATION_DESCRIPTION": "Por ejemplo, \"5h 23m\", que  es equivalente a 5 horas y 23 minutos.",
+    "DO_IT": "¡Hazlo!",
     "EDIT": "Editar",
     "ENABLED": "Habilitado",
     "EXTENSION_INFO": "Por favor <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> descarga la extensión de chrome</a> para permitir la comunicación con la Api de Jira y el Manejo de Tiempo Inactivo. Ten en cuenta que esto no funciona para móvil.",
@@ -1698,16 +1558,7 @@
       "BREAK_DURATION": "Duración de descansos cortos",
       "CYCLES_BEFORE_LONGER_BREAK": "Iniciar descanso más largo después de X sesiones de trabajo",
       "DURATION": "Duración de sesiones de trabajo",
-      "HELP": "<p>El temporizador pomodoro se puede configurar a través de un par de ajustes. La duración de cada sesión de trabajo, la duración de los descansos normales, el número de sesiones de trabajo a ejecutar antes de que comience un descanso más largo y la duración de este descanso más largo.</p> <p>También puedes establecer si quieres mostrar tus distracciones durante tus descansos pomodoro.</p> <p>Establecer \"Pausar seguimiento de tiempo en descanso pomodoro\" también rastreará tus descansos como tiempo de trabajo dedicado a una tarea. </p> <p>Habilitar \"Pausar sesión pomodoro cuando no hay tarea activa\" también pausará la sesión pomodoro, cuando pauses una tarea.</p>",
-      "IS_ENABLED": "Habilitar temporizador pomodoro",
-      "IS_MANUAL_CONTINUE": "Confirmar manualmente iniciar siguiente sesión pomodoro",
-      "IS_MANUAL_CONTINUE_BREAK": "Confirmar manualmente iniciar siguiente descanso",
-      "IS_PLAY_SOUND": "Reproducir sonido cuando termine la sesión",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Reproducir sonido cuando termine el descanso",
-      "IS_PLAY_TICK": "Reproducir sonido de tic cada segundo",
-      "IS_STOP_TRACKING_ON_BREAK": "Parar seguimiento de tiempo para tarea en descanso",
-      "LONGER_BREAK_DURATION": "Duración de descansos más largos",
-      "TITLE": "Temporizador Pomodoro"
+      "LONGER_BREAK_DURATION": "Duración de descansos más largos"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Mostrar banner X antes del recordatorio real",

@@ -221,9 +221,6 @@
       "NEXT": "Prossimo",
       "ON": "su",
       "OPEN_ISSUE_IN_BROWSER": "Apri issue nel Browser",
-      "POMODORO_BACK": "Indietro",
-      "POMODORO_DISABLE": "Disabilita Pomodoro",
-      "POMODORO_INFO": "Le sessioni Concentrazione non possono essere usate insieme con il temporizzatore del pomodoro attivo.",
       "PREP_GET_MENTALLY_READY": "Preparati mentalmente per essere concentrato e produttivo",
       "PREP_SIT_UPRIGHT": "Siediti o alzati in posizione eretta",
       "PREP_STRETCH": "Fai un po' di stretching",
@@ -719,23 +716,7 @@
       "TASK_DRAWER": "Disegnatore di attività"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Torna al lavoro!",
-      "BREAK_IS_DONE": "La tua pausa è finita!",
-      "ENJOY_YOURSELF": "Rilassati, fai un po' di movimento, torna qui:",
-      "FINISH_SESSION_X": "Hai completato con successo la sessione <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Tempo della pausa {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Pausa {{nr}} iniziata!",
-        "NO_TASKS": "È necessario aggiungere attività prima che il timer del Pomodoro possa iniziare.",
-        "SESSION_X_START": "Pomodoro: Sessione {{nr}} iniziata!"
-      },
-      "S": {
-        "RESET": "Azzera alla prima Sessione di Pomodoro",
-        "SESSION_SKIP": "Salta alla fine della Sessione di Pomodoro attuale",
-        "SESSION_X_START": "Pomodoro: Sessione {{nr}} iniziata!"
-      },
-      "SKIP_BREAK": "Salta la pausa",
-      "START_BREAK": "Avvia la pausa"
+      "BREAK_IS_DONE": "La tua pausa è finita!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Torna al lavoro!",
@@ -1787,16 +1768,7 @@
       "BREAK_DURATION": "Durata delle pause brevi",
       "CYCLES_BEFORE_LONGER_BREAK": "Inizia pause più lunghe dopo X sessioni di lavoro",
       "DURATION": "Durata delle sessioni di lavoro",
-      "HELP": "<p>Il timer pomodoro può essere configurato tramite qualche impostazione. La durata di ogni sessione di lavoro, la durata delle pause normali, il numero di sessioni di lavoro che devono trascorrere prima che inizi una pausa più lunga e la durata di questa pausa più lunga.</p> <p>Puoi anche decidere se mostrare le tue distrazioni durante le pause pomodoro.</p> <p>Impostare \"Pausa il tracciamento del tempo nelle pause pomodoro\" traccerà anche le tue pause come lavoro impiegato per un'attività. </p> <p>Enabling \"Metti in pausa la sessione pomodoro quando non c'è un'attività attiva\" metterà in pausa anche la sessione pomodoro, quando metti in pausa un'attività.</p>",
-      "IS_ENABLED": "Abilita timer pomodoro",
-      "IS_MANUAL_CONTINUE": "Conferma manualmente l'inizio della prossima sessione pomodoro",
-      "IS_MANUAL_CONTINUE_BREAK": "Conferma manualmente l'avvio della prossima pausa",
-      "IS_PLAY_SOUND": "Emetti un suono quando la sessione è terminata",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Emetti un suono quando la pausa è terminata",
-      "IS_PLAY_TICK": "Emetti un suono d'orologio ogni secondo",
-      "IS_STOP_TRACKING_ON_BREAK": "Interrompi il tracciamento del tempo di un'attività durante una pausa",
-      "LONGER_BREAK_DURATION": "Durata delle pause più lunghe",
-      "TITLE": "Impostazioni del pomodoro"
+      "LONGER_BREAK_DURATION": "Durata delle pause più lunghe"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Mostra banner X tempo prima del promemoria attuale",

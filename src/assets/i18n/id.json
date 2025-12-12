@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Jeda pelacakan",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Jeda pelacakan untuk tugas saat ini",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Kembali",
-      "POMODORO_DISABLE": "Nonaktifkan Pomodoro",
       "POMODORO_HINT": "Sprint terstruktur dengan istirahat terencana",
-      "POMODORO_INFO": "Sesi fokus tidak dapat digunakan bersamaan dengan pengatur waktu pomodoro yang diaktifkan.",
       "POMODORO_SESSION_COMPLETED": "Sesi Pomodoro Selesai!",
       "PREP_GET_MENTALLY_READY": "Bersiaplah secara mental untuk fokus dan produktif",
       "PREP_SIT_UPRIGHT": "Duduk (atau berdiri) dengan tegak",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "Laci Tugas"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Kembali bekerja!",
-      "BREAK_IS_DONE": "Istirahat Anda selesai!",
-      "ENJOY_YOURSELF": "Nikmati diri Anda sendiri, buat diri Anda bergerak, kembali dalam:",
-      "FINISH_SESSION_X": "Anda berhasil menyelesaikan sesi <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Waktunya istirahat {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Istirahat {{nr}} dimulai!",
-        "NO_TASKS": "Anda perlu menambahkan tugas sebelum timer Pomodoro dapat dimulai.",
-        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!"
-      },
-      "S": {
-        "RESET": "Akhiri sesi Pomodoro",
-        "SESSION_SKIP": "Lewatkan sesi Pomodoro",
-        "SESSION_X_START": "Pomodoro: Sesi {{nr}} dimulai!"
-      },
-      "SKIP_BREAK": "Lewatkan istirahat",
-      "START_BREAK": "Mulai istirahat"
+      "BREAK_IS_DONE": "Istirahat Anda selesai!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Kembali bekerja!",
@@ -1924,17 +1905,7 @@
       "BREAK_DURATION": "Durasi istirahat pendek",
       "CYCLES_BEFORE_LONGER_BREAK": "Mulai istirahat lebih lama setelah X sesi kerja",
       "DURATION": "Durasi sesi kerja",
-      "HELP": "<p>Pengatur waktu pomodoro dapat dikonfigurasi melalui beberapa pengaturan. Durasi setiap sesi kerja, durasi istirahat normal, jumlah sesi kerja yang harus dijalankan sebelum istirahat yang lebih panjang dimulai dan durasi istirahat yang lebih panjang ini.</p> <p>Anda juga dapat mengatur jika ingin menampilkan gangguan Anda selama istirahat pomodoro.</p> <p>Menyetel \"Jeda pelacakan waktu saat istirahat pomodoro\" juga akan melacak waktu istirahat Anda sebagai waktu kerja yang dihabiskan untuk suatu tugas. </p> <p>Mengaktifkan \"Jeda sesi pomodoro saat tidak ada tugas aktif\" juga akan menjeda sesi pomodoro, saat Anda menjeda tugas.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Nonaktifkan mulai otomatis sesi setelah istirahat",
-      "IS_ENABLED": "Aktifkan pengatur waktu pomodoro",
-      "IS_MANUAL_CONTINUE": "Konfirmasi secara manual memulai sesi pomodoro berikutnya",
-      "IS_MANUAL_CONTINUE_BREAK": "Konfirmasikan secara manual mulai istirahat berikutnya",
-      "IS_PLAY_SOUND": "Putar suara saat sesi selesai",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Putar suara saat istirahat selesai",
-      "IS_PLAY_TICK": "Putar suara centang setiap detik",
-      "IS_STOP_TRACKING_ON_BREAK": "Hentikan pelacakan waktu untuk tugas saat istirahat",
-      "LONGER_BREAK_DURATION": "Durasi istirahat lebih lama",
-      "TITLE": "Timer Pomodoro"
+      "LONGER_BREAK_DURATION": "Durasi istirahat lebih lama"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Tampilkan spanduk X sebelum pengingat yang sebenarnya",

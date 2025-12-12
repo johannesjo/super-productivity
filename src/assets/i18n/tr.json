@@ -229,9 +229,6 @@
       "ON": "on",
       "OPEN_ISSUE_IN_BROWSER": "Sorunu Tarayıcıda aç",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Geri",
-      "POMODORO_DISABLE": "Pomodoro'yu devre dışı bırak",
-      "POMODORO_INFO": "Odaklanma oturumları pomodoro zamanlayıcı etkinken birlikte kullanılamaz.",
       "PREP_GET_MENTALLY_READY": "Odaklanmaya ve üretken olmaya zihinsel olarak hazır olun",
       "PREP_SIT_UPRIGHT": "Dik durun",
       "PREP_STRETCH": "Hafifçe esneme hareketleri yapın",
@@ -732,23 +729,7 @@
       "TASK_DRAWER": "Görev Çekmecesi"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Çalışmaya geri dön!",
-      "BREAK_IS_DONE": "Molan bitti!",
-      "ENJOY_YOURSELF": "Eğlenin, harekete geçin, tekrar gelin:",
-      "FINISH_SESSION_X": " <strong>{{nr}}</strong> oturumunu başarıyla tamamladınız!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Mola zamanı {{nr}}!",
-        "BREAK_X_START": "Pomodoro: {{nr}} molası başladı!",
-        "NO_TASKS": "Pomodoro zamanlayıcısının başlayabilmesi için görevleri eklemeniz gerekir.",
-        "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
-      },
-      "S": {
-        "RESET": "İlk Pomodoro Oturumuna Sıfırla",
-        "SESSION_SKIP": "Mevcut Pomodoro Oturumunun sonuna atla",
-        "SESSION_X_START": "Pomodoro: {{nr}} oturumu başladı!"
-      },
-      "SKIP_BREAK": "Molayı atla",
-      "START_BREAK": "Molayı başlat"
+      "BREAK_IS_DONE": "Molan bitti!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Çalışmaya geri dön!",
@@ -1819,17 +1800,7 @@
       "BREAK_DURATION": "Kısa molaların süresi",
       "CYCLES_BEFORE_LONGER_BREAK": "X iş oturumundan sonra daha uzun ara vermeye başlayın",
       "DURATION": "İş seanslarının süresi",
-      "HELP": "<p>Pomodoro zamanlayıcı birkaç ayar yoluyla yapılandırılabilir. Her iş oturumunun süresi, normal araların süresi, daha uzun bir ara başlamadan önce çalıştırılacak iş oturumlarının sayısı ve bu uzun aralığın süresi.</p> <p>Ayrıca pomodoro molalarınız sırasında dikkatinizi dağıtmak isteyip istemediğinizi de ayarlayabilirsiniz.</p> <p>\"Pomodoro molasında zaman izlemesini duraklat\" ayarı aynı zamanda molalarınızı bir görev için harcanan iş zamanı olarak izleyecektir. </p> <p>\"Etkin görev olmadığında pomodoro oturumunu duraklat\" seçeneğinin etkinleştirilmesi, bir görevi duraklattığınızda pomodoro oturumunu duraklatır.</p>",
-      "IS_ENABLED": "Pomodoro zamanlayıcıyı etkinleştir",
-      "IS_MANUAL_CONTINUE": "Bir sonraki pomodoro oturumunun başladığını elle onayla",
-      "IS_MANUAL_CONTINUE_BREAK": "Sonraki molanın başlamasını elle onaylayın",
-      "IS_PLAY_SOUND": "Oturum bittiğinde ses çal",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Mola bittiğinde ses çal",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Mola sonrası oturumun otomatik başlamasını devre dışı bırak",
-      "IS_PLAY_TICK": "Her saniye saat sesini çal",
-      "IS_STOP_TRACKING_ON_BREAK": "Arada görev için zaman izlemeyi durdur",
-      "LONGER_BREAK_DURATION": "Uzun molaların süresi",
-      "TITLE": "Pomodoro Zamanlayıcı (eski)"
+      "LONGER_BREAK_DURATION": "Uzun molaların süresi"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Gerçek hatırlatıcıdan önce X başlığını göster",

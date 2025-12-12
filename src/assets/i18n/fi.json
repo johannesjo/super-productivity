@@ -237,9 +237,6 @@
       "ON": "päällä",
       "OPEN_ISSUE_IN_BROWSER": "Avaa ongelma selaimessa",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Takaisin",
-      "POMODORO_DISABLE": "Poista Pomodoro käytöstä",
-      "POMODORO_INFO": "Keskittymistilaa ei voi käyttää yhdessä pomodoro-ajastimen kanssa.",
       "POMODORO_SESSION_COMPLETED": "Pomodorotunti suoritettu!",
       "PREP_GET_MENTALLY_READY": "Valmistaudu henkisesti olemaan keskittynyt ja tuottelias",
       "PREP_SIT_UPRIGHT": "Istu (tai seiso) selkä suorana",
@@ -739,23 +736,7 @@
       "TASK_DRAWER": "Tehtävälipas"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Takaisin työhön!",
-      "BREAK_IS_DONE": "Keskittymistauko on ohi!",
-      "ENJOY_YOURSELF": "Nauti itsestäsi, liiku, tule takaisin:",
-      "FINISH_SESSION_X": "Suoritit onnistuneesti istunnon <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Aika tauolle {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Tauko {{nr}} alkoi!",
-        "NO_TASKS": "Sinun täytyy lisätä tehtäviä, ennen kuin Pomodoro-ajastin voi aloittaa.",
-        "SESSION_X_START": "Pomodoro: Istunto {{nr}} alkoi!"
-      },
-      "S": {
-        "RESET": "Nollaa ensimmäiseen Pomodoro-istuntoon",
-        "SESSION_SKIP": "Siirry nykyisen Pomodoro-istunnon loppuun",
-        "SESSION_X_START": "Pomodoro: Istunto {{nr}} alkoi!"
-      },
-      "SKIP_BREAK": "Ohita tauko",
-      "START_BREAK": "Aloita tauko"
+      "BREAK_IS_DONE": "Keskittymistauko on ohi!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Takaisin työhön!",
@@ -1835,17 +1816,7 @@
       "BREAK_DURATION": "Lyhyiden taukojen kesto",
       "CYCLES_BEFORE_LONGER_BREAK": "Aloita pidempi tauko X työistunnon jälkeen",
       "DURATION": "Työistuntojen kesto",
-      "HELP": "<p>Pomodoro-ajastinta voidaan määrittää muutamilla asetuksilla. Jokaisen työistunnon kesto, normaalien taukojen kesto, työistuntojen määrä ennen kuin pidempi tauko käynnistetään ja tämän pidemmän tauon kesto.</p> <p>Voit myös asettaa, haluatko näyttää häiriösi pomodoro-taukojesi aikana.</p> <p>Asetus \"Keskeytä ajanseuranta pomodoro-tauolla\" seuraa myös taukojasikin työaikana, joka on käytetty tehtävään. </p> <p>Ottaen käyttöön \"Keskeytä pomodoro-istunto, kun ei aktiivista tehtävää\" keskeyttää myös pomodoro-istunnon, kun keskeytät tehtävän.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Poista istunnon automaattinen käynnistys tauon jälkeen käytöstä",
-      "IS_ENABLED": "Ota pomodoro-ajastin käyttöön",
-      "IS_MANUAL_CONTINUE": "Vahvista manuaalisesti seuraavan pomodoro-istunnon aloitus",
-      "IS_MANUAL_CONTINUE_BREAK": "Vahvista manuaalisesti seuraavan tauon aloitus",
-      "IS_PLAY_SOUND": "Soita ääni, kun istunto on valmis",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Soita ääni, kun tauko on valmis",
-      "IS_PLAY_TICK": "Soita tikitysääni joka sekunti",
-      "IS_STOP_TRACKING_ON_BREAK": "Lopeta ajanseuranta tehtävälle tauolla",
-      "LONGER_BREAK_DURATION": "Pidempien taukojen kesto",
-      "TITLE": "Pomodoro-ajastin (perinteinen)"
+      "LONGER_BREAK_DURATION": "Pidempien taukojen kesto"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Näytä banneri X ennen varsinaista muistutusta",

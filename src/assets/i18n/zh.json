@@ -205,7 +205,7 @@
     },
     "ISSUE_PANEL": {
       "CALENDAR_AGENDA": {
-        "OFFLINE_BANNER_MSG": "显示的是日历的缓存结果，数据可能不是最新。"
+        "OFFLINE_BANNER_MSG": "显示的是缓存的日历结果，数据可能已过期。"
       }
     },
     "FINISH_DAY_BEFORE_EXIT": {
@@ -243,9 +243,6 @@
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "暂停追踪当前任务",
       "POMODORO": "番茄",
       "POMODORO_HINT": "有计划休息的结构化冲刺",
-      "POMODORO_BACK": "返回",
-      "POMODORO_DISABLE": "禁用番茄",
-      "POMODORO_INFO": "专注会话不能与启用的番茄计时器一起使用。",
       "PREP_GET_MENTALLY_READY": "在心理上做好准备，保持专注和高效",
       "PREP_SIT_UPRIGHT": "坐直（或站立）",
       "PREP_STRETCH": "做一些轻度拉伸",
@@ -449,11 +446,6 @@
         "NEW_COMMENT": "{{issueProviderName}}: \"{{issueTitle}}\" 的新评论",
         "POLLING_BACKLOG": "{{issueProviderName}}: 轮询新 {{issuesStr}}",
         "POLLING_CHANGES": "{{issueProviderName}}: 轮询 {{issuesStr}} 的更改"
-      }
-    },
-    "ISSUE_PANEL": {
-      "CALENDAR_AGENDA": {
-        "OFFLINE_BANNER_MSG": "显示的是缓存的日历结果，数据可能已过期。"
       }
     },
     "JIRA": {
@@ -802,23 +794,7 @@
       "TASK_DRAWER": "任务抽屉"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "回去工作！",
-      "BREAK_IS_DONE": "专注休息结束！",
-      "ENJOY_YOURSELF": "尽情享受，让自己动起来，回来：",
-      "FINISH_SESSION_X": "您成功完成了会话 <strong>{{nr}}</strong>！",
-      "NOTIFICATION": {
-        "BREAK_TIME": "番茄: 休息时间 {{nr}} 到！",
-        "BREAK_X_START": "番茄: 休息 {{nr}} 开始！",
-        "NO_TASKS": "您需要先添加任务，然后才能启动番茄计时器。",
-        "SESSION_X_START": "番茄: 会话 {{nr}} 开始！"
-      },
-      "S": {
-        "RESET": "重置到第一个番茄会话",
-        "SESSION_SKIP": "跳到当前番茄会话的结束",
-        "SESSION_X_START": "番茄: 会话 {{nr}} 开始！"
-      },
-      "SKIP_BREAK": "跳过休息",
-      "START_BREAK": "开始休息"
+      "BREAK_IS_DONE": "专注休息结束！"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "回去工作！",
@@ -1898,7 +1874,6 @@
       "IS_DARK_MODE": "深色模式",
       "IS_DISABLE_ANIMATIONS": "禁用所有动画",
       "IS_DISABLE_CELEBRATION": "在每日摘要中禁用庆祝",
-
       "IS_HIDE_NAV": "隐藏导航栏，直到鼠标悬停在标题栏上（仅限桌面端）",
       "IS_MINIMIZE_TO_TRAY": "最小化到托盘（仅限桌面）",
       "IS_OVERLAY_INDICATOR_ENABLED": "启用覆盖指示器窗口（桌面 Linux/Gnome）",
@@ -1920,17 +1895,7 @@
       "BREAK_DURATION": "短休息持续时间",
       "CYCLES_BEFORE_LONGER_BREAK": "在 X 个工作会话后开始更长的休息",
       "DURATION": "工作会话持续时间",
-      "HELP": "<p>可以通过几个设置配置番茄计时器。每个工作会话的持续时间、正常休息的持续时间、开始更长休息之前运行的工作会话数以及这个更长休息的持续时间。</p> <p>您还可以设置是否希望在番茄休息期间显示分心。</p> <p>设置 \"在番茄休息时暂停时间跟踪\" 还会将您的休息时间跟踪为任务的工作时间。</p> <p>启用 \"没有活跃任务时暂停番茄会话\" 还会在您暂停任务时暂停番茄会话。</p>",
-      "IS_ENABLED": "启用番茄计时器",
-      "IS_MANUAL_CONTINUE": "手动确认开始下一个番茄会话",
-      "IS_MANUAL_CONTINUE_BREAK": "手动确认开始下一个休息",
-      "IS_PLAY_SOUND": "会话结束时播放声音",
-      "IS_PLAY_SOUND_AFTER_BREAK": "休息结束时播放声音",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "禁用休息后自动开始会话",
-      "IS_PLAY_TICK": "每秒播放滴答声",
-      "IS_STOP_TRACKING_ON_BREAK": "在休息时停止任务的时间跟踪",
-      "LONGER_BREAK_DURATION": "更长休息持续时间",
-      "TITLE": "番茄计时器（旧版）"
+      "LONGER_BREAK_DURATION": "更长休息持续时间"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "在实际提醒前 X 显示横幅",

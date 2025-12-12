@@ -125,9 +125,6 @@
       "NEXT": "Další",
       "ON": "zapnuto",
       "OPEN_ISSUE_IN_BROWSER": "Otevřít problém v prohlížeči",
-      "POMODORO_BACK": "Zpět",
-      "POMODORO_DISABLE": "Deaktivovat Pomodoro",
-      "POMODORO_INFO": "Relace zaměření nelze používat současně s aktivovaným časovačem Pomodoro.",
       "PREP_GET_MENTALLY_READY": "Připravte se mentálně na zaměření a produktivitu",
       "PREP_SIT_UPRIGHT": "Sedět (nebo stát) vzpřímeně",
       "PREP_STRETCH": "Zahřejte se lehkým protažením",
@@ -535,23 +532,7 @@
       }
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Zpět do práce!",
-      "BREAK_IS_DONE": "Vaše přestávka skončila!",
-      "ENJOY_YOURSELF": "Užijte si to, rozpohybuje se, vraťte se za:",
-      "FINISH_SESSION_X": "Úspěšně jste dokončili sezení <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Čas na přestávku {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Přestávka {{nr}} začala!",
-        "NO_TASKS": "Musíte přidat úkoly, než může začít časovač Pomodoro.",
-        "SESSION_X_START": "Pomodoro: Sezení {{nr}} začalo!"
-      },
-      "S": {
-        "RESET": "Resetovat na první sezení Pomodoro",
-        "SESSION_SKIP": "Přeskočit na konec aktuálního sezení Pomodoro",
-        "SESSION_X_START": "Pomodoro: Sezení {{nr}} začalo!"
-      },
-      "SKIP_BREAK": "Přeskočit přestávku",
-      "START_BREAK": "Začít přestávku"
+      "BREAK_IS_DONE": "Vaše přestávka skončila!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Zpět do práce!",
@@ -1265,16 +1246,7 @@
       "BREAK_DURATION": "Délka krátkých přestávek",
       "CYCLES_BEFORE_LONGER_BREAK": "Začít delší přestávku po X pracovních sezeních",
       "DURATION": "Délka pracovních sezení",
-      "HELP": "<p>Pomodoro časovač lze konfigurovat několika nastaveními. Délka každého pracovního sezení, délka běžných přestávek, počet pracovních sezení do delší přestávky a délka této delší přestávky.</p> <p>Můžete také nastavit, zda chcete zobrazit své rušení během pomodoro přestávek.</p> <p>Nastavení „Pozastavit sledování času během přestávky Pomodoro“ také sleduje vaše přestávky jako pracovní dobu strávenou na úkolu.</p> <p>Povolení „Pozastavit relaci Pomodoro, když není aktivní úkol“ také pozastaví relaci Pomodoro, když pozastavíte úkol.</p>",
-      "IS_ENABLED": "Povolit pomodoro časovač",
-      "IS_MANUAL_CONTINUE": "Ručně potvrdit začátek dalšího pomodoro sezení",
-      "IS_MANUAL_CONTINUE_BREAK": "Ručně potvrdit začátek další přestávky",
-      "IS_PLAY_SOUND": "Přehrát zvuk po skončení sezení",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Přehrát zvuk po skončení přestávky",
-      "IS_PLAY_TICK": "Přehrát zvuk tikání každou sekundu",
-      "IS_STOP_TRACKING_ON_BREAK": "Přestat sledovat čas pro úkol během přestávky",
-      "LONGER_BREAK_DURATION": "Délka delší přestávky",
-      "TITLE": "Pomodoro časovač"
+      "LONGER_BREAK_DURATION": "Délka delší přestávky"
     },
     "SCHEDULE": {
       "HELP": "Funkce časové osy by vám měla poskytnout rychlý přehled o tom, jak se plánované úkoly vyvíjejí v čase. Najdete ji v levém bočním menu pod <a href='#/schedule'>‘Časová osa’</a>.",

@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Mettre le suivi en pause",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Mettre le suivi en pause pour la tâche actuelle",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Retour",
-      "POMODORO_DISABLE": "Désactiver Pomodoro",
       "POMODORO_HINT": "Sprints structurés avec pauses planifiées",
-      "POMODORO_INFO": "Les sessions de concentration ne peuvent pas être utilisées avec le minuteur Pomodoro activé",
       "POMODORO_SESSION_COMPLETED": "Session Pomodoro terminée !",
       "PREP_GET_MENTALLY_READY": "Préparez-vous mentalement à être concentré et productif",
       "PREP_SIT_UPRIGHT": "Asseyez-vous (ou tenez-vous debout) droit",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "Tiroir des tâches"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Au travail !",
-      "BREAK_IS_DONE": "Votre pause est terminée !",
-      "ENJOY_YOURSELF": "Amusez-vous, bougez, revenez dans :",
-      "FINISH_SESSION_X": "Vous avez terminé avec succès la session <strong>{{nr}}</strong> !",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Temps pour la pause {{nr}}!",
-        "BREAK_X_START": "Pomodoro : La pause {{nr}} a commencée !",
-        "NO_TASKS": "Vous devez ajouter des tâches avant que la minuterie Pomodoro puisse démarrer.",
-        "SESSION_X_START": "Pomodoro : La session {{nr}} a commencée !"
-      },
-      "S": {
-        "RESET": "Arrêter la session Pomodoro",
-        "SESSION_SKIP": "Passer la session Pomodoro",
-        "SESSION_X_START": "Pomodoro : La session {{nr}} a commencée !"
-      },
-      "SKIP_BREAK": "Passer la pause",
-      "START_BREAK": "Démarrer la pause"
+      "BREAK_IS_DONE": "Votre pause est terminée !"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Au travail !",
@@ -1924,17 +1905,7 @@
       "BREAK_DURATION": "Durée des pauses courtes",
       "CYCLES_BEFORE_LONGER_BREAK": "Commencez une pause plus longue après X sessions de travail",
       "DURATION": "Durée des séances de travail",
-      "HELP": "<p>Le minuteur pomodoro peut être configurée via deux paramètres. La durée de chaque session de travail, la durée des pauses normales, le nombre de sessions de travail à exécuter avant le début d'une pause plus longue et la durée de cette pause plus longue.</p> <p>Vous pouvez également définir si vous souhaitez afficher vos distractions pendant vos pomodo.</p> <p>Le paramètre \"Suivi du temps de pause sur une pause pomodoro\" suit également vos pauses en tant que temps de travail consacré à une tâche. </p> <p>L'activation de \"Suspendre la session pomodoro en l'absence de tâche active\" suspend également la session pomodoro, lorsque vous suspendez une tâche.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Désactiver le démarrage automatique de la session après la pause",
-      "IS_ENABLED": "Activer le minuteur pomodoro",
-      "IS_MANUAL_CONTINUE": "Confirmez manuellement le démarrage de la prochaine session pomodoro",
-      "IS_MANUAL_CONTINUE_BREAK": "Confirmez manuellement le démarrage de la prochaine pause",
-      "IS_PLAY_SOUND": "Jouer un son quand la session est terminée",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Jouer un son quand la pause est terminée",
-      "IS_PLAY_TICK": "Jouer un tick toutes les secondes",
-      "IS_STOP_TRACKING_ON_BREAK": "Arrêter le suivi du temps pour la tâche en pause",
-      "LONGER_BREAK_DURATION": "Durée des pauses plus longues",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Durée des pauses plus longues"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Afficher la bannière \"X temps\" avant le rappel réel",
