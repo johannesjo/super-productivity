@@ -71,12 +71,15 @@ export class ClickUpAdditionalCfgComponent implements OnInit, OnDestroy {
 
   private _subs: Subscription = new Subscription();
   private _cfg?: IssueProviderClickUp;
+  private _boundCfg?: IssueProviderClickUp;
 
   get cfg(): IssueProviderClickUp {
-    return this._cfg as IssueProviderClickUp;
+    return this._boundCfg as IssueProviderClickUp;
   }
 
   @Input() set cfg(cfg: IssueProviderClickUp) {
+    this._boundCfg = cfg;
+
     const newCfg: IssueProviderClickUp = { ...cfg };
     const isEqual = JSON.stringify(newCfg) === JSON.stringify(this._cfg);
     if (isEqual) {
@@ -102,7 +105,7 @@ export class ClickUpAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   partialModelChange(cfg: Partial<IssueProviderClickUp>): void {
-    this._cfg = { ...this._cfg, ...cfg } as IssueProviderClickUp;
+    this._cfg = { ...this.cfg, ...cfg } as IssueProviderClickUp;
     this.notifyModelChange();
   }
 
@@ -111,7 +114,7 @@ export class ClickUpAdditionalCfgComponent implements OnInit, OnDestroy {
   }
 
   loadAvailableTeams(): void {
-    if (!this.cfg.apiKey) {
+    if (!this.cfg?.apiKey) {
       this._snackService.open({
         type: 'ERROR',
         msg: 'Please enter your API key first',
