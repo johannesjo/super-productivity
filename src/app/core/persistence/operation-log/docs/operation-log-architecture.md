@@ -2,7 +2,7 @@
 
 **Status:** Parts A, B, C, D Complete (single-version; cross-version sync requires A.7.11)
 **Branch:** `feat/operation-logs`
-**Last Updated:** December 8, 2025
+**Last Updated:** December 12, 2025
 
 ---
 
@@ -1267,6 +1267,64 @@ interface OperationDependency {
 // Operations with missing hard dependencies are queued for retry
 // After MAX_RETRY_ATTEMPTS (3), they're marked as permanently failed
 ```
+
+## C.7 Late-Joiner Replay (SYNC_IMPORT Handling)
+
+When a client receives a `SYNC_IMPORT` (full state from another client), local synced operations must be replayed on top of the imported state to preserve work that was already accepted by the server.
+
+### The Problem
+
+Consider this scenario:
+
+1. Client B uploads ops to server (Op3, Op4)
+2. Client B goes offline
+3. Client A uploads a SYNC_IMPORT (full state snapshot)
+4. Client B comes online and downloads the SYNC_IMPORT
+5. **Without replay**: Client B loses Op3 and Op4's changes
+
+### The Solution: Vector Clock Dominance Filtering
+
+When replaying local synced ops after a SYNC_IMPORT, we filter out ops that are **dominated** by the SYNC_IMPORT's vector clock:
+
+```typescript
+// In OperationLogSyncService._replayLocalSyncedOpsAfterImport()
+const localSyncedOps = allEntries.filter((entry) => {
+  // Must be created by this client
+  if (entry.op.clientId !== clientId) return false;
+  // Must be synced (accepted by server)
+  if (!entry.syncedAt) return false;
+  // Must NOT be a full-state op itself
+  if (entry.op.opType === OpType.SyncImport || entry.op.opType === OpType.BackupImport)
+    return false;
+
+  // Must NOT be dominated by the SYNC_IMPORT's vector clock
+  const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
+  if (comparison === VectorClockComparison.LESS_THAN) {
+    return false; // Skip - state already captured in SYNC_IMPORT
+  }
+  return true;
+});
+```
+
+### Vector Clock Dominance
+
+An operation is "dominated" if its vector clock is `LESS_THAN` the SYNC_IMPORT's clock:
+
+| Comparison     | Meaning                        | Replay?                         |
+| -------------- | ------------------------------ | ------------------------------- |
+| `LESS_THAN`    | Op happened-before SYNC_IMPORT | No (state captured in snapshot) |
+| `EQUAL`        | Same causal history            | Yes (edge case)                 |
+| `GREATER_THAN` | Op happened-after SYNC_IMPORT  | Yes (newer than snapshot)       |
+| `CONCURRENT`   | Independent changes            | Yes (may have unique changes)   |
+
+**Example:**
+
+- SYNC_IMPORT clock: `{A: 10, B: 5}`
+- Local op clock: `{B: 3}` → `LESS_THAN` → Skip (dominated)
+- Local op clock: `{B: 6}` → `GREATER_THAN` → Replay (not dominated)
+- Local op clock: `{A: 10, B: 5, C: 1}` → `CONCURRENT` → Replay (not dominated)
+
+See [operation-log-architecture-diagrams.md](./operation-log-architecture-diagrams.md) Section 2c for visual diagrams.
 
 ---
 

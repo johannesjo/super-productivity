@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 8, 2025
+**Last Updated:** December 12, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -253,6 +253,113 @@ flowchart TB
 1. **Body Size Limits**: Regular `/api/sync/ops` has a ~30MB limit which backup imports can exceed
 2. **Efficiency**: Snapshot endpoint is designed for large payloads and stores state directly
 3. **Server-Side Handling**: Server creates a synthetic operation record for audit purposes
+
+## 2c. Late-Joiner Replay with Vector Clock Dominance ✅ IMPLEMENTED
+
+When a client receives a SYNC_IMPORT (full state from another client), it must replay any local synced operations that happened "after" the import's vector clock. This ensures local work isn't lost when receiving a full state snapshot.
+
+**Implementation Status:** Complete. See `OperationLogSyncService._replayLocalSyncedOpsAfterImport()`.
+
+### The Late-Joiner Problem
+
+```mermaid
+sequenceDiagram
+    participant A as Client A
+    participant S as Server
+    participant B as Client B
+
+    Note over A,B: Both start synced
+
+    A->>S: Upload Op1 (task created)
+    A->>S: Upload Op2 (task updated)
+
+    Note over B: Client B is offline
+
+    B->>B: Make local changes (Op3, Op4)
+    B->>S: Upload Op3, Op4
+
+    Note over B: Client B comes online, receives SYNC_IMPORT from A
+
+    S->>B: SYNC_IMPORT (A's full state)
+
+    Note over B: Problem: Op3, Op4 were already synced!<br/>If we just apply SYNC_IMPORT, we lose B's work
+```
+
+### The Solution: Vector Clock Dominance Filter
+
+Before replaying local synced ops after a SYNC_IMPORT, we filter out ops that are "dominated" by the SYNC_IMPORT's vector clock. An op is dominated if its vector clock is `LESS_THAN` the SYNC_IMPORT's clock - meaning the op's state is already captured in the imported snapshot.
+
+```mermaid
+flowchart TD
+    subgraph Input["SYNC_IMPORT Received"]
+        SI[SYNC_IMPORT<br/>vectorClock: {A:10, B:5}]
+    end
+
+    subgraph LocalOps["Local Synced Operations"]
+        Op1["Op1: {B:1}<br/>LESS_THAN → dominated"]
+        Op2["Op2: {A:5, B:3}<br/>LESS_THAN → dominated"]
+        Op3["Op3: {B:6}<br/>GREATER_THAN → NOT dominated"]
+        Op4["Op4: {A:10, B:5, C:1}<br/>CONCURRENT → NOT dominated"]
+    end
+
+    subgraph Filter["Vector Clock Comparison"]
+        Check{Compare each op's clock<br/>with SYNC_IMPORT clock}
+    end
+
+    subgraph Result["Ops to Replay"]
+        Replay["Only Op3 and Op4<br/>(not dominated)"]
+    end
+
+    SI --> Check
+    LocalOps --> Check
+    Check --> |"LESS_THAN"| Skip[Skip - already in snapshot]
+    Check --> |"Otherwise"| Replay
+
+    style Op1 fill:#ffcdd2,stroke:#c62828
+    style Op2 fill:#ffcdd2,stroke:#c62828
+    style Op3 fill:#c8e6c9,stroke:#2e7d32
+    style Op4 fill:#c8e6c9,stroke:#2e7d32
+    style Skip fill:#ffebee,stroke:#c62828
+    style Replay fill:#e8f5e9,stroke:#2e7d32
+```
+
+### Vector Clock Comparison Results
+
+| Comparison     | Meaning                        | Action                             |
+| -------------- | ------------------------------ | ---------------------------------- |
+| `LESS_THAN`    | Op happened-before SYNC_IMPORT | Skip (state already captured)      |
+| `EQUAL`        | Same causal history            | Replay (edge case, safe to replay) |
+| `GREATER_THAN` | Op happened-after SYNC_IMPORT  | Replay (newer than snapshot)       |
+| `CONCURRENT`   | Independent changes            | Replay (may have unique changes)   |
+
+### Implementation Details
+
+```typescript
+// In OperationLogSyncService._replayLocalSyncedOpsAfterImport()
+const localSyncedOps = allEntries.filter((entry) => {
+  // Must be created by this client
+  if (entry.op.clientId !== clientId) return false;
+  // Must be synced (accepted by server)
+  if (!entry.syncedAt) return false;
+  // Must NOT be a full-state op itself
+  if (entry.op.opType === OpType.SyncImport || entry.op.opType === OpType.BackupImport)
+    return false;
+
+  // Must NOT be dominated by the SYNC_IMPORT's vector clock
+  const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
+  if (comparison === VectorClockComparison.LESS_THAN) {
+    return false; // Skip - state already captured in SYNC_IMPORT
+  }
+  return true;
+});
+```
+
+**Key Points:**
+
+- Only filters local ops (created by this client)
+- Only considers synced ops (accepted by server)
+- Uses vector clock comparison to determine dominance
+- `LESS_THAN` means dominated (skip), all other results mean not dominated (replay)
 
 ---
 

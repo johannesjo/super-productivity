@@ -207,6 +207,42 @@ web.vectorClock = { desktop: 4, mobile: 3, web: 7 };
 // Mobile vs Web: Web is ahead (7 > 2, everything else equal)
 ```
 
+### Example 4: Vector Clock Dominance (SYNC_IMPORT Handling)
+
+When a client receives a full state import (SYNC_IMPORT), it must replay local synced operations that happened "after" the import. Vector clock comparison determines which ops are "dominated" (happened-before) vs "not dominated" (happened-after or concurrent).
+
+```typescript
+// Client receives SYNC_IMPORT with this vector clock:
+const syncImportClock = { clientA: 10, clientB: 5 };
+
+// Local synced operations to evaluate:
+const op1 = { vectorClock: { clientB: 1 } }; // LESS_THAN - dominated
+const op2 = { vectorClock: { clientA: 5, clientB: 3 } }; // LESS_THAN - dominated
+const op3 = { vectorClock: { clientB: 6 } }; // GREATER_THAN - NOT dominated
+const op4 = { vectorClock: { clientA: 10, clientB: 5, clientC: 1 } }; // CONCURRENT - NOT dominated
+
+// Only op3 and op4 should be replayed
+// op1 and op2 are dominated - their state is already in the SYNC_IMPORT
+
+// Comparison logic:
+const comparison = compareVectorClocks(op.vectorClock, syncImportClock);
+if (comparison === VectorClockComparison.LESS_THAN) {
+  // Op is dominated - skip (state already captured in SYNC_IMPORT)
+  return false;
+}
+// EQUAL, GREATER_THAN, or CONCURRENT - replay the op
+return true;
+```
+
+**Why This Matters:**
+
+- **LESS_THAN** (dominated): The op's changes are already reflected in the SYNC_IMPORT snapshot. Replaying would be redundant or cause issues.
+- **GREATER_THAN**: The op happened after the SYNC_IMPORT was created. Must replay to preserve local work.
+- **CONCURRENT**: The op happened independently of the SYNC_IMPORT. Must replay because it may contain unique changes not in the snapshot.
+- **EQUAL**: Edge case where clocks match exactly. Safe to replay.
+
+See the operation log architecture docs for detailed diagrams of this late-joiner replay scenario.
+
 ## Debugging
 
 ### Enable Verbose Logging
