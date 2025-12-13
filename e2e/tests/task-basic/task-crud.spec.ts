@@ -67,4 +67,49 @@ test.describe('Task CRUD Operations', () => {
     await page.keyboard.press('Tab');
     await expect(page.locator(`${FIRST_TASK} task-title`)).toContainText(/Final title/);
   });
+
+  test('should restore deleted task when clicking undo', async ({
+    page,
+    workViewPage,
+  }) => {
+    // Wait for work view to be ready
+    await workViewPage.waitForTaskList();
+
+    // Create a task
+    const taskTitle = 'Task to delete and restore';
+    await workViewPage.addTask(taskTitle);
+    await page.waitForSelector(TASK, { state: 'visible' });
+    await expect(page.locator(TASK_TITLE).first()).toContainText(taskTitle);
+
+    // Count tasks before delete
+    const countBefore = await page.locator(TASK).count();
+
+    // Delete the task via context menu
+    await page.click(FIRST_TASK, { button: 'right' });
+    await page.locator('.mat-mdc-menu-item').filter({ hasText: 'Delete' }).click();
+
+    // Handle confirmation dialog if present
+    const dialog = page.locator('dialog-confirm');
+    if (await dialog.isVisible()) {
+      await dialog.locator('button[type=submit]').click();
+    }
+
+    // Verify task is deleted
+    await expect(page.locator(`${TASK}:has-text("${taskTitle}")`)).not.toBeVisible();
+
+    // Click Undo in the snackbar (appears for 5 seconds)
+    const undoButton = page.locator('simple-snack-bar button, snack button');
+    await undoButton.waitFor({ state: 'visible', timeout: 3000 });
+    await undoButton.click();
+
+    // Wait for restore to complete
+    await page.waitForTimeout(500);
+
+    // Verify task is restored
+    await expect(page.locator(`${TASK}:has-text("${taskTitle}")`)).toBeVisible();
+
+    // Verify task count is back to original
+    const countAfter = await page.locator(TASK).count();
+    expect(countAfter).toBe(countBefore);
+  });
 });
