@@ -87,7 +87,14 @@ describe('SyncService', () => {
       'uploadPendingOps',
       'downloadRemoteOps',
     ]);
-    mockOperationLogSyncService.uploadPendingOps.and.returnValue(Promise.resolve());
+    mockOperationLogSyncService.uploadPendingOps.and.returnValue(
+      Promise.resolve({
+        uploadedCount: 0,
+        piggybackedOps: [],
+        rejectedCount: 0,
+        rejectedOps: [],
+      }),
+    );
     mockOperationLogSyncService.downloadRemoteOps.and.returnValue(
       Promise.resolve({ serverMigrationHandled: false }),
     );

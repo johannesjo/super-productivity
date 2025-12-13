@@ -23,7 +23,7 @@ import { isOperationSyncCapable } from './operation-sync.util';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from '../processing/validate-state.service';
-import { OperationLogUploadService } from './operation-log-upload.service';
+import { OperationLogUploadService, UploadResult } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { VectorClockService } from './vector-clock.service';
 import { toEntityKey } from '../entity-key.util';
@@ -170,7 +170,7 @@ export class OperationLogSyncService {
    */
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<void> {
+  ): Promise<UploadResult | null> {
     // SAFETY: Block upload from wholly fresh clients
     // A fresh client has nothing meaningful to upload and uploading could overwrite
     // valid remote data with empty/default state.
@@ -180,7 +180,7 @@ export class OperationLogSyncService {
         'OperationLogSyncService: Upload blocked - this is a fresh client with no history. ' +
           'Download remote data first before uploading.',
       );
-      return;
+      return null;
     }
 
     // SERVER MIGRATION CHECK: Passed as callback to execute INSIDE the upload lock.
@@ -204,6 +204,8 @@ export class OperationLogSyncService {
     // We mark remaining rejected ops (those not already resolved via conflict dialog)
     // as rejected so they won't be re-uploaded.
     await this._handleRejectedOps(result.rejectedOps);
+
+    return result;
   }
 
   /**
