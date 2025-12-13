@@ -225,18 +225,20 @@ export class ModelSyncService<MD extends ModelCfgs> {
         );
       }
 
-      Object.keys(mainModelData).forEach((modelId) => {
-        if (modelId in mainModelData) {
-          this.m[modelId].save(
-            mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
-            {
-              isUpdateRevAndLastUpdate: false,
-              // NOTE: this is during sync, so we ignore the DB lock
-              isIgnoreDBLock: true,
-            },
-          );
-        }
-      });
+      await Promise.all(
+        Object.keys(mainModelData)
+          .filter((modelId) => modelId in mainModelData)
+          .map((modelId) =>
+            this.m[modelId].save(
+              mainModelData[modelId] as ExtractModelCfgType<MD[string]>,
+              {
+                isUpdateRevAndLastUpdate: false,
+                // NOTE: this is during sync, so we ignore the DB lock
+                isIgnoreDBLock: true,
+              },
+            ),
+          ),
+      );
     } else {
       throw new ImpossibleError('No remote.mainModelData!!! Is this correct?');
     }

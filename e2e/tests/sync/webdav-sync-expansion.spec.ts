@@ -60,9 +60,28 @@ test.describe('WebDAV Sync Expansion', () => {
   const setupClient = async (
     browser: Browser,
     baseURL: string | undefined,
+    clientName: string = 'Client',
   ): Promise<{ context: any; page: Page }> => {
     const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
+    // Capture console logs from browser
+    page.on('console', (msg) => {
+      const text = msg.text();
+      // Log sync-related messages
+      if (
+        text.includes('Vector clock') ||
+        text.includes('MetaSyncService') ||
+        text.includes('getSyncStatus') ||
+        text.includes('hasLocalChanges') ||
+        text.includes('hasRemoteChanges') ||
+        text.includes('SyncService.sync') ||
+        text.includes('incrementVectorClock') ||
+        text.includes('__SYNC_START__') ||
+        text.includes('SYNC_DEBUG')
+      ) {
+        console.log(`[${clientName}] ${msg.type()}: ${text}`);
+      }
+    });
     await page.goto('/');
     await waitForAppReady(page);
     await dismissTour(page);
@@ -74,8 +93,28 @@ test.describe('WebDAV Sync Expansion', () => {
     syncPage: SyncPage,
   ): Promise<'success' | 'conflict' | void> => {
     const startTime = Date.now();
+    let sawSpinner = false;
     let stableCount = 0;
     await expect(syncPage.syncBtn).toBeVisible({ timeout: 10000 });
+
+    // First, wait for sync to START (spinner appears) or immediately complete
+    // Give it a short window to start
+    const spinnerStartWait = Date.now();
+    while (Date.now() - spinnerStartWait < 3000) {
+      const isSpinning = await syncPage.syncSpinner.isVisible();
+      if (isSpinning) {
+        sawSpinner = true;
+        console.log('[waitForSync] Spinner appeared - sync started');
+        break;
+      }
+      await page.waitForTimeout(100);
+    }
+
+    if (!sawSpinner) {
+      console.log(
+        '[waitForSync] Spinner never appeared - sync may have completed instantly',
+      );
+    }
 
     while (Date.now() - startTime < 60000) {
       // Check for conflict dialog
@@ -94,19 +133,41 @@ test.describe('WebDAV Sync Expansion', () => {
 
       // Check if sync is in progress (spinner visible)
       const isSpinning = await syncPage.syncSpinner.isVisible();
-      if (!isSpinning) {
-        // Check for success icon
+      if (isSpinning) {
+        sawSpinner = true;
+        stableCount = 0; // Reset stable count while spinning
+      } else if (sawSpinner) {
+        // Spinner was visible before, now it's gone - sync completed
         const successVisible = await syncPage.syncCheckIcon.isVisible();
-        if (successVisible) return 'success';
-
-        // No spinner, no error, no check icon - use stable count fallback
-        // This handles cases where the check icon doesn't render or is too small
+        if (successVisible) {
+          console.log('[waitForSync] Sync completed with success icon');
+          return 'success';
+        }
+        // No check icon but spinner stopped - wait a bit more
         stableCount++;
         if (stableCount >= 3) {
-          return 'success'; // Consider sync complete after 3 stable checks
+          console.log('[waitForSync] Sync completed (stable count)');
+          return 'success';
         }
       } else {
-        stableCount = 0; // Reset if still spinning
+        // Never saw spinner - might have completed instantly
+        // Check for new snackbar indicating sync result
+        for (let i = 0; i < count; ++i) {
+          const text = await snackBars.nth(i).innerText();
+          if (
+            text.toLowerCase().includes('sync') ||
+            text.toLowerCase().includes('already in sync')
+          ) {
+            console.log('[waitForSync] Sync completed (snackbar):', text);
+            return 'success';
+          }
+        }
+        stableCount++;
+        if (stableCount >= 6) {
+          // Wait longer if we never saw spinner
+          console.log('[waitForSync] Sync assumed complete (extended stable count)');
+          return 'success';
+        }
       }
 
       await page.waitForTimeout(500);
@@ -114,10 +175,7 @@ test.describe('WebDAV Sync Expansion', () => {
     throw new Error('Sync timeout: Sync did not complete');
   };
 
-  // TODO: Investigate WebDAV sync regression - task data not syncing between clients
-  // This test passes on master but fails on feat/operation-logs
-  // The sync appears to complete but remote data is not being applied
-  test.skip('should sync projects', async ({ browser, baseURL, request }) => {
+  test('should sync projects', async ({ browser, baseURL, request }) => {
     test.slow();
     const SYNC_FOLDER_NAME = `e2e-expansion-proj-${Date.now()}`;
     await createSyncFolder(request, SYNC_FOLDER_NAME);
@@ -129,7 +187,7 @@ test.describe('WebDAV Sync Expansion', () => {
     const url = baseURL || 'http://localhost:4242';
 
     // --- Client A ---
-    const { context: contextA, page: pageA } = await setupClient(browser, url);
+    const { context: contextA, page: pageA } = await setupClient(browser, url, 'ClientA');
     const syncPageA = new SyncPage(pageA);
     const workViewPageA = new WorkViewPage(pageA);
     const projectPageA = new ProjectPage(pageA);
@@ -153,7 +211,7 @@ test.describe('WebDAV Sync Expansion', () => {
     await waitForSync(pageA, syncPageA);
 
     // --- Client B ---
-    const { context: contextB, page: pageB } = await setupClient(browser, url);
+    const { context: contextB, page: pageB } = await setupClient(browser, url, 'ClientB');
     const syncPageB = new SyncPage(pageB);
     const workViewPageB = new WorkViewPage(pageB);
     const projectPageB = new ProjectPage(pageB);
@@ -164,10 +222,13 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 
-    // Reload to ensure UI is updated with synced data
-    await pageB.reload();
-    await waitForAppReady(pageB);
-    await dismissTour(pageB);
+    // Wait for state persistence to complete after sync
+    await waitForStatePersistence(pageB);
+
+    // Note: We DON'T reload here because:
+    // 1. The sync already updates NgRx store via reInitFromRemoteSync()
+    // 2. Reload would require re-initializing the sync provider which has timing issues
+    // 3. Without reload, the sync button remains functional
 
     // Wait for the synced project to appear in the sidebar
     // First ensure Projects group is expanded
@@ -192,37 +253,59 @@ test.describe('WebDAV Sync Expansion', () => {
     await expect(pageB.locator('task').first()).toContainText('Task in Project A');
 
     // Add task on B in project
+    console.log(`[DEBUG] Client B adding task...`);
     await workViewPageB.addTask('Task in Project B');
 
     // Wait for state persistence before syncing
+    console.log(`[DEBUG] Client B waiting for state persistence...`);
     await waitForStatePersistence(pageB);
 
+    console.log(`[DEBUG] Client B triggering sync...`);
     await syncPageB.triggerSync();
-    await waitForSync(pageB, syncPageB);
+    const syncResultB = await waitForSync(pageB, syncPageB);
+    console.log(`[DEBUG] Sync result for Client B: ${syncResultB}`);
 
-    // Wait a bit for server to process
-    await pageB.waitForTimeout(1000);
+    // Check snackbar on B too
+    const snackBarsB = pageB.locator('.mat-mdc-snack-bar-container');
+    const snackCountB = await snackBarsB.count();
+    console.log(`[DEBUG] Client B snackbars: ${snackCountB}`);
+    for (let i = 0; i < snackCountB; i++) {
+      const text = await snackBarsB.nth(i).innerText();
+      console.log(`[DEBUG] Client B snackbar ${i}: ${text}`);
+    }
 
-    // Sync A - trigger multiple times to ensure we get latest
+    // Wait longer for server to process and ensure Last-Modified timestamp differs
+    // WebDAV servers often have second-level timestamp precision
+    await pageB.waitForTimeout(2000);
+
+    // Sync A - trigger sync to download changes from B
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
 
-    // Reload A to ensure fresh state from IndexedDB
-    await pageA.reload();
-    await waitForAppReady(pageA);
-    await dismissTour(pageA);
+    // Debug: check for snackbar messages during sync
+    const syncResult = await waitForSync(pageA, syncPageA);
+    console.log(`[DEBUG] Sync result for Client A: ${syncResult}`);
 
-    // Sync again after reload to ensure we have latest remote data
-    await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    // Check all visible snackbar messages
+    const snackBars = pageA.locator('.mat-mdc-snack-bar-container');
+    const snackCount = await snackBars.count();
+    console.log(`[DEBUG] Number of snackbars visible: ${snackCount}`);
+    for (let i = 0; i < snackCount; i++) {
+      const text = await snackBars.nth(i).innerText();
+      console.log(`[DEBUG] Snackbar ${i}: ${text}`);
+    }
 
-    // Wait for state to settle after reload
-    await pageA.waitForTimeout(1000);
+    // Wait for state persistence to complete after sync
+    await waitForStatePersistence(pageA);
 
-    // Ensure we are on the project page
+    // First check: Can we see the task BEFORE reload? (tests NgRx update)
+    // Navigate to project page first
     await projectPageA.navigateToProjectByName(projectName);
 
-    // Verify task on A
+    // Debug: check task count before reload
+    const taskCountBeforeReload = await pageA.locator('task').count();
+    console.log(`[DEBUG] Task count before reload: ${taskCountBeforeReload}`);
+
+    // Check if task B is visible immediately after sync (no reload)
     await expect(pageA.locator('task', { hasText: 'Task in Project B' })).toBeVisible({
       timeout: 20000,
     });
@@ -231,10 +314,7 @@ test.describe('WebDAV Sync Expansion', () => {
     await contextB.close();
   });
 
-  // TODO: Investigate WebDAV sync regression - task data not syncing between clients
-  // This test passes on master but fails on feat/operation-logs
-  // The sync appears to complete but remote data is not being applied
-  test.skip('should sync task done state', async ({ browser, baseURL, request }) => {
+  test('should sync task done state', async ({ browser, baseURL, request }) => {
     test.slow();
     const SYNC_FOLDER_NAME = `e2e-expansion-done-${Date.now()}`;
     await createSyncFolder(request, SYNC_FOLDER_NAME);
@@ -270,11 +350,10 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 
-    await pageB.reload();
-    await waitForAppReady(pageB);
-    await dismissTour(pageB);
-    await workViewPageB.waitForTaskList();
+    // Wait for state persistence to complete after sync
+    await waitForStatePersistence(pageB);
 
+    // Note: We DON'T reload here - sync updates NgRx directly
     await expect(pageB.locator('task', { hasText: taskName })).toBeVisible({
       timeout: 20000,
     });
@@ -298,8 +377,13 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageB.triggerSync();
     await waitForSync(pageB, syncPageB);
 
+    // Wait for state persistence to complete after sync
+    await waitForStatePersistence(pageB);
+
+    // Note: We DON'T reload - sync updates NgRx directly
+    // Verify task has isDone class after sync (sync updates NgRx store)
     const taskB = pageB.locator('task', { hasText: taskName }).first();
-    await expect(taskB).toHaveClass(/isDone/);
+    await expect(taskB).toHaveClass(/isDone/, { timeout: 10000 });
 
     // Mark undone on B
     const doneBtnB = taskB.locator('.check-done');
@@ -316,12 +400,8 @@ test.describe('WebDAV Sync Expansion', () => {
     await syncPageA.triggerSync();
     await waitForSync(pageA, syncPageA);
 
-    // Reload A to ensure UI reflects synced state
-    await pageA.reload();
-    await waitForAppReady(pageA);
-    await dismissTour(pageA);
-
-    // Re-locate the task after reload
+    // Note: We DON'T reload - sync updates NgRx directly
+    // Verify task is no longer done on A after sync
     const taskAAfterSync = pageA.locator('task', { hasText: taskName }).first();
     await expect(taskAAfterSync).not.toHaveClass(/isDone/, { timeout: 10000 });
 

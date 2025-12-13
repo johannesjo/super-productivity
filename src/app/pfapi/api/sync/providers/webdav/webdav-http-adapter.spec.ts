@@ -54,6 +54,7 @@ describe('WebDavHttpAdapter', () => {
         method: 'GET',
         headers: { Authorization: 'Basic test' },
         body: undefined,
+        cache: 'no-store',
       });
 
       expect(result.status).toBe(200);
@@ -136,6 +137,7 @@ describe('WebDavHttpAdapter', () => {
         method: 'PUT',
         headers: undefined,
         body: body,
+        cache: 'no-store',
       });
     });
 

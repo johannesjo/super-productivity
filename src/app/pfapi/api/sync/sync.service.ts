@@ -92,7 +92,8 @@ export class SyncService<const MD extends ModelCfgs> {
    */
   async sync(): Promise<{ status: SyncStatus; conflictData?: ConflictData }> {
     try {
-      if (!(await this._isReadyForSync())) {
+      const isReady = await this._isReadyForSync();
+      if (!isReady) {
         return { status: SyncStatus.NotConfigured };
       }
 
@@ -133,16 +134,9 @@ export class SyncService<const MD extends ModelCfgs> {
         isInSync: localMeta0.lastSyncedUpdate === localMeta0.lastUpdate,
       });
 
-      // Quick pre-check for all synced
-      if (localMeta0.lastSyncedUpdate === localMeta0.lastUpdate) {
-        const metaRev = await this._metaFileSyncService.getRev(localMeta0.metaRev);
-        if (metaRev === localMeta0.metaRev) {
-          PFLog.normal(
-            `${SyncService.L}.${this.sync.name}(): Early return - already in sync`,
-          );
-          return { status: SyncStatus.InSync };
-        }
-      }
+      // NOTE: Early return optimization removed - always do full vector clock comparison
+      // The metaRev (Last-Modified timestamp) comparison was unreliable with WebDAV servers
+      // and caused sync to incorrectly return InSync when remote had changes
 
       const { remoteMeta, remoteMetaRev } = await this._metaFileSyncService.download();
 

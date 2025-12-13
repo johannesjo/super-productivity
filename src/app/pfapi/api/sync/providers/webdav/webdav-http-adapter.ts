@@ -86,6 +86,8 @@ export class WebDavHttpAdapter {
             method: options.method,
             headers: options.headers,
             body: options.body,
+            // Disable HTTP caching to ensure we get fresh metadata for sync operations
+            cache: 'no-store',
           });
 
           response = await this._convertFetchResponse(fetchResponse);

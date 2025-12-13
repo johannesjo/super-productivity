@@ -219,17 +219,23 @@ const _checkForUpdateVectorClock = (params: {
     throw new Error('Invalid remoteVector in vector clock comparison');
   }
 
-  PFLog.normal('Vector clock check', {
-    localVector: vectorClockToString(localVector),
-    remoteVector: vectorClockToString(remoteVector),
-    lastSyncedVector: vectorClockToString(lastSyncedVector),
-  });
-
   // Check if there have been changes since last sync
   const hasLocalChanges = hasVectorClockChanges(localVector, lastSyncedVector);
   const hasRemoteChanges = hasVectorClockChanges(remoteVector, lastSyncedVector);
 
+  PFLog.normal('Vector clock check - detailed', {
+    localVector: vectorClockToString(localVector),
+    remoteVector: vectorClockToString(remoteVector),
+    lastSyncedVector: vectorClockToString(lastSyncedVector),
+    hasLocalChanges,
+    hasRemoteChanges,
+    localVectorRaw: JSON.stringify(localVector),
+    remoteVectorRaw: JSON.stringify(remoteVector),
+    lastSyncedVectorRaw: JSON.stringify(lastSyncedVector),
+  });
+
   if (!hasLocalChanges && !hasRemoteChanges) {
+    PFLog.normal('Vector clock check - result: InSync (no changes on either side)');
     return UpdateCheckResult.InSync;
   } else if (hasLocalChanges && !hasRemoteChanges) {
     return UpdateCheckResult.RemoteUpdateRequired;

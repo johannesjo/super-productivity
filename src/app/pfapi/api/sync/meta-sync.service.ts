@@ -119,7 +119,17 @@ export class MetaSyncService {
           r.dataStr,
         );
 
-      return { remoteMeta: validateMetaBase(data), remoteMetaRev: r.rev };
+      const validatedMeta = validateMetaBase(data);
+      PFLog.normal(
+        `${MetaSyncService.L}.${this.download.name}(): Downloaded remote meta`,
+        {
+          vectorClock: validatedMeta.vectorClock,
+          lastUpdate: validatedMeta.lastUpdate,
+          rev: r.rev,
+        },
+      );
+
+      return { remoteMeta: validatedMeta, remoteMetaRev: r.rev };
     } catch (e) {
       if (e instanceof RemoteFileNotFoundAPIError) {
         throw new NoRemoteMetaFile();
@@ -147,7 +157,10 @@ export class MetaSyncService {
         meta.crossModelVersion,
       );
 
-    PFLog.normal(`${MetaSyncService.L}.${this.upload.name}()`, { meta });
+    PFLog.normal(`${MetaSyncService.L}.${this.upload.name}()`, {
+      vectorClock: meta.vectorClock,
+      lastUpdate: meta.lastUpdate,
+    });
 
     // Upload the data
     return (

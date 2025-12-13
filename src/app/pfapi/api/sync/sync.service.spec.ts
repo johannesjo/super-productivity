@@ -262,20 +262,33 @@ describe('SyncService', () => {
 
   describe('sync operations', () => {
     it('should detect already in sync state', async () => {
-      // Setup for in-sync state
+      // Setup for in-sync state - local and remote have same vector clocks
       mockMetaModelCtrl.load.and.returnValue(
         Promise.resolve(
           createDefaultLocalMeta({
             metaRev: 'meta-rev-123',
+            lastUpdate: 2000,
+            lastSyncedUpdate: 2000,
+            vectorClock: { CLIENT_123: 2 },
+            lastSyncedVectorClock: { CLIENT_123: 2 },
           }),
         ),
       );
-      mockMetaSyncService.getRev.and.returnValue(Promise.resolve('meta-rev-123'));
+      mockMetaSyncService.download.and.returnValue(
+        Promise.resolve({
+          remoteMeta: createDefaultRemoteMeta({
+            lastUpdate: 2000,
+            vectorClock: { CLIENT_123: 2 },
+          }),
+          remoteMetaRev: 'meta-rev-123',
+        }),
+      );
 
       const result = await service.sync();
 
       expect(result.status).toBe(SyncStatus.InSync);
-      expect(mockMetaSyncService.download).not.toHaveBeenCalled();
+      // Now always calls download to do full vector clock comparison
+      expect(mockMetaSyncService.download).toHaveBeenCalled();
     });
 
     it('should return inSync if revs match special case', async () => {
@@ -702,7 +715,8 @@ describe('SyncService', () => {
 
     it('should handle connection errors during sync', async () => {
       const connectionError = new Error('Network error');
-      mockMetaSyncService.getRev.and.throwError(connectionError);
+      // Throw error during download (early return optimization was removed)
+      mockMetaSyncService.download.and.throwError(connectionError);
 
       await expectAsync(service.sync()).toBeRejected();
     });
