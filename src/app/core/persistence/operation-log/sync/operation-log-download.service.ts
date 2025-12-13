@@ -18,9 +18,9 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import {
   MAX_DOWNLOAD_RETRIES,
-  DOWNLOAD_RETRY_BASE_DELAY_MS,
   MAX_DOWNLOAD_OPS_IN_MEMORY,
   CLOCK_DRIFT_THRESHOLD_MS,
+  RETRY_DELAY_BASE_MS,
 } from '../operation-log.const';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
@@ -68,6 +68,7 @@ export class OperationLogDownloadService {
   private manifestService = inject(OperationLogManifestService);
   private snackService = inject(SnackService);
   private encryptionService = inject(OperationEncryptionService);
+  private retryDelayBaseMs = inject(RETRY_DELAY_BASE_MS);
 
   /** Track if we've already warned about clock drift this session */
   private hasWarnedClockDrift = false;
@@ -367,7 +368,7 @@ export class OperationLogDownloadService {
         lastError = e;
 
         if (attempt < MAX_DOWNLOAD_RETRIES) {
-          const delay = DOWNLOAD_RETRY_BASE_DELAY_MS * Math.pow(2, attempt);
+          const delay = this.retryDelayBaseMs * Math.pow(2, attempt);
           OpLog.warn(
             `OperationLogDownloadService: Download failed for ${filePath}, retrying in ${delay}ms (attempt ${attempt + 1}/${MAX_DOWNLOAD_RETRIES})`,
             e,

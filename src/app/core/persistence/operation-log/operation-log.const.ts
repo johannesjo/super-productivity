@@ -1,3 +1,5 @@
+import { InjectionToken } from '@angular/core';
+
 /**
  * Configuration constants for the Operation Log system.
  * Centralizes all tunable parameters for easier maintenance and documentation.
@@ -161,3 +163,13 @@ export const STATE_SIZE_WARNING_THRESHOLD_MB = 20;
  * Default: 5 minutes
  */
 export const CONFLICT_DIALOG_TIMEOUT_MS = 5 * 60 * 1000;
+
+/**
+ * Injection token for retry delay base value (milliseconds).
+ * Use this token to inject a different delay value in tests (e.g., 0 for instant retries).
+ * Defaults to DOWNLOAD_RETRY_BASE_DELAY_MS if not provided.
+ */
+export const RETRY_DELAY_BASE_MS = new InjectionToken<number>('RETRY_DELAY_BASE_MS', {
+  providedIn: 'root',
+  factory: () => DOWNLOAD_RETRY_BASE_DELAY_MS,
+});

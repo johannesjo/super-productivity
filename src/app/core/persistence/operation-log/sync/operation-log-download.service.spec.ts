@@ -13,7 +13,7 @@ import {
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
 import { OpType, OperationLogEntry } from '../operation.types';
-import { CLOCK_DRIFT_THRESHOLD_MS } from '../operation-log.const';
+import { CLOCK_DRIFT_THRESHOLD_MS, RETRY_DELAY_BASE_MS } from '../operation-log.const';
 import { T } from '../../../../t.const';
 import { OpLog } from '../../../log';
 
@@ -56,6 +56,8 @@ describe('OperationLogDownloadService', () => {
         { provide: LockService, useValue: mockLockService },
         { provide: OperationLogManifestService, useValue: mockManifestService },
         { provide: SnackService, useValue: mockSnackService },
+        // Set retry delay to 0 for instant retries in tests
+        { provide: RETRY_DELAY_BASE_MS, useValue: 0 },
       ],
     });
 
@@ -638,7 +640,7 @@ describe('OperationLogDownloadService', () => {
 
       // Download failure handling tests
       // These tests verify retry behavior by counting download attempts and verifying
-      // the final result, without waiting for real retry delays.
+      // the final result. RETRY_DELAY_BASE_MS is set to 0 in TestBed for instant retries.
       describe('download failure handling', () => {
         it('should return success:false when file download fails after all retries', async () => {
           // Setup: provider that always fails to download
@@ -657,8 +659,7 @@ describe('OperationLogDownloadService', () => {
             throw new Error('Network error');
           });
 
-          // Act: Download with retry (this will take ~7 seconds with real delays)
-          // We're testing the behavior, not the timing
+          // Act: Download with retry (delay is 0, so this is instant)
           const result = await service.downloadRemoteOps(mockFileProvider);
 
           // Assert: Should have attempted download multiple times
@@ -669,7 +670,7 @@ describe('OperationLogDownloadService', () => {
           expect(result.success).toBeFalse();
           expect(result.failedFileCount).toBe(1);
           expect(result.newOps).toEqual([]);
-        }, 30000); // Extended timeout for retry delays
+        });
 
         it('should notify user about failed downloads via snackbar', async () => {
           mockManifestService.loadRemoteManifest.and.returnValue(
@@ -691,7 +692,7 @@ describe('OperationLogDownloadService', () => {
               type: 'ERROR',
             }),
           );
-        }, 30000); // Extended timeout for retry delays
+        });
 
         it('should succeed if download succeeds after retry', async () => {
           let downloadAttempts = 0;
@@ -740,7 +741,7 @@ describe('OperationLogDownloadService', () => {
           expect(result.success).toBeTrue();
           expect(result.newOps.length).toBe(1);
           expect(result.newOps[0].id).toBe('op-retry-success');
-        }, 30000); // Extended timeout for retry delays
+        });
 
         it('should log warnings for each retry attempt', async () => {
           mockManifestService.loadRemoteManifest.and.returnValue(
@@ -763,7 +764,7 @@ describe('OperationLogDownloadService', () => {
           // so it's 3 warnings (one before each of the 3 retries)
           // The 4th call might be from the final failure log
           expect((OpLog.warn as jasmine.Spy).calls.count()).toBeGreaterThanOrEqual(3);
-        }, 30000); // Extended timeout for retry delays
+        });
       });
 
       it('should return success true when all files download successfully', async () => {
