@@ -222,9 +222,13 @@ export class SuperSyncProvider
     const baseUrl = cfg.baseUrl.replace(/\/$/, '');
     const url = `${baseUrl}${path}`;
 
+    // Sanitize token - remove any non-ASCII characters that may have been
+    // accidentally copied (e.g., zero-width spaces, smart quotes)
+    const sanitizedToken = cfg.accessToken.replace(/[^\x20-\x7E]/g, '');
+
     const headers = new Headers(options.headers as HeadersInit);
     headers.set('Content-Type', 'application/json');
-    headers.set('Authorization', `Bearer ${cfg.accessToken}`);
+    headers.set('Authorization', `Bearer ${sanitizedToken}`);
 
     const response = await fetch(url, {
       ...options,
@@ -253,10 +257,14 @@ export class SuperSyncProvider
     const baseUrl = cfg.baseUrl.replace(/\/$/, '');
     const url = `${baseUrl}${path}`;
 
+    // Sanitize token - remove any non-ASCII characters that may have been
+    // accidentally copied (e.g., zero-width spaces, smart quotes)
+    const sanitizedToken = cfg.accessToken.replace(/[^\x20-\x7E]/g, '');
+
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
     headers.set('Content-Encoding', 'gzip');
-    headers.set('Authorization', `Bearer ${cfg.accessToken}`);
+    headers.set('Authorization', `Bearer ${sanitizedToken}`);
 
     const response = await fetch(url, {
       method: 'POST',
