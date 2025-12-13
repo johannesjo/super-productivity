@@ -4,6 +4,8 @@ import { TaskSharedActions } from '../task-shared.actions';
 import { RootState } from '../../root-state';
 import { TASK_FEATURE_NAME } from '../../../features/tasks/store/task.reducer';
 import { PROJECT_FEATURE_NAME } from '../../../features/project/store/project.reducer';
+import { TIME_TRACKING_FEATURE_KEY } from '../../../features/time-tracking/store/time-tracking.reducer';
+import { TimeTrackingState } from '../../../features/time-tracking/time-tracking.model';
 import { Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { Action, ActionReducer } from '@ngrx/store';
 import {
@@ -473,6 +475,51 @@ describe('projectSharedMetaReducer', () => {
         mockReducer,
         baseState,
       );
+    });
+
+    it('should cleanup time tracking state for deleted project', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // Add time tracking state
+      testState[TIME_TRACKING_FEATURE_KEY] = {
+        tag: {},
+        project: {
+          project1: { timeSpent: 3600 },
+          'other-project': { timeSpent: 7200 },
+        },
+      } as TimeTrackingState;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+
+      const passedState = mockReducer.calls.mostRecent().args[0];
+      expect(passedState[TIME_TRACKING_FEATURE_KEY].project.project1).toBeUndefined();
+      expect(
+        passedState[TIME_TRACKING_FEATURE_KEY].project['other-project'],
+      ).toBeDefined();
+    });
+
+    it('should handle deleting project without time tracking state', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], []) as any;
+
+      // No time tracking state set
+      testState[TIME_TRACKING_FEATURE_KEY] = undefined;
+
+      const mockProject = createMockProject({ id: 'project1' });
+      const action = TaskSharedActions.deleteProject({
+        projectId: mockProject.id,
+        noteIds: mockProject.noteIds,
+        allTaskIds: ['task1'],
+      });
+
+      // Should not throw
+      expect(() => metaReducer(testState, action)).not.toThrow();
     });
   });
 
