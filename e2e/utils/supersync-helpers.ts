@@ -37,30 +37,45 @@ export interface SimulatedE2EClient {
  * @param testId - Unique test identifier for user email
  * @returns Test user with email and JWT token
  */
-export const createTestUser = async (testId: string): Promise<TestUser> => {
+export const createTestUser = async (
+  testId: string,
+  maxRetries = 3,
+): Promise<TestUser> => {
   const email = `test-${testId}@e2e.local`;
   const password = 'TestPassword123!';
 
   const headers = new Headers();
   headers.set('Content-Type', 'application/json');
 
-  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/create-user`, {
-    method: 'POST',
-    headers,
-    body: JSON.stringify({ email, password }),
-  });
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/create-user`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({ email, password }),
+    });
 
-  if (!response.ok) {
-    const text = await response.text();
-    throw new Error(`Failed to create test user: ${response.status} - ${text}`);
+    // Handle rate limiting with exponential backoff
+    if (response.status === 429 && attempt < maxRetries - 1) {
+      const delay = 1000 * Math.pow(2, attempt);
+      console.log(`[createTestUser] Rate limited (429), retrying in ${delay}ms...`);
+      await new Promise((r) => setTimeout(r, delay));
+      continue;
+    }
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Failed to create test user: ${response.status} - ${text}`);
+    }
+
+    const data = await response.json();
+    return {
+      email,
+      token: data.token,
+      userId: data.userId,
+    };
   }
 
-  const data = await response.json();
-  return {
-    email,
-    token: data.token,
-    userId: data.userId,
-  };
+  throw new Error(`Max retries (${maxRetries}) exceeded for createTestUser`);
 };
 
 /**

@@ -43,6 +43,7 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
+import { OperationWriteFlushService } from './operation-write-flush.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -125,6 +126,7 @@ export class OperationLogSyncService {
   private dialog = inject(MatDialog);
   private userInputWaitState = inject(UserInputWaitStateService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
+  private operationWriteFlush = inject(OperationWriteFlushService);
 
   // Lazy injection to break circular dependency:
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
@@ -714,6 +716,12 @@ export class OperationLogSyncService {
     // NOTE: A client with 0 pending ops can still have an entity frontier from
     // already-synced ops. The frontier tracks ALL applied ops, not just pending.
     // ─────────────────────────────────────────────────────────────────────────
+
+    // CRITICAL: Ensure all pending local writes are complete before conflict detection.
+    // Without this, a recently-dispatched action might not be in IndexedDB yet,
+    // causing getUnsyncedByEntity() to miss it and fail to detect a conflict.
+    await this.operationWriteFlush.flushPendingWrites();
+
     const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
     const { nonConflicting, conflicts } = await this.detectConflicts(
       validOps,
