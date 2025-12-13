@@ -44,6 +44,10 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
           },
         },
       },
+      // Disable rate limiting for test user creation to allow rapid E2E test execution
+      config: {
+        rateLimit: false,
+      },
     },
     async (request, reply) => {
       const { email, password } = request.body;
@@ -115,28 +119,37 @@ export const testRoutes = async (fastify: FastifyInstance): Promise<void> => {
    * Clean up all test data.
    * Wipes users, operations, sync state, and devices.
    */
-  fastify.post('/cleanup', async (_request, reply) => {
-    try {
-      // Delete in correct order due to foreign key constraints (cascades usually handle it, but explicit is safer)
-      await prisma.$transaction([
-        prisma.operation.deleteMany(),
-        prisma.syncDevice.deleteMany(),
-        prisma.userSyncState.deleteMany(),
-        prisma.tombstone.deleteMany(),
-        prisma.user.deleteMany(),
-      ]);
+  fastify.post(
+    '/cleanup',
+    {
+      // Disable rate limiting for cleanup endpoint
+      config: {
+        rateLimit: false,
+      },
+    },
+    async (_request, reply) => {
+      try {
+        // Delete in correct order due to foreign key constraints (cascades usually handle it, but explicit is safer)
+        await prisma.$transaction([
+          prisma.operation.deleteMany(),
+          prisma.syncDevice.deleteMany(),
+          prisma.userSyncState.deleteMany(),
+          prisma.tombstone.deleteMany(),
+          prisma.user.deleteMany(),
+        ]);
 
-      Logger.info('[TEST] All test data cleaned up');
+        Logger.info('[TEST] All test data cleaned up');
 
-      return reply.send({ cleaned: true });
-    } catch (err: unknown) {
-      Logger.error('[TEST] Cleanup failed:', err);
-      return reply.status(500).send({
-        error: 'Cleanup failed',
-        message: (err as Error).message,
-      });
-    }
-  });
+        return reply.send({ cleaned: true });
+      } catch (err: unknown) {
+        Logger.error('[TEST] Cleanup failed:', err);
+        return reply.status(500).send({
+          error: 'Cleanup failed',
+          message: (err as Error).message,
+        });
+      }
+    },
+  );
 
   Logger.info('[TEST] Test routes registered at /api/test/*');
 };
