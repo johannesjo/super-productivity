@@ -98,8 +98,11 @@ test.describe('Task CRUD Operations', () => {
     await expect(page.locator(`${TASK}:has-text("${taskTitle}")`)).not.toBeVisible();
 
     // Click Undo in the snackbar (appears for 5 seconds)
-    const undoButton = page.locator('simple-snack-bar button, snack button');
-    await undoButton.waitFor({ state: 'visible', timeout: 3000 });
+    // The snackbar uses snack-custom component with a button.action
+    const undoButton = page.locator(
+      'snack-custom button.action, .mat-mdc-snack-bar-container button',
+    );
+    await undoButton.waitFor({ state: 'visible', timeout: 5000 });
     await undoButton.click();
 
     // Wait for restore to complete
