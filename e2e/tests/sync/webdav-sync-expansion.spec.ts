@@ -6,6 +6,15 @@ import { waitForAppReady, waitForStatePersistence } from '../../utils/waits';
 import { type Browser, type Page } from '@playwright/test';
 import { isWebDavServerUp } from '../../utils/check-webdav';
 
+// Timing constants for sync detection
+const SYNC_TIMEOUT_MS = 60000;
+const SPINNER_START_WAIT_MS = 3000;
+const SPINNER_POLL_INTERVAL_MS = 100;
+const SYNC_POLL_INTERVAL_MS = 500;
+const STABLE_COUNT_WITH_SPINNER = 3;
+const STABLE_COUNT_WITHOUT_SPINNER = 6;
+const WEBDAV_TIMESTAMP_DELAY_MS = 2000;
+
 test.describe('WebDAV Sync Expansion', () => {
   const WEBDAV_CONFIG_TEMPLATE = {
     baseUrl: 'http://127.0.0.1:2345/',
@@ -60,28 +69,9 @@ test.describe('WebDAV Sync Expansion', () => {
   const setupClient = async (
     browser: Browser,
     baseURL: string | undefined,
-    clientName: string = 'Client',
   ): Promise<{ context: any; page: Page }> => {
     const context = await browser.newContext({ baseURL });
     const page = await context.newPage();
-    // Capture console logs from browser
-    page.on('console', (msg) => {
-      const text = msg.text();
-      // Log sync-related messages
-      if (
-        text.includes('Vector clock') ||
-        text.includes('MetaSyncService') ||
-        text.includes('getSyncStatus') ||
-        text.includes('hasLocalChanges') ||
-        text.includes('hasRemoteChanges') ||
-        text.includes('SyncService.sync') ||
-        text.includes('incrementVectorClock') ||
-        text.includes('__SYNC_START__') ||
-        text.includes('SYNC_DEBUG')
-      ) {
-        console.log(`[${clientName}] ${msg.type()}: ${text}`);
-      }
-    });
     await page.goto('/');
     await waitForAppReady(page);
     await dismissTour(page);
@@ -98,25 +88,17 @@ test.describe('WebDAV Sync Expansion', () => {
     await expect(syncPage.syncBtn).toBeVisible({ timeout: 10000 });
 
     // First, wait for sync to START (spinner appears) or immediately complete
-    // Give it a short window to start
     const spinnerStartWait = Date.now();
-    while (Date.now() - spinnerStartWait < 3000) {
+    while (Date.now() - spinnerStartWait < SPINNER_START_WAIT_MS) {
       const isSpinning = await syncPage.syncSpinner.isVisible();
       if (isSpinning) {
         sawSpinner = true;
-        console.log('[waitForSync] Spinner appeared - sync started');
         break;
       }
-      await page.waitForTimeout(100);
+      await page.waitForTimeout(SPINNER_POLL_INTERVAL_MS);
     }
 
-    if (!sawSpinner) {
-      console.log(
-        '[waitForSync] Spinner never appeared - sync may have completed instantly',
-      );
-    }
-
-    while (Date.now() - startTime < 60000) {
+    while (Date.now() - startTime < SYNC_TIMEOUT_MS) {
       // Check for conflict dialog
       const conflictDialog = page.locator('dialog-sync-conflict');
       if (await conflictDialog.isVisible()) return 'conflict';
@@ -140,37 +122,32 @@ test.describe('WebDAV Sync Expansion', () => {
         // Spinner was visible before, now it's gone - sync completed
         const successVisible = await syncPage.syncCheckIcon.isVisible();
         if (successVisible) {
-          console.log('[waitForSync] Sync completed with success icon');
           return 'success';
         }
         // No check icon but spinner stopped - wait a bit more
         stableCount++;
-        if (stableCount >= 3) {
-          console.log('[waitForSync] Sync completed (stable count)');
+        if (stableCount >= STABLE_COUNT_WITH_SPINNER) {
           return 'success';
         }
       } else {
         // Never saw spinner - might have completed instantly
-        // Check for new snackbar indicating sync result
+        // Check for snackbar indicating sync result
         for (let i = 0; i < count; ++i) {
           const text = await snackBars.nth(i).innerText();
           if (
             text.toLowerCase().includes('sync') ||
             text.toLowerCase().includes('already in sync')
           ) {
-            console.log('[waitForSync] Sync completed (snackbar):', text);
             return 'success';
           }
         }
         stableCount++;
-        if (stableCount >= 6) {
-          // Wait longer if we never saw spinner
-          console.log('[waitForSync] Sync assumed complete (extended stable count)');
+        if (stableCount >= STABLE_COUNT_WITHOUT_SPINNER) {
           return 'success';
         }
       }
 
-      await page.waitForTimeout(500);
+      await page.waitForTimeout(SYNC_POLL_INTERVAL_MS);
     }
     throw new Error('Sync timeout: Sync did not complete');
   };
@@ -187,7 +164,7 @@ test.describe('WebDAV Sync Expansion', () => {
     const url = baseURL || 'http://localhost:4242';
 
     // --- Client A ---
-    const { context: contextA, page: pageA } = await setupClient(browser, url, 'ClientA');
+    const { context: contextA, page: pageA } = await setupClient(browser, url);
     const syncPageA = new SyncPage(pageA);
     const workViewPageA = new WorkViewPage(pageA);
     const projectPageA = new ProjectPage(pageA);
@@ -211,7 +188,7 @@ test.describe('WebDAV Sync Expansion', () => {
     await waitForSync(pageA, syncPageA);
 
     // --- Client B ---
-    const { context: contextB, page: pageB } = await setupClient(browser, url, 'ClientB');
+    const { context: contextB, page: pageB } = await setupClient(browser, url);
     const syncPageB = new SyncPage(pageB);
     const workViewPageB = new WorkViewPage(pageB);
     const projectPageB = new ProjectPage(pageB);
@@ -253,57 +230,27 @@ test.describe('WebDAV Sync Expansion', () => {
     await expect(pageB.locator('task').first()).toContainText('Task in Project A');
 
     // Add task on B in project
-    console.log(`[DEBUG] Client B adding task...`);
     await workViewPageB.addTask('Task in Project B');
 
     // Wait for state persistence before syncing
-    console.log(`[DEBUG] Client B waiting for state persistence...`);
     await waitForStatePersistence(pageB);
 
-    console.log(`[DEBUG] Client B triggering sync...`);
     await syncPageB.triggerSync();
-    const syncResultB = await waitForSync(pageB, syncPageB);
-    console.log(`[DEBUG] Sync result for Client B: ${syncResultB}`);
+    await waitForSync(pageB, syncPageB);
 
-    // Check snackbar on B too
-    const snackBarsB = pageB.locator('.mat-mdc-snack-bar-container');
-    const snackCountB = await snackBarsB.count();
-    console.log(`[DEBUG] Client B snackbars: ${snackCountB}`);
-    for (let i = 0; i < snackCountB; i++) {
-      const text = await snackBarsB.nth(i).innerText();
-      console.log(`[DEBUG] Client B snackbar ${i}: ${text}`);
-    }
-
-    // Wait longer for server to process and ensure Last-Modified timestamp differs
+    // Wait for server to process and ensure Last-Modified timestamp differs
     // WebDAV servers often have second-level timestamp precision
-    await pageB.waitForTimeout(2000);
+    await pageB.waitForTimeout(WEBDAV_TIMESTAMP_DELAY_MS);
 
     // Sync A - trigger sync to download changes from B
     await syncPageA.triggerSync();
-
-    // Debug: check for snackbar messages during sync
-    const syncResult = await waitForSync(pageA, syncPageA);
-    console.log(`[DEBUG] Sync result for Client A: ${syncResult}`);
-
-    // Check all visible snackbar messages
-    const snackBars = pageA.locator('.mat-mdc-snack-bar-container');
-    const snackCount = await snackBars.count();
-    console.log(`[DEBUG] Number of snackbars visible: ${snackCount}`);
-    for (let i = 0; i < snackCount; i++) {
-      const text = await snackBars.nth(i).innerText();
-      console.log(`[DEBUG] Snackbar ${i}: ${text}`);
-    }
+    await waitForSync(pageA, syncPageA);
 
     // Wait for state persistence to complete after sync
     await waitForStatePersistence(pageA);
 
-    // First check: Can we see the task BEFORE reload? (tests NgRx update)
-    // Navigate to project page first
+    // Navigate to project page to verify task synced
     await projectPageA.navigateToProjectByName(projectName);
-
-    // Debug: check task count before reload
-    const taskCountBeforeReload = await pageA.locator('task').count();
-    console.log(`[DEBUG] Task count before reload: ${taskCountBeforeReload}`);
 
     // Check if task B is visible immediately after sync (no reload)
     await expect(pageA.locator('task', { hasText: 'Task in Project B' })).toBeVisible({
