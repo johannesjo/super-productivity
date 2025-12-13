@@ -2087,6 +2087,65 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(task1Count).toBe(1);
     });
 
+    it('should correctly restore multiple adjacent tasks to their original positions', () => {
+      // Scenario: delete task1 and task2 (adjacent), then restore both
+      // This tests that mergeTaskIdsAtPositions handles multiple inserts correctly
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['task3'], // Only task3 remains after deleting task1 and task2
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          // Captured at delete time: task1 at 0, task2 at 1, task3 at 2
+          tag1: ['task1', 'task2', 'task3'],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', tagIds: ['tag1'] }),
+          task2: createMockTask({ id: 'task2', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      const taskIds = updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds;
+      // All three tasks should be present
+      expect(taskIds).toContain('task1');
+      expect(taskIds).toContain('task2');
+      expect(taskIds).toContain('task3');
+      // task1 should be before task2 (original relative order preserved)
+      expect(taskIds.indexOf('task1')).toBeLessThan(taskIds.indexOf('task2'));
+    });
+
+    it('should use current project state when restoring task to project', () => {
+      // This test verifies that we read from the current state, not stale state
+      const testState = createStateWithExistingTasks(['newTask'], [], [], []);
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restoredTask', projectId: 'project1' },
+        projectContext: {
+          projectId: 'project1',
+          // Captured at delete time (before newTask existed)
+          taskIdsForProject: ['restoredTask', 'oldTask'],
+          taskIdsForProjectBacklog: [],
+        },
+        deletedTaskEntities: {
+          restoredTask: createMockTask({ id: 'restoredTask', projectId: 'project1' }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      const projectTaskIds = updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds;
+      // Both restoredTask and newTask should be present (merge, not replace)
+      expect(projectTaskIds).toContain('restoredTask');
+      expect(projectTaskIds).toContain('newTask');
+    });
+
     // ==========================================================================
     // DATA PRESERVATION TESTS - ensure all task data is preserved
     // ==========================================================================
