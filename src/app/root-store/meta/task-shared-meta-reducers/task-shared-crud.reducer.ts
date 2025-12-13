@@ -451,6 +451,81 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
   return updateTags(updatedState, tagUpdates);
 };
 
+/**
+ * Restores a deleted task with all its associations.
+ * This is the sync-aware version of undo delete - the payload contains
+ * all data needed to restore the task on any device.
+ */
+const handleRestoreDeletedTask = (
+  state: RootState,
+  payload: ReturnType<typeof TaskSharedActions.restoreDeletedTask>,
+): RootState => {
+  const { deletedTaskEntities, tagTaskIdMap, projectContext, parentContext } = payload;
+  let updatedState = state;
+
+  // 1. Restore task entities with updated modified timestamp
+  const tasksToRestore = Object.values(deletedTaskEntities)
+    .filter((task): task is Task => !!task)
+    .map((task) => ({
+      ...task,
+      modified: Date.now(),
+    }));
+
+  updatedState = {
+    ...updatedState,
+    [TASK_FEATURE_NAME]: taskAdapter.addMany(
+      tasksToRestore,
+      updatedState[TASK_FEATURE_NAME],
+    ),
+  };
+
+  // 2. Restore parent-child relationships (if task was a subtask)
+  if (parentContext) {
+    const parentExists =
+      !!updatedState[TASK_FEATURE_NAME].entities[parentContext.parentTaskId];
+    if (parentExists) {
+      updatedState = {
+        ...updatedState,
+        [TASK_FEATURE_NAME]: taskAdapter.updateOne(
+          {
+            id: parentContext.parentTaskId,
+            changes: { subTaskIds: parentContext.subTaskIds },
+          },
+          updatedState[TASK_FEATURE_NAME],
+        ),
+      };
+    }
+  }
+
+  // 3. Restore tag associations (only for tags that still exist)
+  const tagUpdates = Object.entries(tagTaskIdMap)
+    .filter(([tagId]) => !!state[TAG_FEATURE_NAME].entities[tagId])
+    .map(
+      ([tagId, taskIds]): Update<Tag> => ({
+        id: tagId,
+        changes: { taskIds },
+      }),
+    );
+
+  if (tagUpdates.length > 0) {
+    updatedState = updateTags(updatedState, tagUpdates);
+  }
+
+  // 4. Restore project associations (if project still exists)
+  if (projectContext) {
+    const projectExists =
+      !!state[PROJECT_FEATURE_NAME].entities[projectContext.projectId];
+    if (projectExists) {
+      updatedState = updateProject(updatedState, projectContext.projectId, {
+        taskIds: projectContext.taskIdsForProject,
+        backlogTaskIds: projectContext.taskIdsForProjectBacklog,
+      });
+    }
+  }
+
+  return updatedState;
+};
+
 const handleUpdateTask = (
   state: RootState,
   taskUpdate: Update<Task>,
@@ -566,6 +641,12 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
   [TaskSharedActions.deleteTasks.type]: () => {
     const { taskIds } = action as ReturnType<typeof TaskSharedActions.deleteTasks>;
     return handleDeleteTasks(state, taskIds);
+  },
+  [TaskSharedActions.restoreDeletedTask.type]: () => {
+    return handleRestoreDeletedTask(
+      state,
+      action as ReturnType<typeof TaskSharedActions.restoreDeletedTask>,
+    );
   },
   [TaskSharedActions.updateTask.type]: () => {
     const { task, isIgnoreShortSyntax } = action as ReturnType<

@@ -1,8 +1,8 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
-import { undoDeleteTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { getLastDeletePayload } from '../../../root-store/meta/undo-task-delete.meta-reducer';
 import { select, Store } from '@ngrx/store';
 import {
   distinctUntilChanged,
@@ -103,7 +103,12 @@ export class TaskUiEffects {
             msg: T.F.TASK.S.DELETED,
             config: { duration: 5000 },
             actionStr: T.G.UNDO,
-            actionId: undoDeleteTask.type,
+            actionFn: () => {
+              const payload = getLastDeletePayload();
+              if (payload) {
+                this._store$.dispatch(TaskSharedActions.restoreDeletedTask(payload));
+              }
+            },
           });
         }),
       ),

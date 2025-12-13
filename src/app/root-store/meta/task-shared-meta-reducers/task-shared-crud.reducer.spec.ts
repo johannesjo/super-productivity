@@ -1450,6 +1450,493 @@ describe('taskSharedCrudMetaReducer', () => {
     });
   });
 
+  describe('restoreDeletedTask action', () => {
+    const createRestoreAction = (
+      overrides: {
+        taskOverrides?: Partial<Task>;
+        projectContext?: {
+          projectId: string;
+          taskIdsForProject: string[];
+          taskIdsForProjectBacklog: string[];
+        };
+        parentContext?: {
+          parentTaskId: string;
+          subTaskIds: string[];
+        };
+        tagTaskIdMap?: Record<string, string[]>;
+        deletedTaskEntities?: Record<string, Task | undefined>;
+      } = {},
+    ) => {
+      const task = createMockTask(overrides.taskOverrides);
+      const taskWithSubTasks = {
+        ...task,
+        subTasks: [],
+      };
+
+      return TaskSharedActions.restoreDeletedTask({
+        task: taskWithSubTasks as any,
+        projectContext: overrides.projectContext,
+        parentContext: overrides.parentContext,
+        tagTaskIdMap: overrides.tagTaskIdMap || {},
+        deletedTaskEntities: overrides.deletedTaskEntities || { [task.id]: task },
+      });
+    };
+
+    it('should restore task entity with updated modified timestamp', () => {
+      const oldTimestamp = Date.now() - 10000;
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', modified: oldTimestamp },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            modified: oldTimestamp,
+          }),
+        },
+      });
+
+      const beforeRestore = Date.now();
+      metaReducer(baseState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const restoredTask = updatedState[TASK_FEATURE_NAME].entities['restored-task'];
+
+      expect(restoredTask).toBeDefined();
+      expect(restoredTask.modified).toBeGreaterThanOrEqual(beforeRestore);
+      expect(restoredTask.modified).not.toEqual(oldTimestamp);
+    });
+
+    it('should restore task to project taskIds', () => {
+      const testState = createStateWithExistingTasks(['existing-task'], [], [], []);
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', projectId: 'project1' },
+        projectContext: {
+          projectId: 'project1',
+          taskIdsForProject: ['restored-task', 'existing-task'],
+          taskIdsForProjectBacklog: [],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            projectId: 'project1',
+          }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectProjectUpdate('project1', {
+            taskIds: ['restored-task', 'existing-task'],
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should restore task to project backlogTaskIds', () => {
+      const testState = createStateWithExistingTasks([], ['existing-backlog'], [], []);
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', projectId: 'project1' },
+        projectContext: {
+          projectId: 'project1',
+          taskIdsForProject: [],
+          taskIdsForProjectBacklog: ['restored-task', 'existing-backlog'],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            projectId: 'project1',
+          }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectProjectUpdate('project1', {
+            backlogTaskIds: ['restored-task', 'existing-backlog'],
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should restore task to tag taskIds', () => {
+      const testState = createStateWithExistingTasks([], [], ['existing-task'], []);
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          tag1: ['restored-task', 'existing-task'],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            tagIds: ['tag1'],
+          }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTagUpdate('tag1', {
+            taskIds: ['restored-task', 'existing-task'],
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should restore task to TODAY tag', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['existing-today']);
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task' },
+        tagTaskIdMap: {
+          TODAY: ['restored-task', 'existing-today'],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({ id: 'restored-task' }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTagUpdate('TODAY', {
+            taskIds: ['restored-task', 'existing-today'],
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should restore subtask and parent relationship', () => {
+      const testState = createStateWithExistingTasks(['parent-task'], [], [], []);
+      testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+        id: 'parent-task',
+        subTaskIds: [], // Subtask was removed
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'sub-task', parentId: 'parent-task' },
+        parentContext: {
+          parentTaskId: 'parent-task',
+          subTaskIds: ['sub-task'], // Restore the relationship
+        },
+        deletedTaskEntities: {
+          'sub-task': createMockTask({
+            id: 'sub-task',
+            parentId: 'parent-task',
+          }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('sub-task'),
+          ...expectTaskUpdate('parent-task', {
+            subTaskIds: ['sub-task'],
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should restore task with subtasks', () => {
+      const subTask1 = createMockTask({ id: 'sub1', parentId: 'parent-task' });
+      const subTask2 = createMockTask({ id: 'sub2', parentId: 'parent-task' });
+      const parentTask = createMockTask({
+        id: 'parent-task',
+        subTaskIds: ['sub1', 'sub2'],
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'parent-task', subTaskIds: ['sub1', 'sub2'] },
+        deletedTaskEntities: {
+          'parent-task': parentTask,
+          sub1: subTask1,
+          sub2: subTask2,
+        },
+        tagTaskIdMap: {
+          tag1: ['parent-task'],
+        },
+      });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('parent-task'),
+          ...expectTaskEntityExists('sub1'),
+          ...expectTaskEntityExists('sub2'),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
+    it('should skip project restoration if project no longer exists', () => {
+      // Project does not exist in state
+      const testState = {
+        ...baseState,
+        [PROJECT_FEATURE_NAME]: {
+          ...baseState[PROJECT_FEATURE_NAME],
+          entities: {}, // No projects
+          ids: [],
+        },
+      };
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', projectId: 'deleted-project' },
+        projectContext: {
+          projectId: 'deleted-project',
+          taskIdsForProject: ['restored-task'],
+          taskIdsForProjectBacklog: [],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            projectId: 'deleted-project',
+          }),
+        },
+      });
+
+      // Should not throw
+      expect(() => metaReducer(testState, action)).not.toThrow();
+
+      // Task should still be restored
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      expect(updatedState[TASK_FEATURE_NAME].entities['restored-task']).toBeDefined();
+    });
+
+    it('should skip tag restoration if tag no longer exists', () => {
+      const testState = {
+        ...baseState,
+        [TAG_FEATURE_NAME]: {
+          ...baseState[TAG_FEATURE_NAME],
+          entities: {
+            TODAY: baseState[TAG_FEATURE_NAME].entities.TODAY,
+            // tag1 does not exist
+          },
+          ids: ['TODAY'],
+        },
+      };
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', tagIds: ['deleted-tag'] },
+        tagTaskIdMap: {
+          'deleted-tag': ['restored-task'], // Tag no longer exists
+          TODAY: ['restored-task'],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            tagIds: ['deleted-tag'],
+          }),
+        },
+      });
+
+      // Should not throw
+      expect(() => metaReducer(testState, action)).not.toThrow();
+
+      // Task should still be restored, only TODAY should be updated
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTagUpdate('TODAY', { taskIds: ['restored-task'] }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should skip parent restoration if parent no longer exists', () => {
+      // Parent task does not exist
+      const action = createRestoreAction({
+        taskOverrides: { id: 'sub-task', parentId: 'deleted-parent' },
+        parentContext: {
+          parentTaskId: 'deleted-parent',
+          subTaskIds: ['sub-task'],
+        },
+        deletedTaskEntities: {
+          'sub-task': createMockTask({
+            id: 'sub-task',
+            parentId: 'deleted-parent',
+          }),
+        },
+      });
+
+      // Should not throw
+      expect(() => metaReducer(baseState, action)).not.toThrow();
+
+      // Subtask should still be restored
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      expect(updatedState[TASK_FEATURE_NAME].entities['sub-task']).toBeDefined();
+    });
+
+    it('should handle restore without project context', () => {
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', projectId: '' },
+        // No projectContext provided
+        tagTaskIdMap: { tag1: ['restored-task'] },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({ id: 'restored-task', projectId: '' }),
+        },
+      });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTagUpdate('tag1', { taskIds: ['restored-task'] }),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
+    it('should handle restore without parent context', () => {
+      const action = createRestoreAction({
+        taskOverrides: { id: 'main-task' },
+        // No parentContext provided - this is a main task
+        tagTaskIdMap: { tag1: ['main-task'] },
+        deletedTaskEntities: {
+          'main-task': createMockTask({ id: 'main-task' }),
+        },
+      });
+
+      metaReducer(baseState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('main-task'),
+        },
+        action,
+        mockReducer,
+        baseState,
+      );
+    });
+
+    it('should handle empty deletedTaskEntities gracefully', () => {
+      const action = TaskSharedActions.restoreDeletedTask({
+        task: { ...createMockTask(), subTasks: [] } as any,
+        tagTaskIdMap: {},
+        deletedTaskEntities: {},
+      });
+
+      // Should not throw
+      expect(() => metaReducer(baseState, action)).not.toThrow();
+    });
+
+    it('should restore multiple tags simultaneously', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
+        id: 'tag2',
+        title: 'Tag 2',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push('tag2');
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'restored-task', tagIds: ['tag1', 'tag2'] },
+        tagTaskIdMap: {
+          tag1: ['restored-task'],
+          tag2: ['restored-task'],
+          TODAY: ['restored-task'],
+        },
+        deletedTaskEntities: {
+          'restored-task': createMockTask({
+            id: 'restored-task',
+            tagIds: ['tag1', 'tag2'],
+          }),
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTagUpdates({
+            tag1: { taskIds: ['restored-task'] },
+            tag2: { taskIds: ['restored-task'] },
+            TODAY: { taskIds: ['restored-task'] },
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+
+    it('should handle full restore scenario with all associations', () => {
+      const testState = createStateWithExistingTasks(
+        ['existing-task'],
+        ['existing-backlog'],
+        ['existing-tag'],
+        ['existing-today'],
+      );
+
+      const subTask = createMockTask({ id: 'sub1', parentId: 'restored-task' });
+      const mainTask = createMockTask({
+        id: 'restored-task',
+        projectId: 'project1',
+        tagIds: ['tag1'],
+        subTaskIds: ['sub1'],
+      });
+
+      const action = TaskSharedActions.restoreDeletedTask({
+        task: { ...mainTask, subTasks: [subTask] } as any,
+        projectContext: {
+          projectId: 'project1',
+          taskIdsForProject: ['restored-task', 'existing-task'],
+          taskIdsForProjectBacklog: ['existing-backlog'],
+        },
+        tagTaskIdMap: {
+          tag1: ['restored-task', 'existing-tag'],
+          TODAY: ['restored-task', 'existing-today'],
+        },
+        deletedTaskEntities: {
+          'restored-task': mainTask,
+          sub1: subTask,
+        },
+      });
+
+      metaReducer(testState, action);
+      expectStateUpdate(
+        {
+          ...expectTaskEntityExists('restored-task'),
+          ...expectTaskEntityExists('sub1'),
+          ...expectProjectUpdate('project1', {
+            taskIds: ['restored-task', 'existing-task'],
+          }),
+          ...expectTagUpdates({
+            tag1: { taskIds: ['restored-task', 'existing-tag'] },
+            TODAY: { taskIds: ['restored-task', 'existing-today'] },
+          }),
+        },
+        action,
+        mockReducer,
+        testState,
+      );
+    });
+  });
+
   describe('other actions', () => {
     it('should pass through other actions to the reducer', () => {
       const action = { type: 'SOME_OTHER_ACTION' };

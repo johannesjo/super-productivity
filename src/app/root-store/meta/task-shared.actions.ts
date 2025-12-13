@@ -93,6 +93,30 @@ export const TaskSharedActions = createActionGroup({
       } satisfies PersistentActionMeta,
     }),
 
+    // Restore a deleted task (undo delete) - syncs across devices
+    restoreDeletedTask: (payload: {
+      task: TaskWithSubTasks;
+      projectContext?: {
+        projectId: string;
+        taskIdsForProject: string[];
+        taskIdsForProjectBacklog: string[];
+      };
+      parentContext?: {
+        parentTaskId: string;
+        subTaskIds: string[];
+      };
+      tagTaskIdMap: Record<string, string[]>;
+      deletedTaskEntities: Record<string, Task | undefined>;
+    }) => ({
+      ...payload,
+      meta: {
+        isPersistent: true,
+        entityType: 'TASK',
+        entityId: payload.task.id,
+        opType: OpType.Update,
+      } satisfies PersistentActionMeta,
+    }),
+
     // Task Scheduling
     scheduleTaskWithTime: (taskProps: {
       task: Task;
