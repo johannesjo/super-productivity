@@ -567,7 +567,7 @@ const handleRestoreDeletedTask = (
 
   // 4. Restore project associations (if project still exists)
   if (projectContext) {
-    const project = state[PROJECT_FEATURE_NAME].entities[
+    const project = updatedState[PROJECT_FEATURE_NAME].entities[
       projectContext.projectId
     ] as Project;
     if (project) {
