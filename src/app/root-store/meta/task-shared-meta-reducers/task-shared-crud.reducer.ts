@@ -19,6 +19,7 @@ import {
   updateTimeSpentForTask,
 } from '../../../features/tasks/store/task.reducer.util';
 import { Tag } from '../../../features/tag/tag.model';
+import { Project } from '../../../features/project/project.model';
 import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { calcTotalTimeSpent } from '../../../features/tasks/util/calc-total-time-spent';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
@@ -452,15 +453,52 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
 };
 
 /**
+ * Merges restored task IDs into a current array at their original positions.
+ * This preserves any new tasks added after the delete while restoring the
+ * deleted tasks at their original positions.
+ */
+const mergeTaskIdsAtPositions = (
+  capturedArray: string[],
+  currentArray: string[],
+  taskIdsToRestore: string[],
+): string[] => {
+  const result = [...currentArray];
+
+  for (const taskId of taskIdsToRestore) {
+    // Skip if already in current array
+    if (result.includes(taskId)) {
+      continue;
+    }
+
+    // Find original position in captured array
+    const capturedIndex = capturedArray.indexOf(taskId);
+    if (capturedIndex === -1) {
+      // Not found in captured array, append to end
+      result.push(taskId);
+    } else {
+      // Insert at the original position, clamped to array bounds
+      const insertIndex = Math.min(capturedIndex, result.length);
+      result.splice(insertIndex, 0, taskId);
+    }
+  }
+
+  return result;
+};
+
+/**
  * Restores a deleted task with all its associations.
  * This is the sync-aware version of undo delete - the payload contains
  * all data needed to restore the task on any device.
+ *
+ * IMPORTANT: This uses MERGE semantics, not REPLACE. Any tasks added
+ * between delete and restore are preserved.
  */
 const handleRestoreDeletedTask = (
   state: RootState,
   payload: ReturnType<typeof TaskSharedActions.restoreDeletedTask>,
 ): RootState => {
   const { deletedTaskEntities, tagTaskIdMap, projectContext, parentContext } = payload;
+  const restoredTaskIds = Object.keys(deletedTaskEntities);
   let updatedState = state;
 
   // 1. Restore task entities with updated modified timestamp
@@ -481,15 +519,20 @@ const handleRestoreDeletedTask = (
 
   // 2. Restore parent-child relationships (if task was a subtask)
   if (parentContext) {
-    const parentExists =
-      !!updatedState[TASK_FEATURE_NAME].entities[parentContext.parentTaskId];
-    if (parentExists) {
+    const parent = updatedState[TASK_FEATURE_NAME].entities[parentContext.parentTaskId];
+    if (parent) {
+      const currentSubTaskIds = parent.subTaskIds || [];
+      const mergedSubTaskIds = mergeTaskIdsAtPositions(
+        parentContext.subTaskIds,
+        currentSubTaskIds,
+        restoredTaskIds,
+      );
       updatedState = {
         ...updatedState,
         [TASK_FEATURE_NAME]: taskAdapter.updateOne(
           {
             id: parentContext.parentTaskId,
-            changes: { subTaskIds: parentContext.subTaskIds },
+            changes: { subTaskIds: mergedSubTaskIds },
           },
           updatedState[TASK_FEATURE_NAME],
         ),
@@ -499,13 +542,24 @@ const handleRestoreDeletedTask = (
 
   // 3. Restore tag associations (only for tags that still exist)
   const tagUpdates = Object.entries(tagTaskIdMap)
-    .filter(([tagId]) => !!state[TAG_FEATURE_NAME].entities[tagId])
-    .map(
-      ([tagId, taskIds]): Update<Tag> => ({
+    .filter(([tagId]) => !!updatedState[TAG_FEATURE_NAME].entities[tagId])
+    .map(([tagId, capturedTaskIds]): Update<Tag> => {
+      const currentTag = updatedState[TAG_FEATURE_NAME].entities[tagId] as Tag;
+      const currentTaskIds = currentTag?.taskIds || [];
+      // Only restore task IDs that were actually in this tag at delete time
+      const taskIdsToRestoreForTag = restoredTaskIds.filter((id) =>
+        capturedTaskIds.includes(id),
+      );
+      const mergedTaskIds = mergeTaskIdsAtPositions(
+        capturedTaskIds,
+        currentTaskIds,
+        taskIdsToRestoreForTag,
+      );
+      return {
         id: tagId,
-        changes: { taskIds },
-      }),
-    );
+        changes: { taskIds: mergedTaskIds },
+      };
+    });
 
   if (tagUpdates.length > 0) {
     updatedState = updateTags(updatedState, tagUpdates);
@@ -513,13 +567,36 @@ const handleRestoreDeletedTask = (
 
   // 4. Restore project associations (if project still exists)
   if (projectContext) {
-    const projectExists =
-      !!state[PROJECT_FEATURE_NAME].entities[projectContext.projectId];
-    if (projectExists) {
-      updatedState = updateProject(updatedState, projectContext.projectId, {
-        taskIds: projectContext.taskIdsForProject,
-        backlogTaskIds: projectContext.taskIdsForProjectBacklog,
-      });
+    const project = state[PROJECT_FEATURE_NAME].entities[
+      projectContext.projectId
+    ] as Project;
+    if (project) {
+      const currentTaskIds = project.taskIds || [];
+      const currentBacklogTaskIds = project.backlogTaskIds || [];
+
+      // Only restore to one list - check which one the task was in
+      const mainTaskId = payload.task.id;
+      const wasInBacklog = projectContext.taskIdsForProjectBacklog.includes(mainTaskId);
+
+      if (wasInBacklog) {
+        const mergedBacklogTaskIds = mergeTaskIdsAtPositions(
+          projectContext.taskIdsForProjectBacklog,
+          currentBacklogTaskIds,
+          [mainTaskId],
+        );
+        updatedState = updateProject(updatedState, projectContext.projectId, {
+          backlogTaskIds: mergedBacklogTaskIds,
+        });
+      } else {
+        const mergedTaskIds = mergeTaskIdsAtPositions(
+          projectContext.taskIdsForProject,
+          currentTaskIds,
+          [mainTaskId],
+        );
+        updatedState = updateProject(updatedState, projectContext.projectId, {
+          taskIds: mergedTaskIds,
+        });
+      }
     }
   }
 

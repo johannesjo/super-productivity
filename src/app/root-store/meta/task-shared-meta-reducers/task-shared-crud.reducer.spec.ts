@@ -1935,6 +1935,157 @@ describe('taskSharedCrudMetaReducer', () => {
         testState,
       );
     });
+
+    // ==========================================================================
+    // MERGE BEHAVIOR TESTS - verify tasks added after delete are preserved
+    // ==========================================================================
+
+    it('should preserve new tasks in tag when restoring (MERGE not REPLACE)', () => {
+      // Scenario: delete task1, then create task3, then undo delete task1
+      // Expected: tag should have [task1, task3] (task3 is preserved)
+      const testState = createStateWithExistingTasks([], [], [], []);
+
+      // Current state has task3 (created after task1 was deleted)
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['task3'], // New task added after delete
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          // Captured at delete time: ['task1', 'task2']
+          tag1: ['task1', 'task2'],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // task1 should be restored at position 0, task3 should still be there
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds).toContain('task1');
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds).toContain('task3');
+    });
+
+    it('should preserve new tasks in project when restoring (MERGE not REPLACE)', () => {
+      // Scenario: delete task1, then create task3, then undo delete task1
+      const testState = createStateWithExistingTasks(['task3'], [], [], []);
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', projectId: 'project1' },
+        projectContext: {
+          projectId: 'project1',
+          // Captured at delete time
+          taskIdsForProject: ['task1', 'task2'],
+          taskIdsForProjectBacklog: [],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', projectId: 'project1' }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // Both task1 and task3 should be present
+      expect(updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds).toContain(
+        'task1',
+      );
+      expect(updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds).toContain(
+        'task3',
+      );
+    });
+
+    it('should preserve new subtasks when restoring parent relationship (MERGE)', () => {
+      // Scenario: delete sub1, add sub3 to parent, undo delete sub1
+      const testState = createStateWithExistingTasks(['parent-task'], [], [], []);
+      testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+        id: 'parent-task',
+        subTaskIds: ['sub3'], // New subtask added after delete
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'sub1', parentId: 'parent-task' },
+        parentContext: {
+          parentTaskId: 'parent-task',
+          // Captured at delete time
+          subTaskIds: ['sub1', 'sub2'],
+        },
+        deletedTaskEntities: {
+          sub1: createMockTask({ id: 'sub1', parentId: 'parent-task' }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // Both sub1 and sub3 should be present
+      const parentSubTaskIds =
+        updatedState[TASK_FEATURE_NAME].entities['parent-task'].subTaskIds;
+      expect(parentSubTaskIds).toContain('sub1');
+      expect(parentSubTaskIds).toContain('sub3');
+    });
+
+    it('should restore task at original position in tag', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['task2', 'task3'], // Remaining tasks after delete
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          // Captured: task1 was at position 0
+          tag1: ['task1', 'task2', 'task3'],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // task1 should be restored at position 0
+      const taskIds = updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds;
+      expect(taskIds[0]).toBe('task1');
+    });
+
+    it('should not duplicate task if already present (idempotent restore)', () => {
+      // Scenario: restore action replayed during sync
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['task1', 'task2'], // task1 already restored
+      });
+      testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
+        id: 'task1',
+        tagIds: ['tag1'],
+      });
+      (testState[TASK_FEATURE_NAME].ids as string[]).push('task1');
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          tag1: ['task1', 'task2'],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // task1 should appear exactly once
+      const taskIds = updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds;
+      const task1Count = taskIds.filter((id: string) => id === 'task1').length;
+      expect(task1Count).toBe(1);
+    });
   });
 
   describe('other actions', () => {
