@@ -526,4 +526,115 @@ base.describe('@supersync SuperSync Edge Cases', () => {
       }
     },
   );
+
+  /**
+   * Scenario 7: Undo Task Delete Syncs Across Devices
+   *
+   * Verifies that undoing a task deletion syncs correctly to other clients.
+   * This tests the restoreDeletedTask action which carries full task data.
+   *
+   * Actions:
+   * 1. Client A creates Task, syncs
+   * 2. Client B syncs (has task)
+   * 3. Client A deletes Task
+   * 4. Client A clicks Undo (within 5 seconds)
+   * 5. Client A syncs
+   * 6. Client B syncs
+   * 7. Verify Task exists on both clients
+   */
+  base(
+    'Undo task delete syncs restored task to other client',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup Clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task
+        const taskName = `UndoDelete-${testRunId}`;
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.syncAndWait();
+
+        // 2. Client B syncs (download task)
+        await clientB.sync.syncAndWait();
+
+        // Verify task exists on both clients
+        await waitForTask(clientA.page, taskName);
+        await waitForTask(clientB.page, taskName);
+
+        // 3. Client A deletes the task
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorA.click({ button: 'right' });
+        await clientA.page
+          .locator('.mat-mdc-menu-item')
+          .filter({ hasText: 'Delete' })
+          .click();
+
+        // Handle confirmation dialog if present
+        const dialog = clientA.page.locator('dialog-confirm');
+        if (await dialog.isVisible()) {
+          await dialog.locator('button[type=submit]').click();
+        }
+
+        // Verify task is deleted locally
+        await expect(taskLocatorA).not.toBeVisible({ timeout: 5000 });
+
+        // 4. Client A clicks Undo (snackbar should be visible)
+        // The snackbar appears for 5 seconds with an "Undo" action
+        const undoButton = clientA.page.locator('simple-snack-bar button, snack button');
+        await undoButton.waitFor({ state: 'visible', timeout: 3000 });
+        await undoButton.click();
+
+        // Wait for undo to complete
+        await clientA.page.waitForTimeout(500);
+
+        // Verify task is restored locally on A
+        const restoredTaskA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await expect(restoredTaskA).toBeVisible({ timeout: 5000 });
+
+        // 5. Client A syncs
+        await clientA.sync.syncAndWait();
+
+        // 6. Client B syncs (should receive the restore action)
+        await clientB.sync.syncAndWait();
+
+        // Wait for UI to update
+        await clientB.page.waitForTimeout(500);
+
+        // 7. Verify Task exists on Client B after sync
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await expect(taskLocatorB).toBeVisible({ timeout: 10000 });
+
+        // Verify both clients have exactly the same task count
+        const countA = await clientA.page.locator(`task:has-text("${taskName}")`).count();
+        const countB = await clientB.page.locator(`task:has-text("${taskName}")`).count();
+        expect(countA).toBe(1);
+        expect(countB).toBe(1);
+
+        console.log(
+          '[UndoDelete] ✓ Undo task delete synced successfully to other client',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

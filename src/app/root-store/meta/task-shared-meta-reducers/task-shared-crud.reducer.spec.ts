@@ -2086,6 +2086,212 @@ describe('taskSharedCrudMetaReducer', () => {
       const task1Count = taskIds.filter((id: string) => id === 'task1').length;
       expect(task1Count).toBe(1);
     });
+
+    // ==========================================================================
+    // DATA PRESERVATION TESTS - ensure all task data is preserved
+    // ==========================================================================
+
+    it('should preserve timeSpentOnDay data when restoring', () => {
+      const timeSpentOnDay = {
+        '2024-01-15': 3600000,
+        '2024-01-16': 1800000,
+      };
+      const task = createMockTask({
+        id: 'task-with-time',
+        timeSpentOnDay,
+        timeSpent: 5400000,
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task-with-time' },
+        deletedTaskEntities: { 'task-with-time': task },
+      });
+
+      metaReducer(baseState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const restoredTask = updatedState[TASK_FEATURE_NAME].entities['task-with-time'];
+
+      expect(restoredTask.timeSpentOnDay).toEqual(timeSpentOnDay);
+      expect(restoredTask.timeSpent).toBe(5400000);
+    });
+
+    it('should preserve task attachments when restoring', () => {
+      const attachments = [
+        {
+          id: 'att1',
+          path: '/path/to/file.pdf',
+          originalFileName: 'file.pdf',
+          type: 'FILE',
+        },
+      ];
+      const task = createMockTask({
+        id: 'task-with-attachments',
+        attachments: attachments as any,
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task-with-attachments' },
+        deletedTaskEntities: { 'task-with-attachments': task },
+      });
+
+      metaReducer(baseState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const restoredTask =
+        updatedState[TASK_FEATURE_NAME].entities['task-with-attachments'];
+
+      expect(restoredTask.attachments).toEqual(attachments);
+    });
+
+    it('should preserve notes and other task properties when restoring', () => {
+      const task = createMockTask({
+        id: 'task-with-notes',
+        notes: 'Important notes here',
+        issueId: 'JIRA-123',
+        issueType: 'JIRA',
+        reminderId: 'reminder-1',
+        dueWithTime: 1700000000000,
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task-with-notes' },
+        deletedTaskEntities: { 'task-with-notes': task },
+      });
+
+      metaReducer(baseState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      const restoredTask = updatedState[TASK_FEATURE_NAME].entities['task-with-notes'];
+
+      expect(restoredTask.notes).toBe('Important notes here');
+      expect(restoredTask.issueId).toBe('JIRA-123');
+      expect(restoredTask.issueType).toBe('JIRA');
+      expect(restoredTask.reminderId).toBe('reminder-1');
+      expect(restoredTask.dueWithTime).toBe(1700000000000);
+    });
+
+    it('should not duplicate task in project if already present (idempotent)', () => {
+      // Scenario: restore action replayed during sync - project already has task
+      const testState = createStateWithExistingTasks(['task1', 'task2'], [], [], []);
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', projectId: 'project1' },
+        projectContext: {
+          projectId: 'project1',
+          taskIdsForProject: ['task1', 'task2'],
+          taskIdsForProjectBacklog: [],
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', projectId: 'project1' }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // task1 should appear exactly once in project taskIds
+      const projectTaskIds = updatedState[PROJECT_FEATURE_NAME].entities.project1.taskIds;
+      const task1Count = projectTaskIds.filter((id: string) => id === 'task1').length;
+      expect(task1Count).toBe(1);
+    });
+
+    it('should restore task with subtasks where subtasks have their own tags', () => {
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag2 = createMockTag({
+        id: 'tag2',
+        title: 'SubTask Tag',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push('tag2');
+
+      const subTask = createMockTask({
+        id: 'sub1',
+        parentId: 'parent-task',
+        tagIds: ['tag2'], // Subtask has different tag
+      });
+      const parentTask = createMockTask({
+        id: 'parent-task',
+        subTaskIds: ['sub1'],
+        tagIds: ['tag1'], // Parent has tag1
+      });
+
+      const action = TaskSharedActions.restoreDeletedTask({
+        task: { ...parentTask, subTasks: [subTask] } as any,
+        tagTaskIdMap: {
+          tag1: ['parent-task'], // Parent in tag1
+          tag2: ['sub1'], // Subtask in tag2
+        },
+        deletedTaskEntities: {
+          'parent-task': parentTask,
+          sub1: subTask,
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      // Parent should be in tag1
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds).toContain(
+        'parent-task',
+      );
+      // Subtask should be in tag2
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag2.taskIds).toContain('sub1');
+      // Subtask should NOT be in tag1
+      expect(updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds).not.toContain('sub1');
+    });
+
+    it('should handle restore of task from middle position in list', () => {
+      // Task was at position 1 (middle), should be restored there
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['task0', 'task2'], // task1 was between these
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task1', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          tag1: ['task0', 'task1', 'task2'], // Original order
+        },
+        deletedTaskEntities: {
+          task1: createMockTask({ id: 'task1', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      const taskIds = updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds;
+      // task1 should be at index 1
+      expect(taskIds.indexOf('task1')).toBe(1);
+      expect(taskIds).toEqual(['task0', 'task1', 'task2']);
+    });
+
+    it('should handle restore when captured position exceeds current array length', () => {
+      // Task was at position 5, but current array only has 2 items
+      const testState = createStateWithExistingTasks([], [], [], []);
+      testState[TAG_FEATURE_NAME].entities.tag1 = createMockTag({
+        id: 'tag1',
+        taskIds: ['taskA', 'taskB'], // Only 2 tasks now
+      });
+
+      const action = createRestoreAction({
+        taskOverrides: { id: 'task-at-end', tagIds: ['tag1'] },
+        tagTaskIdMap: {
+          // Original had 6 tasks, restored task was at position 5
+          tag1: ['t0', 't1', 't2', 't3', 't4', 'task-at-end'],
+        },
+        deletedTaskEntities: {
+          'task-at-end': createMockTask({ id: 'task-at-end', tagIds: ['tag1'] }),
+        },
+      });
+
+      metaReducer(testState, action);
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+
+      const taskIds = updatedState[TAG_FEATURE_NAME].entities.tag1.taskIds;
+      // Should be clamped to end of current array
+      expect(taskIds).toContain('task-at-end');
+      expect(taskIds.length).toBe(3);
+    });
   });
 
   describe('other actions', () => {
