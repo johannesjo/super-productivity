@@ -49,6 +49,27 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
         <div class="pulse-circle"></div>
       }
 
+      @if (hasTimeEstimate) {
+        <svg
+          class="circle-svg"
+          focusable="false"
+          height="40"
+          width="40"
+        >
+          <circle
+            #circleSvg
+            cx="50%"
+            cy="50%"
+            fill="none"
+            r="10"
+            stroke="currentColor"
+            stroke-dasharray="62.83185307179586"
+            stroke-dashoffset="0"
+            stroke-width="20"
+          ></circle>
+        </svg>
+      }
+
       <button
         (click)="taskService.toggleStartTask()"
         [color]="currentTaskId() ? 'accent' : 'primary'"
@@ -61,27 +82,6 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
           <mat-icon>play_arrow</mat-icon>
         } @else {
           <mat-icon>pause</mat-icon>
-        }
-
-        @if (hasTimeEstimate) {
-          <svg
-            class="circle-svg"
-            focusable="false"
-            height="40"
-            width="40"
-          >
-            <circle
-              #circleSvg
-              cx="50%"
-              cy="50%"
-              fill="none"
-              r="10"
-              stroke="currentColor"
-              stroke-dasharray="62.83185307179586"
-              stroke-dashoffset="0"
-              stroke-width="20"
-            ></circle>
-          </svg>
         }
       </button>
     </div>
@@ -127,20 +127,24 @@ import { distinctUntilChanged, observeOn } from 'rxjs/operators';
           opacity: 0.6;
         }
 
+        .circle-svg {
+          position: absolute;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          margin: auto;
+          transform: rotate(-90deg);
+          opacity: 0.15;
+          pointer-events: none;
+          z-index: 3;
+        }
+
         .play-btn {
           position: relative;
           margin-left: 0;
           z-index: 2;
           box-shadow: var(--whiteframe-shadow-2dp);
-
-          .circle-svg {
-            transform: rotate(-90deg);
-            position: absolute;
-            opacity: 0.15;
-            top: -8px;
-            right: -8px;
-            pointer-events: none;
-          }
 
           .mat-icon {
             position: relative;
