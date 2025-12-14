@@ -364,7 +364,19 @@ const getAllPossibleEventsAfterStartFromIcal = (icalData: string, start: Date): 
       }
     }
   }
-  const vevents = ICAL.helpers.updateTimezones(comp).getAllSubcomponents('vevent');
+  // Wrap updateTimezones in try-catch to handle edge cases in some Office 365 calendars
+  // that can cause "Cannot read properties of null (reading 'parent')" errors.
+  // See: https://github.com/johannesjo/super-productivity/issues/5722
+  let vevents: any[];
+  try {
+    vevents = ICAL.helpers.updateTimezones(comp).getAllSubcomponents('vevent');
+  } catch (error) {
+    Log.warn(
+      'Failed to update timezones for calendar, falling back to raw component:',
+      error,
+    );
+    vevents = comp.getAllSubcomponents('vevent');
+  }
 
   const allPossibleFutureEvents = vevents.filter((ve: any) => {
     try {
