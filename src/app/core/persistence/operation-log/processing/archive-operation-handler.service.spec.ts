@@ -13,6 +13,7 @@ import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actio
 import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 
 describe('isArchiveAffectingAction', () => {
   it('should return true for moveToArchive action', () => {
@@ -72,6 +73,11 @@ describe('isArchiveAffectingAction', () => {
 
   it('should return true for updateTask action', () => {
     const action = { type: TaskSharedActions.updateTask.type };
+    expect(isArchiveAffectingAction(action)).toBe(true);
+  });
+
+  it('should return true for loadAllData action (SYNC_IMPORT/BACKUP_IMPORT)', () => {
+    const action = { type: loadAllData.type };
     expect(isArchiveAffectingAction(action)).toBe(true);
   });
 });
@@ -609,6 +615,201 @@ describe('ArchiveOperationHandler', () => {
         expect(mockTaskArchiveService.removeTagsFromAllTasks).not.toHaveBeenCalled();
         expect(
           mockTaskArchiveService.removeRepeatCfgFromArchiveTasks,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('loadAllData action (SYNC_IMPORT/BACKUP_IMPORT)', () => {
+      const createArchiveModelForTest = (taskIds: string[]): ArchiveModel => ({
+        task: {
+          ids: taskIds,
+          entities: taskIds.reduce(
+            (acc, id) => ({ ...acc, [id]: { id, title: `Task ${id}` } }),
+            {},
+          ),
+        },
+        timeTracking: { project: {}, tag: {} },
+        lastTimeTrackingFlush: Date.now(),
+      });
+
+      it('should write archiveYoung to IndexedDB for remote operations', async () => {
+        const archiveYoungData = createArchiveModelForTest(['archived-1', 'archived-2']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+          archiveYoungData,
+          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
+        );
+      });
+
+      it('should write archiveOld to IndexedDB for remote operations', async () => {
+        const archiveOldData = createArchiveModelForTest(['old-archived-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveOld: archiveOldData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        });
+      });
+
+      it('should write both archiveYoung and archiveOld for remote operations', async () => {
+        const archiveYoungData = createArchiveModelForTest(['young-1']);
+        const archiveOldData = createArchiveModelForTest(['old-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData, archiveOld: archiveOldData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+          archiveYoungData,
+          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
+        );
+        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        });
+      });
+
+      it('should NOT write archive for local operations (already done by PfapiService)', async () => {
+        const archiveYoungData = createArchiveModelForTest(['archived-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
+        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+      });
+
+      it('should NOT write archive when isRemote is undefined (treated as local)', async () => {
+        const archiveYoungData = createArchiveModelForTest(['archived-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
+        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+      });
+
+      it('should handle missing archiveYoung gracefully', async () => {
+        const archiveOldData = createArchiveModelForTest(['old-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveOld: archiveOldData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
+        expect(mockPfapiService.m.archiveOld.save).toHaveBeenCalledWith(archiveOldData, {
+          isUpdateRevAndLastUpdate: false,
+          isIgnoreDBLock: true,
+        });
+      });
+
+      it('should handle missing archiveOld gracefully', async () => {
+        const archiveYoungData = createArchiveModelForTest(['young-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).toHaveBeenCalledWith(
+          archiveYoungData,
+          { isUpdateRevAndLastUpdate: false, isIgnoreDBLock: true },
+        );
+        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+      });
+
+      it('should handle empty appDataComplete gracefully', async () => {
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: {},
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
+        expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
+      });
+
+      it('should preserve timeTracking data in archive', async () => {
+        const archiveYoungData: ArchiveModel = {
+          task: { ids: [], entities: {} },
+          timeTracking: {
+            project: { proj1: { date20240115: { s: 3600000, e: 7200000 } } },
+            tag: { tag1: { date20240115: { s: 1800000, e: 3600000 } } },
+          },
+          lastTimeTrackingFlush: 1234567890,
+        };
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        const savedData = (
+          mockPfapiService.m.archiveYoung.save as jasmine.Spy
+        ).calls.mostRecent().args[0];
+        expect(savedData.timeTracking.project.proj1.date20240115.s).toBe(3600000);
+        expect(savedData.timeTracking.tag.tag1.date20240115.s).toBe(1800000);
+        expect(savedData.lastTimeTrackingFlush).toBe(1234567890);
+      });
+
+      it('should not call other handlers for loadAllData', async () => {
+        const archiveYoungData = createArchiveModelForTest(['archived-1']);
+
+        const action = {
+          type: loadAllData.type,
+          appDataComplete: { archiveYoung: archiveYoungData },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
         ).not.toHaveBeenCalled();
       });
     });

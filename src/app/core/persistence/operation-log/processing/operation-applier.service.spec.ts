@@ -119,6 +119,46 @@ describe('OperationApplierService', () => {
 
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
     });
+
+    it('should call archiveOperationHandler with loadAllData action for SYNC_IMPORT operations', async () => {
+      const archiveYoungData = { task: { ids: ['t1'], entities: {} } };
+      const archiveOldData = { task: { ids: ['t2'], entities: {} } };
+
+      const op: Operation = {
+        id: 'sync-import-1',
+        clientId: 'remoteClient',
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'sync-import-1',
+        payload: {
+          appDataComplete: {
+            archiveYoung: archiveYoungData,
+            archiveOld: archiveOldData,
+          },
+        },
+        vectorClock: { remoteClient: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      await service.applyOperations([op]);
+
+      // Verify store.dispatch was called with loadAllData action
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+      const dispatchedAction = mockStore.dispatch.calls.first().args[0] as any;
+      expect(dispatchedAction.type).toBe('[SP_ALL] Load(import) all data');
+      expect(dispatchedAction.appDataComplete.archiveYoung).toEqual(archiveYoungData);
+      expect(dispatchedAction.appDataComplete.archiveOld).toEqual(archiveOldData);
+      expect(dispatchedAction.meta.isRemote).toBe(true);
+
+      // Verify archiveOperationHandler was called with the action
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
+      const handlerAction = mockArchiveOperationHandler.handleOperation.calls.first()
+        .args[0] as any;
+      expect(handlerAction.type).toBe('[SP_ALL] Load(import) all data');
+      expect(handlerAction.meta.isRemote).toBe(true);
+    });
   });
 
   describe('dependency handling', () => {

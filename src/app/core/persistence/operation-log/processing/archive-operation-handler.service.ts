@@ -12,6 +12,8 @@ import { Log } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { ArchiveModel } from '../../../../features/time-tracking/time-tracking.model';
 
 /**
  * Action types that affect archive storage and require special handling.
@@ -27,6 +29,7 @@ const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   TaskSharedActions.deleteTaskRepeatCfg.type,
   TaskSharedActions.deleteIssueProvider.type,
   TaskSharedActions.deleteIssueProviders.type,
+  loadAllData.type, // For SYNC_IMPORT/BACKUP_IMPORT handling
 ];
 
 /**
@@ -136,6 +139,10 @@ export class ArchiveOperationHandler {
 
       case TaskSharedActions.deleteIssueProviders.type:
         await this._handleDeleteIssueProviders(action);
+        break;
+
+      case loadAllData.type:
+        await this._handleLoadAllData(action);
         break;
     }
   }
@@ -306,5 +313,46 @@ export class ArchiveOperationHandler {
         issueProviderId,
       );
     }
+  }
+
+  /**
+   * Writes archive data to IndexedDB from a SYNC_IMPORT/BACKUP_IMPORT operation.
+   * REMOTE ONLY: For local operations, archive is already written by
+   * PfapiService._updateModelCtrlCaches(), so we skip here to avoid double-writes.
+   *
+   * This fixes the bug where SYNC_IMPORT updated NgRx state but never persisted
+   * archive data to IndexedDB on the remote client, causing data loss on restart.
+   */
+  private async _handleLoadAllData(action: PersistentAction): Promise<void> {
+    if (!action.meta?.isRemote) {
+      return; // Local: already written by PfapiService._updateModelCtrlCaches
+    }
+
+    const loadAllDataAction = action as unknown as ReturnType<typeof loadAllData>;
+    const appDataComplete = loadAllDataAction.appDataComplete;
+    const pfapi = this._getPfapiService();
+
+    // Write archiveYoung if present in the import data
+    const archiveYoung = (appDataComplete as { archiveYoung?: ArchiveModel })
+      .archiveYoung;
+    if (archiveYoung !== undefined) {
+      await pfapi.m.archiveYoung.save(archiveYoung, {
+        isUpdateRevAndLastUpdate: false, // Preserve rev from import
+        isIgnoreDBLock: true,
+      });
+    }
+
+    // Write archiveOld if present in the import data
+    const archiveOld = (appDataComplete as { archiveOld?: ArchiveModel }).archiveOld;
+    if (archiveOld !== undefined) {
+      await pfapi.m.archiveOld.save(archiveOld, {
+        isUpdateRevAndLastUpdate: false,
+        isIgnoreDBLock: true,
+      });
+    }
+
+    Log.log(
+      '[ArchiveOperationHandler] Wrote archive data from SYNC_IMPORT/BACKUP_IMPORT',
+    );
   }
 }
