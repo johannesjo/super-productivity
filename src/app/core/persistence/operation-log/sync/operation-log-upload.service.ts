@@ -10,10 +10,6 @@ import {
   SyncOperation,
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
-import {
-  OperationLogManifestService,
-  OPS_DIR,
-} from '../store/operation-log-manifest.service';
 import { isOperationSyncCapable, syncOpToOperation } from './operation-sync.util';
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
@@ -73,7 +69,6 @@ export interface UploadOptions {
 export class OperationLogUploadService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
-  private manifestService = inject(OperationLogManifestService);
   private encryptionService = inject(OperationEncryptionService);
 
   async uploadPendingOps(
@@ -85,13 +80,15 @@ export class OperationLogUploadService {
       return { uploadedCount: 0, piggybackedOps: [], rejectedCount: 0, rejectedOps: [] };
     }
 
-    // Use operation sync if supported
-    if (isOperationSyncCapable(syncProvider)) {
-      return this._uploadPendingOpsViaApi(syncProvider, options);
+    // Operation log sync requires an API-capable provider
+    if (!isOperationSyncCapable(syncProvider)) {
+      OpLog.error(
+        'OperationLogUploadService: Sync provider does not support operation sync.',
+      );
+      return { uploadedCount: 0, piggybackedOps: [], rejectedCount: 0, rejectedOps: [] };
     }
 
-    // Fall back to file-based sync
-    return this._uploadPendingOpsViaFiles(syncProvider, options);
+    return this._uploadPendingOpsViaApi(syncProvider, options);
   }
 
   private async _uploadPendingOpsViaApi(
@@ -272,111 +269,6 @@ export class OperationLogUploadService {
     // may be resolved via conflict dialog. The sync service handles this.
 
     return { uploadedCount, piggybackedOps, rejectedCount, rejectedOps };
-  }
-
-  /**
-   * CURRENTLY UNUSED - This method exists for future extensibility but is never called.
-   *
-   * Why: Operation log sync only runs for providers where `_supportsOpLogSync()` returns true
-   * (see sync.service.ts:104). Currently only SuperSync supports this, and SuperSync uses
-   * API-based sync (`_uploadPendingOpsViaApi`), not file-based sync.
-   *
-   * Legacy providers (WebDAV, Dropbox, LocalFile) skip operation log sync entirely and use
-   * pfapi's model-level LWW sync instead.
-   *
-   * NOTE: This method does NOT encrypt operation payloads. If file-based operation log sync
-   * is ever enabled for a provider, encryption support must be added here.
-   */
-  private async _uploadPendingOpsViaFiles(
-    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-    options?: UploadOptions,
-  ): Promise<UploadResult> {
-    OpLog.normal('OperationLogUploadService: Uploading pending operations via files...');
-
-    let uploadedCount = 0;
-
-    await this.lockService.request('sp_op_log_upload', async () => {
-      // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
-      if (options?.preUploadCallback) {
-        await options.preUploadCallback();
-      }
-
-      const pendingOps = await this.opLogStore.getUnsynced();
-
-      if (pendingOps.length === 0) {
-        OpLog.normal('OperationLogUploadService: No pending operations to upload.');
-        return;
-      }
-
-      const remoteManifest = await this.manifestService.loadRemoteManifest(syncProvider);
-      const updatedManifestFiles: string[] = [...remoteManifest.operationFiles];
-      let newFilesUploaded = 0;
-
-      // Batch into chunks (e.g., 100 ops per file for WebDAV)
-      const MAX_OPS_PER_FILE = 100;
-      const chunks = chunkArray(pendingOps, MAX_OPS_PER_FILE);
-
-      for (const chunk of chunks) {
-        // Filename format: ops_CLIENTID_TIMESTAMP.json
-        const filename = `ops_${chunk[0].op.clientId}_${chunk[0].op.timestamp}.json`;
-        const fullFilePath = OPS_DIR + filename;
-
-        // Only upload if file isn't already in the manifest (simple dedupe for now)
-        if (!updatedManifestFiles.includes(fullFilePath)) {
-          OpLog.normal(
-            `OperationLogUploadService: Uploading ${chunk.length} ops to ${fullFilePath}`,
-          );
-          // revToMatch is null, as these are new files
-          await syncProvider.uploadFile(fullFilePath, JSON.stringify(chunk), null);
-          updatedManifestFiles.push(fullFilePath);
-          newFilesUploaded++;
-          // Only mark as synced after successful upload
-          await this.opLogStore.markSynced(chunk.map((e) => e.seq));
-          uploadedCount += chunk.length;
-        } else {
-          OpLog.normal(
-            `OperationLogUploadService: Skipping upload for existing file ${fullFilePath}`,
-          );
-          // File already exists in manifest, so these ops are already synced
-          // Mark them as synced locally to prevent re-upload attempts
-          await this.opLogStore.markSynced(chunk.map((e) => e.seq));
-        }
-      }
-
-      if (newFilesUploaded > 0) {
-        // Sort files for deterministic manifest content
-        updatedManifestFiles.sort();
-        remoteManifest.operationFiles = updatedManifestFiles;
-        await this.manifestService.uploadRemoteManifest(syncProvider, remoteManifest);
-
-        // Periodically clean up old remote files to prevent unbounded storage growth
-        // Run cleanup after every 10 new file uploads to balance overhead vs storage
-        if (newFilesUploaded >= 10 || updatedManifestFiles.length > 50) {
-          await this.manifestService.cleanupRemoteFiles(syncProvider);
-        }
-      }
-
-      OpLog.normal(
-        `OperationLogUploadService: Successfully uploaded ${newFilesUploaded} new operation files (${uploadedCount} ops).`,
-      );
-    });
-
-    // File-based sync doesn't support piggybacking or per-op rejection
-    return { uploadedCount, piggybackedOps: [], rejectedCount: 0, rejectedOps: [] };
-  }
-
-  /**
-   * Triggers remote cleanup of old operation files for file-based sync.
-   * Can be called manually or scheduled periodically.
-   */
-  async cleanupRemoteFiles(
-    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<number> {
-    if (isOperationSyncCapable(syncProvider)) {
-      // API-based sync handles cleanup on server side
-      return 0;
-    }
-    return this.manifestService.cleanupRemoteFiles(syncProvider);
   }
 
   private _entryToSyncOp(entry: OperationLogEntry): SyncOperation {

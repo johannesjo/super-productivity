@@ -3,10 +3,6 @@ import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
 import {
-  OperationLogManifestService,
-  OPS_DIR,
-} from '../store/operation-log-manifest.service';
-import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
 } from '../../../../pfapi/api/sync/sync-provider.interface';
@@ -19,7 +15,6 @@ describe('OperationLogUploadService', () => {
   let service: OperationLogUploadService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockLockService: jasmine.SpyObj<LockService>;
-  let mockManifestService: jasmine.SpyObj<OperationLogManifestService>;
 
   const createMockEntry = (
     seq: number,
@@ -51,10 +46,6 @@ describe('OperationLogUploadService', () => {
       'markRejected',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
-    mockManifestService = jasmine.createSpyObj('OperationLogManifestService', [
-      'loadRemoteManifest',
-      'uploadRemoteManifest',
-    ]);
 
     // Default mock implementations
     mockLockService.request.and.callFake(
@@ -64,10 +55,6 @@ describe('OperationLogUploadService', () => {
     );
     mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([]));
     mockOpLogStore.markSynced.and.returnValue(Promise.resolve());
-    mockManifestService.loadRemoteManifest.and.returnValue(
-      Promise.resolve({ operationFiles: [], version: 1 }),
-    );
-    mockManifestService.uploadRemoteManifest.and.returnValue(Promise.resolve());
 
     TestBed.configureTestingModule({
       providers: [
@@ -75,7 +62,6 @@ describe('OperationLogUploadService', () => {
         provideMockStore(),
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: LockService, useValue: mockLockService },
-        { provide: OperationLogManifestService, useValue: mockManifestService },
         {
           provide: SnackService,
           useValue: jasmine.createSpyObj('SnackService', ['open']),
@@ -287,133 +273,6 @@ describe('OperationLogUploadService', () => {
         await service.uploadPendingOps(mockApiProvider);
 
         expect(mockApiProvider.uploadOps).toHaveBeenCalledTimes(2);
-      });
-    });
-
-    describe('file-based sync', () => {
-      let mockFileProvider: jasmine.SpyObj<SyncProviderServiceInterface<SyncProviderId>>;
-
-      beforeEach(() => {
-        mockFileProvider = jasmine.createSpyObj('FileSyncProvider', ['uploadFile']);
-        (mockFileProvider as any).supportsOperationSync = false;
-
-        mockFileProvider.uploadFile.and.returnValue(Promise.resolve({ rev: 'test-rev' }));
-      });
-
-      it('should use file upload for non-API providers', async () => {
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1', 12345)]),
-        );
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockFileProvider.uploadFile).toHaveBeenCalled();
-      });
-
-      it('should return empty result when no pending ops', async () => {
-        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([]));
-
-        const result = await service.uploadPendingOps(mockFileProvider);
-
-        expect(result).toEqual({
-          uploadedCount: 0,
-          rejectedCount: 0,
-          piggybackedOps: [],
-          rejectedOps: [],
-        });
-      });
-
-      it('should upload pending operations as file', async () => {
-        const timestamp = 1234567890;
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1', timestamp)]),
-        );
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockFileProvider.uploadFile).toHaveBeenCalledWith(
-          `${OPS_DIR}ops_client-1_${timestamp}.json`,
-          jasmine.any(String),
-          null,
-        );
-      });
-
-      it('should mark operations as synced after upload', async () => {
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([
-            createMockEntry(1, 'op-1', 'client-1'),
-            createMockEntry(2, 'op-2', 'client-1'),
-          ]),
-        );
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1, 2]);
-      });
-
-      it('should update manifest after uploading new files', async () => {
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
-        );
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockManifestService.uploadRemoteManifest).toHaveBeenCalled();
-      });
-
-      it('should skip upload for existing files in manifest', async () => {
-        const timestamp = 1234567890;
-        const existingFile = `${OPS_DIR}ops_client-1_${timestamp}.json`;
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [existingFile], version: 1 }),
-        );
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1', timestamp)]),
-        );
-
-        const result = await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockFileProvider.uploadFile).not.toHaveBeenCalled();
-        // Still mark as synced to prevent re-upload attempts
-        expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
-        expect(result.uploadedCount).toBe(0);
-      });
-
-      it('should not return piggybacked ops for file-based sync', async () => {
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
-        );
-
-        const result = await service.uploadPendingOps(mockFileProvider);
-
-        expect(result.piggybackedOps).toEqual([]);
-      });
-
-      it('should not update manifest when no new files uploaded', async () => {
-        const timestamp = 1234567890;
-        const existingFile = `${OPS_DIR}ops_client-1_${timestamp}.json`;
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [existingFile], version: 1 }),
-        );
-        mockOpLogStore.getUnsynced.and.returnValue(
-          Promise.resolve([createMockEntry(1, 'op-1', 'client-1', timestamp)]),
-        );
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockManifestService.uploadRemoteManifest).not.toHaveBeenCalled();
-      });
-
-      it('should batch large uploads into multiple files', async () => {
-        // Create 150 pending ops to test batching (max 100 per file)
-        const pendingOps = Array.from({ length: 150 }, (_, i) =>
-          createMockEntry(i + 1, `op-${i}`, 'client-1', 1234567890 + i),
-        );
-        mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
-
-        await service.uploadPendingOps(mockFileProvider);
-
-        expect(mockFileProvider.uploadFile).toHaveBeenCalledTimes(2);
       });
     });
 
@@ -904,7 +763,6 @@ describe('OperationLogUploadService', () => {
       let mockApiProvider: jasmine.SpyObj<
         SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable
       >;
-      let mockFileProvider: jasmine.SpyObj<SyncProviderServiceInterface<SyncProviderId>>;
 
       beforeEach(() => {
         mockApiProvider = jasmine.createSpyObj('ApiSyncProvider', [
@@ -923,10 +781,6 @@ describe('OperationLogUploadService', () => {
           Promise.resolve({ results: [], latestSeq: 0, newOps: [] }),
         );
         mockApiProvider.setLastServerSeq.and.returnValue(Promise.resolve());
-
-        mockFileProvider = jasmine.createSpyObj('FileSyncProvider', ['uploadFile']);
-        (mockFileProvider as any).supportsOperationSync = false;
-        mockFileProvider.uploadFile.and.returnValue(Promise.resolve({ rev: 'test-rev' }));
       });
 
       it('should call preUploadCallback inside the lock for API-based sync', async () => {
@@ -955,33 +809,7 @@ describe('OperationLogUploadService', () => {
         ]);
       });
 
-      it('should call preUploadCallback inside the lock for file-based sync', async () => {
-        const callOrder: string[] = [];
-
-        mockLockService.request.and.callFake(
-          async (_name: string, fn: () => Promise<void>) => {
-            callOrder.push('lock-acquired');
-            await fn();
-            callOrder.push('lock-released');
-          },
-        );
-
-        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
-          callOrder.push('callback-executed');
-        });
-
-        await service.uploadPendingOps(mockFileProvider, { preUploadCallback: callback });
-
-        expect(callback).toHaveBeenCalled();
-        // Verify callback was called INSIDE the lock
-        expect(callOrder).toEqual([
-          'lock-acquired',
-          'callback-executed',
-          'lock-released',
-        ]);
-      });
-
-      it('should call preUploadCallback BEFORE checking for pending ops (API)', async () => {
+      it('should call preUploadCallback BEFORE checking for pending ops', async () => {
         const callOrder: string[] = [];
 
         mockOpLogStore.getUnsynced.and.callFake(async () => {
@@ -994,24 +822,6 @@ describe('OperationLogUploadService', () => {
         });
 
         await service.uploadPendingOps(mockApiProvider, { preUploadCallback: callback });
-
-        // Callback should be called before getUnsynced
-        expect(callOrder).toEqual(['callback-executed', 'getUnsynced-called']);
-      });
-
-      it('should call preUploadCallback BEFORE checking for pending ops (file-based)', async () => {
-        const callOrder: string[] = [];
-
-        mockOpLogStore.getUnsynced.and.callFake(async () => {
-          callOrder.push('getUnsynced-called');
-          return [];
-        });
-
-        const callback = jasmine.createSpy('preUploadCallback').and.callFake(async () => {
-          callOrder.push('callback-executed');
-        });
-
-        await service.uploadPendingOps(mockFileProvider, { preUploadCallback: callback });
 
         // Callback should be called before getUnsynced
         expect(callOrder).toEqual(['callback-executed', 'getUnsynced-called']);

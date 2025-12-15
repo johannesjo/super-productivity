@@ -2,26 +2,21 @@ import { TestBed } from '@angular/core/testing';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
-import {
-  OperationLogManifestService,
-  OPS_DIR,
-} from '../store/operation-log-manifest.service';
 import { SnackService } from '../../../snack/snack.service';
 import {
   SyncProviderServiceInterface,
   OperationSyncCapable,
 } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
-import { OpType, OperationLogEntry } from '../operation.types';
-import { CLOCK_DRIFT_THRESHOLD_MS, RETRY_DELAY_BASE_MS } from '../operation-log.const';
-import { T } from '../../../../t.const';
+import { OpType } from '../operation.types';
+import { CLOCK_DRIFT_THRESHOLD_MS } from '../operation-log.const';
 import { OpLog } from '../../../log';
+import { T } from '../../../../t.const';
 
 describe('OperationLogDownloadService', () => {
   let service: OperationLogDownloadService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockLockService: jasmine.SpyObj<LockService>;
-  let mockManifestService: jasmine.SpyObj<OperationLogManifestService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
 
   beforeEach(() => {
@@ -29,10 +24,6 @@ describe('OperationLogDownloadService', () => {
       'getAppliedOpIds',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
-    mockManifestService = jasmine.createSpyObj('OperationLogManifestService', [
-      'loadRemoteManifest',
-      'uploadRemoteManifest',
-    ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
 
     // Mock OpLog
@@ -45,19 +36,13 @@ describe('OperationLogDownloadService', () => {
       },
     );
     mockOpLogStore.getAppliedOpIds.and.returnValue(Promise.resolve(new Set<string>()));
-    mockManifestService.loadRemoteManifest.and.returnValue(
-      Promise.resolve({ operationFiles: [], version: 1 }),
-    );
 
     TestBed.configureTestingModule({
       providers: [
         OperationLogDownloadService,
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: LockService, useValue: mockLockService },
-        { provide: OperationLogManifestService, useValue: mockManifestService },
         { provide: SnackService, useValue: mockSnackService },
-        // Set retry delay to 0 for instant retries in tests
-        { provide: RETRY_DELAY_BASE_MS, useValue: 0 },
       ],
     });
 
@@ -492,293 +477,6 @@ describe('OperationLogDownloadService', () => {
           // Should update lastServerSeq to stay in sync
           expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(5);
         });
-      });
-    });
-
-    describe('file-based sync', () => {
-      let mockFileProvider: jasmine.SpyObj<SyncProviderServiceInterface<SyncProviderId>>;
-
-      beforeEach(() => {
-        mockFileProvider = jasmine.createSpyObj('FileSyncProvider', [
-          'downloadFile',
-          'listFiles',
-        ]);
-        (mockFileProvider as any).supportsOperationSync = false;
-      });
-
-      it('should use file download for non-API providers', async () => {
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [], version: 1 }),
-        );
-
-        await service.downloadRemoteOps(mockFileProvider);
-
-        expect(mockManifestService.loadRemoteManifest).toHaveBeenCalledWith(
-          mockFileProvider,
-        );
-      });
-
-      it('should download operation files from manifest', async () => {
-        const mockEntry: OperationLogEntry = {
-          seq: 1,
-          op: {
-            id: 'op-1',
-            actionType: '[Task] Add',
-            opType: OpType.Create,
-            entityType: 'TASK',
-            entityId: 'task-1',
-            payload: {},
-            clientId: 'c1',
-            vectorClock: {},
-            timestamp: Date.now(),
-            schemaVersion: 1,
-          },
-          appliedAt: Date.now(),
-          source: 'local',
-        };
-
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'], version: 1 }),
-        );
-        mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: JSON.stringify([mockEntry]), rev: 'test-rev' }),
-        );
-
-        const result = await service.downloadRemoteOps(mockFileProvider);
-
-        expect(mockFileProvider.downloadFile).toHaveBeenCalledWith(
-          'ops/ops_client_123.json',
-        );
-        expect(result.newOps.length).toBe(1);
-      });
-
-      it('should fallback to listFiles when manifest is empty', async () => {
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [], version: 1 }),
-        );
-        (mockFileProvider.listFiles as jasmine.Spy).and.returnValue(
-          Promise.resolve([`${OPS_DIR}ops_client_123.json`]),
-        );
-        mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
-        );
-
-        await service.downloadRemoteOps(mockFileProvider);
-
-        expect(mockFileProvider.listFiles).toHaveBeenCalledWith(OPS_DIR);
-      });
-
-      it('should update manifest after discovering files via listFiles', async () => {
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: [], version: 1 }),
-        );
-        (mockFileProvider.listFiles as jasmine.Spy).and.returnValue(
-          Promise.resolve([`${OPS_DIR}ops_client_123.json`]),
-        );
-        mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
-        );
-
-        await service.downloadRemoteOps(mockFileProvider);
-
-        expect(mockManifestService.uploadRemoteManifest).toHaveBeenCalled();
-      });
-
-      it('should filter already applied operations from files', async () => {
-        const mockEntries: OperationLogEntry[] = [
-          {
-            seq: 1,
-            op: {
-              id: 'op-1',
-              actionType: '[Task] Add',
-              opType: OpType.Create,
-              entityType: 'TASK',
-              entityId: 'task-1',
-              payload: {},
-              clientId: 'c1',
-              vectorClock: {},
-              timestamp: Date.now(),
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
-          },
-          {
-            seq: 2,
-            op: {
-              id: 'op-2',
-              actionType: '[Task] Update',
-              opType: OpType.Update,
-              entityType: 'TASK',
-              entityId: 'task-1',
-              payload: {},
-              clientId: 'c1',
-              vectorClock: {},
-              timestamp: Date.now(),
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
-          },
-        ];
-
-        mockOpLogStore.getAppliedOpIds.and.returnValue(
-          Promise.resolve(new Set(['op-1'])),
-        );
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_123.json'], version: 1 }),
-        );
-        mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: JSON.stringify(mockEntries), rev: 'test-rev' }),
-        );
-
-        const result = await service.downloadRemoteOps(mockFileProvider);
-
-        expect(result.newOps.length).toBe(1);
-        expect(result.newOps[0].id).toBe('op-2');
-      });
-
-      // Download failure handling tests
-      // These tests verify retry behavior by counting download attempts and verifying
-      // the final result. RETRY_DELAY_BASE_MS is set to 0 in TestBed for instant retries.
-      describe('download failure handling', () => {
-        it('should return success:false when file download fails after all retries', async () => {
-          // Setup: provider that always fails to download
-          let downloadAttempts = 0;
-          mockManifestService.loadRemoteManifest.and.returnValue(
-            Promise.resolve({
-              operationFiles: ['ops/ops_client_fail.json'],
-              version: 1,
-            }),
-          );
-
-          // Mock downloadFile to track attempts and always reject
-          // The service will retry MAX_DOWNLOAD_RETRIES (3) times
-          mockFileProvider.downloadFile.and.callFake(async () => {
-            downloadAttempts++;
-            throw new Error('Network error');
-          });
-
-          // Act: Download with retry (delay is 0, so this is instant)
-          const result = await service.downloadRemoteOps(mockFileProvider);
-
-          // Assert: Should have attempted download multiple times
-          // Note: 1 initial attempt + MAX_DOWNLOAD_RETRIES (3) = 4 total attempts
-          expect(downloadAttempts).toBe(4);
-
-          // Assert: Result should indicate failure
-          expect(result.success).toBeFalse();
-          expect(result.failedFileCount).toBe(1);
-          expect(result.newOps).toEqual([]);
-        });
-
-        it('should notify user about failed downloads via snackbar', async () => {
-          mockManifestService.loadRemoteManifest.and.returnValue(
-            Promise.resolve({
-              operationFiles: ['ops/ops_client_fail.json'],
-              version: 1,
-            }),
-          );
-
-          // Mock downloadFile to always fail
-          mockFileProvider.downloadFile.and.rejectWith(new Error('Network error'));
-
-          // Act
-          await service.downloadRemoteOps(mockFileProvider);
-
-          // Assert: Should have shown error notification
-          expect(mockSnackService.open).toHaveBeenCalledWith(
-            jasmine.objectContaining({
-              type: 'ERROR',
-            }),
-          );
-        });
-
-        it('should succeed if download succeeds after retry', async () => {
-          let downloadAttempts = 0;
-          const mockOps = [
-            {
-              seq: 1,
-              op: {
-                id: 'op-retry-success',
-                actionType: '[Test] Action',
-                opType: OpType.Create,
-                entityType: 'TASK',
-                entityId: 'task-1',
-                payload: {},
-                clientId: 'remoteClient',
-                vectorClock: { remoteClient: 1 },
-                timestamp: Date.now(),
-                schemaVersion: 1,
-              },
-              appliedAt: Date.now(),
-              source: 'remote' as const,
-            },
-          ];
-
-          mockManifestService.loadRemoteManifest.and.returnValue(
-            Promise.resolve({
-              operationFiles: ['ops/ops_client_retry.json'],
-              version: 1,
-            }),
-          );
-          mockOpLogStore.getAppliedOpIds.and.returnValue(Promise.resolve(new Set()));
-
-          // Fail first 2 attempts, succeed on 3rd
-          mockFileProvider.downloadFile.and.callFake(async () => {
-            downloadAttempts++;
-            if (downloadAttempts < 3) {
-              throw new Error('Temporary network error');
-            }
-            return { dataStr: JSON.stringify(mockOps), rev: 'test-rev' };
-          });
-
-          // Act
-          const result = await service.downloadRemoteOps(mockFileProvider);
-
-          // Assert: Should have retried and eventually succeeded
-          expect(downloadAttempts).toBe(3);
-          expect(result.success).toBeTrue();
-          expect(result.newOps.length).toBe(1);
-          expect(result.newOps[0].id).toBe('op-retry-success');
-        });
-
-        it('should log warnings for each retry attempt', async () => {
-          mockManifestService.loadRemoteManifest.and.returnValue(
-            Promise.resolve({
-              operationFiles: ['ops/ops_client_warn.json'],
-              version: 1,
-            }),
-          );
-
-          // Fail always to trigger all retries
-          mockFileProvider.downloadFile.and.rejectWith(new Error('Network error'));
-
-          // Act
-          await service.downloadRemoteOps(mockFileProvider);
-
-          // Assert: Should have logged warnings for each failed attempt
-          // Total warnings = one warning per failed attempt that will be retried (3)
-          // plus one final warning when all retries exhausted (1) = 4 total
-          // Actually looking at the code: warnings are logged before each retry delay,
-          // so it's 3 warnings (one before each of the 3 retries)
-          // The 4th call might be from the final failure log
-          expect((OpLog.warn as jasmine.Spy).calls.count()).toBeGreaterThanOrEqual(3);
-        });
-      });
-
-      it('should return success true when all files download successfully', async () => {
-        mockManifestService.loadRemoteManifest.and.returnValue(
-          Promise.resolve({ operationFiles: ['ops/ops_client_1.json'], version: 1 }),
-        );
-        mockFileProvider.downloadFile.and.returnValue(
-          Promise.resolve({ dataStr: '[]', rev: 'test-rev' }),
-        );
-
-        const result = await service.downloadRemoteOps(mockFileProvider);
-
-        expect(result.success).toBeTrue();
-        expect(result.failedFileCount).toBe(0);
       });
     });
   });

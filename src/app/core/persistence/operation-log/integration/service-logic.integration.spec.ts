@@ -27,7 +27,6 @@ import { MatDialog } from '@angular/material/dialog';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { SnackService } from '../../../snack/snack.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
-import { OperationLogManifestService } from '../store/operation-log-manifest.service';
 import { LockService } from '../sync/lock.service';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { SchemaMigrationService } from '../store/schema-migration.service';
@@ -184,7 +183,6 @@ describe('Service Logic Integration', () => {
         OperationLogDownloadService,
         OperationEncryptionService,
         OperationLogStoreService,
-        OperationLogManifestService,
         LockService,
         VectorClockService,
         DependencyResolverService,
