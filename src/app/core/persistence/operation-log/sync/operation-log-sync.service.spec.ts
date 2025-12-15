@@ -1444,9 +1444,9 @@ describe('OperationLogSyncService', () => {
       syncedAt: options.syncedAt,
     });
 
-    it('should replay local synced ops after SYNC_IMPORT is applied', async () => {
-      // Scenario: "Late joiner" - Client B has local synced ops that need to be
-      // replayed after receiving SYNC_IMPORT from Client A
+    it('should replay local synced ops created AFTER SYNC_IMPORT', async () => {
+      // Scenario: "Late joiner" - Client B has local synced ops that were created
+      // AFTER the SYNC_IMPORT and need to be replayed
 
       const testClientId = 'test-client-id';
       const syncImportOp = createOp({
@@ -1457,9 +1457,10 @@ describe('OperationLogSyncService', () => {
         payload: { task: {}, project: {} },
       });
 
-      // Local synced ops created by THIS client
+      // Local synced ops created by THIS client AFTER the SYNC_IMPORT (higher UUIDs)
+      // UUIDv7 is time-ordered, so higher UUID = created after
       const localSyncedOp1 = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1467,7 +1468,7 @@ describe('OperationLogSyncService', () => {
         actionType: '[Task] Add Task',
       });
       const localSyncedOp2 = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1501,14 +1502,14 @@ describe('OperationLogSyncService', () => {
       // 2. Second call: Replay local synced ops
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
 
-      // Second call should have the local synced ops
+      // Second call should have the local synced ops (created AFTER the SYNC_IMPORT)
       const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
       expect(secondCallArgs[0].length).toBe(2);
       expect(secondCallArgs[0].map((op: Operation) => op.id)).toContain(
-        '019afd68-0001-7000-0000-000000000000',
+        '019afd68-0051-7000-0000-000000000000',
       );
       expect(secondCallArgs[0].map((op: Operation) => op.id)).toContain(
-        '019afd68-0002-7000-0000-000000000000',
+        '019afd68-0052-7000-0000-000000000000',
       );
     });
 
@@ -1521,15 +1522,15 @@ describe('OperationLogSyncService', () => {
         entityType: 'ALL',
       });
 
-      // Op from THIS client (should be replayed)
+      // Op from THIS client created AFTER SYNC_IMPORT (should be replayed)
       const localOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         clientId: testClientId,
       });
 
-      // Op from OTHER client (should NOT be replayed)
+      // Op from OTHER client created AFTER SYNC_IMPORT (should NOT be replayed - wrong client)
       const otherClientOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         clientId: 'other-client',
       });
 
@@ -1566,15 +1567,15 @@ describe('OperationLogSyncService', () => {
         entityType: 'ALL',
       });
 
-      // Synced op (should be replayed)
+      // Synced op created AFTER SYNC_IMPORT (should be replayed)
       const syncedOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         clientId: testClientId,
       });
 
-      // Unsynced op (should NOT be replayed - will be uploaded later)
+      // Unsynced op created AFTER SYNC_IMPORT (should NOT be replayed - will be uploaded later)
       const unsyncedOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         clientId: testClientId,
       });
 
@@ -1596,10 +1597,10 @@ describe('OperationLogSyncService', () => {
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
-      // Second call (replay) should only have the synced op
+      // Second call (replay) should only have the synced op (created AFTER SYNC_IMPORT)
       const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
       expect(secondCallArgs[0].length).toBe(1);
-      expect(secondCallArgs[0][0].id).toBe('019afd68-0001-7000-0000-000000000000');
+      expect(secondCallArgs[0][0].id).toBe('019afd68-0051-7000-0000-000000000000');
     });
 
     it('should NOT replay SYNC_IMPORT or BACKUP_IMPORT ops', async () => {
@@ -1611,16 +1612,16 @@ describe('OperationLogSyncService', () => {
         entityType: 'ALL',
       });
 
-      // Regular op (should be replayed)
+      // Regular op created AFTER SYNC_IMPORT (should be replayed)
       const regularOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
       });
 
-      // Old SYNC_IMPORT from this client (should NOT be replayed)
+      // Old SYNC_IMPORT from this client created AFTER (should NOT be replayed - import ops excluded)
       const oldImportOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.SyncImport,
         clientId: testClientId,
         entityType: 'ALL',
@@ -1687,7 +1688,7 @@ describe('OperationLogSyncService', () => {
 
       // Tag update that references a task (should come AFTER task create)
       const tagUpdateOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Update,
         clientId: testClientId,
         entityType: 'TAG',
@@ -1697,7 +1698,7 @@ describe('OperationLogSyncService', () => {
 
       // Task create (should come FIRST since tag depends on it)
       const taskCreateOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000', // Later ID
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1760,7 +1761,7 @@ describe('OperationLogSyncService', () => {
 
       // Task delete (should come LAST after tag update removes reference)
       const taskDeleteOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Delete,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1770,7 +1771,7 @@ describe('OperationLogSyncService', () => {
 
       // Tag update that removes task-1 from tagIds (should come FIRST)
       const tagUpdateOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000', // Later ID
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Update,
         clientId: testClientId,
         entityType: 'TAG',
@@ -1832,14 +1833,14 @@ describe('OperationLogSyncService', () => {
       });
 
       const op1 = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
         entityId: 'task-1',
       });
       const op2 = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Update,
         clientId: testClientId,
         entityType: 'TAG',
@@ -1884,7 +1885,7 @@ describe('OperationLogSyncService', () => {
 
       // Project create (should be first - no dependencies)
       const projectCreateOp = createOp({
-        id: '019afd68-0003-7000-0000-000000000000',
+        id: '019afd68-0053-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'PROJECT',
@@ -1894,7 +1895,7 @@ describe('OperationLogSyncService', () => {
 
       // Task create that depends on project (should be second)
       const taskCreateOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000', // Earlier ID but should come after project
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050 - earlier but should come after project due to deps
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1904,7 +1905,7 @@ describe('OperationLogSyncService', () => {
 
       // Sub-task create that depends on task (should be third)
       const subTaskCreateOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
@@ -1966,43 +1967,40 @@ describe('OperationLogSyncService', () => {
     });
 
     // ─────────────────────────────────────────────────────────────────────────
-    // Vector Clock Dominance Tests
-    // These tests verify that only ops NOT dominated by the SYNC_IMPORT's
-    // vector clock are replayed. An op is "dominated" if its clock is
-    // strictly LESS_THAN the SYNC_IMPORT's clock (happened before).
+    // UUIDv7 Timestamp Filtering Tests
+    // These tests verify that only ops created AFTER the SYNC_IMPORT
+    // (higher UUIDv7) are replayed. Ops created BEFORE (lower UUIDv7) are
+    // filtered out since they reference the old state.
     // ─────────────────────────────────────────────────────────────────────────
 
-    it('should NOT replay ops with vector clock dominated by SYNC_IMPORT (LESS_THAN)', async () => {
+    it('should NOT replay ops created BEFORE SYNC_IMPORT (lower UUIDv7)', async () => {
       const testClientId = 'test-client-id';
 
-      // SYNC_IMPORT with a vector clock indicating it knows about clientA:5 and testClient:3
+      // SYNC_IMPORT
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-A',
         entityType: 'ALL',
-        vectorClock: { clientA: 5, [testClientId]: 3 },
       });
 
-      // Op created BEFORE the SYNC_IMPORT (vectorClock is LESS_THAN) - should NOT be replayed
+      // Op created BEFORE the SYNC_IMPORT (lower UUIDv7) - should NOT be replayed
       const preImportOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0040-7000-0000-000000000000', // BEFORE 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
         entityId: 'task-old',
-        vectorClock: { [testClientId]: 2 }, // 2 < 3, so dominated
         actionType: '[Task] Add Task',
       });
 
-      // Op created AFTER the SYNC_IMPORT (vectorClock is GREATER_THAN) - should be replayed
+      // Op created AFTER the SYNC_IMPORT (higher UUIDv7) - should be replayed
       const postImportOp = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
         entityId: 'task-new',
-        vectorClock: { [testClientId]: 4 }, // 4 > 3, so not dominated
         actionType: '[Task] Add Task',
       });
 
@@ -2031,35 +2029,32 @@ describe('OperationLogSyncService', () => {
       expect(secondCallArgs[0][0].entityId).toBe('task-new');
     });
 
-    it('should replay ops with vector clock CONCURRENT with SYNC_IMPORT', async () => {
+    it('should replay ops created AFTER SYNC_IMPORT (UUIDv7 comparison)', async () => {
       const testClientId = 'test-client-id';
 
-      // SYNC_IMPORT with vector clock
+      // SYNC_IMPORT
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-A',
         entityType: 'ALL',
-        vectorClock: { clientA: 5, clientB: 3 },
       });
 
-      // Op with CONCURRENT vector clock (has testClient:4 which SYNC_IMPORT doesn't know)
-      // SYNC_IMPORT has {A:5, B:3}, op has {testClient:4}
-      // Neither dominates the other = CONCURRENT
-      const concurrentOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+      // Op created AFTER SYNC_IMPORT (higher UUIDv7 = later timestamp)
+      // UUIDv7 is time-ordered: higher UUID means created later
+      const afterOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
-        entityId: 'task-concurrent',
-        vectorClock: { [testClientId]: 4 },
+        entityId: 'task-after',
         actionType: '[Task] Add Task',
       });
 
       (opLogStoreSpy as any).getOpsAfterSeq = jasmine
         .createSpy('getOpsAfterSeq')
         .and.returnValue(
-          Promise.resolve([createEntry(concurrentOp, { syncedAt: Date.now() })]),
+          Promise.resolve([createEntry(afterOp, { syncedAt: Date.now() })]),
         );
 
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
@@ -2071,40 +2066,39 @@ describe('OperationLogSyncService', () => {
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
-      // Second call should have the concurrent op (CONCURRENT is NOT dominated)
+      // Second call should have the op created after SYNC_IMPORT
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
       const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
       expect(secondCallArgs[0].length).toBe(1);
-      expect(secondCallArgs[0][0].entityId).toBe('task-concurrent');
+      expect(secondCallArgs[0][0].entityId).toBe('task-after');
     });
 
-    it('should replay ops with vector clock GREATER_THAN SYNC_IMPORT', async () => {
+    it('should NOT replay ops created BEFORE SYNC_IMPORT (UUIDv7 comparison)', async () => {
       const testClientId = 'test-client-id';
 
-      // SYNC_IMPORT with vector clock
+      // SYNC_IMPORT
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-A',
         entityType: 'ALL',
-        vectorClock: { clientA: 5, [testClientId]: 3 },
       });
 
-      // Op with GREATER_THAN vector clock (testClient:10 > 3)
-      const greaterOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+      // Op created BEFORE SYNC_IMPORT (lower UUIDv7 = earlier timestamp)
+      // These ops reference the old state and should be discarded
+      const beforeOp = createOp({
+        id: '019afd68-0040-7000-0000-000000000000', // BEFORE 0050
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
-        entityId: 'task-greater',
-        vectorClock: { clientA: 5, [testClientId]: 10 },
+        entityId: 'task-before',
         actionType: '[Task] Add Task',
       });
 
       (opLogStoreSpy as any).getOpsAfterSeq = jasmine
         .createSpy('getOpsAfterSeq')
         .and.returnValue(
-          Promise.resolve([createEntry(greaterOp, { syncedAt: Date.now() })]),
+          Promise.resolve([createEntry(beforeOp, { syncedAt: Date.now() })]),
         );
 
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
@@ -2116,35 +2110,30 @@ describe('OperationLogSyncService', () => {
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
-      // Second call should have the greater op
-      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
-      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
-      expect(secondCallArgs[0].length).toBe(1);
-      expect(secondCallArgs[0][0].entityId).toBe('task-greater');
+      // applyOperations should only be called once (SYNC_IMPORT), no replay
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
     });
 
-    it('should NOT replay ops with vector clock EQUAL to SYNC_IMPORT (edge case)', async () => {
+    it('should replay ops with EQUAL UUIDv7 to SYNC_IMPORT (edge case)', async () => {
       const testClientId = 'test-client-id';
 
-      // SYNC_IMPORT with vector clock
+      // SYNC_IMPORT
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-A',
         entityType: 'ALL',
-        vectorClock: { clientA: 5, [testClientId]: 3 },
       });
 
-      // Op with EQUAL vector clock - this is an edge case where the op's state
-      // is already captured in the SYNC_IMPORT, so it should be replayed to be safe
-      // (EQUAL means same causal history, op is valid)
+      // Op with EQUAL UUID - created at same instant as SYNC_IMPORT
+      // Since op.id is NOT < syncImportOp.id, this op IS replayed
+      // (In practice, UUIDv7 collisions are extremely rare due to random bits)
       const equalOp = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+        id: '019afd68-0050-7000-0000-000000000000', // EQUAL to SYNC_IMPORT
         opType: OpType.Create,
         clientId: testClientId,
         entityType: 'TASK',
         entityId: 'task-equal',
-        vectorClock: { clientA: 5, [testClientId]: 3 },
         actionType: '[Task] Add Task',
       });
 
@@ -2163,59 +2152,55 @@ describe('OperationLogSyncService', () => {
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
-      // Second call should have the equal op (EQUAL is NOT LESS_THAN)
+      // Equal ID ops ARE replayed (not strictly less than import)
+      // applyOperations called twice: once for SYNC_IMPORT, once for replay
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
       const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
       expect(secondCallArgs[0].length).toBe(1);
       expect(secondCallArgs[0][0].entityId).toBe('task-equal');
     });
 
-    it('should filter dominated ops correctly in mixed scenario', async () => {
+    it('should filter ops by UUIDv7 correctly in mixed scenario', async () => {
       const testClientId = 'test-client-id';
 
-      // SYNC_IMPORT with vector clock
+      // SYNC_IMPORT
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-A',
         entityType: 'ALL',
-        vectorClock: { clientA: 10, [testClientId]: 5 },
       });
 
-      // Mix of ops with different vector clock relationships
-      const dominatedOp1 = createOp({
-        id: '019afd68-0001-7000-0000-000000000000',
+      // Mix of ops: some BEFORE SYNC_IMPORT (should be filtered), some AFTER (should be replayed)
+      const beforeOp1 = createOp({
+        id: '019afd68-0001-7000-0000-000000000000', // BEFORE 0050
         clientId: testClientId,
-        entityId: 'task-dominated-1',
-        vectorClock: { [testClientId]: 1 }, // LESS_THAN - dominated
+        entityId: 'task-before-1',
       });
-      const dominatedOp2 = createOp({
-        id: '019afd68-0002-7000-0000-000000000000',
+      const beforeOp2 = createOp({
+        id: '019afd68-0002-7000-0000-000000000000', // BEFORE 0050
         clientId: testClientId,
-        entityId: 'task-dominated-2',
-        vectorClock: { clientA: 5, [testClientId]: 3 }, // LESS_THAN - dominated
+        entityId: 'task-before-2',
       });
-      const notDominatedOp1 = createOp({
-        id: '019afd68-0003-7000-0000-000000000000',
+      const afterOp1 = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER 0050
         clientId: testClientId,
-        entityId: 'task-not-dominated-1',
-        vectorClock: { [testClientId]: 6 }, // GREATER_THAN - not dominated
+        entityId: 'task-after-1',
       });
-      const notDominatedOp2 = createOp({
-        id: '019afd68-0004-7000-0000-000000000000',
+      const afterOp2 = createOp({
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER 0050
         clientId: testClientId,
-        entityId: 'task-not-dominated-2',
-        vectorClock: { clientA: 10, [testClientId]: 5, clientC: 1 }, // CONCURRENT - not dominated
+        entityId: 'task-after-2',
       });
 
       (opLogStoreSpy as any).getOpsAfterSeq = jasmine
         .createSpy('getOpsAfterSeq')
         .and.returnValue(
           Promise.resolve([
-            createEntry(dominatedOp1, { syncedAt: Date.now() - 400 }),
-            createEntry(dominatedOp2, { syncedAt: Date.now() - 300 }),
-            createEntry(notDominatedOp1, { syncedAt: Date.now() - 200 }),
-            createEntry(notDominatedOp2, { syncedAt: Date.now() - 100 }),
+            createEntry(beforeOp1, { syncedAt: Date.now() - 400 }),
+            createEntry(beforeOp2, { syncedAt: Date.now() - 300 }),
+            createEntry(afterOp1, { syncedAt: Date.now() - 200 }),
+            createEntry(afterOp2, { syncedAt: Date.now() - 100 }),
           ]),
         );
 
@@ -2228,15 +2213,80 @@ describe('OperationLogSyncService', () => {
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
-      // Second call should have only the non-dominated ops
+      // Second call should have only the ops created AFTER SYNC_IMPORT
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
       const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
       expect(secondCallArgs[0].length).toBe(2);
       const replayedIds = secondCallArgs[0].map((op: Operation) => op.entityId);
-      expect(replayedIds).toContain('task-not-dominated-1');
-      expect(replayedIds).toContain('task-not-dominated-2');
-      expect(replayedIds).not.toContain('task-dominated-1');
-      expect(replayedIds).not.toContain('task-dominated-2');
+      expect(replayedIds).toContain('task-after-1');
+      expect(replayedIds).toContain('task-after-2');
+      expect(replayedIds).not.toContain('task-before-1');
+      expect(replayedIds).not.toContain('task-before-2');
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Bug Fix Verification Test
+    // This test verifies the specific bug fix where vector clock comparison
+    // failed after restore because fresh vector clocks have no overlapping
+    // client IDs with existing ops.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    it('should NOT replay old ops even when SYNC_IMPORT has fresh vector clock with no overlapping client IDs', async () => {
+      // This is the exact bug scenario:
+      // 1. Client A restores a backup with isForceConflict=true
+      // 2. This creates a SYNC_IMPORT with a FRESH vector clock (new clientId: freshClient)
+      // 3. Client B has old ops with vector clock { clientB: 10 }
+      // 4. When comparing { clientB: 10 } with { freshClient: 1 }:
+      //    - With vector clock comparison: CONCURRENT (bug - both clocks have components > 0)
+      //    - With UUIDv7 comparison: old ops correctly filtered (fix)
+
+      const testClientId = 'test-client-id';
+
+      // SYNC_IMPORT with a FRESH vector clock (new client ID after restore)
+      // This simulates what happens when isForceConflict=true creates a new vector clock
+      const freshClientId = 'freshRestoreClient';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: freshClientId, // NEW client ID after restore
+        entityType: 'ALL',
+        vectorClock: { [freshClientId]: 1 }, // FRESH clock with no history
+      });
+
+      // Old op from this client with a vector clock that has NO overlap with SYNC_IMPORT's clock
+      // In vector clock comparison, { testClientId: 10 } vs { freshClient: 1 } = CONCURRENT
+      // because each has components the other doesn't have
+      // But with UUIDv7 comparison, this op is BEFORE the import and should be filtered
+      const oldOpWithNoOverlap = createOp({
+        id: '019afd68-0040-7000-0000-000000000000', // BEFORE 0050
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-old-no-overlap',
+        vectorClock: { [testClientId]: 10 }, // No overlap with { freshClient: 1 }
+        actionType: '[Task] Update',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(oldOpWithNoOverlap, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // The old op should NOT be replayed because:
+      // 1. Its UUIDv7 (0040) < SYNC_IMPORT's UUIDv7 (0050)
+      // 2. Therefore it was created BEFORE the restore and references old state
+      // applyOperations should only be called once (for the SYNC_IMPORT itself)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
     });
   });
 });

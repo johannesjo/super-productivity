@@ -510,9 +510,7 @@ export class OperationLogSyncService {
     // Get all local ops that:
     // 1. Were created by THIS client (so they're not in the piggybacked ops)
     // 2. Are already synced (accepted by server)
-    // 3. Have a vector clock that is NOT dominated by the SYNC_IMPORT's clock
-    //    (meaning they were created after/concurrently with the SYNC_IMPORT)
-    const syncImportClock = syncImportOp.vectorClock;
+    // 3. Were created AFTER the SYNC_IMPORT (by UUIDv7 timestamp comparison)
     const allEntries = await this.opLogStore.getOpsAfterSeq(0);
     const localSyncedOps = allEntries
       .filter((entry) => {
@@ -527,15 +525,16 @@ export class OperationLogSyncService {
         ) {
           return false;
         }
-        // Must NOT be dominated by the SYNC_IMPORT's vector clock.
-        // If the op's clock is LESS_THAN the SYNC_IMPORT's clock, it means
-        // the op happened BEFORE the SYNC_IMPORT was created, so it's already
-        // included in the SYNC_IMPORT's state and should NOT be replayed.
-        // Only replay ops that are GREATER_THAN, EQUAL, or CONCURRENT.
-        const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
-        if (comparison === VectorClockComparison.LESS_THAN) {
+        // Must be created AFTER the SYNC_IMPORT/BACKUP_IMPORT.
+        // UUIDv7 is time-ordered: first 48 bits = millisecond timestamp.
+        // Ops created BEFORE the import should NOT be replayed - they reference
+        // the old state that was replaced by the import.
+        // NOTE: We use UUIDv7 comparison instead of vector clock comparison
+        // because imports with isForceConflict=true create a fresh vector clock
+        // with a new client ID, breaking vector clock causality detection.
+        if (entry.op.id < syncImportOp.id) {
           OpLog.verbose(
-            `OperationLogSyncService: Skipping op ${entry.op.id} - dominated by SYNC_IMPORT clock`,
+            `OperationLogSyncService: Skipping op ${entry.op.id} - created before SYNC_IMPORT`,
           );
           return false;
         }
