@@ -28,6 +28,7 @@ import {
   DialogConfirmUrlImportData,
 } from '../dialog-confirm-url-import/dialog-confirm-url-import.component';
 import { Log } from '../../core/log';
+import { DialogArchiveCompressionComponent } from '../../features/time-tracking/dialog-archive-compression/dialog-archive-compression.component';
 
 @Component({
   selector: 'file-imex',
@@ -217,5 +218,12 @@ export class FileImexComponent implements OnInit {
           : T.FILE_IMEX.S_BACKUP_DOWNLOADED,
       });
     }
+  }
+
+  openArchiveCompression(): void {
+    this._matDialog.open(DialogArchiveCompressionComponent, {
+      width: '500px',
+      maxWidth: '90vw',
+    });
   }
 }

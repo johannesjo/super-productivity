@@ -1143,7 +1143,11 @@
         "BTN_RESTORE": "Restore",
         "TYPE_SYNC_IMPORT": "Full sync import",
         "TYPE_BACKUP_IMPORT": "Backup restore",
-        "TYPE_REPAIR": "Auto-repair"
+        "TYPE_REPAIR": "Auto-repair",
+        "CONFIRM_TITLE": "Confirm Restore",
+        "CONFIRM_MSG": "Are you absolutely sure you want to restore to <strong>{{timestamp}}</strong>?<br><br>This will <strong>completely replace</strong> all your current data and <strong>cannot be undone</strong>.",
+        "ERROR_LOADING": "Failed to load restore points",
+        "ERROR_RESTORE": "Failed to restore data"
       },
       "FORM": {
         "DROPBOX": {
@@ -1227,7 +1231,8 @@
         "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied.",
         "RESTORE_SUCCESS": "Data restored successfully",
         "RESTORE_ERROR": "Failed to restore data",
-        "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated."
+        "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated.",
+        "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed."
       },
       "D_DATA_REPAIRED": {
         "TITLE": "Data Repair Executed",
@@ -1244,6 +1249,7 @@
         "CLEAR_FAILED": "Failed to clear backups",
         "CREATED_SUCCESS": "Manual backup created successfully",
         "CREATE_FAILED": "Failed to create backup",
+        "CREATE_FAILED_SYNC_CONTINUES": "Backup creation failed. Sync will continue without a safety backup.",
         "DELETED_SUCCESS": "Backup deleted successfully",
         "DELETE_FAILED": "Failed to delete backup",
         "DESCRIPTION": "Automatic backups are created before downloading data from remote during sync operations. Backups are organized in 4 smart slots: 2 most recent, 1 first from today, and 1 first from a day before today.",
@@ -1673,6 +1679,20 @@
         "TASK": "Task",
         "TRACK_TO": "Track to:",
         "UNTRACKED_TIME": "Untracked time:"
+      },
+      "D_ARCHIVE_COMPRESS": {
+        "TITLE": "Compress Archive",
+        "LOADING": "Analyzing archive...",
+        "INTRO": "This will compress your archived tasks by removing old data. This operation is synced across all devices.",
+        "SUBTASKS_TO_DELETE": "Subtasks to delete (time merged to parent)",
+        "NOTES_TO_CLEAR": "Task notes to clear (older than 1 year)",
+        "ISSUE_FIELDS_TO_CLEAR": "Issue fields to clear",
+        "ESTIMATED_SAVINGS": "Estimated space savings",
+        "WARNING": "This operation cannot be undone. Make sure you have a backup before proceeding.",
+        "CONFIRM_TITLE": "Confirm Archive Compression",
+        "CONFIRM_MSG": "Are you sure you want to compress the archive? This will permanently delete the data listed above.",
+        "BTN_COMPRESS": "Compress Archive",
+        "NO_DATA": "No data to compress. Your archive is already optimized."
       }
     },
     "WORKLOG": {
@@ -1754,7 +1774,8 @@
     "S_ERR_INVALID_URL": "Import failed: Invalid URL provided",
     "S_ERR_NETWORK": "Import failed: Network error while fetching data from URL",
     "S_IMPORT_FROM_URL_ERR_DECODE": "Error: Could not decode the URL parameter for import. Please ensure it is correctly formatted.",
-    "URL_PLACEHOLDER": "Enter URL to import from"
+    "URL_PLACEHOLDER": "Enter URL to import from",
+    "BTN_COMPRESS_ARCHIVE": "Compress Archive"
   },
   "G": {
     "ADD": "Add",

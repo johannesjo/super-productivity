@@ -26,3 +26,24 @@ export const flushYoungToOld = createAction(
     } satisfies PersistentActionMeta,
   }),
 );
+
+/**
+ * Persistent action to compress archive data by:
+ * 1. Deleting subtask entities and merging their time data to parent tasks
+ * 2. Clearing notes from tasks older than 1 year
+ * 3. Clearing non-essential issue fields (keeps issueId and issueType)
+ *
+ * The oneYearAgoTimestamp is passed explicitly so all clients compress the same
+ * tasks deterministically, regardless of when they process the operation.
+ */
+export const compressArchive = createAction(
+  '[Archive] Compress Archive',
+  (actionProps: { timestamp: number; oneYearAgoTimestamp: number }) => ({
+    ...actionProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'ALL',
+      opType: OpType.Batch,
+    } satisfies PersistentActionMeta,
+  }),
+);

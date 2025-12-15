@@ -2,7 +2,10 @@ import { inject, Injectable, Injector } from '@angular/core';
 import { Action } from '@ngrx/store';
 import { PersistentAction } from '../persistent-action.interface';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
-import { flushYoungToOld } from '../../../../features/time-tracking/store/archive.actions';
+import {
+  compressArchive,
+  flushYoungToOld,
+} from '../../../../features/time-tracking/store/archive.actions';
 import { ArchiveService } from '../../../../features/time-tracking/archive.service';
 import { TaskArchiveService } from '../../../../features/time-tracking/task-archive.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
@@ -12,6 +15,7 @@ import { Log } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
+import { ArchiveCompressionService } from '../../../../features/time-tracking/archive-compression.service';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { ArchiveModel } from '../../../../features/time-tracking/time-tracking.model';
 
@@ -23,6 +27,7 @@ const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   TaskSharedActions.restoreTask.type,
   TaskSharedActions.updateTask.type,
   flushYoungToOld.type,
+  compressArchive.type,
   TaskSharedActions.deleteProject.type,
   deleteTag.type,
   deleteTags.type,
@@ -91,6 +96,10 @@ export class ArchiveOperationHandler {
   private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);
   private _getPfapiService = lazyInject(this._injector, PfapiService);
   private _getTimeTrackingService = lazyInject(this._injector, TimeTrackingService);
+  private _getArchiveCompressionService = lazyInject(
+    this._injector,
+    ArchiveCompressionService,
+  );
 
   /**
    * Process an action and handle any archive-related side effects.
@@ -118,6 +127,10 @@ export class ArchiveOperationHandler {
 
       case flushYoungToOld.type:
         await this._handleFlushYoungToOld(action);
+        break;
+
+      case compressArchive.type:
+        await this._handleCompressArchive(action);
         break;
 
       case TaskSharedActions.deleteProject.type:
@@ -187,18 +200,17 @@ export class ArchiveOperationHandler {
     const { id, changes } = (action as ReturnType<typeof TaskSharedActions.updateTask>)
       .task;
 
-    // Try to update in archive - will throw if task is not archived (which is fine,
-    // the NgRx reducer already handled it for non-archived tasks)
-    try {
-      await this._getTaskArchiveService().updateTask(id as string, changes, {
-        isSkipDispatch: true,
-        isIgnoreDBLock: true,
-      });
-    } catch (e) {
-      // Task not in archive - this is expected for non-archived tasks
-      // The reducer already handled it
-      Log.log('[ArchiveOperationHandler] updateTask: task not in archive, skipping');
+    // Check if task exists in archive before attempting update
+    // Non-archived tasks are handled by the NgRx reducer instead
+    const taskArchiveService = this._getTaskArchiveService();
+    if (!(await taskArchiveService.hasTask(id as string))) {
+      return;
     }
+
+    await taskArchiveService.updateTask(id as string, changes, {
+      isSkipDispatch: true,
+      isIgnoreDBLock: true,
+    });
   }
 
   /**
@@ -248,6 +260,28 @@ export class ArchiveOperationHandler {
     Log.log(
       `______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via ${isRemote ? 'remote' : 'local'} op handler)\n_______________________`,
     );
+  }
+
+  /**
+   * Compresses archive data by:
+   * 1. Deleting subtask entities and merging their time data to parent tasks
+   * 2. Clearing notes from tasks older than the threshold
+   * 3. Clearing non-essential issue fields (keeps issueId and issueType)
+   *
+   * Called for both local and remote compressArchive operations.
+   * This operation is deterministic - given the same timestamp, it produces
+   * the same result on all clients.
+   */
+  private async _handleCompressArchive(action: PersistentAction): Promise<void> {
+    const { oneYearAgoTimestamp } = action as ReturnType<typeof compressArchive>;
+    const isRemote = !!action.meta?.isRemote;
+
+    await this._getArchiveCompressionService().compressArchive(
+      oneYearAgoTimestamp,
+      isRemote,
+    );
+
+    Log.log(`Archive compressed (via ${isRemote ? 'remote' : 'local'} op handler)`);
   }
 
   /**
