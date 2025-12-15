@@ -211,13 +211,14 @@ describe('taskSharedSchedulingMetaReducer', () => {
       expect(updatedState.planner.days['2024-01-02']).toEqual(['other-task']);
     });
 
-    it('should preserve dueWithTime when task is scheduled for today', () => {
+    it('should preserve dueWithTime but clear remindAt when task is scheduled for today', () => {
       const now = Date.now();
       const testState = createStateWithExistingTasks([], [], [], []);
-      // Create task with dueWithTime for today
+      // Create task with dueWithTime and remindAt for today
       testState[TASK_FEATURE_NAME].entities.task1 = createMockTask({
         id: 'task1',
         dueWithTime: now,
+        remindAt: now,
       });
       testState[TASK_FEATURE_NAME].ids.push('task1');
 
@@ -231,6 +232,7 @@ describe('taskSharedSchedulingMetaReducer', () => {
       const updatedTask = updatedState[TASK_FEATURE_NAME].entities.task1;
 
       expect(updatedTask.dueWithTime).toBe(now);
+      expect(updatedTask.remindAt).toBeUndefined();
       expect(updatedTask.dueDay).toBeDefined();
     });
 

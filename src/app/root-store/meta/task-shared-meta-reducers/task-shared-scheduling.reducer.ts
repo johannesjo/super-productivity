@@ -183,7 +183,8 @@ const handlePlanTasksForToday = (
       id: taskId,
       changes: {
         dueDay: today,
-        ...(shouldClearTime ? { dueWithTime: undefined, remindAt: undefined } : {}),
+        remindAt: undefined, // Always clear reminder when explicitly adding to today
+        ...(shouldClearTime ? { dueWithTime: undefined } : {}),
       },
     };
   });
