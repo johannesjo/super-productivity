@@ -464,7 +464,42 @@ sequenceDiagram
     Note over Client,Server: Used by client to check:<br/>- Current server seq<br/>- If local sinceSeq is still valid<br/>- Other connected devices
 ```
 
-## 1.13 Server Cleanup Process
+## 1.13 Server Storage Model & Compaction
+
+The server uses a **Snapshot + Operation Log** model for efficient sync:
+
+```mermaid
+flowchart LR
+    subgraph Storage["Per-User Storage"]
+        Snapshot["Cached Snapshot<br/>(gzip compressed)<br/>~1-10 MB"]
+        Ops["Operation Log<br/>(45 days retained)<br/>~5-50 MB"]
+    end
+
+    subgraph Rebuild["State Reconstruction"]
+        Snapshot --> Apply["Apply ops since<br/>lastSnapshotSeq"]
+        Ops --> Apply
+        Apply --> Current["Current State"]
+    end
+```
+
+**Why keep operations after snapshots?**
+
+| Sync Type     | Data Transferred          | Use Case                                      |
+| ------------- | ------------------------- | --------------------------------------------- |
+| Incremental   | Few KB (recent ops only)  | Normal sync - device is mostly up-to-date     |
+| Full Snapshot | Several MB (entire state) | New device or gap detected (>45 days offline) |
+
+Keeping operations enables **incremental sync** - devices fetch only what changed since their last sync, not the entire state.
+
+**Storage growth pattern:**
+
+```
+Day 1-45:   Operations accumulate (linear growth)
+Day 45+:    Old ops deleted, storage stabilizes at ~45 days of history
+Steady state: Snapshot (~1-10 MB) + 45 days ops (~5-50 MB) per user
+```
+
+## 1.14 Server Cleanup Process
 
 ```mermaid
 flowchart TB
@@ -475,13 +510,38 @@ flowchart TB
 
     subgraph Cleanup["Cleanup Tasks"]
         StaleDevices[Remove stale devices<br/>not seen in 50 days]
-        OldOps[Delete old operations<br/>older than 90 days]
-        ExpiredTombstones[Delete expired tombstones<br/>older than 90 days]
+        OldOps[Delete old operations<br/>older than 45 days<br/>AND covered by snapshot]
+        ExpiredTombstones[Delete expired tombstones<br/>older than 45 days]
     end
 
     Hourly --> StaleDevices
     Daily --> OldOps
     Daily --> ExpiredTombstones
+```
+
+**Operation deletion constraint:**
+
+Operations are only deleted when BOTH conditions are met:
+
+1. `receivedAt < (now - 45 days)` - older than retention period
+2. `serverSeq <= lastSnapshotSeq` - covered by a cached snapshot
+
+This ensures we can always reconstruct current state from snapshot + remaining ops.
+
+```mermaid
+flowchart LR
+    subgraph Before["Before Cleanup"]
+        S1["Snapshot @ seq 1000"]
+        O1["Ops 1-1000<br/>(covered)"]
+        O2["Ops 1001-1500<br/>(recent)"]
+    end
+
+    subgraph After["After Cleanup"]
+        S2["Snapshot @ seq 1000"]
+        O3["Ops 1001-1500<br/>(kept)"]
+    end
+
+    Before -->|"Daily cleanup<br/>(ops 1-1000 > 45 days old)"| After
 ```
 
 ---
@@ -782,6 +842,7 @@ flowchart TB
 ```
 
 **Key Meta-Reducers:**
+
 - `tagSharedMetaReducer` - Tag deletion with full cleanup
 - `projectSharedMetaReducer` - Project deletion cleanup
 - `taskSharedCrudMetaReducer` - Task CRUD with tag/project updates
