@@ -70,9 +70,9 @@ describe('isArchiveAffectingAction', () => {
     expect(isArchiveAffectingAction(action)).toBe(false);
   });
 
-  it('should return false for updateTask action', () => {
+  it('should return true for updateTask action', () => {
     const action = { type: TaskSharedActions.updateTask.type };
-    expect(isArchiveAffectingAction(action)).toBe(false);
+    expect(isArchiveAffectingAction(action)).toBe(true);
   });
 });
 
@@ -113,6 +113,7 @@ describe('ArchiveOperationHandler', () => {
     ]);
     mockTaskArchiveService = jasmine.createSpyObj('TaskArchiveService', [
       'deleteTasks',
+      'updateTask',
       'removeAllArchiveTasksForProject',
       'removeTagsFromAllTasks',
       'removeRepeatCfgFromArchiveTasks',
@@ -144,6 +145,7 @@ describe('ArchiveOperationHandler', () => {
       Promise.resolve(),
     );
     mockTaskArchiveService.deleteTasks.and.returnValue(Promise.resolve());
+    mockTaskArchiveService.updateTask.and.returnValue(Promise.resolve());
     mockTaskArchiveService.removeAllArchiveTasksForProject.and.returnValue(
       Promise.resolve(),
     );
@@ -281,6 +283,81 @@ describe('ArchiveOperationHandler', () => {
 
         expect(
           mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('updateTask action', () => {
+      it('should update archived task for remote operations', async () => {
+        const action = {
+          type: TaskSharedActions.updateTask.type,
+          task: { id: 'task-1', changes: { title: 'Updated Title' } },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTask).toHaveBeenCalledWith(
+          'task-1',
+          { title: 'Updated Title' },
+          { isSkipDispatch: true, isIgnoreDBLock: true },
+        );
+      });
+
+      it('should NOT update archive for local operations (already done by TaskArchiveService)', async () => {
+        const action = {
+          type: TaskSharedActions.updateTask.type,
+          task: { id: 'task-1', changes: { title: 'Updated Title' } },
+          meta: { isPersistent: true, isRemote: false },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTask).not.toHaveBeenCalled();
+      });
+
+      it('should NOT update archive when isRemote is undefined (treated as local)', async () => {
+        const action = {
+          type: TaskSharedActions.updateTask.type,
+          task: { id: 'task-1', changes: { title: 'Updated Title' } },
+          meta: { isPersistent: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(mockTaskArchiveService.updateTask).not.toHaveBeenCalled();
+      });
+
+      it('should handle task not in archive gracefully (task is non-archived)', async () => {
+        mockTaskArchiveService.updateTask.and.returnValue(
+          Promise.reject(new Error('Archive task to update not found')),
+        );
+
+        const action = {
+          type: TaskSharedActions.updateTask.type,
+          task: { id: 'task-1', changes: { title: 'Updated Title' } },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        // Should not throw - the task might just not be archived
+        await expectAsync(service.handleOperation(action)).toBeResolved();
+      });
+
+      it('should not call other handlers for updateTask', async () => {
+        const action = {
+          type: TaskSharedActions.updateTask.type,
+          task: { id: 'task-1', changes: { title: 'Updated' } },
+          meta: { isPersistent: true, isRemote: true },
+        } as unknown as PersistentAction;
+
+        await service.handleOperation(action);
+
+        expect(
+          mockArchiveService.writeTasksToArchiveForRemoteSync,
+        ).not.toHaveBeenCalled();
+        expect(mockTaskArchiveService.deleteTasks).not.toHaveBeenCalled();
+        expect(
+          mockTaskArchiveService.removeAllArchiveTasksForProject,
         ).not.toHaveBeenCalled();
       });
     });

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Store } from '@ngrx/store';
 import { TaskArchiveService } from './task-archive.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { Task, TaskArchive, TaskState } from '../tasks/task.model';
@@ -6,9 +7,11 @@ import { ArchiveModel } from './time-tracking.model';
 import { Update } from '@ngrx/entity';
 import { RoundTimeOption } from '../project/project.model';
 import { ModelCtrl } from '../../pfapi/api/model-ctrl/model-ctrl';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 
 describe('TaskArchiveService', () => {
   let service: TaskArchiveService;
+  let storeMock: jasmine.SpyObj<Store>;
   let pfapiServiceMock: {
     m: {
       archiveYoung: jasmine.SpyObj<ModelCtrl<ArchiveModel>>;
@@ -57,6 +60,8 @@ describe('TaskArchiveService', () => {
   });
 
   beforeEach(() => {
+    storeMock = jasmine.createSpyObj<Store>('Store', ['dispatch']);
+
     archiveYoungMock = jasmine.createSpyObj<ModelCtrl<ArchiveModel>>('archiveYoung', [
       'load',
       'save',
@@ -82,6 +87,7 @@ describe('TaskArchiveService', () => {
       providers: [
         TaskArchiveService,
         { provide: PfapiService, useValue: pfapiServiceMock },
+        { provide: Store, useValue: storeMock },
       ],
     });
 
@@ -290,6 +296,64 @@ describe('TaskArchiveService', () => {
         service.updateTask('nonexistent', { title: 'New Title' }),
       ).toBeRejectedWithError('Archive task to update not found');
     });
+
+    it('should dispatch persistent action for sync by default', async () => {
+      const task = createMockTask('task1', { title: 'Original' });
+      const youngArchive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+
+      await service.updateTask('task1', { title: 'Updated' });
+
+      expect(storeMock.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: { id: 'task1', changes: { title: 'Updated' } },
+        }),
+      );
+    });
+
+    it('should NOT dispatch action when isSkipDispatch is true', async () => {
+      const task = createMockTask('task1', { title: 'Original' });
+      const youngArchive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+
+      await service.updateTask('task1', { title: 'Updated' }, { isSkipDispatch: true });
+
+      expect(storeMock.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('should pass isIgnoreDBLock to save when provided', async () => {
+      const task = createMockTask('task1', { title: 'Original' });
+      const youngArchive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+
+      await service.updateTask('task1', { title: 'Updated' }, { isIgnoreDBLock: true });
+
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      expect(saveCall.args[1]).toEqual({
+        isUpdateRevAndLastUpdate: true,
+        isIgnoreDBLock: true,
+      });
+    });
+
+    it('should dispatch action for task in archiveOld', async () => {
+      const task = createMockTask('task1', { title: 'Original' });
+      const youngArchive = createMockArchiveModel([]);
+      const oldArchive = createMockArchiveModel([task]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(oldArchive));
+
+      await service.updateTask('task1', { title: 'Updated' });
+
+      expect(storeMock.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: { id: 'task1', changes: { title: 'Updated' } },
+        }),
+      );
+    });
   });
 
   describe('updateTasks', () => {
@@ -316,6 +380,66 @@ describe('TaskArchiveService', () => {
       // We just verify that save was called on both archives
       expect(archiveYoungMock.save).toHaveBeenCalled();
       expect(archiveOldMock.save).toHaveBeenCalled();
+    });
+
+    it('should dispatch persistent actions for each update by default', async () => {
+      const task1 = createMockTask('task1', { title: 'Task 1' });
+      const task2 = createMockTask('task2', { title: 'Task 2' });
+      const youngArchive = createMockArchiveModel([task1, task2]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      const updates: Update<Task>[] = [
+        { id: 'task1', changes: { title: 'Updated 1' } },
+        { id: 'task2', changes: { title: 'Updated 2' } },
+      ];
+
+      await service.updateTasks(updates);
+
+      expect(storeMock.dispatch).toHaveBeenCalledTimes(2);
+      expect(storeMock.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: { id: 'task1', changes: { title: 'Updated 1' } },
+        }),
+      );
+      expect(storeMock.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: { id: 'task2', changes: { title: 'Updated 2' } },
+        }),
+      );
+    });
+
+    it('should NOT dispatch actions when isSkipDispatch is true', async () => {
+      const task1 = createMockTask('task1', { title: 'Task 1' });
+      const youngArchive = createMockArchiveModel([task1]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      const updates: Update<Task>[] = [{ id: 'task1', changes: { title: 'Updated' } }];
+
+      await service.updateTasks(updates, { isSkipDispatch: true });
+
+      expect(storeMock.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('should pass isIgnoreDBLock to save when provided', async () => {
+      const task1 = createMockTask('task1', { title: 'Task 1' });
+      const youngArchive = createMockArchiveModel([task1]);
+
+      archiveYoungMock.load.and.returnValue(Promise.resolve(youngArchive));
+      archiveOldMock.load.and.returnValue(Promise.resolve(createMockArchiveModel([])));
+
+      const updates: Update<Task>[] = [{ id: 'task1', changes: { title: 'Updated' } }];
+
+      await service.updateTasks(updates, { isIgnoreDBLock: true });
+
+      const saveCall = archiveYoungMock.save.calls.mostRecent();
+      expect(saveCall.args[1]).toEqual({
+        isUpdateRevAndLastUpdate: true,
+        isIgnoreDBLock: true,
+      });
     });
   });
 
@@ -584,7 +708,11 @@ describe('TaskArchiveService', () => {
       expect(archiveYoungMock.save).toHaveBeenCalled();
       const saveCall = archiveYoungMock.save.calls.mostRecent();
       expect(saveCall.args[0].task).toBeDefined();
-      expect(saveCall.args[1]).toEqual({ isUpdateRevAndLastUpdate: true });
+      // isIgnoreDBLock is undefined by default
+      expect(saveCall.args[1]).toEqual({
+        isUpdateRevAndLastUpdate: true,
+        isIgnoreDBLock: undefined,
+      });
     });
 
     it('should handle deleteTasks action through _reduceForArchive', async () => {
