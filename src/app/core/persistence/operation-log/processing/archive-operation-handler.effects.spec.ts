@@ -117,8 +117,13 @@ describe('ArchiveOperationHandlerEffects', () => {
 
     it('should NOT call handleOperation for non-archive-affecting actions', (done) => {
       const task = createMockTask('task-1');
-      const action = TaskSharedActions.updateTask({
-        task: { id: task.id, changes: { title: 'Updated' } },
+      // Use addTask which is NOT archive-affecting (updateTask is now archive-affecting)
+      const action = TaskSharedActions.addTask({
+        task,
+        workContextId: 'ctx-1',
+        workContextType: WorkContextType.TAG,
+        isAddToBacklog: false,
+        isAddToBottom: false,
       });
 
       // Subscribe to effect
@@ -240,6 +245,7 @@ describe('ArchiveOperationHandlerEffects', () => {
       const archiveActions = [
         TaskSharedActions.moveToArchive({ tasks: [] }),
         TaskSharedActions.restoreTask({ task: createMockTask('t1'), subTasks: [] }),
+        TaskSharedActions.updateTask({ task: { id: 't1', changes: { title: 'test' } } }),
         flushYoungToOld({ timestamp: Date.now() }),
         TaskSharedActions.deleteProject({
           projectId: 'p1',
@@ -257,9 +263,7 @@ describe('ArchiveOperationHandlerEffects', () => {
           isAddToBacklog: false,
           isAddToBottom: false,
         }),
-        TaskSharedActions.updateTask({
-          task: { id: 't1', changes: { title: 'test' } },
-        }),
+        // Note: updateTask is now archive-affecting (for syncing archived task updates)
       ];
 
       archiveActions.forEach((action) => {
