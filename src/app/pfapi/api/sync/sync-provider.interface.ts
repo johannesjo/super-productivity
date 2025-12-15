@@ -262,3 +262,54 @@ export interface SnapshotUploadResponse {
   serverSeq?: number;
   error?: string;
 }
+
+// ===== Restore Point Types =====
+
+/**
+ * Type of restore point
+ */
+export type RestorePointType = 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR';
+
+/**
+ * A point in time that can be restored to
+ */
+export interface RestorePoint {
+  serverSeq: number;
+  timestamp: number;
+  type: RestorePointType;
+  clientId: string;
+  description?: string;
+}
+
+/**
+ * Response from getting restore points
+ */
+export interface RestorePointsResponse {
+  restorePoints: RestorePoint[];
+}
+
+/**
+ * Response from getting a restore snapshot
+ */
+export interface RestoreSnapshotResponse {
+  state: unknown;
+  serverSeq: number;
+  generatedAt: number;
+}
+
+/**
+ * Extended sync provider interface with restore point support
+ */
+export interface RestoreCapable {
+  /**
+   * Get available restore points
+   * @param limit Maximum number of restore points to return
+   */
+  getRestorePoints(limit?: number): Promise<RestorePoint[]>;
+
+  /**
+   * Get state snapshot at a specific server sequence
+   * @param serverSeq The server sequence to restore to
+   */
+  getStateAtSeq(serverSeq: number): Promise<RestoreSnapshotResponse>;
+}

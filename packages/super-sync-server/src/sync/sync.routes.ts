@@ -499,4 +499,70 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       return reply.status(500).send({ error: 'Internal server error' });
     }
   });
+
+  // GET /api/sync/restore-points - List available restore points
+  fastify.get<{
+    Querystring: { limit?: string };
+  }>('/restore-points', async (req, reply) => {
+    try {
+      const userId = getAuthUser(req).userId;
+      const syncService = getSyncService();
+      const limit = req.query.limit ? parseInt(req.query.limit, 10) : 30;
+
+      if (isNaN(limit) || limit < 1 || limit > 100) {
+        return reply.status(400).send({
+          error: 'Invalid limit parameter (must be 1-100)',
+        });
+      }
+
+      Logger.debug(`[user:${userId}] Restore points requested (limit=${limit})`);
+
+      const restorePoints = await syncService.getRestorePoints(userId, limit);
+
+      Logger.info(`[user:${userId}] Returning ${restorePoints.length} restore points`);
+
+      return reply.send({ restorePoints });
+    } catch (err) {
+      Logger.error(`Get restore points error: ${errorMessage(err)}`);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
+
+  // GET /api/sync/restore/:serverSeq - Get state snapshot at specific serverSeq
+  fastify.get<{
+    Params: { serverSeq: string };
+  }>('/restore/:serverSeq', async (req, reply) => {
+    try {
+      const userId = getAuthUser(req).userId;
+      const syncService = getSyncService();
+      const targetSeq = parseInt(req.params.serverSeq, 10);
+
+      if (isNaN(targetSeq) || targetSeq < 1) {
+        return reply.status(400).send({
+          error: 'Invalid serverSeq parameter (must be a positive integer)',
+        });
+      }
+
+      Logger.info(`[user:${userId}] Restore snapshot requested at seq=${targetSeq}`);
+
+      const snapshot = await syncService.generateSnapshotAtSeq(userId, targetSeq);
+
+      Logger.info(`[user:${userId}] Restore snapshot generated at seq=${targetSeq}`);
+
+      return reply.send(snapshot);
+    } catch (err) {
+      const message = errorMessage(err);
+      if (
+        message.includes('exceeds latest sequence') ||
+        message.includes('must be at least')
+      ) {
+        Logger.warn(
+          `[user:${getAuthUser(req).userId}] Invalid restore request: ${message}`,
+        );
+        return reply.status(400).send({ error: message });
+      }
+      Logger.error(`Get restore snapshot error: ${message}`);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
 };

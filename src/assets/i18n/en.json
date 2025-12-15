@@ -1036,6 +1036,7 @@
         "REMOTE_MODEL_VERSION_NEWER": "The remote model version is newer than the local one. Please update your local app to the newest version!"
       },
       "BTN_SYNC_NOW": "Sync Now",
+      "BTN_RESTORE_FROM_HISTORY": "Restore from History",
       "C": {
         "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
         "FORCE_UPLOAD": "Forcing an upload of your data could lead to data loss. Continue?",
@@ -1133,6 +1134,17 @@
         "TEXT": "<p>Your file permission for local syncing has been revoked.</p>",
         "TITLE": "Sync: Local file permission denied"
       },
+      "D_RESTORE": {
+        "TITLE": "Restore from History",
+        "LOADING": "Loading restore points...",
+        "NO_POINTS": "No restore points available. Restore points are created when you sync or import data.",
+        "INTRO": "Select a point in time to restore your data to:",
+        "WARNING": "This will replace all your current data with the selected backup. This action cannot be undone.",
+        "BTN_RESTORE": "Restore",
+        "TYPE_SYNC_IMPORT": "Full sync import",
+        "TYPE_BACKUP_IMPORT": "Backup restore",
+        "TYPE_REPAIR": "Auto-repair"
+      },
       "FORM": {
         "DROPBOX": {
           "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
@@ -1212,7 +1224,9 @@
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
-        "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied."
+        "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied.",
+        "RESTORE_SUCCESS": "Data restored successfully",
+        "RESTORE_ERROR": "Failed to restore data"
       },
       "D_DATA_REPAIRED": {
         "TITLE": "Data Repair Executed",

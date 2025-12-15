@@ -23,11 +23,11 @@ services:
     container_name: supersync-server
     restart: always
     environment:
-      - NODE_ENV=production
+      - NODE_ENV=${NODE_ENV:-development}
       - PORT=1900
       - DATABASE_URL=postgresql://${POSTGRES_USER:-supersync}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-supersync}
       - JWT_SECRET=${JWT_SECRET}
-      - PUBLIC_URL=https://${DOMAIN}
+      - PUBLIC_URL=${PUBLIC_URL:-http://localhost:1900}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://app.super-productivity.com}
       - SMTP_HOST=${SMTP_HOST:-}
       - SMTP_PORT=${SMTP_PORT:-587}
@@ -35,6 +35,8 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-}
+    ports:
+      - '1900:1900'
     volumes:
       - supersync-data:/app/data
     depends_on:

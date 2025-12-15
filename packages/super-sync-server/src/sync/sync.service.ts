@@ -781,6 +781,189 @@ export class SyncService {
     );
   }
 
+  // === Restore Points ===
+
+  /**
+   * Get available restore points for a user.
+   * Returns significant state-change operations (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
+   * which represent complete snapshots of the application state.
+   */
+  async getRestorePoints(
+    userId: number,
+    limit: number = 30,
+  ): Promise<
+    {
+      serverSeq: number;
+      timestamp: number;
+      type: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR';
+      clientId: string;
+      description?: string;
+    }[]
+  > {
+    // Query for full-state operations only
+    const ops = await prisma.operation.findMany({
+      where: {
+        userId,
+        opType: {
+          in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'],
+        },
+      },
+      orderBy: {
+        serverSeq: 'desc',
+      },
+      take: limit,
+      select: {
+        serverSeq: true,
+        clientId: true,
+        opType: true,
+        clientTimestamp: true,
+      },
+    });
+
+    return ops.map((op) => ({
+      serverSeq: op.serverSeq,
+      timestamp: Number(op.clientTimestamp),
+      type: op.opType as 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
+      clientId: op.clientId,
+      description: this._getRestorePointDescription(
+        op.opType as 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
+      ),
+    }));
+  }
+
+  private _getRestorePointDescription(
+    opType: 'SYNC_IMPORT' | 'BACKUP_IMPORT' | 'REPAIR',
+  ): string {
+    switch (opType) {
+      case 'SYNC_IMPORT':
+        return 'Full sync import';
+      case 'BACKUP_IMPORT':
+        return 'Backup restore';
+      case 'REPAIR':
+        return 'Auto-repair';
+      default:
+        return 'State snapshot';
+    }
+  }
+
+  /**
+   * Generate a snapshot at a specific serverSeq.
+   * Replays operations from the beginning (or cached snapshot) up to targetSeq.
+   */
+  async generateSnapshotAtSeq(
+    userId: number,
+    targetSeq: number,
+  ): Promise<{
+    state: unknown;
+    serverSeq: number;
+    generatedAt: number;
+  }> {
+    return prisma.$transaction(
+      async (tx) => {
+        // Verify targetSeq is valid
+        const maxSeqRow = await tx.userSyncState.findUnique({
+          where: { userId },
+          select: { lastSeq: true },
+        });
+        const maxSeq = maxSeqRow?.lastSeq ?? 0;
+
+        if (targetSeq > maxSeq) {
+          throw new Error(
+            `Target sequence ${targetSeq} exceeds latest sequence ${maxSeq}`,
+          );
+        }
+
+        if (targetSeq < 1) {
+          throw new Error('Target sequence must be at least 1');
+        }
+
+        let state: Record<string, unknown> = {};
+        let startSeq = 0;
+
+        // Try to use cached snapshot as base if it's before targetSeq
+        const cachedRow = await tx.userSyncState.findUnique({
+          where: { userId },
+          select: {
+            snapshotData: true,
+            lastSnapshotSeq: true,
+            snapshotSchemaVersion: true,
+          },
+        });
+
+        if (
+          cachedRow?.snapshotData &&
+          cachedRow.lastSnapshotSeq &&
+          cachedRow.lastSnapshotSeq <= targetSeq
+        ) {
+          try {
+            const decompressed = zlib
+              .gunzipSync(cachedRow.snapshotData, {
+                maxOutputLength: MAX_SNAPSHOT_DECOMPRESSED_BYTES,
+              })
+              .toString('utf-8');
+            state = JSON.parse(decompressed) as Record<string, unknown>;
+            startSeq = cachedRow.lastSnapshotSeq;
+
+            // Migrate if needed
+            const snapshotSchemaVersion = cachedRow.snapshotSchemaVersion ?? 1;
+            if (stateNeedsMigration(snapshotSchemaVersion, CURRENT_SCHEMA_VERSION)) {
+              const migrationResult = migrateState(
+                state,
+                snapshotSchemaVersion,
+                CURRENT_SCHEMA_VERSION,
+              );
+              if (migrationResult.success) {
+                state = migrationResult.data as Record<string, unknown>;
+              }
+            }
+          } catch (err) {
+            // Ignore corrupted cache, start from scratch
+            Logger.warn(
+              `[user:${userId}] Failed to use cached snapshot: ${(err as Error).message}`,
+            );
+          }
+        }
+
+        const totalOpsToProcess = targetSeq - startSeq;
+        if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
+          throw new Error(
+            `Too many operations to process (${totalOpsToProcess}). ` +
+              `Max: ${MAX_OPS_FOR_SNAPSHOT}.`,
+          );
+        }
+
+        // Replay ops from startSeq to targetSeq
+        const BATCH_SIZE = 10000;
+        let currentSeq = startSeq;
+
+        while (currentSeq < targetSeq) {
+          const batchOps = await tx.operation.findMany({
+            where: {
+              userId,
+              serverSeq: { gt: currentSeq, lte: targetSeq },
+            },
+            orderBy: { serverSeq: 'asc' },
+            take: BATCH_SIZE,
+          });
+
+          if (batchOps.length === 0) break;
+
+          state = this.replayOpsToState(batchOps, state);
+          currentSeq = batchOps[batchOps.length - 1].serverSeq;
+        }
+
+        return {
+          state,
+          serverSeq: targetSeq,
+          generatedAt: Date.now(),
+        };
+      },
+      {
+        timeout: 60000, // Snapshot generation can take time
+      },
+    );
+  }
+
   private replayOpsToState(
     ops: PrismaOperation[],
     initialState: Record<string, unknown> = {},

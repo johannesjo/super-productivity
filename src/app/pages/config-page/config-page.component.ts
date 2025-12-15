@@ -48,6 +48,9 @@ import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { UserProfileService } from '../../features/user-profile/user-profile.service';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogDisableProfilesConfirmationComponent } from '../../features/user-profile/dialog-disable-profiles-confirmation/dialog-disable-profiles-confirmation.component';
+import { SuperSyncRestoreService } from '../../imex/sync/super-sync-restore.service';
+import { DialogRestorePointComponent } from '../../imex/sync/dialog-restore-point/dialog-restore-point.component';
+import { LegacySyncProvider } from '../../imex/sync/legacy-sync-provider.model';
 
 @Component({
   selector: 'config-page',
@@ -74,6 +77,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   private readonly _snackService = inject(SnackService);
   private readonly _userProfileService = inject(UserProfileService);
   private readonly _matDialog = inject(MatDialog);
+  private readonly _superSyncRestoreService = inject(SuperSyncRestoreService);
 
   T: typeof T = T;
   globalConfigFormCfg: ConfigFormConfig;
@@ -93,6 +97,21 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
           required: false,
           onClick: () => {
             this._syncWrapperService.sync();
+          },
+        },
+      },
+      {
+        hideExpression: (m: any) =>
+          !m.isEnabled || m.syncProvider !== LegacySyncProvider.SuperSync,
+        key: '____',
+        type: 'btn',
+        className: 'mt2 block',
+        templateOptions: {
+          text: T.F.SYNC.BTN_RESTORE_FROM_HISTORY,
+          btnType: 'stroked',
+          required: false,
+          onClick: () => {
+            this._openRestoreDialog();
           },
         },
       },
@@ -292,5 +311,12 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
     } catch (error) {
       this._snackService.open('Failed to download logs');
     }
+  }
+
+  private _openRestoreDialog(): void {
+    this._matDialog.open(DialogRestorePointComponent, {
+      width: '500px',
+      maxWidth: '90vw',
+    });
   }
 }

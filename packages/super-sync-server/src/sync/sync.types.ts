@@ -219,6 +219,31 @@ export interface SyncStatusResponse {
   snapshotAge?: number;
 }
 
+// Restore point types
+export type RestorePointType =
+  | 'SYNC_IMPORT'
+  | 'BACKUP_IMPORT'
+  | 'REPAIR'
+  | 'DAILY_BOUNDARY';
+
+export interface RestorePoint {
+  serverSeq: number;
+  timestamp: number; // clientTimestamp from the operation
+  type: RestorePointType;
+  clientId: string;
+  description?: string; // e.g., "Backup from Desktop" or "Daily checkpoint"
+}
+
+export interface RestorePointsResponse {
+  restorePoints: RestorePoint[];
+}
+
+export interface RestoreSnapshotResponse {
+  state: unknown;
+  serverSeq: number;
+  generatedAt: number;
+}
+
 // Payload validation result
 export interface PayloadValidationResult {
   valid: boolean;

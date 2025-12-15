@@ -8,6 +8,10 @@ import {
   OpUploadResponse,
   OpDownloadResponse,
   SnapshotUploadResponse,
+  RestoreCapable,
+  RestorePoint,
+  RestorePointsResponse,
+  RestoreSnapshotResponse,
 } from '../../sync-provider.interface';
 import { SyncProviderPrivateCfgStore } from '../../sync-provider-private-cfg-store';
 import { SuperSyncPrivateCfg } from './super-sync.model';
@@ -26,7 +30,10 @@ const LAST_SERVER_SEQ_KEY_PREFIX = 'super_sync_last_server_seq_';
  * @see docs/sync/SYNC-PLAN.md for full roadmap
  */
 export class SuperSyncProvider
-  implements SyncProviderServiceInterface<SyncProviderId.SuperSync>, OperationSyncCapable
+  implements
+    SyncProviderServiceInterface<SyncProviderId.SuperSync>,
+    OperationSyncCapable,
+    RestoreCapable
 {
   readonly id = SyncProviderId.SuperSync;
   readonly isUploadForcePossible = false;
@@ -180,6 +187,34 @@ export class SuperSyncProvider
       cfg,
       '/api/sync/snapshot',
       compressedPayload,
+    );
+
+    return response;
+  }
+
+  // === Restore Point Methods ===
+
+  async getRestorePoints(limit: number = 30): Promise<RestorePoint[]> {
+    SyncLog.debug(this.logLabel, 'getRestorePoints', { limit });
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<RestorePointsResponse>(
+      cfg,
+      `/api/sync/restore-points?limit=${limit}`,
+      { method: 'GET' },
+    );
+
+    return response.restorePoints;
+  }
+
+  async getStateAtSeq(serverSeq: number): Promise<RestoreSnapshotResponse> {
+    SyncLog.debug(this.logLabel, 'getStateAtSeq', { serverSeq });
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<RestoreSnapshotResponse>(
+      cfg,
+      `/api/sync/restore/${serverSeq}`,
+      { method: 'GET' },
     );
 
     return response;

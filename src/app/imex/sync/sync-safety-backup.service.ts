@@ -1,4 +1,4 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { SyncLog } from '../../core/log';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
@@ -22,16 +22,33 @@ const TOTAL_BACKUP_SLOTS = 4;
   providedIn: 'root',
 })
 export class SyncSafetyBackupService {
-  // NOTE: Using pfapi db adapter directly, DatabaseService is legacy and no longer used
-  private readonly _pfapiService = inject(PfapiService);
+  private readonly _injector = inject(Injector);
+
+  // Lazy-loaded PfapiService to avoid circular dependency
+  // Chain: PfapiService -> Pfapi -> OperationLogSyncService -> ConflictResolutionService -> SyncSafetyBackupService
+  private _pfapiService: PfapiService | null = null;
+  private _getPfapiService(): PfapiService {
+    if (!this._pfapiService) {
+      this._pfapiService = this._injector.get(PfapiService);
+    }
+    return this._pfapiService;
+  }
 
   // Subject to notify components when backups change
   private readonly _backupsChanged$ = new Subject<void>();
   readonly backupsChanged$ = this._backupsChanged$.asObservable();
 
   constructor() {
+    // Defer event subscription to avoid circular dependency during construction
+    // Use setTimeout to ensure PfapiService is fully constructed before we access it
+    setTimeout(() => {
+      this._initEventSubscription();
+    }, 0);
+  }
+
+  private _initEventSubscription(): void {
     // Subscribe to the onBeforeUpdateLocal event
-    this._pfapiService.pf.ev.on('onBeforeUpdateLocal', async (eventData) => {
+    this._getPfapiService().pf.ev.on('onBeforeUpdateLocal', async (eventData) => {
       try {
         SyncLog.normal('SyncSafetyBackupService: Received onBeforeUpdateLocal event', {
           modelsToUpdate: eventData.modelsToUpdate,
@@ -43,7 +60,7 @@ export class SyncSafetyBackupService {
         }
 
         // Get the last changed model from meta-data
-        const metaData = await this._pfapiService.pf.metaModel.load();
+        const metaData = await this._getPfapiService().pf.metaModel.load();
         const lastChangedModelId = metaData.lastUpdateAction || null;
 
         const backup: SyncSafetyBackup = {
@@ -76,14 +93,14 @@ export class SyncSafetyBackupService {
    * Creates a manual backup
    */
   async createBackup(): Promise<void> {
-    const data = await this._pfapiService.pf.loadCompleteBackup();
+    const data = await this._getPfapiService().pf.loadCompleteBackup();
     const backupId = nanoid();
     if (!backupId || backupId === 'EMPTY') {
       throw new Error('Invalid backup ID generated');
     }
 
     // Get the last changed model from meta data
-    const metaData = await this._pfapiService.pf.metaModel.load();
+    const metaData = await this._getPfapiService().pf.metaModel.load();
     const lastChangedModelId = metaData.lastUpdateAction || null;
 
     const backup: SyncSafetyBackup = {
@@ -106,7 +123,7 @@ export class SyncSafetyBackupService {
   async getBackups(): Promise<SyncSafetyBackup[]> {
     try {
       // Use pfapi db adapter for loading
-      const backups = (await this._pfapiService.pf.db.load(
+      const backups = (await this._getPfapiService().pf.db.load(
         STORAGE_KEY,
       )) as SyncSafetyBackup[];
       if (!backups || !Array.isArray(backups)) {
@@ -215,7 +232,12 @@ export class SyncSafetyBackupService {
 
       try {
         // Import backup with: isSkipLegacyWarnings=false, isSkipReload=true, isForceConflict=true
-        await this._pfapiService.importCompleteBackup(backup.data, false, true, true);
+        await this._getPfapiService().importCompleteBackup(
+          backup.data,
+          false,
+          true,
+          true,
+        );
 
         SyncLog.normal('SyncSafetyBackupService: Backup restored successfully', {
           backupId,
@@ -242,7 +264,7 @@ export class SyncSafetyBackupService {
     const filteredBackups = backups.filter((b) => b.id !== backupId);
 
     // Use pfapi db adapter for saving
-    await this._pfapiService.pf.db.save(STORAGE_KEY, filteredBackups, true);
+    await this._getPfapiService().pf.db.save(STORAGE_KEY, filteredBackups, true);
 
     // Notify components that backups have changed
     this._backupsChanged$.next();
@@ -255,7 +277,7 @@ export class SyncSafetyBackupService {
    */
   async clearAllBackups(): Promise<void> {
     // Use pfapi db adapter for saving
-    await this._pfapiService.pf.db.save(STORAGE_KEY, [], true);
+    await this._getPfapiService().pf.db.save(STORAGE_KEY, [], true);
 
     // Notify components that backups have changed
     this._backupsChanged$.next();
@@ -346,7 +368,7 @@ export class SyncSafetyBackupService {
     }
 
     // Use pfapi db adapter for saving
-    await this._pfapiService.pf.db.save(STORAGE_KEY, result, true);
+    await this._getPfapiService().pf.db.save(STORAGE_KEY, result, true);
 
     // Notify components that backups have changed
     this._backupsChanged$.next();
