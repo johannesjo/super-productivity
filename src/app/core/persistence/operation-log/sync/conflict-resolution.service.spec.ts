@@ -12,6 +12,7 @@ import {
   DialogConflictResolutionComponent,
 } from '../../../../imex/sync/dialog-conflict-resolution/dialog-conflict-resolution.component';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
+import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backup.service';
 
 describe('ConflictResolutionService', () => {
   let service: ConflictResolutionService;
@@ -21,6 +22,7 @@ describe('ConflictResolutionService', () => {
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockValidateStateService: jasmine.SpyObj<ValidateStateService>;
   let mockUserInputWaitState: jasmine.SpyObj<UserInputWaitStateService>;
+  let mockSyncSafetyBackupService: jasmine.SpyObj<SyncSafetyBackupService>;
 
   const createMockOp = (id: string, clientId: string): Operation => ({
     id,
@@ -58,6 +60,11 @@ describe('ConflictResolutionService', () => {
     // startWaiting returns a stop function
     mockUserInputWaitState.startWaiting.and.returnValue(() => {});
 
+    mockSyncSafetyBackupService = jasmine.createSpyObj('SyncSafetyBackupService', [
+      'createBackup',
+    ]);
+    mockSyncSafetyBackupService.createBackup.and.resolveTo(undefined);
+
     TestBed.configureTestingModule({
       providers: [
         ConflictResolutionService,
@@ -67,6 +74,7 @@ describe('ConflictResolutionService', () => {
         { provide: SnackService, useValue: mockSnackService },
         { provide: ValidateStateService, useValue: mockValidateStateService },
         { provide: UserInputWaitStateService, useValue: mockUserInputWaitState },
+        { provide: SyncSafetyBackupService, useValue: mockSyncSafetyBackupService },
       ],
     });
     service = TestBed.inject(ConflictResolutionService);
@@ -604,6 +612,11 @@ describe('ConflictResolutionService', () => {
       // Start the presentConflicts call
       const presentPromise = service.presentConflicts(conflicts);
 
+      // Allow microtasks (async operations like createBackup()) to complete
+      // before advancing the fake clock. This ensures setTimeout is registered.
+      await Promise.resolve();
+      await Promise.resolve();
+
       // Advance time past the timeout
       jasmine.clock().tick(FIVE_MINUTES_MS + 100);
 
@@ -667,6 +680,11 @@ describe('ConflictResolutionService', () => {
       mockDialog.open.and.returnValue(mockDialogRef);
 
       const presentPromise = service.presentConflicts(conflicts);
+
+      // Allow microtasks (async operations like createBackup()) to complete
+      // before advancing the fake clock. This ensures setTimeout is registered.
+      await Promise.resolve();
+      await Promise.resolve();
 
       // Advance time past timeout
       jasmine.clock().tick(FIVE_MINUTES_MS + 100);

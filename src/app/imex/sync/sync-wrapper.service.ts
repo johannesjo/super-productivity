@@ -1,7 +1,8 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, Observable, of } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
+import { SyncAlreadyInProgressError } from '../../pfapi/api/errors/errors';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -36,6 +37,25 @@ import { SyncLog } from '../../core/log';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { devError } from '../../util/dev-error';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
+import { LegacySyncProvider } from './legacy-sync-provider.model';
+import { SYNC_WAIT_TIMEOUT_MS, SYNC_REINIT_DELAY_MS } from './sync.const';
+
+/**
+ * Converts LegacySyncProvider to SyncProviderId.
+ * These enums have identical values but are different types for historical reasons.
+ * This provides a type-safe conversion without unsafe double assertions.
+ */
+const toSyncProviderId = (legacy: LegacySyncProvider | null): SyncProviderId | null => {
+  if (legacy === null) return null;
+  // SyncProviderId and LegacySyncProvider have identical string values
+  // Runtime check ensures safety if they ever diverge
+  const providerId = legacy as unknown;
+  if (Object.values(SyncProviderId).includes(providerId as SyncProviderId)) {
+    return providerId as SyncProviderId;
+  }
+  SyncLog.err(`Unknown sync provider: ${legacy}`);
+  return null;
+};
 
 @Injectable({
   providedIn: 'root',
@@ -56,8 +76,7 @@ export class SyncWrapperService {
     map((cfg) => cfg?.sync),
   );
   syncProviderId$: Observable<SyncProviderId | null> = this.syncCfg$.pipe(
-    // NOTE: types are compatible
-    map((cfg) => cfg.syncProvider as unknown as SyncProviderId | null),
+    map((cfg) => toSyncProviderId(cfg.syncProvider)),
   );
 
   syncInterval$: Observable<number> = this.syncCfg$.pipe(map((cfg) => cfg.syncInterval));
@@ -82,7 +101,7 @@ export class SyncWrapperService {
         ? this._isSyncInProgress$.pipe(
             filter((isInProgress) => !isInProgress),
             timeout({
-              each: 40000,
+              each: SYNC_WAIT_TIMEOUT_MS,
               with: () =>
                 // If waiting for user input, don't error - just wait indefinitely
                 this._userInputWaitState.isWaitingForUserInput$.pipe(
@@ -105,6 +124,11 @@ export class SyncWrapperService {
   );
 
   async sync(): Promise<SyncStatus | 'HANDLED_ERROR'> {
+    // Race condition fix: Check-and-set atomically before starting sync
+    if (this._isSyncInProgress$.getValue()) {
+      SyncLog.log('Sync already in progress, skipping concurrent sync attempt');
+      return 'HANDLED_ERROR';
+    }
     this._isSyncInProgress$.next(true);
     return this._sync().finally(() => {
       this._isSyncInProgress$.next(false);
@@ -212,41 +236,18 @@ export class SyncWrapperService {
         });
         return 'HANDLED_ERROR';
       } else if (error instanceof SyncInvalidTimeValuesError) {
-        this._matDialog
-          .open(DialogIncoherentTimestampsErrorComponent, {
-            disableClose: true,
-            autoFocus: false,
-          })
-          .afterClosed()
-          .subscribe(async (res) => {
-            if (res === 'FORCE_UPDATE_REMOTE') {
-              await this._forceUpload();
-            } else if (res === 'FORCE_UPDATE_LOCAL') {
-              await this._pfapiService.pf.downloadAll();
-              await this._reInitAppAfterDataModelChange();
-            }
-          });
+        // Handle async dialog result properly to avoid silent error swallowing
+        this._handleIncoherentTimestampsDialog();
         return 'HANDLED_ERROR';
       } else if (
         error instanceof RevMismatchForModelError ||
         error instanceof NoRemoteModelFile
       ) {
         SyncLog.log(error, Object.keys(error));
-        const modelId =
-          (error.additionalLog && error.additionalLog[0]) || error.additionalLog;
-
-        this._matDialog
-          .open(DialogIncompleteSyncComponent, {
-            data: { modelId },
-            disableClose: true,
-            autoFocus: false,
-          })
-          .afterClosed()
-          .subscribe((res) => {
-            if (res === 'FORCE_UPDATE_REMOTE') {
-              this._forceUpload();
-            }
-          });
+        // Extract modelId safely with proper type validation
+        const modelId = this._extractModelIdFromError(error);
+        // Handle async dialog result properly to avoid silent error swallowing
+        this._handleIncompleteSyncDialog(modelId);
         return 'HANDLED_ERROR';
       } else if (error instanceof LockPresentError) {
         this._snackService.open({
@@ -266,10 +267,8 @@ export class SyncWrapperService {
       } else if (error instanceof CanNotMigrateMajorDownError) {
         alert(this._translateService.instant(T.F.SYNC.A.REMOTE_MODEL_VERSION_NEWER));
         return 'HANDLED_ERROR';
-      } else if (
-        (error as { message?: string })?.message === 'Sync already in progress'
-      ) {
-        // Silently ignore concurrent sync attempts
+      } else if (error instanceof SyncAlreadyInProgressError) {
+        // Silently ignore concurrent sync attempts (using proper error class)
         SyncLog.log('Sync already in progress, skipping concurrent sync attempt');
         return 'HANDLED_ERROR';
       } else {
@@ -367,6 +366,74 @@ export class SyncWrapperService {
     return { wasConfigured: false };
   }
 
+  /**
+   * Handle incoherent timestamps dialog with proper async error handling.
+   * Uses fire-and-forget pattern but logs errors instead of swallowing them.
+   */
+  private _handleIncoherentTimestampsDialog(): void {
+    const dialogRef = this._matDialog.open(DialogIncoherentTimestampsErrorComponent, {
+      disableClose: true,
+      autoFocus: false,
+    });
+
+    // Use firstValueFrom for proper async handling
+    firstValueFrom(dialogRef.afterClosed())
+      .then(async (res) => {
+        if (res === 'FORCE_UPDATE_REMOTE') {
+          await this._forceUpload();
+        } else if (res === 'FORCE_UPDATE_LOCAL') {
+          await this._pfapiService.pf.downloadAll();
+          await this._reInitAppAfterDataModelChange();
+        }
+      })
+      .catch((err) => {
+        SyncLog.err('Error handling incoherent timestamps dialog result:', err);
+      });
+  }
+
+  /**
+   * Handle incomplete sync dialog with proper async error handling.
+   * Uses fire-and-forget pattern but logs errors instead of swallowing them.
+   */
+  private _handleIncompleteSyncDialog(modelId: string | undefined): void {
+    const dialogRef = this._matDialog.open(DialogIncompleteSyncComponent, {
+      data: { modelId },
+      disableClose: true,
+      autoFocus: false,
+    });
+
+    // Use firstValueFrom for proper async handling
+    firstValueFrom(dialogRef.afterClosed())
+      .then(async (res) => {
+        if (res === 'FORCE_UPDATE_REMOTE') {
+          await this._forceUpload();
+        }
+      })
+      .catch((err) => {
+        SyncLog.err('Error handling incomplete sync dialog result:', err);
+      });
+  }
+
+  /**
+   * Safely extract modelId from error with proper type validation.
+   */
+  private _extractModelIdFromError(
+    error: RevMismatchForModelError | NoRemoteModelFile,
+  ): string | undefined {
+    if (!error.additionalLog) {
+      return undefined;
+    }
+    // Handle both array and string formats
+    if (Array.isArray(error.additionalLog) && error.additionalLog.length > 0) {
+      const firstItem = error.additionalLog[0];
+      return typeof firstItem === 'string' ? firstItem : undefined;
+    }
+    if (typeof error.additionalLog === 'string') {
+      return error.additionalLog;
+    }
+    return undefined;
+  }
+
   private _handleDecryptionError(): void {
     this._matDialog
       .open(DialogHandleDecryptErrorComponent, {
@@ -394,7 +461,7 @@ export class SyncWrapperService {
         this._dataInitService.reInitFromRemoteSync(),
       ]);
       // wait an extra frame to potentially avoid follow up problems
-      await promiseTimeout(100);
+      await promiseTimeout(SYNC_REINIT_DELAY_MS);
       SyncLog.log('Data re-initialization complete');
       // Signal that data reload is complete
     } catch (error) {

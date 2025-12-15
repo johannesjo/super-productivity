@@ -23,6 +23,18 @@ export const SYNC_BEFORE_GOING_TO_SLEEP_THROTTLE_TIME = 1000 * 60 * 5;
 export const SYNC_BEFORE_CLOSE_ID = 'SYNC_BEFORE_CLOSE_ID';
 export const SYNC_MIN_INTERVAL = 5000;
 
+/**
+ * Maximum time to wait for an ongoing sync to complete before considering it timed out.
+ * Used by `afterCurrentSyncDoneOrSyncDisabled$` to prevent indefinite waiting.
+ */
+export const SYNC_WAIT_TIMEOUT_MS = 40000;
+
+/**
+ * Small delay after data re-initialization to allow Angular change detection
+ * and prevent potential follow-up timing issues.
+ */
+export const SYNC_REINIT_DELAY_MS = 100;
+
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   project: initialProjectState,
   menuTree: menuTreeInitialState,

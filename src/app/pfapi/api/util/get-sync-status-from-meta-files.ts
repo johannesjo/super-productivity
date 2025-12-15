@@ -116,8 +116,14 @@ export const getSyncStatusFromMetaFiles = (
     if (hasVectorClocks(local, remote)) {
       // Extract vector clocks directly since we're comparing full clocks
       // Don't use backwards compatibility functions here as they require client ID for migration
-      const localVector = local.vectorClock!;
-      const remoteVector = remote.vectorClock!;
+      // Defensive null check even though hasVectorClocks should guarantee existence
+      if (!local.vectorClock || !remote.vectorClock) {
+        throw new ImpossibleError(
+          'Vector clocks missing after hasVectorClocks check - this should never happen',
+        );
+      }
+      const localVector = local.vectorClock;
+      const remoteVector = remote.vectorClock;
       const lastSyncedVector = local.lastSyncedVectorClock;
 
       PFLog.normal('Using vector clocks for sync status', {

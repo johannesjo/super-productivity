@@ -191,6 +191,14 @@ export class NoSyncProviderSetError extends Error {
   override name = 'NoSyncProviderSetError';
 }
 
+export class SyncAlreadyInProgressError extends Error {
+  override name = 'SyncAlreadyInProgressError';
+
+  constructor() {
+    super('Sync already in progress');
+  }
+}
+
 export class RevMismatchForModelError extends AdditionalLogErrorBase<string> {
   override name = 'RevMismatchForModelError';
 }

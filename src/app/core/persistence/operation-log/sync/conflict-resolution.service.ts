@@ -18,6 +18,7 @@ import {
   CONFLICT_DIALOG_TIMEOUT_MS,
 } from '../operation-log.const';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
+import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backup.service';
 
 /**
  * Handles sync conflicts when the same entity has been modified both locally and remotely.
@@ -56,9 +57,13 @@ export class ConflictResolutionService {
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
   private userInputWaitState = inject(UserInputWaitStateService);
+  private syncSafetyBackupService = inject(SyncSafetyBackupService);
 
   /** Reference to the open conflict dialog, if any */
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
+
+  /** Atomic flag to prevent timeout race condition with user resolution */
+  private _dialogResolved = false;
 
   /**
    * Present conflicts to the user and apply their chosen resolutions.
@@ -93,10 +98,25 @@ export class ConflictResolutionService {
   ): Promise<void> {
     OpLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
 
+    // SAFETY: Create backup before conflict resolution
+    // If state corruption occurs during apply, user can restore from this backup
+    try {
+      await this.syncSafetyBackupService.createBackup();
+      OpLog.normal(
+        'ConflictResolutionService: Safety backup created before conflict resolution',
+      );
+    } catch (backupErr) {
+      OpLog.err('ConflictResolutionService: Failed to create safety backup', backupErr);
+      // Continue with conflict resolution - backup failure shouldn't block sync
+    }
+
     // Signal that we're waiting for user input to prevent sync timeout
     const stopWaiting = this.userInputWaitState.startWaiting('oplog-conflict');
     let result: ConflictResolutionResult | undefined;
     let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+    // Reset atomic flag for this dialog session
+    this._dialogResolved = false;
 
     try {
       this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
@@ -106,8 +126,10 @@ export class ConflictResolutionService {
 
       // Set up timeout to auto-cancel the dialog
       // This prevents sync from being blocked indefinitely if user walks away
+      // Uses atomic flag to prevent race condition with user resolution
       timeoutId = setTimeout(() => {
-        if (this._dialogRef) {
+        if (this._dialogRef && !this._dialogResolved) {
+          this._dialogResolved = true; // Set flag before closing
           OpLog.warn(
             'ConflictResolutionService: Dialog timeout - auto-cancelling after ' +
               `${CONFLICT_DIALOG_TIMEOUT_MS / 1000}s`,
@@ -121,6 +143,7 @@ export class ConflictResolutionService {
       }, CONFLICT_DIALOG_TIMEOUT_MS);
 
       result = await firstValueFrom(this._dialogRef.afterClosed());
+      this._dialogResolved = true; // Mark as resolved after dialog closes
     } finally {
       // Clear timeout on normal close
       if (timeoutId) {

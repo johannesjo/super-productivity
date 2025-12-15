@@ -7,7 +7,6 @@ import { switchMap, tap } from 'rxjs/operators';
 import { PrivateCfgByProviderId, SyncProviderId } from '../../pfapi/api';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { SyncLog } from '../../core/log';
-import { environment } from '../../../environments/environment';
 
 // Maps sync providers to their corresponding form field in SyncConfig
 // Dropbox is null because it doesn't store settings in the form (uses OAuth)
@@ -20,6 +19,35 @@ const PROP_MAP_TO_FORM: Record<SyncProviderId, keyof SyncConfig | null> = {
 
 // Ensures all required fields have empty string defaults to prevent undefined/null errors
 // when providers expect string values (e.g., WebDAV API calls fail with undefined URLs)
+// Fields that should never be logged, even in development
+const SENSITIVE_FIELDS = ['password', 'encryptKey', 'accessToken', 'refreshToken'];
+
+/**
+ * Redacts sensitive fields from an object for safe logging.
+ * Replaces sensitive values with '[REDACTED]' to prevent credential exposure.
+ */
+const redactSensitiveFields = (obj: unknown): unknown => {
+  if (!obj || typeof obj !== 'object') {
+    return obj;
+  }
+
+  if (Array.isArray(obj)) {
+    return obj.map(redactSensitiveFields);
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+    if (SENSITIVE_FIELDS.includes(key)) {
+      result[key] = value ? '[REDACTED]' : '';
+    } else if (typeof value === 'object' && value !== null) {
+      result[key] = redactSensitiveFields(value);
+    } else {
+      result[key] = value;
+    }
+  }
+  return result;
+};
+
 const PROVIDER_FIELD_DEFAULTS: Record<
   SyncProviderId,
   Record<string, string | boolean>
@@ -113,8 +141,8 @@ export class SyncConfigService {
 
       return of(result);
     }),
-    // NOTE: DO NOT LOG - contains passwords and encryption keys in production
-    tap((v) => SyncLog.log('syncSettingsForm$', environment.production ? typeof v : v)),
+    // Redact sensitive fields (passwords, encryption keys) in all environments
+    tap((v) => SyncLog.log('syncSettingsForm$', redactSensitiveFields(v))),
   );
 
   async updateEncryptionPassword(
