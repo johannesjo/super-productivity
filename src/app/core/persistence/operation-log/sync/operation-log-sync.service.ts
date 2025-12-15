@@ -1192,10 +1192,14 @@ export class OperationLogSyncService {
         continue;
       }
 
-      // Operations created AFTER the import are valid (by UUIDv7 comparison)
+      // Operations created AT OR AFTER the import are valid (by UUIDv7 timestamp)
       // UUIDv7 is time-ordered: first 48 bits = millisecond timestamp
-      // Lexicographic comparison works for chronological ordering
-      if (op.id > latestImport.id) {
+      // We use timestamp extraction instead of string comparison to handle
+      // same-millisecond operations correctly (string comparison uses random bits
+      // which can cause operations created in the same ms to appear "before" the import)
+      const opTimestamp = this._extractTimestampFromUuidv7(op.id);
+      const importTimestamp = this._extractTimestampFromUuidv7(latestImport.id);
+      if (opTimestamp >= importTimestamp) {
         validOps.push(op);
         continue;
       }
@@ -1206,5 +1210,17 @@ export class OperationLogSyncService {
     }
 
     return { validOps, invalidatedOps };
+  }
+
+  /**
+   * Extracts the millisecond timestamp from a UUIDv7.
+   * UUIDv7 format: first 48 bits are the millisecond timestamp.
+   * The UUID format is: XXXXXXXX-XXXX-7XXX-XXXX-XXXXXXXXXXXX
+   * where the first 12 hex chars (48 bits) represent the timestamp.
+   */
+  private _extractTimestampFromUuidv7(uuid: string): number {
+    // Remove hyphens and take first 12 hex chars (48 bits = timestamp)
+    const hex = uuid.replace(/-/g, '').substring(0, 12);
+    return parseInt(hex, 16);
   }
 }
