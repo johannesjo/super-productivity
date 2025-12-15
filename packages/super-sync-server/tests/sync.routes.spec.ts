@@ -917,3 +917,288 @@ describe('Concurrent Operations', () => {
     expect(serverSeqs.sort((a: number, b: number) => a - b)).toEqual([1, 2, 3, 4, 5]);
   });
 });
+
+describe('Restore Points API', () => {
+  let app: FastifyInstance;
+  const userId = 1;
+  const clientId = 'test-device-1';
+  let authToken: string;
+
+  beforeEach(async () => {
+    initDb('./data', true);
+    const db = getDb();
+
+    db.prepare(
+      `INSERT INTO users (id, email, password_hash, is_verified, created_at)
+       VALUES (?, 'test@test.com', 'hash', 1, ?)`,
+    ).run(userId, Date.now());
+
+    initSyncService();
+    authToken = createToken(userId, 'test@test.com');
+
+    app = Fastify();
+    await app.register(syncRoutes, { prefix: '/api/sync' });
+    await app.ready();
+  });
+
+  afterEach(async () => {
+    await app.close();
+  });
+
+  describe('GET /api/sync/restore-points', () => {
+    it('should return empty array when no restore points exist', async () => {
+      // Upload regular operations (not restore points)
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [createOp(clientId)],
+          clientId,
+        },
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore-points',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.restorePoints).toHaveLength(0);
+    });
+
+    it('should return restore points for SYNC_IMPORT operations', async () => {
+      // Upload a SYNC_IMPORT operation
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [
+            createOp(clientId, {
+              opType: 'SYNC_IMPORT',
+              entityType: 'ALL',
+              actionType: '[SP_ALL] Load(import) all data',
+              payload: { globalConfig: {}, tasks: {} },
+            }),
+          ],
+          clientId,
+        },
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore-points',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.restorePoints).toHaveLength(1);
+      expect(body.restorePoints[0].type).toBe('SYNC_IMPORT');
+      expect(body.restorePoints[0].serverSeq).toBe(1);
+    });
+
+    it('should return restore points for BACKUP_IMPORT operations', async () => {
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [
+            createOp(clientId, {
+              opType: 'BACKUP_IMPORT',
+              entityType: 'ALL',
+              actionType: '[SP_ALL] Load(import) all data',
+              payload: { globalConfig: {} },
+            }),
+          ],
+          clientId,
+        },
+      });
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore-points',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.restorePoints).toHaveLength(1);
+      expect(body.restorePoints[0].type).toBe('BACKUP_IMPORT');
+    });
+
+    it('should respect limit query parameter', async () => {
+      // Upload 5 SYNC_IMPORT operations
+      for (let i = 1; i <= 5; i++) {
+        await app.inject({
+          method: 'POST',
+          url: '/api/sync/ops',
+          headers: { authorization: `Bearer ${authToken}` },
+          payload: {
+            ops: [
+              createOp(clientId, {
+                opType: 'SYNC_IMPORT',
+                entityType: 'ALL',
+                actionType: '[SP_ALL] Load(import) all data',
+                payload: { version: i },
+              }),
+            ],
+            clientId,
+          },
+        });
+      }
+
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore-points?limit=2',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.restorePoints).toHaveLength(2);
+      expect(body.restorePoints[0].serverSeq).toBe(5);
+      expect(body.restorePoints[1].serverSeq).toBe(4);
+    });
+
+    it('should return 401 without authorization', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore-points',
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+
+  describe('GET /api/sync/restore/:serverSeq', () => {
+    beforeEach(async () => {
+      // Upload some operations to create history
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [
+            createOp(clientId, {
+              entityId: 't1',
+              payload: { title: 'Task 1', done: false },
+            }),
+          ],
+          clientId,
+        },
+      });
+
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [
+            createOp(clientId, {
+              entityId: 't2',
+              payload: { title: 'Task 2', done: false },
+            }),
+          ],
+          clientId,
+        },
+      });
+
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [
+            createOp(clientId, {
+              opType: 'UPD',
+              actionType: 'UPDATE_TASK',
+              entityId: 't1',
+              payload: { done: true },
+            }),
+          ],
+          clientId,
+        },
+      });
+    });
+
+    it('should return snapshot at specific serverSeq', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/2',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.serverSeq).toBe(2);
+      expect(body.state).toBeDefined();
+      expect(body.generatedAt).toBeDefined();
+
+      // At seq 2, t1 should not be done yet (update is at seq 3)
+      const state = body.state as Record<string, Record<string, { done: boolean }>>;
+      expect(state.TASK.t1.done).toBe(false);
+    });
+
+    it('should return state before later operations', async () => {
+      // Get state at seq 1 (only first task exists)
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/1',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      const state = body.state as Record<string, Record<string, { title: string }>>;
+
+      expect(state.TASK.t1).toBeDefined();
+      expect(state.TASK.t2).toBeUndefined();
+    });
+
+    it('should return 400 for invalid serverSeq (too high)', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/999',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error).toContain('exceeds');
+    });
+
+    it('should return 400 for serverSeq of 0', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/0',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(400);
+      expect(response.json().error).toContain('at least 1');
+    });
+
+    it('should return 400 for negative serverSeq', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/-1',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+
+      expect(response.statusCode).toBe(400);
+    });
+
+    it('should return 401 without authorization', async () => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/restore/1',
+      });
+
+      expect(response.statusCode).toBe(401);
+    });
+  });
+});

@@ -1165,4 +1165,404 @@ describe('SyncService', () => {
       expect(userIds).toHaveLength(2);
     });
   });
+
+  describe('getRestorePoints', () => {
+    it('should return empty array when no restore points exist', async () => {
+      const service = getSyncService();
+
+      // Upload regular operations (not restore points)
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD_TASK',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Test Task' },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(0);
+    });
+
+    it('should return SYNC_IMPORT operations as restore points', async () => {
+      const service = getSyncService();
+      const timestamp = Date.now();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: { globalConfig: {}, tasks: {} },
+          vectorClock: {},
+          timestamp,
+          schemaVersion: 1,
+        },
+      ]);
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(1);
+      expect(restorePoints[0].type).toBe('SYNC_IMPORT');
+      expect(restorePoints[0].serverSeq).toBe(1);
+      expect(restorePoints[0].clientId).toBe(clientId);
+      expect(restorePoints[0].description).toBe('Full sync import');
+    });
+
+    it('should return BACKUP_IMPORT operations as restore points', async () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'BACKUP_IMPORT',
+          entityType: 'ALL',
+          payload: { globalConfig: {}, tasks: {} },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(1);
+      expect(restorePoints[0].type).toBe('BACKUP_IMPORT');
+      expect(restorePoints[0].description).toBe('Backup restore');
+    });
+
+    it('should return REPAIR operations as restore points', async () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'REPAIR',
+          entityType: 'ALL',
+          payload: { globalConfig: {}, tasks: {} },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(1);
+      expect(restorePoints[0].type).toBe('REPAIR');
+      expect(restorePoints[0].description).toBe('Auto-repair');
+    });
+
+    it('should return restore points in descending order by serverSeq', async () => {
+      const service = getSyncService();
+
+      // Upload multiple restore points
+      for (let i = 1; i <= 3; i++) {
+        service.uploadOps(userId, clientId, [
+          {
+            id: uuidv7(),
+            clientId,
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: 'SYNC_IMPORT',
+            entityType: 'ALL',
+            payload: { version: i },
+            vectorClock: {},
+            timestamp: Date.now() + i,
+            schemaVersion: 1,
+          },
+        ]);
+      }
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(3);
+      expect(restorePoints[0].serverSeq).toBe(3);
+      expect(restorePoints[1].serverSeq).toBe(2);
+      expect(restorePoints[2].serverSeq).toBe(1);
+    });
+
+    it('should respect limit parameter', async () => {
+      const service = getSyncService();
+
+      // Upload 5 restore points
+      for (let i = 1; i <= 5; i++) {
+        service.uploadOps(userId, clientId, [
+          {
+            id: uuidv7(),
+            clientId,
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: 'SYNC_IMPORT',
+            entityType: 'ALL',
+            payload: { version: i },
+            vectorClock: {},
+            timestamp: Date.now() + i,
+            schemaVersion: 1,
+          },
+        ]);
+      }
+
+      const restorePoints = await service.getRestorePoints(userId, 2);
+
+      expect(restorePoints).toHaveLength(2);
+      expect(restorePoints[0].serverSeq).toBe(5);
+      expect(restorePoints[1].serverSeq).toBe(4);
+    });
+
+    it('should only return restore point types, not regular operations', async () => {
+      const service = getSyncService();
+
+      // Upload mixed operations
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD_TASK',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Task 1' },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: { globalConfig: {} },
+          vectorClock: {},
+          timestamp: Date.now() + 1,
+          schemaVersion: 1,
+        },
+      ]);
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'UPDATE_TASK',
+          opType: 'UPD',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { done: true },
+          vectorClock: {},
+          timestamp: Date.now() + 2,
+          schemaVersion: 1,
+        },
+      ]);
+
+      const restorePoints = await service.getRestorePoints(userId);
+
+      expect(restorePoints).toHaveLength(1);
+      expect(restorePoints[0].type).toBe('SYNC_IMPORT');
+      expect(restorePoints[0].serverSeq).toBe(2);
+    });
+  });
+
+  describe('generateSnapshotAtSeq', () => {
+    it('should generate snapshot at a specific serverSeq', async () => {
+      const service = getSyncService();
+
+      // Upload 3 operations
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: { title: 'Task 1', done: false },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't2',
+          payload: { title: 'Task 2', done: false },
+          vectorClock: {},
+          timestamp: Date.now() + 1,
+          schemaVersion: 1,
+        },
+      ]);
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'UPDATE',
+          opType: 'UPD',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: { done: true },
+          vectorClock: {},
+          timestamp: Date.now() + 2,
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Get snapshot at seq 2 (before the update)
+      const snapshot = await service.generateSnapshotAtSeq(userId, 2);
+
+      expect(snapshot.serverSeq).toBe(2);
+      const state = snapshot.state as Record<
+        string,
+        Record<string, { title: string; done: boolean }>
+      >;
+      expect(state.TASK.t1.done).toBe(false); // Not yet updated
+      expect(state.TASK.t2).toBeDefined();
+    });
+
+    it('should throw error for targetSeq exceeding latest', async () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: { title: 'Task 1' },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      await expect(service.generateSnapshotAtSeq(userId, 100)).rejects.toThrow(
+        'Target sequence 100 exceeds latest sequence 1',
+      );
+    });
+
+    it('should throw error for targetSeq less than 1', async () => {
+      const service = getSyncService();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: { title: 'Task 1' },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      await expect(service.generateSnapshotAtSeq(userId, 0)).rejects.toThrow(
+        'Target sequence must be at least 1',
+      );
+    });
+
+    it('should correctly restore state from SYNC_IMPORT operation', async () => {
+      const service = getSyncService();
+
+      const importPayload = {
+        globalConfig: { theme: 'dark' },
+        tasks: {
+          t1: { title: 'Imported Task', done: true },
+        },
+      };
+
+      // Upload a SYNC_IMPORT (full state)
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: importPayload,
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Add more operations after
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't2',
+          payload: { title: 'New Task' },
+          vectorClock: {},
+          timestamp: Date.now() + 1,
+          schemaVersion: 1,
+        },
+      ]);
+
+      // Get snapshot at seq 1 (the SYNC_IMPORT)
+      const snapshot = await service.generateSnapshotAtSeq(userId, 1);
+
+      expect(snapshot.serverSeq).toBe(1);
+      const state = snapshot.state as Record<string, unknown>;
+      expect(state.globalConfig).toEqual({ theme: 'dark' });
+      expect((state.tasks as Record<string, unknown>).t1).toEqual({
+        title: 'Imported Task',
+        done: true,
+      });
+      expect((state.TASK as Record<string, unknown> | undefined)?.t2).toBeUndefined();
+    });
+
+    it('should include generatedAt timestamp', async () => {
+      const service = getSyncService();
+      const beforeTime = Date.now();
+
+      service.uploadOps(userId, clientId, [
+        {
+          id: uuidv7(),
+          clientId,
+          actionType: 'ADD',
+          opType: 'CRT',
+          entityType: 'TASK',
+          entityId: 't1',
+          payload: { title: 'Task 1' },
+          vectorClock: {},
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ]);
+
+      const snapshot = await service.generateSnapshotAtSeq(userId, 1);
+      const afterTime = Date.now();
+
+      expect(snapshot.generatedAt).toBeGreaterThanOrEqual(beforeTime);
+      expect(snapshot.generatedAt).toBeLessThanOrEqual(afterTime);
+    });
+  });
 });
