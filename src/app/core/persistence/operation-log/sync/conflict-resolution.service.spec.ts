@@ -31,7 +31,8 @@ describe('ConflictResolutionService', () => {
     opType: OpType.Update,
     entityType: 'TASK',
     entityId: 'task-1',
-    payload: {},
+    // Use different payloads for different clients to avoid auto-resolution as identical
+    payload: { source: clientId },
     vectorClock: { [clientId]: 1 },
     timestamp: Date.now(),
     schemaVersion: 1,
@@ -560,6 +561,509 @@ describe('ConflictResolutionService', () => {
       expect(mockOperationApplier.applyOperations).toHaveBeenCalled();
 
       expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
+  });
+
+  describe('isIdenticalConflict', () => {
+    it('should detect identical conflict when both sides DELETE', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
+    });
+
+    it('should detect identical conflict when both sides have same UPDATE payload', () => {
+      const payload = { title: 'Same Title', notes: 'Same Notes' };
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          { ...createMockOp('local-1', 'local'), opType: OpType.Update, payload },
+        ],
+        remoteOps: [
+          { ...createMockOp('remote-1', 'remote'), opType: OpType.Update, payload },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
+    });
+
+    it('should NOT detect identical conflict when payloads differ', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          {
+            ...createMockOp('local-1', 'local'),
+            opType: OpType.Update,
+            payload: { title: 'Local Title' },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-1', 'remote'),
+            opType: OpType.Update,
+            payload: { title: 'Remote Title' },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+
+    it('should NOT detect identical conflict when opTypes differ', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Update }],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+
+    it('should NOT detect identical conflict when multiple ops with different counts', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          { ...createMockOp('local-1', 'local'), opType: OpType.Update },
+          { ...createMockOp('local-2', 'local'), opType: OpType.Update },
+        ],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Update }],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+
+    it('should detect identical conflict with multiple DELETE ops on both sides', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          { ...createMockOp('local-1', 'local'), opType: OpType.Delete },
+          { ...createMockOp('local-2', 'local'), opType: OpType.Delete },
+        ],
+        remoteOps: [
+          { ...createMockOp('remote-1', 'remote'), opType: OpType.Delete },
+          { ...createMockOp('remote-2', 'remote'), opType: OpType.Delete },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
+    });
+
+    it('should handle nested object payloads correctly', () => {
+      const payload = {
+        title: 'Test',
+        nested: { deep: { value: 123 }, array: [1, 2, 3] },
+      };
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          { ...createMockOp('local-1', 'local'), opType: OpType.Update, payload },
+        ],
+        remoteOps: [
+          { ...createMockOp('remote-1', 'remote'), opType: OpType.Update, payload },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
+    });
+
+    it('should return false for empty ops', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+  });
+
+  describe('auto-resolve identical conflicts', () => {
+    it('should auto-resolve identical DELETE conflict without showing dialog', async () => {
+      const identicalConflict: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+          remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(identicalConflict);
+
+      // Dialog should NOT be opened for identical conflicts
+      expect(mockDialog.open).not.toHaveBeenCalled();
+
+      // Remote ops should be applied (remote wins for identical conflicts)
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        identicalConflict[0].remoteOps[0],
+        'remote',
+        { pendingApply: true },
+      );
+
+      // Local ops should be rejected
+      expect(mockOpLogStore.markRejected).toHaveBeenCalledWith(['local-1']);
+
+      expect(mockValidateStateService.validateAndRepairCurrentState).toHaveBeenCalled();
+    });
+
+    it('should show dialog only for non-identical conflicts in mixed set', async () => {
+      const identicalConflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+        suggestedResolution: 'manual',
+      };
+
+      const realConflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-2',
+        localOps: [
+          {
+            ...createMockOp('local-2', 'local'),
+            entityId: 'task-2',
+            opType: OpType.Update,
+            payload: { title: 'Local' },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-2', 'remote'),
+            entityId: 'task-2',
+            opType: OpType.Update,
+            payload: { title: 'Remote' },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      const mockDialogRef = {
+        afterClosed: () =>
+          of({
+            resolutions: new Map([[0, 'remote']]),
+            conflicts: [realConflict],
+          }),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts([identicalConflict, realConflict]);
+
+      // Dialog should be opened with ONLY the non-identical conflict
+      expect(mockDialog.open).toHaveBeenCalledTimes(1);
+      const dialogData = mockDialog.open.calls.mostRecent().args[1]?.data as {
+        conflicts: EntityConflict[];
+      };
+      expect(dialogData.conflicts.length).toBe(1);
+      expect(dialogData.conflicts[0].entityId).toBe('task-2');
+
+      // Both identical and user-resolved conflicts should be processed
+      // Remote ops from both should be applied
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        identicalConflict.remoteOps[0],
+        'remote',
+        { pendingApply: true },
+      );
+    });
+
+    it('should reject stale ops for entities in auto-resolved identical conflicts', async () => {
+      const siblingOp = { ...createMockOp('sibling-1', 'local'), entityId: 'task-1' };
+
+      const identicalConflict: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+          remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+      mockOpLogStore.getUnsyncedByEntity.and.resolveTo(
+        new Map([['TASK:task-1', [siblingOp]]]),
+      );
+
+      await service.presentConflicts(identicalConflict);
+
+      // Sibling ops should also be rejected
+      const rejectedCalls = mockOpLogStore.markRejected.calls.allArgs();
+      const allRejectedIds = rejectedCalls.flat().flat();
+      expect(allRejectedIds).toContain('local-1');
+      expect(allRejectedIds).toContain('sibling-1');
+    });
+
+    it('should auto-resolve identical CREATE conflict without dialog', async () => {
+      const payload = { title: 'New Task', notes: '' };
+      const identicalConflict: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [
+            { ...createMockOp('local-1', 'local'), opType: OpType.Create, payload },
+          ],
+          remoteOps: [
+            { ...createMockOp('remote-1', 'remote'), opType: OpType.Create, payload },
+          ],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(identicalConflict);
+
+      // Dialog should NOT be opened
+      expect(mockDialog.open).not.toHaveBeenCalled();
+
+      // Remote ops should be applied
+      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'remote-1', opType: OpType.Create }),
+        'remote',
+        { pendingApply: true },
+      );
+    });
+
+    it('should auto-resolve multiple identical conflicts without showing dialog', async () => {
+      const identicalConflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+          remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+          suggestedResolution: 'manual',
+        },
+        {
+          entityType: 'TASK',
+          entityId: 'task-2',
+          localOps: [
+            {
+              ...createMockOp('local-2', 'local'),
+              entityId: 'task-2',
+              opType: OpType.Delete,
+            },
+          ],
+          remoteOps: [
+            {
+              ...createMockOp('remote-2', 'remote'),
+              entityId: 'task-2',
+              opType: OpType.Delete,
+            },
+          ],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(identicalConflicts);
+
+      // Dialog should NOT be opened for any of them
+      expect(mockDialog.open).not.toHaveBeenCalled();
+
+      // Both remote ops should be stored
+      expect(mockOpLogStore.append).toHaveBeenCalledTimes(2);
+
+      // Both local ops should be rejected
+      expect(mockOpLogStore.markRejected).toHaveBeenCalled();
+      const rejectedIds = mockOpLogStore.markRejected.calls.allArgs().flat().flat();
+      expect(rejectedIds).toContain('local-1');
+      expect(rejectedIds).toContain('local-2');
+    });
+
+    it('should apply operations for auto-resolved identical conflicts', async () => {
+      const identicalConflict: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+          remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+          suggestedResolution: 'manual',
+        },
+      ];
+
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts(identicalConflict);
+
+      // Operations should be applied (not just stored)
+      expect(mockOperationApplier.applyOperations).toHaveBeenCalled();
+      const appliedOps = mockOperationApplier.applyOperations.calls.mostRecent().args[0];
+      expect(appliedOps.length).toBe(1);
+      expect(appliedOps[0].id).toBe('remote-1');
+    });
+
+    it('should process identical conflicts even when dialog is cancelled for real conflicts', async () => {
+      const identicalConflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [{ ...createMockOp('local-1', 'local'), opType: OpType.Delete }],
+        remoteOps: [{ ...createMockOp('remote-1', 'remote'), opType: OpType.Delete }],
+        suggestedResolution: 'manual',
+      };
+
+      const realConflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-2',
+        localOps: [
+          {
+            ...createMockOp('local-2', 'local'),
+            entityId: 'task-2',
+            payload: { title: 'Local' },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-2', 'remote'),
+            entityId: 'task-2',
+            payload: { title: 'Remote' },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      // User cancels the dialog
+      const mockDialogRef = {
+        afterClosed: () => of(undefined),
+      } as MatDialogRef<DialogConflictResolutionComponent>;
+      mockDialog.open.and.returnValue(mockDialogRef);
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(100);
+
+      await service.presentConflicts([identicalConflict, realConflict]);
+
+      // Dialog was opened for the real conflict
+      expect(mockDialog.open).toHaveBeenCalledTimes(1);
+
+      // Since dialog was cancelled, nothing should be processed
+      // (including the identical conflicts that were prepared but not applied)
+      expect(mockOperationApplier.applyOperations).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('isIdenticalConflict edge cases', () => {
+    it('should NOT detect arrays with different order as identical', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          {
+            ...createMockOp('local-1', 'local'),
+            opType: OpType.Update,
+            payload: { tagIds: ['a', 'b', 'c'] },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-1', 'remote'),
+            opType: OpType.Update,
+            payload: { tagIds: ['c', 'b', 'a'] },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+
+    it('should handle null payload values correctly', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          {
+            ...createMockOp('local-1', 'local'),
+            opType: OpType.Update,
+            payload: { notes: null },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-1', 'remote'),
+            opType: OpType.Update,
+            payload: { notes: null },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
+    });
+
+    it('should NOT treat null and undefined as identical', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          {
+            ...createMockOp('local-1', 'local'),
+            opType: OpType.Update,
+            payload: { notes: null },
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-1', 'remote'),
+            opType: OpType.Update,
+            payload: { notes: undefined },
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(false);
+    });
+
+    it('should handle empty objects as identical', () => {
+      const conflict: EntityConflict = {
+        entityType: 'TASK',
+        entityId: 'task-1',
+        localOps: [
+          {
+            ...createMockOp('local-1', 'local'),
+            opType: OpType.Update,
+            payload: {},
+          },
+        ],
+        remoteOps: [
+          {
+            ...createMockOp('remote-1', 'remote'),
+            opType: OpType.Update,
+            payload: {},
+          },
+        ],
+        suggestedResolution: 'manual',
+      };
+
+      expect(service.isIdenticalConflict(conflict)).toBe(true);
     });
   });
 

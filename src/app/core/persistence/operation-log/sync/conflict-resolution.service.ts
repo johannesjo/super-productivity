@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { EntityConflict, Operation } from '../operation.types';
+import { EntityConflict, Operation, OpType } from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { OpLog } from '../../../log';
@@ -98,6 +98,28 @@ export class ConflictResolutionService {
   ): Promise<void> {
     OpLog.warn('ConflictResolutionService: Presenting conflicts', conflicts);
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // AUTO-RESOLVE IDENTICAL CONFLICTS
+    // Conflicts where both sides have the same effect (e.g., both DELETE)
+    // are auto-resolved as "remote" without user intervention.
+    // ─────────────────────────────────────────────────────────────────────────
+    const identicalConflicts: EntityConflict[] = [];
+    const realConflicts: EntityConflict[] = [];
+
+    for (const conflict of conflicts) {
+      if (this.isIdenticalConflict(conflict)) {
+        identicalConflicts.push(conflict);
+      } else {
+        realConflicts.push(conflict);
+      }
+    }
+
+    if (identicalConflicts.length > 0) {
+      OpLog.normal(
+        `ConflictResolutionService: Auto-resolving ${identicalConflicts.length} identical conflict(s) as remote`,
+      );
+    }
+
     // SAFETY: Create backup before conflict resolution
     // If state corruption occurs during apply, user can restore from this backup
     try {
@@ -110,59 +132,6 @@ export class ConflictResolutionService {
       // Continue with conflict resolution - backup failure shouldn't block sync
     }
 
-    // Signal that we're waiting for user input to prevent sync timeout
-    const stopWaiting = this.userInputWaitState.startWaiting('oplog-conflict');
-    let result: ConflictResolutionResult | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    // Reset atomic flag for this dialog session
-    this._dialogResolved = false;
-
-    try {
-      this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
-        data: { conflicts },
-        disableClose: false,
-      });
-
-      // Set up timeout to auto-cancel the dialog
-      // This prevents sync from being blocked indefinitely if user walks away
-      // Uses atomic flag to prevent race condition with user resolution
-      timeoutId = setTimeout(() => {
-        if (this._dialogRef && !this._dialogResolved) {
-          this._dialogResolved = true; // Set flag before closing
-          OpLog.warn(
-            'ConflictResolutionService: Dialog timeout - auto-cancelling after ' +
-              `${CONFLICT_DIALOG_TIMEOUT_MS / 1000}s`,
-          );
-          this._dialogRef.close(undefined);
-          this.snackService.open({
-            type: 'ERROR',
-            msg: T.F.SYNC.S.CONFLICT_DIALOG_TIMEOUT,
-          });
-        }
-      }, CONFLICT_DIALOG_TIMEOUT_MS);
-
-      result = await firstValueFrom(this._dialogRef.afterClosed());
-      this._dialogResolved = true; // Mark as resolved after dialog closes
-    } finally {
-      // Clear timeout on normal close
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-      stopWaiting();
-    }
-
-    // If dialog was cancelled, don't apply any operations
-    // The user chose not to sync - state should remain as-is
-    if (!result || !result.resolutions) {
-      OpLog.normal(
-        'ConflictResolutionService: Dialog cancelled, no operations will be applied',
-      );
-      return;
-    }
-
-    OpLog.normal('ConflictResolutionService: Processing resolutions', result.resolutions);
-
     // Collect all operations to apply in a single batch for proper dependency sorting
     const allOpsToApply: Operation[] = [];
     const allStoredOps: Array<{ id: string; seq: number }> = [];
@@ -170,13 +139,94 @@ export class ConflictResolutionService {
     const remoteOpsToReject: string[] = [];
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 1: Process each conflict based on user's choice
+    // STEP 0: Process identical conflicts automatically (always choose remote)
+    // ─────────────────────────────────────────────────────────────────────────
+    for (const conflict of identicalConflicts) {
+      // Remote wins for identical conflicts
+      for (const op of conflict.remoteOps) {
+        if (await this.opLogStore.hasOp(op.id)) {
+          OpLog.verbose(
+            `ConflictResolutionService: Skipping duplicate op (identical): ${op.id}`,
+          );
+          continue;
+        }
+        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+        allStoredOps.push({ id: op.id, seq });
+        allOpsToApply.push(op);
+      }
+      localOpsToReject.push(...conflict.localOps.map((op) => op.id));
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1: Show dialog for real conflicts (if any)
+    // ─────────────────────────────────────────────────────────────────────────
+    let result: ConflictResolutionResult | undefined;
+
+    if (realConflicts.length > 0) {
+      // Signal that we're waiting for user input to prevent sync timeout
+      const stopWaiting = this.userInputWaitState.startWaiting('oplog-conflict');
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+
+      // Reset atomic flag for this dialog session
+      this._dialogResolved = false;
+
+      try {
+        this._dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
+          data: { conflicts: realConflicts },
+          disableClose: false,
+        });
+
+        // Set up timeout to auto-cancel the dialog
+        // This prevents sync from being blocked indefinitely if user walks away
+        // Uses atomic flag to prevent race condition with user resolution
+        timeoutId = setTimeout(() => {
+          if (this._dialogRef && !this._dialogResolved) {
+            this._dialogResolved = true; // Set flag before closing
+            OpLog.warn(
+              'ConflictResolutionService: Dialog timeout - auto-cancelling after ' +
+                `${CONFLICT_DIALOG_TIMEOUT_MS / 1000}s`,
+            );
+            this._dialogRef.close(undefined);
+            this.snackService.open({
+              type: 'ERROR',
+              msg: T.F.SYNC.S.CONFLICT_DIALOG_TIMEOUT,
+            });
+          }
+        }, CONFLICT_DIALOG_TIMEOUT_MS);
+
+        result = await firstValueFrom(this._dialogRef.afterClosed());
+        this._dialogResolved = true; // Mark as resolved after dialog closes
+      } finally {
+        // Clear timeout on normal close
+        if (timeoutId) {
+          clearTimeout(timeoutId);
+        }
+        stopWaiting();
+      }
+
+      // If dialog was cancelled, don't apply any operations
+      // The user chose not to sync - state should remain as-is
+      if (!result || !result.resolutions) {
+        OpLog.normal(
+          'ConflictResolutionService: Dialog cancelled, no operations will be applied',
+        );
+        return;
+      }
+
+      OpLog.normal(
+        'ConflictResolutionService: Processing resolutions',
+        result.resolutions,
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2: Process each real conflict based on user's choice
     // - Remote wins: queue remote ops for application, mark local ops for rejection
     // - Local wins: store remote ops as rejected (local ops stay pending for upload)
     // ─────────────────────────────────────────────────────────────────────────
-    for (let i = 0; i < conflicts.length; i++) {
-      const conflict = conflicts[i];
-      const resolution = result.resolutions.get(i);
+    for (let i = 0; i < realConflicts.length; i++) {
+      const conflict = realConflicts[i];
+      const resolution = result?.resolutions.get(i);
 
       if (!resolution) {
         OpLog.warn(
@@ -212,16 +262,28 @@ export class ConflictResolutionService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 1.5: Reject ALL pending ops for entities where remote won
+    // STEP 2.5: Reject ALL pending ops for entities where remote won
     // Why: When remote wins, the local state is replaced. Any pending ops for that
     // entity were created against the old local state and have outdated vector clocks.
     // Uploading them would cause conflicts on other clients or corrupt data.
     // ─────────────────────────────────────────────────────────────────────────
     if (localOpsToReject.length > 0) {
       const affectedEntityKeys = new Set<string>();
-      for (let i = 0; i < conflicts.length; i++) {
-        const conflict = conflicts[i];
-        const resolution = result.resolutions.get(i);
+
+      // Add entity keys from identical conflicts (always resolved as remote)
+      for (const conflict of identicalConflicts) {
+        for (const op of conflict.remoteOps) {
+          const ids = op.entityIds || (op.entityId ? [op.entityId] : []);
+          for (const id of ids) {
+            affectedEntityKeys.add(toEntityKey(op.entityType, id));
+          }
+        }
+      }
+
+      // Add entity keys from real conflicts resolved as remote
+      for (let i = 0; i < realConflicts.length; i++) {
+        const conflict = realConflicts[i];
+        const resolution = result?.resolutions.get(i);
         if (resolution === 'remote') {
           for (const op of conflict.remoteOps) {
             const ids = op.entityIds || (op.entityId ? [op.entityId] : []);
@@ -248,7 +310,7 @@ export class ConflictResolutionService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 2: Add non-conflicting remote ops to the batch
+    // STEP 3: Add non-conflicting remote ops to the batch
     // These are remote ops that don't conflict but need to be applied together
     // with conflict resolutions for correct dependency sorting.
     // ─────────────────────────────────────────────────────────────────────────
@@ -263,7 +325,7 @@ export class ConflictResolutionService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 2.5: Mark rejected operations BEFORE applying (crash safety)
+    // STEP 4: Mark rejected operations BEFORE applying (crash safety)
     // Why do this before applying? If we crash after applying but before marking,
     // rejected ops won't be re-uploaded on restart. Order matters for consistency.
     // ─────────────────────────────────────────────────────────────────────────
@@ -281,7 +343,7 @@ export class ConflictResolutionService {
     }
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 3: Apply ALL operations in a single batch
+    // STEP 5: Apply ALL operations in a single batch
     // Why batch? Dependency sorting only works within a single applyOperations() call.
     // Example: A Task create depends on its Project existing. If the Project came from
     // a conflict resolution and the Task from non-conflicting ops, batching ensures
@@ -356,5 +418,92 @@ export class ConflictResolutionService {
    */
   private async _validateAndRepairAfterResolution(): Promise<void> {
     await this.validateStateService.validateAndRepairCurrentState('conflict-resolution');
+  }
+
+  /**
+   * Check if a conflict has identical effects on both sides.
+   *
+   * Identical conflicts occur when both local and remote operations would result
+   * in the same final state. These can be auto-resolved without user intervention.
+   *
+   * ## Identical Conflict Scenarios:
+   * 1. **Both DELETE**: Both sides deleted the same entity
+   * 2. **Same UPDATE payloads**: Both sides made identical changes
+   *
+   * @param conflict - The conflict to check
+   * @returns true if the conflict has identical effects and can be auto-resolved
+   */
+  isIdenticalConflict(conflict: EntityConflict): boolean {
+    const { localOps, remoteOps } = conflict;
+
+    // Empty ops can't be identical conflicts
+    if (localOps.length === 0 || remoteOps.length === 0) {
+      return false;
+    }
+
+    // Case 1: Both sides DELETE the same entity
+    // This is the most common "identical" conflict
+    const allLocalDelete = localOps.every((op) => op.opType === OpType.Delete);
+    const allRemoteDelete = remoteOps.every((op) => op.opType === OpType.Delete);
+    if (allLocalDelete && allRemoteDelete) {
+      OpLog.verbose(
+        `ConflictResolutionService: Identical conflict (both DELETE) for ${conflict.entityType}:${conflict.entityId}`,
+      );
+      return true;
+    }
+
+    // Case 2: Single ops with same opType and identical payloads
+    // Only check single-op conflicts for payload comparison (multi-op is too complex)
+    if (localOps.length === 1 && remoteOps.length === 1) {
+      const localOp = localOps[0];
+      const remoteOp = remoteOps[0];
+
+      // Must be same operation type
+      if (localOp.opType !== remoteOp.opType) {
+        return false;
+      }
+
+      // Compare payloads using deep equality
+      if (this._deepEqual(localOp.payload, remoteOp.payload)) {
+        OpLog.verbose(
+          `ConflictResolutionService: Identical conflict (same ${localOp.opType} payload) for ${conflict.entityType}:${conflict.entityId}`,
+        );
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Deep equality check for payloads.
+   * Handles nested objects, arrays, and primitives.
+   */
+  private _deepEqual(a: unknown, b: unknown): boolean {
+    if (a === b) return true;
+    if (a === null || b === null) return a === b;
+    if (typeof a !== typeof b) return false;
+
+    if (typeof a === 'object') {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        return a.every((val, i) => this._deepEqual(val, b[i]));
+      }
+
+      if (Array.isArray(a) !== Array.isArray(b)) return false;
+
+      const aKeys = Object.keys(a as object);
+      const bKeys = Object.keys(b as object);
+      if (aKeys.length !== bKeys.length) return false;
+
+      return aKeys.every((key) =>
+        this._deepEqual(
+          (a as Record<string, unknown>)[key],
+          (b as Record<string, unknown>)[key],
+        ),
+      );
+    }
+
+    return false;
   }
 }
