@@ -42,11 +42,7 @@ registerForm.addEventListener('submit', async (e) => {
   }
 
   // Register first
-  const success = await handleAuth(
-    '/register',
-    { email, password, termsAccepted },
-    true,
-  );
+  const success = await handleAuth('/register', { email, password, termsAccepted }, true);
 
   // Auto login if registration successful
   if (success) {

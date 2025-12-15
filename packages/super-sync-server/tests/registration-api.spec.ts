@@ -51,9 +51,10 @@ describe('API Routes - Registration', () => {
     expect(response.json().error).toBe('Validation failed');
     const details = response.json().details;
     // Check for either the message or the path being termsAccepted
-    const hasTermsError = details.some((d: any) => 
-      d.message === 'You must accept the Terms of Service' || 
-      d.path.includes('termsAccepted')
+    const hasTermsError = details.some(
+      (d: any) =>
+        d.message === 'You must accept the Terms of Service' ||
+        d.path.includes('termsAccepted'),
     );
     expect(hasTermsError).toBe(true);
   });
