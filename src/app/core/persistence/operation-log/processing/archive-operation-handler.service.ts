@@ -19,6 +19,7 @@ import { TimeTrackingService } from '../../../../features/time-tracking/time-tra
 const ARCHIVE_AFFECTING_ACTION_TYPES: string[] = [
   TaskSharedActions.moveToArchive.type,
   TaskSharedActions.restoreTask.type,
+  TaskSharedActions.updateTask.type,
   flushYoungToOld.type,
   TaskSharedActions.deleteProject.type,
   deleteTag.type,
@@ -108,6 +109,10 @@ export class ArchiveOperationHandler {
         await this._handleRestoreTask(action);
         break;
 
+      case TaskSharedActions.updateTask.type:
+        await this._handleUpdateTask(action);
+        break;
+
       case flushYoungToOld.type:
         await this._handleFlushYoungToOld(action);
         break;
@@ -160,6 +165,33 @@ export class ArchiveOperationHandler {
       taskIds,
       isRemote ? { isIgnoreDBLock: true } : {},
     );
+  }
+
+  /**
+   * Updates an archived task in archive storage.
+   * REMOTE ONLY: For local operations, archive is written BEFORE action dispatch
+   * by TaskArchiveService.updateTask(), so we skip here to avoid double-writes.
+   */
+  private async _handleUpdateTask(action: PersistentAction): Promise<void> {
+    if (!action.meta.isRemote) {
+      return; // Local: already written by TaskArchiveService before dispatch
+    }
+
+    const { id, changes } = (action as ReturnType<typeof TaskSharedActions.updateTask>)
+      .task;
+
+    // Try to update in archive - will throw if task is not archived (which is fine,
+    // the NgRx reducer already handled it for non-archived tasks)
+    try {
+      await this._getTaskArchiveService().updateTask(id as string, changes, {
+        isSkipDispatch: true,
+        isIgnoreDBLock: true,
+      });
+    } catch (e) {
+      // Task not in archive - this is expected for non-archived tasks
+      // The reducer already handled it
+      Log.log('[ArchiveOperationHandler] updateTask: task not in archive, skipping');
+    }
   }
 
   /**

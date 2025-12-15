@@ -1,5 +1,5 @@
 import { inject, Injectable, Injector } from '@angular/core';
-import { Action } from '@ngrx/store';
+import { Action, Store } from '@ngrx/store';
 import { roundTimeSpentForDay } from '../tasks/store/task.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { TASK_FEATURE_NAME, taskReducer } from '../tasks/store/task.reducer';
@@ -51,6 +51,14 @@ export class TaskArchiveService {
       this._pfapiService = this._injector.get(PfapiService);
     }
     return this._pfapiService;
+  }
+
+  private _store?: Store;
+  private get store(): Store {
+    if (!this._store) {
+      this._store = this._injector.get(Store);
+    }
+    return this._store;
   }
 
   constructor() {}
@@ -139,29 +147,52 @@ export class TaskArchiveService {
     }
   }
 
-  async updateTask(id: string, changedFields: Partial<Task>): Promise<void> {
+  async updateTask(
+    id: string,
+    changedFields: Partial<Task>,
+    options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
       Log.x(changedFields, id);
 
-      return await this._execAction(
+      await this._execAction(
         'archiveYoung',
         archiveYoung,
         TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
+        options?.isIgnoreDBLock,
       );
+      // Dispatch persistent action for sync (skip for remote handler calls)
+      if (!options?.isSkipDispatch) {
+        this.store.dispatch(
+          TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
+        );
+      }
+      return;
     }
     const archiveOld = await this.pfapiService.m.archiveOld.load();
     if (archiveOld.task.entities[id]) {
-      return await this._execAction(
+      await this._execAction(
         'archiveOld',
         archiveOld,
         TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
+        options?.isIgnoreDBLock,
       );
+      // Dispatch persistent action for sync (skip for remote handler calls)
+      if (!options?.isSkipDispatch) {
+        this.store.dispatch(
+          TaskSharedActions.updateTask({ task: { id, changes: changedFields } }),
+        );
+      }
+      return;
     }
     throw new Error('Archive task to update not found');
   }
 
-  async updateTasks(updates: Update<Task>[]): Promise<void> {
+  async updateTasks(
+    updates: Update<Task>[],
+    options?: { isSkipDispatch?: boolean; isIgnoreDBLock?: boolean },
+  ): Promise<void> {
     const allUpdates = updates.map((upd) => TaskSharedActions.updateTask({ task: upd }));
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const updatesYoung = allUpdates.filter(
@@ -179,7 +210,7 @@ export class TaskArchiveService {
           ...archiveYoung,
           task: newTaskStateArchiveYoung,
         },
-        { isUpdateRevAndLastUpdate: true },
+        { isUpdateRevAndLastUpdate: true, isIgnoreDBLock: options?.isIgnoreDBLock },
       );
     }
 
@@ -199,8 +230,15 @@ export class TaskArchiveService {
           ...archiveOld,
           task: newTaskStateArchiveOld,
         },
-        { isUpdateRevAndLastUpdate: true },
+        { isUpdateRevAndLastUpdate: true, isIgnoreDBLock: options?.isIgnoreDBLock },
       );
+    }
+
+    // Dispatch persistent actions for sync (skip for remote handler calls)
+    if (!options?.isSkipDispatch) {
+      for (const upd of updates) {
+        this.store.dispatch(TaskSharedActions.updateTask({ task: upd }));
+      }
     }
   }
 
@@ -362,6 +400,7 @@ export class TaskArchiveService {
     >,
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
+    isIgnoreDBLock?: boolean,
   ): Promise<void> {
     const newTaskState = this._reduceForArchive(archiveBefore, action);
     Log.x(newTaskState);
@@ -370,7 +409,7 @@ export class TaskArchiveService {
         ...archiveBefore,
         task: newTaskState,
       },
-      { isUpdateRevAndLastUpdate: true },
+      { isUpdateRevAndLastUpdate: true, isIgnoreDBLock },
     );
   }
 
