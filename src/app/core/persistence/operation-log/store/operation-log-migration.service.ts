@@ -14,19 +14,44 @@ export class OperationLogMigrationService {
   private persistenceLocalService = inject(PersistenceLocalService);
 
   async checkAndMigrate(): Promise<void> {
-    const lastSeq = await this.opLogStore.getLastSeq();
-    if (lastSeq > 0) {
-      // Already migrated or in use
+    // Check if there's a state cache (snapshot) - this indicates a proper migration happened
+    const snapshot = await this.opLogStore.loadStateCache();
+    if (snapshot) {
+      // Already migrated - snapshot exists
       return;
+    }
+
+    // No snapshot exists. Check if there are any operations in the log.
+    const allOps = await this.opLogStore.getOpsAfterSeq(0);
+
+    if (allOps.length > 0) {
+      // Operations exist but no snapshot. Check if the first op is a Genesis/Migration op.
+      const firstOp = allOps[0].op;
+      if (firstOp.entityType === 'MIGRATION' || firstOp.entityType === 'RECOVERY') {
+        // Valid Genesis exists - migration already happened but snapshot might have been lost
+        OpLog.normal(
+          'OperationLogMigrationService: Genesis operation found. Skipping migration.',
+        );
+        return;
+      }
+
+      // Orphan operations exist (captured before migration ran).
+      // This happens when effects dispatch actions during app init before hydration completes.
+      // We need to clear these orphan ops and proceed with proper migration.
+      OpLog.warn(
+        `OperationLogMigrationService: Found ${allOps.length} orphan operations without Genesis. ` +
+          `Clearing them and proceeding with migration.`,
+      );
+      await this.opLogStore.deleteOpsWhere(() => true);
     }
 
     OpLog.normal('OperationLogMigrationService: Checking for legacy data to migrate...');
 
-    // Load all legacy data
-    // We skip validity check here because we want to migrate whatever is there.
-    // NOTE: This call automatically runs legacy `CROSS_MODEL_MIGRATIONS` if the data
-    // is from an older version. This ensures we import already-migrated data.
-    const legacyState = await this.pfapiService.pf.getAllSyncModelData(true);
+    // Load all legacy data directly from ModelCtrl caches ('pf' database).
+    // We must use getAllSyncModelDataFromModelCtrls() instead of getAllSyncModelData()
+    // because the NgRx store delegate is set early in initialization, and NgRx store
+    // is empty at migration time. Reading from 'pf' database gets the actual legacy data.
+    const legacyState = await this.pfapiService.pf.getAllSyncModelDataFromModelCtrls();
 
     // Check if there is any actual user data to migrate.
     // We only check entity models (tasks, projects, tags, etc.) because config models

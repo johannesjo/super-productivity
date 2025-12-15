@@ -23,9 +23,11 @@ export class MigrationService<MD extends ModelCfgs> {
       localStorage.getItem(PFAPI_MIGRATE_FORCE_VERSION_LS_KEY) || 0
     );
 
+    // Read directly from ModelCtrl caches ('pf' database), not via NgRx delegate.
+    // During app init, NgRx store is empty, so getAllSyncModelData() would return empty data.
     const r = await this.migrate(
       forceMigrationVersion || meta.crossModelVersion,
-      await this._pfapiMain.getAllSyncModelData(true),
+      await this._pfapiMain.getAllSyncModelDataFromModelCtrls(),
     );
     if (r.wasMigrated) {
       const { dataAfter, versionAfter } = r;
