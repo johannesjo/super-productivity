@@ -21,7 +21,7 @@
       "CHANGE_BACKGROUND": "Zmień tło"
     },
     "UPDATE_MAIN_MODEL": "Super Productivity posiada ważną aktualizację! Wymagana jest migracja danych, która spowoduje że starsze wersje aplikacji nie będą mogły ich używać.",
-    "UPDATE_MAIN_MODEL_NO_UPDATE": "No model update chosen. Please note that you either have to downgrade to the last version, if you do not want to perform the model upgrade.",
+    "UPDATE_MAIN_MODEL_NO_UPDATE": "Nie wybrano aktualizacji modelu. Pamiętaj, że jeśli nie chcesz przeprowadzać aktualizacji modelu, musisz wrócić do poprzedniej wersji aplikacji.",
     "UPDATE_WEB_APP": "Nowa wersja dostępna. Załadować ją?"
   },
   "BL": {
@@ -43,7 +43,7 @@
     "LATER_TODAY": "Później dzisiaj",
     "NEXT_WEEK": "Następny tydzień",
     "PLACEHOLDER": "Proszę wybrać datę",
-    "PRESS_ENTER_AGAIN": "Naciśnij enter aby zapusać",
+    "PRESS_ENTER_AGAIN": "Naciśnij enter aby zapisać",
     "TOMORROW": "Jutro"
   },
   "DIALOG_UNSPLASH_PICKER": {
@@ -61,11 +61,11 @@
         "LABELS": {
           "FILE": "Ścieżka do pliku",
           "IMG": "Zdjęcie",
-          "LINK": "Url"
+          "LINK": "URL"
         },
         "SELECT_TYPE": "Wybierz typ",
         "TYPES": {
-          "FILE": "Plik (otwiera domyślną aplikacje)",
+          "FILE": "Plik (otwiera domyślną aplikację)",
           "IMG": "Zdjęcie (otwiera się jako thumbnail)",
           "LINK": "Link (otwiera się w nowej karcie)"
         }
@@ -113,7 +113,7 @@
     },
     "CALDAV": {
       "DIALOG_INITIAL": {
-        "TITLE": "Ustaiwenia synchronizacji kalendarza (CalDav) dla projektu"
+        "TITLE": "Ustawienia synchronizacji kalendarza (CalDav) dla projektu"
       },
       "FORM": {
         "CALDAV_CATEGORY_FILTER": "Kategoria do filtrowania zadań CalDav dla (zostaw puste dla żadnego)",
@@ -124,7 +124,7 @@
         "IS_TRANSITION_ISSUES_ENABLED": "Automatycznie wypełniaj zadania CalDav po zakończeniu zadania"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p>",
+        "HELP": "<p>Tutaj możesz skonfigurować Super Productivity tak, aby w panelu tworzenia zadań w widoku planowania dziennego wyświetlał listę niewykonanych zadań CalDav dla wybranego projektu. Będą one pokazywane jako sugestie i będą zawierały link do zadania oraz dodatkowe informacje.</p><p>Możesz też automatycznie dodać i synchronizować wszystkie niewykonane zadania do zaległości.</p>",
         "TITLE": "CalDav"
       },
       "ISSUE_CONTENT": {
@@ -148,9 +148,9 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
-        "CALENDAR_NOT_FOUND": "CalDav: Calendar \"{{calendarName}}\" not found",
-        "CALENDAR_READ_ONLY": "CalDav: Calendar \"{{calendarName}}\" is readonly",
-        "ISSUE_NOT_FOUND": "CalDav: Todo \"{{issueId}}\" seems to be deleted on server."
+        "CALENDAR_NOT_FOUND": "CalDav: nie znaleziono kalendarza „{{calendarName}}”",
+        "CALENDAR_READ_ONLY": "CalDav: kalendarz „{{calendarName}}” jest tylko do odczytu",
+        "ISSUE_NOT_FOUND": "CalDav: zadanie „{{issueId}}” wygląda na usunięte na serwerze."
       }
     },
     "CALENDARS": {
@@ -173,7 +173,7 @@
     },
     "CONFIG": {
       "S": {
-        "UPDATE_SECTION": "Updated settings for <strong>{{sectionKey}}</strong>"
+        "UPDATE_SECTION": "Zaktualizowano ustawienia dla <strong>{{sectionKey}}</strong>"
       }
     },
     "D_RATE": {
@@ -195,12 +195,12 @@
     },
     "DROPBOX": {
       "S": {
-        "ACCESS_TOKEN_ERROR": "Dropbox: Unable to generate Access Token from Auth Code",
-        "ACCESS_TOKEN_GENERATED": "Dropbox: Access Token generated from Auth Code",
-        "AUTH_ERROR": "Dropbox: Invalid access token provided",
+        "ACCESS_TOKEN_ERROR": "Dropbox: nie udało się wygenerować tokenu dostępu (Access Token) na podstawie kodu autoryzacji",
+        "ACCESS_TOKEN_GENERATED": "Dropbox: wygenerowano token dostępu (Access Token) na podstawie kodu autoryzacji",
+        "AUTH_ERROR": "Dropbox: podano nieprawidłowy token dostępu",
         "AUTH_ERROR_ACTION": "Żeton zmiany",
-        "OFFLINE": "Dropbox: Unable to sync, because offline",
-        "SYNC_ERROR": "Dropbox: Error while syncing",
+        "OFFLINE": "Dropbox: nie można zsynchronizować danych, ponieważ brak połączenia z internetem",
+        "SYNC_ERROR": "Dropbox: błąd podczas synchronizacji",
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: Nie można wygenerować wyzwania PKCE."
       }
     },
@@ -308,11 +308,11 @@
         "TITLE": "Skonfiguruj GitHub dla projektu"
       },
       "FORM": {
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "FILTER_USER": "Nazwa użytkownika (e.g. to filter out changes by yourself)",
         "INVALID_TOKEN_MESSAGE": "Nieprawidłowy token GitHub. Musi zaczynać się od \"ghp_\".",
         "IS_ASSIGNEE_FILTER": "Importuj tylko sprawy przypisane do mnie do zaległości",
         "REPO": "username/repositoryName",
-        "TOKEN": "Access Token"
+        "TOKEN": "Token dostępu"
       },
       "FORM_SECTION": {
         "HELP": "<p>Here you can configure SuperProductivity to list open GitHub issues for a specific repository in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p><p>To get by usage limits and to access you can provide a an access token. <a href='https://docs.github.com/en/free-pro-team@latest/developers/apps/scopes-for-oauth-apps'>More info about its scopes can be found here</a>.",
@@ -333,7 +333,7 @@
       },
       "S": {
         "CONFIG_ERROR": "GitHub: Błąd podczas mapowania danych. Czy nazwa repozytorium jest poprawna?",
-        "ERR_UNKNOWN": "GitHub: Unknown error {{statusCode}} {{errorMsg}}. Api Rate limit exceeded?"
+        "ERR_UNKNOWN": "GitHub: nieznany błąd {{statusCode}} {{errorMsg}}. Przekroczono limit zapytań API?"
       }
     },
     "GITLAB": {
@@ -351,9 +351,9 @@
       "FORM": {
         "FILTER": "Filtr niestandardowy",
         "FILTER_DESCRIPTION": "Zobacz https://docs.gitlab.com/ee/api/issues.html#list-issues. Wielokrotność może być łączona przez &",
-        "FILTER_USER": "Username (e.g. to filter out changes by yourself)",
+        "FILTER_USER": "Nazwa użytkownika (e.g. to filter out changes by yourself)",
         "GITLAB_BASE_URL": "Custom GitLab base URL",
-        "PROJECT": "project ID or user name/project",
+        "PROJECT": "ID projektu lub nazwa użytkownika/projekt",
         "PROJECT_HINT": "np. johannesjo/super-produktywność",
         "SCOPE": "Zakres",
         "SCOPE_ALL": "Wszystkie",
@@ -365,10 +365,10 @@
         "SOURCE_PROJECT": "Projekt",
         "SUBMIT_TIMELOGS": "Przesyłanie dzienników czasowych do Gitlab",
         "SUBMIT_TIMELOGS_DESCRIPTION": "Wyświetlanie okna dialogowego śledzenia czasu po kliknięciu dnia zakończenia",
-        "TOKEN": "Access Token"
+        "TOKEN": "Token dostępu"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list open GitLab (either its the online version or a self-hosted instance) issues for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the issue as well as more information about it.</p> <p>In addition you can automatically add and sync all open issues to your task backlog.</p>",
+        "HELP": "<p>Tutaj możesz skonfigurować Super Productivity tak, aby wyświetlał otwarte zgłoszenia GitLab (zarówno wersji online, jak i instancji hostowanej samodzielnie) dla wybranego projektu w panelu tworzenia zadań w widoku planowania dziennego. Będą one pokazywane jako sugestie i będą zawierały link do zgłoszenia oraz dodatkowe informacje.</p><p>Możesz też automatycznie dodawać i synchronizować wszystkie otwarte zgłoszenia do zaległości.</p>",
         "TITLE": "GitLab"
       },
       "ISSUE_CONTENT": {
@@ -383,7 +383,7 @@
         "WRITE_A_COMMENT": "Napisz komentarz"
       },
       "S": {
-        "ERR_UNKNOWN": "GitLab: Unknown error {{statusCode}} {{errorMsg}}"
+        "ERR_UNKNOWN": "GitLab: nieznany błąd {{statusCode}} {{errorMsg}}"
       }
     },
     "ISSUE": {
@@ -452,38 +452,38 @@
     },
     "JIRA": {
       "BANNER": {
-        "BLOCK_ACCESS_MSG": "Jira: To prevent shut out from api, access has been blocked by Super Productivity. You probably should check your jira settings!",
+        "BLOCK_ACCESS_MSG": "Jira: aby zapobiec zablokowaniu dostępu przez API, Super Productivity tymczasowo zablokowało połączenia. Sprawdź ustawienia Jiry!",
         "BLOCK_ACCESS_UNBLOCK": "Odblokuj"
       },
       "CFG_CMP": {
-        "ALWAYS_ASK": "Always open dialog",
+        "ALWAYS_ASK": "Zawsze pokazuj okno dialogowe",
         "DO_NOT": "Don't transition",
-        "DONE": "Status for completing task",
-        "ENABLE": "Enable Jira integration",
-        "ENABLE_TRANSITIONS": "Enable Transition Handling",
-        "IN_PROGRESS": "Status for starting task",
-        "LOAD_SUGGESTIONS": "Load Suggestions",
-        "MAP_CUSTOM_FIELDS": "Map Custom Fields",
-        "MAP_CUSTOM_FIELDS_INFO": "Unfortunately some of Jira's data is saved under custom fields which are different for every installation. If you want to include this data you need to select the proper custom field for it.",
-        "OPEN": "Status for pausing task",
-        "SELECT_ISSUE_FOR_TRANSITIONS": "Select issue to load available transitions",
-        "STORY_POINTS": "Story Points",
+        "DONE": "Status zakończenia zadania",
+        "ENABLE": "Włącz integrację z Jira",
+        "ENABLE_TRANSITIONS": "Włącz obsługę przejść",
+        "IN_PROGRESS": "Status rozpoczęcia zadania",
+        "LOAD_SUGGESTIONS": "Wczytuj sugestie",
+        "MAP_CUSTOM_FIELDS": "Mapuj pola niestandardowe",
+        "MAP_CUSTOM_FIELDS_INFO": "Niestety część danych Jiry jest zapisywana w polach niestandardowych, które różnią się w zależności od instalacji. Jeśli chcesz uwzględnić te dane, wybierz odpowiednie pole niestandardowe.",
+        "OPEN": "Status wstrzymania zadania",
+        "SELECT_ISSUE_FOR_TRANSITIONS": "Wybierz zgłoszenie, aby wczytać dostępne przejścia",
+        "STORY_POINTS": "Punkty historii",
         "TRANSITION": "Obsługa przejścia"
       },
       "DIALOG_CONFIRM_ASSIGNMENT": {
-        "MSG": "<strong>{{summary}}</strong> is currently assigned to <strong>{{assignee}}</strong>. Do you want to assign it to yourself?",
+        "MSG": "<strong>{{summary}}</strong> jest obecnie przypisane do <strong>{{assignee}}</strong>. Czy chcesz przypisać je do siebie?",
         "OK": "Zrób to!"
       },
       "DIALOG_INITIAL": {
-        "TITLE": "Ustawenia Jiry dla projektu"
+        "TITLE": "Ustawienia Jiry dla projektu"
       },
       "DIALOG_TRANSITION": {
-        "CHOOSE_STATUS": "Choose status to assign",
-        "CURRENT_ASSIGNEE": "Current Assignee:",
-        "CURRENT_STATUS": "Current Status:",
+        "CHOOSE_STATUS": "Wybierz status do przypisania",
+        "CURRENT_ASSIGNEE": "Obecnie przypisany:",
+        "CURRENT_STATUS": "Obecny status:",
         "TASK_NAME": "Nazwa zadania:",
-        "TITLE": "Jira: Update Status",
-        "UPDATE_STATUS": "Update Status"
+        "TITLE": "Jira: aktualizacja statusu",
+        "UPDATE_STATUS": "Zaktualizuj status"
       },
       "DIALOG_WORKLOG": {
         "CHECKBOXES": {
@@ -492,21 +492,21 @@
           "TIME_SPENT_TODAY": "Zawsze używaj tylko czasu spędzonego dzisiaj jako domyślnego",
           "TIME_SPENT_YESTERDAY": "Zawsze używaj tylko czasu spędzonego wczoraj jako domyślnego"
         },
-        "CURRENTLY_LOGGED": "Currently logged time: ",
-        "INVALID_DATE": "The entered value is not a date!",
-        "SAVE_WORKLOG": "Save Worklog",
-        "STARTED": "Started",
-        "SUBMIT_WORKLOG_FOR": "Submit a worklog to Jira for",
-        "TIME_SPENT": "Time Spent",
+        "CURRENTLY_LOGGED": "Aktualnie zaraportowany czas: ",
+        "INVALID_DATE": "Wprowadzona wartość nie jest datą!",
+        "SAVE_WORKLOG": "Zapisz worklog",
+        "STARTED": "Rozpoczęto",
+        "SUBMIT_WORKLOG_FOR": "Wyślij worklog do Jiry dla",
+        "TIME_SPENT": "Czas spędzony",
         "TIME_SPENT_TOOLTIP": "Dodaj różne czasy",
-        "TITLE": "Jira: Submit Worklog"
+        "TITLE": "Jira: wysyłanie worklogu"
       },
       "FORM_ADV": {
-        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL used for adding tasks automatically to backlog",
-        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Open dialog to submit worklog to jira when sub task is done",
-        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Check if the currently worked on issue is assigned to current user",
-        "IS_WORKLOG_ENABLED": "Open dialog to submit worklog to jira when task is done",
-        "SEARCH_JQL_QUERY": "JQL Query for limiting searching tasks",
+        "AUTO_ADD_BACKLOG_JQL_QUERY": "JQL używane do automatycznego dodawania zadań do zaległości",
+        "IS_ADD_WORKLOG_ON_SUB_TASK_DONE": "Otwieraj okno dodania worklogu po ukończeniu podzadania",
+        "IS_CHECK_TO_RE_ASSIGN_TICKET_ON_TASK_START": "Sprawdzaj, czy aktualnie wykonywane zgłoszenie jest przypisane do bieżącego użytkownika",
+        "IS_WORKLOG_ENABLED": "Otwieraj okno dodania worklogu do Jiry po ukończeniu zadania",
+        "SEARCH_JQL_QUERY": "Zapytanie JQL ograniczające wyszukiwanie zadań",
         "WORKLOG_DEFAULT_ALL_TIME": "Wypełnij cały czas spędzony na wykonywaniu zadania",
         "WORKLOG_DEFAULT_ALL_TIME_MINUS_LOGGED": "Wypełnij cały czas spędzony minus czas zarejestrowany",
         "WORKLOG_DEFAULT_TIME_MODE": "Domyślna wartość czasu dla okna dialogowego",
@@ -514,27 +514,27 @@
         "WORKLOG_DEFAULT_YESTERDAY": "Wypełnij tylko czas spędzony wczoraj"
       },
       "FORM_CRED": {
-        "ALLOW_SELF_SIGNED": "Allow self signed certificate",
-        "HOST": "Host (e.g.: http://my-host.de:1234)",
-        "PASSWORD": "Token / Password",
+        "ALLOW_SELF_SIGNED": "Zezwalaj na certyfikat self-signed",
+        "HOST": "Host (np.: http://mój-host.pl:1234)",
+        "PASSWORD": "Token / hasło",
         "USE_PAT": "Zamiast tego użyj osobistego tokena dostępu (LEGACY)",
-        "USER_NAME": "Email / Username",
-        "WONKY_COOKIE_MODE": "Wonky Cookie Fallback Authentication (desktop app only)"
+        "USER_NAME": "E-mail / nazwa użytkownika",
+        "WONKY_COOKIE_MODE": "Awaryjne uwierzytelnianie „Wonky Cookie” (tylko aplikacja desktopowa)"
       },
       "FORM_SECTION": {
-        "ADV_CFG": "Advanced Config",
+        "ADV_CFG": "Zaawansowana konfiguracja",
         "HELP_ARR": {
-          "H1": "Basic configuration",
-          "H2": "Worklog settings",
-          "H3": "Default transitions",
-          "P1_1": "Please provide a login name (can be found on your profile page) and an <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">API token</a> or password if you can't generate one for some reason. Please not that newer versions of jira sometimes only work with the token. ",
-          "P1_2": "You also need to specify a JQL query which is used for the suggestions to add tasks from Jira. If you need help check out this link <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
-          "P1_3": "You can also configure, if you want to automatically (e.g. every time you visit the planning view), to add all new tasks specified by a custom JQL query to the backlog.",
-          "P1_4": "Another option is \"Check if current ticket is assigned to current user\". If enabled and you're starting, a check will be made if you're currently assigned to that ticket on Jira, if not an Dialog appears in which you can chose to assign the ticket to yourself.",
-          "P2_1": "There are several options to determine when and how you want to submit a worklog. Enabling <em>'Open worklog dialog for adding a worklog to Jira when task is done'</em> opens a dialog to add an worklog every time you mark a Jira Task as done. So keep in mind that worklogs will be added on top of everything tracked so far. So if you mark a task as done for a second time, you might not want to submit the complete worked time for the task again.",
-          "P2_2": "<em>'Open worklog dialog when sub task is done and not for tasks with sub tasks themselves'</em> opens a worklog dialog every time when you mark a sub task of a Jira issue as done. Because you already track your time via the sub tasks, no dialog is opened once you mark the Jira task itself as done.",
-          "P2_3": "<em>'Send updates to worklog automatically without dialog'</em> does what it says. Because marking a task as done several times leads to the whole worked time being tracked twice, this is not recommended.",
-          "P3_1": "Here you can reconfigure your default transitions. Jira enables a wide configuration of transitions usually coming into action as different columns on your Jira agile board we can't make assumptions about where and when to transition your tasks and you need to set it manually."
+          "H1": "Podstawowa konfiguracja",
+          "H2": "Ustawienia worklogu",
+          "H3": "Domyślne przejścia",
+          "P1_1": "Podaj login (znajdziesz go w profilu) oraz <a target=\"_blank\" href=\"https://confluence.atlassian.com/cloud/api-tokens-938839638.html\" target=\"_blank\">token API</a> albo hasło, jeśli nie możesz go wygenerować. Pamiętaj, że nowsze wersje Jiry czasem działają tylko z tokenem.",
+          "P1_2": "Musisz też podać zapytanie JQL używane do sugestii dodawania zadań z Jiry. Jeśli potrzebujesz pomocy, zobacz ten link: <a target=\"_blank\" href=\"https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html\" target=\"_blank\">https://confluence.atlassian.com/jirasoftwarecloud/advanced-searching-764478330.html</a>.",
+          "P1_3": "Możesz także ustawić automatyczne (np. przy każdej wizycie w widoku planowania) dodawanie wszystkich nowych zadań wskazanych przez niestandardowe zapytanie JQL do zaległości.",
+          "P1_4": "Opcja „Sprawdź, czy bieżące zgłoszenie jest przypisane do użytkownika” po uruchomieniu zadania sprawdza przypisanie w Jirze. Jeśli zgłoszenie nie jest przypisane do Ciebie, pojawi się okno, w którym możesz przypisać je do siebie.",
+          "P2_1": "Możesz określić, kiedy i jak wysyłać worklog. Włączenie <em>„Otwieraj okno dodania worklogu do Jiry po ukończeniu zadania”</em> powoduje, że przy oznaczeniu zadania Jira jako ukończonego pojawia się okno dodania worklogu. Pamiętaj, że worklogi będą dodawane do wszystkiego, co do tej pory zostało zmierzone. Jeśli oznaczysz zadanie jako ukończone ponownie, możesz nie chcieć wysyłać pełnego czasu drugi raz.",
+          "P2_2": "<em>„Otwieraj okno worklogu po ukończeniu podzadania, ale nie dla zadań z podzadaniami”</em> otwiera okno worklogu za każdym razem, gdy ukończysz podzadanie zgłoszenia Jira. Ponieważ czas śledzisz na podzadaniach, okno nie pojawi się po ukończeniu zadania głównego Jira.",
+          "P2_3": "<em>„Wysyłaj aktualizacje worklogu automatycznie bez okna dialogowego”</em> robi dokładnie to, co mówi. Ponieważ wielokrotne oznaczanie zadania jako ukończonego może spowodować podwójne naliczenie czasu, ta opcja nie jest zalecana.",
+          "P3_1": "Tutaj możesz zmienić domyślne przejścia. Jira pozwala bardzo szeroko konfigurować przejścia (często odpowiadają kolumnom na tablicy agile), więc nie możemy zgadywać, kiedy i jak przełączać statusy — musisz ustawić to ręcznie."
         }
       },
       "ISSUE_CONTENT": {
@@ -558,23 +558,23 @@
       },
       "S": {
         "ADDED_WORKLOG_FOR": "Jira: Added worklog for {{issueKey}}",
-        "EXTENSION_NOT_LOADED": "Super Productivity Extension not loaded. Reloading the page might help",
-        "INSUFFICIENT_SETTINGS": "Insufficient Settings provided for Jira",
+        "EXTENSION_NOT_LOADED": "Rozszerzenie Super Productivity nie jest załadowane. Ponowne wczytanie strony może pomóc.",
+        "INSUFFICIENT_SETTINGS": "Insufficient Ustawienia provided for Jira",
         "INVALID_RESPONSE": "Jira: Odpowiedź zawierała nieprawidłowe dane",
         "ISSUE_NO_UPDATE_REQUIRED": "Jira: \"{{issueText}}\" already up to date",
         "MANUAL_UPDATE_ISSUE_SUCCESS": "Jira: Updated data for \"{{issueText}}\"",
         "MISSING_ISSUE_DATA": "Jira: Tasks with missing issue data found. Reloading.",
-        "NO_AUTO_IMPORT_JQL": "Jira: No search query defined for auto import",
+        "NO_AUTO_IMPORT_JQL": "Jira: nie zdefiniowano zapytania wyszukiwania dla auto-importu",
         "NO_VALID_TRANSITION": "Jira: No valid transition configured",
         "TIMED_OUT": "Jira: Request timed out",
         "TRANSITION": "Jira: Set issue \"{{issueKey}}\" to \"{{name}}\"",
         "TRANSITION_SUCCESS": "Jira: Set issue {{issueKey}} to <strong>{{chosenTransition}}</strong>",
-        "TRANSITIONS_LOADED": "Jira: Transitions loaded. Use the selects below to assign them",
-        "UNABLE_TO_REASSIGN": "Jira: Unable to reassign ticket to yourself, because you didn't specify a username. Please visit the settings."
+        "TRANSITIONS_LOADED": "Jira: wczytano przejścia. Użyj poniższych list, aby je przypisać.",
+        "UNABLE_TO_REASSIGN": "Jira: nie można przypisać zgłoszenia do siebie, ponieważ nie podano nazwy użytkownika. Wejdź w ustawienia."
       },
       "STEPPER": {
         "CREDENTIALS": "Credentials",
-        "DONE": "You are now done.",
+        "DONE": "To wszystko — gotowe.",
         "LOGIN_SUCCESS": "Login successful!",
         "TEST_CREDENTIALS": "Test Credentials",
         "WELCOME_USER": "Welcome {{user}}!"
@@ -603,8 +603,8 @@
         "DAYS_WORKED": "Days worked",
         "FOCUS_SESSION_TRENDS": "Sesje skupienia w czasie",
         "GLOBAL_METRICS": "Global Metrics",
-        "MOOD_PRODUCTIVITY_OVER_TIME": "Mood and productivity over time",
-        "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
+        "MOOD_PRODUCTIVITY_OVER_TIME": "Nastrój i produktywność w czasie",
+        "NO_ADDITIONAL_DATA_YET": "Nie zebrano jeszcze dodatkowych danych. Użyj formularza w panelu „Ocena” w podsumowaniu dnia, aby je dodać.",
         "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Produktywność i zrównoważony rozwój w czasie",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Liczniki kliknięć w czasie",
         "SIMPLE_COUNTERS": "Proste liczniki",
@@ -618,21 +618,21 @@
         "TIME_SPENT": "Time Spent"
       },
       "EVAL_FORM": {
-        "ADD_NOTE_FOR_TOMORROW": "Add Note for tomorrow",
+        "ADD_NOTE_FOR_TOMORROW": "Dodaj Note for tomorrow",
         "DAILY_STATE": "Stan dzienny",
-        "DISABLE_REPEAT_EVERY_DAY": "Disable repeat every day",
+        "DISABLE_REPEAT_EVERY_DAY": "Wyłącz repeat every day",
         "ENABLE_REPEAT_EVERY_DAY": "Repeat every day",
-        "HELP_H1": "Why should I care?",
+        "HELP_H1": "Po co mi to?",
         "HELP_LINK_TXT": "Go to metrics section",
-        "HELP_P1": "Time for a little self evaluation! Your answers here are saved and provide you with a little bit of statistics on how you work in the metrics section. Furthermore the suggestions for tomorrow will appear above your task list the next day.",
-        "HELP_P2": "This is intended to be less about calculating exact metrics or becoming machine like efficient in all you do than it is about improving how you feel about your work. It can be helpful to evaluate pain points in your daily routine, as well as it is to find factors that help you out. Being just a little bit systematic about it hopefully helps to get a better grip on these and to improve what you can.",
-        "IMPROVEMENTS": "What improved your productivity?",
-        "IMPROVEMENTS_TOMORROW": "What could you do to improve tomorrow?",
-        "MOOD": "How do you feel?",
+        "HELP_P1": "Czas na krótką samoocenę! Twoje odpowiedzi są zapisywane i tworzą proste statystyki w sekcji metryk. Dodatkowo sugestie na jutro pojawią się nad listą zadań następnego dnia.",
+        "HELP_P2": "Chodzi tu mniej o wyliczanie dokładnych metryk i „robotyczną” efektywność, a bardziej o poprawę Twojego samopoczucia w pracy. To może pomóc zauważyć powtarzające się przeszkody w codziennej rutynie oraz czynniki, które Ci sprzyjają. Odrobina systematyczności ułatwia złapanie nad tym kontroli i poprawę tego, co da się poprawić.",
+        "IMPROVEMENTS": "Co poprawiło Twoją produktywność?",
+        "IMPROVEMENTS_TOMORROW": "Co możesz zrobić, aby jutro było lepiej?",
+        "MOOD": "Jak się czujesz?",
         "MOOD_HINT": "1: Awful – 10: Splendid",
         "NOTES": "Notes for tomorrow",
-        "OBSTRUCTIONS": "What hindered your productivity?",
-        "PRODUCTIVITY": "How efficient did you work?",
+        "OBSTRUCTIONS": "Co utrudniało Twoją produktywność?",
+        "PRODUCTIVITY": "Jak efektywnie pracowałeś(-aś)?",
         "PRODUCTIVITY_HINT": "1: Haven't even started – 10: Enormously efficient"
       },
       "FOCUS_SESSION_DIALOG": {
@@ -641,12 +641,12 @@
         "TOTAL_TIME": "Całkowity czas"
       },
       "S": {
-        "SAVE_METRIC": "Metric successfully saved"
+        "SAVE_METRIC": "Metryka została zapisana"
       }
     },
     "NOTE": {
       "D_ADD": {
-        "NOTE_LABEL": "Enter some text to save as note..."
+        "NOTE_LABEL": "Wpisz tekst, aby zapisać notatkę…"
       },
       "D_FULLSCREEN": {
         "VIEW_PARSED": "Wyświetlanie jako przeanalizowany (nieedytowalny) markdown",
@@ -654,12 +654,12 @@
         "VIEW_TEXT_ONLY": "Wyświetlanie jako nieprzeanalizowany tekst"
       },
       "NOTE_CMP": {
-        "DISABLE_PARSE": "Disable markdown parsing",
-        "ENABLE_PARSE": "Enable markdown parse"
+        "DISABLE_PARSE": "Wyłącz markdown parsing",
+        "ENABLE_PARSE": "Włącz markdown parse"
       },
       "NOTES_CMP": {
-        "ADD_BTN": "Add new Note",
-        "DROP_TO_ADD": "Drop here to add new note",
+        "ADD_BTN": "Dodaj new Note",
+        "DROP_TO_ADD": "Upuść tutaj, aby dodać nową notatkę",
         "NO_NOTES": "Obecnie nie ma żadnych notatek"
       },
       "S": {
@@ -768,44 +768,44 @@
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Wróć do pracy!",
       "COMP": {
-        "INTRO": "People with high procrastination levels usually have low self-compassion. So practice it! It improves your feeling of self-worth, fosters positive emotions and can help you overcome procrastination, of course. Try a little exercise:",
-        "L1": "Sit down for bit and stretch yourself, if you like, calm down a little bit",
-        "L2": "Try to listen to the thoughts and feelings that arise",
-        "L3": "Are you responding to yourself in a way that you would respond to a friend?",
-        "L4": "If the answer is no, imagine your friend in your situation. What you would say to them? What you would do for them?",
-        "OUTRO": "More exercises <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">can be found here</a> or on <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">google</a>.",
-        "TITLE": "Self Compassion"
+        "INTRO": "Osoby z wysoką skłonnością do prokrastynacji często mają niską samożyczliwość. Poćwicz ją! Poprawia poczucie własnej wartości, wzmacnia pozytywne emocje i może pomóc przezwyciężyć prokrastynację. Spróbuj krótkiego ćwiczenia:",
+        "L1": "Usiądź na chwilę i — jeśli chcesz — przeciągnij się, uspokój oddech",
+        "L2": "Spróbuj wsłuchać się w pojawiające się myśli i emocje",
+        "L3": "Czy zwracasz się do siebie tak, jak zwrócił(a)byś się do przyjaciela?",
+        "L4": "Jeśli nie — wyobraź sobie przyjaciela w Twojej sytuacji. Co byś mu powiedział(a)? Co byś dla niego zrobił(a)?",
+        "OUTRO": "Więcej ćwiczeń znajdziesz <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion\" target=\"_blank\">tutaj</a> lub przez <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8\" target=\"_blank\">Google</a>.",
+        "TITLE": "Samożyczliwość"
       },
       "CUR": {
-        "INTRO": "Procrastination is interesting, isn't it? It doesn't make sense to do it. Not in your long term interest at all. But still everybody does it. Enjoy and explore!",
-        "L1": "What feelings are eliciting your temptation to procrastinate?",
-        "L2": "Where do you feel them in your body?",
-        "L3": "What do they remind you of?",
-        "L4": "What happens to the thought of procrastinating as you observe it? Does it intensify? Dissipate? Cause other emotions to arise?",
-        "L5": "How are the sensations in your body shifting as you continue to rest your awareness on them?",
+        "INTRO": "Prokrastynacja jest ciekawa, prawda? Nie ma sensu jej robić — w ogóle nie leży w Twoim długoterminowym interesie. A jednak każdy czasem to robi. Obserwuj i eksploruj!",
+        "L1": "Jakie uczucia wywołują w Tobie pokusę zwlekania?",
+        "L2": "Gdzie czujesz je w ciele?",
+        "L3": "Z czym Ci się kojarzą?",
+        "L4": "Co dzieje się z myślą o prokrastynacji, gdy ją obserwujesz? Nasila się? Słabnie? Wywołuje inne emocje?",
+        "L5": "Jak zmieniają się odczucia w ciele, gdy nadal skupiasz na nich uwagę?",
         "PROCRASTINATION_TRIGGERS_TEXT": "Inną bardzo skuteczną metodą jest zapisywanie tego, co wywołało u ciebie chęć zwlekania. Na przykład ja osobiście często mam ochotę szybko przeskoczyć na reddit lub moją ulubioną stronę z wiadomościami, gdy tylko moje okno przeglądarki znajdzie się w centrum uwagi. Odkąd zacząłem zapisywać swoje wyzwalacze w prostym, pustym dokumencie tekstowym, uświadomiłem sobie, jak zakorzeniony był ten wzorzec i pomogło mi to eksperymentować z różnymi środkami zaradczymi.",
         "PROCRASTINATION_TRIGGERS_TITLE": "Zapisywanie czynników wywołujących prokrastynację",
         "TITLE": "Curiosity"
       },
-      "H1": "Cut yourself some slack!",
+      "H1": "Daj sobie trochę luzu!",
       "INTRO": {
         "AVOIDING": "Unikanie zadania",
         "FEAR": "Strach przed porażką",
         "STRESSED": "Stres związany z brakiem realizacji zadań",
         "TITLE": "Wprowadzenie"
       },
-      "P1": "First of all relax! Everybody does it once in a while. And if you're not doing what you should, you should at least enjoy it! Then check out the sections below for something helpful.",
-      "P2": "Remember: Procrastination is an emotion regulation problem, not a time management problem.",
+      "P1": "Po pierwsze — rozluźnij się! Każdemu zdarza się to od czasu do czasu. A jeśli i tak nie robisz tego, co trzeba, to przynajmniej spróbuj to świadomie przeżyć. Potem zajrzyj do sekcji poniżej po coś pomocnego.",
+      "P2": "Pamiętaj: prokrastynacja to problem regulacji emocji, a nie zarządzania czasem.",
       "REFRAME": {
-        "INTRO": "Think about what might be positive about the task despite its flaws.",
+        "INTRO": "Pomyśl, co może być pozytywne w tym zadaniu, mimo jego wad.",
         "TITLE": "Reframing",
         "TL1": "What might be interesting about it?",
-        "TL2": "What is to gain if you complete it?",
-        "TL3": "How will you feel about it if you complete it?"
+        "TL2": "Co możesz zyskać, jeśli je ukończysz?",
+        "TL3": "Jak się poczujesz, jeśli je ukończysz?"
       },
       "SPLIT_UP": {
-        "INTRO": "Split up the task into as many small chunks as you can.",
-        "OUTRO": "Done? Then think about it. What would be – strictly theoretical – the first thing you would do <i>if</i> you were to start working on the task? Just think about it...",
+        "INTRO": "Podziel zadanie na jak najwięcej małych kroków.",
+        "OUTRO": "Gotowe? To teraz pomyśl: co byłoby — czysto teoretycznie — pierwszą rzeczą, którą byś zrobił(a), <i>gdyby</i>ś miał(a) zacząć pracę nad zadaniem? Po prostu o tym pomyśl…",
         "TITLE": "Split it up!"
       }
     },
@@ -832,31 +832,31 @@
       },
       "FORM_THEME": {
         "D_IS_DARK_THEME": "Won`t be used if system supports global dark mode.",
-        "HELP": "Theme settings for your project.",
-        "L_BACKGROUND_IMAGE_DARK": "Background Image Url (Dark Theme)",
-        "L_BACKGROUND_IMAGE_LIGHT": "Background Image Url (Light Theme)",
+        "HELP": "Ustawienia motywu dla projektu.",
+        "L_BACKGROUND_IMAGE_DARK": "Background Image URL (Dark Theme)",
+        "L_BACKGROUND_IMAGE_LIGHT": "Background Image URL (Light Theme)",
         "L_COLOR_ACCENT": "Accent Color",
         "L_COLOR_PRIMARY": "Primary Color",
-        "L_COLOR_WARN": "Warn/Error Color",
+        "L_COLOR_WARN": "Kolor ostrzeżeń/błędów",
         "L_HUE_ACCENT": "Threshold for dark text on accent color background",
         "L_HUE_PRIMARY": "Threshold for dark text on primary color background",
         "L_HUE_WARN": "Threshold for dark text on warn color background",
         "L_IS_AUTO_CONTRAST": "Auto set text colors for best readability",
-        "L_IS_DISABLE_BACKGROUND_TINT": "Disable colored background gradient",
+        "L_IS_DISABLE_BACKGROUND_TINT": "Wyłącz colored background gradient",
         "L_IS_REDUCED_THEME": "Use reduced UI (no boxes around tasks)",
         "L_THEME_COLOR": "Theme Color",
-        "L_TITLE": "Title",
+        "L_TITLE": "Tytuł",
         "TITLE": "Theme"
       },
       "S": {
-        "ARCHIVED": "Archived Project",
-        "CREATED": "Created project <strong>{{title}}</strong>. You can select it from the menu on the top left.",
-        "DELETED": "Deleted Project",
+        "ARCHIVED": "Projekt zarchiwizowany",
+        "CREATED": "Utworzono projekt <strong>{{title}}</strong>. Możesz go wybrać z menu w lewym górnym rogu.",
+        "DELETED": "Projekt usunięty",
         "E_EXISTS": "Project \"{{title}}\" already exists",
         "E_INVALID_FILE": "Invalid data for project file",
-        "ISSUE_PROVIDER_UPDATED": "Updated project settings for <strong>{{issueProviderKey}}</strong>",
-        "UNARCHIVED": "Unarchived project",
-        "UPDATED": "Updated project settings"
+        "ISSUE_PROVIDER_UPDATED": "Zaktualizowano ustawienia projektu for <strong>{{issueProviderKey}}</strong>",
+        "UNARCHIVED": "Przywrócono projekt z archiwum",
+        "UPDATED": "Zaktualizowano ustawienia projektu"
       }
     },
     "PROJECT_FOLDER": {
@@ -915,38 +915,38 @@
         "TXT_MULTIPLE": "<strong>{{title}}</strong> zaczyna się od <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} inne zadania są wymagalne)"
       },
       "S_ACTIVE_TASK_DUE": "Zadanie, nad którym obecnie pracujesz, jest już gotowe!<br/> ({{title}})",
-      "S_REMINDER_ERR": "Error for reminder interface"
+      "S_REMINDER_ERR": "Błąd interfejsu przypomnień"
     },
     "SCHEDULE": {
-      "CONTINUED": "continued",
+      "CONTINUED": "ciąg dalszy",
       "D_INITIAL": {
-        "TEXT": "<p>The idea of the Schedule is to provide a better picture of how one's planned tasks play out over time. It is automatically generated from your Tasks and distinguishes two different things: <strong>Scheduled Tasks</strong>, which are shown at their planned time and <strong>Regular Tasks</strong> which should flow around those fixed events. All tasks consider the time estimates you have assigned to them.</p><p>In addition to this you can also provide a work start and end time. If configured regular tasks will never show up outside of these. Please note that the schedule only includes the upcoming 30 days.</p>",
+        "TEXT": "<p>Ideą Harmonogramu jest lepsze pokazanie, jak zaplanowane zadania układają się w czasie. Harmonogram jest generowany automatycznie na podstawie Twoich zadań i rozróżnia: <strong>Zadania zaplanowane</strong> (pokazywane o wyznaczonym czasie) oraz <strong>Zadania zwykłe</strong>, które „wypełniają” przestrzeń pomiędzy stałymi wydarzeniami. Wszystkie zadania uwzględniają przypisane im estymacje czasu.</p><p>Dodatkowo możesz ustawić godzinę rozpoczęcia i zakończenia pracy. Jeśli to skonfigurujesz, zadania zwykłe nie będą pokazywane poza tym zakresem. Pamiętaj, że harmonogram obejmuje tylko najbliższe 30 dni.</p>",
         "TITLE": "Schedule"
       },
-      "END": "Work End",
+      "END": "Koniec pracy",
       "INSERT_BEFORE": "Przed",
       "LUNCH_BREAK": "Przerwa na lunch",
       "MONTH": "Miesiąc",
-      "NO_TASKS": "Currently there are no tasks. Please add some tasks via the + Button in the top bar.",
-      "NOW": "Now",
+      "NO_TASKS": "Obecnie nie ma żadnych zadań. Dodaj je przyciskiem + na górnym pasku.",
+      "NOW": "Teraz",
       "PLAN_END_DAY": "Plan na koniec dnia",
       "PLAN_START_DAY": "Plan na początek dnia",
-      "START": "Work Start",
+      "START": "Początek pracy",
       "TASK_PROJECTION_INFO": "Przyszła projekcja zaplanowanego powtarzalnego zadania",
       "WEEK": "Tydzień"
     },
     "SEARCH_BAR": {
-      "INFO": "Click on the list icon to search for archived tasks",
-      "INFO_ARCHIVED": "Click on the archive icon to search for normal tasks",
+      "INFO": "Kliknij ikonę listy, aby wyszukać zarchiwizowane zadania",
+      "INFO_ARCHIVED": "Kliknij ikonę archiwum, aby wyszukać zwykłe zadania",
       "NO_RESULTS": "Nie znaleziono zadań pasujących do twojego wyszukiwania",
-      "PLACEHOLDER": "Search for task or task description",
-      "PLACEHOLDER_ARCHIVED": "Search for archived tasks",
-      "TOO_MANY_RESULTS": "Too many results, please narrow your search"
+      "PLACEHOLDER": "Szukaj zadania lub opisu zadania",
+      "PLACEHOLDER_ARCHIVED": "Szukaj zarchiwizowanych zadań",
+      "TOO_MANY_RESULTS": "Za dużo wyników — zawęź wyszukiwanie"
     },
     "SIMPLE_COUNTER": {
       "D_CONFIRM_REMOVE": {
-        "MSG": "Deleting a simple counter, will also delete all past data tracked on it. Are you sure you want to proceed?",
-        "OK": "Do it!"
+        "MSG": "Usunięcie prostego licznika spowoduje także usunięcie wszystkich historycznych danych, które na nim zapisano. Czy na pewno chcesz kontynuować?",
+        "OK": "Zrób to!"
       },
       "D_EDIT": {
         "CURRENT_STREAK": "Aktualna passa",
@@ -955,19 +955,19 @@
         "L_COUNTER": "Count"
       },
       "FORM": {
-        "ADD_NEW": "Add simple counter",
-        "HELP": "Here you can configure simple buttons which will appear at the top right. They can either be timers or just a simple counter, which is counted up, by clicking on it.",
+        "ADD_NEW": "Dodaj simple counter",
+        "HELP": "Tutaj możesz skonfigurować proste przyciski, które pojawią się w prawym górnym rogu. Mogą to być timery albo zwykły licznik, który zwiększa się po kliknięciu.",
         "L_COUNTDOWN_DURATION": "Czas trwania odliczania",
         "L_DAILY_GOAL": "Codzienny cel dla udanej passy",
         "L_ICON": "Icon",
         "L_ICON_ON": "Icon when toggled",
         "L_IS_ENABLED": "Enabled",
-        "L_TITLE": "Title",
+        "L_TITLE": "Tytuł",
         "L_TRACK_STREAKS": "Track Streaks",
         "L_TYPE": "Type",
         "L_WEEKDAYS": "Dni powszednie, aby sprawdzić smugę",
         "TITLE": "Simple Counters",
-        "TYPE_CLICK_COUNTER": "Click Counter",
+        "TYPE_CLICK_COUNTER": "Licznik kliknięć",
         "TYPE_REPEATED_COUNTDOWN": "Powtarzane odliczanie",
         "TYPE_STOPWATCH": "Stopwatch"
       },
@@ -983,18 +983,18 @@
         "REMOTE_MODEL_VERSION_NEWER": "Wersja modelu zdalnego jest nowsza niż lokalna. Zaktualizuj swoją lokalną aplikację do najnowszej wersji!"
       },
       "C": {
-        "EMPTY_SYNC": "You're trying to sync an empty data object. If you are trying to setup syncing from a new app instance, just press OK to load the data from the server. Otherwise, please check your data.",
-        "FORCE_UPLOAD": "Upload local data anyway?",
-        "FORCE_UPLOAD_AFTER_ERROR": "An Error occurred while uploading your local data. Try to force the update?",
+        "EMPTY_SYNC": "Próbujesz zsynchronizować pusty obiekt danych. Jeśli konfigurujesz synchronizację na nowej instancji aplikacji, kliknij OK, aby wczytać dane z serwera. W przeciwnym razie sprawdź poprawność swoich danych.",
+        "FORCE_UPLOAD": "Wysłać lokalne dane mimo wszystko?",
+        "FORCE_UPLOAD_AFTER_ERROR": "Wystąpił błąd podczas wysyłania lokalnych danych. Wymusić aktualizację?",
         "MIGRATE_LEGACY": "Wykryto starsze dane podczas importowania, czy chcesz spróbować je zmigrować?",
-        "NO_REMOTE_DATA": "No remote data found. Upload local to Remote?",
-        "TRY_LOAD_REMOTE_AGAIN": "Try to re-load data from remote once again?",
+        "NO_REMOTE_DATA": "Nie znaleziono danych zdalnych. Wysłać lokalne dane na serwer?",
+        "TRY_LOAD_REMOTE_AGAIN": "Spróbować ponownie wczytać dane z serwera?",
         "UNABLE_TO_LOAD_REMOTE_DATA": "Nie można załadować danych ze zdalnego. Czy chcesz spróbować nadpisać zdalne dane danymi lokalnymi? Wszystkie zdalne dane zostaną utracone w tym procesie."
       },
       "D_AUTH_CODE": {
-        "FOLLOW_LINK": "Please open the following link and copy the auth code provided there into the the input field below.",
-        "GET_AUTH_CODE": "Get Authorization Code",
-        "L_AUTH_CODE": "Enter Auth Code",
+        "FOLLOW_LINK": "Otwórz poniższy link i skopiuj otrzymany kod autoryzacji do pola poniżej.",
+        "GET_AUTH_CODE": "Pobierz kod autoryzacji",
+        "L_AUTH_CODE": "Wpisz kod autoryzacji",
         "TITLE": "Login: {{provider}}"
       },
       "D_CONFLICT": {
@@ -1006,7 +1006,7 @@
         "LOCAL_REMOTE": "Local -> Remote",
         "NEVER": "Nigdy",
         "REMOTE": "Remote",
-        "TEXT": "<p>Update from remote. Both local and remote data seem to be modified.</p>",
+        "TEXT": "<p>Aktualizacja z serwera. Zarówno dane lokalne, jak i zdalne wyglądają na zmodyfikowane.</p>",
         "TIME": "Czas",
         "TIMESTAMP": "Znacznik czasu",
         "TITLE": "Sync: Conflicting Data",
@@ -1049,14 +1049,14 @@
       },
       "FORM": {
         "DROPBOX": {
-          "L_ACCESS_TOKEN": "Access Token (generated from Auth Code)"
+          "L_ACCESS_TOKEN": "Token dostępu (generated from Auth Code)"
         },
         "GOOGLE": {
           "L_SYNC_FILE_NAME": "Sync File Name"
         },
         "L_ENABLE_COMPRESSION": "Włącz kompresję (szybszy transfer danych)",
         "L_ENABLE_ENCRYPTION": "Włączenie szyfrowania end-to-end (eksperymentalne) - uniemożliwienie dostępu do danych dostawcy synchronizacji.",
-        "L_ENABLE_SYNCING": "Enable Syncing",
+        "L_ENABLE_SYNCING": "Włącz Syncing",
         "L_ENCRYPTION_NOTES": "WAŻNE UWAGI: Aby wszystko działało, należy ustawić to samo hasło na innych urządzeniach <strong>PRZED</strong> następną synchronizacją. Wybierz bezpieczne hasło. Należy również pamiętać, że <strong>NIE będzie można uzyskać dostępu do danych, jeśli zapomni się tego hasła. Nie ma możliwości odzyskania</strong>ponieważ tylko ty posiadasz klucz. Szyfrowanie będzie prawdopodobnie wystarczająco dobre, aby udaremnić większość ataków, ale <strong>nie ma gwarancji.</strong>",
         "L_ENCRYPTION_PASSWORD": "Hasło szyfrowania (NIE ZAPOMNIJ)",
         "L_SYNC_INTERVAL": "Sync Interval",
@@ -1068,10 +1068,10 @@
         "TITLE": "Sync",
         "WEB_DAV": {
           "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
-          "L_BASE_URL": "Base Url",
-          "L_PASSWORD": "Password",
+          "L_BASE_URL": "Adres bazowy URL",
+          "L_PASSWORD": "Hasło",
           "L_SYNC_FOLDER_PATH": "Ścieżka folderu synchronizacji",
-          "L_USER_NAME": "Username"
+          "L_USER_NAME": "Nazwa użytkownika"
         }
       },
       "S": {
@@ -1080,18 +1080,18 @@
         "BTN_CONFIGURE": "Konfiguruj",
         "BTN_FORCE_OVERWRITE": "Wymuś nadpisanie",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Dane zdalne są obecnie zapisywane",
-        "ERROR_FALLBACK_TO_BACKUP": "Something went wrong while importing the data. Falling back to local backup.",
-        "ERROR_INVALID_DATA": "Error while syncing. Invalid data",
+        "ERROR_FALLBACK_TO_BACKUP": "Coś poszło nie tak podczas importu danych. Przywracanie z lokalnej kopii zapasowej.",
+        "ERROR_INVALID_DATA": "Błąd podczas synchronizacji: nieprawidłowe dane",
         "ERROR_NO_REV": "Brak prawidłowego rev dla zdalnego pliku",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Błąd podczas synchronizacji. Nie można odczytać danych zdalnych. Być może włączono szyfrowanie, a hasło lokalne nie jest zgodne z hasłem używanym do szyfrowania danych zdalnych?",
-        "IMPORTING": "Importing data",
-        "INCOMPLETE_CFG": "Authentication for sync failed. Please check your Config!",
-        "INITIAL_SYNC_ERROR": "Initial Sync failed",
+        "IMPORTING": "Importowanie danych",
+        "INCOMPLETE_CFG": "Uwierzytelnienie synchronizacji nie powiodło się. Sprawdź konfigurację!",
+        "INITIAL_SYNC_ERROR": "Początkowa synchronizacja nie powiodła się",
         "SUCCESS_DOWNLOAD": "Zsynchronizowane dane ze zdalnej",
         "SUCCESS_IMPORT": "Zaimportowane dane",
         "SUCCESS_VIA_BUTTON": "Dane zostały pomyślnie zsynchronizowane",
-        "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
-        "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}"
+        "UNKNOWN_ERROR": "Nieznany błąd synchronizacji: {{err}}",
+        "UPLOAD_ERROR": "Nieznany błąd wysyłania (czy ustawienia są poprawne?): {{err}}"
       },
       "SAFETY_BACKUP": {
         "BTN_CLEAR_ALL": "Wyczyść wszystko",
@@ -1104,24 +1104,24 @@
     "TAG": {
       "D_CREATE": {
         "CREATE": "Create Tag",
-        "EDIT": "Edit Tag"
+        "EDIT": "Edytuj Tag"
       },
       "D_DELETE": {
-        "CONFIRM_MSG": "Do you really want to delete the tag \"{{tagName}}\"? It will be removed from all tasks. This cannot be undone."
+        "CONFIRM_MSG": "Czy na pewno chcesz usunąć tag „{{tagName}}”? Zostanie usunięty ze wszystkich zadań. Tej operacji nie można cofnąć."
       },
       "D_EDIT": {
-        "ADD": "Add tags for \"{{title}}\"",
-        "EDIT": "Edit tags for \"{{title}}\"",
+        "ADD": "Dodaj tags for \"{{title}}\"",
+        "EDIT": "Edytuj tags for \"{{title}}\"",
         "LABEL": "Tags"
       },
       "FORM_BASIC": {
-        "L_COLOR": "Color (if undefined primary theme color is used)",
+        "L_COLOR": "Kolor (jeśli nie ustawisz, użyty zostanie główny kolor motywu)",
         "L_ICON": "Icon",
         "L_TITLE": "Tag Name",
-        "TITLE": "Basic Settings"
+        "TITLE": "Basic Ustawienia"
       },
       "S": {
-        "UPDATED": "Tag Settings were updated"
+        "UPDATED": "Zaktualizowano ustawienia tagu"
       },
       "TTL": {
         "ADD_NEW_TAG": "Dodaj nowy tag"
@@ -1140,8 +1140,8 @@
     },
     "TASK": {
       "ADD_TASK_BAR": {
-        "ADD_EXISTING_TASK": "Add existing task \"{{taskTitle}}\"",
-        "ADD_ISSUE_TASK": "Add issue #{{issueNr}} from {{issueType}}",
+        "ADD_EXISTING_TASK": "Dodaj existing task \"{{taskTitle}}\"",
+        "ADD_ISSUE_TASK": "Dodaj issue #{{issueNr}} from {{issueType}}",
         "ADD_TASK_TO_BOTTOM_OF_BACKLOG": "Dodaj zadanie do dolnej części zaległości",
         "ADD_TASK_TO_BOTTOM_OF_TODAY": "Dodaj zadanie do dolnej części listy",
         "ADD_TASK_TO_TOP_OF_BACKLOG": "Dodanie zadania na początku listy zaległości",
@@ -1157,8 +1157,8 @@
         "TOMORROW": "Jutro"
       },
       "ADDITIONAL_INFO": {
-        "ADD_ATTACHMENT": "Add attachment",
-        "ADD_SUB_TASK": "Add Sub Task",
+        "ADD_ATTACHMENT": "Dodaj attachment",
+        "ADD_SUB_TASK": "Dodaj Sub Task",
         "ATTACHMENTS": "Attachments ({{nr}})",
         "DUE": "Zaplanowane na",
         "FROM_PARENT": "(from Parent)",
@@ -1173,20 +1173,20 @@
         "TITLE_PLACEHOLDER": "Wprowadź tytuł"
       },
       "B": {
-        "ADD_HALF_HOUR": "Add 1/2 hour",
+        "ADD_HALF_HOUR": "Dodaj 1/2 hour",
         "ESTIMATE_EXCEEDED": "Time estimate exceeded for  \"{{title}}\""
       },
       "CMP": {
-        "ADD_SUB_TASK": "Add sub task",
-        "ADD_TO_MY_DAY": "Add to My Day",
-        "ADD_TO_PROJECT": "Add to a Project",
+        "ADD_SUB_TASK": "Dodaj sub task",
+        "ADD_TO_MY_DAY": "Dodaj to My Day",
+        "ADD_TO_PROJECT": "Dodaj to a Project",
         "CONVERT_TO_PARENT_TASK": "Convert to parent Task",
-        "DELETE": "Delete Task",
+        "DELETE": "Usuń Task",
         "DELETE_REPEAT_INSTANCE": "Usuwanie powtarzających się instancji zadań",
-        "DROP_ATTACHMENT": "Drop here to attach to \"{{title}}\"",
+        "DROP_ATTACHMENT": "Upuść tutaj, aby dodać do „{{title}}”",
         "DUPLICATE": "Duplikat",
-        "EDIT_SCHEDULED": "Edit reminder",
-        "EDIT_TAGS": "Edit tags",
+        "EDIT_SCHEDULED": "Edytuj reminder",
+        "EDIT_TAGS": "Edytuj tags",
         "EDIT_TASK_TITLE": "Edytuj tytuł",
         "FOCUS_SESSION": "Rozpocznij sesję skupienia",
         "MARK_DONE": "Mark as done",
@@ -1195,11 +1195,11 @@
         "MOVE_TO_OTHER_PROJECT": "Move to other Project",
         "MOVE_TO_REGULAR": "Move to today's list",
         "MOVE_TO_TOP": "Przejście na górę listy",
-        "OPEN_ATTACH": "Attach file or link",
-        "OPEN_ISSUE": "Open in browser",
+        "OPEN_ATTACH": "Dodaj plik lub link",
+        "OPEN_ISSUE": "Otwórz in browser",
         "OPEN_TIME": "Time Tracking",
         "REMOVE_FROM_MY_DAY": "Remove from My Day",
-        "REPEAT_EDIT": "Edit repeat task config",
+        "REPEAT_EDIT": "Edytuj repeat task config",
         "SCHEDULE": "Schedule task",
         "SHOW_UPDATES": "Show updates",
         "TOGGLE_ATTACHMENTS": "Show/Hide attachments",
@@ -1222,14 +1222,14 @@
       },
       "D_REMINDER_VIEW": {
         "ADD_ALL_TO_TODAY": "Dodaj wszystkie do dzisiaj",
-        "ADD_TO_TODAY": "Add to today",
+        "ADD_TO_TODAY": "Dodaj to today",
         "COMPLETE": "Zakończ",
         "COMPLETE_ALL": "Zakończ wszystkie",
         "DONE": "Gotowe",
         "DUE_TASK": "Due task",
         "DUE_TASKS": "Due tasks",
-        "FOR_CURRENT": "Task is due. Do you want to start working on it?",
-        "FOR_OTHER": "Task is due. Do you want to start working on it?",
+        "FOR_CURRENT": "Termin zadania minął. Czy chcesz zacząć nad nim pracować?",
+        "FOR_OTHER": "Termin zadania minął. Czy chcesz zacząć nad nim pracować?",
         "FROM_PROJECT": "From Project: \"{{title}}\"",
         "FROM_TAG": "From Tag: \"{{title}}\"",
         "RESCHEDULE_EDIT": "Edytuj (Zmień harmonogram)",
@@ -1264,23 +1264,23 @@
         "TIME": "Czas"
       },
       "D_TIME": {
-        "ADD_FOR_OTHER_DAY": "Add time spent for other day",
-        "DELETE_FOR": "Delete entry for day",
+        "ADD_FOR_OTHER_DAY": "Dodaj time spent for other day",
+        "DELETE_FOR": "Usuń entry for day",
         "ESTIMATE": "Estimate",
         "TIME_SPENT": "Time Spent",
         "TIME_SPENT_ON": "Time Spent {{date}}",
         "TITLE": "Time spent / Estimates"
       },
       "D_TIME_FOR_DAY": {
-        "ADD_ENTRY_FOR": "Add new entry for {{date}}",
+        "ADD_ENTRY_FOR": "Dodaj new entry for {{date}}",
         "DATE": "Date for new entry",
-        "HELP": "Examples:<br> 30m => 30 minutes<br> 2h => 2 hours<br> 2h 30m => 2 hours and 30 minutes<br> 1.5h => 1 hour and 30 minutes<br> 03:15 => 3 hours and 15 minutes",
+        "HELP": "Przykłady:<br> 30m =&gt; 30 minut<br> 2h =&gt; 2 godziny<br> 2h30m =&gt; 2 godziny i 30 minut<br> 1.5h =&gt; 1 godzina i 30 minut",
         "TINE_SPENT": "Time Spent",
-        "TITLE": "Add for Day"
+        "TITLE": "Dodaj for Day"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
-        "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."
+        "ESTIMATE_EXCEEDED_BODY": "Przekroczyłeś(-aś) szacowany czas dla „{{title}}”."
       },
       "S": {
         "CANNOT_ASSIGN_PROJECT_FOR_REPEATABLE_TASK": "Nie można przypisać projektu za pomocą krótkiej składni dla powtarzalnych zadań!",
@@ -1290,7 +1290,7 @@
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>{{title}}</strong> from backlog to todays task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>{{title}}</strong> from <strong>{{contextTitle}}</strong> to current list",
         "FOUND_RESTORE_FROM_ARCHIVE": "Restored task <strong>{{title}}</strong> related to issue from archive",
-        "LAST_TAG_DELETION_WARNING": "You're trying to remove the last tag of a non project task. This is not allowed!",
+        "LAST_TAG_DELETION_WARNING": "Próbujesz usunąć ostatni tag z zadania niepowiązanego z projektem. To jest niedozwolone!",
         "MOVED_TO_ARCHIVE": "Przeniesiono zadania {{nr}} do archiwum",
         "MOVED_TO_PROJECT": "Przeniesiono zadanie \"{{taskTitle}}\" do projektu \"{{projectTitle}}\"",
         "MOVED_TO_PROJECT_ACTION": "Przejdź do projektu",
@@ -1299,7 +1299,7 @@
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
         "TASK_CREATED": "Created task \"{{title}}\""
       },
-      "SELECT_OR_CREATE": "Select or create task",
+      "SELECT_OR_CREATE": "Wybierz lub utwórz zadanie",
       "SUMMARY_TABLE": {
         "ESTIMATE": "Estimate",
         "SPENT_TODAY": "Spent Today",
@@ -1336,7 +1336,7 @@
         "OK": "Zaktualizuj wszystkie instancje"
       },
       "D_CONFIRM_REMOVE": {
-        "MSG": "Removing the repeat config will convert all previous instances of this task to just regular tasks. Are you sure you want to proceed",
+        "MSG": "Usunięcie konfiguracji powtarzania zamieni wszystkie powtórzenia tego zadania w zwykłe zadania. Czy na pewno chcesz kontynuować?",
         "OK": "Remove completely"
       },
       "D_CONFIRM_UPDATE_INSTANCES": {
@@ -1345,12 +1345,12 @@
         "OK": "Zaktualizuj wszystkie instancje"
       },
       "D_EDIT": {
-        "ADD": "Add Repeat Task Config",
+        "ADD": "Dodaj Repeat Task Config",
         "ADVANCED_CFG": "Zaawansowana konfiguracja",
-        "EDIT": "Edit Repeat Task Config",
-        "HELP1": "Repeating tasks are meant for daily chores, e.g.: \"Organization\", \"Daily Meeting\", \"Code Review\", \"Checking emails\" or similar tasks which are likely to occur again and again.",
-        "HELP2": "Once configured a repeating task will be recreated on every day selected below as soon as you open your project and will be automatically marked as completed at the end of the day. They will be handled as different instances. So you can freely add sub tasks etc.",
-        "HELP3": "Tasks imported from Jira or Git Issues cannot be repeated. All reminders will also be deleted on a repeating task.",
+        "EDIT": "Edytuj Repeat Task Config",
+        "HELP1": "Zadania powtarzalne są przeznaczone dla codziennych/regularnych czynności, np. „Planowanie dzienne”, „Daily Meeting”, „Code Review”, „Sprawdzanie poczty” itd.",
+        "HELP2": "Po skonfigurowaniu zadanie powtarzalne będzie automatycznie tworzone w wybrane dni, gdy otworzysz projekt, i pojawi się na liście zadań.",
+        "HELP3": "Zadania importowane z Jiry lub systemów Git mogą również być oznaczone jako powtarzalne. Wszystkie przypomnienia będą także usuwane w przypadku zadania powtarzalnego.",
         "HELP4": "Uwaga dotycząca pola zamówienia: Odnosi się do kolejności tworzenia zadań powtarzalnych. Działa tylko w przypadku zadań powtarzalnych, które są tworzone w tym samym czasie. Niższa wartość oznacza, że zadanie będzie znajdować się wyżej na liście, a wyższa, że będzie znajdować się niżej. Wartość większa niż 0 oznacza, że elementy są tworzone na dole normalnych zadań.",
         "TAG_LABEL": "Tags to add"
       },
@@ -1383,7 +1383,7 @@
         "START_TIME_DESCRIPTION": "Np. 15:00. Pozostaw puste dla zadania całodniowego",
         "SUNDAY": "Sunday",
         "THURSDAY": "Thursday",
-        "TITLE": "Title for task",
+        "TITLE": "Tytuł for task",
         "TUESDAY": "Tuesday",
         "WEDNESDAY": "Wednesday"
       }
@@ -1471,14 +1471,14 @@
         "WEEK_NR": "Tydzień {{nr}}",
         "WORKED": "Pracowano"
       },
-      "D_CONFIRM_RESTORE": "Are you sure you want to move the task <strong>\"{{title}}\"</strong> into your todays task list?",
-      "D_EXPORT_TITLE": "Worklog Export {{start}}–{{end}}",
-      "D_EXPORT_TITLE_SINGLE": "Worklog Export {{day}}",
+      "D_CONFIRM_RESTORE": "Czy na pewno chcesz przenieść zarchiwizowane zadanie <strong>„{{title}}”</strong> z powrotem na dzisiejszą listę zadań?",
+      "D_EXPORT_TITLE": "Eksport worklogu {{start}}–{{end}}",
+      "D_EXPORT_TITLE_SINGLE": "Eksport worklogu {{day}}",
       "EXPORT": {
-        "ADD_COL": "Add column",
+        "ADD_COL": "Dodaj column",
         "COPY_TO_CLIPBOARD": "Copy to clipboard",
         "DONT_ROUND": "don't round",
-        "EDIT_COL": "Edit column",
+        "EDIT_COL": "Edytuj column",
         "GROUP_BY": "Group by",
         "O": {
           "DATE": "Date",
@@ -1499,21 +1499,21 @@
           "TIME_AS_CLOCK": "Time as clock (e.g. 5:23)",
           "TIME_AS_MILLISECONDS": "Time as milliseconds",
           "TIME_AS_STRING": "Time as string (e.g. 5h 23m)",
-          "TITLES_AND_SUB_TASK_TITLES": "Titles and Sub Task Titles",
+          "TITLES_AND_SUB_TASK_TITLES": "Tytuły oraz tytuły podzadań",
           "WORKLOG": "Worklog"
         },
         "OPTIONS": "Options",
         "ROUND_END_TIME_TO": "Round end time to",
         "ROUND_START_TIME_TO": "Round start time to",
         "ROUND_TIME_WORKED_TO": "Round time worked to",
-        "SAVE_TO_FILE": "Save to file",
+        "SAVE_TO_FILE": "Zapisz to file",
         "SEPARATE_TASKS_BY": "Separate tasks by",
         "SHOW_AS_TEXT": "Show as text"
       },
       "WEEK": {
-        "EXPORT": "Export Week Data",
+        "EXPORT": "Eksport danych tygodnia",
         "NO_DATA": "No tasks this week yet.",
-        "TITLE": "Title"
+        "TITLE": "Tytuł"
       }
     }
   },
@@ -1525,8 +1525,8 @@
       "WARNING_MSG": "Kontynuacja spowoduje nadpisanie obecnych danych i konfiguracji aplikacji zawartością z podanego URL. Tej operacji nie można cofnąć.",
       "WARNING_TITLE": "Ostrzeżenie"
     },
-    "EXPORT_DATA": "Export Data",
-    "IMPORT_FROM_FILE": "Import from file",
+    "EXPORT_DATA": "Eksportuj dane",
+    "IMPORT_FROM_FILE": "Importuj z pliku",
     "IMPORT_FROM_URL": "Importuj z URL",
     "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Wprowadź pełny URL pliku kopii zapasowej JSON Super Productivity, który chcesz zaimportować.",
     "IMPORT_FROM_URL_DIALOG_TITLE": "Importuj z URL",
@@ -1534,7 +1534,7 @@
     "PRIVACY_EXPORT": "Eksport anonimowych danych (do wysłania na adres contact@super-productivity.com w celu debugowania)",
     "S_BACKUP_DOWNLOADED": "Kopia zapasowa pobrana do folderu dokumentów Androida",
     "S_ERR_IMPORT_FAILED": "Importowanie danych nie powiodło się",
-    "S_ERR_INVALID_DATA": "Import failed: Invalid JSON",
+    "S_ERR_INVALID_DATA": "Nieprawidłowe dane w pliku",
     "S_ERR_INVALID_URL": "Import nie powiódł się: Podano nieprawidłowy URL",
     "S_ERR_NETWORK": "Import nie powiódł się: Błąd sieci podczas pobierania danych z URL",
     "S_IMPORT_FROM_URL_ERR_DECODE": "Błąd: Nie można zdekodować parametru URL do importu. Upewnij się, że jest poprawnie sformatowany.",
@@ -1544,16 +1544,16 @@
     "ADD": "Dodaj",
     "ADVANCED_CFG": "Zaawansowana konfiguracja",
     "CANCEL": "Cancel",
-    "CLOSE": "Close",
+    "CLOSE": "Zamknij",
     "COMPLETE": "Zakończone",
     "CONFIRM": "Potwierdź",
-    "DELETE": "Delete",
+    "DELETE": "Usuń",
     "DISMISS": "Dismiss",
     "DO_IT": "Do it!",
     "DURATION_DESCRIPTION": "np. \"5h 23m\", co daje wynik 5 godzin w 23 minuty.",
-    "EDIT": "Edit",
+    "EDIT": "Edytuj",
     "ENABLED": "Włączone",
-    "EXAMPLE_VAL": "click to edit",
+    "EXAMPLE_VAL": "Przykładowa wartość",
     "EXTENSION_INFO": "Please <a target=\"_blank\" href=\"https://chrome.google.com/webstore/detail/super-productivity/ljkbjodfmekklcoibdnhahlaalhihmlb\"> download the chrome extension</a> in order to allow communication with the Jira Api and Idle Time Handling. Note that this doesn't work for mobile.",
     "HIDE": "Ukryj",
     "ICON_INP_DESCRIPTION": "Obsługiwane są również wszystkie emotikony utf-8!",
@@ -1564,16 +1564,16 @@
     "MOVE_BACKWARD": "Przesuń wstecz",
     "MOVE_FORWARD": "Przesuń do przodu",
     "NEXT": "Next",
-    "NO_CON": "You are currently offline. Please reconnect to the internet.",
+    "NO_CON": "Brak połączenia",
     "NONE": "None",
     "OK": "Ok",
     "OVERDUE": "Zaległy",
     "PREVIOUS": "Previous",
     "REMOVE": "Remove",
     "RESET": "Reset",
-    "SAVE": "Save",
+    "SAVE": "Zapisz",
     "SUBMIT": "Prześlij",
-    "TITLE": "Title",
+    "TITLE": "Tytuł",
     "TODAY_TAG_TITLE": "Dzisiaj",
     "TRACKING_INTERVAL_DESCRIPTION": "Śledzenie czasu przy użyciu tego interwału w milisekundach. Możesz chcieć to zmienić, aby zmniejszyć liczbę zapisów na dysku. Zobacz błąd #2355.",
     "UNDO": "Undo",
@@ -1583,9 +1583,9 @@
   },
   "GCF": {
     "AUTO_BACKUPS": {
-      "HELP": "Auto save all data to your app folder in order to have it ready in case something goes wrong.",
-      "LABEL_IS_ENABLED": "Enable automatic backups",
-      "LOCATION_INFO": "Backups are saved to:",
+      "HELP": "Automatycznie zapisuj wszystkie dane w folderze aplikacji, aby mieć kopię na wypadek problemów.",
+      "LABEL_IS_ENABLED": "Włącz automatic backups",
+      "LOCATION_INFO": "Lokalizacja: {{path}}",
       "TITLE": "Automatic Backups"
     },
     "CALENDARS": {
@@ -1608,33 +1608,33 @@
       "TITLE": "Tryb ostrości"
     },
     "IDLE": {
-      "HELP": "<div><p>When idle time handling is enabled a dialog will open after a specified amount of time to check if and on which task you want to track your time, when you have been idle.</p></div>",
-      "IS_ENABLE_IDLE_TIME_TRACKING": "Enable idle time handling",
-      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Only trigger idle time dialog when a current task is selected",
+      "HELP": "Pokaż okno dialogowe, gdy wykryto bezczynność (brak aktywności) podczas śledzenia czasu.",
+      "IS_ENABLE_IDLE_TIME_TRACKING": "Włącz idle time handling",
+      "IS_ONLY_OPEN_IDLE_WHEN_CURRENT_TASK": "Pokazuj okno bezczynności tylko wtedy, gdy jest ustawione bieżące zadanie",
       "MIN_IDLE_TIME": "Trigger idle after X",
       "TITLE": "Idle Handling"
     },
     "IMEX": {
-      "HELP": "<p>Here you can export all your data as a <strong>JSON</strong> for backups, but also to use it in a different context (e.g. you might want to export your projects in the browser and import them into the desktop version). </p> <p>The import expects valid JSON to be copied into the text area. <strong>NOTE: Once you hit the import button all your current settings and data will be overwritten!</strong></p>",
-      "TITLE": "Import/Export"
+      "HELP": "Importuj i eksportuj dane aplikacji (np. do przeniesienia na inne urządzenie lub kopii zapasowej).",
+      "TITLE": "Import/eksport"
     },
     "KEYBOARD": {
-      "ADD_NEW_NOTE": "Add new note",
-      "ADD_NEW_TASK": "Add New Task",
+      "ADD_NEW_NOTE": "Dodaj new note",
+      "ADD_NEW_TASK": "Dodaj New Task",
       "APP_WIDE_SHORTCUTS": "Global Shortcuts (application wide)",
       "COLLAPSE_SUB_TASKS": "Collapse Sub Tasks",
       "EXPAND_SUB_TASKS": "Expand Sub Tasks",
-      "GLOBAL_ADD_NOTE": "Add new note",
-      "GLOBAL_ADD_TASK": "Add new task",
+      "GLOBAL_ADD_NOTE": "Dodaj new note",
+      "GLOBAL_ADD_TASK": "Dodaj new task",
       "GLOBAL_SHOW_HIDE": "Show/Hide Super Productivity",
       "GLOBAL_TOGGLE_TASK_START": "Toggle time tracking for last active task",
       "GO_TO_DAILY_AGENDA": "Go to Agenda",
       "GO_TO_FOCUS_MODE": "Go to Focus Mode",
       "GO_TO_SCHEDULE": "Go to Schedule",
       "GO_TO_SCHEDULED_VIEW": "Go to scheduled Tasks",
-      "GO_TO_SETTINGS": "Go to Settings",
+      "GO_TO_SETTINGS": "Go to Ustawienia",
       "GO_TO_WORK_VIEW": "Go to Work View",
-      "HELP": "<p>Here you can configure all keyboard shortcuts.</p> <p>Click on the text input and enter the desired keyboard combination. Hit enter to save and Escape to abort.</p> <p>There are three types of shortcuts:</p> <ul> <li> <strong>Global shortcuts:</strong> When the app is running it will trigger the action from every other application. </li> <li> <strong>Application level shortcuts:</strong> Will trigger from every screen of the application, but not if you're currently editing a text field. </li> <li> <strong>Task level shortcuts:</strong> They will only trigger if you have selected a task via mouse or keyboard and usually trigger an action specifically related to that one task. </li> </ul><p>You can <strong>press Escape to remove a shortcut.</strong>",
+      "HELP": "Ustaw skróty klawiaturowe.",
       "MOVE_TASK_DOWN": "Move Task down in List",
       "MOVE_TASK_TO_BOTTOM": "Przenieś zadanie na dół listy",
       "MOVE_TASK_TO_TOP": "Przenieś zadanie na górę listy",
@@ -1647,20 +1647,20 @@
       "SELECT_PREVIOUS_TASK": "Select previous Task",
       "SHOW_SEARCH_BAR": "Show search bar",
       "SYSTEM_SHORTCUTS": "Global Shortcuts (system wide)",
-      "TASK_ADD_ATTACHMENT": "Attach file or link",
-      "TASK_ADD_SUB_TASK": "Add sub Task",
-      "TASK_DELETE": "Delete Task",
-      "TASK_EDIT_TAGS": "Edit Tags",
-      "TASK_EDIT_TITLE": "Edit Title",
-      "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
-      "TASK_OPEN_CONTEXT_MENU": "Open task context menu",
-      "TASK_OPEN_ESTIMATION_DIALOG": "Edit estimation / time spent",
+      "TASK_ADD_ATTACHMENT": "Dodaj załącznik do zadania",
+      "TASK_ADD_SUB_TASK": "Dodaj sub Task",
+      "TASK_DELETE": "Usuń Task",
+      "TASK_EDIT_TAGS": "Edytuj Tags",
+      "TASK_EDIT_TITLE": "Edytuj Tytuł",
+      "TASK_MOVE_TO_PROJECT": "Otwórz move task to project menu",
+      "TASK_OPEN_CONTEXT_MENU": "Otwórz task context menu",
+      "TASK_OPEN_ESTIMATION_DIALOG": "Edytuj estimation / time spent",
       "TASK_PLAN_FORDAY": "Plan na dzień",
       "TASK_SCHEDULE": "Zaplanuj Zadanie",
       "TASK_SHORTCUTS": "Zadania",
-      "TASK_SHORTCUTS_INFO": "The following shortcuts apply for the currently selected task (selected via tab or mouse).",
+      "TASK_SHORTCUTS_INFO": "Skróty działają w kontekście aktualnego projektu.",
       "TASK_TOGGLE_DETAIL_PANEL_OPEN": "Show/Hide additional task info",
-      "TASK_TOGGLE_DONE": "Toggle Done",
+      "TASK_TOGGLE_DONE": "Toggle Gotowe",
       "TITLE": "Skróty klawiszowe",
       "TOGGLE_BACKLOG": "Pokaż/Ukryj Zadanie Backlogu",
       "TOGGLE_BOOKMARKS": "Pokaż/Ukryj Pasek Zakładek",
@@ -1709,18 +1709,18 @@
       "HELP": "<p><strong>Nie widzisz powidomień na pulpicie?</strong> Dla windowsa sprawdź czy w Ustawienia > System > Powiadomienia i akcje zaznaczone zostały odpowiednie opcje.</p>",
       "IS_AUTO_ADD_WORKED_ON_TO_TODAY": "Dodaj automatycznie tag dzisiejszy do zadania",
       "IS_AUTO_MARK_PARENT_AS_DONE": "Zaznacz zadanie główne jako ukończone, jeżeli wszystkie podrzędne zostały ukończone",
-      "IS_CONFIRM_BEFORE_EXIT": "Confirm before exiting the app",
+      "IS_CONFIRM_BEFORE_EXIT": "Pytaj o potwierdzenie przed zamknięciem aplikacji",
       "IS_CONFIRM_BEFORE_EXIT_WITHOUT_FINISH_DAY": "Potwierdź przed opuszczeniem aplikacji bez wcześniejszego zakończenia dnia.",
       "IS_DARK_MODE": "Dark Mode",
       "IS_DISABLE_ANIMATIONS": "Wyłącz wszystkie animacje",
       "IS_DISABLE_CELEBRATION": "Wyłącz świętowanie w podsumowaniu dnia",
       "USER_PROFILES": "Włącz profile użytkowników (Beta)",
       "USER_PROFILES_HINT": "Umożliwia tworzenie i przełączanie się między różnymi profilami użytkowników, każdy z oddzielnymi ustawieniami, zadaniami i konfiguracjami synchronizacji. Przycisk zarządzania profilami pojawi się w prawym górnym rogu po włączeniu. Uwaga: wyłączenie tej funkcji ukryje interfejs użytkownika, ale zachowa dane profilu (funkcja Beta, bez gwarancji. Upewnij się, że masz kopię zapasową).",
-      "IS_HIDE_NAV": "Hide navigation until main header is hovered (desktop only)",
+      "IS_HIDE_NAV": "Ukrywaj nawigację, dopóki nie najedziesz kursorem na nagłówek główny (tylko desktop)",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Pokaż wskazówkę dotyczącą produktywności przy starcie aplikacji nieco dłużej",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Pokaż aktualne odliczanie w zasobniku / menu statusu (tylko na desktopie Mac)",
-      "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
+      "IS_TRAY_SHOW_CURRENT_TASK": "Pokazuj bieżące zadanie w zasobniku / menu statusu (tylkoტერესო macOS/Windows)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for notes",
       "IS_USE_MINIMAL_SIDE_NAV": "Używaj minimalnego paska nawigacji (wyświetlaj tylko ikony)",
       "START_OF_NEXT_DAY": "Godzina rozpoczęcia następnego dnia",
@@ -1740,7 +1740,7 @@
       "TITLE": "Przypomnienia"
     },
     "SCHEDULE": {
-      "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
+      "HELP": "Funkcja harmonogramu ma dać Ci lepszy podgląd tego, jak zaplanowane zadania układają się w czasie. Ustawienia znajdziesz w sekcji „Harmonogram”.",
       "L_IS_LUNCH_BREAK_ENABLED": "Włącz przerwę na lunch",
       "L_IS_WORK_START_END_ENABLED": "Limit unscheduled task flow to specific work times",
       "L_LUNCH_BREAK_END": "Koniec przerwy obiadowej",
@@ -1771,11 +1771,11 @@
     "TAKE_A_BREAK": {
       "ADD_NEW_IMG": "Dodaj motywujący obraz",
       "FULL_SCREEN_BLOCKER_DURATION": "Czas wyświetlania okna pełnoekranowego (tylko pulpit)",
-      "HELP": "<div> <p>Allows you to configure a reoccurring reminder when you have worked for a specified amount of time without taking a break.</p> <p>You can modify the message displayed. ${duration} will be replaced with the time spent without a break.</p> </div>",
-      "IS_ENABLED": "Enable take a break reminder",
-      "IS_FOCUS_WINDOW": "Focus app window when reminder is active (desktop only)",
+      "HELP": "<div><p>Pozwala skonfigurować powiadomienie o przerwie, gdy pracujesz przez określony czas bez przerwy.</p></div>",
+      "IS_ENABLED": "Włącz take a break reminder",
+      "IS_FOCUS_WINDOW": "Uaktywnij okno aplikacji, gdy przypomnienie jest aktywne (tylko desktop)",
       "IS_FULL_SCREEN_BLOCKER": "Wyświetlanie wiadomości w oknie pełnoekranowym (tylko pulpit)",
-      "IS_LOCK_SCREEN": "Lock screen when a break is due (desktop only)",
+      "IS_LOCK_SCREEN": "Zablokuj ekran, gdy pora na przerwę (tylko desktop)",
       "MESSAGE": "Take a break message",
       "MIN_WORKING_TIME": "Trigger take a break notification after X working without one",
       "MOTIVATIONAL_IMGS": "Motivational image (web url)",
@@ -1835,7 +1835,7 @@
     "PERSISTENCE_DISALLOWED": "Dane nie będą trzymane na stałe. Bądź świadom, że może to prowadzić do utraty danych!!",
     "PERSISTENCE_ERROR": "Błąd podczas żądania utrwalenia danych: {{err}}",
     "RUNNING_X": "Uruchomiono \"{{str}}\".",
-    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context."
+    "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "Skrót {{keyCombo}} do otwierania zakładek jest dostępny tylko w kontekście projektu."
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -2015,15 +2015,15 @@
     "SAVE": "Zapisz"
   },
   "V": {
-    "E_1TO10": "Please enter a value between 1 and 10",
-    "E_DATETIME": "The entered value is not a datetime!",
+    "E_1TO10": "Wpisz wartość z zakresu od 1 do 10",
+    "E_DATETIME": "Wprowadzona wartość nie jest datą i czasem!",
     "E_DURATION": "Podaj prawidłowy czas trwania (np. 1 godzina)",
-    "E_MAX": "Should not be bigger than {{val}}",
-    "E_MAX_LENGTH": "Should be max {{val}} characters long",
-    "E_MIN": "Should be smaller than {{val}}",
-    "E_MIN_LENGTH": "Should be at least {{val}} characters long",
+    "E_MAX": "Nie może być większe niż {{val}}",
+    "E_MAX_LENGTH": "Maksymalnie {{val}} znaków",
+    "E_MIN": "Nie może być mniejsze niż {{val}}",
+    "E_MIN_LENGTH": "Co najmniej {{val}} znaków",
     "E_PATTERN": "Invalid input",
-    "E_REQUIRED": "This field is required"
+    "E_REQUIRED": "To pole jest wymagane"
   },
   "WW": {
     "ADD_MORE": "Dodaj więcej",
