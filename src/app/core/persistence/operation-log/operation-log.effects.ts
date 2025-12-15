@@ -305,30 +305,23 @@ export class OperationLogEffects {
   }
 
   /**
-   * Derives the primary opType from entity changes.
-   * Priority: Delete > Create > Update (most significant change wins).
-   * Falls back to action meta opType if no entity changes.
+   * Returns the opType for an operation.
+   *
+   * Uses the action's declared opType (from meta) rather than deriving from entity changes.
+   * This is important because some operations have different semantic meaning than their
+   * state changes suggest. For example:
+   * - `moveToArchive`: Declared as UPDATE (tasks are moved, not deleted from system)
+   *   but entity changes show DELETE (tasks removed from main state)
+   *
+   * The entity changes are still captured in the operation payload, so conflict
+   * resolution can still use them. But the opType should reflect the action's intent.
    */
   private deriveOpType(
-    entityChanges: import('./operation.types').EntityChange[],
-    fallbackOpType: OpType,
+    _entityChanges: import('./operation.types').EntityChange[],
+    actionOpType: OpType,
   ): OpType {
-    if (entityChanges.length === 0) {
-      return fallbackOpType;
-    }
-
-    // Check for deletes first (most significant)
-    if (entityChanges.some((c) => c.opType === OpType.Delete)) {
-      return OpType.Delete;
-    }
-
-    // Then creates
-    if (entityChanges.some((c) => c.opType === OpType.Create)) {
-      return OpType.Create;
-    }
-
-    // Default to update
-    return OpType.Update;
+    // Always use the action's declared opType
+    return actionOpType;
   }
 
   /**

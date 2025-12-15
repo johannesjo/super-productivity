@@ -1226,7 +1226,8 @@
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
         "FRESH_CLIENT_SYNC_CANCELLED": "Initial sync cancelled. Remote data was not applied.",
         "RESTORE_SUCCESS": "Data restored successfully",
-        "RESTORE_ERROR": "Failed to restore data"
+        "RESTORE_ERROR": "Failed to restore data",
+        "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated."
       },
       "D_DATA_REPAIRED": {
         "TITLE": "Data Repair Executed",

@@ -16,7 +16,8 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { OperationLogUploadService } from './operation-log-upload.service';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { DependencyResolverService } from './dependency-resolver.service';
-import { OperationWriteFlushService } from './operation-write-flush.service';
+import { LockService } from './lock.service';
+import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Operation, OpType } from '../operation.types';
 import { T } from '../../../../t.const';
@@ -39,7 +40,8 @@ describe('OperationLogSyncService', () => {
   let conflictResolutionServiceSpy: jasmine.SpyObj<ConflictResolutionService>;
   let validateStateServiceSpy: jasmine.SpyObj<ValidateStateService>;
   let dependencyResolverSpy: jasmine.SpyObj<DependencyResolverService>;
-  let operationWriteFlushSpy: jasmine.SpyObj<OperationWriteFlushService>;
+  let lockServiceSpy: jasmine.SpyObj<LockService>;
+  let compactionServiceSpy: jasmine.SpyObj<OperationLogCompactionService>;
 
   beforeEach(() => {
     schemaMigrationServiceSpy = jasmine.createSpyObj('SchemaMigrationService', [
@@ -73,10 +75,17 @@ describe('OperationLogSyncService', () => {
     dependencyResolverSpy = jasmine.createSpyObj('DependencyResolverService', [
       'extractDependencies',
     ]);
-    operationWriteFlushSpy = jasmine.createSpyObj('OperationWriteFlushService', [
-      'flushPendingWrites',
+    lockServiceSpy = jasmine.createSpyObj('LockService', ['request']);
+    // Default: execute callback immediately (simulating lock acquisition)
+    lockServiceSpy.request.and.callFake(
+      async (_name: string, callback: () => Promise<void>) => {
+        await callback();
+      },
+    );
+    compactionServiceSpy = jasmine.createSpyObj('OperationLogCompactionService', [
+      'compact',
     ]);
-    operationWriteFlushSpy.flushPendingWrites.and.resolveTo();
+    compactionServiceSpy.compact.and.resolveTo();
 
     TestBed.configureTestingModule({
       providers: [
@@ -126,7 +135,8 @@ describe('OperationLogSyncService', () => {
           ]),
         },
         { provide: DependencyResolverService, useValue: dependencyResolverSpy },
-        { provide: OperationWriteFlushService, useValue: operationWriteFlushSpy },
+        { provide: LockService, useValue: lockServiceSpy },
+        { provide: OperationLogCompactionService, useValue: compactionServiceSpy },
       ],
     });
 
@@ -142,6 +152,10 @@ describe('OperationLogSyncService', () => {
     validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
     // Default dependency extraction: return empty array (no dependencies)
     dependencyResolverSpy.extractDependencies.and.returnValue([]);
+    // Default: return empty Set for snapshotEntityKeys (avoids triggering compaction branch)
+    vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+      Promise.resolve(new Set()),
+    );
     // Default: no local ops to replay after SYNC_IMPORT
     opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
     // Default: successful operation application
@@ -179,7 +193,7 @@ describe('OperationLogSyncService', () => {
       );
     });
 
-    it('should call flushPendingWrites before conflict detection', async () => {
+    it('should acquire lock before conflict detection to ensure write consistency', async () => {
       const remoteOps: Operation[] = [{ id: 'op1', schemaVersion: 1 } as Operation];
 
       // Setup for a normal (non-full-state) operation flow
@@ -187,6 +201,9 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
       vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
       vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
+        Promise.resolve(new Set()),
+      );
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
       opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
@@ -196,9 +213,12 @@ describe('OperationLogSyncService', () => {
 
       // Track call order
       const callOrder: string[] = [];
-      operationWriteFlushSpy.flushPendingWrites.and.callFake(async () => {
-        callOrder.push('flush');
-      });
+      lockServiceSpy.request.and.callFake(
+        async (_name: string, callback: () => Promise<void>) => {
+          callOrder.push('lockAcquired');
+          await callback();
+        },
+      );
       spyOn(service, 'detectConflicts').and.callFake(async () => {
         callOrder.push('detectConflicts');
         return { nonConflicting: remoteOps, conflicts: [] };
@@ -206,11 +226,14 @@ describe('OperationLogSyncService', () => {
 
       await service.processRemoteOps(remoteOps);
 
-      // Verify flush was called
-      expect(operationWriteFlushSpy.flushPendingWrites).toHaveBeenCalled();
+      // Verify lock was acquired
+      expect(lockServiceSpy.request).toHaveBeenCalledWith(
+        'sp_op_log',
+        jasmine.any(Function),
+      );
 
-      // Verify flush was called BEFORE detectConflicts
-      expect(callOrder).toEqual(['flush', 'detectConflicts']);
+      // Verify lock was acquired BEFORE detectConflicts
+      expect(callOrder).toEqual(['lockAcquired', 'detectConflicts']);
     });
 
     it('should drop operations if migrateOperation returns null', async () => {

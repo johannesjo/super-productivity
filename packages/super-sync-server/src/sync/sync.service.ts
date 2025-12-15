@@ -78,6 +78,17 @@ const MAX_SNAPSHOT_DECOMPRESSED_BYTES = 100 * 1024 * 1024;
 const MAX_CACHE_SIZE = 10000;
 
 /**
+ * Maximum state size during replay (100MB).
+ * Prevents memory exhaustion from malicious or corrupted data.
+ */
+const MAX_REPLAY_STATE_SIZE_BYTES = 100 * 1024 * 1024;
+
+/**
+ * How often to check state size during replay (every N operations).
+ */
+const REPLAY_SIZE_CHECK_INTERVAL = 1000;
+
+/**
  * Tracks recently processed request IDs for deduplication.
  * Key format: "userId:requestId"
  */
@@ -97,6 +108,21 @@ export class SyncService {
    */
   private requestDeduplicationCache: Map<string, RequestDeduplicationEntry> = new Map();
   private readonly REQUEST_DEDUP_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
+  /**
+   * FIX 1.7: In-memory lock to prevent concurrent snapshot generation for the same user.
+   * Maps userId to a Promise that resolves when generation completes.
+   * Concurrent requests wait for the existing generation and reuse its result.
+   */
+  private snapshotGenerationLocks: Map<
+    number,
+    Promise<{
+      state: unknown;
+      serverSeq: number;
+      generatedAt: number;
+      schemaVersion: number;
+    }>
+  > = new Map();
 
   constructor(config: Partial<SyncConfig> = {}) {
     this.config = { ...DEFAULT_SYNC_CONFIG, ...config };
@@ -236,11 +262,11 @@ export class SyncService {
           // Large operations like SYNC_IMPORT/BACKUP_IMPORT can have payloads up to 20MB.
           // Default Prisma timeout (5s) is too short for these. Use 60s to match generateSnapshot.
           timeout: 60000,
-          // Serializable might be too strict/slow for Postgres, 'RepeatableRead' is often enough,
-          // but for strict sequence consistency, we want to avoid gaps/races.
-          // Default isolation level in Prisma is usually adequate (ReadCommitted).
-          // However, to strictly serialize `getNextSeq` (last_seq increment), we rely on row locking of `user_sync_state`.
-          // `tx.userSyncState.update` locks the row.
+          // FIX 1.6: Set explicit isolation level for strict consistency.
+          // REPEATABLE_READ prevents phantom reads and ensures consistent conflict detection.
+          // Combined with the FIX 1.5 re-check after sequence allocation, this prevents
+          // race conditions where two concurrent requests both pass conflict detection.
+          isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
         },
       );
     } catch (err) {
@@ -333,6 +359,35 @@ export class SyncService {
         data: { lastSeq: { increment: 1 } },
       });
       const serverSeq = updatedState.lastSeq;
+
+      // FIX 1.5: Re-check for conflicts after sequence allocation.
+      // This catches races where another request inserted an operation for the same
+      // entity between our initial conflict check and now. Combined with REPEATABLE_READ
+      // isolation, this ensures no undetected concurrent modifications.
+      const finalConflict = await this.detectConflict(userId, op, tx);
+      if (finalConflict.hasConflict) {
+        const isConcurrent = finalConflict.reason?.includes('Concurrent');
+        const errorCode = isConcurrent
+          ? SYNC_ERROR_CODES.CONFLICT_CONCURRENT
+          : SYNC_ERROR_CODES.CONFLICT_STALE;
+        Logger.audit({
+          event: 'OP_REJECTED',
+          userId,
+          clientId,
+          opId: op.id,
+          entityType: op.entityType,
+          entityId: op.entityId,
+          errorCode,
+          reason: `[RACE] ${finalConflict.reason}`,
+          opType: op.opType,
+        });
+        return {
+          opId: op.id,
+          accepted: false,
+          error: finalConflict.reason,
+          errorCode,
+        };
+      }
 
       await tx.operation.create({
         data: {
@@ -639,6 +694,37 @@ export class SyncService {
   }
 
   async generateSnapshot(userId: number): Promise<{
+    state: unknown;
+    serverSeq: number;
+    generatedAt: number;
+    schemaVersion: number;
+  }> {
+    // FIX 1.7: Check if snapshot generation is already in progress for this user.
+    // If so, wait for the existing generation and return its result.
+    // This prevents duplicate expensive computation under concurrent requests.
+    const existingPromise = this.snapshotGenerationLocks.get(userId);
+    if (existingPromise) {
+      Logger.info(`Waiting for existing snapshot generation for user ${userId}`);
+      return existingPromise;
+    }
+
+    // Start new generation and store the promise
+    const promise = this._generateSnapshotImpl(userId);
+    this.snapshotGenerationLocks.set(userId, promise);
+
+    try {
+      return await promise;
+    } finally {
+      // Clean up lock when done (whether success or failure)
+      this.snapshotGenerationLocks.delete(userId);
+    }
+  }
+
+  /**
+   * Internal implementation of snapshot generation.
+   * Called only when no concurrent generation is in progress.
+   */
+  private async _generateSnapshotImpl(userId: number): Promise<{
     state: unknown;
     serverSeq: number;
     generatedAt: number;
@@ -970,7 +1056,20 @@ export class SyncService {
   ): Record<string, unknown> {
     const state = { ...(initialState as Record<string, Record<string, unknown>>) };
 
-    for (const row of ops) {
+    for (let i = 0; i < ops.length; i++) {
+      const row = ops[i];
+
+      // Periodically check state size to prevent memory exhaustion
+      if (i > 0 && i % REPLAY_SIZE_CHECK_INTERVAL === 0) {
+        const estimatedSize = JSON.stringify(state).length;
+        if (estimatedSize > MAX_REPLAY_STATE_SIZE_BYTES) {
+          throw new Error(
+            `State too large during replay: ${Math.round(estimatedSize / 1024 / 1024)}MB ` +
+              `(max: ${Math.round(MAX_REPLAY_STATE_SIZE_BYTES / 1024 / 1024)}MB)`,
+          );
+        }
+      }
+
       let opType = row.opType as Operation['opType'];
       let entityType = row.entityType;
       let entityId = row.entityId;

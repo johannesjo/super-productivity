@@ -206,16 +206,21 @@ export const incrementVectorClock = (
     allClients: Object.keys(newClock),
   });
 
-  // Handle overflow - reset to 1 if approaching max safe integer
+  // Handle overflow - throw error instead of silently resetting
+  // Resetting to 1 would break causality (new ops appear older than previous ops)
+  // User must do a SYNC_IMPORT to properly reset clocks across all clients
   if (currentValue >= Number.MAX_SAFE_INTEGER - 1000) {
-    PFLog.warn('Vector clock component overflow protection triggered', {
+    PFLog.critical('Vector clock component overflow detected', {
       clientId,
       currentValue,
     });
-    newClock[clientId] = 1;
-  } else {
-    newClock[clientId] = currentValue + 1;
+    throw new Error(
+      'Vector clock overflow detected. A full sync reset (SYNC_IMPORT) is required. ' +
+        'This is extremely rare and indicates very long-term usage.',
+    );
   }
+
+  newClock[clientId] = currentValue + 1;
 
   // Warn if vector clock is getting large
   const size = Object.keys(newClock).length;

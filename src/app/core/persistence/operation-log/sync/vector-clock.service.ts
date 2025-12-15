@@ -134,6 +134,9 @@ export class VectorClockService {
     // Build frontier from ops after snapshot
     // The last op for each entity determines its frontier
     for (const entry of ops) {
+      // Skip rejected ops - they shouldn't affect the frontier
+      if (entry.rejectedAt) continue;
+
       const ids = entry.op.entityIds || (entry.op.entityId ? [entry.op.entityId] : []);
 
       for (const id of ids) {

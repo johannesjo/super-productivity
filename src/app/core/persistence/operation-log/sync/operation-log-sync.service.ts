@@ -43,7 +43,8 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
-import { OperationWriteFlushService } from './operation-write-flush.service';
+import { LockService } from './lock.service';
+import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -126,7 +127,8 @@ export class OperationLogSyncService {
   private dialog = inject(MatDialog);
   private userInputWaitState = inject(UserInputWaitStateService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
-  private operationWriteFlush = inject(OperationWriteFlushService);
+  private lockService = inject(LockService);
+  private compactionService = inject(OperationLogCompactionService);
 
   // Lazy injection to break circular dependency:
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
@@ -195,15 +197,22 @@ export class OperationLogSyncService {
     // that caused our local ops to be rejected. By processing them first while our
     // local ops are still in the pending list, conflict detection will work properly
     // and the user will see a conflict dialog to choose which version to keep.
-    if (result.piggybackedOps.length > 0) {
-      await this._processRemoteOps(result.piggybackedOps);
-    }
-
+    //
     // STEP 2: Now handle server-rejected operations
     // At this point, conflicts have been detected and presented to the user.
     // We mark remaining rejected ops (those not already resolved via conflict dialog)
     // as rejected so they won't be re-uploaded.
-    await this._handleRejectedOps(result.rejectedOps);
+    //
+    // CRITICAL: Use try-finally to ensure rejected ops are ALWAYS handled,
+    // even if _processRemoteOps throws. Otherwise rejected ops remain in pending
+    // state and get re-uploaded infinitely.
+    try {
+      if (result.piggybackedOps.length > 0) {
+        await this._processRemoteOps(result.piggybackedOps);
+      }
+    } finally {
+      await this._handleRejectedOps(result.rejectedOps);
+    }
 
     return result;
   }
@@ -464,15 +473,19 @@ export class OperationLogSyncService {
     // Check for meaningful data in key entity collections
     const taskState = s['task'] as { ids?: unknown[] } | undefined;
     const projectState = s['project'] as { ids?: unknown[] } | undefined;
-    const tagState = s['tag'] as { ids?: unknown[] } | undefined;
+    const tagState = s['tag'] as { ids?: (string | unknown)[] } | undefined;
 
     const hasNoTasks = !taskState?.ids || taskState.ids.length === 0;
     const hasNoProjects = !projectState?.ids || projectState.ids.length === 0;
-    const hasNoTags = !tagState?.ids || tagState.ids.length === 0;
+
+    // FIX 2.1: TODAY_TAG ('TODAY') always exists by default, so we need to filter it out
+    // when checking for user-created tags. Without this, a fresh install with only TODAY_TAG
+    // would be considered non-empty and could trigger unnecessary SYNC_IMPORT operations.
+    const TODAY_TAG_ID = 'TODAY';
+    const userTagCount = tagState?.ids?.filter((id) => id !== TODAY_TAG_ID).length ?? 0;
+    const hasNoTags = userTagCount === 0;
 
     // Consider empty if there are no tasks, projects, or user-defined tags
-    // Note: There may be default tags like TODAY_TAG, but if there are no
-    // user tasks/projects, we consider it empty
     return hasNoTasks && hasNoProjects && hasNoTags;
   }
 
@@ -718,12 +731,16 @@ export class OperationLogSyncService {
     // already-synced ops. The frontier tracks ALL applied ops, not just pending.
     // ─────────────────────────────────────────────────────────────────────────
 
-    // CRITICAL: Ensure all pending local writes are complete before conflict detection.
-    // Without this, a recently-dispatched action might not be in IndexedDB yet,
-    // causing getUnsyncedByEntity() to miss it and fail to detect a conflict.
-    await this.operationWriteFlush.flushPendingWrites();
-
-    const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
+    // CRITICAL: Acquire the same lock used by writeOperation effects.
+    // This ensures:
+    // 1. All pending writes complete before we read (FIFO lock ordering)
+    // 2. No NEW writes can start while we read the frontier (we hold the lock)
+    // Without this, a race condition exists where a write could start after
+    // flushing but before reading the frontier, causing conflict detection to miss it.
+    let appliedFrontierByEntity!: Map<string, VectorClock>;
+    await this.lockService.request('sp_op_log', async () => {
+      appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
+    });
     const { nonConflicting, conflicts } = await this.detectConflicts(
       validOps,
       appliedFrontierByEntity,
@@ -818,6 +835,16 @@ export class OperationLogSyncService {
         );
         await this.opLogStore.markFailed(failedOpIds);
 
+        // Run validation after partial failure to detect/repair any state inconsistencies
+        await this.validateStateService.validateAndRepairCurrentState(
+          'partial-apply-failure',
+        );
+
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.PARTIAL_APPLY_FAILURE,
+        });
+
         // Re-throw if it's a SyncStateCorruptedError, otherwise wrap it
         throw result.failedOp.error;
       }
@@ -868,6 +895,23 @@ export class OperationLogSyncService {
     // Get snapshot entity keys to distinguish entities that existed at compaction time
     // vs new entities created later. This is critical for correct fallback behavior.
     const snapshotEntityKeys = await this.vectorClockService.getSnapshotEntityKeys();
+
+    // FIX: Detect old snapshot format (missing snapshotEntityKeys) and trigger compaction.
+    // Without snapshotEntityKeys, new entities from other clients may be incorrectly rejected
+    // as "stale" because we'd compare against the snapshot clock instead of an empty clock.
+    if (snapshotEntityKeys === undefined) {
+      // Note: This is an expected transitional state for clients with old snapshots, not a dev error.
+      // The sync will continue with fallback behavior (treating all entities as existing).
+      OpLog.warn(
+        'OperationLogSyncService: Old snapshot format detected - missing snapshotEntityKeys. Triggering compaction.',
+      );
+      // Schedule compaction asynchronously to create a new snapshot with proper entity keys.
+      // We don't await this - let it run in the background while we proceed with the current
+      // sync using the fallback behavior (treating all entities as existing).
+      this.compactionService.compact().catch((err) => {
+        OpLog.err('OperationLogSyncService: Failed to compact old snapshot', err);
+      });
+    }
 
     for (const remoteOp of remoteOps) {
       const entityIdsToCheck =
