@@ -129,14 +129,14 @@ describe('Vector Clock Stress Tests', () => {
         CLIENT_C: 999999999,
       };
 
-      // Test overflow protection
-      let updated = incrementVectorClock(clock, 'CLIENT_A');
-      expect(updated.CLIENT_A).toBe(1); // Should reset immediately due to overflow protection
+      // Should throw error when near overflow (silently resetting would break causality)
+      expect(() => incrementVectorClock(clock, 'CLIENT_A')).toThrowError(
+        /Vector clock overflow detected/,
+      );
 
-      // Continue incrementing after reset
-      updated = incrementVectorClock(updated, 'CLIENT_A');
-      expect(updated.CLIENT_A).toBe(2); // Normal increment after reset
-      expect(updated.CLIENT_B).toBe(clock.CLIENT_B); // Others unchanged
+      // CLIENT_C is not near overflow, should increment normally
+      const updated = incrementVectorClock(clock, 'CLIENT_C');
+      expect(updated.CLIENT_C).toBe(1000000000);
     });
   });
 

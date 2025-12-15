@@ -594,8 +594,9 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         // 4. Client A clicks Undo (snackbar should be visible)
         // The snackbar appears for 5 seconds with an "Undo" action
-        const undoButton = clientA.page.locator('simple-snack-bar button, snack button');
-        await undoButton.waitFor({ state: 'visible', timeout: 3000 });
+        // Use snack-custom .action selector (app uses custom snackbar component)
+        const undoButton = clientA.page.locator('snack-custom button.action');
+        await undoButton.waitFor({ state: 'visible', timeout: 5000 });
         await undoButton.click();
 
         // Wait for undo to complete
@@ -630,6 +631,119 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         console.log(
           '[UndoDelete] ✓ Undo task delete synced successfully to other client',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * Scenario 8: Rejected Op Does Not Pollute Entity Frontier
+   *
+   * This test verifies Fix 2.2: rejected operations should NOT be included
+   * in the entity frontier used for conflict detection. If rejected ops
+   * pollute the frontier, subsequent unrelated operations may be incorrectly
+   * rejected or cause false conflicts.
+   *
+   * Actions:
+   * 1. Client A creates Task1, syncs
+   * 2. Client B syncs (downloads Task1)
+   * 3. Both clients concurrently edit Task1 (causing conflict)
+   * 4. Client A syncs first (succeeds)
+   * 5. Client B syncs (Task1 edit rejected due to conflict)
+   * 6. Client B creates NEW Task2 (unrelated to Task1)
+   * 7. Client B syncs again
+   * 8. Verify Task2 syncs successfully to Client A
+   *    (proves frontier wasn't polluted by rejected op)
+   */
+  base(
+    'Rejected op does not pollute entity frontier for subsequent syncs',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates Task1
+        const task1Name = `ConflictTask-${testRunId}`;
+        await clientA.workView.addTask(task1Name);
+        await clientA.sync.syncAndWait();
+
+        // 2. Client B downloads Task1
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, task1Name);
+
+        // 3. Both clients concurrently edit Task1 (mark as done)
+        // Client A marks done - use .first() to avoid strict mode violation from animation duplicates
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${task1Name}")`)
+          .first();
+        await taskLocatorA.hover();
+        await taskLocatorA.locator('.task-done-btn').click();
+        await expect(taskLocatorA).toHaveClass(/isDone/, { timeout: 5000 });
+
+        // Client B also marks done (concurrent change, will conflict)
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${task1Name}")`)
+          .first();
+        await taskLocatorB.hover();
+        await taskLocatorB.locator('.task-done-btn').click();
+        await expect(taskLocatorB).toHaveClass(/isDone/, { timeout: 5000 });
+
+        // 4. Client A syncs first (succeeds)
+        await clientA.sync.syncAndWait();
+
+        // 5. Client B syncs (will get conflict/rejection for Task1 edit)
+        // The conflict may be auto-resolved or show dialog - either way, B's op is rejected
+        await clientB.sync.syncAndWait();
+
+        // 6. Client B creates a NEW, UNRELATED Task2
+        // This is the critical part: if rejected op polluted the frontier,
+        // this new task might fail to sync or cause unexpected conflicts
+        const task2Name = `NewTaskAfterReject-${testRunId}`;
+        await clientB.workView.addTask(task2Name);
+
+        // Verify Task2 exists locally on B
+        await waitForTask(clientB.page, task2Name);
+
+        // 7. Client B syncs again (Task2 should sync successfully)
+        await clientB.sync.syncAndWait();
+
+        // 8. Client A syncs to receive Task2
+        await clientA.sync.syncAndWait();
+
+        // Verify Task2 appeared on Client A
+        // This proves the frontier wasn't polluted by the rejected op
+        await waitForTask(clientA.page, task2Name);
+
+        // Additional verification: count tasks on both clients
+        const countA = await clientA.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        const countB = await clientB.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+
+        // Both should have 2 tasks (Task1 and Task2)
+        expect(countA).toBe(2);
+        expect(countB).toBe(2);
+
+        console.log(
+          '[RejectedOpFrontier] ✓ Rejected op did not pollute frontier - subsequent sync succeeded',
         );
       } finally {
         if (clientA) await closeClient(clientA);

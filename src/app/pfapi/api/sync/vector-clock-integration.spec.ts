@@ -273,9 +273,10 @@ describe('Vector Clock Integration with Sync Service', () => {
         [CLIENT_ID_A]: Number.MAX_SAFE_INTEGER - 500,
       };
 
-      const incremented = incrementVectorClock(clock, CLIENT_ID_A);
-
-      expect(incremented[CLIENT_ID_A]).toBe(1); // Reset due to overflow protection
+      // Should throw error when near overflow (silently resetting would break causality)
+      expect(() => incrementVectorClock(clock, CLIENT_ID_A)).toThrowError(
+        /Vector clock overflow detected/,
+      );
     });
   });
 });

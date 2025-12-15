@@ -119,8 +119,9 @@ describe('Vector Clock', () => {
 
     it('should handle overflow protection', () => {
       const clock = { client1: Number.MAX_SAFE_INTEGER - 500 };
-      const result = incrementVectorClock(clock, 'client1');
-      expect(result).toEqual({ client1: 1 });
+      expect(() => incrementVectorClock(clock, 'client1')).toThrowError(
+        /Vector clock overflow detected/,
+      );
     });
   });
 
@@ -413,13 +414,10 @@ describe('Vector Clock', () => {
       const nearMax = Number.MAX_SAFE_INTEGER - 100;
       const clock = { CLIENT_A: nearMax };
 
-      // First increment should trigger overflow protection
-      const clock1 = incrementVectorClock(clock, 'CLIENT_A');
-      expect(clock1.CLIENT_A).toBe(1);
-
-      // Subsequent increments should work normally
-      const clock2 = incrementVectorClock(clock1, 'CLIENT_A');
-      expect(clock2.CLIENT_A).toBe(2);
+      // Should throw error when near overflow (silently resetting would break causality)
+      expect(() => incrementVectorClock(clock, 'CLIENT_A')).toThrowError(
+        /Vector clock overflow detected/,
+      );
     });
 
     it('should maintain consistency when merging with self', () => {
