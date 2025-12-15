@@ -45,6 +45,7 @@ import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
+import { SuperSyncStatusService } from './super-sync-status.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -129,6 +130,7 @@ export class OperationLogSyncService {
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private lockService = inject(LockService);
   private compactionService = inject(OperationLogCompactionService);
+  private superSyncStatusService = inject(SuperSyncStatusService);
 
   // Lazy injection to break circular dependency:
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
@@ -213,6 +215,10 @@ export class OperationLogSyncService {
     } finally {
       await this._handleRejectedOps(result.rejectedOps);
     }
+
+    // Update pending ops status for UI indicator
+    const pendingOps = await this.opLogStore.getUnsynced();
+    this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
 
     return result;
   }
@@ -324,6 +330,11 @@ export class OperationLogSyncService {
     }
 
     await this._processRemoteOps(result.newOps);
+
+    // Update pending ops status for UI indicator
+    const pendingOps = await this.opLogStore.getUnsynced();
+    this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
+
     return { serverMigrationHandled: false };
   }
 

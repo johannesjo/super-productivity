@@ -19,6 +19,7 @@ import {
 import { OperationEncryptionService } from './operation-encryption.service';
 import { SuperSyncPrivateCfg } from '../../../../pfapi/api/sync/providers/super-sync/super-sync.model';
 import { DecryptError } from '../../../../pfapi/api/errors/errors';
+import { SuperSyncStatusService } from './super-sync-status.service';
 
 /**
  * Result of a download operation.
@@ -61,6 +62,7 @@ export class OperationLogDownloadService {
   private lockService = inject(LockService);
   private snackService = inject(SnackService);
   private encryptionService = inject(OperationEncryptionService);
+  private superSyncStatusService = inject(SuperSyncStatusService);
 
   /** Track if we've already warned about clock drift this session */
   private hasWarnedClockDrift = false;
@@ -232,6 +234,9 @@ export class OperationLogDownloadService {
     if (downloadFailed) {
       return { newOps: [], success: false, failedFileCount: 0 };
     }
+
+    // Mark that we successfully checked the remote server
+    this.superSyncStatusService.markRemoteChecked();
 
     return { newOps: allNewOps, success: true, failedFileCount: 0, needsFullStateUpload };
   }

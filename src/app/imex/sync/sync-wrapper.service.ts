@@ -1,7 +1,16 @@
 import { inject, Injectable } from '@angular/core';
-import { BehaviorSubject, firstValueFrom, Observable, of } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { filter, first, map, switchMap, take, timeout } from 'rxjs/operators';
+import {
+  filter,
+  first,
+  map,
+  shareReplay,
+  switchMap,
+  take,
+  timeout,
+} from 'rxjs/operators';
+import { toObservable } from '@angular/core/rxjs-interop';
 import { SyncAlreadyInProgressError } from '../../pfapi/api/errors/errors';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
@@ -39,6 +48,7 @@ import { devError } from '../../util/dev-error';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { SYNC_WAIT_TIMEOUT_MS, SYNC_REINIT_DELAY_MS } from './sync.const';
+import { SuperSyncStatusService } from '../../core/persistence/operation-log/sync/super-sync-status.service';
 
 /**
  * Converts LegacySyncProvider to SyncProviderId.
@@ -69,6 +79,7 @@ export class SyncWrapperService {
   private _dataInitService = inject(DataInitService);
   private _reminderService = inject(ReminderService);
   private _userInputWaitState = inject(UserInputWaitStateService);
+  private _superSyncStatusService = inject(SuperSyncStatusService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -87,6 +98,24 @@ export class SyncWrapperService {
   // NOTE we don't use this._pfapiService.isSyncInProgress$ since it does not include handling and re-init view model
   private _isSyncInProgress$ = new BehaviorSubject(false);
   isSyncInProgress$ = this._isSyncInProgress$.asObservable();
+
+  /**
+   * Observable for UI: true when Super Sync is confirmed fully in sync
+   * (no pending ops AND remote recently checked).
+   * For non-Super Sync providers, always returns true (shows single checkmark).
+   */
+  superSyncIsConfirmedInSync$: Observable<boolean> = combineLatest([
+    this.syncProviderId$,
+    toObservable(this._superSyncStatusService.isConfirmedInSync),
+  ]).pipe(
+    map(([providerId, isConfirmed]) => {
+      if (providerId !== SyncProviderId.SuperSync) {
+        return true; // Non-Super Sync always shows single checkmark
+      }
+      return isConfirmed;
+    }),
+    shareReplay(1),
+  );
 
   isSyncInProgressSync(): boolean {
     return this._isSyncInProgress$.getValue();
