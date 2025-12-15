@@ -119,6 +119,48 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('filterNewOps', () => {
+    it('should return all ops when none exist in store', async () => {
+      const op1 = createTestOperation({ entityId: 'task1' });
+      const op2 = createTestOperation({ entityId: 'task2' });
+
+      const result = await service.filterNewOps([op1, op2]);
+
+      expect(result.length).toBe(2);
+      expect(result).toContain(op1);
+      expect(result).toContain(op2);
+    });
+
+    it('should filter out ops that already exist', async () => {
+      const existingOp = createTestOperation({ entityId: 'existing' });
+      const newOp = createTestOperation({ entityId: 'new' });
+
+      await service.append(existingOp);
+
+      const result = await service.filterNewOps([existingOp, newOp]);
+
+      expect(result.length).toBe(1);
+      expect(result[0].id).toBe(newOp.id);
+    });
+
+    it('should return empty array when all ops exist', async () => {
+      const op1 = createTestOperation({ entityId: 'task1' });
+      const op2 = createTestOperation({ entityId: 'task2' });
+
+      await service.append(op1);
+      await service.append(op2);
+
+      const result = await service.filterNewOps([op1, op2]);
+
+      expect(result.length).toBe(0);
+    });
+
+    it('should return empty array for empty input', async () => {
+      const result = await service.filterNewOps([]);
+      expect(result.length).toBe(0);
+    });
+  });
+
   describe('getOpsAfterSeq', () => {
     it('should return all operations after given sequence', async () => {
       const op1 = createTestOperation({ entityId: 'task1' });

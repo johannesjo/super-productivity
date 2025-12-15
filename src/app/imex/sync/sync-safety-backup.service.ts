@@ -4,17 +4,35 @@ import { PfapiService } from '../../pfapi/pfapi.service';
 import { CompleteBackup } from '../../pfapi/api';
 import { Subject } from 'rxjs';
 import { nanoid } from 'nanoid';
+import { SnackService } from '../../core/snack/snack.service';
+import { T } from '../../t.const';
 
+/**
+ * Represents a safety backup created before sync updates local data.
+ * These backups allow users to recover from problematic sync operations.
+ */
 export interface SyncSafetyBackup {
+  /** Unique identifier for this backup (nanoid) */
   id: string;
+  /** Unix timestamp (ms) when the backup was created */
   timestamp: number;
+  /** Complete application data snapshot */
   data: CompleteBackup<any>;
+  /** Why this backup was created */
   reason: 'BEFORE_UPDATE_LOCAL' | 'MANUAL';
+  /** ID of the model that triggered the sync (for debugging) */
   lastChangedModelId?: string | null;
+  /** Which models were about to be updated when backup was created */
   modelsToUpdate?: string[];
 }
 
 const STORAGE_KEY = 'SYNC_SAFETY_BACKUPS';
+
+// Backup slot strategy:
+// - MAX_RECENT_BACKUPS (2): Most recent backups, rolling (newest replaces oldest)
+// - Plus 1 "today" slot: Oldest backup from today (preserved until tomorrow)
+// - Plus 1 "before today" slot: Most recent backup from before today (preserved)
+// This ensures we always have: 2 recent + 1 older-today + 1 older-day = 4 slots max
 const MAX_RECENT_BACKUPS = 2;
 const TOTAL_BACKUP_SLOTS = 4;
 
@@ -32,6 +50,15 @@ export class SyncSafetyBackupService {
       this._pfapiService = this._injector.get(PfapiService);
     }
     return this._pfapiService;
+  }
+
+  // Lazy-loaded SnackService to avoid circular dependency
+  private _snackService: SnackService | null = null;
+  private _getSnackService(): SnackService {
+    if (!this._snackService) {
+      this._snackService = this._injector.get(SnackService);
+    }
+    return this._snackService;
   }
 
   // Subject to notify components when backups change
@@ -55,7 +82,7 @@ export class SyncSafetyBackupService {
         });
 
         const backupId = nanoid();
-        if (!backupId || backupId === 'EMPTY') {
+        if (!this._isValidBackupId(backupId)) {
           throw new Error('Invalid backup ID generated');
         }
 
@@ -85,6 +112,11 @@ export class SyncSafetyBackupService {
             error,
           },
         );
+        // Notify user that backup failed but sync continues
+        this._getSnackService().open({
+          type: 'ERROR',
+          msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED_SYNC_CONTINUES,
+        });
       }
     });
   }
@@ -95,7 +127,7 @@ export class SyncSafetyBackupService {
   async createBackup(): Promise<void> {
     const data = await this._getPfapiService().pf.loadCompleteBackup();
     const backupId = nanoid();
-    if (!backupId || backupId === 'EMPTY') {
+    if (!this._isValidBackupId(backupId)) {
       throw new Error('Invalid backup ID generated');
     }
 
@@ -140,12 +172,7 @@ export class SyncSafetyBackupService {
         }
 
         // Check for valid ID - must be a non-empty string and not "EMPTY"
-        if (
-          !backup.id ||
-          typeof backup.id !== 'string' ||
-          backup.id === 'EMPTY' ||
-          backup.id.trim() === ''
-        ) {
+        if (!this._isValidBackupId(backup.id)) {
           SyncLog.error('SyncSafetyBackupService: Invalid backup ID found', {
             id: backup.id,
             timestamp: backup.timestamp,
@@ -167,17 +194,14 @@ export class SyncSafetyBackupService {
       // Check for duplicate IDs and regenerate if needed
       const seenIds = new Set<string>();
       const uniqueBackups = validBackups.map((backup) => {
-        if (seenIds.has(backup.id) || backup.id === 'EMPTY' || !backup.id) {
-          // Generate a new unique ID if duplicate, empty, or "EMPTY" found
+        if (seenIds.has(backup.id)) {
+          // Generate a new unique ID if duplicate found
           const newId = nanoid();
-          SyncLog.critical(
-            'SyncSafetyBackupService: Regenerating duplicate/invalid backup ID',
-            {
-              oldId: backup.id,
-              newId,
-              timestamp: backup.timestamp,
-            },
-          );
+          SyncLog.critical('SyncSafetyBackupService: Regenerating duplicate backup ID', {
+            oldId: backup.id,
+            newId,
+            timestamp: backup.timestamp,
+          });
           backup.id = newId;
         }
         seenIds.add(backup.id);
@@ -286,42 +310,79 @@ export class SyncSafetyBackupService {
   }
 
   private async _saveBackup(backup: SyncSafetyBackup): Promise<void> {
-    // Ensure backup has a valid ID
-    if (!backup.id || backup.id === 'EMPTY' || backup.id.trim() === '') {
+    this._ensureValidBackupId(backup);
+
+    const existingBackups = await this.getBackups();
+    const todayStart = this._getTodayStart();
+    const categorized = this._categorizeBackups(existingBackups, todayStart);
+    const result = this._buildBackupSlots(backup, categorized, todayStart);
+
+    await this._getPfapiService().pf.db.save(STORAGE_KEY, result, true);
+    this._backupsChanged$.next();
+
+    SyncLog.normal(
+      `SyncSafetyBackupService: Saved backup. Total slots used: ${result.length}/${TOTAL_BACKUP_SLOTS}`,
+      {
+        recentCount: result.filter((b) => b.timestamp >= todayStart).length,
+        hasTodayBackup: result.length > MAX_RECENT_BACKUPS,
+        hasBeforeTodayBackup: result.some((b) => b.timestamp < todayStart),
+      },
+    );
+  }
+
+  /**
+   * Checks if a backup ID is valid.
+   * Valid IDs must be non-empty strings that aren't the placeholder "EMPTY".
+   */
+  private _isValidBackupId(id: unknown): id is string {
+    return typeof id === 'string' && id.length > 0 && id !== 'EMPTY' && id.trim() !== '';
+  }
+
+  /**
+   * Ensures the backup has a valid ID, generating one if necessary.
+   */
+  private _ensureValidBackupId(backup: SyncSafetyBackup): void {
+    if (!this._isValidBackupId(backup.id)) {
       const oldId = backup.id;
       backup.id = nanoid();
       SyncLog.normal(
         'SyncSafetyBackupService: Generated new ID for backup with invalid ID',
-        {
-          oldId,
-          newId: backup.id,
-        },
+        { oldId, newId: backup.id },
       );
     }
+  }
 
-    const existingBackups = await this.getBackups();
+  /**
+   * Gets the start of today as a timestamp.
+   */
+  private _getTodayStart(): number {
     const now = new Date();
-    const todayStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate(),
-    ).getTime();
+    return new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  }
 
-    // Categorize existing backups
+  /**
+   * Categorizes existing backups into slots.
+   */
+  private _categorizeBackups(
+    existingBackups: SyncSafetyBackup[],
+    todayStart: number,
+  ): {
+    recentBackups: SyncSafetyBackup[];
+    todayBackup: SyncSafetyBackup | null;
+    beforeTodayBackup: SyncSafetyBackup | null;
+  } {
     const recentBackups: SyncSafetyBackup[] = [];
     let todayBackup: SyncSafetyBackup | null = null;
     let beforeTodayBackup: SyncSafetyBackup | null = null;
 
     for (const existingBackup of existingBackups) {
       if (existingBackup.timestamp >= todayStart) {
-        // This is from today
         if (recentBackups.length < MAX_RECENT_BACKUPS) {
           recentBackups.push(existingBackup);
         } else if (!todayBackup) {
           todayBackup = existingBackup;
         }
       } else {
-        // This is from before today
         if (
           !beforeTodayBackup ||
           existingBackup.timestamp > beforeTodayBackup.timestamp
@@ -331,55 +392,49 @@ export class SyncSafetyBackupService {
       }
     }
 
-    // Now figure out where to place the new backup
+    return { recentBackups, todayBackup, beforeTodayBackup };
+  }
+
+  /**
+   * Builds the final backup slots array with the new backup.
+   */
+  private _buildBackupSlots(
+    newBackup: SyncSafetyBackup,
+    categorized: {
+      recentBackups: SyncSafetyBackup[];
+      todayBackup: SyncSafetyBackup | null;
+      beforeTodayBackup: SyncSafetyBackup | null;
+    },
+    todayStart: number,
+  ): SyncSafetyBackup[] {
+    let { todayBackup, beforeTodayBackup } = categorized;
+    const { recentBackups } = categorized;
     const finalBackups: SyncSafetyBackup[] = [];
 
-    if (backup.timestamp >= todayStart) {
-      // New backup is from today
+    if (newBackup.timestamp >= todayStart) {
       if (recentBackups.length < MAX_RECENT_BACKUPS) {
-        // Add to recent slots
-        finalBackups.push(backup, ...recentBackups);
+        finalBackups.push(newBackup, ...recentBackups);
       } else {
-        // Recent slots are full, move oldest recent to today slot
-        finalBackups.push(backup, recentBackups[0]);
-        todayBackup = recentBackups[1]; // The older recent backup becomes today's backup
+        finalBackups.push(newBackup, recentBackups[0]);
+        if (!todayBackup) {
+          todayBackup = recentBackups[1];
+        }
       }
     } else {
-      // New backup is from before today (shouldn't happen normally, but handle it)
-      if (!beforeTodayBackup || backup.timestamp > beforeTodayBackup.timestamp) {
-        beforeTodayBackup = backup;
+      if (!beforeTodayBackup || newBackup.timestamp > beforeTodayBackup.timestamp) {
+        beforeTodayBackup = newBackup;
       }
     }
 
-    // Rebuild the final backup list respecting the slots
-    const result: SyncSafetyBackup[] = [];
-
-    // Slots 1-2: Most recent backups
-    result.push(...finalBackups.slice(0, MAX_RECENT_BACKUPS));
-
-    // Slot 3: First backup of today (if any)
+    // Build result: recent slots + today slot + before-today slot
+    const result: SyncSafetyBackup[] = [...finalBackups.slice(0, MAX_RECENT_BACKUPS)];
     if (todayBackup) {
       result.push(todayBackup);
     }
-
-    // Slot 4: Last backup before today (if any)
     if (beforeTodayBackup) {
       result.push(beforeTodayBackup);
     }
 
-    // Use pfapi db adapter for saving
-    await this._getPfapiService().pf.db.save(STORAGE_KEY, result, true);
-
-    // Notify components that backups have changed
-    this._backupsChanged$.next();
-
-    SyncLog.normal(
-      `SyncSafetyBackupService: Saved backup. Total slots used: ${result.length}/${TOTAL_BACKUP_SLOTS}`,
-      {
-        recentCount: Math.min(finalBackups.length, MAX_RECENT_BACKUPS),
-        hasTodayBackup: !!todayBackup,
-        hasBeforeTodayBackup: !!beforeTodayBackup,
-      },
-    );
+    return result;
   }
 }

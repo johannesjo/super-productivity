@@ -176,6 +176,17 @@ export class OperationLogStoreService {
   }
 
   /**
+   * Filters out operations that already exist in the store.
+   * More efficient than calling hasOp() for each op individually.
+   * @returns Only the operations that don't already exist in the store
+   */
+  async filterNewOps(ops: Operation[]): Promise<Operation[]> {
+    if (ops.length === 0) return [];
+    const appliedIds = await this.getAppliedOpIds();
+    return ops.filter((op) => !appliedIds.has(op.id));
+  }
+
+  /**
    * Gets an operation entry by its ID.
    * Returns undefined if the operation doesn't exist.
    */

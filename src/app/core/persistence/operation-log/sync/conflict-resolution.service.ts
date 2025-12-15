@@ -129,7 +129,11 @@ export class ConflictResolutionService {
       );
     } catch (backupErr) {
       OpLog.err('ConflictResolutionService: Failed to create safety backup', backupErr);
-      // Continue with conflict resolution - backup failure shouldn't block sync
+      // Warn user but continue - backup failure shouldn't block sync
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED_SYNC_CONTINUES,
+      });
     }
 
     // Collect all operations to apply in a single batch for proper dependency sorting
@@ -314,11 +318,14 @@ export class ConflictResolutionService {
     // These are remote ops that don't conflict but need to be applied together
     // with conflict resolutions for correct dependency sorting.
     // ─────────────────────────────────────────────────────────────────────────
-    for (const op of nonConflictingOps) {
-      if (await this.opLogStore.hasOp(op.id)) {
-        OpLog.verbose(`ConflictResolutionService: Skipping duplicate op: ${op.id}`);
-        continue;
-      }
+    const newNonConflictingOps = await this.opLogStore.filterNewOps(nonConflictingOps);
+    const duplicateCount = nonConflictingOps.length - newNonConflictingOps.length;
+    if (duplicateCount > 0) {
+      OpLog.verbose(
+        `ConflictResolutionService: Skipping ${duplicateCount} duplicate non-conflicting op(s)`,
+      );
+    }
+    for (const op of newNonConflictingOps) {
       const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
       allStoredOps.push({ id: op.id, seq });
       allOpsToApply.push(op);

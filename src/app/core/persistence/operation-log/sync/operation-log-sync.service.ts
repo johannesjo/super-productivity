@@ -34,7 +34,10 @@ import {
 } from '../store/schema-migration.service';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
-import { DependencyResolverService } from './dependency-resolver.service';
+import {
+  DependencyResolverService,
+  OperationDependency,
+} from './dependency-resolver.service';
 import { sortOperationsByDependency } from '../processing/sort-operations-by-dependency.util';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
@@ -45,6 +48,7 @@ import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
+import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
 import { SuperSyncStatusService } from './super-sync-status.service';
 
 /**
@@ -488,16 +492,78 @@ export class OperationLogSyncService {
 
     const hasNoTasks = !taskState?.ids || taskState.ids.length === 0;
     const hasNoProjects = !projectState?.ids || projectState.ids.length === 0;
-
-    // FIX 2.1: TODAY_TAG ('TODAY') always exists by default, so we need to filter it out
-    // when checking for user-created tags. Without this, a fresh install with only TODAY_TAG
-    // would be considered non-empty and could trigger unnecessary SYNC_IMPORT operations.
-    const TODAY_TAG_ID = 'TODAY';
-    const userTagCount = tagState?.ids?.filter((id) => id !== TODAY_TAG_ID).length ?? 0;
-    const hasNoTags = userTagCount === 0;
+    const hasNoUserTags = this._hasNoUserCreatedTags(tagState?.ids);
 
     // Consider empty if there are no tasks, projects, or user-defined tags
-    return hasNoTasks && hasNoProjects && hasNoTags;
+    return hasNoTasks && hasNoProjects && hasNoUserTags;
+  }
+
+  /**
+   * Checks if there are no user-created tags.
+   * System tags (TODAY, URGENT, IMPORTANT, IN_PROGRESS) are excluded from the count.
+   */
+  private _hasNoUserCreatedTags(tagIds: (string | unknown)[] | undefined): boolean {
+    if (!tagIds || tagIds.length === 0) {
+      return true;
+    }
+    const userTagCount = tagIds.filter(
+      (id) => typeof id === 'string' && !SYSTEM_TAG_IDS.has(id),
+    ).length;
+    return userTagCount === 0;
+  }
+
+  /**
+   * Checks if the primary target entities of an operation exist in the current store.
+   *
+   * For UPDATE/DELETE operations, the target entities (entityId/entityIds) must exist
+   * in the store for the operation to be applied successfully. This method checks
+   * existence using the DependencyResolverService.
+   *
+   * ## Why This Is Needed
+   *
+   * Operations don't carry their own state - they're like Redux actions that describe
+   * "what happened" but rely on the current store state to apply correctly.
+   *
+   * After a SYNC_IMPORT replaces the entire state, some local operations may reference
+   * entities that no longer exist. For example:
+   * - Local client has task T1 (created long ago, CREATE op compacted)
+   * - Local client does `planTasksForToday({ taskIds: [T1] })` → operation O2
+   * - SYNC_IMPORT from remote client arrives (doesn't include T1)
+   * - SYNC_IMPORT replaces state → T1 is gone
+   * - Replay tries to apply O2 → fails because T1 doesn't exist
+   *
+   * @param op - The operation to check
+   * @returns Array of missing entity IDs (empty if all exist or check not applicable)
+   */
+  private async _checkOperationEntitiesExist(op: Operation): Promise<string[]> {
+    // Get entity IDs directly from the operation metadata.
+    // Operations have: entityId (single entity) and entityIds (bulk operations)
+    const entityIds: string[] = op.entityIds?.length
+      ? op.entityIds
+      : op.entityId && op.entityId !== '*'
+        ? [op.entityId]
+        : [];
+
+    if (entityIds.length === 0) {
+      return []; // No specific entities to check (e.g., global config)
+    }
+
+    // Skip check for CREATE operations - entities won't exist yet by definition
+    if (op.opType === OpType.Create) {
+      return [];
+    }
+
+    // Convert entity IDs to dependency format for the resolver
+    const deps: OperationDependency[] = entityIds.map((id) => ({
+      entityType: op.entityType,
+      entityId: id,
+      mustExist: true,
+      relation: 'reference' as const,
+    }));
+
+    // Check all dependencies in a single batch (efficient for bulk operations)
+    const { missing } = await this.dependencyResolver.checkDependencies(deps);
+    return missing.map((d) => d.entityId);
   }
 
   /**
@@ -513,6 +579,12 @@ export class OperationLogSyncService {
    * The key insight: piggybacked ops exclude the client's own ops,
    * so the SYNC_IMPORT doesn't include Client B's changes.
    * But those ops ARE on the server and SHOULD be in the final state.
+   *
+   * ## Entity Existence Check
+   *
+   * Before replaying, we verify that the operation's target entities still exist.
+   * SYNC_IMPORT may have deleted entities that local operations reference.
+   * Operations referencing deleted entities are skipped to prevent dangling references.
    *
    * @param appliedOps - The ops that were just applied (includes the SYNC_IMPORT)
    */
@@ -573,13 +645,45 @@ export class OperationLogSyncService {
       return;
     }
 
+    // ─────────────────────────────────────────────────────────────────────────
+    // Filter out operations whose target entities were deleted by SYNC_IMPORT
+    // ─────────────────────────────────────────────────────────────────────────
+    // SYNC_IMPORT replaces the entire state. Local operations may reference
+    // entities that existed before but are now gone. We must skip these to
+    // prevent creating dangling references (e.g., Today tag → non-existent task).
+    const validOps: Operation[] = [];
+    const skippedOps: { op: Operation; missingIds: string[] }[] = [];
+
+    for (const op of localSyncedOps) {
+      const missingEntityIds = await this._checkOperationEntitiesExist(op);
+
+      if (missingEntityIds.length > 0) {
+        OpLog.warn(
+          `OperationLogSyncService: Skipping op ${op.id} (${op.actionType}) - ` +
+            `target entities deleted by SYNC_IMPORT: ${missingEntityIds.join(', ')}`,
+        );
+        skippedOps.push({ op, missingIds: missingEntityIds });
+      } else {
+        validOps.push(op);
+      }
+    }
+
+    if (validOps.length === 0) {
+      OpLog.normal(
+        `OperationLogSyncService: All ${localSyncedOps.length} local ops skipped - ` +
+          `target entities deleted by SYNC_IMPORT.`,
+      );
+      return;
+    }
+
     OpLog.normal(
-      `OperationLogSyncService: Replaying ${localSyncedOps.length} local synced ops after SYNC_IMPORT.`,
+      `OperationLogSyncService: Replaying ${validOps.length} local synced ops ` +
+        `(${skippedOps.length} skipped) after SYNC_IMPORT.`,
     );
 
     // Sort operations by dependencies to ensure parents are created before children
     // and DELETE ops come after ops that reference the deleted entity
-    const sortedOps = sortOperationsByDependency(localSyncedOps, (op) =>
+    const sortedOps = sortOperationsByDependency(validOps, (op) =>
       this.dependencyResolver.extractDependencies(op),
     );
 
@@ -799,19 +903,21 @@ export class OperationLogSyncService {
   private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
     // Map op ID to seq for marking partial success
     const opIdToSeq = new Map<string, number>();
-    // Track ops that are NOT duplicates (need to be applied)
-    const opsToApply: Operation[] = [];
+
+    // Filter out duplicates in a single batch (more efficient than N individual hasOp calls)
+    const opsToApply = await this.opLogStore.filterNewOps(ops);
+    const duplicateCount = ops.length - opsToApply.length;
+    if (duplicateCount > 0) {
+      OpLog.verbose(
+        `OperationLogSyncService: Skipping ${duplicateCount} duplicate op(s)`,
+      );
+    }
 
     // Store operations with pending status before applying
     // If we crash after storing but before applying, these will be retried on startup
-    for (const op of ops) {
-      if (!(await this.opLogStore.hasOp(op.id))) {
-        const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
-        opIdToSeq.set(op.id, seq);
-        opsToApply.push(op);
-      } else {
-        OpLog.verbose(`OperationLogSyncService: Skipping duplicate op: ${op.id}`);
-      }
+    for (const op of opsToApply) {
+      const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+      opIdToSeq.set(op.id, seq);
     }
 
     // Apply only NON-duplicate ops to NgRx store
@@ -898,138 +1004,207 @@ export class OperationLogSyncService {
     const nonConflicting: Operation[] = [];
 
     // Get the snapshot vector clock as a fallback for entities not in the frontier map
-    // This prevents false conflicts for entities that haven't been modified since compaction
     const snapshotVectorClock = await this.vectorClockService.getSnapshotVectorClock();
     const hasNoSnapshotClock =
       !snapshotVectorClock || Object.keys(snapshotVectorClock).length === 0;
 
     // Get snapshot entity keys to distinguish entities that existed at compaction time
-    // vs new entities created later. This is critical for correct fallback behavior.
     const snapshotEntityKeys = await this.vectorClockService.getSnapshotEntityKeys();
 
-    // FIX: Detect old snapshot format (missing snapshotEntityKeys) and trigger compaction.
-    // Without snapshotEntityKeys, new entities from other clients may be incorrectly rejected
-    // as "stale" because we'd compare against the snapshot clock instead of an empty clock.
-    if (snapshotEntityKeys === undefined) {
-      // Note: This is an expected transitional state for clients with old snapshots, not a dev error.
-      // The sync will continue with fallback behavior (treating all entities as existing).
-      OpLog.warn(
-        'OperationLogSyncService: Old snapshot format detected - missing snapshotEntityKeys. Triggering compaction.',
-      );
-      // Schedule compaction asynchronously to create a new snapshot with proper entity keys.
-      // We don't await this - let it run in the background while we proceed with the current
-      // sync using the fallback behavior (treating all entities as existing).
-      this.compactionService.compact().catch((err) => {
-        OpLog.err('OperationLogSyncService: Failed to compact old snapshot', err);
-      });
-    }
+    // Handle old snapshot format migration
+    this._handleOldSnapshotFormat(snapshotEntityKeys);
 
     for (const remoteOp of remoteOps) {
-      const entityIdsToCheck =
-        remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
-      let isConflicting = false;
-      let isStaleOrDuplicate = false;
+      const result = this._checkOpForConflicts(remoteOp, {
+        localPendingOpsByEntity,
+        appliedFrontierByEntity,
+        snapshotVectorClock,
+        snapshotEntityKeys,
+        hasNoSnapshotClock,
+      });
 
-      for (const entityId of entityIdsToCheck) {
-        const entityKey = toEntityKey(remoteOp.entityType, entityId);
-        const localOpsForEntity = localPendingOpsByEntity.get(entityKey) || [];
-        const appliedFrontier = appliedFrontierByEntity.get(entityKey); // latest applied vector per entity
-
-        // Build the frontier from everything we know locally (applied + pending)
-        // CRITICAL FIX: Only use snapshot clock for entities that existed at snapshot time.
-        // For new entities (not in snapshotEntityKeys), use empty clock as baseline.
-        // This prevents incorrectly rejecting remote ops for new entities as "stale"
-        // when the snapshot clock has high counters from unrelated work.
-        //
-        // Backward compatibility: if snapshotEntityKeys is undefined (old snapshot format),
-        // treat all entities as existing (use snapshot clock) to maintain existing behavior.
-        const entityExistedAtSnapshot =
-          snapshotEntityKeys === undefined || snapshotEntityKeys.has(entityKey);
-        const fallbackClock = entityExistedAtSnapshot ? snapshotVectorClock : {};
-        const baselineClock = appliedFrontier || fallbackClock || {};
-        const allClocks = [
-          baselineClock,
-          ...localOpsForEntity.map((op) => op.vectorClock),
-        ];
-        const localFrontier = allClocks.reduce(
-          (acc, clock) => mergeVectorClocks(acc, clock),
-          {},
-        );
-
-        const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
-
-        // FAST PATH: If no local PENDING ops AND no applied frontier for this entity,
-        // there's no local state to compare against - the remote op is newer by default.
-        if (localOpsForEntity.length === 0 && localFrontierIsEmpty) {
-          continue; // No local state - remote is newer, check next entityId
-        }
-
-        let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
-
-        // SAFETY: Per-entity clock corruption check.
-        // If THIS entity has pending local ops but an empty frontier (no snapshot clock),
-        // this indicates corrupted metadata for this specific entity.
-        // Convert LESS_THAN to CONCURRENT to force conflict resolution.
-        // NOTE: We check per-entity, not globally, to avoid false conflicts when
-        // a fresh client has unrelated pending ops (e.g., GLOBAL_CONFIG) but no
-        // local ops for the entity being checked (e.g., TASK).
-        const entityHasPendingOps = localOpsForEntity.length > 0;
-        const potentialEntityCorruption =
-          entityHasPendingOps && hasNoSnapshotClock && localFrontierIsEmpty;
-        if (
-          potentialEntityCorruption &&
-          vcComparison === VectorClockComparison.LESS_THAN
-        ) {
-          OpLog.warn(
-            `OperationLogSyncService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
-          );
-          vcComparison = VectorClockComparison.CONCURRENT;
-        }
-
-        // Skip stale operations (local already has newer state)
-        if (vcComparison === VectorClockComparison.GREATER_THAN) {
-          OpLog.verbose(
-            `OperationLogSyncService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
-          );
-          isStaleOrDuplicate = true;
-          break;
-        }
-
-        // Skip duplicate operations (already applied)
-        if (vcComparison === VectorClockComparison.EQUAL) {
-          OpLog.verbose(
-            `OperationLogSyncService: Skipping duplicate remote op: ${remoteOp.id}`,
-          );
-          isStaleOrDuplicate = true;
-          break;
-        }
-
-        // If no pending local ops, there's no conflict - just check stale/duplicate above.
-        // The remote op is newer (LESS_THAN) and safe to apply.
-        if (localOpsForEntity.length === 0) {
-          continue; // No pending ops = no conflict possible
-        }
-
-        if (vcComparison === VectorClockComparison.CONCURRENT) {
-          // True conflict - same entity modified independently
-          conflicts.push({
-            entityType: remoteOp.entityType,
-            entityId: entityId, // Conflicting entity ID
-            localOps: localOpsForEntity,
-            remoteOps: [remoteOp],
-            suggestedResolution: this._suggestResolution(localOpsForEntity, [remoteOp]),
-          });
-          isConflicting = true;
-          break; // Conflict for this remoteOp, move to next remoteOp
-        }
-      }
-
-      if (!isConflicting && !isStaleOrDuplicate) {
-        // Remote is newer (LESS_THAN) - safe to apply
+      if (result.conflict) {
+        conflicts.push(result.conflict);
+      } else if (!result.isStaleOrDuplicate) {
         nonConflicting.push(remoteOp);
       }
     }
     return { nonConflicting, conflicts };
+  }
+
+  /**
+   * Handles old snapshot format by triggering compaction asynchronously.
+   */
+  private _handleOldSnapshotFormat(snapshotEntityKeys: Set<string> | undefined): void {
+    if (snapshotEntityKeys === undefined) {
+      OpLog.warn(
+        'OperationLogSyncService: Old snapshot format detected - missing snapshotEntityKeys. Triggering compaction.',
+      );
+      this.compactionService.compact().catch((err) => {
+        OpLog.err('OperationLogSyncService: Failed to compact old snapshot', err);
+      });
+    }
+  }
+
+  /**
+   * Context needed for conflict detection.
+   */
+  private _checkOpForConflicts(
+    remoteOp: Operation,
+    ctx: {
+      localPendingOpsByEntity: Map<string, Operation[]>;
+      appliedFrontierByEntity: Map<string, VectorClock>;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+      hasNoSnapshotClock: boolean;
+    },
+  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
+    const entityIdsToCheck =
+      remoteOp.entityIds || (remoteOp.entityId ? [remoteOp.entityId] : []);
+
+    for (const entityId of entityIdsToCheck) {
+      const entityKey = toEntityKey(remoteOp.entityType, entityId);
+      const localOpsForEntity = ctx.localPendingOpsByEntity.get(entityKey) || [];
+
+      const result = this._checkEntityForConflict(remoteOp, entityId, entityKey, {
+        localOpsForEntity,
+        appliedFrontier: ctx.appliedFrontierByEntity.get(entityKey),
+        snapshotVectorClock: ctx.snapshotVectorClock,
+        snapshotEntityKeys: ctx.snapshotEntityKeys,
+        hasNoSnapshotClock: ctx.hasNoSnapshotClock,
+      });
+
+      if (result.isStaleOrDuplicate) {
+        return { isStaleOrDuplicate: true, conflict: null };
+      }
+      if (result.conflict) {
+        return { isStaleOrDuplicate: false, conflict: result.conflict };
+      }
+    }
+
+    return { isStaleOrDuplicate: false, conflict: null };
+  }
+
+  /**
+   * Checks a single entity for conflict with a remote operation.
+   */
+  private _checkEntityForConflict(
+    remoteOp: Operation,
+    entityId: string,
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      appliedFrontier: VectorClock | undefined;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+      hasNoSnapshotClock: boolean;
+    },
+  ): { isStaleOrDuplicate: boolean; conflict: EntityConflict | null } {
+    const localFrontier = this._buildEntityFrontier(entityKey, ctx);
+    const localFrontierIsEmpty = Object.keys(localFrontier).length === 0;
+
+    // FAST PATH: No local state means remote is newer by default
+    if (ctx.localOpsForEntity.length === 0 && localFrontierIsEmpty) {
+      return { isStaleOrDuplicate: false, conflict: null };
+    }
+
+    let vcComparison = compareVectorClocks(localFrontier, remoteOp.vectorClock);
+
+    // Handle potential per-entity clock corruption
+    vcComparison = this._adjustForClockCorruption(vcComparison, entityKey, {
+      localOpsForEntity: ctx.localOpsForEntity,
+      hasNoSnapshotClock: ctx.hasNoSnapshotClock,
+      localFrontierIsEmpty,
+    });
+
+    // Skip stale operations (local already has newer state)
+    if (vcComparison === VectorClockComparison.GREATER_THAN) {
+      OpLog.verbose(
+        `OperationLogSyncService: Skipping stale remote op (local dominates): ${remoteOp.id}`,
+      );
+      return { isStaleOrDuplicate: true, conflict: null };
+    }
+
+    // Skip duplicate operations (already applied)
+    if (vcComparison === VectorClockComparison.EQUAL) {
+      OpLog.verbose(
+        `OperationLogSyncService: Skipping duplicate remote op: ${remoteOp.id}`,
+      );
+      return { isStaleOrDuplicate: true, conflict: null };
+    }
+
+    // No pending ops = no conflict possible
+    if (ctx.localOpsForEntity.length === 0) {
+      return { isStaleOrDuplicate: false, conflict: null };
+    }
+
+    // CONCURRENT = true conflict
+    if (vcComparison === VectorClockComparison.CONCURRENT) {
+      return {
+        isStaleOrDuplicate: false,
+        conflict: {
+          entityType: remoteOp.entityType,
+          entityId,
+          localOps: ctx.localOpsForEntity,
+          remoteOps: [remoteOp],
+          suggestedResolution: this._suggestResolution(ctx.localOpsForEntity, [remoteOp]),
+        },
+      };
+    }
+
+    return { isStaleOrDuplicate: false, conflict: null };
+  }
+
+  /**
+   * Builds the local frontier vector clock for an entity.
+   * Merges applied frontier + pending ops clocks.
+   */
+  private _buildEntityFrontier(
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      appliedFrontier: VectorClock | undefined;
+      snapshotVectorClock: VectorClock | undefined;
+      snapshotEntityKeys: Set<string> | undefined;
+    },
+  ): VectorClock {
+    // Use snapshot clock only for entities that existed at snapshot time
+    const entityExistedAtSnapshot =
+      ctx.snapshotEntityKeys === undefined || ctx.snapshotEntityKeys.has(entityKey);
+    const fallbackClock = entityExistedAtSnapshot ? ctx.snapshotVectorClock : {};
+    const baselineClock = ctx.appliedFrontier || fallbackClock || {};
+
+    const allClocks = [
+      baselineClock,
+      ...ctx.localOpsForEntity.map((op) => op.vectorClock),
+    ];
+    return allClocks.reduce((acc, clock) => mergeVectorClocks(acc, clock), {});
+  }
+
+  /**
+   * Adjusts comparison result for potential per-entity clock corruption.
+   * Converts LESS_THAN to CONCURRENT if corruption is suspected.
+   */
+  private _adjustForClockCorruption(
+    comparison: VectorClockComparison,
+    entityKey: string,
+    ctx: {
+      localOpsForEntity: Operation[];
+      hasNoSnapshotClock: boolean;
+      localFrontierIsEmpty: boolean;
+    },
+  ): VectorClockComparison {
+    const entityHasPendingOps = ctx.localOpsForEntity.length > 0;
+    const potentialCorruption =
+      entityHasPendingOps && ctx.hasNoSnapshotClock && ctx.localFrontierIsEmpty;
+
+    if (potentialCorruption && comparison === VectorClockComparison.LESS_THAN) {
+      OpLog.warn(
+        `OperationLogSyncService: Converting LESS_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption`,
+      );
+      return VectorClockComparison.CONCURRENT;
+    }
+    return comparison;
   }
 
   /**
@@ -1228,10 +1403,27 @@ export class OperationLogSyncService {
    * UUIDv7 format: first 48 bits are the millisecond timestamp.
    * The UUID format is: XXXXXXXX-XXXX-7XXX-XXXX-XXXXXXXXXXXX
    * where the first 12 hex chars (48 bits) represent the timestamp.
+   *
+   * @throws Error if the UUID format is invalid
    */
   private _extractTimestampFromUuidv7(uuid: string): number {
+    if (!uuid || typeof uuid !== 'string') {
+      throw new Error(`Invalid UUID: expected string, got ${typeof uuid}`);
+    }
+
+    // UUIDv7 should be 36 chars with hyphens (8-4-4-4-12)
+    if (uuid.length !== 36) {
+      throw new Error(`Invalid UUID length: expected 36, got ${uuid.length}`);
+    }
+
     // Remove hyphens and take first 12 hex chars (48 bits = timestamp)
     const hex = uuid.replace(/-/g, '').substring(0, 12);
+
+    // Validate that we have 12 valid hex chars
+    if (!/^[0-9a-f]{12}$/i.test(hex)) {
+      throw new Error(`Invalid UUID format: timestamp portion not valid hex`);
+    }
+
     return parseInt(hex, 16);
   }
 }

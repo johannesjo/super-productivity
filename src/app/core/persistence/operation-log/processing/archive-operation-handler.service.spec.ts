@@ -120,6 +120,7 @@ describe('ArchiveOperationHandler', () => {
     mockTaskArchiveService = jasmine.createSpyObj('TaskArchiveService', [
       'deleteTasks',
       'updateTask',
+      'hasTask',
       'removeAllArchiveTasksForProject',
       'removeTagsFromAllTasks',
       'removeRepeatCfgFromArchiveTasks',
@@ -152,6 +153,8 @@ describe('ArchiveOperationHandler', () => {
     );
     mockTaskArchiveService.deleteTasks.and.returnValue(Promise.resolve());
     mockTaskArchiveService.updateTask.and.returnValue(Promise.resolve());
+    // By default, assume task is in archive (for updateTask tests)
+    mockTaskArchiveService.hasTask.and.returnValue(Promise.resolve(true));
     mockTaskArchiveService.removeAllArchiveTasksForProject.and.returnValue(
       Promise.resolve(),
     );
@@ -334,10 +337,9 @@ describe('ArchiveOperationHandler', () => {
         expect(mockTaskArchiveService.updateTask).not.toHaveBeenCalled();
       });
 
-      it('should handle task not in archive gracefully (task is non-archived)', async () => {
-        mockTaskArchiveService.updateTask.and.returnValue(
-          Promise.reject(new Error('Archive task to update not found')),
-        );
+      it('should skip update for task not in archive (task is non-archived)', async () => {
+        // Task is not in archive
+        mockTaskArchiveService.hasTask.and.returnValue(Promise.resolve(false));
 
         const action = {
           type: TaskSharedActions.updateTask.type,
@@ -345,8 +347,11 @@ describe('ArchiveOperationHandler', () => {
           meta: { isPersistent: true, isRemote: true },
         } as unknown as PersistentAction;
 
-        // Should not throw - the task might just not be archived
-        await expectAsync(service.handleOperation(action)).toBeResolved();
+        await service.handleOperation(action);
+
+        // Should check if task exists and skip update since it's not in archive
+        expect(mockTaskArchiveService.hasTask).toHaveBeenCalledWith('task-1');
+        expect(mockTaskArchiveService.updateTask).not.toHaveBeenCalled();
       });
 
       it('should not call other handlers for updateTask', async () => {

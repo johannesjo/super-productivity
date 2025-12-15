@@ -14,6 +14,7 @@ import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import {
   MAX_DOWNLOAD_OPS_IN_MEMORY,
+  MAX_DOWNLOAD_ITERATIONS,
   CLOCK_DRIFT_THRESHOLD_MS,
 } from '../operation-log.const';
 import { OperationEncryptionService } from './operation-encryption.service';
@@ -111,8 +112,19 @@ export class OperationLogDownloadService {
       let hasMore = true;
       let sinceSeq = lastServerSeq;
       let hasResetForGap = false;
+      let iterationCount = 0;
 
       while (hasMore) {
+        iterationCount++;
+        if (iterationCount > MAX_DOWNLOAD_ITERATIONS) {
+          OpLog.error(
+            `OperationLogDownloadService: Exceeded max iterations (${MAX_DOWNLOAD_ITERATIONS}). ` +
+              `Server may have a bug returning hasMore=true indefinitely.`,
+          );
+          downloadFailed = true;
+          break;
+        }
+
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
         finalLatestSeq = response.latestSeq;
 

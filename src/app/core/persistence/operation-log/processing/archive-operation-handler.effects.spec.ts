@@ -13,11 +13,13 @@ import { deleteTag } from '../../../../features/tag/store/tag.actions';
 import { Action } from '@ngrx/store';
 import { Task, TaskWithSubTasks } from '../../../../features/tasks/task.model';
 import { WorkContextType } from '../../../../features/work-context/work-context.model';
+import { SnackService } from '../../../snack/snack.service';
 
 describe('ArchiveOperationHandlerEffects', () => {
   let effects: ArchiveOperationHandlerEffects;
   let actions$: ReplaySubject<Action>;
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
+  let mockSnackService: jasmine.SpyObj<SnackService>;
 
   const createMockTask = (id: string): Task =>
     ({
@@ -40,6 +42,7 @@ describe('ArchiveOperationHandlerEffects', () => {
       'handleOperation',
     ]);
     mockArchiveOperationHandler.handleOperation.and.returnValue(Promise.resolve());
+    mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -47,6 +50,7 @@ describe('ArchiveOperationHandlerEffects', () => {
         provideMockActions(() => actions$),
         { provide: LOCAL_ACTIONS, useValue: actions$ },
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
+        { provide: SnackService, useValue: mockSnackService },
       ],
     });
 

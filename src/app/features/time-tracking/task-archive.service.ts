@@ -12,7 +12,6 @@ import { Update } from '@ngrx/entity';
 import { ArchiveModel } from './time-tracking.model';
 import { ModelCfgToModelCtrl } from '../../pfapi/api';
 import { PfapiAllModelCfg } from '../../pfapi/pfapi-config';
-import { Log } from '../../core/log';
 import { RootState } from '../../root-store/root-state';
 import { PROJECT_FEATURE_NAME } from '../project/store/project.reducer';
 import { TAG_FEATURE_NAME } from '../tag/store/tag.reducer';
@@ -61,6 +60,20 @@ export class TaskArchiveService {
     return this._store;
   }
 
+  // Cached reducer chain to avoid recreating on every call
+  private _cachedReducer?: (state: RootState, action: Action) => RootState;
+  private get cachedReducer(): (state: RootState, action: Action) => RootState {
+    if (!this._cachedReducer) {
+      const baseReducer = (state: RootState, act: Action): RootState => ({
+        ...state,
+        [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
+      });
+      const reducerWithCrud = taskSharedCrudMetaReducer(baseReducer);
+      this._cachedReducer = tagSharedMetaReducer(reducerWithCrud);
+    }
+    return this._cachedReducer;
+  }
+
   constructor() {}
 
   async loadYoung(): Promise<TaskArchive> {
@@ -97,6 +110,18 @@ export class TaskArchiveService {
       return archiveOld.task.entities[id];
     }
     throw new Error('Archive task not found by id');
+  }
+
+  /**
+   * Checks if a task exists in either archive (young or old).
+   */
+  async hasTask(id: string): Promise<boolean> {
+    const archiveYoung = await this.pfapiService.m.archiveYoung.load();
+    if (archiveYoung.task.entities[id]) {
+      return true;
+    }
+    const archiveOld = await this.pfapiService.m.archiveOld.load();
+    return !!archiveOld.task.entities[id];
   }
 
   async deleteTasks(
@@ -154,8 +179,6 @@ export class TaskArchiveService {
   ): Promise<void> {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     if (archiveYoung.task.entities[id]) {
-      Log.x(changedFields, id);
-
       await this._execAction(
         'archiveYoung',
         archiveYoung,
@@ -403,7 +426,6 @@ export class TaskArchiveService {
     isIgnoreDBLock?: boolean,
   ): Promise<void> {
     const newTaskState = this._reduceForArchive(archiveBefore, action);
-    Log.x(newTaskState);
     await this.pfapiService.m[target].save(
       {
         ...archiveBefore,
@@ -443,23 +465,14 @@ export class TaskArchiveService {
     archiveBefore: ArchiveModel,
     action: TaskArchiveAction,
   ): TaskState {
-    // Create a wrapped reducer that combines taskReducer with the meta-reducer
-    const baseReducer = (state: RootState, act: Action): RootState => ({
-      ...state,
-      [TASK_FEATURE_NAME]: taskReducer(state[TASK_FEATURE_NAME], act),
-    });
-
-    const reducerWithCrud = taskSharedCrudMetaReducer(baseReducer);
-    const reducerWithTags = tagSharedMetaReducer(reducerWithCrud);
-
     // Create root state with the actual archive task state
     const rootStateWithArchiveTasks: RootState = {
       ...FAKE_ROOT_STATE,
       [TASK_FEATURE_NAME]: archiveBefore.task as TaskState,
     };
 
-    // Apply the action through the wrapped reducer
-    const updatedRootState = reducerWithTags(rootStateWithArchiveTasks, action);
+    // Apply the action through the cached reducer chain
+    const updatedRootState = this.cachedReducer(rootStateWithArchiveTasks, action);
 
     // Extract and return the updated task state
     return updatedRootState[TASK_FEATURE_NAME];

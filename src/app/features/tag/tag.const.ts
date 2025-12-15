@@ -94,3 +94,14 @@ export const IN_PROGRESS_TAG: Tag = {
     isDisableBackgroundTint: false,
   },
 };
+
+/**
+ * IDs of system-created tags that should be excluded when counting user-created tags.
+ * These tags are created automatically and don't represent user data.
+ */
+export const SYSTEM_TAG_IDS: ReadonlySet<string> = new Set([
+  TODAY_TAG.id,
+  URGENT_TAG.id,
+  IMPORTANT_TAG.id,
+  IN_PROGRESS_TAG.id,
+]);

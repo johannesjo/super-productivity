@@ -6,6 +6,7 @@ import {
   signal,
 } from '@angular/core';
 import {
+  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -19,6 +20,8 @@ import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { SuperSyncRestoreService } from '../super-sync-restore.service';
 import { RestorePoint } from '../../../pfapi/api/sync/sync-provider.interface';
 import { T } from '../../../t.const';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { firstValueFrom } from 'rxjs';
 
 @Component({
   selector: 'dialog-restore-point',
@@ -38,6 +41,7 @@ import { T } from '../../../t.const';
 })
 export class DialogRestorePointComponent implements OnInit {
   private _dialogRef = inject(MatDialogRef<DialogRestorePointComponent>);
+  private _matDialog = inject(MatDialog);
   private _restoreService = inject(SuperSyncRestoreService);
 
   T = T;
@@ -53,7 +57,7 @@ export class DialogRestorePointComponent implements OnInit {
       const points = await this._restoreService.getRestorePoints();
       this.restorePoints.set(points);
     } catch (err) {
-      this.error.set((err as Error).message || 'Failed to load restore points');
+      this.error.set(T.F.SYNC.D_RESTORE.ERROR_LOADING);
     } finally {
       this.isLoading.set(false);
     }
@@ -73,12 +77,31 @@ export class DialogRestorePointComponent implements OnInit {
       return;
     }
 
+    const timestamp = new Date(point.timestamp).toLocaleString();
+    const confirmed = await firstValueFrom(
+      this._matDialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: {
+            title: T.F.SYNC.D_RESTORE.CONFIRM_TITLE,
+            message: T.F.SYNC.D_RESTORE.CONFIRM_MSG,
+            translateParams: { timestamp },
+            titleIcon: 'warning',
+          },
+        })
+        .afterClosed(),
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
     this.isRestoring.set(true);
     try {
       await this._restoreService.restoreToPoint(point.serverSeq);
       this._dialogRef.close(true);
     } catch (err) {
-      this.error.set((err as Error).message || 'Failed to restore');
+      this.error.set(T.F.SYNC.D_RESTORE.ERROR_RESTORE);
       this.isRestoring.set(false);
     }
   }

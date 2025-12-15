@@ -56,7 +56,10 @@ describe('OperationLogSyncService', () => {
       'markApplied',
       'getUnsyncedByEntity',
       'getOpsAfterSeq',
+      'filterNewOps',
     ]);
+    // By default, treat all ops as new (return them as-is)
+    opLogStoreSpy.filterNewOps.and.callFake((ops: any[]) => Promise.resolve(ops));
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getEntityFrontier',
       'getSnapshotVectorClock',
@@ -74,6 +77,7 @@ describe('OperationLogSyncService', () => {
     ]);
     dependencyResolverSpy = jasmine.createSpyObj('DependencyResolverService', [
       'extractDependencies',
+      'checkDependencies',
     ]);
     lockServiceSpy = jasmine.createSpyObj('LockService', ['request']);
     // Default: execute callback immediately (simulating lock acquisition)
@@ -152,6 +156,10 @@ describe('OperationLogSyncService', () => {
     validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo(true);
     // Default dependency extraction: return empty array (no dependencies)
     dependencyResolverSpy.extractDependencies.and.returnValue([]);
+    // Default: all entities exist (no missing dependencies)
+    dependencyResolverSpy.checkDependencies.and.returnValue(
+      Promise.resolve({ missing: [] }),
+    );
     // Default: return empty Set for snapshotEntityKeys (avoids triggering compaction branch)
     vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
       Promise.resolve(new Set()),
@@ -2310,6 +2318,329 @@ describe('OperationLogSyncService', () => {
       // 2. Therefore it was created BEFORE the restore and references old state
       // applyOperations should only be called once (for the SYNC_IMPORT itself)
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
+    });
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Entity Existence Validation Tests
+    // These tests verify that ops referencing entities deleted by SYNC_IMPORT
+    // are skipped to prevent dangling references.
+    // ─────────────────────────────────────────────────────────────────────────
+
+    it('should skip ops whose target entities were deleted by SYNC_IMPORT', async () => {
+      // Scenario:
+      // 1. Local client has task T1 (created long ago, CREATE op compacted)
+      // 2. Local client does planTasksForToday({ taskIds: [T1] }) → op with entityIds: [T1]
+      // 3. SYNC_IMPORT from remote (doesn't include T1)
+      // 4. SYNC_IMPORT replaces state → T1 is gone
+      // 5. Replay should SKIP the planTasksForToday op because T1 doesn't exist
+
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+        payload: { task: {}, project: {} },
+      });
+
+      // Local op that references a task that will be deleted by SYNC_IMPORT
+      const planTodayOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityIds: ['task-deleted-by-import', 'task-also-deleted'], // Bulk op with entityIds
+        actionType: '[Task Shared] Plan Tasks for Today',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(planTodayOp, { syncedAt: Date.now() })]),
+        );
+
+      // Mock: checkDependencies returns missing entities (task doesn't exist)
+      dependencyResolverSpy.checkDependencies.and.returnValue(
+        Promise.resolve({
+          missing: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-deleted-by-import',
+              mustExist: true,
+              relation: 'reference',
+            },
+            {
+              entityType: 'TASK',
+              entityId: 'task-also-deleted',
+              mustExist: true,
+              relation: 'reference',
+            },
+          ],
+        }),
+      );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // applyOperations should only be called once (for SYNC_IMPORT itself)
+      // The planTodayOp should be skipped because its entityIds don't exist
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
+    });
+
+    it('should replay ops whose target entities still exist after SYNC_IMPORT', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Local op referencing a task that still exists after SYNC_IMPORT
+      const updateTaskOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-still-exists',
+        actionType: '[Task] Update Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(updateTaskOp, { syncedAt: Date.now() })]),
+        );
+
+      // Mock: checkDependencies returns NO missing entities (task exists)
+      dependencyResolverSpy.checkDependencies.and.returnValue(
+        Promise.resolve({ missing: [] }),
+      );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // applyOperations should be called twice:
+      // 1. For SYNC_IMPORT
+      // 2. For replaying local ops (entity exists)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-still-exists');
+    });
+
+    it('should NOT check entity existence for CREATE operations', async () => {
+      // CREATE operations create new entities, so they should not be checked
+      // for existence (they won't exist until the CREATE is applied)
+
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // CREATE op - should be replayed regardless of entity existence
+      const createTaskOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'new-task',
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(createTaskOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // CREATE ops should be replayed (applyOperations called twice)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+      // checkDependencies should NOT be called for CREATE operations
+      // (we skip entity existence check for CREATE ops)
+      expect(dependencyResolverSpy.checkDependencies).not.toHaveBeenCalled();
+    });
+
+    it('should filter out ops with partially missing entities (bulk operations)', async () => {
+      // For bulk ops like planTasksForToday with multiple taskIds,
+      // if ANY target entity is missing, the whole op should be skipped
+
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Bulk op with multiple entityIds - one exists, one doesn't
+      const bulkOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityIds: ['task-exists', 'task-missing'],
+        actionType: '[Task Shared] Plan Tasks for Today',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(bulkOp, { syncedAt: Date.now() })]),
+        );
+
+      // One entity is missing
+      dependencyResolverSpy.checkDependencies.and.returnValue(
+        Promise.resolve({
+          missing: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-missing',
+              mustExist: true,
+              relation: 'reference',
+            },
+          ],
+        }),
+      );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Op should be skipped entirely (only SYNC_IMPORT applied)
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
+    });
+
+    it('should replay valid ops while skipping invalid ones in mixed batch', async () => {
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      // Valid op - entity exists
+      const validOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-exists',
+        actionType: '[Task] Update Task',
+      });
+
+      // Invalid op - entity was deleted by SYNC_IMPORT
+      const invalidOp = createOp({
+        id: '019afd68-0052-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-deleted',
+        actionType: '[Task] Update Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([
+            createEntry(validOp, { syncedAt: Date.now() - 100 }),
+            createEntry(invalidOp, { syncedAt: Date.now() }),
+          ]),
+        );
+
+      // Mock checkDependencies to return missing for invalidOp's entity
+      dependencyResolverSpy.checkDependencies.and.callFake((deps: any[]) => {
+        const missing = deps.filter((d: any) => d.entityId === 'task-deleted');
+        return Promise.resolve({ missing });
+      });
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // applyOperations called twice: SYNC_IMPORT and replay
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+      // Second call should only have the valid op
+      const secondCallArgs = operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+      expect(secondCallArgs[0].length).toBe(1);
+      expect(secondCallArgs[0][0].entityId).toBe('task-exists');
+    });
+
+    it('should NOT check entity existence for ops with wildcard entityId (*)', async () => {
+      // Global config updates use entityId: '*' - should not be checked
+      const testClientId = 'test-client-id';
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      const globalConfigOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Update,
+        clientId: testClientId,
+        entityType: 'GLOBAL_CONFIG',
+        entityId: '*', // Wildcard for singleton entities
+        actionType: '[Global Config] Update',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(globalConfigOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({ appliedOps: [] }),
+      );
+
+      await (service as any)._processRemoteOps([syncImportOp]);
+
+      // Should be replayed (no entity check for '*')
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+      // checkDependencies should NOT be called for wildcard entities
+      expect(dependencyResolverSpy.checkDependencies).not.toHaveBeenCalled();
     });
   });
 });

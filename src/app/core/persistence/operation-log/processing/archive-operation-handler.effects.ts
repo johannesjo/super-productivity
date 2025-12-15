@@ -7,6 +7,8 @@ import {
   isArchiveAffectingAction,
 } from './archive-operation-handler.service';
 import { devError } from '../../../../util/dev-error';
+import { SnackService } from '../../../snack/snack.service';
+import { T } from '../../../../t.const';
 
 /**
  * Unified effect for all archive-affecting operations.
@@ -65,6 +67,7 @@ import { devError } from '../../../../util/dev-error';
 export class ArchiveOperationHandlerEffects {
   private _actions$ = inject(LOCAL_ACTIONS);
   private _archiveOperationHandler = inject(ArchiveOperationHandler);
+  private _snackService = inject(SnackService);
 
   /**
    * Processes all archive-affecting local actions through the central handler.
@@ -82,8 +85,12 @@ export class ArchiveOperationHandlerEffects {
             await this._archiveOperationHandler.handleOperation(action);
           } catch (e) {
             // Archive operations failing is serious but not critical to app function.
-            // Log the error but don't crash the effect stream.
+            // Log the error and notify user but don't crash the effect stream.
             devError(e);
+            this._snackService.open({
+              type: 'ERROR',
+              msg: T.F.SYNC.S.ARCHIVE_OPERATION_FAILED,
+            });
           }
         }),
       ),

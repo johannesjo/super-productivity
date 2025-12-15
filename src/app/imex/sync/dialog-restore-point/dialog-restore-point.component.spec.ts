@@ -1,15 +1,17 @@
 import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DialogRestorePointComponent } from './dialog-restore-point.component';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { SuperSyncRestoreService } from '../super-sync-restore.service';
 import { TranslateModule } from '@ngx-translate/core';
 import { RestorePoint } from '../../../pfapi/api/sync/sync-provider.interface';
 import { T } from '../../../t.const';
+import { of } from 'rxjs';
 
 describe('DialogRestorePointComponent', () => {
   let component: DialogRestorePointComponent;
   let fixture: ComponentFixture<DialogRestorePointComponent>;
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<DialogRestorePointComponent>>;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let mockRestoreService: jasmine.SpyObj<SuperSyncRestoreService>;
 
   const mockRestorePoints: RestorePoint[] = [
@@ -35,6 +37,7 @@ describe('DialogRestorePointComponent', () => {
 
   beforeEach(async () => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
+    mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
     mockRestoreService = jasmine.createSpyObj('SuperSyncRestoreService', [
       'getRestorePoints',
       'restoreToPoint',
@@ -45,10 +48,14 @@ describe('DialogRestorePointComponent', () => {
       Promise.resolve(mockRestorePoints),
     );
 
+    // Default: user confirms the restore dialog
+    mockMatDialog.open.and.returnValue({ afterClosed: () => of(true) } as any);
+
     await TestBed.configureTestingModule({
       imports: [DialogRestorePointComponent, TranslateModule.forRoot()],
       providers: [
         { provide: MatDialogRef, useValue: mockDialogRef },
+        { provide: MatDialog, useValue: mockMatDialog },
         { provide: SuperSyncRestoreService, useValue: mockRestoreService },
       ],
     }).compileComponents();
@@ -81,7 +88,7 @@ describe('DialogRestorePointComponent', () => {
       tick();
 
       expect(component.isLoading()).toBe(false);
-      expect(component.error()).toBe('Network error');
+      expect(component.error()).toBe(T.F.SYNC.D_RESTORE.ERROR_LOADING);
       expect(component.restorePoints()).toEqual([]);
     }));
 
@@ -91,7 +98,7 @@ describe('DialogRestorePointComponent', () => {
       fixture.detectChanges();
       tick();
 
-      expect(component.error()).toBe('Failed to load restore points');
+      expect(component.error()).toBe(T.F.SYNC.D_RESTORE.ERROR_LOADING);
     }));
 
     it('should show loading state initially', () => {
@@ -141,15 +148,38 @@ describe('DialogRestorePointComponent', () => {
       component.restore();
       tick();
 
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
       expect(mockRestoreService.restoreToPoint).not.toHaveBeenCalled();
+    }));
+
+    it('should show confirmation dialog before restoring', fakeAsync(() => {
+      component.selectPoint(mockRestorePoints[0]);
+
+      component.restore();
+      tick();
+
+      expect(mockMatDialog.open).toHaveBeenCalled();
+      const dialogConfig = mockMatDialog.open.calls.mostRecent().args[1] as any;
+      expect(dialogConfig?.data.title).toBe(T.F.SYNC.D_RESTORE.CONFIRM_TITLE);
+      expect(dialogConfig?.data.message).toBe(T.F.SYNC.D_RESTORE.CONFIRM_MSG);
+    }));
+
+    it('should not restore when user cancels confirmation', fakeAsync(() => {
+      mockMatDialog.open.and.returnValue({ afterClosed: () => of(false) } as any);
+      component.selectPoint(mockRestorePoints[0]);
+
+      component.restore();
+      tick();
+
+      expect(mockMatDialog.open).toHaveBeenCalled();
+      expect(mockRestoreService.restoreToPoint).not.toHaveBeenCalled();
+      expect(component.isRestoring()).toBe(false);
     }));
 
     it('should call restoreToPoint and close dialog on success', fakeAsync(() => {
       component.selectPoint(mockRestorePoints[0]);
 
       component.restore();
-      expect(component.isRestoring()).toBe(true);
-
       tick();
 
       expect(mockRestoreService.restoreToPoint).toHaveBeenCalledWith(100);
@@ -163,11 +193,9 @@ describe('DialogRestorePointComponent', () => {
       );
 
       component.restore();
-      expect(component.isRestoring()).toBe(true);
-
       tick();
 
-      expect(component.error()).toBe('Restore failed');
+      expect(component.error()).toBe(T.F.SYNC.D_RESTORE.ERROR_RESTORE);
       expect(component.isRestoring()).toBe(false);
       expect(mockDialogRef.close).not.toHaveBeenCalled();
     }));
@@ -179,7 +207,7 @@ describe('DialogRestorePointComponent', () => {
       component.restore();
       tick();
 
-      expect(component.error()).toBe('Failed to restore');
+      expect(component.error()).toBe(T.F.SYNC.D_RESTORE.ERROR_RESTORE);
     }));
   });
 

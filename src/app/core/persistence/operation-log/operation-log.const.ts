@@ -83,6 +83,13 @@ export const LOCK_FINAL_VERIFICATION_DELAY_MS = 20;
 export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;
 
 /**
+ * Maximum iterations for the download loop.
+ * Prevents infinite loops if server has a bug and always returns hasMore=true.
+ * At 500 ops per page, this allows downloading up to 500,000 operations.
+ */
+export const MAX_DOWNLOAD_ITERATIONS = 1000;
+
+/**
  * Maximum retry attempts for operations that fail during conflict resolution.
  * After this many retries across restarts, the operation is marked as rejected.
  */

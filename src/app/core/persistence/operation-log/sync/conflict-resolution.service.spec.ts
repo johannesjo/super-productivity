@@ -50,6 +50,7 @@ describe('ConflictResolutionService', () => {
       'markRejected',
       'markFailed',
       'getUnsyncedByEntity',
+      'filterNewOps',
     ]);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockValidateStateService = jasmine.createSpyObj('ValidateStateService', [
@@ -84,6 +85,8 @@ describe('ConflictResolutionService', () => {
     mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
     mockValidateStateService.validateAndRepairCurrentState.and.resolveTo(true);
     mockOpLogStore.getUnsyncedByEntity.and.resolveTo(new Map());
+    // By default, treat all ops as new (return them as-is)
+    mockOpLogStore.filterNewOps.and.callFake((ops: any[]) => Promise.resolve(ops));
   });
 
   it('should be created', () => {

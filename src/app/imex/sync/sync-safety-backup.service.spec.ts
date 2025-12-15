@@ -124,6 +124,52 @@ describe('SyncSafetyBackupService', () => {
 
       expect(emitted).toBe(true);
     });
+
+    it('should preserve existing todayBackup when adding new backup with full recent slots', async () => {
+      // This tests the fix for the bug where todayBackup was incorrectly overwritten
+      const todayStart = new Date(
+        new Date().getFullYear(),
+        new Date().getMonth(),
+        new Date().getDate(),
+      ).getTime();
+
+      // Create 3 existing backups from today:
+      // - 2 in recent slots
+      // - 1 in todayBackup slot (this should be preserved)
+      const existingBackups: SyncSafetyBackup[] = [
+        {
+          id: 'recent-1',
+          timestamp: todayStart + 3600000,
+          data: {} as any,
+          reason: 'MANUAL',
+        }, // recent slot 1
+        {
+          id: 'recent-2',
+          timestamp: todayStart + 1800000,
+          data: {} as any,
+          reason: 'MANUAL',
+        }, // recent slot 2
+        {
+          id: 'today-first',
+          timestamp: todayStart + 900000,
+          data: {} as any,
+          reason: 'MANUAL',
+        }, // today slot (first backup of today)
+      ];
+      mockDb.load.and.returnValue(Promise.resolve(existingBackups));
+
+      await service.createBackup();
+
+      const saveCall = mockDb.save.calls.mostRecent();
+      const savedBackups = saveCall.args[1] as SyncSafetyBackup[];
+
+      // Should have max 4 slots: 2 recent + 1 today + (optionally 1 before today)
+      expect(savedBackups.length).toBeLessThanOrEqual(4);
+
+      // The 'today-first' backup should still be present (the fix ensures it's not overwritten)
+      const todayFirstStillPresent = savedBackups.some((b) => b.id === 'today-first');
+      expect(todayFirstStillPresent).toBe(true);
+    });
   });
 
   describe('getBackups', () => {
