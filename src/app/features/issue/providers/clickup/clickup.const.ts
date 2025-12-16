@@ -45,3 +45,5 @@ export const CLICKUP_CONFIG_FORM_SECTION: ConfigFormSection<IssueProviderClickUp
   help: 'Configure ClickUp integration to sync tasks.',
   customSection: 'CLICKUP_CFG',
 };
+
+export const CLICKUP_HEADER_RATE_LIMIT_RESET = 'X-RateLimit-Reset';

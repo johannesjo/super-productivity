@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import {
   HttpClientTestingModule,
   HttpTestingController,
@@ -14,6 +14,7 @@ import {
   ClickUpTaskSearchResponse,
 } from './clickup-issue.model';
 import typia from 'typia';
+import { CLICKUP_HEADER_RATE_LIMIT_RESET } from './clickup.const';
 
 const CLICKUP_API_URL = 'https://api.clickup.com/api/v2';
 
@@ -270,5 +271,67 @@ describe('ClickUpApiService', () => {
       );
       req2.flush(mockTasksResponse);
     });
+    it('should retry with backoff on 429 using X-RateLimit-Reset', fakeAsync(() => {
+      // Current time is X. Reset time is X + 1s.
+      const resetDelay = 1000;
+      const resetTime = Math.floor(Date.now() / 1000) + 1;
+
+      let errorResponse: any;
+      service.getById$('TASK_ID', mockCfg).subscribe({
+        error: (err) => (errorResponse = err),
+      });
+
+      // Request 1: Fail with 429
+      const req1 = httpMock.expectOne(
+        `${CLICKUP_API_URL}/task/TASK_ID?include_markdown_description=true&include_subtasks=true`,
+      );
+      req1.flush('Rate Limit Exceeded', {
+        status: 429,
+        statusText: 'Too Many Requests',
+        headers: { [CLICKUP_HEADER_RATE_LIMIT_RESET]: resetTime.toString() },
+      });
+
+      // Should be waiting now. No new request yet.
+      httpMock.expectNone(
+        `${CLICKUP_API_URL}/task/TASK_ID?include_markdown_description=true&include_subtasks=true`,
+      );
+
+      // Advance time by slightly more than resetDelay
+      tick(resetDelay + 100);
+
+      // Request 2: Should happen now. Fail again.
+      const req2 = httpMock.expectOne(
+        `${CLICKUP_API_URL}/task/TASK_ID?include_markdown_description=true&include_subtasks=true`,
+      );
+      req2.flush('Rate Limit Exceeded', {
+        status: 429,
+        statusText: 'Too Many Requests',
+        headers: { [CLICKUP_HEADER_RATE_LIMIT_RESET]: (resetTime + 2).toString() },
+      });
+
+      tick(2100); // Wait for next retry
+
+      // Request 3: Fail again
+      const req3 = httpMock.expectOne(
+        `${CLICKUP_API_URL}/task/TASK_ID?include_markdown_description=true&include_subtasks=true`,
+      );
+      req3.flush('Rate Limit Exceeded', {
+        status: 429,
+        statusText: 'Too Many Requests',
+      });
+
+      tick(5000); // Backoff wait
+
+      // Request 4: Final attempt (since count is 3, original + 3 retries? No, standard retry(3) is 3 retries (total 4 requests) or 3 attempts?
+      // RxJS retry(3) resubscribes 3 times. Total 4 attempts.
+
+      const req4 = httpMock.expectOne(
+        `${CLICKUP_API_URL}/task/TASK_ID?include_markdown_description=true&include_subtasks=true`,
+      );
+      req4.flush('Rate Limit Exceeded', { status: 429, statusText: 'Too Many Requests' });
+
+      // Should error out now
+      expect(errorResponse).toBeDefined();
+    }));
   });
 });

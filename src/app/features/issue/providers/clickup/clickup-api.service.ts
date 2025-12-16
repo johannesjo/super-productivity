@@ -1,12 +1,19 @@
-import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
+import {
+  HttpClient,
+  HttpHeaders,
+  HttpParams,
+  HttpErrorResponse,
+  HttpResponse,
+} from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
-import { Observable, forkJoin, of } from 'rxjs';
-import { catchError, map, switchMap } from 'rxjs/operators';
+import { Observable, forkJoin, of, throwError, timer } from 'rxjs';
+import { catchError, map, switchMap, retry } from 'rxjs/operators';
 import typia from 'typia';
 import { IssueLog } from '../../../../core/log';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 import { CLICKUP_TYPE } from '../../issue.const';
+import { CLICKUP_HEADER_RATE_LIMIT_RESET } from './clickup.const';
 import {
   ClickUpTask,
   ClickUpTaskReduced,
@@ -157,14 +164,40 @@ export class ClickUpApiService {
     const headers = this._getHeaders(cfg);
 
     return this._http
-      .get(url, {
+      .get<T>(url, {
         headers,
         params,
         reportProgress: false,
         observe: 'response',
       })
       .pipe(
-        map((res) => (res && res.body ? res.body : res)),
+        // Retry with backoff on 429
+        retry({
+          count: 3,
+          delay: (error: HttpErrorResponse, retryCount) => {
+            if (error.status === 429) {
+              const resetHeader = error.headers.get(CLICKUP_HEADER_RATE_LIMIT_RESET);
+              if (resetHeader) {
+                const resetTime = parseInt(resetHeader, 10) * 1000;
+                const waitTime = resetTime - Date.now();
+                if (waitTime > 0) {
+                  IssueLog.warn(
+                    `ClickUp: Rate limit exceeded. Waiting for ${waitTime}ms before retry ${retryCount}.`,
+                  );
+                  return timer(waitTime);
+                }
+              }
+              // Fallback to exponential backoff if no header or invalid
+              const delay = 1000 * Math.pow(2, retryCount - 1);
+              IssueLog.warn(
+                `ClickUp: Rate limit exceeded. Waiting for ${delay}ms (backoff) before retry ${retryCount}.`,
+              );
+              return timer(delay);
+            }
+            return throwError(() => error);
+          },
+        }),
+        map((res: HttpResponse<T>) => (res && res.body ? res.body : res)),
         map((res) => {
           if (validator) {
             return validator(res);
