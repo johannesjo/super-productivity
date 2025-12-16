@@ -194,7 +194,7 @@ graph TB
         subgraph ServerProcessing["Server-Side Processing (SyncService)"]
             direction TB
 
-            subgraph Validation["1. Validation"]:::validation
+            subgraph Validation["1. Validation"]
                 V1["Validate op.id, opType"]
                 V2["Validate entityType allowlist"]
                 V3["Sanitize vectorClock"]
@@ -202,7 +202,7 @@ graph TB
                 V5["Check timestamp drift"]
             end
 
-            subgraph ConflictCheck["2. Conflict Detection"]:::conflict
+            subgraph ConflictCheck["2. Conflict Detection"]
                 C1["Find latest op for entity"]
                 C2["Compare vector clocks"]
                 C3{Result?}
@@ -211,7 +211,7 @@ graph TB
                 C3 -- LESS_THAN --> C6[Reject]
             end
 
-            subgraph Persist["3. Persistence (REPEATABLE_READ)"]:::db
+            subgraph Persist["3. Persistence (REPEATABLE_READ)"]
                 P1["Increment lastSeq"]
                 P2["Re-check conflict"]
                 P3["INSERT operation"]
@@ -271,6 +271,13 @@ graph TB
     StatusAPI -.->|"SELECT"| SyncState
     StatusAPI -.->|"COUNT"| Devices
     RestoreAPI -.->|"SELECT (replay)"| OpsTable
+
+    %% Subgraph styles
+    style Validation fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style ConflictCheck fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Persist fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style PostgreSQL fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style APIEndpoints fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 ```
 
 ### Quick Reference Tables
