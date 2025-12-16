@@ -70,7 +70,7 @@ describe('OperationLogSyncService', () => {
       'applyOperations',
     ]);
     conflictResolutionServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
-      'presentConflicts',
+      'autoResolveConflictsLWW',
     ]);
     validateStateServiceSpy = jasmine.createSpyObj('ValidateStateService', [
       'validateAndRepair',
@@ -1308,7 +1308,7 @@ describe('OperationLogSyncService', () => {
 
       // Should have applied ops directly without showing conflict dialog
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
-      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.autoResolveConflictsLWW).not.toHaveBeenCalled();
     });
 
     it('should skip conflict detection when BACKUP_IMPORT is in remote ops', async () => {
@@ -1330,7 +1330,7 @@ describe('OperationLogSyncService', () => {
       await (service as any)._processRemoteOps([backupImportOp]);
 
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
-      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.autoResolveConflictsLWW).not.toHaveBeenCalled();
     });
 
     it('should skip conflict detection even when local pending ops exist for SYNC_IMPORT', async () => {
@@ -1383,7 +1383,7 @@ describe('OperationLogSyncService', () => {
       // detectConflicts should NOT be called at all for full-state ops
       expect(service.detectConflicts).not.toHaveBeenCalled();
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
-      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.autoResolveConflictsLWW).not.toHaveBeenCalled();
     });
 
     it('should apply SYNC_IMPORT along with subsequent ops from same client', async () => {
@@ -1418,7 +1418,7 @@ describe('OperationLogSyncService', () => {
         syncImportOp,
         followUpOp,
       ]);
-      expect(conflictResolutionServiceSpy.presentConflicts).not.toHaveBeenCalled();
+      expect(conflictResolutionServiceSpy.autoResolveConflictsLWW).not.toHaveBeenCalled();
     });
 
     it('should still run conflict detection for regular ops without full-state op', async () => {

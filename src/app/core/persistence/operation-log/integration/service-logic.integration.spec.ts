@@ -171,7 +171,6 @@ describe('Service Logic Integration', () => {
 
     // Spies for dependencies we don't want to execute fully
     conflictServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
-      'presentConflicts',
       'autoResolveConflictsLWW',
     ]);
     conflictServiceSpy.autoResolveConflictsLWW.and.returnValue(Promise.resolve());

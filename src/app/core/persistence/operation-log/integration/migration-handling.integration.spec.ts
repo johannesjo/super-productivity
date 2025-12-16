@@ -58,7 +58,7 @@ describe('Migration Handling Integration', () => {
         {
           provide: ConflictResolutionService,
           useValue: jasmine.createSpyObj('ConflictResolutionService', [
-            'presentConflicts',
+            'autoResolveConflictsLWW',
           ]),
         },
         {

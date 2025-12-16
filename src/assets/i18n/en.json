@@ -1082,19 +1082,6 @@
         "VECTOR_COMPARISON_LOCAL_GREATER": "Local > Remote",
         "VECTOR_COMPARISON_LOCAL_LESS": "Local < Remote"
       },
-      "D_CONFLICT_RESOLUTION": {
-        "ENTITY": "Entity",
-        "INTRO": "Your local and remote data have conflicting changes. Click to choose which version to keep for each item.",
-        "LAST_OP": "Last:",
-        "LOCAL": "Local",
-        "OPS_COUNT": "Operations:",
-        "REMOTE": "Remote",
-        "TITLE": "Resolve Sync Conflicts",
-        "USE_ALL_LOCAL": "Use All Local",
-        "USE_ALL_REMOTE": "Use All Remote",
-        "USE_LOCAL": "Use Local",
-        "USE_REMOTE": "Use Remote"
-      },
       "D_DECRYPT_ERROR": {
         "BTN_OVER_WRITE_REMOTE": "Change & Overwrite Remote",
         "CHANGE_PW_AND_DECRYPT": "Change & Attempt Decrypt",
