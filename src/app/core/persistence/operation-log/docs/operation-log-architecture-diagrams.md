@@ -312,27 +312,27 @@ Before replaying local synced ops after a SYNC_IMPORT, we filter out ops that ar
 ```mermaid
 flowchart TD
     subgraph Input["SYNC_IMPORT Received"]
-        SI[SYNC_IMPORT<br/>vectorClock: {A:10, B:5}]
+        SI["SYNC_IMPORT<br/>vectorClock: A=10, B=5"]
     end
 
     subgraph LocalOps["Local Synced Operations"]
-        Op1["Op1: {B:1}<br/>LESS_THAN → dominated"]
-        Op2["Op2: {A:5, B:3}<br/>LESS_THAN → dominated"]
-        Op3["Op3: {B:6}<br/>GREATER_THAN → NOT dominated"]
-        Op4["Op4: {A:10, B:5, C:1}<br/>CONCURRENT → NOT dominated"]
+        Op1["Op1: B=1<br/>LESS_THAN → dominated"]
+        Op2["Op2: A=5, B=3<br/>LESS_THAN → dominated"]
+        Op3["Op3: B=6<br/>GREATER_THAN → NOT dominated"]
+        Op4["Op4: A=10, B=5, C=1<br/>CONCURRENT → NOT dominated"]
     end
 
     subgraph Filter["Vector Clock Comparison"]
-        Check{Compare each op's clock<br/>with SYNC_IMPORT clock}
+        Check["Compare each op's clock<br/>with SYNC_IMPORT clock"]
     end
 
     subgraph Result["Ops to Replay"]
-        Replay["Only Op3 and Op4<br/>(not dominated)"]
+        Replay["Only Op3 and Op4<br/>not dominated"]
     end
 
     SI --> Check
     LocalOps --> Check
-    Check --> |"LESS_THAN"| Skip[Skip - already in snapshot]
+    Check --> |"LESS_THAN"| Skip["Skip - already in snapshot"]
     Check --> |"Otherwise"| Replay
 
     style Op1 fill:#ffcdd2,stroke:#c62828
