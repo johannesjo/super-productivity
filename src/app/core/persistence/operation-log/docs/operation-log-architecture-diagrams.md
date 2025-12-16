@@ -45,13 +45,13 @@ graph TD
 
     subgraph "Archive Storage (IndexedDB: PFAPI)"
         ArchiveWrite["ArchiveService<br/><sub>time-tracking/archive.service.ts</sub>"]:::archive
-        ArchiveWrite -->|Write BEFORE dispatch| ArchiveYoung["archiveYoung<br/>Recent tasks<br/><sub>< 21 days old</sub>"]:::archive
-        ArchiveYoung -->|Flush every ~14 days| ArchiveOld["archiveOld<br/>Older tasks<br/><sub>> 21 days old</sub>"]:::archive
-        ArchiveOld -->|Contains| TimeTracking["Time Tracking Data<br/>timeSpentOnDay entries"]:::archive
+        ArchiveWrite -->|Write BEFORE dispatch| ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>• task: TaskArchive<br/>• timeTracking: State<br/>━━━━━━━━━━━━━━━<br/><sub>Tasks < 21 days old</sub>"]:::archive
+        ArchiveYoung -->|"flushYoungToOld action<br/>(every ~14 days)"| ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>• task: TaskArchive<br/>• timeTracking: State<br/>━━━━━━━━━━━━━━━<br/><sub>Tasks > 21 days old</sub>"]:::archive
     end
 
     User -->|Archive Tasks| ArchiveWrite
     NgRx -.->|moveToArchive action<br/>AFTER archive write| OpEffects
+    OpEffects -->|flushYoungToOld| ArchiveYoung
 
     subgraph "Legacy Bridge (PFAPI)"
         DBWrite -.->|3. Bridge| LegacyMeta["META_MODEL<br/>Vector Clock<br/><sub>pfapi.service.ts</sub>"]:::legacy
@@ -100,9 +100,13 @@ graph TD
 **Archive Data Flow Notes:**
 
 - **Archive writes happen BEFORE dispatch**: When a user archives tasks, `ArchiveService` writes to IndexedDB first, then dispatches the `moveToArchive` action. This ensures data is safely stored before state updates.
-- **Two-tier archive**: Recent tasks go to `archiveYoung`. Tasks older than 21 days are flushed to `archiveOld` via `flushYoungToOld` (checked every ~14 days when archiving tasks).
-- **Time tracking data**: Stored with archived tasks as `timeSpentOnDay` entries.
-- **Not in NgRx state**: Archive data is stored directly in IndexedDB (via PFAPI), not in the NgRx store. Only the operation (moveToArchive) is logged for sync.
+- **ArchiveModel structure**: Each archive tier stores `{ task: TaskArchive, timeTracking: TimeTrackingState, lastTimeTrackingFlush: number }`. Both archived Task entities AND their time tracking data are stored together.
+- **Two-tier archive**: Recent tasks go to `archiveYoung` (tasks < 21 days old). Older tasks are flushed to `archiveOld` via `flushYoungToOld` action (checked every ~14 days when archiving tasks).
+- **Flush mechanism**: `flushYoungToOld` is a persistent action that:
+  1. Triggers when `lastTimeTrackingFlush > 14 days` during `moveTasksToArchiveAndFlushArchiveIfDue()`
+  2. Moves tasks older than 21 days from `archiveYoung.task` to `archiveOld.task`
+  3. Syncs via operation log so all clients execute the same flush deterministically
+- **Not in NgRx state**: Archive data is stored directly in IndexedDB (via PFAPI), not in the NgRx store. Only the operations (`moveToArchive`, `flushYoungToOld`) are logged for sync.
 - **Sync handling**: On remote clients, `ArchiveOperationHandler` writes archive data AFTER receiving the operation (see Section 8).
 
 ## 2. Operation Log Sync Architecture (Server Sync) ✅ IMPLEMENTED
@@ -947,9 +951,8 @@ flowchart TB
 
         subgraph PFAPI["PFAPI Database (Legacy + Archive)"]
             direction TB
-            ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>Recent archived tasks<br/>less than 21 days old"]
-            ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>Older archived tasks<br/>flushed every ~14 days"]
-            TimeTracking["Time Tracking Data<br/>━━━━━━━━━━━━━━━<br/>timeSpentOnDay entries<br/>stored with tasks"]
+            ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>ArchiveModel:<br/>• task: TaskArchive<br/>• timeTracking: State<br/>━━━━━━━━━━━━━━━<br/>Tasks < 21 days old"]
+            ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>ArchiveModel:<br/>• task: TaskArchive<br/>• timeTracking: State<br/>━━━━━━━━━━━━━━━<br/>Tasks > 21 days old"]
             MetaModel["META_MODEL<br/>━━━━━━━━━━━━━━━<br/>Vector clocks for<br/>legacy sync providers"]
             OtherModels["Other Models<br/>━━━━━━━━━━━━━━━<br/>globalConfig, etc.<br/>legacy storage"]
         end
@@ -957,7 +960,7 @@ flowchart TB
 
     subgraph Writers["What Writes Where"]
         OpLog["OperationLogStoreService"] -->|ops, snapshots| SUPOPS
-        Archive["ArchiveService<br/>ArchiveOperationHandler"] -->|tasks, time data| PFAPI
+        Archive["ArchiveService<br/>ArchiveOperationHandler"] -->|"ArchiveModel:<br/>tasks + time tracking"| PFAPI
         Legacy["VectorClockFacadeService"] -->|vector clocks| MetaModel
     end
 
