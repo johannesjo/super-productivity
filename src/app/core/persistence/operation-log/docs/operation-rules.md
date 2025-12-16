@@ -1,5 +1,8 @@
 # Operation Log: Design Rules & Guidelines
 
+**Last Updated:** December 2025
+**Related:** [Operation Log Architecture](./operation-log-architecture.md)
+
 This document establishes the core rules and principles for designing the Operation Log store and defining new Operations. Adherence to these rules ensures data integrity, synchronization reliability, and system performance.
 
 ## 1. Store Design Rules
@@ -133,3 +136,80 @@ This document establishes the core rules and principles for designing the Operat
   - **Max batch size:** 100 operations per batch for normal sync uploads.
   - **Max payload size:** 1 MB per batch to prevent timeout issues.
 - **Exception:** `SYNC_IMPORT` and `BACKUP_IMPORT` bypass these limits but must be clearly marked as bulk operations and trigger immediate snapshot creation afterward.
+
+## 4. Effect Rules
+
+### 4.1 LOCAL_ACTIONS for Side Effects
+
+- **Rule:** All NgRx effects that perform side effects MUST use `inject(LOCAL_ACTIONS)` instead of `inject(Actions)`.
+- **Reasoning:** Effects should NEVER run for remote sync operations. Side effects (snackbars, API calls, sounds) happen exactly once on the originating client.
+- **Exception:** Effects that only dispatch state-modifying actions (not side effects) may use regular `Actions`.
+
+**Example:**
+
+```typescript
+@Injectable()
+export class MyEffects {
+  private _actions$ = inject(LOCAL_ACTIONS); // ✅ Correct for side effects
+
+  showSnack$ = createEffect(
+    () =>
+      this._actions$.pipe(
+        ofType(completeTask),
+        tap(() => this.snackService.show('Task completed!')),
+      ),
+    { dispatch: false },
+  );
+}
+```
+
+### 4.2 Avoid Selector-Based Effects That Dispatch Actions
+
+- **Rule:** Prefer action-based effects (`this._actions$.pipe(ofType(...))`) over selector-based effects (`this._store$.select(...)`).
+- **Reasoning:** Selector-based effects fire whenever the store changes, including during hydration and sync replay, bypassing `LOCAL_ACTIONS` filtering.
+- **Workaround:** If you must use a selector-based effect that dispatches actions, guard it with `HydrationStateService.isApplyingRemoteOps()`.
+
+### 4.3 Archive Side Effects
+
+- **Rule:** Archive operations (writing to IndexedDB) are handled by `ArchiveOperationHandler`, NOT by regular effects.
+- **Local operations:** `ArchiveOperationHandlerEffects` routes through `ArchiveOperationHandler` (via LOCAL_ACTIONS)
+- **Remote operations:** `OperationApplierService` calls `ArchiveOperationHandler` directly after dispatch
+
+## 5. Multi-Entity Operation Rules
+
+### 5.1 Use Meta-Reducers for Atomic Changes
+
+- **Rule:** When one action affects multiple entities, use **meta-reducers** instead of effects.
+- **Reasoning:** Meta-reducers ensure all changes happen in a single reducer pass, creating one operation in the sync log and preventing partial sync.
+- **Example:** Deleting a tag also removes it from tasks → handled in `tagSharedMetaReducer`, not in an effect.
+
+### 5.2 Capture Multi-Entity Changes
+
+- **Rule:** The `OperationCaptureService` automatically captures all entity changes from a single action.
+- **Implementation:** The `operation-capture.meta-reducer` calls `OperationCaptureService.computeAndEnqueue()` with before/after states.
+- **Result:** Single operation with `entityChanges[]` array containing all affected entities.
+
+## 6. Configuration Constants
+
+See `operation-log.const.ts` for all configurable values:
+
+| Constant                            | Value    | Description                               |
+| ----------------------------------- | -------- | ----------------------------------------- |
+| `COMPACTION_TRIGGER`                | 500 ops  | Operations before automatic compaction    |
+| `COMPACTION_RETENTION_MS`           | 7 days   | Synced ops older than this may be deleted |
+| `EMERGENCY_COMPACTION_RETENTION_MS` | 1 day    | Shorter retention for quota exceeded      |
+| `MAX_COMPACTION_FAILURES`           | 3        | Failures before user notification         |
+| `MAX_DOWNLOAD_OPS_IN_MEMORY`        | 50,000   | Bounds memory during API download         |
+| `REMOTE_OP_FILE_RETENTION_MS`       | 14 days  | Server-side operation file retention      |
+| `PENDING_OPERATION_EXPIRY_MS`       | 24 hours | Pending ops older than this are rejected  |
+
+## 7. Quick Reference Checklist
+
+When adding a new persistent action:
+
+- [ ] Add `meta.isPersistent: true` to the action
+- [ ] Add `meta.entityType` and `meta.opType`
+- [ ] Ensure related entity changes are in a meta-reducer (not effects)
+- [ ] Effects with side effects use `LOCAL_ACTIONS`
+- [ ] Archive operations route through `ArchiveOperationHandler`
+- [ ] Add action to `ACTION_AFFECTED_ENTITIES` if multi-entity

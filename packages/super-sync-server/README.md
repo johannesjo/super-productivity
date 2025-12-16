@@ -4,6 +4,11 @@ A custom, high-performance synchronization server for Super Productivity.
 
 > **Note:** This server implements a custom operation-based synchronization protocol (Event Sourcing), **not** WebDAV. It is designed specifically for the Super Productivity client's efficient sync requirements.
 
+> **Related Documentation:**
+>
+> - [Operation Log Architecture](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md) - Client-side architecture
+> - [Server Architecture Diagrams](./sync-server-architecture-diagrams.md) - Visual diagrams
+
 ## Architecture
 
 The server uses an **Append-Only Log** architecture backed by **PostgreSQL** (via Prisma):
@@ -12,6 +17,15 @@ The server uses an **Append-Only Log** architecture backed by **PostgreSQL** (vi
 2.  **Sequence Numbers**: The server assigns a strictly increasing `server_seq` to each operation.
 3.  **Synchronization**: Clients request "all operations since sequence `X`".
 4.  **Snapshots**: The server can regenerate the full state by replaying operations, optimizing initial syncs.
+
+### Key Design Principles
+
+| Principle                           | Description                                                               |
+| ----------------------------------- | ------------------------------------------------------------------------- |
+| **Server-Authoritative**            | Server assigns monotonic sequence numbers for total ordering              |
+| **Client-Side Conflict Resolution** | Server stores operations as-is; clients detect and resolve conflicts      |
+| **E2E Encryption Support**          | Payloads can be encrypted client-side; server treats them as opaque blobs |
+| **Idempotent Uploads**              | Request ID deduplication prevents duplicate operations                    |
 
 ## Quick Start
 
@@ -174,8 +188,79 @@ npm run clear-data -- user@example.com
 npm run clear-data -- --all
 ```
 
+## API Details
+
+### Upload Operations (`POST /api/sync/ops`)
+
+Request body:
+
+```json
+{
+  "ops": [
+    {
+      "id": "uuid-v7",
+      "opType": "UPD",
+      "entityType": "TASK",
+      "entityId": "task-123",
+      "payload": { "changes": { "title": "New title" } },
+      "vectorClock": { "clientA": 5 },
+      "timestamp": 1701234567890,
+      "schemaVersion": 1
+    }
+  ],
+  "clientId": "clientA",
+  "lastKnownSeq": 100
+}
+```
+
+Response:
+
+```json
+{
+  "results": [{ "opId": "uuid-v7", "accepted": true, "serverSeq": 101 }],
+  "newOps": [],
+  "latestSeq": 101
+}
+```
+
+### Download Operations (`GET /api/sync/ops`)
+
+Query parameters:
+
+- `sinceSeq` (required): Server sequence number to start from
+- `limit` (optional): Max operations to return (default: 500)
+
+### Upload Snapshot (`POST /api/sync/snapshot`)
+
+Used for full-state operations (BackupImport, SyncImport, Repair):
+
+```json
+{
+  "state": {
+    /* Full AppDataComplete */
+  },
+  "clientId": "clientA",
+  "reason": "initial",
+  "vectorClock": { "clientA": 10 },
+  "schemaVersion": 1
+}
+```
+
+## Security Features
+
+| Feature                       | Implementation                                    |
+| ----------------------------- | ------------------------------------------------- |
+| **Authentication**            | JWT Bearer tokens in Authorization header         |
+| **Timing Attack Mitigation**  | Dummy hash comparison on invalid users            |
+| **Input Validation**          | Operation ID, entity ID, schema version validated |
+| **Rate Limiting**             | Configurable per-user limits                      |
+| **Vector Clock Sanitization** | Limited to 100 entries, 255 char keys             |
+| **Entity Type Allowlist**     | Prevents injection of invalid entity types        |
+| **Request Deduplication**     | Prevents duplicate operations on retry            |
+
 ## Security Notes
 
-- **Set JWT_SECRET** to a secure random value in production.
+- **Set JWT_SECRET** to a secure random value in production (min 32 characters).
 - **Use HTTPS in production**. The Docker setup includes Caddy to handle this automatically.
 - **Restrict CORS origins** in production.
+- **Database backups** are recommended for production deployments.

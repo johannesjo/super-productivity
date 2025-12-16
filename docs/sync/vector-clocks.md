@@ -1,8 +1,15 @@
 # Vector Clocks in Super Productivity Sync
 
+**Last Updated:** December 2025
+
 ## Overview
 
-Super Productivity uses vector clocks to provide accurate conflict detection and resolution in its synchronization system. This document explains how vector clocks work, why they're used, and how they integrate with the existing sync infrastructure.
+Super Productivity uses vector clocks to provide accurate conflict detection and resolution in its synchronization system. This document explains how vector clocks work, why they're used, and how they integrate with both the legacy PFAPI sync and the newer Operation Log sync infrastructure.
+
+> **Related Documentation:**
+>
+> - [Operation Log Architecture](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md) - How vector clocks are used in the operation log
+> - [Operation Log Diagrams](/src/app/core/persistence/operation-log/docs/operation-log-architecture-diagrams.md) - Visual diagrams including conflict detection
 
 ## Table of Contents
 
@@ -270,9 +277,29 @@ pfLog(2, 'Vector clock comparison', {
 4. **Use backwards-compat** helpers during migration period
 5. **Log vector states** when debugging sync issues
 
+## Current Implementation Status
+
+| Feature                         | Status         | Notes                                  |
+| ------------------------------- | -------------- | -------------------------------------- |
+| Vector clock conflict detection | ✅ Implemented | Used by both PFAPI and Operation Log   |
+| Entity-level conflict detection | ✅ Implemented | Operation Log tracks per-entity clocks |
+| User conflict resolution UI     | ✅ Implemented | `DialogConflictResolutionComponent`    |
+| Client pruning (max 50 entries) | ✅ Implemented | `limitVectorClockSize()`               |
+| Overflow protection             | ✅ Implemented | Clocks reset at MAX_SAFE_INTEGER       |
+
 ## Future Improvements
 
-1. **Compression**: Prune old client entries after inactivity
-2. **Conflict Resolution**: Add automatic resolution strategies
-3. **Visualization**: Add UI to show vector clock states
-4. **Performance**: Optimize comparison for many clients
+1. **Automatic Resolution**: Field-level LWW for non-critical fields
+2. **Visualization**: Add UI to show vector clock states for debugging
+3. **Performance**: Optimize comparison for very large clocks
+
+## Operation Log Integration
+
+The Operation Log system uses vector clocks in several ways:
+
+1. **Per-Operation Clocks**: Each operation carries a vector clock for causality tracking
+2. **Entity Frontier**: `VectorClockService` tracks the "frontier" clock per entity
+3. **Conflict Detection**: `detectConflicts()` compares clocks between pending local ops and remote ops
+4. **SYNC_IMPORT Handling**: Vector clock dominance filtering determines which ops to replay after full state imports
+
+For detailed information, see [Operation Log Architecture - Part C: Server Sync](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md#part-c-server-sync).

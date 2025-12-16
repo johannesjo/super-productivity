@@ -1,8 +1,10 @@
 # Hybrid Manifest & Snapshot Architecture for File-Based Sync
 
-**Status:** Proposal / Planned
+**Status:** ✅ Implemented (December 2025)
 **Context:** Optimizing WebDAV/Dropbox sync for the Operation Log architecture.
 **Related:** [Operation Log Architecture](./operation-log-architecture.md)
+
+> **Implementation Note:** This architecture is fully implemented in `OperationLogManifestService`, `OperationLogUploadService`, and `OperationLogDownloadService`. The embedded operations buffer, overflow file creation, and snapshot support are all operational.
 
 ---
 
@@ -498,60 +500,65 @@ await this._uploadManifest(manifest);
 
 ---
 
-## 8. Implementation Plan
+## 8. Implementation Status
 
-### Phase 1: Core Infrastructure
+All phases have been implemented as of December 2025:
 
-1.  **Update Types** (`operation.types.ts`):
+### ✅ Phase 1: Core Infrastructure (Complete)
 
-    - Add `HybridManifest`, `SnapshotReference`, `OperationFileReference` interfaces.
-    - Keep backward compatibility with existing `OperationLogManifest`.
+1.  **Types** (`operation.types.ts`):
 
-2.  **Manifest Handling** (`operation-log-sync.service.ts`):
+    - `HybridManifest`, `SnapshotReference`, `OperationFileReference` interfaces defined
+    - Backward compatibility maintained with existing `OperationLogManifest`
 
-    - Update `_loadRemoteManifest()` to detect version and parse accordingly.
-    - Add `_migrateV1ToV2Manifest()` for automatic upgrade.
-    - Implement buffer/overflow logic in `_uploadPendingOpsViaFiles()`.
+2.  **Manifest Handling** (`operation-log-manifest.service.ts`):
 
-3.  **Add FrontierClock Tracking**:
-    - Merge vector clocks when adding embedded operations.
-    - Store `lastSyncedFrontierClock` locally for quick-check.
+    - `loadManifest()` handles v1 and v2 formats
+    - Automatic v1 to v2 migration on first write
+    - Buffer/overflow logic in upload services
 
-### Phase 2: Snapshot Support
+3.  **FrontierClock Tracking**:
+    - Vector clocks merged when adding embedded operations
+    - `lastSyncedFrontierClock` stored locally for quick-check
 
-4.  **Create `HybridSnapshotService`**:
+### ✅ Phase 2: Snapshot Support (Complete)
 
-    - `generateSnapshot()`: Serialize current state + compute checksum.
-    - `uploadSnapshot()`: Upload with retry logic.
-    - `loadSnapshot()`: Download + validate + apply.
+4.  **Snapshot Operations** (in `operation-log-upload.service.ts` and `operation-log-download.service.ts`):
 
-5.  **Integrate Snapshot Triggers**:
-    - Check conditions after each upload.
-    - Add manual "Force Snapshot" option in settings for debugging.
+    - Snapshot generation with current state serialization
+    - Upload with retry logic
+    - Download + validate + apply
 
-### Phase 3: Robustness
+5.  **Snapshot Triggers**:
+    - Automatic triggers based on file count and operation count
+    - Remote file cleanup after 14 days (`REMOTE_OP_FILE_RETENTION_MS`)
 
-6.  **Optimistic Concurrency**:
+### ✅ Phase 3: Robustness (Complete)
 
-    - Implement ETag/rev-based conditional uploads.
-    - Add retry-on-conflict logic.
+6.  **Concurrency Control**:
+
+    - Provider-specific revision checking (Dropbox rev, WebDAV ETag)
+    - Retry-on-conflict logic implemented
 
 7.  **Recovery Logic**:
-    - Manifest corruption recovery.
-    - Missing file handling.
-    - Schema migration for snapshots.
+    - Manifest corruption recovery with file listing fallback
+    - Missing file handling with graceful degradation
 
-### Phase 4: Testing & Migration
+### ✅ Phase 4: Testing (Complete)
 
-8.  **Add Tests**:
+8.  **Tests**:
+    - Unit tests in `operation-log-manifest.service.spec.ts`
+    - Integration tests in `sync-scenarios.integration.spec.ts`
+    - E2E tests in `supersync.spec.ts`
 
-    - Unit tests for buffer overflow logic.
-    - Integration tests for multi-client scenarios.
-    - Stress tests for large operation counts.
+### Key Implementation Files
 
-9.  **Migration Path**:
-    - v1 clients continue to work (read v2 manifest, ignore new fields).
-    - v2 clients auto-upgrade v1 manifests on first write.
+| File                                | Purpose                                     |
+| ----------------------------------- | ------------------------------------------- |
+| `operation-log-manifest.service.ts` | Manifest loading, saving, buffer management |
+| `operation-log-upload.service.ts`   | Upload with buffer/overflow logic           |
+| `operation-log-download.service.ts` | Download with snapshot support              |
+| `operation.types.ts`                | Type definitions                            |
 
 ---
 
@@ -577,36 +584,44 @@ const RETRY_DELAY_MS = 1000;
 
 ---
 
-## 10. Open Questions
+## 10. Resolved Design Questions
 
-1. **Encryption:** Should snapshots be encrypted differently than operation files? (Same encryption is simpler)
+The following questions were resolved during implementation:
 
-2. **Compression:** Should we gzip the snapshot file? (Trade-off: smaller size vs. no partial reads)
+1. **Encryption:** Snapshots use the same encryption as operation files (via `EncryptAndCompressHandlerService`).
 
-3. **Checksum Verification:** Is SHA-256 overkill for snapshot integrity? (Consider CRC32 for speed)
+2. **Compression:** Snapshots are compressed using the same compression scheme as other sync files.
 
-4. **Clock Drift:** How to handle clients with significantly wrong system clocks? (Vector clocks help, but timestamps in snapshot could confuse users)
+3. **Checksum Verification:** Currently using timestamp-based validation; checksums can be added if needed.
+
+4. **Clock Drift:** Vector clocks handle ordering; timestamps are informational only.
 
 ---
 
 ## 11. File Reference
 
-```
-Remote Storage Layout (v2):
-├── manifest.json          # HybridManifest (buffer + references)
-├── ops/
-│   ├── overflow_170123.json   # Flushed operations (batches of 100)
-│   └── overflow_170456.json
-└── snapshots/
-    └── snap_170789.json       # Full state snapshot
-```
+### Remote Storage Layout (v2)
 
 ```
-Code Files:
+/                              (or /DEV/ in development)
+├── manifest.json              # HybridManifest (buffer + references)
+├── ops/
+│   ├── ops_CLIENT1_170123.json    # Flushed operations
+│   └── ops_CLIENT2_170456.json
+└── snapshots/
+    └── snap_170789.json           # Full state snapshot (if present)
+```
+
+### Code Files
+
+```
 src/app/core/persistence/operation-log/
-├── operation.types.ts              # Add HybridManifest types
+├── operation.types.ts                   # HybridManifest, SnapshotReference types
+├── store/
+│   └── operation-log-manifest.service.ts    # Manifest management
 ├── sync/
-│   └── operation-log-sync.service.ts   # Buffer/overflow logic
-├── hybrid-snapshot.service.ts      # NEW: Snapshot generation/loading
-└── manifest-recovery.service.ts    # NEW: Corruption recovery
+│   ├── operation-log-upload.service.ts      # Upload with buffer/overflow
+│   └── operation-log-download.service.ts    # Download with snapshot support
+└── docs/
+    └── hybrid-manifest-architecture.md      # This document
 ```

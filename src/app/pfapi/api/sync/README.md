@@ -1,6 +1,15 @@
-# Sync System Overview
+# Sync System Overview (PFAPI)
 
-This directory contains the synchronization implementation for Super Productivity, enabling data sync across devices through various providers (Dropbox, WebDAV, Local File).
+**Last Updated:** December 2025
+
+This directory contains the **legacy PFAPI** synchronization implementation for Super Productivity. This system enables data sync across devices through file-based providers (Dropbox, WebDAV, Local File).
+
+> **Note:** Super Productivity now has **two sync systems** running in parallel:
+>
+> 1. **PFAPI Sync** (this directory) - File-based sync via Dropbox/WebDAV
+> 2. **Operation Log Sync** - Operation-based sync via SuperSync Server
+>
+> See [Operation Log Architecture](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md) for the newer operation-based system.
 
 ## Key Components
 
@@ -119,11 +128,29 @@ interface LocalMeta {
 3. Verify client IDs are stable
 4. Ensure metadata files are properly updated
 
-## Future Improvements
+## Integration with Operation Log
 
-- [ ] Automatic conflict resolution strategies
-- [ ] Partial sync for large datasets
-- [ ] Real-time sync notifications
-- [ ] Sync history visualization
+When using file-based sync (Dropbox, WebDAV), the Operation Log system maintains compatibility through:
 
-For detailed vector clock documentation, see [vector-clocks.md](../../../docs/sync/vector-clocks.md).
+1. **Vector Clock Updates**: `VectorClockFacadeService` updates the PFAPI meta-model's vector clock when operations are persisted locally
+2. **State Source**: PFAPI reads current state from NgRx store (not from operation log IndexedDB)
+3. **Bridge Effect**: `updateModelVectorClock$` in `operation-log.effects.ts` ensures clocks stay in sync
+
+This allows users to:
+
+- Use file-based sync (Dropbox/WebDAV) while benefiting from Operation Log's local persistence
+- Migrate between sync providers without data loss
+
+## Future Direction
+
+The PFAPI sync system is **stable but not receiving new features**. New sync features are being developed in the Operation Log system:
+
+- ✅ Entity-level conflict resolution (Operation Log)
+- ✅ Incremental sync (Operation Log)
+- 📋 Planned: Deprecate file-based sync in favor of Operation Log with file fallback
+
+## Related Documentation
+
+- [Vector Clocks](../../../docs/sync/vector-clocks.md) - Conflict detection implementation
+- [Operation Log Architecture](/src/app/core/persistence/operation-log/docs/operation-log-architecture.md) - Newer operation-based sync
+- [Hybrid Manifest Architecture](/src/app/core/persistence/operation-log/docs/hybrid-manifest-architecture.md) - File-based Operation Log sync
