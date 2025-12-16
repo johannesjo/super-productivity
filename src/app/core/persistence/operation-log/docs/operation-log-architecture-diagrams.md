@@ -84,9 +84,12 @@ graph TD
         Replayer -->|Dispatch| NgRx
     end
 
-    subgraph "Multi-Tab"
-        DBWrite -->|4. Broadcast| BC["BroadcastChannel<br/><sub>sync/multi-tab-coordinator.service.ts</sub>"]
-        BC -->|Notify| OtherTabs((Other Tabs))
+    subgraph "Single Instance + Sync Locking"
+        Startup2((App Startup)) -->|BroadcastChannel| SingleCheck{"Already<br/>Open?<br/><sub>startup.service.ts</sub>"}
+        SingleCheck -- Yes --> Block[Block New Tab]
+        SingleCheck -- No --> Allow[Allow]
+
+        DBWrite -.->|Critical ops use| WebLocks["Web Locks API<br/><sub>sync/lock.service.ts</sub>"]
     end
 
     class OpsTable,StateCache storage;
