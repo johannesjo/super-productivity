@@ -161,10 +161,20 @@ describe('Service Logic Integration', () => {
   let applierSpy: jasmine.SpyObj<OperationApplierService>;
 
   beforeEach(async () => {
+    // Mock window.confirm to return true for fresh client confirmation
+    // Use callFake if already spied, otherwise create new spy
+    if (!(window.confirm as jasmine.Spy).and) {
+      spyOn(window, 'confirm').and.returnValue(true);
+    } else {
+      (window.confirm as jasmine.Spy).and.returnValue(true);
+    }
+
     // Spies for dependencies we don't want to execute fully
     conflictServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
       'presentConflicts',
+      'autoResolveConflictsLWW',
     ]);
+    conflictServiceSpy.autoResolveConflictsLWW.and.returnValue(Promise.resolve());
     applierSpy = jasmine.createSpyObj('OperationApplierService', ['applyOperations']);
     applierSpy.applyOperations.and.returnValue(Promise.resolve({ appliedOps: [] }));
 
@@ -375,9 +385,9 @@ describe('Service Logic Integration', () => {
       // 3. Download
       await syncService.downloadRemoteOps(mockProvider);
 
-      // 4. Verify ConflictResolutionService was called
-      expect(conflictServiceSpy.presentConflicts).toHaveBeenCalled();
-      const args = conflictServiceSpy.presentConflicts.calls.mostRecent().args;
+      // 4. Verify ConflictResolutionService.autoResolveConflictsLWW was called
+      expect(conflictServiceSpy.autoResolveConflictsLWW).toHaveBeenCalled();
+      const args = conflictServiceSpy.autoResolveConflictsLWW.calls.mostRecent().args;
       const conflicts = args[0];
 
       expect(conflicts.length).toBe(1);
