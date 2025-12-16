@@ -207,6 +207,128 @@ graph TD
     API <--> ServerDB
 ```
 
+### 2.1 Server API Endpoints & Database Operations ✅ IMPLEMENTED
+
+This section details which API endpoints are called for each sync action and what gets written to PostgreSQL.
+
+**PostgreSQL Tables (Prisma Schema):**
+
+| Table             | Purpose                                              |
+| ----------------- | ---------------------------------------------------- |
+| `users`           | User accounts (id, email, passwordHash, etc.)        |
+| `operations`      | Event log (serverSeq, opType, entityType, payload)   |
+| `user_sync_state` | Per-user metadata (lastSeq, cached snapshot)         |
+| `sync_devices`    | Device tracking (clientId, lastSeenAt, lastAckedSeq) |
+| `tombstones`      | Deleted entity tracking (for conflict resolution)    |
+
+```mermaid
+flowchart TB
+    subgraph Endpoints["API Endpoints (Fastify)"]
+        direction TB
+        E1["POST /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Upload operations"]
+        E2["GET /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Download operations"]
+        E3["POST /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Upload full state"]
+        E4["GET /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Get full state"]
+        E5["GET /api/sync/status<br/>━━━━━━━━━━━━━━━<br/>Check sync status"]
+        E6["GET /api/sync/restore-points<br/>━━━━━━━━━━━━━━━<br/>List restore points"]
+        E7["GET /api/sync/restore/:seq<br/>━━━━━━━━━━━━━━━<br/>Restore to point"]
+    end
+
+    subgraph PostgreSQL["PostgreSQL Database"]
+        direction TB
+        T1[("operations<br/>━━━━━━━━━━━━━━━<br/>id, serverSeq, opType<br/>entityType, entityId<br/>payload, vectorClock<br/>clientTimestamp")]
+        T2[("user_sync_state<br/>━━━━━━━━━━━━━━━<br/>lastSeq, snapshotData<br/>lastSnapshotSeq<br/>snapshotAt")]
+        T3[("sync_devices<br/>━━━━━━━━━━━━━━━<br/>clientId, lastSeenAt<br/>lastAckedSeq")]
+        T4[("tombstones<br/>━━━━━━━━━━━━━━━<br/>entityType, entityId<br/>deletedAt, expiresAt")]
+    end
+
+    E1 -->|"INSERT"| T1
+    E1 -->|"UPDATE lastSeq"| T2
+    E1 -->|"UPSERT"| T3
+    E1 -->|"UPSERT if DEL"| T4
+
+    E2 -->|"SELECT"| T1
+    E2 -->|"SELECT"| T2
+
+    E3 -->|"INSERT (SYNC_IMPORT)"| T1
+    E3 -->|"UPDATE snapshot"| T2
+
+    E4 -->|"SELECT snapshot"| T2
+    E4 -->|"SELECT (replay)"| T1
+
+    E5 -->|"SELECT"| T2
+    E5 -->|"COUNT"| T3
+
+    E6 -->|"SELECT"| T1
+
+    E7 -->|"SELECT (replay)"| T1
+    E7 -->|"SELECT"| T2
+
+    style Endpoints fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style PostgreSQL fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+### 2.2 Detailed Database Writes Per Action
+
+| Action               | Endpoint                       | Database Writes                                                                                                                                                                                                                |
+| -------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Upload Ops**       | `POST /api/sync/ops`           | 1. `user_sync_state.upsert` (ensure exists)<br/>2. `user_sync_state.update` (increment lastSeq)<br/>3. `operations.create` (insert op)<br/>4. `tombstones.upsert` (if DEL op)<br/>5. `sync_devices.upsert` (update lastSeenAt) |
+| **Download Ops**     | `GET /api/sync/ops`            | READ ONLY:<br/>1. `operations.findMany` (get ops > sinceSeq)<br/>2. `user_sync_state.findUnique` (get lastSeq)<br/>3. `operations.aggregate` (min seq for gap detection)                                                       |
+| **Upload Snapshot**  | `POST /api/sync/snapshot`      | 1. Creates SYNC_IMPORT operation (same as Upload Ops)<br/>2. `user_sync_state.update` (cache snapshot data)                                                                                                                    |
+| **Get Snapshot**     | `GET /api/sync/snapshot`       | 1. `user_sync_state.findUnique` (try cached)<br/>2. If stale: `operations.findMany` (replay)<br/>3. `user_sync_state.update` (cache new snapshot)                                                                              |
+| **Get Status**       | `GET /api/sync/status`         | READ ONLY:<br/>1. `user_sync_state.findUnique`<br/>2. `sync_devices.count`                                                                                                                                                     |
+| **Restore Points**   | `GET /api/sync/restore-points` | READ ONLY: `operations.findMany` (filter SYNC_IMPORT, BACKUP_IMPORT, REPAIR)                                                                                                                                                   |
+| **Restore Snapshot** | `GET /api/sync/restore/:seq`   | READ ONLY: Replay ops up to targetSeq                                                                                                                                                                                          |
+
+### 2.3 Operation Processing Flow (Server-Side)
+
+```mermaid
+flowchart TD
+    subgraph Validation["1. Validation"]
+        V1[Validate op.id, opType, entityType]
+        V2[Validate entityId format]
+        V3[Sanitize vectorClock]
+        V4[Check payload size/complexity]
+        V5[Check timestamp drift]
+    end
+
+    subgraph Conflict["2. Conflict Detection"]
+        C1["Find latest op for<br/>same entityType + entityId"]
+        C2["Compare vector clocks"]
+        C3{"Result?"}
+        C3 -->|GREATER_THAN| C4[No conflict]
+        C3 -->|CONCURRENT| C5[Reject: concurrent mod]
+        C3 -->|LESS_THAN| C6[Reject: stale op]
+    end
+
+    subgraph Persist["3. Persistence (Transaction)"]
+        P1["user_sync_state.update<br/>increment lastSeq"]
+        P2["Re-check conflict<br/>(race condition guard)"]
+        P3["operations.create<br/>INSERT new row"]
+        P4{"opType = DEL?"}
+        P4 -->|Yes| P5["tombstones.upsert"]
+        P4 -->|No| P6[Skip tombstone]
+        P7["sync_devices.upsert<br/>update lastSeenAt"]
+    end
+
+    V1 --> V2 --> V3 --> V4 --> V5
+    V5 --> C1 --> C2 --> C3
+    C4 --> P1 --> P2 --> P3 --> P4
+    P5 --> P7
+    P6 --> P7
+
+    style Validation fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Conflict fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Persist fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+**Key Implementation Details:**
+
+- **Transaction Isolation**: Uses `REPEATABLE_READ` isolation level to prevent phantom reads
+- **Double Conflict Check**: Checks conflict before AND after sequence allocation (race condition guard)
+- **Idempotency**: Duplicate op IDs are rejected with `DUPLICATE_OPERATION` error code
+- **Tombstones**: Created for DEL operations, expire after retention period (default 30 days)
+
 ## 2b. Full-State Operations via Snapshot Endpoint ✅ IMPLEMENTED
 
 Full-state operations (BackupImport, Repair, SyncImport) contain the entire application state and can exceed the regular `/api/sync/ops` body size limit (~30MB). These operations are routed through the `/api/sync/snapshot` endpoint instead.
