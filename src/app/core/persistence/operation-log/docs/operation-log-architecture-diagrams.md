@@ -111,223 +111,200 @@ graph TD
 
 ## 2. Operation Log Sync Architecture (Server Sync) ✅ IMPLEMENTED
 
-This diagram details the flow for syncing individual operations with a server (`Part C`), including conflict detection, resolution strategies, and the validation loop (`Part D`).
+This master diagram shows the complete sync architecture: client-side flow, server API endpoints, PostgreSQL database operations, and server-side processing.
 
 **Implementation Status:** Complete (single-schema-version). Key services:
 
-- `OperationLogSyncService` - Orchestration, fresh client safety checks
-- `OperationLogUploadService` / `OperationLogDownloadService` - Data transfer (API + file-based fallback)
-- `ConflictResolutionService` - User resolution UI, batch apply
-- `VectorClockService` - Conflict detection, frontier tracking
-- `DependencyResolverService` - Hard/soft dependency extraction
-
-**Recent Additions (December 2025):**
-
-- Server-side security: audit logging, error codes, deduplication, validation
-- Gap detection in download operations
-- Transaction isolation for downloads
-- Full-state operations (BackupImport, Repair, SyncImport) routed via snapshot endpoint
+- **Client**: `OperationLogSyncService`, `OperationLogUploadService`, `OperationLogDownloadService`, `ConflictResolutionService`
+- **Server**: Fastify API (`sync.routes.ts`), `SyncService` (`sync.service.ts`), Prisma ORM
 
 ```mermaid
-graph TD
+graph TB
     %% Styles
-    classDef remote fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
-    classDef local fill:#fff,stroke:#333,stroke-width:2px,color:black;
+    classDef client fill:#fff,stroke:#333,stroke-width:2px,color:black;
+    classDef api fill:#e3f2fd,stroke:#1565c0,stroke-width:2px,color:black;
+    classDef db fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:black;
     classDef conflict fill:#ffebee,stroke:#c62828,stroke-width:2px,color:black;
-    classDef repair fill:#f3e5f5,stroke:#7b1fa2,stroke-width:2px,color:black;
+    classDef validation fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,color:black;
 
-    subgraph "Remote Server"
-        ServerDB[(Server Database)]:::remote
-        API[Sync API Endpoint]:::remote
-    end
+    %% ═══════════════════════════════════════════════════════════════
+    %% CLIENT SIDE
+    %% ═══════════════════════════════════════════════════════════════
 
-    subgraph "Client: Sync Loop"
-        Scheduler((Scheduler)) -->|Interval| SyncService["OperationLogSyncService<br/><sub>sync/operation-log-sync.service.ts</sub>"]
-
-        SyncService -->|1. Get Last Seq| LocalMeta["Sync Metadata<br/><sub>store/operation-log-store.service.ts</sub>"]
-
-        %% Download Flow
-        SyncService -->|2. Download Ops| API
-        API -->|Return Ops > Seq| DownOps[Downloaded Operations]
-
-        DownOps --> FilterApplied{Already<br/>Applied?}
-        FilterApplied -- Yes --> Discard[Discard]
-        FilterApplied -- No --> ConflictDet
-    end
-
-    subgraph "Client: Conflict Management"
-        ConflictDet{"Conflict<br/>Detection<br/><sub>sync/conflict-resolution.service.ts</sub>"}:::conflict
-
-        ConflictDet -->|Check Vector Clocks| VCCheck[Entity-Level Check]
-
-        VCCheck -- Concurrent --> ConflictFound[Conflict Found!]:::conflict
-        VCCheck -- Sequential --> NoConflict[No Conflict]
-
-        ConflictFound --> UserDialog["User Resolution Dialog<br/><sub>dialog-conflict-resolution.component.ts</sub>"]:::conflict
-
-        UserDialog -- "Keep Remote" --> MarkRejected[Mark Local Ops<br/>as Rejected]:::conflict
-        MarkRejected --> ApplyRemote[Apply Remote Ops]
-
-        UserDialog -- "Keep Local" --> IgnoreRemote[Ignore Remote Ops]
-
-        NoConflict --> ApplyRemote
-    end
-
-    subgraph "Client: Application & Validation"
-        ApplyRemote -->|Apply to Store| Store[NgRx Store]
-
-        Store -->|Post-Apply| Validator{"Validate<br/>State?<br/><sub>processing/validate-state.service.ts</sub>"}:::repair
-
-        Validator -- Valid --> Done((Sync Done))
-        Validator -- Invalid --> Repair["Auto-Repair Service<br/><sub>processing/repair-operation.service.ts</sub>"]:::repair
-
-        Repair -->|Fix Data| RepairedState
-        Repair -->|Create Op| RepairOp[Create REPAIR Op]:::repair
-        RepairOp -->|Append| OpLog[(SUP_OPS)]
-        RepairedState -->|Update| Store
-    end
-
-    subgraph "Client: Upload Flow"
-        OpLog -->|Get Unsynced| PendingOps[Pending Ops]
-        PendingOps -->|Filter| FilterRejected{Is<br/>Rejected?}
-
-        FilterRejected -- Yes --> Skip[Skip Upload]
-        FilterRejected -- No --> ClassifyOp{Op Type?}
-
-        ClassifyOp -- "BackupImport<br/>Repair<br/>SyncImport" --> SnapshotUpload[Upload via<br/>/api/sync/snapshot]
-        ClassifyOp -- "Other" --> UploadBatch[Batch for Upload]
-
-        SnapshotUpload -->|3a. Upload State| API
-        UploadBatch -->|3b. Upload| API
-        API -->|Ack| ServerAck[Server Acknowledgement]
-        ServerAck -->|Update| MarkSynced[Mark Ops Synced]
-        MarkSynced --> OpLog
-    end
-
-    API <--> ServerDB
-```
-
-### 2.1 Server API Endpoints & Database Operations ✅ IMPLEMENTED
-
-This section details which API endpoints are called for each sync action and what gets written to PostgreSQL.
-
-**PostgreSQL Tables (Prisma Schema):**
-
-| Table             | Purpose                                              |
-| ----------------- | ---------------------------------------------------- |
-| `users`           | User accounts (id, email, passwordHash, etc.)        |
-| `operations`      | Event log (serverSeq, opType, entityType, payload)   |
-| `user_sync_state` | Per-user metadata (lastSeq, cached snapshot)         |
-| `sync_devices`    | Device tracking (clientId, lastSeenAt, lastAckedSeq) |
-| `tombstones`      | Deleted entity tracking (for conflict resolution)    |
-
-```mermaid
-flowchart TB
-    subgraph Endpoints["API Endpoints (Fastify)"]
+    subgraph Client["CLIENT (Angular)"]
         direction TB
-        E1["POST /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Upload operations"]
-        E2["GET /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Download operations"]
-        E3["POST /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Upload full state"]
-        E4["GET /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Get full state"]
-        E5["GET /api/sync/status<br/>━━━━━━━━━━━━━━━<br/>Check sync status"]
-        E6["GET /api/sync/restore-points<br/>━━━━━━━━━━━━━━━<br/>List restore points"]
-        E7["GET /api/sync/restore/:seq<br/>━━━━━━━━━━━━━━━<br/>Restore to point"]
+
+        subgraph SyncLoop["Sync Loop"]
+            Scheduler((Scheduler)) -->|Interval| SyncService["OperationLogSyncService"]
+            SyncService -->|1. Get lastSyncedSeq| LocalMeta["SUP_OPS IndexedDB"]
+        end
+
+        subgraph DownloadFlow["Download Flow"]
+            SyncService -->|"2. GET /api/sync/ops?sinceSeq=N"| DownAPI
+            DownAPI -->|Operations| FilterApplied{Already Applied?}
+            FilterApplied -- Yes --> Discard[Discard]
+            FilterApplied -- No --> ConflictDet
+        end
+
+        subgraph ConflictMgmt["Conflict Management"]
+            ConflictDet{"Compare<br/>Vector Clocks"}:::conflict
+            ConflictDet -- Concurrent --> UserDialog["Resolution Dialog"]:::conflict
+            ConflictDet -- Sequential --> ApplyRemote
+
+            UserDialog -- "Keep Remote" --> MarkRejected[Mark Local Rejected]:::conflict
+            UserDialog -- "Keep Local" --> IgnoreRemote[Ignore Remote]
+            MarkRejected --> ApplyRemote
+        end
+
+        subgraph Application["Application & Validation"]
+            ApplyRemote -->|Dispatch| NgRx["NgRx Store"]
+            NgRx --> Validator{Valid State?}
+            Validator -- Yes --> SyncDone((Done))
+            Validator -- No --> Repair["Auto-Repair"]:::conflict
+            Repair --> NgRx
+        end
+
+        subgraph UploadFlow["Upload Flow"]
+            LocalMeta -->|Get Unsynced| PendingOps[Pending Ops]
+            PendingOps --> FilterRejected{Rejected?}
+            FilterRejected -- Yes --> Skip[Skip]
+            FilterRejected -- No --> ClassifyOp{Op Type?}
+
+            ClassifyOp -- "SYNC_IMPORT<br/>BACKUP_IMPORT<br/>REPAIR" --> SnapshotAPI
+            ClassifyOp -- "CRT/UPD/DEL/MOV/BATCH" --> OpsAPI
+        end
     end
 
-    subgraph PostgreSQL["PostgreSQL Database"]
+    %% ═══════════════════════════════════════════════════════════════
+    %% SERVER API LAYER
+    %% ═══════════════════════════════════════════════════════════════
+
+    subgraph Server["SERVER (Fastify + Node.js)"]
         direction TB
-        T1[("operations<br/>━━━━━━━━━━━━━━━<br/>id, serverSeq, opType<br/>entityType, entityId<br/>payload, vectorClock<br/>clientTimestamp")]
-        T2[("user_sync_state<br/>━━━━━━━━━━━━━━━<br/>lastSeq, snapshotData<br/>lastSnapshotSeq<br/>snapshotAt")]
-        T3[("sync_devices<br/>━━━━━━━━━━━━━━━<br/>clientId, lastSeenAt<br/>lastAckedSeq")]
-        T4[("tombstones<br/>━━━━━━━━━━━━━━━<br/>entityType, entityId<br/>deletedAt, expiresAt")]
+
+        subgraph APIEndpoints["API Endpoints"]
+            DownAPI["GET /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Download operations<br/>Query: sinceSeq, limit"]:::api
+            OpsAPI["POST /api/sync/ops<br/>━━━━━━━━━━━━━━━<br/>Upload operations<br/>Body: ops[], clientId"]:::api
+            SnapshotAPI["POST /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Upload full state<br/>Body: state, reason"]:::api
+            GetSnapshotAPI["GET /api/sync/snapshot<br/>━━━━━━━━━━━━━━━<br/>Get full state"]:::api
+            StatusAPI["GET /api/sync/status<br/>━━━━━━━━━━━━━━━<br/>Check sync status"]:::api
+            RestoreAPI["GET /api/sync/restore/:seq<br/>━━━━━━━━━━━━━━━<br/>Restore to point"]:::api
+        end
+
+        subgraph ServerProcessing["Server-Side Processing (SyncService)"]
+            direction TB
+
+            subgraph Validation["1. Validation"]:::validation
+                V1["Validate op.id, opType"]
+                V2["Validate entityType allowlist"]
+                V3["Sanitize vectorClock"]
+                V4["Check payload size"]
+                V5["Check timestamp drift"]
+            end
+
+            subgraph ConflictCheck["2. Conflict Detection"]:::conflict
+                C1["Find latest op for entity"]
+                C2["Compare vector clocks"]
+                C3{Result?}
+                C3 -- GREATER_THAN --> C4[Accept]
+                C3 -- CONCURRENT --> C5[Reject]
+                C3 -- LESS_THAN --> C6[Reject]
+            end
+
+            subgraph Persist["3. Persistence (REPEATABLE_READ)"]:::db
+                P1["Increment lastSeq"]
+                P2["Re-check conflict"]
+                P3["INSERT operation"]
+                P4{DEL op?}
+                P4 -- Yes --> P5["UPSERT tombstone"]
+                P4 -- No --> P6[Skip]
+                P7["UPSERT sync_device"]
+            end
+        end
     end
 
-    E1 -->|"INSERT"| T1
-    E1 -->|"UPDATE lastSeq"| T2
-    E1 -->|"UPSERT"| T3
-    E1 -->|"UPSERT if DEL"| T4
+    %% ═══════════════════════════════════════════════════════════════
+    %% POSTGRESQL DATABASE
+    %% ═══════════════════════════════════════════════════════════════
 
-    E2 -->|"SELECT"| T1
-    E2 -->|"SELECT"| T2
+    subgraph PostgreSQL["POSTGRESQL DATABASE"]
+        direction TB
 
-    E3 -->|"INSERT (SYNC_IMPORT)"| T1
-    E3 -->|"UPDATE snapshot"| T2
+        OpsTable[("operations<br/>━━━━━━━━━━━━━━━<br/>id, serverSeq<br/>opType, entityType<br/>entityId, payload<br/>vectorClock<br/>clientTimestamp")]:::db
 
-    E4 -->|"SELECT snapshot"| T2
-    E4 -->|"SELECT (replay)"| T1
+        SyncState[("user_sync_state<br/>━━━━━━━━━━━━━━━<br/>lastSeq<br/>snapshotData<br/>lastSnapshotSeq")]:::db
 
-    E5 -->|"SELECT"| T2
-    E5 -->|"COUNT"| T3
+        Devices[("sync_devices<br/>━━━━━━━━━━━━━━━<br/>clientId<br/>lastSeenAt<br/>lastAckedSeq")]:::db
 
-    E6 -->|"SELECT"| T1
-
-    E7 -->|"SELECT (replay)"| T1
-    E7 -->|"SELECT"| T2
-
-    style Endpoints fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
-    style PostgreSQL fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
-```
-
-### 2.2 Detailed Database Writes Per Action
-
-| Action               | Endpoint                       | Database Writes                                                                                                                                                                                                                |
-| -------------------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Upload Ops**       | `POST /api/sync/ops`           | 1. `user_sync_state.upsert` (ensure exists)<br/>2. `user_sync_state.update` (increment lastSeq)<br/>3. `operations.create` (insert op)<br/>4. `tombstones.upsert` (if DEL op)<br/>5. `sync_devices.upsert` (update lastSeenAt) |
-| **Download Ops**     | `GET /api/sync/ops`            | READ ONLY:<br/>1. `operations.findMany` (get ops > sinceSeq)<br/>2. `user_sync_state.findUnique` (get lastSeq)<br/>3. `operations.aggregate` (min seq for gap detection)                                                       |
-| **Upload Snapshot**  | `POST /api/sync/snapshot`      | 1. Creates SYNC_IMPORT operation (same as Upload Ops)<br/>2. `user_sync_state.update` (cache snapshot data)                                                                                                                    |
-| **Get Snapshot**     | `GET /api/sync/snapshot`       | 1. `user_sync_state.findUnique` (try cached)<br/>2. If stale: `operations.findMany` (replay)<br/>3. `user_sync_state.update` (cache new snapshot)                                                                              |
-| **Get Status**       | `GET /api/sync/status`         | READ ONLY:<br/>1. `user_sync_state.findUnique`<br/>2. `sync_devices.count`                                                                                                                                                     |
-| **Restore Points**   | `GET /api/sync/restore-points` | READ ONLY: `operations.findMany` (filter SYNC_IMPORT, BACKUP_IMPORT, REPAIR)                                                                                                                                                   |
-| **Restore Snapshot** | `GET /api/sync/restore/:seq`   | READ ONLY: Replay ops up to targetSeq                                                                                                                                                                                          |
-
-### 2.3 Operation Processing Flow (Server-Side)
-
-```mermaid
-flowchart TD
-    subgraph Validation["1. Validation"]
-        V1[Validate op.id, opType, entityType]
-        V2[Validate entityId format]
-        V3[Sanitize vectorClock]
-        V4[Check payload size/complexity]
-        V5[Check timestamp drift]
+        Tombstones[("tombstones<br/>━━━━━━━━━━━━━━━<br/>entityType<br/>entityId<br/>deletedAt")]:::db
     end
 
-    subgraph Conflict["2. Conflict Detection"]
-        C1["Find latest op for<br/>same entityType + entityId"]
-        C2["Compare vector clocks"]
-        C3{"Result?"}
-        C3 -->|GREATER_THAN| C4[No conflict]
-        C3 -->|CONCURRENT| C5[Reject: concurrent mod]
-        C3 -->|LESS_THAN| C6[Reject: stale op]
-    end
+    %% ═══════════════════════════════════════════════════════════════
+    %% CONNECTIONS: API -> Processing
+    %% ═══════════════════════════════════════════════════════════════
 
-    subgraph Persist["3. Persistence (Transaction)"]
-        P1["user_sync_state.update<br/>increment lastSeq"]
-        P2["Re-check conflict<br/>(race condition guard)"]
-        P3["operations.create<br/>INSERT new row"]
-        P4{"opType = DEL?"}
-        P4 -->|Yes| P5["tombstones.upsert"]
-        P4 -->|No| P6[Skip tombstone]
-        P7["sync_devices.upsert<br/>update lastSeenAt"]
-    end
-
+    OpsAPI --> V1
+    SnapshotAPI --> V1
     V1 --> V2 --> V3 --> V4 --> V5
     V5 --> C1 --> C2 --> C3
     C4 --> P1 --> P2 --> P3 --> P4
     P5 --> P7
     P6 --> P7
 
-    style Validation fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
-    style Conflict fill:#ffebee,stroke:#c62828,stroke-width:2px
-    style Persist fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    %% ═══════════════════════════════════════════════════════════════
+    %% CONNECTIONS: Processing -> Database
+    %% ═══════════════════════════════════════════════════════════════
+
+    P1 -.->|"UPDATE"| SyncState
+    P3 -.->|"INSERT"| OpsTable
+    P5 -.->|"UPSERT"| Tombstones
+    P7 -.->|"UPSERT"| Devices
+
+    %% ═══════════════════════════════════════════════════════════════
+    %% CONNECTIONS: Read endpoints -> Database
+    %% ═══════════════════════════════════════════════════════════════
+
+    DownAPI -.->|"SELECT ops > sinceSeq"| OpsTable
+    DownAPI -.->|"SELECT lastSeq"| SyncState
+    GetSnapshotAPI -.->|"SELECT snapshot"| SyncState
+    GetSnapshotAPI -.->|"SELECT (replay)"| OpsTable
+    StatusAPI -.->|"SELECT"| SyncState
+    StatusAPI -.->|"COUNT"| Devices
+    RestoreAPI -.->|"SELECT (replay)"| OpsTable
 ```
+
+### Quick Reference Tables
+
+**API Endpoints:**
+
+| Endpoint                   | Method | Purpose                         | DB Operations                                                        |
+| -------------------------- | ------ | ------------------------------- | -------------------------------------------------------------------- |
+| `/api/sync/ops`            | POST   | Upload operations               | INSERT ops, UPDATE lastSeq, UPSERT device, UPSERT tombstone (if DEL) |
+| `/api/sync/ops?sinceSeq=N` | GET    | Download operations             | SELECT ops, SELECT lastSeq                                           |
+| `/api/sync/snapshot`       | POST   | Upload full state (SYNC_IMPORT) | Same as POST /ops + UPDATE snapshot cache                            |
+| `/api/sync/snapshot`       | GET    | Get full state                  | SELECT snapshot (or replay ops if stale)                             |
+| `/api/sync/status`         | GET    | Check sync status               | SELECT lastSeq, COUNT devices                                        |
+| `/api/sync/restore-points` | GET    | List restore points             | SELECT ops (filter SYNC_IMPORT, BACKUP_IMPORT, REPAIR)               |
+| `/api/sync/restore/:seq`   | GET    | Restore to specific point       | SELECT ops, replay to targetSeq                                      |
+
+**PostgreSQL Tables:**
+
+| Table             | Purpose                                    | Key Columns                                             |
+| ----------------- | ------------------------------------------ | ------------------------------------------------------- |
+| `operations`      | Event log (append-only)                    | id, serverSeq, opType, entityType, payload, vectorClock |
+| `user_sync_state` | Per-user metadata + cached snapshot        | lastSeq, snapshotData, lastSnapshotSeq                  |
+| `sync_devices`    | Device tracking                            | clientId, lastSeenAt, lastAckedSeq                      |
+| `tombstones`      | Deleted entity tracking (30-day retention) | entityType, entityId, deletedAt, expiresAt              |
 
 **Key Implementation Details:**
 
-- **Transaction Isolation**: Uses `REPEATABLE_READ` isolation level to prevent phantom reads
-- **Double Conflict Check**: Checks conflict before AND after sequence allocation (race condition guard)
-- **Idempotency**: Duplicate op IDs are rejected with `DUPLICATE_OPERATION` error code
-- **Tombstones**: Created for DEL operations, expire after retention period (default 30 days)
+- **Transaction Isolation**: `REPEATABLE_READ` prevents phantom reads during conflict detection
+- **Double Conflict Check**: Before AND after sequence allocation (race condition guard)
+- **Idempotency**: Duplicate op IDs rejected with `DUPLICATE_OPERATION` error
+- **Gzip Support**: Both upload/download support `Content-Encoding: gzip` for bandwidth savings
+- **Rate Limiting**: Per-user limits (100 uploads/min, 200 downloads/min)
+
+---
 
 ## 2b. Full-State Operations via Snapshot Endpoint ✅ IMPLEMENTED
 
