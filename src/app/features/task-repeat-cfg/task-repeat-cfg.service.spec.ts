@@ -494,13 +494,18 @@ describe('TaskRepeatCfgService', () => {
       ).toBeRejectedWithError('No taskRepeatCfg.id');
     });
 
-    it('should throw error if startDate is undefined', async () => {
-      const cfgInvalid = { ...mockTaskRepeatCfg, startDate: undefined };
+    it('should use fallback date when startDate is undefined', async () => {
+      const cfgInvalid = {
+        ...mockTaskRepeatCfg,
+        startDate: undefined,
+        lastTaskCreationDay: '1970-01-01',
+      };
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
 
-      await expectAsync(
-        service._getActionsForTaskRepeatCfg(cfgInvalid as any),
-      ).toBeRejectedWithError('Repeat startDate needs to be defined');
+      // Should not throw, but return actions with fallback date handling
+      const result = await service._getActionsForTaskRepeatCfg(cfgInvalid as any);
+      // When startDate is undefined, it falls back to '1970-01-01' and should work
+      expect(result).toBeDefined();
     });
 
     it('should return empty array when due date is in the future', async () => {

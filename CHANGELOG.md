@@ -1,3 +1,12 @@
+## [16.6.1](https://github.com/johannesjo/super-productivity/compare/v16.6.0...v16.6.1) (2025-12-14)
+
+### Bug Fixes
+
+- **calendar:** handle Office 365 updateTimezones crash ([#5722](https://github.com/johannesjo/super-productivity/issues/5722)) ([887bf05](https://github.com/johannesjo/super-productivity/commit/887bf05ee10e8e58ec692efb6f06ac7298bd35a6))
+- **docker:** drop arm/v7 platform to fix QEMU build failure ([89d672d](https://github.com/johannesjo/super-productivity/commit/89d672d1cc198309958c57cda0097860b244779f))
+- **repeat:** use fallback for undefined startDate ([#5724](https://github.com/johannesjo/super-productivity/issues/5724)) ([3283e3c](https://github.com/johannesjo/super-productivity/commit/3283e3ce85b815eb636e2e1d09eb36cfcc0ec381))
+- **ui:** align time tracking button overlay ([#5720](https://github.com/johannesjo/super-productivity/issues/5720)) ([6f3d9ef](https://github.com/johannesjo/super-productivity/commit/6f3d9efc78a92e9c5d390d6b04bb403cbe41f9eb))
+
 # [16.6.0](https://github.com/johannesjo/super-productivity/compare/v16.5.5...v16.6.0) (2025-12-12)
 
 ### Bug Fixes

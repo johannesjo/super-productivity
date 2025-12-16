@@ -48,6 +48,6 @@ jobs:
             BUILDKIT_CONTEXT_KEEP_GIT_DIR=1
             UNSPLASH_KEY=${{ secrets.UNSPLASH_KEY }}
             UNSPLASH_CLIENT_ID=${{ secrets.UNSPLASH_CLIENT_ID }}
-          platforms: linux/amd64, linux/arm64, linux/arm/v7
+          platforms: linux/amd64, linux/arm64
           cache-from: type=gha
           cache-to: type=gha,mode=max
