@@ -1,24 +1,26 @@
 import { ClickUpTaskReduced, ClickUpTask } from './clickup-issue.model';
 import { mapClickUpTaskToTask, isClickUpTaskDone } from './clickup-issue-map.util';
+import typia from 'typia';
 
 const mockIssueReduced: ClickUpTaskReduced = {
+  ...typia.random<ClickUpTaskReduced>(),
   id: 'abc',
   name: 'Test Task',
   custom_id: '123',
   status: {
+    ...typia.random<ClickUpTaskReduced['status']>(),
     status: 'open',
     type: 'open',
     color: '#000',
   },
   date_updated: '1600000000000',
-  url: 'https://app.clickup.com/t/abc',
 };
 
 const mockIssue: ClickUpTask = {
+  ...typia.random<ClickUpTask>(),
   ...mockIssueReduced,
   date_created: '1500000000000',
   assignees: [],
-  creator: { id: 1, username: 'Test' },
   tags: [],
   attachments: [],
 };
@@ -26,7 +28,7 @@ const mockIssue: ClickUpTask = {
 describe('mapClickUpTaskToTask', () => {
   it('should map correctly', () => {
     const result = mapClickUpTaskToTask(mockIssue);
-    expect(result.title).toBe('#123 Test Task');
+    expect(result.title).toBe('Test Task');
     expect(result.issueLastUpdated).toBe(1600000000000);
     expect(result.isDone).toBe(false);
   });

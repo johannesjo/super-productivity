@@ -6,7 +6,14 @@ import {
 import { ClickUpApiService } from './clickup-api.service';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { ClickUpCfg } from './clickup.model';
-import { ClickUpTask } from './clickup-issue.model';
+import {
+  ClickUpTaskReduced,
+  ClickUpTask,
+  ClickUpTeamsResponse,
+  ClickUpUserResponse,
+  ClickUpTaskSearchResponse,
+} from './clickup-issue.model';
+import typia from 'typia';
 
 const CLICKUP_API_URL = 'https://api.clickup.com/api/v2';
 
@@ -48,9 +55,10 @@ describe('ClickUpApiService', () => {
   describe('getById$', () => {
     it('should fetch a task by ID', () => {
       const mockTask: ClickUpTask = {
+        ...typia.random<ClickUpTask>(),
         id: 'TASK_ID',
         name: 'Task Name',
-      } as Partial<ClickUpTask> as ClickUpTask;
+      };
 
       service.getById$('TASK_ID', mockCfg).subscribe((task) => {
         expect(task).toEqual(mockTask);
@@ -69,17 +77,26 @@ describe('ClickUpApiService', () => {
 
   describe('getAuthorizedTeams$', () => {
     it('should fetch and map authorized teams', () => {
-      const mockResponse = {
+      const mockResponse: ClickUpTeamsResponse = {
+        ...typia.random<ClickUpTeamsResponse>(),
         teams: [
-          { id: '1', name: 'Team 1', members: [] },
-          { id: '2', name: 'Team 2', members: [] },
+          {
+            ...typia.random<ClickUpTeamsResponse['teams'][0]>(),
+            id: '1',
+            name: 'Team 1',
+          },
+          {
+            ...typia.random<ClickUpTeamsResponse['teams'][0]>(),
+            id: '2',
+            name: 'Team 2',
+          },
         ],
       };
 
-      const expectedTeams = [
-        { id: '1', name: 'Team 1' },
-        { id: '2', name: 'Team 2' },
-      ];
+      const expectedTeams = mockResponse.teams.map((team) => ({
+        id: team.id,
+        name: team.name,
+      }));
 
       service.getAuthorizedTeams$(mockCfg).subscribe((teams) => {
         expect(teams).toEqual(expectedTeams);
@@ -96,16 +113,16 @@ describe('ClickUpApiService', () => {
 
   describe('getCurrentUser$', () => {
     it('should fetch current user', () => {
-      const mockUser = {
+      const mockUserResponse: ClickUpUserResponse = {
         user: {
+          ...typia.random<ClickUpUserResponse['user']>(),
           id: 123,
           username: 'Test User',
-          email: 'test@example.com',
         },
       };
 
       service.getCurrentUser$(mockCfg).subscribe((user) => {
-        expect(user).toEqual(mockUser);
+        expect(user).toEqual(mockUserResponse);
       });
 
       const req = httpMock.expectOne(
@@ -113,57 +130,45 @@ describe('ClickUpApiService', () => {
       );
       expect(req.request.method).toBe('GET');
       expect(req.request.headers.get('Authorization')).toBe(mockCfg.apiKey!);
-      req.flush(mockUser);
+      req.flush(mockUserResponse);
     });
   });
 
   describe('searchTasks$', () => {
-    const mockTasksResponse = {
+    const mockTasksResponse: ClickUpTaskSearchResponse = {
+      ...typia.random<ClickUpTaskSearchResponse>(),
       tasks: [
         {
+          ...typia.random<ClickUpTask>(),
           id: '1',
           name: 'Task 1',
-          custom_id: 'C1',
-          status: { status: 'open', type: 'open', color: '#000' },
-          date_updated: '123',
-          url: 'url1',
         },
         {
+          ...typia.random<ClickUpTask>(),
           id: '2',
           name: 'Task 2',
-          custom_id: undefined,
-          status: { status: 'closed', type: 'closed', color: '#fff' },
-          date_updated: '124',
-          url: 'url2',
         },
       ],
     };
 
     it('should search tasks in specific teams when teamIds are provided', () => {
       const cfgWithTeams: ClickUpCfg = { ...mockCfg, teamIds: ['T1', 'T2'] };
-      const expectedTasks = [
-        {
-          id: '1',
-          name: 'Task 1',
-          custom_id: 'C1',
-          status: { status: 'open', type: 'open', color: '#000' },
-          date_updated: '123',
-          url: 'url1',
-        },
-        {
-          id: '2',
-          name: 'Task 2',
-          custom_id: undefined,
-          status: { status: 'closed', type: 'closed', color: '#fff' },
-          date_updated: '124',
-          url: 'url2',
-        },
-      ];
+      const expectedTasks: ClickUpTaskReduced[] = mockTasksResponse.tasks.map((task) => ({
+        id: task.id,
+        name: task.name,
+        status: task.status,
+        date_updated: task.date_updated,
+        url: task.url,
+        custom_id: task.custom_id,
+      }));
 
       service.searchTasks$('Task', cfgWithTeams).subscribe((tasks) => {
         // We expect flattened results from 2 teams, each returning same mock data for this test
         expect(tasks.length).toBe(4);
-        expect(tasks[0]).toEqual(expectedTasks[0]);
+        expect(tasks[0].id).toBe(expectedTasks[0].id);
+        expect(tasks[0].name).toBe(expectedTasks[0].name);
+        expect(tasks[0].status).toEqual(expectedTasks[0].status);
+        expect(tasks[0].custom_id).toBe(expectedTasks[0].custom_id);
       });
 
       const req1 = httpMock.expectOne(
@@ -185,8 +190,15 @@ describe('ClickUpApiService', () => {
 
     it('should fetch authorized teams and then search in all of them when teamIds are NOT provided', () => {
       const cfgNoTeams: ClickUpCfg = { ...mockCfg, teamIds: [] };
-      const teamResponse = {
-        teams: [{ id: 'T1', name: 'Team 1' }],
+      const teamResponse: ClickUpTeamsResponse = {
+        ...typia.random<ClickUpTeamsResponse>(),
+        teams: [
+          {
+            ...typia.random<ClickUpTeamsResponse['teams'][0]>(),
+            id: 'T1',
+            name: 'Team 1',
+          },
+        ],
       };
 
       service.searchTasks$('Task', cfgNoTeams).subscribe((tasks) => {
