@@ -423,4 +423,240 @@ base.describe('@supersync SuperSync LWW Conflict Resolution', () => {
       }
     },
   );
+
+  /**
+   * Scenario: LWW Local-Win Op Uploaded in Same Sync Cycle
+   *
+   * This is the critical test for the fix in sync.service.ts that ensures
+   * local-win update ops are uploaded immediately in the same sync cycle,
+   * not deferred to the next sync.
+   *
+   * Actions:
+   * 1. Client A creates Task with title "Original", syncs
+   * 2. Client B syncs (download task)
+   * 3. Client B edits title to "B-Title" (earlier timestamp T1)
+   * 4. Wait 1 second for timestamp gap
+   * 5. Client A edits title to "A-Title" (later timestamp T2, T2 > T1)
+   * 6. Client B syncs (uploads "B-Title" to server)
+   * 7. Client A syncs ONCE (should: detect conflict, LWW says A wins, re-upload A-Title)
+   * 8. Client B syncs ONCE (should get "A-Title" if fix works)
+   * 9. Verify B has "A-Title" - NOT "B-Title"
+   *
+   * Before the fix: B would keep "B-Title" because A's local-win op wasn't uploaded
+   * After the fix: B gets "A-Title" because A re-uploads in the same sync cycle
+   */
+  base(
+    'LWW: Local-win update op is uploaded in same sync cycle',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task with original title
+        const originalTitle = `Original-${testRunId}`;
+        const titleA = `A-Title-${testRunId}`;
+        const titleB = `B-Title-${testRunId}`;
+
+        await clientA.workView.addTask(originalTitle);
+        await clientA.sync.syncAndWait();
+
+        // 2. Client B downloads the task
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, originalTitle);
+
+        // 3. Client B edits title FIRST (earlier timestamp)
+        const taskLocatorB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+        await taskLocatorB.dblclick(); // Double-click to edit
+        const editInputB = clientB.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInputB.waitFor({ state: 'visible', timeout: 5000 });
+        await editInputB.fill(titleB);
+        await clientB.page.keyboard.press('Enter');
+        await clientB.page.waitForTimeout(500);
+
+        // Verify B has the new title locally
+        await waitForTask(clientB.page, titleB);
+
+        // 4. Wait for timestamp gap (ensures A's timestamp > B's timestamp)
+        await clientB.page.waitForTimeout(1000);
+
+        // 5. Client A edits title (later timestamp)
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+        await taskLocatorA.dblclick(); // Double-click to edit
+        const editInputA = clientA.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInputA.waitFor({ state: 'visible', timeout: 5000 });
+        await editInputA.fill(titleA);
+        await clientA.page.keyboard.press('Enter');
+        await clientA.page.waitForTimeout(500);
+
+        // Verify A has the new title locally
+        await waitForTask(clientA.page, titleA);
+
+        // 6. Client B syncs FIRST (uploads "B-Title" to server)
+        await clientB.sync.syncAndWait();
+
+        // 7. Client A syncs ONCE
+        // This should:
+        // - Upload A's "A-Title" op
+        // - Server rejects it (conflict with B's "B-Title")
+        // - A receives B's op as piggybacked
+        // - LWW: A's timestamp > B's, so A wins
+        // - A creates local-win UPDATE op with "A-Title"
+        // - FIX: A immediately re-uploads this op
+        await clientA.sync.syncAndWait();
+
+        // 8. Client B syncs ONCE to receive A's update
+        // CRITICAL: If the fix works, B gets "A-Title" here
+        // If the fix is broken, B still has "B-Title"
+        await clientB.sync.syncAndWait();
+
+        // 9. Verify BOTH clients have A's title (the winner)
+        const taskWithATitleOnA = clientA.page.locator(
+          `task:not(.ng-animating):has-text("${titleA}")`,
+        );
+        const taskWithATitleOnB = clientB.page.locator(
+          `task:not(.ng-animating):has-text("${titleA}")`,
+        );
+
+        // A should have A-Title (it's the local state)
+        await expect(taskWithATitleOnA.first()).toBeVisible({ timeout: 5000 });
+
+        // B should have A-Title (received from server via local-win update op)
+        // This is the KEY assertion that fails without the fix
+        await expect(taskWithATitleOnB.first()).toBeVisible({ timeout: 5000 });
+
+        console.log(
+          '[LWW-Single-Cycle] ✓ Local-win op uploaded in same sync cycle, B has A-Title',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  /**
+   * Scenario: LWW Update Action Updates UI Without Reload
+   *
+   * This test specifically verifies the lwwUpdateMetaReducer fix. When a client
+   * receives an LWW Update operation from another client, the NgRx store should
+   * be updated immediately, and the UI should reflect the change without needing
+   * a page reload.
+   *
+   * Before the fix: UI wouldn't update because [TASK] LWW Update action wasn't handled
+   * After the fix: lwwUpdateMetaReducer handles the action and updates the store
+   *
+   * Actions:
+   * 1. Client A creates Task, syncs
+   * 2. Client B syncs (download task)
+   * 3. Client A edits title and adds notes
+   * 4. Client A syncs (uploads changes)
+   * 5. Client B syncs (receives LWW Update via piggybacked op)
+   * 6. Verify B's UI shows A's changes WITHOUT reload
+   */
+  base(
+    'LWW: UI updates immediately after receiving LWW Update operation',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000);
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup clients
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates task with original title
+        const originalTitle = `UI-Update-${testRunId}`;
+        const updatedTitle = `Updated-UI-${testRunId}`;
+
+        await clientA.workView.addTask(originalTitle);
+        await clientA.sync.syncAndWait();
+
+        // 2. Client B downloads the task
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, originalTitle);
+
+        // Verify B has the original title
+        const taskOnB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+        await expect(taskOnB).toBeVisible({ timeout: 5000 });
+
+        // 3. Client A edits the title
+        const taskOnA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${originalTitle}")`)
+          .first();
+        await taskOnA.dblclick(); // Double-click to edit
+        const editInput = clientA.page.locator(
+          'input.mat-mdc-input-element:focus, textarea:focus',
+        );
+        await editInput.waitFor({ state: 'visible', timeout: 5000 });
+        await editInput.fill(updatedTitle);
+        await clientA.page.keyboard.press('Enter');
+        await clientA.page.waitForTimeout(500);
+
+        // Verify A has the updated title
+        await waitForTask(clientA.page, updatedTitle);
+
+        // 4. Client A syncs (uploads the change)
+        await clientA.sync.syncAndWait();
+
+        // 5. Client B syncs (receives A's change)
+        // This is where the lwwUpdateMetaReducer fix kicks in:
+        // B receives [TASK] LWW Update action, and the meta-reducer updates the store
+        await clientB.sync.syncAndWait();
+
+        // 6. Verify B's UI shows A's updated title WITHOUT reload
+        // This is the KEY assertion - if lwwUpdateMetaReducer isn't working,
+        // B would still show the old title until a page reload
+        const updatedTaskOnB = clientB.page.locator(
+          `task:not(.ng-animating):has-text("${updatedTitle}")`,
+        );
+
+        await expect(updatedTaskOnB.first()).toBeVisible({ timeout: 5000 });
+
+        // Also verify the old title is no longer visible
+        const oldTaskOnB = clientB.page.locator(
+          `task:not(.ng-animating):has-text("${originalTitle}")`,
+        );
+        await expect(oldTaskOnB).toHaveCount(0);
+
+        console.log(
+          '[LWW-UI-Update] ✓ UI updated immediately after receiving LWW Update operation',
+        );
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });

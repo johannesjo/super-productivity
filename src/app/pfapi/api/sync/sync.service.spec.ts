@@ -96,7 +96,7 @@ describe('SyncService', () => {
       }),
     );
     mockOperationLogSyncService.downloadRemoteOps.and.returnValue(
-      Promise.resolve({ serverMigrationHandled: false }),
+      Promise.resolve({ serverMigrationHandled: false, localWinOpsCreated: 0 }),
     );
 
     // Create service with spies for internal services

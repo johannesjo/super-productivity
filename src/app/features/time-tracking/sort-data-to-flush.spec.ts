@@ -353,6 +353,97 @@ describe('sort-data-to-flush', () => {
         new ImpossibleError('splitArchiveTasksByDoneOnThreshold(): Task not found'),
       );
     });
+
+    it('should return sorted ids for deterministic ordering across clients', () => {
+      // Arrange - use UUIDv7-like ids that would be in different order if unsorted
+      const youngTaskState = {
+        ids: ['019xyz', '019abc', '019def'], // Intentionally out of order
+        entities: {
+          '019xyz': {
+            ...BASE_TASK,
+            id: '019xyz',
+            doneOn: now - (threshold + 1000), // Will be moved to old
+          },
+          '019abc': {
+            ...BASE_TASK,
+            id: '019abc',
+            doneOn: now - 1000, // Will stay in young
+          },
+          '019def': {
+            ...BASE_TASK,
+            id: '019def',
+            doneOn: now - (threshold + 2000), // Will be moved to old
+          },
+        },
+      };
+
+      const oldTaskState = {
+        ids: ['019zzz'], // Existing old task
+        entities: {
+          '019zzz': {
+            ...BASE_TASK,
+            id: '019zzz',
+            // eslint-disable-next-line no-mixed-operators
+            doneOn: now - threshold * 2,
+          },
+        },
+      };
+
+      // Act
+      const result = splitArchiveTasksByDoneOnThreshold({
+        youngTaskState,
+        oldTaskState,
+        threshold,
+        now,
+      });
+
+      // Assert - ids should be sorted alphabetically (UUIDv7 is lexicographically sortable)
+      expect(result.youngTaskState.ids).toEqual(['019abc']);
+      expect(result.oldTaskState.ids).toEqual(['019def', '019xyz', '019zzz']);
+    });
+
+    it('should produce same sorted order regardless of entity insertion order', () => {
+      // Arrange - simulate different insertion orders that could occur across clients
+      const youngTaskState1 = {
+        ids: ['c', 'a', 'b'],
+        entities: {
+          c: { ...BASE_TASK, id: 'c', doneOn: now - (threshold + 1000) },
+          a: { ...BASE_TASK, id: 'a', doneOn: now - (threshold + 1000) },
+          b: { ...BASE_TASK, id: 'b', doneOn: now - (threshold + 1000) },
+        },
+      };
+
+      const youngTaskState2 = {
+        ids: ['b', 'c', 'a'],
+        entities: {
+          b: { ...BASE_TASK, id: 'b', doneOn: now - (threshold + 1000) },
+          c: { ...BASE_TASK, id: 'c', doneOn: now - (threshold + 1000) },
+          a: { ...BASE_TASK, id: 'a', doneOn: now - (threshold + 1000) },
+        },
+      };
+
+      const oldTaskState = { ids: [], entities: {} };
+
+      // Act
+      const result1 = splitArchiveTasksByDoneOnThreshold({
+        youngTaskState: youngTaskState1,
+        oldTaskState,
+        threshold,
+        now,
+      });
+
+      const result2 = splitArchiveTasksByDoneOnThreshold({
+        youngTaskState: youngTaskState2,
+        oldTaskState,
+        threshold,
+        now,
+      });
+
+      // Assert - both should produce the same sorted order
+      expect(result1.oldTaskState.ids).toEqual(['a', 'b', 'c']);
+      expect(result2.oldTaskState.ids).toEqual(['a', 'b', 'c']);
+      expect(result1.oldTaskState.ids).toEqual(result2.oldTaskState.ids);
+    });
   });
 
   describe('sortTimeTrackingAndTasksFromArchiveYoungToOld', () => {

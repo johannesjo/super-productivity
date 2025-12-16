@@ -103,16 +103,33 @@ export class SyncService<const MD extends ModelCfgs> {
       // Op-log sync is reserved for future server-based providers only.
       const currentSyncProvider = this._currentSyncProvider$.value;
       if (currentSyncProvider && this._supportsOpLogSync(currentSyncProvider)) {
-        await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+        const uploadResult =
+          await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
         const downloadResult =
           await this._operationLogSyncService.downloadRemoteOps(currentSyncProvider);
 
-        // If server migration was detected, a SYNC_IMPORT was created and needs to be uploaded
-        // immediately to seed the new server with the client's full state
-        if (downloadResult.serverMigrationHandled) {
-          PFLog.normal(
-            `${SyncService.L}.${this.sync.name}(): Server migration detected, uploading full state snapshot`,
-          );
+        // Track if we need a re-upload:
+        // 1. Server migration created a SYNC_IMPORT that needs uploading
+        // 2. LWW local-wins created new update ops from piggybacked ops (during upload)
+        // 3. LWW local-wins created new update ops from downloaded ops
+        const needsReupload =
+          downloadResult.serverMigrationHandled ||
+          (uploadResult?.localWinOpsCreated ?? 0) > 0 ||
+          downloadResult.localWinOpsCreated > 0;
+
+        if (needsReupload) {
+          if (downloadResult.serverMigrationHandled) {
+            PFLog.normal(
+              `${SyncService.L}.${this.sync.name}(): Server migration detected, uploading full state snapshot`,
+            );
+          } else {
+            const totalLocalWinOps =
+              (uploadResult?.localWinOpsCreated ?? 0) + downloadResult.localWinOpsCreated;
+            PFLog.normal(
+              `${SyncService.L}.${this.sync.name}(): LWW local-wins created ` +
+                `${totalLocalWinOps} update op(s), re-uploading`,
+            );
+          }
           await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
         }
 

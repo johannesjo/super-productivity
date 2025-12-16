@@ -38,6 +38,12 @@ export interface UploadResult {
   piggybackedOps: Operation[];
   rejectedCount: number;
   rejectedOps: RejectedOpInfo[];
+  /**
+   * Number of local-win update ops created during LWW conflict resolution.
+   * These ops need to be uploaded to propagate local state to other clients.
+   * Set by OperationLogSyncService.uploadPendingOps after processing piggybacked ops.
+   */
+  localWinOpsCreated?: number;
 }
 
 /**

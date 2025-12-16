@@ -8,6 +8,7 @@ export { taskBatchUpdateMetaReducer } from './task-batch-update.reducer';
 export { issueProviderSharedMetaReducer } from './issue-provider-shared.reducer';
 export { taskRepeatCfgSharedMetaReducer } from './task-repeat-cfg-shared.reducer';
 export { shortSyntaxSharedMetaReducer } from './short-syntax-shared.reducer';
+export { lwwUpdateMetaReducer } from './lww-update.meta-reducer';
 export {
   operationCaptureMetaReducer,
   setOperationCaptureService,

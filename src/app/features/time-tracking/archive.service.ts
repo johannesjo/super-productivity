@@ -75,7 +75,7 @@ export class ArchiveService {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
-    const newTaskArchive = taskAdapter.addMany(
+    const newTaskArchiveUnsorted = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
         ...task,
         reminderId: undefined,
@@ -92,6 +92,11 @@ export class ArchiveService {
       })),
       taskArchiveState,
     );
+    // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
+    const newTaskArchive = {
+      ...newTaskArchiveUnsorted,
+      ids: [...newTaskArchiveUnsorted.ids].sort(),
+    };
 
     // ------------------------------------------------
     // Result A:
@@ -165,7 +170,7 @@ export class ArchiveService {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
-    const newTaskArchive = taskAdapter.addMany(
+    const newTaskArchiveUnsorted = taskAdapter.addMany(
       flatTasks.map(({ subTasks, ...task }) => ({
         ...task,
         reminderId: undefined,
@@ -182,6 +187,11 @@ export class ArchiveService {
       })),
       taskArchiveState,
     );
+    // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
+    const newTaskArchive = {
+      ...newTaskArchiveUnsorted,
+      ids: [...newTaskArchiveUnsorted.ids].sort(),
+    };
 
     // Also move historical time tracking data to archiveYoung
     // This ensures the remote client's archive matches the originating client

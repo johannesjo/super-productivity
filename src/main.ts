@@ -41,6 +41,7 @@ import { undoTaskDeleteMetaReducer } from './app/root-store/meta/undo-task-delet
 import { actionLoggerReducer } from './app/root-store/meta/action-logger.reducer';
 import {
   issueProviderSharedMetaReducer,
+  lwwUpdateMetaReducer,
   operationCaptureMetaReducer,
   plannerSharedMetaReducer,
   projectSharedMetaReducer,
@@ -128,6 +129,7 @@ bootstrapApplication(AppComponent, {
           taskRepeatCfgSharedMetaReducer,
           plannerSharedMetaReducer,
           shortSyntaxSharedMetaReducer,
+          lwwUpdateMetaReducer, // Handles [ENTITY_TYPE] LWW Update actions from conflict resolution
           actionLoggerReducer,
         ],
         ...(environment.production

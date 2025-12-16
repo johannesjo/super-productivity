@@ -181,11 +181,11 @@ export const splitArchiveTasksByDoneOnThreshold = ({
 
   return {
     youngTaskState: {
-      ids: Object.keys(newYoungEntities),
+      ids: Object.keys(newYoungEntities).sort(),
       entities: newYoungEntities,
     },
     oldTaskState: {
-      ids: Object.keys(newOldEntities),
+      ids: Object.keys(newOldEntities).sort(),
       entities: newOldEntities,
     },
   };

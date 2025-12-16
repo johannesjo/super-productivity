@@ -173,7 +173,9 @@ describe('Service Logic Integration', () => {
     conflictServiceSpy = jasmine.createSpyObj('ConflictResolutionService', [
       'autoResolveConflictsLWW',
     ]);
-    conflictServiceSpy.autoResolveConflictsLWW.and.returnValue(Promise.resolve());
+    conflictServiceSpy.autoResolveConflictsLWW.and.returnValue(
+      Promise.resolve({ localWinOpsCreated: 0 }),
+    );
     applierSpy = jasmine.createSpyObj('OperationApplierService', ['applyOperations']);
     applierSpy.applyOperations.and.returnValue(Promise.resolve({ appliedOps: [] }));
 

@@ -208,9 +208,11 @@ export class OperationLogSyncService {
     // CRITICAL: Use try-finally to ensure rejected ops are ALWAYS handled,
     // even if _processRemoteOps throws. Otherwise rejected ops remain in pending
     // state and get re-uploaded infinitely.
+    let localWinOpsCreated = 0;
     try {
       if (result.piggybackedOps.length > 0) {
-        await this._processRemoteOps(result.piggybackedOps);
+        const processResult = await this._processRemoteOps(result.piggybackedOps);
+        localWinOpsCreated = processResult.localWinOpsCreated;
       }
     } finally {
       await this._handleRejectedOps(result.rejectedOps);
@@ -220,7 +222,7 @@ export class OperationLogSyncService {
     const pendingOps = await this.opLogStore.getUnsynced();
     this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
 
-    return result;
+    return { ...result, localWinOpsCreated };
   }
 
   /**
@@ -282,10 +284,11 @@ export class OperationLogSyncService {
    * to ensure all local data is transferred to the new server.
    *
    * @returns Result indicating whether server migration was handled (requires follow-up upload)
+   *          and how many local-win ops were created during LWW resolution
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<{ serverMigrationHandled: boolean }> {
+  ): Promise<{ serverMigrationHandled: boolean; localWinOpsCreated: number }> {
     const result = await this.downloadService.downloadRemoteOps(syncProvider);
 
     // Server migration detected: gap on empty server
@@ -293,14 +296,14 @@ export class OperationLogSyncService {
     if (result.needsFullStateUpload) {
       await this._handleServerMigration();
       // Return with flag indicating migration was handled - caller should upload the SYNC_IMPORT
-      return { serverMigrationHandled: true };
+      return { serverMigrationHandled: true, localWinOpsCreated: 0 };
     }
 
     if (result.newOps.length === 0) {
       OpLog.normal(
         'OperationLogSyncService: No new remote operations to process after download.',
       );
-      return { serverMigrationHandled: false };
+      return { serverMigrationHandled: false, localWinOpsCreated: 0 };
     }
 
     // SAFETY: Fresh client confirmation
@@ -321,7 +324,7 @@ export class OperationLogSyncService {
         this.snackService.open({
           msg: T.F.SYNC.S.FRESH_CLIENT_SYNC_CANCELLED,
         });
-        return { serverMigrationHandled: false };
+        return { serverMigrationHandled: false, localWinOpsCreated: 0 };
       }
 
       OpLog.normal(
@@ -329,13 +332,16 @@ export class OperationLogSyncService {
       );
     }
 
-    await this._processRemoteOps(result.newOps);
+    const processResult = await this._processRemoteOps(result.newOps);
 
     // Update pending ops status for UI indicator
     const pendingOps = await this.opLogStore.getUnsynced();
     this.superSyncStatusService.updatePendingOpsStatus(pendingOps.length > 0);
 
-    return { serverMigrationHandled: false };
+    return {
+      serverMigrationHandled: false,
+      localWinOpsCreated: processResult.localWinOpsCreated,
+    };
   }
 
   /**
@@ -681,8 +687,11 @@ export class OperationLogSyncService {
   /**
    * Process remote operations: detect conflicts and apply non-conflicting ones.
    * If applying operations fails, rolls back any stored operations to maintain consistency.
+   * @returns Object indicating how many local-win ops were created during LWW resolution
    */
-  async processRemoteOps(remoteOps: Operation[]): Promise<void> {
+  async processRemoteOps(
+    remoteOps: Operation[],
+  ): Promise<{ localWinOpsCreated: number }> {
     return this._processRemoteOps(remoteOps);
   }
 
@@ -704,8 +713,11 @@ export class OperationLogSyncService {
    * 6. **Validation** - Checkpoint D: validate and repair state
    *
    * @param remoteOps - Operations received from remote storage
+   * @returns Object indicating how many local-win ops were created during LWW resolution
    */
-  private async _processRemoteOps(remoteOps: Operation[]): Promise<void> {
+  private async _processRemoteOps(
+    remoteOps: Operation[],
+  ): Promise<{ localWinOpsCreated: number }> {
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 1: Schema Migration (Receiver-Side)
     // Migrate ops from older schema versions to current version.
@@ -755,7 +767,7 @@ export class OperationLogSyncService {
         actionStr: T.PS.UPDATE_APP,
         actionFn: () => window.open('https://super-productivity.com/download', '_blank'),
       });
-      return;
+      return { localWinOpsCreated: 0 };
     }
 
     // Warn if any migrated ops depend on dropped entities
@@ -769,7 +781,7 @@ export class OperationLogSyncService {
           'OperationLogSyncService: All remote ops were dropped during migration.',
         );
       }
-      return;
+      return { localWinOpsCreated: 0 };
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -795,7 +807,7 @@ export class OperationLogSyncService {
       OpLog.normal(
         'OperationLogSyncService: No valid ops to process after SYNC_IMPORT filtering.',
       );
-      return;
+      return { localWinOpsCreated: 0 };
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -822,7 +834,7 @@ export class OperationLogSyncService {
       await this._replayLocalSyncedOpsAfterImport(validOps);
 
       await this._validateAfterSync();
-      return;
+      return { localWinOpsCreated: 0 };
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -860,11 +872,11 @@ export class OperationLogSyncService {
       );
       // Auto-resolve conflicts using Last-Write-Wins strategy
       // Piggyback non-conflicting ops so they're applied with resolved conflicts
-      await this.conflictResolutionService.autoResolveConflictsLWW(
+      const result = await this.conflictResolutionService.autoResolveConflictsLWW(
         conflicts,
         nonConflicting,
       );
-      return;
+      return result;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -874,6 +886,7 @@ export class OperationLogSyncService {
       await this._applyNonConflictingOps(nonConflicting);
       await this._validateAfterSync();
     }
+    return { localWinOpsCreated: 0 };
   }
 
   /**

@@ -221,9 +221,9 @@ export class ConflictResolutionService {
   async autoResolveConflictsLWW(
     conflicts: EntityConflict[],
     nonConflictingOps: Operation[] = [],
-  ): Promise<void> {
+  ): Promise<{ localWinOpsCreated: number }> {
     if (conflicts.length === 0 && nonConflictingOps.length === 0) {
-      return;
+      return { localWinOpsCreated: 0 };
     }
 
     OpLog.normal(
@@ -427,6 +427,8 @@ export class ConflictResolutionService {
     // STEP 8: Validate and repair state after resolution
     // ─────────────────────────────────────────────────────────────────────────
     await this._validateAndRepairAfterResolution();
+
+    return { localWinOpsCreated: newLocalWinOps.length };
   }
 
   /**
