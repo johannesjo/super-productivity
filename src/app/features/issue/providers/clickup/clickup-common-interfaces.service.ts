@@ -203,6 +203,24 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
     }));
   }
 
+  async getSubTasks(
+    issueId: string | number,
+    issueProviderId: string,
+    issue: ClickUpTaskReduced,
+  ): Promise<ClickUpTaskReduced[]> {
+    let subtasks = (issue as ClickUpTask).subtasks;
+
+    if (!subtasks) {
+      const fullIssue = await this.getById(issueId.toString(), issueProviderId);
+      subtasks = fullIssue.subtasks;
+    }
+
+    if (subtasks) {
+      return subtasks.filter((subtask) => subtask.status?.type !== 'closed');
+    }
+    return [];
+  }
+
   private _getCfgOnce$(issueProviderId: string): Observable<ClickUpCfg> {
     return this._issueProviderService.getCfgOnce$(issueProviderId, 'CLICKUP');
   }

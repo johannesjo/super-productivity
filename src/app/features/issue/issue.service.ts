@@ -529,9 +529,9 @@ export class IssueService {
         );
       }
 
-      // Handle ClickUp subtasks
-      if (issueProviderKey === CLICKUP_TYPE && taskId) {
-        await this._addClickUpSubTasks(
+      // Handle subtasks if provider supports it
+      if (this.ISSUE_SERVICE_MAP[issueProviderKey].getSubTasks && taskId) {
+        await this._addSubTasks(
           issueDataReduced,
           taskId,
           issueProviderId,
@@ -543,33 +543,28 @@ export class IssueService {
     return taskId;
   }
 
-  private async _addClickUpSubTasks(
+  private async _addSubTasks(
     issueDataReduced: IssueDataReduced,
     parentTaskId: string,
     issueProviderId: string,
     issueProviderKey: IssueProviderKey,
   ): Promise<void> {
+    const provider = this.ISSUE_SERVICE_MAP[issueProviderKey];
+    if (!provider.getSubTasks) {
+      return;
+    }
     try {
-      // Fetch full task data to get subtasks
-      const fullIssue = await this.getById(
-        issueProviderKey,
+      const subtasks = await provider.getSubTasks(
         issueDataReduced.id,
         issueProviderId,
+        issueDataReduced,
       );
 
-      if (!fullIssue || !(fullIssue as any).subtasks) {
+      if (!subtasks || subtasks.length === 0) {
         return;
       }
 
-      const subtasks = (fullIssue as any).subtasks || [];
-
-      // Filter out completed subtasks - only add incomplete ones
-      const incompleteSubtasks = subtasks.filter(
-        (subtask: any) => subtask.status?.type !== 'closed',
-      );
-
-      // Add each incomplete subtask
-      for (const subtask of incompleteSubtasks) {
+      for (const subtask of subtasks) {
         const subTaskData = this._getAddTaskData(issueProviderKey, subtask);
         const { title: subTaskTitle, ...subTaskAdditional } = subTaskData;
 
@@ -583,9 +578,8 @@ export class IssueService {
           ...subTaskAdditional,
         });
       }
-    } catch (error) {
-      IssueLog.warn('Failed to add ClickUp subtasks:', error);
-      // Don't throw - parent task was already created successfully
+    } catch (e) {
+      IssueLog.warn('Failed to add subtasks for ' + issueProviderKey, e);
     }
   }
 
