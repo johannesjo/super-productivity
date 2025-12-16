@@ -113,6 +113,10 @@ bootstrapApplication(AppComponent, {
       // NOTE: both need to be present to use forFeature stores
       StoreModule.forRoot(undefined, {
         metaReducers: [
+          // IMPORTANT: operationCaptureMetaReducer must be FIRST (outermost) to capture
+          // original state BEFORE any other meta-reducer modifies it.
+          // NgRx composes meta-reducers such that FIRST in array = OUTERMOST in call chain.
+          operationCaptureMetaReducer,
           undoTaskDeleteMetaReducer,
           taskSharedCrudMetaReducer,
           taskBatchUpdateMetaReducer,
@@ -125,8 +129,6 @@ bootstrapApplication(AppComponent, {
           plannerSharedMetaReducer,
           shortSyntaxSharedMetaReducer,
           actionLoggerReducer,
-          // IMPORTANT: operationCaptureMetaReducer must be LAST to capture both before and after state synchronously
-          operationCaptureMetaReducer,
         ],
         ...(environment.production
           ? {
