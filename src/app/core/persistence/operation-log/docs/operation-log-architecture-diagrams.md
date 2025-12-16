@@ -51,7 +51,6 @@ graph TD
 
     User -->|Archive Tasks| ArchiveWrite
     NgRx -.->|moveToArchive action<br/>AFTER archive write| OpEffects
-    OpEffects -->|flushYoungToOld| ArchiveYoung
 
     subgraph "Legacy Bridge (PFAPI)"
         DBWrite -.->|3. Bridge| LegacyMeta["META_MODEL<br/>Vector Clock<br/><sub>pfapi.service.ts</sub>"]:::legacy
@@ -142,9 +141,10 @@ graph TB
         subgraph DownloadFlow["Download Flow"]
             SyncService -->|"2. GET /api/sync/ops?sinceSeq=N"| DownAPI
             DownAPI -->|Response| GapCheck{Gap Detected?}
-            GapCheck -- Yes --> GetSnapshot["GET /api/sync/snapshot"]:::api
+            GapCheck -- "Yes + Empty Server" --> ServerMigration["Server Migration:<br/>Create SYNC_IMPORT"]
+            GapCheck -- "Yes + Has Ops" --> ResetSeq["Reset sinceSeq=0<br/>Re-download all"]
             GapCheck -- No --> FreshCheck{Fresh Client?}
-            GetSnapshot --> FreshCheck
+            ResetSeq --> FreshCheck
             FreshCheck -- "Yes + Has Ops" --> ConfirmDialog["Confirmation Dialog"]
             FreshCheck -- No --> FilterApplied
             ConfirmDialog -- Confirmed --> FilterApplied{Already Applied?}
@@ -329,7 +329,8 @@ graph TB
 - **Auto-Resolve Conflicts**: Identical conflicts (both DELETE, or same payload) auto-resolved as "remote" without user dialog
 - **Fresh Client Safety**: Clients with no history blocked from uploading; confirmation dialog shown before accepting first remote data
 - **Piggybacked Ops**: Upload response includes new remote ops → processed immediately to trigger conflict detection
-- **Gap Detection**: Server returns `gapDetected: true` when requested sinceSeq is purged → client fetches full snapshot
+- **Gap Detection**: Server returns `gapDetected: true` when client sinceSeq is invalid → client resets to seq=0 and re-downloads all ops
+- **Server Migration**: Gap + empty server (no ops) → client creates SYNC_IMPORT to seed new server
 
 ---
 
