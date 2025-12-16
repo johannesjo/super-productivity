@@ -148,9 +148,13 @@ graph TB
 
         subgraph ConflictMgmt["Conflict Management"]
             ConflictDet{"Compare<br/>Vector Clocks"}:::conflict
-            ConflictDet -- Concurrent --> UserDialog["Resolution Dialog"]:::conflict
             ConflictDet -- Sequential --> ApplyRemote
+            ConflictDet -- Concurrent --> AutoCheck{"Auto-Resolve?"}
 
+            AutoCheck -- "Both DELETE or<br/>Identical payload" --> AutoResolve["Auto: Keep Remote"]
+            AutoCheck -- "Real conflict" --> UserDialog["Resolution Dialog"]:::conflict
+
+            AutoResolve --> MarkRejected
             UserDialog -- "Keep Remote" --> MarkRejected[Mark Local Rejected]:::conflict
             UserDialog -- "Keep Local" --> IgnoreRemote[Ignore Remote]
             MarkRejected --> ApplyRemote
@@ -310,6 +314,7 @@ graph TB
 - **Idempotency**: Duplicate op IDs rejected with `DUPLICATE_OPERATION` error
 - **Gzip Support**: Both upload/download support `Content-Encoding: gzip` for bandwidth savings
 - **Rate Limiting**: Per-user limits (100 uploads/min, 200 downloads/min)
+- **Auto-Resolve Conflicts**: Identical conflicts (both DELETE, or same payload) auto-resolved as "remote" without user dialog
 
 ---
 
