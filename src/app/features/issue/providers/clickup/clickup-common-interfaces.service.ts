@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, of, firstValueFrom } from 'rxjs';
 import { concatMap, first, map, switchMap } from 'rxjs/operators';
 import { IssueServiceInterface } from '../../issue-service-interface';
 import { IssueProviderService } from '../../issue-provider.service';
@@ -28,45 +28,42 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
   }
 
   testConnection(cfg: ClickUpCfg): Promise<boolean> {
-    return this._clickUpApiService
-      .getCurrentUser$(cfg)
-      .pipe(
+    return firstValueFrom(
+      this._clickUpApiService.getCurrentUser$(cfg).pipe(
         map(() => true),
         first(),
-      )
-      .toPromise()
+      ),
+    )
       .then((result) => result ?? false)
       .catch(() => false);
   }
 
   issueLink(issueId: string, issueProviderId: string): Promise<string> {
-    return this._getCfgOnce$(issueProviderId)
-      .pipe(
+    return firstValueFrom(
+      this._getCfgOnce$(issueProviderId).pipe(
         concatMap((cfg) =>
           this._clickUpApiService.getById$(issueId, cfg).pipe(map((issue) => issue.url)),
         ),
         first(),
-      )
-      .toPromise()
-      .then((res) => res ?? '');
+      ),
+    ).then((res) => res ?? '');
   }
 
   getById(issueId: string, issueProviderId: string): Promise<ClickUpTask> {
-    return this._getCfgOnce$(issueProviderId)
-      .pipe(
+    return firstValueFrom(
+      this._getCfgOnce$(issueProviderId).pipe(
         concatMap((cfg) => this._clickUpApiService.getById$(issueId, cfg)),
         first(),
-      )
-      .toPromise()
-      .then((res) => {
-        if (!res) throw new Error('Failed to get ClickUp task');
-        return res;
-      });
+      ),
+    ).then((res) => {
+      if (!res) throw new Error('Failed to get ClickUp task');
+      return res;
+    });
   }
 
   searchIssues(searchTerm: string, issueProviderId: string): Promise<SearchResultItem[]> {
-    return this._getCfgOnce$(issueProviderId)
-      .pipe(
+    return firstValueFrom(
+      this._getCfgOnce$(issueProviderId).pipe(
         switchMap((cfg) =>
           this.isEnabled(cfg)
             ? this._clickUpApiService.searchTasks$(searchTerm, cfg).pipe(
@@ -81,9 +78,8 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
             : of([]),
         ),
         first(),
-      )
-      .toPromise()
-      .then((res) => res ?? []);
+      ),
+    ).then((res) => res ?? []);
   }
 
   async getFreshDataForIssueTask(task: Task): Promise<{
@@ -95,20 +91,19 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
       throw new Error('No issueProviderId or issueId');
     }
 
-    const cfg = await this._getCfgOnce$(task.issueProviderId)
-      .toPromise()
-      .then((res) => {
+    const cfg = await firstValueFrom(this._getCfgOnce$(task.issueProviderId)).then(
+      (res) => {
         if (!res) throw new Error('No config found');
         return res;
-      });
+      },
+    );
 
-    const issue = await this._clickUpApiService
-      .getById$(task.issueId, cfg)
-      .toPromise()
-      .then((res) => {
-        if (!res) throw new Error('Issue not found');
-        return res;
-      });
+    const issue = await firstValueFrom(
+      this._clickUpApiService.getById$(task.issueId, cfg),
+    ).then((res) => {
+      if (!res) throw new Error('Issue not found');
+      return res;
+    });
 
     const issueLastUpdated = parseInt(issue.date_updated, 10);
     const wasUpdated = issueLastUpdated > (task.issueLastUpdated || 0);
@@ -163,20 +158,18 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
     issueProviderId: string,
     allExistingIssueIds: (string | number)[],
   ): Promise<ClickUpTaskReduced[]> {
-    const cfg = await this._getCfgOnce$(issueProviderId)
-      .toPromise()
-      .then((result) => {
+    const cfg = await firstValueFrom(this._getCfgOnce$(issueProviderId)).then(
+      (result) => {
         if (!result) {
           throw new Error('No config found');
         }
         return result;
-      });
+      },
+    );
 
-    const tasks = await this._clickUpApiService
-      .searchTasks$('', cfg)
-      .pipe(first())
-      .toPromise()
-      .then((res) => res ?? []);
+    const tasks = await firstValueFrom(
+      this._clickUpApiService.searchTasks$('', cfg).pipe(first()),
+    ).then((res) => res ?? []);
 
     return tasks.filter((task) => !allExistingIssueIds.includes(task.id));
   }
