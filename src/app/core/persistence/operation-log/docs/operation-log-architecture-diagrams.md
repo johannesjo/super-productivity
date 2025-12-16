@@ -929,9 +929,50 @@ flowchart TD
     style Why fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
 ```
 
-### 8.2 Archive Operations Flow
+### 8.2 Dual-Database Architecture
 
-Archive data is stored in IndexedDB (via PFAPI), not in NgRx state. This requires special handling through a **unified** `ArchiveOperationHandler`:
+Super Productivity uses **two separate IndexedDB databases** for persistence:
+
+```mermaid
+flowchart TB
+    subgraph Browser["Browser IndexedDB"]
+        subgraph SUPOPS["SUP_OPS Database (Operation Log)"]
+            direction TB
+            OpsTable["ops table<br/>━━━━━━━━━━━━━━━<br/>Operation event log<br/>UUIDv7, vectorClock, payload"]
+            StateCache["state_cache table<br/>━━━━━━━━━━━━━━━<br/>NgRx state snapshots<br/>for fast hydration"]
+        end
+
+        subgraph PFAPI["PFAPI Database (Legacy + Archive)"]
+            direction TB
+            ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>Recent archived tasks<br/>less than 6 months old"]
+            ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>Older archived tasks<br/>more than 6 months old"]
+            TimeTracking["Time Tracking Data<br/>━━━━━━━━━━━━━━━<br/>timeSpentOnDay entries<br/>stored with tasks"]
+            MetaModel["META_MODEL<br/>━━━━━━━━━━━━━━━<br/>Vector clocks for<br/>legacy sync providers"]
+            OtherModels["Other Models<br/>━━━━━━━━━━━━━━━<br/>globalConfig, etc.<br/>legacy storage"]
+        end
+    end
+
+    subgraph Writers["What Writes Where"]
+        OpLog["OperationLogStoreService"] -->|ops, snapshots| SUPOPS
+        Archive["ArchiveService<br/>ArchiveOperationHandler"] -->|tasks, time data| PFAPI
+        Legacy["VectorClockFacadeService"] -->|vector clocks| MetaModel
+    end
+
+    style SUPOPS fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style PFAPI fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style Writers fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+**Key Points:**
+
+| Database  | Purpose                                           | Written By                                                  |
+| --------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| `SUP_OPS` | Operation log (event sourcing)                    | `OperationLogStoreService`                                  |
+| `PFAPI`   | Archive data, time tracking, legacy sync metadata | `ArchiveService`, `ArchiveOperationHandler`, `PfapiService` |
+
+### 8.3 Archive Operations Flow
+
+Archive data is stored in PFAPI's IndexedDB, **not** in NgRx state or the operation log. This requires special handling through a **unified** `ArchiveOperationHandler`:
 
 - **Local operations**: `ArchiveOperationHandlerEffects` routes through `ArchiveOperationHandler` (using LOCAL_ACTIONS)
 - **Remote operations**: `OperationApplierService` calls `ArchiveOperationHandler` directly after dispatch
@@ -941,31 +982,41 @@ Both paths use the same handler to ensure consistent behavior.
 ```mermaid
 flowchart TD
     subgraph LocalOp["LOCAL Operation (User Action)"]
-        L1[User archives tasks] --> L2[ArchiveService writes<br/>to IndexedDB<br/>BEFORE dispatch]
+        L1[User archives tasks] --> L2["ArchiveService writes<br/>to PFAPI IndexedDB<br/>BEFORE dispatch"]
         L2 --> L3[Dispatch moveToArchive]
-        L3 --> L4[Meta-reducers update state]
+        L3 --> L4[Meta-reducers update NgRx state]
         L4 --> L5[ArchiveOperationHandlerEffects<br/>via LOCAL_ACTIONS]
-        L5 --> L6[ArchiveOperationHandler<br/>.handleOperation]
-        L4 --> L7[OperationLogEffects<br/>creates operation]
+        L5 --> L6["ArchiveOperationHandler<br/>.handleOperation<br/>(skips - already written)"]
+        L4 --> L7[OperationLogEffects<br/>creates operation in SUP_OPS]
     end
 
     subgraph RemoteOp["REMOTE Operation (Sync)"]
-        R1[Download operation] --> R2[OperationApplierService<br/>dispatches action]
-        R2 --> R3[Meta-reducers update state]
-        R3 --> R4[ArchiveOperationHandler<br/>.handleOperation]
-        R4 --> R5[Write/delete archive<br/>in IndexedDB]
+        R1[Download operation<br/>from SUP_OPS sync] --> R2[OperationApplierService<br/>dispatches action]
+        R2 --> R3[Meta-reducers update NgRx state]
+        R3 --> R4["ArchiveOperationHandler<br/>.handleOperation"]
+        R4 --> R5["Write to PFAPI IndexedDB<br/>(archiveYoung/archiveOld)"]
 
         NoEffect["❌ Regular effects DON'T run<br/>(action has meta.isRemote=true)"]
     end
 
-    L7 -.->|"Sync"| R1
+    subgraph Storage["Storage Layer"]
+        PFAPI_DB[("PFAPI IndexedDB<br/>archiveYoung<br/>archiveOld")]
+        SUPOPS_DB[("SUP_OPS IndexedDB<br/>ops table")]
+    end
+
+    L2 --> PFAPI_DB
+    L7 --> SUPOPS_DB
+    R5 --> PFAPI_DB
+    SUPOPS_DB -.->|"Sync downloads ops"| R1
 
     style LocalOp fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style RemoteOp fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
     style NoEffect fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style PFAPI_DB fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style SUPOPS_DB fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
 ```
 
-### 8.3 ArchiveOperationHandler Integration
+### 8.4 ArchiveOperationHandler Integration
 
 The `OperationApplierService` uses a **fail-fast** approach: if hard dependencies are missing, it throws `SyncStateCorruptedError` rather than attempting complex retry logic. This triggers a full re-sync, which is safer than partial recovery.
 
@@ -1003,7 +1054,7 @@ flowchart TD
 
 The server guarantees operations arrive in sequence order, and delete operations are atomic via meta-reducers. If dependencies are missing, something is fundamentally wrong with sync state. A full re-sync is safer than attempting partial recovery with potential inconsistencies.
 
-### 8.4 Archive Operations Summary
+### 8.5 Archive Operations Summary
 
 | Operation              | Local Handling                                                         | Remote Handling                                              |
 | ---------------------- | ---------------------------------------------------------------------- | ------------------------------------------------------------ |
@@ -1015,7 +1066,7 @@ The server guarantees operations arrive in sequence order, and delete operations
 | `deleteTaskRepeatCfg`  | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler removes repeatCfgId from tasks       |
 | `deleteIssueProvider`  | ArchiveOperationHandlerEffects → ArchiveOperationHandler               | ArchiveOperationHandler unlinks issue data                   |
 
-### 8.5 Key Files
+### 8.6 Key Files
 
 | File                                              | Purpose                                                             |
 | ------------------------------------------------- | ------------------------------------------------------------------- |
