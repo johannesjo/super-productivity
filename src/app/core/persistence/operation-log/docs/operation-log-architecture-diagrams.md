@@ -141,7 +141,14 @@ graph TB
 
         subgraph DownloadFlow["Download Flow"]
             SyncService -->|"2. GET /api/sync/ops?sinceSeq=N"| DownAPI
-            DownAPI -->|Operations| FilterApplied{Already Applied?}
+            DownAPI -->|Response| GapCheck{Gap Detected?}
+            GapCheck -- Yes --> GetSnapshot["GET /api/sync/snapshot"]:::api
+            GapCheck -- No --> FreshCheck{Fresh Client?}
+            GetSnapshot --> FreshCheck
+            FreshCheck -- "Yes + Has Ops" --> ConfirmDialog["Confirmation Dialog"]
+            FreshCheck -- No --> FilterApplied
+            ConfirmDialog -- Confirmed --> FilterApplied{Already Applied?}
+            ConfirmDialog -- Cancelled --> SkipDownload[Skip]
             FilterApplied -- Yes --> Discard[Discard]
             FilterApplied -- No --> ConflictDet
         end
@@ -170,12 +177,17 @@ graph TB
 
         subgraph UploadFlow["Upload Flow"]
             LocalMeta -->|Get Unsynced| PendingOps[Pending Ops]
-            PendingOps --> FilterRejected{Rejected?}
-            FilterRejected -- Yes --> Skip[Skip]
+            PendingOps --> FreshUploadCheck{Fresh Client?}
+            FreshUploadCheck -- Yes --> BlockUpload["Block Upload<br/>(must download first)"]
+            FreshUploadCheck -- No --> FilterRejected{Rejected?}
+            FilterRejected -- Yes --> SkipRejected[Skip]
             FilterRejected -- No --> ClassifyOp{Op Type?}
 
             ClassifyOp -- "SYNC_IMPORT<br/>BACKUP_IMPORT<br/>REPAIR" --> SnapshotAPI
             ClassifyOp -- "CRT/UPD/DEL/MOV/BATCH" --> OpsAPI
+
+            OpsAPI -->|Response with<br/>piggybackedOps| ProcessPiggybacked["Process Piggybacked<br/>(→ Conflict Detection)"]
+            ProcessPiggybacked --> ConflictDet
         end
     end
 
@@ -315,6 +327,9 @@ graph TB
 - **Gzip Support**: Both upload/download support `Content-Encoding: gzip` for bandwidth savings
 - **Rate Limiting**: Per-user limits (100 uploads/min, 200 downloads/min)
 - **Auto-Resolve Conflicts**: Identical conflicts (both DELETE, or same payload) auto-resolved as "remote" without user dialog
+- **Fresh Client Safety**: Clients with no history blocked from uploading; confirmation dialog shown before accepting first remote data
+- **Piggybacked Ops**: Upload response includes new remote ops → processed immediately to trigger conflict detection
+- **Gap Detection**: Server returns `gapDetected: true` when requested sinceSeq is purged → client fetches full snapshot
 
 ---
 
