@@ -22,6 +22,7 @@ import { T } from '../../../../t.const';
 import { MatDialog } from '@angular/material/dialog';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
+import { TranslateService } from '@ngx-translate/core';
 
 /**
  * Integration tests for Schema Migration Handling in Sync.
@@ -109,6 +110,10 @@ describe('Migration Handling Integration', () => {
         {
           provide: UserInputWaitStateService,
           useValue: jasmine.createSpyObj('UserInputWaitStateService', ['startWaiting']),
+        },
+        {
+          provide: TranslateService,
+          useValue: jasmine.createSpyObj('TranslateService', ['instant']),
         },
       ],
     });

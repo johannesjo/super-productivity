@@ -31,6 +31,7 @@ import { LockService } from '../sync/lock.service';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { SchemaMigrationService } from '../store/schema-migration.service';
 import { decrypt, encrypt } from '../../../../pfapi/api/encryption/encryption';
+import { TranslateService } from '@ngx-translate/core';
 
 // Mock Sync Provider that supports operation sync
 class MockOperationSyncProvider
@@ -231,6 +232,10 @@ describe('Service Logic Integration', () => {
         {
           provide: UserInputWaitStateService,
           useValue: waitServiceSpy,
+        },
+        {
+          provide: TranslateService,
+          useValue: jasmine.createSpyObj('TranslateService', ['instant']),
         },
       ],
     });
