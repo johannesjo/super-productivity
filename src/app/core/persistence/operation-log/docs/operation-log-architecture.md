@@ -1217,40 +1217,64 @@ If Client A sends a delete operation for a task, and Client B has no pending ops
 Client B should simply apply the delete - there's no local work to lose. The snapshot/frontier
 vector clocks track _history_, not _intent_.
 
-## C.5 Conflict Resolution
+## C.5 Conflict Resolution (LWW Auto-Resolution)
 
-Conflicts are presented to the user via `ConflictResolutionService`:
+Conflicts are automatically resolved using Last-Write-Wins (LWW) strategy via `ConflictResolutionService.autoResolveConflictsLWW()`:
+
+### LWW Resolution Strategy
+
+1. **Compare timestamps**: Each side's maximum operation timestamp is compared
+2. **Newer wins**: The side with the newer timestamp wins
+3. **Tie-breaker**: When timestamps are equal, remote wins (server-authoritative)
 
 ```typescript
-async presentConflicts(conflicts: EntityConflict[]): Promise<void> {
-  const dialogRef = this.dialog.open(DialogConflictResolutionComponent, {
-    data: { conflicts },
-    disableClose: true
-  });
+async autoResolveConflictsLWW(conflicts: EntityConflict[], nonConflictingOps: Operation[]): Promise<void> {
+  for (const conflict of conflicts) {
+    const localMaxTimestamp = Math.max(...conflict.localOps.map(op => op.timestamp));
+    const remoteMaxTimestamp = Math.max(...conflict.remoteOps.map(op => op.timestamp));
 
-  const result = await firstValueFrom(dialogRef.afterClosed());
-
-  if (result.resolution === 'remote') {
-    // Apply remote ops, overwrite local state
-    for (const conflict of conflicts) {
+    if (localMaxTimestamp > remoteMaxTimestamp) {
+      // Local wins - create new UPDATE op with current entity state
+      const localWinOp = await this._createLocalWinUpdateOp(conflict);
+      // Reject both old local and remote ops
+      await this.opLogStore.markRejected([...localOpIds, ...remoteOpIds]);
+      // New op will sync local state on next upload
+      await this.opLogStore.append(localWinOp, 'local');
+    } else {
+      // Remote wins (including tie)
       await this.operationApplier.applyOperations(conflict.remoteOps);
+      await this.opLogStore.markRejected(localOpIds);
     }
-    // Mark local ops as rejected so they won't be re-synced
-    const localOpIds = conflicts.flatMap(c => c.localOps.map(op => op.id));
-    await this.opLogStore.markRejected(localOpIds);
-  } else {
-    // Keep local ops, ignore remote
   }
 }
 ```
 
+### When Local Wins
+
+When local state is newer, we can't just reject the remote ops - that would cause the local state to never sync to the server. Instead:
+
+1. **Reject both** local AND remote ops (they're now obsolete)
+2. **Create a new UPDATE operation** with:
+   - Current entity state from NgRx store
+   - Merged vector clock (local + remote) + increment
+   - Current timestamp
+3. **This new op will be uploaded** on next sync cycle, propagating local state to server
+
+A warning-level log is emitted: `OpLog.warn('LWW local wins - creating update op for ${entityType}:${entityId}')`
+
 ### Rejected Operations
 
-When the user chooses "remote" resolution, local conflicting operations are marked with `rejectedAt` timestamp:
+When operations are rejected (either local or remote):
 
 - Rejected ops remain in the log for history/debugging
 - `getUnsynced()` excludes rejected ops (won't re-upload)
 - Compaction may eventually delete old rejected ops
+
+### User Notification
+
+A non-blocking snack notification is shown after auto-resolution:
+
+- "Sync conflicts auto-resolved: X local win(s), Y remote win(s)"
 
 ## C.6 Dependency Resolution
 
@@ -1876,7 +1900,7 @@ When adding new entities or relationships:
 - `OperationLogUploadService` (API upload + file-based fallback, batching)
 - `OperationLogDownloadService` (API download + file-based fallback, pagination)
 - Entity-level conflict detection (vector clock comparisons)
-- `ConflictResolutionService` (UI presentation + batch apply resolutions)
+- `ConflictResolutionService` (LWW auto-resolution + batch apply)
 - `VectorClockService` (global/entity frontier tracking, compaction recovery)
 - `DependencyResolverService` (extract/check hard/soft dependencies)
 - `OperationApplierService` (fail-fast on missing deps → throws `SyncStateCorruptedError`)

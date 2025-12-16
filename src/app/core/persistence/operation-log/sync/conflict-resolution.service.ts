@@ -1,6 +1,13 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
-import { EntityConflict, Operation, OpType } from '../operation.types';
+import { Store } from '@ngrx/store';
+import {
+  EntityConflict,
+  EntityType,
+  Operation,
+  OpType,
+  VectorClock,
+} from '../operation.types';
 import { OperationApplierService } from '../processing/operation-applier.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { OpLog } from '../../../log';
@@ -19,6 +26,40 @@ import {
 } from '../operation-log.const';
 import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backup.service';
+import {
+  incrementVectorClock,
+  mergeVectorClocks,
+} from '../../../../pfapi/api/util/vector-clock';
+import { uuidv7 } from '../../../../util/uuid-v7';
+import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import { lazyInject } from '../../../../util/lazy-inject';
+import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
+import { selectProjectById } from '../../../../features/project/store/project.selectors';
+import { selectTagById } from '../../../../features/tag/store/tag.reducer';
+import { selectNoteById } from '../../../../features/note/store/note.reducer';
+import { selectConfigFeatureState } from '../../../../features/config/store/global-config.reducer';
+import { selectSimpleCounterById } from '../../../../features/simple-counter/store/simple-counter.reducer';
+import { selectTaskRepeatCfgById } from '../../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { selectIssueProviderById } from '../../../../features/issue/store/issue-provider.selectors';
+import { selectMetricById } from '../../../../features/metric/store/metric.selectors';
+import { selectPlannerState } from '../../../../features/planner/store/planner.selectors';
+import { selectBoardsState } from '../../../../features/boards/store/boards.selectors';
+import { selectReminderFeatureState } from '../../../../features/reminder/store/reminder.reducer';
+import { selectTimeTrackingState } from '../../../../features/time-tracking/store/time-tracking.selectors';
+import { selectMenuTreeState } from '../../../../features/menu-tree/store/menu-tree.selectors';
+
+/**
+ * Represents the result of LWW (Last-Write-Wins) conflict resolution.
+ */
+interface LWWResolution {
+  /** The conflict that was resolved */
+  conflict: EntityConflict;
+  /** Which side won: 'local' or 'remote' */
+  winner: 'local' | 'remote';
+  /** If local wins, this is the new UPDATE operation to sync local state */
+  localWinOp?: Operation;
+}
 
 /**
  * Handles sync conflicts when the same entity has been modified both locally and remotely.
@@ -52,12 +93,17 @@ import { SyncSafetyBackupService } from '../../../../imex/sync/sync-safety-backu
 })
 export class ConflictResolutionService {
   private dialog = inject(MatDialog);
+  private store = inject(Store);
   private operationApplier = inject(OperationApplierService);
   private opLogStore = inject(OperationLogStoreService);
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
   private userInputWaitState = inject(UserInputWaitStateService);
   private syncSafetyBackupService = inject(SyncSafetyBackupService);
+
+  // Lazy injection to break circular dependency
+  private _injector = inject(Injector);
+  private _getPfapiService = lazyInject(this._injector, PfapiService);
 
   /** Reference to the open conflict dialog, if any */
   private _dialogRef?: MatDialogRef<DialogConflictResolutionComponent>;
@@ -512,5 +558,451 @@ export class ConflictResolutionService {
     }
 
     return false;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // LAST-WRITE-WINS (LWW) AUTO-RESOLUTION
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  /**
+   * Automatically resolves conflicts using Last-Write-Wins (LWW) strategy.
+   *
+   * ## How LWW Works
+   * 1. Compare timestamps of conflicting operations
+   * 2. The side with the newer timestamp wins
+   * 3. When timestamps are equal, remote wins (server-authoritative)
+   *
+   * ## When Local Wins
+   * When local state is newer, we can't just reject the remote ops - that would
+   * cause the local state to never sync to the server. Instead, we:
+   * 1. Reject BOTH local AND remote ops (they're now obsolete)
+   * 2. Create a NEW update operation with:
+   *    - Current entity state from NgRx store
+   *    - Merged vector clock (local + remote) + increment
+   *    - New timestamp
+   * 3. This new op will be uploaded on next sync, propagating local state
+   *
+   * @param conflicts - Entity conflicts to auto-resolve
+   * @param nonConflictingOps - Remote ops that don't conflict (batched for dependency sorting)
+   * @returns Promise resolving when all resolutions are applied
+   */
+  async autoResolveConflictsLWW(
+    conflicts: EntityConflict[],
+    nonConflictingOps: Operation[] = [],
+  ): Promise<void> {
+    if (conflicts.length === 0 && nonConflictingOps.length === 0) {
+      return;
+    }
+
+    OpLog.normal(
+      `ConflictResolutionService: Auto-resolving ${conflicts.length} conflict(s) using LWW`,
+    );
+
+    // SAFETY: Create backup before conflict resolution
+    try {
+      await this.syncSafetyBackupService.createBackup();
+      OpLog.normal(
+        'ConflictResolutionService: Safety backup created before LWW resolution',
+      );
+    } catch (backupErr) {
+      OpLog.err('ConflictResolutionService: Failed to create safety backup', backupErr);
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED_SYNC_CONTINUES,
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 1: Resolve each conflict using LWW
+    // ─────────────────────────────────────────────────────────────────────────
+    const resolutions = await this._resolveConflictsWithLWW(conflicts);
+
+    // Count results for notification
+    let localWinsCount = 0;
+    let remoteWinsCount = 0;
+
+    const allOpsToApply: Operation[] = [];
+    const allStoredOps: Array<{ id: string; seq: number }> = [];
+    const localOpsToReject: string[] = [];
+    const remoteOpsToReject: string[] = [];
+    const newLocalWinOps: Operation[] = [];
+
+    for (const resolution of resolutions) {
+      if (resolution.winner === 'remote') {
+        remoteWinsCount++;
+        // Remote wins: apply remote ops, reject local ops
+        for (const op of resolution.conflict.remoteOps) {
+          if (await this.opLogStore.hasOp(op.id)) {
+            OpLog.verbose(
+              `ConflictResolutionService: Skipping duplicate op (LWW remote): ${op.id}`,
+            );
+            continue;
+          }
+          const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+          allStoredOps.push({ id: op.id, seq });
+          allOpsToApply.push(op);
+        }
+        localOpsToReject.push(...resolution.conflict.localOps.map((op) => op.id));
+      } else {
+        localWinsCount++;
+        // Local wins: reject both local AND remote ops, create new update op
+        localOpsToReject.push(...resolution.conflict.localOps.map((op) => op.id));
+        for (const op of resolution.conflict.remoteOps) {
+          if (!(await this.opLogStore.hasOp(op.id))) {
+            await this.opLogStore.append(op, 'remote');
+          }
+        }
+        remoteOpsToReject.push(...resolution.conflict.remoteOps.map((op) => op.id));
+
+        // Store the new update op (will be uploaded on next sync)
+        if (resolution.localWinOp) {
+          newLocalWinOps.push(resolution.localWinOp);
+          OpLog.warn(
+            `ConflictResolutionService: LWW local wins - creating update op for ` +
+              `${resolution.conflict.entityType}:${resolution.conflict.entityId}`,
+          );
+        }
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 2: Reject ALL pending ops for entities where remote won
+    // ─────────────────────────────────────────────────────────────────────────
+    if (localOpsToReject.length > 0) {
+      const affectedEntityKeys = new Set<string>();
+      for (const resolution of resolutions) {
+        if (resolution.winner === 'remote') {
+          for (const op of resolution.conflict.remoteOps) {
+            const ids = op.entityIds || (op.entityId ? [op.entityId] : []);
+            for (const id of ids) {
+              affectedEntityKeys.add(toEntityKey(op.entityType, id));
+            }
+          }
+        }
+      }
+
+      const pendingByEntity = await this.opLogStore.getUnsyncedByEntity();
+      for (const entityKey of affectedEntityKeys) {
+        const pendingOps = pendingByEntity.get(entityKey) || [];
+        for (const op of pendingOps) {
+          if (!localOpsToReject.includes(op.id)) {
+            localOpsToReject.push(op.id);
+            OpLog.normal(
+              `ConflictResolutionService: Also rejecting stale op ${op.id} for entity ${entityKey}`,
+            );
+          }
+        }
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 3: Add non-conflicting remote ops to the batch
+    // ─────────────────────────────────────────────────────────────────────────
+    const newNonConflictingOps = await this.opLogStore.filterNewOps(nonConflictingOps);
+    for (const op of newNonConflictingOps) {
+      const seq = await this.opLogStore.append(op, 'remote', { pendingApply: true });
+      allStoredOps.push({ id: op.id, seq });
+      allOpsToApply.push(op);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 4: Mark rejected operations BEFORE applying (crash safety)
+    // ─────────────────────────────────────────────────────────────────────────
+    if (localOpsToReject.length > 0) {
+      await this.opLogStore.markRejected(localOpsToReject);
+      OpLog.normal(
+        `ConflictResolutionService: Marked ${localOpsToReject.length} local ops as rejected`,
+      );
+    }
+    if (remoteOpsToReject.length > 0) {
+      await this.opLogStore.markRejected(remoteOpsToReject);
+      OpLog.normal(
+        `ConflictResolutionService: Marked ${remoteOpsToReject.length} remote ops as rejected`,
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 5: Apply ALL remote operations in a single batch
+    // ─────────────────────────────────────────────────────────────────────────
+    if (allOpsToApply.length > 0) {
+      OpLog.normal(
+        `ConflictResolutionService: Applying ${allOpsToApply.length} ops in single batch`,
+      );
+
+      const opIdToSeq = new Map(allStoredOps.map((o) => [o.id, o.seq]));
+      const applyResult = await this.operationApplier.applyOperations(allOpsToApply);
+
+      const appliedSeqs = applyResult.appliedOps
+        .map((op) => opIdToSeq.get(op.id))
+        .filter((seq): seq is number => seq !== undefined);
+
+      if (appliedSeqs.length > 0) {
+        await this.opLogStore.markApplied(appliedSeqs);
+        OpLog.normal(
+          `ConflictResolutionService: Successfully applied ${appliedSeqs.length} ops`,
+        );
+      }
+
+      if (applyResult.failedOp) {
+        const failedOpIndex = allOpsToApply.findIndex(
+          (op) => op.id === applyResult.failedOp!.op.id,
+        );
+        const failedOps = allOpsToApply.slice(failedOpIndex);
+        const failedOpIds = failedOps.map((op) => op.id);
+
+        OpLog.err(
+          `ConflictResolutionService: ${applyResult.appliedOps.length} ops applied before failure. ` +
+            `Marking ${failedOpIds.length} ops as failed.`,
+          applyResult.failedOp.error,
+        );
+        await this.opLogStore.markFailed(failedOpIds, MAX_CONFLICT_RETRY_ATTEMPTS);
+
+        this.snackService.open({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+          actionStr: T.PS.RELOAD,
+          actionFn: (): void => {
+            window.location.reload();
+          },
+        });
+      }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 6: Append new update ops for local wins (will sync on next cycle)
+    // ─────────────────────────────────────────────────────────────────────────
+    for (const op of newLocalWinOps) {
+      await this.opLogStore.append(op, 'local');
+      OpLog.normal(
+        `ConflictResolutionService: Appended local-win update op ${op.id} for ${op.entityType}:${op.entityId}`,
+      );
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 7: Show non-blocking notification
+    // ─────────────────────────────────────────────────────────────────────────
+    if (localWinsCount > 0 || remoteWinsCount > 0) {
+      this.snackService.open({
+        msg: T.F.SYNC.S.LWW_CONFLICTS_AUTO_RESOLVED,
+        translateParams: {
+          localWins: localWinsCount,
+          remoteWins: remoteWinsCount,
+        },
+      });
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // STEP 8: Validate and repair state after resolution
+    // ─────────────────────────────────────────────────────────────────────────
+    await this._validateAndRepairAfterResolution();
+  }
+
+  /**
+   * Resolves conflicts using LWW timestamp comparison.
+   *
+   * @param conflicts - The conflicts to resolve
+   * @returns Array of resolutions with winner and optional new update op
+   */
+  private async _resolveConflictsWithLWW(
+    conflicts: EntityConflict[],
+  ): Promise<LWWResolution[]> {
+    const resolutions: LWWResolution[] = [];
+
+    for (const conflict of conflicts) {
+      // Get max timestamp from each side
+      const localMaxTimestamp = Math.max(...conflict.localOps.map((op) => op.timestamp));
+      const remoteMaxTimestamp = Math.max(
+        ...conflict.remoteOps.map((op) => op.timestamp),
+      );
+
+      // LWW comparison: newer wins, tie goes to remote (server-authoritative)
+      if (localMaxTimestamp > remoteMaxTimestamp) {
+        // Local wins - create update op with current state
+        const localWinOp = await this._createLocalWinUpdateOp(conflict);
+        resolutions.push({
+          conflict,
+          winner: 'local',
+          localWinOp,
+        });
+        OpLog.normal(
+          `ConflictResolutionService: LWW resolved ${conflict.entityType}:${conflict.entityId} as LOCAL ` +
+            `(local: ${localMaxTimestamp}, remote: ${remoteMaxTimestamp})`,
+        );
+      } else {
+        // Remote wins (includes tie)
+        resolutions.push({
+          conflict,
+          winner: 'remote',
+        });
+        OpLog.normal(
+          `ConflictResolutionService: LWW resolved ${conflict.entityType}:${conflict.entityId} as REMOTE ` +
+            `(local: ${localMaxTimestamp}, remote: ${remoteMaxTimestamp})`,
+        );
+      }
+    }
+
+    return resolutions;
+  }
+
+  /**
+   * Creates a new UPDATE operation to sync local state when local wins LWW.
+   *
+   * The new operation has:
+   * - Fresh UUIDv7 ID
+   * - Current entity state from NgRx store
+   * - Merged vector clock (local + remote) + increment
+   * - Current timestamp
+   *
+   * @param conflict - The conflict where local won
+   * @returns New UPDATE operation, or undefined if entity not found
+   */
+  private async _createLocalWinUpdateOp(
+    conflict: EntityConflict,
+  ): Promise<Operation | undefined> {
+    // Get current entity state from store
+    const entityState = await this._getCurrentEntityState(
+      conflict.entityType,
+      conflict.entityId,
+    );
+
+    if (entityState === undefined) {
+      OpLog.warn(
+        `ConflictResolutionService: Cannot create local-win op - entity not found: ` +
+          `${conflict.entityType}:${conflict.entityId}`,
+      );
+      return undefined;
+    }
+
+    // Get client ID
+    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    if (!clientId) {
+      OpLog.err('ConflictResolutionService: Cannot create local-win op - no client ID');
+      return undefined;
+    }
+
+    // Merge all vector clocks (local ops + remote ops) and increment
+    let mergedClock: VectorClock = {};
+    for (const op of conflict.localOps) {
+      mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
+    }
+    for (const op of conflict.remoteOps) {
+      mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
+    }
+    const newClock = incrementVectorClock(mergedClock, clientId);
+
+    // Create the update operation
+    const op: Operation = {
+      id: uuidv7(),
+      actionType: `[${conflict.entityType}] LWW Update`,
+      opType: OpType.Update,
+      entityType: conflict.entityType,
+      entityId: conflict.entityId,
+      payload: entityState,
+      clientId,
+      vectorClock: newClock,
+      timestamp: Date.now(),
+      schemaVersion: CURRENT_SCHEMA_VERSION,
+    };
+
+    return op;
+  }
+
+  /**
+   * Gets the current state of an entity from the NgRx store.
+   *
+   * @param entityType - The type of entity
+   * @param entityId - The ID of the entity
+   * @returns The entity state, or undefined if not found
+   */
+  private async _getCurrentEntityState(
+    entityType: EntityType,
+    entityId: string,
+  ): Promise<unknown> {
+    try {
+      switch (entityType) {
+        // Entities with direct selectById selectors
+        case 'TASK':
+          return await firstValueFrom(
+            this.store.select(selectTaskById, { id: entityId }),
+          );
+        case 'PROJECT':
+          return await firstValueFrom(
+            this.store.select(selectProjectById, { id: entityId }),
+          );
+        case 'TAG':
+          return await firstValueFrom(this.store.select(selectTagById, { id: entityId }));
+        case 'NOTE':
+          return await firstValueFrom(
+            this.store.select(selectNoteById, { id: entityId }),
+          );
+        case 'SIMPLE_COUNTER':
+          return await firstValueFrom(
+            this.store.select(selectSimpleCounterById, { id: entityId }),
+          );
+        case 'TASK_REPEAT_CFG':
+          return await firstValueFrom(
+            this.store.select(selectTaskRepeatCfgById, { id: entityId }),
+          );
+        case 'ISSUE_PROVIDER':
+          // selectIssueProviderById is a factory function: (id, key) => selector
+          return await firstValueFrom(
+            this.store.select(selectIssueProviderById(entityId, null)),
+          );
+        case 'METRIC':
+          return await firstValueFrom(
+            this.store.select(selectMetricById, { id: entityId }),
+          );
+
+        // Singleton entities (entire feature state)
+        case 'GLOBAL_CONFIG':
+          return await firstValueFrom(this.store.select(selectConfigFeatureState));
+        case 'TIME_TRACKING':
+          return await firstValueFrom(this.store.select(selectTimeTrackingState));
+        case 'MENU_TREE':
+          return await firstValueFrom(this.store.select(selectMenuTreeState));
+
+        // Complex state entities - extract entity from feature state
+        case 'PLANNER': {
+          const plannerState = await firstValueFrom(
+            this.store.select(selectPlannerState),
+          );
+          // Planner stores days as a map, entityId is the day string
+          return plannerState?.days?.[entityId];
+        }
+        case 'BOARD': {
+          const boardsState = await firstValueFrom(this.store.select(selectBoardsState));
+          // Boards state has boardCfgs array, find by id
+          return boardsState?.boardCfgs?.find((b: { id: string }) => b.id === entityId);
+        }
+        case 'REMINDER': {
+          const reminderState = await firstValueFrom(
+            this.store.select(selectReminderFeatureState),
+          );
+          // Reminder state follows entity adapter pattern
+          return (reminderState as { entities?: Record<string, unknown> })?.entities?.[
+            entityId
+          ];
+        }
+
+        // Fallback for unhandled entity types
+        case 'WORK_CONTEXT':
+        case 'PLUGIN_USER_DATA':
+        case 'PLUGIN_METADATA':
+        case 'MIGRATION':
+        case 'RECOVERY':
+        case 'ALL':
+        default:
+          OpLog.warn(
+            `ConflictResolutionService: No selector for entity type ${entityType}, falling back to remote`,
+          );
+          return undefined;
+      }
+    } catch (err) {
+      OpLog.err(
+        `ConflictResolutionService: Error getting entity state for ${entityType}:${entityId}`,
+        err,
+      );
+      return undefined;
+    }
   }
 }

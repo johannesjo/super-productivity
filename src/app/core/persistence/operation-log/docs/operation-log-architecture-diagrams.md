@@ -153,17 +153,19 @@ graph TB
             FilterApplied -- No --> ConflictDet
         end
 
-        subgraph ConflictMgmt["Conflict Management"]
+        subgraph ConflictMgmt["Conflict Management (LWW Auto-Resolution)"]
             ConflictDet{"Compare<br/>Vector Clocks"}:::conflict
             ConflictDet -- Sequential --> ApplyRemote
             ConflictDet -- Concurrent --> AutoCheck{"Auto-Resolve?"}
 
             AutoCheck -- "Both DELETE or<br/>Identical payload" --> AutoResolve["Auto: Keep Remote"]
-            AutoCheck -- "Real conflict" --> UserDialog["Resolution Dialog"]:::conflict
+            AutoCheck -- "Real conflict" --> LWWResolve["LWW: Compare<br/>Timestamps"]:::conflict
 
             AutoResolve --> MarkRejected
-            UserDialog -- "Keep Remote" --> MarkRejected[Mark Local Rejected]:::conflict
-            UserDialog -- "Keep Local" --> IgnoreRemote[Ignore Remote]
+            LWWResolve -- "Remote newer<br/>or tie" --> MarkRejected[Mark Local Rejected]:::conflict
+            LWWResolve -- "Local newer" --> LocalWins["Create Update Op<br/>with local state"]:::conflict
+            LocalWins --> RejectBoth[Mark both rejected]
+            RejectBoth --> CreateNewOp[New op syncs local state]
             MarkRejected --> ApplyRemote
         end
 
@@ -326,7 +328,8 @@ graph TB
 - **Idempotency**: Duplicate op IDs rejected with `DUPLICATE_OPERATION` error
 - **Gzip Support**: Both upload/download support `Content-Encoding: gzip` for bandwidth savings
 - **Rate Limiting**: Per-user limits (100 uploads/min, 200 downloads/min)
-- **Auto-Resolve Conflicts**: Identical conflicts (both DELETE, or same payload) auto-resolved as "remote" without user dialog
+- **Auto-Resolve Conflicts (Identical)**: Identical conflicts (both DELETE, or same payload) auto-resolved as "remote" without user intervention
+- **LWW Conflict Resolution**: Real conflicts are automatically resolved using Last-Write-Wins (timestamp comparison). See Section 2d below for detailed diagrams.
 - **Fresh Client Safety**: Clients with no history blocked from uploading; confirmation dialog shown before accepting first remote data
 - **Piggybacked Ops**: Upload response includes new remote ops → processed immediately to trigger conflict detection
 - **Gap Detection**: Server returns `gapDetected: true` when client sinceSeq is invalid → client resets to seq=0 and re-downloads all ops
@@ -514,6 +517,258 @@ const localSyncedOps = allEntries.filter((entry) => {
 - Only considers synced ops (accepted by server)
 - Uses vector clock comparison to determine dominance
 - `LESS_THAN` means dominated (skip), all other results mean not dominated (replay)
+
+---
+
+## 2d. LWW (Last-Write-Wins) Conflict Auto-Resolution ✅ IMPLEMENTED
+
+When two clients make concurrent changes to the same entity, a conflict occurs. Rather than interrupting the user with a dialog, the system automatically resolves conflicts using **Last-Write-Wins (LWW)** based on operation timestamps.
+
+**Implementation Status:** Complete. See `ConflictResolutionService.autoResolveConflictsLWW()`.
+
+### 2d.1 What is a Conflict?
+
+A conflict occurs when vector clock comparison returns `CONCURRENT` - meaning neither operation "happened before" the other. They represent independent, simultaneous edits.
+
+```mermaid
+flowchart TD
+    subgraph Detection["Conflict Detection (Vector Clocks)"]
+        Download[Download remote ops] --> Compare{Compare Vector Clocks}
+
+        Compare -->|"LESS_THAN<br/>(remote is older)"| Discard["Discard remote<br/>(already have it)"]
+        Compare -->|"GREATER_THAN<br/>(remote is newer)"| Apply["Apply remote<br/>(sequential update)"]
+        Compare -->|"CONCURRENT<br/>(independent edits)"| Conflict["⚠️ CONFLICT<br/>Both changed same entity"]
+    end
+
+    subgraph Example["Example: Concurrent Edits"]
+        direction LR
+        ClientA["Client A<br/>Clock: {A:5, B:3}<br/>Marks task done"]
+        ClientB["Client B<br/>Clock: {A:4, B:4}<br/>Renames task"]
+
+        ClientA -.->|"Neither dominates"| Concurrent["CONCURRENT<br/>A has more A,<br/>B has more B"]
+        ClientB -.-> Concurrent
+    end
+
+    Conflict --> Resolution["LWW Resolution"]
+
+    style Conflict fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Concurrent fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+```
+
+### 2d.2 LWW Resolution Algorithm
+
+The winner is determined by comparing the **maximum timestamp** from each operation's vector clock. The operation with the later timestamp wins. Ties go to remote (to ensure convergence).
+
+```mermaid
+flowchart TD
+    subgraph Input["Conflicting Operations"]
+        Local["LOCAL Operation<br/>━━━━━━━━━━━━━━━<br/>vectorClock: {A:5, B:3}<br/>timestamps: [1702900000, 1702899000]<br/>maxTimestamp: 1702900000"]
+        Remote["REMOTE Operation<br/>━━━━━━━━━━━━━━━<br/>vectorClock: {A:4, B:4}<br/>timestamps: [1702898000, 1702901000]<br/>maxTimestamp: 1702901000"]
+    end
+
+    subgraph Algorithm["LWW Comparison"]
+        GetMax["Extract max timestamp<br/>from each vector clock"]
+        Compare{"Compare<br/>Timestamps"}
+
+        GetMax --> Compare
+
+        Compare -->|"Local > Remote"| LocalWins["🏆 LOCAL WINS<br/>Local state preserved<br/>Create UPDATE op to sync"]
+        Compare -->|"Remote > Local<br/>OR tie"| RemoteWins["🏆 REMOTE WINS<br/>Apply remote state<br/>Reject local op"]
+    end
+
+    Local --> GetMax
+    Remote --> GetMax
+
+    subgraph Outcome["Resolution Outcome"]
+        LocalWins --> CreateOp["Create new UPDATE operation<br/>with current entity state<br/>+ merged vector clock"]
+        RemoteWins --> MarkRejected["Mark local op as rejected<br/>Apply remote op"]
+
+        CreateOp --> Sync["New op syncs to server<br/>Other clients receive update"]
+        MarkRejected --> Apply["Remote state applied<br/>User sees change"]
+    end
+
+    style LocalWins fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style RemoteWins fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style CreateOp fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px
+```
+
+### 2d.3 Two Possible Outcomes
+
+```mermaid
+flowchart LR
+    subgraph RemoteWinsPath["REMOTE WINS (more common)"]
+        direction TB
+        RW1["Remote timestamp >= Local timestamp"]
+        RW2["Mark local op as REJECTED"]
+        RW3["Apply remote operation"]
+        RW4["Local change is overwritten"]
+
+        RW1 --> RW2 --> RW3 --> RW4
+    end
+
+    subgraph LocalWinsPath["LOCAL WINS (less common)"]
+        direction TB
+        LW1["Local timestamp > Remote timestamp"]
+        LW2["Mark BOTH ops as rejected"]
+        LW3["Keep current local state"]
+        LW4["Create NEW update operation<br/>with merged vector clock"]
+        LW5["New op syncs to server"]
+        LW6["Other clients receive<br/>local state as update"]
+
+        LW1 --> LW2 --> LW3 --> LW4 --> LW5 --> LW6
+    end
+
+    style RemoteWinsPath fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+    style LocalWinsPath fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+### 2d.4 Complete LWW Flow
+
+```mermaid
+sequenceDiagram
+    participant A as Client A
+    participant S as Server
+    participant B as Client B
+
+    Note over A,B: Both start with Task "Buy milk"
+
+    A->>A: User marks task done (T=100)
+    B->>B: User renames to "Buy oat milk" (T=105)
+
+    Note over A,B: Both go offline, then reconnect
+
+    B->>S: Upload: Rename op (T=105)
+    S-->>B: OK (serverSeq=50)
+
+    A->>S: Upload: Done op (T=100)
+    S-->>A: Rejected (CONCURRENT with seq=50)
+    S-->>A: Piggybacked: Rename op from B
+
+    Note over A: Conflict detected!<br/>Local: Done (T=100)<br/>Remote: Rename (T=105)
+
+    A->>A: LWW: Remote wins (105 > 100)
+    A->>A: Mark local op REJECTED
+    A->>A: Apply remote (rename)
+    A->>A: Show snackbar notification
+
+    Note over A: Task is now "Buy oat milk"<br/>(not done - A's change lost)
+
+    A->>S: Sync (download only)
+    B->>S: Sync
+    S-->>B: No new ops
+
+    Note over A,B: ✅ Both clients converged<br/>Task: "Buy oat milk" (not done)
+```
+
+### 2d.5 Local Wins Scenario (with Update Propagation)
+
+```mermaid
+sequenceDiagram
+    participant A as Client A
+    participant S as Server
+    participant B as Client B
+
+    Note over A,B: Both start with Task "Meeting"
+
+    B->>B: User adds note (T=100)
+
+    Note over B: B goes offline
+
+    B->>S: Upload: Add note op (T=100)
+    S-->>B: OK (serverSeq=50)
+
+    Note over A: A is offline, makes change later
+
+    A->>A: User marks urgent (T=200)
+
+    A->>S: Sync (download first)
+    S-->>A: Download: Add note op from B
+
+    Note over A: Conflict detected!<br/>Local: Urgent (T=200)<br/>Remote: Note (T=100)
+
+    A->>A: LWW: Local wins (200 > 100)
+    A->>A: Mark BOTH ops rejected
+    A->>A: Create NEW update op with<br/>current state (urgent + note merged)<br/>+ merged vector clock
+
+    A->>S: Upload: New update op
+    S-->>A: OK (serverSeq=51)
+
+    B->>S: Sync
+    S-->>B: Download: Update op from A
+    B->>B: Apply update
+
+    Note over A,B: ✅ Both clients converged<br/>Task has BOTH changes
+```
+
+### 2d.6 User Notification
+
+After auto-resolution, users see a non-blocking snackbar notification informing them that conflicts were resolved automatically.
+
+```mermaid
+flowchart LR
+    subgraph Resolution["After LWW Resolution"]
+        Resolved["Conflicts resolved"]
+    end
+
+    subgraph Notification["User Notification"]
+        Snack["📋 Snackbar<br/>━━━━━━━━━━━━━━━<br/>'X conflicts were<br/>auto-resolved'<br/>━━━━━━━━━━━━━━━<br/>Non-blocking<br/>Auto-dismisses"]
+    end
+
+    subgraph Backup["Safety Net"]
+        BackupCreated["💾 Safety Backup<br/>━━━━━━━━━━━━━━━<br/>Created BEFORE resolution<br/>User can restore if needed"]
+    end
+
+    Resolution --> Notification
+    Resolution --> Backup
+
+    style Snack fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+    style BackupCreated fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+### 2d.7 Key Implementation Details
+
+| Aspect                 | Implementation                                                              |
+| ---------------------- | --------------------------------------------------------------------------- |
+| **Timestamp Source**   | `Math.max(...Object.values(vectorClock))` - max timestamp from vector clock |
+| **Tie Breaker**        | Remote wins (ensures convergence across all clients)                        |
+| **Safety Backup**      | Created via `BackupService` before any resolution                           |
+| **Local Win Update**   | New `OpType.UPD` operation created with merged vector clock                 |
+| **Vector Clock Merge** | `mergeVectorClocks(localClock, remoteClock)` for local-win ops              |
+| **Entity State**       | Retrieved from NgRx store via entity-specific selectors                     |
+| **Notification**       | Non-blocking snackbar showing count of resolved conflicts                   |
+
+### 2d.8 Why LWW?
+
+```mermaid
+flowchart TB
+    subgraph Problem["❌ Manual Resolution (Old Approach)"]
+        P1["User sees blocking dialog"]
+        P2["Must choose: local or remote"]
+        P3["Interrupts workflow"]
+        P4["Confusing for non-technical users"]
+        P5["Can cause sync to stall"]
+    end
+
+    subgraph Solution["✅ LWW Auto-Resolution (New Approach)"]
+        S1["Automatic, instant resolution"]
+        S2["Based on objective criteria (time)"]
+        S3["Non-blocking notification"]
+        S4["Safety backup available"]
+        S5["All clients converge to same state"]
+    end
+
+    subgraph Tradeoff["⚖️ Tradeoff"]
+        T1["Occasionally 'wrong' winner<br/>(user's intent may differ from timestamp)"]
+        T2["Mitigated by: undo, backup,<br/>and generally rare conflicts"]
+    end
+
+    Problem --> Solution
+    Solution --> Tradeoff
+
+    style Problem fill:#ffebee,stroke:#c62828,stroke-width:2px
+    style Solution fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Tradeoff fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
+```
 
 ---
 

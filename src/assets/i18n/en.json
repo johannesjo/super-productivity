@@ -1232,7 +1232,8 @@
         "RESTORE_SUCCESS": "Data restored successfully",
         "RESTORE_ERROR": "Failed to restore data",
         "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated.",
-        "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed."
+        "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed.",
+        "LWW_CONFLICTS_AUTO_RESOLVED": "Sync conflicts auto-resolved: {{localWins}} local win(s), {{remoteWins}} remote win(s)"
       },
       "D_DATA_REPAIRED": {
         "TITLE": "Data Repair Executed",

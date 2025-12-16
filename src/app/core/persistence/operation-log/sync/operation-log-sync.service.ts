@@ -82,7 +82,7 @@ import { SuperSyncStatusService } from './super-sync-status.service';
  * │  2. Filter ops invalidated by SYNC_IMPORT                              │
  * │  3. Full-state op? → Skip conflict detection, apply directly           │
  * │  4. Conflict detection via vector clocks                               │
- * │  5. Conflicts? → Present dialog, piggyback non-conflicting ops         │
+ * │  5. Conflicts? → Auto-resolve with LWW, piggyback non-conflicting ops  │
  * │  6. No conflicts? → Apply ops directly                                 │
  * │  7. Validate state (Checkpoint D)                                      │
  * └─────────────────────────────────────────────────────────────────────────┘
@@ -848,18 +848,22 @@ export class OperationLogSyncService {
     );
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STEP 5: Handle Results - Apply or Present Conflicts
+    // STEP 5: Handle Results - Auto-Resolve Conflicts with LWW
     // IMPORTANT: If conflicts exist, we must NOT apply non-conflicting ops first.
     // They may depend on entities in the conflict (e.g., Task depends on Project).
     // Instead, piggyback them to ConflictResolutionService for batched application.
     // ─────────────────────────────────────────────────────────────────────────
     if (conflicts.length > 0) {
       OpLog.warn(
-        `OperationLogSyncService: Detected ${conflicts.length} conflicts. Showing dialog before applying any ops.`,
+        `OperationLogSyncService: Detected ${conflicts.length} conflicts. Auto-resolving with LWW.`,
         conflicts,
       );
+      // Auto-resolve conflicts using Last-Write-Wins strategy
       // Piggyback non-conflicting ops so they're applied with resolved conflicts
-      await this.conflictResolutionService.presentConflicts(conflicts, nonConflicting);
+      await this.conflictResolutionService.autoResolveConflictsLWW(
+        conflicts,
+        nonConflicting,
+      );
       return;
     }
 
