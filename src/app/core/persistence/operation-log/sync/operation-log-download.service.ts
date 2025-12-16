@@ -216,6 +216,14 @@ export class OperationLogDownloadService {
         sinceSeq = response.ops[response.ops.length - 1].serverSeq;
         hasMore = response.hasMore;
 
+        // Monotonicity check: warn if server seq decreased (indicates potential server bug)
+        if (response.latestSeq < lastServerSeq) {
+          OpLog.warn(
+            `OperationLogDownloadService: Server sequence decreased from ${lastServerSeq} to ${response.latestSeq}. ` +
+              `This may indicate a server bug or data loss.`,
+          );
+        }
+
         // Update the last known server seq
         await syncProvider.setLastServerSeq(response.latestSeq);
       }

@@ -7,7 +7,21 @@ import { ModelValidationError } from '../errors/errors';
 // type ExtractModelType<T extends ModelCfg<unknown>> = T extends ModelCfg<infer U> ? U : never;
 
 /**
- * Controller for handling model data operations
+ * Controller for handling model data operations.
+ *
+ * ## Cache Behavior Note
+ * This controller maintains an in-memory cache (`_inMemoryData`) that is updated
+ * on save() and read on load(). However, when SuperSync is enabled, persistence
+ * happens via NgRx effects -> OperationLogEffects -> SUP_OPS database, NOT via
+ * this controller's save() method.
+ *
+ * This means the cache becomes stale when using SuperSync. To work around this:
+ * - `Pfapi.getAllSyncModelData()` uses a delegate that reads from NgRx store
+ *   instead of ModelCtrl caches (see `setGetAllSyncModelDataFromStoreDelegate`)
+ * - Legacy sync providers (WebDAV, Dropbox, LocalFile) still use this cache
+ *
+ * When legacy sync is deprecated, this cache mechanism should be revisited.
+ *
  * @template MT - Model type that extends ModelBase
  */
 export class ModelCtrl<MT extends ModelBase> {

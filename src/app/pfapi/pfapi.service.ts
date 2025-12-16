@@ -42,6 +42,7 @@ import { incrementVectorClock } from './api/util/vector-clock';
 import { uuidv7 } from '../util/uuid-v7';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
 import { VectorClockService } from '../core/persistence/operation-log/sync/vector-clock.service';
+import { SnackService } from '../core/snack/snack.service';
 
 @Injectable({
   providedIn: 'root',
@@ -55,6 +56,7 @@ export class PfapiService {
   private _storeDelegateService = inject(PfapiStoreDelegateService);
   private _opLogStore = inject(OperationLogStoreService);
   private _vectorClockService = inject(VectorClockService);
+  private _snackService = inject(SnackService);
 
   public readonly pf = new Pfapi(PFAPI_MODEL_CFGS, PFAPI_SYNC_PROVIDERS, PFAPI_CFG);
   public readonly m: ModelCfgToModelCtrl<PfapiAllModelCfg> = this.pf.m;
@@ -182,6 +184,15 @@ export class PfapiService {
     this.pf.setGetAllSyncModelDataFromStoreDelegate(() =>
       this._storeDelegateService.getAllSyncModelDataFromStore(),
     );
+
+    // Notify user when save is blocked during sync
+    this.pf.ev.on('saveBlocked', ({ key }) => {
+      PFLog.warn(`PfapiService: Save blocked for ${key} during sync`);
+      this._snackService.open({
+        msg: T.GLOBAL_SNACK.SAVE_BLOCKED_DURING_SYNC,
+        type: 'CUSTOM',
+      });
+    });
   }
 
   async importCompleteBackup(

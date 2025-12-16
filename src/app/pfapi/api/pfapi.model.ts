@@ -200,7 +200,8 @@ export type PfapiEvents =
   | 'providerChange'
   | 'providerPrivateCfgChange'
   | 'providerReady'
-  | 'onBeforeUpdateLocal';
+  | 'onBeforeUpdateLocal'
+  | 'saveBlocked';
 
 export type SyncStatusChangePayload =
   | 'UNKNOWN_OR_CHANGED'
@@ -226,6 +227,7 @@ export interface PfapiEventPayloadMap {
     backup: CompleteBackup<any>;
     modelsToUpdate?: string[];
   };
+  saveBlocked: { key: string };
 }
 
 export interface EncryptAndCompressCfg {

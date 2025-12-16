@@ -9,10 +9,16 @@ export class Database {
   private _isLocked: boolean = false;
   private readonly _adapter: DatabaseAdapter;
   private readonly _onError: (e: Error) => void;
+  private readonly _onSaveBlocked?: (key: string) => void;
 
-  constructor(_cfg: { onError: (e: Error) => void; adapter: DatabaseAdapter }) {
+  constructor(_cfg: {
+    onError: (e: Error) => void;
+    adapter: DatabaseAdapter;
+    onSaveBlocked?: (key: string) => void;
+  }) {
     this._adapter = _cfg.adapter;
     this._onError = _cfg.onError;
+    this._onSaveBlocked = _cfg.onSaveBlocked;
     this._init().catch((e) => this._onError(e));
   }
 
@@ -49,6 +55,9 @@ export class Database {
   async save<T>(key: string, data: T, isIgnoreDBLock = false): Promise<void> {
     this._lastParams = { a: 'save', key, data };
     if (this._isLocked && !isIgnoreDBLock) {
+      PFLog.warn(
+        `${Database.L}.save() BLOCKED for '${key}' - Database is locked during sync`,
+      );
       console.trace();
       devError(`Attempting to write DB for ${key} while locked`);
       PFLog.critical(`${Database.L}.save() BLOCKED!!! - Database is locked!`, {
@@ -64,6 +73,7 @@ export class Database {
             : undefined,
         data,
       });
+      this._onSaveBlocked?.(key);
       return;
     }
     try {

@@ -1,7 +1,6 @@
 import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom } from 'rxjs';
+import { TranslateService } from '@ngx-translate/core';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
   ConflictResult,
@@ -39,8 +38,6 @@ import {
   OperationDependency,
 } from './dependency-resolver.service';
 import { sortOperationsByDependency } from '../processing/sort-operations-by-dependency.util';
-import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
-import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait-state.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { uuidv7 } from '../../../../util/uuid-v7';
@@ -129,8 +126,7 @@ export class OperationLogSyncService {
   private schemaMigrationService = inject(SchemaMigrationService);
   private snackService = inject(SnackService);
   private dependencyResolver = inject(DependencyResolverService);
-  private dialog = inject(MatDialog);
-  private userInputWaitState = inject(UserInputWaitStateService);
+  private translateService = inject(TranslateService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private lockService = inject(LockService);
   private compactionService = inject(OperationLogCompactionService);
@@ -317,7 +313,7 @@ export class OperationLogSyncService {
         `OperationLogSyncService: Fresh client detected. Requesting confirmation before accepting ${result.newOps.length} remote ops.`,
       );
 
-      const confirmed = await this._showFreshClientSyncConfirmation(result.newOps.length);
+      const confirmed = this._showFreshClientSyncConfirmation(result.newOps.length);
       if (!confirmed) {
         OpLog.normal(
           'OperationLogSyncService: User cancelled fresh client sync. Remote data not applied.',
@@ -344,28 +340,18 @@ export class OperationLogSyncService {
 
   /**
    * Shows a confirmation dialog for fresh client sync.
-   * Asks user to confirm before accepting remote data on a fresh install.
+   * Uses synchronous window.confirm() to prevent race conditions where
+   * pending operations could be added during an async dialog.
    */
-  private async _showFreshClientSyncConfirmation(opCount: number): Promise<boolean> {
-    // Signal that we're waiting for user input to prevent sync timeout
-    const stopWaiting = this.userInputWaitState.startWaiting('fresh-client-confirm');
-    try {
-      const dialogRef = this.dialog.open(DialogConfirmComponent, {
-        restoreFocus: true,
-        data: {
-          title: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE,
-          message: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE,
-          translateParams: { count: opCount },
-          okTxt: T.F.SYNC.D_FRESH_CLIENT_CONFIRM.OK,
-          cancelTxt: T.G.CANCEL,
-        },
-      });
-
-      const result = await firstValueFrom(dialogRef.afterClosed());
-      return result === true;
-    } finally {
-      stopWaiting();
-    }
+  private _showFreshClientSyncConfirmation(opCount: number): boolean {
+    const title = this.translateService.instant(T.F.SYNC.D_FRESH_CLIENT_CONFIRM.TITLE);
+    const message = this.translateService.instant(
+      T.F.SYNC.D_FRESH_CLIENT_CONFIRM.MESSAGE,
+      {
+        count: opCount,
+      },
+    );
+    return window.confirm(`${title}\n\n${message}`);
   }
 
   /**
@@ -1184,6 +1170,17 @@ export class OperationLogSyncService {
   /**
    * Adjusts comparison result for potential per-entity clock corruption.
    * Converts LESS_THAN to CONCURRENT if corruption is suspected.
+   *
+   * ## Known Limitation
+   * This only handles LESS_THAN corruption (where local ops would be incorrectly
+   * skipped). GREATER_THAN corruption (where remote ops would be skipped) is NOT
+   * handled because:
+   * 1. It's extremely rare (requires specific corruption pattern)
+   * 2. Local pending ops will eventually sync on next sync cycle
+   * 3. Adding complexity for this edge case isn't worth the risk of introducing bugs
+   *
+   * If you encounter data loss from GREATER_THAN corruption, a full re-sync
+   * (clear local data and download from server) will restore consistency.
    */
   private _adjustForClockCorruption(
     comparison: VectorClockComparison,

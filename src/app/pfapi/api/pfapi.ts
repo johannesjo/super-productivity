@@ -103,6 +103,7 @@ export class Pfapi<const MD extends ModelCfgs> {
           dbMainName: 'main',
           version: 1,
         }),
+      onSaveBlocked: (key: string) => this.ev.emit('saveBlocked', { key }),
     });
 
     this.tmpBackupService = new TmpBackupService<AllSyncModels<MD>>(this.db);
