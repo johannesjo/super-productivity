@@ -44,8 +44,7 @@ export const CLICKUP_ISSUE_CONTENT_CONFIG: IssueContentConfig<ClickUpTask> = {
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: ClickUpTask) => !!issue.markdown_description,
     },
+    // TODO: Add comments (activity)
   ],
-  // Comments usually require parsing comment data structure which we haven't defined deeply
-  // For now let's might irrelevant or we can just leave it out
   getIssueUrl: (issue) => issue.url,
 };
