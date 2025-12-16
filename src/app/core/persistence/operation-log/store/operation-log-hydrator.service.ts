@@ -179,11 +179,13 @@ export class OperationLogHydratorService {
               `OperationLogHydratorService: Replaying ${opsToReplay.length} tail ops ` +
                 `(${droppedCount} dropped during migration).`,
             );
-            // Use OperationApplierService to handle dependency resolution during replay.
-            // This ensures operations referencing deleted entities are handled gracefully
-            // rather than throwing errors (e.g., adding subtask to deleted parent).
-            const tailReplayResult =
-              await this.operationApplierService.applyOperations(opsToReplay);
+            // Use OperationApplierService with isLocalHydration=true to skip dependency
+            // checks and archive handling. These operations were already validated when
+            // created, and archive data is already persisted from original execution.
+            const tailReplayResult = await this.operationApplierService.applyOperations(
+              opsToReplay,
+              { isLocalHydration: true },
+            );
             if (tailReplayResult.failedOp) {
               throw tailReplayResult.failedOp.error;
             }
@@ -257,11 +259,13 @@ export class OperationLogHydratorService {
             `OperationLogHydratorService: Replaying all ${opsToReplay.length} ops ` +
               `(${droppedCount} dropped during migration).`,
           );
-          // Use OperationApplierService to handle dependency resolution during replay.
-          // This ensures operations referencing deleted entities are handled gracefully
-          // rather than throwing errors (e.g., adding subtask to deleted parent).
-          const fullReplayResult =
-            await this.operationApplierService.applyOperations(opsToReplay);
+          // Use OperationApplierService with isLocalHydration=true to skip dependency
+          // checks and archive handling. These operations were already validated when
+          // created, and archive data is already persisted from original execution.
+          const fullReplayResult = await this.operationApplierService.applyOperations(
+            opsToReplay,
+            { isLocalHydration: true },
+          );
           if (fullReplayResult.failedOp) {
             throw fullReplayResult.failedOp.error;
           }

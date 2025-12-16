@@ -311,9 +311,10 @@ describe('OperationLogHydratorService', () => {
 
         // First dispatch is snapshot
         expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
-        // Then tail ops are replayed via applier service
+        // Then tail ops are replayed via applier service with isLocalHydration=true
         expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
           tailOps.map((e) => e.op),
+          { isLocalHydration: true },
         );
       });
 
@@ -759,9 +760,10 @@ describe('OperationLogHydratorService', () => {
 
         // No snapshot dispatch
         expect(mockStore.dispatch).not.toHaveBeenCalled();
-        // Replay all ops via applier service
+        // Replay all ops via applier service with isLocalHydration=true
         expect(mockOperationApplierService.applyOperations).toHaveBeenCalledWith(
           allOps.map((e) => e.op),
+          { isLocalHydration: true },
         );
       });
 

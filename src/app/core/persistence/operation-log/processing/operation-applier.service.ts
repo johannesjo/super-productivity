@@ -32,6 +32,21 @@ export interface ApplyOperationsResult {
 }
 
 /**
+ * Options for applying operations to the NgRx store.
+ */
+export interface ApplyOperationsOptions {
+  /**
+   * When true, skip dependency checking and archive handling.
+   * Use ONLY for local hydration where operations are replaying
+   * previously validated local operations from SUP_OPS.
+   *
+   * SAFETY: This flag should NEVER be used for remote operations.
+   * Remote ops need dependency validation for correctness.
+   */
+  isLocalHydration?: boolean;
+}
+
+/**
  * Service responsible for applying operations to the local NgRx store.
  *
  * ## Design Philosophy: Fail Fast, Re-sync Clean
@@ -69,18 +84,33 @@ export class OperationApplierService {
    * Operations are applied in order. If any operation fails, the result includes
    * information about which operations succeeded and which failed.
    *
+   * @param ops Operations to apply
+   * @param options Configuration options. Use `isLocalHydration: true` for
+   *                replaying local operations (skips dependency checks and archive handling).
    * @returns Result containing applied operations and optionally the failed operation.
    *          Callers should:
    *          - Mark `appliedOps` as applied (they've been dispatched to NgRx)
    *          - Mark the failed op and any remaining ops as failed
    */
-  async applyOperations(ops: Operation[]): Promise<ApplyOperationsResult> {
+  async applyOperations(
+    ops: Operation[],
+    options: ApplyOperationsOptions = {},
+  ): Promise<ApplyOperationsResult> {
     if (ops.length === 0) {
       return { appliedOps: [] };
     }
 
-    OpLog.normal(
-      'OperationApplierService: Applying operations:',
+    const isLocalHydration = options.isLocalHydration ?? false;
+
+    if (isLocalHydration) {
+      OpLog.normal(
+        `OperationApplierService: Hydrating ${ops.length} local operations (fast path)`,
+      );
+    } else {
+      OpLog.normal(`OperationApplierService: Applying ${ops.length} operations`);
+    }
+    OpLog.verbose(
+      'OperationApplierService: Operation IDs:',
       ops.map((op) => op.id),
     );
 
@@ -91,7 +121,7 @@ export class OperationApplierService {
     try {
       for (const op of ops) {
         try {
-          await this._applyOperation(op);
+          await this._applyOperation(op, isLocalHydration);
           appliedOps.push(op);
         } catch (e) {
           // Log the error
@@ -122,39 +152,49 @@ export class OperationApplierService {
   /**
    * Apply a single operation, checking dependencies first.
    * Throws SyncStateCorruptedError if hard dependencies are missing.
+   *
+   * @param op Operation to apply
+   * @param isLocalHydration When true, skip dependency checks and archive handling.
+   *                         Used for replaying local operations that were already validated.
    */
-  private async _applyOperation(op: Operation): Promise<void> {
-    const deps = this.dependencyResolver.extractDependencies(op);
-    const { missing } = await this.dependencyResolver.checkDependencies(deps);
+  private async _applyOperation(op: Operation, isLocalHydration: boolean): Promise<void> {
+    // FAST PATH: Local hydration skips dependency checks and archive handling.
+    // These operations were already validated when created, and archive data
+    // is already persisted in IndexedDB from the original execution.
+    if (!isLocalHydration) {
+      // STANDARD PATH: Full validation for remote operations
+      const deps = this.dependencyResolver.extractDependencies(op);
+      const { missing } = await this.dependencyResolver.checkDependencies(deps);
 
-    // Only hard dependencies block application
-    const missingHardDeps = missing.filter((dep) => dep.mustExist);
+      // Only hard dependencies block application
+      const missingHardDeps = missing.filter((dep) => dep.mustExist);
 
-    if (missingHardDeps.length > 0) {
-      const missingDepIds = missingHardDeps.map((d) => `${d.entityType}:${d.entityId}`);
+      if (missingHardDeps.length > 0) {
+        const missingDepIds = missingHardDeps.map((d) => `${d.entityType}:${d.entityId}`);
 
-      OpLog.err(
-        'OperationApplierService: Operation has missing hard dependencies. ' +
-          'This indicates corrupted sync state - a full re-sync is required.',
-        {
-          opId: op.id,
-          actionType: op.actionType,
-          missingDeps: missingDepIds,
-        },
-      );
+        OpLog.err(
+          'OperationApplierService: Operation has missing hard dependencies. ' +
+            'This indicates corrupted sync state - a full re-sync is required.',
+          {
+            opId: op.id,
+            actionType: op.actionType,
+            missingDeps: missingDepIds,
+          },
+        );
 
-      throw new SyncStateCorruptedError(
-        `Operation ${op.id} cannot be applied: missing hard dependencies [${missingDepIds.join(', ')}]. ` +
-          'This indicates corrupted sync state. A full re-sync is required to restore consistency.',
-        {
-          opId: op.id,
-          actionType: op.actionType,
-          missingDependencies: missingDepIds,
-        },
-      );
+        throw new SyncStateCorruptedError(
+          `Operation ${op.id} cannot be applied: missing hard dependencies [${missingDepIds.join(', ')}]. ` +
+            'This indicates corrupted sync state. A full re-sync is required to restore consistency.',
+          {
+            opId: op.id,
+            actionType: op.actionType,
+            missingDependencies: missingDepIds,
+          },
+        );
+      }
     }
 
-    // Dependencies satisfied, apply the operation
+    // Dependencies satisfied (or skipped for hydration), apply the operation
     const action = convertOpToAction(op);
 
     OpLog.verbose(
@@ -164,8 +204,10 @@ export class OperationApplierService {
     );
     this.store.dispatch(action);
 
-    // Handle archive-specific side effects for remote operations
-    // This is called AFTER dispatch because the NgRx state must be updated first
-    await this.archiveOperationHandler.handleOperation(action);
+    // Archive handling - only needed for remote operations.
+    // Local ops already have archive data persisted from original execution.
+    if (!isLocalHydration) {
+      await this.archiveOperationHandler.handleOperation(action);
+    }
   }
 }
