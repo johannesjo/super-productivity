@@ -45,8 +45,8 @@ graph TD
 
     subgraph "Archive Storage (IndexedDB: PFAPI)"
         ArchiveWrite["ArchiveService<br/><sub>time-tracking/archive.service.ts</sub>"]:::archive
-        ArchiveWrite -->|Write BEFORE dispatch| ArchiveYoung["archiveYoung<br/>Recent tasks<br/><sub>< 6 months</sub>"]:::archive
-        ArchiveYoung -->|Flush when old| ArchiveOld["archiveOld<br/>Older tasks<br/><sub>> 6 months</sub>"]:::archive
+        ArchiveWrite -->|Write BEFORE dispatch| ArchiveYoung["archiveYoung<br/>Recent tasks<br/><sub>< 21 days old</sub>"]:::archive
+        ArchiveYoung -->|Flush every ~14 days| ArchiveOld["archiveOld<br/>Older tasks<br/><sub>> 21 days old</sub>"]:::archive
         ArchiveOld -->|Contains| TimeTracking["Time Tracking Data<br/>timeSpentOnDay entries"]:::archive
     end
 
@@ -100,7 +100,7 @@ graph TD
 **Archive Data Flow Notes:**
 
 - **Archive writes happen BEFORE dispatch**: When a user archives tasks, `ArchiveService` writes to IndexedDB first, then dispatches the `moveToArchive` action. This ensures data is safely stored before state updates.
-- **Two-tier archive**: Recent tasks go to `archiveYoung` (< 6 months). Older tasks are flushed to `archiveOld` via `flushYoungToOld`.
+- **Two-tier archive**: Recent tasks go to `archiveYoung`. Tasks older than 21 days are flushed to `archiveOld` via `flushYoungToOld` (checked every ~14 days when archiving tasks).
 - **Time tracking data**: Stored with archived tasks as `timeSpentOnDay` entries.
 - **Not in NgRx state**: Archive data is stored directly in IndexedDB (via PFAPI), not in the NgRx store. Only the operation (moveToArchive) is logged for sync.
 - **Sync handling**: On remote clients, `ArchiveOperationHandler` writes archive data AFTER receiving the operation (see Section 8).
@@ -947,8 +947,8 @@ flowchart TB
 
         subgraph PFAPI["PFAPI Database (Legacy + Archive)"]
             direction TB
-            ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>Recent archived tasks<br/>less than 6 months old"]
-            ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>Older archived tasks<br/>more than 6 months old"]
+            ArchiveYoung["archiveYoung<br/>━━━━━━━━━━━━━━━<br/>Recent archived tasks<br/>less than 21 days old"]
+            ArchiveOld["archiveOld<br/>━━━━━━━━━━━━━━━<br/>Older archived tasks<br/>flushed every ~14 days"]
             TimeTracking["Time Tracking Data<br/>━━━━━━━━━━━━━━━<br/>timeSpentOnDay entries<br/>stored with tasks"]
             MetaModel["META_MODEL<br/>━━━━━━━━━━━━━━━<br/>Vector clocks for<br/>legacy sync providers"]
             OtherModels["Other Models<br/>━━━━━━━━━━━━━━━<br/>globalConfig, etc.<br/>legacy storage"]
