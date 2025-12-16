@@ -879,5 +879,117 @@ describe('shortSyntaxSharedMetaReducer', () => {
       // timeSpent should remain unchanged (default 0)
       expect(updatedTask.timeSpent).toBe(0);
     });
+
+    it('should update parent task timeEstimate when subtask estimate is set', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+
+      // Create parent-subtask relationship
+      const stateWithSubtask = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          ids: ['parent1', 'subtask1'],
+          entities: {
+            parent1: {
+              ...createMockTask({ id: 'parent1' }),
+              subTaskIds: ['subtask1'],
+              timeEstimate: 0,
+              timeSpent: 0,
+            } as Task,
+            subtask1: {
+              ...createMockTask({ id: 'subtask1' }),
+              parentId: 'parent1',
+              subTaskIds: [],
+              timeEstimate: 0,
+              timeSpent: 0,
+              isDone: false,
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const subtask = createMockTask({
+        id: 'subtask1',
+        parentId: 'parent1',
+      });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task: subtask,
+        taskChanges: {
+          timeEstimate: 7200000, // 2 hours
+        },
+      });
+
+      metaReducer(stateWithSubtask, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedSubtask = calledState[TASK_FEATURE_NAME].entities.subtask1 as Task;
+      const updatedParent = calledState[TASK_FEATURE_NAME].entities.parent1 as Task;
+
+      // Subtask should have the estimate
+      expect(updatedSubtask.timeEstimate).toBe(7200000);
+
+      // Parent should have aggregated estimate (remaining = estimate - timeSpent)
+      expect(updatedParent.timeEstimate).toBe(7200000);
+    });
+
+    it('should calculate parent timeEstimate as remaining time across subtasks', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+
+      // Create parent with two subtasks, one partially done
+      const stateWithSubtasks = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          ids: ['parent1', 'subtask1', 'subtask2'],
+          entities: {
+            parent1: {
+              ...createMockTask({ id: 'parent1' }),
+              subTaskIds: ['subtask1', 'subtask2'],
+              timeEstimate: 0,
+            } as Task,
+            subtask1: {
+              ...createMockTask({ id: 'subtask1' }),
+              parentId: 'parent1',
+              subTaskIds: [],
+              timeEstimate: 3600000, // 1 hour estimate
+              timeSpent: 1800000, // 30 min spent
+              isDone: false,
+            } as Task,
+            subtask2: {
+              ...createMockTask({ id: 'subtask2' }),
+              parentId: 'parent1',
+              subTaskIds: [],
+              timeEstimate: 0,
+              timeSpent: 0,
+              isDone: false,
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const subtask2 = createMockTask({
+        id: 'subtask2',
+        parentId: 'parent1',
+      });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task: subtask2,
+        taskChanges: {
+          timeEstimate: 7200000, // 2 hours for subtask2
+        },
+      });
+
+      metaReducer(stateWithSubtasks, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedParent = calledState[TASK_FEATURE_NAME].entities.parent1 as Task;
+
+      // Parent estimate = (subtask1 remaining) + (subtask2 remaining)
+      // subtask1: max(0, 3600000 - 1800000) = 1800000 (30 min remaining)
+      // subtask2: max(0, 7200000 - 0) = 7200000 (2 hours remaining)
+      // Total: 9000000 (2.5 hours)
+      expect(updatedParent.timeEstimate).toBe(9000000);
+    });
   });
 });
