@@ -623,4 +623,261 @@ describe('shortSyntaxSharedMetaReducer', () => {
       expect(plannerState.days[day2]).toContain('task1');
     });
   });
+
+  describe('applyShortSyntax action - timeSpent calculation', () => {
+    it('should calculate timeSpent from timeSpentOnDay', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const task = createMockTask({ id: 'task1', projectId: 'project1' });
+      const today = getDbDateStr();
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          title: 'Updated Title',
+          timeSpentOnDay: { [today]: 3600000 }, // 1 hour
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      expect(updatedTask.timeSpentOnDay[today]).toBe(3600000);
+      expect(updatedTask.timeSpent).toBe(3600000);
+    });
+
+    it('should merge timeSpentOnDay with existing values and recalculate timeSpent', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const yesterday = '2023-12-05';
+      const today = getDbDateStr();
+
+      // Set up task with existing timeSpentOnDay
+      const stateWithExistingTime = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          entities: {
+            ...testState[TASK_FEATURE_NAME].entities,
+            task1: {
+              ...testState[TASK_FEATURE_NAME].entities.task1,
+              timeSpentOnDay: { [yesterday]: 1800000 }, // 30 min from yesterday
+              timeSpent: 1800000,
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const task = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        timeSpentOnDay: { [yesterday]: 1800000 },
+        timeSpent: 1800000,
+      });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          timeSpentOnDay: { [today]: 3600000 }, // Add 1 hour today
+        },
+      });
+
+      metaReducer(stateWithExistingTime, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      // Should have both days' time
+      expect(updatedTask.timeSpentOnDay[yesterday]).toBe(1800000);
+      expect(updatedTask.timeSpentOnDay[today]).toBe(3600000);
+      // Total should be sum of both days
+      expect(updatedTask.timeSpent).toBe(5400000); // 1.5 hours total
+    });
+
+    it('should update parent task timeSpent when subtask time is set', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const today = getDbDateStr();
+
+      // Create parent-subtask relationship
+      const stateWithSubtask = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          ids: ['parent1', 'subtask1'],
+          entities: {
+            parent1: {
+              ...createMockTask({ id: 'parent1' }),
+              subTaskIds: ['subtask1'],
+              timeSpentOnDay: {},
+              timeSpent: 0,
+            } as Task,
+            subtask1: {
+              ...createMockTask({ id: 'subtask1' }),
+              parentId: 'parent1',
+              subTaskIds: [],
+              timeSpentOnDay: {},
+              timeSpent: 0,
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const subtask = createMockTask({
+        id: 'subtask1',
+        parentId: 'parent1',
+      });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task: subtask,
+        taskChanges: {
+          timeSpentOnDay: { [today]: 3600000 }, // 1 hour
+        },
+      });
+
+      metaReducer(stateWithSubtask, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedSubtask = calledState[TASK_FEATURE_NAME].entities.subtask1 as Task;
+      const updatedParent = calledState[TASK_FEATURE_NAME].entities.parent1 as Task;
+
+      // Subtask should have the time
+      expect(updatedSubtask.timeSpentOnDay[today]).toBe(3600000);
+      expect(updatedSubtask.timeSpent).toBe(3600000);
+
+      // Parent should aggregate subtask time
+      expect(updatedParent.timeSpentOnDay[today]).toBe(3600000);
+      expect(updatedParent.timeSpent).toBe(3600000);
+    });
+
+    it('should handle timeSpentOnDay with other task changes', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const task = createMockTask({ id: 'task1', projectId: 'project1' });
+      const today = getDbDateStr();
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          title: 'Updated Title',
+          timeEstimate: 7200000, // 2 hours estimate
+          timeSpentOnDay: { [today]: 3600000 }, // 1 hour spent
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      expect(updatedTask.title).toBe('Updated Title');
+      expect(updatedTask.timeEstimate).toBe(7200000);
+      expect(updatedTask.timeSpentOnDay[today]).toBe(3600000);
+      expect(updatedTask.timeSpent).toBe(3600000);
+    });
+
+    it('should handle timeSpentOnDay with scheduling', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const today = getDbDateStr();
+
+      const stateWithTask = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          entities: {
+            ...testState[TASK_FEATURE_NAME].entities,
+            task1: {
+              ...testState[TASK_FEATURE_NAME].entities.task1,
+              tagIds: [] as string[],
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const task = createMockTask({ id: 'task1', projectId: 'project1', tagIds: [] });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          title: 'Scheduled task',
+          timeSpentOnDay: { [today]: 1800000 }, // 30 min
+        },
+        schedulingInfo: { day: today },
+      });
+
+      metaReducer(stateWithTask, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      expect(updatedTask.title).toBe('Scheduled task');
+      expect(updatedTask.timeSpentOnDay[today]).toBe(1800000);
+      expect(updatedTask.timeSpent).toBe(1800000);
+      expect(updatedTask.dueDay).toBe(today);
+    });
+
+    it('should overwrite timeSpentOnDay for same day and recalculate total', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const today = getDbDateStr();
+
+      // Set up task with existing timeSpentOnDay for today
+      const stateWithExistingTime = {
+        ...testState,
+        [TASK_FEATURE_NAME]: {
+          ...testState[TASK_FEATURE_NAME],
+          entities: {
+            ...testState[TASK_FEATURE_NAME].entities,
+            task1: {
+              ...testState[TASK_FEATURE_NAME].entities.task1,
+              timeSpentOnDay: { [today]: 1800000 }, // 30 min existing
+              timeSpent: 1800000,
+            } as Task,
+          },
+        },
+      } as RootState;
+
+      const task = createMockTask({
+        id: 'task1',
+        projectId: 'project1',
+        timeSpentOnDay: { [today]: 1800000 },
+        timeSpent: 1800000,
+      });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          timeSpentOnDay: { [today]: 7200000 }, // Overwrite with 2 hours
+        },
+      });
+
+      metaReducer(stateWithExistingTime, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      // Should overwrite, not add
+      expect(updatedTask.timeSpentOnDay[today]).toBe(7200000);
+      expect(updatedTask.timeSpent).toBe(7200000);
+    });
+
+    it('should handle empty timeSpentOnDay gracefully', () => {
+      const testState = createStateWithExistingTasks(['task1'], [], [], []);
+      const task = createMockTask({ id: 'task1', projectId: 'project1' });
+
+      const action = TaskSharedActions.applyShortSyntax({
+        task,
+        taskChanges: {
+          title: 'Updated Title',
+          // No timeSpentOnDay - should not affect existing values
+        },
+      });
+
+      metaReducer(testState, action);
+
+      const calledState = mockReducer.calls.mostRecent().args[0] as RootState;
+      const updatedTask = calledState[TASK_FEATURE_NAME].entities.task1 as Task;
+
+      expect(updatedTask.title).toBe('Updated Title');
+      // timeSpent should remain unchanged (default 0)
+      expect(updatedTask.timeSpent).toBe(0);
+    });
+  });
 });

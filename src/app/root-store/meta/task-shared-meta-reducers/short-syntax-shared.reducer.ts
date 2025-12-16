@@ -23,6 +23,7 @@ import {
   updateTags,
 } from './task-shared-helpers';
 import { filterOutId } from '../../../util/filter-out-id';
+import { updateTimeSpentForTask } from '../../../features/tasks/store/task.reducer.util';
 
 // Type for mutable task changes within the reducer
 type MutableTaskChanges = { -readonly [K in keyof Task]?: Task[K] };
@@ -110,17 +111,31 @@ const handleApplyShortSyntax = (
     }
   }
 
-  // Step 3: Apply all task changes at once
-  updatedState = {
-    ...updatedState,
-    [TASK_FEATURE_NAME]: taskAdapter.updateOne(
-      {
-        id: task.id,
-        changes: finalTaskChanges,
-      },
-      updatedState[TASK_FEATURE_NAME],
-    ),
-  };
+  // Step 3: Apply all task changes
+  // Handle timeSpentOnDay separately to ensure proper timeSpent calculation and parent updates
+  let taskState = updatedState[TASK_FEATURE_NAME];
+
+  if (finalTaskChanges.timeSpentOnDay) {
+    // Merge with existing timeSpentOnDay
+    const mergedTimeSpentOnDay = {
+      ...(currentTask.timeSpentOnDay || {}),
+      ...finalTaskChanges.timeSpentOnDay,
+    };
+    // Use updateTimeSpentForTask which calculates timeSpent and handles parent aggregation
+    taskState = updateTimeSpentForTask(task.id, mergedTimeSpentOnDay, taskState);
+    // Remove timeSpentOnDay from finalTaskChanges since it's been handled
+    delete finalTaskChanges.timeSpentOnDay;
+  }
+
+  // Apply remaining changes
+  if (Object.keys(finalTaskChanges).length > 0) {
+    taskState = taskAdapter.updateOne(
+      { id: task.id, changes: finalTaskChanges },
+      taskState,
+    );
+  }
+
+  updatedState = { ...updatedState, [TASK_FEATURE_NAME]: taskState };
 
   return updatedState;
 };
