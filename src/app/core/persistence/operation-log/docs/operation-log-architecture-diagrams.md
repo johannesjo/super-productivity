@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 12, 2025
+**Last Updated:** December 16, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -20,6 +20,7 @@ graph TD
     classDef process fill:#e1f5fe,stroke:#0277bd,stroke-width:2px,color:black;
     classDef legacy fill:#fff3e0,stroke:#ef6c00,stroke-width:2px,stroke-dasharray: 5 5,color:black;
     classDef trigger fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px,color:black;
+    classDef archive fill:#e8eaf6,stroke:#3949ab,stroke-width:2px,color:black;
 
     User((User / UI)) -->|Dispatch Action| NgRx["NgRx Store <br/> Runtime Source of Truth<br/><sub>*.effects.ts / *.reducer.ts</sub>"]
 
@@ -35,12 +36,22 @@ graph TD
         PayloadValid -- Yes --> DBWrite
     end
 
-    subgraph "Persistence Layer (IndexedDB)"
+    subgraph "Persistence Layer (IndexedDB: SUP_OPS)"
         DBWrite["Write to SUP_OPS<br/><sub>store/operation-log-store.service.ts</sub>"]:::storage
 
         DBWrite -->|Append| OpsTable["Table: ops<br/>The Event Log<br/><sub>IndexedDB</sub>"]:::storage
         DBWrite -->|Update| StateCache["Table: state_cache<br/>Snapshots<br/><sub>IndexedDB</sub>"]:::storage
     end
+
+    subgraph "Archive Storage (IndexedDB: PFAPI)"
+        ArchiveWrite["ArchiveService<br/><sub>time-tracking/archive.service.ts</sub>"]:::archive
+        ArchiveWrite -->|Write BEFORE dispatch| ArchiveYoung["archiveYoung<br/>Recent tasks<br/><sub>< 6 months</sub>"]:::archive
+        ArchiveYoung -->|Flush when old| ArchiveOld["archiveOld<br/>Older tasks<br/><sub>> 6 months</sub>"]:::archive
+        ArchiveOld -->|Contains| TimeTracking["Time Tracking Data<br/>timeSpentOnDay entries"]:::archive
+    end
+
+    User -->|Archive Tasks| ArchiveWrite
+    NgRx -.->|moveToArchive action<br/>AFTER archive write| OpEffects
 
     subgraph "Legacy Bridge (PFAPI)"
         DBWrite -.->|3. Bridge| LegacyMeta["META_MODEL<br/>Vector Clock<br/><sub>pfapi.service.ts</sub>"]:::legacy
@@ -80,7 +91,16 @@ graph TD
 
     class OpsTable,StateCache storage;
     class LegacyMeta,LegacySync,noteLegacy legacy;
+    class ArchiveWrite,ArchiveYoung,ArchiveOld,TimeTracking archive;
 ```
+
+**Archive Data Flow Notes:**
+
+- **Archive writes happen BEFORE dispatch**: When a user archives tasks, `ArchiveService` writes to IndexedDB first, then dispatches the `moveToArchive` action. This ensures data is safely stored before state updates.
+- **Two-tier archive**: Recent tasks go to `archiveYoung` (< 6 months). Older tasks are flushed to `archiveOld` via `flushYoungToOld`.
+- **Time tracking data**: Stored with archived tasks as `timeSpentOnDay` entries.
+- **Not in NgRx state**: Archive data is stored directly in IndexedDB (via PFAPI), not in the NgRx store. Only the operation (moveToArchive) is logged for sync.
+- **Sync handling**: On remote clients, `ArchiveOperationHandler` writes archive data AFTER receiving the operation (see Section 8).
 
 ## 2. Operation Log Sync Architecture (Server Sync) ✅ IMPLEMENTED
 
