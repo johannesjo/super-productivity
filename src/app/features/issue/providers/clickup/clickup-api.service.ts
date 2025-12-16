@@ -1,13 +1,20 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders, HttpRequest, HttpParams } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { Observable, of, forkJoin } from 'rxjs';
-import { catchError, filter, map, switchMap } from 'rxjs/operators';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { ClickUpCfg } from './clickup.model';
-import { ClickUpTask, ClickUpTaskReduced } from './clickup-issue.model';
+import {
+  ClickUpTask,
+  ClickUpTaskReduced,
+  ClickUpTeamsResponse,
+  ClickUpTaskSearchResponse,
+  ClickUpUserResponse,
+} from './clickup-issue.model';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 import { CLICKUP_TYPE } from '../../issue.const';
 import { IssueLog } from '../../../../core/log';
+import typia from 'typia';
 
 const CLICKUP_API_URL = 'https://api.clickup.com/api/v2';
 
@@ -27,22 +34,20 @@ export class ClickUpApiService {
       url: `${CLICKUP_API_URL}/task/${taskId}`,
       params,
       cfg,
-    }).pipe(map((res) => res as ClickUpTask));
+      validator: (res) => typia.assert<ClickUpTask>(res),
+    });
   }
 
   getAuthorizedTeams$(cfg: ClickUpCfg): Observable<Array<{ id: string; name: string }>> {
     return this._sendRequest$({
       url: `${CLICKUP_API_URL}/team`,
       cfg,
-    }).pipe(
-      map((res: any) => {
-        const teams = res.teams || [];
-        return teams.map((team: any) => ({
+      validator: (res) =>
+        typia.assert<ClickUpTeamsResponse>(res).teams.map((team) => ({
           id: team.id,
           name: team.name,
-        }));
-      }),
-    );
+        })),
+    });
   }
 
   searchTasks$(searchTerm: string, cfg: ClickUpCfg): Observable<ClickUpTaskReduced[]> {
@@ -104,13 +109,13 @@ export class ClickUpApiService {
       url: `${CLICKUP_API_URL}/team/${teamId}/task`,
       params,
       cfg,
-    }).pipe(
-      map((res: any) => {
-        let tasks = res.tasks || [];
+      validator: (res) => {
+        const body = typia.assert<ClickUpTaskSearchResponse>(res);
+        let tasks = body.tasks;
         if (searchTerm.trim()) {
           const lowerSearchTerm = searchTerm.toLowerCase();
           tasks = tasks.filter(
-            (task: any) =>
+            (task) =>
               task.name.toLowerCase().includes(lowerSearchTerm) ||
               (task.custom_id &&
                 task.custom_id.toLowerCase().includes(lowerSearchTerm)) ||
@@ -118,63 +123,68 @@ export class ClickUpApiService {
           );
         }
         return tasks.map(this._mapToReduced);
-      }),
-    );
-  }
-
-  getCurrentUser$(cfg: ClickUpCfg): Observable<any> {
-    return this._sendRequest$({
-      url: `${CLICKUP_API_URL}/user`,
-      cfg,
+      },
     });
   }
 
-  private _sendRequest$({
-    url,
-    method = 'GET',
-    params = {},
-    body,
-    cfg,
-  }: {
-    url: string;
-    method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
-    params?: any;
-    body?: any;
-    cfg: ClickUpCfg;
-  }): Observable<any> {
-    const headers = new HttpHeaders({
+  getCurrentUser$(cfg: ClickUpCfg): Observable<ClickUpUserResponse> {
+    return this._sendRequest$({
+      url: `${CLICKUP_API_URL}/user`,
+      cfg,
+      validator: (res) => typia.assert<ClickUpUserResponse>(res),
+    });
+  }
+
+  private _getHeaders(cfg: ClickUpCfg): HttpHeaders {
+    return new HttpHeaders({
       // eslint-disable-next-line @typescript-eslint/naming-convention
       'Content-Type': 'application/json',
       Authorization: cfg.apiKey || '',
     });
-
-    const req = new HttpRequest(method, url, body, {
-      headers,
-      params,
-      reportProgress: false,
-    });
-
-    return this._http.request(req).pipe(
-      filter((res: any) => !(res === Object(res) && res.type === 0)),
-      map((res: any) => (res && res.body ? res.body : res)),
-      catchError((err) =>
-        handleIssueProviderHttpError$(CLICKUP_TYPE, this._snackService, err),
-      ),
-    );
   }
 
-  private _mapToReduced(task: any): ClickUpTaskReduced {
+  private _sendRequest$<T>({
+    url,
+    params,
+    cfg,
+    validator,
+  }: {
+    url: string;
+    params?: HttpParams;
+    cfg: ClickUpCfg;
+    validator?: (res: unknown) => T;
+  }): Observable<T> {
+    const headers = this._getHeaders(cfg);
+
+    return this._http
+      .get(url, {
+        headers,
+        params,
+        reportProgress: false,
+        observe: 'response',
+      })
+      .pipe(
+        map((res) => (res && res.body ? res.body : res)),
+        map((res) => {
+          if (validator) {
+            return validator(res);
+          }
+          return res as T;
+        }),
+        catchError((err) =>
+          handleIssueProviderHttpError$<T>(CLICKUP_TYPE, this._snackService, err),
+        ),
+      );
+  }
+
+  private _mapToReduced(task: ClickUpTask): ClickUpTaskReduced {
     return {
       id: task.id,
       name: task.name,
-      custom_id: task.custom_id,
-      status: {
-        status: task.status.status,
-        type: task.status.type,
-        color: task.status.color,
-      },
+      status: task.status,
       date_updated: task.date_updated,
       url: task.url,
+      custom_id: task.custom_id,
     };
   }
 }

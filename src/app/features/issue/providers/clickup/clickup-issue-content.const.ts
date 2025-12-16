@@ -11,8 +11,7 @@ export const CLICKUP_ISSUE_CONTENT_CONFIG: IssueContentConfig<ClickUpTask> = {
     {
       label: T.F.ISSUE.ISSUE_CONTENT.SUMMARY,
       type: IssueFieldType.LINK,
-      value: (issue: ClickUpTask) =>
-        `${issue.custom_id ? '#' + issue.custom_id + ' ' : ''}${issue.name}`,
+      value: (issue: ClickUpTask) => issue.name,
       getLink: (issue: ClickUpTask) => issue.url,
     },
     {

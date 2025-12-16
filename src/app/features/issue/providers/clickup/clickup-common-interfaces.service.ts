@@ -72,7 +72,7 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
             ? this._clickUpApiService.searchTasks$(searchTerm, cfg).pipe(
                 map((tasks) =>
                   tasks.map((task) => ({
-                    title: `${task.custom_id ? '#' + task.custom_id + ' ' : ''}${task.name}`,
+                    title: task.name,
                     issueType: 'CLICKUP' as const,
                     issueData: task,
                   })),
@@ -120,9 +120,7 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
           issueWasUpdated: true,
         },
         issue,
-        issueTitle: truncate(
-          `${issue.custom_id ? '#' + issue.custom_id + ' ' : ''}${issue.name}`,
-        ),
+        issueTitle: truncate(issue.name),
       };
     }
 
@@ -187,7 +185,7 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
 
   getAddTaskData(issue: ClickUpTaskReduced): Partial<Task> & { title: string } {
     return {
-      title: `${issue.custom_id ? '#' + issue.custom_id + ' ' : ''}${issue.name}`,
+      title: issue.name,
       issueWasUpdated: false,
       issueLastUpdated: parseInt(issue.date_updated, 10),
       isDone: isClickUpTaskDone(issue),
@@ -202,7 +200,7 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
     }
 
     return issue.subtasks.map((subtask) => ({
-      title: `${subtask.custom_id ? '#' + subtask.custom_id + ' ' : ''}${subtask.name}`,
+      title: subtask.name,
       issueWasUpdated: false,
       issueLastUpdated: parseInt(subtask.date_updated, 10),
       isDone: isClickUpTaskDone(subtask),

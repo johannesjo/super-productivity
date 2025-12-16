@@ -1,8 +1,14 @@
-import { ClickUpTask, ClickUpTaskReduced } from './clickup-issue.model';
+import {
+  ClickUpTask,
+  ClickUpTaskReduced,
+  ClickUpAttachment,
+} from './clickup-issue.model';
 import { Task } from '../../../tasks/task.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 
-export const mapClickUpAttachmentToTaskAttachment = (attachment: any): TaskAttachment => {
+export const mapClickUpAttachmentToTaskAttachment = (
+  attachment: ClickUpAttachment,
+): TaskAttachment => {
   return {
     id: attachment.id,
     title: attachment.title,
@@ -17,7 +23,7 @@ export const mapClickUpTaskToTask = (
   issue: ClickUpTask,
 ): Partial<Task> & { title: string } => {
   return {
-    title: `${issue.custom_id ? '#' + issue.custom_id + ' ' : ''}${issue.name}`,
+    title: issue.name,
     issueWasUpdated: false,
     issueLastUpdated: parseInt(issue.date_updated, 10),
     isDone: isClickUpTaskDone(issue),
@@ -44,7 +50,7 @@ export const mapClickUpTaskWithSubTasks = (
   if (issue.subtasks && issue.subtasks.length > 0) {
     issue.subtasks.forEach((subtask) => {
       subTasks.push({
-        title: `${subtask.custom_id ? '#' + subtask.custom_id + ' ' : ''}${subtask.name}`,
+        title: subtask.name,
         issueWasUpdated: false,
         issueLastUpdated: parseInt(subtask.date_updated, 10),
         isDone: isClickUpTaskDone(subtask),
