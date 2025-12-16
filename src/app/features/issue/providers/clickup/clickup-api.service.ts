@@ -1,20 +1,20 @@
-import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
-import { Observable, of, forkJoin } from 'rxjs';
+import { Injectable, inject } from '@angular/core';
+import { Observable, forkJoin, of } from 'rxjs';
 import { catchError, map, switchMap } from 'rxjs/operators';
-import { ClickUpCfg } from './clickup.model';
-import {
-  ClickUpTask,
-  ClickUpTaskReduced,
-  ClickUpTeamsResponse,
-  ClickUpTaskSearchResponse,
-  ClickUpUserResponse,
-} from './clickup-issue.model';
+import typia from 'typia';
+import { IssueLog } from '../../../../core/log';
 import { SnackService } from '../../../../core/snack/snack.service';
 import { handleIssueProviderHttpError$ } from '../../handle-issue-provider-http-error';
 import { CLICKUP_TYPE } from '../../issue.const';
-import { IssueLog } from '../../../../core/log';
-import typia from 'typia';
+import {
+  ClickUpTask,
+  ClickUpTaskReduced,
+  ClickUpTaskSearchResponse,
+  ClickUpTeamsResponse,
+  ClickUpUserResponse,
+} from './clickup-issue.model';
+import { ClickUpCfg } from './clickup.model';
 
 const CLICKUP_API_URL = 'https://api.clickup.com/api/v2';
 
