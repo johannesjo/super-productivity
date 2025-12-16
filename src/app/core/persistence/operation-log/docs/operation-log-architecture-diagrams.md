@@ -411,9 +411,9 @@ flowchart TB
 2. **Efficiency**: Snapshot endpoint is designed for large payloads and stores state directly
 3. **Server-Side Handling**: Server creates a synthetic operation record for audit purposes
 
-## 2c. Late-Joiner Replay with Vector Clock Dominance ✅ IMPLEMENTED
+## 2c. Late-Joiner Replay with UUIDv7 Timestamp Filter ✅ IMPLEMENTED
 
-When a client receives a SYNC_IMPORT (full state from another client), it must replay any local synced operations that happened "after" the import's vector clock. This ensures local work isn't lost when receiving a full state snapshot.
+When a client receives a SYNC_IMPORT (full state from another client), it must replay any local synced operations created **after** the import (by UUIDv7 timestamp). This ensures local work isn't lost when receiving a full state snapshot.
 
 **Implementation Status:** Complete. See `OperationLogSyncService._replayLocalSyncedOpsAfterImport()`.
 
@@ -442,35 +442,35 @@ sequenceDiagram
     Note over B: Problem: Op3, Op4 were already synced!<br/>If we just apply SYNC_IMPORT, we lose B's work
 ```
 
-### The Solution: Vector Clock Dominance Filter
+### The Solution: UUIDv7 Timestamp Filter
 
-Before replaying local synced ops after a SYNC_IMPORT, we filter out ops that are "dominated" by the SYNC_IMPORT's vector clock. An op is dominated if its vector clock is `LESS_THAN` the SYNC_IMPORT's clock - meaning the op's state is already captured in the imported snapshot.
+Before replaying local synced ops after a SYNC_IMPORT, we filter out ops that were created **before** the SYNC_IMPORT (by comparing UUIDv7 IDs, which embed timestamps). Ops created before the import are already captured in the imported snapshot.
 
 ```mermaid
 flowchart TD
     subgraph Input["SYNC_IMPORT Received"]
-        SI["SYNC_IMPORT<br/>vectorClock: A=10, B=5"]
+        SI["SYNC_IMPORT<br/>id: 019abc... (T=1702900000)"]
     end
 
     subgraph LocalOps["Local Synced Operations"]
-        Op1["Op1: B=1<br/>LESS_THAN → dominated"]
-        Op2["Op2: A=5, B=3<br/>LESS_THAN → dominated"]
-        Op3["Op3: B=6<br/>GREATER_THAN → NOT dominated"]
-        Op4["Op4: A=10, B=5, C=1<br/>CONCURRENT → NOT dominated"]
+        Op1["Op1: id=019aa...<br/>T=1702890000 → BEFORE"]
+        Op2["Op2: id=019ab...<br/>T=1702895000 → BEFORE"]
+        Op3["Op3: id=019abd...<br/>T=1702905000 → AFTER"]
+        Op4["Op4: id=019abe...<br/>T=1702910000 → AFTER"]
     end
 
-    subgraph Filter["Vector Clock Comparison"]
-        Check["Compare each op's clock<br/>with SYNC_IMPORT clock"]
+    subgraph Filter["UUIDv7 Timestamp Comparison"]
+        Check["Compare each op.id<br/>with SYNC_IMPORT.id"]
     end
 
     subgraph Result["Ops to Replay"]
-        Replay["Only Op3 and Op4<br/>not dominated"]
+        Replay["Only Op3 and Op4<br/>created after import"]
     end
 
     SI --> Check
     LocalOps --> Check
-    Check --> |"LESS_THAN"| Skip["Skip - already in snapshot"]
-    Check --> |"Otherwise"| Replay
+    Check --> |"op.id < import.id"| Skip["Skip - created before import"]
+    Check --> |"op.id >= import.id"| Replay
 
     style Op1 fill:#ffcdd2,stroke:#c62828
     style Op2 fill:#ffcdd2,stroke:#c62828
@@ -480,14 +480,12 @@ flowchart TD
     style Replay fill:#e8f5e9,stroke:#2e7d32
 ```
 
-### Vector Clock Comparison Results
+### UUIDv7 Comparison Results
 
-| Comparison     | Meaning                        | Action                             |
-| -------------- | ------------------------------ | ---------------------------------- |
-| `LESS_THAN`    | Op happened-before SYNC_IMPORT | Skip (state already captured)      |
-| `EQUAL`        | Same causal history            | Replay (edge case, safe to replay) |
-| `GREATER_THAN` | Op happened-after SYNC_IMPORT  | Replay (newer than snapshot)       |
-| `CONCURRENT`   | Independent changes            | Replay (may have unique changes)   |
+| Comparison           | Meaning                          | Action                                |
+| -------------------- | -------------------------------- | ------------------------------------- |
+| `op.id < import.id`  | Op created before SYNC_IMPORT    | Skip (state already captured)         |
+| `op.id >= import.id` | Op created at same time or after | Replay (newer than or equal snapshot) |
 
 ### Implementation Details
 
@@ -502,10 +500,12 @@ const localSyncedOps = allEntries.filter((entry) => {
   if (entry.op.opType === OpType.SyncImport || entry.op.opType === OpType.BackupImport)
     return false;
 
-  // Must NOT be dominated by the SYNC_IMPORT's vector clock
-  const comparison = compareVectorClocks(entry.op.vectorClock, syncImportClock);
-  if (comparison === VectorClockComparison.LESS_THAN) {
-    return false; // Skip - state already captured in SYNC_IMPORT
+  // Must be created AFTER the SYNC_IMPORT (by UUIDv7 timestamp)
+  // NOTE: We use UUIDv7 comparison instead of vector clock comparison
+  // because imports with isForceConflict=true create a fresh vector clock
+  // with a new client ID, breaking vector clock causality detection.
+  if (entry.op.id < syncImportOp.id) {
+    return false; // Skip - created before SYNC_IMPORT
   }
   return true;
 });
@@ -515,8 +515,12 @@ const localSyncedOps = allEntries.filter((entry) => {
 
 - Only filters local ops (created by this client)
 - Only considers synced ops (accepted by server)
-- Uses vector clock comparison to determine dominance
-- `LESS_THAN` means dominated (skip), all other results mean not dominated (replay)
+- Uses **UUIDv7 ID comparison** (not vector clocks) to determine temporal order
+- Ops with ID < import ID are skipped (created before import)
+
+**Why UUIDv7 Instead of Vector Clocks?**
+
+SYNC_IMPORT operations with `isForceConflict=true` create a fresh vector clock with a new client ID. This breaks vector clock causality detection because the import's clock has no causal relationship with existing local operations. UUIDv7 IDs embed millisecond-precision timestamps, providing reliable "created before/after" comparison that works regardless of vector clock semantics.
 
 ---
 
