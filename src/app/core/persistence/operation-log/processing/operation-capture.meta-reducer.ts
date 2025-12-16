@@ -19,6 +19,7 @@ let operationCaptureService: OperationCaptureService | null = null;
  */
 export const setOperationCaptureService = (service: OperationCaptureService): void => {
   operationCaptureService = service;
+  OpLog.normal('operationCaptureMetaReducer: Service initialized');
 };
 
 /**
@@ -29,11 +30,11 @@ export const getOperationCaptureService = (): OperationCaptureService | null => 
 };
 
 /**
- * Post-reducer meta-reducer that captures entity changes SYNCHRONOUSLY.
+ * Meta-reducer that captures entity changes SYNCHRONOUSLY.
  *
  * This solves the race condition in the previous approach:
  * - OLD: Before-state captured in pre-reducer, after-state captured ASYNC in effect
- * - NEW: Both before and after captured SYNCHRONOUSLY in this post-reducer
+ * - NEW: Both before and after captured SYNCHRONOUSLY in this meta-reducer
  *
  * Flow:
  * 1. Capture before-state (current state)
@@ -42,8 +43,16 @@ export const getOperationCaptureService = (): OperationCaptureService | null => 
  *
  * The effect simply dequeues the pre-computed changes - no async state reads!
  *
- * Note: This meta-reducer should be registered LAST in the chain so that
- * it wraps all other reducers and sees the final state changes.
+ * CRITICAL: This meta-reducer MUST be registered FIRST (index 0) in the metaReducers
+ * array in main.ts. NgRx composes meta-reducers from RIGHT-TO-LEFT using reduceRight,
+ * so FIRST in array = OUTERMOST in call chain.
+ *
+ * Being OUTERMOST means this meta-reducer:
+ * - Receives the ORIGINAL state BEFORE any other meta-reducer modifies it
+ * - Gets the FINAL state AFTER all inner reducers complete
+ *
+ * If placed LAST (innermost), other meta-reducers like taskSharedCrudMetaReducer
+ * would modify state BEFORE this runs, causing beforeState === afterState.
  */
 export const operationCaptureMetaReducer = <S, A extends Action = Action>(
   reducer: ActionReducer<S, A>,
@@ -56,28 +65,36 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
     const afterState = reducer(state, action);
 
     // Only process persistent, non-remote actions
-    if (
-      beforeState &&
-      operationCaptureService &&
-      isPersistentAction(action) &&
-      !(action as PersistentAction).meta.isRemote
-    ) {
-      try {
-        const persistentAction = action as PersistentAction;
-
-        // Compute entity changes and queue in one step
-        operationCaptureService.computeAndEnqueue(
-          persistentAction,
-          beforeState as unknown as RootState,
-          afterState as unknown as RootState,
+    if (isPersistentAction(action) && !(action as PersistentAction).meta.isRemote) {
+      // Warn if service not initialized - this means we'll lose the operation
+      if (!operationCaptureService) {
+        OpLog.warn(
+          'operationCaptureMetaReducer: Service not initialized - operation will not be captured!',
+          { actionType: action.type },
         );
+      } else if (!beforeState) {
+        OpLog.warn(
+          'operationCaptureMetaReducer: No before state - operation will not be captured!',
+          { actionType: action.type },
+        );
+      } else {
+        try {
+          const persistentAction = action as PersistentAction;
 
-        OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
-          actionType: persistentAction.type,
-        });
-      } catch (e) {
-        OpLog.err('operationCaptureMetaReducer: Failed to capture operation', e);
-        // Don't block the reducer - state change already happened
+          // Compute entity changes and queue in one step
+          operationCaptureService.computeAndEnqueue(
+            persistentAction,
+            beforeState as unknown as RootState,
+            afterState as unknown as RootState,
+          );
+
+          OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
+            actionType: persistentAction.type,
+          });
+        } catch (e) {
+          OpLog.err('operationCaptureMetaReducer: Failed to capture operation', e);
+          // Don't block the reducer - state change already happened
+        }
       }
     }
 

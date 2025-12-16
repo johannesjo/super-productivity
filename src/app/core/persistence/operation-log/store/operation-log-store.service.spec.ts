@@ -978,6 +978,139 @@ describe('OperationLogStoreService', () => {
       expect(ids2.size).toBe(2);
       expect(ids2.has(op2.id)).toBe(true);
     });
+
+    it('should incrementally update cache when new ops added', async () => {
+      // Build initial cache with 5 ops
+      const initialOps = Array.from({ length: 5 }, (_, i) =>
+        createTestOperation({ entityId: `task-${i}` }),
+      );
+      for (const op of initialOps) {
+        await service.append(op);
+      }
+
+      // First call - builds cache
+      const ids1 = await service.getAppliedOpIds();
+      expect(ids1.size).toBe(5);
+
+      // Add 2 more ops
+      const newOp1 = createTestOperation({ entityId: 'new-task-1' });
+      const newOp2 = createTestOperation({ entityId: 'new-task-2' });
+      await service.append(newOp1);
+      await service.append(newOp2);
+
+      // Second call - should incrementally add only new IDs
+      const ids2 = await service.getAppliedOpIds();
+      expect(ids2.size).toBe(7);
+      expect(ids2.has(newOp1.id)).toBe(true);
+      expect(ids2.has(newOp2.id)).toBe(true);
+
+      // All original IDs should still be present
+      for (const op of initialOps) {
+        expect(ids2.has(op.id)).toBe(true);
+      }
+    });
+  });
+
+  describe('unsynced cache', () => {
+    it('should return cached result when no changes', async () => {
+      const op = createTestOperation();
+      await service.append(op);
+
+      // First call builds cache
+      const unsynced1 = await service.getUnsynced();
+      // Second call should use cache
+      const unsynced2 = await service.getUnsynced();
+
+      expect(unsynced1.length).toBe(1);
+      expect(unsynced2.length).toBe(1);
+      expect(unsynced1[0].op.id).toBe(op.id);
+    });
+
+    it('should incrementally add new unsynced ops to cache', async () => {
+      // Build initial cache with 3 ops
+      const initialOps = Array.from({ length: 3 }, (_, i) =>
+        createTestOperation({ entityId: `task-${i}` }),
+      );
+      for (const op of initialOps) {
+        await service.append(op);
+      }
+
+      // First call - builds cache
+      const unsynced1 = await service.getUnsynced();
+      expect(unsynced1.length).toBe(3);
+
+      // Add 2 more ops
+      const newOp1 = createTestOperation({ entityId: 'new-task-1' });
+      const newOp2 = createTestOperation({ entityId: 'new-task-2' });
+      await service.append(newOp1);
+      await service.append(newOp2);
+
+      // Second call - should incrementally add new unsynced ops
+      const unsynced2 = await service.getUnsynced();
+      expect(unsynced2.length).toBe(5);
+    });
+
+    it('should invalidate cache when markSynced is called', async () => {
+      const op1 = createTestOperation({ entityId: 'task1' });
+      const op2 = createTestOperation({ entityId: 'task2' });
+      await service.append(op1);
+      await service.append(op2);
+
+      // Build cache
+      const unsynced1 = await service.getUnsynced();
+      expect(unsynced1.length).toBe(2);
+
+      // Mark one as synced
+      const ops = await service.getOpsAfterSeq(0);
+      await service.markSynced([ops[0].seq]);
+
+      // Cache should be invalidated, returning only the unsynced op
+      const unsynced2 = await service.getUnsynced();
+      expect(unsynced2.length).toBe(1);
+      expect(unsynced2[0].op.id).toBe(op2.id);
+    });
+
+    it('should invalidate cache when markRejected is called', async () => {
+      const op1 = createTestOperation({ entityId: 'task1' });
+      const op2 = createTestOperation({ entityId: 'task2' });
+      await service.append(op1);
+      await service.append(op2);
+
+      // Build cache
+      const unsynced1 = await service.getUnsynced();
+      expect(unsynced1.length).toBe(2);
+
+      // Mark one as rejected
+      await service.markRejected([op1.id]);
+
+      // Cache should be invalidated, returning only the non-rejected op
+      const unsynced2 = await service.getUnsynced();
+      expect(unsynced2.length).toBe(1);
+      expect(unsynced2[0].op.id).toBe(op2.id);
+    });
+
+    it('should not include already synced ops when incrementally updating', async () => {
+      // Add initial ops
+      const op1 = createTestOperation({ entityId: 'task1' });
+      await service.append(op1);
+
+      // Build initial cache
+      const unsynced1 = await service.getUnsynced();
+      expect(unsynced1.length).toBe(1);
+
+      // Mark as synced - this invalidates the cache
+      const ops = await service.getOpsAfterSeq(0);
+      await service.markSynced([ops[0].seq]);
+
+      // Add a new unsynced op
+      const op2 = createTestOperation({ entityId: 'task2' });
+      await service.append(op2);
+
+      // Should only return the new unsynced op
+      const unsynced2 = await service.getUnsynced();
+      expect(unsynced2.length).toBe(1);
+      expect(unsynced2[0].op.id).toBe(op2.id);
+    });
   });
 
   describe('edge cases', () => {

@@ -49,6 +49,10 @@ export class OperationLogStoreService {
   private _appliedOpIdsCache: Set<string> | null = null;
   private _cacheLastSeq: number = 0;
 
+  // Cache for getUnsynced() to avoid full table scans on every sync
+  private _unsyncedCache: OperationLogEntry[] | null = null;
+  private _unsyncedCacheLastSeq: number = 0;
+
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
       upgrade: (db) => {
@@ -202,9 +206,40 @@ export class OperationLogStoreService {
 
   async getUnsynced(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    // Scan all ops and filter. Optimized later if needed.
+
+    const currentLastSeq = await this.getLastSeq();
+
+    // Return cache if valid (no new operations since last cache build)
+    if (this._unsyncedCache && this._unsyncedCacheLastSeq === currentLastSeq) {
+      return [...this._unsyncedCache];
+    }
+
+    // If cache exists but is stale (new ops added), incrementally add new unsynced ops
+    if (this._unsyncedCache && this._unsyncedCacheLastSeq > 0) {
+      const newEntries = await this.db.getAll(
+        'ops',
+        IDBKeyRange.lowerBound(this._unsyncedCacheLastSeq, true),
+      );
+      const newUnsynced = newEntries.filter((e) => !e.syncedAt && !e.rejectedAt);
+      this._unsyncedCache.push(...newUnsynced);
+      this._unsyncedCacheLastSeq = currentLastSeq;
+      return [...this._unsyncedCache];
+    }
+
+    // Initial cache build - full scan required
     const all = await this.db.getAll('ops');
-    return all.filter((e) => !e.syncedAt && !e.rejectedAt);
+    this._unsyncedCache = all.filter((e) => !e.syncedAt && !e.rejectedAt);
+    this._unsyncedCacheLastSeq = currentLastSeq;
+
+    return [...this._unsyncedCache];
+  }
+
+  /**
+   * Invalidates the unsynced cache. Called when operations are marked synced/rejected.
+   */
+  private _invalidateUnsyncedCache(): void {
+    this._unsyncedCache = null;
+    this._unsyncedCacheLastSeq = 0;
   }
 
   async getUnsyncedByEntity(): Promise<Map<string, Operation[]>> {
@@ -232,7 +267,20 @@ export class OperationLogStoreService {
       return new Set(this._appliedOpIdsCache);
     }
 
-    // Rebuild cache
+    // If cache exists but is stale, incrementally add new IDs
+    if (this._appliedOpIdsCache && this._cacheLastSeq > 0) {
+      const newEntries = await this.db.getAll(
+        'ops',
+        IDBKeyRange.lowerBound(this._cacheLastSeq, true),
+      );
+      for (const entry of newEntries) {
+        this._appliedOpIdsCache.add(entry.op.id);
+      }
+      this._cacheLastSeq = currentLastSeq;
+      return new Set(this._appliedOpIdsCache);
+    }
+
+    // Initial cache build - full scan required
     const entries = await this.db.getAll('ops');
     this._appliedOpIdsCache = new Set(entries.map((e) => e.op.id));
     this._cacheLastSeq = currentLastSeq;
@@ -253,6 +301,7 @@ export class OperationLogStoreService {
       }
     }
     await tx.done;
+    this._invalidateUnsyncedCache();
   }
 
   async markRejected(opIds: string[]): Promise<void> {
@@ -270,6 +319,7 @@ export class OperationLogStoreService {
       }
     }
     await tx.done;
+    this._invalidateUnsyncedCache();
   }
 
   /**

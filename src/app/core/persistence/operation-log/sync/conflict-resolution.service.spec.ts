@@ -1189,5 +1189,191 @@ describe('ConflictResolutionService', () => {
         );
       });
     });
+
+    describe('return value (localWinOpsCreated)', () => {
+      // Helper to create a mock local-win update operation
+      const createMockLocalWinOp = (entityId: string): Operation => ({
+        id: `lww-update-${entityId}`,
+        clientId: 'client-a',
+        actionType: '[TASK] LWW Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId,
+        payload: { title: 'Local Win State' },
+        vectorClock: { clientA: 2, clientB: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      });
+
+      it('should return { localWinOpsCreated: 0 } when no conflicts', async () => {
+        const result = await service.autoResolveConflictsLWW([]);
+
+        expect(result).toEqual({ localWinOpsCreated: 0 });
+      });
+
+      it('should return { localWinOpsCreated: 0 } when only non-conflicting ops', async () => {
+        const now = Date.now();
+        const nonConflicting = [
+          createOpWithTimestamp('nc-1', 'client-b', now, OpType.Update, 'task-99'),
+        ];
+
+        mockOperationApplier.applyOperations.and.resolveTo({
+          appliedOps: nonConflicting,
+        });
+
+        const result = await service.autoResolveConflictsLWW([], nonConflicting);
+
+        expect(result).toEqual({ localWinOpsCreated: 0 });
+      });
+
+      it('should return { localWinOpsCreated: 0 } when remote wins all conflicts', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now - 1000)],
+            [createOpWithTimestamp('remote-1', 'client-b', now)],
+          ),
+        ];
+
+        mockOperationApplier.applyOperations.and.resolveTo({
+          appliedOps: conflicts[0].remoteOps,
+        });
+
+        const result = await service.autoResolveConflictsLWW(conflicts);
+
+        expect(result).toEqual({ localWinOpsCreated: 0 });
+      });
+
+      it('should return { localWinOpsCreated: 1 } when local wins one conflict', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now)],
+            [createOpWithTimestamp('remote-1', 'client-b', now - 1000)],
+          ),
+        ];
+
+        // Spy on the private method to return a mock local-win op
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.returnValue(
+          Promise.resolve(createMockLocalWinOp('task-1')),
+        );
+
+        const result = await service.autoResolveConflictsLWW(conflicts);
+
+        expect(result).toEqual({ localWinOpsCreated: 1 });
+      });
+
+      it('should return correct count when multiple local wins', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now)],
+            [createOpWithTimestamp('remote-1', 'client-b', now - 1000)],
+          ),
+          createConflict(
+            'task-2',
+            [createOpWithTimestamp('local-2', 'client-a', now, OpType.Update, 'task-2')],
+            [
+              createOpWithTimestamp(
+                'remote-2',
+                'client-b',
+                now - 1000,
+                OpType.Update,
+                'task-2',
+              ),
+            ],
+          ),
+        ];
+
+        // Spy on the private method to return mock local-win ops
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.callFake(
+          (conflict: EntityConflict) =>
+            Promise.resolve(createMockLocalWinOp(conflict.entityId)),
+        );
+
+        const result = await service.autoResolveConflictsLWW(conflicts);
+
+        expect(result).toEqual({ localWinOpsCreated: 2 });
+      });
+
+      it('should return correct count for mixed local/remote wins', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          // Remote wins this one
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now - 1000)],
+            [createOpWithTimestamp('remote-1', 'client-b', now)],
+          ),
+          // Local wins this one
+          createConflict(
+            'task-2',
+            [createOpWithTimestamp('local-2', 'client-a', now, OpType.Update, 'task-2')],
+            [
+              createOpWithTimestamp(
+                'remote-2',
+                'client-b',
+                now - 1000,
+                OpType.Update,
+                'task-2',
+              ),
+            ],
+          ),
+          // Remote wins this one
+          createConflict(
+            'task-3',
+            [
+              createOpWithTimestamp(
+                'local-3',
+                'client-a',
+                now - 500,
+                OpType.Update,
+                'task-3',
+              ),
+            ],
+            [createOpWithTimestamp('remote-3', 'client-b', now, OpType.Update, 'task-3')],
+          ),
+        ];
+
+        mockOperationApplier.applyOperations.and.resolveTo({
+          appliedOps: [conflicts[0].remoteOps[0], conflicts[2].remoteOps[0]],
+        });
+
+        // Spy on the private method to return mock local-win op (only called for task-2)
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.callFake(
+          (conflict: EntityConflict) =>
+            Promise.resolve(createMockLocalWinOp(conflict.entityId)),
+        );
+
+        const result = await service.autoResolveConflictsLWW(conflicts);
+
+        // Only 1 local win out of 3 conflicts
+        expect(result).toEqual({ localWinOpsCreated: 1 });
+      });
+
+      it('should return 0 when local wins but entity not found', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now)],
+            [createOpWithTimestamp('remote-1', 'client-b', now - 1000)],
+          ),
+        ];
+
+        // Spy on the private method to return undefined (entity not found)
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.returnValue(
+          Promise.resolve(undefined),
+        );
+
+        const result = await service.autoResolveConflictsLWW(conflicts);
+
+        // No op created because entity not found
+        expect(result).toEqual({ localWinOpsCreated: 0 });
+      });
+    });
   });
 });

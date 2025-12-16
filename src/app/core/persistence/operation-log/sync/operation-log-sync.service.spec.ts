@@ -2734,4 +2734,176 @@ describe('OperationLogSyncService', () => {
       expect(result).toBe(0x0193e1d88000);
     });
   });
+
+  describe('localWinOpsCreated propagation', () => {
+    let uploadServiceSpy: jasmine.SpyObj<OperationLogUploadService>;
+    let downloadServiceSpy: jasmine.SpyObj<OperationLogDownloadService>;
+
+    beforeEach(() => {
+      uploadServiceSpy = TestBed.inject(
+        OperationLogUploadService,
+      ) as jasmine.SpyObj<OperationLogUploadService>;
+      downloadServiceSpy = TestBed.inject(
+        OperationLogDownloadService,
+      ) as jasmine.SpyObj<OperationLogDownloadService>;
+
+      // Mock loadStateCache to return null (no cache) so isWhollyFreshClient check passes
+      (opLogStoreSpy as any).loadStateCache = jasmine
+        .createSpy('loadStateCache')
+        .and.returnValue(Promise.resolve(null));
+      (opLogStoreSpy as any).getLastSeq = jasmine
+        .createSpy('getLastSeq')
+        .and.returnValue(Promise.resolve(1)); // Not fresh (has seq)
+    });
+
+    describe('uploadPendingOps', () => {
+      it('should return localWinOpsCreated: 0 when no piggybacked ops', async () => {
+        opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+        uploadServiceSpy.uploadPendingOps.and.returnValue(
+          Promise.resolve({
+            uploadedCount: 0,
+            piggybackedOps: [],
+            rejectedCount: 0,
+            rejectedOps: [],
+          }),
+        );
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+        } as any;
+
+        const result = await service.uploadPendingOps(mockProvider);
+
+        expect(result?.localWinOpsCreated).toBe(0);
+      });
+
+      it('should return localWinOpsCreated count from piggybacked ops processing', async () => {
+        opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+        const piggybackedOp: Operation = {
+          id: 'piggybacked-1',
+          clientId: 'client-B',
+          actionType: 'test',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Remote Title' },
+          vectorClock: { clientB: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        uploadServiceSpy.uploadPendingOps.and.returnValue(
+          Promise.resolve({
+            uploadedCount: 1,
+            piggybackedOps: [piggybackedOp],
+            rejectedCount: 0,
+            rejectedOps: [],
+          }),
+        );
+
+        // Spy on _processRemoteOps to return 2 local-win ops
+        spyOn<any>(service, '_processRemoteOps').and.returnValue(
+          Promise.resolve({ localWinOpsCreated: 2 }),
+        );
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+        } as any;
+
+        const result = await service.uploadPendingOps(mockProvider);
+
+        expect(result?.localWinOpsCreated).toBe(2);
+      });
+    });
+
+    describe('downloadRemoteOps', () => {
+      it('should return localWinOpsCreated: 0 when no new ops', async () => {
+        downloadServiceSpy.downloadRemoteOps.and.returnValue(
+          Promise.resolve({
+            newOps: [],
+            hasMore: false,
+            latestSeq: 0,
+            needsFullStateUpload: false,
+            success: true,
+            failedFileCount: 0,
+          }),
+        );
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+        } as any;
+
+        const result = await service.downloadRemoteOps(mockProvider);
+
+        expect(result.localWinOpsCreated).toBe(0);
+      });
+
+      it('should return localWinOpsCreated count from processing remote ops', async () => {
+        opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+        const remoteOp: Operation = {
+          id: 'remote-1',
+          clientId: 'client-B',
+          actionType: 'test',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Remote Title' },
+          vectorClock: { clientB: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        downloadServiceSpy.downloadRemoteOps.and.returnValue(
+          Promise.resolve({
+            newOps: [remoteOp],
+            hasMore: false,
+            latestSeq: 1,
+            needsFullStateUpload: false,
+            success: true,
+            failedFileCount: 0,
+          }),
+        );
+
+        // Spy on _processRemoteOps to return 1 local-win op
+        spyOn<any>(service, '_processRemoteOps').and.returnValue(
+          Promise.resolve({ localWinOpsCreated: 1 }),
+        );
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+        } as any;
+
+        const result = await service.downloadRemoteOps(mockProvider);
+
+        expect(result.localWinOpsCreated).toBe(1);
+      });
+
+      it('should return localWinOpsCreated: 0 on server migration', async () => {
+        downloadServiceSpy.downloadRemoteOps.and.returnValue(
+          Promise.resolve({
+            newOps: [],
+            hasMore: false,
+            latestSeq: 0,
+            needsFullStateUpload: true, // Server migration
+            success: true,
+            failedFileCount: 0,
+          }),
+        );
+
+        // Mock the server migration handler
+        spyOn<any>(service, '_handleServerMigration').and.returnValue(Promise.resolve());
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+        } as any;
+
+        const result = await service.downloadRemoteOps(mockProvider);
+
+        expect(result.serverMigrationHandled).toBe(true);
+        expect(result.localWinOpsCreated).toBe(0);
+      });
+    });
+  });
 });
