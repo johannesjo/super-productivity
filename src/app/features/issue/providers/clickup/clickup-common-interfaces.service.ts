@@ -15,6 +15,7 @@ import {
 import { Task } from '../../../tasks/task.model';
 import { TaskAttachment } from '../../../tasks/task-attachment/task-attachment.model';
 import { truncate } from '../../../../util/truncate';
+import { IssueLog } from '../../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -135,7 +136,7 @@ export class ClickUpCommonInterfacesService implements IssueServiceInterface {
               refreshData,
             }))
             .catch((e) => {
-              console.error('ClickUp getFreshDataForIssueTasks error', e);
+              IssueLog.error('ClickUp getFreshDataForIssueTasks error', e);
               return { task, refreshData: null };
             }), // suppress error to not fail all?
       ),
