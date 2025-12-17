@@ -1,5 +1,8 @@
 // This file is required by karma.conf.js and loads recursively all the .spec and framework files
 
+// NOTE: Do NOT import 'zone.js' or 'zone.js/testing' here explicitly.
+// Angular's karma builder handles Zone.js setup automatically.
+// Adding explicit imports causes conflicts with Jasmine's clock mocking.
 import { getTestBed, TestBed } from '@angular/core/testing';
 import {
   BrowserDynamicTestingModule,

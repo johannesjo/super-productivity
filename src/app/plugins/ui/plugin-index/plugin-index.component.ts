@@ -22,9 +22,6 @@ import {
   handlePluginMessage,
   cleanupPluginIframeUrl,
 } from '../../util/plugin-iframe.util';
-import { MatButton } from '@angular/material/button';
-import { MatIcon } from '@angular/material/icon';
-import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import {
   MatCard,
   MatCardContent,
@@ -34,6 +31,10 @@ import {
 import { TranslateService, TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { PluginLog } from '../../../core/log';
+import { LayoutService } from '../../../core-ui/layout/layout.service';
+import { MatButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatProgressSpinner } from '@angular/material/progress-spinner';
 
 @Component({
   selector: 'plugin-index',
@@ -81,13 +82,15 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _cleanupService = inject(PluginCleanupService);
   private readonly _translateService = inject(TranslateService);
+  private readonly _layoutService = inject(LayoutService);
 
-  T: typeof T = T;
+  T = T;
 
   readonly pluginId = signal<string>('');
   readonly isLoading = signal<boolean>(true);
   readonly error = signal<string | null>(null);
   readonly iframeSrc = signal<SafeResourceUrl | null>(null);
+  readonly isResizing = this._layoutService.isPanelResizing;
 
   private _messageListener?: EventListener;
   private _routeSubscription?: Subscription;
@@ -104,11 +107,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._loadPluginIndex(this.directPluginId);
       } catch (err) {
         PluginLog.err('Failed to load plugin index:', err);
-        this.error.set(
-          err instanceof Error
-            ? err.message
-            : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD),
-        );
+        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
         this.isLoading.set(false);
       }
       return;
@@ -125,7 +124,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       );
 
       if (!newPluginId) {
-        this.error.set(this._translateService.instant(T.PLUGINS.PLUGIN_ID_NOT_PROVIDED));
+        this.error.set('Plugin ID not provided');
         this.isLoading.set(false);
         return;
       }
@@ -155,11 +154,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._loadPluginIndex(newPluginId);
       } catch (err) {
         PluginLog.err('Failed to load plugin index:', err);
-        this.error.set(
-          err instanceof Error
-            ? err.message
-            : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD),
-        );
+        this.error.set(err instanceof Error ? err.message : 'Failed to load plugin');
         this.isLoading.set(false);
       }
     });
@@ -173,9 +168,7 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
         await this._pluginService.initializePlugins();
       } catch (error) {
         PluginLog.err('Failed to initialize plugin system:', error);
-        throw new Error(
-          this._translateService.instant(T.PLUGINS.PLUGIN_SYSTEM_FAILED_INIT),
-        );
+        throw new Error('Failed to initialize plugin system');
       }
     }
   }
@@ -203,16 +196,14 @@ export class PluginIndexComponent implements OnInit, OnDestroy {
       const plugin = plugins.find((p) => p.manifest.id === pluginId);
 
       if (!plugin) {
-        throw new Error(this._translateService.instant(T.PLUGINS.PLUGIN_NOT_FOUND));
+        throw new Error('Plugin not found');
       }
 
       if (!plugin.manifest.iFrame) {
-        throw new Error(
-          this._translateService.instant(T.PLUGINS.PLUGIN_DOES_NOT_SUPPORT_IFRAME),
-        );
+        throw new Error('Plugin does not support iframes');
       }
 
-      throw new Error(this._translateService.instant(T.PLUGINS.INDEX_HTML_NOT_LOADED));
+      throw new Error('Plugin index.html not loaded');
     }
 
     // Get plugin data for iframe setup

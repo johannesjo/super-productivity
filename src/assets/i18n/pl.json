@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Wstrzymaj śledzenie",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Wstrzymaj śledzenie dla bieżącego zadania",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Powrót",
-      "POMODORO_DISABLE": "Wyłącz Pomodoro",
       "POMODORO_HINT": "Strukturalne sprinty z zaplanowanymi przerwami",
-      "POMODORO_INFO": "Sesje skupienia nie mogą być używane razem z włączonym pomodoro timerem.",
       "POMODORO_SESSION_COMPLETED": "Sesja Pomodoro zakończona!",
       "PREP_GET_MENTALLY_READY": "Przygotuj się psychicznie, aby być skupionym i produktywnym",
       "PREP_SIT_UPRIGHT": "Siedzenie (lub stanie) w pozycji wyprostowanej",
@@ -766,23 +763,7 @@
       "TASK_DRAWER": "Szuflada zadaniowa"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Wróć do pracy!",
-      "BREAK_IS_DONE": "Twoja przerwa się skończyła!",
-      "ENJOY_YOURSELF": "Zrób sobie przerwę, poruszaj się trochę, wróć za:",
-      "FINISH_SESSION_X": "Zakończyłeś sesję <strong>{{nr}}</strong> z powodzeniem!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Czas na przerwę {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Przerwa {{nr}} się zaczęła!",
-        "NO_TASKS": "Przed uruchomieniem minutnika Pomodoro należy dodać zadania.",
-        "SESSION_X_START": "Pomodoro: Sesja {{nr}} się zaczęła!"
-      },
-      "S": {
-        "RESET": "Reset do pierwszej sesji Pomodoro",
-        "SESSION_SKIP": "Przejdź do końca bieżącej sesji Pomodoro",
-        "SESSION_X_START": "Pomodoro: Sesja {{nr}} się zaczęła!"
-      },
-      "SKIP_BREAK": "Pomiń przerwę",
-      "START_BREAK": "Zacznij przerwę"
+      "BREAK_IS_DONE": "Twoja przerwa się skończyła!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Wróć do pracy!",
@@ -1425,7 +1406,6 @@
         "GROUP_SCHEDULED_DATE": "Data zaplanowana",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Zresetuj wszystko",
-        "SCHEDULED_DEFAULT": "Dowolna data",
         "SCHEDULED_NEXT_MONTH": "Następny miesiąc",
         "SCHEDULED_NEXT_WEEK": "Następny tydzień",
         "SCHEDULED_THIS_MONTH": "Ten miesiąc",
@@ -1441,7 +1421,7 @@
         "TIME_2HOUR": "> 2 godziny",
         "TIME_10MIN": "> 10 minut",
         "TIME_30MIN": "> 30 minut",
-        "TIME_DEFAULT": "Dowolny czas trwania",
+        "FILTER_NOT_SPECIFIED": "Nie określono",
         "TIME_SPENT": "Czas spędzony",
         "TITLE": "Dostosuj widok zadań"
       }
@@ -1752,16 +1732,7 @@
       "BREAK_DURATION": "Duration of short breaks",
       "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
       "DURATION": "Duration of work sessions",
-      "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
-      "IS_ENABLED": "Enable pomodoro timer",
-      "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
-      "IS_MANUAL_CONTINUE_BREAK": "Manually confirm starting next break",
-      "IS_PLAY_SOUND": "Play sound when session is done",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
-      "IS_PLAY_TICK": "Play tick sound every second",
-      "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
-      "LONGER_BREAK_DURATION": "Duration of longer breaks",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Duration of longer breaks"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Pokaż baner X przed właściwym przypomnieniem",

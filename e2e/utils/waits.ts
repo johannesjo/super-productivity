@@ -108,3 +108,15 @@ export const waitForAppReady = async (
   // Small buffer to ensure animations settle.
   await page.waitForTimeout(200);
 };
+
+/**
+ * Wait for local state changes to persist before triggering sync.
+ * This ensures IndexedDB writes have completed after UI state changes.
+ * Uses Angular stability + networkidle as indicators that async operations have settled.
+ */
+export const waitForStatePersistence = async (page: Page): Promise<void> => {
+  // Wait for Angular to become stable (async operations complete)
+  await waitForAngularStability(page, 3000).catch(() => {});
+  // Wait for any pending network requests to complete
+  await page.waitForLoadState('networkidle', { timeout: 3000 }).catch(() => {});
+};

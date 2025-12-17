@@ -207,9 +207,6 @@
       "NEXT": "다음",
       "ON": "켜짐",
       "OPEN_ISSUE_IN_BROWSER": "브라우저에서 열린 이슈",
-      "POMODORO_BACK": "뒤로",
-      "POMODORO_DISABLE": "포모도로 비활성화",
-      "POMODORO_INFO": "포커스 세션은 포모도로 타이머가 활성화된 상태에서 함께 사용할 수 없습니다.",
       "PREP_GET_MENTALLY_READY": "집중력과 생산성을 높이기 위한 정신적 준비",
       "PREP_SIT_UPRIGHT": "똑바로 앉거나 서기",
       "PREP_STRETCH": "가벼운 스트레칭하기",
@@ -701,23 +698,7 @@
       "TASK_DRAWER": "작업 서랍"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "다시 일!",
-      "BREAK_IS_DONE": "너의 휴식은 끝났어!",
-      "ENJOY_YOURSELF": "자신을 즐기고, 스스로 움직여서 다시 들어가십시오.",
-      "FINISH_SESSION_X": " <strong>{{nr}}</strong>세션을 성공적으로 마쳤습니다!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "포모도로: 휴식 시간 {{nr}}!",
-        "BREAK_X_START": "Pomodoro : 휴식 {{nr}} 시작!",
-        "NO_TASKS": "Pomodoro 타이머가 시작되기 전에 작업을 추가해야 합니다.",
-        "SESSION_X_START": "Pomodoro : 세션 {{nr}} 이 시작되었습니다."
-      },
-      "S": {
-        "RESET": "첫 번째 포모도로 세션으로 재설정",
-        "SESSION_SKIP": "현재 포모도로 세션 끝으로 건너뛰기",
-        "SESSION_X_START": "Pomodoro : 세션 {{nr}} 이 시작되었습니다."
-      },
-      "SKIP_BREAK": "휴식 시간 건너 뛰기",
-      "START_BREAK": "휴식 시작"
+      "BREAK_IS_DONE": "너의 휴식은 끝났어!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "다시 일!",
@@ -1331,7 +1312,6 @@
         "GROUP_SCHEDULED_DATE": "예정일",
         "GROUP_TAG": "태그",
         "RESET_ALL": "모두 재설정",
-        "SCHEDULED_DEFAULT": "모든 날짜",
         "SCHEDULED_NEXT_MONTH": "다음 달",
         "SCHEDULED_NEXT_WEEK": "다음 주",
         "SCHEDULED_THIS_MONTH": "이달",
@@ -1347,7 +1327,7 @@
         "TIME_2HOUR": "> 2 시간",
         "TIME_10MIN": "> 10분",
         "TIME_30MIN": "> 30분",
-        "TIME_DEFAULT": "모든 기간",
+        "FILTER_NOT_SPECIFIED": "지정되지 않음",
         "TIME_SPENT": "소요 시간",
         "TITLE": "작업 보기 사용자 지정"
       }
@@ -1655,16 +1635,7 @@
       "BREAK_DURATION": "짧은 휴식 시간",
       "CYCLES_BEFORE_LONGER_BREAK": "X 작업 세션 후에 더 긴 휴식을 시작하십시오.",
       "DURATION": "작업 세션의 지속 기간",
-      "HELP": "<p>포모도로 타이머는 몇 가지 설정을 통해 구성 할 수 있습니다. 모든 작업 세션의 지속 시간, 정상 휴식 기간, 긴 휴식 시간이 시작되기 전에 실행할 작업 세션 수 및이 긴 휴식 기간.</p> <p>당신은 당신의 pomodoro 휴식 시간 동안 산만을 표시하고 싶다면 설정할 수 있습니다.</p> <p>\"Pomodoro break on pomodoro break\"설정은 작업에 소요되는 작업 시간으로 휴식 시간을 추적합니다. </p> <p>활성 작업이 없을 때 pomodoro 세션을 일시 중지하면 작업을 일시 중지 할 때 pomodoro 세션도 일시 중지됩니다.</p>",
-      "IS_ENABLED": "포모도로 타이머 사용",
-      "IS_MANUAL_CONTINUE": "수동으로 다음 pomodoro 세션 시작 확인",
-      "IS_MANUAL_CONTINUE_BREAK": "다음 휴식 시간 시작 수동 확인",
-      "IS_PLAY_SOUND": "세션이 끝나면 소리를냅니다.",
-      "IS_PLAY_SOUND_AFTER_BREAK": "휴식이 끝나면 소리를 내십시오.",
-      "IS_PLAY_TICK": "매초마다 틱 소리 재생",
-      "IS_STOP_TRACKING_ON_BREAK": "휴식 시간에 작업 중지 시간 추적",
-      "LONGER_BREAK_DURATION": "긴 휴식 시간",
-      "TITLE": "포모도로 타이머"
+      "LONGER_BREAK_DURATION": "긴 휴식 시간"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "실제 알림 앞에 배너 X 표시",

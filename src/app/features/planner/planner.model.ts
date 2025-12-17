@@ -1,5 +1,6 @@
 import { TaskCopy } from '../tasks/task.model';
 import { TaskRepeatCfg } from '../task-repeat-cfg/task-repeat-cfg.model';
+import { ScheduleFromCalendarEvent } from '../schedule/schedule.model';
 
 export enum ScheduleItemType {
   Task = 'Task',
@@ -15,6 +16,7 @@ export interface PlannerDay {
   itemsTotal: number;
   tasks: TaskCopy[];
   noStartTimeRepeatProjections: NoStartTimeRepeatProjection[];
+  allDayEvents: ScheduleFromCalendarEvent[];
   scheduledIItems: ScheduleItem[];
   availableHours?: number;
   progressPercentage?: number;

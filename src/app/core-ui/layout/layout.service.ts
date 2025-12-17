@@ -98,6 +98,9 @@ export class LayoutService {
     { initialValue: false },
   );
 
+  // Signal to track if any panel is currently being resized
+  readonly isPanelResizing = signal(false);
+
   showAddTaskBar(): void {
     // Store currently focused element if it's a task
     const activeElement = document.activeElement as HTMLElement;

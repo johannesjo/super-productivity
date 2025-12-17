@@ -38,6 +38,7 @@ export type MiscConfig = Readonly<{
   isShowProductivityTipLonger?: boolean;
   isTrayShowCurrentCountdown?: boolean;
   isOverlayIndicatorEnabled?: boolean;
+  isUseCustomWindowTitleBar?: boolean;
   customTheme?: string;
   defaultStartPage?: number;
   unsplashApiKey?: string | null;
@@ -86,17 +87,6 @@ export type TakeABreakConfig = Readonly<{
 }>;
 
 export type PomodoroConfig = Readonly<{
-  isEnabled?: boolean;
-  isStopTrackingOnBreak?: boolean;
-  isStopTrackingOnLongBreak?: boolean;
-  isDisableAutoStartAfterBreak?: boolean;
-  isManualContinue?: boolean;
-  isManualContinueBreak?: boolean;
-  isPlaySound?: boolean;
-  isPlaySoundAfterBreak?: boolean;
-  // isGoToWorkView?: boolean;
-  isPlayTick?: boolean;
-
   // due to formly not being reliable here we need to be more lenient
   duration?: number | null;
   breakDuration?: number | null;
@@ -176,6 +166,7 @@ export type ReminderConfig = Readonly<{
   isCountdownBannerEnabled: boolean;
   countdownDuration: number;
   defaultTaskRemindOption?: TaskReminderOptionId;
+  disableReminders?: boolean;
 }>;
 
 export type TrackingReminderConfigOld = Readonly<{

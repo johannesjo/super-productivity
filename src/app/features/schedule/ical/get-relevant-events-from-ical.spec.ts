@@ -286,7 +286,7 @@ END:VCALENDAR`;
   });
 
   describe('edge cases', () => {
-    it('should handle all-day events', () => {
+    it('should handle all-day events and set isAllDay flag', () => {
       const icalData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -307,6 +307,31 @@ END:VCALENDAR`;
 
       expect(events.length).toBe(1);
       expect(events[0].title).toBe('All Day Event');
+      expect(events[0].isAllDay).toBe(true);
+    });
+
+    it('should NOT set isAllDay flag for timed events', () => {
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VEVENT
+UID:timed-event
+DTSTART:20250115T100000Z
+DTEND:20250115T110000Z
+SUMMARY:Timed Event
+END:VEVENT
+END:VCALENDAR`;
+
+      const events = getRelevantEventsForCalendarIntegrationFromIcal(
+        icalData,
+        calProviderId,
+        startTimestamp,
+        endTimestamp,
+      );
+
+      expect(events.length).toBe(1);
+      expect(events[0].title).toBe('Timed Event');
+      expect(events[0].isAllDay).toBeUndefined();
     });
 
     it('should handle recurring event with UNTIL', () => {
@@ -336,7 +361,7 @@ END:VCALENDAR`;
       });
     });
 
-    it('should handle recurring all-day event without end time', () => {
+    it('should handle recurring all-day event without end time and set isAllDay flag', () => {
       const icalData = `BEGIN:VCALENDAR
 VERSION:2.0
 PRODID:-//Test//Test//EN
@@ -359,6 +384,7 @@ END:VCALENDAR`;
       events.forEach((event) => {
         expect(event.title).toBe('Recurring All Day No End');
         expect(event.duration).toBe(0); // No duration specified
+        expect(event.isAllDay).toBe(true);
       });
     });
 
@@ -765,6 +791,104 @@ END:VCALENDAR`;
       modifiedEvents.forEach((ev) => {
         expect(ev.legacyIds).toEqual(['unique@test']);
       });
+    });
+  });
+
+  describe('timezone edge cases (Office 365 compatibility)', () => {
+    it('should handle iCal with timezone reference but malformed VTIMEZONE gracefully', () => {
+      // This reproduces the issue from GitHub #5722 where Office 365 calendars
+      // can cause "Cannot read properties of null (reading 'parent')" errors
+      // in ICAL.helpers.updateTimezones()
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN
+METHOD:PUBLISH
+X-WR-TIMEZONE:Europe/London
+BEGIN:VTIMEZONE
+TZID:Europe/London
+BEGIN:STANDARD
+DTSTART:16010101T020000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10
+TZOFFSETFROM:+0100
+TZOFFSETTO:+0000
+END:STANDARD
+BEGIN:DAYLIGHT
+DTSTART:16010101T010000
+RRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=3
+TZOFFSETFROM:+0000
+TZOFFSETTO:+0100
+END:DAYLIGHT
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:office365-event@microsoft.com
+DTSTART;TZID=Europe/London:20250115T100000
+DTEND;TZID=Europe/London:20250115T110000
+SUMMARY:Office 365 Meeting
+END:VEVENT
+END:VCALENDAR`;
+
+      // Should not throw an error
+      expect(() => {
+        const events = getRelevantEventsForCalendarIntegrationFromIcal(
+          icalData,
+          calProviderId,
+          startTimestamp,
+          endTimestamp,
+        );
+        expect(events.length).toBe(1);
+        expect(events[0].title).toBe('Office 365 Meeting');
+      }).not.toThrow();
+    });
+
+    it('should handle iCal with TZID reference to unknown timezone gracefully', () => {
+      // Some Office 365 calendars reference timezones that may not be in the
+      // ical.js TimezoneService, which can cause updateTimezones to fail
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Microsoft Corporation//Outlook 16.0 MIMEDIR//EN
+BEGIN:VEVENT
+UID:unknown-tz-event@microsoft.com
+DTSTART;TZID=Custom/Unknown_Timezone:20250115T100000
+DTEND;TZID=Custom/Unknown_Timezone:20250115T110000
+SUMMARY:Event with Unknown Timezone
+END:VEVENT
+END:VCALENDAR`;
+
+      // Should not throw, should handle gracefully
+      expect(() => {
+        getRelevantEventsForCalendarIntegrationFromIcal(
+          icalData,
+          calProviderId,
+          startTimestamp,
+          endTimestamp,
+        );
+      }).not.toThrow();
+    });
+
+    it('should handle iCal with empty VTIMEZONE component gracefully', () => {
+      // Edge case: VTIMEZONE exists but has no subcomponents
+      const icalData = `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//Test//Test//EN
+BEGIN:VTIMEZONE
+TZID:Empty/Timezone
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:empty-tz-event@test.com
+DTSTART;TZID=Empty/Timezone:20250115T100000
+DTEND;TZID=Empty/Timezone:20250115T110000
+SUMMARY:Event with Empty Timezone
+END:VEVENT
+END:VCALENDAR`;
+
+      expect(() => {
+        getRelevantEventsForCalendarIntegrationFromIcal(
+          icalData,
+          calProviderId,
+          startTimestamp,
+          endTimestamp,
+        );
+      }).not.toThrow();
     });
   });
 });

@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "一時停止トラッキング",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "現在のタスクの一時停止トラッキング",
       "POMODORO": "ポモドーロ",
-      "POMODORO_BACK": "バック",
-      "POMODORO_DISABLE": "ポモドーロを無効にする",
       "POMODORO_HINT": "計画的な休憩を伴う構造化されたスプリント",
-      "POMODORO_INFO": "ポモドーロ タイマーが有効になっている場合、フォーカス セッションを併用することはできません。",
       "POMODORO_SESSION_COMPLETED": "ポモドーロセッション終了!",
       "PREP_GET_MENTALLY_READY": "集中して生産的になるために精神的に準備する",
       "PREP_SIT_UPRIGHT": "まっすぐに座る(または立つ)",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "タスクドロワー"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "仕事に戻る！",
-      "BREAK_IS_DONE": "休憩時間が終わりました！",
-      "ENJOY_YOURSELF": "楽しんで、体を動かして、また戻ってきてね：",
-      "FINISH_SESSION_X": "セッション <strong>{{nr}}</strong>が正常に終了しました。",
-      "NOTIFICATION": {
-        "BREAK_TIME": "ポモドーロ休憩時間 {{nr}}！",
-        "BREAK_X_START": "ポモドーロ：休憩 {{nr}} が始まりました！",
-        "NO_TASKS": "ポモドーロタイマーを開始する前に、タスクを追加する必要があります。",
-        "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
-      },
-      "S": {
-        "RESET": "最初のポモドーロ・セッションにリセット",
-        "SESSION_SKIP": "現在のポモドーロ・セッションの終わりまでスキップする",
-        "SESSION_X_START": "ポモドーロ：セッション {{nr}} が始まりました！"
-      },
-      "SKIP_BREAK": "休憩をスキップする",
-      "START_BREAK": "休憩開始"
+      "BREAK_IS_DONE": "休憩時間が終わりました！"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "仕事に戻る！",
@@ -1569,7 +1550,6 @@
         "GROUP_SCHEDULED_DATE": "開催予定日",
         "GROUP_TAG": "タグ",
         "RESET_ALL": "すべてリセット",
-        "SCHEDULED_DEFAULT": "任意の日付",
         "SCHEDULED_NEXT_MONTH": "来月",
         "SCHEDULED_NEXT_WEEK": "来週",
         "SCHEDULED_THIS_MONTH": "今月",
@@ -1587,7 +1567,7 @@
         "TIME_2HOUR": "> 2時間",
         "TIME_10MIN": "> 10分間",
         "TIME_30MIN": ">30分",
-        "TIME_DEFAULT": "任意の期間",
+        "FILTER_NOT_SPECIFIED": "指定されていない",
         "TIME_SPENT": "滞在時間",
         "TITLE": "タスクビューのカスタマイズ"
       }
@@ -1925,17 +1905,7 @@
       "BREAK_DURATION": "短い休憩時間",
       "CYCLES_BEFORE_LONGER_BREAK": "長い休憩までの作業セッションの回数",
       "DURATION": "作業セッションの時間",
-      "HELP": "<p>ポモドーロタイマーは各作業セッションの時間、短い休憩時間、長い休憩までの作業セッションの回数、長い休憩時間など複数の項目で設定できます。</p> <p>ポモドーロが中断している間に気を散らすものを表示するかどうかも設定できます。</p> <p>「ポモドーロ休憩時間追跡の一時停止」を設定すると、作業時間がタスクに費やされたときに休憩時間も追跡されます。 </p> <p>「アクティブなタスクがないときにポモドーロセッションを一時停止」を有効にすると、タスクを一時停止したときにポモドーロセッションも一時停止します。</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "休憩後にセッションの自動開始を無効にしてください",
-      "IS_ENABLED": "ポモドーロタイマーを有効にする",
-      "IS_MANUAL_CONTINUE": "次のポモドーロセッションを手動で開始する",
-      "IS_MANUAL_CONTINUE_BREAK": "次の休憩の開始を手動で確認",
-      "IS_PLAY_SOUND": "セッション終了時に音を鳴らす",
-      "IS_PLAY_SOUND_AFTER_BREAK": "休憩終了時に音を鳴らす",
-      "IS_PLAY_TICK": "1秒ごとにチクタク音を鳴らす",
-      "IS_STOP_TRACKING_ON_BREAK": "休憩中のタスクのタイムトラッキングを停止する",
-      "LONGER_BREAK_DURATION": "長い休憩時間",
-      "TITLE": "ポモドーロタイマー"
+      "LONGER_BREAK_DURATION": "長い休憩時間"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "リマインダーの前にバナーXを表示",

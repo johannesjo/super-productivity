@@ -309,6 +309,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.config().resizable || this.isMobile()) return;
 
     this.isResizing.set(true);
+    this._layoutService.isPanelResizing.set(true);
     this.startX.set(event.clientX);
     this.startWidth.set(this.isFullMode() ? this.currentWidth() : COLLAPSED_WIDTH);
 
@@ -372,6 +373,7 @@ export class MagicSideNavComponent implements OnInit, OnDestroy, AfterViewInit {
     if (!this.isResizing()) return;
 
     this.isResizing.set(false);
+    this._layoutService.isPanelResizing.set(false);
     document.removeEventListener('mousemove', this._onDrag);
     document.removeEventListener('mouseup', this._onDragEnd);
     document.body.style.cursor = '';

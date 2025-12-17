@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 20
       - name: Check out Git repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           persist-credentials: false
       # work around for npm installs from git+https://github.com/johannesjo/J2M.git
@@ -49,7 +49,17 @@ jobs:
       - run: npm run env # Generate env.generated.ts from environment variables
       - run: npm run lint
       - run: npm run test
+      - name: Start WebDAV Server
+        run: |
+          docker compose up -d webdav
+
+          # Wait for WebDAV server to be ready
+          chmod +x ./scripts/wait-for-webdav.sh
+          ./scripts/wait-for-webdav.sh
       - run: npm run e2e
+      - name: Print WebDAV logs on failure
+        if: ${{ failure() }}
+        run: docker compose logs webdav
 
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}

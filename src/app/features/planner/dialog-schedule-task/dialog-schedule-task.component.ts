@@ -148,8 +148,9 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       }
 
       if (this.data.task.dueWithTime) {
-        const tzOffset = new Date().getTimezoneOffset() * 60 * 1000;
-        this.selectedDate = new Date(this.data.task.dueWithTime + tzOffset);
+        // dueWithTime is a UTC timestamp - Date constructor handles timezone conversion automatically
+        // Do NOT add timezone offset here as it would double-apply the conversion (fixes #5515)
+        this.selectedDate = new Date(this.data.task.dueWithTime);
         this.selectedTime = new Date(this.data.task.dueWithTime).toLocaleTimeString(
           'en-GB',
           {

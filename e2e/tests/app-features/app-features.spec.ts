@@ -39,7 +39,10 @@ test.describe('App Features', () => {
       const featureElement = feature.locator(page);
 
       // elements on settings page
-      const appFeaturesSection = page.locator('collapsible', { hasText: 'App Features' });
+      // Use .first() because there may be multiple "App Features" sections (global and project-specific)
+      const appFeaturesSection = page
+        .locator('collapsible', { hasText: 'App Features' })
+        .first();
       const featureSwitch = page.getByRole('switch', {
         name: feature.label,
         exact: true,
@@ -48,13 +51,14 @@ test.describe('App Features', () => {
       // Go to settings page
       await page.goto('/#/config');
 
-      // expand "App Features"
+      // expand "App Features" and wait for switch to be visible
       await appFeaturesSection.click();
+      await expect(featureSwitch).toBeVisible();
 
       // Ensure feature is enabled (all features are enabled by default)
       await expect(featureSwitch).toBeChecked();
 
-      // Click switch to disable
+      // Click switch to disable and wait for state change
       await featureSwitch.click();
       await expect(featureSwitch).not.toBeChecked();
 
@@ -67,10 +71,14 @@ test.describe('App Features', () => {
       // Re-enable the feature
       await page.goto('/#/config');
 
-      // expand "App Features"
+      // expand "App Features" and wait for switch to be visible and interactable
       await appFeaturesSection.click();
+      await expect(featureSwitch).toBeVisible();
 
-      // click toggle button to enable
+      // Wait a moment for the toggle to be fully interactive after expansion animation
+      await page.waitForTimeout(100);
+
+      // Click toggle button to enable and verify state change
       await featureSwitch.click();
       await expect(featureSwitch).toBeChecked();
 

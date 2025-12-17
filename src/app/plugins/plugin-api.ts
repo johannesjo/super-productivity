@@ -265,6 +265,11 @@ export class PluginAPI implements PluginAPIInterface {
     return this._boundMethods.getConfig();
   }
 
+  async downloadFile(filename: string, data: string): Promise<void> {
+    PluginLog.log(`Plugin ${this._pluginId} requested to download file "${filename}"`);
+    return this._boundMethods.downloadFile(filename, data);
+  }
+
   async openDialog(dialogCfg: DialogCfg): Promise<void> {
     PluginLog.log(`Plugin ${this._pluginId} requested to open dialog:`, dialogCfg);
     return this._pluginBridge.openDialog(dialogCfg);

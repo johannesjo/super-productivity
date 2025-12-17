@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Sett sporing på pause",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Sett sporing på pause for gjeldende oppgave",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Tilbake",
-      "POMODORO_DISABLE": "Deaktiver Pomodoro",
       "POMODORO_HINT": "Strukturerte sprint med planlagte pauser",
-      "POMODORO_INFO": "Fokusøkter kan ikke brukes sammen med pomodoro-timeren aktivert.",
       "POMODORO_SESSION_COMPLETED": "Pomodoro-økt fullført!",
       "PREP_GET_MENTALLY_READY": "Gjør deg mentalt klar til å være fokusert og produktiv",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) oppreist",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "Oppgaveskuff"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Tilbake til arbeid!",
-      "BREAK_IS_DONE": "Pausen din er ferdig!",
-      "ENJOY_YOURSELF": "Kos deg, få deg i bevegelse, kom inn igjen:",
-      "FINISH_SESSION_X": "Du har fullført økten <strong>{{nr}}</strong> !",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Tid for pause {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Pause {{nr}} startet!",
-        "NO_TASKS": "Du må legge til oppgaver før Pomodoro-timeren kan starte.",
-        "SESSION_X_START": "Pomodoro: Økten {{nr}} startet!"
-      },
-      "S": {
-        "RESET": "Tilbakestill til første Pomodoro-økt",
-        "SESSION_SKIP": "Hopp til slutten av den aktuelle Pomodoro-økten",
-        "SESSION_X_START": "Pomodoro: Økten {{nr}} startet!"
-      },
-      "SKIP_BREAK": "Hopp over pause",
-      "START_BREAK": "Start pause"
+      "BREAK_IS_DONE": "Pausen din er ferdig!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Tilbake til arbeid!",
@@ -1569,7 +1550,6 @@
         "GROUP_SCHEDULED_DATE": "Planlagt dato",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Tilbakestill alt",
-        "SCHEDULED_DEFAULT": "Hvilken som helst dato",
         "SCHEDULED_NEXT_MONTH": "Neste måned",
         "SCHEDULED_NEXT_WEEK": "Neste uke",
         "SCHEDULED_THIS_MONTH": "Denne måneden",
@@ -1587,7 +1567,7 @@
         "TIME_2HOUR": "> 2 timer",
         "TIME_10MIN": "> 10 minutter",
         "TIME_30MIN": "> 30 minutter",
-        "TIME_DEFAULT": "Valgfri varighet",
+        "FILTER_NOT_SPECIFIED": "Ikke spesifisert",
         "TIME_SPENT": "Brukt tid",
         "TITLE": "Tilpass oppgavevisning"
       }
@@ -1925,17 +1905,7 @@
       "BREAK_DURATION": "Varighet av korte pauser",
       "CYCLES_BEFORE_LONGER_BREAK": "Start lengre pause etter X-arbeidsøkter",
       "DURATION": "Varigheten av arbeidsøktene",
-      "HELP": "<p>Pomodoro-timeren kan konfigureres via et par innstillinger. Varigheten av hver arbeidsøkt, varigheten av normale pauser, antall arbeidsøkter som skal kjøres før en lengre pause startes og varigheten av denne lengre pausen.</p><p> Du kan også angi om du vil vise distraksjoner i pomodoro-pausene dine.</p><p> Innstilling av &quot;Pause tidssporing på pomodoro pause&quot; vil også spore pausene dine som arbeidstid brukt på en oppgave.</p><p> Aktivering av &quot;Pause pomodoro-økt midlertidig når ingen aktiv oppgave er aktivert&quot; vil også pomodoro-økten pause når du setter en oppgave på pause.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Deaktiver automatisk start av økt etter pause",
-      "IS_ENABLED": "Aktiver pomodoro",
-      "IS_MANUAL_CONTINUE": "Bekreft manuelt start av neste pomodoro-økt",
-      "IS_MANUAL_CONTINUE_BREAK": "Bekreft manuelt at du starter neste pause",
-      "IS_PLAY_SOUND": "Spill lyd når økten er ferdig",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Spill lyd når pause er ferdig",
-      "IS_PLAY_TICK": "Spill av krysslyd hvert sekund",
-      "IS_STOP_TRACKING_ON_BREAK": "Stopp tidsporing for oppgave på pause",
-      "LONGER_BREAK_DURATION": "Varighet av lengre pauser",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Varighet av lengre pauser"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Vis banner X før den faktiske påminnelsen",

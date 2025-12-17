@@ -239,10 +239,7 @@
       "ON": "An",
       "OPEN_ISSUE_IN_BROWSER": "Issue im Browser öffnen",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Zurück",
-      "POMODORO_DISABLE": "Pomodoro deaktivieren",
       "POMODORO_HINT": "Strukturierte Sprints mit geplanten Pausen",
-      "POMODORO_INFO": "Fokussitzungen können nicht zusammen mit aktiviertem Pomodoro-Timer verwendet werden.",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
       "PREP_GET_MENTALLY_READY": "Machen Sie sich mental bereit, konzentriert und produktiv zu sein",
       "PREP_SIT_UPRIGHT": "Sitzen (oder stehen) Sie aufrecht",
@@ -761,23 +758,7 @@
       "TASK_DRAWER": "Aufgabenschublade"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Zurück an die Arbeit!",
-      "BREAK_IS_DONE": "Ihre Pause ist geschafft!",
-      "ENJOY_YOURSELF": "Amüsieren Sie sich, bewegen Sie sich, kommen Sie zurück in:",
-      "FINISH_SESSION_X": "Sie haben die Sitzung <strong>{{nr}}</strong>erfolgreich beendet!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Zeit für eine Pause {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Pause {{nr}} gestartet!",
-        "NO_TASKS": "Sie müssen Aufgaben hinzufügen, bevor der Pomodoro-Timer starten kann.",
-        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
-      },
-      "S": {
-        "RESET": "Zurücksetzen auf die erste Pomodoro-Sitzung",
-        "SESSION_SKIP": "Zum Ende der aktuellen Pomodoro-Sitzung springen",
-        "SESSION_X_START": "Pomodoro: Sitzung {{nr}} gestartet!"
-      },
-      "SKIP_BREAK": "Pause überspringen",
-      "START_BREAK": "Pause beginnen"
+      "BREAK_IS_DONE": "Ihre Pause ist geschafft!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Zurück an die Arbeit!",
@@ -1516,7 +1497,6 @@
         "GROUP_SCHEDULED_DATE": "Geplantes Datum",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Alle zurücksetzen",
-        "SCHEDULED_DEFAULT": "Jedes Datum",
         "SCHEDULED_NEXT_MONTH": "Nächsten Monat",
         "SCHEDULED_NEXT_WEEK": "Nächste Woche",
         "SCHEDULED_THIS_MONTH": "Diesen Monat",
@@ -1533,7 +1513,7 @@
         "TIME_2HOUR": "> 2 Stunden",
         "TIME_10MIN": "> 10 Minuten",
         "TIME_30MIN": "> 30 Minuten",
-        "TIME_DEFAULT": "Jede Dauer",
+        "FILTER_NOT_SPECIFIED": "Nicht angegeben",
         "TIME_SPENT": "Aufgewendete Zeit",
         "TITLE": "Aufgabenansicht anpassen"
       }
@@ -1870,17 +1850,7 @@
       "BREAK_DURATION": "Dauer der kurzen Pausen",
       "CYCLES_BEFORE_LONGER_BREAK": "Beginnen einer längeren Pause nach X Arbeitssitzungen",
       "DURATION": "Dauer der Arbeitssitzungen",
-      "HELP": "<p>Der Pomodoro-Timer kann über einige Einstellungen konfiguriert werden. Die Dauer jeder Arbeitssitzung, die Dauer der normalen Pausen, die Anzahl der Arbeitssitzungen, die ausgeführt werden müssen, bevor eine längere Pause gestartet wird, und die Dauer dieser längeren Pause.</p> <p>Sie können auch festlegen, ob Ihre Ablenkungen während der Pomodoro-Pausen angezeigt werden sollen.</p> <p>Mit der Einstellung \"Pausenzeiterfassung bei Pomodoro-Pause\" werden Ihre Pausen auch als Arbeitszeit für eine Aufgabe erfasst. </p> <p>Wenn Sie \"Pomodoro-Sitzung anhalten, wenn keine aktive Aufgabe vorhanden ist\" aktivieren, wird die Pomodoro-Sitzung auch angehalten, wenn Sie eine Aufgabe anhalten.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Automatischer Start der Sitzung nach einer Pause deaktivieren",
-      "IS_ENABLED": "Aktivieren Sie den Pomodoro-Timer",
-      "IS_MANUAL_CONTINUE": "Bestätigen Sie den Start der nächsten Pomodoro-Sitzung manuell",
-      "IS_MANUAL_CONTINUE_BREAK": "Beginn der nächsten Pause manuell bestätigen",
-      "IS_PLAY_SOUND": "Ton abspielen, wenn die Sitzung beendet ist",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Ton abspielen, wenn die Pause beendet ist",
-      "IS_PLAY_TICK": "Spielen Sie jede Sekunde einen Tick-Sound ab",
-      "IS_STOP_TRACKING_ON_BREAK": "Stoppen Sie die Zeiterfassung für die Aufgabe in der Pause",
-      "LONGER_BREAK_DURATION": "Dauer längerer Pausen",
-      "TITLE": "Pomodoro Timer"
+      "LONGER_BREAK_DURATION": "Dauer längerer Pausen"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Zeigen Sie Banner vor der eigentlichen Erinnerung an",

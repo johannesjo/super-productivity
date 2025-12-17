@@ -91,6 +91,18 @@ export class IdleEffects {
         }),
       );
 
+  // NOTE: Why we filter out triggers when already idle (fixes #5652):
+  // When the idle dialog is open, two timers compete to update idleTime in the store:
+  // 1. The IPC stream from Electron (this effect) - reports current system idle time
+  // 2. The internal poll timer (_initIdlePoll) - calculates initialIdleTime + elapsed time
+  //
+  // The internal poll timer is MORE ACCURATE for display because:
+  // - It uses Date.now() with a fixed reference point (idleStart) for precise calculation
+  // - The IPC system idle time resets whenever the user moves the mouse slightly
+  // - We want to show "total time away" not "current system idle time"
+  //
+  // By filtering when isIdle=true, we let the internal poll timer control the display
+  // while the dialog is open, preventing the flickering between two different values.
   triggerIdleWhenEnabled$ = createEffect(() =>
     this._store.select(selectIdleConfig).pipe(
       switchMap(
@@ -102,7 +114,12 @@ export class IdleEffects {
           !isEnableIdleTimeTracking
             ? of(resetIdle())
             : this._triggerIdleApis$.pipe(
-                switchMap((idleTimeInMs) => {
+                withLatestFrom(this._store.select(selectIsIdle)),
+                switchMap(([idleTimeInMs, isAlreadyIdle]) => {
+                  // Skip if already in idle state - let internal poll timer handle updates
+                  if (isAlreadyIdle) {
+                    return EMPTY;
+                  }
                   Log.verbose('triggerIdleWhenEnabled$', {
                     idleTimeInMs,
                     isEnableIdleTimeTracking,

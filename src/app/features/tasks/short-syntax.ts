@@ -16,6 +16,7 @@ type TagChanges = {
 type DueChanges = {
   title?: string;
   dueWithTime?: number;
+  dueDay?: string | null;
 };
 
 const CH_TSP = '/';
@@ -361,17 +362,16 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
       if (!start.isCertain('hour')) {
         hasPlannedTime = false;
       }
-      let inputDate = parsedDateResult.text;
-      // Hacky way to strip short syntax for time estimate that was
-      // accidentally included in the date parser
-      // For example: the task is "Task @14/4 90m" and we don't want "90m"
-      if (inputDate.match(/ [0-9]{1,}m/g)) {
-        inputDate += 'm';
-      }
+
+      const matchText = parsedDateResult.text;
+      const matchIndex = parsedDateResult.index;
+      const textToReplace = rr[0].substring(0, matchIndex + matchText.length);
+
       return {
         dueWithTime: due,
+        dueDay: null,
         // Strip out the short syntax for scheduled date and given date
-        title: task.title.replace(`@${inputDate}`, ''),
+        title: task.title.replace(textToReplace, '').trim(),
         ...(hasPlannedTime ? {} : { hasPlannedTime: false }),
       };
     }
@@ -395,9 +395,14 @@ const parseScheduledDate = (task: Partial<TaskCopy>, now: Date): DueChanges => {
           due.setDate(due.getDate() + 1);
         }
 
+        const matchIndex = simpleMatch.index as number;
+        const matchText = simpleMatch[0];
+        const textToReplace = rr[0].substring(0, matchIndex + matchText.length);
+
         return {
           dueWithTime: due.getTime(),
-          title: task.title.replace(`@${nr}`, ''),
+          dueDay: null,
+          title: task.title.replace(textToReplace, '').trim(),
         };
       }
     }

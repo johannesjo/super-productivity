@@ -138,6 +138,18 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_OVERLAY_INDICATOR_ENABLED,
       },
     },
+    ...((IS_ELECTRON
+      ? [
+          {
+            key: 'isUseCustomWindowTitleBar',
+            type: 'checkbox',
+            templateOptions: {
+              label: T.GCF.MISC.IS_USE_CUSTOM_WINDOW_TITLE_BAR,
+              description: T.GCF.MISC.IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT,
+            },
+          },
+        ]
+      : []) as LimitedFormlyFieldConfig<MiscConfig>[]),
     {
       key: 'customTheme',
       type: 'select',

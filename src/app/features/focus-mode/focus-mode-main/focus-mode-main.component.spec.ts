@@ -18,6 +18,8 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { EffectsModule } from '@ngrx/effects';
 import { Component, EventEmitter, Output } from '@angular/core';
 import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { DialogPomodoroSettingsComponent } from '../dialog-pomodoro-settings/dialog-pomodoro-settings.component';
 
 @Component({
   selector: 'focus-mode-task-selector',
@@ -38,6 +40,7 @@ describe('FocusModeMainComponent', () => {
   let mockIssueService: jasmine.SpyObj<IssueService>;
   let focusModeServiceSpy: jasmine.SpyObj<FocusModeService>;
   let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   const mockTask: TaskCopy = {
     id: 'task-1',
@@ -83,6 +86,11 @@ describe('FocusModeMainComponent', () => {
 
     const simpleCounterServiceSpy = jasmine.createSpyObj('SimpleCounterService', ['']);
 
+    mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockMatDialog.open.and.returnValue({
+      afterClosed: () => of(null),
+    } as MatDialogRef<any>);
+
     focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', [], {
       timeElapsed: jasmine.createSpy().and.returnValue(60000),
       isCountTimeDown: jasmine.createSpy().and.returnValue(true),
@@ -115,6 +123,7 @@ describe('FocusModeMainComponent', () => {
         { provide: IssueService, useValue: issueServiceSpy },
         { provide: SimpleCounterService, useValue: simpleCounterServiceSpy },
         { provide: FocusModeService, useValue: focusModeServiceSpy },
+        { provide: MatDialog, useValue: mockMatDialog },
       ],
     })
       .overrideComponent(FocusModeMainComponent, {
@@ -482,6 +491,64 @@ describe('FocusModeMainComponent', () => {
       expect(() => component.updateTaskTitleIfChanged(true, 'New Title')).toThrowError(
         'No task data',
       );
+    });
+  });
+
+  describe('pomodoro settings', () => {
+    describe('isShowPomodoroSettings computed signal', () => {
+      // Note: The component is initialized with Preparation state and Pomodoro mode
+      // so isShowPomodoroSettings should be true by default
+      it('should return true when initialized with preparation state and Pomodoro mode', () => {
+        // Default setup has: mainState=Preparation, mode=Pomodoro
+        expect(component.isShowPomodoroSettings()).toBe(true);
+      });
+    });
+
+    describe('openPomodoroSettings', () => {
+      it('should open the pomodoro settings dialog', () => {
+        component.openPomodoroSettings();
+
+        expect(mockMatDialog.open).toHaveBeenCalledWith(DialogPomodoroSettingsComponent);
+      });
+    });
+  });
+
+  describe('mode selector visibility', () => {
+    it('should show mode selector in preparation state (default)', () => {
+      // Default setup has: mainState=Preparation
+      expect(component.isShowModeSelector()).toBe(true);
+    });
+  });
+
+  describe('selectMode', () => {
+    it('should dispatch setFocusModeMode action for valid mode', () => {
+      component.selectMode(FocusModeMode.Flowtime);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.setFocusModeMode({ mode: FocusModeMode.Flowtime }),
+      );
+    });
+
+    it('should dispatch setFocusModeMode action for Pomodoro mode', () => {
+      component.selectMode(FocusModeMode.Pomodoro);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.setFocusModeMode({ mode: FocusModeMode.Pomodoro }),
+      );
+    });
+
+    it('should dispatch setFocusModeMode action for Countdown mode', () => {
+      component.selectMode(FocusModeMode.Countdown);
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.setFocusModeMode({ mode: FocusModeMode.Countdown }),
+      );
+    });
+
+    it('should not dispatch for invalid mode value', () => {
+      component.selectMode('invalid-mode');
+
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
   });
 });

@@ -14,6 +14,7 @@ import { IssueProviderService } from '../../issue-provider.service';
 import { CalendarProviderCfg, ICalIssueReduced } from './calendar.model';
 import { HttpClient } from '@angular/common/http';
 import { ICAL_TYPE } from '../../issue.const';
+import { getDbDateStr } from '../../../../util/get-db-date-str';
 
 @Injectable({
   providedIn: 'root',
@@ -45,6 +46,12 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
   getAddTaskData(
     calEv: ICalIssueReduced,
   ): Partial<Readonly<TaskCopy>> & { title: string } {
+    // For all-day events, use dueDay instead of dueWithTime
+    // This prevents them from cluttering the schedule timeline
+    const dueDateFields = calEv.isAllDay
+      ? { dueDay: getDbDateStr(calEv.start) }
+      : { dueWithTime: calEv.start };
+
     return {
       title: calEv.title,
       issueId: calEv.id,
@@ -54,7 +61,7 @@ export class CalendarCommonInterfacesService implements IssueServiceInterface {
       notes: calEv.description || '',
       issueWasUpdated: false,
       issueLastUpdated: new Date().getTime(),
-      dueWithTime: calEv.start,
+      ...dueDateFields,
     };
   }
 

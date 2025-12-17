@@ -250,11 +250,9 @@
       "PAUSE_TRACKING": "Pause tracking",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pause tracking for current task",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Back",
-      "POMODORO_DISABLE": "Disable Pomodoro",
       "POMODORO_HINT": "Structured sprints with planned breaks",
-      "POMODORO_INFO": "Focus sessions cannot be used together with the pomodoro timer enabled.",
       "POMODORO_SESSION_COMPLETED": "Pomodoro Session Completed!",
+      "POMODORO_SETTINGS": "Pomodoro Settings",
       "PREP_GET_MENTALLY_READY": "Get mentally ready to be focused and productive",
       "PREP_SIT_UPRIGHT": "Sit (or stand) upright",
       "PREP_STRETCH": "Do some mild stretching",
@@ -802,23 +800,7 @@
       "TASK_DRAWER": "Task Drawer"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Back to work!",
-      "BREAK_IS_DONE": "Focus break is over!",
-      "ENJOY_YOURSELF": "Enjoy yourself, get yourself moving, come back in:",
-      "FINISH_SESSION_X": "You successfully finished session <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Time for break {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Break {{nr}} started!",
-        "NO_TASKS": "You need to add tasks before the Pomodoro timer can start.",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "S": {
-        "RESET": "Reset to first Pomodoro Session",
-        "SESSION_SKIP": "Skip to end of current Pomodoro Session",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} started!"
-      },
-      "SKIP_BREAK": "Skip break",
-      "START_BREAK": "Start break"
+      "BREAK_IS_DONE": "Focus break is over!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Back to work!",
@@ -865,6 +847,12 @@
       }
     },
     "PROJECT": {
+      "D_CONFIRM_DUPLICATE_BIG_PROJECT": {
+        "TITLE": "Duplicate Project?",
+        "MSG": "This project is quite large and might take a while to duplicate. Do you want to proceed?",
+        "OK": "Duplicate Anyway",
+        "CANCEL": "Cancel"
+      },
       "D_CREATE": {
         "CREATE": "Create Project",
         "EDIT": "Edit Project",
@@ -1558,7 +1546,6 @@
         "GROUP_SCHEDULED_DATE": "Scheduled Date",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reset All",
-        "SCHEDULED_DEFAULT": "Any Date",
         "SCHEDULED_NEXT_MONTH": "Next Month",
         "SCHEDULED_NEXT_WEEK": "Next Week",
         "SCHEDULED_THIS_MONTH": "This Month",
@@ -1575,7 +1562,7 @@
         "TIME_2HOUR": "> 2 Hours",
         "TIME_10MIN": "> 10 Minutes",
         "TIME_30MIN": "> 30 Minutes",
-        "TIME_DEFAULT": "Any Duration",
+        "FILTER_NOT_SPECIFIED": "Not specified",
         "TIME_SPENT": "Time Spent",
         "TITLE": "Customize Task View"
       }
@@ -1901,6 +1888,8 @@
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (desktop mac only)",
       "IS_TRAY_SHOW_CURRENT_TASK": "Show current task in the tray / status menu (desktop mac/windows only)",
       "IS_TURN_OFF_MARKDOWN": "Turn off markdown parsing for task notes",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Use custom title bar (Windows/Linux only)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Requires restart to take effect",
       "START_OF_NEXT_DAY": "Start time of the next day",
       "START_OF_NEXT_DAY_HINT": "from when (in hour) you want to count the next day has started. default is midnight which is 0.",
       "TASK_NOTES_TPL": "Task description template",
@@ -1913,23 +1902,14 @@
       "BREAK_DURATION": "Duration of short breaks",
       "CYCLES_BEFORE_LONGER_BREAK": "Start longer break after X work sessions",
       "DURATION": "Duration of work sessions",
-      "HELP": "<p>The pomodoro timer can be configured via a couple of settings. The duration of every work session, the duration of normal breaks, the number of work sessions to run before a longer break is started and the duration of this longer break.</p> <p>You can also set if you want to display your distractions during your pomodoro breaks.</p> <p>Setting \"Pause time tracking on pomodoro break\" will also track your breaks as work time spent on a task. </p> <p>Enabling \"Pause pomodoro session when no active task\" will also pause the pomodoro session, when you pause a task.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Disable auto-start of session after break",
-      "IS_ENABLED": "Enable pomodoro timer",
-      "IS_MANUAL_CONTINUE": "Manually confirm starting next pomodoro session",
-      "IS_MANUAL_CONTINUE_BREAK": "Manually confirm starting next break",
-      "IS_PLAY_SOUND": "Play sound when session is done",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Play sound when break is done",
-      "IS_PLAY_TICK": "Play tick sound every second",
-      "IS_STOP_TRACKING_ON_BREAK": "Stop time tracking for task on break",
-      "LONGER_BREAK_DURATION": "Duration of longer breaks",
-      "TITLE": "Pomodoro Timer (legacy)"
+      "LONGER_BREAK_DURATION": "Duration of longer breaks"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Show banner X before the actual reminder",
       "DEFAULT_TASK_REMIND_OPTION": "Default remind option selected when creating tasks",
       "IS_COUNTDOWN_BANNER_ENABLED": "Show countdown banner before reminders are due",
-      "TITLE": "Reminders"
+      "TITLE": "Reminders",
+      "DISABLE_REMINDERS": "Disable all reminders"
     },
     "SCHEDULE": {
       "HELP": "The schedule feature should provide you with a quick overview over how your planned tasks play out over time. You can find it in the left hand menu under <a href='#/schedule'>'Schedule'</a>. ",
@@ -2036,6 +2016,8 @@
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copied to clipboard",
+    "DUPLICATE_PROJECT_ERROR": "The project could not be duplicated",
+    "DUPLICATE_PROJECT_SUCCESS": "Project duplicated successfully",
     "ERR_COMPRESSION": "Error for compression interface",
     "FILE_DOWNLOADED": "{{fileName}} downloaded",
     "FILE_DOWNLOADED_BTN": "Open folder",
@@ -2050,6 +2032,9 @@
     "SHARE_UNAVAILABLE_FALLBACK": "Copied to clipboard.",
     "SHORTCUT_WARN_OPEN_BOOKMARKS_FROM_TAG": "{{keyCombo}} pressed, but open bookmarks shortcut is only available when in project context.",
     "UNPLANNED_TODAY_TASKS": "Unplanned all tasks from Today"
+  },
+  "GLOBAL": {
+    "COPY_SUFFIX": " (copy)"
   },
   "GPB": {
     "ASSETS": "Loading assets...",
@@ -2070,6 +2055,7 @@
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to Clipboard",
     "CREATE_PROJECT": "Create Project",
+    "DUPLICATE_PROJECT": "Duplicate",
     "CREATE_TAG": "Create Tag",
     "DELETE_PROJECT": "Delete Project",
     "DELETE_TAG": "Delete Tag",

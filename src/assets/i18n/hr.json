@@ -207,9 +207,6 @@
       "NEXT": "Sljedeći",
       "ON": "na",
       "OPEN_ISSUE_IN_BROWSER": "Otvori problem u pregledniku",
-      "POMODORO_BACK": "Natrag",
-      "POMODORO_DISABLE": "Deaktiviraj Pomodoro",
-      "POMODORO_INFO": "Sesije fokusiranja se ne mogu koristiti zajedno s aktiviranim timerom.",
       "PREP_GET_MENTALLY_READY": "Mentalno se pripremi na fokusiran i produktivan rad",
       "PREP_SIT_UPRIGHT": "Sjedni (ili ustani) uspravno",
       "PREP_STRETCH": "Malo se protegni",
@@ -698,23 +695,7 @@
       "TASK_DRAWER": "Tiwa Objektif Travay la"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Vrati se na posao!",
-      "BREAK_IS_DONE": "Tvoja pauza je gotova!",
-      "ENJOY_YOURSELF": "Odmori se, razgibaj se, vrati se za:",
-      "FINISH_SESSION_X": "Uspješno si završio/la sesiju broj <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Vrijeme je za {{nr}}. pauzu!",
-        "BREAK_X_START": "Pomodoro: {{nr}}. pauza je počela!",
-        "NO_TASKS": "Prije nego što se Pomodoro timer može pokrenuti moraš dodati zadatke.",
-        "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
-      },
-      "S": {
-        "RESET": "Završi Pomodoro sesiju",
-        "SESSION_SKIP": "Preskoči Pomodoro sesiju",
-        "SESSION_X_START": "Pomodoro: {{nr}}. sesija je počela!"
-      },
-      "SKIP_BREAK": "Preskoči pauzu",
-      "START_BREAK": "Počni pauzu"
+      "BREAK_IS_DONE": "Tvoja pauza je gotova!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Vrati se na posao!",
@@ -1310,7 +1291,6 @@
         "GROUP_SCHEDULED_DATE": "Dat pwograme",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Reyaji tout",
-        "SCHEDULED_DEFAULT": "Nenpòt Dat",
         "SCHEDULED_NEXT_MONTH": "Mwa pwochen",
         "SCHEDULED_NEXT_WEEK": "Semenn pwochenn",
         "SCHEDULED_THIS_MONTH": "Mwa sa a",
@@ -1326,7 +1306,7 @@
         "TIME_2HOUR": "> 2 èdtan",
         "TIME_10MIN": "> 10 minit",
         "TIME_30MIN": "> 30 minit",
-        "TIME_DEFAULT": "Nenpòt Dire",
+        "FILTER_NOT_SPECIFIED": "Nije navedeno",
         "TIME_SPENT": "Tan pase",
         "TITLE": "Customize Travay View"
       }
@@ -1630,16 +1610,7 @@
       "BREAK_DURATION": "Trajanje kratkih pauza",
       "CYCLES_BEFORE_LONGER_BREAK": "Započni dužu pauzu nakon određenog broja radnih sesija",
       "DURATION": "Trajanje radnih sesija",
-      "HELP": "<p>Pomodoro timer se može konfigurirati putem nekoliko postavki. Trajanje svake radne sesije, trajanje normalnih pauza, broj radnih sesija koje se pokreću prije početka duže pauze i trajanje ove duže pauze.</p> <p>Također možeš postaviti prikaz tvojih ometanja tijekom pomodoro pauza.</p> <p>Postavka „Pauziraj praćenja vremena pri pomodoro pauzi” će također pratiti tvoje pauze kao utrošeno radno vrijeme na zadatku. </p> <p>Aktiviranje „Pauziraj pomodoro sesiju kad nema aktivnog zadatka” također će pauzirati pomodoro sesiju kad pauziraš zadatak.</p>",
-      "IS_ENABLED": "Aktiviraj pomodoro timer",
-      "IS_MANUAL_CONTINUE": "Ručno potvrdi početak sljedeće pomodoro sesije",
-      "IS_MANUAL_CONTINUE_BREAK": "Ručno potvrdi početak sljedeće pauze",
-      "IS_PLAY_SOUND": "Sviraj zvuk kad je sesija gotova",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Sviraj zvuk kad je pauza gotova",
-      "IS_PLAY_TICK": "Sviraj zvuk otkucavanja sekundi",
-      "IS_STOP_TRACKING_ON_BREAK": "Prekini praćenje vremena zadatka tijekom pauze",
-      "LONGER_BREAK_DURATION": "Trajanje dužih pauza",
-      "TITLE": "Pomodoro timer"
+      "LONGER_BREAK_DURATION": "Trajanje dužih pauza"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Prikaži traku X prije podsjetnika",

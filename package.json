@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "16.4.3",
+  "version": "16.6.1",
   "description": "ToDo list and Time Tracking",
   "keywords": [
     "ToDo",
@@ -49,7 +49,7 @@
     "dist:win:only": "electron-builder --win",
     "dist:win:store": "git pull && npm run && copy electron-builder.win-store.yaml electron-builder.yaml && npm run dist:win && git checkout electron-builder.yaml || git checkout electron-builder.yaml",
     "droid": "npm run buildFrontend:stageWeb:unminified && npx cap sync",
-    "pree2e": "npm run plugins:build",
+    "pree2e": "npm run plugins:build:silent",
     "e2e": "npx playwright test --config e2e/playwright.config.ts --reporter=line",
     "e2e:ui": "npx playwright test --config e2e/playwright.config.ts --ui",
     "e2e:file": "npx playwright test --config e2e/playwright.config.ts --reporter=list",
@@ -57,7 +57,7 @@
     "e2e:headed": "npx playwright test --config e2e/playwright.config.ts --headed",
     "e2e:show-report": "npx playwright show-report .tmp/e2e-test-results/playwright-report",
     "e2e:report": "PLAYWRIGHT_HTML_REPORT=1 npx playwright test --config e2e/playwright.config.ts",
-    "e2e:webdav": "WEBDAV_DATA_DIR=./e2e-webdav-data docker compose up -d webdav && sleep 5 && npm run e2e -- --grep webdav; docker compose down",
+    "e2e:webdav": "docker compose up -d webdav && ./scripts/wait-for-webdav.sh && npm run e2e -- --grep webdav; docker compose down",
     "electron": "NODE_ENV=PROD electron .",
     "electron:build": "tsc -p electron/tsconfig.electron.json",
     "electron:watch": "tsc -p electron/tsconfig.electron.json --watch",
@@ -120,7 +120,8 @@
     "plugin-api:build": "cd packages/plugin-api && npm run build",
     "plugin-api:build:watch": "cd packages/plugin-api && npm run build:watch",
     "vite-plugin:build": "cd packages/vite-plugin && npm run build",
-    "plugins:build": "npm run vite-plugin:build && cd packages/plugin-dev && npm run build:all"
+    "plugins:build": "npm run vite-plugin:build && cd packages/plugin-dev && npm run build:all",
+    "plugins:build:silent": "npm run vite-plugin:build && cd packages/plugin-dev && npm run build:all:silent"
   },
   "resolutions": {
     "sass": "1.32.6",
@@ -129,9 +130,10 @@
   "dependencies": {
     "electron-dl": "^3.5.2",
     "electron-localshortcut": "^3.2.1",
-    "electron-log": "^5.4.1",
+    "electron-log": "^5.4.3",
     "electron-window-state": "^5.0.3",
     "fs-extra": "^11.3.2",
+    "hash-wasm": "^4.12.0",
     "node-fetch": "^2.7.0"
   },
   "devDependencies": {
@@ -168,7 +170,7 @@
     "@capawesome/capacitor-background-task": "^7.0.1",
     "@csstools/stylelint-formatter-github": "^1.0.0",
     "@dotenv-run/cli": "^1.3.6",
-    "@electron/notarize": "^3.0.1",
+    "@electron/notarize": "^3.1.1",
     "@fontsource/open-sans": "^5.2.6",
     "@nextcloud/cdav-library": "^1.5.3",
     "@ngrx/effects": "^20.0.0",
@@ -195,7 +197,7 @@
     "@typescript-eslint/types": "^8.17.0",
     "@typescript-eslint/utils": "^8.41.0",
     "angular-material-css-vars": "^9.1.1",
-    "canvas-confetti": "^1.9.3",
+    "canvas-confetti": "^1.9.4",
     "chai": "^5.1.2",
     "chart.js": "^4.4.7",
     "chrono-node": "^2.8.3",
@@ -204,12 +206,12 @@
     "core-js": "^3.39.0",
     "cross-env": "^7.0.3",
     "detect-it": "^4.0.1",
-    "electron": "37.7.0",
-    "electron-builder": "^26.0.20",
+    "electron": "37.10.3",
+    "electron-builder": "^26.3.3",
     "eslint": "^8.57.1",
     "eslint-config-prettier": "^10.1.5",
     "eslint-plugin-import": "^2.31.0",
-    "eslint-plugin-jsdoc": "50.6.0",
+    "eslint-plugin-jsdoc": "61.4.1",
     "eslint-plugin-prefer-arrow": "1.2.3",
     "eslint-plugin-prettier": "^5.2.1",
     "fflate": "^0.8.2",
@@ -230,7 +232,7 @@
     "karma-jasmine-html-reporter": "^1.6.0",
     "karma-spec-reporter": "^0.0.36",
     "marked": "^12.0.2",
-    "nanoid": "^5.1.5",
+    "nanoid": "^5.1.6",
     "new-github-issue-url": "^1.1.0",
     "ng2-charts": "^8.0.0",
     "ngx-markdown": "^20.0.0",
@@ -254,13 +256,14 @@
   "overrides": {
     "ngx-markdown": {
       "marked": "12.0.2"
-    }
+    },
+    "@conventional-changelog/git-client": "^2.5.1"
   },
   "optionalDependencies": {
     "@lmdb/lmdb-darwin-x64": "^3.2.0",
     "@lmdb/lmdb-linux-x64": "^3.4.3",
     "@lmdb/lmdb-win32-x64": "^3.2.0",
-    "@rollup/rollup-darwin-x64": "4.27.4",
+    "@rollup/rollup-darwin-x64": "4.53.3",
     "@rollup/rollup-linux-x64-gnu": "4.27.4",
     "@rollup/rollup-win32-x64-msvc": "4.52.3"
   },

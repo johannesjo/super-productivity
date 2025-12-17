@@ -247,10 +247,7 @@
       "PAUSE_TRACKING": "Pausar acompanhamento",
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pausar acompanhamento da tarefa atual",
       "POMODORO": "Pomodoro",
-      "POMODORO_BACK": "Voltar",
-      "POMODORO_DISABLE": "Desabilitar Pomodoro",
       "POMODORO_HINT": "Sprints estruturados com intervalos planejados",
-      "POMODORO_INFO": "As sessões de foco não podem ser usadas junto com o temporizador Pomodoro ativado.",
       "POMODORO_SESSION_COMPLETED": "Sessão Pomodoro Concluída!",
       "PREP_GET_MENTALLY_READY": "Prepare-se mentalmente para ser focado e produtivo",
       "PREP_SIT_UPRIGHT": "Corrija sua postura (sentado ou em pé)",
@@ -813,23 +810,7 @@
       "TASK_DRAWER": "Gaveta de tarefas"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "De volta ao trabalho!",
-      "BREAK_IS_DONE": "Seu intervalo acabou!",
-      "ENJOY_YOURSELF": "Divirta-se, movimente-se e volte:",
-      "FINISH_SESSION_X": "Você concluiu com sucesso a sessão <strong>{{nr}}</strong> !",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Hora do intervalo {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Intervalo {{nr}} iniciado!",
-        "NO_TASKS": "Você precisa adicionar tarefas antes que o cronômetro Pomodoro possa iniciar.",
-        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
-      },
-      "S": {
-        "RESET": "Redefinir para a primeira sessão Pomodoro",
-        "SESSION_SKIP": "Pular para o final da sessão atual do Pomodoro",
-        "SESSION_X_START": "Pomodoro: Sessão {{nr}} iniciada!"
-      },
-      "SKIP_BREAK": "Pular intervalo",
-      "START_BREAK": "Começar o intervalo"
+      "BREAK_IS_DONE": "Seu intervalo acabou!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "De volta ao trabalho!",
@@ -1569,7 +1550,6 @@
         "GROUP_SCHEDULED_DATE": "Data Agendada",
         "GROUP_TAG": "Tag",
         "RESET_ALL": "Redefinir Tudo",
-        "SCHEDULED_DEFAULT": "Qualquer Data",
         "SCHEDULED_NEXT_MONTH": "Próximo mês",
         "SCHEDULED_NEXT_WEEK": "Próxima Semana",
         "SCHEDULED_THIS_MONTH": "Este mês",
@@ -1586,7 +1566,7 @@
         "TIME_2HOUR": "> 2 Horas",
         "TIME_10MIN": "> 10 Minutos",
         "TIME_30MIN": "> 30 Minutos",
-        "TIME_DEFAULT": "Qualquer Duração",
+        "FILTER_NOT_SPECIFIED": "Não especificado",
         "TIME_SPENT": "Tempo gasto",
         "TITLE": "Personalizar Visualização da Tarefa"
       }
@@ -1924,17 +1904,7 @@
       "BREAK_DURATION": "Duração de pausas curtas",
       "CYCLES_BEFORE_LONGER_BREAK": "Iniciar um intervalo maior após X sessões de trabalho",
       "DURATION": "Duração das sessões de trabalho",
-      "HELP": "<p>O timer pomodoro pode ser configurado por meio de algumas configurações. A duração de cada sessão de trabalho, a duração dos intervalos normais, o número de sessões de trabalho a serem executadas antes que um intervalo mais longo seja iniciado e a duração desse intervalo mais longo.</p><p> Você também pode definir se deseja exibir suas distrações durante seus intervalos de pomodoro.</p><p> Definir \"Pausar o controle de tempo no intervalo do Pomodoro\" também controlará seus intervalos como tempo de trabalho gasto em uma tarefa.</p><p> Habilitar \"Pausar sessão do Pomodoro quando nenhuma tarefa ativa\" também pausará a sessão do Pomodoro quando você pausar uma tarefa.</p>",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Desativar início automático da sessão após o intervalo",
-      "IS_ENABLED": "Habilitar temporizador pomodoro",
-      "IS_MANUAL_CONTINUE": "Confirmar manualmente o início da próxima sessão do Pomodoro",
-      "IS_MANUAL_CONTINUE_BREAK": "Confirmar manualmente o início do próximo intervalo",
-      "IS_PLAY_SOUND": "Tocar som quando a sessão terminar",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Tocar som quando o intervalo for concluído",
-      "IS_PLAY_TICK": "Tocar som de tique a cada segundo",
-      "IS_STOP_TRACKING_ON_BREAK": "Pare o controle de tempo para a tarefa no intervalo",
-      "LONGER_BREAK_DURATION": "Duração das pausas longas",
-      "TITLE": "Temporizador Pomodoro"
+      "LONGER_BREAK_DURATION": "Duração das pausas longas"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Mostrar banner X antes do lembrete real",

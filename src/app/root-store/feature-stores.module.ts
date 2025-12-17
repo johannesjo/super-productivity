@@ -29,11 +29,6 @@ import {
 import { NOTE_FEATURE_NAME, noteReducer } from '../features/note/store/note.reducer';
 import { NoteEffects } from '../features/note/store/note.effects';
 import {
-  POMODORO_FEATURE_NAME,
-  pomodoroReducer,
-} from '../features/pomodoro/store/pomodoro.reducer';
-import { PomodoroEffects } from '../features/pomodoro/store/pomodoro.effects';
-import {
   PROJECT_FEATURE_NAME,
   projectReducer,
 } from '../features/project/store/project.reducer';
@@ -120,9 +115,6 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
     StoreModule.forFeature(NOTE_FEATURE_NAME, noteReducer),
     EffectsModule.forFeature([NoteEffects]),
 
-    StoreModule.forFeature(POMODORO_FEATURE_NAME, pomodoroReducer),
-    EffectsModule.forFeature([PomodoroEffects]),
-
     StoreModule.forFeature(PROJECT_FEATURE_NAME, projectReducer),
     EffectsModule.forFeature([ProjectEffects]),
 
@@ -163,7 +155,7 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
     EffectsModule.forFeature([CaldavIssueEffects]),
     EffectsModule.forFeature([CalendarIntegrationEffects]),
     EffectsModule.forFeature([ElectronEffects]),
-    EffectsModule.forFeature([PomodoroEffects, DominaModeEffects]),
+    EffectsModule.forFeature([DominaModeEffects]),
     EffectsModule.forFeature([DropboxEffects]),
     EffectsModule.forFeature([FinishDayBeforeCloseEffects]),
     EffectsModule.forFeature([GitlabIssueEffects]),

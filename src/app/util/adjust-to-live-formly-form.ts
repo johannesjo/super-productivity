@@ -51,18 +51,28 @@ export const adjustToLiveFormlyForm = (
       };
     }
 
-    if (
-      item.type === 'repeat' &&
-      (item?.fieldArray as any)?.fieldGroup &&
-      Array.isArray((item.fieldArray as any).fieldGroup)
-    ) {
-      return {
-        ...item,
-        fieldArray: {
-          ...item.fieldArray,
-          fieldGroup: adjustToLiveFormlyForm((item?.fieldArray as any)?.fieldGroup),
-        },
-      };
+    if (item.type === 'repeat' && item.fieldArray) {
+      const fieldArray = item.fieldArray as FormlyFieldConfig;
+
+      // Handle fieldArray with fieldGroup (complex repeat items)
+      if (fieldArray.fieldGroup && Array.isArray(fieldArray.fieldGroup)) {
+        return {
+          ...item,
+          fieldArray: {
+            ...fieldArray,
+            fieldGroup: adjustToLiveFormlyForm(fieldArray.fieldGroup),
+          },
+        };
+      }
+
+      // Handle simple fieldArray with just a type (e.g., { type: 'input' })
+      if (fieldArray.type) {
+        const adjusted = adjustToLiveFormlyForm([fieldArray]);
+        return {
+          ...item,
+          fieldArray: adjusted[0],
+        };
+      }
     }
 
     return item;

@@ -33,5 +33,12 @@ export const REMINDER_FORM_CFG: ConfigFormSection<ReminderConfig> = {
         options: TASK_REMINDER_OPTIONS,
       },
     },
+    {
+      key: 'disableReminders',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.REMINDER.DISABLE_REMINDERS,
+      },
+    },
   ],
 };

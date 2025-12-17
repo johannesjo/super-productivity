@@ -88,6 +88,7 @@
   z-index: 1002;
   overflow-y: auto;
   overflow-x: hidden;
+  -webkit-app-region: drag;
 
   // Slight elevation and clear background for overlay/mobile mode is defined in the mobile block below
 
@@ -165,6 +166,7 @@
   cursor: pointer;
   transition: var(--transition-standard);
   color: var(--sidenav-text-secondary);
+  -webkit-app-region: no-drag;
 
   :host-context(.isMac.isElectron) & {
     top: calc(var(--top) + var(--mac-title-bar-padding, 0px));
@@ -207,6 +209,7 @@
 
 .nav-item {
   margin-bottom: 2px;
+  -webkit-app-region: no-drag;
 
   &.has-children {
     margin-bottom: 4px;
@@ -221,6 +224,7 @@
   border: none;
   opacity: 1;
   flex-shrink: 0;
+  -webkit-app-region: no-drag;
 }
 
 // Resize handle (now positioned relative to host component)

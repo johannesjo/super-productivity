@@ -12,6 +12,15 @@
   --s: 8px;
   --s-quarter: 2px;
   --s-half: 4px;
+
+  // -----------------------------
+  // Fonts
+  // -----------------------------
+  --font-primary-stack:
+    'Open Sans', 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji', 'Android Emoji', 'EmojiSymbols', -apple-system,
+    BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
   --s2: 16px; // 2 * 8px
   --s3: 24px; // 3 * 8px
   --s4: 32px; // 4 * 8px
@@ -46,6 +55,7 @@
   --mat-mini-fab-size: 48px;
   --mac-title-bar-padding: 20px;
   --card-border-radius: 4px;
+  --window-controls-width: 140px; // Fallback for non-WCO contexts; main-header uses env() directly
 
   // Z-index layers
   --z-focus-mode-overlay: 101;

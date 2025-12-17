@@ -20,11 +20,12 @@ import { Task, TaskCopy } from '../../tasks/task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
-import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
+import { TaskRepeatCfg, TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
+import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { isToday } from '../../../util/is-today.util';
@@ -43,6 +44,7 @@ import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creat
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { devError } from '../../../util/dev-error';
 import { TaskReminderOptionId } from '../../tasks/task.model';
+import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -63,11 +65,27 @@ export class TaskRepeatCfgEffects {
               devError(`Task with id ${taskId} not found`);
               return null; // Return null instead of EMPTY
             }
-            const targetDayTimestamp =
-              (taskRepeatCfg.startDate && new Date(taskRepeatCfg.startDate).getTime()) ||
-              (task.dueDay && new Date(task.dueDay).getTime()) ||
-              task.dueWithTime ||
-              Date.now();
+            // Calculate the correct target day based on the repeat pattern (fixes #5594)
+            // instead of using startDate which always defaults to today
+            let calculatedTargetDate: Date | null = null;
+            try {
+              // getNewestPossibleDueDate throws if startDate is undefined or repeatEvery is invalid
+              if (taskRepeatCfg.startDate) {
+                calculatedTargetDate = getNewestPossibleDueDate(
+                  taskRepeatCfg as TaskRepeatCfg,
+                  new Date(),
+                );
+              }
+            } catch (e) {
+              // Fall back to existing logic if calculation fails
+            }
+
+            // Use calculated date if available, otherwise fall back to existing logic
+            const targetDayTimestamp = calculatedTargetDate
+              ? calculatedTargetDate.getTime()
+              : (task.dueDay && dateStrToUtcDate(task.dueDay).getTime()) ||
+                task.dueWithTime ||
+                Date.now();
             const dateTime = getDateTimeFromClockString(
               startTime as string,
               targetDayTimestamp,

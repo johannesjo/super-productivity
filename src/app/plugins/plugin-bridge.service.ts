@@ -15,6 +15,7 @@ import {
   PluginNodeScriptResult,
   PluginShortcutCfg,
   PluginSidePanelBtnCfg,
+  Task,
 } from './plugin-api.model';
 
 import {
@@ -121,6 +122,7 @@ export class PluginBridgeService implements OnDestroy {
     persistDataSynced: (dataStr: string) => Promise<void>;
     loadPersistedData: () => Promise<string | null>;
     getConfig: () => Promise<any>;
+    downloadFile: (filename: string, data: string) => Promise<void>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
     registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
@@ -152,6 +154,8 @@ export class PluginBridgeService implements OnDestroy {
       persistDataSynced: (dataStr: string) => this._persistDataSynced(pluginId, dataStr),
       loadPersistedData: () => this._loadPersistedData(pluginId),
       getConfig: () => this._getConfig(pluginId),
+      downloadFile: (filename: string, data: string) =>
+        this._downloadFile(filename, data),
 
       // UI registration
       registerHeaderButton: (cfg: PluginHeaderBtnCfg) =>
@@ -203,6 +207,17 @@ export class PluginBridgeService implements OnDestroy {
       // Logging
       log: Log.withContext(`${pluginId}`),
     };
+  }
+
+  /**
+   * Internal method to download file
+   */
+  private async _downloadFile(filename: string, data: string): Promise<void> {
+    typia.assert<string>(filename);
+    typia.assert<string>(data);
+
+    const { download } = await import('../util/download');
+    await download(filename, data);
   }
 
   /**
@@ -349,10 +364,10 @@ export class PluginBridgeService implements OnDestroy {
       taskData.parentId,
     );
 
-    // Check if this is a subtask
+    let createdTask: Task;
     if (taskData.parentId) {
       // For subtasks, we need to use the addSubTask action to properly update parent
-      const task = this._taskService.createNewTaskWithDefaults({
+      const newTask = this._taskService.createNewTaskWithDefaults({
         title: taskData.title,
         additional: {
           notes: taskData.notes || '',
@@ -366,16 +381,18 @@ export class PluginBridgeService implements OnDestroy {
       // Dispatch the addSubTask action which properly updates parent's subTaskIds
       this._store.dispatch(
         addSubTask({
-          task,
+          task: newTask,
           parentId: taskData.parentId,
         }),
       );
+      createdTask = newTask;
 
       PluginLog.log('PluginBridge: Subtask added successfully', {
-        taskId: task.id,
+        taskId: createdTask.id,
         taskData,
       });
-      return task.id;
+
+      return createdTask.id;
     } else {
       // For main tasks, use the regular add method
       const additional: Partial<TaskCopy> = {

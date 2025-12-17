@@ -3,7 +3,6 @@ import {
   TASK_REPEAT_WEEKDAY_MAP,
   TaskRepeatCfg,
 } from '../task-repeat-cfg.model';
-import { getDbDateStr } from '../../../util/get-db-date-str';
 
 export const getQuickSettingUpdates = (
   quickSetting: RepeatQuickSetting,
@@ -13,7 +12,6 @@ export const getQuickSettingUpdates = (
       return {
         repeatCycle: 'DAILY',
         repeatEvery: 1,
-        startDate: getDbDateStr(),
       };
     }
 
@@ -22,7 +20,6 @@ export const getQuickSettingUpdates = (
       return {
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
-        startDate: getDbDateStr(),
         monday: false,
         tuesday: false,
         wednesday: false,
@@ -38,7 +35,6 @@ export const getQuickSettingUpdates = (
       return {
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
-        startDate: getDbDateStr(),
         monday: true,
         tuesday: true,
         wednesday: true,
@@ -53,7 +49,6 @@ export const getQuickSettingUpdates = (
       return {
         repeatCycle: 'MONTHLY',
         repeatEvery: 1,
-        startDate: getDbDateStr(),
       };
     }
 
@@ -61,7 +56,6 @@ export const getQuickSettingUpdates = (
       return {
         repeatCycle: 'YEARLY',
         repeatEvery: 1,
-        startDate: getDbDateStr(),
       };
     }
 

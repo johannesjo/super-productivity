@@ -243,9 +243,6 @@
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "Pausa spårning för aktuell uppgift",
       "POMODORO": "Pomodoro",
       "POMODORO_HINT": "Strukturerade sprintar med planerade pauser",
-      "POMODORO_BACK": "Tillbaka",
-      "POMODORO_DISABLE": "Inaktivera Pomodoro",
-      "POMODORO_INFO": "Fokus-sessioner kan inte användas tillsammans med pomodoro-timern aktiverad.",
       "PREP_GET_MENTALLY_READY": "Gör dig mentalt redo för att vara fokuserad och produktiv",
       "PREP_SIT_UPRIGHT": "Sitt (eller stå) upprätt",
       "PREP_STRETCH": "Gör lite mild stretching",
@@ -797,23 +794,7 @@
       "TASK_DRAWER": "Uppgiftslåda"
     },
     "POMODORO": {
-      "BACK_TO_WORK": "Tillbaka till arbetet!",
-      "BREAK_IS_DONE": "Fokuspausen är över!",
-      "ENJOY_YOURSELF": "Ha kul, rör på dig, kom tillbaka:",
-      "FINISH_SESSION_X": "Du har avslutat session <strong>{{nr}}</strong>!",
-      "NOTIFICATION": {
-        "BREAK_TIME": "Pomodoro: Dags för paus {{nr}}!",
-        "BREAK_X_START": "Pomodoro: Paus {{nr}} har börjat!",
-        "NO_TASKS": "Du måste lägga till uppgifter innan Pomodoro-timern kan starta.",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} har startat!"
-      },
-      "S": {
-        "RESET": "Återställ till första Pomodoro-sessionen",
-        "SESSION_SKIP": "Hoppa till slutet av aktuell Pomodoro-session",
-        "SESSION_X_START": "Pomodoro: Session {{nr}} har startat!"
-      },
-      "SKIP_BREAK": "Hoppa över rasten",
-      "START_BREAK": "Börja rasten"
+      "BREAK_IS_DONE": "Fokuspausen är över!"
     },
     "PROCRASTINATION": {
       "BACK_TO_WORK": "Tillbaka till arbetet!",
@@ -983,7 +964,7 @@
     "REFLECTION_NOTE": {
       "MSG": "Reflektionsanteckning: ({{date}}): {{content}}",
       "ACTION_DISMISS": "Avvisa"
-	},
+    },
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "HIDE": "Dölj",
@@ -1553,7 +1534,6 @@
         "GROUP_SCHEDULED_DATE": "Planerat datum",
         "GROUP_TAG": "Tagg",
         "RESET_ALL": "Återställ alla",
-        "SCHEDULED_DEFAULT": "Valfritt datum",
         "SCHEDULED_NEXT_MONTH": "Nästa månad",
         "SCHEDULED_NEXT_WEEK": "Nästa vecka",
         "SCHEDULED_THIS_MONTH": "Denna månad",
@@ -1570,7 +1550,7 @@
         "TIME_2HOUR": "> 2 Timmar",
         "TIME_10MIN": "> 10 Minuter",
         "TIME_30MIN": "> 30 Minuter",
-        "TIME_DEFAULT": "Valfri varaktighet",
+        "FILTER_NOT_SPECIFIED": "Inte specificerat",
         "TIME_SPENT": "Tid som spenderats",
         "TITLE": "Anpassa uppgiftsvy"
       }
@@ -1774,7 +1754,7 @@
     },
     "KEYBOARD": {
       "ADD_NEW_NOTE": "Lägg till ny anteckning",
-      "ADD_NEW_TASK": "Lägg till ny uppgift"
+      "ADD_NEW_TASK": "Lägg till ny uppgift",
       "ADD_NEW_PROJECT": "Lägg till nytt projekt",
       "APP_WIDE_SHORTCUTS": "Globala genvägar (gäller hela programmet)",
       "COLLAPSE_SUB_TASKS": "Dölj underuppgifter",
@@ -1906,17 +1886,7 @@
       "BREAK_DURATION": "Varaktighet för korta raster",
       "CYCLES_BEFORE_LONGER_BREAK": "Börja längre paus efter X arbetspass",
       "DURATION": "Arbetstidens längd",
-      "HELP": "<p>Pomodoro-timern kan konfigureras via ett par inställningar. Varje arbetspassets längd, längden på normala pauser, antalet arbetspass som ska genomföras innan en längre paus påbörjas och längden på denna längre paus. </p> <p>Du kan också ställa in om du vill visa dina distraktioner under dina pomodoro-pauser. </p> <p>Om du ställer in "Pausa tidsspårning under pomodoro-paus" kommer även dina pauser att spåras som arbetstid som lagts på en uppgift. </p> <p>Om du aktiverar "Pausa pomodoro-session när ingen aktiv uppgift finns" kommer även pomodoro-sessionen att pausas när du pausar en uppgift.",
-      "IS_ENABLED": "Aktivera pomodoro-timer",
-      "IS_MANUAL_CONTINUE": "Bekräfta manuellt att nästa pomodoro-session ska startas",
-      "IS_MANUAL_CONTINUE_BREAK": "Bekräfta manuellt att nästa paus ska börja",
-      "IS_PLAY_SOUND": "Spela upp ljud när sessionen är klar",
-      "IS_PLAY_SOUND_AFTER_BREAK": "Spela upp ljud när rasten är slut",
-      "IS_DISABLE_AUTO_START_AFTER_BREAK": "Inaktivera automatisk start av session efter paus",
-      "IS_PLAY_TICK": "Spela tickande ljud varje sekund",
-      "IS_STOP_TRACKING_ON_BREAK": "Stoppa tidrapporteringen för uppgiften under pausen",
-      "LONGER_BREAK_DURATION": "Varaktighet för längre raster",
-      "TITLE": "Pomodoro Timer (arv)"
+      "LONGER_BREAK_DURATION": "Varaktighet för längre raster"
     },
     "REMINDER": {
       "COUNTDOWN_DURATION": "Visa banner X före den faktiska påminnelsen",

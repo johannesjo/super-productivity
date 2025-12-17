@@ -1,0 +1,8 @@
+
+### Bug Fixes
+
+* broken translation files
+* **electron:** remove forced X11 mode on Linux (152939a), closes #5663
+
+
+

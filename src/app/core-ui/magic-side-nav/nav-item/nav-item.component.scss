@@ -301,6 +301,23 @@ button[mat-menu-item].nav-link.active {
       color: var(--sidenav-text-hover);
     }
 
+    ::ng-deep .mat-mdc-menu-item-text {
+      display: flex;
+      justify-content: center;
+      width: 100%;
+      padding: 0;
+
+      > * {
+        margin: 0 !important;
+      }
+    }
+
+    // Hide the text wrapper if there is a mat-icon sibling (Regular Icon case)
+    // This prevents the empty wrapper from shifting the icon
+    mat-icon.nav-icon ~ ::ng-deep .mat-mdc-menu-item-text {
+      display: none !important;
+    }
+
     &.active {
       color: var(--sidenav-active-text) !important;
       background: var(--sidenav-item-active-bg) !important;
@@ -318,10 +335,6 @@ button[mat-menu-item].nav-link.active {
       .nav-label {
         color: var(--sidenav-active-text) !important;
       }
-    }
-
-    ::ng-deep .mat-mdc-menu-item-text {
-      display: none;
     }
   }
 
