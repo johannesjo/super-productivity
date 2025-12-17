@@ -3100,6 +3100,143 @@ describe('OperationLogSyncService', () => {
         expect(result.serverMigrationHandled).toBe(true);
         expect(result.localWinOpsCreated).toBe(0);
       });
+
+      describe('lastServerSeq persistence', () => {
+        it('should persist lastServerSeq AFTER processing ops (crash safety)', async () => {
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+          const remoteOp: Operation = {
+            id: 'remote-1',
+            clientId: 'client-B',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Remote Title' },
+            vectorClock: { clientB: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          downloadServiceSpy.downloadRemoteOps.and.returnValue(
+            Promise.resolve({
+              newOps: [remoteOp],
+              hasMore: false,
+              latestSeq: 1,
+              needsFullStateUpload: false,
+              success: true,
+              failedFileCount: 0,
+              latestServerSeq: 42, // Server sequence to persist
+            }),
+          );
+
+          // Track call order to verify setLastServerSeq is called AFTER _processRemoteOps
+          const callOrder: string[] = [];
+          spyOn<any>(service, '_processRemoteOps').and.callFake(async () => {
+            callOrder.push('_processRemoteOps');
+            return { localWinOpsCreated: 0 };
+          });
+
+          const setLastServerSeqSpy = jasmine
+            .createSpy('setLastServerSeq')
+            .and.callFake(async () => {
+              callOrder.push('setLastServerSeq');
+            });
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            setLastServerSeq: setLastServerSeqSpy,
+          } as any;
+
+          await service.downloadRemoteOps(mockProvider);
+
+          // Verify setLastServerSeq was called with correct value
+          expect(setLastServerSeqSpy).toHaveBeenCalledWith(42);
+          // Verify order: _processRemoteOps must complete BEFORE setLastServerSeq
+          expect(callOrder).toEqual(['_processRemoteOps', 'setLastServerSeq']);
+        });
+
+        it('should persist lastServerSeq even when no ops (to stay in sync with server)', async () => {
+          downloadServiceSpy.downloadRemoteOps.and.returnValue(
+            Promise.resolve({
+              newOps: [],
+              hasMore: false,
+              latestSeq: 0,
+              needsFullStateUpload: false,
+              success: true,
+              failedFileCount: 0,
+              latestServerSeq: 100, // Server is at seq 100 but no new ops for us
+            }),
+          );
+
+          const setLastServerSeqSpy = jasmine
+            .createSpy('setLastServerSeq')
+            .and.resolveTo();
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            setLastServerSeq: setLastServerSeqSpy,
+          } as any;
+
+          await service.downloadRemoteOps(mockProvider);
+
+          // Should still update lastServerSeq to stay in sync with server
+          expect(setLastServerSeqSpy).toHaveBeenCalledWith(100);
+        });
+
+        it('should not call setLastServerSeq if latestServerSeq is undefined', async () => {
+          downloadServiceSpy.downloadRemoteOps.and.returnValue(
+            Promise.resolve({
+              newOps: [],
+              hasMore: false,
+              latestSeq: 0,
+              needsFullStateUpload: false,
+              success: true,
+              failedFileCount: 0,
+              // latestServerSeq not set
+            }),
+          );
+
+          const setLastServerSeqSpy = jasmine
+            .createSpy('setLastServerSeq')
+            .and.resolveTo();
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            setLastServerSeq: setLastServerSeqSpy,
+          } as any;
+
+          await service.downloadRemoteOps(mockProvider);
+
+          // Should NOT call setLastServerSeq when latestServerSeq is undefined
+          expect(setLastServerSeqSpy).not.toHaveBeenCalled();
+        });
+
+        it('should not call setLastServerSeq if provider does not support operation sync', async () => {
+          downloadServiceSpy.downloadRemoteOps.and.returnValue(
+            Promise.resolve({
+              newOps: [],
+              hasMore: false,
+              latestSeq: 0,
+              needsFullStateUpload: false,
+              success: true,
+              failedFileCount: 0,
+              latestServerSeq: 100,
+            }),
+          );
+
+          const mockProvider = {
+            isReady: () => Promise.resolve(true),
+            // supportsOperationSync NOT set - not an operation sync provider
+          } as any;
+
+          // Should not throw even though provider doesn't support operation sync
+          await expectAsync(service.downloadRemoteOps(mockProvider)).toBeResolved();
+        });
+      });
     });
   });
 });
