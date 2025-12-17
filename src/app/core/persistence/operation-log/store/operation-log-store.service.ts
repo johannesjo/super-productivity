@@ -424,6 +424,22 @@ export class OperationLogStoreService {
     return cursor ? (cursor.key as number) : 0;
   }
 
+  /**
+   * Checks if there are any operations that have been synced to the server.
+   * Used to distinguish between:
+   * - Fresh client (only local ops, never synced) → NOT a server migration
+   * - Client that previously synced (has synced ops) → Server migration scenario
+   */
+  async hasSyncedOps(): Promise<boolean> {
+    await this._ensureInit();
+    // Use the bySyncedAt index to efficiently check for any synced ops
+    const cursor = await this.db
+      .transaction('ops')
+      .store.index('bySyncedAt')
+      .openCursor();
+    return cursor !== null;
+  }
+
   async saveStateCache(snapshot: {
     state: unknown;
     lastAppliedOpSeq: number;

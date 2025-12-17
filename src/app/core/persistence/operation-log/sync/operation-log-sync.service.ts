@@ -382,11 +382,14 @@ export class OperationLogSyncService {
    * Check if we're connecting to a new/empty server and need to upload full state.
    *
    * This handles the server migration scenario:
-   * - Client has history (not fresh)
+   * - Client has PREVIOUSLY SYNCED operations (not just local ops)
    * - lastServerSeq is 0 for this server (first time connecting)
    * - Server is empty (latestSeq = 0)
    *
    * When detected, creates a SYNC_IMPORT with full state before regular ops are uploaded.
+   *
+   * IMPORTANT: A fresh client with only local (unsynced) ops is NOT a migration scenario.
+   * Fresh clients should just upload their ops normally without creating a SYNC_IMPORT.
    */
   private async _checkAndHandleServerMigration(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
@@ -411,11 +414,23 @@ export class OperationLogSyncService {
       return;
     }
 
-    // Server is empty AND we have history (not fresh) AND lastServerSeq is 0
+    // CRITICAL: Check if this client has PREVIOUSLY synced operations.
+    // A client that has never synced (only local ops) is NOT a migration case.
+    // It's just a fresh client that should upload its ops normally.
+    const hasSyncedOps = await this.opLogStore.hasSyncedOps();
+    if (!hasSyncedOps) {
+      OpLog.normal(
+        'OperationLogSyncService: Empty server detected, but no previously synced ops. ' +
+          'This is a fresh client, not a server migration. Proceeding with normal upload.',
+      );
+      return;
+    }
+
+    // Server is empty AND we have PREVIOUSLY SYNCED ops AND lastServerSeq is 0
     // This is a server migration - create SYNC_IMPORT with full state
     OpLog.warn(
       'OperationLogSyncService: Server migration detected during upload check. ' +
-        'Empty server detected, creating full state SYNC_IMPORT.',
+        'Empty server with previously synced ops. Creating full state SYNC_IMPORT.',
     );
     await this._handleServerMigration();
   }
