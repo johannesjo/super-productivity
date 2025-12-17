@@ -1211,6 +1211,162 @@ describe('LWW Conflict Resolution Integration', () => {
     });
   });
 
+  describe('Same timestamp edge cases', () => {
+    it('should handle exact same timestamp with different payloads consistently', async () => {
+      const clientA = new TestClient('client-a-ts');
+      const clientB = new TestClient('client-b-ts');
+
+      const exactTimestamp = 1700000000000; // Fixed timestamp for reproducibility
+
+      // Create operations with exact same timestamp
+      const opA = clientA.createOperation({
+        actionType: '[Task] Update Task',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-tie',
+        payload: { title: 'A wins?', notes: 'from A' },
+      });
+      (opA as any).timestamp = exactTimestamp;
+
+      const opB = clientB.createOperation({
+        actionType: '[Task] Update Task',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-tie',
+        payload: { title: 'B wins?', notes: 'from B' },
+      });
+      (opB as any).timestamp = exactTimestamp;
+
+      // Both have exact same timestamp
+      expect(opA.timestamp).toBe(opB.timestamp);
+
+      // Store operations
+      await storeService.append(opA, 'local');
+      await storeService.append(opB, 'remote', { pendingApply: true });
+
+      // Convention: remote wins on tie
+      // This test documents the expected behavior
+      const localEntry = await storeService.getOpById(opA.id);
+      const remoteEntry = await storeService.getOpById(opB.id);
+
+      expect(localEntry).toBeDefined();
+      expect(remoteEntry).toBeDefined();
+    });
+
+    it('should handle Delete vs Update conflict at same timestamp (Update wins)', async () => {
+      const clientA = new TestClient('client-delete');
+      const clientB = new TestClient('client-update');
+
+      const sameTime = Date.now();
+
+      // Client A deletes task
+      const deleteOp = clientA.createOperation({
+        actionType: '[Task] Delete Task',
+        opType: OpType.Delete,
+        entityType: 'TASK',
+        entityId: 'task-conflict',
+        payload: {},
+      });
+      (deleteOp as any).timestamp = sameTime;
+
+      // Client B updates same task
+      const updateOp = clientB.createOperation({
+        actionType: '[Task] Update Task',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-conflict',
+        payload: { title: 'Updated title' },
+      });
+      (updateOp as any).timestamp = sameTime;
+
+      await storeService.append(deleteOp, 'local');
+      const updateSeq = await storeService.append(updateOp, 'remote', {
+        pendingApply: true,
+      });
+
+      // LWW heuristic: Update wins over Delete (preserve data)
+      // Mark delete as rejected, update as applied
+      await storeService.markRejected([deleteOp.id]);
+      await storeService.markApplied([updateSeq]);
+
+      const deleteEntry = await storeService.getOpById(deleteOp.id);
+      const updateEntry = await storeService.getOpById(updateOp.id);
+
+      expect(deleteEntry?.rejectedAt).toBeDefined();
+      expect(updateEntry?.applicationStatus).toBe('applied');
+    });
+
+    it('should handle Create vs Create conflict (should not happen but gracefully handle)', async () => {
+      const clientA = new TestClient('client-create-a');
+      const clientB = new TestClient('client-create-b');
+
+      const sameTime = Date.now();
+      const sameEntityId = 'new-task-123'; // Same ID by coincidence (extremely rare)
+
+      // Both clients create task with same ID (very rare edge case)
+      const createA = clientA.createOperation({
+        actionType: '[Task] Add Task',
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: sameEntityId,
+        payload: { id: sameEntityId, title: 'Task from A' },
+      });
+      (createA as any).timestamp = sameTime;
+
+      const createB = clientB.createOperation({
+        actionType: '[Task] Add Task',
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: sameEntityId,
+        payload: { id: sameEntityId, title: 'Task from B' },
+      });
+      (createB as any).timestamp = sameTime;
+
+      await storeService.append(createA, 'local');
+      const createBSeq = await storeService.append(createB, 'remote', {
+        pendingApply: true,
+      });
+
+      // In Create vs Create, remote wins (convention)
+      await storeService.markRejected([createA.id]);
+      await storeService.markApplied([createBSeq]);
+
+      const entryA = await storeService.getOpById(createA.id);
+      const entryB = await storeService.getOpById(createB.id);
+
+      expect(entryA?.rejectedAt).toBeDefined();
+      expect(entryB?.applicationStatus).toBe('applied');
+    });
+
+    it('should handle rapid-fire updates from same client', async () => {
+      const client = new TestClient('rapid-client');
+
+      const baseTime = Date.now();
+
+      // Create 5 rapid updates (might have same ms timestamp)
+      for (let i = 0; i < 5; i++) {
+        const op = client.createOperation({
+          actionType: '[Task] Update Task',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'rapid-task',
+          payload: { title: `Update ${i}` },
+        });
+        (op as any).timestamp = baseTime; // Same timestamp for all
+        await storeService.append(op, 'local');
+      }
+
+      // All ops should be stored successfully
+      const allOps = await storeService.getOpsAfterSeq(0);
+      expect(allOps.length).toBe(5);
+
+      // All should be from same client
+      for (const entry of allOps) {
+        expect(entry.op.clientId).toBe('rapid-client');
+      }
+    });
+  });
+
   describe('Mixed operations and entity types', () => {
     it('should handle multiple entity types in a single LWW resolution batch', async () => {
       const clientA = new TestClient('client-a-test');

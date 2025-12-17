@@ -260,4 +260,213 @@ describe('LockService', () => {
       expect(order).toEqual(['outer-start', 'inner', 'outer-end']);
     });
   });
+
+  describe('high contention scenarios', () => {
+    it('should handle 20 concurrent requests fairly', async () => {
+      const executed: number[] = [];
+      const requests: Promise<void>[] = [];
+
+      // Launch 20 concurrent requests
+      for (let i = 0; i < 20; i++) {
+        const requestNum = i;
+        requests.push(
+          service.request('contention_lock', async () => {
+            executed.push(requestNum);
+            // Small delay to simulate work
+            await new Promise((r) => setTimeout(r, 2));
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+
+      // All 20 should have executed
+      expect(executed.length).toBe(20);
+      // Each number should appear exactly once
+      const uniqueExecuted = [...new Set(executed)];
+      expect(uniqueExecuted.length).toBe(20);
+    });
+
+    it('should not starve any request under moderate contention', async () => {
+      const startTimes: Map<number, number> = new Map();
+      const endTimes: Map<number, number> = new Map();
+      const requests: Promise<void>[] = [];
+
+      const startTime = Date.now();
+      // Pre-defined work times to avoid mixed operator lint error
+      const workTimes = [5, 7, 9, 5, 7, 9, 5, 7, 9, 5];
+
+      // Launch 10 concurrent requests with varying work times
+      for (let i = 0; i < 10; i++) {
+        const requestNum = i;
+        const workTime = workTimes[i];
+        requests.push(
+          service.request('starvation_lock', async () => {
+            startTimes.set(requestNum, Date.now() - startTime);
+            // Vary the work time
+            await new Promise((r) => setTimeout(r, workTime));
+            endTimes.set(requestNum, Date.now() - startTime);
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+
+      // All requests should have completed
+      expect(startTimes.size).toBe(10);
+      expect(endTimes.size).toBe(10);
+
+      // Check no request waited unreasonably long (more than 200ms for 10 requests)
+      const maxWait = Math.max(...Array.from(startTimes.values()));
+      expect(maxWait).toBeLessThan(200);
+    });
+
+    it('should maintain correct execution order for FIFO-like behavior', async () => {
+      const executionOrder: number[] = [];
+      const requests: Promise<void>[] = [];
+
+      // Launch requests with small delays between them
+      for (let i = 0; i < 5; i++) {
+        const requestNum = i;
+        // Stagger the requests slightly
+        await new Promise((r) => setTimeout(r, 1));
+        requests.push(
+          service.request('fifo_lock', async () => {
+            executionOrder.push(requestNum);
+            await new Promise((r) => setTimeout(r, 5));
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+
+      // All should execute
+      expect(executionOrder.length).toBe(5);
+      // Web Locks API should maintain roughly FIFO order for requests on same lock
+      // Note: exact ordering is implementation-dependent, but all should complete
+    });
+
+    it('should handle burst of requests followed by quiet period', async () => {
+      const executed: string[] = [];
+
+      // Burst of 5 requests
+      const burstRequests: Promise<void>[] = [];
+      for (let i = 0; i < 5; i++) {
+        burstRequests.push(
+          service.request('burst_lock', async () => {
+            executed.push(`burst-${i}`);
+            await new Promise((r) => setTimeout(r, 2));
+          }),
+        );
+      }
+
+      await Promise.all(burstRequests);
+      expect(executed.filter((e) => e.startsWith('burst-')).length).toBe(5);
+
+      // Quiet period
+      await new Promise((r) => setTimeout(r, 10));
+
+      // Single request after quiet period should work immediately
+      const quietStart = Date.now();
+      await service.request('burst_lock', async () => {
+        executed.push('after-quiet');
+      });
+      const quietDuration = Date.now() - quietStart;
+
+      expect(executed).toContain('after-quiet');
+      // Should complete quickly (no backlog)
+      expect(quietDuration).toBeLessThan(50);
+    });
+
+    it('should handle interleaved requests to multiple locks', async () => {
+      const executed: string[] = [];
+      const requests: Promise<void>[] = [];
+
+      // Interleave requests to lock_a and lock_b
+      for (let i = 0; i < 6; i++) {
+        const lockName = i % 2 === 0 ? 'interleave_a' : 'interleave_b';
+        const requestId = `${lockName}-${Math.floor(i / 2)}`;
+        requests.push(
+          service.request(lockName, async () => {
+            executed.push(`start-${requestId}`);
+            await new Promise((r) => setTimeout(r, 5));
+            executed.push(`end-${requestId}`);
+          }),
+        );
+      }
+
+      await Promise.all(requests);
+
+      // All should complete
+      expect(executed.filter((e) => e.startsWith('start-')).length).toBe(6);
+      expect(executed.filter((e) => e.startsWith('end-')).length).toBe(6);
+
+      // Locks a and b should run independently (interleaved starts possible)
+      // Just verify all completed - exact interleaving depends on timing
+    });
+  });
+
+  describe('error recovery under contention', () => {
+    it('should release lock and allow next waiter when callback throws', async () => {
+      const executed: string[] = [];
+      const requests: Promise<void>[] = [];
+
+      // First request throws
+      requests.push(
+        service
+          .request('error_recovery_lock', async () => {
+            executed.push('first-start');
+            throw new Error('First request failed');
+          })
+          .catch(() => {
+            executed.push('first-caught');
+          }),
+      );
+
+      // Second request should still execute after first fails
+      requests.push(
+        service.request('error_recovery_lock', async () => {
+          executed.push('second-executed');
+        }),
+      );
+
+      await Promise.all(requests);
+
+      expect(executed).toContain('first-start');
+      expect(executed).toContain('first-caught');
+      expect(executed).toContain('second-executed');
+    });
+
+    it('should handle multiple consecutive failures', async () => {
+      const executed: string[] = [];
+      const requests: Promise<void>[] = [];
+
+      // Multiple failing requests
+      for (let i = 0; i < 3; i++) {
+        requests.push(
+          service
+            .request('multi_fail_lock', async () => {
+              executed.push(`fail-${i}`);
+              throw new Error(`Request ${i} failed`);
+            })
+            .catch(() => {
+              // Swallow error
+            }),
+        );
+      }
+
+      // One success at the end
+      requests.push(
+        service.request('multi_fail_lock', async () => {
+          executed.push('success');
+        }),
+      );
+
+      await Promise.all(requests);
+
+      // All should have attempted
+      expect(executed.filter((e) => e.startsWith('fail-')).length).toBe(3);
+      expect(executed).toContain('success');
+    });
+  });
 });

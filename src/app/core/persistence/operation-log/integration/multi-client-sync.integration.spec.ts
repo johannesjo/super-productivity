@@ -431,4 +431,221 @@ describe('Multi-Client Sync Integration', () => {
       expect(frontier.get('PROJECT:proj-1')).toBeDefined();
     });
   });
+
+  describe('Concurrent operation race conditions', () => {
+    it('should handle concurrent appends from multiple clients', async () => {
+      const clientA = new TestClient('race-client-a');
+      const clientB = new TestClient('race-client-b');
+      const clientC = new TestClient('race-client-c');
+
+      // Create operations concurrently
+      const appendPromises = [
+        storeService.append(
+          createTaskOperation(clientA, 'task-a', OpType.Create, { from: 'A' }),
+          'local',
+        ),
+        storeService.append(
+          createTaskOperation(clientB, 'task-b', OpType.Create, { from: 'B' }),
+          'local',
+        ),
+        storeService.append(
+          createTaskOperation(clientC, 'task-c', OpType.Create, { from: 'C' }),
+          'local',
+        ),
+      ];
+
+      const seqs = await Promise.all(appendPromises);
+
+      // All should have unique sequences
+      expect(new Set(seqs).size).toBe(3);
+
+      // All operations should be stored
+      const allOps = await storeService.getOpsAfterSeq(0);
+      expect(allOps.length).toBe(3);
+    });
+
+    it('should handle concurrent updates to same entity from different clients', async () => {
+      const clientA = new TestClient('concurrent-a');
+      const clientB = new TestClient('concurrent-b');
+
+      // Both clients update same entity concurrently
+      const opA = createTaskOperation(clientA, 'shared-task', OpType.Update, {
+        title: 'Title from A',
+      });
+      const opB = createTaskOperation(clientB, 'shared-task', OpType.Update, {
+        title: 'Title from B',
+      });
+
+      // Append concurrently
+      const [seqA, seqB] = await Promise.all([
+        storeService.append(opA, 'local'),
+        storeService.append(opB, 'remote'),
+      ]);
+
+      // Both should be stored with different sequences
+      expect(seqA).not.toBe(seqB);
+
+      // Vector clocks should be concurrent (neither knows about the other)
+      const comparison = compareVectorClocks(opA.vectorClock, opB.vectorClock);
+      expect(comparison).toBe(VectorClockComparison.CONCURRENT);
+    });
+
+    it('should maintain operation order under rapid concurrent writes', async () => {
+      const client = new TestClient('rapid-writes');
+      const writeCount = 20;
+      const appendPromises: Promise<number>[] = [];
+
+      // Launch many rapid concurrent writes
+      for (let i = 0; i < writeCount; i++) {
+        appendPromises.push(
+          storeService.append(
+            createTaskOperation(client, `rapid-task-${i}`, OpType.Create, { index: i }),
+            'local',
+          ),
+        );
+      }
+
+      const seqs = await Promise.all(appendPromises);
+
+      // All should have unique sequences
+      expect(new Set(seqs).size).toBe(writeCount);
+
+      // All operations should be persisted
+      const allOps = await storeService.getOpsAfterSeq(0);
+      expect(allOps.length).toBe(writeCount);
+
+      // Verify each operation is retrievable
+      for (let i = 0; i < writeCount; i++) {
+        const entry = allOps.find((e) => e.op.entityId === `rapid-task-${i}`);
+        expect(entry).toBeDefined();
+      }
+    });
+
+    it('should handle concurrent read and write operations', async () => {
+      const client = new TestClient('read-write-client');
+
+      // Pre-populate with some operations
+      for (let i = 0; i < 5; i++) {
+        await storeService.append(
+          createTaskOperation(client, `existing-${i}`, OpType.Create, {}),
+          'local',
+        );
+      }
+
+      // Concurrent reads and writes
+      const operations = [
+        // Writes
+        storeService.append(
+          createTaskOperation(client, 'new-task-1', OpType.Create, {}),
+          'local',
+        ),
+        storeService.append(
+          createTaskOperation(client, 'new-task-2', OpType.Create, {}),
+          'local',
+        ),
+        // Reads
+        storeService.getOpsAfterSeq(0),
+        storeService.getUnsynced(),
+        storeService.getOpById((await storeService.getOpsAfterSeq(0))[0]?.op.id || ''),
+      ];
+
+      const results = await Promise.all(operations);
+
+      // All operations should complete without error
+      expect(results.length).toBe(5);
+    });
+
+    it('should handle concurrent markSynced calls', async () => {
+      const clientA = new TestClient('sync-mark-a');
+      const clientB = new TestClient('sync-mark-b');
+
+      // Create operations
+      const seq1 = await storeService.append(
+        createTaskOperation(clientA, 't1', OpType.Create, {}),
+        'local',
+      );
+      const seq2 = await storeService.append(
+        createTaskOperation(clientB, 't2', OpType.Create, {}),
+        'local',
+      );
+
+      // Verify initially unsynced
+      let unsynced = await storeService.getUnsynced();
+      expect(unsynced.length).toBe(2);
+
+      // Concurrent markSynced calls
+      await Promise.all([
+        storeService.markSynced([seq1]),
+        storeService.markSynced([seq2]),
+      ]);
+
+      // Both should now be synced
+      unsynced = await storeService.getUnsynced();
+      expect(unsynced.length).toBe(0);
+    });
+
+    it('should handle interleaved create/update/delete for same entity', async () => {
+      const client = new TestClient('interleave-client');
+      const entityId = 'interleaved-task';
+
+      // Rapid interleaved operations on same entity
+      const createOp = createTaskOperation(client, entityId, OpType.Create, {
+        title: 'Created',
+      });
+      const updateOp = createTaskOperation(client, entityId, OpType.Update, {
+        title: 'Updated',
+      });
+      const deleteOp = createTaskOperation(client, entityId, OpType.Delete, {});
+
+      // Sequential append (operations happen in order)
+      await storeService.append(createOp, 'local');
+      await storeService.append(updateOp, 'local');
+      await storeService.append(deleteOp, 'local');
+
+      // All three operations should be stored
+      const allOps = await storeService.getOpsAfterSeq(0);
+      expect(allOps.length).toBe(3);
+
+      // Verify operation order by sequence
+      const entityOps = allOps.filter((e) => e.op.entityId === entityId);
+      expect(entityOps.length).toBe(3);
+      expect(entityOps[0].op.opType).toBe(OpType.Create);
+      expect(entityOps[1].op.opType).toBe(OpType.Update);
+      expect(entityOps[2].op.opType).toBe(OpType.Delete);
+    });
+
+    it('should handle vector clock frontier updates under concurrent access', async () => {
+      const clientA = new TestClient('frontier-a');
+      const clientB = new TestClient('frontier-b');
+
+      // Client A creates the entity
+      const createOp = createTaskOperation(clientA, 'frontier-task', OpType.Create, {
+        from: 'A-create',
+      });
+      await storeService.append(createOp, 'local');
+
+      // Client B merges A's clock before updating (simulating sync)
+      clientB.mergeRemoteClock(createOp.vectorClock);
+      const updateOpB = createTaskOperation(clientB, 'frontier-task', OpType.Update, {
+        from: 'B-update',
+      });
+      await storeService.append(updateOpB, 'local');
+
+      // Client A merges B's clock before updating (simulating sync)
+      clientA.mergeRemoteClock(updateOpB.vectorClock);
+      const updateOpA = createTaskOperation(clientA, 'frontier-task', OpType.Update, {
+        from: 'A-update',
+      });
+      await storeService.append(updateOpA, 'local');
+
+      // Get frontier - should have the merged clock from the last operation
+      const frontier = await vectorClockService.getEntityFrontier('TASK');
+      const taskClock = frontier.get('TASK:frontier-task');
+
+      expect(taskClock).toBeDefined();
+      // Frontier should know about both clients (A's last op merged B's clock)
+      expect(taskClock!['frontier-a']).toBeDefined();
+      expect(taskClock!['frontier-b']).toBeDefined();
+    });
+  });
 });

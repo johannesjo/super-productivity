@@ -274,6 +274,183 @@ describe('Network Failure Integration', () => {
     });
   });
 
+  describe('Offline/Online Transitions', () => {
+    it('should queue operations created while offline and sync when back online', async () => {
+      const client = new SimulatedClient('client-offline-test', storeService);
+
+      // Client creates operations while "offline" (just don't sync)
+      await client.createLocalOp(
+        'TASK',
+        't1',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t1'),
+      );
+      await client.createLocalOp(
+        'TASK',
+        't2',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t2'),
+      );
+
+      // Verify operations are queued locally
+      const unsynced = await storeService.getUnsynced();
+      expect(unsynced.length).toBe(2);
+
+      // Server has no operations yet
+      expect(server.getAllOps().length).toBe(0);
+
+      // Simulate coming "online" - sync succeeds
+      const result = await client.sync(server);
+      expect(result.uploaded).toBe(2);
+      expect(result.downloaded).toBe(0);
+
+      // Verify all synced
+      const unsyncedAfter = await storeService.getUnsynced();
+      expect(unsyncedAfter.length).toBe(0);
+      expect(server.getAllOps().length).toBe(2);
+    });
+
+    it('should handle multiple offline sessions with sync between', async () => {
+      const client = new SimulatedClient('client-multi-offline', storeService);
+
+      // First offline session
+      await client.createLocalOp(
+        'TASK',
+        't1',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t1'),
+      );
+
+      // Come online, sync
+      await client.sync(server);
+      expect(server.getAllOps().length).toBe(1);
+
+      // Second offline session
+      await client.createLocalOp(
+        'TASK',
+        't2',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t2'),
+      );
+      await client.createLocalOp(
+        'TASK',
+        't3',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t3'),
+      );
+
+      // Come online again, sync
+      const result = await client.sync(server);
+      expect(result.uploaded).toBe(2);
+
+      // Verify all 3 ops on server
+      expect(server.getAllOps().length).toBe(3);
+    });
+
+    it('should merge remote changes received after offline period', async () => {
+      const clientA = new SimulatedClient('client-a-offline', storeService);
+      const clientB = new SimulatedClient('client-b-offline', storeService);
+
+      // Client A creates and syncs while B is "offline"
+      await clientA.createLocalOp(
+        'TASK',
+        't-from-a',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t-from-a'),
+      );
+      await clientA.sync(server);
+
+      // Client B creates operations while "offline"
+      await clientB.createLocalOp(
+        'TASK',
+        't-from-b',
+        OpType.Create,
+        'Create',
+        createMinimalTaskPayload('t-from-b'),
+      );
+
+      // Client B comes online and syncs
+      const result = await clientB.sync(server);
+
+      // B should upload its op and download A's op
+      expect(result.uploaded).toBe(1);
+      // Note: due to shared DB in tests, downloaded may be 0 or 1 depending on implementation
+      // The important thing is both ops end up on server
+      expect(server.getAllOps().length).toBe(2);
+    });
+
+    it('should preserve operation order created during long offline period', async () => {
+      const client = new SimulatedClient('client-long-offline', storeService);
+
+      // Create many operations in sequence while "offline"
+      const opIds: string[] = [];
+      for (let i = 0; i < 10; i++) {
+        const op = await client.createLocalOp(
+          'TASK',
+          `t${i}`,
+          OpType.Create,
+          'Create',
+          createMinimalTaskPayload(`t${i}`),
+        );
+        opIds.push(op.id);
+      }
+
+      // Come online and sync
+      const result = await client.sync(server);
+      expect(result.uploaded).toBe(10);
+
+      // Verify server has all ops in correct order (by serverSeq)
+      const serverOps = server.getAllOps();
+      expect(serverOps.length).toBe(10);
+
+      // Server sequence should preserve upload order
+      for (let i = 0; i < 10; i++) {
+        expect(serverOps[i].op.entityId).toBe(`t${i}`);
+      }
+    });
+
+    it('should handle connection drop mid-sync and resume correctly', async () => {
+      const client = new SimulatedClient('client-drop-test', storeService);
+
+      // Create operations
+      for (let i = 0; i < 5; i++) {
+        await client.createLocalOp(
+          'TASK',
+          `t${i}`,
+          OpType.Create,
+          'Create',
+          createMinimalTaskPayload(`t${i}`),
+        );
+      }
+
+      // First sync attempt fails after 2 ops
+      server.setFailAfterUploadCount(2);
+
+      try {
+        await client.sync(server);
+        fail('Should have thrown error');
+      } catch (e) {
+        // Expected
+      }
+
+      // Server has 2 ops, client thinks all 5 are unsynced
+      expect(server.getAllOps().length).toBe(2);
+
+      // Connection restored, sync again
+      const result = await client.sync(server);
+
+      // All 5 should now be on server (2 duplicates handled, 3 new)
+      expect(server.getAllOps().length).toBe(5);
+      expect(result.uploaded).toBe(5); // All processed (duplicates counted as success)
+    });
+  });
+
   describe('Mixed Failure Scenarios', () => {
     it('should handle failure during sync (upload success, download fail)', async () => {
       // Scenario: Client uploads successfully, but fails to get response or fails subsequent download
