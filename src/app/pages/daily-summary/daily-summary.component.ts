@@ -326,6 +326,10 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
 
   async finishDay(): Promise<void> {
     await this._beforeFinishDayService.executeActions();
+    // Wait for any ongoing sync to complete before archiving to avoid DB lock errors
+    await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
+      .pipe(first())
+      .toPromise();
     if (IS_ELECTRON && this.isForToday) {
       const isConfirm = await this._matDialog
         .open(DialogConfirmComponent, {
