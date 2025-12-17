@@ -1,6 +1,6 @@
 # Operation Log: Architecture Diagrams
 
-**Last Updated:** December 16, 2025
+**Last Updated:** December 17, 2025
 **Status:** All core diagrams reflect current implementation
 
 These diagrams visualize the Operation Log system architecture. For implementation details, see [operation-log-architecture.md](./operation-log-architecture.md).
@@ -305,7 +305,7 @@ graph TB
 | Endpoint                   | Method | Purpose                         | DB Operations                                                        |
 | -------------------------- | ------ | ------------------------------- | -------------------------------------------------------------------- |
 | `/api/sync/ops`            | POST   | Upload operations               | INSERT ops, UPDATE lastSeq, UPSERT device, UPSERT tombstone (if DEL) |
-| `/api/sync/ops?sinceSeq=N` | GET    | Download operations             | SELECT ops, SELECT lastSeq                                           |
+| `/api/sync/ops?sinceSeq=N` | GET    | Download operations             | SELECT ops, SELECT lastSeq, find latest snapshot (skip optimization) |
 | `/api/sync/snapshot`       | POST   | Upload full state (SYNC_IMPORT) | Same as POST /ops + UPDATE snapshot cache                            |
 | `/api/sync/snapshot`       | GET    | Get full state                  | SELECT snapshot (or replay ops if stale)                             |
 | `/api/sync/status`         | GET    | Check sync status               | SELECT lastSeq, COUNT devices                                        |
@@ -334,6 +334,7 @@ graph TB
 - **Piggybacked Ops**: Upload response includes new remote ops → processed immediately to trigger conflict detection
 - **Gap Detection**: Server returns `gapDetected: true` when client sinceSeq is invalid → client resets to seq=0 and re-downloads all ops
 - **Server Migration**: Gap + empty server (no ops) → client creates SYNC_IMPORT to seed new server
+- **Snapshot Skip Optimization**: Server skips pre-snapshot operations when `sinceSeq < latestSnapshotSeq`. Returns `latestSnapshotSeq` in response. See Section 2e below.
 
 ---
 
@@ -773,6 +774,189 @@ flowchart TB
     style Solution fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
     style Tradeoff fill:#fff3e0,stroke:#ef6c00,stroke-width:2px
 ```
+
+---
+
+## 2e. Full-State Operation Skip Optimization ✅ IMPLEMENTED
+
+When a SYNC_IMPORT, BACKUP_IMPORT, or REPAIR operation exists, all prior operations are superseded because the full-state operation contains the complete application state. This optimization reduces bandwidth and processing by skipping pre-snapshot operations during download.
+
+**Implementation Status:** Complete.
+
+- **Server**: `SyncService.getOpsSinceWithSeq()` in `sync.service.ts`
+- **Client**: `OperationLogSyncService._filterOpsInvalidatedBySyncImport()` in `operation-log-sync.service.ts`
+
+### 2e.1 The Problem: Wasted Bandwidth
+
+Without optimization, a fresh client downloading operations after a SYNC_IMPORT would receive all historical operations, even though they're superseded by the full-state snapshot:
+
+```mermaid
+flowchart TD
+    subgraph Problem["❌ Without Optimization"]
+        Server["Server Operations<br/>━━━━━━━━━━━━━━━<br/>Op 1-99: Historical ops<br/>Op 100: SYNC_IMPORT<br/>Op 101-105: Post-import"]
+
+        Client["Fresh Client<br/>sinceSeq = 0"]
+
+        Download["Downloads ALL 105 ops<br/>━━━━━━━━━━━━━━━<br/>• Ops 1-99: Will be filtered<br/>• Op 100: Applied (snapshot)<br/>• Ops 101-105: Applied"]
+
+        Waste["⚠️ 99 ops downloaded<br/>but immediately discarded"]
+    end
+
+    Server --> Client
+    Client --> Download
+    Download --> Waste
+
+    style Waste fill:#ffebee,stroke:#c62828,stroke-width:2px
+```
+
+### 2e.2 The Solution: Server-Side Skip
+
+The server detects the latest full-state operation and skips directly to it when the client's `sinceSeq` is before the snapshot:
+
+```mermaid
+flowchart TD
+    subgraph Solution["✅ With Optimization"]
+        Server2["Server Operations<br/>━━━━━━━━━━━━━━━<br/>Op 1-99: Historical ops<br/>Op 100: SYNC_IMPORT ⬅️<br/>Op 101-105: Post-import"]
+
+        Query["GET /api/sync/ops?sinceSeq=0"]
+
+        Detect["Server detects:<br/>latestSnapshotSeq = 100<br/>sinceSeq (0) < snapshotSeq (100)"]
+
+        Skip["Skip to seq 99<br/>(effectiveSinceSeq = 99)"]
+
+        Response["Response:<br/>━━━━━━━━━━━━━━━<br/>• ops: [100, 101, 102, 103, 104, 105]<br/>• latestSnapshotSeq: 100<br/>• gapDetected: false"]
+
+        Efficient["✅ Only 6 ops downloaded<br/>(not 105)"]
+    end
+
+    Query --> Detect
+    Detect --> Skip
+    Skip --> Response
+    Response --> Efficient
+
+    style Efficient fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Skip fill:#e3f2fd,stroke:#1565c0,stroke-width:2px
+```
+
+### 2e.3 Server-Side Implementation
+
+```mermaid
+flowchart TD
+    subgraph ServerLogic["Server: getOpsSinceWithSeq()"]
+        Start[Receive request<br/>sinceSeq, excludeClient]
+
+        FindSnapshot["Find latest full-state op<br/>WHERE opType IN<br/>('SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR')<br/>ORDER BY serverSeq DESC"]
+
+        CheckSkip{sinceSeq <<br/>snapshotSeq?}
+
+        Skip["effectiveSinceSeq =<br/>snapshotSeq - 1"]
+
+        NoSkip["effectiveSinceSeq =<br/>sinceSeq"]
+
+        Query["SELECT ops WHERE<br/>serverSeq > effectiveSinceSeq"]
+
+        GapCheck{"Gap detection:<br/>first op > effectiveSinceSeq + 1?"}
+
+        Response["Return {<br/>  ops,<br/>  latestSeq,<br/>  latestSnapshotSeq,<br/>  gapDetected<br/>}"]
+    end
+
+    Start --> FindSnapshot
+    FindSnapshot --> CheckSkip
+    CheckSkip -->|Yes| Skip
+    CheckSkip -->|No| NoSkip
+    Skip --> Query
+    NoSkip --> Query
+    Query --> GapCheck
+    GapCheck --> Response
+
+    style Skip fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+```
+
+### 2e.4 Client-Side Filtering
+
+Even with server-side optimization, the client maintains its own safety filter for pre-import operations. This handles edge cases like:
+
+- Pagination (ops downloaded in multiple batches)
+- `excludeClient` parameter filtering
+- Race conditions during upload
+
+```mermaid
+flowchart TD
+    subgraph ClientFilter["Client: _filterOpsInvalidatedBySyncImport()"]
+        Receive["Receive downloaded ops"]
+
+        FindImport["Find latest full-state op<br/>in downloaded batch"]
+
+        HasImport{Found<br/>SYNC_IMPORT?}
+
+        ForEach["For each operation:"]
+
+        IsFullState{Is full-state<br/>operation?}
+
+        CheckTimestamp{"UUIDv7 timestamp<br/>op.id >= import.id?"}
+
+        Keep["Keep operation<br/>(valid)"]
+
+        Discard["Discard operation<br/>(superseded)"]
+
+        Return["Return filtered ops"]
+    end
+
+    Receive --> FindImport
+    FindImport --> HasImport
+    HasImport -->|No| Return
+    HasImport -->|Yes| ForEach
+
+    ForEach --> IsFullState
+    IsFullState -->|Yes| Keep
+    IsFullState -->|No| CheckTimestamp
+
+    CheckTimestamp -->|Yes| Keep
+    CheckTimestamp -->|No| Discard
+
+    Keep --> ForEach
+    Discard --> ForEach
+
+    style Keep fill:#e8f5e9,stroke:#2e7d32,stroke-width:2px
+    style Discard fill:#ffebee,stroke:#c62828,stroke-width:2px
+```
+
+**Important:** The client filter uses **UUIDv7 timestamp comparison** (not client ID) to determine which operations are valid. Operations created **before** the SYNC_IMPORT (by timestamp) are filtered out, regardless of which client created them.
+
+### 2e.5 Gap Detection Interaction
+
+The skip optimization must not trigger false gap detection. The server uses `effectiveSinceSeq` for gap detection:
+
+| Scenario                | sinceSeq | snapshotSeq | effectiveSinceSeq | First Op | Gap?                |
+| ----------------------- | -------- | ----------- | ----------------- | -------- | ------------------- |
+| Fresh client, skip      | 0        | 100         | 99                | 100      | ❌ No (100 = 99+1)  |
+| Client past snapshot    | 150      | 100         | 150               | 151      | ❌ No (151 = 150+1) |
+| Real gap after snapshot | 52       | 50          | 52                | 56       | ✅ Yes (56 > 52+1)  |
+| Client at snapshot      | 100      | 100         | 100               | 101      | ❌ No (101 = 100+1) |
+
+### 2e.6 Full-State Operation Types
+
+| OpType          | Description                   | When Created                           |
+| --------------- | ----------------------------- | -------------------------------------- |
+| `SYNC_IMPORT`   | Full state from sync download | Client receives full state during sync |
+| `BACKUP_IMPORT` | Full state from backup file   | User imports a backup file             |
+| `REPAIR`        | Full state from auto-repair   | System detects and fixes corruption    |
+
+All three operation types contain `{ appDataComplete: {...} }` payload with the entire application state.
+
+### 2e.7 Response Schema
+
+```typescript
+interface DownloadOpsResponse {
+  ops: ServerOperation[]; // Operations after sinceSeq (or after snapshot)
+  hasMore: boolean; // True if more ops available (pagination)
+  latestSeq: number; // Server's latest sequence number
+  gapDetected?: boolean; // True if operations are missing
+  latestSnapshotSeq?: number; // Server seq of latest full-state op (if any)
+}
+```
+
+The `latestSnapshotSeq` field is informational - clients can use it to know a snapshot exists without scanning the ops array.
 
 ---
 
