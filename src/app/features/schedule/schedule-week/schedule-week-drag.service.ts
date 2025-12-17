@@ -531,11 +531,7 @@ export class ScheduleWeekDragService {
     if (!event) {
       return 6;
     }
-    const task = this._pluckTaskFromEvent(event);
-    if (task?.timeEstimate) {
-      const timeInHours = task.timeEstimate / (60 * 60 * 1000);
-      return Math.max(Math.round(timeInHours * FH), 1);
-    }
+    // Use timeLeftInHours which already accounts for timeSpent
     return Math.max(Math.round(event.timeLeftInHours * FH), 1);
   }
 
