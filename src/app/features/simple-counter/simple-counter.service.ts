@@ -5,7 +5,6 @@ import {
   selectEnabledAndToggledSimpleCounters,
   selectEnabledSimpleCounters,
   selectEnabledSimpleStopWatchCounters,
-  selectSimpleCounterById,
 } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
@@ -48,6 +47,7 @@ export class SimpleCounterService implements OnDestroy {
   private _imexViewService = inject(ImexViewService);
 
   private _unsyncedDuration = new Map<string, { duration: number; date: string }>();
+  private _modifiedClickCounters = new Set<string>(); // Track click counters that need sync
   private _lastSyncTime = Date.now();
   private _subscriptions = new Subscription();
   private _visibilityHandler: (() => void) | null = null;
@@ -197,12 +197,31 @@ export class SimpleCounterService implements OnDestroy {
   }
 
   private _flushAccumulatedTime(): void {
+    // Flush StopWatch accumulated time
     this._unsyncedDuration.forEach(({ duration, date }, counterId) => {
       if (duration > 0) {
         this._store$.dispatch(syncSimpleCounterTime({ id: counterId, date, duration }));
       }
     });
     this._unsyncedDuration.clear();
+
+    // Flush ClickCounter modifications with absolute values
+    if (this._modifiedClickCounters.size > 0) {
+      const today = this._dateService.todayStr();
+      this._store$
+        .pipe(select(selectAllSimpleCounters), take(1))
+        .subscribe((counters) => {
+          for (const id of this._modifiedClickCounters) {
+            const counter = counters.find((c) => c.id === id);
+            if (counter) {
+              const newVal = counter.countOnDay[today] || 0;
+              this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+            }
+          }
+          this._modifiedClickCounters.clear();
+        });
+    }
+
     this._lastSyncTime = Date.now();
   }
 
@@ -223,30 +242,16 @@ export class SimpleCounterService implements OnDestroy {
     const today = this._dateService.todayStr();
     // Local UI update (non-persistent)
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
-    // Sync with absolute value (persistent)
-    this._store$
-      .pipe(select(selectSimpleCounterById, { id }), take(1))
-      .subscribe((counter) => {
-        if (counter) {
-          const newVal = counter.countOnDay[today] || 0;
-          this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-        }
-      });
+    // Mark for batched sync (will sync every 5 minutes)
+    this._modifiedClickCounters.add(id);
   }
 
   decreaseCounterToday(id: string, decreaseBy: number): void {
     const today = this._dateService.todayStr();
     // Local UI update (non-persistent)
     this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy, today }));
-    // Sync with absolute value (persistent)
-    this._store$
-      .pipe(select(selectSimpleCounterById, { id }), take(1))
-      .subscribe((counter) => {
-        if (counter) {
-          const newVal = counter.countOnDay[today] || 0;
-          this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-        }
-      });
+    // Mark for batched sync (will sync every 5 minutes)
+    this._modifiedClickCounters.add(id);
   }
 
   toggleCounter(id: string): void {
