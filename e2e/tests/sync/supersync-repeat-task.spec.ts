@@ -14,6 +14,13 @@ import {
  *
  * Verifies that repeatable task instances sync correctly between clients,
  * especially after import operations.
+ *
+ * Note: These tests use "scheduled tasks" (tasks with dueDay) rather than
+ * full repeat configs. Testing actual TaskRepeatCfg creation via UI would
+ * require navigating the task detail panel and filling the repeat dialog.
+ *
+ * For repeat config sync logic testing, see the integration tests:
+ * src/app/core/persistence/operation-log/integration/repeat-task-sync.integration.spec.ts
  */
 
 const generateTestRunId = (workerIndex: number): string => {
@@ -198,4 +205,89 @@ base.describe('@supersync SuperSync Repeatable Task Sync', () => {
       }
     },
   );
+
+  /**
+   * Scenario: Task Deletion Syncs to Other Client
+   *
+   * This test verifies that when Client A deletes a task,
+   * the deletion syncs correctly to Client B.
+   *
+   * Actions:
+   * 1. Client A creates a task and syncs
+   * 2. Client B syncs and sees the task
+   * 3. Client A deletes the task and syncs
+   * 4. Client B syncs
+   * 5. Verify Client B no longer has the task
+   */
+  base('Task deletion syncs to other client', async ({ browser, baseURL }, testInfo) => {
+    testInfo.setTimeout(120000);
+    const testRunId = generateTestRunId(testInfo.workerIndex);
+    const appUrl = baseURL || 'http://localhost:4242';
+    let clientA: SimulatedE2EClient | null = null;
+    let clientB: SimulatedE2EClient | null = null;
+
+    try {
+      const user = await createTestUser(testRunId);
+      const syncConfig = getSuperSyncConfig(user);
+
+      // Setup both clients
+      clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+      await clientA.sync.setupSuperSync(syncConfig);
+
+      clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+      await clientB.sync.setupSuperSync(syncConfig);
+
+      // 1. Client A creates a task
+      const taskName = `TaskToDelete-${testRunId}`;
+      await clientA.workView.addTask(taskName);
+      await waitForTask(clientA.page, taskName);
+
+      // Client A syncs
+      await clientA.sync.syncAndWait();
+
+      // 2. Client B syncs and verifies task exists
+      await clientB.sync.syncAndWait();
+      await clientB.page.waitForTimeout(1000);
+      const taskOnB = clientB.page.locator(`task:has-text("${taskName}")`).first();
+      await expect(taskOnB).toBeVisible({ timeout: 10000 });
+
+      // 3. Client A deletes the task
+      const taskOnA = clientA.page.locator(`task:has-text("${taskName}")`).first();
+      await taskOnA.click({ button: 'right' });
+      await clientA.page.waitForTimeout(300);
+
+      // Click delete in context menu
+      const deleteBtn = clientA.page
+        .locator('.mat-mdc-menu-item')
+        .filter({ hasText: 'Delete' });
+      await deleteBtn.click();
+
+      // Handle confirmation dialog if present
+      const confirmDialog = clientA.page.locator('dialog-confirm');
+      if (await confirmDialog.isVisible({ timeout: 2000 }).catch(() => false)) {
+        await confirmDialog.locator('button[type=submit]').click();
+      }
+
+      // Verify task is gone from Client A
+      await expect(taskOnA).not.toBeVisible({ timeout: 5000 });
+
+      // Client A syncs the deletion
+      await clientA.sync.syncAndWait();
+
+      // 4. Client B syncs
+      await clientB.sync.syncAndWait();
+      await clientB.page.waitForTimeout(1000);
+
+      // 5. Verify Client B no longer has the task
+      const taskCountOnB = await clientB.page
+        .locator(`task:has-text("${taskName}")`)
+        .count();
+      expect(taskCountOnB).toBe(0);
+
+      console.log('[TaskDeletionSync] ✓ Task deletion synced correctly to other client');
+    } finally {
+      if (clientA) await closeClient(clientA);
+      if (clientB) await closeClient(clientB);
+    }
+  });
 });
