@@ -1051,10 +1051,11 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps[0].clientId).toBe('client-A');
     });
 
-    it('should preserve ops from the SAME client as SYNC_IMPORT', () => {
-      // Scenario: Client B does SYNC_IMPORT, then creates more ops
+    it('should filter pre-import ops from the SAME client as SYNC_IMPORT', () => {
+      // Scenario: Client B has ops before import, does SYNC_IMPORT, then creates more ops
+      // Pre-import ops from the SAME client should be filtered (they reference old state)
       const ops: Operation[] = [
-        // Client B's ops created BEFORE the import are still valid (same client)
+        // Client B's op created BEFORE the import - should be FILTERED
         createOp({
           id: '019afd68-0001-7000-0000-000000000000',
           opType: OpType.Update,
@@ -1068,7 +1069,7 @@ describe('OperationLogSyncService', () => {
           clientId: 'client-B',
           entityType: 'ALL',
         }),
-        // Client B's ops after the import
+        // Client B's ops after the import - should be KEPT
         createOp({
           id: '019afd68-0100-7000-0000-000000000000',
           opType: OpType.Create,
@@ -1079,9 +1080,18 @@ describe('OperationLogSyncService', () => {
 
       const result = service._filterOpsInvalidatedBySyncImport(ops);
 
-      // All ops from client-B should be valid
-      expect(result.validOps.length).toBe(3);
-      expect(result.invalidatedOps.length).toBe(0);
+      // Only SYNC_IMPORT and post-import ops should be valid
+      // Pre-import ops are filtered regardless of which client they came from
+      expect(result.validOps.length).toBe(2);
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0050-7000-0000-000000000000',
+      ); // SYNC_IMPORT
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0100-7000-0000-000000000000',
+      ); // Post-import
+
+      expect(result.invalidatedOps.length).toBe(1);
+      expect(result.invalidatedOps[0].id).toBe('019afd68-0001-7000-0000-000000000000'); // Pre-import
     });
 
     it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by UUIDv7)', () => {
@@ -1262,6 +1272,73 @@ describe('OperationLogSyncService', () => {
       // Therefore it should be VALID
       expect(result.validOps.length).toBe(2);
       expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    it('should filter out PRE-IMPORT ops from the SAME client (fresh client joining scenario)', () => {
+      // BUG REGRESSION TEST: This scenario caused data corruption when a fresh client joined.
+      //
+      // Scenario: Client B created many ops, then did a SYNC_IMPORT (data import).
+      // When a fresh client joins, it downloads ALL ops including:
+      // - Pre-import ops from Client B (reference OLD state - should be filtered!)
+      // - The SYNC_IMPORT (defines the new state)
+      // - Post-import ops from Client B (reference NEW state - should be kept)
+      //
+      // The bug was that pre-import ops from the SAME client bypassed timestamp filtering
+      // due to a same-client exception. These old ops then corrupted the imported state.
+      const ops: Operation[] = [
+        // Client B's ops created BEFORE the import - should be FILTERED
+        createOp({
+          id: '019afd60-0001-7000-0000-000000000000', // Much earlier timestamp
+          opType: OpType.Update,
+          clientId: 'client-B', // SAME client as import
+          entityId: 'task-old-1',
+          actionType: '[Task] Update',
+        }),
+        createOp({
+          id: '019afd60-0002-7000-0000-000000000000', // Much earlier timestamp
+          opType: OpType.Update,
+          clientId: 'client-B', // SAME client as import
+          entityId: 'task-old-2',
+          actionType: '[Task] Update',
+        }),
+        // Client B's SYNC_IMPORT (data import)
+        createOp({
+          id: '019afd68-0050-7000-0000-000000000000', // Import timestamp
+          opType: OpType.SyncImport,
+          clientId: 'client-B',
+          entityType: 'ALL',
+        }),
+        // Client B's ops created AFTER the import - should be KEPT
+        createOp({
+          id: '019afd68-0100-7000-0000-000000000000', // After import timestamp
+          opType: OpType.Create,
+          clientId: 'client-B', // SAME client as import
+          entityId: 'task-new',
+          actionType: '[Task] Create',
+        }),
+      ];
+
+      const result = service._filterOpsInvalidatedBySyncImport(ops);
+
+      // CORRECT behavior:
+      // - SYNC_IMPORT: valid (always kept)
+      // - Post-import op: valid (timestamp >= import timestamp)
+      // - Pre-import ops: INVALID (timestamp < import timestamp, regardless of client)
+      expect(result.validOps.length).toBe(2);
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0050-7000-0000-000000000000',
+      ); // SYNC_IMPORT
+      expect(result.validOps.map((op) => op.id)).toContain(
+        '019afd68-0100-7000-0000-000000000000',
+      ); // Post-import op
+
+      expect(result.invalidatedOps.length).toBe(2);
+      expect(result.invalidatedOps.map((op) => op.id)).toContain(
+        '019afd60-0001-7000-0000-000000000000',
+      ); // Pre-import op 1
+      expect(result.invalidatedOps.map((op) => op.id)).toContain(
+        '019afd60-0002-7000-0000-000000000000',
+      ); // Pre-import op 2
     });
   });
 

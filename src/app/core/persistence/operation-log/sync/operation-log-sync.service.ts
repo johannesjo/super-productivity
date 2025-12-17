@@ -1385,18 +1385,14 @@ export class OperationLogSyncService {
         continue;
       }
 
-      // Operations from the SAME client as the import are valid
-      // They were created with knowledge of the import state
-      if (op.clientId === latestImport.clientId) {
-        validOps.push(op);
-        continue;
-      }
-
       // Operations created AT OR AFTER the import are valid (by UUIDv7 timestamp)
       // UUIDv7 is time-ordered: first 48 bits = millisecond timestamp
       // We use timestamp extraction instead of string comparison to handle
       // same-millisecond operations correctly (string comparison uses random bits
       // which can cause operations created in the same ms to appear "before" the import)
+      //
+      // NOTE: This applies to ALL clients, including the importing client.
+      // Pre-import ops from any client (even the same client) reference the old state.
       const opTimestamp = this._extractTimestampFromUuidv7(op.id);
       const importTimestamp = this._extractTimestampFromUuidv7(latestImport.id);
       if (opTimestamp >= importTimestamp) {
@@ -1404,7 +1400,7 @@ export class OperationLogSyncService {
         continue;
       }
 
-      // Operations created BEFORE the import from OTHER clients are invalidated
+      // Operations created BEFORE the import are invalidated
       // They reference the pre-import state which no longer exists
       invalidatedOps.push(op);
     }
