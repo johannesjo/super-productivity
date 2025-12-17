@@ -38,6 +38,12 @@ export interface DownloadResult {
    * to ensure all data is transferred to the new server.
    */
   needsFullStateUpload?: boolean;
+  /**
+   * The server's latest sequence number after download.
+   * IMPORTANT: Caller must persist this to lastServerSeq AFTER storing ops to IndexedDB.
+   * This ensures localStorage and IndexedDB stay in sync even if the app crashes.
+   */
+  latestServerSeq?: number;
 }
 
 /**
@@ -132,21 +138,19 @@ export class OperationLogDownloadService {
         if (response.gapDetected && !hasResetForGap) {
           OpLog.warn(
             `OperationLogDownloadService: Gap detected (sinceSeq=${sinceSeq}, latestSeq=${response.latestSeq}). ` +
-              `Resetting lastServerSeq to 0 and re-downloading.`,
+              `Resetting to 0 and re-downloading.`,
           );
           // Reset and re-download from the beginning
           sinceSeq = 0;
           hasResetForGap = true;
           allNewOps.length = 0; // Clear any ops we may have accumulated
-          await syncProvider.setLastServerSeq(0);
+          // NOTE: Don't persist lastServerSeq=0 here - caller will persist the final value
+          // after ops are stored in IndexedDB. This ensures localStorage and IndexedDB stay in sync.
           continue;
         }
 
         if (response.ops.length === 0) {
-          // Update latestSeq even when no ops returned (to stay in sync with server)
-          if (response.latestSeq > 0) {
-            await syncProvider.setLastServerSeq(response.latestSeq);
-          }
+          // No ops to download - caller will persist latestServerSeq after this method returns
           break;
         }
 
@@ -224,8 +228,8 @@ export class OperationLogDownloadService {
           );
         }
 
-        // Update the last known server seq
-        await syncProvider.setLastServerSeq(response.latestSeq);
+        // NOTE: Don't persist lastServerSeq here - caller will persist it after ops are
+        // stored in IndexedDB. This ensures localStorage and IndexedDB stay in sync.
       }
 
       // NOTE: We don't call acknowledgeOps here anymore.
@@ -258,7 +262,15 @@ export class OperationLogDownloadService {
     // Mark that we successfully checked the remote server
     this.superSyncStatusService.markRemoteChecked();
 
-    return { newOps: allNewOps, success: true, failedFileCount: 0, needsFullStateUpload };
+    // Return latestServerSeq so caller can persist it AFTER storing ops in IndexedDB.
+    // This ensures localStorage (lastServerSeq) and IndexedDB (ops) stay in sync.
+    return {
+      newOps: allNewOps,
+      success: true,
+      failedFileCount: 0,
+      needsFullStateUpload,
+      latestServerSeq: finalLatestSeq,
+    };
   }
 
   /**

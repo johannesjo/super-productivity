@@ -360,10 +360,11 @@ describe('OperationLogDownloadService', () => {
 
           const result = await service.downloadRemoteOps(mockApiProvider);
 
-          // Should have reset to 0 and re-downloaded
-          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(0);
+          // Should have re-downloaded after detecting gap (caller is responsible for persisting lastServerSeq)
           expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
           expect(result.newOps.length).toBe(1);
+          // latestServerSeq is returned for caller to persist AFTER storing ops
+          expect(result.latestServerSeq).toBe(3);
         });
 
         it('should only reset once per download session to prevent infinite loops', async () => {
@@ -384,16 +385,14 @@ describe('OperationLogDownloadService', () => {
             }),
           );
 
-          await service.downloadRemoteOps(mockApiProvider);
+          const result = await service.downloadRemoteOps(mockApiProvider);
 
-          // Should have called setLastServerSeq(0) only once
-          expect(
-            mockApiProvider.setLastServerSeq.calls
-              .allArgs()
-              .filter((args) => args[0] === 0).length,
-          ).toBe(1);
           // Should have exited after second download (no infinite loop)
           expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
+          // Download service no longer calls setLastServerSeq directly - caller handles persistence
+          expect(mockApiProvider.setLastServerSeq).not.toHaveBeenCalled();
+          // latestServerSeq is returned for caller to persist
+          expect(result.latestServerSeq).toBe(0);
         });
 
         it('should clear accumulated ops when gap is detected mid-download', async () => {
@@ -461,7 +460,7 @@ describe('OperationLogDownloadService', () => {
           expect(result.newOps[0].id).toBe('op-fresh');
         });
 
-        it('should update lastServerSeq even when no ops are returned', async () => {
+        it('should return latestServerSeq even when no ops are returned', async () => {
           mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
           mockApiProvider.downloadOps.and.returnValue(
             Promise.resolve({
@@ -472,10 +471,13 @@ describe('OperationLogDownloadService', () => {
             }),
           );
 
-          await service.downloadRemoteOps(mockApiProvider);
+          const result = await service.downloadRemoteOps(mockApiProvider);
 
-          // Should update lastServerSeq to stay in sync
-          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(5);
+          // Download service returns latestServerSeq for caller to persist
+          // (caller will persist it after storing any ops to IndexedDB)
+          expect(result.latestServerSeq).toBe(5);
+          // Download service no longer calls setLastServerSeq directly
+          expect(mockApiProvider.setLastServerSeq).not.toHaveBeenCalled();
         });
       });
     });
