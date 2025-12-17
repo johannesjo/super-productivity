@@ -12,6 +12,7 @@ import {
 } from '../simple-counter.model';
 import { EMPTY_SIMPLE_COUNTER, DEFAULT_SIMPLE_COUNTERS } from '../simple-counter.const';
 import { AppDataCompleteLegacy } from '../../../imex/sync/sync.model';
+import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
 const createCounter = (
   id: string,
@@ -521,6 +522,131 @@ describe('SimpleCounterReducer', () => {
 
       expect(result.entities['sw1']!.title).toBe('My StopWatch');
       expect(result.entities['sw1']!.countOnDay).toEqual({ '2024-01-15': 1000 });
+    });
+  });
+
+  describe('action persistence metadata', () => {
+    describe('updateAllSimpleCounters', () => {
+      it('should have isPersistent: true', () => {
+        const action = SimpleCounterActions.updateAllSimpleCounters({ items: [] });
+
+        expect(action.meta).toBeDefined();
+        expect(action.meta.isPersistent).toBe(true);
+      });
+
+      it('should have correct entityType', () => {
+        const action = SimpleCounterActions.updateAllSimpleCounters({ items: [] });
+
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+      });
+
+      it('should have Update opType', () => {
+        const action = SimpleCounterActions.updateAllSimpleCounters({ items: [] });
+
+        expect(action.meta.opType).toBe(OpType.Update);
+      });
+
+      it('should include items in payload', () => {
+        const counter = createCounter('test-counter');
+        const action = SimpleCounterActions.updateAllSimpleCounters({ items: [counter] });
+
+        expect(action.items).toEqual([counter]);
+      });
+    });
+
+    describe('addSimpleCounter', () => {
+      it('should have isPersistent: true', () => {
+        const counter = createCounter('test-counter');
+        const action = SimpleCounterActions.addSimpleCounter({ simpleCounter: counter });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityId).toBe('test-counter');
+        expect(action.meta.opType).toBe(OpType.Create);
+      });
+    });
+
+    describe('updateSimpleCounter', () => {
+      it('should have isPersistent: true', () => {
+        const action = SimpleCounterActions.updateSimpleCounter({
+          simpleCounter: { id: 'test-counter', changes: { title: 'New' } },
+        });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityId).toBe('test-counter');
+        expect(action.meta.opType).toBe(OpType.Update);
+      });
+    });
+
+    describe('deleteSimpleCounter', () => {
+      it('should have isPersistent: true', () => {
+        const action = SimpleCounterActions.deleteSimpleCounter({ id: 'test-counter' });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityId).toBe('test-counter');
+        expect(action.meta.opType).toBe(OpType.Delete);
+      });
+    });
+
+    describe('deleteSimpleCounters', () => {
+      it('should have isPersistent: true with bulk flag', () => {
+        const action = SimpleCounterActions.deleteSimpleCounters({
+          ids: ['counter1', 'counter2'],
+        });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityIds).toEqual(['counter1', 'counter2']);
+        expect(action.meta.opType).toBe(OpType.Delete);
+        expect(action.meta.isBulk).toBe(true);
+      });
+    });
+
+    describe('upsertSimpleCounter', () => {
+      it('should NOT have isPersistent (used for sync/import)', () => {
+        const counter = createCounter('test-counter');
+        const action = SimpleCounterActions.upsertSimpleCounter({
+          simpleCounter: counter,
+        }) as any;
+
+        expect(action.meta).toBeUndefined();
+      });
+    });
+
+    describe('turnOffAllSimpleCounterCounters', () => {
+      it('should NOT have isPersistent (internal cleanup)', () => {
+        const action = SimpleCounterActions.turnOffAllSimpleCounterCounters() as any;
+
+        expect(action.meta).toBeUndefined();
+      });
+    });
+
+    describe('setSimpleCounterCounterToday', () => {
+      it('should have isPersistent: true', () => {
+        const action = SimpleCounterActions.setSimpleCounterCounterToday({
+          id: 'counter1',
+          newVal: 5,
+          today: '2024-01-15',
+        });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityId).toBe('counter1');
+      });
+    });
+
+    describe('toggleSimpleCounterCounter', () => {
+      it('should have isPersistent: true', () => {
+        const action = SimpleCounterActions.toggleSimpleCounterCounter({
+          id: 'counter1',
+        });
+
+        expect(action.meta.isPersistent).toBe(true);
+        expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
+        expect(action.meta.entityId).toBe('counter1');
+      });
     });
   });
 });

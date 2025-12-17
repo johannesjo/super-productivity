@@ -63,10 +63,16 @@ export const deleteSimpleCounters = createAction(
   }),
 );
 
-// Bulk update is typically used for sync/import, so no persistence metadata
 export const updateAllSimpleCounters = createAction(
   '[SimpleCounter] Update all SimpleCounters',
-  props<{ items: SimpleCounter[] }>(),
+  (counterProps: { items: SimpleCounter[] }) => ({
+    ...counterProps,
+    meta: {
+      isPersistent: true,
+      entityType: 'SIMPLE_COUNTER',
+      opType: OpType.Update,
+    } satisfies PersistentActionMeta,
+  }),
 );
 
 export const setSimpleCounterCounterToday = createAction(
