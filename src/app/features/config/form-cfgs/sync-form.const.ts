@@ -1,4 +1,4 @@
-/* eslint-disable max-len */
+/* eslint-disable max-len, @typescript-eslint/naming-convention */
 import { T } from '../../../t.const';
 import { ConfigFormSection, SyncConfig } from '../global-config.model';
 import { LegacySyncProvider } from '../../../imex/sync/legacy-sync-provider.model';
@@ -35,9 +35,12 @@ const createWebdavFormFields = (options: {
       type: 'input',
       className: 'e2e-baseUrl',
       templateOptions: {
-        required: true,
         label: T.F.SYNC.FORM.WEB_DAV.L_BASE_URL,
         description: options.baseUrlDescription,
+      },
+      expressions: {
+        'props.required': (field: FormlyFieldConfig) =>
+          field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.WebDAV,
       },
     },
     {
@@ -45,8 +48,11 @@ const createWebdavFormFields = (options: {
       type: 'input',
       className: 'e2e-userName',
       templateOptions: {
-        required: true,
         label: T.F.SYNC.FORM.WEB_DAV.L_USER_NAME,
+      },
+      expressions: {
+        'props.required': (field: FormlyFieldConfig) =>
+          field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.WebDAV,
       },
     },
     {
@@ -55,8 +61,11 @@ const createWebdavFormFields = (options: {
       className: 'e2e-password',
       templateOptions: {
         type: 'password',
-        required: true,
         label: T.F.SYNC.FORM.WEB_DAV.L_PASSWORD,
+      },
+      expressions: {
+        'props.required': (field: FormlyFieldConfig) =>
+          field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.WebDAV,
       },
     },
     {
@@ -64,8 +73,11 @@ const createWebdavFormFields = (options: {
       type: 'input',
       className: 'e2e-syncFolderPath',
       templateOptions: {
-        required: true,
         label: T.F.SYNC.FORM.WEB_DAV.L_SYNC_FOLDER_PATH,
+      },
+      expressions: {
+        'props.required': (field: FormlyFieldConfig) =>
+          field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.WebDAV,
       },
     },
   ];
@@ -109,6 +121,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
         IS_ANDROID_WEB_VIEW,
+      resetOnHide: true,
       key: 'localFileSync',
       fieldGroup: [
         {
@@ -116,10 +129,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'syncFolderPath',
           templateOptions: {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
-            required: true,
             onClick: () => {
               return fileSyncElectron.pickDirectory();
             },
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.LocalFile,
           },
         },
       ],
@@ -128,6 +144,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.LocalFile ||
         !IS_ANDROID_WEB_VIEW,
+      resetOnHide: true,
       key: 'localFileSync',
       fieldGroup: [
         {
@@ -135,11 +152,14 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           key: 'safFolderUri',
           templateOptions: {
             text: T.F.SYNC.FORM.LOCAL_FILE.L_SYNC_FOLDER_PATH,
-            required: true,
             onClick: () => {
               // NOTE: this actually sets the value in the model
               return fileSyncDroid.setupSaf();
             },
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.LocalFile,
           },
         },
       ],
@@ -149,6 +169,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
     {
       hideExpression: (m, v, field) =>
         field?.parent?.model.syncProvider !== LegacySyncProvider.WebDAV,
+      resetOnHide: true,
       key: 'webDav',
       fieldGroup: createWebdavFormFields({
         corsInfoText: T.F.SYNC.FORM.WEB_DAV.CORS_INFO,
@@ -176,13 +197,17 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
+          resetOnHide: true,
           key: 'baseUrl',
           type: 'input',
           className: 'e2e-baseUrl',
           templateOptions: {
-            required: true,
             label: T.F.SYNC.FORM.SUPER_SYNC.L_SERVER_URL,
             description: T.F.SYNC.FORM.SUPER_SYNC.SERVER_URL_DESCRIPTION,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.SuperSync,
           },
         },
         {
@@ -207,14 +232,18 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
         {
           hideExpression: (m, v, field) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync,
+          resetOnHide: true,
           key: 'accessToken',
           type: 'textarea',
           className: 'e2e-accessToken',
           templateOptions: {
-            required: true,
             label: T.F.SYNC.FORM.SUPER_SYNC.L_ACCESS_TOKEN,
             description: T.F.SYNC.FORM.SUPER_SYNC.ACCESS_TOKEN_DESCRIPTION,
             rows: 3,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider === LegacySyncProvider.SuperSync,
           },
         },
         // E2E Encryption for SuperSync
@@ -243,13 +272,18 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (model: any, v: any, field: any) =>
             field?.parent?.parent?.model.syncProvider !== LegacySyncProvider.SuperSync ||
             !model.isEncryptionEnabled,
+          resetOnHide: true,
           key: 'encryptKey',
           type: 'input',
           className: 'e2e-encryptKey',
           templateOptions: {
-            required: true,
             type: 'password',
             label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider ===
+                LegacySyncProvider.SuperSync && field?.model?.isEncryptionEnabled,
           },
         },
       ],
@@ -305,12 +339,17 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (m: any, v: any, field: any) =>
             field?.parent?.parent?.model.syncProvider === LegacySyncProvider.SuperSync ||
             !m.isEncryptionEnabled,
+          resetOnHide: true,
           key: 'encryptKey',
           type: 'input',
           templateOptions: {
-            required: true,
             type: 'password',
             label: T.F.SYNC.FORM.L_ENCRYPTION_PASSWORD,
+          },
+          expressions: {
+            'props.required': (field: FormlyFieldConfig) =>
+              field?.parent?.parent?.model?.syncProvider !==
+                LegacySyncProvider.SuperSync && field?.model?.isEncryptionEnabled,
           },
         },
       ],
