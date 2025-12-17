@@ -640,6 +640,30 @@ describe('SimpleCounterReducer', () => {
     // Note: toggleSimpleCounterCounter is intentionally non-persistent
     // isOn state should not sync across devices
 
+    describe('increaseSimpleCounterCounterToday', () => {
+      it('should NOT have isPersistent (local UI update, sync via setSimpleCounterCounterToday)', () => {
+        const action = SimpleCounterActions.increaseSimpleCounterCounterToday({
+          id: 'counter1',
+          increaseBy: 1,
+          today: '2024-01-15',
+        }) as any;
+
+        expect(action.meta).toBeUndefined();
+      });
+    });
+
+    describe('decreaseSimpleCounterCounterToday', () => {
+      it('should NOT have isPersistent (local UI update, sync via setSimpleCounterCounterToday)', () => {
+        const action = SimpleCounterActions.decreaseSimpleCounterCounterToday({
+          id: 'counter1',
+          decreaseBy: 1,
+          today: '2024-01-15',
+        }) as any;
+
+        expect(action.meta).toBeUndefined();
+      });
+    });
+
     describe('tickSimpleCounterLocal', () => {
       it('should NOT have isPersistent (local UI update only)', () => {
         const action = SimpleCounterActions.tickSimpleCounterLocal({
@@ -688,99 +712,7 @@ describe('SimpleCounterReducer', () => {
     });
   });
 
-  describe('remote action handling (sync)', () => {
-    describe('increaseSimpleCounterCounterToday', () => {
-      it('should skip increment for remote actions (entity already updated by applier)', () => {
-        const counter = createCounter('counter1', {
-          countOnDay: { '2024-01-15': 10 },
-        });
-        const existingState = createStateWithCounters([counter]);
-
-        // Simulate remote action with isRemote flag
-        const action = {
-          ...SimpleCounterActions.increaseSimpleCounterCounterToday({
-            id: 'counter1',
-            increaseBy: 5,
-            today: '2024-01-15',
-          }),
-          meta: {
-            isPersistent: true,
-            entityType: 'SIMPLE_COUNTER',
-            entityId: 'counter1',
-            opType: OpType.Update,
-            isRemote: true,
-          },
-        };
-        const result = simpleCounterReducer(existingState, action);
-
-        // Should NOT increment - state unchanged
-        expect(result.entities['counter1']!.countOnDay['2024-01-15']).toBe(10);
-      });
-
-      it('should apply increment for local actions', () => {
-        const counter = createCounter('counter1', {
-          countOnDay: { '2024-01-15': 10 },
-        });
-        const existingState = createStateWithCounters([counter]);
-
-        const action = SimpleCounterActions.increaseSimpleCounterCounterToday({
-          id: 'counter1',
-          increaseBy: 5,
-          today: '2024-01-15',
-        });
-        const result = simpleCounterReducer(existingState, action);
-
-        // Should increment
-        expect(result.entities['counter1']!.countOnDay['2024-01-15']).toBe(15);
-      });
-    });
-
-    describe('decreaseSimpleCounterCounterToday', () => {
-      it('should skip decrement for remote actions (entity already updated by applier)', () => {
-        const counter = createCounter('counter1', {
-          countOnDay: { '2024-01-15': 10 },
-        });
-        const existingState = createStateWithCounters([counter]);
-
-        // Simulate remote action with isRemote flag
-        const action = {
-          ...SimpleCounterActions.decreaseSimpleCounterCounterToday({
-            id: 'counter1',
-            decreaseBy: 3,
-            today: '2024-01-15',
-          }),
-          meta: {
-            isPersistent: true,
-            entityType: 'SIMPLE_COUNTER',
-            entityId: 'counter1',
-            opType: OpType.Update,
-            isRemote: true,
-          },
-        };
-        const result = simpleCounterReducer(existingState, action);
-
-        // Should NOT decrement - state unchanged
-        expect(result.entities['counter1']!.countOnDay['2024-01-15']).toBe(10);
-      });
-
-      it('should apply decrement for local actions', () => {
-        const counter = createCounter('counter1', {
-          countOnDay: { '2024-01-15': 10 },
-        });
-        const existingState = createStateWithCounters([counter]);
-
-        const action = SimpleCounterActions.decreaseSimpleCounterCounterToday({
-          id: 'counter1',
-          decreaseBy: 3,
-          today: '2024-01-15',
-        });
-        const result = simpleCounterReducer(existingState, action);
-
-        // Should decrement
-        expect(result.entities['counter1']!.countOnDay['2024-01-15']).toBe(7);
-      });
-    });
-
+  describe('StopWatch sync (batched)', () => {
     describe('tickSimpleCounterLocal', () => {
       it('should increment countOnDay for today', () => {
         const counter = createCounter('counter1', {

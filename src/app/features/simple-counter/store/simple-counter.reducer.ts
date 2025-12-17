@@ -140,18 +140,12 @@ const _reducer = createReducer<SimpleCounterState>(
     ),
   ),
 
-  // Used for ClickCounter - immediate persistent sync
-  // For remote: entity already updated by operation applier, skip increment
-  on(increaseSimpleCounterCounterToday, (state, action) => {
-    if ((action as { meta?: PersistentActionMeta }).meta?.isRemote) {
-      return state;
-    }
-
-    const { id, increaseBy, today } = action;
-    const todayStr = today;
+  // Non-persistent local UI update for ClickCounter
+  // Sync happens via setSimpleCounterCounterToday with absolute value
+  on(increaseSimpleCounterCounterToday, (state, { id, increaseBy, today }) => {
     const oldEntity = state.entities[id] as SimpleCounter;
     const currentTotalCount = oldEntity.countOnDay || {};
-    const currentVal = currentTotalCount[todayStr] || 0;
+    const currentVal = currentTotalCount[today] || 0;
     const newValForToday = currentVal + increaseBy;
     return adapter.updateOne(
       {
@@ -159,7 +153,7 @@ const _reducer = createReducer<SimpleCounterState>(
         changes: {
           countOnDay: {
             ...currentTotalCount,
-            [todayStr]: newValForToday,
+            [today]: newValForToday,
           },
         },
       },
@@ -167,17 +161,11 @@ const _reducer = createReducer<SimpleCounterState>(
     );
   }),
 
-  // For remote: entity already updated by operation applier, skip decrement
-  on(decreaseSimpleCounterCounterToday, (state, action) => {
-    if ((action as { meta?: PersistentActionMeta }).meta?.isRemote) {
-      return state;
-    }
-
-    const { id, decreaseBy, today } = action;
-    const todayStr = today;
+  // Non-persistent local UI update for ClickCounter
+  on(decreaseSimpleCounterCounterToday, (state, { id, decreaseBy, today }) => {
     const oldEntity = state.entities[id] as SimpleCounter;
     const currentTotalCount = oldEntity.countOnDay || {};
-    const currentVal = currentTotalCount[todayStr] || 0;
+    const currentVal = currentTotalCount[today] || 0;
     const newValForToday = Math.max(0, currentVal - decreaseBy);
     return adapter.updateOne(
       {
@@ -185,7 +173,7 @@ const _reducer = createReducer<SimpleCounterState>(
         changes: {
           countOnDay: {
             ...currentTotalCount,
-            [todayStr]: newValForToday,
+            [today]: newValForToday,
           },
         },
       },

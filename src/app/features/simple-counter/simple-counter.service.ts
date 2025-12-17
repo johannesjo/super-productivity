@@ -5,6 +5,7 @@ import {
   selectEnabledAndToggledSimpleCounters,
   selectEnabledSimpleCounters,
   selectEnabledSimpleStopWatchCounters,
+  selectSimpleCounterById,
 } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
@@ -29,7 +30,7 @@ import {
   SimpleCounterType,
 } from './simple-counter.model';
 import { nanoid } from 'nanoid';
-import { distinctUntilChanged, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, take, withLatestFrom } from 'rxjs/operators';
 import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
@@ -220,12 +221,32 @@ export class SimpleCounterService implements OnDestroy {
 
   increaseCounterToday(id: string, increaseBy: number): void {
     const today = this._dateService.todayStr();
+    // Local UI update (non-persistent)
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
+    // Sync with absolute value (persistent)
+    this._store$
+      .pipe(select(selectSimpleCounterById, { id }), take(1))
+      .subscribe((counter) => {
+        if (counter) {
+          const newVal = counter.countOnDay[today] || 0;
+          this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+        }
+      });
   }
 
   decreaseCounterToday(id: string, decreaseBy: number): void {
     const today = this._dateService.todayStr();
+    // Local UI update (non-persistent)
     this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy, today }));
+    // Sync with absolute value (persistent)
+    this._store$
+      .pipe(select(selectSimpleCounterById, { id }), take(1))
+      .subscribe((counter) => {
+        if (counter) {
+          const newVal = counter.countOnDay[today] || 0;
+          this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+        }
+      });
   }
 
   toggleCounter(id: string): void {

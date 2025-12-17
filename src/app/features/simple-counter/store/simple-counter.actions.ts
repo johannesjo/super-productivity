@@ -101,30 +101,18 @@ export const setSimpleCounterCounterForDate = createAction(
   }),
 );
 
+// Non-persistent - local UI update only
+// Sync happens via setSimpleCounterCounterToday with absolute value
 export const increaseSimpleCounterCounterToday = createAction(
   '[SimpleCounter] Increase SimpleCounter Counter Today',
-  (counterProps: { id: string; increaseBy: number; today: string }) => ({
-    ...counterProps,
-    meta: {
-      isPersistent: true,
-      entityType: 'SIMPLE_COUNTER',
-      entityId: counterProps.id,
-      opType: OpType.Update,
-    } satisfies PersistentActionMeta,
-  }),
+  props<{ id: string; increaseBy: number; today: string }>(),
 );
 
+// Non-persistent - local UI update only
+// Sync happens via setSimpleCounterCounterToday with absolute value
 export const decreaseSimpleCounterCounterToday = createAction(
   '[SimpleCounter] Decrease SimpleCounter Counter Today',
-  (counterProps: { id: string; decreaseBy: number; today: string }) => ({
-    ...counterProps,
-    meta: {
-      isPersistent: true,
-      entityType: 'SIMPLE_COUNTER',
-      entityId: counterProps.id,
-      opType: OpType.Update,
-    } satisfies PersistentActionMeta,
-  }),
+  props<{ id: string; decreaseBy: number; today: string }>(),
 );
 
 // Non-persistent - isOn state is local only (shouldn't sync across devices)
