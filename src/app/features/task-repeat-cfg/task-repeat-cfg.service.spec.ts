@@ -22,6 +22,7 @@ import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
+import { getRepeatableTaskId } from './get-repeatable-task-id.util';
 
 describe('TaskRepeatCfgService', () => {
   let service: TaskRepeatCfgService;
@@ -323,8 +324,16 @@ describe('TaskRepeatCfgService', () => {
     it('should create actions for a new repeatable task', async () => {
       const today = new Date();
       const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const expectedId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
       taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
-      taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+      // Mock createNewTaskWithDefaults to capture and return the id and dueDay
+      taskService.createNewTaskWithDefaults.and.callFake((args: any) => ({
+        ...mockTask,
+        id: args.id || mockTask.id,
+        dueDay: args.additional?.dueDay,
+      }));
 
       await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
 
@@ -336,7 +345,8 @@ describe('TaskRepeatCfgService', () => {
           type: TaskSharedActions.addTask.type,
           task: jasmine.objectContaining({
             title: mockTaskRepeatCfg.title,
-            dueDay: getDbDateStr(new Date(targetDayDate)),
+            dueDay: expectedDueDay,
+            id: expectedId,
           }),
           workContextType: WorkContextType.PROJECT,
           workContextId: 'test-project',
@@ -353,7 +363,7 @@ describe('TaskRepeatCfgService', () => {
             id: mockTaskRepeatCfg.id,
             changes: {
               lastTaskCreation: jasmine.any(Number),
-              lastTaskCreationDay: getDbDateStr(targetDayDate),
+              lastTaskCreationDay: expectedDueDay,
             },
           },
         }),
@@ -404,6 +414,92 @@ describe('TaskRepeatCfgService', () => {
         }),
       );
     });
+
+    it('should pass deterministic ID to createNewTaskWithDefaults', async () => {
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const expectedId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue({
+        ...mockTask,
+        id: expectedId,
+      });
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          id: expectedId,
+        }),
+      );
+    });
+
+    it('should not create task if task with deterministic ID already exists', async () => {
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const expectedId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
+      // Existing task has the deterministic ID (simulating sync from another device)
+      const existingTaskWithDeterministicId = {
+        ...mockTaskWithSubTasks,
+        id: expectedId,
+        dueDay: expectedDueDay,
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+        of([existingTaskWithDeterministicId]),
+      );
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should not create task if task with matching dueDay already exists (legacy check)', async () => {
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+
+      // Existing task has a different ID but same dueDay (legacy task)
+      const existingLegacyTask = {
+        ...mockTaskWithSubTasks,
+        id: 'legacy-random-id-12345',
+        dueDay: expectedDueDay,
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+        of([existingLegacyTask]),
+      );
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('should generate same deterministic ID for same config and day', async () => {
+      // Use today's date since mockTaskRepeatCfg has startDate=today
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const expectedId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+      taskService.createNewTaskWithDefaults.and.returnValue({
+        ...mockTask,
+        id: expectedId,
+        dueDay: expectedDueDay,
+      });
+
+      await service.createRepeatableTask(mockTaskRepeatCfg, targetDayDate);
+
+      // Verify the ID follows the deterministic format
+      expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          id: `rpt_${mockTaskRepeatCfg.id}_${expectedDueDay}`,
+        }),
+      );
+    });
   });
 
   describe('getActionsForTaskRepeatCfg', () => {
@@ -419,6 +515,87 @@ describe('TaskRepeatCfgService', () => {
       );
 
       expect(actions).toEqual([]);
+    });
+
+    it('should return empty array if task with deterministic ID already exists', async () => {
+      // Use today's date since mockTaskRepeatCfg has startDate=today
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const deterministicId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
+      // Task exists with deterministic ID (simulating sync from another device)
+      const existingTaskFromSync = {
+        ...mockTaskWithSubTasks,
+        id: deterministicId,
+        dueDay: expectedDueDay,
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+        of([existingTaskFromSync]),
+      );
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should return empty array if legacy task with same dueDay exists', async () => {
+      // Use today's date since mockTaskRepeatCfg has startDate=today
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+
+      // Legacy task with random ID but matching dueDay
+      const legacyTask = {
+        ...mockTaskWithSubTasks,
+        id: 'old-random-nanoid-xyz',
+        dueDay: expectedDueDay,
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([legacyTask]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions).toEqual([]);
+    });
+
+    it('should create task if no task with matching ID or dueDay exists', async () => {
+      // Use today's date since mockTaskRepeatCfg has startDate=today
+      const today = new Date();
+      const targetDayDate = today.getTime();
+      const expectedDueDay = getDbDateStr(targetDayDate);
+      const deterministicId = getRepeatableTaskId(mockTaskRepeatCfg.id, expectedDueDay);
+
+      // Different task exists (different day - yesterday)
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayStr = getDbDateStr(yesterday);
+      const differentDayTask = {
+        ...mockTaskWithSubTasks,
+        id: `rpt_test-cfg-id_${yesterdayStr}`,
+        dueDay: yesterdayStr,
+      };
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+        of([differentDayTask]),
+      );
+      taskService.createNewTaskWithDefaults.and.returnValue({
+        ...mockTask,
+        id: deterministicId,
+        dueDay: expectedDueDay,
+      });
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        mockTaskRepeatCfg,
+        targetDayDate,
+      );
+
+      expect(actions.length).toBeGreaterThan(0);
+      expect(actions[0].type).toBe(TaskSharedActions.addTask.type);
     });
 
     it('should skip creation if computed target date already has an instance', async () => {

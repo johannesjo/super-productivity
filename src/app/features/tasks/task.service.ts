@@ -1239,11 +1239,13 @@ export class TaskService {
 
   createNewTaskWithDefaults({
     title,
+    id,
     additional = {},
     workContextType = this._workContextService.activeWorkContextType as WorkContextType,
     workContextId = this._workContextService.activeWorkContextId as string,
   }: {
     title: string | null;
+    id?: string;
     additional?: Partial<Task>;
     workContextType?: WorkContextType;
     workContextId?: string;
@@ -1253,7 +1255,7 @@ export class TaskService {
       ...DEFAULT_TASK,
       created: Date.now(),
       title: title as string,
-      id: nanoid(),
+      id: id || nanoid(),
 
       ...(workContextType === WorkContextType.PROJECT
         ? { projectId: workContextId }

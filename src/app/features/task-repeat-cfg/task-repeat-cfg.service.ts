@@ -40,6 +40,7 @@ import {
   selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
 import { devError } from '../../util/dev-error';
+import { getRepeatableTaskId } from './get-repeatable-task-id.util';
 
 @Injectable({
   providedIn: 'root',
@@ -208,13 +209,19 @@ export class TaskRepeatCfgService {
     // differs from the repeat day we are about to create.
     const targetDateStr = getDbDateStr(targetCreated);
 
-    const isCreateNew =
-      existingTaskInstances.filter((taskI) => {
-        const existingDateStr = taskI.dueDay || getDbDateStr(taskI.created);
-        return existingDateStr === targetDateStr;
-      }).length === 0;
+    // Generate the deterministic ID that would be used for this task.
+    // This ensures both local dueDay check AND ID check prevent duplicates.
+    const expectedTaskId = getRepeatableTaskId(taskRepeatCfg.id, targetDateStr);
 
-    if (!isCreateNew) {
+    // Check if a task already exists with this deterministic ID or dueDay.
+    // The ID check handles cases where another device created the task but it hasn't
+    // fully synced yet (the task exists locally but dueDay might differ during migration).
+    const taskAlreadyExists = existingTaskInstances.some((taskI) => {
+      const existingDateStr = taskI.dueDay || getDbDateStr(taskI.created);
+      return taskI.id === expectedTaskId || existingDateStr === targetDateStr;
+    });
+
+    if (taskAlreadyExists) {
       return [];
     }
     // Check if this date is in the deleted instances list
@@ -223,13 +230,15 @@ export class TaskRepeatCfgService {
       return [];
     }
 
-    const { task, isAddToBottom } = this._getTaskRepeatTemplate(taskRepeatCfg);
+    const { task, isAddToBottom } = this._getTaskRepeatTemplate(
+      taskRepeatCfg,
+      targetDateStr,
+    );
     const taskWithTargetDates: Task = {
       ...task,
       // NOTE if moving this to top isCreateNew check above would not work as intended
       // we use created also for the repeat day label for past tasks
       created: targetCreated.getTime(),
-      dueDay: targetDateStr,
     };
 
     const createNewActions: (
@@ -304,20 +313,24 @@ export class TaskRepeatCfgService {
     return createNewActions;
   }
 
-  private _getTaskRepeatTemplate(taskRepeatCfg: TaskRepeatCfg): {
+  private _getTaskRepeatTemplate(
+    taskRepeatCfg: TaskRepeatCfg,
+    dueDay: string,
+  ): {
     task: Task;
     isAddToBottom: boolean;
   } {
+    const taskId = getRepeatableTaskId(taskRepeatCfg.id, dueDay);
     return {
       task: this._taskService.createNewTaskWithDefaults({
         title: taskRepeatCfg.title,
+        id: taskId,
         additional: {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate || 0,
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
-          // always due for today
-          dueDay: getDbDateStr(),
+          dueDay,
           tagIds: taskRepeatCfg.tagIds.filter((tagId) => tagId !== TODAY_TAG.id),
         },
       }),
