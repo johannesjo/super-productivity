@@ -397,4 +397,217 @@ describe('Service Logic Integration', () => {
       expect(conflicts[0].remoteOps[0].id).toBe('op-remote-1');
     });
   });
+
+  describe('SYNC_IMPORT Filtering Integration', () => {
+    /**
+     * BUG REGRESSION TEST: Offline client operations should be filtered after SYNC_IMPORT
+     *
+     * Scenario:
+     * 1. Client A and B are synced
+     * 2. Client B goes offline and creates operations
+     * 3. Client A does SYNC_IMPORT (replaces state)
+     * 4. Client B comes online and uploads its ops to server
+     * 5. Client A downloads B's ops
+     *
+     * Expected: B's ops should be FILTERED (not applied) because they were created
+     * without knowledge of the SYNC_IMPORT (CONCURRENT vector clocks)
+     *
+     * This test verifies the vector clock-based filtering works correctly at the
+     * integration level (through the full sync service flow).
+     */
+    it('should filter CONCURRENT ops from offline client after SYNC_IMPORT', async (): Promise<void> => {
+      // 1. Store already has a SYNC_IMPORT from a previous sync (Client A imported)
+      const importOp: Operation = {
+        id: 'import-op-1',
+        clientId: 'client-a',
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'import-entity',
+        payload: { appDataComplete: {} },
+        vectorClock: { clientA: 5 }, // Import's vector clock
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+      await opLogStore.append(importOp, 'remote');
+
+      // 2. Client B was offline and created ops WITHOUT knowledge of the import
+      // (vector clocks are CONCURRENT - no clientA component, or lower clientA)
+      const offlineOp1: SyncOperation = {
+        id: 'offline-op-1',
+        clientId: 'client-b',
+        actionType: '[Task] Update Task',
+        opType: OpType.Update as any,
+        entityType: 'TASK' as any,
+        entityId: 'task-1',
+        payload: { title: 'Offline change 1' },
+        vectorClock: { clientB: 3 }, // CONCURRENT - no knowledge of clientA: 5
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      const offlineOp2: SyncOperation = {
+        id: 'offline-op-2',
+        clientId: 'client-b',
+        actionType: '[Task] Create Task',
+        opType: OpType.Create as any,
+        entityType: 'TASK' as any,
+        entityId: 'task-2',
+        payload: { title: 'Offline task' },
+        vectorClock: { clientA: 2, clientB: 4 }, // CONCURRENT - clientA:2 < import's clientA:5
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // 3. Mock download to return these offline ops (B uploaded after coming online)
+      spyOn(mockProvider, 'downloadOps').and.returnValue(
+        Promise.resolve({
+          ops: [
+            { op: offlineOp1, serverSeq: 1, receivedAt: Date.now() },
+            { op: offlineOp2, serverSeq: 2, receivedAt: Date.now() },
+          ],
+          hasMore: false,
+          latestSeq: 2,
+        }),
+      );
+
+      // 4. Download and process remote ops
+      await syncService.downloadRemoteOps(mockProvider);
+
+      // 5. EXPECTED: Both ops should be filtered - NOT passed to applier
+      // Because they have CONCURRENT vector clocks with the SYNC_IMPORT
+      if (applierSpy.applyOperations.calls.count() > 0) {
+        const appliedOps = applierSpy.applyOperations.calls.mostRecent().args[0];
+        // Neither offline op should be applied
+        expect(
+          appliedOps.find((op: Operation) => op.id === 'offline-op-1'),
+        ).toBeUndefined();
+        expect(
+          appliedOps.find((op: Operation) => op.id === 'offline-op-2'),
+        ).toBeUndefined();
+      }
+      // If applyOperations wasn't called at all, that's also correct (no ops to apply)
+    });
+
+    /**
+     * Test: Operations created WITH knowledge of SYNC_IMPORT should be kept
+     *
+     * After Client B syncs and sees the SYNC_IMPORT, any new ops it creates
+     * should have vector clocks that are GREATER_THAN the import.
+     */
+    it('should keep operations created after seeing SYNC_IMPORT', async (): Promise<void> => {
+      // 1. Store has SYNC_IMPORT
+      const importOp: Operation = {
+        id: 'import-op-2',
+        clientId: 'client-a',
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'import-entity-2',
+        payload: { appDataComplete: {} },
+        vectorClock: { clientA: 5 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+      await opLogStore.append(importOp, 'remote');
+
+      // 2. Client B saw the import and then created new ops
+      // (vector clock is GREATER_THAN - includes import's clock)
+      const postImportOp: SyncOperation = {
+        id: 'post-import-op-1',
+        clientId: 'client-b',
+        actionType: '[Task] Create Task',
+        opType: OpType.Create as any,
+        entityType: 'TASK' as any,
+        entityId: 'new-task-1',
+        payload: { title: 'Post-import task' },
+        vectorClock: { clientA: 5, clientB: 1 }, // GREATER_THAN - includes import's clock
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // 3. Mock download
+      spyOn(mockProvider, 'downloadOps').and.returnValue(
+        Promise.resolve({
+          ops: [{ op: postImportOp, serverSeq: 3, receivedAt: Date.now() }],
+          hasMore: false,
+          latestSeq: 3,
+        }),
+      );
+
+      // 4. Download
+      await syncService.downloadRemoteOps(mockProvider);
+
+      // 5. EXPECTED: Op should be applied (not filtered)
+      expect(applierSpy.applyOperations).toHaveBeenCalled();
+      const appliedOps = applierSpy.applyOperations.calls.mostRecent().args[0];
+      const appliedOp = appliedOps.find((op: Operation) => op.id === 'post-import-op-1');
+      expect(appliedOp).toBeDefined();
+      expect(appliedOp!.payload).toEqual({ title: 'Post-import task' });
+    });
+
+    /**
+     * CLOCK DRIFT REGRESSION TEST: Filtering should work even with future UUIDv7 timestamps
+     *
+     * This tests the key advantage of vector clocks over UUIDv7:
+     * Even if client B's clock is ahead (ops have future timestamps), vector clocks
+     * correctly identify that B had no knowledge of the import.
+     */
+    it('should filter offline ops even when client clock was ahead (clock drift)', async (): Promise<void> => {
+      // 1. Store has SYNC_IMPORT
+      const importOp: Operation = {
+        id: 'import-clock-drift',
+        clientId: 'client-a',
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'import-drift',
+        payload: { appDataComplete: {} },
+        vectorClock: { clientA: 5 },
+        timestamp: Date.now() - 3600000, // Import was 1 hour ago
+        schemaVersion: 1,
+      };
+      await opLogStore.append(importOp, 'remote');
+
+      // 2. Client B was offline, clock was 2 hours AHEAD
+      // In the OLD (broken) UUIDv7 approach, this op would have a "future" timestamp
+      // and bypass filtering. With vector clocks, it's correctly identified as CONCURRENT.
+      const driftOp: SyncOperation = {
+        // This UUIDv7 would be in the "future" due to clock drift
+        id: '019afd90-0001-7000-0000-000000000000',
+        clientId: 'client-b',
+        actionType: '[Task] Update Task',
+        opType: OpType.Update as any,
+        entityType: 'TASK' as any,
+        entityId: 'task-drift',
+        payload: { title: 'Created with drifted clock' },
+        vectorClock: { clientB: 3 }, // CONCURRENT - no knowledge of import
+        timestamp: Date.now() + 7200000, // 2 hours in the "future" (clock drift)
+        schemaVersion: 1,
+      };
+
+      // 3. Mock download
+      spyOn(mockProvider, 'downloadOps').and.returnValue(
+        Promise.resolve({
+          ops: [{ op: driftOp, serverSeq: 4, receivedAt: Date.now() }],
+          hasMore: false,
+          latestSeq: 4,
+        }),
+      );
+
+      // 4. Download
+      await syncService.downloadRemoteOps(mockProvider);
+
+      // 5. EXPECTED: Op should be filtered despite having "future" timestamp
+      // Vector clock comparison correctly identifies it as CONCURRENT
+      if (applierSpy.applyOperations.calls.count() > 0) {
+        const appliedOps = applierSpy.applyOperations.calls.mostRecent().args[0];
+        expect(
+          appliedOps.find(
+            (op: Operation) => op.id === '019afd90-0001-7000-0000-000000000000',
+          ),
+        ).toBeUndefined();
+      }
+    });
+  });
 });

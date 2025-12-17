@@ -1029,25 +1029,27 @@ describe('OperationLogSyncService', () => {
     it('should filter out ops from OTHER clients created BEFORE SYNC_IMPORT', async () => {
       // Scenario: Client B does SYNC_IMPORT, Client A had ops created before it
       const ops: Operation[] = [
-        // Client A's op created BEFORE the import (lower UUIDv7)
+        // Client A's op created BEFORE the import - LESS_THAN import's clock
         createOp({
-          id: '019afd68-0001-7000-0000-000000000000', // Earlier timestamp
+          id: '019afd68-0001-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-1',
+          vectorClock: { clientA: 2 }, // LESS_THAN import's clock
         }),
-        // Client B's SYNC_IMPORT
+        // Client B's SYNC_IMPORT with higher clock
         createOp({
-          id: '019afd68-0050-7000-0000-000000000000', // Later timestamp
+          id: '019afd68-0050-7000-0000-000000000000',
           opType: OpType.SyncImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientA: 5, clientB: 3 }, // Import has knowledge of clientA up to 5
         }),
       ];
 
       const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
-      // SYNC_IMPORT is valid, Client A's earlier op is invalidated
+      // SYNC_IMPORT is valid, Client A's earlier op is invalidated (LESS_THAN)
       expect(result.validOps.length).toBe(1);
       expect(result.validOps[0].opType).toBe(OpType.SyncImport);
       expect(result.invalidatedOps.length).toBe(1);
@@ -1058,12 +1060,13 @@ describe('OperationLogSyncService', () => {
       // Scenario: Client B has ops before import, does SYNC_IMPORT, then creates more ops
       // Pre-import ops from the SAME client should be filtered (they reference old state)
       const ops: Operation[] = [
-        // Client B's op created BEFORE the import - should be FILTERED
+        // Client B's op created BEFORE the import - LESS_THAN import's clock
         createOp({
           id: '019afd68-0001-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-B',
           entityId: 'task-1',
+          vectorClock: { clientB: 2 }, // LESS_THAN import's clock
         }),
         // Client B's SYNC_IMPORT
         createOp({
@@ -1071,13 +1074,15 @@ describe('OperationLogSyncService', () => {
           opType: OpType.SyncImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientB: 5 }, // Import's clock
         }),
-        // Client B's ops after the import - should be KEPT
+        // Client B's ops after the import - GREATER_THAN import's clock
         createOp({
           id: '019afd68-0100-7000-0000-000000000000',
           opType: OpType.Create,
           clientId: 'client-B',
           entityId: 'task-2',
+          vectorClock: { clientB: 6 }, // GREATER_THAN import's clock (B saw import first)
         }),
       ];
 
@@ -1097,8 +1102,8 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps[0].id).toBe('019afd68-0001-7000-0000-000000000000'); // Pre-import
     });
 
-    it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by UUIDv7)', async () => {
-      // Scenario: Client B does SYNC_IMPORT, then Client A creates new ops AFTER
+    it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by vector clock)', async () => {
+      // Scenario: Client B does SYNC_IMPORT, then Client A creates new ops AFTER seeing it
       const ops: Operation[] = [
         // Client B's SYNC_IMPORT
         createOp({
@@ -1106,31 +1111,34 @@ describe('OperationLogSyncService', () => {
           opType: OpType.SyncImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientB: 5 }, // Import's clock
         }),
-        // Client A's op created AFTER the import (higher UUIDv7)
+        // Client A's op created AFTER seeing the import - GREATER_THAN
         createOp({
-          id: '019afd68-0100-7000-0000-000000000000', // Later timestamp
+          id: '019afd68-0100-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-1',
+          vectorClock: { clientA: 1, clientB: 5 }, // A saw import (has B's clock), then created op
         }),
       ];
 
       const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
-      // Both should be valid - Client A's op came after the import
+      // Both should be valid - Client A's op was created after seeing the import
       expect(result.validOps.length).toBe(2);
       expect(result.invalidatedOps.length).toBe(0);
     });
 
     it('should handle BACKUP_IMPORT the same way as SYNC_IMPORT', async () => {
       const ops: Operation[] = [
-        // Client A's op created BEFORE the backup import
+        // Client A's op created BEFORE the backup import - LESS_THAN
         createOp({
           id: '019afd68-0001-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-1',
+          vectorClock: { clientA: 2 }, // LESS_THAN import's clock
         }),
         // Client B's BACKUP_IMPORT
         createOp({
@@ -1138,6 +1146,7 @@ describe('OperationLogSyncService', () => {
           opType: OpType.BackupImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientA: 5, clientB: 3 }, // Import dominates A's clock
         }),
       ];
 
@@ -1151,13 +1160,17 @@ describe('OperationLogSyncService', () => {
 
     it('should use the LATEST import when multiple imports exist', async () => {
       // Scenario: Multiple imports in the batch - use the latest one
+      // Vector clocks must reflect causality:
+      // - Pre-import ops: LESS_THAN or CONCURRENT with latest import
+      // - Post-import ops: GREATER_THAN latest import (must include import's clock)
       const ops: Operation[] = [
-        // Client A's early op
+        // Client A's early op - CONCURRENT with latest import (no knowledge of imports)
         createOp({
           id: '019afd68-0001-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-1',
+          vectorClock: { clientA: 1 }, // CONCURRENT with latest import
         }),
         // First SYNC_IMPORT from Client B
         createOp({
@@ -1165,13 +1178,15 @@ describe('OperationLogSyncService', () => {
           opType: OpType.SyncImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientB: 1 },
         }),
-        // Client A's op between the two imports
+        // Client A's op between the two imports - still CONCURRENT with latest
         createOp({
           id: '019afd68-0020-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-2',
+          vectorClock: { clientA: 2, clientB: 1 }, // Saw first import but CONCURRENT with second
         }),
         // Second SYNC_IMPORT from Client C (latest)
         createOp({
@@ -1179,13 +1194,15 @@ describe('OperationLogSyncService', () => {
           opType: OpType.SyncImport,
           clientId: 'client-C',
           entityType: 'ALL',
+          vectorClock: { clientB: 1, clientC: 1 }, // Latest import's clock
         }),
-        // Client A's op after the latest import
+        // Client A's op after the latest import - GREATER_THAN (includes latest import's clock)
         createOp({
           id: '019afd68-0100-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'task-3',
+          vectorClock: { clientA: 3, clientB: 1, clientC: 1 }, // GREATER_THAN latest import
         }),
       ];
 
@@ -1208,14 +1225,18 @@ describe('OperationLogSyncService', () => {
 
     it('should handle mixed scenario with multiple clients and imports', async () => {
       // Complex scenario: A creates ops, B imports, A syncs stale ops, C creates ops
+      // Vector clocks establish causality:
+      // - A's ops: created without knowledge of import → CONCURRENT
+      // - C's ops: created after seeing import → GREATER_THAN
       const ops: Operation[] = [
-        // Client A's stale ops (created BEFORE B's import)
+        // Client A's stale ops (created BEFORE B's import) - CONCURRENT with import
         createOp({
           id: '019afd60-0001-7000-0000-000000000000',
           opType: OpType.Update,
           clientId: 'client-A',
           entityId: 'tag-today',
           actionType: '[Tag] Update',
+          vectorClock: { clientA: 1 }, // CONCURRENT - no knowledge of import
         }),
         createOp({
           id: '019afd60-0002-7000-0000-000000000000',
@@ -1223,6 +1244,7 @@ describe('OperationLogSyncService', () => {
           clientId: 'client-A',
           entityId: 'tag-today',
           actionType: '[Tag] Update',
+          vectorClock: { clientA: 2 }, // CONCURRENT - no knowledge of import
         }),
         // Client B's SYNC_IMPORT (genesis import)
         createOp({
@@ -1231,14 +1253,16 @@ describe('OperationLogSyncService', () => {
           clientId: 'client-B',
           entityType: 'ALL',
           actionType: '[OpLog] SyncImport',
+          vectorClock: { clientB: 1 }, // Import's clock
         }),
-        // Client C's ops (created AFTER B's import)
+        // Client C's ops (created AFTER B's import) - GREATER_THAN (includes import's clock)
         createOp({
           id: '019afd70-0001-7000-0000-000000000000',
           opType: OpType.Create,
           clientId: 'client-C',
           entityId: 'new-task',
           actionType: '[Task] Create',
+          vectorClock: { clientB: 1, clientC: 1 }, // GREATER_THAN - saw the import
         }),
       ];
 
@@ -1286,38 +1310,43 @@ describe('OperationLogSyncService', () => {
       // - The SYNC_IMPORT (defines the new state)
       // - Post-import ops from Client B (reference NEW state - should be kept)
       //
-      // The bug was that pre-import ops from the SAME client bypassed timestamp filtering
-      // due to a same-client exception. These old ops then corrupted the imported state.
+      // Vector clocks establish causality for the SAME client:
+      // - Pre-import ops: LESS_THAN the import (lower counter for same client)
+      // - Post-import ops: GREATER_THAN the import (higher counter for same client)
       const ops: Operation[] = [
-        // Client B's ops created BEFORE the import - should be FILTERED
+        // Client B's ops created BEFORE the import - LESS_THAN import
         createOp({
-          id: '019afd60-0001-7000-0000-000000000000', // Much earlier timestamp
+          id: '019afd60-0001-7000-0000-000000000000',
           opType: OpType.Update,
-          clientId: 'client-B', // SAME client as import
+          clientId: 'client-B',
           entityId: 'task-old-1',
           actionType: '[Task] Update',
+          vectorClock: { clientB: 1 }, // LESS_THAN import (1 < 3)
         }),
         createOp({
-          id: '019afd60-0002-7000-0000-000000000000', // Much earlier timestamp
+          id: '019afd60-0002-7000-0000-000000000000',
           opType: OpType.Update,
-          clientId: 'client-B', // SAME client as import
+          clientId: 'client-B',
           entityId: 'task-old-2',
           actionType: '[Task] Update',
+          vectorClock: { clientB: 2 }, // LESS_THAN import (2 < 3)
         }),
         // Client B's SYNC_IMPORT (data import)
         createOp({
-          id: '019afd68-0050-7000-0000-000000000000', // Import timestamp
+          id: '019afd68-0050-7000-0000-000000000000',
           opType: OpType.SyncImport,
           clientId: 'client-B',
           entityType: 'ALL',
+          vectorClock: { clientB: 3 }, // Import's clock
         }),
-        // Client B's ops created AFTER the import - should be KEPT
+        // Client B's ops created AFTER the import - GREATER_THAN import
         createOp({
-          id: '019afd68-0100-7000-0000-000000000000', // After import timestamp
+          id: '019afd68-0100-7000-0000-000000000000',
           opType: OpType.Create,
-          clientId: 'client-B', // SAME client as import
+          clientId: 'client-B',
           entityId: 'task-new',
           actionType: '[Task] Create',
+          vectorClock: { clientB: 4 }, // GREATER_THAN import (4 > 3)
         }),
       ];
 
@@ -1325,8 +1354,8 @@ describe('OperationLogSyncService', () => {
 
       // CORRECT behavior:
       // - SYNC_IMPORT: valid (always kept)
-      // - Post-import op: valid (timestamp >= import timestamp)
-      // - Pre-import ops: INVALID (timestamp < import timestamp, regardless of client)
+      // - Post-import op: valid (vector clock GREATER_THAN import)
+      // - Pre-import ops: INVALID (vector clock LESS_THAN import)
       expect(result.validOps.length).toBe(2);
       expect(result.validOps.map((op) => op.id)).toContain(
         '019afd68-0050-7000-0000-000000000000',
@@ -1420,6 +1449,7 @@ describe('OperationLogSyncService', () => {
 
     it('should keep post-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
       // Same scenario but with ops created AFTER the import
+      // Vector clock must show that client A had knowledge of the import (includes import's clock)
       const existingSyncImport: Operation = {
         id: '019afd68-0050-7000-0000-000000000000',
         actionType: '[SP_ALL] Load(import) all data',
@@ -1437,17 +1467,17 @@ describe('OperationLogSyncService', () => {
         Promise.resolve(existingSyncImport),
       );
 
-      // These ops are created AFTER the import (higher UUIDv7)
+      // These ops are created AFTER the import - client A saw the import (includes clientB: 1)
       const newOpsFromClientA: Operation[] = [
         {
-          id: '019afd70-0001-7000-0000-000000000000', // AFTER import timestamp
+          id: '019afd70-0001-7000-0000-000000000000',
           actionType: '[Task] Update Task',
           opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task-1',
           payload: { title: 'New title' },
           clientId: 'client-A',
-          vectorClock: { clientA: 7 },
+          vectorClock: { clientB: 1, clientA: 7 }, // GREATER_THAN import - includes import's clock
           timestamp: Date.now(),
           schemaVersion: 1,
         },
@@ -1455,9 +1485,340 @@ describe('OperationLogSyncService', () => {
 
       const result = await service._filterOpsInvalidatedBySyncImport(newOpsFromClientA);
 
-      // EXPECTED: Op should be valid because it was created AFTER the import
+      // EXPECTED: Op should be valid because it has knowledge of the import
       expect(result.validOps.length).toBe(1);
       expect(result.invalidatedOps.length).toBe(0);
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // VECTOR CLOCK BASED FILTERING TESTS
+    // These tests verify filtering based on CAUSALITY (vector clocks) rather than
+    // wall-clock time (UUIDv7 timestamps). This is more reliable because vector
+    // clocks track whether a client had knowledge of the import, regardless of
+    // client clock drift issues.
+    // ═══════════════════════════════════════════════════════════════════════════
+
+    describe('vector clock based filtering', () => {
+      it('should filter CONCURRENT ops (client had no knowledge of import)', async () => {
+        // Scenario: Client B was offline, creates ops without seeing the import
+        // Client B's ops have clock {clientA: 2, clientB: 3}
+        // SYNC_IMPORT has clock {clientA: 5}
+        // Compare: A:2 < A:5, but B:3 > 0 → CONCURRENT → FILTER
+        const ops: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000', // Later UUIDv7 (would pass timestamp check!)
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Offline change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 2, clientB: 3 }, // CONCURRENT with import
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: 'import-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-A',
+            vectorClock: { clientA: 5 }, // Import's clock
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        // EXPECTED: SYNC_IMPORT valid, Client B's op filtered (CONCURRENT = no knowledge)
+        expect(result.validOps.length).toBe(1);
+        expect(result.validOps[0].opType).toBe(OpType.SyncImport);
+        expect(result.invalidatedOps.length).toBe(1);
+        expect(result.invalidatedOps[0].clientId).toBe('client-B');
+      });
+
+      it('should filter LESS_THAN ops (dominated by import)', async () => {
+        // Op has clock {clientA: 2} - strictly less than import's clock
+        // SYNC_IMPORT has clock {clientA: 5, clientB: 3}
+        // Compare: A:2 < A:5, no B → LESS_THAN → FILTER
+        const ops: Operation[] = [
+          {
+            id: '019afd60-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Old change' },
+            clientId: 'client-A',
+            vectorClock: { clientA: 2 }, // LESS_THAN import's clock
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: 'import-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-B',
+            vectorClock: { clientA: 5, clientB: 3 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        expect(result.validOps.length).toBe(1);
+        expect(result.validOps[0].opType).toBe(OpType.SyncImport);
+        expect(result.invalidatedOps.length).toBe(1);
+      });
+
+      it('should keep GREATER_THAN ops (created after seeing import)', async () => {
+        // Client saw import, then created op with clock {clientA: 5, clientB: 1}
+        // SYNC_IMPORT has clock {clientA: 5}
+        // Compare: A:5 = A:5, B:1 > 0 → GREATER_THAN → KEEP
+        const ops: Operation[] = [
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: 'import-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-A',
+            vectorClock: { clientA: 5 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd70-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Post-import change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 5, clientB: 1 }, // GREATER_THAN - B saw the import
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        // Both should be valid - Client B's op was created after seeing import
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+
+      it('should keep EQUAL ops (same causal history as import)', async () => {
+        // Edge case: op has exactly the same clock as import
+        const ops: Operation[] = [
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: 'import-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-A',
+            vectorClock: { clientA: 5, clientB: 3 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd68-0051-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Same-clock change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 5, clientB: 3 }, // EQUAL to import
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+
+      it('should filter ops even if client clock was ahead (clock drift regression)', async () => {
+        // REGRESSION TEST: Client B's wall-clock is 2 hours ahead
+        // Op created "before" import in real time, but has FUTURE UUIDv7 timestamp
+        // The UUIDv7 approach would INCORRECTLY keep this op
+        // Vector clock: {clientA: 2, clientB: 3} vs import {clientA: 5}
+        // Result: CONCURRENT → FILTER (regardless of UUIDv7 timestamp)
+
+        const ops: Operation[] = [
+          {
+            // UUIDv7 timestamp is AFTER the import (client clock was ahead!)
+            // With UUIDv7 filtering, this would INCORRECTLY pass through
+            id: '019afd80-0001-7000-0000-000000000000', // Future timestamp!
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Clock-drift change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 2, clientB: 3 }, // But vector clock shows no knowledge of import!
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[SP_ALL] Load(import) all data',
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: 'import-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-A',
+            vectorClock: { clientA: 5 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        // EXPECTED: Even though UUIDv7 says the op is "newer", vector clock shows
+        // Client B had no knowledge of the import → CONCURRENT → FILTER
+        expect(result.validOps.length).toBe(1);
+        expect(result.validOps[0].opType).toBe(OpType.SyncImport);
+        expect(result.invalidatedOps.length).toBe(1);
+        expect(result.invalidatedOps[0].clientId).toBe('client-B');
+      });
+
+      it('should filter CONCURRENT ops from store import (previous sync cycle)', async () => {
+        // Scenario: SYNC_IMPORT was downloaded in a previous sync cycle (in store)
+        // Now receiving CONCURRENT ops that have no knowledge of the import
+        const existingSyncImport: Operation = {
+          id: '019afd68-0050-7000-0000-000000000000',
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          payload: { appDataComplete: {} },
+          clientId: 'client-A',
+          vectorClock: { clientA: 5 }, // Import's clock
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+          Promise.resolve(existingSyncImport),
+        );
+
+        // Ops from Client B who was offline and never saw the import
+        const concurrentOps: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000', // Later UUIDv7
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Offline change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 2, clientB: 3 }, // CONCURRENT - no knowledge of import
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(concurrentOps);
+
+        // EXPECTED: Filtered because vector clock shows no knowledge of import
+        expect(result.invalidatedOps.length).toBe(1);
+        expect(result.validOps.length).toBe(0);
+        expect(opLogStoreSpy.getLatestFullStateOp).toHaveBeenCalled();
+      });
+
+      it('should keep GREATER_THAN ops from store import (previous sync cycle)', async () => {
+        // Same scenario but with ops that DO have knowledge of the import
+        const existingSyncImport: Operation = {
+          id: '019afd68-0050-7000-0000-000000000000',
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          payload: { appDataComplete: {} },
+          clientId: 'client-A',
+          vectorClock: { clientA: 5 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+          Promise.resolve(existingSyncImport),
+        );
+
+        // Ops from Client B who SAW the import first
+        const validOps: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Post-import change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 5, clientB: 1 }, // GREATER_THAN - B saw import first
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(validOps);
+
+        // EXPECTED: Kept because vector clock shows knowledge of import
+        expect(result.validOps.length).toBe(1);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+
+      it('should handle REPAIR operations the same as SYNC_IMPORT', async () => {
+        // REPAIR operations also contain full state and should trigger filtering
+        const ops: Operation[] = [
+          {
+            id: '019afd60-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Old change' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 2, clientB: 3 }, // CONCURRENT with repair
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd68-0050-7000-0000-000000000000',
+            actionType: '[OpLog] Repair',
+            opType: OpType.Repair,
+            entityType: 'ALL',
+            entityId: 'repair-1',
+            payload: { appDataComplete: {} },
+            clientId: 'client-A',
+            vectorClock: { clientA: 5 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service._filterOpsInvalidatedBySyncImport(ops);
+
+        // REPAIR should be kept, CONCURRENT op should be filtered
+        expect(result.validOps.length).toBe(1);
+        expect(result.validOps[0].opType).toBe(OpType.Repair);
+        expect(result.invalidatedOps.length).toBe(1);
+      });
     });
   });
 

@@ -960,6 +960,216 @@ The `latestSnapshotSeq` field is informational - clients can use it to know a sn
 
 ---
 
+## 2f. Vector Clock-Based SYNC_IMPORT Filtering ✅ IMPLEMENTED
+
+When a SYNC_IMPORT occurs, operations created **without knowledge** of the import must be filtered out - they reference state that no longer exists. This section explains why **vector clock comparison** is more reliable than UUIDv7 timestamp comparison for this filtering.
+
+**Implementation Status:** ✅ Implemented in `operation-log-sync.service.ts:_filterOpsInvalidatedBySyncImport()`. Uses `compareVectorClocks()` to determine causality rather than UUIDv7 timestamps.
+
+### 2f.1 The Problem: Clock Drift with UUIDv7
+
+UUIDv7 timestamps depend on client wall-clock time. If a client's clock is incorrect, pre-import operations may have future timestamps and bypass filtering:
+
+```mermaid
+flowchart LR
+    subgraph UUIDv7["❌ UUIDv7 Approach (Previous)"]
+        direction TB
+        U1["Client B's clock is 2 hours AHEAD"]
+        U2["B creates op at REAL time 10:00"]
+        U3["UUIDv7 timestamp = 12:00<br/>(wrong due to clock drift)"]
+        U4["SYNC_IMPORT at 11:00"]
+        U5["Filter check: 12:00 > 11:00"]
+        U6["🐛 NOT FILTERED!<br/>Old op applied, corrupts state"]
+
+        U1 --> U2 --> U3 --> U4 --> U5 --> U6
+    end
+
+    subgraph VectorClock["✅ Vector Clock Approach (Current)"]
+        direction TB
+        V1["Client B's clock is 2 hours AHEAD"]
+        V2["B creates op (offline)"]
+        V3["op.vectorClock = {A: 2, B: 3}<br/>(wall-clock time irrelevant)"]
+        V4["SYNC_IMPORT.vectorClock = {A: 3}"]
+        V5["Compare: {A:2,B:3} vs {A:3}<br/>Result: CONCURRENT"]
+        V6["✅ FILTERED!<br/>Op created without knowledge of import"]
+
+        V1 --> V2 --> V3 --> V4 --> V5 --> V6
+    end
+
+    style U6 fill:#ffcccc
+    style V6 fill:#ccffcc
+```
+
+### 2f.2 How Vector Clocks Track Causality
+
+Each client maintains a counter. When creating an operation, the client increments its counter and attaches the full clock state. When receiving operations, it **merges** clocks (taking the max of each component).
+
+```mermaid
+sequenceDiagram
+    participant A as Client A<br/>clock: {}
+    participant Server as Server
+    participant B as Client B<br/>clock: {}
+
+    Note over A,B: === PHASE 1: Normal Sync ===
+
+    rect rgb(220, 240, 220)
+        Note over A: Creates op1<br/>clock: {A: 1}
+        A->>Server: upload op1<br/>vectorClock: {A: 1}
+
+        Note over A: Creates op2<br/>clock: {A: 2}
+        A->>Server: upload op2<br/>vectorClock: {A: 2}
+    end
+
+    rect rgb(220, 220, 240)
+        Server->>B: download op1, op2
+        Note over B: Merges clocks<br/>clock: {A: 2}
+
+        Note over B: Creates op3<br/>clock: {A: 2, B: 1}
+        B->>Server: upload op3<br/>vectorClock: {A: 2, B: 1}
+    end
+
+    rect rgb(220, 240, 220)
+        Server->>A: download op3
+        Note over A: Merges clocks<br/>clock: {A: 2, B: 1}
+    end
+
+    Note over A,B: Both clients now have synchronized clocks<br/>A: {A: 2, B: 1}, B: {A: 2, B: 1}
+
+    Note over A,B: === PHASE 2: Client B Goes Offline ===
+
+    rect rgb(255, 240, 220)
+        Note over B: 🔴 OFFLINE
+
+        Note over B: Creates op4 (offline)<br/>clock: {A: 2, B: 2}
+        Note over B: Creates op5 (offline)<br/>clock: {A: 2, B: 3}
+
+        Note over B: These ops reference<br/>the OLD state
+    end
+
+    Note over A,B: === PHASE 3: Client A Does SYNC_IMPORT ===
+
+    rect rgb(255, 220, 220)
+        Note over A: User imports backup<br/>FULL STATE REPLACEMENT
+
+        Note over A: Creates SYNC_IMPORT op<br/>clock: {A: 3}
+
+        A->>Server: upload SYNC_IMPORT<br/>vectorClock: {A: 3}
+
+        Note over Server: Server has:<br/>op1 {A:1}<br/>op2 {A:2}<br/>op3 {A:2,B:1}<br/>SYNC_IMPORT {A:3}<br/>(op4, op5 not uploaded yet)
+    end
+
+    Note over A,B: === PHASE 4: Client B Comes Online ===
+
+    rect rgb(255, 240, 220)
+        Note over B: 🟢 ONLINE
+        B->>Server: upload op4, op5<br/>vectorClock: {A: 2, B: 2}<br/>vectorClock: {A: 2, B: 3}
+    end
+
+    Note over A,B: === PHASE 5: The Problem - Client A Downloads B's Ops ===
+
+    rect rgb(255, 200, 200)
+        Server->>A: download op4, op5
+
+        Note over A: Compare op4 to SYNC_IMPORT:<br/>op4: {A: 2, B: 2}<br/>import: {A: 3}<br/><br/>A: 2 < 3 (import ahead)<br/>B: 2 > 0 (op4 ahead)<br/><br/>Result: CONCURRENT
+
+        Note over A: CONCURRENT means:<br/>"Created WITHOUT knowledge<br/>of the SYNC_IMPORT"<br/><br/>These ops reference entities<br/>that may not exist anymore!
+    end
+```
+
+### 2f.3 Vector Clock Comparison Logic
+
+```mermaid
+flowchart TB
+    subgraph VectorClockComparison["Vector Clock Comparison Logic"]
+        direction TB
+
+        Compare["Compare op.vectorClock vs syncImport.vectorClock"]
+
+        Compare --> CheckAll{"For each client ID<br/>in both clocks"}
+
+        CheckAll --> |"All op values ≤ import values"| LessThan["LESS_THAN<br/>(Dominated)"]
+        CheckAll --> |"All op values ≥ import values"| GreaterThan["GREATER_THAN<br/>(Newer)"]
+        CheckAll --> |"All values equal"| Equal["EQUAL"]
+        CheckAll --> |"Some greater, some less"| Concurrent["CONCURRENT<br/>(Independent)"]
+
+        LessThan --> Filter1["🚫 FILTER<br/>Op created BEFORE import"]
+        Concurrent --> Filter2["🚫 FILTER<br/>Op created WITHOUT<br/>KNOWLEDGE of import"]
+        Equal --> Keep1["✅ KEEP"]
+        GreaterThan --> Keep2["✅ KEEP<br/>Op created AFTER<br/>seeing import"]
+    end
+
+    subgraph Example1["Example: LESS_THAN (Dominated)"]
+        E1Op["op.vectorClock = {A: 1}"]
+        E1Import["import.vectorClock = {A: 3}"]
+        E1Result["A: 1 < 3<br/>Result: LESS_THAN → FILTER"]
+    end
+
+    subgraph Example2["Example: CONCURRENT (The Problem Case)"]
+        E2Op["op.vectorClock = {A: 2, B: 3}"]
+        E2Import["import.vectorClock = {A: 3}"]
+        E2Result["A: 2 < 3 (import ahead)<br/>B: 3 > 0 (op ahead)<br/>Result: CONCURRENT → FILTER"]
+    end
+
+    subgraph Example3["Example: GREATER_THAN (Valid)"]
+        E3Op["op.vectorClock = {A: 3, B: 4}"]
+        E3Import["import.vectorClock = {A: 3}"]
+        E3Result["A: 3 = 3 (equal)<br/>B: 4 > 0 (op ahead)<br/>Result: GREATER_THAN → KEEP"]
+    end
+```
+
+### 2f.4 The Key Insight: CONCURRENT = "No Knowledge"
+
+```mermaid
+flowchart TB
+    subgraph KeyInsight["🔑 Key Insight"]
+        direction TB
+
+        K1["CONCURRENT = 'Created without knowledge of'"]
+        K2["If Client B had SEEN the import first..."]
+        K3["B would merge: {A: 3} into their clock"]
+        K4["B's new ops would have: {A: 3, B: 4}"]
+        K5["Compare {A:3,B:4} vs {A:3} = GREATER_THAN"]
+        K6["These ops are VALID (created after seeing import)"]
+
+        K1 --> K2 --> K3 --> K4 --> K5 --> K6
+    end
+
+    subgraph FilterRule["📋 Filter Rule"]
+        direction TB
+
+        R1["For each downloaded op:"]
+        R2{"compareVectorClocks(<br/>op.vectorClock,<br/>syncImport.vectorClock)"}
+
+        R2 --> |"LESS_THAN"| R3["🚫 Filter (dominated)"]
+        R2 --> |"CONCURRENT"| R4["🚫 Filter (no knowledge)"]
+        R2 --> |"EQUAL"| R5["✅ Keep"]
+        R2 --> |"GREATER_THAN"| R6["✅ Keep (saw import)"]
+
+        R1 --> R2
+    end
+
+    style K1 fill:#ffffcc
+    style R3 fill:#ffcccc
+    style R4 fill:#ffcccc
+    style R5 fill:#ccffcc
+    style R6 fill:#ccffcc
+```
+
+### 2f.5 Comparison Summary
+
+| Scenario                                             | Vector Clock Comparison | UUIDv7 Comparison            | Correct Action                           |
+| ---------------------------------------------------- | ----------------------- | ---------------------------- | ---------------------------------------- |
+| Op created before import, same client                | LESS_THAN               | Earlier timestamp            | ✅ Both filter correctly                 |
+| Op created before import, different client (offline) | CONCURRENT              | Earlier timestamp            | ✅ Both filter correctly                 |
+| Op created after seeing import                       | GREATER_THAN            | Later timestamp              | ✅ Both keep correctly                   |
+| **Op created before import, but client clock ahead** | CONCURRENT              | **Later timestamp (wrong!)** | Vector clock filters ✅, UUIDv7 fails ❌ |
+
+**Why Vector Clocks Are More Reliable:**
+
+Vector clocks track **causality via counters**, not wall-clock time. A client that didn't see the import will always produce CONCURRENT ops, regardless of what their system clock says. This makes the filtering immune to clock drift.
+
+---
+
 ## 3. Conflict-Aware Migration Strategy (The Migration Shield)
 
 > **Note:** Sections 3, 4.1, and 4.2 describe the **cross-version migration strategy** (A.7.8) which is designed but not yet implemented. Currently `CURRENT_SCHEMA_VERSION = 1`, so all clients are on the same version. State cache snapshots are migrated via `SchemaMigrationService.migrateIfNeeded()`. Individual operation migration will be needed when schema versions diverge between clients.

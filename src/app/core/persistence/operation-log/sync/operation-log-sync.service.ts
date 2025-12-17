@@ -1342,7 +1342,7 @@ export class OperationLogSyncService {
   // ═══════════════════════════════════════════════════════════════════════════
 
   /**
-   * Filters out operations invalidated by a SYNC_IMPORT or BACKUP_IMPORT.
+   * Filters out operations invalidated by a SYNC_IMPORT, BACKUP_IMPORT, or REPAIR.
    *
    * ## The Problem
    * ```
@@ -1356,16 +1356,23 @@ export class OperationLogSyncService {
    * ```
    *
    * ## The Solution
-   * Discard ops from OTHER clients created BEFORE the import (by UUIDv7 comparison).
-   * UUIDv7 is time-ordered, so lexicographic comparison gives chronological ordering.
+   * Use VECTOR CLOCK comparison to determine if ops were created with knowledge
+   * of the import. This is more reliable than UUIDv7 timestamps because vector
+   * clocks track CAUSALITY (did the client know about the import?) rather than
+   * wall-clock time (which can be affected by clock drift).
    *
-   * ## Which ops are kept?
-   * | Op Source              | Op Created          | Result      |
-   * |------------------------|---------------------|-------------|
-   * | Any client             | AFTER import        | ✅ Valid    |
-   * | Any client             | BEFORE import       | ❌ Invalid  |
+   * ## Vector Clock Comparison Results
+   * | Comparison     | Meaning                              | Action  |
+   * |----------------|--------------------------------------|---------|
+   * | GREATER_THAN   | Op created after seeing import       | ✅ Keep |
+   * | EQUAL          | Same causal history as import        | ✅ Keep |
+   * | LESS_THAN      | Op dominated by import               | ❌ Filter|
+   * | CONCURRENT     | Op created without knowledge of import| ❌ Filter|
    *
-   * Note: The import can be in the current batch OR in the local store from a
+   * Note: CONCURRENT ops are filtered because they reference pre-import state,
+   * even if they were created "after" the import in wall-clock time.
+   *
+   * The import can be in the current batch OR in the local store from a
    * previous sync cycle. We check both to handle the case where old ops from
    * another client arrive after we already downloaded the import.
    *
@@ -1376,9 +1383,12 @@ export class OperationLogSyncService {
     validOps: Operation[];
     invalidatedOps: Operation[];
   }> {
-    // Find full state import operations (SYNC_IMPORT or BACKUP_IMPORT) in current batch
+    // Find full state import operations (SYNC_IMPORT, BACKUP_IMPORT, or REPAIR) in current batch
     const fullStateImportsInBatch = ops.filter(
-      (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
+      (op) =>
+        op.opType === OpType.SyncImport ||
+        op.opType === OpType.BackupImport ||
+        op.opType === OpType.Repair,
     );
 
     // Check local store for previously downloaded import
@@ -1417,29 +1427,40 @@ export class OperationLogSyncService {
 
     for (const op of ops) {
       // Full state import operations themselves are always valid
-      if (op.opType === OpType.SyncImport || op.opType === OpType.BackupImport) {
+      if (
+        op.opType === OpType.SyncImport ||
+        op.opType === OpType.BackupImport ||
+        op.opType === OpType.Repair
+      ) {
         validOps.push(op);
         continue;
       }
 
-      // Operations created AT OR AFTER the import are valid (by UUIDv7 timestamp)
-      // UUIDv7 is time-ordered: first 48 bits = millisecond timestamp
-      // We use timestamp extraction instead of string comparison to handle
-      // same-millisecond operations correctly (string comparison uses random bits
-      // which can cause operations created in the same ms to appear "before" the import)
+      // Use VECTOR CLOCK comparison instead of UUIDv7 timestamps.
+      // Vector clocks track CAUSALITY ("did this client know about the import?")
+      // rather than wall-clock time, making them immune to client clock drift.
       //
-      // NOTE: This applies to ALL clients, including the importing client.
-      // Pre-import ops from any client (even the same client) reference the old state.
-      const opTimestamp = this._extractTimestampFromUuidv7(op.id);
-      const importTimestamp = this._extractTimestampFromUuidv7(latestImport.id);
-      if (opTimestamp >= importTimestamp) {
-        validOps.push(op);
-        continue;
-      }
+      // Comparison results:
+      // - GREATER_THAN: Op was created by a client that SAW the import → KEEP
+      // - EQUAL: Same causal history as import → KEEP
+      // - LESS_THAN: Op is dominated by import (created before with less history) → FILTER
+      // - CONCURRENT: Op created WITHOUT knowledge of import → FILTER
+      //
+      // NOTE: CONCURRENT ops are filtered because they reference pre-import state,
+      // even though they may have been created "after" the import in wall-clock time.
+      const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
 
-      // Operations created BEFORE the import are invalidated
-      // They reference the pre-import state which no longer exists
-      invalidatedOps.push(op);
+      if (
+        comparison === VectorClockComparison.GREATER_THAN ||
+        comparison === VectorClockComparison.EQUAL
+      ) {
+        // Op was created by a client that had knowledge of the import
+        validOps.push(op);
+      } else {
+        // LESS_THAN or CONCURRENT: Op created without knowledge of import
+        // These ops reference the pre-import state which no longer exists
+        invalidatedOps.push(op);
+      }
     }
 
     return { validOps, invalidatedOps };

@@ -93,15 +93,42 @@ export const cleanupTestData = async (): Promise<void> => {
 };
 
 /**
- * Check if the SuperSync server is running and healthy.
+ * Check if the SuperSync server is running, healthy, AND has test mode enabled.
+ * Tests require TEST_MODE=true on the server for the /api/test/* endpoints.
  */
 export const isServerHealthy = async (): Promise<boolean> => {
   try {
-    const response = await fetch(`${SUPERSYNC_BASE_URL}/health`, {
+    // First check basic health
+    const healthResponse = await fetch(`${SUPERSYNC_BASE_URL}/health`, {
       method: 'GET',
       signal: AbortSignal.timeout(2000),
     });
-    return response.ok;
+    if (!healthResponse.ok) {
+      return false;
+    }
+
+    // Then verify test mode is enabled by trying to create a dummy user
+    // This is the only reliable way to check if test endpoints exist
+    const headers = new Headers();
+    headers.set('Content-Type', 'application/json');
+    const testModeResponse = await fetch(`${SUPERSYNC_BASE_URL}/api/test/create-user`, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify({
+        email: `health-check-${Date.now()}@test.local`,
+        password: 'HealthCheck123!',
+      }),
+      signal: AbortSignal.timeout(3000),
+    });
+
+    // If test mode is disabled, the route won't exist (404)
+    // If test mode is enabled, we'll get 201 (created) or 409 (conflict) or similar
+    if (testModeResponse.status === 404) {
+      console.warn('SuperSync server is running but TEST_MODE is not enabled');
+      return false;
+    }
+
+    return true;
   } catch {
     return false;
   }
