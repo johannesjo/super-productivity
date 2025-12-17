@@ -36,6 +36,7 @@ import {
 } from './store/task.actions';
 import { IssueProviderKey } from '../issue/issue.model';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
+import { BatchedTimeSyncAccumulator } from '../../core/util/batched-time-sync-accumulator';
 import {
   selectAllTasks,
   selectCurrentTask,
@@ -190,12 +191,15 @@ export class TaskService {
 
   // Batch sync for time tracking: accumulates duration per task, syncs every 5 minutes
   private static readonly SYNC_INTERVAL_MS = 5 * 60 * 1000; // 5 minutes
-  private _unsyncedDuration: Map<string, { duration: number; date: string }> = new Map();
+  private _timeAccumulator = new BatchedTimeSyncAccumulator(
+    TaskService.SYNC_INTERVAL_MS,
+    (taskId, date, duration) =>
+      this._store.dispatch(syncTimeSpent({ taskId, date, duration })),
+  );
   private _unsyncedContexts: Map<
     string,
     { contextType: 'TAG' | 'PROJECT'; contextId: string; date: string }
   > = new Map();
-  private _lastSyncTime = Date.now();
 
   constructor() {
     document.addEventListener(
@@ -223,13 +227,13 @@ export class TaskService {
           this.addTimeSpent(currentTask, tick.duration, tick.date);
 
           // Accumulate for batch sync
-          this._accumulateTimeSpent(currentTask.id, tick.duration, tick.date);
+          this._timeAccumulator.accumulate(currentTask.id, tick.duration, tick.date);
 
           // Track contexts for TIME_TRACKING sync
           this._trackContextsForSync(currentTask, tick.date);
 
           // Check if it's time to sync (every 5 minutes)
-          if (Date.now() - this._lastSyncTime >= TaskService.SYNC_INTERVAL_MS) {
+          if (this._timeAccumulator.shouldFlush()) {
             this._flushAccumulatedTimeSpent();
           }
         }
@@ -246,24 +250,6 @@ export class TaskService {
         this.toggleStartTask();
       }
     });
-  }
-
-  /**
-   * Accumulates time spent for batch sync to other clients.
-   */
-  private _accumulateTimeSpent(taskId: string, duration: number, date: string): void {
-    const existing = this._unsyncedDuration.get(taskId);
-    if (existing && existing.date === date) {
-      existing.duration += duration;
-    } else {
-      // If date changed, flush the old accumulated time first
-      if (existing) {
-        this._store.dispatch(
-          syncTimeSpent({ taskId, date: existing.date, duration: existing.duration }),
-        );
-      }
-      this._unsyncedDuration.set(taskId, { duration, date });
-    }
   }
 
   /**
@@ -296,12 +282,7 @@ export class TaskService {
    */
   private _flushAccumulatedTimeSpent(): void {
     // Sync task.timeSpent totals
-    this._unsyncedDuration.forEach(({ duration, date }, taskId) => {
-      if (duration > 0) {
-        this._store.dispatch(syncTimeSpent({ taskId, date, duration }));
-      }
-    });
-    this._unsyncedDuration.clear();
+    this._timeAccumulator.flush();
 
     // Sync TIME_TRACKING session data (start/end times)
     if (this._unsyncedContexts.size > 0) {
@@ -320,8 +301,6 @@ export class TaskService {
           this._unsyncedContexts.clear();
         });
     }
-
-    this._lastSyncTime = Date.now();
   }
 
   getAllParentWithoutTag$(tagId: string): Observable<Task[]> {

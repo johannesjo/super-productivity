@@ -34,6 +34,7 @@ import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
+import { BatchedTimeSyncAccumulator } from '../../core/util/batched-time-sync-accumulator';
 
 @Injectable({
   providedIn: 'root',
@@ -46,9 +47,12 @@ export class SimpleCounterService implements OnDestroy {
   private _timeTrackingService = inject(GlobalTrackingIntervalService);
   private _imexViewService = inject(ImexViewService);
 
-  private _unsyncedDuration = new Map<string, { duration: number; date: string }>();
+  private _stopwatchAccumulator = new BatchedTimeSyncAccumulator(
+    SimpleCounterService.SYNC_INTERVAL_MS,
+    (id, date, duration) =>
+      this._store$.dispatch(syncSimpleCounterTime({ id, date, duration })),
+  );
   private _modifiedClickCounters = new Set<string>(); // Track click counters that need sync
-  private _lastSyncTime = Date.now();
   private _subscriptions = new Subscription();
   private _visibilityHandler: (() => void) | null = null;
 
@@ -119,11 +123,11 @@ export class SimpleCounterService implements OnDestroy {
             );
 
             // Accumulate for batch sync
-            this._accumulateTime(counter.id, tick.duration, tick.date);
+            this._stopwatchAccumulator.accumulate(counter.id, tick.duration, tick.date);
           }
 
           // Check if it's time to sync (every 5 minutes)
-          if (Date.now() - this._lastSyncTime >= SimpleCounterService.SYNC_INTERVAL_MS) {
+          if (this._stopwatchAccumulator.shouldFlush()) {
             this._flushAccumulatedTime();
           }
         }),
@@ -144,21 +148,9 @@ export class SimpleCounterService implements OnDestroy {
           (id) => !currentRunningIds.includes(id),
         );
 
-        if (stoppedIds.length > 0) {
-          // Flush only the stopped counters
-          for (const id of stoppedIds) {
-            const accumulated = this._unsyncedDuration.get(id);
-            if (accumulated && accumulated.duration > 0) {
-              this._store$.dispatch(
-                syncSimpleCounterTime({
-                  id,
-                  date: accumulated.date,
-                  duration: accumulated.duration,
-                }),
-              );
-              this._unsyncedDuration.delete(id);
-            }
-          }
+        // Flush only the stopped counters
+        for (const id of stoppedIds) {
+          this._stopwatchAccumulator.flushOne(id);
         }
 
         previousRunningIds = currentRunningIds;
@@ -177,33 +169,9 @@ export class SimpleCounterService implements OnDestroy {
     }
   }
 
-  private _accumulateTime(counterId: string, duration: number, date: string): void {
-    const existing = this._unsyncedDuration.get(counterId);
-    if (existing && existing.date === date) {
-      existing.duration += duration;
-    } else {
-      // If date changed, flush the old accumulated time first
-      if (existing && existing.duration > 0) {
-        this._store$.dispatch(
-          syncSimpleCounterTime({
-            id: counterId,
-            date: existing.date,
-            duration: existing.duration,
-          }),
-        );
-      }
-      this._unsyncedDuration.set(counterId, { duration, date });
-    }
-  }
-
   private _flushAccumulatedTime(): void {
     // Flush StopWatch accumulated time
-    this._unsyncedDuration.forEach(({ duration, date }, counterId) => {
-      if (duration > 0) {
-        this._store$.dispatch(syncSimpleCounterTime({ id: counterId, date, duration }));
-      }
-    });
-    this._unsyncedDuration.clear();
+    this._stopwatchAccumulator.flush();
 
     // Flush ClickCounter modifications with absolute values
     if (this._modifiedClickCounters.size > 0) {
@@ -221,8 +189,6 @@ export class SimpleCounterService implements OnDestroy {
           this._modifiedClickCounters.clear();
         });
     }
-
-    this._lastSyncTime = Date.now();
   }
 
   updateAll(items: SimpleCounter[]): void {
