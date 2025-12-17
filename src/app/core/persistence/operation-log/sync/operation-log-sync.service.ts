@@ -295,6 +295,10 @@ export class OperationLogSyncService {
     // Create a SYNC_IMPORT operation with full local state to seed the new server
     if (result.needsFullStateUpload) {
       await this._handleServerMigration();
+      // Persist lastServerSeq=0 for the migration case (server was reset)
+      if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
+        await syncProvider.setLastServerSeq(result.latestServerSeq);
+      }
       // Return with flag indicating migration was handled - caller should upload the SYNC_IMPORT
       return { serverMigrationHandled: true, localWinOpsCreated: 0 };
     }
@@ -303,6 +307,12 @@ export class OperationLogSyncService {
       OpLog.normal(
         'OperationLogSyncService: No new remote operations to process after download.',
       );
+      // IMPORTANT: Persist lastServerSeq even when no ops - keeps client in sync with server.
+      // This is safe because we're not storing any ops, so there's no risk of localStorage
+      // getting ahead of IndexedDB.
+      if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
+        await syncProvider.setLastServerSeq(result.latestServerSeq);
+      }
       return { serverMigrationHandled: false, localWinOpsCreated: 0 };
     }
 
@@ -333,6 +343,14 @@ export class OperationLogSyncService {
     }
 
     const processResult = await this._processRemoteOps(result.newOps);
+
+    // IMPORTANT: Persist lastServerSeq AFTER ops are stored in IndexedDB.
+    // This ensures localStorage and IndexedDB stay in sync. If we crash before this point,
+    // lastServerSeq won't be updated, and the client will re-download the ops on next sync.
+    // This is the correct behavior - better to re-download than to skip ops.
+    if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
+      await syncProvider.setLastServerSeq(result.latestServerSeq);
+    }
 
     // Update pending ops status for UI indicator
     const pendingOps = await this.opLogStore.getUnsynced();
@@ -788,9 +806,10 @@ export class OperationLogSyncService {
     // STEP 2: Filter ops invalidated by SYNC_IMPORT
     // When a full-state import happens, ops from OTHER clients created BEFORE the
     // import reference entities that were wiped. These must be discarded.
+    // This also checks the LOCAL STORE for imports downloaded in previous sync cycles.
     // ─────────────────────────────────────────────────────────────────────────
     const { validOps, invalidatedOps } =
-      this._filterOpsInvalidatedBySyncImport(migratedOps);
+      await this._filterOpsInvalidatedBySyncImport(migratedOps);
 
     if (invalidatedOps.length > 0) {
       OpLog.warn(
@@ -1343,36 +1362,54 @@ export class OperationLogSyncService {
    * ## Which ops are kept?
    * | Op Source              | Op Created          | Result      |
    * |------------------------|---------------------|-------------|
-   * | Same client as import  | Any time            | ✅ Valid    |
-   * | Other client           | AFTER import        | ✅ Valid    |
-   * | Other client           | BEFORE import       | ❌ Invalid  |
+   * | Any client             | AFTER import        | ✅ Valid    |
+   * | Any client             | BEFORE import       | ❌ Invalid  |
+   *
+   * Note: The import can be in the current batch OR in the local store from a
+   * previous sync cycle. We check both to handle the case where old ops from
+   * another client arrive after we already downloaded the import.
    *
    * @param ops - Operations to filter (already migrated)
    * @returns Object with `validOps` and `invalidatedOps` arrays
    */
-  _filterOpsInvalidatedBySyncImport(ops: Operation[]): {
+  async _filterOpsInvalidatedBySyncImport(ops: Operation[]): Promise<{
     validOps: Operation[];
     invalidatedOps: Operation[];
-  } {
-    // Find full state import operations (SYNC_IMPORT or BACKUP_IMPORT)
-    const fullStateImports = ops.filter(
+  }> {
+    // Find full state import operations (SYNC_IMPORT or BACKUP_IMPORT) in current batch
+    const fullStateImportsInBatch = ops.filter(
       (op) => op.opType === OpType.SyncImport || op.opType === OpType.BackupImport,
     );
 
-    // No imports = no filtering needed
-    if (fullStateImports.length === 0) {
+    // Check local store for previously downloaded import
+    const storedImport = await this.opLogStore.getLatestFullStateOp();
+
+    // Determine the latest import (from batch or store)
+    let latestImport: Operation | undefined;
+
+    if (fullStateImportsInBatch.length > 0) {
+      // Find the latest in the current batch
+      const latestInBatch = fullStateImportsInBatch.reduce((latest, op) =>
+        op.id > latest.id ? op : latest,
+      );
+      // Compare with stored import (if any)
+      if (storedImport && storedImport.id > latestInBatch.id) {
+        latestImport = storedImport;
+      } else {
+        latestImport = latestInBatch;
+      }
+    } else if (storedImport) {
+      // No import in batch, but we have one from a previous sync
+      latestImport = storedImport;
+    }
+
+    // No imports found anywhere = no filtering needed
+    if (!latestImport) {
       return { validOps: ops, invalidatedOps: [] };
     }
 
-    // Find the latest import by UUIDv7 (lexicographic = chronological for UUIDv7)
-    // If there are multiple imports, we care about the latest one since it defines
-    // the current state that subsequent ops should reference.
-    const latestImport = fullStateImports.reduce((latest, op) =>
-      op.id > latest.id ? op : latest,
-    );
-
     OpLog.normal(
-      `OperationLogSyncService: Processing SYNC_IMPORT from client ${latestImport.clientId} (op: ${latestImport.id})`,
+      `OperationLogSyncService: Filtering ops against SYNC_IMPORT from client ${latestImport.clientId} (op: ${latestImport.id})`,
     );
 
     const validOps: Operation[] = [];

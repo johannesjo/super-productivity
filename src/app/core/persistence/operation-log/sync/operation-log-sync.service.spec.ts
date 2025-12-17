@@ -58,9 +58,12 @@ describe('OperationLogSyncService', () => {
       'getUnsyncedByEntity',
       'getOpsAfterSeq',
       'filterNewOps',
+      'getLatestFullStateOp',
     ]);
     // By default, treat all ops as new (return them as-is)
     opLogStoreSpy.filterNewOps.and.callFake((ops: any[]) => Promise.resolve(ops));
+    // By default, no full-state ops in store
+    opLogStoreSpy.getLatestFullStateOp.and.returnValue(Promise.resolve(undefined));
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getEntityFrontier',
       'getSnapshotVectorClock',
@@ -996,34 +999,34 @@ describe('OperationLogSyncService', () => {
       ...partial,
     });
 
-    it('should return all ops as valid when no SYNC_IMPORT is present', () => {
+    it('should return all ops as valid when no SYNC_IMPORT is present', async () => {
       const ops: Operation[] = [
         createOp({ id: '019afd68-0001-7000-0000-000000000000', opType: OpType.Update }),
         createOp({ id: '019afd68-0002-7000-0000-000000000000', opType: OpType.Create }),
         createOp({ id: '019afd68-0003-7000-0000-000000000000', opType: OpType.Delete }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       expect(result.validOps.length).toBe(3);
       expect(result.invalidatedOps.length).toBe(0);
     });
 
-    it('should keep SYNC_IMPORT operation itself as valid', () => {
+    it('should keep SYNC_IMPORT operation itself as valid', async () => {
       const syncImportOp = createOp({
         id: '019afd68-0050-7000-0000-000000000000',
         opType: OpType.SyncImport,
         clientId: 'client-B',
       });
 
-      const result = service._filterOpsInvalidatedBySyncImport([syncImportOp]);
+      const result = await service._filterOpsInvalidatedBySyncImport([syncImportOp]);
 
       expect(result.validOps.length).toBe(1);
       expect(result.validOps[0].opType).toBe(OpType.SyncImport);
       expect(result.invalidatedOps.length).toBe(0);
     });
 
-    it('should filter out ops from OTHER clients created BEFORE SYNC_IMPORT', () => {
+    it('should filter out ops from OTHER clients created BEFORE SYNC_IMPORT', async () => {
       // Scenario: Client B does SYNC_IMPORT, Client A had ops created before it
       const ops: Operation[] = [
         // Client A's op created BEFORE the import (lower UUIDv7)
@@ -1042,7 +1045,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // SYNC_IMPORT is valid, Client A's earlier op is invalidated
       expect(result.validOps.length).toBe(1);
@@ -1051,7 +1054,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps[0].clientId).toBe('client-A');
     });
 
-    it('should filter pre-import ops from the SAME client as SYNC_IMPORT', () => {
+    it('should filter pre-import ops from the SAME client as SYNC_IMPORT', async () => {
       // Scenario: Client B has ops before import, does SYNC_IMPORT, then creates more ops
       // Pre-import ops from the SAME client should be filtered (they reference old state)
       const ops: Operation[] = [
@@ -1078,7 +1081,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // Only SYNC_IMPORT and post-import ops should be valid
       // Pre-import ops are filtered regardless of which client they came from
@@ -1094,7 +1097,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps[0].id).toBe('019afd68-0001-7000-0000-000000000000'); // Pre-import
     });
 
-    it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by UUIDv7)', () => {
+    it('should preserve ops from OTHER clients created AFTER SYNC_IMPORT (by UUIDv7)', async () => {
       // Scenario: Client B does SYNC_IMPORT, then Client A creates new ops AFTER
       const ops: Operation[] = [
         // Client B's SYNC_IMPORT
@@ -1113,14 +1116,14 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // Both should be valid - Client A's op came after the import
       expect(result.validOps.length).toBe(2);
       expect(result.invalidatedOps.length).toBe(0);
     });
 
-    it('should handle BACKUP_IMPORT the same way as SYNC_IMPORT', () => {
+    it('should handle BACKUP_IMPORT the same way as SYNC_IMPORT', async () => {
       const ops: Operation[] = [
         // Client A's op created BEFORE the backup import
         createOp({
@@ -1138,7 +1141,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       expect(result.validOps.length).toBe(1);
       expect(result.validOps[0].opType).toBe(OpType.BackupImport);
@@ -1146,7 +1149,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps[0].clientId).toBe('client-A');
     });
 
-    it('should use the LATEST import when multiple imports exist', () => {
+    it('should use the LATEST import when multiple imports exist', async () => {
       // Scenario: Multiple imports in the batch - use the latest one
       const ops: Operation[] = [
         // Client A's early op
@@ -1186,7 +1189,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // Valid: both SYNC_IMPORTs, Client A's op after latest import
       // Invalid: Client A's two ops before the latest import
@@ -1203,7 +1206,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps.length).toBe(2);
     });
 
-    it('should handle mixed scenario with multiple clients and imports', () => {
+    it('should handle mixed scenario with multiple clients and imports', async () => {
       // Complex scenario: A creates ops, B imports, A syncs stale ops, C creates ops
       const ops: Operation[] = [
         // Client A's stale ops (created BEFORE B's import)
@@ -1239,7 +1242,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // Valid: B's import, C's new op
       // Invalid: A's two stale ops
@@ -1248,7 +1251,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps.every((op) => op.clientId === 'client-A')).toBe(true);
     });
 
-    it('should correctly compare UUIDv7 IDs lexicographically', () => {
+    it('should correctly compare UUIDv7 IDs lexicographically', async () => {
       // Test that UUIDv7 lexicographic comparison works for chronological ordering
       // Earlier timestamp = lower hex = comes first lexicographically
       const ops: Operation[] = [
@@ -1266,7 +1269,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // Client A's op (019afd6d) > SYNC_IMPORT (019afd68), so it's AFTER the import
       // Therefore it should be VALID
@@ -1274,7 +1277,7 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps.length).toBe(0);
     });
 
-    it('should filter out PRE-IMPORT ops from the SAME client (fresh client joining scenario)', () => {
+    it('should filter out PRE-IMPORT ops from the SAME client (fresh client joining scenario)', async () => {
       // BUG REGRESSION TEST: This scenario caused data corruption when a fresh client joined.
       //
       // Scenario: Client B created many ops, then did a SYNC_IMPORT (data import).
@@ -1318,7 +1321,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = service._filterOpsInvalidatedBySyncImport(ops);
+      const result = await service._filterOpsInvalidatedBySyncImport(ops);
 
       // CORRECT behavior:
       // - SYNC_IMPORT: valid (always kept)
@@ -1339,6 +1342,122 @@ describe('OperationLogSyncService', () => {
       expect(result.invalidatedOps.map((op) => op.id)).toContain(
         '019afd60-0002-7000-0000-000000000000',
       ); // Pre-import op 2
+    });
+
+    // ═══════════════════════════════════════════════════════════════════════════
+    // BUG FIX TEST: Pre-import ops should be filtered even when SYNC_IMPORT
+    // was downloaded in a PREVIOUS sync cycle (not in current batch)
+    // ═══════════════════════════════════════════════════════════════════════════
+    it('should filter pre-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
+      // This test reproduces the bug where:
+      // 1. Client B imports data, SYNC_IMPORT is uploaded (seq 100)
+      // 2. Client C downloads SYNC_IMPORT in first sync (batch contains import)
+      // 3. Client A (offline) comes online, uploads OLD ops (seq 101, 102...)
+      // 4. Client C syncs again - downloads Client A's old ops (batch does NOT contain import)
+      // 5. BUG: Old ops pass through filter because no SYNC_IMPORT in current batch!
+      //
+      // The fix: Check local store for latest SYNC_IMPORT when none in current batch
+
+      // Set up the store to have a SYNC_IMPORT from a previous sync
+      const existingSyncImport: Operation = {
+        id: '019afd68-0050-7000-0000-000000000000', // Import timestamp
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'import-1',
+        payload: { appDataComplete: {} },
+        clientId: 'client-B',
+        vectorClock: { clientB: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // Mock the store to return the SYNC_IMPORT when asked for the latest full-state op
+      opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+        Promise.resolve(existingSyncImport),
+      );
+
+      // These are OLD ops from Client A, created BEFORE the import (lower UUIDv7)
+      // They arrive in a batch that does NOT contain the SYNC_IMPORT
+      const oldOpsFromClientA: Operation[] = [
+        {
+          id: '019afd60-0001-7000-0000-000000000000', // BEFORE import timestamp!
+          actionType: '[Task] Update Task',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Old title' },
+          clientId: 'client-A',
+          vectorClock: { clientA: 5 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        {
+          id: '019afd60-0002-7000-0000-000000000000', // BEFORE import timestamp!
+          actionType: '[Task] Update Task',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          payload: { title: 'Another old title' },
+          clientId: 'client-A',
+          vectorClock: { clientA: 6 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ];
+
+      // Call the filter - the method should check the store since no import in batch
+      const result = await service._filterOpsInvalidatedBySyncImport(oldOpsFromClientA);
+
+      // EXPECTED: Both ops should be invalidated because they were created BEFORE
+      // the SYNC_IMPORT that was downloaded in a previous sync cycle
+      expect(result.invalidatedOps.length).toBe(2);
+      expect(result.validOps.length).toBe(0);
+
+      // Verify the store was consulted
+      expect(opLogStoreSpy.getLatestFullStateOp).toHaveBeenCalled();
+    });
+
+    it('should keep post-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
+      // Same scenario but with ops created AFTER the import
+      const existingSyncImport: Operation = {
+        id: '019afd68-0050-7000-0000-000000000000',
+        actionType: '[SP_ALL] Load(import) all data',
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: 'import-1',
+        payload: { appDataComplete: {} },
+        clientId: 'client-B',
+        vectorClock: { clientB: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+        Promise.resolve(existingSyncImport),
+      );
+
+      // These ops are created AFTER the import (higher UUIDv7)
+      const newOpsFromClientA: Operation[] = [
+        {
+          id: '019afd70-0001-7000-0000-000000000000', // AFTER import timestamp
+          actionType: '[Task] Update Task',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'New title' },
+          clientId: 'client-A',
+          vectorClock: { clientA: 7 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ];
+
+      const result = await service._filterOpsInvalidatedBySyncImport(newOpsFromClientA);
+
+      // EXPECTED: Op should be valid because it was created AFTER the import
+      expect(result.validOps.length).toBe(1);
+      expect(result.invalidatedOps.length).toBe(0);
     });
   });
 

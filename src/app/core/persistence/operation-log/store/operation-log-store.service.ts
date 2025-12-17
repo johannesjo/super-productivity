@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
-import { Operation, OperationLogEntry, VectorClock } from '../operation.types';
+import { Operation, OperationLogEntry, OpType, VectorClock } from '../operation.types';
 import { toEntityKey } from '../entity-key.util';
 
 const DB_NAME = 'SUP_OPS';
@@ -202,6 +202,41 @@ export class OperationLogStoreService {
   async getOpsAfterSeq(seq: number): Promise<OperationLogEntry[]> {
     await this._ensureInit();
     return this.db.getAll('ops', IDBKeyRange.lowerBound(seq, true));
+  }
+
+  /**
+   * Finds the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, or REPAIR)
+   * in the local operation log.
+   *
+   * This is used to filter incoming ops - any operation with a UUIDv7 timestamp
+   * BEFORE the latest full-state op should be discarded, as it references state
+   * that no longer exists.
+   *
+   * @returns The latest full-state operation, or undefined if none exists
+   */
+  async getLatestFullStateOp(): Promise<Operation | undefined> {
+    await this._ensureInit();
+
+    // Scan all ops to find full-state operations
+    // Note: We scan backwards from the end since the latest is most likely near the end
+    const allOps = await this.db.getAll('ops');
+
+    // Filter to full-state ops and find the one with the latest UUIDv7 timestamp
+    const fullStateOps = allOps.filter(
+      (entry) =>
+        entry.op.opType === OpType.SyncImport ||
+        entry.op.opType === OpType.BackupImport ||
+        entry.op.opType === OpType.Repair,
+    );
+
+    if (fullStateOps.length === 0) {
+      return undefined;
+    }
+
+    // Find the latest by UUIDv7 (lexicographic comparison works for UUIDv7)
+    return fullStateOps.reduce((latest, entry) =>
+      entry.op.id > latest.op.id ? entry : latest,
+    ).op;
   }
 
   async getUnsynced(): Promise<OperationLogEntry[]> {
