@@ -325,11 +325,20 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   async finishDay(): Promise<void> {
-    await this._beforeFinishDayService.executeActions();
-    // Wait for any ongoing sync to complete before archiving to avoid DB lock errors
-    await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
-      .pipe(first())
-      .toPromise();
+    try {
+      await this._beforeFinishDayService.executeActions();
+      // Wait for any ongoing sync to complete before archiving to avoid DB lock errors
+      await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
+        .pipe(first())
+        .toPromise();
+    } catch (error) {
+      Log.error('[DailySummary] Failed during pre-archive operations:', error);
+      this._snackService.open({
+        msg: T.F.SYNC.S.S_FINISH_DAY_SYNC_ERROR,
+        type: 'ERROR',
+      });
+      return;
+    }
     if (IS_ELECTRON && this.isForToday) {
       const isConfirm = await this._matDialog
         .open(DialogConfirmComponent, {

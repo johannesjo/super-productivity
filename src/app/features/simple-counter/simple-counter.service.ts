@@ -82,6 +82,9 @@ export class SimpleCounterService implements OnDestroy {
   }
 
   ngOnDestroy(): void {
+    // Flush any pending data before cleanup to prevent data loss
+    this._flushAccumulatedTime();
+
     this._subscriptions.unsubscribe();
     if (this._visibilityHandler && typeof document !== 'undefined') {
       document.removeEventListener('visibilitychange', this._visibilityHandler);
@@ -240,14 +243,27 @@ export class SimpleCounterService implements OnDestroy {
   }
 
   deleteSimpleCounter(id: string): void {
+    // Clean up accumulators to prevent memory leak
+    this._stopwatchAccumulator.clearOne(id);
+    this._modifiedClickCounters.delete(id);
     this._store$.dispatch(deleteSimpleCounter({ id }));
   }
 
   deleteSimpleCounters(ids: string[]): void {
+    // Clean up accumulators to prevent memory leak
+    for (const id of ids) {
+      this._stopwatchAccumulator.clearOne(id);
+      this._modifiedClickCounters.delete(id);
+    }
     this._store$.dispatch(deleteSimpleCounters({ ids }));
   }
 
   updateSimpleCounter(id: string, changes: Partial<SimpleCounter>): void {
+    // If type is changing, flush the old type's accumulated data first
+    if (changes.type !== undefined) {
+      this._stopwatchAccumulator.flushOne(id);
+      this._modifiedClickCounters.delete(id);
+    }
     this._store$.dispatch(updateSimpleCounter({ simpleCounter: { id, changes } }));
   }
 

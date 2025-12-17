@@ -1220,7 +1220,8 @@
         "RESTORE_ERROR": "Failed to restore data",
         "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated.",
         "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed.",
-        "LWW_CONFLICTS_AUTO_RESOLVED": "Sync conflicts auto-resolved: {{localWins}} local win(s), {{remoteWins}} remote win(s)"
+        "LWW_CONFLICTS_AUTO_RESOLVED": "Sync conflicts auto-resolved: {{localWins}} local win(s), {{remoteWins}} remote win(s)",
+        "FINISH_DAY_SYNC_ERROR": "Sync error while finishing day. Please try again."
       },
       "D_DATA_REPAIRED": {
         "TITLE": "Data Repair Executed",

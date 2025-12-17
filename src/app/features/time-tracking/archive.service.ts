@@ -79,20 +79,31 @@ export class ArchiveService {
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const newTaskArchiveUnsorted = taskAdapter.addMany(
-      flatTasks.map(({ subTasks, ...task }) => ({
-        ...task,
-        reminderId: undefined,
-        isDone: true,
-        dueWithTime: undefined,
-        dueDay: undefined,
-        _hideSubTasksMode: undefined,
-        doneOn:
-          task.isDone && task.doneOn
-            ? task.doneOn
-            : task.parentId
-              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
-              : now,
-      })),
+      flatTasks.map(({ subTasks, ...task }) => {
+        let doneOn: number;
+        if (task.isDone && task.doneOn) {
+          doneOn = task.doneOn;
+        } else if (task.parentId) {
+          const parent = flatTasks.find((t) => t.id === task.parentId);
+          if (!parent) {
+            Log.warn(
+              `[ArchiveService] Subtask ${task.id} has parentId ${task.parentId} but parent not found in flatTasks, using current time`,
+            );
+          }
+          doneOn = parent?.doneOn || now;
+        } else {
+          doneOn = now;
+        }
+        return {
+          ...task,
+          reminderId: undefined,
+          isDone: true,
+          dueWithTime: undefined,
+          dueDay: undefined,
+          _hideSubTasksMode: undefined,
+          doneOn,
+        };
+      }),
       taskArchiveState,
     );
     // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
@@ -114,6 +125,8 @@ export class ArchiveService {
     const newArchiveYoung = {
       ...newSorted1.archiveYoung,
       task: newTaskArchive,
+      // Note: lastFlush tracks when tasks were last moved to archiveYoung (daily).
+      // This is different from lastTimeTrackingFlush which tracks young→old flushes.
       lastFlush: now,
     };
     await this.pfapiService.m.archiveYoung.save(newArchiveYoung, {
@@ -150,9 +163,11 @@ export class ArchiveService {
     // By doing the flush here, we ensure it completes before this method returns.
     // The action is still dispatched for op-log capture (syncs to other clients).
     // ArchiveOperationHandler._handleFlushYoungToOld skips local operations.
-    const updatedArchiveYoung = await this.pfapiService.m.archiveYoung.load();
+    //
+    // IMPORTANT: We use `newArchiveYoung` directly instead of reloading from DB
+    // to avoid a race condition where the archive could change between save and load.
     const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
-      archiveYoung: updatedArchiveYoung,
+      archiveYoung: newArchiveYoung,
       archiveOld,
       threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
       now,
@@ -189,6 +204,10 @@ export class ArchiveService {
    * the client's archive consistent with the originating client.
    *
    * Used when receiving moveToArchive operations from other clients.
+   *
+   * Note: This method does NOT check if flush is due. Flushes are triggered
+   * only on the originating client and synced via the flushYoungToOld action.
+   * This ensures flushes happen exactly once, not on every receiving client.
    */
   async writeTasksToArchiveForRemoteSync(tasks: TaskWithSubTasks[]): Promise<void> {
     const now = Date.now();
@@ -209,20 +228,31 @@ export class ArchiveService {
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
     const newTaskArchiveUnsorted = taskAdapter.addMany(
-      flatTasks.map(({ subTasks, ...task }) => ({
-        ...task,
-        reminderId: undefined,
-        isDone: true,
-        dueWithTime: undefined,
-        dueDay: undefined,
-        _hideSubTasksMode: undefined,
-        doneOn:
-          task.isDone && task.doneOn
-            ? task.doneOn
-            : task.parentId
-              ? flatTasks.find((t) => t.id === task.parentId)?.doneOn || now
-              : now,
-      })),
+      flatTasks.map(({ subTasks, ...task }) => {
+        let doneOn: number;
+        if (task.isDone && task.doneOn) {
+          doneOn = task.doneOn;
+        } else if (task.parentId) {
+          const parent = flatTasks.find((t) => t.id === task.parentId);
+          if (!parent) {
+            Log.warn(
+              `[ArchiveService] Remote sync: Subtask ${task.id} has parentId ${task.parentId} but parent not found in flatTasks, using current time`,
+            );
+          }
+          doneOn = parent?.doneOn || now;
+        } else {
+          doneOn = now;
+        }
+        return {
+          ...task,
+          reminderId: undefined,
+          isDone: true,
+          dueWithTime: undefined,
+          dueDay: undefined,
+          _hideSubTasksMode: undefined,
+          doneOn,
+        };
+      }),
       taskArchiveState,
     );
     // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)

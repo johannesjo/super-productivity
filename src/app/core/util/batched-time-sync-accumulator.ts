@@ -53,8 +53,15 @@ export class BatchedTimeSyncAccumulator {
     const accumulated = this._unsyncedDuration.get(id);
     if (accumulated && accumulated.duration > 0) {
       this._dispatchSync(id, accumulated.date, accumulated.duration);
-      this._unsyncedDuration.delete(id);
     }
+    this._unsyncedDuration.delete(id);
+  }
+
+  /**
+   * Clears accumulated data for an entity without dispatching (e.g., when deleted).
+   */
+  clearOne(id: string): void {
+    this._unsyncedDuration.delete(id);
   }
 
   /**

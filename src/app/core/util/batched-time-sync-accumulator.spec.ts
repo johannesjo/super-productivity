@@ -160,6 +160,35 @@ describe('BatchedTimeSyncAccumulator', () => {
     });
   });
 
+  describe('clearOne', () => {
+    it('should remove entity without dispatching', () => {
+      accumulator.accumulate('entity1', 1000, '2024-01-15');
+      accumulator.accumulate('entity2', 2000, '2024-01-15');
+
+      accumulator.clearOne('entity1');
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+
+      // Flush should only dispatch entity2
+      accumulator.flush();
+      expect(dispatchSpy).toHaveBeenCalledTimes(1);
+      expect(dispatchSpy).toHaveBeenCalledWith('entity2', '2024-01-15', 2000);
+    });
+
+    it('should not error when clearing nonexistent entity', () => {
+      expect(() => accumulator.clearOne('nonexistent')).not.toThrow();
+    });
+
+    it('should prevent subsequent flush for cleared entity', () => {
+      accumulator.accumulate('entity1', 1000, '2024-01-15');
+      accumulator.clearOne('entity1');
+
+      accumulator.flush();
+
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+  });
+
   describe('resetSyncTime', () => {
     it('should reset the sync time', () => {
       jasmine.clock().install();

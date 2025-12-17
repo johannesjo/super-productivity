@@ -8,6 +8,9 @@ import {
   increaseSimpleCounterCounterToday,
   decreaseSimpleCounterCounterToday,
   setSimpleCounterCounterToday,
+  deleteSimpleCounter,
+  deleteSimpleCounters,
+  updateSimpleCounter,
 } from './store/simple-counter.actions';
 import { selectAllSimpleCounters } from './store/simple-counter.reducer';
 import { DateService } from 'src/app/core/date/date.service';
@@ -224,5 +227,173 @@ describe('SimpleCounterService', () => {
       expect(action.meta.isPersistent).toBe(true);
       expect(action.meta.entityType).toBe('SIMPLE_COUNTER');
     });
+  });
+
+  describe('deleteSimpleCounter', () => {
+    it('should dispatch deleteSimpleCounter action', fakeAsync(() => {
+      service.deleteSimpleCounter('counter1');
+      tick();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(deleteSimpleCounter({ id: 'counter1' }));
+    }));
+
+    it('should remove counter from _modifiedClickCounters set', fakeAsync(() => {
+      // First, mark the counter as modified
+      service.increaseCounterToday('counter1', 1);
+      tick();
+      dispatchSpy.calls.reset();
+
+      // Delete the counter
+      service.deleteSimpleCounter('counter1');
+      tick();
+
+      // Flush should NOT dispatch setSimpleCounterCounterToday for deleted counter
+      service.flushAccumulatedTime();
+      tick();
+
+      // Only the delete action should have been dispatched, no sync for counter1
+      const syncCalls = dispatchSpy.calls
+        .allArgs()
+        .filter(
+          (args) => args[0].type === '[SimpleCounter] Set SimpleCounter Counter Today',
+        );
+      expect(syncCalls.length).toBe(0);
+    }));
+  });
+
+  describe('deleteSimpleCounters', () => {
+    beforeEach(() => {
+      store.overrideSelector(selectAllSimpleCounters, [
+        createCounter('counter1', { countOnDay: { '2024-01-15': 6 } }),
+        createCounter('counter2', { countOnDay: { '2024-01-15': 3 } }),
+      ]);
+    });
+
+    it('should dispatch deleteSimpleCounters action', fakeAsync(() => {
+      service.deleteSimpleCounters(['counter1', 'counter2']);
+      tick();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        deleteSimpleCounters({ ids: ['counter1', 'counter2'] }),
+      );
+    }));
+
+    it('should remove all counters from _modifiedClickCounters set', fakeAsync(() => {
+      // Mark counters as modified
+      service.increaseCounterToday('counter1', 1);
+      service.increaseCounterToday('counter2', 1);
+      tick();
+      dispatchSpy.calls.reset();
+
+      // Delete the counters
+      service.deleteSimpleCounters(['counter1', 'counter2']);
+      tick();
+
+      // Flush should NOT dispatch setSimpleCounterCounterToday for deleted counters
+      service.flushAccumulatedTime();
+      tick();
+
+      const syncCalls = dispatchSpy.calls
+        .allArgs()
+        .filter(
+          (args) => args[0].type === '[SimpleCounter] Set SimpleCounter Counter Today',
+        );
+      expect(syncCalls.length).toBe(0);
+    }));
+  });
+
+  describe('updateSimpleCounter', () => {
+    it('should dispatch updateSimpleCounter action', fakeAsync(() => {
+      service.updateSimpleCounter('counter1', { title: 'New Title' });
+      tick();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        updateSimpleCounter({
+          simpleCounter: { id: 'counter1', changes: { title: 'New Title' } },
+        }),
+      );
+    }));
+
+    it('should flush stopwatch accumulator when type changes', fakeAsync(() => {
+      // Simulate accumulated stopwatch time by accessing the private field
+      // We'll test the effect indirectly by checking dispatch calls
+      service.updateSimpleCounter('counter1', { type: SimpleCounterType.StopWatch });
+      tick();
+
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        updateSimpleCounter({
+          simpleCounter: {
+            id: 'counter1',
+            changes: { type: SimpleCounterType.StopWatch },
+          },
+        }),
+      );
+    }));
+
+    it('should remove counter from _modifiedClickCounters when type changes', fakeAsync(() => {
+      // Mark counter as modified
+      service.increaseCounterToday('counter1', 1);
+      tick();
+      dispatchSpy.calls.reset();
+
+      // Change type (which should clear the modified tracker)
+      service.updateSimpleCounter('counter1', { type: SimpleCounterType.StopWatch });
+      tick();
+
+      // Flush should NOT dispatch for this counter since type change cleared it
+      service.flushAccumulatedTime();
+      tick();
+
+      const syncCalls = dispatchSpy.calls
+        .allArgs()
+        .filter(
+          (args) => args[0].type === '[SimpleCounter] Set SimpleCounter Counter Today',
+        );
+      expect(syncCalls.length).toBe(0);
+    }));
+
+    it('should NOT flush when updating non-type properties', fakeAsync(() => {
+      // Mark counter as modified
+      service.increaseCounterToday('counter1', 1);
+      tick();
+      dispatchSpy.calls.reset();
+
+      // Update title (should NOT clear modified tracker)
+      service.updateSimpleCounter('counter1', { title: 'New Title' });
+      tick();
+
+      // Flush SHOULD still dispatch for this counter
+      service.flushAccumulatedTime();
+      tick();
+
+      const syncCalls = dispatchSpy.calls
+        .allArgs()
+        .filter(
+          (args) => args[0].type === '[SimpleCounter] Set SimpleCounter Counter Today',
+        );
+      expect(syncCalls.length).toBe(1);
+    }));
+  });
+
+  describe('ngOnDestroy', () => {
+    it('should flush accumulated time before cleanup', fakeAsync(() => {
+      // Mark counter as modified
+      service.increaseCounterToday('counter1', 1);
+      tick();
+      dispatchSpy.calls.reset();
+
+      // Destroy the service
+      service.ngOnDestroy();
+      tick();
+
+      // Should have dispatched sync for the modified counter
+      expect(dispatchSpy).toHaveBeenCalledWith(
+        setSimpleCounterCounterToday({
+          id: 'counter1',
+          newVal: 6,
+          today: '2024-01-15',
+        }),
+      );
+    }));
   });
 });
