@@ -526,18 +526,54 @@ export class SyncService {
 
   /**
    * Get operations and latest sequence atomically with gap detection.
+   *
+   * OPTIMIZATION: When sinceSeq is before the latest full-state operation (SYNC_IMPORT,
+   * BACKUP_IMPORT, REPAIR), we skip to that operation's sequence instead. This prevents
+   * sending operations that will be filtered out by the client anyway, saving bandwidth
+   * and processing time.
    */
   async getOpsSinceWithSeq(
     userId: number,
     sinceSeq: number,
     excludeClient?: string,
     limit: number = 500,
-  ): Promise<{ ops: ServerOperation[]; latestSeq: number; gapDetected: boolean }> {
+  ): Promise<{
+    ops: ServerOperation[];
+    latestSeq: number;
+    gapDetected: boolean;
+    latestSnapshotSeq?: number;
+  }> {
     return prisma.$transaction(async (tx) => {
+      // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
+      // These operations supersede all previous operations
+      const latestFullStateOp = await tx.operation.findFirst({
+        where: {
+          userId,
+          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+        },
+        orderBy: { serverSeq: 'desc' },
+        select: { serverSeq: true },
+      });
+
+      const latestSnapshotSeq = latestFullStateOp?.serverSeq ?? undefined;
+
+      // OPTIMIZATION: If client is requesting ops from before the latest full-state op,
+      // start from the full-state op instead. Pre-import ops are superseded and will
+      // be filtered out by the client anyway.
+      let effectiveSinceSeq = sinceSeq;
+      if (latestSnapshotSeq !== undefined && sinceSeq < latestSnapshotSeq) {
+        // Start from one before the snapshot so it's included in results
+        effectiveSinceSeq = latestSnapshotSeq - 1;
+        Logger.info(
+          `[user:${userId}] Optimized download: skipping from sinceSeq=${sinceSeq} to ${effectiveSinceSeq} ` +
+            `(latest snapshot at seq ${latestSnapshotSeq})`,
+        );
+      }
+
       const ops = await tx.operation.findMany({
         where: {
           userId,
-          serverSeq: { gt: sinceSeq },
+          serverSeq: { gt: effectiveSinceSeq },
           ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
         },
         orderBy: {
@@ -588,11 +624,15 @@ export class SyncService {
           );
         }
 
-        // Case 4: Gap in returned operations
-        if (!excludeClient && ops.length > 0 && ops[0].serverSeq > sinceSeq + 1) {
+        // Case 4: Gap in returned operations (use original sinceSeq for gap detection)
+        if (
+          !excludeClient &&
+          ops.length > 0 &&
+          ops[0].serverSeq > effectiveSinceSeq + 1
+        ) {
           gapDetected = true;
           Logger.warn(
-            `[user:${userId}] Gap detected: expected seq ${sinceSeq + 1} but got ${ops[0].serverSeq}`,
+            `[user:${userId}] Gap detected: expected seq ${effectiveSinceSeq + 1} but got ${ops[0].serverSeq}`,
           );
         }
       }
@@ -616,7 +656,7 @@ export class SyncService {
         receivedAt: Number(row.receivedAt),
       }));
 
-      return { ops: mappedOps, latestSeq, gapDetected };
+      return { ops: mappedOps, latestSeq, gapDetected, latestSnapshotSeq };
     });
   }
 

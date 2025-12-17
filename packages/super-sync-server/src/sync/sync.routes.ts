@@ -309,12 +309,13 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Use atomic read to get ops and latestSeq in one transaction
         // This prevents race conditions where new ops arrive between the two reads
-        const { ops, latestSeq, gapDetected } = await syncService.getOpsSinceWithSeq(
-          userId,
-          sinceSeq,
-          excludeClient,
-          maxLimit + 1,
-        );
+        const { ops, latestSeq, gapDetected, latestSnapshotSeq } =
+          await syncService.getOpsSinceWithSeq(
+            userId,
+            sinceSeq,
+            excludeClient,
+            maxLimit + 1,
+          );
 
         const hasMore = ops.length > maxLimit;
         if (hasMore) ops.pop();
@@ -327,7 +328,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         Logger.info(
           `[user:${userId}] Download: ${ops.length} ops ` +
-            `(sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore}, gap=${gapDetected})`,
+            `(sinceSeq=${sinceSeq}, latestSeq=${latestSeq}, hasMore=${hasMore}, gap=${gapDetected}` +
+            `${latestSnapshotSeq ? `, snapshotSeq=${latestSnapshotSeq}` : ''})`,
         );
 
         const response: DownloadOpsResponse = {
@@ -335,6 +337,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           hasMore,
           latestSeq,
           gapDetected: gapDetected || undefined, // Only include if true
+          latestSnapshotSeq, // Optimization: tells client where effective state starts
         };
 
         return reply.send(response);

@@ -194,6 +194,12 @@ export interface DownloadOpsResponse {
    * - There's a gap in sequence numbers (operations were purged)
    */
   gapDetected?: boolean;
+  /**
+   * Server sequence of the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR).
+   * Fresh clients (sinceSeq=0) can use this to understand where the effective state starts.
+   * Operations before this seq are superseded by the full-state operation.
+   */
+  latestSnapshotSeq?: number;
 }
 
 // Snapshot types
