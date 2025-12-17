@@ -6,8 +6,10 @@ import { waitForAppReady } from './waits';
 /**
  * SuperSync server URL for E2E tests.
  * Server must be running with TEST_MODE=true.
+ * Defaults to port 1901 for e2e tests (dev server uses 1900).
  */
-export const SUPERSYNC_BASE_URL = 'http://localhost:1900';
+export const SUPERSYNC_BASE_URL =
+  process.env.SUPERSYNC_E2E_URL || 'http://localhost:1901';
 
 /**
  * Test user credentials returned from the server.

@@ -215,14 +215,19 @@ export class ArchiveOperationHandler {
 
   /**
    * Executes the flush from archiveYoung to archiveOld.
-   * Called for both local and remote flushYoungToOld operations.
+   * REMOTE ONLY: For local operations, the flush is already performed by
+   * ArchiveService.moveTasksToArchiveAndFlushArchiveIfDue() before action dispatch.
+   * This prevents race conditions with sync (see that method for details).
    *
    * This operation is deterministic - given the same timestamp and archive state,
    * it will produce the same result on all clients.
    */
   private async _handleFlushYoungToOld(action: PersistentAction): Promise<void> {
+    if (!action.meta?.isRemote) {
+      return; // Local: already written by ArchiveService before dispatch
+    }
+
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
-    const isRemote = !!action.meta?.isRemote;
     const pfapi = this._getPfapiService();
 
     const archiveYoung = await pfapi.m.archiveYoung.load();
@@ -242,7 +247,7 @@ export class ArchiveOperationHandler {
       },
       {
         isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: isRemote ? true : undefined,
+        isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
       },
     );
 
@@ -253,12 +258,12 @@ export class ArchiveOperationHandler {
       },
       {
         isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: isRemote ? true : undefined,
+        isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
       },
     );
 
     Log.log(
-      `______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via ${isRemote ? 'remote' : 'local'} op handler)\n_______________________`,
+      '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',
     );
   }
 

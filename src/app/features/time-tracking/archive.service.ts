@@ -4,7 +4,10 @@ import { flattenTasks } from '../tasks/store/task.selectors';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { taskAdapter } from '../tasks/store/task.adapter';
 import { PfapiService } from '../../pfapi/pfapi.service';
-import { sortTimeTrackingDataToArchiveYoung } from './sort-data-to-flush';
+import {
+  sortTimeTrackingAndTasksFromArchiveYoungToOld,
+  sortTimeTrackingDataToArchiveYoung,
+} from './sort-data-to-flush';
 import { Store } from '@ngrx/store';
 import { TimeTrackingActions } from './store/time-tracking.actions';
 import { flushYoungToOld } from './store/archive.actions';
@@ -138,10 +141,45 @@ export class ArchiveService {
       return;
     }
 
-    // Dispatch the flush action - this will be persisted and synced to other clients
-    // The actual flush operation is handled by ArchiveEffects.flushYoungToOld$
-    // This ensures other clients receive the operation and replay the same flush,
-    // maintaining deterministic archive state without syncing large archiveOld files.
+    // Perform the flush BEFORE dispatching the action.
+    // This prevents a race condition where sync starts before the effect completes:
+    // 1. Action dispatch -> effect queued
+    // 2. Method returns -> daily summary starts sync -> DB locked
+    // 3. Effect runs -> tries to write -> blocked by DB lock
+    //
+    // By doing the flush here, we ensure it completes before this method returns.
+    // The action is still dispatched for op-log capture (syncs to other clients).
+    // ArchiveOperationHandler._handleFlushYoungToOld skips local operations.
+    const updatedArchiveYoung = await this.pfapiService.m.archiveYoung.load();
+    const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+      archiveYoung: updatedArchiveYoung,
+      archiveOld,
+      threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
+      now,
+    });
+
+    await this.pfapiService.m.archiveYoung.save(
+      {
+        ...newSorted.archiveYoung,
+        lastTimeTrackingFlush: now,
+      },
+      { isUpdateRevAndLastUpdate: true },
+    );
+
+    await this.pfapiService.m.archiveOld.save(
+      {
+        ...newSorted.archiveOld,
+        lastTimeTrackingFlush: now,
+      },
+      { isUpdateRevAndLastUpdate: true },
+    );
+
+    Log.log(
+      '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via ArchiveService)\n_______________________',
+    );
+
+    // Dispatch for op-log capture - syncs to other clients
+    // The handler skips local operations since we already did the flush above
     this._store.dispatch(flushYoungToOld({ timestamp: now }));
   }
 

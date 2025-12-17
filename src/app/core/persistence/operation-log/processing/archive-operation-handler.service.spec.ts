@@ -1103,7 +1103,7 @@ describe('ArchiveOperationHandler', () => {
       });
 
       describe('flushYoungToOld', () => {
-        it('should NOT pass isIgnoreDBLock for local operations', async () => {
+        it('should skip local operations (flush done by ArchiveService before dispatch)', async () => {
           const timestamp = Date.now();
           const action = {
             type: flushYoungToOld.type,
@@ -1111,20 +1111,19 @@ describe('ArchiveOperationHandler', () => {
             meta: { isPersistent: true, isRemote: false },
           } as unknown as PersistentAction;
 
-          try {
-            await service.handleOperation(action);
-          } catch {
-            // Expected - sort function returns undefined in tests
-          }
+          // Reset spies to verify nothing is called
+          (mockPfapiService.m.archiveYoung.load as jasmine.Spy).calls.reset();
+          (mockPfapiService.m.archiveYoung.save as jasmine.Spy).calls.reset();
+          (mockPfapiService.m.archiveOld.load as jasmine.Spy).calls.reset();
+          (mockPfapiService.m.archiveOld.save as jasmine.Spy).calls.reset();
 
-          // Verify save was called without isIgnoreDBLock: true
-          const saveCall = (
-            mockPfapiService.m.archiveYoung.save as jasmine.Spy
-          ).calls.mostRecent();
-          if (saveCall) {
-            const options = saveCall.args[1];
-            expect(options.isIgnoreDBLock).toBeUndefined();
-          }
+          await service.handleOperation(action);
+
+          // Verify NO archive operations were performed for local actions
+          expect(mockPfapiService.m.archiveYoung.load).not.toHaveBeenCalled();
+          expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
+          expect(mockPfapiService.m.archiveOld.load).not.toHaveBeenCalled();
+          expect(mockPfapiService.m.archiveOld.save).not.toHaveBeenCalled();
         });
 
         it('should pass isIgnoreDBLock: true for remote operations', async () => {
