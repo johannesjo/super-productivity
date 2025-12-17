@@ -18,7 +18,7 @@ import { waitForAppReady } from '../../utils/waits';
  * the full stack including UI, network, and real IndexedDB isolation.
  *
  * Prerequisites:
- * - super-sync-server running on localhost:1900 with TEST_MODE=true
+ * - super-sync-server running on localhost:1901 with TEST_MODE=true
  * - Frontend running on localhost:4242
  *
  * Run with: npm run e2e:supersync
@@ -41,7 +41,7 @@ base.describe('@supersync SuperSync E2E', () => {
       serverHealthy = await isServerHealthy();
       if (!serverHealthy) {
         console.warn(
-          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+          'SuperSync server not healthy at http://localhost:1901 - skipping tests',
         );
       }
     }

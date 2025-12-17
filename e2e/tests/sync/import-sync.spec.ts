@@ -17,7 +17,7 @@ import { ImportPage } from '../../pages/import.page';
  * This includes active tasks, archived tasks (worklog), and projects.
  *
  * Prerequisites:
- * - super-sync-server running on localhost:1900 with TEST_MODE=true
+ * - super-sync-server running on localhost:1901 with TEST_MODE=true
  * - Frontend running on localhost:4242
  *
  * Run with: npm run e2e:playwright -- --grep @importsync
@@ -35,7 +35,7 @@ base.describe('@importsync @supersync Import + Sync E2E', () => {
       serverHealthy = await isServerHealthy();
       if (!serverHealthy) {
         console.warn(
-          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+          'SuperSync server not healthy at http://localhost:1901 - skipping tests',
         );
       }
     }

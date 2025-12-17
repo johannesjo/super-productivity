@@ -155,7 +155,7 @@ base.describe('@supersync SuperSync Models', () => {
       serverHealthy = await isServerHealthy();
       if (!serverHealthy) {
         console.warn(
-          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+          'SuperSync server not healthy at http://localhost:1901 - skipping tests',
         );
       }
     }
@@ -259,62 +259,57 @@ base.describe('@supersync SuperSync Models', () => {
       // Create task
       await clientA.workView.addTask(taskName);
 
-      // Add tag to task via task detail
+      // Helper to dismiss all overlays reliably
+      const dismissAllOverlays = async (): Promise<void> => {
+        // Dismiss backdrops by pressing Escape multiple times
+        for (let j = 0; j < 3; j++) {
+          await clientA.page.keyboard.press('Escape');
+          await clientA.page.waitForTimeout(100);
+        }
+        // Wait for any overlays to disappear
+        const overlayBackdrop = clientA.page.locator('.cdk-overlay-backdrop');
+        try {
+          await overlayBackdrop.waitFor({ state: 'hidden', timeout: 2000 });
+        } catch {
+          // If still visible, force click to dismiss
+          if (await overlayBackdrop.isVisible()) {
+            await overlayBackdrop.click({ force: true });
+            await clientA.page.waitForTimeout(200);
+          }
+        }
+      };
+
+      // Dismiss any existing overlays first
+      await dismissAllOverlays();
+
+      // Add tag to task via context menu (most reliable method)
       const taskLocator = clientA.page.locator(`task:has-text("${taskName}")`);
-      await taskLocator.click();
+      await taskLocator.waitFor({ state: 'visible' });
 
-      // Hover to ensure buttons appear
-      await taskLocator.hover();
-      await clientA.page.waitForTimeout(500);
-
-      // Click "Edit Tags" button
-      const editTagsBtn = clientA.page
-        .locator('button[title="Edit tags"], button[aria-label="Edit tags"]')
-        .first();
-
-      // Retry loop for opening tags menu
+      // Retry loop for opening tags menu via context menu
       let menuOpened = false;
       for (let i = 0; i < 3; i++) {
         try {
-          if (await editTagsBtn.isVisible()) {
-            await editTagsBtn.click();
-          } else {
-            // Fallback: Try context menu
-            await taskLocator.click({ button: 'right' });
-            // The context menu item is named "Toggle Tags" in English (from T.F.TASK.CMP.TOGGLE_TAGS)
-            // But we also check for "Edit tags" just in case
-            const ctxEditTags = clientA.page.locator('.e2e-edit-tags-btn').first();
+          // Ensure clean state before each attempt
+          await dismissAllOverlays();
 
-            if (await ctxEditTags.isVisible()) {
-              await ctxEditTags.click();
-            } else {
-              // Last resort: shortcut
-              console.log('Context menu item not found, trying shortcut...');
-              // Close context menu if open
-              const backdrop = clientA.page.locator('.cdk-overlay-backdrop');
-              if (await backdrop.isVisible()) {
-                await backdrop.click({ force: true });
-              } else {
-                await clientA.page.keyboard.press('Escape');
-              }
-              await clientA.page.waitForTimeout(200);
+          // Right-click on task to open context menu (doesn't trigger edit mode)
+          await taskLocator.click({ button: 'right' });
+          await clientA.page.waitForTimeout(300);
 
-              // Ensure task is focused/selected
-              await taskLocator.click({ force: true });
-              await clientA.page.waitForTimeout(200);
-              // Use keyboard shortcut to open the tag menu (default: "G")
-              await clientA.page.keyboard.press('g');
-            }
-          }
+          // Find and click the "Edit tags" button in context menu
+          const ctxEditTags = clientA.page.locator('.e2e-edit-tags-btn').first();
+          await ctxEditTags.waitFor({ state: 'visible', timeout: 3000 });
+          await ctxEditTags.click();
 
-          // Dialog "Edit Tags" - now it's a menu
-          const menuPanel = clientA.page.locator('.mat-mdc-menu-panel');
-          await menuPanel.waitFor({ state: 'visible', timeout: 3000 });
+          // Wait for tag submenu to appear
+          const menuPanel = clientA.page.locator('.mat-mdc-menu-panel').last();
+          await menuPanel.waitFor({ state: 'visible', timeout: 5000 });
           menuOpened = true;
-          break; // Success
+          break;
         } catch (e) {
           console.log(`Attempt ${i + 1} to open tags menu failed: ${e}, retrying...`);
-          await clientA.page.keyboard.press('Escape'); // Reset state
+          await dismissAllOverlays();
           await clientA.page.waitForTimeout(500);
         }
       }
@@ -323,23 +318,18 @@ base.describe('@supersync SuperSync Models', () => {
         throw new Error('Failed to open tags menu after 3 attempts');
       }
 
-      const menuPanel = clientA.page.locator('.mat-mdc-menu-panel');
-      // Select the tag from list
-      const tagOption = menuPanel
+      // Select the tag from the submenu (last menu panel is the tag submenu)
+      const tagMenu = clientA.page.locator('.mat-mdc-menu-panel').last();
+      const tagOption = tagMenu
         .locator('button[mat-menu-item]')
         .filter({ hasText: tagName })
         .first();
-      if (await tagOption.isVisible()) {
-        await tagOption.click();
-      } else {
-        console.log('Tag not found in menu, creating new via prompt if needed');
-        // If not found, maybe we need to scroll or it's not in the list
-      }
+      await tagOption.waitFor({ state: 'visible', timeout: 3000 });
+      await tagOption.click();
 
-      // Close menu if still open (clicking option might close it)
-      if (await menuPanel.isVisible()) {
-        await clientA.page.keyboard.press('Escape');
-      }
+      // Wait for menus to close after selection
+      await clientA.page.waitForTimeout(500);
+      await dismissAllOverlays();
 
       // Ensure tag is shown on Client A before syncing
       await expect(taskLocator).toContainText(tagName);

@@ -65,7 +65,7 @@ base.describe('@supersync SuperSync Repeatable Task Sync', () => {
       serverHealthy = await isServerHealthy();
       if (!serverHealthy) {
         console.warn(
-          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+          'SuperSync server not healthy at http://localhost:1901 - skipping tests',
         );
       }
     }

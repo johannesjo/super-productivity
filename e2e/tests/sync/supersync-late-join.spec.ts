@@ -27,7 +27,7 @@ base.describe('@supersync SuperSync Late Join', () => {
       serverHealthy = await isServerHealthy();
       if (!serverHealthy) {
         console.warn(
-          'SuperSync server not healthy at http://localhost:1900 - skipping tests',
+          'SuperSync server not healthy at http://localhost:1901 - skipping tests',
         );
       }
     }
@@ -92,36 +92,44 @@ base.describe('@supersync SuperSync Late Join', () => {
         // Since B has local data and server has remote data, and they might touch global settings or similar,
         // a conflict might occur. However, tasks are distinct IDs, so they should merge cleanly.
         // If a conflict dialog appears for Global Config or similar, we should handle it.
-        // The helper `syncAndWait` doesn't handle conflicts automatically, but the tests in `supersync.spec.ts`
-        // seem to expect `Conflict dialog detected` in logs and handle it?
-        // Let's check if conflict dialog is visible and resolve it if so.
-        // Usually "Use Remote" or "Use Local" is fine if keys don't overlap.
-        // For distinct tasks, no conflict should occur on the tasks themselves.
-
+        // Check multiple times as dialog might appear with slight delay
         const conflictDialog = clientB.page.locator('dialog-conflict-resolution');
-        if (await conflictDialog.isVisible({ timeout: 2000 })) {
-          console.log('Conflict dialog detected on B, resolving...');
-          // Click "Use Local" or "Use Remote" or "Merge"
-          // Since we want to keep B's local tasks and A's remote tasks, valid merge should happen.
-          // But if it's a conflict on a singleton model (like Global Config), we just pick one.
-          // Let's pick Remote for config.
-          const useRemoteBtn = conflictDialog
-            .locator('button')
-            .filter({ hasText: 'Remote' })
-            .first();
-          if (await useRemoteBtn.isVisible()) {
-            await useRemoteBtn.click();
-          } else {
-            // Fallback
-            await clientB.page.keyboard.press('Escape');
+        for (let attempt = 0; attempt < 3; attempt++) {
+          try {
+            await conflictDialog.waitFor({ state: 'visible', timeout: 2000 });
+            console.log('Conflict dialog detected on B, resolving...');
+            // Pick Remote for singleton models (like Global Config)
+            const useRemoteBtn = conflictDialog
+              .locator('button')
+              .filter({ hasText: 'Remote' })
+              .first();
+            if (await useRemoteBtn.isVisible()) {
+              await useRemoteBtn.click();
+              // Wait for dialog to close
+              await conflictDialog.waitFor({ state: 'hidden', timeout: 5000 });
+            } else {
+              // Fallback: dismiss dialog
+              await clientB.page.keyboard.press('Escape');
+            }
+            // Brief wait for any subsequent dialogs
+            await clientB.page.waitForTimeout(500);
+          } catch {
+            // No conflict dialog visible, proceed
+            break;
           }
         }
 
-        // Wait for sync to settle
-        await clientB.page.waitForTimeout(1000);
+        // Wait for sync to fully settle after conflict resolution
+        await clientB.page.waitForTimeout(2000);
+
+        // Trigger another sync to ensure all data is propagated
+        await clientB.sync.syncAndWait();
 
         // A Syncs to get B's data
         await clientA.sync.syncAndWait();
+
+        // Brief wait for state to propagate
+        await clientA.page.waitForTimeout(1000);
 
         // VERIFICATION
         // Both clients should have A1, A2, A3, B1, B2, B3
