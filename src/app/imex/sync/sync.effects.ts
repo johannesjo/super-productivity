@@ -62,6 +62,7 @@ export class SyncEffects {
             filter((ids) => ids.includes(SYNC_BEFORE_CLOSE_ID)),
             tap(() => {
               this._taskService.setCurrentId(null);
+              this._simpleCounterService.flushAccumulatedTime();
               this._simpleCounterService.turnOffAll();
             }),
             // minimally hacky delay to wait for inMemoryDatabase update...

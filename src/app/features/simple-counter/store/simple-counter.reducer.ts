@@ -26,12 +26,15 @@ import {
   setSimpleCounterCounterOff,
   setSimpleCounterCounterOn,
   setSimpleCounterCounterToday,
+  syncSimpleCounterTime,
+  tickSimpleCounterLocal,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
   updateAllSimpleCounters,
   updateSimpleCounter,
   upsertSimpleCounter,
 } from './simple-counter.actions';
+import { PersistentActionMeta } from '../../../core/persistence/operation-log/persistent-action.interface';
 
 export const SIMPLE_COUNTER_FEATURE_NAME = 'simpleCounter';
 
@@ -137,7 +140,14 @@ const _reducer = createReducer<SimpleCounterState>(
     ),
   ),
 
-  on(increaseSimpleCounterCounterToday, (state, { id, increaseBy, today }) => {
+  // Used for ClickCounter - immediate persistent sync
+  // For remote: entity already updated by operation applier, skip increment
+  on(increaseSimpleCounterCounterToday, (state, action) => {
+    if ((action as { meta?: PersistentActionMeta }).meta?.isRemote) {
+      return state;
+    }
+
+    const { id, increaseBy, today } = action;
     const todayStr = today;
     const oldEntity = state.entities[id] as SimpleCounter;
     const currentTotalCount = oldEntity.countOnDay || {};
@@ -157,7 +167,13 @@ const _reducer = createReducer<SimpleCounterState>(
     );
   }),
 
-  on(decreaseSimpleCounterCounterToday, (state, { id, decreaseBy, today }) => {
+  // For remote: entity already updated by operation applier, skip decrement
+  on(decreaseSimpleCounterCounterToday, (state, action) => {
+    if ((action as { meta?: PersistentActionMeta }).meta?.isRemote) {
+      return state;
+    }
+
+    const { id, decreaseBy, today } = action;
     const todayStr = today;
     const oldEntity = state.entities[id] as SimpleCounter;
     const currentTotalCount = oldEntity.countOnDay || {};
@@ -170,6 +186,55 @@ const _reducer = createReducer<SimpleCounterState>(
           countOnDay: {
             ...currentTotalCount,
             [todayStr]: newValForToday,
+          },
+        },
+      },
+      state,
+    );
+  }),
+
+  // Non-persistent local tick for StopWatch - immediate UI update
+  on(tickSimpleCounterLocal, (state, { id, increaseBy, today }) => {
+    const oldEntity = state.entities[id] as SimpleCounter;
+    const currentTotalCount = oldEntity.countOnDay || {};
+    const currentVal = currentTotalCount[today] || 0;
+    const newValForToday = currentVal + increaseBy;
+    return adapter.updateOne(
+      {
+        id,
+        changes: {
+          countOnDay: {
+            ...currentTotalCount,
+            [today]: newValForToday,
+          },
+        },
+      },
+      state,
+    );
+  }),
+
+  // Batched sync for StopWatch time - only applies for remote actions
+  on(syncSimpleCounterTime, (state, action) => {
+    // Local dispatch: no-op (state already updated by tickSimpleCounterLocal)
+    if (!(action.meta as PersistentActionMeta).isRemote) {
+      return state;
+    }
+
+    const { id, date, duration } = action;
+    const counter = state.entities[id];
+    if (!counter) {
+      return state;
+    }
+
+    const currentTotalCount = counter.countOnDay || {};
+    const currentVal = currentTotalCount[date] || 0;
+    return adapter.updateOne(
+      {
+        id,
+        changes: {
+          countOnDay: {
+            ...currentTotalCount,
+            [date]: currentVal + duration,
           },
         },
       },

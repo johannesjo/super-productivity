@@ -127,17 +127,10 @@ export const decreaseSimpleCounterCounterToday = createAction(
   }),
 );
 
+// Non-persistent - isOn state is local only (shouldn't sync across devices)
 export const toggleSimpleCounterCounter = createAction(
   '[SimpleCounter] Toggle SimpleCounter Counter',
-  (counterProps: { id: string }) => ({
-    ...counterProps,
-    meta: {
-      isPersistent: true,
-      entityType: 'SIMPLE_COUNTER',
-      entityId: counterProps.id,
-      opType: OpType.Update,
-    } satisfies PersistentActionMeta,
-  }),
+  props<{ id: string }>(),
 );
 
 // Internal cleanup action - typically triggered automatically, no persistence
@@ -145,27 +138,37 @@ export const turnOffAllSimpleCounterCounters = createAction(
   '[SimpleCounter] Turn off all simple counters',
 );
 
+// Non-persistent - isOn state is local only (shouldn't sync across devices)
 export const setSimpleCounterCounterOff = createAction(
   '[SimpleCounter] Set SimpleCounter Counter Off',
-  (counterProps: { id: string }) => ({
-    ...counterProps,
-    meta: {
-      isPersistent: true,
-      entityType: 'SIMPLE_COUNTER',
-      entityId: counterProps.id,
-      opType: OpType.Update,
-    } satisfies PersistentActionMeta,
-  }),
+  props<{ id: string }>(),
 );
 
+// Non-persistent - isOn state is local only (shouldn't sync across devices)
 export const setSimpleCounterCounterOn = createAction(
   '[SimpleCounter] Set SimpleCounter Counter On',
-  (counterProps: { id: string }) => ({
-    ...counterProps,
+  props<{ id: string }>(),
+);
+
+// Non-persistent local tick for immediate UI updates (StopWatch only)
+// Accumulated and synced periodically via syncSimpleCounterTime
+export const tickSimpleCounterLocal = createAction(
+  '[SimpleCounter] Tick Local',
+  props<{ id: string; increaseBy: number; today: string }>(),
+);
+
+// Persistent sync action for batched StopWatch time updates
+// Dispatched every 5 minutes and when counter stops
+// Local dispatch: no-op (state already updated by tickSimpleCounterLocal)
+// Remote dispatch: applies accumulated duration
+export const syncSimpleCounterTime = createAction(
+  '[SimpleCounter] Sync counter time',
+  (actionProps: { id: string; date: string; duration: number }) => ({
+    ...actionProps,
     meta: {
       isPersistent: true,
       entityType: 'SIMPLE_COUNTER',
-      entityId: counterProps.id,
+      entityId: actionProps.id,
       opType: OpType.Update,
     } satisfies PersistentActionMeta,
   }),
