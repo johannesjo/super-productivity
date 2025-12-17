@@ -148,6 +148,15 @@ const validateUpdatePayload = (
     }
   }
 
+  // Check for bulk ID-based update shape: { taskIds: string[] }
+  // Used by actions like planTasksForToday, removeTasksFromTodayTag
+  if (entityKey) {
+    const idsKey = entityKey + 'Ids';
+    if (Array.isArray(p[idsKey])) {
+      return { success: true };
+    }
+  }
+
   // Check if there's any entity-like object in payload
   const entity = findEntityInPayload(p);
   if (entity && typeof entity === 'object' && (entity as Record<string, unknown>).id) {
