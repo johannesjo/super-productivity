@@ -112,10 +112,9 @@ export class GlobalConfigEffects {
       this._actions$.pipe(
         ofType(updateGlobalConfigSection),
         filter(({ sectionKey, sectionCfg }) => sectionKey === 'misc'),
-        // eslint-disable-next-line
         filter(
-          ({ sectionKey, sectionCfg }) =>
-            sectionCfg && !!(sectionCfg as MiscConfig).startOfNextDay,
+          ({ sectionCfg }) =>
+            sectionCfg && typeof (sectionCfg as MiscConfig).startOfNextDay === 'number',
         ),
         tap(({ sectionKey, sectionCfg }) => {
           // eslint-disable-next-line
