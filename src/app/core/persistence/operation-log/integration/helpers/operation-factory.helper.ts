@@ -243,3 +243,63 @@ export const createMinimalGlobalConfigPayload = (
   },
   ...overrides,
 });
+
+/**
+ * Factory for creating TaskRepeatCfg operations.
+ */
+export const createTaskRepeatCfgOperation = (
+  client: TestClient,
+  cfgId: string,
+  opType: OpType,
+  payload: Record<string, unknown>,
+): Operation => {
+  const actionTypeMap: Record<OpType, string> = {
+    [OpType.Create]: '[TaskRepeatCfg] Add Task Repeat Cfg',
+    [OpType.Update]: '[TaskRepeatCfg] Update Task Repeat Cfg',
+    [OpType.Delete]: '[TaskRepeatCfg] Delete Task Repeat Cfg',
+    [OpType.Move]: '[TaskRepeatCfg] Move',
+    [OpType.Batch]: '[TaskRepeatCfg] Batch Update',
+    [OpType.SyncImport]: '[TaskRepeatCfg] Sync Import',
+    [OpType.BackupImport]: '[TaskRepeatCfg] Backup Import',
+    [OpType.Repair]: '[TaskRepeatCfg] Repair',
+  };
+
+  return client.createOperation({
+    actionType: actionTypeMap[opType] || '[TaskRepeatCfg] Update Task Repeat Cfg',
+    opType,
+    entityType: 'TASK_REPEAT_CFG',
+    entityId: cfgId,
+    payload,
+  });
+};
+
+/**
+ * Creates a minimal TaskRepeatCfg payload for testing.
+ * Based on the TaskRepeatCfg model structure.
+ */
+export const createMinimalTaskRepeatCfgPayload = (
+  id: string,
+  overrides: Record<string, unknown> = {},
+): Record<string, unknown> => ({
+  id,
+  title: `Repeat ${id}`,
+  repeatCycle: 'DAILY',
+  repeatEvery: 1,
+  startDate: '2024-01-01',
+  lastTaskCreation: 0,
+  lastTaskCreationDay: null,
+  deletedInstanceDates: [],
+  defaultEstimate: 0,
+  order: 0,
+  tagIds: [],
+  projectId: null,
+  ...overrides,
+});
+
+/**
+ * Creates deterministic task ID for repeat instance.
+ * Mirrors the logic in get-repeatable-task-id.util.ts
+ */
+export const getTestRepeatableTaskId = (cfgId: string, dueDay: string): string => {
+  return `rpt_${cfgId}_${dueDay}`;
+};
