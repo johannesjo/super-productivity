@@ -8,12 +8,14 @@ import {
 import { Operation, OpType, EntityType } from '../operation.types';
 import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
+import { HydrationStateService } from './hydration-state.service';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
   let mockStore: jasmine.SpyObj<Store>;
   let mockDependencyResolver: jasmine.SpyObj<DependencyResolverService>;
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
+  let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
 
   const createMockOperation = (
     id: string,
@@ -43,6 +45,10 @@ describe('OperationApplierService', () => {
     mockArchiveOperationHandler = jasmine.createSpyObj('ArchiveOperationHandler', [
       'handleOperation',
     ]);
+    mockHydrationState = jasmine.createSpyObj('HydrationStateService', [
+      'startApplyingRemoteOps',
+      'endApplyingRemoteOps',
+    ]);
 
     // Default: no dependencies
     mockDependencyResolver.extractDependencies.and.returnValue([]);
@@ -57,6 +63,7 @@ describe('OperationApplierService', () => {
         { provide: Store, useValue: mockStore },
         { provide: DependencyResolverService, useValue: mockDependencyResolver },
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
+        { provide: HydrationStateService, useValue: mockHydrationState },
       ],
     });
 
@@ -317,6 +324,134 @@ describe('OperationApplierService', () => {
       expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
       expect(result.appliedOps).toEqual([ops[0], ops[1]]);
       expect(result.failedOp!.op).toBe(ops[2]);
+    });
+  });
+
+  describe('error paths', () => {
+    it('should return failed op when archiveOperationHandler throws', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+      const archiveError = new Error('Archive write failed');
+
+      mockArchiveOperationHandler.handleOperation.and.rejectWith(archiveError);
+
+      const result = await service.applyOperations([op]);
+
+      expect(result.appliedOps).toEqual([]);
+      expect(result.failedOp).toBeDefined();
+      expect(result.failedOp!.op).toBe(op);
+      expect(result.failedOp!.error).toBe(archiveError);
+    });
+
+    it('should return failed op when extractDependencies throws', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+      const depError = new Error('Dependency extraction failed');
+
+      mockDependencyResolver.extractDependencies.and.throwError(depError);
+
+      const result = await service.applyOperations([op]);
+
+      expect(result.appliedOps).toEqual([]);
+      expect(result.failedOp).toBeDefined();
+      expect(result.failedOp!.op).toBe(op);
+      expect(result.failedOp!.error.message).toBe('Dependency extraction failed');
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('should return failed op when checkDependencies throws', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+      const checkError = new Error('Dependency check failed');
+
+      mockDependencyResolver.checkDependencies.and.rejectWith(checkError);
+
+      const result = await service.applyOperations([op]);
+
+      expect(result.appliedOps).toEqual([]);
+      expect(result.failedOp).toBeDefined();
+      expect(result.failedOp!.op).toBe(op);
+      expect(result.failedOp!.error).toBe(checkError);
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('should convert non-Error throwables to Error objects', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      mockDependencyResolver.extractDependencies.and.callFake(() => {
+        throw 'string error';
+      });
+
+      const result = await service.applyOperations([op]);
+
+      expect(result.failedOp).toBeDefined();
+      expect(result.failedOp!.error).toBeInstanceOf(Error);
+      expect(result.failedOp!.error.message).toBe('string error');
+    });
+  });
+
+  describe('hydration state tracking', () => {
+    it('should call startApplyingRemoteOps at start', async () => {
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op]);
+
+      expect(mockHydrationState.startApplyingRemoteOps).toHaveBeenCalledTimes(1);
+      expect(mockHydrationState.endApplyingRemoteOps).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call endApplyingRemoteOps even on error', async () => {
+      const op = createMockOperation('op-1');
+      const testError = new Error('Test failure');
+
+      mockDependencyResolver.extractDependencies.and.throwError(testError);
+
+      await service.applyOperations([op]);
+
+      expect(mockHydrationState.startApplyingRemoteOps).toHaveBeenCalledTimes(1);
+      expect(mockHydrationState.endApplyingRemoteOps).toHaveBeenCalledTimes(1);
+    });
+
+    it('should call endApplyingRemoteOps after all ops', async () => {
+      const ops = [
+        createMockOperation('op-1'),
+        createMockOperation('op-2'),
+        createMockOperation('op-3'),
+      ];
+
+      await service.applyOperations(ops);
+
+      expect(mockHydrationState.startApplyingRemoteOps).toHaveBeenCalledTimes(1);
+      expect(mockHydrationState.endApplyingRemoteOps).toHaveBeenCalledTimes(1);
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(3);
+    });
+  });
+
+  describe('isLocalHydration option', () => {
+    it('should skip dependency checks when isLocalHydration is true', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      expect(mockDependencyResolver.extractDependencies).not.toHaveBeenCalled();
+      expect(mockDependencyResolver.checkDependencies).not.toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should skip archiveOperationHandler when isLocalHydration is true', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      expect(mockArchiveOperationHandler.handleOperation).not.toHaveBeenCalled();
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+    });
+
+    it('should still call dependency checks when isLocalHydration is false', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      await service.applyOperations([op], { isLocalHydration: false });
+
+      expect(mockDependencyResolver.extractDependencies).toHaveBeenCalledTimes(1);
+      expect(mockDependencyResolver.checkDependencies).toHaveBeenCalledTimes(1);
+      expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
     });
   });
 });
