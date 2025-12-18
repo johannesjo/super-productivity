@@ -136,9 +136,9 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         await createProjectReliably(clientA.page, proj2Name);
 
         // 2. Create Task in Project 1
-        // Navigate to Project 1 using sidebar nav item (more specific than getByText)
+        // Navigate to Project 1 using sidebar nav item (button with nav-link class)
         const projectBtn1 = clientA.page.locator(
-          `.nav-sidenav nav-item a:has-text("${proj1Name}")`,
+          `.nav-sidenav .nav-link:has-text("${proj1Name}")`,
         );
         await projectBtn1.waitFor({ state: 'visible', timeout: 10000 });
         await projectBtn1.click();
@@ -158,7 +158,7 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         // Verify B has projects and task in Proj 1
         const projectBtnB1 = clientB.page.locator(
-          `.nav-sidenav nav-item a:has-text("${proj1Name}")`,
+          `.nav-sidenav .nav-link:has-text("${proj1Name}")`,
         );
         await expect(projectBtnB1).toBeVisible({ timeout: 10000 });
         await projectBtnB1.click();
@@ -221,7 +221,7 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         // Go to Proj 2 and check
         const projectBtn2 = clientA.page.locator(
-          `.nav-sidenav nav-item a:has-text("${proj2Name}")`,
+          `.nav-sidenav .nav-link:has-text("${proj2Name}")`,
         );
         await projectBtn2.click();
         await clientA.page.waitForLoadState('networkidle');
@@ -235,7 +235,7 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         // 6. Verify Task is in Project 2 on Client B
         const projectBtnB2 = clientB.page.locator(
-          `.nav-sidenav nav-item a:has-text("${proj2Name}")`,
+          `.nav-sidenav .nav-link:has-text("${proj2Name}")`,
         );
         await projectBtnB2.click();
         await clientB.page.waitForLoadState('networkidle');
