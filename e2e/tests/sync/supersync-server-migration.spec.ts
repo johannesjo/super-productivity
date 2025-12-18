@@ -180,24 +180,38 @@ base.describe.serial('@supersync SuperSync Server Migration', () => {
         // Create and sync initial data
         const task1 = `Initial-${testRunId}`;
         await clientA.workView.addTask(task1);
+        // Wait for task to be fully created before syncing
+        await waitForTask(clientA.page, task1);
         await clientA.sync.syncAndWait();
+        console.log('[Test] Task 1 created and synced to server 1');
 
         // Create MORE data AFTER syncing (pending local changes)
         const task2 = `Pending-${testRunId}`;
         await clientA.workView.addTask(task2);
+        // Wait for task to be fully created in store before migration
+        await waitForTask(clientA.page, task2);
+        console.log('[Test] Task 2 created (pending local change)');
         // DON'T sync yet - task2 is a pending local change
 
         // Migrate to new server
         const user2 = await createTestUser(`${testRunId}-server2`);
         const syncConfig2 = getSuperSyncConfig(user2);
+        console.log('[Test] Migrating to new server...');
         await clientA.sync.setupSuperSync(syncConfig2);
 
         // Sync to new server (should include both synced and pending data)
         await clientA.sync.syncAndWait();
+        console.log('[Test] Migration sync completed');
+
+        // Verify Client A still has both tasks after migration
+        await waitForTask(clientA.page, task1);
+        await waitForTask(clientA.page, task2);
 
         // Client B joins
         clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
         await clientB.sync.setupSuperSync(syncConfig2);
+        // Add settling time before sync
+        await clientB.page.waitForTimeout(500);
         await clientB.sync.syncAndWait();
 
         // Verify Client B has BOTH tasks

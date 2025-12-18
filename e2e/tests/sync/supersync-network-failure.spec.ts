@@ -213,7 +213,9 @@ base.describe('@supersync Network Failure Recovery', () => {
       const testRunId = generateTestRunId(testInfo.workerIndex);
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
-      let returnServerError = true;
+
+      // Use object to ensure mutable reference is captured correctly
+      const state = { returnServerError: true };
 
       try {
         const user = await createTestUser(testRunId);
@@ -224,11 +226,13 @@ base.describe('@supersync Network Failure Recovery', () => {
 
         const taskName = `Task-${testRunId}-server-error`;
         await clientA.workView.addTask(taskName);
+        // Wait for task to be fully created in store
+        await waitForTask(clientA.page, taskName);
 
         // Intercept and return 500 error on first request
         await clientA.page.route('**/api/sync/ops/**', async (route) => {
-          if (returnServerError && route.request().method() === 'POST') {
-            returnServerError = false;
+          if (state.returnServerError && route.request().method() === 'POST') {
+            state.returnServerError = false;
             console.log('[Test] Simulating 500 server error');
             await route.fulfill({
               status: 500,
@@ -243,16 +247,20 @@ base.describe('@supersync Network Failure Recovery', () => {
         // First sync - server error
         try {
           await clientA.sync.triggerSync();
-          await clientA.page.waitForTimeout(2000);
+          // Wait for the error to be processed
+          await clientA.page.waitForTimeout(3000);
         } catch {
           console.log('[Test] First sync got server error as expected');
         }
 
-        // Remove interception
+        // Remove interception before retry
         await clientA.page.unroute('**/api/sync/ops/**');
+        // Give time for route to be fully removed
+        await clientA.page.waitForTimeout(500);
 
-        // Retry - should succeed
+        // Retry - should succeed now
         await clientA.sync.syncAndWait();
+        console.log('[Test] Retry sync succeeded');
 
         // Verify with Client B
         clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
@@ -263,6 +271,10 @@ base.describe('@supersync Network Failure Recovery', () => {
         const taskLocator = clientB.page.locator(`task:has-text("${taskName}")`);
         await expect(taskLocator).toBeVisible();
       } finally {
+        // Ensure routes are cleaned up
+        if (clientA) {
+          await clientA.page.unroute('**/api/sync/ops/**').catch(() => {});
+        }
         if (clientA) await closeClient(clientA);
         if (clientB) await closeClient(clientB);
       }
@@ -283,7 +295,9 @@ base.describe('@supersync Network Failure Recovery', () => {
       const testRunId = generateTestRunId(testInfo.workerIndex);
       let clientA: SimulatedE2EClient | null = null;
       let clientB: SimulatedE2EClient | null = null;
-      let blockAllSyncRequests = true;
+
+      // Use object to ensure mutable reference is captured correctly
+      const state = { blockAllSyncRequests: true };
 
       try {
         const user = await createTestUser(testRunId);
@@ -294,7 +308,7 @@ base.describe('@supersync Network Failure Recovery', () => {
 
         // Block all sync requests
         await clientA.page.route('**/api/sync/**', async (route) => {
-          if (blockAllSyncRequests) {
+          if (state.blockAllSyncRequests) {
             console.log('[Test] Blocking sync request');
             await route.abort('failed');
           } else {
@@ -311,22 +325,27 @@ base.describe('@supersync Network Failure Recovery', () => {
 
         for (const taskName of taskNames) {
           await clientA.workView.addTask(taskName);
+          // Ensure task is created before adding next one
+          await waitForTask(clientA.page, taskName);
         }
 
-        // Try to sync (will fail)
+        // Try to sync (will fail due to route blocking)
         try {
           await clientA.sync.triggerSync();
-          await clientA.page.waitForTimeout(1000);
+          await clientA.page.waitForTimeout(2000);
         } catch {
           console.log('[Test] Sync blocked as expected');
         }
 
-        // "Restore network" - unblock requests
-        blockAllSyncRequests = false;
+        // "Restore network" - unblock requests and remove route
+        state.blockAllSyncRequests = false;
         await clientA.page.unroute('**/api/sync/**');
+        // Give time for route to be fully removed
+        await clientA.page.waitForTimeout(500);
 
         // Sync should now succeed with all pending operations
         await clientA.sync.syncAndWait();
+        console.log('[Test] Sync after network recovery succeeded');
 
         // Verify all tasks on Client A
         for (const taskName of taskNames) {
@@ -345,6 +364,10 @@ base.describe('@supersync Network Failure Recovery', () => {
           await expect(taskLocator).toBeVisible();
         }
       } finally {
+        // Ensure routes are cleaned up
+        if (clientA) {
+          await clientA.page.unroute('**/api/sync/**').catch(() => {});
+        }
         if (clientA) await closeClient(clientA);
         if (clientB) await closeClient(clientB);
       }

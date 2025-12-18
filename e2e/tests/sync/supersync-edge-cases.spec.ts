@@ -138,11 +138,16 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         // 2. Create Task in Project 1
         // Navigate to Project 1
         const projectBtn1 = clientA.page.getByText(proj1Name).first();
+        await projectBtn1.waitFor({ state: 'visible', timeout: 10000 });
         await projectBtn1.click({ force: true });
         await clientA.page.waitForLoadState('networkidle');
+        // Extra wait to ensure project view is fully loaded
+        await clientA.page.waitForTimeout(500);
 
         const taskName = `MovingTask-${testRunId}`;
         await clientA.workView.addTask(taskName);
+        // Wait for task to be fully created before syncing
+        await waitForTask(clientA.page, taskName);
 
         // 3. Sync A -> Sync B
         await clientA.sync.syncAndWait();
@@ -150,35 +155,69 @@ base.describe('@supersync SuperSync Edge Cases', () => {
 
         // Verify B has projects and task in Proj 1
         const projectBtnB1 = clientB.page.getByText(proj1Name).first();
-        await expect(projectBtnB1).toBeVisible();
+        await expect(projectBtnB1).toBeVisible({ timeout: 10000 });
         await projectBtnB1.click({ force: true });
+        await clientB.page.waitForLoadState('networkidle');
+        await clientB.page.waitForTimeout(500);
         await waitForTask(clientB.page, taskName);
 
         // 4. Client A moves Task to Project 2
+        // First ensure we're still in Project 1 view (may have navigated away)
+        const proj1NavItem = clientA.page.getByText(proj1Name).first();
+        await proj1NavItem.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
+        await clientA.page.waitForTimeout(300);
+
         // Using context menu or drag and drop. Context menu is more reliable for e2e.
-        const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorA.click({ button: 'right' });
+        const taskLocatorA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        await taskLocatorA.waitFor({ state: 'visible', timeout: 10000 });
 
-        // Click "Move to project"
-        const moveItem = clientA.page
-          .locator('.mat-mdc-menu-item')
-          .filter({ hasText: 'Move to project' });
-        await moveItem.click();
+        // Context menu retry loop - menus can be flaky due to overlay timing
+        let moveSuccess = false;
+        for (let attempt = 0; attempt < 3 && !moveSuccess; attempt++) {
+          try {
+            await taskLocatorA.click({ button: 'right' });
 
-        // Select Project 2 from the submenu
-        const proj2Item = clientA.page
-          .locator('.mat-mdc-menu-item:not(.nav-link)')
-          .filter({ hasText: proj2Name });
-        await proj2Item.waitFor({ state: 'visible' });
-        await proj2Item.click();
+            // Click "Move to project"
+            const moveItem = clientA.page
+              .locator('.mat-mdc-menu-item')
+              .filter({ hasText: 'Move to project' });
+            await moveItem.waitFor({ state: 'visible', timeout: 3000 });
+            await moveItem.click();
+
+            // Select Project 2 from the submenu
+            const proj2Item = clientA.page
+              .locator('.mat-mdc-menu-item:not(.nav-link)')
+              .filter({ hasText: proj2Name });
+            await proj2Item.waitFor({ state: 'visible', timeout: 3000 });
+            await proj2Item.click();
+            moveSuccess = true;
+          } catch (e) {
+            console.log(
+              `[MoveTask] Context menu attempt ${attempt + 1} failed, retrying...`,
+            );
+            // Close any open menus by pressing Escape
+            await clientA.page.keyboard.press('Escape');
+            await clientA.page.waitForTimeout(300);
+          }
+        }
+
+        if (!moveSuccess) {
+          throw new Error('Failed to move task via context menu after 3 attempts');
+        }
 
         // Verify move locally on A
-        // Should disappear from Proj 1 view
-        await expect(taskLocatorA).not.toBeVisible();
+        // Should disappear from current view (Proj 1)
+        await clientA.page.waitForTimeout(500); // Wait for move animation
+        const taskInProj1A = clientA.page.locator(`task:has-text("${taskName}")`);
+        await expect(taskInProj1A).not.toBeVisible({ timeout: 5000 });
 
         // Go to Proj 2 and check
         const projectBtn2 = clientA.page.getByText(proj2Name).first();
         await projectBtn2.click({ force: true });
+        await clientA.page.waitForLoadState('networkidle');
         await waitForTask(clientA.page, taskName);
 
         // 5. Sync A -> Sync B
@@ -188,15 +227,17 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         // 6. Verify Task is in Project 2 on Client B
         const projectBtnB2 = clientB.page.getByText(proj2Name).first();
         await projectBtnB2.click({ force: true });
+        await clientB.page.waitForLoadState('networkidle');
         await waitForTask(clientB.page, taskName);
 
         // 7. Verify Task is NOT in Project 1 on Client B
         await projectBtnB1.click({ force: true });
-        // Short wait to ensure UI updates
+        await clientB.page.waitForLoadState('networkidle');
+        // Wait for UI to settle after navigation
         await clientB.page.waitForTimeout(500);
         // Should not be visible in Project 1 list
         const taskInProj1B = clientB.page.locator(`task:has-text("${taskName}")`);
-        await expect(taskInProj1B).not.toBeVisible();
+        await expect(taskInProj1B).not.toBeVisible({ timeout: 5000 });
 
         console.log(
           '[MoveTask] ✓ Task moved between projects successfully across clients',
@@ -247,68 +288,103 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         const task2 = `Burst2-${testRunId}`;
         const task3 = `Burst3-${testRunId}`;
 
-        // 3. Create Tasks
+        // 3. Create Tasks - wait for each to be visible before creating next
         await clientA.workView.addTask(task1);
+        await waitForTask(clientA.page, task1);
         await clientA.workView.addTask(task2);
+        await waitForTask(clientA.page, task2);
         await clientA.workView.addTask(task3);
+        await waitForTask(clientA.page, task3);
 
         // 4. Mark Task 1 Done
         // Use .first() to avoid strict mode violations during animations
         const taskLocator1 = clientA.page
           .locator(`task:not(.ng-animating):has-text("${task1}")`)
           .first();
+        await taskLocator1.waitFor({ state: 'visible', timeout: 10000 });
         await taskLocator1.hover();
-        await taskLocator1.locator('.task-done-btn').click();
-        await expect(taskLocator1).toHaveClass(/isDone/);
+        const doneBtn1 = taskLocator1.locator('.task-done-btn');
+        await doneBtn1.waitFor({ state: 'visible', timeout: 5000 });
+        await doneBtn1.click();
+        await expect(taskLocator1).toHaveClass(/isDone/, { timeout: 5000 });
         // Wait for done animation to complete
-        await clientA.page.waitForTimeout(300);
+        await clientA.page.waitForTimeout(500);
 
-        // 5. Delete Task 2
-        const taskLocator2 = clientA.page
-          .locator(`task:not(.ng-animating):has-text("${task2}")`)
-          .first();
-        await taskLocator2.click({ button: 'right' });
-        await clientA.page
-          .locator('.mat-mdc-menu-item')
-          .filter({ hasText: 'Delete' })
-          .click();
+        // 5. Delete Task 2 with retry logic for context menu
+        let deleteSuccess = false;
+        for (let attempt = 0; attempt < 3 && !deleteSuccess; attempt++) {
+          try {
+            const taskLocator2 = clientA.page
+              .locator(`task:not(.ng-animating):has-text("${task2}")`)
+              .first();
+            await taskLocator2.waitFor({ state: 'visible', timeout: 5000 });
+            await taskLocator2.click({ button: 'right' });
 
-        const dialog = clientA.page.locator('dialog-confirm');
-        if (await dialog.isVisible()) {
-          await dialog.locator('button[type=submit]').click();
+            const deleteMenuItem = clientA.page
+              .locator('.mat-mdc-menu-item')
+              .filter({ hasText: 'Delete' });
+            await deleteMenuItem.waitFor({ state: 'visible', timeout: 3000 });
+            await deleteMenuItem.click();
+
+            // Handle confirmation dialog
+            const dialog = clientA.page.locator('dialog-confirm');
+            try {
+              await dialog.waitFor({ state: 'visible', timeout: 2000 });
+              await dialog.locator('button[type=submit]').click();
+              await dialog.waitFor({ state: 'hidden', timeout: 5000 });
+            } catch {
+              // Dialog may not appear for all delete operations
+            }
+
+            // Verify task is deleted
+            await expect(taskLocator2).not.toBeVisible({ timeout: 5000 });
+            deleteSuccess = true;
+          } catch (e) {
+            console.log(`[BurstTest] Delete attempt ${attempt + 1} failed, retrying...`);
+            // Close any open menus
+            await clientA.page.keyboard.press('Escape');
+            await clientA.page.waitForTimeout(300);
+          }
         }
-        await expect(taskLocator2).not.toBeVisible();
+
+        if (!deleteSuccess) {
+          throw new Error('Failed to delete task after 3 attempts');
+        }
 
         // 6. Client A syncs (burst)
         await clientA.sync.syncAndWait();
+        console.log('[BurstTest] Client A synced burst changes');
 
         // 7. Client B syncs
         await clientB.sync.syncAndWait();
+        console.log('[BurstTest] Client B synced');
 
         // 8. Verify B state
-        // Wait for sync animations to settle
-        await clientB.page.waitForTimeout(500);
+        // Wait for sync and UI to settle
+        await clientB.page.waitForTimeout(1000);
 
-        // Task 1: Visible and Done
-        // Use .first() to avoid strict mode violations if task appears in multiple locations during render
+        // Task 1: Visible and Done - use waitForTask for reliability
+        await waitForTask(clientB.page, task1);
         const taskLocatorB1 = clientB.page
           .locator(`task:not(.ng-animating):has-text("${task1}")`)
           .first();
-        await expect(taskLocatorB1).toBeVisible();
-        await expect(taskLocatorB1).toHaveClass(/isDone/);
+        await expect(taskLocatorB1).toBeVisible({ timeout: 10000 });
+        await expect(taskLocatorB1).toHaveClass(/isDone/, { timeout: 5000 });
+        console.log('[BurstTest] Task 1 verified as done on Client B');
 
         // Task 2: Not Visible (was deleted)
-        const taskLocatorB2 = clientB.page.locator(
-          `task:not(.ng-animating):has-text("${task2}")`,
-        );
-        await expect(taskLocatorB2).not.toBeVisible();
+        const taskLocatorB2 = clientB.page.locator(`task:has-text("${task2}")`);
+        await expect(taskLocatorB2).not.toBeVisible({ timeout: 5000 });
+        console.log('[BurstTest] Task 2 verified as deleted on Client B');
 
-        // Task 3: Visible and Open
+        // Task 3: Visible and Open - use waitForTask for reliability
+        await waitForTask(clientB.page, task3);
         const taskLocatorB3 = clientB.page
           .locator(`task:not(.ng-animating):has-text("${task3}")`)
           .first();
-        await expect(taskLocatorB3).toBeVisible();
-        await expect(taskLocatorB3).not.toHaveClass(/isDone/);
+        await expect(taskLocatorB3).toBeVisible({ timeout: 10000 });
+        await expect(taskLocatorB3).not.toHaveClass(/isDone/, { timeout: 5000 });
+        console.log('[BurstTest] Task 3 verified as open on Client B');
 
         console.log('[BurstTest] ✓ Offline burst changes synced successfully');
       } finally {
@@ -376,21 +452,33 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         await waitForTask(clientC.page, taskName);
 
         // 3. All 3 clients make concurrent changes (no syncs between)
+        // Helper to mark task as done with retry for stability
+        const markTaskDone = async (
+          page: typeof clientA.page,
+          name: string,
+          clientLabel: string,
+        ): Promise<void> => {
+          const taskLoc = page
+            .locator(`task:not(.ng-animating):has-text("${name}")`)
+            .first();
+          await taskLoc.waitFor({ state: 'visible', timeout: 10000 });
+          await taskLoc.hover();
+          const doneBtn = taskLoc.locator('.task-done-btn');
+          await doneBtn.waitFor({ state: 'visible', timeout: 5000 });
+          await doneBtn.click();
+          // Wait for done state to be applied
+          await expect(taskLoc).toHaveClass(/isDone/, { timeout: 5000 });
+          console.log(`[3WayConflict] Client ${clientLabel} marked task as done`);
+        };
 
         // Client A: Mark as done
-        const taskLocatorA = clientA.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorA.hover();
-        await taskLocatorA.locator('.task-done-btn').click();
+        await markTaskDone(clientA.page, taskName, 'A');
 
         // Client B: Mark as done (same action, should merge cleanly)
-        const taskLocatorB = clientB.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorB.hover();
-        await taskLocatorB.locator('.task-done-btn').click();
+        await markTaskDone(clientB.page, taskName, 'B');
 
         // Client C: Mark as done (same action from third client)
-        const taskLocatorC = clientC.page.locator(`task:has-text("${taskName}")`);
-        await taskLocatorC.hover();
-        await taskLocatorC.locator('.task-done-btn').click();
+        await markTaskDone(clientC.page, taskName, 'C');
 
         // 4-6. Sequential syncs to resolve conflicts
         await clientA.sync.syncAndWait();
@@ -402,16 +490,32 @@ base.describe('@supersync SuperSync Edge Cases', () => {
         await clientB.sync.syncAndWait();
         await clientC.sync.syncAndWait();
 
+        // Wait for UI to settle after final sync
+        await clientA.page.waitForTimeout(500);
+        await clientB.page.waitForTimeout(500);
+        await clientC.page.waitForTimeout(500);
+
         // 8. Verify all 3 clients have identical state
+        // Re-query locators after sync to get fresh references
+        const finalTaskA = clientA.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        const finalTaskB = clientB.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+        const finalTaskC = clientC.page
+          .locator(`task:not(.ng-animating):has-text("${taskName}")`)
+          .first();
+
         // Task should exist and be marked as done on all clients
-        await expect(taskLocatorA).toBeVisible();
-        await expect(taskLocatorB).toBeVisible();
-        await expect(taskLocatorC).toBeVisible();
+        await expect(finalTaskA).toBeVisible({ timeout: 10000 });
+        await expect(finalTaskB).toBeVisible({ timeout: 10000 });
+        await expect(finalTaskC).toBeVisible({ timeout: 10000 });
 
         // All should show task as done
-        await expect(taskLocatorA).toHaveClass(/isDone/);
-        await expect(taskLocatorB).toHaveClass(/isDone/);
-        await expect(taskLocatorC).toHaveClass(/isDone/);
+        await expect(finalTaskA).toHaveClass(/isDone/, { timeout: 5000 });
+        await expect(finalTaskB).toHaveClass(/isDone/, { timeout: 5000 });
+        await expect(finalTaskC).toHaveClass(/isDone/, { timeout: 5000 });
 
         // Count tasks - should be identical
         const countA = await clientA.page.locator('task').count();

@@ -149,19 +149,30 @@ base.describe('@supersync SuperSync E2E', () => {
         // Step 1: Client A creates Task A
         const taskA = `TaskA-${testRunId}`;
         await clientA.workView.addTask(taskA);
+        // Wait for task to be fully created in store
+        await waitForTask(clientA.page, taskA);
 
         // Step 2: Client A syncs (upload Task A)
         await clientA.sync.syncAndWait();
+        console.log('[Test] Client A synced Task A');
 
         // Step 3: Client B creates Task B
         const taskB = `TaskB-${testRunId}`;
         await clientB.workView.addTask(taskB);
+        // Wait for task to be fully created in store
+        await waitForTask(clientB.page, taskB);
 
         // Step 4: Client B syncs (upload Task B, download Task A)
         await clientB.sync.syncAndWait();
+        console.log('[Test] Client B synced (uploaded Task B, downloaded Task A)');
 
         // Step 5: Client A syncs (download Task B)
         await clientA.sync.syncAndWait();
+        console.log('[Test] Client A synced (downloaded Task B)');
+
+        // Wait for UI to settle after sync
+        await clientA.page.waitForTimeout(500);
+        await clientB.page.waitForTimeout(500);
 
         // Verify both clients have both tasks
         await waitForTask(clientA.page, taskA);
