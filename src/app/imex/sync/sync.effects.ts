@@ -12,6 +12,7 @@ import {
   switchMap,
   take,
   tap,
+  throttleTime,
   withLatestFrom,
 } from 'rxjs/operators';
 import { SyncTriggerService } from './sync-trigger.service';
@@ -19,7 +20,7 @@ import {
   SYNC_BEFORE_CLOSE_ID,
   SYNC_INITIAL_SYNC_TRIGGER,
 } from '../../imex/sync/sync.const';
-import { combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
+import { asyncScheduler, combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
 import { isOnline$ } from '../../util/is-online';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
@@ -137,6 +138,8 @@ export class SyncEffects {
           ),
         ),
         tap((x) => SyncLog.log('sync(effect).....', x)),
+        // Limit sync frequency to prevent rapid consecutive syncs (e.g., blur event right after initial sync)
+        throttleTime(2000, asyncScheduler, { leading: true, trailing: false }),
         withLatestFrom(isOnline$),
         // don't run multiple after each other when dialog is open
         exhaustMap(([trigger, isOnline]) => {
