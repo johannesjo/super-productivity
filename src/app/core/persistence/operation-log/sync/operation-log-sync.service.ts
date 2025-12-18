@@ -406,8 +406,9 @@ export class OperationLogSyncService {
       return 0;
     }
 
-    // Get the entity frontier (all applied clocks including remote ops)
-    const entityFrontier = await this.vectorClockService.getEntityFrontier();
+    // Get the GLOBAL vector clock which includes snapshot + all ops after
+    // This ensures we have all known clocks, not just entity-specific ones
+    const globalClock = await this.vectorClockService.getCurrentVectorClock();
 
     // Group ops by entity to handle multiple ops for the same entity
     const opsByEntity = new Map<string, Array<{ opId: string; op: Operation }>>();
@@ -435,8 +436,9 @@ export class OperationLogSyncService {
       const entityType = firstOp.entityType;
       const entityId = firstOp.entityId!; // Non-null - we filtered out ops without entityId above
 
-      // Merge all clocks: entity frontier + all local pending ops for this entity
-      let mergedClock: VectorClock = entityFrontier.get(entityKey) || {};
+      // Start with the global clock to ensure we dominate ALL known ops
+      // Then merge in the local pending ops' clocks
+      let mergedClock: VectorClock = { ...globalClock };
       for (const { op } of entityOps) {
         mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
       }
