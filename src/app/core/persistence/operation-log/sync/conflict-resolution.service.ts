@@ -494,7 +494,7 @@ export class ConflictResolutionService {
     conflict: EntityConflict,
   ): Promise<Operation | undefined> {
     // Get current entity state from store
-    const entityState = await this._getCurrentEntityState(
+    const entityState = await this.getCurrentEntityState(
       conflict.entityType,
       conflict.entityId,
     );
@@ -548,7 +548,7 @@ export class ConflictResolutionService {
    * @param entityId - The ID of the entity
    * @returns The entity state, or undefined if not found
    */
-  private async _getCurrentEntityState(
+  async getCurrentEntityState(
     entityType: EntityType,
     entityId: string,
   ): Promise<unknown> {

@@ -5,6 +5,7 @@ import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
   ConflictResult,
   EntityConflict,
+  EntityType,
   Operation,
   OpType,
   VectorClock,
@@ -217,7 +218,7 @@ export class OperationLogSyncService {
         localWinOpsCreated = processResult.localWinOpsCreated;
       }
     } finally {
-      await this._handleRejectedOps(result.rejectedOps);
+      await this._handleRejectedOps(result.rejectedOps, syncProvider);
     }
 
     // Update pending ops status for UI indicator
@@ -235,46 +236,251 @@ export class OperationLogSyncService {
    * 2. User has had a chance to resolve conflicts via the dialog
    * 3. Only ops that weren't resolved via conflict dialog get marked rejected
    *
+   * Special handling for CONCURRENT MODIFICATION rejections:
+   * - These indicate the server has a conflicting operation from another client
+   * - We try to download any new ops first
+   * - If download returns new ops, conflict detection happens automatically
+   * - If download returns nothing (we already have the conflicting ops), we:
+   *   1. Mark the old pending ops as rejected
+   *   2. Create NEW ops with current state and merged vector clocks
+   *   3. The new ops will be uploaded on next sync cycle
+   *
    * @param rejectedOps - Operations rejected by the server with error messages
+   * @param syncProvider - The active sync provider (needed to trigger download)
    */
   private async _handleRejectedOps(
     rejectedOps: Array<{ opId: string; error?: string }>,
+    syncProvider?: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<void> {
     if (rejectedOps.length === 0) {
       return;
     }
 
-    // Check which rejected ops are still pending (not yet handled by conflict resolution)
-    const stillPendingRejected: string[] = [];
+    // Separate concurrent modification rejections from permanent failures
+    // For concurrent mods, we collect the full operation for later processing
+    const concurrentModificationOps: Array<{ opId: string; op: Operation }> = [];
+    const permanentlyRejectedOps: string[] = [];
+
     for (const rejected of rejectedOps) {
       const entry = await this.opLogStore.getOpById(rejected.opId);
-      // Only mark as rejected if:
-      // - Op still exists (wasn't somehow removed)
-      // - Op is not yet synced (if synced, it was accepted after all)
-      // - Op is not already rejected (conflict resolution may have already handled it)
-      if (entry && !entry.syncedAt && !entry.rejectedAt) {
-        stillPendingRejected.push(rejected.opId);
+      // Skip if:
+      // - Op doesn't exist (was somehow removed)
+      // - Op is already synced (was accepted after all)
+      // - Op is already rejected (conflict resolution already handled it)
+      if (!entry || entry.syncedAt || entry.rejectedAt) {
+        continue;
+      }
+
+      // Check if this is a concurrent modification rejection
+      // These happen when another client uploaded a conflicting operation
+      const isConcurrentModification =
+        rejected.error?.includes('Concurrent modification') ||
+        rejected.error?.includes('CONFLICT_CONCURRENT');
+
+      if (isConcurrentModification) {
+        concurrentModificationOps.push({
+          opId: rejected.opId,
+          op: entry.op,
+        });
+        OpLog.warn(
+          `OperationLogSyncService: Concurrent modification for ${entry.op.entityType}:${entry.op.entityId}, ` +
+            `will resolve after download check`,
+        );
+      } else {
+        permanentlyRejectedOps.push(rejected.opId);
         OpLog.normal(
-          `OperationLogSyncService: Marking op ${rejected.opId} as rejected (not resolved via conflict): ${rejected.error || 'unknown error'}`,
+          `OperationLogSyncService: Marking op ${rejected.opId} as rejected: ${rejected.error || 'unknown error'}`,
         );
       }
     }
 
-    if (stillPendingRejected.length > 0) {
-      await this.opLogStore.markRejected(stillPendingRejected);
+    // Mark permanent rejections (validation errors, etc.) as rejected
+    if (permanentlyRejectedOps.length > 0) {
+      await this.opLogStore.markRejected(permanentlyRejectedOps);
       OpLog.normal(
-        `OperationLogSyncService: Marked ${stillPendingRejected.length} server-rejected ops as rejected`,
+        `OperationLogSyncService: Marked ${permanentlyRejectedOps.length} server-rejected ops as rejected`,
       );
 
       // Notify user if significant number of ops were rejected without conflict resolution
-      if (stillPendingRejected.length >= MAX_REJECTED_OPS_BEFORE_WARNING) {
+      if (permanentlyRejectedOps.length >= MAX_REJECTED_OPS_BEFORE_WARNING) {
         this.snackService.open({
           type: 'ERROR',
           msg: T.F.SYNC.S.UPLOAD_OPS_REJECTED,
-          translateParams: { count: stillPendingRejected.length },
+          translateParams: { count: permanentlyRejectedOps.length },
         });
       }
     }
+
+    // For concurrent modifications: try download first, then resolve locally if needed
+    if (concurrentModificationOps.length > 0) {
+      OpLog.warn(
+        `OperationLogSyncService: ${concurrentModificationOps.length} ops had concurrent modifications. ` +
+          `Triggering download to check for new remote ops...`,
+      );
+
+      const provider = syncProvider || this._getPfapiService().pf.getActiveSyncProvider();
+      if (provider && isOperationSyncCapable(provider)) {
+        try {
+          // Try to download new remote ops - if there are any, conflict detection will handle them
+          const downloadResult = await this.downloadRemoteOps(provider);
+
+          // If download got new ops, conflict detection already happened
+          // If download got nothing, we need to resolve locally
+          if (downloadResult.localWinOpsCreated === 0) {
+            // Check if pending ops still exist (weren't resolved by conflict detection)
+            const stillPendingOps: Array<{ opId: string; op: Operation }> = [];
+            for (const { opId, op } of concurrentModificationOps) {
+              const entry = await this.opLogStore.getOpById(opId);
+              if (entry && !entry.syncedAt && !entry.rejectedAt) {
+                stillPendingOps.push({ opId, op });
+              }
+            }
+
+            if (stillPendingOps.length > 0) {
+              OpLog.warn(
+                `OperationLogSyncService: Download returned no new ops but ${stillPendingOps.length} ` +
+                  `concurrent ops still pending. Resolving locally with merged clocks...`,
+              );
+              await this._resolveStaleLocalOps(stillPendingOps);
+            }
+          }
+        } catch (e) {
+          OpLog.err(
+            'OperationLogSyncService: Failed to download after concurrent modification detection',
+            e,
+          );
+        }
+      }
+    }
+  }
+
+  /**
+   * Resolves stale local ops that were rejected due to concurrent modification.
+   *
+   * When the server rejects ops because of concurrent clocks, but download returns nothing
+   * (we already have the conflicting remote ops), we need to:
+   * 1. Mark the old pending ops as rejected (their clocks are stale)
+   * 2. Create NEW ops with the current entity state and merged vector clocks
+   * 3. The new ops will be uploaded on next sync cycle
+   *
+   * @param staleOps - Operations that were rejected due to concurrent modification
+   */
+  private async _resolveStaleLocalOps(
+    staleOps: Array<{ opId: string; op: Operation }>,
+  ): Promise<void> {
+    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    if (!clientId) {
+      OpLog.err('OperationLogSyncService: Cannot resolve stale ops - no client ID');
+      return;
+    }
+
+    // Get the entity frontier (all applied clocks including remote ops)
+    const entityFrontier = await this.vectorClockService.getEntityFrontier();
+
+    // Group ops by entity to handle multiple ops for the same entity
+    const opsByEntity = new Map<string, Array<{ opId: string; op: Operation }>>();
+    for (const item of staleOps) {
+      // Skip ops without entityId (shouldn't happen for entity-level ops)
+      if (!item.op.entityId) {
+        OpLog.warn(
+          `OperationLogSyncService: Skipping stale op ${item.opId} - no entityId`,
+        );
+        continue;
+      }
+      const entityKey = toEntityKey(item.op.entityType, item.op.entityId);
+      if (!opsByEntity.has(entityKey)) {
+        opsByEntity.set(entityKey, []);
+      }
+      opsByEntity.get(entityKey)!.push(item);
+    }
+
+    const opsToReject: string[] = [];
+    const newOpsCreated: Operation[] = [];
+
+    for (const [entityKey, entityOps] of opsByEntity) {
+      // Get the first op to determine entity type and ID
+      const firstOp = entityOps[0].op;
+      const entityType = firstOp.entityType;
+      const entityId = firstOp.entityId!; // Non-null - we filtered out ops without entityId above
+
+      // Merge all clocks: entity frontier + all local pending ops for this entity
+      let mergedClock: VectorClock = entityFrontier.get(entityKey) || {};
+      for (const { op } of entityOps) {
+        mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
+      }
+
+      // Increment to create a clock that dominates everything
+      const newClock = incrementVectorClock(mergedClock, clientId);
+
+      // Get current entity state from NgRx store
+      const entityState = await this._getCurrentEntityState(entityType, entityId);
+      if (entityState === undefined) {
+        OpLog.warn(
+          `OperationLogSyncService: Cannot create update op - entity not found: ${entityKey}`,
+        );
+        // Still mark the ops as rejected
+        opsToReject.push(...entityOps.map((e) => e.opId));
+        continue;
+      }
+
+      // Create new UPDATE op with current state and merged clock
+      const newOp: Operation = {
+        id: uuidv7(),
+        actionType: `[${entityType}] Merged Update`,
+        opType: OpType.Update,
+        entityType,
+        entityId,
+        payload: entityState,
+        clientId,
+        vectorClock: newClock,
+        timestamp: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      };
+
+      newOpsCreated.push(newOp);
+      opsToReject.push(...entityOps.map((e) => e.opId));
+
+      OpLog.normal(
+        `OperationLogSyncService: Created merged update op for ${entityKey}, ` +
+          `replacing ${entityOps.length} stale op(s)`,
+      );
+    }
+
+    // Mark old ops as rejected
+    if (opsToReject.length > 0) {
+      await this.opLogStore.markRejected(opsToReject);
+      OpLog.normal(
+        `OperationLogSyncService: Marked ${opsToReject.length} stale ops as rejected`,
+      );
+    }
+
+    // Append new ops to the log (will be uploaded on next sync)
+    for (const op of newOpsCreated) {
+      await this.opLogStore.append(op, 'local');
+      OpLog.normal(
+        `OperationLogSyncService: Appended merged update op ${op.id} for ${op.entityType}:${op.entityId}`,
+      );
+    }
+
+    if (newOpsCreated.length > 0) {
+      this.snackService.open({
+        msg: T.F.SYNC.S.LWW_CONFLICTS_AUTO_RESOLVED,
+        translateParams: {
+          localWins: newOpsCreated.length,
+          remoteWins: 0,
+        },
+      });
+    }
+  }
+
+  /**
+   * Gets the current state of an entity from the NgRx store.
+   */
+  private async _getCurrentEntityState(
+    entityType: EntityType,
+    entityId: string,
+  ): Promise<unknown | undefined> {
+    return this.conflictResolutionService.getCurrentEntityState(entityType, entityId);
   }
 
   /**

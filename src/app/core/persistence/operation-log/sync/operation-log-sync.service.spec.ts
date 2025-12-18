@@ -60,6 +60,8 @@ describe('OperationLogSyncService', () => {
       'getOpsAfterSeq',
       'filterNewOps',
       'getLatestFullStateOp',
+      'getOpById',
+      'markRejected',
     ]);
     // By default, treat all ops as new (return them as-is)
     opLogStoreSpy.filterNewOps.and.callFake((ops: any[]) => Promise.resolve(ops));
@@ -3372,6 +3374,296 @@ describe('OperationLogSyncService', () => {
         const result = await service.uploadPendingOps(mockProvider);
 
         expect(result?.localWinOpsCreated).toBe(2);
+      });
+
+      describe('concurrent modification rejection handling', () => {
+        let mockProvider: any;
+
+        beforeEach(() => {
+          mockProvider = {
+            isReady: () => Promise.resolve(true),
+            supportsOperationSync: true,
+            downloadOps: jasmine.createSpy('downloadOps').and.returnValue(
+              Promise.resolve({
+                ops: [],
+                latestSeq: 0,
+              }),
+            ),
+          };
+          // Default: markRejected resolves
+          opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
+        });
+
+        it('should keep concurrent modification ops as pending and trigger download', async () => {
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Concurrent modification detected for TAG:TODAY',
+                },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              { seq: 1, op: localOp, appliedAt: Date.now(), source: 'local' as const },
+            ]),
+          );
+
+          // Spy on downloadRemoteOps to verify it's called
+          const downloadSpy = spyOn(service, 'downloadRemoteOps').and.returnValue(
+            Promise.resolve({ serverMigrationHandled: false, localWinOpsCreated: 0 }),
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should NOT mark the op as rejected
+          expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+          // Should trigger a download to get conflicting remote ops
+          expect(downloadSpy).toHaveBeenCalledWith(mockProvider);
+        });
+
+        it('should mark permanent rejection errors as rejected', async () => {
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Test' },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                { opId: 'local-op-1', error: 'Validation failed: invalid payload' },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should mark the op as rejected
+          expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['local-op-1']);
+        });
+
+        it('should handle CONFLICT_CONCURRENT error same as Concurrent modification', async () => {
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [{ opId: 'local-op-1', error: 'CONFLICT_CONCURRENT' }],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              { seq: 1, op: localOp, appliedAt: Date.now(), source: 'local' as const },
+            ]),
+          );
+
+          const downloadSpy = spyOn(service, 'downloadRemoteOps').and.returnValue(
+            Promise.resolve({ serverMigrationHandled: false, localWinOpsCreated: 0 }),
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should NOT mark the op as rejected
+          expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+          // Should trigger a download
+          expect(downloadSpy).toHaveBeenCalledWith(mockProvider);
+        });
+
+        it('should handle mixed rejection types correctly', async () => {
+          const concurrentOp: Operation = {
+            id: 'op-concurrent',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          const permanentOp: Operation = {
+            id: 'op-permanent',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-2',
+            payload: { title: 'Test' },
+            vectorClock: { clientA: 2 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 2,
+              rejectedOps: [
+                {
+                  opId: 'op-concurrent',
+                  error: 'Concurrent modification detected for TAG:TODAY',
+                },
+                { opId: 'op-permanent', error: 'Schema validation failed' },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.callFake((opId: string) => {
+            if (opId === 'op-concurrent') {
+              return Promise.resolve({
+                seq: 1,
+                op: concurrentOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              });
+            }
+            if (opId === 'op-permanent') {
+              return Promise.resolve({
+                seq: 2,
+                op: permanentOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              });
+            }
+            return Promise.resolve(undefined);
+          });
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              {
+                seq: 1,
+                op: concurrentOp,
+                appliedAt: Date.now(),
+                source: 'local' as const,
+              },
+            ]),
+          );
+
+          const downloadSpy = spyOn(service, 'downloadRemoteOps').and.returnValue(
+            Promise.resolve({ serverMigrationHandled: false, localWinOpsCreated: 0 }),
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should only mark the permanent rejection as rejected
+          expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['op-permanent']);
+          // Should trigger a download for the concurrent modification
+          expect(downloadSpy).toHaveBeenCalledWith(mockProvider);
+        });
+
+        it('should skip ops that are already synced or rejected', async () => {
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 2,
+              rejectedOps: [
+                { opId: 'already-synced', error: 'Concurrent modification' },
+                { opId: 'already-rejected', error: 'Some error' },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.callFake((opId: string) => {
+            if (opId === 'already-synced') {
+              return Promise.resolve({
+                seq: 1,
+                op: { id: 'already-synced' } as Operation,
+                appliedAt: Date.now(),
+                syncedAt: Date.now(), // Already synced
+                source: 'local' as const,
+              });
+            }
+            if (opId === 'already-rejected') {
+              return Promise.resolve({
+                seq: 2,
+                op: { id: 'already-rejected' } as Operation,
+                appliedAt: Date.now(),
+                rejectedAt: Date.now(), // Already rejected
+                source: 'local' as const,
+              });
+            }
+            return Promise.resolve(undefined);
+          });
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should not mark anything as rejected (both were skipped)
+          expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+        });
       });
     });
 
