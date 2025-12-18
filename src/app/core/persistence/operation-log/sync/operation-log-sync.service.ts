@@ -47,6 +47,8 @@ import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
 import { SuperSyncStatusService } from './super-sync-status.service';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -454,12 +456,42 @@ export class OperationLogSyncService {
     );
 
     // Get current full state from NgRx store
-    const currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
+    let currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
 
     // Skip if local state is effectively empty
     if (this._isEmptyState(currentState)) {
       OpLog.warn('OperationLogSyncService: Skipping SYNC_IMPORT - local state is empty.');
       return;
+    }
+
+    // Validate and repair state before creating SYNC_IMPORT
+    // This prevents corrupted state (e.g., orphaned menuTree references) from
+    // propagating to other clients via the full state import.
+    const validationResult = this.validateStateService.validateAndRepair(
+      currentState as AppDataCompleteNew,
+    );
+
+    // If state is invalid and couldn't be repaired, abort - don't propagate corruption
+    if (!validationResult.isValid) {
+      OpLog.err(
+        'OperationLogSyncService: Cannot create SYNC_IMPORT - state validation failed.',
+        validationResult.error || validationResult.crossModelError,
+      );
+      return;
+    }
+
+    // If state was repaired, use the repaired version
+    if (validationResult.repairedState) {
+      OpLog.warn(
+        'OperationLogSyncService: State repaired before creating SYNC_IMPORT',
+        validationResult.repairSummary,
+      );
+      currentState = validationResult.repairedState;
+
+      // Also update NgRx store with repaired state so local client is consistent
+      this.store.dispatch(
+        loadAllData({ appDataComplete: validationResult.repairedState }),
+      );
     }
 
     // Get client ID and vector clock
