@@ -18,6 +18,7 @@ import { OperationLogDownloadService } from './operation-log-download.service';
 import { DependencyResolverService } from './dependency-resolver.service';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
+import { Store } from '@ngrx/store';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Operation, OpType } from '../operation.types';
 import { T } from '../../../../t.const';
@@ -3597,6 +3598,576 @@ describe('OperationLogSyncService', () => {
           // Should not throw even though provider doesn't support operation sync
           await expectAsync(service.downloadRemoteOps(mockProvider)).toBeResolved();
         });
+      });
+    });
+  });
+
+  describe('_handleServerMigration state validation', () => {
+    let storeDelegateSpy: jasmine.SpyObj<PfapiStoreDelegateService>;
+    let mockStore: jasmine.SpyObj<any>;
+
+    beforeEach(() => {
+      storeDelegateSpy = TestBed.inject(
+        PfapiStoreDelegateService,
+      ) as jasmine.SpyObj<PfapiStoreDelegateService>;
+      mockStore = TestBed.inject(Store) as jasmine.SpyObj<any>;
+      spyOn(mockStore, 'dispatch');
+
+      // Setup default mocks for client ID and vector clock
+      vectorClockServiceSpy.getCurrentVectorClock = jasmine
+        .createSpy('getCurrentVectorClock')
+        .and.returnValue(Promise.resolve({ testClientId: 1 }));
+    });
+
+    it('should validate state before creating SYNC_IMPORT', async () => {
+      // Setup: valid state with some tasks (cast to any to avoid typing all properties)
+      const mockState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(mockState),
+      );
+
+      // Validation returns valid (no repair needed)
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      // Call the private method
+      await (service as any)._handleServerMigration();
+
+      // Should have called validateAndRepair
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledWith(mockState);
+    });
+
+    it('should repair state before creating SYNC_IMPORT when validation finds issues', async () => {
+      // Setup: corrupted state (cast to any to avoid typing all properties)
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+        menuTree: {
+          projectTree: [{ k: 'PROJECT', id: 'deleted-project' }], // orphaned reference
+          tagTree: [],
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      // Repaired state (menuTree cleaned up)
+      const repairedState = {
+        ...corruptedState,
+        menuTree: {
+          projectTree: [], // orphaned reference removed
+          tagTree: [],
+        },
+      } as any;
+
+      // Validation returns repaired state
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+        repairSummary: { menuTreeProjectsRemoved: 1 },
+      } as any);
+
+      // Call the private method
+      await (service as any)._handleServerMigration();
+
+      // Should have called validateAndRepair
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledWith(
+        corruptedState,
+      );
+
+      // Should have dispatched loadAllData with repaired state
+      expect(mockStore.dispatch).toHaveBeenCalled();
+      const dispatchedAction = mockStore.dispatch.calls.mostRecent().args[0];
+      expect(dispatchedAction.type).toBe('[SP_ALL] Load(import) all data');
+      expect(dispatchedAction.appDataComplete).toEqual(repairedState);
+
+      // Should have appended operation with repaired state (not corrupted state)
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.payload).toEqual(repairedState);
+    });
+
+    it('should use original state if validation finds no issues', async () => {
+      const validState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(validState),
+      );
+
+      // Validation returns valid (no repair)
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should NOT dispatch loadAllData (no repair needed)
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+
+      // Should have appended operation with original state
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.payload).toEqual(validState);
+    });
+
+    it('should skip SYNC_IMPORT creation for empty state', async () => {
+      // Empty state (no tasks, projects, tags)
+      const emptyState = {
+        task: { ids: [], entities: {} },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(emptyState),
+      );
+
+      await (service as any)._handleServerMigration();
+
+      // Should NOT call validateAndRepair (early return for empty state)
+      expect(validateStateServiceSpy.validateAndRepair).not.toHaveBeenCalled();
+
+      // Should NOT append operation
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should NOT dispatch loadAllData when wasRepaired is true but repairedState is undefined', async () => {
+      // Edge case: validator reports repair but doesn't provide repaired state
+      const mockState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(mockState),
+      );
+
+      // wasRepaired true but repairedState undefined (edge case)
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState: undefined, // No repaired state provided
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should NOT dispatch loadAllData (repairedState is undefined)
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+
+      // Should use original state since repairedState is undefined
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.payload).toEqual(mockState);
+    });
+
+    it('should handle orphaned tag references in menuTree', async () => {
+      // Scenario: menuTree has tag references that don't exist
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: ['tag1'], entities: { tag1: { id: 'tag1', title: 'Valid' } } },
+        menuTree: {
+          projectTree: [],
+          tagTree: [
+            { k: 'TAG', id: 'tag1' }, // valid
+            { k: 'TAG', id: 'deleted-tag' }, // orphaned
+          ],
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      const repairedState = {
+        ...corruptedState,
+        menuTree: {
+          projectTree: [],
+          tagTree: [{ k: 'TAG', id: 'tag1' }], // only valid tag
+        },
+      } as any;
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+        repairSummary: { orphanedTagsRemoved: 1 },
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should use repaired state
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect((appendedOp.payload as any).menuTree.tagTree).toEqual([
+        { k: 'TAG', id: 'tag1' },
+      ]);
+    });
+
+    it('should handle multiple types of corruption in single repair', async () => {
+      // Scenario: multiple issues - orphaned project and tag in menuTree
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test', tagIds: ['deleted-tag'] } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+        menuTree: {
+          projectTree: [{ k: 'PROJECT', id: 'deleted-project' }],
+          tagTree: [{ k: 'TAG', id: 'deleted-tag' }],
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      const repairedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test', tagIds: [] } }, // cleaned up
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+        menuTree: {
+          projectTree: [], // cleaned up
+          tagTree: [], // cleaned up
+        },
+      } as any;
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+        repairSummary: {
+          orphanedProjectsRemoved: 1,
+          orphanedTagsRemoved: 1,
+          taskTagIdsFixed: 1,
+        },
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should dispatch with fully repaired state
+      expect(mockStore.dispatch).toHaveBeenCalled();
+
+      // SYNC_IMPORT should have repaired state
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.payload).toEqual(repairedState);
+      expect((appendedOp.payload as any).menuTree.projectTree).toEqual([]);
+      expect((appendedOp.payload as any).menuTree.tagTree).toEqual([]);
+      expect((appendedOp.payload as any).task.entities.task1.tagIds).toEqual([]);
+    });
+
+    it('should create SYNC_IMPORT with correct metadata after repair', async () => {
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+        menuTree: {
+          projectTree: [{ k: 'PROJECT', id: 'orphan' }],
+          tagTree: [],
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      const repairedState = {
+        ...corruptedState,
+        menuTree: { projectTree: [], tagTree: [] },
+      } as any;
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Verify SYNC_IMPORT operation structure
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+
+      expect(appendedOp.actionType).toBe('[SP_ALL] Load(import) all data');
+      expect(appendedOp.opType).toBe(OpType.SyncImport);
+      expect(appendedOp.entityType).toBe('ALL');
+      expect(appendedOp.clientId).toBe('test-client-id');
+      expect(appendedOp.vectorClock).toBeDefined();
+      expect(appendedOp.timestamp).toBeDefined();
+      expect(appendedOp.schemaVersion).toBeDefined();
+    });
+
+    it('should validate state with project data', async () => {
+      // State with projects (not empty)
+      const stateWithProject = {
+        task: { ids: [], entities: {} },
+        project: {
+          ids: ['proj1'],
+          entities: { proj1: { id: 'proj1', title: 'My Project' } },
+        },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithProject),
+      );
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should call validateAndRepair (has project data)
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledWith(
+        stateWithProject,
+      );
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should validate state with tag data', async () => {
+      // State with tags (not empty)
+      const stateWithTag = {
+        task: { ids: [], entities: {} },
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: ['tag1'],
+          entities: { tag1: { id: 'tag1', title: 'My Tag' } },
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithTag),
+      );
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should call validateAndRepair (has tag data)
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledWith(
+        stateWithTag,
+      );
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should skip system tags when checking for empty state', async () => {
+      // State with ONLY system tag (TODAY tag) - should be considered empty
+      const stateWithOnlySystemTag = {
+        task: { ids: [], entities: {} },
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: ['TODAY'],
+          entities: { TODAY: { id: 'TODAY', title: 'Today' } },
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithOnlySystemTag),
+      );
+
+      await (service as any)._handleServerMigration();
+
+      // Should NOT call validateAndRepair (only system tags = empty)
+      expect(validateStateServiceSpy.validateAndRepair).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should proceed with user tag alongside system tag', async () => {
+      // State with system tag AND user tag - NOT empty
+      const stateWithUserAndSystemTag = {
+        task: { ids: [], entities: {} },
+        project: { ids: [], entities: {} },
+        tag: {
+          ids: ['TODAY', 'userTag1'],
+          entities: {
+            TODAY: { id: 'TODAY', title: 'Today' },
+            userTag1: { id: 'userTag1', title: 'User Tag' },
+          },
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(stateWithUserAndSystemTag),
+      );
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should call validateAndRepair (has user tag)
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalled();
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should call validation exactly once per migration', async () => {
+      const mockState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(mockState),
+      );
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: false,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should be called exactly once
+      expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledTimes(1);
+    });
+
+    it('should handle nested folder structure in menuTree repair', async () => {
+      // Complex menuTree with nested folders
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: {
+          ids: ['proj1'],
+          entities: { proj1: { id: 'proj1', title: 'Valid Project' } },
+        },
+        tag: { ids: [], entities: {} },
+        menuTree: {
+          projectTree: [
+            {
+              k: 'FOLDER',
+              id: 'folder1',
+              name: 'My Folder',
+              children: [
+                { k: 'PROJECT', id: 'proj1' }, // valid
+                { k: 'PROJECT', id: 'deleted-project' }, // orphaned
+              ],
+            },
+          ],
+          tagTree: [],
+        },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      const repairedState = {
+        ...corruptedState,
+        menuTree: {
+          projectTree: [
+            {
+              k: 'FOLDER',
+              id: 'folder1',
+              name: 'My Folder',
+              children: [{ k: 'PROJECT', id: 'proj1' }], // only valid
+            },
+          ],
+          tagTree: [],
+        },
+      } as any;
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Verify nested structure is preserved correctly
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      const projectTree = (appendedOp.payload as any).menuTree.projectTree;
+      expect(projectTree.length).toBe(1);
+      expect(projectTree[0].k).toBe('FOLDER');
+      expect(projectTree[0].children.length).toBe(1);
+      expect(projectTree[0].children[0].id).toBe('proj1');
+    });
+
+    describe('integration with downloadRemoteOps', () => {
+      let downloadServiceSpy: jasmine.SpyObj<OperationLogDownloadService>;
+
+      beforeEach(() => {
+        downloadServiceSpy = TestBed.inject(
+          OperationLogDownloadService,
+        ) as jasmine.SpyObj<OperationLogDownloadService>;
+      });
+
+      it('should validate state when needsFullStateUpload is true', async () => {
+        const mockState = {
+          task: {
+            ids: ['task1'],
+            entities: { task1: { id: 'task1', title: 'Test' } },
+          },
+          project: { ids: [], entities: {} },
+          tag: { ids: [], entities: {} },
+        } as any;
+        storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+          Promise.resolve(mockState),
+        );
+
+        downloadServiceSpy.downloadRemoteOps.and.returnValue(
+          Promise.resolve({
+            newOps: [],
+            hasMore: false,
+            needsFullStateUpload: true, // Triggers server migration
+            success: true,
+            failedFileCount: 0,
+            latestServerSeq: 0,
+          }),
+        );
+
+        validateStateServiceSpy.validateAndRepair.and.returnValue({
+          isValid: true,
+          wasRepaired: false,
+        } as any);
+
+        const mockProvider = {
+          isReady: () => Promise.resolve(true),
+          supportsOperationSync: true,
+          setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+        } as any;
+
+        await service.downloadRemoteOps(mockProvider);
+
+        // Should have called validateAndRepair as part of server migration
+        expect(validateStateServiceSpy.validateAndRepair).toHaveBeenCalledWith(mockState);
       });
     });
   });

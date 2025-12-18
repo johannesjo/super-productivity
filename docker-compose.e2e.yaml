@@ -2,5 +2,5 @@
 # Uses port 1901 so tests can run while dev server uses 1900
 services:
   supersync:
-    ports:
+    ports: !override
       - '1901:1900'
