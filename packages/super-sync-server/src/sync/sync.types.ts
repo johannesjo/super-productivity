@@ -21,6 +21,9 @@ export const SYNC_ERROR_CODES = {
   // Rate limiting (429)
   RATE_LIMITED: 'RATE_LIMITED',
 
+  // Storage quota (413)
+  STORAGE_QUOTA_EXCEEDED: 'STORAGE_QUOTA_EXCEEDED',
+
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;
@@ -223,6 +226,8 @@ export interface SyncStatusResponse {
   devicesOnline: number;
   pendingOps: number;
   snapshotAge?: number;
+  storageUsedBytes: number;
+  storageQuotaBytes: number;
 }
 
 // Restore point types

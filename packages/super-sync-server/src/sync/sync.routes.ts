@@ -185,6 +185,21 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           });
         }
 
+        // Check storage quota before processing
+        const payloadSize = JSON.stringify(body).length;
+        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+        if (!quotaCheck.allowed) {
+          Logger.warn(
+            `[user:${userId}] Storage quota exceeded: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+          );
+          return reply.status(413).send({
+            error: 'Storage quota exceeded',
+            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
+            storageUsedBytes: quotaCheck.currentUsage,
+            storageQuotaBytes: quotaCheck.quota,
+          });
+        }
+
         // Check for duplicate request (client retry)
         if (requestId) {
           const cachedResults = syncService.checkRequestDeduplication(userId, requestId);
@@ -224,6 +239,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             `[user:${userId}] Rejected ops:`,
             results.filter((r) => !r.accepted),
           );
+        }
+
+        // Update storage usage after successful operations
+        if (accepted > 0) {
+          await syncService.updateStorageUsage(userId);
         }
 
         // Optionally include new ops from other clients (with atomic latestSeq read)
@@ -439,6 +459,21 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         const { state, clientId, reason, vectorClock, schemaVersion } = parseResult.data;
         const syncService = getSyncService();
 
+        // Check storage quota before processing
+        const payloadSize = JSON.stringify(body).length;
+        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+        if (!quotaCheck.allowed) {
+          Logger.warn(
+            `[user:${userId}] Storage quota exceeded for snapshot: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+          );
+          return reply.status(413).send({
+            error: 'Storage quota exceeded',
+            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
+            storageUsedBytes: quotaCheck.currentUsage,
+            storageQuotaBytes: quotaCheck.quota,
+          });
+        }
+
         // Create a SYNC_IMPORT operation
         // Use the correct NgRx action type so the operation can be replayed on other clients
         const op = {
@@ -459,6 +494,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         if (result.accepted && result.serverSeq !== undefined) {
           // Cache the snapshot
           await syncService.cacheSnapshot(userId, state, result.serverSeq);
+          // Update storage usage
+          await syncService.updateStorageUsage(userId);
         }
 
         Logger.info(`Snapshot uploaded for user ${userId}, reason: ${reason}`);
@@ -487,6 +524,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       const cached = await syncService.getCachedSnapshot(userId);
       const snapshotAge = cached ? Date.now() - cached.generatedAt : undefined;
 
+      const storageInfo = await syncService.getStorageInfo(userId);
+
       Logger.debug(`[user:${userId}] Status: seq=${latestSeq}, devices=${devicesOnline}`);
 
       const response: SyncStatusResponse = {
@@ -494,6 +533,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         devicesOnline,
         pendingOps: 0, // Deprecated: ACK-based tracking removed
         snapshotAge,
+        storageUsedBytes: storageInfo.storageUsedBytes,
+        storageQuotaBytes: storageInfo.storageQuotaBytes,
       };
 
       return reply.send(response);

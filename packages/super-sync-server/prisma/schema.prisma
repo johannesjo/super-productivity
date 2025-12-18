@@ -23,7 +23,9 @@ model User {
   tokenVersion               Int       @default(0) @map("token_version")
   termsAcceptedAt            BigInt?   @map("terms_accepted_at")
   createdAt                  DateTime  @default(now()) @map("created_at")
-  
+  storageQuotaBytes          BigInt    @default(104857600) @map("storage_quota_bytes")  // 100MB default
+  storageUsedBytes           BigInt    @default(0) @map("storage_used_bytes")
+
   operations                 Operation[]
   syncState                  UserSyncState?
   devices                    SyncDevice[]
