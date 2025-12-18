@@ -112,13 +112,20 @@ export class SyncService<const MD extends ModelCfgs> {
         // 1. Server migration created a SYNC_IMPORT that needs uploading
         // 2. LWW local-wins created new update ops from piggybacked ops (during upload)
         // 3. LWW local-wins created new update ops from downloaded ops
-        const needsReupload =
+        let needsReupload =
           downloadResult.serverMigrationHandled ||
           (uploadResult?.localWinOpsCreated ?? 0) > 0 ||
           downloadResult.localWinOpsCreated > 0;
 
-        if (needsReupload) {
-          if (downloadResult.serverMigrationHandled) {
+        // Loop until all merged ops are uploaded
+        // Each upload may fail due to concurrent modification and create more merged ops
+        const MAX_REUPLOAD_ATTEMPTS = 5;
+        let reuploadAttempts = 0;
+
+        while (needsReupload && reuploadAttempts < MAX_REUPLOAD_ATTEMPTS) {
+          reuploadAttempts++;
+
+          if (downloadResult.serverMigrationHandled && reuploadAttempts === 1) {
             PFLog.normal(
               `${SyncService.L}.${this.sync.name}(): Server migration detected, uploading full state snapshot`,
             );
@@ -127,10 +134,21 @@ export class SyncService<const MD extends ModelCfgs> {
               (uploadResult?.localWinOpsCreated ?? 0) + downloadResult.localWinOpsCreated;
             PFLog.normal(
               `${SyncService.L}.${this.sync.name}(): LWW local-wins created ` +
-                `${totalLocalWinOps} update op(s), re-uploading`,
+                `${totalLocalWinOps} update op(s), re-uploading (attempt ${reuploadAttempts})`,
             );
           }
-          await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+
+          const reuploadResult =
+            await this._operationLogSyncService.uploadPendingOps(currentSyncProvider);
+
+          // Check if re-upload created more merged ops (due to concurrent modification)
+          needsReupload = (reuploadResult?.localWinOpsCreated ?? 0) > 0;
+        }
+
+        if (reuploadAttempts >= MAX_REUPLOAD_ATTEMPTS) {
+          PFLog.warn(
+            `${SyncService.L}.${this.sync.name}(): Max re-upload attempts reached, some ops may still be pending`,
+          );
         }
 
         // For operation-only providers (like SuperSync), skip file-based sync
