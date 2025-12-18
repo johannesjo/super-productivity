@@ -44,6 +44,12 @@ export interface DownloadResult {
    * This ensures localStorage and IndexedDB stay in sync even if the app crashes.
    */
   latestServerSeq?: number;
+  /**
+   * All operation clocks seen during download, INCLUDING duplicates that were filtered out.
+   * This is populated when forceFromSeq0 is true, allowing callers to rebuild their
+   * vector clock state from all known ops on the server.
+   */
+  allOpClocks?: import('../operation.types').VectorClock[];
 }
 
 /**
@@ -76,6 +82,7 @@ export class OperationLogDownloadService {
 
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    options?: { forceFromSeq0?: boolean },
   ): Promise<DownloadResult> {
     if (!syncProvider) {
       OpLog.warn(
@@ -92,15 +99,20 @@ export class OperationLogDownloadService {
       return { newOps: [], success: false, failedFileCount: 0 };
     }
 
-    return this._downloadRemoteOpsViaApi(syncProvider);
+    return this._downloadRemoteOpsViaApi(syncProvider, options);
   }
 
   private async _downloadRemoteOpsViaApi(
     syncProvider: SyncProviderServiceInterface<SyncProviderId> & OperationSyncCapable,
+    options?: { forceFromSeq0?: boolean },
   ): Promise<DownloadResult> {
-    OpLog.normal('OperationLogDownloadService: Downloading remote operations via API...');
+    const forceFromSeq0 = options?.forceFromSeq0 ?? false;
+    OpLog.normal(
+      `OperationLogDownloadService: Downloading remote operations via API...${forceFromSeq0 ? ' (forced from seq 0)' : ''}`,
+    );
 
     const allNewOps: Operation[] = [];
+    const allOpClocks: import('../operation.types').VectorClock[] = [];
     let downloadFailed = false;
     let needsFullStateUpload = false;
     let finalLatestSeq = 0;
@@ -111,8 +123,14 @@ export class OperationLogDownloadService {
     const encryptKey = privateCfg?.encryptKey;
 
     await this.lockService.request('sp_op_log_download', async () => {
-      const lastServerSeq = await syncProvider.getLastServerSeq();
+      const lastServerSeq = forceFromSeq0 ? 0 : await syncProvider.getLastServerSeq();
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
+
+      if (forceFromSeq0) {
+        OpLog.warn(
+          'OperationLogDownloadService: Forced download from seq 0 to rebuild clock state',
+        );
+      }
 
       // Download ops in pages
       let hasMore = true;
@@ -144,6 +162,7 @@ export class OperationLogDownloadService {
           sinceSeq = 0;
           hasResetForGap = true;
           allNewOps.length = 0; // Clear any ops we may have accumulated
+          allOpClocks.length = 0; // Clear clocks too
           // NOTE: Don't persist lastServerSeq=0 here - caller will persist the final value
           // after ops are stored in IndexedDB. This ensures localStorage and IndexedDB stay in sync.
           continue;
@@ -156,6 +175,16 @@ export class OperationLogDownloadService {
 
         // Check for clock drift using server's receivedAt timestamp
         this._checkClockDrift(response.ops[0].receivedAt);
+
+        // When force downloading from seq 0, capture ALL op clocks (including duplicates)
+        // This allows rebuilding vector clock state from all known ops on the server
+        if (forceFromSeq0) {
+          for (const serverOp of response.ops) {
+            if (serverOp.op.vectorClock) {
+              allOpClocks.push(serverOp.op.vectorClock);
+            }
+          }
+        }
 
         // Filter already applied ops
         let syncOps: SyncOperation[] = response.ops
@@ -270,6 +299,8 @@ export class OperationLogDownloadService {
       failedFileCount: 0,
       needsFullStateUpload,
       latestServerSeq: finalLatestSeq,
+      // Include all op clocks when force downloading from seq 0
+      ...(forceFromSeq0 && allOpClocks.length > 0 ? { allOpClocks } : {}),
     };
   }
 

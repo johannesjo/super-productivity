@@ -334,34 +334,58 @@ export class OperationLogSyncService {
           // Try to download new remote ops - if there are any, conflict detection will handle them
           const downloadResult = await this.downloadRemoteOps(provider);
 
+          // Helper to check which ops are still pending
+          const getStillPendingOps = async (): Promise<
+            Array<{ opId: string; op: Operation }>
+          > => {
+            const pending: Array<{ opId: string; op: Operation }> = [];
+            for (const { opId, op } of concurrentModificationOps) {
+              const entry = await this.opLogStore.getOpById(opId);
+              if (entry && !entry.syncedAt && !entry.rejectedAt) {
+                pending.push({ opId, op });
+              }
+            }
+            return pending;
+          };
+
           // If download got new ops, conflict detection already happened in _processRemoteOps
           // If download got nothing (newOpsCount === 0), we need to resolve locally
           if (downloadResult.newOpsCount === 0) {
-            // Check if pending ops still exist (weren't resolved by conflict detection)
-            const stillPendingOps: Array<{ opId: string; op: Operation }> = [];
-            for (const { opId, op } of concurrentModificationOps) {
-              const entry = await this.opLogStore.getOpById(opId);
-              if (entry && !entry.syncedAt && !entry.rejectedAt) {
-                stillPendingOps.push({ opId, op });
-              }
-            }
+            const stillPendingOps = await getStillPendingOps();
 
             if (stillPendingOps.length > 0) {
+              // Normal download returned 0 ops but concurrent ops still pending.
+              // This means our local clock is likely missing entries the server has.
+              // Try a FORCE download from seq 0 to get ALL op clocks.
               OpLog.warn(
                 `OperationLogSyncService: Download returned no new ops but ${stillPendingOps.length} ` +
-                  `concurrent ops still pending. Resolving locally with merged clocks...`,
+                  `concurrent ops still pending. Forcing full download from seq 0...`,
               );
-              mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
+
+              const forceDownloadResult = await this.downloadRemoteOps(provider, {
+                forceFromSeq0: true,
+              });
+
+              // Use the clocks from force download to resolve stale ops
+              if (
+                forceDownloadResult.allOpClocks &&
+                forceDownloadResult.allOpClocks.length > 0
+              ) {
+                OpLog.normal(
+                  `OperationLogSyncService: Got ${forceDownloadResult.allOpClocks.length} clocks from force download`,
+                );
+                mergedOpsCreated += await this._resolveStaleLocalOps(
+                  stillPendingOps,
+                  forceDownloadResult.allOpClocks,
+                );
+              } else {
+                // No extra clocks from force download, resolve with what we have
+                mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
+              }
             }
           } else {
             // Download got new ops - check if our pending ops were resolved by conflict detection
-            const stillPendingOps: Array<{ opId: string; op: Operation }> = [];
-            for (const { opId, op } of concurrentModificationOps) {
-              const entry = await this.opLogStore.getOpById(opId);
-              if (entry && !entry.syncedAt && !entry.rejectedAt) {
-                stillPendingOps.push({ opId, op });
-              }
-            }
+            const stillPendingOps = await getStillPendingOps();
 
             if (stillPendingOps.length > 0) {
               // Ops still pending after download - conflict detection didn't resolve them
@@ -395,10 +419,12 @@ export class OperationLogSyncService {
    * 3. The new ops will be uploaded on next sync cycle
    *
    * @param staleOps - Operations that were rejected due to concurrent modification
+   * @param extraClocks - Additional clocks to merge (from force download)
    * @returns Number of merged ops created
    */
   private async _resolveStaleLocalOps(
     staleOps: Array<{ opId: string; op: Operation }>,
+    extraClocks?: VectorClock[],
   ): Promise<number> {
     const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
     if (!clientId) {
@@ -408,7 +434,18 @@ export class OperationLogSyncService {
 
     // Get the GLOBAL vector clock which includes snapshot + all ops after
     // This ensures we have all known clocks, not just entity-specific ones
-    const globalClock = await this.vectorClockService.getCurrentVectorClock();
+    let globalClock = await this.vectorClockService.getCurrentVectorClock();
+
+    // If extra clocks were provided (from force download), merge them all
+    // This helps recover from situations where our local clock is missing entries
+    if (extraClocks && extraClocks.length > 0) {
+      OpLog.normal(
+        `OperationLogSyncService: Merging ${extraClocks.length} clocks from force download`,
+      );
+      for (const clock of extraClocks) {
+        globalClock = mergeVectorClocks(globalClock, clock);
+      }
+    }
 
     // Group ops by entity to handle multiple ops for the same entity
     const opsByEntity = new Map<string, Array<{ opId: string; op: Operation }>>();
@@ -527,17 +564,21 @@ export class OperationLogSyncService {
    * When server migration is detected (gap on empty server), triggers a full state upload
    * to ensure all local data is transferred to the new server.
    *
+   * @param syncProvider - The sync provider to download from
+   * @param options.forceFromSeq0 - Force download from seq 0 to rebuild clock state
    * @returns Result indicating whether server migration was handled (requires follow-up upload)
    *          and how many local-win ops were created during LWW resolution
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
+    options?: { forceFromSeq0?: boolean },
   ): Promise<{
     serverMigrationHandled: boolean;
     localWinOpsCreated: number;
     newOpsCount: number;
+    allOpClocks?: VectorClock[];
   }> {
-    const result = await this.downloadService.downloadRemoteOps(syncProvider);
+    const result = await this.downloadService.downloadRemoteOps(syncProvider, options);
 
     // Server migration detected: gap on empty server
     // Create a SYNC_IMPORT operation with full local state to seed the new server
@@ -561,7 +602,13 @@ export class OperationLogSyncService {
       if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
         await syncProvider.setLastServerSeq(result.latestServerSeq);
       }
-      return { serverMigrationHandled: false, localWinOpsCreated: 0, newOpsCount: 0 };
+      return {
+        serverMigrationHandled: false,
+        localWinOpsCreated: 0,
+        newOpsCount: 0,
+        // Include all op clocks from forced download (even though no new ops)
+        allOpClocks: result.allOpClocks,
+      };
     }
 
     // SAFETY: Fresh client confirmation
@@ -608,6 +655,7 @@ export class OperationLogSyncService {
       serverMigrationHandled: false,
       localWinOpsCreated: processResult.localWinOpsCreated,
       newOpsCount: result.newOps.length,
+      allOpClocks: result.allOpClocks,
     };
   }
 
