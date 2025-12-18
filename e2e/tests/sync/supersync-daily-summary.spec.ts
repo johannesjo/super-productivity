@@ -237,8 +237,9 @@ base.describe('@supersync Daily Summary Sync', () => {
           await taskLocator.locator('.task-done-btn').click();
         }
 
-        // Click finish day
+        // Click finish day - wait for button to be visible and stable
         const finishDayBtn = client.page.locator('.e2e-finish-day');
+        await finishDayBtn.waitFor({ state: 'visible', timeout: 10000 });
         await finishDayBtn.click();
 
         // Wait for Daily Summary

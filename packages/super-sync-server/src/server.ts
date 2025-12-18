@@ -48,10 +48,12 @@ export const createServer = (
       });
 
       // Rate Limiting (prevent brute force)
-      await fastifyServer.register(rateLimit, {
-        max: 100,
-        timeWindow: '15 minutes',
-      });
+      if (!fullConfig.testMode?.enabled) {
+        await fastifyServer.register(rateLimit, {
+          max: 100,
+          timeWindow: '15 minutes',
+        });
+      }
 
       // CORS Configuration
       // Supports both string origins and RegExp patterns

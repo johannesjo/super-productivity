@@ -66,10 +66,17 @@ export class SuperSyncPage extends BasePage {
    * Uses right-click to open settings dialog (works even when sync is already configured).
    */
   async setupSuperSync(config: SuperSyncConfig): Promise<void> {
+    // Wait for sync button to be ready first
+    await this.syncBtn.waitFor({ state: 'visible', timeout: 10000 });
+
     // Use right-click to always open sync settings dialog
     // (left-click triggers sync if already configured)
     await this.syncBtn.click({ button: 'right' });
-    await this.providerSelect.waitFor({ state: 'visible' });
+
+    // Wait for dialog to be fully loaded
+    await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+    // Additional wait for the element to be stable/interactive
+    await this.page.waitForTimeout(300);
 
     // Retry loop for opening the dropdown
     let dropdownOpen = false;
@@ -77,10 +84,11 @@ export class SuperSyncPage extends BasePage {
       .locator('mat-option')
       .filter({ hasText: 'SuperSync' });
 
-    for (let i = 0; i < 3; i++) {
+    for (let i = 0; i < 5; i++) {
       try {
-        await this.providerSelect.click();
-        // Wait briefly for animation
+        // Use shorter timeout for click to fail fast and retry
+        await this.providerSelect.click({ timeout: 5000 });
+        // Wait for dropdown animation
         await this.page.waitForTimeout(500);
 
         if (await superSyncOption.isVisible()) {
@@ -88,22 +96,26 @@ export class SuperSyncPage extends BasePage {
           break;
         } else {
           console.log(`[SuperSyncPage] Dropdown not open attempt ${i + 1}, retrying...`);
-          // If not visible, maybe we need to click again or close/open
-          // Click body to close if it was partially open/confused
-          await this.page.locator('body').click({ force: true });
-          await this.page.waitForTimeout(200);
+          // If not visible, close any partial dropdown and wait before retry
+          await this.page.keyboard.press('Escape');
+          await this.page.waitForTimeout(300);
         }
       } catch (e) {
         console.log(`[SuperSyncPage] Error opening dropdown attempt ${i + 1}: ${e}`);
+        // On click timeout, try to dismiss any blocking overlays
+        await this.page.keyboard.press('Escape');
+        await this.page.waitForTimeout(500);
       }
     }
 
     if (!dropdownOpen) {
-      // Last ditch effort - try one more simple click
-      await this.providerSelect.click();
+      // Last ditch effort - force click
+      console.log('[SuperSyncPage] Last attempt - force clicking provider select');
+      await this.providerSelect.click({ force: true, timeout: 10000 });
+      await this.page.waitForTimeout(500);
     }
 
-    await superSyncOption.waitFor({ state: 'visible' });
+    await superSyncOption.waitFor({ state: 'visible', timeout: 10000 });
     await superSyncOption.click();
 
     // Wait for the dropdown overlay to close
@@ -264,15 +276,30 @@ export class SuperSyncPage extends BasePage {
 
           // Only throw if this looks like a real sync error, not an informational message
           // Informational messages include: "Deleted task X Undo", "addCreated task X", etc.
+          // Rate limit errors (429) are transient - the app retries automatically
+          const isRateLimitError =
+            snackbarLower.includes('rate limit') ||
+            snackbarLower.includes('429') ||
+            snackbarLower.includes('retry in');
+
           const isRealError =
-            snackbarLower.includes('error') ||
-            snackbarLower.includes('failed') ||
-            snackbarLower.includes('problem') ||
-            snackbarLower.includes('could not') ||
-            snackbarLower.includes('unable to');
+            (snackbarLower.includes('error') ||
+              snackbarLower.includes('failed') ||
+              snackbarLower.includes('problem') ||
+              snackbarLower.includes('could not') ||
+              snackbarLower.includes('unable to')) &&
+            !isRateLimitError;
 
           if (isRealError) {
             throw new Error(`Sync failed: ${snackbarText?.trim() || 'Server error'}`);
+          }
+
+          // If rate limited, wait for the retry (app handles this automatically)
+          if (isRateLimitError) {
+            console.log('[SuperSyncPage] Rate limited, waiting for automatic retry...');
+            stableCount = 0;
+            await this.page.waitForTimeout(1000);
+            continue;
           }
           // Not a real error, just an informational snackbar - continue checking
         }
