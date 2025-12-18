@@ -1,12 +1,17 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Operation } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
 import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { OpLog } from '../../../log';
-import { ArchiveOperationHandler } from './archive-operation-handler.service';
+import {
+  ArchiveOperationHandler,
+  isArchiveAffectingAction,
+} from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
+import { WorklogService } from '../../../../features/worklog/worklog.service';
+import { lazyInject } from '../../../../util/lazy-inject';
 
 /**
  * Result of applying operations to the NgRx store.
@@ -78,6 +83,10 @@ export class OperationApplierService {
   private dependencyResolver = inject(DependencyResolverService);
   private archiveOperationHandler = inject(ArchiveOperationHandler);
   private hydrationState = inject(HydrationStateService);
+  // Use lazy injection to break circular dependency:
+  // OperationApplierService -> WorklogService -> PfapiService -> ... -> OperationApplierService
+  private _injector = inject(Injector);
+  private _getWorklogService = lazyInject(this._injector, WorklogService);
 
   /**
    * Apply operations to the NgRx store.
@@ -115,13 +124,15 @@ export class OperationApplierService {
     );
 
     const appliedOps: Operation[] = [];
+    let hadArchiveAffectingOp = false;
 
     // Mark that we're applying remote operations to suppress selector-based effects
     this.hydrationState.startApplyingRemoteOps();
     try {
       for (const op of ops) {
         try {
-          await this._applyOperation(op, isLocalHydration);
+          const wasArchiveAffecting = await this._applyOperation(op, isLocalHydration);
+          hadArchiveAffectingOp = hadArchiveAffectingOp || wasArchiveAffecting;
           appliedOps.push(op);
         } catch (e) {
           // Log the error
@@ -145,6 +156,11 @@ export class OperationApplierService {
       this.hydrationState.endApplyingRemoteOps();
     }
 
+    // Trigger archive reload for UI if archive-affecting operations were applied
+    if (!isLocalHydration && hadArchiveAffectingOp) {
+      this._getWorklogService().refreshWorklog();
+    }
+
     OpLog.normal('OperationApplierService: Finished applying operations.');
     return { appliedOps };
   }
@@ -156,8 +172,12 @@ export class OperationApplierService {
    * @param op Operation to apply
    * @param isLocalHydration When true, skip dependency checks and archive handling.
    *                         Used for replaying local operations that were already validated.
+   * @returns Whether the operation affected archive data (for UI refresh purposes)
    */
-  private async _applyOperation(op: Operation, isLocalHydration: boolean): Promise<void> {
+  private async _applyOperation(
+    op: Operation,
+    isLocalHydration: boolean,
+  ): Promise<boolean> {
     // FAST PATH: Local hydration skips dependency checks and archive handling.
     // These operations were already validated when created, and archive data
     // is already persisted in IndexedDB from the original execution.
@@ -208,6 +228,8 @@ export class OperationApplierService {
     // Local ops already have archive data persisted from original execution.
     if (!isLocalHydration) {
       await this.archiveOperationHandler.handleOperation(action);
+      return isArchiveAffectingAction(action);
     }
+    return false;
   }
 }

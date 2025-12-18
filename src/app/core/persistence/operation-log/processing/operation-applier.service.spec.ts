@@ -9,6 +9,8 @@ import { Operation, OpType, EntityType } from '../operation.types';
 import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
+import { WorklogService } from '../../../../features/worklog/worklog.service';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -16,6 +18,7 @@ describe('OperationApplierService', () => {
   let mockDependencyResolver: jasmine.SpyObj<DependencyResolverService>;
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
   let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
+  let mockWorklogService: jasmine.SpyObj<WorklogService>;
 
   const createMockOperation = (
     id: string,
@@ -49,6 +52,7 @@ describe('OperationApplierService', () => {
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
     ]);
+    mockWorklogService = jasmine.createSpyObj('WorklogService', ['refreshWorklog']);
 
     // Default: no dependencies
     mockDependencyResolver.extractDependencies.and.returnValue([]);
@@ -64,6 +68,7 @@ describe('OperationApplierService', () => {
         { provide: DependencyResolverService, useValue: mockDependencyResolver },
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
         { provide: HydrationStateService, useValue: mockHydrationState },
+        { provide: WorklogService, useValue: mockWorklogService },
       ],
     });
 
@@ -452,6 +457,81 @@ describe('OperationApplierService', () => {
       expect(mockDependencyResolver.extractDependencies).toHaveBeenCalledTimes(1);
       expect(mockDependencyResolver.checkDependencies).toHaveBeenCalledTimes(1);
       expect(mockArchiveOperationHandler.handleOperation).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('archive reload trigger', () => {
+    it('should call refreshWorklog for archive-affecting operations', async () => {
+      // moveToArchive is an archive-affecting action
+      const op: Operation = {
+        id: 'op-1',
+        clientId: 'testClient',
+        actionType: TaskSharedActions.moveToArchive.type,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { tasks: [] },
+        vectorClock: { testClient: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      await service.applyOperations([op]);
+
+      expect(mockWorklogService.refreshWorklog).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not call refreshWorklog for non-archive-affecting operations', async () => {
+      // A regular task update is not archive-affecting
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      await service.applyOperations([op]);
+
+      expect(mockWorklogService.refreshWorklog).not.toHaveBeenCalled();
+    });
+
+    it('should not call refreshWorklog when isLocalHydration is true', async () => {
+      // Even for archive-affecting operations, skip during local hydration
+      const op: Operation = {
+        id: 'op-1',
+        clientId: 'testClient',
+        actionType: TaskSharedActions.moveToArchive.type,
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { tasks: [] },
+        vectorClock: { testClient: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      expect(mockWorklogService.refreshWorklog).not.toHaveBeenCalled();
+    });
+
+    it('should call refreshWorklog once for batch with archive-affecting ops', async () => {
+      const ops: Operation[] = [
+        createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' }),
+        {
+          id: 'op-2',
+          clientId: 'testClient',
+          actionType: TaskSharedActions.moveToArchive.type,
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { tasks: [] },
+          vectorClock: { testClient: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        createMockOperation('op-3', 'TASK', OpType.Update, { title: 'Test2' }),
+      ];
+
+      await service.applyOperations(ops);
+
+      // Only called once at the end, not per operation
+      expect(mockWorklogService.refreshWorklog).toHaveBeenCalledTimes(1);
     });
   });
 });
