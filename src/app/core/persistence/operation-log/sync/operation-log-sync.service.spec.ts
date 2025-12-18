@@ -4216,7 +4216,7 @@ describe('OperationLogSyncService', () => {
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
 
-    it('should abort SYNC_IMPORT when validation fails and repair is not possible', async () => {
+    it('should abort SYNC_IMPORT and show snackbar when validation fails and repair is not possible', async () => {
       // Scenario: state is corrupted and cannot be repaired
       const corruptedState = {
         task: {
@@ -4244,9 +4244,15 @@ describe('OperationLogSyncService', () => {
 
       // Should NOT dispatch loadAllData
       expect(mockStore.dispatch).not.toHaveBeenCalled();
+
+      // Should show error snackbar to notify user
+      expect(snackServiceSpy.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
+      });
     });
 
-    it('should abort SYNC_IMPORT when repair runs but fails to fix state', async () => {
+    it('should abort SYNC_IMPORT and show snackbar when repair runs but fails to fix state', async () => {
       // Scenario: repair attempted but state still invalid
       const corruptedState = {
         task: {
@@ -4275,6 +4281,12 @@ describe('OperationLogSyncService', () => {
 
       // Should NOT dispatch the still-invalid state
       expect(mockStore.dispatch).not.toHaveBeenCalled();
+
+      // Should show error snackbar to notify user
+      expect(snackServiceSpy.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
+      });
     });
 
     it('should handle orphaned tag references in menuTree', async () => {

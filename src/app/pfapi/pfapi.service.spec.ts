@@ -379,7 +379,7 @@ describe('PfapiService', () => {
       expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
     });
 
-    it('should continue import even if backup save fails', async () => {
+    it('should continue import but skip clearing operations when backup save fails', async () => {
       const existingState = createMockBackupData();
       opLogStoreMock.loadStateCache.and.returnValue(
         Promise.resolve({
@@ -401,8 +401,9 @@ describe('PfapiService', () => {
 
       // Should have attempted backup
       expect(opLogStoreMock.saveImportBackup).toHaveBeenCalled();
-      // Should still proceed with clearing and importing
-      expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
+      // Should NOT clear operations when backup failed (to prevent data loss)
+      expect(opLogStoreMock.clearAllOperations).not.toHaveBeenCalled();
+      // Import should still proceed
       expect(opLogStoreMock.append).toHaveBeenCalled();
     });
   });

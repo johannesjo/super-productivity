@@ -772,6 +772,10 @@ export class OperationLogSyncService {
         'OperationLogSyncService: Cannot create SYNC_IMPORT - state validation failed.',
         validationResult.error || validationResult.crossModelError,
       );
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
+      });
       return;
     }
 
