@@ -50,6 +50,7 @@ import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
 import { SuperSyncStatusService } from './super-sync-status.service';
 import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
+import { SyncImportFilterService } from './sync-import-filter.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -134,6 +135,7 @@ export class OperationLogSyncService {
   private lockService = inject(LockService);
   private compactionService = inject(OperationLogCompactionService);
   private superSyncStatusService = inject(SuperSyncStatusService);
+  private syncImportFilterService = inject(SyncImportFilterService);
 
   // Lazy injection to break circular dependency:
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
@@ -1155,7 +1157,7 @@ export class OperationLogSyncService {
     // This also checks the LOCAL STORE for imports downloaded in previous sync cycles.
     // ─────────────────────────────────────────────────────────────────────────
     const { validOps, invalidatedOps } =
-      await this._filterOpsInvalidatedBySyncImport(migratedOps);
+      await this.syncImportFilterService.filterOpsInvalidatedBySyncImport(migratedOps);
 
     if (invalidatedOps.length > 0) {
       OpLog.warn(
@@ -1679,135 +1681,6 @@ export class OperationLogSyncService {
         { affectedOps: affectedOps.slice(0, 10) }, // Log first 10 for debugging
       );
     }
-  }
-
-  // ═══════════════════════════════════════════════════════════════════════════
-  // SYNC_IMPORT FILTERING
-  // ═══════════════════════════════════════════════════════════════════════════
-
-  /**
-   * Filters out operations invalidated by a SYNC_IMPORT, BACKUP_IMPORT, or REPAIR.
-   *
-   * ## The Problem
-   * ```
-   * Timeline:
-   *   Client A creates ops → Client B does SYNC_IMPORT → Client A syncs
-   *
-   * Result:
-   *   - Client A's ops have higher serverSeq than SYNC_IMPORT
-   *   - But they reference entities that were WIPED by the import
-   *   - Applying them causes "Task not found" errors
-   * ```
-   *
-   * ## The Solution
-   * Use VECTOR CLOCK comparison to determine if ops were created with knowledge
-   * of the import. This is more reliable than UUIDv7 timestamps because vector
-   * clocks track CAUSALITY (did the client know about the import?) rather than
-   * wall-clock time (which can be affected by clock drift).
-   *
-   * ## Vector Clock Comparison Results
-   * | Comparison     | Meaning                              | Action  |
-   * |----------------|--------------------------------------|---------|
-   * | GREATER_THAN   | Op created after seeing import       | ✅ Keep |
-   * | EQUAL          | Same causal history as import        | ✅ Keep |
-   * | LESS_THAN      | Op dominated by import               | ❌ Filter|
-   * | CONCURRENT     | Op created without knowledge of import| ❌ Filter|
-   *
-   * Note: CONCURRENT ops are filtered because they reference pre-import state,
-   * even if they were created "after" the import in wall-clock time.
-   *
-   * The import can be in the current batch OR in the local store from a
-   * previous sync cycle. We check both to handle the case where old ops from
-   * another client arrive after we already downloaded the import.
-   *
-   * @param ops - Operations to filter (already migrated)
-   * @returns Object with `validOps` and `invalidatedOps` arrays
-   */
-  async _filterOpsInvalidatedBySyncImport(ops: Operation[]): Promise<{
-    validOps: Operation[];
-    invalidatedOps: Operation[];
-  }> {
-    // Find full state import operations (SYNC_IMPORT, BACKUP_IMPORT, or REPAIR) in current batch
-    const fullStateImportsInBatch = ops.filter(
-      (op) =>
-        op.opType === OpType.SyncImport ||
-        op.opType === OpType.BackupImport ||
-        op.opType === OpType.Repair,
-    );
-
-    // Check local store for previously downloaded import
-    const storedImport = await this.opLogStore.getLatestFullStateOp();
-
-    // Determine the latest import (from batch or store)
-    let latestImport: Operation | undefined;
-
-    if (fullStateImportsInBatch.length > 0) {
-      // Find the latest in the current batch
-      const latestInBatch = fullStateImportsInBatch.reduce((latest, op) =>
-        op.id > latest.id ? op : latest,
-      );
-      // Compare with stored import (if any)
-      if (storedImport && storedImport.id > latestInBatch.id) {
-        latestImport = storedImport;
-      } else {
-        latestImport = latestInBatch;
-      }
-    } else if (storedImport) {
-      // No import in batch, but we have one from a previous sync
-      latestImport = storedImport;
-    }
-
-    // No imports found anywhere = no filtering needed
-    if (!latestImport) {
-      return { validOps: ops, invalidatedOps: [] };
-    }
-
-    OpLog.normal(
-      `OperationLogSyncService: Filtering ops against SYNC_IMPORT from client ${latestImport.clientId} (op: ${latestImport.id})`,
-    );
-
-    const validOps: Operation[] = [];
-    const invalidatedOps: Operation[] = [];
-
-    for (const op of ops) {
-      // Full state import operations themselves are always valid
-      if (
-        op.opType === OpType.SyncImport ||
-        op.opType === OpType.BackupImport ||
-        op.opType === OpType.Repair
-      ) {
-        validOps.push(op);
-        continue;
-      }
-
-      // Use VECTOR CLOCK comparison instead of UUIDv7 timestamps.
-      // Vector clocks track CAUSALITY ("did this client know about the import?")
-      // rather than wall-clock time, making them immune to client clock drift.
-      //
-      // Comparison results:
-      // - GREATER_THAN: Op was created by a client that SAW the import → KEEP
-      // - EQUAL: Same causal history as import → KEEP
-      // - LESS_THAN: Op is dominated by import (created before with less history) → FILTER
-      // - CONCURRENT: Op created WITHOUT knowledge of import → FILTER
-      //
-      // NOTE: CONCURRENT ops are filtered because they reference pre-import state,
-      // even though they may have been created "after" the import in wall-clock time.
-      const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
-
-      if (
-        comparison === VectorClockComparison.GREATER_THAN ||
-        comparison === VectorClockComparison.EQUAL
-      ) {
-        // Op was created by a client that had knowledge of the import
-        validOps.push(op);
-      } else {
-        // LESS_THAN or CONCURRENT: Op created without knowledge of import
-        // These ops reference the pre-import state which no longer exists
-        invalidatedOps.push(op);
-      }
-    }
-
-    return { validOps, invalidatedOps };
   }
 
   /**
