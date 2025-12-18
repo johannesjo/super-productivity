@@ -71,6 +71,7 @@ describe('OperationLogSyncService', () => {
       'getEntityFrontier',
       'getSnapshotVectorClock',
       'getSnapshotEntityKeys',
+      'getCurrentVectorClock',
     ]);
     operationApplierServiceSpy = jasmine.createSpyObj('OperationApplierService', [
       'applyOperations',
@@ -175,6 +176,8 @@ describe('OperationLogSyncService', () => {
     vectorClockServiceSpy.getSnapshotEntityKeys.and.returnValue(
       Promise.resolve(new Set()),
     );
+    // Default: return empty clock for getCurrentVectorClock
+    vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(Promise.resolve({}));
     // Default: no local ops to replay after SYNC_IMPORT
     opLogStoreSpy.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
     // Default: successful operation application
@@ -3675,6 +3678,161 @@ describe('OperationLogSyncService', () => {
 
           // Should not mark anything as rejected (both were skipped)
           expect(opLogStoreSpy.markRejected).not.toHaveBeenCalled();
+        });
+
+        it('should trigger force download from seq 0 when normal download returns 0 ops but ops still pending', async () => {
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Concurrent modification detected for TAG:TODAY',
+                },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              { seq: 1, op: localOp, appliedAt: Date.now(), source: 'local' as const },
+            ]),
+          );
+
+          let downloadCallCount = 0;
+          const downloadSpy = spyOn(service, 'downloadRemoteOps').and.callFake(
+            (_provider: any, options?: { forceFromSeq0?: boolean }) => {
+              downloadCallCount++;
+              if (downloadCallCount === 1) {
+                // First call: normal download returns 0 ops
+                return Promise.resolve({
+                  serverMigrationHandled: false,
+                  localWinOpsCreated: 0,
+                  newOpsCount: 0,
+                });
+              } else {
+                // Second call: force download from seq 0
+                expect(options?.forceFromSeq0).toBe(true);
+                return Promise.resolve({
+                  serverMigrationHandled: false,
+                  localWinOpsCreated: 0,
+                  newOpsCount: 0,
+                  allOpClocks: [{ clientA: 5, clientB: 3 }], // Extra clocks from server
+                });
+              }
+            },
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should call download twice: normal then force from seq 0
+          expect(downloadCallCount).toBe(2);
+          expect(downloadSpy).toHaveBeenCalledWith(mockProvider);
+          expect(downloadSpy).toHaveBeenCalledWith(mockProvider, { forceFromSeq0: true });
+        });
+
+        it('should pass allOpClocks to _resolveStaleLocalOps when force download returns clocks', async () => {
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Concurrent modification detected for TAG:TODAY',
+                },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              { seq: 1, op: localOp, appliedAt: Date.now(), source: 'local' as const },
+            ]),
+          );
+
+          const forceDownloadClocks = [
+            { clientA: 3, clientB: 10 },
+            { clientA: 5, clientC: 2 },
+          ];
+
+          let downloadCallCount = 0;
+          spyOn(service, 'downloadRemoteOps').and.callFake(() => {
+            downloadCallCount++;
+            if (downloadCallCount === 1) {
+              return Promise.resolve({
+                serverMigrationHandled: false,
+                localWinOpsCreated: 0,
+                newOpsCount: 0,
+              });
+            } else {
+              return Promise.resolve({
+                serverMigrationHandled: false,
+                localWinOpsCreated: 0,
+                newOpsCount: 0,
+                allOpClocks: forceDownloadClocks,
+              });
+            }
+          });
+
+          // Spy on _resolveStaleLocalOps to verify it receives allOpClocks
+          const resolveStaleOpsSpy = spyOn<any>(
+            service,
+            '_resolveStaleLocalOps',
+          ).and.returnValue(Promise.resolve(0));
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Verify _resolveStaleLocalOps was called with the clocks from force download
+          expect(resolveStaleOpsSpy).toHaveBeenCalledWith(
+            jasmine.any(Array),
+            forceDownloadClocks,
+          );
         });
       });
     });

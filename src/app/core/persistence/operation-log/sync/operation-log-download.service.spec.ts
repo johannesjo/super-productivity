@@ -321,6 +321,200 @@ describe('OperationLogDownloadService', () => {
         expect(result.failedFileCount).toBe(0);
       });
 
+      describe('forceFromSeq0 option', () => {
+        it('should download from seq 0 when forceFromSeq0 is true', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(100));
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c1: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 1,
+            }),
+          );
+
+          await service.downloadRemoteOps(mockApiProvider, { forceFromSeq0: true });
+
+          // Should start from 0, not from lastServerSeq (100)
+          expect(mockApiProvider.downloadOps).toHaveBeenCalledWith(0, undefined, 500);
+        });
+
+        it('should collect all op clocks when forceFromSeq0 is true', async () => {
+          const clock1: Record<string, number> = { clientA: 1 };
+          const clock2: Record<string, number> = { clientA: 1, clientB: 1 };
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: clock1,
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+                {
+                  serverSeq: 2,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-2',
+                    clientId: 'c2',
+                    actionType: '[Task] Update',
+                    opType: OpType.Update,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: clock2,
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 2,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider, {
+            forceFromSeq0: true,
+          });
+
+          expect(result.allOpClocks).toBeDefined();
+          expect(result.allOpClocks!.length).toBe(2);
+          expect(result.allOpClocks![0]).toEqual({ clientA: 1 });
+          expect(result.allOpClocks![1]).toEqual({ clientA: 1, clientB: 1 });
+        });
+
+        it('should include clocks from duplicate ops that are filtered out', async () => {
+          // Mark op-1 as already applied
+          mockOpLogStore.getAppliedOpIds.and.returnValue(
+            Promise.resolve(new Set(['op-1'])),
+          );
+
+          const clock1: Record<string, number> = { clientA: 5 };
+          const clock2: Record<string, number> = { clientA: 5, clientB: 1 };
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1', // Already applied - will be filtered from newOps
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: clock1, // Important clock data
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+                {
+                  serverSeq: 2,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-2', // New op
+                    clientId: 'c2',
+                    actionType: '[Task] Update',
+                    opType: OpType.Update,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: clock2,
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 2,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider, {
+            forceFromSeq0: true,
+          });
+
+          // newOps should only contain the non-duplicate
+          expect(result.newOps.length).toBe(1);
+          expect(result.newOps[0].id).toBe('op-2');
+
+          // But allOpClocks should include BOTH clocks
+          expect(result.allOpClocks!.length).toBe(2);
+          expect(result.allOpClocks![0]).toEqual({ clientA: 5 });
+          expect(result.allOpClocks![1]).toEqual({ clientA: 5, clientB: 1 });
+        });
+
+        it('should not include allOpClocks when forceFromSeq0 is false', async () => {
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { clientA: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 1,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          expect(result.allOpClocks).toBeUndefined();
+        });
+
+        it('should return empty allOpClocks array when no ops on server', async () => {
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 0,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider, {
+            forceFromSeq0: true,
+          });
+
+          // No ops means no clocks to collect
+          expect(result.allOpClocks).toBeUndefined();
+        });
+      });
+
       describe('gap detection handling', () => {
         it('should reset lastServerSeq to 0 when gap is detected', async () => {
           // First call returns gap detected (client has stale sinceSeq)
