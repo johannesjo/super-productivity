@@ -23,8 +23,9 @@
         "plugin:@angular-eslint/recommended",
         "plugin:prettier/recommended"
       ],
-      "plugins": ["@typescript-eslint", "prettier", "prefer-arrow"],
+      "plugins": ["@typescript-eslint", "prettier", "prefer-arrow", "local-rules"],
       "rules": {
+        "local-rules/require-hydration-guard": "warn",
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/ban-ts-comment": 0,
         "@typescript-eslint/no-empty-function": 0,
