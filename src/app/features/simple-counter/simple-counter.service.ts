@@ -14,7 +14,6 @@ import {
   increaseSimpleCounterCounterToday,
   setSimpleCounterCounterForDate,
   setSimpleCounterCounterToday,
-  syncSimpleCounterTime,
   tickSimpleCounterLocal,
   toggleSimpleCounterCounter,
   turnOffAllSimpleCounterCounters,
@@ -35,7 +34,6 @@ import { DateService } from 'src/app/core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { BatchedTimeSyncAccumulator } from '../../core/util/batched-time-sync-accumulator';
-import { Log } from 'src/app/core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -50,10 +48,8 @@ export class SimpleCounterService implements OnDestroy {
 
   private _stopwatchAccumulator = new BatchedTimeSyncAccumulator(
     SimpleCounterService.SYNC_INTERVAL_MS,
-    (id, date, duration) =>
-      this._store$.dispatch(syncSimpleCounterTime({ id, date, duration })),
+    (id, date, _duration) => this._syncStopwatchAbsoluteValue(id, date),
   );
-  private _modifiedClickCounters = new Set<string>(); // Track click counters that need sync
   private _subscriptions = new Subscription();
   private _visibilityHandler: (() => void) | null = null;
 
@@ -173,33 +169,29 @@ export class SimpleCounterService implements OnDestroy {
     }
   }
 
-  private async _flushAccumulatedTime(): Promise<void> {
-    // Flush StopWatch accumulated time
+  private _flushAccumulatedTime(): void {
+    // Flush StopWatch accumulated time only
+    // Click counters sync immediately in increaseCounterToday/decreaseCounterToday
     this._stopwatchAccumulator.flush();
+  }
 
-    // Flush ClickCounter modifications with absolute values
-    if (this._modifiedClickCounters.size > 0) {
-      const today = this._dateService.todayStr();
-      // Copy IDs before clearing to ensure cleanup even if dispatch fails
-      const idsToFlush = [...this._modifiedClickCounters];
-      this._modifiedClickCounters.clear();
-
-      try {
-        const counters = await firstValueFrom(
-          this._store$.pipe(select(selectAllSimpleCounters)),
-        );
-        for (const id of idsToFlush) {
-          const counter = counters.find((c) => c.id === id);
-          if (counter) {
-            const newVal = counter.countOnDay[today] || 0;
-            this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-          }
+  /**
+   * Sync stopwatch counter with absolute value instead of relative duration.
+   * This ensures remote clients get the correct value regardless of their current state.
+   */
+  private _syncStopwatchAbsoluteValue(id: string, date: string): void {
+    // Read current state synchronously via firstValueFrom
+    firstValueFrom(this._store$.pipe(select(selectAllSimpleCounters))).then(
+      (counters) => {
+        const counter = counters.find((c) => c.id === id);
+        if (counter) {
+          const newVal = counter.countOnDay[date] || 0;
+          this._store$.dispatch(
+            setSimpleCounterCounterToday({ id, newVal, today: date }),
+          );
         }
-      } catch (e) {
-        // Log error but don't re-throw - flush is best-effort
-        Log.error('[SimpleCounterService] Error flushing click counters:', e);
-      }
-    }
+      },
+    );
   }
 
   updateAll(items: SimpleCounter[]): void {
@@ -215,20 +207,36 @@ export class SimpleCounterService implements OnDestroy {
     this._store$.dispatch(setSimpleCounterCounterForDate({ id, newVal, date }));
   }
 
-  increaseCounterToday(id: string, increaseBy: number): void {
+  async increaseCounterToday(id: string, increaseBy: number): Promise<void> {
     const today = this._dateService.todayStr();
     // Local UI update (non-persistent)
     this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
-    // Mark for batched sync (will sync every 5 minutes)
-    this._modifiedClickCounters.add(id);
+
+    // Immediately sync with absolute value (persistent)
+    const counters = await firstValueFrom(
+      this._store$.pipe(select(selectAllSimpleCounters)),
+    );
+    const counter = counters.find((c) => c.id === id);
+    if (counter) {
+      const newVal = counter.countOnDay[today] || 0;
+      this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+    }
   }
 
-  decreaseCounterToday(id: string, decreaseBy: number): void {
+  async decreaseCounterToday(id: string, decreaseBy: number): Promise<void> {
     const today = this._dateService.todayStr();
     // Local UI update (non-persistent)
     this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy, today }));
-    // Mark for batched sync (will sync every 5 minutes)
-    this._modifiedClickCounters.add(id);
+
+    // Immediately sync with absolute value (persistent)
+    const counters = await firstValueFrom(
+      this._store$.pipe(select(selectAllSimpleCounters)),
+    );
+    const counter = counters.find((c) => c.id === id);
+    if (counter) {
+      const newVal = counter.countOnDay[today] || 0;
+      this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+    }
   }
 
   toggleCounter(id: string): void {
@@ -253,7 +261,6 @@ export class SimpleCounterService implements OnDestroy {
   deleteSimpleCounter(id: string): void {
     // Clean up accumulators to prevent memory leak
     this._stopwatchAccumulator.clearOne(id);
-    this._modifiedClickCounters.delete(id);
     this._store$.dispatch(deleteSimpleCounter({ id }));
   }
 
@@ -261,7 +268,6 @@ export class SimpleCounterService implements OnDestroy {
     // Clean up accumulators to prevent memory leak
     for (const id of ids) {
       this._stopwatchAccumulator.clearOne(id);
-      this._modifiedClickCounters.delete(id);
     }
     this._store$.dispatch(deleteSimpleCounters({ ids }));
   }
@@ -270,7 +276,6 @@ export class SimpleCounterService implements OnDestroy {
     // If type is changing, flush the old type's accumulated data first
     if (changes.type !== undefined) {
       this._stopwatchAccumulator.flushOne(id);
-      this._modifiedClickCounters.delete(id);
     }
     this._store$.dispatch(updateSimpleCounter({ simpleCounter: { id, changes } }));
   }
