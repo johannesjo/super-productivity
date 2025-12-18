@@ -142,12 +142,14 @@ describe('PfapiService', () => {
       'saveStateCache',
       'loadStateCache',
       'clearAllOperations',
+      'saveImportBackup',
     ]);
     opLogStoreMock.append.and.returnValue(Promise.resolve(1));
     opLogStoreMock.getLastSeq.and.returnValue(Promise.resolve(1));
     opLogStoreMock.saveStateCache.and.returnValue(Promise.resolve());
     opLogStoreMock.loadStateCache.and.returnValue(Promise.resolve(null));
     opLogStoreMock.clearAllOperations.and.returnValue(Promise.resolve());
+    opLogStoreMock.saveImportBackup.and.returnValue(Promise.resolve());
 
     vectorClockServiceMock = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
@@ -204,9 +206,6 @@ describe('PfapiService', () => {
     spyOn(service.pf.metaModel, 'generateNewClientId').and.returnValue(
       Promise.resolve('new-client-id'),
     );
-
-    // Mock tmpBackupService methods
-    spyOn(service.pf.tmpBackupService, 'save').and.returnValue(Promise.resolve());
 
     // Mock ModelCtrl.save for all models to track what gets saved
     Object.keys(service.pf.m).forEach((modelId) => {
@@ -361,7 +360,7 @@ describe('PfapiService', () => {
       await service.importCompleteBackup(backupData, true, true);
 
       // Should backup existing state before clearing
-      expect(service.pf.tmpBackupService.save).toHaveBeenCalledWith(existingState);
+      expect(opLogStoreMock.saveImportBackup).toHaveBeenCalledWith(existingState);
       // Should clear all operations to prevent IndexedDB bloat
       expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
       // Should then append the new import operation
@@ -375,7 +374,7 @@ describe('PfapiService', () => {
       await service.importCompleteBackup(backupData, true, true);
 
       // Should not try to backup if no existing state
-      expect(service.pf.tmpBackupService.save).not.toHaveBeenCalled();
+      expect(opLogStoreMock.saveImportBackup).not.toHaveBeenCalled();
       // Should still clear operations
       expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
     });

@@ -257,14 +257,12 @@ export class PfapiService {
     PFLog.normal('PfapiService: Persisting import to operation log...');
 
     // 1. Backup current state before clearing operations
-    //    This allows recovery if something goes wrong during import
+    //    This allows manual recovery if the import causes issues
     try {
       const existingStateCache = await this._opLogStore.loadStateCache();
       if (existingStateCache?.state) {
         PFLog.normal('PfapiService: Backing up current state before import...');
-        await this.pf.tmpBackupService.save(
-          existingStateCache.state as AppDataCompleteNew,
-        );
+        await this._opLogStore.saveImportBackup(existingStateCache.state);
       }
     } catch (e) {
       PFLog.warn('PfapiService: Failed to backup state before import:', e);

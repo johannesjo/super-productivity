@@ -1181,6 +1181,58 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('import backup', () => {
+    it('should save and load import backup', async () => {
+      const state = { tasks: ['task1', 'task2'], projects: [] };
+
+      await service.saveImportBackup(state);
+
+      const backup = await service.loadImportBackup();
+      expect(backup).not.toBeNull();
+      expect(backup!.state).toEqual(state);
+      expect(backup!.savedAt).toBeDefined();
+      expect(typeof backup!.savedAt).toBe('number');
+    });
+
+    it('should return null when no backup exists', async () => {
+      const backup = await service.loadImportBackup();
+      expect(backup).toBeNull();
+    });
+
+    it('should overwrite existing backup on save', async () => {
+      const state1 = { version: 1 };
+      const state2 = { version: 2 };
+
+      await service.saveImportBackup(state1);
+      await service.saveImportBackup(state2);
+
+      const backup = await service.loadImportBackup();
+      expect(backup!.state).toEqual(state2);
+    });
+
+    it('should clear import backup', async () => {
+      const state = { data: 'test' };
+      await service.saveImportBackup(state);
+
+      await service.clearImportBackup();
+
+      const backup = await service.loadImportBackup();
+      expect(backup).toBeNull();
+    });
+
+    it('should check if backup exists with hasImportBackup', async () => {
+      expect(await service.hasImportBackup()).toBe(false);
+
+      await service.saveImportBackup({ test: true });
+
+      expect(await service.hasImportBackup()).toBe(true);
+
+      await service.clearImportBackup();
+
+      expect(await service.hasImportBackup()).toBe(false);
+    });
+  });
+
   describe('clearAllOperations', () => {
     it('should remove all operations from the log', async () => {
       // Add several operations

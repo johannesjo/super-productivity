@@ -28,6 +28,14 @@ interface OpLogDB extends DBSchema {
       snapshotEntityKeys?: string[]; // Entity keys that existed at compaction time
     };
   };
+  import_backup: {
+    key: string;
+    value: {
+      id: string;
+      state: unknown;
+      savedAt: number;
+    };
+  };
 }
 
 /**
@@ -64,6 +72,7 @@ export class OperationLogStoreService {
         opStore.createIndex('bySyncedAt', 'syncedAt');
 
         db.createObjectStore('state_cache', { keyPath: 'id' });
+        db.createObjectStore('import_backup', { keyPath: 'id' });
       },
     });
   }
@@ -613,10 +622,54 @@ export class OperationLogStoreService {
    */
   async _clearAllDataForTesting(): Promise<void> {
     await this._ensureInit();
-    const tx = this.db.transaction(['ops', 'state_cache'], 'readwrite');
+    const tx = this.db.transaction(['ops', 'state_cache', 'import_backup'], 'readwrite');
     await tx.objectStore('ops').clear();
     await tx.objectStore('state_cache').clear();
+    await tx.objectStore('import_backup').clear();
     await tx.done;
+  }
+
+  // ============================================================
+  // Import Backup (pre-import state preservation)
+  // ============================================================
+
+  /**
+   * Saves a backup of the current state before an import operation.
+   * This allows manual recovery if the import causes issues.
+   */
+  async saveImportBackup(state: unknown): Promise<void> {
+    await this._ensureInit();
+    await this.db.put('import_backup', {
+      id: 'current',
+      state,
+      savedAt: Date.now(),
+    });
+  }
+
+  /**
+   * Loads the import backup, if one exists.
+   */
+  async loadImportBackup(): Promise<{ state: unknown; savedAt: number } | null> {
+    await this._ensureInit();
+    const backup = await this.db.get('import_backup', 'current');
+    return backup ? { state: backup.state, savedAt: backup.savedAt } : null;
+  }
+
+  /**
+   * Clears the import backup.
+   */
+  async clearImportBackup(): Promise<void> {
+    await this._ensureInit();
+    await this.db.delete('import_backup', 'current');
+  }
+
+  /**
+   * Checks if an import backup exists.
+   */
+  async hasImportBackup(): Promise<boolean> {
+    await this._ensureInit();
+    const backup = await this.db.get('import_backup', 'current');
+    return !!backup;
   }
 
   /**
