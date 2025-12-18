@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { PersistenceLocalService } from '../../persistence-local.service';
 import { OpLog } from '../../../log';
 import { OpType } from '../operation.types';
 
@@ -10,7 +9,6 @@ describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockPfapiService: any;
-  let mockPersistenceLocalService: jasmine.SpyObj<PersistenceLocalService>;
 
   beforeEach(() => {
     // Mock OperationLogStoreService
@@ -35,11 +33,6 @@ describe('OperationLogMigrationService', () => {
       },
     };
 
-    // Mock PersistenceLocalService
-    mockPersistenceLocalService = jasmine.createSpyObj('PersistenceLocalService', [
-      'save',
-    ]);
-
     // Spy on OpLog
     spyOn(OpLog, 'normal');
     spyOn(OpLog, 'warn');
@@ -50,7 +43,6 @@ describe('OperationLogMigrationService', () => {
         OperationLogMigrationService,
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: PfapiService, useValue: mockPfapiService },
-        { provide: PersistenceLocalService, useValue: mockPersistenceLocalService },
       ],
     });
     service = TestBed.inject(OperationLogMigrationService);

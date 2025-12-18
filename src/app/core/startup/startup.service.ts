@@ -1,5 +1,4 @@
 import { effect, inject, Injectable } from '@angular/core';
-import { PersistenceLocalService } from '../persistence/persistence-local.service';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { TranslateService } from '@ngx-translate/core';
@@ -40,8 +39,6 @@ const DEFERRED_INIT_DELAY_MS = 1000;
   providedIn: 'root',
 })
 export class StartupService {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  private _persistenceLocalService = inject(PersistenceLocalService);
   private _pfapiService = inject(PfapiService);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   private _imexMetaService = inject(ImexViewService);

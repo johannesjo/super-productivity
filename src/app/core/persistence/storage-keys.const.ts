@@ -5,9 +5,6 @@ export type AllowedDBKeys = keyof AppDataCompleteLegacy | 'SUP_COMPLETE_BACKUP';
 // INDEXEDDB
 export enum DB {
   BACKUP = 'SUP_COMPLETE_BACKUP',
-  LOCAL_NON_SYNC = 'LOCAL_NON_SYNC',
-  LOCAL_LAST_SYNC_MODEL_CHANGE = 'LOCAL_LAST_SYNC_MODEL_CHANGE',
-  LOCAL_LAST_ARCHIVE_CHANGE = 'LOCAL_LAST_ARCHIVE_CHANGE',
   // and lots of non hard-coded AppDataComplete keys
 }
 

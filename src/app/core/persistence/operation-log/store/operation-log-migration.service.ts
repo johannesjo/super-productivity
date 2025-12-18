@@ -4,14 +4,12 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { Operation, OpType } from '../operation.types';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { OpLog } from '../../../log';
-import { PersistenceLocalService } from '../../persistence-local.service';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 
 @Injectable({ providedIn: 'root' })
 export class OperationLogMigrationService {
   private opLogStore = inject(OperationLogStoreService);
   private pfapiService = inject(PfapiService);
-  private persistenceLocalService = inject(PersistenceLocalService);
 
   async checkAndMigrate(): Promise<void> {
     // Check if there's a state cache (snapshot) - this indicates a proper migration happened

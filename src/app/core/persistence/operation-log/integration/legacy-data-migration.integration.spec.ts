@@ -2,7 +2,6 @@ import { TestBed } from '@angular/core/testing';
 import { OperationLogMigrationService } from '../store/operation-log-migration.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { PersistenceLocalService } from '../../persistence-local.service';
 import { OpType } from '../operation.types';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 
@@ -53,10 +52,6 @@ describe('Legacy Data Migration Integration', () => {
         OperationLogMigrationService,
         OperationLogStoreService,
         { provide: PfapiService, useValue: mockPfapiService },
-        {
-          provide: PersistenceLocalService,
-          useValue: jasmine.createSpyObj('PersistenceLocalService', ['save']),
-        },
       ],
     });
 
