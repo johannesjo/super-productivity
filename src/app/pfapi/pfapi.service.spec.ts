@@ -140,10 +140,14 @@ describe('PfapiService', () => {
       'append',
       'getLastSeq',
       'saveStateCache',
+      'loadStateCache',
+      'clearAllOperations',
     ]);
     opLogStoreMock.append.and.returnValue(Promise.resolve(1));
     opLogStoreMock.getLastSeq.and.returnValue(Promise.resolve(1));
     opLogStoreMock.saveStateCache.and.returnValue(Promise.resolve());
+    opLogStoreMock.loadStateCache.and.returnValue(Promise.resolve(null));
+    opLogStoreMock.clearAllOperations.and.returnValue(Promise.resolve());
 
     vectorClockServiceMock = jasmine.createSpyObj('VectorClockService', [
       'getCurrentVectorClock',
@@ -200,6 +204,9 @@ describe('PfapiService', () => {
     spyOn(service.pf.metaModel, 'generateNewClientId').and.returnValue(
       Promise.resolve('new-client-id'),
     );
+
+    // Mock tmpBackupService methods
+    spyOn(service.pf.tmpBackupService, 'save').and.returnValue(Promise.resolve());
 
     // Mock ModelCtrl.save for all models to track what gets saved
     Object.keys(service.pf.m).forEach((modelId) => {
@@ -337,6 +344,40 @@ describe('PfapiService', () => {
 
       // Should still reset the flag
       expect(imexViewServiceMock.setDataImportInProgress).toHaveBeenCalledWith(false);
+    });
+
+    it('should backup existing state and clear old operations before import', async () => {
+      const existingState = createMockBackupData();
+      opLogStoreMock.loadStateCache.and.returnValue(
+        Promise.resolve({
+          state: existingState,
+          lastAppliedOpSeq: 5,
+          vectorClock: { client1: 5 },
+          compactedAt: Date.now(),
+        }),
+      );
+
+      const backupData = createMockBackupData();
+      await service.importCompleteBackup(backupData, true, true);
+
+      // Should backup existing state before clearing
+      expect(service.pf.tmpBackupService.save).toHaveBeenCalledWith(existingState);
+      // Should clear all operations to prevent IndexedDB bloat
+      expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
+      // Should then append the new import operation
+      expect(opLogStoreMock.append).toHaveBeenCalled();
+    });
+
+    it('should not save backup if no existing state cache', async () => {
+      opLogStoreMock.loadStateCache.and.returnValue(Promise.resolve(null));
+
+      const backupData = createMockBackupData();
+      await service.importCompleteBackup(backupData, true, true);
+
+      // Should not try to backup if no existing state
+      expect(service.pf.tmpBackupService.save).not.toHaveBeenCalled();
+      // Should still clear operations
+      expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
     });
   });
 

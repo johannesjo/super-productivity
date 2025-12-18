@@ -1180,4 +1180,76 @@ describe('OperationLogStoreService', () => {
       }
     });
   });
+
+  describe('clearAllOperations', () => {
+    it('should remove all operations from the log', async () => {
+      // Add several operations
+      await service.append(createTestOperation({ entityId: 'task1' }));
+      await service.append(createTestOperation({ entityId: 'task2' }));
+      await service.append(createTestOperation({ entityId: 'task3' }));
+
+      // Verify they exist
+      let ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(3);
+
+      // Clear all operations
+      await service.clearAllOperations();
+
+      // Verify they are gone
+      ops = await service.getOpsAfterSeq(0);
+      expect(ops.length).toBe(0);
+    });
+
+    it('should reset lastSeq to 0 after clearing', async () => {
+      await service.append(createTestOperation());
+      await service.append(createTestOperation());
+
+      const seqBefore = await service.getLastSeq();
+      expect(seqBefore).toBeGreaterThan(0);
+
+      await service.clearAllOperations();
+
+      const seqAfter = await service.getLastSeq();
+      expect(seqAfter).toBe(0);
+    });
+
+    it('should invalidate caches after clearing', async () => {
+      // Add operations and build caches
+      await service.append(createTestOperation({ entityId: 'task1' }));
+      await service.getAppliedOpIds(); // Build appliedOpIds cache
+      await service.getUnsynced(); // Build unsynced cache
+
+      // Clear all operations
+      await service.clearAllOperations();
+
+      // Subsequent calls should return empty results (not stale cached data)
+      const appliedOpIds = await service.getAppliedOpIds();
+      expect(appliedOpIds.size).toBe(0);
+
+      const unsynced = await service.getUnsynced();
+      expect(unsynced.length).toBe(0);
+    });
+
+    it('should not affect state_cache', async () => {
+      // Save a state cache
+      const stateCache = {
+        state: { test: 'data' },
+        lastAppliedOpSeq: 5,
+        vectorClock: { client1: 5 } as VectorClock,
+        compactedAt: Date.now(),
+      };
+      await service.saveStateCache(stateCache);
+
+      // Add operations
+      await service.append(createTestOperation());
+
+      // Clear operations
+      await service.clearAllOperations();
+
+      // State cache should still exist
+      const loadedCache = await service.loadStateCache();
+      expect(loadedCache).not.toBeNull();
+      expect(loadedCache?.state).toEqual({ test: 'data' });
+    });
+  });
 });

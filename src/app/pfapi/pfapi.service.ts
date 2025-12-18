@@ -256,6 +256,26 @@ export class PfapiService {
   ): Promise<void> {
     PFLog.normal('PfapiService: Persisting import to operation log...');
 
+    // 1. Backup current state before clearing operations
+    //    This allows recovery if something goes wrong during import
+    try {
+      const existingStateCache = await this._opLogStore.loadStateCache();
+      if (existingStateCache?.state) {
+        PFLog.normal('PfapiService: Backing up current state before import...');
+        await this.pf.tmpBackupService.save(
+          existingStateCache.state as AppDataCompleteNew,
+        );
+      }
+    } catch (e) {
+      PFLog.warn('PfapiService: Failed to backup state before import:', e);
+      // Continue anyway - import is more important than backup
+    }
+
+    // 2. Clear all old operations to prevent IndexedDB bloat
+    //    Each SYNC_IMPORT contains the full app state (10-30MB+) and they accumulate
+    PFLog.normal('PfapiService: Clearing old operations before import...');
+    await this._opLogStore.clearAllOperations();
+
     const clientId = isForceConflict
       ? await this.pf.metaModel.generateNewClientId()
       : await this.pf.metaModel.loadClientId();

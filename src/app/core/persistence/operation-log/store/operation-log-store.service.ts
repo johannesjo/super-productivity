@@ -618,4 +618,20 @@ export class OperationLogStoreService {
     await tx.objectStore('state_cache').clear();
     await tx.done;
   }
+
+  /**
+   * Clears all operations from the operation log.
+   * Used when importing data to avoid accumulating old SYNC_IMPORT operations.
+   * NOTE: This does NOT clear the state_cache - that should be updated separately.
+   */
+  async clearAllOperations(): Promise<void> {
+    await this._ensureInit();
+    const tx = this.db.transaction('ops', 'readwrite');
+    await tx.objectStore('ops').clear();
+    await tx.done;
+    // Invalidate caches since we cleared all ops
+    this._appliedOpIdsCache = null;
+    this._cacheLastSeq = 0;
+    this._invalidateUnsyncedCache();
+  }
 }
