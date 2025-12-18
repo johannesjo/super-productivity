@@ -35,6 +35,15 @@ export const SYNC_WAIT_TIMEOUT_MS = 40000;
  */
 export const SYNC_REINIT_DELAY_MS = 100;
 
+/**
+ * Delay before triggering the initial sync for SuperSync provider.
+ * This allows the UI to render and become interactive first.
+ * Only applies to SuperSync because:
+ * - SuperSync uses operation-based sync where data is already local
+ * - Other providers (Dropbox, WebDAV, LocalFile) may need to download data before user can work
+ */
+export const INITIAL_SYNC_DELAY_MS = 500;
+
 export const DEFAULT_APP_BASE_DATA: AppBaseData = {
   project: initialProjectState,
   menuTree: menuTreeInitialState,

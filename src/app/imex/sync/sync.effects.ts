@@ -17,9 +17,11 @@ import {
 } from 'rxjs/operators';
 import { SyncTriggerService } from './sync-trigger.service';
 import {
+  INITIAL_SYNC_DELAY_MS,
   SYNC_BEFORE_CLOSE_ID,
   SYNC_INITIAL_SYNC_TRIGGER,
 } from '../../imex/sync/sync.const';
+import { SyncProviderId } from '../../pfapi/api';
 import { asyncScheduler, combineLatest, EMPTY, merge, Observable, of } from 'rxjs';
 import { isOnline$ } from '../../util/is-online';
 import { SnackService } from '../../core/snack/snack.service';
@@ -120,13 +122,18 @@ export class SyncEffects {
             this._initialPwaUpdateCheckService.afterInitialUpdateCheck$.pipe(
               concatMap(() => this._syncWrapperService.isEnabledAndReady$),
               take(1),
-              switchMap((isEnabledAndReady) => {
-                if (isEnabledAndReady) {
-                  return of(SYNC_INITIAL_SYNC_TRIGGER);
-                } else {
+              withLatestFrom(this._syncWrapperService.syncProviderId$),
+              switchMap(([isEnabledAndReady, providerId]) => {
+                if (!isEnabledAndReady) {
                   this._syncTriggerService.setInitialSyncDone(true);
                   return EMPTY;
                 }
+                // SuperSync can be delayed - data is already local, just needs upload/download
+                // Other providers (Dropbox, WebDAV, LocalFile) need sync first to download data
+                if (providerId === SyncProviderId.SuperSync) {
+                  return of(SYNC_INITIAL_SYNC_TRIGGER).pipe(delay(INITIAL_SYNC_DELAY_MS));
+                }
+                return of(SYNC_INITIAL_SYNC_TRIGGER);
               }),
             ),
 

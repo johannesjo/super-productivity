@@ -200,6 +200,14 @@ export class Pfapi<const MD extends ModelCfgs> {
         PFLog.log(provider, activeProviderId);
         throw new InvalidSyncProviderError();
       }
+
+      // Pre-warm the private config cache (fire-and-forget).
+      // This reduces IndexedDB reads during sync startup by ensuring
+      // the config is already cached when sync operations begin.
+      provider.privateCfg.load().catch((e) => {
+        PFLog.warn('Failed to pre-warm privateCfg cache:', e);
+      });
+
       this._activeSyncProvider$.next(provider);
       provider.isReady().then((isReady) => {
         this.ev.emit('providerReady', isReady);
