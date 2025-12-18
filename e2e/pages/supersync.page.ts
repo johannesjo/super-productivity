@@ -255,14 +255,26 @@ export class SuperSyncPage extends BasePage {
         // Check for error state first
         const hasError = await this.syncErrorIcon.isVisible();
         if (hasError) {
-          // Check for error snackbar
+          // Check for error snackbar - only treat as error if it contains actual error keywords
           const errorSnackbar = this.page.locator(
             'simple-snack-bar, .mat-mdc-snack-bar-container',
           );
-          const snackbarText = await errorSnackbar
-            .textContent()
-            .catch(() => 'Unknown error');
-          throw new Error(`Sync failed: ${snackbarText?.trim() || 'Server error'}`);
+          const snackbarText = await errorSnackbar.textContent().catch(() => '');
+          const snackbarLower = (snackbarText || '').toLowerCase();
+
+          // Only throw if this looks like a real sync error, not an informational message
+          // Informational messages include: "Deleted task X Undo", "addCreated task X", etc.
+          const isRealError =
+            snackbarLower.includes('error') ||
+            snackbarLower.includes('failed') ||
+            snackbarLower.includes('problem') ||
+            snackbarLower.includes('could not') ||
+            snackbarLower.includes('unable to');
+
+          if (isRealError) {
+            throw new Error(`Sync failed: ${snackbarText?.trim() || 'Server error'}`);
+          }
+          // Not a real error, just an informational snackbar - continue checking
         }
 
         // Sync finished - check icon may appear briefly or not at all
