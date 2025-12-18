@@ -212,13 +212,20 @@ export class OperationLogSyncService {
     // even if _processRemoteOps throws. Otherwise rejected ops remain in pending
     // state and get re-uploaded infinitely.
     let localWinOpsCreated = 0;
+    let mergedOpsFromRejection = 0;
     try {
       if (result.piggybackedOps.length > 0) {
         const processResult = await this._processRemoteOps(result.piggybackedOps);
         localWinOpsCreated = processResult.localWinOpsCreated;
       }
     } finally {
-      await this._handleRejectedOps(result.rejectedOps, syncProvider);
+      // _handleRejectedOps may create merged ops for concurrent modifications
+      // These need to be uploaded, so we add them to localWinOpsCreated
+      mergedOpsFromRejection = await this._handleRejectedOps(
+        result.rejectedOps,
+        syncProvider,
+      );
+      localWinOpsCreated += mergedOpsFromRejection;
     }
 
     // Update pending ops status for UI indicator
@@ -247,14 +254,17 @@ export class OperationLogSyncService {
    *
    * @param rejectedOps - Operations rejected by the server with error messages
    * @param syncProvider - The active sync provider (needed to trigger download)
+   * @returns Number of merged ops created (caller should trigger follow-up upload if > 0)
    */
   private async _handleRejectedOps(
     rejectedOps: Array<{ opId: string; error?: string }>,
     syncProvider?: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<void> {
+  ): Promise<number> {
     if (rejectedOps.length === 0) {
-      return;
+      return 0;
     }
+
+    let mergedOpsCreated = 0;
 
     // Separate concurrent modification rejections from permanent failures
     // For concurrent mods, we collect the full operation for later processing
@@ -341,7 +351,7 @@ export class OperationLogSyncService {
                 `OperationLogSyncService: Download returned no new ops but ${stillPendingOps.length} ` +
                   `concurrent ops still pending. Resolving locally with merged clocks...`,
               );
-              await this._resolveStaleLocalOps(stillPendingOps);
+              mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
             }
           } else {
             // Download got new ops - check if our pending ops were resolved by conflict detection
@@ -360,7 +370,7 @@ export class OperationLogSyncService {
                 `OperationLogSyncService: Download got ${downloadResult.newOpsCount} ops but ${stillPendingOps.length} ` +
                   `concurrent ops still pending. Resolving locally with merged clocks...`,
               );
-              await this._resolveStaleLocalOps(stillPendingOps);
+              mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
             }
           }
         } catch (e) {
@@ -371,6 +381,8 @@ export class OperationLogSyncService {
         }
       }
     }
+
+    return mergedOpsCreated;
   }
 
   /**
@@ -383,14 +395,15 @@ export class OperationLogSyncService {
    * 3. The new ops will be uploaded on next sync cycle
    *
    * @param staleOps - Operations that were rejected due to concurrent modification
+   * @returns Number of merged ops created
    */
   private async _resolveStaleLocalOps(
     staleOps: Array<{ opId: string; op: Operation }>,
-  ): Promise<void> {
+  ): Promise<number> {
     const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
     if (!clientId) {
       OpLog.err('OperationLogSyncService: Cannot resolve stale ops - no client ID');
-      return;
+      return 0;
     }
 
     // Get the entity frontier (all applied clocks including remote ops)
@@ -490,6 +503,8 @@ export class OperationLogSyncService {
         },
       });
     }
+
+    return newOpsCreated.length;
   }
 
   /**
