@@ -320,3 +320,55 @@ export const selectTimelineTasks = createSelector(
     };
   },
 );
+
+/**
+ * Detects if TODAY_TAG.taskIds is inconsistent with tasks' dueDay values.
+ * Returns the repaired taskIds if repair is needed, or null if consistent.
+ *
+ * This is used by ValidateStateService to repair state after sync, preventing
+ * divergence caused by per-entity conflict resolution of multi-entity operations.
+ *
+ * See: docs/ai/today-tag-architecture.md
+ */
+export const selectTodayTagRepair = createSelector(
+  selectTagFeatureState,
+  selectTaskFeatureState,
+  (tagState, taskState): { needsRepair: boolean; repairedTaskIds: string[] } | null => {
+    const todayTag = tagState.entities[TODAY_TAG.id];
+    if (!todayTag) {
+      return null;
+    }
+
+    const todayStr = getDbDateStr();
+    const storedTaskIds = todayTag.taskIds;
+
+    // Find all parent tasks where dueDay === today
+    const tasksForTodaySet = new Set<string>();
+    for (const id of taskState.ids) {
+      const task = taskState.entities[id];
+      if (task && !task.parentId && task.dueDay === todayStr) {
+        tasksForTodaySet.add(task.id);
+      }
+    }
+
+    // Check for inconsistencies:
+    // 1. storedTaskIds contains IDs where task.dueDay !== today (invalid)
+    // 2. tasksForTodaySet contains IDs not in storedTaskIds (missing)
+    const invalidInStored = storedTaskIds.filter((id) => !tasksForTodaySet.has(id));
+    const missingFromStored = [...tasksForTodaySet].filter(
+      (id) => !storedTaskIds.includes(id),
+    );
+
+    if (invalidInStored.length === 0 && missingFromStored.length === 0) {
+      return null; // No repair needed
+    }
+
+    // Repair: keep valid IDs in their original order, append missing IDs
+    const repairedTaskIds = [
+      ...storedTaskIds.filter((id) => tasksForTodaySet.has(id)),
+      ...missingFromStored,
+    ];
+
+    return { needsRepair: true, repairedTaskIds };
+  },
+);

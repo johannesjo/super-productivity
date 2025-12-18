@@ -11,7 +11,10 @@ import {
   tap,
 } from 'rxjs/operators';
 import { Store } from '@ngrx/store';
-import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
+import {
+  selectTodayTagRepair,
+  selectTodayTaskIds,
+} from '../../work-context/store/work-context.selectors';
 import { T } from '../../../t.const';
 import { SnackService } from '../../../core/snack/snack.service';
 import { deleteTag, deleteTags, updateTag } from './tag.actions';
@@ -211,6 +214,44 @@ export class TagEffects {
 
         return EMPTY;
       }),
+    ),
+  );
+
+  /**
+   * Repairs TODAY_TAG.taskIds when it becomes inconsistent with tasks' dueDay values.
+   *
+   * This handles state divergence caused by per-entity conflict resolution during sync.
+   * When "Add to today" and "Snooze" operations conflict, the TASK entity may resolve
+   * to one client's values while TODAY_TAG entity gets different values.
+   *
+   * SAFETY: Protected by skipDuringSync() - won't fire during sync replay.
+   *
+   * @see selectTodayTagRepair - detects inconsistencies between TODAY_TAG.taskIds and task.dueDay
+   * @see docs/ai/today-tag-architecture.md
+   */
+  repairTodayTagConsistency$: Observable<unknown> = createEffect(() =>
+    this._store$.select(selectTodayTagRepair).pipe(
+      skipDuringSync(),
+      filter(
+        (repair): repair is { needsRepair: boolean; repairedTaskIds: string[] } =>
+          repair !== null && repair.needsRepair,
+      ),
+      tap((repair) => {
+        Log.log('Repairing TODAY_TAG consistency', {
+          repairedTaskIds: repair.repairedTaskIds,
+        });
+      }),
+      map((repair) =>
+        updateTag({
+          tag: {
+            id: TODAY_TAG.id,
+            changes: {
+              taskIds: repair.repairedTaskIds,
+            },
+          },
+          isSkipSnack: true,
+        }),
+      ),
     ),
   );
   // PREVENT LAST TAG DELETION ACTIONS

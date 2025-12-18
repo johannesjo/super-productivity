@@ -5,6 +5,7 @@ import {
   selectStartableTasksForActiveContext,
   selectTimelineTasks,
   selectTodayTaskIds,
+  selectTodayTagRepair,
   selectTrackableTasksForActiveContext,
   selectUndoneTodayTaskIds,
 } from './work-context.selectors';
@@ -396,6 +397,225 @@ describe('workContext selectors', () => {
       const result = selectUndoneTodayTaskIds.projector(['task1', 'task2'], taskState);
       // task2 is filtered out because taskState.entities[task2]?.isDone is undefined (falsy but not false)
       expect(result).toEqual(['task1']);
+    });
+  });
+
+  describe('selectTodayTagRepair (post-sync consistency check)', () => {
+    it('should return null when TODAY_TAG.taskIds is consistent with tasks dueDay', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagConsistent = {
+        ...TODAY_TAG,
+        taskIds: ['task1', 'task2'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagConsistent]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toBeNull();
+    });
+
+    it('should return null when TODAY_TAG does not exist', () => {
+      // Create a tag state without TODAY_TAG by using a different tag
+      const otherTag = { ...TODAY_TAG, id: 'OTHER_TAG', taskIds: [] };
+      const tagState = fakeEntityStateFromArray([otherTag]);
+      // Remove the TODAY tag from entities to simulate it not existing
+      const tagStateWithoutToday = {
+        ...tagState,
+        entities: { OTHER_TAG: otherTag },
+      };
+      const taskState = fakeEntityStateFromArray([]) as any;
+
+      const result = selectTodayTagRepair.projector(
+        tagStateWithoutToday as any,
+        taskState,
+      );
+      expect(result).toBeNull();
+    });
+
+    it('should detect stale taskIds (tasks that no longer have dueDay === today)', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: '2000-01-01', // NOT today - should be removed
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithStaleIds = {
+        ...TODAY_TAG,
+        taskIds: ['task1', 'task2'], // task2 is stale
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithStaleIds]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toEqual({
+        needsRepair: true,
+        repairedTaskIds: ['task1'], // task2 removed
+      });
+    });
+
+    it('should detect missing taskIds (tasks with dueDay === today not in taskIds)', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: todayStr, // Should be in today
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagMissingTask2 = {
+        ...TODAY_TAG,
+        taskIds: ['task1'], // task2 is missing
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagMissingTask2]);
+      const taskState = fakeEntityStateFromArray([task1, task2]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toEqual({
+        needsRepair: true,
+        repairedTaskIds: ['task1', 'task2'], // task2 added
+      });
+    });
+
+    it('should handle both stale and missing taskIds', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: '2000-01-01', // NOT today - stale
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task3 = {
+        id: 'task3',
+        tagIds: [],
+        dueDay: todayStr, // Should be in today - missing
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      const todayTagWithIssues = {
+        ...TODAY_TAG,
+        taskIds: ['task2', 'task1'], // task2 is stale, task3 is missing
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithIssues]);
+      const taskState = fakeEntityStateFromArray([task1, task2, task3]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toEqual({
+        needsRepair: true,
+        repairedTaskIds: ['task1', 'task3'], // task2 removed, task3 added, order preserved for task1
+      });
+    });
+
+    it('should preserve original order for valid tasks', () => {
+      const task1 = {
+        id: 'task1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task2 = {
+        id: 'task2',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const task3 = {
+        id: 'task3',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+
+      // Original order: task3, task1 (task2 missing)
+      const todayTagMissingOne = {
+        ...TODAY_TAG,
+        taskIds: ['task3', 'task1'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagMissingOne]);
+      const taskState = fakeEntityStateFromArray([task1, task2, task3]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toEqual({
+        needsRepair: true,
+        repairedTaskIds: ['task3', 'task1', 'task2'], // Preserve task3, task1 order; append task2
+      });
+    });
+
+    it('should exclude subtasks from repair', () => {
+      const parentTask = {
+        id: 'parent',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: ['subtask1'],
+      } as Partial<TaskCopy> as TaskCopy;
+      const subtask = {
+        id: 'subtask1',
+        tagIds: [],
+        dueDay: todayStr,
+        subTaskIds: [],
+        parentId: 'parent',
+      } as Partial<TaskCopy> as TaskCopy;
+
+      // taskIds incorrectly includes subtask
+      const todayTagWithSubtask = {
+        ...TODAY_TAG,
+        taskIds: ['parent', 'subtask1'],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagWithSubtask]);
+      const taskState = fakeEntityStateFromArray([parentTask, subtask]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toEqual({
+        needsRepair: true,
+        repairedTaskIds: ['parent'], // subtask removed
+      });
+    });
+
+    it('should return null when empty and consistent', () => {
+      const todayTagEmpty = {
+        ...TODAY_TAG,
+        taskIds: [],
+      };
+
+      const tagState = fakeEntityStateFromArray([todayTagEmpty]);
+      const taskState = fakeEntityStateFromArray([]) as any;
+
+      const result = selectTodayTagRepair.projector(tagState, taskState);
+      expect(result).toBeNull();
     });
   });
 });

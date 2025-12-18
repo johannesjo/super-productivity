@@ -3751,9 +3751,9 @@ describe('OperationLogSyncService', () => {
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
 
-    it('should NOT dispatch loadAllData when wasRepaired is true but repairedState is undefined', async () => {
-      // Edge case: validator reports repair but doesn't provide repaired state
-      const mockState = {
+    it('should abort SYNC_IMPORT when validation fails and repair is not possible', async () => {
+      // Scenario: state is corrupted and cannot be repaired
+      const corruptedState = {
         task: {
           ids: ['task1'],
           entities: { task1: { id: 'task1', title: 'Test' } },
@@ -3762,25 +3762,54 @@ describe('OperationLogSyncService', () => {
         tag: { ids: [], entities: {} },
       } as any;
       storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
-        Promise.resolve(mockState),
+        Promise.resolve(corruptedState),
       );
 
-      // wasRepaired true but repairedState undefined (edge case)
+      // Validation fails, repair not possible
       validateStateServiceSpy.validateAndRepair.and.returnValue({
-        isValid: true,
-        wasRepaired: true,
-        repairedState: undefined, // No repaired state provided
+        isValid: false,
+        wasRepaired: false,
+        error: 'Data repair not possible - state too corrupted',
       } as any);
 
       await (service as any)._handleServerMigration();
 
-      // Should NOT dispatch loadAllData (repairedState is undefined)
-      expect(mockStore.dispatch).not.toHaveBeenCalled();
+      // Should NOT create SYNC_IMPORT when validation fails
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
 
-      // Should use original state since repairedState is undefined
-      expect(opLogStoreSpy.append).toHaveBeenCalled();
-      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
-      expect(appendedOp.payload).toEqual(mockState);
+      // Should NOT dispatch loadAllData
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('should abort SYNC_IMPORT when repair runs but fails to fix state', async () => {
+      // Scenario: repair attempted but state still invalid
+      const corruptedState = {
+        task: {
+          ids: ['task1'],
+          entities: { task1: { id: 'task1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      } as any;
+      storeDelegateSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(corruptedState),
+      );
+
+      // Repair ran but failed to fully fix the state
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: false,
+        wasRepaired: true,
+        repairedState: corruptedState, // Partially repaired but still invalid
+        error: 'State still invalid after repair',
+      } as any);
+
+      await (service as any)._handleServerMigration();
+
+      // Should NOT create SYNC_IMPORT when state is still invalid
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+
+      // Should NOT dispatch the still-invalid state
+      expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
 
     it('should handle orphaned tag references in menuTree', async () => {
