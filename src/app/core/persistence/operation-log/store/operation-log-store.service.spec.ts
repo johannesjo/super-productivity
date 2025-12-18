@@ -1231,6 +1231,71 @@ describe('OperationLogStoreService', () => {
 
       expect(await service.hasImportBackup()).toBe(false);
     });
+
+    it('should preserve complex nested data structures', async () => {
+      const complexState = {
+        tasks: {
+          ids: ['task1', 'task2'],
+          entities: {
+            task1: { id: 'task1', title: 'Test', nested: { deep: { value: 123 } } },
+            task2: { id: 'task2', title: 'Test 2', tags: ['a', 'b', 'c'] },
+          },
+        },
+        projects: [{ id: 'p1', name: 'Project' }],
+        nullValue: null,
+        undefinedValue: undefined,
+        emptyArray: [],
+        emptyObject: {},
+      };
+
+      await service.saveImportBackup(complexState);
+
+      const backup = await service.loadImportBackup();
+      expect(backup!.state).toEqual(complexState);
+    });
+
+    it('should survive clearAllOperations', async () => {
+      // Save backup and add some operations
+      const backupState = { important: 'data' };
+      await service.saveImportBackup(backupState);
+      await service.append(createTestOperation());
+      await service.append(createTestOperation());
+
+      // Clear all operations
+      await service.clearAllOperations();
+
+      // Backup should still exist
+      const backup = await service.loadImportBackup();
+      expect(backup).not.toBeNull();
+      expect(backup!.state).toEqual(backupState);
+    });
+
+    it('should be independent from state_cache', async () => {
+      // Save both import backup and state cache
+      const importBackupState = { type: 'import_backup' };
+      const stateCacheState = { type: 'state_cache' };
+
+      await service.saveImportBackup(importBackupState);
+      await service.saveStateCache({
+        state: stateCacheState,
+        lastAppliedOpSeq: 1,
+        vectorClock: { client1: 1 } as VectorClock,
+        compactedAt: Date.now(),
+      });
+
+      // Both should be independent
+      const importBackup = await service.loadImportBackup();
+      const stateCache = await service.loadStateCache();
+
+      expect(importBackup!.state).toEqual(importBackupState);
+      expect(stateCache!.state).toEqual(stateCacheState);
+
+      // Clearing one should not affect the other
+      await service.clearImportBackup();
+
+      expect(await service.loadImportBackup()).toBeNull();
+      expect((await service.loadStateCache())!.state).toEqual(stateCacheState);
+    });
   });
 
   describe('clearAllOperations', () => {
@@ -1302,6 +1367,23 @@ describe('OperationLogStoreService', () => {
       const loadedCache = await service.loadStateCache();
       expect(loadedCache).not.toBeNull();
       expect(loadedCache?.state).toEqual({ test: 'data' });
+    });
+
+    it('should not affect import_backup', async () => {
+      // Save an import backup
+      const backupState = { preserved: 'backup_data' };
+      await service.saveImportBackup(backupState);
+
+      // Add operations
+      await service.append(createTestOperation());
+
+      // Clear operations
+      await service.clearAllOperations();
+
+      // Import backup should still exist
+      const backup = await service.loadImportBackup();
+      expect(backup).not.toBeNull();
+      expect(backup?.state).toEqual(backupState);
     });
   });
 });

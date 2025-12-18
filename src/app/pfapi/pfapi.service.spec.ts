@@ -378,6 +378,33 @@ describe('PfapiService', () => {
       // Should still clear operations
       expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
     });
+
+    it('should continue import even if backup save fails', async () => {
+      const existingState = createMockBackupData();
+      opLogStoreMock.loadStateCache.and.returnValue(
+        Promise.resolve({
+          state: existingState,
+          lastAppliedOpSeq: 5,
+          vectorClock: { client1: 5 },
+          compactedAt: Date.now(),
+        }),
+      );
+      // Make backup save fail
+      opLogStoreMock.saveImportBackup.and.rejectWith(new Error('Backup failed'));
+
+      const backupData = createMockBackupData();
+
+      // Import should still succeed despite backup failure
+      await expectAsync(
+        service.importCompleteBackup(backupData, true, true),
+      ).toBeResolved();
+
+      // Should have attempted backup
+      expect(opLogStoreMock.saveImportBackup).toHaveBeenCalled();
+      // Should still proceed with clearing and importing
+      expect(opLogStoreMock.clearAllOperations).toHaveBeenCalled();
+      expect(opLogStoreMock.append).toHaveBeenCalled();
+    });
   });
 
   describe('ModelCtrl cache consistency', () => {
