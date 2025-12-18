@@ -227,7 +227,9 @@ const handleConvertToMainTask = (
       id: task.id,
       changes: {
         parentId: undefined,
-        tagIds: [...parentTask.tagIds],
+        // Filter out TODAY_TAG.id - it's a virtual tag where membership is
+        // determined by task.dueDay, not by being in tagIds
+        tagIds: parentTask.tagIds.filter((id) => id !== TODAY_TAG.id),
         modified: Date.now(),
         ...(isPlanForToday && !task.dueWithTime
           ? {
@@ -657,12 +659,14 @@ const handleTagUpdates = (
   oldTagIds: string[],
   newTagIds: string[],
 ): RootState => {
+  // Filter TODAY_TAG from both sides - it's a virtual tag where membership is
+  // determined by task.dueDay, not by being in tagIds
   const tagsToRemoveFrom = oldTagIds
     .filter((oldId) => !newTagIds.includes(oldId))
+    .filter((oldId) => oldId !== TODAY_TAG.id)
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
   const tagsToAddTo = newTagIds
     .filter((newId) => !oldTagIds.includes(newId))
-    // always filter TODAY_TAG
     .filter((newId) => newId !== TODAY_TAG.id)
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
 

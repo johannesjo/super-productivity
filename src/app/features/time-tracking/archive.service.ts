@@ -1,5 +1,5 @@
 import { inject, Injectable, Injector } from '@angular/core';
-import { TaskWithSubTasks } from '../tasks/task.model';
+import { Task, TaskWithSubTasks } from '../tasks/task.model';
 import { flattenTasks } from '../tasks/store/task.selectors';
 import { createEmptyEntity } from '../../util/create-empty-entity';
 import { taskAdapter } from '../tasks/store/task.adapter';
@@ -13,6 +13,46 @@ import { TimeTrackingActions } from './store/time-tracking.actions';
 import { flushYoungToOld } from './store/archive.actions';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { Log } from '../../core/log';
+
+/**
+ * Maps tasks to archive format by:
+ * - Setting isDone=true
+ * - Computing doneOn from task.doneOn, parent.doneOn, or fallback to now
+ * - Clearing reminder/scheduling fields
+ */
+const mapTasksToArchiveFormat = (
+  flatTasks: Task[],
+  now: number,
+  logPrefix: string,
+): Task[] => {
+  return flatTasks.map((task: Task) => {
+    let doneOn: number;
+    if (task.isDone && task.doneOn) {
+      doneOn = task.doneOn;
+    } else if (task.parentId) {
+      const parent = flatTasks.find((t) => t.id === task.parentId);
+      if (parent) {
+        doneOn = parent.doneOn || now;
+      } else {
+        Log.warn(
+          `[ArchiveService] ${logPrefix}: Subtask ${task.id} has parentId ${task.parentId} but parent not found in flatTasks, using current time`,
+        );
+        doneOn = now;
+      }
+    } else {
+      doneOn = now;
+    }
+    return {
+      ...task,
+      reminderId: undefined,
+      isDone: true,
+      dueWithTime: undefined,
+      dueDay: undefined,
+      _hideSubTasksMode: undefined,
+      doneOn,
+    };
+  });
+};
 
 /*
 # Considerations for flush architecture:
@@ -78,34 +118,8 @@ export class ArchiveService {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
-    const newTaskArchiveUnsorted = taskAdapter.addMany(
-      flatTasks.map(({ subTasks, ...task }) => {
-        let doneOn: number;
-        if (task.isDone && task.doneOn) {
-          doneOn = task.doneOn;
-        } else if (task.parentId) {
-          const parent = flatTasks.find((t) => t.id === task.parentId);
-          if (!parent) {
-            Log.warn(
-              `[ArchiveService] Subtask ${task.id} has parentId ${task.parentId} but parent not found in flatTasks, using current time`,
-            );
-          }
-          doneOn = parent?.doneOn || now;
-        } else {
-          doneOn = now;
-        }
-        return {
-          ...task,
-          reminderId: undefined,
-          isDone: true,
-          dueWithTime: undefined,
-          dueDay: undefined,
-          _hideSubTasksMode: undefined,
-          doneOn,
-        };
-      }),
-      taskArchiveState,
-    );
+    const archiveTasks = mapTasksToArchiveFormat(flatTasks, now, 'moveToArchive');
+    const newTaskArchiveUnsorted = taskAdapter.addMany(archiveTasks, taskArchiveState);
     // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
     const newTaskArchive = {
       ...newTaskArchiveUnsorted,
@@ -227,34 +241,8 @@ export class ArchiveService {
     const archiveYoung = await this.pfapiService.m.archiveYoung.load();
     const taskArchiveState = archiveYoung.task || createEmptyEntity();
 
-    const newTaskArchiveUnsorted = taskAdapter.addMany(
-      flatTasks.map(({ subTasks, ...task }) => {
-        let doneOn: number;
-        if (task.isDone && task.doneOn) {
-          doneOn = task.doneOn;
-        } else if (task.parentId) {
-          const parent = flatTasks.find((t) => t.id === task.parentId);
-          if (!parent) {
-            Log.warn(
-              `[ArchiveService] Remote sync: Subtask ${task.id} has parentId ${task.parentId} but parent not found in flatTasks, using current time`,
-            );
-          }
-          doneOn = parent?.doneOn || now;
-        } else {
-          doneOn = now;
-        }
-        return {
-          ...task,
-          reminderId: undefined,
-          isDone: true,
-          dueWithTime: undefined,
-          dueDay: undefined,
-          _hideSubTasksMode: undefined,
-          doneOn,
-        };
-      }),
-      taskArchiveState,
-    );
+    const archiveTasks = mapTasksToArchiveFormat(flatTasks, now, 'Remote sync');
+    const newTaskArchiveUnsorted = taskAdapter.addMany(archiveTasks, taskArchiveState);
     // Sort ids for deterministic ordering across clients (UUIDv7 is lexicographically sortable)
     const newTaskArchive = {
       ...newTaskArchiveUnsorted,

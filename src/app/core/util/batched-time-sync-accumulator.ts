@@ -1,3 +1,5 @@
+import { Log } from '../log';
+
 /**
  * Handles batched accumulation and flushing of time tracking data.
  * Used by TaskService and SimpleCounterService to reduce sync frequency.
@@ -35,15 +37,25 @@ export class BatchedTimeSyncAccumulator {
 
   /**
    * Flushes all accumulated time and resets.
+   * Uses defensive approach: clears internal state first to prevent data loss
+   * if an exception occurs during dispatch.
    */
   flush(): void {
-    this._unsyncedDuration.forEach(({ duration, date }, id) => {
-      if (duration > 0) {
-        this._dispatchSync(id, date, duration);
-      }
-    });
+    // Copy entries and clear state first to ensure we don't lose data on error
+    const entries = Array.from(this._unsyncedDuration.entries());
     this._unsyncedDuration.clear();
     this._lastSyncTime = Date.now();
+
+    // Dispatch each entry, catching errors individually
+    for (const [id, { duration, date }] of entries) {
+      if (duration > 0) {
+        try {
+          this._dispatchSync(id, date, duration);
+        } catch (e) {
+          Log.error('[BatchedTimeSyncAccumulator] Error dispatching sync for', id, e);
+        }
+      }
+    }
   }
 
   /**
@@ -51,10 +63,16 @@ export class BatchedTimeSyncAccumulator {
    */
   flushOne(id: string): void {
     const accumulated = this._unsyncedDuration.get(id);
-    if (accumulated && accumulated.duration > 0) {
-      this._dispatchSync(id, accumulated.date, accumulated.duration);
-    }
+    // Delete first to ensure cleanup even if dispatch fails
     this._unsyncedDuration.delete(id);
+
+    if (accumulated && accumulated.duration > 0) {
+      try {
+        this._dispatchSync(id, accumulated.date, accumulated.duration);
+      } catch (e) {
+        Log.error('[BatchedTimeSyncAccumulator] Error dispatching sync for', id, e);
+      }
+    }
   }
 
   /**

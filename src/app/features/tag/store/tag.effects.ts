@@ -141,7 +141,22 @@ export class TagEffects {
     { dispatch: false },
   );
 
-  // Uses selectTodayTaskIds which already computes membership from task.dueDay (virtual tag pattern)
+  /**
+   * Maintains TODAY_TAG.taskIds consistency by:
+   * 1. Removing subtasks whose parents are also in the list (parent takes precedence)
+   * 2. Adding tasks with dueDay=today that aren't in the list yet
+   *
+   * SAFETY: This is a selector-based effect that dispatches actions.
+   * Protected against sync replay by:
+   * - skipDuringSync() - skips when HydrationStateService.isApplyingRemoteOps()
+   * - distinctUntilChanged - prevents duplicate dispatches for same state
+   * - explicit isChanged check before dispatch
+   *
+   * Note: Converting to a meta-reducer was considered but rejected because:
+   * - The logic needs access to multiple selectors (todayTaskIds, allTasksDueToday)
+   * - The current guards provide sufficient protection
+   * - This is a "cleanup" effect that corrects inconsistencies, not a primary data flow
+   */
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
     this._store$.select(selectTodayTaskIds).pipe(
       filter((v) => v.length > 0),

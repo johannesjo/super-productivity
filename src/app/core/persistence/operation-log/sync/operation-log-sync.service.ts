@@ -881,17 +881,15 @@ export class OperationLogSyncService {
     // CRITICAL: Acquire the same lock used by writeOperation effects.
     // This ensures:
     // 1. All pending writes complete before we read (FIFO lock ordering)
-    // 2. No NEW writes can start while we read the frontier (we hold the lock)
+    // 2. No NEW writes can start while we read the frontier AND detect conflicts
     // Without this, a race condition exists where a write could start after
-    // flushing but before reading the frontier, causing conflict detection to miss it.
-    let appliedFrontierByEntity!: Map<string, VectorClock>;
+    // reading the frontier but before conflict detection completes.
+    let conflictResult!: ConflictResult;
     await this.lockService.request('sp_op_log', async () => {
-      appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
+      const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
+      conflictResult = await this.detectConflicts(validOps, appliedFrontierByEntity);
     });
-    const { nonConflicting, conflicts } = await this.detectConflicts(
-      validOps,
-      appliedFrontierByEntity,
-    );
+    const { nonConflicting, conflicts } = conflictResult;
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 5: Handle Results - Auto-Resolve Conflicts with LWW

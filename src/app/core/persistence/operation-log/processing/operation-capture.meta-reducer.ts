@@ -14,6 +14,13 @@ import { OpLog } from '../../../log';
 let operationCaptureService: OperationCaptureService | null = null;
 
 /**
+ * Track consecutive capture failures to detect persistent issues.
+ * If failures accumulate, something is seriously wrong with sync.
+ */
+let consecutiveCaptureFailures = 0;
+const MAX_CONSECUTIVE_FAILURES_BEFORE_WARNING = 3;
+
+/**
  * Sets the service instance for the meta-reducer.
  * Must be called during app initialization before any persistent actions are dispatched.
  */
@@ -88,12 +95,32 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
             afterState as unknown as RootState,
           );
 
+          // Reset failure counter on success
+          consecutiveCaptureFailures = 0;
+
           OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
             actionType: persistentAction.type,
           });
         } catch (e) {
-          OpLog.err('operationCaptureMetaReducer: Failed to capture operation', e);
-          // Don't block the reducer - state change already happened
+          consecutiveCaptureFailures++;
+
+          // Log with increasing severity based on failure count
+          if (consecutiveCaptureFailures >= MAX_CONSECUTIVE_FAILURES_BEFORE_WARNING) {
+            OpLog.err(
+              `operationCaptureMetaReducer: CRITICAL - ${consecutiveCaptureFailures} consecutive capture failures! ` +
+                'Sync data may be inconsistent. Consider triggering a full sync.',
+              { actionType: action.type, error: e },
+            );
+          } else {
+            OpLog.err('operationCaptureMetaReducer: Failed to capture operation', {
+              actionType: action.type,
+              error: e,
+              failureCount: consecutiveCaptureFailures,
+            });
+          }
+          // Don't block the reducer - state change already happened.
+          // Note: If capture fails, local state diverges from other clients until a
+          // SYNC_IMPORT (full state sync) is triggered. This is a known limitation.
         }
       }
     }

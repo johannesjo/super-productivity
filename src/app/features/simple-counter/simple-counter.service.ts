@@ -22,19 +22,20 @@ import {
   updateSimpleCounter,
   upsertSimpleCounter,
 } from './store/simple-counter.actions';
-import { Observable, Subscription } from 'rxjs';
+import { firstValueFrom, Observable, Subscription } from 'rxjs';
 import {
   SimpleCounter,
   SimpleCounterState,
   SimpleCounterType,
 } from './simple-counter.model';
 import { nanoid } from 'nanoid';
-import { distinctUntilChanged, take, withLatestFrom } from 'rxjs/operators';
+import { distinctUntilChanged, withLatestFrom } from 'rxjs/operators';
 import { isEqualSimpleCounterCfg } from './is-equal-simple-counter-cfg.util';
 import { DateService } from 'src/app/core/date/date.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { BatchedTimeSyncAccumulator } from '../../core/util/batched-time-sync-accumulator';
+import { Log } from 'src/app/core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -172,25 +173,32 @@ export class SimpleCounterService implements OnDestroy {
     }
   }
 
-  private _flushAccumulatedTime(): void {
+  private async _flushAccumulatedTime(): Promise<void> {
     // Flush StopWatch accumulated time
     this._stopwatchAccumulator.flush();
 
     // Flush ClickCounter modifications with absolute values
     if (this._modifiedClickCounters.size > 0) {
       const today = this._dateService.todayStr();
-      this._store$
-        .pipe(select(selectAllSimpleCounters), take(1))
-        .subscribe((counters) => {
-          for (const id of this._modifiedClickCounters) {
-            const counter = counters.find((c) => c.id === id);
-            if (counter) {
-              const newVal = counter.countOnDay[today] || 0;
-              this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-            }
+      // Copy IDs before clearing to ensure cleanup even if dispatch fails
+      const idsToFlush = [...this._modifiedClickCounters];
+      this._modifiedClickCounters.clear();
+
+      try {
+        const counters = await firstValueFrom(
+          this._store$.pipe(select(selectAllSimpleCounters)),
+        );
+        for (const id of idsToFlush) {
+          const counter = counters.find((c) => c.id === id);
+          if (counter) {
+            const newVal = counter.countOnDay[today] || 0;
+            this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
           }
-          this._modifiedClickCounters.clear();
-        });
+        }
+      } catch (e) {
+        // Log error but don't re-throw - flush is best-effort
+        Log.error('[SimpleCounterService] Error flushing click counters:', e);
+      }
     }
   }
 

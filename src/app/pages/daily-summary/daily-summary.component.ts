@@ -30,6 +30,7 @@ import {
   switchMap,
   take,
   takeUntil,
+  timeout,
   withLatestFrom,
 } from 'rxjs/operators';
 import { DateService } from 'src/app/core/date/date.service';
@@ -327,10 +328,18 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
   async finishDay(): Promise<void> {
     try {
       await this._beforeFinishDayService.executeActions();
-      // Wait for any ongoing sync to complete before archiving to avoid DB lock errors
+      // Wait for any ongoing sync to complete before archiving to avoid DB lock errors.
+      // Use a 30-second timeout to prevent hanging indefinitely if sync is stuck.
       await this._syncWrapperService.afterCurrentSyncDoneOrSyncDisabled$
-        .pipe(first())
-        .toPromise();
+        .pipe(first(), timeout(30000))
+        .toPromise()
+        .catch((err) => {
+          // Log timeout but continue - better to proceed than to block the user
+          Log.warn(
+            '[DailySummary] Sync wait timed out after 30s, proceeding anyway:',
+            err,
+          );
+        });
     } catch (error) {
       Log.error('[DailySummary] Failed during pre-archive operations:', error);
       this._snackService.open({
