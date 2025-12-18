@@ -324,9 +324,9 @@ export class OperationLogSyncService {
           // Try to download new remote ops - if there are any, conflict detection will handle them
           const downloadResult = await this.downloadRemoteOps(provider);
 
-          // If download got new ops, conflict detection already happened
-          // If download got nothing, we need to resolve locally
-          if (downloadResult.localWinOpsCreated === 0) {
+          // If download got new ops, conflict detection already happened in _processRemoteOps
+          // If download got nothing (newOpsCount === 0), we need to resolve locally
+          if (downloadResult.newOpsCount === 0) {
             // Check if pending ops still exist (weren't resolved by conflict detection)
             const stillPendingOps: Array<{ opId: string; op: Operation }> = [];
             for (const { opId, op } of concurrentModificationOps) {
@@ -339,6 +339,25 @@ export class OperationLogSyncService {
             if (stillPendingOps.length > 0) {
               OpLog.warn(
                 `OperationLogSyncService: Download returned no new ops but ${stillPendingOps.length} ` +
+                  `concurrent ops still pending. Resolving locally with merged clocks...`,
+              );
+              await this._resolveStaleLocalOps(stillPendingOps);
+            }
+          } else {
+            // Download got new ops - check if our pending ops were resolved by conflict detection
+            const stillPendingOps: Array<{ opId: string; op: Operation }> = [];
+            for (const { opId, op } of concurrentModificationOps) {
+              const entry = await this.opLogStore.getOpById(opId);
+              if (entry && !entry.syncedAt && !entry.rejectedAt) {
+                stillPendingOps.push({ opId, op });
+              }
+            }
+
+            if (stillPendingOps.length > 0) {
+              // Ops still pending after download - conflict detection didn't resolve them
+              // This can happen if downloaded ops were for different entities
+              OpLog.warn(
+                `OperationLogSyncService: Download got ${downloadResult.newOpsCount} ops but ${stillPendingOps.length} ` +
                   `concurrent ops still pending. Resolving locally with merged clocks...`,
               );
               await this._resolveStaleLocalOps(stillPendingOps);
@@ -496,7 +515,11 @@ export class OperationLogSyncService {
    */
   async downloadRemoteOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<{ serverMigrationHandled: boolean; localWinOpsCreated: number }> {
+  ): Promise<{
+    serverMigrationHandled: boolean;
+    localWinOpsCreated: number;
+    newOpsCount: number;
+  }> {
     const result = await this.downloadService.downloadRemoteOps(syncProvider);
 
     // Server migration detected: gap on empty server
@@ -508,7 +531,7 @@ export class OperationLogSyncService {
         await syncProvider.setLastServerSeq(result.latestServerSeq);
       }
       // Return with flag indicating migration was handled - caller should upload the SYNC_IMPORT
-      return { serverMigrationHandled: true, localWinOpsCreated: 0 };
+      return { serverMigrationHandled: true, localWinOpsCreated: 0, newOpsCount: 0 };
     }
 
     if (result.newOps.length === 0) {
@@ -521,7 +544,7 @@ export class OperationLogSyncService {
       if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
         await syncProvider.setLastServerSeq(result.latestServerSeq);
       }
-      return { serverMigrationHandled: false, localWinOpsCreated: 0 };
+      return { serverMigrationHandled: false, localWinOpsCreated: 0, newOpsCount: 0 };
     }
 
     // SAFETY: Fresh client confirmation
@@ -542,7 +565,7 @@ export class OperationLogSyncService {
         this.snackService.open({
           msg: T.F.SYNC.S.FRESH_CLIENT_SYNC_CANCELLED,
         });
-        return { serverMigrationHandled: false, localWinOpsCreated: 0 };
+        return { serverMigrationHandled: false, localWinOpsCreated: 0, newOpsCount: 0 };
       }
 
       OpLog.normal(
@@ -567,6 +590,7 @@ export class OperationLogSyncService {
     return {
       serverMigrationHandled: false,
       localWinOpsCreated: processResult.localWinOpsCreated,
+      newOpsCount: result.newOps.length,
     };
   }
 
