@@ -46,11 +46,9 @@ import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
-import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
 import { SuperSyncStatusService } from './super-sync-status.service';
-import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
-import { AppDataCompleteNew } from '../../../../pfapi/pfapi-config';
 import { SyncImportFilterService } from './sync-import-filter.service';
+import { ServerMigrationService } from './server-migration.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -136,6 +134,7 @@ export class OperationLogSyncService {
   private compactionService = inject(OperationLogCompactionService);
   private superSyncStatusService = inject(SuperSyncStatusService);
   private syncImportFilterService = inject(SyncImportFilterService);
+  private serverMigrationService = inject(ServerMigrationService);
 
   // Lazy injection to break circular dependency:
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
@@ -196,7 +195,8 @@ export class OperationLogSyncService {
     // This prevents race conditions where multiple tabs could both detect migration
     // and create duplicate SYNC_IMPORT operations.
     const result = await this.uploadService.uploadPendingOps(syncProvider, {
-      preUploadCallback: () => this._checkAndHandleServerMigration(syncProvider),
+      preUploadCallback: () =>
+        this.serverMigrationService.checkAndHandleMigration(syncProvider),
     });
 
     // STEP 1: Process piggybacked ops FIRST
@@ -585,7 +585,7 @@ export class OperationLogSyncService {
     // Server migration detected: gap on empty server
     // Create a SYNC_IMPORT operation with full local state to seed the new server
     if (result.needsFullStateUpload) {
-      await this._handleServerMigration();
+      await this.serverMigrationService.handleServerMigration();
       // Persist lastServerSeq=0 for the migration case (server was reset)
       if (isOperationSyncCapable(syncProvider) && result.latestServerSeq !== undefined) {
         await syncProvider.setLastServerSeq(result.latestServerSeq);
@@ -675,199 +675,6 @@ export class OperationLogSyncService {
       },
     );
     return window.confirm(`${title}\n\n${message}`);
-  }
-
-  /**
-   * Check if we're connecting to a new/empty server and need to upload full state.
-   *
-   * This handles the server migration scenario:
-   * - Client has PREVIOUSLY SYNCED operations (not just local ops)
-   * - lastServerSeq is 0 for this server (first time connecting)
-   * - Server is empty (latestSeq = 0)
-   *
-   * When detected, creates a SYNC_IMPORT with full state before regular ops are uploaded.
-   *
-   * IMPORTANT: A fresh client with only local (unsynced) ops is NOT a migration scenario.
-   * Fresh clients should just upload their ops normally without creating a SYNC_IMPORT.
-   */
-  private async _checkAndHandleServerMigration(
-    syncProvider: SyncProviderServiceInterface<SyncProviderId>,
-  ): Promise<void> {
-    // Only check for operation-sync capable providers
-    if (!isOperationSyncCapable(syncProvider)) {
-      return;
-    }
-
-    // Check if lastServerSeq is 0 (first time connecting to this server)
-    const lastServerSeq = await syncProvider.getLastServerSeq();
-    if (lastServerSeq !== 0) {
-      // We've synced with this server before, no migration needed
-      return;
-    }
-
-    // Check if server is empty by doing a minimal download request
-    const response = await syncProvider.downloadOps(0, undefined, 1);
-    if (response.latestSeq !== 0) {
-      // Server has data, this is not a migration scenario
-      // (might be joining an existing sync group)
-      return;
-    }
-
-    // CRITICAL: Check if this client has PREVIOUSLY synced operations.
-    // A client that has never synced (only local ops) is NOT a migration case.
-    // It's just a fresh client that should upload its ops normally.
-    const hasSyncedOps = await this.opLogStore.hasSyncedOps();
-    if (!hasSyncedOps) {
-      OpLog.normal(
-        'OperationLogSyncService: Empty server detected, but no previously synced ops. ' +
-          'This is a fresh client, not a server migration. Proceeding with normal upload.',
-      );
-      return;
-    }
-
-    // Server is empty AND we have PREVIOUSLY SYNCED ops AND lastServerSeq is 0
-    // This is a server migration - create SYNC_IMPORT with full state
-    OpLog.warn(
-      'OperationLogSyncService: Server migration detected during upload check. ' +
-        'Empty server with previously synced ops. Creating full state SYNC_IMPORT.',
-    );
-    await this._handleServerMigration();
-  }
-
-  /**
-   * Handles server migration scenario by creating a SYNC_IMPORT operation
-   * with the full current state.
-   *
-   * This is called when:
-   * 1. Client has existing data (lastServerSeq > 0 from old server)
-   * 2. Server returns gapDetected: true (client seq ahead of server)
-   * 3. Server is empty (no ops to download)
-   *
-   * This indicates the client has connected to a new/reset server.
-   * Without uploading full state, incremental ops would reference
-   * entities that don't exist on the new server.
-   */
-  private async _handleServerMigration(): Promise<void> {
-    OpLog.warn(
-      'OperationLogSyncService: Server migration detected. Creating full state SYNC_IMPORT.',
-    );
-
-    // Get current full state from NgRx store
-    let currentState = await this.storeDelegateService.getAllSyncModelDataFromStore();
-
-    // Skip if local state is effectively empty
-    if (this._isEmptyState(currentState)) {
-      OpLog.warn('OperationLogSyncService: Skipping SYNC_IMPORT - local state is empty.');
-      return;
-    }
-
-    // Validate and repair state before creating SYNC_IMPORT
-    // This prevents corrupted state (e.g., orphaned menuTree references) from
-    // propagating to other clients via the full state import.
-    const validationResult = this.validateStateService.validateAndRepair(
-      currentState as AppDataCompleteNew,
-    );
-
-    // If state is invalid and couldn't be repaired, abort - don't propagate corruption
-    if (!validationResult.isValid) {
-      OpLog.err(
-        'OperationLogSyncService: Cannot create SYNC_IMPORT - state validation failed.',
-        validationResult.error || validationResult.crossModelError,
-      );
-      this.snackService.open({
-        type: 'ERROR',
-        msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
-      });
-      return;
-    }
-
-    // If state was repaired, use the repaired version
-    if (validationResult.repairedState) {
-      OpLog.warn(
-        'OperationLogSyncService: State repaired before creating SYNC_IMPORT',
-        validationResult.repairSummary,
-      );
-      currentState = validationResult.repairedState;
-
-      // Also update NgRx store with repaired state so local client is consistent
-      this.store.dispatch(
-        loadAllData({ appDataComplete: validationResult.repairedState }),
-      );
-    }
-
-    // Get client ID and vector clock
-    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
-    if (!clientId) {
-      OpLog.err(
-        'OperationLogSyncService: Cannot create SYNC_IMPORT - no client ID available.',
-      );
-      return;
-    }
-
-    const currentClock = await this.vectorClockService.getCurrentVectorClock();
-    const newClock = incrementVectorClock(currentClock, clientId);
-
-    // Create SYNC_IMPORT operation with full state
-    // NOTE: Use raw state directly (not wrapped in appDataComplete).
-    // The snapshot endpoint expects raw state, and the hydrator handles
-    // both formats on extraction.
-    const op: Operation = {
-      id: uuidv7(),
-      actionType: '[SP_ALL] Load(import) all data',
-      opType: OpType.SyncImport,
-      entityType: 'ALL',
-      payload: currentState,
-      clientId,
-      vectorClock: newClock,
-      timestamp: Date.now(),
-      schemaVersion: CURRENT_SCHEMA_VERSION,
-    };
-
-    // Append to operation log - will be uploaded via snapshot endpoint
-    await this.opLogStore.append(op, 'local');
-
-    OpLog.normal(
-      'OperationLogSyncService: Created SYNC_IMPORT operation for server migration. ' +
-        'Will be uploaded immediately via follow-up upload.',
-    );
-  }
-
-  /**
-   * Checks if the state is effectively empty (no meaningful data to sync).
-   * An empty state has no tasks, projects, or tags.
-   */
-  private _isEmptyState(state: unknown): boolean {
-    if (!state || typeof state !== 'object') {
-      return true;
-    }
-
-    const s = state as Record<string, unknown>;
-
-    // Check for meaningful data in key entity collections
-    const taskState = s['task'] as { ids?: unknown[] } | undefined;
-    const projectState = s['project'] as { ids?: unknown[] } | undefined;
-    const tagState = s['tag'] as { ids?: (string | unknown)[] } | undefined;
-
-    const hasNoTasks = !taskState?.ids || taskState.ids.length === 0;
-    const hasNoProjects = !projectState?.ids || projectState.ids.length === 0;
-    const hasNoUserTags = this._hasNoUserCreatedTags(tagState?.ids);
-
-    // Consider empty if there are no tasks, projects, or user-defined tags
-    return hasNoTasks && hasNoProjects && hasNoUserTags;
-  }
-
-  /**
-   * Checks if there are no user-created tags.
-   * System tags (TODAY, URGENT, IMPORTANT, IN_PROGRESS) are excluded from the count.
-   */
-  private _hasNoUserCreatedTags(tagIds: (string | unknown)[] | undefined): boolean {
-    if (!tagIds || tagIds.length === 0) {
-      return true;
-    }
-    const userTagCount = tagIds.filter(
-      (id) => typeof id === 'string' && !SYSTEM_TAG_IDS.has(id),
-    ).length;
-    return userTagCount === 0;
   }
 
   /**

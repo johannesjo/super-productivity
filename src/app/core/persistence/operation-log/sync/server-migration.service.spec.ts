@@ -1,0 +1,409 @@
+/* eslint-disable @typescript-eslint/naming-convention, @typescript-eslint/no-explicit-any */
+import { TestBed } from '@angular/core/testing';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { ServerMigrationService } from './server-migration.service';
+import { OperationLogStoreService } from '../store/operation-log-store.service';
+import { VectorClockService } from './vector-clock.service';
+import { ValidateStateService } from '../processing/validate-state.service';
+import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
+import { SnackService } from '../../../snack/snack.service';
+import { PfapiService } from '../../../../pfapi/pfapi.service';
+import {
+  SyncProviderServiceInterface,
+  OperationSyncCapable,
+} from '../../../../pfapi/api/sync/sync-provider.interface';
+import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
+import { OpType } from '../operation.types';
+import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
+import { loadAllData } from '../../../../root-store/meta/load-all-data.action';
+
+describe('ServerMigrationService', () => {
+  let service: ServerMigrationService;
+  let store: MockStore;
+  let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
+  let vectorClockServiceSpy: jasmine.SpyObj<VectorClockService>;
+  let validateStateServiceSpy: jasmine.SpyObj<ValidateStateService>;
+  let storeDelegateServiceSpy: jasmine.SpyObj<PfapiStoreDelegateService>;
+  let snackServiceSpy: jasmine.SpyObj<SnackService>;
+  let pfapiServiceSpy: any;
+
+  // Type for operation-sync-capable provider
+  type OperationSyncProvider = SyncProviderServiceInterface<SyncProviderId> &
+    OperationSyncCapable;
+
+  // Mock sync provider that supports operations
+  const createMockSyncProvider = (): OperationSyncProvider => {
+    return {
+      supportsOperationSync: true,
+      id: 'SuperSync' as SyncProviderId,
+      maxConcurrentRequests: 10,
+      getLastServerSeq: jasmine
+        .createSpy('getLastServerSeq')
+        .and.returnValue(Promise.resolve(0)),
+      downloadOps: jasmine
+        .createSpy('downloadOps')
+        .and.returnValue(Promise.resolve({ ops: [], latestSeq: 0, hasMore: false })),
+      uploadOps: jasmine.createSpy('uploadOps'),
+      uploadSnapshot: jasmine.createSpy('uploadSnapshot'),
+      setLastServerSeq: jasmine.createSpy('setLastServerSeq'),
+      privateCfg: {} as any,
+      getFileRev: jasmine.createSpy('getFileRev'),
+      downloadFile: jasmine.createSpy('downloadFile'),
+      uploadFile: jasmine.createSpy('uploadFile'),
+      removeFile: jasmine.createSpy('removeFile'),
+      isReady: jasmine.createSpy('isReady'),
+      setPrivateCfg: jasmine.createSpy('setPrivateCfg'),
+    } as unknown as OperationSyncProvider;
+  };
+
+  // Mock sync provider that does NOT support operations
+  const createLegacySyncProvider = (): SyncProviderServiceInterface<SyncProviderId> => {
+    return {
+      id: 'WebDAV' as SyncProviderId,
+      maxConcurrentRequests: 5,
+      privateCfg: {} as any,
+      getFileRev: jasmine.createSpy('getFileRev'),
+      downloadFile: jasmine.createSpy('downloadFile'),
+      uploadFile: jasmine.createSpy('uploadFile'),
+      removeFile: jasmine.createSpy('removeFile'),
+      isReady: jasmine.createSpy('isReady'),
+      setPrivateCfg: jasmine.createSpy('setPrivateCfg'),
+    } as unknown as SyncProviderServiceInterface<SyncProviderId>;
+  };
+
+  beforeEach(() => {
+    opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
+      'hasSyncedOps',
+      'append',
+    ]);
+    vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
+      'getCurrentVectorClock',
+    ]);
+    validateStateServiceSpy = jasmine.createSpyObj('ValidateStateService', [
+      'validateAndRepair',
+    ]);
+    storeDelegateServiceSpy = jasmine.createSpyObj('PfapiStoreDelegateService', [
+      'getAllSyncModelDataFromStore',
+    ]);
+    snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
+
+    // Mock PfapiService
+    pfapiServiceSpy = {
+      pf: {
+        metaModel: {
+          loadClientId: jasmine
+            .createSpy('loadClientId')
+            .and.returnValue(Promise.resolve('test-client')),
+        },
+      },
+    };
+
+    // Default mock returns
+    opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(true));
+    opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+    vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+      Promise.resolve({ 'test-client': 5 }),
+    );
+    validateStateServiceSpy.validateAndRepair.and.returnValue({
+      isValid: true,
+      wasRepaired: false,
+    } as any);
+    storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+      Promise.resolve({
+        task: {
+          ids: ['task-1'],
+          entities: { 'task-1': { id: 'task-1', title: 'Test' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      }) as any,
+    );
+
+    TestBed.configureTestingModule({
+      providers: [
+        ServerMigrationService,
+        provideMockStore(),
+        { provide: OperationLogStoreService, useValue: opLogStoreSpy },
+        { provide: VectorClockService, useValue: vectorClockServiceSpy },
+        { provide: ValidateStateService, useValue: validateStateServiceSpy },
+        { provide: PfapiStoreDelegateService, useValue: storeDelegateServiceSpy },
+        { provide: SnackService, useValue: snackServiceSpy },
+        { provide: PfapiService, useValue: pfapiServiceSpy },
+      ],
+    });
+
+    service = TestBed.inject(ServerMigrationService);
+    store = TestBed.inject(MockStore);
+    spyOn(store, 'dispatch');
+  });
+
+  describe('checkAndHandleMigration', () => {
+    it('should skip for non-operation-sync-capable providers', async () => {
+      const legacyProvider = createLegacySyncProvider();
+      await service.checkAndHandleMigration(legacyProvider);
+
+      expect(opLogStoreSpy.hasSyncedOps).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should skip if lastServerSeq !== 0 (already synced with server)', async () => {
+      const provider = createMockSyncProvider();
+      (provider.getLastServerSeq as jasmine.Spy).and.returnValue(Promise.resolve(10));
+
+      await service.checkAndHandleMigration(provider);
+
+      expect(provider.downloadOps).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should skip if server has data (latestSeq !== 0)', async () => {
+      const provider = createMockSyncProvider();
+      (provider.getLastServerSeq as jasmine.Spy).and.returnValue(Promise.resolve(0));
+      (provider.downloadOps as jasmine.Spy).and.returnValue(
+        Promise.resolve({ ops: [], latestSeq: 5, hasMore: false }),
+      );
+
+      await service.checkAndHandleMigration(provider);
+
+      expect(opLogStoreSpy.hasSyncedOps).not.toHaveBeenCalled();
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should skip if client has no previously synced ops (fresh client)', async () => {
+      const provider = createMockSyncProvider();
+      opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(false));
+
+      await service.checkAndHandleMigration(provider);
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should call handleServerMigration when all conditions are met', async () => {
+      const provider = createMockSyncProvider();
+      (provider.getLastServerSeq as jasmine.Spy).and.returnValue(Promise.resolve(0));
+      (provider.downloadOps as jasmine.Spy).and.returnValue(
+        Promise.resolve({ ops: [], latestSeq: 0, hasMore: false }),
+      );
+      opLogStoreSpy.hasSyncedOps.and.returnValue(Promise.resolve(true));
+
+      await service.checkAndHandleMigration(provider);
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.opType).toBe(OpType.SyncImport);
+    });
+  });
+
+  describe('handleServerMigration', () => {
+    it('should skip if state is empty (no tasks/projects/tags)', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: [], entities: {} },
+          project: { ids: [], entities: {} },
+          tag: { ids: [], entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should skip if state only has system tags', async () => {
+      const systemTagIds = Array.from(SYSTEM_TAG_IDS);
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: [], entities: {} },
+          project: { ids: [], entities: {} },
+          tag: { ids: systemTagIds, entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should abort if state validation fails', async () => {
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: false,
+        wasRepaired: false,
+        error: 'Validation failed',
+      } as any);
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: 'ERROR' }),
+      );
+    });
+
+    it('should use repaired state and dispatch to store if repair occurred', async () => {
+      const repairedState = {
+        task: {
+          ids: ['task-1'],
+          entities: { 'task-1': { id: 'task-1', title: 'Repaired' } },
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      };
+
+      validateStateServiceSpy.validateAndRepair.and.returnValue({
+        isValid: true,
+        wasRepaired: true,
+        repairedState,
+        repairSummary: 'Fixed orphaned references',
+      } as any);
+
+      await service.handleServerMigration();
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        loadAllData({ appDataComplete: repairedState as any }),
+      );
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.payload).toBe(repairedState);
+    });
+
+    it('should create SYNC_IMPORT with correct structure', async () => {
+      const mockState = {
+        task: { ids: ['task-1'], entities: { 'task-1': { id: 'task-1' } } },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+      };
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(mockState) as any,
+      );
+      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ 'test-client': 5 }),
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.opType).toBe(OpType.SyncImport);
+      expect(appendedOp.entityType).toBe('ALL');
+      expect(appendedOp.clientId).toBe('test-client');
+      expect(appendedOp.payload).toBe(mockState);
+      expect(appendedOp.vectorClock['test-client']).toBe(6);
+    });
+
+    it('should abort if no client ID is available', async () => {
+      pfapiServiceSpy.pf.metaModel.loadClientId.and.returnValue(Promise.resolve(null));
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should proceed if state has tasks', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: ['task-1'], entities: { 'task-1': { id: 'task-1' } } },
+          project: { ids: [], entities: {} },
+          tag: { ids: [], entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should proceed if state has projects', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: [], entities: {} },
+          project: { ids: ['proj-1'], entities: { 'proj-1': { id: 'proj-1' } } },
+          tag: { ids: [], entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+
+    it('should proceed if state has user-created tags', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: [], entities: {} },
+          project: { ids: [], entities: {} },
+          tag: { ids: ['user-tag-1'], entities: { 'user-tag-1': { id: 'user-tag-1' } } },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+  });
+
+  describe('_isEmptyState (tested via handleServerMigration)', () => {
+    it('should treat null state as empty', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(null) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should treat undefined state as empty', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve(undefined) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+
+    it('should treat non-object state as empty', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve('not an object') as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('_hasNoUserCreatedTags (tested via handleServerMigration)', () => {
+    it('should identify system tags correctly', async () => {
+      for (const systemTagId of SYSTEM_TAG_IDS) {
+        opLogStoreSpy.append.calls.reset();
+        storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+          Promise.resolve({
+            task: { ids: [], entities: {} },
+            project: { ids: [], entities: {} },
+            tag: { ids: [systemTagId], entities: {} },
+          }) as any,
+        );
+
+        await service.handleServerMigration();
+
+        expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+      }
+    });
+
+    it('should proceed with mixed system and user tags', async () => {
+      storeDelegateServiceSpy.getAllSyncModelDataFromStore.and.returnValue(
+        Promise.resolve({
+          task: { ids: [], entities: {} },
+          project: { ids: [], entities: {} },
+          tag: { ids: ['TODAY', 'user-custom-tag'], entities: {} },
+        }) as any,
+      );
+
+      await service.handleServerMigration();
+
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+    });
+  });
+});
