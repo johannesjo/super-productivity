@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Operation, EntityType, isMultiEntityPayload } from '../operation.types';
+import { Operation, EntityType, extractActionPayload } from '../operation.types';
 import { Store } from '@ngrx/store';
 import { selectTaskEntities } from '../../../../features/tasks/store/task.selectors';
 import {
@@ -84,24 +84,13 @@ export class DependencyResolverService {
   private store = inject(Store);
 
   /**
-   * Extracts the action payload from an operation.
-   * Handles both multi-entity (new format) and legacy payloads.
-   */
-  private extractActionPayload(op: Operation): unknown {
-    if (isMultiEntityPayload(op.payload)) {
-      return op.payload.actionPayload;
-    }
-    return op.payload;
-  }
-
-  /**
    * Identifies dependencies for a given operation.
    */
   extractDependencies(op: Operation): OperationDependency[] {
     const deps: OperationDependency[] = [];
 
     // Extract actionPayload for both multi-entity and legacy payloads
-    const actionPayload = this.extractActionPayload(op);
+    const actionPayload = extractActionPayload(op.payload);
 
     if (op.entityType === 'TASK') {
       const payload = actionPayload as TaskOperationPayload;

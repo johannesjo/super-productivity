@@ -270,3 +270,14 @@ export const isMultiEntityPayload = (payload: unknown): payload is MultiEntityPa
     Array.isArray((payload as MultiEntityPayload).entityChanges)
   );
 };
+
+/**
+ * Extracts the action payload from an operation payload.
+ * Handles both multi-entity payloads (new format) and legacy payloads.
+ */
+export const extractActionPayload = (payload: unknown): Record<string, unknown> => {
+  if (isMultiEntityPayload(payload)) {
+    return payload.actionPayload;
+  }
+  return payload as Record<string, unknown>;
+};

@@ -162,8 +162,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Writes archived tasks to archiveYoung storage.
-   * REMOTE ONLY: For local operations, archive is written BEFORE action dispatch
-   * by ArchiveService.moveToArchive(), so we skip here to avoid double-writes.
+   *
+   * @localBehavior SKIP - Archive written by ArchiveService.moveToArchive() before dispatch
+   * @remoteBehavior Executes - Writes tasks to archiveYoung
    */
   private async _handleMoveToArchive(action: PersistentAction): Promise<void> {
     if (!action.meta.isRemote) {
@@ -175,7 +176,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Removes a restored task from archive storage.
-   * Called for both local and remote restoreTask operations.
+   *
+   * @localBehavior Executes normally (acquires DB lock)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleRestoreTask(action: PersistentAction): Promise<void> {
     const task = (action as ReturnType<typeof TaskSharedActions.restoreTask>).task;
@@ -189,8 +192,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Updates an archived task in archive storage.
-   * REMOTE ONLY: For local operations, archive is written BEFORE action dispatch
-   * by TaskArchiveService.updateTask(), so we skip here to avoid double-writes.
+   *
+   * @localBehavior SKIP - Archive written by TaskArchiveService.updateTask() before dispatch
+   * @remoteBehavior Executes - Updates task in archive if it exists there
    */
   private async _handleUpdateTask(action: PersistentAction): Promise<void> {
     if (!action.meta.isRemote) {
@@ -215,12 +219,11 @@ export class ArchiveOperationHandler {
 
   /**
    * Executes the flush from archiveYoung to archiveOld.
-   * REMOTE ONLY: For local operations, the flush is already performed by
-   * ArchiveService.moveTasksToArchiveAndFlushArchiveIfDue() before action dispatch.
-   * This prevents race conditions with sync (see that method for details).
-   *
    * This operation is deterministic - given the same timestamp and archive state,
    * it will produce the same result on all clients.
+   *
+   * @localBehavior SKIP - Flush performed by ArchiveService.moveTasksToArchiveAndFlushArchiveIfDue() before dispatch
+   * @remoteBehavior Executes - Performs flush with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleFlushYoungToOld(action: PersistentAction): Promise<void> {
     if (!action.meta?.isRemote) {
@@ -273,9 +276,11 @@ export class ArchiveOperationHandler {
    * 2. Clearing notes from tasks older than the threshold
    * 3. Clearing non-essential issue fields (keeps issueId and issueType)
    *
-   * Called for both local and remote compressArchive operations.
    * This operation is deterministic - given the same timestamp, it produces
    * the same result on all clients.
+   *
+   * @localBehavior Executes normally (acquires DB lock)
+   * @remoteBehavior Executes with isIgnoreDBLock (sync has DB locked)
    */
   private async _handleCompressArchive(action: PersistentAction): Promise<void> {
     const { oneYearAgoTimestamp } = action as ReturnType<typeof compressArchive>;
@@ -291,7 +296,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Removes all archived tasks for a deleted project.
-   * Called when receiving a remote deleteProject operation.
+   *
+   * @localBehavior Executes (cleans up archive for deleted project)
+   * @remoteBehavior Executes (same behavior)
    */
   private async _handleDeleteProject(action: PersistentAction): Promise<void> {
     const projectId = (action as ReturnType<typeof TaskSharedActions.deleteProject>)
@@ -302,7 +309,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Removes tag references from archived tasks and deletes orphaned tasks.
-   * Called when receiving a remote deleteTag or deleteTags operation.
+   *
+   * @localBehavior Executes (cleans up archive for deleted tags)
+   * @remoteBehavior Executes (same behavior)
    */
   private async _handleDeleteTags(action: PersistentAction): Promise<void> {
     const tagIdsToRemove =
@@ -319,7 +328,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Removes repeatCfgId from archived tasks.
-   * Called when receiving a remote deleteTaskRepeatCfg operation.
+   *
+   * @localBehavior Executes (cleans up archive for deleted repeat config)
+   * @remoteBehavior Executes (same behavior)
    */
   private async _handleDeleteTaskRepeatCfg(action: PersistentAction): Promise<void> {
     const repeatCfgId = (
@@ -330,7 +341,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Unlinks issue data from archived tasks for a deleted issue provider.
-   * Called when receiving a remote deleteIssueProvider operation.
+   *
+   * @localBehavior Executes (cleans up archive for deleted provider)
+   * @remoteBehavior Executes (same behavior)
    */
   private async _handleDeleteIssueProvider(action: PersistentAction): Promise<void> {
     const issueProviderId = (
@@ -343,7 +356,9 @@ export class ArchiveOperationHandler {
 
   /**
    * Unlinks issue data from archived tasks for multiple deleted issue providers.
-   * Called when receiving a remote deleteIssueProviders operation.
+   *
+   * @localBehavior Executes (cleans up archive for deleted providers)
+   * @remoteBehavior Executes (same behavior)
    */
   private async _handleDeleteIssueProviders(action: PersistentAction): Promise<void> {
     const ids = (action as ReturnType<typeof TaskSharedActions.deleteIssueProviders>).ids;
@@ -356,11 +371,11 @@ export class ArchiveOperationHandler {
 
   /**
    * Writes archive data to IndexedDB from a SYNC_IMPORT/BACKUP_IMPORT operation.
-   * REMOTE ONLY: For local operations, archive is already written by
-   * PfapiService._updateModelCtrlCaches(), so we skip here to avoid double-writes.
+   * Fixes bug where SYNC_IMPORT updated NgRx state but never persisted archive
+   * data to IndexedDB on remote client, causing data loss on restart.
    *
-   * This fixes the bug where SYNC_IMPORT updated NgRx state but never persisted
-   * archive data to IndexedDB on the remote client, causing data loss on restart.
+   * @localBehavior SKIP - Archive written by PfapiService._updateModelCtrlCaches()
+   * @remoteBehavior Executes - Writes archiveYoung/archiveOld to IndexedDB
    */
   private async _handleLoadAllData(action: PersistentAction): Promise<void> {
     if (!action.meta?.isRemote) {

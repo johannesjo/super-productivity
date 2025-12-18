@@ -1,4 +1,4 @@
-import { isMultiEntityPayload, Operation, OpType } from './operation.types';
+import { extractActionPayload, Operation, OpType } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 
 /**
@@ -24,19 +24,6 @@ const FULL_STATE_OP_TYPES = new Set([
   OpType.BackupImport,
   OpType.Repair,
 ]);
-
-/**
- * Extracts the action payload from an operation.
- * Handles both multi-entity payloads (new format) and legacy payloads.
- */
-const extractActionPayload = (payload: unknown): Record<string, unknown> => {
-  if (isMultiEntityPayload(payload)) {
-    // Multi-entity payload: extract the original action payload
-    return payload.actionPayload;
-  }
-  // Legacy format: payload is directly the action payload
-  return payload as Record<string, unknown>;
-};
 
 /**
  * Extracts the action payload for full-state operations (SYNC_IMPORT, BACKUP_IMPORT, Repair).
