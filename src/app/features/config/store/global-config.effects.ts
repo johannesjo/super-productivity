@@ -77,8 +77,10 @@ export class GlobalConfigEffects {
 
   // Selector-based effect to apply language from state.
   // This fires on initial load, local changes, AND remote sync.
+  // Intentional: UI config should apply from any source, dispatch: false
   applyLanguageFromState$ = createEffect(
     () =>
+      // eslint-disable-next-line local-rules/require-hydration-guard
       this._store.select(selectLocalizationConfig).pipe(
         map((config) => config.lng),
         distinctUntilChanged(),
