@@ -476,7 +476,7 @@ export class OperationLogSyncService {
 
       OpLog.normal(
         `OperationLogSyncService: Created merged update op for ${entityKey}, ` +
-          `replacing ${entityOps.length} stale op(s)`,
+          `replacing ${entityOps.length} stale op(s). New clock: ${JSON.stringify(newClock)}`,
       );
     }
 
