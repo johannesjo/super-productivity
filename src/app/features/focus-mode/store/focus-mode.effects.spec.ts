@@ -14,7 +14,11 @@ import * as selectors from './focus-mode.selectors';
 import { FocusModeMode, FocusScreen, TimerState } from '../focus-mode.model';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import {
+  selectFocusModeConfig,
+  selectPomodoroConfig,
+} from '../../config/store/global-config.reducer';
+import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
 import { take, toArray } from 'rxjs/operators';
 
 describe('FocusModeEffects', () => {
@@ -81,6 +85,7 @@ describe('FocusModeEffects', () => {
             { selector: selectors.selectCurrentCycle, value: 1 },
             { selector: selectors.selectLastSessionDuration, value: 0 },
             { selector: selectFocusModeConfig, value: { isAlwaysUseFocusMode: false } },
+            { selector: selectPomodoroConfig, value: { duration: 25 * 60 * 1000 } },
           ],
         }),
         { provide: FocusModeStrategyFactory, useValue: strategyFactoryMock },
@@ -157,6 +162,155 @@ describe('FocusModeEffects', () => {
 
       const result: any[] = [];
       effects.syncDurationWithMode$.subscribe({
+        next: (action) => result.push(action),
+        complete: () => {
+          expect(result.length).toBe(0);
+          done();
+        },
+      });
+    });
+  });
+
+  describe('syncDurationWithPomodoroConfig$', () => {
+    it('should sync duration when pomodoro config changes for unstarted session', (done) => {
+      actions$ = of(
+        updateGlobalConfigSection({ sectionKey: 'pomodoro', sectionCfg: {} }),
+      );
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 20 * 60 * 1000 }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 30 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      effects.syncDurationWithPomodoroConfig$.subscribe((action) => {
+        expect(action).toEqual(
+          actions.setFocusSessionDuration({ focusSessionDuration: 30 * 60 * 1000 }),
+        );
+        done();
+      });
+    });
+
+    it('should NOT sync when session has already started', (done) => {
+      actions$ = of(
+        updateGlobalConfigSection({ sectionKey: 'pomodoro', sectionCfg: {} }),
+      );
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 20 * 60 * 1000, purpose: 'work' }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 30 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      const result: any[] = [];
+      effects.syncDurationWithPomodoroConfig$.subscribe({
+        next: (action) => result.push(action),
+        complete: () => {
+          expect(result.length).toBe(0);
+          done();
+        },
+      });
+    });
+
+    it('should NOT sync for non-Pomodoro modes', (done) => {
+      actions$ = of(
+        updateGlobalConfigSection({ sectionKey: 'pomodoro', sectionCfg: {} }),
+      );
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 20 * 60 * 1000 }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 30 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      const result: any[] = [];
+      effects.syncDurationWithPomodoroConfig$.subscribe({
+        next: (action) => result.push(action),
+        complete: () => {
+          expect(result.length).toBe(0);
+          done();
+        },
+      });
+    });
+
+    it('should NOT sync for non-pomodoro config section updates', (done) => {
+      actions$ = of(updateGlobalConfigSection({ sectionKey: 'misc', sectionCfg: {} }));
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 20 * 60 * 1000 }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 30 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      const result: any[] = [];
+      effects.syncDurationWithPomodoroConfig$.subscribe({
+        next: (action) => result.push(action),
+        complete: () => {
+          expect(result.length).toBe(0);
+          done();
+        },
+      });
+    });
+
+    it('should NOT sync if duration is not divisible by 1000', (done) => {
+      actions$ = of(
+        updateGlobalConfigSection({ sectionKey: 'pomodoro', sectionCfg: {} }),
+      );
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 20 * 60 * 1000 }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      // 30 minutes + 500ms = not divisible by 1000
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 1800500,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      const result: any[] = [];
+      effects.syncDurationWithPomodoroConfig$.subscribe({
+        next: (action) => result.push(action),
+        complete: () => {
+          expect(result.length).toBe(0);
+          done();
+        },
+      });
+    });
+
+    it('should NOT sync if duration is the same as current', (done) => {
+      actions$ = of(
+        updateGlobalConfigSection({ sectionKey: 'pomodoro', sectionCfg: {} }),
+      );
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ duration: 25 * 60 * 1000 }),
+      );
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectPomodoroConfig, {
+        duration: 25 * 60 * 1000,
+        cyclesBeforeLongerBreak: 4,
+      });
+      store.refreshState();
+
+      const result: any[] = [];
+      effects.syncDurationWithPomodoroConfig$.subscribe({
         next: (action) => result.push(action),
         complete: () => {
           expect(result.length).toBe(0);

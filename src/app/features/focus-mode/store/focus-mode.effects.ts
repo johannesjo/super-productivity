@@ -20,7 +20,11 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
 import { LS } from '../../../core/persistence/storage-keys.const';
-import { selectFocusModeConfig } from '../../config/store/global-config.reducer';
+import {
+  selectFocusModeConfig,
+  selectPomodoroConfig,
+} from '../../config/store/global-config.reducer';
+import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
 import { FocusModeMode, FocusScreen, TimerState } from '../focus-mode.model';
 import { BannerService } from '../../../core/banner/banner.service';
 import { BannerId } from '../../../core/banner/banner.model';
@@ -346,6 +350,44 @@ export class FocusModeEffects {
         }
 
         return of(actions.setFocusSessionDuration({ focusSessionDuration: duration }));
+      }),
+    ),
+  );
+
+  // Sync duration when Pomodoro settings change (only for unstarted sessions)
+  syncDurationWithPomodoroConfig$ = createEffect(() =>
+    this.actions$.pipe(
+      ofType(updateGlobalConfigSection),
+      filter(({ sectionKey }) => sectionKey === 'pomodoro'),
+      withLatestFrom(
+        this.store.select(selectors.selectTimer),
+        this.store.select(selectors.selectMode),
+        this.store.select(selectPomodoroConfig),
+      ),
+      switchMap(([_action, timer, mode, pomodoroConfig]) => {
+        // Only sync if session hasn't started yet
+        if (timer.purpose !== null) {
+          return EMPTY;
+        }
+
+        // Only sync for Pomodoro mode
+        if (mode !== FocusModeMode.Pomodoro) {
+          return EMPTY;
+        }
+
+        const newDuration = pomodoroConfig?.duration;
+
+        // Only sync if duration is valid and divisible by 1000 (whole seconds)
+        if (
+          typeof newDuration !== 'number' ||
+          newDuration <= 0 ||
+          newDuration % 1000 !== 0 ||
+          newDuration === timer.duration
+        ) {
+          return EMPTY;
+        }
+
+        return of(actions.setFocusSessionDuration({ focusSessionDuration: newDuration }));
       }),
     ),
   );
