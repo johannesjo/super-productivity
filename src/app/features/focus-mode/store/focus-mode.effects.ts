@@ -560,6 +560,13 @@ export class FocusModeEffects {
               isSessionCompleted ||
               (useIconButtons && isSessionPaused);
 
+            // Check if break time is up (needed for both banner display and button actions)
+            const isBreakTimeUp =
+              timer.purpose === 'break' &&
+              !timer.isRunning &&
+              timer.duration > 0 &&
+              timer.elapsed >= timer.duration;
+
             if (shouldShowBanner) {
               // Determine banner message based on session type
               let translationKey: string;
@@ -577,13 +584,6 @@ export class FocusModeEffects {
                 timer$ = undefined; // No timer needed for completed state
                 progress$ = undefined; // No progress bar needed
               } else if (isOnBreak) {
-                // Check if break time is up
-                const isBreakTimeUp =
-                  timer.purpose === 'break' &&
-                  !timer.isRunning &&
-                  timer.duration > 0 &&
-                  timer.elapsed >= timer.duration;
-
                 if (isBreakTimeUp) {
                   // Break is done - time is up
                   translationKey = T.F.POMODORO.BREAK_IS_DONE;
@@ -629,7 +629,12 @@ export class FocusModeEffects {
                 // Hide dismiss button in icon button mode (banner-only mode)
                 isHideDismissBtn: useIconButtons,
                 ...(useIconButtons
-                  ? this._getIconButtonActions(timer, isOnBreak, isSessionCompleted)
+                  ? this._getIconButtonActions(
+                      timer,
+                      isOnBreak,
+                      isSessionCompleted,
+                      isBreakTimeUp,
+                    )
                   : this._getTextButtonActions(isSessionCompleted)),
               });
             } else {
@@ -669,11 +674,15 @@ export class FocusModeEffects {
     timer: TimerState,
     isOnBreak: boolean,
     isSessionCompleted: boolean,
+    isBreakTimeUp: boolean,
   ): Pick<Banner, 'action' | 'action2' | 'action3'> {
     const isPaused = !timer.isRunning && timer.purpose !== null;
 
-    // Play/Pause button - or Start button when session completed
-    const playPauseAction = isSessionCompleted
+    // Show "Start" button when session completed OR break time is up
+    // Otherwise show play/pause button
+    const shouldShowStartButton = isSessionCompleted || isBreakTimeUp;
+
+    const playPauseAction = shouldShowStartButton
       ? {
           label: T.F.FOCUS_MODE.B.START,
           icon: 'play_arrow',
@@ -708,10 +717,10 @@ export class FocusModeEffects {
           },
         };
 
-    // End session button - complete for work, skip/complete for break
-    // Hide when session is already completed
+    // End session button - complete for work, skip for break (while running)
+    // Hide when session is completed, break time is up, or during active break
     const endAction =
-      isSessionCompleted || isOnBreak
+      shouldShowStartButton || isOnBreak
         ? undefined
         : {
             label: T.F.FOCUS_MODE.B.END_SESSION,
