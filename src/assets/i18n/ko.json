@@ -1203,7 +1203,7 @@
         "REMINDER_ADDED": "예약 된 작업 \"{{title}}\"",
         "REMINDER_DELETED": "할 일 목록 삭제",
         "REMINDER_UPDATED": "\"{{title}}\"작업에 대한 알림이 업데이트되었습니다.",
-        "TASK_CREATED": "\"{{title}}\"작업 생성"
+        "TASK_CREATED": "\"{{taskTitle}}\"작업 생성"
       },
       "SELECT_OR_CREATE": "작업 선택 또는 생성",
       "SUMMARY_TABLE": {

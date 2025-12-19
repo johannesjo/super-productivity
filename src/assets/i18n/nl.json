@@ -1374,7 +1374,7 @@
         "REMINDER_ADDED": "Geplande taak \"{{title}}\"",
         "REMINDER_DELETED": "Herinnering voor taak verwijderd",
         "REMINDER_UPDATED": "Herinnering voor taak \"{{title}}\" bijgewerkt",
-        "TASK_CREATED": "Taak \"{{title}}\" gemaakt"
+        "TASK_CREATED": "Taak \"{{taskTitle}}\" gemaakt"
       },
       "SELECT_OR_CREATE": "Selecteer of maak een taak",
       "SUMMARY_TABLE": {

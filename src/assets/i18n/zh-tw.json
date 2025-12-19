@@ -1339,7 +1339,7 @@
         "REMINDER_ADDED": "已計劃任務\"{{title}}\"",
         "REMINDER_DELETED": "已刪除任務提醒",
         "REMINDER_UPDATED": "更新了任務\"{{title}}\"的提醒",
-        "TASK_CREATED": "已建立任務\"{{title}}\""
+        "TASK_CREATED": "已建立任務\"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "選擇或建立任務",
       "SUMMARY_TABLE": {

@@ -1333,7 +1333,7 @@
         "REMINDER_ADDED": "Zamanlanmış görev \"{{title}}\"",
         "REMINDER_DELETED": "Görev için silinen hatırlatıcı",
         "REMINDER_UPDATED": "\"{{title}}\" görevi için güncellenmiş hatırlatıcı",
-        "TASK_CREATED": "\"{{title}}\" görevi oluşturuldu"
+        "TASK_CREATED": "\"{{taskTitle}}\" görevi oluşturuldu"
       },
       "SELECT_OR_CREATE": "Görev seç veya oluştur",
       "SUMMARY_TABLE": {

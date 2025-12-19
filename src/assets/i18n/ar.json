@@ -1426,7 +1426,7 @@
         "REMINDER_ADDED": "المهمة المجدولة \"{{title}}\"",
         "REMINDER_DELETED": "تذكير محذوف للمهمة",
         "REMINDER_UPDATED": "تذكير محدث للمهمة \"{{title}}\"",
-        "TASK_CREATED": "المهمة التي تم تكوينها \"{{title}}\""
+        "TASK_CREATED": "المهمة التي تم تكوينها \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "حدد أو أنشئ المهمة",
       "SUMMARY_TABLE": {

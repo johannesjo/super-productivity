@@ -1426,7 +1426,7 @@
         "REMINDER_ADDED": "Planlagt oppgave \"{{title}}\"",
         "REMINDER_DELETED": "Slettet påminnelse for oppgaven",
         "REMINDER_UPDATED": "Oppdatert påminnelse for oppgaven \"{{title}}\"",
-        "TASK_CREATED": "Opprettet oppgaven \"{{title}}\""
+        "TASK_CREATED": "Opprettet oppgaven \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Velg eller opprett oppgave",
       "SUMMARY_TABLE": {

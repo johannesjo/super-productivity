@@ -1347,7 +1347,7 @@
         "REMINDER_ADDED": "Aikataulutettu <strong>{{title}}</strong> klo <strong>{{date}}</strong>",
         "REMINDER_DELETED": "Poistettiin muistutus tehtävälle",
         "REMINDER_UPDATED": "Päivitettiin muistutus tehtävälle \"{{title}}\"",
-        "TASK_CREATED": "Luotiin tehtävä \"{{title}}\""
+        "TASK_CREATED": "Luotiin tehtävä \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Valitse tai luo tehtävä",
       "SUMMARY_TABLE": {

@@ -1426,7 +1426,7 @@
         "REMINDER_ADDED": "Tarefa agendada \"{{title}}\"",
         "REMINDER_DELETED": "Lembrete excluído da tarefa",
         "REMINDER_UPDATED": "Lembrete atualizado para a tarefa \"{{title}}\"",
-        "TASK_CREATED": "Tarefa criada \"{{title}}\""
+        "TASK_CREATED": "Tarefa criada \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Selecione ou crie tarefa",
       "SUMMARY_TABLE": {
