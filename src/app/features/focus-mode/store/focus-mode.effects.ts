@@ -52,12 +52,12 @@ export class FocusModeEffects {
   private metricService = inject(MetricService);
   private storageService = inject(FocusModeStorageService);
 
-  // Auto-show overlay when task is selected (if always use focus mode is enabled)
+  // Auto-show overlay when task is selected (if sync session with tracking is enabled)
   // Skip showing overlay if isStartInBackground is enabled
   autoShowOverlay$ = createEffect(() =>
     this.store.select(selectFocusModeConfig).pipe(
       switchMap((cfg) =>
-        cfg?.isAlwaysUseFocusMode && !cfg?.isStartInBackground
+        cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((id) => !!id),
@@ -69,11 +69,11 @@ export class FocusModeEffects {
   );
 
   // Sync: When tracking starts → start/unpause focus session
-  // Only triggers when both isSyncSessionWithTracking and isAlwaysUseFocusMode are enabled
+  // Only triggers when isSyncSessionWithTracking is enabled
   syncTrackingStartToSession$ = createEffect(() =>
     this.store.select(selectFocusModeConfig).pipe(
       switchMap((cfg) =>
-        cfg?.isAlwaysUseFocusMode && cfg?.isSyncSessionWithTracking
+        cfg?.isSyncSessionWithTracking
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((taskId) => !!taskId),

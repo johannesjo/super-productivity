@@ -84,7 +84,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     voice: defaultVoice,
   },
   focusMode: {
-    isAlwaysUseFocusMode: false,
     isSkipPreparation: false,
     isPlayTick: false,
     isPauseTrackingDuringBreak: false,

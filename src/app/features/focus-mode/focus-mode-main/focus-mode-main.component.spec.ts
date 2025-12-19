@@ -107,7 +107,6 @@ describe('FocusModeMainComponent', () => {
       mainState: jasmine.createSpy().and.returnValue(FocusMainUIState.Preparation),
       focusModeConfig: jasmine.createSpy().and.returnValue({
         isSkipPreparation: false,
-        isAlwaysUseFocusMode: false,
       }),
     });
 
@@ -409,14 +408,12 @@ describe('FocusModeMainComponent', () => {
       focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Pomodoro);
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: false,
-        isAlwaysUseFocusMode: false,
       });
     });
 
     it('should dispatch startFocusPreparation when skip is disabled', () => {
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: false,
-        isAlwaysUseFocusMode: false,
       });
 
       component.startSession();
@@ -428,7 +425,6 @@ describe('FocusModeMainComponent', () => {
       component.displayDuration.set(900000);
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: true,
-        isAlwaysUseFocusMode: false,
       });
 
       component.startSession();
@@ -441,7 +437,6 @@ describe('FocusModeMainComponent', () => {
     it('should use zero duration for Flowtime when skipping preparation', () => {
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: true,
-        isAlwaysUseFocusMode: false,
       });
       focusModeServiceSpy.mode.and.returnValue(FocusModeMode.Flowtime);
 
@@ -632,7 +627,6 @@ describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
       mainState: mainStateSignal,
       focusModeConfig: signal({
         isSkipPreparation: false,
-        isAlwaysUseFocusMode: false,
       }),
     };
 
