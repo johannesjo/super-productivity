@@ -2416,6 +2416,81 @@ describe('OperationLogSyncService', () => {
       // checkDependencies should NOT be called for wildcard entities
       expect(dependencyResolverSpy.checkDependencies).not.toHaveBeenCalled();
     });
+
+    it('should catch errors in replay, notify user, and run validation instead of crashing', async () => {
+      const errorSpy = spyOn(console, 'error');
+      const testClientId = 'test-client-id';
+
+      const syncImportOp = createOp({
+        id: '019afd68-0050-7000-0000-000000000000',
+        opType: OpType.SyncImport,
+        clientId: 'client-A',
+        entityType: 'ALL',
+      });
+
+      const localOp = createOp({
+        id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+        opType: OpType.Create,
+        clientId: testClientId,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        actionType: '[Task] Add Task',
+      });
+
+      (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+        .createSpy('getOpsAfterSeq')
+        .and.returnValue(
+          Promise.resolve([createEntry(localOp, { syncedAt: Date.now() })]),
+        );
+
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+
+      // First call (SYNC_IMPORT) succeeds
+      let applyCallCount = 0;
+      operationApplierServiceSpy.applyOperations.and.callFake(() => {
+        applyCallCount++;
+        if (applyCallCount === 1) {
+          // First call succeeds (SYNC_IMPORT)
+          return Promise.resolve({ appliedOps: [] });
+        } else {
+          // Second call (replay) throws an error
+          return Promise.reject(new Error('Replay failed: entity not found'));
+        }
+      });
+
+      // Should NOT throw - error should be caught
+      await expectAsync(
+        (service as any)._processRemoteOps([syncImportOp]),
+      ).toBeResolved();
+
+      // Should have logged the error
+      expect(errorSpy).toHaveBeenCalled();
+      const errorCalls = errorSpy.calls.allArgs();
+      // OpLog.err calls console.error with prefix '[ol]' as first arg, message as second
+      const hasReplayError = errorCalls.some((args) =>
+        args.some(
+          (arg) =>
+            typeof arg === 'string' &&
+            arg.includes('Failed to replay') &&
+            arg.includes('local ops'),
+        ),
+      );
+      expect(hasReplayError).toBe(true);
+
+      // Should have triggered state validation
+      expect(validateStateServiceSpy.validateAndRepairCurrentState).toHaveBeenCalledWith(
+        'replay-local-ops-failed',
+      );
+
+      // Should have shown error snack to user
+      expect(snackServiceSpy.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+        }),
+      );
+    });
   });
 
   describe('_extractTimestampFromUuidv7', () => {

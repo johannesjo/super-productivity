@@ -1190,4 +1190,108 @@ describe('OperationCaptureService', () => {
       });
     });
   });
+
+  describe('queue overflow protection', () => {
+    it('should log warning when queue exceeds warning threshold', () => {
+      const warnSpy = spyOn(console, 'warn');
+      const state = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task' },
+      }) as unknown as RootState;
+      const action = createPersistentAction(
+        '[TaskShared] Update Task',
+        'TASK',
+        'task-1',
+        OpType.Update,
+      );
+
+      // Enqueue 101 items to exceed the warning threshold (100)
+      for (let i = 0; i < 101; i++) {
+        service.computeAndEnqueue(action, state, state);
+      }
+
+      // Should have logged a warning
+      expect(warnSpy).toHaveBeenCalled();
+      const warnCalls = warnSpy.calls.allArgs();
+      // OpLog.warn calls console.warn with prefix '[ol]' as first arg, message as second
+      const hasQueueWarning = warnCalls.some((args) =>
+        args.some(
+          (arg) => typeof arg === 'string' && arg.includes('exceeds warning threshold'),
+        ),
+      );
+      expect(hasQueueWarning).toBe(true);
+    });
+
+    it('should drop oldest item when queue reaches max size', () => {
+      const errorSpy = spyOn(console, 'error');
+      const state = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task' },
+      }) as unknown as RootState;
+      const action = createPersistentAction(
+        '[TaskShared] Update Task',
+        'TASK',
+        'task-1',
+        OpType.Update,
+      );
+
+      // Fill queue to max (1000 items)
+      for (let i = 0; i < 1000; i++) {
+        service.computeAndEnqueue(action, state, state);
+      }
+      expect(service.getQueueSize()).toBe(1000);
+
+      // Adding one more should drop oldest and log error
+      service.computeAndEnqueue(action, state, state);
+
+      // Queue should still be at max size (oldest was dropped)
+      expect(service.getQueueSize()).toBe(1000);
+
+      // Should have logged an error about queue being full
+      expect(errorSpy).toHaveBeenCalled();
+      const errorCalls = errorSpy.calls.allArgs();
+      // OpLog.err calls console.error with prefix '[ol]' as first arg, message as second
+      const hasQueueFullError = errorCalls.some((args) =>
+        args.some((arg) => typeof arg === 'string' && arg.includes('Queue full')),
+      );
+      expect(hasQueueFullError).toBe(true);
+    });
+
+    it('should reset warning flag when queue drains below threshold', () => {
+      const warnSpy = spyOn(console, 'warn');
+      const state = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task' },
+      }) as unknown as RootState;
+      const action = createPersistentAction(
+        '[TaskShared] Update Task',
+        'TASK',
+        'task-1',
+        OpType.Update,
+      );
+
+      // Enqueue 101 items to trigger warning
+      for (let i = 0; i < 101; i++) {
+        service.computeAndEnqueue(action, state, state);
+      }
+      warnSpy.calls.reset();
+
+      // Dequeue all items
+      while (service.getQueueSize() > 0) {
+        service.dequeue();
+      }
+
+      // Re-enqueue to exceed threshold again
+      for (let i = 0; i < 101; i++) {
+        service.computeAndEnqueue(action, state, state);
+      }
+
+      // Should have logged warning again since flag was reset
+      const warnCalls = warnSpy.calls.allArgs();
+      // OpLog.warn calls console.warn with prefix '[ol]' as first arg, message as second
+      const hasQueueWarning = warnCalls.some((args) =>
+        args.some(
+          (arg) => typeof arg === 'string' && arg.includes('exceeds warning threshold'),
+        ),
+      );
+      expect(hasQueueWarning).toBe(true);
+    });
+  });
 });

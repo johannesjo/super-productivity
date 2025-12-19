@@ -1376,4 +1376,152 @@ describe('ConflictResolutionService', () => {
       });
     });
   });
+
+  describe('_deepEqual', () => {
+    // Access private method for testing
+    const deepEqual = (a: unknown, b: unknown): boolean =>
+      (service as any)._deepEqual(a, b);
+
+    it('should return true for identical primitives', () => {
+      expect(deepEqual(1, 1)).toBe(true);
+      expect(deepEqual('hello', 'hello')).toBe(true);
+      expect(deepEqual(true, true)).toBe(true);
+      expect(deepEqual(null, null)).toBe(true);
+    });
+
+    it('should return false for different primitives', () => {
+      expect(deepEqual(1, 2)).toBe(false);
+      expect(deepEqual('hello', 'world')).toBe(false);
+      expect(deepEqual(true, false)).toBe(false);
+    });
+
+    it('should return true for identical objects', () => {
+      expect(deepEqual({ a: 1, b: 2 }, { a: 1, b: 2 })).toBe(true);
+      expect(
+        deepEqual({ nested: { value: 'test' } }, { nested: { value: 'test' } }),
+      ).toBe(true);
+    });
+
+    it('should return true for identical arrays', () => {
+      expect(deepEqual([1, 2, 3], [1, 2, 3])).toBe(true);
+      expect(deepEqual([{ a: 1 }], [{ a: 1 }])).toBe(true);
+    });
+
+    describe('circular reference protection', () => {
+      it('should return false for objects with circular references', () => {
+        const warnSpy = spyOn(console, 'warn');
+        const obj1: Record<string, unknown> = { a: 1 };
+        obj1['self'] = obj1; // Create circular reference
+
+        const obj2: Record<string, unknown> = { a: 1 };
+        obj2['self'] = obj2; // Create circular reference
+
+        const result = deepEqual(obj1, obj2);
+
+        expect(result).toBe(false);
+        expect(warnSpy).toHaveBeenCalled();
+        const warnCalls = warnSpy.calls.allArgs();
+        // OpLog.warn calls console.warn with prefix '[ol]' as first arg, message as second
+        const hasCircularWarning = warnCalls.some((args) =>
+          args.some(
+            (arg) => typeof arg === 'string' && arg.includes('circular reference'),
+          ),
+        );
+        expect(hasCircularWarning).toBe(true);
+      });
+
+      it('should return false for arrays with circular references', () => {
+        const warnSpy = spyOn(console, 'warn');
+        const arr1: unknown[] = [1, 2];
+        arr1.push(arr1); // Create circular reference
+
+        const arr2: unknown[] = [1, 2];
+        arr2.push(arr2); // Create circular reference
+
+        const result = deepEqual(arr1, arr2);
+
+        expect(result).toBe(false);
+        expect(warnSpy).toHaveBeenCalled();
+      });
+    });
+
+    describe('depth limit protection', () => {
+      it('should return false for deeply nested objects exceeding max depth', () => {
+        const warnSpy = spyOn(console, 'warn');
+
+        // Create object with depth > 50
+        let obj1: Record<string, unknown> = { value: 'deep' };
+        let obj2: Record<string, unknown> = { value: 'deep' };
+        for (let i = 0; i < 60; i++) {
+          obj1 = { nested: obj1 };
+          obj2 = { nested: obj2 };
+        }
+
+        const result = deepEqual(obj1, obj2);
+
+        expect(result).toBe(false);
+        expect(warnSpy).toHaveBeenCalled();
+        const warnCalls = warnSpy.calls.allArgs();
+        // OpLog.warn calls console.warn with prefix '[ol]' as first arg, message as second
+        const hasDepthWarning = warnCalls.some((args) =>
+          args.some(
+            (arg) => typeof arg === 'string' && arg.includes('exceeded max depth'),
+          ),
+        );
+        expect(hasDepthWarning).toBe(true);
+      });
+    });
+  });
+
+  describe('backup timeout', () => {
+    it('should continue with sync if backup times out', async () => {
+      const warnSpy = spyOn(console, 'warn');
+
+      // Make backup hang indefinitely
+      mockSyncSafetyBackupService.createBackup.and.returnValue(
+        new Promise(() => {
+          /* never resolves */
+        }),
+      );
+
+      const conflicts: EntityConflict[] = [
+        {
+          entityType: 'TASK',
+          entityId: 'task-1',
+          localOps: [createMockOp('local-1', 'client-a')],
+          remoteOps: [createMockOp('remote-1', 'client-b')],
+          suggestedResolution: 'remote',
+        },
+      ];
+
+      // Set up necessary mocks for the rest of the flow
+      mockOpLogStore.hasOp.and.resolveTo(false);
+      mockOpLogStore.append.and.resolveTo(1);
+      mockOpLogStore.markApplied.and.resolveTo(undefined);
+      mockOpLogStore.markRejected.and.resolveTo(undefined);
+      mockOperationApplier.applyOperations.and.resolveTo({
+        appliedOps: [conflicts[0].remoteOps[0]],
+      });
+
+      // This should complete within timeout (10 seconds), not hang forever
+      const resultPromise = service.autoResolveConflictsLWW(conflicts);
+
+      // Wait for the result - should complete due to backup timeout
+      const result = await resultPromise;
+
+      // Sync should have continued despite backup timeout
+      expect(result).toBeDefined();
+
+      // Should have logged timeout warning
+      const warnCalls = warnSpy.calls.allArgs();
+      // OpLog.warn calls console.warn with prefix '[ol]' as first arg, message as second
+      const hasTimeoutWarning = warnCalls.some((args) =>
+        args.some((arg) => typeof arg === 'string' && arg.includes('timed out')),
+      );
+      expect(hasTimeoutWarning).toBe(true);
+
+      // Should have shown error snack
+      expect(mockSnackService.open).toHaveBeenCalled();
+    }, 15000); // Allow 15 seconds for the test (10s timeout + buffer)
+  });
 });
