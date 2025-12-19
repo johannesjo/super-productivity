@@ -197,37 +197,42 @@ const showUsageHistory = async (args: string[]): Promise<void> => {
       console.log(`Average: ${formatBytes(growth / days)}/day`);
     }
 
-    // Per-user growth table
-    const firstUsers = new Map(first.users.map((u: any) => [u.id, u]));
-    const lastUsers = new Map(last.users.map((u: any) => [u.id, u]));
-    const allUserIds = new Set([...firstUsers.keys(), ...lastUsers.keys()]);
+    // Per-user pivot table: rows = users, columns = snapshots
+    const allUserIds = new Set<string>();
+    const userEmails = new Map<string, string>();
+    for (const snap of snapshots) {
+      for (const u of snap.users) {
+        allUserIds.add(u.id);
+        userEmails.set(u.id, u.email);
+      }
+    }
 
-    const userGrowth = Array.from(allUserIds)
-      .map((id) => {
-        const firstUser = firstUsers.get(id);
-        const lastUser = lastUsers.get(id);
-        const firstBytes = firstUser?.bytes ?? 0;
-        const lastBytes = lastUser?.bytes ?? 0;
-        const diff = lastBytes - firstBytes;
-        return {
-          Email: lastUser?.email ?? firstUser?.email ?? id,
-          Before: formatBytes(firstBytes),
-          After: formatBytes(lastBytes),
-          Change: `${diff >= 0 ? '+' : ''}${formatBytes(diff)}`,
-          _diff: diff,
-        };
-      })
-      .sort((a, b) => b._diff - a._diff);
+    // Build column headers (short date format)
+    const colHeaders = snapshots.map((s: any) => {
+      const d = new Date(s.timestamp);
+      return `${d.getMonth() + 1}/${d.getDate()}`;
+    });
 
-    console.log('\n--- Per-User Growth ---');
-    console.table(
-      userGrowth.map(({ Email, Before, After, Change }) => ({
-        Email,
-        Before,
-        After,
-        Change,
-      })),
-    );
+    // Build rows
+    const rows = Array.from(allUserIds).map((id) => {
+      const row: Record<string, string> = { Email: userEmails.get(id) ?? id };
+      snapshots.forEach((snap: any, i: number) => {
+        const user = snap.users.find((u: any) => u.id === id);
+        row[colHeaders[i]] = user ? formatBytes(user.bytes) : '-';
+      });
+      return row;
+    });
+
+    // Sort by latest snapshot size (descending)
+    const lastCol = colHeaders[colHeaders.length - 1];
+    rows.sort((a, b) => {
+      const aVal = a[lastCol] === '-' ? 0 : parseFloat(a[lastCol]);
+      const bVal = b[lastCol] === '-' ? 0 : parseFloat(b[lastCol]);
+      return bVal - aVal;
+    });
+
+    console.log('\n--- Per-User History ---');
+    console.table(rows);
   }
 };
 
@@ -280,6 +285,174 @@ const showLogs = async (args: string[]): Promise<void> => {
   lines.forEach((line) => console.log(line));
 };
 
+const showOps = async (args: string[]): Promise<void> => {
+  console.log('\n--- Recent Operations Analysis ---');
+  try {
+    const tailIndex = args.indexOf('--tail');
+    const tailCount = tailIndex !== -1 ? parseInt(args[tailIndex + 1], 10) : 50;
+
+    const userIndex = args.indexOf('--user');
+    const userId = userIndex !== -1 ? parseInt(args[userIndex + 1], 10) : null;
+
+    // Get recent operations with sizes
+    let ops: any[];
+    if (userId) {
+      ops = await prisma.$queryRaw`
+        SELECT
+          o.id,
+          o.user_id,
+          o.action_type,
+          o.op_type,
+          o.entity_type,
+          o.entity_id,
+          pg_column_size(o.payload) as payload_bytes,
+          LENGTH(o.payload::text) as payload_json_length,
+          o.received_at
+        FROM operations o
+        WHERE o.user_id = ${userId}
+        ORDER BY o.server_seq DESC
+        LIMIT ${tailCount};
+      `;
+    } else {
+      ops = await prisma.$queryRaw`
+        SELECT
+          o.id,
+          o.user_id,
+          o.action_type,
+          o.op_type,
+          o.entity_type,
+          o.entity_id,
+          pg_column_size(o.payload) as payload_bytes,
+          LENGTH(o.payload::text) as payload_json_length,
+          o.received_at
+        FROM operations o
+        ORDER BY o.server_seq DESC
+        LIMIT ${tailCount};
+      `;
+    }
+
+    if (ops.length === 0) {
+      console.log('No operations found.');
+      return;
+    }
+
+    console.table(
+      ops.map((o) => ({
+        User: o.user_id,
+        Action: o.action_type.substring(0, 40),
+        Entity: `${o.entity_type}:${(o.entity_id || '*').substring(0, 15)}`,
+        PayloadSize: formatBytes(Number(o.payload_bytes)),
+        JSONLen: Number(o.payload_json_length),
+        Time: new Date(Number(o.received_at)).toLocaleTimeString(),
+      })),
+    );
+
+    // Summary by entity type
+    let byType: any[];
+    if (userId) {
+      byType = await prisma.$queryRaw`
+        SELECT
+          o.entity_type,
+          COUNT(*) as count,
+          SUM(pg_column_size(o.payload)) as total_bytes,
+          AVG(pg_column_size(o.payload)) as avg_bytes,
+          MAX(pg_column_size(o.payload)) as max_bytes
+        FROM operations o
+        WHERE o.user_id = ${userId}
+        GROUP BY o.entity_type
+        ORDER BY total_bytes DESC;
+      `;
+    } else {
+      byType = await prisma.$queryRaw`
+        SELECT
+          o.entity_type,
+          COUNT(*) as count,
+          SUM(pg_column_size(o.payload)) as total_bytes,
+          AVG(pg_column_size(o.payload)) as avg_bytes,
+          MAX(pg_column_size(o.payload)) as max_bytes
+        FROM operations o
+        GROUP BY o.entity_type
+        ORDER BY total_bytes DESC;
+      `;
+    }
+
+    console.log('\n--- Breakdown by Entity Type ---');
+    console.table(
+      byType.map((t) => ({
+        Type: t.entity_type,
+        Count: Number(t.count),
+        Total: formatBytes(Number(t.total_bytes)),
+        Avg: formatBytes(Number(t.avg_bytes)),
+        Max: formatBytes(Number(t.max_bytes)),
+      })),
+    );
+
+    // Show largest single operation
+    let largest: any[];
+    if (userId) {
+      largest = await prisma.$queryRaw`
+        SELECT
+          o.id,
+          o.action_type,
+          o.entity_type,
+          o.entity_id,
+          pg_column_size(o.payload) as payload_bytes,
+          o.payload
+        FROM operations o
+        WHERE o.user_id = ${userId}
+        ORDER BY pg_column_size(o.payload) DESC
+        LIMIT 1;
+      `;
+    } else {
+      largest = await prisma.$queryRaw`
+        SELECT
+          o.id,
+          o.action_type,
+          o.entity_type,
+          o.entity_id,
+          pg_column_size(o.payload) as payload_bytes,
+          o.payload
+        FROM operations o
+        ORDER BY pg_column_size(o.payload) DESC
+        LIMIT 1;
+      `;
+    }
+
+    if (largest.length > 0) {
+      const op = largest[0];
+      console.log('\n--- Largest Operation ---');
+      console.log(`ID: ${op.id}`);
+      console.log(`Action: ${op.action_type}`);
+      console.log(`Entity: ${op.entity_type}:${op.entity_id || '*'}`);
+      console.log(`Size: ${formatBytes(Number(op.payload_bytes))}`);
+
+      // Show keys in the payload
+      const payload = op.payload as any;
+      if (payload && typeof payload === 'object') {
+        console.log('\nPayload structure:');
+        const analyzePayload = (obj: any, prefix = ''): void => {
+          for (const key of Object.keys(obj)) {
+            const val = obj[key];
+            const valStr = JSON.stringify(val);
+            const size = new TextEncoder().encode(valStr).length;
+            if (size > 1000) {
+              console.log(
+                `  ${prefix}${key}: ${formatBytes(size)} (${typeof val}${Array.isArray(val) ? `[${val.length}]` : ''})`,
+              );
+              if (typeof val === 'object' && val !== null && !Array.isArray(val)) {
+                analyzePayload(val, prefix + '  ');
+              }
+            }
+          }
+        };
+        analyzePayload(payload);
+      }
+    }
+  } catch (error) {
+    console.error('Error fetching operations:', error);
+  }
+};
+
 const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
   const command = args[0];
@@ -298,6 +471,9 @@ const main = async (): Promise<void> => {
       case 'logs':
         await showLogs(args);
         break;
+      case 'ops':
+        await showOps(args);
+        break;
       default:
         console.log('SuperSync Monitor CLI');
         console.log('Usage: npm run monitor -- <command> [flags]');
@@ -310,6 +486,9 @@ const main = async (): Promise<void> => {
         console.log('    --tail <n>     Show last n lines (default 100)');
         console.log('    --search "s"   Filter logs by term');
         console.log('    --error        Show only errors');
+        console.log('  ops            Analyze recent operations');
+        console.log('    --tail <n>     Show last n ops (default 50)');
+        console.log('    --user <id>    Filter by user ID');
         break;
     }
   } catch (err) {
