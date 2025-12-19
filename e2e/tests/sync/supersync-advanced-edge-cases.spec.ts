@@ -166,8 +166,11 @@ base.describe('@supersync SuperSync Advanced Edge Cases', () => {
         await waitForTask(clientB.page, offlineTask3);
 
         // Initial task should be marked as done
-        const initialTaskB = clientB.page.locator(`task:has-text("${initialTask}")`);
-        await expect(initialTaskB).toHaveClass(/isDone/);
+        // Use more specific locator to target the done task (avoids matching both backlog and done section)
+        const initialTaskB = clientB.page.locator(
+          `task.isDone:has-text("${initialTask}")`,
+        );
+        await expect(initialTaskB).toBeVisible();
 
         console.log('[Stale] Stale client reconnected and received all changes');
       } finally {
