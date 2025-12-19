@@ -99,5 +99,9 @@ export const addTaskToList = (
   isAddToBottom: boolean,
 ): string[] => (isAddToBottom ? [...taskIds, taskId] : [taskId, ...taskIds]);
 
-export const removeTasksFromList = (taskIds: string[], toRemove: string[]): string[] =>
-  taskIds.filter((id) => !toRemove.includes(id));
+export const removeTasksFromList = (taskIds: string[], toRemove: string[]): string[] => {
+  // Use Set for O(1) lookup instead of O(n) Array.includes
+  // This changes overall complexity from O(n*m) to O(n+m)
+  const removeSet = new Set(toRemove);
+  return taskIds.filter((id) => !removeSet.has(id));
+};

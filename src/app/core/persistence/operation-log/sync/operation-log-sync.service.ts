@@ -888,7 +888,29 @@ export class OperationLogSyncService {
 
     // Re-apply these ops to restore the local changes on top of the SYNC_IMPORT state
     // Use applyOperations which handles action dispatching
-    await this.operationApplier.applyOperations(sortedOps);
+    try {
+      await this.operationApplier.applyOperations(sortedOps);
+    } catch (replayError) {
+      // If replay fails after SYNC_IMPORT succeeded, user loses their local synced operations.
+      // Log the error, notify user, and trigger validation to detect/repair any inconsistencies.
+      OpLog.err(
+        `OperationLogSyncService: Failed to replay ${sortedOps.length} local ops after SYNC_IMPORT`,
+        replayError,
+      );
+
+      // Run validation to detect and repair any state inconsistencies
+      await this.validateStateService.validateAndRepairCurrentState(
+        'replay-local-ops-failed',
+      );
+
+      // Notify user that some changes may be lost
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.REPLAY_LOCAL_OPS_FAILED,
+      });
+
+      // Don't re-throw - the SYNC_IMPORT itself succeeded, so sync should continue
+    }
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1044,44 +1066,49 @@ export class OperationLogSyncService {
     // CRITICAL: Acquire the same lock used by writeOperation effects.
     // This ensures:
     // 1. All pending writes complete before we read (FIFO lock ordering)
-    // 2. No NEW writes can start while we read the frontier AND detect conflicts
+    // 2. No NEW writes can start while we read the frontier, detect conflicts, AND apply resolutions
     // Without this, a race condition exists where a write could start after
-    // reading the frontier but before conflict detection completes.
-    let conflictResult!: ConflictResult;
+    // reading the frontier but before conflict resolution/application completes,
+    // causing the new write to be based on stale state.
+    let result!: { localWinOpsCreated: number };
     await this.lockService.request('sp_op_log', async () => {
       const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
-      conflictResult = await this._detectConflicts(validOps, appliedFrontierByEntity);
+      const conflictResult = await this._detectConflicts(
+        validOps,
+        appliedFrontierByEntity,
+      );
+      const { nonConflicting, conflicts } = conflictResult;
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // STEP 5: Handle Results - Auto-Resolve Conflicts with LWW
+      // IMPORTANT: If conflicts exist, we must NOT apply non-conflicting ops first.
+      // They may depend on entities in the conflict (e.g., Task depends on Project).
+      // Instead, piggyback them to ConflictResolutionService for batched application.
+      // ─────────────────────────────────────────────────────────────────────────
+      if (conflicts.length > 0) {
+        OpLog.warn(
+          `OperationLogSyncService: Detected ${conflicts.length} conflicts. Auto-resolving with LWW.`,
+          conflicts,
+        );
+        // Auto-resolve conflicts using Last-Write-Wins strategy
+        // Piggyback non-conflicting ops so they're applied with resolved conflicts
+        result = await this.conflictResolutionService.autoResolveConflictsLWW(
+          conflicts,
+          nonConflicting,
+        );
+        return;
+      }
+
+      // ─────────────────────────────────────────────────────────────────────────
+      // STEP 6: No Conflicts - Apply directly and validate
+      // ─────────────────────────────────────────────────────────────────────────
+      if (nonConflicting.length > 0) {
+        await this._applyNonConflictingOps(nonConflicting);
+        await this._validateAfterSync();
+      }
+      result = { localWinOpsCreated: 0 };
     });
-    const { nonConflicting, conflicts } = conflictResult;
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // STEP 5: Handle Results - Auto-Resolve Conflicts with LWW
-    // IMPORTANT: If conflicts exist, we must NOT apply non-conflicting ops first.
-    // They may depend on entities in the conflict (e.g., Task depends on Project).
-    // Instead, piggyback them to ConflictResolutionService for batched application.
-    // ─────────────────────────────────────────────────────────────────────────
-    if (conflicts.length > 0) {
-      OpLog.warn(
-        `OperationLogSyncService: Detected ${conflicts.length} conflicts. Auto-resolving with LWW.`,
-        conflicts,
-      );
-      // Auto-resolve conflicts using Last-Write-Wins strategy
-      // Piggyback non-conflicting ops so they're applied with resolved conflicts
-      const result = await this.conflictResolutionService.autoResolveConflictsLWW(
-        conflicts,
-        nonConflicting,
-      );
-      return result;
-    }
-
-    // ─────────────────────────────────────────────────────────────────────────
-    // STEP 6: No Conflicts - Apply directly and validate
-    // ─────────────────────────────────────────────────────────────────────────
-    if (nonConflicting.length > 0) {
-      await this._applyNonConflictingOps(nonConflicting);
-      await this._validateAfterSync();
-    }
-    return { localWinOpsCreated: 0 };
+    return result;
   }
 
   /**

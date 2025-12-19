@@ -1219,6 +1219,7 @@
         "RESTORE_SUCCESS": "Data restored successfully",
         "RESTORE_ERROR": "Failed to restore data",
         "PARTIAL_APPLY_FAILURE": "Some sync operations failed to apply. Data has been validated.",
+        "REPLAY_LOCAL_OPS_FAILED": "Failed to replay local operations after import. Some recent changes may be lost. Data has been validated.",
         "ARCHIVE_OPERATION_FAILED": "Archive operation failed. Some cleanup may not have completed.",
         "LWW_CONFLICTS_AUTO_RESOLVED": "Sync conflicts auto-resolved: {{localWins}} local win(s), {{remoteWins}} remote win(s)",
         "FINISH_DAY_SYNC_ERROR": "Sync error while finishing day. Please try again.",

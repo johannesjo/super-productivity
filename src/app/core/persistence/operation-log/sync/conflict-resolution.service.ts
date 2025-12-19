@@ -161,18 +161,54 @@ export class ConflictResolutionService {
   }
 
   /**
+   * Maximum depth for deep equality check to prevent stack overflow
+   * from deeply nested or circular structures.
+   */
+  private readonly MAX_DEEP_EQUAL_DEPTH = 50;
+
+  /**
    * Deep equality check for payloads.
    * Handles nested objects, arrays, and primitives.
+   * Includes protection against circular references and deep nesting.
+   *
+   * @param a First value to compare
+   * @param b Second value to compare
+   * @param seen WeakSet to track visited objects (circular reference protection)
+   * @param depth Current recursion depth (deep nesting protection)
    */
-  private _deepEqual(a: unknown, b: unknown): boolean {
+  private _deepEqual(
+    a: unknown,
+    b: unknown,
+    seen: WeakSet<object> = new WeakSet(),
+    depth: number = 0,
+  ): boolean {
+    // Depth limit protection
+    if (depth > this.MAX_DEEP_EQUAL_DEPTH) {
+      OpLog.warn(
+        'ConflictResolutionService: _deepEqual exceeded max depth, returning false',
+      );
+      return false;
+    }
+
     if (a === b) return true;
     if (a === null || b === null) return a === b;
     if (typeof a !== typeof b) return false;
 
     if (typeof a === 'object') {
+      // Circular reference protection: if we've seen this object before, return false
+      // (comparing circular structures for equality is complex and likely indicates corrupted data)
+      if (seen.has(a as object) || seen.has(b as object)) {
+        OpLog.warn(
+          'ConflictResolutionService: _deepEqual detected circular reference, returning false',
+        );
+        return false;
+      }
+      seen.add(a as object);
+      seen.add(b as object);
+
       if (Array.isArray(a) && Array.isArray(b)) {
         if (a.length !== b.length) return false;
-        return a.every((val, i) => this._deepEqual(val, b[i]));
+        return a.every((val, i) => this._deepEqual(val, b[i], seen, depth + 1));
       }
 
       if (Array.isArray(a) !== Array.isArray(b)) return false;
@@ -185,6 +221,8 @@ export class ConflictResolutionService {
         this._deepEqual(
           (a as Record<string, unknown>)[key],
           (b as Record<string, unknown>)[key],
+          seen,
+          depth + 1,
         ),
       );
     }
@@ -230,14 +268,30 @@ export class ConflictResolutionService {
       `ConflictResolutionService: Auto-resolving ${conflicts.length} conflict(s) using LWW`,
     );
 
-    // SAFETY: Create backup before conflict resolution
+    // SAFETY: Create backup before conflict resolution (with timeout to prevent indefinite stall)
+    const BACKUP_TIMEOUT_MS = 10000; // 10 seconds
     try {
-      await this.syncSafetyBackupService.createBackup();
+      const backupPromise = this.syncSafetyBackupService.createBackup();
+      const timeoutPromise = new Promise<never>((_, reject) =>
+        setTimeout(
+          () => reject(new Error('Backup creation timed out')),
+          BACKUP_TIMEOUT_MS,
+        ),
+      );
+      await Promise.race([backupPromise, timeoutPromise]);
       OpLog.normal(
         'ConflictResolutionService: Safety backup created before LWW resolution',
       );
     } catch (backupErr) {
-      OpLog.err('ConflictResolutionService: Failed to create safety backup', backupErr);
+      const isTimeout =
+        backupErr instanceof Error && backupErr.message === 'Backup creation timed out';
+      if (isTimeout) {
+        OpLog.warn(
+          `ConflictResolutionService: Safety backup timed out after ${BACKUP_TIMEOUT_MS}ms, continuing with sync`,
+        );
+      } else {
+        OpLog.err('ConflictResolutionService: Failed to create safety backup', backupErr);
+      }
       this.snackService.open({
         type: 'ERROR',
         msg: T.F.SYNC.SAFETY_BACKUP.CREATE_FAILED_SYNC_CONTINUES,

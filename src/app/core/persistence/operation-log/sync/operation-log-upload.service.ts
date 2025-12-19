@@ -362,31 +362,43 @@ export class OperationLogUploadService {
    *
    * Permanent rejections are typically validation errors (invalid payload,
    * duplicate operation, conflict, etc.) that won't succeed on retry.
+   *
+   * Uses regex patterns with word boundaries for more precise matching,
+   * avoiding false positives like "not a network error".
    */
   private _isNetworkError(error: string | undefined): boolean {
     if (!error) return false;
-    const transientErrorPatterns = [
-      // Network errors
-      'failed to fetch',
-      'network',
-      'timeout',
-      'econnrefused',
-      'enotfound',
-      'cors',
-      'net::',
-      'offline',
-      'aborted',
-      // Server transient errors
-      'server busy',
-      'please retry',
-      'transaction rolled back',
-      'internal server error',
-      '500',
-      '502',
-      '503',
-      '504',
-    ];
+
     const lowerError = error.toLowerCase();
-    return transientErrorPatterns.some((pattern) => lowerError.includes(pattern));
+
+    // Use regex patterns for more precise matching
+    const transientErrorPatterns: RegExp[] = [
+      // Network/fetch errors - use word boundaries to avoid false positives
+      /\bfailed to fetch\b/,
+      /\bnetwork\s*(error|request|failure)?\b/, // "network error", "network request", "network"
+      /\btimeout\b/,
+      /\beconnrefused\b/,
+      /\benotfound\b/,
+      /\bcors\b/,
+      /\bnet::/,
+      /\boffline\b/,
+      /\baborted\b/,
+      /\bconnection\s*(refused|reset|closed)\b/,
+      /\bsocket\s*(hang up|closed)\b/,
+      // Server transient errors
+      /\bserver\s*busy\b/,
+      /\bplease\s*retry\b/,
+      /\btransaction\s*rolled\s*back\b/,
+      /\binternal\s*server\s*error\b/,
+      // HTTP status codes - match as words to avoid matching in other contexts
+      /\b500\b/,
+      /\b502\b/,
+      /\b503\b/,
+      /\b504\b/,
+      /\bservice\s*unavailable\b/,
+      /\bgateway\s*timeout\b/,
+    ];
+
+    return transientErrorPatterns.some((pattern) => pattern.test(lowerError));
   }
 }

@@ -55,9 +55,21 @@ const ENTITY_TYPE_TO_FEATURE: Partial<Record<EntityType, string>> = {
 })
 export class OperationCaptureService {
   /**
+   * Maximum queue size to prevent unbounded memory growth.
+   * If effects fail to dequeue, we cap the queue and log errors.
+   */
+  private readonly MAX_QUEUE_SIZE = 1000;
+  private readonly QUEUE_WARNING_THRESHOLD = 100;
+
+  /**
    * FIFO queue of pending entity changes.
    */
   private queue: EntityChange[][] = [];
+
+  /**
+   * Tracks if we've already warned about queue overflow to avoid log spam.
+   */
+  private hasWarnedAboutQueueSize = false;
 
   /**
    * Computes entity changes from before/after states and enqueues them.
@@ -69,6 +81,28 @@ export class OperationCaptureService {
     afterState: RootState,
   ): void {
     const entityChanges = this._computeEntityChanges(action, beforeState, afterState);
+
+    // Warn if queue is growing large (indicates potential processing issue)
+    if (
+      this.queue.length >= this.QUEUE_WARNING_THRESHOLD &&
+      !this.hasWarnedAboutQueueSize
+    ) {
+      OpLog.warn(
+        `OperationCaptureService: Queue size (${this.queue.length}) exceeds warning threshold ` +
+          `(${this.QUEUE_WARNING_THRESHOLD}). Effects may not be processing operations.`,
+      );
+      this.hasWarnedAboutQueueSize = true;
+    }
+
+    // Cap queue size to prevent unbounded memory growth
+    if (this.queue.length >= this.MAX_QUEUE_SIZE) {
+      OpLog.err(
+        `OperationCaptureService: Queue full (${this.MAX_QUEUE_SIZE}). ` +
+          `Dropping oldest operation to make room. This indicates a serious processing issue!`,
+      );
+      this.queue.shift(); // Drop oldest to make room
+    }
+
     this.queue.push(entityChanges);
 
     OpLog.verbose('OperationCaptureService: Computed and enqueued operation', {
@@ -88,6 +122,14 @@ export class OperationCaptureService {
     if (entityChanges === undefined) {
       OpLog.warn('OperationCaptureService: No queued operation found');
       return [];
+    }
+
+    // Reset warning flag when queue drains below threshold so we can warn again if it fills up
+    if (
+      this.queue.length < this.QUEUE_WARNING_THRESHOLD &&
+      this.hasWarnedAboutQueueSize
+    ) {
+      this.hasWarnedAboutQueueSize = false;
     }
 
     OpLog.verbose('OperationCaptureService: Dequeued operation', {
@@ -110,6 +152,7 @@ export class OperationCaptureService {
    */
   clear(): void {
     this.queue = [];
+    this.hasWarnedAboutQueueSize = false;
   }
 
   /**
