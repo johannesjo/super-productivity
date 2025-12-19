@@ -186,6 +186,7 @@ export type DominaModeConfig = Readonly<{
 export type FocusModeConfig = Readonly<{
   isAlwaysUseFocusMode: boolean;
   isSkipPreparation: boolean;
+  isPlayTick?: boolean;
 }>;
 
 export type DailySummaryNote = Readonly<{

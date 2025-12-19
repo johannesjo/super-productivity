@@ -20,5 +20,12 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
         label: T.GCF.FOCUS_MODE.L_SKIP_PREPARATION_SCREEN,
       },
     },
+    {
+      key: 'isPlayTick',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.FOCUS_MODE.L_IS_PLAY_TICK,
+      },
+    },
   ],
 };
