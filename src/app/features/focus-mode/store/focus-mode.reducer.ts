@@ -32,6 +32,7 @@ export const initialState: FocusModeState = {
     : FocusModeMode.Countdown,
   currentCycle: 1,
   lastCompletedDuration: 0,
+  pausedTaskId: null,
 };
 
 const createWorkTimer = (duration: number): TimerState => ({
@@ -160,10 +161,11 @@ export const focusModeReducer = createReducer(
     currentScreen: FocusScreen.Main,
     mainState: FocusMainUIState.Preparation,
     isOverlayShown: false,
+    pausedTaskId: null,
   })),
 
   // Break handling
-  on(a.startBreak, (state, { duration, isLongBreak }) => {
+  on(a.startBreak, (state, { duration, isLongBreak, pausedTaskId }) => {
     const timer = createBreakTimer(
       duration || FOCUS_MODE_DEFAULTS.SHORT_BREAK_DURATION,
       isLongBreak || false,
@@ -174,6 +176,7 @@ export const focusModeReducer = createReducer(
       timer,
       currentScreen: FocusScreen.Break,
       mainState: FocusMainUIState.Preparation,
+      pausedTaskId: pausedTaskId ?? state.pausedTaskId,
     };
   }),
 
@@ -182,6 +185,7 @@ export const focusModeReducer = createReducer(
     timer: createIdleTimer(),
     currentScreen: FocusScreen.Main,
     mainState: FocusMainUIState.Preparation,
+    pausedTaskId: null,
   })),
 
   // Timer updates - much simpler!

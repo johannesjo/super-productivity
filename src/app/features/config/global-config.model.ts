@@ -187,6 +187,9 @@ export type FocusModeConfig = Readonly<{
   isAlwaysUseFocusMode: boolean;
   isSkipPreparation: boolean;
   isPlayTick?: boolean;
+  isPauseTrackingDuringBreak?: boolean;
+  isAutoStartSession?: boolean;
+  isStartInBackground?: boolean;
 }>;
 
 export type DailySummaryNote = Readonly<{
