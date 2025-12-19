@@ -44,7 +44,7 @@ import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creat
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { devError } from '../../../util/dev-error';
 import { TaskReminderOptionId } from '../../tasks/task.model';
-import { getNewestPossibleDueDate } from './get-newest-possible-due-date.util';
+import { getFirstRepeatOccurrence } from './get-first-repeat-occurrence.util';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -66,19 +66,11 @@ export class TaskRepeatCfgEffects {
               return null; // Return null instead of EMPTY
             }
             // Calculate the correct target day based on the repeat pattern (fixes #5594)
-            // instead of using startDate which always defaults to today
-            let calculatedTargetDate: Date | null = null;
-            try {
-              // getNewestPossibleDueDate throws if startDate is undefined or repeatEvery is invalid
-              if (taskRepeatCfg.startDate) {
-                calculatedTargetDate = getNewestPossibleDueDate(
-                  taskRepeatCfg as TaskRepeatCfg,
-                  new Date(),
-                );
-              }
-            } catch (e) {
-              // Fall back to existing logic if calculation fails
-            }
+            // Use getFirstRepeatOccurrence which handles future start dates correctly
+            const calculatedTargetDate = getFirstRepeatOccurrence(
+              taskRepeatCfg as TaskRepeatCfg,
+              new Date(),
+            );
 
             // Use calculated date if available, otherwise fall back to existing logic
             const targetDayTimestamp = calculatedTargetDate
@@ -90,6 +82,10 @@ export class TaskRepeatCfgEffects {
               startTime as string,
               targetDayTimestamp,
             );
+
+            // Only skip auto-removal from today if the task is scheduled for today
+            const scheduledForToday = isToday(dateTime);
+
             return TaskSharedActions.scheduleTaskWithTime({
               task,
               dueWithTime: dateTime,
@@ -98,7 +94,7 @@ export class TaskRepeatCfgEffects {
                 remindAt as TaskReminderOptionId,
               ),
               isMoveToBacklog: false,
-              isSkipAutoRemoveFromToday: true,
+              isSkipAutoRemoveFromToday: scheduledForToday,
             });
           }),
           filter(
@@ -143,47 +139,81 @@ export class TaskRepeatCfgEffects {
     { dispatch: false },
   );
 
-  updateTaskAfterMakingItRepeatable$ = createEffect(
-    () =>
-      this._actions$.pipe(
-        ofType(addTaskRepeatCfgToTask),
-        switchMap(({ taskRepeatCfg, taskId }) => {
-          return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
-            first(),
-            map((taskWithSubTasks) => {
-              // Extract subtasks safely, ensuring we handle the type properly
-              const subTasks = Array.isArray(taskWithSubTasks.subTasks)
-                ? taskWithSubTasks.subTasks
-                : [];
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { subTasks: _ignored, ...taskWithoutSubs } = taskWithSubTasks;
+  updateTaskAfterMakingItRepeatable$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(addTaskRepeatCfgToTask),
+      switchMap(({ taskRepeatCfg, taskId }) => {
+        return this._taskService.getByIdWithSubTaskData$(taskId).pipe(
+          first(),
+          map((taskWithSubTasks) => {
+            // Extract subtasks safely, ensuring we handle the type properly
+            const subTasks = Array.isArray(taskWithSubTasks.subTasks)
+              ? taskWithSubTasks.subTasks
+              : [];
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { subTasks: _ignored, ...taskWithoutSubs } = taskWithSubTasks;
 
-              if (subTasks.length === 0) {
-                return {
-                  task: taskWithoutSubs,
-                  taskRepeatCfg,
-                  subTaskTemplates: [],
-                };
-              }
-
-              const subTaskTemplates = this._toSubTaskTemplates(subTasks);
-
+            if (subTasks.length === 0) {
               return {
                 task: taskWithoutSubs,
                 taskRepeatCfg,
-                subTaskTemplates,
+                subTaskTemplates: [],
               };
-            }),
-          );
-        }),
-        tap(({ task, taskRepeatCfg, subTaskTemplates }) => {
-          this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfg.id, {
-            subTaskTemplates,
+            }
+
+            const subTaskTemplates = this._toSubTaskTemplates(subTasks);
+
+            return {
+              task: taskWithoutSubs,
+              taskRepeatCfg,
+              subTaskTemplates,
+            };
+          }),
+        );
+      }),
+      map(({ task, taskRepeatCfg, subTaskTemplates }) => {
+        // Calculate the correct first occurrence date (#5594)
+        // and update both the task's dueDay and the repeat config's lastTaskCreationDay
+        const firstOccurrence = getFirstRepeatOccurrence(
+          taskRepeatCfg as TaskRepeatCfg,
+          new Date(),
+        );
+
+        const firstOccurrenceStr = firstOccurrence
+          ? getDbDateStr(firstOccurrence)
+          : getDbDateStr(new Date());
+
+        // Update repeat config with subtask templates AND the correct lastTaskCreationDay
+        // Setting lastTaskCreationDay to first occurrence indicates a task exists for that day
+        this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfg.id, {
+          subTaskTemplates,
+          lastTaskCreationDay: firstOccurrenceStr,
+          lastTaskCreation: firstOccurrence?.getTime() || Date.now(),
+        });
+
+        // Update task's dueDay if it differs from first occurrence
+        const currentDueDay = task.dueDay || getDbDateStr(task.created);
+        if (currentDueDay !== firstOccurrenceStr) {
+          this._taskService.update(task.id, {
+            dueDay: firstOccurrenceStr,
           });
-          this._updateRegularTaskInstance(task, taskRepeatCfg, taskRepeatCfg);
+        }
+
+        this._updateRegularTaskInstance(task, taskRepeatCfg, taskRepeatCfg);
+
+        // Return action to remove from Today if first occurrence is not today (#5594)
+        // This handles the case where startTime/remindAt are not set, so the
+        // addRepeatCfgToTaskUpdateTask$ effect doesn't fire
+        const isFirstOccurrenceToday = firstOccurrence ? isToday(firstOccurrence) : true;
+        return { task, isFirstOccurrenceToday };
+      }),
+      filter(({ isFirstOccurrenceToday }) => !isFirstOccurrenceToday),
+      map(({ task }) =>
+        TaskSharedActions.removeTasksFromTodayTag({
+          taskIds: [task.id],
         }),
       ),
-    { dispatch: false },
+    ),
   );
 
   /**
