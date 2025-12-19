@@ -196,6 +196,38 @@ const showUsageHistory = async (args: string[]): Promise<void> => {
     if (days > 0) {
       console.log(`Average: ${formatBytes(growth / days)}/day`);
     }
+
+    // Per-user growth table
+    const firstUsers = new Map(first.users.map((u: any) => [u.id, u]));
+    const lastUsers = new Map(last.users.map((u: any) => [u.id, u]));
+    const allUserIds = new Set([...firstUsers.keys(), ...lastUsers.keys()]);
+
+    const userGrowth = Array.from(allUserIds)
+      .map((id) => {
+        const firstUser = firstUsers.get(id);
+        const lastUser = lastUsers.get(id);
+        const firstBytes = firstUser?.bytes ?? 0;
+        const lastBytes = lastUser?.bytes ?? 0;
+        const diff = lastBytes - firstBytes;
+        return {
+          Email: lastUser?.email ?? firstUser?.email ?? id,
+          Before: formatBytes(firstBytes),
+          After: formatBytes(lastBytes),
+          Change: `${diff >= 0 ? '+' : ''}${formatBytes(diff)}`,
+          _diff: diff,
+        };
+      })
+      .sort((a, b) => b._diff - a._diff);
+
+    console.log('\n--- Per-User Growth ---');
+    console.table(
+      userGrowth.map(({ Email, Before, After, Change }) => ({
+        Email,
+        Before,
+        After,
+        Change,
+      })),
+    );
   }
 };
 
