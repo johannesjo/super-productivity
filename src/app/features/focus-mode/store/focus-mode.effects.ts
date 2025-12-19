@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { Actions, createEffect, ofType } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { EMPTY, of } from 'rxjs';
+import { combineLatest, EMPTY, of } from 'rxjs';
 import {
   distinctUntilChanged,
   filter,
@@ -13,6 +13,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import * as actions from './focus-mode.actions';
+import { cancelFocusSession, showFocusOverlay } from './focus-mode.actions';
 import * as selectors from './focus-mode.selectors';
 import { FocusModeStrategyFactory } from '../focus-mode-strategies';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -32,9 +33,6 @@ import { FocusModeMode, FocusScreen, TimerState } from '../focus-mode.model';
 import { BannerService } from '../../../core/banner/banner.service';
 import { Banner, BannerId } from '../../../core/banner/banner.model';
 import { T } from '../../../t.const';
-import { showFocusOverlay } from './focus-mode.actions';
-import { cancelFocusSession } from './focus-mode.actions';
-import { combineLatest } from 'rxjs';
 import { MetricService } from '../../metric/metric.service';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 
@@ -628,6 +626,8 @@ export class FocusModeEffects {
                 translateParams,
                 timer$,
                 progress$,
+                // Hide dismiss button in icon button mode (banner-only mode)
+                isHideDismissBtn: useIconButtons,
                 ...(useIconButtons
                   ? this._getIconButtonActions(timer, isOnBreak, isSessionCompleted)
                   : this._getTextButtonActions(isSessionCompleted)),
@@ -710,19 +710,16 @@ export class FocusModeEffects {
 
     // End session button - complete for work, skip/complete for break
     // Hide when session is already completed
-    const endAction = isSessionCompleted
-      ? undefined
-      : {
-          label: isOnBreak ? T.F.FOCUS_MODE.B.END_BREAK : T.F.FOCUS_MODE.B.END_SESSION,
-          icon: 'stop',
-          fn: () => {
-            if (isOnBreak) {
-              this.store.dispatch(actions.skipBreak());
-            } else {
+    const endAction =
+      isSessionCompleted || isOnBreak
+        ? undefined
+        : {
+            label: T.F.FOCUS_MODE.B.END_SESSION,
+            icon: 'done_all',
+            fn: () => {
               this.store.dispatch(actions.completeFocusSession({ isManual: true }));
-            }
-          },
-        };
+            },
+          };
 
     // Open overlay button
     const overlayAction = {
