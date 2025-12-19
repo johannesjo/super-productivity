@@ -354,6 +354,198 @@ describe('OperationCaptureService', () => {
     });
 
     describe('reference equality optimization', () => {
+      describe('entity-level reference equality', () => {
+        it('should skip diffing entities with identical references', () => {
+          // Simulate NgRx immutable update: only changed entity gets new reference
+          const unchangedTask = { id: 'task-1', title: 'Unchanged Task' };
+          const unchangedTask2 = { id: 'task-2', title: 'Another Unchanged' };
+
+          const beforeState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1', 'task-2', 'task-3'],
+              entities: {
+                'task-1': unchangedTask,
+                'task-2': unchangedTask2,
+                'task-3': { id: 'task-3', title: 'Will Change' },
+              },
+            },
+          } as unknown as RootState;
+
+          // After state: task-1 and task-2 keep same reference, task-3 gets new reference
+          const afterState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1', 'task-2', 'task-3'],
+              entities: {
+                'task-1': unchangedTask, // Same reference - skip diff
+                'task-2': unchangedTask2, // Same reference - skip diff
+                'task-3': { id: 'task-3', title: 'Changed Title' }, // New reference - diff this
+              },
+            },
+          } as unknown as RootState;
+
+          const action = createPersistentAction(
+            '[TaskShared] Update Task',
+            'TASK',
+            'task-3',
+            OpType.Update,
+          );
+
+          service.computeAndEnqueue(action, beforeState, afterState);
+
+          const changes = service.dequeue();
+          // Only task-3 should be reported as changed
+          expect(changes.length).toBe(1);
+          expect(changes[0].entityId).toBe('task-3');
+          expect(changes[0].opType).toBe(OpType.Update);
+          expect(changes[0].changes).toEqual({ title: 'Changed Title' });
+        });
+
+        it('should handle many unchanged entities efficiently via reference equality', () => {
+          // Simulate a large state where most entities are unchanged
+          const unchangedEntities: Record<string, { id: string; title: string }> = {};
+          for (let i = 0; i < 100; i++) {
+            unchangedEntities[`task-${i}`] = { id: `task-${i}`, title: `Task ${i}` };
+          }
+
+          const beforeState = {
+            [TASKS_FEATURE]: {
+              ids: Object.keys(unchangedEntities),
+              entities: unchangedEntities,
+            },
+          } as unknown as RootState;
+
+          // After state: all entities keep same reference (no changes at all)
+          const afterState = {
+            [TASKS_FEATURE]: {
+              ids: Object.keys(unchangedEntities),
+              entities: unchangedEntities, // Same object reference for entire entities map
+            },
+          } as unknown as RootState;
+
+          const action = createPersistentAction(
+            '[TaskShared] Update Task',
+            'TASK',
+            'task-50',
+            OpType.Update,
+          );
+
+          service.computeAndEnqueue(action, beforeState, afterState);
+
+          const changes = service.dequeue();
+          // No changes because all entity references are identical
+          expect(changes.length).toBe(0);
+        });
+
+        it('should detect update when entity has new reference with changed content', () => {
+          const originalTask = { id: 'task-1', title: 'Original', tagIds: ['tag-1'] };
+
+          const beforeState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1'],
+              entities: { 'task-1': originalTask },
+            },
+          } as unknown as RootState;
+
+          // New reference with different content
+          const afterState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1'],
+              entities: {
+                'task-1': { id: 'task-1', title: 'Updated', tagIds: ['tag-1', 'tag-2'] },
+              },
+            },
+          } as unknown as RootState;
+
+          const action = createPersistentAction(
+            '[TaskShared] Update Task',
+            'TASK',
+            'task-1',
+            OpType.Update,
+          );
+
+          service.computeAndEnqueue(action, beforeState, afterState);
+
+          const changes = service.dequeue();
+          expect(changes.length).toBe(1);
+          expect(changes[0].changes).toEqual({
+            title: 'Updated',
+            tagIds: ['tag-1', 'tag-2'],
+          });
+        });
+
+        it('should report no changes when entity has new reference but identical content', () => {
+          // Edge case: different reference but same content (deep equality check still runs)
+          const beforeState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1'],
+              entities: { 'task-1': { id: 'task-1', title: 'Same', tagIds: ['a', 'b'] } },
+            },
+          } as unknown as RootState;
+
+          // Different reference but identical content
+          const afterState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1'],
+              entities: { 'task-1': { id: 'task-1', title: 'Same', tagIds: ['a', 'b'] } },
+            },
+          } as unknown as RootState;
+
+          const action = createPersistentAction(
+            '[TaskShared] Update Task',
+            'TASK',
+            'task-1',
+            OpType.Update,
+          );
+
+          service.computeAndEnqueue(action, beforeState, afterState);
+
+          const changes = service.dequeue();
+          // Deep equality check should find no actual changes
+          expect(changes.length).toBe(0);
+        });
+
+        it('should handle mixed scenario: some entities same reference, some changed', () => {
+          const unchangedTask1 = { id: 'task-1', title: 'Unchanged 1' };
+          const unchangedTask3 = { id: 'task-3', title: 'Unchanged 3' };
+
+          const beforeState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1', 'task-2', 'task-3'],
+              entities: {
+                'task-1': unchangedTask1,
+                'task-2': { id: 'task-2', title: 'Will Change' },
+                'task-3': unchangedTask3,
+              },
+            },
+          } as unknown as RootState;
+
+          const afterState = {
+            [TASKS_FEATURE]: {
+              ids: ['task-1', 'task-2', 'task-3'],
+              entities: {
+                'task-1': unchangedTask1, // Same reference
+                'task-2': { id: 'task-2', title: 'Changed!' }, // New reference, changed
+                'task-3': unchangedTask3, // Same reference
+              },
+            },
+          } as unknown as RootState;
+
+          const action = createPersistentAction(
+            '[TaskShared] Update Task',
+            'TASK',
+            'task-2',
+            OpType.Update,
+          );
+
+          service.computeAndEnqueue(action, beforeState, afterState);
+
+          const changes = service.dequeue();
+          expect(changes.length).toBe(1);
+          expect(changes[0].entityId).toBe('task-2');
+          expect(changes[0].changes).toEqual({ title: 'Changed!' });
+        });
+      });
+
       it('should skip diffing feature states with identical references', () => {
         // Create shared references for unchanged features
         const sharedTagFeature = {

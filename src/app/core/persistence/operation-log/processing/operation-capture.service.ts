@@ -215,8 +215,15 @@ export class OperationCaptureService {
     }
 
     // Find updated entities (in both, but changed)
+    // PERF: Reference equality check is critical here. NgRx uses immutable updates,
+    // so unchanged entities keep the same reference. Without this check, we'd run
+    // expensive deep diffs (_computeObjectDiff → _isEqual) on every entity in state.
+    // With 100+ tasks, that's O(n * m) comparisons where m = properties per entity.
+    // This single check reduces it to O(changed * m) where changed is typically 1-5.
     for (const id of afterIds) {
       if (beforeIds.has(id)) {
+        if (beforeEntities[id] === afterEntities[id]) continue;
+
         const diff = this._computeObjectDiff(
           beforeEntities[id] as Record<string, unknown>,
           afterEntities[id] as Record<string, unknown>,

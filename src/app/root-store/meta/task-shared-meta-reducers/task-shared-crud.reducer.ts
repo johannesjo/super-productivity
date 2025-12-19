@@ -61,16 +61,18 @@ const removeConflictingTasksFromTag = (
   if (!task) return state;
 
   const tag = getTag(state, tagId);
+  // PERF: Use Set for O(1) lookups instead of O(n) Array.includes()
+  const tagTaskIdSet = new Set(tag.taskIds);
   const conflictingTaskIds: string[] = [];
 
   // If this is a sub-task, check if parent is in the tag
-  if (task.parentId && tag.taskIds.includes(task.parentId)) {
+  if (task.parentId && tagTaskIdSet.has(task.parentId)) {
     conflictingTaskIds.push(task.parentId);
   }
 
   // If this is a parent task, check if any sub-tasks are in the tag
   if (task.subTaskIds && task.subTaskIds.length > 0) {
-    const subTasksInTag = task.subTaskIds.filter((subId) => tag.taskIds.includes(subId));
+    const subTasksInTag = task.subTaskIds.filter((subId) => tagTaskIdSet.has(subId));
     conflictingTaskIds.push(...subTasksInTag);
   }
 
@@ -95,11 +97,12 @@ const removeConflictingTasksFromTag = (
     [TASK_FEATURE_NAME]: taskAdapter.updateMany(taskUpdates, state[TASK_FEATURE_NAME]),
   };
 
-  // Update the tag to remove conflicting tasks
+  // PERF: Use Set for O(1) lookups when filtering
+  const conflictingSet = new Set(conflictingTaskIds);
   const tagUpdate: Update<Tag> = {
     id: tagId,
     changes: {
-      taskIds: tag.taskIds.filter((id) => !conflictingTaskIds.includes(id)),
+      taskIds: tag.taskIds.filter((id) => !conflictingSet.has(id)),
     },
   };
 
@@ -659,14 +662,17 @@ const handleTagUpdates = (
   oldTagIds: string[],
   newTagIds: string[],
 ): RootState => {
+  // PERF: Use Sets for O(1) lookups instead of O(n) Array.includes()
+  const oldTagIdSet = new Set(oldTagIds);
+  const newTagIdSet = new Set(newTagIds);
   // Filter TODAY_TAG from both sides - it's a virtual tag where membership is
   // determined by task.dueDay, not by being in tagIds
   const tagsToRemoveFrom = oldTagIds
-    .filter((oldId) => !newTagIds.includes(oldId))
+    .filter((oldId) => !newTagIdSet.has(oldId))
     .filter((oldId) => oldId !== TODAY_TAG.id)
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
   const tagsToAddTo = newTagIds
-    .filter((newId) => !oldTagIds.includes(newId))
+    .filter((newId) => !oldTagIdSet.has(newId))
     .filter((newId) => newId !== TODAY_TAG.id)
     .filter((tagId) => state[TAG_FEATURE_NAME].entities[tagId]); // Only existing tags
 

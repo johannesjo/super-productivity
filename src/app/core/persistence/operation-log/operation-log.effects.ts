@@ -15,11 +15,7 @@ import { SnackService } from '../../snack/snack.service';
 import { T } from '../../../t.const';
 import { validateOperationPayload } from './processing/validate-operation-payload';
 import { VectorClockService } from './sync/vector-clock.service';
-import {
-  COMPACTION_THRESHOLD,
-  LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES,
-  MAX_COMPACTION_FAILURES,
-} from './operation-log.const';
+import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
@@ -38,6 +34,12 @@ export class OperationLogEffects {
   private compactionFailures = 0;
   /** Circuit breaker: prevents recursive quota exceeded handling */
   private isHandlingQuotaExceeded = false;
+  /**
+   * PERF: In-memory compaction counter to avoid IndexedDB transaction on every operation.
+   * The persistent counter in state_cache is only used for cross-tab/restart recovery.
+   * Initialized lazily from persisted value on first operation.
+   */
+  private inMemoryCompactionCounter: number | null = null;
   // Uses ALL_ACTIONS because this effect captures all persistent actions and handles isRemote filtering internally
   private actions$ = inject(ALL_ACTIONS);
   private lockService = inject(LockService);
@@ -137,9 +139,6 @@ export class OperationLogEffects {
           });
         }
 
-        // Monitor payload size for performance analysis
-        this.monitorPayloadSize(op);
-
         // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);
 
@@ -153,9 +152,14 @@ export class OperationLogEffects {
           await pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
         }
 
-        // 3. Check if compaction is needed (inside lock to prevent race between tabs)
-        const opsCount = await this.opLogStore.incrementCompactionCounter();
-        if (opsCount >= COMPACTION_THRESHOLD) {
+        // 3. Check if compaction is needed
+        // PERF: Use in-memory counter instead of IndexedDB transaction on every operation.
+        // Initialize from persisted value on first use (for crash recovery).
+        if (this.inMemoryCompactionCounter === null) {
+          this.inMemoryCompactionCounter = await this.opLogStore.getCompactionCounter();
+        }
+        this.inMemoryCompactionCounter++;
+        if (this.inMemoryCompactionCounter >= COMPACTION_THRESHOLD) {
           // Trigger compaction asynchronously (don't block write operation)
           // Counter is reset in compaction service on success
           this.triggerCompaction();
@@ -192,6 +196,8 @@ export class OperationLogEffects {
       .compact()
       .then(() => {
         this.compactionFailures = 0;
+        // Reset in-memory counter on successful compaction
+        this.inMemoryCompactionCounter = 0;
       })
       .catch((e) => {
         OpLog.err('OperationLogEffects: Compaction failed', e);
@@ -285,30 +291,6 @@ export class OperationLogEffects {
         },
       });
     });
-  }
-
-  /**
-   * Monitors operation payload size and logs warnings for large payloads.
-   * This helps identify inefficient data patterns that could impact sync performance.
-   */
-  private monitorPayloadSize(op: Operation): void {
-    try {
-      const payloadJson = JSON.stringify(op.payload);
-      const payloadSizeBytes = new Blob([payloadJson]).size;
-
-      if (payloadSizeBytes > LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES) {
-        OpLog.warn('[OperationLogEffects] Large operation payload detected', {
-          actionType: op.actionType,
-          entityType: op.entityType,
-          opType: op.opType,
-          payloadSizeKB: Math.round(payloadSizeBytes / 1024),
-          entityId: op.entityId,
-          entityIdsCount: op.entityIds?.length,
-        });
-      }
-    } catch {
-      // Silently ignore serialization errors - validation already passed
-    }
   }
 
   /**

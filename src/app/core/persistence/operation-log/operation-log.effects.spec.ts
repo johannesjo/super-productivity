@@ -57,7 +57,7 @@ describe('OperationLogEffects', () => {
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'append',
-      'incrementCompactionCounter',
+      'getCompactionCounter',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
     mockVectorClockService = jasmine.createSpyObj('VectorClockService', [
@@ -81,7 +81,7 @@ describe('OperationLogEffects', () => {
       },
     );
     mockOpLogStore.append.and.returnValue(Promise.resolve(1));
-    mockOpLogStore.incrementCompactionCounter.and.returnValue(Promise.resolve(0));
+    mockOpLogStore.getCompactionCounter.and.returnValue(Promise.resolve(0));
     mockVectorClockService.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ testClient: 5 }),
     );
@@ -217,8 +217,9 @@ describe('OperationLogEffects', () => {
     });
 
     it('should trigger compaction when threshold reached', (done) => {
-      mockOpLogStore.incrementCompactionCounter.and.returnValue(
-        Promise.resolve(COMPACTION_THRESHOLD),
+      // Counter starts at threshold - 1, after increment it reaches threshold
+      mockOpLogStore.getCompactionCounter.and.returnValue(
+        Promise.resolve(COMPACTION_THRESHOLD - 1),
       );
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
@@ -235,8 +236,9 @@ describe('OperationLogEffects', () => {
     });
 
     it('should not trigger compaction when below threshold', (done) => {
-      mockOpLogStore.incrementCompactionCounter.and.returnValue(
-        Promise.resolve(COMPACTION_THRESHOLD - 1),
+      // Counter starts at threshold - 2, after increment it's still below threshold
+      mockOpLogStore.getCompactionCounter.and.returnValue(
+        Promise.resolve(COMPACTION_THRESHOLD - 2),
       );
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
@@ -525,8 +527,9 @@ describe('OperationLogEffects', () => {
 
   describe('compaction failures', () => {
     it('should track compaction failures', (done) => {
-      mockOpLogStore.incrementCompactionCounter.and.returnValue(
-        Promise.resolve(COMPACTION_THRESHOLD),
+      // Counter starts at threshold - 1, after increment it reaches threshold
+      mockOpLogStore.getCompactionCounter.and.returnValue(
+        Promise.resolve(COMPACTION_THRESHOLD - 1),
       );
       mockCompactionService.compact.and.returnValue(Promise.reject(new Error('Failed')));
 
@@ -544,8 +547,9 @@ describe('OperationLogEffects', () => {
     });
 
     it('should reset failure count on successful compaction', (done) => {
-      mockOpLogStore.incrementCompactionCounter.and.returnValue(
-        Promise.resolve(COMPACTION_THRESHOLD),
+      // Counter starts at threshold - 1, after increment it reaches threshold
+      mockOpLogStore.getCompactionCounter.and.returnValue(
+        Promise.resolve(COMPACTION_THRESHOLD - 1),
       );
       mockCompactionService.compact.and.returnValue(Promise.resolve());
 
