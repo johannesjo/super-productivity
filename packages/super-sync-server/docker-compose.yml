@@ -5,8 +5,8 @@
 #   2. Run: docker-compose up -d
 #   3. View logs: docker-compose logs -f
 #
-# Build from repo root:
-#   docker-compose -f packages/super-sync-server/docker-compose.yml up -d --build
+# For local builds (development):
+#   docker-compose -f docker-compose.yml -f docker-compose.build.yml up -d --build
 
 x-logging: &default-logging
   driver: 'json-file'
@@ -16,10 +16,7 @@ x-logging: &default-logging
 
 services:
   supersync:
-    build:
-      context: ../..
-      dockerfile: packages/super-sync-server/Dockerfile
-    image: supersync:v4
+    image: ${SUPERSYNC_IMAGE:-ghcr.io/johannesjo/supersync:latest}
     container_name: supersync-server
     restart: always
     environment:

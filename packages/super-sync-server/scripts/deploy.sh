@@ -2,22 +2,21 @@
 # SuperSync Server Deployment Script
 #
 # Usage:
-#   ./scripts/deploy.sh [--force]
+#   ./scripts/deploy.sh [--build]
 #
 # This script:
-#   1. Pulls latest changes from git
-#   2. Rebuilds and restarts containers
+#   1. Pulls latest image from GHCR (or builds locally with --build)
+#   2. Restarts containers
 #   3. Verifies health check passes
 #
 # Options:
-#   --force    Force rebuild without cache
+#   --build    Build locally instead of pulling from registry
 
 set -e
 
 # Configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SERVER_DIR="$(dirname "$SCRIPT_DIR")"
-REPO_DIR="$(dirname "$(dirname "$SERVER_DIR")")"
 
 # Get domain from .env file
 if [ -f "$SERVER_DIR/.env" ]; then
@@ -32,9 +31,9 @@ else
 fi
 
 # Parse arguments
-FORCE_BUILD=""
-if [ "$1" = "--force" ]; then
-    FORCE_BUILD="--no-cache"
+BUILD_LOCAL=false
+if [ "$1" = "--build" ]; then
+    BUILD_LOCAL=true
 fi
 
 echo "==> SuperSync Deployment"
@@ -42,14 +41,6 @@ echo "    Server dir: $SERVER_DIR"
 echo "    Health URL: $HEALTH_URL"
 echo ""
 
-# Step 1: Pull latest changes
-echo "==> Pulling latest changes..."
-cd "$REPO_DIR"
-git pull origin "$(git rev-parse --abbrev-ref HEAD)"
-
-# Step 2: Build and restart
-echo ""
-echo "==> Building and restarting containers..."
 cd "$SERVER_DIR"
 
 # Check if monitoring compose exists and include it
@@ -58,9 +49,22 @@ if [ -f "docker-compose.monitoring.yml" ]; then
     COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.monitoring.yml"
 fi
 
-docker compose $COMPOSE_FILES up -d --build $FORCE_BUILD
+if [ "$BUILD_LOCAL" = true ]; then
+    # Local build mode
+    echo "==> Building locally..."
+    COMPOSE_FILES="$COMPOSE_FILES -f docker-compose.build.yml"
+    docker compose $COMPOSE_FILES up -d --build
+else
+    # Pull from registry (default)
+    echo "==> Pulling latest image..."
+    docker compose $COMPOSE_FILES pull supersync
 
-# Step 3: Wait for health check
+    echo ""
+    echo "==> Restarting containers..."
+    docker compose $COMPOSE_FILES up -d
+fi
+
+# Wait for health check
 echo ""
 echo "==> Waiting for service to be healthy..."
 sleep 5

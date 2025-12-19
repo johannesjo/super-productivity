@@ -4,16 +4,18 @@
   "description": "SuperSync server for Super Productivity",
   "main": "dist/index.js",
   "scripts": {
-    "deploy": "git pull && docker compose down && docker compose up -d --build && docker logs supersync-server",
     "build": "tsc",
-    "start": "docker compose down && docker compose up -d --build",
-    "start2": "node dist/index.js",
+    "start": "node dist/index.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "test": "vitest run",
+    "docker:build": "./scripts/build-and-push.sh",
+    "docker:deploy": "./scripts/deploy.sh",
+    "docker:deploy:build": "./scripts/deploy.sh --build",
+    "docker:backup": "./scripts/backup.sh",
+    "docker:logs": "docker logs supersync-server -f",
     "delete-user": "ts-node scripts/delete-user.ts",
     "clear-data": "ts-node scripts/clear-data.ts",
-    "monitor": "ts-node scripts/monitor.ts",
-    "logs": "docker logs supersync-server -f"
+    "monitor": "ts-node scripts/monitor.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",
