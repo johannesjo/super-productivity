@@ -10,6 +10,7 @@ import {
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
+  MatDialogContent,
   MatDialogRef,
 } from '@angular/material/dialog';
 import {
@@ -70,6 +71,7 @@ const DEFAULT_TIME = '09:00';
     TranslatePipe,
     MatButton,
     MatDialogActions,
+    MatDialogContent,
     MatCalendar,
     MatInput,
     MatLabel,

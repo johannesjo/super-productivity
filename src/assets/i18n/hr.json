@@ -1182,7 +1182,7 @@
         "REMINDER_ADDED": "Terminirani zadatak „{{title}}”",
         "REMINDER_DELETED": "Izbrisan je podjsetnik za zadatak",
         "REMINDER_UPDATED": "Aktualiziran je podjsetnik za zadatak „{{title}}”",
-        "TASK_CREATED": "Stvoren je zadatak „{{title}}”"
+        "TASK_CREATED": "Stvoren je zadatak „{{taskTitle}}”"
       },
       "SELECT_OR_CREATE": "Odaberi ili stvori zadatak",
       "SUMMARY_TABLE": {

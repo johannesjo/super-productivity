@@ -1182,7 +1182,7 @@
         "REMINDER_ADDED": "Заплановано завдання \"{{title}}\"",
         "REMINDER_DELETED": "Видалено нагадування для завдання",
         "REMINDER_UPDATED": "Оновлено нагадування для завдання \"{{title}}\"",
-        "TASK_CREATED": "Створено завдання \"{{title}}\""
+        "TASK_CREATED": "Створено завдання \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Виберіть або створіть завдання",
       "SUMMARY_TABLE": {

@@ -16,9 +16,9 @@ export const LINEAR_ISSUE_CONTENT_CONFIG: IssueContentConfig<LinearIssue> = {
     },
     {
       label: T.F.ISSUE.ISSUE_CONTENT.STATUS,
-      value: 'state',
+      value: (issue: LinearIssue) => issue.state.name,
       type: IssueFieldType.TEXT,
-      isVisible: (issue: LinearIssue) => !!issue.state,
+      isVisible: (issue: LinearIssue) => !!issue.state.name,
     },
     {
       label: 'Priority',
@@ -44,12 +44,6 @@ export const LINEAR_ISSUE_CONTENT_CONFIG: IssueContentConfig<LinearIssue> = {
       value: 'description',
       type: IssueFieldType.MARKDOWN,
       isVisible: (issue: LinearIssue) => !!issue.description,
-    },
-    {
-      label: T.F.ISSUE.ISSUE_CONTENT.ATTACHMENTS,
-      value: 'attachments',
-      type: IssueFieldType.LINK,
-      isVisible: (issue: LinearIssue) => Boolean(issue.attachments?.length),
     },
   ],
   comments: {

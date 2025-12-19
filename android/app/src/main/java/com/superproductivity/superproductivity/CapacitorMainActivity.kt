@@ -13,6 +13,8 @@ import androidx.activity.addCallback
 import com.anggrayudi.storage.SimpleStorageHelper
 import com.getcapacitor.BridgeActivity
 import com.superproductivity.superproductivity.plugins.SafBridgePlugin
+import com.superproductivity.superproductivity.service.FocusModeForegroundService
+import com.superproductivity.superproductivity.service.TrackingForegroundService
 import com.superproductivity.superproductivity.util.printWebViewVersion
 import com.superproductivity.superproductivity.webview.JavaScriptInterface
 import com.superproductivity.superproductivity.webview.WebHelper
@@ -144,6 +146,43 @@ class CapacitorMainActivity : BridgeActivity() {
 
     private fun handleIntent(intent: Intent) {
         Log.d("SP_SHARE", "handleIntent action: ${intent.action} type: ${intent.type}")
+
+        // Handle tracking notification actions
+        when (intent.action) {
+            TrackingForegroundService.ACTION_PAUSE -> {
+                Log.d("SP_TRACKING", "Pause action received from notification")
+                callJSInterfaceFunctionIfExists("next", "onPauseTracking$")
+                return
+            }
+            TrackingForegroundService.ACTION_DONE -> {
+                Log.d("SP_TRACKING", "Done action received from notification")
+                callJSInterfaceFunctionIfExists("next", "onMarkTaskDone$")
+                return
+            }
+            // Handle focus mode notification actions
+            FocusModeForegroundService.ACTION_PAUSE -> {
+                Log.d("SP_FOCUS", "Pause action received from focus mode notification")
+                callJSInterfaceFunctionIfExists("next", "onFocusPause$")
+                return
+            }
+            FocusModeForegroundService.ACTION_RESUME -> {
+                Log.d("SP_FOCUS", "Resume action received from focus mode notification")
+                callJSInterfaceFunctionIfExists("next", "onFocusResume$")
+                return
+            }
+            FocusModeForegroundService.ACTION_SKIP -> {
+                Log.d("SP_FOCUS", "Skip action received from focus mode notification")
+                callJSInterfaceFunctionIfExists("next", "onFocusSkip$")
+                return
+            }
+            FocusModeForegroundService.ACTION_COMPLETE -> {
+                Log.d("SP_FOCUS", "Complete action received from focus mode notification")
+                callJSInterfaceFunctionIfExists("next", "onFocusComplete$")
+                return
+            }
+        }
+
+        // Handle share intent
         if (Intent.ACTION_SEND == intent.action && intent.type != null) {
             if (intent.type?.startsWith("text/") == true) {
                 val sharedText = intent.getStringExtra(Intent.EXTRA_TEXT)

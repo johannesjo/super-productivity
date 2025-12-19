@@ -46,6 +46,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { devError } from '../../../util/dev-error';
 import { IssueLog } from '../../../core/log';
 import { TrelloAdditionalCfgComponent } from '../providers/trello/trello-view-components/trello_cfg/trello_additional_cfg.component';
+import { ClickUpAdditionalCfgComponent } from '../providers/clickup/clickup-view-components/clickup-cfg/clickup-additional-cfg.component';
 import { TaskService } from '../../tasks/task.service';
 import { firstValueFrom } from 'rxjs';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -70,6 +71,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
     MatIcon,
     MatDialogTitle,
     TrelloAdditionalCfgComponent, // added for custom trello board loading support
+    ClickUpAdditionalCfgComponent, // added for custom clickup workspace selection
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
   styleUrl: './dialog-edit-issue-provider.component.scss',

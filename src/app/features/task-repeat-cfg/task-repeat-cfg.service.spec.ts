@@ -18,7 +18,12 @@ import {
   selectAllUnprocessedTaskRepeatCfgs,
   selectTaskRepeatCfgsForExactDay,
 } from './store/task-repeat-cfg.selectors';
-import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../tasks/task.model';
+import {
+  DEFAULT_TASK,
+  Task,
+  TaskWithSubTasks,
+  TaskReminderOptionId,
+} from '../tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { TODAY_TAG } from '../tag/tag.const';
@@ -1152,6 +1157,84 @@ describe('TaskRepeatCfgService', () => {
 
       const subTaskAction1 = actions[2] as any;
       expect(subTaskAction1.task.projectId).toBeUndefined();
+    });
+  });
+
+  describe('addTaskRepeatCfgToTask dispatch (#5594)', () => {
+    // Note: First occurrence calculation and lastTaskCreationDay updates
+    // are handled by the updateTaskAfterMakingItRepeatable$ effect.
+    // These tests verify the service correctly dispatches the action.
+
+    it('should include startTime and remindAt in dispatched action', () => {
+      const taskId = 'task-123';
+      const projectId = 'project-123';
+      const today = new Date();
+
+      const taskRepeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        title: 'Task with Time',
+        repeatCycle: 'DAILY' as const,
+        repeatEvery: 1,
+        startDate: formatIsoDate(today),
+        startTime: '09:00',
+        remindAt: TaskReminderOptionId.AtStart,
+      };
+
+      service.addTaskRepeatCfgToTask(taskId, projectId, taskRepeatCfg);
+
+      const dispatchedAction = dispatchSpy.calls.mostRecent().args[0];
+
+      expect(dispatchedAction.startTime).toBe('09:00');
+      expect(dispatchedAction.remindAt).toBe(TaskReminderOptionId.AtStart);
+    });
+
+    it('should preserve all taskRepeatCfg properties', () => {
+      const taskId = 'task-123';
+      const projectId = 'project-123';
+      const today = new Date();
+
+      const taskRepeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        title: 'Task with Properties',
+        repeatCycle: 'DAILY' as const,
+        repeatEvery: 2,
+        startDate: formatIsoDate(today),
+        notes: 'Some notes',
+        defaultEstimate: 3600000,
+        tagIds: ['tag1', 'tag2'],
+      };
+
+      service.addTaskRepeatCfgToTask(taskId, projectId, taskRepeatCfg);
+
+      const dispatchedAction = dispatchSpy.calls.mostRecent().args[0];
+      const cfg = dispatchedAction.taskRepeatCfg;
+
+      expect(cfg.title).toBe('Task with Properties');
+      expect(cfg.repeatEvery).toBe(2);
+      expect(cfg.notes).toBe('Some notes');
+      expect(cfg.defaultEstimate).toBe(3600000);
+      expect(cfg.tagIds).toEqual(['tag1', 'tag2']);
+      expect(cfg.projectId).toBe(projectId);
+      expect(cfg.id).toBeDefined();
+    });
+
+    it('should dispatch action with taskId', () => {
+      const taskId = 'task-123';
+      const projectId = 'project-123';
+
+      const taskRepeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        title: 'Test Task',
+        repeatCycle: 'DAILY' as const,
+        repeatEvery: 1,
+      };
+
+      service.addTaskRepeatCfgToTask(taskId, projectId, taskRepeatCfg);
+
+      const dispatchedAction = dispatchSpy.calls.mostRecent().args[0];
+
+      expect(dispatchedAction.type).toBe(addTaskRepeatCfgToTask.type);
+      expect(dispatchedAction.taskId).toBe(taskId);
     });
   });
 });
