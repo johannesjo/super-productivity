@@ -180,22 +180,54 @@ describe('lwwUpdateMetaReducer', () => {
       expect(updatedTask.modified).toBeLessThanOrEqual(afterTime);
     });
 
-    it('should skip update if entity does not exist', () => {
+    it('should recreate entity if it does not exist (LWW update won over delete)', () => {
       const state = createMockState();
       const action = {
         type: '[TASK] LWW Update',
-        id: 'non-existent-task',
-        title: 'Updated Title',
-        meta: { isPersistent: true, entityType: 'TASK', entityId: 'non-existent-task' },
+        id: 'recreated-task',
+        title: 'Recreated Task Title',
+        notes: 'This task was deleted locally but update won via LWW',
+        isDone: true,
+        doneOn: 12345,
+        meta: { isPersistent: true, entityType: 'TASK', entityId: 'recreated-task' },
       };
 
-      spyOn(console, 'warn');
+      spyOn(console, 'log');
       reducer(state, action);
 
-      expect(console.warn).toHaveBeenCalledWith(
-        jasmine.stringMatching(/Entity TASK:non-existent-task not found/),
+      expect(console.log).toHaveBeenCalledWith(
+        jasmine.stringMatching(
+          /Entity TASK:recreated-task not found, recreating from LWW update/,
+        ),
       );
-      expect(mockReducer).toHaveBeenCalledWith(state, action);
+      expect(mockReducer).toHaveBeenCalled();
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const recreatedTask = updatedState[TASK_FEATURE_NAME]?.entities[
+        'recreated-task'
+      ] as Task;
+      expect(recreatedTask).toBeDefined();
+      expect(recreatedTask.id).toBe('recreated-task');
+      expect(recreatedTask.title).toBe('Recreated Task Title');
+      expect(recreatedTask.notes).toBe(
+        'This task was deleted locally but update won via LWW',
+      );
+      expect(recreatedTask.isDone).toBe(true);
+      expect(recreatedTask.doneOn).toBe(12345);
+    });
+
+    it('should add recreated entity to the ids array', () => {
+      const state = createMockState();
+      const action = {
+        type: '[TASK] LWW Update',
+        id: 'new-task-from-lww',
+        title: 'New Task',
+        meta: { isPersistent: true, entityType: 'TASK', entityId: 'new-task-from-lww' },
+      };
+
+      reducer(state, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      expect(updatedState[TASK_FEATURE_NAME]?.ids).toContain('new-task-from-lww');
     });
 
     it('should skip update if action has no id', () => {

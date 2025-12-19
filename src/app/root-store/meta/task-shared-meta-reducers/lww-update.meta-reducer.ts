@@ -116,28 +116,39 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       return reducer(state, action);
     }
 
-    // Check if entity exists
     const entityId = entityData['id'] as string;
     const existingEntity = (featureState as any).entities?.[entityId];
-    if (!existingEntity) {
-      console.warn(
-        `lwwUpdateMetaReducer: Entity ${entityType}:${entityId} not found, skipping update`,
-      );
-      return reducer(state, action);
-    }
 
-    // Replace the entity entirely with the LWW winning state
-    // Use updateOne with all fields as changes to preserve adapter behavior
-    const updatedFeatureState = adapter.updateOne(
-      {
-        id: entityId,
-        changes: {
+    let updatedFeatureState;
+
+    if (!existingEntity) {
+      // Entity was deleted locally but UPDATE won via LWW.
+      // This means another client's update beat our delete, so we need to
+      // recreate the entity with the winning state.
+      console.log(
+        `lwwUpdateMetaReducer: Entity ${entityType}:${entityId} not found, recreating from LWW update`,
+      );
+      updatedFeatureState = adapter.addOne(
+        {
           ...entityData,
-          modified: Date.now(), // Update modified timestamp
+          modified: Date.now(),
+        } as any,
+        featureState as any,
+      );
+    } else {
+      // Entity exists - replace it entirely with the LWW winning state
+      // Use updateOne with all fields as changes to preserve adapter behavior
+      updatedFeatureState = adapter.updateOne(
+        {
+          id: entityId,
+          changes: {
+            ...entityData,
+            modified: Date.now(), // Update modified timestamp
+          },
         },
-      },
-      featureState as any,
-    );
+        featureState as any,
+      );
+    }
 
     const updatedState: RootState = {
       ...rootState,
