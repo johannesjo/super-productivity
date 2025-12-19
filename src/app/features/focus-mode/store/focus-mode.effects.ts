@@ -8,6 +8,7 @@ import {
   map,
   pairwise,
   switchMap,
+  take,
   tap,
   withLatestFrom,
 } from 'rxjs/operators';
@@ -19,6 +20,7 @@ import { TaskService } from '../../tasks/task.service';
 import { playSound } from '../../../util/play-sound';
 import { IS_ELECTRON } from '../../../app.constants';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
+import { selectTaskById } from '../../tasks/store/task.selectors';
 import { openIdleDialog } from '../../idle/store/idle.actions';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import {
@@ -141,6 +143,7 @@ export class FocusModeEffects {
   );
 
   // Sync: When focus session resumes → start tracking
+  // Checks that the paused task still exists before resuming tracking
   syncSessionResumeToTracking$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.unPauseFocusSession),
@@ -157,13 +160,18 @@ export class FocusModeEffects {
           !currentTaskId &&
           !!pausedTaskId,
       ),
-      map(([_action, _cfg, _timer, pausedTaskId]) =>
-        setCurrentTask({ id: pausedTaskId! }),
+      switchMap(([_action, _cfg, _timer, pausedTaskId]) =>
+        this.store.select(selectTaskById, { id: pausedTaskId! }).pipe(
+          take(1),
+          map((task) => (task ? setCurrentTask({ id: pausedTaskId! }) : null)),
+        ),
       ),
+      filter((action): action is ReturnType<typeof setCurrentTask> => action !== null),
     ),
   );
 
   // Sync: When focus session starts → start tracking (if not already tracking)
+  // Checks that the paused task still exists before starting tracking
   syncSessionStartToTracking$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.startFocusSession),
@@ -176,7 +184,13 @@ export class FocusModeEffects {
         ([_action, cfg, pausedTaskId, currentTaskId]) =>
           !!cfg?.isSyncSessionWithTracking && !currentTaskId && !!pausedTaskId,
       ),
-      map(([_action, _cfg, pausedTaskId]) => setCurrentTask({ id: pausedTaskId! })),
+      switchMap(([_action, _cfg, pausedTaskId]) =>
+        this.store.select(selectTaskById, { id: pausedTaskId! }).pipe(
+          take(1),
+          map((task) => (task ? setCurrentTask({ id: pausedTaskId! }) : null)),
+        ),
+      ),
+      filter((action): action is ReturnType<typeof setCurrentTask> => action !== null),
     ),
   );
 
