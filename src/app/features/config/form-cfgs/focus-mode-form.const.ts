@@ -27,5 +27,26 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
         label: T.GCF.FOCUS_MODE.L_IS_PLAY_TICK,
       },
     },
+    {
+      key: 'isPauseTrackingDuringBreak',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.FOCUS_MODE.L_PAUSE_TRACKING_DURING_BREAK,
+      },
+    },
+    {
+      key: 'isAutoStartSession',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.FOCUS_MODE.L_AUTO_START_SESSION,
+      },
+    },
+    {
+      key: 'isStartInBackground',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.FOCUS_MODE.L_START_IN_BACKGROUND,
+      },
+    },
   ],
 };
