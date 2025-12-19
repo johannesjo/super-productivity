@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect } from '@ngrx/effects';
 import { Store } from '@ngrx/store';
-import { map, pairwise, startWith, tap } from 'rxjs/operators';
+import { map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { androidInterface } from '../android-interface';
 import {
@@ -12,7 +12,7 @@ import {
   selectTimer,
 } from '../../focus-mode/store/focus-mode.selectors';
 import * as focusModeActions from '../../focus-mode/store/focus-mode.actions';
-import { selectCurrentTask } from '../../tasks/store/task.selectors';
+import { selectCurrentTask, selectCurrentTaskId } from '../../tasks/store/task.selectors';
 import { combineLatest } from 'rxjs';
 import { FocusModeMode, TimerState } from '../../focus-mode/focus-mode.model';
 import { DroidLog } from '../../../core/log';
@@ -112,7 +112,10 @@ export class AndroidFocusModeEffects {
     createEffect(() =>
       androidInterface.onFocusPause$.pipe(
         tap(() => DroidLog.log('AndroidFocusModeEffects: Pause action received')),
-        map(() => focusModeActions.pauseFocusSession()),
+        withLatestFrom(this._store.select(selectCurrentTaskId)),
+        map(([_, currentTaskId]) =>
+          focusModeActions.pauseFocusSession({ pausedTaskId: currentTaskId }),
+        ),
       ),
     );
 

@@ -346,7 +346,8 @@ export class FocusModeMainComponent {
   }
 
   pauseSession(): void {
-    this._store.dispatch(pauseFocusSession());
+    const currentTaskId = this.taskService.currentTaskId();
+    this._store.dispatch(pauseFocusSession({ pausedTaskId: currentTaskId }));
   }
 
   resumeSession(): void {

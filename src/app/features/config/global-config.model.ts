@@ -188,7 +188,7 @@ export type FocusModeConfig = Readonly<{
   isSkipPreparation: boolean;
   isPlayTick?: boolean;
   isPauseTrackingDuringBreak?: boolean;
-  isAutoStartSession?: boolean;
+  isSyncSessionWithTracking?: boolean;
   isStartInBackground?: boolean;
 }>;
 
