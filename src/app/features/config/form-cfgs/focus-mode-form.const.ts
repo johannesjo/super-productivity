@@ -35,10 +35,10 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
       },
     },
     {
-      key: 'isAutoStartSession',
+      key: 'isSyncSessionWithTracking',
       type: 'checkbox',
       templateOptions: {
-        label: T.GCF.FOCUS_MODE.L_AUTO_START_SESSION,
+        label: T.GCF.FOCUS_MODE.L_SYNC_SESSION_WITH_TRACKING,
       },
     },
     {

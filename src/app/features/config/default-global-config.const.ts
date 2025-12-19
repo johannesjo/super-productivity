@@ -88,7 +88,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isSkipPreparation: false,
     isPlayTick: false,
     isPauseTrackingDuringBreak: false,
-    isAutoStartSession: false,
+    isSyncSessionWithTracking: false,
     isStartInBackground: false,
   },
   pomodoro: {
