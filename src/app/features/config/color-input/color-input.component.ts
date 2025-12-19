@@ -21,5 +21,11 @@ import { GlobalThemeService } from '../../../../app/core/theme/global-theme.serv
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ColorInputComponent extends FieldType {
-  readonly globalThemeService = inject(GlobalThemeService);
+  private readonly _globalThemeService = inject(GlobalThemeService, {
+    optional: true,
+  });
+
+  get globalThemeService(): GlobalThemeService | null {
+    return this._globalThemeService ?? null;
+  }
 }

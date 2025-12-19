@@ -13,8 +13,8 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DEFAULT_TAG_COLOR } from '../../features/work-context/work-context.const';
-import { ColorPickerDirective } from 'ngx-color-picker'; // Added this
-import { GlobalThemeService } from '../../core/theme/global-theme.service'; // Adjust path if needed
+import { ColorPickerDirective } from 'ngx-color-picker';
+import { GlobalThemeService } from '../../core/theme/global-theme.service';
 
 export interface CreateTagData {
   title?: string;
@@ -23,7 +23,7 @@ export interface CreateTagData {
 
 @Component({
   selector: 'dialog-create-tag',
-  standalone: true, // Assuming standalone based on imports list
+  standalone: true,
   templateUrl: './dialog-create-tag.component.html',
   styleUrls: ['./dialog-create-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,12 +37,21 @@ export interface CreateTagData {
     MatButton,
     MatIcon,
     TranslatePipe,
-    ColorPickerDirective, // Added this
+    ColorPickerDirective,
   ],
 })
 export class DialogCreateTagComponent {
   private _matDialogRef = inject<MatDialogRef<DialogCreateTagComponent>>(MatDialogRef);
-  readonly globalThemeService = inject(GlobalThemeService); // Added this
+
+  // 🔑 LAZY injection – Store is NOT resolved unless accessed
+  private readonly _globalThemeService = inject(GlobalThemeService, {
+    optional: true,
+  });
+
+  get globalThemeService(): GlobalThemeService | null {
+    return this._globalThemeService ?? null;
+  }
+
   data = inject(MAT_DIALOG_DATA);
 
   T: typeof T = T;

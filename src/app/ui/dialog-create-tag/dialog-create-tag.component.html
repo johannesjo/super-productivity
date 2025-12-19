@@ -30,9 +30,6 @@
         [style.background-color]="color || '#26c6da'"
         style="color: white; font-weight: bold; caret-color: black"
         [(colorPicker)]="color"
-        [cpExtraClassName]="
-          globalThemeService.isDarkTheme() ? 'dark-theme' : 'light-theme'
-        "
         [cpPresetColors]="[
           '#000000',
           '#FFFFFF',

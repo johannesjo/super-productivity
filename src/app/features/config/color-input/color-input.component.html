@@ -7,7 +7,6 @@
     style="color: white; font-weight: bold; caret-color: black"
     [(colorPicker)]="formControl.value"
     (colorPickerChange)="formControl.setValue($event); formControl.markAsTouched()"
-    [cpExtraClassName]="globalThemeService.isDarkTheme() ? 'dark-theme' : 'light-theme'"
     [cpPresetColors]="[
       '#000000',
       '#FFFFFF',
