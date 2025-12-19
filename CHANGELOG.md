@@ -1,3 +1,37 @@
+## [16.7.1](https://github.com/johannesjo/super-productivity/compare/v16.6.1...v16.7.1) (2025-12-19)
+
+### Bug Fixes
+
+- add retry for rate limiting ([f965301](https://github.com/johannesjo/super-productivity/commit/f9653010f53616e673b4421a071a2d491980359b))
+- **android:** make schedule dialog scrollable on small screens ([#5741](https://github.com/johannesjo/super-productivity/issues/5741)) ([19e76ac](https://github.com/johannesjo/super-productivity/commit/19e76ac0aa2813623cd07013e3b4de2f11001060))
+- **docker:** use Debian-based nginx for ARM64 QEMU compatibility ([5ca6434](https://github.com/johannesjo/super-productivity/commit/5ca64347eff2dd24a25d304c06e14b948f43ae93))
+- **electron:** use includes() instead of in operator for hostname check ([6597e23](https://github.com/johannesjo/super-productivity/commit/6597e233d22a9400a7f522b66f4cdc37b323f6d2))
+- **focus-mode:** add start button in banner after session completes ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([25de8ee](https://github.com/johannesjo/super-productivity/commit/25de8ee1ff810bd8d3075380986169c65d00c76e))
+- **focus-mode:** fix pomodoro long break timing and add ticking sound option ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([9fdc1fc](https://github.com/johannesjo/super-productivity/commit/9fdc1fc609efd9adecd765c4b6317440e06265f5))
+- **focus-mode:** hide dismiss button in banner-only mode ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([c571700](https://github.com/johannesjo/super-productivity/commit/c571700cfa88c00e83123e423faa4130b2210542))
+- **focus-mode:** preserve existing notes when opening notes panel ([#5752](https://github.com/johannesjo/super-productivity/issues/5752)) ([0a915d9](https://github.com/johannesjo/super-productivity/commit/0a915d901beca1f3d5c29f992831695899062c8e))
+- **focus-mode:** show start button when break time is up in banner mode ([ee54b4e](https://github.com/johannesjo/super-productivity/commit/ee54b4e11e8006a1cec496b41ac23e328cedb249))
+- **i18n:** use correct variable in TASK_CREATED translation ([#5743](https://github.com/johannesjo/super-productivity/issues/5743)) ([529f885](https://github.com/johannesjo/super-productivity/commit/529f88517abbc5d36543a859e6852675c36d9015))
+- **linear:** show status name property ([f306adb](https://github.com/johannesjo/super-productivity/commit/f306adb6b7441d68174dc8fb44f36229746fb8b2))
+- remove deprecated toPromise calls ([de06693](https://github.com/johannesjo/super-productivity/commit/de06693bf619960d8b49e1e82679f1d30a669918))
+- **repeat:** schedule tasks for correct day and remove from Today when needed ([#5594](https://github.com/johannesjo/super-productivity/issues/5594)) ([ffc086d](https://github.com/johannesjo/super-productivity/commit/ffc086dd0078003ecbfcc03098ebd0a41871317f))
+- **sync:** show user-friendly error for Flatpak/Snap permission issues ([196f84b](https://github.com/johannesjo/super-productivity/commit/196f84b40f5698f39b15f2e61bbbc5000d5e74ba)), closes [#4078](https://github.com/johannesjo/super-productivity/issues/4078)
+- update workspace selection api key ([e05d78f](https://github.com/johannesjo/super-productivity/commit/e05d78f5ffb0f6f9a733ebb311dd271bd99ed718))
+
+### Features
+
+- **2356:** add clickup support ([8f79477](https://github.com/johannesjo/super-productivity/commit/8f7947753c4d583d741b7b1598f7db766877d3c0))
+- Add generic subtask support for issue providers, implement for ClickUp ([4c113cd](https://github.com/johannesjo/super-productivity/commit/4c113cdeb5467065b44d1f35a9aa5e72460a3194))
+- **android:** add background time tracking via foreground service ([543b63c](https://github.com/johannesjo/super-productivity/commit/543b63c131c78866e83fc3e779fe2ec1ef578726))
+- **android:** add better notifications and permanent notification for focus mode ([5000f08](https://github.com/johannesjo/super-productivity/commit/5000f081fed7be262dcadd4ff3b751d466677a64))
+- **focus-mode:** add icon buttons for banner and sync session with tracking ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([b551d07](https://github.com/johannesjo/super-productivity/commit/b551d07895a5119dfe5789bc5aa802f4ee13b32f))
+- **focus-mode:** add new settings and fix pomodoro dialog ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([bbbb082](https://github.com/johannesjo/super-productivity/commit/bbbb082ea4067fb29da8f4979bccd1a8518f13e8))
+- **focus-mode:** add task existence check before resuming tracking ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([404df5f](https://github.com/johannesjo/super-productivity/commit/404df5f3132c841b1a98dc20d73c82871bc30c10))
+- **focus-mode:** sync duration when Pomodoro settings change ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([ed2b4d8](https://github.com/johannesjo/super-productivity/commit/ed2b4d89ee041529e76da93227d4f76791b63485))
+- Introduce typia for ClickUp API runtime type validation, refactor ClickUp models, and simplify task title display. ([cb6edd3](https://github.com/johannesjo/super-productivity/commit/cb6edd3debba1f14c3c4b9e646015056bcd9fe99))
+- refactor ClickUp error logging to use IssueLog ([3ff45cb](https://github.com/johannesjo/super-productivity/commit/3ff45cb7087492394c148188c38aef3235dc71e6))
+- update ClickUp issue content comments ([e77fdbc](https://github.com/johannesjo/super-productivity/commit/e77fdbc0e8ef0a53247a22d2b260fbabdec2f775))
+
 # [16.7.0](https://github.com/johannesjo/super-productivity/compare/v16.6.1...v16.7.0) (2025-12-19)
 
 ### Bug Fixes
