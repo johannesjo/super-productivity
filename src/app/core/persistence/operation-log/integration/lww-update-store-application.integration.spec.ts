@@ -229,7 +229,7 @@ describe('LWW Update Store Application Integration', () => {
       expect(updatedTag.modified).toBeGreaterThan(1000);
     });
 
-    it('should skip update for non-existent entity', () => {
+    it('should recreate entity when LWW update arrives for deleted entity', () => {
       const composedReducer = lwwUpdateMetaReducer(passthroughReducer) as ActionReducer<
         MockRootState,
         Action
@@ -245,22 +245,28 @@ describe('LWW Update Store Application Integration', () => {
         },
       });
 
-      // Try to update a non-existent task
-      const op = createLwwUpdateOperation('TASK', 'nonExistentTask', {
-        id: 'nonExistentTask',
-        title: 'Should Not Appear',
+      // LWW update arrives for an entity that was deleted locally
+      // (This happens when remote update beats local delete via LWW)
+      const op = createLwwUpdateOperation('TASK', 'deletedLocallyTask', {
+        id: 'deletedLocallyTask',
+        title: 'Recreated From LWW',
       });
 
-      spyOn(console, 'warn');
+      spyOn(console, 'log');
       const action = convertOpToAction(op);
       const resultState = composedReducer(initialState, action);
 
-      // State should remain unchanged
-      expect(resultState[TASKS_FEATURE].entities['nonExistentTask']).toBeUndefined();
+      // Entity should be recreated with the LWW winning state
+      expect(resultState[TASKS_FEATURE].entities['deletedLocallyTask']).toBeDefined();
+      expect(resultState[TASKS_FEATURE].entities['deletedLocallyTask'].title).toBe(
+        'Recreated From LWW',
+      );
+      // Existing task should remain unchanged
       expect(resultState[TASKS_FEATURE].entities['existingTask'].title).toBe(
         'Existing Task',
       );
-      expect(console.warn).toHaveBeenCalled();
+      // Should log the recreation
+      expect(console.log).toHaveBeenCalled();
     });
 
     it('should pass through non-LWW Update actions unchanged', () => {
