@@ -224,6 +224,7 @@
         "POMODORO_SESSION_RUNNING": "Pomodoro Session #{{cycleNr}} is running",
         "RESUME": "Resume",
         "SESSION_RUNNING": "Focus Session is running",
+        "START": "Start",
         "TO_FOCUS_OVERLAY": "To Focus Overlay"
       },
       "BACK_TO_PLANNING": "Back to Planning",

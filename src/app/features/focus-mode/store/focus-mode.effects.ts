@@ -672,9 +672,26 @@ export class FocusModeEffects {
   ): Pick<Banner, 'action' | 'action2' | 'action3'> {
     const isPaused = !timer.isRunning && timer.purpose !== null;
 
-    // Play/Pause button - only show when not completed
+    // Play/Pause button - or Start button when session completed
     const playPauseAction = isSessionCompleted
-      ? undefined
+      ? {
+          label: T.F.FOCUS_MODE.B.START,
+          icon: 'play_arrow',
+          fn: () => {
+            // Start a new session using the current mode's strategy
+            this.store
+              .select(selectors.selectMode)
+              .pipe(take(1))
+              .subscribe((mode) => {
+                const strategy = this.strategyFactory.getStrategy(mode);
+                this.store.dispatch(
+                  actions.startFocusSession({
+                    duration: strategy.initialSessionDuration,
+                  }),
+                );
+              });
+          },
+        }
       : {
           label: isPaused ? T.F.FOCUS_MODE.B.RESUME : T.F.FOCUS_MODE.B.PAUSE,
           icon: isPaused ? 'play_arrow' : 'pause',
@@ -692,22 +709,25 @@ export class FocusModeEffects {
         };
 
     // End session button - complete for work, skip/complete for break
-    const endAction = {
-      label: isOnBreak ? T.F.FOCUS_MODE.B.END_BREAK : T.F.FOCUS_MODE.B.END_SESSION,
-      icon: 'stop',
-      fn: () => {
-        if (isOnBreak) {
-          this.store.dispatch(actions.skipBreak());
-        } else {
-          this.store.dispatch(actions.completeFocusSession({ isManual: true }));
-        }
-      },
-    };
+    // Hide when session is already completed
+    const endAction = isSessionCompleted
+      ? undefined
+      : {
+          label: isOnBreak ? T.F.FOCUS_MODE.B.END_BREAK : T.F.FOCUS_MODE.B.END_SESSION,
+          icon: 'stop',
+          fn: () => {
+            if (isOnBreak) {
+              this.store.dispatch(actions.skipBreak());
+            } else {
+              this.store.dispatch(actions.completeFocusSession({ isManual: true }));
+            }
+          },
+        };
 
     // Open overlay button
     const overlayAction = {
       label: T.F.FOCUS_MODE.B.TO_FOCUS_OVERLAY,
-      icon: 'open_in_full',
+      icon: 'fullscreen',
       fn: () => {
         this.store.dispatch(showFocusOverlay());
       },
