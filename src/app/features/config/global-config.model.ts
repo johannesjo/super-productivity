@@ -238,7 +238,8 @@ export type CustomCfgSection =
   | 'SYNC_SAFETY_BACKUPS'
   | 'JIRA_CFG'
   | 'SIMPLE_COUNTER_CFG'
-  | 'OPENPROJECT_CFG';
+  | 'OPENPROJECT_CFG'
+  | 'CLICKUP_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {
