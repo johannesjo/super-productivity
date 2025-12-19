@@ -3087,10 +3087,8 @@ describe('OperationLogSyncService', () => {
 
           const snapshotVectorClock = { clientA: 10, clientB: 5, clientC: 3 };
 
-          let downloadCallCount = 0;
           spyOn(service, 'downloadRemoteOps').and.callFake(() => {
-            downloadCallCount++;
-            // First download returns no new ops but has snapshotVectorClock
+            // Download returns no new ops but has snapshotVectorClock
             return Promise.resolve({
               serverMigrationHandled: false,
               localWinOpsCreated: 0,

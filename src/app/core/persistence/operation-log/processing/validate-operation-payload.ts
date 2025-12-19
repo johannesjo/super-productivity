@@ -129,6 +129,12 @@ const validateUpdatePayload = (
     // Fall through to standard validation if unknown TIME_TRACKING shape
   }
 
+  // TASK time tracking updates use a special shape: { taskId, date, duration }
+  // This comes from syncTimeSpent action (see time-tracking.actions.ts)
+  if (entityType === 'TASK' && 'taskId' in p && 'date' in p && 'duration' in p) {
+    return { success: true };
+  }
+
   // Update payloads can have various shapes:
   // 1. { task: { id, changes } } or { project: { id, changes } }
   // 2. { id, changes }
