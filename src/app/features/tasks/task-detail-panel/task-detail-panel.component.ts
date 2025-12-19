@@ -144,7 +144,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
   private _task$ = toObservable(this.task);
 
   @HostListener('keydown', ['$event'])
-  onKeydown(ev: KeyboardEvent): void {
+  async onKeydown(ev: KeyboardEvent): Promise<void> {
     // Skip handling inside input elements
     const target = ev.target as HTMLElement;
     if (isInputElement(target)) return;
@@ -153,7 +153,7 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
     if (!cfg) throw new Error('No config service available');
 
     const keys = cfg.keyboard;
-    if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) this.collapseParent();
+    if (await checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) this.collapseParent();
   }
 
   // Parent task data

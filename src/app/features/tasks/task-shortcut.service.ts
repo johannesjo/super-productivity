@@ -46,7 +46,7 @@ export class TaskShortcutService {
    * @param ev - The keyboard event
    * @returns True if the shortcut was handled, false otherwise
    */
-  handleTaskShortcuts(ev: KeyboardEvent): boolean {
+  async handleTaskShortcuts(ev: KeyboardEvent): Promise<boolean> {
     // Handle task-specific shortcuts if a task is focused
     const focusedTaskId: TaskId | null = this._taskFocusService.focusedTaskId();
 
@@ -75,78 +75,78 @@ export class TaskShortcutService {
     // Basic task actions that work through component delegation
     if (
       !isContextMenuOpen &&
-      (checkKeyCombo(ev, keys.taskEditTitle) || ev.key === 'Enter')
+      ((await checkKeyCombo(ev, keys.taskEditTitle)) || ev.key === 'Enter')
     ) {
       this._handleTaskShortcut(focusedTaskId, 'focusTitleForEdit');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) {
+    if (await checkKeyCombo(ev, keys.taskToggleDetailPanelOpen)) {
       this._handleTaskShortcut(focusedTaskId, 'toggleShowDetailPanel');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
+    if (await checkKeyCombo(ev, keys.taskOpenEstimationDialog)) {
       this._handleTaskShortcut(focusedTaskId, 'estimateTime');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskSchedule)) {
+    if (await checkKeyCombo(ev, keys.taskSchedule)) {
       this._handleTaskShortcut(focusedTaskId, 'scheduleTask');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskToggleDone)) {
+    if (await checkKeyCombo(ev, keys.taskToggleDone)) {
       this._handleTaskShortcut(focusedTaskId, 'toggleDoneKeyboard');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskAddSubTask)) {
+    if (await checkKeyCombo(ev, keys.taskAddSubTask)) {
       this._handleTaskShortcut(focusedTaskId, 'addSubTask');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskAddAttachment)) {
+    if (await checkKeyCombo(ev, keys.taskAddAttachment)) {
       this._handleTaskShortcut(focusedTaskId, 'addAttachment');
       ev.preventDefault();
       return true;
     }
-    if (checkKeyCombo(ev, keys.taskDelete)) {
+    if (await checkKeyCombo(ev, keys.taskDelete)) {
       this._handleTaskShortcut(focusedTaskId, 'deleteTask');
       ev.preventDefault();
       return true;
     }
 
     // Move to project / Open project menu for project selection (only for non-sub-tasks)
-    if (!isContextMenuOpen && checkKeyCombo(ev, keys.taskMoveToProject)) {
+    if (!isContextMenuOpen && (await checkKeyCombo(ev, keys.taskMoveToProject))) {
       this._handleTaskShortcut(focusedTaskId, 'openProjectMenu');
       ev.preventDefault();
       return true;
     }
 
     // Edit tags
-    if (checkKeyCombo(ev, keys.taskEditTags)) {
+    if (await checkKeyCombo(ev, keys.taskEditTags)) {
       this._handleTaskShortcut(focusedTaskId, 'editTags');
       ev.preventDefault();
       return true;
     }
 
     // Toggle context menu
-    if (checkKeyCombo(ev, keys.taskOpenContextMenu)) {
+    if (await checkKeyCombo(ev, keys.taskOpenContextMenu)) {
       this._handleTaskShortcut(focusedTaskId, 'openContextMenu', ev);
       ev.preventDefault();
       return true;
     }
 
     // Move to backlog/today (only for project tasks, not sub-tasks)
-    if (checkKeyCombo(ev, keys.moveToBacklog)) {
+    if (await checkKeyCombo(ev, keys.moveToBacklog)) {
       this._handleTaskShortcut(focusedTaskId, 'moveToBacklogWithFocus');
       ev.preventDefault();
       ev.stopPropagation();
       return true;
     }
 
-    if (checkKeyCombo(ev, keys.moveToTodaysTasks)) {
+    if (await checkKeyCombo(ev, keys.moveToTodaysTasks)) {
       this._handleTaskShortcut(focusedTaskId, 'moveToTodayWithFocus');
       ev.preventDefault();
       ev.stopPropagation();
@@ -157,7 +157,7 @@ export class TaskShortcutService {
     if (
       !isContextMenuOpen &&
       ((!isShiftOrCtrlPressed && ev.key === 'ArrowUp') ||
-        checkKeyCombo(ev, keys.selectPreviousTask))
+        (await checkKeyCombo(ev, keys.selectPreviousTask)))
     ) {
       ev.preventDefault();
       this._handleTaskShortcut(focusedTaskId, 'focusPrevious');
@@ -167,7 +167,7 @@ export class TaskShortcutService {
     if (
       !isContextMenuOpen &&
       ((!isShiftOrCtrlPressed && ev.key === 'ArrowDown') ||
-        checkKeyCombo(ev, keys.selectNextTask))
+        (await checkKeyCombo(ev, keys.selectNextTask)))
     ) {
       ev.preventDefault();
       this._handleTaskShortcut(focusedTaskId, 'focusNext');
@@ -177,7 +177,7 @@ export class TaskShortcutService {
     // Arrow navigation for expand/collapse - only work if context menu is not open
     if (
       !isContextMenuOpen &&
-      (ev.key === 'ArrowLeft' || checkKeyCombo(ev, keys.collapseSubTasks))
+      (ev.key === 'ArrowLeft' || (await checkKeyCombo(ev, keys.collapseSubTasks)))
     ) {
       this._handleTaskShortcut(focusedTaskId, 'handleArrowLeft');
       ev.preventDefault();
@@ -186,7 +186,7 @@ export class TaskShortcutService {
 
     if (
       !isContextMenuOpen &&
-      (ev.key === 'ArrowRight' || checkKeyCombo(ev, keys.expandSubTasks))
+      (ev.key === 'ArrowRight' || (await checkKeyCombo(ev, keys.expandSubTasks)))
     ) {
       this._handleTaskShortcut(focusedTaskId, 'handleArrowRight');
       ev.preventDefault();
@@ -194,35 +194,35 @@ export class TaskShortcutService {
     }
 
     // Toggle play/pause
-    if (checkKeyCombo(ev, keys.togglePlay) && this.isTimeTrackingEnabled()) {
+    if ((await checkKeyCombo(ev, keys.togglePlay)) && this.isTimeTrackingEnabled()) {
       this._handleTaskShortcut(focusedTaskId, 'togglePlayPause');
       ev.preventDefault();
       return true;
     }
 
     // Task movement shortcuts
-    if (checkKeyCombo(ev, keys.moveTaskUp)) {
+    if (await checkKeyCombo(ev, keys.moveTaskUp)) {
       this._handleTaskShortcut(focusedTaskId, 'moveTaskUp');
       ev.preventDefault();
       ev.stopPropagation();
       return true;
     }
 
-    if (checkKeyCombo(ev, keys.moveTaskDown)) {
+    if (await checkKeyCombo(ev, keys.moveTaskDown)) {
       this._handleTaskShortcut(focusedTaskId, 'moveTaskDown');
       ev.preventDefault();
       ev.stopPropagation();
       return true;
     }
 
-    if (checkKeyCombo(ev, keys.moveTaskToTop)) {
+    if (await checkKeyCombo(ev, keys.moveTaskToTop)) {
       this._handleTaskShortcut(focusedTaskId, 'moveTaskToTop');
       ev.preventDefault();
       ev.stopPropagation();
       return true;
     }
 
-    if (checkKeyCombo(ev, keys.moveTaskToBottom)) {
+    if (await checkKeyCombo(ev, keys.moveTaskToBottom)) {
       this._handleTaskShortcut(focusedTaskId, 'moveTaskToBottom');
       ev.preventDefault();
       ev.stopPropagation();

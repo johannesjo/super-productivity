@@ -19,7 +19,7 @@ export class KeyboardInputComponent extends FieldType<FormlyFieldConfig> {
     return this.to.type || 'text';
   }
 
-  onKeyDown(ev: KeyboardEvent): void {
+  async onKeyDown(ev: KeyboardEvent): Promise<void> {
     // ! Use ev.code to support multilanguage layouts
     const keyCode = ev.code;
 
@@ -52,7 +52,7 @@ export class KeyboardInputComponent extends FieldType<FormlyFieldConfig> {
       if (ev.shiftKey) val += 'Shift+';
       if (ev.metaKey) val += 'Meta+';
 
-      const keyName = prepareKeyCode(keyCode);
+      const keyName = await prepareKeyCode(keyCode);
 
       if (keyName === 'Meta') {
         // Fail safe for MacOsX crashing bug

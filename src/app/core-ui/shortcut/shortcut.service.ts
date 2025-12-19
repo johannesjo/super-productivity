@@ -107,7 +107,7 @@ export class ShortcutService {
     }
 
     if (
-      checkKeyCombo(ev, keys.toggleBacklog) &&
+      (await checkKeyCombo(ev, keys.toggleBacklog)) &&
       this._workContextService.activeWorkContextType === WorkContextType.PROJECT
     ) {
       let backlogPos = 0;
@@ -124,19 +124,22 @@ export class ShortcutService {
       this._router.navigate(['/active/tasks'], {
         queryParams: { backlogPos },
       });
-    } else if (checkKeyCombo(ev, keys.goToFocusMode) && this.isFocusModeEnabled()) {
+    } else if (
+      (await checkKeyCombo(ev, keys.goToFocusMode)) &&
+      this.isFocusModeEnabled()
+    ) {
       this._store.dispatch(showFocusOverlay());
-    } else if (checkKeyCombo(ev, keys.goToWorkView)) {
+    } else if (await checkKeyCombo(ev, keys.goToWorkView)) {
       this._router.navigate(['/active/tasks']).then(() => {
         window.setTimeout(() => {
           this._taskService.focusFirstTaskIfVisible();
         });
       });
-    } else if (checkKeyCombo(ev, keys.goToTimeline)) {
+    } else if (await checkKeyCombo(ev, keys.goToTimeline)) {
       this._router.navigate(['/timeline']);
-    } else if (checkKeyCombo(ev, keys.goToSettings)) {
+    } else if (await checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/config']);
-    } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
+    } else if (await checkKeyCombo(ev, keys.goToScheduledView)) {
       this._router.navigate(['/schedule']);
 
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
@@ -144,21 +147,21 @@ export class ShortcutService {
       //
       // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       //   this._router.navigate(['/focus-view']);
-    } else if (checkKeyCombo(ev, keys.showSearchBar)) {
+    } else if (await checkKeyCombo(ev, keys.showSearchBar)) {
       this._router.navigate(['/search']);
       ev.preventDefault();
-    } else if (checkKeyCombo(ev, keys.focusSideNav)) {
+    } else if (await checkKeyCombo(ev, keys.focusSideNav)) {
       this._focusSideNav();
       ev.preventDefault();
-    } else if (checkKeyCombo(ev, keys.addNewTask)) {
+    } else if (await checkKeyCombo(ev, keys.addNewTask)) {
       this._layoutService.showAddTaskBar();
       ev.preventDefault();
-    } else if (checkKeyCombo(ev, keys.addNewProject)) {
+    } else if (await checkKeyCombo(ev, keys.addNewProject)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogCreateProjectComponent, { restoreFocus: true });
         ev.preventDefault();
       }
-    } else if (checkKeyCombo(ev, keys.addNewNote)) {
+    } else if (await checkKeyCombo(ev, keys.addNewNote)) {
       if (this._matDialog.openDialogs.length === 0) {
         this._matDialog.open(DialogAddNoteComponent, {
           minWidth: '100vw',
@@ -167,22 +170,22 @@ export class ShortcutService {
         });
         ev.preventDefault();
       }
-    } else if (checkKeyCombo(ev, keys.openProjectNotes)) {
+    } else if (await checkKeyCombo(ev, keys.openProjectNotes)) {
       ev.preventDefault();
       this._layoutService.toggleNotes();
-    } else if (checkKeyCombo(ev, keys.toggleTaskViewCustomizerPanel)) {
+    } else if (await checkKeyCombo(ev, keys.toggleTaskViewCustomizerPanel)) {
       ev.preventDefault();
       this._layoutService.toggleTaskViewCustomizerPanel();
-    } else if (checkKeyCombo(ev, keys.toggleIssuePanel)) {
+    } else if (await checkKeyCombo(ev, keys.toggleIssuePanel)) {
       ev.preventDefault();
       this._layoutService.toggleAddTaskPanel();
-    } else if (checkKeyCombo(ev, keys.triggerSync)) {
+    } else if (await checkKeyCombo(ev, keys.triggerSync)) {
       ev.preventDefault();
       if (await this._syncWrapperService.isEnabledAndReady$.pipe(first()).toPromise()) {
         this._syncWrapperService.sync();
       }
     } else if (
-      checkKeyCombo(ev, 'Ctrl+Shift+*') &&
+      (await checkKeyCombo(ev, 'Ctrl+Shift+*')) &&
       document.activeElement &&
       document.activeElement.getAttribute('routerlink') === '/procrastination'
     ) {
@@ -191,19 +194,19 @@ export class ShortcutService {
 
     // special hidden dev tools combo to use them for production
     if (IS_ELECTRON) {
-      if (checkKeyCombo(ev, 'Ctrl+Shift+J')) {
+      if (await checkKeyCombo(ev, 'Ctrl+Shift+J')) {
         window.ea.openDevTools();
-      } else if (checkKeyCombo(ev, keys.zoomIn)) {
+      } else if (await checkKeyCombo(ev, keys.zoomIn)) {
         this._uiHelperService.zoomBy(0.05);
-      } else if (checkKeyCombo(ev, keys.zoomOut)) {
+      } else if (await checkKeyCombo(ev, keys.zoomOut)) {
         this._uiHelperService.zoomBy(-0.05);
-      } else if (checkKeyCombo(ev, keys.zoomDefault)) {
+      } else if (await checkKeyCombo(ev, keys.zoomDefault)) {
         this._uiHelperService.zoomTo(1);
       }
     }
 
     // Handle task-specific shortcuts
-    if (this._taskShortcutService.handleTaskShortcuts(ev)) {
+    if (await this._taskShortcutService.handleTaskShortcuts(ev)) {
       return;
     }
 
@@ -212,7 +215,7 @@ export class ShortcutService {
     for (const shortcut of pluginShortcuts) {
       const shortcutKey = `plugin_${shortcut.pluginId}:${shortcut.id}`;
       const shortcutKeyCombo = (keys as any)[shortcutKey];
-      if (shortcutKeyCombo && checkKeyCombo(ev, shortcutKeyCombo)) {
+      if (shortcutKeyCombo && (await checkKeyCombo(ev, shortcutKeyCombo))) {
         ev.preventDefault();
         this._pluginBridgeService.executeShortcut(`${shortcut.pluginId}:${shortcut.id}`);
         return;
