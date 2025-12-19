@@ -371,6 +371,28 @@ export class OperationCaptureService {
   }
 
   /**
+   * Captures TASK time sync changes from syncTimeSpent action payload.
+   * The local reducer is a no-op (state already updated by addTimeSpent ticks),
+   * so we capture from the action payload instead of state diffing.
+   */
+  private _captureTaskTimeSyncFromAction(action: PersistentAction): EntityChange[] {
+    const { taskId, date, duration } = action as unknown as {
+      taskId: string;
+      date: string;
+      duration: number;
+    };
+
+    return [
+      {
+        entityType: 'TASK',
+        entityId: taskId,
+        opType: OpType.Update,
+        changes: { taskId, date, duration },
+      },
+    ];
+  }
+
+  /**
    * Computes a shallow diff between two objects, returning only changed fields.
    * Returns null if objects are identical.
    */
