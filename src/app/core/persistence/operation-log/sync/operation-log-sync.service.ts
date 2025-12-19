@@ -1551,33 +1551,4 @@ export class OperationLogSyncService {
       );
     }
   }
-
-  /**
-   * Extracts the millisecond timestamp from a UUIDv7.
-   * UUIDv7 format: first 48 bits are the millisecond timestamp.
-   * The UUID format is: XXXXXXXX-XXXX-7XXX-XXXX-XXXXXXXXXXXX
-   * where the first 12 hex chars (48 bits) represent the timestamp.
-   *
-   * @throws Error if the UUID format is invalid
-   */
-  private _extractTimestampFromUuidv7(uuid: string): number {
-    if (!uuid || typeof uuid !== 'string') {
-      throw new Error(`Invalid UUID: expected string, got ${typeof uuid}`);
-    }
-
-    // UUIDv7 should be 36 chars with hyphens (8-4-4-4-12)
-    if (uuid.length !== 36) {
-      throw new Error(`Invalid UUID length: expected 36, got ${uuid.length}`);
-    }
-
-    // Remove hyphens and take first 12 hex chars (48 bits = timestamp)
-    const hex = uuid.replace(/-/g, '').substring(0, 12);
-
-    // Validate that we have 12 valid hex chars
-    if (!/^[0-9a-f]{12}$/i.test(hex)) {
-      throw new Error(`Invalid UUID format: timestamp portion not valid hex`);
-    }
-
-    return parseInt(hex, 16);
-  }
 }

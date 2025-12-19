@@ -173,6 +173,18 @@ export class OperationCaptureService {
       return this._captureTimeTrackingFromAction(action);
     }
 
+    // TASK time sync (syncTimeSpent): Use action-payload capture.
+    // The reducer is a no-op locally (state already updated by addTimeSpent ticks),
+    // so state diff would be empty. Check payload shape (same check as validation uses).
+    if (
+      action.meta.entityType === 'TASK' &&
+      'taskId' in action &&
+      'date' in action &&
+      'duration' in action
+    ) {
+      return this._captureTaskTimeSyncFromAction(action);
+    }
+
     const changes: EntityChange[] = [];
 
     // Check all mapped entity types, but only diff those that actually changed
@@ -392,22 +404,55 @@ export class OperationCaptureService {
   }
 
   /**
-   * Deep equality check for values.
+   * Maximum depth for _isEqual recursion to prevent stack overflow on deeply nested structures.
    */
-  private _isEqual(a: unknown, b: unknown): boolean {
+  private readonly MAX_EQUAL_DEPTH = 50;
+
+  /**
+   * Deep equality check for values with circular reference and depth protection.
+   *
+   * @param a First value to compare
+   * @param b Second value to compare
+   * @param seen WeakSet to track visited objects (circular reference protection)
+   * @param depth Current recursion depth (deep nesting protection)
+   */
+  private _isEqual(
+    a: unknown,
+    b: unknown,
+    seen: WeakSet<object> = new WeakSet(),
+    depth: number = 0,
+  ): boolean {
+    // Depth limit protection
+    if (depth > this.MAX_EQUAL_DEPTH) {
+      OpLog.warn('OperationCaptureService: _isEqual exceeded max depth, returning false');
+      return false;
+    }
+
     if (a === b) return true;
     if (a === null || b === null) return a === b;
     if (typeof a !== typeof b) return false;
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) return false;
-      for (let i = 0; i < a.length; i++) {
-        if (!this._isEqual(a[i], b[i])) return false;
-      }
-      return true;
-    }
-
+    // For objects/arrays, check for circular references
     if (typeof a === 'object' && typeof b === 'object') {
+      if (seen.has(a as object) || seen.has(b as object)) {
+        OpLog.warn(
+          'OperationCaptureService: _isEqual detected circular reference, returning false',
+        );
+        return false;
+      }
+      seen.add(a as object);
+      seen.add(b as object);
+
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        for (let i = 0; i < a.length; i++) {
+          if (!this._isEqual(a[i], b[i], seen, depth + 1)) return false;
+        }
+        return true;
+      }
+
+      if (Array.isArray(a) !== Array.isArray(b)) return false;
+
       const aObj = a as Record<string, unknown>;
       const bObj = b as Record<string, unknown>;
       const aKeys = Object.keys(aObj);
@@ -416,7 +461,7 @@ export class OperationCaptureService {
       if (aKeys.length !== bKeys.length) return false;
 
       for (const key of aKeys) {
-        if (!this._isEqual(aObj[key], bObj[key])) return false;
+        if (!this._isEqual(aObj[key], bObj[key], seen, depth + 1)) return false;
       }
       return true;
     }

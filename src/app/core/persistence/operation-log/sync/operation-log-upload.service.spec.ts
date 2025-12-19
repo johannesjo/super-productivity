@@ -878,4 +878,147 @@ describe('OperationLogUploadService', () => {
       });
     });
   });
+
+  describe('_isNetworkError', () => {
+    // Access private method for testing
+    const isNetworkError = (error: string | undefined): boolean =>
+      (service as any)._isNetworkError(error);
+
+    describe('should return true for transient network errors', () => {
+      it('failed to fetch', () => {
+        expect(isNetworkError('Failed to fetch')).toBe(true);
+        expect(isNetworkError('failed to fetch resources')).toBe(true);
+      });
+
+      it('timeout errors', () => {
+        expect(isNetworkError('Request timeout')).toBe(true);
+        expect(isNetworkError('Timeout exceeded')).toBe(true);
+        // Note: "timed out" doesn't match - only the word "timeout" matches
+      });
+
+      it('network error keywords', () => {
+        expect(isNetworkError('Network error occurred')).toBe(true);
+        expect(isNetworkError('network request failed')).toBe(true);
+        expect(isNetworkError('Network failure')).toBe(true);
+      });
+
+      it('connection errors', () => {
+        expect(isNetworkError('ECONNREFUSED')).toBe(true);
+        expect(isNetworkError('ENOTFOUND')).toBe(true);
+        expect(isNetworkError('Connection refused by server')).toBe(true);
+        expect(isNetworkError('Connection reset by peer')).toBe(true);
+        expect(isNetworkError('Connection closed unexpectedly')).toBe(true);
+      });
+
+      it('socket errors', () => {
+        expect(isNetworkError('Socket hang up')).toBe(true);
+        expect(isNetworkError('socket closed')).toBe(true);
+      });
+
+      it('CORS errors', () => {
+        expect(isNetworkError('CORS policy blocked')).toBe(true);
+        // Note: "cross-origin" doesn't match - only the word "cors" matches
+      });
+
+      it('offline status', () => {
+        expect(isNetworkError('Client is offline')).toBe(true);
+        expect(isNetworkError('Device offline')).toBe(true);
+      });
+
+      it('aborted requests', () => {
+        expect(isNetworkError('Request aborted')).toBe(true);
+        expect(isNetworkError('Fetch aborted by user')).toBe(true);
+      });
+
+      it('server transient errors', () => {
+        expect(isNetworkError('Server busy, please retry')).toBe(true);
+        expect(isNetworkError('Please retry later')).toBe(true);
+        expect(isNetworkError('Transaction rolled back')).toBe(true);
+        expect(isNetworkError('Internal server error')).toBe(true);
+      });
+
+      it('HTTP 5xx status codes', () => {
+        expect(isNetworkError('HTTP 500 Internal Server Error')).toBe(true);
+        expect(isNetworkError('Error 502 Bad Gateway')).toBe(true);
+        expect(isNetworkError('503 Service Unavailable')).toBe(true);
+        expect(isNetworkError('504 Gateway Timeout')).toBe(true);
+        expect(isNetworkError('Service unavailable')).toBe(true);
+        expect(isNetworkError('Gateway timeout')).toBe(true);
+      });
+
+      it('Chrome net:: errors', () => {
+        expect(isNetworkError('net::ERR_INTERNET_DISCONNECTED')).toBe(true);
+        expect(isNetworkError('net::ERR_CONNECTION_REFUSED')).toBe(true);
+      });
+    });
+
+    describe('should return false for permanent errors', () => {
+      it('undefined or empty error', () => {
+        expect(isNetworkError(undefined)).toBe(false);
+        expect(isNetworkError('')).toBe(false);
+      });
+
+      it('validation errors', () => {
+        expect(isNetworkError('Invalid payload: missing required field')).toBe(false);
+        expect(isNetworkError('Schema validation failed')).toBe(false);
+        expect(isNetworkError('Duplicate operation ID')).toBe(false);
+      });
+
+      it('conflict errors', () => {
+        expect(isNetworkError('Conflict: operation already exists')).toBe(false);
+        expect(isNetworkError('Version conflict detected')).toBe(false);
+      });
+
+      it('authentication errors', () => {
+        expect(isNetworkError('Unauthorized: invalid token')).toBe(false);
+        expect(isNetworkError('Authentication failed')).toBe(false);
+        expect(isNetworkError('Access denied')).toBe(false);
+      });
+
+      it('HTTP 4xx status codes', () => {
+        expect(isNetworkError('400 Bad Request')).toBe(false);
+        expect(isNetworkError('401 Unauthorized')).toBe(false);
+        expect(isNetworkError('403 Forbidden')).toBe(false);
+        expect(isNetworkError('404 Not Found')).toBe(false);
+      });
+
+      it('generic errors without network keywords', () => {
+        expect(isNetworkError('Unknown error')).toBe(false);
+        expect(isNetworkError('Something went wrong')).toBe(false);
+        expect(isNetworkError('Operation failed')).toBe(false);
+      });
+    });
+
+    describe('edge cases', () => {
+      it('case insensitive matching', () => {
+        expect(isNetworkError('TIMEOUT')).toBe(true);
+        expect(isNetworkError('Network ERROR')).toBe(true);
+        expect(isNetworkError('FAILED TO FETCH')).toBe(true);
+      });
+    });
+  });
+
+  describe('_opTypeToSnapshotReason', () => {
+    // Access private method for testing
+    const opTypeToSnapshotReason = (opType: OpType): string =>
+      (service as any)._opTypeToSnapshotReason(opType);
+
+    it('should map SyncImport to initial', () => {
+      expect(opTypeToSnapshotReason(OpType.SyncImport)).toBe('initial');
+    });
+
+    it('should map BackupImport to recovery', () => {
+      expect(opTypeToSnapshotReason(OpType.BackupImport)).toBe('recovery');
+    });
+
+    it('should map Repair to recovery', () => {
+      expect(opTypeToSnapshotReason(OpType.Repair)).toBe('recovery');
+    });
+
+    it('should map unknown types to recovery (default)', () => {
+      expect(opTypeToSnapshotReason(OpType.Update)).toBe('recovery');
+      expect(opTypeToSnapshotReason(OpType.Create)).toBe('recovery');
+      expect(opTypeToSnapshotReason(OpType.Delete)).toBe('recovery');
+    });
+  });
 });

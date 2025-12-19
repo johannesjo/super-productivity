@@ -1294,4 +1294,136 @@ describe('OperationCaptureService', () => {
       expect(hasQueueWarning).toBe(true);
     });
   });
+
+  describe('_isEqual with circular reference and depth protection', () => {
+    // Access private method for testing
+    const isEqual = (a: unknown, b: unknown): boolean => (service as any)._isEqual(a, b);
+
+    describe('basic equality', () => {
+      it('should return true for identical primitives', () => {
+        expect(isEqual(1, 1)).toBe(true);
+        expect(isEqual('a', 'a')).toBe(true);
+        expect(isEqual(true, true)).toBe(true);
+        expect(isEqual(null, null)).toBe(true);
+      });
+
+      it('should return false for different primitives', () => {
+        expect(isEqual(1, 2)).toBe(false);
+        expect(isEqual('a', 'b')).toBe(false);
+        expect(isEqual(true, false)).toBe(false);
+        expect(isEqual(1, '1')).toBe(false);
+      });
+
+      it('should return true for identical objects', () => {
+        expect(isEqual({ a: 1 }, { a: 1 })).toBe(true);
+        expect(isEqual({ a: { b: 2 } }, { a: { b: 2 } })).toBe(true);
+      });
+
+      it('should return false for different objects', () => {
+        expect(isEqual({ a: 1 }, { a: 2 })).toBe(false);
+        expect(isEqual({ a: 1 }, { b: 1 })).toBe(false);
+        expect(isEqual({ a: 1 }, { a: 1, b: 2 })).toBe(false);
+      });
+
+      it('should return true for identical arrays', () => {
+        expect(isEqual([1, 2, 3], [1, 2, 3])).toBe(true);
+        expect(isEqual([{ a: 1 }], [{ a: 1 }])).toBe(true);
+      });
+
+      it('should return false for different arrays', () => {
+        expect(isEqual([1, 2], [1, 2, 3])).toBe(false);
+        expect(isEqual([1, 2], [2, 1])).toBe(false);
+      });
+    });
+
+    describe('circular reference protection', () => {
+      it('should handle circular reference in objects', () => {
+        const obj1: Record<string, unknown> = { a: 1 };
+        obj1['self'] = obj1;
+
+        const obj2: Record<string, unknown> = { a: 1 };
+        obj2['self'] = obj2;
+
+        const warnSpy = spyOn(console, 'warn');
+
+        // Should return false and not stack overflow
+        const result = isEqual(obj1, obj2);
+        expect(result).toBe(false);
+
+        // Should have logged a warning
+        const warnCalls = warnSpy.calls.allArgs();
+        const hasCircularWarning = warnCalls.some((args) =>
+          args.some(
+            (arg) => typeof arg === 'string' && arg.includes('circular reference'),
+          ),
+        );
+        expect(hasCircularWarning).toBe(true);
+      });
+
+      it('should handle circular reference in arrays', () => {
+        const arr1: unknown[] = [1, 2];
+        arr1.push(arr1);
+
+        const arr2: unknown[] = [1, 2];
+        arr2.push(arr2);
+
+        const warnSpy = spyOn(console, 'warn');
+
+        // Should return false and not stack overflow
+        const result = isEqual(arr1, arr2);
+        expect(result).toBe(false);
+
+        // Should have logged a warning
+        const warnCalls = warnSpy.calls.allArgs();
+        const hasCircularWarning = warnCalls.some((args) =>
+          args.some(
+            (arg) => typeof arg === 'string' && arg.includes('circular reference'),
+          ),
+        );
+        expect(hasCircularWarning).toBe(true);
+      });
+    });
+
+    describe('depth protection', () => {
+      it('should handle deeply nested structures up to MAX_EQUAL_DEPTH', () => {
+        // Create deeply nested structure (within limit)
+        let obj1: Record<string, unknown> = { value: 'bottom' };
+        let obj2: Record<string, unknown> = { value: 'bottom' };
+
+        for (let i = 0; i < 40; i++) {
+          obj1 = { nested: obj1 };
+          obj2 = { nested: obj2 };
+        }
+
+        // Should work correctly for normal depth
+        expect(isEqual(obj1, obj2)).toBe(true);
+      });
+
+      it('should return false and log warning when exceeding max depth', () => {
+        // Create extremely deeply nested structure (exceeds limit)
+        let obj1: Record<string, unknown> = { value: 'bottom' };
+        let obj2: Record<string, unknown> = { value: 'bottom' };
+
+        for (let i = 0; i < 60; i++) {
+          obj1 = { nested: obj1 };
+          obj2 = { nested: obj2 };
+        }
+
+        const warnSpy = spyOn(console, 'warn');
+
+        // Should return false when exceeding depth
+        const result = isEqual(obj1, obj2);
+        expect(result).toBe(false);
+
+        // Should have logged a warning
+        const warnCalls = warnSpy.calls.allArgs();
+        const hasDepthWarning = warnCalls.some((args) =>
+          args.some(
+            (arg) => typeof arg === 'string' && arg.includes('exceeded max depth'),
+          ),
+        );
+        expect(hasDepthWarning).toBe(true);
+      });
+    });
+  });
 });
