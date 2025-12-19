@@ -10,6 +10,8 @@ import com.superproductivity.superproductivity.App
 import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.service.FocusModeForegroundService
+import com.superproductivity.superproductivity.service.ReminderNotificationHelper
 import com.superproductivity.superproductivity.service.TrackingForegroundService
 
 
@@ -108,6 +110,75 @@ class JavaScriptInterface(
         }
     }
 
+    @Suppress("unused")
+    @JavascriptInterface
+    fun startFocusModeService(
+        title: String,
+        durationMs: Long,
+        remainingMs: Long,
+        isBreak: Boolean,
+        isPaused: Boolean,
+        taskTitle: String?
+    ) {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_START
+            putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
+            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+            putExtra(FocusModeForegroundService.EXTRA_DURATION_MS, durationMs)
+            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+            putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
+            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+        }
+        ContextCompat.startForegroundService(activity, intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun stopFocusModeService() {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_STOP
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun updateFocusModeService(remainingMs: Long, isPaused: Boolean, taskTitle: String?) {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_UPDATE
+            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun scheduleNativeReminder(
+        notificationId: Int,
+        reminderId: String,
+        relatedId: String,
+        title: String,
+        reminderType: String,
+        triggerAtMs: Long
+    ) {
+        ReminderNotificationHelper.scheduleReminder(
+            activity,
+            notificationId,
+            reminderId,
+            relatedId,
+            title,
+            reminderType,
+            triggerAtMs
+        )
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun cancelNativeReminder(notificationId: Int) {
+        ReminderNotificationHelper.cancelReminder(activity, notificationId)
+    }
 
     fun callJavaScriptFunction(script: String) {
         webView.post { webView.evaluateJavascript(script) { } }

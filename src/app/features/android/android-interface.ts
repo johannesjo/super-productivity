@@ -43,6 +43,33 @@ export interface AndroidInterface {
   stopTrackingService?(): void;
   getTrackingElapsed?(): string;
 
+  // Foreground service methods for focus mode timer
+  startFocusModeService?(
+    title: string,
+    durationMs: number,
+    remainingMs: number,
+    isBreak: boolean,
+    isPaused: boolean,
+    taskTitle: string | null,
+  ): void;
+  stopFocusModeService?(): void;
+  updateFocusModeService?(
+    remainingMs: number,
+    isPaused: boolean,
+    taskTitle: string | null,
+  ): void;
+
+  // Native reminder scheduling (snooze handled entirely in background)
+  scheduleNativeReminder?(
+    notificationId: number,
+    reminderId: string,
+    relatedId: string,
+    title: string,
+    reminderType: string,
+    triggerAtMs: number,
+  ): void;
+  cancelNativeReminder?(notificationId: number): void;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
@@ -58,6 +85,12 @@ export interface AndroidInterface {
   // Notification action callbacks
   onPauseTracking$: Subject<void>;
   onMarkTaskDone$: Subject<void>;
+
+  // Focus mode notification action callbacks
+  onFocusPause$: Subject<void>;
+  onFocusResume$: Subject<void>;
+  onFocusSkip$: Subject<void>;
+  onFocusComplete$: Subject<void>;
 }
 
 // setInterval(() => {
@@ -75,6 +108,10 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseTracking$ = new Subject();
   androidInterface.onMarkTaskDone$ = new Subject();
+  androidInterface.onFocusPause$ = new Subject();
+  androidInterface.onFocusResume$ = new Subject();
+  androidInterface.onFocusSkip$ = new Subject();
+  androidInterface.onFocusComplete$ = new Subject();
   androidInterface.onShareWithAttachment$ = new ReplaySubject(1);
   androidInterface.isKeyboardShown$ = new BehaviorSubject(false);
 
