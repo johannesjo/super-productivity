@@ -322,8 +322,11 @@ describe('FileImexComponent', () => {
       await component['_processAndImportData'](validData);
 
       expect(mockRouter.navigate).toHaveBeenCalledWith([`tag/${TODAY_TAG.id}/tasks`]);
+      // importCompleteBackup is called with (data, isBackup=false, isForceConflict=true)
       expect(mockPfapiService.importCompleteBackup).toHaveBeenCalledWith(
         jasmine.any(Object),
+        false,
+        true,
       );
     });
 
