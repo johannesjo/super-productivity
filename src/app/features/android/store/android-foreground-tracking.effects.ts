@@ -4,6 +4,7 @@ import { Store } from '@ngrx/store';
 import {
   distinctUntilChanged,
   filter,
+  map,
   pairwise,
   startWith,
   tap,
@@ -16,6 +17,8 @@ import { selectCurrentTask } from '../../tasks/store/task.selectors';
 import { DroidLog } from '../../../core/log';
 import { DateService } from '../../../core/date/date.service';
 import { Task } from '../../tasks/task.model';
+import { selectTimer } from '../../focus-mode/store/focus-mode.selectors';
+import { combineLatest } from 'rxjs';
 
 @Injectable()
 export class AndroidForegroundTrackingEffects {
@@ -26,19 +29,48 @@ export class AndroidForegroundTrackingEffects {
   /**
    * Start/stop the native foreground service when the current task changes.
    * Also handles syncing time when switching tasks directly.
+   * NOTE: When focus mode is active, we hide the tracking notification
+   * to avoid showing two notifications (focus mode notification takes priority).
    */
   syncTrackingToService$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
       () =>
-        this._store.select(selectCurrentTask).pipe(
-          distinctUntilChanged((a, b) => a?.id === b?.id),
-          startWith(null as Task | null),
+        combineLatest([
+          this._store.select(selectCurrentTask),
+          this._store.select(selectTimer),
+        ]).pipe(
+          map(([currentTask, timer]) => ({
+            currentTask,
+            isFocusModeActive: timer.purpose !== null,
+          })),
+          distinctUntilChanged(
+            (a, b) =>
+              a.currentTask?.id === b.currentTask?.id &&
+              a.isFocusModeActive === b.isFocusModeActive,
+          ),
+          startWith({ currentTask: null as Task | null, isFocusModeActive: false }),
           pairwise(),
-          tap(([prevTask, currentTask]) => {
+          tap(([prev, curr]) => {
+            const { currentTask, isFocusModeActive } = curr;
+            const prevTask = prev.currentTask;
+            const wasFocusModeActive = prev.isFocusModeActive;
+
             // If switching from one task to another (or stopping), sync the previous task's time first
-            if (prevTask) {
+            // Also sync when focus mode just started (to capture time tracked before focus mode)
+            const focusModeJustStarted = isFocusModeActive && !wasFocusModeActive;
+            if (prevTask && (!wasFocusModeActive || focusModeJustStarted)) {
               this._syncElapsedTimeForTask(prevTask.id);
+            }
+
+            // Don't show tracking notification when focus mode is active
+            // (focus mode notification takes priority)
+            if (isFocusModeActive) {
+              DroidLog.log(
+                'Focus mode active, stopping tracking service to avoid duplicate notification',
+              );
+              androidInterface.stopTrackingService?.();
+              return;
             }
 
             if (currentTask) {

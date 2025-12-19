@@ -87,5 +87,25 @@
         android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
         android:value="time_tracking" />
     </service>
+
+    <service
+      android:name=".service.FocusModeForegroundService"
+      android:enabled="true"
+      android:exported="false"
+      android:foregroundServiceType="specialUse">
+      <property
+        android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+        android:value="focus_timer" />
+    </service>
+
+    <receiver
+      android:name=".receiver.ReminderAlarmReceiver"
+      android:enabled="true"
+      android:exported="false" />
+
+    <receiver
+      android:name=".receiver.ReminderActionReceiver"
+      android:enabled="true"
+      android:exported="false" />
   </application>
 </manifest>

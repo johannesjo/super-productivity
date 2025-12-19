@@ -63,6 +63,7 @@ import { workContextReducer } from '../features/work-context/store/work-context.
 import { WorkContextEffects } from '../features/work-context/store/work-context.effects';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { AndroidEffects } from '../features/android/store/android.effects';
+import { AndroidFocusModeEffects } from '../features/android/store/android-focus-mode.effects';
 import { AndroidForegroundTrackingEffects } from '../features/android/store/android-foreground-tracking.effects';
 import { CaldavIssueEffects } from '../features/issue/providers/caldav/caldav-issue.effects';
 import { CalendarIntegrationEffects } from '../features/calendar-integration/store/calendar-integration.effects';
@@ -153,7 +154,9 @@ import { PluginHooksEffects } from '../plugins/plugin-hooks.effects';
 
     // EFFECTS ONLY
     EffectsModule.forFeature([
-      ...(IS_ANDROID_WEB_VIEW ? [AndroidEffects, AndroidForegroundTrackingEffects] : []),
+      ...(IS_ANDROID_WEB_VIEW
+        ? [AndroidEffects, AndroidFocusModeEffects, AndroidForegroundTrackingEffects]
+        : []),
     ]),
     EffectsModule.forFeature([CaldavIssueEffects]),
     EffectsModule.forFeature([CalendarIntegrationEffects]),

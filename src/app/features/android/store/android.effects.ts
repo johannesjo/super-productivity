@@ -6,7 +6,6 @@ import { ReminderService } from '../../reminder/reminder.service';
 import { LocalNotifications } from '@capacitor/local-notifications';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { LocalNotificationSchema } from '@capacitor/local-notifications/dist/esm/definitions';
 import { DroidLog } from '../../../core/log';
 import { generateNotificationId } from '../android-notification-id.util';
 import { androidInterface } from '../android-interface';
@@ -55,6 +54,8 @@ export class AndroidEffects {
       },
     );
 
+  // Use native reminder scheduling with BroadcastReceiver for actions
+  // This allows snooze/done to work without opening the app
   scheduleNotifications$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
@@ -64,19 +65,17 @@ export class AndroidEffects {
           tap(async (reminders) => {
             try {
               if (!reminders || reminders.length === 0) {
-                // Nothing to schedule yet, so avoid triggering the runtime permission dialog prematurely.
                 return;
               }
-              DroidLog.log('AndroidEffects: scheduling reminders', {
+              DroidLog.log('AndroidEffects: scheduling reminders natively', {
                 reminderCount: reminders.length,
               });
+
+              // Check permissions first
               const checkResult = await LocalNotifications.checkPermissions();
-              DroidLog.log('AndroidEffects: pre-schedule permission check', checkResult);
               let displayPermissionGranted = checkResult.display === 'granted';
               if (!displayPermissionGranted) {
-                // Reminder scheduling only works after the runtime permission is accepted.
                 const requestResult = await LocalNotifications.requestPermissions();
-                DroidLog.log({ requestResult });
                 displayPermissionGranted = requestResult.display === 'granted';
                 if (!displayPermissionGranted) {
                   this._notifyPermissionIssue();
@@ -84,42 +83,25 @@ export class AndroidEffects {
                 }
               }
               await this._ensureExactAlarmAccess();
-              const pendingNotifications = await LocalNotifications.getPending();
-              DroidLog.log({ pendingNotifications });
-              if (pendingNotifications.notifications.length > 0) {
-                await LocalNotifications.cancel({
-                  notifications: pendingNotifications.notifications.map((n) => ({
-                    id: n.id,
-                  })),
-                });
+
+              // Schedule each reminder using native Android AlarmManager
+              for (const reminder of reminders) {
+                const id = generateNotificationId(reminder.relatedId);
+                const now = Date.now();
+                const scheduleAt =
+                  reminder.remindAt <= now ? now + 1000 : reminder.remindAt;
+
+                androidInterface.scheduleNativeReminder?.(
+                  id,
+                  reminder.id,
+                  reminder.relatedId,
+                  reminder.title,
+                  reminder.type,
+                  scheduleAt,
+                );
               }
-              // Re-schedule the full set so the native alarm manager is always in sync.
-              await LocalNotifications.schedule({
-                notifications: reminders.map((reminder) => {
-                  // Use deterministic ID based on reminder's relatedId to prevent duplicate notifications
-                  const id = generateNotificationId(reminder.relatedId);
-                  const now = Date.now();
-                  const scheduleAt =
-                    reminder.remindAt <= now ? now + 1000 : reminder.remindAt; // push overdue reminders into the immediate future
-                  const mapped: LocalNotificationSchema = {
-                    id,
-                    title: reminder.title,
-                    body: '',
-                    extra: {
-                      reminder,
-                    },
-                    schedule: {
-                      // eslint-disable-next-line no-mixed-operators
-                      at: new Date(scheduleAt),
-                      allowWhileIdle: true,
-                      repeats: false,
-                      every: undefined,
-                    },
-                  };
-                  return mapped;
-                }),
-              });
-              DroidLog.log('AndroidEffects: scheduled local notifications', {
+
+              DroidLog.log('AndroidEffects: scheduled native reminders', {
                 reminderCount: reminders.length,
               });
             } catch (error) {
