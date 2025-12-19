@@ -38,6 +38,11 @@ export interface AndroidInterface {
 
   triggerGetShareData?(): void;
 
+  // Foreground service methods for background time tracking
+  startTrackingService?(taskId: string, taskTitle: string, timeSpentMs: number): void;
+  stopTrackingService?(): void;
+  getTrackingElapsed?(): string;
+
   // added here only
   onResume$: Subject<void>;
   onPause$: Subject<void>;
@@ -50,9 +55,9 @@ export interface AndroidInterface {
     path: string;
   }>;
 
-  // onPauseCurrentTask$: Subject<void>;
-  // onMarkCurrentTaskAsDone$: Subject<void>;
-  // onAddNewTask$: Subject<void>;
+  // Notification action callbacks
+  onPauseTracking$: Subject<void>;
+  onMarkTaskDone$: Subject<void>;
 }
 
 // setInterval(() => {
@@ -68,9 +73,8 @@ if (IS_ANDROID_WEB_VIEW) {
 
   androidInterface.onResume$ = new Subject();
   androidInterface.onPause$ = new Subject();
-  // androidInterface.onPauseCurrentTask$ = new Subject();
-  // androidInterface.onMarkCurrentTaskAsDone$ = new Subject();
-  // androidInterface.onAddNewTask$ = new Subject();
+  androidInterface.onPauseTracking$ = new Subject();
+  androidInterface.onMarkTaskDone$ = new Subject();
   androidInterface.onShareWithAttachment$ = new ReplaySubject(1);
   androidInterface.isKeyboardShown$ = new BehaviorSubject(false);
 
