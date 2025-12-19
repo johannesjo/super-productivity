@@ -43,6 +43,18 @@ echo ""
 
 cd "$SERVER_DIR"
 
+# Load GHCR credentials from .env (for private images)
+if [ -f ".env" ]; then
+    export $(grep -E '^(GHCR_USER|GHCR_TOKEN)=' ".env" 2>/dev/null | xargs)
+fi
+
+# Login to GHCR if credentials provided
+if [ -n "$GHCR_TOKEN" ] && [ -n "$GHCR_USER" ]; then
+    echo "==> Logging in to GHCR..."
+    echo "$GHCR_TOKEN" | docker login ghcr.io -u "$GHCR_USER" --password-stdin
+    echo ""
+fi
+
 # Check if monitoring compose exists and include it
 COMPOSE_FILES="-f docker-compose.yml"
 if [ -f "docker-compose.monitoring.yml" ]; then

@@ -3,6 +3,7 @@ import * as os from 'os';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as readline from 'readline';
+import { execSync } from 'child_process';
 
 const LOG_FILE_PATH = path.join(process.cwd(), 'logs', 'app.log');
 
@@ -41,9 +42,50 @@ const showStats = async () => {
       SELECT pg_size_pretty(pg_database_size(current_database())) as size;
     `;
     console.log(`DB Size: ${dbSizeResult[0]?.size}`);
+
+    // Get table sizes
+    const tableSizes: any[] = await prisma.$queryRaw`
+      SELECT
+        relname as table,
+        pg_size_pretty(pg_total_relation_size(relid)) as size
+      FROM pg_catalog.pg_statio_user_tables
+      ORDER BY pg_total_relation_size(relid) DESC
+      LIMIT 5;
+    `;
+    if (tableSizes.length > 0) {
+      console.log('\nTop tables by size:');
+      tableSizes.forEach((t) => console.log(`  ${t.table}: ${t.size}`));
+    }
   } catch (error) {
     console.log('Status: Disconnected ❌');
     console.error('Error:', error);
+  }
+
+  // Disk space
+  console.log('\n--- Disk Space ---');
+  try {
+    const dfOutput = execSync('df -h / 2>/dev/null || echo "N/A"', { encoding: 'utf-8' });
+    const lines = dfOutput.trim().split('\n');
+    if (lines.length >= 2) {
+      const parts = lines[1].split(/\s+/);
+      if (parts.length >= 5) {
+        console.log(
+          `Root filesystem: ${parts[2]} used / ${parts[1]} total (${parts[4]} used)`,
+        );
+      }
+    }
+
+    // Data directory size
+    const dataDir = process.env.DATA_DIR || './data';
+    if (fs.existsSync(dataDir)) {
+      const duOutput = execSync(`du -sh "${dataDir}" 2>/dev/null || echo "N/A"`, {
+        encoding: 'utf-8',
+      });
+      const size = duOutput.split('\t')[0];
+      console.log(`Data directory: ${size}`);
+    }
+  } catch {
+    console.log('Could not determine disk space');
   }
 };
 
