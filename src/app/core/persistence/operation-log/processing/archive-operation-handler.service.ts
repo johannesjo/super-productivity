@@ -233,37 +233,78 @@ export class ArchiveOperationHandler {
     const timestamp = (action as ReturnType<typeof flushYoungToOld>).timestamp;
     const pfapi = this._getPfapiService();
 
-    const archiveYoung = await pfapi.m.archiveYoung.load();
-    const archiveOld = await pfapi.m.archiveOld.load();
+    // Load original state for potential rollback
+    const originalArchiveYoung = await pfapi.m.archiveYoung.load();
+    const originalArchiveOld = await pfapi.m.archiveOld.load();
 
     const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
-      archiveYoung,
-      archiveOld,
+      archiveYoung: originalArchiveYoung,
+      archiveOld: originalArchiveOld,
       threshold: ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD,
       now: timestamp,
     });
 
-    await pfapi.m.archiveYoung.save(
-      {
-        ...newSorted.archiveYoung,
-        lastTimeTrackingFlush: timestamp,
-      },
-      {
-        isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
-      },
-    );
+    try {
+      await pfapi.m.archiveYoung.save(
+        {
+          ...newSorted.archiveYoung,
+          lastTimeTrackingFlush: timestamp,
+        },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
+        },
+      );
 
-    await pfapi.m.archiveOld.save(
-      {
-        ...newSorted.archiveOld,
-        lastTimeTrackingFlush: timestamp,
-      },
-      {
-        isUpdateRevAndLastUpdate: true,
-        isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
-      },
-    );
+      await pfapi.m.archiveOld.save(
+        {
+          ...newSorted.archiveOld,
+          lastTimeTrackingFlush: timestamp,
+        },
+        {
+          isUpdateRevAndLastUpdate: true,
+          isIgnoreDBLock: true, // Remote ops: DB is locked during sync processing
+        },
+      );
+    } catch (e) {
+      // Attempt rollback: restore BOTH archiveYoung and archiveOld to original state
+      Log.err('Archive flush failed, attempting rollback...', e);
+      const rollbackErrors: Error[] = [];
+
+      // Rollback archiveYoung
+      try {
+        if (originalArchiveYoung) {
+          await pfapi.m.archiveYoung.save(originalArchiveYoung, {
+            isUpdateRevAndLastUpdate: true,
+            isIgnoreDBLock: true,
+          });
+        }
+      } catch (rollbackErr) {
+        rollbackErrors.push(rollbackErr as Error);
+      }
+
+      // Rollback archiveOld
+      try {
+        if (originalArchiveOld) {
+          await pfapi.m.archiveOld.save(originalArchiveOld, {
+            isUpdateRevAndLastUpdate: true,
+            isIgnoreDBLock: true,
+          });
+        }
+      } catch (rollbackErr) {
+        rollbackErrors.push(rollbackErr as Error);
+      }
+
+      if (rollbackErrors.length > 0) {
+        Log.err(
+          'Archive flush rollback FAILED - archive may be inconsistent',
+          rollbackErrors,
+        );
+      } else {
+        Log.log('Archive flush rollback successful');
+      }
+      throw e; // Re-throw original error
+    }
 
     Log.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',

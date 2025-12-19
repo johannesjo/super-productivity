@@ -381,8 +381,20 @@ export class OperationLogSyncService {
                   forceDownloadResult.allOpClocks,
                 );
               } else {
-                // No extra clocks from force download, resolve with what we have
-                mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
+                // Force download returned no clocks but we have concurrent ops.
+                // This is an unrecoverable edge case - cannot safely resolve without server clocks.
+                // Mark ops as rejected to prevent infinite retry loop.
+                OpLog.err(
+                  `OperationLogSyncService: Force download returned no clocks. ` +
+                    `Cannot safely resolve ${stillPendingOps.length} concurrent ops. Marking as rejected.`,
+                );
+                for (const { opId } of stillPendingOps) {
+                  await this.opLogStore.markRejected([opId]);
+                }
+                this.snackService.open({
+                  type: 'ERROR',
+                  msg: T.F.SYNC.S.CONFLICT_RESOLUTION_FAILED,
+                });
               }
             }
           } else {
@@ -1358,18 +1370,21 @@ export class OperationLogSyncService {
 
   /**
    * Adjusts comparison result for potential per-entity clock corruption.
-   * Converts LESS_THAN to CONCURRENT if corruption is suspected.
+   * Converts LESS_THAN or GREATER_THAN to CONCURRENT if corruption is suspected.
    *
-   * ## Known Limitation
-   * This only handles LESS_THAN corruption (where local ops would be incorrectly
-   * skipped). GREATER_THAN corruption (where remote ops would be skipped) is NOT
-   * handled because:
-   * 1. It's extremely rare (requires specific corruption pattern)
-   * 2. Local pending ops will eventually sync on next sync cycle
-   * 3. Adding complexity for this edge case isn't worth the risk of introducing bugs
+   * ## Corruption Detection
+   * Potential corruption is detected when:
+   * - Entity has pending local ops (we made changes)
+   * - But has no snapshot clock AND empty local frontier
+   * - This suggests the clock data was lost/corrupted
    *
-   * If you encounter data loss from GREATER_THAN corruption, a full re-sync
-   * (clear local data and download from server) will restore consistency.
+   * ## Safety Behavior
+   * When corruption is suspected:
+   * - LESS_THAN → CONCURRENT: Prevents incorrectly skipping local ops
+   * - GREATER_THAN → CONCURRENT: Prevents incorrectly skipping remote ops
+   *
+   * Converting to CONCURRENT forces conflict resolution, which is safer than
+   * silently skipping either local or remote operations.
    */
   private _adjustForClockCorruption(
     comparison: VectorClockComparison,
@@ -1390,6 +1405,15 @@ export class OperationLogSyncService {
       );
       return VectorClockComparison.CONCURRENT;
     }
+
+    if (potentialCorruption && comparison === VectorClockComparison.GREATER_THAN) {
+      OpLog.warn(
+        `OperationLogSyncService: Converting GREATER_THAN to CONCURRENT for entity ${entityKey} due to potential clock corruption. ` +
+          `Remote op will be processed via conflict resolution instead of being skipped.`,
+      );
+      return VectorClockComparison.CONCURRENT;
+    }
+
     return comparison;
   }
 

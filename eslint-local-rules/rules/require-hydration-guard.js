@@ -151,31 +151,52 @@ module.exports = {
     };
 
     /**
-     * Check if a selector is used as a secondary source (e.g., in withLatestFrom, combineLatest).
+     * Check if a selector is used as a secondary source (e.g., in withLatestFrom, combineLatestWith).
      * These selectors don't drive the observable - they're just providing supplemental data.
+     *
+     * IMPORTANT: This distinguishes between:
+     * - `combineLatest([sel1, sel2]).pipe(...)` at root level → selectors ARE primary (not secondary)
+     * - `actions$.pipe(combineLatestWith(sel))` → selector IS secondary
+     * - `actions$.pipe(withLatestFrom(sel))` → selector IS secondary
      */
     const isSecondarySource = (selectorNode) => {
       let current = selectorNode.parent;
+      let passedFunctionBoundary = false;
 
       while (current) {
+        // Track if we've passed a function boundary (indicating we're inside an operator callback)
+        if (
+          current.type === 'ArrowFunctionExpression' ||
+          current.type === 'FunctionExpression'
+        ) {
+          passedFunctionBoundary = true;
+        }
+
         if (current.type === 'CallExpression') {
           const callee = current.callee;
           if (callee.type === 'Identifier') {
             const opName = callee.name;
-            // Operators where selectors are secondary sources
-            if (
-              [
-                'withLatestFrom',
-                'combineLatest',
-                'combineLatestWith',
-                'forkJoin',
-                'zip',
-                'zipWith',
-              ].includes(opName)
-            ) {
-              // Check if the selector is in the arguments of this operator
+
+            // withLatestFrom is ALWAYS secondary (only used inside pipe chains)
+            if (opName === 'withLatestFrom') {
               if (current.arguments.some((arg) => containsNode(arg, selectorNode))) {
                 return true;
+              }
+            }
+
+            // combineLatestWith, zipWith are ALWAYS secondary (only used inside pipe chains)
+            if (['combineLatestWith', 'zipWith'].includes(opName)) {
+              if (current.arguments.some((arg) => containsNode(arg, selectorNode))) {
+                return true;
+              }
+            }
+
+            // combineLatest, forkJoin, zip at ROOT level (not inside a function) → NOT secondary
+            // But if inside a function (like switchMap callback) → IS secondary
+            if (['combineLatest', 'forkJoin', 'zip'].includes(opName)) {
+              if (current.arguments.some((arg) => containsNode(arg, selectorNode))) {
+                // Only secondary if we're inside an operator callback
+                return passedFunctionBoundary;
               }
             }
           }
@@ -295,6 +316,13 @@ module.exports = {
 
       if (node.type === 'ReturnStatement') {
         findPrimarySelectorCalls(node.argument, effectFnNode, results);
+      }
+
+      // Handle ArrayExpression (e.g., combineLatest([sel1, sel2]))
+      if (node.type === 'ArrayExpression') {
+        for (const element of node.elements || []) {
+          findPrimarySelectorCalls(element, effectFnNode, results);
+        }
       }
 
       return results;

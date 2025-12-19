@@ -36,6 +36,25 @@ describe('SimpleCounterService', () => {
     ...partial,
   });
 
+  /**
+   * Helper to mock counters for both selectAllSimpleCounters and selectSimpleCounterById.
+   * Since the service now uses selectSimpleCounterById (O(1) lookup), we need to mock both.
+   */
+  const mockCounters = (counters: SimpleCounter[]): void => {
+    store.overrideSelector(selectAllSimpleCounters, counters);
+    // For selectSimpleCounterById, we override the base state since it uses props
+    const entities: Record<string, SimpleCounter> = {};
+    for (const counter of counters) {
+      entities[counter.id] = counter;
+    }
+    store.setState({
+      simpleCounter: {
+        ids: counters.map((c) => c.id),
+        entities,
+      },
+    });
+  };
+
   beforeEach(() => {
     TestBed.configureTestingModule({
       providers: [
@@ -60,10 +79,11 @@ describe('SimpleCounterService', () => {
     service = TestBed.inject(SimpleCounterService);
     dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
 
-    // Mock the selector to return counters
-    store.overrideSelector(selectAllSimpleCounters, [
+    // Mock the counters with CURRENT state (BEFORE increment)
+    // New behavior: we read state first, calculate new value, then dispatch both actions
+    mockCounters([
       createCounter('counter1', {
-        countOnDay: { '2024-01-15': 6 },
+        countOnDay: { '2024-01-15': 5 },
       }),
     ]);
   });
@@ -92,6 +112,7 @@ describe('SimpleCounterService', () => {
 
       // Should dispatch both the increment action AND the sync action
       expect(dispatchSpy.calls.count()).toBe(2);
+      // New behavior: reads state (5) BEFORE dispatch, calculates newVal = 5 + 1 = 6
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
@@ -104,10 +125,11 @@ describe('SimpleCounterService', () => {
 
   describe('decreaseCounterToday', () => {
     beforeEach(() => {
-      // Mock the selector to return the counter after decrement
-      store.overrideSelector(selectAllSimpleCounters, [
+      // Mock the counters BEFORE decrement
+      // New behavior: reads state first, calculates new value, then dispatches
+      mockCounters([
         createCounter('counter1', {
-          countOnDay: { '2024-01-15': 4 },
+          countOnDay: { '2024-01-15': 5 },
         }),
       ]);
     });
@@ -131,6 +153,7 @@ describe('SimpleCounterService', () => {
 
       // Should dispatch both the decrement action AND the sync action
       expect(dispatchSpy.calls.count()).toBe(2);
+      // New behavior: reads state (5) BEFORE dispatch, calculates newVal = 5 - 1 = 4
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
@@ -215,7 +238,7 @@ describe('SimpleCounterService', () => {
 
   describe('deleteSimpleCounters', () => {
     beforeEach(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      mockCounters([
         createCounter('counter1', { countOnDay: { '2024-01-15': 6 } }),
         createCounter('counter2', { countOnDay: { '2024-01-15': 3 } }),
       ]);
@@ -262,7 +285,7 @@ describe('SimpleCounterService', () => {
 
   describe('stopwatch sync with absolute values', () => {
     beforeEach(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      mockCounters([
         createCounter('stopwatch1', {
           type: SimpleCounterType.StopWatch,
           countOnDay: { '2024-01-15': 20000 }, // 20 seconds
@@ -282,7 +305,7 @@ describe('SimpleCounterService', () => {
     it('should use setSimpleCounterCounterToday for stopwatch sync (not relative duration)', fakeAsync(() => {
       // Verify the sync uses absolute values by checking the action type
       // When stopwatch syncs, it should dispatch setSimpleCounterCounterToday with absolute value
-      store.overrideSelector(selectAllSimpleCounters, [
+      mockCounters([
         createCounter('stopwatch1', {
           type: SimpleCounterType.StopWatch,
           countOnDay: { '2024-01-15': 20000 },
@@ -298,15 +321,17 @@ describe('SimpleCounterService', () => {
 
   describe('click counter immediate sync - edge cases', () => {
     it('should sync with correct absolute value when counter starts from 0', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      // BEFORE increment: counter is at 0
+      mockCounters([
         createCounter('counter1', {
-          countOnDay: { '2024-01-15': 1 }, // After increment from 0
+          countOnDay: { '2024-01-15': 0 },
         }),
       ]);
 
       service.increaseCounterToday('counter1', 1);
       tick();
 
+      // New behavior: reads state (0) BEFORE dispatch, calculates newVal = 0 + 1 = 1
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
@@ -317,15 +342,17 @@ describe('SimpleCounterService', () => {
     }));
 
     it('should sync with 0 when decrementing to 0', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      // BEFORE decrement: counter is at 1
+      mockCounters([
         createCounter('counter1', {
-          countOnDay: { '2024-01-15': 0 }, // After decrement to 0
+          countOnDay: { '2024-01-15': 1 },
         }),
       ]);
 
       service.decreaseCounterToday('counter1', 1);
       tick();
 
+      // New behavior: reads state (1) BEFORE dispatch, calculates newVal = max(0, 1 - 1) = 0
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
@@ -336,7 +363,8 @@ describe('SimpleCounterService', () => {
     }));
 
     it('should handle multiple counters independently', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      // BEFORE increment: counters at 10 and 20
+      mockCounters([
         createCounter('counter1', { countOnDay: { '2024-01-15': 10 } }),
         createCounter('counter2', { countOnDay: { '2024-01-15': 20 } }),
       ]);
@@ -344,11 +372,11 @@ describe('SimpleCounterService', () => {
       service.increaseCounterToday('counter1', 1);
       tick();
 
-      // Should sync counter1 with its absolute value
+      // Should sync counter1: reads 10, calculates 10 + 1 = 11
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
-          newVal: 10,
+          newVal: 11,
           today: '2024-01-15',
         }),
       );
@@ -357,20 +385,21 @@ describe('SimpleCounterService', () => {
       service.increaseCounterToday('counter2', 1);
       tick();
 
-      // Should sync counter2 with its absolute value
+      // Should sync counter2: reads 20, calculates 20 + 1 = 21
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter2',
-          newVal: 20,
+          newVal: 21,
           today: '2024-01-15',
         }),
       );
     }));
 
     it('should handle increment by values greater than 1', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      // BEFORE increment: counter is at 10
+      mockCounters([
         createCounter('counter1', {
-          countOnDay: { '2024-01-15': 15 }, // After increment by 5
+          countOnDay: { '2024-01-15': 10 },
         }),
       ]);
 
@@ -385,6 +414,7 @@ describe('SimpleCounterService', () => {
         }),
       );
 
+      // New behavior: reads state (10) BEFORE dispatch, calculates newVal = 10 + 5 = 15
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
@@ -394,32 +424,20 @@ describe('SimpleCounterService', () => {
       );
     }));
 
-    it('should not dispatch sync if counter not found', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, []);
+    it('should not dispatch anything if counter not found', fakeAsync(() => {
+      mockCounters([]);
 
       service.increaseCounterToday('nonexistent', 1);
       tick();
 
-      // Should dispatch the increment action
-      expect(dispatchSpy).toHaveBeenCalledWith(
-        increaseSimpleCounterCounterToday({
-          id: 'nonexistent',
-          increaseBy: 1,
-          today: '2024-01-15',
-        }),
-      );
-
-      // Should NOT dispatch sync since counter not found
-      const syncCalls = dispatchSpy.calls
-        .allArgs()
-        .filter(
-          (args) => args[0].type === '[SimpleCounter] Set SimpleCounter Counter Today',
-        );
-      expect(syncCalls.length).toBe(0);
+      // New behavior: reads state first, counter not found, returns early
+      // Should NOT dispatch ANY actions since counter not found
+      expect(dispatchSpy.calls.count()).toBe(0);
     }));
 
     it('should handle missing countOnDay for today', fakeAsync(() => {
-      store.overrideSelector(selectAllSimpleCounters, [
+      // BEFORE increment: counter has no entry for today (defaults to 0)
+      mockCounters([
         createCounter('counter1', {
           countOnDay: { '2024-01-14': 5 }, // Yesterday, not today
         }),
@@ -428,11 +446,11 @@ describe('SimpleCounterService', () => {
       service.increaseCounterToday('counter1', 1);
       tick();
 
-      // Should sync with 0 since today's count is missing
+      // New behavior: reads state, today's count is 0 (undefined), calculates 0 + 1 = 1
       expect(dispatchSpy).toHaveBeenCalledWith(
         setSimpleCounterCounterToday({
           id: 'counter1',
-          newVal: 0,
+          newVal: 1,
           today: '2024-01-15',
         }),
       );

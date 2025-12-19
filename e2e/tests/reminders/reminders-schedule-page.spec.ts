@@ -2,7 +2,6 @@ import type { Locator, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/test.fixture';
 
 const TASK = 'task';
-const TASK_SCHEDULE_BTN = '.ico-btn.schedule-btn';
 const SCHEDULE_DIALOG = 'dialog-schedule-task';
 const SCHEDULE_DIALOG_TIME_INPUT = 'dialog-schedule-task input[type="time"]';
 const SCHEDULE_DIALOG_CONFIRM = 'mat-dialog-actions button:last-child';
@@ -94,10 +93,9 @@ test.describe('Reminders Schedule Page', () => {
     // Open detail panel to access schedule action
     await scheduleTaskViaDetailPanel(page, targetTask, scheduleTime);
 
-    // Wait for schedule indicator to appear on the task
-    await targetTask
-      .locator(TASK_SCHEDULE_BTN)
-      .waitFor({ state: 'visible', timeout: 10000 });
+    // Note: After scheduling with time, task may disappear from Today view
+    // because scheduleTaskWithTime sets dueDay: undefined.
+    // We skip checking for schedule button visibility and go directly to scheduled list.
 
     // Navigate to scheduled page
     try {
@@ -139,10 +137,9 @@ test.describe('Reminders Schedule Page', () => {
 
       await scheduleTaskViaDetailPanel(page, task, scheduleTime);
 
-      await task
-        .locator(TASK_SCHEDULE_BTN)
-        .first()
-        .waitFor({ state: 'visible', timeout: 10000 });
+      // Note: After scheduling with time, task may disappear from Today view
+      // because scheduleTaskWithTime sets dueDay: undefined.
+      // We skip checking for schedule button visibility.
     };
 
     // Add and schedule first task
@@ -177,13 +174,9 @@ test.describe('Reminders Schedule Page', () => {
 
     await scheduleTask(title2, scheduleTime2);
 
-    // Verify both tasks have schedule indicators
-    // Use first() to avoid multiple element issues if there are duplicates
-    const task1 = page.locator(TASK).filter({ hasText: title1 }).first();
-    const task2 = page.locator(TASK).filter({ hasText: title2 }).first();
-
-    await expect(task1.locator(TASK_SCHEDULE_BTN).first()).toBeVisible();
-    await expect(task2.locator(TASK_SCHEDULE_BTN).first()).toBeVisible();
+    // Note: After scheduling with time, tasks disappear from Today view
+    // (scheduleTaskWithTime sets dueDay: undefined).
+    // We verify tasks in the scheduled list instead.
 
     // Navigate to scheduled page
     try {

@@ -418,13 +418,22 @@ export class OperationLogStoreService {
     const tx = this.db.transaction('ops', 'readwrite');
     const store = tx.objectStore('ops');
     let cursor = await store.openCursor();
+    let deletedCount = 0;
     while (cursor) {
       if (predicate(cursor.value)) {
         await cursor.delete();
+        deletedCount++;
       }
       cursor = await cursor.continue();
     }
     await tx.done;
+
+    // Invalidate caches if any ops were deleted to prevent stale data
+    if (deletedCount > 0) {
+      this._appliedOpIdsCache = null;
+      this._cacheLastSeq = 0;
+      this._invalidateUnsyncedCache();
+    }
   }
 
   async getLastSeq(): Promise<number> {

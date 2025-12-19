@@ -5,6 +5,7 @@ import {
   selectEnabledAndToggledSimpleCounters,
   selectEnabledSimpleCounters,
   selectEnabledSimpleStopWatchCounters,
+  selectSimpleCounterById,
 } from './store/simple-counter.reducer';
 import {
   addSimpleCounter,
@@ -180,18 +181,19 @@ export class SimpleCounterService implements OnDestroy {
    * This ensures remote clients get the correct value regardless of their current state.
    */
   private _syncStopwatchAbsoluteValue(id: string, date: string): void {
-    // Read current state synchronously via firstValueFrom
-    firstValueFrom(this._store$.pipe(select(selectAllSimpleCounters))).then(
-      (counters) => {
-        const counter = counters.find((c) => c.id === id);
+    // Read current state via selectSimpleCounterById (O(1) lookup)
+    firstValueFrom(this._store$.pipe(select(selectSimpleCounterById, { id })))
+      .then((counter) => {
         if (counter) {
           const newVal = counter.countOnDay[date] || 0;
           this._store$.dispatch(
             setSimpleCounterCounterToday({ id, newVal, today: date }),
           );
         }
-      },
-    );
+      })
+      .catch((error) => {
+        console.error('[SimpleCounterService] Error syncing stopwatch value:', error);
+      });
   }
 
   updateAll(items: SimpleCounter[]): void {
@@ -207,36 +209,64 @@ export class SimpleCounterService implements OnDestroy {
     this._store$.dispatch(setSimpleCounterCounterForDate({ id, newVal, date }));
   }
 
-  async increaseCounterToday(id: string, increaseBy: number): Promise<void> {
-    const today = this._dateService.todayStr();
-    // Local UI update (non-persistent)
-    this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
-
-    // Immediately sync with absolute value (persistent)
-    const counters = await firstValueFrom(
-      this._store$.pipe(select(selectAllSimpleCounters)),
+  /**
+   * Get current counter value for today using O(1) selector lookup.
+   * Returns null if counter doesn't exist.
+   */
+  private async _getCounterValue(id: string, today: string): Promise<number | null> {
+    const counter = await firstValueFrom(
+      this._store$.pipe(select(selectSimpleCounterById, { id })),
     );
-    const counter = counters.find((c) => c.id === id);
-    if (counter) {
-      const newVal = counter.countOnDay[today] || 0;
-      this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-    }
+    if (!counter) return null;
+    return counter.countOnDay[today] || 0;
   }
 
+  /**
+   * Increase counter and sync with absolute value.
+   *
+   * Uses two-phase approach to ensure correct sync:
+   * 1. Read current value FIRST to calculate correct new value
+   * 2. Dispatch local update for immediate UI feedback (non-persistent)
+   * 3. Dispatch sync action with calculated absolute value (persistent)
+   *
+   * This prevents race conditions where NgRx hasn't processed the local update
+   * before we read the state for syncing.
+   */
+  async increaseCounterToday(id: string, increaseBy: number): Promise<void> {
+    const today = this._dateService.todayStr();
+    const currentVal = await this._getCounterValue(id, today);
+    if (currentVal === null) return;
+
+    const newVal = currentVal + increaseBy;
+
+    // Local UI update (non-persistent)
+    this._store$.dispatch(increaseSimpleCounterCounterToday({ id, increaseBy, today }));
+    // Sync with calculated absolute value (persistent)
+    this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
+  }
+
+  /**
+   * Decrease counter and sync with absolute value.
+   *
+   * Uses two-phase approach to ensure correct sync:
+   * 1. Read current value FIRST to calculate correct new value
+   * 2. Dispatch local update for immediate UI feedback (non-persistent)
+   * 3. Dispatch sync action with calculated absolute value (persistent)
+   *
+   * This prevents race conditions where NgRx hasn't processed the local update
+   * before we read the state for syncing.
+   */
   async decreaseCounterToday(id: string, decreaseBy: number): Promise<void> {
     const today = this._dateService.todayStr();
+    const currentVal = await this._getCounterValue(id, today);
+    if (currentVal === null) return;
+
+    const newVal = Math.max(0, currentVal - decreaseBy);
+
     // Local UI update (non-persistent)
     this._store$.dispatch(decreaseSimpleCounterCounterToday({ id, decreaseBy, today }));
-
-    // Immediately sync with absolute value (persistent)
-    const counters = await firstValueFrom(
-      this._store$.pipe(select(selectAllSimpleCounters)),
-    );
-    const counter = counters.find((c) => c.id === id);
-    if (counter) {
-      const newVal = counter.countOnDay[today] || 0;
-      this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
-    }
+    // Sync with calculated absolute value (persistent)
+    this._store$.dispatch(setSimpleCounterCounterToday({ id, newVal, today }));
   }
 
   toggleCounter(id: string): void {
