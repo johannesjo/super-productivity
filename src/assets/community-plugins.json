@@ -3,5 +3,10 @@
     "name": "Date Range Reporter Plugin",
     "shortDescription": "Generates reports of completed tasks and tasks with work logs within a specified date range.",
     "url": "https://github.com/dougcooper/sp-reporter"
+  },
+  {
+    "name": "Archived Tasks Viewer",
+    "shortDescription": "Read-only viewer to browse archived tasks with grouping, filtering, subtasks preview, and theme toggle.",
+    "url": "https://github.com/baiyina/Archived-Tasks-Viewer"
   }
 ]
