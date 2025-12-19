@@ -160,6 +160,38 @@ describe('validateOperationPayload', () => {
       expect(result.warnings?.length).toBeGreaterThan(0);
     });
 
+    it('should validate TASK UPDATE with syncTimeSpent shape (taskId, date, duration)', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-123',
+        payload: {
+          taskId: 'task-123',
+          date: '2024-01-15',
+          duration: 3600000,
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('should validate TASK UPDATE with syncTimeSpent shape with zero duration', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task-456',
+        payload: {
+          taskId: 'task-456',
+          date: '2024-12-25',
+          duration: 0,
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings).toBeUndefined();
+    });
+
     it('should validate TIME_TRACKING UPDATE with syncTimeTracking shape', () => {
       const op = createTestOperation({
         opType: OpType.Update,
