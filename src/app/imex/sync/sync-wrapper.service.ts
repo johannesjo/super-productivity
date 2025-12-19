@@ -242,6 +242,13 @@ export class SyncWrapperService {
         // Silently ignore concurrent sync attempts
         SyncLog.log('Sync already in progress, skipping concurrent sync attempt');
         return 'HANDLED_ERROR';
+      } else if (this._isPermissionError(error)) {
+        this._snackService.open({
+          msg: T.F.SYNC.S.ERROR_PERMISSION,
+          type: 'ERROR',
+          config: { duration: 12000 },
+        });
+        return 'HANDLED_ERROR';
       } else {
         const errStr = getSyncErrorStr(error);
         this._snackService.open({
@@ -374,6 +381,11 @@ export class SyncWrapperService {
 
   private _c(str: string): boolean {
     return confirm(this._translateService.instant(str));
+  }
+
+  private _isPermissionError(error: unknown): boolean {
+    const errStr = String(error);
+    return /EROFS|EACCES|EPERM|read-only file system|permission denied/i.test(errStr);
   }
 
   private lastConflictDialog?: MatDialogRef<any, any>;
