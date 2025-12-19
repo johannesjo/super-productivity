@@ -14,6 +14,7 @@ import * as selectors from './focus-mode.selectors';
 import { FocusModeMode, FocusScreen, TimerState } from '../focus-mode.model';
 import { unsetCurrentTask } from '../../tasks/store/task.actions';
 import { openIdleDialog } from '../../idle/store/idle.actions';
+import { selectTaskById } from '../../tasks/store/task.selectors';
 import {
   selectFocusModeConfig,
   selectPomodoroConfig,
@@ -1004,6 +1005,11 @@ describe('FocusModeEffects', () => {
         createMockTimer({ isRunning: true, purpose: 'work' }),
       );
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
+      // Mock that the task exists
+      store.overrideSelector(selectTaskById as any, {
+        id: 'task-123',
+        title: 'Test Task',
+      });
       currentTaskId$.next(null); // No current task
       store.refreshState();
 
@@ -1096,6 +1102,35 @@ describe('FocusModeEffects', () => {
         done();
       }, 50);
     });
+
+    it('should NOT dispatch setCurrentTask when task no longer exists', (done) => {
+      store.overrideSelector(selectFocusModeConfig, {
+        isAlwaysUseFocusMode: true,
+        isSkipPreparation: false,
+        isSyncSessionWithTracking: true,
+      });
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ isRunning: true, purpose: 'work' }),
+      );
+      store.overrideSelector(selectors.selectPausedTaskId, 'deleted-task-123');
+      // Mock that the task doesn't exist (use any cast for parameterized selector)
+      store.overrideSelector(selectTaskById as any, undefined as any);
+      currentTaskId$.next(null);
+      store.refreshState();
+
+      actions$ = of(actions.unPauseFocusSession());
+
+      let emitted = false;
+      effects.syncSessionResumeToTracking$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
   });
 
   describe('syncSessionStartToTracking$', () => {
@@ -1106,6 +1141,11 @@ describe('FocusModeEffects', () => {
         isSyncSessionWithTracking: true,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
+      // Mock that the task exists
+      store.overrideSelector(selectTaskById as any, {
+        id: 'task-123',
+        title: 'Test Task',
+      });
       currentTaskId$.next(null);
       store.refreshState();
 
@@ -1171,6 +1211,31 @@ describe('FocusModeEffects', () => {
         isSyncSessionWithTracking: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
+      currentTaskId$.next(null);
+      store.refreshState();
+
+      actions$ = of(actions.startFocusSession({ duration: 25 * 60 * 1000 }));
+
+      let emitted = false;
+      effects.syncSessionStartToTracking$.subscribe(() => {
+        emitted = true;
+      });
+
+      setTimeout(() => {
+        expect(emitted).toBe(false);
+        done();
+      }, 50);
+    });
+
+    it('should NOT dispatch setCurrentTask when task no longer exists', (done) => {
+      store.overrideSelector(selectFocusModeConfig, {
+        isAlwaysUseFocusMode: true,
+        isSkipPreparation: false,
+        isSyncSessionWithTracking: true,
+      });
+      store.overrideSelector(selectors.selectPausedTaskId, 'deleted-task-123');
+      // Mock that the task doesn't exist (use any cast for parameterized selector)
+      store.overrideSelector(selectTaskById as any, undefined as any);
       currentTaskId$.next(null);
       store.refreshState();
 
