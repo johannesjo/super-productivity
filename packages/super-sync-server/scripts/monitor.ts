@@ -6,8 +6,9 @@ import * as readline from 'readline';
 import { execSync } from 'child_process';
 
 const LOG_FILE_PATH = path.join(process.cwd(), 'logs', 'app.log');
+const USAGE_HISTORY_PATH = path.join(process.cwd(), 'logs', 'usage-history.jsonl');
 
-const formatBytes = (bytes: number, decimals = 2) => {
+const formatBytes = (bytes: number, decimals = 2): string => {
   if (bytes === 0) return '0 Bytes';
   const k = 1024;
   const dm = decimals < 0 ? 0 : decimals;
@@ -16,7 +17,7 @@ const formatBytes = (bytes: number, decimals = 2) => {
   return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
 };
 
-const showStats = async () => {
+const showStats = async (): Promise<void> => {
   console.log('\n--- System Vitals ---');
   console.log(`Hostname: ${os.hostname()}`);
   console.log(`OS: ${os.type()} ${os.release()} (${os.arch()})`);
@@ -89,7 +90,7 @@ const showStats = async () => {
   }
 };
 
-const showUsage = async () => {
+const showUsage = async (saveHistory = true): Promise<void> => {
   console.log('\n--- User Storage Usage (Top 20) ---');
   try {
     // Calculate size of operations and snapshot data per user
@@ -111,21 +112,94 @@ const showUsage = async () => {
 
     if (users.length === 0) {
       console.log('No users found.');
-    } else {
-      console.table(
-        users.map((u) => ({
-          ID: u.id,
-          Email: u.email,
-          Usage: formatBytes(Number(u.total_bytes)),
-        })),
-      );
+      return;
+    }
+
+    const usersData = users.map((u) => ({
+      id: u.id,
+      email: u.email,
+      bytes: Number(u.total_bytes),
+    }));
+
+    console.table(
+      usersData.map((u) => ({
+        ID: u.id,
+        Email: u.email,
+        Usage: formatBytes(u.bytes),
+      })),
+    );
+
+    const totalBytes = usersData.reduce((sum, u) => sum + u.bytes, 0);
+    console.log(`\nTotal: ${formatBytes(totalBytes)} across ${usersData.length} users`);
+
+    // Save snapshot to history
+    if (saveHistory) {
+      const snapshot = {
+        timestamp: new Date().toISOString(),
+        totalBytes,
+        userCount: usersData.length,
+        users: usersData,
+      };
+
+      const logsDir = path.dirname(USAGE_HISTORY_PATH);
+      if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
+      }
+      fs.appendFileSync(USAGE_HISTORY_PATH, JSON.stringify(snapshot) + '\n');
+      console.log(`\nSnapshot saved to ${USAGE_HISTORY_PATH}`);
     }
   } catch (error) {
     console.error('Error fetching usage data:', error);
   }
 };
 
-const showLogs = async (args: string[]) => {
+const showUsageHistory = async (args: string[]): Promise<void> => {
+  console.log('\n--- Usage History ---');
+
+  if (!fs.existsSync(USAGE_HISTORY_PATH)) {
+    console.log('No history yet. Run "usage" command to start tracking.');
+    return;
+  }
+
+  const tailIndex = args.indexOf('--tail');
+  const tailCount = tailIndex !== -1 ? parseInt(args[tailIndex + 1], 10) : 10;
+
+  const content = fs.readFileSync(USAGE_HISTORY_PATH, 'utf-8');
+  const lines = content.trim().split('\n').filter(Boolean);
+  const snapshots = lines.slice(-tailCount).map((line) => JSON.parse(line));
+
+  if (snapshots.length === 0) {
+    console.log('No snapshots found.');
+    return;
+  }
+
+  console.table(
+    snapshots.map((s: any) => ({
+      Date: new Date(s.timestamp).toLocaleString(),
+      Users: s.userCount,
+      Total: formatBytes(s.totalBytes),
+    })),
+  );
+
+  // Show growth if we have multiple snapshots
+  if (snapshots.length >= 2) {
+    const first = snapshots[0];
+    const last = snapshots[snapshots.length - 1];
+    const growth = last.totalBytes - first.totalBytes;
+    const days =
+      (new Date(last.timestamp).getTime() - new Date(first.timestamp).getTime()) /
+      (1000 * 60 * 60 * 24);
+
+    console.log(
+      `\nGrowth over ${days.toFixed(1)} days: ${growth >= 0 ? '+' : ''}${formatBytes(growth)}`,
+    );
+    if (days > 0) {
+      console.log(`Average: ${formatBytes(growth / days)}/day`);
+    }
+  }
+};
+
+const showLogs = async (args: string[]): Promise<void> => {
   console.log('\n--- Server Logs ---');
 
   if (!fs.existsSync(LOG_FILE_PATH)) {
@@ -174,7 +248,7 @@ const showLogs = async (args: string[]) => {
   lines.forEach((line) => console.log(line));
 };
 
-const main = async () => {
+const main = async (): Promise<void> => {
   const args = process.argv.slice(2);
   const command = args[0];
 
@@ -186,6 +260,9 @@ const main = async () => {
       case 'usage':
         await showUsage();
         break;
+      case 'usage-history':
+        await showUsageHistory(args);
+        break;
       case 'logs':
         await showLogs(args);
         break;
@@ -193,12 +270,14 @@ const main = async () => {
         console.log('SuperSync Monitor CLI');
         console.log('Usage: npm run monitor -- <command> [flags]');
         console.log('\nCommands:');
-        console.log('  stats       Show system vitals and DB status');
-        console.log('  usage       Show top 20 users by storage usage');
-        console.log('  logs        Show server logs');
-        console.log('    --tail <n>    Show last n lines (default 100)');
-        console.log('    --search "s"  Filter logs by term');
-        console.log('    --error       Show only errors');
+        console.log('  stats          Show system vitals and DB status');
+        console.log('  usage          Show top 20 users by storage (saves snapshot)');
+        console.log('  usage-history  Show usage over time');
+        console.log('    --tail <n>     Show last n snapshots (default 10)');
+        console.log('  logs           Show server logs');
+        console.log('    --tail <n>     Show last n lines (default 100)');
+        console.log('    --search "s"   Filter logs by term');
+        console.log('    --error        Show only errors');
         break;
     }
   } catch (err) {
