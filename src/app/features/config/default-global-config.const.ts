@@ -86,6 +86,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   focusMode: {
     isAlwaysUseFocusMode: false,
     isSkipPreparation: false,
+    isPlayTick: false,
   },
   pomodoro: {
     duration: 25 * minute,

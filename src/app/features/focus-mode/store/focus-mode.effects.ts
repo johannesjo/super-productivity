@@ -32,6 +32,7 @@ import { MetricService } from '../../metric/metric.service';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 
 const SESSION_DONE_SOUND = 'positive.ogg';
+const TICK_SOUND = 'tick.mp3';
 
 @Injectable()
 export class FocusModeEffects {
@@ -445,6 +446,30 @@ export class FocusModeEffects {
             }
           },
         ),
+      ),
+    { dispatch: false },
+  );
+
+  // Play ticking sound during focus sessions if enabled
+  playTickSound$ = createEffect(
+    () =>
+      this.store.select(selectors.selectTimer).pipe(
+        filter(
+          (timer) => timer.isRunning && timer.purpose === 'work' && timer.elapsed > 0,
+        ),
+        // Only emit when we cross a second boundary
+        distinctUntilChanged(
+          (prev, curr) =>
+            Math.floor(prev.elapsed / 1000) === Math.floor(curr.elapsed / 1000),
+        ),
+        withLatestFrom(this.store.select(selectFocusModeConfig)),
+        tap(([, focusModeConfig]) => {
+          const soundVolume = this.globalConfigService.sound()?.volume || 0;
+          if (focusModeConfig?.isPlayTick && soundVolume > 0) {
+            // Play at reduced volume (40% of main volume) to not be too intrusive
+            playSound(TICK_SOUND, Math.round(soundVolume * 0.4));
+          }
+        }),
       ),
     { dispatch: false },
   );

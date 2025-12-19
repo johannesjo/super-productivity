@@ -1751,7 +1751,8 @@
     "FOCUS_MODE": {
       "HELP": "Focus Mode opens up a distraction free screen to help you focus on your current task.",
       "L_ALWAYS_OPEN_FOCUS_MODE": "Always open focus mode, when tracking",
-      "L_SKIP_PREPARATION_SCREEN": "Skip preparation screen (stretching etc.)",
+      "L_IS_PLAY_TICK": "Play ticking sound during focus sessions",
+      "L_SKIP_PREPARATION_SCREEN": "Skip preparation screen (rocket animation)",
       "TITLE": "Focus Mode"
     },
     "IDLE": {
