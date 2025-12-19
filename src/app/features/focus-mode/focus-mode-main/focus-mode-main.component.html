@@ -55,6 +55,11 @@
   <!-- Task title -->
   <div class="task-section">
     @if (ct) {
+      @if (ct.parentId && parentTaskTitle()) {
+        <div class="parent-title">
+          <div class="title">{{ parentTaskTitle() }}</div>
+        </div>
+      }
       <task-title
         @fade
         (valueEdited)="updateTaskTitleIfChanged($event.wasChanged, $event.newVal)"
