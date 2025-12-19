@@ -182,7 +182,12 @@ export class FileImexComponent implements OnInit {
 
     try {
       // Import first, then navigate (no page reload, state updates inline)
-      await this._pfapiService.importCompleteBackup(data as AppDataCompleteNew);
+      // isForceConflict=true resets vector clock to prevent accumulation of old client IDs
+      await this._pfapiService.importCompleteBackup(
+        data as AppDataCompleteNew,
+        false,
+        true,
+      );
       await this._router.navigate([`tag/${TODAY_TAG.id}/tasks`]);
     } catch (e) {
       Log.err('Import process failed', e);

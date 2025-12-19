@@ -104,8 +104,11 @@ export class LocalBackupService {
 
   private async _importBackup(backupData: string): Promise<void> {
     try {
+      // isForceConflict=true resets vector clock to prevent accumulation of old client IDs
       await this._pfapiService.importCompleteBackup(
         JSON.parse(backupData) as AppDataCompleteNew,
+        false,
+        true,
       );
     } catch (e) {
       this._snackService.open({
