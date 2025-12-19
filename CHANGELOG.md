@@ -1,3 +1,28 @@
+# [16.7.0](https://github.com/johannesjo/super-productivity/compare/v16.6.1...v16.7.0) (2025-12-19)
+
+### Bug Fixes
+
+- **android:** make schedule dialog scrollable on small screens ([#5741](https://github.com/johannesjo/super-productivity/issues/5741)) ([b6a7660](https://github.com/johannesjo/super-productivity/commit/b6a7660645e0a91469b198ddd6a97ddd2b58b217))
+- **docker:** use Debian-based nginx for ARM64 QEMU compatibility ([5ca6434](https://github.com/johannesjo/super-productivity/commit/5ca64347eff2dd24a25d304c06e14b948f43ae93))
+- **electron:** use includes() instead of in operator for hostname check ([52fd0df](https://github.com/johannesjo/super-productivity/commit/52fd0dfc75b951ad93add7836900c64dc52c18e5))
+- **focus-mode:** add start button in banner after session completes ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([fa46aa5](https://github.com/johannesjo/super-productivity/commit/fa46aa5c364d325f18afc45b4e1ac92b90a49561))
+- **focus-mode:** fix pomodoro long break timing and add ticking sound option ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([88405ea](https://github.com/johannesjo/super-productivity/commit/88405eaecb4ffa36bba5da2fd64f3d38264a2eb8))
+- **focus-mode:** hide dismiss button in banner-only mode ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([4c38486](https://github.com/johannesjo/super-productivity/commit/4c38486eb62cb9f75bb6f54828002c32745f904d))
+- **focus-mode:** preserve existing notes when opening notes panel ([#5752](https://github.com/johannesjo/super-productivity/issues/5752)) ([2aebc2c](https://github.com/johannesjo/super-productivity/commit/2aebc2c21607eee6720cd48a34486259efd8a06a))
+- **focus-mode:** show start button when break time is up in banner mode ([97eb781](https://github.com/johannesjo/super-productivity/commit/97eb781c9c71996842ba0e9e772e365d41f4de23))
+- **i18n:** use correct variable in TASK_CREATED translation ([#5743](https://github.com/johannesjo/super-productivity/issues/5743)) ([68f3c6a](https://github.com/johannesjo/super-productivity/commit/68f3c6a5d9066e98e0068969b70c5ce85e02f6b7))
+- **repeat:** schedule tasks for correct day and remove from Today when needed ([#5594](https://github.com/johannesjo/super-productivity/issues/5594)) ([9e3159d](https://github.com/johannesjo/super-productivity/commit/9e3159dbb22d0d2ecc97a09b91a2fca417df3aa7))
+- **sync:** show user-friendly error for Flatpak/Snap permission issues ([495abcb](https://github.com/johannesjo/super-productivity/commit/495abcb4cf87d18d37f775ddbf2d122a60ef8acf)), closes [#4078](https://github.com/johannesjo/super-productivity/issues/4078)
+
+### Features
+
+- **android:** add background time tracking via foreground service ([ffa7122](https://github.com/johannesjo/super-productivity/commit/ffa7122aea96be5f69076d890efeee9f486d7ac4))
+- **android:** add better notifications and permanent notification for focus mode ([f7901ba](https://github.com/johannesjo/super-productivity/commit/f7901ba47f5bd6c27917917a1b9969ea87a94a27))
+- **focus-mode:** add icon buttons for banner and sync session with tracking ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([4f9c514](https://github.com/johannesjo/super-productivity/commit/4f9c5146e1480ab15c24533a2ba8c93dd45ed024))
+- **focus-mode:** add new settings and fix pomodoro dialog ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([7b099af](https://github.com/johannesjo/super-productivity/commit/7b099af796de85b8d1015d91aa91d364d75a9e98))
+- **focus-mode:** add task existence check before resuming tracking ([#5737](https://github.com/johannesjo/super-productivity/issues/5737)) ([7c21b3b](https://github.com/johannesjo/super-productivity/commit/7c21b3bf5cfce1b1f0d8cdcb572beb4f73761f80))
+- **focus-mode:** sync duration when Pomodoro settings change ([#5753](https://github.com/johannesjo/super-productivity/issues/5753)) ([2bcd4b9](https://github.com/johannesjo/super-productivity/commit/2bcd4b911f1d626c10c6fc3b752da4d2fbbcadbe))
+
 ## [16.6.1](https://github.com/johannesjo/super-productivity/compare/v16.6.0...v16.6.1) (2025-12-14)
 
 ### Bug Fixes
