@@ -4,6 +4,39 @@ import { isPersistentAction, PersistentAction } from '../persistent-action.inter
 import { OperationCaptureService } from './operation-capture.service';
 import { OpLog } from '../../../log';
 
+// ═══════════════════════════════════════════════════════════════════════════
+// ARCHITECTURAL DEBT: Module-Level State for Meta-Reducer Service Injection
+// ═══════════════════════════════════════════════════════════════════════════
+//
+// Meta-reducers in NgRx are pure functions that cannot use Angular's dependency
+// injection directly. To enable the capture service to be called from within
+// the meta-reducer, we use module-level mutable state.
+//
+// This pattern has tradeoffs:
+// PROS:
+// - Works with NgRx's pure function requirement
+// - Service is initialized once, used synchronously
+// - Simple to understand and debug
+//
+// CONS:
+// - Breaks pure function convention (hidden side effect)
+// - Requires explicit initialization in app bootstrap
+// - Test setup must call setOperationCaptureService()
+// - If actions dispatch before init, operations are lost (with warning logged)
+//
+// POTENTIAL REFACTORING APPROACHES:
+// 1. Use NgRx's META_REDUCERS token with a factory provider that creates a
+//    closure over the injected service. This would require structural changes
+//    to how metaReducers are registered in StoreModule.forRoot().
+// 2. Use Angular's APP_INITIALIZER to guarantee service is set before any
+//    actions dispatch (currently done, but coupling is implicit).
+// 3. Store before-state in action metadata instead of capturing in meta-reducer
+//    (would require changes to all persistent actions).
+//
+// Current implementation is stable and well-tested. Refactoring should be
+// considered only if significant architectural changes are planned.
+// ═══════════════════════════════════════════════════════════════════════════
+
 /**
  * Reference to the consolidated service needed by the meta-reducer.
  * Set during app initialization via `setOperationCaptureService()`.

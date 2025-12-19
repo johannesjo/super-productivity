@@ -159,6 +159,50 @@ describe('validateOperationPayload', () => {
       expect(result.success).toBe(true);
       expect(result.warnings?.length).toBeGreaterThan(0);
     });
+
+    it('should validate TIME_TRACKING UPDATE with syncTimeTracking shape', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TIME_TRACKING' as EntityType,
+        entityId: 'TAG:tag1:2024-01-01',
+        payload: {
+          contextType: 'TAG',
+          contextId: 'tag1',
+          date: '2024-01-01',
+          data: { timeSpentOnDay: 3600000 },
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('should validate TIME_TRACKING UPDATE with updateWorkContextData shape', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TIME_TRACKING' as EntityType,
+        entityId: 'PROJECT:proj1:2024-01-01',
+        payload: {
+          ctx: { id: 'proj1', type: 'PROJECT' },
+          date: '2024-01-01',
+          updates: { timeSpentOnDay: 7200000 },
+        },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings).toBeUndefined();
+    });
+
+    it('should allow TIME_TRACKING UPDATE with unusual shape but with warning', () => {
+      const op = createTestOperation({
+        opType: OpType.Update,
+        entityType: 'TIME_TRACKING' as EntityType,
+        payload: { unknownShape: 'value' },
+      });
+      const result = validateOperationPayload(op);
+      expect(result.success).toBe(true);
+      expect(result.warnings?.length).toBeGreaterThan(0);
+    });
   });
 
   describe('DELETE operation', () => {

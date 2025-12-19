@@ -22,7 +22,6 @@ import {
 } from './operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
-import { OpType } from './operation.types';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
 
 /**
@@ -85,8 +84,10 @@ export class OperationLogEffects {
       entityChanges,
     };
 
-    // Determine primary opType: if any entity was created/deleted, use that; otherwise Update
-    const derivedOpType = this.deriveOpType(entityChanges, action.meta.opType);
+    // Use the action's declared opType from meta. We don't derive from entity changes because
+    // some operations have different semantic meaning than their state changes suggest.
+    // E.g., moveToArchive is UPDATE (tasks moved, not deleted) but shows as DELETE in state.
+    const opType = action.meta.opType;
 
     try {
       await this.lockService.request('sp_op_log', async () => {
@@ -96,7 +97,7 @@ export class OperationLogEffects {
         const op: Operation = {
           id: uuidv7(),
           actionType: action.type,
-          opType: derivedOpType,
+          opType,
           entityType: action.meta.entityType,
           entityId: action.meta.entityId,
           entityIds: this.collectAllEntityIds(entityChanges, action.meta.entityIds),
@@ -239,44 +240,50 @@ export class OperationLogEffects {
   /**
    * Handles storage quota exceeded by triggering emergency compaction
    * and retrying the failed operation.
-   * Uses circuit breaker flag to prevent infinite recursion.
+   *
+   * Uses LockService for cross-tab coordination to ensure only one tab
+   * handles quota exceeded at a time. Uses instance flag to prevent
+   * recursive calls within the same tab.
    */
   private async handleQuotaExceeded(action: PersistentAction): Promise<void> {
     OpLog.err(
       'OperationLogEffects: Storage quota exceeded, attempting emergency compaction',
     );
 
-    const compactionSucceeded = await this.compactionService.emergencyCompact();
+    // Use lock for cross-tab coordination - only one tab handles quota at a time
+    await this.lockService.request('sp_quota_exceeded', async () => {
+      const compactionSucceeded = await this.compactionService.emergencyCompact();
 
-    if (compactionSucceeded) {
-      try {
-        // Set circuit breaker before retry to prevent recursive handling
-        this.isHandlingQuotaExceeded = true;
-        // Retry the failed operation after compaction freed space
-        await this.writeOperation(action);
-        this.snackService.open({
-          type: 'SUCCESS',
-          msg: T.F.SYNC.S.STORAGE_RECOVERED_AFTER_COMPACTION,
-        });
-        return;
-      } catch (retryErr) {
-        OpLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
-      } finally {
-        // Always clear circuit breaker
-        this.isHandlingQuotaExceeded = false;
+      if (compactionSucceeded) {
+        try {
+          // Set circuit breaker before retry to prevent recursive handling
+          this.isHandlingQuotaExceeded = true;
+          // Retry the failed operation after compaction freed space
+          await this.writeOperation(action);
+          this.snackService.open({
+            type: 'SUCCESS',
+            msg: T.F.SYNC.S.STORAGE_RECOVERED_AFTER_COMPACTION,
+          });
+          return;
+        } catch (retryErr) {
+          OpLog.err('OperationLogEffects: Retry after compaction also failed', retryErr);
+        } finally {
+          // Always clear circuit breaker
+          this.isHandlingQuotaExceeded = false;
+        }
+      } else {
+        OpLog.err('OperationLogEffects: Emergency compaction failed');
       }
-    } else {
-      OpLog.err('OperationLogEffects: Emergency compaction failed');
-    }
 
-    // Compaction failed or retry failed - show error with action
-    this.snackService.open({
-      type: 'ERROR',
-      msg: T.F.SYNC.S.STORAGE_QUOTA_EXCEEDED,
-      actionStr: T.PS.RELOAD,
-      actionFn: (): void => {
-        window.location.reload();
-      },
+      // Compaction failed or retry failed - show error with action
+      this.snackService.open({
+        type: 'ERROR',
+        msg: T.F.SYNC.S.STORAGE_QUOTA_EXCEEDED,
+        actionStr: T.PS.RELOAD,
+        actionFn: (): void => {
+          window.location.reload();
+        },
+      });
     });
   }
 
@@ -302,26 +309,6 @@ export class OperationLogEffects {
     } catch {
       // Silently ignore serialization errors - validation already passed
     }
-  }
-
-  /**
-   * Returns the opType for an operation.
-   *
-   * Uses the action's declared opType (from meta) rather than deriving from entity changes.
-   * This is important because some operations have different semantic meaning than their
-   * state changes suggest. For example:
-   * - `moveToArchive`: Declared as UPDATE (tasks are moved, not deleted from system)
-   *   but entity changes show DELETE (tasks removed from main state)
-   *
-   * The entity changes are still captured in the operation payload, so conflict
-   * resolution can still use them. But the opType should reflect the action's intent.
-   */
-  private deriveOpType(
-    _entityChanges: import('./operation.types').EntityChange[],
-    actionOpType: OpType,
-  ): OpType {
-    // Always use the action's declared opType
-    return actionOpType;
   }
 
   /**

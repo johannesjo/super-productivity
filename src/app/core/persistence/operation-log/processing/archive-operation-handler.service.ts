@@ -87,10 +87,25 @@ export const isArchiveAffectingAction = (action: Action): action is PersistentAc
   providedIn: 'root',
 })
 export class ArchiveOperationHandler {
-  // Use lazy injection to break circular dependency:
-  // DataInitService -> OperationLogHydratorService -> OperationApplierService
-  // -> ArchiveOperationHandler -> ArchiveService/TaskArchiveService -> PfapiService
-  // DataInitService also injects PfapiService directly, causing the cycle.
+  // ═══════════════════════════════════════════════════════════════════════════
+  // ARCHITECTURAL DEBT: Lazy Injection for Circular Dependencies
+  // ═══════════════════════════════════════════════════════════════════════════
+  //
+  // These services use lazyInject() to break circular dependency chains:
+  //   DataInitService -> OperationLogHydratorService -> OperationApplierService
+  //   -> ArchiveOperationHandler -> ArchiveService/TaskArchiveService -> PfapiService
+  //   DataInitService also injects PfapiService directly, causing the cycle.
+  //
+  // POTENTIAL REFACTORING APPROACHES:
+  // 1. Extract archive storage operations into a lower-level service that doesn't
+  //    depend on PfapiService directly, only on the database adapter
+  // 2. Create an event-based notification system where archive operations emit
+  //    events and a dedicated handler picks them up (decouples dependencies)
+  // 3. Move archive storage into NgRx state instead of IndexedDB (would require
+  //    significant architectural changes and increase memory usage)
+  //
+  // For now, lazyInject works correctly and the pattern is well-documented.
+  // ═══════════════════════════════════════════════════════════════════════════
   private _injector = inject(Injector);
   private _getArchiveService = lazyInject(this._injector, ArchiveService);
   private _getTaskArchiveService = lazyInject(this._injector, TaskArchiveService);

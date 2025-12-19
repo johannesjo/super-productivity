@@ -115,6 +115,20 @@ const validateUpdatePayload = (
   const p = payload as Record<string, unknown>;
   const warnings: string[] = [];
 
+  // TIME_TRACKING uses action-payload capture with specific shapes
+  // that don't match standard entity update patterns (see operation-capture.service.ts)
+  if (entityType === 'TIME_TRACKING') {
+    // syncTimeTracking shape: { contextType, contextId, date, data }
+    if ('contextType' in p && 'contextId' in p && 'date' in p && 'data' in p) {
+      return { success: true };
+    }
+    // updateWorkContextData shape: { ctx: { id, type }, date, updates }
+    if ('ctx' in p && 'date' in p && 'updates' in p) {
+      return { success: true };
+    }
+    // Fall through to standard validation if unknown TIME_TRACKING shape
+  }
+
   // Update payloads can have various shapes:
   // 1. { task: { id, changes } } or { project: { id, changes } }
   // 2. { id, changes }

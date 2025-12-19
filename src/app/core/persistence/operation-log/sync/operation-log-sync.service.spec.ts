@@ -209,7 +209,7 @@ describe('OperationLogSyncService', () => {
     expect(service).toBeTruthy();
   });
 
-  describe('processRemoteOps', () => {
+  describe('_processRemoteOps', () => {
     it('should call migrateOperation for each remote op', async () => {
       const remoteOps: Operation[] = [
         { id: 'op1', schemaVersion: 1 } as Operation,
@@ -223,7 +223,7 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
 
-      await service.processRemoteOps(remoteOps);
+      await (service as any)._processRemoteOps(remoteOps);
 
       expect(schemaMigrationServiceSpy.migrateOperation).toHaveBeenCalledTimes(2);
       expect(schemaMigrationServiceSpy.migrateOperation).toHaveBeenCalledWith(
@@ -260,12 +260,12 @@ describe('OperationLogSyncService', () => {
           await callback();
         },
       );
-      spyOn(service, 'detectConflicts').and.callFake(async () => {
+      spyOn(service as any, '_detectConflicts').and.callFake(async () => {
         callOrder.push('detectConflicts');
         return { nonConflicting: remoteOps, conflicts: [] };
       });
 
-      await service.processRemoteOps(remoteOps);
+      await (service as any)._processRemoteOps(remoteOps);
 
       // Verify lock was acquired
       expect(lockServiceSpy.request).toHaveBeenCalledWith(
@@ -296,7 +296,7 @@ describe('OperationLogSyncService', () => {
       opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
       opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
 
-      await service.processRemoteOps(remoteOps);
+      await (service as any)._processRemoteOps(remoteOps);
 
       // Only op1 should be applied
       expect(opLogStoreSpy.append).toHaveBeenCalledTimes(1);
@@ -310,7 +310,7 @@ describe('OperationLogSyncService', () => {
         { id: 'op1', schemaVersion: 1 + MAX_VERSION_SKIP + 1 } as Operation,
       ];
 
-      await service.processRemoteOps(remoteOps);
+      await (service as any)._processRemoteOps(remoteOps);
 
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
@@ -337,22 +337,19 @@ describe('OperationLogSyncService', () => {
       vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
       vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
 
-      // Mock detectConflicts to return non-conflicting
-      // We can't easily spy on the private/protected detectConflicts if it wasn't extracted,
-      // but we can verify what append is called with.
-      // Actually detectConflicts is public in the service!
-      spyOn(service, 'detectConflicts').and.callThrough();
+      // Spy on _detectConflicts to verify it's called with migrated ops
+      spyOn(service as any, '_detectConflicts').and.callThrough();
 
-      await service.processRemoteOps([remoteOp]);
+      await (service as any)._processRemoteOps([remoteOp]);
 
-      expect(service.detectConflicts).toHaveBeenCalledWith(
+      expect((service as any)._detectConflicts).toHaveBeenCalledWith(
         [migratedOp],
         jasmine.any(Map),
       );
     });
   });
 
-  describe('detectConflicts - fresh client scenarios', () => {
+  describe('_detectConflicts - fresh client scenarios', () => {
     const createOp = (partial: Partial<Operation>): Operation => ({
       id: 'op-1',
       actionType: '[Test] Action',
@@ -403,7 +400,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = await service.detectConflicts(remoteTaskOps, new Map());
+      const result = await (service as any)._detectConflicts(remoteTaskOps, new Map());
 
       // TASK op should be non-conflicting (not a conflict!)
       expect(result.nonConflicting.length).toBe(1);
@@ -446,7 +443,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = await service.detectConflicts(remoteOps, new Map());
+      const result = await (service as any)._detectConflicts(remoteOps, new Map());
 
       // Should be flagged as conflict due to per-entity corruption check
       expect(result.conflicts.length).toBe(1);
@@ -477,7 +474,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = await service.detectConflicts(remoteOps, new Map());
+      const result = await (service as any)._detectConflicts(remoteOps, new Map());
 
       // All ops should be non-conflicting
       expect(result.nonConflicting.length).toBe(2);
@@ -513,7 +510,7 @@ describe('OperationLogSyncService', () => {
         }),
       ];
 
-      const result = await service.detectConflicts(remoteOps, new Map());
+      const result = await (service as any)._detectConflicts(remoteOps, new Map());
 
       // Should NOT be a conflict - entity has no local state
       expect(result.conflicts.length).toBe(0);
@@ -553,7 +550,7 @@ describe('OperationLogSyncService', () => {
       ];
 
       // Pass the entity frontier to detectConflicts
-      const result = await service.detectConflicts(remoteOps, entityFrontier);
+      const result = await (service as any)._detectConflicts(remoteOps, entityFrontier);
 
       // No pending local ops = no conflict possible
       // The remote op should be applied directly
@@ -603,7 +600,10 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([staleRemoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts(
+        [staleRemoteOp],
+        entityFrontier,
+      );
 
       // Stale ops should be skipped (neither nonConflicting nor conflicting)
       expect(result.nonConflicting.length).toBe(0);
@@ -644,7 +644,10 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([duplicateRemoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts(
+        [duplicateRemoteOp],
+        entityFrontier,
+      );
 
       // Duplicate ops should be skipped (neither nonConflicting nor conflicting)
       expect(result.nonConflicting.length).toBe(0);
@@ -685,7 +688,10 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([newerRemoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts(
+        [newerRemoteOp],
+        entityFrontier,
+      );
 
       // This is the correct behavior that should continue to work
       expect(result.nonConflicting.length).toBe(1);
@@ -738,7 +744,7 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([remoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts([remoteOp], entityFrontier);
 
       // Should be accepted as non-conflicting, NOT dropped as stale
       expect(result.nonConflicting.length).toBe(1);
@@ -780,7 +786,10 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([staleRemoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts(
+        [staleRemoteOp],
+        entityFrontier,
+      );
 
       // Should be skipped as stale (existing behavior preserved)
       expect(result.nonConflicting.length).toBe(0);
@@ -820,7 +829,7 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([remoteOp], entityFrontier);
+      const result = await (service as any)._detectConflicts([remoteOp], entityFrontier);
 
       // Should be rejected as stale (backward compatible behavior)
       expect(result.nonConflicting.length).toBe(0);
@@ -873,7 +882,10 @@ describe('OperationLogSyncService', () => {
         schemaVersion: 1,
       };
 
-      const result = await service.detectConflicts([staleOp, validOp], entityFrontier);
+      const result = await (service as any)._detectConflicts(
+        [staleOp, validOp],
+        entityFrontier,
+      );
 
       // staleOp should be rejected (for existing entity)
       // validOp should be accepted (for new entity)
@@ -1133,12 +1145,12 @@ describe('OperationLogSyncService', () => {
       );
 
       // Spy on detectConflicts to verify it's NOT called
-      spyOn(service, 'detectConflicts').and.callThrough();
+      spyOn(service as any, '_detectConflicts').and.callThrough();
 
       await (service as any)._processRemoteOps([syncImportOp]);
 
       // detectConflicts should NOT be called at all for full-state ops
-      expect(service.detectConflicts).not.toHaveBeenCalled();
+      expect((service as any)._detectConflicts).not.toHaveBeenCalled();
       expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
       expect(conflictResolutionServiceSpy.autoResolveConflictsLWW).not.toHaveBeenCalled();
     });
@@ -1200,12 +1212,12 @@ describe('OperationLogSyncService', () => {
         Promise.resolve({ appliedOps: [] }),
       );
 
-      spyOn(service, 'detectConflicts').and.callThrough();
+      spyOn(service as any, '_detectConflicts').and.callThrough();
 
       await (service as any)._processRemoteOps([regularOp]);
 
       // detectConflicts SHOULD be called for regular ops
-      expect(service.detectConflicts).toHaveBeenCalled();
+      expect((service as any)._detectConflicts).toHaveBeenCalled();
     });
   });
 

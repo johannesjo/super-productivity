@@ -144,7 +144,7 @@ describe('Migration Handling Integration', () => {
       const currentVersion = 1; // Assuming CURRENT_SCHEMA_VERSION is 1
       const op = createOp(currentVersion);
 
-      await service.processRemoteOps([op]);
+      await (service as any)._processRemoteOps([op]);
 
       // Should be applied (no error snackbar)
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
@@ -159,7 +159,7 @@ describe('Migration Handling Integration', () => {
       const compatibleVersion = 1 + MAX_VERSION_SKIP;
       const op = createOp(compatibleVersion);
 
-      await service.processRemoteOps([op]);
+      await (service as any)._processRemoteOps([op]);
 
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
       expect(operationApplierSpy.applyOperations).toHaveBeenCalled();
@@ -170,7 +170,7 @@ describe('Migration Handling Integration', () => {
       const incompatibleVersion = 1 + MAX_VERSION_SKIP + 1;
       const op = createOp(incompatibleVersion);
 
-      await service.processRemoteOps([op]);
+      await (service as any)._processRemoteOps([op]);
 
       // Should trigger error snackbar
       expect(snackServiceSpy.open).toHaveBeenCalledWith(
@@ -188,7 +188,7 @@ describe('Migration Handling Integration', () => {
       const op = createOp(1);
       delete (op as any).schemaVersion; // Simulate legacy op
 
-      await service.processRemoteOps([op]);
+      await (service as any)._processRemoteOps([op]);
 
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
       expect(operationApplierSpy.applyOperations).toHaveBeenCalledWith([
@@ -227,7 +227,7 @@ describe('Migration Handling Integration', () => {
       spyOn(opLogStore, 'markFailed').and.callThrough();
 
       try {
-        await service.processRemoteOps([op]);
+        await (service as any)._processRemoteOps([op]);
         fail('Should have thrown error');
       } catch (e) {
         expect((e as Error).message).toBe('Simulated Apply Error');

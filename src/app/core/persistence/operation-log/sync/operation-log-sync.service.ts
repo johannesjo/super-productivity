@@ -5,7 +5,6 @@ import { OperationLogStoreService } from '../store/operation-log-store.service';
 import {
   ConflictResult,
   EntityConflict,
-  EntityType,
   Operation,
   OpType,
   VectorClock,
@@ -498,7 +497,10 @@ export class OperationLogSyncService {
       const newClock = incrementVectorClock(mergedClock, clientId);
 
       // Get current entity state from NgRx store
-      const entityState = await this._getCurrentEntityState(entityType, entityId);
+      const entityState = await this.conflictResolutionService.getCurrentEntityState(
+        entityType,
+        entityId,
+      );
       if (entityState === undefined) {
         OpLog.warn(
           `OperationLogSyncService: Cannot create update op - entity not found: ${entityKey}`,
@@ -558,16 +560,6 @@ export class OperationLogSyncService {
     }
 
     return newOpsCreated.length;
-  }
-
-  /**
-   * Gets the current state of an entity from the NgRx store.
-   */
-  private async _getCurrentEntityState(
-    entityType: EntityType,
-    entityId: string,
-  ): Promise<unknown | undefined> {
-    return this.conflictResolutionService.getCurrentEntityState(entityType, entityId);
   }
 
   /**
@@ -869,17 +861,6 @@ export class OperationLogSyncService {
     await this.operationApplier.applyOperations(sortedOps);
   }
 
-  /**
-   * Process remote operations: detect conflicts and apply non-conflicting ones.
-   * If applying operations fails, rolls back any stored operations to maintain consistency.
-   * @returns Object indicating how many local-win ops were created during LWW resolution
-   */
-  async processRemoteOps(
-    remoteOps: Operation[],
-  ): Promise<{ localWinOpsCreated: number }> {
-    return this._processRemoteOps(remoteOps);
-  }
-
   // ═══════════════════════════════════════════════════════════════════════════
   // REMOTE OPS PROCESSING (Core Pipeline)
   // ═══════════════════════════════════════════════════════════════════════════
@@ -1039,7 +1020,7 @@ export class OperationLogSyncService {
     let conflictResult!: ConflictResult;
     await this.lockService.request('sp_op_log', async () => {
       const appliedFrontierByEntity = await this.vectorClockService.getEntityFrontier();
-      conflictResult = await this.detectConflicts(validOps, appliedFrontierByEntity);
+      conflictResult = await this._detectConflicts(validOps, appliedFrontierByEntity);
     });
     const { nonConflicting, conflicts } = conflictResult;
 
@@ -1182,7 +1163,7 @@ export class OperationLogSyncService {
    * @param appliedFrontierByEntity - Per-entity vector clocks of applied ops
    * @returns Object with `nonConflicting` ops to apply and `conflicts` to resolve
    */
-  async detectConflicts(
+  private async _detectConflicts(
     remoteOps: Operation[],
     appliedFrontierByEntity: Map<string, VectorClock>,
   ): Promise<ConflictResult> {
