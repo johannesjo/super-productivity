@@ -16,10 +16,13 @@ import { SimpleCounter } from '../../simple-counter/simple-counter.model';
 import * as actions from '../store/focus-mode.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { EffectsModule } from '@ngrx/effects';
-import { Component, EventEmitter, Output } from '@angular/core';
+import { Component, EventEmitter, Output, signal, WritableSignal } from '@angular/core';
 import { FocusModeTaskSelectorComponent } from '../focus-mode-task-selector/focus-mode-task-selector.component';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { DialogPomodoroSettingsComponent } from '../dialog-pomodoro-settings/dialog-pomodoro-settings.component';
+import { By } from '@angular/platform-browser';
+import { InlineMarkdownComponent } from '../../../ui/inline-markdown/inline-markdown.component';
+import { MarkdownModule } from 'ngx-markdown';
 
 @Component({
   selector: 'focus-mode-task-selector',
@@ -550,5 +553,190 @@ describe('FocusModeMainComponent', () => {
 
       expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
+  });
+});
+
+/**
+ * Separate test suite for notes panel tests that need InProgress state
+ * Uses signal-based mocks to properly trigger computed signals
+ */
+describe('FocusModeMainComponent - notes panel (issue #5752)', () => {
+  let component: FocusModeMainComponent;
+  let fixture: ComponentFixture<FocusModeMainComponent>;
+  let currentTaskSubject: BehaviorSubject<TaskCopy | null>;
+  let mainStateSignal: WritableSignal<FocusMainUIState>;
+  let isSessionRunningSignal: WritableSignal<boolean>;
+
+  const mockTask: TaskCopy = {
+    id: 'task-1',
+    title: 'Test Task',
+    notes: 'Test notes',
+    timeSpent: 0,
+    timeEstimate: 0,
+    created: Date.now(),
+    isDone: false,
+    subTaskIds: [],
+    projectId: 'project-1',
+    timeSpentOnDay: {},
+    attachments: [],
+    tagIds: [],
+  } as TaskCopy;
+
+  beforeEach(async () => {
+    // Create writable signals for state that affects template rendering
+    mainStateSignal = signal(FocusMainUIState.InProgress);
+    isSessionRunningSignal = signal(true);
+
+    const storeSpy = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    storeSpy.select.and.returnValue(of([]));
+
+    const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
+      misc: jasmine.createSpy().and.returnValue({
+        taskNotesTpl: 'Default task notes template',
+      }),
+    });
+
+    currentTaskSubject = new BehaviorSubject<TaskCopy | null>(mockTask);
+    const taskServiceSpy = jasmine.createSpyObj('TaskService', ['update'], {
+      currentTask$: currentTaskSubject.asObservable(),
+    });
+
+    const taskAttachmentServiceSpy = jasmine.createSpyObj('TaskAttachmentService', [
+      'createFromDrop',
+    ]);
+
+    const issueServiceSpy = jasmine.createSpyObj('IssueService', ['issueLink']);
+    issueServiceSpy.issueLink.and.returnValue(Promise.resolve('https://example.com'));
+
+    const simpleCounterServiceSpy = jasmine.createSpyObj('SimpleCounterService', [''], {
+      enabledSimpleCounters$: of([]),
+    });
+
+    const mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockMatDialog.open.and.returnValue({
+      afterClosed: () => of(null),
+    } as MatDialogRef<any>);
+
+    // Use signals instead of spies for properties that affect computed signals
+    const focusModeServiceMock = {
+      timeElapsed: signal(60000),
+      isCountTimeDown: signal(true),
+      progress: signal(0),
+      timeRemaining: signal(1500000),
+      isSessionRunning: isSessionRunningSignal,
+      isSessionPaused: signal(false),
+      isBreakActive: signal(false),
+      currentCycle: signal(1),
+      sessionDuration: signal(0),
+      mode: signal(FocusModeMode.Pomodoro),
+      mainState: mainStateSignal,
+      focusModeConfig: signal({
+        isSkipPreparation: false,
+        isAlwaysUseFocusMode: false,
+      }),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        FocusModeMainComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+        EffectsModule.forRoot([]),
+        MarkdownModule.forRoot(),
+      ],
+      providers: [
+        { provide: Store, useValue: storeSpy },
+        { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: TaskAttachmentService, useValue: taskAttachmentServiceSpy },
+        { provide: IssueService, useValue: issueServiceSpy },
+        { provide: SimpleCounterService, useValue: simpleCounterServiceSpy },
+        { provide: FocusModeService, useValue: focusModeServiceMock },
+        { provide: MatDialog, useValue: mockMatDialog },
+      ],
+    })
+      .overrideComponent(FocusModeMainComponent, {
+        remove: { imports: [FocusModeTaskSelectorComponent] },
+        add: { imports: [MockFocusModeTaskSelectorComponent] },
+      })
+      .compileComponents();
+
+    fixture = TestBed.createComponent(FocusModeMainComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should pass isDefaultText=false to inline-markdown when task has notes', () => {
+    // Arrange: task has existing notes
+    const taskWithNotes = { ...mockTask, notes: 'My existing notes' };
+    currentTaskSubject.next(taskWithNotes);
+    fixture.detectChanges();
+
+    // Act: open notes panel
+    component.isFocusNotes.set(true);
+    fixture.detectChanges();
+
+    // Assert: inline-markdown should receive isDefaultText=false
+    const inlineMarkdown = fixture.debugElement.query(
+      By.directive(InlineMarkdownComponent),
+    );
+    expect(inlineMarkdown).toBeTruthy();
+    expect(inlineMarkdown.componentInstance.isDefaultText()).toBe(false);
+  });
+
+  it('should pass isDefaultText=true to inline-markdown when task has no notes', () => {
+    // Arrange: task has no notes (undefined)
+    const taskWithoutNotes = { ...mockTask, notes: undefined };
+    currentTaskSubject.next(taskWithoutNotes);
+    fixture.detectChanges();
+
+    // Act: open notes panel
+    component.isFocusNotes.set(true);
+    fixture.detectChanges();
+
+    // Assert: inline-markdown should receive isDefaultText=true
+    const inlineMarkdown = fixture.debugElement.query(
+      By.directive(InlineMarkdownComponent),
+    );
+    expect(inlineMarkdown).toBeTruthy();
+    expect(inlineMarkdown.componentInstance.isDefaultText()).toBe(true);
+  });
+
+  it('should pass isDefaultText=true to inline-markdown when task has empty notes', () => {
+    // Arrange: task has empty string notes
+    const taskWithEmptyNotes = { ...mockTask, notes: '' };
+    currentTaskSubject.next(taskWithEmptyNotes);
+    fixture.detectChanges();
+
+    // Act: open notes panel
+    component.isFocusNotes.set(true);
+    fixture.detectChanges();
+
+    // Assert: inline-markdown should receive isDefaultText=true
+    const inlineMarkdown = fixture.debugElement.query(
+      By.directive(InlineMarkdownComponent),
+    );
+    expect(inlineMarkdown).toBeTruthy();
+    expect(inlineMarkdown.componentInstance.isDefaultText()).toBe(true);
+  });
+
+  it('should display existing notes instead of default template when task has notes', () => {
+    // Arrange: task has existing notes, default template is set
+    const existingNotes = 'My important existing notes';
+    const taskWithNotes = { ...mockTask, notes: existingNotes };
+    currentTaskSubject.next(taskWithNotes);
+    component.defaultTaskNotes.set('Default task notes template');
+    fixture.detectChanges();
+
+    // Act: open notes panel
+    component.isFocusNotes.set(true);
+    fixture.detectChanges();
+
+    // Assert: inline-markdown model should be the existing notes, not the template
+    const inlineMarkdown = fixture.debugElement.query(
+      By.directive(InlineMarkdownComponent),
+    );
+    expect(inlineMarkdown).toBeTruthy();
+    expect(inlineMarkdown.componentInstance.model).toBe(existingNotes);
   });
 });

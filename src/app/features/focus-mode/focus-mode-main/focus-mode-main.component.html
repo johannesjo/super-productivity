@@ -302,6 +302,7 @@
           (changed)="changeTaskNotes($event); isFocusNotes.set(false)"
           [isFocus]="isFocusNotes()"
           [isShowControls]="true"
+          [isDefaultText]="!ct.notes"
           [model]="ct.notes || defaultTaskNotes()"
         ></inline-markdown>
       </div>
