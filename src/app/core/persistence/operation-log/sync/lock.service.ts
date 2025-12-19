@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Log } from '../../../log';
+import { OpLog } from '../../../log';
 
 /**
  * Provides a cross-tab locking mechanism for critical operations using the Web Locks API.
@@ -24,13 +24,13 @@ export class LockService {
       // Fallback: Use Promise-based mutex for single-tab protection.
       // WARNING: This does NOT protect against multi-tab data corruption!
       if (!this._hasWarnedAboutMissingLocks) {
-        Log.error(
+        OpLog.err(
           '[LockService] Web Locks API not available. Using multiple tabs may cause DATA LOSS. ' +
             'Please upgrade your browser or use only ONE tab at a time.',
         );
         this._hasWarnedAboutMissingLocks = true;
       }
-      Log.warn(
+      OpLog.warn(
         '[LockService] Delaying action cause of lock and executing fallback request.',
       );
       return this._fallbackRequest(lockName, callback);

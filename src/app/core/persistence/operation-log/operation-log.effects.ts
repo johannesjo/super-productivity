@@ -167,7 +167,7 @@ export class OperationLogEffects {
       });
     } catch (e) {
       // 4.1.1 Error Handling for Optimistic Updates
-      console.error('Failed to persist operation', e);
+      OpLog.err('OperationLogEffects: Failed to persist operation', e);
       if (this.isQuotaExceededError(e)) {
         // Circuit breaker: prevent recursive quota handling
         if (this.isHandlingQuotaExceeded) {

@@ -11,7 +11,7 @@ import { TaskArchiveService } from '../../../../features/time-tracking/task-arch
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { sortTimeTrackingAndTasksFromArchiveYoungToOld } from '../../../../features/time-tracking/sort-data-to-flush';
 import { ARCHIVE_TASK_YOUNG_TO_OLD_THRESHOLD } from '../../../../features/time-tracking/archive.service';
-import { Log } from '../../../log';
+import { OpLog } from '../../../log';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { deleteTag, deleteTags } from '../../../../features/tag/store/tag.actions';
 import { TimeTrackingService } from '../../../../features/time-tracking/time-tracking.service';
@@ -283,7 +283,7 @@ export class ArchiveOperationHandler {
       );
     } catch (e) {
       // Attempt rollback: restore BOTH archiveYoung and archiveOld to original state
-      Log.err('Archive flush failed, attempting rollback...', e);
+      OpLog.err('Archive flush failed, attempting rollback...', e);
       const rollbackErrors: Error[] = [];
 
       // Rollback archiveYoung
@@ -311,17 +311,17 @@ export class ArchiveOperationHandler {
       }
 
       if (rollbackErrors.length > 0) {
-        Log.err(
+        OpLog.err(
           'Archive flush rollback FAILED - archive may be inconsistent',
           rollbackErrors,
         );
       } else {
-        Log.log('Archive flush rollback successful');
+        OpLog.log('Archive flush rollback successful');
       }
       throw e; // Re-throw original error
     }
 
-    Log.log(
+    OpLog.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via remote op handler)\n_______________________',
     );
   }
@@ -347,7 +347,7 @@ export class ArchiveOperationHandler {
       isRemote,
     );
 
-    Log.log(`Archive compressed (via ${isRemote ? 'remote' : 'local'} op handler)`);
+    OpLog.log(`Archive compressed (via ${isRemote ? 'remote' : 'local'} op handler)`);
   }
 
   /**
@@ -461,7 +461,7 @@ export class ArchiveOperationHandler {
       });
     }
 
-    Log.log(
+    OpLog.log(
       '[ArchiveOperationHandler] Wrote archive data from SYNC_IMPORT/BACKUP_IMPORT',
     );
   }
