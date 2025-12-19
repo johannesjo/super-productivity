@@ -307,26 +307,39 @@ export class OperationLogDownloadService {
   /**
    * Checks for significant clock drift between client and server.
    * Warns user once per session if drift exceeds threshold.
+   * Retries once after 1 second to handle transient drift after device wake-up.
    */
   private _checkClockDrift(serverTimestamp: number): void {
     if (this.hasWarnedClockDrift) {
       return;
     }
 
-    const drift = Date.now() - serverTimestamp;
-    const driftMinutes = Math.abs(drift) / 60000;
+    const getDriftMinutes = (): number => Math.abs(Date.now() - serverTimestamp) / 60000;
+    const thresholdMinutes = CLOCK_DRIFT_THRESHOLD_MS / 60000;
 
-    if (driftMinutes > CLOCK_DRIFT_THRESHOLD_MS / 60000) {
-      this.hasWarnedClockDrift = true;
-      OpLog.warn('OperationLogDownloadService: Clock drift detected', {
-        driftMinutes: driftMinutes.toFixed(1),
-        direction: drift > 0 ? 'client ahead' : 'client behind',
-      });
-      this.snackService.open({
-        type: 'ERROR',
-        msg: T.F.SYNC.S.CLOCK_DRIFT_WARNING,
-        translateParams: { minutes: Math.round(driftMinutes) },
-      });
+    const driftMinutes = getDriftMinutes();
+
+    if (driftMinutes > thresholdMinutes) {
+      // Retry after 1 second - clock may sync after device wake-up
+      setTimeout(() => {
+        if (this.hasWarnedClockDrift) {
+          return;
+        }
+        const retryDriftMinutes = getDriftMinutes();
+        if (retryDriftMinutes > thresholdMinutes) {
+          this.hasWarnedClockDrift = true;
+          const retryDrift = Date.now() - serverTimestamp;
+          OpLog.warn('OperationLogDownloadService: Clock drift detected', {
+            driftMinutes: retryDriftMinutes.toFixed(1),
+            direction: retryDrift > 0 ? 'client ahead' : 'client behind',
+          });
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.CLOCK_DRIFT_WARNING,
+            translateParams: { minutes: Math.round(retryDriftMinutes) },
+          });
+        }
+      }, 1000);
     }
   }
 }

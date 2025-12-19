@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { LockService } from './lock.service';
@@ -87,7 +87,7 @@ describe('OperationLogDownloadService', () => {
         expect(mockApiProvider.downloadOps).toHaveBeenCalled();
       });
 
-      it('should detect and warn about clock drift', async () => {
+      it('should detect and warn about clock drift after retry', fakeAsync(() => {
         const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
         const serverTime = Date.now() - driftMs;
 
@@ -115,7 +115,14 @@ describe('OperationLogDownloadService', () => {
           }),
         );
 
-        await service.downloadRemoteOps(mockApiProvider);
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+
+        // Warning should not be shown immediately
+        expect(OpLog.warn).not.toHaveBeenCalled();
+
+        // After 1 second retry, warning should appear
+        tick(1000);
 
         expect(OpLog.warn).toHaveBeenCalledWith(
           'OperationLogDownloadService: Clock drift detected',
@@ -130,7 +137,58 @@ describe('OperationLogDownloadService', () => {
             msg: T.F.SYNC.S.CLOCK_DRIFT_WARNING,
           }),
         );
-      });
+      }));
+
+      it('should not warn if clock drift resolves after retry', fakeAsync(() => {
+        const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Initial drift exceeds threshold
+        const initialTime = Date.now();
+        const serverTime = initialTime - driftMs;
+
+        // Track Date.now() calls to simulate clock correction
+        let dateNowCallCount = 0;
+        spyOn(Date, 'now').and.callFake(() => {
+          dateNowCallCount++;
+          // First call (initial check): return time with drift
+          // Subsequent calls (after retry): return corrected time (close to server time)
+          if (dateNowCallCount <= 2) {
+            return initialTime; // Initial check shows drift
+          }
+          // After "clock correction", drift is now within threshold
+          return serverTime + 60000; // Only 1 minute drift
+        });
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: serverTime,
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: initialTime,
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+          }),
+        );
+
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for retry
+
+        // Should NOT warn because drift resolved after retry
+        expect(OpLog.warn).not.toHaveBeenCalled();
+        expect(mockSnackService.open).not.toHaveBeenCalled();
+      }));
 
       it('should not warn about clock drift if within threshold', async () => {
         const smallDriftMs = CLOCK_DRIFT_THRESHOLD_MS - 60000; // Threshold - 1 min
@@ -166,7 +224,7 @@ describe('OperationLogDownloadService', () => {
         expect(mockSnackService.open).not.toHaveBeenCalled();
       });
 
-      it('should only warn about clock drift once per session', async () => {
+      it('should only warn about clock drift once per session', fakeAsync(() => {
         const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
         const serverTime = Date.now() - driftMs;
 
@@ -194,14 +252,18 @@ describe('OperationLogDownloadService', () => {
           }),
         );
 
-        // First call - should warn
-        await service.downloadRemoteOps(mockApiProvider);
+        // First call - should warn after retry
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for retry
         expect(OpLog.warn).toHaveBeenCalledTimes(1);
 
         // Second call - should NOT warn again
-        await service.downloadRemoteOps(mockApiProvider);
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for retry (if any)
         expect(OpLog.warn).toHaveBeenCalledTimes(1);
-      });
+      }));
 
       it('should acquire lock before downloading', async () => {
         await service.downloadRemoteOps(mockApiProvider);
