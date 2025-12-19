@@ -85,7 +85,10 @@ describe('FocusModeEffects', () => {
             { selector: selectors.selectMode, value: FocusModeMode.Pomodoro },
             { selector: selectors.selectCurrentCycle, value: 1 },
             { selector: selectors.selectLastSessionDuration, value: 0 },
-            { selector: selectFocusModeConfig, value: { isAlwaysUseFocusMode: false } },
+            {
+              selector: selectFocusModeConfig,
+              value: { isSyncSessionWithTracking: false },
+            },
             { selector: selectPomodoroConfig, value: { duration: 25 * 60 * 1000 } },
           ],
         }),
@@ -538,9 +541,9 @@ describe('FocusModeEffects', () => {
   });
 
   describe('autoShowOverlay$', () => {
-    it('should dispatch showFocusOverlay when isAlwaysUseFocusMode is true and task is selected', (done) => {
+    it('should dispatch showFocusOverlay when isSyncSessionWithTracking is true and task is selected', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
+        isSyncSessionWithTracking: true,
         isSkipPreparation: false,
       });
       store.refreshState();
@@ -559,9 +562,9 @@ describe('FocusModeEffects', () => {
       });
     });
 
-    it('should NOT dispatch when isAlwaysUseFocusMode is false', (done) => {
+    it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: false,
+        isSyncSessionWithTracking: false,
         isSkipPreparation: false,
       });
       store.refreshState();
@@ -579,7 +582,7 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when task id is null', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
+        isSyncSessionWithTracking: true,
         isSkipPreparation: false,
       });
       store.refreshState();
@@ -595,7 +598,7 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch showFocusOverlay when isStartInBackground is true', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
+        isSyncSessionWithTracking: true,
         isSkipPreparation: false,
         isStartInBackground: true,
       });
@@ -615,9 +618,8 @@ describe('FocusModeEffects', () => {
   describe('syncTrackingStartToSession$', () => {
     it('should dispatch startFocusSession when isSyncSessionWithTracking is true and task is selected on Main screen', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectTimer, createMockTimer());
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
@@ -638,9 +640,8 @@ describe('FocusModeEffects', () => {
 
     it('should dispatch unPauseFocusSession when session is paused and task is selected', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       // Session is paused (purpose is 'work' but not running)
       store.overrideSelector(
@@ -665,27 +666,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: false,
-      });
-      store.overrideSelector(selectors.selectCurrentScreen, FocusScreen.Main);
-      store.refreshState();
-
-      effects = TestBed.inject(FocusModeEffects);
-
-      currentTaskId$.next('task-123');
-
-      setTimeout(() => {
-        done();
-      }, 50);
-    });
-
-    it('should NOT dispatch when isAlwaysUseFocusMode is false', (done) => {
-      store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: false,
         isSkipPreparation: false,
-        isSyncSessionWithTracking: true,
       });
       store.overrideSelector(selectors.selectCurrentScreen, FocusScreen.Main);
       store.refreshState();
@@ -701,9 +683,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when session is already running', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -723,9 +704,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when on SessionDone screen', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectTimer, createMockTimer());
       store.overrideSelector(selectors.selectMode, FocusModeMode.Flowtime);
@@ -744,9 +724,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when on Break screen', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectTimer, createMockTimer());
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
@@ -767,9 +746,8 @@ describe('FocusModeEffects', () => {
   describe('syncTrackingStopToSession$', () => {
     it('should dispatch pauseFocusSession when tracking stops and session is running', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -796,9 +774,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: false,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -821,9 +798,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when session is not running', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -846,9 +822,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch during break', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -871,9 +846,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when switching to different task (not stopping)', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -899,9 +873,8 @@ describe('FocusModeEffects', () => {
   describe('syncSessionPauseToTracking$', () => {
     it('should dispatch unsetCurrentTask when session pauses with pausedTaskId', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -919,9 +892,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when pausedTaskId is null', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -944,9 +916,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: false,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -969,9 +940,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch during break', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -996,9 +966,8 @@ describe('FocusModeEffects', () => {
   describe('syncSessionResumeToTracking$', () => {
     it('should dispatch setCurrentTask when session resumes with pausedTaskId', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -1024,9 +993,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when no pausedTaskId', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -1051,9 +1019,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when already tracking a task', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -1078,9 +1045,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: false,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -1105,9 +1071,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch setCurrentTask when task no longer exists', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(
         selectors.selectTimer,
@@ -1136,9 +1101,8 @@ describe('FocusModeEffects', () => {
   describe('syncSessionStartToTracking$', () => {
     it('should dispatch setCurrentTask when session starts with pausedTaskId and no current task', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
       // Mock that the task exists
@@ -1160,9 +1124,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when already tracking a task', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
       currentTaskId$.next('task-456'); // Already tracking
@@ -1183,9 +1146,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when no pausedTaskId', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, null);
       currentTaskId$.next(null);
@@ -1206,9 +1168,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch when isSyncSessionWithTracking is false', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: false,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'task-123');
       currentTaskId$.next(null);
@@ -1229,9 +1190,8 @@ describe('FocusModeEffects', () => {
 
     it('should NOT dispatch setCurrentTask when task no longer exists', (done) => {
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: true,
-        isSkipPreparation: false,
         isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
       });
       store.overrideSelector(selectors.selectPausedTaskId, 'deleted-task-123');
       // Mock that the task doesn't exist (use any cast for parameterized selector)
@@ -1259,7 +1219,7 @@ describe('FocusModeEffects', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
       store.overrideSelector(selectors.selectCurrentCycle, 1);
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: false,
+        isSyncSessionWithTracking: false,
         isSkipPreparation: false,
         isPauseTrackingDuringBreak: true,
       });
@@ -1278,7 +1238,7 @@ describe('FocusModeEffects', () => {
       store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
       store.overrideSelector(selectors.selectCurrentCycle, 1);
       store.overrideSelector(selectFocusModeConfig, {
-        isAlwaysUseFocusMode: false,
+        isSyncSessionWithTracking: false,
         isSkipPreparation: false,
         isPauseTrackingDuringBreak: false,
       });
