@@ -50,6 +50,12 @@ export interface DownloadResult {
    * vector clock state from all known ops on the server.
    */
   allOpClocks?: import('../operation.types').VectorClock[];
+  /**
+   * Aggregated vector clock from all ops before and including the snapshot.
+   * Only set when snapshot optimization is used (sinceSeq < latestSnapshotSeq).
+   * Clients need this to create merged updates that dominate all known clocks.
+   */
+  snapshotVectorClock?: import('../operation.types').VectorClock;
 }
 
 /**
@@ -116,6 +122,7 @@ export class OperationLogDownloadService {
     let downloadFailed = false;
     let needsFullStateUpload = false;
     let finalLatestSeq = 0;
+    let snapshotVectorClock: import('../operation.types').VectorClock | undefined;
 
     // Get encryption key upfront
     const privateCfg =
@@ -152,6 +159,14 @@ export class OperationLogDownloadService {
         const response = await syncProvider.downloadOps(sinceSeq, undefined, 500);
         finalLatestSeq = response.latestSeq;
 
+        // Capture snapshot vector clock from first response (only present when snapshot optimization used)
+        if (!snapshotVectorClock && response.snapshotVectorClock) {
+          snapshotVectorClock = response.snapshotVectorClock;
+          OpLog.normal(
+            `OperationLogDownloadService: Received snapshotVectorClock with ${Object.keys(snapshotVectorClock).length} entries`,
+          );
+        }
+
         // Handle gap detection: server was reset or client has stale lastServerSeq
         if (response.gapDetected && !hasResetForGap) {
           OpLog.warn(
@@ -163,6 +178,7 @@ export class OperationLogDownloadService {
           hasResetForGap = true;
           allNewOps.length = 0; // Clear any ops we may have accumulated
           allOpClocks.length = 0; // Clear clocks too
+          snapshotVectorClock = undefined; // Clear snapshot clock to capture fresh one after reset
           // NOTE: Don't persist lastServerSeq=0 here - caller will persist the final value
           // after ops are stored in IndexedDB. This ensures localStorage and IndexedDB stay in sync.
           continue;
@@ -301,6 +317,8 @@ export class OperationLogDownloadService {
       latestServerSeq: finalLatestSeq,
       // Include all op clocks when force downloading from seq 0
       ...(forceFromSeq0 && allOpClocks.length > 0 ? { allOpClocks } : {}),
+      // Include snapshot vector clock when snapshot optimization was used
+      ...(snapshotVectorClock ? { snapshotVectorClock } : {}),
     };
   }
 

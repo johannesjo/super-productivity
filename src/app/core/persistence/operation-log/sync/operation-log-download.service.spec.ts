@@ -577,6 +577,227 @@ describe('OperationLogDownloadService', () => {
         });
       });
 
+      describe('snapshotVectorClock handling', () => {
+        it('should capture snapshotVectorClock from first response', async () => {
+          const snapshotClock = { clientA: 10, clientB: 5, clientC: 3 };
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 317,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-317',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c1: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 317,
+              snapshotVectorClock: snapshotClock,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          expect(result.snapshotVectorClock).toEqual(snapshotClock);
+        });
+
+        it('should return snapshotVectorClock even when no new ops', async () => {
+          const snapshotClock = { clientA: 10, clientB: 5 };
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 316,
+              snapshotVectorClock: snapshotClock,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          expect(result.snapshotVectorClock).toEqual(snapshotClock);
+          expect(result.newOps.length).toBe(0);
+        });
+
+        it('should capture snapshotVectorClock from first page in paginated download', async () => {
+          const snapshotClock = { clientA: 10, clientB: 5 };
+          mockApiProvider.downloadOps.and.returnValues(
+            // First page - has snapshotVectorClock
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 317,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-317',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c1: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: true,
+              latestSeq: 320,
+              snapshotVectorClock: snapshotClock,
+            }),
+            // Second page - no snapshotVectorClock (only first response has it)
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 318,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-318',
+                    clientId: 'c2',
+                    actionType: '[Task] Update',
+                    opType: OpType.Update,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c2: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 320,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          // Should have captured snapshotVectorClock from first response
+          expect(result.snapshotVectorClock).toEqual(snapshotClock);
+          expect(result.newOps.length).toBe(2);
+        });
+
+        it('should not have snapshotVectorClock when server does not send it', async () => {
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c1: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 1,
+              // No snapshotVectorClock
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          expect(result.snapshotVectorClock).toBeUndefined();
+        });
+
+        it('should clear snapshotVectorClock when gap is detected and re-downloading', async () => {
+          const staleSnapshotClock = { clientA: 5 };
+          const freshSnapshotClock = { clientA: 10, clientB: 3 };
+
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(100));
+          mockApiProvider.downloadOps.and.returnValues(
+            // First response: gap detected with stale clock
+            Promise.resolve({
+              ops: [],
+              hasMore: false,
+              latestSeq: 50,
+              gapDetected: true,
+              snapshotVectorClock: staleSnapshotClock,
+            }),
+            // After reset: fresh clock
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 1,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-1',
+                    clientId: 'c1',
+                    actionType: '[Task] Add',
+                    opType: OpType.Create,
+                    entityType: 'TASK',
+                    payload: {},
+                    vectorClock: { c1: 1 },
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 50,
+              snapshotVectorClock: freshSnapshotClock,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider);
+
+          // Should have the fresh clock from after the reset
+          expect(result.snapshotVectorClock).toEqual(freshSnapshotClock);
+        });
+
+        it('should work with forceFromSeq0 option and return snapshotVectorClock', async () => {
+          const snapshotClock = { clientA: 100, clientB: 50 };
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(500));
+          mockApiProvider.downloadOps.and.returnValue(
+            Promise.resolve({
+              ops: [
+                {
+                  serverSeq: 316,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'op-316',
+                    clientId: 'c1',
+                    actionType: '[All] Sync Import',
+                    opType: 'SYNC_IMPORT' as OpType,
+                    entityType: 'ALL',
+                    payload: {},
+                    vectorClock: snapshotClock,
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMore: false,
+              latestSeq: 316,
+              snapshotVectorClock: snapshotClock,
+            }),
+          );
+
+          const result = await service.downloadRemoteOps(mockApiProvider, {
+            forceFromSeq0: true,
+          });
+
+          expect(result.snapshotVectorClock).toEqual(snapshotClock);
+          expect(result.allOpClocks).toBeDefined();
+          expect(result.allOpClocks!.length).toBe(1);
+        });
+      });
+
       describe('gap detection handling', () => {
         it('should reset lastServerSeq to 0 when gap is detected', async () => {
           // First call returns gap detected (client has stale sinceSeq)

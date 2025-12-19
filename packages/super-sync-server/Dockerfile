@@ -39,7 +39,7 @@ RUN apk add --no-cache openssl libc6-compat wget && \
 
 WORKDIR /app
 
-# Copy built artifacts from builder
+# Copy built artifacts from builder (note: tsconfig rootDir is "." so structure is dist/src/ and dist/scripts/)
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/dist ./dist
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/public ./public
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/prisma ./prisma
@@ -64,4 +64,4 @@ ENV DATA_DIR=/app/data
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1
 
-CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/index.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node dist/src/index.js"]

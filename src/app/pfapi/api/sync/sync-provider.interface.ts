@@ -191,6 +191,12 @@ export interface OpDownloadResponse {
    * When true, the client should reset lastServerSeq to 0 and re-download.
    */
   gapDetected?: boolean;
+  /**
+   * Aggregated vector clock from all ops before and including the snapshot.
+   * Only set when snapshot optimization is used (sinceSeq < latestSnapshotSeq).
+   * Clients need this to create merged updates that dominate all known clocks.
+   */
+  snapshotVectorClock?: Record<string, number>;
 }
 
 /**

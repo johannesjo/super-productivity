@@ -97,13 +97,6 @@ export const globalConfigReducer = createReducer<GlobalConfigState>(
     const syncProvider =
       oldState.sync.syncProvider ?? appDataComplete.globalConfig.sync.syncProvider;
 
-    // Debug logging for hot reload investigation
-    console.warn('[HotReloadDebug] loadAllData reducer:', {
-      oldSyncProvider: oldState.sync.syncProvider,
-      newSyncProvider: appDataComplete.globalConfig?.sync?.syncProvider,
-      resolvedProvider: syncProvider,
-    });
-
     return {
       ...appDataComplete.globalConfig,
       sync: {

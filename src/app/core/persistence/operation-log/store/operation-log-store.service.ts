@@ -350,6 +350,7 @@ export class OperationLogStoreService {
 
   async markRejected(opIds: string[]): Promise<void> {
     await this._ensureInit();
+
     const tx = this.db.transaction('ops', 'readwrite');
     const store = tx.objectStore('ops');
     const index = store.index('byId');

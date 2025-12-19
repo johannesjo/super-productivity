@@ -547,6 +547,7 @@ export class SyncService {
     latestSeq: number;
     gapDetected: boolean;
     latestSnapshotSeq?: number;
+    snapshotVectorClock?: VectorClock;
   }> {
     return prisma.$transaction(async (tx) => {
       // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
@@ -566,12 +567,43 @@ export class SyncService {
       // start from the full-state op instead. Pre-import ops are superseded and will
       // be filtered out by the client anyway.
       let effectiveSinceSeq = sinceSeq;
+      let snapshotVectorClock: VectorClock | undefined;
+
       if (latestSnapshotSeq !== undefined && sinceSeq < latestSnapshotSeq) {
         // Start from one before the snapshot so it's included in results
         effectiveSinceSeq = latestSnapshotSeq - 1;
         Logger.info(
           `[user:${userId}] Optimized download: skipping from sinceSeq=${sinceSeq} to ${effectiveSinceSeq} ` +
             `(latest snapshot at seq ${latestSnapshotSeq})`,
+        );
+
+        // Compute aggregated vector clock from all ops up to and including the snapshot.
+        // This ensures clients know about all clock entries from skipped ops.
+        const skippedOps = await tx.operation.findMany({
+          where: {
+            userId,
+            serverSeq: { lte: latestSnapshotSeq },
+          },
+          select: { vectorClock: true },
+        });
+
+        snapshotVectorClock = {};
+        for (const op of skippedOps) {
+          const clock = op.vectorClock as unknown as VectorClock;
+          if (clock && typeof clock === 'object') {
+            for (const [clientId, value] of Object.entries(clock)) {
+              if (typeof value === 'number') {
+                snapshotVectorClock[clientId] = Math.max(
+                  snapshotVectorClock[clientId] ?? 0,
+                  value,
+                );
+              }
+            }
+          }
+        }
+
+        Logger.info(
+          `[user:${userId}] Computed snapshotVectorClock from ${skippedOps.length} ops: ${JSON.stringify(snapshotVectorClock)}`,
         );
       }
 
@@ -661,7 +693,7 @@ export class SyncService {
         receivedAt: Number(row.receivedAt),
       }));
 
-      return { ops: mappedOps, latestSeq, gapDetected, latestSnapshotSeq };
+      return { ops: mappedOps, latestSeq, gapDetected, latestSnapshotSeq, snapshotVectorClock };
     });
   }
 

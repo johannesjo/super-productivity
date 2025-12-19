@@ -2,10 +2,10 @@
   "name": "@super-productivity/super-sync-server",
   "version": "1.0.0",
   "description": "SuperSync server for Super Productivity",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "scripts": {
     "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node dist/src/index.js",
     "dev": "nodemon --watch src --ext ts --exec ts-node src/index.ts",
     "test": "vitest run",
     "docker:build": "./scripts/build-and-push.sh",
@@ -15,7 +15,8 @@
     "docker:logs": "docker logs supersync-server -f",
     "delete-user": "ts-node scripts/delete-user.ts",
     "clear-data": "ts-node scripts/clear-data.ts",
-    "monitor": "ts-node scripts/monitor.ts"
+    "monitor": "node dist/scripts/monitor.js",
+    "monitor:dev": "ts-node scripts/monitor.ts"
   },
   "dependencies": {
     "@fastify/cors": "^11.1.0",

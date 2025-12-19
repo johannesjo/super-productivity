@@ -203,6 +203,12 @@ export interface DownloadOpsResponse {
    * Operations before this seq are superseded by the full-state operation.
    */
   latestSnapshotSeq?: number;
+  /**
+   * Aggregated vector clock from all ops before and including the snapshot.
+   * Only set when snapshot optimization is used (sinceSeq < latestSnapshotSeq).
+   * Clients need this to create merged updates that dominate all known clocks.
+   */
+  snapshotVectorClock?: VectorClock;
 }
 
 // Snapshot types

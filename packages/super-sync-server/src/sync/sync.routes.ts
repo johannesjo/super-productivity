@@ -329,7 +329,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Use atomic read to get ops and latestSeq in one transaction
         // This prevents race conditions where new ops arrive between the two reads
-        const { ops, latestSeq, gapDetected, latestSnapshotSeq } =
+        const { ops, latestSeq, gapDetected, latestSnapshotSeq, snapshotVectorClock } =
           await syncService.getOpsSinceWithSeq(
             userId,
             sinceSeq,
@@ -358,6 +358,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           latestSeq,
           gapDetected: gapDetected || undefined, // Only include if true
           latestSnapshotSeq, // Optimization: tells client where effective state starts
+          snapshotVectorClock, // Aggregated clock from skipped ops for conflict resolution
         };
 
         return reply.send(response);

@@ -378,6 +378,17 @@ export class OperationLogSyncService {
                 mergedOpsCreated += await this._resolveStaleLocalOps(
                   stillPendingOps,
                   forceDownloadResult.allOpClocks,
+                  forceDownloadResult.snapshotVectorClock,
+                );
+              } else if (forceDownloadResult.snapshotVectorClock) {
+                // Force download returned no individual clocks but we have snapshot clock
+                OpLog.normal(
+                  `OperationLogSyncService: Using snapshotVectorClock from force download`,
+                );
+                mergedOpsCreated += await this._resolveStaleLocalOps(
+                  stillPendingOps,
+                  undefined,
+                  forceDownloadResult.snapshotVectorClock,
                 );
               } else {
                 // Force download returned no clocks but we have concurrent ops.
@@ -407,7 +418,11 @@ export class OperationLogSyncService {
                 `OperationLogSyncService: Download got ${downloadResult.newOpsCount} ops but ${stillPendingOps.length} ` +
                   `concurrent ops still pending. Resolving locally with merged clocks...`,
               );
-              mergedOpsCreated += await this._resolveStaleLocalOps(stillPendingOps);
+              mergedOpsCreated += await this._resolveStaleLocalOps(
+                stillPendingOps,
+                undefined,
+                downloadResult.snapshotVectorClock,
+              );
             }
           }
         } catch (e) {
@@ -433,11 +448,13 @@ export class OperationLogSyncService {
    *
    * @param staleOps - Operations that were rejected due to concurrent modification
    * @param extraClocks - Additional clocks to merge (from force download)
+   * @param snapshotVectorClock - Aggregated clock from snapshot optimization (if available)
    * @returns Number of merged ops created
    */
   private async _resolveStaleLocalOps(
     staleOps: Array<{ opId: string; op: Operation }>,
     extraClocks?: VectorClock[],
+    snapshotVectorClock?: VectorClock,
   ): Promise<number> {
     const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
     if (!clientId) {
@@ -448,6 +465,15 @@ export class OperationLogSyncService {
     // Get the GLOBAL vector clock which includes snapshot + all ops after
     // This ensures we have all known clocks, not just entity-specific ones
     let globalClock = await this.vectorClockService.getCurrentVectorClock();
+
+    // Merge snapshot vector clock if available (from server's snapshot optimization)
+    // This ensures we have the clocks from ops that were skipped during download
+    if (snapshotVectorClock && Object.keys(snapshotVectorClock).length > 0) {
+      OpLog.normal(
+        `OperationLogSyncService: Merging snapshotVectorClock with ${Object.keys(snapshotVectorClock).length} entries`,
+      );
+      globalClock = mergeVectorClocks(globalClock, snapshotVectorClock);
+    }
 
     // If extra clocks were provided (from force download), merge them all
     // This helps recover from situations where our local clock is missing entries
@@ -583,6 +609,7 @@ export class OperationLogSyncService {
     localWinOpsCreated: number;
     newOpsCount: number;
     allOpClocks?: VectorClock[];
+    snapshotVectorClock?: VectorClock;
   }> {
     const result = await this.downloadService.downloadRemoteOps(syncProvider, options);
 
@@ -614,6 +641,8 @@ export class OperationLogSyncService {
         newOpsCount: 0,
         // Include all op clocks from forced download (even though no new ops)
         allOpClocks: result.allOpClocks,
+        // Include snapshot vector clock for stale op resolution
+        snapshotVectorClock: result.snapshotVectorClock,
       };
     }
 
@@ -662,6 +691,7 @@ export class OperationLogSyncService {
       localWinOpsCreated: processResult.localWinOpsCreated,
       newOpsCount: result.newOps.length,
       allOpClocks: result.allOpClocks,
+      snapshotVectorClock: result.snapshotVectorClock,
     };
   }
 
