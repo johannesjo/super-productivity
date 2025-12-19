@@ -1,13 +1,16 @@
 package com.superproductivity.superproductivity.webview
 
 import android.app.Activity
+import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.superproductivity.superproductivity.App
 import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.service.TrackingForegroundService
 
 
 class JavaScriptInterface(
@@ -68,6 +71,40 @@ class JavaScriptInterface(
             activity.runOnUiThread {
                 activity.flushPendingShareIntent()
             }
+        }
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun startTrackingService(taskId: String, taskTitle: String, timeSpentMs: Long) {
+        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_START
+            putExtra(TrackingForegroundService.EXTRA_TASK_ID, taskId)
+            putExtra(TrackingForegroundService.EXTRA_TASK_TITLE, taskTitle)
+            putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+        }
+        ContextCompat.startForegroundService(activity, intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun stopTrackingService() {
+        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_STOP
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun getTrackingElapsed(): String {
+        val taskId = TrackingForegroundService.currentTaskId
+        val elapsedMs = TrackingForegroundService.getElapsedMs()
+        val isTracking = TrackingForegroundService.isTracking
+        return if (isTracking && taskId != null) {
+            """{"taskId":"$taskId","elapsedMs":$elapsedMs}"""
+        } else {
+            "null"
         }
     }
 
