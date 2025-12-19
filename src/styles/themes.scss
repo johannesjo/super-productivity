@@ -14,6 +14,68 @@ $custom-typography: mat.m2-define-typography-config(
   }
 }
 
+// Used inside body tag to increase specificity
+body {
+  /* 1. Target the Picker Dialog Background */
+  /* We use .isDarkTheme & to check if your app is in dark mode */
+  .color-picker {
+    .isDarkTheme & {
+      background-color: #2c2c2c !important;
+      border: 1px solid #444 !important;
+      color: #ffffff !important;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+
+      /* Internal text labels and inputs for Dark Mode */
+      .cp-input {
+        background-color: #3d3d3d !important;
+        color: #ffffff !important;
+        border: 1px solid #555 !important;
+      }
+      .type-policy,
+      .hex-text {
+        color: #bbbbbb !important;
+      }
+    }
+  }
+
+  /* 2. OK Button - Vibrant Blue */
+  .cp-ok-button-class {
+    background-color: #26c6da !important;
+    color: #1a1a1a !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    border: none !important;
+    cursor: pointer !important;
+    transition: all 0.2s ease-in-out !important;
+    text-transform: uppercase !important;
+    font-size: 12px !important;
+    box-shadow: 0 4px 10px rgba(38, 198, 218, 0.3) !important;
+
+    &:hover {
+      background-color: #00acc1 !important;
+      transform: translateY(-1px) !important;
+    }
+  }
+
+  /* 3. Cancel Button - Subtle Ghost Style */
+  .cp-cancel-button-class {
+    background-color: transparent !important;
+    color: #81d4fa !important;
+    font-weight: 600 !important;
+    padding: 8px 18px !important;
+    border-radius: 6px !important;
+    border: 1px solid rgba(129, 212, 250, 0.3) !important;
+    cursor: pointer !important;
+    margin-right: 8px !important;
+
+    &:hover {
+      background-color: rgba(129, 212, 250, 0.1) !important;
+      border-color: #81d4fa !important;
+    }
+  }
+}
+
 .bg-primary {
   background-color: var(--c-primary);
 }

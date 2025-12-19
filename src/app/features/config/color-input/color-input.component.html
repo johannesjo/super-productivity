@@ -1,11 +1,31 @@
-<mat-form-field>
+<mat-form-field appearance="fill">
   <mat-label>{{ to.label }}</mat-label>
   <input
-    type="color"
-    class="color-input"
+    matInput
+    type="text"
+    [style.background-color]="formControl.value || '#26c6da'"
+    style="color: white; font-weight: bold; caret-color: black"
+    [(colorPicker)]="formControl.value"
+    (colorPickerChange)="formControl.setValue($event); formControl.markAsTouched()"
+    [cpExtraClassName]="globalThemeService.isDarkTheme() ? 'dark-theme' : 'light-theme'"
+    [cpPresetColors]="[
+      '#000000',
+      '#FFFFFF',
+      '#FF0000',
+      '#00FF00',
+      '#0000FF',
+      '#FFFF00',
+      '#FFA500',
+      '#808080',
+      '#26c6da',
+    ]"
+    [cpOKButton]="true"
+    [cpCancelButton]="true"
+    [cpUseRootViewContainer]="true"
+    [cpDialogDisplay]="'popup'"
+    [cpAlphaChannel]="'disabled'"
+    [cpOutputFormat]="'hex'"
     [formControl]="formControl"
     [formlyAttributes]="field"
-    (focus)="onFocus($event)"
-    matInput
   />
 </mat-form-field>

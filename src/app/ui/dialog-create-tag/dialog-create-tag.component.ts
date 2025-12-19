@@ -13,6 +13,8 @@ import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { DEFAULT_TAG_COLOR } from '../../features/work-context/work-context.const';
+import { ColorPickerDirective } from 'ngx-color-picker'; // Added this
+import { GlobalThemeService } from '../../core/theme/global-theme.service'; // Adjust path if needed
 
 export interface CreateTagData {
   title?: string;
@@ -21,6 +23,7 @@ export interface CreateTagData {
 
 @Component({
   selector: 'dialog-create-tag',
+  standalone: true, // Assuming standalone based on imports list
   templateUrl: './dialog-create-tag.component.html',
   styleUrls: ['./dialog-create-tag.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,10 +37,12 @@ export interface CreateTagData {
     MatButton,
     MatIcon,
     TranslatePipe,
+    ColorPickerDirective, // Added this
   ],
 })
 export class DialogCreateTagComponent {
   private _matDialogRef = inject<MatDialogRef<DialogCreateTagComponent>>(MatDialogRef);
+  readonly globalThemeService = inject(GlobalThemeService); // Added this
   data = inject(MAT_DIALOG_DATA);
 
   T: typeof T = T;
