@@ -27,18 +27,22 @@ export abstract class BasePage {
 
     const inputEl = this.page.locator('add-task-bar.global input');
 
-    // If the global input is not present, open the Add Task Bar first
-    const inputCount = await inputEl.count();
-    if (inputCount === 0) {
+    // Check if input is visible - if not, try clicking the add button
+    const isInputVisible = await inputEl
+      .first()
+      .isVisible()
+      .catch(() => false);
+    if (!isInputVisible) {
       const addBtn = this.page.locator('.tour-addBtn');
-      await addBtn.waitFor({ state: 'visible', timeout: 10000 });
+      // Wait for add button with longer timeout - it depends on config loading
+      await addBtn.waitFor({ state: 'visible', timeout: 20000 });
       await addBtn.click();
       // Wait for input to appear after clicking
-      await this.page.waitForTimeout(300);
+      await this.page.waitForTimeout(500);
     }
 
-    // Ensure input is visible and interactable
-    await inputEl.first().waitFor({ state: 'visible', timeout: 15000 });
+    // Ensure input is visible and interactable with longer timeout
+    await inputEl.first().waitFor({ state: 'visible', timeout: 20000 });
     await inputEl.first().waitFor({ state: 'attached', timeout: 5000 });
 
     // Wait for Angular to stabilize before interacting

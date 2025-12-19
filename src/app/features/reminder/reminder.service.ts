@@ -56,6 +56,7 @@ export class ReminderService {
       throw new Error('No service workers supported :(');
     }
 
+    // @ts-ignore - import.meta.url works in browser ES modules; ignore for electron CommonJS build
     this._w = new Worker(new URL('./reminder.worker', import.meta.url), {
       name: 'reminder',
       type: 'module',

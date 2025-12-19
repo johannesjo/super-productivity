@@ -48,32 +48,51 @@ base.describe('@supersync Simple Counter Sync', () => {
     );
     await settingsBtn.waitFor({ state: 'visible', timeout: 15000 });
     await settingsBtn.click();
-    await client.page.waitForURL(/settings/);
+    await client.page.waitForURL(/config/);
     await client.page.waitForTimeout(500);
 
-    // Click on Simple Counters section
+    // Click on Simple Counters section (it's inside a collapsible component)
+    // The translated title is "Simple Counters & Habit Tracking"
+    // It's under "Productivity Helper" section, may need to scroll to see it
     const simpleCountersSection = client.page.locator(
-      'section-header:has-text("Simple Counters")',
+      '.collapsible-header:has-text("Simple Counter")',
     );
+
+    // Scroll to section and wait for it
+    await simpleCountersSection.scrollIntoViewIfNeeded();
     await simpleCountersSection.waitFor({ state: 'visible', timeout: 10000 });
     await simpleCountersSection.click();
-    await client.page.waitForTimeout(300);
 
-    // Click Add Counter button
-    const addBtn = client.page.locator('button:has-text("Add Counter")');
+    // Wait for collapsible to expand
+    await client.page.waitForTimeout(500);
+
+    // Click Add Counter button - text is "Add simple counter/ habit"
+    // This is a formly repeat type that adds fields inline (not a dialog)
+    // The repeat section type has a footer with the add button
+    const addBtn = client.page.locator(
+      'repeat-section-type .footer button, button:has-text("Add simple counter")',
+    );
+    await addBtn.scrollIntoViewIfNeeded();
     await addBtn.waitFor({ state: 'visible', timeout: 5000 });
     await addBtn.click();
 
-    // Wait for dialog
-    const dialog = client.page.locator('dialog-simple-counter-edit');
-    await expect(dialog).toBeVisible({ timeout: 5000 });
+    // Wait for inline form fields to appear
+    await client.page.waitForTimeout(500);
 
-    // Fill title
-    const titleInput = dialog.locator('input[formcontrolname="title"]');
+    // Find the newly added counter row (last one in the list)
+    // The repeat section type creates .row elements inside .list-wrapper
+    const counterRows = client.page.locator('repeat-section-type .row');
+    const lastCounterRow = counterRows.last();
+
+    // Fill title - find the title input in the last counter row
+    const titleInput = lastCounterRow.locator('input').first();
+    await titleInput.scrollIntoViewIfNeeded();
+    await titleInput.waitFor({ state: 'visible', timeout: 5000 });
     await titleInput.fill(title);
 
-    // Select type
-    const typeSelect = dialog.locator('mat-select[formcontrolname="type"]');
+    // Select type - find the select in the last counter row
+    const typeSelect = lastCounterRow.locator('mat-select').first();
+    await typeSelect.scrollIntoViewIfNeeded();
     await typeSelect.click();
     await client.page.waitForTimeout(300);
     const typeOption = client.page.locator(
@@ -81,12 +100,18 @@ base.describe('@supersync Simple Counter Sync', () => {
     );
     await typeOption.click();
 
-    // Save
-    const saveBtn = dialog.locator('button:has-text("Save")');
+    // Wait for dropdown to close
+    await client.page.waitForTimeout(300);
+
+    // Save the form - the simple counter cfg has a Save button
+    const saveBtn = client.page.locator(
+      'simple-counter-cfg button:has-text("Save"), .submit-button:has-text("Save")',
+    );
+    await saveBtn.scrollIntoViewIfNeeded();
     await saveBtn.click();
 
-    // Wait for dialog to close
-    await expect(dialog).not.toBeVisible({ timeout: 5000 });
+    // Wait for save to complete
+    await client.page.waitForTimeout(500);
 
     // Navigate back to work view using home button or similar
     await client.page.goto('/#/tag/TODAY/tasks');

@@ -67,7 +67,18 @@ export class SuperSyncPage extends BasePage {
    */
   async setupSuperSync(config: SuperSyncConfig): Promise<void> {
     // Wait for sync button to be ready first
-    await this.syncBtn.waitFor({ state: 'visible', timeout: 10000 });
+    // The sync button depends on globalConfig being loaded (isSyncIconEnabled),
+    // which can take time after initial app load. Use longer timeout and retry.
+    const syncBtnTimeout = 30000;
+    try {
+      await this.syncBtn.waitFor({ state: 'visible', timeout: syncBtnTimeout });
+    } catch {
+      // If sync button not visible, the app might not be fully loaded
+      // Wait a bit more and try once more
+      console.log('[SuperSyncPage] Sync button not found initially, waiting longer...');
+      await this.page.waitForTimeout(2000);
+      await this.syncBtn.waitFor({ state: 'visible', timeout: syncBtnTimeout });
+    }
 
     // Use right-click to always open sync settings dialog
     // (left-click triggers sync if already configured)
@@ -157,8 +168,40 @@ export class SuperSyncPage extends BasePage {
       }
     }
 
-    // Save
-    await this.saveBtn.click();
+    // Save - use a robust click that handles element detachment during dialog close
+    // The dialog may close and navigation may start before click completes
+    try {
+      // Wait for button to be stable before clicking
+      await this.saveBtn.waitFor({ state: 'visible', timeout: 5000 });
+      await this.page.waitForTimeout(100); // Brief settle
+
+      // Click and don't wait for navigation to complete - just initiate the action
+      await Promise.race([
+        this.saveBtn.click({ timeout: 5000 }),
+        // If dialog closes quickly, the click may fail - that's OK if dialog is gone
+        this.page
+          .locator('mat-dialog-container')
+          .waitFor({ state: 'detached', timeout: 5000 }),
+      ]);
+    } catch (e) {
+      // If click failed but dialog is already closed, that's fine
+      const dialogStillOpen = await this.page
+        .locator('mat-dialog-container')
+        .isVisible()
+        .catch(() => false);
+      if (dialogStillOpen) {
+        // Dialog still open - the click actually failed
+        throw e;
+      }
+      // Dialog closed - click worked or was unnecessary
+      console.log('[SuperSyncPage] Dialog closed (click may have been interrupted)');
+    }
+
+    // Wait for dialog to fully close
+    await this.page
+      .locator('mat-dialog-container')
+      .waitFor({ state: 'detached', timeout: 5000 })
+      .catch(() => {});
 
     // Check if sync starts automatically (it should if enabled)
     try {
