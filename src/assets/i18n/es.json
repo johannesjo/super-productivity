@@ -1199,7 +1199,7 @@
         "REMINDER_ADDED": "Tarea programada \"{{title}}\"",
         "REMINDER_DELETED": "Recordatorio eliminado para tarea",
         "REMINDER_UPDATED": "Recordatorio actualizado para tarea \"{{title}}\"",
-        "TASK_CREATED": "Tarea creada \"{{title}}\""
+        "TASK_CREATED": "Tarea creada \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Seleccionar o crear tarea",
       "SUMMARY_TABLE": {

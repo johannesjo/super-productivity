@@ -1426,7 +1426,7 @@
         "REMINDER_ADDED": "Tugas \"{{title}}\" terjadwal",
         "REMINDER_DELETED": "Pengingat yang dihapus untuk tugas",
         "REMINDER_UPDATED": "Pengingat yang diperbarui untuk tugas \"{{title}}\"",
-        "TASK_CREATED": "tugas yang dibuat \"{{title}}\""
+        "TASK_CREATED": "tugas yang dibuat \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Pilih atau buat tugas",
       "SUMMARY_TABLE": {

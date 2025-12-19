@@ -1410,7 +1410,7 @@
         "REMINDER_ADDED": "Schemalagd <strong>{{title}}</strong> vid <strong>{{date}}</strong>",
         "REMINDER_DELETED": "Raderade påminnelse för uppgift",
         "REMINDER_UPDATED": "Uppdaterade påminnelse för uppgiften \"{{title}}\"",
-        "TASK_CREATED": "Skapade uppgiften \"{{title}}\""
+        "TASK_CREATED": "Skapade uppgiften \"{{taskTitle}}\""
       },
       "SELECT_OR_CREATE": "Välj eller skapa uppgift",
       "SUMMARY_TABLE": {
