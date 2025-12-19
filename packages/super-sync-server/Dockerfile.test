@@ -50,4 +50,4 @@ ENV CORS_ORIGINS=*
 ENV JWT_SECRET=e2e-test-secret-minimum-32-chars-long-for-security
 
 # Push schema to DB and start server
-CMD sh -c "npx prisma db push && node dist/index.js"
+CMD sh -c "npx prisma db push && node dist/src/index.js"
