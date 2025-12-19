@@ -98,14 +98,15 @@ const showUsage = async (saveHistory = true): Promise<void> => {
       SELECT
         u.id,
         u.email,
+        COALESCE((SELECT SUM(pg_column_size(o.payload)) FROM operations o WHERE o.user_id = u.id), 0) as ops_bytes,
+        COALESCE((SELECT COUNT(*) FROM operations o WHERE o.user_id = u.id), 0) as ops_count,
+        COALESCE(LENGTH(s.snapshot_data), 0) as snapshot_bytes,
         (
-          COALESCE(SUM(pg_column_size(o.payload)), 0) +
-          COALESCE(SUM(pg_column_size(s.snapshot_data)), 0)
+          COALESCE((SELECT SUM(pg_column_size(o.payload)) FROM operations o WHERE o.user_id = u.id), 0) +
+          COALESCE(LENGTH(s.snapshot_data), 0)
         ) as total_bytes
       FROM users u
-      LEFT JOIN operations o ON u.id = o.user_id
       LEFT JOIN user_sync_state s ON u.id = s.user_id
-      GROUP BY u.id
       ORDER BY total_bytes DESC
       LIMIT 20;
     `;
@@ -119,13 +120,20 @@ const showUsage = async (saveHistory = true): Promise<void> => {
       id: u.id,
       email: u.email,
       bytes: Number(u.total_bytes),
+      opsBytes: Number(u.ops_bytes),
+      opsCount: Number(u.ops_count),
+      snapshotBytes: Number(u.snapshot_bytes),
     }));
 
     console.table(
       usersData.map((u) => ({
         ID: u.id,
         Email: u.email,
-        Usage: formatBytes(u.bytes),
+        Ops: u.opsCount,
+        OpsSize: formatBytes(u.opsBytes),
+        AvgOp: u.opsCount > 0 ? formatBytes(u.opsBytes / u.opsCount) : '-',
+        Snapshot: formatBytes(u.snapshotBytes),
+        Total: formatBytes(u.bytes),
       })),
     );
 
