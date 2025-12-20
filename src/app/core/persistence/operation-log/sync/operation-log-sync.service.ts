@@ -1103,8 +1103,8 @@ export class OperationLogSyncService {
       // STEP 6: No Conflicts - Apply directly and validate
       // ─────────────────────────────────────────────────────────────────────────
       if (nonConflicting.length > 0) {
-        await this._applyNonConflictingOps(nonConflicting);
-        await this._validateAfterSync();
+        await this._applyNonConflictingOps(nonConflicting, true);
+        await this._validateAfterSync(true); // Inside sp_op_log lock
       }
       result = { localWinOpsCreated: 0 };
     });
@@ -1123,9 +1123,14 @@ export class OperationLogSyncService {
    * If crash occurs between steps 2-3, ops may be re-applied (idempotent).
    *
    * @param ops - Non-conflicting operations to apply
+   * @param callerHoldsLock - If true, skip lock acquisition in repair operation.
+   *        Pass true when calling from within the sp_op_log lock.
    * @throws Re-throws if application fails (ops marked as failed first)
    */
-  private async _applyNonConflictingOps(ops: Operation[]): Promise<void> {
+  private async _applyNonConflictingOps(
+    ops: Operation[],
+    callerHoldsLock: boolean = false,
+  ): Promise<void> {
     // Map op ID to seq for marking partial success
     const opIdToSeq = new Map<string, number>();
 
@@ -1180,6 +1185,7 @@ export class OperationLogSyncService {
         // Run validation after partial failure to detect/repair any state inconsistencies
         await this.validateStateService.validateAndRepairCurrentState(
           'partial-apply-failure',
+          { callerHoldsLock },
         );
 
         this.snackService.open({
@@ -1458,9 +1464,14 @@ export class OperationLogSyncService {
   /**
    * CHECKPOINT D: Validates state after applying remote operations.
    * If validation fails, attempts repair and creates a REPAIR operation.
+   *
+   * @param callerHoldsLock - If true, skip lock acquisition in repair operation.
+   *        Pass true when calling from within the sp_op_log lock.
    */
-  private async _validateAfterSync(): Promise<void> {
-    await this.validateStateService.validateAndRepairCurrentState('sync');
+  private async _validateAfterSync(callerHoldsLock: boolean = false): Promise<void> {
+    await this.validateStateService.validateAndRepairCurrentState('sync', {
+      callerHoldsLock,
+    });
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

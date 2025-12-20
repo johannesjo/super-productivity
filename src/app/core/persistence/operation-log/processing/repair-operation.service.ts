@@ -33,12 +33,14 @@ export class RepairOperationService {
    * @param repairedState - The fully repaired application state
    * @param repairSummary - Summary of what was repaired (counts by category)
    * @param clientId - The client ID for the operation (passed by caller to avoid circular dependency)
+   * @param options.skipLock - If true, skip acquiring sp_op_log lock. Use when caller already holds the lock.
    * @returns The sequence number of the created operation
    */
   async createRepairOperation(
     repairedState: unknown,
     repairSummary: RepairSummary,
     clientId: string,
+    options?: { skipLock?: boolean },
   ): Promise<number> {
     if (!clientId) {
       throw new Error('clientId is required - cannot create repair operation');
@@ -51,7 +53,7 @@ export class RepairOperationService {
 
     let seq: number = 0;
 
-    await this.lockService.request('sp_op_log', async () => {
+    const doCreateOperation = async (): Promise<void> => {
       const currentClock = await this.vectorClockService.getCurrentVectorClock();
       const newClock = incrementVectorClock(currentClock, clientId);
 
@@ -84,7 +86,14 @@ export class RepairOperationService {
         seq,
         repairSummary,
       });
-    });
+    };
+
+    // Skip lock if caller already holds it (e.g., during sync validation)
+    if (options?.skipLock) {
+      await doCreateOperation();
+    } else {
+      await this.lockService.request('sp_op_log', doCreateOperation);
+    }
 
     // Notify user that repair happened
     this._notifyUser(repairSummary);

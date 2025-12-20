@@ -19,6 +19,7 @@ import { ActionReducer, Action, MetaReducer } from '@ngrx/store';
 import {
   operationCaptureMetaReducer,
   setOperationCaptureService,
+  setIsApplyingRemoteOps,
 } from './operation-capture.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { EntityType, OpType } from '../operation.types';
@@ -117,10 +118,14 @@ describe('Meta-reducer ordering integration', () => {
     );
 
     setOperationCaptureService(captureService);
+    // Reset sync state to prevent test pollution from previous tests
+    setIsApplyingRemoteOps(false);
   });
 
   afterEach(() => {
     captureService.clear();
+    // Ensure sync state is reset after each test
+    setIsApplyingRemoteOps(false);
   });
 
   describe('CORRECT ordering: operationCaptureMetaReducer FIRST (outermost)', () => {

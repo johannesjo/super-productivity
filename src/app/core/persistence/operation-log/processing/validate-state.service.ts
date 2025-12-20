@@ -131,9 +131,14 @@ export class ValidateStateService {
    * and dispatches the repaired state. This is the full Checkpoint D flow.
    *
    * @param context - Logging context (e.g., 'sync', 'conflict-resolution')
+   * @param options.callerHoldsLock - If true, skip lock acquisition in repair operation.
+   *        Set to true when calling from within a sp_op_log lock (e.g., during sync).
    * @returns true if state is valid (or was successfully repaired), false otherwise
    */
-  async validateAndRepairCurrentState(context: string): Promise<boolean> {
+  async validateAndRepairCurrentState(
+    context: string,
+    options?: { callerHoldsLock?: boolean },
+  ): Promise<boolean> {
     OpLog.normal(
       `[ValidateStateService:${context}] Running post-operation validation...`,
     );
@@ -168,6 +173,7 @@ export class ValidateStateService {
       result.repairedState,
       result.repairSummary,
       clientId,
+      { skipLock: options?.callerHoldsLock },
     );
 
     // Dispatch repaired state to NgRx

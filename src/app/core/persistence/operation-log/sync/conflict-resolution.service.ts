@@ -99,10 +99,15 @@ export class ConflictResolutionService {
    * - Orphaned sub-tasks after parent deletion
    * - Inconsistent taskIds arrays in projects/tags
    *
+   * Note: This is called from within the sp_op_log lock (via autoResolveConflictsLWW),
+   * so we pass callerHoldsLock: true to prevent deadlock when creating repair operations.
+   *
    * @see ValidateStateService for the full validation and repair logic
    */
   private async _validateAndRepairAfterResolution(): Promise<void> {
-    await this.validateStateService.validateAndRepairCurrentState('conflict-resolution');
+    await this.validateStateService.validateAndRepairCurrentState('conflict-resolution', {
+      callerHoldsLock: true,
+    });
   }
 
   /**

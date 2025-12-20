@@ -1022,4 +1022,96 @@ base.describe('@supersync SuperSync Edge Cases', () => {
       }
     },
   );
+
+  /**
+   * Scenario: High Volume Sync (499 Operations)
+   *
+   * Tests that the system can handle a large number of operations (499)
+   * right at the edge before the COMPACTION_THRESHOLD (500) triggers.
+   * This verifies the operation log can handle high-volume syncs without issues.
+   *
+   * Actions:
+   * 1. Client A creates 250 tasks (250 operations)
+   * 2. Client A marks 249 tasks as done (249 more operations = 499 total)
+   * 3. Client A syncs all 499 operations
+   * 4. Client B syncs (bulk download of 499 operations)
+   * 5. Verify B has all 250 tasks with correct done states
+   */
+  base(
+    'High volume sync: 499 operations sync correctly',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(300000); // 5 minutes for this stress test
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup Client A
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        // Create 250 tasks (250 operations)
+        const taskCount = 250;
+        const taskNames: string[] = [];
+        for (let i = 1; i <= taskCount; i++) {
+          const taskName = `HighVol-${i}-${testRunId}`;
+          taskNames.push(taskName);
+          await clientA.workView.addTask(taskName);
+          await waitForTask(clientA.page, taskName);
+          if (i % 50 === 0) {
+            console.log(`[HighVolume] Created task ${i}/${taskCount}`);
+          }
+        }
+
+        // Mark 249 tasks as done (249 more operations = 499 total)
+        for (let i = 0; i < 249; i++) {
+          const taskLocator = clientA.page
+            .locator(`task:has-text("${taskNames[i]}")`)
+            .first();
+          await taskLocator.locator('.check-btn').click();
+          await clientA.page.waitForTimeout(100);
+          if ((i + 1) % 50 === 0) {
+            console.log(`[HighVolume] Marked ${i + 1}/249 tasks as done`);
+          }
+        }
+        console.log('[HighVolume] All 499 operations created locally');
+
+        // Sync all changes from A
+        await clientA.sync.syncAndWait();
+        console.log('[HighVolume] Client A synced 499 operations');
+
+        // Setup Client B and sync (bulk download)
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        console.log('[HighVolume] Client B synced (bulk download)');
+
+        // Wait for UI to settle after bulk sync
+        await clientB.page.waitForTimeout(3000);
+
+        // Verify all tasks exist on B
+        const taskCountB = await clientB.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        expect(taskCountB).toBe(taskCount);
+        console.log(`[HighVolume] Client B has all ${taskCount} tasks`);
+
+        // Verify done status (249 should be done, 1 should be open)
+        const doneCount = await clientB.page
+          .locator(`task.isDone:has-text("${testRunId}")`)
+          .count();
+        expect(doneCount).toBe(249);
+        console.log('[HighVolume] Done states verified on Client B');
+
+        console.log('[HighVolume] ✓ 499 operations applied successfully');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
