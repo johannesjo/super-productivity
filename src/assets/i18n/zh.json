@@ -217,9 +217,14 @@
       "ADD_TIME_MINUTE": "增加一分钟",
       "B": {
         "BREAK_RUNNING": "休息正在进行",
-        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
+        "END_BREAK": "休息结束",
+        "END_SESSION": "结束会话",
+        "PAUSE": "暂停",
         "POMODORO_BREAK_RUNNING": "休息 #{{cycleNr}} 正在进行",
+        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
+        "RESUME": "恢复",
         "SESSION_RUNNING": "专注会话正在进行",
+        "START": "开始",
         "TO_FOCUS_OVERLAY": "到专注覆盖"
       },
       "BACK_TO_PLANNING": "返回规划",
@@ -1150,6 +1155,7 @@
         "BTN_FORCE_OVERWRITE": "强制覆盖",
         "ERROR_CORS": "WebDAV 同步错误: 网络请求失败。\n\n这可能是一个跨域资源共享问题。请确保：\n• 您的 WebDAV 服务器允许跨源请求\n• 服务器 URL 正确且可访问\n• 您有有效的互联网连接",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "远程数据当前正在写入",
+        "ERROR_PERMISSION": "文件访问被拒绝。如果正在使用 Flatpak/Snap ，请通过 Flatseal 授予文件系统权限，或者使用 ~/.var/app/ 目录内的路径。",
         "ERROR_FALLBACK_TO_BACKUP": "导入数据时出错。回退到本地备份。",
         "ERROR_INVALID_DATA": "同步时出错。数据无效",
         "ERROR_NO_REV": "远程文件没有有效的修订",
@@ -1751,6 +1757,10 @@
       "HELP": "专注模式打开一个无干扰的屏幕，以帮助您专注于当前任务。",
       "L_ALWAYS_OPEN_FOCUS_MODE": "始终在跟踪时打开专注模式",
       "L_SKIP_PREPARATION_SCREEN": "跳过准备屏幕（拉伸等）",
+      "L_IS_PLAY_TICK": "专注时播放滴答声",
+      "L_PAUSE_TRACKING_DURING_BREAK": "休息期间暂停任务跟踪",
+      "L_SKIP_PREPARATION_SCREEN": "跳过准备界面（火箭动画）",
+      "L_START_IN_BACKGROUND": "仅以横幅开始专注时段（无覆盖层）",
       "TITLE": "专注模式"
     },
     "IDLE": {
