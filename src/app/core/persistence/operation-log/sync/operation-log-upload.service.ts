@@ -65,9 +65,6 @@ export interface UploadOptions {
  * - SuperSync uses API-based sync via `_uploadPendingOpsViaApi()`
  * - Legacy providers (WebDAV, Dropbox, LocalFile) do NOT use operation log sync at all
  *   They use pfapi's model-level LWW sync instead (see sync.service.ts:104)
- *
- * The file-based sync method `_uploadPendingOpsViaFiles()` exists for future extensibility
- * but is currently NEVER CALLED. If it's ever enabled, encryption support must be added.
  */
 @Injectable({
   providedIn: 'root',

@@ -69,33 +69,10 @@ export const MAX_DOWNLOAD_ITERATIONS = 1000;
 export const MAX_CONFLICT_RETRY_ATTEMPTS = 5;
 
 /**
- * Maximum age of remote operation files to keep during remote cleanup (milliseconds).
- * Files older than this will be deleted to prevent unbounded remote storage growth.
- * Should be >= COMPACTION_RETENTION_MS to ensure no data loss during sync gaps.
- * Default: 14 days (double local retention for safety margin)
- */
-export const REMOTE_COMPACTION_RETENTION_MS = 14 * 24 * 60 * 60 * 1000;
-
-/**
- * Maximum number of remote operation files to keep regardless of age.
- * Prevents deletion of recent files even if there are many.
- * Provides safety margin for high-frequency usage scenarios.
- */
-export const MAX_REMOTE_FILES_TO_KEEP = 100;
-
-/**
  * Maximum number of operations to be rejected before showing user warning.
  * Once this threshold is reached, user is notified about permanently failed ops.
  */
 export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
-
-/**
- * Threshold in bytes for logging a warning about large operation payloads.
- * Operations exceeding this size may indicate inefficient data patterns
- * and could impact sync performance and storage usage.
- * Default: 10KB
- */
-export const LARGE_PAYLOAD_WARNING_THRESHOLD_BYTES = 10 * 1024;
 
 /**
  * Maximum number of operations in a single batchUpdateForProject call.
@@ -135,14 +112,6 @@ export const SLOW_COMPACTION_THRESHOLD_MS = 3000;
  * Default: 20MB
  */
 export const STATE_SIZE_WARNING_THRESHOLD_MB = 20;
-
-/**
- * Timeout for the conflict resolution dialog (milliseconds).
- * If user doesn't respond within this time, the dialog auto-cancels
- * to prevent sync from being blocked indefinitely.
- * Default: 5 minutes
- */
-export const CONFLICT_DIALOG_TIMEOUT_MS = 5 * 60 * 1000;
 
 /**
  * Injection token for retry delay base value (milliseconds).

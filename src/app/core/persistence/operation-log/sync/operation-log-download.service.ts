@@ -67,9 +67,6 @@ export interface DownloadResult {
  * - Legacy providers (WebDAV, Dropbox, LocalFile) do NOT use operation log sync at all
  *   They use pfapi's model-level LWW sync instead (see sync.service.ts:104)
  *
- * The file-based sync method `_downloadRemoteOpsViaFiles()` exists for future extensibility
- * but is currently NEVER CALLED. If it's ever enabled, decryption support must be added.
- *
  * This service only handles downloading and filtering - conflict detection
  * and application are handled by OperationLogSyncService.
  */
