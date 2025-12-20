@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Operation } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
@@ -10,8 +10,7 @@ import {
 } from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
-import { WorklogService } from '../../../../features/worklog/worklog.service';
-import { lazyInject } from '../../../../util/lazy-inject';
+import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
 
 /**
  * Result of applying operations to the NgRx store.
@@ -83,10 +82,6 @@ export class OperationApplierService {
   private dependencyResolver = inject(DependencyResolverService);
   private archiveOperationHandler = inject(ArchiveOperationHandler);
   private hydrationState = inject(HydrationStateService);
-  // Use lazy injection to break circular dependency:
-  // OperationApplierService -> WorklogService -> PfapiService -> ... -> OperationApplierService
-  private _injector = inject(Injector);
-  private _getWorklogService = lazyInject(this._injector, WorklogService);
 
   /**
    * Apply operations to the NgRx store.
@@ -158,7 +153,7 @@ export class OperationApplierService {
 
     // Trigger archive reload for UI if archive-affecting operations were applied
     if (!isLocalHydration && hadArchiveAffectingOp) {
-      this._getWorklogService().refreshWorklog();
+      this.store.dispatch(remoteArchiveDataApplied());
     }
 
     OpLog.normal('OperationApplierService: Finished applying operations.');

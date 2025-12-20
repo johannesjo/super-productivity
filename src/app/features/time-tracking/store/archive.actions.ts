@@ -3,6 +3,17 @@ import { PersistentActionMeta } from '../../../core/persistence/operation-log/pe
 import { OpType } from '../../../core/persistence/operation-log/operation.types';
 
 /**
+ * Non-persistent action dispatched after remote archive-affecting operations
+ * have been applied to the store. This triggers UI refresh for worklog/archive views.
+ *
+ * This action breaks the circular dependency between OperationApplierService
+ * and WorklogService by using NgRx instead of direct service injection.
+ */
+export const remoteArchiveDataApplied = createAction(
+  '[Archive] Remote Archive Data Applied',
+);
+
+/**
  * Persistent action to flush data from archiveYoung to archiveOld.
  * This action is dispatched when the local client determines it's time to flush,
  * and is synced to other clients to ensure deterministic archive state.

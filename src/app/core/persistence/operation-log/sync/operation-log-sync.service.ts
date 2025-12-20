@@ -43,6 +43,7 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { lazyInject } from '../../../../util/lazy-inject';
 import { MAX_REJECTED_OPS_BEFORE_WARNING } from '../operation-log.const';
+import { CLIENT_ID_PROVIDER } from '../client-id.provider';
 import { LockService } from './lock.service';
 import { OperationLogCompactionService } from '../store/operation-log-compaction.service';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -134,9 +135,11 @@ export class OperationLogSyncService {
   private superSyncStatusService = inject(SuperSyncStatusService);
   private syncImportFilterService = inject(SyncImportFilterService);
   private serverMigrationService = inject(ServerMigrationService);
+  private clientIdProvider = inject(CLIENT_ID_PROVIDER);
 
-  // Lazy injection to break circular dependency:
+  // Lazy injection to break circular dependency for getActiveSyncProvider():
   // PfapiService -> Pfapi -> OperationLogSyncService -> PfapiService
+  // Note: loadClientId() now uses CLIENT_ID_PROVIDER instead
   private _injector = inject(Injector);
   private _getPfapiService = lazyInject(this._injector, PfapiService);
 
@@ -456,7 +459,7 @@ export class OperationLogSyncService {
     extraClocks?: VectorClock[],
     snapshotVectorClock?: VectorClock,
   ): Promise<number> {
-    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
       OpLog.err('OperationLogSyncService: Cannot resolve stale ops - no client ID');
       return 0;
@@ -797,7 +800,7 @@ export class OperationLogSyncService {
     }
 
     // Get the current client ID
-    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
       return;
     }

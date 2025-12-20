@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import {
   EntityConflict,
@@ -23,8 +23,7 @@ import {
 } from '../../../../pfapi/api/util/vector-clock';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { lazyInject } from '../../../../util/lazy-inject';
+import { CLIENT_ID_PROVIDER } from '../client-id.provider';
 import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
 import { selectProjectById } from '../../../../features/project/store/project.selectors';
 import { selectTagById } from '../../../../features/tag/store/tag.reducer';
@@ -86,10 +85,7 @@ export class ConflictResolutionService {
   private snackService = inject(SnackService);
   private validateStateService = inject(ValidateStateService);
   private syncSafetyBackupService = inject(SyncSafetyBackupService);
-
-  // Lazy injection to break circular dependency
-  private _injector = inject(Injector);
-  private _getPfapiService = lazyInject(this._injector, PfapiService);
+  private clientIdProvider = inject(CLIENT_ID_PROVIDER);
 
   /**
    * Validates the current state after conflict resolution and repairs if necessary.
@@ -567,7 +563,7 @@ export class ConflictResolutionService {
     }
 
     // Get client ID
-    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
       OpLog.err('ConflictResolutionService: Cannot create local-win op - no client ID');
       return undefined;

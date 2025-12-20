@@ -9,8 +9,8 @@ import { Operation, OpType, EntityType } from '../operation.types';
 import { ArchiveOperationHandler } from './archive-operation-handler.service';
 import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
-import { WorklogService } from '../../../../features/worklog/worklog.service';
 import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
+import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -18,7 +18,6 @@ describe('OperationApplierService', () => {
   let mockDependencyResolver: jasmine.SpyObj<DependencyResolverService>;
   let mockArchiveOperationHandler: jasmine.SpyObj<ArchiveOperationHandler>;
   let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
-  let mockWorklogService: jasmine.SpyObj<WorklogService>;
 
   const createMockOperation = (
     id: string,
@@ -52,7 +51,6 @@ describe('OperationApplierService', () => {
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
     ]);
-    mockWorklogService = jasmine.createSpyObj('WorklogService', ['refreshWorklog']);
 
     // Default: no dependencies
     mockDependencyResolver.extractDependencies.and.returnValue([]);
@@ -68,7 +66,6 @@ describe('OperationApplierService', () => {
         { provide: DependencyResolverService, useValue: mockDependencyResolver },
         { provide: ArchiveOperationHandler, useValue: mockArchiveOperationHandler },
         { provide: HydrationStateService, useValue: mockHydrationState },
-        { provide: WorklogService, useValue: mockWorklogService },
       ],
     });
 
@@ -156,8 +153,8 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations([op]);
 
-      // Verify store.dispatch was called with loadAllData action
-      expect(mockStore.dispatch).toHaveBeenCalledTimes(1);
+      // Verify store.dispatch was called with loadAllData action and remoteArchiveDataApplied
+      expect(mockStore.dispatch).toHaveBeenCalledTimes(2);
       const dispatchedAction = mockStore.dispatch.calls.first().args[0] as any;
       expect(dispatchedAction.type).toBe('[SP_ALL] Load(import) all data');
       expect(dispatchedAction.appDataComplete.archiveYoung).toEqual(archiveYoungData);
@@ -461,7 +458,7 @@ describe('OperationApplierService', () => {
   });
 
   describe('archive reload trigger', () => {
-    it('should call refreshWorklog for archive-affecting operations', async () => {
+    it('should dispatch remoteArchiveDataApplied for archive-affecting operations', async () => {
       // moveToArchive is an archive-affecting action
       const op: Operation = {
         id: 'op-1',
@@ -478,19 +475,30 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations([op]);
 
-      expect(mockWorklogService.refreshWorklog).toHaveBeenCalledTimes(1);
+      // Check that remoteArchiveDataApplied action was dispatched
+      const dispatchCalls = mockStore.dispatch.calls.allArgs();
+      const archiveDataAppliedCalls = dispatchCalls.filter(
+        (args) =>
+          (args[0] as unknown as { type: string }).type === remoteArchiveDataApplied.type,
+      );
+      expect(archiveDataAppliedCalls.length).toBe(1);
     });
 
-    it('should not call refreshWorklog for non-archive-affecting operations', async () => {
+    it('should not dispatch remoteArchiveDataApplied for non-archive-affecting operations', async () => {
       // A regular task update is not archive-affecting
       const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
 
       await service.applyOperations([op]);
 
-      expect(mockWorklogService.refreshWorklog).not.toHaveBeenCalled();
+      const dispatchCalls = mockStore.dispatch.calls.allArgs();
+      const archiveDataAppliedCalls = dispatchCalls.filter(
+        (args) =>
+          (args[0] as unknown as { type: string }).type === remoteArchiveDataApplied.type,
+      );
+      expect(archiveDataAppliedCalls.length).toBe(0);
     });
 
-    it('should not call refreshWorklog when isLocalHydration is true', async () => {
+    it('should not dispatch remoteArchiveDataApplied when isLocalHydration is true', async () => {
       // Even for archive-affecting operations, skip during local hydration
       const op: Operation = {
         id: 'op-1',
@@ -507,10 +515,15 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations([op], { isLocalHydration: true });
 
-      expect(mockWorklogService.refreshWorklog).not.toHaveBeenCalled();
+      const dispatchCalls = mockStore.dispatch.calls.allArgs();
+      const archiveDataAppliedCalls = dispatchCalls.filter(
+        (args) =>
+          (args[0] as unknown as { type: string }).type === remoteArchiveDataApplied.type,
+      );
+      expect(archiveDataAppliedCalls.length).toBe(0);
     });
 
-    it('should call refreshWorklog once for batch with archive-affecting ops', async () => {
+    it('should dispatch remoteArchiveDataApplied once for batch with archive-affecting ops', async () => {
       const ops: Operation[] = [
         createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' }),
         {
@@ -530,8 +543,13 @@ describe('OperationApplierService', () => {
 
       await service.applyOperations(ops);
 
-      // Only called once at the end, not per operation
-      expect(mockWorklogService.refreshWorklog).toHaveBeenCalledTimes(1);
+      // Only dispatched once at the end, not per operation
+      const dispatchCalls = mockStore.dispatch.calls.allArgs();
+      const archiveDataAppliedCalls = dispatchCalls.filter(
+        (args) =>
+          (args[0] as unknown as { type: string }).type === remoteArchiveDataApplied.type,
+      );
+      expect(archiveDataAppliedCalls.length).toBe(1);
     });
   });
 });

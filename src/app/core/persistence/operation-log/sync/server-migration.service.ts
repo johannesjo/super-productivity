@@ -1,4 +1,4 @@
-import { inject, Injectable, Injector } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { SyncProviderServiceInterface } from '../../../../pfapi/api/sync/sync-provider.interface';
 import { SyncProviderId } from '../../../../pfapi/api/pfapi.const';
@@ -17,8 +17,7 @@ import { Operation, OpType } from '../operation.types';
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { OpLog } from '../../../log';
 import { SYSTEM_TAG_IDS } from '../../../../features/tag/tag.const';
-import { PfapiService } from '../../../../pfapi/pfapi.service';
-import { lazyInject } from '../../../../util/lazy-inject';
+import { CLIENT_ID_PROVIDER } from '../client-id.provider';
 
 /**
  * Service responsible for handling server migration scenarios.
@@ -50,11 +49,7 @@ export class ServerMigrationService {
   private validateStateService = inject(ValidateStateService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private snackService = inject(SnackService);
-
-  // Lazy injection to break circular dependency:
-  // PfapiService -> Pfapi -> OperationLogSyncService -> ServerMigrationService -> PfapiService
-  private _injector = inject(Injector);
-  private _getPfapiService = lazyInject(this._injector, PfapiService);
+  private clientIdProvider = inject(CLIENT_ID_PROVIDER);
 
   /**
    * Checks if we're connecting to a new/empty server and handles migration if needed.
@@ -180,7 +175,7 @@ export class ServerMigrationService {
     }
 
     // Get client ID and vector clock
-    const clientId = await this._getPfapiService().pf.metaModel.loadClientId();
+    const clientId = await this.clientIdProvider.loadClientId();
     if (!clientId) {
       OpLog.err(
         'ServerMigrationService: Cannot create SYNC_IMPORT - no client ID available.',
