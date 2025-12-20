@@ -79,7 +79,7 @@ export const createServer = (
 
       // Serve static files
       await fastifyServer.register(fastifyStatic, {
-        root: path.join(__dirname, '../public'),
+        root: path.join(__dirname, '../../public'),
         prefix: '/',
       });
 
