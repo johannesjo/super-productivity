@@ -46,7 +46,7 @@ export const LOCAL_ACTIONS = new InjectionToken<Observable<Action>>('LOCAL_ACTIO
  *
  * Only use this for effects that MUST react to remote operations:
  * - operation-log.effects.ts: Captures and persists all actions (handles isRemote internally)
- * - archive.effects.ts: Deterministic archive handling across devices
+ * - archive-operation-handler.effects.ts: Refreshes worklog UI after remote archive ops
  *
  * For all other effects, use LOCAL_ACTIONS instead.
  */
