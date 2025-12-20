@@ -197,6 +197,15 @@ export interface OpDownloadResponse {
    * Clients need this to create merged updates that dominate all known clocks.
    */
   snapshotVectorClock?: Record<string, number>;
+  /**
+   * Server's current time when the response was generated (Unix timestamp).
+   * Used to detect clock drift between client and server.
+   *
+   * Note: This differs from `receivedAt` on individual ops, which is the time
+   * when each operation was originally uploaded to the server (could be hours ago).
+   * For clock drift detection, we need the server's CURRENT time, not old timestamps.
+   */
+  serverTime?: number;
 }
 
 /**

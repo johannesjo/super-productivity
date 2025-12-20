@@ -189,8 +189,12 @@ export class OperationLogDownloadService {
           break;
         }
 
-        // Check for clock drift using server's receivedAt timestamp
-        this._checkClockDrift(response.ops[0].receivedAt);
+        // Check for clock drift using server's current time (if provided)
+        // NOTE: We use serverTime (current server time) instead of receivedAt (when ops were uploaded)
+        // because receivedAt can be hours old and would falsely trigger clock drift warnings.
+        if (response.serverTime !== undefined) {
+          this._checkClockDrift(response.serverTime);
+        }
 
         // When force downloading from seq 0, capture ALL op clocks (including duplicates)
         // This allows rebuilding vector clock state from all known ops on the server

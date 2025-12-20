@@ -3,6 +3,7 @@ import {
   operationCaptureMetaReducer,
   setOperationCaptureService,
   getOperationCaptureService,
+  setIsApplyingRemoteOps,
 } from './operation-capture.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { Action } from '@ngrx/store';
@@ -57,6 +58,13 @@ describe('operationCaptureMetaReducer', () => {
     mockReducer = jasmine.createSpy('reducer').and.returnValue(mockModifiedState);
 
     setOperationCaptureService(mockCaptureService);
+    // Reset sync state to prevent test pollution
+    setIsApplyingRemoteOps(false);
+  });
+
+  afterEach(() => {
+    // Ensure sync state is reset after each test
+    setIsApplyingRemoteOps(false);
   });
 
   describe('setOperationCaptureService', () => {
@@ -222,6 +230,60 @@ describe('operationCaptureMetaReducer', () => {
         wrappedReducer(mockState, action);
         expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalled();
       });
+    });
+  });
+
+  describe('sync blocking (user interaction during sync)', () => {
+    /**
+     * BUG FIX TEST: When remote operations are being applied (sync replay),
+     * user interactions should NOT create new local operations.
+     *
+     * The problem:
+     * 1. User syncs after 12 hours, many operations need to be applied
+     * 2. User interacts with the app during sync (creates a task, clicks done, etc.)
+     * 3. These interactions are captured as local operations
+     * 4. The local operations have stale vector clocks (not including remote ops being applied)
+     * 5. When uploaded, these ops conflict with recently-downloaded remote ops
+     *
+     * The fix:
+     * Check HydrationStateService.isApplyingRemoteOps() in the meta-reducer
+     * and skip capturing when it returns true.
+     */
+    it('should NOT capture local operations when applying remote operations (sync in progress)', () => {
+      // This requires mocking the HydrationStateService
+      // The meta-reducer needs to check isApplyingRemoteOps() before capturing
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const action = createMockAction();
+
+      // Simulate sync in progress by setting hydration state
+      // The fix should add a check for this in the meta-reducer
+      setIsApplyingRemoteOps(true);
+
+      wrappedReducer(mockState, action);
+
+      // Should NOT capture - sync is in progress
+      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+
+      // Reset for other tests
+      setIsApplyingRemoteOps(false);
+    });
+
+    it('should resume capturing local operations after sync completes', () => {
+      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
+      const action = createMockAction();
+
+      // Start sync
+      setIsApplyingRemoteOps(true);
+
+      wrappedReducer(mockState, action);
+      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+
+      // End sync
+      setIsApplyingRemoteOps(false);
+
+      // Now actions should be captured again
+      wrappedReducer(mockState, action);
+      expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalled();
     });
   });
 });

@@ -54,6 +54,20 @@ let consecutiveCaptureFailures = 0;
 const MAX_CONSECUTIVE_FAILURES_BEFORE_WARNING = 3;
 
 /**
+ * Flag indicating whether remote operations are currently being applied.
+ * When true, local user interactions should NOT be captured as new operations.
+ *
+ * This prevents the "slow device cascade" problem where:
+ * 1. User syncs after a long time, many operations need to be applied
+ * 2. User interacts with the app during sync (creates a task, clicks done, etc.)
+ * 3. These interactions are captured as local operations with stale vector clocks
+ * 4. When uploaded, these ops conflict with the remote ops just downloaded
+ *
+ * Set by HydrationStateService via setIsApplyingRemoteOps().
+ */
+let isApplyingRemoteOps = false;
+
+/**
  * Sets the service instance for the meta-reducer.
  * Must be called during app initialization before any persistent actions are dispatched.
  */
@@ -67,6 +81,24 @@ export const setOperationCaptureService = (service: OperationCaptureService): vo
  */
 export const getOperationCaptureService = (): OperationCaptureService | null => {
   return operationCaptureService;
+};
+
+/**
+ * Sets the flag indicating whether remote operations are being applied.
+ * Called by HydrationStateService.startApplyingRemoteOps() and endApplyingRemoteOps().
+ *
+ * When true, local user interactions will not be captured as operations.
+ * This prevents stale vector clocks and conflicts during sync.
+ */
+export const setIsApplyingRemoteOps = (value: boolean): void => {
+  isApplyingRemoteOps = value;
+};
+
+/**
+ * Gets the current state of the isApplyingRemoteOps flag.
+ */
+export const getIsApplyingRemoteOps = (): boolean => {
+  return isApplyingRemoteOps;
 };
 
 /**
@@ -105,7 +137,18 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
     const afterState = reducer(state, action);
 
     // Only process persistent, non-remote actions
+    // Also skip if remote operations are being applied (prevents stale vector clocks)
     if (isPersistentAction(action) && !(action as PersistentAction).meta.isRemote) {
+      // Skip capturing if remote operations are being applied (sync in progress)
+      // This prevents user interactions during sync from creating operations with stale clocks
+      if (isApplyingRemoteOps) {
+        OpLog.verbose(
+          'operationCaptureMetaReducer: Skipping capture during remote op application',
+          { actionType: action.type },
+        );
+        return afterState;
+      }
+
       // Warn if service not initialized - this means we'll lose the operation
       if (!operationCaptureService) {
         OpLog.warn(

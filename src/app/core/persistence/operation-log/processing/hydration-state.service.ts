@@ -1,4 +1,5 @@
 import { Injectable, signal } from '@angular/core';
+import { setIsApplyingRemoteOps } from './operation-capture.meta-reducer';
 
 /**
  * Tracks whether the application is currently applying remote operations
@@ -32,6 +33,13 @@ import { Injectable, signal } from '@angular/core';
  *   );
  * }
  * ```
+ *
+ * ## Preventing Stale Operations During Sync
+ *
+ * This service also notifies the operation capture meta-reducer to skip
+ * capturing user interactions during sync. This prevents the "slow device
+ * cascade" problem where user actions during sync create operations with
+ * stale vector clocks that immediately conflict.
  */
 @Injectable({ providedIn: 'root' })
 export class HydrationStateService {
@@ -48,16 +56,23 @@ export class HydrationStateService {
   /**
    * Marks the start of remote operation application.
    * Called by OperationApplierService before applying operations.
+   *
+   * Also notifies the meta-reducer to skip capturing local operations
+   * during this time to prevent stale vector clocks.
    */
   startApplyingRemoteOps(): void {
     this._isApplyingRemoteOps.set(true);
+    setIsApplyingRemoteOps(true);
   }
 
   /**
    * Marks the end of remote operation application.
    * Called by OperationApplierService after applying operations.
+   *
+   * Re-enables operation capturing for local operations.
    */
   endApplyingRemoteOps(): void {
     this._isApplyingRemoteOps.set(false);
+    setIsApplyingRemoteOps(false);
   }
 }

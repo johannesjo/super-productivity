@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { HydrationStateService } from './hydration-state.service';
+import { getIsApplyingRemoteOps } from './operation-capture.meta-reducer';
 
 describe('HydrationStateService', () => {
   let service: HydrationStateService;
@@ -74,6 +75,56 @@ describe('HydrationStateService', () => {
 
       service.endApplyingRemoteOps();
       expect(secondService.isApplyingRemoteOps()).toBeFalse();
+    });
+  });
+
+  describe('meta-reducer integration', () => {
+    /**
+     * These tests verify that HydrationStateService correctly notifies the
+     * operation-capture meta-reducer to skip capturing during sync.
+     * This is critical for preventing the "slow device cascade" problem.
+     */
+    it('should set meta-reducer flag when startApplyingRemoteOps is called', () => {
+      expect(getIsApplyingRemoteOps()).toBeFalse();
+
+      service.startApplyingRemoteOps();
+
+      // Both the service state and meta-reducer flag should be true
+      expect(service.isApplyingRemoteOps()).toBeTrue();
+      expect(getIsApplyingRemoteOps()).toBeTrue();
+    });
+
+    it('should clear meta-reducer flag when endApplyingRemoteOps is called', () => {
+      service.startApplyingRemoteOps();
+      expect(getIsApplyingRemoteOps()).toBeTrue();
+
+      service.endApplyingRemoteOps();
+
+      // Both the service state and meta-reducer flag should be false
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+      expect(getIsApplyingRemoteOps()).toBeFalse();
+    });
+
+    it('should keep service state and meta-reducer flag in sync', () => {
+      // Start sync
+      service.startApplyingRemoteOps();
+      expect(service.isApplyingRemoteOps()).toBeTrue();
+      expect(getIsApplyingRemoteOps()).toBeTrue();
+
+      // End sync
+      service.endApplyingRemoteOps();
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+      expect(getIsApplyingRemoteOps()).toBeFalse();
+
+      // Start again
+      service.startApplyingRemoteOps();
+      expect(service.isApplyingRemoteOps()).toBeTrue();
+      expect(getIsApplyingRemoteOps()).toBeTrue();
+
+      // End again
+      service.endApplyingRemoteOps();
+      expect(service.isApplyingRemoteOps()).toBeFalse();
+      expect(getIsApplyingRemoteOps()).toBeFalse();
     });
   });
 });

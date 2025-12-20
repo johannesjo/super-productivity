@@ -89,14 +89,14 @@ describe('OperationLogDownloadService', () => {
 
       it('should detect and warn about clock drift after retry', fakeAsync(() => {
         const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
-        const serverTime = Date.now() - driftMs;
+        const serverCurrentTime = Date.now() - driftMs; // Server clock is behind
 
         mockApiProvider.downloadOps.and.returnValue(
           Promise.resolve({
             ops: [
               {
                 serverSeq: 1,
-                receivedAt: serverTime,
+                receivedAt: serverCurrentTime,
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -112,6 +112,8 @@ describe('OperationLogDownloadService', () => {
             ],
             hasMore: false,
             latestSeq: 1,
+            // Server's current time (this is what we check for clock drift)
+            serverTime: serverCurrentTime,
           }),
         );
 
@@ -142,7 +144,7 @@ describe('OperationLogDownloadService', () => {
       it('should not warn if clock drift resolves after retry', fakeAsync(() => {
         const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Initial drift exceeds threshold
         const initialTime = Date.now();
-        const serverTime = initialTime - driftMs;
+        const serverCurrentTime = initialTime - driftMs;
 
         // Track Date.now() calls to simulate clock correction
         let dateNowCallCount = 0;
@@ -154,7 +156,7 @@ describe('OperationLogDownloadService', () => {
             return initialTime; // Initial check shows drift
           }
           // After "clock correction", drift is now within threshold
-          return serverTime + 60000; // Only 1 minute drift
+          return serverCurrentTime + 60000; // Only 1 minute drift
         });
 
         mockApiProvider.downloadOps.and.returnValue(
@@ -162,7 +164,7 @@ describe('OperationLogDownloadService', () => {
             ops: [
               {
                 serverSeq: 1,
-                receivedAt: serverTime,
+                receivedAt: serverCurrentTime,
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -178,6 +180,7 @@ describe('OperationLogDownloadService', () => {
             ],
             hasMore: false,
             latestSeq: 1,
+            serverTime: serverCurrentTime,
           }),
         );
 
@@ -226,14 +229,14 @@ describe('OperationLogDownloadService', () => {
 
       it('should only warn about clock drift once per session', fakeAsync(() => {
         const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // Threshold + 1 min
-        const serverTime = Date.now() - driftMs;
+        const serverCurrentTime = Date.now() - driftMs;
 
         mockApiProvider.downloadOps.and.returnValue(
           Promise.resolve({
             ops: [
               {
                 serverSeq: 1,
-                receivedAt: serverTime,
+                receivedAt: serverCurrentTime,
                 op: {
                   id: 'op-1',
                   clientId: 'c1',
@@ -249,6 +252,7 @@ describe('OperationLogDownloadService', () => {
             ],
             hasMore: false,
             latestSeq: 1,
+            serverTime: serverCurrentTime,
           }),
         );
 
@@ -263,6 +267,136 @@ describe('OperationLogDownloadService', () => {
         tick(); // Resolve promises
         tick(1000); // Wait for retry (if any)
         expect(OpLog.warn).toHaveBeenCalledTimes(1);
+      }));
+
+      it('should NOT warn about clock drift when operations are just old (not actual drift)', fakeAsync(() => {
+        // BUG FIX TEST: The old implementation compared Date.now() with receivedAt
+        // (when the op was uploaded). If ops are 12 hours old, it would incorrectly
+        // warn about "clock drift" even though clocks are synchronized.
+        //
+        // The fix: Use serverTime from the response (server's current time) instead
+        // of receivedAt (when the op was uploaded).
+        const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+        const twelveHoursAgo = Date.now() - TWELVE_HOURS_MS;
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: twelveHoursAgo, // Op was uploaded 12 hours ago
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: twelveHoursAgo,
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+            // Server's current time is NOW (no drift)
+            serverTime: Date.now(),
+          }),
+        );
+
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for retry
+
+        // Should NOT warn - there's no actual clock drift, ops are just old
+        expect(OpLog.warn).not.toHaveBeenCalled();
+        expect(mockSnackService.open).not.toHaveBeenCalled();
+      }));
+
+      it('should warn about clock drift using serverTime from response', fakeAsync(() => {
+        // When server sends its current time and it differs significantly from
+        // client time, we should warn about clock drift
+        const driftMs = CLOCK_DRIFT_THRESHOLD_MS + 60000; // 6 minutes drift
+        const serverCurrentTime = Date.now() - driftMs; // Server clock is 6 min behind
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: serverCurrentTime - 1000, // Op was received 1 sec before response
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: serverCurrentTime - 1000,
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+            serverTime: serverCurrentTime, // Server's current time
+          }),
+        );
+
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for retry
+
+        // Should warn because serverTime differs from client time
+        expect(OpLog.warn).toHaveBeenCalledWith(
+          'OperationLogDownloadService: Clock drift detected',
+          jasmine.objectContaining({
+            driftMinutes: jasmine.any(String),
+            direction: 'client ahead',
+          }),
+        );
+      }));
+
+      it('should skip clock drift check when serverTime is not provided (backwards compatibility)', fakeAsync(() => {
+        // Old servers may not provide serverTime. In this case, we should NOT
+        // check clock drift at all because using receivedAt would give false positives.
+        const TWELVE_HOURS_MS = 12 * 60 * 60 * 1000;
+        const twelveHoursAgo = Date.now() - TWELVE_HOURS_MS;
+
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              {
+                serverSeq: 1,
+                receivedAt: twelveHoursAgo, // Old op
+                op: {
+                  id: 'op-1',
+                  clientId: 'c1',
+                  actionType: '[Task] Add',
+                  opType: OpType.Create,
+                  entityType: 'TASK',
+                  payload: {},
+                  vectorClock: {},
+                  timestamp: twelveHoursAgo,
+                  schemaVersion: 1,
+                },
+              },
+            ],
+            hasMore: false,
+            latestSeq: 1,
+            // serverTime is NOT provided (old server)
+          }),
+        );
+
+        service.downloadRemoteOps(mockApiProvider);
+        tick(); // Resolve promises
+        tick(1000); // Wait for potential retry
+
+        // Should NOT warn - no serverTime means we can't reliably detect drift
+        expect(OpLog.warn).not.toHaveBeenCalled();
+        expect(mockSnackService.open).not.toHaveBeenCalled();
       }));
 
       it('should acquire lock before downloading', async () => {

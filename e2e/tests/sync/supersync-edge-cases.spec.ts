@@ -915,4 +915,111 @@ base.describe('@supersync SuperSync Edge Cases', () => {
       }
     },
   );
+
+  /**
+   * Scenario: Bulk Sync (Slow Device Recovery)
+   *
+   * Tests that many operations sync correctly without causing cascade conflicts.
+   * This verifies the fix for the "slow device cascade" problem where user
+   * interactions during sync would create operations with stale vector clocks.
+   *
+   * Actions:
+   * 1. Client A creates many tasks (simulating a day's work)
+   * 2. Client B syncs (downloads all operations at once)
+   * 3. Verify B has all tasks from A
+   * 4. Verify no spurious conflicts or errors
+   */
+  base(
+    'Bulk sync: Many operations sync without cascade conflicts',
+    async ({ browser, baseURL }, testInfo) => {
+      testInfo.setTimeout(120000); // Bulk operations need more time
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const syncConfig = getSuperSyncConfig(user);
+
+        // Setup Client A
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        // 1. Client A creates many tasks (simulating a day's work)
+        const taskCount = 10;
+        const taskNames: string[] = [];
+        for (let i = 1; i <= taskCount; i++) {
+          const taskName = `BulkTask-${i}-${testRunId}`;
+          taskNames.push(taskName);
+          await clientA.workView.addTask(taskName);
+          await waitForTask(clientA.page, taskName);
+          console.log(`[BulkSync] Created task ${i}/${taskCount}`);
+        }
+
+        // Mark some tasks as done
+        for (let i = 0; i < 3; i++) {
+          const taskLocator = clientA.page
+            .locator(`task:has-text("${taskNames[i]}")`)
+            .first();
+          await taskLocator.locator('.check-btn').click();
+          await clientA.page.waitForTimeout(200);
+        }
+        console.log('[BulkSync] Marked 3 tasks as done');
+
+        // Sync all changes from A
+        await clientA.sync.syncAndWait();
+        console.log('[BulkSync] Client A synced all changes');
+
+        // 2. Setup Client B and sync (downloads all operations at once)
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        console.log('[BulkSync] Client B synced (bulk download)');
+
+        // Wait for UI to settle after bulk sync
+        await clientB.page.waitForTimeout(2000);
+
+        // 3. Verify B has all tasks from A
+        for (const taskName of taskNames) {
+          await waitForTask(clientB.page, taskName);
+        }
+        console.log(`[BulkSync] Client B has all ${taskCount} tasks`);
+
+        // Verify task count matches
+        const taskCountB = await clientB.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        expect(taskCountB).toBe(taskCount);
+
+        // Verify done status of first 3 tasks
+        for (let i = 0; i < 3; i++) {
+          const taskLocator = clientB.page
+            .locator(`task:not(.ng-animating):has-text("${taskNames[i]}")`)
+            .first();
+          await expect(taskLocator).toHaveClass(/isDone/, { timeout: 5000 });
+        }
+        console.log('[BulkSync] Done status verified on Client B');
+
+        // 4. Do another round of sync to verify no spurious conflicts
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        // Verify counts still match
+        const finalCountA = await clientA.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        const finalCountB = await clientB.page
+          .locator(`task:has-text("${testRunId}")`)
+          .count();
+        expect(finalCountA).toBe(taskCount);
+        expect(finalCountB).toBe(taskCount);
+
+        console.log('[BulkSync] ✓ Bulk sync completed without cascade conflicts');
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
 });
