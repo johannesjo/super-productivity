@@ -153,17 +153,46 @@ export class SyncService {
       return { hasConflict: false };
     }
 
-    // Skip if no entityId (can't have entity-level conflicts)
-    if (!op.entityId) {
+    // Build list of entity IDs to check for conflicts.
+    // Operations may have either entityId (singular) or entityIds (batch operations).
+    const entityIdsToCheck: string[] = op.entityIds?.length
+      ? op.entityIds
+      : op.entityId
+        ? [op.entityId]
+        : [];
+
+    // Skip if no entity IDs (can't have entity-level conflicts)
+    if (entityIdsToCheck.length === 0) {
       return { hasConflict: false };
     }
 
+    // Check each entity for conflicts
+    for (const entityId of entityIdsToCheck) {
+      const conflictResult = await this.detectConflictForEntity(userId, op, entityId, tx);
+      if (conflictResult.hasConflict) {
+        return conflictResult;
+      }
+    }
+
+    return { hasConflict: false };
+  }
+
+  /**
+   * Checks for conflicts on a single entity.
+   * Extracted from detectConflict to support multi-entity operations.
+   */
+  private async detectConflictForEntity(
+    userId: number,
+    op: Operation,
+    entityId: string,
+    tx: Prisma.TransactionClient,
+  ): Promise<{ hasConflict: boolean; reason?: string; existingClock?: VectorClock }> {
     // Get the latest operation for this entity
     const existingOp = await tx.operation.findFirst({
       where: {
         userId,
         entityType: op.entityType,
-        entityId: op.entityId,
+        entityId,
       },
       orderBy: {
         serverSeq: 'desc',
@@ -195,7 +224,7 @@ export class SyncService {
     if (comparison === 'CONCURRENT') {
       return {
         hasConflict: true,
-        reason: `Concurrent modification detected for ${op.entityType}:${op.entityId}`,
+        reason: `Concurrent modification detected for ${op.entityType}:${entityId}`,
         existingClock,
       };
     }
@@ -204,7 +233,7 @@ export class SyncService {
     if (comparison === 'LESS_THAN') {
       return {
         hasConflict: true,
-        reason: `Stale operation: server has newer version of ${op.entityType}:${op.entityId}`,
+        reason: `Stale operation: server has newer version of ${op.entityType}:${entityId}`,
         existingClock,
       };
     }
@@ -310,8 +339,8 @@ export class SyncService {
     tx: Prisma.TransactionClient,
   ): Promise<UploadResult> {
     try {
-      // Validate operation
-      const validation = this.validateOp(op);
+      // Validate operation (including clientId match)
+      const validation = this.validateOp(op, clientId);
       if (!validation.valid) {
         Logger.audit({
           event: 'OP_REJECTED',
@@ -693,7 +722,13 @@ export class SyncService {
         receivedAt: Number(row.receivedAt),
       }));
 
-      return { ops: mappedOps, latestSeq, gapDetected, latestSnapshotSeq, snapshotVectorClock };
+      return {
+        ops: mappedOps,
+        latestSeq,
+        gapDetected,
+        latestSnapshotSeq,
+        snapshotVectorClock,
+      };
     });
   }
 
@@ -1476,11 +1511,23 @@ export class SyncService {
 
   // === Validation ===
 
-  private validateOp(op: Operation): {
+  private validateOp(
+    op: Operation,
+    requestClientId: string,
+  ): {
     valid: boolean;
     error?: string;
     errorCode?: SyncErrorCode;
   } {
+    // Validate clientId matches request
+    if (op.clientId !== requestClientId) {
+      return {
+        valid: false,
+        error: `Operation clientId "${op.clientId}" does not match request clientId "${requestClientId}"`,
+        errorCode: SYNC_ERROR_CODES.INVALID_CLIENT_ID,
+      };
+    }
+
     if (!op.id || typeof op.id !== 'string') {
       return {
         valid: false,

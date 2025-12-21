@@ -2615,6 +2615,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),
@@ -2693,7 +2694,7 @@ describe('OperationLogSyncService', () => {
           expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['local-op-1']);
         });
 
-        it('should handle CONFLICT_CONCURRENT error same as Concurrent modification', async () => {
+        it('should handle CONFLICT_CONCURRENT errorCode as concurrent modification', async () => {
           const localOp: Operation = {
             id: 'local-op-1',
             clientId: 'client-A',
@@ -2712,7 +2713,14 @@ describe('OperationLogSyncService', () => {
               uploadedCount: 0,
               piggybackedOps: [],
               rejectedCount: 1,
-              rejectedOps: [{ opId: 'local-op-1', error: 'CONFLICT_CONCURRENT' }],
+              // Now uses errorCode instead of error string matching
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  error: 'Some random message',
+                  errorCode: 'CONFLICT_CONCURRENT',
+                },
+              ],
             }),
           );
 
@@ -2742,6 +2750,68 @@ describe('OperationLogSyncService', () => {
 
           // Should trigger a download
           expect(downloadSpy).toHaveBeenCalledWith(mockProvider);
+        });
+
+        it('should NOT treat error string without errorCode as concurrent modification', async () => {
+          // This tests that we use errorCode, not error string matching
+          const localOp: Operation = {
+            id: 'local-op-1',
+            clientId: 'client-A',
+            actionType: 'test',
+            opType: OpType.Update,
+            entityType: 'TAG',
+            entityId: 'TODAY',
+            payload: { taskIds: ['task-1'] },
+            vectorClock: { clientA: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
+
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 0,
+              piggybackedOps: [],
+              rejectedCount: 1,
+              rejectedOps: [
+                {
+                  opId: 'local-op-1',
+                  // Error message contains "Concurrent modification" but errorCode is NOT CONFLICT_CONCURRENT
+                  error: 'Concurrent modification in some other context',
+                  errorCode: 'VALIDATION_ERROR',
+                },
+              ],
+            }),
+          );
+
+          opLogStoreSpy.getOpById.and.returnValue(
+            Promise.resolve({
+              seq: 1,
+              op: localOp,
+              appliedAt: Date.now(),
+              source: 'local' as const,
+            }),
+          );
+          opLogStoreSpy.getUnsynced.and.returnValue(
+            Promise.resolve([
+              { seq: 1, op: localOp, appliedAt: Date.now(), source: 'local' as const },
+            ]),
+          );
+
+          const downloadSpy = spyOn(service, 'downloadRemoteOps').and.returnValue(
+            Promise.resolve({
+              serverMigrationHandled: false,
+              localWinOpsCreated: 0,
+              newOpsCount: 0,
+            }),
+          );
+
+          await service.uploadPendingOps(mockProvider);
+
+          // Should NOT trigger download (not treated as concurrent modification)
+          expect(downloadSpy).not.toHaveBeenCalled();
+
+          // Should mark as rejected (permanent rejection)
+          expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['local-op-1']);
         });
 
         it('should handle mixed rejection types correctly', async () => {
@@ -2780,8 +2850,13 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'op-concurrent',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
-                { opId: 'op-permanent', error: 'Schema validation failed' },
+                {
+                  opId: 'op-permanent',
+                  error: 'Schema validation failed',
+                  errorCode: 'VALIDATION_ERROR',
+                },
               ],
             }),
           );
@@ -2840,7 +2915,11 @@ describe('OperationLogSyncService', () => {
               piggybackedOps: [],
               rejectedCount: 2,
               rejectedOps: [
-                { opId: 'already-synced', error: 'Concurrent modification' },
+                {
+                  opId: 'already-synced',
+                  error: 'Concurrent modification',
+                  errorCode: 'CONFLICT_CONCURRENT',
+                },
                 { opId: 'already-rejected', error: 'Some error' },
               ],
             }),
@@ -2898,6 +2977,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),
@@ -2972,6 +3052,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),
@@ -3055,6 +3136,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),
@@ -3125,6 +3207,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TAG:TODAY',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),
@@ -3211,6 +3294,7 @@ describe('OperationLogSyncService', () => {
                 {
                   opId: 'local-op-1',
                   error: 'Concurrent modification detected for TIME_TRACKING:tt-123',
+                  errorCode: 'CONFLICT_CONCURRENT',
                 },
               ],
             }),

@@ -261,7 +261,7 @@ export class OperationLogSyncService {
    * @returns Number of merged ops created (caller should trigger follow-up upload if > 0)
    */
   private async _handleRejectedOps(
-    rejectedOps: Array<{ opId: string; error?: string }>,
+    rejectedOps: Array<{ opId: string; error?: string; errorCode?: string }>,
     syncProvider?: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<number> {
     if (rejectedOps.length === 0) {
@@ -286,10 +286,9 @@ export class OperationLogSyncService {
       }
 
       // Check if this is a concurrent modification rejection
-      // These happen when another client uploaded a conflicting operation
-      const isConcurrentModification =
-        rejected.error?.includes('Concurrent modification') ||
-        rejected.error?.includes('CONFLICT_CONCURRENT');
+      // These happen when another client uploaded a conflicting operation.
+      // Use errorCode for reliable detection (string matching is fragile).
+      const isConcurrentModification = rejected.errorCode === 'CONFLICT_CONCURRENT';
 
       if (isConcurrentModification) {
         concurrentModificationOps.push({

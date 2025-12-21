@@ -163,8 +163,14 @@ export class SuperSyncProvider
     reason: 'initial' | 'recovery' | 'migration',
     vectorClock: Record<string, number>,
     schemaVersion: number,
+    isPayloadEncrypted?: boolean,
   ): Promise<SnapshotUploadResponse> {
-    SyncLog.debug(this.logLabel, 'uploadSnapshot', { clientId, reason, schemaVersion });
+    SyncLog.debug(this.logLabel, 'uploadSnapshot', {
+      clientId,
+      reason,
+      schemaVersion,
+      isPayloadEncrypted,
+    });
     const cfg = await this._cfgOrError();
 
     // Compress the payload to reduce upload size
@@ -174,6 +180,7 @@ export class SuperSyncProvider
       reason,
       vectorClock,
       schemaVersion,
+      isPayloadEncrypted,
     });
 
     const compressedPayload = await compressWithGzip(jsonPayload);

@@ -31,6 +31,7 @@ const FULL_STATE_OP_TYPES = new Set([
 export interface RejectedOpInfo {
   opId: string;
   error?: string;
+  errorCode?: string;
 }
 
 export interface UploadResult {
@@ -251,7 +252,7 @@ export class OperationLogUploadService {
         const rejected = response.results.filter((r) => !r.accepted);
         if (rejected.length > 0) {
           for (const r of rejected) {
-            rejectedOps.push({ opId: r.opId, error: r.error });
+            rejectedOps.push({ opId: r.opId, error: r.error, errorCode: r.errorCode });
           }
           rejectedCount += rejected.length;
 
@@ -307,6 +308,7 @@ export class OperationLogUploadService {
 
     // The payload for full-state ops IS the complete state
     let state = op.payload;
+    const isPayloadEncrypted = !!encryptKey;
 
     // If encryption is enabled, encrypt the state
     if (encryptKey) {
@@ -324,6 +326,7 @@ export class OperationLogUploadService {
         reason,
         op.vectorClock,
         op.schemaVersion,
+        isPayloadEncrypted,
       );
       return response;
     } catch (err) {

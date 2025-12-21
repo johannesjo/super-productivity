@@ -370,6 +370,7 @@ describe('OperationLogUploadService', () => {
           'initial',
           jasmine.anything(),
           jasmine.anything(),
+          false, // isPayloadEncrypted
         );
       });
 
@@ -385,6 +386,7 @@ describe('OperationLogUploadService', () => {
           'recovery',
           jasmine.anything(),
           jasmine.anything(),
+          false, // isPayloadEncrypted
         );
       });
 
@@ -400,6 +402,7 @@ describe('OperationLogUploadService', () => {
           'recovery',
           jasmine.anything(),
           jasmine.anything(),
+          false, // isPayloadEncrypted
         );
       });
 
@@ -575,6 +578,7 @@ describe('OperationLogUploadService', () => {
           'recovery',
           vectorClock,
           42,
+          false, // isPayloadEncrypted
         );
       });
     });

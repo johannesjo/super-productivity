@@ -66,6 +66,7 @@ const UploadSnapshotSchema = z.object({
   reason: z.enum(['initial', 'recovery', 'migration']),
   vectorClock: z.record(z.string(), z.number()),
   schemaVersion: z.number().optional(),
+  isPayloadEncrypted: z.boolean().optional(),
 });
 
 // Error helper
@@ -207,9 +208,35 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             Logger.info(
               `[user:${userId}] Returning cached results for request ${requestId}`,
             );
-            const latestSeq = await syncService.getLatestSeq(userId);
+
+            // IMPORTANT: Recompute piggybacked ops using the retry request's lastKnownServerSeq.
+            // The original response may have contained newOps that the client missed if the
+            // network dropped the response. By using the CURRENT request's lastKnownServerSeq,
+            // we ensure the client gets all ops it hasn't seen yet.
+            let newOps: import('./sync.types').ServerOperation[] | undefined;
+            let latestSeq: number;
+
+            if (lastKnownServerSeq !== undefined) {
+              const opsResult = await syncService.getOpsSinceWithSeq(
+                userId,
+                lastKnownServerSeq,
+                clientId,
+                100,
+              );
+              newOps = opsResult.ops;
+              latestSeq = opsResult.latestSeq;
+              if (newOps.length > 0) {
+                Logger.info(
+                  `[user:${userId}] Dedup request: piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})`,
+                );
+              }
+            } else {
+              latestSeq = await syncService.getLatestSeq(userId);
+            }
+
             return reply.send({
               results: cachedResults,
+              newOps: newOps?.length ? newOps : undefined,
               latestSeq,
               deduplicated: true,
             } as UploadOpsResponse & { deduplicated: boolean });
@@ -457,7 +484,14 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           });
         }
 
-        const { state, clientId, reason, vectorClock, schemaVersion } = parseResult.data;
+        const {
+          state,
+          clientId,
+          reason,
+          vectorClock,
+          schemaVersion,
+          isPayloadEncrypted,
+        } = parseResult.data;
         const syncService = getSyncService();
 
         // Check storage quota before processing
@@ -487,6 +521,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           vectorClock,
           timestamp: Date.now(),
           schemaVersion: schemaVersion ?? 1,
+          isPayloadEncrypted: isPayloadEncrypted ?? false,
         };
 
         const results = await syncService.uploadOps(userId, clientId, [op]);

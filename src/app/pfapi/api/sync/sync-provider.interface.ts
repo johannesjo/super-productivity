@@ -163,6 +163,8 @@ export interface OpUploadResult {
   accepted: boolean;
   serverSeq?: number;
   error?: string;
+  /** Structured error code for programmatic handling */
+  errorCode?: string;
 }
 
 /**
@@ -259,6 +261,7 @@ export interface OperationSyncCapable {
    * @param reason Why the snapshot is being uploaded
    * @param vectorClock Current vector clock state
    * @param schemaVersion Schema version of the state
+   * @param isPayloadEncrypted Whether the state payload is E2E encrypted
    */
   uploadSnapshot(
     state: unknown,
@@ -266,6 +269,7 @@ export interface OperationSyncCapable {
     reason: 'initial' | 'recovery' | 'migration',
     vectorClock: Record<string, number>,
     schemaVersion: number,
+    isPayloadEncrypted?: boolean,
   ): Promise<SnapshotUploadResponse>;
 }
 
