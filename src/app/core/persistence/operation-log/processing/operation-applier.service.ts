@@ -147,6 +147,13 @@ export class OperationApplierService {
           };
         }
       }
+
+      // Yield to the event loop after dispatching all operations.
+      // This ensures NgRx reducers have finished processing before we return.
+      // Without this, rapid dispatches can overwhelm the store and cause state updates to be lost.
+      if (appliedOps.length > 0) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      }
     } finally {
       this.hydrationState.endApplyingRemoteOps();
     }

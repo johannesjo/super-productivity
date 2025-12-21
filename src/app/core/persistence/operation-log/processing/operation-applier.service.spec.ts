@@ -552,4 +552,48 @@ describe('OperationApplierService', () => {
       expect(archiveDataAppliedCalls.length).toBe(1);
     });
   });
+
+  describe('event loop yield after dispatch', () => {
+    it('should yield to event loop after dispatching operations', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      let setTimeoutCalledWithZero = false;
+      const originalSetTimeout = window.setTimeout.bind(window);
+      spyOn(window, 'setTimeout').and.callFake(((fn: () => void, ms?: number) => {
+        if (ms === 0) setTimeoutCalledWithZero = true;
+        return originalSetTimeout(fn, ms);
+      }) as typeof window.setTimeout);
+
+      await service.applyOperations([op]);
+
+      expect(setTimeoutCalledWithZero).toBe(true);
+    });
+
+    it('should not yield to event loop when no operations are applied', async () => {
+      let setTimeoutCalledWithZero = false;
+      spyOn(window, 'setTimeout').and.callFake(((fn: () => void, ms?: number) => {
+        if (ms === 0) setTimeoutCalledWithZero = true;
+        return 0;
+      }) as typeof window.setTimeout);
+
+      await service.applyOperations([]);
+
+      expect(setTimeoutCalledWithZero).toBe(false);
+    });
+
+    it('should yield to event loop even with isLocalHydration true', async () => {
+      const op = createMockOperation('op-1', 'TASK', OpType.Update, { title: 'Test' });
+
+      let setTimeoutCalledWithZero = false;
+      const originalSetTimeout = window.setTimeout.bind(window);
+      spyOn(window, 'setTimeout').and.callFake(((fn: () => void, ms?: number) => {
+        if (ms === 0) setTimeoutCalledWithZero = true;
+        return originalSetTimeout(fn, ms);
+      }) as typeof window.setTimeout);
+
+      await service.applyOperations([op], { isLocalHydration: true });
+
+      expect(setTimeoutCalledWithZero).toBe(true);
+    });
+  });
 });
