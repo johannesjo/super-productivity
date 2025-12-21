@@ -134,15 +134,6 @@ export class PfapiService {
         const newProviderId = cfg.isEnabled
           ? (cfg.syncProvider as unknown as SyncProviderId)
           : null;
-        const currentProvider = this.pf.getActiveSyncProvider();
-
-        // Guard against hot reload race condition:
-        // Don't clear provider if we had a valid one and the new config has sync disabled
-        // This protects against temporary state resets during HMR
-        if (currentProvider && !newProviderId) {
-          return;
-        }
-
         this.pf.setActiveSyncProvider(newProviderId);
         if (cfg.isEnabled) {
           this.pf.setEncryptAndCompressCfg({

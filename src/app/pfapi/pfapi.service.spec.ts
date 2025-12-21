@@ -11,11 +11,15 @@ import { OperationLogStoreService } from '../core/persistence/operation-log/stor
 import { VectorClockService } from '../core/persistence/operation-log/sync/vector-clock.service';
 import { loadAllData } from '../root-store/meta/load-all-data.action';
 import { AppDataCompleteNew, CROSS_MODEL_VERSION } from './pfapi-config';
-import { of, Observable } from 'rxjs';
-import { CompleteBackup, Pfapi } from './api';
+import { of, Observable, BehaviorSubject } from 'rxjs';
+import { CompleteBackup, Pfapi, SyncProviderId } from './api';
 import { Task, TaskState } from '../features/tasks/task.model';
 import { ArchiveModel } from '../features/time-tracking/time-tracking.model';
 import { Action } from '@ngrx/store';
+import { SyncConfig } from '../features/config/global-config.model';
+import { LegacySyncProvider } from '../imex/sync/legacy-sync-provider.model';
+import { selectSyncConfig } from '../features/config/store/global-config.reducer';
+import { SnackService } from '../core/snack/snack.service';
 
 describe('PfapiService', () => {
   let service: PfapiService;
@@ -440,5 +444,165 @@ describe('PfapiService', () => {
 
       expect(archivedTask1.timeEstimate).toBe(7200000);
     });
+  });
+});
+
+describe('PfapiService sync provider management', () => {
+  let syncConfig$: BehaviorSubject<SyncConfig>;
+  let setActiveSyncProviderSpy: jasmine.Spy;
+
+  const createDefaultSyncConfig = (overrides: Partial<SyncConfig> = {}): SyncConfig => ({
+    isEnabled: false,
+    syncProvider: null,
+    syncInterval: 60000,
+    isCompressionEnabled: false,
+    isEncryptionEnabled: false,
+    localFileSync: { syncFilePath: null },
+    webDav: {
+      baseUrl: '',
+      userName: '',
+      password: '',
+      syncFilePath: '',
+    },
+    superSync: {
+      userName: '',
+      password: '',
+      accessToken: '',
+      baseUrl: '',
+    },
+    ...overrides,
+  });
+
+  beforeEach(() => {
+    // Reset the singleton flag
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (Pfapi as any)._wasInstanceCreated = false;
+
+    syncConfig$ = new BehaviorSubject<SyncConfig>(createDefaultSyncConfig());
+
+    const storeMock = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    storeMock.select.and.callFake((selector: unknown) => {
+      if (selector === selectSyncConfig) {
+        return syncConfig$.asObservable();
+      }
+      return of({});
+    });
+
+    const dataInitStateServiceMock = {
+      isAllDataLoadedInitially$: of(true),
+    };
+
+    const globalProgressBarServiceMock = jasmine.createSpyObj(
+      'GlobalProgressBarService',
+      ['countUp', 'countDown'],
+    );
+
+    const translateServiceMock = jasmine.createSpyObj('TranslateService', ['instant']);
+
+    const storeDelegateServiceMock = jasmine.createSpyObj('PfapiStoreDelegateService', [
+      'getAllSyncModelDataFromStore',
+    ]);
+
+    const opLogStoreMock = jasmine.createSpyObj('OperationLogStoreService', [
+      'append',
+      'getLastSeq',
+      'saveStateCache',
+    ]);
+
+    const vectorClockServiceMock = jasmine.createSpyObj('VectorClockService', [
+      'getCurrentVectorClock',
+    ]);
+
+    const imexViewServiceMock = jasmine.createSpyObj('ImexViewService', [
+      'setDataImportInProgress',
+    ]);
+
+    const snackServiceMock = jasmine.createSpyObj('SnackService', ['open']);
+
+    TestBed.configureTestingModule({
+      providers: [
+        PfapiService,
+        { provide: Store, useValue: storeMock },
+        { provide: DataInitStateService, useValue: dataInitStateServiceMock },
+        { provide: GlobalProgressBarService, useValue: globalProgressBarServiceMock },
+        { provide: TranslateService, useValue: translateServiceMock },
+        { provide: PfapiStoreDelegateService, useValue: storeDelegateServiceMock },
+        { provide: OperationLogStoreService, useValue: opLogStoreMock },
+        { provide: VectorClockService, useValue: vectorClockServiceMock },
+        { provide: ImexViewService, useValue: imexViewServiceMock },
+        { provide: SnackService, useValue: snackServiceMock },
+      ],
+    });
+
+    const service = TestBed.inject(PfapiService);
+    setActiveSyncProviderSpy = spyOn(service.pf, 'setActiveSyncProvider');
+  });
+
+  it('should clear sync provider when sync is disabled', () => {
+    // Start with sync enabled
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.SuperSync,
+      }),
+    );
+
+    // Verify provider was set
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(SyncProviderId.SuperSync);
+    setActiveSyncProviderSpy.calls.reset();
+
+    // Disable sync
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: false,
+        syncProvider: LegacySyncProvider.SuperSync,
+      }),
+    );
+
+    // Provider should be cleared (null)
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(null);
+  });
+
+  it('should set sync provider when sync is enabled', () => {
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.WebDAV,
+      }),
+    );
+
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(SyncProviderId.WebDAV);
+  });
+
+  it('should switch sync provider when provider changes while enabled', () => {
+    // Enable with SuperSync
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.SuperSync,
+      }),
+    );
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(SyncProviderId.SuperSync);
+    setActiveSyncProviderSpy.calls.reset();
+
+    // Switch to WebDAV
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: true,
+        syncProvider: LegacySyncProvider.WebDAV,
+      }),
+    );
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(SyncProviderId.WebDAV);
+  });
+
+  it('should set null provider when sync starts disabled', () => {
+    syncConfig$.next(
+      createDefaultSyncConfig({
+        isEnabled: false,
+        syncProvider: null,
+      }),
+    );
+
+    expect(setActiveSyncProviderSpy).toHaveBeenCalledWith(null);
   });
 });
