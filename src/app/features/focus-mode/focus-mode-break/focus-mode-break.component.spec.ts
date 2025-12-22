@@ -10,6 +10,7 @@ import {
   Signal,
 } from '@angular/core';
 import { T } from '../../../t.const';
+import { of } from 'rxjs';
 
 describe('FocusModeBreakComponent', () => {
   let component: FocusModeBreakComponent;
@@ -20,9 +21,11 @@ describe('FocusModeBreakComponent', () => {
     isBreakLong: Signal<boolean>;
   };
   let environmentInjector: EnvironmentInjector;
+  const mockPausedTaskId = 'test-task-id';
 
   beforeEach(() => {
-    mockStore = jasmine.createSpyObj('Store', ['dispatch']);
+    mockStore = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    mockStore.select.and.returnValue(of(mockPausedTaskId));
 
     mockFocusModeService = {
       timeRemaining: signal(300000),
@@ -78,18 +81,22 @@ describe('FocusModeBreakComponent', () => {
   });
 
   describe('skipBreak', () => {
-    it('should dispatch skipBreak action', () => {
+    it('should dispatch skipBreak action with pausedTaskId', () => {
       component.skipBreak();
 
-      expect(mockStore.dispatch).toHaveBeenCalledWith(skipBreak());
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        skipBreak({ pausedTaskId: mockPausedTaskId }),
+      );
     });
   });
 
   describe('completeBreak', () => {
-    it('should dispatch completeBreak action', () => {
+    it('should dispatch completeBreak action with pausedTaskId', () => {
       component.completeBreak();
 
-      expect(mockStore.dispatch).toHaveBeenCalledWith(completeBreak());
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        completeBreak({ pausedTaskId: mockPausedTaskId }),
+      );
     });
   });
 });

@@ -55,8 +55,10 @@ export interface AndroidInterface {
   ): void;
   stopFocusModeService?(): void;
   updateFocusModeService?(
+    title: string,
     remainingMs: number,
     isPaused: boolean,
+    isBreak: boolean,
     taskTitle: string | null,
   ): void;
 

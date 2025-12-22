@@ -1148,6 +1148,7 @@
           "L_SYNC_FOLDER_PATH": "Sync Folder Path",
           "L_TEST_CONNECTION": "Test Connection",
           "L_USER_NAME": "Username",
+          "S_FILL_ALL_FIELDS": "Please fill in all WebDAV fields first",
           "S_TEST_FAIL": "Connection test failed: {{error}} - Target URL: {{url}}",
           "S_TEST_SUCCESS": "Connection test successful! Target URL: {{url}}"
         }

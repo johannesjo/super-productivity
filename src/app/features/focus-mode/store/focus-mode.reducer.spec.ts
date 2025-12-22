@@ -354,7 +354,7 @@ describe('FocusModeReducer', () => {
         currentScreen: FocusScreen.Break,
       };
 
-      const action = a.skipBreak();
+      const action = a.skipBreak({ pausedTaskId: null });
       const result = focusModeReducer(breakState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);
@@ -376,7 +376,7 @@ describe('FocusModeReducer', () => {
         currentScreen: FocusScreen.Break,
       };
 
-      const action = a.completeBreak();
+      const action = a.completeBreak({ pausedTaskId: null });
       const result = focusModeReducer(breakState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);

@@ -304,14 +304,13 @@ export class FocusModeEffects {
   );
 
   // Handle break completion
+  // Note: pausedTaskId is passed in action payload to avoid race condition
+  // (reducer clears pausedTaskId before effect reads state)
   breakComplete$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.completeBreak),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.store.select(selectors.selectPausedTaskId),
-      ),
-      switchMap(([_, mode, pausedTaskId]) => {
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([action, mode]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
@@ -319,8 +318,8 @@ export class FocusModeEffects {
         this._notifyUser();
 
         // Resume task tracking if we paused it during break
-        if (pausedTaskId) {
-          actionsToDispatch.push(setCurrentTask({ id: pausedTaskId }));
+        if (action.pausedTaskId) {
+          actionsToDispatch.push(setCurrentTask({ id: action.pausedTaskId }));
         }
 
         // Auto-start next session if configured
@@ -335,20 +334,18 @@ export class FocusModeEffects {
   );
 
   // Handle skip break
+  // Note: pausedTaskId is passed in action payload to avoid race condition
   skipBreak$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.skipBreak),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.store.select(selectors.selectPausedTaskId),
-      ),
-      switchMap(([_, mode, pausedTaskId]) => {
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([action, mode]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
         // Resume task tracking if we paused it during break
-        if (pausedTaskId) {
-          actionsToDispatch.push(setCurrentTask({ id: pausedTaskId }));
+        if (action.pausedTaskId) {
+          actionsToDispatch.push(setCurrentTask({ id: action.pausedTaskId }));
         }
 
         // Auto-start next session if configured
@@ -701,18 +698,39 @@ export class FocusModeEffects {
           label: T.F.FOCUS_MODE.B.START,
           icon: 'play_arrow',
           fn: () => {
-            // Start a new session using the current mode's strategy
-            this.store
-              .select(selectors.selectMode)
-              .pipe(take(1))
-              .subscribe((mode) => {
-                const strategy = this.strategyFactory.getStrategy(mode);
-                this.store.dispatch(
-                  actions.startFocusSession({
-                    duration: strategy.initialSessionDuration,
-                  }),
-                );
-              });
+            // When starting from break completion, first properly complete/skip the break
+            // to resume task tracking and clean up state
+            if (isBreakTimeUp) {
+              combineLatest([
+                this.store.select(selectors.selectMode),
+                this.store.select(selectors.selectPausedTaskId),
+              ])
+                .pipe(take(1))
+                .subscribe(([mode, pausedTaskId]) => {
+                  // Skip break (with pausedTaskId to resume tracking)
+                  this.store.dispatch(actions.skipBreak({ pausedTaskId }));
+                  // Then start new session
+                  const strategy = this.strategyFactory.getStrategy(mode);
+                  this.store.dispatch(
+                    actions.startFocusSession({
+                      duration: strategy.initialSessionDuration,
+                    }),
+                  );
+                });
+            } else {
+              // Start a new session using the current mode's strategy
+              this.store
+                .select(selectors.selectMode)
+                .pipe(take(1))
+                .subscribe((mode) => {
+                  const strategy = this.strategyFactory.getStrategy(mode);
+                  this.store.dispatch(
+                    actions.startFocusSession({
+                      duration: strategy.initialSessionDuration,
+                    }),
+                  );
+                });
+            }
           },
         }
       : {

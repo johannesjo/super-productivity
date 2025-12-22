@@ -230,7 +230,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
                   ) {
                     this._snackService.open({
                       type: 'ERROR',
-                      msg: 'Please fill in all WebDAV fields first',
+                      msg: T.F.SYNC.FORM.WEB_DAV.S_FILL_ALL_FIELDS,
                     });
                     return;
                   }

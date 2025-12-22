@@ -153,11 +153,13 @@ class JavaScriptInterface(
 
     @Suppress("unused")
     @JavascriptInterface
-    fun updateFocusModeService(remainingMs: Long, isPaused: Boolean, taskTitle: String?) {
+    fun updateFocusModeService(title: String, remainingMs: Long, isPaused: Boolean, isBreak: Boolean, taskTitle: String?) {
         val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
             action = FocusModeForegroundService.ACTION_UPDATE
+            putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
             putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
             putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+            putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
             putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
         }
         activity.startService(intent)
