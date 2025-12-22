@@ -1,19 +1,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 /**
- * Integration tests for meta-reducer ordering.
+ * Integration tests for meta-reducer ordering and operation capture.
  *
- * These tests verify that operationCaptureMetaReducer correctly captures
- * entity changes even when other meta-reducers (like taskSharedCrudMetaReducer)
- * modify the state before passing it to inner reducers.
+ * These tests verify that operationCaptureMetaReducer correctly enqueues
+ * actions for operation logging, regardless of other meta-reducers in the chain.
  *
- * CRITICAL: operationCaptureMetaReducer must be FIRST (outermost) in the
- * meta-reducer chain to capture the original state before any modifications.
- * If it's LAST (innermost), it receives already-modified state from
- * taskSharedCrudMetaReducer and cannot detect entity changes.
- *
- * This bug was discovered when delete operations weren't syncing because
- * operationCaptureMetaReducer was positioned LAST, causing it to see
- * beforeState === afterState (both modified).
+ * NOTE: Since state diffing was removed (for performance), the meta-reducer
+ * ordering is no longer critical for correctness. The operation capture
+ * meta-reducer now simply enqueues actions without comparing before/after state.
  */
 import { ActionReducer, Action, MetaReducer } from '@ngrx/store';
 import {
@@ -27,7 +21,7 @@ import { PersistentAction } from '../persistent-action.interface';
 
 describe('Meta-reducer ordering integration', () => {
   let captureService: OperationCaptureService;
-  let capturedChanges: { beforeState: unknown; afterState: unknown }[];
+  let enqueuedActions: PersistentAction[];
 
   // Feature name must match the actual NgRx feature name
   const TASKS_FEATURE = 'tasks';
@@ -108,14 +102,12 @@ describe('Meta-reducer ordering integration', () => {
 
   beforeEach(() => {
     captureService = new OperationCaptureService();
-    capturedChanges = [];
+    enqueuedActions = [];
 
-    // Spy on computeAndEnqueue to capture what states are being passed
-    spyOn(captureService, 'computeAndEnqueue').and.callFake(
-      (_action, beforeState, afterState) => {
-        capturedChanges.push({ beforeState, afterState });
-      },
-    );
+    // Spy on enqueue to capture what actions are being passed
+    spyOn(captureService, 'enqueue').and.callFake((action: PersistentAction) => {
+      enqueuedActions.push(action);
+    });
 
     setOperationCaptureService(captureService);
     // Reset sync state to prevent test pollution from previous tests
@@ -128,10 +120,9 @@ describe('Meta-reducer ordering integration', () => {
     setIsApplyingRemoteOps(false);
   });
 
-  describe('CORRECT ordering: operationCaptureMetaReducer FIRST (outermost)', () => {
-    it('should capture entity deletion when operationCaptureMetaReducer is outermost', () => {
+  describe('action capture with meta-reducer chain', () => {
+    it('should enqueue action when operationCaptureMetaReducer is outermost', () => {
       // Compose: operationCapture wraps taskCrud wraps passthrough
-      // This is the CORRECT order (operationCapture is FIRST in array = OUTERMOST)
       const composedReducer = operationCaptureMetaReducer(
         mockTaskCrudMetaReducer(passthroughReducer),
       );
@@ -149,29 +140,37 @@ describe('Meta-reducer ordering integration', () => {
       expect(resultState[TASKS_FEATURE].ids).not.toContain('task-1');
       expect(resultState[TASKS_FEATURE].entities['task-1']).toBeUndefined();
 
-      // Verify computeAndEnqueue was called with DIFFERENT before/after states
-      expect(captureService.computeAndEnqueue).toHaveBeenCalled();
-      expect(capturedChanges.length).toBe(1);
-
-      const { beforeState, afterState } = capturedChanges[0];
-
-      // beforeState should have the task (original state)
-      expect((beforeState as MockRootState)[TASKS_FEATURE].ids).toContain('task-1');
-      expect(
-        (beforeState as MockRootState)[TASKS_FEATURE].entities['task-1'],
-      ).toBeDefined();
-
-      // afterState should NOT have the task (modified state)
-      expect((afterState as MockRootState)[TASKS_FEATURE].ids).not.toContain('task-1');
-      expect(
-        (afterState as MockRootState)[TASKS_FEATURE].entities['task-1'],
-      ).toBeUndefined();
-
-      // Most importantly: beforeState !== afterState
-      expect(beforeState).not.toBe(afterState);
+      // Verify enqueue was called with the action
+      expect(captureService.enqueue).toHaveBeenCalledWith(action);
+      expect(enqueuedActions.length).toBe(1);
+      expect(enqueuedActions[0].meta.entityId).toBe('task-1');
     });
 
-    it('should capture multiple entity deletions correctly', () => {
+    it('should enqueue action when operationCaptureMetaReducer is innermost', () => {
+      // Compose: taskCrud wraps operationCapture wraps passthrough
+      // NOTE: Since we no longer diff state, ordering doesn't affect correctness
+      const composedReducer = mockTaskCrudMetaReducer(
+        operationCaptureMetaReducer(passthroughReducer),
+      );
+
+      const initialState = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task to delete' },
+      });
+
+      const action = createDeleteTaskAction('task-1');
+
+      // Execute the composed reducer
+      const resultState = composedReducer(initialState, action);
+
+      // The task should still be removed from final state
+      expect(resultState[TASKS_FEATURE].ids).not.toContain('task-1');
+
+      // enqueue should still be called with the action
+      expect(captureService.enqueue).toHaveBeenCalledWith(action);
+      expect(enqueuedActions.length).toBe(1);
+    });
+
+    it('should capture multiple deletions correctly', () => {
       const composedReducer = operationCaptureMetaReducer(
         mockTaskCrudMetaReducer(passthroughReducer),
       );
@@ -191,73 +190,89 @@ describe('Meta-reducer ordering integration', () => {
       // Final state should only have task-3
       expect(finalState[TASKS_FEATURE].ids).toEqual(['task-3']);
 
-      // Should have captured 2 operations
-      expect(capturedChanges.length).toBe(2);
-
-      // First deletion should show task-1 removed
-      const firstDelete = capturedChanges[0];
-      expect((firstDelete.beforeState as MockRootState)[TASKS_FEATURE].ids).toContain(
-        'task-1',
-      );
-      expect((firstDelete.afterState as MockRootState)[TASKS_FEATURE].ids).not.toContain(
-        'task-1',
-      );
-
-      // Second deletion should show task-2 removed
-      const secondDelete = capturedChanges[1];
-      expect((secondDelete.beforeState as MockRootState)[TASKS_FEATURE].ids).toContain(
-        'task-2',
-      );
-      expect((secondDelete.afterState as MockRootState)[TASKS_FEATURE].ids).not.toContain(
-        'task-2',
-      );
+      // Should have enqueued 2 actions
+      expect(enqueuedActions.length).toBe(2);
+      expect(enqueuedActions[0].meta.entityId).toBe('task-1');
+      expect(enqueuedActions[1].meta.entityId).toBe('task-2');
     });
   });
 
-  describe('INCORRECT ordering: operationCaptureMetaReducer LAST (innermost)', () => {
-    it('should NOT capture entity deletion when operationCaptureMetaReducer is innermost (demonstrates the bug)', () => {
-      // Compose: taskCrud wraps operationCapture wraps passthrough
-      // This is the INCORRECT order (operationCapture is LAST in array = INNERMOST)
-      const composedReducer = mockTaskCrudMetaReducer(
-        operationCaptureMetaReducer(passthroughReducer),
+  describe('remote action filtering', () => {
+    it('should NOT enqueue remote actions', () => {
+      const composedReducer = operationCaptureMetaReducer(
+        mockTaskCrudMetaReducer(passthroughReducer),
       );
 
       const initialState = createTaskState({
         'task-1': { id: 'task-1', title: 'Task to delete' },
       });
 
-      const action = createDeleteTaskAction('task-1');
+      // Create a remote action (from sync)
+      const remoteAction: PersistentAction = {
+        ...createDeleteTaskAction('task-1'),
+        meta: {
+          ...createDeleteTaskAction('task-1').meta,
+          isRemote: true,
+        },
+      };
 
-      // Execute the composed reducer
-      const resultState = composedReducer(initialState, action);
+      composedReducer(initialState, remoteAction);
 
-      // The task should still be removed from final state
-      expect(resultState[TASKS_FEATURE].ids).not.toContain('task-1');
-
-      // But computeAndEnqueue receives ALREADY MODIFIED state!
-      expect(captureService.computeAndEnqueue).toHaveBeenCalled();
-      expect(capturedChanges.length).toBe(1);
-
-      const { beforeState, afterState } = capturedChanges[0];
-
-      // BUG: Both beforeState and afterState show the task as ALREADY DELETED
-      // because mockTaskCrudMetaReducer passed modified state to operationCapture
-      expect((beforeState as MockRootState)[TASKS_FEATURE].ids).not.toContain('task-1');
-      expect((afterState as MockRootState)[TASKS_FEATURE].ids).not.toContain('task-1');
-
-      // This is the bug: beforeState === afterState (same reference!)
-      // or at least they have the same content
-      expect(
-        (beforeState as MockRootState)[TASKS_FEATURE].entities['task-1'],
-      ).toBeUndefined();
-      expect(
-        (afterState as MockRootState)[TASKS_FEATURE].entities['task-1'],
-      ).toBeUndefined();
+      // Should NOT enqueue remote actions
+      expect(captureService.enqueue).not.toHaveBeenCalled();
+      expect(enqueuedActions.length).toBe(0);
     });
   });
 
-  describe('state reference equality', () => {
-    it('should work with NgRx immutability pattern (different references for changed slices)', () => {
+  describe('sync blocking', () => {
+    it('should NOT enqueue actions when applying remote operations', () => {
+      const composedReducer = operationCaptureMetaReducer(
+        mockTaskCrudMetaReducer(passthroughReducer),
+      );
+
+      const initialState = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task to delete' },
+      });
+
+      // Simulate sync in progress
+      setIsApplyingRemoteOps(true);
+
+      const action = createDeleteTaskAction('task-1');
+      composedReducer(initialState, action);
+
+      // Should NOT enqueue when sync is in progress
+      expect(captureService.enqueue).not.toHaveBeenCalled();
+    });
+
+    it('should resume capturing after sync completes', () => {
+      const composedReducer = operationCaptureMetaReducer(
+        mockTaskCrudMetaReducer(passthroughReducer),
+      );
+
+      const initialState = createTaskState({
+        'task-1': { id: 'task-1', title: 'Task 1' },
+        'task-2': { id: 'task-2', title: 'Task 2' },
+      });
+
+      // Start sync
+      setIsApplyingRemoteOps(true);
+
+      // Action during sync - should not be captured
+      const state = composedReducer(initialState, createDeleteTaskAction('task-1'));
+      expect(enqueuedActions.length).toBe(0);
+
+      // End sync
+      setIsApplyingRemoteOps(false);
+
+      // Action after sync - should be captured
+      composedReducer(state, createDeleteTaskAction('task-2'));
+      expect(enqueuedActions.length).toBe(1);
+      expect(enqueuedActions[0].meta.entityId).toBe('task-2');
+    });
+  });
+
+  describe('state immutability', () => {
+    it('should work with NgRx immutability pattern', () => {
       const composedReducer = operationCaptureMetaReducer(
         mockTaskCrudMetaReducer(passthroughReducer),
       );
@@ -279,12 +294,8 @@ describe('Meta-reducer ordering integration', () => {
         initialState[TASKS_FEATURE].entities,
       );
 
-      // Verify the capture service received different states
-      const { beforeState, afterState } = capturedChanges[0];
-      expect(beforeState).not.toBe(afterState);
-      expect((beforeState as MockRootState)[TASKS_FEATURE]).not.toBe(
-        (afterState as MockRootState)[TASKS_FEATURE],
-      );
+      // Verify the action was enqueued
+      expect(enqueuedActions.length).toBe(1);
     });
   });
 });
