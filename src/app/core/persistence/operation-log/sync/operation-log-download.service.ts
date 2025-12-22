@@ -126,6 +126,12 @@ export class OperationLogDownloadService {
       (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
     const encryptKey = privateCfg?.encryptKey;
 
+    // Set scope for status service to ensure status is per-server/account
+    if (privateCfg?.baseUrl && privateCfg?.accessToken) {
+      const scopeId = this._generateScopeId(privateCfg.baseUrl, privateCfg.accessToken);
+      this.superSyncStatusService.setScope(scopeId);
+    }
+
     await this.lockService.request('sp_op_log_download', async () => {
       const lastServerSeq = forceFromSeq0 ? 0 : await syncProvider.getLastServerSeq();
       const appliedOpIds = await this.opLogStore.getAppliedOpIds();
@@ -360,5 +366,18 @@ export class OperationLogDownloadService {
         }
       }, 1000);
     }
+  }
+
+  /**
+   * Generate a scope ID from the server URL and access token.
+   * Uses the same hashing algorithm as SuperSyncProvider for consistency.
+   */
+  private _generateScopeId(baseUrl: string, accessToken: string): string {
+    const identifier = `${baseUrl}|${accessToken}`;
+    const hash = identifier
+      .split('')
+      .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
+      .toString(16);
+    return hash;
   }
 }

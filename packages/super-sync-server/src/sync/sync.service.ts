@@ -220,7 +220,17 @@ export class SyncService {
       return { hasConflict: false };
     }
 
-    // CONCURRENT or LESS_THAN means conflict
+    // EQUAL clocks from different clients is suspicious - treat as conflict
+    // This could happen if client IDs rotate or clocks are somehow reused
+    if (comparison === 'EQUAL') {
+      return {
+        hasConflict: true,
+        reason: `Equal vector clocks from different clients for ${op.entityType}:${entityId} (client ${op.clientId} vs ${existingOp.clientId})`,
+        existingClock,
+      };
+    }
+
+    // CONCURRENT means both clocks have entries the other doesn't
     if (comparison === 'CONCURRENT') {
       return {
         hasConflict: true,
@@ -238,7 +248,13 @@ export class SyncService {
       };
     }
 
-    return { hasConflict: false };
+    // Should never reach here - all comparison cases handled above
+    // But if we do, default to conflict for safety
+    return {
+      hasConflict: true,
+      reason: `Unknown vector clock comparison result for ${op.entityType}:${entityId}`,
+      existingClock,
+    };
   }
 
   // === Upload Operations ===
@@ -1130,6 +1146,22 @@ export class SyncService {
           );
         }
 
+        // Check for encrypted ops in the range - server cannot replay encrypted payloads
+        const encryptedOpCount = await tx.operation.count({
+          where: {
+            userId,
+            serverSeq: { gt: startSeq, lte: targetSeq },
+            isPayloadEncrypted: true,
+          },
+        });
+
+        if (encryptedOpCount > 0) {
+          throw new Error(
+            `ENCRYPTED_OPS_NOT_SUPPORTED: Cannot generate snapshot - ${encryptedOpCount} operations have encrypted payloads. ` +
+              `Server-side restore is not available when E2E encryption is enabled.`,
+          );
+        }
+
         // Replay ops from startSeq to targetSeq
         const BATCH_SIZE = 10000;
         let currentSeq = startSeq;
@@ -1170,6 +1202,15 @@ export class SyncService {
 
     for (let i = 0; i < ops.length; i++) {
       const row = ops[i];
+
+      // Skip encrypted operations - server cannot decrypt E2E encrypted payloads
+      // This is a defensive check; generateSnapshotAtSeq should reject encrypted ops upfront
+      if (row.isPayloadEncrypted) {
+        Logger.warn(
+          `[replayOpsToState] Skipping encrypted op ${row.id} (seq=${row.serverSeq})`,
+        );
+        continue;
+      }
 
       // Periodically check state size to prevent memory exhaustion
       if (i > 0 && i % REPLAY_SIZE_CHECK_INTERVAL === 0) {

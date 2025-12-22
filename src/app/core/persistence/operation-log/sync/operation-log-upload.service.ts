@@ -122,7 +122,8 @@ export class OperationLogUploadService {
 
       // Get the clientId from the first operation
       const clientId = pendingOps[0].op.clientId;
-      const lastKnownServerSeq = await syncProvider.getLastServerSeq();
+      // Use let so we can update between chunks to avoid duplicate piggybacked ops
+      let lastKnownServerSeq = await syncProvider.getLastServerSeq();
 
       // Check if E2E encryption is enabled
       const privateCfg =
@@ -222,8 +223,9 @@ export class OperationLogUploadService {
           uploadedCount += acceptedSeqs.length;
         }
 
-        // Update last known server seq
+        // Update last known server seq (both stored and local variable for next chunk)
         await syncProvider.setLastServerSeq(response.latestSeq);
+        lastKnownServerSeq = response.latestSeq;
 
         // Collect piggybacked new ops from other clients
         if (response.newOps && response.newOps.length > 0) {

@@ -25,6 +25,9 @@ export const SYNC_ERROR_CODES = {
   // Storage quota (413)
   STORAGE_QUOTA_EXCEEDED: 'STORAGE_QUOTA_EXCEEDED',
 
+  // Encryption-related errors (400)
+  ENCRYPTED_OPS_NOT_SUPPORTED: 'ENCRYPTED_OPS_NOT_SUPPORTED' as const,
+
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
 } as const;

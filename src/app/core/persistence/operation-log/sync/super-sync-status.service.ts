@@ -2,6 +2,8 @@ import { computed, inject, Injectable, signal, DestroyRef } from '@angular/core'
 import { BehaviorSubject, interval } from 'rxjs';
 import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
+const STORAGE_KEY_PREFIX = 'super_sync_last_remote_check_';
+
 /**
  * Tracks Super Sync-specific status for the UI indicator.
  *
@@ -17,13 +19,16 @@ import { toSignal, takeUntilDestroyed } from '@angular/core/rxjs-interop';
   providedIn: 'root',
 })
 export class SuperSyncStatusService {
-  private readonly STORAGE_KEY = 'super_sync_last_remote_check';
   private readonly FRESHNESS_MS = 60_000; // 1 minute
 
   private _destroyRef = inject(DestroyRef);
 
+  // Current scope identifier (hash of server URL + access token)
+  // This ensures status doesn't bleed across different accounts/servers
+  private _currentScope: string | null = null;
+
   // Last remote check timestamp
-  private _lastRemoteCheck$ = new BehaviorSubject<number>(this._loadTimestamp());
+  private _lastRemoteCheck$ = new BehaviorSubject<number>(0);
   private _lastRemoteCheck = toSignal(this._lastRemoteCheck$, { initialValue: 0 });
 
   // Current time (updated every second for reactive freshness check)
@@ -52,12 +57,40 @@ export class SuperSyncStatusService {
   }
 
   /**
+   * Set the scope for this status service.
+   * The scope should be unique per server/account combination.
+   * Call this when the sync provider is configured.
+   *
+   * @param scopeId A unique identifier (e.g., hash of server URL + access token)
+   */
+  setScope(scopeId: string): void {
+    if (this._currentScope !== scopeId) {
+      this._currentScope = scopeId;
+      // Load timestamp for the new scope
+      this._lastRemoteCheck$.next(this._loadTimestamp());
+    }
+  }
+
+  /**
+   * Clear the scope (e.g., when sync is disabled).
+   * Resets to default state.
+   */
+  clearScope(): void {
+    this._currentScope = null;
+    this._lastRemoteCheck$.next(0);
+    this._hasPendingOps$.next(true);
+  }
+
+  /**
    * Called after successfully checking the remote server for updates.
    * This includes both cases where updates were found and where no updates were found.
    */
   markRemoteChecked(): void {
     const now = Date.now();
-    localStorage.setItem(this.STORAGE_KEY, String(now));
+    const key = this._getStorageKey();
+    if (key) {
+      localStorage.setItem(key, String(now));
+    }
     this._lastRemoteCheck$.next(now);
   }
 
@@ -68,8 +101,19 @@ export class SuperSyncStatusService {
     this._hasPendingOps$.next(hasPending);
   }
 
+  private _getStorageKey(): string | null {
+    if (!this._currentScope) {
+      return null;
+    }
+    return `${STORAGE_KEY_PREFIX}${this._currentScope}`;
+  }
+
   private _loadTimestamp(): number {
-    const stored = localStorage.getItem(this.STORAGE_KEY);
+    const key = this._getStorageKey();
+    if (!key) {
+      return 0;
+    }
+    const stored = localStorage.getItem(key);
     return stored ? parseInt(stored, 10) : 0;
   }
 }

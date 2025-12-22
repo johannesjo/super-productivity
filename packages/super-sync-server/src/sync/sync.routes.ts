@@ -186,22 +186,9 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           });
         }
 
-        // Check storage quota before processing
-        const payloadSize = JSON.stringify(body).length;
-        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
-        if (!quotaCheck.allowed) {
-          Logger.warn(
-            `[user:${userId}] Storage quota exceeded: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
-          );
-          return reply.status(413).send({
-            error: 'Storage quota exceeded',
-            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
-            storageUsedBytes: quotaCheck.currentUsage,
-            storageQuotaBytes: quotaCheck.quota,
-          });
-        }
-
-        // Check for duplicate request (client retry)
+        // Check for duplicate request (client retry) BEFORE quota check
+        // This ensures retries after successful uploads don't fail with 413
+        // if the original upload pushed the user over quota
         if (requestId) {
           const cachedResults = syncService.checkRequestDeduplication(userId, requestId);
           if (cachedResults) {
@@ -241,6 +228,21 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
               deduplicated: true,
             } as UploadOpsResponse & { deduplicated: boolean });
           }
+        }
+
+        // Check storage quota before processing (after dedup to allow retries)
+        const payloadSize = JSON.stringify(body).length;
+        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+        if (!quotaCheck.allowed) {
+          Logger.warn(
+            `[user:${userId}] Storage quota exceeded: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+          );
+          return reply.status(413).send({
+            error: 'Storage quota exceeded',
+            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
+            storageUsedBytes: quotaCheck.currentUsage,
+            storageQuotaBytes: quotaCheck.quota,
+          });
         }
 
         // Process operations - cast to Operation[] since Zod validates the structure
@@ -640,6 +642,16 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           `[user:${getAuthUser(req).userId}] Invalid restore request: ${message}`,
         );
         return reply.status(400).send({ error: message });
+      }
+      // Handle encrypted ops error - this is a known limitation, not a server error
+      if (message.includes('ENCRYPTED_OPS_NOT_SUPPORTED')) {
+        Logger.info(
+          `[user:${getAuthUser(req).userId}] Restore blocked due to encrypted ops`,
+        );
+        return reply.status(400).send({
+          error: message,
+          errorCode: SYNC_ERROR_CODES.ENCRYPTED_OPS_NOT_SUPPORTED,
+        });
       }
       Logger.error(`Get restore snapshot error: ${message}`);
       return reply.status(500).send({ error: 'Internal server error' });
