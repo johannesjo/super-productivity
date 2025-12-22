@@ -79,7 +79,8 @@ export class OperationLogEffects {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { type, meta, ...actionPayload } = action;
 
-    // Get pre-computed entity changes from the FIFO queue (synchronous capture from meta-reducer)
+    // Get entity changes from the FIFO queue (for TIME_TRACKING and TASK time sync)
+    // For most actions, this returns empty array since action payloads are sufficient.
     const entityChanges = this.operationCaptureService.dequeue();
 
     // Create multi-entity payload with action payload and computed changes
@@ -104,7 +105,10 @@ export class OperationLogEffects {
           opType,
           entityType: action.meta.entityType,
           entityId: action.meta.entityId,
-          entityIds: this.collectAllEntityIds(entityChanges, action.meta.entityIds),
+          // Use entityIds from action meta directly (or derive from entityId if not provided)
+          entityIds:
+            action.meta.entityIds ??
+            (action.meta.entityId ? [action.meta.entityId] : undefined),
           payload: multiEntityPayload,
           clientId: clientId,
           vectorClock: newClock,
@@ -301,24 +305,5 @@ export class OperationLogEffects {
         },
       });
     });
-  }
-
-  /**
-   * Collects all unique entity IDs from entity changes plus any existing entityIds.
-   * This ensures the operation tracks all affected entities for conflict detection.
-   */
-  private collectAllEntityIds(
-    entityChanges: import('./operation.types').EntityChange[],
-    existingEntityIds?: string[],
-  ): string[] | undefined {
-    const ids = new Set<string>(existingEntityIds || []);
-
-    for (const change of entityChanges) {
-      if (change.entityId && change.entityId !== '*') {
-        ids.add(change.entityId);
-      }
-    }
-
-    return ids.size > 0 ? Array.from(ids) : undefined;
   }
 }

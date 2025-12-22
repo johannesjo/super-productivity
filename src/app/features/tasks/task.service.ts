@@ -734,18 +734,16 @@ export class TaskService {
   }
 
   private _focusNewlyCreatedTask(taskId: string, shouldStartEditing: boolean): void {
-    // Tasks render asynchronously; retry focus a few times before giving up.
-    const MAX_ATTEMPTS = 5;
-    const attemptFocus = (attempt = 0): void => {
-      window.setTimeout(() => {
+    // Use double-RAF to ensure Angular has completed rendering after change detection.
+    // First RAF queues after the current frame, second RAF runs after the render.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
         const taskElement = document.getElementById(`t-${taskId}`);
-        if (taskElement) {
-          taskElement.focus();
+        if (!taskElement) return;
 
-          if (!shouldStartEditing) {
-            return;
-          }
+        taskElement.focus();
 
+        if (shouldStartEditing) {
           const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
           if (
             taskComponent &&
@@ -753,17 +751,10 @@ export class TaskService {
             !taskComponent.task().title?.trim().length
           ) {
             taskComponent.focusTitleForEdit();
-            return;
           }
         }
-
-        if (attempt < MAX_ATTEMPTS) {
-          attemptFocus(attempt + 1);
-        }
-      }, 50);
-    };
-
-    attemptFocus();
+      });
+    });
   }
 
   addTimeSpent(

@@ -49,7 +49,7 @@ describe('operationCaptureMetaReducer', () => {
 
   beforeEach(() => {
     mockCaptureService = jasmine.createSpyObj('OperationCaptureService', [
-      'computeAndEnqueue',
+      'enqueue',
       'dequeue',
       'getQueueSize',
       'clear',
@@ -70,7 +70,7 @@ describe('operationCaptureMetaReducer', () => {
   describe('setOperationCaptureService', () => {
     it('should set the capture service instance', () => {
       const newCaptureService = jasmine.createSpyObj('OperationCaptureService', [
-        'computeAndEnqueue',
+        'enqueue',
       ]);
 
       setOperationCaptureService(newCaptureService);
@@ -103,18 +103,14 @@ describe('operationCaptureMetaReducer', () => {
       expect(result).toBe(mockModifiedState);
     });
 
-    it('should compute and enqueue entity changes for persistent local actions', () => {
+    it('should enqueue action for persistent local actions', () => {
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
       wrappedReducer(mockState, action);
 
-      // Should call computeAndEnqueue with action, beforeState, afterState
-      expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalledWith(
-        action,
-        mockState,
-        mockModifiedState,
-      );
+      // Should call enqueue with just the action (no state params)
+      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(action);
     });
 
     it('should NOT process remote actions', () => {
@@ -131,7 +127,7 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(mockState, action);
 
-      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
     });
 
     it('should NOT process non-persistent actions', () => {
@@ -140,16 +136,17 @@ describe('operationCaptureMetaReducer', () => {
 
       wrappedReducer(mockState, action);
 
-      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
     });
 
-    it('should NOT process when state is undefined (initial state)', () => {
+    it('should process even when state is undefined (initial state)', () => {
+      // Since we no longer need state for diffing, we can enqueue for all persistent actions
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
       wrappedReducer(undefined, action);
 
-      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).toHaveBeenCalledWith(action);
     });
 
     it('should work without service (graceful degradation)', () => {
@@ -162,7 +159,7 @@ describe('operationCaptureMetaReducer', () => {
     });
 
     it('should handle errors in capture service gracefully', () => {
-      mockCaptureService.computeAndEnqueue.and.throwError('Test error');
+      mockCaptureService.enqueue.and.throwError('Test error');
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       const action = createMockAction();
 
@@ -173,27 +170,8 @@ describe('operationCaptureMetaReducer', () => {
     });
   });
 
-  describe('capture ordering (race condition fix)', () => {
-    it('should capture before-state and after-state in a single synchronous call', () => {
-      let capturedBeforeState: unknown = null;
-      let capturedAfterState: unknown = null;
-
-      mockCaptureService.computeAndEnqueue.and.callFake(
-        (_action, beforeState, afterState) => {
-          capturedBeforeState = beforeState;
-          capturedAfterState = afterState;
-        },
-      );
-
-      const wrappedReducer = operationCaptureMetaReducer(mockReducer);
-      wrappedReducer(mockState, createMockAction());
-
-      // Both states should be captured
-      expect(capturedBeforeState).toBe(mockState);
-      expect(capturedAfterState).toBe(mockModifiedState);
-    });
-
-    it('should call reducer before computing changes', () => {
+  describe('enqueue ordering', () => {
+    it('should call reducer before enqueuing action', () => {
       const callOrder: string[] = [];
 
       mockReducer.and.callFake(() => {
@@ -201,15 +179,15 @@ describe('operationCaptureMetaReducer', () => {
         return mockModifiedState;
       });
 
-      mockCaptureService.computeAndEnqueue.and.callFake(() => {
-        callOrder.push('computeAndEnqueue');
+      mockCaptureService.enqueue.and.callFake(() => {
+        callOrder.push('enqueue');
       });
 
       const wrappedReducer = operationCaptureMetaReducer(mockReducer);
       wrappedReducer(mockState, createMockAction());
 
-      // Reducer should be called first, then computeAndEnqueue
-      expect(callOrder).toEqual(['reducer', 'computeAndEnqueue']);
+      // Reducer should be called first, then enqueue
+      expect(callOrder).toEqual(['reducer', 'enqueue']);
     });
   });
 
@@ -225,10 +203,10 @@ describe('operationCaptureMetaReducer', () => {
       ];
 
       actionTypes.forEach((type) => {
-        mockCaptureService.computeAndEnqueue.calls.reset();
+        mockCaptureService.enqueue.calls.reset();
         const action = createMockAction({ type });
         wrappedReducer(mockState, action);
-        expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalled();
+        expect(mockCaptureService.enqueue).toHaveBeenCalled();
       });
     });
   });
@@ -262,7 +240,7 @@ describe('operationCaptureMetaReducer', () => {
       wrappedReducer(mockState, action);
 
       // Should NOT capture - sync is in progress
-      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
 
       // Reset for other tests
       setIsApplyingRemoteOps(false);
@@ -276,14 +254,14 @@ describe('operationCaptureMetaReducer', () => {
       setIsApplyingRemoteOps(true);
 
       wrappedReducer(mockState, action);
-      expect(mockCaptureService.computeAndEnqueue).not.toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).not.toHaveBeenCalled();
 
       // End sync
       setIsApplyingRemoteOps(false);
 
       // Now actions should be captured again
       wrappedReducer(mockState, action);
-      expect(mockCaptureService.computeAndEnqueue).toHaveBeenCalled();
+      expect(mockCaptureService.enqueue).toHaveBeenCalled();
     });
   });
 });

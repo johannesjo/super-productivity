@@ -1,5 +1,4 @@
 import { Action, ActionReducer } from '@ngrx/store';
-import { RootState } from '../../../../root-store/root-state';
 import { isPersistentAction, PersistentAction } from '../persistent-action.interface';
 import { OperationCaptureService } from './operation-capture.service';
 import { OpLog } from '../../../log';
@@ -108,38 +107,25 @@ export const getIsApplyingRemoteOps = (): boolean => {
 };
 
 /**
- * Meta-reducer that captures entity changes SYNCHRONOUSLY.
+ * Meta-reducer that enqueues actions for operation logging.
  *
- * This solves the race condition in the previous approach:
- * - OLD: Before-state captured in pre-reducer, after-state captured ASYNC in effect
- * - NEW: Both before and after captured SYNCHRONOUSLY in this meta-reducer
+ * PERFORMANCE OPTIMIZATION: This meta-reducer no longer performs state diffing.
+ * It simply enqueues the action for the effect to process.
  *
  * Flow:
- * 1. Capture before-state (current state)
- * 2. Call inner reducer to get after-state
- * 3. Compute entity changes from diff and queue for effect
+ * 1. Call inner reducer to get after-state
+ * 2. Enqueue action for effect processing (no expensive diffing)
  *
- * The effect simply dequeues the pre-computed changes - no async state reads!
+ * The effect dequeues and creates operations from action payloads.
  *
- * CRITICAL: This meta-reducer MUST be registered FIRST (index 0) in the metaReducers
- * array in main.ts. NgRx composes meta-reducers from RIGHT-TO-LEFT using reduceRight,
- * so FIRST in array = OUTERMOST in call chain.
- *
- * Being OUTERMOST means this meta-reducer:
- * - Receives the ORIGINAL state BEFORE any other meta-reducer modifies it
- * - Gets the FINAL state AFTER all inner reducers complete
- *
- * If placed LAST (innermost), other meta-reducers like taskSharedCrudMetaReducer
- * would modify state BEFORE this runs, causing beforeState === afterState.
+ * Note: This meta-reducer can be registered at any position in the metaReducers
+ * array since it no longer needs before/after state comparison.
  */
 export const operationCaptureMetaReducer = <S, A extends Action = Action>(
   reducer: ActionReducer<S, A>,
 ): ActionReducer<S, A> => {
   return (state: S | undefined, action: A): S => {
-    // Capture before-state BEFORE calling reducer
-    const beforeState = state;
-
-    // Call inner reducer to get after-state
+    // Call inner reducer first
     const afterState = reducer(state, action);
 
     // Only process persistent, non-remote actions
@@ -161,21 +147,12 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
           'operationCaptureMetaReducer: Service not initialized - operation will not be captured!',
           { actionType: action.type },
         );
-      } else if (!beforeState) {
-        OpLog.warn(
-          'operationCaptureMetaReducer: No before state - operation will not be captured!',
-          { actionType: action.type },
-        );
       } else {
         try {
           const persistentAction = action as PersistentAction;
 
-          // Compute entity changes and queue in one step
-          operationCaptureService.computeAndEnqueue(
-            persistentAction,
-            beforeState as unknown as RootState,
-            afterState as unknown as RootState,
-          );
+          // Enqueue action for effect processing (no state diffing needed)
+          operationCaptureService.enqueue(persistentAction);
 
           // Reset failure counter on success
           consecutiveCaptureFailures = 0;
@@ -188,9 +165,12 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
             );
           }
 
-          OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
-            actionType: persistentAction.type,
-          });
+          OpLog.verbose(
+            'operationCaptureMetaReducer: Enqueued action for operation capture',
+            {
+              actionType: persistentAction.type,
+            },
+          );
         } catch (e) {
           consecutiveCaptureFailures++;
 
