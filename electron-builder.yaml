@@ -29,9 +29,6 @@ win:
         - x64
   publish:
     - github
-  win32metadata:
-    FileDescription: Super Productivity
-    InternalName: Super Productivity
 nsis:
   artifactName: ${productName} Setup-${arch}.${ext}
 portable:
