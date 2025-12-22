@@ -111,6 +111,55 @@ export class AndroidForegroundTrackingEffects {
     );
 
   /**
+   * Update the native service when timeSpent changes for the current task.
+   * This handles the case where the user manually edits the time spent.
+   */
+  syncTimeSpentChanges$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        combineLatest([
+          this._store.select(selectCurrentTask),
+          this._store.select(selectTimer),
+        ]).pipe(
+          map(([currentTask, timer]) => ({
+            taskId: currentTask?.id || null,
+            timeSpent: currentTask?.timeSpent || 0,
+            isFocusModeActive: timer.purpose !== null,
+          })),
+          // Only react when timeSpent changes for the same task
+          distinctUntilChanged(
+            (a, b) =>
+              a.taskId === b.taskId &&
+              a.timeSpent === b.timeSpent &&
+              a.isFocusModeActive === b.isFocusModeActive,
+          ),
+          pairwise(),
+          filter(([prev, curr]) => {
+            // Only update if:
+            // 1. Same task (not switching tasks - that's handled by syncTrackingToService$)
+            // 2. Task exists
+            // 3. Focus mode is not active (notification is hidden during focus mode)
+            // 4. timeSpent actually changed
+            return (
+              prev.taskId === curr.taskId &&
+              curr.taskId !== null &&
+              !curr.isFocusModeActive &&
+              prev.timeSpent !== curr.timeSpent
+            );
+          }),
+          tap(([, curr]) => {
+            DroidLog.log('Time spent changed for current task, updating service', {
+              taskId: curr.taskId,
+              timeSpent: curr.timeSpent,
+            });
+            androidInterface.updateTrackingService?.(curr.timeSpent);
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  /**
    * Handle pause action from the notification.
    */
   handlePauseAction$ =

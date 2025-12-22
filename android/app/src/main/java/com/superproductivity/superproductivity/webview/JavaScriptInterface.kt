@@ -99,6 +99,16 @@ class JavaScriptInterface(
 
     @Suppress("unused")
     @JavascriptInterface
+    fun updateTrackingService(timeSpentMs: Long) {
+        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_UPDATE
+            putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
     fun getTrackingElapsed(): String {
         val taskId = TrackingForegroundService.currentTaskId
         val elapsedMs = TrackingForegroundService.getElapsedMs()
