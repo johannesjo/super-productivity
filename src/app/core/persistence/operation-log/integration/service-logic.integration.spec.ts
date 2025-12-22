@@ -151,6 +151,12 @@ class MockOperationSyncProvider
     return { rev: 'new-rev' };
   }
   async removeFile(targetPath: string): Promise<void> {}
+
+  async deleteAllData(): Promise<{ success: boolean }> {
+    this._uploadedOps = [];
+    this._lastServerSeq = 0;
+    return { success: true };
+  }
 }
 
 describe('Service Logic Integration', () => {

@@ -343,7 +343,7 @@ export class DailySummaryComponent implements OnInit, OnDestroy, AfterViewInit {
     } catch (error) {
       Log.error('[DailySummary] Failed during pre-archive operations:', error);
       this._snackService.open({
-        msg: T.F.SYNC.S.S_FINISH_DAY_SYNC_ERROR,
+        msg: T.F.SYNC.S.FINISH_DAY_SYNC_ERROR,
         type: 'ERROR',
       });
       return;

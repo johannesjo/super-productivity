@@ -1524,6 +1524,36 @@ export class SyncService {
     return result.count;
   }
 
+  /**
+   * Delete ALL sync data for a user. Used for encryption password changes.
+   * Deletes operations, tombstones, devices, and resets sync state.
+   */
+  async deleteAllUserData(userId: number): Promise<void> {
+    await prisma.$transaction(async (tx) => {
+      // Delete all operations
+      await tx.operation.deleteMany({ where: { userId } });
+
+      // Delete all tombstones
+      await tx.tombstone.deleteMany({ where: { userId } });
+
+      // Delete all devices
+      await tx.syncDevice.deleteMany({ where: { userId } });
+
+      // Reset sync state (delete if exists)
+      await tx.userSyncState.deleteMany({ where: { userId } });
+
+      // Reset storage usage
+      await tx.user.update({
+        where: { id: userId },
+        data: { storageUsedBytes: BigInt(0) },
+      });
+    });
+
+    // Clear caches
+    this.rateLimitCounters.delete(userId);
+    this.snapshotGenerationLocks.delete(userId);
+  }
+
   async isDeviceOwner(userId: number, clientId: string): Promise<boolean> {
     const count = await prisma.syncDevice.count({
       where: { userId, clientId },

@@ -227,6 +227,23 @@ export class SuperSyncProvider
     return response;
   }
 
+  // === Data Management ===
+
+  async deleteAllData(): Promise<{ success: boolean }> {
+    SyncLog.debug(this.logLabel, 'deleteAllData');
+    const cfg = await this._cfgOrError();
+
+    const response = await this._fetchApi<{ success: boolean }>(cfg, '/api/sync/data', {
+      method: 'DELETE',
+    });
+
+    // Reset local lastServerSeq since all server data is deleted
+    const key = await this._getServerSeqKey();
+    localStorage.removeItem(key);
+
+    return response;
+  }
+
   // === Private Helper Methods ===
 
   private async _cfgOrError(): Promise<SuperSyncPrivateCfg> {

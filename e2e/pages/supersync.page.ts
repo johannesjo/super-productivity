@@ -390,4 +390,62 @@ export class SuperSyncPage extends BasePage {
     // Allow UI to settle after sync - reduces flakiness
     await this.page.waitForTimeout(300);
   }
+
+  /**
+   * Open the sync settings dialog and change the encryption password.
+   * This will delete all server data and re-upload with the new password.
+   *
+   * @param newPassword - The new encryption password
+   */
+  async changeEncryptionPassword(newPassword: string): Promise<void> {
+    // Open sync settings via right-click
+    await this.syncBtn.click({ button: 'right' });
+    await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+
+    // Scroll down to find the change password button
+    const dialogContent = this.page.locator('mat-dialog-content');
+    await dialogContent.evaluate((el) => el.scrollTo(0, el.scrollHeight));
+
+    // Click the "Change Encryption Password" button
+    const changePasswordBtn = this.page.locator(
+      'button:has-text("Change Encryption Password")',
+    );
+    await changePasswordBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await changePasswordBtn.click();
+
+    // Wait for the change password dialog to appear
+    const changePasswordDialog = this.page.locator('dialog-change-encryption-password');
+    await changePasswordDialog.waitFor({ state: 'visible', timeout: 5000 });
+
+    // Fill in the new password
+    const newPasswordInput = changePasswordDialog.locator('input[name="newPassword"]');
+    const confirmPasswordInput = changePasswordDialog.locator(
+      'input[name="confirmPassword"]',
+    );
+
+    await newPasswordInput.fill(newPassword);
+    await confirmPasswordInput.fill(newPassword);
+
+    // Click the confirm button
+    const confirmBtn = changePasswordDialog.locator('button[color="warn"]');
+    await confirmBtn.click();
+
+    // Wait for the dialog to close (password change complete)
+    await changePasswordDialog.waitFor({ state: 'detached', timeout: 60000 });
+
+    // Verify success snackbar
+    const snackbar = this.page.locator('simple-snack-bar');
+    await snackbar.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+    const snackbarText = await snackbar.textContent().catch(() => '');
+    if (snackbarText?.toLowerCase().includes('error')) {
+      throw new Error(`Password change failed: ${snackbarText}`);
+    }
+
+    // Close the sync settings dialog if still open
+    const dialogContainer = this.page.locator('mat-dialog-container');
+    if (await dialogContainer.isVisible()) {
+      await this.page.keyboard.press('Escape');
+      await dialogContainer.waitFor({ state: 'detached', timeout: 5000 });
+    }
+  }
 }

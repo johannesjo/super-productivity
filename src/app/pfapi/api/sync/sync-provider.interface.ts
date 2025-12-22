@@ -271,6 +271,13 @@ export interface OperationSyncCapable {
     schemaVersion: number,
     isPayloadEncrypted?: boolean,
   ): Promise<SnapshotUploadResponse>;
+
+  /**
+   * Delete all sync data for this user on the server.
+   * Used for encryption password changes - deletes all operations,
+   * tombstones, devices, and resets sync state.
+   */
+  deleteAllData(): Promise<{ success: boolean }>;
 }
 
 /**

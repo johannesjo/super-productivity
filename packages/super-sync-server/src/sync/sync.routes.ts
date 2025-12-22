@@ -582,6 +582,29 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
     }
   });
 
+  // DELETE /api/sync/data - Delete all sync data for user
+  // Used for encryption password changes
+  fastify.delete('/data', async (req: FastifyRequest, reply: FastifyReply) => {
+    try {
+      const userId = getAuthUser(req).userId;
+      const syncService = getSyncService();
+
+      Logger.info(`[user:${userId}] DELETE ALL DATA requested`);
+
+      await syncService.deleteAllUserData(userId);
+
+      Logger.audit({
+        event: 'USER_DATA_DELETED',
+        userId,
+      });
+
+      return reply.send({ success: true });
+    } catch (err) {
+      Logger.error(`Delete user data error: ${errorMessage(err)}`);
+      return reply.status(500).send({ error: 'Internal server error' });
+    }
+  });
+
   // GET /api/sync/restore-points - List available restore points
   fastify.get<{
     Querystring: { limit?: string };
