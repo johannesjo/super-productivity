@@ -66,25 +66,28 @@ export class TaskUiEffects {
         tap(({ project, task, activeContextTaskIds }) => {
           const isTaskVisibleOnCurrentPage = activeContextTaskIds.includes(task.id);
 
-          this._snackService.open({
-            type: 'SUCCESS',
-            translateParams: {
-              taskTitle: truncate(task.title),
-              projectTitle: project ? truncate(project.title) : '',
-            },
-            msg:
-              task.projectId && !isTaskVisibleOnCurrentPage
-                ? T.F.TASK.S.CREATED_FOR_PROJECT
-                : T.F.TASK.S.TASK_CREATED,
-            ico: 'add',
-            ...(task.projectId && !isTaskVisibleOnCurrentPage
-              ? {
-                  actionFn: () => {
-                    this._navigateToTaskService.navigate(task.id, false);
-                  },
-                  actionStr: T.F.TASK.S.GO_TO_TASK,
-                }
-              : {}),
+          // Defer snackbar to next frame so task add completes first
+          requestAnimationFrame(() => {
+            this._snackService.open({
+              type: 'SUCCESS',
+              translateParams: {
+                taskTitle: truncate(task.title),
+                projectTitle: project ? truncate(project.title) : '',
+              },
+              msg:
+                task.projectId && !isTaskVisibleOnCurrentPage
+                  ? T.F.TASK.S.CREATED_FOR_PROJECT
+                  : T.F.TASK.S.TASK_CREATED,
+              ico: 'add',
+              ...(task.projectId && !isTaskVisibleOnCurrentPage
+                ? {
+                    actionFn: () => {
+                      this._navigateToTaskService.navigate(task.id, false);
+                    },
+                    actionStr: T.F.TASK.S.GO_TO_TASK,
+                  }
+                : {}),
+            });
           });
         }),
       ),
