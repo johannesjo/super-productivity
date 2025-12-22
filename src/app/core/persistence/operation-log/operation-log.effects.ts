@@ -34,6 +34,8 @@ export class OperationLogEffects {
   private compactionFailures = 0;
   /** Circuit breaker: prevents recursive quota exceeded handling */
   private isHandlingQuotaExceeded = false;
+  /** Counter for total operations written. Used for high-volume sync debugging. */
+  private writeCount = 0;
   /**
    * PERF: In-memory compaction counter to avoid IndexedDB transaction on every operation.
    * The persistent counter in state_cache is only used for cross-tab/restart recovery.
@@ -141,6 +143,14 @@ export class OperationLogEffects {
 
         // 1. Write to SUP_OPS (Part A)
         await this.opLogStore.append(op);
+
+        // Track write count for high-volume debugging
+        this.writeCount++;
+        if (this.writeCount % 50 === 0) {
+          OpLog.normal(
+            `OperationLogEffects: Wrote ${this.writeCount} operations to IndexedDB`,
+          );
+        }
 
         // 1b. Trigger immediate upload to SuperSync (async, non-blocking)
         this.immediateUploadService.trigger();

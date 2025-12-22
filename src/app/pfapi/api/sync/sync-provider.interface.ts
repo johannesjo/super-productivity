@@ -174,6 +174,11 @@ export interface OpUploadResponse {
   results: OpUploadResult[];
   newOps?: ServerSyncOperation[];
   latestSeq: number;
+  /**
+   * True when piggybacked ops were limited (more ops exist on server).
+   * Client should trigger a download to get the remaining operations.
+   */
+  hasMorePiggyback?: boolean;
 }
 
 /**

@@ -181,6 +181,11 @@ export interface UploadOpsResponse {
   results: UploadResult[];
   newOps?: ServerOperation[];
   latestSeq: number;
+  /**
+   * True when piggybacked ops were limited (more ops exist on server).
+   * Client should trigger a download to get the remaining operations.
+   */
+  hasMorePiggyback?: boolean;
 }
 
 // Download types

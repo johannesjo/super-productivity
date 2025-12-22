@@ -49,6 +49,7 @@ import { OperationLogCompactionService } from '../store/operation-log-compaction
 import { SuperSyncStatusService } from './super-sync-status.service';
 import { SyncImportFilterService } from './sync-import-filter.service';
 import { ServerMigrationService } from './server-migration.service';
+import { OperationWriteFlushService } from './operation-write-flush.service';
 
 /**
  * Orchestrates synchronization of the Operation Log with remote storage.
@@ -135,6 +136,7 @@ export class OperationLogSyncService {
   private superSyncStatusService = inject(SuperSyncStatusService);
   private syncImportFilterService = inject(SyncImportFilterService);
   private serverMigrationService = inject(ServerMigrationService);
+  private writeFlushService = inject(OperationWriteFlushService);
   private clientIdProvider = inject(CLIENT_ID_PROVIDER);
 
   // Lazy injection to break circular dependency for getActiveSyncProvider():
@@ -181,6 +183,12 @@ export class OperationLogSyncService {
   async uploadPendingOps(
     syncProvider: SyncProviderServiceInterface<SyncProviderId>,
   ): Promise<UploadResult | null> {
+    // CRITICAL: Ensure all pending write operations have completed before uploading.
+    // The effect that writes operations uses concatMap for sequential processing,
+    // but if sync is triggered before all operations are written to IndexedDB,
+    // we would upload an incomplete set. This flush waits for all queued writes.
+    await this.writeFlushService.flushPendingWrites();
+
     // SAFETY: Block upload from wholly fresh clients
     // A fresh client has nothing meaningful to upload and uploading could overwrite
     // valid remote data with empty/default state.

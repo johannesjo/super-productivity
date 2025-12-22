@@ -54,6 +54,12 @@ let consecutiveCaptureFailures = 0;
 const MAX_CONSECUTIVE_FAILURES_BEFORE_WARNING = 3;
 
 /**
+ * Counter for total operations enqueued.
+ * Used for high-volume sync debugging to track operation flow.
+ */
+let totalEnqueueCount = 0;
+
+/**
  * Flag indicating whether remote operations are currently being applied.
  * When true, local user interactions should NOT be captured as new operations.
  *
@@ -173,6 +179,14 @@ export const operationCaptureMetaReducer = <S, A extends Action = Action>(
 
           // Reset failure counter on success
           consecutiveCaptureFailures = 0;
+
+          // Track enqueue count for high-volume debugging
+          totalEnqueueCount++;
+          if (totalEnqueueCount % 50 === 0) {
+            OpLog.normal(
+              `operationCaptureMetaReducer: Enqueued ${totalEnqueueCount} operations total`,
+            );
+          }
 
           OpLog.verbose('operationCaptureMetaReducer: Captured operation synchronously', {
             actionType: persistentAction.type,

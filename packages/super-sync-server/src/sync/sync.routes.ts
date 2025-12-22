@@ -202,19 +202,29 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             // we ensure the client gets all ops it hasn't seen yet.
             let newOps: import('./sync.types').ServerOperation[] | undefined;
             let latestSeq: number;
+            let hasMorePiggyback = false;
+            const PIGGYBACK_LIMIT = 100;
 
             if (lastKnownServerSeq !== undefined) {
               const opsResult = await syncService.getOpsSinceWithSeq(
                 userId,
                 lastKnownServerSeq,
                 clientId,
-                100,
+                PIGGYBACK_LIMIT,
               );
               newOps = opsResult.ops;
               latestSeq = opsResult.latestSeq;
+
+              // Check if there are more ops beyond what we piggybacked
+              if (newOps.length === PIGGYBACK_LIMIT) {
+                const lastPiggybackSeq = newOps[newOps.length - 1].serverSeq;
+                hasMorePiggyback = lastPiggybackSeq < latestSeq;
+              }
+
               if (newOps.length > 0) {
                 Logger.info(
-                  `[user:${userId}] Dedup request: piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})`,
+                  `[user:${userId}] Dedup request: piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})` +
+                    (hasMorePiggyback ? ` (has more)` : ''),
                 );
               }
             } else {
@@ -226,6 +236,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
               newOps: newOps?.length ? newOps : undefined,
               latestSeq,
               deduplicated: true,
+              ...(hasMorePiggyback ? { hasMorePiggyback: true } : {}),
             } as UploadOpsResponse & { deduplicated: boolean });
           }
         }
@@ -278,6 +289,8 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
         // Optionally include new ops from other clients (with atomic latestSeq read)
         let newOps: import('./sync.types').ServerOperation[] | undefined;
         let latestSeq: number;
+        let hasMorePiggyback = false;
+        const PIGGYBACK_LIMIT = 100;
 
         if (lastKnownServerSeq !== undefined) {
           // Use atomic read to get ops and latestSeq together
@@ -285,11 +298,25 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
             userId,
             lastKnownServerSeq,
             clientId,
-            100,
+            PIGGYBACK_LIMIT,
           );
           newOps = opsResult.ops;
           latestSeq = opsResult.latestSeq;
-          if (newOps.length > 0) {
+
+          // Check if there are more ops beyond what we piggybacked
+          // This happens when we hit the limit AND there are more ops on the server
+          if (newOps.length === PIGGYBACK_LIMIT) {
+            const lastPiggybackSeq = newOps[newOps.length - 1].serverSeq;
+            hasMorePiggyback = lastPiggybackSeq < latestSeq;
+            if (hasMorePiggyback) {
+              Logger.info(
+                `[user:${userId}] Piggybacking ${newOps.length} ops (has more: ${hasMorePiggyback}, ` +
+                  `lastPiggybackSeq=${lastPiggybackSeq}, latestSeq=${latestSeq})`,
+              );
+            }
+          }
+
+          if (newOps.length > 0 && !hasMorePiggyback) {
             Logger.info(
               `[user:${userId}] Piggybacking ${newOps.length} ops (since seq ${lastKnownServerSeq})`,
             );
@@ -302,6 +329,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           results,
           newOps: newOps && newOps.length > 0 ? newOps : undefined,
           latestSeq,
+          ...(hasMorePiggyback ? { hasMorePiggyback: true } : {}),
         };
 
         return reply.send(response);

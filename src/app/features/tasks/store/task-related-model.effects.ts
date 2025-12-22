@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
-import { filter, map, switchMap, withLatestFrom } from 'rxjs/operators';
+import { filter, map, mergeMap, switchMap, withLatestFrom } from 'rxjs/operators';
 import { Task } from '../task.model';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -52,7 +52,10 @@ export class TaskRelatedModelEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((a) => a.task.changes.isDone === true),
-        switchMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
+        // Use mergeMap instead of switchMap to ensure ALL mark-as-done actions
+        // trigger planTasksForToday, not just the last one. switchMap would cancel
+        // previous inner subscriptions when new actions arrive quickly.
+        mergeMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
         filter((task: Task) => !!task && !task.parentId),
         map((task) =>
           TaskSharedActions.planTasksForToday({

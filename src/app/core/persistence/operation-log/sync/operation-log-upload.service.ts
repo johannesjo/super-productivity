@@ -45,6 +45,11 @@ export interface UploadResult {
    * Set by OperationLogSyncService.uploadPendingOps after processing piggybacked ops.
    */
   localWinOpsCreated?: number;
+  /**
+   * True when piggybacked ops were limited (more ops exist on server).
+   * Caller should trigger a download to get the remaining operations.
+   */
+  hasMorePiggyback?: boolean;
 }
 
 /**
@@ -105,6 +110,7 @@ export class OperationLogUploadService {
     const rejectedOps: RejectedOpInfo[] = [];
     let uploadedCount = 0;
     let rejectedCount = 0;
+    let hasMorePiggyback = false;
 
     await this.lockService.request('sp_op_log_upload', async () => {
       // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
@@ -223,14 +229,11 @@ export class OperationLogUploadService {
           uploadedCount += acceptedSeqs.length;
         }
 
-        // Update last known server seq (both stored and local variable for next chunk)
-        await syncProvider.setLastServerSeq(response.latestSeq);
-        lastKnownServerSeq = response.latestSeq;
-
         // Collect piggybacked new ops from other clients
         if (response.newOps && response.newOps.length > 0) {
           OpLog.normal(
-            `OperationLogUploadService: Received ${response.newOps.length} piggybacked ops`,
+            `OperationLogUploadService: Received ${response.newOps.length} piggybacked ops` +
+              (response.hasMorePiggyback ? ' (more available on server)' : ''),
           );
           let piggybackSyncOps = response.newOps.map((serverOp) => serverOp.op);
 
@@ -246,6 +249,21 @@ export class OperationLogUploadService {
           const ops = piggybackSyncOps.map((op) => syncOpToOperation(op));
           piggybackedOps.push(...ops);
         }
+
+        // Update last known server seq
+        // When hasMorePiggyback is true, use the max piggybacked op's serverSeq
+        // so subsequent download will fetch remaining ops
+        let seqToStore = response.latestSeq;
+        if (response.hasMorePiggyback && response.newOps && response.newOps.length > 0) {
+          hasMorePiggyback = true;
+          const maxPiggybackSeq = Math.max(...response.newOps.map((op) => op.serverSeq));
+          seqToStore = maxPiggybackSeq;
+          OpLog.normal(
+            `OperationLogUploadService: hasMorePiggyback=true, setting lastServerSeq to ${maxPiggybackSeq} instead of ${response.latestSeq}`,
+          );
+        }
+        await syncProvider.setLastServerSeq(seqToStore);
+        lastKnownServerSeq = seqToStore;
 
         // Collect rejected operations - DO NOT mark as rejected here!
         // The sync service must process piggybacked ops FIRST to allow proper conflict detection.
@@ -274,7 +292,13 @@ export class OperationLogUploadService {
     // Note: We no longer show the rejection warning here since rejections
     // may be resolved via conflict dialog. The sync service handles this.
 
-    return { uploadedCount, piggybackedOps, rejectedCount, rejectedOps };
+    return {
+      uploadedCount,
+      piggybackedOps,
+      rejectedCount,
+      rejectedOps,
+      ...(hasMorePiggyback ? { hasMorePiggyback: true } : {}),
+    };
   }
 
   private _entryToSyncOp(entry: OperationLogEntry): SyncOperation {

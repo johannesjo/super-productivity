@@ -305,6 +305,19 @@ export class OperationLogDownloadService {
       OpLog.normal(
         `OperationLogDownloadService: Downloaded ${allNewOps.length} new operations via API.`,
       );
+
+      // Log type breakdown for high-volume sync debugging
+      if (allNewOps.length > 10) {
+        const opTypeCounts = new Map<string, number>();
+        for (const op of allNewOps) {
+          const key = op.opType;
+          opTypeCounts.set(key, (opTypeCounts.get(key) || 0) + 1);
+        }
+        OpLog.verbose(
+          `OperationLogDownloadService: Downloaded ops breakdown:`,
+          Object.fromEntries(opTypeCounts),
+        );
+      }
     });
 
     if (downloadFailed) {
