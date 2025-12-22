@@ -171,7 +171,7 @@ describe('EncryptionPasswordChangeService', () => {
       );
 
       await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
-        'Snapshot upload failed: Server rejected snapshot',
+        /CRITICAL: Password change failed.*Original error: Snapshot upload failed: Server rejected snapshot/,
       );
     });
 
