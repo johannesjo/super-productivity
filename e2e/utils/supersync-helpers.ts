@@ -166,10 +166,13 @@ export const createSimulatedClient = async (
   clientName: string,
   testPrefix: string,
 ): Promise<SimulatedE2EClient> => {
+  // Use provided baseURL or fall back to localhost:4242 (Playwright fixture may be undefined)
+  const effectiveBaseURL = baseURL || 'http://localhost:4242';
+
   const context = await browser.newContext({
     storageState: undefined, // Clean slate - no shared state
     userAgent: `PLAYWRIGHT SYNC-CLIENT-${clientName}`,
-    baseURL,
+    baseURL: effectiveBaseURL,
     viewport: { width: 1920, height: 1080 },
   });
 

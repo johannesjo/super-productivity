@@ -4,8 +4,39 @@
   "crossModelVersion": 4.5,
   "data": {
     "project": {
-      "ids": [],
-      "entities": {}
+      "ids": ["INBOX_PROJECT"],
+      "entities": {
+        "INBOX_PROJECT": {
+          "id": "INBOX_PROJECT",
+          "title": "Inbox",
+          "isHiddenFromMenu": false,
+          "taskIds": ["active-task-1", "active-task-2"],
+          "backlogTaskIds": [],
+          "noteIds": [],
+          "theme": {
+            "primary": "#607d8b",
+            "accent": "#ff4081",
+            "warn": "#e91e63",
+            "isAutoContrast": true
+          },
+          "icon": "inbox",
+          "workStart": {},
+          "workEnd": {},
+          "breakNr": {},
+          "breakTime": {},
+          "isArchived": false,
+          "advancedCfg": {
+            "worklogExportSettings": {
+              "cols": ["DATE", "START", "END", "TIME_CLOCK", "TITLES_INCLUDING_SUB"],
+              "roundWorkTimeTo": null,
+              "roundStartTimeTo": null,
+              "roundEndTimeTo": null,
+              "groupBy": "DATE",
+              "separateTasksBy": ""
+            }
+          }
+        }
+      }
     },
     "menuTree": {
       "tagTree": [],

@@ -95,6 +95,10 @@ base.describe('@importsync @supersync Import + Sync E2E', () => {
         await waitForTask(clientA.page, 'E2E Import Test - Simple Active Task');
         console.log('[Import Test] Client A has imported tasks visible');
 
+        // Re-enable sync after import (import overwrites globalConfig including sync settings)
+        console.log('[Import Test] Re-enabling sync after import');
+        await clientA.sync.setupSuperSync(syncConfig);
+
         // ============ PHASE 2: Client A Syncs to Server ============
         console.log('[Import Test] Phase 2: Client A syncing to server');
         await clientA.sync.syncAndWait();
@@ -268,6 +272,10 @@ base.describe('@importsync @supersync Import + Sync E2E', () => {
         const backupPath = ImportPage.getFixturePath('test-backup.json');
         await importPage.importBackupFile(backupPath);
         console.log('[Merge Test] Client A imported backup');
+
+        // Re-enable sync after import (import overwrites globalConfig including sync settings)
+        console.log('[Merge Test] Re-enabling sync after import');
+        await clientA.sync.setupSuperSync(syncConfig);
 
         // ============ PHASE 3: Sync After Import ============
         console.log('[Merge Test] Phase 3: Syncing after import');
