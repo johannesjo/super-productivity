@@ -16,29 +16,11 @@ import {
  * - Setting up encryption
  * - Secure syncing between clients with same password
  * - Denial of access for clients with wrong password
+ * - Multiple operations with encryption
+ * - Bidirectional sync with encryption
+ * - Update and delete operations
  *
- * TODO: Fix encryption test failures. Known issues:
- *
- * 1. FORM CONFIG PROPAGATION: When using SuperSync encryption, the form correctly
- *    captures `superSync.isEncryptionEnabled` and `superSync.encryptKey`, but the
- *    encryption flag needs to be propagated to both the global config (for pfapi
- *    file-based sync) and the private config (for operation-log sync).
- *    - Fixed: sync-form.const.ts now uses per-field hideExpression instead of fieldGroup hideExpression
- *    - Fixed: sync-config.service.ts now reads from saved private config as fallback
- *
- * 2. ACTION PAYLOAD EXTRACTION: When encrypted operations are replayed on Client B,
- *    the `task` property in `addTask` actions is `undefined`, causing:
- *    `TypeError: Cannot read properties of undefined (reading 'dueDay')`
- *    at task-shared-crud.reducer.ts:121
- *
- *    Hypothesis: The operation payload is being encrypted/decrypted correctly, but
- *    `extractActionPayload()` in operation-converter.util.ts may be returning incorrect
- *    data. Needs investigation into:
- *    - Whether `isMultiEntityPayload()` is correctly identifying encrypted/decrypted payloads
- *    - Whether `actionPayload` is correctly structured after decryption
- *    - Whether there's a JSON serialization issue with the task object
- *
- * 3. To debug: Run with E2E_VERBOSE=1 to see browser console logs
+ * Run with E2E_VERBOSE=1 to see browser console logs for debugging.
  */
 
 const generateTestRunId = (workerIndex: number): string => {
@@ -174,6 +156,207 @@ base.describe('@supersync SuperSync Encryption', () => {
       } finally {
         if (clientA) await closeClient(clientA);
         if (clientC) await closeClient(clientC);
+      }
+    },
+  );
+
+  base(
+    'Multiple tasks sync correctly with encryption',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const baseConfig = getSuperSyncConfig(user);
+        const encryptionPassword = `multi-${testRunId}`;
+        const syncConfig = {
+          ...baseConfig,
+          isEncryptionEnabled: true,
+          password: encryptionPassword,
+        };
+
+        // --- Client A: Create multiple tasks ---
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const task1 = `Task1-${testRunId}`;
+        const task2 = `Task2-${testRunId}`;
+        const task3 = `Task3-${testRunId}`;
+
+        await clientA.workView.addTask(task1);
+        await clientA.page.waitForTimeout(100);
+        await clientA.workView.addTask(task2);
+        await clientA.page.waitForTimeout(100);
+        await clientA.workView.addTask(task3);
+
+        // Sync all tasks
+        await clientA.sync.syncAndWait();
+
+        // --- Client B: Verify all tasks arrive ---
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        // Verify all 3 tasks exist
+        await waitForTask(clientB.page, task1);
+        await waitForTask(clientB.page, task2);
+        await waitForTask(clientB.page, task3);
+
+        await expect(clientB.page.locator(`task:has-text("${task1}")`)).toBeVisible();
+        await expect(clientB.page.locator(`task:has-text("${task2}")`)).toBeVisible();
+        await expect(clientB.page.locator(`task:has-text("${task3}")`)).toBeVisible();
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  base(
+    'Bidirectional sync works with encryption',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const baseConfig = getSuperSyncConfig(user);
+        const encryptionPassword = `bidi-${testRunId}`;
+        const syncConfig = {
+          ...baseConfig,
+          isEncryptionEnabled: true,
+          password: encryptionPassword,
+        };
+
+        // --- Setup both clients ---
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        // --- Client A creates a task ---
+        const taskFromA = `FromA-${testRunId}`;
+        await clientA.workView.addTask(taskFromA);
+        await clientA.sync.syncAndWait();
+
+        // --- Client B syncs and creates a task ---
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, taskFromA);
+
+        const taskFromB = `FromB-${testRunId}`;
+        await clientB.workView.addTask(taskFromB);
+        await clientB.sync.syncAndWait();
+
+        // --- Client A syncs again and should have both tasks ---
+        await clientA.sync.syncAndWait();
+        await waitForTask(clientA.page, taskFromB);
+
+        // Verify both clients have both tasks
+        await expect(clientA.page.locator(`task:has-text("${taskFromA}")`)).toBeVisible();
+        await expect(clientA.page.locator(`task:has-text("${taskFromB}")`)).toBeVisible();
+        await expect(clientB.page.locator(`task:has-text("${taskFromA}")`)).toBeVisible();
+        await expect(clientB.page.locator(`task:has-text("${taskFromB}")`)).toBeVisible();
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  base(
+    'Task update syncs correctly with encryption',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const baseConfig = getSuperSyncConfig(user);
+        const encryptionPassword = `update-${testRunId}`;
+        const syncConfig = {
+          ...baseConfig,
+          isEncryptionEnabled: true,
+          password: encryptionPassword,
+        };
+
+        // --- Client A: Create a task ---
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `UpdatableTask-${testRunId}`;
+        await clientA.workView.addTask(taskName);
+        await clientA.page.waitForTimeout(300);
+        await clientA.sync.syncAndWait();
+
+        // --- Client B: Sync and verify task exists ---
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        await waitForTask(clientB.page, taskName);
+        await expect(clientB.page.locator(`task:has-text("${taskName}")`)).toBeVisible();
+
+        // --- Client B: Create another task ---
+        const task2Name = `UpdatedByB-${testRunId}`;
+        await clientB.workView.addTask(task2Name);
+        await clientB.page.waitForTimeout(300);
+        await clientB.sync.syncAndWait();
+
+        // --- Client A: Sync and verify both tasks exist ---
+        await clientA.sync.syncAndWait();
+        await waitForTask(clientA.page, task2Name);
+
+        await expect(clientA.page.locator(`task:has-text("${taskName}")`)).toBeVisible();
+        await expect(clientA.page.locator(`task:has-text("${task2Name}")`)).toBeVisible();
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    },
+  );
+
+  base(
+    'Long encryption password works correctly',
+    async ({ browser, baseURL }, testInfo) => {
+      const testRunId = generateTestRunId(testInfo.workerIndex);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const user = await createTestUser(testRunId);
+        const baseConfig = getSuperSyncConfig(user);
+        // Use a very long password with special characters
+        const longPassword = `This-Is-A-Very-Long-Password-With-Special-Chars!@#$%^&*()-${testRunId}`;
+        const syncConfig = {
+          ...baseConfig,
+          isEncryptionEnabled: true,
+          password: longPassword,
+        };
+
+        // --- Client A: Create task with long password ---
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+
+        const taskName = `LongPassTask-${testRunId}`;
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.syncAndWait();
+
+        // --- Client B: Sync with same long password ---
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+
+        // Verify task synced correctly
+        await waitForTask(clientB.page, taskName);
+        await expect(clientB.page.locator(`task:has-text("${taskName}")`)).toBeVisible();
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
       }
     },
   );
