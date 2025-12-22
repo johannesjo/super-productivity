@@ -134,6 +134,8 @@ export class AndroidForegroundTrackingEffects {
               a.timeSpent === b.timeSpent &&
               a.isFocusModeActive === b.isFocusModeActive,
           ),
+          // Provide initial state so pairwise can emit on first actual change
+          startWith({ taskId: null, timeSpent: 0, isFocusModeActive: false }),
           pairwise(),
           filter(([prev, curr]) => {
             // Only update if:

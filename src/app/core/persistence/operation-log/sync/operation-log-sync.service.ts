@@ -1176,6 +1176,22 @@ export class OperationLogSyncService {
         );
       }
 
+      // Handle skipped operations (stale ops that depend on deleted entities)
+      // Mark these as rejected so they won't be retried
+      if (result.skippedOps && result.skippedOps.length > 0) {
+        const skippedOpIds = result.skippedOps.map((s) => s.op.id);
+        OpLog.warn(
+          `OperationLogSyncService: Marking ${skippedOpIds.length} stale ops as rejected ` +
+            `(depend on entities that no longer exist after import)`,
+          result.skippedOps.map((s) => ({
+            opId: s.op.id,
+            reason: s.reason,
+            missingDeps: s.missingDeps,
+          })),
+        );
+        await this.opLogStore.markRejected(skippedOpIds);
+      }
+
       // Handle partial failure
       if (result.failedOp) {
         // Find all ops that weren't applied (failed op + remaining ops)

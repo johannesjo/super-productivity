@@ -1158,7 +1158,8 @@ export class SyncService {
         if (encryptedOpCount > 0) {
           throw new Error(
             `ENCRYPTED_OPS_NOT_SUPPORTED: Cannot generate snapshot - ${encryptedOpCount} operations have encrypted payloads. ` +
-              `Server-side restore is not available when E2E encryption is enabled.`,
+              `Server-side restore is not available when E2E encryption is enabled. ` +
+              `Alternative: Use the client app's "Sync Now" button which can decrypt and restore locally.`,
           );
         }
 

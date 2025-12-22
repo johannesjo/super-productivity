@@ -433,12 +433,35 @@ export class SuperSyncPage extends BasePage {
     // Wait for the dialog to close (password change complete)
     await changePasswordDialog.waitFor({ state: 'detached', timeout: 60000 });
 
-    // Verify success snackbar
+    // Verify success snackbar - must see confirmation
     const snackbar = this.page.locator('simple-snack-bar');
-    await snackbar.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-    const snackbarText = await snackbar.textContent().catch(() => '');
-    if (snackbarText?.toLowerCase().includes('error')) {
+    try {
+      await snackbar.waitFor({ state: 'visible', timeout: 10000 });
+    } catch {
+      throw new Error('Password change: No confirmation snackbar appeared');
+    }
+
+    const snackbarText = (await snackbar.textContent()) || '';
+    const lowerText = snackbarText.toLowerCase();
+
+    // Check for error indicators
+    if (
+      lowerText.includes('error') ||
+      lowerText.includes('failed') ||
+      lowerText.includes('critical')
+    ) {
       throw new Error(`Password change failed: ${snackbarText}`);
+    }
+
+    // Verify success indicator is present
+    if (
+      !lowerText.includes('success') &&
+      !lowerText.includes('changed') &&
+      !lowerText.includes('complete')
+    ) {
+      throw new Error(
+        `Password change may have failed - unexpected message: ${snackbarText}`,
+      );
     }
 
     // Close the sync settings dialog if still open

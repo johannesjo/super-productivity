@@ -35,6 +35,10 @@ export class EncryptionPasswordChangeService {
    * Changes the encryption password by deleting all server data
    * and uploading a new encrypted snapshot.
    *
+   * Recovery flow:
+   * - If snapshot upload fails after server deletion, attempts to restore
+   *   using the OLD password so user doesn't lose their server data.
+   *
    * @param newPassword - The new encryption password
    * @throws Error if sync provider is not SuperSync or not ready
    */
@@ -50,6 +54,11 @@ export class EncryptionPasswordChangeService {
     if (!isOperationSyncCapable(syncProvider)) {
       throw new Error('Sync provider does not support operation sync');
     }
+
+    // Get current config (save old password for recovery)
+    const existingCfg =
+      (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
+    const oldPassword = existingCfg?.encryptKey;
 
     // Get current state
     SyncLog.normal('EncryptionPasswordChangeService: Getting current state...');
@@ -68,39 +77,89 @@ export class EncryptionPasswordChangeService {
     SyncLog.normal(
       'EncryptionPasswordChangeService: Encrypting and uploading snapshot...',
     );
-    const encryptedState = await this._encryptionService.encryptPayload(
-      currentState,
-      newPassword,
-    );
+    try {
+      const encryptedState = await this._encryptionService.encryptPayload(
+        currentState,
+        newPassword,
+      );
 
-    const response = await syncProvider.uploadSnapshot(
-      encryptedState,
-      clientId,
-      'recovery',
-      vectorClock,
-      CURRENT_SCHEMA_VERSION,
-      true, // isPayloadEncrypted
-    );
+      const response = await syncProvider.uploadSnapshot(
+        encryptedState,
+        clientId,
+        'recovery',
+        vectorClock,
+        CURRENT_SCHEMA_VERSION,
+        true, // isPayloadEncrypted
+      );
 
-    if (!response.accepted) {
-      throw new Error(`Snapshot upload failed: ${response.error}`);
+      if (!response.accepted) {
+        throw new Error(`Snapshot upload failed: ${response.error}`);
+      }
+
+      // Update local config with new password
+      SyncLog.normal('EncryptionPasswordChangeService: Updating local config...');
+      await syncProvider.setPrivateCfg({
+        ...existingCfg,
+        encryptKey: newPassword,
+        isEncryptionEnabled: true,
+      } as SuperSyncPrivateCfg);
+
+      // Update lastServerSeq to the new snapshot's seq
+      if (response.serverSeq !== undefined) {
+        await syncProvider.setLastServerSeq(response.serverSeq);
+      }
+
+      SyncLog.normal('EncryptionPasswordChangeService: Password change complete!');
+    } catch (uploadError) {
+      // CRITICAL: Server data was deleted but new snapshot failed to upload.
+      // Attempt recovery by re-uploading with the old password.
+      SyncLog.err(
+        'EncryptionPasswordChangeService: Snapshot upload failed, attempting recovery...',
+        uploadError,
+      );
+
+      if (oldPassword) {
+        try {
+          const recoveryState = await this._encryptionService.encryptPayload(
+            currentState,
+            oldPassword,
+          );
+
+          const recoveryResponse = await syncProvider.uploadSnapshot(
+            recoveryState,
+            clientId,
+            'recovery',
+            vectorClock,
+            CURRENT_SCHEMA_VERSION,
+            true,
+          );
+
+          if (recoveryResponse.accepted) {
+            if (recoveryResponse.serverSeq !== undefined) {
+              await syncProvider.setLastServerSeq(recoveryResponse.serverSeq);
+            }
+            SyncLog.warn(
+              'EncryptionPasswordChangeService: Restored server data with old password.',
+            );
+            throw new Error(
+              'Password change failed. Server data has been restored with your old password. ' +
+                'Please try again or check your network connection.',
+            );
+          }
+        } catch (recoveryError) {
+          SyncLog.err(
+            'EncryptionPasswordChangeService: Recovery also failed!',
+            recoveryError,
+          );
+        }
+      }
+
+      // Recovery failed or no old password available
+      throw new Error(
+        'CRITICAL: Password change failed and could not restore server data. ' +
+          'Your local data is safe. Please use "Sync Now" to re-upload your data. ' +
+          `Original error: ${uploadError instanceof Error ? uploadError.message : uploadError}`,
+      );
     }
-
-    // Update local config with new password
-    SyncLog.normal('EncryptionPasswordChangeService: Updating local config...');
-    const existingCfg =
-      (await syncProvider.privateCfg.load()) as SuperSyncPrivateCfg | null;
-    await syncProvider.setPrivateCfg({
-      ...existingCfg,
-      encryptKey: newPassword,
-      isEncryptionEnabled: true,
-    } as SuperSyncPrivateCfg);
-
-    // Update lastServerSeq to the new snapshot's seq
-    if (response.serverSeq !== undefined) {
-      await syncProvider.setLastServerSeq(response.serverSeq);
-    }
-
-    SyncLog.normal('EncryptionPasswordChangeService: Password change complete!');
   }
 }

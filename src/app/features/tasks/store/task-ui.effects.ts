@@ -5,6 +5,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { getLastDeletePayload } from '../../../root-store/meta/undo-task-delete.meta-reducer';
 import { select, Store } from '@ngrx/store';
 import {
+  delay,
   distinctUntilChanged,
   filter,
   first,
@@ -63,31 +64,30 @@ export class TaskUiEffects {
             return [{ project: null, task, activeContextTaskIds }];
           }
         }),
+        // Defer snackbar to next microtask so task add completes first
+        delay(0),
         tap(({ project, task, activeContextTaskIds }) => {
           const isTaskVisibleOnCurrentPage = activeContextTaskIds.includes(task.id);
 
-          // Defer snackbar to next frame so task add completes first
-          requestAnimationFrame(() => {
-            this._snackService.open({
-              type: 'SUCCESS',
-              translateParams: {
-                taskTitle: truncate(task.title),
-                projectTitle: project ? truncate(project.title) : '',
-              },
-              msg:
-                task.projectId && !isTaskVisibleOnCurrentPage
-                  ? T.F.TASK.S.CREATED_FOR_PROJECT
-                  : T.F.TASK.S.TASK_CREATED,
-              ico: 'add',
-              actionStr: T.F.TASK.S.GO_TO_TASK,
-              actionFn: () => {
-                if (isTaskVisibleOnCurrentPage) {
-                  this._taskService.setSelectedId(task.id);
-                } else {
-                  this._navigateToTaskService.navigate(task.id, false);
-                }
-              },
-            });
+          this._snackService.open({
+            type: 'SUCCESS',
+            translateParams: {
+              taskTitle: truncate(task.title),
+              projectTitle: project ? truncate(project.title) : '',
+            },
+            msg:
+              task.projectId && !isTaskVisibleOnCurrentPage
+                ? T.F.TASK.S.CREATED_FOR_PROJECT
+                : T.F.TASK.S.TASK_CREATED,
+            ico: 'add',
+            actionStr: T.F.TASK.S.GO_TO_TASK,
+            actionFn: () => {
+              if (isTaskVisibleOnCurrentPage) {
+                this._taskService.setSelectedId(task.id);
+              } else {
+                this._navigateToTaskService.navigate(task.id, false);
+              }
+            },
           });
         }),
       ),

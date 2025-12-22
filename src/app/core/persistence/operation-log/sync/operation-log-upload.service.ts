@@ -254,13 +254,24 @@ export class OperationLogUploadService {
         // When hasMorePiggyback is true, use the max piggybacked op's serverSeq
         // so subsequent download will fetch remaining ops
         let seqToStore = response.latestSeq;
-        if (response.hasMorePiggyback && response.newOps && response.newOps.length > 0) {
+        if (response.hasMorePiggyback) {
           hasMorePiggyback = true;
-          const maxPiggybackSeq = Math.max(...response.newOps.map((op) => op.serverSeq));
-          seqToStore = maxPiggybackSeq;
-          OpLog.normal(
-            `OperationLogUploadService: hasMorePiggyback=true, setting lastServerSeq to ${maxPiggybackSeq} instead of ${response.latestSeq}`,
-          );
+          if (response.newOps && response.newOps.length > 0) {
+            const maxPiggybackSeq = Math.max(
+              ...response.newOps.map((op) => op.serverSeq),
+            );
+            seqToStore = maxPiggybackSeq;
+            OpLog.normal(
+              `OperationLogUploadService: hasMorePiggyback=true, setting lastServerSeq to ${maxPiggybackSeq} instead of ${response.latestSeq}`,
+            );
+          } else {
+            // Server indicates more ops but didn't send any - don't advance sequence
+            // Keep lastKnownServerSeq to ensure subsequent download fetches from correct point
+            seqToStore = lastKnownServerSeq;
+            OpLog.warn(
+              `OperationLogUploadService: hasMorePiggyback=true but no ops received, keeping lastServerSeq at ${lastKnownServerSeq}`,
+            );
+          }
         }
         await syncProvider.setLastServerSeq(seqToStore);
         lastKnownServerSeq = seqToStore;

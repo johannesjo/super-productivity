@@ -148,6 +148,14 @@ export class OperationCaptureService {
   }
 
   /**
+   * Peeks at pending operations without removing them (for diagnostics).
+   * Returns a flat list of all entity changes in the queue.
+   */
+  peekPendingOperations(): EntityChange[] {
+    return this.queue.flat();
+  }
+
+  /**
    * Clears all queued operations (for testing).
    */
   clear(): void {

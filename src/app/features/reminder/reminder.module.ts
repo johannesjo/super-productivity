@@ -87,6 +87,13 @@ export class ReminderModule {
         this._showNotification(reminders);
 
         // Skip dialog on Android - native notifications handle reminders
+        // TODO: Native Android reminder notification actions (snooze/done buttons) currently
+        // work entirely in the background without notifying TypeScript. This means:
+        // 1. Snooze: Works correctly (native code reschedules the alarm)
+        // 2. Done: Works for dismissing the notification, but the reminder isn't removed from
+        //    app state. The reminder will be cancelled when the task is marked done in the app.
+        // To fully fix: Add onReminderDone$ subject to android-interface.ts and wire it up
+        // in the Kotlin ReminderBroadcastReceiver to call dismissReminderOnly action.
         if (IS_ANDROID_WEB_VIEW) {
           return;
         }

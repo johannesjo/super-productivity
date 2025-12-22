@@ -240,23 +240,34 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
                     return;
                   }
 
-                  // Create a temporary WebdavApi instance for testing
-                  const api = new WebdavApi(async () => webDavCfg);
-                  const result = await api.testConnection(webDavCfg);
+                  try {
+                    // Create a temporary WebdavApi instance for testing
+                    const api = new WebdavApi(async () => webDavCfg);
+                    const result = await api.testConnection(webDavCfg);
 
-                  if (result.success) {
-                    this._snackService.open({
-                      type: 'SUCCESS',
-                      msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_SUCCESS,
-                      translateParams: { url: result.fullUrl },
-                    });
-                  } else {
+                    if (result.success) {
+                      this._snackService.open({
+                        type: 'SUCCESS',
+                        msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_SUCCESS,
+                        translateParams: { url: result.fullUrl },
+                      });
+                    } else {
+                      this._snackService.open({
+                        type: 'ERROR',
+                        msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_FAIL,
+                        translateParams: {
+                          error: result.error || 'Unknown error',
+                          url: result.fullUrl,
+                        },
+                      });
+                    }
+                  } catch (e) {
                     this._snackService.open({
                       type: 'ERROR',
                       msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_FAIL,
                       translateParams: {
-                        error: result.error || 'Unknown error',
-                        url: result.fullUrl,
+                        error: e instanceof Error ? e.message : 'Unexpected error',
+                        url: webDavCfg.baseUrl || 'N/A',
                       },
                     });
                   }

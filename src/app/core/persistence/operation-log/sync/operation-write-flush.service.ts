@@ -75,12 +75,21 @@ export class OperationWriteFlushService {
 
       // Check for timeout
       if (Date.now() - startTime > this.MAX_WAIT_TIME) {
+        // Get diagnostic info about stuck operations
+        const pendingOps = this.captureService.peekPendingOperations();
+        const sampleOps = pendingOps.slice(0, 5).map((op) => ({
+          opType: op.opType,
+          entityType: op.entityType,
+          entityId: op.entityId,
+        }));
         OpLog.err(
           `OperationWriteFlushService: Timeout waiting for queue to drain. ` +
             `Queue still has ${queueSize} items after ${this.MAX_WAIT_TIME}ms.`,
+          { queueSize, sampleOps },
         );
         throw new Error(
-          `Operation write flush timeout: queue still has ${queueSize} pending items`,
+          `Operation write flush timeout: queue still has ${queueSize} pending items. ` +
+            `This may indicate a stuck effect. Try reloading the app.`,
         );
       }
 
