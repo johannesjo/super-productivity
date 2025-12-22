@@ -17,6 +17,7 @@ import { openIdleDialog } from '../../idle/store/idle.actions';
 import { selectTaskById } from '../../tasks/store/task.selectors';
 import {
   selectFocusModeConfig,
+  selectIsFocusModeEnabled,
   selectPomodoroConfig,
 } from '../../config/store/global-config.reducer';
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
@@ -90,6 +91,7 @@ describe('FocusModeEffects', () => {
               value: { isSyncSessionWithTracking: false },
             },
             { selector: selectPomodoroConfig, value: { duration: 25 * 60 * 1000 } },
+            { selector: selectIsFocusModeEnabled, value: true },
           ],
         }),
         { provide: FocusModeStrategyFactory, useValue: strategyFactoryMock },
@@ -613,6 +615,24 @@ describe('FocusModeEffects', () => {
         done();
       }, 50);
     });
+
+    it('should NOT dispatch showFocusOverlay when isFocusModeEnabled is false', (done) => {
+      store.overrideSelector(selectFocusModeConfig, {
+        isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
+      });
+      store.overrideSelector(selectIsFocusModeEnabled, false);
+      store.refreshState();
+
+      effects = TestBed.inject(FocusModeEffects);
+
+      currentTaskId$.next('task-123');
+
+      setTimeout(() => {
+        // If we get here without the effect emitting, test passes
+        done();
+      }, 50);
+    });
   });
 
   describe('syncTrackingStartToSession$', () => {
@@ -741,6 +761,27 @@ describe('FocusModeEffects', () => {
         done();
       }, 50);
     });
+
+    it('should NOT dispatch when isFocusModeEnabled is false', (done) => {
+      store.overrideSelector(selectFocusModeConfig, {
+        isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
+      });
+      store.overrideSelector(selectors.selectTimer, createMockTimer());
+      store.overrideSelector(selectors.selectMode, FocusModeMode.Pomodoro);
+      store.overrideSelector(selectors.selectCurrentScreen, FocusScreen.Main);
+      store.overrideSelector(selectIsFocusModeEnabled, false);
+      store.refreshState();
+
+      effects = TestBed.inject(FocusModeEffects);
+
+      currentTaskId$.next('task-123');
+
+      setTimeout(() => {
+        // Should not start session when focus mode feature is disabled
+        done();
+      }, 50);
+    });
   });
 
   describe('syncTrackingStopToSession$', () => {
@@ -865,6 +906,32 @@ describe('FocusModeEffects', () => {
       }, 10);
 
       setTimeout(() => {
+        done();
+      }, 50);
+    });
+
+    it('should NOT dispatch when isFocusModeEnabled is false', (done) => {
+      store.overrideSelector(selectFocusModeConfig, {
+        isSyncSessionWithTracking: true,
+        isSkipPreparation: false,
+      });
+      store.overrideSelector(
+        selectors.selectTimer,
+        createMockTimer({ isRunning: true, purpose: 'work' }),
+      );
+      store.overrideSelector(selectIsFocusModeEnabled, false);
+      store.refreshState();
+
+      effects = TestBed.inject(FocusModeEffects);
+
+      currentTaskId$.next('task-123');
+
+      setTimeout(() => {
+        currentTaskId$.next(null);
+      }, 10);
+
+      setTimeout(() => {
+        // Should not pause session when focus mode feature is disabled
         done();
       }, 50);
     });

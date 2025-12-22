@@ -26,6 +26,7 @@ import { openIdleDialog } from '../../idle/store/idle.actions';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import {
   selectFocusModeConfig,
+  selectIsFocusModeEnabled,
   selectPomodoroConfig,
 } from '../../config/store/global-config.reducer';
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
@@ -52,10 +53,14 @@ export class FocusModeEffects {
 
   // Auto-show overlay when task is selected (if sync session with tracking is enabled)
   // Skip showing overlay if isStartInBackground is enabled
+  // Only triggers when focus mode feature is enabled
   autoShowOverlay$ = createEffect(() =>
-    this.store.select(selectFocusModeConfig).pipe(
-      switchMap((cfg) =>
-        cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
+    combineLatest([
+      this.store.select(selectFocusModeConfig),
+      this.store.select(selectIsFocusModeEnabled),
+    ]).pipe(
+      switchMap(([cfg, isFocusModeEnabled]) =>
+        isFocusModeEnabled && cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((id) => !!id),
@@ -67,11 +72,14 @@ export class FocusModeEffects {
   );
 
   // Sync: When tracking starts → start/unpause focus session
-  // Only triggers when isSyncSessionWithTracking is enabled
+  // Only triggers when isSyncSessionWithTracking is enabled and focus mode feature is enabled
   syncTrackingStartToSession$ = createEffect(() =>
-    this.store.select(selectFocusModeConfig).pipe(
-      switchMap((cfg) =>
-        cfg?.isSyncSessionWithTracking
+    combineLatest([
+      this.store.select(selectFocusModeConfig),
+      this.store.select(selectIsFocusModeEnabled),
+    ]).pipe(
+      switchMap(([cfg, isFocusModeEnabled]) =>
+        isFocusModeEnabled && cfg?.isSyncSessionWithTracking
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((taskId) => !!taskId),
@@ -101,15 +109,18 @@ export class FocusModeEffects {
 
   // Sync: When tracking stops → pause focus session
   // Uses pairwise to capture the previous task ID before it's lost
+  // Only triggers when focus mode feature is enabled
   syncTrackingStopToSession$ = createEffect(() =>
     this.taskService.currentTaskId$.pipe(
       pairwise(),
       withLatestFrom(
         this.store.select(selectFocusModeConfig),
         this.store.select(selectors.selectTimer),
+        this.store.select(selectIsFocusModeEnabled),
       ),
       filter(
-        ([[prevTaskId, currTaskId], cfg, timer]) =>
+        ([[prevTaskId, currTaskId], cfg, timer, isFocusModeEnabled]) =>
+          isFocusModeEnabled &&
           !!cfg?.isSyncSessionWithTracking &&
           timer.purpose === 'work' &&
           timer.isRunning &&
@@ -521,6 +532,7 @@ export class FocusModeEffects {
     );
 
   // Update banner when session or break state changes
+  // Only shows banner when focus mode feature is enabled
   updateBanner$ = createEffect(
     () =>
       combineLatest([
@@ -533,6 +545,7 @@ export class FocusModeEffects {
         this.store.select(selectors.selectIsOverlayShown),
         this.store.select(selectors.selectTimer),
         this.store.select(selectFocusModeConfig),
+        this.store.select(selectIsFocusModeEnabled),
       ]).pipe(
         tap(
           ([
@@ -545,9 +558,10 @@ export class FocusModeEffects {
             isOverlayShown,
             timer,
             focusModeConfig,
+            isFocusModeEnabled,
           ]) => {
-            // Only show banner when overlay is hidden
-            if (isOverlayShown) {
+            // Only show banner when overlay is hidden and focus mode feature is enabled
+            if (isOverlayShown || !isFocusModeEnabled) {
               this.bannerService.dismiss(BannerId.FocusMode);
               return;
             }
