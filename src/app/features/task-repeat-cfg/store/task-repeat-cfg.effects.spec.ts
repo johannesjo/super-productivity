@@ -229,13 +229,16 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
     it('should update task dueDay when first occurrence differs from current (#5594)', () => {
       // Scenario: Task is created today, but repeat config only matches future days
-      // Calculate next Monday from today
+      // Use a day that is 3 days from today (guaranteed to not be today)
       const today = new Date();
       const todayStr = getDbDateStr(today);
-      const daysUntilMonday = (8 - today.getDay()) % 7 || 7; // Next Monday (not today even if today is Monday)
-      const nextMonday = new Date(today);
-      nextMonday.setDate(today.getDate() + daysUntilMonday);
-      const mondayStr = getDbDateStr(nextMonday);
+      const todayDayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+
+      // Pick a weekday that is 3 days from now (guaranteed to not be today)
+      const targetDayOfWeek = (todayDayOfWeek + 3) % 7;
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + 3);
+      const targetDateStr = getDbDateStr(targetDate);
 
       const taskCreatedToday: TaskWithSubTasks = {
         ...mockTask,
@@ -244,18 +247,19 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         created: today.getTime(),
       };
 
+      // Create weekday booleans with only the target day set to true
       const weeklyRepeatCfg: TaskRepeatCfgCopy = {
         ...mockRepeatCfg,
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
         startDate: todayStr,
-        monday: true,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false,
+        sunday: targetDayOfWeek === 0,
+        monday: targetDayOfWeek === 1,
+        tuesday: targetDayOfWeek === 2,
+        wednesday: targetDayOfWeek === 3,
+        thursday: targetDayOfWeek === 4,
+        friday: targetDayOfWeek === 5,
+        saturday: targetDayOfWeek === 6,
       };
 
       const action = addTaskRepeatCfgToTask({
@@ -270,9 +274,9 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
       effects.updateTaskAfterMakingItRepeatable$.subscribe().unsubscribe();
 
-      // Verify that update was called with next Monday
+      // Verify that update was called with the target day (3 days from today)
       expect(taskService.update).toHaveBeenCalledWith('parent-task-id', {
-        dueDay: mondayStr,
+        dueDay: targetDateStr,
       });
     });
 
@@ -405,13 +409,16 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
     it('should use task created date as fallback when dueDay is missing', () => {
       // Scenario: Task has no dueDay, should use created date for comparison
-      // Calculate next Monday from today
+      // Use a day that is 3 days from today (guaranteed to not be today)
       const today = new Date();
-      const daysUntilMonday = (8 - today.getDay()) % 7 || 7; // Next Monday (not today even if today is Monday)
-      const nextMonday = new Date(today);
-      nextMonday.setDate(today.getDate() + daysUntilMonday);
-      const mondayStr = getDbDateStr(nextMonday);
       const todayStr = getDbDateStr(today);
+      const todayDayOfWeek = today.getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
+
+      // Pick a weekday that is 3 days from now (guaranteed to not be today)
+      const targetDayOfWeek = (todayDayOfWeek + 3) % 7;
+      const targetDate = new Date(today);
+      targetDate.setDate(today.getDate() + 3);
+      const targetDateStr = getDbDateStr(targetDate);
 
       const taskWithoutDueDay: TaskWithSubTasks = {
         ...mockTask,
@@ -420,18 +427,19 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         created: today.getTime(),
       };
 
+      // Create weekday booleans with only the target day set to true
       const weeklyRepeatCfg: TaskRepeatCfgCopy = {
         ...mockRepeatCfg,
         repeatCycle: 'WEEKLY',
         repeatEvery: 1,
         startDate: todayStr,
-        monday: true,
-        tuesday: false,
-        wednesday: false,
-        thursday: false,
-        friday: false,
-        saturday: false,
-        sunday: false,
+        sunday: targetDayOfWeek === 0,
+        monday: targetDayOfWeek === 1,
+        tuesday: targetDayOfWeek === 2,
+        wednesday: targetDayOfWeek === 3,
+        thursday: targetDayOfWeek === 4,
+        friday: targetDayOfWeek === 5,
+        saturday: targetDayOfWeek === 6,
       };
 
       const action = addTaskRepeatCfgToTask({
@@ -446,10 +454,79 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
       effects.updateTaskAfterMakingItRepeatable$.subscribe().unsubscribe();
 
-      // Verify that update was called with next Monday
+      // Verify that update was called with the target day (3 days from today)
       expect(taskService.update).toHaveBeenCalledWith('parent-task-id', {
-        dueDay: mondayStr,
+        dueDay: targetDateStr,
       });
+    });
+
+    it('should update dueDay for Mon/Wed/Fri pattern when today is not a match (#5594 exact scenario)', () => {
+      // This test replicates the exact bug scenario from issue #5594:
+      // User creates Mon/Wed/Fri repeat, but dueDay incorrectly stays as today
+      const today = new Date();
+      const todayStr = getDbDateStr(today);
+      const todayDayOfWeek = today.getDay();
+
+      // Mon=1, Wed=3, Fri=5
+      const isMonWedFri =
+        todayDayOfWeek === 1 || todayDayOfWeek === 3 || todayDayOfWeek === 5;
+
+      // Calculate expected first occurrence
+      let expectedDate: Date;
+      if (isMonWedFri) {
+        expectedDate = new Date(today);
+      } else {
+        expectedDate = new Date(today);
+        const daysToAdd = [1, 3, 5]
+          .map((d) => (d - todayDayOfWeek + 7) % 7)
+          .filter((d) => d > 0)
+          .sort((a, b) => a - b)[0];
+        expectedDate.setDate(expectedDate.getDate() + daysToAdd);
+      }
+      const expectedDateStr = getDbDateStr(expectedDate);
+
+      const taskCreatedToday: TaskWithSubTasks = {
+        ...mockTask,
+        subTasks: [],
+        dueDay: todayStr, // Task starts with today's date
+        created: today.getTime(),
+      };
+
+      const monWedFriRepeatCfg: TaskRepeatCfgCopy = {
+        ...mockRepeatCfg,
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 1,
+        startDate: todayStr,
+        monday: true,
+        tuesday: false,
+        wednesday: true,
+        thursday: false,
+        friday: true,
+        saturday: false,
+        sunday: false,
+      };
+
+      const action = addTaskRepeatCfgToTask({
+        taskRepeatCfg: monWedFriRepeatCfg,
+        taskId: 'parent-task-id',
+      });
+
+      actions$ = of(action);
+      taskService.getByIdWithSubTaskData$.and.returnValue(of(taskCreatedToday));
+
+      spyOn(effects as any, '_updateRegularTaskInstance');
+
+      effects.updateTaskAfterMakingItRepeatable$.subscribe().unsubscribe();
+
+      // If today is Mon/Wed/Fri, no update needed (dueDay already correct)
+      // If today is Tue/Thu/Sat/Sun, dueDay should be updated to next Mon/Wed/Fri
+      if (isMonWedFri) {
+        expect(taskService.update).not.toHaveBeenCalled();
+      } else {
+        expect(taskService.update).toHaveBeenCalledWith('parent-task-id', {
+          dueDay: expectedDateStr,
+        });
+      }
     });
   });
 
