@@ -16,8 +16,7 @@ interface LogEntry {
   args: unknown[];
 }
 
-// Production uses ERROR level to reduce noise, development uses DEBUG for full visibility
-const LOG_LEVEL = environment.production ? LogLevel.ERROR : LogLevel.DEBUG;
+const LOG_LEVEL = environment.production ? LogLevel.VERBOSE : LogLevel.VERBOSE;
 
 const MAX_DATA_LENGTH = 400;
 
