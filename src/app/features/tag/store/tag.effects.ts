@@ -31,7 +31,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { selectAllTasksDueToday } from '../../planner/store/planner.selectors';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Log } from '../../../core/log';
-import { skipDuringSync } from '../../../util/skip-during-sync.operator';
+import { skipDuringSyncWindow } from '../../../util/skip-during-sync-window.operator';
 
 @Injectable()
 export class TagEffects {
@@ -151,7 +151,7 @@ export class TagEffects {
    *
    * SAFETY: This is a selector-based effect that dispatches actions.
    * Protected against sync replay by:
-   * - skipDuringSync() - skips when HydrationStateService.isApplyingRemoteOps()
+   * - skipDuringSyncWindow() - skips during both op application AND post-sync cooldown
    * - distinctUntilChanged - prevents duplicate dispatches for same state
    * - explicit isChanged check before dispatch
    *
@@ -163,7 +163,7 @@ export class TagEffects {
   preventParentAndSubTaskInTodayList$: any = createEffect(() =>
     this._store$.select(selectTodayTaskIds).pipe(
       filter((v) => v.length > 0),
-      skipDuringSync(),
+      skipDuringSyncWindow(),
       distinctUntilChanged(fastArrayCompare),
       // NOTE: wait a bit for potential effects to be executed
       switchMap((todayTaskIds) =>
@@ -224,14 +224,15 @@ export class TagEffects {
    * When "Add to today" and "Snooze" operations conflict, the TASK entity may resolve
    * to one client's values while TODAY_TAG entity gets different values.
    *
-   * SAFETY: Protected by skipDuringSync() - won't fire during sync replay.
+   * SAFETY: Protected by skipDuringSyncWindow() - won't fire during sync replay
+   * or post-sync cooldown period.
    *
    * @see selectTodayTagRepair - detects inconsistencies between TODAY_TAG.taskIds and task.dueDay
    * @see docs/ai/today-tag-architecture.md
    */
   repairTodayTagConsistency$: Observable<unknown> = createEffect(() =>
     this._store$.select(selectTodayTagRepair).pipe(
-      skipDuringSync(),
+      skipDuringSyncWindow(),
       filter(
         (repair): repair is { needsRepair: boolean; repairedTaskIds: string[] } =>
           repair !== null && repair.needsRepair,

@@ -10,6 +10,10 @@ describe('HydrationStateService', () => {
       providers: [HydrationStateService],
     });
     service = TestBed.inject(HydrationStateService);
+
+    // Ensure clean state - meta-reducer flag may be dirty from previous tests
+    service.endApplyingRemoteOps();
+    service.clearPostSyncCooldown();
   });
 
   describe('initial state', () => {
@@ -125,6 +129,71 @@ describe('HydrationStateService', () => {
       service.endApplyingRemoteOps();
       expect(service.isApplyingRemoteOps()).toBeFalse();
       expect(getIsApplyingRemoteOps()).toBeFalse();
+    });
+  });
+
+  describe('post-sync cooldown', () => {
+    it('should set isInSyncWindow to true during cooldown', () => {
+      expect(service.isInSyncWindow()).toBeFalse();
+
+      service.startPostSyncCooldown(1000);
+
+      expect(service.isInSyncWindow()).toBeTrue();
+    });
+
+    it('should clear cooldown with clearPostSyncCooldown', () => {
+      service.startPostSyncCooldown(1000);
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      service.clearPostSyncCooldown();
+
+      expect(service.isInSyncWindow()).toBeFalse();
+    });
+
+    it('should return true for isInSyncWindow during applyingRemoteOps', () => {
+      service.startApplyingRemoteOps();
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      service.endApplyingRemoteOps();
+      expect(service.isInSyncWindow()).toBeFalse();
+    });
+
+    it('should return true for isInSyncWindow when either flag is true', () => {
+      // Neither flag set
+      expect(service.isInSyncWindow()).toBeFalse();
+
+      // Only applying remote ops
+      service.startApplyingRemoteOps();
+      expect(service.isInSyncWindow()).toBeTrue();
+      service.endApplyingRemoteOps();
+
+      // Only cooldown
+      service.startPostSyncCooldown(1000);
+      expect(service.isInSyncWindow()).toBeTrue();
+      service.clearPostSyncCooldown();
+
+      // Both (unusual but possible)
+      service.startApplyingRemoteOps();
+      service.startPostSyncCooldown(1000);
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      // Clear applyingRemoteOps, cooldown still active
+      service.endApplyingRemoteOps();
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      // Clear cooldown
+      service.clearPostSyncCooldown();
+      expect(service.isInSyncWindow()).toBeFalse();
+    });
+
+    it('should auto-clear cooldown after timeout', (done) => {
+      service.startPostSyncCooldown(50); // 50ms for fast test
+      expect(service.isInSyncWindow()).toBeTrue();
+
+      setTimeout(() => {
+        expect(service.isInSyncWindow()).toBeFalse();
+        done();
+      }, 100);
     });
   });
 });

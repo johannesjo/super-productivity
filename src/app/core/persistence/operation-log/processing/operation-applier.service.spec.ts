@@ -50,6 +50,7 @@ describe('OperationApplierService', () => {
     mockHydrationState = jasmine.createSpyObj('HydrationStateService', [
       'startApplyingRemoteOps',
       'endApplyingRemoteOps',
+      'startPostSyncCooldown',
     ]);
 
     // Default: no dependencies

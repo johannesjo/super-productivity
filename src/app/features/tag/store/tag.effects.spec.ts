@@ -33,9 +33,11 @@ describe('TagEffects', () => {
 
     hydrationStateServiceSpy = jasmine.createSpyObj('HydrationStateService', [
       'isApplyingRemoteOps',
+      'isInSyncWindow',
     ]);
     // Default: not applying remote ops (so effect should fire)
     hydrationStateServiceSpy.isApplyingRemoteOps.and.returnValue(false);
+    hydrationStateServiceSpy.isInSyncWindow.and.returnValue(false);
 
     const snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     const tagServiceSpy = jasmine.createSpyObj('TagService', ['updateTag']);
@@ -143,9 +145,9 @@ describe('TagEffects', () => {
       }, 50);
     });
 
-    it('should not dispatch during sync (skipDuringSync)', (done) => {
-      // Simulate being in sync mode
-      hydrationStateServiceSpy.isApplyingRemoteOps.and.returnValue(true);
+    it('should not dispatch during sync window (skipDuringSyncWindow)', (done) => {
+      // Simulate being in sync window (either applying ops or in post-sync cooldown)
+      hydrationStateServiceSpy.isInSyncWindow.and.returnValue(true);
 
       store.overrideSelector(selectTodayTagRepair, {
         needsRepair: true,

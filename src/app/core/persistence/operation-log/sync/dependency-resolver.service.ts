@@ -202,6 +202,47 @@ export class DependencyResolverService {
   }
 
   /**
+   * Checks if an operation is stale because a SYNC_IMPORT deleted its hard dependencies.
+   *
+   * When a SYNC_IMPORT replaces the full state, operations created before the import
+   * that reference entities deleted by the import become stale. Instead of throwing
+   * SyncStateCorruptedError for these, we can gracefully skip them.
+   *
+   * @param op - The operation to check
+   * @param latestImportOpId - UUIDv7 of the latest SYNC_IMPORT/BACKUP_IMPORT operation.
+   *                           If undefined, no import has occurred and the op is not stale.
+   * @returns true if the operation is stale (predates import AND has missing hard dependencies)
+   */
+  async checkIfStaleAfterImport(
+    op: Operation,
+    latestImportOpId?: string,
+  ): Promise<boolean> {
+    // No import → not stale
+    if (!latestImportOpId) {
+      return false;
+    }
+
+    // Operation is newer than import → not stale (created after import)
+    // UUIDv7 IDs are lexicographically sortable by time
+    if (op.id >= latestImportOpId) {
+      return false;
+    }
+
+    // Operation predates import - check if its hard dependencies exist
+    const deps = this.extractDependencies(op);
+    const hardDeps = deps.filter((d) => d.mustExist);
+
+    // No hard dependencies → not stale (nothing required)
+    if (hardDeps.length === 0) {
+      return false;
+    }
+
+    // Check if hard dependencies are missing in current state
+    const { missing } = await this.checkDependencies(hardDeps);
+    return missing.length > 0;
+  }
+
+  /**
    * Fetches entity dictionaries for the requested entity types.
    * Only makes one selector call per entity type, regardless of how many entities are checked.
    */

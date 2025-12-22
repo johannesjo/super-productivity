@@ -122,3 +122,20 @@ export const RETRY_DELAY_BASE_MS = new InjectionToken<number>('RETRY_DELAY_BASE_
   providedIn: 'root',
   factory: () => DOWNLOAD_RETRY_BASE_DELAY_MS,
 });
+
+/**
+ * Duration in milliseconds to suppress selector-based effects after sync completes.
+ * This prevents "repair" effects from creating redundant operations based on
+ * freshly-synced state that looks like it needs repair.
+ *
+ * The timing gap problem:
+ * 1. Tab gains focus → sync triggers
+ * 2. Remote ops applied (isApplyingRemoteOps = true)
+ * 3. Sync finishes, isApplyingRemoteOps = false
+ * 4. Selectors re-evaluate with new state
+ * 5. Effects fire and create operations that conflict with just-synced state
+ *
+ * This cooldown extends the suppression window to prevent step 5.
+ * Default: 2 seconds
+ */
+export const POST_SYNC_COOLDOWN_MS = 2000;

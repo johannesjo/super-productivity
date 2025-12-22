@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { setIsApplyingRemoteOps } from './operation-capture.meta-reducer';
+import { POST_SYNC_COOLDOWN_MS } from '../operation-log.const';
 
 /**
  * Tracks whether the application is currently applying remote operations
@@ -40,10 +41,19 @@ import { setIsApplyingRemoteOps } from './operation-capture.meta-reducer';
  * capturing user interactions during sync. This prevents the "slow device
  * cascade" problem where user actions during sync create operations with
  * stale vector clocks that immediately conflict.
+ *
+ * ## Post-Sync Cooldown
+ *
+ * When effects use `skipDuringSyncWindow()` operator, they are suppressed not
+ * only during op application but also for a short cooldown period after sync.
+ * This prevents the timing gap where selectors re-evaluate with new state and
+ * effects fire immediately, creating conflicting operations. See `isInSyncWindow()`.
  */
 @Injectable({ providedIn: 'root' })
 export class HydrationStateService {
   private _isApplyingRemoteOps = signal(false);
+  private _isInPostSyncCooldown = signal(false);
+  private _cooldownTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Returns true if remote operations are currently being applied.
@@ -74,5 +84,56 @@ export class HydrationStateService {
   endApplyingRemoteOps(): void {
     this._isApplyingRemoteOps.set(false);
     setIsApplyingRemoteOps(false);
+  }
+
+  /**
+   * Returns true if we're in the extended sync window where selector-based
+   * effects that modify shared state (like TODAY_TAG) should be suppressed.
+   *
+   * This includes:
+   * - During remote op application (isApplyingRemoteOps)
+   * - During post-sync cooldown period
+   *
+   * Use `skipDuringSyncWindow()` operator for effects that should be
+   * suppressed during this extended window.
+   */
+  isInSyncWindow(): boolean {
+    return this._isApplyingRemoteOps() || this._isInPostSyncCooldown();
+  }
+
+  /**
+   * Starts a cooldown period after sync completes.
+   * During this window, `isInSyncWindow()` returns true.
+   *
+   * This prevents the timing gap where:
+   * 1. Sync finishes, isApplyingRemoteOps = false
+   * 2. Selectors immediately re-evaluate with new state
+   * 3. Effects fire and create operations conflicting with just-synced state
+   *
+   * The cooldown ensures effects don't fire until state has stabilized.
+   */
+  startPostSyncCooldown(durationMs: number = POST_SYNC_COOLDOWN_MS): void {
+    this._isInPostSyncCooldown.set(true);
+
+    if (this._cooldownTimer) {
+      clearTimeout(this._cooldownTimer);
+    }
+
+    this._cooldownTimer = setTimeout(() => {
+      this._isInPostSyncCooldown.set(false);
+      this._cooldownTimer = null;
+    }, durationMs);
+  }
+
+  /**
+   * Clears the post-sync cooldown timer.
+   * Used for cleanup during testing.
+   */
+  clearPostSyncCooldown(): void {
+    if (this._cooldownTimer) {
+      clearTimeout(this._cooldownTimer);
+      this._cooldownTimer = null;
+    }
+    this._isInPostSyncCooldown.set(false);
   }
 }

@@ -184,11 +184,28 @@ export class SuperSyncProvider
     });
 
     const compressedPayload = await compressWithGzip(jsonPayload);
+
+    // Diagnostic logging for gzip decompression issues
+    // Gzip magic bytes should be 0x1f, 0x8b
+    const hasValidGzipMagic =
+      compressedPayload.length >= 2 &&
+      compressedPayload[0] === 0x1f &&
+      compressedPayload[1] === 0x8b;
+
     SyncLog.debug(this.logLabel, 'uploadSnapshot compressed', {
       originalSize: jsonPayload.length,
       compressedSize: compressedPayload.length,
       ratio: ((compressedPayload.length / jsonPayload.length) * 100).toFixed(1) + '%',
+      hasValidGzipMagic,
+      firstBytes: Array.from(compressedPayload.slice(0, 10)).map((b) => b.toString(16)),
     });
+
+    if (!hasValidGzipMagic) {
+      SyncLog.error(this.logLabel, 'uploadSnapshot: Invalid gzip magic bytes!', {
+        expected: [0x1f, 0x8b],
+        actual: [compressedPayload[0], compressedPayload[1]],
+      });
+    }
 
     const response = await this._fetchApiCompressed<SnapshotUploadResponse>(
       cfg,
