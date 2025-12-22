@@ -1,13 +1,18 @@
 package com.superproductivity.superproductivity.webview
 
 import android.app.Activity
+import android.content.Intent
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.superproductivity.superproductivity.App
 import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
+import com.superproductivity.superproductivity.service.FocusModeForegroundService
+import com.superproductivity.superproductivity.service.ReminderNotificationHelper
+import com.superproductivity.superproductivity.service.TrackingForegroundService
 
 
 class JavaScriptInterface(
@@ -71,6 +76,109 @@ class JavaScriptInterface(
         }
     }
 
+    @Suppress("unused")
+    @JavascriptInterface
+    fun startTrackingService(taskId: String, taskTitle: String, timeSpentMs: Long) {
+        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_START
+            putExtra(TrackingForegroundService.EXTRA_TASK_ID, taskId)
+            putExtra(TrackingForegroundService.EXTRA_TASK_TITLE, taskTitle)
+            putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
+        }
+        ContextCompat.startForegroundService(activity, intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun stopTrackingService() {
+        val intent = Intent(activity, TrackingForegroundService::class.java).apply {
+            action = TrackingForegroundService.ACTION_STOP
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun getTrackingElapsed(): String {
+        val taskId = TrackingForegroundService.currentTaskId
+        val elapsedMs = TrackingForegroundService.getElapsedMs()
+        val isTracking = TrackingForegroundService.isTracking
+        return if (isTracking && taskId != null) {
+            """{"taskId":"$taskId","elapsedMs":$elapsedMs}"""
+        } else {
+            "null"
+        }
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun startFocusModeService(
+        title: String,
+        durationMs: Long,
+        remainingMs: Long,
+        isBreak: Boolean,
+        isPaused: Boolean,
+        taskTitle: String?
+    ) {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_START
+            putExtra(FocusModeForegroundService.EXTRA_TITLE, title)
+            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+            putExtra(FocusModeForegroundService.EXTRA_DURATION_MS, durationMs)
+            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+            putExtra(FocusModeForegroundService.EXTRA_IS_BREAK, isBreak)
+            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+        }
+        ContextCompat.startForegroundService(activity, intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun stopFocusModeService() {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_STOP
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun updateFocusModeService(remainingMs: Long, isPaused: Boolean, taskTitle: String?) {
+        val intent = Intent(activity, FocusModeForegroundService::class.java).apply {
+            action = FocusModeForegroundService.ACTION_UPDATE
+            putExtra(FocusModeForegroundService.EXTRA_REMAINING_MS, remainingMs)
+            putExtra(FocusModeForegroundService.EXTRA_IS_PAUSED, isPaused)
+            putExtra(FocusModeForegroundService.EXTRA_TASK_TITLE, taskTitle)
+        }
+        activity.startService(intent)
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun scheduleNativeReminder(
+        notificationId: Int,
+        reminderId: String,
+        relatedId: String,
+        title: String,
+        reminderType: String,
+        triggerAtMs: Long
+    ) {
+        ReminderNotificationHelper.scheduleReminder(
+            activity,
+            notificationId,
+            reminderId,
+            relatedId,
+            title,
+            reminderType,
+            triggerAtMs
+        )
+    }
+
+    @Suppress("unused")
+    @JavascriptInterface
+    fun cancelNativeReminder(notificationId: Int) {
+        ReminderNotificationHelper.cancelReminder(activity, notificationId)
+    }
 
     fun callJavaScriptFunction(script: String) {
         webView.post { webView.evaluateJavascript(script) { } }

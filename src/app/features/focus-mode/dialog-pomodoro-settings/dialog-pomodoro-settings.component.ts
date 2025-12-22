@@ -63,6 +63,7 @@ const POMODORO_DURATION_FIELDS: FormlyFieldConfig[] = [
           [fields]="fields"
           [form]="form"
           [model]="model"
+          (modelChange)="model = $event"
         ></formly-form>
       </form>
       <div class="dialog-actions">

@@ -130,6 +130,22 @@ export class FocusModeMainComponent {
   mainState = this.focusModeService.mainState;
   currentTask = toSignal(this.taskService.currentTask$);
 
+  readonly parentTask = toSignal(
+    this.taskService.currentTask$.pipe(
+      switchMap((t) =>
+        t && t.parentId ? this.taskService.getByIdLive$(t.parentId) : of(null),
+      ),
+    ),
+  );
+
+  readonly parentTaskTitle = computed(() => {
+    const parent = this.parentTask();
+    if (!parent) {
+      return null;
+    }
+    return parent.title;
+  });
+
   private readonly _isPreparation = computed(
     () => this.mainState() === FocusMainUIState.Preparation,
   );
@@ -346,7 +362,8 @@ export class FocusModeMainComponent {
   }
 
   pauseSession(): void {
-    this._store.dispatch(pauseFocusSession());
+    const currentTaskId = this.taskService.currentTaskId();
+    this._store.dispatch(pauseFocusSession({ pausedTaskId: currentTaskId }));
   }
 
   resumeSession(): void {

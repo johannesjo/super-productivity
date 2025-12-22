@@ -184,8 +184,11 @@ export type DominaModeConfig = Readonly<{
 }>;
 
 export type FocusModeConfig = Readonly<{
-  isAlwaysUseFocusMode: boolean;
   isSkipPreparation: boolean;
+  isPlayTick?: boolean;
+  isPauseTrackingDuringBreak?: boolean;
+  isSyncSessionWithTracking?: boolean;
+  isStartInBackground?: boolean;
 }>;
 
 export type DailySummaryNote = Readonly<{
@@ -238,7 +241,8 @@ export type CustomCfgSection =
   | 'SYNC_SAFETY_BACKUPS'
   | 'JIRA_CFG'
   | 'SIMPLE_COUNTER_CFG'
-  | 'OPENPROJECT_CFG';
+  | 'OPENPROJECT_CFG'
+  | 'CLICKUP_CFG';
 
 // Intermediate model
 export interface ConfigFormSection<FormModel> {

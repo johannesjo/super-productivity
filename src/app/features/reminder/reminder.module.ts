@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { MatDialog } from '@angular/material/dialog';
 import { IS_ELECTRON } from '../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import {
   concatMap,
   delay,
@@ -121,6 +122,11 @@ export class ReminderModule {
 
   @throttle(60000)
   private _showNotification(reminders: Reminder[]): void {
+    // Skip on Android - we use native notifications with snooze button instead
+    if (IS_ANDROID_WEB_VIEW) {
+      return;
+    }
+
     const isMultiple = reminders.length > 1;
     const title = isMultiple
       ? '"' +

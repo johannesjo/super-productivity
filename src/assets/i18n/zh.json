@@ -24,14 +24,14 @@
     "UPDATE_MAIN_MODEL_NO_UPDATE": "未选择模型更新。请注意，如果您不想执行模型升级，则必须降级到上一个版本。",
     "UPDATE_WEB_APP": "有新版本可用。加载新版本？"
   },
+  "BL": {
+    "NO_TASKS": "您的待办事项列表中当前没有任务"
+  },
   "BN": {
     "SHOW_ISSUE_PANEL": "显示问题看板",
     "SHOW_NOTES": "显示项目备注",
     "SHOW_TASK_VIEW_CUSTOMIZER_PANEL": "显示筛选/分组/排序看板"
-  },
-  "BL": {
-    "NO_TASKS": "您的待办事项列表中当前没有任务"
-  },
+  },  
   "CONFIRM": {
     "AUTO_FIX": "您的数据似乎已损坏（“{{validityError}}”）。您想尝试自动修复吗？这可能会导致部分数据丢失。",
     "RELOAD_AFTER_IDB_ERROR": "无法访问数据库 :( 可能的原因是在后台更新了应用或磁盘空间不足。如果您在 Linux 上将应用安装为 snap，您还需要启用刷新感知 'snap set core experimental.refresh-app-awareness=true'，直到他们在他们那边修复此问题。按 OK 重新加载应用（在某些平台上可能需要手动重新启动应用）。",
@@ -52,6 +52,11 @@
     "SEARCH_PLACEHOLDER": "例如，自然、山脉、抽象",
     "NO_RESULTS": "没有找到图片。尝试不同的搜索词。",
     "BY": "由"
+  },
+  "DONATE_PAGE": {
+    "BUTTON_TEXT": "通过 GitHub Sponsors 捐赠",
+    "INTRO_1": "Super Productivity 完全由社区资助。没有追踪、没有广告、也没有数据收集——您的任务数据仅存于本地设备。",
+    "INTRO_2": "如果您认同这种方式，并希望项目持续健康地发展，您的自愿性捐赠我们将非常感激。"
   },
   "F": {
     "ATTACHMENT": {
@@ -203,38 +208,41 @@
         "UNABLE_TO_GENERATE_PKCE_CHALLENGE": "Dropbox: 无法生成 PKCE 挑战。"
       }
     },
-    "ISSUE_PANEL": {
-      "CALENDAR_AGENDA": {
-        "OFFLINE_BANNER_MSG": "显示的是缓存的日历结果，数据可能已过期。"
-      }
-    },
     "FINISH_DAY_BEFORE_EXIT": {
       "C": {
         "FINISH_DAY_BEFORE_EXIT": "您的今日列表中有 {{nr}} 个已完成的任务尚未移动到归档。您真的想不完成一天的工作就退出吗？"
       }
     },
     "FOCUS_MODE": {
+      "ADD_TIME_MINUTE": "增加一分钟",
       "B": {
-        "SESSION_RUNNING": "专注会话正在进行",
-        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
         "BREAK_RUNNING": "休息正在进行",
+        "POMODORO_SESSION_RUNNING": "番茄会话 #{{cycleNr}} 正在进行",
         "POMODORO_BREAK_RUNNING": "休息 #{{cycleNr}} 正在进行",
+        "SESSION_RUNNING": "专注会话正在进行",
         "TO_FOCUS_OVERLAY": "到专注覆盖"
       },
-      "ADD_TIME_MINUTE": "增加一分钟",
       "BACK_TO_PLANNING": "返回规划",
+      "BREAK_RELAX_MSG": "花点时间放松一下",
       "CLICK_TO_EDIT_DURATION": "点击编辑时长",
       "COMPLETE_FOCUS_SESSION": "完成专注会话",
+      "COMPLETE_SESSION": "完成会话",
       "CONGRATS": "恭喜完成此会话！",
+      "CONTINUE_SESSION": "继续会话",
+      "CONTINUE_TO_NEXT_SESSION": "继续下一个会话",
       "COUNTDOWN": "倒计时",
       "COUNTDOWN_HINT": "专注直到时钟归零",
+      "CURRENT_SESSION_TIME_TOOLTIP": "当前会话时间",
       "FINISH_TASK_AND_SELECT_NEXT": "完成任务并选择下一个",
       "FLOWTIME": "Flowtime",
       "FLOWTIME_HINT": "无严格计时器的灵活节奏",
+      "FOCUS_TIME_TOOLTIP": "专注时间",
       "FOR_TASK": "对于任务",
       "GET_READY": "为您的专注会话做好准备！",
       "GO_TO_PROCRASTINATION": "拖延时获取帮助",
-      "GOGOGO": "开始，开始，开始！！！",
+      "GOGOGO": "冲，冲，冲！！！",
+      "LONG_BREAK": "长休息",
+      "LONG_BREAK_TITLE": "长休息 - 第 {{cycle}} 轮",
       "NEXT": "下一个",
       "ON": "在",
       "OPEN_ISSUE_IN_BROWSER": "在浏览器中打开问题",
@@ -243,34 +251,27 @@
       "PAUSE_TRACKING_FOR_CURRENT_TASK": "暂停追踪当前任务",
       "POMODORO": "番茄",
       "POMODORO_HINT": "有计划休息的结构化冲刺",
+      "POMODORO_SESSION_COMPLETED": "番茄会话已完成！",
+      "POMODORO_SETTINGS": "番茄时钟设置",
       "PREP_GET_MENTALLY_READY": "在心理上做好准备，保持专注和高效",
       "PREP_SIT_UPRIGHT": "坐直（或站立）",
       "PREP_STRETCH": "做一些轻度拉伸",
       "REMOVE_TIME_MINUTE": "减少一分钟",
       "RESUME_SESSION": "恢复会话",
       "SELECT_ANOTHER_TASK": "选择另一个任务",
+      "SELECT_MODE": "选择您的专注模式",
       "SELECT_TASK": "选择要专注的任务",
       "SELECT_TASK_TO_FOCUS": "选择要专注的任务",
-      "SELECT_MODE": "选择您的专注模式",
       "SESSION_COMPLETED": "专注会话已完成！",
-      "POMODORO_SESSION_COMPLETED": "番茄会话已完成！",
       "SET_FOCUS_SESSION_DURATION": "设置专注会话持续时间",
+      "SHORT_BREAK": "短休息",
+      "SHORT_BREAK_TITLE": "短休息 - 第 {{cycle}} 轮",
       "SHOW_HIDE_NOTES_AND_ATTACHMENTS": "显示/隐藏任务备注和附件",
-      "SWITCH_TASK": "切换任务",
+      "SKIP_BREAK": "跳过休息",
       "START_FOCUS_SESSION": "开始专注会话",
       "START_NEXT_FOCUS_SESSION": "开始下一个专注会话",
-      "WORKED_FOR": "您工作了",
-      "BREAK_RELAX_MSG": "花点时间放松一下",
-      "SKIP_BREAK": "跳过休息",
-      "CONTINUE_TO_NEXT_SESSION": "继续下一个会话",
-      "FOCUS_TIME_TOOLTIP": "专注时间",
-      "CURRENT_SESSION_TIME_TOOLTIP": "当前会话时间",
-      "COMPLETE_SESSION": "完成会话",
-      "CONTINUE_SESSION": "继续会话",
-      "LONG_BREAK": "长休息",
-      "SHORT_BREAK": "短休息",
-      "LONG_BREAK_TITLE": "长休息 - 周期 {{cycle}}",
-      "SHORT_BREAK_TITLE": "短休息 - 周期 {{cycle}}"
+      "SWITCH_TASK": "切换任务",
+      "WORKED_FOR": "您工作了"
     },
     "GITEA": {
       "DIALOG_INITIAL": {
@@ -446,6 +447,11 @@
         "NEW_COMMENT": "{{issueProviderName}}: \"{{issueTitle}}\" 的新评论",
         "POLLING_BACKLOG": "{{issueProviderName}}: 轮询新 {{issuesStr}}",
         "POLLING_CHANGES": "{{issueProviderName}}: 轮询 {{issuesStr}} 的更改"
+      }
+    },
+    "ISSUE_PANEL": {
+      "CALENDAR_AGENDA": {
+        "OFFLINE_BANNER_MSG": "正在显示缓存中的日历结果。请注意，数据可能已过时。"
       }
     },
     "JIRA": {
@@ -644,9 +650,6 @@
         "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7天生产力分解",
         "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7天可持续性分解"
       },
-      "S": {
-        "SAVE_METRIC": "指标已成功保存"
-      },
       "FOCUS_SESSION_DIALOG": {
         "TITLE": "专注会话",
         "CHART_LABEL": "专注时长（分钟）",
@@ -673,6 +676,9 @@
         "REMINDER_CREATED": "已设置明天的反思提醒",
         "REMINDER_ERROR": "无法设置提醒",
         "REMINDER_NEEDS_TEXT": "请先写下反思内容，再设置提醒"
+      },
+      "S": {
+        "SAVE_METRIC": "指标已成功保存"
       }
     },
     "NOTE": {
@@ -805,7 +811,7 @@
         "L3": "您是否以回应朋友的方式回应自己？",
         "L4": "如果答案是否定的，想象您的朋友处于您的境地。您会对他们说什么？您会为他们做什么？",
         "OUTRO": "更多练习 <a target=\"_blank\" href=\"https://drsoph.com/blog/2018/9/17/3-exercises-in-self-compassion \" target=\"_blank\">可以在此处找到</a> 或在 <a target=\"_blank\" href=\"https://www.google.com/search?q=self+compassion+exercises&oq=self+compassion+excers&aqs=chrome.1.69i57j0l5.4303j0j7&sourceid=chrome&ie=UTF-8 \">谷歌</a> 上。",
-        "TITLE": "自我怜悯"
+        "TITLE": "自我关怀"
       },
       "CUR": {
         "INTRO": "拖延不是很有趣吗？它似乎没有任何意义，因为它根本不符合您的长期利益。但仍然每个人都这样做。探索并更好地了解它如何为您个人工作是非常有帮助的！一些基本问题可以问自己：",
@@ -897,6 +903,7 @@
       }
     },
     "PROJECT_FOLDER": {
+      "CONFIRM_DELETE": "确定要删除文件夹“{{title}}”吗？该文件夹内的所有项目将被移至根目录级别。",
       "DIALOG": {
         "CREATE_TITLE": "创建文件夹",
         "EDIT_TITLE": "编辑文件夹",
@@ -911,7 +918,6 @@
         "PLACEHOLDER": "选择文件夹",
         "NO_PARENT": "无文件夹（根级别）"
       },
-      "CONFIRM_DELETE": "您确定要删除文件夹 \"{{title}}\" 吗？此文件夹中的所有项目都将移动到根级别。",
       "TOOLTIP_CREATE": "创建项目文件夹",
       "TOOLTIP_VISIBILITY": "显示/隐藏项目"
     },
@@ -1376,6 +1382,11 @@
         "SCHEDULE": "计划",
         "UNSCHEDULE": "移除"
       },
+      "D_SELECT_DATE_AND_TIME": {
+        "DATE": "日期",
+        "TIME": "时间",
+        "TITLE": "选择日期和时间"
+      },
       "D_TIME": {
         "ADD_FOR_OTHER_DAY": "为其他天添加花费时间",
         "DELETE_FOR": "删除当天的条目",
@@ -1390,11 +1401,6 @@
         "HELP": "示例：<br> 30m => 30 分钟<br> 2h => 2 小时<br> 2h 30m => 2 小时 30 分钟<br> 1.5h => 1 小时 30 分钟<br> 03:15 => 3 小时 15 分钟",
         "TINE_SPENT": "花费时间",
         "TITLE": "为当天添加"
-      },
-      "D_SELECT_DATE_AND_TIME": {
-        "DATE": "日期",
-        "TIME": "时间",
-        "TITLE": "选择日期和时间"
       },
       "N": {
         "ESTIMATE_EXCEEDED": "超出时间估计！",
@@ -1458,14 +1464,14 @@
         "MSG": "移除重复配置会将此任务的所有先前实例转换为普通任务。您确定要继续吗？",
         "OK": "完全移除"
       },
-      "D_DELETE_INSTANCE": {
-        "MSG": "移除 {{date}} 的重复任务实例？这将阻止任务仅在此日期创建。",
-        "OK": "移除实例"
-      },
       "D_CONFIRM_UPDATE_INSTANCES": {
         "CANCEL": "仅未来任务",
         "MSG": "此重复任务有 {{tasksNr}} 个实例。您是想用新的默认值更新所有实例，还是仅更新未来任务？",
         "OK": "更新所有实例"
+      },
+      "D_DELETE_INSTANCE": {
+        "MSG": "移除 {{date}} 的重复任务实例？这将阻止任务仅在此日期创建。",
+        "OK": "移除实例"
       },
       "D_EDIT": {
         "ADD": "添加重复任务配置",

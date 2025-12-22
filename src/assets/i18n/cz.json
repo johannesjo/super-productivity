@@ -913,7 +913,7 @@
         "REMINDER_ADDED": "Naplánován úkol „{{title}}“",
         "REMINDER_DELETED": "Smazáno připomenutí k úkolu",
         "REMINDER_UPDATED": "Aktualizováno připomenutí k úkolu „{{title}}“",
-        "TASK_CREATED": "Vytvořen úkol „{{title}}“"
+        "TASK_CREATED": "Vytvořen úkol „{{taskTitle}}“"
       },
       "SELECT_OR_CREATE": "Vyberte nebo vytvořte úkol",
       "SUMMARY_TABLE": {
