@@ -439,10 +439,12 @@ const handleDeleteTasks = (state: RootState, taskIds: string[]): RootState => {
 
   // Only update tags that actually contain at least one of the tasks being deleted
   // Use allIds (includes subtasks) to ensure subtask IDs are also removed from tags
+  // PERF: Use Set for O(1) lookup instead of O(n) Array.includes() - fixes O(n³) bottleneck
+  const allIdsSet = new Set(allIds);
   const affectedTags = (state[TAG_FEATURE_NAME].ids as string[]).filter((tagId) => {
     const tag = state[TAG_FEATURE_NAME].entities[tagId];
     if (!tag) return false;
-    return allIds.some((taskId) => tag.taskIds.includes(taskId));
+    return tag.taskIds.some((taskId) => allIdsSet.has(taskId));
   });
 
   const tagUpdates = affectedTags.map(
@@ -468,10 +470,12 @@ const mergeTaskIdsAtPositions = (
   taskIdsToRestore: string[],
 ): string[] => {
   const result = [...currentArray];
+  // PERF: Use Set for O(1) lookup instead of O(n) Array.includes()
+  const resultSet = new Set(currentArray);
 
   for (const taskId of taskIdsToRestore) {
     // Skip if already in current array
-    if (result.includes(taskId)) {
+    if (resultSet.has(taskId)) {
       continue;
     }
 
@@ -485,6 +489,8 @@ const mergeTaskIdsAtPositions = (
       const insertIndex = Math.min(capturedIndex, result.length);
       result.splice(insertIndex, 0, taskId);
     }
+    // Track the added ID for subsequent iterations
+    resultSet.add(taskId);
   }
 
   return result;
