@@ -1406,8 +1406,7 @@
         "NO_DATA": "No hay tareas esta semana todavía.",
         "TITLE": "Título"
       }
-    }
-  },
+    },
   "FILE_IMEX": {
     "EXPORT_DATA": "Exportar Datos",
     "IMPORT_FROM_FILE": "Importar desde archivo",
@@ -1659,7 +1658,6 @@
 	  "DONATE_PAGE": "Página de donaciones",
 	  "USER_PROFILES": "Perfiles de usuario (Experimental)",
 	  "USER_PROFILES_HINT": "Permite crear y alternar entre diferentes perfiles de usuario, cada uno con configuraciones, tareas y datos de sincronización independientes. El botón de gestión de perfiles aparecerá en la esquina superior derecha cuando esté habilitado. Nota: Deshabilitar esta función ocultará la interfaz pero conservará los datos de tu perfil (Función experimental, sin garantías. Asegúrate de tener una copia de seguridad)."
-	}
   },
     "TIMELINE": {
       "CAL_PROVIDERS": "Proveedores de calendario (experimental y opcional)",
@@ -1679,7 +1677,6 @@
       "L_IS_SHOW_ON_MOBILE": "Mostrar en app móvil",
       "L_MIN_TIME": "Tiempo de espera antes de mostrar Banner",
       "TITLE": "Recordatorio de Seguimiento de Tiempo"
-    }
   },
   "GLOBAL_SNACK": {
     "COPY_TO_CLIPPBOARD": "Copiado al portapapeles",
@@ -1931,4 +1928,5 @@
     "WITHOUT_BREAK": "Sin descanso:",
     "WORKING_TODAY": "Trabajando hoy:"
   }
+ }
 }
