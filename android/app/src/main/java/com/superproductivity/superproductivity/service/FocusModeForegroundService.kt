@@ -86,10 +86,22 @@ class FocusModeForegroundService : Service() {
             }
 
             ACTION_UPDATE -> {
+                val wasPaused = isPaused
+                title = intent.getStringExtra(EXTRA_TITLE) ?: title
                 remainingMs = intent.getLongExtra(EXTRA_REMAINING_MS, remainingMs)
                 isPaused = intent.getBooleanExtra(EXTRA_IS_PAUSED, isPaused)
+                isBreak = intent.getBooleanExtra(EXTRA_IS_BREAK, isBreak)
                 taskTitle = intent.getStringExtra(EXTRA_TASK_TITLE) ?: taskTitle
                 lastUpdateTimestamp = System.currentTimeMillis()
+
+                // Restart update runnable if resuming from paused state
+                if (wasPaused && !isPaused) {
+                    handler.removeCallbacks(updateRunnable)
+                    handler.post(updateRunnable)
+                } else if (!wasPaused && isPaused) {
+                    handler.removeCallbacks(updateRunnable)
+                }
+
                 updateNotification()
             }
 

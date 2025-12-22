@@ -15,6 +15,7 @@ class TrackingForegroundService : Service() {
 
         const val ACTION_START = "com.superproductivity.ACTION_START_TRACKING"
         const val ACTION_STOP = "com.superproductivity.ACTION_STOP_TRACKING"
+        const val ACTION_UPDATE = "com.superproductivity.ACTION_UPDATE_TRACKING"
         const val ACTION_PAUSE = "com.superproductivity.ACTION_PAUSE_TRACKING"
         const val ACTION_DONE = "com.superproductivity.ACTION_MARK_DONE"
         const val ACTION_GET_ELAPSED = "com.superproductivity.ACTION_GET_ELAPSED"
@@ -79,6 +80,11 @@ class TrackingForegroundService : Service() {
                 startTracking(taskId, title, timeSpentMs)
             }
 
+            ACTION_UPDATE -> {
+                val timeSpentMs = intent.getLongExtra(EXTRA_TIME_SPENT, accumulatedMs)
+                updateTimeSpent(timeSpentMs)
+            }
+
             ACTION_STOP -> {
                 stopTracking()
             }
@@ -113,6 +119,21 @@ class TrackingForegroundService : Service() {
         // Start update loop
         handler.removeCallbacks(updateRunnable)
         handler.post(updateRunnable)
+    }
+
+    private fun updateTimeSpent(timeSpentMs: Long) {
+        if (!isTracking) {
+            Log.d(TAG, "Ignoring updateTimeSpent: not tracking")
+            return
+        }
+        Log.d(TAG, "Updating time spent: timeSpentMs=$timeSpentMs (was accumulated=$accumulatedMs)")
+
+        // Reset the timer with the new accumulated value
+        accumulatedMs = timeSpentMs
+        startTimestamp = System.currentTimeMillis()
+
+        // Update notification immediately
+        updateNotification()
     }
 
     private fun stopTracking() {

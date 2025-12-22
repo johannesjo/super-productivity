@@ -160,9 +160,16 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     ),
   );
 
-  isShowFocusOverlay = toSignal(this._store.select(selectIsOverlayShown), {
+  private _isOverlayShownFromStore = toSignal(this._store.select(selectIsOverlayShown), {
     initialValue: false,
   });
+
+  // Only show focus overlay if both the store says to show it AND the feature is enabled
+  isShowFocusOverlay = computed(
+    () =>
+      this._isOverlayShownFromStore() &&
+      this._globalConfigService.cfg()?.appFeatures.isFocusModeEnabled,
+  );
 
   private readonly _activeWorkContextId = toSignal(
     this.workContextService.activeWorkContextId$,

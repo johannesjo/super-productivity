@@ -41,6 +41,7 @@ export interface AndroidInterface {
   // Foreground service methods for background time tracking
   startTrackingService?(taskId: string, taskTitle: string, timeSpentMs: number): void;
   stopTrackingService?(): void;
+  updateTrackingService?(timeSpentMs: number): void;
   getTrackingElapsed?(): string;
 
   // Foreground service methods for focus mode timer
@@ -54,8 +55,10 @@ export interface AndroidInterface {
   ): void;
   stopFocusModeService?(): void;
   updateFocusModeService?(
+    title: string,
     remainingMs: number,
     isPaused: boolean,
+    isBreak: boolean,
     taskTitle: string | null,
   ): void;
 

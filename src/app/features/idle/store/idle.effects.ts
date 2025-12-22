@@ -157,7 +157,7 @@ export class IdleEffects {
         // ALL IDLE SIDE EFFECTS
         // ---------------------
         if (IS_ELECTRON) {
-          this._uiHelperService.focusApp();
+          this._uiHelperService.focusAppAfterNotification();
         }
 
         // untrack current task time und unselect

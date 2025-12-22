@@ -28,6 +28,7 @@ import { openIdleDialog } from '../../idle/store/idle.actions';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import {
   selectFocusModeConfig,
+  selectIsFocusModeEnabled,
   selectPomodoroConfig,
 } from '../../config/store/global-config.reducer';
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
@@ -54,11 +55,15 @@ export class FocusModeEffects {
 
   // Auto-show overlay when task is selected (if sync session with tracking is enabled)
   // Skip showing overlay if isStartInBackground is enabled
+  // Only triggers when focus mode feature is enabled
   autoShowOverlay$ = createEffect(() =>
-    this.store.select(selectFocusModeConfig).pipe(
+    combineLatest([
+      this.store.select(selectFocusModeConfig),
+      this.store.select(selectIsFocusModeEnabled),
+    ]).pipe(
       skipDuringSync(),
-      switchMap((cfg) =>
-        cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
+      switchMap(([cfg, isFocusModeEnabled]) =>
+        isFocusModeEnabled && cfg?.isSyncSessionWithTracking && !cfg?.isStartInBackground
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((id) => !!id),
@@ -70,11 +75,14 @@ export class FocusModeEffects {
   );
 
   // Sync: When tracking starts → start/unpause focus session
-  // Only triggers when isSyncSessionWithTracking is enabled
+  // Only triggers when isSyncSessionWithTracking is enabled and focus mode feature is enabled
   syncTrackingStartToSession$ = createEffect(() =>
-    this.store.select(selectFocusModeConfig).pipe(
-      switchMap((cfg) =>
-        cfg?.isSyncSessionWithTracking
+    combineLatest([
+      this.store.select(selectFocusModeConfig),
+      this.store.select(selectIsFocusModeEnabled),
+    ]).pipe(
+      switchMap(([cfg, isFocusModeEnabled]) =>
+        isFocusModeEnabled && cfg?.isSyncSessionWithTracking
           ? this.taskService.currentTaskId$.pipe(
               distinctUntilChanged(),
               filter((taskId) => !!taskId),
@@ -104,15 +112,18 @@ export class FocusModeEffects {
 
   // Sync: When tracking stops → pause focus session
   // Uses pairwise to capture the previous task ID before it's lost
+  // Only triggers when focus mode feature is enabled
   syncTrackingStopToSession$ = createEffect(() =>
     this.taskService.currentTaskId$.pipe(
       pairwise(),
       withLatestFrom(
         this.store.select(selectFocusModeConfig),
         this.store.select(selectors.selectTimer),
+        this.store.select(selectIsFocusModeEnabled),
       ),
       filter(
-        ([[prevTaskId, currTaskId], cfg, timer]) =>
+        ([[prevTaskId, currTaskId], cfg, timer, isFocusModeEnabled]) =>
+          isFocusModeEnabled &&
           !!cfg?.isSyncSessionWithTracking &&
           timer.purpose === 'work' &&
           timer.isRunning &&
@@ -298,14 +309,13 @@ export class FocusModeEffects {
   );
 
   // Handle break completion
+  // Note: pausedTaskId is passed in action payload to avoid race condition
+  // (reducer clears pausedTaskId before effect reads state)
   breakComplete$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.completeBreak),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.store.select(selectors.selectPausedTaskId),
-      ),
-      switchMap(([_, mode, pausedTaskId]) => {
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([action, mode]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
@@ -313,8 +323,8 @@ export class FocusModeEffects {
         this._notifyUser();
 
         // Resume task tracking if we paused it during break
-        if (pausedTaskId) {
-          actionsToDispatch.push(setCurrentTask({ id: pausedTaskId }));
+        if (action.pausedTaskId) {
+          actionsToDispatch.push(setCurrentTask({ id: action.pausedTaskId }));
         }
 
         // Auto-start next session if configured
@@ -329,20 +339,18 @@ export class FocusModeEffects {
   );
 
   // Handle skip break
+  // Note: pausedTaskId is passed in action payload to avoid race condition
   skipBreak$ = createEffect(() =>
     this.actions$.pipe(
       ofType(actions.skipBreak),
-      withLatestFrom(
-        this.store.select(selectors.selectMode),
-        this.store.select(selectors.selectPausedTaskId),
-      ),
-      switchMap(([_, mode, pausedTaskId]) => {
+      withLatestFrom(this.store.select(selectors.selectMode)),
+      switchMap(([action, mode]) => {
         const strategy = this.strategyFactory.getStrategy(mode);
         const actionsToDispatch: any[] = [];
 
         // Resume task tracking if we paused it during break
-        if (pausedTaskId) {
-          actionsToDispatch.push(setCurrentTask({ id: pausedTaskId }));
+        if (action.pausedTaskId) {
+          actionsToDispatch.push(setCurrentTask({ id: action.pausedTaskId }));
         }
 
         // Auto-start next session if configured
@@ -527,6 +535,7 @@ export class FocusModeEffects {
     );
 
   // Update banner when session or break state changes
+  // Only shows banner when focus mode feature is enabled
   updateBanner$ = createEffect(
     () =>
       combineLatest([
@@ -539,6 +548,7 @@ export class FocusModeEffects {
         this.store.select(selectors.selectIsOverlayShown),
         this.store.select(selectors.selectTimer),
         this.store.select(selectFocusModeConfig),
+        this.store.select(selectIsFocusModeEnabled),
       ]).pipe(
         skipDuringSync(),
         tap(
@@ -552,9 +562,10 @@ export class FocusModeEffects {
             isOverlayShown,
             timer,
             focusModeConfig,
+            isFocusModeEnabled,
           ]) => {
-            // Only show banner when overlay is hidden
-            if (isOverlayShown) {
+            // Only show banner when overlay is hidden and focus mode feature is enabled
+            if (isOverlayShown || !isFocusModeEnabled) {
               this.bannerService.dismiss(BannerId.FocusMode);
               return;
             }
@@ -694,18 +705,39 @@ export class FocusModeEffects {
           label: T.F.FOCUS_MODE.B.START,
           icon: 'play_arrow',
           fn: () => {
-            // Start a new session using the current mode's strategy
-            this.store
-              .select(selectors.selectMode)
-              .pipe(take(1))
-              .subscribe((mode) => {
-                const strategy = this.strategyFactory.getStrategy(mode);
-                this.store.dispatch(
-                  actions.startFocusSession({
-                    duration: strategy.initialSessionDuration,
-                  }),
-                );
-              });
+            // When starting from break completion, first properly complete/skip the break
+            // to resume task tracking and clean up state
+            if (isBreakTimeUp) {
+              combineLatest([
+                this.store.select(selectors.selectMode),
+                this.store.select(selectors.selectPausedTaskId),
+              ])
+                .pipe(take(1))
+                .subscribe(([mode, pausedTaskId]) => {
+                  // Skip break (with pausedTaskId to resume tracking)
+                  this.store.dispatch(actions.skipBreak({ pausedTaskId }));
+                  // Then start new session
+                  const strategy = this.strategyFactory.getStrategy(mode);
+                  this.store.dispatch(
+                    actions.startFocusSession({
+                      duration: strategy.initialSessionDuration,
+                    }),
+                  );
+                });
+            } else {
+              // Start a new session using the current mode's strategy
+              this.store
+                .select(selectors.selectMode)
+                .pipe(take(1))
+                .subscribe((mode) => {
+                  const strategy = this.strategyFactory.getStrategy(mode);
+                  this.store.dispatch(
+                    actions.startFocusSession({
+                      duration: strategy.initialSessionDuration,
+                    }),
+                  );
+                });
+            }
           },
         }
       : {

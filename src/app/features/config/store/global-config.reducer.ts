@@ -77,6 +77,10 @@ export const selectReminderConfig = createSelector(
   selectConfigFeatureState,
   (cfg): ReminderConfig => cfg.reminder,
 );
+export const selectIsFocusModeEnabled = createSelector(
+  selectConfigFeatureState,
+  (cfg): boolean => cfg.appFeatures.isFocusModeEnabled,
+);
 
 export const initialGlobalConfigState: GlobalConfigState = {
   ...DEFAULT_GLOBAL_CONFIG,

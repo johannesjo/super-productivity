@@ -86,6 +86,11 @@ export class ReminderModule {
 
         this._showNotification(reminders);
 
+        // Skip dialog on Android - native notifications handle reminders
+        if (IS_ANDROID_WEB_VIEW) {
+          return;
+        }
+
         const oldest = reminders[0];
         const taskId = oldest.id;
 

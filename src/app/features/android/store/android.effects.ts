@@ -27,6 +27,8 @@ export class AndroidEffects {
   // Single-shot guard so we don't spam the user with duplicate warnings.
   private _hasShownNotificationWarning = false;
   private _hasCheckedExactAlarm = false;
+  // Track scheduled reminder IDs to cancel removed ones
+  private _scheduledReminderIds = new Set<string>();
 
   askPermissionsIfNotGiven$ =
     IS_ANDROID_WEB_VIEW &&
@@ -65,8 +67,24 @@ export class AndroidEffects {
           switchMap(() => this._store.select(selectAllTasksWithReminder)),
           tap(async (tasksWithReminders) => {
             try {
+              const currentReminderIds = new Set(
+                (tasksWithReminders || []).map((t) => t.id),
+              );
+
+              // Cancel reminders that are no longer in the list
+              for (const previousId of this._scheduledReminderIds) {
+                if (!currentReminderIds.has(previousId)) {
+                  const notificationId = generateNotificationId(previousId);
+                  DroidLog.log('AndroidEffects: cancelling removed reminder', {
+                    relatedId: previousId,
+                    notificationId,
+                  });
+                  androidInterface.cancelNativeReminder?.(notificationId);
+                }
+              }
+
               if (!tasksWithReminders || tasksWithReminders.length === 0) {
-                // Nothing to schedule yet, so avoid triggering the runtime permission dialog prematurely.
+                this._scheduledReminderIds.clear();
                 return;
               }
               DroidLog.log('AndroidEffects: scheduling reminders natively', {
@@ -101,6 +119,9 @@ export class AndroidEffects {
                   scheduleAt,
                 );
               }
+
+              // Update tracked IDs
+              this._scheduledReminderIds = currentReminderIds;
 
               DroidLog.log('AndroidEffects: scheduled native reminders', {
                 reminderCount: tasksWithReminders.length,

@@ -85,6 +85,8 @@ export interface ElectronAPI {
 
   isSnap(): boolean;
 
+  isFlatpak(): boolean;
+
   // SEND
   // ----
   reloadMainWin(): void;

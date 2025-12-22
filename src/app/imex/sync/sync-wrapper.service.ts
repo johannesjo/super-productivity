@@ -49,6 +49,7 @@ import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { SYNC_WAIT_TIMEOUT_MS, SYNC_REINIT_DELAY_MS } from './sync.const';
 import { SuperSyncStatusService } from '../../core/persistence/operation-log/sync/super-sync-status.service';
+import { IS_ELECTRON } from '../../app.constants';
 
 /**
  * Converts LegacySyncProvider to SyncProviderId.
@@ -302,7 +303,7 @@ export class SyncWrapperService {
         return 'HANDLED_ERROR';
       } else if (this._isPermissionError(error)) {
         this._snackService.open({
-          msg: T.F.SYNC.S.ERROR_PERMISSION,
+          msg: this._getPermissionErrorMessage(),
           type: 'ERROR',
           config: { duration: 12000 },
         });
@@ -513,6 +514,16 @@ export class SyncWrapperService {
   private _isPermissionError(error: unknown): boolean {
     const errStr = String(error);
     return /EROFS|EACCES|EPERM|read-only file system|permission denied/i.test(errStr);
+  }
+
+  private _getPermissionErrorMessage(): string {
+    if (IS_ELECTRON && window.ea?.isFlatpak?.()) {
+      return T.F.SYNC.S.ERROR_PERMISSION_FLATPAK;
+    }
+    if (IS_ELECTRON && window.ea?.isSnap?.()) {
+      return T.F.SYNC.S.ERROR_PERMISSION_SNAP;
+    }
+    return T.F.SYNC.S.ERROR_PERMISSION;
   }
 
   private lastConflictDialog?: MatDialogRef<any, any>;

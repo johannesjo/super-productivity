@@ -8,6 +8,7 @@ import {
   selectIsBreakActive,
   selectIsLongBreak,
   selectMode,
+  selectPausedTaskId,
   selectTimeRemaining,
   selectTimer,
 } from '../../focus-mode/store/focus-mode.selectors';
@@ -87,12 +88,16 @@ export class AndroidFocusModeEffects {
               } else if (this._hasStateChanged(prev?.timer, timer, taskTitle, curr)) {
                 // Only update if something significant changed
                 DroidLog.log('AndroidFocusModeEffects: Updating focus mode service', {
+                  title,
                   remaining: remainingMs,
                   isPaused: !timer.isRunning,
+                  isBreak: isBreakActive,
                 });
                 androidInterface.updateFocusModeService?.(
+                  title,
                   remainingMs,
                   !timer.isRunning,
+                  isBreakActive,
                   taskTitle,
                 );
               }
@@ -133,7 +138,8 @@ export class AndroidFocusModeEffects {
     createEffect(() =>
       androidInterface.onFocusSkip$.pipe(
         tap(() => DroidLog.log('AndroidFocusModeEffects: Skip action received')),
-        map(() => focusModeActions.skipBreak()),
+        withLatestFrom(this._store.select(selectPausedTaskId)),
+        map(([_, pausedTaskId]) => focusModeActions.skipBreak({ pausedTaskId })),
       ),
     );
 

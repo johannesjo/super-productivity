@@ -34,6 +34,7 @@ import { SYNC_FORM } from '../../features/config/form-cfgs/sync-form.const';
 import { PfapiService } from '../../pfapi/pfapi.service';
 import { map, tap } from 'rxjs/operators';
 import { SyncConfigService } from '../../imex/sync/sync-config.service';
+import { WebdavApi } from '../../pfapi/api/sync/providers/webdav/webdav-api';
 import { AsyncPipe } from '@angular/common';
 import { PluginManagementComponent } from '../../plugins/ui/plugin-management/plugin-management.component';
 import { CollapsibleComponent } from '../../ui/collapsible/collapsible.component';
@@ -84,57 +85,7 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
   globalConfigFormCfg: ConfigFormConfig;
   globalImexFormCfg: ConfigFormConfig;
   globalProductivityConfigFormCfg: ConfigFormConfig;
-  globalSyncConfigFormCfg = {
-    ...SYNC_FORM,
-    items: [
-      ...SYNC_FORM.items!,
-      {
-        hideExpression: (m, v, field) => !m.isEnabled || !field?.form?.valid,
-        key: '___',
-        type: 'btn',
-        className: 'mt3 block',
-        templateOptions: {
-          text: T.F.SYNC.BTN_SYNC_NOW,
-          required: false,
-          onClick: () => {
-            this._syncWrapperService.sync();
-          },
-        },
-      },
-      {
-        hideExpression: (m: any) =>
-          !m.isEnabled || m.syncProvider !== LegacySyncProvider.SuperSync,
-        key: '____',
-        type: 'btn',
-        className: 'mt2 block',
-        templateOptions: {
-          text: T.F.SYNC.BTN_RESTORE_FROM_HISTORY,
-          btnType: 'stroked',
-          required: false,
-          onClick: () => {
-            this._openRestoreDialog();
-          },
-        },
-      },
-      {
-        hideExpression: (m: any) =>
-          !m.isEnabled ||
-          m.syncProvider !== LegacySyncProvider.SuperSync ||
-          !m.superSync?.isEncryptionEnabled,
-        key: '_____',
-        type: 'btn',
-        className: 'mt2 block',
-        templateOptions: {
-          text: T.F.SYNC.FORM.SUPER_SYNC.L_CHANGE_ENCRYPTION_PASSWORD,
-          btnType: 'stroked',
-          required: false,
-          onClick: () => {
-            this._openChangePasswordDialog();
-          },
-        },
-      },
-    ],
-  };
+  globalSyncConfigFormCfg = this._buildSyncFormConfig();
 
   globalCfg?: GlobalConfigState;
 
@@ -257,6 +208,116 @@ export class ConfigPageComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this._subs.unsubscribe();
+  }
+
+  private _buildSyncFormConfig(): typeof SYNC_FORM {
+    // Deep clone the SYNC_FORM items to avoid mutating the original
+    const items = SYNC_FORM.items!.map((item) => {
+      // Find the WebDAV fieldGroup and add the Test Connection button
+      if (item.key === 'webDav' && item.fieldGroup) {
+        return {
+          ...item,
+          fieldGroup: [
+            ...item.fieldGroup,
+            {
+              type: 'btn',
+              className: 'mt3 block',
+              templateOptions: {
+                text: T.F.SYNC.FORM.WEB_DAV.L_TEST_CONNECTION,
+                required: false,
+                onClick: async (_field: any, _form: any, model: any) => {
+                  const webDavCfg = model;
+                  if (
+                    !webDavCfg?.baseUrl ||
+                    !webDavCfg?.userName ||
+                    !webDavCfg?.password ||
+                    !webDavCfg?.syncFolderPath
+                  ) {
+                    this._snackService.open({
+                      type: 'ERROR',
+                      msg: T.F.SYNC.FORM.WEB_DAV.S_FILL_ALL_FIELDS,
+                    });
+                    return;
+                  }
+
+                  // Create a temporary WebdavApi instance for testing
+                  const api = new WebdavApi(async () => webDavCfg);
+                  const result = await api.testConnection(webDavCfg);
+
+                  if (result.success) {
+                    this._snackService.open({
+                      type: 'SUCCESS',
+                      msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_SUCCESS,
+                      translateParams: { url: result.fullUrl },
+                    });
+                  } else {
+                    this._snackService.open({
+                      type: 'ERROR',
+                      msg: T.F.SYNC.FORM.WEB_DAV.S_TEST_FAIL,
+                      translateParams: {
+                        error: result.error || 'Unknown error',
+                        url: result.fullUrl,
+                      },
+                    });
+                  }
+                },
+              },
+            },
+          ],
+        };
+      }
+      return item;
+    });
+
+    return {
+      ...SYNC_FORM,
+      items: [
+        ...items,
+        {
+          hideExpression: (m: any, _v: any, field: any) =>
+            !m.isEnabled || !field?.form?.valid,
+          type: 'btn',
+          className: 'mt3 block',
+          templateOptions: {
+            text: T.F.SYNC.BTN_SYNC_NOW,
+            required: false,
+            onClick: () => {
+              this._syncWrapperService.sync();
+            },
+          },
+        },
+        {
+          hideExpression: (m: any) =>
+            !m.isEnabled || m.syncProvider !== LegacySyncProvider.SuperSync,
+          type: 'btn',
+          className: 'mt2 block',
+          templateOptions: {
+            text: T.F.SYNC.BTN_RESTORE_FROM_HISTORY,
+            btnType: 'stroked',
+            required: false,
+            onClick: () => {
+              this._openRestoreDialog();
+            },
+          },
+        },
+        {
+          hideExpression: (m: any) =>
+            !m.isEnabled ||
+            m.syncProvider !== LegacySyncProvider.SuperSync ||
+            !m.superSync?.isEncryptionEnabled,
+          type: 'btn',
+          className: 'mt2 block',
+          templateOptions: {
+            text: T.F.SYNC.FORM.SUPER_SYNC.L_CHANGE_ENCRYPTION_PASSWORD,
+            btnType: 'stroked',
+            required: false,
+            onClick: () => {
+              this._openChangePasswordDialog();
+            },
+          },
+        },
+      ],
+    } as typeof SYNC_FORM;
   }
 
   async saveGlobalCfg($event: {

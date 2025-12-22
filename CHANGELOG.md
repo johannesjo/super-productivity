@@ -1,3 +1,9 @@
+## [16.7.3](https://github.com/johannesjo/super-productivity/compare/v16.7.2...v16.7.3) (2025-12-20)
+
+### Bug Fixes
+
+- es.json ([75e0e7e](https://github.com/johannesjo/super-productivity/commit/75e0e7e86c4bca3adb886e1d4bccc02c9f48568a))
+
 ## [16.7.2](https://github.com/johannesjo/super-productivity/compare/v16.6.1...v16.7.2) (2025-12-19)
 
 ### Bug Fixes

@@ -42,8 +42,14 @@ export const startBreak = createAction(
   '[FocusMode] Start Break',
   props<{ duration?: number; isLongBreak?: boolean; pausedTaskId?: string | null }>(),
 );
-export const skipBreak = createAction('[FocusMode] Skip Break');
-export const completeBreak = createAction('[FocusMode] Complete Break');
+export const skipBreak = createAction(
+  '[FocusMode] Skip Break',
+  props<{ pausedTaskId?: string | null }>(),
+);
+export const completeBreak = createAction(
+  '[FocusMode] Complete Break',
+  props<{ pausedTaskId?: string | null }>(),
+);
 
 export const incrementCycle = createAction('[FocusMode] Next Cycle');
 export const resetCycles = createAction('[FocusMode] Reset Cycles');

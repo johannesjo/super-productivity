@@ -285,7 +285,7 @@ export class TakeABreakService {
         this._triggerFullscreenBlocker$.next(true);
       }
       if (IS_ELECTRON && cfg.takeABreak.isFocusWindow) {
-        this._uiHelperService.focusApp();
+        this._uiHelperService.focusAppAfterNotification();
       }
 
       this._bannerService.open({
