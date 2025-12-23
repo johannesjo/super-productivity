@@ -3638,4 +3638,110 @@ describe('OperationLogSyncService', () => {
 
   // NOTE: Old _handleServerMigration state validation tests (600+ lines) have been moved to
   // server-migration.service.spec.ts. The OperationLogSyncService now delegates to ServerMigrationService.
+
+  describe('_resolveStaleLocalOps', () => {
+    it('should create operations with LWW Update action type (not Merged Update)', async () => {
+      // This test ensures that operations created by _resolveStaleLocalOps use the correct
+      // action type '[ENTITY_TYPE] LWW Update' which is recognized by lwwUpdateMetaReducer.
+      // Previously, it used '[ENTITY_TYPE] Merged Update' which was NOT handled by any reducer,
+      // causing state updates to be silently ignored on remote clients.
+
+      // Setup: Mock client ID
+      const pfapiServiceMock = jasmine.createSpyObj('PfapiService', [], {
+        pf: {
+          metaModel: {
+            loadClientId: () => Promise.resolve('test-client'),
+          },
+        },
+      });
+
+      // Setup: Mock vector clock service
+      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ testClient: 5 }),
+      );
+
+      // Setup: Mock conflict resolution service to return entity state
+      conflictResolutionServiceSpy.getCurrentEntityState = jasmine
+        .createSpy('getCurrentEntityState')
+        .and.returnValue(
+          Promise.resolve({
+            id: 'task-1',
+            title: 'Test Task',
+            tagIds: [], // This is the important field that was being lost
+          }),
+        );
+
+      // Setup: Mock opLogStore.append to capture the operation
+      let appendedOp: Operation | null = null;
+      opLogStoreSpy.append.and.callFake((op: Operation) => {
+        appendedOp = op;
+        return Promise.resolve(1);
+      });
+      opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
+
+      // Create a stale op to trigger _resolveStaleLocalOps
+      const staleOp: Operation = {
+        id: 'stale-op-1',
+        clientId: 'test-client',
+        actionType: '[Task Shared] updateTask',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { task: { id: 'task-1', changes: { tagIds: [] } } },
+        vectorClock: { testClient: 3 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // Re-create service with the mocked pfapi service
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          OperationLogSyncService,
+          { provide: SchemaMigrationService, useValue: schemaMigrationServiceSpy },
+          { provide: SnackService, useValue: snackServiceSpy },
+          { provide: OperationLogStoreService, useValue: opLogStoreSpy },
+          { provide: VectorClockService, useValue: vectorClockServiceSpy },
+          { provide: OperationApplierService, useValue: operationApplierServiceSpy },
+          { provide: ConflictResolutionService, useValue: conflictResolutionServiceSpy },
+          { provide: ValidateStateService, useValue: validateStateServiceSpy },
+          { provide: RepairOperationService, useValue: {} },
+          { provide: PfapiStoreDelegateService, useValue: {} },
+          { provide: PfapiService, useValue: pfapiServiceMock },
+          { provide: OperationLogUploadService, useValue: {} },
+          { provide: OperationLogDownloadService, useValue: {} },
+          { provide: DependencyResolverService, useValue: dependencyResolverSpy },
+          { provide: LockService, useValue: lockServiceSpy },
+          { provide: OperationLogCompactionService, useValue: compactionServiceSpy },
+          { provide: SyncImportFilterService, useValue: syncImportFilterServiceSpy },
+          { provide: ServerMigrationService, useValue: serverMigrationServiceSpy },
+          { provide: TranslateService, useValue: {} },
+          provideMockStore({ initialState: {} }),
+        ],
+      });
+
+      const testService = TestBed.inject(OperationLogSyncService);
+
+      // Call the private method directly to test it
+      const result = await (testService as any)._resolveStaleLocalOps([
+        { opId: 'stale-op-1', op: staleOp },
+      ]);
+
+      // Verify: Operation was created
+      expect(result).toBe(1);
+      expect(appendedOp).not.toBeNull();
+
+      // CRITICAL: Verify the action type is 'LWW Update', NOT 'Merged Update'
+      // This is the fix - 'Merged Update' was not recognized by lwwUpdateMetaReducer
+      expect(appendedOp!.actionType).toBe('[TASK] LWW Update');
+      expect(appendedOp!.actionType).not.toBe('[TASK] Merged Update');
+
+      // Verify the payload contains the full entity state (including tagIds)
+      expect(appendedOp!.payload).toEqual({
+        id: 'task-1',
+        title: 'Test Task',
+        tagIds: [],
+      });
+    });
+  });
 });

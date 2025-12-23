@@ -547,9 +547,11 @@ export class OperationLogSyncService {
       }
 
       // Create new UPDATE op with current state and merged clock
+      // IMPORTANT: Use 'LWW Update' action type to match lwwUpdateMetaReducer pattern.
+      // This ensures the operation is properly applied on remote clients.
       const newOp: Operation = {
         id: uuidv7(),
-        actionType: `[${entityType}] Merged Update`,
+        actionType: `[${entityType}] LWW Update`,
         opType: OpType.Update,
         entityType,
         entityId,
@@ -564,7 +566,7 @@ export class OperationLogSyncService {
       opsToReject.push(...entityOps.map((e) => e.opId));
 
       OpLog.normal(
-        `OperationLogSyncService: Created merged update op for ${entityKey}, ` +
+        `OperationLogSyncService: Created LWW update op for ${entityKey}, ` +
           `replacing ${entityOps.length} stale op(s). New clock: ${JSON.stringify(newClock)}`,
       );
     }
@@ -581,7 +583,7 @@ export class OperationLogSyncService {
     for (const op of newOpsCreated) {
       await this.opLogStore.append(op, 'local');
       OpLog.normal(
-        `OperationLogSyncService: Appended merged update op ${op.id} for ${op.entityType}:${op.entityId}`,
+        `OperationLogSyncService: Appended LWW update op ${op.id} for ${op.entityType}:${op.entityId}`,
       );
     }
 
