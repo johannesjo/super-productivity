@@ -79,6 +79,9 @@ export class OperationLogStoreService {
   private _unsyncedCache: OperationLogEntry[] | null = null;
   private _unsyncedCacheLastSeq: number = 0;
 
+  // PERF: Cache for getVectorClock() to avoid IndexedDB read per operation
+  private _vectorClockCache: VectorClock | null = null;
+
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
       upgrade: (db, oldVersion) => {
@@ -669,6 +672,12 @@ export class OperationLogStoreService {
     await tx.objectStore('import_backup').clear();
     await tx.objectStore('vector_clock').clear();
     await tx.done;
+    // Invalidate all caches
+    this._appliedOpIdsCache = null;
+    this._cacheLastSeq = 0;
+    this._unsyncedCache = null;
+    this._unsyncedCacheLastSeq = 0;
+    this._vectorClockCache = null;
   }
 
   // ============================================================
@@ -737,11 +746,16 @@ export class OperationLogStoreService {
   /**
    * Gets the current vector clock from the SUP_OPS database.
    * Returns null if no vector clock has been stored yet.
+   * PERF: Uses in-memory cache to avoid IndexedDB read on every operation.
    */
   async getVectorClock(): Promise<VectorClock | null> {
+    if (this._vectorClockCache !== null) {
+      return { ...this._vectorClockCache };
+    }
     await this._ensureInit();
     const entry = await this.db.get('vector_clock', 'current');
-    return entry?.clock ?? null;
+    this._vectorClockCache = entry?.clock ?? null;
+    return this._vectorClockCache ? { ...this._vectorClockCache } : null;
   }
 
   /**
@@ -752,6 +766,7 @@ export class OperationLogStoreService {
   async setVectorClock(clock: VectorClock): Promise<void> {
     await this._ensureInit();
     await this.db.put('vector_clock', { clock, lastUpdate: Date.now() }, 'current');
+    this._vectorClockCache = clock;
   }
 
   /**
@@ -808,6 +823,7 @@ export class OperationLogStoreService {
     // We store it as the current clock so subsequent operations can build on it.
     if (source === 'local') {
       await vcStore.put({ clock: op.vectorClock, lastUpdate: Date.now() }, 'current');
+      this._vectorClockCache = op.vectorClock;
     }
 
     await tx.done;
