@@ -347,6 +347,69 @@ describe('OperationLogSyncService', () => {
         jasmine.any(Map),
       );
     });
+
+    it('should mark skipped ops as rejected BEFORE marking applied ops (crash safety)', async () => {
+      // This test verifies the ordering of markRejected and markApplied calls
+      // for crash safety. If we crash after markApplied but before markRejected,
+      // skipped ops would be retried unnecessarily on restart.
+
+      const remoteOps: Operation[] = [
+        {
+          id: 'op1',
+          schemaVersion: 1,
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          actionType: '[Task] Update',
+          payload: {},
+          clientId: 'remoteClient',
+          vectorClock: { remoteClient: 1 },
+          timestamp: Date.now(),
+        } as Operation,
+      ];
+
+      // Setup: fresh client
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+      opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+      opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
+
+      // Simulate applyOperations returning both applied and skipped ops
+      operationApplierServiceSpy.applyOperations.and.returnValue(
+        Promise.resolve({
+          appliedOps: [remoteOps[0]],
+          skippedOps: [
+            {
+              op: { id: 'skipped-op-1' } as Operation,
+              reason: 'stale_after_import' as const,
+              missingDeps: ['task-deleted'],
+            },
+          ],
+        }),
+      );
+
+      // Track call order
+      const callOrder: string[] = [];
+      opLogStoreSpy.markRejected.and.callFake(async () => {
+        callOrder.push('markRejected');
+      });
+      opLogStoreSpy.markApplied.and.callFake(async () => {
+        callOrder.push('markApplied');
+      });
+
+      await (service as any)._processRemoteOps(remoteOps);
+
+      // Verify both were called
+      expect(opLogStoreSpy.markRejected).toHaveBeenCalledWith(['skipped-op-1']);
+      expect(opLogStoreSpy.markApplied).toHaveBeenCalled();
+
+      // CRITICAL: markRejected must come BEFORE markApplied for crash safety
+      expect(callOrder).toEqual(['markRejected', 'markApplied']);
+    });
   });
 
   describe('_detectConflicts - fresh client scenarios', () => {

@@ -130,6 +130,8 @@ export class OperationLogUploadService {
       const clientId = pendingOps[0].op.clientId;
       // Use let so we can update between chunks to avoid duplicate piggybacked ops
       let lastKnownServerSeq = await syncProvider.getLastServerSeq();
+      // Track highest received sequence across ALL chunks to prevent regression
+      let highestReceivedSeq = lastKnownServerSeq;
 
       // Check if E2E encryption is enabled
       const privateCfg =
@@ -260,18 +262,24 @@ export class OperationLogUploadService {
             const maxPiggybackSeq = Math.max(
               ...response.newOps.map((op) => op.serverSeq),
             );
-            seqToStore = maxPiggybackSeq;
+            // Use Math.max to ensure we never regress across chunks
+            highestReceivedSeq = Math.max(highestReceivedSeq, maxPiggybackSeq);
+            seqToStore = highestReceivedSeq;
             OpLog.normal(
-              `OperationLogUploadService: hasMorePiggyback=true, setting lastServerSeq to ${maxPiggybackSeq} instead of ${response.latestSeq}`,
+              `OperationLogUploadService: hasMorePiggyback=true, setting lastServerSeq to ${seqToStore} instead of ${response.latestSeq}`,
             );
           } else {
             // Server indicates more ops but didn't send any - don't advance sequence
-            // Keep lastKnownServerSeq to ensure subsequent download fetches from correct point
-            seqToStore = lastKnownServerSeq;
+            // Use highestReceivedSeq to ensure we don't regress from previous chunks
+            seqToStore = highestReceivedSeq;
             OpLog.warn(
-              `OperationLogUploadService: hasMorePiggyback=true but no ops received, keeping lastServerSeq at ${lastKnownServerSeq}`,
+              `OperationLogUploadService: hasMorePiggyback=true but no ops received, keeping lastServerSeq at ${highestReceivedSeq}`,
             );
           }
+        } else {
+          // No more piggyback, but still ensure we don't regress
+          highestReceivedSeq = Math.max(highestReceivedSeq, response.latestSeq);
+          seqToStore = highestReceivedSeq;
         }
         await syncProvider.setLastServerSeq(seqToStore);
         lastKnownServerSeq = seqToStore;

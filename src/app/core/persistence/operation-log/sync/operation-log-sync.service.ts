@@ -1169,15 +1169,10 @@ export class OperationLogSyncService {
         .map((op) => opIdToSeq.get(op.id))
         .filter((seq): seq is number => seq !== undefined);
 
-      if (appliedSeqs.length > 0) {
-        await this.opLogStore.markApplied(appliedSeqs);
-        OpLog.normal(
-          `OperationLogSyncService: Applied and marked ${appliedSeqs.length} remote ops`,
-        );
-      }
-
       // Handle skipped operations (stale ops that depend on deleted entities)
-      // Mark these as rejected so they won't be retried
+      // Mark these as rejected FIRST (before marking applied) for crash safety.
+      // If we crash after marking applied but before marking rejected, skipped ops
+      // would be retried unnecessarily on restart.
       if (result.skippedOps && result.skippedOps.length > 0) {
         const skippedOpIds = result.skippedOps.map((s) => s.op.id);
         OpLog.warn(
@@ -1190,6 +1185,13 @@ export class OperationLogSyncService {
           })),
         );
         await this.opLogStore.markRejected(skippedOpIds);
+      }
+
+      if (appliedSeqs.length > 0) {
+        await this.opLogStore.markApplied(appliedSeqs);
+        OpLog.normal(
+          `OperationLogSyncService: Applied and marked ${appliedSeqs.length} remote ops`,
+        );
       }
 
       // Handle partial failure

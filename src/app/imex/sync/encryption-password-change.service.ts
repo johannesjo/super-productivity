@@ -107,6 +107,13 @@ export class EncryptionPasswordChangeService {
       // Update lastServerSeq to the new snapshot's seq
       if (response.serverSeq !== undefined) {
         await syncProvider.setLastServerSeq(response.serverSeq);
+      } else {
+        // serverSeq should always be present when accepted=true
+        // If missing, sync state may be inconsistent
+        SyncLog.err(
+          'EncryptionPasswordChangeService: Snapshot accepted but serverSeq is missing. ' +
+            'Sync state may be inconsistent - consider using "Sync Now" to verify.',
+        );
       }
 
       SyncLog.normal('EncryptionPasswordChangeService: Password change complete!');
@@ -137,16 +144,33 @@ export class EncryptionPasswordChangeService {
           if (recoveryResponse.accepted) {
             if (recoveryResponse.serverSeq !== undefined) {
               await syncProvider.setLastServerSeq(recoveryResponse.serverSeq);
+            } else {
+              // serverSeq should always be present when accepted=true
+              // If missing, sync state may be inconsistent
+              SyncLog.err(
+                'EncryptionPasswordChangeService: Recovery succeeded but serverSeq is missing. ' +
+                  'Sync state may be inconsistent - consider using "Sync Now" to re-sync.',
+              );
             }
             SyncLog.warn(
               'EncryptionPasswordChangeService: Restored server data with old password.',
             );
+            // Throw outside try/catch so caller knows recovery succeeded but password change failed
             throw new Error(
               'Password change failed. Server data has been restored with your old password. ' +
                 'Please try again or check your network connection.',
             );
           }
+          // Recovery upload was not accepted - fall through to CRITICAL error
         } catch (recoveryError) {
+          // Only log if this is a genuine recovery failure, not our success throw
+          const isRecoverySuccessError =
+            recoveryError instanceof Error &&
+            recoveryError.message.includes('Server data has been restored');
+          if (isRecoverySuccessError) {
+            // Re-throw the success message to caller
+            throw recoveryError;
+          }
           SyncLog.err(
             'EncryptionPasswordChangeService: Recovery also failed!',
             recoveryError,

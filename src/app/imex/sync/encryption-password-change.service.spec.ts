@@ -233,5 +233,145 @@ describe('EncryptionPasswordChangeService', () => {
       // Should not proceed to upload
       expect(mockSyncProvider.uploadSnapshot).not.toHaveBeenCalled();
     });
+
+    describe('recovery flow', () => {
+      it('should attempt recovery with old password when snapshot upload fails', async () => {
+        // First uploadSnapshot call fails (new password), second succeeds (recovery with old)
+        let uploadCallCount = 0;
+        mockSyncProvider.uploadSnapshot.and.callFake(() => {
+          uploadCallCount++;
+          if (uploadCallCount === 1) {
+            return Promise.reject(new Error('Network timeout'));
+          }
+          return Promise.resolve({ accepted: true, serverSeq: 100 });
+        });
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /Password change failed\. Server data has been restored with your old password/,
+        );
+
+        // Verify encryption was called twice: once with new password, once with old
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledTimes(2);
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledWith(
+          TEST_CURRENT_STATE,
+          TEST_PASSWORD,
+        );
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledWith(
+          TEST_CURRENT_STATE,
+          'old-password',
+        );
+
+        // Should set lastServerSeq from recovery response
+        expect(mockSyncProvider.setLastServerSeq).toHaveBeenCalledWith(100);
+      });
+
+      it('should throw CRITICAL error when both upload and recovery fail', async () => {
+        // Both uploadSnapshot calls fail
+        mockSyncProvider.uploadSnapshot.and.returnValue(
+          Promise.reject(new Error('Server is down')),
+        );
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /CRITICAL: Password change failed and could not restore server data/,
+        );
+
+        // Verify encryption was called twice (main attempt + recovery)
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledTimes(2);
+      });
+
+      it('should throw CRITICAL error when recovery upload is rejected', async () => {
+        let uploadCallCount = 0;
+        mockSyncProvider.uploadSnapshot.and.callFake(() => {
+          uploadCallCount++;
+          if (uploadCallCount === 1) {
+            return Promise.reject(new Error('Initial upload failed'));
+          }
+          // Recovery upload returns accepted: false
+          return Promise.resolve({
+            accepted: false,
+            error: 'Quota exceeded',
+          });
+        });
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /CRITICAL: Password change failed.*Original error: Initial upload failed/,
+        );
+
+        // Should NOT set lastServerSeq since recovery was not accepted
+        expect(mockSyncProvider.setLastServerSeq).not.toHaveBeenCalled();
+      });
+
+      it('should handle missing serverSeq in recovery response gracefully', async () => {
+        let uploadCallCount = 0;
+        mockSyncProvider.uploadSnapshot.and.callFake(() => {
+          uploadCallCount++;
+          if (uploadCallCount === 1) {
+            return Promise.reject(new Error('Network error'));
+          }
+          // Recovery succeeds but serverSeq is missing
+          return Promise.resolve({ accepted: true });
+        });
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /Password change failed\. Server data has been restored with your old password/,
+        );
+
+        // Should NOT call setLastServerSeq when serverSeq is missing
+        expect(mockSyncProvider.setLastServerSeq).not.toHaveBeenCalled();
+      });
+
+      it('should not attempt recovery when no old password exists', async () => {
+        // No existing config (first time setup)
+        mockSyncProvider.privateCfg.load.and.returnValue(Promise.resolve(null));
+        mockSyncProvider.uploadSnapshot.and.returnValue(
+          Promise.reject(new Error('Upload failed')),
+        );
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /CRITICAL: Password change failed/,
+        );
+
+        // Encryption should only be called once (no recovery attempt)
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledTimes(1);
+      });
+
+      it('should skip recovery when encryptKey is empty string', async () => {
+        mockSyncProvider.privateCfg.load.and.returnValue(
+          Promise.resolve({
+            encryptKey: '', // Empty string is falsy
+            isEncryptionEnabled: false,
+          }),
+        );
+        mockSyncProvider.uploadSnapshot.and.returnValue(
+          Promise.reject(new Error('Upload failed')),
+        );
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /CRITICAL: Password change failed/,
+        );
+
+        // Encryption should only be called once (no recovery attempt)
+        expect(mockEncryptionService.encryptPayload).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle encryption failure during recovery', async () => {
+        let encryptCallCount = 0;
+        mockEncryptionService.encryptPayload.and.callFake(() => {
+          encryptCallCount++;
+          if (encryptCallCount === 1) {
+            return Promise.resolve(TEST_ENCRYPTED_STATE);
+          }
+          // Second call (recovery) fails
+          return Promise.reject(new Error('Encryption failed'));
+        });
+        mockSyncProvider.uploadSnapshot.and.returnValue(
+          Promise.reject(new Error('Initial upload failed')),
+        );
+
+        await expectAsync(service.changePassword(TEST_PASSWORD)).toBeRejectedWithError(
+          /CRITICAL: Password change failed.*Original error: Initial upload failed/,
+        );
+      });
+    });
   });
 });

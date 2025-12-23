@@ -274,6 +274,234 @@ describe('OperationLogUploadService', () => {
 
         expect(mockApiProvider.uploadOps).toHaveBeenCalledTimes(2);
       });
+
+      describe('piggyback sequence handling', () => {
+        it('should handle hasMorePiggyback=true with empty newOps array', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));
+          mockOpLogStore.getUnsynced.and.returnValue(
+            Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+          );
+          mockApiProvider.uploadOps.and.returnValue(
+            Promise.resolve({
+              results: [{ opId: 'op-1', accepted: true }],
+              latestSeq: 100,
+              newOps: [], // Empty - no piggybacked ops
+              hasMorePiggyback: true, // But server indicates more exist
+            }),
+          );
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          // Should keep lastServerSeq at initial value to trigger download
+          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(40);
+          expect(result.hasMorePiggyback).toBe(true);
+        });
+
+        it('should use max piggybacked op serverSeq when hasMorePiggyback=true', async () => {
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));
+          mockOpLogStore.getUnsynced.and.returnValue(
+            Promise.resolve([createMockEntry(1, 'op-1', 'client-1')]),
+          );
+          mockApiProvider.uploadOps.and.returnValue(
+            Promise.resolve({
+              results: [{ opId: 'op-1', accepted: true }],
+              latestSeq: 100,
+              newOps: [
+                {
+                  serverSeq: 45,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'remote-1',
+                    clientId: 'other',
+                    actionType: '[Task] Update',
+                    opType: OpType.Update,
+                    entityType: 'TASK',
+                    entityId: 't1',
+                    payload: {},
+                    vectorClock: {},
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+                {
+                  serverSeq: 50,
+                  receivedAt: Date.now(),
+                  op: {
+                    id: 'remote-2',
+                    clientId: 'other',
+                    actionType: '[Task] Update',
+                    opType: OpType.Update,
+                    entityType: 'TASK',
+                    entityId: 't2',
+                    payload: {},
+                    vectorClock: {},
+                    timestamp: Date.now(),
+                    schemaVersion: 1,
+                  },
+                },
+              ],
+              hasMorePiggyback: true,
+            }),
+          );
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          // Should use max serverSeq from piggybacked ops (50), not latestSeq (100)
+          expect(mockApiProvider.setLastServerSeq).toHaveBeenCalledWith(50);
+          expect(result.hasMorePiggyback).toBe(true);
+        });
+
+        it('should never regress sequence across multi-chunk uploads', async () => {
+          // Create 150 ops to trigger 2 chunks
+          const pendingOps = Array.from({ length: 150 }, (_, i) =>
+            createMockEntry(i + 1, `op-${i}`, 'client-1'),
+          );
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
+
+          let callCount = 0;
+          mockApiProvider.uploadOps.and.callFake(async (ops) => {
+            callCount++;
+            if (callCount === 1) {
+              // First chunk: returns piggybacked ops with serverSeq 60
+              return {
+                results: ops.map((op) => ({ opId: op.id, accepted: true })),
+                latestSeq: 100,
+                newOps: [
+                  {
+                    serverSeq: 60,
+                    receivedAt: Date.now(),
+                    op: {
+                      id: 'remote-1',
+                      clientId: 'other',
+                      actionType: '[Task] Update',
+                      opType: OpType.Update,
+                      entityType: 'TASK',
+                      entityId: 't1',
+                      payload: {},
+                      vectorClock: {},
+                      timestamp: Date.now(),
+                      schemaVersion: 1,
+                    },
+                  },
+                ],
+                hasMorePiggyback: false, // No more piggyback for this chunk
+              };
+            } else {
+              // Second chunk: returns empty piggyback with hasMorePiggyback=true
+              // latestSeq is 50 (lower than chunk 1's stored 100!)
+              return {
+                results: ops.map((op) => ({ opId: op.id, accepted: true })),
+                latestSeq: 50, // Lower than what chunk 1 stored
+                newOps: [],
+                hasMorePiggyback: true,
+              };
+            }
+          });
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          // Verify setLastServerSeq calls
+          const calls = mockApiProvider.setLastServerSeq.calls.allArgs();
+          expect(calls.length).toBe(2);
+          // First chunk: should store 100 (latestSeq, since no hasMorePiggyback)
+          expect(calls[0][0]).toBe(100);
+          // Second chunk: should NOT regress to 50, should keep 100
+          expect(calls[1][0]).toBe(100);
+          expect(result.hasMorePiggyback).toBe(true);
+        });
+
+        it('should track highest received sequence across chunks with hasMorePiggyback', async () => {
+          // Create 150 ops to trigger 2 chunks
+          const pendingOps = Array.from({ length: 150 }, (_, i) =>
+            createMockEntry(i + 1, `op-${i}`, 'client-1'),
+          );
+          mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));
+          mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
+
+          let callCount = 0;
+          mockApiProvider.uploadOps.and.callFake(async (ops) => {
+            callCount++;
+            if (callCount === 1) {
+              // First chunk: returns piggybacked ops with max serverSeq 55
+              return {
+                results: ops.map((op) => ({ opId: op.id, accepted: true })),
+                latestSeq: 100,
+                newOps: [
+                  {
+                    serverSeq: 50,
+                    receivedAt: Date.now(),
+                    op: {
+                      id: 'remote-1',
+                      clientId: 'other',
+                      actionType: '[Task] Update',
+                      opType: OpType.Update,
+                      entityType: 'TASK',
+                      entityId: 't1',
+                      payload: {},
+                      vectorClock: {},
+                      timestamp: Date.now(),
+                      schemaVersion: 1,
+                    },
+                  },
+                  {
+                    serverSeq: 55,
+                    receivedAt: Date.now(),
+                    op: {
+                      id: 'remote-2',
+                      clientId: 'other',
+                      actionType: '[Task] Update',
+                      opType: OpType.Update,
+                      entityType: 'TASK',
+                      entityId: 't2',
+                      payload: {},
+                      vectorClock: {},
+                      timestamp: Date.now(),
+                      schemaVersion: 1,
+                    },
+                  },
+                ],
+                hasMorePiggyback: true, // More ops exist
+              };
+            } else {
+              // Second chunk: returns ops with lower serverSeq (45)
+              return {
+                results: ops.map((op) => ({ opId: op.id, accepted: true })),
+                latestSeq: 100,
+                newOps: [
+                  {
+                    serverSeq: 45, // Lower than chunk 1's max (55)
+                    receivedAt: Date.now(),
+                    op: {
+                      id: 'remote-3',
+                      clientId: 'other',
+                      actionType: '[Task] Update',
+                      opType: OpType.Update,
+                      entityType: 'TASK',
+                      entityId: 't3',
+                      payload: {},
+                      vectorClock: {},
+                      timestamp: Date.now(),
+                      schemaVersion: 1,
+                    },
+                  },
+                ],
+                hasMorePiggyback: true,
+              };
+            }
+          });
+
+          await service.uploadPendingOps(mockApiProvider);
+
+          // Verify setLastServerSeq calls
+          const calls = mockApiProvider.setLastServerSeq.calls.allArgs();
+          expect(calls.length).toBe(2);
+          // First chunk: should store 55 (max of piggybacked ops)
+          expect(calls[0][0]).toBe(55);
+          // Second chunk: should keep 55 (Math.max(55, 45) = 55), not regress to 45
+          expect(calls[1][0]).toBe(55);
+        });
+      });
     });
 
     describe('full-state operation routing', () => {

@@ -163,11 +163,11 @@ export class OperationCaptureService {
     // TASK time sync (syncTimeSpent): Extract from action payload
     // The reducer is a no-op locally (state already updated by addTimeSpent ticks),
     // so we capture from the action payload instead.
+    // Use explicit action type check to avoid false matches with future TASK actions
+    // that might have taskId, date, duration fields.
     if (
-      action.meta.entityType === 'TASK' &&
-      'taskId' in action &&
-      'date' in action &&
-      'duration' in action
+      action.type === '[TimeTracking] Sync time spent' &&
+      action.meta.entityType === 'TASK'
     ) {
       return this._captureTaskTimeSyncFromAction(action);
     }
