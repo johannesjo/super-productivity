@@ -1357,6 +1357,73 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         });
       });
     });
+
+    it('should NOT schedule task when remindAt is undefined', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const startTimeStr = '10:00';
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: startTimeStr,
+          remindAt: undefined, // No remindAt - should filter out
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // Effect should NOT emit because remindAt is undefined
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('--');
+      });
+    });
+
+    it('should NOT schedule task when startTime is undefined', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: undefined, // No startTime - should filter out
+          remindAt: TaskReminderOptionId.AtStart,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // Effect should NOT emit because startTime is undefined
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('--');
+      });
+    });
+
+    it('should NOT schedule task when both startTime and remindAt are undefined', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const todayStr = getDbDateStr();
+        const action = addTaskRepeatCfgToTask({
+          taskRepeatCfg: {
+            ...mockRepeatCfg,
+            startDate: todayStr,
+            repeatCycle: 'DAILY',
+            repeatEvery: 1,
+          },
+          taskId: 'parent-task-id',
+          startTime: undefined,
+          remindAt: undefined,
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // Effect should NOT emit because both are undefined
+        expectObservable(effects.addRepeatCfgToTaskUpdateTask$).toBe('--');
+      });
+    });
   });
 });
 
