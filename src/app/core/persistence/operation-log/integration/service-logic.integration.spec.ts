@@ -28,7 +28,6 @@ import { UserInputWaitStateService } from '../../../../imex/sync/user-input-wait
 import { SnackService } from '../../../snack/snack.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
 import { LockService } from '../sync/lock.service';
-import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { SchemaMigrationService } from '../store/schema-migration.service';
 import { decrypt, encrypt } from '../../../../pfapi/api/encryption/encryption';
 import { TranslateService } from '@ngx-translate/core';
@@ -203,7 +202,6 @@ describe('Service Logic Integration', () => {
         OperationLogStoreService,
         LockService,
         VectorClockService,
-        DependencyResolverService,
         SchemaMigrationService,
         provideMockStore(),
         { provide: ConflictResolutionService, useValue: conflictServiceSpy },

@@ -134,13 +134,6 @@ import {
  */
 export type EntityStoragePattern = 'adapter' | 'singleton' | 'map' | 'array' | 'virtual';
 
-export interface EntityDependency {
-  dependsOn: EntityType;
-  payloadField: string;
-  isHard: boolean;
-  relation: 'parent' | 'reference';
-}
-
 /**
  * Base entity interface - all NgRx entities have an id.
  */
@@ -180,8 +173,6 @@ export interface EntityConfig {
   mapKey?: string;
   /** Key within state for array storage pattern (null = state IS the array) */
   arrayKey?: string | null;
-  /** Entity dependencies for operation ordering */
-  dependencies?: EntityDependency[];
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -205,21 +196,6 @@ export const ENTITY_CONFIGS = {
     adapter: taskAdapter,
     selectEntities: selectTaskEntities,
     selectById: selectTaskById,
-    dependencies: [
-      {
-        dependsOn: 'PROJECT',
-        payloadField: 'projectId',
-        isHard: false,
-        relation: 'reference',
-      },
-      { dependsOn: 'TASK', payloadField: 'parentId', isHard: true, relation: 'parent' },
-      {
-        dependsOn: 'TASK',
-        payloadField: 'subTaskIds',
-        isHard: false,
-        relation: 'reference',
-      },
-    ],
   },
 
   PROJECT: {
@@ -241,14 +217,6 @@ export const ENTITY_CONFIGS = {
     adapter: tagAdapter,
     selectEntities: createSelector(selectTagFeatureState, selectTagEntitiesFromAdapter),
     selectById: selectTagById,
-    dependencies: [
-      {
-        dependsOn: 'TASK',
-        payloadField: 'taskIds',
-        isHard: false,
-        relation: 'reference',
-      },
-    ],
   },
 
   NOTE: {
@@ -258,14 +226,6 @@ export const ENTITY_CONFIGS = {
     adapter: noteAdapter,
     selectEntities: createSelector(selectNoteFeatureState, selectNoteEntitiesFromAdapter),
     selectById: selectNoteById,
-    dependencies: [
-      {
-        dependsOn: 'PROJECT',
-        payloadField: 'projectId',
-        isHard: false,
-        relation: 'reference',
-      },
-    ],
   },
 
   SIMPLE_COUNTER: {

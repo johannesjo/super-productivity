@@ -15,7 +15,6 @@ import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegat
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { OperationLogUploadService } from '../sync/operation-log-upload.service';
 import { OperationLogDownloadService } from '../sync/operation-log-download.service';
-import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Operation, OpType } from '../operation.types';
 import { T } from '../../../../t.const';
@@ -51,7 +50,6 @@ describe('Migration Handling Integration', () => {
         OperationLogStoreService,
         VectorClockService,
         SchemaMigrationService, // Use REAL service
-        DependencyResolverService, // Use REAL service
         provideMockStore(),
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: OperationApplierService, useValue: operationApplierSpy },

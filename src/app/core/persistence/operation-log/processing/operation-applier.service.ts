@@ -2,13 +2,11 @@ import { inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { Operation } from '../operation.types';
 import { convertOpToAction } from '../operation-converter.util';
-import { DependencyResolverService } from '../sync/dependency-resolver.service';
 import { OpLog } from '../../../log';
 import {
   ArchiveOperationHandler,
   isArchiveAffectingAction,
 } from './archive-operation-handler.service';
-import { SyncStateCorruptedError } from '../sync-state-corrupted.error';
 import { HydrationStateService } from './hydration-state.service';
 import { remoteArchiveDataApplied } from '../../../../features/time-tracking/store/archive.actions';
 
@@ -33,17 +31,6 @@ export interface ApplyOperationsResult {
     op: Operation;
     error: Error;
   };
-
-  /**
-   * Operations that were skipped due to missing dependencies after a SYNC_IMPORT.
-   * These are "stale" ops that reference entities deleted by the import.
-   * Callers should mark these as rejected (they will never succeed).
-   */
-  skippedOps?: {
-    op: Operation;
-    reason: 'stale_after_import';
-    missingDeps: string[];
-  }[];
 }
 
 /**
@@ -51,25 +38,11 @@ export interface ApplyOperationsResult {
  */
 export interface ApplyOperationsOptions {
   /**
-   * When true, skip dependency checking and archive handling.
+   * When true, skip archive handling (already persisted from original execution).
    * Use ONLY for local hydration where operations are replaying
    * previously validated local operations from SUP_OPS.
-   *
-   * SAFETY: This flag should NEVER be used for remote operations.
-   * Remote ops need dependency validation for correctness.
    */
   isLocalHydration?: boolean;
-
-  /**
-   * UUIDv7 of the latest SYNC_IMPORT/BACKUP_IMPORT operation in this batch.
-   * If provided, operations older than this with missing hard dependencies
-   * will be gracefully skipped as "stale" instead of causing a fatal error.
-   *
-   * This handles the case where a SYNC_IMPORT replaces state, deleting entities
-   * that older operations reference. Without this, those operations would cause
-   * SyncStateCorruptedError even though the state is actually valid.
-   */
-  latestImportOpId?: string;
 }
 
 /**
@@ -82,33 +55,16 @@ const DISPATCH_BATCH_SIZE = 10;
 /**
  * Service responsible for applying operations to the local NgRx store.
  *
- * ## Design Philosophy: Fail Fast, Re-sync Clean
- *
- * This service uses a deliberately simple approach to dependency handling:
- * - If all dependencies are satisfied → apply the operation
- * - If hard dependencies are missing → throw SyncStateCorruptedError
- *
- * We do NOT attempt complex retry logic because:
- * 1. The sync server guarantees operations arrive in sequence order
- * 2. Delete operations are atomic via meta-reducers (no separate cleanup operations)
- * 3. If dependencies are missing, something is fundamentally wrong with sync state
- * 4. A full re-sync is safer than partial recovery with potential inconsistencies
- *
- * ### What Happens on Failure?
- *
- * When this service throws SyncStateCorruptedError:
- * 1. The caller (OperationLogSyncService) catches the error
- * 2. The operations are marked as failed in the operation log
- * 3. The user is notified and can trigger a full re-sync
- *
- * This approach trades occasional re-syncs for guaranteed correctness.
+ * Operations are applied in the order they arrive from the sync server,
+ * which guarantees correct dependency ordering. Each client uploads ops
+ * in causal order (can't create a child before parent), and the server
+ * assigns sequence numbers in upload order.
  */
 @Injectable({
   providedIn: 'root',
 })
 export class OperationApplierService {
   private store = inject(Store);
-  private dependencyResolver = inject(DependencyResolverService);
   private archiveOperationHandler = inject(ArchiveOperationHandler);
   private hydrationState = inject(HydrationStateService);
 
@@ -119,7 +75,7 @@ export class OperationApplierService {
    *
    * @param ops Operations to apply
    * @param options Configuration options. Use `isLocalHydration: true` for
-   *                replaying local operations (skips dependency checks and archive handling).
+   *                replaying local operations (skips archive handling).
    * @returns Result containing applied operations and optionally the failed operation.
    *          Callers should:
    *          - Mark `appliedOps` as applied (they've been dispatched to NgRx)
@@ -134,7 +90,6 @@ export class OperationApplierService {
     }
 
     const isLocalHydration = options.isLocalHydration ?? false;
-    const latestImportOpId = options.latestImportOpId;
 
     if (isLocalHydration) {
       OpLog.normal(
@@ -161,7 +116,6 @@ export class OperationApplierService {
     );
 
     const appliedOps: Operation[] = [];
-    const skippedOps: ApplyOperationsResult['skippedOps'] = [];
     let hadArchiveAffectingOp = false;
     let dispatchedSinceYield = 0;
 
@@ -170,21 +124,9 @@ export class OperationApplierService {
     try {
       for (const op of ops) {
         try {
-          const result = await this._applyOperation(
-            op,
-            isLocalHydration,
-            latestImportOpId,
-          );
-          if (result.skipped) {
-            skippedOps.push({
-              op,
-              reason: 'stale_after_import',
-              missingDeps: result.missingDeps!,
-            });
-          } else {
-            hadArchiveAffectingOp = hadArchiveAffectingOp || result.wasArchiveAffecting;
-            appliedOps.push(op);
-          }
+          const result = await this._applyOperation(op, isLocalHydration);
+          hadArchiveAffectingOp = hadArchiveAffectingOp || result.wasArchiveAffecting;
+          appliedOps.push(op);
           dispatchedSinceYield++;
 
           // Yield to the event loop periodically to prevent overwhelming NgRx.
@@ -233,95 +175,24 @@ export class OperationApplierService {
       this.store.dispatch(remoteArchiveDataApplied());
     }
 
-    if (skippedOps.length > 0) {
-      OpLog.warn(
-        `OperationApplierService: Skipped ${skippedOps.length} stale operations with missing dependencies`,
-      );
-    }
-
     OpLog.normal('OperationApplierService: Finished applying operations.');
-    return {
-      appliedOps,
-      skippedOps: skippedOps.length > 0 ? skippedOps : undefined,
-    };
+    return { appliedOps };
   }
 
   /**
-   * Apply a single operation, checking dependencies first.
-   * Returns a result indicating whether the op was applied, skipped, or failed.
+   * Apply a single operation to the NgRx store.
    *
    * @param op Operation to apply
-   * @param isLocalHydration When true, skip dependency checks and archive handling.
-   * @param latestImportOpId If provided, ops older than this with missing deps are skipped.
-   * @returns Result indicating what happened with the operation
+   * @param isLocalHydration When true, skip archive handling (already persisted).
+   * @returns Result indicating whether the operation affected the archive
    */
   private async _applyOperation(
     op: Operation,
     isLocalHydration: boolean,
-    latestImportOpId?: string,
   ): Promise<{
-    skipped: boolean;
     wasArchiveAffecting: boolean;
-    missingDeps?: string[];
   }> {
-    // FAST PATH: Local hydration skips dependency checks and archive handling.
-    // These operations were already validated when created, and archive data
-    // is already persisted in IndexedDB from the original execution.
-    if (!isLocalHydration) {
-      // STANDARD PATH: Full validation for remote operations
-      const deps = this.dependencyResolver.extractDependencies(op);
-      const { missing } = await this.dependencyResolver.checkDependencies(deps);
-
-      // Only hard dependencies block application
-      const missingHardDeps = missing.filter((dep) => dep.mustExist);
-
-      if (missingHardDeps.length > 0) {
-        const missingDepIds = missingHardDeps.map((d) => `${d.entityType}:${d.entityId}`);
-
-        // Check if this op is stale after a SYNC_IMPORT
-        // If the op predates the import AND has missing deps, it's stale and can be skipped
-        if (latestImportOpId && op.id < latestImportOpId) {
-          OpLog.warn(
-            'OperationApplierService: Skipping stale operation with missing dependencies ' +
-              '(predates SYNC_IMPORT that deleted referenced entities)',
-            {
-              opId: op.id,
-              actionType: op.actionType,
-              missingDeps: missingDepIds,
-              latestImportOpId,
-            },
-          );
-          return {
-            skipped: true,
-            wasArchiveAffecting: false,
-            missingDeps: missingDepIds,
-          };
-        }
-
-        // Not stale - this is a genuine missing dependency, throw error
-        OpLog.err(
-          'OperationApplierService: Operation has missing hard dependencies. ' +
-            'This indicates corrupted sync state - a full re-sync is required.',
-          {
-            opId: op.id,
-            actionType: op.actionType,
-            missingDeps: missingDepIds,
-          },
-        );
-
-        throw new SyncStateCorruptedError(
-          `Operation ${op.id} cannot be applied: missing hard dependencies [${missingDepIds.join(', ')}]. ` +
-            'This indicates corrupted sync state. A full re-sync is required to restore consistency.',
-          {
-            opId: op.id,
-            actionType: op.actionType,
-            missingDependencies: missingDepIds,
-          },
-        );
-      }
-    }
-
-    // Dependencies satisfied (or skipped for hydration), apply the operation
+    // Apply the operation - server sequence order ensures dependencies exist
     const action = convertOpToAction(op);
 
     OpLog.verbose(
@@ -335,8 +206,8 @@ export class OperationApplierService {
     // Local ops already have archive data persisted from original execution.
     if (!isLocalHydration) {
       await this.archiveOperationHandler.handleOperation(action);
-      return { skipped: false, wasArchiveAffecting: isArchiveAffectingAction(action) };
+      return { wasArchiveAffecting: isArchiveAffectingAction(action) };
     }
-    return { skipped: false, wasArchiveAffecting: false };
+    return { wasArchiveAffecting: false };
   }
 }

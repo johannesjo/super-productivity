@@ -33,11 +33,9 @@ import {
 } from '../store/schema-migration.service';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
-import {
-  DependencyResolverService,
-  OperationDependency,
-} from './dependency-resolver.service';
-import { sortOperationsByDependency } from '../processing/sort-operations-by-dependency.util';
+import { getEntityConfig, isAdapterEntity } from '../entity-registry';
+import { firstValueFrom } from 'rxjs';
+import { Dictionary } from '@ngrx/entity';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { uuidv7 } from '../../../../util/uuid-v7';
@@ -128,7 +126,6 @@ export class OperationLogSyncService {
   private vectorClockService = inject(VectorClockService);
   private schemaMigrationService = inject(SchemaMigrationService);
   private snackService = inject(SnackService);
-  private dependencyResolver = inject(DependencyResolverService);
   private translateService = inject(TranslateService);
   private storeDelegateService = inject(PfapiStoreDelegateService);
   private lockService = inject(LockService);
@@ -764,17 +761,29 @@ export class OperationLogSyncService {
       return [];
     }
 
-    // Convert entity IDs to dependency format for the resolver
-    const deps: OperationDependency[] = entityIds.map((id) => ({
-      entityType: op.entityType,
-      entityId: id,
-      mustExist: true,
-      relation: 'reference' as const,
-    }));
+    // Check if entities exist in the store using entity registry
+    const config = getEntityConfig(op.entityType);
+    if (!config || !isAdapterEntity(config) || !config.selectEntities) {
+      return []; // Non-adapter entities (singletons, etc.) - assume they exist
+    }
 
-    // Check all dependencies in a single batch (efficient for bulk operations)
-    const { missing } = await this.dependencyResolver.checkDependencies(deps);
-    return missing.map((d) => d.entityId);
+    try {
+      const entities = await firstValueFrom(
+        this.store.select(
+          config.selectEntities as (state: object) => Dictionary<unknown>,
+        ),
+      );
+
+      // If entities is undefined/null, assume all entities exist (graceful degradation)
+      if (!entities) {
+        return [];
+      }
+
+      return entityIds.filter((id) => !entities[id]);
+    } catch {
+      // If selector throws (e.g., missing state slice), assume entities exist
+      return [];
+    }
   }
 
   /**
@@ -892,21 +901,16 @@ export class OperationLogSyncService {
         `(${skippedOps.length} skipped) after SYNC_IMPORT.`,
     );
 
-    // Sort operations by dependencies to ensure parents are created before children
-    // and DELETE ops come after ops that reference the deleted entity
-    const sortedOps = sortOperationsByDependency(validOps, (op) =>
-      this.dependencyResolver.extractDependencies(op),
-    );
-
     // Re-apply these ops to restore the local changes on top of the SYNC_IMPORT state
+    // Operations are already in server sequence order, which is causally correct
     // Use applyOperations which handles action dispatching
     try {
-      await this.operationApplier.applyOperations(sortedOps);
+      await this.operationApplier.applyOperations(validOps);
     } catch (replayError) {
       // If replay fails after SYNC_IMPORT succeeded, user loses their local synced operations.
       // Log the error, notify user, and trigger validation to detect/repair any inconsistencies.
       OpLog.err(
-        `OperationLogSyncService: Failed to replay ${sortedOps.length} local ops after SYNC_IMPORT`,
+        `OperationLogSyncService: Failed to replay ${validOps.length} local ops after SYNC_IMPORT`,
         replayError,
       );
 
@@ -998,11 +1002,6 @@ export class OperationLogSyncService {
         actionFn: () => window.open('https://super-productivity.com/download', '_blank'),
       });
       return { localWinOpsCreated: 0 };
-    }
-
-    // Warn if any migrated ops depend on dropped entities
-    if (droppedEntityIds.size > 0) {
-      this._warnAboutDroppedDependencies(migratedOps, droppedEntityIds);
     }
 
     if (migratedOps.length === 0) {
@@ -1170,24 +1169,6 @@ export class OperationLogSyncService {
       const appliedSeqs = result.appliedOps
         .map((op) => opIdToSeq.get(op.id))
         .filter((seq): seq is number => seq !== undefined);
-
-      // Handle skipped operations (stale ops that depend on deleted entities)
-      // Mark these as rejected FIRST (before marking applied) for crash safety.
-      // If we crash after marking applied but before marking rejected, skipped ops
-      // would be retried unnecessarily on restart.
-      if (result.skippedOps && result.skippedOps.length > 0) {
-        const skippedOpIds = result.skippedOps.map((s) => s.op.id);
-        OpLog.warn(
-          `OperationLogSyncService: Marking ${skippedOpIds.length} stale ops as rejected ` +
-            `(depend on entities that no longer exist after import)`,
-          result.skippedOps.map((s) => ({
-            opId: s.op.id,
-            reason: s.reason,
-            missingDeps: s.missingDeps,
-          })),
-        );
-        await this.opLogStore.markRejected(skippedOpIds);
-      }
 
       if (appliedSeqs.length > 0) {
         await this.opLogStore.markApplied(appliedSeqs);
@@ -1560,36 +1541,5 @@ export class OperationLogSyncService {
 
     // Default: manual - let user decide
     return 'manual';
-  }
-
-  /**
-   * Warns if any operations have dependencies on entities that were dropped during migration.
-   * This helps identify potential issues where subsequent ops may fail due to missing dependencies.
-   */
-  private _warnAboutDroppedDependencies(
-    ops: Operation[],
-    droppedEntityIds: Set<string>,
-  ): void {
-    const affectedOps: Array<{ opId: string; droppedDependency: string }> = [];
-
-    for (const op of ops) {
-      const deps = this.dependencyResolver.extractDependencies(op);
-      for (const dep of deps) {
-        if (droppedEntityIds.has(dep.entityId)) {
-          affectedOps.push({
-            opId: op.id,
-            droppedDependency: `${dep.entityType}:${dep.entityId}`,
-          });
-        }
-      }
-    }
-
-    if (affectedOps.length > 0) {
-      OpLog.warn(
-        `OperationLogSyncService: ${affectedOps.length} ops depend on ${droppedEntityIds.size} dropped entities. ` +
-          `These ops may fail to apply due to missing dependencies.`,
-        { affectedOps: affectedOps.slice(0, 10) }, // Log first 10 for debugging
-      );
-    }
   }
 }
