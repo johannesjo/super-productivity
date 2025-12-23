@@ -20,6 +20,7 @@ import {
 } from '../../tag/store/tag.reducer';
 import { selectTodayStr } from '../../../root-store/app-state/app-state.selectors';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
+import { isToday } from '../../../util/is-today.util';
 const mapSubTasksToTasks = (tasksIN: Task[]): TaskWithSubTasks[] => {
   // Create a Map for O(1) lookups instead of O(n) find() calls
   const taskMap = new Map<string, Task>();
@@ -271,13 +272,13 @@ export const selectAllTasksWithSubTasks = createSelector(
   mapSubTasksToTasks,
 );
 
-// Note: Uses selectTodayTagTaskIds due to circular dependency with work-context.selectors.ts
-// This selector may include stale tasks - for accurate membership use selectTodayTaskIds
+// Uses virtual tag pattern to determine TODAY membership:
+// A task is "in TODAY" if dueDay === today OR dueWithTime is for today
 export const selectLaterTodayTasksWithSubTasks = createSelector(
   selectTaskFeatureState,
-  selectTodayTagTaskIds,
-  (taskState, todayTaskIds): TaskWithSubTasks[] => {
-    if (!todayTaskIds) {
+  selectTodayStr,
+  (taskState, todayStr): TaskWithSubTasks[] => {
+    if (!todayStr) {
       return [];
     }
 
@@ -286,11 +287,15 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
     todayEnd.setHours(23, 59, 59, 999);
     const todayEndTime = todayEnd.getTime();
 
-    // Convert to Set for O(1) lookups
-    const todayTaskIdSet = new Set(todayTaskIds);
+    // Helper to check if task is "in TODAY" via virtual tag pattern
+    const isInToday = (task: Task): boolean => {
+      if (task.dueDay === todayStr) return true;
+      if (task.dueWithTime && isToday(task.dueWithTime)) return true;
+      return false;
+    };
 
     // Filter tasks that are:
-    // 1. In TODAY tag
+    // 1. In TODAY (via dueDay or dueWithTime for today)
     // 2. Have dueWithTime set
     // 3. dueWithTime is later than current time but still today
     // 4. Not done
@@ -299,7 +304,7 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
       .filter(
         (task): task is Task =>
           !!task &&
-          todayTaskIdSet.has(task.id) &&
+          isInToday(task) &&
           !!task.dueWithTime &&
           task.dueWithTime >= now &&
           task.dueWithTime <= todayEndTime &&
@@ -331,7 +336,7 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
       .filter(
         (task): task is Task =>
           !!task &&
-          todayTaskIdSet.has(task.id) &&
+          isInToday(task) &&
           !task.isDone &&
           !task.parentId &&
           (parentTaskIdSet.has(task.id) || parentIdsWithScheduledSubtasks.has(task.id)),
