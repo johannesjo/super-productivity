@@ -1,56 +1,17 @@
 import { Action, ActionReducer, MetaReducer } from '@ngrx/store';
 import { EntityAdapter } from '@ngrx/entity';
 import { RootState } from '../../root-state';
-import {
-  PROJECT_FEATURE_NAME,
-  projectAdapter,
-} from '../../../features/project/store/project.reducer';
-import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
-import {
-  TASK_FEATURE_NAME,
-  taskAdapter,
-} from '../../../features/tasks/store/task.reducer';
-import {
-  adapter as simpleCounterAdapter,
-  SIMPLE_COUNTER_FEATURE_NAME,
-} from '../../../features/simple-counter/store/simple-counter.reducer';
-import {
-  adapter as taskRepeatCfgAdapter,
-  TASK_REPEAT_CFG_FEATURE_NAME,
-} from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
-import {
-  adapter as noteAdapter,
-  NOTE_FEATURE_NAME,
-} from '../../../features/note/store/note.reducer';
 import { EntityType } from '../../../core/persistence/operation-log/operation.types';
+import {
+  getEntityConfig,
+  isAdapterEntity,
+} from '../../../core/persistence/operation-log/entity-registry';
 
 /**
  * Regex to match LWW Update action types.
  * Matches patterns like '[TASK] LWW Update', '[PROJECT] LWW Update', etc.
  */
 const LWW_UPDATE_REGEX = /^\[([A-Z_]+)\] LWW Update$/;
-
-/**
- * Map from entity type to feature name and adapter.
- * This allows us to handle LWW Update for all entity types generically.
- */
-const ENTITY_CONFIG: Record<
-  string,
-  { featureName: string; adapter: EntityAdapter<any> }
-> = {
-  TASK: { featureName: TASK_FEATURE_NAME, adapter: taskAdapter },
-  PROJECT: { featureName: PROJECT_FEATURE_NAME, adapter: projectAdapter },
-  TAG: { featureName: TAG_FEATURE_NAME, adapter: tagAdapter },
-  NOTE: { featureName: NOTE_FEATURE_NAME, adapter: noteAdapter },
-  SIMPLE_COUNTER: {
-    featureName: SIMPLE_COUNTER_FEATURE_NAME,
-    adapter: simpleCounterAdapter,
-  },
-  TASK_REPEAT_CFG: {
-    featureName: TASK_REPEAT_CFG_FEATURE_NAME,
-    adapter: taskRepeatCfgAdapter,
-  },
-};
 
 /**
  * Meta-reducer that handles LWW (Last-Write-Wins) Update actions.
@@ -86,15 +47,24 @@ export const lwwUpdateMetaReducer: MetaReducer = (
     }
 
     const entityType = match[1] as EntityType;
-    const config = ENTITY_CONFIG[entityType];
+    const config = getEntityConfig(entityType);
 
-    if (!config) {
-      console.warn(`lwwUpdateMetaReducer: Unknown entity type: ${entityType}`);
+    if (!config || !isAdapterEntity(config)) {
+      console.warn(
+        `lwwUpdateMetaReducer: Unknown or non-adapter entity type: ${entityType}`,
+      );
+      return reducer(state, action);
+    }
+
+    const { featureName, adapter } = config;
+    if (!featureName || !adapter) {
+      console.warn(
+        `lwwUpdateMetaReducer: Missing featureName or adapter for: ${entityType}`,
+      );
       return reducer(state, action);
     }
 
     const rootState = state as RootState;
-    const { featureName, adapter } = config;
     const featureState = rootState[featureName as keyof RootState];
 
     if (!featureState) {
@@ -128,7 +98,7 @@ export const lwwUpdateMetaReducer: MetaReducer = (
       console.log(
         `lwwUpdateMetaReducer: Entity ${entityType}:${entityId} not found, recreating from LWW update`,
       );
-      updatedFeatureState = adapter.addOne(
+      updatedFeatureState = (adapter as EntityAdapter<any>).addOne(
         {
           ...entityData,
           modified: Date.now(),
@@ -138,7 +108,7 @@ export const lwwUpdateMetaReducer: MetaReducer = (
     } else {
       // Entity exists - replace it entirely with the LWW winning state
       // Use updateOne with all fields as changes to preserve adapter behavior
-      updatedFeatureState = adapter.updateOne(
+      updatedFeatureState = (adapter as EntityAdapter<any>).updateOne(
         {
           id: entityId,
           changes: {

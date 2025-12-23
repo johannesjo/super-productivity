@@ -24,20 +24,14 @@ import {
 import { uuidv7 } from '../../../../util/uuid-v7';
 import { CURRENT_SCHEMA_VERSION } from '../store/schema-migration.service';
 import { CLIENT_ID_PROVIDER } from '../client-id.provider';
-import { selectTaskById } from '../../../../features/tasks/store/task.selectors';
-import { selectProjectById } from '../../../../features/project/store/project.selectors';
-import { selectTagById } from '../../../../features/tag/store/tag.reducer';
-import { selectNoteById } from '../../../../features/note/store/note.reducer';
-import { selectConfigFeatureState } from '../../../../features/config/store/global-config.reducer';
-import { selectSimpleCounterById } from '../../../../features/simple-counter/store/simple-counter.reducer';
-import { selectTaskRepeatCfgById } from '../../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import {
+  getEntityConfig,
+  isAdapterEntity,
+  isSingletonEntity,
+  isMapEntity,
+  isArrayEntity,
+} from '../entity-registry';
 import { selectIssueProviderById } from '../../../../features/issue/store/issue-provider.selectors';
-import { selectMetricById } from '../../../../features/metric/store/metric.selectors';
-import { selectPlannerState } from '../../../../features/planner/store/planner.selectors';
-import { selectBoardsState } from '../../../../features/boards/store/boards.selectors';
-import { selectReminderFeatureState } from '../../../../features/reminder/store/reminder.reducer';
-import { selectTimeTrackingState } from '../../../../features/time-tracking/store/time-tracking.selectors';
-import { selectMenuTreeState } from '../../../../features/menu-tree/store/menu-tree.selectors';
 
 /**
  * Represents the result of LWW (Last-Write-Wins) conflict resolution.
@@ -598,6 +592,7 @@ export class ConflictResolutionService {
 
   /**
    * Gets the current state of an entity from the NgRx store.
+   * Uses the entity registry to look up the appropriate selector.
    *
    * @param entityType - The type of entity
    * @param entityId - The ID of the entity
@@ -607,85 +602,59 @@ export class ConflictResolutionService {
     entityType: EntityType,
     entityId: string,
   ): Promise<unknown> {
+    const config = getEntityConfig(entityType);
+    if (!config) {
+      OpLog.warn(
+        `ConflictResolutionService: No config for entity type ${entityType}, falling back to remote`,
+      );
+      return undefined;
+    }
+
     try {
-      switch (entityType) {
-        // Entities with direct selectById selectors
-        case 'TASK':
-          return await firstValueFrom(
-            this.store.select(selectTaskById, { id: entityId }),
-          );
-        case 'PROJECT':
-          return await firstValueFrom(
-            this.store.select(selectProjectById, { id: entityId }),
-          );
-        case 'TAG':
-          return await firstValueFrom(this.store.select(selectTagById, { id: entityId }));
-        case 'NOTE':
-          return await firstValueFrom(
-            this.store.select(selectNoteById, { id: entityId }),
-          );
-        case 'SIMPLE_COUNTER':
-          return await firstValueFrom(
-            this.store.select(selectSimpleCounterById, { id: entityId }),
-          );
-        case 'TASK_REPEAT_CFG':
-          return await firstValueFrom(
-            this.store.select(selectTaskRepeatCfgById, { id: entityId }),
-          );
-        case 'ISSUE_PROVIDER':
-          // selectIssueProviderById is a factory function: (id, key) => selector
+      // Adapter entities - use selectById
+      if (isAdapterEntity(config) && config.selectById) {
+        // Special case: ISSUE_PROVIDER has a factory selector (id, key) => selector
+        if (entityType === 'ISSUE_PROVIDER') {
           return await firstValueFrom(
             this.store.select(selectIssueProviderById(entityId, null)),
           );
-        case 'METRIC':
-          return await firstValueFrom(
-            this.store.select(selectMetricById, { id: entityId }),
-          );
-
-        // Singleton entities (entire feature state)
-        case 'GLOBAL_CONFIG':
-          return await firstValueFrom(this.store.select(selectConfigFeatureState));
-        case 'TIME_TRACKING':
-          return await firstValueFrom(this.store.select(selectTimeTrackingState));
-        case 'MENU_TREE':
-          return await firstValueFrom(this.store.select(selectMenuTreeState));
-
-        // Complex state entities - extract entity from feature state
-        case 'PLANNER': {
-          const plannerState = await firstValueFrom(
-            this.store.select(selectPlannerState),
-          );
-          // Planner stores days as a map, entityId is the day string
-          return plannerState?.days?.[entityId];
         }
-        case 'BOARD': {
-          const boardsState = await firstValueFrom(this.store.select(selectBoardsState));
-          // Boards state has boardCfgs array, find by id
-          return boardsState?.boardCfgs?.find((b: { id: string }) => b.id === entityId);
-        }
-        case 'REMINDER': {
-          const reminderState = await firstValueFrom(
-            this.store.select(selectReminderFeatureState),
-          );
-          // Reminder state follows entity adapter pattern
-          return (reminderState as { entities?: Record<string, unknown> })?.entities?.[
-            entityId
-          ];
-        }
-
-        // Fallback for unhandled entity types
-        case 'WORK_CONTEXT':
-        case 'PLUGIN_USER_DATA':
-        case 'PLUGIN_METADATA':
-        case 'MIGRATION':
-        case 'RECOVERY':
-        case 'ALL':
-        default:
-          OpLog.warn(
-            `ConflictResolutionService: No selector for entity type ${entityType}, falling back to remote`,
-          );
-          return undefined;
+        // Standard props-based selector
+        return await firstValueFrom(
+          this.store.select(config.selectById as any, { id: entityId }),
+        );
       }
+
+      // Singleton entities - return entire feature state
+      if (isSingletonEntity(config) && config.selectState) {
+        return await firstValueFrom(this.store.select(config.selectState));
+      }
+
+      // Map entities - get state and extract by key
+      if (isMapEntity(config) && config.selectState && config.mapKey) {
+        const state = await firstValueFrom(this.store.select(config.selectState));
+        return (state as Record<string, unknown>)?.[config.mapKey]?.[entityId];
+      }
+
+      // Array entities - get state and find by id
+      if (isArrayEntity(config) && config.selectState) {
+        const state = await firstValueFrom(this.store.select(config.selectState));
+        if (config.arrayKey === null) {
+          // State IS the array (e.g., REMINDER)
+          return (state as Array<{ id: string }>)?.find((item) => item.id === entityId);
+        }
+        // State has array at arrayKey (e.g., BOARD.boardCfgs)
+        if (config.arrayKey) {
+          const arr = (state as Record<string, unknown>)?.[config.arrayKey];
+          return (arr as Array<{ id: string }>)?.find((item) => item.id === entityId);
+        }
+        return undefined;
+      }
+
+      OpLog.warn(
+        `ConflictResolutionService: Cannot get state for entity type ${entityType}`,
+      );
+      return undefined;
     } catch (err) {
       OpLog.err(
         `ConflictResolutionService: Error getting entity state for ${entityType}:${entityId}`,

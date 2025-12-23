@@ -6,6 +6,7 @@ import {
   EntityChange,
 } from '../operation.types';
 import { OpLog } from '../../../log';
+import { getPayloadKey, getAllPayloadKeys } from '../entity-registry';
 
 /**
  * Result of validating an operation payload.
@@ -18,42 +19,18 @@ export interface PayloadValidationResult {
 
 /**
  * Maps EntityType to the expected payload key.
+ * Uses the central entity registry.
  */
 const getEntityKeyFromType = (entityType: EntityType): string | null => {
-  const mapping: Record<string, string> = {
-    TASK: 'task',
-    PROJECT: 'project',
-    TAG: 'tag',
-    NOTE: 'note',
-    GLOBAL_CONFIG: 'globalConfig',
-    SIMPLE_COUNTER: 'simpleCounter',
-    WORK_CONTEXT: 'workContext',
-    TASK_REPEAT_CFG: 'taskRepeatCfg',
-    ISSUE_PROVIDER: 'issueProvider',
-    PLANNER: 'planner',
-    PLUGIN_USER_DATA: 'pluginUserData',
-    PLUGIN_METADATA: 'pluginMetadata',
-  };
-  return mapping[entityType] || null;
+  return getPayloadKey(entityType) ?? null;
 };
 
 /**
  * Attempts to find an entity-like object in the payload.
- * Used when the entity key doesn't match the expected pattern.
+ * Uses payload keys from the central entity registry.
  */
 const findEntityInPayload = (payload: Record<string, unknown>): unknown => {
-  const entityKeys = [
-    'task',
-    'project',
-    'tag',
-    'note',
-    'simpleCounter',
-    'workContext',
-    'taskRepeatCfg',
-    'issueProvider',
-  ];
-
-  for (const key of entityKeys) {
+  for (const key of getAllPayloadKeys()) {
     if (payload[key] && typeof payload[key] === 'object') {
       return payload[key];
     }

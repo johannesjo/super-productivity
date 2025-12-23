@@ -1,51 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { Operation, EntityType, extractActionPayload } from '../operation.types';
 import { Store } from '@ngrx/store';
-import { selectTaskEntities } from '../../../../features/tasks/store/task.selectors';
-import {
-  selectProjectFeatureState,
-  selectEntities as selectProjectEntitiesFromAdapter,
-} from '../../../../features/project/store/project.reducer';
-import {
-  selectTagFeatureState,
-  selectEntities as selectTagEntitiesFromAdapter,
-} from '../../../../features/tag/store/tag.reducer';
-import {
-  selectNoteFeatureState,
-  selectEntities as selectNoteEntitiesFromAdapter,
-} from '../../../../features/note/store/note.reducer';
-import {
-  selectMetricFeatureState,
-  selectEntities as selectMetricEntitiesFromAdapter,
-} from '../../../../features/metric/store/metric.selectors';
-import {
-  selectSimpleCounterFeatureState,
-  selectEntities as selectSimpleCounterEntitiesFromAdapter,
-} from '../../../../features/simple-counter/store/simple-counter.reducer';
 import { firstValueFrom } from 'rxjs';
-import { createSelector, MemoizedSelector } from '@ngrx/store';
 import { Dictionary } from '@ngrx/entity';
-
-/**
- * Registry of entity dictionary selectors for bulk lookups.
- * To add a new entity type, simply add its selector here.
- * Entity types not in this registry are assumed to be singleton/aggregate types
- * that always exist (e.g., GLOBAL_CONFIG, PLANNER).
- */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type AnyDictionarySelector = MemoizedSelector<object, Dictionary<any>>;
-
-const ENTITY_SELECTORS: Partial<Record<EntityType, AnyDictionarySelector>> = {
-  TASK: selectTaskEntities,
-  PROJECT: createSelector(selectProjectFeatureState, selectProjectEntitiesFromAdapter),
-  TAG: createSelector(selectTagFeatureState, selectTagEntitiesFromAdapter),
-  NOTE: createSelector(selectNoteFeatureState, selectNoteEntitiesFromAdapter),
-  METRIC: createSelector(selectMetricFeatureState, selectMetricEntitiesFromAdapter),
-  SIMPLE_COUNTER: createSelector(
-    selectSimpleCounterFeatureState,
-    selectSimpleCounterEntitiesFromAdapter,
-  ),
-};
+import { getEntityConfig, isAdapterEntity, EntityDependency } from '../entity-registry';
 
 export interface OperationDependency {
   entityType: EntityType;
@@ -54,113 +12,33 @@ export interface OperationDependency {
   relation: 'parent' | 'reference';
 }
 
-/** Payload shape for task operations that may have dependencies */
-interface TaskOperationPayload {
-  projectId?: string;
-  parentId?: string;
-  tagIds?: string[];
-  subTaskIds?: string[];
-}
-
-/** Payload shape for note operations that may have dependencies */
-interface NoteOperationPayload {
-  projectId?: string;
-}
-
-/** Payload shape for tag operations that may have dependencies */
-interface TagOperationPayload {
-  taskIds?: string[];
-  // For updateTag action, taskIds are nested in tag.changes
-  tag?: {
-    id?: string;
-    changes?: {
-      taskIds?: string[];
-    };
-  };
-}
-
 @Injectable({ providedIn: 'root' })
 export class DependencyResolverService {
   private store = inject(Store);
 
   /**
-   * Identifies dependencies for a given operation.
+   * Identifies dependencies for a given operation using the entity registry.
    */
   extractDependencies(op: Operation): OperationDependency[] {
-    const deps: OperationDependency[] = [];
+    const config = getEntityConfig(op.entityType);
+    if (!config || !config.dependencies?.length) {
+      return [];
+    }
 
-    // Extract actionPayload for both multi-entity and legacy payloads
+    const deps: OperationDependency[] = [];
     const actionPayload = extractActionPayload(op.payload);
 
-    if (op.entityType === 'TASK') {
-      const payload = actionPayload as TaskOperationPayload;
-      if (payload.projectId) {
+    for (const depConfig of config.dependencies) {
+      const ids = this.extractIdsFromPayload(actionPayload, depConfig, op.entityType);
+      for (const id of ids) {
         deps.push({
-          entityType: 'PROJECT',
-          entityId: payload.projectId,
-          mustExist: false, // Soft dependency (Task can exist without project, or orphaned)
-          relation: 'reference',
-        });
-      }
-      if (payload.parentId) {
-        deps.push({
-          entityType: 'TASK',
-          entityId: payload.parentId,
-          mustExist: true, // Hard dependency (Subtask needs parent)
-          relation: 'parent',
-        });
-      }
-      // SubTaskIds are soft dependencies - parent task references children
-      // We want subtasks to be created before parent updates that reference them
-      if (payload.subTaskIds?.length) {
-        for (const subTaskId of payload.subTaskIds) {
-          deps.push({
-            entityType: 'TASK',
-            entityId: subTaskId,
-            mustExist: false, // Soft dependency (prefer subtask exists, but don't block)
-            relation: 'reference',
-          });
-        }
-      }
-      // Tags are soft dependencies, we usually ignore if missing or handle in reducer
-    }
-
-    if (op.entityType === 'NOTE') {
-      const notePayload = actionPayload as NoteOperationPayload;
-      if (notePayload.projectId) {
-        deps.push({
-          entityType: 'PROJECT',
-          entityId: notePayload.projectId,
-          mustExist: false, // Soft dependency (Note can exist without project)
-          relation: 'reference',
+          entityType: depConfig.dependsOn,
+          entityId: id,
+          mustExist: depConfig.isHard,
+          relation: depConfig.relation,
         });
       }
     }
-
-    if (op.entityType === 'TAG') {
-      const tagPayload = actionPayload as TagOperationPayload;
-      // Tag -> Task is a soft dependency. We want tasks to be created before
-      // tag updates that reference them, to avoid the tag-shared.reducer
-      // filtering out "non-existent" taskIds during sync.
-      // Also ensures DELETE operations for tasks wait until after this tag update.
-
-      // Handle both direct taskIds (addTag) and nested taskIds (updateTag)
-      const taskIds = tagPayload.taskIds || tagPayload.tag?.changes?.taskIds;
-
-      if (taskIds?.length) {
-        for (const taskId of taskIds) {
-          deps.push({
-            entityType: 'TASK',
-            entityId: taskId,
-            mustExist: false, // Soft dependency (prefer task exists, but don't block)
-            relation: 'reference',
-          });
-        }
-      }
-    }
-
-    // SIMPLE_COUNTER, METRIC - typically don't have hard dependencies
-    // PROJECT - typically independent unless nested structure is used
 
     return deps;
   }
@@ -243,6 +121,37 @@ export class DependencyResolverService {
   }
 
   /**
+   * Extracts ID(s) from payload based on dependency config.
+   */
+  private extractIdsFromPayload(
+    payload: Record<string, unknown>,
+    depConfig: EntityDependency,
+    entityType: EntityType,
+  ): string[] {
+    const { payloadField } = depConfig;
+
+    // Direct field access
+    let value = payload[payloadField];
+
+    // Handle nested paths for TAG entity (e.g., tag.changes.taskIds)
+    if (!value && entityType === 'TAG' && payloadField === 'taskIds') {
+      const tag = payload['tag'] as { changes?: { taskIds?: string[] } } | undefined;
+      value = tag?.changes?.taskIds;
+    }
+
+    if (!value) return [];
+
+    // Return as array
+    if (Array.isArray(value)) {
+      return value.filter((v): v is string => typeof v === 'string');
+    }
+    if (typeof value === 'string') {
+      return [value];
+    }
+    return [];
+  }
+
+  /**
    * Fetches entity dictionaries for the requested entity types.
    * Only makes one selector call per entity type, regardless of how many entities are checked.
    */
@@ -253,15 +162,15 @@ export class DependencyResolverService {
     const promises: Promise<void>[] = [];
 
     for (const entityType of depsByType.keys()) {
-      const selector = ENTITY_SELECTORS[entityType];
-      if (selector) {
+      const config = getEntityConfig(entityType);
+      if (config && isAdapterEntity(config) && config.selectEntities) {
         promises.push(
-          firstValueFrom(this.store.select(selector)).then((dict) => {
+          firstValueFrom(this.store.select(config.selectEntities)).then((dict) => {
             result.set(entityType, dict);
           }),
         );
       }
-      // Entity types not in ENTITY_SELECTORS are singleton/aggregate - assumed to exist
+      // Entity types not adapters are singleton/aggregate - assumed to exist
     }
 
     await Promise.all(promises);

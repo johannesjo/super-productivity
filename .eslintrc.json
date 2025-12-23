@@ -26,6 +26,7 @@
       "plugins": ["@typescript-eslint", "prettier", "prefer-arrow", "local-rules"],
       "rules": {
         "local-rules/require-hydration-guard": "warn",
+        "local-rules/require-entity-registry": "warn",
         "@typescript-eslint/no-explicit-any": 0,
         "@typescript-eslint/ban-ts-comment": 0,
         "@typescript-eslint/no-empty-function": 0,

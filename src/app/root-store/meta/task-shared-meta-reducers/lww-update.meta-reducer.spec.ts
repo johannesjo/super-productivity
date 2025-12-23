@@ -314,7 +314,7 @@ describe('lwwUpdateMetaReducer', () => {
       reducer(state, action);
 
       expect(console.warn).toHaveBeenCalledWith(
-        jasmine.stringMatching(/Unknown entity type: UNKNOWN_ENTITY/),
+        jasmine.stringMatching(/Unknown or non-adapter entity type: UNKNOWN_ENTITY/),
       );
       expect(mockReducer).toHaveBeenCalledWith(state, action);
     });
