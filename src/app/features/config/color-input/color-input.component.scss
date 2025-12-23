@@ -1,3 +1,13 @@
 mat-form-field {
   width: 100%;
 }
+::ng-deep .color-picker-panel {
+  background: #303030 !important;
+  color: #ffffff !important;
+  z-index: 1000000 !important;
+}
+::ng-deep .color-picker-panel .cp-input {
+  background: #424242 !important;
+  color: #ffffff !important;
+  z-index: 10000 !important;
+}
