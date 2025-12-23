@@ -10,6 +10,7 @@ import { OperationLogCompactionService } from './store/operation-log-compaction.
 import { SnackService } from '../../snack/snack.service';
 import { Injector } from '@angular/core';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
+import { HydrationStateService } from './processing/hydration-state.service';
 import { OpType } from './operation.types';
 import { PersistentAction } from './persistent-action.interface';
 import { COMPACTION_THRESHOLD } from './operation-log.const';
@@ -25,6 +26,7 @@ describe('OperationLogEffects', () => {
   let mockInjector: jasmine.SpyObj<Injector>;
   let mockStore: jasmine.SpyObj<Store>;
   let mockImmediateUploadService: jasmine.SpyObj<ImmediateUploadService>;
+  let mockHydrationStateService: jasmine.SpyObj<HydrationStateService>;
 
   const mockPfapiService = {
     pf: {
@@ -74,8 +76,12 @@ describe('OperationLogEffects', () => {
     mockImmediateUploadService = jasmine.createSpyObj('ImmediateUploadService', [
       'trigger',
     ]);
+    mockHydrationStateService = jasmine.createSpyObj('HydrationStateService', [
+      'isApplyingRemoteOps',
+    ]);
 
     // Default mock implementations
+    mockHydrationStateService.isApplyingRemoteOps.and.returnValue(false);
     mockLockService.request.and.callFake(
       async (_name: string, fn: () => Promise<void>) => {
         await fn();
@@ -104,6 +110,7 @@ describe('OperationLogEffects', () => {
         { provide: Injector, useValue: mockInjector },
         { provide: Store, useValue: mockStore },
         { provide: ImmediateUploadService, useValue: mockImmediateUploadService },
+        { provide: HydrationStateService, useValue: mockHydrationStateService },
       ],
     });
 
@@ -150,6 +157,82 @@ describe('OperationLogEffects', () => {
       effects.persistOperation$.subscribe({
         complete: () => {
           expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
+          done();
+        },
+      });
+    });
+
+    it('should skip actions when isApplyingRemoteOps is true (sync in progress)', (done) => {
+      // This is the critical fix: user actions during sync replay should NOT be persisted
+      // because the meta-reducer skips enqueueing entity changes, resulting in corrupted ops
+      mockHydrationStateService.isApplyingRemoteOps.and.returnValue(true);
+      const action = createPersistentAction('[Task] Update Task');
+      actions$ = of(action);
+
+      effects.persistOperation$.subscribe({
+        complete: () => {
+          // Should NOT persist when sync is applying remote operations
+          expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
+          done();
+        },
+      });
+    });
+
+    it('should persist actions when isApplyingRemoteOps becomes false after sync', (done) => {
+      // First action during sync - should be skipped
+      mockHydrationStateService.isApplyingRemoteOps.and.returnValue(true);
+      const action1 = createPersistentAction('[Task] Action During Sync');
+      actions$ = of(action1);
+
+      effects.persistOperation$.subscribe({
+        complete: () => {
+          expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
+
+          // Second action after sync completes - should be persisted
+          mockHydrationStateService.isApplyingRemoteOps.and.returnValue(false);
+          const action2 = createPersistentAction('[Task] Action After Sync');
+          actions$ = of(action2);
+
+          effects.persistOperation$.subscribe({
+            complete: () => {
+              expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
+                jasmine.objectContaining({
+                  actionType: '[Task] Action After Sync',
+                }),
+                'local',
+              );
+              done();
+            },
+          });
+        },
+      });
+    });
+
+    it('should check isApplyingRemoteOps for each action independently', (done) => {
+      // This test verifies the filter is evaluated per-action, not just once
+      let callCount = 0;
+      mockHydrationStateService.isApplyingRemoteOps.and.callFake(() => {
+        callCount++;
+        // First call returns true (sync in progress), second returns false
+        return callCount === 1;
+      });
+
+      const action1 = createPersistentAction('[Task] First Action');
+      const action2 = createPersistentAction('[Task] Second Action');
+      actions$ = of(action1, action2);
+
+      effects.persistOperation$.subscribe({
+        complete: () => {
+          // isApplyingRemoteOps should have been called twice (once per action)
+          expect(mockHydrationStateService.isApplyingRemoteOps).toHaveBeenCalledTimes(2);
+          // Only second action should be persisted (first was during sync)
+          expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
+          expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
+            jasmine.objectContaining({
+              actionType: '[Task] Second Action',
+            }),
+            'local',
+          );
           done();
         },
       });

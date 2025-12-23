@@ -19,6 +19,7 @@ import { COMPACTION_THRESHOLD, MAX_COMPACTION_FAILURES } from './operation-log.c
 import { CURRENT_SCHEMA_VERSION } from './store/schema-migration.service';
 import { OperationCaptureService } from './processing/operation-capture.service';
 import { ImmediateUploadService } from './sync/immediate-upload.service';
+import { HydrationStateService } from './processing/hydration-state.service';
 
 /**
  * NgRx Effects for persisting application state changes as operations to the
@@ -52,12 +53,30 @@ export class OperationLogEffects {
   private snackService = inject(SnackService);
   private operationCaptureService = inject(OperationCaptureService);
   private immediateUploadService = inject(ImmediateUploadService);
+  private hydrationState = inject(HydrationStateService);
 
+  /**
+   * Effect that persists local user actions to the operation log.
+   *
+   * Filters out:
+   * 1. Non-persistent actions (actions without PersistentActionMeta)
+   * 2. Remote actions (actions replayed from sync, marked with isRemote: true)
+   * 3. Actions during sync replay (when isApplyingRemoteOps is true)
+   *
+   * The third filter is critical: if a user somehow dispatches an action while
+   * sync is replaying remote operations, the meta-reducer will skip enqueueing
+   * entity changes (see operation-capture.meta-reducer.ts). Without this filter,
+   * we'd create an operation with empty entityChanges but valid actionPayload,
+   * which is corrupted and wastes a vector clock counter.
+   */
   persistOperation$ = createEffect(
     () =>
       this.actions$.pipe(
         filter((action) => isPersistentAction(action)),
         filter((action) => !(action as PersistentAction).meta.isRemote),
+        // Skip actions during sync replay - meta-reducer also skips enqueueing,
+        // so we'd create operations with empty entityChanges (corrupted)
+        filter(() => !this.hydrationState.isApplyingRemoteOps()),
         // Use concatMap for sequential processing to maintain FIFO queue order
         concatMap((action) => this.writeOperation(action as PersistentAction)),
       ),
