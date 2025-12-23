@@ -660,10 +660,14 @@ export class OperationLogStoreService {
    */
   async _clearAllDataForTesting(): Promise<void> {
     await this._ensureInit();
-    const tx = this.db.transaction(['ops', 'state_cache', 'import_backup'], 'readwrite');
+    const tx = this.db.transaction(
+      ['ops', 'state_cache', 'import_backup', 'vector_clock'],
+      'readwrite',
+    );
     await tx.objectStore('ops').clear();
     await tx.objectStore('state_cache').clear();
     await tx.objectStore('import_backup').clear();
+    await tx.objectStore('vector_clock').clear();
     await tx.done;
   }
 
