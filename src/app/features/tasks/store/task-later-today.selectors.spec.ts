@@ -231,13 +231,24 @@ describe('selectLaterTodayTasksWithSubTasks', () => {
 
   it('should only include tasks that are in TODAY (via dueDay or dueWithTime)', () => {
     // Create a task for tomorrow that should NOT be included
-    const tomorrowStr = getDbDateStr(
-      new Date(new Date().getFullYear(), new Date().getMonth(), new Date().getDate() + 1),
+    const tomorrowDate = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth(),
+      new Date().getDate() + 1,
     );
+    const tomorrowStr = getDbDateStr(tomorrowDate);
     const taskForTomorrow = createMockTask({
       id: 'SCHEDULED_FOR_TOMORROW',
       title: 'Scheduled for tomorrow',
-      dueWithTime: new Date(tomorrowStr).setHours(14, 0, 0, 0),
+      // Use Date constructor to avoid timezone issues with date string parsing
+      dueWithTime: new Date(
+        tomorrowDate.getFullYear(),
+        tomorrowDate.getMonth(),
+        tomorrowDate.getDate(),
+        14,
+        0,
+        0,
+      ).getTime(),
       dueDay: tomorrowStr,
     });
 
