@@ -849,9 +849,11 @@ describe('SyncService', () => {
 
       // Time-based cleanup: delete ops received before cutoff
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
-      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      const { totalDeleted, affectedUserIds } =
+        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
-      expect(deleted).toBe(2);
+      expect(totalDeleted).toBe(2);
+      expect(affectedUserIds).toContain(userId);
 
       const remaining = service.getOpsSince(userId, 0);
       expect(remaining).toHaveLength(3);
@@ -907,9 +909,13 @@ describe('SyncService', () => {
 
       // Delete ops older than 50 days
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
-      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      const { totalDeleted, affectedUserIds } =
+        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
-      expect(deleted).toBe(2); // Both users' ops deleted
+      expect(totalDeleted).toBe(2); // Both users' ops deleted
+      expect(affectedUserIds).toHaveLength(2);
+      expect(affectedUserIds).toContain(userId);
+      expect(affectedUserIds).toContain(user2Id);
 
       expect(service.getOpsSince(userId, 0)).toHaveLength(0);
       expect(service.getOpsSince(user2Id, 0)).toHaveLength(0);
@@ -970,9 +976,11 @@ describe('SyncService', () => {
 
       // Try to delete with 50-day cutoff - should delete nothing since ops are fresh
       const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
-      const deleted = service.deleteOldSyncedOpsForAllUsers(cutoffTime);
+      const { totalDeleted, affectedUserIds } =
+        service.deleteOldSyncedOpsForAllUsers(cutoffTime);
 
-      expect(deleted).toBe(0);
+      expect(totalDeleted).toBe(0);
+      expect(affectedUserIds).toHaveLength(0);
       expect(service.getOpsSince(userId, 0)).toHaveLength(3);
     });
 

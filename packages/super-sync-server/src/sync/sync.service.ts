@@ -1481,7 +1481,9 @@ export class SyncService {
     return result.count;
   }
 
-  async deleteOldSyncedOpsForAllUsers(cutoffTime: number): Promise<number> {
+  async deleteOldSyncedOpsForAllUsers(
+    cutoffTime: number,
+  ): Promise<{ totalDeleted: number; affectedUserIds: number[] }> {
     const states = await prisma.userSyncState.findMany({
       where: {
         lastSnapshotSeq: { not: null },
@@ -1495,6 +1497,7 @@ export class SyncService {
     });
 
     let totalDeleted = 0;
+    const affectedUserIds: number[] = [];
 
     for (const state of states) {
       const snapshotAt = Number(state.snapshotAt);
@@ -1509,11 +1512,14 @@ export class SyncService {
             receivedAt: { lt: BigInt(cutoffTime) },
           },
         });
-        totalDeleted += result.count;
+        if (result.count > 0) {
+          totalDeleted += result.count;
+          affectedUserIds.push(state.userId);
+        }
       }
     }
 
-    return totalDeleted;
+    return { totalDeleted, affectedUserIds };
   }
 
   async deleteStaleDevices(beforeTime: number): Promise<number> {

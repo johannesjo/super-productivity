@@ -315,6 +315,22 @@ describe('Sync Routes', () => {
       const body = response.json();
       expect(body.ops).toHaveLength(0);
     });
+
+    it('should include serverTime in response for clock drift detection', async () => {
+      const beforeTime = Date.now();
+      const response = await app.inject({
+        method: 'GET',
+        url: '/api/sync/ops?sinceSeq=0',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+      const afterTime = Date.now();
+
+      expect(response.statusCode).toBe(200);
+      const body = response.json();
+      expect(body.serverTime).toBeDefined();
+      expect(body.serverTime).toBeGreaterThanOrEqual(beforeTime);
+      expect(body.serverTime).toBeLessThanOrEqual(afterTime);
+    });
   });
 
   describe('GET /api/sync/snapshot - Get Snapshot', () => {

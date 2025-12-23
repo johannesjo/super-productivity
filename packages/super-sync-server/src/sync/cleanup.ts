@@ -22,9 +22,18 @@ const CLEANUP_JOBS: CleanupJob[] = [
   {
     name: 'old-ops',
     interval: MS_PER_DAY,
-    run: () => {
+    run: async () => {
       const cutoffTime = Date.now() - DEFAULT_SYNC_CONFIG.opRetentionMs;
-      return getSyncService().deleteOldSyncedOpsForAllUsers(cutoffTime);
+      const syncService = getSyncService();
+      const { totalDeleted, affectedUserIds } =
+        await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      // Update storage usage for affected users to prevent stale quota checks
+      for (const userId of affectedUserIds) {
+        await syncService.updateStorageUsage(userId);
+      }
+
+      return totalDeleted;
     },
   },
   {

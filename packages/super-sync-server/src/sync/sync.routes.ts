@@ -416,6 +416,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           gapDetected: gapDetected || undefined, // Only include if true
           latestSnapshotSeq, // Optimization: tells client where effective state starts
           snapshotVectorClock, // Aggregated clock from skipped ops for conflict resolution
+          serverTime: Date.now(), // For client clock drift detection
         };
 
         return reply.send(response);

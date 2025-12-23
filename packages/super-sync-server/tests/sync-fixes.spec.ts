@@ -151,7 +151,7 @@ vi.mock('../src/auth', () => ({
 
 // Import after mocking
 import { syncRoutes } from '../src/sync/sync.routes';
-import { initSyncService } from '../src/sync/sync.service';
+import { initSyncService, getSyncService } from '../src/sync/sync.service';
 
 // Helper to create operation
 const createOp = (
@@ -453,6 +453,70 @@ describe('Sync System Fixes', () => {
       const retryBody = retryResponse.json();
       expect(retryBody.deduplicated).toBe(true);
       expect(retryBody.results[0].accepted).toBe(true);
+    });
+  });
+
+  // =============================================================================
+  // Issue 7: serverTime in download response
+  // =============================================================================
+  describe('Issue 7: serverTime in download response', () => {
+    it('should include serverTime in download response for clock drift detection', async () => {
+      // First upload an operation
+      await app.inject({
+        method: 'POST',
+        url: '/api/sync/ops',
+        headers: { authorization: `Bearer ${authToken}` },
+        payload: {
+          ops: [createOp('test-client', { entityId: 'task-1' })],
+          clientId: 'test-client',
+        },
+      });
+
+      const beforeTime = Date.now();
+      const downloadResponse = await app.inject({
+        method: 'GET',
+        url: '/api/sync/ops?sinceSeq=0',
+        headers: { authorization: `Bearer ${authToken}` },
+      });
+      const afterTime = Date.now();
+
+      expect(downloadResponse.statusCode).toBe(200);
+      const body = downloadResponse.json();
+
+      // serverTime should be present and within expected range
+      expect(body.serverTime).toBeDefined();
+      expect(typeof body.serverTime).toBe('number');
+      expect(body.serverTime).toBeGreaterThanOrEqual(beforeTime);
+      expect(body.serverTime).toBeLessThanOrEqual(afterTime);
+    });
+  });
+
+  // =============================================================================
+  // Issue 8: Cleanup should return affected userIds for storage update
+  // =============================================================================
+  describe('Issue 8: deleteOldSyncedOpsForAllUsers returns affectedUserIds', () => {
+    it('should return totalDeleted and affectedUserIds structure', async () => {
+      const syncService = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000; // 50 days ago
+
+      // Call the method - with default mock it returns empty since no users have snapshots
+      const result = await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      // Verify return structure
+      expect(result).toHaveProperty('totalDeleted');
+      expect(result).toHaveProperty('affectedUserIds');
+      expect(typeof result.totalDeleted).toBe('number');
+      expect(Array.isArray(result.affectedUserIds)).toBe(true);
+    });
+
+    it('should return empty affectedUserIds when no operations deleted', async () => {
+      const syncService = getSyncService();
+      const cutoffTime = Date.now() - 50 * 24 * 60 * 60 * 1000;
+
+      const result = await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
+
+      expect(result.totalDeleted).toBe(0);
+      expect(result.affectedUserIds).toHaveLength(0);
     });
   });
 
