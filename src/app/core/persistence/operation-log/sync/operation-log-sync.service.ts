@@ -577,8 +577,9 @@ export class OperationLogSyncService {
     }
 
     // Append new ops to the log (will be uploaded on next sync)
+    // Uses appendWithVectorClockUpdate to ensure vector clock store stays in sync
     for (const op of newOpsCreated) {
-      await this.opLogStore.append(op, 'local');
+      await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
       OpLog.normal(
         `OperationLogSyncService: Appended LWW update op ${op.id} for ${op.entityType}:${op.entityId}`,
       );

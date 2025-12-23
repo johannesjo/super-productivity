@@ -69,11 +69,11 @@ export class RepairOperationService {
         schemaVersion: CURRENT_SCHEMA_VERSION,
       };
 
-      // 1. Append REPAIR operation to log
-      await this.opLogStore.append(op, 'local');
+      // 1. Append REPAIR operation to log and update vector clock atomically
+      seq = await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
 
       // 2. Save state cache with repaired state for fast hydration
-      seq = await this.opLogStore.getLastSeq();
+      // Note: vector clock is already updated in step 1, so we omit it here
       await this.opLogStore.saveStateCache({
         state: repairedState,
         lastAppliedOpSeq: seq,

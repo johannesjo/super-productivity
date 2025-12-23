@@ -451,9 +451,10 @@ export class ConflictResolutionService {
 
     // ─────────────────────────────────────────────────────────────────────────
     // STEP 6: Append new update ops for local wins (will sync on next cycle)
+    // Uses appendWithVectorClockUpdate to ensure vector clock store stays in sync
     // ─────────────────────────────────────────────────────────────────────────
     for (const op of newLocalWinOps) {
-      await this.opLogStore.append(op, 'local');
+      await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
       OpLog.normal(
         `ConflictResolutionService: Appended local-win update op ${op.id} for ${op.entityType}:${op.entityId}`,
       );

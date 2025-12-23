@@ -35,8 +35,7 @@ describe('RepairOperationService', () => {
 
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
-      'append',
-      'getLastSeq',
+      'appendWithVectorClockUpdate',
       'saveStateCache',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
@@ -51,8 +50,8 @@ describe('RepairOperationService', () => {
         await fn();
       },
     );
-    mockOpLogStore.append.and.returnValue(Promise.resolve(1));
-    mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(100));
+    // appendWithVectorClockUpdate returns the sequence number
+    mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(100));
     mockOpLogStore.saveStateCache.and.returnValue(Promise.resolve());
     mockVectorClockService.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ clientA: 5 }),
@@ -96,7 +95,7 @@ describe('RepairOperationService', () => {
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      expect(mockOpLogStore.append).toHaveBeenCalledWith(
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
         jasmine.objectContaining({
           actionType: '[Repair] Auto Repair',
           opType: OpType.Repair,
@@ -108,12 +107,22 @@ describe('RepairOperationService', () => {
       );
     });
 
+    it('should use appendWithVectorClockUpdate to ensure vector clock is updated atomically', async () => {
+      const summary = createRepairSummary({ entityStateFixed: 1 });
+
+      await service.createRepairOperation(mockRepairedState, summary, 'test-client');
+
+      // Verify appendWithVectorClockUpdate is called (not plain append)
+      // This ensures the vector clock store is updated atomically with the operation
+      expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalled();
+    });
+
     it('should include repaired state and summary in payload', async () => {
       const summary = createRepairSummary({ orphanedEntitiesRestored: 5 });
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      const appendCall = mockOpLogStore.append.calls.mostRecent();
+      const appendCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
       const operation = appendCall.args[0];
 
       expect(operation.payload).toEqual({
@@ -141,7 +150,7 @@ describe('RepairOperationService', () => {
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
-      const appendCall = mockOpLogStore.append.calls.mostRecent();
+      const appendCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
       const operation = appendCall.args[0];
 
       // Should have incremented the test-client entry
@@ -152,7 +161,8 @@ describe('RepairOperationService', () => {
     });
 
     it('should save state cache after appending operation', async () => {
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(42));
+      // appendWithVectorClockUpdate returns the sequence number directly
+      mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(42));
       const summary = createRepairSummary();
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
@@ -167,7 +177,8 @@ describe('RepairOperationService', () => {
     });
 
     it('should return the sequence number of the created operation', async () => {
-      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(77));
+      // appendWithVectorClockUpdate returns the sequence number directly
+      mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(77));
       const summary = createRepairSummary();
 
       const seq = await service.createRepairOperation(
@@ -211,13 +222,13 @@ describe('RepairOperationService', () => {
       const summary = createRepairSummary();
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
-      const firstCall = mockOpLogStore.append.calls.mostRecent();
+      const firstCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
       const firstId = firstCall.args[0].id;
 
-      mockOpLogStore.append.calls.reset();
+      mockOpLogStore.appendWithVectorClockUpdate.calls.reset();
 
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
-      const secondCall = mockOpLogStore.append.calls.mostRecent();
+      const secondCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
       const secondId = secondCall.args[0].id;
 
       expect(firstId).not.toBe(secondId);
@@ -230,7 +241,7 @@ describe('RepairOperationService', () => {
       await service.createRepairOperation(mockRepairedState, summary, 'test-client');
 
       const afterTime = Date.now();
-      const appendCall = mockOpLogStore.append.calls.mostRecent();
+      const appendCall = mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
       const operation = appendCall.args[0];
 
       expect(operation.timestamp).toBeGreaterThanOrEqual(beforeTime);

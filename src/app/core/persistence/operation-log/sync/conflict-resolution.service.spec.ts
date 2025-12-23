@@ -43,6 +43,7 @@ describe('ConflictResolutionService', () => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'hasOp',
       'append',
+      'appendWithVectorClockUpdate',
       'markApplied',
       'markRejected',
       'markFailed',
@@ -350,6 +351,9 @@ describe('ConflictResolutionService', () => {
       // Default mock behaviors for LWW tests
       mockOpLogStore.hasOp.and.resolveTo(false);
       mockOpLogStore.append.and.callFake((op: Operation) => Promise.resolve(1));
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake((op: Operation) =>
+        Promise.resolve(1),
+      );
       mockOpLogStore.markApplied.and.resolveTo(undefined);
       mockOpLogStore.markRejected.and.resolveTo(undefined);
       mockOperationApplier.applyOperations.and.resolveTo({ appliedOps: [] });
@@ -1373,6 +1377,48 @@ describe('ConflictResolutionService', () => {
 
         // No op created because entity not found
         expect(result).toEqual({ localWinOpsCreated: 0 });
+      });
+    });
+
+    describe('vector clock update', () => {
+      it('should use appendWithVectorClockUpdate for local-win ops to ensure vector clock is updated atomically', async () => {
+        const now = Date.now();
+        const conflicts: EntityConflict[] = [
+          createConflict(
+            'task-1',
+            [createOpWithTimestamp('local-1', 'client-a', now)],
+            [createOpWithTimestamp('remote-1', 'client-b', now - 1000)],
+          ),
+        ];
+
+        // Mock the private method to return a local-win op
+        const mockLocalWinOp: Operation = {
+          id: 'lww-update-task-1',
+          clientId: 'client-a',
+          actionType: '[TASK] LWW Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Local Win State' },
+          vectorClock: { clientA: 2, clientB: 1 },
+          timestamp: now,
+          schemaVersion: 1,
+        };
+        spyOn<any>(service, '_createLocalWinUpdateOp').and.returnValue(
+          Promise.resolve(mockLocalWinOp),
+        );
+
+        await service.autoResolveConflictsLWW(conflicts);
+
+        // Verify appendWithVectorClockUpdate is called (not plain append)
+        // This ensures the vector clock store is updated atomically with the operation
+        expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            id: 'lww-update-task-1',
+            actionType: '[TASK] LWW Update',
+          }),
+          'local',
+        );
       });
     });
   });

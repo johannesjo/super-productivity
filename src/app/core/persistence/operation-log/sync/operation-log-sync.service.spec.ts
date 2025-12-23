@@ -56,6 +56,7 @@ describe('OperationLogSyncService', () => {
       'getUnsynced',
       'hasOp',
       'append',
+      'appendWithVectorClockUpdate',
       'markApplied',
       'getUnsyncedByEntity',
       'getOpsAfterSeq',
@@ -2983,9 +2984,10 @@ describe('OperationLogSyncService', () => {
           }),
         );
 
-      // Setup: Mock opLogStore.append to capture the operation
+      // Setup: Mock opLogStore.appendWithVectorClockUpdate to capture the operation
+      // This method is used instead of append to ensure vector clock is updated atomically
       let appendedOp: Operation | null = null;
-      opLogStoreSpy.append.and.callFake((op: Operation) => {
+      opLogStoreSpy.appendWithVectorClockUpdate.and.callFake((op: Operation) => {
         appendedOp = op;
         return Promise.resolve(1);
       });
@@ -3053,6 +3055,102 @@ describe('OperationLogSyncService', () => {
         title: 'Test Task',
         tagIds: [],
       });
+    });
+
+    it('should use appendWithVectorClockUpdate to ensure vector clock is updated atomically', async () => {
+      // This test verifies that _resolveStaleLocalOps uses appendWithVectorClockUpdate
+      // instead of plain append, ensuring the vector clock store is updated atomically
+      // with each operation. This prevents counter collisions where subsequent operations
+      // could get duplicate vector clock entries.
+
+      // Setup: Mock client ID
+      const pfapiServiceMock = jasmine.createSpyObj('PfapiService', [], {
+        pf: {
+          metaModel: {
+            loadClientId: () => Promise.resolve('test-client'),
+          },
+        },
+      });
+
+      // Setup: Mock vector clock service
+      vectorClockServiceSpy.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ testClient: 5 }),
+      );
+
+      // Setup: Mock conflict resolution service to return entity state
+      conflictResolutionServiceSpy.getCurrentEntityState = jasmine
+        .createSpy('getCurrentEntityState')
+        .and.returnValue(
+          Promise.resolve({
+            id: 'task-1',
+            title: 'Test Task',
+            tagIds: [],
+          }),
+        );
+
+      // Setup: Spy on appendWithVectorClockUpdate
+      opLogStoreSpy.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(1));
+      opLogStoreSpy.markRejected.and.returnValue(Promise.resolve());
+
+      // Create a stale op
+      const staleOp: Operation = {
+        id: 'stale-op-1',
+        clientId: 'test-client',
+        actionType: '[Task Shared] updateTask',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { task: { id: 'task-1', changes: { tagIds: [] } } },
+        vectorClock: { testClient: 3 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      // Re-create service with the mocked pfapi service
+      TestBed.resetTestingModule();
+      TestBed.configureTestingModule({
+        providers: [
+          OperationLogSyncService,
+          { provide: SchemaMigrationService, useValue: schemaMigrationServiceSpy },
+          { provide: SnackService, useValue: snackServiceSpy },
+          { provide: OperationLogStoreService, useValue: opLogStoreSpy },
+          { provide: VectorClockService, useValue: vectorClockServiceSpy },
+          { provide: OperationApplierService, useValue: operationApplierServiceSpy },
+          { provide: ConflictResolutionService, useValue: conflictResolutionServiceSpy },
+          { provide: ValidateStateService, useValue: validateStateServiceSpy },
+          { provide: RepairOperationService, useValue: {} },
+          { provide: PfapiStoreDelegateService, useValue: {} },
+          { provide: PfapiService, useValue: pfapiServiceMock },
+          { provide: OperationLogUploadService, useValue: {} },
+          { provide: OperationLogDownloadService, useValue: {} },
+          { provide: LockService, useValue: lockServiceSpy },
+          { provide: OperationLogCompactionService, useValue: compactionServiceSpy },
+          { provide: SyncImportFilterService, useValue: syncImportFilterServiceSpy },
+          { provide: ServerMigrationService, useValue: serverMigrationServiceSpy },
+          { provide: TranslateService, useValue: {} },
+          provideMockStore({ initialState: {} }),
+        ],
+      });
+
+      const testService = TestBed.inject(OperationLogSyncService);
+
+      // Call the private method
+      await (testService as any)._resolveStaleLocalOps([
+        { opId: 'stale-op-1', op: staleOp },
+      ]);
+
+      // CRITICAL: Verify appendWithVectorClockUpdate was called, not plain append
+      // This ensures vector clock store is updated atomically with the operation
+      expect(opLogStoreSpy.appendWithVectorClockUpdate).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          actionType: '[TASK] LWW Update',
+          entityType: 'TASK',
+          entityId: 'task-1',
+        }),
+        'local',
+      );
+      // Verify plain append was NOT called
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
   });
 });
