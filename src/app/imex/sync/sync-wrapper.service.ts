@@ -50,6 +50,7 @@ import { LegacySyncProvider } from './legacy-sync-provider.model';
 import { SYNC_WAIT_TIMEOUT_MS, SYNC_REINIT_DELAY_MS } from './sync.const';
 import { SuperSyncStatusService } from '../../core/persistence/operation-log/sync/super-sync-status.service';
 import { IS_ELECTRON } from '../../app.constants';
+import { OperationLogStoreService } from '../../core/persistence/operation-log/store/operation-log-store.service';
 
 /**
  * Converts LegacySyncProvider to SyncProviderId.
@@ -81,6 +82,7 @@ export class SyncWrapperService {
   private _reminderService = inject(ReminderService);
   private _userInputWaitState = inject(UserInputWaitStateService);
   private _superSyncStatusService = inject(SuperSyncStatusService);
+  private _opLogStore = inject(OperationLogStoreService);
 
   syncState$ = this._pfapiService.syncState$;
 
@@ -172,6 +174,14 @@ export class SyncWrapperService {
     }
 
     try {
+      // PERF: For legacy sync providers (WebDAV, Dropbox, LocalFile), sync the vector clock
+      // from SUP_OPS to pf.META_MODEL before sync. This bridges the gap between the new
+      // atomic write system (vector clock in SUP_OPS) and legacy sync which reads from pf.
+      // SuperSync uses operation log directly, so it doesn't need this bridge.
+      if (providerId !== SyncProviderId.SuperSync) {
+        await this._syncVectorClockToPfapi();
+      }
+
       const r = await this._pfapiService.pf.sync();
 
       switch (r.status) {
@@ -190,6 +200,12 @@ export class SyncWrapperService {
           // Future improvement: modify the pfapi sync service to support pre-download callbacks.
 
           await this._reInitAppAfterDataModelChange();
+
+          // PERF: After downloading remote data, sync the vector clock from pf.META_MODEL
+          // to SUP_OPS.vector_clock. This ensures subsequent syncs correctly detect local
+          // changes (the vector clock comparison uses SUP_OPS as source of truth).
+          await this._syncVectorClockFromPfapi();
+
           this._snackService.open({
             msg: T.F.SYNC.S.SUCCESS_DOWNLOAD,
             type: 'SUCCESS',
@@ -240,6 +256,7 @@ export class SyncWrapperService {
           } else if (res === 'USE_REMOTE') {
             await this._pfapiService.pf.downloadAll();
             await this._reInitAppAfterDataModelChange();
+            await this._syncVectorClockFromPfapi();
           }
           SyncLog.log({ res });
 
@@ -421,6 +438,7 @@ export class SyncWrapperService {
         } else if (res === 'FORCE_UPDATE_LOCAL') {
           await this._pfapiService.pf.downloadAll();
           await this._reInitAppAfterDataModelChange();
+          await this._syncVectorClockFromPfapi();
         }
       })
       .catch((err) => {
@@ -541,5 +559,50 @@ export class SyncWrapperService {
       data: conflictData,
     });
     return this.lastConflictDialog.afterClosed();
+  }
+
+  /**
+   * Syncs the current vector clock from SUP_OPS to pf.META_MODEL.
+   * Called before legacy sync providers start syncing.
+   * This ensures the legacy sync provider sees the latest vector clock.
+   */
+  private async _syncVectorClockToPfapi(): Promise<void> {
+    const vcEntry = await this._opLogStore.getVectorClockEntry();
+
+    if (vcEntry) {
+      SyncLog.log('[SyncWrapper] Syncing vector clock to pf.META_MODEL', {
+        clockSize: Object.keys(vcEntry.clock).length,
+        lastUpdate: vcEntry.lastUpdate,
+      });
+
+      await this._pfapiService.pf.metaModel.setVectorClockFromBridge(
+        vcEntry.clock,
+        vcEntry.lastUpdate,
+      );
+    } else {
+      SyncLog.log('[SyncWrapper] No vector clock in SUP_OPS, skipping sync');
+    }
+  }
+
+  /**
+   * Syncs the vector clock from pf.META_MODEL to SUP_OPS.vector_clock.
+   * Called after downloading data from remote (UpdateLocal/UpdateLocalAll).
+   * This ensures SUP_OPS has the latest vector clock from the remote,
+   * so subsequent syncs correctly detect changes.
+   */
+  private async _syncVectorClockFromPfapi(): Promise<void> {
+    const metaModel = await this._pfapiService.pf.metaModel.load();
+    if (metaModel?.vectorClock && Object.keys(metaModel.vectorClock).length > 0) {
+      SyncLog.log('[SyncWrapper] Syncing vector clock from pf.META_MODEL to SUP_OPS', {
+        clockSize: Object.keys(metaModel.vectorClock).length,
+        lastUpdate: metaModel.lastUpdate,
+      });
+
+      await this._opLogStore.setVectorClock(metaModel.vectorClock);
+    } else {
+      SyncLog.log(
+        '[SyncWrapper] No vector clock in pf.META_MODEL, skipping sync to SUP_OPS',
+      );
+    }
   }
 }

@@ -4,7 +4,16 @@ import { Operation, OperationLogEntry, OpType, VectorClock } from '../operation.
 import { toEntityKey } from '../entity-key.util';
 
 const DB_NAME = 'SUP_OPS';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
+
+/**
+ * Vector clock entry stored in the vector_clock object store.
+ * Contains the clock and last update timestamp.
+ */
+interface VectorClockEntry {
+  clock: VectorClock;
+  lastUpdate: number;
+}
 
 interface OpLogDB extends DBSchema {
   ops: {
@@ -36,6 +45,15 @@ interface OpLogDB extends DBSchema {
       savedAt: number;
     };
   };
+  /**
+   * Stores the current vector clock for local changes.
+   * This is the single source of truth for the vector clock, updated atomically
+   * with operation writes to avoid multiple database transactions per action.
+   */
+  vector_clock: {
+    key: string; // 'current'
+    value: VectorClockEntry;
+  };
 }
 
 /**
@@ -63,16 +81,26 @@ export class OperationLogStoreService {
 
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
-      upgrade: (db) => {
-        const opStore = db.createObjectStore('ops', {
-          keyPath: 'seq',
-          autoIncrement: true,
-        });
-        opStore.createIndex('byId', 'op.id', { unique: true });
-        opStore.createIndex('bySyncedAt', 'syncedAt');
+      upgrade: (db, oldVersion) => {
+        // Version 1: Create initial stores
+        if (oldVersion < 1) {
+          const opStore = db.createObjectStore('ops', {
+            keyPath: 'seq',
+            autoIncrement: true,
+          });
+          opStore.createIndex('byId', 'op.id', { unique: true });
+          opStore.createIndex('bySyncedAt', 'syncedAt');
 
-        db.createObjectStore('state_cache', { keyPath: 'id' });
-        db.createObjectStore('import_backup', { keyPath: 'id' });
+          db.createObjectStore('state_cache', { keyPath: 'id' });
+          db.createObjectStore('import_backup', { keyPath: 'id' });
+        }
+
+        // Version 2: Add vector_clock store for atomic writes
+        // This consolidates the vector clock from pf.META_MODEL into SUP_OPS
+        // to enable single-transaction writes (op + vector clock together)
+        if (oldVersion < 2) {
+          db.createObjectStore('vector_clock');
+        }
       },
     });
   }
@@ -696,5 +724,89 @@ export class OperationLogStoreService {
     this._appliedOpIdsCache = null;
     this._cacheLastSeq = 0;
     this._invalidateUnsyncedCache();
+  }
+
+  // ============================================================
+  // Vector Clock Management (Performance Optimization)
+  // ============================================================
+
+  /**
+   * Gets the current vector clock from the SUP_OPS database.
+   * Returns null if no vector clock has been stored yet.
+   */
+  async getVectorClock(): Promise<VectorClock | null> {
+    await this._ensureInit();
+    const entry = await this.db.get('vector_clock', 'current');
+    return entry?.clock ?? null;
+  }
+
+  /**
+   * Sets the vector clock directly. Used for:
+   * - Migration from pf.META_MODEL on upgrade
+   * - Sync import when receiving full state
+   */
+  async setVectorClock(clock: VectorClock): Promise<void> {
+    await this._ensureInit();
+    await this.db.put('vector_clock', { clock, lastUpdate: Date.now() }, 'current');
+  }
+
+  /**
+   * Gets the full vector clock entry including lastUpdate timestamp.
+   * Used by legacy sync bridge to sync vector clock to pf.META_MODEL.
+   */
+  async getVectorClockEntry(): Promise<VectorClockEntry | null> {
+    await this._ensureInit();
+    const entry = await this.db.get('vector_clock', 'current');
+    return entry ?? null;
+  }
+
+  /**
+   * Appends an operation AND updates the vector clock in a SINGLE atomic transaction.
+   *
+   * PERFORMANCE: This is the key optimization for mobile devices. Previously, each action
+   * required two separate IndexedDB transactions (one to SUP_OPS, one to pf.META_MODEL).
+   * By consolidating the vector clock into SUP_OPS, we can write both in a single transaction,
+   * reducing disk I/O by ~50%.
+   *
+   * NOTE: The operation's vectorClock field should already contain the incremented clock
+   * (incremented by the caller). This method stores that clock as the current vector clock,
+   * it does NOT increment again.
+   *
+   * @param op The operation to append (with vectorClock already set)
+   * @param source Whether this is a local or remote operation
+   * @param options Additional options (e.g., pendingApply for remote ops)
+   * @returns The sequence number of the appended operation
+   */
+  async appendWithVectorClockUpdate(
+    op: Operation,
+    source: 'local' | 'remote' = 'local',
+    options?: { pendingApply?: boolean },
+  ): Promise<number> {
+    await this._ensureInit();
+
+    const tx = this.db.transaction(['ops', 'vector_clock'], 'readwrite');
+    const opsStore = tx.objectStore('ops');
+    const vcStore = tx.objectStore('vector_clock');
+
+    // 1. Append operation to ops store
+    const entry: Omit<OperationLogEntry, 'seq'> = {
+      op,
+      appliedAt: Date.now(),
+      source,
+      syncedAt: source === 'remote' ? Date.now() : undefined,
+      applicationStatus:
+        source === 'remote' ? (options?.pendingApply ? 'pending' : 'applied') : undefined,
+    };
+    const seq = await opsStore.add(entry as OperationLogEntry);
+
+    // 2. Update vector clock to match the operation's clock (only for local ops)
+    // The op.vectorClock already contains the incremented value from the caller.
+    // We store it as the current clock so subsequent operations can build on it.
+    if (source === 'local') {
+      await vcStore.put({ clock: op.vectorClock, lastUpdate: Date.now() }, 'current');
+    }
+
+    await tx.done;
+    return seq as number;
   }
 }

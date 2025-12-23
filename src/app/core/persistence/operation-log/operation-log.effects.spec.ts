@@ -57,6 +57,7 @@ describe('OperationLogEffects', () => {
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'append',
+      'appendWithVectorClockUpdate',
       'getCompactionCounter',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
@@ -81,6 +82,7 @@ describe('OperationLogEffects', () => {
       },
     );
     mockOpLogStore.append.and.returnValue(Promise.resolve(1));
+    mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(Promise.resolve(1));
     mockOpLogStore.getCompactionCounter.and.returnValue(Promise.resolve(0));
     mockVectorClockService.getCurrentVectorClock.and.returnValue(
       Promise.resolve({ testClient: 5 }),
@@ -115,13 +117,14 @@ describe('OperationLogEffects', () => {
 
       effects.persistOperation$.subscribe({
         complete: () => {
-          expect(mockOpLogStore.append).toHaveBeenCalledWith(
+          expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledWith(
             jasmine.objectContaining({
               actionType: '[Task] Update Task',
               opType: OpType.Update,
               entityType: 'TASK',
               clientId: 'testClient',
             }),
+            'local',
           );
           done();
         },
@@ -134,7 +137,7 @@ describe('OperationLogEffects', () => {
 
       effects.persistOperation$.subscribe({
         complete: () => {
-          expect(mockOpLogStore.append).not.toHaveBeenCalled();
+          expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
           done();
         },
       });
@@ -146,7 +149,7 @@ describe('OperationLogEffects', () => {
 
       effects.persistOperation$.subscribe({
         complete: () => {
-          expect(mockOpLogStore.append).not.toHaveBeenCalled();
+          expect(mockOpLogStore.appendWithVectorClockUpdate).not.toHaveBeenCalled();
           done();
         },
       });
@@ -174,7 +177,8 @@ describe('OperationLogEffects', () => {
       effects.persistOperation$.subscribe({
         complete: () => {
           expect(mockVectorClockService.getCurrentVectorClock).toHaveBeenCalled();
-          const appendCall = mockOpLogStore.append.calls.mostRecent();
+          const appendCall =
+            mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
           const operation = appendCall.args[0];
           expect(operation.vectorClock['testClient']).toBe(6); // Incremented from 5
           done();
@@ -182,39 +186,8 @@ describe('OperationLogEffects', () => {
       });
     });
 
-    it('should update PFAPI vector clock when not syncing', (done) => {
-      mockPfapiService.pf.isSyncInProgress = false;
-      const action = createPersistentAction('[Task] Update Task');
-      actions$ = of(action);
-
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          expect(
-            mockPfapiService.pf.metaModel.incrementVectorClockForLocalChange,
-          ).toHaveBeenCalledWith('testClient');
-          done();
-        },
-      });
-    });
-
-    it('should skip PFAPI update when sync is in progress', (done) => {
-      // Reset the spy from previous tests
-      mockPfapiService.pf.metaModel.incrementVectorClockForLocalChange.calls.reset();
-      mockPfapiService.pf.isSyncInProgress = true;
-      const action = createPersistentAction('[Task] Update Task');
-      actions$ = of(action);
-
-      effects.persistOperation$.subscribe({
-        complete: () => {
-          expect(
-            mockPfapiService.pf.metaModel.incrementVectorClockForLocalChange,
-          ).not.toHaveBeenCalled();
-          // Restore for other tests
-          mockPfapiService.pf.isSyncInProgress = false;
-          done();
-        },
-      });
-    });
+    // Note: Tests for incrementVectorClockForLocalChange have been removed.
+    // Vector clock updates are now handled atomically within appendWithVectorClockUpdate.
 
     it('should trigger compaction when threshold reached', (done) => {
       // Counter starts at threshold - 1, after increment it reaches threshold
@@ -260,7 +233,8 @@ describe('OperationLogEffects', () => {
 
       effects.persistOperation$.subscribe({
         complete: () => {
-          const appendCall = mockOpLogStore.append.calls.mostRecent();
+          const appendCall =
+            mockOpLogStore.appendWithVectorClockUpdate.calls.mostRecent();
           const operation = appendCall.args[0];
           // Payload now uses MultiEntityPayload structure with actionPayload and entityChanges
           expect(operation.payload).toEqual({
@@ -273,7 +247,9 @@ describe('OperationLogEffects', () => {
     });
 
     it('should notify user on persistence error', (done) => {
-      mockOpLogStore.append.and.rejectWith(new Error('Write failed'));
+      mockOpLogStore.appendWithVectorClockUpdate.and.rejectWith(
+        new Error('Write failed'),
+      );
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
 
@@ -293,7 +269,7 @@ describe('OperationLogEffects', () => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // First call fails with quota error, second call (retry) succeeds
       let callCount = 0;
-      mockOpLogStore.append.and.callFake(() => {
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.reject(quotaError);
@@ -309,7 +285,7 @@ describe('OperationLogEffects', () => {
           setTimeout(() => {
             expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
             // Should have tried to append twice (initial + retry after compaction)
-            expect(mockOpLogStore.append).toHaveBeenCalledTimes(2);
+            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
             done();
           }, 10);
         },
@@ -344,7 +320,9 @@ describe('OperationLogEffects', () => {
     it('should show error when retry after emergency compaction fails with quota error', (done) => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // All attempts fail with quota error (nested quota failure)
-      mockOpLogStore.append.and.returnValue(Promise.reject(quotaError));
+      mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
+        Promise.reject(quotaError),
+      );
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
 
@@ -368,7 +346,7 @@ describe('OperationLogEffects', () => {
     it('should abort immediately when quota error during retry (circuit breaker)', (done) => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       // First call fails with quota, emergency compaction succeeds, retry also fails with quota
-      mockOpLogStore.append.and.callFake(() => {
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         return Promise.reject(quotaError);
       });
       const action = createPersistentAction('[Task] Update Task');
@@ -378,7 +356,7 @@ describe('OperationLogEffects', () => {
         complete: () => {
           setTimeout(() => {
             // Should have tried twice (initial + one retry after compaction)
-            expect(mockOpLogStore.append).toHaveBeenCalledTimes(2);
+            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(2);
             // Should not trigger recursive compaction
             expect(mockCompactionService.emergencyCompact).toHaveBeenCalledTimes(1);
             // User should see error snackbar
@@ -391,7 +369,9 @@ describe('OperationLogEffects', () => {
 
     it('should show error when emergency compaction itself fails', (done) => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
-      mockOpLogStore.append.and.returnValue(Promise.reject(quotaError));
+      mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
+        Promise.reject(quotaError),
+      );
       // Emergency compaction fails
       mockCompactionService.emergencyCompact.and.returnValue(Promise.resolve(false));
       const action = createPersistentAction('[Task] Update Task');
@@ -402,7 +382,7 @@ describe('OperationLogEffects', () => {
           setTimeout(() => {
             expect(mockCompactionService.emergencyCompact).toHaveBeenCalled();
             // No retry after failed compaction
-            expect(mockOpLogStore.append).toHaveBeenCalledTimes(1);
+            expect(mockOpLogStore.appendWithVectorClockUpdate).toHaveBeenCalledTimes(1);
             // User should be notified
             expect(mockSnackService.open).toHaveBeenCalledWith(
               jasmine.objectContaining({
@@ -421,7 +401,7 @@ describe('OperationLogEffects', () => {
         'NS_ERROR_DOM_QUOTA_REACHED',
       );
       let callCount = 0;
-      mockOpLogStore.append.and.callFake(() => {
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.reject(firefoxQuotaError);
@@ -452,7 +432,7 @@ describe('OperationLogEffects', () => {
       }) as DOMException;
 
       let callCount = 0;
-      mockOpLogStore.append.and.callFake(() => {
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.reject(safariQuotaError);
@@ -475,7 +455,9 @@ describe('OperationLogEffects', () => {
 
     it('should not treat regular DOMException as quota error', (done) => {
       const regularError = new DOMException('Read failed', 'NotReadableError');
-      mockOpLogStore.append.and.returnValue(Promise.reject(regularError));
+      mockOpLogStore.appendWithVectorClockUpdate.and.returnValue(
+        Promise.reject(regularError),
+      );
       const action = createPersistentAction('[Task] Update Task');
       actions$ = of(action);
 
@@ -499,7 +481,7 @@ describe('OperationLogEffects', () => {
     it('should show success message after recovery from quota exceeded', (done) => {
       const quotaError = new DOMException('Quota exceeded', 'QuotaExceededError');
       let callCount = 0;
-      mockOpLogStore.append.and.callFake(() => {
+      mockOpLogStore.appendWithVectorClockUpdate.and.callFake(() => {
         callCount++;
         if (callCount === 1) {
           return Promise.reject(quotaError);

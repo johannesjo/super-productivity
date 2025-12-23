@@ -62,6 +62,11 @@ export class OperationLogHydratorService {
       // Check for pending remote ops from crashed sync
       await this._recoverPendingRemoteOps();
 
+      // Migrate vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed.
+      // This is a one-time migration when upgrading from DB version 1 to 2.
+      // The vector_clock store in SUP_OPS is now the source of truth for performance.
+      await this._migrateVectorClockFromPfapiIfNeeded();
+
       // A.7.12: Check for interrupted migration (backup exists)
       const hasBackup = await this.opLogStore.hasStateCacheBackup();
       if (hasBackup) {
@@ -1043,5 +1048,37 @@ export class OperationLogHydratorService {
         OpLog.err('OperationLogHydratorService: Deferred validation error', e);
       }
     }, DEFERRED_VALIDATION_DELAY_MS);
+  }
+
+  /**
+   * Migrates the vector clock from pf.META_MODEL to SUP_OPS.vector_clock if needed.
+   * This is a one-time migration when upgrading from DB version 1 to 2.
+   */
+  private async _migrateVectorClockFromPfapiIfNeeded(): Promise<void> {
+    const existingClock = await this.opLogStore.getVectorClock();
+
+    if (existingClock !== null) {
+      OpLog.normal(
+        'OperationLogHydratorService: SUP_OPS already has vector clock, skipping migration',
+      );
+      return;
+    }
+
+    // Load vector clock from pf.META_MODEL
+    const metaModel = await this.pfapiService.pf.metaModel.load();
+    if (metaModel?.vectorClock && Object.keys(metaModel.vectorClock).length > 0) {
+      OpLog.normal(
+        'OperationLogHydratorService: Migrating vector clock from pf.META_MODEL to SUP_OPS',
+        {
+          clockSize: Object.keys(metaModel.vectorClock).length,
+        },
+      );
+
+      await this.opLogStore.setVectorClock(metaModel.vectorClock);
+    } else {
+      OpLog.normal(
+        'OperationLogHydratorService: No vector clock to migrate from pf.META_MODEL',
+      );
+    }
   }
 }

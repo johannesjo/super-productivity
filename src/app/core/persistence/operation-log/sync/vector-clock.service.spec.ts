@@ -43,6 +43,7 @@ describe('VectorClockService', () => {
     mockStoreService = jasmine.createSpyObj('OperationLogStoreService', [
       'loadStateCache',
       'getOpsAfterSeq',
+      'getVectorClock',
     ]);
 
     TestBed.configureTestingModule({
@@ -56,7 +57,20 @@ describe('VectorClockService', () => {
   });
 
   describe('getCurrentVectorClock', () => {
+    it('should return stored clock when vector_clock store has data (fast path)', async () => {
+      const storedClock: VectorClock = { clientA: 10, clientB: 5 };
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(storedClock));
+
+      const clock = await service.getCurrentVectorClock();
+
+      expect(clock).toEqual({ clientA: 10, clientB: 5 });
+      // Should NOT call loadStateCache when fast path is used
+      expect(mockStoreService.loadStateCache).not.toHaveBeenCalled();
+    });
+
     it('should return empty clock when no snapshot and no operations', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       mockStoreService.loadStateCache.and.returnValue(Promise.resolve(null));
       mockStoreService.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
 
@@ -66,6 +80,8 @@ describe('VectorClockService', () => {
     });
 
     it('should return snapshot clock when no operations after snapshot', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       const snapshotClock: VectorClock = { clientA: 5, clientB: 3 };
       mockStoreService.loadStateCache.and.returnValue(
         Promise.resolve({
@@ -83,6 +99,8 @@ describe('VectorClockService', () => {
     });
 
     it('should merge snapshot clock with operation clocks', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       const snapshotClock: VectorClock = { clientA: 5, clientB: 3 };
       mockStoreService.loadStateCache.and.returnValue(
         Promise.resolve({
@@ -105,6 +123,8 @@ describe('VectorClockService', () => {
     });
 
     it('should include new clients from operations', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       const snapshotClock: VectorClock = { clientA: 5 };
       mockStoreService.loadStateCache.and.returnValue(
         Promise.resolve({
@@ -130,6 +150,8 @@ describe('VectorClockService', () => {
     });
 
     it('should call getOpsAfterSeq with correct sequence number', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       mockStoreService.loadStateCache.and.returnValue(
         Promise.resolve({
           vectorClock: { clientA: 5 },
@@ -146,6 +168,8 @@ describe('VectorClockService', () => {
     });
 
     it('should call getOpsAfterSeq with 0 when no snapshot', async () => {
+      // Mock getVectorClock to return null (no stored clock, triggers fallback)
+      mockStoreService.getVectorClock.and.returnValue(Promise.resolve(null));
       mockStoreService.loadStateCache.and.returnValue(Promise.resolve(null));
       mockStoreService.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
 

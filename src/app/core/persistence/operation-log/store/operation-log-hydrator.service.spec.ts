@@ -90,6 +90,8 @@ describe('OperationLogHydratorService', () => {
       'markApplied',
       'getFailedRemoteOps',
       'markFailed',
+      'getVectorClock',
+      'setVectorClock',
     ]);
     mockMigrationService = jasmine.createSpyObj('OperationLogMigrationService', [
       'checkAndMigrate',
@@ -107,6 +109,7 @@ describe('OperationLogHydratorService', () => {
             .createSpy()
             .and.returnValue(Promise.resolve('test-client')),
           syncVectorClock: jasmine.createSpy().and.returnValue(Promise.resolve()),
+          load: jasmine.createSpy().and.returnValue(Promise.resolve({ vectorClock: {} })),
         },
         getAllSyncModelDataFromModelCtrls: jasmine
           .createSpy()
@@ -131,6 +134,8 @@ describe('OperationLogHydratorService', () => {
     ]);
 
     // Default mock implementations
+    mockOpLogStore.getVectorClock.and.returnValue(Promise.resolve(null));
+    mockOpLogStore.setVectorClock.and.returnValue(Promise.resolve());
     mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
     mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve([]));
     mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(0));

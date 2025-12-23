@@ -43,8 +43,11 @@ export class VectorClockService {
   private opLogStore = inject(OperationLogStoreService);
 
   /**
-   * Gets the current global vector clock by merging the snapshot clock
-   * with all subsequent operation clocks.
+   * Gets the current global vector clock.
+   *
+   * PERF OPTIMIZATION: First tries to read from the vector_clock store in SUP_OPS,
+   * which is the authoritative source updated atomically with each operation.
+   * Falls back to computing from snapshot + ops for migration/recovery scenarios.
    *
    * This represents "everything this client knows about" and should be used
    * when generating new operations or determining overall sync state.
@@ -52,6 +55,13 @@ export class VectorClockService {
    * @returns The merged vector clock representing current knowledge
    */
   async getCurrentVectorClock(): Promise<VectorClock> {
+    // Try the vector_clock store first (fast path, authoritative source)
+    const storedClock = await this.opLogStore.getVectorClock();
+    if (storedClock !== null) {
+      return storedClock;
+    }
+
+    // Fallback: compute from snapshot + ops (for migration or when store is empty)
     // Load snapshot (if exists)
     const snapshot = await this.opLogStore.loadStateCache();
     let clock = snapshot ? { ...snapshot.vectorClock } : {};

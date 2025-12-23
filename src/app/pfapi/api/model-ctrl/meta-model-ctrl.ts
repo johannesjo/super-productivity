@@ -380,6 +380,44 @@ export class MetaModelCtrl {
   }
 
   /**
+   * Sets the vector clock and lastUpdate directly from the LegacySyncBridge.
+   * This is called before legacy sync (WebDAV/Dropbox) to ensure they see
+   * the latest vector clock from SUP_OPS.
+   *
+   * Unlike syncVectorClock(), this replaces the vector clock entirely
+   * rather than merging, since SUP_OPS is now the source of truth.
+   *
+   * @param clock The vector clock from SUP_OPS
+   * @param lastUpdate The lastUpdate timestamp from SUP_OPS
+   */
+  async setVectorClockFromBridge(
+    clock: Record<string, number>,
+    lastUpdate: number,
+  ): Promise<void> {
+    const metaModel = this._metaModelInMemory;
+    if (!metaModel) {
+      throw new MetaNotReadyError('setVectorClockFromBridge', {
+        isLocalOnly: false,
+      } as ModelCfg<never>);
+    }
+
+    const updatedMeta: LocalMeta = {
+      ...metaModel,
+      vectorClock: clock,
+      lastUpdate: lastUpdate,
+    };
+
+    PFLog.verbose(`${MetaModelCtrl.L}.setVectorClockFromBridge()`, {
+      oldClock: metaModel.vectorClock,
+      newClock: clock,
+      lastUpdate,
+    });
+
+    // We ignore DB lock here because this is called before sync starts
+    await this.save(updatedMeta, true);
+  }
+
+  /**
    * Gets the metamodel or throws an error if not ready
    */
   private _getMetaModelOrThrow<MT extends ModelBase>(

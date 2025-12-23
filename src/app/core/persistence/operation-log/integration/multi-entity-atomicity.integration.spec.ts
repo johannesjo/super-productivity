@@ -182,8 +182,10 @@ describe('Multi-Entity Atomicity Integration', () => {
 
   describe('TASK time sync entity changes', () => {
     it('should capture entity changes for syncTimeSpent action', () => {
+      // Note: The actual action type is '[TimeTracking] Sync time spent'
+      // with entityType 'TASK' - this syncs task time across clients
       const action: PersistentAction = {
-        type: '[Task] Sync Time Spent',
+        type: '[TimeTracking] Sync time spent',
         taskId: 'task-1',
         date: '2024-01-15',
         duration: 3600000,

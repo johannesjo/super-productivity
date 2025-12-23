@@ -145,8 +145,12 @@ export class OperationLogEffects {
           });
         }
 
-        // 1. Write to SUP_OPS (Part A)
-        await this.opLogStore.append(op);
+        // 1. Write to SUP_OPS with atomic vector clock update (SINGLE TRANSACTION)
+        // PERF: This consolidates what was previously two separate IndexedDB writes
+        // (one to SUP_OPS, one to pf.META_MODEL) into a single atomic transaction,
+        // reducing disk I/O by ~50% on mobile devices.
+        // The op.vectorClock already contains the incremented clock (from newClock above).
+        await this.opLogStore.appendWithVectorClockUpdate(op, 'local');
 
         // Track write count for high-volume debugging
         this.writeCount++;
@@ -159,14 +163,7 @@ export class OperationLogEffects {
         // 1b. Trigger immediate upload to SuperSync (async, non-blocking)
         this.immediateUploadService.trigger();
 
-        // 2. Bridge to PFAPI (Part B) - Update META_MODEL vector clock
-        // This ensures legacy sync (WebDAV/Dropbox) can detect local changes
-        // Skip if sync is in progress (database locked) - the op is already safe in SUP_OPS
-        if (!pfapiService.pf.isSyncInProgress) {
-          await pfapiService.pf.metaModel.incrementVectorClockForLocalChange(clientId);
-        }
-
-        // 3. Check if compaction is needed
+        // 2. Check if compaction is needed
         // PERF: Use in-memory counter instead of IndexedDB transaction on every operation.
         // Initialize from persisted value on first use (for crash recovery).
         if (this.inMemoryCompactionCounter === null) {
