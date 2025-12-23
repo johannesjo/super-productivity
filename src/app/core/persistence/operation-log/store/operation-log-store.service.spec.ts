@@ -1626,4 +1626,128 @@ describe('OperationLogStoreService', () => {
       expect(backup?.state).toEqual(backupState);
     });
   });
+
+  describe('vector clock cache coherence', () => {
+    // Tests for the in-memory _vectorClockCache behavior
+
+    it('should cache vector clock after first read', async () => {
+      // Set vector clock in DB
+      await service.setVectorClock({ client1: 10 });
+
+      // First read - populates cache
+      const clock1 = await service.getVectorClock();
+      expect(clock1).toEqual({ client1: 10 });
+
+      // Second read - should return same value (from cache)
+      const clock2 = await service.getVectorClock();
+      expect(clock2).toEqual({ client1: 10 });
+
+      // Values should be equal but not same reference (defensive copy)
+      expect(clock1).not.toBe(clock2);
+    });
+
+    it('should update cache when local op is appended', async () => {
+      const localOp = createTestOperation({
+        vectorClock: { localClient: 5 },
+      });
+
+      await service.appendWithVectorClockUpdate(localOp, 'local');
+
+      // Cache should be updated with the new clock
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 5 });
+    });
+
+    it('should NOT update cache when remote op is appended', async () => {
+      // First set a local clock
+      await service.setVectorClock({ localClient: 10 });
+
+      // Append a remote op with different clock
+      const remoteOp = createTestOperation({
+        clientId: 'remoteClient',
+        vectorClock: { remoteClient: 99, localClient: 15 },
+      });
+      await service.appendWithVectorClockUpdate(remoteOp, 'remote');
+
+      // Cache should NOT be updated - still returns local clock
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 10 });
+    });
+
+    it('should return correct clock after mixed local and remote ops', async () => {
+      // Local op 1
+      const localOp1 = createTestOperation({
+        entityId: 'task1',
+        vectorClock: { localClient: 1 },
+      });
+      await service.appendWithVectorClockUpdate(localOp1, 'local');
+
+      // Remote op (should not affect cache)
+      const remoteOp = createTestOperation({
+        entityId: 'task2',
+        clientId: 'remoteClient',
+        vectorClock: { remoteClient: 50, localClient: 5 },
+      });
+      await service.appendWithVectorClockUpdate(remoteOp, 'remote');
+
+      // Local op 2
+      const localOp2 = createTestOperation({
+        entityId: 'task3',
+        vectorClock: { localClient: 2 },
+      });
+      await service.appendWithVectorClockUpdate(localOp2, 'local');
+
+      // Cache should reflect the last LOCAL op's clock
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 2 });
+    });
+
+    it('should clear cache when _clearAllDataForTesting is called', async () => {
+      // Set up vector clock
+      await service.setVectorClock({ testClient: 100 });
+
+      // Verify it's set
+      let clock = await service.getVectorClock();
+      expect(clock).toEqual({ testClient: 100 });
+
+      // Clear all data (includes cache)
+      await service._clearAllDataForTesting();
+
+      // Cache should be cleared - getVectorClock should return null
+      clock = await service.getVectorClock();
+      expect(clock).toBeNull();
+    });
+
+    it('should re-read from DB after cache is cleared', async () => {
+      // Set vector clock and read it (populates cache)
+      await service.setVectorClock({ original: 1 });
+      await service.getVectorClock();
+
+      // Clear all data
+      await service._clearAllDataForTesting();
+
+      // Set a new vector clock directly
+      await service.setVectorClock({ newValue: 42 });
+
+      // Should read from DB (cache was cleared)
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ newValue: 42 });
+    });
+
+    it('should return defensive copies from cache', async () => {
+      await service.setVectorClock({ client: 5 });
+
+      const clock1 = await service.getVectorClock();
+      const clock2 = await service.getVectorClock();
+
+      // Modify one copy
+      clock1!.client = 999;
+
+      // Other copy and subsequent reads should be unaffected
+      expect(clock2).toEqual({ client: 5 });
+
+      const clock3 = await service.getVectorClock();
+      expect(clock3).toEqual({ client: 5 });
+    });
+  });
 });
