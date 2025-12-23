@@ -1,5 +1,7 @@
 import { Injectable } from '@angular/core';
 import { OpLog } from '../../../log';
+import { IS_ELECTRON } from '../../../../app.constants';
+import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
 
 /**
  * Provides a cross-tab locking mechanism for critical operations using the Web Locks API.
@@ -11,6 +13,9 @@ import { OpLog } from '../../../log';
  * If Web Locks API is not available, the service provides a single-tab fallback
  * using Promise-based mutual exclusion. This prevents concurrent operations within
  * the same tab but cannot protect against multi-tab scenarios.
+ *
+ * Note: Locking is skipped entirely for Electron and Android WebView since they
+ * are inherently single-instance environments.
  */
 @Injectable({ providedIn: 'root' })
 export class LockService {
@@ -20,6 +25,11 @@ export class LockService {
   private _fallbackLocks = new Map<string, Promise<void>>();
 
   async request(lockName: string, callback: () => Promise<void>): Promise<void> {
+    // Electron and Android WebView are single-instance by design - skip locking
+    if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
+      return callback();
+    }
+
     if (!navigator.locks) {
       // Fallback: Use Promise-based mutex for single-tab protection.
       // WARNING: This does NOT protect against multi-tab data corruption!
