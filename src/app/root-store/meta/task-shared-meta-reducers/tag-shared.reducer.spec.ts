@@ -876,4 +876,240 @@ describe('tagSharedMetaReducer', () => {
       expect(passedState[TIME_TRACKING_FEATURE_KEY].tag.tag3).toBeDefined();
     });
   });
+
+  // =============================================================================
+  // PERFORMANCE REGRESSION TESTS - Large Dataset Behavior Verification
+  // =============================================================================
+
+  describe('large dataset handling (performance regression tests)', () => {
+    it('should correctly remove many tags from many tasks', () => {
+      const testState = createBaseState();
+
+      // Create 100 tags to remove
+      const tagIdsToRemove: string[] = [];
+      for (let i = 0; i < 100; i++) {
+        const tagId = `tag-to-remove-${i}`;
+        tagIdsToRemove.push(tagId);
+        testState[TAG_FEATURE_NAME].entities[tagId] = createMockTag({
+          id: tagId,
+          title: `Tag ${i}`,
+          taskIds: [],
+        });
+        (testState[TAG_FEATURE_NAME].ids as string[]).push(tagId);
+      }
+
+      // Create a tag that should NOT be removed
+      testState[TAG_FEATURE_NAME].entities['keeper-tag'] = createMockTag({
+        id: 'keeper-tag',
+        title: 'Keeper Tag',
+        taskIds: [],
+      });
+      (testState[TAG_FEATURE_NAME].ids as string[]).push('keeper-tag');
+
+      // Create 200 tasks, each with 10 tags from the removal list + the keeper tag
+      const taskIds: string[] = [];
+      for (let i = 0; i < 200; i++) {
+        const taskId = `task-${i}`;
+        taskIds.push(taskId);
+        // Assign 10 tags from the removal list to each task
+        const taskTagIds = tagIdsToRemove.slice(i % 90, (i % 90) + 10);
+        taskTagIds.push('keeper-tag'); // Also has the keeper tag
+        testState[TASK_FEATURE_NAME].entities[taskId] = createMockTask({
+          id: taskId,
+          tagIds: taskTagIds,
+          projectId: 'project1', // Has project so won't be orphaned
+        });
+      }
+      testState[TASK_FEATURE_NAME].ids = taskIds;
+
+      const action = TaskSharedActions.removeTagsForAllTasks({
+        tagIdsToRemove,
+      });
+
+      metaReducer(testState, action);
+
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // Verify all tasks now only have the keeper tag
+      for (let i = 0; i < 200; i++) {
+        const task = passedState[TASK_FEATURE_NAME].entities[`task-${i}`];
+        expect(task).toBeDefined();
+        expect(task.tagIds).toEqual(['keeper-tag']);
+      }
+    });
+
+    it('should correctly handle deleting tags from many tasks with orphan detection', () => {
+      const testState = createBaseState();
+
+      // Create 50 tags
+      const allTagIds: string[] = ['tag1']; // tag1 already exists
+      for (let i = 2; i <= 50; i++) {
+        const tagId = `tag${i}`;
+        allTagIds.push(tagId);
+        testState[TAG_FEATURE_NAME].entities[tagId] = createMockTag({
+          id: tagId,
+          title: `Tag ${i}`,
+          taskIds: [],
+        });
+        (testState[TAG_FEATURE_NAME].ids as string[]).push(tagId);
+      }
+
+      // Create tasks - half with projects, half orphans
+      const taskIds: string[] = [];
+      for (let i = 0; i < 100; i++) {
+        const taskId = `task-${i}`;
+        taskIds.push(taskId);
+        const hasProject = i < 50;
+        // Assign multiple tags from the list
+        const taskTagIds = allTagIds.slice(0, Math.min(10, allTagIds.length));
+        testState[TASK_FEATURE_NAME].entities[taskId] = createMockTask({
+          id: taskId,
+          tagIds: [...taskTagIds],
+          projectId: hasProject ? 'project1' : undefined,
+          parentId: undefined,
+        });
+      }
+      testState[TASK_FEATURE_NAME].ids = taskIds;
+
+      // Delete tags 1-10 (all tags that tasks have)
+      const tagsToDelete = allTagIds.slice(0, 10);
+      const action = deleteTags({ ids: tagsToDelete });
+
+      metaReducer(testState, action);
+
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // Tasks 0-49 (with project) should still exist but with no tags
+      for (let i = 0; i < 50; i++) {
+        const task = passedState[TASK_FEATURE_NAME].entities[`task-${i}`];
+        expect(task).toBeDefined();
+        expect(task.tagIds).toEqual([]);
+      }
+
+      // Tasks 50-99 (no project, no remaining tags) should be deleted
+      for (let i = 50; i < 100; i++) {
+        const task = passedState[TASK_FEATURE_NAME].entities[`task-${i}`];
+        expect(task).toBeUndefined();
+      }
+    });
+
+    it('should correctly cleanup many task repeat configs when tags are deleted', () => {
+      const testState = createBaseState() as any;
+
+      // Create 20 tags
+      const allTagIds: string[] = ['tag1'];
+      for (let i = 2; i <= 20; i++) {
+        const tagId = `tag${i}`;
+        allTagIds.push(tagId);
+        testState[TAG_FEATURE_NAME].entities[tagId] = createMockTag({
+          id: tagId,
+          title: `Tag ${i}`,
+          taskIds: [],
+        });
+        (testState[TAG_FEATURE_NAME].ids as string[]).push(tagId);
+      }
+
+      // Create 50 task repeat configs with various tag combinations
+      const cfgIds: string[] = [];
+      const cfgEntities: Record<string, any> = {};
+      for (let i = 0; i < 50; i++) {
+        const cfgId = `cfg-${i}`;
+        cfgIds.push(cfgId);
+
+        // Some configs have projects, some don't
+        // Some have multiple tags, some have just the tags we'll delete
+        const hasProject = i < 10;
+        const hasMultipleTags = i >= 10 && i < 30;
+
+        let cfgTagIds: string[];
+        if (hasMultipleTags) {
+          // Has tags we'll delete AND tags we won't
+          cfgTagIds = ['tag1', 'tag2', 'tag15', 'tag16'];
+        } else {
+          // Only has tags we'll delete
+          cfgTagIds = ['tag1', 'tag2'];
+        }
+
+        cfgEntities[cfgId] = {
+          id: cfgId,
+          tagIds: cfgTagIds,
+          projectId: hasProject ? 'project1' : null,
+        };
+      }
+
+      testState[TASK_REPEAT_CFG_FEATURE_NAME] = {
+        ids: cfgIds,
+        entities: cfgEntities,
+      } as unknown as TaskRepeatCfgState;
+
+      // Delete tags 1-10
+      const tagsToDelete = allTagIds.slice(0, 10);
+      const action = deleteTags({ ids: tagsToDelete });
+
+      metaReducer(testState, action);
+
+      const passedState = mockReducer.calls.mostRecent().args[0];
+
+      // Configs 0-9 (with project) should still exist with remaining tags
+      for (let i = 0; i < 10; i++) {
+        const cfg = passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities[`cfg-${i}`];
+        expect(cfg).toBeDefined();
+        // tag1 and tag2 removed, should have empty tagIds
+        expect(cfg.tagIds).toEqual([]);
+      }
+
+      // Configs 10-29 (no project but multiple tags including non-deleted ones) should exist
+      for (let i = 10; i < 30; i++) {
+        const cfg = passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities[`cfg-${i}`];
+        expect(cfg).toBeDefined();
+        // tag1 and tag2 removed, tag15 and tag16 should remain
+        expect(cfg.tagIds).toEqual(['tag15', 'tag16']);
+      }
+
+      // Configs 30-49 (no project, only deleted tags) should be deleted
+      for (let i = 30; i < 50; i++) {
+        const cfg = passedState[TASK_REPEAT_CFG_FEATURE_NAME].entities[`cfg-${i}`];
+        expect(cfg).toBeUndefined();
+      }
+    });
+
+    it('should handle removing a single tag from tasks with many tags efficiently', () => {
+      const testState = createBaseState();
+
+      // Create 50 tags
+      const allTagIds: string[] = ['tag1'];
+      for (let i = 2; i <= 50; i++) {
+        const tagId = `tag${i}`;
+        allTagIds.push(tagId);
+        testState[TAG_FEATURE_NAME].entities[tagId] = createMockTag({
+          id: tagId,
+          title: `Tag ${i}`,
+          taskIds: [],
+        });
+        (testState[TAG_FEATURE_NAME].ids as string[]).push(tagId);
+      }
+
+      // Create a task with ALL 50 tags
+      testState[TASK_FEATURE_NAME].entities['mega-task'] = createMockTask({
+        id: 'mega-task',
+        tagIds: [...allTagIds],
+        projectId: 'project1',
+      });
+      testState[TASK_FEATURE_NAME].ids = ['mega-task'];
+
+      // Remove just tag1
+      const action = deleteTag({ id: 'tag1' });
+
+      metaReducer(testState, action);
+
+      const passedState = mockReducer.calls.mostRecent().args[0];
+      const task = passedState[TASK_FEATURE_NAME].entities['mega-task'];
+
+      expect(task).toBeDefined();
+      expect(task.tagIds.length).toBe(49);
+      expect(task.tagIds).not.toContain('tag1');
+      expect(task.tagIds).toContain('tag2');
+      expect(task.tagIds).toContain('tag50');
+    });
+  });
 });

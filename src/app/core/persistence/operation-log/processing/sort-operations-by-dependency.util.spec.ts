@@ -459,4 +459,225 @@ describe('sortOperationsByDependency', () => {
       expect(tagIdx).toBeLessThan(deleteIdx);
     });
   });
+
+  // =============================================================================
+  // PERFORMANCE REGRESSION TESTS - Large Dataset Behavior Verification
+  // =============================================================================
+
+  describe('large dataset handling (performance regression tests)', () => {
+    it('should correctly sort 100 operations with linear dependency chain', () => {
+      // Create a chain: op-0 -> op-1 -> op-2 -> ... -> op-99
+      // Each operation depends on the previous one
+      const ops: Operation[] = [];
+      for (let i = 0; i < 100; i++) {
+        ops.push(
+          createTestOperation({
+            id: `op-${i}`,
+            opType: OpType.Create,
+            entityId: `entity-${i}`,
+            timestamp: 1000 - i, // Reverse timestamp order to force reordering
+          }),
+        );
+      }
+
+      const extractor: DependencyExtractor = (op) => {
+        const index = parseInt(op.id.split('-')[1], 10);
+        if (index > 0) {
+          return [
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: `entity-${index - 1}`,
+              mustExist: true,
+              relation: 'parent',
+            },
+          ];
+        }
+        return [];
+      };
+
+      // Shuffle the operations to simulate random input order
+      const shuffled = [...ops].sort(() => Math.random() - 0.5);
+
+      const result = sortOperationsByDependency(shuffled, extractor);
+
+      // Verify all operations are present
+      expect(result.length).toBe(100);
+
+      // Verify dependency order is maintained
+      for (let i = 1; i < 100; i++) {
+        const prevIdx = result.findIndex((o) => o.id === `op-${i - 1}`);
+        const currIdx = result.findIndex((o) => o.id === `op-${i}`);
+        expect(prevIdx).toBeLessThan(currIdx);
+      }
+    });
+
+    it('should correctly sort 50 operations with mixed CREATE/UPDATE/DELETE', () => {
+      const ops: Operation[] = [];
+
+      // 20 CREATE operations
+      for (let i = 0; i < 20; i++) {
+        ops.push(
+          createTestOperation({
+            id: `create-${i}`,
+            opType: OpType.Create,
+            entityType: 'TASK' as EntityType,
+            entityId: `task-${i}`,
+            timestamp: 100 + i,
+          }),
+        );
+      }
+
+      // 20 UPDATE operations (some referencing tasks that will be deleted)
+      for (let i = 0; i < 20; i++) {
+        ops.push(
+          createTestOperation({
+            id: `update-${i}`,
+            opType: OpType.Update,
+            entityType: 'TAG' as EntityType,
+            entityId: `tag-${i}`,
+            timestamp: 200 + i,
+          }),
+        );
+      }
+
+      // 10 DELETE operations
+      for (let i = 0; i < 10; i++) {
+        ops.push(
+          createTestOperation({
+            id: `delete-${i}`,
+            opType: OpType.Delete,
+            entityType: 'TASK' as EntityType,
+            entityId: `task-${i}`, // Deleting tasks 0-9
+            timestamp: 300 + i,
+          }),
+        );
+      }
+
+      const extractor: DependencyExtractor = (op) => {
+        // UPDATE operations reference the task that will be deleted
+        if (op.id.startsWith('update-')) {
+          const index = parseInt(op.id.split('-')[1], 10);
+          if (index < 10) {
+            return [
+              {
+                entityType: 'TASK' as EntityType,
+                entityId: `task-${index}`,
+                mustExist: false,
+                relation: 'reference',
+              },
+            ];
+          }
+        }
+        return [];
+      };
+
+      // Shuffle and sort
+      const shuffled = [...ops].sort(() => Math.random() - 0.5);
+      const result = sortOperationsByDependency(shuffled, extractor);
+
+      // Verify all operations are present
+      expect(result.length).toBe(50);
+
+      // Verify DELETE operations come after their referencing UPDATE operations
+      for (let i = 0; i < 10; i++) {
+        const updateIdx = result.findIndex((o) => o.id === `update-${i}`);
+        const deleteIdx = result.findIndex((o) => o.id === `delete-${i}`);
+        expect(updateIdx).toBeLessThan(deleteIdx);
+      }
+    });
+
+    it('should handle many operations with soft dependencies for tie-breaking', () => {
+      // Create operations where soft dependency count should affect ordering
+      const ops: Operation[] = [];
+
+      // Create a "hub" operation that many others soft-depend on
+      ops.push(
+        createTestOperation({
+          id: 'hub',
+          opType: OpType.Create,
+          entityId: 'hub-entity',
+          timestamp: 500, // Middle timestamp
+        }),
+      );
+
+      // Create "spoke" operations that soft-depend on the hub
+      for (let i = 0; i < 30; i++) {
+        ops.push(
+          createTestOperation({
+            id: `spoke-${i}`,
+            opType: OpType.Update,
+            entityId: `spoke-entity-${i}`,
+            timestamp: 500, // Same timestamp as hub
+          }),
+        );
+      }
+
+      // Create independent operations (no dependencies)
+      for (let i = 0; i < 20; i++) {
+        ops.push(
+          createTestOperation({
+            id: `independent-${i}`,
+            opType: OpType.Create,
+            entityId: `independent-entity-${i}`,
+            timestamp: 500, // Same timestamp
+          }),
+        );
+      }
+
+      const extractor: DependencyExtractor = (op) => {
+        if (op.id.startsWith('spoke-')) {
+          return [
+            {
+              entityType: 'TASK' as EntityType,
+              entityId: 'hub-entity',
+              mustExist: false, // Soft dependency
+              relation: 'reference',
+            },
+          ];
+        }
+        return [];
+      };
+
+      const shuffled = [...ops].sort(() => Math.random() - 0.5);
+      const result = sortOperationsByDependency(shuffled, extractor);
+
+      // Verify all operations present
+      expect(result.length).toBe(51);
+
+      // The hub should come before any of its spokes due to soft dependency prioritization
+      const hubIdx = result.findIndex((o) => o.id === 'hub');
+      for (let i = 0; i < 30; i++) {
+        const spokeIdx = result.findIndex((o) => o.id === `spoke-${i}`);
+        expect(hubIdx).toBeLessThan(spokeIdx);
+      }
+    });
+
+    it('should maintain sort stability for operations with identical sort keys', () => {
+      // Create operations with identical timestamps, opTypes, and no dependencies
+      // This tests that the sorting is deterministic
+      const ops: Operation[] = [];
+      for (let i = 0; i < 50; i++) {
+        ops.push(
+          createTestOperation({
+            id: `op-${String(i).padStart(2, '0')}`, // op-00, op-01, etc.
+            opType: OpType.Update,
+            entityId: `entity-${i}`,
+            timestamp: 1000, // All same timestamp
+          }),
+        );
+      }
+
+      // Run the sort multiple times with the same input
+      const results: string[][] = [];
+      for (let run = 0; run < 5; run++) {
+        const result = sortOperationsByDependency([...ops], noDepExtractor);
+        results.push(result.map((o) => o.id));
+      }
+
+      // All runs should produce the same order (deterministic)
+      for (let run = 1; run < 5; run++) {
+        expect(results[run]).toEqual(results[0]);
+      }
+    });
+  });
 });

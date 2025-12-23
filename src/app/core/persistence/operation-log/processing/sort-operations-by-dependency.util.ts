@@ -140,6 +140,20 @@ export const sortOperationsByDependency = (
     inDegree.set(op.id, hardDependencies.get(op.id)!.size);
   }
 
+  // Pre-compute sort keys for O(1) comparison instead of recalculating on every sort
+  // This avoids O(n²) key computation during the topological sort
+  const sortKeys = new Map<
+    string,
+    { isCreate: number; softDepCount: number; timestamp: number }
+  >();
+  for (const op of ops) {
+    sortKeys.set(op.id, {
+      isCreate: op.opType === OpType.Create ? 1 : 0,
+      softDepCount: softDependsOn.get(op.id)?.size ?? 0,
+      timestamp: op.timestamp,
+    });
+  }
+
   // Queue of operations with no hard dependencies (in-degree = 0)
   const queue: Operation[] = [];
   for (const op of ops) {
@@ -156,22 +170,21 @@ export const sortOperationsByDependency = (
     // 2. Ops that have soft dependents (other ops soft-depend on them)
     // 3. Earlier timestamp as final tie-breaker
     queue.sort((a, b) => {
+      const aKey = sortKeys.get(a.id)!;
+      const bKey = sortKeys.get(b.id)!;
+
       // CREATE ops first
-      const aIsCreate = a.opType === OpType.Create ? 1 : 0;
-      const bIsCreate = b.opType === OpType.Create ? 1 : 0;
-      if (aIsCreate !== bIsCreate) {
-        return bIsCreate - aIsCreate; // Higher (CREATE) first
+      if (aKey.isCreate !== bKey.isCreate) {
+        return bKey.isCreate - aKey.isCreate; // Higher (CREATE) first
       }
 
       // Ops with more soft dependents first (they unblock more ops)
-      const aSoftDeps = softDependsOn.get(a.id)?.size ?? 0;
-      const bSoftDeps = softDependsOn.get(b.id)?.size ?? 0;
-      if (aSoftDeps !== bSoftDeps) {
-        return bSoftDeps - aSoftDeps; // More soft dependents first
+      if (aKey.softDepCount !== bKey.softDepCount) {
+        return bKey.softDepCount - aKey.softDepCount; // More soft dependents first
       }
 
       // Earlier timestamp first
-      return a.timestamp - b.timestamp;
+      return aKey.timestamp - bKey.timestamp;
     });
 
     const op = queue.shift()!;

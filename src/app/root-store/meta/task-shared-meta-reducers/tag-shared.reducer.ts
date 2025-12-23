@@ -90,12 +90,14 @@ const removeTagsFromTasks = (
 } => {
   const taskUpdates: Update<Task>[] = [];
   const orphanedTaskIds: string[] = [];
+  // Use Set for O(1) lookups instead of O(n) array.includes()
+  const tagIdsToRemoveSet = new Set(tagIdsToRemove);
 
   Object.values(taskState.entities).forEach((task) => {
     if (!task) return;
 
-    if (task.tagIds && task.tagIds.some((id) => tagIdsToRemove.includes(id))) {
-      const newTagIds = task.tagIds.filter((id) => !tagIdsToRemove.includes(id));
+    if (task.tagIds && task.tagIds.some((id) => tagIdsToRemoveSet.has(id))) {
+      const newTagIds = task.tagIds.filter((id) => !tagIdsToRemoveSet.has(id));
       taskUpdates.push({
         id: task.id,
         changes: { tagIds: newTagIds },
@@ -152,14 +154,16 @@ const cleanupTaskRepeatCfgs = (
 
   const cfgIdsToDelete: string[] = [];
   const cfgUpdates: Update<TaskRepeatCfg>[] = [];
+  // Use Set for O(1) lookups instead of O(n) array.includes()
+  const tagIdsToRemoveSet = new Set(tagIdsToRemove);
 
   Object.values(taskRepeatCfgState.entities).forEach((cfg) => {
     if (!cfg || !cfg.tagIds) return;
 
-    const hasDeletedTag = cfg.tagIds.some((tagId) => tagIdsToRemove.includes(tagId));
+    const hasDeletedTag = cfg.tagIds.some((tagId) => tagIdsToRemoveSet.has(tagId));
     if (!hasDeletedTag) return;
 
-    const remainingTagIds = cfg.tagIds.filter((tagId) => !tagIdsToRemove.includes(tagId));
+    const remainingTagIds = cfg.tagIds.filter((tagId) => !tagIdsToRemoveSet.has(tagId));
 
     if (remainingTagIds.length === 0 && !cfg.projectId) {
       // Config becomes orphaned - delete it
