@@ -91,24 +91,6 @@ describe('OperationCaptureService', () => {
     });
   });
 
-  describe('computeAndEnqueue (backward compatibility)', () => {
-    it('should work the same as enqueue (ignores state params)', () => {
-      const action = createPersistentAction(
-        '[Task] Update Task',
-        'TASK',
-        'task-1',
-        OpType.Update,
-      );
-
-      // computeAndEnqueue should work even with undefined params
-      service.computeAndEnqueue(action);
-      expect(service.getQueueSize()).toBe(1);
-
-      const changes = service.dequeue();
-      expect(changes).toEqual([]);
-    });
-  });
-
   describe('TIME_TRACKING entity changes', () => {
     it('should extract entity changes from syncTimeTracking action', () => {
       const action = {
@@ -283,59 +265,6 @@ describe('OperationCaptureService', () => {
       const pending = service.peekPendingOperations();
       expect(pending.length).toBe(1);
       expect(service.getQueueSize()).toBe(1); // Still in queue
-    });
-  });
-
-  describe('queue overflow protection', () => {
-    it('should handle queue approaching warning threshold gracefully', () => {
-      const action = createPersistentAction('[Task] Update', 'TASK');
-
-      // Add many operations (but less than max)
-      for (let i = 0; i < 50; i++) {
-        service.enqueue(action);
-      }
-
-      expect(service.getQueueSize()).toBe(50);
-    });
-
-    it('should cap queue at MAX_QUEUE_SIZE and drop oldest', () => {
-      const MAX_QUEUE_SIZE = 1000;
-      const action = createPersistentAction('[Task] Update', 'TASK');
-
-      // Fill queue to max
-      for (let i = 0; i < MAX_QUEUE_SIZE; i++) {
-        service.enqueue(action);
-      }
-      expect(service.getQueueSize()).toBe(MAX_QUEUE_SIZE);
-
-      // Add one more - should drop oldest to maintain max size
-      service.enqueue(action);
-      expect(service.getQueueSize()).toBe(MAX_QUEUE_SIZE);
-
-      // Add multiple more - should still maintain max size
-      for (let i = 0; i < 10; i++) {
-        service.enqueue(action);
-      }
-      expect(service.getQueueSize()).toBe(MAX_QUEUE_SIZE);
-    });
-
-    it('should still allow dequeue after hitting max queue size', () => {
-      const MAX_QUEUE_SIZE = 1000;
-      const action = createPersistentAction('[Task] Update', 'TASK');
-
-      // Fill queue to max + overflow
-      for (let i = 0; i < MAX_QUEUE_SIZE + 5; i++) {
-        service.enqueue(action);
-      }
-
-      // Should be able to dequeue all remaining items
-      let dequeuedCount = 0;
-      while (service.getQueueSize() > 0) {
-        service.dequeue();
-        dequeuedCount++;
-      }
-
-      expect(dequeuedCount).toBe(MAX_QUEUE_SIZE);
     });
   });
 });

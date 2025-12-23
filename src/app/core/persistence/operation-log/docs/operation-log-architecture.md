@@ -1750,23 +1750,18 @@ Meta-reducers intercept actions before they reach feature reducers and can modif
 
 ## F.3 Multi-Entity Operation Capture
 
-The `OperationCaptureService` and `operation-capture.meta-reducer` work together using a **simple FIFO queue** to capture all entity changes from a single action:
+The `OperationCaptureService` and `operation-capture.meta-reducer` work together using a **simple FIFO queue** to capture actions:
 
-1. **Before action**: Meta-reducer captures before-state
-2. **After action**: Meta-reducer calls `OperationCaptureService.computeAndEnqueue()` with before/after states
-3. **Effect processes**: Effect calls `OperationCaptureService.dequeue()` to get pre-computed changes
-4. **Result**: Single operation with `entityChanges[]` array
+1. **After action**: Meta-reducer calls `OperationCaptureService.enqueue()` with the action
+2. **Effect processes**: Effect calls `OperationCaptureService.dequeue()` to get entity changes
+3. **Result**: Single operation with action payload and optional `entityChanges[]` array
 
 The FIFO queue works because NgRx reducers process actions sequentially, and effects use `concatMap` for sequential processing. Order is preserved between enqueue and dequeue.
 
-**Optimization**: The service uses reference equality to detect which feature states actually changed, only diffing features where `beforeFeature !== afterFeature`.
+**Note**: Most actions return empty `entityChanges[]` - the action payload is sufficient for replay. Only TIME_TRACKING and TASK time sync actions have special handling to extract entity changes from the action payload.
 
 ```
 User Action (e.g., Delete Tag)
-    │
-    ▼
-operation-capture.meta-reducer
-    ├──► Capture before-state
     │
     ▼
 tagSharedMetaReducer (+ other meta-reducers)
@@ -1777,14 +1772,14 @@ Feature Reducers
     │
     ▼
 operation-capture.meta-reducer
-    ├──► Call OperationCaptureService.computeAndEnqueue(action, before, after)
-    │         └──► Computes entity changes by diffing before/after state
+    ├──► Call OperationCaptureService.enqueue(action)
+    │         └──► Extracts entity changes from action payload (for special cases)
     │         └──► Pushes to FIFO queue
     │
     ▼
 OperationLogEffects
-    ├──► Call OperationCaptureService.dequeue() to get pre-computed changes
-    └──► Create single Operation with entityChanges[]
+    ├──► Call OperationCaptureService.dequeue() to get entity changes
+    └──► Create single Operation with action payload
 ```
 
 ## F.4 When to Use Meta-Reducers vs Effects

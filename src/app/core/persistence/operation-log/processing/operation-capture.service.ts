@@ -28,10 +28,9 @@ import { OpLog } from '../../../log';
 })
 export class OperationCaptureService {
   /**
-   * Maximum queue size to prevent unbounded memory growth.
-   * If effects fail to dequeue, we cap the queue and log errors.
+   * Warning threshold for queue size.
+   * If effects fail to dequeue, we log a warning.
    */
-  private readonly MAX_QUEUE_SIZE = 1000;
   private readonly QUEUE_WARNING_THRESHOLD = 100;
 
   /**
@@ -66,15 +65,6 @@ export class OperationCaptureService {
       this.hasWarnedAboutQueueSize = true;
     }
 
-    // Cap queue size to prevent unbounded memory growth
-    if (this.queue.length >= this.MAX_QUEUE_SIZE) {
-      OpLog.err(
-        `OperationCaptureService: Queue full (${this.MAX_QUEUE_SIZE}). ` +
-          `Dropping oldest operation to make room. This indicates a serious processing issue!`,
-      );
-      this.queue.shift(); // Drop oldest to make room
-    }
-
     this.queue.push(entityChanges);
 
     OpLog.verbose('OperationCaptureService: Enqueued operation', {
@@ -82,18 +72,6 @@ export class OperationCaptureService {
       changeCount: entityChanges.length,
       queueSize: this.queue.length,
     });
-  }
-
-  /**
-   * @deprecated Use enqueue() instead. This method exists for backward compatibility.
-   * The beforeState and afterState parameters are ignored.
-   */
-  computeAndEnqueue(
-    action: PersistentAction,
-    _beforeState?: unknown,
-    _afterState?: unknown,
-  ): void {
-    this.enqueue(action);
   }
 
   /**
