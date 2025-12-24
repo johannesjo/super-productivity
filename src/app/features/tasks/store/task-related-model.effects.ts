@@ -12,6 +12,7 @@ import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.act
 import { Store } from '@ngrx/store';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
+import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
 
 @Injectable()
 export class TaskRelatedModelEffects {
@@ -19,6 +20,7 @@ export class TaskRelatedModelEffects {
   private _taskService = inject(TaskService);
   private _globalConfigService = inject(GlobalConfigService);
   private _store = inject(Store);
+  private _hydrationState = inject(HydrationStateService);
 
   // EFFECTS ===> EXTERNAL
   // ---------------------
@@ -32,6 +34,8 @@ export class TaskRelatedModelEffects {
     this.ifAutoAddTodayEnabled$(
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
+        // PERF: Skip during hydration/sync to avoid selector evaluation overhead
+        filter(() => !this._hydrationState.isApplyingRemoteOps()),
         withLatestFrom(this._store.select(selectTodayTaskIds)),
         filter(
           ([{ task }, todayTaskIds]) =>
@@ -52,6 +56,8 @@ export class TaskRelatedModelEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter((a) => a.task.changes.isDone === true),
+        // PERF: Skip during hydration/sync to avoid service calls
+        filter(() => !this._hydrationState.isApplyingRemoteOps()),
         // Use mergeMap instead of switchMap to ensure ALL mark-as-done actions
         // trigger planTasksForToday, not just the last one. switchMap would cancel
         // previous inner subscriptions when new actions arrive quickly.

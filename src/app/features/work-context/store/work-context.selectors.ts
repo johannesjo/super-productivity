@@ -53,13 +53,15 @@ const computeOrderedTaskIdsForToday = (
   }
 
   // Order tasks according to TODAY_TAG.taskIds, with unordered tasks appended
+  // PERF: Use Map for O(1) lookup instead of indexOf which is O(n) per task
   const tasksForTodaySet = new Set(tasksForToday);
+  const storedOrderMap = new Map(storedOrder.map((id, idx) => [id, idx]));
   const orderedTasks: (string | undefined)[] = [];
   const unorderedTasks: string[] = [];
 
   for (const taskId of tasksForToday) {
-    const orderIndex = storedOrder.indexOf(taskId);
-    if (orderIndex > -1) {
+    const orderIndex = storedOrderMap.get(taskId);
+    if (orderIndex !== undefined) {
       orderedTasks[orderIndex] = taskId;
     } else {
       unorderedTasks.push(taskId);
@@ -208,13 +210,14 @@ export const selectTrackableTasksActiveContextFirst = createSelector(
   selectTaskFeatureState,
   selectStartableTasksForActiveContext,
   (s, forActiveContext): Task[] => {
-    const activeContextIds = forActiveContext.map((item) => item.id);
+    // Use Set for O(1) lookup instead of O(n) .includes() in filter
+    const activeContextIdSet = new Set(forActiveContext.map((item) => item.id));
     const otherTasks = s.ids
       .map((id) => s.entities[id] as Task)
       .filter(
         (task) =>
           (!!task.parentId || task.subTaskIds.length === 0) &&
-          !activeContextIds.includes(task.id),
+          !activeContextIdSet.has(task.id),
       );
     return [...forActiveContext, ...otherTasks].sort(sortDoneLast);
   },
@@ -308,7 +311,8 @@ export const selectTimelineTasks = createSelector(
           }
         }
       });
-    const allPlannedIds = allPlannedTasks.map((t) => t.id);
+    // Use Set for O(1) lookup instead of O(n) .includes() in filter
+    const allPlannedIdSet = new Set(allPlannedTasks.map((t) => t.id));
 
     return {
       planned: allPlannedTasks,
@@ -316,7 +320,7 @@ export const selectTimelineTasks = createSelector(
         .map((id) => {
           return mapSubTasksToTask(s.entities[id] as Task, s) as TaskWithSubTasks;
         })
-        .filter((t) => !t.isDone && !allPlannedIds.includes(t.id)),
+        .filter((t) => !t.isDone && !allPlannedIdSet.has(t.id)),
     };
   },
 );
@@ -355,8 +359,10 @@ export const selectTodayTagRepair = createSelector(
     // 1. storedTaskIds contains IDs where task.dueDay !== today (invalid)
     // 2. tasksForTodaySet contains IDs not in storedTaskIds (missing)
     const invalidInStored = storedTaskIds.filter((id) => !tasksForTodaySet.has(id));
+    // Use Set for O(1) lookup instead of O(n) .includes()
+    const storedTaskIdSet = new Set(storedTaskIds);
     const missingFromStored = [...tasksForTodaySet].filter(
-      (id) => !storedTaskIds.includes(id),
+      (id) => !storedTaskIdSet.has(id),
     );
 
     if (invalidInStored.length === 0 && missingFromStored.length === 0) {

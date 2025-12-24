@@ -48,9 +48,11 @@ export interface ApplyOperationsOptions {
 /**
  * Maximum number of operations to dispatch before yielding to the event loop.
  * Dispatching too many operations without yielding can overwhelm NgRx and cause
- * state updates to be lost. Testing shows smaller batches are safer for high-volume syncs.
+ * state updates to be lost. A batch size of 50 balances throughput with responsiveness:
+ * - Too small (10): Excessive event loop yields add ~4ms each on mobile
+ * - Too large (100+): UI becomes unresponsive during large syncs
  */
-const DISPATCH_BATCH_SIZE = 10;
+const DISPATCH_BATCH_SIZE = 50;
 
 /**
  * Service responsible for applying operations to the local NgRx store.
