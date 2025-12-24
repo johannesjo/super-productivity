@@ -51,6 +51,8 @@ npm run test:file <filepath>
   - `npm run e2e:playwright` - Run all tests with minimal output (shows failures clearly)
   - `npm run e2e:playwright:file <path>` - Run a single test file with detailed output
     - Example: `npm run e2e:playwright:file tests/work-view/work-view.spec.ts`
+  - `npm run e2e:supersync:file <path>` - Run SuperSync E2E tests (auto-starts the server)
+    - Example: `npm run e2e:supersync:file e2e/tests/sync/supersync.spec.ts`
 - Linting: `npm run lint` - ESLint for TypeScript, Stylelint for SCSS
 
 ## Architecture Overview
