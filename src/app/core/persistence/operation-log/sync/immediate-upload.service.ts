@@ -7,7 +7,7 @@ import { OperationLogSyncService } from './operation-log-sync.service';
 import { isOperationSyncCapable } from './operation-sync.util';
 import { OpLog } from '../../../log';
 
-const IMMEDIATE_UPLOAD_DEBOUNCE_MS = 100;
+const IMMEDIATE_UPLOAD_DEBOUNCE_MS = 2000;
 
 /**
  * Uploads operations to SuperSync immediately after they're persisted to IndexedDB.
