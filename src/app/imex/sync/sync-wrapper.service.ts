@@ -2,6 +2,7 @@ import { inject, Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
+  distinctUntilChanged,
   filter,
   first,
   map,
@@ -117,6 +118,7 @@ export class SyncWrapperService {
       }
       return isConfirmed;
     }),
+    distinctUntilChanged(),
     shareReplay(1),
   );
 
