@@ -87,6 +87,11 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
       } else {
         // Parse JSON normally for uncompressed requests
         try {
+          // Handle empty body (e.g., DELETE requests)
+          if (body.length === 0) {
+            done(null, undefined);
+            return;
+          }
           const json = JSON.parse(body.toString('utf-8'));
           done(null, json);
         } catch (err) {

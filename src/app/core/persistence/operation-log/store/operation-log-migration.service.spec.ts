@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { of } from 'rxjs';
 import { OperationLogMigrationService } from './operation-log-migration.service';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
@@ -9,6 +11,7 @@ describe('OperationLogMigrationService', () => {
   let service: OperationLogMigrationService;
   let mockOpLogStore: jasmine.SpyObj<OperationLogStoreService>;
   let mockPfapiService: any;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(() => {
     // Mock OperationLogStoreService
@@ -33,6 +36,12 @@ describe('OperationLogMigrationService', () => {
       },
     };
 
+    // Mock MatDialog
+    mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockMatDialog.open.and.returnValue({
+      afterClosed: () => of(true),
+    } as MatDialogRef<any>);
+
     // Spy on OpLog
     spyOn(OpLog, 'normal');
     spyOn(OpLog, 'warn');
@@ -43,6 +52,7 @@ describe('OperationLogMigrationService', () => {
         OperationLogMigrationService,
         { provide: OperationLogStoreService, useValue: mockOpLogStore },
         { provide: PfapiService, useValue: mockPfapiService },
+        { provide: MatDialog, useValue: mockMatDialog },
       ],
     });
     service = TestBed.inject(OperationLogMigrationService);
@@ -318,6 +328,62 @@ describe('OperationLogMigrationService', () => {
         if (mockPfapiService.pf.getAllSyncModelData) {
           expect(mockPfapiService.pf.getAllSyncModelData).not.toHaveBeenCalled();
         }
+      });
+    });
+
+    describe('pre-migration dialog and backup', () => {
+      beforeEach(() => {
+        mockOpLogStore.loadStateCache.and.resolveTo(null);
+        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+      });
+
+      it('should show dialog and download backup before migration', async () => {
+        const legacyData = {
+          task: { ids: ['t1'] },
+          project: { ids: ['p1'] },
+        };
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls.and.resolveTo(legacyData);
+        mockPfapiService.pf.metaModel.loadClientId.and.resolveTo('test-client');
+        mockOpLogStore.append.and.resolveTo(1);
+        mockOpLogStore.saveStateCache.and.resolveTo();
+
+        await service.checkAndMigrate();
+
+        // Verify dialog was shown with correct config
+        expect(mockMatDialog.open).toHaveBeenCalled();
+        const dialogConfig = mockMatDialog.open.calls.first().args[1];
+        expect(dialogConfig?.disableClose).toBe(true);
+        expect((dialogConfig?.data as any).hideCancelButton).toBe(true);
+
+        // Verify backup download log
+        expect(OpLog.normal).toHaveBeenCalledWith(
+          jasmine.stringContaining('Pre-migration backup downloaded'),
+        );
+      });
+
+      it('should not show dialog when no legacy data exists', async () => {
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls.and.resolveTo({
+          task: { ids: [] },
+        });
+
+        await service.checkAndMigrate();
+
+        // Dialog should NOT be shown for fresh install
+        expect(mockMatDialog.open).not.toHaveBeenCalled();
+      });
+
+      it('should not show dialog when already migrated', async () => {
+        mockOpLogStore.loadStateCache.and.resolveTo({
+          state: { task: { ids: ['t1'] } },
+          lastAppliedOpSeq: 5,
+          vectorClock: { client1: 5 },
+          compactedAt: Date.now(),
+        });
+
+        await service.checkAndMigrate();
+
+        // Dialog should NOT be shown for already migrated
+        expect(mockMatDialog.open).not.toHaveBeenCalled();
       });
     });
   });

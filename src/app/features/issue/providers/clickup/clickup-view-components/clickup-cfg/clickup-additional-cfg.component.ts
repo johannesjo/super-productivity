@@ -20,13 +20,10 @@ import { DEFAULT_CLICKUP_CFG } from '../../clickup.const';
 import { SnackService } from '../../../../../../core/snack/snack.service';
 import { T } from '../../../../../../t.const';
 import { HelperClasses } from '../../../../../../app.constants';
-import { MatSlideToggle } from '@angular/material/slide-toggle';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatProgressSpinner } from '@angular/material/progress-spinner';
 import { MatButton } from '@angular/material/button';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { AsyncPipe } from '@angular/common';
-import { TranslatePipe } from '@ngx-translate/core';
 import { ClickUpTeam } from '../../clickup.model';
 import { CollapsibleComponent } from '../../../../../../ui/collapsible/collapsible.component';
 
@@ -39,14 +36,10 @@ import { CollapsibleComponent } from '../../../../../../ui/collapsible/collapsib
   imports: [
     FormsModule,
     ReactiveFormsModule,
-    MatSlideToggle,
-    MatFormField,
-    MatLabel,
     MatProgressSpinner,
     MatButton,
     MatCheckbox,
     AsyncPipe,
-    TranslatePipe,
     CollapsibleComponent,
   ],
   standalone: true,

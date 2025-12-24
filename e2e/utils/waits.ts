@@ -81,6 +81,20 @@ export const waitForAppReady = async (
     .waitForSelector('body', { state: 'visible', timeout: 10000 })
     .catch(() => {});
 
+  // Handle any blocking dialogs (pre-migration, confirmation, etc.)
+  // These dialogs block app until dismissed
+  for (let i = 0; i < 3; i++) {
+    try {
+      const dialogConfirmBtn = page.locator('dialog-confirm button[e2e="confirmBtn"]');
+      await dialogConfirmBtn.waitFor({ state: 'visible', timeout: 2000 });
+      await dialogConfirmBtn.click();
+      await page.waitForTimeout(500);
+    } catch {
+      // No dialog visible, break out
+      break;
+    }
+  }
+
   await page
     .waitForSelector('magic-side-nav', { state: 'visible', timeout: 15000 })
     .catch(() => {});

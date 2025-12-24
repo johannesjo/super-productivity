@@ -1,4 +1,6 @@
 import { TestBed } from '@angular/core/testing';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
+import { of } from 'rxjs';
 import { OperationLogMigrationService } from '../store/operation-log-migration.service';
 import { OperationLogStoreService } from '../store/operation-log-store.service';
 import { PfapiService } from '../../../../pfapi/pfapi.service';
@@ -22,6 +24,7 @@ describe('Legacy Data Migration Integration', () => {
   let migrationService: OperationLogMigrationService;
   let opLogStore: OperationLogStoreService;
   let mockPfapiService: any;
+  let mockMatDialog: jasmine.SpyObj<MatDialog>;
 
   beforeEach(async () => {
     // Create mock PfapiService that simulates the 'pf' database
@@ -47,11 +50,18 @@ describe('Legacy Data Migration Integration', () => {
       },
     };
 
+    // Mock MatDialog
+    mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
+    mockMatDialog.open.and.returnValue({
+      afterClosed: () => of(true),
+    } as MatDialogRef<any>);
+
     TestBed.configureTestingModule({
       providers: [
         OperationLogMigrationService,
         OperationLogStoreService,
         { provide: PfapiService, useValue: mockPfapiService },
+        { provide: MatDialog, useValue: mockMatDialog },
       ],
     });
 
@@ -122,9 +132,16 @@ describe('Legacy Data Migration Integration', () => {
       expect(snapshot!.lastAppliedOpSeq).toBe(1);
     });
 
-    it('should create Genesis operation when projects exist', async () => {
+    it('should include projects in Genesis operation when tasks exist', async () => {
       const legacyData = {
-        task: { ids: [], entities: {} },
+        task: {
+          ids: ['task-1'],
+          entities: {
+            /* eslint-disable @typescript-eslint/naming-convention */
+            'task-1': { id: 'task-1', title: 'Task 1' },
+            /* eslint-enable @typescript-eslint/naming-convention */
+          },
+        },
         project: {
           ids: ['proj-1'],
           entities: {
@@ -143,6 +160,7 @@ describe('Legacy Data Migration Integration', () => {
       const ops = await opLogStore.getOpsAfterSeq(0);
       expect(ops.length).toBe(1);
       expect(ops[0].op.entityType).toBe('MIGRATION');
+      expect((ops[0].op.payload as typeof legacyData).project.ids).toContain('proj-1');
     });
 
     it('should check all entity models for user data', async () => {

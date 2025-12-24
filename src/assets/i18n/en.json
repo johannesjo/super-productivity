@@ -1797,6 +1797,7 @@
     "CLOSE": "Close",
     "COMPLETE": "Complete",
     "CONFIRM": "Confirm",
+    "CONTINUE": "Continue",
     "DELETE": "Delete",
     "DISMISS": "Dismiss",
     "DONT_SHOW_AGAIN": "Don't show again",
@@ -2216,6 +2217,10 @@
     "E_MIGRATION_FAILED": "Migration failed! with Error:",
     "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!",
     "SUCCESS": "Migration all done! Restarting app now..."
+  },
+  "PRE_MIGRATION": {
+    "DIALOG_TITLE": "System Update",
+    "DIALOG_MESSAGE": "We're updating how your data is stored for improved sync reliability.<br><br>A backup of your data will be downloaded automatically. You can use this backup to restore your data if needed (File > Import)."
   },
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "Add tasks from today",

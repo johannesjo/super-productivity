@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, viewChild } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
   MatDialogActions,
@@ -30,6 +30,8 @@ export class DialogConfirmComponent {
     inject<MatDialogRef<DialogConfirmComponent>>(MatDialogRef);
   readonly data = inject(MAT_DIALOG_DATA);
 
+  readonly cancelButton = viewChild<MatButton>('cancelButton');
+
   readonly T: typeof T = T;
 
   close(res: boolean | string | undefined): void {
@@ -40,6 +42,13 @@ export class DialogConfirmComponent {
     const buttonElement = nextButton._elementRef.nativeElement;
     if (buttonElement) {
       buttonElement.focus();
+    }
+  }
+
+  focusCancelButton(): void {
+    const btn = this.cancelButton();
+    if (btn) {
+      btn._elementRef.nativeElement.focus();
     }
   }
 }

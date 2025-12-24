@@ -218,6 +218,10 @@ export interface DownloadOpsResponse {
    * Clients need this to create merged updates that dominate all known clocks.
    */
   snapshotVectorClock?: VectorClock;
+  /**
+   * Server timestamp for client clock drift detection.
+   */
+  serverTime?: number;
 }
 
 // Snapshot types
