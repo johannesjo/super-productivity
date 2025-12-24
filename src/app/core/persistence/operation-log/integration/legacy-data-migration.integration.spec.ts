@@ -163,8 +163,9 @@ describe('Legacy Data Migration Integration', () => {
       expect((ops[0].op.payload as typeof legacyData).project.ids).toContain('proj-1');
     });
 
-    it('should check all entity models for user data', async () => {
-      // Only notes have data (edge case)
+    it('should not migrate when only non-task entity models have data', async () => {
+      // Only notes have data (no tasks) - migration should NOT occur
+      // because the service only checks for tasks to determine user data
       const legacyData = {
         task: { ids: [], entities: {} },
         project: { ids: [], entities: {} },
@@ -186,8 +187,9 @@ describe('Legacy Data Migration Integration', () => {
 
       await migrationService.checkAndMigrate();
 
+      // Should NOT create any operations (no tasks = no migration)
       const ops = await opLogStore.getOpsAfterSeq(0);
-      expect(ops.length).toBe(1);
+      expect(ops.length).toBe(0);
     });
   });
 

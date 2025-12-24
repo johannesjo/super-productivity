@@ -288,26 +288,27 @@ describe('OperationLogMigrationService', () => {
         );
       });
 
-      it('should check all entity models for user data', async () => {
-        // Only notes have data
+      it('should skip migration when only non-task entities have data', async () => {
+        // Only notes have data (no tasks) - migration should NOT occur
+        // because the service only checks for tasks to determine user data
         mockPfapiService.pf.getAllSyncModelDataFromModelCtrls.and.resolveTo({
           task: { ids: [] },
           project: { ids: [] },
           tag: { ids: [] },
-          note: { ids: ['n1'] }, // Notes have data
+          note: { ids: ['n1'] }, // Notes have data but don't trigger migration
           taskRepeatCfg: { ids: [] },
           simpleCounter: { ids: [] },
           metric: { ids: [] },
           globalConfig: { some: 'config' },
         });
-        mockPfapiService.pf.metaModel.loadClientId.and.resolveTo('test-client');
-        mockOpLogStore.append.and.resolveTo();
-        mockOpLogStore.saveStateCache.and.resolveTo();
 
         await service.checkAndMigrate();
 
-        // Should detect the note and proceed with migration
-        expect(mockOpLogStore.append).toHaveBeenCalled();
+        // Should NOT proceed with migration (no tasks = no migration)
+        expect(mockOpLogStore.append).not.toHaveBeenCalled();
+        expect(OpLog.normal).toHaveBeenCalledWith(
+          jasmine.stringContaining('No legacy data found'),
+        );
       });
     });
 
