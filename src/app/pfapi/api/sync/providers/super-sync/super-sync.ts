@@ -42,6 +42,10 @@ export class SuperSyncProvider
 
   public privateCfg!: SyncProviderPrivateCfgStore<SyncProviderId.SuperSync>;
 
+  // Caches to reduce repeated async loads during sync operations
+  private _cachedCfg?: SuperSyncPrivateCfg;
+  private _cachedServerSeqKey?: string;
+
   constructor(_basePath?: string) {
     // basePath is ignored - SuperSync uses operation-based sync only
   }
@@ -56,6 +60,9 @@ export class SuperSyncProvider
   }
 
   async setPrivateCfg(cfg: SuperSyncPrivateCfg): Promise<void> {
+    // Invalidate caches when config changes
+    this._cachedCfg = undefined;
+    this._cachedServerSeqKey = undefined;
     await this.privateCfg.setComplete(cfg);
   }
 
@@ -264,10 +271,14 @@ export class SuperSyncProvider
   // === Private Helper Methods ===
 
   private async _cfgOrError(): Promise<SuperSyncPrivateCfg> {
+    if (this._cachedCfg) {
+      return this._cachedCfg;
+    }
     const cfg = await this.privateCfg.load();
     if (!cfg) {
       throw new MissingCredentialsSPError();
     }
+    this._cachedCfg = cfg;
     return cfg;
   }
 
@@ -276,6 +287,9 @@ export class SuperSyncProvider
    * when switching between different accounts or servers.
    */
   private async _getServerSeqKey(): Promise<string> {
+    if (this._cachedServerSeqKey) {
+      return this._cachedServerSeqKey;
+    }
     const cfg = await this.privateCfg.load();
     const baseUrl = cfg?.baseUrl ?? 'default';
     // Include accessToken in the hash so different users on the same server
@@ -287,7 +301,8 @@ export class SuperSyncProvider
       .split('')
       .reduce((acc, char) => ((acc << 5) - acc + char.charCodeAt(0)) | 0, 0)
       .toString(16);
-    return `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
+    this._cachedServerSeqKey = `${LAST_SERVER_SEQ_KEY_PREFIX}${hash}`;
+    return this._cachedServerSeqKey;
   }
 
   private async _fetchApi<T>(

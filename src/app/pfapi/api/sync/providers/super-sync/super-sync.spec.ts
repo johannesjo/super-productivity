@@ -129,6 +129,66 @@ describe('SuperSyncProvider', () => {
 
       expect(mockPrivateCfgStore.setComplete).toHaveBeenCalledWith(testConfig);
     });
+
+    it('should invalidate caches so subsequent calls load fresh config', async () => {
+      mockPrivateCfgStore.setComplete.and.returnValue(Promise.resolve());
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ops: [], hasMore: false, latestSeq: 0 }),
+        } as Response),
+      );
+
+      // First config
+      const config1 = { ...testConfig, baseUrl: 'https://server1.com' };
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(config1));
+      await provider.downloadOps(0);
+
+      // Change config via setPrivateCfg
+      const config2 = { ...testConfig, baseUrl: 'https://server2.com' };
+      await provider.setPrivateCfg(config2);
+
+      // Now load should return config2
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(config2));
+      await provider.downloadOps(0);
+
+      // Verify second fetch used the new URL
+      const lastCallUrl = fetchSpy.calls.mostRecent().args[0];
+      expect(lastCallUrl).toContain('server2.com');
+    });
+  });
+
+  describe('config caching', () => {
+    it('should cache config and only call privateCfg.load once for multiple operations', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+      fetchSpy.and.returnValue(
+        Promise.resolve({
+          ok: true,
+          json: () => Promise.resolve({ ops: [], hasMore: false, latestSeq: 0 }),
+        } as Response),
+      );
+
+      // Call multiple methods that use _cfgOrError
+      await provider.downloadOps(0);
+      await provider.downloadOps(1);
+      await provider.downloadOps(2);
+
+      // privateCfg.load should only be called once due to caching
+      expect(mockPrivateCfgStore.load).toHaveBeenCalledTimes(1);
+    });
+
+    it('should cache server seq key and only call privateCfg.load once for multiple seq operations', async () => {
+      mockPrivateCfgStore.load.and.returnValue(Promise.resolve(testConfig));
+      localStorageSpy.getItem.and.returnValue('10');
+
+      // Call getLastServerSeq multiple times
+      await provider.getLastServerSeq();
+      await provider.getLastServerSeq();
+      await provider.getLastServerSeq();
+
+      // privateCfg.load should only be called once due to caching
+      expect(mockPrivateCfgStore.load).toHaveBeenCalledTimes(1);
+    });
   });
 
   describe('file operations (not supported)', () => {
@@ -439,17 +499,29 @@ describe('SuperSyncProvider', () => {
         return null;
       });
 
-      // First URL
-      mockPrivateCfgStore.load.and.returnValue(
+      // First URL - use fresh provider
+      const provider1 = new SuperSyncProvider();
+      const mockStore1 = jasmine.createSpyObj('SyncProviderPrivateCfgStore', [
+        'load',
+        'setComplete',
+      ]);
+      provider1.privateCfg = mockStore1;
+      mockStore1.load.and.returnValue(
         Promise.resolve({ ...testConfig, baseUrl: 'https://server1.com' }),
       );
-      await provider.getLastServerSeq();
+      await provider1.getLastServerSeq();
 
-      // Second URL
-      mockPrivateCfgStore.load.and.returnValue(
+      // Second URL - use fresh provider
+      const provider2 = new SuperSyncProvider();
+      const mockStore2 = jasmine.createSpyObj('SyncProviderPrivateCfgStore', [
+        'load',
+        'setComplete',
+      ]);
+      provider2.privateCfg = mockStore2;
+      mockStore2.load.and.returnValue(
         Promise.resolve({ ...testConfig, baseUrl: 'https://server2.com' }),
       );
-      await provider.getLastServerSeq();
+      await provider2.getLastServerSeq();
 
       expect(capturedKeys[0]).not.toBe(capturedKeys[1]);
     });
@@ -461,25 +533,37 @@ describe('SuperSyncProvider', () => {
         return null;
       });
 
-      // First user
-      mockPrivateCfgStore.load.and.returnValue(
+      // First user - use fresh provider
+      const provider1 = new SuperSyncProvider();
+      const mockStore1 = jasmine.createSpyObj('SyncProviderPrivateCfgStore', [
+        'load',
+        'setComplete',
+      ]);
+      provider1.privateCfg = mockStore1;
+      mockStore1.load.and.returnValue(
         Promise.resolve({
           ...testConfig,
           baseUrl: 'https://server.com',
           accessToken: 'token-user-1',
         }),
       );
-      await provider.getLastServerSeq();
+      await provider1.getLastServerSeq();
 
-      // Second user (same server, different token)
-      mockPrivateCfgStore.load.and.returnValue(
+      // Second user - use fresh provider (same server, different token)
+      const provider2 = new SuperSyncProvider();
+      const mockStore2 = jasmine.createSpyObj('SyncProviderPrivateCfgStore', [
+        'load',
+        'setComplete',
+      ]);
+      provider2.privateCfg = mockStore2;
+      mockStore2.load.and.returnValue(
         Promise.resolve({
           ...testConfig,
           baseUrl: 'https://server.com',
           accessToken: 'token-user-2',
         }),
       );
-      await provider.getLastServerSeq();
+      await provider2.getLastServerSeq();
 
       expect(capturedKeys[0]).not.toBe(capturedKeys[1]);
     });
