@@ -322,20 +322,39 @@ export class SyncService {
     } catch (err) {
       // Transaction failed - all operations were rolled back
       const errorMessage = (err as Error).message || 'Unknown error';
-      Logger.error(`Transaction failed for user ${userId}: ${errorMessage}`);
+
+      // Check if this is a serialization failure (concurrent transaction conflict)
+      // Prisma uses P2034 for "Transaction failed due to a write conflict or a deadlock"
+      // PostgreSQL uses 40001 (serialization_failure) and 40P01 (deadlock_detected)
+      const isSerializationFailure =
+        (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2034') ||
+        errorMessage.includes('40001') ||
+        errorMessage.includes('40P01') ||
+        errorMessage.toLowerCase().includes('serialization') ||
+        errorMessage.toLowerCase().includes('deadlock');
 
       // Check if this is a timeout error (common for large payloads)
       const isTimeout =
-        errorMessage.toLowerCase().includes('timeout') || errorMessage.includes('P2028'); // Prisma transaction timeout error code
+        errorMessage.toLowerCase().includes('timeout') || errorMessage.includes('P2028');
+
+      if (isSerializationFailure) {
+        Logger.warn(
+          `Transaction serialization failure for user ${userId} - client should retry: ${errorMessage}`,
+        );
+      } else {
+        Logger.error(`Transaction failed for user ${userId}: ${errorMessage}`);
+      }
 
       // Mark all "successful" results as failed due to transaction rollback
-      // Include enough detail for client to determine if retry is appropriate
+      // Use INTERNAL_ERROR for all transient failures - client will retry
       return ops.map((op) => ({
         opId: op.id,
         accepted: false,
-        error: isTimeout
-          ? 'Transaction timeout - server busy, please retry'
-          : `Transaction rolled back: ${errorMessage}`,
+        error: isSerializationFailure
+          ? 'Concurrent transaction conflict - please retry'
+          : isTimeout
+            ? 'Transaction timeout - server busy, please retry'
+            : `Transaction rolled back: ${errorMessage}`,
         errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
       }));
     }

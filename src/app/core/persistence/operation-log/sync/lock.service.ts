@@ -14,8 +14,8 @@ import { IS_ANDROID_WEB_VIEW } from '../../../../util/is-android-web-view';
  * using Promise-based mutual exclusion. This prevents concurrent operations within
  * the same tab but cannot protect against multi-tab scenarios.
  *
- * Note: Locking is skipped entirely for Electron and Android WebView since they
- * are inherently single-instance environments.
+ * Electron and Android WebView use the fallback mutex since they are single-instance
+ * but still need in-process locking for concurrent code paths.
  */
 @Injectable({ providedIn: 'root' })
 export class LockService {
@@ -25,9 +25,11 @@ export class LockService {
   private _fallbackLocks = new Map<string, Promise<void>>();
 
   async request(lockName: string, callback: () => Promise<void>): Promise<void> {
-    // Electron and Android WebView are single-instance by design - skip locking
+    // Electron and Android WebView are single-instance (no multi-tab), but still need
+    // in-process locking to prevent concurrent code paths (e.g., ImmediateUploadService
+    // and main sync running simultaneously). Use fallback mutex for these.
     if (IS_ELECTRON || IS_ANDROID_WEB_VIEW) {
-      return callback();
+      return this._fallbackRequest(lockName, callback);
     }
 
     if (!navigator.locks) {
