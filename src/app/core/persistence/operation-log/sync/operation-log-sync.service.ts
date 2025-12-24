@@ -293,6 +293,15 @@ export class OperationLogSyncService {
         continue;
       }
 
+      // INTERNAL_ERROR = transient server error (transaction rollback, DB issue, etc.)
+      // These should be retried on next sync, not permanently rejected
+      if (rejected.errorCode === 'INTERNAL_ERROR') {
+        OpLog.warn(
+          `OperationLogSyncService: Transient error for op ${rejected.opId}, will retry: ${rejected.error || 'unknown'}`,
+        );
+        continue;
+      }
+
       const entry = await this.opLogStore.getOpById(rejected.opId);
       // Skip if:
       // - Op doesn't exist (was somehow removed)
