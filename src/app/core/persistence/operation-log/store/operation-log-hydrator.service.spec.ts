@@ -92,6 +92,7 @@ describe('OperationLogHydratorService', () => {
       'markFailed',
       'getVectorClock',
       'setVectorClock',
+      'mergeRemoteOpClocks',
     ]);
     mockMigrationService = jasmine.createSpyObj('OperationLogMigrationService', [
       'checkAndMigrate',
@@ -148,6 +149,7 @@ describe('OperationLogHydratorService', () => {
     mockOpLogStore.getFailedRemoteOps.and.returnValue(Promise.resolve([]));
     mockOpLogStore.markApplied.and.returnValue(Promise.resolve());
     mockOpLogStore.markFailed.and.returnValue(Promise.resolve());
+    mockOpLogStore.mergeRemoteOpClocks.and.returnValue(Promise.resolve());
     mockOperationApplierService.applyOperations.and.returnValue(
       Promise.resolve({ appliedOps: [] }),
     );
@@ -300,6 +302,27 @@ describe('OperationLogHydratorService', () => {
           'test-client',
         );
       });
+
+      it('should restore vector clock from snapshot to vector clock store', async () => {
+        // This test verifies the fix for the bug where vector clock was not restored
+        // from snapshot during hydration, causing new ops to have incomplete clocks
+        const snapshotClock = { clientA: 5, clientB: 3 };
+        const snapshot = createMockSnapshot({ vectorClock: snapshotClock });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.setVectorClock).toHaveBeenCalledWith(snapshotClock);
+      });
+
+      it('should not restore empty vector clock from snapshot', async () => {
+        const snapshot = createMockSnapshot({ vectorClock: {} });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.setVectorClock).not.toHaveBeenCalled();
+      });
     });
 
     describe('tail operation replay', () => {
@@ -359,6 +382,25 @@ describe('OperationLogHydratorService', () => {
         await service.hydrateStore();
 
         expect(mockOpLogStore.saveStateCache).not.toHaveBeenCalled();
+      });
+
+      it('should merge tail ops clocks into local clock after replay', async () => {
+        // This test verifies that tail ops' clocks are merged into local clock
+        // after replay to ensure subsequent ops have clocks that dominate them
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        const op1 = createMockOperation('op-6', OpType.Update, {
+          vectorClock: { clientA: 6 },
+        });
+        const op2 = createMockOperation('op-7', OpType.Update, {
+          vectorClock: { clientA: 6, clientB: 2 },
+        });
+        const tailOps = [createMockEntry(6, op1), createMockEntry(7, op2)];
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(tailOps));
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([op1, op2]);
       });
 
       it('should validate state BEFORE saving snapshot (regression test)', async () => {
@@ -432,6 +474,27 @@ describe('OperationLogHydratorService', () => {
         expect(mockStore.dispatch).toHaveBeenCalledWith(
           loadAllData({ appDataComplete: repairPayload as any }),
         );
+      });
+
+      it('should merge full-state op clock into local clock after direct load', async () => {
+        // When loading a SyncImport directly, its clock should be merged
+        // to ensure subsequent ops have clocks that dominate it
+        const snapshot = createMockSnapshot({ lastAppliedOpSeq: 5 });
+        const syncImportPayload = { task: {}, project: {} };
+        const syncClock = { clientA: 10, clientB: 5 };
+        const syncImportOp = createMockOperation('sync-op', OpType.SyncImport, {
+          payload: { appDataComplete: syncImportPayload },
+          entityType: 'ALL',
+          vectorClock: syncClock,
+        });
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(snapshot));
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(
+          Promise.resolve([createMockEntry(6, syncImportOp)]),
+        );
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([syncImportOp]);
       });
     });
 
@@ -816,6 +879,40 @@ describe('OperationLogHydratorService', () => {
         expect(saveIndex).toBeGreaterThanOrEqual(0);
         expect(validateIndex).toBeLessThan(saveIndex);
       });
+
+      it('should merge ops clocks into local clock in full replay', async () => {
+        // Full replay case: merge all ops' clocks into local clock
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
+        const op1 = createMockOperation('op-1', OpType.Update, {
+          vectorClock: { clientA: 1 },
+        });
+        const op2 = createMockOperation('op-2', OpType.Update, {
+          vectorClock: { clientA: 2 },
+        });
+        const allOps = [createMockEntry(1, op1), createMockEntry(2, op2)];
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(allOps));
+        mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(2));
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([op1, op2]);
+      });
+
+      it('should merge full-state op clock in full replay when last op is SyncImport', async () => {
+        mockOpLogStore.loadStateCache.and.returnValue(Promise.resolve(null));
+        const syncClock = { clientA: 10 };
+        const syncImportOp = createMockOperation('sync-op', OpType.SyncImport, {
+          payload: { appDataComplete: { task: {} } },
+          entityType: 'ALL',
+          vectorClock: syncClock,
+        });
+        const allOps = [createMockEntry(1, syncImportOp)];
+        mockOpLogStore.getOpsAfterSeq.and.returnValue(Promise.resolve(allOps));
+
+        await service.hydrateStore();
+
+        expect(mockOpLogStore.mergeRemoteOpClocks).toHaveBeenCalledWith([syncImportOp]);
+      });
     });
   });
 
@@ -999,6 +1096,52 @@ describe('OperationLogHydratorService', () => {
       expect(mockStore.dispatch).toHaveBeenCalledWith(
         loadAllData({ appDataComplete: syncedDataWithoutConfig }),
       );
+    });
+
+    it('should update vector clock store after sync', async () => {
+      // This test verifies that the vector clock store is updated after hydrateFromRemoteSync
+      // to ensure new ops created in the same session have the correct clock
+      const syncedData = { task: { entities: {}, ids: [] } };
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedData));
+      mockVectorClockService.getCurrentVectorClock.and.returnValue(
+        Promise.resolve({ clientA: 5 }),
+      );
+      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
+
+      await service.hydrateFromRemoteSync();
+
+      // setVectorClock should be called (the clock is incremented by the client ID)
+      expect(mockOpLogStore.setVectorClock).toHaveBeenCalled();
+      // Verify the clock was called with a clock that includes the client ID
+      const setClock = mockOpLogStore.setVectorClock.calls.mostRecent().args[0];
+      expect(setClock).toBeDefined();
+      // Client 'test-client' should have been incremented
+      expect(setClock['test-client']).toBe(1);
+    });
+
+    it('should update vector clock store after saving state cache', async () => {
+      // Verify order: save state cache, then update vector clock store
+      const syncedData = { task: { entities: {}, ids: [] } };
+      (
+        mockPfapiService.pf.getAllSyncModelDataFromModelCtrls as jasmine.Spy
+      ).and.returnValue(Promise.resolve(syncedData));
+      mockOpLogStore.getLastSeq.and.returnValue(Promise.resolve(50));
+
+      const callOrder: string[] = [];
+      mockOpLogStore.saveStateCache.and.callFake(() => {
+        callOrder.push('saveStateCache');
+        return Promise.resolve();
+      });
+      mockOpLogStore.setVectorClock.and.callFake(() => {
+        callOrder.push('setVectorClock');
+        return Promise.resolve();
+      });
+
+      await service.hydrateFromRemoteSync();
+
+      expect(callOrder).toEqual(['saveStateCache', 'setVectorClock']);
     });
   });
 

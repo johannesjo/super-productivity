@@ -789,6 +789,47 @@ export class OperationLogStoreService {
   }
 
   /**
+   * Merges remote operations' vector clocks into the local vector clock.
+   *
+   * CRITICAL: This must be called after applying remote operations to ensure
+   * subsequent local operations have vector clocks that dominate the remote ops.
+   *
+   * Without this, the following bug occurs:
+   * 1. Client A does SYNC_IMPORT with clock {A: 1}
+   * 2. Client B downloads and applies the import
+   * 3. Client B's vector clock is NOT updated (missing A's clock entry)
+   * 4. Client B creates new ops with clock {B: 1} (missing A's entry)
+   * 5. These ops are compared as CONCURRENT with the import, not GREATER_THAN
+   * 6. SyncImportFilterService incorrectly filters them as "invalidated by import"
+   *
+   * @param ops Remote operations whose clocks should be merged into local clock
+   */
+  async mergeRemoteOpClocks(ops: Operation[]): Promise<void> {
+    if (ops.length === 0) return;
+
+    await this._ensureInit();
+
+    // Get current local clock
+    const currentClock = (await this.getVectorClock()) ?? {};
+
+    // Merge all remote ops' clocks into the local clock
+    const mergedClock = { ...currentClock };
+    for (const op of ops) {
+      for (const [clientId, counter] of Object.entries(op.vectorClock)) {
+        mergedClock[clientId] = Math.max(mergedClock[clientId] ?? 0, counter);
+      }
+    }
+
+    // Update the vector clock store
+    await this.db.put(
+      'vector_clock',
+      { clock: mergedClock, lastUpdate: Date.now() },
+      'current',
+    );
+    this._vectorClockCache = mergedClock;
+  }
+
+  /**
    * Gets the full vector clock entry including lastUpdate timestamp.
    * Used by legacy sync bridge to sync vector clock to pf.META_MODEL.
    */

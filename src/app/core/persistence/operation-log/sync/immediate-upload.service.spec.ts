@@ -78,7 +78,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150); // Debounce (100ms) + processing
+      tick(2100); // Debounce (2000ms) + processing
 
       expect(syncStatusEmitSpy).toHaveBeenCalledWith('syncStatusChange', 'IN_SYNC');
     }));
@@ -96,7 +96,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       // Piggybacked ops are processed internally by syncService.uploadPendingOps()
       // ImmediateUploadService should NOT show checkmark when there are piggybacked ops
@@ -115,7 +115,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       expect(syncStatusEmitSpy).not.toHaveBeenCalled();
     }));
@@ -152,7 +152,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       // Piggybacked ops are processed internally, no checkmark shown
       expect(syncStatusEmitSpy).not.toHaveBeenCalled();
@@ -173,7 +173,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       expect(mockSyncService.uploadPendingOps).not.toHaveBeenCalled();
     }));
@@ -185,7 +185,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       // Upload was called, but returned null - no checkmark shown
       expect(mockSyncService.uploadPendingOps).toHaveBeenCalled();
@@ -207,7 +207,7 @@ describe('ImmediateUploadService', () => {
 
       service.initialize();
       service.trigger();
-      tick(150);
+      tick(2100);
 
       expect(mockSyncService.uploadPendingOps).not.toHaveBeenCalled();
     }));
@@ -233,7 +233,7 @@ describe('ImmediateUploadService', () => {
       service.trigger();
       service.trigger();
 
-      tick(150);
+      tick(2100);
 
       // Should only upload once despite 5 triggers
       expect(mockSyncService.uploadPendingOps).toHaveBeenCalledTimes(1);

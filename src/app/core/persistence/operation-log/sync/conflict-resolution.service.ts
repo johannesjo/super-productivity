@@ -535,7 +535,7 @@ export class ConflictResolutionService {
    * - Fresh UUIDv7 ID
    * - Current entity state from NgRx store
    * - Merged vector clock (local + remote) + increment
-   * - Current timestamp
+   * - Preserved maximum timestamp from local ops (for correct LWW semantics)
    *
    * @param conflict - The conflict where local won
    * @returns New UPDATE operation, or undefined if entity not found
@@ -574,6 +574,12 @@ export class ConflictResolutionService {
     }
     const newClock = incrementVectorClock(mergedClock, clientId);
 
+    // Preserve the maximum timestamp from local ops.
+    // This is critical for LWW semantics: we're creating a new op to carry the
+    // local-winning state, so it should retain the original timestamp that caused
+    // it to win. Using Date.now() would give it an unfair advantage in future conflicts.
+    const preservedTimestamp = Math.max(...conflict.localOps.map((op) => op.timestamp));
+
     // Create the update operation
     const op: Operation = {
       id: uuidv7(),
@@ -584,7 +590,7 @@ export class ConflictResolutionService {
       payload: entityState,
       clientId,
       vectorClock: newClock,
-      timestamp: Date.now(),
+      timestamp: preservedTimestamp,
       schemaVersion: CURRENT_SCHEMA_VERSION,
     };
 

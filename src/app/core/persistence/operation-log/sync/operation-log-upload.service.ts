@@ -198,8 +198,8 @@ export class OperationLogUploadService {
         syncOps = await this.encryptionService.encryptOperations(syncOps, encryptKey);
       }
 
-      // Upload in batches (API supports up to 100 ops per request)
-      const MAX_OPS_PER_REQUEST = 100;
+      // Upload in batches (reduced from 100 to avoid 413 Payload Too Large errors)
+      const MAX_OPS_PER_REQUEST = 25;
       const chunks = chunkArray(syncOps, MAX_OPS_PER_REQUEST);
       const correspondingEntries = chunkArray(regularOps, MAX_OPS_PER_REQUEST);
 

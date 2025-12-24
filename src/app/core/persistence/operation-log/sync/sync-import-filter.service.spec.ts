@@ -244,19 +244,11 @@ describe('SyncImportFilterService', () => {
 
       const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-      // Valid: both SYNC_IMPORTs, Client A's op after latest import
-      // Invalid: Client A's two ops before the latest import
-      expect(result.validOps.length).toBe(3);
-      expect(result.validOps.map((op) => op.id)).toContain(
-        '019afd68-0010-7000-0000-000000000000',
-      ); // First import
-      expect(result.validOps.map((op) => op.id)).toContain(
-        '019afd68-0050-7000-0000-000000000000',
-      ); // Second import
-      expect(result.validOps.map((op) => op.id)).toContain(
-        '019afd68-0100-7000-0000-000000000000',
-      ); // After latest import
-      expect(result.invalidatedOps.length).toBe(2);
+      // Updated behavior: Client A was UNKNOWN to the latest import (no clientA entry)
+      // So ALL of Client A's ops are kept (parallel branch of work)
+      // Valid: all 5 ops (2 imports + 3 updates from unknown client)
+      expect(result.validOps.length).toBe(5);
+      expect(result.invalidatedOps.length).toBe(0);
     });
 
     it('should filter pre-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
@@ -308,9 +300,10 @@ describe('SyncImportFilterService', () => {
 
       const result = await service.filterOpsInvalidatedBySyncImport(oldOpsFromClientA);
 
-      // Both ops should be invalidated (CONCURRENT - no knowledge of import)
-      expect(result.invalidatedOps.length).toBe(2);
-      expect(result.validOps.length).toBe(0);
+      // Updated behavior: Client A was UNKNOWN to the import (no clientA entry)
+      // So Client A's ops are kept (parallel branch of work)
+      expect(result.validOps.length).toBe(2);
+      expect(result.invalidatedOps.length).toBe(0);
       expect(opLogStoreSpy.getLatestFullStateOp).toHaveBeenCalled();
     });
 
@@ -386,10 +379,10 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-        expect(result.validOps.length).toBe(1);
-        expect(result.validOps[0].opType).toBe(OpType.SyncImport);
-        expect(result.invalidatedOps.length).toBe(1);
-        expect(result.invalidatedOps[0].clientId).toBe('client-B');
+        // Updated behavior: Client B was UNKNOWN to the import (no clientB entry)
+        // So Client B's ops are kept (parallel branch of work)
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
       });
 
       it('should filter LESS_THAN ops (dominated by import)', async () => {
@@ -526,11 +519,10 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-        // Vector clock shows Client B had no knowledge of the import → FILTER
-        expect(result.validOps.length).toBe(1);
-        expect(result.validOps[0].opType).toBe(OpType.SyncImport);
-        expect(result.invalidatedOps.length).toBe(1);
-        expect(result.invalidatedOps[0].clientId).toBe('client-B');
+        // Updated behavior: Client B was UNKNOWN to the import (no clientB entry)
+        // So Client B's ops are kept (parallel branch of work)
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
       });
 
       it('should handle REPAIR operations the same as SYNC_IMPORT', async () => {
@@ -563,9 +555,181 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
+        // Updated behavior: Client B was UNKNOWN to the repair (no clientB entry)
+        // So Client B's ops are kept (parallel branch of work)
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+    });
+
+    describe('vector clock merge fix verification', () => {
+      /**
+       * These tests verify the bug fix for the vector clock merge issue.
+       *
+       * THE BUG:
+       * When a client receives and applies a SYNC_IMPORT, the local vector clock
+       * was NOT being updated to include the import's clock entries. This caused
+       * subsequent local operations to have vector clocks that were CONCURRENT
+       * with the import instead of GREATER_THAN, leading to incorrect filtering.
+       *
+       * THE FIX:
+       * After applying remote operations (including SYNC_IMPORT), we now call
+       * `mergeRemoteOpClocks()` to merge the remote ops' clocks into the local clock.
+       * This ensures subsequent local ops will have clocks that dominate the import.
+       */
+
+      it('should correctly identify ops created AFTER clock merge as valid', async () => {
+        // Scenario:
+        // 1. Client A creates SYNC_IMPORT with clock {clientA: 1}
+        // 2. Client B receives it, merges clocks → local clock becomes {clientA: 1, clientB: 5}
+        // 3. Client B creates new op with clock {clientA: 1, clientB: 6} (GREATER_THAN import)
+        // 4. This op should pass the filter
+
+        const existingSyncImport: Operation = {
+          id: '019afd68-0050-7000-0000-000000000000',
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          payload: { appDataComplete: {} },
+          clientId: 'client-A',
+          vectorClock: { clientA: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+          Promise.resolve(existingSyncImport),
+        );
+
+        // Op created AFTER merging import's clock - includes clientA: 1
+        const postMergeOp: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'New task after merge' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 1, clientB: 6 }, // Includes import's clock entry
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service.filterOpsInvalidatedBySyncImport(postMergeOp);
+
         expect(result.validOps.length).toBe(1);
-        expect(result.validOps[0].opType).toBe(OpType.Repair);
-        expect(result.invalidatedOps.length).toBe(1);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+
+      it('should correctly keep ops from unknown clients', async () => {
+        // Updated behavior: ops from clients unknown to the SYNC_IMPORT are KEPT
+        // Rationale: if the import didn't know about this client, the op is NOT
+        // "pre-import state" - it's from a parallel branch of work.
+        //
+        // Scenario:
+        // 1. Client A creates SYNC_IMPORT with clock {clientA: 1}
+        // 2. Client B (unknown to A) creates op with clock {clientB: 6}
+        // 3. Client B's op should be KEPT (client B was unknown to import)
+
+        const existingSyncImport: Operation = {
+          id: '019afd68-0050-7000-0000-000000000000',
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          payload: { appDataComplete: {} },
+          clientId: 'client-A',
+          vectorClock: { clientA: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+          Promise.resolve(existingSyncImport),
+        );
+
+        // Op from a client that was UNKNOWN to the import
+        const unknownClientOp: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'New task from unknown client' },
+            clientId: 'client-B',
+            vectorClock: { clientB: 6 }, // Client B is not in import's clock
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result = await service.filterOpsInvalidatedBySyncImport(unknownClientOp);
+
+        // Should be KEPT since client-B was unknown to the import
+        expect(result.validOps.length).toBe(1);
+        expect(result.invalidatedOps.length).toBe(0);
+      });
+
+      it('should handle multiple clients scenario correctly', async () => {
+        // Scenario with 3 clients:
+        // 1. Client A creates SYNC_IMPORT with clock {clientA: 1}
+        // 2. Client B merges → clock becomes {clientA: 1, clientB: 5}
+        // 3. Client C merges → clock becomes {clientA: 1, clientC: 3}
+        // 4. Both B and C create ops, both should pass filter
+
+        const existingSyncImport: Operation = {
+          id: '019afd68-0050-7000-0000-000000000000',
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: OpType.SyncImport,
+          entityType: 'ALL',
+          entityId: 'import-1',
+          payload: { appDataComplete: {} },
+          clientId: 'client-A',
+          vectorClock: { clientA: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        };
+
+        opLogStoreSpy.getLatestFullStateOp.and.returnValue(
+          Promise.resolve(existingSyncImport),
+        );
+
+        const opsFromMultipleClients: Operation[] = [
+          {
+            id: '019afd70-0001-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'From client B' },
+            clientId: 'client-B',
+            vectorClock: { clientA: 1, clientB: 6 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+          {
+            id: '019afd70-0002-7000-0000-000000000000',
+            actionType: '[Task] Update Task',
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-2',
+            payload: { title: 'From client C' },
+            clientId: 'client-C',
+            vectorClock: { clientA: 1, clientC: 4 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        ];
+
+        const result =
+          await service.filterOpsInvalidatedBySyncImport(opsFromMultipleClients);
+
+        expect(result.validOps.length).toBe(2);
+        expect(result.invalidatedOps.length).toBe(0);
       });
     });
   });

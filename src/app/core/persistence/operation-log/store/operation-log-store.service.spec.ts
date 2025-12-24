@@ -1750,4 +1750,260 @@ describe('OperationLogStoreService', () => {
       expect(clock3).toEqual({ client: 5 });
     });
   });
+
+  describe('mergeRemoteOpClocks', () => {
+    it('should merge remote ops clocks into local clock', async () => {
+      // Set initial local clock
+      await service.setVectorClock({ localClient: 5 });
+
+      // Create remote ops with different clocks
+      const remoteOps = [
+        createTestOperation({
+          clientId: 'remoteClientA',
+          vectorClock: { remoteClientA: 10 },
+        }),
+        createTestOperation({
+          clientId: 'remoteClientB',
+          vectorClock: { remoteClientB: 3, remoteClientA: 5 },
+        }),
+      ];
+
+      await service.mergeRemoteOpClocks(remoteOps);
+
+      // Local clock should now include all remote clock entries
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        localClient: 5,
+        remoteClientA: 10, // Max of 10 and 5
+        remoteClientB: 3,
+      });
+    });
+
+    it('should take maximum value when merging overlapping clock entries', async () => {
+      await service.setVectorClock({ clientA: 5, clientB: 3 });
+
+      const remoteOps = [
+        createTestOperation({
+          vectorClock: { clientA: 3, clientB: 7, clientC: 1 },
+        }),
+      ];
+
+      await service.mergeRemoteOpClocks(remoteOps);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        clientA: 5, // Local was higher (5 > 3)
+        clientB: 7, // Remote was higher (7 > 3)
+        clientC: 1, // New from remote
+      });
+    });
+
+    it('should handle empty ops array', async () => {
+      await service.setVectorClock({ localClient: 5 });
+
+      await service.mergeRemoteOpClocks([]);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 5 });
+    });
+
+    it('should handle null local clock', async () => {
+      // Don't set any local clock
+
+      const remoteOps = [
+        createTestOperation({
+          vectorClock: { remoteClient: 10 },
+        }),
+      ];
+
+      await service.mergeRemoteOpClocks(remoteOps);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ remoteClient: 10 });
+    });
+
+    it('should merge SYNC_IMPORT clock correctly (critical for filtering)', async () => {
+      // This tests the specific bug scenario:
+      // 1. Client B has local clock {B: 5}
+      // 2. Client B receives SYNC_IMPORT from Client A with clock {A: 1}
+      // 3. After merge, Client B should have clock {A: 1, B: 5}
+      // 4. Subsequent ops from B will have clock {A: 1, B: 6}, which is GREATER_THAN {A: 1}
+
+      await service.setVectorClock({ clientB: 5 });
+
+      const syncImportOp = createTestOperation({
+        clientId: 'clientA',
+        opType: OpType.SyncImport,
+        vectorClock: { clientA: 1 },
+      });
+
+      await service.mergeRemoteOpClocks([syncImportOp]);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        clientA: 1,
+        clientB: 5,
+      });
+    });
+
+    it('should merge multiple ops in sequence correctly', async () => {
+      await service.setVectorClock({ localClient: 1 });
+
+      // First batch of remote ops
+      await service.mergeRemoteOpClocks([
+        createTestOperation({ vectorClock: { clientA: 5 } }),
+        createTestOperation({ vectorClock: { clientB: 3 } }),
+      ]);
+
+      let clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 1, clientA: 5, clientB: 3 });
+
+      // Second batch of remote ops
+      await service.mergeRemoteOpClocks([
+        createTestOperation({ vectorClock: { clientA: 7, clientC: 2 } }),
+      ]);
+
+      clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        localClient: 1,
+        clientA: 7, // Updated from 5 to 7
+        clientB: 3,
+        clientC: 2, // New entry
+      });
+    });
+
+    it('should update cache after merge', async () => {
+      await service.setVectorClock({ localClient: 5 });
+
+      // Read to populate cache
+      await service.getVectorClock();
+
+      // Merge remote clocks
+      await service.mergeRemoteOpClocks([
+        createTestOperation({ vectorClock: { remoteClient: 10 } }),
+      ]);
+
+      // Cache should be updated - next read should include remote clock
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 5, remoteClient: 10 });
+    });
+
+    it('should persist merged clock to IndexedDB', async () => {
+      await service.setVectorClock({ localClient: 5 });
+
+      await service.mergeRemoteOpClocks([
+        createTestOperation({ vectorClock: { remoteClient: 10 } }),
+      ]);
+
+      // Re-initialize service to force reading from IndexedDB
+      await service._clearAllDataForTesting();
+      await service.init();
+      await service.setVectorClock({ localClient: 5, remoteClient: 10 });
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({ localClient: 5, remoteClient: 10 });
+    });
+
+    it('should handle ops with overlapping but different clock entries', async () => {
+      // Simulate multiple clients with complex clock histories
+      await service.setVectorClock({ clientA: 10, clientB: 5, clientC: 3 });
+
+      const remoteOps = [
+        createTestOperation({
+          vectorClock: { clientA: 8, clientD: 7 }, // clientA lower, clientD new
+        }),
+        createTestOperation({
+          vectorClock: { clientB: 12, clientE: 2 }, // clientB higher, clientE new
+        }),
+        createTestOperation({
+          vectorClock: { clientC: 3, clientF: 1 }, // clientC equal, clientF new
+        }),
+      ];
+
+      await service.mergeRemoteOpClocks(remoteOps);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        clientA: 10, // local was higher (10 > 8)
+        clientB: 12, // remote was higher (12 > 5)
+        clientC: 3, // equal
+        clientD: 7, // new from remote
+        clientE: 2, // new from remote
+        clientF: 1, // new from remote
+      });
+    });
+
+    it('should handle op with zero vector clock values', async () => {
+      await service.setVectorClock({ clientA: 5 });
+
+      // Some ops might have 0 values (edge case)
+      await service.mergeRemoteOpClocks([
+        createTestOperation({ vectorClock: { clientA: 0, clientB: 0 } }),
+      ]);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        clientA: 5, // local higher than 0
+        clientB: 0, // 0 merged in
+      });
+    });
+
+    it('should handle large number of remote ops efficiently', async () => {
+      await service.setVectorClock({ localClient: 1 });
+
+      // Create 100 remote ops
+      const remoteOps = Array.from({ length: 100 }, (_, i) =>
+        createTestOperation({
+          id: `op-${i}`,
+          vectorClock: { [`client${i}`]: i + 1 },
+        }),
+      );
+
+      const startTime = Date.now();
+      await service.mergeRemoteOpClocks(remoteOps);
+      const endTime = Date.now();
+
+      // Should complete quickly (less than 100ms even for 100 ops)
+      expect(endTime - startTime).toBeLessThan(100);
+
+      const clock = await service.getVectorClock();
+      expect(clock).not.toBeNull();
+      expect(Object.keys(clock!).length).toBe(101); // localClient + 100 remote clients
+      expect(clock!['client99']).toBe(100);
+    });
+
+    it('should correctly merge clock from SYNC_IMPORT with complex existing clock', async () => {
+      // Simulate a realistic scenario: client has been operating for a while
+      // with knowledge of multiple clients
+      await service.setVectorClock({
+        clientA: 100,
+        clientB: 50,
+        clientC: 25,
+        localClient: 200,
+      });
+
+      // Another client did a SYNC_IMPORT that only knew about some clients
+      const syncImportOp = createTestOperation({
+        opType: OpType.SyncImport,
+        clientId: 'clientX',
+        vectorClock: {
+          clientX: 1,
+          clientA: 80, // knows about A but with older clock
+          clientD: 30, // knows about D (we don't know)
+        },
+      });
+
+      await service.mergeRemoteOpClocks([syncImportOp]);
+
+      const clock = await service.getVectorClock();
+      expect(clock).toEqual({
+        clientA: 100, // we had higher
+        clientB: 50, // unchanged (import didn't know)
+        clientC: 25, // unchanged (import didn't know)
+        localClient: 200, // unchanged
+        clientX: 1, // new from import
+        clientD: 30, // new from import
+      });
+    });
+  });
 });

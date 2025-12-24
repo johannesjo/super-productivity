@@ -564,6 +564,12 @@ export class OperationLogSyncService {
         continue;
       }
 
+      // Preserve the maximum timestamp from the stale ops being replaced.
+      // This is critical for LWW conflict resolution: if we use Date.now(), the new op
+      // would have a later timestamp than the original user action, causing it to
+      // incorrectly win against concurrent ops that were actually made earlier.
+      const preservedTimestamp = Math.max(...entityOps.map((e) => e.op.timestamp));
+
       // Create new UPDATE op with current state and merged clock
       // IMPORTANT: Use 'LWW Update' action type to match lwwUpdateMetaReducer pattern.
       // This ensures the operation is properly applied on remote clients.
@@ -576,7 +582,7 @@ export class OperationLogSyncService {
         payload: entityState,
         clientId,
         vectorClock: newClock,
-        timestamp: Date.now(),
+        timestamp: preservedTimestamp,
         schemaVersion: CURRENT_SCHEMA_VERSION,
       };
 
@@ -1211,6 +1217,14 @@ export class OperationLogSyncService {
 
       if (appliedSeqs.length > 0) {
         await this.opLogStore.markApplied(appliedSeqs);
+
+        // CRITICAL: Merge remote ops' vector clocks into local clock.
+        // This ensures subsequent local operations have clocks that "dominate"
+        // the remote ops (GREATER_THAN instead of CONCURRENT).
+        // Without this, ops created after a SYNC_IMPORT would be incorrectly
+        // filtered by SyncImportFilterService as "invalidated by import".
+        await this.opLogStore.mergeRemoteOpClocks(result.appliedOps);
+
         OpLog.normal(
           `OperationLogSyncService: Applied and marked ${appliedSeqs.length} remote ops`,
         );

@@ -259,14 +259,14 @@ describe('OperationLogUploadService', () => {
       });
 
       it('should batch large uploads', async () => {
-        // Create 150 pending ops to test batching (max 100 per request)
-        const pendingOps = Array.from({ length: 150 }, (_, i) =>
+        // Create 50 pending ops to test batching (max 25 per request = 2 batches)
+        const pendingOps = Array.from({ length: 50 }, (_, i) =>
           createMockEntry(i + 1, `op-${i}`, 'client-1'),
         );
         mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve(pendingOps));
         mockApiProvider.uploadOps.and.callFake(async (ops) => ({
           results: ops.map((op) => ({ opId: op.id, accepted: true })),
-          latestSeq: 150,
+          latestSeq: 50,
           newOps: [],
         }));
 
@@ -352,8 +352,8 @@ describe('OperationLogUploadService', () => {
         });
 
         it('should never regress sequence across multi-chunk uploads', async () => {
-          // Create 150 ops to trigger 2 chunks
-          const pendingOps = Array.from({ length: 150 }, (_, i) =>
+          // Create 50 ops to trigger 2 chunks (max 25 per request)
+          const pendingOps = Array.from({ length: 50 }, (_, i) =>
             createMockEntry(i + 1, `op-${i}`, 'client-1'),
           );
           mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));
@@ -412,8 +412,8 @@ describe('OperationLogUploadService', () => {
         });
 
         it('should track highest received sequence across chunks with hasMorePiggyback', async () => {
-          // Create 150 ops to trigger 2 chunks
-          const pendingOps = Array.from({ length: 150 }, (_, i) =>
+          // Create 50 ops to trigger 2 chunks (max 25 per request)
+          const pendingOps = Array.from({ length: 50 }, (_, i) =>
             createMockEntry(i + 1, `op-${i}`, 'client-1'),
           );
           mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(40));

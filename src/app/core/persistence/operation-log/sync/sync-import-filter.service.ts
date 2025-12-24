@@ -119,10 +119,13 @@ export class SyncImportFilterService {
       // - GREATER_THAN: Op was created by a client that SAW the import → KEEP
       // - EQUAL: Same causal history as import → KEEP
       // - LESS_THAN: Op is dominated by import (created before with less history) → FILTER
-      // - CONCURRENT: Op created WITHOUT knowledge of import → FILTER
+      // - CONCURRENT: Op created WITHOUT knowledge of import → handled below
       //
-      // NOTE: CONCURRENT ops are filtered because they reference pre-import state,
-      // even though they may have been created "after" the import in wall-clock time.
+      // SPECIAL CASE for CONCURRENT ops:
+      // If the op's client is NOT in the SYNC_IMPORT's clock, this means the
+      // SYNC_IMPORT was created without knowledge of that client. In this case,
+      // the op is NOT "pre-import state" - it's from a client that the import
+      // didn't know about. These ops should be KEPT and applied.
       const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
 
       if (
@@ -131,9 +134,36 @@ export class SyncImportFilterService {
       ) {
         // Op was created by a client that had knowledge of the import
         validOps.push(op);
+      } else if (comparison === VectorClockComparison.CONCURRENT) {
+        // Check if the op's client was unknown when the SYNC_IMPORT was created
+        const opClientValue = op.vectorClock[op.clientId] ?? 0;
+        const importClientValue = latestImport.vectorClock[op.clientId] ?? 0;
+
+        if (importClientValue === 0) {
+          // The SYNC_IMPORT didn't know about this client at all
+          // This op is NOT "pre-import state" - it's from a parallel branch
+          // that the import didn't include. Keep it and apply.
+          OpLog.verbose(
+            `SyncImportFilterService: Keeping CONCURRENT op ${op.id} - ` +
+              `client ${op.clientId} was unknown to SYNC_IMPORT`,
+          );
+          validOps.push(op);
+        } else if (opClientValue > importClientValue) {
+          // The op's client counter is higher than what the import knew about
+          // This means the op was created AFTER the import's knowledge of this client
+          OpLog.verbose(
+            `SyncImportFilterService: Keeping CONCURRENT op ${op.id} - ` +
+              `client counter ${opClientValue} > import's ${importClientValue}`,
+          );
+          validOps.push(op);
+        } else {
+          // The op was created before or at the import's knowledge level for this client
+          // AND the import has entries the op doesn't know about
+          // This is truly pre-import state - filter it
+          invalidatedOps.push(op);
+        }
       } else {
-        // LESS_THAN or CONCURRENT: Op created without knowledge of import
-        // These ops reference the pre-import state which no longer exists
+        // LESS_THAN: Op is dominated by import - definitely pre-import state
         invalidatedOps.push(op);
       }
     }

@@ -13,7 +13,10 @@ import { PfapiService } from '../../../../pfapi/pfapi.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
 import { Operation, OpType, RepairPayload } from '../operation.types';
 import { uuidv7 } from '../../../../util/uuid-v7';
-import { incrementVectorClock } from '../../../../pfapi/api/util/vector-clock';
+import {
+  incrementVectorClock,
+  mergeVectorClocks,
+} from '../../../../pfapi/api/util/vector-clock';
 import { SnackService } from '../../../snack/snack.service';
 import { T } from '../../../../t.const';
 import { ValidateStateService } from '../processing/validate-state.service';
@@ -141,6 +144,20 @@ export class OperationLogHydratorService {
           );
         }
 
+        // CRITICAL: Restore snapshot's vector clock to the vector_clock store.
+        // This is necessary because:
+        // 1. hydrateFromRemoteSync saves the clock in the snapshot but NOT in the store
+        // 2. When user creates new ops, incrementAndStoreVectorClock reads from the store
+        // 3. Without this, new ops would have clocks missing entries from the SYNC_IMPORT
+        // 4. Those ops would be CONCURRENT with the SYNC_IMPORT and get filtered on sync
+        if (snapshot.vectorClock && Object.keys(snapshot.vectorClock).length > 0) {
+          await this.opLogStore.setVectorClock(snapshot.vectorClock);
+          OpLog.normal(
+            'OperationLogHydratorService: Restored vector clock from snapshot',
+            { clockSize: Object.keys(snapshot.vectorClock).length },
+          );
+        }
+
         // 3. Hydrate NgRx with (possibly repaired) snapshot
         this.store.dispatch(loadAllData({ appDataComplete: stateToLoad }));
 
@@ -173,6 +190,9 @@ export class OperationLogHydratorService {
                 loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
               );
             }
+            // Merge the full-state op's clock into local clock
+            // This ensures subsequent ops have clocks that dominate this SYNC_IMPORT
+            await this.opLogStore.mergeRemoteOpClocks([lastOp]);
             // No snapshot save needed - full state ops already contain complete state
             // Snapshot will be saved after next batch of regular operations
           } else {
@@ -194,6 +214,10 @@ export class OperationLogHydratorService {
             if (tailReplayResult.failedOp) {
               throw tailReplayResult.failedOp.error;
             }
+
+            // Merge replayed ops' clocks into local clock
+            // This ensures subsequent ops have clocks that dominate these tail ops
+            await this.opLogStore.mergeRemoteOpClocks(opsToReplay);
 
             // CHECKPOINT C: Validate state after replaying tail operations
             // Must validate BEFORE saving snapshot to avoid persisting corrupted state
@@ -254,6 +278,8 @@ export class OperationLogHydratorService {
               loadAllData({ appDataComplete: appData as AppDataCompleteNew }),
             );
           }
+          // Merge the full-state op's clock into local clock
+          await this.opLogStore.mergeRemoteOpClocks([lastOp]);
           // No snapshot save needed - full state ops already contain complete state
         } else {
           // A.7.13: Migrate all operations before replay
@@ -274,6 +300,9 @@ export class OperationLogHydratorService {
           if (fullReplayResult.failedOp) {
             throw fullReplayResult.failedOp.error;
           }
+
+          // Merge replayed ops' clocks into local clock
+          await this.opLogStore.mergeRemoteOpClocks(opsToReplay);
 
           // CHECKPOINT C: Validate state after replaying all operations
           // Must validate BEFORE saving snapshot to avoid persisting corrupted state
@@ -649,9 +678,25 @@ export class OperationLogHydratorService {
       // 2. Get client ID for vector clock
       const clientId = await this.pfapiService.pf.metaModel.loadClientId();
 
-      // 3. Create SYNC_IMPORT operation
-      const currentClock = await this.vectorClockService.getCurrentVectorClock();
-      const newClock = incrementVectorClock(currentClock, clientId);
+      // 3. Create SYNC_IMPORT operation with merged clock
+      // CRITICAL: The SYNC_IMPORT's clock must include ALL known clients, not just local ones.
+      // If we only use the local clock, ops from other clients will be CONCURRENT with
+      // this import and get filtered out by SyncImportFilterService.
+      // By merging the PFAPI meta model's clock (which includes synced clients),
+      // we ensure ops created AFTER this sync point are GREATER_THAN the import.
+      const localClock = await this.vectorClockService.getCurrentVectorClock();
+      const pfapiMetaModel = await this.pfapiService.pf.metaModel.load();
+      const pfapiClock = pfapiMetaModel?.vectorClock || {};
+      const mergedClock = mergeVectorClocks(localClock, pfapiClock);
+      const newClock = incrementVectorClock(mergedClock, clientId);
+      OpLog.normal(
+        'OperationLogHydratorService: Creating SYNC_IMPORT with merged clock',
+        {
+          localClockSize: Object.keys(localClock).length,
+          pfapiClockSize: Object.keys(pfapiClock).length,
+          mergedClockSize: Object.keys(mergedClock).length,
+        },
+      );
 
       const op: Operation = {
         id: uuidv7(),
@@ -697,7 +742,15 @@ export class OperationLogHydratorService {
       });
       OpLog.normal('OperationLogHydratorService: Saved state cache after sync');
 
-      // 8. Dispatch loadAllData to update NgRx
+      // 8. Update vector clock store to match the new clock
+      // This is critical because:
+      // - The SYNC_IMPORT was appended with source='remote', so store wasn't updated
+      // - If user creates new ops in this session, incrementAndStoreVectorClock reads from store
+      // - Without this, new ops would have clocks missing entries from the SYNC_IMPORT
+      await this.opLogStore.setVectorClock(newClock);
+      OpLog.normal('OperationLogHydratorService: Updated vector clock store after sync');
+
+      // 9. Dispatch loadAllData to update NgRx
       this.store.dispatch(loadAllData({ appDataComplete: dataToLoad }));
       OpLog.normal(
         'OperationLogHydratorService: Dispatched loadAllData with synced data',

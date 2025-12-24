@@ -58,6 +58,8 @@ describe('OperationLogSyncService', () => {
       'append',
       'appendWithVectorClockUpdate',
       'markApplied',
+      'markFailed',
+      'mergeRemoteOpClocks',
       'getUnsyncedByEntity',
       'getOpsAfterSeq',
       'filterNewOps',
@@ -69,6 +71,8 @@ describe('OperationLogSyncService', () => {
     opLogStoreSpy.filterNewOps.and.callFake((ops: any[]) => Promise.resolve(ops));
     // By default, no full-state ops in store
     opLogStoreSpy.getLatestFullStateOp.and.returnValue(Promise.resolve(undefined));
+    // By default, mergeRemoteOpClocks succeeds
+    opLogStoreSpy.mergeRemoteOpClocks.and.resolveTo();
     vectorClockServiceSpy = jasmine.createSpyObj('VectorClockService', [
       'getEntityFrontier',
       'getSnapshotVectorClock',
@@ -3489,6 +3493,176 @@ describe('OperationLogSyncService', () => {
       );
       // Verify plain append was NOT called
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('mergeRemoteOpClocks integration', () => {
+    it('should merge remote ops clocks after successfully applying remote ops', async () => {
+      // Setup: Remote ops to be applied
+      const remoteOps: Operation[] = [
+        {
+          id: '019afd68-0001-7000-0000-000000000000',
+          actionType: '[Task] Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Updated' },
+          clientId: 'remoteClient',
+          vectorClock: { remoteClient: 5 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        {
+          id: '019afd68-0002-7000-0000-000000000000',
+          actionType: '[Task] Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          payload: { title: 'Updated 2' },
+          clientId: 'remoteClient',
+          vectorClock: { remoteClient: 6 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ];
+
+      // Setup: append returns seq numbers
+      let seqCounter = 1;
+      opLogStoreSpy.append.and.callFake(async () => seqCounter++);
+      opLogStoreSpy.markApplied.and.resolveTo();
+
+      // Setup: applyOperations returns success for all ops
+      operationApplierServiceSpy.applyOperations.and.resolveTo({
+        appliedOps: remoteOps,
+      });
+
+      // Act: Process remote ops through the private method
+      await (service as any)._applyNonConflictingOps(remoteOps);
+
+      // Assert: mergeRemoteOpClocks was called with the applied ops
+      expect(opLogStoreSpy.mergeRemoteOpClocks).toHaveBeenCalledTimes(1);
+      expect(opLogStoreSpy.mergeRemoteOpClocks).toHaveBeenCalledWith(remoteOps);
+    });
+
+    it('should NOT call mergeRemoteOpClocks when no ops are applied', async () => {
+      // Setup: Empty ops array
+      const remoteOps: Operation[] = [];
+
+      // Act: Process empty ops
+      await (service as any)._applyNonConflictingOps(remoteOps);
+
+      // Assert: mergeRemoteOpClocks was NOT called
+      expect(opLogStoreSpy.mergeRemoteOpClocks).not.toHaveBeenCalled();
+    });
+
+    it('should merge clocks for partially applied ops on failure', async () => {
+      // Setup: Three remote ops
+      const remoteOps: Operation[] = [
+        {
+          id: '019afd68-0001-7000-0000-000000000000',
+          actionType: '[Task] Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'Op 1' },
+          clientId: 'clientA',
+          vectorClock: { clientA: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        {
+          id: '019afd68-0002-7000-0000-000000000000',
+          actionType: '[Task] Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          payload: { title: 'Op 2' },
+          clientId: 'clientA',
+          vectorClock: { clientA: 2 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+        {
+          id: '019afd68-0003-7000-0000-000000000000',
+          actionType: '[Task] Update',
+          opType: OpType.Update,
+          entityType: 'TASK',
+          entityId: 'task-3',
+          payload: { title: 'Op 3' },
+          clientId: 'clientA',
+          vectorClock: { clientA: 3 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        },
+      ];
+
+      // Setup: append returns seq numbers
+      let seqCounter = 1;
+      opLogStoreSpy.append.and.callFake(async () => seqCounter++);
+      opLogStoreSpy.markApplied.and.resolveTo();
+      opLogStoreSpy.markFailed.and.resolveTo();
+      validateStateServiceSpy.validateAndRepairCurrentState.and.resolveTo();
+
+      // Setup: First two ops succeed, third fails
+      operationApplierServiceSpy.applyOperations.and.resolveTo({
+        appliedOps: [remoteOps[0], remoteOps[1]],
+        failedOp: {
+          op: remoteOps[2],
+          error: new Error('Test failure'),
+        },
+      });
+
+      // Act: Process remote ops - expect it to throw due to failure
+      await expectAsync(
+        (service as any)._applyNonConflictingOps(remoteOps),
+      ).toBeRejectedWithError('Test failure');
+
+      // Assert: mergeRemoteOpClocks was called with only the successfully applied ops
+      expect(opLogStoreSpy.mergeRemoteOpClocks).toHaveBeenCalledTimes(1);
+      expect(opLogStoreSpy.mergeRemoteOpClocks).toHaveBeenCalledWith([
+        remoteOps[0],
+        remoteOps[1],
+      ]);
+    });
+
+    it('should call mergeRemoteOpClocks after markApplied (ensures correct order)', async () => {
+      // This test verifies the order of operations is:
+      // 1. markApplied - update op status
+      // 2. mergeRemoteOpClocks - update local vector clock
+      // 3. Log success message
+
+      const remoteOp: Operation = {
+        id: '019afd68-0001-7000-0000-000000000000',
+        actionType: '[Task] Update',
+        opType: OpType.Update,
+        entityType: 'TASK',
+        entityId: 'task-1',
+        payload: { title: 'Updated' },
+        clientId: 'remoteClient',
+        vectorClock: { remoteClient: 10 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      };
+
+      opLogStoreSpy.append.and.resolveTo(1);
+      opLogStoreSpy.markApplied.and.resolveTo();
+      operationApplierServiceSpy.applyOperations.and.resolveTo({
+        appliedOps: [remoteOp],
+      });
+
+      // Track call order
+      const callOrder: string[] = [];
+      opLogStoreSpy.markApplied.and.callFake(async () => {
+        callOrder.push('markApplied');
+      });
+      opLogStoreSpy.mergeRemoteOpClocks.and.callFake(async () => {
+        callOrder.push('mergeRemoteOpClocks');
+      });
+
+      await (service as any)._applyNonConflictingOps([remoteOp]);
+
+      // Verify order: markApplied is called first, then mergeRemoteOpClocks
+      expect(callOrder).toEqual(['markApplied', 'mergeRemoteOpClocks']);
     });
   });
 });
