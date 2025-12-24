@@ -893,18 +893,35 @@ export class OperationLogSyncService {
     // SYNC_IMPORT replaces the entire state. Local operations may reference
     // entities that existed before but are now gone. We must skip these to
     // prevent creating dangling references (e.g., Today tag → non-existent task).
+    //
+    // IMPORTANT: We must track entities that will be CREATED by ops in this sequence.
+    // If an ADD op creates entity X, then UPDATE/DELETE ops for X should NOT be skipped,
+    // even if X doesn't exist in the SYNC_IMPORT state yet.
     const validOps: Operation[] = [];
     const skippedOps: { op: Operation; missingIds: string[] }[] = [];
+
+    // First pass: collect entity IDs that will be created by CREATE ops in this sequence
+    const entitiesCreatedBySequence = new Set<string>();
+    for (const op of localSyncedOps) {
+      if (op.opType === OpType.Create && op.entityId) {
+        entitiesCreatedBySequence.add(op.entityId);
+      }
+    }
 
     for (const op of localSyncedOps) {
       const missingEntityIds = await this._checkOperationEntitiesExist(op);
 
-      if (missingEntityIds.length > 0) {
+      // Filter out missing entities that will be created by earlier ops in this sequence
+      const trulyMissingIds = missingEntityIds.filter(
+        (id) => !entitiesCreatedBySequence.has(id),
+      );
+
+      if (trulyMissingIds.length > 0) {
         OpLog.warn(
           `OperationLogSyncService: Skipping op ${op.id} (${op.actionType}) - ` +
-            `target entities deleted by SYNC_IMPORT: ${missingEntityIds.join(', ')}`,
+            `target entities deleted by SYNC_IMPORT: ${trulyMissingIds.join(', ')}`,
         );
-        skippedOps.push({ op, missingIds: missingEntityIds });
+        skippedOps.push({ op, missingIds: trulyMissingIds });
       } else {
         validOps.push(op);
       }
