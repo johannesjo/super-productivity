@@ -1257,7 +1257,10 @@ export class OperationLogSyncService {
     // Handle old snapshot format migration
     this._handleOldSnapshotFormat(snapshotEntityKeys);
 
-    for (const remoteOp of remoteOps) {
+    // PERF: Process in batches and yield to event loop to prevent UI hangs
+    const CONFLICT_CHECK_BATCH_SIZE = 100;
+    for (let i = 0; i < remoteOps.length; i++) {
+      const remoteOp = remoteOps[i];
       const result = this._checkOpForConflicts(remoteOp, {
         localPendingOpsByEntity,
         appliedFrontierByEntity,
@@ -1270,6 +1273,11 @@ export class OperationLogSyncService {
         conflicts.push(result.conflict);
       } else if (!result.isStaleOrDuplicate) {
         nonConflicting.push(remoteOp);
+      }
+
+      // Yield to event loop after each batch to keep UI responsive
+      if ((i + 1) % CONFLICT_CHECK_BATCH_SIZE === 0 && i + 1 < remoteOps.length) {
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
     }
     return { nonConflicting, conflicts };

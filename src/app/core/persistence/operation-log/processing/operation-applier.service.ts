@@ -99,23 +99,15 @@ export class OperationApplierService {
       );
     } else {
       OpLog.normal(`OperationApplierService: Applying ${ops.length} operations`);
-      // Debug: log operation types for high-volume debugging
-      if (ops.length > 30) {
-        const opTypeCounts = new Map<string, number>();
-        for (const op of ops) {
-          const key = op.opType;
-          opTypeCounts.set(key, (opTypeCounts.get(key) || 0) + 1);
-        }
-        console.log(
-          `[ol] OperationApplierService: Op type breakdown:`,
-          Object.fromEntries(opTypeCounts),
-        );
-      }
     }
-    OpLog.verbose(
-      'OperationApplierService: Operation IDs:',
-      ops.map((op) => op.id),
-    );
+    // PERF: Skip expensive debug logging - only enable for explicit debugging
+    // To debug, uncomment the lines below:
+    // if (ops.length > 30) {
+    //   const opTypeCounts = new Map<string, number>();
+    //   for (const op of ops) opTypeCounts.set(op.opType, (opTypeCounts.get(op.opType) || 0) + 1);
+    //   console.log('[ol] Op type breakdown:', Object.fromEntries(opTypeCounts));
+    // }
+    // OpLog.verbose('Operation IDs:', ops.map((op) => op.id));
 
     const appliedOps: Operation[] = [];
     let hadArchiveAffectingOp = false;

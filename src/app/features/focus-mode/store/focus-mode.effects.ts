@@ -81,6 +81,7 @@ export class FocusModeEffects {
       this.store.select(selectFocusModeConfig),
       this.store.select(selectIsFocusModeEnabled),
     ]).pipe(
+      skipDuringSync(),
       switchMap(([cfg, isFocusModeEnabled]) =>
         isFocusModeEnabled && cfg?.isSyncSessionWithTracking
           ? this.taskService.currentTaskId$.pipe(
@@ -789,6 +790,7 @@ export class FocusModeEffects {
   playTickSound$ = createEffect(
     () =>
       this.store.select(selectors.selectTimer).pipe(
+        skipDuringSync(),
         filter(
           (timer) => timer.isRunning && timer.purpose === 'work' && timer.elapsed > 0,
         ),

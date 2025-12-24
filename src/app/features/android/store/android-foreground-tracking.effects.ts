@@ -19,12 +19,14 @@ import { DateService } from '../../../core/date/date.service';
 import { Task } from '../../tasks/task.model';
 import { selectTimer } from '../../focus-mode/store/focus-mode.selectors';
 import { combineLatest } from 'rxjs';
+import { HydrationStateService } from '../../../core/persistence/operation-log/processing/hydration-state.service';
 
 @Injectable()
 export class AndroidForegroundTrackingEffects {
   private _store = inject(Store);
   private _taskService = inject(TaskService);
   private _dateService = inject(DateService);
+  private _hydrationState = inject(HydrationStateService);
 
   /**
    * Start/stop the native foreground service when the current task changes.
@@ -40,6 +42,8 @@ export class AndroidForegroundTrackingEffects {
           this._store.select(selectCurrentTask),
           this._store.select(selectTimer),
         ]).pipe(
+          // PERF: Skip during hydration/sync to avoid unnecessary processing
+          filter(() => !this._hydrationState.isApplyingRemoteOps()),
           map(([currentTask, timer]) => ({
             currentTask,
             isFocusModeActive: timer.purpose !== null,
@@ -122,6 +126,8 @@ export class AndroidForegroundTrackingEffects {
           this._store.select(selectCurrentTask),
           this._store.select(selectTimer),
         ]).pipe(
+          // PERF: Skip during hydration/sync to avoid unnecessary processing
+          filter(() => !this._hydrationState.isApplyingRemoteOps()),
           map(([currentTask, timer]) => ({
             taskId: currentTask?.id || null,
             timeSpent: currentTask?.timeSpent || 0,
