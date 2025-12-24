@@ -1867,6 +1867,344 @@ describe('OperationLogSyncService', () => {
         }),
       );
     });
+
+    describe('entity existence filtering (ADD-then-DELETE sequence)', () => {
+      // These tests verify the fix for the bug where DELETE ops were incorrectly
+      // skipped when their target entity was created by an earlier ADD op in the
+      // same replay sequence. The filtering logic now tracks entities that will be
+      // created by CREATE ops and doesn't skip UPDATE/DELETE ops targeting them.
+      //
+      // Uses createOp and createEntry helpers from parent describe block.
+
+      const testClientId = 'test-client-id';
+
+      it('should NOT skip DELETE ops when ADD op for same entity is in the sequence', async () => {
+        // Bug scenario: ADD creates entity, DELETE for same entity was incorrectly skipped
+        // because entity didn't exist in SYNC_IMPORT state yet
+
+        const syncImportOp = createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-A',
+          entityType: 'ALL',
+        });
+
+        // Sequence: ADD task -> UPDATE task -> DELETE task
+        const addTaskOp = createOp({
+          id: '019afd68-0051-7000-0000-000000000000', // AFTER SYNC_IMPORT
+          opType: OpType.Create,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-to-delete',
+          actionType: '[Task Shared] addTask',
+        });
+
+        const updateTaskOp = createOp({
+          id: '019afd68-0052-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-to-delete',
+          actionType: '[Task Shared] updateTask',
+        });
+
+        const deleteTaskOp = createOp({
+          id: '019afd68-0053-7000-0000-000000000000',
+          opType: OpType.Delete,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-to-delete',
+          actionType: '[Task Shared] deleteTask',
+        });
+
+        // Mock: return ADD, UPDATE, DELETE sequence as local synced ops
+        (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+          .createSpy('getOpsAfterSeq')
+          .and.returnValue(
+            Promise.resolve([
+              createEntry(addTaskOp, { syncedAt: Date.now() - 1000 }),
+              createEntry(updateTaskOp, { syncedAt: Date.now() - 900 }),
+              createEntry(deleteTaskOp, { syncedAt: Date.now() - 800 }),
+            ]),
+          );
+
+        // Mock: entity doesn't exist in store (SYNC_IMPORT doesn't have it)
+        // But since ADD is in sequence, DELETE should still be included
+        spyOn(service as any, '_checkOperationEntitiesExist').and.callFake(
+          async (op: Operation) => {
+            // Simulate: entity doesn't exist in current state after SYNC_IMPORT
+            // This would cause DELETE to be skipped without the fix
+            if (op.entityId === 'task-to-delete' && op.opType !== OpType.Create) {
+              return ['task-to-delete']; // Report as missing
+            }
+            return [];
+          },
+        );
+
+        opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+        opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+        opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+        operationApplierServiceSpy.applyOperations.and.returnValue(
+          Promise.resolve({ appliedOps: [] }),
+        );
+
+        await (service as any)._processRemoteOps([syncImportOp]);
+
+        // Verify applyOperations was called twice (SYNC_IMPORT + replay)
+        expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+        // Second call (replay) should include ALL THREE ops: ADD, UPDATE, DELETE
+        const replayCallArgs =
+          operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+        const replayedOps = replayCallArgs[0] as Operation[];
+
+        expect(replayedOps.length).toBe(3);
+        expect(replayedOps.map((op) => op.opType)).toEqual([
+          OpType.Create,
+          OpType.Update,
+          OpType.Delete,
+        ]);
+        expect(replayedOps.every((op) => op.entityId === 'task-to-delete')).toBe(true);
+      });
+
+      it('should still skip ops for entities NOT created in the sequence', async () => {
+        // Verify that ops targeting truly missing entities are still skipped
+
+        const syncImportOp = createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-A',
+          entityType: 'ALL',
+        });
+
+        // Op targeting entity that was never created in this sequence
+        const updateMissingTaskOp = createOp({
+          id: '019afd68-0051-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'truly-missing-task',
+          actionType: '[Task Shared] updateTask',
+        });
+
+        (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+          .createSpy('getOpsAfterSeq')
+          .and.returnValue(
+            Promise.resolve([
+              createEntry(updateMissingTaskOp, { syncedAt: Date.now() - 1000 }),
+            ]),
+          );
+
+        // Mock: entity doesn't exist and NO create op for it
+        spyOn(service as any, '_checkOperationEntitiesExist').and.returnValue(
+          Promise.resolve(['truly-missing-task']),
+        );
+
+        opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+        opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+        opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+        operationApplierServiceSpy.applyOperations.and.returnValue(
+          Promise.resolve({ appliedOps: [] }),
+        );
+
+        await (service as any)._processRemoteOps([syncImportOp]);
+
+        // applyOperations should only be called once (for SYNC_IMPORT)
+        // No replay because the only op was skipped
+        expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(1);
+      });
+
+      it('should handle mixed scenario: some entities created, some truly missing', async () => {
+        const syncImportOp = createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-A',
+          entityType: 'ALL',
+        });
+
+        // Entity 1: Created then deleted (should be included)
+        const addTask1 = createOp({
+          id: '019afd68-0051-7000-0000-000000000000',
+          opType: OpType.Create,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-created',
+          actionType: '[Task Shared] addTask',
+        });
+        const deleteTask1 = createOp({
+          id: '019afd68-0052-7000-0000-000000000000',
+          opType: OpType.Delete,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-created',
+          actionType: '[Task Shared] deleteTask',
+        });
+
+        // Entity 2: Truly missing (should be skipped)
+        const updateMissing = createOp({
+          id: '019afd68-0053-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-truly-missing',
+          actionType: '[Task Shared] updateTask',
+        });
+
+        // Entity 3: Already exists in store (should be included)
+        const updateExisting = createOp({
+          id: '019afd68-0054-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-existing',
+          actionType: '[Task Shared] updateTask',
+        });
+
+        (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+          .createSpy('getOpsAfterSeq')
+          .and.returnValue(
+            Promise.resolve([
+              createEntry(addTask1, { syncedAt: Date.now() - 1000 }),
+              createEntry(deleteTask1, { syncedAt: Date.now() - 900 }),
+              createEntry(updateMissing, { syncedAt: Date.now() - 800 }),
+              createEntry(updateExisting, { syncedAt: Date.now() - 700 }),
+            ]),
+          );
+
+        spyOn(service as any, '_checkOperationEntitiesExist').and.callFake(
+          async (op: Operation) => {
+            // task-created: missing in store (but has CREATE op)
+            if (op.entityId === 'task-created' && op.opType !== OpType.Create) {
+              return ['task-created'];
+            }
+            // task-truly-missing: missing and no CREATE op
+            if (op.entityId === 'task-truly-missing') {
+              return ['task-truly-missing'];
+            }
+            // task-existing: exists in store
+            return [];
+          },
+        );
+
+        opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+        opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+        opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+        operationApplierServiceSpy.applyOperations.and.returnValue(
+          Promise.resolve({ appliedOps: [] }),
+        );
+
+        await (service as any)._processRemoteOps([syncImportOp]);
+
+        expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+        const replayCallArgs =
+          operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+        const replayedOps = replayCallArgs[0] as Operation[];
+
+        // Should include: addTask1, deleteTask1, updateExisting
+        // Should NOT include: updateMissing
+        expect(replayedOps.length).toBe(3);
+        expect(replayedOps.map((op) => op.entityId)).toEqual([
+          'task-created',
+          'task-created',
+          'task-existing',
+        ]);
+        expect(replayedOps.map((op) => op.opType)).toEqual([
+          OpType.Create,
+          OpType.Delete,
+          OpType.Update,
+        ]);
+      });
+
+      it('should handle multiple entities created by same ADD sequence', async () => {
+        // Scenario: Multiple tasks created and some deleted
+
+        const syncImportOp = createOp({
+          id: '019afd68-0050-7000-0000-000000000000',
+          opType: OpType.SyncImport,
+          clientId: 'client-A',
+          entityType: 'ALL',
+        });
+
+        const addTask1 = createOp({
+          id: '019afd68-0051-7000-0000-000000000000',
+          opType: OpType.Create,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          actionType: '[Task Shared] addTask',
+        });
+        const addTask2 = createOp({
+          id: '019afd68-0052-7000-0000-000000000000',
+          opType: OpType.Create,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          actionType: '[Task Shared] addTask',
+        });
+        const deleteTask1 = createOp({
+          id: '019afd68-0053-7000-0000-000000000000',
+          opType: OpType.Delete,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          actionType: '[Task Shared] deleteTask',
+        });
+        const updateTask2 = createOp({
+          id: '019afd68-0054-7000-0000-000000000000',
+          opType: OpType.Update,
+          clientId: testClientId,
+          entityType: 'TASK',
+          entityId: 'task-2',
+          actionType: '[Task Shared] updateTask',
+        });
+
+        (opLogStoreSpy as any).getOpsAfterSeq = jasmine
+          .createSpy('getOpsAfterSeq')
+          .and.returnValue(
+            Promise.resolve([
+              createEntry(addTask1, { syncedAt: Date.now() - 1000 }),
+              createEntry(addTask2, { syncedAt: Date.now() - 900 }),
+              createEntry(deleteTask1, { syncedAt: Date.now() - 800 }),
+              createEntry(updateTask2, { syncedAt: Date.now() - 700 }),
+            ]),
+          );
+
+        // Both entities missing from store but have CREATE ops
+        spyOn(service as any, '_checkOperationEntitiesExist').and.callFake(
+          async (op: Operation) => {
+            if (op.opType !== OpType.Create) {
+              return [op.entityId!]; // Report as missing
+            }
+            return [];
+          },
+        );
+
+        opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+        opLogStoreSpy.append.and.returnValue(Promise.resolve(1));
+        opLogStoreSpy.markApplied.and.returnValue(Promise.resolve());
+        operationApplierServiceSpy.applyOperations.and.returnValue(
+          Promise.resolve({ appliedOps: [] }),
+        );
+
+        await (service as any)._processRemoteOps([syncImportOp]);
+
+        expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalledTimes(2);
+
+        const replayCallArgs =
+          operationApplierServiceSpy.applyOperations.calls.argsFor(1);
+        const replayedOps = replayCallArgs[0] as Operation[];
+
+        // All 4 ops should be included
+        expect(replayedOps.length).toBe(4);
+        expect(replayedOps.map((op) => op.id)).toEqual([
+          '019afd68-0051-7000-0000-000000000000',
+          '019afd68-0052-7000-0000-000000000000',
+          '019afd68-0053-7000-0000-000000000000',
+          '019afd68-0054-7000-0000-000000000000',
+        ]);
+      });
+    });
   });
 
   describe('localWinOpsCreated propagation', () => {
