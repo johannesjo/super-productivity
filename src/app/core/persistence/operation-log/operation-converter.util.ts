@@ -71,9 +71,11 @@ export const convertOpToAction = (op: Operation): PersistentAction => {
     ? extractFullStatePayload(op.payload)
     : extractActionPayload(op.payload);
 
+  // IMPORTANT: Spread actionPayload FIRST, then set type, to prevent entity properties
+  // named 'type' (like SimpleCounter.type = 'ClickCounter') from overwriting the action type.
   return {
-    type: actionType,
     ...actionPayload,
+    type: actionType,
     meta: {
       isPersistent: true,
       entityType: op.entityType,
