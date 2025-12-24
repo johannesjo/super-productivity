@@ -377,6 +377,18 @@ export class OperationLogUploadService {
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Unknown error';
       OpLog.error(`OperationLogUploadService: Snapshot upload failed: ${message}`);
+
+      // Check for storage quota exceeded - show strong alert
+      if (
+        message.includes('STORAGE_QUOTA_EXCEEDED') ||
+        message.includes('Storage quota exceeded')
+      ) {
+        alert(
+          'Sync storage is full! Your data is NOT syncing to the server. ' +
+            'Please archive old tasks or upgrade your plan to continue syncing.',
+        );
+      }
+
       return { accepted: false, error: message };
     }
   }

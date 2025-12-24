@@ -281,6 +281,18 @@ export class OperationLogSyncService {
     const permanentlyRejectedOps: string[] = [];
 
     for (const rejected of rejectedOps) {
+      // Check for storage quota exceeded - show strong alert and skip marking as rejected
+      // This is a critical error that requires user action
+      if (rejected.errorCode === 'STORAGE_QUOTA_EXCEEDED') {
+        OpLog.error(`OperationLogSyncService: Storage quota exceeded - sync is broken!`);
+        alert(
+          'Sync storage is full! Your data is NOT syncing to the server. ' +
+            'Please archive old tasks or upgrade your plan to continue syncing.',
+        );
+        // Don't mark as rejected - user needs to take action to fix storage
+        continue;
+      }
+
       const entry = await this.opLogStore.getOpById(rejected.opId);
       // Skip if:
       // - Op doesn't exist (was somehow removed)

@@ -1522,6 +1522,95 @@ export class SyncService {
     return { totalDeleted, affectedUserIds };
   }
 
+  /**
+   * Delete oldest restore point and all operations before it to free up storage.
+   * Used when storage quota is exceeded to make room for new uploads.
+   *
+   * Strategy:
+   * - If 2+ restore points: Delete oldest restore point AND all ops with serverSeq <= its seq
+   * - If 1 restore point: Delete all ops with serverSeq < its seq (keep the restore point)
+   * - If 0 restore points: Nothing to delete, return failure
+   *
+   * @returns Object with deletedCount, approximate freedBytes, and success flag
+   */
+  async deleteOldestRestorePointAndOps(
+    userId: number,
+  ): Promise<{ deletedCount: number; freedBytes: number; success: boolean }> {
+    // Find all restore points (full-state operations) ordered by serverSeq ASC
+    const restorePoints = await prisma.operation.findMany({
+      where: {
+        userId,
+        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+      },
+      orderBy: { serverSeq: 'asc' },
+      select: { serverSeq: true, opType: true },
+    });
+
+    if (restorePoints.length === 0) {
+      Logger.warn(`[user:${userId}] No restore points found, cannot free storage`);
+      return { deletedCount: 0, freedBytes: 0, success: false };
+    }
+
+    const oldestRestorePoint = restorePoints[0];
+    let deleteUpToSeq: number;
+
+    if (restorePoints.length >= 2) {
+      // Delete the oldest restore point AND all ops up to and including it
+      deleteUpToSeq = oldestRestorePoint.serverSeq;
+      Logger.info(
+        `[user:${userId}] Deleting oldest restore point (seq=${deleteUpToSeq}) and all ops before it`,
+      );
+    } else {
+      // Only one restore point - delete all ops BEFORE it, but keep the restore point
+      deleteUpToSeq = oldestRestorePoint.serverSeq - 1;
+      Logger.info(
+        `[user:${userId}] Keeping single restore point (seq=${oldestRestorePoint.serverSeq}), deleting ops before it`,
+      );
+    }
+
+    if (deleteUpToSeq < 1) {
+      Logger.info(`[user:${userId}] No ops to delete (deleteUpToSeq=${deleteUpToSeq})`);
+      return { deletedCount: 0, freedBytes: 0, success: false };
+    }
+
+    // Calculate approximate size of ops being deleted
+    const opsToDelete = await prisma.operation.findMany({
+      where: {
+        userId,
+        serverSeq: { lte: deleteUpToSeq },
+      },
+      select: { payload: true, vectorClock: true },
+    });
+
+    const freedBytes = opsToDelete.reduce((sum, op) => {
+      const payloadSize = op.payload ? JSON.stringify(op.payload).length : 0;
+      const clockSize = op.vectorClock ? JSON.stringify(op.vectorClock).length : 0;
+      return sum + payloadSize + clockSize;
+    }, 0);
+
+    // Delete the operations
+    const result = await prisma.operation.deleteMany({
+      where: {
+        userId,
+        serverSeq: { lte: deleteUpToSeq },
+      },
+    });
+
+    if (result.count > 0) {
+      // Update storage usage cache
+      await this.updateStorageUsage(userId);
+      Logger.info(
+        `[user:${userId}] Deleted ${result.count} ops (freed ~${Math.round(freedBytes / 1024)}KB)`,
+      );
+    }
+
+    return {
+      deletedCount: result.count,
+      freedBytes,
+      success: result.count > 0,
+    };
+  }
+
   async deleteStaleDevices(beforeTime: number): Promise<number> {
     const result = await prisma.syncDevice.deleteMany({
       where: {

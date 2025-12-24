@@ -248,17 +248,52 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Check storage quota before processing (after dedup to allow retries)
         const payloadSize = JSON.stringify(body).length;
-        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+        let quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
         if (!quotaCheck.allowed) {
-          Logger.warn(
-            `[user:${userId}] Storage quota exceeded: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+          // Cache might be stale - recalculate actual storage before taking action
+          Logger.info(
+            `[user:${userId}] Quota check failed (cached: ${quotaCheck.currentUsage}/${quotaCheck.quota}). Recalculating actual storage...`,
           );
-          return reply.status(413).send({
-            error: 'Storage quota exceeded',
-            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
-            storageUsedBytes: quotaCheck.currentUsage,
-            storageQuotaBytes: quotaCheck.quota,
-          });
+          await syncService.updateStorageUsage(userId);
+          quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+
+          if (!quotaCheck.allowed) {
+            Logger.warn(
+              `[user:${userId}] Storage quota exceeded: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes. Attempting auto-cleanup...`,
+            );
+
+            // Try to free up space by deleting oldest restore point and ops
+            const cleanupResult =
+              await syncService.deleteOldestRestorePointAndOps(userId);
+
+            if (cleanupResult.success) {
+              // Re-check quota after cleanup
+              quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+              if (quotaCheck.allowed) {
+                Logger.info(
+                  `[user:${userId}] Auto-cleanup freed ${Math.round(cleanupResult.freedBytes / 1024)}KB, quota now OK`,
+                );
+              }
+            }
+
+            // If still exceeded, return error
+            if (!quotaCheck.allowed) {
+              Logger.warn(
+                `[user:${userId}] Storage quota still exceeded after cleanup: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+              );
+              return reply.status(413).send({
+                error: 'Storage quota exceeded',
+                errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
+                storageUsedBytes: quotaCheck.currentUsage,
+                storageQuotaBytes: quotaCheck.quota,
+                autoCleanupAttempted: true,
+              });
+            }
+          } else {
+            Logger.info(
+              `[user:${userId}] Quota OK after recalculation: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+            );
+          }
         }
 
         // Process operations - cast to Operation[] since Zod validates the structure
@@ -532,17 +567,53 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
         // Check storage quota before processing
         const payloadSize = JSON.stringify(body).length;
-        const quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+        let quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
         if (!quotaCheck.allowed) {
-          Logger.warn(
-            `[user:${userId}] Storage quota exceeded for snapshot: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+          // Cache might be stale - recalculate actual storage before taking action
+          Logger.info(
+            `[user:${userId}] Snapshot quota check failed (cached: ${quotaCheck.currentUsage}/${quotaCheck.quota}). Recalculating actual storage...`,
           );
-          return reply.status(413).send({
-            error: 'Storage quota exceeded',
-            errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
-            storageUsedBytes: quotaCheck.currentUsage,
-            storageQuotaBytes: quotaCheck.quota,
-          });
+          await syncService.updateStorageUsage(userId);
+          quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+
+          if (!quotaCheck.allowed) {
+            Logger.warn(
+              `[user:${userId}] Storage quota exceeded for snapshot: ` +
+                `${quotaCheck.currentUsage}/${quotaCheck.quota} bytes. Attempting auto-cleanup...`,
+            );
+
+            // Try to free up space by deleting oldest restore point and ops
+            const cleanupResult =
+              await syncService.deleteOldestRestorePointAndOps(userId);
+
+            if (cleanupResult.success) {
+              // Re-check quota after cleanup
+              quotaCheck = await syncService.checkStorageQuota(userId, payloadSize);
+              if (quotaCheck.allowed) {
+                Logger.info(
+                  `[user:${userId}] Auto-cleanup freed ${Math.round(cleanupResult.freedBytes / 1024)}KB, snapshot quota now OK`,
+                );
+              }
+            }
+
+            // If still exceeded, return error
+            if (!quotaCheck.allowed) {
+              Logger.warn(
+                `[user:${userId}] Storage quota still exceeded for snapshot after cleanup: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+              );
+              return reply.status(413).send({
+                error: 'Storage quota exceeded',
+                errorCode: SYNC_ERROR_CODES.STORAGE_QUOTA_EXCEEDED,
+                storageUsedBytes: quotaCheck.currentUsage,
+                storageQuotaBytes: quotaCheck.quota,
+                autoCleanupAttempted: true,
+              });
+            }
+          } else {
+            Logger.info(
+              `[user:${userId}] Snapshot quota OK after recalculation: ${quotaCheck.currentUsage}/${quotaCheck.quota} bytes`,
+            );
+          }
         }
 
         // Create a SYNC_IMPORT operation
