@@ -7,7 +7,6 @@ import { VectorClockService } from '../sync/vector-clock.service';
 import {
   COMPACTION_RETENTION_MS,
   SLOW_COMPACTION_THRESHOLD_MS,
-  STATE_SIZE_WARNING_THRESHOLD_MB,
 } from '../operation-log.const';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { OperationLogEntry } from '../operation.types';
@@ -94,38 +93,6 @@ describe('OperationLogCompactionService', () => {
       await service.compact();
 
       expect(mockStoreDelegate.getAllSyncModelDataFromStore).toHaveBeenCalled();
-    });
-
-    it('should warn if state size exceeds threshold', async () => {
-      // Create a large state (threshold in MB, plus extra bytes)
-      const thresholdBytes = STATE_SIZE_WARNING_THRESHOLD_MB * 1024 * 1024;
-      const largeState = {
-        data: 'x'.repeat(thresholdBytes + 100),
-      };
-      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
-        Promise.resolve(largeState as any),
-      );
-
-      await service.compact();
-
-      expect(OpLog.warn).toHaveBeenCalledWith(
-        'OperationLogCompactionService: Large state for compaction',
-        jasmine.objectContaining({
-          stateSizeMB: jasmine.any(String),
-        }),
-      );
-    });
-
-    it('should not warn if state size is within threshold', async () => {
-      // Create a small state
-      const smallState = { data: 'x' };
-      mockStoreDelegate.getAllSyncModelDataFromStore.and.returnValue(
-        Promise.resolve(smallState as any),
-      );
-
-      await service.compact();
-
-      expect(OpLog.warn).not.toHaveBeenCalled();
     });
 
     it(

@@ -5,7 +5,6 @@ import {
   COMPACTION_TIMEOUT_MS,
   EMERGENCY_COMPACTION_RETENTION_MS,
   SLOW_COMPACTION_THRESHOLD_MS,
-  STATE_SIZE_WARNING_THRESHOLD_MB,
 } from '../operation-log.const';
 import { OperationLogStoreService } from './operation-log-store.service';
 import { PfapiStoreDelegateService } from '../../../../pfapi/pfapi-store-delegate.service';
@@ -63,17 +62,6 @@ export class OperationLogCompactionService {
       const currentState = await this.storeDelegate.getAllSyncModelDataFromStore();
       this.checkCompactionTimeout(startTime, `${label}state snapshot`);
 
-      // Measure state size for monitoring
-      const stateJson = JSON.stringify(currentState);
-      const stateSizeBytes = new Blob([stateJson]).size;
-      const stateSizeMB = stateSizeBytes / (1024 * 1024);
-
-      if (stateSizeMB > STATE_SIZE_WARNING_THRESHOLD_MB) {
-        OpLog.warn('OperationLogCompactionService: Large state for compaction', {
-          stateSizeMB: stateSizeMB.toFixed(1),
-        });
-      }
-
       // 2. Get current vector clock (max of all ops)
       const currentVectorClock = await this.vectorClockService.getCurrentVectorClock();
       this.checkCompactionTimeout(startTime, `${label}vector clock`);
@@ -118,7 +106,7 @@ export class OperationLogCompactionService {
       if (totalDuration > SLOW_COMPACTION_THRESHOLD_MS || isEmergency) {
         OpLog.normal('OperationLogCompactionService: Compaction completed', {
           durationMs: totalDuration,
-          stateSizeMB: stateSizeMB.toFixed(1),
+          entityCount: snapshotEntityKeys.length,
           isEmergency,
         });
       }

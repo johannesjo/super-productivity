@@ -4,7 +4,7 @@ import { Operation, OperationLogEntry, OpType, VectorClock } from '../operation.
 import { toEntityKey } from '../entity-key.util';
 
 const DB_NAME = 'SUP_OPS';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 /**
  * Vector clock entry stored in the vector_clock object store.
@@ -22,6 +22,8 @@ interface OpLogDB extends DBSchema {
     indexes: {
       byId: string;
       bySyncedAt: number;
+      // PERF: Compound index for efficient queries on remote ops by status
+      bySourceAndStatus: string;
     };
   };
   state_cache: {
@@ -84,7 +86,7 @@ export class OperationLogStoreService {
 
   async init(): Promise<void> {
     this._db = await openDB<OpLogDB>(DB_NAME, DB_VERSION, {
-      upgrade: (db, oldVersion) => {
+      upgrade: (db, oldVersion, _newVersion, transaction) => {
         // Version 1: Create initial stores
         if (oldVersion < 1) {
           const opStore = db.createObjectStore('ops', {
@@ -103,6 +105,14 @@ export class OperationLogStoreService {
         // to enable single-transaction writes (op + vector clock together)
         if (oldVersion < 2) {
           db.createObjectStore('vector_clock');
+        }
+
+        // Version 3: Add compound index for efficient source+status queries
+        // PERF: Enables O(results) queries for getPendingRemoteOps/getFailedRemoteOps
+        // instead of O(all ops) full table scan
+        if (oldVersion < 3) {
+          const opStore = transaction.objectStore('ops');
+          opStore.createIndex('bySourceAndStatus', ['source', 'applicationStatus']);
         }
       },
     });
@@ -206,11 +216,16 @@ export class OperationLogStoreService {
   /**
    * Gets remote operations that are pending application (for crash recovery).
    * These are ops that were stored but the app crashed before marking them applied.
+   * PERF: Uses compound index for O(results) instead of O(all ops) scan.
    */
   async getPendingRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    const all = await this.db.getAll('ops');
-    return all.filter((e) => e.source === 'remote' && e.applicationStatus === 'pending');
+    // Type assertion needed for compound index key - idb's types don't fully support this
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+      'remote',
+      'pending',
+    ] as any);
   }
 
   async hasOp(id: string): Promise<boolean> {
@@ -432,13 +447,17 @@ export class OperationLogStoreService {
   /**
    * Gets remote operations that failed and can be retried.
    * These are ops that were attempted but failed (e.g., missing dependency).
+   * PERF: Uses compound index to reduce scan scope, then filters by rejectedAt.
    */
   async getFailedRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    const all = await this.db.getAll('ops');
-    return all.filter(
-      (e) => e.source === 'remote' && e.applicationStatus === 'failed' && !e.rejectedAt,
-    );
+    // Type assertion needed for compound index key - idb's types don't fully support this
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const failedOps = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+      'remote',
+      'failed',
+    ] as any);
+    return failedOps.filter((e) => !e.rejectedAt);
   }
 
   async deleteOpsWhere(predicate: (entry: OperationLogEntry) => boolean): Promise<void> {

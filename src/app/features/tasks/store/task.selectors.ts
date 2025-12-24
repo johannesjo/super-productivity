@@ -274,6 +274,7 @@ export const selectAllTasksWithSubTasks = createSelector(
 
 // Uses virtual tag pattern to determine TODAY membership:
 // A task is "in TODAY" if dueDay === today OR dueWithTime is for today
+// PERF: Single-pass iteration instead of multiple passes over all tasks
 export const selectLaterTodayTasksWithSubTasks = createSelector(
   selectTaskFeatureState,
   selectTodayStr,
@@ -294,53 +295,46 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
       return false;
     };
 
-    // Filter tasks that are:
-    // 1. In TODAY (via dueDay or dueWithTime for today)
-    // 2. Have dueWithTime set
-    // 3. dueWithTime is later than current time but still today
-    // 4. Not done
-    const laterTodayTasksAll: Task[] = taskState.ids
-      .map((id) => taskState.entities[id])
-      .filter(
-        (task): task is Task =>
-          !!task &&
-          isInToday(task) &&
-          !!task.dueWithTime &&
-          task.dueWithTime >= now &&
-          task.dueWithTime <= todayEndTime &&
-          !task.isDone,
-      );
+    // Helper to check if task is scheduled for later today
+    const isScheduledLaterToday = (task: Task): boolean =>
+      !!task.dueWithTime && task.dueWithTime >= now && task.dueWithTime <= todayEndTime;
 
-    // Separate parent tasks and subtasks
-    const parentTasks: Task[] = [];
+    // PERF: Single pass to categorize all tasks (was 2 passes before)
+    const scheduledParentTasks: Task[] = [];
     const scheduledSubtasks: Task[] = [];
-    for (const task of laterTodayTasksAll) {
+    const unscheduledParentsInToday: Task[] = [];
+
+    for (const id of taskState.ids) {
+      const task = taskState.entities[id];
+      if (!task || task.isDone || !isInToday(task)) continue;
+
       if (task.parentId) {
-        scheduledSubtasks.push(task);
+        // Subtask - only care about scheduled ones
+        if (isScheduledLaterToday(task)) {
+          scheduledSubtasks.push(task);
+        }
       } else {
-        parentTasks.push(task);
+        // Parent task - categorize by scheduled status
+        if (isScheduledLaterToday(task)) {
+          scheduledParentTasks.push(task);
+        } else {
+          unscheduledParentsInToday.push(task);
+        }
       }
     }
 
-    // Create sets for O(1) lookups
+    // Create set for O(1) lookup
     const parentIdsWithScheduledSubtasks = new Set(
       scheduledSubtasks.map((subtask) => subtask.parentId),
     );
-    const parentTaskIdSet = new Set(parentTasks.map((t) => t.id));
 
-    // Include parent tasks that either:
-    // 1. Are scheduled themselves, OR
-    // 2. Have scheduled subtasks
-    const parentsToInclude: Task[] = taskState.ids
-      .map((id) => taskState.entities[id])
-      .filter(
-        (task): task is Task =>
-          !!task &&
-          isInToday(task) &&
-          !task.isDone &&
-          !task.parentId &&
-          (parentTaskIdSet.has(task.id) || parentIdsWithScheduledSubtasks.has(task.id)),
-      );
+    // Parents to include: scheduled parents OR parents with scheduled subtasks
+    const parentsToInclude = [
+      ...scheduledParentTasks,
+      ...unscheduledParentsInToday.filter((t) =>
+        parentIdsWithScheduledSubtasks.has(t.id),
+      ),
+    ];
 
     // Get IDs of parents that will be included
     const parentIdsInLaterToday = new Set(parentsToInclude.map((task) => task.id));
@@ -354,30 +348,22 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
     const allTopLevelTasks = [...parentsToInclude, ...orphanedScheduledSubtasks];
 
     // Map to include subtasks for parents and sort by time
-    const tasksWithSubTasks = allTopLevelTasks
-      .map((task) => {
-        // If it's a parent task, include its subtasks
-        if (!task.parentId) {
-          return mapSubTasksToTask(task, taskState) as TaskWithSubTasks;
-        } else {
-          // If it's an orphaned subtask, treat it as a standalone task
-          return { ...task, subTasks: [] } as TaskWithSubTasks;
-        }
-      })
-      .sort((a, b) => {
-        // Sort by the earliest scheduled time (parent or any subtask)
-        const aTime = Math.min(
-          a.dueWithTime || Infinity,
-          ...(a.subTasks || []).map((st) => st.dueWithTime || Infinity),
-        );
-        const bTime = Math.min(
-          b.dueWithTime || Infinity,
-          ...(b.subTasks || []).map((st) => st.dueWithTime || Infinity),
-        );
-        return aTime - bTime;
-      });
+    // PERF: Pre-compute earliest times to avoid recalculating in sort comparator
+    const tasksWithTimes = allTopLevelTasks.map((task) => {
+      const taskWithSubTasks = !task.parentId
+        ? (mapSubTasksToTask(task, taskState) as TaskWithSubTasks)
+        : ({ ...task, subTasks: [] } as TaskWithSubTasks);
 
-    return tasksWithSubTasks;
+      // Pre-compute earliest scheduled time for sorting
+      const earliestTime = Math.min(
+        taskWithSubTasks.dueWithTime || Infinity,
+        ...(taskWithSubTasks.subTasks || []).map((st) => st.dueWithTime || Infinity),
+      );
+      return { task: taskWithSubTasks, earliestTime };
+    });
+
+    tasksWithTimes.sort((a, b) => a.earliestTime - b.earliestTime);
+    return tasksWithTimes.map((t) => t.task);
   },
 );
 

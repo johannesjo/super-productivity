@@ -121,13 +121,15 @@ export const computeOrderedTaskIdsForTag = (
   }
 
   // Order tasks according to stored order, with unordered tasks appended at end
+  // PERF: Use Map for O(1) lookup instead of indexOf which is O(n) per task
   const orderedTasks: (string | undefined)[] = [];
   const unorderedTasks: string[] = [];
   const tasksWithTagSet = new Set(tasksWithTag);
+  const storedOrderMap = new Map(storedOrder.map((id, idx) => [id, idx]));
 
   for (const taskId of tasksWithTag) {
-    const orderIndex = storedOrder.indexOf(taskId);
-    if (orderIndex > -1) {
+    const orderIndex = storedOrderMap.get(taskId);
+    if (orderIndex !== undefined) {
       orderedTasks[orderIndex] = taskId;
     } else {
       // Task has tagId but not in stored order - auto-add at end
@@ -314,42 +316,50 @@ export const tagReducer = createReducer<TagState>(
 
   on(
     moveTaskUpInTodayList,
-    (state: TagState, { taskId, workContextId, workContextType, doneTaskIds }) =>
-      workContextType === WORK_CONTEXT_TYPE
-        ? tagAdapter.updateOne(
-            {
-              id: workContextId,
-              changes: {
-                taskIds: arrayMoveLeftUntil(
-                  (state.entities[workContextId] as Tag).taskIds,
-                  taskId,
-                  (id) => !doneTaskIds.includes(id),
-                ),
-              },
-            },
-            state,
-          )
-        : state,
+    (state: TagState, { taskId, workContextId, workContextType, doneTaskIds }) => {
+      if (workContextType !== WORK_CONTEXT_TYPE) {
+        return state;
+      }
+      // Use Set for O(1) lookup instead of O(n) .includes() in callback
+      const doneTaskIdSet = new Set(doneTaskIds);
+      return tagAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            taskIds: arrayMoveLeftUntil(
+              (state.entities[workContextId] as Tag).taskIds,
+              taskId,
+              (id) => !doneTaskIdSet.has(id),
+            ),
+          },
+        },
+        state,
+      );
+    },
   ),
 
   on(
     moveTaskDownInTodayList,
-    (state: TagState, { taskId, workContextId, workContextType, doneTaskIds }) =>
-      workContextType === WORK_CONTEXT_TYPE
-        ? tagAdapter.updateOne(
-            {
-              id: workContextId,
-              changes: {
-                taskIds: arrayMoveRightUntil(
-                  (state.entities[workContextId] as Tag).taskIds,
-                  taskId,
-                  (id) => !doneTaskIds.includes(id),
-                ),
-              },
-            },
-            state,
-          )
-        : state,
+    (state: TagState, { taskId, workContextId, workContextType, doneTaskIds }) => {
+      if (workContextType !== WORK_CONTEXT_TYPE) {
+        return state;
+      }
+      // Use Set for O(1) lookup instead of O(n) .includes() in callback
+      const doneTaskIdSet = new Set(doneTaskIds);
+      return tagAdapter.updateOne(
+        {
+          id: workContextId,
+          changes: {
+            taskIds: arrayMoveRightUntil(
+              (state.entities[workContextId] as Tag).taskIds,
+              taskId,
+              (id) => !doneTaskIdSet.has(id),
+            ),
+          },
+        },
+        state,
+      );
+    },
   ),
 
   on(moveTaskToTopInTodayList, (state, { taskId, workContextType, workContextId }) => {
