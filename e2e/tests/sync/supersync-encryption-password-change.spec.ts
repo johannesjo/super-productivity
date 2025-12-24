@@ -25,10 +25,7 @@ const generateTestRunId = (workerIndex: number): string => {
   return `${Date.now()}-${workerIndex}`;
 };
 
-// TODO: These tests are temporarily skipped due to snackbar detection issues.
-// The password change functionality works (DELETE endpoint fixed), but the
-// e2e test helper expects a snackbar that may be auto-dismissed too quickly.
-base.describe.skip('@supersync SuperSync Encryption Password Change', () => {
+base.describe('@supersync SuperSync Encryption Password Change', () => {
   let serverHealthy: boolean | null = null;
 
   base.beforeEach(async ({}, testInfo) => {
@@ -63,9 +60,9 @@ base.describe.skip('@supersync SuperSync Encryption Password Change', () => {
           password: oldPassword,
         });
 
-        // Create tasks
-        const task1 = `PreChange-${testRunId}`;
-        const task2 = `AlsoPreChange-${testRunId}`;
+        // Create tasks (names must be distinct - no substring overlap)
+        const task1 = `TaskA-${testRunId}`;
+        const task2 = `TaskB-${testRunId}`;
         await clientA.workView.addTask(task1);
         await clientA.page.waitForTimeout(100);
         await clientA.workView.addTask(task2);
