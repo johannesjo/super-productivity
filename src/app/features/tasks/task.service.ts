@@ -147,6 +147,9 @@ export class TaskService {
     initialValue: [] as string[],
   });
 
+  // Set version for O(1) lookup - used by task components to check membership
+  todayListSet = computed(() => new Set(this.todayList()));
+
   selectedTask$: Observable<TaskWithSubTasks | null> = this._store.pipe(
     select(selectSelectedTask),
     // NOTE: we can't use share here, as we need the last emitted value
