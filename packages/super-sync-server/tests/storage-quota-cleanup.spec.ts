@@ -463,4 +463,367 @@ describe('Storage Quota Cleanup', () => {
       expect(check.currentUsage).toBe(50 * 1024 * 1024);
     });
   });
+
+  describe('freeStorageForUpload - iterative cleanup', () => {
+    it('should return success immediately if quota is already satisfied', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // User has plenty of space
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(10 * 1024 * 1024), // 10MB used
+        storageQuotaBytes: BigInt(100 * 1024 * 1024), // 100MB quota
+      });
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      expect(result.success).toBe(true);
+      expect(result.freedBytes).toBe(0);
+      expect(result.deletedRestorePoints).toBe(0);
+      expect(result.deletedOps).toBe(0);
+    });
+
+    it('should return failure when no restore points exist and quota exceeded', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // User is over quota with no restore points
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(150 * 1024 * 1024), // 150MB used
+        storageQuotaBytes: BigInt(100 * 1024 * 1024), // 100MB quota
+      });
+
+      // Create some regular operations (no restore points)
+      createOp(clientId, userId);
+      createOp(clientId, userId);
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      expect(result.success).toBe(false);
+      expect(result.freedBytes).toBe(0);
+      expect(result.deletedRestorePoints).toBe(0);
+      expect(result.deletedOps).toBe(0);
+    });
+
+    it('should return failure when only one restore point exists', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // User is over quota
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(150 * 1024 * 1024), // 150MB used
+        storageQuotaBytes: BigInt(100 * 1024 * 1024), // 100MB quota
+      });
+
+      // Create: op1, RESTORE1 (only one), op3
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2 - only restore point
+      createOp(clientId, userId); // seq 3
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      // Should fail because we can't delete the only restore point
+      expect(result.success).toBe(false);
+      // May have deleted ops before the restore point but still not enough space
+      expect(result.deletedRestorePoints).toBe(0);
+    });
+
+    it('should delete multiple restore points iteratively until quota is satisfied', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // Track storage updates to simulate freeing space after each deletion
+      let currentStorage = 150 * 1024 * 1024; // Start at 150MB
+      const storagePerRestorePoint = 30 * 1024 * 1024; // 30MB per restore point
+
+      // Mock user lookup to return decreasing storage after each update
+      const originalGet = testUsers.get.bind(testUsers);
+      testUsers.get = (key: number) => {
+        const user = originalGet(key);
+        if (user) {
+          return {
+            ...user,
+            storageUsedBytes: BigInt(currentStorage),
+          };
+        }
+        return user;
+      };
+
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(currentStorage),
+        storageQuotaBytes: BigInt(100 * 1024 * 1024), // 100MB quota
+      });
+
+      // Create: RESTORE1, ops, RESTORE2, ops, RESTORE3, ops, RESTORE4 (current)
+      createRestorePoint(clientId, userId); // seq 1 - oldest
+      createOp(clientId, userId); // seq 2
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4
+      createOp(clientId, userId); // seq 5
+      createOp(clientId, userId); // seq 6
+      createRestorePoint(clientId, userId); // seq 7
+      createOp(clientId, userId); // seq 8
+      createRestorePoint(clientId, userId); // seq 9 - newest (must keep)
+
+      expect(testOperations.size).toBe(9);
+
+      // Mock updateStorageUsage to decrease storage
+      const originalUpdateStorageUsage = service.updateStorageUsage.bind(service);
+      service.updateStorageUsage = async (uid: number) => {
+        currentStorage -= storagePerRestorePoint;
+        if (currentStorage < 0) currentStorage = 0;
+        await originalUpdateStorageUsage(uid);
+      };
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      // Should succeed after deleting enough restore points
+      // Need to delete 2 restore points to go from 150MB to 90MB (under 100MB quota)
+      expect(result.success).toBe(true);
+      expect(result.deletedRestorePoints).toBeGreaterThanOrEqual(1);
+      expect(result.deletedOps).toBeGreaterThan(0);
+      expect(result.freedBytes).toBeGreaterThan(0);
+    });
+
+    it('should stop when only one restore point remains even if quota still exceeded', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // User way over quota - can't be fixed by cleanup
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(500 * 1024 * 1024), // 500MB used
+        storageQuotaBytes: BigInt(100 * 1024 * 1024), // 100MB quota
+      });
+
+      // Create: op1, RESTORE1 (seq 2), op3, RESTORE2 (seq 4)
+      // This way when we delete RESTORE1 and ops <= seq 2, we delete ops 1 and 2
+      createOp(clientId, userId); // seq 1 - will be deleted
+      createRestorePoint(clientId, userId); // seq 2 - oldest restore point, will be deleted
+      createOp(clientId, userId); // seq 3 - remains
+      createRestorePoint(clientId, userId); // seq 4 - must keep (only one left)
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      // Should fail because we can only delete down to 1 restore point
+      expect(result.success).toBe(false);
+      expect(result.deletedRestorePoints).toBe(1);
+      expect(result.deletedOps).toBe(2); // ops 1 and 2 (restore point at seq 2)
+
+      // Verify only the newer restore point and the op after the deleted one remain
+      expect(testOperations.size).toBe(2);
+      const remainingOps = Array.from(testOperations.values()).sort(
+        (a, b) => a.serverSeq - b.serverSeq,
+      );
+      expect(remainingOps[0].serverSeq).toBe(3);
+      expect(remainingOps[1].serverSeq).toBe(4);
+      expect(remainingOps[1].opType).toBe('SYNC_IMPORT');
+    });
+
+    it('should return stats even when cleanup fails', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // User over quota
+      testUsers.set(userId, {
+        id: userId,
+        email: 'test@test.com',
+        storageUsedBytes: BigInt(200 * 1024 * 1024),
+        storageQuotaBytes: BigInt(100 * 1024 * 1024),
+      });
+
+      // Create: op, RESTORE1, op, RESTORE2
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4
+
+      const result = await service.freeStorageForUpload(userId, 1000);
+
+      // Even if it fails, should report what was cleaned
+      expect(result.freedBytes).toBeGreaterThanOrEqual(0);
+      expect(result.deletedRestorePoints).toBeGreaterThanOrEqual(0);
+      expect(result.deletedOps).toBeGreaterThanOrEqual(0);
+    });
+  });
+
+  describe('Stale snapshot cache cleanup', () => {
+    it('should clear snapshot cache when deleted ops include the cached snapshot seq', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      const { prisma } = await import('../src/db');
+      initSyncService();
+      const service = getSyncService();
+
+      // Set up user sync state with cached snapshot at seq 2
+      testUserSyncStates.set(userId, {
+        userId,
+        lastSeq: 10,
+        lastSnapshotSeq: 2, // Cached snapshot is at seq 2
+        snapshotData: Buffer.from('cached-snapshot'),
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      // Create: op1, RESTORE1 (seq 2 - matches cache), op3, RESTORE2
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2 - oldest restore point (matches cache)
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4 - newer
+
+      const result = await service.deleteOldestRestorePointAndOps(userId);
+
+      expect(result.success).toBe(true);
+      expect(result.deletedCount).toBe(2); // ops 1, 2
+
+      // Verify snapshot cache was cleared (update was called with null values)
+      expect(prisma.userSyncState.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId },
+          data: expect.objectContaining({
+            snapshotData: null,
+            lastSnapshotSeq: null,
+            snapshotAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should NOT clear snapshot cache when cached seq is after deleted ops', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      const { prisma } = await import('../src/db');
+      initSyncService();
+      const service = getSyncService();
+
+      // Set up user sync state with cached snapshot at seq 5 (after what we'll delete)
+      testUserSyncStates.set(userId, {
+        userId,
+        lastSeq: 10,
+        lastSnapshotSeq: 5, // Cached snapshot is at seq 5
+        snapshotData: Buffer.from('cached-snapshot'),
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      // Create: op1, RESTORE1 (seq 2), op3, RESTORE2 (seq 4), op5
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2 - oldest restore point
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4 - newer
+      createOp(clientId, userId); // seq 5 (cache points here)
+
+      // Clear mock call history
+      (prisma.userSyncState.update as any).mockClear();
+
+      const result = await service.deleteOldestRestorePointAndOps(userId);
+
+      expect(result.success).toBe(true);
+      expect(result.deletedCount).toBe(2); // ops 1, 2
+
+      // Verify snapshot cache was NOT cleared (update was called but not with null values)
+      const updateCalls = (prisma.userSyncState.update as any).mock.calls;
+      const nullDataCalls = updateCalls.filter(
+        (call: any) =>
+          call[0]?.data?.snapshotData === null && call[0]?.data?.lastSnapshotSeq === null,
+      );
+      expect(nullDataCalls.length).toBe(0);
+    });
+
+    it('should clear snapshot cache when cached seq equals deleteUpToSeq exactly', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      const { prisma } = await import('../src/db');
+      initSyncService();
+      const service = getSyncService();
+
+      // Set up user sync state with cached snapshot exactly at seq 2
+      testUserSyncStates.set(userId, {
+        userId,
+        lastSeq: 10,
+        lastSnapshotSeq: 2, // Exactly at the restore point we'll delete
+        snapshotData: Buffer.from('cached-snapshot'),
+        snapshotAt: BigInt(Date.now()),
+      });
+
+      // Create: op1, RESTORE1 (seq 2), op3, RESTORE2 (seq 4)
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2 - will be deleted
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4
+
+      const result = await service.deleteOldestRestorePointAndOps(userId);
+
+      expect(result.success).toBe(true);
+
+      // Verify snapshot cache was cleared
+      expect(prisma.userSyncState.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId },
+          data: expect.objectContaining({
+            snapshotData: null,
+            lastSnapshotSeq: null,
+            snapshotAt: null,
+          }),
+        }),
+      );
+    });
+
+    it('should not crash when no cached snapshot exists', async () => {
+      const { initSyncService, getSyncService } = await import(
+        '../src/sync/sync.service'
+      );
+      initSyncService();
+      const service = getSyncService();
+
+      // No cached snapshot (lastSnapshotSeq is null)
+      testUserSyncStates.set(userId, {
+        userId,
+        lastSeq: 10,
+        lastSnapshotSeq: null,
+        snapshotData: null,
+        snapshotAt: null,
+      });
+
+      // Create: op1, RESTORE1, op3, RESTORE2
+      createOp(clientId, userId); // seq 1
+      createRestorePoint(clientId, userId); // seq 2
+      createOp(clientId, userId); // seq 3
+      createRestorePoint(clientId, userId); // seq 4
+
+      // Should not throw
+      const result = await service.deleteOldestRestorePointAndOps(userId);
+
+      expect(result.success).toBe(true);
+      expect(result.deletedCount).toBe(2);
+    });
+  });
 });

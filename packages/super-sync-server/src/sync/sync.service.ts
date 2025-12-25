@@ -1616,6 +1616,26 @@ export class SyncService {
     });
 
     if (result.count > 0) {
+      // Clear stale snapshot cache if it references deleted operations
+      const cachedRow = await prisma.userSyncState.findUnique({
+        where: { userId },
+        select: { lastSnapshotSeq: true },
+      });
+
+      if (cachedRow?.lastSnapshotSeq && cachedRow.lastSnapshotSeq <= deleteUpToSeq) {
+        await prisma.userSyncState.update({
+          where: { userId },
+          data: {
+            snapshotData: null,
+            lastSnapshotSeq: null,
+            snapshotAt: null,
+          },
+        });
+        Logger.info(
+          `[user:${userId}] Cleared stale snapshot cache (was at seq ${cachedRow.lastSnapshotSeq}, deleted up to ${deleteUpToSeq})`,
+        );
+      }
+
       // Update storage usage cache
       await this.updateStorageUsage(userId);
       Logger.info(
@@ -1628,6 +1648,87 @@ export class SyncService {
       freedBytes,
       success: result.count > 0,
     };
+  }
+
+  /**
+   * Iteratively delete old restore points and operations until enough storage
+   * space is available for the requested upload. Always keeps at least one
+   * restore point and all operations after it (minimum valid sync state).
+   *
+   * @param userId - User ID
+   * @param requiredBytes - Number of bytes needed for the upload
+   * @returns Object with success status and cleanup statistics
+   */
+  async freeStorageForUpload(
+    userId: number,
+    requiredBytes: number,
+  ): Promise<{
+    success: boolean;
+    freedBytes: number;
+    deletedRestorePoints: number;
+    deletedOps: number;
+  }> {
+    let totalFreedBytes = 0;
+    let deletedRestorePoints = 0;
+    let totalDeletedOps = 0;
+
+    // Keep trying until we have enough space or hit minimum
+    while (true) {
+      // Check if we now have enough space
+      const quotaCheck = await this.checkStorageQuota(userId, requiredBytes);
+      if (quotaCheck.allowed) {
+        return {
+          success: true,
+          freedBytes: totalFreedBytes,
+          deletedRestorePoints,
+          deletedOps: totalDeletedOps,
+        };
+      }
+
+      // Count restore points remaining
+      const restorePoints = await prisma.operation.findMany({
+        where: {
+          userId,
+          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+        },
+        orderBy: { serverSeq: 'asc' },
+        select: { serverSeq: true },
+      });
+
+      // Minimum: 1 restore point + all ops after it
+      // If we only have 1 or fewer restore points, we can't delete any more
+      if (restorePoints.length <= 1) {
+        Logger.warn(
+          `[user:${userId}] Cannot free more storage: only ${restorePoints.length} restore point(s) remaining`,
+        );
+        return {
+          success: false,
+          freedBytes: totalFreedBytes,
+          deletedRestorePoints,
+          deletedOps: totalDeletedOps,
+        };
+      }
+
+      // Delete oldest restore point + all ops before it
+      const result = await this.deleteOldestRestorePointAndOps(userId);
+      if (!result.success) {
+        return {
+          success: false,
+          freedBytes: totalFreedBytes,
+          deletedRestorePoints,
+          deletedOps: totalDeletedOps,
+        };
+      }
+
+      totalFreedBytes += result.freedBytes;
+      deletedRestorePoints++;
+      totalDeletedOps += result.deletedCount;
+
+      Logger.info(
+        `[user:${userId}] Auto-cleanup iteration: freed ${Math.round(result.freedBytes / 1024)}KB, ` +
+          `${restorePoints.length - 1} restore points remaining`,
+      );
+    }
   }
 
   async deleteStaleDevices(beforeTime: number): Promise<number> {
