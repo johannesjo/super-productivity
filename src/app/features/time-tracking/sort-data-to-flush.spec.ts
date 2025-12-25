@@ -450,6 +450,99 @@ describe('sort-data-to-flush', () => {
     const now = 1621100000000; // May 16, 2021
     const threshold = 7 * 24 * 60 * 60 * 1000; // 7 days
 
+    it('should handle frozen timeTracking from defaultData (fresh install scenario)', () => {
+      // Simulate the exact frozen state from initialTimeTrackingState with `as const`
+      // This happens on fresh install or after sync when archiveOld uses defaultData
+      const frozenTimeTracking = Object.freeze({
+        project: Object.freeze({}),
+        tag: Object.freeze({}),
+      });
+
+      const archiveYoung: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: {
+          project: { project1: { '2023-05-14': createTimeEntry() } },
+          tag: { tag1: { '2023-05-14': createTimeEntry() } },
+        },
+        // eslint-disable-next-line no-mixed-operators
+        lastTimeTrackingFlush: now - threshold / 2,
+      };
+
+      const archiveOld: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: frozenTimeTracking as any, // Frozen default!
+        lastTimeTrackingFlush: now - threshold,
+      };
+
+      // Before fix: throws TypeError: Cannot add property, object is not extensible
+      // After fix: completes successfully
+      expect(() => {
+        sortTimeTrackingAndTasksFromArchiveYoungToOld({
+          archiveYoung,
+          archiveOld,
+          threshold,
+          now,
+        });
+      }).not.toThrow();
+
+      // Also verify the merge worked correctly
+      const result = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+        archiveYoung,
+        archiveOld,
+        threshold,
+        now,
+      });
+      expect(result.archiveOld.timeTracking.project.project1['2023-05-14']).toBeDefined();
+      expect(result.archiveOld.timeTracking.tag.tag1['2023-05-14']).toBeDefined();
+    });
+
+    it('should handle frozen nested context objects', () => {
+      // Frozen nested context - simulates partial frozen state
+      const frozenTimeTracking = {
+        project: Object.freeze({ existingProject: Object.freeze({}) }),
+        tag: {},
+      };
+
+      // archiveYoung adds new date to the frozen existingProject context
+      const archiveYoung: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: {
+          project: { existingProject: { '2023-05-14': createTimeEntry() } },
+          tag: {},
+        },
+        // eslint-disable-next-line no-mixed-operators
+        lastTimeTrackingFlush: now - threshold / 2,
+      };
+
+      const archiveOld: ArchiveModel = {
+        task: { ids: [], entities: {} },
+        timeTracking: frozenTimeTracking as any,
+        lastTimeTrackingFlush: now - threshold,
+      };
+
+      // Before fix: throws TypeError when trying to add to frozen existingProject
+      // After fix: completes successfully
+      expect(() => {
+        sortTimeTrackingAndTasksFromArchiveYoungToOld({
+          archiveYoung,
+          archiveOld,
+          threshold,
+          now,
+        });
+      }).not.toThrow();
+
+      // Verify the merge worked correctly
+      const result = sortTimeTrackingAndTasksFromArchiveYoungToOld({
+        archiveYoung,
+        archiveOld,
+        threshold,
+        now,
+      });
+      expect(
+        result.archiveOld.timeTracking.project.existingProject['2023-05-14'],
+      ).toBeDefined();
+    });
+
     it('should move old tasks and all time tracking data', () => {
       // Arrange
       const archiveYoung: ArchiveModel = {

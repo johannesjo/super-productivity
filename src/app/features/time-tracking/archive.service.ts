@@ -180,6 +180,11 @@ export class ArchiveService {
     //
     // IMPORTANT: We use `newArchiveYoung` directly instead of reloading from DB
     // to avoid a race condition where the archive could change between save and load.
+
+    // Store original state for potential rollback
+    const originalArchiveYoung = newArchiveYoung;
+    const originalArchiveOld = archiveOld;
+
     const newSorted = sortTimeTrackingAndTasksFromArchiveYoungToOld({
       archiveYoung: newArchiveYoung,
       archiveOld,
@@ -187,21 +192,58 @@ export class ArchiveService {
       now,
     });
 
-    await this.pfapiService.m.archiveYoung.save(
-      {
-        ...newSorted.archiveYoung,
-        lastTimeTrackingFlush: now,
-      },
-      { isUpdateRevAndLastUpdate: true },
-    );
+    try {
+      await this.pfapiService.m.archiveYoung.save(
+        {
+          ...newSorted.archiveYoung,
+          lastTimeTrackingFlush: now,
+        },
+        { isUpdateRevAndLastUpdate: true },
+      );
 
-    await this.pfapiService.m.archiveOld.save(
-      {
-        ...newSorted.archiveOld,
-        lastTimeTrackingFlush: now,
-      },
-      { isUpdateRevAndLastUpdate: true },
-    );
+      await this.pfapiService.m.archiveOld.save(
+        {
+          ...newSorted.archiveOld,
+          lastTimeTrackingFlush: now,
+        },
+        { isUpdateRevAndLastUpdate: true },
+      );
+    } catch (e) {
+      // Attempt rollback: restore BOTH archiveYoung and archiveOld to original state
+      Log.err('[ArchiveService] Archive flush failed, attempting rollback...', e);
+      const rollbackErrors: Error[] = [];
+
+      // Rollback archiveYoung
+      try {
+        await this.pfapiService.m.archiveYoung.save(originalArchiveYoung, {
+          isUpdateRevAndLastUpdate: true,
+        });
+      } catch (rollbackErr) {
+        rollbackErrors.push(rollbackErr as Error);
+      }
+
+      // Rollback archiveOld
+      try {
+        await this.pfapiService.m.archiveOld.save(originalArchiveOld, {
+          isUpdateRevAndLastUpdate: true,
+        });
+      } catch (rollbackErr) {
+        rollbackErrors.push(rollbackErr as Error);
+      }
+
+      if (rollbackErrors.length > 0) {
+        Log.err(
+          '[ArchiveService] Archive flush rollback FAILED - archive may be inconsistent',
+          rollbackErrors,
+        );
+      } else {
+        Log.log('[ArchiveService] Archive flush rollback successful');
+      }
+
+      // Don't dispatch action if flush failed - prevents op-log pollution
+      // and ensures remote clients don't try to apply a failed operation
+      throw e;
+    }
 
     Log.log(
       '______________________\nFLUSHED ALL FROM ARCHIVE YOUNG TO OLD (via ArchiveService)\n_______________________',

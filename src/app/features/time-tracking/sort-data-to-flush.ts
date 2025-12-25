@@ -116,7 +116,7 @@ const mergeTimeTrackingCategory = (
   source: TTWorkContextSessionMap,
   target: TTWorkContextSessionMap,
 ): TTWorkContextSessionMap => {
-  const result = { ...target };
+  const result = dirtyDeepCopy(target || {});
 
   Object.entries(source || {}).forEach(([contextId, contextData]) => {
     if (!result[contextId]) {

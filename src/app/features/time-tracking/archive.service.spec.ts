@@ -232,5 +232,147 @@ describe('ArchiveService', () => {
       expect(mockPfapiService.m.archiveYoung.save).not.toHaveBeenCalled();
       expect(mockStore.dispatch).not.toHaveBeenCalled();
     });
+
+    describe('error handling and rollback during flush', () => {
+      const oldFlushTime = Date.now() - ARCHIVE_ALL_YOUNG_TO_OLD_THRESHOLD - 1000;
+
+      beforeEach(() => {
+        // Set up conditions for flush to be triggered
+        mockPfapiService.m.archiveOld.load.and.returnValue(
+          Promise.resolve(createEmptyArchive(oldFlushTime)),
+        );
+      });
+
+      it('should NOT dispatch flushYoungToOld if archiveYoung.save fails during flush', async () => {
+        const tasks = [createMockTask('task-1')];
+
+        // First save (for tasks) succeeds, second save (for flush) fails
+        let saveCallCount = 0;
+        mockPfapiService.m.archiveYoung.save.and.callFake(() => {
+          saveCallCount++;
+          if (saveCallCount === 2) {
+            return Promise.reject(new Error('archiveYoung.save failed during flush'));
+          }
+          return Promise.resolve();
+        });
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejectedWithError('archiveYoung.save failed during flush');
+
+        expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({ type: flushYoungToOld.type }),
+        );
+      });
+
+      it('should NOT dispatch flushYoungToOld if archiveOld.save fails', async () => {
+        const tasks = [createMockTask('task-1')];
+
+        mockPfapiService.m.archiveOld.save.and.returnValue(
+          Promise.reject(new Error('archiveOld.save failed')),
+        );
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejectedWithError('archiveOld.save failed');
+
+        expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+          jasmine.objectContaining({ type: flushYoungToOld.type }),
+        );
+      });
+
+      it('should attempt rollback when archiveOld.save fails', async () => {
+        const tasks = [createMockTask('task-1')];
+        const originalArchiveYoung = createEmptyArchive();
+        const originalArchiveOld = createEmptyArchive(oldFlushTime);
+
+        mockPfapiService.m.archiveYoung.load.and.returnValue(
+          Promise.resolve(originalArchiveYoung),
+        );
+        mockPfapiService.m.archiveOld.load.and.returnValue(
+          Promise.resolve(originalArchiveOld),
+        );
+
+        // archiveOld.save fails on first call
+        mockPfapiService.m.archiveOld.save.and.returnValue(
+          Promise.reject(new Error('archiveOld.save failed')),
+        );
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejected();
+
+        // Rollback should attempt to save both archives again
+        // archiveYoung: 1st call for tasks, 2nd call for flush (try), 3rd call for rollback
+        // archiveOld: 1st call for flush (fails), 2nd call for rollback
+        expect(mockPfapiService.m.archiveYoung.save.calls.count()).toBeGreaterThanOrEqual(
+          3,
+        );
+        expect(mockPfapiService.m.archiveOld.save.calls.count()).toBeGreaterThanOrEqual(
+          2,
+        );
+      });
+
+      it('should re-throw original error after rollback succeeds', async () => {
+        const tasks = [createMockTask('task-1')];
+
+        mockPfapiService.m.archiveOld.save.and.returnValue(
+          Promise.reject(new Error('Original flush error')),
+        );
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejectedWithError('Original flush error');
+      });
+
+      it('should re-throw original error even if rollback fails', async () => {
+        const tasks = [createMockTask('task-1')];
+
+        // Track call count to make archiveOld.save fail on flush but also on rollback
+        let archiveOldSaveCount = 0;
+        mockPfapiService.m.archiveOld.save.and.callFake(() => {
+          archiveOldSaveCount++;
+          if (archiveOldSaveCount === 1) {
+            return Promise.reject(new Error('Original flush error'));
+          }
+          return Promise.reject(new Error('Rollback also failed'));
+        });
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejectedWithError('Original flush error');
+      });
+
+      it('should continue rollback of archiveOld even if archiveYoung rollback fails', async () => {
+        const tasks = [createMockTask('task-1')];
+
+        // archiveOld.save fails on flush
+        let archiveOldSaveCount = 0;
+        mockPfapiService.m.archiveOld.save.and.callFake(() => {
+          archiveOldSaveCount++;
+          if (archiveOldSaveCount === 1) {
+            return Promise.reject(new Error('Original flush error'));
+          }
+          return Promise.resolve(); // Rollback succeeds
+        });
+
+        // archiveYoung.save fails on rollback (3rd call)
+        let archiveYoungSaveCount = 0;
+        mockPfapiService.m.archiveYoung.save.and.callFake(() => {
+          archiveYoungSaveCount++;
+          if (archiveYoungSaveCount === 3) {
+            return Promise.reject(new Error('archiveYoung rollback failed'));
+          }
+          return Promise.resolve();
+        });
+
+        await expectAsync(
+          service.moveTasksToArchiveAndFlushArchiveIfDue(tasks),
+        ).toBeRejected();
+
+        // Should still attempt to rollback archiveOld even though archiveYoung rollback failed
+        expect(mockPfapiService.m.archiveOld.save.calls.count()).toBe(2);
+      });
+    });
   });
 });
