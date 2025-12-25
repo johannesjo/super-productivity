@@ -2006,4 +2006,125 @@ describe('OperationLogStoreService', () => {
       });
     });
   });
+
+  describe('index fallback behavior', () => {
+    // These tests verify that getPendingRemoteOps and getFailedRemoteOps
+    // gracefully handle missing bySourceAndStatus index (for legacy DBs)
+
+    it('getPendingRemoteOps should fall back to full scan when index throws', async () => {
+      // Create some test data first
+      const pendingOp = createTestOperation({ entityId: 'pending-task' });
+      const appliedOp = createTestOperation({ entityId: 'applied-task' });
+
+      await service.append(appliedOp, 'remote'); // applied by default
+      await service.append(pendingOp, 'remote', { pendingApply: true });
+
+      // Access the internal db and spy on getAllFromIndex
+      const db = (service as any)._db;
+      const originalGetAllFromIndex = db.getAllFromIndex.bind(db);
+
+      spyOn(db, 'getAllFromIndex').and.callFake(
+        (storeName: string, indexName: string, query: any) => {
+          if (indexName === 'bySourceAndStatus') {
+            // Simulate missing index error
+            throw new DOMException(
+              "Failed to execute 'index' on 'IDBObjectStore': The specified index was not found.",
+              'NotFoundError',
+            );
+          }
+          return originalGetAllFromIndex(storeName, indexName, query);
+        },
+      );
+
+      // Should still work via fallback
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(1);
+      expect(pending[0].op.entityId).toBe('pending-task');
+      expect(pending[0].source).toBe('remote');
+      expect(pending[0].applicationStatus).toBe('pending');
+    });
+
+    it('getFailedRemoteOps should fall back to full scan when index throws', async () => {
+      // Create test data
+      const failedOp = createTestOperation({ entityId: 'failed-task' });
+      const pendingOp = createTestOperation({ entityId: 'pending-task' });
+
+      await service.append(failedOp, 'remote', { pendingApply: true });
+      await service.append(pendingOp, 'remote', { pendingApply: true });
+      await service.markFailed([failedOp.id]);
+
+      // Access the internal db and spy on getAllFromIndex
+      const db = (service as any)._db;
+      const originalGetAllFromIndex = db.getAllFromIndex.bind(db);
+
+      spyOn(db, 'getAllFromIndex').and.callFake(
+        (storeName: string, indexName: string, query: any) => {
+          if (indexName === 'bySourceAndStatus') {
+            throw new DOMException(
+              "Failed to execute 'index' on 'IDBObjectStore': The specified index was not found.",
+              'NotFoundError',
+            );
+          }
+          return originalGetAllFromIndex(storeName, indexName, query);
+        },
+      );
+
+      // Should still work via fallback
+      const failed = await service.getFailedRemoteOps();
+
+      expect(failed.length).toBe(1);
+      expect(failed[0].op.entityId).toBe('failed-task');
+      expect(failed[0].source).toBe('remote');
+      expect(failed[0].applicationStatus).toBe('failed');
+    });
+
+    it('getPendingRemoteOps fallback should filter correctly with mixed data', async () => {
+      // Create a variety of ops to ensure filtering works correctly
+      const localOp = createTestOperation({ entityId: 'local-task' });
+      const remoteApplied = createTestOperation({ entityId: 'remote-applied' });
+      const remotePending1 = createTestOperation({ entityId: 'remote-pending-1' });
+      const remotePending2 = createTestOperation({ entityId: 'remote-pending-2' });
+
+      await service.append(localOp, 'local');
+      await service.append(remoteApplied, 'remote');
+      await service.append(remotePending1, 'remote', { pendingApply: true });
+      await service.append(remotePending2, 'remote', { pendingApply: true });
+
+      // Force fallback path
+      const db = (service as any)._db;
+      spyOn(db, 'getAllFromIndex').and.throwError(
+        new DOMException('Index not found', 'NotFoundError'),
+      );
+
+      const pending = await service.getPendingRemoteOps();
+
+      expect(pending.length).toBe(2);
+      const entityIds = pending.map((p) => p.op.entityId).sort();
+      expect(entityIds).toEqual(['remote-pending-1', 'remote-pending-2']);
+    });
+
+    it('getFailedRemoteOps fallback should exclude rejected ops', async () => {
+      const failedOp = createTestOperation({ entityId: 'failed' });
+      const rejectedOp = createTestOperation({ entityId: 'rejected' });
+
+      await service.append(failedOp, 'remote', { pendingApply: true });
+      await service.append(rejectedOp, 'remote', { pendingApply: true });
+      await service.markFailed([failedOp.id]);
+      await service.markFailed([rejectedOp.id]);
+      await service.markRejected([rejectedOp.id]);
+
+      // Force fallback path
+      const db = (service as any)._db;
+      spyOn(db, 'getAllFromIndex').and.throwError(
+        new DOMException('Index not found', 'NotFoundError'),
+      );
+
+      const failed = await service.getFailedRemoteOps();
+
+      // Only the failed (not rejected) op should be returned
+      expect(failed.length).toBe(1);
+      expect(failed[0].op.entityId).toBe('failed');
+    });
+  });
 });

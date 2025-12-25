@@ -220,12 +220,24 @@ export class OperationLogStoreService {
    */
   async getPendingRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    // Type assertion needed for compound index key - idb's types don't fully support this
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
-      'remote',
-      'pending',
-    ] as any);
+    try {
+      // Type assertion needed for compound index key - idb's types don't fully support this
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+        'remote',
+        'pending',
+      ] as any);
+    } catch (e) {
+      // Fallback for databases created before version 3 index migration
+      // This handles the case where the bySourceAndStatus index doesn't exist
+      console.warn(
+        'OperationLogStoreService: bySourceAndStatus index not found, using fallback scan',
+      );
+      const allOps = await this.db.getAll('ops');
+      return allOps.filter(
+        (entry) => entry.source === 'remote' && entry.applicationStatus === 'pending',
+      );
+    }
   }
 
   async hasOp(id: string): Promise<boolean> {
@@ -451,12 +463,24 @@ export class OperationLogStoreService {
    */
   async getFailedRemoteOps(): Promise<OperationLogEntry[]> {
     await this._ensureInit();
-    // Type assertion needed for compound index key - idb's types don't fully support this
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const failedOps = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
-      'remote',
-      'failed',
-    ] as any);
+    let failedOps: OperationLogEntry[];
+    try {
+      // Type assertion needed for compound index key - idb's types don't fully support this
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      failedOps = await this.db.getAllFromIndex('ops', 'bySourceAndStatus', [
+        'remote',
+        'failed',
+      ] as any);
+    } catch (e) {
+      // Fallback for databases created before version 3 index migration
+      console.warn(
+        'OperationLogStoreService: bySourceAndStatus index not found, using fallback scan',
+      );
+      const allOps = await this.db.getAll('ops');
+      failedOps = allOps.filter(
+        (entry) => entry.source === 'remote' && entry.applicationStatus === 'failed',
+      );
+    }
     return failedOps.filter((e) => !e.rejectedAt);
   }
 
