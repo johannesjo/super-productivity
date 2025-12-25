@@ -563,13 +563,13 @@ describe('Vector Clock', () => {
   describe('Vector Clock Size Limiting', () => {
     it('should not limit clocks under the threshold', () => {
       const small: VectorClock = {};
-      for (let i = 0; i < 30; i++) {
+      for (let i = 0; i < 6; i++) {
         small[`client${i}`] = i;
       }
 
       const result = limitVectorClockSize(small, 'client0');
       expect(result).toEqual(small);
-      expect(Object.keys(result).length).toBe(30);
+      expect(Object.keys(result).length).toBe(6);
     });
 
     it('should limit vector clock size to MAX_VECTOR_CLOCK_SIZE', () => {
@@ -579,7 +579,7 @@ describe('Vector Clock', () => {
       }
 
       const limited = limitVectorClockSize(large, 'myClient');
-      expect(Object.keys(limited).length).toBe(50); // MAX_VECTOR_CLOCK_SIZE
+      expect(Object.keys(limited).length).toBe(8); // MAX_VECTOR_CLOCK_SIZE
     });
 
     it('should always preserve current client', () => {
@@ -591,7 +591,7 @@ describe('Vector Clock', () => {
 
       const limited = limitVectorClockSize(large, 'myClient');
       expect(limited['myClient']).toBe(1);
-      expect(Object.keys(limited).length).toBe(50);
+      expect(Object.keys(limited).length).toBe(8);
     });
 
     it('should keep clients with highest values', () => {
@@ -628,7 +628,7 @@ describe('Vector Clock', () => {
       }
 
       const limited = limitVectorClockSize(clock, 'newClient');
-      expect(Object.keys(limited).length).toBe(50);
+      expect(Object.keys(limited).length).toBe(8);
       expect(limited['newClient']).toBeUndefined();
     });
 
@@ -649,7 +649,7 @@ describe('Vector Clock', () => {
       // Verify we kept the highest values
       const values = Object.values(limited).sort((a, b) => b - a);
       expect(values[0]).toBe(1000); // Highest value
-      expect(values.length).toBe(50);
+      expect(values.length).toBe(8);
 
       // client99 should be included even with low value
       expect(limited['client99']).toBe(901);

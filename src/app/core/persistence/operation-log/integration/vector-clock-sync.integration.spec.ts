@@ -347,15 +347,15 @@ describe('Vector Clock Sync Integration', () => {
 
     it('should handle many clients in vector clock', async () => {
       const manyClock: VectorClock = {};
-      for (let i = 0; i < 50; i++) {
+      for (let i = 0; i < 8; i++) {
         manyClock[`client-${i}`] = i + 1;
       }
       await opLogStore.setVectorClock(manyClock);
 
       const clock = await opLogStore.getVectorClock();
       expect(clock).not.toBeNull();
-      expect(Object.keys(clock!).length).toBe(50);
-      expect(clock!['client-49']).toBe(50);
+      expect(Object.keys(clock!).length).toBe(8);
+      expect(clock!['client-7']).toBe(8);
     });
   });
 });

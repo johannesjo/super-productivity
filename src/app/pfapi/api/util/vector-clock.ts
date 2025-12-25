@@ -1,8 +1,5 @@
 import { PFLog } from '../../../core/log';
 
-// Session flag to prevent noisy repeated warnings about large vector clocks
-let hasWarnedAboutLargeVectorClock = false;
-
 /**
  * Vector Clock implementation for distributed synchronization
  *
@@ -225,18 +222,6 @@ export const incrementVectorClock = (
 
   newClock[clientId] = currentValue + 1;
 
-  // Warn once per session if vector clock is getting large
-  const size = Object.keys(newClock).length;
-  if (size > 40 && !hasWarnedAboutLargeVectorClock) {
-    hasWarnedAboutLargeVectorClock = true;
-    PFLog.warn('Warning: Vector clock growing large', {
-      size,
-      clientId,
-      threshold: 40,
-      maxSize: MAX_VECTOR_CLOCK_SIZE,
-    });
-  }
-
   return newClock;
 };
 
@@ -332,7 +317,7 @@ export const hasVectorClockChanges = (
 };
 
 // Maximum number of clients to track in a vector clock
-const MAX_VECTOR_CLOCK_SIZE = 50;
+const MAX_VECTOR_CLOCK_SIZE = 8;
 
 /**
  * Metrics for vector clock operations
@@ -359,7 +344,7 @@ export const limitVectorClockSize = (
     return clock;
   }
 
-  PFLog.error('Vector clock pruning triggered', {
+  PFLog.warn('Vector clock pruning triggered', {
     originalSize: entries.length,
     maxSize: MAX_VECTOR_CLOCK_SIZE,
     currentClientId,

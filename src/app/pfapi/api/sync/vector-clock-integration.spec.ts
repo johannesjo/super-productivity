@@ -119,7 +119,7 @@ describe('Vector Clock Integration with Sync Service', () => {
       const merged = mergeVectorClocks(largeVectorClock, { [currentClientId]: 150 });
       const pruned = limitVectorClockSize(merged, currentClientId);
 
-      expect(Object.keys(pruned).length).toBe(50); // MAX_VECTOR_CLOCK_SIZE
+      expect(Object.keys(pruned).length).toBe(8); // MAX_VECTOR_CLOCK_SIZE
       expect(pruned[currentClientId]).toBe(150); // Current client preserved
 
       // Verify most active clients are kept
@@ -154,7 +154,7 @@ describe('Vector Clock Integration with Sync Service', () => {
       const pruned = limitVectorClockSize(merged, CLIENT_ID_A);
 
       expect(Object.keys(merged).length).toBeGreaterThan(100); // Before pruning
-      expect(Object.keys(pruned).length).toBe(50); // After pruning
+      expect(Object.keys(pruned).length).toBe(8); // After pruning
     });
   });
 

@@ -31,7 +31,7 @@ describe('Vector Clock Stress Tests', () => {
       const pruned = limitVectorClockSize(merged, 'CLIENT_A_0');
       const pruneDuration = performance.now() - startPrune;
 
-      expect(Object.keys(pruned).length).toBe(50);
+      expect(Object.keys(pruned).length).toBe(8);
       expect(pruneDuration).toBeLessThan(25); // Pruning should be fast (increased threshold for CI/different environments)
     });
 
@@ -110,7 +110,7 @@ describe('Vector Clock Stress Tests', () => {
       // Final pruning
       clock = limitVectorClockSize(clock, clientId);
 
-      expect(Object.keys(clock).length).toBe(50);
+      expect(Object.keys(clock).length).toBe(8);
       expect(clock[clientId]).toBe(1000); // Main client preserved
 
       // Verify we kept the most active clients
@@ -188,7 +188,7 @@ describe('Vector Clock Stress Tests', () => {
 
       // Prune to manageable size
       const pruned = limitVectorClockSize(merged, 'PARTITION_A');
-      expect(Object.keys(pruned).length).toBe(50);
+      expect(Object.keys(pruned).length).toBe(8);
     });
   });
 
@@ -235,7 +235,7 @@ describe('Vector Clock Stress Tests', () => {
       expect(merged.evil).toBeUndefined(); // Prototype pollution prevented
 
       const pruned = limitVectorClockSize(merged, 'SAFE_CLIENT');
-      expect(Object.keys(pruned).length).toBeLessThanOrEqual(50);
+      expect(Object.keys(pruned).length).toBeLessThanOrEqual(8);
     });
 
     it('should handle DoS attempts with large vector clocks', () => {
@@ -251,7 +251,7 @@ describe('Vector Clock Stress Tests', () => {
       const pruned = limitVectorClockSize(massive, 'DEFENDER');
       const duration = performance.now() - startTime;
 
-      expect(Object.keys(pruned).length).toBe(50);
+      expect(Object.keys(pruned).length).toBe(8);
       expect(duration).toBeLessThan(100); // Should complete quickly despite size
     });
   });
