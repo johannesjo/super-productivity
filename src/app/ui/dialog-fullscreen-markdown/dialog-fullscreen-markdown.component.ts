@@ -1,23 +1,25 @@
+import { ESCAPE } from '@angular/cdk/keycodes';
 import {
   ChangeDetectionStrategy,
   Component,
+  ElementRef,
   inject,
   OnDestroy,
   viewChild,
 } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { T } from '../../t.const';
-import { Subscription } from 'rxjs';
-import { ESCAPE } from '@angular/cdk/keycodes';
-import { LS } from '../../core/persistence/storage-keys.const';
-import { isSmallScreen } from '../../util/is-small-screen';
 import { FormsModule } from '@angular/forms';
-import { MarkdownComponent } from 'ngx-markdown';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatButtonToggle, MatButtonToggleGroup } from '@angular/material/button-toggle';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton } from '@angular/material/button';
+import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
+import { MarkdownComponent } from 'ngx-markdown';
+import { Subscription } from 'rxjs';
+import { LS } from '../../core/persistence/storage-keys.const';
+import { T } from '../../t.const';
+import { isSmallScreen } from '../../util/is-small-screen';
+import * as MarkdownToolbar from '../inline-markdown/markdown-toolbar.util';
 
 type ViewMode = 'SPLIT' | 'PARSED' | 'TEXT_ONLY';
 const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TEXT_ONLY'];
@@ -35,6 +37,7 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
     MatTooltip,
     MatIcon,
     MatButton,
+    MatIconButton,
     TranslatePipe,
   ],
 })
@@ -45,6 +48,7 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
   readonly previewEl = viewChild<MarkdownComponent>('previewEl');
+  readonly textareaEl = viewChild<ElementRef>('textareaEl');
   private _subs: Subscription = new Subscription();
 
   constructor() {
@@ -127,5 +131,97 @@ export class DialogFullscreenMarkdownComponent implements OnDestroy {
         this.data.content = allLines.join('\n');
       }
     }
+  }
+
+  // =========================================================================
+  // Toolbar actions
+  // =========================================================================
+
+  onApplyBold(): void {
+    this._applyTransform(MarkdownToolbar.applyBold);
+  }
+
+  onApplyItalic(): void {
+    this._applyTransform(MarkdownToolbar.applyItalic);
+  }
+
+  onApplyStrikethrough(): void {
+    this._applyTransform(MarkdownToolbar.applyStrikethrough);
+  }
+
+  onApplyHeading(level: 1 | 2 | 3): void {
+    this._applyTransformWithArgs((text, start, end) =>
+      MarkdownToolbar.applyHeading(text, start, end, level),
+    );
+  }
+
+  onApplyQuote(): void {
+    this._applyTransform(MarkdownToolbar.applyQuote);
+  }
+
+  onApplyBulletList(): void {
+    this._applyTransform(MarkdownToolbar.applyBulletList);
+  }
+
+  onApplyNumberedList(): void {
+    this._applyTransform(MarkdownToolbar.applyNumberedList);
+  }
+
+  onApplyTaskList(): void {
+    this._applyTransform(MarkdownToolbar.applyTaskList);
+  }
+
+  onApplyInlineCode(): void {
+    this._applyTransform(MarkdownToolbar.applyInlineCode);
+  }
+
+  onApplyCodeBlock(): void {
+    this._applyTransform(MarkdownToolbar.applyCodeBlock);
+  }
+
+  onInsertLink(): void {
+    this._applyTransform(MarkdownToolbar.insertLink);
+  }
+
+  onInsertImage(): void {
+    this._applyTransform(MarkdownToolbar.insertImage);
+  }
+
+  onInsertTable(): void {
+    this._applyTransform(MarkdownToolbar.insertTable);
+  }
+
+  private _applyTransform(
+    transformFn: (
+      text: string,
+      start: number,
+      end: number,
+    ) => MarkdownToolbar.TextTransformResult,
+  ): void {
+    this._applyTransformWithArgs(transformFn);
+  }
+
+  private _applyTransformWithArgs(
+    transformFn: (
+      text: string,
+      start: number,
+      end: number,
+    ) => MarkdownToolbar.TextTransformResult,
+  ): void {
+    const textarea = this.textareaEl()?.nativeElement;
+    if (!textarea) {
+      return;
+    }
+
+    const { value, selectionStart, selectionEnd } = textarea;
+    const result = transformFn(value || '', selectionStart, selectionEnd);
+
+    this.data.content = result.text;
+
+    // Restore focus and selection
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(result.selectionStart, result.selectionEnd);
+    });
   }
 }
