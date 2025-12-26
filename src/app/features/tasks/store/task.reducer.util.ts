@@ -12,6 +12,7 @@ import { taskAdapter } from './task.adapter';
 import { filterOutId } from '../../../util/filter-out-id';
 import { Update } from '@ngrx/entity';
 import { TaskLog } from '../../../core/log';
+import { devError } from '../../../util/dev-error';
 
 export const getTaskById = (taskId: string, state: TaskState): Task => {
   if (!state.entities[taskId]) {
@@ -301,13 +302,38 @@ export const deleteTaskHelper = (
 
   // SUB TASK side effects
   // also delete all sub tasks if any
-  if (taskToDelete.subTaskIds) {
-    stateCopy = taskAdapter.removeMany(taskToDelete.subTaskIds, stateCopy);
+  const payloadSubTaskIds = taskToDelete.subTaskIds || [];
+
+  // DEFENSIVE FIX: Also check state for subtasks not in subTaskIds.
+  // This handles race conditions where subtasks were added but parent's
+  // subTaskIds wasn't synced before a SYNC_IMPORT + moveToArchive.
+  // See: https://github.com/johannesjo/super-productivity/issues/XXXX
+  const stateSubTaskIds = (state.ids as string[]).filter(
+    (id) => state.entities[id]?.parentId === taskToDelete.id,
+  );
+
+  // Find orphans: subtasks in state but NOT in payload's subTaskIds
+  const orphanSubTaskIds = stateSubTaskIds.filter(
+    (id) => !payloadSubTaskIds.includes(id),
+  );
+
+  // Log devError if we found orphan subtasks - this indicates an upstream bug
+  if (orphanSubTaskIds.length > 0) {
+    devError(
+      `[deleteTaskHelper] Found ${orphanSubTaskIds.length} orphan subtask(s) not in parent's subTaskIds. ` +
+        `Parent: ${taskToDelete.id}, Orphans: ${orphanSubTaskIds.join(', ')}. ` +
+        `This indicates a sync race condition - subtasks added but parent.subTaskIds not updated before archive.`,
+    );
+  }
+
+  // Combine both lists to ensure all subtasks are removed
+  const allSubTaskIds = [...new Set([...payloadSubTaskIds, ...stateSubTaskIds])];
+
+  if (allSubTaskIds.length > 0) {
+    stateCopy = taskAdapter.removeMany(allSubTaskIds, stateCopy);
     // unset current if one of them is the current task
     currentTaskId =
-      !!currentTaskId && taskToDelete.subTaskIds.includes(currentTaskId)
-        ? null
-        : currentTaskId;
+      !!currentTaskId && allSubTaskIds.includes(currentTaskId) ? null : currentTaskId;
   }
 
   return {

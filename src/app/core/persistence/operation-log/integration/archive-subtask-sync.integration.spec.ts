@@ -567,3 +567,158 @@ describe('Archive Subtask Sync - Handler Integration', () => {
     expect(capturedTasks![0].subTasks[1].id).toBe('sub-2');
   });
 });
+
+/**
+ * Test suite documenting the orphan subtask race condition and its defensive fix.
+ *
+ * The race condition occurs when:
+ * 1. Client A adds a subtask to a parent
+ * 2. Client B does a SYNC_IMPORT before parent.subTaskIds is synced with the new subtask
+ * 3. Client A archives the parent
+ * 4. Client B receives the archive operation with stale subTaskIds (missing the new subtask)
+ *
+ * Without the fix, the new subtask would remain in Client B's active state as an "orphan"
+ * (pointing to a parent that no longer exists), causing "Lonely Sub Task in Today" error.
+ *
+ * The defensive fix in deleteTaskHelper looks up subtasks from state in addition to
+ * the action payload's subTaskIds, ensuring orphan subtasks are removed.
+ */
+describe('Archive Subtask Sync - Orphan Subtask Race Condition', () => {
+  /**
+   * Creates a mock task with proper structure.
+   */
+  const createMockTask = (id: string, overrides: Partial<Task> = {}): Task =>
+    ({
+      id,
+      title: `Task ${id}`,
+      subTaskIds: [],
+      tagIds: [],
+      projectId: null,
+      parentId: null,
+      timeSpentOnDay: {},
+      timeSpent: 0,
+      timeEstimate: 0,
+      isDone: false,
+      doneOn: null,
+      notes: '',
+      attachments: [],
+      created: Date.now(),
+      ...overrides,
+    }) as Task;
+
+  beforeEach(async () => {
+    TestBed.configureTestingModule({
+      providers: [OperationLogStoreService],
+    });
+
+    const storeService = TestBed.inject(OperationLogStoreService);
+    await storeService.init();
+    await storeService._clearAllDataForTesting();
+    resetTestUuidCounter();
+  });
+
+  it('should document the race condition scenario: stale subTaskIds in operation payload', async () => {
+    // This test documents the scenario that causes orphan subtasks:
+    //
+    // Timeline:
+    // T1: Client A has parent with subTaskIds: []
+    // T2: Client A adds subtask -> parent.subTaskIds: ['sub-1'], subtask.parentId: 'parent-1'
+    // T3: Client B does SYNC_IMPORT (gets state where parent.subTaskIds: [])
+    // T4: Client A archives parent (operation has subTaskIds: ['sub-1'] from Client A's state)
+    // T5: Client B syncs and receives archive operation
+    //
+    // The BUG scenario (if operation log had stale data):
+    // - If the archive operation somehow had stale subTaskIds: []
+    // - Client B would remove parent but NOT subtask
+    // - Subtask becomes orphan: has parentId but parent doesn't exist
+    //
+    // The FIX ensures the reducer checks state for subtasks with matching parentId,
+    // not just the subTaskIds from the operation payload.
+
+    const client = new TestClient('client-test');
+
+    // Simulate the problematic operation: parent being archived with EMPTY subTaskIds
+    // (This happens when the operation was captured before subTaskIds was updated)
+    const parentWithEmptySubTaskIds = createMockTask('parent-1', {
+      subTaskIds: [], // Stale! The actual state has subtasks
+      isDone: true,
+      doneOn: Date.now(),
+    });
+
+    const multiEntityPayload: MultiEntityPayload = {
+      actionPayload: { tasks: [parentWithEmptySubTaskIds] } as Record<string, unknown>,
+      entityChanges: [],
+    };
+
+    const op = client.createOperation({
+      actionType: TaskSharedActions.moveToArchive.type,
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'parent-1',
+      entityIds: ['parent-1'],
+      payload: multiEntityPayload,
+    });
+
+    // Extract the action payload to verify it has empty subTaskIds
+    const storeService = TestBed.inject(OperationLogStoreService);
+    await storeService.append(op, 'local');
+    const storedOps = await storeService.getOpsAfterSeq(0);
+    const action = convertOpToAction(storedOps[0].op);
+
+    // Verify the reconstructed action has empty subTaskIds (documenting the problem)
+    const tasks = (action as ReturnType<typeof TaskSharedActions.moveToArchive>).tasks;
+    expect(tasks[0].subTaskIds).toEqual([]);
+
+    // This operation, when applied to a state that HAS subtasks for this parent,
+    // would previously leave those subtasks orphaned.
+    // The unit tests in task.reducer.spec.ts verify the fix works.
+  });
+
+  it('should show that operation payload subTaskIds comes from originating client state', async () => {
+    // This test shows the CORRECT scenario: when operation is captured correctly,
+    // subTaskIds should include all subtasks
+    const client = new TestClient('client-test');
+
+    // Subtask is properly included in parent's subTaskIds
+    const subtask = createMockTask('sub-1', {
+      parentId: 'parent-1',
+    });
+
+    const parentWithSubTask = createMockTask('parent-1', {
+      subTaskIds: ['sub-1'],
+      isDone: true,
+      doneOn: Date.now(),
+    });
+
+    // Create TaskWithSubTasks (as the selector would produce)
+    const parentTaskWithSubTasks: TaskWithSubTasks = {
+      ...parentWithSubTask,
+      subTasks: [subtask],
+    } as TaskWithSubTasks;
+
+    const multiEntityPayload: MultiEntityPayload = {
+      actionPayload: { tasks: [parentTaskWithSubTasks] } as Record<string, unknown>,
+      entityChanges: [],
+    };
+
+    const op = client.createOperation({
+      actionType: TaskSharedActions.moveToArchive.type,
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'parent-1',
+      entityIds: ['parent-1'],
+      payload: multiEntityPayload,
+    });
+
+    const storeService = TestBed.inject(OperationLogStoreService);
+    await storeService.append(op, 'local');
+    const storedOps = await storeService.getOpsAfterSeq(0);
+    const action = convertOpToAction(storedOps[0].op);
+
+    // Verify the reconstructed action has correct subTaskIds
+    const tasks = (action as ReturnType<typeof TaskSharedActions.moveToArchive>).tasks;
+    expect(tasks[0].subTaskIds).toEqual(['sub-1']);
+    expect(tasks[0].subTasks).toBeDefined();
+    expect(tasks[0].subTasks[0].id).toBe('sub-1');
+  });
+});

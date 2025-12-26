@@ -657,4 +657,108 @@ describe('Task Reducer', () => {
       expect(state.entities['parent']!.timeSpent).toBe(1500);
     });
   });
+
+  describe('moveToArchive action - orphan subtask handling', () => {
+    // These tests document the defensive fix for a race condition where:
+    // 1. Client A adds subtask to parent
+    // 2. Client B does SYNC_IMPORT before parent.subTaskIds is synced
+    // 3. Client A archives parent
+    // 4. Client B receives archive op with stale subTaskIds (missing the new subtask)
+    // The fix ensures subtasks are looked up from state, not just from the action payload.
+
+    beforeEach(() => {
+      // Mock confirm to return false to prevent devError from throwing
+      // Note: confirm may already be spied, so we use callFake on the existing spy
+      if (jasmine.isSpy(window.confirm)) {
+        (window.confirm as jasmine.Spy).and.returnValue(false);
+      } else {
+        spyOn(window, 'confirm').and.returnValue(false);
+      }
+      if (!jasmine.isSpy(window.alert)) {
+        spyOn(window, 'alert');
+      }
+    });
+
+    it('should remove subtasks even when they are in state but not in payload subTaskIds', () => {
+      // State has a subtask that points to parent, but parent's subTaskIds is empty
+      // This simulates the race condition scenario
+      const orphanSubTask = createTask('orphan-sub', { parentId: 'task1' });
+      const parentWithEmptySubTaskIds = { ...task1, subTaskIds: [] };
+
+      const stateWithOrphan: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'orphan-sub'],
+        entities: {
+          task1: parentWithEmptySubTaskIds,
+          'orphan-sub': orphanSubTask,
+        },
+      };
+
+      // Archive action has parent with empty subTaskIds (stale data from another client)
+      const action = TaskSharedActions.moveToArchive({
+        tasks: [parentWithEmptySubTaskIds as any],
+      });
+
+      const state = taskReducer(stateWithOrphan, action);
+
+      // AFTER FIX: Both parent and orphan subtask should be removed
+      expect(state.ids).not.toContain('task1');
+      expect(state.ids).not.toContain('orphan-sub');
+      expect(state.entities['task1']).toBeUndefined();
+      expect(state.entities['orphan-sub']).toBeUndefined();
+    });
+
+    it('should remove all subtasks: those in payload AND those in state', () => {
+      // Parent has sub1 in subTaskIds, but sub2 is orphaned (in state but not in subTaskIds)
+      const sub1 = createTask('sub1', { parentId: 'task1' });
+      const sub2 = createTask('sub2', { parentId: 'task1' }); // orphan
+      const parentWithOnlySub1 = { ...task1, subTaskIds: ['sub1'] };
+
+      const stateWithMixed: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'sub1', 'sub2'],
+        entities: {
+          task1: parentWithOnlySub1,
+          sub1: sub1,
+          sub2: sub2,
+        },
+      };
+
+      const action = TaskSharedActions.moveToArchive({
+        tasks: [parentWithOnlySub1 as any],
+      });
+
+      const state = taskReducer(stateWithMixed, action);
+
+      // All should be removed
+      expect(state.ids).toEqual([]);
+      expect(state.entities['task1']).toBeUndefined();
+      expect(state.entities['sub1']).toBeUndefined();
+      expect(state.entities['sub2']).toBeUndefined();
+    });
+
+    it('should clear currentTaskId if it was an orphan subtask', () => {
+      const orphanSubTask = createTask('orphan-sub', { parentId: 'task1' });
+      const parentWithEmptySubTaskIds = { ...task1, subTaskIds: [] };
+
+      const stateWithOrphanAsCurrent: TaskState = {
+        ...initialTaskState,
+        ids: ['task1', 'orphan-sub'],
+        entities: {
+          task1: parentWithEmptySubTaskIds,
+          'orphan-sub': orphanSubTask,
+        },
+        currentTaskId: 'orphan-sub', // Current task is the orphan
+      };
+
+      const action = TaskSharedActions.moveToArchive({
+        tasks: [parentWithEmptySubTaskIds as any],
+      });
+
+      const state = taskReducer(stateWithOrphanAsCurrent, action);
+
+      // Current task should be cleared since orphan subtask was removed
+      expect(state.currentTaskId).toBeNull();
+    });
+  });
 });
