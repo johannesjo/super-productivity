@@ -21,11 +21,21 @@ import { OpLog } from '../../../log';
  *   - Applying them causes "Task not found" errors
  * ```
  *
- * ## The Solution
- * Use VECTOR CLOCK comparison to determine if ops were created with knowledge
- * of the import. This is more reliable than UUIDv7 timestamps because vector
- * clocks track CAUSALITY (did the client know about the import?) rather than
- * wall-clock time (which can be affected by clock drift).
+ * ## The Solution: Clean Slate Semantics
+ * SYNC_IMPORT and BACKUP_IMPORT are explicit user actions to restore ALL clients
+ * to a specific state. ALL operations without knowledge of the import are dropped:
+ *
+ * - **GREATER_THAN / EQUAL**: Op was created with knowledge of import → KEEP
+ * - **CONCURRENT**: Op was created without knowledge of import → DROP
+ * - **LESS_THAN**: Op is dominated by import → DROP
+ *
+ * This ensures a true "restore to point in time" semantic. Concurrent work from
+ * other clients is intentionally discarded because the user explicitly chose to
+ * reset all state to the imported snapshot.
+ *
+ * We use vector clock comparison (not UUIDv7 timestamps) because vector clocks
+ * track CAUSALITY (did the client know about the import?) rather than wall-clock
+ * time (which can be affected by clock drift).
  */
 @Injectable({
   providedIn: 'root',
@@ -36,6 +46,10 @@ export class SyncImportFilterService {
   /**
    * Filters out operations invalidated by a SYNC_IMPORT, BACKUP_IMPORT, or REPAIR.
    *
+   * ## Clean Slate Semantics
+   * Imports are explicit user actions to restore all clients to a specific state.
+   * ALL operations without knowledge of the import are dropped - no exceptions.
+   *
    * ## Vector Clock Comparison Results
    * | Comparison     | Meaning                              | Action  |
    * |----------------|--------------------------------------|---------|
@@ -44,8 +58,8 @@ export class SyncImportFilterService {
    * | LESS_THAN      | Op dominated by import               | ❌ Filter|
    * | CONCURRENT     | Op created without knowledge of import| ❌ Filter|
    *
-   * Note: CONCURRENT ops are filtered because they reference pre-import state,
-   * even if they were created "after" the import in wall-clock time.
+   * CONCURRENT ops are filtered even if they come from a client the import
+   * didn't know about. This ensures a true "restore to point in time" semantic.
    *
    * The import can be in the current batch OR in the local store from a
    * previous sync cycle. We check both to handle the case where old ops from
@@ -115,17 +129,15 @@ export class SyncImportFilterService {
       // Vector clocks track CAUSALITY ("did this client know about the import?")
       // rather than wall-clock time, making them immune to client clock drift.
       //
-      // Comparison results:
+      // Clean Slate Semantics:
       // - GREATER_THAN: Op was created by a client that SAW the import → KEEP
       // - EQUAL: Same causal history as import → KEEP
-      // - LESS_THAN: Op is dominated by import (created before with less history) → FILTER
-      // - CONCURRENT: Op created WITHOUT knowledge of import → handled below
+      // - CONCURRENT: Op created WITHOUT knowledge of import → FILTER
+      // - LESS_THAN: Op is dominated by import → FILTER
       //
-      // SPECIAL CASE for CONCURRENT ops:
-      // If the op's client is NOT in the SYNC_IMPORT's clock, this means the
-      // SYNC_IMPORT was created without knowledge of that client. In this case,
-      // the op is NOT "pre-import state" - it's from a client that the import
-      // didn't know about. These ops should be KEPT and applied.
+      // CONCURRENT ops are filtered even from "unknown" clients. The import is
+      // an explicit user action to restore to a specific state - any concurrent
+      // work is intentionally discarded to ensure a clean slate.
       const comparison = compareVectorClocks(op.vectorClock, latestImport.vectorClock);
 
       if (
@@ -134,36 +146,9 @@ export class SyncImportFilterService {
       ) {
         // Op was created by a client that had knowledge of the import
         validOps.push(op);
-      } else if (comparison === VectorClockComparison.CONCURRENT) {
-        // Check if the op's client was unknown when the SYNC_IMPORT was created
-        const opClientValue = op.vectorClock[op.clientId] ?? 0;
-        const importClientValue = latestImport.vectorClock[op.clientId] ?? 0;
-
-        if (importClientValue === 0) {
-          // The SYNC_IMPORT didn't know about this client at all
-          // This op is NOT "pre-import state" - it's from a parallel branch
-          // that the import didn't include. Keep it and apply.
-          OpLog.verbose(
-            `SyncImportFilterService: Keeping CONCURRENT op ${op.id} - ` +
-              `client ${op.clientId} was unknown to SYNC_IMPORT`,
-          );
-          validOps.push(op);
-        } else if (opClientValue > importClientValue) {
-          // The op's client counter is higher than what the import knew about
-          // This means the op was created AFTER the import's knowledge of this client
-          OpLog.verbose(
-            `SyncImportFilterService: Keeping CONCURRENT op ${op.id} - ` +
-              `client counter ${opClientValue} > import's ${importClientValue}`,
-          );
-          validOps.push(op);
-        } else {
-          // The op was created before or at the import's knowledge level for this client
-          // AND the import has entries the op doesn't know about
-          // This is truly pre-import state - filter it
-          invalidatedOps.push(op);
-        }
       } else {
-        // LESS_THAN: Op is dominated by import - definitely pre-import state
+        // CONCURRENT or LESS_THAN: Op was created without knowledge of import
+        // Filter it to ensure clean slate semantics
         invalidatedOps.push(op);
       }
     }

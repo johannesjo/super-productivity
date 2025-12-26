@@ -244,11 +244,12 @@ describe('SyncImportFilterService', () => {
 
       const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-      // Updated behavior: Client A was UNKNOWN to the latest import (no clientA entry)
-      // So ALL of Client A's ops are kept (parallel branch of work)
-      // Valid: all 5 ops (2 imports + 3 updates from unknown client)
-      expect(result.validOps.length).toBe(5);
-      expect(result.invalidatedOps.length).toBe(0);
+      // Clean Slate Semantics: Only ops with knowledge of the latest import are kept.
+      // - First two Client A ops are CONCURRENT (no knowledge of latest import) → filtered
+      // - Third Client A op is GREATER_THAN (has latest import's clock) → kept
+      // - Both SYNC_IMPORTs are kept
+      expect(result.validOps.length).toBe(3); // 2 imports + 1 post-import op
+      expect(result.invalidatedOps.length).toBe(2); // 2 concurrent ops from Client A
     });
 
     it('should filter pre-import ops when SYNC_IMPORT was downloaded in a PREVIOUS sync cycle', async () => {
@@ -271,6 +272,7 @@ describe('SyncImportFilterService', () => {
       );
 
       // These are OLD ops from Client A, created BEFORE the import
+      // They are CONCURRENT with the import (no knowledge of it)
       const oldOpsFromClientA: Operation[] = [
         {
           id: '019afd60-0001-7000-0000-000000000000',
@@ -280,7 +282,7 @@ describe('SyncImportFilterService', () => {
           entityId: 'task-1',
           payload: { title: 'Old title' },
           clientId: 'client-A',
-          vectorClock: { clientA: 5 },
+          vectorClock: { clientA: 5 }, // CONCURRENT - no knowledge of import
           timestamp: Date.now(),
           schemaVersion: 1,
         },
@@ -292,7 +294,7 @@ describe('SyncImportFilterService', () => {
           entityId: 'task-2',
           payload: { title: 'Another old title' },
           clientId: 'client-A',
-          vectorClock: { clientA: 6 },
+          vectorClock: { clientA: 6 }, // CONCURRENT - no knowledge of import
           timestamp: Date.now(),
           schemaVersion: 1,
         },
@@ -300,10 +302,10 @@ describe('SyncImportFilterService', () => {
 
       const result = await service.filterOpsInvalidatedBySyncImport(oldOpsFromClientA);
 
-      // Updated behavior: Client A was UNKNOWN to the import (no clientA entry)
-      // So Client A's ops are kept (parallel branch of work)
-      expect(result.validOps.length).toBe(2);
-      expect(result.invalidatedOps.length).toBe(0);
+      // Clean Slate Semantics: CONCURRENT ops are filtered, even from unknown clients.
+      // These ops have no knowledge of the import, so they're invalidated.
+      expect(result.validOps.length).toBe(0);
+      expect(result.invalidatedOps.length).toBe(2);
       expect(opLogStoreSpy.getLatestFullStateOp).toHaveBeenCalled();
     });
 
@@ -379,10 +381,10 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-        // Updated behavior: Client B was UNKNOWN to the import (no clientB entry)
-        // So Client B's ops are kept (parallel branch of work)
-        expect(result.validOps.length).toBe(2);
-        expect(result.invalidatedOps.length).toBe(0);
+        // Clean Slate Semantics: CONCURRENT ops are filtered, even from unknown clients.
+        // Client B's op has no knowledge of the import, so it's invalidated.
+        expect(result.validOps.length).toBe(1); // Only SYNC_IMPORT
+        expect(result.invalidatedOps.length).toBe(1); // Client B's concurrent op
       });
 
       it('should filter LESS_THAN ops (dominated by import)', async () => {
@@ -519,10 +521,11 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-        // Updated behavior: Client B was UNKNOWN to the import (no clientB entry)
-        // So Client B's ops are kept (parallel branch of work)
-        expect(result.validOps.length).toBe(2);
-        expect(result.invalidatedOps.length).toBe(0);
+        // Clean Slate Semantics: CONCURRENT ops are filtered based on vector clock,
+        // NOT UUIDv7 timestamp. Even though UUIDv7 is later, vector clock shows
+        // no knowledge of import, so it's filtered.
+        expect(result.validOps.length).toBe(1); // Only SYNC_IMPORT
+        expect(result.invalidatedOps.length).toBe(1); // Client B's concurrent op
       });
 
       it('should handle REPAIR operations the same as SYNC_IMPORT', async () => {
@@ -555,10 +558,10 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(ops);
 
-        // Updated behavior: Client B was UNKNOWN to the repair (no clientB entry)
-        // So Client B's ops are kept (parallel branch of work)
-        expect(result.validOps.length).toBe(2);
-        expect(result.invalidatedOps.length).toBe(0);
+        // Clean Slate Semantics: REPAIR ops are handled the same as SYNC_IMPORT.
+        // CONCURRENT ops are filtered, even from unknown clients.
+        expect(result.validOps.length).toBe(1); // Only REPAIR
+        expect(result.invalidatedOps.length).toBe(1); // Client B's concurrent op
       });
     });
 
@@ -624,15 +627,15 @@ describe('SyncImportFilterService', () => {
         expect(result.invalidatedOps.length).toBe(0);
       });
 
-      it('should correctly keep ops from unknown clients', async () => {
-        // Updated behavior: ops from clients unknown to the SYNC_IMPORT are KEPT
-        // Rationale: if the import didn't know about this client, the op is NOT
-        // "pre-import state" - it's from a parallel branch of work.
+      it('should filter ops from unknown clients (clean slate semantics)', async () => {
+        // Clean Slate Semantics: ops from clients unknown to the SYNC_IMPORT are FILTERED.
+        // Rationale: the import is an explicit user action to restore ALL clients to
+        // a specific state. Concurrent work is intentionally discarded.
         //
         // Scenario:
         // 1. Client A creates SYNC_IMPORT with clock {clientA: 1}
         // 2. Client B (unknown to A) creates op with clock {clientB: 6}
-        // 3. Client B's op should be KEPT (client B was unknown to import)
+        // 3. Client B's op should be FILTERED (no knowledge of import)
 
         const existingSyncImport: Operation = {
           id: '019afd68-0050-7000-0000-000000000000',
@@ -669,9 +672,9 @@ describe('SyncImportFilterService', () => {
 
         const result = await service.filterOpsInvalidatedBySyncImport(unknownClientOp);
 
-        // Should be KEPT since client-B was unknown to the import
-        expect(result.validOps.length).toBe(1);
-        expect(result.invalidatedOps.length).toBe(0);
+        // Should be FILTERED - no knowledge of import means it's pre-import state
+        expect(result.validOps.length).toBe(0);
+        expect(result.invalidatedOps.length).toBe(1);
       });
 
       it('should handle multiple clients scenario correctly', async () => {
